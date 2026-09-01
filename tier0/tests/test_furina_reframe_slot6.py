@@ -1,6 +1,6 @@
 """Slot 6, the early probe: the two Evoke routes, measured against each other.
 
-`review/active/furina-reframe-2026-08-29.md` §6.3 slot 6 states the worry in
+`review/ruled/furina-reframe-2026-08-29.md` §6.3 slot 6 states the worry in
 its own words: under §4.2 a deploy onto a full stage Evokes the front member to
 make room, and the ruled text prices that at NOTHING -- the deploy Evokes the
 old front, lands a replacement, and performs the replacement, all for the

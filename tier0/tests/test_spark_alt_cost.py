@@ -3,7 +3,7 @@
 [USER], 2026-08-29: "The old base rule ('At 3 Sparks, your Attacks cost 0.
 Playing one consumes 3') is being retired as the universal base mechanic;
 Sparks become an ALTERNATIVE card cost." The packet is
-`review/active/klee-sparks-2026-08-29.md`; its sec.9 is the independent seat's
+`review/ruled/klee-sparks-2026-08-29.md`; its sec.9 is the independent seat's
 doctrine read, and the picks this file exercises are 1, 3, 4, 5, 6 and 7.
 
 THE FIRST TEST IS THE ONE THAT MATTERS. PICK 6 took option 1 -- both economies

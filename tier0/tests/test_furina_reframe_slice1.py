@@ -1,7 +1,7 @@
 """Furina reframe, SLICE 1 -- the five ruled sentences, both sides of the flag.
 
-The design is `review/active/furina-reframe-2026-08-29.md` (R220 A; `F`-picks
-answered by R224) plus `review/active/furina-spotlight-options-2026-08-30.md`
+The design is `review/ruled/furina-reframe-2026-08-29.md` (R220 A; `F`-picks
+answered by R224) plus `review/ruled/furina-spotlight-options-2026-08-30.md`
 §5 (R228 option 1). The engine is `tier0/engine/furina_reframe.py`, and every
 flag in it ships OFF.
 

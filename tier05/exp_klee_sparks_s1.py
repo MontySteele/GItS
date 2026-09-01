@@ -1,7 +1,7 @@
 """`KLEESPARK-S1` — the Klee Spark arm measured DRAFTED. THE INSTRUMENT.
 
 THE REGISTRATION IS ELSEWHERE AND CAME FIRST:
-`review/active/klee-sparks-2026-08-29.md` §17, committed before this file.
+`review/ruled/klee-sparks-2026-08-29.md` §17, committed before this file.
 This module PREDICTS NOTHING. Every threshold it prints a grade against is
 quoted from §17.4 as a literal below, so a reader can check the grade against
 the registration without leaving the file, and so no threshold can drift after
@@ -457,7 +457,7 @@ def main(argv: list[str] | None = None) -> int:
 
     stamp = cells.world_stamp()
     print("KLEESPARK-S1 — the Klee Spark arm measured DRAFTED, in the sim.")
-    print(f"  REGISTRATION: review/active/klee-sparks-2026-08-29.md §17 "
+    print(f"  REGISTRATION: review/ruled/klee-sparks-2026-08-29.md §17 "
           f"(slate §17.4), committed before this file and before this run.")
     print(f"  world stamp {stamp}   cell {cell.describe()}")
     print("  NOT A BALANCE READ (R215 B). Counts only; Guardrail-7 applies.")
@@ -467,7 +467,7 @@ def main(argv: list[str] | None = None) -> int:
     print()
 
     record: dict = {"registration": "KLEESPARK-S1",
-                    "packet": "review/active/klee-sparks-2026-08-29.md §17",
+                    "packet": "review/ruled/klee-sparks-2026-08-29.md §17",
                     "stamp": stamp, "cell": cell.describe(), "arms": {}}
     for label, flag in (("flag OFF (shipped pool) — CONTROL, NOT GRADED",
                          False),

@@ -23,7 +23,7 @@ level covered and archived is in [`STAMPS.md`](STAMPS.md), not here.
 | `P` `POLICY_VERSION` | **11** | `tier05/draft.py` | R207's scorer-literacy window: Spark hold-versus-spend, five state predicates, payout-aware selection scoring. |
 | `C` `CONSTANTS_VERSION` | **21** | `tier0/constants.py` | `EB-219`: Prune's printed `gain_spark` ops leave the sheet, her Spark grant becoming Klee's own kit declaration (`KLEE_COMPANION_SPARK_*`, LAW:145). |
 
-**Standing baseline:** `review/active/sitting-reads-2026-08-26-c20-d18-p11.md`,
+**Standing baseline:** `review/records/sitting-reads-2026-08-26-c20-d18-p11.md`,
 twelve arms at `RT12/D18/P11/C20` (`main` = `190e598`) in ONE pass with
 `game_ref/` present: `real_ironclad` **5.2%** / **65.5%** act-1, `real_silent`
 **1.1%** / **54.0%**; **no interval separation on any arm and no control set**,
@@ -67,7 +67,7 @@ Klee is the compatibility baseline; companion pools ship per nation
 Defect 75, Regent 75, Silent 70, Necrobinder 66): Furina 60 → **78** and Kokomi
 70 → **80** by **R219 F**, both canonical HP-scalers, Klee low by design, so
 every measured table quoting a Furina or Kokomi row is stale under R68 until a
-re-baseline (`review/active/roster-hp-scalers-2026-08-29.md` lists which).
+re-baseline (`review/records/roster-hp-scalers-2026-08-29.md` lists which).
 
 **Reference anchors** (measurement anchors, NOT roster members): `ref_ironclad`,
 `real_ironclad`, `ref_silent`, `real_silent` (`tier0/roster.py:165-171`), the

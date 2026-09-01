@@ -97,7 +97,7 @@ public sealed class Klee : CustomCharacterModel
     {
 #if PROTOTYPE_CARDS
         // QUARANTINED, THE SPARKS ARM'S ONE STARTER SEAM
-        // (review/active/klee-sparks-2026-08-29.md sec.10.10 item 4; sim twin
+        // (review/ruled/klee-sparks-2026-08-29.md sec.10.10 item 4; sim twin
         // `tier0/content/loader._starter_ids`, which is the ONE seam both the
         // tier 0 battery and the tier 0.5 run read so they cannot disagree
         // about what she opens with). With the flag on these two slots are the

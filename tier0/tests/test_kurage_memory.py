@@ -1,5 +1,5 @@
 """The Kurage's memory, VERSION 3: the QUARANTINED rule prototype behind
-`C.KURAGE_MEMORY` (review/active/kokomi-kurage-memory-2026-08-29.md sec.11).
+`C.KURAGE_MEMORY` (review/ruled/kokomi-kurage-memory-2026-08-29.md sec.11).
 
 TWO KINDS OF TEST LIVE HERE and they are not the same claim.
 

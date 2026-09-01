@@ -13,7 +13,7 @@ namespace KleeMod.Powers;
 /// printed price existed only as a number baked into the generated
 /// <c>IsPlayable</c> expression, so nothing outside the card could ask what a
 /// card costs -- which is exactly what the Spark cost BADGE has to ask
-/// (review/active/klee-sparks-2026-08-29.md sec.6.4 / PICK 8 option 2). The
+/// (review/ruled/klee-sparks-2026-08-29.md sec.6.4 / PICK 8 option 2). The
 /// alternative was a second table of prices for the display to read, and a
 /// price the player sees drifting from the price the gate charges is the D4
 /// defect the badge exists to repair. One number, one source.

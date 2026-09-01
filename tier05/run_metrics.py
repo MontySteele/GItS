@@ -188,7 +188,7 @@ def pooled_route_regret(results: list[RunResult]) -> dict:
 # R164 (2026-08-10) ruled the shape of the settlement: PRE-REGISTER the
 # measurement, do NOT ratify 1.0. The printer that made a registration
 # possible is `tools/regret_distribution.py` and the packet is
-# `review/active/regret-margin-registration-2026-08-12.md` (EB-72). Neither
+# `review/records/regret-margin-registration-2026-08-12.md` (EB-72). Neither
 # derives this number; both are careful not to.
 ROUTE_REGRET_MARGIN = 1.0
 # The sample rate is homed in tier0/constants.py beside its draft twin

@@ -1,6 +1,6 @@
 """`X9READ-S1`'s grader, on synthetic fixtures — BEFORE the registered run.
 
-The measurement law's order (`review/active/charge-reads-per-turn-registration
+The measurement law's order (`review/records/charge-reads-per-turn-registration
 -2026-08-13.md` §5.5, §6): the grader lands as its own commit, tested, before
 any number of the registered run is looked at. These fixtures are hand-built
 logs, not run output — no number here came off a run, and every threshold

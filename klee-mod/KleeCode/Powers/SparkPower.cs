@@ -42,7 +42,7 @@ namespace KleeMod.Powers;
 public sealed class SparkPower : PowerModel, ILocalizationProvider
 {
     /// <summary>
-    /// THE ALTERNATIVE-COST FLAG, C# side (review/active/klee-sparks-2026-08-29.md
+    /// THE ALTERNATIVE-COST FLAG, C# side (review/ruled/klee-sparks-2026-08-29.md
     /// sec.10.1, PICK 6 option 1). Twin of tier0's
     /// <c>C.SPARK_ALT_COST_ENABLED</c>, and it is the SAME switch that
     /// quarantines the prototype surface: <c>-p:PrototypeCards=true</c> defines

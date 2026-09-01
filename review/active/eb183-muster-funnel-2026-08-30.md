@@ -1,3 +1,5 @@
+Status: OPEN (the section 4 slate awaits countersign, then the run; BACKLOG EB-183)
+
 # EB-183 — Muster's Charge subsidy, asked at the funnel
 
 **2026-08-30. Branch `eb183-muster-funnel`, on `main` at `c17a2fe6`.** Built

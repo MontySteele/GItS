@@ -1,3 +1,5 @@
+Status: SUPERSEDED by review/active/klee-brief-2026-09-01.md
+
 # Klee's two new Personal Companions — the drafted faces
 
 **Drafted 2026-08-31 on branch `klee-personal-drafts-2026-08-31`, based on main

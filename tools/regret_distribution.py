@@ -37,7 +37,7 @@ WHAT THIS FILE DOES NOT DO. It proposes no margin, no band, no acceptance
 target and no percentile as "the" percentile. Every ladder rung is printed at
 equal weight for that reason. Which number (if any) becomes a threshold is a
 [USER] act at `M13`, downstream of the registration draft that accompanies
-this tool (`review/active/regret-margin-registration-2026-08-12.md`), and that
+this tool (`review/records/regret-margin-registration-2026-08-12.md`), and that
 draft states the circularity hazard in reading a threshold off this output.
 
 READING THE OUTPUT -- the one trap. Two denominators are printed and they are
@@ -268,7 +268,7 @@ def report(cell: cells.Cell, route: dict, drafted: dict) -> None:
     print("Descriptive only. Which percentile (if any) becomes a margin is a")
     print("[USER] call at QUEUE M13, and the registration draft states why")
     print("reading one off THIS page needs its pipeline named:")
-    print("  review/active/regret-margin-registration-2026-08-12.md")
+    print("  review/records/regret-margin-registration-2026-08-12.md")
     print("=" * 78)
 
 

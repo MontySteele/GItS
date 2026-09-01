@@ -12,7 +12,7 @@ namespace KleeMod.Tests;
 /// EB-196 -- THE MEMORY'S LIFETIME, and the reason a live Kokomi's queue was
 /// always empty.
 ///
-/// THE FINDING (review/active/kokomi-kurage-memory-2026-08-29.md sec.13.6,
+/// THE FINDING (review/ruled/kokomi-kurage-memory-2026-08-29.md sec.13.6,
 /// Gate B). On the 0.2.1441+proto build the strip printed and the base-kit
 /// facts were true on the wire, but across two whole fights the queue never
 /// held an entry: Gorou Exhausted (the bank moved, so the funnel ran), the

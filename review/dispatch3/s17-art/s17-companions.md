@@ -443,7 +443,7 @@ zero duplicates, zero effective collisions. *Does not prove* any of the 51 looks
 right — no eyes-on was taken and none may be (§8, review state).
 
 **F2 — the [USER] taste pass on these 51 has never been taken, and the register
-already says so.** `review/active/art-runs-2026-08-08.md:267-274` (run 9) rules
+already says so.** `review/ruled/art-runs-2026-08-08.md:267-274` (run 9) rules
 precisely this: *"all 62 Kokomi personal faces and all 15 Inazuma companions
 carry 3 ranked candidates each, with every candidate PNG present on disk … What
 is owed is [USER]'s eyes, and that is what the row means."* `art/picks.tsv` in
@@ -571,7 +571,7 @@ per-character `source_group` column self-documenting and write none.
   companion YAML sheets, `docs/current/{STATE,BACKLOG,QUEUE,OPERATIONS}.md`,
   `docs/current/art/*`, `tools/art_{coverage,lint,fetch}.py`,
   `tools/build_pck.ps1`, `klee-mod/build/deploy.ps1`, the `klee-mod/KleeCode`
-  files naming a companion power or a `powers/` path, `review/active/art-runs-2026-08-08.md`,
+  files naming a companion power or a `powers/` path, `review/ruled/art-runs-2026-08-08.md`,
   the four sibling S17 files, the lane B handoff, and — read-only in the primary
   — `art/raw/`, `art/candidates/`, `art/picks.tsv`,
   `art/contact_sheet_companions.html`, `ImageGen/images/**`,

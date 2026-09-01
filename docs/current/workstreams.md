@@ -112,7 +112,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   fixed) are in `EXPERIMENTS.md`; the design call it raised (`M37`) is ruled
   (R199), which is also the Phase-3 authorization and its four guardrails.
 - **Kokomi playtest** — EXPLORATORY run played 2026-08-26 on `0.2-1159`
-  (raw notes `review/active/kokomi-playtest-notes-2026-08-26.md`);
+  (raw notes `review/records/kokomi-playtest-notes-2026-08-26.md`);
   the confirmatory protocol run is unrun
   (`docs/current/playtest/kokomi-playtest-protocol.md`).
 - **Design course-correction — R213 (2026-08-26), authority amended R217
@@ -147,7 +147,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     after a kill ridden out — `EB-178`; powers, meters and a repeated
     card name say what the feed does not carry — `EB-179`);
     pinned managed assemblies in the vault (`EB-172`).
-  - **Kokomi slice 1** (`review/active/kokomi-slice-1-2026-08-27.md`,
+  - **Kokomi slice 1** (`review/ruled/kokomi-slice-1-2026-08-27.md`,
     §§Round 1–4): four rounds on the quarantined surface, **no shipped
     number moved**. Round 4 (`0.2.1293+proto`) re-boarded the two arms
     round 3 returned and ran them on TWO graders: 8 forms, 8 SURVIVES,
@@ -198,7 +198,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `EB-182` (no per-option playability on the choose-a-card screen,
     proven off the decompile), `EB-183` (R216 D's per-companion half,
     owed and unbuilt).
-  - **Klee slice 1** (`review/active/klee-slice-1-2026-08-29.md`, §11–§13):
+  - **Klee slice 1** (`review/ruled/klee-slice-1-2026-08-29.md`, §11–§13):
     R213 E2's three Spark-spending arms. **Round 1** RUN 2026-08-29 on
     `0.2.1314+proto`: six turns in three matched pairs, seeds pinned
     after 11 rolls; closeness SURVIVES on all six both ways, though the
@@ -272,7 +272,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     MOOT rather than
     re-boardable, since both re-boarded arms price Charge.
   - **Klee Sparks — RE-AUTHORED, both engines, behind a flag**
-    (`review/active/klee-sparks-2026-08-29.md`; evidence
+    (`review/ruled/klee-sparks-2026-08-29.md`; evidence
     `docs/current/research/regent-stars-economy.md`). R219 B/C: the
     threshold rule retires and Sparks become an ALTERNATIVE CARD COST,
     with **no cap** — the governor is generator scarcity, matched to
@@ -330,7 +330,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     spend may sit at the card's top level or at the HEAD of a `choose_one`
     mode, and nothing nested or conditional. *Bag of Tricks* is admitted on
     that clause and is `EB-224`, sequenced after `EB-205`'s read.
-  - **Kokomi Kurage memory — BASE KIT** (`review/active/kokomi-kurage-memory-2026-08-29.md`
+  - **Kokomi Kurage memory — BASE KIT** (`review/ruled/kokomi-kurage-memory-2026-08-29.md`
     §11–§13). R219 D: the Bake-Kurage is **always on**, part of the base
     kit rather than a summoned card, and one Muster card joins the base
     deck to teach the pattern. The memory queue prices each remembered
@@ -387,7 +387,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     ANSWERED — option 3, and the element draws for the local seat only —
     and `EB-198` is BUILT on `kurage-memory-card`, awaiting the live check.
   - **Furina REFRAME — COUNTERSIGNED, AND SLICE 1 IS BUILT IN THE SIM**
-    (`review/active/furina-reframe-2026-08-29.md`, §11). R220 A, from [USER]'s
+    (`review/ruled/furina-reframe-2026-08-29.md`, §11). R220 A, from [USER]'s
     brief and his four answers: the Salon is an **orb board** in the Defect
     shape whose members never auto-play, **Fanfare is its Focus and its
     Burst** — a full meter is a maximally scaled Salon and that fill state
@@ -411,9 +411,9 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     returning with evidence if Encore proves over-subscribed. `M68` CLOSES and
     `M45`(4) is answered with it; **nothing migrates before the reframe's own
     whole-fight read**
-    (`review/active/furina-spotlight-options-2026-08-30.md`).
+    (`review/ruled/furina-spotlight-options-2026-08-30.md`).
     The packet **supersedes E4 §3, §4, §7.1 and §12 on paper**
-    (`review/active/furina-e4-2026-08-29.md` stays in place as the record).
+    (`review/ruled/furina-e4-2026-08-29.md` stays in place as the record).
     No sheet row, no constant and no LAW line has moved.
     **`M52` is re-pointed** onto this packet's §3 ruling text and its §3.1
     prospective LAW text, and the sixteen design picks are **`M59`**.
@@ -658,7 +658,7 @@ WITH TABLE TIME: Klee `PICK 1` (reopens if the income reads short), `M45`'s five
 (after `S4-G14`), `S4-G6`'s band (Claude drafts from written intent — the
 mechanism ruled at R231 — after the Kokomi fold), and `S4-G14` itself. Slot 6's
 fork is no longer among them: R231 RULED it. The slate's third section in
-`review/active/sitting-2026-08-30.md` carries that list.
+`review/ruled/sitting-2026-08-30.md` carries that list.
 
 **R231 (2026-08-30) landed the sitting slate whole and emptied most of what was
 left here.** `M14` closed as NOISE — the published trigger result stands exactly
@@ -685,7 +685,7 @@ Art debt = `grand_gala` r6); and — after **R224
 (2026-08-30) closed `M49`, `M50`, `M52`, `M54`, `M56`, `M57`, `M59` and `M60`**
 — **`M47`, `M55` and `M64` with them, and `M67` by R227, so NO prototype-slice
 row is open.**
-R224 landed `review/active/sitting-2026-08-30.md` WHOLE: the Klee round-2
+R224 landed `review/ruled/sitting-2026-08-30.md` WHOLE: the Klee round-2
 picks and the §14 direction with its Spark-only migration branch (`EB-218`);
 `M47` at option (3), build per-mode playability (`EB-182`) then re-ask; `M55`
 at (5) re-scoped to the pile view, folded into `EB-214`; `M64` at a SPLIT —

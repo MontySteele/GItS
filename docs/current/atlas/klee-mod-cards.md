@@ -272,4 +272,4 @@ would otherwise get wrong:
   the first time a staged turn drew it.
 
 Commands and the deletion rule: `docs/current/OPERATIONS.md`, "Prototype
-surface". Packet: `review/active/eb147-prototype-surface-2026-08-27.md`.
+surface". Packet: `review/ruled/eb147-prototype-surface-2026-08-27.md`.

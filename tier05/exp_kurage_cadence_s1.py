@@ -1,7 +1,7 @@
 """`KURAGECAD-S1` — the Kurage memory's CADENCE measured DRAFTED. THE INSTRUMENT.
 
 THE REGISTRATION IS ELSEWHERE AND CAME FIRST:
-`review/active/kokomi-kurage-memory-2026-08-29.md` §15, committed before this
+`review/ruled/kokomi-kurage-memory-2026-08-29.md` §15, committed before this
 file. This module PREDICTS NOTHING. Every threshold it prints a grade against is
 quoted from §15.4 as a literal below, so a reader can check the grade against the
 registration without leaving the file, and so no threshold can drift after a
@@ -509,7 +509,7 @@ def main(argv: list[str] | None = None) -> int:
 
     stamp = cells.world_stamp()
     print("KURAGECAD-S1 — the Kurage memory's CADENCE, measured DRAFTED.")
-    print("  REGISTRATION: review/active/kokomi-kurage-memory-2026-08-29.md "
+    print("  REGISTRATION: review/ruled/kokomi-kurage-memory-2026-08-29.md "
           "§15 (slate §15.4), committed before this file and before this run.")
     print(f"  world stamp {stamp}   cell {cell.describe()}")
     print("  NOT A BALANCE READ (R213 B / R215 B). Counts only; the pilot "
@@ -520,7 +520,7 @@ def main(argv: list[str] | None = None) -> int:
     print()
 
     record: dict = {"registration": "KURAGECAD-S1",
-                    "packet": "review/active/kokomi-kurage-memory-2026-08-29"
+                    "packet": "review/ruled/kokomi-kurage-memory-2026-08-29"
                               ".md §15",
                     "stamp": stamp, "cell": cell.describe(), "arms": {}}
     for label, flag in (("flag OFF (shipped Kokomi) — CONTROL, NOT GRADED",

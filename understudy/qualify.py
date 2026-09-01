@@ -243,7 +243,7 @@ def score_costs(form: Mapping[str, Any], turn_dir: Path) -> tuple[bool, str]:
     THE CATEGORY USED TO BE HALF A CHECK. It ran `free_card_misreads` over the
     reader's prose and PASSED on no hits, so a form that never mentioned a
     price passed `costs` and R223's mark of 4 of 6 was satisfiable by silence
-    (`review/active/klee-sparks-2026-08-29.md` section 13.8, claim 3). Silence
+    (`review/ruled/klee-sparks-2026-08-29.md` section 13.8, claim 3). Silence
     now FAILS: the reader states, per play and in the board's own printed
     numbers, the bank before, the price paid, and the bank after.
 

@@ -1,6 +1,6 @@
 """The payoff-reach sprint's two owed builds: the generic reader and `blind`.
 
-Both are named in `review/active/payoff-reach-reregistration.md` §6.4 / §6.5
+Both are named in `review/records/payoff-reach-reregistration.md` §6.4 / §6.5
 as owed BEFORE the run and after the predictions commit (R186). Neither may
 move a drafter pick, so the pins here are about arithmetic and about rng
 seams, never about a measured number: no figure from a live sheet is asserted,

@@ -45,7 +45,7 @@ public class KurageMemoryPileHeaderTests
     [Fact]
     public void The_head_of_the_pile_view_carries_R224s_sentence_verbatim()
     {
-        // Verbatim, review/active/sitting-2026-08-30.md item 7. No trailing
+        // Verbatim, review/ruled/sitting-2026-08-30.md item 7. No trailing
         // stop, no "Stir", nothing about the queue: R224 ruled ONE sentence
         // and this is it.
         Assert.Equal("Gain 1 Charge when a card of yours Exhausts", Line());

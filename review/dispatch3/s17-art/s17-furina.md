@@ -114,7 +114,7 @@ are stated once here and only exceptions are repeated in a row.
 - **Packed path.** From the live `klee.pck.contract.txt`, which is *derived
   from what actually landed* (`build_pck.ps1:789-823`), not asserted.
 - **Fallback.** What the game renders when the file is absent.
-- **Review state.** From `docs/current/art/`, `review/active/art-runs-*.md`,
+- **Review state.** From `docs/current/art/`, `review/ruled/art-runs-*.md`,
   and the open `QUEUE.md` rows. "SHIPPED, no recorded eyes-on" means the file
   is on disk and packed but I found no record of [USER] approving it by eye.
 - **Collision/duplicate state.** Two ids sharing one effective source, or two
@@ -225,7 +225,7 @@ nothing references, is itself an error. That is a well-built gate.
 | `quick_change` | first Attack each turn draws | `Item Fontaine Redemption.png` | `Item Fontaine Lucine.png` | `:1135-1136` | both PRESENT |
 | `unheard_confession` | Block whenever Fanfare changes | `Animula Choragi.png` (1080², Furina's own Animula symbol) | `Item Fontaine Attunement.png` | `:1123-1124` | both PRESENT |
 
-Shortlist reasoning is at `review/active/art-runs-2026-08-08.md:146-171`.
+Shortlist reasoning is at `review/ruled/art-runs-2026-08-08.md:146-171`.
 All 14 raw sources are on disk under `C:\Users\Monty\Documents\GitHub\GItS\art\raw\`
 (verified file-by-file), so re-rendering the candidates is a tool run with no
 fetch. **Blocking unknown: see §9 F1 — none of these seven has a rank-1 row.**
@@ -413,7 +413,7 @@ failing, `baseline-run-2026-08-26.txt:74-88`):
 PNGs, commit the sheet. **Gate:** none — R212(1): Claude picks, [USER] vetoes
 on the sheet." But **none of the seven has a rank-1 plan row**: every row for
 all seven asset ids is rank 2 or 3 (`art/plan.tsv:1123-1136`, verified by
-enumerating ranks per asset id). `review/active/art-runs-2026-08-08.md:149-151`
+enumerating ranks per asset id). `review/ruled/art-runs-2026-08-08.md:149-151`
 says so explicitly — "Every row is rank 2 or 3; there is no rank 1, so no file
 lands and the S12 deferral stays valid." R212(1) authorises *applying* a
 shortlist rank 1; it does not authorise *creating* one. **What this does not
@@ -428,7 +428,7 @@ mechanical close.
 (`docs/current/STATE.md:114-115`). Every other Furina card-sized output has at
 least two candidates. **What this does not establish:** whether they are worth
 hunting now — the 2026-08-08 scarcity note
-(`review/active/art-runs-2026-08-08.md:187-200`) says the free Furina pool at
+(`review/ruled/art-runs-2026-08-08.md:187-200`) says the free Furina pool at
 card scale is down to low single digits, so a hunt may legitimately return
 empty.
 

@@ -1,7 +1,7 @@
 """Furina reframe, SLICE 1 -- the quarantined prototype engine.
 
-`review/active/furina-reframe-2026-08-29.md` is the countersigned design (R220
-A, F-picks answered by R224); `review/active/furina-spotlight-options-2026-08-30.md`
+`review/ruled/furina-reframe-2026-08-29.md` is the countersigned design (R220
+A, F-picks answered by R224); `review/ruled/furina-spotlight-options-2026-08-30.md`
 §5 is R228's ruled Spotlight direction. This module is the sim half of that
 packet's §6 testable slice, and NOTHING IN IT IS ON.
 

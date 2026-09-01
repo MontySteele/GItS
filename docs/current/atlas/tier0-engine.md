@@ -177,7 +177,7 @@ In-process: `combat.run_fight(player, enemies, pilot, seed) -> CombatState`
 Merged into `main` 2026-08-23 on the settled Route-1 precedent: the ops, the
 field and the context exist in HEAD, **no card on any sheet reaches any of
 them**, every drafter price is PROPOSED, and no live `RT/D/P/C` integer moved.
-Activation is Phase 2 (`review/active/eb118-richness-phase0-2026-08-23.md`
+Activation is Phase 2 (`review/ruled/eb118-richness-phase0-2026-08-23.md`
 §3). Each entry says what the surface *is*, because the thing a reader will
 trip over is assuming it is dead code.
 

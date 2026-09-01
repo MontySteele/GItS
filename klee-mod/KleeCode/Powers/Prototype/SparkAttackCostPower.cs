@@ -13,7 +13,7 @@ namespace KleeMod.Powers;
 
 /// <summary>
 /// TRUE SPARK KNIGHT, re-authored -- the STRICT conversion (PICK 5 wording (1),
-/// sub-pick (a); the independent seat FOLLOWS on both, review/active/
+/// sub-pick (a); the independent seat FOLLOWS on both, review/ruled/
 /// klee-sparks-2026-08-29.md sec.9). The C# half of the rule tier0 carries in
 /// <c>combat.spark_power_price</c>; every clause below is that function's, and
 /// no rule is re-derived on this side.

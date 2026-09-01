@@ -1,3 +1,5 @@
+Status: RULED (see RULINGS.md)
+
 # The canonical payoff census — rubric + census + candidate bands
 
 **R137 step (2a).** BACKLOG `EB-56`, closed by this packet.

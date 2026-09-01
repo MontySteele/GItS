@@ -5,7 +5,7 @@ R223's battery marks a seat 4 of 6 on `costs`, and until this commit
 reader's prose -- and returned PASS whenever it found nothing. A form that
 never mentioned a price therefore passed the category, so the mark was
 satisfiable by SILENCE and the category could only ever fail a POSITIVE
-misread (`review/active/klee-sparks-2026-08-29.md` section 13.8, claim 3).
+misread (`review/ruled/klee-sparks-2026-08-29.md` section 13.8, claim 3).
 
 The fix is a per-play PRICE LEDGER on the form -- bank before, price paid,
 bank after -- scored against the costs and the bank the PACKET prints. The

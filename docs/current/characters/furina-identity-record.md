@@ -52,7 +52,7 @@ written, not by a LAW amendment; until then this file is where they are read.
 
 ---
 
-**Live tension to carry into the brief.** `review/active/furina-reframe-2026-08-29.md`
+**Live tension to carry into the brief.** `review/ruled/furina-reframe-2026-08-29.md`
 (countersigned R220 A) and R228 already supersede parts of the Spotlight and
 Fanfare bullets above on paper: Center Stage retires, one mode priced, Fanfare
 becomes the Salon's Focus and Burst. Nothing above was rewritten to match,

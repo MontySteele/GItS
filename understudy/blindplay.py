@@ -1089,7 +1089,7 @@ def render(obs: dict[str, Any]) -> str:
                 for r in you["relics"]]
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
-            # (review/active/kokomi-kurage-memory-2026-08-29.md §14). The page
+            # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page
             # mirrors THE ELEMENT'S facts, in the element's own order, because
             # a blind reader must be given what a sighted player sees and
             # nothing else:

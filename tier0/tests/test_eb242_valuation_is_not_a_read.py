@@ -2,7 +2,7 @@
 
 THE DEFECT. `resources.note_charge_read` has always DECLARED the two pilot
 valuation sites out of scope -- its own docstring says so, and §2 of
-`review/active/charge-reads-per-turn-registration-2026-08-13.md` says
+`review/records/charge-reads-per-turn-registration-2026-08-13.md` says
 deliberation is deliberately NOT counted. The code did not implement the
 declaration: `_bonus_formula`'s `N_per_M_charge` branch ticked the instrument
 on every call, and `policy._expected_damage` and `policy._raw_block` call that

@@ -212,6 +212,8 @@ REGISTRY: tuple[Lint, ...] = (
     _ci("stamp-rows",           "tools/lint_stamp_rows.py"),
     _ci("sheet-stamp",          "tools/lint_sheet_stamp.py"),
     _ci("experiments-active",   "tools/lint_experiments_active.py"),
+    # The review tree's three directories, and the paths that cite them.
+    _ci("review-status",        "tools/lint_review_status.py"),
     # The hooks under tools/hooks/ are the only code here that no test imports
     # and no lint reads -- they run out of process, on stdin JSON. A refusal
     # that quietly stopped refusing looks exactly like a session that never
@@ -234,6 +236,10 @@ REGISTRY: tuple[Lint, ...] = (
     _suite("recall-exhaust",           "tools/lint_recall_exhaust.py"),
     _suite("register-isolation",       "tools/lint_register_isolation.py"),
     _suite("sheet-comments",           "tools/lint_sheet_comments.py"),
+    # The other half of the sheet-comment pair (2026-09-01): `sheet-comments`
+    # checks that the prose on a sheet is TRUE, this one checks that there is
+    # not too much of it for an agent to open the sheet cheaply.
+    _suite("sheet-comment-blocks",     "tools/lint_sheet_comment_blocks.py"),
     _suite("strict-domination",        "tools/lint_strict_domination.py"),
     _suite("upgrade-comment-arith",    "tools/lint_upgrade_comment_arithmetic.py"),
     _suite("upgrade-coverage",         "tools/lint_upgrade_coverage.py"),

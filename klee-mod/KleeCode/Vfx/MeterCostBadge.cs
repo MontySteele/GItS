@@ -16,7 +16,7 @@ namespace KleeMod.Vfx;
 /// THE METER COST BADGE -- one badge, three meters (EB-220).
 ///
 /// It began as the Klee Spark cost badge (PICK 8 option 2,
-/// review/active/klee-sparks-2026-08-29.md sec.6.4; the independent seat
+/// review/ruled/klee-sparks-2026-08-29.md sec.6.4; the independent seat
 /// FOLLOWS, citing D4: "at the decision point the player can perceive and
 /// forecast the consequences that matter, through the card, a keyword, a
 /// persistent UI element or a character rule"). [USER], 2026-08-30: "Yes, I

@@ -10,7 +10,7 @@ slate and are deliberately absent here.
 
 WHY A SIBLING AND NOT AN EDIT. `tier05/exp_klee_sparks_r1.py` is a PUBLISHED
 instrument: the `KLEESPARK-R1` packet quotes its output at
-`review/active/klee-sparks-r1-sim-2026-08-29.txt` and R101b says a published
+`review/records/klee-sparks-r1-sim-2026-08-29.txt` and R101b says a published
 measurement record stands as published. r1 is therefore byte-identical and
 untouched, and this file is its successor.
 

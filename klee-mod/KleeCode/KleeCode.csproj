@@ -34,8 +34,8 @@
     <Compile Remove="Cards/Prototype/**/*.cs" />
     <!-- The same quarantine, for a RULE rather than a card. Two arms use it and
          they are independent: the Kurage's memory
-         (review/active/kokomi-kurage-memory-2026-08-29.md sec.11) and the Klee
-         Sparks alternative cost (review/active/klee-sparks-2026-08-29.md
+         (review/ruled/kokomi-kurage-memory-2026-08-29.md sec.11) and the Klee
+         Sparks alternative cost (review/ruled/klee-sparks-2026-08-29.md
          sec.10). Both are engine (and, for Sparks, UI) behaviour rather than a
          sheet row, so neither has a generated class to sit in Cards/Prototype,
          and both are quarantined on exactly the same terms and by exactly the

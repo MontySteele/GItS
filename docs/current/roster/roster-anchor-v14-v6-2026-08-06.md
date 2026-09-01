@@ -63,8 +63,8 @@
 > **Same banner, closed; not a third banner and not a rewrite.** The condition
 > the two addenda above fixed has occurred. The payoff-reach sprint ran under
 > `DRAFTER 14` at the frozen `RT12/D14/P7/C11` (step 3) and was **graded blind
-> on 2026-08-24** (step 4) — `review/active/payoff-reach-reregistration.md`
-> §7–§8, raw results at `review/active/payoff-reach-results-2026-08-24.txt`.
+> on 2026-08-24** (step 4) — `review/records/payoff-reach-reregistration.md`
+> §7–§8, raw results at `review/records/payoff-reach-results-2026-08-24.txt`.
 > `R121` put the lift "on the graded read, and nowhere earlier", and the graded
 > read has landed. **Steps (5) and (6) were taken in the window after the
 > grade, in order: `EB-43`'s `D15` landed with its re-baseline, then this.**
@@ -86,7 +86,7 @@
 > quotable **as the `C6`/`D14` reading they are** and are not comparable,
 > unlabeled, with any current number (R68). The `DRAFTER 14 → 15` bump of
 > 2026-08-24 archives them along with every other `D14` reading; the standing
-> twelve-arm table is `review/active/sitting-reads-2026-08-25-c19-d17-p10.md`,
+> twelve-arm table is `review/records/sitting-reads-2026-08-25-c19-d17-p10.md`,
 > which supersedes the two 2026-08-24 tables this line used to name (each
 > stands as published, R101b). The two facts are independent and both apply.
 >
@@ -237,7 +237,7 @@ bonus is blind to the anchor arm's tags; `core_complete` and every other
 reader still sees them), and the `ref_ironclad` arm **alone** was re-measured
 under this document's own recipe — `n=3000`, `seed 20260729`,
 `RT7/D14/P3/C6`, same per-arm harness body, checkpoint
-`review/r121-shield/shielded-arm-9.json`.
+`git show pre-simplification-2026-08-06:review/r121-shield/shielded-arm-9.json`.
 
 **The tripwire fired, and [USER] released the republication anyway.** R121's
 stated tripwire was that a shielded reading which does not restore the
@@ -267,7 +267,7 @@ evidence about those arms and not about this one. **An untagged-under-C6
 reading of this arm did not exist before this one.** A second,
 diagnostic-only measurement that shields the WHOLE of `score_offer` — the
 scorer seeing exactly the pre-rider cards — reads **13.20%** (z = +2.45 vs
-11.13%; `review/r121-shield/probe-full-shield.json`, **not** committed
+11.13%; `git show pre-simplification-2026-08-06:review/r121-shield/probe-full-shield.json`, **not** committed
 behaviour), so the residual is not a leftover tag-reading term in the scorer.
 
 **Therefore: this row is the honest untagged-C6 baseline going forward.** The

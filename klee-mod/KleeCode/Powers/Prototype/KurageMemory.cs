@@ -19,7 +19,7 @@ namespace KleeMod.Powers;
 /// <summary>
 /// THE KURAGE'S MEMORY, v3 -- the C# half of the rule the sim carries behind
 /// <c>tier0/constants.py C.KURAGE_MEMORY</c>. Spec:
-/// <c>review/active/kokomi-kurage-memory-2026-08-29.md</c> §11, whose §11.1 is
+/// <c>review/ruled/kokomi-kurage-memory-2026-08-29.md</c> §11, whose §11.1 is
 /// [USER]'s words and IS the spec. Every behaviour here mirrors
 /// <c>tier0/engine/effects.py</c>; no rule is re-derived C#-side.
 ///
@@ -464,7 +464,7 @@ public static class KurageMemory
     /// <summary>
     /// THE AFFORDABILITY RUN -- the running subtraction over the queue.
     ///
-    /// Spec: <c>review/active/kokomi-kurage-memory-2026-08-29.md</c> §14.4,
+    /// Spec: <c>review/ruled/kokomi-kurage-memory-2026-08-29.md</c> §14.4,
     /// which is [USER]'s direction for the card element that replaced the
     /// strip. The HUD answers "does the next one fire" -- one comparison,
     /// <c>bank &gt;= front.Price</c>, no forecast. The PILE VIEW answers "how

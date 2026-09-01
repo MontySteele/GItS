@@ -893,3 +893,30 @@ def test_the_face_scaling_lint_reads_a_concatenated_hand_written_face():
     face = shipped["LetThePeopleRejoice"]
     assert "{CalculatedDamage" in face and "Gain 6 [gold]Encore[/gold]" in face
     assert lint.FOLD in face and "Scales with" not in face
+
+
+def test_the_review_tree_says_what_each_packet_is():
+    """`review/active/` holds only packets with an open pick, and every
+    review path a live file cites still exists (tools/lint_review_status.py).
+
+    On 2026-09-01 `review/active/` held 61 files. Five had an open pick; the
+    other 56 were finished decision packets and published measurements a
+    session had to open to discover were finished. The split into three
+    directories only stays true if something checks it, and the second half of
+    the check is the one that bites: moving a packet is what breaks the
+    citations, so the move and the repoint are gated together."""
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_review_status.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+    assert "review-status OK" in res.stdout
+
+
+def test_the_review_status_lint_catches_a_packet_in_the_wrong_place():
+    """The lint's own cases: the four status forms, the retrieval-path
+    exemption, and the rejections."""
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_review_status.py"),
+         "--self-test"], capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+    assert "0 failure(s)" in res.stdout

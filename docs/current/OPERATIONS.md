@@ -725,7 +725,7 @@ pair-read both, and those two arms' outcomes were provisional. **They are not
 any more:** Klee ROUND 3 (2026-08-29) re-derived both rows Claude-side from the
 clause the seat named, set both `authored_by:` back to `[claude]`, re-ran the
 two arms on two graders and re-read the pair, and both arms ADVANCE on a clean
-independent read (`review/active/klee-slice-1-2026-08-29.md` §13). There is no
+independent read (`review/ruled/klee-slice-1-2026-08-29.md` §13). There is no
 third family and none is being added; the roles are fixed at two — **Claude
 authors, GPT grades and reviews** — so the separation has to be enforced
 structurally.

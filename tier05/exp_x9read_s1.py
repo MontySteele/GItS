@@ -1,7 +1,7 @@
 """`X9READ-S1` — Kokomi's charge reads per turn, a DESCRIPTIVE read. THE RUN.
 
 THE REGISTRATION IS ELSEWHERE AND CAME FIRST:
-`review/active/charge-reads-per-turn-registration-2026-08-13.md` §5, the slate
+`review/records/charge-reads-per-turn-registration-2026-08-13.md` §5, the slate
 `X9READ-S1` (`X1`–`X7`, `W9` at §5.4), DRAFTED under R212(2) and committed
 before any run, revised 2026-08-30 on the pair review's correction and
 COUNTERSIGNED in the R233 batch. THE GRADER IS ALSO ELSEWHERE AND ALSO CAME
@@ -67,7 +67,7 @@ CELL = cells.CANONICAL.but(name="x9read-s1", character="kokomi",
 #: reader density differ per plan.
 ARCHETYPES = ("priest", "commander", "assist")
 
-PACKET = "review/active/charge-reads-per-turn-registration-2026-08-13.md"
+PACKET = "review/records/charge-reads-per-turn-registration-2026-08-13.md"
 
 
 def _observe(cell) -> list[ct.ChargeTrace]:

@@ -1,7 +1,7 @@
 """`KLEESPARK-R1` slots P5 and P6 — the Spark economy on a drafted-shape deck.
 
 THE TWO SLOTS, verbatim from the countersigned slate at
-`review/active/klee-sparks-2026-08-29.md` sec.10.9:
+`review/ruled/klee-sparks-2026-08-29.md` sec.10.9:
 
   P5  Does the pilot's SPEND RATE rise when the flag is on and the tight set
       is drafted?  Predicted YES.

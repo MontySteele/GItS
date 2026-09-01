@@ -5,7 +5,7 @@ namespace KleeMod.Powers;
 
 /// <summary>
 /// THE STARTER SWAP, and it is ONE seam
-/// (review/active/klee-sparks-2026-08-29.md sec.10.10 item 4).
+/// (review/ruled/klee-sparks-2026-08-29.md sec.10.10 item 4).
 ///
 /// Klee's printed template is 4x Ka-boom!, 4x Duck and Cover, 1x Jumpy Dumpty,
 /// 1x Pop. Under the alternative cost two of those ten slots carry the PRICED

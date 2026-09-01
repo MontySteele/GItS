@@ -3,7 +3,7 @@
 `spend_spark` appeared nowhere in `tier0/pilot/` until this window, so the
 three `C19` sinks bought their payoff for free at score time and the standing
 read had to publish their contribution as a FLOOR
-(`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`). This file pins the
+(`review/records/sitting-reads-2026-08-25-c19-d17-p10.md`). This file pins the
 term that closes it, and it pins the SHAPE rather than the tuning: what the
 three legs are, that the largest wins, that the bank is restored, and -- the
 two the row actually asks for -- that a sink is REFUSED when banking is worth

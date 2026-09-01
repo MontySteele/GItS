@@ -1,3 +1,5 @@
+Status: RULED (see RULINGS.md)
+
 # The machinery review — how a character moves from an idea to the table, and where the fun goes
 
 **Written 2026-09-01 on branch `kit-overhaul-2026-09-01`. Paper only.** Nothing

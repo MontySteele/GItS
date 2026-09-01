@@ -2,7 +2,7 @@
 
 MEASUREMENT ONLY. This script runs no design, moves no constant, and reads
 nothing into its own output. It is the runner for the registration at
-`review/active/eb17p-registration-draft-2026-08-08.md`, and every choice it
+`review/records/eb17p-registration-draft-2026-08-08.md`, and every choice it
 makes is a choice that packet already made -- the cell, the seeds, the arms,
 the columns and the tests are all fixed there, not here.
 

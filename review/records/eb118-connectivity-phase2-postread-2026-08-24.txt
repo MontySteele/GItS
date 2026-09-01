@@ -1,0 +1,1006 @@
+==============================================================================
+EB-118 CONNECTIVITY — THE PHASE-2 POST-READ, over BOTH activation windows
+  registration  review/ruled/eb118-richness-phase0-2026-08-23.md §2
+                (§2.3 step 5 reporting, §2.4 the graded predictions,
+                 §2.5 no gate, §2.6 blind spots)
+  sequence      R202 step (iii) — "close Phase 2's windows separately and take
+                a Phase-2 post-read", ONE read over both activation windows
+                rather than one per switch; and step (iv) — "that read is W1's
+                pre-state"
+  read date     2026-08-24
+  instrument    tools/card_connectivity_report.py, vocabulary
+                eb118-connectivity-v3 (R203-authorized, R205-RATIFIED)
+  paired with   review/records/eb118-connectivity-phase1-postread-2026-08-24.txt
+                (the `dcc1dd0` Phase-1-complete world)
+==============================================================================
+WHY THIS READ IS TAKEN FROM `main`, WHERE THE PHASE-1 READ COULD NOT BE.
+The Phase-1 read had to be reconstructed on a scratch world because `main`
+already mixed Phase 1 with Phase 2, so a read off `main` would have been a
+Phase-1+2 read wearing a Phase-1 label. That problem is over. Phase 2 is
+COMPLETE — all three of its windows are closed on `main` — so `main` IS the
+Phase-2 world, and this read is taken from it directly with no cherry-pick, no
+conflict resolution and no discarded hunk.
+
+THIS FILE IS NOT A GATE. §2.5 registers NO threshold: no 55–65% target, no
+pass/fail bar, and no code in the instrument compares a share to a constant.
+Every percentage below is a REPORTED QUANTITY.
+
+------------------------------------------------------------------------------
+1. THE WORLD THAT WAS READ
+------------------------------------------------------------------------------
+  POST WORLD      770f880d2728a6179ff7b90a4fbfc2134ebf7f3f
+                  `main`, "Merge pull request #78 from
+                  MontySteele/defect-filings-2026-08-24"
+                  Read in the worktree `../GItS-phase2-postread` on branch
+                  `eb118-phase2-postread`. Nothing in that worktree was
+                  edited to take the read; this record is its whole diff.
+
+  LIVE CELL       RT12 / D16 / P9 / C14, `PILOT_WEIGHTS_VERSION` 4
+                  READ FROM THE CODE, not copied from prose:
+                    tier05.cells.CANONICAL.versions -> {RT: 12, D: 16,
+                                                        P: 9, C: 14}
+                    tier05.cells.CANONICAL.stamp()  -> "cell=canonical
+                                                        seed=11 runs=600
+                                                        RT12/D16/P9/C14"
+                    tier0.constants.PILOT_WEIGHTS_VERSION -> 4
+                  BOTH ACTIVATION SWITCHES ARE LIVE, also read from the code:
+                    tier0/pilot/policy.py:683  PILOT_POLICIES_ENABLED = True
+                    tier0/pilot/policy.py:775  MODE_CHOOSER_ENABLED   = True
+                  That pair is the whole reason this read is owed once rather
+                  than twice: R202 step (iii) asks for ONE post-read over both,
+                  and both are now `True` in one tree.
+
+                  Recorded for provenance ONLY. This instrument reads SHEETS.
+                  It has no run count, no seed, no combat and no draft, so no
+                  `RT/D/P/C` field and neither switch is an input to a single
+                  number below, and none moved to take it.
+
+  PRE WORLD       dcc1dd04824925d39905f75875abeaf7e31db23d — the Phase-1
+                  post-read's own scratch world, `phase1-postread`. The
+                  comparison base is the PHASE BOUNDARY, which is what
+                  §2.3(5)'s "re-run after each coordinated phase" means: the
+                  Phase-1 read was paired against the pre-Phase-1 baseline,
+                  and this one is paired against the Phase-1 read.
+
+  CANON           All five canon pools decompiled from the local `sts2.dll`
+                  through `klee-mod/local.props` on BOTH sides. The
+                  honest-stop mod-only path was taken on neither. `game_ref/`
+                  was not needed, was not linked and was not present in
+                  either tree — `canon_source()` asks about the BINARY, which
+                  is why a worktree can print the complete report.
+
+  ALL EIGHT POOLS READ on both sides, 673 cards, and `UNCLASSIFIED: none` in
+  every one of the eight, twice.
+
+THE PRE SIDE WAS RE-RUN, NOT COPIED.
+The Phase-1 world was rebuilt from a clean `git archive` of `dcc1dd0` (given
+only `klee-mod/local.props`, which is gitignored and committed nowhere) and
+the instrument was run over it in this session. Its stdout reproduces the
+published Phase-1 appendix LINE FOR LINE, all 319 lines, zero differences.
+Independently, the ORIGINAL Phase-1 scratch worktree survives on this machine,
+clean at `dcc1dd0`, and a per-card dump taken from it is EQUAL, card for card
+and field for field, to the dump taken from the archive re-derivation. So both
+sides of the table below come from runs taken in this session.
+
+PROVENANCE DIGESTS (sha256, working-tree form).
+  instrument
+    fa8665eec8c6f6237d733b7220d0d88edf2e4312ae2cb281b3a4b8d08f4a2058
+      tools/card_connectivity_report.py   PRE  (dcc1dd0)
+    9b1805db95e41c6c08c124bd158b6022d5834a0690cbc3fcbec4b9eca5216718
+      tools/card_connectivity_report.py   POST (770f880)
+    ef6ef2ae18de106edf33e986b5439726bcc2426133d7a26608f6c2827a118e99
+      tools/effect_walk.py                IDENTICAL on both sides
+    584f40d57ad5afa9887a3fcaff121458136c8534488c5cfba88085a5184cf549
+      tools/extract_base_game_pool.py     IDENTICAL on both sides
+  The PRE digests reproduce the published Phase-1 record's exactly. The one
+  instrument file that differs is accounted for in full at §3 below, and the
+  difference is comment-only.
+
+  mod inputs — PRE (dcc1dd0)
+    2326f6e45886c31cb3e062aa79ce3b2fe530c20d193d045c2cc3d85c02d125ea klee-cards
+    e86fb40d36d675f6199560a2eadc9688d57953c50430e31982f9f824257910fb furina-cards
+    9edcb046e7441b895683ecc1545f4572f9c6c7edc0ed2a33b09732681105d8a8 kokomi-cards
+    (all three reproduce the published Phase-1 POST digests exactly, taken
+     from the surviving original worktree)
+  mod inputs — POST (770f880)
+    cee4d5d2a40918d24874925f949f594f3b62857c8012476c579d86539272a31e klee-cards
+    cb2b54971bb93a4668d54c508938bb2ac7833ea16ab96015d7ba9d4324404e1d furina-cards
+    9edcb046e7441b895683ecc1545f4572f9c6c7edc0ed2a33b09732681105d8a8 kokomi-cards
+
+  KOKOMI'S SHEET IS BYTE-IDENTICAL ACROSS THIS WINDOW TOO, and that is the
+  input file's own hash rather than an inference from the report. It is
+  identical in the git-object form as well (`ed2f1128…` at both commits), so
+  the claim does not rest on a checkout convention. Kokomi has now been the
+  control pool across BOTH phase boundaries.
+
+A PROVENANCE NOTE, RECORDED AND NOT ACTED ON. A fresh checkout of `dcc1dd0`
+today hashes `docs/klee-cards.yaml` to `82e8586a…` rather than the published
+`2326f6e4…`. The surviving original worktree hashes it to `2326f6e4…`. The two
+differ only by line-ending renormalization — these sheets carry mixed endings,
+and a re-checkout settles them differently — and the classifier parses YAML,
+which cannot see it. The decisive evidence that the world is the same world is
+the byte-exact stdout reproduction above, not the digest. Nothing published is
+rewritten (R101b); the observation is written down here so a later reader who
+re-checkouts and gets a different number is not left guessing.
+
+------------------------------------------------------------------------------
+2. WHAT IS REGISTERED FOR THIS READ, AND WHAT IS NOT
+------------------------------------------------------------------------------
+Derived from the repo before the instrument was run, and written down here
+before any result below was computed. The house rule is that an expectation is
+never revised against a result, so the derivation comes first and is quoted.
+
+WHAT IS REGISTERED — three obligations and one prediction set.
+
+(S1) §2.3(5), the reporting obligation, verbatim: "Re-run after each
+     coordinated phase, reporting paired per-card diffs as well as pool
+     aggregates." That is a REPORTING duty, not a graded expectation. It is
+     discharged at §§4–7 below.
+
+(S2) §2.3(4), the freeze: the classifier is frozen for the whole richness
+     batch; if the vocabulary is found wrong, BOTH sides are re-run under a
+     new `VOCAB_VERSION`, never the post result alone. Discharged at §3.
+
+(S3) R202 step (iii), from the BACKLOG `EB-118` row: close Phase 2's windows
+     separately and take a Phase-2 post-read — "ONE read over both activation
+     windows, not one per switch". Step (iv): "that read is W1's pre-state."
+     Discharged by this file, and §10 is the pre-state half.
+
+(S4) §2.4's committed directional predictions — TEN clauses (nine live, one
+     struck), committed 2026-08-23, before any `EB-118` sheet moved. This is
+     the ONLY graded content in the registration.
+
+WHAT IS **NOT** REGISTERED, stated explicitly rather than invented.
+
+  * **PHASE 2 HAS NO SEPARATELY REGISTERED EXPECTATIONS.** There is no
+    Phase-2 prediction set anywhere: not in the phase-0 packet (§2.4 is one
+    prediction set for the whole richness pass and is not phase-scoped —
+    the Phase-1 read recorded that property as its finding F-2), not in
+    `EXPERIMENTS.md` (whose `EB-118` pointer registers the instrument, the
+    paired baseline, the freeze and "directional predictions only (§2.4)"
+    and nothing further), and not in the BACKLOG `EB-118` row (which fixes
+    the SEQUENCE and the window order, never a predicted outcome). The
+    packet's own §3 "Phase 2" paragraph is a delivery-discipline clause —
+    which bumps are owed, that ops land with prices and parity, that one
+    modal prototype is priced before the pattern is copied — and it predicts
+    nothing.
+    So §8 grades §2.4's clauses AT THIS CHECKPOINT and nothing else. No
+    Phase-2-specific grade is minted here, because there is no
+    Phase-2-specific expectation to grade.
+
+  * **NO THRESHOLD, AND NO NEW STANDING TABLE.** §2.5 registers no gate. And
+    no twelve-arm standing table is owed at this read: what R202 step (iii)
+    owes is the connectivity post-read, and the connectivity instrument IS
+    the read. The Phase-2 content windows' own re-baseline was published
+    separately (`review/records/sitting-reads-2026-08-24-c13-d16.md`), and
+    both `P` bumps recorded, each in its own STATE block, that no table is
+    re-taken at a flip.
+
+------------------------------------------------------------------------------
+3. THE CLASSIFIER — FROZEN AT v3, AND THE ONE FILE DIFFERENCE, ACCOUNTED FOR
+------------------------------------------------------------------------------
+`VOCAB_VERSION` reads `eb118-connectivity-v3` on BOTH sides. The vocabulary is
+the one R203 authorized and R205 RATIFIED, and it is not revised here.
+
+`tools/card_connectivity_report.py` is nevertheless not byte-identical across
+the two worlds, and pretending otherwise would be the exact failure §2.3(4)
+exists to prevent. The whole difference, checked rather than asserted:
+
+    git diff dcc1dd0 770f880 -- tools/card_connectivity_report.py
+      1 file changed, 26 insertions(+), 0 deletions(-)
+
+ALL TWENTY-SIX INSERTED LINES ARE COMMENTS. Twenty-two are R205's ratification
+block above `VOCAB_VERSION` — the declaration that v3's `random_enemies`
+double-membership artifact is REAL BUT CORRECTLY SIGNED, that the missing
+concept is `target_selection` rather than a defect in `enemy_count`, and that
+target choice, if ever modelled, enters as a NEW vocabulary roster-wide with
+both sides re-run. Four are the cross-reference at `RANDOM_TARGETS` pointing a
+reader back to it. NOT ONE EXECUTABLE LINE MOVED: no vocabulary entry, no
+detector, no share, no threshold, no hook table. The declaration R205 ordered
+was placed where the instrument's readers meet it, which is exactly what that
+ruling asked for, and it is inert to the numbers.
+
+The empirical confirmation is stronger than the diff: the PRE side was re-run
+in this session under the R205-annotated tree's own vocabulary and reproduced
+the published Phase-1 stdout line for line, 319 of 319.
+
+------------------------------------------------------------------------------
+4. TABLE 1 — POOL AGGREGATES, PRE (dcc1dd0, Phase-1 complete), vocab v3
+------------------------------------------------------------------------------
+shares are over NON-BASIC cards
+
+pool         cards nonbas   shared  choice contest  autoOnly  extReach  rndDmg  rndPlace
+klee            76     72    65.3%    6.9%   52.8%     30.6%     13.9%   11.1%      5.6%
+furina          82     77    75.3%    1.3%   45.5%     70.1%      6.5%    0.0%      6.5%
+kokomi          76     71    93.0%   38.0%   56.3%     25.4%     23.9%    2.8%     25.4%
+ironclad        87     84   100.0%    6.0%   14.3%     94.0%     10.7%    0.0%      6.0%
+silent          88     84   100.0%    9.5%   22.6%     90.5%     26.2%    0.0%      3.6%
+defect          88     84   100.0%    3.6%   41.7%     96.4%     20.2%    0.0%      2.4%
+necrobinder     88     84   100.0%    6.0%   15.5%     94.0%     21.4%    0.0%      2.4%
+regent          88     84   100.0%    9.5%   15.5%     90.5%     16.7%    0.0%      0.0%
+
+UNCLASSIFIED: none, in all eight pools.
+
+------------------------------------------------------------------------------
+5. TABLE 2 — POOL AGGREGATES, POST (770f880, Phase-2 complete), vocab v3
+------------------------------------------------------------------------------
+pool         cards nonbas   shared  choice contest  autoOnly  extReach  rndDmg  rndPlace
+klee            76     72    66.7%    6.9%   52.8%     31.9%     13.9%   12.5%      5.6%
+furina          82     77    75.3%    2.6%   45.5%     70.1%      6.5%    0.0%      6.5%
+kokomi          76     71    93.0%   38.0%   56.3%     25.4%     23.9%    2.8%     25.4%
+ironclad        87     84   100.0%    6.0%   14.3%     94.0%     10.7%    0.0%      6.0%
+silent          88     84   100.0%    9.5%   22.6%     90.5%     26.2%    0.0%      3.6%
+defect          88     84   100.0%    3.6%   41.7%     96.4%     20.2%    0.0%      2.4%
+necrobinder     88     84   100.0%    6.0%   15.5%     94.0%     21.4%    0.0%      2.4%
+regent          88     84   100.0%    9.5%   15.5%     90.5%     16.7%    0.0%      0.0%
+
+UNCLASSIFIED: none, in all eight pools. Both grammars Phase 2 armed — the
+`ethereal:` card-level keyword on a draftable row, and the `choose_one` modal
+body — classify. Nothing fell outside the vocabulary on either side.
+
+DELTAS (post − pre), the whole of them, with the exact counts behind the
+percentages so no reader has to reconstruct them:
+  klee     shared hook       +1.4pp    65.3 → 66.7    47/72 → 48/72
+           automatic only    +1.3pp    30.6 → 31.9    22/72 → 23/72
+           random damage     +1.4pp    11.1 → 12.5     8/72 →  9/72
+  furina   play-time choice  +1.3pp     1.3 →  2.6     1/77 →  2/77
+  kokomi   nothing moves. Every column identical.
+  canon    nothing moves in any of the five pools. Every column identical.
+
+THE WHOLE STDOUT DIFF BETWEEN THE TWO WORLDS IS TWELVE LINES — eleven changed
+and one added — and is confined entirely to the `furina` and `klee` sections.
+Kokomi and all five canon pools render byte-identically. That is a far smaller
+window than Phase 1's 61-line diff, and the reason is in §6: Phase 2 moved two
+cards where Phase 1 moved thirty-three.
+
+CUMULATIVE, BASELINE → NOW (f2d5f00 → dcc1dd0 → 770f880), for the four columns
+that ever moved on Klee and Furina:
+  klee     shared hook       66.7 → 65.3 → 66.7    NET ZERO across the pass
+           automatic only    30.6 → 30.6 → 31.9    +1.3pp
+           random damage     11.1 → 11.1 → 12.5    +1.4pp
+           random placement  20.8 →  5.6 →  5.6    −15.2pp, all of it Phase 1
+           play-time choice   5.6 →  6.9 →  6.9    +1.3pp, all of it Phase 1
+           external reach    11.1 → 13.9 → 13.9    +2.8pp, all of it Phase 1
+           contested state   51.4 → 52.8 → 52.8    +1.4pp, all of it Phase 1
+  furina   automatic only    74.0 → 70.1 → 70.1    −3.9pp, all of it Phase 1
+           play-time choice   1.3 →  1.3 →  2.6    +1.3pp, all of it Phase 2
+  kokomi   every column unmoved across BOTH phases.
+
+------------------------------------------------------------------------------
+6. PER-CARD DIFFS — 2 CARDS MOVED
+------------------------------------------------------------------------------
+Every card whose classification or hook set changed. klee 1, furina 1,
+kokomi 0. No card was added to or removed from any pool, in any of the eight.
+This is the paired per-card half §2.3(5) requires.
+
+KLEE (1)
+  big_badda_boom         shared_reads   []    → [enemy_count]
+                         shared_writes  []    → [ethereal]
+                         random_damage  False → True
+                         automatic_value False → True
+                         automatic_only False → True
+                         hook_count     0     → 2
+     Phase 2B. R201's Option A body — *Deal 16. If this kills its target, deal
+     8 to a random other enemy* — plus `ethereal: true`, the pool's first
+     draftable carrier of the keyword. The `enemy_count` read and the
+     `random_damage` flag are both the kill-splash's `random_enemy`; the
+     `ethereal` write is the printed keyword. THIS CARD HAD ZERO HOOKS IN THE
+     PRE WORLD and has two now: it is the single card behind Klee's entire
+     +1.4pp shared-hook move, and behind the `automatic only` and
+     `random damage` moves as well.
+
+FURINA (1)
+  deep_breath            chosen_actions []                → [mode]
+                         private_reads  []                → [encore]
+                         shared_reads   []                → [draw_pile]
+                         shared_writes  [self_exhaust]    → [hand_contents,
+                                                             self_exhaust]
+                         uses           []                → [private:encore,
+                                                             shared:draw_pile]
+                         hook_count     2                 → 4
+     Phase 2C. The `choose_one` conversion with R194's ratified pair. The
+     card stops being a single fixed body and becomes a decision: the `mode`
+     choice kind is new to the Furina pool, and mode 2's `spend_encore` +
+     `draw` is what puts `encore` in its reads and `draw_pile` /
+     `hand_contents` in its hooks. It is the single card behind Furina's
+     entire +1.3pp play-time-choice move.
+
+KOKOMI (0)
+  No card moved in any field. The sheet's sha256 is identical on both sides,
+  in both the working-tree and the git-object form.
+
+WHAT DID NOT SHOW UP, AND SHOULD NOT HAVE — three nulls worth naming, because
+each is a place a reader could reasonably expect movement.
+
+  (a) THE MODE-2 RE-BODY IS INVISIBLE HERE, CORRECTLY. `CONSTANTS_VERSION` 14
+      re-bodied `deep_breath`'s mode 2 from `spend_encore 2` + `draw 2` to
+      `spend_encore 3` + `draw 3` (R205). The classifier reads STRUCTURE — which
+      states a card touches — not amounts, so a change of 2 to 3 moves nothing
+      it can see. Measured rather than assumed: a run taken at `17d4a4b`, the
+      pre-2C-activation commit, is EQUAL to this read card for card and field
+      for field in all three pools (§10 uses that fact for W1).
+
+  (b) BOTH PILOT ACTIVATIONS ARE INVISIBLE HERE, BY CONSTRUCTION. Phase 2A
+      armed Klee's Bomb-placement and Kokomi's chosen-Exhaust policies, and
+      Phase 2C armed the mode chooser's argmax. This instrument reads sheets,
+      not pilots: `PILOT_POLICIES_ENABLED` and `MODE_CHOOSER_ENABLED` change
+      how a decision is TAKEN, and the instrument only ever reported that the
+      decision EXISTS. The `mode:1` choice kind above is `deep_breath`'s modal
+      BODY, which landed in the C13 content window; it would read the same
+      with the chooser still `False`. So of Phase 2's three windows, this read
+      sees the content window and is structurally blind to the two activation
+      windows. That is not a defect and it is not a softened grade — it is the
+      registered scope of a sheets-only instrument, and §9 records it.
+
+  (c) NO ARCHETYPE-DRIVEN MEASURE MOVED IN ANY POOL. Cross-archetype edges are
+      3 / 3 / 3 on klee / furina / kokomi on both sides, with identical state
+      lists, and "cards in two non-generic plans" is 2 / 6 / 7 on both sides
+      with identical membership. The mechanism is the same for both moved
+      cards: `big_badda_boom` is `[demolition, generic]` and `deep_breath` is
+      `[generic, fanfare]`, so each sits in exactly ONE non-generic plan, and
+      neither archetype-driven aggregate counts such a card. Every state
+      `deep_breath` newly touches was already on the `fanfare|salon` edge.
+
+------------------------------------------------------------------------------
+7. STRUCTURE THAT MOVED BENEATH THE SHARES
+------------------------------------------------------------------------------
+WRITER:READER, klee SHARED
+    enemy_count            0W:13R → 0W:14R    big_badda_boom's splash reads it
+    ethereal               ABSENT → 1W:0R     a NEW ROW in the klee table —
+                                              the keyword had no carrier in
+                                              any mod pool before this window
+  Everything else in klee's shared and private tables is unmoved, `bombs`
+  18W:10R and `sparks` 15W:5R included.
+
+WRITER:READER, furina
+    shared  draw_pile     0W:18R → 0W:19R     deep_breath's mode-2 draw
+    shared  hand_contents 19W:0R → 20W:0R     same
+    private encore        20W:9R → 20W:10R    deep_breath READS the meter now
+  `fanfare` 3W:14R, `salon` 13W:11R and `spotlight` 1W:12R are all UNMOVED.
+
+HOOK-COUNT DISTRIBUTION
+  klee    0:6 1:26 2:25 3:9 4:9 6:1   →   0:5 1:26 2:26 3:9 4:9 6:1
+  furina  0:2 1:23 2:28 3:21 4:6 5:1 6:1 → 0:2 1:23 2:27 3:21 4:7 5:1 6:1
+  kokomi  unchanged.
+  One card moves in each: klee loses a zero-hook card to the 2 bucket, furina
+  moves one card from 2 to 4. Both are the cards named in §6.
+
+PLAY-TIME CHOICE KINDS
+  furina  pile:1   →   mode:1, pile:1
+  klee    discard:2, pile:1, x_alloc:2 — unchanged.
+  kokomi  discard:4, exhaust:12, mode:12, pile:2, queue:1 — unchanged.
+  `mode` is not a new KIND to the report — Kokomi has printed twelve of them
+  since before the baseline — but it is new to FURINA, and `deep_breath` is
+  the pool's second play-time choice of any kind, beside `curtain_up`'s pile.
+
+CROSS-ARCHETYPE EDGES and TWO-PLAN CARD LISTS
+  Unchanged in all three mod pools, membership included. §6(c) has the reason.
+
+------------------------------------------------------------------------------
+8. THE GRADE — §2.4's COMMITTED DIRECTIONAL PREDICTIONS, AT THIS CHECKPOINT
+------------------------------------------------------------------------------
+Graded AS WRITTEN, clause by clause. The clauses were derived and written into
+§2 above BEFORE the instrument was run; none was re-interpreted to fit a
+number, and the instrument was not touched during the read.
+
+TWO STANDING PROPERTIES OF THIS PREDICTION SET, both inherited and neither a
+new finding. §2.4 is ONE set for the whole richness pass and is not
+phase-scoped (Phase 1's finding F-2). And Phase 2 registers no clauses of its
+own (§2 above). So what follows is the SAME ten clauses graded at a later
+checkpoint, and each grade states BOTH what Phase 2 moved and where the pass
+now stands. Where Phase 2 moved a clause by nothing, that is said in those
+words rather than dressed up as a verdict.
+
+--- KLEE ---
+
+K1  "chosen/controllable Bomb-board interactions and shared-hook share rise"
+    SPLIT — same verdict as Phase 1, reached a different way.
+    FIRST HALF, unmoved by Phase 2 and already met by Phase 1: no bomb row
+    moved in this window. Klee's play-time choice kinds are identical, and no
+    `place_bomb` row changed target form. Cumulatively the half holds and is
+    large — Phase 1 converted all twelve random placements.
+    SECOND HALF: Phase 2 RAISES shared-hook share 65.3% → 66.7%, +1.4pp,
+    47/72 → 48/72 — and that is exactly the point Phase 1 lost. CUMULATIVELY
+    THE SHARE IS FLAT: 66.7% at the baseline, 66.7% now, 48 non-basic cards
+    with a shared hook at both ends of the pass. So the second half no longer
+    fails DOWNWARD, as it did at Phase 1, but it still does not RISE.
+    The two movements are unrelated: Phase 1 removed a hook from two Bomb
+    rows by de-randomizing them (finding F-1), and Phase 2 gave a hook to a
+    card that is not a Bomb card at all. The share returning to its starting
+    value is a coincidence of magnitude, and it is reported as one.
+
+K2  "random placement falls to zero"
+    SPLIT — unchanged from Phase 1. PHASE 2 MOVED THIS CLAUSE BY NOTHING.
+    `random placement` reads 5.6% on both sides, the same four non-bomb cards
+    (`bright_idea`, `chained_reactions`, `dodge_roll`, `secret_stash`), and
+    the sheet still contains no `place_bomb` row with a random target. Both
+    halves of Phase 1's split stand exactly as published.
+
+K3  "the explicit random spray family stays"
+    PRED, and Phase 2 STRENGTHENS it.
+    `random damage` 11.1% → 12.5%, 8/72 → 9/72 non-basic. The family did not
+    merely stay: every one of the nine pre-window members is still in it —
+    crackle, da_da_da, gleeful_barrage, jumpy_dumpty (basic),
+    jumpy_dumpty_mk2, kaboom_beetle_swarm, pocket_fireworks, rapid_fire,
+    study_of_explosions — and `big_badda_boom` JOINED, through R201's
+    random-other-enemy kill splash. Ten members now.
+
+K4  "manual Spark competing-use count rises"
+    MISS — unchanged from Phase 1. PHASE 2 MOVED THIS CLAUSE BY NOTHING.
+    Klee's private `sparks` reads 15W:5R on both sides and NO card in either
+    world registers a competing use on Sparks — the `uses` set for `sparks`
+    is empty in both. `spend_spark` landed with the Route-1 infrastructure
+    set and is still INERT: no card carries it. Phase 2's job was to land ops
+    with prices and parity; authoring the 3–4-card Spark sink family is
+    §3's Phase 3 work, and it has not happened.
+
+--- FURINA ---
+
+F1  "inert Cap and zero-body reader text falls"
+    PRED — unchanged from Phase 1. PHASE 2 MOVED THIS CLAUSE BY NOTHING.
+    Private `fanfare` reads 3W:14R on both sides, shared `block_held` 17W:0R,
+    automatic-only 70.1%. The pool still prints the Cap verb on no card. The
+    whole of this clause's movement was Phase 1's.
+
+F2  "player-directed Encore spending and Salon queue control rise"
+    SPLIT — UPGRADED FROM MISS. THIS IS THE ONLY VERDICT PHASE 2 MOVED, and
+    it is the largest thing in the window.
+    FIRST HALF HOLDS, for the first time in the pass. `deep_breath` becomes a
+    modal card whose second mode SPENDS Encore, and the player picks. Private
+    `encore` goes 20W:9R → 20W:10R — the tenth reader is `deep_breath`,
+    joining breathless, crowd_work, dress_rehearsal, ebb_and_flow,
+    graceful_retreat, limelight, poised_riposte, standing_ovation and
+    swelling_overture — and Furina's play-time choice share doubles 1.3% →
+    2.6%, 1/77 → 2/77, with a `mode` kind the pool had never printed. A
+    player-directed Encore spend is precisely what the clause named.
+    SECOND HALF STILL MISSES. `salon` is 13W:11R on both sides and Furina's
+    choice kinds carry no `queue`. The Salon rotate-leftmost and
+    perform-leftmost verbs landed inert with Route-1 and no card carries
+    either; arming them is Phase 3's `W3-Furina` slice.
+    The half that moved is one card wide. It is reported at that width.
+
+F3  "repeated Fanfare-reader families shrink without removing the distinct
+     marquee payoffs"
+    PRED — unchanged from Phase 1. PHASE 2 MOVED THIS CLAUSE BY NOTHING.
+    Readers 14 on both sides and the marquee list is unchanged card for card.
+
+--- KOKOMI ---
+
+Ko1 "distinct card signatures and identity-sensitive Exhaust choices rise"
+    MISS — unchanged from Phase 1, on the same evidence one phase later.
+    Kokomi's sheet is byte-identical across this window as it was across the
+    last one. Every column, every writer:reader row, every hook-count bucket
+    and every choice-kind count is unchanged. Nothing rose.
+    DISCLOSED, AND NOT USED TO SOFTEN THE GRADE: Phase 2A armed the
+    chosen-Exhaust PILOT POLICY, which is the half of "identity-sensitive
+    Exhaust choices" that lives in the pilot rather than the sheet. This
+    instrument cannot see it (§6(b)), and the clause is graded on what the
+    instrument reads. Whether that arming improved the choice is a question
+    for a run-layer read, not this one.
+
+Ko2 "bridge/shared-decision density rises"
+    MISS — unchanged from Phase 1. Same evidence. Shared-hook 93.0%, choice
+    38.0%, contested 56.3%, external reach 23.9%, cross-archetype edges 3 with
+    identical state lists — identical on both sides.
+
+Ko3 "Assist payoff supply does not rise before the payoff grade"
+    NOT GRADED — SPOILED 2026-08-23 by an authorized content intervention
+    (R197) and struck in the packet under R101b. A spoiled prediction is not a
+    corrected one, it is not re-predicted here, and it does not become
+    gradable by the passage of a phase.
+
+TALLY, PHASE-2 CHECKPOINT: 3 PRED, 3 SPLIT, 3 MISS, 1 NOT GRADED (spoiled).
+TALLY, PHASE-1 CHECKPOINT: 3 PRED, 2 SPLIT, 4 MISS, 1 NOT GRADED.
+
+EXACTLY ONE VERDICT MOVED ACROSS THE PHASE BOUNDARY: F2, MISS → SPLIT. Six
+clauses were moved by Phase 2 by literally nothing (K2, K4, F1, F3, Ko1, Ko2);
+K1 kept its verdict while the number under it moved; K3 kept its verdict and
+gained a member. Nine of the ten clauses stand where Phase 1 left them.
+
+------------------------------------------------------------------------------
+9. FINDINGS THE GRADE RAISED — recorded, not acted on
+------------------------------------------------------------------------------
+(G-1) A SHEETS-ONLY INSTRUMENT IS STRUCTURALLY BLIND TO TWO OF PHASE 2's
+      THREE WINDOWS, AND THIS IS THE READ THAT MAKES IT VISIBLE.
+      R202 step (iii) asks for one post-read over BOTH activation windows.
+      This file is that read, and it must say plainly what it can and cannot
+      see: it sees the C13/D16 CONTENT window in full, and it is blind by
+      construction to the 2A and 2C ACTIVATION windows, because both moved
+      pilot behaviour and neither moved a sheet. The twelve-line stdout diff
+      is therefore a complete account of Phase 2's SHEET movement and not of
+      Phase 2's movement.
+      That is not a defect in the instrument — §2.1 registers it as
+      sheets-only and §2.6 registers "a static hook is opportunity, not proof
+      that a human decision is hard" — but it does mean the phrase "the
+      Phase-2 post-read" is doing more work in the sequence than this
+      instrument can carry alone. What the activation windows moved is
+      recorded elsewhere and was recorded at the time: `W4`'s 78-point weight
+      sweep, all INSEPARABLE, at the 2A landing, and the `policy.mode_score`
+      crossover verification (mode 1 flat at 2.6; mode 2 at 0.0/1.0/2.0/3.0
+      for banks 0/1/2/3+) at the 2C landing. Neither is a connectivity number
+      and neither is restated as one here.
+
+(G-2) THE PASS-LEVEL SHARED-HOOK SHARE ON KLEE HAS RETURNED TO ITS STARTING
+      VALUE BY TWO UNRELATED MECHANISMS, AND THE COINCIDENCE IS WORTH NAMING
+      SO IT IS NOT LATER READ AS STABILITY.
+      66.7% → 65.3% → 66.7%, 48 → 47 → 48 non-basic cards. The card that left
+      and the card that arrived are different cards, and the reasons are
+      unrelated: Phase 1's door (a) deleted an `enemy_count` read from two
+      Bomb rows as a side effect of de-randomizing them (F-1, the artifact
+      R205 then ratified as correctly signed), and Phase 2's `big_badda_boom`
+      acquired two hooks by gaining a keyword and a random splash. A reader
+      who compares only the baseline to today would conclude the richness
+      pass has not moved Klee's shared-hook share, which is true of the
+      NUMBER and false of the POOL.
+
+(G-3) THE CLAUSE THAT MOVED IS ONE CARD WIDE, AND SO IS THE CLAUSE THAT
+      DIDN'T. F2's upgrade from MISS to SPLIT rests entirely on
+      `deep_breath`, the modal prototype §3's Phase 2 explicitly scoped as
+      "one modal prototype is priced before the pattern is copied". The
+      prototype worked and the instrument registers it. Nothing here says the
+      pattern should be copied — that is a Phase-3 design act behind the
+      body-sheet gate — and one card is not evidence about a family.
+
+(G-4) DISCLOSED, ABOUT THE PUBLISHED PHASE-1 RECORD RATHER THAN ABOUT THIS
+      READ. That record's provenance block lists five of its six mod-input
+      digests in working-tree form and its klee POST digest in git-object
+      form. §1 above records the measurement and the reason. Nothing in
+      either record depends on it, the worlds are proven identical by stdout,
+      and the published file is not rewritten (R101b).
+
+------------------------------------------------------------------------------
+10. THIS READ IS WINDOW 1's PRE-STATE — R202 STEP (iv)
+------------------------------------------------------------------------------
+R202's sequence step (iv) is one sentence: "that read is W1's pre-state." This
+section is the half of this file W1 consumes. The staged branch
+`eb118-w1-labels` lands against THIS world.
+
+THE PRE-STATE WORLD, for citation by W1's post-read:
+    commit    770f880d2728a6179ff7b90a4fbfc2134ebf7f3f
+    cell      RT12 / D16 / P9 / C14, `PILOT_WEIGHTS_VERSION` 4
+    vocab     eb118-connectivity-v3, FROZEN — W1 may not revise it, and a
+              vocabulary found wrong means BOTH sides re-run (§2.3(4))
+    report    the complete eight-pool form, 321 lines, at Appendix A
+    mod-only  the three-pool form this world prints without `local.props` is
+              171 newline-terminated lines and ends on a blank one — i.e.
+              **172 lines** counted the way the W1 pre-registration counts
+              them. W1's identity claims are stated against that form, and
+              they are stated against the right number.
+
+W1's BUILD-TIME MEASUREMENTS ARE VALID AGAINST THIS PRE-STATE, AND THAT WAS
+CHECKED RATHER THAN ASSUMED. `eb118-w1-labels` was built on `17d4a4b`, which
+is nineteen commits behind this world and predates the 2A landing, the 2C
+activation and the `deep_breath` mode-2 re-body. A per-card dump taken at
+`17d4a4b` is EQUAL to this read — all three pools, every card, every field,
+ZERO differences. So nothing that landed on `main` after W1's branch point
+moved anything this instrument can see, and W1's pre-registered numbers do not
+need re-taking. The reason is §6(a): the only post-`17d4a4b` sheet edit was an
+amount change, and the classifier reads structure.
+
+THE PRE-W1 VALUES W1's ATTRIBUTION RESTS ON, recorded here as the pre-state.
+
+(a) THE TWO MEASURES W1's §5(a) SAYS ITS FOUR FURINA TAG CHANGES WILL MOVE.
+    Both read here as W1 registered their "before":
+
+      furina  cards in two non-generic plans   6
+              -- curtain_cue, dress_rehearsal, hearts_swelling, high_tide,
+                 rain_of_roses, tempo_change
+      furina  fanfare|salon cross-archetype edge   11 shared states
+              -- private:encore, private:fanfare, private:salon,
+                 shared:aura_reaction, shared:block_held, shared:card_timing,
+                 shared:draw_pile, shared:enemy_count, shared:hand_contents,
+                 shared:hp_ledger, shared:self_exhaust
+
+(b) THE 172/172 IDENTITY RESULT FOR THE BIG BADDA BOOM TAG DROP. W1's §6.1
+    measured the `demolition` drop as moving ZERO of 172 report lines. The
+    structural precondition that claim rests on holds in this pre-state and is
+    recorded so W1's post-read can cite it rather than re-derive it:
+      * `big_badda_boom` archetypes here are `[demolition, generic]` — ONE
+        non-generic plan, so it is counted by neither archetype-driven
+        aggregate (`cards in two non-generic plans` is 2 on klee, membership
+        `playtime_forever` and `sparkly_explosion`, and it is not in it; the
+        three klee cross-archetype edges need a state shared by two
+        non-generic plans, and it supplies none);
+      * every other per-card field the report reads is unaffected by an
+        `archetypes` edit, `role` included.
+    THE CARD IS NOT INERT IN THIS WORLD, WHICH IS WHY THE NULL IS WORTH
+    STATING PRECISELY: `big_badda_boom` is the ONLY klee card that moved in
+    the whole Phase-2 window, and it carries two shared hooks, `random_damage`
+    and `automatic_only` here (§6). Its connectivity contribution is real; it
+    is simply not archetype-driven, so dropping the tag cannot disturb it.
+
+(c) THE FIVE TAG-CHANGED CARDS' FULL PRE-W1 RECORDS. W1's registered claim is
+    that any connectivity movement after Window 1 belongs to these five and to
+    no others — in fact to four, the fifth measuring zero. Their pre-state:
+
+    furina/showstopper          rare
+      archetypes [fanfare]  hooks 4
+      shared_reads [draw_pile, enemy_count]  shared_writes [hand_contents]
+      private_writes [encore]  uses [shared:draw_pile]
+      automatic_value True  automatic_only True  competing_uses True
+    furina/high_tide            rare
+      archetypes [salon, fanfare]  hooks 1
+      private_reads [fanfare]   (no shared hook of any kind)
+      automatic_value True  automatic_only True  competing_uses False
+    furina/rain_of_roses        rare
+      archetypes [salon, spotlight]  hooks 3
+      shared_reads [enemy_count]  shared_writes [aura_reaction]
+      private_writes [encore]
+      automatic_value False  competing_uses True
+    furina/singer_of_many_waters  rare
+      archetypes [generic, salon]  hooks 2
+      shared_writes [hp_ledger, self_exhaust]
+      automatic_value False  competing_uses False
+    klee/big_badda_boom         common
+      archetypes [demolition, generic]  hooks 2
+      shared_reads [enemy_count]  shared_writes [ethereal]
+      automatic_value True  automatic_only True  random_damage True
+
+    `high_tide` and `rain_of_roses` are the two cards W1's §5(a) expects to
+    leave the two-plan list, and both are in it here. `role` is absent from
+    every record above because the instrument does not store it — the field
+    appears in `tools/card_connectivity_report.py` exactly once, in
+    `CARD_FIELDS_NO_HOOK`, and no aggregate reads it. That is the mechanical
+    ground of W1's claim that its sixteen role conversions provably cannot
+    move this instrument, and it holds in this pre-state.
+
+(d) WHAT THIS FILE DOES NOT GRANT W1. It fixes a pre-state; it ratifies
+    nothing. W1's own §3 constraint stands untouched: no causal role-versus-tag
+    claim may be read out of tier-0.5 numbers after Window 1, because both
+    fields feed the offer scorer. And the attribution in W1's §2 is registered
+    for the CONNECTIVITY instrument only. Nothing measured here widens it.
+
+------------------------------------------------------------------------------
+11. WHAT THIS READ DOES NOT SAY
+------------------------------------------------------------------------------
+No threshold is derived and none may be. The five-canon precondition of §2.5
+is met on both sides — all eight pools, zero UNCLASSIFIED, twice more — but
+meeting it authorizes a PROPOSAL to [USER], not a gate. The canon pools sit at
+100.0% shared-hook share and 90–96% automatic-only on both sides; the mod
+pools sit at 66.7–93.0% and 25.4–70.1%. Whether that gap is a defect or a
+design difference is exactly the question §2.5 refuses to answer from a static
+read, and this file does not answer it either.
+
+No standing-table number is taken or moved here, and none is owed (§2). This
+read moves no `RT/D/P/C` field and mints no identifier.
+
+Registered blind spots are unchanged and still apply (§2.6): `decide%`'s known
+gaps, tier0's lowest-HP `enemy` heuristic, the `_worst_card` exhaust proxy,
+and the standing rule that a static hook is opportunity, not proof that a human
+decision is hard. G-1 adds the one this read surfaced: two of Phase 2's three
+windows are invisible to a sheets-only instrument. Live play remains the final
+check.
+
+This is the Phase-2 read. R202's step (iii) is discharged by it, and step (iv)
+makes it Window 1's pre-state.
+
+==============================================================================
+APPENDIX A — THE INSTRUMENT'S OWN STDOUT, PHASE-2-COMPLETE WORLD (770f880)
+Unedited, on the Phase-1 record's precedent. The PRE half of the pair is
+already published verbatim as Appendix A of
+`review/records/eb118-connectivity-phase1-postread-2026-08-24.txt`; §1 above
+records that the re-derivation of it taken in this session reproduces that
+publication line for line, 319 of 319.
+==============================================================================
+
+CARD CONNECTIVITY REPORT  (vocabulary eb118-connectivity-v3)
+EB-118. Deterministic, sheets-only, no gate and no threshold.
+
+All eight pools read. Canon pools: defect, ironclad, necrobinder, regent, silent
+
+--- furina (82 cards, 77 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook        75.3%
+    a non-target play-time choice    2.6%
+    touches a contested state       45.5%
+    extra value is automatic only   70.1%
+    external reach                   6.5%
+    random damage                    0.0%
+    random placement                 6.5%
+  writer:reader by SHARED state (cards, not instances):
+    aura_reaction              3 W :   4 R
+    block_held                17 W :   0 R
+    card_identity              9 W :   1 R
+    card_timing                2 W :   0 R
+    discard_pile               1 W :   0 R
+    draw_pile                  0 W :  19 R
+    enemy_count                0 W :   9 R
+    enemy_intent               0 W :   1 R
+    hand_contents             20 W :   0 R
+    hp_ledger                  2 W :   0 R
+    plays_this_turn            1 W :   2 R
+    self_exhaust               9 W :   0 R
+    universal_verb_power       1 W :   0 R
+  writer:reader by PRIVATE state:
+    burst                      0 W :   1 R
+    encore                    20 W :  10 R
+    fanfare                    3 W :  14 R
+    salon                     13 W :  11 R
+    spotlight                  1 W :  12 R
+  distinct hooks per card: 0:2, 1:23, 2:27, 3:21, 4:7, 5:1, 6:1
+  play-time choice kinds: mode:1, pile:1
+  cross-archetype edges: 3
+    fanfare|salon            via private:encore, private:fanfare, private:salon, shared:aura_reaction, shared:block_held, shared:card_timing, shared:draw_pile, shared:enemy_count, shared:hand_contents, shared:hp_ledger, shared:self_exhaust
+    fanfare|spotlight        via private:encore, private:salon, private:spotlight, shared:aura_reaction, shared:block_held, shared:card_identity, shared:draw_pile, shared:enemy_count, shared:hand_contents, shared:self_exhaust
+    salon|spotlight          via private:encore, private:salon, shared:aura_reaction, shared:block_held, shared:draw_pile, shared:enemy_count, shared:hand_contents, shared:self_exhaust
+  cards in two non-generic plans: 6 -- curtain_cue, dress_rehearsal, hearts_swelling, high_tide, rain_of_roses, tempo_change
+  UNCLASSIFIED: none
+
+--- klee (76 cards, 72 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook        66.7%
+    a non-target play-time choice    6.9%
+    touches a contested state       52.8%
+    extra value is automatic only   31.9%
+    external reach                  13.9%
+    random damage                   12.5%
+    random placement                 5.6%
+  writer:reader by SHARED state (cards, not instances):
+    aura_reaction              0 W :   7 R
+    block_held                16 W :   0 R
+    card_identity              1 W :   6 R
+    card_timing                0 W :   2 R
+    discard_chosen             2 W :   0 R
+    discard_pile               6 W :   1 R
+    discard_random             1 W :   0 R
+    draw_pile                  0 W :   9 R
+    enemy_count                0 W :  14 R
+    ethereal                   1 W :   0 R
+    exhaust_other_random       1 W :   0 R
+    exhaust_pile               1 W :   1 R
+    hand_contents             10 W :   5 R
+    hp_ledger                  1 W :   0 R
+    junk_create                2 W :   0 R
+    junk_remove                1 W :   0 R
+    plays_this_turn            1 W :   1 R
+    self_exhaust               6 W :   0 R
+    universal_verb_power       2 W :   0 R
+  writer:reader by PRIVATE state:
+    bombs                     18 W :  10 R
+    burst                      3 W :   1 R
+    sparks                    15 W :   5 R
+  distinct hooks per card: 0:5, 1:26, 2:26, 3:9, 4:9, 6:1
+  play-time choice kinds: discard:2, pile:1, x_alloc:2
+  cross-archetype edges: 3
+    demolition|reaction      via private:sparks, shared:block_held, shared:draw_pile, shared:enemy_count, shared:hand_contents, shared:self_exhaust
+    demolition|spark         via private:bombs, private:sparks, shared:block_held, shared:discard_pile, shared:draw_pile, shared:enemy_count, shared:hand_contents, shared:self_exhaust, shared:universal_verb_power
+    reaction|spark           via private:sparks, shared:block_held, shared:card_identity, shared:draw_pile, shared:enemy_count, shared:hand_contents, shared:self_exhaust
+  cards in two non-generic plans: 2 -- playtime_forever, sparkly_explosion
+  UNCLASSIFIED: none
+
+--- kokomi (76 cards, 71 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook        93.0%
+    a non-target play-time choice   38.0%
+    touches a contested state       56.3%
+    extra value is automatic only   25.4%
+    external reach                  23.9%
+    random damage                    2.8%
+    random placement                25.4%
+  writer:reader by SHARED state (cards, not instances):
+    block_held                29 W :   0 R
+    card_identity             16 W :   1 R
+    discard_chosen             4 W :   0 R
+    discard_pile              13 W :   2 R
+    discard_random             9 W :   0 R
+    draw_pile                  1 W :  21 R
+    enemy_count                0 W :   7 R
+    exhaust_other_chosen      12 W :   0 R
+    exhaust_pile              14 W :   6 R
+    hand_contents             18 W :  34 R
+    hp_ledger                  2 W :   0 R
+    self_exhaust              11 W :   0 R
+    universal_verb_power       2 W :   0 R
+  writer:reader by PRIVATE state:
+    burst                      0 W :   1 R
+    charge                    10 W :   5 R
+    conscript_sly             26 W :   0 R
+    kurage                     1 W :   2 R
+  distinct hooks per card: 0:1, 1:17, 2:12, 3:12, 4:20, 5:9, 6:4, 7:1
+  play-time choice kinds: discard:4, exhaust:12, mode:12, pile:2, queue:1
+  cross-archetype edges: 3
+    assist|commander         via private:charge, private:conscript_sly, shared:block_held, shared:card_identity, shared:discard_chosen, shared:discard_pile, shared:draw_pile, shared:exhaust_other_chosen, shared:exhaust_pile, shared:hand_contents, shared:self_exhaust
+    assist|priest            via private:charge, private:conscript_sly, shared:block_held, shared:discard_chosen, shared:discard_pile, shared:discard_random, shared:draw_pile, shared:enemy_count, shared:exhaust_other_chosen, shared:exhaust_pile, shared:hand_contents, shared:self_exhaust, shared:universal_verb_power
+    commander|priest         via private:charge, private:conscript_sly, shared:block_held, shared:discard_chosen, shared:discard_pile, shared:draw_pile, shared:exhaust_other_chosen, shared:exhaust_pile, shared:hand_contents, shared:self_exhaust
+  cards in two non-generic plans: 7 -- communion_of_tides, council_at_bourou, epiphany_of_the_deep, moonlit_offering, open_the_stores, raise_the_sashimono, send_the_runner
+  UNCLASSIFIED: none
+
+--- defect (88 cards, 84 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook       100.0%
+    a non-target play-time choice    3.6%
+    touches a contested state       41.7%
+    extra value is automatic only   96.4%
+    external reach                  20.2%
+    random damage                    0.0%
+    random placement                 2.4%
+  writer:reader by SHARED state (cards, not instances):
+    block_held                14 W :   0 R
+    card_identity              1 W :  88 R
+    card_timing                5 W :   2 R
+    discard_pile               1 W :   8 R
+    discard_random             1 W :   0 R
+    draw_pile                  0 W :  12 R
+    enemy_count                0 W :   8 R
+    ethereal                   1 W :   0 R
+    exhaust_other_chosen       1 W :   0 R
+    exhaust_other_random       1 W :   0 R
+    exhaust_pile               2 W :   1 R
+    hand_contents             20 W :   9 R
+    hp_ledger                  3 W :   0 R
+    junk_create                5 W :   3 R
+    junk_remove                2 W :   0 R
+    plays_this_turn            1 W :   0 R
+    self_exhaust              18 W :   0 R
+    universal_verb_power       5 W :   0 R
+  writer:reader by PRIVATE state:
+    orbs                      24 W :   2 R
+  distinct hooks per card: 1:15, 2:32, 3:21, 4:14, 5:6
+  play-time choice kinds: pile:1, x_alloc:2
+  cross-archetype edges: 0
+  cards in two non-generic plans: 0
+  UNCLASSIFIED: none
+
+--- ironclad (87 cards, 84 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook       100.0%
+    a non-target play-time choice    6.0%
+    touches a contested state       14.3%
+    extra value is automatic only   94.0%
+    external reach                  10.7%
+    random damage                    0.0%
+    random placement                 6.0%
+  writer:reader by SHARED state (cards, not instances):
+    block_held                17 W :   0 R
+    card_identity              4 W :  87 R
+    card_timing                4 W :   2 R
+    discard_pile               0 W :   3 R
+    draw_pile                  0 W :  12 R
+    enemy_count                0 W :  12 R
+    exhaust_other_chosen       3 W :   0 R
+    exhaust_other_random       5 W :   0 R
+    exhaust_pile               8 W :   4 R
+    hand_contents             15 W :  15 R
+    hp_ledger                 13 W :   0 R
+    plays_this_turn            5 W :   0 R
+    self_exhaust              25 W :   0 R
+    universal_verb_power       6 W :   0 R
+  writer:reader by PRIVATE state:
+    (none)
+  distinct hooks per card: 1:24, 2:18, 3:24, 4:11, 5:7, 6:3
+  play-time choice kinds: pile:3, x_alloc:2
+  cross-archetype edges: 0
+  cards in two non-generic plans: 0
+  UNCLASSIFIED: none
+
+--- necrobinder (88 cards, 84 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook       100.0%
+    a non-target play-time choice    6.0%
+    touches a contested state       15.5%
+    extra value is automatic only   94.0%
+    external reach                  21.4%
+    random damage                    0.0%
+    random placement                 2.4%
+  writer:reader by SHARED state (cards, not instances):
+    block_held                14 W :   0 R
+    card_identity              3 W :  88 R
+    card_timing               13 W :   2 R
+    discard_pile               0 W :   6 R
+    draw_pile                  0 W :  13 R
+    enemy_count                0 W :  11 R
+    ethereal                  15 W :   0 R
+    exhaust_other_random       2 W :   0 R
+    exhaust_pile               2 W :   1 R
+    hand_contents             17 W :   7 R
+    hp_ledger                  5 W :   0 R
+    self_exhaust              15 W :   0 R
+    universal_verb_power       9 W :   0 R
+  writer:reader by PRIVATE state:
+    osty                      23 W :   0 R
+  distinct hooks per card: 1:11, 2:35, 3:21, 4:16, 5:3, 6:2
+  play-time choice kinds: pile:3, x_alloc:2
+  cross-archetype edges: 0
+  cards in two non-generic plans: 0
+  UNCLASSIFIED: none
+
+--- regent (88 cards, 84 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook       100.0%
+    a non-target play-time choice    9.5%
+    touches a contested state       15.5%
+    extra value is automatic only   90.5%
+    external reach                  16.7%
+    random damage                    0.0%
+    random placement                 0.0%
+  writer:reader by SHARED state (cards, not instances):
+    block_held                14 W :   0 R
+    card_identity              6 W :  88 R
+    card_timing                8 W :   1 R
+    discard_pile               0 W :   2 R
+    draw_pile                  0 W :  13 R
+    enemy_count                0 W :  10 R
+    ethereal                   2 W :   0 R
+    exhaust_pile               1 W :   1 R
+    hand_contents             21 W :  13 R
+    hp_ledger                  2 W :   0 R
+    junk_create                2 W :   0 R
+    plays_this_turn            3 W :   0 R
+    self_exhaust               9 W :   0 R
+    universal_verb_power       6 W :   0 R
+  writer:reader by PRIVATE state:
+    stars                     23 W :   0 R
+  distinct hooks per card: 1:22, 2:34, 3:16, 4:12, 5:3, 6:1
+  play-time choice kinds: pile:7, x_alloc:1
+  cross-archetype edges: 0
+  cards in two non-generic plans: 0
+  UNCLASSIFIED: none
+
+--- silent (88 cards, 84 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook       100.0%
+    a non-target play-time choice    9.5%
+    touches a contested state       22.6%
+    extra value is automatic only   90.5%
+    external reach                  26.2%
+    random damage                    0.0%
+    random placement                 3.6%
+  writer:reader by SHARED state (cards, not instances):
+    block_held                15 W :   1 R
+    card_identity              4 W :  88 R
+    card_timing               12 W :   2 R
+    discard_chosen             5 W :   0 R
+    discard_pile               9 W :   0 R
+    discard_random             3 W :   0 R
+    draw_pile                  0 W :   9 R
+    enemy_count                0 W :  15 R
+    exhaust_pile               0 W :   1 R
+    hand_contents              9 W :  14 R
+    hp_ledger                 12 W :   0 R
+    plays_this_turn            1 W :   0 R
+    self_exhaust              12 W :   0 R
+    universal_verb_power      10 W :   0 R
+  writer:reader by PRIVATE state:
+    conscript_sly             10 W :   0 R
+  distinct hooks per card: 1:23, 2:21, 3:26, 4:12, 5:5, 6:1
+  play-time choice kinds: discard:5, pile:2, x_alloc:2
+  cross-archetype edges: 0
+  cards in two non-generic plans: 0
+  UNCLASSIFIED: none
+
+vocabulary (entry -- canon detection status):
+  shared  hp_ledger              grounded      HP lost or paid (self-damage, heal, max HP)
+  shared  discard_chosen         grounded      a discard the player picks
+  shared  discard_random         grounded      a discard the game picks
+  shared  exhaust_other_chosen   grounded      Exhaust another card, player's pick
+  shared  exhaust_other_random   grounded      Exhaust another card, game's pick
+  shared  self_exhaust           grounded      the card Exhausts itself
+  shared  ethereal               grounded      the card is Ethereal
+  shared  junk_create            grounded      junk/status/curse creation
+  shared  junk_remove            grounded      junk/status/curse removal
+  shared  hand_contents          grounded      hand contents or hand size
+  shared  draw_pile              grounded      draw-pile contents or size
+  shared  discard_pile           grounded      discard-pile contents or size
+  shared  exhaust_pile           grounded      Exhaust-pile contents or size
+  shared  block_held             grounded      Block held, by either side
+  shared  enemy_count            grounded      how many enemies there are / how many died
+  shared  enemy_intent           grounded      what the enemy intends this turn
+  shared  aura_reaction          canon_absent  elemental aura / reaction state
+  shared  plays_this_turn        grounded      cards/Attacks/Skills/Companions played this turn or combat
+  shared  card_identity          grounded      card identity, type, cost or upgrade state
+  shared  card_timing            grounded      timing fields: X, Retain, Innate
+  shared  universal_verb_power   grounded      a Power that modifies a universal verb -- playing, drawing, discarding or Exhausting ANY eligible card
+  private bombs                  canon_absent  Klee's Bombs
+  private sparks                 canon_absent  Klee's Sparks
+  private encore                 canon_absent  Furina's Encore
+  private fanfare                canon_absent  Furina's Fanfare
+  private salon                  canon_absent  Furina's Salon members
+  private spotlight              canon_absent  Furina's Spotlight
+  private charge                 canon_absent  Kokomi's Charge
+  private burst                  canon_absent  Kokomi's Burst meter (the Charge family's spend door)
+  private conscript_sly          canon_absent  Conscript / Sly
+  private kurage                 canon_absent  the Bake-Kurage summon
+  private orbs                   grounded      canon: channelled Orbs
+  private stars                  grounded      canon: Forge / Stars
+  private osty                   grounded      canon: summoned bodies
+

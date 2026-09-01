@@ -486,7 +486,7 @@ def is_on_plan_payoff(card: Card, archetype: str) -> bool:
     """Is this card an on-plan PAYOFF for this archetype? The one predicate.
 
     `role == "payoff" and archetype in c.archetypes` -- the membership rule
-    `review/active/payoff-reach-reregistration.md` §6.4 registers, written
+    `review/records/payoff-reach-reregistration.md` §6.4 registers, written
     once and shared, so the sprint's two legs cannot classify the same card
     differently. `_generic_core_counts` below is the DECK side (it counts
     instances in a finished deck); `exp_payoff_reach.static_leg` is the STATIC
@@ -1050,7 +1050,7 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
     # the bump was OWED, not proposed.
     # IT IS TAKEN: `DRAFTER_VERSION` 15 -> 16 at the Phase-2 integration
     # window, 2026-08-24, with the re-baseline in the same window
-    # (`review/active/sitting-reads-2026-08-24-c13-d16.md`). The integer was
+    # (`review/records/sitting-reads-2026-08-24-c13-d16.md`). The integer was
     # written at integration and not before, which is what packet §3 asks for;
     # the price it moved is `big_badda_boom` 8.0000 -> 4.8000, and the R193
     # read of that number is at the constant above.
@@ -2476,7 +2476,7 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 #
 # WHAT IS OWED NEXT: ONE re-baseline at this cell, and it has NOT been taken
 # here. The standing read's three diagnostic caveats
-# (`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`) clear AT THAT
+# (`review/records/sitting-reads-2026-08-25-c19-d17-p10.md`) clear AT THAT
 # RE-BASELINE, not at this bump -- landing the repair is not reading it. The
 # Phase-4 milestone read follows the re-baseline (R207, R211 item 7).
 POLICY_VERSION = 11

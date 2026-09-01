@@ -330,7 +330,7 @@ EVERYTHING ELSE GOES TO [USER] VIA `QUEUE.md`. Specifically:
 
 Where the rule and a reading disagree, the rule wins; where this docstring and
 the packet disagree, the packet
-(`review/active/eb118-richness-phase0-2026-08-23.md`) wins.
+(`review/ruled/eb118-richness-phase0-2026-08-23.md`) wins.
 
 
 WHAT THE SANDBOX GUARANTEES

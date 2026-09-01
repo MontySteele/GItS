@@ -37,7 +37,7 @@ public class SparkSinkPinTests
     public void The_base_rule_runs_exactly_when_the_flag_says_it_does()
     {
         // THE HALF THAT ONLY THIS FILE CAN SAY. The Sparks alternative-cost arm
-        // (review/active/klee-sparks-2026-08-29.md sec.10) retires the base rule
+        // (review/ruled/klee-sparks-2026-08-29.md sec.10) retires the base rule
         // -- at 3 Sparks your Attacks cost 0, playing one consumes 3 -- behind
         // `-p:PrototypeCards=true`. `Prototype/SparkAlternativeCostPinTests`
         // asserts it is RETIRED, but that file is not compiled without the
