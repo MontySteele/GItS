@@ -53,7 +53,7 @@ public sealed class ProtoMcSucroseGust : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Wind Spirit Creation (proto)"),
-        ("description", "[gold]Swirl[/gold] an enemy's aura. Draw 1 card."),
+        ("description", "[gold]Swirl[/gold] the enemy. Draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -45,7 +45,7 @@ public sealed class ProtoKkExposedFlank : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Exposed Flank"),
-        ("description", "Apply {PowerAmount:diff()} Vulnerable. [gold]Plan[/gold]: every enemy gains 2 Vulnerable."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Vulnerable[/gold] to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

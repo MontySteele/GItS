@@ -42,7 +42,7 @@ public sealed class ProtoKoRunAway : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Run Away!"),
-        ("description", "Gain {Block:diff()} Block. If a [gold]Bomb[/gold] went off this turn, gain 4 more."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, gain 4 additional [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

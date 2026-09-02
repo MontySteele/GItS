@@ -235,8 +235,8 @@ public static class KokomiPlan
     /// <summary>The prompt text. Merged into the `cards` table by
     /// <c>KleeMod.InjectLocStrings</c>, which is its only source.</summary>
     public const string ReflectionPromptText =
-        "Choose a card in your Exhaust Pile. The Bake-Kurage will carry out "
-      + "its Plan line, or the card itself if it has none.";
+        "Choose a card. The Bake-Kurage carries out its Plan line, or the "
+      + "card if it has none.";
 
     private static LocString ReflectionPrompt =>
         new LocString("cards", ReflectionPromptKey);
@@ -618,9 +618,9 @@ public sealed class PendingPlansPower : PowerModel, ILocalizationProvider
     {
         ("title", "Plan"),
         ("description",
-            "The Bake-Kurage will carry out {Amount} "
+            "Carries out [blue]{Amount}[/blue] "
           + "[gold]Plan{Amount:plural:|s}[/gold] at the start of your next "
-          + "turn, in the order you wrote them."),
+          + "turn, in order."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -646,8 +646,8 @@ public sealed class PlanTwicePower : PowerModel, ILocalizationProvider
     {
         ("title", "Nereid's Ascension"),
         ("description",
-            "The Bake-Kurage carries out every [gold]Plan[/gold] twice. Lasts "
-          + "{Amount} more turn{Amount:plural:|s}."),
+            "The [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] "
+          + "twice. Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;

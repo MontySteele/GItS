@@ -153,9 +153,9 @@ public sealed class WarBannerPower : PowerModel, ILocalizationProvider
     {
         ("title", "General's War Banner"),
         ("description",
-            "You have " + CompanionOverhaulLaw.WarBannerDexterity
-          + " more [gold]Dexterity[/gold]. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+            "You have [blue]" + CompanionOverhaulLaw.WarBannerDexterity
+          + "[/blue] more [gold]Dexterity[/gold]. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -199,9 +199,9 @@ public sealed class JuugaPower : PowerModel, ILocalizationProvider
         ("title", "Juuga: Forward Unto Victory"),
         ("description",
             "At the end of your turn, deal "
-          + $"{CompanionOverhaulLaw.JuugaDamage} damage and apply "
-          + "[gold]Geo[/gold] to a random enemy. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+          + $"[blue]{CompanionOverhaulLaw.JuugaDamage}[/blue] [gold]Geo[/gold] "
+          + "damage to a random enemy. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -243,10 +243,11 @@ public sealed class MujiMujiDarumaPower : PowerModel, ILocalizationProvider
     {
         ("title", "Muji-Muji Daruma"),
         ("description",
-            "At the end of your turn, if you are above 70% HP deal "
-          + $"{CompanionOverhaulLaw.DarumaDamage} damage to a random enemy; "
-          + $"otherwise gain {CompanionOverhaulLaw.DarumaBlock} "
-          + "[gold]Block[/gold]. Lasts {Amount} more turn{Amount:plural:|s}."),
+            "At the end of your turn, deal "
+          + $"[blue]{CompanionOverhaulLaw.DarumaDamage}[/blue] damage to a random "
+          + "enemy if you are above 70% HP, otherwise gain "
+          + $"[blue]{CompanionOverhaulLaw.DarumaBlock}[/blue] [gold]Block[/gold]. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -300,9 +301,8 @@ public sealed class NaptimePower : PowerModel, ILocalizationProvider
     {
         ("title", "Naptime"),
         ("description",
-            "At the start of your next turn, draw {Amount} "
-          + "card{Amount:plural:|s} -- unless you play an [gold]Attack[/gold] "
-          + "this turn."),
+            "If you play no Attacks this turn, draw [blue]{Amount}[/blue] "
+          + "card{Amount:plural:|s} at the start of your next turn."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -348,10 +348,10 @@ public sealed class SanctifyingRingPower : PowerModel, ILocalizationProvider
         ("title", "Sanctifying Ring"),
         ("description",
             "At the end of your turn, deal "
-          + $"{CompanionOverhaulLaw.SanctifyingRingDamage} damage and apply "
-          + "[gold]Electro[/gold] to ALL enemies, then gain "
-          + $"{CompanionOverhaulLaw.SanctifyingRingBlock} [gold]Block[/gold]. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+          + $"[blue]{CompanionOverhaulLaw.SanctifyingRingDamage}[/blue] "
+          + "[gold]Electro[/gold] damage to ALL enemies and gain "
+          + $"[blue]{CompanionOverhaulLaw.SanctifyingRingBlock}[/blue] [gold]Block[/gold]. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -402,9 +402,9 @@ public sealed class BlazingBarrierPower : PowerModel, ILocalizationProvider
     {
         ("title", "Blazing Barrier"),
         ("description",
-            "When this [gold]Block[/gold] absorbs damage, gain "
-          + $"{CompanionOverhaulLaw.BlazingBarrierBlock} [gold]Block[/gold]. "
-          + "{Amount} [gold]Block[/gold] still burns."),
+            "[blue]{Amount}[/blue] [gold]Block[/gold] left. When it absorbs "
+          + $"damage, gain [blue]{CompanionOverhaulLaw.BlazingBarrierBlock}[/blue] "
+          + "[gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -456,11 +456,11 @@ public sealed class CrimsonOoyoroiPower : PowerModel, ILocalizationProvider
     {
         ("title", "Crimson Ooyoroi"),
         ("description",
-            "Whenever you play an [gold]Attack[/gold], deal "
-          + $"{CompanionOverhaulLaw.OoyoroiDamage} damage and apply "
-          + "[gold]Pyro[/gold] to a random enemy and gain "
-          + $"{CompanionOverhaulLaw.OoyoroiBlock} [gold]Block[/gold]. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+            "Whenever you play an Attack, deal "
+          + $"[blue]{CompanionOverhaulLaw.OoyoroiDamage}[/blue] [gold]Pyro[/gold] "
+          + "damage to a random enemy and gain "
+          + $"[blue]{CompanionOverhaulLaw.OoyoroiBlock}[/blue] [gold]Block[/gold]. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -504,7 +504,7 @@ public sealed class CrowfeatherCoverPower
     {
         ("title", "Crowfeather Cover"),
         ("description",
-            "Your next [gold]Attack[/gold] this turn deals {Amount} more "
+            "Your next Attack this turn deals [blue]{Amount}[/blue] additional "
           + "damage and applies [gold]Electro[/gold]."),
     };
 
@@ -543,9 +543,9 @@ public sealed class TenguStormcallPower : PowerModel, ILocalizationProvider
     {
         ("title", "Tengu Stormcall"),
         ("description",
-            "At the start of your next turn, your [gold]Attacks[/gold] deal "
+            "Next turn, your Attacks deal [blue]"
           + CompanionOverhaulLaw.StormcallBonus
-          + " more damage for that turn."),
+          + "[/blue] additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -604,10 +604,10 @@ public sealed class SesshouSakuraPower : PowerModel, ILocalizationProvider
         ("title", "Sesshou Sakura"),
         ("description",
             "At the end of your turn, each [gold]Sakura[/gold] deals "
-          + $"{CompanionOverhaulLaw.SakuraDamage} damage and applies "
-          + "[gold]Electro[/gold] to a random enemy; every one placed beside "
-          + $"another deals {CompanionOverhaulLaw.SakuraBonus} more. "
-          + "{Amount} out."),
+          + $"[blue]{CompanionOverhaulLaw.SakuraDamage}[/blue] [gold]Electro[/gold] "
+          + "damage to a random enemy, plus "
+          + $"[blue]{CompanionOverhaulLaw.SakuraBonus}[/blue] "
+          + "after the first. [blue]{Amount}[/blue] out."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -660,11 +660,10 @@ public sealed class AurousBlazePower : PowerModel, ILocalizationProvider
     {
         ("title", "Aurous Blaze"),
         ("description",
-            "Whenever this enemy takes damage from a card that is not an "
-          + "[gold]Attack[/gold], deal "
-          + $"{CompanionOverhaulLaw.AurousBlazeDamage} damage and apply "
-          + "[gold]Pyro[/gold] to ALL enemies. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+            "Whenever this enemy takes damage from a non-Attack card, deal "
+          + $"[blue]{CompanionOverhaulLaw.AurousBlazeDamage}[/blue] [gold]Pyro[/gold] "
+          + "damage to ALL enemies. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Debuff;
@@ -716,10 +715,10 @@ public sealed class SoumetsuPower : PowerModel, ILocalizationProvider
         ("title", "Soumetsu"),
         ("description",
             "At the end of your turn, deal "
-          + $"{CompanionOverhaulLaw.SoumetsuDamage} damage and apply "
-          + "[gold]Cryo[/gold] to ALL enemies; when it ends, "
-          + $"{CompanionOverhaulLaw.SoumetsuFinale} more. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+          + $"[blue]{CompanionOverhaulLaw.SoumetsuDamage}[/blue] [gold]Cryo[/gold] "
+          + "damage to ALL enemies, then "
+          + $"[blue]{CompanionOverhaulLaw.SoumetsuFinale}[/blue] when it ends. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -768,11 +767,11 @@ public sealed class KyoukaPower : PowerModel, ILocalizationProvider
     {
         ("title", "Kyouka"),
         ("description",
-            "Your [gold]Attacks[/gold] apply [gold]Hydro[/gold] and deal "
-          + $"{CompanionOverhaulLaw.KyoukaDamage} more damage; when it ends, "
-          + $"deal {CompanionOverhaulLaw.KyoukaFinale} damage and apply "
-          + "[gold]Hydro[/gold] to a random enemy. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+            "Your Attacks apply [gold]Hydro[/gold] and deal "
+          + $"[blue]{CompanionOverhaulLaw.KyoukaDamage}[/blue] additional damage. "
+          + $"Then deal [blue]{CompanionOverhaulLaw.KyoukaFinale}[/blue] "
+          + "[gold]Hydro[/gold] damage to a random enemy. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -826,9 +825,9 @@ public sealed class SurpriseDispatchPower : PowerModel, ILocalizationProvider
     {
         ("title", "Surprise Dispatch"),
         ("description",
-            "At the start of your next turn, deal "
+            "Next turn, deal [blue]"
           + CompanionOverhaulLaw.SurpriseDispatchDamage
-          + " damage to a random enemy."),
+          + "[/blue] damage to a random enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -870,9 +869,9 @@ public sealed class TamotoPower : PowerModel, ILocalizationProvider
         ("title", "Tamoto"),
         ("description",
             "At the end of your turn, deal "
-          + $"{CompanionOverhaulLaw.TamotoDamage} damage and apply "
-          + "[gold]Geo[/gold] to a random enemy, ignoring [gold]Block[/gold]. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+          + $"[blue]{CompanionOverhaulLaw.TamotoDamage}[/blue] [gold]Geo[/gold] "
+          + "damage to a random enemy, ignoring [gold]Block[/gold]. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;

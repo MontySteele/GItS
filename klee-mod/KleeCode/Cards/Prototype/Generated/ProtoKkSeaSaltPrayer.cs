@@ -41,7 +41,7 @@ public sealed class ProtoKkSeaSaltPrayer : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sea-Salt Prayer"),
-        ("description", "Gain {Block:diff()} Block. Apply {PowerAmount:diff()} Weak."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Apply {PowerAmount:diff()} [gold]Weak[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

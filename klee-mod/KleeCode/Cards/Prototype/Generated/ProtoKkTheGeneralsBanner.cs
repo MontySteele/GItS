@@ -41,7 +41,7 @@ public sealed class ProtoKkTheGeneralsBanner : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The General's Banner"),
-        ("description", "Whenever you play a [gold]Companion[/gold] card, the front enemy gains 1 Weak. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Whenever you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

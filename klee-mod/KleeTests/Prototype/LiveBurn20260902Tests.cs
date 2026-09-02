@@ -126,7 +126,7 @@ public class LiveBurn20260902Tests
                 .GetMethod("ForMine", HeadlessGame.All)!));
 
         Assert.Contains("[gold]Weak[/gold]", body);
-        Assert.Contains("same Pyro hit for its own", body);
+        Assert.Contains("shrinks it like any Bomb", body);
     }
 
     // ---- EB-293: the Plan keyword covers the plan-only case ---------------
@@ -134,15 +134,19 @@ public class LiveBurn20260902Tests
     [Fact]
     public void The_plan_tip_covers_a_card_that_can_only_be_planned()
     {
-        // "instead" presumes a normal play to do instead of, and a plan-only
+        // "instead" presumed a normal play to do instead of, and a plan-only
         // row has none. The r2 Opus seat could not tell and would not risk
-        // finding out.
+        // finding out. The word "instead" is gone from the tip; the plan-only
+        // instruction itself is printed on the FACE by the codegen
+        // (`gen_klee_cards._plan_only_line`, pinned by
+        // `tier0/tests/test_prototype_surface.py`), and the tip says what
+        // every Plan card shares: where it goes and when it happens.
         var body = string.Concat(Il.Strings(
             typeof(ArmKeywordTips)
                 .GetMethod("ForPlan", HeadlessGame.All)!));
 
-        Assert.Contains("only be played on", body);
-        Assert.Contains("[gold]Bake-Kurage[/gold]", body);
+        Assert.DoesNotContain("instead", body);
+        Assert.Contains("Play this on the [gold]Bake-Kurage[/gold]", body);
     }
 
     // ---- EB-297: no Burst gauge for a Kokomi who has no Burst -------------

@@ -42,7 +42,7 @@ public sealed class ProtoKoDigIn : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dig In"),
-        ("description", "Gain {Block:diff()} Block."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,

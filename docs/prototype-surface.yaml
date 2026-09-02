@@ -196,7 +196,7 @@
 - {id: proto_ko_jumpy_dumpty, name: "Jumpy Dumpty", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   description: "Place a [gold]Bomb[/gold] 8. When it goes off, place a [gold]Mine[/gold] 3 on every enemy.",
+   description: "Place a [gold]Bomb[/gold] 8. When it goes off, place a [gold]Mine[/gold] 3 on ALL enemies.",
    upgrade: {bomb_size: +3, payload_mine: +1},
    effects: [{op: plant_bomb, target: enemy, size: 8, payload_mine_all: 3}]}
 
@@ -218,7 +218,7 @@
 - {id: proto_ko_chain_fuse, name: "Chain Fuse", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Each [gold]Bomb[/gold] on target enemy grows by 3.",
+   description: "Each [gold]Bomb[/gold] on the enemy grows by 3.",
    effects: [{op: grow_bombs, target: enemy, amount: 3}]}
 
 - {id: proto_ko_explosives_workshop, name: "Explosives Workshop", character: klee,
@@ -230,20 +230,20 @@
 - {id: proto_ko_careful_arrangement, name: "Careful Arrangement", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Move all your [gold]Bombs[/gold] onto target enemy as one [gold]Bomb[/gold]. It grows by 2.",
+   description: "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold]. It grows by 2.",
    effects: [{op: merge_bombs, target: enemy, growth: 2}]}
 
 - {id: proto_ko_big_badda_boom, name: "Big Badda Boom", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 12 damage. Then hit again for the damage the [gold]Bombs[/gold] dealt.",
+   description: "[gold]Set off[/gold]. Deal 12 damage. Then deal damage equal to what the [gold]Bombs[/gold] dealt.",
    effects: [{op: set_off, target: enemy, damage: 12},
              {op: damage_set_off_total, target: enemy}]}
 
 - {id: proto_ko_the_big_one, name: "The Big One", character: klee,
    authored_by: [claude],
    cost: 3, type: attack, rarity: rare,
-   description: "[gold]Set off[/gold]. [gold]Bombs[/gold] set off this way deal double. Deal 10 damage.",
+   description: "[gold]Set off[/gold] for double damage. Deal 10 damage.",
    effects: [{op: double_set_off},
              {op: set_off, target: enemy, damage: 10}]}
 
@@ -267,7 +267,7 @@
 - {id: proto_ko_mine_toss, name: "Mine Toss", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Place a [gold]Mine[/gold] 4 on every enemy.",
+   description: "Place a [gold]Mine[/gold] 4 on ALL enemies.",
    effects: [{op: plant_bomb, target: all_enemies, size: 4, mine: true}]}
 
 - {id: proto_ko_fwoosh, name: "Fwoosh!", character: klee,
@@ -280,14 +280,14 @@
 - {id: proto_ko_tinder_toss, name: "Tinder Toss", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "[gold]Set off[/gold] and deal 4 damage, to two random enemies.",
+   description: "[gold]Set off[/gold] and deal 4 damage to a random enemy twice.",
    effects: [{op: spend_spark, amount: 1},
              {op: set_off, target: random_enemy, damage: 4, times: 2}]}
 
 - {id: proto_ko_quick_fuse, name: "Quick Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Target enemy's [gold]Bombs[/gold] grow by 3, then [gold]Set off[/gold].",
+   description: "Each [gold]Bomb[/gold] on the enemy grows by 3, then [gold]Set off[/gold].",
    effects: [{op: spend_spark, amount: 1},
              {op: grow_bombs, target: enemy, amount: 3},
              {op: set_off, target: enemy}]}
@@ -303,7 +303,7 @@
 - {id: proto_ko_rapid_fire, name: "Rapid Fire", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal 3 damage to a random enemy four times. [gold]Set off[/gold] each enemy hit.",
+   description: "Deal 3 damage to a random enemy 4 times. [gold]Set off[/gold] each enemy hit.",
    effects: [{op: set_off, target: random_enemy, damage: 3, times: 4}]}
 
 - {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
@@ -323,7 +323,7 @@
 - {id: proto_ko_sizzle, name: "Sizzle", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "[gold]Set off[/gold]. Deal 6 damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal 6 more.",
+   description: "[gold]Set off[/gold]. Deal 6 damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal 6 additional damage.",
    effects: [{op: set_off, target: enemy, damage: 6},
              {op: conditional, if: bomb_reacted_this_turn,
               then: [{op: damage, amount: 6, target: enemy}]}]}
@@ -339,14 +339,14 @@
 - {id: proto_ko_flame_dance, name: "Flame Dance", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 5 damage to ALL enemies. [gold]Set off[/gold] each enemy that has a non-Pyro aura.",
+   description: "Deal 5 damage to ALL enemies. [gold]Set off[/gold] each enemy with a non-Pyro aura.",
    effects: [{op: damage, amount: 5, target: all_enemies},
              {op: set_off, target: all_enemies, aura: non_pyro}]}
 
 - {id: proto_ko_catalytic_converter, name: "Catalytic Converter", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], gain 1 extra [gold]Spark[/gold].",
+   description: "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], gain 1 additional [gold]Spark[/gold].",
    effects: [{op: apply_power, power: ko_bomb_reaction_spark, amount: 1, target: self}]}
 
 # --- currencies and defence (packet sec.4) ---
@@ -354,7 +354,7 @@
 - {id: proto_ko_ammo_scavenging, name: "Ammo Scavenging", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Place a [gold]Bomb[/gold] 4. Draw a card for each of your [gold]Bombs[/gold] that went off this turn.",
+   description: "Place a [gold]Bomb[/gold] 4. Draw 1 card for each of your [gold]Bombs[/gold] that went off this turn.",
    effects: [{op: plant_bomb, target: enemy, size: 4},
              {op: draw_per_set_off}]}
 
@@ -368,7 +368,7 @@
 - {id: proto_ko_dig_in, name: "Dig In", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Gain 8 Block.",
+   description: "Gain 8 [gold]Block[/gold].",
    effects: [{op: spend_spark, amount: 1},
              {op: block, amount: 8}]}
 
@@ -383,7 +383,7 @@
 - {id: proto_ko_run_away, name: "Run Away!", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Gain 3 Block. If a [gold]Bomb[/gold] went off this turn, gain 4 more.",
+   description: "Gain 3 [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, gain 4 additional [gold]Block[/gold].",
    effects: [{op: block, amount: 3},
              {op: conditional, if: bomb_went_off_this_turn,
               then: [{op: block, amount: 4}]}]}
@@ -391,13 +391,13 @@
 - {id: proto_ko_grounded, name: "Grounded", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 6 Block.",
+   description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 6 [gold]Block[/gold].",
    effects: [{op: apply_power, power: ko_grounded, amount: 6, target: self}]}
 
 - {id: proto_ko_sorry_jean, name: "Sorry, Jean...", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Remove one of your [gold]Bombs[/gold]. Gain Block equal to its size.",
+   description: "Remove one of your [gold]Bombs[/gold]. Gain [gold]Block[/gold] equal to its size.",
    effects: [{op: remove_bomb_for_block}]}
 
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
@@ -416,7 +416,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: geo,
    cost: 1, type: skill,
-   description: "Gain 6 [gold]Block[/gold]. If you are below half HP, gain 4 more.",
+   description: "Gain 6 [gold]Block[/gold]. If you are below half HP, gain 4 additional [gold]Block[/gold].",
    effects: [{op: block, amount: 6},
              {op: conditional, if: hp_pct_below_50,
               then: [{op: block, amount: 4}]}]}
@@ -440,7 +440,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
    cost: 1, type: skill,
-   description: "Gain 6 [gold]Block[/gold]. Apply [gold]Hydro[/gold] to target enemy.",
+   description: "Gain 6 [gold]Block[/gold]. Apply [gold]Hydro[/gold].",
    effects: [{op: block, amount: 6},
              {op: apply_aura, element: hydro, target: enemy}]}
 
@@ -455,7 +455,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 1, type: attack,
-   description: "Deal 10 damage. [gold]Swirl[/gold] an enemy's aura.",
+   description: "Deal 10 damage. [gold]Swirl[/gold] the enemy.",
    effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
              {op: swirl, target: enemy}]}
 
@@ -470,7 +470,7 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
-   description: "Deal 7 damage. If Oz is out, Oz attacks now.",
+   description: "Deal 7 damage. If Oz is out, he deals 5 [gold]Electro[/gold] damage to a random enemy.",
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true},
              {op: conditional, if: self_has_power_mc_oz,
               then: [{op: damage, amount: 5, target: random_enemy, applies_element: true}]}]}
@@ -486,14 +486,14 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 0, type: skill,
-   description: "[gold]Swirl[/gold] an enemy's aura. Draw 1 card.",
+   description: "[gold]Swirl[/gold] the enemy. Draw 1 card.",
    effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
 
 - {id: proto_mc_sucrose_astable, name: "Sucrose — Astable Anemohypostasis (proto)", character: klee,
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 0, type: skill, exhaust: true,
-   description: "[gold]Swirl[/gold] the aura of ALL enemies.",
+   description: "[gold]Swirl[/gold] ALL enemies.",
    effects: [{op: swirl, target: all_enemies}]}
 
 - {id: proto_mc_sucrose_catalyst_conversion, name: "Sucrose — Catalyst Conversion (proto)", character: klee,
@@ -507,7 +507,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: pyro,
    cost: 1, type: skill, exhaust: true,
-   description: "If you are above 70% HP, gain 3 [gold]Strength[/gold]. Otherwise gain 10 [gold]Block[/gold].",
+   description: "If you are above 70% HP, gain 3 [gold]Strength[/gold]. Otherwise, gain 10 [gold]Block[/gold].",
    effects: [{op: conditional, if: hp_pct_above_70,
               then: [{op: apply_power, power: strength, amount: 3, target: self}],
               else: [{op: block, amount: 10}]}]}
@@ -516,14 +516,14 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 5, rarity: rare, role_c: buffer, element: pyro,
    cost: 2, type: power,
-   description: "At the start of your turn, gain 5 [gold]Block[/gold]. If you had [gold]Block[/gold] left at the end of your last turn, also gain 2 [gold]Strength[/gold].",
+   description: "At the start of your turn, gain 5 [gold]Block[/gold], and 2 [gold]Strength[/gold] if you ended last turn with [gold]Block[/gold].",
    effects: [{op: apply_power, power: mc_revelation, amount: 1, target: self}]}
 
 - {id: proto_mc_mona_stellaris_phantasm, name: "Mona — Stellaris Phantasm", character: klee,
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 5, rarity: rare, role_c: applier, element: hydro,
    cost: 2, type: skill, exhaust: true,
-   description: "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, enemies take 50% more damage.",
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, apply 1 [gold]Vulnerable[/gold] to ALL enemies.",
    effects: [{op: apply_aura, element: hydro, target: all_enemies},
              {op: apply_power, power: mc_omen, amount: 1, target: self}]}
 
@@ -531,7 +531,7 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
    cost: 2, type: skill, exhaust: true,
-   description: "Deal 8 damage to ALL enemies. For 2 turns, at the end of your turn [gold]Swirl[/gold] the aura of ALL enemies.",
+   description: "Deal 8 damage to ALL enemies. For 2 turns, at the end of your turn [gold]Swirl[/gold] ALL enemies.",
    effects: [{op: damage, amount: 8, target: all_enemies, applies_element: true},
              {op: apply_power, power: mc_grand_ode, amount: 2, target: self}]}
 
@@ -539,7 +539,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: pyro,
    cost: 1, type: attack,
-   description: "Deal 4 damage to ALL enemies three times.",
+   description: "Deal 4 damage to ALL enemies 3 times.",
    effects: [{op: damage, amount: 4, target: all_enemies, times: 3, applies_element: true}]}
 
 - {id: proto_mc_lisa_violet_arc, name: "Lisa — Violet Arc", character: klee,
@@ -590,7 +590,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: hydro,
    cost: 1, type: skill, exhaust: true,
-   description: "Gain 4 [gold]Block[/gold]. For 3 turns, at the start of your turn apply [gold]Hydro[/gold] to target enemy.",
+   description: "Gain 4 [gold]Block[/gold]. For 3 turns, at the start of your turn apply [gold]Hydro[/gold] to the enemy.",
    effects: [{op: block, amount: 4},
              {op: apply_power, power: mc_melody_loop, amount: 3, target: enemy}]}
 
@@ -598,21 +598,21 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: pyro,
    cost: 0, type: skill,
-   description: "Your next [gold]Attack[/gold] this turn deals 4 more damage and applies [gold]Pyro[/gold].",
+   description: "Your next Attack this turn deals 4 additional damage and applies [gold]Pyro[/gold].",
    effects: [{op: apply_power, power: mc_passion_overload, amount: 4, target: self}]}
 
 - {id: proto_mc_dahlia_sacramental_shower, name: "Dahlia — Sacramental Shower (proto)", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
    cost: 1, type: skill,
-   description: "Place a [gold]Shower[/gold]: the next time an enemy attacks you, deal 9 [gold]Hydro[/gold] damage to it first.",
+   description: "The next time an enemy attacks you, deal 9 [gold]Hydro[/gold] damage to it first.",
    effects: [{op: apply_power, power: mc_sacramental_shower, amount: 1, target: self}]}
 
 - {id: proto_mc_dahlia_favonian_favor, name: "Dahlia — Favonian Favor (proto)", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: hydro,
    cost: 1, type: skill,
-   description: "Gain 7 [gold]Block[/gold]. Whenever a reaction happens this turn, gain 3 [gold]Block[/gold].",
+   description: "Gain 7 [gold]Block[/gold]. Whenever an [gold]Elemental Reaction[/gold] happens this turn, gain 3 [gold]Block[/gold].",
    effects: [{op: block, amount: 7},
              {op: apply_power, power: mc_favonian_favor, amount: 3, target: self}]}
 
@@ -620,19 +620,19 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
    cost: 2, type: power,
-   description: "Deal 10 damage to ALL enemies, then choose one for the fight. [gold]White[/gold]: enemies take 50% more damage from reactions. [gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage.",
+   description: "Deal 10 damage to ALL enemies, then choose one for the combat. [gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage.",
    effects: [{op: damage, amount: 10, target: all_enemies, applies_element: true},
              {op: choose_one, modes: [
-              {label: "[gold]White[/gold]: enemies take 50% more damage from reactions",
+              {label: "[gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]",
                effects: [{op: apply_power, power: mc_binary_white, amount: 1, target: self}]},
-              {label: "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage",
+              {label: "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage",
                effects: [{op: apply_power, power: mc_binary_dark, amount: 8, target: self}]}]}]}
 
 - {id: proto_mc_razor_claw_and_thunder, name: "Razor — Claw and Thunder", character: klee,
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
-   description: "Deal 8 damage. If this is the third [gold]Attack[/gold] you played this turn, gain 1 [gold]Energy[/gold].",
+   description: "Deal 8 damage. If this is the third Attack you played this turn, gain 1 [gold]Energy[/gold].",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: conditional, if: nth_attack_this_turn_3,
               then: [{op: energy, amount: 1}]}]}
@@ -641,35 +641,35 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: skill, exhaust: true,
-   description: "For 2 turns, your [gold]Attacks[/gold] apply [gold]Electro[/gold] and deal 3 more damage.",
+   description: "For 2 turns, your Attacks apply [gold]Electro[/gold] and deal 3 additional damage.",
    effects: [{op: apply_power, power: mc_lightning_fang, amount: 2, target: self}]}
 
 - {id: proto_mc_varka_sturm_und_drang, name: "Varka — Sturm und Drang", character: klee,
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
    cost: 2, type: power,
-   description: "Whenever a [gold]Swirl[/gold] happens, your next [gold]Attack[/gold] deals 6 more damage of the swirled element.",
+   description: "Whenever a [gold]Swirl[/gold] happens, your next Attack deals 6 additional damage of the swirled element.",
    effects: [{op: apply_power, power: mc_sturm_und_drang, amount: 6, target: self}]}
 
 - {id: proto_mc_amber_explosive_puppet, name: "Amber — Explosive Puppet", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: pyro,
    cost: 1, type: skill,
-   description: "Place [gold]Baron Bunny[/gold]: the next time an enemy attacks you, take 3 less damage and deal 8 [gold]Pyro[/gold] damage to ALL enemies.",
+   description: "The next time an enemy attacks you, take 3 less damage and deal 8 [gold]Pyro[/gold] damage to ALL enemies.",
    effects: [{op: apply_power, power: mc_baron_bunny, amount: 1, target: self}]}
 
 - {id: proto_mc_eula_glacial_illumination, name: "Eula — Glacial Illumination", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: cryo,
    cost: 1, type: skill, exhaust: true,
-   description: "Place a [gold]Lightfall Sword[/gold] on target enemy: for 2 turns it counts your [gold]Attacks[/gold]; then it deals 8 damage plus 5 per [gold]Attack[/gold] counted.",
+   description: "Place a [gold]Lightfall Sword[/gold] on the enemy. After 2 turns it deals 8 damage, plus 5 for each Attack you played meanwhile.",
    effects: [{op: apply_power, power: mc_lightfall_sword, amount: 2, target: enemy}]}
 
 - {id: proto_mc_mika_starfrost_swirl, name: "Mika — Starfrost Swirl", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: attack,
-   description: "Deal 5 damage to ALL enemies. Your next [gold]Attack[/gold] costs 1 less.",
+   description: "Deal 5 damage to ALL enemies. Your next Attack costs 1 less.",
    effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
              {op: apply_power, power: mc_starfrost_discount, amount: 1, target: self}]}
 
@@ -684,14 +684,14 @@
 - {id: proto_kk_kurages_oath, name: "Kurage's Oath (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   description: "[gold]Plan[/gold]: Deal 5 damage to every enemy.",
+   description: "[gold]Plan[/gold]: Deal 5 damage to ALL enemies.",
    effects: [],
    plan: [{op: damage, amount: 5, target: all_enemies}]}
 
 - {id: proto_kk_slack_water, name: "Slack Water (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: basic,
-   description: "Deal 4 damage. Apply 1 Weak. [gold]Plan[/gold]: every enemy gains 2 Weak.",
+   description: "Deal 4 damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Weak[/gold] to ALL enemies.",
    effects: [{op: damage, amount: 4, target: enemy},
              {op: apply_power, power: weak, amount: 1, target: enemy}],
    plan: [{op: apply_power, power: weak, amount: 2, target: all_enemies}]}
@@ -715,33 +715,33 @@
 - {id: proto_kk_read_the_field, name: "Read the Field", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 4 Block. [gold]Plan[/gold]: Gain 10 Block.",
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 10 [gold]Block[/gold].",
    effects: [{op: block, amount: 4}],
    plan: [{op: block, amount: 10}]}
 
 - {id: proto_kk_exposed_flank, name: "Exposed Flank", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Apply 1 Vulnerable. [gold]Plan[/gold]: every enemy gains 2 Vulnerable.",
+   description: "Apply 1 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Vulnerable[/gold] to ALL enemies.",
    effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}],
    plan: [{op: apply_power, power: vulnerable, amount: 2, target: all_enemies}]}
 
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever the jellyfish carries out a [gold]Plan[/gold], draw 1.",
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}]}
 
 - {id: proto_kk_song_of_pearls, name: "Song of Pearls (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever the jellyfish carries out a [gold]Plan[/gold], gain 3 Block.",
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain 3 [gold]Block[/gold].",
    effects: [{op: apply_power, power: kk_song_of_pearls, amount: 3, target: self}]}
 
 - {id: proto_kk_war_council, name: "War Council", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Plan[/gold]: Deal 4 damage to every enemy and apply 1 Weak to each.",
+   description: "[gold]Plan[/gold]: Deal 4 damage and apply 1 [gold]Weak[/gold] to ALL enemies.",
    effects: [],
    plan: [{op: damage, amount: 4, target: all_enemies},
           {op: apply_power, power: weak, amount: 1, target: all_enemies}]}
@@ -749,14 +749,14 @@
 - {id: proto_kk_nereids_ascension, name: "Nereid's Ascension (proto)", character: kokomi,
    authored_by: [claude],
    cost: 2, type: skill, rarity: rare, exhaust: true,
-   description: "Exhaust. [gold]Plan[/gold]: for 2 turns, the jellyfish carries out every [gold]Plan[/gold] twice.",
+   description: "Exhaust. [gold]Plan[/gold]: for 2 turns, the [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] twice.",
    effects: [],
    plan: [{op: plan_twice, amount: 2}]}
 
 - {id: proto_kk_the_moon_overlooks_the_waters, name: "The Moon Overlooks the Waters", character: kokomi,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "[gold]Plans[/gold] also happen now.",
+   description: "[gold]Plans[/gold] also happen when played.",
    effects: [{op: apply_power, power: kk_plans_also_now, amount: 1, target: self}]}
 
 # --- the Priestess: Block through the jellyfish, Mend at Rare (packet sec.4) ---
@@ -764,20 +764,20 @@
 - {id: proto_kk_sea_salt_prayer, name: "Sea-Salt Prayer", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 4 Block. Apply 1 Weak.",
+   description: "Gain 4 [gold]Block[/gold]. Apply 1 [gold]Weak[/gold].",
    effects: [{op: block, amount: 4},
              {op: apply_power, power: weak, amount: 1, target: enemy}]}
 
 - {id: proto_kk_deep_current, name: "Deep Current", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 4 damage to every enemy.",
+   description: "Deal 4 damage to ALL enemies.",
    effects: [{op: damage, amount: 4, target: all_enemies}]}
 
 - {id: proto_kk_coral_bulwark, name: "Coral Bulwark", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 6 Block. [gold]Plan[/gold]: Gain 6 Block and the front enemy gains 1 Weak.",
+   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] and apply 1 [gold]Weak[/gold].",
    effects: [{op: block, amount: 6}],
    plan: [{op: block, amount: 6},
           {op: apply_power, power: weak, amount: 1, target: front_enemy}]}
@@ -785,7 +785,7 @@
 - {id: proto_kk_cleansing_wave, name: "Cleansing Wave", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 5 Block. Remove a debuff from yourself. [gold]Plan[/gold]: Gain 10 Block.",
+   description: "Gain 5 [gold]Block[/gold]. Remove one of your debuffs. [gold]Plan[/gold]: Gain 10 [gold]Block[/gold].",
    effects: [{op: block, amount: 5},
              {op: remove_debuff}],
    plan: [{op: block, amount: 10}]}
@@ -793,7 +793,7 @@
 - {id: proto_kk_the_clouds_like_waves, name: "The Clouds Like Waves Rippling", character: kokomi,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "Whenever you apply a debuff to an enemy, gain 2 Block.",
+   description: "Whenever you apply a debuff to an enemy, gain 2 [gold]Block[/gold].",
    effects: [{op: apply_power, power: kk_clouds_like_waves, amount: 2, target: self}]}
 
 - {id: proto_kk_the_moon_a_ship, name: "The Moon, A Ship O'er the Seas", character: kokomi,
@@ -806,7 +806,7 @@
 - {id: proto_kk_sango_isshin, name: "Sango Isshin (proto)", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   description: "Deal damage equal to a quarter of your Max HP. [gold]Plan[/gold]: the same to every enemy.",
+   description: "Deal damage equal to a quarter of your Max HP. [gold]Plan[/gold]: Deal the same to ALL enemies.",
    effects: [{op: damage_quarter_max_hp, target: enemy}],
    plan: [{op: damage_quarter_max_hp, target: all_enemies}]}
 
@@ -815,14 +815,14 @@
 - {id: proto_kk_rally, name: "Rally", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Apply 1 Weak. The next [gold]Companion[/gold] card you play this turn costs 1 less.",
+   description: "Apply 1 [gold]Weak[/gold]. The next [gold]Companion[/gold] card you play this turn costs 1 less.",
    effects: [{op: apply_power, power: weak, amount: 1, target: enemy},
              {op: next_companion_discount}]}
 
 - {id: proto_kk_vanguard, name: "Vanguard", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common, exhaust: true,
-   description: "Exhaust. [gold]Plan[/gold]: the front enemy gains 1 Vulnerable and 1 Weak.",
+   description: "Exhaust. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] and 1 [gold]Weak[/gold].",
    effects: [],
    plan: [{op: apply_power, power: vulnerable, amount: 1, target: front_enemy},
           {op: apply_power, power: weak, amount: 1, target: front_enemy}]}
@@ -830,7 +830,7 @@
 - {id: proto_kk_the_generals_banner, name: "The General's Banner", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a [gold]Companion[/gold] card, the front enemy gains 1 Weak.",
+   description: "Whenever you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy.",
    effects: [{op: apply_power, power: kk_generals_banner, amount: 1, target: self}]}
 
 - {id: proto_kk_chain_of_command, name: "Chain of Command", character: kokomi,
@@ -845,14 +845,14 @@
 - {id: proto_kk_stolen_chapter, name: "Stolen Chapter (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Draw 1. [gold]Plan[/gold]: Draw 3.",
+   description: "Draw 1 card. [gold]Plan[/gold]: Draw 3 cards.",
    effects: [{op: draw, amount: 1}],
    plan: [{op: draw, amount: 3}]}
 
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common, exhaust: true,
-   description: "Exhaust. The jellyfish carries out your front [gold]Plan[/gold] now.",
+   description: "Exhaust. The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now.",
    effects: [{op: carry_out_front_plan}]}
 
 - {id: proto_kk_undertow, name: "Undertow (proto)", character: kokomi,
@@ -866,13 +866,13 @@
 - {id: proto_kk_salt_line, name: "Salt Line (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common, exhaust: true,
-   description: "Exhaust. Gain 8 Block.",
+   description: "Exhaust. Gain 8 [gold]Block[/gold].",
    effects: [{op: block, amount: 8}]}
 
 - {id: proto_kk_battle_plan, name: "Battle Plan", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw 1.",
+   description: "[gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw 1 card.",
    effects: [],
    plan: [{op: energy, amount: 2},
           {op: draw, amount: 1}]}
@@ -880,7 +880,7 @@
 - {id: proto_kk_moons_reflection, name: "Moon's Reflection", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Exhaust. Choose a card in your exhaust pile: [gold]Plan[/gold]: the jellyfish carries out its [gold]Plan[/gold] line, or the card itself if it has none.",
+   description: "Exhaust. Choose a card in your [gold]Exhaust Pile[/gold]. Next turn, the [gold]Bake-Kurage[/gold] carries out its [gold]Plan[/gold] line, or the card if it has none.",
    effects: [{op: plan_from_exhaust}]}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
@@ -914,21 +914,21 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
    cost: 1, type: attack,
-   description: "Deal 8 damage to a random enemy. [gold]Swirl[/gold].",
+   description: "Deal 8 damage to a random enemy and [gold]Swirl[/gold] it.",
    effects: [{op: damage, amount: 8, target: random_enemy, applies_element: true}]}
 
 - {id: proto_mi_sayu_daruma, name: "Sayu — Muji-Muji Daruma (proto)", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 1, type: skill, exhaust: true,
-   description: "Summon the [gold]Daruma[/gold]: for 2 turns, at the end of your turn, if you are above 70% HP deal 6 damage to a random enemy; otherwise gain 6 [gold]Block[/gold].",
+   description: "For 2 turns, at the end of your turn deal 6 damage to a random enemy if you are above 70% HP, otherwise gain 6 [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_daruma, amount: 2, target: self}]}
 
 - {id: proto_mi_sayu_naptime, name: "Sayu — Naptime (proto)", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: anemo,
    cost: 0, type: skill,
-   description: "Gain 4 [gold]Block[/gold]. At the start of your next turn, draw 2 if you played no [gold]Attacks[/gold] this turn.",
+   description: "Gain 4 [gold]Block[/gold]. Next turn, draw 2 cards if you play no Attacks this turn.",
    effects: [{op: block, amount: 4},
              {op: apply_power, power: mi_naptime, amount: 2, target: self}]}
 
@@ -944,7 +944,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: electro,
    cost: 0, type: skill,
-   description: "Gain 4 [gold]Block[/gold]. If you lost HP this turn, gain 4 more.",
+   description: "Gain 4 [gold]Block[/gold]. If you lost HP this turn, gain 4 additional [gold]Block[/gold].",
    effects: [{op: block, amount: 4},
              {op: conditional, if: hp_lost_this_turn,
               then: [{op: block, amount: 4}]}]}
@@ -953,7 +953,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
-   description: "Deal 8 damage. If you are below half HP, deal 5 more.",
+   description: "Deal 8 damage. If you are below half HP, deal 5 additional damage.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: conditional, if: hp_pct_below_50,
               then: [{op: damage, amount: 5, target: enemy, applies_element: true}]}]}
@@ -970,21 +970,21 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: pyro,
    cost: 1, type: skill, exhaust: true,
-   description: "For 2 turns, whenever you play an [gold]Attack[/gold], deal 5 [gold]Pyro[/gold] damage to a random enemy and gain 3 [gold]Block[/gold].",
+   description: "For 2 turns, whenever you play an Attack, deal 5 [gold]Pyro[/gold] damage to a random enemy and gain 3 [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_crimson_ooyoroi, amount: 2, target: self}]}
 
 - {id: proto_mi_sara_crowfeather_cover, name: "Kujou Sara — Crowfeather Cover (proto)", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: electro,
    cost: 0, type: skill,
-   description: "Your next [gold]Attack[/gold] this turn deals 4 more damage and applies [gold]Electro[/gold].",
+   description: "Your next Attack this turn deals 4 additional damage and applies [gold]Electro[/gold].",
    effects: [{op: apply_power, power: mi_crowfeather, amount: 4, target: self}]}
 
 - {id: proto_mi_sara_tengu_stormcall, name: "Kujou Sara — Tengu Stormcall (proto)", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: attack,
-   description: "Deal 5 damage. Next turn, your [gold]Attacks[/gold] deal 5 more damage.",
+   description: "Deal 5 damage. Next turn, your Attacks deal 5 additional damage.",
    effects: [{op: damage, amount: 5, target: enemy, applies_element: true},
              {op: apply_power, power: mi_stormcall, amount: 1, target: self}]}
 
@@ -1000,7 +1000,7 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: applier, element: electro,
    cost: 3, type: attack,
-   description: "Deal 20 damage. Deals 5 more for each [gold]Companion[/gold] card you played this combat.",
+   description: "Deal 20 damage. Deals 5 additional damage for each [gold]Companion[/gold] card you played this combat.",
    effects: [{op: damage, target: enemy, applies_element: true,
               amount_formula: {base: 20, per: 5, count: companions_played_this_combat}}]}
 
@@ -1008,21 +1008,21 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 1, type: attack, exhaust: true,
-   description: "Deal 10 damage to ALL enemies. [gold]Swirl[/gold] each.",
+   description: "Deal 10 damage and [gold]Swirl[/gold] ALL enemies.",
    effects: [{op: damage, amount: 10, target: all_enemies, applies_element: true}]}
 
 - {id: proto_mi_yae_sesshou_sakura, name: "Yae Miko — Sesshou Sakura", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: electro,
    cost: 1, type: skill,
-   description: "Place a [gold]Sakura[/gold]: at the end of your turn it deals 4 [gold]Electro[/gold] damage plus your [gold]Strength[/gold] to a random enemy. Each [gold]Sakura[/gold] you place while one is out deals 3 more. Up to 3.",
+   description: "Place a [gold]Sakura[/gold], up to 3. At the end of your turn each deals 4 [gold]Electro[/gold] damage to a random enemy, plus 3 after the first.",
    effects: [{op: apply_power, power: mi_sesshou_sakura, amount: 1, target: self}]}
 
 - {id: proto_mi_yoimiya_aurous_blaze, name: "Yoimiya — Aurous Blaze", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: pyro,
    cost: 1, type: skill, exhaust: true,
-   description: "Mark an enemy for 2 turns. Whenever it takes damage from a card that is not an [gold]Attack[/gold], deal 6 [gold]Pyro[/gold] damage to ALL enemies.",
+   description: "For 2 turns, whenever the enemy takes damage from a non-Attack card, deal 6 [gold]Pyro[/gold] damage to ALL enemies.",
    effects: [{op: apply_power, power: mi_aurous_blaze, amount: 2, target: enemy}]}
 
 - {id: proto_mi_ayaka_soumetsu, name: "Kamisato Ayaka — Soumetsu", character: klee,
@@ -1036,14 +1036,14 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: buffer, element: hydro,
    cost: 1, type: skill, exhaust: true,
-   description: "For 2 turns, your [gold]Attacks[/gold] apply [gold]Hydro[/gold] and deal 4 more damage. When it ends, deal 12 [gold]Hydro[/gold] damage to a random enemy.",
+   description: "For 2 turns, your Attacks apply [gold]Hydro[/gold] and deal 4 additional damage. Then deal 12 [gold]Hydro[/gold] damage to a random enemy.",
    effects: [{op: apply_power, power: mi_kyouka, amount: 2, target: self}]}
 
 - {id: proto_mi_heizou_heartstopper, name: "Shikanoin Heizou — Heartstopper Strike", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
    cost: 1, type: attack,
-   description: "Deal 6 damage. Deals 4 more for each [gold]Swirl[/gold] this turn.",
+   description: "Deal 6 damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn.",
    effects: [{op: damage, target: enemy, applies_element: true,
               amount_formula: {base: 6, per: 4, count: swirls_this_turn}}]}
 
@@ -1059,7 +1059,7 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: anemo,
    cost: 2, type: skill, exhaust: true,
-   description: "[gold]Swirl[/gold] the aura of ALL enemies. If you are above 70% HP, deal 18 damage to ALL enemies. Otherwise, [gold]Mend[/gold] 10.",
+   description: "[gold]Swirl[/gold] ALL enemies. If you are above 70% HP, deal 18 damage to ALL enemies. Otherwise, [gold]Mend[/gold] 10.",
    effects: [{op: swirl, target: all_enemies},
              {op: conditional, if: hp_pct_above_70,
               then: [{op: damage, amount: 18, target: all_enemies, applies_element: true}],
@@ -1069,5 +1069,5 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: geo,
    cost: 1, type: skill, exhaust: true,
-   description: "Summon [gold]Tamoto[/gold]: for 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold].",
+   description: "For 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_tamoto, amount: 3, target: self}]}

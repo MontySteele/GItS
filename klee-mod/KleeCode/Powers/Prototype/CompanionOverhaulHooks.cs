@@ -355,9 +355,8 @@ public sealed class IcyPawsPower : PowerModel, ILocalizationProvider
     {
         ("title", "Icy Paws"),
         ("description",
-            "When this [gold]Block[/gold] absorbs damage, apply "
-          + "[gold]Cryo[/gold] to the attacker. {Amount} [gold]Block[/gold] "
-          + "still bites."),
+            "[blue]{Amount}[/blue] [gold]Block[/gold] left. When it absorbs "
+          + "damage, apply [gold]Cryo[/gold] to the attacker."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -420,8 +419,8 @@ public sealed class MelodyLoopPower : PowerModel, ILocalizationProvider
     {
         ("title", "Melody Loop"),
         ("description",
-            "At the start of its owner's turn, apply [gold]Hydro[/gold] to "
-          + "this enemy. Lasts {Amount} more turn{Amount:plural:|s}."),
+            "At the start of your turn, apply [gold]Hydro[/gold] to this "
+          + "enemy. Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -518,7 +517,7 @@ public sealed class PassionOverloadPower : NextAttackRiderPower, ILocalizationPr
     {
         ("title", "Passion Overload"),
         ("description",
-            "Your next [gold]Attack[/gold] this turn deals {Amount} more "
+            "Your next Attack this turn deals [blue]{Amount}[/blue] additional "
           + "damage and applies [gold]Pyro[/gold]."),
     };
 
@@ -557,8 +556,8 @@ public sealed class SwirlChargePower : NextAttackRiderPower, ILocalizationProvid
     {
         ("title", "Sturm und Drang"),
         ("description",
-            "Your next [gold]Attack[/gold] deals {Amount} more damage, of the "
-          + "element it last [gold]Swirl[/gold]ed."),
+            "Your next Attack deals [blue]{Amount}[/blue] additional damage of "
+          + "the last [gold]Swirl[/gold]ed element."),
     };
 
     /// <summary>The element the latest Swirl carried. LAST WINS.</summary>
@@ -590,7 +589,7 @@ public sealed class StarfrostDiscountPower : NextAttackRiderPower, ILocalization
     public List<(string, string)>? Localization => new()
     {
         ("title", "Starfrost Swirl"),
-        ("description", "Your next [gold]Attack[/gold] costs {Amount} less."),
+        ("description", "Your next Attack costs [blue]{Amount}[/blue] less."),
     };
 
     public override bool TryModifyEnergyCostInCombat(
@@ -625,9 +624,9 @@ public sealed class LightningFangPower : PowerModel, ILocalizationProvider
     {
         ("title", "Lightning Fang"),
         ("description",
-            "Your [gold]Attacks[/gold] apply [gold]Electro[/gold] and deal "
-          + $"{CompanionOverhaulLaw.LightningFangDamage} more damage. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+            "Your Attacks apply [gold]Electro[/gold] and deal "
+          + $"[blue]{CompanionOverhaulLaw.LightningFangDamage}[/blue] additional damage. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -668,9 +667,8 @@ public sealed class SturmUndDrangPower : PowerModel, ILocalizationProvider
     {
         ("title", "Sturm und Drang"),
         ("description",
-            "Whenever a [gold]Swirl[/gold] happens, your next "
-          + "[gold]Attack[/gold] deals {Amount} more damage of the swirled "
-          + "element."),
+            "Whenever a [gold]Swirl[/gold] happens, your next Attack deals "
+          + "[blue]{Amount}[/blue] additional damage of the swirled element."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -692,8 +690,8 @@ public sealed class FavonianFavorPower : PowerModel, ILocalizationProvider
     {
         ("title", "Favonian Favor"),
         ("description",
-            "Whenever a reaction happens this turn, gain {Amount} "
-          + "[gold]Block[/gold]."),
+            "Whenever an [gold]Elemental Reaction[/gold] happens this turn, "
+          + "gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -723,7 +721,8 @@ public sealed class BinaryFormWhitePower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Binary Form: White"),
-        ("description", "Enemies take 50% more damage from reactions."),
+        ("description",
+            "Enemies take 50% more damage from [gold]Elemental Reactions[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -753,8 +752,8 @@ public sealed class BinaryFormDarkPower : PowerModel, ILocalizationProvider
     {
         ("title", "Binary Form: Dark"),
         ("description",
-            "Your [gold]Pyro[/gold] [gold]Attacks[/gold] that react deal "
-          + "{Amount} more damage."),
+            "Your [gold]Pyro[/gold] Attacks that react deal "
+          + "[blue]{Amount}[/blue] additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -795,8 +794,8 @@ public sealed class SacramentalShowerPower : PowerModel, ILocalizationProvider
         ("title", "Sacramental Shower"),
         ("description",
             "The next time an enemy attacks you, deal "
-          + $"{CompanionOverhaulLaw.ShowerDamage} damage and apply "
-          + "[gold]Hydro[/gold] to it first."),
+          + $"[blue]{CompanionOverhaulLaw.ShowerDamage}[/blue] [gold]Hydro[/gold] "
+          + "damage to it first."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -847,9 +846,9 @@ public sealed class BaronBunnyPower : PowerModel, ILocalizationProvider
         ("title", "Baron Bunny"),
         ("description",
             "The next time an enemy attacks you, take "
-          + $"{CompanionOverhaulLaw.BaronBunnyReduction} less damage and deal "
-          + $"{CompanionOverhaulLaw.BaronBunnyDamage} damage and "
-          + "[gold]Pyro[/gold] to ALL enemies."),
+          + $"[blue]{CompanionOverhaulLaw.BaronBunnyReduction}[/blue] less damage and deal "
+          + $"[blue]{CompanionOverhaulLaw.BaronBunnyDamage}[/blue] [gold]Pyro[/gold] "
+          + "damage to ALL enemies."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -912,11 +911,11 @@ public sealed class LightfallSwordPower : PowerModel, ILocalizationProvider
     {
         ("title", "Lightfall Sword"),
         ("description",
-            "Counts its owner's [gold]Attacks[/gold]. When it falls, deals "
-          + $"{CompanionOverhaulLaw.LightfallBase} damage plus "
-          + $"{CompanionOverhaulLaw.LightfallPerAttack} per "
-          + "[gold]Attack[/gold] counted. Falls in {Amount} "
-          + "turn{Amount:plural:|s}."),
+            "Counts its owner's Attacks. When it falls, deals "
+          + $"[blue]{CompanionOverhaulLaw.LightfallBase}[/blue] damage plus "
+          + $"[blue]{CompanionOverhaulLaw.LightfallPerAttack}[/blue] per "
+          + "Attack counted. Falls in [blue]{Amount}[/blue] "
+          + "{Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Debuff;

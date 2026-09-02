@@ -89,10 +89,10 @@ public sealed class TamakushiCasket : CustomRelicModel
     {
         ("title", "Tamakushi Casket"),
         ("description",
-            "The [gold]Bake-Kurage[/gold] is out from the start of every "
-          + "combat. Whenever you apply a debuff to an enemy, it answers with "
-          + "a Hydro hit for " + KokomiOverhaulLaw.CasketStrike + " on that "
-          + "enemy. "
+            "Start each combat with the [gold]Bake-Kurage[/gold]. Whenever "
+          + "you apply a debuff to an enemy, it deals [blue]"
+          + KokomiOverhaulLaw.CasketStrike + "[/blue] [gold]Hydro[/gold] damage "
+          + "to that enemy. "
           + CompanionSlot.RewardSlotDescription),
     };
 
