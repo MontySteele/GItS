@@ -565,8 +565,30 @@ public class KokomiOverhaulRuleTests
         Assert.Equal(10, Il.CallSequence(deck)
             .Count(c => c.StartsWith("ModelDb.Card")));
 
-        var pool = Il.Method("KokomiOverhaulRoster", "OfferablePool");
-        Assert.Equal(28, Il.CallSequence(pool)
+        // EB-284 split the pool in two: `Slice` is the packet's 28 rows and
+        // `OfferablePool` is that plus the Ancient tail below, so the count
+        // the packet states is asked of the list that states it.
+        var slice = Il.Method("KokomiOverhaulRoster", "Slice");
+        Assert.Equal(28, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
+    }
+
+    [Fact]
+    public void The_arm_pool_carries_her_ancient_card()
+    {
+        // `EB-284`. The arm's `FilterThroughEpochs` RETURNS this list and never
+        // reaches the shipped pool, so this list IS `GetUnlockedCards` under
+        // the flag -- and `DustyTome.SetupForPlayer` draws a random
+        // `CardRarity.Ancient` card from exactly that set. Without the tail the
+        // draw is empty and `Darv.GenerateInitialOptions` NREs on room entry,
+        // which is how [USER]'s run ended at the act-two door.
+        //
+        // Structural, because building the models needs `ModelDb`: what is
+        // pinned is that the pool reads the SAME ledger the shipped pool reads
+        // (`tools/lint_ancient_coverage.py` owns the rest of the invariant --
+        // that the ledger is non-empty and every class in it is Ancient).
+        var pool = Il.Method("KokomiOverhaulRoster", "OfferablePool");
+        Assert.Contains("RosterAncientCards.get_Kokomi", Il.Calls(pool));
+        Assert.Contains("KokomiOverhaulRoster.Slice", Il.Calls(pool));
     }
 }

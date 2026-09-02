@@ -67,9 +67,8 @@ internal static class KleeStartingCompanionsPatch
         var supportOk = ReplaceFirst<DuckAndCover>(player, support);
         if (!attackOk || !supportOk)
         {
-            Log.Error($"[{KleeMod.ModId}] could not resolve Klee's "
-                    + "randomized starter Companion slots; keeping any "
-                    + "unreplaced basics.");
+            ReportUnreplaced("could not resolve Klee's randomized starter "
+                           + "Companion slots; keeping any unreplaced basics");
         }
     }
 
@@ -135,10 +134,45 @@ internal static class KleeStartingCompanionsPatch
         // visible in the deck view.
         if (!ReplaceFirst<SayuDarumaGift>(player, support))
         {
-            Log.Error($"[{KleeMod.ModId}] could not resolve Kokomi's "
-                    + "randomized starter Companion slot; keeping the "
-                    + "authored Sayu.");
+            ReportUnreplaced("could not resolve Kokomi's randomized "
+                           + "starter Companion slot; keeping the authored "
+                           + "Sayu");
         }
+    }
+
+    /// <summary>
+    /// EB-284 hygiene. WHY THIS IS AN INFO LINE AND NOT AN ERROR under an
+    /// overhaul arm.
+    ///
+    /// The replacement can only find a slot in the SHIPPED starting deck: it
+    /// matches on the authored basic's exact type (`Kaboom`, `DuckAndCover`,
+    /// `SoloistsSolicitation`, `SayuDarumaGift`). A prototype arm REPLACES the
+    /// whole starter (`KleeOverhaulRoster.StartingDeck` and its Kokomi twin),
+    /// so not one of those types is in the deck and the miss is a
+    /// CONSEQUENCE OF THE ARM rather than a defect -- the rosters' own doc
+    /// comments say so and call the lost companions a real, reported cost.
+    /// `Log.Error` on a by-construction outcome trains a reader to skim the
+    /// error channel, which is the one thing the error channel cannot afford.
+    ///
+    /// Off the arms nothing changes: the miss is still unexplained and still
+    /// an error. NO BEHAVIOUR MOVES either way -- this picks a log level and
+    /// a sentence, and the deck is identical in both branches.
+    /// </summary>
+    private static void ReportUnreplaced(string message)
+    {
+#if PROTOTYPE_CARDS
+        // The arms exist only in a dev build; a release build has no type to
+        // ask and takes the error branch unconditionally, which is right there
+        // because no arm can be on.
+        if (Powers.KleeOverhaul.Enabled || Powers.KokomiOverhaul.Enabled)
+        {
+            Log.Info($"[{KleeMod.ModId}] {message} -- expected: a prototype "
+                   + "overhaul arm is on and has replaced the whole starting "
+                   + "deck, so there is no shipped slot to take.");
+            return;
+        }
+#endif
+        Log.Error($"[{KleeMod.ModId}] {message}.");
     }
 
     /// <summary>
