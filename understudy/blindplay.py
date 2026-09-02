@@ -119,6 +119,23 @@ PLAY_GUARDRAIL = (
 COMBAT_SCREENS = frozenset({"monster", "elite", "boss"})
 SELECT_SCREENS = frozenset({"card_select", "hand_select"})
 
+# `EB-245`. THE OVERLAYS A FIGHT WEARS, and they are not the end of one.
+#
+# The wire's `state_type` changes from `monster` to `card_select` the moment a
+# *Choose one* mode, an Exhaust chooser or a bundle picker opens MID-COMBAT --
+# the fight is still up behind it, the enemies are still standing, and the very
+# next screen is the same board. `Session.run` read its fight boundary off
+# `screen == "combat"` alone, so every such overlay looked like a fight ending
+# and the seat was asked for a FIGHT RECORD in the middle of its turn.
+# `KLEESPARK-W5` sealed FOUR fight records for THREE fights that way, and the
+# phantom one reports a fight that ended while its enemy stood at 44/44.
+#
+# So an overlay is NEITHER a start nor an end: it INHERITS whatever the run was
+# already in. A `card_select` at a rest site inherits "not in a fight" and is
+# still not one, which is why this is the whole rule rather than a special case
+# for combat overlays -- there is no field on the feed that says which it is.
+FIGHT_OVERLAYS = frozenset({"card_select", "hand_select", "bundle_select"})
+
 # Screens that exist and are deliberately NOT driven. Each is TOOL-BLOCKED
 # with its own reason rather than lumped in with the unknown ones, because
 # "this module has no grammar for a minigame" and "the wire returned a screen
@@ -237,7 +254,19 @@ def _despritify(blob: Any) -> Any:
 
 
 def _text(value: Any) -> str:
-    return qa_packet._text(value)
+    """One printed string, with the game's markup folded out (`EB-246`).
+
+    THE DEFECT, IN ONE SENTENCE: a *Choose one* option is named
+    `Spend 6 [gold]Charge[/gold]: gain 12 Block` on the wire, the staged packet
+    folds those tags out through `scenario.card_key` and this page did not, so
+    the same choice had two printed names and a `KLEESPARK-W5` tester had to
+    type `[gold]` to name the thing they were reading. The fold is
+    `qa_packet.strip_markup` -- the SAME object `scenario` uses, not a copy --
+    and it is applied HERE, at the one door every printed value on this page
+    comes through, for the reason `_despritify` gives one screen over: a rule
+    applied in one reader is a rule the next reader somebody adds will miss.
+    """
+    return qa_packet._text(qa_packet.strip_markup(value))
 
 
 def _int(value: Any, default: int = 0) -> int:
@@ -260,8 +289,14 @@ def _fold(text: Any) -> str:
     game's own printed mark for an upgraded card, and folding it away made
     `Coral Guard` and `Coral Guard+` one key, which made both unplayable
     whenever a hand held one of each.
+
+    `EB-246`: the markup goes FIRST, so a tester who echoes a name back with
+    the tags still in it (which is what the W5 tester had to type) folds to the
+    same key as the bare name this page now prints. Without it the tag WORDS
+    survived the punctuation fold -- `[gold]Charge[/gold]` folded to
+    `gold charge gold` -- and the two spellings were two different names.
     """
-    s = str(text or "").casefold()
+    s = qa_packet.strip_markup(text).casefold()
     s = s.replace("—", " ").replace("–", " ").replace("-", " ")
     s = re.sub(r"[^a-z0-9+ ]+", " ", s)
     return " ".join(s.split())
@@ -1599,6 +1634,12 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     # from the next one somebody adds.
     obs = _despritify(obs)
 
+    # `EB-272`: computed over the FINISHED structure, at the same boundary and
+    # for the same reason the sprite tags are rewritten there -- every screen
+    # gets the rule, and a reader added tomorrow gets it for free. After the
+    # sprite pass, so a word inside a rewritten icon tag is read as it prints.
+    obs["keywords"] = keyword_notes(obs)
+
     # The wire's own screen name is the ONE token exempted from the snake_case
     # rule, and only because a refusal has to be able to name what it refused.
     #
@@ -1735,6 +1776,97 @@ AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
              "`(debuff)`, because it is neither: it is the element left "
              "clinging to a body, and it is what an Elemental Reaction needs "
              "-- a hit of a different element consumes it and reacts.*")
+
+
+# `EB-272`. THE ARMS' OWN WORDS, DEFINED ONCE PER SCREEN.
+#
+# THE GAP. Every keyword a SHIPPED face prints has somewhere a player can read
+# it -- `Block` and `Exhaust` are the base game's, `Applies Pyro` and the eight
+# reaction previews are `KleeKeywords`' -- and the words the two live prototype
+# arms invented had nothing at all. Both Kokomi seats in round one worked out
+# what a rule did by watching their own HP; the Casket's `Mend` read as BROKEN
+# at full HP because the entry-HP bound is real and was printed nowhere; the r4
+# Opus seat lost a deliberate free kill because a Mine's damage is shrunk by
+# Weak and no line said so.
+#
+# WHERE THESE SENTENCES COME FROM, AND WHY THEY ARE COPIED RATHER THAN READ.
+# They are `klee-mod/KleeCode/Cards/Prototype/ArmKeywordTips.cs`'s bodies, with
+# the game's `[gold]` markup and the interpolated balance constants folded out
+# -- the mod's own tooltip text, which is what a player hovering the card in
+# the real game reads. They are copied HERE because the wire only ever defines
+# a word on the card that DECLARES it: `Kaboom!` prints *Set off* in its own
+# body while the tip rides on the rows that place a Bomb, an enemy's badge and
+# a reward row print the word with no tip at all, and this page is read by
+# somebody who met the word for the first time three lines up. A page-side
+# table answers all of those; a per-card tip answers one.
+# `test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text` reads the C# and
+# fails the moment a sentence here falls behind it -- the same way
+# `CHARGE_SOURCE_LINE` is held in step from the other side.
+#
+# THE LIVE ARMS ONLY. Klee's overhaul (Bomb, Set off, Spark, Mine) and Kokomi's
+# (Plan, Mend). `Tide`, `Surge` and `Exert` left with the rules they named when
+# R240/R241 replaced the Tide with the Plan, and a page defining a dead word
+# would be teaching a tester a rule this build does not have.
+ARM_KEYWORDS: dict[str, str] = {
+    "Bomb": ("A numbered charge on an enemy. It grows at the start of your "
+             "turn and never goes off by itself. A Bomb placed on an enemy "
+             "that already has one joins it there: the badge shows their "
+             "total, and a single Set off pops them all."),
+    "Set off": ("Every Bomb on the target goes off, one at a time, each a "
+                "Pyro hit for its size, before the rest of the card."),
+    "Spark": ("Some cards cost Sparks instead of energy. No cap; gone at the "
+              "end of combat."),
+    "Mine": ("A Bomb that also goes off when its enemy attacks you, before "
+             "the hit lands. It is the same Pyro hit for its own size, so "
+             "Weak shrinks it exactly as it shrinks a Set off; the enemy's "
+             "badge prints the number."),
+    "Plan": ("Play this on the Bake-Kurage instead and the jellyfish carries "
+             "out the Plan line at the start of your next turn. The cost is "
+             "paid now either way, and planned hits land on the front enemy "
+             "unless the line says every enemy. A card with nothing but a "
+             "Plan line can only be played on the jellyfish, and says so."),
+    "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
+             "with."),
+}
+
+# One pattern per word, and they are CASE-SENSITIVE on purpose: the game
+# capitalises a keyword wherever it prints one, and a case-blind `mine` or
+# `plan` would define a word out of ordinary prose. The plural is the same
+# word (`two Bombs`), and `Set Off` is accepted because a badge title-cases it.
+_ARM_KEYWORD_RE = {
+    "Bomb": re.compile(r"\bBombs?\b"),
+    "Set off": re.compile(r"\bSet [Oo]ffs?\b"),
+    "Spark": re.compile(r"\bSparks?\b"),
+    "Mine": re.compile(r"\bMines?\b"),
+    "Plan": re.compile(r"\bPlans?\b"),
+    "Mend": re.compile(r"\bMends?\b"),
+}
+
+
+def _every_string(blob: Any):
+    """Every string anywhere in a finished observation, values only."""
+    if isinstance(blob, str):
+        yield blob
+    elif isinstance(blob, dict):
+        for value in blob.values():
+            yield from _every_string(value)
+    elif isinstance(blob, list):
+        for value in blob:
+            yield from _every_string(value)
+
+
+def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
+    """The arm keywords this screen prints, each with one definition.
+
+    ONCE PER SCREEN and in the arms' own order, however many faces printed the
+    word -- a definition repeated under every card in a hand is a page a reader
+    stops reading. It is computed over the WHOLE finished observation, so a
+    word that reaches the page through a card's body, an enemy's badge, a
+    power's text, a relic, a potion or a reward row is defined the same way.
+    """
+    hay = "\n".join(_every_string(obs))
+    return [{"name": word, "text": ARM_KEYWORDS[word]}
+            for word, pattern in _ARM_KEYWORD_RE.items() if pattern.search(hay)]
 
 
 def _render_power(power: dict[str, Any], indent: str) -> str:
@@ -2039,6 +2171,13 @@ def render(obs: dict[str, Any]) -> str:
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
 
+    # `EB-272`: one definition per arm keyword the screen printed, once, below
+    # the board and above the grammar -- where a reader who has just met the
+    # word looks next, and where it does not push the board off the top.
+    if obs.get("keywords"):
+        out += ["", "## Words on this screen", ""]
+        out += [f"- **{k['name']}** — {k['text']}" for k in obs["keywords"]]
+
     out += ["", "## What you can say", ""]
     out += [f"- `{c}`" for c in obs["commands"]]
     out += ["", obs["guardrail"], ""]
@@ -2050,6 +2189,21 @@ def render(obs: dict[str, Any]) -> str:
 def observe(state: dict[str, Any]) -> str:
     """A design-blind Markdown render of any screen the wire can return."""
     return render(observation(state))
+
+
+def still_in_fight(obs: dict[str, Any], was_in_fight: bool) -> bool:
+    """Whether the run is inside a fight on THIS screen (`EB-245`).
+
+    A combat screen IS a fight. An overlay a fight can wear inherits the answer
+    from the screen before it, because the feed does not say which side of a
+    fight boundary an overlay is on. Everything else is not a fight, which is
+    where a fight record is owed.
+    """
+    if obs["screen"] == "combat":
+        return True
+    if obs["state_type"] in FIGHT_OVERLAYS:
+        return was_in_fight
+    return False
 
 
 def sha256(text: str) -> str:
@@ -2194,6 +2348,18 @@ def wire_snapshot(state: dict[str, Any], *, index: int, verb: str,
     memory = p.get("kurage_memory")
     if isinstance(memory, dict):
         snap["kurage_memory"] = memory
+    # `EB-273`. THE KOKOMI ARM'S OWN METER, on the same terms as the strip
+    # above and for the same reason. The wire has carried `player.kokomi_plans`
+    # since the Plan build (`vendor/STS2_MCP/gits/GitsKokomiPlan.cs`) and
+    # `kokomi_plans()` puts it on the tester's PAGE -- but the snapshot the
+    # GRADER reads carried none of it, so "the queue was empty when the call
+    # was made" was not a fact a seat run could be asked. The map goes in raw
+    # and unscrubbed (the page's reading drops the pet's entity id; a grader is
+    # entitled to the id a play aimed at), and an absent key stays absent: no
+    # Plan rule in this build is a different fact from an empty queue.
+    plans = p.get("kokomi_plans")
+    if isinstance(plans, dict):
+        snap["kokomi_plans"] = plans
     return snap
 
 
@@ -2339,6 +2505,12 @@ def _is_upgraded(entry: dict[str, Any]) -> bool:
     return bool(entry.get("is_upgraded") or entry.get("upgraded"))
 
 
+# `EB-271`: a trailing `(2)` on a name the tester typed. `_number_names` only
+# ever appends this shape, so stripping it back off is exact rather than a
+# guess at what a bracketed number might have meant.
+_STALE_NUMBER = re.compile(r"\s*\((\d+)\)\s*$")
+
+
 def _match(entries: list[dict[str, Any]], name: str, *,
            key: Callable[[dict[str, Any]], str],
            face: Callable[[dict[str, Any]], str] | None = None,
@@ -2382,6 +2554,30 @@ def _match(entries: list[dict[str, Any]], name: str, *,
         return -1, "no name given"
     exact = [i for i, p in enumerate(printed) if _fold(p) == want]
     loose = [i for i, p in enumerate(printed) if want in _fold(p)]
+    if not (exact or loose):
+        # `EB-271`, FOUND LIVE. A NUMBER IS A PLACE IN A LIST, AND THE LIST
+        # MOVES. `_number_names` numbers a title only while it repeats, so the
+        # moment one of two `Duck and Cover` copies is played the survivor is
+        # printed bare and `play "Duck and Cover (1)"` -- the name the page was
+        # printing one screen earlier, and the name the tester had just typed
+        # once -- answered "nothing here is called that". `HAND_REPEAT_NOTE`
+        # tells a reader the number is re-counted per screen; that is true and
+        # it is not a reason to refuse a name that can only mean one thing.
+        #
+        # So a stale number is ACCEPTED WHEN ONE COPY REMAINS, and only then:
+        # the suffix comes off and the bare name has to resolve to EXACTLY ONE
+        # entry. With two copies still on the screen `(3)` is genuinely
+        # ambiguous and falls through to the refusal below, which advertises
+        # the numbered names that would have worked.
+        bare = _STALE_NUMBER.sub("", name).strip()
+        if bare and bare != name:
+            want_bare = _fold(bare)
+            again = ([i for i, p in enumerate(printed)
+                      if _fold(p) == want_bare]
+                     or [i for i, p in enumerate(printed)
+                         if want_bare and want_bare in _fold(p)])
+            if len(again) == 1:
+                name, want, exact = bare, want_bare, again
     hits = exact or loose
     if want_upgraded is not None:
         def _wanted(idx: list[int]) -> list[int]:
@@ -2480,6 +2676,19 @@ def _card_face_key(entry: dict[str, Any]) -> str:
     return f"{c['title']}|{c['cost']}|{c['upgraded']}|{c['text']}"
 
 
+# The wire's `target_type` spellings, split by what the BRIDGE does with each.
+#
+# `EB-269`. `ExecuteUsePotion` (`vendor/STS2_MCP/McpMod.Actions.cs:287-306`) is
+# the authority and it is a `switch` on `potion.TargetType`: `AnyEnemy` REFUSES
+# a post with no `target`, while `Self` / `AnyAlly` / `AnyPlayer` resolve the
+# target to the player's own creature and anything else resolves it to nothing.
+# So an aimed potion has to be aimed before it is posted and a self-aimed one
+# must not carry a target at all -- and a card follows the same table, which is
+# why `_play` reads the aimed set from here rather than spelling its own copy.
+AIMED_TARGETS = frozenset({"anyenemy", "enemy", "singleenemy", "targetenemy"})
+SELF_TARGETS = frozenset({"self", "anyally", "anyplayer"})
+
+
 def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     """`(entity id, refusal)` for an enemy named the way the screen names it."""
     enemies = _enemies(state)
@@ -2542,8 +2751,7 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
         post["target"] = pet
         printed["target"] = (_combat(state)["plans"]["pet_name"])
         return Resolution(True, "play", post, printed)
-    needs_target = str(entry.get("target_type") or "").lower() in (
-        "anyenemy", "enemy", "singleenemy", "targetenemy")
+    needs_target = str(entry.get("target_type") or "").lower() in AIMED_TARGETS
     if cmd.target or needs_target:
         eid, why = _resolve_enemy(state, cmd.target)
         if not eid:
@@ -2557,20 +2765,53 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
 
 
 def _use_potion(state: dict[str, Any], cmd: Command) -> Resolution:
+    """`use potion "<title>" [on "<enemy>"]`, resolved against the belt.
+
+    `EB-269`, AND THE DEFECT WAS THE SLOT NUMBER. `BuildPlayerState` walks
+    `player.PotionSlots` and SKIPS the empty ones while numbering every slot it
+    walks past (`McpMod.StateBuilder.cs:1274-1292`), so each row carries its own
+    `slot` and the list position stops agreeing with it the moment a potion is
+    spent out of an earlier slot. This function posted the LIST POSITION. On the
+    r2 Opus run that is exactly what happened: the Energy Potion in slot 0 was
+    drunk, the Dexterity Potion in slot 1 became the only row and therefore list
+    index 0, and every `use potion "Dexterity Potion"` for the rest of the run
+    posted `slot: 0` -- an empty slot -- and was answered `No potion in slot 0`.
+    Three attempts, three failures, on two screens, with a full Skill Potion as
+    the seat's last out on the turn it died. The slot is the wire's own number
+    now, and the list position is only the fallback for a feed that sends none.
+
+    THE TARGET IS THE POTION'S OWN, and the table is `ExecuteUsePotion`'s. An
+    `AnyEnemy` potion is refused by the bridge with no `target`, so it is aimed
+    HERE where the refusal can name the enemies instead of coming back as a
+    bare word; a `Self` / `AnyAlly` / `AnyPlayer` potion is resolved to the
+    player by the bridge whatever is sent, so nothing is sent -- and a tester
+    who aimed one anyway is told it went on them rather than being refused for
+    a mistake with no consequence.
+    """
     potions = _potions(state)
     if not potions:
         return _refuse("you are not carrying any potions")
     idx, why = _match(potions, cmd.name, key=lambda p: _text(p.get("name")))
     if idx < 0:
         return _refuse(why)
-    post: dict[str, Any] = {"action": "use_potion", "slot": idx}
-    printed = {"potion": _text(potions[idx].get("name"))}
-    if cmd.target:
+    entry = potions[idx]
+    slot = entry.get("slot")
+    post: dict[str, Any] = {"action": "use_potion",
+                            "slot": slot if isinstance(slot, int) else idx}
+    printed = {"potion": _text(entry.get("name"))}
+    aim = str(entry.get("target_type") or "").strip().lower()
+    if aim in SELF_TARGETS:
+        printed["target"] = "yourself"
+        return Resolution(True, "use potion", post, printed)
+    if aim in AIMED_TARGETS or cmd.target:
         eid, why = _resolve_enemy(state, cmd.target)
         if not eid:
             return _refuse(why)
         post["target"] = eid
-        printed["target"] = cmd.target
+        printed["target"] = next(
+            (n for e, n in zip(_enemies(state), _number_names(
+                [_text(x.get("name")) for x in _enemies(state)]))
+             if _entity_id(e) == eid), cmd.target)
     return Resolution(True, "use potion", post, printed)
 
 
@@ -3355,7 +3596,7 @@ class Session:
                                   blocked=obs["blocked"],
                                   observation_sha256=page_sha)
 
-            was_in_fight, in_fight = in_fight, obs["screen"] == "combat"
+            was_in_fight, in_fight = in_fight, still_in_fight(obs, in_fight)
             if was_in_fight and not in_fight and self.actions:
                 # SAME REASONING AS THE RUN RECORD BELOW (b0de780): a seat that
                 # cannot answer at a fight boundary must not take the fight
@@ -3505,14 +3746,24 @@ class Session:
 def _result_line(result: Any) -> str:
     """The wire's answer to a POST, in the tester's vocabulary.
 
-    Only the game's own `message` and `status` cross back -- a full state dump
-    would carry ids, and the next observation is where the board is read
-    anyway. Scrubbed like everything else.
+    Only the game's own `message`, `error` and `status` cross back -- a full
+    state dump would carry ids, and the next observation is where the board is
+    read anyway. Scrubbed like everything else.
+
+    `EB-269`, THE HALF THAT MADE THE DEFECT INVISIBLE. The bridge writes a
+    refusal's reason under `error`, never `message`
+    (`vendor/STS2_MCP/McpMod.Helpers.cs:158-161`), and this line read `status`
+    and `message` only -- so EVERY refusal the game gave reached the tester as
+    the single word `error` with the sentence dropped on the floor. The r2 Opus
+    seat had to report a potion that "cannot be used" three times over because
+    the game had said `No potion in slot 0` three times and nobody was carrying
+    it across. A refusal is words now, which is the row's own next action.
     """
     if not isinstance(result, dict):
         return ""
     text = " ".join(x for x in (_text(result.get("status")),
-                                _text(result.get("message"))) if x)
+                                _text(result.get("message")),
+                                _text(result.get("error"))) if x)
     leaks = qa_packet.leaks(text)
     if leaks:
         return "(the game answered with something this tool will not repeat)"
