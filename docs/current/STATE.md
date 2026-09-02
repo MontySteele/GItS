@@ -100,11 +100,10 @@ Slay the Spire 2 **v0.111.0**, commit `41cef1ea`, buildid `24724944`, appid
 v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
-`+proto` dev mark beside it (R217 D). The **installed build is
-`0.2.2083+proto.dirty`** (2026-09-02, main `3f6157c0`), a dev package carrying
-the three prototype arms behind `-p:PrototypeCards=true`; the **last RELEASE
-package deployed is `0.2.1357`** (2026-08-29). Pin history and the per-build narrative:
-[`workstreams.md`](workstreams.md).
+`+proto` dev mark (R217 D). **Installed: `0.2.2136+proto.dirty`** (2026-09-02,
+main `4da69fe5`), the three prototype arms behind `-p:PrototypeCards=true`; the
+Furina arm needs `-p:FurinaReframe=true` too and ships OFF. **Last RELEASE
+package: `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
 
 ## Systems
 
@@ -112,18 +111,20 @@ Depth for each is in [`atlas/`](atlas/); these are one line apiece.
 
 - **tier0 combat kernel** — ops, powers, statuses, reactions, resources; 7-axis
   scorecard anchored at `(ref_ironclad, starter) = 3.0`, frozen battery.
-  **No axis value gates anything (R204)** — they are reportable diagnostics.
-- **tier0.5 run sim + drafter** — run model, acts, runner, draft, and the real
-  StS2 16-floor map/route policy.
+  **No axis value gates anything (R204).** Prototype twins beside it:
+  `tier0/engine/kokomi_plan.py` and `tier0/engine/klee_overhaul.py`.
+- **tier0.5 run sim + drafter** — run model, acts, runner, draft, the real
+  StS2 16-floor map; the drafter prices Plan lines under the instrument dial
+  `PLAN_DELAY_DISCOUNT` (EB-311, shipped scores byte-identical).
 - **understudy** — the bot playtest bridge driving the real game (Guardrail-7,
-  no-fun rule), plus the targeted-scenario harness and the `GitsDebugState`
-  board-setup door, attended only.
+  no-fun rule), two lanes beside [USER]'s game (`--lane 1` / `--lane 2`), the
+  local Qwen seat (`GITS_LOCAL_PLAY_TOKENS=12000`), and the scenario harness.
 - **klee-mod** — the C# character mod (`KleeCode/`), the PCK build/deploy
-  pipeline, and a headless C# test project. Co-op's automated backstop is
-  partial: transport and anything needing a live `CombatState` is play-only.
+  pipeline, a headless C# test project; co-op's automated backstop is partial.
 - **vendor STS2_MCP bridge** — the wire contract the understudy speaks.
   **art pipeline** — `ImageGen/` art staged into the roster mod and packed by
-  `tools/build_pck.ps1`.
+  `tools/build_pck.ps1`. **Player-facing text** has measured ceilings and a
+  lint (`docs/current/text-conventions.md`).
 
 ## Active workstreams
 
@@ -132,41 +133,31 @@ are in [`workstreams.md`](workstreams.md).
 
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
-- **Klee** — the overhaul is at Prototype round 5, the R242 starter, played
-  by the Opus and local seats on lanes 1 and 2; the packet applies growth 5
-  and puts Ka-pow!'s Retain, Dig In and the round-six play to [USER] (PR
-  #292). The prototype balance pass (twelve D defaults on both arms, read
-  `review/records/balance-read-prototype-2026-09-02.md`) is being built;
-  `EB-311` to `EB-314` are its and round five's rows.
-- **Kokomi** — the OVERHAUL is at Prototype round 3 on draft 6, *the Plan*
-  (brief R241): the Bake-Kurage is a pet, a card played on it writes its Plan
-  line. [USER]'s act-1 run passed the rules gate (R243); round three
-  (`review/ruled/kokomi-overhaul-round-3-2026-09-02.md`) files the casket
-  and morning legibility rows (`EB-316`, `EB-317`); the acts-2/3 depth is
-  the Plan cards' own design, no momentum rule (R243). The sim twin runs
-  beside the C#
-  (`tier0/engine/kokomi_plan.py`), its drafter prices Plan lines only once
-  `EB-311` lands; the Kurage memory is base kit behind `C.KURAGE_MEMORY`
-  (`EB-198`, `EB-234`).
-- **Seats** — two lanes beside [USER]'s game (`--lane 1` / `--lane 2`,
-  `GITS_LANE`), proven twice on 2026-09-02; the local Qwen seat is
-  live-proven (needs `GITS_LOCAL_PLAY_TOKENS=12000`); a teardown leaves the
-  shared bridge in place (`EB-310`, met live). Player-facing text now has
-  measured ceilings and a lint (`docs/current/text-conventions.md`, PR #291);
-  the shipped-sheet proposal is [USER]'s
-  (`review/active/text-conventions-shipped-2026-09-02.md`).
-- **Furina** — the reframe is countersigned (R220 A), slice 1 is built in the
-  sim behind five flags that all ship OFF, and the C# arm is deferred.
+- **Klee** — Prototype round 6 is installed: the R242 starter with R243's
+  numbers (growth 4, Ka-pow! Retain, the Sparks 'n' Splash echo, the base
+  Strike applying nothing) and the Plan/Bomb upgrade pass (EB-315). The
+  Fable card audit (PR #302)
+  is the next build; the seats then play three acts before [USER] does.
+- **Kokomi** — Prototype round 3 on draft 6, *the Plan* (brief R241), the
+  rules gate passed on [USER]'s act-1 run (R243). Installed with the same
+  build; the casket and morning legibility rows (`EB-316`, `EB-317`) and the
+  Fable card audit (PR #303) are next; the acts-2/3 depth is the Plan cards'
+  own design, no momentum rule. The Kurage memory is base kit behind
+  `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
+- **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
+  sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF; no
+  card rows exist for it yet.
 - **Companion cards** — R234 ruled the slate whole, Mondstadt first, in
-  parallel; `EB-249` / `EB-250` / `EB-251` are what it owes.
+  parallel; `EB-249` / `EB-250` / `EB-251` are what it owes; Itto and Gorou's
+  rate are noted there from the round-5 and act-1 reads.
+- **Repo debt** — the deploy gate, the push hook, derived register ids and
+  the agent rituals as scripts and skills are being built (2026-09-02).
 - **Deferred content families** — `Win10` and `Win11`, both FROZEN by R213.
-- **Also live** — funnel throughput (R221), enemy remapping, the Furina and
-  Kokomi art passes, animation sprint 2, the axis-validity Track A / E logs.
 
 ## Open [USER] pile
 
 Every open row is in [`QUEUE.md`](QUEUE.md) and owned by [USER] — Kokomi's two,
-`M69`, the art eyes-on pile and `M45`'s five. **No prototype-slice row is
-open**, and how the pile emptied is in [`workstreams.md`](workstreams.md). The
-nine blessed mechanisms are in [`watch-register.md`](watch-register.md): `W9`
-has FIRED and is back with [USER] as `M69`, the other eight are dormant.
+`M69`, the art eyes-on pile and `M45`'s five; the text-conventions shipped
+proposal (`review/active/text-conventions-shipped-2026-09-02.md`) carries four
+more. The nine blessed mechanisms are in [`watch-register.md`](watch-register.md):
+`W9` has FIRED and is back with [USER] as `M69`, the other eight are dormant.
