@@ -245,10 +245,13 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R233 | 2026-08-30 | landed: the countersign batch, three revised slates signed as one | `0fb6417` |
 | R234 | 2026-08-30 | landed: the companion-cards slate ruled whole, and the program runs parallel | `630234b` |
 | R235 | 2026-08-31 | landed: Klee's two Personal Companion faces signed on all six defaults | `3ec41b7` |
+| R236 | 2026-09-01 | the Mondstadt and Inazuma companion workshops, ruled and moved to review/ruled | `cd532fd` |
+| R237 | 2026-09-01 | [USER]'s Klee run rules round one; starter draft 3, six rows EB-279 to EB-284 | `c49685f` |
+| R240 | 2026-09-02 | STATE: Klee at Prototype round 3, Kokomi back to the brief under R240 | `027f77d` |
 
-234 rows over the R1..R235 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 123 from a commit message, 0 unresolved.
+237 rows over the R1..R241 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 126 from a commit message, 0 unresolved.
 
-1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
+4 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28, R238-R239, R241.
 
 Ledger retrieval point: `3907837` (tag `pre-simplification-2026-08-06`); ledger paths `tier0/DECISIONS.md`, `tier0/DECISIONS-archive-R39-R99.md`, `klee-mod/DECISIONS.md`.
 
