@@ -1,9 +1,0 @@
-{
-  "_note": "Control for s03-mixed-fight: every turn degraded, so the whole Encore column is 0. This is the shape _encore_unseen() was written to catch.",
-  "fight_id": "s03-allzero",
-  "meters_by_turn": [
-    [1, 5, 1, 3, 0],
-    [2, 7, 1, 3, 0],
-    [3, 9, 2, 3, 0]
-  ]
-}

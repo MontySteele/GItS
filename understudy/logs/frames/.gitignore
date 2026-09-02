@@ -1,7 +1,0 @@
-# Window captures and their manifest: per-machine MATERIAL, never repo content.
-# Same rule and the same reason as art/g12_captures/ and art/eb52_captures/ --
-# a frame of the running game has Tier F art in it, and committing one
-# distributes exactly what principles section 9 refuses to. Cite frames by path
-# from a review packet, the way the live-game capture packets already do.
-*
-!.gitignore

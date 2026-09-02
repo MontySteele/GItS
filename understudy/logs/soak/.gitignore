@@ -1,7 +1,0 @@
-# Soak output: per-machine run logs, telemetry and reversibility ledgers.
-# Not evidence anyone else can reproduce -- the seeds are read-back (R95) and
-# the game dir is local -- so nothing here is committed. The Phase-0 decision
-# log one level up IS the instrument of a published measurement and IS
-# committed. Schema: understudy/README.md, "Telemetry schema".
-*
-!.gitignore

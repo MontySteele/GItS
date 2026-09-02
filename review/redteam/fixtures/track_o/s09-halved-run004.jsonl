@@ -1,3 +1,0 @@
-{"record": "run_begin", "character": "KLEEMOD-FURINA", "policy": "policy_v1", "commit": null, "dials": {}, "run": 4, "seed": null, "ts": 0}
-{"record": "defect", "kind": "unexpected_start_state", "detail": "expected a menu at run start, found 'rewards'", "seed": null, "run": 4, "act": 1, "floor": 4, "state_type": "rewards", "actions_taken": 0, "proc_exit_code": null, "state_dump": {"state_type": "rewards"}, "recent": [], "ts": 0}
-{"record": "run_end", "outcome": "defect", "detail": "unexpected_start_state: expected a menu at run start, found 'rewards'", "seed": null, "run": 4, "actions": 0, "wall_s": 0.3, "fights": 0, "final_act": null, "final_floor": null, "defects": 1, "forced_defaults": 0, "log": "x", "ts": 0}

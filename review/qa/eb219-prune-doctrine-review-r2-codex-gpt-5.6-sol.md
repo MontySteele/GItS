@@ -1,7 +1,0 @@
-1. ARM A — FOLLOWS. CLAUSE: LAW:145. RISK: None.
-
-2. ARM B — FOLLOWS. CLAUSES: D3, D4. RISK: None.
-
-3. ARM C — FOLLOWS. CLAUSES: D7, D9. RISK: None.
-
-4. ARM D — FOLLOWS. CLAUSES: D2, D4. The derivation holds. RISK: None.
