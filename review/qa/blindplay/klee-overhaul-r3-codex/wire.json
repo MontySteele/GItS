@@ -1,0 +1,7627 @@
+{
+ "session_id": "20260902-053744",
+ "snapshots": [
+  {
+   "index": 1,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "verb": "play",
+   "command": "play \"Dig In\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 14,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DIG_IN",
+     "card_name": "Dig In",
+     "before": 1,
+     "price_paid": 1,
+     "gains": {},
+     "after": 0,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_DIG_IN",
+       "delta": -1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "verb": "play",
+   "command": "play \"Kaboom!\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 8,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 14,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 8,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 4,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 8,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 6,
+   "verb": "play",
+   "command": "play \"Kaboom!\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1,
+     "FRAIL_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!+",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 5,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "verb": "play",
+   "command": "play \"Pop!+\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1,
+     "FRAIL_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!+",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1,
+     "FRAIL_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 3,
+     "FRAIL_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 6,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 10,
+   "verb": "play",
+   "command": "play \"Ka-pow! (1)\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 3,
+     "FRAIL_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 6,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 11,
+   "verb": "play",
+   "command": "play \"Pop!+\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!+",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 46,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 12,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 46,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 13,
+   "verb": "play",
+   "command": "play \"Dig In\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 32,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DIG_IN",
+     "card_name": "Dig In",
+     "before": 1,
+     "price_paid": 1,
+     "gains": {},
+     "after": 0,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_DIG_IN",
+       "delta": -1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 14,
+   "verb": "play",
+   "command": "play \"Kaboom!\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 8,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 32,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DIG_IN",
+     "card_name": "Dig In",
+     "before": 1,
+     "price_paid": 1,
+     "gains": {},
+     "after": 0,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_DIG_IN",
+       "delta": -1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 15,
+   "verb": "play",
+   "command": "play \"Duck and Cover\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 8,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 4,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 26,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DIG_IN",
+     "card_name": "Dig In",
+     "before": 1,
+     "price_paid": 1,
+     "gains": {},
+     "after": 0,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_DIG_IN",
+       "delta": -1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 16,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 13,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [],
+   "piles": {
+    "draw": 6,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 26,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DIG_IN",
+     "card_name": "Dig In",
+     "before": 1,
+     "price_paid": 1,
+     "gains": {},
+     "after": 0,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_DIG_IN",
+       "delta": -1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 17,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 26,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DIG_IN",
+     "card_name": "Dig In",
+     "before": 1,
+     "price_paid": 1,
+     "gains": {},
+     "after": 0,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_DIG_IN",
+       "delta": -1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 18,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 26,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DIG_IN",
+     "card_name": "Dig In",
+     "before": 1,
+     "price_paid": 1,
+     "gains": {},
+     "after": 0,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_DIG_IN",
+       "delta": -1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 19,
+   "verb": "play",
+   "command": "play \"Duck and Cover (1)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 13,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 20,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 13,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 21,
+   "verb": "play",
+   "command": "play \"Powder Charge\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "name": "Powder Charge",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 10,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      },
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "card_name": "Powder Charge",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {},
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_POWDER_CHARGE",
+       "delta": -1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 22,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 10,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      },
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 10,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 23,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!+",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 24,
+   "verb": "play",
+   "command": "play \"Pop!+\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!+",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 25,
+   "verb": "play",
+   "command": "play \"Duck and Cover (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 26,
+   "verb": "play",
+   "command": "play \"Duck and Cover (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 27,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 10,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 4,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 28,
+   "verb": "play",
+   "command": "play \"Ka-pow!+\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "WEAK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "name": "Powder Charge",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!+",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 2,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 29,
+   "verb": "play",
+   "command": "play \"Powder Charge\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "WEAK_POWER": 1,
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "name": "Powder Charge",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 2,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 18,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "card_name": "Powder Charge",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {},
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_POWDER_CHARGE",
+       "delta": -1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 30,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "WEAK_POWER": 1,
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 2,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 18,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "card_name": "Powder Charge",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {},
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_POWDER_CHARGE",
+       "delta": -1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 31,
+   "verb": "play",
+   "command": "play \"Kaboom!\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "WEAK_POWER": 1,
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 2,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 7,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "card_name": "Powder Charge",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {},
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_POWDER_CHARGE",
+       "delta": -1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 32,
+   "verb": "play",
+   "command": "play \"Dig In\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "WEAK_POWER": 1,
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    }
+   ],
+   "piles": {
+    "draw": 2,
+    "discard": 9,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 3,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "card_name": "Powder Charge",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {},
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_POWDER_CHARGE",
+       "delta": -1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    },
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DIG_IN",
+     "card_name": "Dig In",
+     "before": 3,
+     "price_paid": 1,
+     "gains": {},
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_DIG_IN",
+       "delta": -1,
+       "bank_before": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 33,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 59,
+   "max_hp": 62,
+   "block": 8,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "WEAK_POWER": 1,
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [],
+   "piles": {
+    "draw": 2,
+    "discard": 10,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 3,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "card_name": "Powder Charge",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {},
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_POWDER_CHARGE",
+       "delta": -1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    },
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DIG_IN",
+     "card_name": "Dig In",
+     "before": 3,
+     "price_paid": 1,
+     "gains": {},
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_DIG_IN",
+       "delta": -1,
+       "bank_before": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 34,
+   "verb": "play",
+   "command": "play \"Kaboom! (1)\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 56,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_FWOOSH",
+     "name": "Fwoosh!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "name": "Powder Charge",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!+",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 3,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 35,
+   "verb": "play",
+   "command": "play \"Ka-pow!+\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 56,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "name": "Run Away!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!+",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "name": "Powder Charge",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 36,
+   "verb": "play",
+   "command": "play \"Kaboom!\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 56,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "name": "Run Away!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "name": "Powder Charge",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 16,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 37,
+   "verb": "play",
+   "command": "play \"Run Away!\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 56,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "name": "Run Away!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "name": "Powder Charge",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 10,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "card_name": "Run Away!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 38,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 56,
+   "max_hp": 62,
+   "block": 3,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "name": "Powder Charge",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 10,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "card_name": "Run Away!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 39,
+   "verb": "play",
+   "command": "play \"Pop!+\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!+",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_FWOOSH",
+     "name": "Fwoosh!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 10,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "card_name": "Run Away!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 40,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_FWOOSH",
+     "name": "Fwoosh!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 10,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "card_name": "Run Away!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 41,
+   "verb": "play",
+   "command": "play \"Duck and Cover (1)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_FWOOSH",
+     "name": "Fwoosh!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 10,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "card_name": "Run Away!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 42,
+   "verb": "play",
+   "command": "play \"Duck and Cover\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 3,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_FWOOSH",
+     "name": "Fwoosh!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 10,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "card_name": "Run Away!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 43,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 6,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_FWOOSH",
+     "name": "Fwoosh!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 9,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 10,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "card_name": "Run Away!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 44,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 37,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 10,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "card_name": "Run Away!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 45,
+   "verb": "play",
+   "command": "play \"Kaboom!\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 37,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 3,
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "card_name": "Run Away!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 46,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 37,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 3,
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DIG_IN",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 21,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "card_name": "Run Away!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 47,
+   "verb": "play",
+   "command": "play \"Ka-pow!+\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 37,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 2,
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!+",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_FWOOSH",
+     "name": "Fwoosh!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "name": "Run Away!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 21,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 48,
+   "verb": "play",
+   "command": "play \"Kaboom!\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 37,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 2,
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_FWOOSH",
+     "name": "Fwoosh!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "name": "Run Away!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 1,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 11,
+     "meter": "spark",
+     "turn": 4,
+     "card": "KLEEMOD-PROTO_KO_KABOOM",
+     "card_name": "Kaboom!",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 49,
+   "verb": "play",
+   "command": "play \"Fwoosh!\"",
+   "state_type": "monster",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 37,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 2,
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_FWOOSH",
+     "name": "Fwoosh!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "name": "Run Away!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 12,
+     "meter": "spark",
+     "turn": 4,
+     "card": "KLEEMOD-PROTO_KO_FWOOSH",
+     "card_name": "Fwoosh!",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_FWOOSH",
+       "delta": -1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 50,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 37,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 2,
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_RUN_AWAY",
+     "name": "Run Away!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 14,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 51,
+   "verb": "play",
+   "command": "play \"Powder Charge\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 5,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 37,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 1,
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "name": "Powder Charge",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!+",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_FWOOSH",
+     "name": "Fwoosh!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 14,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "16",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 13,
+     "meter": "spark",
+     "turn": 5,
+     "card": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
+     "card_name": "Powder Charge",
+     "before": 3,
+     "price_paid": 1,
+     "gains": {},
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_POWDER_CHARGE",
+       "delta": -1,
+       "bank_before": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 52,
+   "verb": "play",
+   "command": "play \"Pop!+\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 5,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 37,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 1,
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!+",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_FWOOSH",
+     "name": "Fwoosh!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 14,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "16",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 14,
+     "meter": "spark",
+     "turn": 5,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!+",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 53,
+   "verb": "play",
+   "command": "play \"Fwoosh!\"",
+   "state_type": "monster",
+   "turn": 5,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 37,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "FRAIL_POWER": 1,
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_FWOOSH",
+     "name": "Fwoosh!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 14,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "16",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 15,
+     "meter": "spark",
+     "turn": 5,
+     "card": "KLEEMOD-PROTO_KO_FWOOSH",
+     "card_name": "Fwoosh!",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_FWOOSH",
+       "delta": -1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
