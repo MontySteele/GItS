@@ -45,7 +45,7 @@ public sealed class ProtoKkCoralBulwark : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Coral Bulwark"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] and apply 1 [gold]Weak[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Gain 8 [gold]Block[/gold] and apply 1 [gold]Weak[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,7 +54,7 @@ public sealed class ProtoKkCoralBulwark : CustomCardModel, ICharacterCard, IPlan
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Block, 6, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Block, 8, KokomiPlan.Aim.Self),
             new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, 1, KokomiPlan.Aim.FrontEnemy),
         };
 

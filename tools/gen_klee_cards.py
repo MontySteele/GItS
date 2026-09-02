@@ -1482,13 +1482,13 @@ APPLY_POWERS = {
     "ko_bomb_growth_up": ("ExplosivesWorkshopGrowthPower", None,
         "At the start of your turn, your [gold]Bombs[/gold] grow by {X} more."),
     "ko_alices_recipe": ("AlicesRecipePower", None,
-        "Your [gold]Bombs[/gold] grow by 4 instead of 2."),
+        "Your [gold]Bombs[/gold] grow twice each turn."),
     "ko_chained_reactions": ("ChainedReactionsPower", None,
         "Whenever one of your [gold]Bombs[/gold] goes off, place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
-    "ko_end_turn_set_off": ("EndOfTurnSetOffPower", None,
-        "At the end of your turn, [gold]Set off[/gold] a random enemy's "
-        "[gold]Bombs[/gold]."),
+    "ko_start_turn_set_off": ("StartOfTurnSetOffPower", None,
+        "At the start of your turn, after your [gold]Bombs[/gold] grow, "
+        "[gold]Set off[/gold] a random enemy's [gold]Bombs[/gold]."),
     "ko_bomb_reaction_spark": ("BombReactionSparkPower", None,
         "Whenever one of your [gold]Bombs[/gold] triggers an "
         "[gold]Elemental Reaction[/gold], gain {X} extra [gold]Spark[/gold]."),

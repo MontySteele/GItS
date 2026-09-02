@@ -358,7 +358,9 @@ public class KleeOverhaulRoundThreeTests
         // the row that carries the `set_off`-hit clause is now Fwoosh!.
         AssertUpgradeMoves<ProtoKoFwoosh>("Damage", 5m, 8m);
         AssertUpgradeMoves<ProtoKoPop>("BombSize", 5m, 7m);
-        AssertUpgradeMoves<ProtoKoChainFuse>("Grow", 3m, 4m);
+        // Chain Fuse grows by 6 since the 2026-09-02 balance pass; the
+        // upgrade's +1 rides the new base, which is that pass's own rule.
+        AssertUpgradeMoves<ProtoKoChainFuse>("Grow", 6m, 7m);
         // The Mend clause, on draft 6's carrier. `Tide` left this pin with the
         // verb it read: the rule's key list is written over OPS, so retiring
         // `gain_tide` retired the delta and nothing here had to be re-decided.

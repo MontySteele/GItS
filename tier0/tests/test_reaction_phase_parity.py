@@ -799,6 +799,24 @@ CO_TENANCY_LEDGER = {
             "The brief's own script C requires the later hook -- its turn 2 "
             "opens on FIVE energy, which is three plus the Plan's two. The "
             "reading is recorded in full on the method",
+        ("Powers/Prototype/KleeOverhaulPowers.cs", "StartOfTurnSetOffPower"):
+            "QUARANTINED (the Klee overhaul). Sparks 'n' Splash, the ONE "
+            "power in the slice that fires without a card saying so -- rule 7 "
+            "names her Rare as the one allowed explosion source. MOVED HERE "
+            "FROM BeforeSideTurnEnd by the 2026-09-02 balance pass, and the "
+            "broadcast IS the card's printed 'after your Bombs grow': growth "
+            "runs in ProtoBombPower.BeforeSideTurnStart, which "
+            "TURN_START_BROADCAST_ORDER above puts strictly earlier, so no "
+            "tenant of either broadcast can reverse the order the card "
+            "prints. THE ORDERING QUESTION, answered: it sets off one random "
+            "enemy's overhaul Bombs, which is damage plus a Spark plus the "
+            "overhaul ledger's counters. The one co-tenant that reads that "
+            "ledger is GroundedPower below, and it reads SetOffLastTurn -- a "
+            "number this power cannot move: the roll to this round happens on "
+            "the first KleeOverhaulLedger.For of the turn, whichever tenant "
+            "asks first, and every explosion after it lands in "
+            "SetOffThisTurn. The Bomb piles and the Spark bank are shared "
+            "with no other tenant here",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "GroundedPower"):
             "QUARANTINED (the Klee overhaul). Raw per-turn Block mint on a "
             "condition, the same shape as MetallicizePower below. THE "
@@ -918,15 +936,6 @@ CO_TENANCY_LEDGER = {
             "there is nothing here to model",
     },
     "BeforeSideTurnEnd": {
-        ("Powers/Prototype/KleeOverhaulPowers.cs", "EndOfTurnSetOffPower"):
-            "QUARANTINED (the Klee overhaul). Sparks 'n' Splash, the ONE "
-            "power in the slice that fires without a card saying so -- the "
-            "brief's own 'Breaks rule 7'. THE ORDERING QUESTION, answered: it "
-            "sets off one random enemy's overhaul Bombs, which is damage plus "
-            "a Spark plus the ledger's counters, and no co-tenant of this "
-            "broadcast reads any of the three. It shares the Spark bank with "
-            "nothing here (the kit-grant check reads the BURST meter) and the "
-            "overhaul Bomb pile with nothing at all",
         ("Powers/CompanionPowers.cs", "SolarIsotomaPower"):
             "duration tick-down of itself, player side",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):

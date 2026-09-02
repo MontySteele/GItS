@@ -64,7 +64,7 @@ few Companions.
 | Alice's Recipe | Bombs grow by 4 instead of 3, 1 energy | Bombs grow twice each turn, 2 energy | It was Explosives Workshop's twin at Rare and strictly weaker (a second Workshop reaches 5; a second Recipe still reads 4). Doubling growth is the Rare; Workshop stays the stacking +1. |
 | Careful Arrangement | merge onto one enemy, grows by 2 | grows by 5 | +2 for 1 energy was the weakest line on the sheet; the merge is the card's point and it now pays close to Chain Fuse for setting up the big cash. |
 | Sorry, Jean... | 1 energy | 0 energy | Ka-pow! cashes a Bomb for damage for free; paying 1 to cash it for Block instead made the safe play the expensive one. Free, it is Ka-pow!'s defensive twin, and it still forfeits the Spark, since the Bomb is removed rather than set off. |
-| Sparks 'n' Splash | 2: at the end of your turn, Set off a random enemy's Bombs | 2: your Set off cards set off every enemy's Bombs | The old text breaks brief rule 2 (only a Set off card makes Bombs go off) and, firing at the end of the turn before growth, it meant no Bomb it touched ever saw a dawn. The new one keeps the decision and rewards planting wide. |
+| Sparks 'n' Splash | 2: at the end of your turn, Set off a random enemy's Bombs | 2: at the start of your turn, after your Bombs grow, Set off a random enemy's Bombs | Rule 7 grants the Rare its own explosion, so the auto-detonation stays; but firing at the end of the turn, before growth, it meant no Bomb it touched ever saw a dawn. At the start of the turn the Bombs it pops have grown, and the Sparks arrive when she can spend them. |
 
 **Left alone, with the reason.** Big Badda Boom (14 per energy on a
 grown Bomb) and The Big One (22 on two) read "over" only because the

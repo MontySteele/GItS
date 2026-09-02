@@ -117,18 +117,23 @@ public class KleeOverhaulRuleTests
     }
 
     [Fact]
-    public void Rule1_alices_recipe_replaces_the_base_and_the_workshop_still_adds()
+    public void Rule1_alices_recipe_doubles_the_turns_growth_workshop_included()
     {
-        // "Grow by 4 INSTEAD of 3" -- replace, not add; and the two compose
-        // the only way that leaves both printed faces true.
+        // "Your Bombs grow TWICE each turn" (balance pass 2026-09-02) --
+        // multiply, and multiply what the Workshop already added, which is the
+        // only reading that leaves both printed faces true. The row used to
+        // read "grow by 4 instead of 3", a Rare a second Workshop beat.
         var alice = Seat.Klee().WithPower<AlicesRecipePower>(1);
-        Assert.Equal(KleeOverhaulLaw.AliceGrowth, GrowthFor(alice.Creature));
+        Assert.Equal(KleeOverhaulLaw.BombGrowth * KleeOverhaulLaw.AliceMultiplier,
+                     GrowthFor(alice.Creature));
 
         var both = Seat.Klee()
             .WithPower<AlicesRecipePower>(1)
             .WithPower<ExplosivesWorkshopGrowthPower>(1);
-        Assert.Equal(KleeOverhaulLaw.AliceGrowth + KleeOverhaulLaw.WorkshopGrowth,
-                     GrowthFor(both.Creature));
+        Assert.Equal(
+            (KleeOverhaulLaw.BombGrowth + KleeOverhaulLaw.WorkshopGrowth)
+                * KleeOverhaulLaw.AliceMultiplier,
+            GrowthFor(both.Creature));
     }
 
     [Fact]

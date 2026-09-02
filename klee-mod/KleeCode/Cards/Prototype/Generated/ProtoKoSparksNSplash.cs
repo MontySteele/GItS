@@ -42,7 +42,7 @@ public sealed class ProtoKoSparksNSplash : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sparks 'n' Splash (proto)"),
-        ("description", "At the end of your turn, [gold]Set off[/gold] a random enemy's [gold]Bombs[/gold]."),
+        ("description", "At the start of your turn, after your [gold]Bombs[/gold] grow, [gold]Set off[/gold] a random enemy's [gold]Bombs[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -60,7 +60,7 @@ public sealed class ProtoKoSparksNSplash : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<EndOfTurnSetOffPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<StartOfTurnSetOffPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

@@ -205,9 +205,9 @@
 - {id: proto_ko_fish_flavored_bait, name: "Fish-Flavored Bait", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 5 damage. Place a [gold]Bomb[/gold] 5.",
-   effects: [{op: damage, amount: 5, target: enemy},
-             {op: plant_bomb, target: enemy, size: 5}]}
+   description: "Deal 4 damage. Place a [gold]Bomb[/gold] 4.",
+   effects: [{op: damage, amount: 4, target: enemy},
+             {op: plant_bomb, target: enemy, size: 4}]}
 
 - {id: proto_ko_pocket_fireworks, name: "Pocket Fireworks", character: klee,
    authored_by: [claude],
@@ -218,8 +218,8 @@
 - {id: proto_ko_chain_fuse, name: "Chain Fuse", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Each [gold]Bomb[/gold] on the enemy grows by 3.",
-   effects: [{op: grow_bombs, target: enemy, amount: 3}]}
+   description: "Each [gold]Bomb[/gold] on the enemy grows by 6.",
+   effects: [{op: grow_bombs, target: enemy, amount: 6}]}
 
 - {id: proto_ko_explosives_workshop, name: "Explosives Workshop", character: klee,
    authored_by: [claude],
@@ -230,8 +230,8 @@
 - {id: proto_ko_careful_arrangement, name: "Careful Arrangement", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold]. It grows by 2.",
-   effects: [{op: merge_bombs, target: enemy, growth: 2}]}
+   description: "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold]. It grows by 5.",
+   effects: [{op: merge_bombs, target: enemy, growth: 5}]}
 
 - {id: proto_ko_big_badda_boom, name: "Big Badda Boom", character: klee,
    authored_by: [claude],
@@ -249,8 +249,8 @@
 
 - {id: proto_ko_alices_recipe, name: "Alice's Recipe", character: klee,
    authored_by: [claude],
-   cost: 1, type: power, rarity: rare,
-   description: "Your [gold]Bombs[/gold] grow by 4 instead of 3.",
+   cost: 2, type: power, rarity: rare,
+   description: "Your [gold]Bombs[/gold] grow twice each turn.",
    effects: [{op: apply_power, power: ko_alices_recipe, amount: 1, target: self}]}
 
 # --- Spray, everything explodes now (packet sec.4) ---
@@ -315,8 +315,8 @@
 - {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash (proto)", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the end of your turn, [gold]Set off[/gold] a random enemy's [gold]Bombs[/gold].",
-   effects: [{op: apply_power, power: ko_end_turn_set_off, amount: 1, target: self}]}
+   description: "At the start of your turn, after your [gold]Bombs[/gold] grow, [gold]Set off[/gold] a random enemy's [gold]Bombs[/gold].",
+   effects: [{op: apply_power, power: ko_start_turn_set_off, amount: 1, target: self}]}
 
 # --- React, the one that goes off twice (packet sec.4) ---
 
@@ -396,7 +396,7 @@
 
 - {id: proto_ko_sorry_jean, name: "Sorry, Jean...", character: klee,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
+   cost: 0, type: skill, rarity: common,
    description: "Remove one of your [gold]Bombs[/gold]. Gain [gold]Block[/gold] equal to its size.",
    effects: [{op: remove_bomb_for_block}]}
 
@@ -684,9 +684,9 @@
 - {id: proto_kk_kurages_oath, name: "Kurage's Oath (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   description: "[gold]Plan[/gold]: Deal 5 damage to ALL enemies.",
+   description: "[gold]Plan[/gold]: Deal 7 damage to ALL enemies.",
    effects: [],
-   plan: [{op: damage, amount: 5, target: all_enemies}]}
+   plan: [{op: damage, amount: 7, target: all_enemies}]}
 
 - {id: proto_kk_slack_water, name: "Slack Water (proto)", character: kokomi,
    authored_by: [claude],
@@ -701,9 +701,9 @@
 - {id: proto_kk_feint, name: "Feint", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 4 damage. [gold]Plan[/gold]: Deal 9 damage.",
-   effects: [{op: damage, amount: 4, target: enemy}],
-   plan: [{op: damage, amount: 9, target: front_enemy}]}
+   description: "Deal 6 damage. [gold]Plan[/gold]: Deal 10 damage.",
+   effects: [{op: damage, amount: 6, target: enemy}],
+   plan: [{op: damage, amount: 10, target: front_enemy}]}
 
 - {id: proto_kk_ambush, name: "Ambush", character: kokomi,
    authored_by: [claude],
@@ -715,8 +715,8 @@
 - {id: proto_kk_read_the_field, name: "Read the Field", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 10 [gold]Block[/gold].",
-   effects: [{op: block, amount: 4}],
+   description: "Gain 5 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 10 [gold]Block[/gold].",
+   effects: [{op: block, amount: 5}],
    plan: [{op: block, amount: 10}]}
 
 - {id: proto_kk_exposed_flank, name: "Exposed Flank", character: kokomi,
@@ -771,15 +771,15 @@
 - {id: proto_kk_deep_current, name: "Deep Current", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 4 damage to ALL enemies.",
-   effects: [{op: damage, amount: 4, target: all_enemies}]}
+   description: "Deal 6 damage to ALL enemies.",
+   effects: [{op: damage, amount: 6, target: all_enemies}]}
 
 - {id: proto_kk_coral_bulwark, name: "Coral Bulwark", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] and apply 1 [gold]Weak[/gold].",
+   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 8 [gold]Block[/gold] and apply 1 [gold]Weak[/gold].",
    effects: [{op: block, amount: 6}],
-   plan: [{op: block, amount: 6},
+   plan: [{op: block, amount: 8},
           {op: apply_power, power: weak, amount: 1, target: front_enemy}]}
 
 - {id: proto_kk_cleansing_wave, name: "Cleansing Wave", character: kokomi,
@@ -851,7 +851,7 @@
 
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: common, exhaust: true,
+   cost: 1, type: skill, rarity: common, exhaust: true,
    description: "Exhaust. The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now.",
    effects: [{op: carry_out_front_plan}]}
 

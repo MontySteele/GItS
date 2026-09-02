@@ -39,19 +39,22 @@ public sealed class ExplosivesWorkshopGrowthPower : PowerModel, ILocalizationPro
 }
 
 /// <summary>
-/// Alice's Recipe: "Your Bombs grow by 4 instead of 3." The brief's own gloss
-/// is "Breaks rule 1", and it breaks it by REPLACING the base rather than
-/// adding to it -- see <c>ProtoBombPower.GrowthFor</c>, which is the one place
-/// the two modifiers compose.
+/// Alice's Recipe: "Your Bombs grow twice each turn." The brief's own gloss is
+/// "Breaks rule 1", and it breaks it by MULTIPLYING the turn's growth rather
+/// than adding to it -- see <c>ProtoBombPower.GrowthFor</c>, which is the one
+/// place the two modifiers compose.
+///
+/// THE ROW USED TO READ "grow by 4 instead of 3" (balance pass 2026-09-02).
+/// That made a Rare strictly weaker than the Uncommon beside it: a second
+/// Explosives Workshop reaches 5 and a second Recipe still read 4. Doubling is
+/// the Rare; the Workshop stays the stacking +1, and one of each is 8.
 /// </summary>
 public sealed class AlicesRecipePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Alice's Recipe"),
-        ("description",
-            "Your [gold]Bombs[/gold] grow by [blue]" + KleeOverhaulLaw.AliceGrowth
-          + "[/blue] instead of [blue]" + KleeOverhaulLaw.BombGrowth + "[/blue]."),
+        ("description", "Your [gold]Bombs[/gold] grow twice each turn."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -104,34 +107,48 @@ public sealed class ChainedReactionsPower
 }
 
 /// <summary>
-/// Sparks 'n' Splash: "At the end of your turn, Set off a random enemy's
-/// Bombs." The brief's gloss is "Breaks rule 7", and this is the one power in
-/// the slice that fires without a card saying so -- which is exactly why it is
-/// a Rare and why it is the ONLY such hook here.
+/// Sparks 'n' Splash: "At the start of your turn, after your Bombs grow, Set
+/// off a random enemy's Bombs." The brief's gloss is "Breaks rule 7" -- rule 7
+/// names her Rare as the one allowed explosion source, and this is that Rare
+/// and the ONLY such hook here.
+///
+/// IT MOVED FROM THE END OF THE TURN TO THE START (balance pass 2026-09-02).
+/// Firing at the end of the turn, ahead of the growth that happens at the
+/// start of the next one, meant no Bomb it touched ever saw a dawn: it popped
+/// what had just been planted, at its planted size, and the Sparks it minted
+/// arrived when the turn was already over. At the start of the turn the Bombs
+/// it pops have grown and the Sparks arrive when she can spend them.
+///
+/// <c>AfterPlayerTurnStart</c> IS THE "after your Bombs grow" HALF, and it is
+/// the hook rather than a comment: growth runs in
+/// <c>ProtoBombPower.BeforeSideTurnStart</c>, which is a strictly earlier
+/// broadcast (<c>TURN_START_BROADCAST_ORDER</c> in
+/// <c>tier0/tests/test_reaction_phase_parity.py</c>), so the order the card
+/// prints is the order the engine runs and no tenant of either broadcast can
+/// reverse it.
 ///
 /// A RANDOM ENEMY, not a random BOMBED enemy: the card says what it says, and
 /// picking only from bombed enemies would make it strictly better than printed
 /// on a board where one enemy is loaded and three are not.
 /// </summary>
-public sealed class EndOfTurnSetOffPower : PowerModel, ILocalizationProvider
+public sealed class StartOfTurnSetOffPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Sparks 'n' Splash"),
         ("description",
-            "At the end of your turn, [gold]Set off[/gold] a random enemy's "
-          + "[gold]Bombs[/gold]."),
+            "At the start of your turn, after your [gold]Bombs[/gold] grow, "
+          + "[gold]Set off[/gold] a random enemy's [gold]Bombs[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override async Task BeforeSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
     {
-        if (side != CombatSide.Player) return;
-        if (Owner?.CombatState == null) return;
+        if (Owner == null || player.Creature != Owner) return;
+        if (Owner.CombatState == null) return;
 
         var candidates = Owner.CombatState.HittableEnemies
             .Where(e => !e.IsDead).ToList();
