@@ -284,6 +284,21 @@ that run the whole loop without the game or codex (`blindplay.py`).
   numbers only** — HP, Block, power stacks, resource amounts, `prompt`,
   `can_play`, `unplayable_reason`, printed text — and a failed assert is a
   DEFECT, never a design finding.
+- **`log_lacks` is the one check that reads the engine log, not the wire**
+  (EB-292). Its defect class is invisible to a state read: an `NCard` handed a
+  non-finite size still reports a legal board, and the bridge answers normally
+  right up to the moment the card trail's unbounded interpolation takes the
+  process's memory and it stops answering at all. So the check greps
+  `godot.log` from the byte offset the `Runner` recorded when it was built —
+  resetting to zero when the file has since been rewritten, which is what every
+  launch does — and a MISSING log fails rather than passes. Its companion verb
+  `wait` buys the seconds a turn boundary needs (bounded by
+  `scenario.MAX_WAIT_SECONDS`) and does not move the delta baseline.
+- **A Plan card's target is a PET, which `find_enemy` cannot see** (EB-292).
+  `scenario.find_pet` reads `player.kokomi_plans.pet_entity_id` — the block
+  `KleeMod.Powers.KokomiPlan.Snapshot` writes and `blindplay._pet_target`
+  already aimed at — and `_do_play` asks it before `find_enemy`, so the seat and
+  the scenario reach the Bake-Kurage through one contract.
 - **A scenario posts its OWN actions, unlike the two probes.**
   `soak._mechanical_action` claims `hand_select` BEFORE `policy_v1.decide` is
   asked and answers it with card 0 + confirm. A scenario whose question is

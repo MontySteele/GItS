@@ -186,8 +186,35 @@ the selector as written and the id it resolved to. `set_resource` and
 combat state and ignores the field, so the parser refuses one rather than let a
 player write wear an enemy's name.
 
-**It asserts numbers and nothing else.** HP, Block, power stacks, resource
+**The Bake-Kurage is the one target that is not an enemy** (EB-292). Under the
+Kokomi Plan arm a Plan card's only legal target is a PET on the player's side;
+`find_enemy` cannot see it, because the wire publishes it in the arm's own block
+(`player.kokomi_plans.pet_entity_id`, written by `KokomiPlan.Snapshot`) rather
+than under `battle.enemies`. `scenario.find_pet` reads exactly that field, and
+`_do_play` asks it FIRST — `blindplay._play`'s order, so a seat and a scenario
+aim at the jellyfish through one contract and cannot disagree.
+
+**`wait` buys time, not state.** The runner's settle is sized for one card play;
+`end_turn` crosses a TURN BOUNDARY — the enemy side acts, block clears, energy
+resets, the hand is dealt, and under the Kokomi arm the Plan queue drains — each
+with its own visuals. A `wait: <seconds>` step sleeps, re-reads, and does NOT
+move the delta baseline, so an `expect` after it still reads the bracket around
+the action before it. It is bounded at parse time
+(`scenario.MAX_WAIT_SECONDS`): a file asking for longer is a file waiting for
+something it should be asserting.
+
+**It asserts numbers and nothing else** — with one door onto the engine log.
+HP, Block, power stacks, resource
 amounts, prompt strings, `can_play`, `unplayable_reason`, printed card text.
+The exception is `log_lacks` (EB-292): no line matching a given string has
+reached `godot.log` since the run began. It exists because that defect is
+invisible to the wire — a card node handed a non-finite size still reports a
+legal board, and the bridge answers normally right up to the moment it stops
+answering at all — so the only instrument that can fail on the frame the defect
+appears is the log. A missing log FAILS the check rather than passing it, and
+the cursor resets when the file is shorter than the cursor (the game rewrites
+`godot.log` on every launch, and a stale cursor would seek past the end and pass
+everything, silently).
 Guardrail-7 is unchanged: a failed assert is a DEFECT, never a design finding,
 and a scenario's board was set by hand so it is not comparable to any soak, any
 run, or any other scenario. The no-fun rule is unchanged: a JSON-state agent
@@ -233,6 +260,7 @@ The pack:
 | `tide-of-names-splash.yaml` | 5 + 2×cost = 9 to **every living enemy**, exhausting a second copy of itself for the cost-2 rung. The splash is the half no sheet lint can see |
 | `spark-gate-refusal.yaml` | `hold_the_line` reads `can_play: false` at Sparks 0 and 1 with the game's own `UnplayableReason`, and playable at 2. The bank is EARNED by play here, which is what makes this the instrument for the rule |
 | `set-power-sparks.yaml` | **EB-146**: the `set_power` door itself — Sparks written 0 -> 2 onto a creature carrying no Spark badge at all (an apply), then 2 -> 0 (a removal), with the gate answering the written bank exactly as it answers a played one |
+| `eb292-plan-on-pet-hang.yaml` | **EB-292**: two Plan cards onto the Bake-Kurage in one turn, the turn boundary that drains them, and a play on the turn after — with `godot.log` read for a non-finite number after each. The only file in the pack whose subject the wire cannot see |
 
 **`assumptions` is part of the file format and is printed with the result.** An
 exact expected number usually depends on something the scenario did not set —

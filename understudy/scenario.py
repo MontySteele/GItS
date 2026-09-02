@@ -180,7 +180,7 @@ TOKEN_CARDS = {
 ACTION_STEPS = ("play", "select", "confirm", "end_turn")
 SETUP_STEPS = ("give", "set_resource", "set_energy", "set_hp", "set_block",
                "set_power", "clear_hand")
-OTHER_STEPS = ("expect", "read", "mark")
+OTHER_STEPS = ("expect", "read", "mark", "wait")
 STEP_VERBS = ACTION_STEPS + SETUP_STEPS + OTHER_STEPS
 
 # The setup verbs that address a CREATURE, and so take the `play` target's
@@ -202,6 +202,14 @@ AMOUNTLESS_SETUP_STEPS = ("clear_hand",)
 # rather than a tuned number, and it is a REFUSAL bound: reaching it fails the
 # step by name.
 CLEAR_HAND_SETTLES = 12
+
+# The ceiling on one `wait` step. A turn boundary is the only thing in a
+# scenario that takes longer than the runner's own settle -- the enemy side
+# acts, the block clears, the hand is dealt and (for the Kokomi arm) the Plan
+# queue drains, each with its own visuals -- and 30 s is a bound with room in
+# it rather than a tuned number. A file that needs more than this is a file
+# that is waiting for something a scenario should be asserting instead.
+MAX_WAIT_SECONDS = 30.0
 
 
 class ScenarioError(RuntimeError):
@@ -275,6 +283,8 @@ def _as_body(verb: str, raw: Any) -> dict[str, Any]:
         return dict(raw)
     if verb in ("set_energy",) and isinstance(raw, int):
         return {"amount": raw}
+    if verb == "wait" and isinstance(raw, (int, float)):
+        return {"seconds": float(raw)}
     if verb == "select" and isinstance(raw, list):
         return {"cards": list(raw)}
     if verb == "select" and isinstance(raw, str):
@@ -348,6 +358,22 @@ def _validate(i: int, verb: str, body: dict[str, Any]) -> None:
     elif verb == "select":
         if not body.get("cards"):
             raise ScenarioError(f"step {i} ('select'): needs 'cards'")
+    elif verb == "wait":
+        # A BOUNDED WAIT, refused at parse time rather than clamped at run
+        # time. A scenario is attended and the game is somebody's live process:
+        # a file that asked for a minute of silence would be a file that looks
+        # hung, and a silently clamped number is a file whose text stops being
+        # what ran.
+        try:
+            seconds = float(body.get("seconds", 1.0))
+        except (TypeError, ValueError):
+            raise ScenarioError(
+                f"step {i} ('wait'): 'seconds' must be a number, got "
+                f"{body.get('seconds')!r}")
+        if not 0 < seconds <= MAX_WAIT_SECONDS:
+            raise ScenarioError(
+                f"step {i} ('wait'): 'seconds' must be in (0, "
+                f"{MAX_WAIT_SECONDS}], got {seconds}")
     elif verb == "expect":
         if not body:
             raise ScenarioError(f"step {i} ('expect'): asserts nothing")
@@ -503,6 +529,31 @@ def find_enemy(state: dict[str, Any], who: str) -> dict[str, Any] | None:
         if str(e.get("name") or "").strip().casefold() == want:
             return e
     return None
+
+
+def find_pet(state: dict[str, Any], who: str) -> str | None:
+    """The Bake-Kurage's entity id when `who` names it, else `None`.
+
+    `EB-292`. THE ONE TARGET THAT IS NOT AN ENEMY. The Kokomi arm's jellyfish
+    is a PET: it is on the player's side, `find_enemy` cannot see it, and a
+    Plan card's only legal target is that creature. The wire publishes it in
+    the arm's own block (`player.kokomi_plans.pet_entity_id`, written by
+    `KleeMod.Powers.KokomiPlan.Snapshot`) rather than in `battle.enemies`,
+    which is the same place `blindplay._pet_target` reads it from -- one
+    contract, two readers, so a seat and a scenario cannot aim differently.
+
+    NAMED, NEVER DEFAULTED, for `blindplay._pet_target`'s reason: a card that
+    could go either way and was aimed at nothing is played NOW.
+    """
+    plans = ((state.get("player") or {}).get("kokomi_plans")) or {}
+    if not isinstance(plans, dict):
+        return None
+    pet_id = plans.get("pet_entity_id")
+    if not pet_id:
+        return None
+    name = str(plans.get("pet_name") or "Bake-Kurage")
+    return str(pet_id) if str(who or "").strip().casefold() == name.casefold() \
+        else None
 
 
 def _enemy_pair(who: str, before: dict[str, Any], after: dict[str, Any]
@@ -751,7 +802,89 @@ def _check_description_contains(spec, before, after):
         f"description {got!r} does not contain {want!r}"
 
 
+class _LogWindow:
+    """Where in `godot.log` this scenario's own output starts.
+
+    A CURSOR AND NOT THE WHOLE FILE, because `--no-setup` attaches to a game
+    that has already been playing: a scenario must not fail on an engine error
+    somebody else's fight produced, and it must not pass because the one it
+    caused scrolled past. The cursor is set when the `Runner` is built, which
+    is before its first step and after the launch either way.
+    """
+
+    def __init__(self) -> None:
+        self.offset = 0
+
+    def path(self) -> Path:
+        """The log of the instance THIS THREAD is bound to.
+
+        `bridge.current_instance()` is the lane binding the whole harness
+        already resolves against (`EB-210`); falling back to lane 0 is the
+        same fallback `bridge.current_base` makes for an unbound thread.
+        """
+        from understudy import instances
+        inst = bridge.current_instance() or instances.lane("lane0")
+        return inst.log_path()
+
+    def reset(self) -> None:
+        try:
+            self.offset = self.path().stat().st_size
+        except OSError:
+            self.offset = 0
+
+    def tail(self) -> tuple[list[str], Path]:
+        """Everything written since `reset`, and the whole file after a relaunch.
+
+        THE TRUNCATION CASE IS THE NORMAL ONE, not an edge: the runner is built
+        before `soak.run_scripted` launches the game, and the game REWRITES
+        `godot.log` from zero on every launch. A cursor taken from the previous
+        session's file is past the new file's end, and seeking there would read
+        nothing and pass every check -- which is a silent instrument, the one
+        failure mode this check must not have.
+        """
+        p = self.path()
+        offset = self.offset
+        try:
+            if p.stat().st_size < offset:
+                offset = 0
+        except OSError:
+            offset = 0
+        with p.open("r", encoding="utf-8", errors="replace") as fh:
+            fh.seek(offset)
+            return fh.read().splitlines(), p
+
+
+LOG_WINDOW = _LogWindow()
+
+
+def _check_log_lacks(spec, before, after):
+    """No line matching `text` has reached `godot.log` since the run began.
+
+    THE ONLY CHECK IN THIS FILE THAT DOES NOT READ THE WIRE, and it exists
+    because `EB-292`'s defect is invisible to the wire: an `NCard` given a
+    non-finite size still reports a legal board, and the first thing that goes
+    wrong is a Godot error printed every frame until the card trail runs the
+    process out of memory. The bridge answers normally right up to the moment
+    it stops answering at all, so the state a scenario can assert on cannot see
+    it and the log can.
+
+    A MISSING LOG IS A FAILURE, not a pass: the instrument is the file, and a
+    check that cannot find it has not looked.
+    """
+    want = str(spec if isinstance(spec, str) else spec["text"])
+    try:
+        lines, path = LOG_WINDOW.tail()
+    except OSError as e:
+        return f"no godot.log to read ({e}); the check could not be made"
+    hits = [ln for ln in lines if want in ln]
+    if not hits:
+        return None
+    return (f"{len(hits)} line(s) matching {want!r} in {path} since the run "
+            f"began; first: {hits[0].strip()!r}")
+
+
 CHECKS: dict[str, Callable[..., str | None]] = {
+    "log_lacks": _check_log_lacks,
     "enemy_hp_delta": _check_enemy_hp_delta,
     "enemy_hp_block_delta": _check_enemy_hp_block_delta,
     "each_enemy_hp_block_delta": _check_each_enemy_hp_block_delta,
@@ -803,6 +936,10 @@ class Runner:
         # exactly one card").
         self.before: dict[str, Any] = {}
         self.i = 0
+        # Where this run's engine output starts. Set here rather than at the
+        # first `log_lacks` step, so a file that asserts the log late still
+        # sees everything its own steps produced.
+        LOG_WINDOW.reset()
 
     # -- log ---------------------------------------------------------------
     def emit(self, row: dict[str, Any]) -> None:
@@ -1016,13 +1153,21 @@ class Runner:
         action: dict[str, Any] = {"action": "play_card", "card_index": index}
         target = body.get("target")
         if target:
-            enemy = find_enemy(self.state, str(target))
-            if enemy is None:
-                raise ExpectFailed(
-                    "play", f"no enemy {target!r}; the fight has "
-                            f"{[adapter.enemy_id(e) for e in adapter.enemy_blobs(self.state)]}",
-                    self.state, self.state)
-            action["target"] = adapter.enemy_id(enemy)
+            # THE JELLYFISH FIRST, `blindplay._play`'s order and for its
+            # reason: it is the one target that is not an enemy, so asking
+            # `find_enemy` first would refuse a legal Plan play with a message
+            # about the wrong half of the board.
+            pet = find_pet(self.state, str(target))
+            if pet is not None:
+                action["target"] = pet
+            else:
+                enemy = find_enemy(self.state, str(target))
+                if enemy is None:
+                    raise ExpectFailed(
+                        "play", f"no enemy {target!r}; the fight has "
+                                f"{[adapter.enemy_id(e) for e in adapter.enemy_blobs(self.state)]}",
+                        self.state, self.state)
+                action["target"] = adapter.enemy_id(enemy)
         # EB-184: the chosen MODE, when the step names one, so the bridge can
         # ask that mode whether the play aims rather than asking the card's
         # printed type. A `choose_one` card typed as an Attack declares
@@ -1097,6 +1242,20 @@ class Runner:
         self.read()
         self.before = self.state
         self.emit({"step": "mark", "at": digest(self.state)})
+
+    def _do_wait(self, body: dict[str, Any]) -> None:
+        """Sleep, then read. The one step that buys time rather than state.
+
+        The runner's settle is sized for a card play; a TURN BOUNDARY is not,
+        and `end_turn` is the only action that crosses one. It does not move
+        the delta baseline: a wait is not an action, so an `expect` after it
+        still reads the bracket around the play or the end-turn before it.
+        """
+        seconds = float(body.get("seconds", 1.0))
+        self.sleep(seconds)
+        self.read()
+        self.emit({"step": "wait", "seconds": seconds,
+                   "after": digest(self.state)})
 
     def _do_expect(self, body: dict[str, Any]) -> None:
         self.read()
