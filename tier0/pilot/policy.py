@@ -434,7 +434,12 @@ def _expected_damage(state: CombatState, card: Card) -> float:
     # NONE of it, so it priced every attack at its printed number and played
     # straight through its own buff windows. Same helper the engine calls, so
     # the estimate cannot drift from what resolves; it is a pure read.
-    flat = effects.flat_attack_bonus(state, card, card_cost(state, card))
+    #
+    # `valuation=True` (EB-253): the Fanfare term inside that helper files a
+    # `fanfare_read`, and scoring a hand is not playing it. Same declaration
+    # the `bonus_formula` call below already carries for EB-242's instrument.
+    flat = effects.flat_attack_bonus(state, card, card_cost(state, card),
+                                     valuation=True)
     for fx in _active_effects(state, card.effects, card):
         if fx["op"] == "damage":
             if fx.get("target") == "self":
