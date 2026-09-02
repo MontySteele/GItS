@@ -1520,9 +1520,9 @@ APPLY_POWERS = {
     "ko_chained_reactions": ("ChainedReactionsPower", None,
         "Whenever one of your [gold]Bombs[/gold] goes off, place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
-    "ko_start_turn_set_off": ("StartOfTurnSetOffPower", None,
-        "At the start of your turn, after your [gold]Bombs[/gold] grow, "
-        "[gold]Set off[/gold] a random enemy's [gold]Bombs[/gold]."),
+    "ko_bomb_echo": ("BombEchoPower", None,
+        "At the end of your turn, deal [gold]Pyro[/gold] damage to a random "
+        "enemy equal to the [gold]Bombs[/gold] on it."),
     "ko_bomb_reaction_spark": ("BombReactionSparkPower", None,
         "Whenever one of your [gold]Bombs[/gold] triggers an "
         "[gold]Elemental Reaction[/gold], gain {X} extra [gold]Spark[/gold]."),

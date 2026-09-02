@@ -206,7 +206,7 @@ KLEE_OVERHAUL = False
 # claims (slice packet sec.1: "No number in it is a claim"). They are named here
 # because the C# mirrors must be compared BY VALUE -- an unnamed literal in the
 # mod is exactly what `tools/lint_constant_parity.py` exists to refuse.
-KLEE_OVERHAUL_BOMB_GROWTH = 5        # rule 1: every Bomb, start of her turn
+KLEE_OVERHAUL_BOMB_GROWTH = 4        # rule 1: every Bomb, start of her turn
 KLEE_OVERHAUL_WORKSHOP_GROWTH = 1    # Explosives Workshop: +1 more
 # Alice's Recipe MULTIPLIES the turn's growth ("your Bombs grow twice each
 # turn"), balance pass 2026-09-02. It used to REPLACE the base with 4, which
