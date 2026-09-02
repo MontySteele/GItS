@@ -1192,7 +1192,20 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         255,
         256,
         257,
-        259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
+        # 276 and 278 LEFT OPEN_IDS 2026-09-02 with their rows. Both were
+        # about draft 2's TIDE -- a Strength gain converting into it, and
+        # Tide-scaled cards playable at Tide 0 -- and R240/R241 deleted
+        # the Tide outright when the Plan replaced it (PR #266), so
+        # neither row describes anything a build can reach. Verified in
+        # the C# rather than assumed: no `gain_tide` / `draw_per_tide` /
+        # `surge` / `exert` op is registered in either engine, the arm's
+        # own conversion site returns false under
+        # `KokomiOverhaul.LiveFor` (pinned by
+        # `KokomiOverhaulRuleTests.Rule3_the_shipped_strength_refusal_is_
+        # skipped_under_the_arm`), and every surviving `Tide` in the mod
+        # is a SHIPPED card's name (Ebb Tide, Tide of Names), which the
+        # arm's pool replacement puts out of reach anyway.
+        259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 277, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
         # 292: the `NCardTrail` hang off the Kokomi round-two blind session.
         # BUILT in the commit that mints it -- the guard refuses the
         # non-finite value at three doors and names the node chain -- and it

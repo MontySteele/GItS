@@ -1,0 +1,166 @@
+"""EB-283 / EB-277: a staged row's `+` face may not be its base face.
+
+THE DEFECT THIS PINS, in the words of the two rows it closes:
+
+    "an upgraded prototype card was identical to its base: `Coral Bulwark+`
+    and `Water's Edge (proto)+` printed and dealt the base numbers, so the
+    Light Door's *Upgrade 2 random cards* had no visible effect"  (EB-277)
+
+    "no prototype row upgraded -- Klee's offered no campfire choice at all
+    and Kokomi's upgraded into a copy of itself"                  (EB-283)
+
+`EB-283` answered it with `upgrades.prototype_default_delta`, a rule both
+engines read. That fixed most of the surface and left TWO holes, and [USER]
+found both of them by playing rather than by reading: "'Change of Plans' has
+no upgrade?" and "Neither does Rally". Every reading available at the time --
+a delta exists, the delta was expressible, a var moved -- was true of cards
+that printed identical text, so the check has to be the one thing a player
+actually sees: the FACE.
+
+WHAT IS PINNED HERE, and each is a separate failure mode:
+
+  1. the live surface is green under the gate (no row upgrades invisibly that
+     is not on the curated `UPGRADE_DEBT` register);
+  2. the gate GOES RED on a base-only row, on a row whose declared upgrade the
+     face does not print, and on an added-effect upgrade that prints no
+     `{IfUpgraded:...}` clause -- red-first, because a gate nobody has watched
+     fail is not known to be a gate;
+  3. the register cannot rot: an entry for a row that has left the surface,
+     and an entry for a row that now passes, are both findings.
+
+The fixtures are dicts and strings, never a row on the shipped surface: R213 B
+makes an EMPTY surface the healthy committed state, and a permanent fixture
+row would be the second permanent pool that ruling forbids
+(`test_prototype_surface.py` makes the same argument at length).
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[2]
+if str(REPO) not in sys.path:
+    sys.path.insert(0, str(REPO))
+
+from tools import gen_prototype_cards as gp     # noqa: E402
+
+# A minimal emitted card, in the shape `gen_klee_cards.emit` writes. Held as a
+# template rather than generated, so the gate is exercised against the exact
+# two strings it reads and a change to either is visible in this file.
+_CARD = '''\
+public sealed class Fixture : CustomCardModel
+{{
+    public override List<(string, string)>? Localization => new()
+    {{
+        ("title", "Fixture"),
+        ("description", "{face}"),
+    }};
+
+    protected override void OnUpgrade()
+    {{
+{body}
+    }}
+}}
+'''
+
+
+def _emitted(face: str, body: str) -> str:
+    return _CARD.format(face=face, body=body)
+
+
+def test_the_live_surface_prints_every_upgrade_it_declares():
+    """The gate, run over the committed sheet exactly as the codegen runs it.
+
+    `gen_prototype_cards.main` raises on a finding -- which is what the
+    `prototype-codegen` CI lint runs -- and this is the suite's own copy of the
+    same read, so a regression is red here as well as at the codegen door.
+    """
+    built = gp.plan()
+    rows = gp._rows()
+    deltas = {}
+    for row in rows:
+        delta = gp.effective_upgrade(dict(row))
+        if delta:
+            deltas[row["id"]] = delta
+    assert gp.upgrade_face_findings(rows, deltas, built.generated) == []
+
+
+def test_a_row_with_no_upgrade_at_all_is_a_finding():
+    # EB-277's own shape: the smith hands back a copy of the card.
+    why = gp._upgrade_face_finding({}, _emitted("Deal 7 damage.", ""))
+    assert why is not None
+    assert "no upgrade at all" in why
+
+
+def test_a_moved_var_the_face_does_not_print_is_a_finding():
+    # The subtler half: a delta that IS expressible, an OnUpgrade that DOES
+    # move a number, and a face that never prints it.
+    why = gp._upgrade_face_finding(
+        {"power_amount": 1},
+        _emitted("Whenever you play a card, gain 1 Block.",
+                 '        DynamicVars["PowerAmount"].UpgradeValueBy(1m);'))
+    assert why is not None
+    assert "printed identically to its base" in why
+
+
+def test_an_appended_effect_with_no_face_clause_is_a_finding():
+    # The thirteen-row class this gate found: the Prototype rule's last clause
+    # ("otherwise the card draws one more") emits an `IsUpgraded`-gated draw in
+    # `OnPlay` and NOTHING in `OnUpgrade`, so before the fix the `+` face was
+    # byte-identical to the base one.
+    why = gp._upgrade_face_finding(
+        {"add": {"op": "draw", "amount": 1}},
+        _emitted("Whenever you play a card, the front enemy gains 1 Weak.",
+                 "        // add: draw -- expressed at play time."))
+    assert why is not None
+    assert "does nothing" in why
+
+
+def test_the_same_row_passes_once_the_face_states_the_added_effect():
+    # ... and passes the moment the face says so, which is the fix.
+    assert gp._upgrade_face_finding(
+        {"add": {"op": "draw", "amount": 1}},
+        _emitted("Whenever you play a card, the front enemy gains 1 Weak. "
+                 "{IfUpgraded:show:Draw 1 card.|}",
+                 "        // add: draw -- expressed at play time.")) is None
+
+
+def test_the_four_visible_shapes_pass():
+    moved = _emitted("Deal {Damage:diff()} damage.",
+                     "        DynamicVars.Damage.UpgradeValueBy(3m);")
+    keyword = _emitted("Deal 7 damage. Exhaust.",
+                       "        RemoveKeyword(CardKeyword.Exhaust);")
+    cost = _emitted("Deal 7 damage.", "        EnergyCost.UpgradeBy(-1);")
+    # The base game's Calculated* TRIPLE: the upgrade moves `CalculationBase`
+    # and the face prints `CalculatedDamage`, which is the same number.
+    calculated = _emitted(
+        "Deal {CalculatedDamage:diff()} damage.",
+        "        DynamicVars.CalculationBase.UpgradeValueBy(3m);")
+    for source in (moved, keyword, cost, calculated):
+        assert gp._upgrade_face_finding({"damage": 3}, source) is None
+
+
+def test_a_debt_entry_for_a_row_that_left_the_surface_is_a_finding():
+    # R213 B deletes a row WHOLE. An exemption that outlives its row is an
+    # exemption nobody can see -- the B6 ledger lesson, one register over.
+    findings = gp.upgrade_face_findings([], {}, {})
+    assert findings
+    assert all("not on the surface" in f for f in findings)
+    assert len(findings) == len(gp.UPGRADE_DEBT)
+
+
+def test_a_debt_entry_for_a_row_that_now_passes_is_a_finding():
+    # A paid debt is deleted, never left standing: an entry that no longer
+    # excuses anything would quietly excuse the NEXT regression on that id.
+    paid = sorted(gp.UPGRADE_DEBT)[0]
+    rows = [{"id": paid}]
+    generated = {paid: _emitted("Deal {Damage:diff()} damage.",
+                                "        DynamicVars.Damage.UpgradeValueBy(3m);")}
+    findings = gp.upgrade_face_findings(rows, {paid: {"damage": 3}}, generated)
+    assert [f for f in findings if f.startswith(f"{paid}: UPGRADE_DEBT still")]
+
+
+def test_every_debt_entry_states_a_reason():
+    for card_id, reason in gp.UPGRADE_DEBT.items():
+        assert isinstance(reason, str) and len(reason.split()) >= 8, card_id

@@ -49,7 +49,7 @@ public sealed class ProtoMcAmberExplosivePuppet : CustomCardModel, ICompanionCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Amber — Explosive Puppet"),
-        ("description", "Place [gold]Baron Bunny[/gold]: the next time an enemy attacks you, take 3 less damage and deal 8 [gold]Pyro[/gold] damage to ALL enemies."),
+        ("description", "Place [gold]Baron Bunny[/gold]: the next time an enemy attacks you, take 3 less damage and deal 8 [gold]Pyro[/gold] damage to ALL enemies. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
