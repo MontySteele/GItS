@@ -45,13 +45,13 @@ public sealed class ProtoKkTreatise : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Treatise"),
-        ("description", "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], draw 1 card. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,14 +64,10 @@ public sealed class ProtoKkTreatise : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<TreatisePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        AddKeyword(CardKeyword.Innate);
     }
 }

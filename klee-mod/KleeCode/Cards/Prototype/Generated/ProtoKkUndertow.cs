@@ -51,13 +51,13 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undertow (proto)"),
-        ("description", "Deal 7 damage. If the enemy has a debuff, deal 10 instead. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Deal {IfUpgraded:show:10|7} damage. If the enemy has a debuff, deal {IfUpgraded:show:13|10} instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -72,7 +72,7 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
         if (KokomiOverhaulKit.HasDebuff(cardPlay.Target))
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack(10m)
+            await DamageCmd.Attack((IsUpgraded ? 13m : 10m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
@@ -80,20 +80,16 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
         }
         else
         {
-            await DamageCmd.Attack(7m)
+            await DamageCmd.Attack((IsUpgraded ? 10m : 7m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
                 .Execute(choiceContext);
         }
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the text swaps via {IfUpgraded:show:...|...}.
     }
 }

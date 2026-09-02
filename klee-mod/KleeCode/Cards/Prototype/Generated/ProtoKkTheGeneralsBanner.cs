@@ -41,13 +41,13 @@ public sealed class ProtoKkTheGeneralsBanner : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The General's Banner"),
-        ("description", "Once per turn, when you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Once per turn, when you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,14 +60,10 @@ public sealed class ProtoKkTheGeneralsBanner : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<GeneralsBannerPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        AddKeyword(CardKeyword.Innate);
     }
 }

@@ -60,7 +60,7 @@ public sealed class ProtoKkChainOfCommand : CustomCardModel, ICharacterCard, IPl
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PlanDamage", 4m)
+            new DynamicVar("PlanDamage", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -77,6 +77,6 @@ public sealed class ProtoKkChainOfCommand : CustomCardModel, ICharacterCard, IPl
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PlanDamage"].UpgradeValueBy(1m);
+        DynamicVars["PlanDamage"].UpgradeValueBy(2m);
     }
 }
