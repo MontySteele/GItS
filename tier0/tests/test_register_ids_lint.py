@@ -18,17 +18,27 @@ the thing it checks, that its ceilings do not fork the series
 `lint_r_numbers.py` already owns, and that it holds nothing but ids the
 registers actually define. The rot rule is enforced by the lint itself, so
 what is left for a test is the shape of the constants.
+
+**And since 2026-09-02 the ceiling is DERIVED**, so the last section here is a
+MERGE test in a hermetic repository: two branches that each mint a row must
+merge with no conflict in this file at all, because neither of them touched it.
+That is the property the redesign bought, and a property nothing else in the
+suite could see — the old failure was a conflict, and a conflict is not a test
+failure, it is a person's afternoon.
 """
 
 from __future__ import annotations
 
 import importlib.util
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 TOOL = REPO / "tools" / "lint_register_ids.py"
+
+GIT_ID = ["-c", "user.name=Test", "-c", "user.email=test@example.invalid"]
 
 
 def _module():
@@ -72,7 +82,7 @@ def test_the_self_test_case_count_is_honest():
     """The printed denominator is a hand-kept number; a self-test that says
     eleven cases and runs three is the vacuum this file exists to prevent."""
     mod = _module()
-    assert mod.SELF_TEST_CASES == 19
+    assert mod.SELF_TEST_CASES == 21
     assert mod.self_test() == []
 
 
@@ -175,10 +185,12 @@ def test_an_irregular_id_is_covered_by_the_explicit_set():
 # --- the manifest as a committed artifact ----------------------------------
 
 def test_the_manifest_is_not_derived_from_what_it_checks():
-    """A ceiling recomputed at runtime from the live rows guards nothing: it
-    would follow a re-mint down instead of refusing it. So no ceiling may sit
-    BELOW the highest id still defining a row, and the manifest must record
-    numbers the live scan cannot see.
+    """A ceiling recomputed from the live rows ALONE guards nothing: it would
+    follow a closed row out of HEAD and re-offer its number. Since 2026-09-02
+    the ceiling IS computed at runtime — from the rows PLUS `RETIRED`, which is
+    the half no scan of the registers can produce. So no ceiling may sit BELOW
+    the highest id still defining a row, and the manifest must record numbers
+    the live scan cannot see.
 
     THE EVIDENCE OF THAT IS THE HOLES IN `OPEN_IDS`, NOT A CEILING GAP. This
     test used to demand that at least one ceiling sit STRICTLY above its
@@ -235,3 +247,158 @@ def test_the_manifest_is_neither_empty_nor_a_blanket():
         assert mod.ID.match(cid), cid
         assert mod.parse(cid) == (None, None), (
             f"{cid} is an integer id and belongs under a CEILINGS series")
+
+
+# --- the derived ceiling: two branches minting in parallel MERGE -----------
+
+def _hermetic(tmp_path: Path) -> Path:
+    """A git repo carrying the real lint, the real registers and the real
+    minting tools, and nothing else.
+
+    The REAL files, copied: a merge test against a synthetic lint would be a
+    test of the synthetic lint. Each tool resolves its repo root from
+    `__file__`, so a copy under `<tmp>/tools/` reads `<tmp>/docs/current/`.
+    """
+    root = tmp_path / "repo"
+    (root / "tools").mkdir(parents=True)
+    (root / "docs" / "current").mkdir(parents=True)
+    for name in ("lint_register_ids.py", "lint_register_shape.py",
+                 "register_io.py", "mint_row.py"):
+        shutil.copyfile(REPO / "tools" / name, root / "tools" / name)
+    for name in ("BACKLOG.md", "QUEUE.md"):
+        shutil.copyfile(REPO / "docs" / "current" / name,
+                        root / "docs" / "current" / name)
+    subprocess.run(["git", "init", "-q", "-b", "main", str(root)], check=True)
+    subprocess.run(["git", *GIT_ID, "add", "tools", "docs"], cwd=root,
+                   check=True)
+    subprocess.run(["git", *GIT_ID, "commit", "-qm", "base"], cwd=root,
+                   check=True)
+    return root
+
+
+def _mint(root: Path, section: str, register: str = "BACKLOG",
+          **fields: str) -> subprocess.CompletedProcess:
+    argv = [sys.executable, "tools/mint_row.py", register, section,
+            "--provenance", "test", "--write"]
+    if register == "BACKLOG":
+        fields = {"scope": "a synthetic row.", "next-action": "none.",
+                  "gate": "none.", "acceptance": "the test passes.", **fields}
+    for key, value in fields.items():
+        argv += [f"--{key}", value]
+    return subprocess.run(argv, cwd=root, capture_output=True, text=True)
+
+
+def _branch(root: Path, name: str, section: str, register: str = "BACKLOG",
+            **fields: str) -> None:
+    subprocess.run(["git", *GIT_ID, "checkout", "-q", "-b", name, "main"],
+                   cwd=root, check=True)
+    res = _mint(root, section, register, **fields)
+    assert res.returncode == 0, res.stdout + res.stderr
+    page = f"docs/current/{register}.md"
+    subprocess.run(["git", *GIT_ID, "add", page], cwd=root, check=True)
+    subprocess.run(["git", *GIT_ID, "commit", "-qm", f"mint on {name}"],
+                   cwd=root, check=True)
+
+
+def _merge(root: Path, into: str, other: str) -> subprocess.CompletedProcess:
+    subprocess.run(["git", *GIT_ID, "checkout", "-q", into], cwd=root,
+                   check=True)
+    return subprocess.run(["git", *GIT_ID, "merge", "--no-edit", other],
+                          cwd=root, capture_output=True, text=True)
+
+
+def test_two_branches_each_minting_a_row_merge_with_no_conflict_in_the_lint(
+        tmp_path):
+    """THE PROPERTY THE DERIVED CEILING BOUGHT, and it lands green.
+
+    Under the frozen literal, a branch minting an `EB` row bumped
+    `CEILINGS["EB"]` and extended `OPEN_IDS["EB"]`, and a branch minting an `M`
+    row did the same two things in the same dict — so two mints in one sitting
+    met in the same file, and four such conflicts were resolved by hand on
+    2026-09-02. Now NEITHER branch touches the file at all: the row is the
+    record.
+    """
+    root = _hermetic(tmp_path)
+    lint_before = (root / "tools" / "lint_register_ids.py").read_bytes()
+
+    _branch(root, "a", "tools")                      # the next free EB
+    _branch(root, "b", "5", register="QUEUE",        # the next free M
+            decision="**CHOOSE** between (1) a and (2) b",
+            status="OPEN -- gated on the test")
+
+    # Neither commit touched the lint; each touched only its own register.
+    for branch, page in (("a", "docs/current/BACKLOG.md"),
+                         ("b", "docs/current/QUEUE.md")):
+        changed = subprocess.run(
+            ["git", "diff", "--name-only", "main", branch],
+            cwd=root, capture_output=True, text=True).stdout.split()
+        assert changed == [page], (branch, changed)
+
+    merged = _merge(root, "a", "b")
+    assert merged.returncode == 0, merged.stdout + merged.stderr
+    assert "CONFLICT" not in (merged.stdout + merged.stderr)
+
+    lint_after = (root / "tools" / "lint_register_ids.py").read_bytes()
+    assert lint_after == lint_before, "the merge touched the lint file"
+    assert b"<<<<<<<" not in lint_after
+
+    checked = subprocess.run(
+        [sys.executable, "tools/lint_register_ids.py"], cwd=root,
+        capture_output=True, text=True)
+    assert checked.returncode == 0, checked.stdout + checked.stderr
+
+
+def test_when_both_branches_take_the_same_number_the_LINT_catches_it(tmp_path):
+    """The hazard did not vanish, it MOVED — and this is where it lands.
+
+    Two branches deriving "the next free number" in the SAME series off the
+    same base both take it. Under the literal that was a merge conflict in
+    this file; now the merge is clean, the file is untouched, and rule 1 fires
+    on the merged tree naming both rows and both line numbers. That is the
+    trade this design makes, and it is only a good trade if the finding is
+    real, so: assert it.
+    """
+    root = _hermetic(tmp_path)
+    lint_before = (root / "tools" / "lint_register_ids.py").read_bytes()
+    _branch(root, "a", "tools")          # no --id: both derive the same one
+    _branch(root, "b", "tests")
+
+    merged = _merge(root, "a", "b")
+    assert merged.returncode == 0, merged.stdout + merged.stderr
+    assert (root / "tools" / "lint_register_ids.py").read_bytes() \
+        == lint_before
+
+    checked = subprocess.run(
+        [sys.executable, "tools/lint_register_ids.py"], cwd=root,
+        capture_output=True, text=True)
+    assert checked.returncode == 1, checked.stdout
+    assert "DUPLICATE:" in checked.stdout, checked.stdout
+
+
+def test_a_close_that_records_no_retirement_leaves_a_hole_the_lint_finds(
+        tmp_path):
+    """Rule 5, on the real registers: delete a row, record nothing, fail.
+
+    This is the successor to "an OPEN_IDS entry that outlived its row", and it
+    is what keeps `RETIRED` from rotting: the retirement is recorded by the
+    act of retiring, or the lint says so.
+    """
+    root = _hermetic(tmp_path)
+    page = root / "docs" / "current" / "BACKLOG.md"
+    module = _module()
+    text = page.read_text(encoding="utf-8")
+    lines = text.split("\n")
+    # Drop one EB row that is NOT the highest (the ceiling must not move).
+    numbers = sorted(n for cid, _ in module.row_ids(text)
+                     for s, n in [module.parse(cid)] if s == "EB")
+    victim = numbers[len(numbers) // 2]
+    kept = [l for l in lines if f"`EB-{victim}`" not in l]
+    assert len(kept) == len(lines) - 1, victim
+    page.write_text("\n".join(kept), encoding="utf-8")
+
+    checked = subprocess.run(
+        [sys.executable, "tools/lint_register_ids.py"], cwd=root,
+        capture_output=True, text=True)
+    assert checked.returncode == 1, checked.stdout
+    assert f"UNRECORDED RETIREMENT: EB-{victim}" in checked.stdout, \
+        checked.stdout

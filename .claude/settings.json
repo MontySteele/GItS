@@ -11,6 +11,11 @@
           },
           {
             "type": "command",
+            "command": "python tools/hooks/deny_deploy_outside_main.py",
+            "timeout": 20
+          },
+          {
+            "type": "command",
             "command": "python tools/hooks/push_gate.py",
             "timeout": 330
           }

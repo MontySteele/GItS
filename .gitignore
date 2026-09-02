@@ -74,3 +74,4 @@ card_gallery.html
 # third party's system prompt exactly as `understudy/logs/seat/` does.
 review/qa/*.stdout.txt
 review/qa/*.stderr.txt
+.gates/
