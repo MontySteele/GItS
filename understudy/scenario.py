@@ -122,6 +122,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -819,17 +820,28 @@ class _LogWindow:
         """The log of the instance THIS THREAD is bound to.
 
         `bridge.current_instance()` is the lane binding the whole harness
-        already resolves against (`EB-210`); falling back to lane 0 is the
-        same fallback `bridge.current_base` makes for an unbound thread.
+        already resolves against (`EB-210`); an unbound thread is lane 0, whose
+        tree is the machine's own `%APPDATA%` -- the same fallback
+        `bridge.current_base` makes.
+
+        BUILT BY HAND RATHER THAN THROUGH `instances.lane("lane0")`, and the
+        reason is a red CI run: `lane()` resolves the GAME DIRECTORY, which
+        `SystemExit`s when `klee-mod/local.props` is absent. A `Runner` is
+        constructed by two dozen unit tests on a machine that has no game and
+        needs no game, and a log path has no business asking where the game is
+        installed -- only where its user tree is.
         """
         from understudy import instances
-        inst = bridge.current_instance() or instances.lane("lane0")
-        return inst.log_path()
+        inst = bridge.current_instance()
+        root = getattr(inst, "appdata", None) if inst is not None else None
+        if root is None:
+            root = os.environ.get("APPDATA", "")
+        return Path(root).joinpath(*instances.LOG_RELATIVE)
 
     def reset(self) -> None:
         try:
             self.offset = self.path().stat().st_size
-        except OSError:
+        except (OSError, ValueError):
             self.offset = 0
 
     def tail(self) -> tuple[list[str], Path]:
