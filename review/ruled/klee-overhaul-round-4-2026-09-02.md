@@ -1,4 +1,4 @@
-Status: OPEN (round four; the Opus seat played, the Codex seat is owed; the read and the picks at the end)
+Status: RULED R242 2026-09-02
 
 # Klee overhaul, round four: growth 3, one seat so far
 
@@ -69,21 +69,26 @@ numbers are floors, not fun claims (Guardrail 7).
   Plating's first decrement, a Gremlin Merc's unlisted Weak, and the
   Steady enchant with no tooltip are the base game's screens.
 
-## 3. Picks (round three's three, with new evidence)
+## 3. Picks, ruled R242 (2026-09-02)
 
-1. **Spark at the start of a combat.** (1) None. (2) Klee starts every
-   combat with 1 Spark, so a Spark-priced card in the opening hand is
-   live. **Default moves to (2)**: two seats across two rounds and the
-   seat's own "by construction" argument say the opening-hand refusal is
-   structural, not draw luck. A starting resource is a rule in the brief's
-   list, so it is a play by you.
-2. **A long fuse.** (1) No rule; growth alone is the reason to wait.
-   **Default holds**: at 3 the wait is a real bet, and the seat lost it.
-   (2) A Bomb that has grown at least once pays 1 extra Spark when set
-   off.
-3. **Duck and Cover.** (1) Three copies stay. (2) Two copies, and a third
-   Kaboom! in the tenth slot. **Default moves to (2)**: three rounds, two
-   seats, one verdict.
+1. **Spark at the start of a combat.** RULED (2): Klee starts every combat
+   with 1 Spark. [USER]: Regent starts with 3 stars and has to generate more
+   through cards, so 1 is a reasonable compromise. Rule 4 in the brief
+   carries the line.
+2. **A long fuse.** RULED (1): no rule; growth alone is the reason to wait.
+3. **Duck and Cover.** RULED, neither option: the starter takes the
+   canonical shape. [USER]: the starting deck already does too much; base
+   characters open with four Strikes, four Defends and two good cards of
+   their own, and Klee had three, two and five. Draft 4 of the starter
+   (slice section 3) is Strike x4, Defend x4, Jumpy Dumpty, and Ka-pow! at 0
+   energy with Retain on the upgrade. Strike and Defend are the base game's
+   cards; Kaboom! and Duck and Cover leave the sheet.
 
-Growth 3 stays. The Codex seat plays this build next; its record joins
-this packet.
+Ruled in the same breath, for all three characters: where a character's
+basics are a renamed Strike or Defend with the same stat line, the base
+game's Strike and Defend replace them. Kokomi's Water's Edge and Coral
+Guard go the same way; Furina's basics carry register text and are read by
+the audit before anything moves.
+
+Growth 3 stays. Round five is the draft-4 starter build; the seats play it
+first, then, because rule 4 changed, [USER].

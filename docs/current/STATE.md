@@ -140,11 +140,11 @@ are in [`workstreams.md`](workstreams.md).
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside: quarantined prototype surface, the independent seat, Kokomi → Klee
   → Furina in sequence with the shared Burst retirement last (R220 B).
-- **Klee** — the overhaul is at Prototype round 4 (PR #265, growth 3): the
-  Opus seat played it, the Codex seat is owed, and the packet
-  `review/active/klee-overhaul-round-4-2026-09-02.md` carries three picks for
-  [USER] (start with 1 Spark, Duck and Cover ×2, no long fuse); `EB-289` to
-  `EB-291` are the round-four finds.
+- **Klee** — the overhaul is at Prototype: round 4 is ruled (R242: Klee
+  starts each combat with 1 Spark, no long fuse, and the starter takes the
+  canonical shape, Strike x4 / Defend x4 / Jumpy Dumpty / Ka-pow! at 0);
+  round 5 is that build, seats first, then [USER] since rule 4 changed.
+  `review/ruled/klee-overhaul-round-4-2026-09-02.md`; `EB-289` to `EB-291`.
 - **Kokomi** — the OVERHAUL is at Prototype round 2 on draft 6, *the Plan*
   (brief R241): the Bake-Kurage is a pet, a card played on it writes its Plan
   line, both seats played the build, [USER]'s first run's finds are fixed

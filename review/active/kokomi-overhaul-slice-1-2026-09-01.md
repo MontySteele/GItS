@@ -37,10 +37,14 @@ only on Rare cards that Exhaust. Keywords with tooltips: Plan, Mend.
 
 ## 3. The starter (ten cards, four ids)
 
+Strike and Defend are the base game's cards (R242): the renamed twins
+Water's Edge and Coral Guard leave the sheet, and her Attacks still apply
+Hydro by the catalyst rule, which the build checks on a base Strike.
+
 | Card | Cost | Type | Printed text | Copies |
 |---|---|---|---|---|
-| Water's Edge | 1 | Attack | Deal 6 damage. | 4 |
-| Coral Guard | 1 | Skill | Gain 5 Block. | 4 |
+| Strike | 1 | Attack | Deal 6 damage. | 4 |
+| Defend | 1 | Skill | Gain 5 Block. | 4 |
 | Kurage's Oath | 1 | Skill | Plan: Deal 5 damage to every enemy. | 1 |
 | Slack Water | 1 | Attack | Deal 4 damage. Apply 1 Weak. Plan: every enemy gains 2 Weak. | 1 |
 
