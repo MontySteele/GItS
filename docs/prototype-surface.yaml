@@ -570,3 +570,110 @@
    effects: [{op: damage, amount: 9, target: enemy, applies_element: true},
              {op: conditional, if: target_has_aura,
               then: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}]}]}
+
+# THE SAME OVERHAUL'S THIRTEEN ROWS THAT NEEDED ENGINE HOOKS. Same source and
+# same terms; the hooks are built now, in both engines, and which hook each row
+# spends is in docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_mc_diona_icy_paws, name: "Diona — Icy Paws (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
+   cost: 1, type: skill,
+   description: "Gain 6 [gold]Block[/gold]. When this [gold]Block[/gold] absorbs damage, apply [gold]Cryo[/gold] to the attacker.",
+   effects: [{op: block, amount: 6},
+             {op: apply_power, power: mc_icy_paws, amount: 6, target: self}]}
+
+- {id: proto_mc_noelle_sweeping_time, name: "Noelle — Sweeping Time", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: geo,
+   cost: 2, type: attack,
+   description: "Deal damage equal to your [gold]Block[/gold] to ALL enemies.",
+   effects: [{op: damage, target: all_enemies, applies_element: true,
+              amount_formula: {base: 0, per: 1, count: player_block}}]}
+
+- {id: proto_mc_barbara_melody_loop, name: "Barbara — Melody Loop", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: hydro,
+   cost: 1, type: skill, exhaust: true,
+   description: "Gain 4 [gold]Block[/gold]. For 3 turns, at the start of your turn apply [gold]Hydro[/gold] to target enemy.",
+   effects: [{op: block, amount: 4},
+             {op: apply_power, power: mc_melody_loop, amount: 3, target: enemy}]}
+
+- {id: proto_mc_bennett_passion_overload, name: "Bennett — Passion Overload (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: pyro,
+   cost: 0, type: skill,
+   description: "Your next [gold]Attack[/gold] this turn deals 4 more damage and applies [gold]Pyro[/gold].",
+   effects: [{op: apply_power, power: mc_passion_overload, amount: 4, target: self}]}
+
+- {id: proto_mc_dahlia_sacramental_shower, name: "Dahlia — Sacramental Shower (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
+   cost: 1, type: skill,
+   description: "Place a [gold]Shower[/gold]: the next time an enemy attacks you, deal 9 [gold]Hydro[/gold] damage to it first.",
+   effects: [{op: apply_power, power: mc_sacramental_shower, amount: 1, target: self}]}
+
+- {id: proto_mc_dahlia_favonian_favor, name: "Dahlia — Favonian Favor (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: hydro,
+   cost: 1, type: skill,
+   description: "Gain 7 [gold]Block[/gold]. Whenever a reaction happens this turn, gain 3 [gold]Block[/gold].",
+   effects: [{op: block, amount: 7},
+             {op: apply_power, power: mc_favonian_favor, amount: 3, target: self}]}
+
+- {id: proto_mc_durin_binary_form, name: "Durin — Binary Form", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
+   cost: 2, type: power,
+   description: "Deal 10 damage to ALL enemies, then choose one for the fight. [gold]White[/gold]: enemies take 50% more damage from reactions. [gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage.",
+   effects: [{op: damage, amount: 10, target: all_enemies, applies_element: true},
+             {op: choose_one, modes: [
+              {label: "[gold]White[/gold]: enemies take 50% more damage from reactions",
+               effects: [{op: apply_power, power: mc_binary_white, amount: 1, target: self}]},
+              {label: "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage",
+               effects: [{op: apply_power, power: mc_binary_dark, amount: 8, target: self}]}]}]}
+
+- {id: proto_mc_razor_claw_and_thunder, name: "Razor — Claw and Thunder", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
+   cost: 1, type: attack,
+   description: "Deal 8 damage. If this is the third [gold]Attack[/gold] you played this turn, gain 1 [gold]Energy[/gold].",
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
+             {op: conditional, if: nth_attack_this_turn_3,
+              then: [{op: energy, amount: 1}]}]}
+
+- {id: proto_mc_razor_lightning_fang, name: "Razor — Lightning Fang", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
+   cost: 1, type: skill, exhaust: true,
+   description: "For 2 turns, your [gold]Attacks[/gold] apply [gold]Electro[/gold] and deal 3 more damage.",
+   effects: [{op: apply_power, power: mc_lightning_fang, amount: 2, target: self}]}
+
+- {id: proto_mc_varka_sturm_und_drang, name: "Varka — Sturm und Drang", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
+   cost: 2, type: power,
+   description: "Whenever a [gold]Swirl[/gold] happens, your next [gold]Attack[/gold] deals 6 more damage of the swirled element.",
+   effects: [{op: apply_power, power: mc_sturm_und_drang, amount: 6, target: self}]}
+
+- {id: proto_mc_amber_explosive_puppet, name: "Amber — Explosive Puppet", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: pyro,
+   cost: 1, type: skill,
+   description: "Place [gold]Baron Bunny[/gold]: the next time an enemy attacks you, take 3 less damage and deal 8 [gold]Pyro[/gold] damage to ALL enemies.",
+   effects: [{op: apply_power, power: mc_baron_bunny, amount: 1, target: self}]}
+
+- {id: proto_mc_eula_glacial_illumination, name: "Eula — Glacial Illumination", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: cryo,
+   cost: 1, type: skill, exhaust: true,
+   description: "Place a [gold]Lightfall Sword[/gold] on target enemy: for 2 turns it counts your [gold]Attacks[/gold]; then it deals 8 damage plus 5 per [gold]Attack[/gold] counted.",
+   effects: [{op: apply_power, power: mc_lightfall_sword, amount: 2, target: enemy}]}
+
+- {id: proto_mc_mika_starfrost_swirl, name: "Mika — Starfrost Swirl", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
+   cost: 1, type: attack,
+   description: "Deal 5 damage to ALL enemies. Your next [gold]Attack[/gold] costs 1 less.",
+   effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
+             {op: apply_power, power: mc_starfrost_discount, amount: 1, target: self}]}

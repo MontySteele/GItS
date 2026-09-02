@@ -61,20 +61,25 @@ internal static class CompanionOverhaulRoster
             .ToList();
 
     /// <summary>
-    /// Mondstadt's twenty-one rewritten Universals, in the workshop's sec.3
+    /// Mondstadt's thirty-four rewritten Universals, in the workshop's sec.3
     /// character order. Coven Personals (its sec.4) and Klee-only stand-ins are
     /// NOT here: this arm rewrites the Universal pool and nothing else, and a
     /// Personal is Klee's kit rather than a companion offer.
     ///
-    /// TWENTY-ONE OF THE WORKSHOP'S THIRTY-FOUR. The thirteen that are missing
-    /// are missing because their printed text wants an engine hook that does
-    /// not exist in either engine -- a Block-absorption trigger, a
-    /// pre-enemy-attack trap, a next-Attack element override, a Swirl event, an
-    /// Attack counter, a next-Attack discount. Each one is named, with the hook
-    /// it wanted, in <c>docs/notes/prototype-surface-provenance.md</c>. A card
-    /// that cannot be printed as written is left OUT rather than replaced by a
-    /// simpler card, which is the same rule the Klee overhaul applied to
-    /// Vermillion Pact.
+    /// THIRTY-FOUR OF THIRTY-FOUR, in two waves. Twenty-one landed first; the
+    /// other thirteen were held back because their printed text wanted an
+    /// engine hook that existed in NEITHER engine -- a Block-absorption
+    /// trigger, a pre-enemy-attack trap, a next-Attack element override, a
+    /// Swirl event that remembers its element, an Attack counter, a next-Attack
+    /// cost discount, a Block-reading damage formula, a power on a chosen body,
+    /// a counting delayed blade, and two damage-pipeline modifiers behind a
+    /// modal Power. Those hooks are
+    /// <c>Powers/Prototype/CompanionOverhaulHooks.cs</c> and the sim's
+    /// `companion_overhaul_*` block; which row spends which is in
+    /// <c>docs/notes/prototype-surface-provenance.md</c>. The rule that held
+    /// them out still binds anything later: a card that cannot be printed as
+    /// written is left OUT rather than replaced by a simpler card, the same
+    /// rule the Klee overhaul applied to Vermillion Pact.
     /// </summary>
     private static IEnumerable<CardModel> Universals() => new CardModel[]
     {
@@ -99,5 +104,19 @@ internal static class CompanionOverhaulRoster
         ModelDb.Card<ProtoMcLisaVioletArc>(),
         ModelDb.Card<ProtoMcLisaLightningRose>(),
         ModelDb.Card<ProtoMcRosariaRavagingConfession>(),
+        // The thirteen the engine hooks unblocked, in the same sec.3 order.
+        ModelDb.Card<ProtoMcDionaIcyPaws>(),
+        ModelDb.Card<ProtoMcNoelleSweepingTime>(),
+        ModelDb.Card<ProtoMcBarbaraMelodyLoop>(),
+        ModelDb.Card<ProtoMcBennettPassionOverload>(),
+        ModelDb.Card<ProtoMcDahliaSacramentalShower>(),
+        ModelDb.Card<ProtoMcDahliaFavonianFavor>(),
+        ModelDb.Card<ProtoMcDurinBinaryForm>(),
+        ModelDb.Card<ProtoMcRazorClawAndThunder>(),
+        ModelDb.Card<ProtoMcRazorLightningFang>(),
+        ModelDb.Card<ProtoMcVarkaSturmUndDrang>(),
+        ModelDb.Card<ProtoMcAmberExplosivePuppet>(),
+        ModelDb.Card<ProtoMcEulaGlacialIllumination>(),
+        ModelDb.Card<ProtoMcMikaStarfrostSwirl>(),
     };
 }
