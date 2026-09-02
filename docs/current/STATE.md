@@ -140,17 +140,22 @@ are in [`workstreams.md`](workstreams.md).
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside: quarantined prototype surface, the independent seat, Kokomi → Klee
   → Furina in sequence with the shared Burst retirement last (R220 B).
-- **Klee** — the overhaul is at Prototype: R237's draft-3 starter (Set off
-  only on Ka-pow!) is built, round 4 (PR #265, growth 3, 0.2.1993+proto) is
-  deployed and the seats are on it; `EB-285` to `EB-288` are the round-three
-  finds and the round packets are `review/active/klee-overhaul-round-*.md`.
-- **Kokomi** — the OVERHAUL is at draft 6, *the Plan* (brief approved R241):
-  the Bake-Kurage is a real pet, a card played on it writes its Plan line, and
-  draft 2's Tide/Surge/Exert are deleted. Built behind `KOKOMI_OVERHAUL`
-  (PR #266), awaiting its Prototype gate; the sim twin of the Plan now runs
-  beside the C# (`tier0/engine/kokomi_plan.py`), every drafter price still ZERO
-  so no world moved. Beside it the Kurage memory is base kit behind
+- **Klee** — the overhaul is at Prototype round 4 (PR #265, growth 3): the
+  Opus seat played it, the Codex seat is owed, and the packet
+  `review/active/klee-overhaul-round-4-2026-09-02.md` carries three picks for
+  [USER] (start with 1 Spark, Duck and Cover ×2, no long fuse); `EB-289` to
+  `EB-291` are the round-four finds.
+- **Kokomi** — the OVERHAUL is at Prototype round 2 on draft 6, *the Plan*
+  (brief R241): the Bake-Kurage is a pet, a card played on it writes its Plan
+  line, both seats played the build, [USER]'s first run's finds are fixed
+  (PR #271) and the fresh rules-gate run is on 0.2.2024+proto; packet
+  `review/active/kokomi-overhaul-round-2-2026-09-02.md` (PR #275). The sim
+  twin runs beside the C# (`tier0/engine/kokomi_plan.py`), every drafter
+  price still ZERO. Beside it the Kurage memory is base kit behind
   `C.KURAGE_MEMORY`, display rebuild `EB-198`, cadence read `EB-234`.
+- **Seats** — two games at once (`--lane 1` / `GITS_LANE`, PR #274), a
+  local-model seat (`blindplay session --backend local`, PR #269, live proof
+  owed), and the render fixes `EB-290`/`EB-294`/`EB-298`/`EB-299` (PR #272).
 - **Furina** — the reframe is countersigned (R220 A), slice 1 is built in the
   sim behind five flags that all ship OFF, Spotlight is ruled one-mode priced
   (R228), and the C# arm is deferred.
