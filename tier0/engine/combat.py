@@ -14,8 +14,9 @@ import random
 from typing import Callable
 
 from tier0 import constants as C
-from tier0.engine import (effects, furina_reframe, kokomi_plan, potions,
-                          powers, reactions, refpowers, relics, resources)
+from tier0.engine import (effects, furina_reframe, klee_overhaul, kokomi_plan,
+                          potions, powers, reactions, refpowers, relics,
+                          resources)
 from tier0.engine.state import (Card, CombatState, Enemy, Player,
                                 remove_instance, sync_fanfare_cap_to_max_hp)
 
@@ -245,6 +246,15 @@ def card_playable(state: CombatState, card: Card) -> bool:
     # `modal_refusal` is the same predicate with the reason attached.
     if modal_refusal(state, card) is not None:
         return False
+    # QUARANTINED (C.KLEE_OVERHAUL). `EB-261`, and it is the Spark gate's own
+    # argument one resource over: a card whose whole body is a damage-less Set
+    # off pays its price and resolves to NOTHING on a Bomb-less board. The mod
+    # refuses it at `CardModel.IsPlayable`, the extension point the base game
+    # documents for exactly this shape, and this is that refusal at this
+    # engine's twin seam. DERIVED FROM THE ROW -- see
+    # `klee_overhaul.set_off_only` -- never a per-card flag.
+    if klee_overhaul.refuses_for_no_bomb(state, card):
+        return False
     # No Fanfare playability gate: Fanfare is read, never spent (F-A4).
     return card_cost(state, card) <= state.player.energy
 
@@ -406,7 +416,14 @@ def card_cost(state: CombatState, card: Card) -> int:
     # picks it. With `SPARK_ALT_COST_ENABLED` on, an Attack costs what it
     # prints (or what the Power above charges), and a full bank discounts
     # nothing.
-    if (not C.SPARK_ALT_COST_ENABLED
+    #
+    # AND RETIRED UNDER THE KLEE OVERHAUL TOO (QUARANTINED, C.KLEE_OVERHAUL),
+    # which is rule 7 in as many words: "no automatic free attack, no 'at 3
+    # Sparks'". The C# says it one switch up -- `SparkPower.BaseRuleActive` is
+    # `false` for the whole of `PROTOTYPE_CARDS`, so both prototype arms
+    # inherit the retirement, and the overhaul's Spark line is the printed
+    # price and nothing else.
+    if (not (C.SPARK_ALT_COST_ENABLED or klee_overhaul.live(state))
             and card.type == "attack"
             and state.player.sparks >= spark_threshold(state)):
         return 0
@@ -441,7 +458,9 @@ def play_card(state: CombatState, card: Card) -> None:
     # before the card is played. R34's X exemption above goes with it (there
     # is no spend to be exempt from); the branch is left inert rather than
     # deleted so the OFF arm still runs the shipped rule byte for byte.
-    if (not C.SPARK_ALT_COST_ENABLED
+    # The KLEE OVERHAUL retires it too (rule 7), on the same one switch the
+    # zeroing above is retired by -- see `card_cost` for the C#'s side of it.
+    if (not (C.SPARK_ALT_COST_ENABLED or klee_overhaul.live(state))
             and card.type == "attack" and cost == 0
             and p.sparks >= spark_threshold(state)
             and card.cost != 0 and card.cost != "X"):
@@ -701,6 +720,14 @@ def _finish_play(state: CombatState, card: Card,
     # the enemy-hit funnel. Give Fairy the same lethal checkpoint, then update
     # HP-threshold relics before the pilot chooses another card.
     _revive_player_if_needed(state)
+    # QUARANTINED (C.KLEE_OVERHAUL). RULE 3's BACKSTOP (`EB-279`), at the same
+    # shared half of a play the two arms above use and for the same structural
+    # reason: a manual play and an auto-play both enter here and nothing else
+    # does. `KleeOverhaulSweepHooks.AfterCardPlayed` is the mod's twin, and the
+    # guarantee it is worded on is this one -- whatever else happened, the
+    # Bombs of an enemy something else killed are on a LIVING enemy before the
+    # next card is played. Idempotent: with nothing owed it is one list walk.
+    klee_overhaul.sweep_jumps(state)
     if p.relic_effects:
         relics.reevaluate_conditionals(state)
 
@@ -846,6 +873,19 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # the draw. Aggression pulls Attacks out of the discard pile here; running
     # it after the draw would over-fill the hand versus the real game.
     refpowers.side_turn_start_early(state)
+    # QUARANTINED (C.KLEE_OVERHAUL). THE LEDGER'S ROLL, on the line above the
+    # growth that follows it and for `kokomi_plan.roll_turn`'s reason one arm
+    # over: this turn's explosion count becomes last turn's at the ONE place
+    # either moves, so Grounded and the counter cannot disagree about which
+    # turn "last" was. The C# rolls lazily on a round stamp
+    # (`KleeOverhaulLedger.For`); `roll_to` is that same stamp comparison, so a
+    # skipped round still reports an honest zero.
+    klee_overhaul.roll_to(state, state.turn)
+    # RULE 1 and RULE 3, at StS2 site A -- `ProtoBombPower.BeforeSideTurnStart`,
+    # which is the hook the shipped Bomb uses to FIRE and this arm uses only to
+    # GROW (rule 7). Jumps first, so a Bomb owed one grows on its new enemy
+    # this turn rather than next.
+    klee_overhaul.turn_start(state)
     if refpowers.should_clear_block(p):      # Barricade suppresses the clear
         p.block = 0
 
@@ -918,6 +958,16 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     _revive_player_if_needed(state)             # Inferno / Mantle self-damage
     if not p.alive or state.over:
         return
+
+    # QUARANTINED (C.KLEE_OVERHAUL). Rule 4's OPENING SPARK and Grounded's
+    # Block, both at StS2 site E/F (`AfterPlayerTurnStart`) -- the site
+    # `KleeOverhaulOpening` and `GroundedPower` each name for themselves, and
+    # the line above is this engine's own name for it. The Spark has to land
+    # here rather than at combat start because the sim's combat-start effects
+    # fire on TURN 1 after the block clear, the energy reset and the draw; the
+    # Block has to land here because it reads a ledger that was rolled at the
+    # top of this function.
+    klee_overhaul.turn_start_late(state)
 
     # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): RULE 2's RESOLUTION POINT --
     # every Plan she wrote last turn is carried out, in order, HERE.
@@ -1028,6 +1078,13 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # effects" -- which is precisely what player_turn_end_triggers holds.
     refpowers.before_side_turn_end_early(state)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
+    # QUARANTINED (C.KLEE_OVERHAUL). The OVERHAUL's Sparks 'n' Splash -- "at
+    # the end of your turn, deal Pyro damage to a random enemy equal to the
+    # Bombs on it" -- beside the shipped card of the same name and at the same
+    # site, which is `BombEchoPower.BeforeSideTurnEnd`'s twin. It READS the
+    # pile and does not spend it, so rule 7 is untouched: nothing goes off,
+    # no Spark is minted and the arm's ledger never moves.
+    klee_overhaul.turn_end(state)
     _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
     #                              drop a phased boss
     # Injected Burn/Wither (§10.2): end-of-turn damage while in hand,
@@ -1246,6 +1303,19 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # rather than returning None.
             dmg = effects.companion_overhaul_before_enemy_hit(
                 state, enemy, dmg)
+            # QUARANTINED (C.KLEE_OVERHAUL). RULE 6, at the moment the comment
+            # above already names as its own: "a Mine ALSO goes off when its
+            # enemy attacks you, BEFORE the hit lands". The mod's hook is
+            # `ProtoBombPower.BeforeDamageReceived`, guarded on the dealer
+            # being this pile's enemy, the target being the Klee who placed it
+            # and the incoming hit being a POWERED ATTACK -- and all three are
+            # true by construction here: this is the attack branch of that
+            # enemy's own intent, and tier 0 runs one seat.
+            #
+            # NO PER-ACTION LATCH, unlike the shipped Bomb's suppression: the
+            # Mines are consumed, so the second hit of a multi-hit intent finds
+            # none. The rule is self-limiting.
+            klee_overhaul.mines_answer_attack(state, enemy)
             if not enemy.alive:
                 # A trap killed the attacker before its hit landed. Same exit
                 # the FlameBarrier case takes at the foot of this loop.

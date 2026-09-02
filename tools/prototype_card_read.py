@@ -22,16 +22,18 @@ memoized caches whose answers move with it (`loader._card_prototype`,
 the previous value and re-clears on the way out, so an importing test leaves the
 world where it found it.
 
-ONE ARM DOES NOT RUN. `KLEE_OVERHAUL`'s eight ops
-(`set_off`, `plant_bomb`, `grow_bombs`, `merge_bombs`, `remove_bomb_for_block`,
-`damage_set_off_total`, `double_set_off`, `draw_per_set_off`) are registered in
-`effects.OPS` as `_op_klee_overhaul_unbuilt`, which RAISES: that arm is C# first
-and the sim was never brought up for it. So `--arm klee` reports the refusal by
-name rather than a table, and `probe_arm_runnable` is what a caller asks first.
+BOTH ARMS RUN NOW. `KLEE_OVERHAUL`'s eight ops (`set_off`, `plant_bomb`,
+`grow_bombs`, `merge_bombs`, `remove_bomb_for_block`, `damage_set_off_total`,
+`double_set_off`, `draw_per_set_off`) used to be registered in `effects.OPS` as
+a handler that RAISED -- that arm was C# first and the sim had not been brought
+up for it -- and `EB-312` raised the twin (`tier0/engine/klee_overhaul.py`)
+after the C# had proved the rules. `probe_arm_runnable` is still what a caller
+asks first, and it still answers off `effects.OPS` rather than off a list kept
+here, so an arm that is re-quarantined reports the refusal again by itself.
 
 Usage:
     python tools/prototype_card_read.py --arm kokomi --runs 300 --seed 42
-    python tools/prototype_card_read.py --arm kokomi --runs 300 --acts 1 --json out.json
+    python tools/prototype_card_read.py --arm klee --runs 300 --acts 1 --json out.json
 """
 
 from __future__ import annotations
@@ -82,23 +84,36 @@ def arm_live(arm: str):
         rewards.character_pool.cache_clear()
 
 
+#: The handler name each arm's ops would be registered under if the arm were
+#: not built. PER ARM, so an unbuilt arm refuses only its OWN read: asked of
+#: `effects.OPS` itself, so a re-quarantined arm answers the probe without a
+#: second list here having to be remembered.
+_UNBUILT_MARKERS = {"klee": "_op_klee_overhaul_unbuilt",
+                    "kokomi": "_op_kokomi_overhaul_unbuilt"}
+
+
 def probe_arm_runnable(arm: str, seed: int = 7) -> str | None:
     """None if the arm's own rows resolve in this engine, else the refusal.
 
-    Asked by resolving every prototype row's body against a throwaway combat is
-    more machinery than the question needs: the ops that refuse do so
-    unconditionally, so reading `effects.OPS` for the arm's unbuilt marker
+    Resolving every prototype row's body against a throwaway combat is more
+    machinery than the question needs: an arm that is not built registers its
+    ops under one refusing handler, so reading `effects.OPS` for that marker
     answers it exactly and instantly.
+
+    BOTH ARMS ARE BUILT TODAY (`EB-312` raised the Klee twin; the Kokomi twin
+    landed 2026-09-02), so this returns None for both -- and it is kept, not
+    deleted, because the question it answers is "does this engine run the arm",
+    which a future arm will ask again.
     """
     from tier0.engine import effects
+    marker = _UNBUILT_MARKERS[arm]
     unbuilt = sorted(
         op for op, fn in effects.OPS.items()
-        if getattr(fn, "__name__", "") == "_op_klee_overhaul_unbuilt")
-    if arm == "klee" and unbuilt:
-        return ("the KLEE_OVERHAUL arm does not run in this engine: "
-                f"{', '.join(unbuilt)} are registered as "
-                "`_op_klee_overhaul_unbuilt`, which raises (C# first; the sim "
-                "was not brought up for slice one)")
+        if getattr(fn, "__name__", "") == marker)
+    if unbuilt:
+        return (f"the {ARMS[arm]['flag']} arm does not run in this engine: "
+                f"{', '.join(unbuilt)} are registered under a refusing "
+                "handler (C# first; the sim was not brought up for it)")
     return None
 
 
