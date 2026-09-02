@@ -101,9 +101,9 @@ v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
 `+proto` dev mark beside it (R217 D). The **installed build is
-`0.2.1786+proto.dirty`** (2026-08-30), a dev package carrying both prototype
-arms behind `-p:PrototypeCards=true`; the **last RELEASE package deployed is
-`0.2.1357`** (2026-08-29). Pin history and the per-build narrative:
+`0.2.2083+proto.dirty`** (2026-09-02, main `3f6157c0`), a dev package carrying
+the three prototype arms behind `-p:PrototypeCards=true`; the **last RELEASE
+package deployed is `0.2.1357`** (2026-08-29). Pin history and the per-build narrative:
 [`workstreams.md`](workstreams.md).
 
 ## Systems
@@ -132,24 +132,29 @@ are in [`workstreams.md`](workstreams.md).
 
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
-- **Klee** — the overhaul is at Prototype: round 4 is ruled (R242: Klee
-  starts each combat with 1 Spark, no long fuse, and the starter takes the
-  canonical shape, Strike x4 / Defend x4 / Jumpy Dumpty / Ka-pow! at 0);
-  round 5 is that build, seats first, then [USER] since rule 4 changed.
-  `review/ruled/klee-overhaul-round-4-2026-09-02.md`; `EB-289` to `EB-291`.
-- **Kokomi** — the OVERHAUL is at Prototype round 2 on draft 6, *the Plan*
+- **Klee** — the overhaul is at Prototype round 5, the R242 starter, played
+  by the Opus and local seats on lanes 1 and 2; the packet applies growth 5
+  and puts Ka-pow!'s Retain, Dig In and the round-six play to [USER] (PR
+  #292). The prototype balance pass (twelve D defaults on both arms, read
+  `review/records/balance-read-prototype-2026-09-02.md`) is being built;
+  `EB-311` to `EB-314` are its and round five's rows.
+- **Kokomi** — the OVERHAUL is at Prototype round 3 on draft 6, *the Plan*
   (brief R241): the Bake-Kurage is a pet, a card played on it writes its Plan
-  line, both seats played the build, [USER]'s first run's finds are fixed
-  (PR #271) and the fresh rules-gate run is on 0.2.2024+proto; packet
-  `review/active/kokomi-overhaul-round-2-2026-09-02.md` (PR #275). The sim
-  twin runs beside the C# (`tier0/engine/kokomi_plan.py`), every drafter
-  price still ZERO. Beside it the Kurage memory is base kit behind
-  `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
-- **Seats** — two games at once (`--lane 1` / `GITS_LANE`, PR #274), proven
-  end to end on lane 1 2026-09-02 (`review/qa/lane1-live-reads-2026-09-02/`;
-  it also took the map and arm-keyword live reads and found `EB-310`, the
-  shared bridge no teardown may remove); a local-model seat (PR #269, live
-  proof owed); and the render fixes (PR #272), of which `EB-299` remains.
+  line. [USER]'s act-1 run passed the rules gate (R243); round three
+  (`review/ruled/kokomi-overhaul-round-3-2026-09-02.md`) files the casket
+  and morning legibility rows (`EB-316`, `EB-317`); the acts-2/3 depth is
+  the Plan cards' own design, no momentum rule (R243). The sim twin runs
+  beside the C#
+  (`tier0/engine/kokomi_plan.py`), its drafter prices Plan lines only once
+  `EB-311` lands; the Kurage memory is base kit behind `C.KURAGE_MEMORY`
+  (`EB-198`, `EB-234`).
+- **Seats** — two lanes beside [USER]'s game (`--lane 1` / `--lane 2`,
+  `GITS_LANE`), proven twice on 2026-09-02; the local Qwen seat is
+  live-proven (needs `GITS_LOCAL_PLAY_TOKENS=12000`); a teardown leaves the
+  shared bridge in place (`EB-310`, met live). Player-facing text now has
+  measured ceilings and a lint (`docs/current/text-conventions.md`, PR #291);
+  the shipped-sheet proposal is [USER]'s
+  (`review/active/text-conventions-shipped-2026-09-02.md`).
 - **Furina** — the reframe is countersigned (R220 A), slice 1 is built in the
   sim behind five flags that all ship OFF, and the C# arm is deferred.
 - **Companion cards** — R234 ruled the slate whole, Mondstadt first, in

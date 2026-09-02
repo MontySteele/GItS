@@ -1152,6 +1152,17 @@ public static partial class McpMod
             // Implementation and its reflection contract: gits/GitsResources.cs.
             state["resources"] = GitsResourceSnapshot(combatState);
 
+            // GItS LOCAL EDIT (`EB-181`, the meter half). AN ID AND AN AMOUNT
+            // IS THE WHOLE OF THE LINE ABOVE, so a meter reaches the page with
+            // no ceiling and the blind render has had to say so on every meter
+            // row it prints ("the game's data feed carries this meter's amount
+            // only: no maximum"). `resources` keeps its shape exactly -- it is
+            // an `{id: amount}` map several readers already parse -- and the
+            // fuller row rides beside it, per id, so a reader that wants the
+            // ceiling asks for it and every reader that does not is unmoved.
+            // Implementation and its opt-in contract: gits/GitsResources.cs.
+            state["resource_info"] = GitsResourceInfo(combatState);
+
             // GItS LOCAL EDIT (EB-181, the Kokomi half). A resource snapshot is
             // an id and an amount, which is the whole of EB-181's second half
             // ("a meter has no maximum"): under the Kurage's memory rule Charge
@@ -1312,7 +1323,7 @@ public static partial class McpMod
     /// </summary>
     private static Dictionary<string, object?> BuildCardInfo(CardModel card, PileType pile = PileType.None)
     {
-        return new Dictionary<string, object?>
+        var info = new Dictionary<string, object?>
         {
             ["id"] = card.Id.Entry,
             ["name"] = SafeGetText(() => card.Title),
@@ -1324,6 +1335,53 @@ public static partial class McpMod
             ["is_upgraded"] = card.IsUpgraded,
             ["keywords"] = BuildHoverTips(card.HoverTips)
         };
+
+        // GItS LOCAL EDIT (`EB-181`). A CARD FACE CARRIED NO ENCHANTMENT AT
+        // ALL. `is_upgraded` is on the wire and an enchantment is not, so run
+        // B6's Sharp *Water's Edge* reached NONE of the fields that exist and
+        // a hand holding an enchanted copy beside a plain one was two
+        // identical faces to every reader -- the blind page had to say so in
+        // words (`HAND_REPEAT_NOTE`) because it could not say which.
+        //
+        // `CardModel.Enchantment` is the game's own property and is null on
+        // almost every card, so the key is EMITTED ONLY WHEN THERE IS ONE:
+        // an absent key means "not enchanted" and every board that was not
+        // stays the size it was. `Amount` rides beside the name because an
+        // enchantment can stack, and `shows_amount` is the game's own
+        // `ShowAmount` -- whether the number is one a player is shown at all,
+        // which is not for this bridge to decide.
+        if (GitsEnchantmentInfo(card) is { } enchantment)
+        {
+            info["enchantment"] = enchantment;
+        }
+        return info;
+    }
+
+    /// <summary>
+    /// `{ id, name, description, amount, shows_amount }` for an enchanted
+    /// card, or null when the card carries none (`EB-181`). Never throws: it
+    /// runs inside every card serialisation on every state poll, including the
+    /// compendium's canonical copies.
+    /// </summary>
+    private static Dictionary<string, object?>? GitsEnchantmentInfo(CardModel card)
+    {
+        try
+        {
+            var enchantment = card.Enchantment;
+            if (enchantment == null) return null;
+            return new Dictionary<string, object?>
+            {
+                ["id"] = enchantment.Id.Entry,
+                ["name"] = SafeGetText(() => enchantment.Title),
+                ["description"] = SafeGetText(() => enchantment.DynamicDescription),
+                ["amount"] = enchantment.DisplayAmount,
+                ["shows_amount"] = enchantment.ShowAmount
+            };
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     private static Dictionary<string, object?> BuildCardState(CardModel card, int index)
@@ -2007,6 +2065,11 @@ public static partial class McpMod
             NDeckUpgradeSelectScreen => "upgrade",
             NDeckCardSelectScreen => "select",
             NSimpleCardSelectScreen => "simple_select",
+            // GItS LOCAL EDIT (`EB-263`). The enchant picker fell through to
+            // `GetType().Name`, so the page named the screen
+            // `NDeckEnchantSelectScreen` -- an internal class name at a blind
+            // reader, and a spelling no other screen on this wire uses.
+            NDeckEnchantSelectScreen => "enchant",
             _ => screen.GetType().Name
         };
 
@@ -2022,6 +2085,8 @@ public static partial class McpMod
 
         // Cards in the grid (sorted by visual position - MoveToFront can reorder children)
         var cardHolders = FindAllSortedByPosition<NGridCardHolder>(screen);
+        // GItS LOCAL EDIT (`EB-263`): the selection, read once for the screen.
+        var selected = GitsSelectedCards(screen);
         var cards = new List<Dictionary<string, object?>>();
         int index = 0;
         foreach (var holder in cardHolders)
@@ -2031,19 +2096,38 @@ public static partial class McpMod
 
             var cardInfo = BuildCardInfo(card);
             cardInfo["index"] = index;
+            cardInfo["selected"] = selected != null && selected.Contains(card);
             cards.Add(cardInfo);
             index++;
         }
         state["cards"] = cards;
+        // Whether the flag above is a READ or a default. `selected` is null
+        // when the grid could not be asked, and a page that cannot tell
+        // "nothing is selected" from "the feed does not know" would print the
+        // first while meaning the second.
+        state["selection_known"] = selected != null;
 
         // Preview container showing? (selection complete, awaiting confirm)
         // Upgrade screens use UpgradeSinglePreviewContainer / UpgradeMultiPreviewContainer
         var previewSingle = screen.GetNodeOrNull<Godot.Control>("%UpgradeSinglePreviewContainer");
         var previewMulti = screen.GetNodeOrNull<Godot.Control>("%UpgradeMultiPreviewContainer");
         var previewGeneric = screen.GetNodeOrNull<Godot.Control>("%PreviewContainer");
+        // GItS LOCAL EDIT (`EB-263`). THE ENCHANT SCREEN OPENED NO PREVIEW.
+        // `NDeckEnchantSelectScreen` names its two containers
+        // `%EnchantSinglePreviewContainer` / `%EnchantMultiPreviewContainer`
+        // (its `_Ready`), and neither spelling was looked up here -- so the
+        // pick a tester had just made reached the page nowhere and `EB-263`
+        // filed "the enchant picker offered no pick". Both hold
+        // `NPreviewCardHolder`s: the single one holds the BEFORE card and the
+        // enchanted AFTER card, in that tree order (`NEnchantPreview.Init`),
+        // and the multi one holds one per selected card.
+        var previewEnchantSingle = screen.GetNodeOrNull<Godot.Control>("%EnchantSinglePreviewContainer");
+        var previewEnchantMulti = screen.GetNodeOrNull<Godot.Control>("%EnchantMultiPreviewContainer");
         bool previewShowing = (previewSingle?.Visible ?? false)
                             || (previewMulti?.Visible ?? false)
-                            || (previewGeneric?.Visible ?? false);
+                            || (previewGeneric?.Visible ?? false)
+                            || (previewEnchantSingle?.Visible ?? false)
+                            || (previewEnchantMulti?.Visible ?? false);
         state["preview_showing"] = previewShowing;
         if (previewShowing)
         {
@@ -2051,6 +2135,8 @@ public static partial class McpMod
             AddPreviewCardsFromContainer(previewSingle, previewCards);
             AddPreviewCardsFromContainer(previewMulti, previewCards);
             AddPreviewCardsFromContainer(previewGeneric, previewCards);
+            AddPreviewCardsFromContainer(previewEnchantSingle, previewCards);
+            AddPreviewCardsFromContainer(previewEnchantMulti, previewCards);
             state["preview_cards"] = previewCards;
         }
 
@@ -2060,7 +2146,8 @@ public static partial class McpMod
         bool canCancel = false;
         if (previewShowing)
         {
-            foreach (var container in new[] { previewSingle, previewMulti, previewGeneric })
+            foreach (var container in new[] { previewSingle, previewMulti, previewGeneric,
+                                              previewEnchantSingle, previewEnchantMulti })
             {
                 if (container?.Visible == true)
                 {
@@ -2079,7 +2166,8 @@ public static partial class McpMod
 
         // Confirm button - search all preview containers and main screen
         bool canConfirm = false;
-        foreach (var container in new[] { previewSingle, previewMulti, previewGeneric })
+        foreach (var container in new[] { previewSingle, previewMulti, previewGeneric,
+                                          previewEnchantSingle, previewEnchantMulti })
         {
             if (container?.Visible == true)
             {

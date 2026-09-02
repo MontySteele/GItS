@@ -38,8 +38,9 @@ only on Rare cards that Exhaust. Keywords with tooltips: Plan, Mend.
 ## 3. The starter (ten cards, four ids)
 
 Strike and Defend are the base game's cards (R242): the renamed twins
-Water's Edge and Coral Guard leave the sheet, and her Attacks still apply
-Hydro by the catalyst rule, which the build checks on a base Strike.
+Water's Edge and Coral Guard leave the sheet. The base Strike applies no
+Hydro ([USER], 2026-09-02: the basic cards are supposed to be bad); her own
+Attacks still do, by the catalyst rule.
 
 | Card | Cost | Type | Printed text | Copies |
 |---|---|---|---|---|

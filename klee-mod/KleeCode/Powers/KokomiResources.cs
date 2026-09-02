@@ -959,6 +959,17 @@ public sealed class KokomiBurstResource : BasicCustomResource
     }
 
     /// <summary>
+    /// The meter's ceiling, on the wire (`EB-181`). The bridge's resource
+    /// snapshot is an id and an amount, so a meter reached a blind page with
+    /// no maximum and the render had to say so on every meter row it printed.
+    /// A ceiling is the MOD's fact and never BaseLib's, so the bridge asks for
+    /// a public int `Max` and reports `null` for any resource that declares
+    /// none (`vendor/STS2_MCP/gits/GitsResources.cs`, `GitsResourceInfo`).
+    /// This exposes the constant that is already the gate; it decides nothing.
+    /// </summary>
+    public int Max => KokomiConstants.BurstMax;
+
+    /// <summary>
     /// The meter is not an energy cost and must not be discounted like one.
     /// BaseLib forwards SetToFreeThisTurn / SetToFreeThisCombat onto every
     /// custom-resource cost unless the resource opts out here. A "this card is

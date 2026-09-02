@@ -92,9 +92,23 @@ RELIC_RARITY = re.compile(r"RelicRarity\.(\w+)")
 # `new DynamicVar("Lightning", 1m)` and `new PowerVar<FocusPower>(1m)` are the
 # two canonical-var spellings a relic model uses; both carry the printed
 # number, which is the half that moves in a balance patch.
-RELIC_NAMED_VAR = re.compile(r'new DynamicVar\(\s*"(\w+)"\s*,\s*(-?[\d.]+)m')
-RELIC_TYPED_VAR = re.compile(r"new (\w+)Var<(\w+)>\(\s*(-?[\d.]+)m")
-RELIC_PLAIN_VAR = re.compile(r"new (\w+)Var\(\s*(-?[\d.]+)m")
+#
+# THE `m` IS OPTIONAL, AND IT USED TO BE MANDATORY (`EB-193`). These three are
+# the card extractor's `VAR` regex a second time, and they carried its defect
+# a second time: a CanonicalVar whose backing type is `int` is built from a
+# bare int literal and has no decimal suffix, so every int-typed relic var was
+# dropped from the sentinel without a word -- Divine Right's 3 Stars among
+# them, which is half of `EB-193`'s acceptance and lives in `.sentinel/`
+# rather than in `game_ref/` because it is a `RelicModel` and not a card.
+#
+# OPTIONAL, NOT DELETED, and with the terminator the `m` was silently
+# serving as: a bare literal is admitted only at the end of its argument, so
+# the greedy `[\d.]+` cannot take the trailing dot off a member access on a
+# numeric literal and hand `float()` a string it cannot parse.
+RELIC_NAMED_VAR = re.compile(
+    r'new DynamicVar\(\s*"(\w+)"\s*,\s*(-?[\d.]+)(?:m|\s*[,)])')
+RELIC_TYPED_VAR = re.compile(r"new (\w+)Var<(\w+)>\(\s*(-?[\d.]+)(?:m|\s*[,)])")
+RELIC_PLAIN_VAR = re.compile(r"new (\w+)Var\(\s*(-?[\d.]+)(?:m|\s*[,)])")
 POOL_MEMBER = re.compile(r"ModelDb\.Relic<(\w+)>")
 CARD_MEMBER = re.compile(r"ModelDb\.Card<(\w+)>")
 STARTING_HP = re.compile(r"StartingHp\s*=>\s*(\d+)")

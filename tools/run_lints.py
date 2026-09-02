@@ -234,6 +234,12 @@ REGISTRY: tuple[Lint, ...] = (
     _ci("experiments-active",   "tools/lint_experiments_active.py"),
     # The review tree's three directories, and the paths that cite them.
     _ci("review-status",        "tools/lint_review_status.py"),
+    # EB-228, and the other half of review-status's question: that one asks
+    # whether a packet SAYS what it is, this asks whether a packet that HOLDS
+    # live work on a pick ever reached a register. Kokomi slice 2 sec.9 PICK 2
+    # held round-2 staging and minted no QUEUE row, so STATE.md read clean and
+    # a round-2 run was scheduled and stopped at the door on 2026-08-30.
+    _ci("packet-holds",         "tools/lint_packet_holds.py"),
     # The hooks under tools/hooks/ are the only code here that no test imports
     # and no lint reads -- they run out of process, on stdin JSON. A refusal
     # that quietly stopped refusing looks exactly like a session that never
