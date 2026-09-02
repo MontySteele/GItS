@@ -13,7 +13,7 @@
   ruling's own guard forbids the shape. One dev file that the release path
   never calls is the arrangement that leaves both halves true.
 
-  WHAT IS DIFFERENT FROM deploy.ps1, and it is exactly three things:
+  WHAT IS DIFFERENT FROM deploy.ps1, and it is exactly four things:
 
     1. `-p:PrototypeCards=true` on the build, which compiles
        Cards/Prototype/** and defines PROTOTYPE_CARDS.
@@ -24,6 +24,17 @@
        surface -- so without this a dev deploy could ship prototype classes
        that no longer match the sheet, which is the one way this script could
        hand a staged turn a card nobody wrote.
+    4. It installs the STS2_MCP bridge as its LAST step, so this machine's
+       next launch is parallel-ready (2026-09-02). The reason it belongs here
+       and nowhere near deploy.ps1: mods load at BOOT and this script is the
+       one moment the game is guaranteed closed (it refuses to run otherwise),
+       so it is the only moment the bridge can be put in front of a launch the
+       OWNER makes from Steam. Without it, an agent's second instance can only
+       ever reach a game the harness launched itself. A dev build is never
+       handed to anyone -- that is stated three times below -- so the harness
+       riding along with it reaches nobody a prototype class does not. It is a
+       WARNING and not a failure if it does not take: the klee package is
+       already deployed by then, and the bridge is a harness.
 
   WHAT IS NOT DIFFERENT, deliberately: the gate. validate.ps1 runs whole --
   every S-rule and the full pytest suite, with no fast mode requested and
@@ -151,10 +162,17 @@ $gameDir = ([xml](Get-Content $localProps)).Project.PropertyGroup.GameDir
 if ([string]::IsNullOrWhiteSpace($gameDir)) { throw "GameDir is empty in local.props." }
 if (-not (Test-Path $gameDir)) { throw "GameDir does not exist: $gameDir" }
 
+# ONE INSTALL MEANS ONE DEPLOYED BUILD, FOR EVERY LANE. The understudy funnel
+# can run a second game out of this same directory (`--lane 1`,
+# understudy/instances.py): a separate process, a separate port, a separate
+# user tree -- but mods\klee is shared, so there is no such thing as deploying
+# to one lane. This check is BY IMAGE NAME on purpose, and must stay that way:
+# by pid it would miss the other lane's game, whose held lock on klee.dll is
+# exactly the same lock. Every listed pid has to go before a deploy.
 $running = Get-Process -Name 'SlayTheSpire2' -ErrorAction SilentlyContinue
 if ($running) {
     $ids = $running.Id -join ', '
-    throw "Slay the Spire 2 is running (PID $ids). Close the game before deploying; it holds a lock on klee.dll."
+    throw "Slay the Spire 2 is running (PID $ids). Close EVERY game process before deploying; it holds a lock on klee.dll. One install means one deployed build for all lanes, so a second lane's game (understudy --lane 1) blocks this deploy exactly as the first one does -- tear its lane down (python -m understudy.embark --teardown --lane 1) rather than deploying around it."
 }
 
 # The prototype codegen staleness gate. FIRST, before anything is built:
@@ -317,3 +335,26 @@ Get-ChildItem $target | ForEach-Object {
 Write-Host ""
 Write-Host ("Installed version " + $version.Version + ". To go back to the release build:") -ForegroundColor Yellow
 Write-Host "  klee-mod\build\deploy.ps1" -ForegroundColor Yellow
+
+# THE FOURTH DIFFERENCE (2026-09-02). Install the harness bridge too, so the
+# next launch out of this install is parallel-ready: mods load at BOOT, and
+# this is the one moment the game is guaranteed closed, so it is the only
+# moment the bridge can be put in front of a launch the OWNER makes from
+# Steam. With it there, the owner's game answers on 15526 and an agent's
+# second instance takes 15527 (understudy --lane 1); without it, an agent can
+# only ever drive a game the harness launched itself.
+#
+# A WARNING RATHER THAN A FAILURE. The klee package is deployed by the line
+# above and the deploy has already succeeded; the bridge is a harness, and a
+# vendor-pin drift or a missing dotnet is a thing to be told about, not a
+# reason to report the mod deploy as failed. Removed by hand with
+# `.\build\deploy_bridge.ps1 -Remove` if it is ever in the way.
+Write-Host ""
+Write-Host "Installing the STS2_MCP bridge (parallel-ready launch)..." -ForegroundColor Cyan
+try {
+    & (Join-Path $PSScriptRoot 'deploy_bridge.ps1') -Configuration $Configuration
+} catch {
+    Write-Host ("WARNING: the bridge install did not take: " + $_.Exception.Message) -ForegroundColor Yellow
+    Write-Host "  The klee package IS deployed. Install the harness by hand with:" -ForegroundColor Yellow
+    Write-Host "  klee-mod\build\deploy_bridge.ps1" -ForegroundColor Yellow
+}

@@ -48,7 +48,7 @@ public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Change of Plans"),
-        ("description", "Exhaust. The jellyfish carries out your front [gold]Plan[/gold] now."),
+        ("description", "The jellyfish carries out your front [gold]Plan[/gold] now."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -71,6 +71,6 @@ public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        RemoveKeyword(CardKeyword.Exhaust);
     }
 }

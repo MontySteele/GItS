@@ -139,12 +139,28 @@ public static class ArmKeywordTips
              + "[gold]Bomb[/gold] goes off. " + shared;
     }
 
-    /// <summary>Rule 6.</summary>
+    /// <summary>
+    /// Rule 6, and its SECOND sentence is `EB-291`.
+    ///
+    /// The Bomb badge learned to say "after [gold]Weak[/gold]" at `EB-287`.
+    /// The Mine, which fires on its own during the ENEMY's turn and so is
+    /// never in front of a player at the moment it matters, said nothing at
+    /// all. The r4 Opus seat left a Gremlin Merc at 3 HP under a "Mine 3" as a
+    /// deliberate free kill, the Mine dealt 2, and the enemy survived and hit
+    /// him: "The Mine has no equivalent... no number, no Weak note."
+    ///
+    /// It states the RULE rather than a number, because a keyword tip is read
+    /// in hand where there is no pile to quote: a Mine IS a Bomb, so it is the
+    /// same Pyro hit for its own size and the same modifiers move it. The live
+    /// arithmetic stays where it can be right -- on the badge.
+    /// </summary>
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
-          + "you, before the hit lands.");
+          + "you, before the hit lands. It is the same Pyro hit for its own "
+          + "size, so [gold]Weak[/gold] shrinks it exactly as it shrinks a "
+          + "[gold]Set off[/gold]; the enemy's badge prints the number.");
 
     // ---------------------------------------------------------- Kokomi -----
     //
@@ -154,10 +170,19 @@ public static class ArmKeywordTips
     // Exert and Garment left with the rules they named.
 
     /// <summary>
-    /// RULE 2, and it is the whole kit in two sentences. The SECOND one is the
+    /// RULE 2, and it is the whole kit in three sentences. The SECOND is the
     /// load-bearing half: a player who has never read the brief has to be able
     /// to find "play it on the jellyfish" from the card in their hand, which is
     /// the slice's own first acceptance sentence (sec.1).
+    ///
+    /// THE THIRD IS `EB-293`. "instead" presumes a normal play to do instead
+    /// of, and a card with no now-line has none -- its target type is
+    /// <c>KokomiTargets.PetOnly</c> and the jellyfish is the only legal drop.
+    /// The r2 Opus seat could not tell: "Plan-only cards never say what happens
+    /// if you play them normally... I never risked finding out." The row's own
+    /// face now leads with "Play on the Bake-Kurage." (the codegen's
+    /// <c>_plan_only_line</c>) and the word's definition says why some rows
+    /// carry that line and others do not.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -165,7 +190,9 @@ public static class ArmKeywordTips
             "Play this on the [gold]Bake-Kurage[/gold] instead and the "
           + "jellyfish carries out the [gold]Plan[/gold] line at the start of "
           + "your next turn. The cost is paid now either way, and planned hits "
-          + "land on the front enemy unless the line says every enemy.");
+          + "land on the front enemy unless the line says every enemy. A card "
+          + "with nothing but a [gold]Plan[/gold] line can only be played on "
+          + "the jellyfish, and says so.");
 
     /// <summary>
     /// THE BOUND IS THE WHOLE POINT OF THIS ROW'S SECOND HALF. The Casket read

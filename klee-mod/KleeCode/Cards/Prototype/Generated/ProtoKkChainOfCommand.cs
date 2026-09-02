@@ -45,7 +45,7 @@ public sealed class ProtoKkChainOfCommand : CustomCardModel, ICharacterCard, IPl
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chain of Command"),
-        ("description", "[gold]Plan[/gold]: Deal 4 damage for each [gold]Companion[/gold] card you played last turn."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal 4 damage for each [gold]Companion[/gold] card you played last turn."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

@@ -18,7 +18,20 @@ nothing torn down. What comes next is a person running
     python -m understudy.embark --character kokomi
     python -m understudy.embark --character kokomi --hold      # attach, no launch
     python -m understudy.embark --character klee --arm proto_spark_priced_draw
+    python -m understudy.embark --character klee --lane 1      # a SECOND game
     python -m understudy.embark --teardown                     # put it all back
+    python -m understudy.embark --teardown --lane 1            # lane 1's only
+
+`--lane 1` opens the run in a second `SlayTheSpire2.exe` out of the same
+install (port 15527, its own disposable user tree) so an agent's run can play
+beside a game somebody else is playing. It prints the `GITS_LANE` export line,
+which is how the three `blindplay` commands -- which take no flag -- find the
+same game. The shared halves are refcounted by pre-existence: a bridge already
+installed with a game up on it is REUSED and never rewritten (so a lane can
+start beside a game that has it loaded), `steam_appid.txt` found in place is
+left in place, and one deployed `mods\\klee` serves every lane. A lane's
+teardown therefore touches its own process, port and profile and nothing it
+did not install. A lane-1 run is NOT a run of record.
 
 THE PROTOTYPE ARM DOOR (`EB-188`). The gate after a pair read reads an arm PLAYABLE
 is whole-fight blind play, automatically -- and it could not run for any arm,
@@ -86,7 +99,7 @@ from typing import Any
 
 import yaml
 
-from understudy import authorship, bridge, report, soak
+from understudy import authorship, bridge, instances, report, soak
 
 LOG_DIR = Path(__file__).resolve().parent / "logs"
 
@@ -273,12 +286,20 @@ def grant_arms(arms: list[str]) -> list[dict[str, Any]]:
 def embark(character: str, *, hold: bool = False,
            chosen_seed: str | None = None,
            arms: list[str] | None = None,
-           instance: Any = None) -> dict[str, Any]:
+           instance: Any = None,
+           install_bridge: bool = True) -> dict[str, Any]:
     """Launch (or attach), embark, read the seed back, and LEAVE IT RUNNING.
 
     Returns the sidecar dict. Raises rather than tearing down on failure: a
     half-open game the operator can look at is worth more than a clean
     directory and no diagnosis, and `--teardown` puts it back either way.
+
+    `instance` is the lane (`None` for lane 0, which is every embark that ever
+    ran before this flag existed). `install_bridge` is the hard OFF switch for
+    the shared `mods\\STS2_MCP`: a caller that KNOWS another lane owns it
+    passes `False`, while `soak.lane_setup` leaves it on, because the
+    session's own refcount -- an install with a game up on it is left alone --
+    is a rule that can see the machine rather than guess at it.
     """
     who = option_id(character)
     wanted = list(arms or [])
@@ -290,7 +311,7 @@ def embark(character: str, *, hold: bool = False,
     stamp = time.strftime("%Y%m%d-%H%M%S")
     soak.LOG_DIR.mkdir(parents=True, exist_ok=True)
     session = soak.Session(stamp, do_setup=not hold, intent="",
-                           instance=instance)
+                           instance=instance, install_bridge=install_bridge)
     sidecar = {
         "stamp": stamp,
         "ledger": str(session.ledger.path),
@@ -303,6 +324,13 @@ def embark(character: str, *, hold: bool = False,
         # to find the log that belongs to it.
         **(session.instance.as_row() if session.instance is not None
            else {"instance": bridge.current_label()}),
+        # AND WHAT THAT MEANS, IN THE FILE. A lane above zero is a disposable
+        # profile, and the sentence saying so travels with the run rather than
+        # living in this comment -- the same arrangement `arms_guardrail`
+        # below has, for the same reason.
+        **({"lane_guardrail": instances.LANE_GUARDRAIL,
+            "run_of_record": False}
+           if session.instance is not None else {}),
         "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
     _write_sidecar(stamp, sidecar)
@@ -354,35 +382,76 @@ def _write_sidecar(stamp: str, blob: dict[str, Any]) -> None:
                                    encoding="utf-8")
 
 
-def _is_hold(path: Path) -> bool:
+def _sidecar(path: Path) -> dict[str, Any]:
+    """One sidecar's dict, or `{}` when it cannot be read."""
     try:
-        return bool(json.loads(path.read_text(encoding="utf-8")).get("hold"))
+        return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):                            # noqa: PERF203
-        return False
+        return {}
 
 
-def latest_stamp() -> str:
+def _is_hold(path: Path) -> bool:
+    return bool(_sidecar(path).get("hold"))
+
+
+def sidecar_lane(blob: dict[str, Any]) -> str:
+    """Which lane a sidecar's embark was on. A sidecar written before lanes
+    existed carries no `instance` key at all, and it was lane 0."""
+    return str(blob.get("instance") or instances.DEFAULT_LABEL)
+
+
+def latest_stamp(label: str = "") -> str:
     """The most recent embark that actually CHANGED something, or an error.
 
     A `--hold` embark attaches to a game somebody else launched and records no
     ledger rows at all, so it has nothing to tear down -- and picking one as
     "the latest" would hide the launch that DOES need reverting behind it.
     They are skipped here and answered by name below.
+
+    `label` NARROWS IT TO ONE LANE, which is what `--teardown --lane 1` needs:
+    with two games open the newest sidecar is whichever was started last, and
+    tearing that one down is a coin flip over somebody else's run.
     """
     found = [p for p in sorted(LOG_DIR.glob("embark-*.json"))
-             if not _is_hold(p)]
+             if not _is_hold(p)
+             and (not label or sidecar_lane(_sidecar(p)) == label)]
     if not found:
+        where = f" on {label}" if label else ""
         raise EmbarkError(
-            f"no launching embark sidecar in {LOG_DIR}; there is nothing to "
-            f"tear down (if the game was launched by hand, close it by hand "
-            f"and run `klee-mod\\build\\deploy_bridge.ps1 -Remove`)")
+            f"no launching embark sidecar{where} in {LOG_DIR}; there is "
+            f"nothing to tear down (if the game was launched by hand, close "
+            f"it by hand and run "
+            f"`klee-mod\\build\\deploy_bridge.ps1 -Remove`)")
     return found[-1].stem[len("embark-"):]
 
 
-def teardown(stamp: str = "") -> str:
-    """Walk the ledger ON DISK through `Session`'s own undo steps."""
-    stamp = stamp or latest_stamp()
+def teardown(stamp: str = "", lane: object = None) -> str:
+    """Walk the ledger ON DISK through `Session`'s own undo steps.
+
+    THE LANE COMES OFF THE SIDECAR, NOT OFF THE ENVIRONMENT. Every step of
+    this teardown that touches the wire -- releasing the seed, restoring
+    FastMode -- has to reach the game this embark opened, and the shell that
+    runs the teardown is not the shell that ran the embark. So the thread is
+    bound to the lane the sidecar RECORDS, explicitly and in both directions:
+    a lane-0 teardown run in a shell with `GITS_LANE=1` exported still talks
+    to lane 0.
+
+    A lane-1 teardown then touches lane 1's process, port and profile and
+    nothing else, because the shared halves are not on its ledger at all: it
+    found `steam_appid.txt` already there, and it found a bridge with another
+    lane's game up on it, so both rows were reverted at setup as
+    "pre-existing, left in place" and there is nothing here to remove.
+    """
+    label = instances.label_for(lane) if lane is not None else ""
+    stamp = stamp or latest_stamp(label)
     blob = json.loads(sidecar_path(stamp).read_text(encoding="utf-8"))
+    recorded = sidecar_lane(blob)
+    if label and recorded != label:
+        raise EmbarkError(
+            f"embark {stamp} was on {recorded}, not {label}; refusing to tear "
+            f"down another lane's game (drop --lane, or name the stamp you "
+            f"mean)")
+    bridge.use(instances.wire_lane(recorded))
     if blob.get("hold"):
         return (f"embark {stamp} was a --hold: it attached to a game somebody "
                 f"else launched, changed nothing in the game directory, and "
@@ -434,15 +503,34 @@ def main(argv: list[str] | None = None) -> int:
                          "bridge, steam_appid.txt, in that order")
     ap.add_argument("--stamp", default="",
                     help="which embark to tear down; the newest by default")
+    ap.add_argument("--lane", default=0, metavar="N",
+                    help="which game instance to open the run in. 0 (the "
+                         "default) is the machine's own %%APPDATA%% and port "
+                         "15526 -- an embark exactly as it was. 1 launches a "
+                         "SECOND game from the same install, on port 15527 "
+                         "and its own disposable user tree "
+                         "(%%LOCALAPPDATA%%\\gits-lanes\\lane1), so an agent's "
+                         "run can play beside a game somebody else is "
+                         "playing. A bridge that is already installed and "
+                         "current is reused, never rewritten, so this cannot "
+                         "pull the mods directory out from under a running "
+                         "game. A lane-1 run is NOT a run of record. With "
+                         "--teardown it names WHICH lane's embark to revert")
     args = ap.parse_args(argv)
 
     try:
         if args.teardown:
-            print(teardown(args.stamp))
+            # NO `lane_setup` HERE. Putting a game back must not depend on the
+            # shared install still being in the state a LAUNCH needs; the
+            # sidecar already knows which lane it was, and the ledger already
+            # knows what it changed.
+            print(teardown(args.stamp, lane=args.lane))
             return 0
+        instance, install_bridge = soak.lane_setup(args.lane)
         blob = embark(args.character, hold=args.hold, chosen_seed=args.seed,
-                      arms=args.arms)
-    except EmbarkError as exc:
+                      arms=args.arms, instance=instance,
+                      install_bridge=install_bridge)
+    except (EmbarkError, ValueError) as exc:
         print(f"embark error: {exc}", file=sys.stderr)
         return 2
 
@@ -458,11 +546,30 @@ def main(argv: list[str] | None = None) -> int:
               f"on {blob.get('arms_build_version')}")
         print(f"  {bridge.GRANT_GUARDRAIL}")
     print(f"sidecar:   {sidecar_path(blob['stamp'])}")
+    label = sidecar_lane(blob)
+    lane_arg = ""
+    if label != instances.DEFAULT_LABEL:
+        lane_arg = f" --lane {label[len('lane'):]}"
+        print(f"lane:      {label}  port {blob.get('port')}  "
+              f"appdata {blob.get('appdata')}")
     print()
     print("The game is UP and the run is OPEN. Nothing has been torn down.")
+    if lane_arg:
+        # THE THREE BLIND COMMANDS TAKE NO FLAG, so the lane reaches them
+        # through the environment (`bridge.env_instance`). Printed as an
+        # export line rather than described, because the one way this goes
+        # wrong is a tester reading lane 0's game and never knowing.
+        print(f"  $env:{instances.LANE_ENV} = "
+              f"'{label[len('lane'):]}'      # PowerShell, this shell only")
+        print(f"  export {instances.LANE_ENV}={label[len('lane'):]}"
+              f"          # bash")
     print("  python -m understudy.blindplay observe")
     print("  python -m understudy.blindplay session --max-actions N")
-    print("  python -m understudy.embark --teardown")
+    print(f"  python -m understudy.embark --teardown{lane_arg}")
+    if lane_arg:
+        print()
+        print("LANE 1 IS NOT A RUN OF RECORD: its profile is disposable and "
+              "nothing in it is read back.")
     return 0
 
 

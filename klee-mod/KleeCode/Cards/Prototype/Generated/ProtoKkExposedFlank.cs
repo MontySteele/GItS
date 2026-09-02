@@ -45,7 +45,7 @@ public sealed class ProtoKkExposedFlank : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Exposed Flank"),
-        ("description", "Apply 1 Vulnerable. [gold]Plan[/gold]: every enemy gains 2 Vulnerable."),
+        ("description", "Apply {PowerAmount:diff()} Vulnerable. [gold]Plan[/gold]: every enemy gains 2 Vulnerable."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,7 +60,7 @@ public sealed class ProtoKkExposedFlank : CustomCardModel, ICharacterCard, IPlan
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,11 +78,11 @@ public sealed class ProtoKkExposedFlank : CustomCardModel, ICharacterCard, IPlan
             return;
         }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

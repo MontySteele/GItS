@@ -82,6 +82,6 @@ public sealed class ProtoMcSucroseAstable : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        RemoveKeyword(CardKeyword.Exhaust);
     }
 }

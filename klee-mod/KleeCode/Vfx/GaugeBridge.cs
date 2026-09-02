@@ -248,7 +248,13 @@ public static class GaugeBridge
             AnchorOffset = OverheadBurstAnchor,
             VisualSpan = KokomiConstants.BurstMax,
             LabelMax = KokomiConstants.BurstMax,
-            AppliesTo = KokomiResources.IsKokomi,
+            // NOT a bare `IsKokomi` any more (`EB-297`), and it is `EB-281`'s
+            // fact one character over: under her overhaul arm she has no Burst
+            // -- the brief retires the engine that fed it -- so a spec that
+            // still APPLIED drew an overhead bar pinned at 0/20, pearl cap and
+            // all, for the whole run. [USER] read it live on the arm. The
+            // guard lives beside the resource, as Klee's does.
+            AppliesTo = KokomiResources.BurstGaugeApplies,
             ReadValue = KokomiResources.GetBurst,
             ShouldFlash = (previous, current) =>
                 previous < KokomiConstants.BurstMax

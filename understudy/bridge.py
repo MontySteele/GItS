@@ -25,6 +25,8 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from understudy import instances
+
 BASE = "http://localhost:15526"
 SINGLEPLAYER = f"{BASE}/api/v1/singleplayer"
 COMPENDIUM = f"{BASE}/api/v1/compendium"
@@ -70,18 +72,55 @@ class LaneCrossed(BridgeError):
 # The URL constants above stay spelled with lane 0's base. `_request` rebases
 # every URL onto the CURRENT base at call time, so a constant is a path
 # carrier and never a promise about which game answers it.
+#
+# AND BENEATH THE THREAD-LOCAL, ONE ENVIRONMENT VARIABLE: `GITS_LANE`.
+# `blindplay observe` / `act` / `session` are the whole-run commands with no
+# lane flag, and they cannot be given one the ordinary way -- that module is
+# design-blind and may not import `instances` or `soak`
+# (`test_understudy_blindplay` pins both ends of the line), so a `--lane` there
+# would have to reach the lane registry through an import that is forbidden.
+# It reaches it through THIS module instead, which every one of those commands
+# already calls. The order is: an explicit `use()` on this thread FIRST (a
+# two-lane round binds its workers and must never be second-guessed by whatever
+# the operator exported), then the variable, then lane 0.
+#
+# `GITS_LANE=0`, and an unset variable, both resolve to NO instance rather
+# than to lane 0's -- the same distinction `instances.cli_lane` makes, and for
+# the same reason: lane 0 is the machine's own `%APPDATA%` and the default
+# port, which is what an unbound thread already does.
 
 _local = threading.local()
 
 
+def env_instance():
+    """The lane `GITS_LANE` names, or `None` for lane 0 / unset.
+
+    WIRE-ONLY (`instances.wire_lane`): a client needs the port and the user
+    tree and has no business resolving where the game is installed. `bridge`
+    is imported by tests on machines with no `klee-mod/local.props` at all,
+    and `instances.lane()` would `SystemExit` on them.
+    """
+    label = instances.env_label()
+    return (None if label == instances.DEFAULT_LABEL
+            else instances.wire_lane(label))
+
+
 def current_base() -> str:
     """The base URL this thread's calls go to."""
-    return getattr(_local, "base", BASE)
+    bound = getattr(_local, "base", None)
+    if bound is not None:
+        return bound
+    inst = env_instance()
+    return BASE if inst is None else inst.base
 
 
 def current_label() -> str:
     """This thread's lane label, for record rows. `lane0` unless set."""
-    return getattr(_local, "label", "lane0")
+    bound = getattr(_local, "label", None)
+    if bound is not None:
+        return bound
+    inst = env_instance()
+    return instances.DEFAULT_LABEL if inst is None else inst.label
 
 
 def current_instance():
@@ -89,9 +128,13 @@ def current_instance():
 
     Kept beside the base and the label because `EB-210`'s check needs the
     lane's `appdata`, not just its port: the crossing it exists to catch is
-    about which USER TREE answered, and the port cannot say.
+    about which USER TREE answered, and the port cannot say. That is also why
+    the `GITS_LANE` fallback returns a whole instance rather than a port: a
+    lane-1 blind session gets the crossing check and the per-lane `godot.log`
+    cursor (`scenario._LogWindow`) out of the same one answer.
     """
-    return getattr(_local, "instance", None)
+    bound = getattr(_local, "instance", None)
+    return bound if bound is not None else env_instance()
 
 
 def use(instance) -> None:

@@ -16,6 +16,15 @@
   should have installed. -Remove exists because the reversibility log demands
   a one-command undo, not as an afterthought.
 
+  PLAYING ALONGSIDE AN AGENT (2026-09-02). The bridge is installed BEFORE the
+  owner launches, with the game closed -- deploy_proto.ps1 now does it as its
+  last step, so every dev deploy leaves the install parallel-ready. The owner's
+  Steam-launched game then carries the bridge on the default port 15526
+  (lane 0) and an agent's second instance takes 15527 (lane 1, its own APPDATA;
+  understudy/instances.py). Once a game is up holding this dll, this script
+  cannot rewrite it and does not need to: the lane reuses a current install
+  (understudy/soak.py `bridge_status`).
+
   -BuildOnly lints the pin and compiles, and stops before the game directory is
   touched at all. That is the check a bridge EDIT wants (EB-142): a worktree
   that is not the art-bearing main checkout has no business installing
@@ -66,11 +75,48 @@ if ($target -eq $kleeTarget) {
     throw "Refusing to run: this script's target collides with deploy.ps1's."
 }
 
+function Test-FileHeld {
+    <#
+      Is this file locked by another process RIGHT NOW? Opened for read/write
+      with FileShare.None: if anything else holds it the open throws, and if
+      nothing does, it is closed again having changed nothing.
+
+      THIS IS THE QUESTION THE REFUSAL BELOW ACTUALLY NEEDS TO ASK, and it
+      replaces asking whether a game process exists at all. Those are
+      different questions, and a live attempt (2026-09-02) proved it: the
+      owner's Steam-launched game had no mods\STS2_MCP in the install, held
+      nothing, and the by-process refusal blocked a second understudy lane
+      that was in no danger -- so Steam's tolerance of a second instance went
+      untested for a reason that was never Steam's. A game that HAS loaded
+      this dll does hold it, and that case is still refused, by the lock,
+      which is the thing that is true.
+    #>
+    param([string]$Path)
+    if (-not (Test-Path $Path)) { return $false }
+    try {
+        $fs = [System.IO.File]::Open(
+            $Path, [System.IO.FileMode]::Open,
+            [System.IO.FileAccess]::ReadWrite, [System.IO.FileShare]::None)
+        $fs.Close()
+        $fs.Dispose()
+        return $false
+    } catch {
+        return $true
+    }
+}
+
 if (-not $BuildOnly) {
     $running = Get-Process -Name 'SlayTheSpire2' -ErrorAction SilentlyContinue
+    $ids = if ($running) { $running.Id -join ', ' } else { 'none' }
+    $held = @(Get-ChildItem -Path $target -Recurse -File -ErrorAction SilentlyContinue |
+              Where-Object { Test-FileHeld $_.FullName })
+    if ($held) {
+        $names = ($held | ForEach-Object { $_.Name }) -join ', '
+        throw "A running Slay the Spire 2 (PID $ids) is holding $names under $target, so this cannot rewrite it. Close that game -- and if it is another understudy lane's, tear the lane down (python -m understudy.embark --teardown --lane N) rather than killing it."
+    }
     if ($running) {
-        $ids = $running.Id -join ', '
-        throw "Slay the Spire 2 is running (PID $ids). Close it first; it holds a lock on the mod dll."
+        Write-Host "NOTE: Slay the Spire 2 is running (PID $ids), but nothing under $target is locked, so this is safe." -ForegroundColor Yellow
+        Write-Host "      Mods load at BOOT: a game that is already up will NOT pick this up. The next launch does -- a second understudy lane, or a restart." -ForegroundColor Yellow
     }
 }
 
