@@ -62,8 +62,19 @@ if ($running -and -not $Package) {
     throw "Slay the Spire 2 is running (PID $ids). Close the game before deploying; it holds a lock on klee.dll."
 }
 
+# EB-161. THE VERSION IS COMPUTED BEFORE THE BUILD, not after it, because the
+# dll is stamped WITH it: MAJOR.AUTO into AssemblyVersion/FileVersion and the
+# whole string into AssemblyInformationalVersion, so the one artifact a crash
+# log names carries the build it came from. It used to read 1.0.0.0 on every
+# build ever made. Get-PackageVersion depends on nothing the build produces --
+# a manifest and a commit count -- so hoisting it is free, and computing it
+# once is what makes the dll and manifest.json unable to disagree.
+$version = Get-PackageVersion `
+    -SourceManifest (Join-Path $packageDir 'manifest.json') -RepoRoot $repoRoot
+$stamp = Get-AssemblyStamp -Version $version
+
 Write-Host "Building ($Configuration)..." -ForegroundColor Cyan
-& dotnet build $csproj -c $Configuration -v minimal --nologo
+& dotnet build $csproj -c $Configuration -v minimal --nologo @($stamp.BuildArgs)
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
 
 $dll = Join-Path $root "KleeCode\bin\$Configuration\klee.dll"
@@ -78,8 +89,7 @@ Copy-Item $dll -Destination $stage
 # R70: stamp MAJOR.AUTO into the STAGED manifest. MAJOR is the deliberate half
 # and stays exactly as committed; AUTO is the commit count, generated here.
 # The source manifest is never written to -- it is a ratified artifact.
-$version = Get-PackageVersion `
-    -SourceManifest (Join-Path $packageDir 'manifest.json') -RepoRoot $repoRoot
+# $version was computed above the build (EB-161) so the dll carries it too.
 $stagedManifest = Join-Path $stage 'manifest.json'
 $sm = Get-Content $stagedManifest -Raw | ConvertFrom-Json
 $sm.version = $version.Version

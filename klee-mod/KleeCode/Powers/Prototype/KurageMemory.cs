@@ -1024,7 +1024,8 @@ public static class KurageMemory
                 // sacrificing anything else." The Power branch pays in the
                 // currency the whole rule runs on. It lands with no board and
                 // no target -- a bank does not need a body.
-                KokomiResources.GainCharge(owner, KokomiConstants.ChargePerExhaust);
+                KokomiResources.GainCharge(owner, KokomiConstants.ChargePerExhaust,
+                    "rule:kurage_power_pulse");
             }
             else if (target != null)
             {

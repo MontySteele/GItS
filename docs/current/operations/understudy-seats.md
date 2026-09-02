@@ -141,6 +141,25 @@ prompt inlines the packet and the rollout carries a third party's system
 prompt and raw output. The committed artifact is the form and the verdict
 under `review/qa/<turn-id>/`.
 
+**A closed round's per-turn directories leave HEAD (`EB-189`).** On
+2026-09-02, 57 of them — 476 files, 51,726 lines of `packet`, `observed`,
+`closeness`, `form-*` and `verdict-*` JSON from rounds already graded and
+ruled — were removed. What each turn decided stays: `review/qa/ledger.tsv`,
+the round's `*-round-summary.json` and its pair-review file, all at the top of
+`review/qa/`. The raw bytes are retrieved from git, which is where closed
+items live (CLAUDE.md §History retrieval):
+
+```
+git fetch --depth=1 origin e85d1309
+git show e85d1309:review/qa/<turn-id>/observed.json
+```
+
+Forty per-turn directories were **kept** because a test or a lint reads them —
+`understudy/qualify.py`'s battery and its regression set, the recorded-combat
+fixture `kokomi-slice1-r3-t01/observed.json`, the authorship fixtures and the
+`kokomi-slice2-t0*` set — as were `review/qa/blindplay/`, the two-instance
+proof and the `kokomi-eb183-*` turns, whose packet is still open.
+
 `closeness` is the one number (R213 F): the gap between the top two lines on
 the pilot's own score surface, quotable under R215 B's exception because it
 reads the TURN. SURVIVES means **not yet falsified** — nothing here rates a
@@ -577,12 +596,15 @@ deals the boards to the two lanes in the pre-registered order.
   carries so a reader can find the log. The ledger's trailing **`instance`**
   column sits AFTER `role` — `role` was appended first — and `ledger_rows`
   pads both, so a row written before either column existed still parses.
-- **Only lane 0 installs the bridge, and lanes tear down in reverse.**
+- **Only lane 0 installs the bridge, and NO lane ever removes it.**
   `deploy_bridge.ps1` rewrites the shared `mods\STS2_MCP`, so lane 1 is given
-  `install_bridge=False` and removes nothing shared. (Since 2026-09-02 a
-  session refuses to rewrite it anyway when a game is already up on an
-  installed one — see the whole-run lane below — so the flag is the round
-  saying it once for both its lanes rather than the only lock.)
+  `install_bridge=False`. (Since 2026-09-02 a session refuses to rewrite it
+  anyway when a game is already up on an installed one — see the whole-run
+  lane below — so the flag is the round saying it once for both its lanes
+  rather than the only lock.) **The removal half is gone outright (`EB-310`):**
+  the bridge is shared with the owner's own Steam launches, so every branch
+  records it *shared, left in place* and no teardown takes it out.
+  `deploy_bridge.ps1 -Remove` is the only remover, by hand.
 - **STANDING RULE: lane 1's profile is DISPOSABLE.** It is seeded once from
   lane 0's `settings.save` (without it the lane boots with no mod profile) and
   nothing in it is ever read back. No run of record is played on it. If it
@@ -646,8 +668,18 @@ up in **16 s** on `APPDATA=%LOCALAPPDATA%\gits-lanes\lane1` and
 teardown removed the lane's process and its `steam_appid.txt` and nothing
 else, with the owner's game still running and still answering. That is the
 platform half and the Steam half together, on a game this harness did not
-launch. **What is still owed is the flags themselves**: `--lane 1` driving an
-embark, a blind session on 15527 and a teardown, end to end.
+launch.
+
+**AND THE FLAGS THEMSELVES ARE PROVEN, END TO END, 2026-09-02** —
+`review/qa/lane1-live-reads-2026-09-02/`. `embark --character
+KLEEMOD-KOKOMI --lane 1`, then `GITS_LANE=1` with `blindplay observe` / `act`
+through Neow, the map (`map.md`), fight one (`fight1-round1.md`), a planned
+turn and its morning (`fight1-planned.md`, `fight1-round2-morning.md`), then
+`embark --teardown --lane 1` — all on **15527**, with no other game up. **The
+one defect it found was `EB-310`, and it is the lesson:** the bridge under
+`mods\STS2_MCP` is shared with the owner's own Steam launches, so an embark
+may refresh it but no teardown may ever remove it — that teardown did, and the
+owner's next launch would have had no bridge.
 
 **PROVEN LIVE 2026-08-29** (`review/qa/two-instance/live-proof.json`, and
 `understudy/twolane_proof.py` / `twolane_frames.py` are the two scripts that

@@ -1,13 +1,12 @@
 # STATE
 
 > **What currently ships** — roster, systems, versions — and the pointers into
-> everything else. Snapshot only, near 150 lines by rule (`CLAUDE.md` §Norms).
-> Where the detail went: [`STAMPS.md`](STAMPS.md) stamp history ·
-> [`QUEUE.md`](QUEUE.md) picks · [`BACKLOG.md`](BACKLOG.md) engineering ·
-> [`LAW.md`](LAW.md) rules · [`EXPERIMENTS.md`](EXPERIMENTS.md) measurement law
-> · [`OPERATIONS.md`](OPERATIONS.md) commands ·
-> [`workstreams.md`](workstreams.md) workstream status, build detail and the
-> [USER] pile · [`watch-register.md`](watch-register.md) · [`atlas/`](atlas/).
+> everything else. Snapshot only, near 150 lines by rule (`CLAUDE.md` §Norms),
+> whose read order routes the detail to [`STAMPS.md`](STAMPS.md),
+> [`QUEUE.md`](QUEUE.md), [`BACKLOG.md`](BACKLOG.md), [`LAW.md`](LAW.md),
+> [`EXPERIMENTS.md`](EXPERIMENTS.md), [`OPERATIONS.md`](OPERATIONS.md),
+> [`workstreams.md`](workstreams.md), [`watch-register.md`](watch-register.md)
+> and [`atlas/`](atlas/).
 
 ## Live cell
 
@@ -27,10 +26,8 @@ level covered and archived is in [`STAMPS.md`](STAMPS.md), not here.
 twelve arms at `RT12/D18/P11/C20` (`main` = `190e598`) in ONE pass with
 `game_ref/` present: `real_ironclad` **5.2%** / **65.5%** act-1, `real_silent`
 **1.1%** / **54.0%**; **no interval separation on any arm and no control set**,
-which it says itself. Its §0 grades the predecessor's three scorer caveats
-CLEARED, so under R211 item 7 it is both the standing re-baseline and the
-Phase-4 milestone table, **and that read is TAKEN**. It supersedes the
-`c19-d17-p10` read, which stands as published (R101b).
+which it says itself. Under R211 item 7 it is both the standing re-baseline and
+the Phase-4 milestone table, **and that read is TAKEN**.
 
 Pinned, and NOT part of the run-cell stamp: `A6_INSTRUMENT_VERSION = 2`
 (`tier0/harness/axes.py`, anchored additively so `ref_ironclad` stays 3.00; v1
@@ -42,15 +39,13 @@ kept only as the archived world's name.
 
 ## Lifecycle
 
-- **Tier 0 v0.1 — LOCKED.** Frozen v2 errata: non-boss Frozen is soft control
-  (−50% next action + Shatter on the first Attack hit), bosses take Vulnerable 2
-  (R44); the v0.1 scorecard baseline and median identity are regression-locked
-  (`test_errata.V02_MEDIAN`).
+- **Tier 0 v0.1 — LOCKED.** The R44 Frozen errata, the v0.1 scorecard baseline
+  and the median identity are regression-locked (`test_errata.V02_MEDIAN`).
 - **Tier 0.5 M5 — SHIPPED.** The live run model is the real StS2 map; the M5–M8
   archive world was the v1 run template, never compared across template versions
-  unlabeled. **Kokomi meter-20 — RATIFIED (R139);** the dead v0.3 W1 comparator
-  is not rebuilt. **Roster slot 4 — Zhongli countersigned (R108), unscheduled;**
-  the pre-slot-4 gate is the roster registry (`tier0/roster.py`).
+  unlabeled. **Kokomi meter-20 — RATIFIED (R139). Roster slot 4 — Zhongli
+  countersigned (R108), unscheduled;** the pre-slot-4 gate is the roster
+  registry (`tier0/roster.py`).
 
 ## Roster
 
@@ -64,10 +59,10 @@ Ship order is stable and meaningful (`tier0/roster.py`); reports print it.
 
 Klee is the compatibility baseline; companion pools ship per nation
 (`docs/<nation>-companions.yaml`). HP sits against the base cast (Ironclad 80,
-Defect 75, Regent 75, Silent 70, Necrobinder 66): Furina 60 → **78** and Kokomi
-70 → **80** by **R219 F**, both canonical HP-scalers, Klee low by design, so
-every measured table quoting a Furina or Kokomi row is stale under R68 until a
-re-baseline (`review/records/roster-hp-scalers-2026-08-29.md` lists which).
+Defect 75, Regent 75, Silent 70, Necrobinder 66), Klee low by design. **R219 F
+moved Furina and Kokomi, so every measured table quoting one of their rows is
+stale under R68** until a re-baseline
+(`review/records/roster-hp-scalers-2026-08-29.md` lists which).
 
 **Reference anchors** (measurement anchors, NOT roster members): `ref_ironclad`,
 `real_ironclad`, `ref_silent`, `real_silent` (`tier0/roster.py:165-171`), the
@@ -117,9 +112,7 @@ Depth for each is in [`atlas/`](atlas/); these are one line apiece.
 
 - **tier0 combat kernel** — ops, powers, statuses, reactions, resources; 7-axis
   scorecard anchored at `(ref_ironclad, starter) = 3.0`, frozen battery.
-  **No axis value gates anything (R204):** axis values and declared-identity
-  comparisons are reportable diagnostics only, and ratified 1,000-fight
-  `winrate_bands` are unaffected.
+  **No axis value gates anything (R204)** — they are reportable diagnostics.
 - **tier0.5 run sim + drafter** — run model, acts, runner, draft, and the real
   StS2 16-floor map/route policy.
 - **understudy** — the bot playtest bridge driving the real game (Guardrail-7,
@@ -138,8 +131,7 @@ Status only, one line each; the narrative, the round records and every citation
 are in [`workstreams.md`](workstreams.md).
 
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
-  inside: quarantined prototype surface, the independent seat, Kokomi → Klee
-  → Furina in sequence with the shared Burst retirement last (R220 B).
+  inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
 - **Klee** — the overhaul is at Prototype: round 4 is ruled (R242: Klee
   starts each combat with 1 Spark, no long fuse, and the starter takes the
   canonical shape, Strike x4 / Defend x4 / Jumpy Dumpty / Ka-pow! at 0);
@@ -152,28 +144,24 @@ are in [`workstreams.md`](workstreams.md).
   `review/active/kokomi-overhaul-round-2-2026-09-02.md` (PR #275). The sim
   twin runs beside the C# (`tier0/engine/kokomi_plan.py`), every drafter
   price still ZERO. Beside it the Kurage memory is base kit behind
-  `C.KURAGE_MEMORY`, display rebuild `EB-198`, cadence read `EB-234`.
-- **Seats** — two games at once (`--lane 1` / `GITS_LANE`, PR #274), a
-  local-model seat (`blindplay session --backend local`, PR #269, live proof
-  owed), and the render fixes `EB-290`/`EB-294`/`EB-298`/`EB-299` (PR #272).
+  `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
+- **Seats** — two games at once (`--lane 1` / `GITS_LANE`, PR #274), proven
+  end to end on lane 1 2026-09-02 (`review/qa/lane1-live-reads-2026-09-02/`;
+  it also took the map and arm-keyword live reads and found `EB-310`, the
+  shared bridge no teardown may remove); a local-model seat (PR #269, live
+  proof owed); and the render fixes (PR #272), of which `EB-299` remains.
 - **Furina** — the reframe is countersigned (R220 A), slice 1 is built in the
-  sim behind five flags that all ship OFF, Spotlight is ruled one-mode priced
-  (R228), and the C# arm is deferred.
+  sim behind five flags that all ship OFF, and the C# arm is deferred.
 - **Companion cards** — R234 ruled the slate whole, Mondstadt first, in
   parallel; `EB-249` / `EB-250` / `EB-251` are what it owes.
-- **Deferred content families** — `Win10` (Klee bomb-board readers) and `Win11`
-  (Furina Encore spenders): named, neither open, both FROZEN by R213.
-- **Also live** — funnel throughput (R221, lanes and read-workers at 1.35× on
-  reads), enemy remapping, the Furina and Kokomi art passes, animation sprint 2,
-  the axis-validity Track A / Track E logs.
+- **Deferred content families** — `Win10` and `Win11`, both FROZEN by R213.
+- **Also live** — funnel throughput (R221), enemy remapping, the Furina and
+  Kokomi art passes, animation sprint 2, the axis-validity Track A / E logs.
 
 ## Open [USER] pile
 
-Every open row is in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
-stability band (`S4-G6`, mechanism answered at R231) and her protocol playtest
-(`S4-G14`); `M69` on the Charge read budget; the art eyes-on pile
-(`S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M26`, Globe Head, `grand_gala` r6); and
-`M45`'s five post-playtest calls. **No prototype-slice row is open.** How the
-pile emptied is in [`workstreams.md`](workstreams.md). The nine blessed
-mechanisms are in [`watch-register.md`](watch-register.md): `W9` has FIRED and
-is back with [USER] as `M69`, the other eight are dormant.
+Every open row is in [`QUEUE.md`](QUEUE.md) and owned by [USER] — Kokomi's two,
+`M69`, the art eyes-on pile and `M45`'s five. **No prototype-slice row is
+open**, and how the pile emptied is in [`workstreams.md`](workstreams.md). The
+nine blessed mechanisms are in [`watch-register.md`](watch-register.md): `W9`
+has FIRED and is back with [USER] as `M69`, the other eight are dormant.

@@ -93,6 +93,25 @@ if (-not (Test-Path $manifestPath)) {
     if (-not $m.has_dll -and (Test-Path $dll)) {
         Fail 'S2' "package ships $($m.id).dll but manifest says has_dll: false; it will never be loaded"
     }
+
+    # S2a. EB-161. THE DLL CARRIES THIS BUILD'S VERSION.
+    #
+    # Until this existed klee.dll shipped AssemblyVersion 1.0.0.0 on every
+    # build ever made, so the artifact a crash log, a co-op desync report or a
+    # support question actually names said nothing about which build it was,
+    # while the manifest.json beside it said it exactly. Both deploy paths now
+    # stamp the dll from the SAME Get-PackageVersion call that stamps the
+    # manifest, and this is the assertion that they did: a stale dll left in
+    # bin/, or a build that lost the properties, fails here instead of
+    # shipping.
+    #
+    # The comparison is against the STAGED MANIFEST rather than against a
+    # freshly computed version, deliberately: S3 already asserts the staged
+    # manifest is what this checkout computes, and asking the same question
+    # twice would report one defect as two findings pointing at each other.
+    foreach ($finding in (Test-AssemblyStamp -DllPath $dll -Expected $m.version)) {
+        Fail 'S2a' $finding
+    }
     if ($m.has_pck) {
         $pck = Get-ChildItem $StageDir -Filter *.pck -ErrorAction SilentlyContinue
         if (-not $pck) {

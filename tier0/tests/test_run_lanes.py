@@ -18,6 +18,7 @@ included).
 from __future__ import annotations
 
 import json
+import shutil
 import threading
 from pathlib import Path
 
@@ -269,54 +270,143 @@ def test_a_running_game_is_read_by_image_name_and_a_bad_probe_says_yes():
     assert soak.game_is_running(probe=_boom).startswith("<probe failed")
 
 
-def test_a_bridge_with_a_game_up_on_it_is_reused_never_rewritten(
-        tmp_path, monkeypatch, capsys):
-    """THE PARALLEL CASE. A session that finds an install with a game already
-    running on it records NOTHING, so it neither rewrites a dll that game may
-    hold nor removes one it did not put there -- which is also what makes
-    `deploy_proto.ps1`'s bridge install stick instead of being torn out by the
-    first teardown after it."""
-    monkeypatch.setattr(soak, "game_dir", lambda: _installed(tmp_path))
+# ------------------------------- EB-310: the bridge is nobody's to remove --
+#
+# Observed live 2026-09-02 with NO game running and the bridge already staged
+# by `deploy_proto.ps1`: `embark --lane 1` re-deployed it and wrote it down as
+# its OWN install, because the old rule counted an install as pre-existing only
+# when a game was UP on it. `embark --teardown --lane 1` then printed
+# "Deployed mods\STS2_MCP ... REVERTED" and took it out, and the owner's next
+# Steam launch would have had no bridge. The three cases below are the whole
+# rule: reused, refreshed, installed -- and a teardown that leaves it in all
+# three. Evidence: `review/qa/lane1-live-reads-2026-09-02/`.
+
+
+def _bridge_session(tmp_path, monkeypatch, *, installed: bool, pids: str,
+                    ran: list):
+    """A `Session` on a prepared game directory, with the deploy script faked.
+
+    The fake STAGES AND UNSTAGES FOR REAL -- `_installed` on a plain call, an
+    `rmtree` on `-Remove` -- so "the bridge is still there after teardown" is a
+    claim about the directory rather than about a call list.
+    """
+    root = tmp_path / "game"
+    root.mkdir(parents=True, exist_ok=True)
+    if installed:
+        _installed(root)
     monkeypatch.setattr(soak, "LOG_DIR", tmp_path)
-    monkeypatch.setattr(soak, "game_is_running", lambda *a, **k: "4740")
-
-    def _no_powershell(*a, **k):                              # pragma: no cover
-        raise AssertionError("this must not redeploy over a running game")
-
-    monkeypatch.setattr(soak.subprocess, "run", _no_powershell)
-
-    sess = soak.Session("stamp", do_setup=False)
-    sess._deploy_bridge()
-
-    assert sess._bridge_entry is None                # nothing to revert
-    row = [e for e in sess.ledger.entries if e["change"].startswith("Deployed")]
-    assert row and row[0]["state"] == "REVERTED"
-    assert row[0]["pre_existing"] is True
-    assert "left in place" in row[0]["note"] and "4740" in row[0]["note"]
-    assert "reusing it" in capsys.readouterr().out
-
-
-def test_with_no_game_up_the_bridge_is_deployed_exactly_as_before(tmp_path,
-                                                                  monkeypatch):
-    """The safety argument for the reuse branch above: it fires NOWHERE a
-    deploy used to succeed. With no game running -- installed or not -- this
-    redeploys, which is what it has always done."""
-    monkeypatch.setattr(soak, "LOG_DIR", tmp_path)
-    monkeypatch.setattr(soak, "game_is_running", lambda *a, **k: "")
-    ran: list = []
+    monkeypatch.setattr(soak, "game_dir", lambda: root)
+    monkeypatch.setattr(soak, "game_is_running", lambda *a, **k: pids)
 
     class _Ok:
         returncode = 0
         stdout = stderr = ""
 
-    monkeypatch.setattr(soak.subprocess, "run",
-                        lambda *a, **k: ran.append(a[0]) or _Ok())
-    for prepared in (_installed(tmp_path / "with"), tmp_path / "without"):
-        monkeypatch.setattr(soak, "game_dir", lambda p=prepared: p)
-        sess = soak.Session("stamp", do_setup=False)
-        sess._deploy_bridge()
-        assert sess._bridge_entry is not None
-        assert ran and str(soak.DEPLOY_BRIDGE) in ran[-1]
+    def _fake_powershell(argv, *a, **k):
+        ran.append(list(argv))
+        if "-Remove" in argv:
+            shutil.rmtree(root / soak.BRIDGE_RELATIVE, ignore_errors=True)
+        else:
+            _installed(root)
+        return _Ok()
+
+    monkeypatch.setattr(soak.subprocess, "run", _fake_powershell)
+    return soak.Session("stamp", do_setup=False), root
+
+
+def _bridge_row(sess) -> dict:
+    rows = [e for e in sess.ledger.entries
+            if e["change"].startswith("Deployed `mods")]
+    assert len(rows) == 1, rows
+    return rows[0]
+
+
+def _teardown_leaves_the_bridge(sess, root, ran) -> None:
+    """The half `EB-310` is actually about, asserted the same way three times."""
+    before = len(ran)
+    sess.teardown()
+    assert soak.bridge_installed(root), (
+        "a teardown removed the shared bridge; the owner's next Steam launch "
+        "would have had none")
+    assert all("-Remove" not in call for call in ran[before:])
+    # The attribute is gone, not merely unused: an entry to hold would be an
+    # invitation to wire the removal back up.
+    assert not hasattr(sess, "_bridge_entry")
+
+
+def test_an_installed_bridge_with_no_game_is_refreshed_and_left_shared(
+        tmp_path, monkeypatch):
+    """(a) THE CASE THAT WENT WRONG LIVE. Nothing holds the dll, so the vendor
+    pin is re-staged -- and the row says `shared, left in place`, which is what
+    keeps `deploy_proto.ps1`'s install from being torn out by the first
+    teardown after it."""
+    ran: list = []
+    sess, root = _bridge_session(tmp_path, monkeypatch, installed=True,
+                                 pids="", ran=ran)
+    sess._deploy_bridge()
+
+    row = _bridge_row(sess)
+    assert row["state"] == "REVERTED" and row["pre_existing"] is True
+    assert "shared, left in place" in row["note"]
+    assert "refreshed" in row["note"]
+    assert ran and str(soak.DEPLOY_BRIDGE) in ran[-1]
+    assert "-Remove" not in ran[-1]
+    _teardown_leaves_the_bridge(sess, root, ran)
+
+
+def test_a_bridge_with_a_game_up_on_it_is_reused_never_rewritten(
+        tmp_path, monkeypatch, capsys):
+    """(b) THE PARALLEL CASE. A session that finds an install with a game
+    already running on it writes NOTHING to disk, so it does not rewrite a dll
+    that game may hold -- and the row is `shared, left in place` for the same
+    reason case (a)'s is."""
+    ran: list = []
+    sess, root = _bridge_session(tmp_path, monkeypatch, installed=True,
+                                 pids="4740", ran=ran)
+    sess._deploy_bridge()
+
+    assert ran == [], "this must not redeploy over a running game"
+    row = _bridge_row(sess)
+    assert row["state"] == "REVERTED" and row["pre_existing"] is True
+    assert "shared, left in place" in row["note"] and "4740" in row["note"]
+    assert "reusing it" in capsys.readouterr().out
+    _teardown_leaves_the_bridge(sess, root, ran)
+
+
+def test_an_install_with_no_bridge_gets_one_and_still_never_loses_it(
+        tmp_path, monkeypatch):
+    """(c) A session may PUT the bridge there -- and still may not take it
+    away. The harness has no remover at all now: `deploy_bridge.ps1 -Remove`
+    is run by hand, by whoever decides the machine is done with it."""
+    ran: list = []
+    sess, root = _bridge_session(tmp_path, monkeypatch, installed=False,
+                                 pids="", ran=ran)
+    assert not soak.bridge_installed(root)
+    sess._deploy_bridge()
+
+    assert soak.bridge_installed(root)
+    row = _bridge_row(sess)
+    assert row["state"] == "REVERTED" and row["pre_existing"] is True
+    assert "shared, left in place" in row["note"]
+    assert "installed here" in row["note"]
+    assert ran and str(soak.DEPLOY_BRIDGE) in ran[-1]
+    _teardown_leaves_the_bridge(sess, root, ran)
+
+
+def test_the_harness_has_no_bridge_remover_left(tmp_path, monkeypatch):
+    """The rule stated where a future edit would trip over it: no undo step,
+    no ledger slot, no method. The one row `_deploy_bridge` writes carries the
+    BY HAND instruction in its own undo text, so a person reading the ledger is
+    told who removes it."""
+    assert not hasattr(soak.Session, "_remove_bridge")
+    assert all(attr != "_bridge_entry" for attr, _ in embark._LEDGER_SLOTS)
+
+    ran: list = []
+    sess, _root = _bridge_session(tmp_path, monkeypatch, installed=True,
+                                  pids="", ran=ran)
+    sess._deploy_bridge()
+    undo = _bridge_row(sess)["undo"]
+    assert "-Remove" in undo and "BY HAND" in undo
 
 
 def test_a_game_running_on_an_install_with_no_bridge_still_deploys(
@@ -324,20 +414,12 @@ def test_a_game_running_on_an_install_with_no_bridge_still_deploys(
     """The live blocker, from the other side: the owner's game holds nothing
     when the install carries no bridge, so a lane may put one there and
     launch. This is the case the old refusal made impossible."""
-    monkeypatch.setattr(soak, "LOG_DIR", tmp_path)
-    monkeypatch.setattr(soak, "game_dir", lambda: tmp_path / "bare")
-    monkeypatch.setattr(soak, "game_is_running", lambda *a, **k: "4740")
     ran: list = []
-
-    class _Ok:
-        returncode = 0
-        stdout = stderr = ""
-
-    monkeypatch.setattr(soak.subprocess, "run",
-                        lambda *a, **k: ran.append(a[0]) or _Ok())
-    sess = soak.Session("stamp", do_setup=False)
+    sess, root = _bridge_session(tmp_path, monkeypatch, installed=False,
+                                 pids="4740", ran=ran)
     sess._deploy_bridge()
-    assert sess._bridge_entry is not None
+    assert soak.bridge_installed(root)
+    assert ran and str(soak.DEPLOY_BRIDGE) in ran[-1]
 
 
 def test_the_bridge_deploy_refuses_a_held_file_not_a_running_game():
