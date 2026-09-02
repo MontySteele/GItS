@@ -314,7 +314,6 @@ select_bg	ImageGen/images/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Nam
 # ---------- COMBAT MODEL SOURCE (raw; hand-cut into layers per manifest recipe) ----------
 combat_model	ImageGen/images/model/combat_model.png	240	280	sprite	center	auto	1	png	Character Klee Full Wish.png		splash
 model_source_full_wish	ImageGen/images/model/character_klee_full_wish.png	0	0	raw	center	auto	1	png	Character Klee Full Wish.png		splash
-model_source_tcg_alt	ImageGen/images/model/klee_character_card.png	0	0	raw	center	auto	1	png	Klee Character Card.png		splash
 
 # --- Art red-pen round 3 (2026-07-21) -- PARKED, NOT ACTIVE ------------
 # Every source round 3 locked is ALREADY the effective pick of a shipped
