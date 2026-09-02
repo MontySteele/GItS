@@ -320,6 +320,15 @@ MIRRORED: dict[str, object] = {
 # legitimate is leaving the question unanswered.
 # --------------------------------------------------------------------------
 UNMIRRORED: dict[str, str] = {
+    "NonFiniteCardGuard.MaxTrailTravelPx":
+        "`EB-292`. A SCENE BOUND, not balance: how far a followed node may "
+        "travel in one frame before the base game's card-trail gap-fill loop "
+        "is refused. That loop walks the gap at a fixed 48 px and is bounded "
+        "by the travel, so an infinite -- or merely enormous -- position asks "
+        "it for unbounded work and takes the process's memory. 100,000 px is "
+        "far past anything a real flight produces on a 1920x1080 design "
+        "resolution. It touches no card, no meter and no number the sim can "
+        "see: tier0 draws nothing.",
     "MeterLedger.MaxRows":
         "`EB-216`. INSTRUMENT, not balance: how many per-play ledger rows the "
         "mod keeps before dropping the oldest. It touches no game number, no "
