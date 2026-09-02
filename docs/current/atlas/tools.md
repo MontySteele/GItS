@@ -77,6 +77,15 @@ python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full
   `newline=""`, and `rstrip("\r\n")` on the whole line, or the last column
   (`register`) carries a `\r` and L3/L4 silently stop matching
   (`art_fetch.py:38-58`).
+- **The three duplicate rules PARTITION on `proto_`, they do not exempt it**
+  (`art_lint.is_prototype`). A prototype placeholder wears a shipped card's
+  source, crop and pixels on purpose, so L1, L7 and L12 compare prototypes with
+  prototypes and shipped with shipped and never across — while **two prototype
+  cards on one picture is still a finding**, because that is the defect the
+  rules exist for. `dump_claimed_sources` splits the same way, into CLAIMED and
+  PLACEHOLDER, so a hunt still sees a borrowed title without it counting as a
+  claim; `art_contact_sheet --batch prototype` is the one page the whole set is
+  vetoed on.
 - **art_lint scopes to EFFECTIVE picks only** — auto rows and shortlist rank 1;
   dead ranks may share sources freely (`art_lint.py:4-5`). `source_group`
   defaults to BLANK and blank means strict L1 (`:35-46`).
