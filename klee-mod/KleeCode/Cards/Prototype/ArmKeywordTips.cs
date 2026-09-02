@@ -80,13 +80,25 @@ public static class ArmKeywordTips
     // sec.2, "Keywords with tooltips: Bomb, Set off, Spark, Mine").
 
     /// <summary>Rule 1. Deliberately NOT the badge's paragraph: the badge
-    /// speaks about one enemy's live pile, this speaks about the word.</summary>
+    /// speaks about one enemy's live pile, this speaks about the word.
+    ///
+    /// THE SECOND SENTENCE IS <c>EB-287</c>. The r3 Opus seat called the
+    /// stacking "the single most important interaction in the deck and I only
+    /// found it by gambling a card on it", because nothing printed said what
+    /// happens when a second Bomb lands where one already is. It says what is
+    /// TRUE and stops there: the charges share one pile and one badge total
+    /// and one <i>Set off</i> pops all of them, but they stay separate charges
+    /// and each grows on its own -- fusing them into a single charge is
+    /// Careful Arrangement's whole card, and a tip claiming the kit did it for
+    /// free would print that card as a blank.</summary>
     public static IEnumerable<IHoverTip> ForBomb(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
             "A numbered charge on an enemy. It grows by "
           + KleeOverhaulLaw.BombGrowth + " at the start of your turn and never "
-          + "goes off by itself.");
+          + "goes off by itself. A Bomb placed on an enemy that already has "
+          + "one joins it there: the badge shows their total, and a single "
+          + "[gold]Set off[/gold] pops them all.");
 
     /// <summary>Rule 2, and the one [USER] named ("Set Off has no tooltip
     /// text"). The ORDER clause is the load-bearing half: the explosions land
