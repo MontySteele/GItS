@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,12 +37,15 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_read_the_field");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Read the Field"),
-        ("description", "Gain 3 Block. [gold]Plan[/gold]: gain 4 Block."),
+        ("description", "Gain {Block:diff()} Block. [gold]Plan[/gold]: gain 4 Block."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -65,6 +69,6 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

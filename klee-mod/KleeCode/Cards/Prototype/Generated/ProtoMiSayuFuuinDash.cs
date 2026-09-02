@@ -49,14 +49,14 @@ public sealed class ProtoMiSayuFuuinDash : CustomCardModel, IElementalCard, ICom
     public string? Nation => "inazuma";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false);
+        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_sayu_fuuin_dash");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sayu — Yoohoo Art: Fuuin Dash (proto)"),
-        ("description", "Deal 8 damage to a random enemy. [gold]Swirl[/gold]."),
+        ("description", "Deal {Damage:diff()} damage to a random enemy. [gold]Swirl[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -85,6 +85,6 @@ public sealed class ProtoMiSayuFuuinDash : CustomCardModel, IElementalCard, ICom
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

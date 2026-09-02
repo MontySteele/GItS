@@ -59,7 +59,7 @@ public sealed class ProtoMcRazorClawAndThunder : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Razor — Claw and Thunder"),
-        ("description", "Deal 8 damage. If this is the third [gold]Attack[/gold] you played this turn, gain 1 [gold]Energy[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. If this is the third [gold]Attack[/gold] you played this turn, gain 1 [gold]Energy[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -93,6 +93,6 @@ public sealed class ProtoMcRazorClawAndThunder : CustomCardModel, IElementalCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

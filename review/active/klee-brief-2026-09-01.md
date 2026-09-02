@@ -514,23 +514,33 @@ the source game's own most recent chapter.
 
 ## 8. What fight one teaches
 
-Starter deck, ten cards: Kaboom! ×3 (1 energy: 6 damage, *Set off*), Ka-pow!
-×1 (1 Spark: 7 damage, *Set off*), Duck and Cover ×4 (1 energy: 5 Block), Pop!
-(0 energy: plant a Bomb 5), Jumpy Dumpty (2 energy: plant a Bomb 8 on a random
-enemy; when it goes off, plant a Mine 3 on every enemy).
+Starter deck, ten cards: Kaboom! ×2 (1 energy: 6 damage), Ka-pow! ×2 (1
+energy: 7 damage, *Set off*), Duck and Cover ×3 (1 energy: 5 Block), Dig In
+×1 (1 Spark: 8 Block), Pop! (0 energy: plant a Bomb 5), Jumpy Dumpty (1
+energy: plant a Bomb 6 on a random enemy; when it goes off, plant a Mine 3
+on every enemy).
+
+Draft 3, 2026-09-02, after [USER]'s first run: draft 2 gave every starter
+Attack *Set off*, so hitting and cashing were the same act and no Bomb ever
+grew. The plain hit and the cash button are now different cards, the cash
+costs energy, and the Spark buys Block.
 
 Relic, Pounding Surprise: the Spark rule in §3. It is the only free Spark
 source, and it **pays for a whole verb**: every Spark-priced card in the pool
 is playable only because explosions mint Sparks. Without the relic, Spray is
 a deck of dead cards, which is exactly Burning Blood's relationship to
 Ironclad's Bleed. The player meets the relic's job on turn two of fight one,
-when the first explosion turns Ka-pow! from a blank into a free 7.
+when the first explosion turns Dig In from a blank into 8 Block for no
+energy.
 
 Turn one, fight one, the player sees: a 0-cost card that puts a 5 on an
-enemy, three Attacks that say *Set off*, a Spark card they cannot afford yet,
-and Jumpy Dumpty promising Mines. The obvious plan is on the table: plant,
-Duck, and next turn Kaboom! collects a 7. Every verb is visible, the badge
-shows the bomb growing, and nothing is hidden. Script A plays it out.
+enemy, two plain Attacks, two Attacks that say *Set off*, a Spark card they
+cannot afford yet, and Jumpy Dumpty promising Mines. The obvious plan is on
+the table: plant, hit with Kaboom!, Duck, and next turn Ka-pow! collects a
+7, or hit again and let it become a 9. Every verb is visible, the badge
+shows the bomb growing, and nothing is hidden. Script A plays it out. The
+boards in §10 were written against draft 2 and read Kaboom! as the *Set
+off* card; read Ka-pow! for it there.
 
 ## 9. Failure modes, named
 

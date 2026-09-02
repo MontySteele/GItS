@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,12 +37,15 @@ public sealed class ProtoKoSugarRush : CustomCardModel, ISparkPricedCard
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Exhaust };
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForSpark(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_sugar_rush");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sugar Rush"),
-        ("description", "Spend 2 [gold]Sparks[/gold]. Gain 2 [gold]Energy[/gold]. Draw 1 card. Exhaust."),
+        ("description", "Gain 2 [gold]Energy[/gold]. Draw 1 card. Exhaust."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,

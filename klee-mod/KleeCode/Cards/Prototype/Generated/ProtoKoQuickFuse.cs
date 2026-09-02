@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -33,12 +34,15 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKoQuickFuse : CustomCardModel, ISparkPricedCard, IUnplayableReasonCard
 {
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this), this);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_quick_fuse");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Quick Fuse"),
-        ("description", "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold] target enemy's [gold]Bombs[/gold]."),
+        ("description", "Target enemy's [gold]Bombs[/gold] grow by {Grow:diff()}, then [gold]Set off[/gold]."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -64,7 +68,7 @@ public sealed class ProtoKoQuickFuse : CustomCardModel, ISparkPricedCard, IUnpla
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("Grow", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,11 +82,12 @@ public sealed class ProtoKoQuickFuse : CustomCardModel, ISparkPricedCard, IUnpla
     {
         await SparkPower.Spend(choiceContext, Owner.Creature, 1, this);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        ProtoBombPower.GrowOn(cardPlay.Target, Owner.Creature, DynamicVars["Grow"].IntValue);
         await ProtoBombPower.SetOffAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, 0);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["Grow"].UpgradeValueBy(1m);
     }
 }

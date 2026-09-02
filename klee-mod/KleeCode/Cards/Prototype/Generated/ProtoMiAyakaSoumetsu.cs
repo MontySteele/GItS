@@ -52,13 +52,13 @@ public sealed class ProtoMiAyakaSoumetsu : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kamisato Ayaka — Soumetsu"),
-        ("description", "For 2 turns, at the end of your turn deal 8 [gold]Cryo[/gold] damage to ALL enemies. Then deal 16 [gold]Cryo[/gold] damage to ALL enemies."),
+        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 8 [gold]Cryo[/gold] damage to ALL enemies. Then deal 16 [gold]Cryo[/gold] damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -70,11 +70,11 @@ public sealed class ProtoMiAyakaSoumetsu : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<SoumetsuPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<SoumetsuPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

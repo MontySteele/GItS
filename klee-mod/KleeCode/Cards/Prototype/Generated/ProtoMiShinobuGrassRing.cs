@@ -49,7 +49,7 @@ public sealed class ProtoMiShinobuGrassRing : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shinobu — Grass Ring of Sanctification (proto)"),
-        ("description", "Gain 4 [gold]Block[/gold]. If you lost HP this turn, gain 4 more."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you lost HP this turn, gain 4 more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -78,6 +78,6 @@ public sealed class ProtoMiShinobuGrassRing : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

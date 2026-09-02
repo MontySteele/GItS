@@ -41,20 +41,20 @@ public sealed class ProtoKoBigBaddaBoom : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
+        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_big_badda_boom");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Big Badda Boom"),
-        ("description", "[gold]Set off[/gold]. Deal 12 damage. Then deal damage equal to the total size of the [gold]Bombs[/gold] set off."),
+        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. Then deal damage equal to the total size of the [gold]Bombs[/gold] set off."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DamageVar(12m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -68,12 +68,12 @@ public sealed class ProtoKoBigBaddaBoom : CustomCardModel, IElementalCard
     {
         KleeOverhaulLedger.For(Owner.Creature).BeginPlay();
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ProtoBombPower.SetOffAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, 12);
+        await ProtoBombPower.SetOffAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue);
         await ProtoBombPower.DealSetOffTotal(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

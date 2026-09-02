@@ -38,7 +38,7 @@ public sealed class ProtoPopSpark : CustomCardModel, ISkillTagCard
         new[] { KleeKeywords.ElementalSkill };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForBurst(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.None, includesBombRules: true), this);
+        ArmKeywordTips.ForSpark(KleeCardTooltips.ForBurst(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.None, includesBombRules: true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_pop_spark");
 

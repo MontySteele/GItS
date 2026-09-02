@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -39,18 +40,22 @@ public sealed class ProtoKkWatatsumisBlessing : CustomCardModel, ICharacterCard
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Exhaust };
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForMend(ArmKeywordTips.ForTide(base.ExtraHoverTips, this), this);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_watatsumis_blessing");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watatsumi's Blessing"),
-        ("description", "Exhaust. [gold]Mend[/gold] 12. [gold]Tide[/gold] +6."),
+        ("description", "Exhaust. [gold]Mend[/gold] {Mend:diff()}. [gold]Tide[/gold] +{Tide:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("Mend", 12m),
+            new DynamicVar("Tide", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -62,12 +67,13 @@ public sealed class ProtoKkWatatsumisBlessing : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiTide.Mend(choiceContext, Owner.Creature, 12);
-        await KokomiTide.Gain(choiceContext, Owner.Creature, 6);
+        await KokomiTide.Mend(choiceContext, Owner.Creature, DynamicVars["Mend"].IntValue);
+        await KokomiTide.Gain(choiceContext, Owner.Creature, DynamicVars["Tide"].IntValue);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["Mend"].UpgradeValueBy(2m);
+        DynamicVars["Tide"].UpgradeValueBy(2m);
     }
 }

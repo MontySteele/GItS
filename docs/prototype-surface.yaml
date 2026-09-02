@@ -182,20 +182,21 @@
 # `C.KLEE_OVERHAUL` these ARE Klee's starter and her whole pool. Why each row
 # reads as it does: docs/notes/prototype-surface-provenance.md.
 
-# --- the starter, ten cards, five ids (packet sec.3) ---
+# --- the starter, ten cards, six ids (packet sec.3, draft 3 of 2026-09-02:
+# the plain hit and the cash button are different cards; Dig In is the
+# starter's Spark sink and lives below under "currencies and defence") ---
 
 - {id: proto_ko_kaboom, name: "Kaboom!", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: basic,
-   description: "[gold]Set off[/gold]. Deal 6 damage.",
-   effects: [{op: set_off, target: enemy, damage: 6}]}
+   description: "Deal 6 damage.",
+   effects: [{op: damage, amount: 6, target: enemy}]}
 
 - {id: proto_ko_kapow, name: "Ka-pow!", character: klee,
    authored_by: [claude],
-   cost: 0, type: attack, rarity: basic,
-   description: "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold]. Deal 7 damage.",
-   effects: [{op: spend_spark, amount: 1},
-             {op: set_off, target: enemy, damage: 7}]}
+   cost: 1, type: attack, rarity: basic,
+   description: "[gold]Set off[/gold]. Deal 7 damage.",
+   effects: [{op: set_off, target: enemy, damage: 7}]}
 
 - {id: proto_ko_duck_and_cover, name: "Duck and Cover", character: klee,
    authored_by: [claude],
@@ -211,9 +212,9 @@
 
 - {id: proto_ko_jumpy_dumpty, name: "Jumpy Dumpty", character: klee,
    authored_by: [claude],
-   cost: 2, type: skill, rarity: basic,
-   description: "Place a [gold]Bomb[/gold] 8 on a random enemy. When it goes off, place a [gold]Mine[/gold] 3 on every enemy.",
-   effects: [{op: plant_bomb, target: random_enemy, size: 8, payload_mine_all: 3}]}
+   cost: 1, type: skill, rarity: basic,
+   description: "Place a [gold]Bomb[/gold] 6 on a random enemy. When it goes off, place a [gold]Mine[/gold] 3 on every enemy.",
+   effects: [{op: plant_bomb, target: random_enemy, size: 6, payload_mine_all: 3}]}
 
 # --- Cook, the starter's plan (packet sec.4) ---
 
@@ -279,28 +280,29 @@
 - {id: proto_ko_fwoosh, name: "Fwoosh!", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold] and deal 5 damage to a random enemy.",
+   description: "[gold]Set off[/gold] and deal 5 damage to a random enemy.",
    effects: [{op: spend_spark, amount: 1},
              {op: set_off, target: random_enemy, damage: 5}]}
 
 - {id: proto_ko_tinder_toss, name: "Tinder Toss", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold] and deal 4 damage, to two random enemies.",
+   description: "[gold]Set off[/gold] and deal 4 damage, to two random enemies.",
    effects: [{op: spend_spark, amount: 1},
              {op: set_off, target: random_enemy, damage: 4, times: 2}]}
 
 - {id: proto_ko_quick_fuse, name: "Quick Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold] target enemy's [gold]Bombs[/gold].",
+   description: "Target enemy's [gold]Bombs[/gold] grow by 3, then [gold]Set off[/gold].",
    effects: [{op: spend_spark, amount: 1},
+             {op: grow_bombs, target: enemy, amount: 3},
              {op: set_off, target: enemy}]}
 
 - {id: proto_ko_bang_bang, name: "Bang Bang!", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: uncommon,
-   description: "Spend 2 [gold]Sparks[/gold]. [gold]Set off[/gold]. Deal 8 damage. Place a [gold]Bomb[/gold] 4.",
+   description: "[gold]Set off[/gold]. Deal 8 damage. Place a [gold]Bomb[/gold] 4.",
    effects: [{op: spend_spark, amount: 2},
              {op: set_off, target: enemy, damage: 8},
              {op: plant_bomb, target: enemy, size: 4}]}
@@ -366,21 +368,21 @@
 - {id: proto_ko_powder_charge, name: "Powder Charge", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Spend 1 [gold]Spark[/gold]. Place a [gold]Bomb[/gold] 6.",
+   description: "Place a [gold]Bomb[/gold] 6.",
    effects: [{op: spend_spark, amount: 1},
              {op: plant_bomb, target: enemy, size: 6}]}
 
 - {id: proto_ko_dig_in, name: "Dig In", character: klee,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
-   description: "Spend 1 [gold]Spark[/gold]. Gain 8 Block.",
+   cost: 0, type: skill, rarity: basic,
+   description: "Gain 8 Block.",
    effects: [{op: spend_spark, amount: 1},
              {op: block, amount: 8}]}
 
 - {id: proto_ko_sugar_rush, name: "Sugar Rush", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: rare, exhaust: true,
-   description: "Spend 2 [gold]Sparks[/gold]. Gain 2 [gold]Energy[/gold]. Draw 1 card. Exhaust.",
+   description: "Gain 2 [gold]Energy[/gold]. Draw 1 card. Exhaust.",
    effects: [{op: spend_spark, amount: 2},
              {op: energy, amount: 2},
              {op: draw, amount: 1}]}
@@ -699,9 +701,9 @@
 - {id: proto_kk_kurages_oath, name: "Kurage's Oath (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   description: "[gold]Exert[/gold] 2. [gold]Tide[/gold] +5.",
+   description: "[gold]Exert[/gold] 2. [gold]Tide[/gold] +8.",
    effects: [{op: exert, amount: 2},
-             {op: gain_tide, amount: 5}]}
+             {op: gain_tide, amount: 8}]}
 
 - {id: proto_kk_rising_tide, name: "Rising Tide", character: kokomi,
    authored_by: [claude],

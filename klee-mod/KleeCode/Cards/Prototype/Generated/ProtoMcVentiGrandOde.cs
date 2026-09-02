@@ -52,14 +52,14 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false);
+        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_venti_grand_ode");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Venti — Wind's Grand Ode"),
-        ("description", "Deal 8 damage to ALL enemies. For 2 turns, at the end of your turn [gold]Swirl[/gold] the aura of ALL enemies."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. For {PowerAmount:diff()} turns, at the end of your turn [gold]Swirl[/gold] the aura of ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -67,7 +67,8 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
         {
             new CalculationBaseVar(8m),
             new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -85,11 +86,12 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        await PowerCmd.Apply<GrandOdePower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<GrandOdePower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

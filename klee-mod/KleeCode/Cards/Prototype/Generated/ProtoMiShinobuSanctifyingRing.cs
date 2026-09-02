@@ -52,13 +52,14 @@ public sealed class ProtoMiShinobuSanctifyingRing : CustomCardModel, ICompanionC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shinobu — Sanctifying Ring (proto)"),
-        ("description", "Lose 3 HP. For 3 turns, at the end of your turn deal 5 [gold]Electro[/gold] damage to ALL enemies and gain 5 [gold]Block[/gold]."),
+        ("description", "Lose 3 HP. For {PowerAmount:diff()} turns, at the end of your turn deal 5 [gold]Electro[/gold] damage to ALL enemies and gain 5 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new HpLossVar(3m)
+            new HpLossVar(3m),
+            new DynamicVar("PowerAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -71,11 +72,11 @@ public sealed class ProtoMiShinobuSanctifyingRing : CustomCardModel, ICompanionC
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.Damage(choiceContext, Owner.Creature, DynamicVars.HpLoss.BaseValue, ValueProp.Unblockable | ValueProp.Unpowered, this, cardPlay);
-        await PowerCmd.Apply<SanctifyingRingPower>(choiceContext, Owner.Creature, 3, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<SanctifyingRingPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

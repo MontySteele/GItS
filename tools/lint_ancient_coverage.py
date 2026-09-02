@@ -24,7 +24,12 @@ lint). Checks, per character in CHARACTERS:
      detached ledger is not a gate;
   4. no referenced class also appears in the character's off-pool filter
      (off-pool cards are stripped from GetUnlockedCards, which would remake
-     the empty-draw crash with the ledger looking green).
+     the empty-draw crash with the ledger looking green);
+  5. EB-284: every PROTOTYPE ARM pool concats the same ledger. An arm's
+     FilterThroughEpochs RETURNS its own roster and never reaches the
+     character pool above, so under its flag the arm roster IS
+     GetUnlockedCards -- and both arms shipped without the Ancient tail,
+     which is how [USER]'s Klee run ended at the act-two Darv door.
 
 Adding a roster character means adding a ledger property AND a CHARACTERS
 row here; a property the table does not know about is a FINDING, not a skip.
@@ -52,6 +57,32 @@ CHARACTERS = {
     "Furina": (CODE / "FurinaCardPool.cs", CODE / "FurinaCardPool.cs"),
     "Kokomi": (CODE / "KokomiCardPool.cs", CODE / "KokomiCardPool.cs"),
 }
+
+# EB-284. THE SAME GATE ON THE ARMS, BECAUSE THEY REPLACE THE POOL THE GATE
+# ABOVE CHECKS.
+#
+# `KleeCardPool.FilterThroughEpochs` and its Kokomi twin RETURN the arm's
+# roster and never reach `base.FilterThroughEpochs`, so under a prototype arm
+# the pool file's concat above is not the set `GetUnlockedCards` yields --
+# the arm roster is. Both arms shipped without the Ancient tail, Darv's Dusty
+# Tome roll drew nothing, and [USER]'s Klee run ended at the act-two door with
+# an NRE inside `Darv.GenerateInitialOptions`. Checked file-by-file rather
+# than by following the seam, for the reason the whole lint exists: the
+# compiler cannot see an empty draw, so the invariant needs a ledger and a
+# text gate.
+#
+# An arm pool listed here must concat its character's ledger property. Adding
+# an arm means adding a row; a `*OverhaulRoster.cs` this table does not know
+# about is caught by the sweep below rather than skipped.
+ARM_POOLS = {
+    "Klee": CODE / "Powers" / "Prototype" / "KleeOverhaulRoster.cs",
+    "Kokomi": CODE / "Powers" / "Prototype" / "KokomiOverhaulRoster.cs",
+}
+ARM_POOL_GLOB = "Powers/Prototype/*OverhaulRoster.cs"
+# The one `*OverhaulRoster.cs` that is NOT a character reward pool: the
+# companion overhaul replaces a NATION's Universal companion roster, which
+# Dusty Tome never draws from, so it has no Ancient to owe.
+ARM_POOL_EXEMPT = {"CompanionOverhaulRoster.cs"}
 
 PROPERTY_RE = re.compile(
     r"public\s+static\s+IReadOnlyList<CardModel>\s+(\w+)\s*=>")
@@ -153,6 +184,30 @@ def main() -> int:
                         f"reach GetUnlockedCards, so the Dusty Tome draw is "
                         f"empty again.")
 
+    # EB-284: the arm pools, which REPLACE the pools checked above.
+    seen_arm_files: set[str] = set()
+    for character, arm_file in ARM_POOLS.items():
+        seen_arm_files.add(arm_file.name)
+        if not arm_file.is_file():
+            findings.append(
+                f"{character}: arm pool file missing: "
+                f"{arm_file.relative_to(REPO)}")
+            continue
+        if f"RosterAncientCards.{character}" not in arm_file.read_text(
+                encoding="utf-8"):
+            findings.append(
+                f"{character}: {arm_file.name} does not concat "
+                f"RosterAncientCards.{character}; the arm REPLACES the "
+                f"character's pool, so under its flag Dusty Tome draws from "
+                f"this list and an empty Ancient draw softlocks Darv.")
+    for path in sorted(CODE.glob(ARM_POOL_GLOB)):
+        if path.name in seen_arm_files or path.name in ARM_POOL_EXEMPT:
+            continue
+        findings.append(
+            f"{path.relative_to(REPO)} is an arm pool this lint has no row "
+            f"for -- add it to ARM_POOLS (or to ARM_POOL_EXEMPT, with the "
+            f"reason it draws no Ancient).")
+
     for finding in findings:
         print(f"FINDING: {finding}")
     if findings:
@@ -160,7 +215,8 @@ def main() -> int:
     covered = ", ".join(
         f"{c}={len(MEMBER_RE.findall(property_block(ledger_text, c) or ''))}"
         for c in CHARACTERS)
-    print(f"ancient coverage: OK ({covered})")
+    print(f"ancient coverage: OK ({covered}; "
+          f"arm pools {', '.join(sorted(ARM_POOLS))})")
     return 0
 
 

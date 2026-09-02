@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -44,18 +45,21 @@ public sealed class ProtoMcVarkaSturmUndDrang : CustomCardModel, ICompanionCard
 
     public string? Nation => "mondstadt";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForSwirl(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_varka_sturm_und_drang");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Varka — Sturm und Drang"),
-        ("description", "Whenever a [gold]Swirl[/gold] happens, your next [gold]Attack[/gold] deals 6 more damage of the swirled element."),
+        ("description", "Whenever a [gold]Swirl[/gold] happens, your next [gold]Attack[/gold] deals {PowerAmount:diff()} more damage of the swirled element."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -67,11 +71,11 @@ public sealed class ProtoMcVarkaSturmUndDrang : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<SturmUndDrangPower>(choiceContext, Owner.Creature, 6, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<SturmUndDrangPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

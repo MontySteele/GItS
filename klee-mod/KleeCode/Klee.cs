@@ -41,8 +41,17 @@ namespace KleeMod;
 /// It also adds no abstract members of its own — everything it declares is
 /// virtual with a default — so there is no cost to being on the right base
 /// type and no signal when you are not.
+///
+/// IKleeCharacter is her identity gate, and it arrives late on purpose
+/// (`EB-281`): she is the compatibility baseline, so every shipped site tests
+/// <c>is Klee</c> directly and still does. The interface exists for the
+/// QUARANTINE, where a patch compiled under the one prototype switch runs on
+/// every seat at the table and has to be able to say whose creature it is about
+/// in the idiom Furina and Kokomi already use
+/// (<c>tools/lint_prototype_patch_scope.py</c>). It declares nothing, so
+/// carrying it costs her nothing.
 /// </summary>
-public sealed class Klee : CustomCharacterModel
+public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
 {
     /// <remarks>
     /// Loc MUST live here, not in KleeMod's hand-rolled dictionary. BaseLib

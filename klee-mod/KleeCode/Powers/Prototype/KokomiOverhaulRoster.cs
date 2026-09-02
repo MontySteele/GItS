@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using KleeMod.Cards.Prototype.Generated;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Relics;
@@ -88,11 +89,20 @@ internal static class KokomiOverhaulRoster
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
-    /// ANCIENTS ARE NOT HERE, matching the Klee arm's own default and for the
-    /// same reason: the design is silent, and "her only reward pool" read
-    /// literally means Dusty Tome and its kin see the slice and nothing else.
+    /// THE ANCIENTS ARE HERE, AND THEY HAVE TO BE (`EB-284`), for the reason
+    /// <c>KleeOverhaulRoster.OfferablePool</c> states at length: this list is
+    /// what `KokomiCardPool.FilterThroughEpochs` returns under the arm, which
+    /// IS `GetUnlockedCards`, and `DustyTome.SetupForPlayer` draws its Ancient
+    /// from that set. Without them Darv's Tome roll draws nothing and the
+    /// act-two door NREs. Ancient rarity never rolls anywhere else, so this
+    /// costs the arm's "her only reward pool" nothing.
     /// </summary>
-    internal static IEnumerable<CardModel> OfferablePool() => new CardModel[]
+    internal static IEnumerable<CardModel> OfferablePool() =>
+        Slice().Concat(RosterAncientCards.Kokomi);
+
+    /// <summary>The slice's own 28 rows, without the Ancient tail
+    /// <see cref="OfferablePool"/> adds.</summary>
+    private static CardModel[] Slice() => new CardModel[]
     {
         // Priestess -- feed, hold, surge (9)
         ModelDb.Card<ProtoKkTidalPrayer>(),

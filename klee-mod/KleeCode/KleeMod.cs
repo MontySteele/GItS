@@ -86,6 +86,17 @@ public static class KleeMod
                     // arm's rows, which is every board with the arm off.
                     .Concat(Powers.CompanionOverhaulIncomingHit.Subscribe(combatState))
                     .Concat(Powers.CompanionOverhaulPlayWatcher.Subscribe(combatState))
+                    // EB-279. The Klee overhaul's rule-3 sweep, on the same
+                    // argument as the three lines above: the two moments a
+                    // Bomb can be orphaned that the arm itself does not cause
+                    // -- any creature's death, and any card play -- are
+                    // BROADCAST hooks, and a power on the dying enemy cannot
+                    // hear either of them. Not compiled in a release build,
+                    // and inert with the arm off: with no proto Bomb on any
+                    // board the register is empty and the sweep is a walk over
+                    // nothing. See KleeOverhaulSweep.cs for why AfterDeath is
+                    // trustworthy where the enemy's own hooks are not.
+                    .Concat(Powers.KleeOverhaulSweepHooks.Subscribe(combatState))
 #endif
                     // Track B's human feed: per-fight telemetry from normal
                     // play, in the schema the soak writes. Reads only -- see
@@ -311,6 +322,39 @@ public static class KleeMod
                     // until now.
                     [Cards.KleeCardTooltips.BurstKey + ".title"] =
                         "Burst Energy",
+#if PROTOTYPE_CARDS
+                    // `EB-272`. QUARANTINED, and inside the switch for the
+                    // reason Rally's prompt is: `Cards/Prototype/**` is
+                    // Compile Remove'd from a release build, so
+                    // `Cards.ArmKeywordTips` does not exist there and these
+                    // eleven keys name nothing. Under the switch they are the
+                    // only source of the titles, exactly as the four rider
+                    // rows above are -- the pck's card_keywords.json carries
+                    // none of them, and a missing row renders as the raw key
+                    // on a card face (0.2-589, 0.2-634).
+                    //
+                    // TITLES ONLY, the bargain every tip in this block makes:
+                    // the bodies are built in ArmKeywordTips because two of
+                    // them interpolate an arm's law constant and one of them
+                    // reads which Klee arm is live.
+                    //
+                    // `ARM_BOMB` is titled "Bomb" and `KLEEMOD-BOMB` is too,
+                    // which is correct rather than a collision: they are the
+                    // same WORD under two different rules, and no single face
+                    // ever raises both (see the attach rule in
+                    // `gen_klee_cards.arm_keyword_tip_calls`).
+                    [Cards.ArmKeywordTips.BombKey + ".title"] = "Bomb",
+                    [Cards.ArmKeywordTips.SetOffKey + ".title"] = "Set off",
+                    [Cards.ArmKeywordTips.SparkKey + ".title"] = "Spark",
+                    [Cards.ArmKeywordTips.MineKey + ".title"] = "Mine",
+                    [Cards.ArmKeywordTips.TideKey + ".title"] = "Tide",
+                    [Cards.ArmKeywordTips.SurgeKey + ".title"] = "Surge",
+                    [Cards.ArmKeywordTips.ExertKey + ".title"] = "Exert",
+                    [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
+                    [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
+                    [Cards.ArmKeywordTips.GarmentKey + ".title"] = "Garment",
+                    [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
+#endif
                 };
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))

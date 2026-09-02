@@ -38,7 +38,7 @@ public sealed class ProtoKoDuckAndCover : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Duck and Cover"),
-        ("description", "Gain 5 Block."),
+        ("description", "Gain {Block:diff()} Block."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Defend };
@@ -63,6 +63,6 @@ public sealed class ProtoKoDuckAndCover : CustomCardModel
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

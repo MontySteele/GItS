@@ -44,14 +44,14 @@ public sealed class ProtoKkRisingTide : CustomCardModel, IElementalCard, ICharac
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
+        ArmKeywordTips.ForSurge(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_rising_tide");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rising Tide"),
-        ("description", "Deal 4 damage. [gold]Surge[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. [gold]Surge[/gold]."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
@@ -82,6 +82,6 @@ public sealed class ProtoKkRisingTide : CustomCardModel, IElementalCard, ICharac
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

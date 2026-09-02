@@ -211,16 +211,24 @@ KLEE_OVERHAUL_WORKSHOP_GROWTH = 1    # Explosives Workshop: +1 more
 KLEE_OVERHAUL_ALICE_GROWTH = 4       # Alice's Recipe: 4 INSTEAD of 2
 KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
 
-# THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, five ids, in
+# THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, SIX ids, in
 # the printed order. This is a REPLACEMENT and not a substitution list because
 # every one of the ten moves: the shipped Ka-boom! has no *Set off* clause and
 # the shipped Pop! places a bomb that detonates itself, so there is no shipped
 # starter card the new rules leave standing.
+#
+# DRAFT 3 (2026-09-02, after [USER]'s first run; slice packet sec.3). Draft 2
+# put *Set off* on every starter Attack, so attacking and cashing were one act
+# and nothing ever grew. The plain hit and the cash button are now different
+# cards (Kaboom! x2 beside Ka-pow! x2), and `proto_ko_dig_in` moves IN from the
+# pool as the starter's one Spark sink -- which is why it is `rarity: basic` on
+# the surface and is absent from `KLEE_OVERHAUL_POOL_IDS` below.
 KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
-    "proto_ko_kaboom", "proto_ko_kaboom", "proto_ko_kaboom",
-    "proto_ko_kapow",
+    "proto_ko_kaboom", "proto_ko_kaboom",
+    "proto_ko_kapow", "proto_ko_kapow",
     "proto_ko_duck_and_cover", "proto_ko_duck_and_cover",
-    "proto_ko_duck_and_cover", "proto_ko_duck_and_cover",
+    "proto_ko_duck_and_cover",
+    "proto_ko_dig_in",
     "proto_ko_pop",
     "proto_ko_jumpy_dumpty",
 )
@@ -230,7 +238,11 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # nothing else" -- so `loader.pool_replacement` is its sibling seam, read at the
 # same single door.
 #
-# TWENTY-SEVEN OF THE PACKET'S TWENTY-EIGHT. Vermillion Pact is NOT here, and
+# TWENTY-SIX OF THE PACKET'S TWENTY-SEVEN. Two rows are absent and for two
+# different reasons. `proto_ko_dig_in` left the OFFER pool at draft 3 because it
+# joined the starter (sec.3: "the Spark buys Block, with Dig In moved from the
+# pool into the starter"), so the packet's sec.4 table now lists 27 offerable
+# rows rather than 28. Vermillion Pact is the other, and
 # the packet's own sec.5 is what leaves it out: "Vermillion Pact is the one item
 # on this list that touches shared reaction code; if it costs more than a day it
 # drops out of slice one and is tested in slice two." It does. Its rule is not
@@ -243,7 +255,8 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # shared code every character's reactions would have to be re-checked against.
 # The reasoning is recorded in `VermillionPactNotBuilt`, and the row is off the
 # surface rather than staged as a card whose face would lie. The pool is
-# therefore 11 Common, 11 Uncommon, 5 Rare.
+# therefore 11 Common, 10 Uncommon, 5 Rare -- one Uncommon fewer than draft 2,
+# and it is Dig In.
 KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Cook (8)
     "proto_ko_fish_flavored_bait",
@@ -268,10 +281,9 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_perfect_timing",
     "proto_ko_flame_dance",
     "proto_ko_catalytic_converter",
-    # Currencies and defence (7)
+    # Currencies and defence (6 of 7; Dig In is in the starter since draft 3)
     "proto_ko_ammo_scavenging",
     "proto_ko_powder_charge",
-    "proto_ko_dig_in",
     "proto_ko_sugar_rush",
     "proto_ko_run_away",
     "proto_ko_grounded",

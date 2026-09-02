@@ -52,14 +52,14 @@ public sealed class ProtoMiKazuhaSlash : CustomCardModel, IElementalCard, ICompa
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false);
+        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_kazuha_slash");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaedehara Kazuha — Kazuha Slash"),
-        ("description", "Deal 10 damage to ALL enemies. [gold]Swirl[/gold] each."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. [gold]Swirl[/gold] each."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -89,6 +89,6 @@ public sealed class ProtoMiKazuhaSlash : CustomCardModel, IElementalCard, ICompa
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

@@ -44,7 +44,7 @@ public sealed class ProtoKkSaltLine : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Salt Line (proto)"),
-        ("description", "Exhaust. Gain 7 Block."),
+        ("description", "Exhaust. Gain {Block:diff()} Block."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -67,6 +67,6 @@ public sealed class ProtoKkSaltLine : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -33,18 +34,21 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKoMineToss : CustomCardModel
 {
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForMine(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_mine_toss");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mine Toss"),
-        ("description", "Place a [gold]Mine[/gold] 4 on every enemy."),
+        ("description", "Place a [gold]Mine[/gold] {BombSize:diff()} on every enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("BombSize", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -56,11 +60,11 @@ public sealed class ProtoKoMineToss : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await ProtoBombPower.PlaceOnAll(choiceContext, Owner.Creature, 4, isMine: true, payloadMineAll: 0, cardSource: this);
+        await ProtoBombPower.PlaceOnAll(choiceContext, Owner.Creature, DynamicVars["BombSize"].IntValue, isMine: true, payloadMineAll: 0, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["BombSize"].UpgradeValueBy(2m);
     }
 }

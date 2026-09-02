@@ -59,7 +59,7 @@ public sealed class ProtoMcKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaeya — Frostgnaw (proto)"),
-        ("description", "Deal 8 damage. Gain 3 [gold]Block[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -91,6 +91,7 @@ public sealed class ProtoMcKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

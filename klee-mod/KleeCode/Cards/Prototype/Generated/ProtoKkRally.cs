@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,18 +37,21 @@ public sealed class ProtoKkRally : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForTide(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_rally");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rally"),
-        ("description", "Draw a [gold]Companion[/gold] card from your draw pile. [gold]Tide[/gold] +2."),
+        ("description", "Draw a [gold]Companion[/gold] card from your draw pile. [gold]Tide[/gold] +{Tide:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("Tide", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,11 +64,11 @@ public sealed class ProtoKkRally : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await KokomiOverhaulKit.DrawCompanionFromDraw(choiceContext, Owner, this);
-        await KokomiTide.Gain(choiceContext, Owner.Creature, 2);
+        await KokomiTide.Gain(choiceContext, Owner.Creature, DynamicVars["Tide"].IntValue);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["Tide"].UpgradeValueBy(2m);
     }
 }

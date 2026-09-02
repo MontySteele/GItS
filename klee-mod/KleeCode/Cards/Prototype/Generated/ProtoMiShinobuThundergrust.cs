@@ -59,7 +59,7 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shinobu — Thundergrust (proto)"),
-        ("description", "Deal 8 damage. If you are below half HP, deal 5 more."),
+        ("description", "Deal {Damage:diff()} damage. If you are below half HP, deal 5 more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -97,6 +97,6 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -33,12 +34,15 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKoPowderCharge : CustomCardModel, ISparkPricedCard
 {
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForSpark(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_powder_charge");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Powder Charge"),
-        ("description", "Spend 1 [gold]Spark[/gold]. Place a [gold]Bomb[/gold] 6."),
+        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -58,7 +62,7 @@ public sealed class ProtoKoPowderCharge : CustomCardModel, ISparkPricedCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("BombSize", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -72,11 +76,11 @@ public sealed class ProtoKoPowderCharge : CustomCardModel, ISparkPricedCard
     {
         await SparkPower.Spend(choiceContext, Owner.Creature, 1, this);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ProtoBombPower.Place(choiceContext, cardPlay.Target, 6, isMine: false, payloadMineAll: 0, Owner.Creature, this);
+        await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: 0, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["BombSize"].UpgradeValueBy(2m);
     }
 }

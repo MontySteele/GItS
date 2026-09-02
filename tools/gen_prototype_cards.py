@@ -84,6 +84,7 @@ sys.path.insert(0, str(REPO))
 
 import tools.gen_klee_cards as gen                            # noqa: E402
 from tier0.content.loader import PROTOTYPE_ID_PREFIX          # noqa: E402
+from tier0.content.upgrades import prototype_default_delta    # noqa: E402
 from understudy import authorship                             # noqa: E402
 
 SHEET = REPO / "docs" / "prototype-surface.yaml"
@@ -103,6 +104,7 @@ DIR_PROFILE = replace(
     manifest=MANIFEST,
     namespace=NAMESPACE,
     generator_script=SCRIPT,
+    arm_keyword_tips=True,
 )
 
 
@@ -112,7 +114,12 @@ def _profile_for(character_id: str) -> gen.CharacterProfile:
     `character_id`, `native_element`, `cadence`, `art_loader` and
     `emit_character_identity` are the OWNER's and are not overridden: they are
     what make the emitted card the character's card rather than a generic one.
-    Only the four location fields move.
+    Only the four location fields move -- and `arm_keyword_tips`, which is a
+    fact about the SURFACE rather than about the owner (`EB-272`): the three
+    quarantined arms invented `Bomb`, `Set off`, `Spark`, `Mine`, `Tide`,
+    `Surge`, `Exert`, `Mend`, `Plan`, `Garment` and the `Swirl` verb, and only
+    a row on this sheet can mean the arm's rule by printing one. The same word
+    on a shipped sheet means the shipped rule and keeps the shipped tip.
     """
     owner = gen.PROFILES[character_id]
     return replace(
@@ -122,6 +129,7 @@ def _profile_for(character_id: str) -> gen.CharacterProfile:
         manifest=MANIFEST,
         namespace=NAMESPACE,
         generator_script=SCRIPT,
+        arm_keyword_tips=True,
     )
 
 
@@ -180,12 +188,22 @@ def plan() -> gen.ProfilePlan:
         # row IS the ratified home, so the block is lifted by taking the key
         # off the card and putting it in the index the shipped path reads.
         upgrade = card.pop("upgrade", None)
+        if upgrade is not None and (not isinstance(upgrade, dict)
+                                    or not upgrade):
+            raise SystemExit(
+                f"gen_prototype_cards: {card_id}: `upgrade:` must be a "
+                "non-empty map of delta keys, as an upgrades sheet's "
+                "entry is; drop the key for a base-only row.")
+        # EB-283. A row with NO authored block takes the Prototype-stage rule,
+        # and it is imported from `tier0.content.upgrades` rather than written
+        # here so the two engines apply one implementation and not two
+        # spellings of one. An authored block always wins, which is how a
+        # Balance-stage ruling replaces the default without removing it.
+        if upgrade is None:
+            default = prototype_default_delta(
+                card_id, card.get("cost"), card.get("effects", []))
+            upgrade = default or None
         if upgrade is not None:
-            if not isinstance(upgrade, dict) or not upgrade:
-                raise SystemExit(
-                    f"gen_prototype_cards: {card_id}: `upgrade:` must be a "
-                    "non-empty map of delta keys, as an upgrades sheet's "
-                    "entry is; drop the key for a base-only row.")
             gen.register_upgrade_deltas(card_id, upgrade)
             upgrades[card_id] = dict(upgrade)
         reason = gen.blocked_reason(card, profile)

@@ -49,14 +49,14 @@ public sealed class ProtoMcJeanGaleBlade : CustomCardModel, IElementalCard, ICom
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false);
+        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_jean_gale_blade");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jean — Gale Blade"),
-        ("description", "Deal 10 damage. [gold]Swirl[/gold] an enemy's aura."),
+        ("description", "Deal {Damage:diff()} damage. [gold]Swirl[/gold] an enemy's aura."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -87,6 +87,6 @@ public sealed class ProtoMcJeanGaleBlade : CustomCardModel, IElementalCard, ICom
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

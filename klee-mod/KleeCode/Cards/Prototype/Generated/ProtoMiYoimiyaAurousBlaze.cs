@@ -52,13 +52,13 @@ public sealed class ProtoMiYoimiyaAurousBlaze : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yoimiya — Aurous Blaze"),
-        ("description", "Mark an enemy for 2 turns. Whenever it takes damage from a card that is not an [gold]Attack[/gold], deal 6 [gold]Pyro[/gold] damage to ALL enemies."),
+        ("description", "Mark an enemy for {PowerAmount:diff()} turns. Whenever it takes damage from a card that is not an [gold]Attack[/gold], deal 6 [gold]Pyro[/gold] damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -71,11 +71,11 @@ public sealed class ProtoMiYoimiyaAurousBlaze : CustomCardModel, ICompanionCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await PowerCmd.Apply<AurousBlazePower>(choiceContext, cardPlay.Target, 2, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<AurousBlazePower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

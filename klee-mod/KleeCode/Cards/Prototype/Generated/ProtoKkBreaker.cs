@@ -44,14 +44,14 @@ public sealed class ProtoKkBreaker : CustomCardModel, IElementalCard, ICharacter
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
+        ArmKeywordTips.ForSurge(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_breaker");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Breaker"),
-        ("description", "[gold]Surge[/gold], then deal 8 damage."),
+        ("description", "[gold]Surge[/gold], then deal {Damage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -80,6 +80,6 @@ public sealed class ProtoKkBreaker : CustomCardModel, IElementalCard, ICharacter
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

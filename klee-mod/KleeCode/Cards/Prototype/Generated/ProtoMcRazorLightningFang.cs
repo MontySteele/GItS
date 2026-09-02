@@ -52,13 +52,13 @@ public sealed class ProtoMcRazorLightningFang : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Razor — Lightning Fang"),
-        ("description", "For 2 turns, your [gold]Attacks[/gold] apply [gold]Electro[/gold] and deal 3 more damage."),
+        ("description", "For {PowerAmount:diff()} turns, your [gold]Attacks[/gold] apply [gold]Electro[/gold] and deal 3 more damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -70,11 +70,11 @@ public sealed class ProtoMcRazorLightningFang : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<LightningFangPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<LightningFangPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

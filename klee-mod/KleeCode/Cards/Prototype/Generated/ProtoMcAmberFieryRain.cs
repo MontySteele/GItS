@@ -59,7 +59,7 @@ public sealed class ProtoMcAmberFieryRain : CustomCardModel, IElementalCard, ICo
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Amber — Fiery Rain"),
-        ("description", "Deal 4 damage to ALL enemies three times."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies three times."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -90,6 +90,6 @@ public sealed class ProtoMcAmberFieryRain : CustomCardModel, IElementalCard, ICo
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(1m);
     }
 }
