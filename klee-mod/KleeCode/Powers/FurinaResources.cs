@@ -321,6 +321,33 @@ public static class FurinaResources
     public static bool IsFurina(Creature creature) =>
         creature.Player?.Character is IFurinaCharacter;
 
+    /// <summary>
+    /// Are the FOUR SHIPPED FANFARE MINT LEGS retired for this creature?
+    ///
+    /// The Furina reframe's §4.1 states its rule positively -- "Fanfare is
+    /// minted by a member PERFORMING and by nothing else" -- and the four legs
+    /// it retires are HP lost, Encore spent, Encore absorbed and a Spotlighted
+    /// card played. Three of those are in this file and the fourth is in
+    /// <c>SpotlightSystem.NotePlay</c>; all four ask THIS question, once,
+    /// rather than each carrying its own copy of the flag read, because a rule
+    /// stated once should be asked once. It is the same argument
+    /// <see cref="BurstResource"/>'s gauge guard makes and the same shape
+    /// <c>KokomiResources.BurstGaugeApplies</c> has.
+    ///
+    /// FALSE IN A RELEASE BUILD BY CONSTRUCTION: the arm's switch lives under
+    /// <c>Powers/Prototype/</c>, which is <c>Compile Remove</c>d, so without
+    /// the quarantine property there is nothing to ask and every leg mints
+    /// exactly as it ships.
+    /// </summary>
+    public static bool ReframeRetiresTheShippedMintLegs(Creature? creature)
+    {
+#if PROTOTYPE_CARDS
+        return FurinaReframe.MeterLiveFor(creature);
+#else
+        return false;
+#endif
+    }
+
     private static EncoreResource? EncoreResourceFor(Creature creature)
     {
         var combatState = creature.Player?.PlayerCombatState;
@@ -641,8 +668,17 @@ public static class FurinaResources
         // Encore's display moved to the Salon stage ribbon (animation sprint 2,
         // D3). Funnels unchanged -- only the surface it draws on.
         Vfx.SalonVisualsBridge.Refresh(creature);
-        GainFanfare(
-            creature, spent * FurinaResourceConstants.FanfarePerEncoreSpent);
+        // RETIRED UNDER THE REFRAME'S METER LEG (packet §4.1, leg 2 of 4):
+        // only a member PERFORMING mints Fanfare, so a deliberate Encore spend
+        // pays nothing. Burst is untouched -- the reframe retires the FANFARE
+        // legs and says nothing about the Burst particle. Inert with the arm
+        // off; mirrors tier0 `resources.spend_encore`, whose Fanfare limb the
+        // slice's `test_the_shipped_generation_legs_mint_nothing` empties.
+        if (!ReframeRetiresTheShippedMintLegs(creature))
+        {
+            GainFanfare(
+                creature, spent * FurinaResourceConstants.FanfarePerEncoreSpent);
+        }
         GainBurst(
             creature, spent * FurinaResourceConstants.BurstPerEncoreSpent);
         SpotlightSystem.OnEncoreSpent(creature);
@@ -694,8 +730,16 @@ public static class FurinaResources
         // Encore's display moved to the Salon stage ribbon (animation sprint 2,
         // D3). Funnels unchanged -- only the surface it draws on.
         Vfx.SalonVisualsBridge.Refresh(creature);
-        GainFanfare(
-            creature, absorbed * FurinaResourceConstants.FanfarePerEncoreAbsorbed);
+        // RETIRED UNDER THE REFRAME'S METER LEG (packet §4.1, leg 3 of 4). The
+        // ABSORPTION still happens -- the buffer still eats the hit, which is
+        // what the buffer is for; what stops is the Fanfare it printed. Inert
+        // with the arm off; mirrors tier0 `resources.absorb_into_encore`.
+        if (!ReframeRetiresTheShippedMintLegs(creature))
+        {
+            GainFanfare(
+                creature,
+                absorbed * FurinaResourceConstants.FanfarePerEncoreAbsorbed);
+        }
         return Math.Max(0m, amount - absorbed);
     }
 
@@ -876,6 +920,28 @@ public sealed class FurinaResourceHooks : AbstractModel
         var player = cardPlay.Card?.Owner;
         if (player?.Creature is not { } owner) return;
         await CurtainCallHooks.FlushPendingDraws(choiceContext, owner);
+#if PROTOTYPE_CARDS
+        // FURINA REFRAME (§4.3, `F3` (1) / `F4` (1)): a Companion play makes
+        // the FRONT Salon member perform, then rotates it to the back.
+        //
+        // BESIDE KLEE'S MINT AND GATED THE SAME WAY, for the same two reasons
+        // (see `KleeCompanionSpark`): once per PLAY, because
+        // `IsFirstInSeries` is the phase that means "once per play_card call"
+        // and a replay is one card resolved twice; and AFTER a resolution has
+        // run, which is what this broadcast is. The sim gates the identical
+        // call on `replay_index == 0 and card.is_companion` inside
+        // `combat._finish_play` and puts Klee's mint on the very next line.
+        //
+        // PLACED BEFORE THE TWO FLUSHES BELOW so the performance's Block and
+        // its Fanfare mint settle inside the play that caused them rather than
+        // waiting for the next one. Inert unless the arm's MANUAL leg is on,
+        // and inert for every other character.
+        if (cardPlay.IsFirstInSeries)
+        {
+            await SalonMemberPower.CompanionPlayTrigger(
+                choiceContext, owner, cardPlay.Card);
+        }
+#endif
         // A7: the play's Encore spend, Center Stage credit and floor grant all
         // moved the meter from BeforeCardPlayed, which has no context of its
         // own. Settling here puts the Block on the board before the enemy can
@@ -1082,8 +1148,17 @@ public sealed class FurinaResourceHooks : AbstractModel
             // local, so the mint and Slip Backstage's predicate can never
             // disagree about how much she lost.
             var lost = (int)Math.Ceiling(-delta);
-            FurinaResources.GainFanfare(
-                creature, lost * FurinaResourceConstants.FanfarePerHpLost);
+            // RETIRED UNDER THE REFRAME'S METER LEG (packet §4.1, leg 1 of 4),
+            // and with it the shipped invariant "every point of damage past
+            // Block prints exactly 1 Fanfare". Slip Backstage's predicate on
+            // the line below is NOT retired: it reads "she lost HP", which is
+            // still true. Inert with the arm off; mirrors tier0
+            // `resources.note_player_hp_loss`.
+            if (!FurinaResources.ReframeRetiresTheShippedMintLegs(creature))
+            {
+                FurinaResources.GainFanfare(
+                    creature, lost * FurinaResourceConstants.FanfarePerHpLost);
+            }
             // Slip Backstage's predicate reads off the same funnel, so
             // "she lost HP" is one fact rather than two trackers.
             CurtainCallHooks.NoteHpLost(creature, lost);

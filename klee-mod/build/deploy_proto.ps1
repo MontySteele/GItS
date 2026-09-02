@@ -112,7 +112,22 @@ param(
     # arm replaces Mondstadt's companion pool, this one replaces Kokomi's
     # starter, relic and pool, and the three sets do not intersect. A dev build
     # that carries all three is the supported dev build.
-    [switch]$KokomiOverhaul
+    [switch]$KokomiOverhaul,
+    # THE FURINA REFRAME ARM (the countersigned packet
+    # review/ruled/furina-reframe-2026-08-29.md, R220 A; R228 option 1 for the
+    # Spotlight; the slot-6 ruling for the aimed Evoke). Adds
+    # -p:FurinaReframe=true to the build below, which is the ONLY thing that
+    # turns the arm on: without it a dev build compiles the arm's types and
+    # never reaches them, and Furina's Salon, her Fanfare meter and her
+    # Spotlight selector behave exactly as they ship. Sim twin: the five module
+    # flags in tier0/engine/furina_reframe.py, which all ship False.
+    #
+    # INDEPENDENT OF THE OTHER THREE, and all four may be passed together: the
+    # Klee arm replaces Klee's starter and pool, the companion arm replaces two
+    # nations' companion pools, the Kokomi arm replaces her starter, relic and
+    # pool, and this one changes FURINA's engine. The four sets do not
+    # intersect.
+    [switch]$FurinaReframe
 )
 
 $ErrorActionPreference = 'Stop'
@@ -195,6 +210,7 @@ $arms = @()
 if ($KleeOverhaul) { $arms += 'the Klee overhaul arm' }
 if ($CompanionOverhaul) { $arms += 'the Mondstadt companion overhaul arm' }
 if ($KokomiOverhaul) { $arms += 'the Kokomi overhaul arm' }
+if ($FurinaReframe) { $arms += 'the Furina reframe arm' }
 $armLabel = if ($arms.Count) { ' AND ' + ($arms -join ' AND ') } else { '' }
 
 # EB-161, on deploy.ps1's terms exactly: computed BEFORE the build because the
@@ -212,6 +228,7 @@ $buildArgs = @('-p:PrototypeCards=true')
 if ($KleeOverhaul) { $buildArgs += '-p:KleeOverhaul=true' }
 if ($CompanionOverhaul) { $buildArgs += '-p:CompanionOverhaul=true' }
 if ($KokomiOverhaul) { $buildArgs += '-p:KokomiOverhaul=true' }
+if ($FurinaReframe) { $buildArgs += '-p:FurinaReframe=true' }
 $buildArgs += $stamp.BuildArgs
 & dotnet build $csproj -c $Configuration -v minimal --nologo @buildArgs
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
@@ -265,6 +282,19 @@ if ($KokomiOverhaul) {
     Write-Host "  replaced by Tamakushi Casket." -ForegroundColor Magenta
     Write-Host "  The Bake-Kurage is always out and holds Tide; nothing" -ForegroundColor Magenta
     Write-Host "  Exhausts for Charge and the Burst gate does not fill." -ForegroundColor Magenta
+}
+
+if ($FurinaReframe) {
+    Write-Host ""
+    Write-Host "*** FURINA REFRAME ARM ON ***" -ForegroundColor Magenta
+    Write-Host "  Salon Members DO NOT auto-play: the turn-start upkeep is" -ForegroundColor Magenta
+    Write-Host "  gone. A Companion play makes the front member perform and" -ForegroundColor Magenta
+    Write-Host "  rotate; a deploy performs the member it deploys; a deploy" -ForegroundColor Magenta
+    Write-Host "  onto a full stage EVOKES the front member." -ForegroundColor Magenta
+    Write-Host "  Fanfare is minted ONLY by a member performing -- HP lost," -ForegroundColor Magenta
+    Write-Host "  Encore spent, Encore absorbed and Center Stage all pay 0." -ForegroundColor Magenta
+    Write-Host "  Center Stage retires; the selector aims Guest Cast for" -ForegroundColor Magenta
+    Write-Host "  Encore. Her sheet is UNCHANGED -- this arm is engine only." -ForegroundColor Magenta
 }
 
 if ($version.IsDirty) {
