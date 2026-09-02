@@ -286,8 +286,19 @@ class Client:
 
     def chat(self, messages: Sequence[Mapping[str, Any]], *,
              max_tokens: int, temperature: float = 0.0,
-             model: str = "") -> Reply:
-        """One completion. Refuses rather than truncates; never streams."""
+             model: str = "",
+             response_format: Mapping[str, Any] | None = None) -> Reply:
+        """One completion. Refuses rather than truncates; never streams.
+
+        `response_format` is OPTIONAL and OMITTED unless a caller passes one,
+        so every existing caller sends the byte-identical payload it always
+        did. `understudy/local_play.py` passes llama.cpp's
+        `{"type": "json_schema", ...}` because a whole run's tester answers
+        forty times and a reply the parser cannot read costs a screen; the
+        grading seats deliberately do not, because a constraint the codex seat
+        does not share would make the two forms incomparable, which is the one
+        thing that tool exists to do.
+        """
         want = model or self.model or self.resolve_model()
         estimate = messages_tokens(messages)
         if self.ctx and estimate + max_tokens > self.ctx:
@@ -307,6 +318,8 @@ class Client:
             "temperature": float(temperature),
             "stream": False,
         }
+        if response_format is not None:
+            payload["response_format"] = dict(response_format)
         t0 = time.time()
         blob = self._post("/chat/completions", payload)
         wall = time.time() - t0
