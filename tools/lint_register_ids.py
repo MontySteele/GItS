@@ -1162,11 +1162,21 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # and re-pinned the two NEW Klee findings the regen reads, each with
         # its arithmetic said out loud in the debt list's header; the gate
         # runs 20 findings against 20 pins. The ceiling stays where it is.
-        # 253 minted 2026-08-31 by the EB-242 fix: the pilot's fanfare
-        # valuations tick note_fanfare_read through the same helper --
-        # fixed separately because it moves a published measurement's
-        # source; the EB-242 test file pins the exposure.
-        253,
+        # 253 LEFT OPEN_IDS 2026-09-02 with its row, on its acceptance word
+        # for word -- "a fanfare valuation tallies nothing, on a test seen to
+        # FAIL". `tier0/tests/test_eb253_fanfare_valuation_is_not_a_read.py`
+        # was seen red on five cases against the unfixed engine and is green
+        # on ten now. TWO sites, not the one the row named: the
+        # `N_per_M_fanfare` leg of `effects._bonus_formula` (EB-242's twin)
+        # and `effects.flat_attack_bonus`, whose own docstring claimed it
+        # "touches no telemetry" while filing an `attack_power` read for every
+        # attack the pilot priced. Both take EB-242's `valuation=True`
+        # declaration and every resolve path tallies exactly what it did,
+        # pinned from both directions. `salon_focus` already carried the fix
+        # in its own spelling (`note=False`) and `threshold` was never exposed
+        # -- the pilot keeps its own copy of `fanfare_at_least_` for precisely
+        # this reason -- and both are pinned now so a tidy-up cannot re-open
+        # it.
         # 254-258 minted 2026-08-31 by the triage of [USER]'s manual solo
         # Kokomi playtest. The world it was played on is the reason four of
         # them exist: `0.2.1786+proto.dirty` was still installed, so a manual
@@ -1189,8 +1199,29 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # CLOSED 2026-08-31, twenty-four faces golded at their emission sites
         # and `tools/lint_keyword_meters.py` grew the lock, seen to FAIL on
         # all of them first.
+        # 255 stays OPEN and is NOT closed by its lint: the row's own next
+        # action -- exclude by starter membership -- moves `archetype_shares`
+        # for Furina and Kokomi, hence `dominant_archetype`, hence the rest
+        # plan and the adaptive drafter, so it is a POLICY window with a
+        # re-baseline. What landed 2026-09-02 is the invariant made checkable:
+        # `tools/lint_starter_pool_overlap.py`, thirteen curated debt rows
+        # across every arm that moves a starter, both directions of the debt
+        # contract seen to FAIL.
         255,
-        256,
+        # 256 LEFT OPEN_IDS 2026-09-02 with its row, on its acceptance word
+        # for word -- "the loop is reported, not run forever". A no-progress
+        # detector landed in `combat._run_rounds`: `STALL_ROUNDS` (10)
+        # consecutive rounds byte-identical on everything a fight can progress
+        # on (both sides' HP and Block, and the deck) end the fight as a
+        # recorded stall -- `CombatState.stalled`, a `fight_stall` event, a
+        # `stalled=` key on `fight_end`, and `RunResult.outcome` reading
+        # "stalled" where it read "died". `won` did NOT move on either side of
+        # the seam, and no shipped run has ever reached the branch: 180 3-act
+        # runs across the roster fired it zero times and reached the turn cap
+        # zero times, `review/records/` carries no stall, and the suite sweeps
+        # the whole frozen battery x 3 characters x 3 seeds asserting it stays
+        # silent. `act1_pool.yaml`'s UNIMPLEMENTED Plating 12 keeps its note
+        # on the enemy, which is that sheet's own convention for a skip.
         257,
         259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
         # 292: the `NCardTrail` hang off the Kokomi round-two blind session.
