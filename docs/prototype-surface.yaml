@@ -182,39 +182,23 @@
 # `C.KLEE_OVERHAUL` these ARE Klee's starter and her whole pool. Why each row
 # reads as it does: docs/notes/prototype-surface-provenance.md.
 
-# --- the starter, ten cards, six ids (packet sec.3, draft 3 of 2026-09-02:
-# the plain hit and the cash button are different cards; Dig In is the
-# starter's Spark sink and lives below under "currencies and defence") ---
-
-- {id: proto_ko_kaboom, name: "Kaboom!", character: klee,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: basic,
-   description: "Deal 6 damage.",
-   effects: [{op: damage, amount: 6, target: enemy}]}
+# --- the starter (packet sec.3, DRAFT 4, R242): Strike x4 + Defend x4 are the
+# BASE GAME's cards and have no row here. Kaboom! and Duck and Cover deleted;
+# Pop! and Dig In are in the pool below. ---
 
 - {id: proto_ko_kapow, name: "Ka-pow!", character: klee,
    authored_by: [claude],
-   cost: 1, type: attack, rarity: basic,
-   description: "[gold]Set off[/gold]. Deal 7 damage.",
-   effects: [{op: set_off, target: enemy, damage: 7}]}
-
-- {id: proto_ko_duck_and_cover, name: "Duck and Cover", character: klee,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: basic,
-   description: "Gain 5 Block.",
-   effects: [{op: block, amount: 5}]}
-
-- {id: proto_ko_pop, name: "Pop!", character: klee,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: basic,
-   description: "Place a [gold]Bomb[/gold] 5.",
-   effects: [{op: plant_bomb, target: enemy, size: 5}]}
+   cost: 0, type: attack, rarity: basic,
+   description: "[gold]Set off[/gold]. Deal 4 damage.",
+   upgrade: {retain: true},
+   effects: [{op: set_off, target: enemy, damage: 4}]}
 
 - {id: proto_ko_jumpy_dumpty, name: "Jumpy Dumpty", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   description: "Place a [gold]Bomb[/gold] 6 on a random enemy. When it goes off, place a [gold]Mine[/gold] 3 on every enemy.",
-   effects: [{op: plant_bomb, target: random_enemy, size: 6, payload_mine_all: 3}]}
+   description: "Place a [gold]Bomb[/gold] 8. When it goes off, place a [gold]Mine[/gold] 3 on every enemy.",
+   upgrade: {bomb_size: +3, payload_mine: +1},
+   effects: [{op: plant_bomb, target: enemy, size: 8, payload_mine_all: 3}]}
 
 # --- Cook, the starter's plan (packet sec.4) ---
 
@@ -270,6 +254,15 @@
    effects: [{op: apply_power, power: ko_alices_recipe, amount: 1, target: self}]}
 
 # --- Spray, everything explodes now (packet sec.4) ---
+
+# Pop! is the packet sec.4 Spray table's first row and it OFFERS from draft 4
+# (R242): the canonical starter has no room for it, so "the cheapest plant"
+# becomes a Common anyone can draft rather than a card every Klee opens with.
+- {id: proto_ko_pop, name: "Pop!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "Place a [gold]Bomb[/gold] 5.",
+   effects: [{op: plant_bomb, target: enemy, size: 5}]}
 
 - {id: proto_ko_mine_toss, name: "Mine Toss", character: klee,
    authored_by: [claude],
@@ -374,7 +367,7 @@
 
 - {id: proto_ko_dig_in, name: "Dig In", character: klee,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: basic,
+   cost: 0, type: skill, rarity: common,
    description: "Gain 8 Block.",
    effects: [{op: spend_spark, amount: 1},
              {op: block, amount: 8}]}
@@ -684,19 +677,9 @@
 # `C.KOKOMI_OVERHAUL` these ARE her starter and her whole pool. The `plan:`
 # key, the targets and every row: docs/notes/prototype-surface-provenance.md.
 
-# --- the starter, ten cards, four ids (packet sec.3) ---
-
-- {id: proto_kk_waters_edge, name: "Water's Edge (proto)", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: basic,
-   description: "Deal 6 damage.",
-   effects: [{op: damage, amount: 6, target: enemy}]}
-
-- {id: proto_kk_coral_guard, name: "Coral Guard (proto)", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: basic,
-   description: "Gain 5 Block.",
-   effects: [{op: block, amount: 5}]}
+# --- the starter (packet sec.3, R242): Strike x4 + Defend x4 are the BASE
+# GAME's cards and have no row here. The renamed twins Water's Edge and Coral
+# Guard printed the base stat line and left the sheet with the ruling. ---
 
 - {id: proto_kk_kurages_oath, name: "Kurage's Oath (proto)", character: kokomi,
    authored_by: [claude],

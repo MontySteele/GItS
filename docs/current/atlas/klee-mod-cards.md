@@ -273,3 +273,47 @@ would otherwise get wrong:
 
 Commands and the deletion rule: `docs/current/operations/prototype.md`, "Prototype
 surface". Packet: `review/ruled/eb147-prototype-surface-2026-08-27.md`.
+
+## 8. The base game's Strike and Defend, and who owns an element (R242)
+
+The engine question a modded starting deck raises, answered off the 0.111.0
+decompile of `sts2.dll` and pinned by `KleeTests/Prototype/BaseBasicsTests.cs`.
+
+- **One pair PER CHARACTER, not one shared pair.** `StrikeIronclad`,
+  `StrikeSilent`, `StrikeDefect`, `StrikeRegent`, `StrikeNecrobinder` and the
+  five matching `Defend*`, all `public sealed`, all `CardRarity.Basic`, all 1
+  energy for 6 damage / 5 Block with `OnUpgrade` `+3` — so Strike+ 9 and
+  Defend+ 8 come for free. The base source says why there are five: *"The only
+  difference between the starting Strike cards are portrait, attack vfx, and
+  color."* There is no colourless or neutral Strike.
+- **A modded character CAN hold one.** `CardModel.Pool` resolves by scanning
+  `ModelDb.AllCardPools` for the pool whose `AllCardIds` contains the id — it
+  never asks the owner — so an Ironclad basic in Klee's deck resolves to
+  `IroncladCardPool` and nothing throws. Portrait path, energy icon and frame
+  material all come off that pool, which is why each arm takes the pair its own
+  pool already borrows: Klee `card_frame_red` + `ironclad`, Kokomi
+  `card_frame_green` + `silent`. **The one visible seam** is the deck screen's
+  `DeckEntryCardColor`, which stays the base pool's (`D62000` / `5EBD00`)
+  rather than the mod pool's — reported, not hidden, and eyes-on at the next
+  live acceptance.
+- **The element does NOT come free, and it never belonged to the card**
+  (`EB-307`). A base card is sealed and can implement nothing, so the mod's
+  `cardSource is IElementalCard` read gave it `Element.None` — Klee's four
+  Strikes would have applied no Pyro at all. tier0 has always read the PLAYER's
+  cadence (`effects._element_for`: a catalyst character's damaging Attack
+  applies `player.element` when the card names none), and the mod agreed only
+  because the codegen tags every Attack it emits for Klee and Kokomi. The rule
+  now lives at the one funnel, `Powers/Prototype/CatalystCadence.cs`, read by
+  `AuraCmd.ElementOfPlay` through `CompanionOverhaulRiders.ElementFor` so
+  application and reaction cannot answer differently. It fires only for a card
+  that **declares nothing**: a row with `IElementalCard` keeps its own element
+  (including a deliberate `Element.None`), and every `ICompanionCard` is exempt,
+  because companions take the sheet's explicit call in both engines.
+- **Scoped to the two arms.** The fallback reads `KleeOverhaul.Enabled` /
+  `KokomiOverhaul.Enabled` and the dealer's identity interface, so a flag-off
+  build and any build's Furina (Skill-grade, not catalyst) are unchanged.
+- **The sim needed nothing new.** `strike` and `defend` have been in
+  `tier0/content/cards/ironclad_starter.yaml` at the base stat line since the
+  `ref_ironclad` starter shipped, with `+3` each in
+  `docs/ref-ironclad-upgrades.yaml`. Both arms' starter constants name them
+  directly, and `rarity: basic` keeps them out of every offer surface.

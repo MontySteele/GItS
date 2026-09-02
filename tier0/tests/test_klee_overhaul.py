@@ -124,10 +124,14 @@ def test_the_overhaul_ids_do_not_resolve_with_the_flag_off():
     """The quarantine's own door, shut. `_card_prototype`'s prototype branch
     is guarded by the flags, so a `proto_ko_` id is a KeyError here -- which
     is what makes "the rows never enter an ordinary run" a property of the
-    code rather than a filter somebody remembers."""
+    code rather than a filter somebody remembers.
+
+    NAMED, not read off `KLEE_OVERHAUL_STARTER_IDS[0]`, since draft 4 (R242):
+    that slot is now the BASE GAME's `strike`, which resolves on every tree by
+    design and would have turned this test green for the wrong reason."""
     loader._card_prototype.cache_clear()
     with pytest.raises(KeyError):
-        loader.get_card(C.KLEE_OVERHAUL_STARTER_IDS[0])
+        loader.get_card("proto_ko_kapow")
     loader._card_prototype.cache_clear()
 
 
@@ -144,24 +148,30 @@ def test_the_sparks_arm_is_untouched():
 
 # --- 2. THE ARM'S OWN SHAPE ------------------------------------------------
 
-def test_the_starter_is_ten_cards_six_ids():
-    """Slice packet sec.3, DRAFT 3: Kaboom! x2, Ka-pow! x2, Duck and Cover x3,
-    Dig In, Pop!, Jumpy Dumpty.
+def test_the_starter_is_the_canonical_ten():
+    """Slice packet sec.3, DRAFT 4 (ruled R242 pick 3): Strike x4, Defend x4,
+    Jumpy Dumpty, Ka-pow!.
 
-    The two copy counts are the draft's whole point: draft 2 put *Set off* on
-    every starter Attack, so the plain hit and the cash button were one card
-    and nothing ever grew. Dig In moved in from the pool, which is why it is
-    also absent from `KLEE_OVERHAUL_POOL_IDS` below.
-    """
+    [USER]: "the starting deck already does too much; base characters open with
+    four Strikes, four Defends and two good cards of their own, and Klee had
+    three, two and five." The shape IS the ruling, so the four-and-four is
+    pinned by count, and so is the fact that exactly two of the ten are hers.
+
+    `strike` and `defend` are the BASE GAME's ids, not `proto_` rows -- tier0
+    has carried them at the base stat line since `ironclad_starter.yaml` -- so
+    a regression that re-minted renamed twins fails here."""
     ids = C.KLEE_OVERHAUL_STARTER_IDS
     assert len(ids) == 10
-    assert len(set(ids)) == 6
-    assert ids.count("proto_ko_kaboom") == 2
-    assert ids.count("proto_ko_kapow") == 2
-    assert ids.count("proto_ko_duck_and_cover") == 3
-    assert ids.count("proto_ko_dig_in") == 1
-    assert ids.count("proto_ko_pop") == 1
+    assert ids.count("strike") == 4
+    assert ids.count("defend") == 4
     assert ids.count("proto_ko_jumpy_dumpty") == 1
+    assert ids.count("proto_ko_kapow") == 1
+    assert len([i for i in ids if i.startswith("proto_")]) == 2
+    # Draft 3's six ids: two deleted outright, two back in the offer pool.
+    for gone in ("proto_ko_kaboom", "proto_ko_duck_and_cover"):
+        assert gone not in {c.id for c in loader.prototype_cards()}
+    assert "proto_ko_pop" in C.KLEE_OVERHAUL_POOL_IDS
+    assert "proto_ko_dig_in" in C.KLEE_OVERHAUL_POOL_IDS
 
 
 def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
@@ -174,15 +184,18 @@ def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
     `VermillionPactNotBuilt` for the reasoning and `C.KLEE_OVERHAUL_POOL_IDS`
     for the record.
 
-    The last assertion is the one that says Dig In left: the starter and the
-    offer pool are disjoint, so a card in both would fail here rather than
-    quietly double as a reward.
+    The last assertion is the disjointness one: the starter and the offer pool
+    share no row, so a card in both would fail here rather than quietly double
+    as a reward.
+
+    TWENTY-EIGHT AT DRAFT 4 (R242). Dig In and Pop! are back, because the
+    canonical starter has no room for either.
     """
     ids = C.KLEE_OVERHAUL_POOL_IDS
-    assert len(ids) == 26
-    assert len(set(ids)) == 26
+    assert len(ids) == 28
+    assert len(set(ids)) == 28
     assert "proto_ko_vermillion_pact" not in ids
-    assert "proto_ko_dig_in" not in ids
+    assert {"proto_ko_dig_in", "proto_ko_pop"} <= set(ids)
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
 
 
@@ -194,6 +207,9 @@ def test_the_numbers_are_the_briefs_placeholders():
     assert C.KLEE_OVERHAUL_WORKSHOP_GROWTH == 1
     assert C.KLEE_OVERHAUL_ALICE_GROWTH == 4
     assert C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION == 1
+    # FIVE since R242 pick 1: rule 4's opening bank. [USER]: "Regent starts
+    # with 3 stars ... so 1 is a reasonable compromise."
+    assert C.KLEE_OVERHAUL_OPENING_SPARK == 1
 
 
 # --- 3. THE FLAG ON: the rows are reachable, and only these rows -----------
@@ -203,12 +219,44 @@ def test_the_starter_resolves_to_the_slices_ten_cards(overhaul):
     run read, so this is what she opens with on either path."""
     ids = loader.starting_deck("klee")
     assert ids == list(C.KLEE_OVERHAUL_STARTER_IDS)
-    assert all(cid.startswith("proto_ko_") for cid in ids)
     # And each one is a real, loadable, validated card -- not just a string.
     for cid in set(ids):
         card = loader.get_card(cid)
-        assert card.character == "klee"
         assert card.id == cid
+        if cid.startswith("proto_ko_"):
+            assert card.character == "klee"
+
+    # THE BASE BASICS, at the base stat line and the base upgrade (R242). They
+    # are not hers and carry no `character:`, which is the point: the ruling
+    # says "Strike and Defend are the base game's cards", so a twin re-minted
+    # on her sheet would fail the identity below as well as the numbers.
+    strike, defend = loader.get_card("strike"), loader.get_card("defend")
+    assert (strike.cost, strike.type, strike.rarity) == (1, "attack", "basic")
+    assert strike.effects == [{"op": "damage", "amount": 6, "target": "enemy"}]
+    assert (defend.cost, defend.type, defend.rarity) == (1, "skill", "basic")
+    assert defend.effects == [{"op": "block", "amount": 5}]
+    assert loader.get_card("strike+").effects[0]["amount"] == 9
+    assert loader.get_card("defend+").effects[0]["amount"] == 8
+
+
+def test_a_base_strike_in_her_hand_applies_pyro(overhaul):
+    """RULE 5 IS ABOUT THE CHARACTER, NOT THE CARD, and R242's base Strike is
+    what proves it. She is catalyst cadence, so `_element_for` answers a
+    damaging Attack that names no element with the PLAYER's own element -- and
+    `strike` names none. The mod read this per-card until `EB-307`; this is the
+    assertion its C# twin (`CatalystCadence.PrintedElement`) mirrors."""
+    from tier0.tests.conftest import make_state
+    from tier0.engine import effects as fx_mod
+
+    state = make_state()
+    state.player = loader.build_player("klee")
+    assert (state.player.cadence, state.player.element) == ("catalyst", "pyro")
+    strike = loader.get_card("strike")
+    assert strike.element == "none"
+    assert fx_mod._element_for(state, strike.effects[0], strike) == "pyro"
+    # And a DEFEND still applies nothing: the cadence is about Attacks.
+    defend = loader.get_card("defend")
+    assert fx_mod._element_for(state, defend.effects[0], defend) is None
 
 
 def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
@@ -223,14 +271,14 @@ def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
 
 
 def test_the_pool_keeps_the_packets_rarity_split(overhaul):
-    """11 Common, 10 Uncommon, 5 Rare -- the packet's sec.4 count with
-    Vermillion Pact removed and Dig In moved into the starter (draft 3, which
-    is also what made its row `rarity: basic`). Pinned because the rarity
-    buckets ARE the offer odds: a row filed in the wrong tier changes how often
-    it is seen."""
+    """13 Common, 10 Uncommon, 5 Rare -- the packet's sec.4 count with
+    Vermillion Pact removed and, since DRAFT 4 (R242), Pop! and Dig In back as
+    Commons. Pinned because the rarity buckets ARE the offer odds: a row filed
+    in the wrong tier changes how often it is seen, and both returning rows had
+    to stop being `rarity: basic` to be offerable at all."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 11, "uncommon": 10, "rare": 5}
+        "common": 13, "uncommon": 10, "rare": 5}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):
@@ -294,10 +342,9 @@ def test_the_prototype_rule_states_the_rows_own_numbers():
         card = next(c for c in loader.prototype_cards() if c.id == card_id)
         return upgrades.prototype_default_delta(card.id, card.cost, card.effects)
 
-    assert delta("proto_ko_kaboom") == {"damage": 3}
     assert delta("proto_ko_kapow") == {"damage": 3}          # a set_off's hit
     assert delta("proto_ko_rapid_fire") == {"damage": 1}     # 4 hits: +1 each
-    assert delta("proto_ko_duck_and_cover") == {"block": 3}
+    assert delta("proto_ko_run_away") == {"block": 3}
     assert delta("proto_ko_pop") == {"bomb_size": 2}
     assert delta("proto_ko_jumpy_dumpty") == {"bomb_size": 2, "payload_mine": 1}
     assert delta("proto_ko_chain_fuse") == {"grow": 1}
@@ -446,9 +493,18 @@ def test_under_the_flag_a_prototype_row_smiths_into_a_different_card(overhaul):
         assert upgrades.has_upgrade("proto_ko_kapow")
         upgraded = loader.get_card("proto_ko_kapow+")
         base = loader.get_card("proto_ko_kapow")
-        assert upgraded.effects != base.effects
-        assert upgraded.effects[0]["damage"] == 10      # 7 + 3
-        assert base.effects[0]["damage"] == 7
+        # DRAFT 4 (R242): "Ka-pow!+ gains Retain and keeps its numbers." The
+        # row's OWN `upgrade:` block wins over the Prototype default rule --
+        # which would still have said `damage +3` -- so the assertion is that
+        # the keyword moved and the number did not.
+        assert upgraded.retain is True and base.retain is False
+        assert upgraded.effects == base.effects
+        assert base.effects[0]["damage"] == 4
+        # Jumpy Dumpty's authored block beats the default the same way: the
+        # default is +2/+1, the ruling is Bomb 11 and Mine 4.
+        jd = loader.get_card("proto_ko_jumpy_dumpty+")
+        assert jd.effects[0]["size"] == 11
+        assert jd.effects[0]["payload_mine_all"] == 4
         # The Spark price is never what the campfire moved.
         dig = loader.get_card("proto_ko_dig_in+")
         assert [f for f in dig.effects if f["op"] == "spend_spark"] == [

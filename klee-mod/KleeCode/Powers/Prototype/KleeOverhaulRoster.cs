@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Cards.Prototype.Generated;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Cards;
 
 namespace KleeMod.Powers;
 
@@ -34,39 +35,69 @@ namespace KleeMod.Powers;
 internal static class KleeOverhaulRoster
 {
     /// <summary>
-    /// Klee's ten opening cards under the arm, DRAFT 3 (slice packet sec.3, in
-    /// its order): Kaboom! x2, Ka-pow! x2, Duck and Cover x3, Dig In, Pop!,
-    /// Jumpy Dumpty. Ten cards, SIX ids.
+    /// Klee's ten opening cards under the arm, DRAFT 4 (slice packet sec.3,
+    /// ruled R242 pick 3, in its order): Strike x4, Defend x4, Jumpy Dumpty,
+    /// Ka-pow!.
     ///
-    /// WHAT DRAFT 3 MOVED, after [USER]'s first run: draft 2 put <i>Set off</i>
-    /// on every starter Attack, so attacking and cashing were one act and
-    /// nothing ever grew. The plain hit (Kaboom!) and the cash button (Ka-pow!)
-    /// are now two cards at two copies each, and <c>ProtoKoDigIn</c> moves IN
-    /// from the pool as the starter's one Spark sink -- which is why its row is
-    /// <c>rarity: basic</c> on the surface and why it is no longer in
-    /// <see cref="OfferablePool"/>.
+    /// WHY THE CANONICAL SHAPE. [USER], R242: "the starting deck already does
+    /// too much; base characters open with four Strikes, four Defends and two
+    /// good cards of their own, and Klee had three, two and five." Draft 3's
+    /// six ids are down to two of her own -- the plant (Jumpy Dumpty) and the
+    /// cash button (Ka-pow!, now 0 energy with Retain on the upgrade). Kaboom!
+    /// and Duck and Cover LEFT THE SHEET (R213 B: a rejected row is deleted,
+    /// not commented out); Pop! and Dig In went back to
+    /// <see cref="OfferablePool"/> as Commons.
     ///
-    /// COMPOSES WITH THE COMPANION ROLL by construction, the same way the Sparks
-    /// starter does: <c>KleeStartingCompanionsPatch.ReplaceFirst</c> matches on
+    /// THESE ARE THE BASE GAME's STRIKE AND DEFEND, not renamed twins, and that
+    /// is the ruling's own word. The base game ships ONE PER CHARACTER, not one
+    /// shared pair -- <c>StrikeIronclad</c>, <c>StrikeSilent</c>,
+    /// <c>StrikeDefect</c>, <c>StrikeRegent</c>, <c>StrikeNecrobinder</c> and
+    /// the five matching Defends, all <c>public sealed</c>, all
+    /// <c>CardRarity.Basic</c>, all 1 energy for 6 damage / 5 Block with
+    /// <c>OnUpgrade</c> +3 (so Strike+ 9 and Defend+ 8 come for free). The
+    /// decompiled source says why there are five: "The only difference between
+    /// the starting Strike cards are portrait, attack vfx, and color."
+    ///
+    /// A MODDED CHARACTER CAN HOLD ONE. <c>CardModel.Pool</c> resolves by
+    /// scanning <c>ModelDb.AllCardPools</c> for the pool whose
+    /// <c>AllCardIds</c> contains the id, so an Ironclad basic in Klee's deck
+    /// resolves to <c>IroncladCardPool</c> and nothing throws; its portrait
+    /// path, its energy icon and its frame material all come off that pool,
+    /// which is why the IRONCLAD pair is the right one for Klee: her own
+    /// <c>KleeCardPool</c> already borrows <c>card_frame_red</c> and the
+    /// <c>ironclad</c> energy colour, so the four Strikes sit in her hand in
+    /// her own frame. The one visible seam is the deck screen's
+    /// <c>DeckEntryCardColor</c>, which is the base pool's <c>D62000</c> rather
+    /// than her <c>E85A4F</c> -- two reds a hair apart, reported not hidden.
+    ///
+    /// THE ELEMENT COMES FROM THE CHARACTER, NOT THE CARD. A base Strike is not
+    /// an <c>IElementalCard</c> and never can be (it is sealed), so under the
+    /// old per-card read it would have applied no Pyro at all. Rule 5 says her
+    /// Attacks ARE ordinary Pyro hits, and tier0 has always answered that from
+    /// the PLAYER's cadence (<c>effects._element_for</c>); the mod now does the
+    /// same through <see cref="CatalystCadence"/>.
+    ///
+    /// COMPOSES WITH THE COMPANION ROLL by construction, the same way draft 3
+    /// did: <c>KleeStartingCompanionsPatch.ReplaceFirst</c> matches on
     /// <c>card.GetType() == typeof(Kaboom)</c> and on
-    /// <c>typeof(DuckAndCover)</c>, and none of these ten is either type -- so
-    /// under this arm the companion roll finds no slot to take. That is a REAL
-    /// consequence and it is reported, not hidden: her two starting companions
-    /// do not arrive, and the slice's React loop draws its appliers from the
-    /// reward slot instead.
+    /// <c>typeof(DuckAndCover)</c> -- her SHIPPED basics, which are different
+    /// types from these -- so under this arm the companion roll finds no slot
+    /// to take. That is a REAL consequence and it is reported, not hidden: her
+    /// two starting companions do not arrive, and the slice's React loop draws
+    /// its appliers from the reward slot instead.
     /// </summary>
     internal static IEnumerable<CardModel> StartingDeck() => new CardModel[]
     {
-        ModelDb.Card<ProtoKoKaboom>(),
-        ModelDb.Card<ProtoKoKaboom>(),
-        ModelDb.Card<ProtoKoKapow>(),
-        ModelDb.Card<ProtoKoKapow>(),
-        ModelDb.Card<ProtoKoDuckAndCover>(),
-        ModelDb.Card<ProtoKoDuckAndCover>(),
-        ModelDb.Card<ProtoKoDuckAndCover>(),
-        ModelDb.Card<ProtoKoDigIn>(),
-        ModelDb.Card<ProtoKoPop>(),
+        ModelDb.Card<StrikeIronclad>(),
+        ModelDb.Card<StrikeIronclad>(),
+        ModelDb.Card<StrikeIronclad>(),
+        ModelDb.Card<StrikeIronclad>(),
+        ModelDb.Card<DefendIronclad>(),
+        ModelDb.Card<DefendIronclad>(),
+        ModelDb.Card<DefendIronclad>(),
+        ModelDb.Card<DefendIronclad>(),
         ModelDb.Card<ProtoKoJumpyDumpty>(),
+        ModelDb.Card<ProtoKoKapow>(),
     };
 
     /// <summary>
@@ -80,12 +111,12 @@ internal static class KleeOverhaulRoster
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
-    /// TWENTY-SIX, NOT THE PACKET'S TWENTY-SEVEN, and two rows are absent for
-    /// two different reasons. Dig In left the OFFER pool at draft 3 because it
-    /// joined the starter above (sec.3), which is also what took the packet's
-    /// sec.4 table from 28 offerable rows to 27. Vermillion Pact is the other:
-    /// it is out on the packet's own sec.5 escape (see
-    /// <c>VermillionPactNotBuilt</c>), so there is no row and no type to name.
+    /// TWENTY-EIGHT AT DRAFT 4, and only ONE row is absent now. Dig In had left
+    /// the OFFER pool at draft 3 to be the starter's Spark sink; the canonical
+    /// starter has no room for it, so it comes back, and Pop! comes with it as
+    /// a Common. Vermillion Pact is the one that stays out, on the packet's own
+    /// sec.5 escape (see <c>VermillionPactNotBuilt</c>), so there is no row and
+    /// no type to name.
     ///
     /// THE ANCIENTS ARE HERE, AND THEY HAVE TO BE (`EB-284`). This list is
     /// what `KleeCardPool.FilterThroughEpochs` returns under the arm, which IS
@@ -119,7 +150,9 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoBigBaddaBoom>(),
         ModelDb.Card<ProtoKoTheBigOne>(),
         ModelDb.Card<ProtoKoAlicesRecipe>(),
-        // Spray (8)
+        // Spray (9 -- Pop! is the packet sec.4 table's first Spray row and it
+        // OFFERS from draft 4)
+        ModelDb.Card<ProtoKoPop>(),
         ModelDb.Card<ProtoKoMineToss>(),
         ModelDb.Card<ProtoKoFwoosh>(),
         ModelDb.Card<ProtoKoTinderToss>(),
@@ -133,9 +166,10 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoPerfectTiming>(),
         ModelDb.Card<ProtoKoFlameDance>(),
         ModelDb.Card<ProtoKoCatalyticConverter>(),
-        // Currencies and defence (6 of 7; Dig In is in the starter since draft 3)
+        // Currencies and defence (7 of 7; Dig In is back in the pool at draft 4)
         ModelDb.Card<ProtoKoAmmoScavenging>(),
         ModelDb.Card<ProtoKoPowderCharge>(),
+        ModelDb.Card<ProtoKoDigIn>(),
         ModelDb.Card<ProtoKoSugarRush>(),
         ModelDb.Card<ProtoKoRunAway>(),
         ModelDb.Card<ProtoKoGrounded>(),

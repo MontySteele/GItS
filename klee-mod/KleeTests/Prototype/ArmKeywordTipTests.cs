@@ -71,7 +71,8 @@ public class ArmKeywordTipTests
             // assertion is built from the constant, so a repricing moves the
             // expectation and the sentence together (`EB-89`).
             Assert.Contains(
-                "You gain " + KleeOverhaulLaw.SparkPerExplosion
+                "You start each combat with " + KleeOverhaulLaw.OpeningSpark
+                + " and gain " + KleeOverhaulLaw.SparkPerExplosion
                 + " whenever a [gold]Bomb[/gold] goes off.", body);
             Assert.Contains("No cap; gone at the end of combat.", body);
         }
@@ -97,6 +98,9 @@ public class ArmKeywordTipTests
 
             Assert.DoesNotContain("whenever a [gold]Bomb[/gold] goes off",
                                   body);
+            // R242 pick 1's opening bank is the overhaul's rule too, so the
+            // Sparks arm must not claim it either.
+            Assert.DoesNotContain("start each combat", body);
             // And the half that is true on BOTH arms is still said: the
             // alternative cost is live in every prototype build.
             Assert.False(SparkPower.BaseRuleActive);

@@ -348,16 +348,31 @@ CEILINGS: dict[str, int] = {
     # accompanying sentence". Both rows land with the commit that mints them,
     # both BUILT, 298 with a live map read still owed. The burn's other three
     # findings folded into `EB-290`, `EB-294` and `EB-268` rather than mint.
+    # EB-307/EB-308 minted 2026-09-02 by the R242 base-basics build, and BOTH
+    # CLOSED in the commit that mints them, so neither entered OPEN_IDS and
+    # neither has a BACKLOG row (the `EB-239/240` precedent below). 307 is a
+    # TWO-ENGINE DIVERGENCE the ruling exposed: the mod answered "what element
+    # does this hit apply?" from the CARD (`cardSource is IElementalCard`)
+    # while tier0 has always answered it from the PLAYER's cadence
+    # (`effects._element_for`), and the two agreed only because the codegen
+    # tags every Attack it emits for a catalyst character -- so the base game's
+    # Strike, which is sealed and can implement nothing, applied no Pyro at
+    # all. Fixed at the one funnel (`Powers/Prototype/CatalystCadence.cs`).
+    # 308 is an EMITTER defect the same ruling surfaced: an authored face got a
+    # `{Var:diff()}` token only where the UPGRADE moved the number, so Ka-pow!,
+    # whose draft-4 upgrade is Retain, printed a dead literal that Strength and
+    # Weak could never move -- the class of defect `EB-288`/`EB-291` had
+    # already found in play. `Damage` and `Block` now always tokenise.
     # EB-310 minted 2026-09-02 by the lane-1 live session, and FIXED in the
-    # commit that mints it (live re-check owed, so it keeps a row): with no
-    # game running and the bridge already staged by `deploy_proto.ps1`, an
+    # commit that mints it (a live re-check is owed, so it keeps a row): with
+    # no game running and the bridge already staged by `deploy_proto.ps1`, an
     # `embark --lane 1` re-deployed it and wrote it down as its OWN install --
     # the old rule counted an install as pre-existing only when a game was UP
     # on it -- and `--teardown --lane 1` then removed `mods\STS2_MCP`, which
-    # the owner's own Steam launch reads. 301..309 are minted on other
-    # branches of this sitting; the ceiling is a floor on "ever issued" and
-    # only moves forward, so it carries them whether or not the branch reading
-    # it holds their rows.
+    # the owner's own Steam launch reads. 309 is minted on another branch of
+    # this sitting; the ceiling is a floor on "ever issued" and only moves
+    # forward, so it carries it whether or not the branch reading this holds
+    # its row.
     # EB-272 and EB-298 LEFT OPEN_IDS 2026-09-02 with their rows, both on
     # their live acceptance, read on lane 1 and kept in
     # `review/qa/lane1-live-reads-2026-09-02/`: the arm-keyword definition
