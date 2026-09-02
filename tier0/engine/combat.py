@@ -366,6 +366,17 @@ def card_cost(state: CombatState, card: Card) -> int:
     if (effects.is_spotlighted(state, card)
             and state.spotlighted_paid_cards_this_turn == 0):
         cost = max(0, cost - p.powers.get("spotlight_discount", 0))
+    # QUARANTINED (C.COMPANION_OVERHAUL). Mika's Starfrost Swirl: "your next
+    # Attack costs 1 less". Beside the Leading Role discount because it is the
+    # same kind of thing and must compose with it the same way -- subtractive,
+    # floored at zero, and read by the playability gate as well as by the
+    # payment, since a discount the gate cannot see is a card the pilot will
+    # not play. THIS SITE IS PURE: the stack is consumed by the next Attack
+    # RESOLVING (`effects.companion_overhaul_card_start`), never by being
+    # priced, so `card_playable` can ask as often as it likes.
+    if (C.COMPANION_OVERHAUL and card.type == "attack"
+            and p.powers.get("mc_starfrost_discount", 0)):
+        cost = max(0, cost - p.powers["mc_starfrost_discount"])
     # THE STRICT RARE POWER'S ENERGY HALF (PICK 5): "...instead of their
     # Energy cost". A converted Attack costs 0 Energy; the Sparks are taken in
     # `play_card`. Checked BEFORE the retired zeroing branch below so the two
@@ -674,6 +685,11 @@ _FREE_PLAY_CONTEXT = (
     "salon_replacements_this_card", "detonations_at_card_start",
     "repeat_requested", "target_had_offelement_aura", "target_had_aura",
     "current_attack_bonus",
+    # QUARANTINED (C.COMPANION_OVERHAUL). The element override is per-CARD, set
+    # in the same breath as the bonus above, so it is saved with it: a free
+    # play that consumed Bennett's rider would otherwise hand the element to
+    # the outer Attack as well.
+    "mc_attack_element_override",
     "sparks_at_play", "current_x", "current_card_cost",
     # Coverage pass 4's three per-card reads. Same hazard as the rest: a Sly
     # auto-play that discards or gains block in the middle of an outer card
@@ -1135,9 +1151,26 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # lands on its owner).
             dmg = powers.modify_damage_taken(state.player, dmg, enemy)
             dmg = int(dmg)
+            # QUARANTINED (C.COMPANION_OVERHAUL). The two TRAPS -- Dahlia's
+            # Sacramental Shower and Amber's Baron Bunny -- fire HERE, after
+            # the hit's number is settled and before Block is spent, which is
+            # the moment the mod's `BeforeDamageReceived` gives Klee's Mine.
+            # Baron Bunny's "take 3 less" is why this returns the damage
+            # rather than returning None.
+            dmg = effects.companion_overhaul_before_enemy_hit(
+                state, enemy, dmg)
+            if not enemy.alive:
+                # A trap killed the attacker before its hit landed. Same exit
+                # the FlameBarrier case takes at the foot of this loop.
+                break
             block_before = state.player.block
             blocked = min(state.player.block, dmg)
             state.player.block -= blocked
+            # QUARANTINED (C.COMPANION_OVERHAUL). Diona's Icy Paws: the ONE
+            # site in this engine that can say "this Block absorbed damage",
+            # because `blocked` exists nowhere else.
+            effects.companion_overhaul_block_absorbed(
+                state, enemy, blocked, block_before)
             # Kokomi's prevention ward (kickoff §2.4): after Block, before
             # anything reaches HP — the first unblocked hit each round is
             # prevented up to the ward's stacks, priced as one random
@@ -1378,6 +1411,9 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # per-combat like everything else on this line: a fight opens with no
     # previous turn, so nobody has held the line yet.
     player.mc_held_block_at_turn_end = False
+    # Same line, same reason: Varka's swirled element is per-combat, and a
+    # reused Player must not carry one fight's Swirl into the next.
+    player.mc_swirl_element = ""
     # QUARANTINED (C.KURAGE_MEMORY + C.KURAGE_ALWAYS_ON): THE BASE KIT.
     # [USER], 2026-08-29 -- "make Bake-Kurage part of the base kit (always on)
     # rather than a separate card". The jellyfish is installed HERE, at true

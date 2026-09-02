@@ -822,6 +822,17 @@ CO_TENANCY_LEDGER = {
             "and no co-tenant of this broadcast deals damage -- every volley "
             "that would care about a Vulnerable fires at turn END, a "
             "broadcast away",
+        ("Powers/Prototype/CompanionOverhaulHooks.cs", "MelodyLoopPower"):
+            "QUARANTINED (the Mondstadt companion overhaul, second wave). "
+            "Applies Hydro to the ENEMY it is hosted on, then ticks its own "
+            "duration. THE ORDERING QUESTION, answered: it touches only its "
+            "own host and reads nothing, and the three overhaul co-tenants "
+            "one block up write the player's Block, the player's Strength and "
+            "an enemy debuff -- none of which an aura landing on one enemy "
+            "can change, and none of which changes what aura this power puts "
+            "up. Two Melody Loops are on two different enemies by "
+            "construction, because the card places the power on the body it "
+            "targeted",
         ("Powers/CompanionPowers.cs", "MetallicizePower"):
             "raw per-turn Block mint (R116)",
         ("Powers/DemolitionPowers.cs", "BombAndSparkPerTurnPower"):
@@ -1000,6 +1011,25 @@ CO_TENANCY_LEDGER = {
             "rows this arm takes out of the pool and so cannot be drafted "
             "while it is on, and the pure this-turn expiries above, which "
             "read nothing this writes",
+        ("Powers/Prototype/CompanionOverhaulHooks.cs", "PassionOverloadPower"):
+            "QUARANTINED (the Mondstadt companion overhaul, second wave). A "
+            "this-turn EXPIRY and nothing else -- it removes itself, exactly "
+            "as the shipped AttackUpThisTurnPower above it does. THE ORDERING "
+            "QUESTION, answered: a removal reads nothing and writes only its "
+            "own existence, so it has no position to defend. It is NOT in "
+            "CompanionOverhaulTurnEnd's walk for that reason",
+        ("Powers/Prototype/CompanionOverhaulHooks.cs", "FavonianFavorPower"):
+            "QUARANTINED (the Mondstadt companion overhaul, second wave). The "
+            "same this-turn expiry, one card over: the Block it pays is paid "
+            "per REACTION during the turn (CompanionOverhaulReactions), never "
+            "in this broadcast, so all that happens here is the removal",
+        ("Powers/Prototype/CompanionOverhaulHooks.cs", "LightningFangPower"):
+            "QUARANTINED (the Mondstadt companion overhaul, second wave). A "
+            "duration TICK and nothing else -- what the power does happens on "
+            "every Attack the player makes, in ModifyDamageAdditive and in "
+            "AuraCmd.ElementOfPlay, both a broadcast away. THE ORDERING "
+            "QUESTION, answered: ticking a clock reads nothing and writes "
+            "only its own stack",
     },
 }
 

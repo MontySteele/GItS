@@ -93,8 +93,27 @@ never read different rosters (R64). Flag off, both are byte-identical to
 shipped (`tier0/tests/test_companion_overhaul.py`,
 `klee-mod/KleeTests/Prototype/CompanionOverhaulTests.cs`). **Unlike the Klee
 overhaul this arm is built in BOTH engines**, because it needed no new op: every
-row is written in the grammar the sheets already speak and its nine powers ride
-the two turn hooks the engine already runs.
+row is written in the grammar the sheets already speak.
+
+**All thirty-four Universals, in two waves.** The first twenty-one rode the two
+turn hooks the engine already ran. The other THIRTEEN were held back because
+their printed text wanted a hook that existed in neither engine, and those
+hooks are now built — a per-instance Block-absorption trigger, a
+pre-enemy-attack trap (the hook Klee's Mine already uses,
+`BeforeDamageReceived`), a next-Attack element override behind ONE element
+funnel per engine, a Swirl event that remembers its element, an
+Attacks-played-this-turn counter, a next-Attack cost discount, a Block-reading
+damage formula, a power hosted on its chosen target, a counting delayed blade,
+and two damage-pipeline modifiers behind a modal Power. **Still no new op and
+no new target spelling:** the thirteen rows are `apply_power`, `damage` and
+`conditional`, plus one new predicate (`nth_attack_this_turn_<N>`) and one new
+C# reader for a count tier0 already had (`player_block`). Sim
+`tier0/tests/test_companion_overhaul_hooks.py`, mod
+`klee-mod/KleeTests/Prototype/CompanionOverhaulHookTests.cs`; the per-row
+reasoning is in `docs/notes/prototype-surface-provenance.md`. Five shipped
+paths carry a flag-guarded branch for it — the enemy-attack loop, `card_cost`,
+`_element_for`, `deal_damage_to_enemy` and `_react` — and each is pinned
+byte-identical with the flag off rather than assumed.
 
 **THE DELETION RULE (R213 B).** *Once a slice is accepted or rejected, its rows
 LEAVE the surface.* Accepted rows are re-authored onto the owning character's

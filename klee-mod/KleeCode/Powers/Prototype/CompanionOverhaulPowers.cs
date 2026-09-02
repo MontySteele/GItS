@@ -575,6 +575,31 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
             {
                 await bloom.FireVolley(choiceContext);
             }
+            // SEVENTH, and the only one of the second wave that joins this
+            // walk. Eula's Lightfall Sword is hosted on an ENEMY and it deals
+            // damage, so its position in the sequence decides which reactions
+            // fire and which bodies are still standing -- the same argument the
+            // six above it are here for. The wave's other three end-of-turn
+            // items are a tick and two removals, which cannot change an outcome
+            // by running in a different order, so they keep their own
+            // broadcast the way the shipped AttackUpThisTurnPower does.
+            //
+            // Walked off the BOARD rather than off `participants`, because the
+            // power is on the enemy while the Attacks it counted are this
+            // creature's: `Applier` is the seat that planted it (R205).
+            var board = creature.CombatState?.HittableEnemies.ToList();
+            if (board != null)
+            {
+                foreach (var enemy in board)
+                {
+                    foreach (var blade in enemy.Powers
+                                 .OfType<LightfallSwordPower>().ToList())
+                    {
+                        if (blade.Applier != creature) continue;
+                        await blade.Tick(choiceContext);
+                    }
+                }
+            }
             foreach (var rev in creature.Powers.OfType<RevelationPower>().ToList())
             {
                 rev.NoteEndOfTurn();

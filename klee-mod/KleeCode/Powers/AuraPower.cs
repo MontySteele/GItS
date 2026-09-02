@@ -74,11 +74,17 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 
     /// <summary>
-    /// Reads the element off the incoming card. Returns None for untagged
-    /// damage, which never reacts.
+    /// Reads the element this play applies. Returns None for untagged damage,
+    /// which never reacts.
+    ///
+    /// DEALER-AWARE since the quarantined Mondstadt companion overhaul, whose
+    /// three next-Attack riders can change the answer; the funnel is
+    /// <see cref="AuraCmd.ElementOfPlay"/> and the whole argument for having
+    /// one is there. With no rider standing -- and always in a release build --
+    /// this is the card read it always was.
     /// </summary>
-    protected static Element ElementOf(CardModel? cardSource) =>
-        cardSource is IElementalCard elemental ? elemental.Element : Element.None;
+    protected static Element ElementOf(CardModel? cardSource, Creature? dealer) =>
+        AuraCmd.ElementOfPlay(cardSource, dealer);
 
     /// <summary>
     /// The multiplicative phase of the triggering hit. Vaporize/Melt multiply
@@ -142,7 +148,7 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         if (target != base.Owner) return 1m;
         if (!props.IsPoweredAttack()) return 1m;
 
-        var trigger = ElementOf(cardSource);
+        var trigger = ElementOf(cardSource, dealer);
         if (trigger == Element.None) return 1m;
 
         var reaction = ReactionTable.Lookup(Element, trigger);
@@ -180,7 +186,7 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         if (target != base.Owner) return;
         if (!props.IsPoweredAttack()) return;
 
-        var trigger = ElementOf(cardSource);
+        var trigger = ElementOf(cardSource, dealer);
         if (trigger == Element.None) return;
 
         if (trigger == Element)
