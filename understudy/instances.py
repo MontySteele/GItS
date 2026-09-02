@@ -21,6 +21,13 @@ the mod profile does not load and the game boots vanilla), and nothing else in
 it is ever read back: no run of record is ever played on lane 1's saves. If it
 goes wrong, delete the directory.
 
+HOW A COMMAND CHOOSES ONE. `--lane N` on `embark`, `soak` and `scenario run`
+(`cli_lane` below turns the flag into an instance, and lane 0 into `None`,
+which is the no-lane behaviour every run had before this existed); and
+`GITS_LANE=1` for the three `blindplay` commands, which are design-blind and
+may not import this module at all -- `bridge` reads the variable for them
+(`env_label`, `wire_lane`).
+
 Nothing here imports `soak` or `bridge` at module scope; `soak` imports
 `bridge`, `bridge` imports this, and the game directory is resolved lazily.
 """
@@ -37,6 +44,26 @@ DEFAULT_PORT = 15526
 #: The environment variable `gits/GitsPort.cs` reads. Pinned here and in the
 #: C# by the same name; `test_local_tester` asserts the two agree.
 PORT_ENV = "STS2_MCP_PORT"
+
+#: The environment variable that names a lane to the commands which take no
+#: `--lane` flag -- `blindplay observe` / `act` / `session`. Those three are
+#: design-blind and may not import this module or `soak` at all
+#: (`test_understudy_blindplay` pins that line), so the lane reaches them the
+#: one way it can: through `bridge`, which reads this. `embark --lane` prints
+#: the export line so the operator never has to remember the spelling.
+LANE_ENV = "GITS_LANE"
+
+#: The lane everything ran on before lanes existed, and still the default.
+DEFAULT_LABEL = "lane0"
+
+#: THE STANDING RULE, IN THE RECORD RATHER THAN IN A COMMENT. Every artefact
+#: an above-zero lane writes carries this sentence, the way a dev card grant
+#: carries `bridge.GRANT_GUARDRAIL`: a caveat nothing on disk states is a
+#: caveat the reader six months from now does not have.
+LANE_GUARDRAIL = (
+    "lane 1 runs on a DISPOSABLE profile seeded from lane 0's settings: no "
+    "run played on it is a run of record, and nothing in its user tree is "
+    "ever read back")
 
 #: Where a lane that is not lane 0 keeps its user:// tree. Local, not roaming:
 #: it is scratch, it is per-machine, and it must never sync anywhere.
@@ -71,9 +98,16 @@ SEED_FILES = ("settings.save", "profile.save", "prefs.save", "progress.save")
 
 @dataclass(frozen=True)
 class Instance:
-    """One game process's identity: where it runs, and how to reach it."""
+    """One game process's identity: where it runs, and how to reach it.
 
-    game_dir: Path
+    `game_dir` is `None` on a WIRE-ONLY handle (`wire_lane` below), which is
+    the shape a client that only ever talks to a port needs -- and it is
+    `None` rather than a guessed path on purpose: a lane with no game
+    directory must fail loudly the moment somebody tries to launch out of it,
+    not launch out of the wrong one.
+    """
+
+    game_dir: Path | None
     port: int
     appdata: Path | None
     label: str
@@ -158,6 +192,68 @@ def lanes(count: int, *, game_dir: Path | None = None) -> list[Instance]:
     if count < 1 or count > len(labels):
         raise ValueError(f"lanes must be 1..{len(labels)}, not {count}")
     return [lane(labels[i], game_dir=game_dir) for i in range(count)]
+
+
+# ------------------------------------------------- naming one lane --------
+
+def label_for(value: object) -> str:
+    """`1`, `"1"`, `"lane1"` -> `"lane1"`. Anything else is a `ValueError`.
+
+    ONE SPELLING FOR EVERY DOOR. `--lane 1`, `GITS_LANE=1` and `GITS_LANE=lane1`
+    are the same request, and a typo is refused HERE, naming the lanes that
+    exist -- rather than reaching a port nobody is listening on and being
+    reported as an unreachable bridge, which is a true sentence about the
+    wrong problem.
+    """
+    raw = str(value).strip()
+    label = raw if raw.startswith("lane") else f"lane{raw}"
+    if label not in LANES:
+        raise ValueError(
+            f"{value!r} is not a lane; known lanes: "
+            f"{', '.join(sorted(LANES))} (or the bare number, 0 / 1)")
+    return label
+
+
+def env_label(env: dict[str, str] | None = None) -> str:
+    """The lane `GITS_LANE` names, or `lane0` when it is unset or empty.
+
+    An empty string is lane 0 and not an error: `GITS_LANE=` is how a shell
+    unsets it in a script, and refusing that would make the variable harder
+    to turn off than to turn on.
+    """
+    raw = str((os.environ if env is None else env).get(LANE_ENV, "")).strip()
+    return DEFAULT_LABEL if not raw else label_for(raw)
+
+
+def wire_lane(label: str = DEFAULT_LABEL) -> Instance:
+    """A handle for the CLIENT half of a lane: its port, its tree, its label.
+
+    NO GAME DIRECTORY, and that is the whole reason this is not `lane()`.
+    `lane()` resolves `GameDir` out of `klee-mod/local.props` and `SystemExit`s
+    when there is none -- correct for anything that will LAUNCH a game, and
+    wrong for `bridge`, which is imported by every test on a machine that has
+    no game installed and only ever needs to know which port to talk to and
+    which user tree that port's game writes into.
+    """
+    if label not in LANES:
+        raise ValueError(f"unknown lane {label!r}; known lanes: "
+                         f"{', '.join(sorted(LANES))}")
+    port, appdata = LANES[label]
+    return Instance(game_dir=None, port=port, appdata=appdata, label=label)
+
+
+def cli_lane(value: object, *, game_dir: Path | None = None) -> Instance | None:
+    """The instance a `--lane N` flag names, and **`None` for lane 0**.
+
+    `None` RATHER THAN lane 0's own `Instance`, and the difference is not
+    cosmetic. A `Session` with an instance binds its thread, stamps the lane
+    into `soak-<stamp>-lane0-run001.jsonl`, and writes an `appdata` into its
+    record rows; a `Session` with `None` does exactly what every run before
+    lanes existed did. Lane 0 has to be the second of those, or "the default
+    is unchanged" is a claim no file on disk agrees with.
+    """
+    return (None if label_for(value) == DEFAULT_LABEL
+            else lane(label_for(value), game_dir=game_dir))
 
 
 # ---------------------------------------------------------- seeding -------

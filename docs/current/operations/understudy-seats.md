@@ -578,9 +578,11 @@ deals the boards to the two lanes in the pre-registered order.
   column sits AFTER `role` — `role` was appended first — and `ledger_rows`
   pads both, so a row written before either column existed still parses.
 - **Only lane 0 installs the bridge, and lanes tear down in reverse.**
-  `deploy_bridge.ps1` rewrites the shared `mods\STS2_MCP` and refuses while a
-  game is running, so lane 1 is given `install_bridge=False` and removes
-  nothing shared.
+  `deploy_bridge.ps1` rewrites the shared `mods\STS2_MCP`, so lane 1 is given
+  `install_bridge=False` and removes nothing shared. (Since 2026-09-02 a
+  session refuses to rewrite it anyway when a game is already up on an
+  installed one — see the whole-run lane below — so the flag is the round
+  saying it once for both its lanes rather than the only lock.)
 - **STANDING RULE: lane 1's profile is DISPOSABLE.** It is seeded once from
   lane 0's `settings.save` (without it the lane boots with no mod profile) and
   nothing in it is ever read back. No run of record is played on it. If it
@@ -591,6 +593,61 @@ deals the boards to the two lanes in the pre-registered order.
   `taskkill /IM SlayTheSpire2.exe` belt would have torn down the other lane's
   game mid-board. A leftover game from a crashed soak is now the deploy
   script's own refusal to report (it lists the pids) and the operator's call.
+
+**THE WHOLE-RUN HARNESS HAS THE SAME LANE (2026-09-02).** `--lane N` on
+`embark`, `soak` and `scenario run`, and `GITS_LANE=1` for the three
+`blindplay` commands, which take no flag — that module is design-blind and
+may not import `instances` or `soak` at all, so the lane reaches it through
+`bridge`, the client it already calls (`bridge.env_instance`; an explicit
+`bridge.use` on the thread still wins over the variable). `--lane` prints the
+export line. **Lane 0 is the default and is every command exactly as it was**
+— no instance, no thread binding, no `-lane0` infix on any file name. So:
+`python -m understudy.embark --character klee --lane 1`, then
+`$env:GITS_LANE = '1'` and `python -m understudy.blindplay session`, then
+`python -m understudy.embark --teardown --lane 1`, which picks that lane's
+newest sidecar and refuses another lane's. **Three hazards, and where each is
+enforced.** (1) A lane-1 run is **never a run of record**: its profile is
+disposable, and the sentence saying so is written into the embark sidecar
+(`lane_guardrail`, `run_of_record: false`) rather than left in a comment.
+(2) One install means **one deployed `mods\klee` for every lane**, so
+`deploy_proto.ps1` refuses while ANY `SlayTheSpire2` process is up — by image
+name, deliberately, because by pid it would miss the other lane's game, whose
+lock on `klee.dll` is the same lock; tear the lane down rather than deploying
+around it. The other two shared halves are refcounted by pre-existence:
+`steam_appid.txt` found in place is left in place (unchanged), and a bridge
+that is **already installed with a game running on it** is REUSED — recorded
+as pre-existing, so no lane rewrites a dll another lane's game holds, and no
+teardown removes one it did not install. (3) The `godot.log` cursor
+(`EB-292`'s `log_lacks`) reads **the lane's own log**, because `scenario`
+resolves it through `bridge.current_instance()` and `scenario run --lane`
+binds the thread BEFORE the `Runner` is built.
+
+**PLAYING ALONGSIDE AN AGENT — the one-line procedure.** *The bridge mod is
+installed before the owner launches, with the game closed.* `deploy_proto.ps1`
+does that as its last step now, so every dev deploy leaves the install
+parallel-ready: the owner's Steam-launched game then carries the bridge on
+lane 0's port **15526** and the agent's lane takes **15527**. (A warning
+rather than a failure if it does not take — the klee package is already
+deployed by then, and the bridge is a harness. Undo it by hand with
+`deploy_bridge.ps1 -Remove`.) **The refusal that used to block this was ours,
+not Steam's:** `deploy_bridge.ps1` threw whenever any game process existed, on
+the assumption that a running game holds the bridge dll — but an install with
+no `mods\STS2_MCP` in it holds nothing, and a lane-1 attempt on 2026-09-02 was
+refused for a danger that did not exist. It now asks whether the files it is
+about to rewrite are **locked** (`Test-FileHeld`, `FileShare.None`), reports
+the pids either way, and says out loud that mods load at BOOT so a deploy
+reaches the next launch and not a game already up.
+
+**PROVEN LIVE 2026-09-02, WITH THE BRIDGE PRE-INSTALLED.** Beside a game the
+owner launched from Steam — which answered on 15526 — a lane-1 session came
+up in **16 s** on `APPDATA=%LOCALAPPDATA%\gits-lanes\lane1` and
+`STS2_MCP_PORT=15527`, its own bridge answering `state_type: menu`; two
+`SlayTheSpire2.exe` processes ran side by side out of the one install; and
+teardown removed the lane's process and its `steam_appid.txt` and nothing
+else, with the owner's game still running and still answering. That is the
+platform half and the Steam half together, on a game this harness did not
+launch. **What is still owed is the flags themselves**: `--lane 1` driving an
+embark, a blind session on 15527 and a teardown, end to end.
 
 **PROVEN LIVE 2026-08-29** (`review/qa/two-instance/live-proof.json`, and
 `understudy/twolane_proof.py` / `twolane_frames.py` are the two scripts that
