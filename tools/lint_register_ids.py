@@ -323,7 +323,7 @@ CEILINGS: dict[str, int] = {
     # only one (CLOSED 2026-08-31 -- it was the twenty-fourth, not the
     # second). (253 was minted in parallel by the EB-242 fix the same day;
     # both landed at the fold, so the numbering closes with no gap.)
-    "EB": 284,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    "EB": 287,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -1167,7 +1167,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         255,
         256,
         257,
-        259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
+        259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
