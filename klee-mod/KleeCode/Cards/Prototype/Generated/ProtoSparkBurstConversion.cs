@@ -38,7 +38,7 @@ public sealed class ProtoSparkBurstConversion : CustomCardModel, ISkillTagCard, 
         new[] { KleeKeywords.ElementalSkill };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForBurst(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForSpark(KleeCardTooltips.ForBurst(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_spark_burst_conversion");
 

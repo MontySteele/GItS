@@ -144,6 +144,13 @@ class CharacterProfile:
     generator_script: str
     art_loader: str
     emit_character_identity: bool = False
+    # `EB-272`. Does this profile's sheet carry the QUARANTINED arms' keywords?
+    # Only `gen_prototype_cards` sets it, and the scoping is the point: on a
+    # shipped sheet `[gold]Bombs[/gold]` means the shipped Bomb, whose rules
+    # are the opposite of the overhaul's, so attaching the arm's definition
+    # there would put a contradicting sentence on eighty release faces. See
+    # `arm_keyword_tip_calls`.
+    arm_keyword_tips: bool = False
 
     def damage_applies_element(self, card: dict) -> bool:
         """Whether this character card's damaging effects carry its element."""
@@ -412,6 +419,116 @@ BURST_WORD = re.compile(r"\bBurst\b")
 def prints_burst_word(description: str) -> bool:
     """Does this built card description name the Burst Energy meter?"""
     return bool(BURST_WORD.search(description))
+
+
+# --- `EB-272`: the QUARANTINED ARMS' KEYWORDS --------------------------------
+#
+# THE DEFECT. Not one word the three prototype arms invented had a definition
+# anywhere -- not in the game and not on the blind-play page -- while every
+# SHIPPED keyword beside them did (`Block` and `Exhaust` are the base game's,
+# `Applies Pyro` and the eight reaction previews ride `KleeKeywords`). [USER]
+# hit it on the dev build ("Set Off has no tooltip text"); both Kokomi seats in
+# round one inferred `Exert` from watching their own HP drop; and the Casket's
+# `Mend` read as broken at full HP because the entry-HP bound is enforced in
+# `KokomiTide.Mend` and printed nowhere.
+#
+# THE ATTACH RULE IS THE PRINTED, GOLDED WORD -- the Charge and Burst rule one
+# register row over, tightened by one turn of the screw. Those two read the
+# whole description for a bare word because their sheets predate `EB-258`'s
+# golding discipline; an arm keyword is `[gold]`-wrapped on every face that
+# prints it, by the same lint, so reading the SPAN rather than the prose is
+# both stricter and cheaper. It cannot mistake `Battle Plan`'s title for the
+# `Plan` verb, and it cannot mistake the English word "mine" for the keyword.
+#
+# AN OP SET WOULD NOT DO, for the reason it would not do for Charge: it cannot
+# be made total. `Alice's Recipe` prints `Bombs` from a POWER that has no bomb
+# op; `Explosives Workshop` and `Sorry, Jean!` do the same; `The Art of War`
+# prints `Plans` and touches no plan op. The word on the face is the surface
+# the player reads, which is the surface the gap was reported against.
+#
+# SCOPED BY PROFILE (`CharacterProfile.arm_keyword_tips`), and only the
+# prototype surface sets it. These are QUARANTINED rules: a shipped Klee card
+# printing `Bombs` means the SHIPPED Bomb, whose definition is `KLEEMOD-BOMB`
+# and whose rules are the opposite ones (it detonates by itself). Widening the
+# attach to the shipped sheets would put the arm's contradicting sentence on
+# eighty release faces.
+GOLD_SPAN = re.compile(r"\[gold\](.*?)\[/gold\]")
+
+# A SmartFormat hole inside a golded span -- `[gold]Mine{Mines:plural:|s}[/gold]`
+# is how the Bomb badge prints a live count. Blanked before matching, because
+# the token is a variable name and not a word the player reads.
+_SMART_HOLE = re.compile(r"\{[^{}]*\}")
+
+
+@dataclass(frozen=True)
+class ArmKeyword:
+    """One arm keyword: the word, the golded spellings, and its tip call."""
+
+    word: str
+    # Every `[gold]...[/gold]` span content that IS this keyword. Spelled out
+    # rather than stemmed: a stemmer would have to decide whether `Sparks`,
+    # `Mends` and `Plans` are plurals or different words, and getting that
+    # wrong is silent in both directions.
+    tokens: tuple[str, ...]
+    # The C# call the emitter wraps the tip list in. `tools/lint_*` and the
+    # pins read this rather than re-spelling the method name.
+    attach: str
+
+
+ARM_KEYWORDS = (
+    # Klee's four (klee-overhaul-slice-1-2026-09-01.md sec.2: "Keywords with
+    # tooltips: Bomb, Set off, Spark, Mine").
+    ArmKeyword("Bomb", ("Bomb", "Bombs"), "ArmKeywordTips.ForBomb"),
+    ArmKeyword("Set off", ("Set off", "Sets off"),
+               "ArmKeywordTips.ForSetOff"),
+    ArmKeyword("Spark", ("Spark", "Sparks"), "ArmKeywordTips.ForSpark"),
+    ArmKeyword("Mine", ("Mine", "Mines"), "ArmKeywordTips.ForMine"),
+    # Kokomi's six (kokomi-overhaul-slice-1-2026-09-01.md sec.2: "Keywords
+    # with tooltips: Tide, Surge, Exert, Mend, Plan, Garment").
+    ArmKeyword("Tide", ("Tide", "Tides"), "ArmKeywordTips.ForTide"),
+    ArmKeyword("Surge", ("Surge", "Surges"), "ArmKeywordTips.ForSurge"),
+    ArmKeyword("Exert", ("Exert", "Exerts"), "ArmKeywordTips.ForExert"),
+    ArmKeyword("Mend", ("Mend", "Mends"), "ArmKeywordTips.ForMend"),
+    ArmKeyword("Plan", ("Plan", "Plans"), "ArmKeywordTips.ForPlan"),
+    ArmKeyword("Garment", ("Garment",), "ArmKeywordTips.ForGarment"),
+    # The companion arm's one. `Swirl` is the shared Anemo reaction printed as
+    # a VERB by ten Universals; the eight reaction PREVIEWS are board-aware and
+    # say nothing over an aura-less board.
+    ArmKeyword("Swirl", ("Swirl", "Swirls"), "ArmKeywordTips.ForSwirl"),
+)
+
+
+def golded_tokens(description: str) -> list[str]:
+    """Every `[gold]...[/gold]` span in a built face, holes blanked."""
+    return [_SMART_HOLE.sub("", span).strip()
+            for span in GOLD_SPAN.findall(description)]
+
+
+def arm_keywords_printed(description: str) -> list[ArmKeyword]:
+    """The arm keywords this face prints as keywords, in table order."""
+    printed = set(golded_tokens(description))
+    return [keyword for keyword in ARM_KEYWORDS
+            if printed.intersection(keyword.tokens)]
+
+
+def arm_keyword_tip_calls(description: str,
+                          includes_bomb_rules: bool = False) -> list[str]:
+    """The tip calls this face owes, in table order.
+
+    `includes_bomb_rules` is the ONE exclusion, and it is a real one rather
+    than a convenience. A row that places a SHIPPED `BombPower` already carries
+    `KLEEMOD-BOMB`, whose rules are the shipped ones -- it detonates by itself
+    and suppresses the enemy's first attack -- and the overhaul's Bomb does
+    neither. Both tips are titled "Bomb", so raising both would put two
+    contradicting definitions of one word on one face and let the game's own
+    de-duplication pick which the player reads. The Sparks arm's three
+    bomb-placing rows are exactly the rows this excludes today, and the two
+    sets cannot drift together: an overhaul row places its Bomb with
+    `plant_bomb` and a shipped one with `place_bomb`.
+    """
+    return [keyword.attach
+            for keyword in arm_keywords_printed(description)
+            if not (keyword.word == "Bomb" and includes_bomb_rules)]
 
 
 # --- companion batch (2026-07-21) --------------------------------------------
@@ -9124,6 +9241,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         tips_expr = (
             "KleeCardTooltips.ForBurst("
             f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+    # `EB-272`, and it is LAST on purpose. Each call above wraps the list, so
+    # the outermost wrapper's tip is yielded last: a card's live arithmetic (a
+    # reaction preview, the Charge rate, the Garment window) says what THIS
+    # play will do and belongs at the top of the stack, and the definition of a
+    # word is the thing a player reads second. The rule and the exclusion are
+    # `arm_keyword_tip_calls`'; nothing about them is decided here.
+    if profile.arm_keyword_tips:
+        for attach in arm_keyword_tip_calls(desc, includes_bomb_rules):
+            tips_expr = (
+                f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
     if tips_expr:
         tooltip_member = (
             "\n    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"

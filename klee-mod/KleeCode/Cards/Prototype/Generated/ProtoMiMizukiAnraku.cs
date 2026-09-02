@@ -49,7 +49,7 @@ public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForMend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_mizuki_anraku");
 

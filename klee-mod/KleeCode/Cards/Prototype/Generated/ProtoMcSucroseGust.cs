@@ -46,7 +46,7 @@ public sealed class ProtoMcSucroseGust : CustomCardModel, ICompanionCard
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false);
+        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_gust");
 

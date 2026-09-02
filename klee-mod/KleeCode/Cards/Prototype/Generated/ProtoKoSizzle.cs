@@ -41,7 +41,7 @@ public sealed class ProtoKoSizzle : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
+        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_sizzle");
 

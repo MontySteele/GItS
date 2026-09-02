@@ -48,6 +48,23 @@ it. A row states its own face with `description:`, emitted into the same
 second channel; `description:` is the prototype surface's field alone and no
 `docs/*-cards.yaml` row may carry it.
 
+**KEYWORD TIPS ARE DERIVED FROM THE FACE** (`EB-272`). A row that prints an arm
+keyword as `[gold]Keyword[/gold]` gets that keyword's hover tip attached by
+codegen — nothing to remember, no per-row field. The table is
+`gen_klee_cards.ARM_KEYWORDS` (Klee: `Bomb`, `Set off`, `Spark`, `Mine`;
+Kokomi: `Tide`, `Surge`, `Exert`, `Mend`, `Plan`, `Garment`; companions:
+`Swirl`), the sentences are `Cards/Prototype/ArmKeywordTips.cs`, and their
+titles are registered under `#if PROTOTYPE_CARDS` in
+`KleeMod.InjectLocStrings` — so a release build carries neither. The tip
+renders in game under the card and on the blind-play page under the card face,
+because the bridge builds `keywords` from `card.HoverTips`, which is the list
+`ExtraHoverTips` feeds. **Scoped to this sheet on purpose:** on a shipped sheet
+the same word means the SHIPPED rule (a shipped Bomb detonates by itself, the
+arm's never does), and a row that places a shipped Bomb keeps `KLEEMOD-BOMB`
+and takes no arm Bomb tip. Adding a keyword means a table row, a `For<Word>`
+method and a title row; `tier0/tests/test_arm_keyword_tips.py` fails on any of
+the three missing.
+
 **An upgrade is on the ROW** (`EB-213`). Shipped deltas live in
 `docs/<character>-upgrades.yaml` keyed by shipped id; a `proto_` key there
 would give the deletion rule below a second file to remember, so a prototype

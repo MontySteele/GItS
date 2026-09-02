@@ -104,6 +104,7 @@ DIR_PROFILE = replace(
     manifest=MANIFEST,
     namespace=NAMESPACE,
     generator_script=SCRIPT,
+    arm_keyword_tips=True,
 )
 
 
@@ -113,7 +114,12 @@ def _profile_for(character_id: str) -> gen.CharacterProfile:
     `character_id`, `native_element`, `cadence`, `art_loader` and
     `emit_character_identity` are the OWNER's and are not overridden: they are
     what make the emitted card the character's card rather than a generic one.
-    Only the four location fields move.
+    Only the four location fields move -- and `arm_keyword_tips`, which is a
+    fact about the SURFACE rather than about the owner (`EB-272`): the three
+    quarantined arms invented `Bomb`, `Set off`, `Spark`, `Mine`, `Tide`,
+    `Surge`, `Exert`, `Mend`, `Plan`, `Garment` and the `Swirl` verb, and only
+    a row on this sheet can mean the arm's rule by printing one. The same word
+    on a shipped sheet means the shipped rule and keeps the shipped tip.
     """
     owner = gen.PROFILES[character_id]
     return replace(
@@ -123,6 +129,7 @@ def _profile_for(character_id: str) -> gen.CharacterProfile:
         manifest=MANIFEST,
         namespace=NAMESPACE,
         generator_script=SCRIPT,
+        arm_keyword_tips=True,
     )
 
 

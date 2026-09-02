@@ -1,4 +1,4 @@
-Status: OPEN (picks ruled 2026-09-01; slice one in progress)
+Status: OPEN (returned to the brief by [USER] 2026-09-02 after the prototype run; the way out is review/active/kokomi-rework-2026-09-02.md, draft 3 follows its picks)
 
 # Kokomi — character brief, draft 2
 
