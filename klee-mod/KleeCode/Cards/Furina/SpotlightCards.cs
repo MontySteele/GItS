@@ -23,11 +23,30 @@ public sealed class EtherealSpotlight : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ethereal Spotlight"),
+#if PROTOTYPE_CARDS && FURINA_REFRAME
+        // THE ARM'S FACE, and it is chosen by the COMPILE constant rather than
+        // by the runtime property on purpose: a card's Localization is read
+        // once at registration, so a face that asked a settable flag would be
+        // whatever the flag happened to be at boot. `-p:FurinaReframe=true` is
+        // the dev build that plays this rule, and this is the face it prints;
+        // a release build compiles the line below and is byte-identical.
+        //
+        // It says what R228 option (1) does and nothing more: Center Stage is
+        // gone, so there is no choice to describe, and the price is
+        // interpolated from the mirrored constant rather than typed -- the
+        // same rule `CenterStageOption` follows (EB-89), so a repricing cannot
+        // leave the card telling the player a retired number.
+        ("description",
+            "Spotlight every Companion card. Their printed damage and Block "
+          + $"are 50% stronger. Costs {FurinaReframeLaw.SpotlightDesignateEncoreCost} "
+          + "[gold]Encore[/gold]."),
+#else
         ("description",
             "Choose [gold]Center Stage[/gold] or [gold]Guest Cast[/gold]. "
           + "Center Stage makes Furina cards generate [gold]Fanfare[/gold]. "
           + "Guest Cast "
           + "empowers all Companion cards."),
+#endif
     };
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
@@ -44,6 +63,20 @@ public sealed class EtherealSpotlight : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+#if PROTOTYPE_CARDS
+        // FURINA REFRAME, R228 option (1): ONE MODE, PRICED. With the arm's
+        // SPOTLIGHT leg on there is no choice left to offer -- Center Stage
+        // retires -- so the screen below is skipped entirely rather than shown
+        // with one option on it, and the selector aims Guest Cast for its
+        // Encore price. Mirrors tier0 `_op_spotlight_designate`, which takes
+        // the same early branch above its own heuristic.
+        if (FurinaReframe.SpotlightLiveFor(Owner.Creature))
+        {
+            await SpotlightSystem.DesignateOneMode(
+                choiceContext, Owner.Creature, this);
+            return;
+        }
+#endif
         // The choose-a-card screen dereferences the first option's Owner
         // (asserting mutability, then initializing the pile viewer from it),
         // so the options must be combat-scoped owned instances -- canonical

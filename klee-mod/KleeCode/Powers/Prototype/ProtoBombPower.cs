@@ -448,20 +448,26 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// Rule 1's growth NUMBER for one Klee, right now. PURE, and it is one
     /// function because the two modifiers compose in one printed way:
     /// Explosives Workshop ADDS <see cref="KleeOverhaulLaw.WorkshopGrowth"/>
-    /// per stack ("your Bombs grow by 1 more"), Alice's Recipe REPLACES the
-    /// base with <see cref="KleeOverhaulLaw.AliceGrowth"/> ("grow by 4 instead
-    /// of 3"). Replace-then-add is the only reading that leaves both faces
-    /// true, and the brief's own gloss on Alice is "Breaks rule 1".
+    /// per stack ("your Bombs grow by 1 more"), Alice's Recipe MULTIPLIES what
+    /// is left by <see cref="KleeOverhaulLaw.AliceMultiplier"/> ("your Bombs
+    /// grow twice each turn").
+    ///
+    /// ADD-THEN-MULTIPLY, and it is the only reading that leaves both faces
+    /// true: "twice" is twice the growth the turn would otherwise have had,
+    /// Workshop's +1 included, so one Workshop and the Recipe is
+    /// (3 + 1) x 2 = 8. The other order would make the Rare read "twice the
+    /// base and the Workshop once", which neither card says. The brief's own
+    /// gloss on Alice is still "Breaks rule 1".
     /// </summary>
     public static int GrowthFor(Creature? klee)
     {
         if (klee == null) return KleeOverhaulLaw.BombGrowth;
-        var baseGrowth = klee.Powers.OfType<AlicesRecipePower>().Any()
-            ? KleeOverhaulLaw.AliceGrowth
-            : KleeOverhaulLaw.BombGrowth;
         var workshop = klee.Powers.OfType<ExplosivesWorkshopGrowthPower>()
             .Sum(p => p.Amount) * KleeOverhaulLaw.WorkshopGrowth;
-        return baseGrowth + workshop;
+        var growth = KleeOverhaulLaw.BombGrowth + workshop;
+        return klee.Powers.OfType<AlicesRecipePower>().Any()
+            ? growth * KleeOverhaulLaw.AliceMultiplier
+            : growth;
     }
 
     // ---- rule 1: growth at the start of Klee's turn ---------------------
@@ -986,6 +992,28 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             if (pile.Applier == applier && pile._charges.Count > 0) return true;
         }
         return false;
+    }
+
+    /// <summary>
+    /// What this placer's charges on <paramref name="enemy"/> add up to, RAW.
+    /// Sparks 'n' Splash's echo reads it ("damage equal to the Bombs on it")
+    /// and hands it to the same <c>ElementalHit.Deal</c> an explosion hands a
+    /// charge's size to -- so Strength, Weak and the reaction all land on the
+    /// echo exactly as they land on a Bomb going off, and the raw sum is what
+    /// enters that pipeline in both cases.
+    ///
+    /// PURE, and R205-scoped like every other read here: another Klee's pile
+    /// is not hers to echo.
+    /// </summary>
+    public static int TotalPlacedBy(Creature? enemy, Creature? applier)
+    {
+        if (enemy == null || applier == null) return 0;
+        var total = 0;
+        foreach (var pile in enemy.Powers.OfType<ProtoBombPower>())
+        {
+            if (pile.Applier == applier) total += pile.TotalSize;
+        }
+        return total;
     }
 
     /// <summary>

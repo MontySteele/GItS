@@ -55,7 +55,7 @@ internal static class KleePowerIcons
             KleePck.Path("klee/powers/bomb_damage_up.png"),
         ChainedReactionsPower =>
             KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
-        EndOfTurnSetOffPower =>
+        BombEchoPower =>
             KleePck.Path("klee/powers/sparks_n_splash.png"),
         BombReactionSparkPower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),

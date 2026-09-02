@@ -1,3 +1,4 @@
+using BaseLib.Abstracts;
 using KleeMod.Cards;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -48,6 +49,15 @@ namespace KleeMod.Powers;
 /// Skill-grade and not catalyst -- is byte for byte what it was. Pinned by
 /// <c>KleeTests/Prototype/BaseBasicsTests.cs</c> rather than assumed.
 ///
+/// THE BASE GAME'S OWN BASICS ARE OUTSIDE IT ([USER], 2026-09-02: "I think we
+/// actually SHOULD remove the elemental application from the basic Strikes for
+/// all characters. Those cards are supposed to be bad!"). `EB-307` read R242's
+/// swap as "her Strikes must keep applying Pyro"; the ruling is the other
+/// reading of the same swap -- the base Strike is the base game's card, weak on
+/// purpose, and the element is what her OWN Attacks are for. So the fallback
+/// skips a Basic-rarity card this mod did not author, and every other card it
+/// ever answered is unmoved. See <see cref="IsBaseGameBasic"/>.
+///
 /// PURE, because <c>AuraCmd.ElementOfPlay</c> is reached from preview paths.
 /// </summary>
 public static class CatalystCadence
@@ -65,8 +75,25 @@ public static class CatalystCadence
         if (cardSource is IElementalCard elemental) return elemental.Element;
         if (cardSource is ICompanionCard) return Element.None;
         if (cardSource is not { Type: CardType.Attack }) return Element.None;
+        if (IsBaseGameBasic(cardSource)) return Element.None;
         return NativeElementOf(dealer);
     }
+
+    /// <summary>
+    /// The base game's own basic cards -- Strike, Defend and their per-character
+    /// twins -- and nothing else.
+    ///
+    /// TWO TESTS, AND BOTH ARE LOAD-BEARING. <c>CustomCardModel</c> is what
+    /// every card this mod authors derives from, so the first says "the base
+    /// game wrote this"; <c>CardRarity.Basic</c> keeps the exemption to the
+    /// BASICS, which is what [USER] ruled, rather than sweeping in a base
+    /// colorless or event card a run might hand her -- those are unmoved, and
+    /// unmoved is also what the sim does with them
+    /// (<c>tier0/engine/effects._is_base_game_basic</c>, the same two tests on
+    /// a row: `rarity == "basic"` and no owning character).
+    /// </summary>
+    private static bool IsBaseGameBasic(CardModel card) =>
+        card is not CustomCardModel && card.Rarity == CardRarity.Basic;
 
     /// <summary>
     /// The dealer's own element, IF the dealer is a catalyst character whose

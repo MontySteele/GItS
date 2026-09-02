@@ -138,14 +138,16 @@ are in [`workstreams.md`](workstreams.md).
   #292). The prototype balance pass (twelve D defaults on both arms, read
   `review/records/balance-read-prototype-2026-09-02.md`) is being built;
   `EB-311` to `EB-314` are its and round five's rows.
-- **Kokomi** — the OVERHAUL is at Prototype round 2 on draft 6, *the Plan*
+- **Kokomi** — the OVERHAUL is at Prototype round 3 on draft 6, *the Plan*
   (brief R241): the Bake-Kurage is a pet, a card played on it writes its Plan
-  line; the pet-targeting and focus fixes (`EB-296`, `EB-300`, PR #288) are
-  in the installed build and [USER]'s fresh rules-gate run is on it, four
-  questions in `review/active/kokomi-overhaul-round-2-2026-09-02.md`. The
-  sim twin runs beside the C# (`tier0/engine/kokomi_plan.py`), every drafter
-  price still ZERO (`EB-311`); the Kurage memory is base kit behind
-  `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
+  line. [USER]'s act-1 run passed the rules gate (R243); round three
+  (`review/ruled/kokomi-overhaul-round-3-2026-09-02.md`) files the casket
+  and morning legibility rows (`EB-316`, `EB-317`); the acts-2/3 depth is
+  the Plan cards' own design, no momentum rule (R243). The sim twin runs
+  beside the C#
+  (`tier0/engine/kokomi_plan.py`), its drafter prices Plan lines only once
+  `EB-311` lands; the Kurage memory is base kit behind `C.KURAGE_MEMORY`
+  (`EB-198`, `EB-234`).
 - **Seats** — two lanes beside [USER]'s game (`--lane 1` / `--lane 2`,
   `GITS_LANE`), proven twice on 2026-09-02; the local Qwen seat is
   live-proven (needs `GITS_LOCAL_PLAY_TOKENS=12000`); a teardown leaves the

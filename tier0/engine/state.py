@@ -438,6 +438,22 @@ class Card:
     # a shared sheet again; the M9 revert landed 2026-07-20 and the
     # no-inline-upgrades test (test_upgrades) now runs un-allowlisted.
     upgrade: Optional[dict] = None
+    # `EB-315`. THE OPT-OUT FROM THE PROTOTYPE-STAGE UPGRADE RULE, and the one
+    # field on this class whose value is a SENTENCE. The rule
+    # (`content/upgrades.prototype_default_delta`) gives every staged row a
+    # campfire choice, and `tier0/tests/test_prototype_surface.py` now holds
+    # every row of the four overhaul arms to having one -- so a row that
+    # genuinely cannot upgrade has to SAY SO, in the row, with the reason,
+    # instead of being invisible in a gap between a rule's reach and a
+    # register nobody reads. It is prototype-surface only (the loader refuses
+    # it on a shipped id, exactly as it refuses `plan:`): a shipped upgrade is
+    # a ruled number in `docs/<character>-upgrades.yaml`, and "this card has
+    # none" is said there by the id's absence.
+    #
+    # BOTH ENGINES READ IT, which is why it is a field rather than a codegen
+    # comment: `upgrades._prototype_deltas` skips a row declaring it, so the
+    # sim cannot smith a card the mod prints as base-only.
+    no_upgrade: Optional[str] = None
 
     @property
     def is_companion(self) -> bool:
@@ -1163,6 +1179,20 @@ class CombatState:
     # seat's Plans are never another's -- holds by construction here, and the
     # per-FIGHT half is what `CombatState` being rebuilt by `run_fight` buys.
     kk_plan_queue: list[PlanEntry] = field(default_factory=list)
+    # QUARANTINED (C.KOKOMI_OVERHAUL): THE ONCE-PER-TURN LATCHES, one set for
+    # every payoff of hers that has one ([USER], live 2026-09-02: Treatise,
+    # Song of Pearls and The General's Banner all paid per trigger and all
+    # three are now capped at one a turn). Keyed by the power's own id, and
+    # the twin of `KokomiOverhaulLedger`'s `_claimed`; both are cleared at the
+    # ONE turn boundary this arm has (`kokomi_plan.roll_turn`), so the three
+    # cards can never come to disagree about when a turn began.
+    kk_once_per_turn: set[str] = field(default_factory=set)
+    # QUARANTINED (C.KOKOMI_OVERHAUL): did the Bake-Kurage carry out a Plan
+    # this turn? Sango Isshin's condition, written at the ONE place a Plan is
+    # carried out (`kokomi_plan._resolve_entry`) so the dawn resolution, Change
+    # of Plans' early one and The Moon Overlooks the Waters' play-time one all
+    # count -- they all carry a Plan out. `KokomiOverhaulLedger`'s twin.
+    kk_plan_carried_out_this_turn: bool = False
     # Blocking Notes' slope (rework Track C.3, 2026-07-28). A per-TURN count
     # where companions_played above is a per-COMBAT list, so the two cannot be
     # derived from each other and both have to exist.

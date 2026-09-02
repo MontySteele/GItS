@@ -1,4 +1,4 @@
-Status: OPEN (the Plan build's first round; both seats played; your first run's finds are built into the deployed build; the four questions for your fresh run)
+Status: RULED R243 2026-09-02
 
 # Kokomi overhaul, round two: the Plan build's first seats
 

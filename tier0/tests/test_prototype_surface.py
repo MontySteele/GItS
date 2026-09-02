@@ -261,14 +261,148 @@ def test_a_row_carrying_an_upgrade_emits_the_shipped_upgrade_path(
         "proto_kokomi_tidecall": {"block": 3}}
 
 
-def test_a_row_without_an_upgrade_stays_base_only(monkeypatch, tmp_path):
-    """The channel is opt-in. Every row on this surface was base-only before
-    EB-213 and a row that declares nothing still is -- and says so, rather
-    than acquiring a delta from somewhere."""
-    genproto, plan, _ = _proto_plan(monkeypatch, tmp_path, [FIXTURE])
-    source = plan.generated["proto_kokomi_tidecall"]
+# --- (b3) EVERY ARM ROW UPGRADES, OR SAYS WHY NOT (`EB-315`) -----------------
+#
+# THE DEFECT, in [USER]'s words playing the Kokomi arm: *"Plan cards often seem
+# to lack upgrades, though (Kurage's Oath, Ambush) - I thought we had a test
+# for that?"* There was a test, and it asserted the OPPOSITE of what he
+# expected: `test_a_row_without_an_upgrade_stays_base_only` pinned that a row
+# the rule found no delta for legitimately shipped base-only, which is exactly
+# the state he was complaining about. The shipped sheets have always been held
+# to "every generated card ships its upgrade" (STATE.md; the three
+# `upgrades.no_upgrade_path` lists are empty). The prototype arms never were.
+#
+# So the invariant is inverted and the old test becomes the OPT-OUT's test: a
+# row may ship base-only, but only by SAYING SO on the row, in a sentence, with
+# `no_upgrade:`. What was silent is now declared, and the declaration is
+# checked both ways (`gen_prototype_cards.upgrade_face_findings` reports an
+# opt-out the rule has since caught up with).
+
+def test_a_row_that_declares_no_upgrade_stays_base_only(monkeypatch, tmp_path):
+    """The opt-out, and it is the only way onto this surface base-only.
+
+    The row states WHY, the emitted card carries no `OnUpgrade` body, the
+    manifest records the reason where a delta would have gone, and the rule is
+    not consulted at all.
+    """
+    row = dict(FIXTURE, id="proto_kk_tidecall",
+               no_upgrade="the fixture prints no number the rule may move")
+    genproto, plan, _ = _proto_plan(monkeypatch, tmp_path, [row])
+    source = plan.generated["proto_kk_tidecall"]
     assert "NO upgrade path" in source
+    manifest = json.loads(plan.manifest_src)
+    assert manifest["upgrades"] == {}
+    assert manifest["no_upgrade"] == {
+        "proto_kk_tidecall": "the fixture prints no number the rule may move"}
+
+
+def test_no_upgrade_beside_an_authored_upgrade_stops_the_run(monkeypatch,
+                                                             tmp_path):
+    """One row, one answer: a row either has a delta or says why it has none."""
+    row = dict(FIXTURE, id="proto_kk_tidecall", upgrade={"block": +3},
+               no_upgrade="a reason that contradicts the block beside it")
+    with pytest.raises(SystemExit) as excinfo:
+        _proto_plan(monkeypatch, tmp_path, [row])
+    assert "BOTH `upgrade:` and `no_upgrade:`" in str(excinfo.value)
+
+
+@pytest.mark.parametrize("value", [True, "", "   "])
+def test_a_bare_no_upgrade_flag_is_refused(monkeypatch, tmp_path, value):
+    """The value is the REASON. A bare flag is the silent exemption this key
+    exists to replace, and it is refused in BOTH engines -- here at the
+    emitter, and at load in `tier0.content.loader`."""
+    row = dict(FIXTURE, id="proto_kk_tidecall", no_upgrade=value)
+    with pytest.raises(SystemExit) as excinfo:
+        _proto_plan(monkeypatch, tmp_path, [row])
+    assert "must be the REASON" in str(excinfo.value)
+
+    with pytest.raises(ValueError) as loaded:
+        loader.prototype_cards(_sheet(tmp_path, [row]))
+    assert "must be the REASON" in str(loaded.value)
+
+
+def test_no_upgrade_is_prototype_surface_only():
+    """`docs/<character>-upgrades.yaml` says "this shipped card has no
+    upgrade" by the id's ABSENCE. A shipped row carrying the key would be a
+    second place to look that contradicts nothing and claims everything.
+
+    Asked of the SHAPE VALIDATOR directly, with a shipped-looking id: every
+    loaded card runs through it (`_validate_card_shape`), so a `no_upgrade:`
+    on any `docs/*-cards.yaml` row raises at load. The prototype-only rule is
+    also true of every shipped card today and stays true by this check, which
+    is why no per-sheet sweep is needed beside it.
+    """
+    from tier0.engine.state import Card
+
+    shipped = Card(id="kokomi_tidecall", name="Tidecall", cost=1,
+                   type="skill", no_upgrade="not allowed here")
+    with pytest.raises(ValueError) as excinfo:
+        loader._validate_no_upgrade_shape(shipped)
+    assert "prototype surface only" in str(excinfo.value)
+    assert not any(c.no_upgrade for c in loader._card_index().values())
+
+
+#: The four OVERHAUL arms, and the reason the gate below is scoped to them:
+#: they are the arms the Prototype-stage rule claims
+#: (`upgrades.PROTOTYPE_DEFAULT_PREFIXES`). The Spark surface predates that
+#: rule and its rows carry the SHIPPED cards' upgrades, which are a
+#: Balance-stage ruling -- they are excused by name in
+#: `gen_prototype_cards.UPGRADE_DEBT` and are not this test's business.
+ARM_PREFIXES = ("proto_ko_", "proto_kk_", "proto_mc_", "proto_mi_")
+
+
+def test_every_arm_row_on_the_live_surface_can_be_smithed():
+    """`EB-315`, THE GATE [USER] EXPECTED TO EXIST.
+
+    Read off the committed MANIFEST rather than off the sheet, because the
+    manifest is what the emitted C# was built from: a row whose delta the
+    generator dropped between the sheet and the card would still read as
+    upgradable if this asked the sheet, and that is the class of defect the
+    whole `EB-283` / `EB-277` line has been about.
+
+    Two lists, and every arm row is in exactly one: `upgrades` (a delta, ruled
+    or defaulted) or `no_upgrade` (a stated reason). A row in neither is a
+    campfire that hands the card back unchanged.
+    """
+    manifest = json.loads(
+        (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
+         / "manifest.json").read_text(encoding="utf-8"))
+    arm_rows = [cid for cid in manifest["generated"]
+                if cid.startswith(ARM_PREFIXES)]
+    assert arm_rows, "no overhaul-arm rows on the surface -- the gate is inert"
+    silent = [cid for cid in arm_rows
+              if cid not in manifest["upgrades"]
+              and cid not in manifest["no_upgrade"]]
+    assert silent == [], (
+        f"{len(silent)} prototype row(s) ship with no upgrade path and no "
+        f"stated reason: {silent}. Either the Prototype-stage rule should "
+        f"reach the row (extend `upgrades.prototype_default_delta`), or the "
+        f"row must carry `no_upgrade: <reason>` saying why it cannot.")
+    for cid, reason in manifest["no_upgrade"].items():
+        assert isinstance(reason, str) and len(reason.split()) >= 8, (
+            f"{cid}: `no_upgrade:` must state the reason, not a phrase")
+
+
+def test_the_gate_goes_red_on_a_row_with_no_path(monkeypatch, tmp_path):
+    """Red-first, at the DERIVATION, because the assertion above reads a
+    committed manifest and a green one proves only that today's surface is
+    clean. Same question, asked of a synthetic row: an arm row that prints no
+    number the rule can move, and no opt-out.
+    """
+    from tier0.content import upgrades
+
+    row = dict(FIXTURE, id="proto_kk_silent", cost=0,
+               effects=[{"op": "draw", "amount": 1}])
+    genproto, plan, _ = _proto_plan(monkeypatch, tmp_path, [row])
     assert json.loads(plan.manifest_src)["upgrades"] == {}
+    assert json.loads(plan.manifest_src)["no_upgrade"] == {}
+    assert upgrades.prototype_default_delta(
+        "proto_kk_silent", 0, row["effects"], False, []) == {}
+    # ... and the SAME row with a Plan line is reached, which is the fix.
+    assert upgrades.prototype_default_delta(
+        "proto_kk_silent", 0, row["effects"], False,
+        [{"op": "damage", "amount": 12, "target": "front_enemy"}]) == {
+            "plan_damage": upgrades.PROTOTYPE_DAMAGE_DELTA}
 
 
 def test_an_inexpressible_declared_upgrade_stops_the_run(monkeypatch,
@@ -318,6 +452,38 @@ def test_the_sim_reads_the_same_row_carried_delta_and_only_when_reachable(
         assert not loader._substituted_card_index()      # no live door
         assert not upgrades.has_upgrade("proto_kokomi_tidecall")
         assert "proto_kokomi_tidecall" not in upgrades._upgrade_index()
+    finally:
+        loader.reset_caches()
+
+
+def test_the_sim_honours_the_rows_no_upgrade_opt_out(tmp_path, monkeypatch):
+    """`EB-315`. The opt-out is BOTH engines' or it is a divergence.
+
+    A row that opts out is one the mod prints base-only, so a sim that still
+    derived the default for it would smith a card the game cannot -- the exact
+    class of defect `upgrades.py`'s own `exhaust` branch note describes ("a key
+    live in one engine and dead in the other"). Proved on a row the rule WOULD
+    otherwise reach (a printed Block), made reachable through the Kokomi arm's
+    own door so the reachability filter is not what is answering.
+    """
+    from tier0 import constants as C
+    from tier0.content import upgrades
+
+    probe = dict(FIXTURE, id="proto_kk_optout",
+                 effects=[{"op": "block", "amount": 5}])
+    monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
+    monkeypatch.setattr(C, "KOKOMI_OVERHAUL_POOL_IDS", ("proto_kk_optout",))
+    monkeypatch.setattr(C, "KOKOMI_OVERHAUL_STARTER_IDS", ())
+    monkeypatch.setattr(loader, "PROTOTYPE_SHEET", _sheet(tmp_path, [probe]))
+    loader.reset_caches()
+    try:
+        assert upgrades._prototype_deltas({}) == {
+            "proto_kk_optout": {"block": upgrades.PROTOTYPE_BLOCK_DELTA}}
+        monkeypatch.setattr(
+            loader, "PROTOTYPE_SHEET",
+            _sheet(tmp_path, [dict(probe, no_upgrade="the reason it cannot")]))
+        loader.reset_caches()
+        assert upgrades._prototype_deltas({}) == {}
     finally:
         loader.reset_caches()
 

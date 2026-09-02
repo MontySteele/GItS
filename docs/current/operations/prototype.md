@@ -97,8 +97,24 @@ row carries `upgrade: {<key>: <delta>}` itself. `gen_prototype_cards.py`
 registers it into the merged delta index before emitting, and everything after
 that is the shipped path — same expressibility check, same `OnUpgrade`, same
 campfire — with `tier0/content/upgrades.py` merging the same block so both
-engines read one place. A row that declares nothing is base-only; a declared
-delta the emitter cannot express STOPS the run, like an inexpressible body.
+engines read one place. A declared delta the emitter cannot express STOPS the
+run, like an inexpressible body.
+
+**AND EVERY ARM ROW HAS ONE, OR SAYS WHY NOT** (`EB-315`). A row that declares
+nothing takes the Prototype-stage rule (`upgrades.prototype_default_delta`),
+which reads **both** printed lines — `effects:` and `plan:` — so a Plan-only
+row's upgrade is its Plan line's delta and a two-line row moves both halves,
+under `plan_*` keys bound clause by clause in `upgrades.PLAN_DELTA_OPS` (the
+one table `gen_klee_cards.plan_var_effects` imports, so the two engines cannot
+upgrade different clauses of one Plan). A moved plan clause is emitted as its
+own `DynamicVar` that the card's `PlanClauses` PROPERTY reads back, which is
+what makes `KokomiPlan.ResolveAll` carry out the upgraded number and the `+`
+face print it green. **A row that genuinely cannot upgrade carries
+`no_upgrade: <reason>`** — a sentence, prototype-surface only, refused empty by
+both engines — and `tier0/tests/test_prototype_surface.py` fails on any
+`proto_ko_` / `proto_kk_` / `proto_mc_` / `proto_mi_` row that has neither. The
+opt-out is checked both ways: one the rule has since caught up with is a
+finding, exactly as a paid `UPGRADE_DEBT` entry is.
 
 **Staging a row** — edit the sheet, regen, dev-build, then grant it by id from
 a scenario (`give: {card: KLEEMOD-PROTO_..., pile: hand}`); template and

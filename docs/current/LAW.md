@@ -70,7 +70,9 @@ combat grammar comes with us. (principles §1)
   enemy, which removes Frozen — it is not a DoT. (M1; principles §2.2)
 - **Application cadence is a per-character dial** — catalyst-grade (every attack
   applies, low base numbers) vs. skill-grade (only Skill/Burst-tagged cards
-  apply, higher base numbers). (principles §2.3)
+  apply, higher base numbers). **The base game's own basic cards are exempt from
+  it: a base Strike applies nothing for any character** ([USER] 2026-09-02, "the
+  basic cards are supposed to be bad"). (principles §2.3)
 - **Spotlight/empowerment boosts numbers only, never turn-economy effects.**
   (principles §2.2a, v1.10)
 

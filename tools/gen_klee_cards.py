@@ -92,6 +92,11 @@ from tools.effect_walk import (SLY_AUTOPLAY_OP, iter_card_effects,  # noqa: E402
 # 5 that could drift from the constant is the defect this line exists to
 # remove, not one to introduce.
 from tier0.constants import BURST_PER_SKILL_TAG                 # noqa: E402
+# EB-315. Which `plan:` op each `plan_*` delta key binds to. Imported for the
+# same reason BURST_PER_SKILL_TAG above is: the sim's applier binds these keys
+# clause by clause, and a second table here could bind one of them to a
+# different clause -- which is a smithed prototype that is two different cards.
+from tier0.content.upgrades import PLAN_DELTA_OPS               # noqa: E402
 
 SHEET = REPO / "docs" / "klee-cards.yaml"
 # Mirrors tier0/content/upgrades.py UPGRADE_SHEETS, in the same order.
@@ -831,6 +836,16 @@ PREDICATES_CS = {
     # about is the board the hit is about to land on.
     "target_has_debuff":
         "KokomiOverhaulKit.HasDebuff(cardPlay.Target)",
+    # Sango Isshin's condition ([USER], live 2026-09-02: "It's fine if Rares
+    # are strong (see: Knife Trap), but this requires absolutely 0 setup or
+    # combo - it's just 'press button, delete act 1'"). It comes off the
+    # ledger, the ONE place this arm's per-turn facts are written, so the card
+    # and the plan bus that feeds it cannot disagree about what a carried-out
+    # Plan is: the dawn queue, Change of Plans' early one and The Moon
+    # Overlooks the Waters' play-time one all set it, because all three carry
+    # a Plan out.
+    "plan_carried_out_this_turn":
+        "KokomiOverhaulLedger.For(Owner.Creature).PlanCarriedOutThisTurn",
 }
 
 # The if-clause each predicate renders on the card.
@@ -851,6 +866,9 @@ PREDICATE_TEXT = {
         "this turn",
     "target_has_aura": "If the enemy holds an elemental aura",
     "target_has_debuff": "If the enemy has a debuff",
+    "plan_carried_out_this_turn":
+        "If the [gold]Bake-Kurage[/gold] carried out a [gold]Plan[/gold] "
+        "this turn",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -1102,7 +1120,16 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # so the keyword lands in an ELSE branch -- and the top-level arm
               # it copies is a single awaited call with no locals, which is the
               # whole branch-legality criterion.
-              "mend"}
+              "mend",
+              # THE KOKOMI OVERHAUL (QUARANTINED). Sango Isshin's redesigned
+              # payoff, "...deal a quarter of your Max HP to ALL enemies
+              # instead". ALL-ENEMIES ONLY, and `_branch_op_reason` blocks the
+              # aimed form by name: `KokomiRules.QuarterMaxHpAll` is a single
+              # awaited call with no locals -- the whole branch-legality
+              # criterion -- while the aimed arm needs the target guard, and
+              # emitting that a second, subtly different way is the drift this
+              # table exists to prevent.
+              "damage_quarter_max_hp"}
 
 # The exact key set each branch op may carry. Module-level because a modal's
 # mode body is emitted through the same `_emit_branch_op` resolvers as a
@@ -1127,6 +1154,9 @@ BRANCH_FIELDS = {
     # Same key set the top-level `mend` validator enforces, so the two cannot
     # disagree about what a Mend is.
     "mend": {"op", "amount"},
+    # No amount: the quarter is computed by the rule, not printed by the row --
+    # the same key set the top-level validator enforces.
+    "damage_quarter_max_hp": {"op", "target"},
     "burst_energy": {"op", "amount"},
     "energy": {"op", "amount"},
     "place_bomb": {"op", "amount", "target", "bomb_damage"},
@@ -1199,6 +1229,15 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
                         f"'{eff['power']}'")
         elif eff.get("target") != "self":
             return f"branch apply_power target '{eff.get('target')}'"
+    if eff["op"] == "damage_quarter_max_hp":
+        # No `amount` to check -- the quarter is the RULE's
+        # (`KokomiRules.QuarterMaxHp`), computed in one place so the face, the
+        # aimed hit and the all-enemies version cannot round differently. Only
+        # the all-enemies form is emittable here; see the BRANCH_OPS note.
+        if eff.get("target") != "all_enemies":
+            return ("branch damage_quarter_max_hp target "
+                    f"'{eff.get('target')}'")
+        return None
     if eff["op"] in SALON_BRANCH_VERBS:
         # EB-137. These two are the only branch ops whose `amount` is
         # OPTIONAL: the top-level validator defaults it to 1 and both branch
@@ -1408,12 +1447,69 @@ def plan_reason(card: dict) -> str | None:
     return None
 
 
-def plan_clause_cs(eff: dict) -> str:
-    """One `KokomiPlan.Planned` literal for one plan clause."""
+#: `EB-315`. The DynamicVar each `plan_*` delta declares, beside the ops it
+#: binds to (`upgrades.PLAN_DELTA_OPS`, imported rather than restated). Every
+#: name is prefixed `Plan` so a two-line row's two halves cannot collide in
+#: `DynamicVarSet`, which throws on a duplicate name at reward time.
+#: `PlanCards` rather than `PlanDraw` for the same reason the base game names
+#: its draw var `Cards`: the token also drives `{...:plural:|s}`.
+PLAN_UPGRADE_VARS = {
+    "plan_damage": "PlanDamage",
+    "plan_block": "PlanBlock",
+    "plan_mend": "PlanMend",
+    "plan_power_amount": "PlanPowerAmount",
+    "plan_draw": "PlanCards",
+}
+
+
+def plan_var_effects(card: dict) -> dict[int, tuple[str, str]]:
+    """`{index in `plan:`: (delta key, var name)}` for the clauses that upgrade.
+
+    `EB-315`. A Plan clause is emitted as a literal amount unless this card's
+    upgrade MOVES it -- the Sparks idiom the whole file keeps, so a row with no
+    plan delta emits exactly the `KokomiPlan.Planned` record it always did and
+    no generated file churns for a card whose upgrade never touches it.
+
+    The FIRST clause of each key's op owns the var, which is the same clause
+    `upgrades.apply_upgrade` bumps (its `PLAN_DELTA_OPS` walk). Both sides read
+    one table, so the two engines cannot upgrade different clauses of one Plan.
+    """
+    plan = card.get("plan") or []
+    if not plan:
+        return {}
+    deltas = upgrade_plan(card)[0]
+    out: dict[int, tuple[str, str]] = {}
+    for key, var in PLAN_UPGRADE_VARS.items():
+        if key not in deltas:
+            continue
+        for plan_op in PLAN_DELTA_OPS[key]:
+            idx = next((i for i, fx in enumerate(plan)
+                        if fx.get("op") == plan_op
+                        and isinstance(fx.get("amount"), int)), None)
+            if idx is not None:
+                out[idx] = (key, var)
+                break
+    return out
+
+
+def plan_clause_cs(eff: dict, var: str | None = None) -> str:
+    """One `KokomiPlan.Planned` literal for one plan clause.
+
+    `var` is the DynamicVar this clause's amount rides when the card's upgrade
+    moves it (`plan_var_effects`). `PlanClauses` is a PROPERTY on the card
+    instance, so reading the var there is what makes `KokomiPlan.ResolveAll`
+    carry out the upgraded number: the clause is built fresh at enqueue time
+    off the smithed card rather than baked into a static literal.
+    """
     op = eff["op"]
     kind = (PLAN_APPLY_POWERS[eff["power"]] if op == "apply_power"
             else PLAN_CLAUSE_KINDS[op])
-    amount = 0 if op == "damage_quarter_max_hp" else int(eff["amount"])
+    if op == "damage_quarter_max_hp":
+        amount = "0"
+    elif var:
+        amount = f'DynamicVars["{var}"].IntValue'
+    else:
+        amount = str(int(eff["amount"]))
     aim = PLAN_AIM_CS.get(eff.get("target"), "KokomiPlan.Aim.Self")
     return (f"new KokomiPlan.Planned(KokomiPlan.Kind.{kind}, {amount}, "
             f"{aim})")
@@ -1482,13 +1578,13 @@ APPLY_POWERS = {
     "ko_bomb_growth_up": ("ExplosivesWorkshopGrowthPower", None,
         "At the start of your turn, your [gold]Bombs[/gold] grow by {X} more."),
     "ko_alices_recipe": ("AlicesRecipePower", None,
-        "Your [gold]Bombs[/gold] grow by 4 instead of 2."),
+        "Your [gold]Bombs[/gold] grow twice each turn."),
     "ko_chained_reactions": ("ChainedReactionsPower", None,
         "Whenever one of your [gold]Bombs[/gold] goes off, place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
-    "ko_end_turn_set_off": ("EndOfTurnSetOffPower", None,
-        "At the end of your turn, [gold]Set off[/gold] a random enemy's "
-        "[gold]Bombs[/gold]."),
+    "ko_bomb_echo": ("BombEchoPower", None,
+        "At the end of your turn, deal [gold]Pyro[/gold] damage to a random "
+        "enemy equal to the [gold]Bombs[/gold] on it."),
     "ko_bomb_reaction_spark": ("BombReactionSparkPower", None,
         "Whenever one of your [gold]Bombs[/gold] triggers an "
         "[gold]Elemental Reaction[/gold], gain {X} extra [gold]Spark[/gold]."),
@@ -1506,17 +1602,18 @@ APPLY_POWERS = {
     # pulse (Song of Pearls and The Clouds Like Waves both rewrote it), Sango
     # Isshin's Mend overflow and Orders' Tide.
     "kk_treatise": ("TreatisePower", None,
-        "Whenever the jellyfish carries out a [gold]Plan[/gold], draw {X}."),
+        "Once per turn, when the jellyfish carries out a [gold]Plan[/gold], "
+        "draw {X}."),
     "kk_song_of_pearls": ("SongOfPearlsPower", None,
-        "Whenever the jellyfish carries out a [gold]Plan[/gold], gain {X} "
-        "Block."),
+        "Once per turn, when the jellyfish carries out a [gold]Plan[/gold], "
+        "gain {X} Block."),
     "kk_plans_also_now": ("PlansAlsoNowPower", None,
         "[gold]Plans[/gold] also happen now."),
     "kk_clouds_like_waves": ("CloudsLikeWavesPower", None,
         "Whenever you apply a debuff to an enemy, gain {X} Block."),
     "kk_generals_banner": ("GeneralsBannerPower", None,
-        "Whenever you play a [gold]Companion[/gold] card, the front enemy "
-        "gains {X} Weak."),
+        "Once per turn, when you play a [gold]Companion[/gold] card, the front "
+        "enemy gains {X} Weak."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
@@ -2083,6 +2180,16 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                       # keys had no campfire path at all, which is EB-277 read
                       # from the other side.
                       | {"bomb_size", "payload_mine", "grow", "mend"}
+                      # EB-315, the PLAN line's own numbers. A Plan is the
+                      # second half of a printed face, so its clauses upgrade
+                      # like any other printed number -- through a per-clause
+                      # DynamicVar the emitted `PlanClauses` reads back, which
+                      # is what makes `KokomiPlan.ResolveAll` carry out the
+                      # UPGRADED value and the `+` face print it green.
+                      # Prefixed rather than sharing the now-line's keys so a
+                      # two-line row moves both halves without either applier
+                      # guessing which line a bare `damage` meant.
+                      | set(PLAN_DELTA_OPS)
                       | POWER_UPGRADE_KEYS)
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
@@ -4164,6 +4271,16 @@ def build_vars(card: dict) -> list[str]:
                         f'new DynamicVar("{else_var}", {int(e["amount"])}m)')
     if added_draw_upgrade(card):
         out.append(f"new CardsVar({added_draw_upgrade(card)})")
+    # EB-315. The PLAN line's upgradeable clauses, in the order the row wrote
+    # them and AFTER the now-line's vars, which is the order the face prints
+    # the two halves in. A plain `DynamicVar` and never an attack var: a
+    # planned hit is dealt by the jellyfish at the start of the next turn, so
+    # resolving the printed number against the player's live attack modifiers
+    # at print time would show a number nobody will get (the same argument
+    # `plant_bomb` above makes about a banked Bomb).
+    for index, (_key, var) in sorted(plan_var_effects(card).items()):
+        amount = int((card.get("plan") or [])[index]["amount"])
+        out.append(f'new DynamicVar("{var}", {amount}m)')
     if added_encore_salon(card) is not None:
         base, deploys = added_encore_salon(card)
         # Same trio as salon_calc_var_decls, for the upgrade-appended encore
@@ -4271,6 +4388,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
     if not deltas:
         return {}, "no ratified delta in klee-upgrades.yaml"
     effects = card.get("effects", [])
+    plan_line = card.get("plan") or []
     # Branch effects too: tier0's `everywhere` (draw deltas bump ALL draw
     # ops, branches included -- "both branches" is sheet law).
     everywhere = list(effects)
@@ -4445,6 +4563,15 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
     # apply_power and Chevreuse's buff_next_attack.
     for pkey in POWER_UPGRADE_KEYS:
         has[pkey] = any(e["op"] in POWER_UPGRADE_OPS for e in effects)
+    # EB-315. A `plan_*` delta needs a CLAUSE OF ITS OP carrying a literal
+    # amount on the row's `plan:` line -- the same requirement every key above
+    # states about `effects:`, one printed line over. A plan delta on a row
+    # with no Plan (or with no clause of that op) is a sheet/card mismatch and
+    # is reported as one rather than silently dropped.
+    for plan_key, plan_ops in PLAN_DELTA_OPS.items():
+        has[plan_key] = any(e.get("op") in plan_ops
+                            and isinstance(e.get("amount"), int)
+                            for e in plan_line)
     for key, value in deltas.items():
         if key not in EXPRESSIBLE_DELTAS:
             return {}, f"delta key '{key}: {value}' not expressible by codegen (structural upgrade)"
@@ -5509,6 +5636,14 @@ def _emit_branch_op(
         # play whose price failed instead of handing out the payoff for free.
         # Sim twin: `effects.spend_sparks`, which refuses the same way.
         lines.append(_stmt_spend_spark_guarded(card, eff))
+    elif op == "damage_quarter_max_hp":
+        # THE KOKOMI OVERHAUL (QUARANTINED). Sango Isshin's payoff, and
+        # byte-for-byte the call `build_body`'s top-level all-enemies arm
+        # makes: the quarter is computed in ONE place so the printed face and
+        # the hit cannot round differently.
+        lines.append(
+            "await KokomiRules.QuarterMaxHpAll("
+            "choiceContext, Owner.Creature);")
     elif op == "mend":
         # THE INAZUMA COMPANION OVERHAUL (QUARANTINED). Byte-for-byte the call
         # `build_body`'s top-level arm makes, because it IS the same rule: one
@@ -7430,6 +7565,30 @@ def _authored_face_numbers(card: dict):
         elif op in ("draw", "energy") \
                 and isinstance(eff.get("amount"), int):
             yield None, None, eff["amount"]
+    # EB-315. THE PLAN LINE'S NUMBERS, AFTER THE NOW-LINE'S, because that is
+    # the order a Plan row's own face prints them in ("Deal 6 damage. Plan:
+    # Deal 10 damage.") and the walk below places its cursor by that order. A
+    # clause the upgrade does not move still yields, for the same reason every
+    # unkeyed number above does: the cursor has to step past it or a later
+    # literal gets mistaken for it.
+    plan_vars = plan_var_effects(card)
+    for index, eff in enumerate(card.get("plan") or []):
+        amount = eff.get("amount")
+        if not isinstance(amount, int):
+            continue
+        if index in plan_vars:
+            key, var = plan_vars[index]
+            yield key, var, amount
+        else:
+            yield None, None, amount
+
+
+# `EB-315`. The vars whose printed number is a CARD COUNT, so the face has to
+# pluralize the noun beside it: "draw 1 card" upgrades to "draw 2 cards", and a
+# token that swapped only the numeral would print "draw 2 card". The rendered
+# path has always emitted `{Cards:plural:|s}` beside its draw token; this is
+# the same pair for a row that states its own face.
+CARD_COUNT_FACE_VARS = frozenset({"Cards", "PlanCards"})
 
 
 # `EB-308`. The two face keys whose var the GAME modifies at runtime -- Damage
@@ -7473,11 +7632,20 @@ def _authored_face_with_tokens(card: dict) -> str:
     deltas = upgrade_plan(card)[0]
     cursor = 0
     for key, var, literal in _authored_face_numbers(card):
-        match = re.compile(rf"(?<!\d){literal}(?!\d)").search(text, cursor)
+        # `EB-315`. A card COUNT takes its noun with it, so the swap can put
+        # the plural token where the noun was -- "draw 1 card" has to become
+        # "draw 2 cards" and not "draw 2 card". The noun is optional in the
+        # pattern so a count printed without one still matches.
+        plural = var in CARD_COUNT_FACE_VARS
+        pattern = (rf"(?<!\d){literal}(?!\d)(?P<noun>\s+cards?\b)?" if plural
+                   else rf"(?<!\d){literal}(?!\d)")
+        match = re.compile(pattern).search(text, cursor)
         if match is None:
             continue
         if var and (key in deltas or key in LIVE_MODIFIED_FACE_KEYS):
             token = f"{{{var}:diff()}}"
+            if plural and match.group("noun"):
+                token += f" card{{{var}:plural:|s}}"
             text = text[:match.start()] + token + text[match.end():]
             cursor = match.start() + len(token)
         else:
@@ -8807,6 +8975,16 @@ def build_upgrade(card: dict) -> list[str]:
         # OnUpgrade with this one line and nothing else.
         done.add("remove")
         lines.append("RemoveKeyword(CardKeyword.Ethereal);")
+    # EB-315. The PLAN line's own numbers, in the order the row wrote its
+    # clauses so the emitted OnUpgrade reads down the face. Each moves the
+    # per-clause var the emitted `PlanClauses` reads back, which is the whole
+    # of the fix: before it, `PlanClauses` carried a literal and Feint+ dealt
+    # its base number at dawn however often it was smithed.
+    for _index, (plan_key, plan_var) in sorted(plan_var_effects(card).items()):
+        if plan_key in deltas and plan_key not in done:
+            done.add(plan_key)
+            lines.append(f'DynamicVars["{plan_var}"].UpgradeValueBy('
+                         f'{int(deltas[plan_key])}m);')
     if "copy_cost_override" in deltas:
         done.add("copy_cost_override")
         lines.append(
@@ -9133,10 +9311,20 @@ def emit(
     # off a card it was handed, which is what Moon's Reflection needs: it
     # replays a chosen card's Plan LINE, and a private member could not be
     # asked.
+    #
+    # EB-315: A CLAUSE THE UPGRADE MOVES READS ITS AMOUNT OFF A DynamicVar,
+    # and it works because this is a PROPERTY rather than a field -- the record
+    # is built at enqueue time off THIS instance, so a smithed card writes the
+    # upgraded number into the queue and `ResolveAll` carries out that one. A
+    # clause no delta touches keeps its literal (the Sparks idiom), so no
+    # generated file churns for an upgrade that does not reach it.
     plan_member = ""
     if plan_body:
+        plan_vars = plan_var_effects(card)
         clauses = (",\n" + " " * 12).join(
-            plan_clause_cs(clause) for clause in plan_body)
+            plan_clause_cs(clause,
+                           plan_vars[i][1] if i in plan_vars else None)
+            for i, clause in enumerate(plan_body))
         interfaces += ", IPlannedCard"
         plan_member = (
             "\n\n    /// <summary>The card's printed [gold]Plan[/gold] line, "
