@@ -243,7 +243,31 @@ def _active_effects(state: CombatState, effect_list: list[dict],
     predicate needs it (`this_cost_zero`, which is a question about the card
     being scored and not about the state), and a mode body probed without a
     host still scores -- it just cannot answer that one.
+
+    THE PLAN SWAP (QUARANTINED, C.KOKOMI_OVERHAUL) IS THE FIRST THING THIS
+    FUNCTION DOES, and it is here rather than at the fifteen call sites for the
+    reason the `choose_one` branch below is here: this is the ONE place the
+    pilot turns a printed face into "what will actually happen", so it is the
+    one place the other half of a Plan card's face can be substituted without
+    every valuation term having to learn the rule.
+
+    IT ASKS THE ENGINE, the Track C.2 lesson: `kokomi_plan.plan_aimed_at_pet`
+    is the same pure function `effects._resolve_card_bound` calls a moment
+    later to decide which half to RUN, so the pilot's read and the play cannot
+    disagree. A card headed for the jellyfish does none of its now-line, so
+    scoring the now-line would price a play that is not going to happen -- and
+    four rows (Ambush, War Council, Chain of Command, Battle Plan) print an
+    EMPTY body, so without the swap they would score zero and never be played.
+
+    WHAT THE SWAP DOES NOT MODEL is the TURN of delay: a planned clause is
+    valued at its face, as though it landed now. That is the crude direction
+    and it is stated rather than hidden -- discounting it is a
+    `POLICY_VERSION` question, and no number taken on this arm is quotable
+    anyway (R215 B).
     """
+    if (card is not None and card.plan and effect_list is card.effects
+            and effects.kokomi_plan.plan_aimed_at_pet(state, card)):
+        effect_list = card.plan
     for fx in effect_list:
         if fx["op"] == "conditional":
             name = fx["if"]
@@ -679,7 +703,13 @@ def _reaction_value(state: CombatState, card: Card) -> float:
         reactable = [e for e in living if e.aura and e.aura != elem]
         target = fx.get("target", "enemy")
 
-        if target == "enemy":
+        # `front_enemy` (QUARANTINED, C.KOKOMI_OVERHAUL) is a SINGLE-target
+        # spelling and rides this branch rather than falling through to the
+        # random one, which would price one planned Hydro hit as a spread. The
+        # aim it estimates against is this engine's default (lowest HP) and not
+        # literally the leftmost, which is the same approximation every other
+        # single-target estimate here makes.
+        if target in ("enemy", "front_enemy"):
             # Single-target Swirl is deliberately aura-aware, and since
             # EB-139 / R211 (`C20`) it is aura-aware AT THE BIND
             # (`effects.bind_card_aim`) rather than inside `_op_swirl`: a card

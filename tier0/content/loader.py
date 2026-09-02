@@ -371,6 +371,7 @@ def _validate_card_shape(c: Card) -> None:
     # loads (see state.Card.sly).
     _validate_effect_vocabulary(c.id, sly_riders(c))
     _validate_recall_shape(c)
+    _validate_plan_shape(c)
 
 
 def prototype_cards(sheet: Path | None = None) -> list[Card]:
@@ -442,12 +443,20 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
         # tier0 has no card text and never renders one, so a `description` on
         # `Card` would be a field the engine carries and nothing reads.
         # THE KOKOMI OVERHAUL, DRAFT 6: `plan:` is the row's OTHER printed
-        # half -- what the card does if it is played on the Bake-Kurage. It is
-        # stripped for the same reason `description:` is, and it is
-        # VOCABULARY-CHECKED first for the same reason the body is: a clause
-        # naming an op nothing registers is a row that cannot be staged, and
-        # the check has to happen where the sheet is read rather than in the
-        # emitter alone (the sim must refuse a row it could not print either).
+        # half -- what the card does if it is played on the Bake-Kurage.
+        #
+        # IT USED TO BE STRIPPED HERE, beside `description:`, because the sim
+        # had no Plan rule to carry it into and a field nothing reads is a
+        # field that drifts. The sim has one now (`engine/kokomi_plan.py`), so
+        # the key is KEPT and lands on `Card.plan` -- the same declaration the
+        # C# emitter builds `IPlannedCard.PlanClauses` from.
+        #
+        # THE VOCABULARY CHECK STAYS WHERE IT WAS and is now doing two jobs: a
+        # clause naming an op nothing registers is a row that cannot be staged
+        # in either engine, and `_validate_plan_shape` below adds the half the
+        # op registry cannot see -- the closed clause table, the closed target
+        # spellings and the literal positive amounts, which are exactly the
+        # checks `gen_klee_cards.plan_reason` makes on the other side.
         plan = d.get("plan")
         if plan is not None:
             if not isinstance(plan, list) or not plan:
@@ -456,8 +465,7 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
                     "list of effects")
             _validate_effect_vocabulary(card_id, plan)
         card = Card.from_dict({k: v for k, v in d.items()
-                               if k not in ("authored_by", "description",
-                                            "plan")})
+                               if k not in ("authored_by", "description")})
         _validate_card_shape(card)
         cards.append(card)
     return cards
@@ -473,6 +481,38 @@ def _prototype_index() -> dict[str, Card]:
     `C.SPARK_ALT_COST_ENABLED` and only for a `proto_`-prefixed id.
     """
     return {c.id: c for c in prototype_cards()}
+
+
+def _validate_plan_shape(card: Card) -> None:
+    """The `plan:` line's own shape, AT LOAD (QUARANTINED, draft 6).
+
+    THE SAME CHECKS `tools/gen_klee_cards.plan_reason` MAKES, from the other
+    side: closed clause table, closed target spellings, literal positive
+    amounts. Both sides run them because both sides need them for different
+    reasons -- the emitter BLOCKS a row it cannot type, and this engine has to
+    refuse a row it could not resolve. A clause the C# would refuse to emit
+    and the sim happily approximated is precisely the divergence the whole
+    quarantine exists to stop.
+
+    IT ALSO KEEPS THE PLAN OFF EVERY SHIPPED SHEET. `plan:` is prototype
+    surface only, the way `description:` is: a shipped face is rendered from
+    the body, and a shipped row printing a rule only one arm has would be a
+    card that means different things with a flag on and off. The `proto_`
+    prefix is the whole test, and it is the same prefix the quarantine itself
+    is built on.
+    """
+    from tier0.engine import kokomi_plan as _plan        # late: cycle
+
+    if not card.plan:
+        return
+    if not card.id.startswith(PROTOTYPE_ID_PREFIX):
+        raise ValueError(
+            f"card {card.id!r}: `plan:` is prototype surface only -- a "
+            f"shipped row may not print the Kokomi overhaul's Plan line "
+            f"(ids on that surface carry {PROTOTYPE_ID_PREFIX!r})")
+    reason = _plan.plan_shape_reason(card.plan)
+    if reason:
+        raise ValueError(f"card {card.id!r}: {reason}")
 
 
 def _validate_recall_shape(card: Card) -> None:
@@ -1025,6 +1065,27 @@ def _starter_ids(spec: dict) -> list[str]:
     return ids
 
 
+def starter_replaced_whole(character_id: str) -> bool:
+    """Did a live arm replace this character's starter WHOLE?
+
+    THE TWO `return list(...)` BRANCHES IN `_starter_ids` ABOVE, named, because
+    one other function has to know: `starting_deck`'s randomized-starter roll
+    replaces printed ids BY NAME, and a starter that is somebody else's ten
+    cards has none of those names in it. Without this the roll raises
+    "randomized starter cannot replace missing card 'sayu_daruma_gift'" the
+    first time a tier-0.5 run opens with either overhaul flag on -- the tier-0
+    battery never sees it, because the battery calls `starting_deck` with no
+    RNG and skips the roll entirely.
+
+    A PREDICATE RATHER THAN A `not in deck` CHECK AT THE CALL SITE, so a genuine
+    sheet defect (a `randomized_starter` naming a card the printed starter does
+    not hold) still raises the way it always has. Silence there would be the
+    bug the raise exists to catch.
+    """
+    return bool((character_id == "klee" and C.KLEE_OVERHAUL)
+                or (character_id == "kokomi" and C.KOKOMI_OVERHAUL))
+
+
 def _pool_substitutions(spec: dict) -> dict[str, str]:
     """{shipped id: prototype id} for the character's OFFERABLE pool, under
     the same quarantine flag `_starter_ids` above reads.
@@ -1110,6 +1171,52 @@ def pool_replacement(character_id: str) -> list[str] | None:
     # a Muster that transforms, a Burst that gates).
     if character_id == "kokomi" and C.KOKOMI_OVERHAUL:
         return list(C.KOKOMI_OVERHAUL_POOL_IDS)
+    return None
+
+
+#: The relic-hook name the KOKOMI_OVERHAUL arm's starting relic carries. A NEW
+#: id rather than a reuse of `tamakushi_casket`, and the two must never be
+#: confused: the shipped hook of that name IS the Pearl of Wisdom's
+#: exhaust-for-Charge funnel plus the Strength-to-Charge conversion (the
+#: constants block above says so at length), and the ruled brief's sec.6
+#: retires both. `KleeCode/Relics/TamakushiCasket.cs` is the same replacement
+#: made from the C# side, and its header says the same sentence: "It also
+#: replaces the Pearl of Wisdom under the arm, because the Pearl IS the
+#: exhaust-for-Charge funnel the brief retires."
+OVERHAUL_CASKET_HOOK = "kokomi_overhaul_casket"
+
+
+def relic_hooks_replacement(character_id: str) -> list[str] | None:
+    """The character's starting relic hooks, or None to keep the shipped ones.
+
+    `pool_replacement`'s sibling, one object over and for the same reason the
+    map shape could not say it: the arm does not ADD a relic to her, it
+    REPLACES the one she starts with, and the two cannot both be live -- a run
+    holding the Pearl would print a rule the arm has turned off. Read at the
+    two builders (`build_player`, `build_player_from_ids`), which are the only
+    places a starting hook list is assembled.
+
+    WHAT MOVES WITH THE HOOK, exhaustively, because dropping a hook is a
+    deletion and deletions deserve a list. `tamakushi_casket` is read at four
+    sites and all four go quiet under the arm, every one of them a rule the
+    brief cuts by name:
+      * `refpowers.after_card_exhausted` -- the exhaust-for-Charge funnel;
+      * `powers.apply_power`             -- Flawless Strategy, the
+                                            Strength-to-Charge refusal. Draft
+                                            6's rule 3 needs her Strength to
+                                            LAND, and the C# turns the same
+                                            refusal off at
+                                            `KokomiResources.TryModifyPower-
+                                            AmountReceived`;
+      * `effects.kokomi_rotation_law`    -- the Exhaust-pool narrowing;
+      * `effects.note_kurage_play`       -- the memory arm's v2 fuel, which is
+                                            a different arm's branch anyway.
+
+    WITH THE FLAG OFF this returns None for every character and both builders
+    are byte-for-byte what they have always been.
+    """
+    if character_id == "kokomi" and C.KOKOMI_OVERHAUL:
+        return [OVERHAUL_CASKET_HOOK]
     return None
 
 
@@ -1214,7 +1321,8 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
     (e.g. 'archetype_package') appended to the starter deck."""
     spec = _character_index()[character_id]
     card_ids = _starter_ids(spec)
-    hooks = list(spec.get("relic_hooks", []))
+    hooks = (relic_hooks_replacement(character_id)
+             or list(spec.get("relic_hooks", [])))
     if deck != "starter":
         card_ids += spec["packages"][deck]
         # R8: probe-only relic hooks (harness instrumentation, e.g. the
@@ -1261,7 +1369,8 @@ def build_player_from_ids(character_id: str, card_ids: list[str],
                   element=spec.get("element", "none"),
                   cadence=spec.get("cadence", "skill"),
                   burst_max=spec.get("burst_max", 0),
-                  relic_hooks=list(spec.get("relic_hooks", [])),
+                  relic_hooks=(relic_hooks_replacement(character_id)
+                               or list(spec.get("relic_hooks", []))),
                   # The character's own starting relic FIRST, then whatever
                   # the run drafted. Two relics with the same hook both
                   # apply (Ring of the Snake + Bag of Preparation is +4 on
@@ -1289,6 +1398,15 @@ def starting_deck(character_id: str, rng=None) -> list[str]:
     spec = _character_index()[character_id]
     deck = _starter_ids(spec)         # the ONE seam; see `_starter_ids`
     if rng is None:
+        return deck
+    # A WHOLE-STARTER REPLACEMENT HAS NO SLOT TO ROLL. The printed
+    # `randomized_starter` names printed cards, and an overhaul's ten are
+    # somebody else's ten -- so the roll has nothing to replace and the arm's
+    # own starter IS the answer. See `starter_replaced_whole` for why this is a
+    # named predicate rather than a swallowed lookup failure. With both
+    # overhaul flags off this line is False and the loop below is reached
+    # exactly as it always was.
+    if starter_replaced_whole(character_id):
         return deck
     for slot in spec.get("randomized_starter", {}).values():
         replaced = slot["replace"]

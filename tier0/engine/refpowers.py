@@ -1104,6 +1104,21 @@ def on_power_applied(state: CombatState, target: Fighter, name: str,
     if applier is None and state.in_player_turn:
         applier = state.player
 
+    # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6). THE ARM'S DEBUFF ANSWER -- the
+    # Tamakushi Casket's strike and The Clouds Like Waves Rippling's Block --
+    # HERE, because this function IS this engine's `AfterPowerAmountChanged`:
+    # `powers.apply_power` is the one door every power application in the
+    # simulator passes through, so a card, a Plan, a companion or a reaction
+    # all reach it and none of them can slip past. The C# says the same
+    # sentence about the same hook.
+    #
+    # FIRST in the function, before the temp-Strength rewrites below, for one
+    # reason: those rewrite `target.powers` for powers that are not debuffs,
+    # and the answer must see the application exactly as it landed.
+    if C.KOKOMI_OVERHAUL:
+        from tier0.engine import kokomi_plan       # late import avoids cycle
+        kokomi_plan.note_debuff_applied(state, target, name, stacks, applier)
+
     # TemporaryStrengthPower: apply +-Amount Strength NOW and revert the same
     # magnitude at the owner's turn end. SetupStrike is IsPositive=true on
     # self; Mangle overrides IsPositive=false on an enemy. Deliberately NOT a

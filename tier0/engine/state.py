@@ -37,7 +37,7 @@ def _copy_plain(val):
 # dataclass definition so a new mutable field cannot be added silently.
 _MUTABLE_FIELDS = ("effects", "solve", "tempo_band", "archetypes", "tags",
                    "companion", "sly", "upgrade", "enchant_effects",
-                   "enchant_first_play_effects")
+                   "enchant_first_play_effects", "plan")
 
 # Card fields that a sheet row may NEVER declare again, with the reason the
 # author needs. House pattern: a caught mistake becomes a lint, so the next
@@ -279,6 +279,27 @@ class Card:
     # Both default False and nothing outside a flag branch reads either.
     kurage_remembered: bool = False
     from_kurage_memory: bool = False
+    # THE PLAN LINE (QUARANTINED, C.KOKOMI_OVERHAUL, draft 6) -- the SECOND
+    # HALF OF A PRINTED FACE, and the reason it is a card field rather than a
+    # side table: what the card does if it is played on the Bake-Kurage
+    # instead of where it would normally go is printed ON the card, in the
+    # same effect vocabulary `effects:` speaks, and the C# emitter already
+    # builds `IPlannedCard.PlanClauses` from this very key
+    # (`gen_klee_cards.CARD_FIELDS` carries `plan`). Two readers, one
+    # declaration.
+    #
+    # THE CLAUSES ARE THE SHEET'S OWN DICTS, not a typed record. The C# has to
+    # type them (`KokomiPlan.Planned`) because a captured closure over the
+    # writing card's context would be a use-after-free across the turn
+    # boundary; this engine has no context to capture and already speaks
+    # effect dicts everywhere, so the honest twin of "the clauses the sheet
+    # declares" is the list the sheet declared. `kokomi_plan.PLAN_KINDS` is
+    # the `Kind` enum's twin and refuses anything outside it.
+    #
+    # PROTOTYPE SURFACE ONLY, like `description:` -- no shipped sheet row
+    # prints a Plan, and `tools/gen_klee_cards.card_level_reason` refuses one
+    # on any character but Kokomi.
+    plan: list[dict] = field(default_factory=list)
     # SLY -- ONE field, ONE word, one trigger (EB-71, R174; formerly two
     # near-identical mechanics, `sly` and `sly_keyword`). Effects that fire
     # when this card is discarded BY A CARD EFFECT. The end-of-turn hand
@@ -908,6 +929,36 @@ class KurageMemory:
     ephemeral: bool = False
     rule: str = "exhaust"
 
+
+@dataclass
+class PlanEntry:
+    """ONE Plan (QUARANTINED, `C.KOKOMI_OVERHAUL`, draft 6).
+
+    THE TWIN OF `KokomiPlan.Entry`, and the unit everything downstream counts
+    in: the pending badge, Change of Plans' "your front Plan", Nereid's
+    Ascension's "carries out every Plan twice" and the
+    whenever-a-Plan-is-carried-out payoffs (Treatise, Song of Pearls). War
+    Council prints two clauses and is ONE Plan, which is what its face says.
+
+      card_id  -- the card that wrote it. Kept for the LOG the way the C#
+                  keeps `Source` for the strip, and for nothing else.
+      clauses  -- the whole of what will happen: the row's own `plan:` list,
+                  verbatim. NOT a closure and NOT a snapshot of the board.
+      card     -- set for a `replay_exhausted` clause ONLY (Moon's
+                  Reflection's chosen card), the one place a Plan holds an
+                  object instead of a number. It is the instance that was
+                  taken OUT of the exhaust pile, so the replay plays the card
+                  the player chose rather than a fresh copy of its id.
+
+    NO STORED ENEMY, deliberately, and it is the C#'s own reason: a Plan
+    written last turn cannot hold a reference to an enemy that may be dead by
+    the time it resolves, so the target is a RULE (`front_enemy` /
+    `all_enemies`) resolved at carry-out.
+    """
+    card_id: str
+    clauses: list[dict] = field(default_factory=list)
+    card: Optional["Card"] = None
+
 @dataclass
 class CombatState:
     player: Player
@@ -1104,6 +1155,14 @@ class CombatState:
     # auto-play. None means "no override" -- E2 leaves it None on purpose and
     # lets the shipped forced-random roll stand.
     kurage_aim: Optional[Enemy] = None
+    # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): THE PLAN QUEUE, front first.
+    #
+    # PER FIGHT, on `CombatState`, which is this engine's whole answer to the
+    # C#'s "per player" (R205): tier 0 runs ONE seat, so a per-player table
+    # would be a dictionary with one key. The property that matters -- one
+    # seat's Plans are never another's -- holds by construction here, and the
+    # per-FIGHT half is what `CombatState` being rebuilt by `run_fight` buys.
+    kk_plan_queue: list[PlanEntry] = field(default_factory=list)
     # Blocking Notes' slope (rework Track C.3, 2026-07-28). A per-TURN count
     # where companions_played above is a per-COMBAT list, so the two cannot be
     # derived from each other and both have to exist.
@@ -1114,6 +1173,15 @@ class CombatState:
     # that ignored generated Companions would punish the deck that generates
     # them, which is the deck this card is for.
     companion_plays_this_turn: int = 0
+    # QUARANTINED (C.KOKOMI_OVERHAUL). Chain of Command's "each Companion card
+    # you played LAST turn", and the twin of
+    # `KokomiOverhaulLedger.CompanionsPlayedLastTurn`. Rolled from the counter
+    # above at the ONE place that counter is cleared (`combat._player_turn`),
+    # which is what keeps the card and the count from disagreeing about which
+    # turn "last" was. A Plan written on turn N is carried out at the top of
+    # N+1, AFTER that roll, so what it reads is turn N -- the turn the player
+    # was looking at when they wrote it.
+    companion_plays_last_turn: int = 0
     companion_cost_delta_this_turn: int = 0   # cost_mod op
     replay_next_companion: int = 0            # Study Buddy
     current_card_companion: bool = False      # control provenance (§2.2a)

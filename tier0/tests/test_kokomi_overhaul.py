@@ -12,12 +12,15 @@ CONDITION, not an intention, so it is pinned the way `test_klee_overhaul.py`
 pins its own: as a digest of a fixed-seed fight's whole event log, plus the
 shape of every seam this arm touches.
 
-WHAT THE SIM DOES AND DOES NOT DO HERE. Slice one is C# FIRST (the slice packet
-sec.5: "All of it behind the prototype switch, C# first. The Python sim is not
-brought up for slice one"). So tier0 LOADS, VALIDATES and RESOLVES-BY-ID the
-slice's rows, and it REFUSES to resolve their new ops rather than shipping a
-second, unplayed implementation of a rule the mod has not proved yet.
-`test_the_new_ops_refuse_to_resolve` is that refusal asserted, not tolerated.
+WHAT THE SIM DOES HERE, AND WHERE THE REST OF IT IS. Slice one was C# FIRST
+(the slice packet sec.5: "All of it behind the prototype switch, C# first. The
+Python sim is not brought up for slice one"), and for a while tier0 loaded and
+validated the rows while REFUSING to resolve their ops. The sim twin exists
+now -- `tier0/engine/kokomi_plan.py`, mirroring
+`KleeCode/Powers/Prototype/KokomiPlan.cs` -- so what is left here is the
+QUARANTINE half: the flag ships off, off is byte-identical, and the rows are
+reachable only with it on. The rules themselves are pinned clause by clause in
+`test_kokomi_plan.py`, which names the C# sentence each one comes from.
 
 NOTHING MEASURED ON ANY PROTOTYPE ROW IS QUOTABLE ANYWHERE (R215 B). These are
 shape assertions about an engine, not numbers about a game.
@@ -38,12 +41,18 @@ from tier05 import draft, rewards
 SEED = 11
 
 #: Every op slice one adds. Registered in `effects.OPS` so the loader's
-#: vocabulary check accepts a row, priced in `draft.STATIC_OP_PRICING` so
-#: `lint_op_parity` stays green, and resolved by nothing.
+#: vocabulary check accepts a row, and priced in `draft.STATIC_OP_PRICING` so
+#: `lint_op_parity` stays green.
 OVERHAUL_OPS = ("mend", "next_companion_discount", "remove_debuff",
                 "carry_out_front_plan", "plan_from_exhaust",
                 "damage_quarter_max_hp", "plan_twice",
                 "damage_per_companion_last_turn")
+
+#: The two that are legal inside a `plan:` list and NOWHERE else. They are in
+#: `OPS` only because the loader validates a `plan:` list through the same
+#: vocabulary check the body takes, and they refuse from a body always -- with
+#: the flag on as well as off, which is what separates them from the six.
+PLAN_ONLY_OPS = ("plan_twice", "damage_per_companion_last_turn")
 
 
 @pytest.fixture
@@ -215,6 +224,49 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
         "common": 13, "uncommon": 8, "rare": 5}
 
 
+def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):
+    """`starting_deck` WITH AN RNG is the tier-0.5 door, and it used to raise
+    here: the printed `randomized_starter` slot names `sayu_daruma_gift`, which
+    an arm that replaces the whole starter does not hold, so no run-level arm
+    on this flag had ever opened. `loader.starter_replaced_whole` is the named
+    predicate that says a whole-starter replacement has no slot to roll; the
+    Klee overhaul had the identical latent break one character over."""
+    import random
+    assert loader.starter_replaced_whole("kokomi") is True
+    deck = loader.starting_deck("kokomi", random.Random(1))
+    assert deck == list(C.KOKOMI_OVERHAUL_STARTER_IDS)
+
+
+def test_the_randomized_starter_still_rolls_with_the_flag_off():
+    """The other half: a sheet defect (a slot naming a card the printed starter
+    does not hold) must still raise, so the predicate is a NAMED branch and not
+    a swallowed lookup failure."""
+    import random
+    assert loader.starter_replaced_whole("kokomi") is False
+    deck = loader.starting_deck("kokomi", random.Random(1))
+    assert len(deck) == 12
+    assert not any(cid.startswith("proto_kk_") for cid in deck)
+
+
+def test_her_starting_relic_becomes_the_tamakushi_casket(overhaul):
+    """The arm REPLACES the relic she starts with; it does not add one. The
+    shipped `tamakushi_casket` hook IS the Pearl of Wisdom's exhaust-for-Charge
+    funnel plus Flawless Strategy's Strength-to-Charge refusal, and the ruled
+    brief's sec.6 retires both -- draft 6's rule 3 needs her Strength to LAND.
+    `Relics/TamakushiCasket.cs` says the same sentence from the C# side."""
+    for player in (loader.build_player("kokomi"),
+                   loader.build_player_from_ids(
+                       "kokomi", list(C.KOKOMI_OVERHAUL_STARTER_IDS))):
+        assert player.relic_hooks == [loader.OVERHAUL_CASKET_HOOK]
+        assert "tamakushi_casket" not in player.relic_hooks
+
+
+def test_the_relic_seam_is_hers_alone_and_shut_with_the_flag_off():
+    for character in ("klee", "furina", "kokomi", "real_silent"):
+        assert loader.relic_hooks_replacement(character) is None
+    assert "tamakushi_casket" in loader.build_player("kokomi").relic_hooks
+
+
 def test_no_other_character_moves_under_the_flag(overhaul):
     """The seam is Kokomi's alone. A flag that quietly re-pooled Klee would
     make every number measured on him incomparable."""
@@ -322,17 +374,38 @@ def test_every_new_op_is_priced_for_the_drafter():
         assert op in draft.STATIC_OP_PRICING, op
 
 
-def test_the_new_ops_refuse_to_resolve():
-    """C# FIRST, said out loud. The slice packet does not bring the sim up,
-    and a silently no-op resolver would be the worst possible stand-in: a
-    prototype that reports numbers for rules it never ran."""
+def test_the_new_ops_refuse_to_resolve_with_the_flag_off():
+    """THE QUARANTINE, said out loud. With the flag off her `proto_kk_` rows do
+    not resolve by id at all, so nothing can reach these -- which makes a verb
+    that ran anyway a DEFECT rather than a degradation, and a silently no-op
+    resolver the worst possible stand-in. The refusal is asserted, not
+    tolerated. `test_kokomi_plan.py` holds the other side: with the flag ON and
+    Kokomi in the seat, every one of them resolves."""
     from tier0.tests.conftest import make_state
     from tier0.engine.state import Card
 
     for op in OVERHAUL_OPS:
         state = make_state()
+        state.player.character_id = "kokomi"    # so the FLAG is the only gate
         card = Card(id="probe", name="probe", cost=1, type="skill",
                     effects=[{"op": op}])
         with pytest.raises(NotImplementedError) as excinfo:
-            effects.OPS[op](state, {"op": op}, card)
+            effects.OPS[op](state, {"op": op, "amount": 1}, card)
         assert "KOKOMI_OVERHAUL" in str(excinfo.value)
+
+
+def test_the_plan_only_clauses_refuse_from_a_body_with_the_flag_on(overhaul):
+    """The two that are never a top-level op, refusing on the arm's own turf.
+    A body spelling would be a different, unpriced card, and
+    `gen_klee_cards.PLAN_ONLY_OPS` refuses the same two in an `effects:` list
+    on the C# side."""
+    from tier0.tests.conftest import make_state
+    from tier0.engine.state import Card
+
+    for op in PLAN_ONLY_OPS:
+        state = make_state()
+        state.player.character_id = "kokomi"
+        card = Card(id="probe", name="probe", cost=1, type="skill",
+                    effects=[{"op": op}])
+        with pytest.raises(NotImplementedError, match="PLAN-ONLY"):
+            effects.OPS[op](state, {"op": op, "amount": 1}, card)

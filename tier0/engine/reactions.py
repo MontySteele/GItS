@@ -203,6 +203,19 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
             # application, which is what the mod's Counter power already did.
             enemy.frozen += 1
             enemy.frozen_by_companion = state.current_card_companion
+            # QUARANTINED (C.KOKOMI_OVERHAUL). Frozen is a POWER in the mod and
+            # a FIELD here (`Enemy.frozen`, NC-7's stacks-are-turns int), so it
+            # is the one debuff application in this engine that does NOT reach
+            # `powers.apply_power` -- and the arm's debuff answer hangs off
+            # that funnel. The C# names Frozen as a feeder in as many words
+            # ("so do REACTIONS, since Superconduct, Overloaded and Frozen each
+            # apply a debuff"), so the event is raised explicitly here rather
+            # than left as a silent gap. The boss-room branch above needs
+            # nothing: it applies real Vulnerable and goes through the funnel.
+            if C.KOKOMI_OVERHAUL:
+                from tier0.engine import kokomi_plan     # late: cycle
+                kokomi_plan.note_debuff_applied(
+                    state, enemy, "frozen", 1, state.player)
 
     if name:
         state.reactions_this_card += 1
