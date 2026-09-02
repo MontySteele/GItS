@@ -3112,3 +3112,447 @@ def test_an_enemy_with_no_intent_at_all_still_renders():
     state = json.loads(json.dumps(spark_priced_state()))
     state["battle"]["enemies"][0].pop("intents")
     assert "Intent: (no intent shown)" in blindplay.observe(state)
+
+
+# --------------------------------------------------------------------------
+# `EB-269` / `EB-271` / `EB-272` / `EB-273` / `EB-245` / `EB-246`: the render
+# and driver defects the Klee r2 and Kokomi r1 blind runs filed. Every fixture
+# below is written from the bridge's OWN builder -- `BuildPlayerState`'s potion
+# rows, `ExecuteUsePotion`'s target switch, `Error()`'s answer shape -- because
+# the render agent's lesson is that a fixture guessed at keeps a render test
+# green while the live screen is wrong (`EB-262`, `EB-290`).
+# --------------------------------------------------------------------------
+
+
+def potion_belt_state(potions: list[dict]) -> dict:
+    """A combat with a POTION BELT as `BuildPlayerState` sends one.
+
+    `McpMod.StateBuilder.cs:1274-1292` walks `player.PotionSlots`, SKIPS every
+    empty slot and numbers every slot it walks past -- so a row carries its own
+    `slot`, and the list position stops agreeing with it the moment a potion is
+    drunk out of an earlier slot. Each row also carries `target_type`, the
+    `TargetType.ToString()` that `ExecuteUsePotion` switches on.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["potions"] = potions
+    return state
+
+
+DEXTERITY_IN_SLOT_ONE = [
+    {"id": "DEXTERITY_POTION", "name": "Dexterity Potion",
+     "description": "Gain 2 Dexterity.", "slot": 1,
+     "can_use_in_combat": True, "target_type": "Self", "keywords": []}]
+
+FIRE_IN_SLOT_ZERO = [
+    {"id": "FIRE_POTION", "name": "Fire Potion",
+     "description": "Deal 20 damage to one enemy.", "slot": 0,
+     "can_use_in_combat": True, "target_type": "AnyEnemy", "keywords": []}]
+
+
+def test_a_self_targeted_potion_posts_the_slot_the_wire_gave_it():
+    """`EB-269`, AND IT IS THE WHOLE DEFECT. The r2 Opus seat drank the Energy
+    Potion out of slot 0; the Dexterity Potion in slot 1 became the only row on
+    the belt and therefore LIST INDEX 0; and every `use potion` for the rest of
+    the run posted `slot: 0`, an empty slot, which the bridge answered `No
+    potion in slot 0`. Three attempts, three failures, on two screens.
+
+    Seen to FAIL: with the list position posted this asserts `slot == 1` and
+    gets 0.
+    """
+    state = potion_belt_state(DEXTERITY_IN_SLOT_ONE)
+    res = blindplay.act(state, 'use potion "Dexterity Potion"')
+    assert res["ok"], res["refusal"]
+    assert res["post"] == {"action": "use_potion", "slot": 1}
+    # `Self` is resolved to the player BY THE BRIDGE, so nothing is aimed here.
+    assert "target" not in res["post"]
+    assert res["printed"] == {"potion": "Dexterity Potion",
+                              "target": "yourself"}
+
+
+def test_a_belt_with_no_slot_field_still_resolves_by_position():
+    """A feed that sends no `slot` keeps the behaviour it always had, rather
+    than the command failing on a missing key."""
+    belt = [dict(DEXTERITY_IN_SLOT_ONE[0])]
+    belt[0].pop("slot")
+    res = blindplay.act(potion_belt_state(belt),
+                        'use potion "Dexterity Potion"')
+    assert res["post"] == {"action": "use_potion", "slot": 0}
+
+
+def test_a_self_potion_aimed_at_an_enemy_is_used_on_you_anyway():
+    """A tester who aims a buff potion has made a mistake with no consequence:
+    `ExecuteUsePotion` resolves `Self` to the player whatever is posted. The
+    page says where it went instead of spending a refusal on it."""
+    res = blindplay.act(potion_belt_state(DEXTERITY_IN_SLOT_ONE),
+                        'use potion "Dexterity Potion" on "Nibbit"')
+    assert res["ok"] and "target" not in res["post"]
+    assert res["printed"]["target"] == "yourself"
+
+
+def test_an_enemy_potion_is_aimed_before_it_is_posted():
+    """The other direction, and it must not regress: `AnyEnemy` is the one
+    branch of `ExecuteUsePotion` that REFUSES a post with no `target`, so the
+    aim happens here where a refusal can name the enemies."""
+    state = potion_belt_state(FIRE_IN_SLOT_ZERO)
+    res = blindplay.act(state, 'use potion "Fire Potion" on "Nibbit"')
+    assert res["ok"], res["refusal"]
+    assert res["post"] == {"action": "use_potion", "slot": 0,
+                           "target": "NIBBIT_0"}
+    assert res["printed"]["target"] == "Nibbit"
+
+
+def test_an_enemy_potion_on_a_one_body_board_needs_no_word():
+    """`_resolve_enemy`'s own rule, unchanged: one living enemy is not a
+    question, so an aimed potion typed bare is aimed at it."""
+    res = blindplay.act(potion_belt_state(FIRE_IN_SLOT_ZERO),
+                        'use potion "Fire Potion"')
+    assert res["ok"] and res["post"]["target"] == "NIBBIT_0"
+
+
+def test_an_enemy_potion_on_a_crowded_board_asks_which():
+    """Two bodies and no word: the refusal names them rather than guessing, and
+    it is the same sentence a card gets."""
+    state = potion_belt_state(FIRE_IN_SLOT_ZERO)
+    state["battle"]["enemies"].append(
+        {"entity_id": "SLUG_1", "name": "Corpse Slug", "hp": 12, "max_hp": 12,
+         "block": 0, "intents": [], "status": []})
+    res = blindplay.act(state, 'use potion "Fire Potion"')
+    assert not res["ok"]
+    assert "Nibbit" in res["refusal"] and "Corpse Slug" in res["refusal"]
+
+
+def test_a_bridge_refusal_reaches_the_page_as_words():
+    """`EB-269`, the half that made the defect invisible. `Error()` writes the
+    reason under `error`, never `message` (`McpMod.Helpers.cs:158-161`), and
+    this line read `status` and `message` only -- so every refusal the game
+    gave arrived as the single word `error`.
+
+    Seen to FAIL: without the `error` key this asserts the sentence and gets
+    `"error"`.
+    """
+    line = blindplay._result_line(
+        {"status": "error", "error": "No potion in slot 0"})
+    assert line == "error No potion in slot 0"
+    # An OK answer is unchanged, and a leaky one is still swallowed whole.
+    assert blindplay._result_line(
+        {"status": "ok", "message": "Using potion"}) == "ok Using potion"
+    assert "will not repeat" in blindplay._result_line(
+        {"status": "error", "error": "card KLEEMOD-KABOOM is not in hand"})
+
+
+# ------------------------------------------ EB-271: a number that went stale
+
+
+def duplicate_hand_state(copies: int) -> dict:
+    """A combat holding `copies` of one printed title, `BuildCardState`'s
+    shape -- the `Duck and Cover` pair the r2 Opus seat was holding."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER", "name": "Duck and Cover",
+         "type": "Skill", "cost": "1", "can_play": True, "index": i,
+         "target_type": "Self", "is_upgraded": False, "keywords": [],
+         "description": "Gain 5 Block."} for i in range(copies)]
+    return state
+
+
+def test_two_copies_are_numbered_and_both_numbers_work():
+    """Unchanged `EB-177` behaviour, asserted here so the fix below cannot be
+    mistaken for having loosened it."""
+    state = duplicate_hand_state(2)
+    assert "Duck and Cover (1)" in blindplay.observe(state)
+    for name in ("Duck and Cover (1)", "Duck and Cover (2)"):
+        assert blindplay.act(state, f'play "{name}"')["ok"], name
+
+
+def test_a_stale_number_still_names_the_last_copy():
+    """`EB-271`, FOUND LIVE. `_number_names` numbers a title only while it
+    repeats, so the moment one of two copies is played the survivor prints
+    bare -- and `play "Duck and Cover (1)"`, the name the page printed one
+    screen earlier and the tester had just typed once, came back *nothing here
+    is called that*.
+
+    Seen to FAIL: without the stale-number retry this refuses.
+    """
+    state = duplicate_hand_state(1)
+    assert "Duck and Cover (1)" not in blindplay.observe(state)
+    res = blindplay.act(state, 'play "Duck and Cover (1)"')
+    assert res["ok"], res["refusal"]
+    assert res["post"]["card_index"] == 0
+    assert res["printed"]["card"] == "Duck and Cover"
+    # Any stale number, not just the one that survived: the page reprints the
+    # list from scratch on every screen and the tester cannot know which.
+    assert blindplay.act(state, 'play "Duck and Cover (2)"')["ok"]
+
+
+def test_a_number_that_is_still_ambiguous_is_still_refused():
+    """The rule is ONE COPY REMAINS, and it stops there. With both copies still
+    in hand a number nothing carries is a real ambiguity, and the refusal
+    advertises the names that would have worked."""
+    res = blindplay.act(duplicate_hand_state(2), 'play "Duck and Cover (3)"')
+    assert not res["ok"]
+    assert "Duck and Cover (1)" in res["refusal"]
+    assert "Duck and Cover (2)" in res["refusal"]
+
+
+def test_a_stale_number_names_the_last_enemy_standing():
+    """The same handle on the other list. The render numbers over EVERY enemy
+    including the corpses, so this only bites where the feed drops a dead body
+    -- and where it does, the survivor is still nameable by the number the
+    tester last saw."""
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["enemies"][0]["name"] = "Two-Tailed Rat"
+    res = blindplay.act(state, 'play "Pearl Barrage" on "Two-Tailed Rat (2)"')
+    assert res["ok"], res["refusal"]
+    assert res["post"]["target"] == "NIBBIT_0"
+
+
+# ------------------------------- EB-272: the arm keywords, defined per screen
+
+
+def keyword_hand_state(descriptions: list[str]) -> dict:
+    """A combat whose hand prints the given bodies, and nothing else."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = [
+        {"id": f"KLEEMOD-PROTO_KO_ROW_{i}", "name": f"Row {i}",
+         "type": "Attack", "cost": "1", "can_play": True, "index": i,
+         "target_type": "AnyEnemy", "is_upgraded": False, "keywords": [],
+         "description": body} for i, body in enumerate(descriptions)]
+    return state
+
+
+def test_an_arm_keyword_prints_one_definition_per_screen():
+    """`EB-272`. Both Kokomi seats inferred a rule by watching their own HP and
+    the r4 Opus seat lost a free kill to a Mine's unstated Weak interaction,
+    because not one word the arms invented had a definition anywhere on the
+    page. ONCE per screen, however many faces printed it.
+
+    Seen to FAIL: with no glossary the definition is absent entirely.
+    """
+    page = blindplay.observe(keyword_hand_state(
+        ["Set off. Deal 8 damage.", "Set off. Place a Bomb 4."]))
+    assert "## Words on this screen" in page
+    assert page.count("- **Set off** ") == 1
+    assert page.count("- **Bomb** ") == 1
+    assert "before the rest of the card" in page
+
+
+def test_a_keyword_no_face_on_the_screen_prints_is_never_defined():
+    """A glossary that defined every word the arms own would teach a reader
+    rules this board does not have."""
+    page = blindplay.observe(keyword_hand_state(["Gain 5 Block."]))
+    assert "## Words on this screen" not in page
+
+
+def test_a_dead_arms_keyword_is_not_in_the_table():
+    """R240/R241 replaced the Tide with the Plan. `Tide`, `Surge` and `Exert`
+    left with the rules they named, and a page that still defined them would be
+    a page teaching a retired rule."""
+    for dead in ("Tide", "Surge", "Exert"):
+        assert dead not in blindplay.ARM_KEYWORDS
+    page = blindplay.observe(keyword_hand_state(["Exert 3. Gain 5 Block."]))
+    assert "## Words on this screen" not in page
+
+
+def test_the_word_is_found_wherever_the_screen_prints_it():
+    """Not only in a hand: an enemy's badge, a relic and a reward row print the
+    same words, and the reader who has just met one is the same reader."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "KLEEMOD-PROTO_BOMB", "name": "Bomb", "amount": 6,
+         "type": "Buff", "description": "Set off deals 6 total Pyro damage.",
+         "keywords": []}]
+    page = blindplay.observe(state)
+    assert "- **Bomb** " in page and "- **Set off** " in page
+
+
+def test_a_lowercase_word_in_prose_is_not_a_keyword():
+    """The match is case-sensitive because the game capitalises a keyword
+    wherever it prints one, and a case-blind `mine` or `plan` would define a
+    word out of ordinary English."""
+    page = blindplay.observe(keyword_hand_state(
+        ["Take what is mine and make a plan."]))
+    assert "## Words on this screen" not in page
+
+
+def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
+    """The table is the mod's OWN tooltip bodies with the markup and the
+    interpolated constants folded out, and it is held in step FROM THIS SIDE --
+    the same discipline `CHARGE_SOURCE_LINE` is under. A sentence rewritten in
+    `ArmKeywordTips.cs` and not here goes red on the anchor it dropped."""
+    src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+           / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+    anchors = {
+        "Bomb": ["A numbered charge on an enemy", "goes off by itself",
+                 "joins it there", "pops them all"],
+        "Set off": ["on the target goes off, one at a time",
+                    "before the rest of the card"],
+        "Spark": ["instead of energy. No cap;", "gone at the end of combat"],
+        "Mine": ["that also goes off when its enemy attacks",
+                 "before the hit lands",
+                 "the enemy's badge prints the number"],
+        "Plan": ["The cost is paid now either way",
+                 "land on the front enemy unless the line says every enemy",
+                 "the jellyfish, and says so"],
+        "Mend": [": heal N HP, never above the HP you entered",
+                 "the fight with"],
+    }
+    assert set(anchors) == set(blindplay.ARM_KEYWORDS)
+    for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
+                "PlanKey"):
+        assert f"public const string {key}" in src
+    for word, phrases in anchors.items():
+        for phrase in phrases:
+            assert phrase in src, (word, phrase)
+            assert phrase in blindplay.ARM_KEYWORDS[word], (word, phrase)
+
+
+def test_the_glossary_carries_no_markup_and_no_id():
+    """It is rendered through the same blindness assertion as everything else,
+    and the sentences are copied from C# that spells them with `[gold]` tags."""
+    for word, body in blindplay.ARM_KEYWORDS.items():
+        assert "[" not in body and "]" not in body, word
+        assert not qa_packet.leaks(body), word
+
+
+# --------------------------------- EB-273: the Kokomi arm's meter on the wire
+
+
+def test_the_wire_snapshot_carries_the_pending_plans_only_when_the_wire_does():
+    """`EB-273`. The page has shown the Plans since the Plan build; the
+    snapshot the GRADER reads carried none of them, so *the queue was empty
+    when the call was made* was not a fact a seat run could be asked. Same
+    three-state contract as the memory strip beside it.
+
+    Seen to FAIL: without the copy the key is absent on a board that has one.
+    """
+    snap = blindplay.wire_snapshot(plans_combat_state(TWO_PLANS),
+                                   index=1, verb="play")
+    assert snap["kokomi_plans"] == TWO_PLANS
+    # The RAW map, not the page's reading: a grader is entitled to the entity
+    # id a play aimed at, which `kokomi_plans()` keeps off the page.
+    assert snap["kokomi_plans"]["pet_entity_id"] == "41"
+    assert "kokomi_plans" not in blindplay.wire_snapshot(
+        plans_combat_state(None), index=1, verb="play")
+    assert blindplay.wire_snapshot(
+        plans_combat_state({}), index=1, verb="play")["kokomi_plans"] == {}
+
+
+def test_the_plans_snapshot_never_reaches_the_tester():
+    """R101b: the tester's page is the grading surface and this is the
+    grader's. The entity id proves it -- it is on the snapshot and on no
+    page."""
+    state = plans_combat_state(TWO_PLANS)
+    obs = blindplay.observation(state)
+    assert obs["combat"]["plans"]["pet_entity_id"] == "41"
+    assert "pet_entity_id" not in blindplay.render(obs)
+
+
+# ------------------------- EB-245: an overlay is not the end of a fight -----
+
+
+def test_a_mode_screen_mid_fight_asks_for_no_fight_record(tmp_path):
+    """`EB-245`. A *Choose one* mode, an Exhaust chooser and a bundle picker
+    all change `state_type` away from `monster` while the fight is still up
+    behind them, and the driver read its fight boundary off that alone --
+    so `KLEESPARK-W5` sealed FOUR fight records for THREE fights, the phantom
+    one reporting a fight that ended with its enemy at full HP.
+
+    Seen to FAIL: without the overlay rule this counts two records.
+    """
+    states = [combat_state(), card_select_state(), combat_state(),
+              rewards_state(), game_over_state()]
+    replies = [
+        {"command": 'play "Pearl Barrage" on "Nibbit"', "thinking": "chip"},
+        {"command": 'choose "Coral Guard"', "thinking": "that one"},
+        {"command": "end turn", "thinking": "done"},
+        {"record": "One fight, and it is the only one."},
+        {"command": 'choose "12 Gold"', "thinking": "take it"},
+        {"record": "the run"},
+    ]
+    _, summary, wire, _ = _session(tmp_path, replies, states=states)
+    assert summary["fight_records"] == ["One fight, and it is the only one."]
+    assert [p["action"] for p in wire.posts] == [
+        "play_card", "select_card", "end_turn", "claim_reward"]
+
+
+def test_a_card_chooser_outside_a_fight_is_still_not_a_fight():
+    """The rule is INHERIT, not "always in a fight": a rest site's upgrade
+    picker is the same `state_type` and must not start one."""
+    reward = blindplay.observation(card_reward_state())
+    chooser = blindplay.observation(card_select_state())
+    combat = blindplay.observation(combat_state())
+    assert blindplay.still_in_fight(chooser, False) is False
+    assert blindplay.still_in_fight(chooser, True) is True
+    assert blindplay.still_in_fight(combat, False) is True
+    assert blindplay.still_in_fight(reward, True) is False
+
+
+# ------------------------ EB-246: the markup a printed name reached with ----
+
+
+def test_a_printed_option_name_loses_its_markup():
+    """`EB-246`. A *Choose one* option is named `Spend 6 [gold]Charge[/gold]:
+    gain 12 Block` on the wire; `scenario.card_key` has folded those tags out
+    for the staged packet since Kokomi slice 2 and this page did not, so one
+    choice had two printed names and the W5 tester had to type `[gold]` to
+    name what they were reading.
+
+    Seen to FAIL: without the shared stripper the page prints the tags.
+    """
+    state = json.loads(json.dumps(card_select_state()))
+    state["card_select"]["cards"][0]["name"] = \
+        "Spend 6 [gold]Charge[/gold]: gain 12 Block"
+    page = blindplay.observe(state)
+    assert "[gold]" not in page and "[/gold]" not in page
+    assert "Spend 6 Charge: gain 12 Block" in page
+    # And the bare name the page now prints is the name that resolves.
+    res = blindplay.act(state, 'choose "Spend 6 Charge: gain 12 Block"')
+    assert res["ok"], res["refusal"]
+    assert res["post"] == {"action": "select_card", "index": 0}
+
+
+def test_the_tagged_spelling_still_resolves_too():
+    """A tester who echoes the screen back with the tags in it -- which is what
+    the W5 tester had learned to do -- folds to the same key."""
+    state = json.loads(json.dumps(card_select_state()))
+    state["card_select"]["cards"][0]["name"] = "[gold]Coral Guard[/gold]"
+    assert blindplay.act(state, 'choose "[gold]Coral Guard[/gold]"')["ok"]
+    assert blindplay.act(state, 'choose "Coral Guard"')["ok"]
+
+
+def test_a_card_body_loses_its_markup_too():
+    """The fold is applied at `_text`, the one door every printed value comes
+    through, so a body carries no tags either."""
+    page = blindplay.observe(keyword_hand_state(
+        ["Spend 6 [gold]Charge[/gold]: gain [b]12[/b] Block."]))
+    assert "Spend 6 Charge: gain 12 Block." in page
+    assert "[gold]" not in page and "[b]" not in page
+
+
+def test_the_markup_fold_never_launders_a_bracketed_id():
+    """THE NARROWNESS IS THE SAFETY ARGUMENT. `[pearl_barrage]` is a bracketed
+    lowercase token and it is a CARD ID; a blunt "strip every bracketed word"
+    fold would have deleted it silently and handed the tester the sentence it
+    was hiding in with the evidence gone. An UNPAIRED tag survives, so the leak
+    guard still sees it and the screen still refuses."""
+    assert qa_packet.strip_markup("gain [pearl_barrage]") \
+        == "gain [pearl_barrage]"
+    assert qa_packet.strip_markup("[gold]Charge[/gold]") == "Charge"
+    assert qa_packet.strip_markup("[color=#ff0000]red[/color]") == "red"
+    state = json.loads(json.dumps(card_select_state()))
+    state["card_select"]["cards"][0]["name"] = "gain [pearl_barrage]"
+    with pytest.raises(qa_packet.PacketLeak):
+        blindplay.observe(state)
+
+
+def test_the_blind_render_and_the_staged_packet_fold_the_same_way():
+    """One stripper, not two copies of one regex -- `blindplay` may not import
+    `scenario` (the structural no-leak pin refuses it), so the rule lives on
+    the leaf both sides already import."""
+    from understudy import scenario
+    screen = "Spend 6 [gold]Charge[/gold]: gain 12 Block"
+    assert scenario.card_key(screen) == scenario.card_key(
+        blindplay._text(screen))
+    assert blindplay._fold(screen) == blindplay._fold(
+        "Spend 6 Charge: gain 12 Block")

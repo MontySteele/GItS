@@ -379,7 +379,19 @@ def test_the_blind_page_prints_the_exert_definition_under_the_card():
 
 def test_a_card_with_no_keyword_row_prints_no_keyword_line():
     """SEEN TO FAIL: the state this row was filed against. The face is
-    identical and the definition is simply absent."""
+    identical and the CARD LINE is simply absent -- this page invents no tip
+    for a card whose wire row carries none, which is the non-vacuous
+    denominator the three tests above need.
+
+    `EB-272`'s second half narrowed what "absent" means here rather than
+    weakening it. The card's own indented `*Set off* — ...` line still comes
+    from the wire and from nowhere else; what the screen now also carries is
+    ONE definition of the word, once, in its own section, because a body that
+    prints an arm keyword reaches a reader who has never met it whether or not
+    the tip happened to ride on that particular card. The two are different
+    lines in different places and this asserts both.
+    """
     page = blindplay.observe(_hand_with([]))
     assert "Kaboom!" in page
-    assert "*Set off*" not in page
+    assert "    *Set off* — " not in page
+    assert "- **Set off** — " in page.split("## Words on this screen")[1]

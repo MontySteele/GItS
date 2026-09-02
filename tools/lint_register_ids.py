@@ -1056,22 +1056,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # nothing, which is where every board written before this row is.
         # The row's GATE -- a repaired BT3 round -- is a RUN and is not
         # discharged here; the leg it was waiting for exists.
-        # 245/246 minted 2026-08-30 by KLEESPARK-W5 (packet section 25.6.3).
-        # 245: blindplay session asked for a FIGHT RECORD on a card_select
-        # observation -- Bag of Tricks' own Choose one mode screen, which is
-        # the middle of a play. The sealed record carries FOUR fight records
-        # for THREE fights and the phantom one reports the fight over while
-        # the enemy stood at 44/44; it cost a Codex call and put a falsehood
-        # in a sealed record. It touched no graded slot: B1-B5 are counted off
-        # per-page wire snapshots and forecast rows, and the mode was still the
-        # tester's own free choice one transcript row later.
-        # 246: the printed option name reaches the blind observation AND the
-        # command with its markup intact -- choose "Spend 3 [gold]Sparks[/gold]
-        # : place 3 [gold]Bombs[/gold] dealing 5". scenario.py folds those tags
-        # out for the staged packet and the blind render does not, so one
-        # choice has two printed names. The W5 tester named it unprompted.
-        245,
-        246,
+        # 245/246 minted 2026-08-30 by KLEESPARK-W5, CLOSED 2026-09-02 on
+        # blind-render-r3: an overlay a fight wears now INHERITS the fight it
+        # is standing in front of rather than ending it, and the game's
+        # rich-text fold moved to `qa_packet.strip_markup`, which the blind
+        # render and `scenario.card_key` now share. Both rows left HEAD with
+        # their acceptance met on tests seen to FAIL, so both numbers have
+        # RETIRED and neither may be re-minted.
         # 247/248 minted 2026-08-30 by KURAGECAD-W1 (kurage packet section
         # 15.9.5). Both are DISPLAY and WORDING rows, which is the destination
         # K1's and K4's decision columns name; neither is a re-price, a dose

@@ -271,6 +271,50 @@ def localization_index(repo: Path) -> dict[str, str]:
     return index
 
 
+# `EB-246`. THE GAME'S RICH-TEXT MARKUP, AND THE ONE PLACE IT IS SPELLED.
+#
+# A printed name or body can carry the game's own inline markup --
+# `Spend 6 [gold]Charge[/gold]: gain 12 Block` is a real *Choose one* option
+# name -- and `scenario.card_key` has folded those tags out since Kokomi slice
+# 2 so a replay can answer a modal in the vocabulary a blind grader was shown.
+# The BLIND RENDER did not, so one choice had two printed names -- the staged
+# packet's and the blind page's -- and the `KLEESPARK-W5` tester had to type
+# `[gold]` tags to name a choice they were looking at.
+#
+# It lives HERE because this module is the leaf both sides may import:
+# `blindplay` is forbidden `scenario` by the structural no-leak pin
+# (`test_blindplay_cannot_reach_a_sheet_or_a_policy`), and a second copy of a
+# regex is a second copy that drifts.
+#
+# DELIBERATELY NARROW, TWICE OVER, and both narrowings are the safety argument.
+#
+# 1. The shape: a bracketed run of lowercase word characters with an optional
+#    `=value`, and nothing else. `[silent_energy_icon.png]` carries a dot and is
+#    NOT matched -- that tag names an icon the player is looking at and
+#    `blindplay._despritify` renders it as `[Energy]`, which has a capital and
+#    is not matched either.
+#
+# 2. IT MUST BE CLOSED. An opening tag comes out only where the same string
+#    also carries its `[/tag]`, and that is not tidiness -- it is what keeps
+#    this from laundering an internal id past the leak guard. `[pearl_barrage]`
+#    is a bracketed lowercase token and it is a CARD ID; a blunt "strip every
+#    bracketed word" fold would have deleted it silently and handed a blind
+#    tester the sentence it was hiding in with the evidence removed. Unpaired,
+#    it survives, `qa_packet.leaks` still sees it, and the screen still refuses.
+#
+# Only the TAGS come out; the words between them are part of the name and stay.
+RICH_TEXT_TAG = re.compile(r"\[/?([a-z0-9_]+)(?:=[^\]]*)?\]")
+_RICH_TEXT_CLOSE = re.compile(r"\[/([a-z0-9_]+)\]")
+
+
+def strip_markup(value: Any) -> str:
+    """`value` with the game's CLOSED rich-text tags removed, nothing else."""
+    text = str(value or "")
+    closed = {m.group(1) for m in _RICH_TEXT_CLOSE.finditer(text)}
+    return RICH_TEXT_TAG.sub(
+        lambda m: "" if m.group(1) in closed else m.group(0), text)
+
+
 def card_key(raw: Any) -> str:
     """The wire's card id as `printed_cost_index` keys it (`EB-267`).
 
