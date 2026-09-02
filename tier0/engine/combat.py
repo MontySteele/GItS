@@ -14,8 +14,8 @@ import random
 from typing import Callable
 
 from tier0 import constants as C
-from tier0.engine import (effects, furina_reframe, potions, powers,
-                          reactions, refpowers, relics, resources)
+from tier0.engine import (effects, furina_reframe, kokomi_plan, potions,
+                          powers, reactions, refpowers, relics, resources)
 from tier0.engine.state import (Card, CombatState, Enemy, Player,
                                 remove_instance, sync_fanfare_cap_to_max_hp)
 
@@ -356,6 +356,22 @@ def card_cost(state: CombatState, card: Card) -> int:
                               * state.skills_played_this_turn))
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
+    # QUARANTINED (C.KOKOMI_OVERHAUL). Rally: "the next Companion card you play
+    # this turn costs 1 less." SUBTRACTIVE and floored, beside the accumulator
+    # above because it is the same kind of thing -- and NOT a zeroing, which is
+    # draft 6's change from draft 2's Vanguard ("costs 1 less" would be a
+    # different card on an expensive Companion). The number is the rule's, not
+    # the card's: `C.KOKOMI_OVERHAUL_RALLY_DISCOUNT`, mirrored by value against
+    # `NextCompanionDiscountPower.Discount`.
+    #
+    # THIS SITE IS PURE. The grant is consumed by the next Companion RESOLVING
+    # (`_finish_play`), never by being priced, so `card_playable` may ask as
+    # often as it likes -- the same contract Mika's discount one block down
+    # keeps.
+    if (C.KOKOMI_OVERHAUL and card.is_companion
+            and state.player.powers.get(
+                kokomi_plan.NEXT_COMPANION_DISCOUNT, 0)):
+        cost = max(0, cost - C.KOKOMI_OVERHAUL_RALLY_DISCOUNT)
     # Leading Role (card-level texture, kickoff §3.2): the FIRST
     # Spotlighted card each turn costs less. This is a Furina-card power
     # granting economy, not the Spotlight baseline -- §2.2a governs the
@@ -566,6 +582,17 @@ def _finish_play(state: CombatState, card: Card,
     # twice -- a replay is one card being resolved again, not a second play.
     if C.KURAGE_MEMORY:
         effects.note_kurage_play(state, card)
+    # QUARANTINED (C.KOKOMI_OVERHAUL). "YOU PLAYED A COMPANION CARD", at the
+    # same shared half of a play and for the same structural reason: a manual
+    # play and an auto-play both enter here and nothing else does, so The
+    # General's Banner's hook and Rally's spend have ONE definition of the
+    # event between them. Ahead of the replay loop, beside the counter Chain of
+    # Command reads, so a replay is one card resolved again rather than a
+    # second play -- exactly where `state.companion_plays_this_turn` is
+    # incremented below.
+    if C.KOKOMI_OVERHAUL:
+        kokomi_plan.note_companion_played(state, card)
+        kokomi_plan.spend_companion_discount(state, card)
     replays = 1
     if card.is_companion:
         # BFF-dedupe, RULED 2026-08-06: an upgraded companion IS the same
@@ -822,6 +849,12 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     if refpowers.should_clear_block(p):      # Barricade suppresses the clear
         p.block = 0
 
+    # THE COMPANION LEDGER'S HANDOVER, on the line above the clear rather than
+    # in a hook of its own: this turn's count becomes last turn's, in the ONE
+    # place that counter moves, so Chain of Command's Plan and the counter can
+    # never disagree about which turn "last" was. `KokomiOverhaulLedger.RollTo`
+    # is the same handover, and its header carries the same sentence.
+    kokomi_plan.roll_turn(state)
     state.companion_plays_this_turn = 0          # Blocking Notes' slope
     # NEITHER `replay_next_companion` NOR `companion_cost_delta_this_turn` is
     # cleared here any more: both expire at the END of the turn that wrote
@@ -885,6 +918,33 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     _revive_player_if_needed(state)             # Inferno / Mantle self-damage
     if not p.alive or state.over:
         return
+
+    # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): RULE 2's RESOLUTION POINT --
+    # every Plan she wrote last turn is carried out, in order, HERE.
+    #
+    # THIS SITE AND NOT THE PRE-DRAW ONE THE SLICE'S PROSE ASKS FOR, and that
+    # is the mod's reading taken whole rather than re-argued
+    # (`ProtoBakeKuragePower.AfterPlayerTurnStart`'s header). The C# hook is
+    # `AfterPlayerTurnStart`, which is StS2 site E/F -- after the block clear,
+    # the energy reset and the hand draw -- and `refpowers.player_turn_start_late`
+    # one line up is this engine's own name for exactly that site. A Plan
+    # resolved "before the draw" would resolve before the block clear and the
+    # energy reset too, and Read the Field's planned Block, Coral Bulwark's,
+    # Cleansing Wave's and Battle Plan's planned Energy would all be wiped by
+    # the turn setup that follows them: five of the sixteen Plan rows, silently
+    # doing nothing. What the later hook costs is one turn's CARD ORDER, which
+    # no card in the slice can tell apart.
+    #
+    # The settle/revive pair below is the `kurage_fire` block's, for its
+    # reason: a planned hit can drop a phased boss, and Mend cannot kill her
+    # but a reaction the hit causes can move the board under the loop.
+    if C.KOKOMI_OVERHAUL:
+        kokomi_plan.resolve_all(state)
+        _settle_phases(state)
+        _revive_player_if_needed(state)
+        if not p.alive or state.over:
+            return
+
     grant_charged_kit(state)                 # turn-start gains + full-hand defer
 
     # Combat-side relics (dead branch on the battery). combat_start_* fires
@@ -1060,6 +1120,17 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # turn -- the same shape X11's errata hit, and the same shape the X1 pin
     # still reports. That loop is governed by the X2 rarity law (R109).
     state.companion_cost_delta_this_turn = 0
+    # QUARANTINED (C.KOKOMI_OVERHAUL). RALLY'S GRANT DIES WITH ITS TURN, on the
+    # same boundary and for the same ratified reason the two above take: the
+    # card says "the next Companion card you play THIS TURN". Its C# twin is
+    # `NextCompanionDiscountPower.AfterSideTurnEnd`, the same removal on the
+    # same side turn end.
+    state.player.powers.pop(kokomi_plan.NEXT_COMPANION_DISCOUNT, None)
+    # NEREID'S ASCENSION'S WINDOW ticks HERE, at the end of her turn -- the
+    # placement IS the rule, and it is `PlanTwicePower.AfterSideTurnEnd`'s: a
+    # window installed by a Plan at the top of turn N+1 ticks at the end of
+    # N+1, so "for 2 turns" is N+1 and N+2.
+    kokomi_plan.tick_windows(state)
     # INSTRUMENT ONLY (pair of `turn_open`): the block standing when the player
     # hands the turn over, which is the quantity a demand curve is read against.
     # A turn that ended by killing the last enemy or by the player dying never

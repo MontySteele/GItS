@@ -731,25 +731,31 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
 
     # -- the Kokomi overhaul, slice one (QUARANTINED, C.KOKOMI_OVERHAUL) ----
     if op in KOKOMI_OVERHAUL_OPS:
-        # ZERO, and a DELIBERATE zero, on exactly the argument the branch above
-        # makes: the arm is C# FIRST (its slice packet sec.5), tier0 registers
-        # these ten verbs and REFUSES to resolve them, so there is no sim
-        # behaviour for a price to approximate and a guessed number would be a
-        # claim about a rule this engine has never run. No `docs/*-cards.yaml`
-        # row prints any of them, no pool, digest or stamp can see one, and
-        # with `C.KOKOMI_OVERHAUL` off the rows are unreachable by draft at
-        # all -- so every drafted number in the world is byte-identical with
-        # and without this branch, and DRAFTER_VERSION does not move.
+        # ZERO, and a DELIBERATE zero -- but NOT on the branch above's argument
+        # any more, and the difference is worth the paragraph.
         #
-        # `mend` IS IN THAT SET AND IS NOW ALSO REACHABLE FROM THE OTHER ARM
-        # (a rewritten Inazuma Universal prints it, and `effects._op_mend`
-        # resolves it behind `C.COMPANION_OVERHAUL`), so the "tier0 refuses to
-        # resolve it" half of the argument stopped covering it on 2026-09-02.
-        # The ZERO stands on the OTHER half, which is the one that decides:
-        # only a `proto_` row prints the keyword, no offerable pool the drafter
-        # reads can hold one with the flag off, and healing has no priced
-        # channel in this table at all -- `heal` itself is `_PRICED_INLINE`.
-        # Pricing a bounded heal is acceptance work, and it moves `D` then.
+        # "TIER0 REFUSES TO RESOLVE THEM" STOPPED BEING TRUE ON 2026-09-02, the
+        # way it had already stopped covering `mend` when a rewritten Inazuma
+        # Universal started printing that one. The sim twin of draft 6's Plan
+        # landed (`tier0/engine/kokomi_plan.py`, mirroring
+        # `KleeCode/Powers/Prototype/KokomiPlan.cs`), so every verb in this set
+        # now RUNS -- with `C.KOKOMI_OVERHAUL` on and Kokomi in the seat.
+        #
+        # THE ZERO STANDS ON THE OTHER HALF, which is the half that decides:
+        # only a `proto_` row prints any of them, no `docs/*-cards.yaml` row
+        # spells one, and with the flag off no offerable pool the drafter reads
+        # can hold one (`loader.pool_replacement` is the seam and it answers
+        # None). So every drafted number in the world is byte-identical with
+        # and without this branch and DRAFTER_VERSION does not move.
+        #
+        # PRICING THEM IS ACCEPTANCE WORK AND IT MOVES `D` THEN. A planned
+        # clause is not the same thing as the clause played now -- it lands a
+        # turn late, it costs the card's whole now-line, and Nereid's window
+        # doubles it -- so a price for it is a drafter DECISION rather than a
+        # translation of behaviour, and it belongs to the change that takes the
+        # arm out of quarantine and archives the old world. `heal` being
+        # `_PRICED_INLINE` is the same story for `mend`: healing has no priced
+        # channel in this table at all.
         return 0.0
 
     # -- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
@@ -1978,18 +1984,24 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "remove_bomb_for_block", "damage_set_off_total",
                   "double_set_off", "draw_per_set_off")},
     # --- the Kokomi overhaul, slice one (QUARANTINED, C.KOKOMI_OVERHAUL) --
-    # One rationale, ten ops, and the same one decision for the same reason.
-    **{op: "ZERO: the KOKOMI_OVERHAUL arm is C# FIRST and tier0 refuses to "
-            "resolve it, so there is no sim behaviour to price (slice packet "
-            "sec.5; prototype surface only -- no shipped row prints it and no "
-            "drafted number moves)"
+    # One rationale, seven ops, and the same one decision for the same reason.
+    # THE ARM RESOLVES NOW (`tier0/engine/kokomi_plan.py`, 2026-09-02), so the
+    # "no sim behaviour to price" half is gone and the QUARANTINE half is the
+    # whole of the argument -- see `_op_price`'s branch for the long form,
+    # including why a planned clause is a drafter decision rather than a
+    # translation of what it does.
+    **{op: "ZERO: prototype surface only -- only a `proto_` row prints it and "
+            "no offerable pool holds one with `C.KOKOMI_OVERHAUL` off, so no "
+            "drafted number moves. Pricing a PLANNED clause (a turn late, the "
+            "whole now-line given up, doubled inside Nereid's window) is "
+            "acceptance work and moves `D` then"
        for op in ("next_companion_discount", "remove_debuff",
                   "carry_out_front_plan", "plan_from_exhaust",
                   "damage_quarter_max_hp", "plan_twice",
                   "damage_per_companion_last_turn")},
-    # `mend` OUT OF THAT BULK, because half of its rationale stopped being
-    # true: it is the one Kokomi verb a rewritten Inazuma UNIVERSAL prints, so
-    # tier0 does resolve it behind `C.COMPANION_OVERHAUL`.
+    # `mend` OUT OF THAT BULK, because it is the one Kokomi verb a rewritten
+    # Inazuma UNIVERSAL prints, so it is reachable behind a SECOND flag
+    # (`C.COMPANION_OVERHAUL`) and its zero rests on a different sentence.
     "mend": "ZERO: healing has no priced channel in this table at all "
             "(`heal` is _PRICED_INLINE), and only a `proto_` row prints the "
             "keyword -- no offerable pool holds one with the flag off, so no "

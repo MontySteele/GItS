@@ -147,8 +147,10 @@ are in [`workstreams.md`](workstreams.md).
 - **Kokomi** — the OVERHAUL is at draft 6, *the Plan* (brief approved R241):
   the Bake-Kurage is a real pet, a card played on it writes its Plan line, and
   draft 2's Tide/Surge/Exert are deleted. Built behind `KOKOMI_OVERHAUL`
-  (PR #266), awaiting its Prototype gate. Beside it the Kurage memory is base
-  kit behind `C.KURAGE_MEMORY`, display rebuild `EB-198`, cadence read `EB-234`.
+  (PR #266), awaiting its Prototype gate; the sim twin of the Plan now runs
+  beside the C# (`tier0/engine/kokomi_plan.py`), every drafter price still ZERO
+  so no world moved. Beside it the Kurage memory is base kit behind
+  `C.KURAGE_MEMORY`, display rebuild `EB-198`, cadence read `EB-234`.
 - **Furina** — the reframe is countersigned (R220 A), slice 1 is built in the
   sim behind five flags that all ship OFF, Spotlight is ruled one-mode priced
   (R228), and the C# arm is deferred.

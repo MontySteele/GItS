@@ -13,8 +13,8 @@ import copy
 from typing import Optional, Sequence
 
 from tier0 import constants as C
-from tier0.engine import (furina_reframe, powers, reactions, resources,
-                          statuses)
+from tier0.engine import (furina_reframe, kokomi_plan, powers, reactions,
+                          resources, statuses)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, KurageMemory,
                                 grant_sly_autoplay,
@@ -760,7 +760,8 @@ def _spotlight_scale(state: CombatState, card: Card, amount: int) -> int:
 def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
                          element: Optional[str] = None,
                          source: str = "card",
-                         ignore_block: bool = False) -> float:
+                         ignore_block: bool = False,
+                         powered: bool = True) -> float:
     """Full damage pipeline: strength/weak -> reaction amp -> vulnerable ->
     block -> hp. Returns damage actually dealt to HP (for metrics).
 
@@ -770,7 +771,17 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     else -- the hit is still powered, still reacts, still counts as a hit and
     is still capped by Intangible, because unblockable is not uncappable
     (R128, the rule the Shatter path below already keeps). Default False, so
-    every shipped caller is byte-identical."""
+    every shipped caller is byte-identical.
+
+    `powered` is QUARANTINED (C.KOKOMI_OVERHAUL) and likewise has exactly one
+    caller: the Tamakushi Casket's strike, whose DEALER is the Bake-Kurage and
+    not her. False drops the dealer's Strength and Weak (`ValueProp.Unpowered`
+    on the dealer's side) and nothing else -- the aura still lands, the
+    reaction still fires, the target's Vulnerable and Block still apply -- so
+    it is NOT `refpowers.unpowered_damage`, which skips all of those and is
+    what a Power's own damage takes. The distinction is the C#'s: the Casket
+    goes through `ElementalHit.Deal` with the PET as applier, and a pet carries
+    no Strength. Default True, so every shipped caller is byte-identical."""
     # THE DEAD TAKE NOTHING (EB-136 / R210, C18). `CreatureCmd.Damage` opens
     # its per-target loop with `if (originalTarget2.IsDead) continue;`, so a
     # corpse absorbs no damage, fires no reaction and pays no on-hit rider --
@@ -788,7 +799,9 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
             and state.player.powers.get("solar_isotoma", 0)):
         state.player.block += C.SOLAR_ISOTOMA_BLOCK
     was_frozen = enemy.frozen > 0   # snapshot: a hit can't shatter the
-    dmg = powers.modify_damage_dealt(state.player, base)  # freeze it applies
+    #                                 freeze it applies
+    dmg = (powers.modify_damage_dealt(state.player, base) if powered
+           else float(base))
     unamped = dmg                   # EB-57: the pre-amplifier counterfactual
     # QUARANTINED (C.COMPANION_OVERHAUL). Durin's DARK form: "your Pyro Attacks
     # that react deal 8 more damage."
@@ -2516,10 +2529,10 @@ def mend(state: CombatState, amount: int) -> int:
     companion pool.
 
     WHAT IT DOES NOT CARRY. Sango Isshin's overflow ("Mend past your entry HP
-    becomes Hydro damage") is hers, it is a KOKOMI_OVERHAUL power, and this
-    engine does not run that arm at all -- the ten Kokomi verbs still raise
-    (`_op_kokomi_overhaul_unbuilt`). With the power absent the excess is simply
-    lost, which is what the cap has always meant on both sides.
+    becomes Hydro damage") is a draft-2 rule the ruled brief's sec.6 cut; draft
+    6's Sango Isshin is an Attack with a planned all-enemies half and no
+    overflow at all. With no such power the excess is simply lost, which is
+    what the cap has always meant on both sides.
     """
     room = companion_overhaul_entry_hp(state) - state.player.hp
     landed = min(amount, room) if room > 0 else 0
@@ -2531,17 +2544,16 @@ def mend(state: CombatState, amount: int) -> int:
 
 
 def _op_mend(state: CombatState, fx: dict, card: Card) -> None:
-    """The `mend` op, which belongs to TWO arms and resolves under one.
+    """The `mend` op, which belongs to TWO arms and now resolves under both.
 
-    Under `C.COMPANION_OVERHAUL` it is the Universal keyword above. Under the
-    KOKOMI arm alone it still raises, because that arm is C# first and the sim
-    is not brought up for its slice one -- resolving it here would report
-    numbers for rules (Tide, Surge, Exert, the pulse) this engine never ran,
-    and Mend is the only one of her ten verbs a companion card can print.
+    Under `C.COMPANION_OVERHAUL` it is the Universal keyword above (Mizuki's
+    Anraku Secret Spring Therapy); under `C.KOKOMI_OVERHAUL` it is her two
+    Rares and one planned clause. ONE `mend`, whichever gate opened it, which
+    is exactly the arrangement `KokomiRules.MendIsLive` makes on the other
+    side: the GATE widened and the RULE did not.
     """
-    if not C.COMPANION_OVERHAUL:
-        _op_kokomi_overhaul_unbuilt(state, fx, card)
-        return
+    if not (C.COMPANION_OVERHAUL or kokomi_plan.live(state)):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
     mend(state, _amount(state, fx["amount"]))
 
 
@@ -3351,11 +3363,17 @@ def _predicate(state: CombatState, name: str) -> bool:
         # the aura via reaction, which is exactly what the bonus rewards.
         return state.target_had_offelement_aura
     if name == "target_has_debuff":
-        # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, C# first). The mod asks
-        # the engine's own PowerType.Debuff classification; tier0 has no
-        # aggregate debuff query and this arm is not brought up here, so the
-        # name exists to be VALIDATED on a staged row and refuses to answer.
-        _op_kokomi_overhaul_unbuilt(state, {"op": "target_has_debuff"}, None)
+        # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED). Undertow's branch. The
+        # mod asks the game's own `PowerType.Debuff` classification
+        # (`KokomiOverhaulKit.HasDebuff`); tier0's `powers` dict carries no
+        # type beside the count, so `kokomi_plan.ENEMY_DEBUFFS` is that
+        # classification written out -- and what it can and cannot see is
+        # documented there rather than here, so there is one list.
+        #
+        # READ OFF THE BOUND AIM, like every other target predicate in this
+        # function: "the enemy" is the creature this play is aimed at, decided
+        # before any op ran (R210).
+        return kokomi_plan.has_debuff(_default_target(state))
     if name == "target_has_aura":
         # The any-aura sibling (R189's Option C2 for `elemental_ecstasy`).
         # ANY element counts, INCLUDING the player's own: LAW says no
@@ -4846,21 +4864,97 @@ def _op_klee_overhaul_unbuilt(state: CombatState, fx: dict,
         "numbers for a rule this engine never ran.")
 
 
-# The Kokomi overhaul's ten, on exactly the terms above and for the same one
-# sentence (its slice packet sec.5: "All of it behind the prototype switch, C#
-# first. The Python sim is not brought up for slice one"). A second function
-# rather than a shared one because the MESSAGE is what a reader gets when a
-# probe or a stray row reaches here, and it has to name the right arm and the
-# right build line.
-def _op_kokomi_overhaul_unbuilt(state: CombatState, fx: dict,
-                                card: Card) -> None:
+# --- THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ---------
+#
+# THE ARM IS BUILT NOW. It used to refuse the way the Klee arm above still
+# does, on its slice packet's sec.5 ("the Python sim is not brought up for
+# slice one"), and the twin was raised deliberately after the C# had proved the
+# rule: `engine/kokomi_plan.py` is that build, and it mirrors
+# `KleeCode/Powers/Prototype/KokomiPlan.cs` clause for clause.
+#
+# WHAT STILL REFUSES, and why each one does:
+#   * every verb, WITH THE FLAG OFF or on a seat that is not Kokomi. The rows
+#     are unreachable there (`loader._card_prototype` refuses a `proto_kk_` id
+#     with the flag off), so reaching one is a DEFECT and not a degradation --
+#     a silent no-op would be the worst possible stand-in.
+#   * the two PLAN-ONLY clauses, always, from a body. They are registered in
+#     `OPS` because `loader._validate_effect_vocabulary` checks a row's `plan:`
+#     list through the same vocabulary the body takes, and they are resolved by
+#     `kokomi_plan` and by nothing else; a top-level spelling would be a
+#     different, unpriced card. `gen_klee_cards.PLAN_ONLY_OPS` refuses the same
+#     two in an `effects:` list on the other side.
+def _op_kokomi_overhaul_off(state: CombatState, fx: dict,
+                            card: Card) -> None:
     raise NotImplementedError(
         f"card {card.id!r}: op {fx['op']!r} belongs to the KOKOMI_OVERHAUL "
-        "arm, which is C# FIRST -- the mod implements it behind "
-        "`-p:PrototypeCards=true -p:KokomiOverhaul=true` and the sim is not "
-        "brought up for slice one (the slice packet sec.5). Registering the "
-        "op lets the row be staged and priced; resolving it here would report "
-        "numbers for a rule this engine never ran.")
+        "arm (draft 6, the Plan). It resolves only with `C.KOKOMI_OVERHAUL` "
+        "on and Kokomi in the seat -- the mod's `KokomiOverhaul.LiveFor` "
+        "gate, mirrored. With the flag off her `proto_kk_` rows do not "
+        "resolve at all, so reaching this is a defect rather than a "
+        "degradation.")
+
+
+def _op_kokomi_plan_only(state: CombatState, fx: dict, card: Card) -> None:
+    raise NotImplementedError(
+        f"card {card.id!r}: op {fx['op']!r} is a PLAN-ONLY clause of the "
+        "KOKOMI_OVERHAUL arm. It is legal inside a row's `plan:` list and "
+        "nowhere else -- `engine.kokomi_plan` is its only resolver, and "
+        "`gen_klee_cards.PLAN_ONLY_OPS` refuses it in an `effects:` list on "
+        "the C# side. Registered here only so the loader's vocabulary check "
+        "accepts the `plan:` list that carries it.")
+
+
+def _op_carry_out_front_plan(state: CombatState, fx: dict,
+                             card: Card) -> None:
+    """Change of Plans: the jellyfish carries out your front Plan now."""
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    kokomi_plan.resolve_front(state)
+
+
+def _op_plan_from_exhaust(state: CombatState, fx: dict, card: Card) -> None:
+    """Moon's Reflection's one screen. See `kokomi_plan.schedule_from_exhaust`
+    for the two shapes it splits into and for the chooser's status."""
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    kokomi_plan.schedule_from_exhaust(state, card)
+
+
+def _op_damage_quarter_max_hp(state: CombatState, fx: dict,
+                              card: Card) -> None:
+    """Sango Isshin's now-line: a quarter of her Max HP, Hydro, at the aim.
+
+    THE ROW'S OWN TARGET, unlike its planned half: the now-line lands where the
+    card was aimed (`target: enemy`, this engine's bound aim) and the planned
+    half lands on the front or on everybody, which is what "the same to every
+    enemy" says. `KokomiRules.QuarterMaxHp` / `QuarterMaxHpAll` are the same
+    split one file over, both reading one `QuarterOfMaxHp`.
+    """
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    amount = kokomi_plan.quarter_of_max_hp(state)
+    if amount <= 0:
+        return
+    for enemy in _pick_targets(state, fx.get("target", "enemy")):
+        deal_damage_to_enemy(state, enemy, amount, element="hydro",
+                             source="attack" if card.type == "attack"
+                             else "card")
+
+
+def _op_next_companion_discount(state: CombatState, fx: dict,
+                                card: Card) -> None:
+    """Rally's grant. One stack, always -- see `kokomi_plan`."""
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    kokomi_plan.next_companion_discount(state)
+
+
+def _op_remove_debuff(state: CombatState, fx: dict, card: Card) -> None:
+    """Cleansing Wave's cleanse. The reading (the FIRST standing debuff, no
+    choice offered) is recorded at `kokomi_plan.remove_one_debuff`."""
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    kokomi_plan.remove_one_debuff(state)
 
 
 OPS = {
@@ -4943,21 +5037,23 @@ OPS = {
     # name, and draft 6's Plan is a top-level `plan:` LIST on the row rather
     # than a clause inside a body. An op left registered for a rule nothing has
     # is a row waiting to print it.
-    # RESOLVED under `C.COMPANION_OVERHAUL` (a Universal prints it) and
-    # still unbuilt under the Kokomi arm alone -- see `_op_mend`.
+    # RESOLVED under `C.COMPANION_OVERHAUL` (a Universal prints it) as well as
+    # under the Kokomi arm -- see `_op_mend`.
     "mend": _op_mend,
-    "next_companion_discount": _op_kokomi_overhaul_unbuilt,
-    "remove_debuff": _op_kokomi_overhaul_unbuilt,
-    "carry_out_front_plan": _op_kokomi_overhaul_unbuilt,
-    "plan_from_exhaust": _op_kokomi_overhaul_unbuilt,
-    "damage_quarter_max_hp": _op_kokomi_overhaul_unbuilt,
+    "next_companion_discount": _op_next_companion_discount,
+    "remove_debuff": _op_remove_debuff,
+    "carry_out_front_plan": _op_carry_out_front_plan,
+    "plan_from_exhaust": _op_plan_from_exhaust,
+    "damage_quarter_max_hp": _op_damage_quarter_max_hp,
     # The two PLAN-ONLY clauses. They never appear in an `effects:` list -- the
     # codegen refuses one there by name -- but they are registered here anyway,
     # because `loader.prototype_cards` validates a row's `plan:` list through
     # the same vocabulary check the body takes and an unregistered clause could
-    # not be staged at all.
-    "plan_twice": _op_kokomi_overhaul_unbuilt,
-    "damage_per_companion_last_turn": _op_kokomi_overhaul_unbuilt,
+    # not be staged at all. `engine.kokomi_plan` resolves them off a `plan:`
+    # list; reached from a BODY they refuse, which is what makes "plan-only"
+    # a property of the code.
+    "plan_twice": _op_kokomi_plan_only,
+    "damage_per_companion_last_turn": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,
@@ -5085,6 +5181,21 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
                 KNOB_READS.get("GARMENT_ATTACK_BLOCK", 0) + 1)
     state.current_attack_bonus = bonus
     state.mc_attack_element_override = companion_overhaul_card_start(state, card)
+
+    # THE PLAN AIM (QUARANTINED, C.KOKOMI_OVERHAUL, draft 6). "Played on the
+    # Bake-Kurage" is a property of the PLAY -- `CardPlay.Target` in the mod,
+    # decided by the player before `OnPlay` is entered -- so it is asked HERE,
+    # after the per-card context is open and before the first op, which is the
+    # same moment the aim above is bound.
+    #
+    # THE `return` IS THE MOD'S. `OnPlay`'s pet branch schedules and returns,
+    # so a card played on the jellyfish does NONE of its now-line: not the
+    # body, not the repeat loop, not the enchantment riders. The cost is
+    # already paid (`combat.play_card` charged it before this) and the card is
+    # already out of hand, which is the whole shape of rule 2.
+    if kokomi_plan.plan_aimed_at_pet(state, card):
+        kokomi_plan.schedule(state, card)
+        return
 
     try:
         _resolve_effects(state, card.effects, card)
