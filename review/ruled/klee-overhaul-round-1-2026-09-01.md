@@ -1,6 +1,8 @@
-Status: OPEN (pick 2; pick 1 applied)
+Status: RULED R237 2026-09-02
 
 # Klee overhaul, rounds one and two: what the seats found
+
+Ruled R237 by [USER]'s own act-one run of 2026-09-02: the four answers are in that commit's message; pick 2 took option 1, the rules stand and the starter changes (draft 3 in the slice document, round three).
 
 Written 2026-09-01, the night the prototype first ran, and extended the
 same night with round two on the fix build. This is the Prototype stage, so

@@ -1,4 +1,4 @@
-Status: OPEN (Paper artefact; build not started)
+Status: OPEN (Prototype built and played; starter draft 3 for round three, sec.3)
 
 # Klee overhaul, slice one: the rules, the starter, and 28 cards (Paper stage)
 
@@ -46,17 +46,27 @@ keyword limit for exactly this.
 
 | Card | Cost | Type | Printed text | Copies |
 |---|---|---|---|---|
-| Kaboom! | 1 | Attack | Set off. Deal 6. | 3 |
-| Ka-pow! | 1 Spark | Attack | Set off. Deal 7. | 1 |
-| Duck and Cover | 1 | Skill | Gain 5 Block. | 4 |
+| Kaboom! | 1 | Attack | Deal 6. | 2 |
+| Ka-pow! | 1 | Attack | Set off. Deal 7. | 2 |
+| Duck and Cover | 1 | Skill | Gain 5 Block. | 3 |
+| Dig In | 1 Spark | Skill | Gain 8 Block. | 1 |
 | Pop! | 0 | Skill | Bomb 5. | 1 |
-| Jumpy Dumpty | 2 | Skill | Bomb 8 on a random enemy. When it goes off, Mine 3 on every enemy. | 1 |
+| Jumpy Dumpty | 1 | Skill | Bomb 6 on a random enemy. When it goes off, Mine 3 on every enemy. | 1 |
 
 Relic: **Pounding Surprise**, the Spark rule itself. Turn one shows a plant,
-three Set off Attacks, one Spark card the player cannot afford yet, and a
-promise of Mines. Script A in the brief plays it out.
+two plain Attacks, two Set off Attacks, one Spark card the player cannot
+afford yet, and a promise of Mines.
 
-## 4. The pool (28 cards)
+**Draft 3, 2026-09-02, after [USER]'s first run.** Draft 2 put Set off on
+every starter Attack, so attacking and cashing were one act and nothing ever
+grew. Now the plain hit and the cash button are different cards; Ka-pow!
+pays energy rather than a Spark, so cashing has a price; the Spark buys
+Block, with Dig In moved from the pool into the starter (27 pool rows);
+Jumpy Dumpty is 1 energy for a Bomb 6, having read as underpowered at 2; and
+Quick Fuse grows the Bombs by 3 before it sets them off, since at 1 Spark it
+was a Fwoosh! without the hit. The seven rules are unchanged.
+
+## 4. The pool (27 cards)
 
 Rarity column: C / U / R. Loop column says which turn shape the card
 belongs to; a bridge belongs to two.
@@ -81,7 +91,7 @@ belongs to; a bridge belongs to two.
 | Mine Toss | C | 1 | Skill | Mine 4 on every enemy. | Cheap bombs that also defend |
 | Fwoosh! | C | 1 Spark | Attack | Set off. Deal 5 to a random enemy. | The Spark Attack |
 | Tinder Toss | C | 1 Spark | Attack | Set off and deal 4, to two random enemies. | Two explosions for one Spark |
-| Quick Fuse | C | 1 Spark | Skill | Set off target enemy's Bombs. | Cash without an Attack; bridge to Cook |
+| Quick Fuse | C | 1 Spark | Skill | Target enemy's Bombs grow by 3, then Set off. | Cash without an Attack, and the only cash that cooks first |
 | Bang Bang! | U | 2 Sparks | Attack | Set off. Deal 8. Bomb 4. | Cash and reload in one card |
 | Rapid Fire | U | 2 | Attack | Deal 3 to a random enemy four times. Set off each enemy hit. | The chain starter |
 | Chained Reactions | R | 1 | Power | Whenever one of your Bombs goes off, Bomb 3 on a random enemy. | The chain never runs dry |
@@ -106,7 +116,7 @@ Appliers come from the Mondstadt Universals already in her pool: Dahlia
 |---|---|---|---|---|---|
 | Ammo Scavenging | C | 1 | Skill | Bomb 4. Draw a card for each of your Bombs that went off this turn. | Bombs into cards |
 | Powder Charge | U | 1 Spark | Skill | Bomb 6. | Sparks into setup |
-| Dig In | U | 1 Spark | Skill | Gain 8 Block. | Sparks into defence |
+| Dig In | starter | 1 Spark | Skill | Gain 8 Block. | Sparks into defence; in the starter since draft 3, not offered |
 | Sugar Rush | R | 2 Sparks | Skill | Exhaust. Gain 2 Energy. Draw 1. | Sparks into energy, Rare only |
 | Run Away! | C | 0 | Skill | Gain 3 Block. If a Bomb went off this turn, gain 4 more. | Pays for the loud turn |
 | Grounded | U | 1 | Power | At the start of your turn, if none of your Bombs went off last turn, gain 6 Block. | Pays for the quiet turn |

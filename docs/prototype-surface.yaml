@@ -182,20 +182,21 @@
 # `C.KLEE_OVERHAUL` these ARE Klee's starter and her whole pool. Why each row
 # reads as it does: docs/notes/prototype-surface-provenance.md.
 
-# --- the starter, ten cards, five ids (packet sec.3) ---
+# --- the starter, ten cards, six ids (packet sec.3, draft 3 of 2026-09-02:
+# the plain hit and the cash button are different cards; Dig In is the
+# starter's Spark sink and lives below under "currencies and defence") ---
 
 - {id: proto_ko_kaboom, name: "Kaboom!", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: basic,
-   description: "[gold]Set off[/gold]. Deal 6 damage.",
-   effects: [{op: set_off, target: enemy, damage: 6}]}
+   description: "Deal 6 damage.",
+   effects: [{op: damage, amount: 6, target: enemy}]}
 
 - {id: proto_ko_kapow, name: "Ka-pow!", character: klee,
    authored_by: [claude],
-   cost: 0, type: attack, rarity: basic,
-   description: "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold]. Deal 7 damage.",
-   effects: [{op: spend_spark, amount: 1},
-             {op: set_off, target: enemy, damage: 7}]}
+   cost: 1, type: attack, rarity: basic,
+   description: "[gold]Set off[/gold]. Deal 7 damage.",
+   effects: [{op: set_off, target: enemy, damage: 7}]}
 
 - {id: proto_ko_duck_and_cover, name: "Duck and Cover", character: klee,
    authored_by: [claude],
@@ -211,9 +212,9 @@
 
 - {id: proto_ko_jumpy_dumpty, name: "Jumpy Dumpty", character: klee,
    authored_by: [claude],
-   cost: 2, type: skill, rarity: basic,
-   description: "Place a [gold]Bomb[/gold] 8 on a random enemy. When it goes off, place a [gold]Mine[/gold] 3 on every enemy.",
-   effects: [{op: plant_bomb, target: random_enemy, size: 8, payload_mine_all: 3}]}
+   cost: 1, type: skill, rarity: basic,
+   description: "Place a [gold]Bomb[/gold] 6 on a random enemy. When it goes off, place a [gold]Mine[/gold] 3 on every enemy.",
+   effects: [{op: plant_bomb, target: random_enemy, size: 6, payload_mine_all: 3}]}
 
 # --- Cook, the starter's plan (packet sec.4) ---
 
@@ -293,8 +294,9 @@
 - {id: proto_ko_quick_fuse, name: "Quick Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold] target enemy's [gold]Bombs[/gold].",
+   description: "Spend 1 [gold]Spark[/gold]. Target enemy's [gold]Bombs[/gold] grow by 3, then [gold]Set off[/gold].",
    effects: [{op: spend_spark, amount: 1},
+             {op: grow_bombs, target: enemy, amount: 3},
              {op: set_off, target: enemy}]}
 
 - {id: proto_ko_bang_bang, name: "Bang Bang!", character: klee,
@@ -372,7 +374,7 @@
 
 - {id: proto_ko_dig_in, name: "Dig In", character: klee,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
+   cost: 0, type: skill, rarity: basic,
    description: "Spend 1 [gold]Spark[/gold]. Gain 8 Block.",
    effects: [{op: spend_spark, amount: 1},
              {op: block, amount: 8}]}
