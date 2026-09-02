@@ -1,4 +1,4 @@
-Status: OPEN (round three: the rules gate passed on your act-1 run; two legibility rows; one pick on the depth axis for acts 2 and 3)
+Status: RULED R243 2026-09-02
 
 # Kokomi overhaul, round three: the rules gate, and what scales
 
@@ -82,24 +82,16 @@ your answer 1 is about: every Plan costs a now. The pick below is which
 axis to build for round four; the seats read it three acts deep before
 you play it.
 
-## 5. Picks
+## 5. Picks, ruled R243 (2026-09-02)
 
-1. **What the morning scales with.** (1) **Momentum** [default]: the
-   Bake-Kurage carries out Plans in order, and each Plan after the first
-   in the same morning is carried out with 2 more (damage, Block or
-   Mend; a debuff Plan applies 1 more). One rule on the pet, printed on
-   its badge, no new card; the queue's length becomes the payoff, so
-   setting up two Plans at the cost of two nows is a different decision
-   from one, and it grows with energy into act 3. The 2 is a D default.
-   (2) **Counting cards**: three new rows that count Plans carried out
-   this combat (a Rare "Plan: deal 3 for each Plan carried out this
-   combat", an Uncommon Power "at the start of your turn, if three or
-   more Plans were carried out this combat, gain 1 Energy", a Common
-   that draws 1 per Plan carried out this morning). Classic combo
-   depth, more surface, drafted rather than given. (3) Both, momentum
-   as the rule and one counting Rare.
-2. **Your next Kokomi play.** The base Strike's exemption is a rule
-   change, so the round-three build is yours. (1) **Play it after the
-   seats' three-act read** [default], one run as far as it goes, with
-   one question: on which floor did the mornings stop being enough.
-   (2) Play it now, before the seats.
+1. **What the morning scales with.** RULED, neither option: no momentum
+   rule and no counting cards. [USER]: "I dislike the idea of just
+   blindly giving extra numbers to replays. Let's leave it be and worry
+   about the Plan cards themselves as an archetype. Powers comboing with
+   them is fine, but extra energy sounds insanely strong." So the depth
+   for acts 2 and 3 is the Plan cards' own design, read after the
+   three-act seat runs; Powers that combo with Plans are fair game; no
+   energy-generating Power.
+2. **Your next Kokomi play.** RULED at the default: after the seats'
+   three-act read, one run as far as it goes, with the one question: on
+   which floor did the mornings stop being enough.

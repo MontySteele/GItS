@@ -141,9 +141,10 @@ are in [`workstreams.md`](workstreams.md).
 - **Kokomi** — the OVERHAUL is at Prototype round 3 on draft 6, *the Plan*
   (brief R241): the Bake-Kurage is a pet, a card played on it writes its Plan
   line. [USER]'s act-1 run passed the rules gate (R243); round three
-  (`review/active/kokomi-overhaul-round-3-2026-09-02.md`) files the casket
-  and morning legibility rows (`EB-316`, `EB-317`) and puts the acts-2/3
-  depth axis to [USER]. The sim twin runs beside the C#
+  (`review/ruled/kokomi-overhaul-round-3-2026-09-02.md`) files the casket
+  and morning legibility rows (`EB-316`, `EB-317`); the acts-2/3 depth is
+  the Plan cards' own design, no momentum rule (R243). The sim twin runs
+  beside the C#
   (`tier0/engine/kokomi_plan.py`), its drafter prices Plan lines only once
   `EB-311` lands; the Kurage memory is base kit behind `C.KURAGE_MEMORY`
   (`EB-198`, `EB-234`).
