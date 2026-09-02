@@ -372,6 +372,7 @@ def _validate_card_shape(c: Card) -> None:
     _validate_effect_vocabulary(c.id, sly_riders(c))
     _validate_recall_shape(c)
     _validate_plan_shape(c)
+    _validate_no_upgrade_shape(c)
 
 
 def prototype_cards(sheet: Path | None = None) -> list[Card]:
@@ -513,6 +514,38 @@ def _validate_plan_shape(card: Card) -> None:
     reason = _plan.plan_shape_reason(card.plan)
     if reason:
         raise ValueError(f"card {card.id!r}: {reason}")
+
+
+def _validate_no_upgrade_shape(card: Card) -> None:
+    """`no_upgrade:` is a prototype-surface SENTENCE, AT LOAD (`EB-315`).
+
+    Two halves, and the same argument `_validate_plan_shape` makes above.
+
+    IT IS PROTOTYPE SURFACE ONLY. A shipped upgrade is a ruled number in
+    `docs/<character>-upgrades.yaml`, and "this shipped card has none" is said
+    there by the id's absence -- a shipped row carrying the key would be a
+    second place to look, contradicting nothing and claiming everything.
+
+    IT MUST SAY WHY. The key exists to opt a row OUT of a gate that otherwise
+    holds every row of the four overhaul arms to having a campfire choice, and
+    `true` would be a silent exemption -- the exact shape the curated
+    `UPGRADE_DEBT` register replaced when [USER] found two rows by playing
+    them. So the value is the reason, and an empty one is refused here rather
+    than accepted as a truthy string.
+    """
+    if card.no_upgrade is None:
+        return
+    if not card.id.startswith(PROTOTYPE_ID_PREFIX):
+        raise ValueError(
+            f"card {card.id!r}: `no_upgrade:` is prototype surface only -- a "
+            "shipped card with no upgrade says so by its absence from "
+            f"docs/<character>-upgrades.yaml (ids on that surface carry "
+            f"{PROTOTYPE_ID_PREFIX!r})")
+    if not isinstance(card.no_upgrade, str) or not card.no_upgrade.strip():
+        raise ValueError(
+            f"card {card.id!r}: `no_upgrade:` must be the REASON this row "
+            "cannot upgrade, as a non-empty string -- a bare flag is a silent "
+            "exemption, which is what this key exists to stop")
 
 
 def _validate_recall_shape(card: Card) -> None:

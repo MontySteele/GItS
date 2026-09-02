@@ -438,6 +438,22 @@ class Card:
     # a shared sheet again; the M9 revert landed 2026-07-20 and the
     # no-inline-upgrades test (test_upgrades) now runs un-allowlisted.
     upgrade: Optional[dict] = None
+    # `EB-315`. THE OPT-OUT FROM THE PROTOTYPE-STAGE UPGRADE RULE, and the one
+    # field on this class whose value is a SENTENCE. The rule
+    # (`content/upgrades.prototype_default_delta`) gives every staged row a
+    # campfire choice, and `tier0/tests/test_prototype_surface.py` now holds
+    # every row of the four overhaul arms to having one -- so a row that
+    # genuinely cannot upgrade has to SAY SO, in the row, with the reason,
+    # instead of being invisible in a gap between a rule's reach and a
+    # register nobody reads. It is prototype-surface only (the loader refuses
+    # it on a shipped id, exactly as it refuses `plan:`): a shipped upgrade is
+    # a ruled number in `docs/<character>-upgrades.yaml`, and "this card has
+    # none" is said there by the id's absence.
+    #
+    # BOTH ENGINES READ IT, which is why it is a field rather than a codegen
+    # comment: `upgrades._prototype_deltas` skips a row declaring it, so the
+    # sim cannot smith a card the mod prints as base-only.
+    no_upgrade: Optional[str] = None
 
     @property
     def is_companion(self) -> bool:

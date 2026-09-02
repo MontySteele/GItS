@@ -1329,6 +1329,11 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 311/312: the balance read's two instrument gaps (Plan pricing in the
         # drafter, a tier-0 Bomb twin for the Klee arm).
         311, 312,
+        # 315: [USER]'s Kokomi run -- "Plan cards often seem to lack
+        # upgrades". BUILT in the commit that mints it and still OPEN,
+        # because its acceptance is eyes-on: the smith offering a real `+`
+        # face on a Plan row in the next dev build.
+        315,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

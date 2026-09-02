@@ -110,6 +110,7 @@ PROTOTYPE_MEND_DELTA = 2
 PROTOTYPE_COST_DELTA = -1
 PROTOTYPE_COST_FLOOR = 2                 # "a card of cost 2 or more"
 PROTOTYPE_ADDED_DRAW = 1                 # the last clause's default, below
+PROTOTYPE_PLAN_DRAW_DELTA = 1            # the Plan line's own draw (`EB-315`)
 
 #: THE FLAG/COUNTED SPLIT, in the ONE place both engines read it.
 #:
@@ -191,16 +192,104 @@ def _proto_power(effects: list[dict]) -> dict | None:
     return first if first.get("power") in COUNTED_POWERS else None
 
 
+# =============================================================================
+# THE PLAN LINE IS A PRINTED LINE TOO (`EB-315`)
+# =============================================================================
+#
+# WHAT WENT WRONG, in [USER]'s words playing the Kokomi arm: *"Plan cards often
+# seem to lack upgrades, though (Kurage's Oath, Ambush) - I thought we had a
+# test for that?"* The rule above reads a row's `effects:` and nothing else, so
+# a Kokomi row whose whole body is its `plan:` line had no printed number the
+# rule could see: five of the seven Plan-only rows fell all the way through to
+# a clause that withholds ("a row with NO now-line at all"), and the two that
+# did get something got it from cost or Exhaust rather than from what the card
+# says it does. Worse on the NINE two-line rows, because those looked fine: the
+# now-line upgraded and the plan clause kept a literal, so `Feint+` dealt 9
+# damage at dawn no matter how often it was smithed.
+#
+# THE FIX IS THE SAME RULE, RUN TWICE. A Plan line is the second half of a
+# printed face -- the same op vocabulary, the same numbers, read by the player
+# off the same card -- so it takes the same per-op deltas, under keys prefixed
+# `plan_` so a two-line row can move BOTH halves without either applier having
+# to guess which line a bare `damage` meant.
+#
+# WHAT THE PLAN LINE ADDS THAT THE NOW-LINE HAS NOT GOT, and each is one line:
+#
+#   * `damage_per_companion_last_turn` is a PER-INSTANCE number, so it takes
+#     the multi-hit delta (+1) and not the flat one (+3) -- the same reading
+#     `_proto_hit` already applies to a `times: N` attack.
+#   * `draw` gets a default here and deliberately does NOT get one on the
+#     now-line. On a now-line the rule's last clause ADDS a draw, so bumping a
+#     printed one would collide with it (`_DEBT_ALREADY_DRAWS`); a Plan line is
+#     never the target of that clause, so its printed draw is just a number.
+#   * `energy` gets NO default in either place. +1 Energy is a whole turn's
+#     tempo and the arm is priced against it; that is a ruling, and the one row
+#     that prints it (Battle Plan) reaches a campfire through its draw clause.
+#   * `damage_quarter_max_hp` and `plan_twice` print no literal the rule may
+#     move (the first has no amount at all, the second is a duration). Both
+#     rows that carry them cost 2 and take the cost clause instead.
+#
+#: Which `plan:` op each `plan_*` key binds to, in order, in the ONE place both
+#: appliers read it. Mirrors `apply_upgrade`'s branches below and
+#: `gen_klee_cards.PLAN_UPGRADE_VARS`; the three move together or a smithed
+#: prototype is two different cards.
+PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
+    "plan_damage": ("damage", "damage_per_companion_last_turn"),
+    "plan_block": ("block",),
+    "plan_mend": ("mend",),
+    "plan_power_amount": ("apply_power",),
+    "plan_draw": ("draw",),
+}
+
+
+def _plan_default_delta(plan: list[dict]) -> dict:
+    """The Prototype-stage upgrade for one row's `plan:` LINE, or `{}`.
+
+    Pure, and the plan list only. Each key binds to the FIRST clause of its op
+    -- the same one-owner rule the now-line keeps -- because both appliers bind
+    it there and a key that decided off one clause and moved another would
+    upgrade a number the face does not print.
+    """
+    delta: dict = {}
+
+    hit = _proto_hit(plan)
+    if hit is not None:
+        delta["plan_damage"] = PROTOTYPE_DAMAGE_DELTA
+    elif any(fx.get("op") == "damage_per_companion_last_turn"
+             and isinstance(fx.get("amount"), int) for fx in plan):
+        # Per COMPANION, so the base game's per-instance idiom (+1) rather
+        # than the flat hit delta -- see the block comment above.
+        delta["plan_damage"] = PROTOTYPE_MULTI_HIT_DAMAGE_DELTA
+    if any(fx.get("op") == "block" and isinstance(fx.get("amount"), int)
+           for fx in plan):
+        delta["plan_block"] = PROTOTYPE_BLOCK_DELTA
+    if any(fx.get("op") == "mend" and isinstance(fx.get("amount"), int)
+           for fx in plan):
+        delta["plan_mend"] = PROTOTYPE_MEND_DELTA
+    if _proto_power(plan) is not None:
+        delta["plan_power_amount"] = PROTOTYPE_POWER_DELTA
+    if any(fx.get("op") == "draw" and isinstance(fx.get("amount"), int)
+           for fx in plan):
+        delta["plan_draw"] = PROTOTYPE_PLAN_DRAW_DELTA
+    return delta
+
+
 def prototype_default_delta(card_id: str, cost, effects: list[dict],
-                            exhaust: bool = False) -> dict:
+                            exhaust: bool = False,
+                            plan: list[dict] | None = None) -> dict:
     """The Prototype-stage upgrade for one row, or `{}`.
 
-    Pure, and effects+cost only (see the block comment above). Empty for any id
-    outside `PROTOTYPE_DEFAULT_PREFIXES`, and empty for a row the rule finds no
-    printed number on whose cost is below `PROTOTYPE_COST_FLOOR` -- the rule's
-    own last clause is "a card of cost 2 or more WITH NO NUMBER costs 1 less",
-    so a 0- or 1-cost row with no number has nothing to move and gets no
-    upgrade rather than an invented one.
+    Pure, and effects+plan+cost only (see the two block comments above). Empty
+    for any id outside `PROTOTYPE_DEFAULT_PREFIXES`, and empty for a row the
+    rule finds no printed number on whose cost is below `PROTOTYPE_COST_FLOOR`
+    -- the rule's own last clause is "a card of cost 2 or more WITH NO NUMBER
+    costs 1 less", so a 0- or 1-cost row with no number has nothing to move and
+    gets no upgrade rather than an invented one.
+
+    `EB-315`: BOTH PRINTED LINES ARE WALKED, and the fall-through clauses at
+    the bottom fire only when neither printed one. That is the same shape the
+    rule always had -- Exhaust and the added draw are what a row with NO number
+    gets -- read on the whole face instead of on half of it.
     """
     if not card_id.startswith(PROTOTYPE_DEFAULT_PREFIXES):
         return {}
@@ -227,6 +316,9 @@ def prototype_default_delta(card_id: str, cost, effects: list[dict],
     if any(fx.get("op") == "mend" and isinstance(fx.get("amount"), int)
            for fx in effects):
         delta["mend"] = PROTOTYPE_MEND_DELTA
+
+    # `EB-315`. The row's OTHER printed line, under its own keys.
+    delta.update(_plan_default_delta(plan or []))
 
     # "Spark costs unchanged": `spend_spark` is never a key here, and the
     # clause below reads the ENERGY cost, which is the only cost this rule
@@ -263,8 +355,13 @@ def prototype_default_delta(card_id: str, cost, effects: list[dict],
     #     printed "Play on the Bake-Kurage."
     #
     # Such a row keeps no default upgrade rather than a generated-wrong one.
-    # The Plan-only rows that DO have Exhaust are covered by the clause above
-    # (Vanguard, Change of Plans); the rest wait for a ruled `upgrade:` block.
+    # `EB-315` is why reaching here is now RARE rather than the Plan-only norm:
+    # a Plan line's own numbers are read above, so a row only falls this far
+    # when NEITHER line prints one -- `damage_quarter_max_hp` and `plan_twice`
+    # are the two clauses that can do it, and both rows carrying them cost 2
+    # and take the cost clause first. A row that falls all the way through says
+    # so on the row, with `no_upgrade:` and a reason, and the surface's gate
+    # (`tier0/tests/test_prototype_surface.py`) is what makes that mandatory.
     if exhaust:
         return {"remove": "exhaust"}
     if not effects or any(fx.get("op") == "draw" for fx in effects):
@@ -424,12 +521,19 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     for card in loader.prototype_cards():
         if card.id not in reachable:
             continue
+        # EB-315: the row's own OPT-OUT wins over everything, including the
+        # rule -- a row that says it cannot upgrade must not be smithable in
+        # one engine and base-only in the other.
+        if getattr(card, "no_upgrade", None):
+            continue
         # EB-283: the row's own block wins; the Prototype rule fills in for a
         # row that has none, so a staged card is never un-smithable for want
         # of a number nobody has ruled yet.
         authored = dict(card.upgrade) if card.upgrade else {}
         delta = authored or prototype_default_delta(
-            card.id, card.cost, card.effects, bool(getattr(card, "exhaust", False)))
+            card.id, card.cost, card.effects,
+            bool(getattr(card, "exhaust", False)),
+            list(getattr(card, "plan", None) or []))
         if not delta:
             continue
         if card.id in merged:
@@ -629,6 +733,23 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "mend":
             ok = _bump_first((fx for fx in top if fx.get("op") == "mend"),
                              "amount", val)
+        elif key in PLAN_DELTA_OPS:
+            # `EB-315`. The PLAN line's own numbers, one key per op, bound to
+            # the FIRST clause of that op -- the same one-owner rule every key
+            # above keeps, and the same one `gen_klee_cards.plan_var_effects`
+            # keeps on the other side, so both engines move the same clause.
+            #
+            # `plan` and not `everywhere`: a Plan line is a flat list of typed
+            # clauses by construction (`kokomi_plan.plan_shape_reason` refuses
+            # anything else), so there are no branches to reach into and a
+            # nested spelling would be a row neither engine can load.
+            plan_line = list(getattr(card, "plan", None) or [])
+            ok = False
+            for plan_op in PLAN_DELTA_OPS[key]:
+                ok = _bump_first((fx for fx in plan_line
+                                  if fx.get("op") == plan_op), "amount", val)
+                if ok:
+                    break
         elif key == "block":
             ok = _bump_first((fx for fx in top if fx.get("op") == "block"),
                              "amount", val)

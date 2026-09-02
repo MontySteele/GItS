@@ -45,7 +45,7 @@ public sealed class ProtoKkStolenChapter : CustomCardModel, ICharacterCard, IPla
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stolen Chapter (proto)"),
-        ("description", "Draw 1 card. [gold]Plan[/gold]: Draw 3 cards."),
+        ("description", "Draw 1 card. [gold]Plan[/gold]: Draw {PlanCards:diff()} card{PlanCards:plural:|s}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,13 +54,14 @@ public sealed class ProtoKkStolenChapter : CustomCardModel, ICharacterCard, IPla
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Draw, 3, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Draw, DynamicVars["PlanCards"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+            new CardsVar(1),
+            new DynamicVar("PlanCards", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -82,6 +83,6 @@ public sealed class ProtoKkStolenChapter : CustomCardModel, ICharacterCard, IPla
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PlanCards"].UpgradeValueBy(1m);
     }
 }
