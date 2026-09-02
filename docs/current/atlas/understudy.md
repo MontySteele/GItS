@@ -103,7 +103,11 @@ that run the whole loop without the game or codex (`blindplay.py`).
   `ConnectionResetError` — an `OSError`, not a `URLError` (`bridge.py:54-63`).
 - **The reversibility ledger is written BEFORE each change lands,** and
   teardown walks it in reverse with every step independently guarded
-  (`soak.py:100-133,271-294`).
+  (`soak.py:100-133,271-294`). **The shared bridge is not one of those steps**
+  (`EB-310`): `mods\STS2_MCP` is read by the owner's own Steam launches, so an
+  embark refreshes it when nothing holds the dll, records it *shared, left in
+  place*, and no teardown removes it — `deploy_bridge.ps1 -Remove` is the only
+  remover and it is run by hand.
 - **Counterfactual and choice are computed at the same state:** `act`
   recomputes policy_v0 before POSTing, and each step of a planned sequence gets
   its own (`harness.py:255-303`). **Names are resolved before the POST, once,

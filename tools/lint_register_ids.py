@@ -363,7 +363,22 @@ CEILINGS: dict[str, int] = {
     # whose draft-4 upgrade is Retain, printed a dead literal that Strength and
     # Weak could never move -- the class of defect `EB-288`/`EB-291` had
     # already found in play. `Damage` and `Block` now always tokenise.
-    "EB": 308,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-310 minted 2026-09-02 by the lane-1 live session, and FIXED in the
+    # commit that mints it (a live re-check is owed, so it keeps a row): with
+    # no game running and the bridge already staged by `deploy_proto.ps1`, an
+    # `embark --lane 1` re-deployed it and wrote it down as its OWN install --
+    # the old rule counted an install as pre-existing only when a game was UP
+    # on it -- and `--teardown --lane 1` then removed `mods\STS2_MCP`, which
+    # the owner's own Steam launch reads. 309 is minted on another branch of
+    # this sitting; the ceiling is a floor on "ever issued" and only moves
+    # forward, so it carries it whether or not the branch reading this holds
+    # its row.
+    # EB-272 and EB-298 LEFT OPEN_IDS 2026-09-02 with their rows, both on
+    # their live acceptance, read on lane 1 and kept in
+    # `review/qa/lane1-live-reads-2026-09-02/`: the arm-keyword definition
+    # printed once on a fight page (272), and the map printed per-option
+    # `leads on to`, the floors by distance and `16 floors ahead: Boss` (298).
+    "EB": 310,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -1261,7 +1276,10 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # by title rather than card id, 268 the shop line's missing cost and
         # type, 290 the r4 reward/chooser/refusal render gaps (6 locks, 5 seen
         # to FAIL). Ceilings never come down and none may be re-minted.
-        260, 261, 262, 263, 264, 265, 266, 269, 270, 271, 272, 273, 274, 275, 277, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
+        # 272 LEFT OPEN_IDS 2026-09-02 with its row, on its live acceptance:
+        # the arm-keyword definition printed once on a Kokomi fight page
+        # (`review/qa/lane1-live-reads-2026-09-02/fight1-round1.md`).
+        260, 261, 262, 263, 264, 265, 266, 269, 270, 271, 273, 274, 275, 277, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
         # 292: the `NCardTrail` hang off the Kokomi round-two blind session.
         # BUILT in the commit that mints it -- the guard refuses the
         # non-finite value at three doors and names the node chain -- and it
@@ -1271,13 +1289,17 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # pick and the emptied reward screen.
         292, 293, 295,  # 293/295: Kokomi round-two seat, text, HP
         # 296/297/300: [USER]'s own controller session on the deployed arm.
-        # 298/299: the blind-render burn, 2026-09-02, both BUILT in the commit
-        # that mints them and both still OPEN -- 298 because a fixture written
-        # from the vendored builder is a statement about the builder and a
-        # live map read is owed (`EB-262` and `EB-263` both closed that way
-        # once and reopened on the wire's own bytes), 299 because its two
-        # lines wait on the next seat reading them.
-        296, 297, 298, 299, 300,
+        # 299: the blind-render burn, 2026-09-02, BUILT in the commit that
+        # mints it and still OPEN, because its two lines wait on the next seat
+        # reading them.
+        # 298 LEFT OPEN_IDS 2026-09-02 with its row: the live map read it was
+        # held open for arrived (`review/qa/lane1-live-reads-2026-09-02/map.md`
+        # -- per-option `leads on to`, the floors by distance, and `16 floors
+        # ahead: Boss` with the act's boss named).
+        296, 297, 299, 300,
+        # 310: the lane-1 live session's one defect -- a teardown removed the
+        # SHARED bridge. Fixed in the minting commit; open on a live re-check.
+        310,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
