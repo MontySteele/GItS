@@ -48,7 +48,7 @@ public sealed class ProtoKoFlameDance : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Flame Dance"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. [gold]Set off[/gold] each enemy with a non-Pyro aura."),
+        ("description", "[gold]Set off[/gold] each enemy whose aura is not [gold]Pyro[/gold]. Deal {Damage:diff()} damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -66,13 +66,13 @@ public sealed class ProtoKoFlameDance : CustomCardModel, IElementalCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await ProtoBombPower.SetOffAll(choiceContext, Owner.Creature, this, cardPlay, 0, nonPyroAuraOnly: true);
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        await ProtoBombPower.SetOffAll(choiceContext, Owner.Creature, this, cardPlay, 0, nonPyroAuraOnly: true);
     }
 
     protected override void OnUpgrade()

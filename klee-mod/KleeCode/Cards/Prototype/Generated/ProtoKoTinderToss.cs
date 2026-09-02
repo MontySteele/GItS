@@ -86,6 +86,6 @@ public sealed class ProtoKoTinderToss : CustomCardModel, IElementalCard, ISparkP
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(1m);
+        DynamicVars.Damage.UpgradeValueBy(2m);
     }
 }

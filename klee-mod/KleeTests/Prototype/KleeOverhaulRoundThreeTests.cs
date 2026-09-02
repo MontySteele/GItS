@@ -360,9 +360,23 @@ public class KleeOverhaulRoundThreeTests
         AssertUpgradeMoves<ProtoKoKapow>("Damage", 4m, 7m);
         AssertUpgradeMoves<ProtoKoFwoosh>("Damage", 5m, 8m);
         AssertUpgradeMoves<ProtoKoPop>("BombSize", 5m, 7m);
-        // Chain Fuse grows by 6 since the 2026-09-02 balance pass; the
-        // upgrade's +1 rides the new base, which is that pass's own rule.
-        AssertUpgradeMoves<ProtoKoChainFuse>("Grow", 6m, 7m);
+        // Chain Fuse grows by 6 since the 2026-09-02 balance pass. Its
+        // upgrade is the row's OWN `grow: +3` (the Klee card audit of the
+        // same day, `review/active/klee-card-audit-2026-09-02.md`): a grow is
+        // damage to be and takes a Strike's +3, where the rule's default +1
+        // was an upgrade nobody could see.
+        AssertUpgradeMoves<ProtoKoChainFuse>("Grow", 6m, 9m);
+        // The same audit's other three levers, one pin each. A power whose
+        // printed number IS 1 moves that number (the rule read it as a
+        // switch and appended a draw); an `energy:` delta moves the Energy
+        // var the authored face now prints; Sorry, Jean...'s upgrade is a
+        // keyword, not a number.
+        AssertUpgradeMoves<ProtoKoExplosivesWorkshop>("PowerAmount", 1m, 2m);
+        AssertUpgradeMoves<ProtoKoSugarRush>("Energy", 2m, 3m);
+        var sorryJean = new ProtoKoSorryJean();
+        Assert.False(sorryJean.Keywords.Contains(CardKeyword.Retain));
+        Upgrade(sorryJean);
+        Assert.True(sorryJean.Keywords.Contains(CardKeyword.Retain));
         // The Mend clause, on draft 6's carrier. `Tide` left this pin with the
         // verb it read: the rule's key list is written over OPS, so retiring
         // `gain_tide` retired the delta and nothing here had to be re-decided.

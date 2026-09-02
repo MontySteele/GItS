@@ -74,6 +74,6 @@ public sealed class ProtoKoBigBaddaBoom : CustomCardModel, IElementalCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars.Damage.UpgradeValueBy(4m);
     }
 }

@@ -65,6 +65,6 @@ public sealed class ProtoKoGrounded : CustomCardModel
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
     }
 }

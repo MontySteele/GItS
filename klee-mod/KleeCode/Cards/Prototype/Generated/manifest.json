@@ -420,26 +420,23 @@
       "cost": -1
     },
     "proto_ko_ammo_scavenging": {
-      "bomb_size": 2
+      "bomb_size": 3
     },
     "proto_ko_bang_bang": {
       "damage": 3,
       "bomb_size": 2
     },
     "proto_ko_big_badda_boom": {
-      "damage": 3
+      "damage": 4
     },
     "proto_ko_careful_arrangement": {
-      "grow": 1
+      "grow": 3
     },
     "proto_ko_catalytic_converter": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "power_amount": 1
     },
     "proto_ko_chain_fuse": {
-      "grow": 1
+      "grow": 3
     },
     "proto_ko_chained_reactions": {
       "power_amount": 1
@@ -448,10 +445,7 @@
       "block": 3
     },
     "proto_ko_explosives_workshop": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "power_amount": 1
     },
     "proto_ko_fish_flavored_bait": {
       "damage": 3,
@@ -464,7 +458,7 @@
       "damage": 3
     },
     "proto_ko_grounded": {
-      "power_amount": 1
+      "power_amount": 2
     },
     "proto_ko_jumpy_dumpty": {
       "bomb_size": 3,
@@ -474,7 +468,7 @@
       "damage": 3
     },
     "proto_ko_mine_toss": {
-      "bomb_size": 2
+      "bomb_size": 3
     },
     "proto_ko_perfect_timing": {
       "damage": 3
@@ -486,10 +480,10 @@
       "bomb_size": 2
     },
     "proto_ko_powder_charge": {
-      "bomb_size": 2
+      "bomb_size": 3
     },
     "proto_ko_quick_fuse": {
-      "grow": 1
+      "grow": 3
     },
     "proto_ko_rapid_fire": {
       "damage": 1
@@ -501,22 +495,19 @@
       "damage": 3
     },
     "proto_ko_sorry_jean": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "retain": true
     },
     "proto_ko_sparks_n_splash": {
       "cost": -1
     },
     "proto_ko_sugar_rush": {
-      "remove": "exhaust"
+      "energy": 1
     },
     "proto_ko_the_big_one": {
       "damage": 3
     },
     "proto_ko_tinder_toss": {
-      "damage": 1
+      "damage": 2
     },
     "proto_kurages_oath_memory": {
       "kurage_ward": 2

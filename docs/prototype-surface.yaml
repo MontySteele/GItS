@@ -218,24 +218,28 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    description: "Each [gold]Bomb[/gold] on the enemy grows by 6.",
+   upgrade: {grow: +3},
    effects: [{op: grow_bombs, target: enemy, amount: 6}]}
 
 - {id: proto_ko_explosives_workshop, name: "Explosives Workshop", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    description: "At the start of your turn, your [gold]Bombs[/gold] grow by 1 more.",
+   upgrade: {power_amount: +1},
    effects: [{op: apply_power, power: ko_bomb_growth_up, amount: 1, target: self}]}
 
 - {id: proto_ko_careful_arrangement, name: "Careful Arrangement", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
    description: "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold]. It grows by 5.",
+   upgrade: {grow: +3},
    effects: [{op: merge_bombs, target: enemy, growth: 5}]}
 
 - {id: proto_ko_big_badda_boom, name: "Big Badda Boom", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
    description: "[gold]Set off[/gold]. Deal 12 damage. Then deal damage equal to what the [gold]Bombs[/gold] dealt.",
+   upgrade: {damage: +4},
    effects: [{op: set_off, target: enemy, damage: 12},
              {op: damage_set_off_total, target: enemy}]}
 
@@ -267,6 +271,7 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    description: "Place a [gold]Mine[/gold] 4 on ALL enemies.",
+   upgrade: {bomb_size: +3},
    effects: [{op: plant_bomb, target: all_enemies, size: 4, mine: true}]}
 
 - {id: proto_ko_fwoosh, name: "Fwoosh!", character: klee,
@@ -280,13 +285,15 @@
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
    description: "[gold]Set off[/gold] and deal 4 damage to a random enemy twice.",
+   upgrade: {damage: +2},
    effects: [{op: spend_spark, amount: 1},
              {op: set_off, target: random_enemy, damage: 4, times: 2}]}
 
 - {id: proto_ko_quick_fuse, name: "Quick Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Each [gold]Bomb[/gold] on the enemy grows by 3, then [gold]Set off[/gold].",
+   description: "Each [gold]Bomb[/gold] on the enemy grows by 3. [gold]Set off[/gold].",
+   upgrade: {grow: +3},
    effects: [{op: spend_spark, amount: 1},
              {op: grow_bombs, target: enemy, amount: 3},
              {op: set_off, target: enemy}]}
@@ -338,14 +345,15 @@
 - {id: proto_ko_flame_dance, name: "Flame Dance", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 5 damage to ALL enemies. [gold]Set off[/gold] each enemy with a non-Pyro aura.",
-   effects: [{op: damage, amount: 5, target: all_enemies},
-             {op: set_off, target: all_enemies, aura: non_pyro}]}
+   description: "[gold]Set off[/gold] each enemy whose aura is not [gold]Pyro[/gold]. Deal 5 damage to ALL enemies.",
+   effects: [{op: set_off, target: all_enemies, aura: non_pyro},
+             {op: damage, amount: 5, target: all_enemies}]}
 
 - {id: proto_ko_catalytic_converter, name: "Catalytic Converter", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    description: "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], gain 1 additional [gold]Spark[/gold].",
+   upgrade: {power_amount: +1},
    effects: [{op: apply_power, power: ko_bomb_reaction_spark, amount: 1, target: self}]}
 
 # --- currencies and defence (packet sec.4) ---
@@ -354,6 +362,7 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    description: "Place a [gold]Bomb[/gold] 4. Draw 1 card for each of your [gold]Bombs[/gold] that went off this turn.",
+   upgrade: {bomb_size: +3},
    effects: [{op: plant_bomb, target: enemy, size: 4},
              {op: draw_per_set_off}]}
 
@@ -361,6 +370,7 @@
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
    description: "Place a [gold]Bomb[/gold] 6.",
+   upgrade: {bomb_size: +3},
    effects: [{op: spend_spark, amount: 1},
              {op: plant_bomb, target: enemy, size: 6}]}
 
@@ -375,6 +385,7 @@
    authored_by: [claude],
    cost: 0, type: skill, rarity: rare, exhaust: true,
    description: "Gain 2 [gold]Energy[/gold]. Draw 1 card. Exhaust.",
+   upgrade: {energy: +1},
    effects: [{op: spend_spark, amount: 2},
              {op: energy, amount: 2},
              {op: draw, amount: 1}]}
@@ -391,12 +402,14 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 6 [gold]Block[/gold].",
+   upgrade: {power_amount: +2},
    effects: [{op: apply_power, power: ko_grounded, amount: 6, target: self}]}
 
 - {id: proto_ko_sorry_jean, name: "Sorry, Jean...", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
    description: "Remove one of your [gold]Bombs[/gold]. Gain [gold]Block[/gold] equal to its size.",
+   upgrade: {retain: true},
    effects: [{op: remove_bomb_for_block}]}
 
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE

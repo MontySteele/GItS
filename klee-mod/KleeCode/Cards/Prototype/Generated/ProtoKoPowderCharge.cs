@@ -81,6 +81,6 @@ public sealed class ProtoKoPowderCharge : CustomCardModel, ISparkPricedCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["BombSize"].UpgradeValueBy(2m);
+        DynamicVars["BombSize"].UpgradeValueBy(3m);
     }
 }

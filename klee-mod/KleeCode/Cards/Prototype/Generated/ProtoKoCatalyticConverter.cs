@@ -42,13 +42,13 @@ public sealed class ProtoKoCatalyticConverter : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Catalytic Converter"),
-        ("description", "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], gain 1 additional [gold]Spark[/gold]. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], gain {PowerAmount:diff()} additional [gold]Spark[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,15 +60,11 @@ public sealed class ProtoKoCatalyticConverter : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<BombReactionSparkPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
+        await PowerCmd.Apply<BombReactionSparkPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

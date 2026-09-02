@@ -7516,15 +7516,23 @@ def _authored_face_numbers(card: dict):
 
     A number with no key is still yielded, and that is the point: the walk in
     `_authored_face_with_tokens` uses the whole ordered run to place its
-    cursor, so a Spark price or an Exert cost ahead of the number being
-    upgraded cannot be mistaken for it. Only TOP-LEVEL effects are here,
+    cursor, so an unowned literal ahead of the number being upgraded cannot
+    be mistaken for it. A Spark price is NOT yielded, because the face does
+    not print it (see the cost branch). Only TOP-LEVEL effects are here,
     because only a top-level effect owns a var -- a branch's number renders as
     the literal it is.
     """
     for eff in card.get("effects", []):
         op = eff.get("op")
         if op in _COST_OPS:
-            yield None, None, int(eff.get("amount", 0))
+            # NOT a number the face prints: the price sits in the cost slot
+            # and the body does not restate it (`docs/current/text-conventions.md`,
+            # the Spark row). Yielding it stepped the cursor past the first
+            # matching digit in the text, which on Sugar Rush ("Gain 2
+            # Energy" behind a 2-Spark price) was the one number the upgrade
+            # moves, so the `+` face kept its literal (Klee card audit,
+            # 2026-09-02).
+            continue
         elif op == "damage" and isinstance(eff.get("amount"), int):
             owns = (eff.get("target") != "self"
                     and eff is damage_var_effect(card))
@@ -7562,8 +7570,17 @@ def _authored_face_numbers(card: dict):
                 else (None, None, eff["amount"])
         elif op == "mend" and isinstance(eff.get("amount"), int):
             yield "mend", "Mend", eff["amount"]
-        elif op in ("draw", "energy") \
-                and isinstance(eff.get("amount"), int):
+        elif op == "energy" and isinstance(eff.get("amount"), int):
+            # An `energy: +N` delta binds to the FIRST energy op (tier0's
+            # `energy` branch), whose amount the emitter already reads back
+            # through the `Energy` var; the authored face has to print that
+            # var or the `+` card says one number and pays another (Sugar
+            # Rush, the Klee card audit of 2026-09-02).
+            owns = eff is next((f for f in card["effects"]
+                                if f.get("op") == "energy"), None)
+            yield ("energy", "Energy", eff["amount"]) if owns \
+                else (None, None, eff["amount"])
+        elif op == "draw" and isinstance(eff.get("amount"), int):
             yield None, None, eff["amount"]
     # EB-315. THE PLAN LINE'S NUMBERS, AFTER THE NOW-LINE'S, because that is
     # the order a Plan row's own face prints them in ("Deal 6 damage. Plan:
