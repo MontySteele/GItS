@@ -1,4 +1,4 @@
-Status: OPEN (the number changes below are applied as D defaults in the next build; two watch items wait on your Kokomi run; picks at the end)
+Status: RULED R243 2026-09-02
 
 # Prototype balance pass: Klee and Kokomi, 2026-09-02
 
