@@ -192,6 +192,30 @@ def _refuse_the_authors_own_weights(model_name: str) -> None:
                 f"author's machine does not create any (R217 C)")
 
 
+def _answer_from_reasoning(reasoning: str, schema: dict) -> "dict | None":
+    """The JSON reply, if the model left it as the TAIL of its scratchpad.
+
+    Only the last line of the reasoning that opens an object is tried, and
+    only if it carries every key the schema requires with a non-empty
+    value: an object quoted mid-thought ("the schema is {command,
+    thinking}") does not qualify, and a half-formed one raises inside
+    `extract_json` and is treated as absent.
+    """
+    if not reasoning or "{" not in reasoning:
+        return None
+    last_open = reasoning.rfind("{")
+    line_start = reasoning.rfind(chr(10), 0, last_open) + 1
+    for text in (reasoning[line_start:].strip(), reasoning[last_open:]):
+        try:
+            blob = local_seat.extract_json(text)
+        except ValueError:
+            continue
+        required = schema.get("required") or []
+        if all(str(blob.get(k) or "").strip() for k in required):
+            return blob
+    return None
+
+
 def strip_reasoning(text: str) -> tuple[str, str]:
     """`(answer, reasoning)` -- the scratchpad out, before the parser.
 
@@ -408,12 +432,27 @@ class LocalThread:
         try:
             blob = local_seat.extract_json(answer)
         except ValueError as exc:
-            self._row(kind="local_refusal", reason="no_reply_json",
-                      turn=self.turn, detail=str(exc))
-            raise blindplay.BlindPlayError(
-                f"no_reply_json: the reply carries no JSON object once the "
-                f"reasoning is stripped, so there is nothing to read as a "
-                f"command ({exc}); the raw reply is at {d / 'reply.txt'}")
+            # THE ANSWER IN THE SCRATCHPAD. Seen live 2026-09-02 (session
+            # `kokomi-r3-local-a`, turn 7): the served model wrote its whole
+            # JSON reply as the last line of its thinking, closed the think
+            # block, and stopped with `finish_reason: "stop"` and an EMPTY
+            # `content`. The command is right there; refusing it would
+            # throw a real decision away for a formatting slip the model
+            # did not repeat on the six turns before. So the reasoning tail
+            # is read ONCE, as a fallback, and the record says so in its own
+            # row -- the scratchpad is otherwise never parsed.
+            blob = _answer_from_reasoning(reasoning, schema)
+            if blob is None:
+                self._row(kind="local_refusal", reason="no_reply_json",
+                          turn=self.turn, detail=str(exc))
+                raise blindplay.BlindPlayError(
+                    f"no_reply_json: the reply carries no JSON object once "
+                    f"the reasoning is stripped, so there is nothing to read "
+                    f"as a command ({exc}); the raw reply is at "
+                    f"{d / 'reply.txt'}")
+            self._row(kind="local_answer_from_reasoning", turn=self.turn,
+                      detail="content was empty; the JSON reply was the "
+                             "tail of the reasoning block")
         missing = [k for k in (schema.get("required") or [])
                    if not str(blob.get(k) or "").strip()
                    and not isinstance(blob.get(k), list)]
