@@ -135,10 +135,14 @@ def test_the_overhaul_ids_do_not_resolve_with_the_flag_off():
     """The quarantine's own door, shut. `_card_prototype`'s prototype branch
     is guarded by the flags, so a `proto_kk_` id is a KeyError here -- which
     is what makes "the rows never enter an ordinary run" a property of the
-    code rather than a filter somebody remembers."""
+    code rather than a filter somebody remembers.
+
+    NAMED, not read off `KOKOMI_OVERHAUL_STARTER_IDS[0]`, since R242: that slot
+    is now the BASE GAME's `strike`, which resolves on every tree by design and
+    would have turned this test green for the wrong reason."""
     loader._card_prototype.cache_clear()
     with pytest.raises(KeyError):
-        loader.get_card(C.KOKOMI_OVERHAUL_STARTER_IDS[0])
+        loader.get_card("proto_kk_kurages_oath")
     loader._card_prototype.cache_clear()
 
 
@@ -154,16 +158,24 @@ def test_the_kurage_memory_arm_is_untouched():
 
 # --- 2. THE ARM'S OWN SHAPE ------------------------------------------------
 
-def test_the_starter_is_ten_cards_four_ids():
-    """Slice draft 6 sec.3: Water's Edge x4, Coral Guard x4, Kurage's Oath,
-    Slack Water."""
+def test_the_starter_is_the_canonical_ten():
+    """Slice draft 6 sec.3, as R242 amended it: Strike x4, Defend x4, Kurage's
+    Oath, Slack Water.
+
+    "Where a character's basics are a renamed Strike or Defend with the same
+    stat line, the base game's Strike and Defend replace them." Water's Edge
+    and Coral Guard were exactly that, so they are DELETED rather than
+    re-priced -- which the last loop is what checks."""
     ids = C.KOKOMI_OVERHAUL_STARTER_IDS
     assert len(ids) == 10
-    assert len(set(ids)) == 4
-    assert ids.count("proto_kk_waters_edge") == 4
-    assert ids.count("proto_kk_coral_guard") == 4
+    assert ids.count("strike") == 4
+    assert ids.count("defend") == 4
     assert ids.count("proto_kk_kurages_oath") == 1
     assert ids.count("proto_kk_slack_water") == 1
+    assert len([i for i in ids if i.startswith("proto_")]) == 2
+    staged = {c.id for c in loader.prototype_cards()}
+    for gone in ("proto_kk_waters_edge", "proto_kk_coral_guard"):
+        assert gone not in staged
 
 
 def test_the_pool_is_all_twenty_six_of_the_slices_rows():
@@ -198,12 +210,37 @@ def test_the_starter_resolves_to_the_slices_ten_cards(overhaul):
     run read, so this is what she opens with on either path."""
     ids = loader.starting_deck("kokomi")
     assert ids == list(C.KOKOMI_OVERHAUL_STARTER_IDS)
-    assert all(cid.startswith("proto_kk_") for cid in ids)
     # And each one is a real, loadable, validated card -- not just a string.
     for cid in set(ids):
         card = loader.get_card(cid)
-        assert card.character == "kokomi"
         assert card.id == cid
+        if cid.startswith("proto_kk_"):
+            assert card.character == "kokomi"
+
+    # THE BASE BASICS, at the base stat line and the base upgrade (R242).
+    strike, defend = loader.get_card("strike"), loader.get_card("defend")
+    assert strike.effects == [{"op": "damage", "amount": 6, "target": "enemy"}]
+    assert defend.effects == [{"op": "block", "amount": 5}]
+    assert loader.get_card("strike+").effects[0]["amount"] == 9
+    assert loader.get_card("defend+").effects[0]["amount"] == 8
+
+
+def test_a_base_strike_in_her_hand_applies_hydro(overhaul):
+    """HER CADENCE IS ABOUT HER, NOT ABOUT THE CARD (slice sec.3: "her Attacks
+    still apply Hydro by the catalyst rule, which the build checks on a base
+    Strike"). `_element_for` has always read the PLAYER's cadence; `EB-307` is
+    the mod catching up, and `CatalystCadence.PrintedElement` is its twin."""
+    from tier0.tests.conftest import make_state
+    from tier0.engine import effects as fx_mod
+
+    state = make_state()
+    state.player = loader.build_player("kokomi")
+    assert (state.player.cadence, state.player.element) == ("catalyst", "hydro")
+    strike = loader.get_card("strike")
+    assert strike.element == "none"
+    assert fx_mod._element_for(state, strike.effects[0], strike) == "hydro"
+    defend = loader.get_card("defend")
+    assert fx_mod._element_for(state, defend.effects[0], defend) is None
 
 
 def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
@@ -289,8 +326,10 @@ def test_every_row_prints_its_own_face():
     import yaml
     rows = yaml.safe_load(loader.PROTOTYPE_SHEET.read_text(encoding="utf-8"))
     faces = {r["id"]: r.get("description") for r in rows}
-    for cid in set(C.KOKOMI_OVERHAUL_POOL_IDS) | set(
-            C.KOKOMI_OVERHAUL_STARTER_IDS):
+    # The BASE basics are not rows on this sheet and have the base game's own
+    # face (R242), so the set is the prototype ids only.
+    for cid in set(C.KOKOMI_OVERHAUL_POOL_IDS) | {
+            c for c in C.KOKOMI_OVERHAUL_STARTER_IDS if c.startswith("proto_")}:
         assert faces.get(cid), cid
 
 

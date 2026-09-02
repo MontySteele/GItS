@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Cards.Prototype.Generated;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Models.Relics;
 
 namespace KleeMod.Powers;
@@ -50,8 +51,33 @@ namespace KleeMod.Powers;
 internal static class KokomiOverhaulRoster
 {
     /// <summary>
-    /// Kokomi's ten opening cards under the arm: Water's Edge x4, Coral Guard
-    /// x4, Kurage's Oath, Slack Water (slice sec.3, in its order).
+    /// Kokomi's ten opening cards under the arm: Strike x4, Defend x4,
+    /// Kurage's Oath, Slack Water (slice sec.3, in its order).
+    ///
+    /// THE BASICS ARE THE BASE GAME's (R242, ruled in the same breath as Klee's
+    /// draft-4 starter): "where a character's basics are a renamed Strike or
+    /// Defend with the same stat line, the base game's Strike and Defend
+    /// replace them." Water's Edge and Coral Guard were exactly that -- 1
+    /// energy for 6 damage and 1 energy for 5 Block, byte for byte the base
+    /// line -- so <c>ProtoKkWatersEdge</c> and <c>ProtoKkCoralGuard</c> are
+    /// DELETED from the surface rather than re-priced (R213 B).
+    ///
+    /// THE SILENT PAIR, not the Ironclad one. The base game ships one Strike
+    /// and one Defend PER CHARACTER (five of each, all <c>public sealed</c>,
+    /// all 6 damage / 5 Block with <c>OnUpgrade</c> +3), and the only
+    /// difference between them is portrait, attack vfx and colour. A card's
+    /// visual identity comes from <c>CardModel.Pool</c>, which resolves by
+    /// scanning <c>ModelDb.AllCardPools</c> -- so a Silent basic renders with
+    /// <c>card_frame_green</c> and the <c>silent</c> energy colour, which is
+    /// exactly what <c>KokomiCardPool</c> already borrows. Her deck screen
+    /// shows them in the Silent pool's <c>5EBD00</c> rather than her
+    /// <c>6FC8D6</c>; that is the one seam and it is reported, not hidden.
+    ///
+    /// HER ATTACKS STILL APPLY HYDRO. A base Strike cannot implement
+    /// <c>IElementalCard</c> (it is sealed), so the mod's per-card element read
+    /// would have given it none. The catalyst cadence is a fact about the
+    /// CHARACTER -- tier0's <c>effects._element_for</c> has always said so --
+    /// and <see cref="CatalystCadence"/> now says it on this side too.
     ///
     /// THE COMPANION ROLL FINDS NO SLOT, by construction and reported rather
     /// than hidden. <c>KokomiStartingCompanionsPatch</c> matches on the shipped
@@ -63,14 +89,14 @@ internal static class KokomiOverhaulRoster
     /// </summary>
     internal static IEnumerable<CardModel> StartingDeck() => new CardModel[]
     {
-        ModelDb.Card<ProtoKkWatersEdge>(),
-        ModelDb.Card<ProtoKkWatersEdge>(),
-        ModelDb.Card<ProtoKkWatersEdge>(),
-        ModelDb.Card<ProtoKkWatersEdge>(),
-        ModelDb.Card<ProtoKkCoralGuard>(),
-        ModelDb.Card<ProtoKkCoralGuard>(),
-        ModelDb.Card<ProtoKkCoralGuard>(),
-        ModelDb.Card<ProtoKkCoralGuard>(),
+        ModelDb.Card<StrikeSilent>(),
+        ModelDb.Card<StrikeSilent>(),
+        ModelDb.Card<StrikeSilent>(),
+        ModelDb.Card<StrikeSilent>(),
+        ModelDb.Card<DefendSilent>(),
+        ModelDb.Card<DefendSilent>(),
+        ModelDb.Card<DefendSilent>(),
+        ModelDb.Card<DefendSilent>(),
         ModelDb.Card<ProtoKkKuragesOath>(),
         ModelDb.Card<ProtoKkSlackWater>(),
     };

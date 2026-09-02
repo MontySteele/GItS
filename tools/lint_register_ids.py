@@ -348,7 +348,22 @@ CEILINGS: dict[str, int] = {
     # accompanying sentence". Both rows land with the commit that mints them,
     # both BUILT, 298 with a live map read still owed. The burn's other three
     # findings folded into `EB-290`, `EB-294` and `EB-268` rather than mint.
-    "EB": 300,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-307/EB-308 minted 2026-09-02 by the R242 base-basics build, and BOTH
+    # CLOSED in the commit that mints them, so neither entered OPEN_IDS and
+    # neither has a BACKLOG row (the `EB-239/240` precedent below). 307 is a
+    # TWO-ENGINE DIVERGENCE the ruling exposed: the mod answered "what element
+    # does this hit apply?" from the CARD (`cardSource is IElementalCard`)
+    # while tier0 has always answered it from the PLAYER's cadence
+    # (`effects._element_for`), and the two agreed only because the codegen
+    # tags every Attack it emits for a catalyst character -- so the base game's
+    # Strike, which is sealed and can implement nothing, applied no Pyro at
+    # all. Fixed at the one funnel (`Powers/Prototype/CatalystCadence.cs`).
+    # 308 is an EMITTER defect the same ruling surfaced: an authored face got a
+    # `{Var:diff()}` token only where the UPGRADE moved the number, so Ka-pow!,
+    # whose draft-4 upgrade is Retain, printed a dead literal that Strength and
+    # Weak could never move -- the class of defect `EB-288`/`EB-291` had
+    # already found in play. `Damage` and `Block` now always tokenise.
+    "EB": 308,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer

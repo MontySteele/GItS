@@ -218,8 +218,14 @@ public static class CompanionOverhaulRiders
     /// </summary>
     public static Element ElementFor(CardModel? cardSource, Creature? dealer)
     {
-        var printed = cardSource is IElementalCard elemental
-            ? elemental.Element : Element.None;
+        // `EB-307`. The card-level read used to be written out here; it moved
+        // to <see cref="CatalystCadence.PrintedElement"/> when R242 put the
+        // BASE GAME's Strike and Defend in both overhaul starters. A base card
+        // is sealed and can never be an `IElementalCard`, so "what does this
+        // apply?" has to be able to fall back on WHOSE hand it came from. The
+        // riders below still win over it, which is the order they already had
+        // over a printed element and the order the sim reads them in.
+        var printed = CatalystCadence.PrintedElement(cardSource, dealer);
         if (dealer == null || cardSource is not { Type: CardType.Attack })
         {
             return printed;

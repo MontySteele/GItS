@@ -7432,6 +7432,13 @@ def _authored_face_numbers(card: dict):
             yield None, None, eff["amount"]
 
 
+# `EB-308`. The two face keys whose var the GAME modifies at runtime -- Damage
+# (Strength, Weak) and Block (Dexterity, Frail) -- as opposed to the mod's own
+# DynamicVars, which nothing outside the card writes. A token on these earns its
+# place even when the upgrade moves nothing.
+LIVE_MODIFIED_FACE_KEYS = frozenset({"damage", "block"})
+
+
 def _authored_face_with_tokens(card: dict) -> str:
     """A row's own face with a `{Var:diff()}` token wherever this card's
     upgrade moves a number the face PRINTS.
@@ -7450,17 +7457,26 @@ def _authored_face_with_tokens(card: dict) -> str:
     number the row is expected to print, so a later clause's literal cannot be
     mistaken for an earlier one and the Spark price a row prints ahead of its
     damage is skipped rather than swapped.
+
+    `EB-308`. THE UPGRADE IS NOT THE ONLY THING THAT MOVES A NUMBER, and
+    keying only on the delta was a hole the day a row's upgrade stopped being a
+    number. Ka-pow!'s draft-4 upgrade is Retain with its numbers unchanged
+    (R242), so no delta touched `damage` and the face kept the literal 4 --
+    which is exactly the class of defect `EB-288`/`EB-291` already found in
+    play, a printed number that is not the number the card pays. `Damage` and
+    `Block` are `ValueProp.Move` vars the GAME modifies live (Strength, Weak,
+    Dexterity, Frail), so their token has a job whether or not the smith ever
+    touches them. The mod's own DynamicVars keep the delta-only rule: no live
+    modifier reads a BombSize, and a Bomb's live arithmetic is on its badge.
     """
     text = card["description"]
     deltas = upgrade_plan(card)[0]
-    if not deltas:
-        return text
     cursor = 0
     for key, var, literal in _authored_face_numbers(card):
         match = re.compile(rf"(?<!\d){literal}(?!\d)").search(text, cursor)
         if match is None:
             continue
-        if key in deltas and var:
+        if var and (key in deltas or key in LIVE_MODIFIED_FACE_KEYS):
             token = f"{{{var}:diff()}}"
             text = text[:match.start()] + token + text[match.end():]
             cursor = match.start() + len(token)
