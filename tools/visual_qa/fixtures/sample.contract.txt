@@ -26,5 +26,7 @@ resource=res://klee/powers/spark.png
 resource=res://klee/ui/char_icon.png
 resource=res://klee/vfx/bomb_lob.tscn
 resource=res://klee/vfx/dodoco_pop.tscn
+resource=res://kokomi/model/bake_kurage.tscn
+resource=res://kokomi/summon/bake_kurage.png
 resource=res://shared/gauge.tscn
 resource=res://shared/turn_end_docket.tscn
