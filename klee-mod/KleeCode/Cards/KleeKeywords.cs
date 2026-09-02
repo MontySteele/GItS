@@ -31,22 +31,47 @@ public static class KleeKeywords
     public static CardKeyword ElementalSkill;
 
     // Elemental application badges. Unlike Bomb (which is merely referenced
-    // by many cards), these are actual card properties, so After gives every
-    // aura-applying card one compact, consistent label below its rules text.
+    // by many cards), these are actual card properties -- so the element they
+    // name is a card's PROPERTY and belongs on the face as such.
+    //
+    // POSITION `None`, NOT `After` ([USER], 2026-09-01, after playing Klee:
+    // "instead of saying 'applies pyro' - maybe make it a card indicator as
+    // well to remove text overhead? That would be a universal shift"). `After`
+    // is what printed the sentence: BaseLib's GenEnumValues puts an `After`
+    // keyword into `AutoKeywordText.AdditionalAfterKeywords`, from there into
+    // the base game's `CardKeywordOrder.afterDescription`, and
+    // `CardModel.BuildDescription` appends its card text as a line of the
+    // rules box. `None` removes that line and nothing else.
+    //
+    // THE TIP SURVIVES THE FLIP, and that is a property of the base game
+    // rather than of this file: `CardModel.HoverTips` walks `Keywords` and
+    // calls `HoverTipFactory.FromKeyword` on every one of them: it never reads
+    // the printed text. Bomb, Confiscated and the eight reaction previews
+    // below have ridden `None` since they were written and have always
+    // hovered; these four now join them.
+    //
+    // WHAT DRAWS THE ELEMENT INSTEAD: `Vfx/ElementBadge.cs`, which reads THESE
+    // keywords off the card and paints the aura's own icon beside the type
+    // plaque. One declaration, so the gem and the tip cannot disagree.
+    //
+    // ONE SWITCH, EVERY SHEET. There is one keyword per element and all four
+    // sheets plus both quarantined arms declare the same four, so this flip is
+    // the whole of the removal on 114 faces (Klee 36 generated + 5 written,
+    // Furina 9, Kokomi 20, the prototype surface 44).
     [CustomEnum("applies_pyro")]
-    [KeywordProperties(AutoKeywordPosition.After)]
+    [KeywordProperties(AutoKeywordPosition.None)]
     public static CardKeyword AppliesPyro;
 
     [CustomEnum("applies_hydro")]
-    [KeywordProperties(AutoKeywordPosition.After)]
+    [KeywordProperties(AutoKeywordPosition.None)]
     public static CardKeyword AppliesHydro;
 
     [CustomEnum("applies_electro")]
-    [KeywordProperties(AutoKeywordPosition.After)]
+    [KeywordProperties(AutoKeywordPosition.None)]
     public static CardKeyword AppliesElectro;
 
     [CustomEnum("applies_cryo")]
-    [KeywordProperties(AutoKeywordPosition.After)]
+    [KeywordProperties(AutoKeywordPosition.None)]
     public static CardKeyword AppliesCryo;
 
     // Referenced-term tips. Auto=None keeps these out of rules text; cards

@@ -51,7 +51,7 @@ public sealed class ProtoKkTreatise : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CardsVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,10 +64,14 @@ public sealed class ProtoKkTreatise : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<TreatisePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        if (IsUpgraded)
+        {
+            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
     }
 }

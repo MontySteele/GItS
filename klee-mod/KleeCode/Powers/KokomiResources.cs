@@ -425,6 +425,29 @@ public static class KokomiResources
     public static int GetBurst(Creature? creature) => FindBurst(creature)?.Amount ?? 0;
 
     /// <summary>
+    /// `EB-297`. SHOULD THE OVERHEAD BURST GAUGE EXIST FOR THIS CREATURE?
+    ///
+    /// The Klee arm's own answer, one character over and for the identical
+    /// reason (`KleeBurstResource.GaugeApplies`, `EB-281`): under the Kokomi
+    /// overhaul her Burst gate is off -- the brief's sec.4 retires the
+    /// Charge/Exhaust engine that fed it and no arm row grants it -- so the
+    /// bridge built an overhead bar pinned at 0/20, pearl cap and all, for the
+    /// whole run. [USER] read it live on the arm.
+    ///
+    /// The guard lives HERE, beside the resource, rather than as a character
+    /// test written out in `GaugeBridge`: that is where `GaugeApplies` put the
+    /// Klee one, and it keeps "who has this meter" one question with one
+    /// answer instead of two that can drift.
+    /// </summary>
+    public static bool BurstGaugeApplies(Creature? creature)
+    {
+#if PROTOTYPE_CARDS
+        if (KokomiOverhaul.LiveFor(creature)) return false;
+#endif
+        return IsKokomi(creature);
+    }
+
+    /// <summary>
     /// The single Burst gain funnel. Every source lands here -- the exhaust
     /// funnel, the skill-tag bonus, reactions -- so the gauge cannot go stale
     /// behind a gain and so the economy stays one place to instrument.

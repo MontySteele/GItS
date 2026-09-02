@@ -48,7 +48,7 @@ public sealed class ProtoKkMoonsReflection : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Moon's Reflection"),
-        ("description", "Exhaust. Choose a card in your exhaust pile: [gold]Plan[/gold]: the jellyfish carries out its [gold]Plan[/gold] line, or the card itself if it has none."),
+        ("description", "Choose a card in your exhaust pile: [gold]Plan[/gold]: the jellyfish carries out its [gold]Plan[/gold] line, or the card itself if it has none."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -71,6 +71,6 @@ public sealed class ProtoKkMoonsReflection : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        RemoveKeyword(CardKeyword.Exhaust);
     }
 }

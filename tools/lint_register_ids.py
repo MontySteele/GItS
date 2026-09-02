@@ -330,7 +330,13 @@ CEILINGS: dict[str, int] = {
     # branches each thinking 285 is free.
     # EB-292 minted 2026-09-02 by the Kokomi round-two blind session: the
     # `NCardTrail` hang. Its row is in this same commit.
-    "EB": 295,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-296..EB-300 minted 2026-09-02 by [USER]'s own controller session on
+    # the deployed Kokomi arm (296 the custom-target drag, 297 the Burst meter
+    # under the arm, 300 the focus trap) and by the blind-render branch, which
+    # holds 298 and 299. The ceiling carries all five whether or not the branch
+    # reading it holds their rows -- the alternative is two branches each
+    # thinking 296 is free.
+    "EB": 300,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -1180,6 +1186,10 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # non-finite value at three doors and names the node chain -- and it
         # stays OPEN because the SOURCE of that value was not reproduced.
         292, 293, 294, 295,  # 293-295: Kokomi round-two seat, text, render, HP
+        # 296/297/300: [USER]'s own controller session on the deployed arm.
+        # 298 and 299 are the blind-render branch's and are listed THERE; the
+        # ceiling above carries them so neither branch re-takes the other's.
+        296, 297, 300,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

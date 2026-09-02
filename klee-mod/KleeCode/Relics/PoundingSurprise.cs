@@ -62,7 +62,19 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
 #if KLEE_OVERHAUL
             // The arm's cards say "Set off" for the action and "goes off"
             // for the event; the relic uses the event word there.
-            "Whenever a [gold]Bomb[/gold] goes off, gain 1 [gold]Spark[/gold]. "
+            //
+            // `EB-291`. THE LEAD CLAUSE IS THE WHOLE FIX. Under this arm the
+            // relic IS rule 4 -- it is the only Spark income there is -- and
+            // the Spark keyword states the same rule in the same words
+            // (`ArmKeywordTips.SparkBody`), so a player meeting both read two
+            // sources and priced a detonation at two Sparks. The r4 Opus seat
+            // did exactly that: "Word for word the same trigger and the same
+            // payout. On my first detonation I predicted 2 Sparks and got 1."
+            // Neither sentence is wrong and neither can be deleted -- the
+            // keyword has to define the word for a player who has not read the
+            // relic -- so the relic says which one of them it is.
+            "Sparks come from this: whenever a [gold]Bomb[/gold] goes off, "
+          + "gain 1 [gold]Spark[/gold]. "
 #else
             "Whenever a [gold]Bomb[/gold] detonates, gain 1 [gold]Spark[/gold]. "
 #endif

@@ -41,13 +41,13 @@ public sealed class ProtoKkRally : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rally"),
-        ("description", "Apply 1 Weak. The next [gold]Companion[/gold] card you play this turn costs 1 less."),
+        ("description", "Apply {PowerAmount:diff()} Weak. The next [gold]Companion[/gold] card you play this turn costs 1 less."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,12 +60,12 @@ public sealed class ProtoKkRally : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
         await KokomiOverhaulKit.NextCompanionDiscount(choiceContext, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

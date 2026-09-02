@@ -753,6 +753,72 @@ where five Block against an eight-damage intent prevents five and three is
 what gets through. It fires only on the exact residual identity with all three
 numbers on the page, because a false MISREAD is worse than a missed one.
 
+**A local backend for WHOLE-RUN blind play — built, tested, and an OPTION
+rather than a seat.** `understudy/local_play.py` is a second tester object of
+`blindplay.CodexThread`'s exact shape, backed by the same OpenAI-compatible
+endpoint everything else on this page talks to:
+
+```
+export GITS_LOCAL_MODEL_URL=http://localhost:8010/v1
+export GITS_LOCAL_MODEL_CTX=131072          # refuse, never truncate
+python -m understudy.blindplay session --backend local \
+    --max-actions 40 --max-wall-s 5400
+# GITS_LOCAL_PLAY_TOKENS   optional — the answer ceiling, default 4096
+# GITS_LOCAL_SEAT_FAMILY   optional — override the derived vendor family
+```
+
+`--backend codex` is the default and the Codex path is unchanged, flag or no
+flag. **`blindplay.Session` is not forked**: the same system prompt, the same
+`prompt_sha256`, the same per-screen page, the same one-command-per-screen
+grammar, the same transcript rows, the same fight and run questions verbatim,
+the same `wire.json`, the same budgets and the same refusal handling. What the
+backend adds is the transport — the run's context is kept HERE, in the
+thread's own message list, because a chat route is stateless where `codex exec
+resume` is not, and the reply shape codex is handed as `--output-schema` goes
+out both as `response_format: json_schema` and as an OUTPUT FORMAT block
+appended after the page (the belt `local_seat` already established; a server
+with no grammar support costs one retry and records `schema_enforced: false`).
+
+**Reasoning is stripped before the command parser and kept.** Both shapes: the
+`reasoning_content` field `--reasoning-format deepseek` returns, and the
+`<think>…</think>` block a server launched without it inlines. The scratchpad
+lands in the run's transcript row (`kind: "local_reply"`) and in the turn's own
+`reasoning.txt`, and never in the committed record.
+
+**Nothing is truncated in either direction, and both ends refuse.**
+`answer_truncated` (a reply that stopped at the ceiling) is the tester seat's
+first condition applied to the run lane; `prompt_exceeds_ctx` is its twin —
+a run's conversation grows by a page and a reply per screen, so **the window
+is the thing to size before a live run**, and when it fills the run STOPS with
+its fight records intact rather than playing on from a page it was half shown.
+
+**The record says which chair played it.** `model_requested: local`,
+`model_observed:` the name the endpoint reported, `server_version:` where the
+server volunteers one, and `seat_family:` the VENDOR family (`qwen` on this
+box) — because R217 C is read by model family and the authorship family
+`local` names a chair rather than a vendor. `blindness:` says in words that
+this backend's claim is **STRUCTURAL** — HTTP posts with no tools, no
+filesystem and no repo root — where the Codex seat's is transcript-proved, and
+that `seat_used_tools` has no counterpart on this route. R217 C is asked twice
+at construction: once on `local:<name>` for attribution, and once on the bare
+served name, which refuses the AUTHOR's own weights however they are served.
+
+**WHY IT IS AN OPTION AND NOT A SEAT.** The Codex seat's ADVANCE (2026-08-29)
+covered the **staged single-turn tester seat only**, and attached the four
+conditions above. Whole-run blind play is a different and much longer-horizon
+job — forty screens of accumulated context against one board — and no seat has
+been asked whether the local model holds it. So **no round rests on this**, and
+whether it ever does is a pick for [USER]. Everything the local grader is not
+is true here: not human validation, not balance evidence, not an approved
+doctrine seat, and grader work, the doctrine gate and the Codex seat's own
+whole-fight blind play are where this page already puts them.
+
+`tier0/tests/test_understudy_local_play.py` runs the whole loop with **no game
+and no model server** — `blindplay.ScriptedWire` over the recorded fixtures for
+the game, and a loopback HTTP stub speaking `/v1/models`, `/props` and
+`/v1/chat/completions` for the model — so the wire itself is tested rather than
+patched away.
+
 ### Blind play (`EB-167` / `EB-168`)
 
 The same blindness widened from one staged turn to a whole run, and a seat

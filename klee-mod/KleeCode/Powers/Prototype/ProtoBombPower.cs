@@ -129,10 +129,34 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     private const string WeakTotal =
         "{Size} Pyro damage in total, after [gold]Weak[/gold].";
 
-    private const string Bombs = " Bombs here: {Amount}.";
+    /// <summary>
+    /// `EB-289`. <c>{Count}</c> AND NOT <c>{Amount}</c>, and the difference is
+    /// the whole defect.
+    ///
+    /// <c>PowerModel</c> binds <c>{Amount}</c> to its own stack amount
+    /// (<c>locString.Add("Amount", Amount)</c>), and this power's stack is
+    /// raised once per <see cref="Place"/> and never lowered: the charge list
+    /// is emptied by <see cref="TakeAll"/>, <see cref="TakeMines"/> and
+    /// <see cref="TakeAt"/>, which are PURE by design -- they run inside a
+    /// damage hook where no command may -- so none of them can move a stack.
+    /// A pile whose Mine had already gone off therefore kept printing the Mine
+    /// in its count.
+    ///
+    /// The r4 Opus seat read exactly that and worked out why unaided: "Bomb 8
+    /// ... Bombs here: 2", a Set off that dealt 8 and paid ONE Spark, and
+    /// "its Mine had already self-popped on the previous enemy turn, so only
+    /// one bomb should have remained". The SPARK was right -- rule 4 pays one
+    /// per explosion and one Bomb went off -- and the COUNT was the lie.
+    ///
+    /// So the count joins <c>{Size}</c> and <c>{Mines}</c> as a var read off
+    /// the charge list itself in <see cref="SyncDisplay"/>. Every number on
+    /// this face now comes from the list the explosions consume, and the stack
+    /// amount is left to be what the engine uses it for.
+    /// </summary>
+    private const string Bombs = " Bombs here: {Count}.";
 
     private const string BombsWithMines =
-        " Bombs here: {Amount}, including {Mines} "
+        " Bombs here: {Count}, including {Mines} "
       + "[gold]Mine{Mines:plural:|s}[/gold].";
 
     private const string GrowthSentence =
@@ -225,7 +249,14 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     public override int DisplayAmount => TotalSize;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new DynamicVar[] { new SetOffDamageVar(), new DynamicVar("Mines", 0m) };
+        new DynamicVar[]
+        {
+            new SetOffDamageVar(),
+            new DynamicVar("Mines", 0m),
+            // `EB-289`: the live charge count. See `Bombs` above for why the
+            // stack amount could not be it.
+            new DynamicVar("Count", 0m),
+        };
 
     /// <summary>
     /// <c>{Size}</c>, READ LIVE. <c>EB-265</c>.
@@ -314,6 +345,9 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         var mines = DynamicVars["Mines"];
         mines.BaseValue = MineCount;
         mines.ResetToBase();
+        var count = DynamicVars["Count"];
+        count.BaseValue = _charges.Count;
+        count.ResetToBase();
         InvokeDisplayAmountChanged();
     }
 

@@ -114,13 +114,121 @@ internal static class NonFiniteCardGuard
     /// the engine calls impossible, and a reporter that threw would replace a
     /// drawn-wrong frame with a lost run.
     /// </summary>
-    internal static void ReportOnce(string what, Node? node)
+    internal static void ReportOnce(string what, Node? node) =>
+        ReportOnce(what, node, detail: null);
+
+    /// <summary>
+    /// THE SOURCE HUNT'S INSTRUMENT (`EB-292`, second pass). The first live
+    /// catch printed the node chain and nothing else, and the chain alone
+    /// cannot decide between the three candidate origins -- so this adds, in
+    /// one line, exactly the readings that separate them.
+    ///
+    /// WHAT THE DECOMPILE ALREADY RULES OUT, so the log does not have to.
+    /// `NCardTrail` INTEGRATES NOTHING: <c>_Process</c> forces its own
+    /// <c>GlobalPosition</c> to zero and hands <c>CreatePoint</c> the raw
+    /// <c>_parent.GlobalPosition</c>; <c>delta</c> is used only to age points.
+    /// One level up, <c>NCardTrailVfx._Process</c> copies
+    /// <c>_nodeToFollow.GlobalPosition</c> -- the played <c>NCard</c> Control
+    /// -- verbatim. So a velocity integrated while paused is not a mechanism
+    /// this code has, and the followed position IS the card's.
+    ///
+    /// THE HYPOTHESIS, which is what the extra readings test.
+    /// <c>NCardFlyVfx.PlayAnim</c> drives the card with
+    /// <c>_card.GlobalPosition = MathHelper.BezierCurve(_startPos, _endPos, c,
+    /// time / _duration)</c>, where <c>time += _speed * GetProcessDeltaTime()</c>
+    /// and <c>_speed += _accel * GetProcessDeltaTime()</c>. The loop tests
+    /// <c>time / _duration &lt;= 1</c> at the TOP and advances <c>time</c>
+    /// inside, so the last iteration always evaluates the curve at a t that has
+    /// already overshot -- by one frame's delta over
+    /// <c>_duration in [1, 1.75]</c>. The curve is a QUADRATIC
+    /// (<c>(1-t)^2 v0 + 2(1-t)t c0 + t^2 v1</c>) and is not clamped, so past
+    /// t = 1 it EXTRAPOLATES: |position| grows as t^2 times a control-point
+    /// offset the same method sets as high as 500 + 400 px. t near 10^3
+    /// therefore lands near 10^9, which is the magnitude the live catch
+    /// recorded (-8.8e9, -4.9e8). And <c>GetProcessDeltaTime()</c> is
+    /// TIME-SCALED: the seat's session holds <c>Engine.TimeScale</c> at 3
+    /// (`understudy/soak.py` TIME_SCALE) on top of FastMode=Instant, so one
+    /// stalled frame is three stalled frames' worth of t.
+    ///
+    /// So the readings below are the hypothesis's own terms: the followed node
+    /// and its owner card name WHICH card was mid-flight, the time scale and
+    /// the frame delta say how far one frame could have carried t, and the
+    /// distance says how far it did. A catch whose delta is an ordinary 16 ms
+    /// at TimeScale 1 falsifies this outright, which is the point of logging
+    /// it.
+    /// </summary>
+    internal static void ReportOnce(string what, Node? node, string? detail)
     {
         if (_reported) return;
         _reported = true;
         Log.Warn($"[{KleeMod.ModId}] EB-292: refused a non-finite {what}; "
                + $"the card trail would have allocated without bound. "
-               + $"Node chain: {Chain(node)}");
+               + $"Node chain: {Chain(node)}"
+               + (string.IsNullOrEmpty(detail) ? "" : $" | {detail}")
+               + $" | {Pacing(node)}");
+    }
+
+    /// <summary>
+    /// The engine's own pacing dials at the moment of the catch. Guarded like
+    /// everything else here: this runs on a scene the engine has already
+    /// called impossible.
+    /// </summary>
+    private static string Pacing(Node? node)
+    {
+        try
+        {
+            var delta = node != null && GodotObject.IsInstanceValid(node)
+                ? node.GetProcessDeltaTime().ToString("G6")
+                : "(no node)";
+            return $"timeScale={Engine.TimeScale:G6} maxFps={Engine.MaxFps} "
+                 + $"fps={Engine.GetFramesPerSecond():G6} frameDelta={delta}";
+        }
+        catch (Exception e)
+        {
+            return $"pacing unreadable: {e.GetType().Name}";
+        }
+    }
+
+    /// <summary>
+    /// The node a trail FOLLOWS, and the card that owns it -- the two readings
+    /// the first catch could not supply, because both live on nodes the guard
+    /// is not handed. Resolved reflectively through <c>AccessTools</c> so a
+    /// rename in either engine type degrades to a named miss rather than a
+    /// throw inside a reporter.
+    /// </summary>
+    internal static string FollowedBy(NCardTrail? trail)
+    {
+        try
+        {
+            if (trail == null || !GodotObject.IsInstanceValid(trail))
+            {
+                return "followed=(no trail)";
+            }
+            var parent = AccessTools
+                .FieldRefAccess<NCardTrail, Node2D>("_parent")?.Invoke(trail);
+            var followed = parent != null && GodotObject.IsInstanceValid(parent)
+                ? Describe(parent) : "(unreadable)";
+
+            // The trail's own owner is the NCardTrailVfx two levels up, whose
+            // `_nodeToFollow` is the played card. `NCard.Model` names it.
+            var vfx = parent?.GetParent() as NCardTrailVfx;
+            var card = vfx == null ? null : AccessTools
+                .FieldRefAccess<NCardTrailVfx, Control>("_nodeToFollow")
+                ?.Invoke(vfx);
+            var cardName = card switch
+            {
+                null => "(no card)",
+                NCard n when GodotObject.IsInstanceValid(n) =>
+                    (n.Model?.Id.ToString() ?? "(no model)")
+                  + $" gpos={n.GlobalPosition} size={n.Size}",
+                _ => Describe(card),
+            };
+            return $"followed={followed} card={cardName}";
+        }
+        catch (Exception e)
+        {
+            return $"followed unreadable: {e.GetType().Name}";
+        }
     }
 
     /// <summary>The node and its ancestors, each with the transform numbers
@@ -147,7 +255,7 @@ internal static class NonFiniteCardGuard
         return sb.ToString();
     }
 
-    private static string Describe(Node node)
+    internal static string Describe(Node node)
     {
         try
         {
@@ -221,10 +329,16 @@ internal static class NCardTrail_CreatePoint_NonFiniteGuard_Patch
             {
                 return true;
             }
-            NonFiniteCardGuard.ReportOnce("card-trail travel", __instance);
+            NonFiniteCardGuard.ReportOnce(
+                "card-trail travel", __instance,
+                $"from={from} to={pointPos} travel={from.DistanceTo(pointPos):G6} "
+              + $"cap={NonFiniteCardGuard.MaxTrailTravelPx:G6} | "
+              + NonFiniteCardGuard.FollowedBy(__instance));
             return false;
         }
-        NonFiniteCardGuard.ReportOnce("card-trail point", __instance);
+        NonFiniteCardGuard.ReportOnce(
+            "card-trail point", __instance,
+            $"point={pointPos} | " + NonFiniteCardGuard.FollowedBy(__instance));
         return false;
     }
 }

@@ -48,7 +48,7 @@ public sealed class ProtoKoBigBaddaBoom : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Big Badda Boom"),
-        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. Then deal damage equal to the total size of the [gold]Bombs[/gold] set off."),
+        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. Then hit again for the damage the [gold]Bombs[/gold] dealt."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

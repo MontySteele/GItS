@@ -252,7 +252,7 @@
 - {id: proto_ko_big_badda_boom, name: "Big Badda Boom", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold]. Deal 12 damage. Then deal damage equal to the total size of the [gold]Bombs[/gold] set off.",
+   description: "[gold]Set off[/gold]. Deal 12 damage. Then hit again for the damage the [gold]Bombs[/gold] dealt.",
    effects: [{op: set_off, target: enemy, damage: 12},
              {op: damage_set_off_total, target: enemy}]}
 
@@ -732,9 +732,9 @@
 - {id: proto_kk_read_the_field, name: "Read the Field", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 3 Block. [gold]Plan[/gold]: Gain 8 Block.",
-   effects: [{op: block, amount: 3}],
-   plan: [{op: block, amount: 8}]}
+   description: "Gain 4 Block. [gold]Plan[/gold]: Gain 10 Block.",
+   effects: [{op: block, amount: 4}],
+   plan: [{op: block, amount: 10}]}
 
 - {id: proto_kk_exposed_flank, name: "Exposed Flank", character: kokomi,
    authored_by: [claude],
