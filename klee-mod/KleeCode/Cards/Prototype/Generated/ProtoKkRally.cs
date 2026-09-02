@@ -41,7 +41,7 @@ public sealed class ProtoKkRally : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rally"),
-        ("description", "Apply {PowerAmount:diff()} Weak. The next [gold]Companion[/gold] card you play this turn costs 1 less."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold]. The next [gold]Companion[/gold] card you play this turn costs 1 less."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

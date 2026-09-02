@@ -41,7 +41,7 @@ public sealed class ProtoKkTheCloudsLikeWaves : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Clouds Like Waves Rippling"),
-        ("description", "Whenever you apply a debuff to an enemy, gain {PowerAmount:diff()} Block."),
+        ("description", "Whenever you apply a debuff to an enemy, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

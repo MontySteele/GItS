@@ -48,7 +48,7 @@ public sealed class ProtoKoFlameDance : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Flame Dance"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. [gold]Set off[/gold] each enemy that has a non-Pyro aura."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. [gold]Set off[/gold] each enemy with a non-Pyro aura."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

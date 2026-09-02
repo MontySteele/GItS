@@ -42,7 +42,7 @@ public sealed class ProtoKoChainFuse : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chain Fuse"),
-        ("description", "Each [gold]Bomb[/gold] on target enemy grows by {Grow:diff()}."),
+        ("description", "Each [gold]Bomb[/gold] on the enemy grows by {Grow:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -1808,23 +1808,19 @@ AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
 # R240/R241 replaced the Tide with the Plan, and a page defining a dead word
 # would be teaching a tester a rule this build does not have.
 ARM_KEYWORDS: dict[str, str] = {
-    "Bomb": ("A numbered charge on an enemy. It grows at the start of your "
-             "turn and never goes off by itself. A Bomb placed on an enemy "
-             "that already has one joins it there: the badge shows their "
-             "total, and a single Set off pops them all."),
-    "Set off": ("Every Bomb on the target goes off, one at a time, each a "
-                "Pyro hit for its size, before the rest of the card."),
-    "Spark": ("Some cards cost Sparks instead of energy. No cap; gone at the "
-              "end of combat."),
+    "Bomb": ("A charge on an enemy. Grows at the start of your turn. Never "
+             "goes off by itself. Bombs on one enemy go off together when "
+             "Set off."),
+    "Set off": ("Every Bomb on the target goes off first, one at a time, "
+                "each a Pyro hit for its size."),
+    "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
+              "after combat."),
     "Mine": ("A Bomb that also goes off when its enemy attacks you, before "
-             "the hit lands. It is the same Pyro hit for its own size, so "
-             "Weak shrinks it exactly as it shrinks a Set off; the enemy's "
-             "badge prints the number."),
-    "Plan": ("Play this on the Bake-Kurage instead and the jellyfish carries "
-             "out the Plan line at the start of your next turn. The cost is "
-             "paid now either way, and planned hits land on the front enemy "
-             "unless the line says every enemy. A card with nothing but a "
-             "Plan line can only be played on the jellyfish, and says so."),
+             "the hit lands. Weak shrinks it like any Bomb; the badge shows "
+             "the number."),
+    "Plan": ("Play this on the Bake-Kurage: it carries out the Plan line at "
+             "the start of your next turn. Cost is paid now. Plans hit the "
+             "front enemy."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
 }

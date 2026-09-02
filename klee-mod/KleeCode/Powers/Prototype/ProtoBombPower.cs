@@ -77,10 +77,9 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     {
         ("title", "Bomb"),
         ("description",
-            "A charge on this enemy. It grows at the start of your turn and "
-          + "never goes off by itself. A card that says [gold]Set off[/gold] "
-          + "pops every Bomb here, one at a time, each dealing its own size as "
-          + "Pyro damage." + MineClause),
+            "A charge on this enemy. It grows at the start of your turn. "
+          + "Every [gold]Bomb[/gold] here goes off as Pyro damage when "
+          + "[gold]Set off[/gold], never by itself." + MineClause),
         // EB-260 and EB-287. FOUR ROWS, not one row with conditionals in it,
         // for the reason <see cref="SmartDescriptionLocKey"/> gives: a headless
         // pin can read a row and cannot run `LocManager`. The two axes are the
@@ -119,18 +118,18 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// name.
     /// </summary>
     private static string Face(bool mines, bool weak) =>
-        "A [gold]Set off[/gold] here deals " + (weak ? WeakTotal : PlainTotal)
+        "[gold]Set off[/gold] here deals " + (weak ? WeakTotal : PlainTotal)
       + (mines ? BombsWithMines : Bombs) + GrowthSentence
-      + (mines ? MineClause : string.Empty);
+      + (mines ? MineClause : NoSelfSentence);
 
     /// <summary>The total, and the one term a player cannot see in it. The
     /// clause is chosen off <see cref="TotalIsAfterWeak"/>, which reads the
     /// same pile state <see cref="PredictedSetOffDamage"/> reads, so the
     /// sentence and the number can never disagree.</summary>
-    private const string PlainTotal = "{Size} Pyro damage in total.";
+    private const string PlainTotal = "[blue]{Size}[/blue] Pyro damage.";
 
     private const string WeakTotal =
-        "{Size} Pyro damage in total, after [gold]Weak[/gold].";
+        "[blue]{Size}[/blue] Pyro damage after [gold]Weak[/gold].";
 
     /// <summary>
     /// `EB-289`. <c>{Count}</c> AND NOT <c>{Amount}</c>, and the difference is
@@ -156,14 +155,20 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// this face now comes from the list the explosions consume, and the stack
     /// amount is left to be what the engine uses it for.
     /// </summary>
-    private const string Bombs = " Bombs here: {Count}.";
+    private const string Bombs = " Bombs here: [blue]{Count}[/blue].";
 
     private const string BombsWithMines =
-        " Bombs here: {Count}, including {Mines} "
+        " Bombs here: [blue]{Count}[/blue], including [blue]{Mines}[/blue] "
       + "[gold]Mine{Mines:plural:|s}[/gold].";
 
     private const string GrowthSentence =
-        " Each grows at the start of your turn, and none goes off by itself.";
+        " Each grows at the start of your turn.";
+
+    /// <summary>Rule 7 on a pile with no Mine in it. A pile holding a Mine
+    /// prints <see cref="MineClause"/> INSTEAD, because "none goes off by
+    /// itself" over a pile that answers the enemy's next attack is the exact
+    /// contradiction <c>EB-260</c> was filed on.</summary>
+    private const string NoSelfSentence = " None goes off by itself.";
 
     /// <summary>
     /// EB-260 and EB-287, the selector. <c>PowerModel.SmartDescription</c>

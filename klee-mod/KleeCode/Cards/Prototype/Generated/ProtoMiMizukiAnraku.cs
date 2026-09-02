@@ -56,7 +56,7 @@ public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yumemizuki Mizuki — Anraku Secret Spring Therapy"),
-        ("description", "[gold]Swirl[/gold] the aura of ALL enemies. If you are above 70% HP, deal 18 damage to ALL enemies. Otherwise, [gold]Mend[/gold] 10."),
+        ("description", "[gold]Swirl[/gold] ALL enemies. If you are above 70% HP, deal 18 damage to ALL enemies. Otherwise, [gold]Mend[/gold] 10."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

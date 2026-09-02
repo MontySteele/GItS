@@ -51,7 +51,7 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Slack Water (proto)"),
-        ("description", "Deal {Damage:diff()} damage. Apply {PowerAmount:diff()} Weak. [gold]Plan[/gold]: every enemy gains 2 Weak."),
+        ("description", "Deal {Damage:diff()} damage. Apply {PowerAmount:diff()} [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Weak[/gold] to ALL enemies."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };

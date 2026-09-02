@@ -41,14 +41,14 @@ public sealed class ProtoKoTheBigOne : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this), this);
+        ArmKeywordTips.ForSetOff(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_the_big_one");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Big One"),
-        ("description", "[gold]Set off[/gold]. [gold]Bombs[/gold] set off this way deal double. Deal {Damage:diff()} damage."),
+        ("description", "[gold]Set off[/gold] for double damage. Deal {Damage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

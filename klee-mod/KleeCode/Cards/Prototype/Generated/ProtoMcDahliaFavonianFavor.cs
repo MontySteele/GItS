@@ -49,7 +49,7 @@ public sealed class ProtoMcDahliaFavonianFavor : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dahlia — Favonian Favor (proto)"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Whenever a reaction happens this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Whenever an [gold]Elemental Reaction[/gold] happens this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -52,7 +52,7 @@ public sealed class ProtoMiChioriHasode : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chiori — Fluttering Hasode"),
-        ("description", "Summon [gold]Tamoto[/gold]: for {PowerAmount:diff()} turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold]."),
+        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

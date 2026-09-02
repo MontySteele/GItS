@@ -52,7 +52,7 @@ public sealed class ProtoMcEulaGlacialIllumination : CustomCardModel, ICompanion
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Eula — Glacial Illumination"),
-        ("description", "Place a [gold]Lightfall Sword[/gold] on target enemy: for {PowerAmount:diff()} turns it counts your [gold]Attacks[/gold]; then it deals 8 damage plus 5 per [gold]Attack[/gold] counted."),
+        ("description", "Place a [gold]Lightfall Sword[/gold] on the enemy. After {PowerAmount:diff()} turns it deals 8 damage, plus 5 for each Attack you played meanwhile."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

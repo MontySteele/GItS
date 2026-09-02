@@ -49,7 +49,7 @@ public sealed class ProtoMcNicoleRevelation : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Nicole — Revelation, Uncreated Light"),
-        ("description", "At the start of your turn, gain 5 [gold]Block[/gold]. If you had [gold]Block[/gold] left at the end of your last turn, also gain 2 [gold]Strength[/gold]."),
+        ("description", "At the start of your turn, gain 5 [gold]Block[/gold], and 2 [gold]Strength[/gold] if you ended last turn with [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

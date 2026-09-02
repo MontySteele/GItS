@@ -52,7 +52,7 @@ public sealed class ProtoMcRazorLightningFang : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Razor — Lightning Fang"),
-        ("description", "For {PowerAmount:diff()} turns, your [gold]Attacks[/gold] apply [gold]Electro[/gold] and deal 3 more damage."),
+        ("description", "For {PowerAmount:diff()} turns, your Attacks apply [gold]Electro[/gold] and deal 3 additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -52,7 +52,7 @@ public sealed class ProtoMiAyatoKyouka : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kamisato Ayato — Kyouka"),
-        ("description", "For {PowerAmount:diff()} turns, your [gold]Attacks[/gold] apply [gold]Hydro[/gold] and deal 4 more damage. When it ends, deal 12 [gold]Hydro[/gold] damage to a random enemy."),
+        ("description", "For {PowerAmount:diff()} turns, your Attacks apply [gold]Hydro[/gold] and deal 4 additional damage. Then deal 12 [gold]Hydro[/gold] damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

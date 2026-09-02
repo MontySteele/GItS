@@ -52,10 +52,9 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
     {
         ("title", "Bake-Kurage"),
         ("description",
-            "The jellyfish is on the field for the whole combat and enemies "
-          + "cannot touch it. Play a card with a [gold]Plan[/gold] line on it "
-          + "and the jellyfish carries that line out at the start of your next "
-          + "turn."),
+            "Enemies cannot target it. Lasts all combat. Play a "
+          + "[gold]Plan[/gold] card on it: it carries out the "
+          + "[gold]Plan[/gold] at the start of your next turn."),
     };
 
     public override PowerType Type => PowerType.Buff;

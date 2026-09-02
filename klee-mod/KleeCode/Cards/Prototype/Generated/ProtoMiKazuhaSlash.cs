@@ -59,7 +59,7 @@ public sealed class ProtoMiKazuhaSlash : CustomCardModel, IElementalCard, ICompa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaedehara Kazuha — Kazuha Slash"),
-        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. [gold]Swirl[/gold] each."),
+        ("description", "Deal {CalculatedDamage:diff()} damage and [gold]Swirl[/gold] ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

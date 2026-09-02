@@ -67,14 +67,18 @@ public class ArmKeywordTipTests
 
             var body = SparkBody();
 
-            // Rule 4, with the rate READ from the law rather than typed: this
-            // assertion is built from the constant, so a repricing moves the
-            // expectation and the sentence together (`EB-89`).
+            // Rule 4, with the opening bank READ from the law rather than
+            // typed, so a repricing moves the expectation and the sentence
+            // together (`EB-89`). The per-explosion RATE is stated once, on
+            // Pounding Surprise, and the tip names the relic instead of
+            // restating it: two statements of one income is what the r4 seat
+            // double-counted (`EB-291`).
             Assert.Contains(
-                "You start each combat with " + KleeOverhaulLaw.OpeningSpark
-                + " and gain " + KleeOverhaulLaw.SparkPerExplosion
-                + " whenever a [gold]Bomb[/gold] goes off.", body);
-            Assert.Contains("No cap; gone at the end of combat.", body);
+                "Start each combat with " + KleeOverhaulLaw.OpeningSpark
+                + ". Pounding Surprise grants more.", body);
+            Assert.DoesNotContain("whenever a [gold]Bomb[/gold] goes off",
+                                  body);
+            Assert.Contains("Gone after combat.", body);
         }
         finally
         {
@@ -100,13 +104,15 @@ public class ArmKeywordTipTests
                                   body);
             // R242 pick 1's opening bank is the overhaul's rule too, so the
             // Sparks arm must not claim it either.
-            Assert.DoesNotContain("start each combat", body);
+            Assert.DoesNotContain("Start each combat", body);
+            Assert.DoesNotContain("Pounding Surprise", body);
             // And the half that is true on BOTH arms is still said: the
             // alternative cost is live in every prototype build.
             Assert.False(SparkPower.BaseRuleActive);
             Assert.Contains(
-                "Some cards cost [gold]Sparks[/gold] instead of energy.", body);
-            Assert.Contains("No cap; gone at the end of combat.", body);
+                "Some cards cost [gold]Sparks[/gold] instead of Energy, with no "
+                + "cap.", body);
+            Assert.Contains("Gone after combat.", body);
         }
         finally
         {
@@ -135,7 +141,7 @@ public class ArmKeywordTipTests
         var printed = Printed("ForSetOff");
 
         Assert.Contains("one at a time", printed);
-        Assert.Contains("before the rest of the card", printed);
+        Assert.Contains("goes off first", printed);
     }
 
     [Fact]
@@ -147,8 +153,8 @@ public class ArmKeywordTipTests
         // other one if the two were ever merged.
         var printed = Printed("ForBomb");
 
-        Assert.Contains("A numbered charge on an enemy. It grows by ", printed);
-        Assert.Contains(" at the start of your turn and never goes off by "
+        Assert.Contains("A charge on an enemy. Grows by ", printed);
+        Assert.Contains(" at the start of your turn. Never goes off by "
                       + "itself.", printed);
 
         // `EB-89`, read the only way it can be read: the growth rate is NOT a

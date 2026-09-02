@@ -56,7 +56,7 @@ public sealed class ProtoMcMonaStellarisPhantasm : CustomCardModel, ICompanionCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mona — Stellaris Phantasm"),
-        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, enemies take 50% more damage."),
+        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, apply 1 [gold]Vulnerable[/gold] to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

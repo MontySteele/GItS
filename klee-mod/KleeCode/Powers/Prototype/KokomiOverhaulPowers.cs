@@ -34,8 +34,8 @@ public sealed class TreatisePower
     {
         ("title", "Treatise"),
         ("description",
-            "Whenever the jellyfish carries out a [gold]Plan[/gold], draw "
-          + "{Amount} card{Amount:plural:|s}."),
+            "Whenever the [gold]Bake-Kurage[/gold] carries out a "
+          + "[gold]Plan[/gold], draw [blue]{Amount}[/blue] card{Amount:plural:|s}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -70,8 +70,8 @@ public sealed class SongOfPearlsPower
     {
         ("title", "Song of Pearls"),
         ("description",
-            "Whenever the jellyfish carries out a [gold]Plan[/gold], gain "
-          + "{Amount} Block."),
+            "Whenever the [gold]Bake-Kurage[/gold] carries out a "
+          + "[gold]Plan[/gold], gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -101,7 +101,7 @@ public sealed class PlansAlsoNowPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "The Moon Overlooks the Waters"),
-        ("description", "[gold]Plans[/gold] also happen now."),
+        ("description", "[gold]Plans[/gold] also happen when played."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -130,7 +130,8 @@ public sealed class CloudsLikeWavesPower : PowerModel, ILocalizationProvider
     {
         ("title", "The Clouds Like Waves Rippling"),
         ("description",
-            "Whenever you apply a debuff to an enemy, gain {Amount} Block."),
+            "Whenever you apply a debuff to an enemy, gain [blue]{Amount}[/blue] "
+          + "[gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -168,8 +169,8 @@ public sealed class GeneralsBannerPower : PowerModel, ILocalizationProvider
     {
         ("title", "The General's Banner"),
         ("description",
-            "Whenever you play a [gold]Companion[/gold] card, the front enemy "
-          + "gains {Amount} Weak."),
+            "Whenever you play a [gold]Companion[/gold] card, apply "
+          + "[blue]{Amount}[/blue] [gold]Weak[/gold] to the front enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -216,7 +217,7 @@ public sealed class NextCompanionDiscountPower : PowerModel, ILocalizationProvid
         ("title", "Rally"),
         ("description",
             "The next [gold]Companion[/gold] card you play this turn costs "
-          + Discount + " less."),
+          + "[blue]" + Discount + "[/blue] less."),
     };
 
     public override PowerType Type => PowerType.Buff;

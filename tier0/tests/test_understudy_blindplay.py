@@ -3415,7 +3415,7 @@ def test_an_arm_keyword_prints_one_definition_per_screen():
     assert "## Words on this screen" in page
     assert page.count("- **Set off** ") == 1
     assert page.count("- **Bomb** ") == 1
-    assert "before the rest of the card" in page
+    assert "goes off first" in page
 
 
 def test_a_keyword_no_face_on_the_screen_prints_is_never_defined():
@@ -3465,17 +3465,16 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
     anchors = {
-        "Bomb": ["A numbered charge on an enemy", "goes off by itself",
-                 "joins it there", "pops them all"],
-        "Set off": ["on the target goes off, one at a time",
-                    "before the rest of the card"],
-        "Spark": ["instead of energy. No cap;", "gone at the end of combat"],
+        "Bomb": ["A charge on an enemy", "Never goes off by itself",
+                 "go off together when"],
+        "Set off": ["on the target goes off first, one at a",
+                    "each a Pyro hit for its size"],
+        "Spark": ["instead of Energy, with no cap", "Gone after combat"],
         "Mine": ["that also goes off when its enemy attacks",
                  "before the hit lands",
-                 "the enemy's badge prints the number"],
-        "Plan": ["The cost is paid now either way",
-                 "land on the front enemy unless the line says every enemy",
-                 "the jellyfish, and says so"],
+                 "the badge shows the number"],
+        "Plan": ["it carries out the ",
+                 "paid now. Plans hit the front enemy"],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
     }
