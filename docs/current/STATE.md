@@ -144,8 +144,8 @@ are in [`workstreams.md`](workstreams.md).
   only on Ka-pow!) is built and deployed as round 3 (PR #261,
   0.2.1966+proto); the seats are playing it and [USER]'s run follows;
   `EB-285` to `EB-287` are the Opus seat's finds.
-- **Kokomi** — the overhaul went back to the brief: R240 makes the Plan her
-  chassis (a card played on the Bake-Kurage is carried out next turn at its
+- **Kokomi** — the overhaul went back to the brief: the Plan is her
+  chassis, ruled 2026-09-02 on PR #258 (a card played on the Bake-Kurage is carried out next turn at its
   Plan line); brief draft 6 is the live Paper artefact (PR #258, [USER]
   reads it before the slice). The shipped kit and `C.KURAGE_MEMORY` stand.
 - **Furina** — the reframe is countersigned (R220 A), slice 1 is built in the
