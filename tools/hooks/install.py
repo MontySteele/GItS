@@ -92,18 +92,24 @@ fi
 
 cd "$top" || exit 1
 
-# git EXPORTS these to its hooks, and the checks below shell out to git in
-# temporary repositories of their own -- with GIT_DIR still pointing at the
-# real one, those tests operate on THIS repo instead. Measured 2026-09-02, and
-# it is not merely noisy: `tier0/tests/test_rulings_index.py` builds a fake
-# history by committing, so the first run of this hook without the scrub wrote
-# six fixture commits onto the pushing worktree's branch, re-inited the shared
-# repo bare, and did the same to three sibling worktrees whose agents pushed in
-# the same minutes. 26 tests failed and the damage was real. Scrub first.
-# (pre_push_gate.py scrubs the same list in the child environment it builds;
-# this is the shell half, for the inline arm below.)
+# EVERY GIT_* VARIABLE GOES, and this is the highest-consequence line here.
+#
+# git EXPORTS its own state into a hook's environment, and GIT_DIR OUTRANKS the
+# working directory. The suite is full of fixtures that build a repository under
+# tmp_path and commit into it -- with GIT_DIR inherited, those commits land in
+# the REAL repository, on the branch being pushed. On 2026-09-02 the first
+# pushes made after this hook was installed put fixture commits onto two other
+# agents' branches, deleted a tracked file on one, left a stray
+# refs/heads/origin/main and a fixture-ledger tag behind, re-inited the shared
+# repo core.bare=true, and caused 28 index.lock collisions on a third worktree.
+#
+# By PREFIX, not by list: the variable nobody has invented yet is the one that
+# does this again. The explicit unsets are the fallback for a shell where the
+# loop cannot run at all. pre_push_gate.py scrubs the same way in the child
+# environment it builds; this is the shell half, which the inline arm needs.
+for v in $(env | sed -n 's/^\\(GIT_[A-Za-z0-9_]*\\)=.*/\\1/p'); do unset "$v"; done
 unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_QUARANTINE_PATH
-unset GIT_REFLOG_ACTION GIT_INTERNAL_GETTEXT_TEST_FALLBACKS
+unset GIT_COMMON_DIR GIT_OBJECT_DIRECTORY GIT_REFLOG_ACTION
 
 if [ -f "$gate" ]; then
   exec "$PY" "$gate" "$@"
@@ -320,6 +326,11 @@ def self_test() -> int:
         failures.append("self-test FAIL [env]: the shim does not scrub GIT_DIR, "
                         "so every test that makes its own repository will "
                         "write into this one")
+    cases += 1
+    if "GIT_[A-Za-z0-9_]*" not in SHIM:
+        failures.append("self-test FAIL [env]: the shim scrubs a NAMED LIST "
+                        "only. Deny by prefix -- the git variable nobody has "
+                        "invented yet is the one that does this again")
 
     for line in failures:
         print(line)

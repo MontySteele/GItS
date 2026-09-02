@@ -133,14 +133,29 @@ def _child_env(cwd: Path) -> dict[str, str]:
     # an inherited PYTHONPATH aimed at another checkout would import that
     # tree's modules while pytest collected this one's tests.
     env["PYTHONPATH"] = str(cwd)
-    # git sets these for the hook, and they leak into `python -m pytest` as a
-    # repo the child would then treat as ITS repo. Nothing here shells out to
-    # git, but tools/ does (lint_vendor_pin, the register lints), and a
-    # GIT_DIR pointing at the common dir of a DIFFERENT worktree is exactly
-    # the "gated the wrong tree" defect in a new coat.
-    for leaked in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE",
-                   "GIT_PREFIX", "GIT_QUARANTINE_PATH"):
-        env.pop(leaked, None)
+    # EVERY `GIT_*` VARIABLE GOES, and this is the highest-consequence line in
+    # the file.
+    #
+    # git EXPORTS its own state into a hook's environment -- GIT_DIR,
+    # GIT_INDEX_FILE, GIT_WORK_TREE, GIT_PREFIX, GIT_COMMON_DIR,
+    # GIT_OBJECT_DIRECTORY, GIT_QUARANTINE_PATH -- and GIT_DIR OUTRANKS THE
+    # WORKING DIRECTORY. The suite is full of fixtures that build a repository
+    # under `tmp_path` and commit into it, so with an inherited GIT_DIR those
+    # commits land in the REAL repository, on the branch being pushed.
+    #
+    # That is not a theory. On 2026-09-02 the first pushes made after this hook
+    # was installed put fixture commits onto two other agents' branches,
+    # deleted a tracked file on one of them, left a stray `refs/heads/origin/main`
+    # and a `fixture-ledger` tag in the shared repo, re-inited it with
+    # `core.bare = true`, and produced 28 `index.lock` collisions on a third
+    # worktree.
+    #
+    # DENY BY PREFIX, NOT BY LIST. A named list is the same defect one release
+    # of git later: the variable nobody has invented yet is the one that does
+    # this again. Nothing under test needs to inherit git's opinion of which
+    # repository it is in.
+    for name in [key for key in env if key.startswith("GIT_")]:
+        env.pop(name, None)
     return env
 
 
@@ -252,15 +267,24 @@ def self_test() -> int:
             failures.append("self-test FAIL [missing]: a directory that does "
                             "not exist was accepted as gateable")
 
-    # And the environment scrub, which is what keeps a hook fired from one
-    # worktree from linting another one's git state.
-    os.environ["GIT_DIR"] = "/somewhere/else/.git"
+    # THE ENVIRONMENT SCRUB. Denied by PREFIX, so a git variable nobody has
+    # heard of yet is covered too -- which is the whole point, since the one
+    # that did the damage (GIT_DIR) is only the best-known member.
+    leaks = {"GIT_DIR": "/somewhere/else/.git",
+             "GIT_INDEX_FILE": "/somewhere/else/index",
+             "GIT_COMMON_DIR": "/somewhere/else/.git",
+             "GIT_OBJECT_DIRECTORY": "/somewhere/else/objects",
+             "GIT_NOT_A_REAL_VARIABLE_YET": "1"}
+    os.environ.update(leaks)
     try:
-        if "GIT_DIR" in _child_env(repo):
-            failures.append("self-test FAIL [env]: GIT_DIR survived into the "
-                            "child environment")
+        survived = sorted(k for k in _child_env(repo) if k.startswith("GIT_"))
+        if survived:
+            failures.append(f"self-test FAIL [env]: {survived} survived into "
+                            f"the child environment; a fixture repo built by "
+                            f"the suite would commit into the real one")
     finally:
-        os.environ.pop("GIT_DIR", None)
+        for key in leaks:
+            os.environ.pop(key, None)
 
     for line in failures:
         print(line)
