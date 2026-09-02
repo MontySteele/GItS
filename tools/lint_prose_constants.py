@@ -136,6 +136,22 @@ ALLOWED: dict[tuple[str, str, str], str] = {
         "The 1 is the floor on a card's energy cost -- a rule of the base "
         "game's cost arithmetic, with no constant behind it -- and again it "
         "is the word `cost` doing the joining.",
+    # 2026-09-02, the text-conventions pass. Both joins are the bare word the
+    # base game uses for a card type: the page un-golded `Attack` on the
+    # prototype faces (card types are plain words, `RAGE_POWER`), and the
+    # lint's affinity now sees it.
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoMcMikaStarfrostSwirl.cs",
+     "SalonConstants.TickEncoreCost", "1"):
+        "Starfrost Swirl reads 'Your next Attack costs 1 less.' The 1 is an "
+        "Energy discount on a card, not the Salon's Encore tick price, and "
+        "`cost` is the only word joining them.",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoMiSaraTenguStormcall.cs",
+     "CompanionOverhaulLaw.LightfallPerAttack", "5"):
+        "Tengu Stormcall reads 'Next turn, your Attacks deal 5 additional "
+        "damage.' The 5 is Stormcall's own bonus (`StormcallBonus`, which the "
+        "POWER face interpolates); the row prints the sheet's literal, as "
+        "every authored face does, and `attack` is the only word joining it "
+        "to Eula's per-Attack 5.",
     # DROPPED 2026-09-02, and by the excuse's own last sentence. It said "the
     # card face is the row's `description:`; move the number there" -- and the
     # `EB-283` counted/flag split did exactly that: `weak` is a COUNTED power,
