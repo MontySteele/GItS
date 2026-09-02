@@ -48,7 +48,7 @@ public sealed class ProtoKkVanguard : CustomCardModel, ICharacterCard, IPlannedC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Vanguard"),
-        ("description", "Exhaust. [gold]Plan[/gold]: the front enemy gains 1 Vulnerable and 1 Weak."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: the front enemy gains 1 Vulnerable and 1 Weak."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -81,6 +81,6 @@ public sealed class ProtoKkVanguard : CustomCardModel, ICharacterCard, IPlannedC
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        RemoveKeyword(CardKeyword.Exhaust);
     }
 }

@@ -41,13 +41,14 @@ public sealed class ProtoKkSeaSaltPrayer : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sea-Salt Prayer"),
-        ("description", "Gain {Block:diff()} Block. Apply 1 Weak."),
+        ("description", "Gain {Block:diff()} Block. Apply {PowerAmount:diff()} Weak."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(4m, ValueProp.Move)
+            new BlockVar(4m, ValueProp.Move),
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,11 +62,12 @@ public sealed class ProtoKkSeaSaltPrayer : CustomCardModel, ICharacterCard
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.Block.UpgradeValueBy(3m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

@@ -201,7 +201,8 @@ def plan() -> gen.ProfilePlan:
         # Balance-stage ruling replaces the default without removing it.
         if upgrade is None:
             default = prototype_default_delta(
-                card_id, card.get("cost"), card.get("effects", []))
+                card_id, card.get("cost"), card.get("effects", []),
+                bool(card.get("exhaust")))
             upgrade = default or None
         if upgrade is not None:
             gen.register_upgrade_deltas(card_id, upgrade)

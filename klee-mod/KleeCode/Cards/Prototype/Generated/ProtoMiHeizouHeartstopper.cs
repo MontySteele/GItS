@@ -64,7 +64,8 @@ public sealed class ProtoMiHeizouHeartstopper : CustomCardModel, IElementalCard,
         {
             new CalculationBaseVar(6m),
             new ExtraDamageVar(4m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => CompanionOverhaulLedger.For(card.Owner.Creature).SwirlsThisTurn)
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => CompanionOverhaulLedger.For(card.Owner.Creature).SwirlsThisTurn),
+            new CardsVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -82,10 +83,14 @@ public sealed class ProtoMiHeizouHeartstopper : CustomCardModel, IElementalCard,
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
+        if (IsUpgraded)
+        {
+            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
     }
 }

@@ -51,7 +51,7 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Slack Water (proto)"),
-        ("description", "Deal {Damage:diff()} damage. Apply 1 Weak. [gold]Plan[/gold]: every enemy gains 2 Weak."),
+        ("description", "Deal {Damage:diff()} damage. Apply {PowerAmount:diff()} Weak. [gold]Plan[/gold]: every enemy gains 2 Weak."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
@@ -68,7 +68,8 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move)
+            new DamageVar(4m, ValueProp.Move),
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -91,11 +92,12 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

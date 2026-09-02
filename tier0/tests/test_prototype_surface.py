@@ -666,3 +666,119 @@ def test_every_prototype_mode_face_is_carried_by_the_prototype_roster():
                       for p in generated.glob("*.cs"))
     for name in faces:
         assert f"class {name} " in emitted, name
+
+
+# =============================================================================
+# The 2026-09-02 live-defect burn: what a generated FACE and a generated
+# TARGET TYPE must say. Both are read off the committed C#, because both
+# defects were "the row is right and the emitted card is not".
+# =============================================================================
+
+_GENERATED = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+              / "Generated")
+
+
+def _emitted_faces() -> dict[str, tuple[dict, str]]:
+    """Every generated prototype card as `{id: (row, printed face)}`."""
+    import re
+
+    rows = {r["id"]: r for r in yaml.safe_load(
+        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []}
+    out: dict[str, tuple[dict, str]] = {}
+    for path in sorted(_GENERATED.glob("*.cs")):
+        source = path.read_text(encoding="utf-8")
+        ident = re.search(r"Sheet entry: id=(\S+)", source)
+        face = re.search(r'\("description", "(.*)"\),', source)
+        if ident is None or face is None:
+            continue
+        row = rows.get(ident.group(1))
+        if row is not None:
+            out[ident.group(1)] = (row, face.group(1))
+    return out
+
+
+def test_no_generated_face_prints_the_exhaust_keyword_twice():
+    """`EB-293`. `exhaust: true` emits `CardKeyword.Exhaust` and the game's own
+    auto-keyword pipeline prints the banner from there, so a face that ALSO
+    writes the word prints it twice. [USER] read it off a reward screen --
+    "Exhaust. The jellyfish carries out your front Plan now. Exhaust." -- and
+    the r2 Opus seat read the same on Vanguard.
+
+    Six rows carried both spellings across two arms. The generator strips the
+    word now (`gen_klee_cards._dedupe_printed_exhaust`), so this is a class-wide
+    assertion rather than six: a seventh row written next week cannot bring it
+    back."""
+    offenders = [cid for cid, (row, face) in _emitted_faces().items()
+                 if row.get("exhaust") and "Exhaust." in face]
+    assert offenders == [], (
+        "these faces print the Exhaust banner the keyword rail already "
+        f"prints: {offenders}")
+
+
+def test_every_plan_only_row_prints_where_it_is_played():
+    """`EB-293`. A row with a `plan:` and no now-line declares
+    `KokomiTargets.PetOnly`, so the jellyfish is its ONLY legal target -- and
+    the face used to say only what the Plan does. The r2 Opus seat: "Plan-only
+    cards never say what happens if you play them normally... I never risked
+    finding out."
+
+    Read off the same test the target type is derived from, so the sentence and
+    the target cannot disagree."""
+    faces = _emitted_faces()
+    plan_only = [cid for cid, (row, _) in faces.items()
+                 if row.get("plan") and not row.get("effects")]
+    assert plan_only, "the arm has no plan-only rows -- this pin is stale"
+    for cid in plan_only:
+        assert faces[cid][1].startswith(
+            "Play on the [gold]Bake-Kurage[/gold]. "), (
+            f"{cid} is plan-only and does not print where it is played")
+    for cid, (row, face) in faces.items():
+        if row.get("plan") and row.get("effects"):
+            assert "Play on the [gold]Bake-Kurage[/gold]" not in face, (
+                f"{cid} has a now-line, so the jellyfish is not its only "
+                "target and the line would be false")
+
+
+def test_every_kokomi_row_declares_the_target_type_the_slice_states():
+    """`EB-296`, the codegen half, pinned per row for the WHOLE arm.
+
+    The slice's rule (draft 6 rule 2): a card with only a `Plan` line targets
+    the jellyfish alone; a card with both lines targets "an enemy or the
+    jellyfish" when its now-line aims at an enemy and "you or the jellyfish"
+    otherwise; a card with no `Plan` line is aimed the ordinary way. The Plan
+    clause's own aim is resolved at CARRY-OUT and never at play, so a
+    front-enemy Plan on a plan-only row must not pull the card's target toward
+    the enemy.
+
+    [USER] hit the three cases live in one session and they read as three
+    different bugs ("'ambush' has no valid selector at all"; Slack Water
+    "offers only the enemy"; Kurage's Oath fine), which is why the derivation
+    is pinned here for every row rather than for the three."""
+    import re
+
+    checked = 0
+    for path in sorted(_GENERATED.glob("*.cs")):
+        source = path.read_text(encoding="utf-8")
+        ident = re.search(r"Sheet entry: id=(\S+)", source)
+        if ident is None:
+            continue
+        rows = {r["id"]: r for r in yaml.safe_load(
+            loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []}
+        row = rows.get(ident.group(1))
+        if row is None or row.get("character") != "kokomi":
+            continue
+        if not row.get("plan"):
+            assert "KokomiTargets." not in source, (
+                f"{row['id']} has no Plan line and must not declare a "
+                "pet-accepting target type")
+            continue
+        checked += 1
+        aims_at_enemy = any(
+            fx.get("target") in ("enemy", "front_enemy")
+            for fx in row.get("effects") or [])
+        expected = ("KokomiTargets.PetOnly" if not row.get("effects")
+                    else "KokomiTargets.PetOrEnemy" if aims_at_enemy
+                    else "KokomiTargets.PetOrSelf")
+        assert expected in source, (
+            f"{row['id']} should declare {expected}")
+    assert checked >= 15, f"only {checked} Plan rows checked -- pin is stale"

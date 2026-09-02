@@ -109,6 +109,26 @@ PROTOTYPE_POWER_DELTA = 1
 PROTOTYPE_MEND_DELTA = 2
 PROTOTYPE_COST_DELTA = -1
 PROTOTYPE_COST_FLOOR = 2                 # "a card of cost 2 or more"
+PROTOTYPE_ADDED_DRAW = 1                 # the last clause's default, below
+
+#: THE FLAG/COUNTED SPLIT, in the ONE place both engines read it.
+#:
+#: A power's `amount` is two different things on two different rows. On
+#: `Rally` it is the number the face prints ("Apply 1 Weak"); on
+#: `Alice's Recipe` it is a bare ON switch for a rule with no number in it.
+#: `_proto_power` told the two apart by `amount > 1`, which is right for every
+#: flag and wrong for exactly the counted powers a row happens to print at 1 --
+#: so `Rally` and `Exposed Flank` read as "this row prints no number" and got
+#: no upgrade at all. [USER] found it from the other end ("Neither does
+#: Rally").
+#:
+#: The set is the base game's own STACKING debuffs and buffs, whose amount is
+#: always a count. A mod power is NOT admitted by default: its `amount` is a
+#: flag far more often than not, and an entry here has to be a deliberate row
+#: rather than a guess, for the same reason `_proto_power`'s doc gives.
+COUNTED_POWERS: frozenset[str] = frozenset({
+    "weak", "vulnerable", "frail", "strength", "dexterity", "poison",
+})
 
 
 def _proto_hit(effects: list[dict]) -> dict | None:
@@ -164,10 +184,15 @@ def _proto_power(effects: list[dict]) -> dict | None:
                   if fx.get("op") in ("apply_power", "buff_next_attack")), None)
     if first is None or not isinstance(first.get("amount"), int):
         return None
-    return first if first["amount"] > 1 else None
+    if first["amount"] > 1:
+        return first
+    # A COUNTED power prints its amount even at 1 (`COUNTED_POWERS`): Rally's
+    # "Apply 1 Weak" is a number, Alice's Recipe's `amount: 1` is a switch.
+    return first if first.get("power") in COUNTED_POWERS else None
 
 
-def prototype_default_delta(card_id: str, cost, effects: list[dict]) -> dict:
+def prototype_default_delta(card_id: str, cost, effects: list[dict],
+                            exhaust: bool = False) -> dict:
     """The Prototype-stage upgrade for one row, or `{}`.
 
     Pure, and effects+cost only (see the block comment above). Empty for any id
@@ -208,7 +233,43 @@ def prototype_default_delta(card_id: str, cost, effects: list[dict]) -> dict:
     # moves.
     if not delta and isinstance(cost, int) and cost >= PROTOTYPE_COST_FLOOR:
         delta["cost"] = PROTOTYPE_COST_DELTA
-    return delta
+    if delta:
+        return delta
+
+    # THE TWO LAST CLAUSES, in this order, and both are [USER]'s applied
+    # defaults from playing the arm ("'Change of Plans' has no upgrade?").
+    # Before them a 0- or 1-cost row printing no number got nothing at all,
+    # which is a card whose upgrade slot is a blank rather than a choice.
+    #
+    #   1. Exhaust comes off. The classic shape, and it is the strongest thing
+    #      an upgrade can say about a card whose numbers are all elsewhere.
+    #   2. Otherwise the card draws one more.
+    #
+    # The draw is withheld twice, and neither is a third clause -- both are the
+    # codegen refusing to emit something, which is a fact about the rule's
+    # reach rather than about its design:
+    #
+    #   * a row that ALREADY draws. Both appliers bind an added draw to one
+    #     `Cards` var, so a second is a collision the codegen names outright
+    #     (`delta 'add: draw' on a card with an existing draw`).
+    #   * a row with NO now-line at all -- a Kokomi Plan-only card. The added
+    #     effect is emitted as an `IsUpgraded`-gated tail on the effects walk,
+    #     and such a row has no walk: its whole body is `KokomiPlan.Schedule`.
+    #     The delta would declare a `Cards` var nothing reads (which
+    #     `lint_generated_structure` L2 says in as many words) and the upgrade
+    #     would do nothing. It would also be wrong on its own terms: the row's
+    #     target type is the jellyfish ALONE precisely because it does nothing
+    #     when played, and a now-line draw would contradict the card's own
+    #     printed "Play on the Bake-Kurage."
+    #
+    # Such a row keeps no default upgrade rather than a generated-wrong one.
+    # The Plan-only rows that DO have Exhaust are covered by the clause above
+    # (Vanguard, Change of Plans); the rest wait for a ruled `upgrade:` block.
+    if exhaust:
+        return {"remove": "exhaust"}
+    if not effects or any(fx.get("op") == "draw" for fx in effects):
+        return {}
+    return {"add": {"op": "draw", "amount": PROTOTYPE_ADDED_DRAW}}
 
 
 def _external_pool_for(sheet: Path) -> Path:
@@ -368,7 +429,7 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
         # of a number nobody has ruled yet.
         authored = dict(card.upgrade) if card.upgrade else {}
         delta = authored or prototype_default_delta(
-            card.id, card.cost, card.effects)
+            card.id, card.cost, card.effects, bool(getattr(card, "exhaust", False)))
         if not delta:
             continue
         if card.id in merged:

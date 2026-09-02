@@ -60,7 +60,7 @@ beside; a Plan-only card is priced as a card that does nothing this turn.
 |---|---|---|---|---|
 | Feint | C | 1 | Attack | Deal 4 damage. Plan: Deal 9 damage. |
 | Ambush | C | 1 | Skill | Plan: Deal 12 damage. |
-| Read the Field | C | 1 | Skill | Gain 3 Block. Plan: Gain 8 Block. |
+| Read the Field | C | 1 | Skill | Gain 4 Block. Plan: Gain 10 Block. |
 | Exposed Flank | C | 1 | Skill | Apply 1 Vulnerable. Plan: every enemy gains 2 Vulnerable. |
 | Treatise | U | 1 | Power | Whenever the jellyfish carries out a Plan, draw 1. |
 | Song of Pearls | U | 1 | Power | Whenever the jellyfish carries out a Plan, gain 3 Block. |

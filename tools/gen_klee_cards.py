@@ -7427,7 +7427,7 @@ def build_description(card: dict) -> str:
     row carries the key.
     """
     if card.get("description"):
-        return _authored_face_with_tokens(card)
+        return _face_riders(card, _authored_face_with_tokens(card))
     parts = []
     deltas = upgrade_plan(card)[0]
     for field, label in (("encore_cost", "Encore"),
@@ -8275,7 +8275,72 @@ def build_description(card: dict) -> str:
         if sly_text:
             parts.append(f"[gold]Sly[/gold]: {sly_text}")
 
-    return " ".join(parts)
+    return _face_riders(card, " ".join(parts))
+
+
+# `Exhaust.` as the face's OWN first or last sentence, which is the only place
+# the keyword banner is ever written. Deliberately anchored rather than swept:
+# `Bounty of the Isles` ends a clause with "...when they Exhaust." and
+# `Moon's Reflection` names "your exhaust pile" mid-sentence, and neither is the
+# banner. An anchored pattern cannot reach either.
+_PRINTED_EXHAUST = re.compile(r"^Exhaust\.\s*|\s*(?<=\.)\s*Exhaust\.$")
+
+
+def _face_riders(card: dict, text: str) -> str:
+    """The two clauses a row's face gets from its own FIELDS rather than from
+    its words. Applied to both faces -- the rendered one and a row's authored
+    one -- because a defect that only bites authored rows today is still a
+    defect the next rendered row inherits.
+
+    `EB-293`. Both are live defects from [USER]'s own play of the arm.
+    """
+    return _plan_only_line(card, _dedupe_printed_exhaust(card, text))
+
+
+def _dedupe_printed_exhaust(card: dict, text: str) -> str:
+    """`EB-293`, first half: a face may not print `Exhaust.` at all when the
+    row already declares `exhaust: true`.
+
+    THE KEYWORD RAIL ALREADY PRINTS IT. `exhaust: true` emits
+    `CardKeyword.Exhaust` into `CanonicalKeywords`, and the game's own
+    auto-keyword pipeline renders the banner from there -- which is why the
+    rendered path has never hand-written the word (see the note beside the
+    `keywords` list in `emit`). A row that states its OWN face (`EB-215`) has
+    no such discipline behind it, and six of the seven prototype rows carrying
+    both spellings duly printed the word twice: [USER] read
+    `Exhaust. The jellyfish carries out your front Plan now. Exhaust.` off a
+    reward screen, and the r2 Opus seat read the same on `Vanguard`.
+
+    FIXED HERE AND NOT IN THE ROWS, once, because "never both" has to be a
+    property of the generator rather than of seven hand-edits: an eighth row
+    written next week gets it for free. The sheet keeps its human-readable
+    sentence and the emitted face drops it.
+    """
+    if not card.get("exhaust"):
+        return text
+    return _PRINTED_EXHAUST.sub("", text).strip()
+
+
+def _plan_only_line(card: dict, text: str) -> str:
+    """`EB-293`, second half: a PLAN-ONLY row says where it is played.
+
+    THE RULE IS ALREADY IN THE CARD'S TYPE and was printed nowhere. A row with
+    a `plan:` and no now-line declares `KokomiTargets.PetOnly`
+    (`CustomTargetType.Pet`), so the jellyfish is its only legal target -- but
+    the face said only what the Plan does, and the blind grammar offered
+    `play "<card>" [on "<enemy>"]` for it like any other card. The r2 Opus
+    seat: "Plan-only cards never say what happens if you play them normally...
+    I never risked finding out, which means the screen made a legal-looking
+    action untestable."
+
+    DERIVED FROM THE SAME TEST THE TARGET TYPE IS DERIVED FROM (`plan` and no
+    `effects`, in `emit`), so the sentence and the target can never disagree,
+    and it leads rather than trails: it is the instruction, and what the
+    jellyfish then does is the consequence.
+    """
+    if not card.get("plan") or card.get("effects"):
+        return text
+    return ("Play on the [gold]Bake-Kurage[/gold]. " + text).strip()
 
 
 def _is_sly_branch(card: dict) -> bool:

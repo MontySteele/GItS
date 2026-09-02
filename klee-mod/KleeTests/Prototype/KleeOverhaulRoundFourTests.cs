@@ -71,7 +71,9 @@ public class KleeOverhaulRoundFourTests
         Assert.DoesNotContain("of them", face);
         Assert.Contains("A [gold]Set off[/gold] here deals {Size} Pyro damage "
                         + "in total.", face);
-        Assert.Contains(" Bombs here: {Amount}.", face);
+        // `EB-289`: `{Count}`, not `{Amount}` -- see the test below and
+        // `ProtoBombPower.Bombs` for why the stack amount could not be it.
+        Assert.Contains(" Bombs here: {Count}.", face);
         Assert.EndsWith(" Each grows at the start of your turn, and none goes "
                         + "off by itself.", face);
     }
