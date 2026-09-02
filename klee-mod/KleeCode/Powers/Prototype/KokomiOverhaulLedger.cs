@@ -25,6 +25,10 @@ namespace KleeMod.Powers;
 ///     count for the turn the player was looking at when they wrote it. The
 ///     roll below is the only place that number moves, which is what keeps the
 ///     card and the counter from disagreeing about which turn "last" was.
+///   * the ONCE-PER-TURN latches (<see cref="ClaimOncePerTurn"/>) -- Treatise,
+///     Song of Pearls and The General's Banner, capped at one payout a turn
+///     each by [USER]'s live 2026-09-02 verdict.
+///   * <see cref="PlanCarriedOutThisTurn"/> -- Sango Isshin's condition.
 ///
 /// PER PLAYER, keyed the way <c>KleeOverhaulLedger</c> is keyed and for the
 /// same reason (R205): in co-op the other seat's turn is not hers.
@@ -101,6 +105,19 @@ public sealed class KokomiOverhaulLedger
     /// </summary>
     private readonly HashSet<string> _claimed = new();
 
+    /// <summary>
+    /// Has the Bake-Kurage carried out a Plan this turn? Sango Isshin's
+    /// condition, and it is a per-turn FACT rather than a latch: reading it
+    /// spends nothing.
+    ///
+    /// Written by <see cref="NotePlanCarriedOut"/> from
+    /// <c>KokomiPlan.ResolveEntry</c>, the one place a Plan is carried out --
+    /// so the morning queue, Change of Plans' early resolution and The Moon
+    /// Overlooks the Waters' play-time one all count. All three carry a Plan
+    /// out, which is the phrase the card prints.
+    /// </summary>
+    public bool PlanCarriedOutThisTurn { get; private set; }
+
     private int _round = -1;
 
     /// <summary>One Companion play finished.</summary>
@@ -133,6 +150,10 @@ public sealed class KokomiOverhaulLedger
         return For(kokomi).Claim(key);
     }
 
+    /// <summary>One Plan carried out. Sango Isshin's condition, and nothing
+    /// else, so a second Plan in the same turn changes nothing.</summary>
+    public void NotePlanCarriedOut() => PlanCarriedOutThisTurn = true;
+
     /// <summary>The claim itself, on the ledger a caller already holds. Public
     /// to the pins for the reason <see cref="RollTo"/> is: a turn boundary can
     /// then be exercised without a combat, which is what the headless suite
@@ -156,6 +177,7 @@ public sealed class KokomiOverhaulLedger
         CompanionsPlayedLastTurn = CompanionsPlayedThisTurn;
         CompanionsPlayedThisTurn = 0;
         _claimed.Clear();
+        PlanCarriedOutThisTurn = false;
         _round = round;
     }
 }

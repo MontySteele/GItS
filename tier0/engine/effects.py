@@ -3187,6 +3187,11 @@ PREDICATE_NAMES = frozenset({
     # slice one is C# first and the sim is not brought up.
     "bomb_went_off_this_turn",
     "bomb_reacted_this_turn",
+    # The Kokomi overhaul's own per-turn read (QUARANTINED,
+    # C.KOKOMI_OVERHAUL): Sango Isshin's "if the Bake-Kurage carried out a
+    # Plan this turn". Unlike the two above this one IS answered -- draft 6
+    # runs in both engines.
+    "plan_carried_out_this_turn",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -3414,6 +3419,13 @@ def _predicate(state: CombatState, name: str) -> bool:
             "C# FIRST -- the mod answers it behind "
             "`-p:PrototypeCards=true -p:KleeOverhaul=true` "
             "(KleeOverhaulLedger) and the sim is not brought up for slice one.")
+    if name == "plan_carried_out_this_turn":
+        # SANGO ISSHIN's condition (QUARANTINED, C.KOKOMI_OVERHAUL). Written
+        # at the ONE place a Plan is carried out (`kokomi_plan._resolve_entry`)
+        # so the morning queue, Change of Plans' early resolution and The Moon
+        # Overlooks the Waters' play-time one all count -- they all carry a
+        # Plan out, which is the phrase the card prints.
+        return state.kk_plan_carried_out_this_turn
     if name == "killed_target":
         return state.kills_this_card > 0
     if name == "drew_skill_this_card":

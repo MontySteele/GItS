@@ -806,9 +806,10 @@
 - {id: proto_kk_sango_isshin, name: "Sango Isshin (proto)", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   description: "Deal damage equal to a quarter of your Max HP. [gold]Plan[/gold]: Deal the same to ALL enemies.",
-   effects: [{op: damage_quarter_max_hp, target: enemy}],
-   plan: [{op: damage_quarter_max_hp, target: all_enemies}]}
+   description: "Deal 8 damage. If the [gold]Bake-Kurage[/gold] carried out a [gold]Plan[/gold] this turn, deal a quarter of your Max HP to ALL enemies instead.",
+   effects: [{op: conditional, if: plan_carried_out_this_turn,
+              then: [{op: damage_quarter_max_hp, target: all_enemies}],
+              else: [{op: damage, amount: 8, target: enemy}]}]}
 
 # --- the Commander: Gorou, go (packet sec.4) ---
 

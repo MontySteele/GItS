@@ -831,6 +831,16 @@ PREDICATES_CS = {
     # about is the board the hit is about to land on.
     "target_has_debuff":
         "KokomiOverhaulKit.HasDebuff(cardPlay.Target)",
+    # Sango Isshin's condition ([USER], live 2026-09-02: "It's fine if Rares
+    # are strong (see: Knife Trap), but this requires absolutely 0 setup or
+    # combo - it's just 'press button, delete act 1'"). It comes off the
+    # ledger, the ONE place this arm's per-turn facts are written, so the card
+    # and the plan bus that feeds it cannot disagree about what a carried-out
+    # Plan is: the dawn queue, Change of Plans' early one and The Moon
+    # Overlooks the Waters' play-time one all set it, because all three carry
+    # a Plan out.
+    "plan_carried_out_this_turn":
+        "KokomiOverhaulLedger.For(Owner.Creature).PlanCarriedOutThisTurn",
 }
 
 # The if-clause each predicate renders on the card.
@@ -851,6 +861,9 @@ PREDICATE_TEXT = {
         "this turn",
     "target_has_aura": "If the enemy holds an elemental aura",
     "target_has_debuff": "If the enemy has a debuff",
+    "plan_carried_out_this_turn":
+        "If the [gold]Bake-Kurage[/gold] carried out a [gold]Plan[/gold] "
+        "this turn",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -1102,7 +1115,16 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # so the keyword lands in an ELSE branch -- and the top-level arm
               # it copies is a single awaited call with no locals, which is the
               # whole branch-legality criterion.
-              "mend"}
+              "mend",
+              # THE KOKOMI OVERHAUL (QUARANTINED). Sango Isshin's redesigned
+              # payoff, "...deal a quarter of your Max HP to ALL enemies
+              # instead". ALL-ENEMIES ONLY, and `_branch_op_reason` blocks the
+              # aimed form by name: `KokomiRules.QuarterMaxHpAll` is a single
+              # awaited call with no locals -- the whole branch-legality
+              # criterion -- while the aimed arm needs the target guard, and
+              # emitting that a second, subtly different way is the drift this
+              # table exists to prevent.
+              "damage_quarter_max_hp"}
 
 # The exact key set each branch op may carry. Module-level because a modal's
 # mode body is emitted through the same `_emit_branch_op` resolvers as a
@@ -1127,6 +1149,9 @@ BRANCH_FIELDS = {
     # Same key set the top-level `mend` validator enforces, so the two cannot
     # disagree about what a Mend is.
     "mend": {"op", "amount"},
+    # No amount: the quarter is computed by the rule, not printed by the row --
+    # the same key set the top-level validator enforces.
+    "damage_quarter_max_hp": {"op", "target"},
     "burst_energy": {"op", "amount"},
     "energy": {"op", "amount"},
     "place_bomb": {"op", "amount", "target", "bomb_damage"},
@@ -1199,6 +1224,15 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
                         f"'{eff['power']}'")
         elif eff.get("target") != "self":
             return f"branch apply_power target '{eff.get('target')}'"
+    if eff["op"] == "damage_quarter_max_hp":
+        # No `amount` to check -- the quarter is the RULE's
+        # (`KokomiRules.QuarterMaxHp`), computed in one place so the face, the
+        # aimed hit and the all-enemies version cannot round differently. Only
+        # the all-enemies form is emittable here; see the BRANCH_OPS note.
+        if eff.get("target") != "all_enemies":
+            return ("branch damage_quarter_max_hp target "
+                    f"'{eff.get('target')}'")
+        return None
     if eff["op"] in SALON_BRANCH_VERBS:
         # EB-137. These two are the only branch ops whose `amount` is
         # OPTIONAL: the top-level validator defaults it to 1 and both branch
@@ -5510,6 +5544,14 @@ def _emit_branch_op(
         # play whose price failed instead of handing out the payoff for free.
         # Sim twin: `effects.spend_sparks`, which refuses the same way.
         lines.append(_stmt_spend_spark_guarded(card, eff))
+    elif op == "damage_quarter_max_hp":
+        # THE KOKOMI OVERHAUL (QUARANTINED). Sango Isshin's payoff, and
+        # byte-for-byte the call `build_body`'s top-level all-enemies arm
+        # makes: the quarter is computed in ONE place so the printed face and
+        # the hit cannot round differently.
+        lines.append(
+            "await KokomiRules.QuarterMaxHpAll("
+            "choiceContext, Owner.Creature);")
     elif op == "mend":
         # THE INAZUMA COMPANION OVERHAUL (QUARANTINED). Byte-for-byte the call
         # `build_body`'s top-level arm makes, because it IS the same rule: one

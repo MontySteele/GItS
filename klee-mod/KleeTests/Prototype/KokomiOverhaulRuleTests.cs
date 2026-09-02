@@ -2,6 +2,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using BaseLib.Abstracts;
+using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using Xunit;
@@ -389,6 +390,70 @@ public class KokomiOverhaulRuleTests
         Assert.True(calls.IndexOf("KokomiOverhaulLedger.ClaimOncePerTurn")
                     < calls.IndexOf("PowerCmd.Apply<WeakPower>"));
         KokomiOverhaulLedger.ResetAll();
+    }
+
+    // ---- SANGO ISSHIN'S CONDITION ([USER], live 2026-09-02) --------------
+
+    [Fact]
+    public void A_carried_out_plan_is_remembered_for_the_turn_and_no_longer()
+    {
+        // [USER], live: "It's fine if Rares are strong (see: Knife Trap), but
+        // this requires absolutely 0 setup or combo - it's just 'press button,
+        // delete act 1'." So the Rare's payoff now asks a per-turn question,
+        // and the ledger is what answers it.
+        var ledger = RolledLedger();
+        Assert.False(ledger.PlanCarriedOutThisTurn);
+        ledger.NotePlanCarriedOut();
+        Assert.True(ledger.PlanCarriedOutThisTurn);
+
+        // A second Plan in the same turn changes nothing, and the turn
+        // boundary forgets it -- a morning is not a combat.
+        ledger.NotePlanCarriedOut();
+        Assert.True(ledger.PlanCarriedOutThisTurn);
+        ledger.RollTo(4);
+        Assert.False(ledger.PlanCarriedOutThisTurn);
+        KokomiOverhaulLedger.ResetAll();
+    }
+
+    [Fact]
+    public void The_flag_is_written_where_a_plan_is_carried_out_and_nowhere_else()
+    {
+        // ONE EVENT, THREE DOORS: the morning queue, Change of Plans and The
+        // Moon Overlooks the Waters all reach `ResolveEntry`, so writing the
+        // flag there is what makes the card's printed "carried out a Plan this
+        // turn" true of all three without naming any of them.
+        var entry = typeof(KokomiPlan)
+            .GetMethod("ResolveEntry", HeadlessGame.All)!;
+        Assert.Contains("KokomiOverhaulLedger.NotePlanCarriedOut",
+                        Il.Calls(entry));
+
+        var writers = typeof(KokomiPlan).GetMethods(HeadlessGame.All)
+            .Where(m => m.Name != "ResolveEntry"
+                        && Il.Calls(m).Contains(
+                            "KokomiOverhaulLedger.NotePlanCarriedOut"))
+            .Select(m => m.Name)
+            .ToList();
+        Assert.Empty(writers);
+    }
+
+    [Fact]
+    public void Sango_isshin_reads_the_flag_and_hits_all_enemies_behind_it()
+    {
+        // The card, as generated: 8 to the aimed enemy is the floor, and the
+        // quarter -- computed by the ONE rule, so the face and the hit cannot
+        // round differently -- is what a planned morning buys. It is an
+        // ordinary aimed Attack now, not a card played on the jellyfish.
+        var play = typeof(ProtoKkSangoIsshin)
+            .GetMethod("OnPlay", HeadlessGame.All)!;
+        var calls = Il.Calls(play);
+        Assert.Contains("KokomiOverhaulLedger.get_PlanCarriedOutThisTurn",
+                        calls);
+        Assert.Contains("KokomiRules.QuarterMaxHpAll", calls);
+        Assert.Contains("DamageCmd.Attack", calls);
+        // No Plan line left: it is not playable on the pet.
+        Assert.DoesNotContain("KokomiPlan.Schedule", calls);
+        Assert.DoesNotContain(typeof(ProtoKkSangoIsshin).GetInterfaces(),
+                              i => i.Name == "IPlannedCard");
     }
 
     [Fact]

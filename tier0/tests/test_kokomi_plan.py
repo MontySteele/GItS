@@ -71,7 +71,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     puts them through. Read off the loaded cards, which is the whole point of
     `plan:` no longer being stripped."""
     planned = [c for c in loader.prototype_cards() if c.plan]
-    assert len(planned) == 16
+    # FIFTEEN since 2026-09-02: Sango Isshin traded its Plan line for a
+    # condition on one ([USER]: "this requires absolutely 0 setup or combo").
+    assert len(planned) == 15
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -235,6 +237,47 @@ def test_damage_quarter_max_hp_rounds_down(overhaul):
     assert kokomi_plan.quarter_of_max_hp(st) == 20
     carry_out(st, [{"op": "damage_quarter_max_hp", "target": "all_enemies"}])
     assert enemy.hp == 40
+
+
+def test_sango_isshin_pays_the_quarter_only_after_a_plan_was_carried_out(overhaul):
+    """[USER], live 2026-09-02: "It's fine if Rares are strong (see: Knife
+    Trap), but this requires absolutely 0 setup or combo - it's just 'press
+    button, delete act 1'." So the quarter is now the PAYOFF of a morning she
+    planned for, and the card's floor is a plain 8 to one enemy."""
+    a, b = make_enemy(hp=60, name="a"), make_enemy(hp=60, name="b")
+    st = kokomi_state(enemies=[a, b], hp=80)
+    card = loader.get_card("proto_kk_sango_isshin")
+
+    # No Plan carried out this turn: the floor, aimed, and only at one enemy.
+    assert st.kk_plan_carried_out_this_turn is False
+    effects.resolve_card(st, card)
+    assert (a.hp, b.hp) == (52, 60)
+
+    # A Plan carried out this morning turns it into the wall.
+    carry_out(st, [{"op": "draw", "amount": 1}])
+    assert st.kk_plan_carried_out_this_turn is True
+    effects.resolve_card(st, card)
+    assert (a.hp, b.hp) == (32, 40)          # 20 apiece at 80 Max HP
+
+
+def test_the_condition_is_written_wherever_a_plan_is_carried_out(overhaul):
+    """"Carried out" is one event with three doors -- the morning queue,
+    Change of Plans and The Moon Overlooks the Waters -- and the flag is
+    written at the bottom of `_resolve_entry`, which all three pass through.
+    It is also a per-TURN fact: the boundary clears it."""
+    st = kokomi_state()
+    kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 1}]))
+    assert st.kk_plan_carried_out_this_turn is False   # written, not carried
+    kokomi_plan.resolve_front(st)                      # Change of Plans' door
+    assert st.kk_plan_carried_out_this_turn is True
+
+    kokomi_plan.roll_turn(st)
+    assert st.kk_plan_carried_out_this_turn is False
+
+    # And Moon's play-time resolution is the third door.
+    st.player.powers[kokomi_plan.PLANS_ALSO_NOW] = 1
+    kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 1}]))
+    assert st.kk_plan_carried_out_this_turn is True
 
 
 def test_damage_per_companion_last_turn_reads_last_turn(overhaul):
