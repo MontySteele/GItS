@@ -701,9 +701,9 @@
 - {id: proto_kk_kurages_oath, name: "Kurage's Oath (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   description: "[gold]Exert[/gold] 2. [gold]Tide[/gold] +5.",
+   description: "[gold]Exert[/gold] 2. [gold]Tide[/gold] +8.",
    effects: [{op: exert, amount: 2},
-             {op: gain_tide, amount: 5}]}
+             {op: gain_tide, amount: 8}]}
 
 - {id: proto_kk_rising_tide, name: "Rising Tide", character: kokomi,
    authored_by: [claude],

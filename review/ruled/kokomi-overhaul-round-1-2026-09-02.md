@@ -1,6 +1,8 @@
-Status: OPEN (picks 1 to 2)
+Status: RULED R237 2026-09-02
 
 # Kokomi overhaul, round one: what the seats found
+
+Ruled R237 by [USER]'s own run of 2026-09-02, whose words are in that commit's message: pick 1 took option 2, the Tide re-priced on the seats' arithmetic (Oath to +8, and a second Rising Tide in the starter; draft 3 in the slice document); pick 2 took option 1, the Inazuma companions, now built, are the second element.
 
 Written 2026-09-02, the night her prototype first ran. Prototype stage, so
 nothing here is a measurement (R217 G): the seats' words are feedback for
