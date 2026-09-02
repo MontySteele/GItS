@@ -23,10 +23,20 @@ namespace KleeMod.Powers;
 /// </summary>
 internal static class ElementalHit
 {
-    /// <summary>Element-tagged damage hit (tier0 deal_damage_to_enemy).</summary>
+    /// <summary>Element-tagged damage hit (tier0 deal_damage_to_enemy).
+    ///
+    /// <paramref name="ignoreBlock"/> is QUARANTINED (the Inazuma companion
+    /// overhaul) and has exactly one caller: Chiori's Tamoto, whose printed
+    /// text is "deal 6 Geo damage to a random enemy, IGNORING BLOCK". It adds
+    /// <c>ValueProp.Unblockable</c> to the <c>Unpowered</c> every hit through
+    /// here already carries, and changes nothing else -- the hit still reacts,
+    /// still counts as a hit, and is still capped by Intangible, because
+    /// unblockable is not uncappable (R128). Defaulted false, so every shipped
+    /// caller is byte-identical. Sim twin: `deal_damage_to_enemy(...,
+    /// ignore_block=True)`.</summary>
     public static async Task Deal(
         PlayerChoiceContext choiceContext, Creature target, Element element,
-        decimal baseDamage, Creature? applier)
+        decimal baseDamage, Creature? applier, bool ignoreBlock = false)
     {
         var dealt = SimDamagePipeline.DealerMods(applier, baseDamage);
 
@@ -59,7 +69,9 @@ internal static class ElementalHit
         // is what makes a Superconduct's Vulnerable amplify this same hit.
         await CreatureCmd.Damage(
             choiceContext, target, (int)SimDamagePipeline.TargetMods(target, dealt),
-            ValueProp.Unpowered, dealer: null, cardSource: null, cardPlay: null);
+            ignoreBlock ? ValueProp.Unpowered | ValueProp.Unblockable
+                        : ValueProp.Unpowered,
+            dealer: null, cardSource: null, cardPlay: null);
     }
 
     /// <summary>

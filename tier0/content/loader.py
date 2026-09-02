@@ -1096,20 +1096,27 @@ def companion_roster_replacement() -> list[Card] | None:
     way to hand out, which is precisely the split R64 shipped the banner to
     close.
 
-    A REPLACEMENT OF ONE NATION, NOT OF THE ROSTER. The approved workshop
-    (`companion-workshop-mondstadt-2026-09-01.md`, approved 2026-09-01; a
-    Paper artefact on the companion-workshop branch, not in this tree) rewrites
-    MONDSTADT's Universals and says in its own sec.6 that Inazuma is a separate
-    document, so the other two nations come through untouched and the seventeen
-    shipped Mondstadt rows do not come through at all.
+    A REPLACEMENT OF TWO NATIONS, NOT OF THE ROSTER. Two approved workshops,
+    one per nation, both Paper artefacts on the companion-workshop branches and
+    neither in this tree: `companion-workshop-mondstadt-2026-09-01.md` (approved
+    2026-09-01) rewrites MONDSTADT's Universals, and
+    `companion-workshop-inazuma-2026-09-01.md` (approved the same day at its
+    four default picks, its sec.9) rewrites INAZUMA's. Fontaine has no workshop
+    yet -- both documents say so in their own sec.6 -- so its rows come through
+    untouched, and the seventeen shipped Mondstadt rows and the fifteen shipped
+    Inazuma rows do not come through at all.
 
     THE KEPT HALF IS FILTERED BY NATION and the ADDED HALF IS LISTED BY ID
-    (`C.MONDSTADT_OVERHAUL_POOL_IDS`), the same asymmetry the C# twin argues:
-    the rule about the other nations is literally "not Mondstadt", and a
-    hand-copied list of their rows would silently drop the next row somebody
-    ships; the rule about Mondstadt is "these rows and nothing else", where a
-    prefix match would be a second, softer definition that fails the day a row
-    is renamed.
+    (`C.MONDSTADT_OVERHAUL_POOL_IDS`, `C.INAZUMA_OVERHAUL_POOL_IDS`), the same
+    asymmetry the C# twin argues: the rule about the other nations is literally
+    "not one of ours", and a hand-copied list of their rows would silently drop
+    the next row somebody ships; the rule about a replaced nation is "these rows
+    and nothing else", where a prefix match would be a second, softer definition
+    that fails the day a row is renamed.
+
+    ONE FLAG FOR BOTH NATIONS. A second property would let a build offer one
+    workshop's rewrites beside the other nation's shipped rows -- a state no
+    document describes and no seat would be asked to grade.
 
     Returns CARDS rather than ids because its callers tier the result by
     rarity and nation, and the ids are resolved here once through the same
@@ -1122,8 +1129,9 @@ def companion_roster_replacement() -> list[Card] | None:
     if not C.COMPANION_OVERHAUL:
         return None
     kept = [c for c in _card_index().values()
-            if c.is_companion and c.nation != C.COMPANION_OVERHAUL_NATION]
-    added = [peek_card(cid) for cid in C.MONDSTADT_OVERHAUL_POOL_IDS]
+            if c.is_companion and c.nation not in C.COMPANION_OVERHAUL_NATIONS]
+    added = [peek_card(cid) for cid in (C.MONDSTADT_OVERHAUL_POOL_IDS
+                                        + C.INAZUMA_OVERHAUL_POOL_IDS)]
     return sorted(kept + added, key=lambda c: c.id)
 
 

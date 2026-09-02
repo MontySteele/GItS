@@ -224,12 +224,23 @@ public static class KokomiTide
         foreach (var player in combat.Players)
         {
             var creature = player.Creature;
+            if (creature == null) continue;
+            // ENTRY HP FIRST, AND FOR EVERY SEAT EITHER ARM REACHES. The Mend
+            // cap is the HP the fighter WALKED IN WITH (brief sec.14), and this
+            // hook runs before the first turn opens, so this is the only moment
+            // in the fight at which that number is simply their current HP.
+            //
+            // THE COMPANION ARM NEEDS IT TOO, and that is the whole reason this
+            // is no longer inside the Kokomi guard: Mizuki's Anraku Secret
+            // Spring Therapy is a UNIVERSAL that prints Mend, so a Klee holding
+            // it must have a ceiling captured at the same moment hers is. A
+            // ledger entry for a seat that never Mends costs one integer and is
+            // dropped with the combat.
+            if (MendIsLive(creature))
+            {
+                KokomiOverhaulLedger.OpenCombat(creature);
+            }
             if (!KokomiOverhaul.LiveFor(creature)) continue;
-            // ENTRY HP FIRST. The Mend cap is the HP she WALKED IN WITH
-            // (brief sec.14), and this hook runs before the first turn opens,
-            // so this is the only moment in the fight at which that number is
-            // simply her current HP.
-            KokomiOverhaulLedger.OpenCombat(creature!);
             await Install(creature);
         }
     }
@@ -385,6 +396,30 @@ public static class KokomiTide
     // ---- the Mend rule ----------------------------------------------------
 
     /// <summary>
+    /// Is MEND live for this creature? The keyword belongs to the Kokomi arm
+    /// and its rule is that arm's, but the CARDS that print it are not all
+    /// hers: the approved Inazuma companion workshop makes Mizuki's Anraku
+    /// Secret Spring Therapy a UNIVERSAL, and "the one true heal in the pool"
+    /// has to be the same keyword with the same bound in whoever's hands it
+    /// lands -- Klee's and Furina's included.
+    ///
+    /// SO THE GATE WIDENED AND THE RULE DID NOT. This is the only line that
+    /// moved for the companion arm: <see cref="Mend"/> below is still the one
+    /// place "never above the HP you entered the fight with" is written, and
+    /// no second Mend was authored for the companion pool. What the widening
+    /// costs is one more seat's <see cref="KokomiOverhaulLedger"/> entry, whose
+    /// EntryHp is captured for every seat at combat start under either arm
+    /// (<see cref="InstallAll"/>).
+    ///
+    /// A CREATURE WITH NO PLAYER IS NEVER MENDED. An enemy has no entry HP in
+    /// this ledger and no card of theirs prints the keyword, so the guard is
+    /// what keeps a widened gate from becoming an open one.
+    /// </summary>
+    internal static bool MendIsLive(Creature? creature) =>
+        KokomiOverhaul.LiveFor(creature)
+        || (CompanionOverhaul.Enabled && creature?.Player != null);
+
+    /// <summary>
     /// MEND: heal, never above entry HP. Returns the HP that actually landed,
     /// which is what the pulse's per-combat budget is measured in.
     ///
@@ -404,7 +439,7 @@ public static class KokomiTide
     public static async Task<int> Mend(
         PlayerChoiceContext choiceContext, Creature? kokomi, int amount)
     {
-        if (!KokomiOverhaul.LiveFor(kokomi) || amount <= 0) return 0;
+        if (!MendIsLive(kokomi) || amount <= 0) return 0;
 
         var entry = KokomiOverhaulLedger.For(kokomi!).EntryHp;
         var room = entry - (int)kokomi!.CurrentHp;

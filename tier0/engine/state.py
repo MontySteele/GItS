@@ -935,6 +935,14 @@ class CombatState:
     detonations_total: int = 0            # The Big One formula
     reactions_this_card: int = 0          # reaction_triggered_by_this
     reactions_this_turn: int = 0          # reaction_triggered_this_turn
+    # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL). The
+    # SWIRLS this player turn, which is the count Heizou's Heartstopper Strike
+    # prints ("deals 4 more for each Swirl this turn"). A second counter beside
+    # `reactions_this_turn` rather than a filter over it, because that one is a
+    # bare integer with no reaction names in it; written at the one site each
+    # engine resolves a reaction, inside the arm's flag branch, and cleared
+    # with the reaction window at the top of the player turn.
+    mi_swirls_this_turn: int = 0
     encore_spend_draws_this_turn: int = 0  # encore_spend_draw once-per-turn
     #                                        latch (Curtain Call, R85)
     # INSTRUMENT ONLY (EB-78 (2); resources.note_charge_read writes it and
@@ -1032,6 +1040,21 @@ class CombatState:
     # Attack and nothing else. Saved and restored across a free play with the
     # rest of the per-card context (`combat._FREE_PLAY_CONTEXT`).
     mc_attack_element_override: str = ""
+    # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL). Damage
+    # this CARD PLAY has actually put on enemy HP, which is what Gorou's Inuzaka
+    # All-Round Defense reads: "Gain Block equal to half the damage dealt". A
+    # per-play counter beside `block_gained_this_card` above and saved with it
+    # across a free play, for the same reason -- an auto-play in the middle of
+    # an outer card would otherwise leave its number behind for the outer card
+    # to bank. Written only inside a flag branch (`deal_damage_to_enemy`).
+    mi_damage_dealt_this_card: int = 0
+    # THE MEND CEILING (QUARANTINED, C.COMPANION_OVERHAUL). The HP the player
+    # walked into this fight with, which is the Kokomi brief's one rule for the
+    # keyword and therefore the bound on Mizuki's Universal in ANYONE's hands.
+    # Per COMBAT, so it lives here and not on Player, which survives the fight.
+    # Zero means "not captured yet"; `effects.companion_overhaul_entry_hp` is
+    # the one reader and captures on first ask.
+    mi_entry_hp: int = 0
     current_x: int = 0                    # X-cost cards
     sparks_at_play: int = 0               # bank BEFORE this card's own spark
                                           # spend (Gleeful Barrage; R39)

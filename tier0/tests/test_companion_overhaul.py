@@ -130,14 +130,20 @@ def test_flag_on_every_overhaul_row_is_offerable(overhaul):
     assert set(C.MONDSTADT_OVERHAUL_POOL_IDS) <= offerable
 
 
-def test_flag_on_inazuma_and_fontaine_are_untouched(overhaul):
-    """The workshop is a Mondstadt document (its sec.6). A nation-scoped
-    replacement that quietly moved another nation's rows would be the defect
-    this asserts against."""
+def test_flag_on_fontaine_is_untouched(overhaul):
+    """Each workshop is a NATION document (both say so in their own sec.6), and
+    Fontaine has none yet. A nation-scoped replacement that quietly moved an
+    unwritten nation's rows would be the defect this asserts against.
+
+    IT USED TO SAY "inazuma and fontaine", and the Inazuma half moved out on
+    2026-09-02 when the Inazuma workshop was approved and built -- so this test
+    is now the last nation the arm leaves alone. `C.COMPANION_OVERHAUL_NATIONS`
+    is the one list that decides, and the assertion below is its complement."""
+    assert "fontaine" not in C.COMPANION_OVERHAUL_NATIONS
     before = {c.id for c in loader._card_index().values()
-              if c.is_companion and c.nation in ("inazuma", "fontaine")}
+              if c.is_companion and c.nation == "fontaine"}
     after = {c.id for c in rewards._companion_roster()
-             if c.nation in ("inazuma", "fontaine")}
+             if c.nation == "fontaine"}
     assert before == after
 
 
@@ -439,6 +445,16 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
                         "LightningRosePower", "GrandOdePower",
                         "DandelionBreezePower", "SolarIsotomaBloomPower",
                         "LightfallSwordPower",
+                        # THE INAZUMA ARM'S BLOCK, appended before the latch --
+                        # its own file's sim twin is
+                        # `effects.inazuma_overhaul_turn_end`, pinned by
+                        # `test_inazuma_companion_overhaul.py`, and this
+                        # assertion is where the two walks are held level.
+                        "JuugaPower", "MujiMujiDarumaPower",
+                        "SanctifyingRingPower", "SesshouSakuraPower",
+                        "SoumetsuPower", "KyoukaPower", "TamotoPower",
+                        "CrimsonOoyoroiPower", "WarBannerPower",
+                        "AurousBlazePower",
                         "RevelationPower"], cs_order
 
 

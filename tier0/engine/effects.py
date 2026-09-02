@@ -326,6 +326,21 @@ def _runtime_count(state: CombatState, token: str,
     #                        returned -- post-Dexterity, post-Frail, not the
     #                        printed number. block_gains_this_card is a
     #                        COUNT of gains and cannot answer this.
+    # QUARANTINED USE ONLY (R213 B): no shipped row reads either token. Both
+    # belong to the INAZUMA companion overhaul and both are counts this engine
+    # already keeps -- which is the whole reason the two rows that print them
+    # are expressible at all.
+    if token == "companions_played_this_combat":
+        # Raiden's Musou no Hitotachi: "5 more for each Companion CARD you
+        # played this combat". `companions_played` is the Best Friends Forever
+        # pool, unique by base id and written once per card play -- so the
+        # count is CARDS and not PLAYS, which is what "each Companion card"
+        # names. The C# twin reads `CompanionPlays.PlayedThisCombat`, which is
+        # deduped by `(Owner, ModelId)` for the same ruling (2026-08-06).
+        return len(state.companions_played)
+    if token == "swirls_this_turn":
+        # Heizou's Heartstopper Strike: "4 more for each Swirl this turn".
+        return state.mi_swirls_this_turn
     if token == "hand_size":
         return len(p.hand)
     if token == "discards_this_card":
@@ -744,9 +759,18 @@ def _spotlight_scale(state: CombatState, card: Card, amount: int) -> int:
 
 def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
                          element: Optional[str] = None,
-                         source: str = "card") -> float:
+                         source: str = "card",
+                         ignore_block: bool = False) -> float:
     """Full damage pipeline: strength/weak -> reaction amp -> vulnerable ->
-    block -> hp. Returns damage actually dealt to HP (for metrics)."""
+    block -> hp. Returns damage actually dealt to HP (for metrics).
+
+    `ignore_block` is QUARANTINED (C.COMPANION_OVERHAUL) and has exactly one
+    caller: Chiori's Tamoto, whose printed text is "deal 6 Geo damage to a
+    random enemy, IGNORING BLOCK". It skips the enemy's Block pool and nothing
+    else -- the hit is still powered, still reacts, still counts as a hit and
+    is still capped by Intangible, because unblockable is not uncappable
+    (R128, the rule the Shatter path below already keeps). Default False, so
+    every shipped caller is byte-identical."""
     # THE DEAD TAKE NOTHING (EB-136 / R210, C18). `CreatureCmd.Damage` opens
     # its per-target loop with `if (originalTarget2.IsDead) continue;`, so a
     # corpse absorbs no damage, fires no reaction and pays no on-hit rider --
@@ -805,7 +829,13 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     if base > 0 and dmg > base * C.AMP_STACK_LIMIT:
         state.emit("amp_stack_warning", base=base, final=dmg, target=enemy.name)
     block_before, hp_before = enemy.block, enemy.hp
-    blocked = min(enemy.block, dmg)
+    # QUARANTINED (C.COMPANION_OVERHAUL). `absorb` is the Block this hit may be
+    # eaten by, which is the whole of "ignoring Block": zero for Chiori's
+    # Tamoto and the standing pool for every other hit in the engine. Named
+    # rather than branched, so the amp counterfactual below reads the same
+    # number this hit did.
+    absorb = 0 if ignore_block else block_before
+    blocked = min(absorb, dmg)
     enemy.block -= blocked
     hp_dmg = dmg - blocked
     was_alive = enemy.alive
@@ -831,7 +861,7 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         if slow_mult != 1.0:
             un *= slow_mult
         un = int(un)
-        un_hp = un - min(block_before, un)
+        un_hp = un - min(absorb, un)
         realized = effective - min(un_hp, max(0, hp_before))
         reactions.settle_amp_delta(state, log_mark, realized)
     # Frozen v2 Shatter (v1.5): the first Attack hit on a frozen enemy
@@ -886,6 +916,12 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         enemy.block += enemy.skittish
         state.emit("skittish_block", target=enemy.name,
                    amount=enemy.skittish)
+    # QUARANTINED (C.COMPANION_OVERHAUL). The INAZUMA arm's two damage-site
+    # readers, both after the whole hit has resolved. See
+    # `companion_overhaul_damage_dealt` for what each one is and why it is
+    # here rather than anywhere else.
+    if C.COMPANION_OVERHAUL:
+        companion_overhaul_damage_dealt(state, enemy, hp_dmg, source)
     return hp_dmg
 
 
@@ -1297,6 +1333,42 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
         state.block_gains_this_card += 1
         state.block_gained_this_card += amount
         state.emit("block", amount=amount)
+
+
+def _op_block_half_damage(state: CombatState, fx: dict, card: Card) -> None:
+    """QUARANTINED (`C.COMPANION_OVERHAUL`). Gorou's Inuzaka All-Round Defense:
+    "Gain Block equal to half the damage dealt."
+
+    THE NUMBER IS THIS PLAY'S OWN, and it has to be: the printed 8 is not what
+    landed once Strength, Weak, an amplifier and the target's Block have had
+    their say, so the card reads the running total
+    (`state.mi_damage_dealt_this_card`, written at the tail of
+    `deal_damage_to_enemy`) rather than its own face. Kokomi's
+    `block_half_surge` is the same shape asking the same question of a
+    different total, which is why this is a second op and not a widening of
+    that one: her clause reads a Tide and this one reads a hit.
+
+    HALF, ROUNDED DOWN, the direction every division in this repo takes.
+
+    THE GAIN GOES THROUGH THE PRINTED-BLOCK FUNNEL, not raw: this is a card's
+    own Block line, so Frail bites it and it counts toward the per-card gain
+    counters exactly as `block` above does. (The arm's POWERS grant raw Block
+    -- NC-11 -- and that distinction is between a power and a card, not
+    between this op and its neighbour.)
+    """
+    if not C.COMPANION_OVERHAUL:
+        raise NotImplementedError(
+            f"card {card.id!r}: op 'block_half_damage' belongs to the INAZUMA "
+            "companion overhaul, which is reachable only behind "
+            "`C.COMPANION_OVERHAUL`.")
+    amount = state.mi_damage_dealt_this_card // 2
+    if amount <= 0:
+        return
+    amount = powers.modify_block_gained(state.player, amount)
+    state.player.block += amount
+    state.block_gains_this_card += 1
+    state.block_gained_this_card += amount
+    state.emit("block", amount=amount)
 
 
 def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
@@ -2406,6 +2478,73 @@ def _op_heal(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("heal", amount=healed)
 
 
+def companion_overhaul_entry_hp(state: CombatState) -> int:
+    """The HP the player walked into this fight with -- every Mend's ceiling.
+
+    QUARANTINED (`C.COMPANION_OVERHAUL`), and it is the SIM TWIN of
+    `KokomiOverhaulLedger.EntryHp`, captured the same two ways for the same
+    reason: `combat.new_combat` records it at the top of the fight, and this
+    reader captures it on first ask if nothing did -- so a state built by a
+    fixture, or by a path that never opened a combat, still caps a Mend at
+    something honest rather than at zero.
+
+    PER COMBAT, on `CombatState`, because that is the object `run_fight`
+    rebuilds; `Player` survives the fight and would carry one fight's ceiling
+    into the next.
+    """
+    if not state.mi_entry_hp:
+        state.mi_entry_hp = state.player.hp
+    return state.mi_entry_hp
+
+
+def mend(state: CombatState, amount: int) -> int:
+    """MEND: heal, never above the HP you entered the fight with. Returns the
+    HP that actually landed.
+
+    ONE FUNCTION, AND IT IS THE KOKOMI ARM'S KEYWORD, NOT A SECOND ONE. The
+    rule is the Kokomi brief's ("heal never above entry HP", its sec.4 rule 4),
+    the C# implementation is `KokomiTide.Mend`, and this is that rule's only
+    spelling in this engine -- so a Universal that prints Mend and one of her
+    own cards that prints it cannot come to mean different things.
+
+    CHARACTER-AGNOSTIC ON PURPOSE. Mizuki's Anraku Secret Spring Therapy is a
+    UNIVERSAL: Klee or Furina can draft it, and "the one true heal in the pool"
+    has to be the same keyword with the same bound in whoever's hands it lands.
+    The C# half is the same change made from the other side -- `KokomiTide.Mend`
+    stops asking whether the creature is Kokomi and starts asking whether
+    EITHER arm is live for it -- rather than a second Mend written for the
+    companion pool.
+
+    WHAT IT DOES NOT CARRY. Sango Isshin's overflow ("Mend past your entry HP
+    becomes Hydro damage") is hers, it is a KOKOMI_OVERHAUL power, and this
+    engine does not run that arm at all -- the ten Kokomi verbs still raise
+    (`_op_kokomi_overhaul_unbuilt`). With the power absent the excess is simply
+    lost, which is what the cap has always meant on both sides.
+    """
+    room = companion_overhaul_entry_hp(state) - state.player.hp
+    landed = min(amount, room) if room > 0 else 0
+    if landed <= 0:
+        return 0
+    state.player.hp += landed
+    state.emit("heal", amount=landed, keyword="mend")
+    return landed
+
+
+def _op_mend(state: CombatState, fx: dict, card: Card) -> None:
+    """The `mend` op, which belongs to TWO arms and resolves under one.
+
+    Under `C.COMPANION_OVERHAUL` it is the Universal keyword above. Under the
+    KOKOMI arm alone it still raises, because that arm is C# first and the sim
+    is not brought up for its slice one -- resolving it here would report
+    numbers for rules (Tide, Surge, Exert, the pulse) this engine never ran,
+    and Mend is the only one of her ten verbs a companion card can print.
+    """
+    if not C.COMPANION_OVERHAUL:
+        _op_kokomi_overhaul_unbuilt(state, fx, card)
+        return
+    mend(state, _amount(state, fx["amount"]))
+
+
 def _op_add_card(state: CombatState, fx: dict, card: Card) -> None:
     from tier0.content import loader                # late import avoids cycle
     zone = fx.get("zone") or fx.get("to", "discard")
@@ -3125,6 +3264,13 @@ RUNTIME_COUNT_NAMES = frozenset({
     "hand_size",
     "discards_this_card",
     "block_gained_this_card",
+    # QUARANTINED USE ONLY (R213 B) -- the INAZUMA companion overhaul's two.
+    # Registered here as well as resolved in `_runtime_count`, because the
+    # loader validates every count token at LOAD off this set and a row whose
+    # token is only in the resolver is a card that raises the first time it is
+    # played (EB-135, the defect this registry exists for).
+    "companions_played_this_combat",
+    "swirls_this_turn",
 })
 
 # The one prefix family, exactly as `PREDICATE_PREFIXES` carries its own.
@@ -4710,6 +4856,8 @@ OPS = {
     "damage": _op_damage,
     "block": _op_block,
     "block_next_turn": _op_block_next_turn,
+    # QUARANTINED (C.COMPANION_OVERHAUL) -- the Inazuma arm's one new op.
+    "block_half_damage": _op_block_half_damage,
     BLOCK_AT_TURN_START: _op_block_at_turn_start,
     "draw": _op_draw,
     "draw_while": _op_draw_while,
@@ -4780,7 +4928,9 @@ OPS = {
     "surge": _op_kokomi_overhaul_unbuilt,
     "block_half_surge": _op_kokomi_overhaul_unbuilt,
     "exert": _op_kokomi_overhaul_unbuilt,
-    "mend": _op_kokomi_overhaul_unbuilt,
+    # RESOLVED under `C.COMPANION_OVERHAUL` (a Universal prints it) and
+    # still unbuilt under the Kokomi arm alone -- see `_op_mend`.
+    "mend": _op_mend,
     "plan": _op_kokomi_overhaul_unbuilt,
     "draw_companion_from_draw": _op_kokomi_overhaul_unbuilt,
     "next_companion_free": _op_kokomi_overhaul_unbuilt,
@@ -4863,6 +5013,10 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     state.exhaust_selection = []
     state.block_gains_this_card = 0
     state.block_gained_this_card = 0
+    # QUARANTINED (C.COMPANION_OVERHAUL). Gorou's "half the damage dealt", on
+    # the same line as the two Block counters and for the same scoping reason:
+    # the card after an Attack must bank nothing from it.
+    state.mi_damage_dealt_this_card = 0
     state.discards_this_card = 0
     state.last_drawn_type = ""
     state.salon_replacements_this_card = 0
@@ -4996,6 +5150,16 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int) -> int:
         bonus += p.powers.get("mc_swirl_charge", 0)
         if p.powers.get("mc_lightning_fang", 0):
             bonus += C.MC_LIGHTNING_FANG_BONUS
+        # THE INAZUMA ARM'S TWO, on the same terms and in the same sum:
+        #   mi_crowfeather  Sara  -- one Attack, its stack IS the number
+        #   mi_kyouka       Ayato -- every Attack, 2 turns, so the stack is
+        #                            TURNS and the constant is the number
+        # Sara's Tengu Stormcall is deliberately NOT here: it pays into the
+        # shipped `attack_up_this_turn` at the start of the turn it names, and
+        # that key is already the first term of this sum.
+        bonus += p.powers.get("mi_crowfeather", 0)
+        if p.powers.get("mi_kyouka", 0):
+            bonus += C.MI_KYOUKA_BONUS
     if cost == 0:
         bonus += p.powers.get("zero_cost_attacks_up", 0)
     # Rapturous Applause: attacks +N per 10 Fanfare ("stacks grant flat
@@ -5268,6 +5432,70 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
             enemy.powers["mc_melody_loop"] = n - 1
         else:
             del enemy.powers["mc_melody_loop"]
+    inazuma_overhaul_turn_start(state)
+
+
+def inazuma_overhaul_turn_start(state: CombatState) -> None:
+    """THE INAZUMA companion overhaul's start-of-turn block (QUARANTINED,
+    `C.COMPANION_OVERHAUL`). Three readers, and no other engine site reads them.
+
+    AFTER the Mondstadt block and not interleaved with it, for the reason that
+    block sits after the shipped income group: a second nation's rewrites are
+    new income and a settled order is not reopened to make room for them. The
+    C# twin is `InazumaCompanionTurnStart`, which walks the same three in the
+    same order.
+
+        mi_blazing_barrier  Thoma   -- the Block mark, CLAMPED (not a payout)
+        mi_naptime          Sayu    -- the deferred draw
+        mi_stormcall        Sara    -- next turn's blanket Attack rider
+        mi_surprise_dispatch Kirara -- the parcel, LAST because it is the only
+                                       one that deals damage
+    """
+    if not C.COMPANION_OVERHAUL:
+        return
+    p = state.player
+    # Thoma, Blazing Barrier -- the same CLAMP Diona's paws take above, and for
+    # the identical reason: `mi_blazing_barrier` marks how much of the standing
+    # Block that card put there, Block is cleared at the top of the turn, and a
+    # mark outliving the Block it names would thicken a shield that is gone.
+    n = p.powers.get("mi_blazing_barrier", 0)
+    if n:
+        left = min(n, p.block)
+        if left > 0:
+            p.powers["mi_blazing_barrier"] = left
+        else:
+            del p.powers["mi_blazing_barrier"]
+    # Sayu, Naptime -- "At the start of your next turn, draw 2 if you played no
+    # Attacks this turn." The CONDITION is about the turn the card was played,
+    # so it is answered at the end of that turn (`inazuma_overhaul_turn_end`
+    # deletes the promise when an Attack was played); anything still standing
+    # here has already earned its draw. Stacks are CARDS, so two Naptimes draw
+    # four, and the promise is popped WHOLE -- it is kept once, not ticked.
+    n = p.powers.pop("mi_naptime", 0)
+    if n:
+        state.draw(n)
+        state.emit("extra_draw", amount=n)   # A5 velocity accounting, as _op_draw
+    # Kujou Sara, Tengu Stormcall -- "Next turn, your Attacks deal 5 more."
+    # POPPED WHOLE and paid into the shipped `attack_up_this_turn`, which is
+    # already summed by `flat_attack_bonus` and already cleared at the end of
+    # the player's turn -- so "next turn" needs no clock of its own and the
+    # rider cannot outlive the turn it was promised for. Stacks are COPIES.
+    n = p.powers.pop("mi_stormcall", 0)
+    if n:
+        powers.apply_power(state, p, "attack_up_this_turn",
+                           C.MI_STORMCALL_BONUS * n, applier=p)
+    # Kirara, Surprise Dispatch -- "Next turn, deal 10 damage to a random
+    # enemy." LAST in this block because it is the only one of the four that
+    # can kill something, so every reader above it sees the same board it would
+    # have seen alone. The damage carries NO element, because the card names
+    # none (Albedo's Solar Isotoma made the same call), and it runs the
+    # pipeline like every other power-sourced hit (NC-1).
+    for _ in range(p.powers.pop("mi_surprise_dispatch", 0)):
+        if not state.living_enemies:
+            break
+        enemy = state.rng.choice(state.living_enemies)
+        deal_damage_to_enemy(state, enemy, C.MI_SURPRISE_DISPATCH_DMG,
+                             element=None, source="companion")
 
 
 def salon_tick_amount(state: CombatState, member: str, paid: bool,
@@ -5673,10 +5901,198 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
         p.powers["mc_lightning_fang"] -= 1
         if p.powers["mc_lightning_fang"] <= 0:
             del p.powers["mc_lightning_fang"]
+    # ---- THE INAZUMA ARM'S end-of-turn block, still before the latch --------
+    # Same argument as the four second-wave readers above: none of it grants
+    # the player Block except Shinobu's ring, and that one is INSIDE this
+    # block rather than after the latch precisely so Nicole's question is
+    # asked of the board the player really ended the turn holding.
+    inazuma_overhaul_turn_end(state)
     # Nicole's latch, LAST. Written unconditionally rather than only while she
     # is on the board: a card drafted mid-fight must not read a stale answer
     # from the turn before it existed, and the field is per-combat anyway.
     p.mc_held_block_at_turn_end = p.block > 0
+
+
+def inazuma_overhaul_turn_end(state: CombatState) -> None:
+    """THE INAZUMA companion overhaul's end-of-turn block (QUARANTINED,
+    `C.COMPANION_OVERHAUL`). Eight powers, in this order:
+
+        mi_juuga              Gorou   -- Geo volley, one target
+        mi_daruma             Sayu    -- the HP-bar split: a volley or Block
+        mi_sanctifying_ring   Shinobu -- Electro to ALL, then Block
+        mi_sesshou_sakura     Yae     -- one Electro volley per Sakura
+        mi_soumetsu           Ayaka   -- Cryo to ALL, then the finale at zero
+        mi_kyouka             Ayato   -- the clock, and the 12 it ends on
+        mi_tamoto             Chiori  -- Geo volley, ignoring Block
+        mi_crimson_ooyoroi    Thoma   -- the clock only; it fires on Attacks
+        mi_war_banner         Gorou   -- the clock, and the Dexterity it takes
+        mi_naptime            Sayu    -- the promise, kept or broken
+        mi_crowfeather        Sara    -- "this turn", popped whole
+
+    THE ORDER IS LAW, exactly as it is for the Mondstadt block this one is
+    appended to, and for the same two reasons: five of these put an ELEMENT on
+    an enemy that may already carry one, so the order decides which reactions
+    fire, and four draw from `state.rng`, so it decides every later roll in the
+    fight. The C# twin (`CompanionOverhaulTurnEnd`) walks the same list.
+
+    IN THE WORKSHOP'S sec.3 CHARACTER ORDER, with the three clock-only entries
+    last: a tick and two removals cannot change an outcome by running in a
+    different order, so they are grouped rather than interleaved.
+    """
+    if not C.COMPANION_OVERHAUL:
+        return
+    p = state.player
+
+    # Gorou, Juuga: Forward Unto Victory -- stacks are TURNS REMAINING. FIRE,
+    # THEN TICK, the idiom every volley in this arm uses.
+    if p.powers.get("mi_juuga", 0):
+        if state.living_enemies:
+            enemy = state.rng.choice(state.living_enemies)
+            deal_damage_to_enemy(state, enemy, C.MI_JUUGA_DMG,
+                                 element="geo", source="companion")
+        _mi_tick(p, "mi_juuga")
+
+    # Sayu, Muji-Muji Daruma -- the nation's shape on a card: "if you are above
+    # 70% HP deal 6 damage to a random enemy; otherwise gain 6 Block". The bar
+    # is read HERE, at the moment the Daruma acts, not when it was summoned --
+    # "if you are" is present tense and the whole point of the split is that it
+    # follows the fight. The damage carries NO element: the card names none.
+    if p.powers.get("mi_daruma", 0):
+        if _mi_above_pct(p, 70):
+            if state.living_enemies:
+                enemy = state.rng.choice(state.living_enemies)
+                deal_damage_to_enemy(state, enemy, C.MI_DARUMA_DMG,
+                                     element=None, source="companion")
+        else:
+            p.block += C.MI_DARUMA_BLOCK
+            state.emit("block", amount=C.MI_DARUMA_BLOCK)
+        _mi_tick(p, "mi_daruma")
+
+    # Kuki Shinobu, Sanctifying Ring -- stacks are TURNS REMAINING. The Block
+    # is paid whether or not the ring found a body, because the printed
+    # sentence joins the two clauses with a bare "and" (Jean's Dandelion Breeze
+    # made the same reading for the same construction).
+    if p.powers.get("mi_sanctifying_ring", 0):
+        for enemy in list(state.living_enemies):
+            deal_damage_to_enemy(state, enemy, C.MI_SANCTIFYING_RING_DMG,
+                                 element="electro", source="companion")
+        p.block += C.MI_SANCTIFYING_RING_BLOCK          # RAW (NC-11)
+        state.emit("block", amount=C.MI_SANCTIFYING_RING_BLOCK)
+        _mi_tick(p, "mi_sanctifying_ring")
+
+    # Yae Miko, Sesshou Sakura -- stacks are SAKURA, capped at 3 by the card
+    # ("Up to 3"), and PERMANENT: the card places a totem, not a timer.
+    #
+    # "EACH SAKURA YOU PLACE WHILE ONE IS OUT DEALS 3 MORE" is read as a
+    # statement about the SAKURA BEING PLACED, which is what its subject says:
+    # the first one out deals 4 and every later one deals 7, whether one or two
+    # were already standing. So the volleys are 4, 7, 7 -- and the order in
+    # which they are fired is the placement order, which is the only order a
+    # counter can hold. Each is its own hit at its own random target, because
+    # each Sakura is its own totem; "plus your Strength" is what the shared
+    # pipeline already does to every power-sourced hit in this arm (NC-1), so
+    # the clause is printed rather than implemented.
+    #
+    # "UP TO 3" IS READ AT THE FIRE, not at the placement, and both engines
+    # read it here: a fourth Sakura can be placed and simply never fires. That
+    # is the conservative direction (R212's one-way rule -- the doubt pays
+    # LESS), and it is the reading that needs no stack cap in either engine.
+    for i in range(min(p.powers.get("mi_sesshou_sakura", 0), C.MI_SAKURA_CAP)):
+        if not state.living_enemies:
+            break
+        enemy = state.rng.choice(state.living_enemies)
+        deal_damage_to_enemy(
+            state, enemy,
+            C.MI_SAKURA_DMG + (C.MI_SAKURA_BONUS if i else 0),
+            element="electro", source="companion")
+
+    # Kamisato Ayaka, Soumetsu -- stacks are TURNS REMAINING, and the card ends
+    # on a bigger hit: "for 2 turns ... deal 8 to ALL. THEN deal 16 to ALL."
+    # FIRE, TICK, AND FIRE AGAIN AT ZERO -- both on the same turn when the
+    # clock runs out, because "then" is what happens after the two turns and
+    # the second turn's own 8 is one of them.
+    if p.powers.get("mi_soumetsu", 0):
+        for enemy in list(state.living_enemies):
+            deal_damage_to_enemy(state, enemy, C.MI_SOUMETSU_DMG,
+                                 element="cryo", source="companion")
+        if _mi_tick(p, "mi_soumetsu"):
+            for enemy in list(state.living_enemies):
+                deal_damage_to_enemy(state, enemy, C.MI_SOUMETSU_FINALE,
+                                     element="cryo", source="companion")
+
+    # Kamisato Ayato, Kyouka -- stacks are TURNS REMAINING; the window itself
+    # is spent on every Attack (`flat_attack_bonus`, `_element_for`), so all
+    # that happens here is the clock, and the illusion that pops at zero.
+    if p.powers.get("mi_kyouka", 0):
+        if _mi_tick(p, "mi_kyouka") and state.living_enemies:
+            enemy = state.rng.choice(state.living_enemies)
+            deal_damage_to_enemy(state, enemy, C.MI_KYOUKA_FINALE,
+                                 element="hydro", source="companion")
+
+    # Chiori, Fluttering Hasode -- Tamoto, "ignoring Block". The one caller of
+    # `deal_damage_to_enemy(ignore_block=True)` in the repo.
+    if p.powers.get("mi_tamoto", 0):
+        if state.living_enemies:
+            enemy = state.rng.choice(state.living_enemies)
+            deal_damage_to_enemy(state, enemy, C.MI_TAMOTO_DMG,
+                                 element="geo", source="companion",
+                                 ignore_block=True)
+        _mi_tick(p, "mi_tamoto")
+
+    # ---- the three clocks that fire nothing here ---------------------------
+    # Thoma, Crimson Ooyoroi -- what it does happens on every Attack the player
+    # plays (`companion_overhaul_card_played`); this is only the clock.
+    _mi_tick(p, "mi_crimson_ooyoroi")
+    # Gorou, General's War Banner -- the clock, and at zero it TAKES BACK the
+    # Dexterity it granted. Granting real Dexterity rather than a private
+    # modifier is what makes "2 Dexterity" mean what every other Dexterity in
+    # the engine means; the stack it hands back is its own, so a banner that
+    # expires while a second one stands leaves that one's 2 alone.
+    if _mi_tick(p, "mi_war_banner"):
+        left = p.powers.get("dexterity", 0) - C.MI_WAR_BANNER_DEXTERITY
+        if left > 0:
+            p.powers["dexterity"] = left
+        else:
+            p.powers.pop("dexterity", None)
+    # Sayu, Naptime -- the promise breaks if an Attack was played this turn.
+    # Read here rather than at the start of the next turn because "this turn"
+    # is THIS turn, and the counter is cleared at the next turn's start.
+    if state.attacks_played_this_turn:
+        p.powers.pop("mi_naptime", None)
+    # Kujou Sara, Crowfeather Cover -- "this turn", so the promise is popped
+    # whole whether or not an Attack ever spent it. Bennett's Passion Overload
+    # is popped four lines above for the identical sentence.
+    p.powers.pop("mi_crowfeather", None)
+
+
+def _mi_tick(fighter, power: str) -> bool:
+    """Tick one turn off a duration, returning True the turn it EXPIRES.
+
+    One helper because eight of the arm's powers are the same clock and a
+    ninth spelling of "decrement, delete at zero" is how two of them come to
+    disagree about whether a stack of 1 fires this turn. Returns False for a
+    power that was not standing at all, so `if _mi_tick(...)` reads as "did
+    this one just run out".
+    """
+    n = fighter.powers.get(power, 0)
+    if not n:
+        return False
+    if n > 1:
+        fighter.powers[power] = n - 1
+        return False
+    del fighter.powers[power]
+    return True
+
+
+def _mi_above_pct(fighter, pct: int) -> bool:
+    """The nation's shape, as one predicate: is this fighter above `pct`% HP?
+
+    CROSS-MULTIPLIED rather than divided, which is the rule the sheet's own
+    `hp_pct_above_N` predicate keeps (`tools/gen_klee_cards.py`) -- so a power
+    reading the bar and a card reading it cannot round the one HP value a
+    player notices in different directions.
+    """
+    return fighter.hp * 100 > fighter.max_hp * pct
 
 
 def _mc_most_auras(state: CombatState):
@@ -5771,8 +6187,19 @@ def companion_overhaul_card_start(state: CombatState, card: Card) -> str:
     override = ""
     if p.powers.get("mc_lightning_fang", 0):
         override = "electro"
+    # THE INAZUMA ARM'S TWO RIDERS join the same sequence, at the same two
+    # tiers, in sheet order after Mondstadt's (QUARANTINED):
+    #   mi_kyouka      Ayato -- Hydro, every Attack, 2 turns   (blanket)
+    #   mi_crowfeather Sara  -- Electro, one Attack            (one-shot)
+    # Blanket first, one-shots after, LAST WINS -- the rule this function
+    # already keeps, applied to five riders instead of three. Varka's stays
+    # last of all: its element is the one the board produced a moment ago.
+    if p.powers.get("mi_kyouka", 0):
+        override = "hydro"
     if p.powers.pop("mc_passion_overload", 0):
         override = "pyro"
+    if p.powers.pop("mi_crowfeather", 0):
+        override = "electro"
     if p.powers.pop("mc_swirl_charge", 0):
         override = p.mc_swirl_element or override
         p.mc_swirl_element = ""
@@ -5869,16 +6296,40 @@ def companion_overhaul_block_absorbed(state: CombatState, enemy: Enemy,
     if not C.COMPANION_OVERHAUL:
         return
     p = state.player
-    mark = min(p.powers.get("mc_icy_paws", 0), block_before)
-    if mark <= 0 or blocked <= 0:
+    if blocked <= 0:
         return
-    if enemy.alive:
-        reactions.resolve_hit(state, enemy, "cryo", 0, "mc_icy_paws")
-    left = mark - blocked
-    if left > 0:
-        p.powers["mc_icy_paws"] = left
-    else:
-        p.powers.pop("mc_icy_paws", None)
+    mark = min(p.powers.get("mc_icy_paws", 0), block_before)
+    if mark > 0:
+        if enemy.alive:
+            reactions.resolve_hit(state, enemy, "cryo", 0, "mc_icy_paws")
+        left = mark - blocked
+        if left > 0:
+            p.powers["mc_icy_paws"] = left
+        else:
+            p.powers.pop("mc_icy_paws", None)
+    # THE INAZUMA ARM's second reader of the same mark (QUARANTINED). Thoma's
+    # Blazing Barrier: "Gain 6 Block. Whenever this Block absorbs damage, gain
+    # 3 Block." Identical construction to the paws above -- one pool, so "this
+    # Block" is a MARK on it, marked-eaten-FIRST, spent by whatever the hit
+    # absorbed -- and the payout is Block instead of an aura.
+    #
+    # SECOND, after the paws, so a board carrying both applies the element
+    # before the shield thickens; neither can change the other's answer (the
+    # marks are separate keys and `block_before` is the number both read), and
+    # the C# listener walks them in this order for the same reason.
+    #
+    # THE NEW BLOCK IS NOT MARKED. The card marks what IT gave you; the 3 it
+    # pays is the barrier's payout, and marking that too would make one play a
+    # shield that thickens for the rest of the fight.
+    mark = min(p.powers.get("mi_blazing_barrier", 0), block_before)
+    if mark > 0:
+        p.block += C.MI_BLAZING_BARRIER_BLOCK           # RAW (NC-11)
+        state.emit("block", amount=C.MI_BLAZING_BARRIER_BLOCK)
+        left = mark - blocked
+        if left > 0:
+            p.powers["mi_blazing_barrier"] = left
+        else:
+            p.powers.pop("mi_blazing_barrier", None)
 
 
 def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
@@ -5910,6 +6361,12 @@ def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
     # stack (so two Swirls before one Attack bank twice, which is what
     # "whenever" says); the element is latched on the player, LAST WINS.
     if name == "swirl":
+        # THE INAZUMA ARM'S Swirl WINDOW (QUARANTINED). Heizou's Heartstopper
+        # Strike prints "deals 4 more for each Swirl this turn", so the count
+        # is taken at the one site this engine resolves a reaction -- beside
+        # Varka's latch, off the same event, so "a Swirl happened" has one
+        # definition here and the two readers cannot disagree.
+        state.mi_swirls_this_turn += 1
         n = p.powers.get("mc_sturm_und_drang", 0)
         if n:
             p.powers["mc_swirl_charge"] = p.powers.get("mc_swirl_charge", 0) + n
@@ -5942,3 +6399,104 @@ def companion_overhaul_reaction_mult(state: CombatState) -> float:
     if not n:
         return 1.0
     return 1.0 + (C.MC_BINARY_WHITE_REACTION_MULT - 1.0) * n
+
+
+# =============================================================================
+# THE INAZUMA COMPANION OVERHAUL -- ITS OWN TWO HOOKS (QUARANTINED,
+# `C.COMPANION_OVERHAUL`).
+#
+# Everything else the Inazuma workshop's twenty-four rows want was already
+# built: the two turn blocks, the Block-absorption trigger, the next-Attack
+# element override, the reaction event and the pre-enemy-attack moment are the
+# Mondstadt arm's, reused row for row. These are the two the arm could not
+# reach, and both hang off a site the engine already ran:
+#
+#   companion_overhaul_damage_dealt   effects.deal_damage_to_enemy, at the
+#                                     tail, after the whole hit has resolved
+#   companion_overhaul_card_played    combat._finish_play, beside
+#                                     `refpowers.after_card_played`
+#
+# Both return before touching anything with the flag off, which is the same
+# acceptance condition the Mondstadt hooks carry and is pinned in
+# `tier0/tests/test_inazuma_companion_overhaul.py` rather than intended.
+# =============================================================================
+
+
+def companion_overhaul_damage_dealt(state: CombatState, enemy: Enemy,
+                                    hp_dmg: float, source: str) -> None:
+    """The two readers of a hit that has just landed on an enemy.
+
+    GOROU'S RUNNING TOTAL. "Gain Block equal to half the damage dealt"
+    (Inuzaka All-Round Defense) needs a number the card cannot compute for
+    itself: the printed 8 is not what landed once Strength, Weak, an amplifier
+    and the target's Block have had their say. So the play keeps a total, and
+    `block_half_damage` reads it.
+
+    IT COUNTS DAMAGE THAT REACHED HP, not the swing. That is the conservative
+    reading of "the damage dealt" (R212's one-way rule: the doubt pays LESS
+    Block), it is what this function already returns to every other caller, and
+    it is the number the C# twin can read off `DamageResult.UnblockedDamage`
+    without a second definition.
+
+    YOIMIYA'S MARK. "Whenever it takes damage from a card that is not an
+    Attack, deal 6 Pyro damage to all enemies." `source` is this engine's own
+    name for what dealt a hit, and it distinguishes exactly the three cases the
+    sentence needs: "attack" is an Attack card, "card" is a card that is not
+    one, and everything else (a bomb, a volley, a Shatter, a splash) came from
+    no card at all. So the mark fires on `source == "card"` and nothing else --
+    which also means the volley it fires cannot re-trigger any mark, its own
+    included, because a power-sourced hit is not a card.
+
+    GUARDED HERE AS WELL AS AT THE CALL SITE. `deal_damage_to_enemy` checks the
+    flag before calling, which is what keeps a shipped hit from paying for a
+    function call it does not need; this guard is what lets the acceptance test
+    assert the property of the FUNCTION rather than of one caller.
+    """
+    if not C.COMPANION_OVERHAUL:
+        return
+    if hp_dmg > 0 and source in ("card", "attack"):
+        # CARD-SOURCED ONLY, which is what "the damage dealt" names on a card
+        # that deals it -- and it is also what keeps the two engines counting
+        # the same thing: the mod totals this off `AfterDamageReceived` where
+        # the DEALER is the player and a `cardSource` is present, and its
+        # power-sourced hits (`ElementalHit.Deal`) carry neither.
+        state.mi_damage_dealt_this_card += int(hp_dmg)
+    if source != "card" or hp_dmg <= 0:
+        return
+    if not enemy.powers.get("mi_aurous_blaze", 0):
+        return
+    # ONE DETONATION PER HIT, however many marks the body carries: the stack is
+    # TURNS REMAINING, not copies, so re-marking a body extends the window
+    # rather than doubling the blast -- the arm's standing rule for a timed
+    # power, and the reading that keeps a second copy from being a multiplier.
+    for other in list(state.living_enemies):
+        deal_damage_to_enemy(state, other, C.MI_AUROUS_BLAZE_DMG,
+                             element="pyro", source="companion")
+
+
+def companion_overhaul_card_played(state: CombatState, card: Card) -> None:
+    """Thoma's Crimson Ooyoroi: "For 2 turns, whenever you play an Attack, deal
+    5 Pyro damage to a random enemy and gain 3 Block."
+
+    AFTER THE CARD RESOLVES, which is where the mod's `AfterCardPlayed` puts
+    it and where this engine already counts an Attack -- so the rider answers
+    the board the Attack left behind, and a killing Attack's rider finds one
+    fewer body. Called from `combat._finish_play` beside
+    `refpowers.after_card_played`, the one site both play paths reach.
+
+    ONE VOLLEY PER PLAY, not per stack: the stack is TURNS REMAINING (the arm's
+    standing rule for a timed power), so a second Ooyoroi lengthens the window.
+    The clock itself runs down at the end of the turn, in
+    `inazuma_overhaul_turn_end`, like every other duration here.
+    """
+    if not C.COMPANION_OVERHAUL or card.type != "attack":
+        return
+    p = state.player
+    if not p.powers.get("mi_crimson_ooyoroi", 0):
+        return
+    if state.living_enemies:
+        enemy = state.rng.choice(state.living_enemies)
+        deal_damage_to_enemy(state, enemy, C.MI_OOYOROI_DMG,
+                             element="pyro", source="companion")
+    p.block += C.MI_OOYOROI_BLOCK                       # RAW (NC-11)
+    state.emit("block", amount=C.MI_OOYOROI_BLOCK)

@@ -38,9 +38,19 @@ namespace KleeMod.Powers;
 /// </summary>
 internal static class CompanionOverhaulRoster
 {
-    /// <summary>tier0 <c>C.COMPANION_OVERHAUL_NATION</c>. The one nation this
+    /// <summary>tier0 <c>C.COMPANION_OVERHAUL_NATION</c>. The FIRST nation the
     /// arm replaces, named once so the line that decides it is greppable.</summary>
     internal const string Nation = "mondstadt";
+
+    /// <summary>tier0 <c>C.INAZUMA_OVERHAUL_NATION</c>. The second, added when
+    /// the Inazuma workshop was approved and built (2026-09-02).</summary>
+    internal const string InazumaNation = "inazuma";
+
+    /// <summary>tier0 <c>C.COMPANION_OVERHAUL_NATIONS</c>: the nations this arm
+    /// replaces, and the one list the kept half is filtered against. Fontaine
+    /// is deliberately absent -- its workshop does not exist yet, and both
+    /// approved documents say so in their own sec.6.</summary>
+    private static readonly string[] Nations = { Nation, InazumaNation };
 
     private static IReadOnlyList<CardModel>? _roster;
 
@@ -56,8 +66,9 @@ internal static class CompanionOverhaulRoster
     /// </summary>
     internal static IReadOnlyList<CardModel> Roster() =>
         _roster ??= CompanionRoster.All
-            .Where(c => (c as ICompanionCard)?.Nation != Nation)
+            .Where(c => !Nations.Contains((c as ICompanionCard)?.Nation))
             .Concat(Universals())
+            .Concat(InazumaUniversals())
             .ToList();
 
     /// <summary>
@@ -118,5 +129,53 @@ internal static class CompanionOverhaulRoster
         ModelDb.Card<ProtoMcAmberExplosivePuppet>(),
         ModelDb.Card<ProtoMcEulaGlacialIllumination>(),
         ModelDb.Card<ProtoMcMikaStarfrostSwirl>(),
+    };
+
+    /// <summary>
+    /// Inazuma's twenty-four rewritten Universals, in the approved workshop's
+    /// sec.3 character order (<c>companion-workshop-inazuma-2026-09-01.md</c>,
+    /// approved 2026-09-01 at its four default picks). Fifteen re-author a
+    /// shipped row and nine give a character with no row today its first.
+    ///
+    /// TWENTY-FOUR AND NOT TWENTY-FIVE, and the number is worth writing down:
+    /// the document's sec.4 counts "25 Universals, 1 Personal" while its sec.3
+    /// enumerates 24 Universals plus Gorou's Kokomi-side Personal, and the
+    /// rarity split it prints (9 Common, 12 Uncommon, 4 Rare) only closes when
+    /// the Personal is counted among the Uncommons. The ENUMERATION is what is
+    /// built. A Personal is Kokomi's kit rather than a companion offer, and no
+    /// stand-in is a Universal either, so neither is here.
+    ///
+    /// NOTHING WAS DROPPED. Every one of the twenty-four prints inside the
+    /// grammar the emitter speaks once this arm's fifteen powers exist -- which
+    /// is what most of <c>CompanionOverhaulInazuma.cs</c> is -- so the rule the
+    /// Mondstadt waves kept ("a card that cannot be printed as written is left
+    /// OUT rather than replaced by a simpler card") bit on nothing here.
+    /// </summary>
+    private static IEnumerable<CardModel> InazumaUniversals() => new CardModel[]
+    {
+        ModelDb.Card<ProtoMiGorouInuzaka>(),
+        ModelDb.Card<ProtoMiGorouWarBanner>(),
+        ModelDb.Card<ProtoMiGorouJuuga>(),
+        ModelDb.Card<ProtoMiSayuFuuinDash>(),
+        ModelDb.Card<ProtoMiSayuDaruma>(),
+        ModelDb.Card<ProtoMiSayuNaptime>(),
+        ModelDb.Card<ProtoMiShinobuSanctifyingRing>(),
+        ModelDb.Card<ProtoMiShinobuGrassRing>(),
+        ModelDb.Card<ProtoMiShinobuThundergrust>(),
+        ModelDb.Card<ProtoMiThomaBlazingBarrier>(),
+        ModelDb.Card<ProtoMiThomaCrimsonOoyoroi>(),
+        ModelDb.Card<ProtoMiSaraCrowfeatherCover>(),
+        ModelDb.Card<ProtoMiSaraTenguStormcall>(),
+        ModelDb.Card<ProtoMiIttoSuperlativeSuperstrength>(),
+        ModelDb.Card<ProtoMiRaidenMusouNoHitotachi>(),
+        ModelDb.Card<ProtoMiKazuhaSlash>(),
+        ModelDb.Card<ProtoMiYaeSesshouSakura>(),
+        ModelDb.Card<ProtoMiYoimiyaAurousBlaze>(),
+        ModelDb.Card<ProtoMiAyakaSoumetsu>(),
+        ModelDb.Card<ProtoMiAyatoKyouka>(),
+        ModelDb.Card<ProtoMiHeizouHeartstopper>(),
+        ModelDb.Card<ProtoMiKiraraSurpriseDispatch>(),
+        ModelDb.Card<ProtoMiMizukiAnraku>(),
+        ModelDb.Card<ProtoMiChioriHasode>(),
     };
 }

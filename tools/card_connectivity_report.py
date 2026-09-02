@@ -285,6 +285,12 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # moves, not how many times it moves it, and a `turns`-scaled hook would
     # make a longer power look like a wider one.
     "block_at_turn_start": [_hook("shared", "block_held", "write")],
+    # QUARANTINED (C.COMPANION_OVERHAUL). Gorou's "Block equal to half the
+    # damage dealt": the same `block_held` WRITE its three neighbours make,
+    # and nothing else. It reads a per-play damage total, and this vocabulary
+    # has no state for that -- `damage` two lines above is `[]` for the same
+    # reason, refined by target rather than counted as a state.
+    "block_half_damage": [_hook("shared", "block_held", "write")],
     "strip_block": [_hook("shared", "block_held", "use")],
     "heal": [_hook("shared", "hp_ledger", "write")],
     "gain_max_hp": [_hook("shared", "hp_ledger", "write")],

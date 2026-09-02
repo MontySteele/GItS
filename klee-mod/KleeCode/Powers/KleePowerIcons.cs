@@ -130,6 +130,28 @@ internal static class KleePowerIcons
         BaronBunnyPower => KleePck.Path("klee/powers/detonation_splash.png"),
         LightfallSwordPower =>
             KleePck.Path("klee/powers/shattering_pressure.png"),
+        // THE INAZUMA ARM, on the same terms again: each borrows the shipped
+        // icon of the power whose job it takes over, and the workshop's own
+        // illustrations are deferred to the Balance stage.
+        WarBannerPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        JuugaPower => KleePck.Path("klee/powers/oz_summon.png"),
+        MujiMujiDarumaPower => KleePck.Path("klee/powers/oz_summon.png"),
+        NaptimePower => KleePck.Path("klee/powers/celestial_gift.png"),
+        SanctifyingRingPower => KleePck.Path("klee/powers/oz_summon.png"),
+        BlazingBarrierPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        CrimsonOoyoroiPower =>
+            KleePck.Path("klee/powers/passion_overload.png"),
+        CrowfeatherCoverPower =>
+            KleePck.Path("klee/powers/passion_overload.png"),
+        TenguStormcallPower =>
+            KleePck.Path("klee/powers/passion_overload.png"),
+        SesshouSakuraPower => KleePck.Path("klee/powers/oz_summon.png"),
+        AurousBlazePower => KleePck.Path("klee/powers/detonation_splash.png"),
+        SoumetsuPower => KleePck.Path("klee/powers/oz_summon.png"),
+        KyoukaPower => KleePck.Path("klee/powers/passion_overload.png"),
+        SurpriseDispatchPower =>
+            KleePck.Path("klee/powers/detonation_splash.png"),
+        TamotoPower => KleePck.Path("klee/powers/shattering_pressure.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

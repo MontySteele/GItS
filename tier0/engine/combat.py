@@ -616,6 +616,14 @@ def _finish_play(state: CombatState, card: Card,
         snap = refpowers.before_card_played(state, card)
         effects.resolve_card(state, card)
         refpowers.after_card_played(state, card, snap)
+        # QUARANTINED (C.COMPANION_OVERHAUL). Thoma's Crimson Ooyoroi, on the
+        # broadcast the mod gives it (`AfterCardPlayed`) and beside the site
+        # this engine already counts an Attack at. INSIDE the replay loop and
+        # NOT gated to the first pass, unlike the two companion triggers below
+        # it: the card says "whenever you play an Attack", and a replayed
+        # Attack is an Attack played again -- the same index rule Rage and
+        # Juggling take three lines up.
+        effects.companion_overhaul_card_played(state, card)
         if replay_index == 0 and card.is_companion:
             # FURINA REFRAME (§4.3, `F3` (1) / `F4` (1)): a Companion play
             # makes the FRONT Salon member perform, then rotates it to the
@@ -695,6 +703,10 @@ _FREE_PLAY_CONTEXT = (
     # auto-play that discards or gains block in the middle of an outer card
     # would otherwise leave its numbers behind for the outer card to read.
     "block_gained_this_card", "discards_this_card", "last_drawn_type",
+    # QUARANTINED (C.COMPANION_OVERHAUL). Gorou's per-play damage total, saved
+    # for the reason its three neighbours are: an auto-play that dealt damage
+    # inside an outer card would otherwise hand the outer card its number.
+    "mi_damage_dealt_this_card",
     # EB-118's identity context. The saved value is the LIST OBJECT, which is
     # why every writer rebinds instead of clearing in place: a free play that
     # exhausts mid-resolution opens its own list, and the restore below hands
@@ -818,6 +830,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # discount to the current turn? Yes." One boundary idiom, used twice.
     state.splash_procs_this_turn = 0             # detonation_splash cap
     state.reactions_this_turn = 0                # Chevreuse predicate window
+    # QUARANTINED (C.COMPANION_OVERHAUL). Heizou's Swirl window, cleared on the
+    # same line as the reaction window it counts a subset of -- one turn
+    # boundary for both, so the two can never disagree about which turn it is.
+    state.mi_swirls_this_turn = 0
     state.spotlighted_cards_this_turn = 0        # Ovation / reserve cap
     state.spotlighted_paid_cards_this_turn = 0   # B2: Leading Role's window
     state.spotlight_moved_this_turn = False      # selector-payoff window
@@ -1411,6 +1427,13 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # per-combat like everything else on this line: a fight opens with no
     # previous turn, so nobody has held the line yet.
     player.mc_held_block_at_turn_end = False
+    # QUARANTINED (C.COMPANION_OVERHAUL). The Mend ceiling, captured at the top
+    # of the fight -- "the HP you entered the fight with", which is the whole of
+    # the keyword's one rule. Written unconditionally, like every other line in
+    # this block: it is a new per-combat field nothing else reads, and a
+    # conditional capture would leave the ceiling at whatever HP the first Mend
+    # happened to find.
+    state.mi_entry_hp = player.hp
     # Same line, same reason: Varka's swirled element is per-combat, and a
     # reused Player must not carry one fight's Swirl into the next.
     player.mc_swirl_element = ""
