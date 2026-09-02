@@ -322,6 +322,17 @@ MIRRORED: dict[str, object] = {
 # legitimate is leaving the question unanswered.
 # --------------------------------------------------------------------------
 UNMIRRORED: dict[str, str] = {
+    "RosterArt.PortraitWidth":
+        "`EB-275`. AN IMAGE SIZE, not balance: the card-art window's authored "
+        "pixel width, used to build the flat blank an uncovered row's portrait "
+        "resolves to instead of null -- which is what stops the game falling "
+        "through to its own atlas and logging a missing sprite on every draw. "
+        "The number is the art pipeline's: `tools/art_lint.py` bills every "
+        "portrait against 500x380 and `tools/art_coverage.py` reads the same "
+        "shape off disk. tier0 draws nothing and has no counterpart.",
+    "RosterArt.PortraitHeight":
+        "`EB-275`. The other half of the card-art window's authored size; see "
+        "`RosterArt.PortraitWidth` for the whole of it.",
     "NonFiniteCardGuard.MaxTrailTravelPx":
         "`EB-292`. A SCENE BOUND, not balance: how far a followed node may "
         "travel in one frame before the base game's card-trail gap-fill loop "

@@ -106,8 +106,15 @@ def _bonus_formula(state: CombatState, formula: str,
         return int(n) * state.companion_plays_this_turn
     m, _, what = rest.partition("_")
     if what == "fanfare" and m.isdigit():
-        resources.note_fanfare_read(state, "bonus_formula",
-                                    card=card.id if card else None)
+        # EB-253: the fanfare twin of the charge leg below. The pilot prices
+        # a Fanfare rider through this same helper, and a price is not a
+        # play -- `note_fanfare_read` is the LIVE-meter instrument, so
+        # deliberation counted there reports the pilot's turn as the
+        # player's. Same declaration, same default: every engine resolve
+        # site and every direct probe still tallies exactly what it did.
+        if not valuation:
+            resources.note_fanfare_read(state, "bonus_formula",
+                                        card=card.id if card else None)
         # `readable`, not the raw field: the meter can sit BELOW ZERO since
         # the Hyperbeam (Track C.2), and a rider reading -12 would pay
         # NEGATIVE damage -- an attack that heals the enemy. Effects shut off
@@ -5237,7 +5244,8 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
         card.enchant_played_this_combat = True
 
 
-def flat_attack_bonus(state: CombatState, card: Card, cost: int) -> int:
+def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
+                      valuation: bool = False) -> int:
     """The per-card flat bonus every attack card carries, as a PURE READ.
 
     Bennett's next_attack_up, Nicole's celestial_gift, the Bennett-burst
@@ -5245,12 +5253,20 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int) -> int:
     Rapturous Applause's Fanfare term, and Kokomi's Ceremonial Garment
     Charge read all land here — flat, folded in before strength/vulnerable.
 
-    Consumes nothing and touches no telemetry, so the pilot may call it to
-    price a play it has not made (v0.4 W1: the pilot previously saw NONE of
-    these, so it valued every attack at its printed number and played
-    straight through its own buff windows -- most visibly the Garment, where
-    a priest-median bank is worth more than most cards' printed damage).
-    The consuming pop and the KNOB_READS tick stay at the real call site.
+    Consumes nothing, so the pilot may call it to price a play it has not
+    made (v0.4 W1: the pilot previously saw NONE of these, so it valued every
+    attack at its printed number and played straight through its own buff
+    windows -- most visibly the Garment, where a priest-median bank is worth
+    more than most cards' printed damage). The consuming pop and the
+    KNOB_READS tick stay at the real call site.
+
+    EB-253, and the reason this line no longer reads "touches no telemetry":
+    it did. Rapturous Applause's Fanfare term files a `fanfare_read` on the
+    way past, so the pilot's price for every attack in hand landed in the
+    LIVE-meter instrument as if the player had played them all. The fix is
+    EB-242's, one instrument over -- `valuation=True` DECLARES the call an
+    estimate and tallies nothing, and the default stays the resolve path so a
+    new resolve site has to opt out on purpose rather than by omission.
     """
     if card.type != "attack":
         return 0
@@ -5299,7 +5315,8 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int) -> int:
     # power bonuses", kickoff §4). Reads the pool, spends nothing.
     n = p.powers.get("fanfare_attack_per10", 0)
     if n:
-        resources.note_fanfare_read(state, "attack_power")
+        if not valuation:                          # EB-253, see the docstring
+            resources.note_fanfare_read(state, "attack_power")
         bonus += n * (resources.readable(p) // 10)
     # Ceremonial Garment (Kokomi kit, kickoff §2.2 Shape B): while the state
     # is active her attack cards READ Charge, scaled down by the divisor

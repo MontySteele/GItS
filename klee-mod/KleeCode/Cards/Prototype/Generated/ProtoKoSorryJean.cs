@@ -42,7 +42,7 @@ public sealed class ProtoKoSorryJean : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sorry, Jean..."),
-        ("description", "Remove one of your [gold]Bombs[/gold]. Gain Block equal to its size."),
+        ("description", "Remove one of your [gold]Bombs[/gold]. Gain Block equal to its size. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

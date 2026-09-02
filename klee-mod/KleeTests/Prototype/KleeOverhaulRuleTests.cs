@@ -378,12 +378,12 @@ public class KleeOverhaulRuleTests
     {
         var ledger = NewLedger();
 
-        ledger.NoteExplosion(reacted: false, size: 5);
-        ledger.NoteExplosion(reacted: true, size: 7);
+        ledger.NoteExplosion(reacted: false, damageDealt: 5);
+        ledger.NoteExplosion(reacted: true, damageDealt: 7);
 
         Assert.Equal(2, ledger.SetOffThisTurn);
         Assert.Equal(1, ledger.ReactedThisTurn);
-        Assert.Equal(12, ledger.SizeSetOffThisPlay);
+        Assert.Equal(12, ledger.DamageSetOffThisPlay);
     }
 
     [Fact]
@@ -391,7 +391,7 @@ public class KleeOverhaulRuleTests
     {
         var ledger = NewLedger();
         ledger.RollTo(1);
-        ledger.NoteExplosion(reacted: false, size: 4);
+        ledger.NoteExplosion(reacted: false, damageDealt: 4);
         Assert.Equal(1, ledger.SetOffThisTurn);
         Assert.Equal(0, ledger.SetOffLastTurn);
 
@@ -411,7 +411,7 @@ public class KleeOverhaulRuleTests
         // rather than a stale number from three rounds ago.
         var ledger = NewLedger();
         ledger.RollTo(1);
-        ledger.NoteExplosion(reacted: false, size: 4);
+        ledger.NoteExplosion(reacted: false, damageDealt: 4);
         ledger.RollTo(5);
         Assert.Equal(0, ledger.SetOffLastTurn);
     }
@@ -420,9 +420,9 @@ public class KleeOverhaulRuleTests
     public void The_per_play_size_memory_is_opened_by_the_card_that_reads_it()
     {
         var ledger = NewLedger();
-        ledger.NoteExplosion(reacted: false, size: 9);
+        ledger.NoteExplosion(reacted: false, damageDealt: 9);
         ledger.BeginPlay();
-        Assert.Equal(0, ledger.SizeSetOffThisPlay);
+        Assert.Equal(0, ledger.DamageSetOffThisPlay);
         // The turn counter is NOT reset by a play: Run Away! and Ammo
         // Scavenging read the turn, and Big Badda Boom reads the play.
         Assert.Equal(1, ledger.SetOffThisTurn);

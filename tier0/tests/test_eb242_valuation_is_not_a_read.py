@@ -109,13 +109,25 @@ def test_the_direct_probe_of_the_primitive_is_still_a_read():
     assert st.charge_reads_this_turn == {"bonus_formula": 1}
 
 
-def test_the_fanfare_leg_of_the_same_helper_is_not_in_scope():
+def test_the_fanfare_leg_of_the_same_helper_was_out_of_scope():
     """EB-242 is the CHARGE instrument. `note_fanfare_read` is a different
     instrument with a different registration, and a fix that quietly retuned
-    it would be an undeclared change to a published measurement's source."""
+    it under this row's name would have been an undeclared change to a
+    published measurement's source -- so this case pinned the fanfare leg's
+    exposure IN PLACE, and it was filed as `EB-253` instead.
+
+    `EB-253` has since been taken on its own disclosed commit, so the pin
+    flips to the far side of the same fact: the fanfare leg honours the flag
+    too now. The case stays because the SEPARATION is what this row decided,
+    and it is still true -- what one leg does does not tell you what the
+    other does by construction. `test_eb253_fanfare_valuation_is_not_a_read`
+    owns the fanfare side.
+    """
     st = CombatState(player=loader.build_player("furina"),
                      enemies=[make_enemy(hp=300)], rng=random.Random(0))
     st.player.fanfare = st.player.fanfare_cap
     st.log.clear()
     effects._bonus_formula(st, "1_per_2_fanfare", valuation=True)
+    assert [ev["event"] for ev in st.log] == []           # EB-253
+    effects._bonus_formula(st, "1_per_2_fanfare")
     assert [ev["event"] for ev in st.log] == ["fanfare_read"]

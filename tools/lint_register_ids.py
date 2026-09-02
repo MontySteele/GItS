@@ -1071,22 +1071,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # nothing, which is where every board written before this row is.
         # The row's GATE -- a repaired BT3 round -- is a RUN and is not
         # discharged here; the leg it was waiting for exists.
-        # 245/246 minted 2026-08-30 by KLEESPARK-W5 (packet section 25.6.3).
-        # 245: blindplay session asked for a FIGHT RECORD on a card_select
-        # observation -- Bag of Tricks' own Choose one mode screen, which is
-        # the middle of a play. The sealed record carries FOUR fight records
-        # for THREE fights and the phantom one reports the fight over while
-        # the enemy stood at 44/44; it cost a Codex call and put a falsehood
-        # in a sealed record. It touched no graded slot: B1-B5 are counted off
-        # per-page wire snapshots and forecast rows, and the mode was still the
-        # tester's own free choice one transcript row later.
-        # 246: the printed option name reaches the blind observation AND the
-        # command with its markup intact -- choose "Spend 3 [gold]Sparks[/gold]
-        # : place 3 [gold]Bombs[/gold] dealing 5". scenario.py folds those tags
-        # out for the staged packet and the blind render does not, so one
-        # choice has two printed names. The W5 tester named it unprompted.
-        245,
-        246,
+        # 245/246 minted 2026-08-30 by KLEESPARK-W5, CLOSED 2026-09-02 on
+        # blind-render-r3: an overlay a fight wears now INHERITS the fight it
+        # is standing in front of rather than ending it, and the game's
+        # rich-text fold moved to `qa_packet.strip_markup`, which the blind
+        # render and `scenario.card_key` now share. Both rows left HEAD with
+        # their acceptance met on tests seen to FAIL, so both numbers have
+        # RETIRED and neither may be re-minted.
         # 247/248 minted 2026-08-30 by KURAGECAD-W1 (kurage packet section
         # 15.9.5). Both are DISPLAY and WORDING rows, which is the destination
         # K1's and K4's decision columns name; neither is a re-price, a dose
@@ -1177,11 +1168,21 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # and re-pinned the two NEW Klee findings the regen reads, each with
         # its arithmetic said out loud in the debt list's header; the gate
         # runs 20 findings against 20 pins. The ceiling stays where it is.
-        # 253 minted 2026-08-31 by the EB-242 fix: the pilot's fanfare
-        # valuations tick note_fanfare_read through the same helper --
-        # fixed separately because it moves a published measurement's
-        # source; the EB-242 test file pins the exposure.
-        253,
+        # 253 LEFT OPEN_IDS 2026-09-02 with its row, on its acceptance word
+        # for word -- "a fanfare valuation tallies nothing, on a test seen to
+        # FAIL". `tier0/tests/test_eb253_fanfare_valuation_is_not_a_read.py`
+        # was seen red on five cases against the unfixed engine and is green
+        # on ten now. TWO sites, not the one the row named: the
+        # `N_per_M_fanfare` leg of `effects._bonus_formula` (EB-242's twin)
+        # and `effects.flat_attack_bonus`, whose own docstring claimed it
+        # "touches no telemetry" while filing an `attack_power` read for every
+        # attack the pilot priced. Both take EB-242's `valuation=True`
+        # declaration and every resolve path tallies exactly what it did,
+        # pinned from both directions. `salon_focus` already carried the fix
+        # in its own spelling (`note=False`) and `threshold` was never exposed
+        # -- the pilot keeps its own copy of `fanfare_at_least_` for precisely
+        # this reason -- and both are pinned now so a tidy-up cannot re-open
+        # it.
         # 254-258 minted 2026-08-31 by the triage of [USER]'s manual solo
         # Kokomi playtest. The world it was played on is the reason four of
         # them exist: `0.2.1786+proto.dirty` was still installed, so a manual
@@ -1204,10 +1205,44 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # CLOSED 2026-08-31, twenty-four faces golded at their emission sites
         # and `tools/lint_keyword_meters.py` grew the lock, seen to FAIL on
         # all of them first.
+        # 255 stays OPEN and is NOT closed by its lint: the row's own next
+        # action -- exclude by starter membership -- moves `archetype_shares`
+        # for Furina and Kokomi, hence `dominant_archetype`, hence the rest
+        # plan and the adaptive drafter, so it is a POLICY window with a
+        # re-baseline. What landed 2026-09-02 is the invariant made checkable:
+        # `tools/lint_starter_pool_overlap.py`, thirteen curated debt rows
+        # across every arm that moves a starter, both directions of the debt
+        # contract seen to FAIL.
         255,
-        256,
+        # 256 LEFT OPEN_IDS 2026-09-02 with its row, on its acceptance word
+        # for word -- "the loop is reported, not run forever". A no-progress
+        # detector landed in `combat._run_rounds`: `STALL_ROUNDS` (10)
+        # consecutive rounds byte-identical on everything a fight can progress
+        # on (both sides' HP and Block, and the deck) end the fight as a
+        # recorded stall -- `CombatState.stalled`, a `fight_stall` event, a
+        # `stalled=` key on `fight_end`, and `RunResult.outcome` reading
+        # "stalled" where it read "died". `won` did NOT move on either side of
+        # the seam, and no shipped run has ever reached the branch: 180 3-act
+        # runs across the roster fired it zero times and reached the turn cap
+        # zero times, `review/records/` carries no stall, and the suite sweeps
+        # the whole frozen battery x 3 characters x 3 seeds asserting it stays
+        # silent. `act1_pool.yaml`'s UNIMPLEMENTED Plating 12 keeps its note
+        # on the enemy, which is that sheet's own convention for a skip.
         257,
-        259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
+        # 276 and 278 LEFT OPEN_IDS 2026-09-02 with their rows. Both were
+        # about draft 2's TIDE -- a Strength gain converting into it, and
+        # Tide-scaled cards playable at Tide 0 -- and R240/R241 deleted
+        # the Tide outright when the Plan replaced it (PR #266), so
+        # neither row describes anything a build can reach. Verified in
+        # the C# rather than assumed: no `gain_tide` / `draw_per_tide` /
+        # `surge` / `exert` op is registered in either engine, the arm's
+        # own conversion site returns false under
+        # `KokomiOverhaul.LiveFor` (pinned by
+        # `KokomiOverhaulRuleTests.Rule3_the_shipped_strength_refusal_is_
+        # skipped_under_the_arm`), and every surviving `Tide` in the mod
+        # is a SHIPPED card's name (Ebb Tide, Tide of Names), which the
+        # arm's pool replacement puts out of reach anyway.
+        259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 277, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
         # 292: the `NCardTrail` hang off the Kokomi round-two blind session.
         # BUILT in the commit that mints it -- the guard refuses the
         # non-finite value at three doors and names the node chain -- and it

@@ -65,10 +65,13 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// interface, so the loc lives here and cannot drift from the id.
     ///
     /// THE BADGE IS THE WHOLE UI (slice packet sec.5, last bullet): the number
-    /// under the enemy is the total size sitting there, and the fuse mark is
+    /// under the enemy is what a Set off here would deal, and the fuse mark is
     /// the Mine count in the smart tooltip. Nothing new is drawn -- this is the
     /// same <c>DisplayAmount</c> + <c>DynamicVar</c> rendering the shipped Bomb
     /// already uses, which is what "reuse the existing badge" means here.
+    /// <c>EB-270</c>: the badge and the <c>{Size}</c> below are ONE number,
+    /// because two numbers on one pile is one too many -- see
+    /// <see cref="DisplayAmount"/>.
     /// </summary>
     public List<(string, string)>? Localization => new()
     {
@@ -243,10 +246,36 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// arithmetic itself.</summary>
     public IReadOnlyList<ProtoCharge> Charges => _charges;
 
-    /// <summary>The badge shows the total size, not the count -- the shipped
-    /// Bomb's ruling (2026-07-20), for its own reason: an enemy-side number
-    /// reads as incoming damage, and a count hides what growing did.</summary>
-    public override int DisplayAmount => TotalSize;
+    /// <summary>
+    /// THE BADGE, AND IT IS THE SAME NUMBER THE TOOLTIP PRINTS -- <c>EB-270</c>.
+    ///
+    /// The badge shows an AMOUNT, not the count -- the shipped Bomb's ruling
+    /// (2026-07-20), for its own reason: an enemy-side number reads as incoming
+    /// damage, and a count hides what growing did. That much is unchanged. What
+    /// changed is WHICH amount.
+    ///
+    /// It used to be <see cref="TotalSize"/>, the raw sum of the charges, while
+    /// the face beside it printed <see cref="PredictedSetOffDamage"/> -- so
+    /// under Weak the pile read "Bomb 17" in bold with "a Set off here deals 12
+    /// Pyro damage in total, after Weak" underneath. The r2 Opus seat read the
+    /// bold 17 first and called it "the wrong one", and the r3 Codex seat had
+    /// to reason its way from one to the other. Two numbers on one pile is one
+    /// number too many, and the survivor has to be the one the Set off actually
+    /// PAYS.
+    ///
+    /// So the badge, the tooltip's <c>{Size}</c> and Big Badda Boom's bonus
+    /// line now all come off the same arithmetic: this getter and
+    /// <c>SetOffDamageVar</c> both call <see cref="PredictedSetOffDamage"/>,
+    /// and the ledger the bonus line reads is fed the number
+    /// <c>ElementalHit.Deal</c> returned. <see cref="TotalSize"/> survives as
+    /// the raw sum every rule inside the arm is priced in (growth, jumps, Sorry
+    /// Jean's Block); it is simply not a number the player is shown any more.
+    ///
+    /// A canonical (compendium) copy has no owner, and
+    /// <see cref="PredictedSetOffDamage"/> answers <see cref="TotalSize"/> for
+    /// one -- so the compendium badge is unchanged by this.
+    /// </summary>
+    public override int DisplayAmount => PredictedSetOffDamage();
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new DynamicVar[]
@@ -557,17 +586,18 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// Big Badda Boom's second clause: "Then deal damage equal to the total
-    /// size of the Bombs set off." Read off the ledger, because by now the pile
-    /// is gone -- which is exactly why the number is remembered rather than
-    /// recomputed.
+    /// Big Badda Boom's second clause: "Then hit again for the damage the
+    /// Bombs dealt." Read off the ledger, because by now the pile is gone --
+    /// which is exactly why the number is remembered rather than recomputed.
+    /// `EB-270`: the ledger banks what each explosion LANDED for, so this is
+    /// the card's printed promise and not the raw charge sum it used to be.
     /// </summary>
     public static async Task DealSetOffTotal(
         PlayerChoiceContext choiceContext, Creature? target, Creature applier,
         CardModel cardSource, CardPlay cardPlay)
     {
         if (target == null) return;
-        var total = KleeOverhaulLedger.For(applier).SizeSetOffThisPlay;
+        var total = KleeOverhaulLedger.For(applier).DamageSetOffThisPlay;
         await DealCardDamage(choiceContext, target, total, cardSource, cardPlay);
     }
 
@@ -666,10 +696,16 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         Vfx.KleeCombatVfx.SpawnBombLob(applier, target);
 
         var reactionsBefore = ReactionEffects.TotalResolved;
-        await ElementalHit.Deal(choiceContext, target, Element.Pyro, size, applier);
+        // `EB-270`: the number the hit LANDED for, straight off the funnel that
+        // computed it. Big Badda Boom's second clause reads this through the
+        // ledger and its face says "the damage the Bombs dealt", so the two
+        // have to be one number -- `size` is the charge, not the damage, and
+        // under Weak (or Strength, or Vulnerable) they are different.
+        var dealt = await ElementalHit.Deal(
+            choiceContext, target, Element.Pyro, size, applier);
         var reacted = ReactionEffects.TotalResolved > reactionsBefore;
 
-        ledger.NoteExplosion(reacted, size);
+        ledger.NoteExplosion(reacted, dealt);
 
         // THE BOMB PAYLOAD (Jumpy Dumpty). It rides the explosion rather than
         // the card, which is the whole of what makes the starter's promise
@@ -1050,11 +1086,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         await CreatureCmd.GainBlock(applier, size, ValueProp.Unpowered, null);
     }
 
-    /// <summary>Big Badda Boom's second clause reads this: the total size this
-    /// play has already set off. Kept on the ledger, not here, because the card
-    /// asks about the PLAY and a pile is gone by the time it asks.</summary>
-    public static int SizeSetOffThisPlay(Creature applier) =>
-        KleeOverhaulLedger.For(applier).SizeSetOffThisPlay;
+    /// <summary>Big Badda Boom's second clause reads this: the damage this
+    /// play's explosions have already dealt. Kept on the ledger, not here,
+    /// because the card asks about the PLAY and a pile is gone by the time it
+    /// asks.</summary>
+    public static int DamageSetOffThisPlay(Creature applier) =>
+        KleeOverhaulLedger.For(applier).DamageSetOffThisPlay;
 
     // ---- the per-combat register of live piles ---------------------------
 

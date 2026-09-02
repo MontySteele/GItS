@@ -170,14 +170,24 @@ public class KleeOverhaulRoundOneFixTests
     public void The_printed_number_is_no_longer_the_raw_pile_size()
     {
         // The mutation guard: put TotalSize back on the face and this fails.
+        //
+        // ONE LINE MOVED WITH `EB-270`, and it is worth saying which. This used
+        // to assert `10 == pile.DisplayAmount` under the comment "the badge is
+        // unchanged" -- EB-265 fixed the FACE and deliberately left the badge
+        // on the raw sum. That is the two-number board the r2 and r3 seats then
+        // read as a contradiction, so EB-270 moved the badge onto the same
+        // arithmetic; `KleeOverhaulOneNumberTests` owns that fact now. What
+        // this test still pins is EB-265's own claim: `TotalSize` is 10 and the
+        // number a Set off pays is 14, so the two are not the same number and
+        // no player-facing surface may print the first.
         var klee = Seat.Klee().WithPower<StrengthPower>(2);
         var enemy = Seat.Klee(30).Creature;
         var pile = ProtoBombs.Place(enemy, klee.Creature,
             new ProtoBombs.Charge(5), new ProtoBombs.Charge(5));
 
         Assert.Equal(10, pile.TotalSize);
-        Assert.Equal(10, pile.DisplayAmount);      // the badge is unchanged
         Assert.Equal(14, pile.PredictedSetOffDamage());
+        Assert.Equal(14, pile.DisplayAmount);      // EB-270: the badge follows
     }
 
     [Fact]

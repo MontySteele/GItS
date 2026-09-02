@@ -132,7 +132,7 @@ from typing import Any, Callable
 
 import yaml
 
-from understudy import adapter, bridge, instances, naming
+from understudy import adapter, bridge, instances, naming, qa_packet
 
 SCENARIO_DIR = Path(__file__).resolve().parent / "scenarios"
 # Gitignored, like `logs/soak/` and for the same reason: a reading taken on a
@@ -442,12 +442,6 @@ def _select_blob(state: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     return "", {}
 
 
-# The game's rich-text markup, as it appears in a modal option's own name:
-# `[gold]`, `[/gold]`, `[b]`, and any other single bracketed tag. Folded out
-# by `card_key` -- see its docstring for the defect that made this necessary.
-_RICH_TEXT_TAG = re.compile(r"\[/?[a-z0-9_]+(?:=[^\]]*)?\]")
-
-
 def card_key(text: str) -> str:
     """One comparable key for a card named by id, loc key, or printed title.
 
@@ -467,11 +461,18 @@ def card_key(text: str) -> str:
     priced modal line stopped `modal_unanswered`. Found live on Kokomi slice 2
     `t06`, on both graders, 2026-08-29. Only the TAGS are removed; the words
     between them are part of the name and stay.
+
+    `EB-246`: THE FOLD ITSELF MOVED TO `qa_packet.strip_markup` and this calls
+    it rather than keeping a second copy of the pattern. The blind render needs
+    the identical fold -- the defect was that it did not have one, so a modal
+    option had two printed names -- and `blindplay` may not import this module
+    (the structural no-leak pin refuses `scenario` from it), so the leaf both
+    sides already import is where the rule lives.
     """
     key = str(text or "").strip().casefold()
     if key.startswith("kleemod-"):
         key = key[len("kleemod-"):]
-    key = _RICH_TEXT_TAG.sub("", key)
+    key = qa_packet.strip_markup(key)
     for ch in ("-", "_", "'", "!", ",", "."):
         key = key.replace(ch, " ")
     return " ".join(key.split())

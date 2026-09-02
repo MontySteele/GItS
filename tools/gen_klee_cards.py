@@ -7509,7 +7509,26 @@ def build_description(card: dict) -> str:
     row carries the key.
     """
     if card.get("description"):
-        return _face_riders(card, _authored_face_with_tokens(card))
+        # `EB-283`, second half. A row states its own face, so an upgrade that
+        # APPENDS an effect rather than moving a number had nowhere to print --
+        # the swap above only ever rewrites a literal that is already in the
+        # text. Thirteen prototype rows took the Prototype-stage rule's last
+        # clause ("otherwise the card draws one more"), gained a real
+        # `IsUpgraded`-gated draw in `OnPlay`, and printed a `+` face
+        # BYTE-IDENTICAL to the base one -- which is `EB-277`'s complaint
+        # ("an upgraded prototype card was identical to its base") surviving
+        # the fix that was supposed to end it.
+        #
+        # The rendered path has always printed these clauses
+        # (`_upgrade_add_text`, placed at `added_effect_anchor`); this is the
+        # same call for the authored path. It APPENDS, because an authored
+        # face's sentence order is the author's and the added effect resolves
+        # after the base body (`_upgrade_add_lines`) -- and no row on the
+        # surface carries `add_before`, which is the only delta that would
+        # want another position.
+        face = " ".join(
+            [_authored_face_with_tokens(card)] + _upgrade_add_text(card))
+        return _face_riders(card, face)
     parts = []
     deltas = upgrade_plan(card)[0]
     for field, label in (("encore_cost", "Encore"),

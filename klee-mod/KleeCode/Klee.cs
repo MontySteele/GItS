@@ -264,11 +264,16 @@ public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
     public override string? CustomRestSiteAnimPath =>
         KleePck.Path("klee/model/rest_character.tscn");
 
-    // Known-benign log error at each merchant visit: NMerchantCharacter._Ready
-    // unconditionally builds a MegaSpineBinding on its first child and throws
-    // on a static Sprite2D. Godot's bridge logs and swallows it; the sprite
-    // still renders, only the "relaxed_loop" idle is lost. Unfixable without
-    // patching game code -- accepted.
+    // NMerchantCharacter._Ready unconditionally builds a MegaSpineBinding on
+    // its first child and throws on a static Sprite2D. Godot's bridge logged
+    // and swallowed one per shop, for every character here, and that was
+    // carried from 2026-07-20 as "unfixable without patching game code --
+    // accepted". EB-274 patched the game code:
+    // Patches/MerchantSpineBindingPatch.cs skips the binding when child 0 is
+    // not a SpineSprite, which is the same test NRestSiteCharacter already
+    // applies to its own children. The sprite renders exactly as before and
+    // the "relaxed_loop" idle is still lost -- there is no rig to play it --
+    // but the exception is gone.
     public override string? CustomMerchantAnimPath =>
         KleePck.Path("klee/model/character_sprite.tscn");
 

@@ -14,9 +14,15 @@ namespace KleeMod.Powers;
 ///
 /// TWO MORE LIVE HERE BECAUSE THEY ARE THE SAME KIND OF FACT, scoped to a PLAY
 /// rather than a turn:
-///   * <see cref="SizeSetOffThisPlay"/> -- Big Badda Boom's "damage equal to
-///     the total size of the Bombs set off". It has to be remembered, because
-///     the pile is gone by the time the card's second clause asks.
+///   * <see cref="DamageSetOffThisPlay"/> -- Big Badda Boom's "hit again for
+///     the damage the Bombs dealt". It has to be remembered, because the pile
+///     is gone by the time the card's second clause asks. `EB-270` renamed it
+///     from `SizeSetOffThisPlay` and moved what is added to it: it used to bank
+///     the charge SIZES, while the card's face (`EB-291`) says DAMAGE, and the
+///     two part company the moment a modifier applies -- under Weak a pair of
+///     8+9 Bombs deals 12 and banked 17. It now banks what
+///     <c>ElementalHit.Deal</c> returned, so the bonus line, the badge and the
+///     tooltip are three readings of one number.
 ///   * <see cref="TakeDoubling"/> -- The Big One's "Bombs set off this way deal
 ///     double". Armed by the card and spent BY the Set off, so "this way" means
 ///     this card rather than the rest of the turn.
@@ -85,25 +91,29 @@ public sealed class KleeOverhaulLedger
     /// whole read: "if none of your Bombs went off LAST turn".</summary>
     public int SetOffLastTurn { get; private set; }
 
-    /// <summary>Total SIZE set off since the current card play began.</summary>
-    public int SizeSetOffThisPlay { get; private set; }
+    /// <summary>Total DAMAGE the explosions since the current card play began
+    /// actually dealt -- post-Strength, post-Weak, post-reaction,
+    /// post-Vulnerable (`EB-270`), which is what Big Badda Boom's face
+    /// promises.</summary>
+    public int DamageSetOffThisPlay { get; private set; }
 
     private bool _doubleNextSetOff;
     private int _round = -1;
 
-    /// <summary>One explosion landed, for <paramref name="size"/>. THE ONE
-    /// write site for both counters and the play memory, so the three can never
-    /// disagree about what an explosion is.</summary>
-    public void NoteExplosion(bool reacted, int size)
+    /// <summary>One explosion landed, for <paramref name="damageDealt"/> --
+    /// the number <c>ElementalHit.Deal</c> returned, never the charge's size.
+    /// THE ONE write site for both counters and the play memory, so the three
+    /// can never disagree about what an explosion is.</summary>
+    public void NoteExplosion(bool reacted, int damageDealt)
     {
         SetOffThisTurn++;
-        SizeSetOffThisPlay += size;
+        DamageSetOffThisPlay += damageDealt;
         if (reacted) ReactedThisTurn++;
     }
 
     /// <summary>A card play begins: the play-scoped size memory starts empty.
     /// Emitted at the top of the body of any card that reads it.</summary>
-    public void BeginPlay() => SizeSetOffThisPlay = 0;
+    public void BeginPlay() => DamageSetOffThisPlay = 0;
 
     /// <summary>The Big One arms this; the next Set off spends it.</summary>
     public void ArmDoubling() => _doubleNextSetOff = true;
@@ -128,7 +138,7 @@ public sealed class KleeOverhaulLedger
         SetOffLastTurn = round == _round + 1 ? SetOffThisTurn : 0;
         SetOffThisTurn = 0;
         ReactedThisTurn = 0;
-        SizeSetOffThisPlay = 0;
+        DamageSetOffThisPlay = 0;
         _doubleNextSetOff = false;
         _round = round;
     }
