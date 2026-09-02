@@ -456,3 +456,133 @@ def test_the_dev_deploy_checks_the_prototype_codegen_first():
     assert "--check" in src
     assert src.index("gen_prototype_cards.py") < src.index("dotnet build"), \
         "the staleness check must run before anything is built"
+
+
+# --- EB-161: the assembly stamp ---------------------------------------------
+#
+# klee.dll shipped AssemblyVersion 1.0.0.0 on every build ever made -- the
+# csproj sets no version property and the SDK's default is 1.0.0.0 -- so the
+# one artifact a crash log, a co-op desync report or a support question
+# actually names carried no build identity, while manifest.json beside it
+# carried the right one. These drive `Get-AssemblyStamp` and
+# `Test-AssemblyStamp`, the two shipped functions the deploy scripts and
+# validate.ps1's S2a rule call, for the same reason the arms above drive
+# `Test-VersionPolicy`: a test that re-implemented the rule would only ever
+# agree with itself.
+
+
+def _stamp(version: str, major: str, auto: str) -> dict:
+    """Run Get-AssemblyStamp over a synthetic Get-PackageVersion hashtable."""
+    script = f"""
+. '{VERSION_PS1}'
+$v = @{{ Version = '{version}'; Major = '{major}'; Auto = '{auto}' }}
+$s = Get-AssemblyStamp -Version $v
+Write-Output "NUMERIC: $($s.Numeric)"
+Write-Output "INFO: $($s.Informational)"
+foreach ($a in $s.BuildArgs) {{ Write-Output "ARG: $a" }}
+"""
+    res = _ps(script)
+    assert res.returncode == 0, res.stdout + res.stderr
+    lines = res.stdout.splitlines()
+    return {
+        "numeric": next(ln[len("NUMERIC: "):] for ln in lines
+                        if ln.startswith("NUMERIC: ")),
+        "informational": next(ln[len("INFO: "):] for ln in lines
+                              if ln.startswith("INFO: ")),
+        "args": [ln[len("ARG: "):] for ln in lines if ln.startswith("ARG: ")],
+    }
+
+
+def _assembly_findings(dll: str, expected: str) -> list[str]:
+    script = f"""
+. '{VERSION_PS1}'
+$out = Test-AssemblyStamp -DllPath '{dll}' -Expected '{expected}'
+foreach ($f in $out) {{ Write-Output "FINDING: $f" }}
+"""
+    res = _ps(script)
+    assert res.returncode == 0, res.stdout + res.stderr
+    return [ln[len("FINDING: "):] for ln in res.stdout.splitlines()
+            if ln.startswith("FINDING: ")]
+
+
+@pytest.mark.parametrize("version,auto,numeric", [
+    ("0.2.1209", "1209", "0.2.1209"),
+    ("0.2.1209+dirty", "1209+dirty", "0.2.1209"),
+    ("0.2.1209+proto", "1209+proto", "0.2.1209"),
+    ("0.2.1209+proto.dirty", "1209+proto.dirty", "0.2.1209"),
+])
+def test_the_numeric_stamp_drops_the_build_metadata(version, auto, numeric):
+    """AssemblyVersion and FileVersion take 2-4 dotted NUMERICS and nothing
+    else, so '+proto.dirty' cannot go in either. The numeric half is the same
+    number with the metadata dropped; the metadata is not lost, it rides
+    AssemblyInformationalVersion, which takes an arbitrary string."""
+    stamp = _stamp(version, "0.2", auto)
+    assert stamp["numeric"] == numeric
+    assert re.fullmatch(r"\d+\.\d+\.\d+", stamp["numeric"])
+    assert stamp["informational"] == version
+
+
+def test_the_informational_stamp_is_the_package_version_verbatim():
+    """The half that answers 'which build is installed' (R217 D): a dev dll
+    pulled out of a crash log says on its face that it is a dev dll."""
+    stamp = _stamp("0.2.1786+proto.dirty", "0.2", "1786+proto.dirty")
+    assert "-p:InformationalVersion=0.2.1786+proto.dirty" in stamp["args"]
+    assert "-p:AssemblyVersion=0.2.1786" in stamp["args"]
+    assert "-p:FileVersion=0.2.1786" in stamp["args"]
+
+
+def test_the_sdk_is_told_not_to_append_a_commit_sha():
+    """Load-bearing, not tidiness: the SDK otherwise appends '+<sha>' to
+    whatever InformationalVersion is set to, which would make the dll's string
+    stop matching the manifest's and turn S2a into a permanent red."""
+    stamp = _stamp("0.2.1209", "0.2", "1209")
+    assert "-p:IncludeSourceRevisionInInformationalVersion=false" in stamp["args"]
+
+
+def test_both_deploy_paths_stamp_the_dll_before_they_build_it():
+    """Get-PackageVersion depends on nothing the build produces, so hoisting
+    it above the build is free -- and computing it ONCE is what makes the dll
+    and manifest.json unable to disagree."""
+    for name in ("deploy.ps1", "deploy_proto.ps1"):
+        src = (BUILD / name).read_text(encoding="utf-8")
+        assert "Get-AssemblyStamp" in src, f"{name} does not stamp the assembly"
+        assert src.index("Get-AssemblyStamp") < src.index("dotnet build"), (
+            f"{name} computes the stamp after the build it is meant to stamp")
+        assert "BuildArgs" in src
+
+
+def test_validate_asserts_the_stamp_it_shipped():
+    """The rule exists in validate.ps1 and calls the shipped function rather
+    than re-deriving the comparison."""
+    src = (BUILD / "validate.ps1").read_text(encoding="utf-8")
+    assert "Test-AssemblyStamp" in src
+    assert "S2a" in src
+
+
+def test_an_unstamped_assembly_is_refused():
+    """A lock is not trusted until it is seen to FAIL. The stale-dll case is
+    the one that shipped for the whole life of the mod, so it is pinned
+    against a REAL assembly on disk rather than a fake path: PowerShell's own
+    System.Management.Automation.dll stands in for a dll whose version is not
+    this build's, which is exactly what an unstamped klee.dll was."""
+    script = f"""
+. '{VERSION_PS1}'
+$dll = [System.Reflection.Assembly]::GetAssembly(
+    [System.Management.Automation.PSObject]).Location
+$out = Test-AssemblyStamp -DllPath $dll -Expected '0.2.9999'
+foreach ($f in $out) {{ Write-Output "FINDING: $f" }}
+"""
+    res = _ps(script)
+    assert res.returncode == 0, res.stdout + res.stderr
+    findings = [ln for ln in res.stdout.splitlines()
+                if ln.startswith("FINDING: ")]
+    assert len(findings) == 2, (
+        "an assembly carrying a foreign version must fail BOTH halves -- the "
+        f"informational string and the numeric file version: {findings}")
+
+
+def test_a_package_with_no_dll_is_not_a_stamp_finding():
+    """Whether the package is supposed to have a dll is S2's question, already
+    asked. Answering it twice would report one defect as two findings pointing
+    at each other."""
+    assert _assembly_findings(str(REPO / "no-such-file.dll"), "0.2.1") == []

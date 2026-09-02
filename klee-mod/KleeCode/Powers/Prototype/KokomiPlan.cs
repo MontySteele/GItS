@@ -185,8 +185,10 @@ public static class KokomiPlan
             _queues[player] = queue;
         }
         var entry = new Entry(source, clauses.ToList());
+        int before = queue.Count;
         queue.Add(entry);
-        await Sync(choiceContext, kokomi);
+        await Sync(choiceContext, kokomi,
+            SparkPower.SourceOf(source), before);
 
         if (kokomi.Powers.OfType<PlansAlsoNowPower>().Any())
         {
@@ -272,7 +274,7 @@ public static class KokomiPlan
         }
         var due = new List<Entry>(queue);
         queue.Clear();
-        await Sync(choiceContext, kokomi);
+        await Sync(choiceContext, kokomi, "rule:morning_drain", due.Count);
 
         foreach (var entry in due)
         {
@@ -316,8 +318,9 @@ public static class KokomiPlan
             return;
         }
         var front = queue[0];
+        int before = queue.Count;
         queue.RemoveAt(0);
-        await Sync(choiceContext, kokomi);
+        await Sync(choiceContext, kokomi, "rule:carried_out_now", before);
         await ResolveEntry(choiceContext, kokomi, front);
     }
 
@@ -549,12 +552,28 @@ public static class KokomiPlan
     /// makes the badge, the strip and the list that will resolve the same three
     /// views of one number by construction -- the arrangement
     /// `KurageMemory.RefreshStrip` already makes for the memory arm.
+    ///
+    /// AND THE METER LEDGER RIDES IT (`EB-273`), for that same reason and no
+    /// other: a note written anywhere but the one funnel could be skipped by a
+    /// future site that moved the queue and only refreshed the badge, and the
+    /// ledger's whole claim is that its arithmetic and the number on screen
+    /// cannot come from different reads. <c>SparkPower.Gain</c> makes the
+    /// argument one file over.
+    ///
+    /// <paramref name="before"/> IS PASSED IN RATHER THAN READ HERE, and that
+    /// is the difference from the Spark sites: by the time this runs the queue
+    /// has already moved, and the badge's own amount is a display value the
+    /// engine's modifier chain is entitled to have resized. Each caller knows
+    /// the depth it started from exactly, so it hands it over.
     /// </summary>
     private static async Task Sync(
-        PlayerChoiceContext choiceContext, Creature kokomi)
+        PlayerChoiceContext choiceContext, Creature kokomi, string source,
+        int before)
     {
         Vfx.KokomiPlanStrip.Refresh(kokomi);
         var count = Pending(kokomi.Player).Count;
+        Diagnostics.MeterLedger.Note(
+            Diagnostics.MeterLedger.Plan, source, count - before, before);
         var badge = kokomi.Powers.OfType<PendingPlansPower>().FirstOrDefault();
         if (count == 0)
         {

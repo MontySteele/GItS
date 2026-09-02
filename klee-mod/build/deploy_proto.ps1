@@ -196,11 +196,23 @@ if ($KleeOverhaul) { $arms += 'the Klee overhaul arm' }
 if ($CompanionOverhaul) { $arms += 'the Mondstadt companion overhaul arm' }
 if ($KokomiOverhaul) { $arms += 'the Kokomi overhaul arm' }
 $armLabel = if ($arms.Count) { ' AND ' + ($arms -join ' AND ') } else { '' }
+
+# EB-161, on deploy.ps1's terms exactly: computed BEFORE the build because the
+# dll is stamped with it. The +proto mark rides AssemblyInformationalVersion,
+# which is the whole point of stamping the informational string verbatim -- a
+# dev dll pulled out of a crash log says it is a dev dll.
+$version = Get-PackageVersion `
+    -SourceManifest (Join-Path $packageDir 'manifest.json') `
+    -RepoRoot $repoRoot `
+    -Prototype
+$stamp = Get-AssemblyStamp -Version $version
+
 Write-Host "Building ($Configuration) WITH the prototype surface$armLabel..." -ForegroundColor Magenta
 $buildArgs = @('-p:PrototypeCards=true')
 if ($KleeOverhaul) { $buildArgs += '-p:KleeOverhaul=true' }
 if ($CompanionOverhaul) { $buildArgs += '-p:CompanionOverhaul=true' }
 if ($KokomiOverhaul) { $buildArgs += '-p:KokomiOverhaul=true' }
+$buildArgs += $stamp.BuildArgs
 & dotnet build $csproj -c $Configuration -v minimal --nologo @buildArgs
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
 
@@ -214,10 +226,7 @@ Copy-Item (Join-Path $packageDir 'manifest.json') -Destination $stage
 Copy-Item $dll -Destination $stage
 
 # MAJOR.AUTO+proto (or +proto.dirty). The source manifest is never written to.
-$version = Get-PackageVersion `
-    -SourceManifest (Join-Path $packageDir 'manifest.json') `
-    -RepoRoot $repoRoot `
-    -Prototype
+# $version was computed above the build (EB-161) so the dll carries it too.
 $stagedManifest = Join-Path $stage 'manifest.json'
 $sm = Get-Content $stagedManifest -Raw | ConvertFrom-Json
 $sm.version = $version.Version
