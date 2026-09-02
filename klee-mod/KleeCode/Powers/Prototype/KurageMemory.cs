@@ -266,10 +266,22 @@ public static class KurageMemory
         Autoplaying = false;
     }
 
-    /// <summary>The one gate: the player IS Kokomi. (The FLAG is the compile
-    /// switch -- this file does not exist in a release build.)</summary>
+    /// <summary>
+    /// The one gate: the player IS Kokomi. (The FLAG is the compile switch --
+    /// this file does not exist in a release build.)
+    ///
+    /// AND THE KOKOMI OVERHAUL IS NOT RUNNING. A dev build compiles this arm
+    /// AND that one, and they are ALTERNATIVES rather than layers: this whole
+    /// mechanic is priced inside the Charge bank, which the overhaul's brief
+    /// retires in as many words (sec.4, "What leaves: the Charge bank, Exhaust
+    /// as the engine and its rotation voice law, Muster as a transform"). One
+    /// line here rather than a branch in each of the eight sites that ask,
+    /// because this is deliberately THE ONE predicate the arm has -- the same
+    /// property that made the base-kit ruling a change to this method alone.
+    /// With the overhaul off this reads exactly as it did.
+    /// </summary>
     public static bool IsLive(Creature? creature) =>
-        KokomiResources.IsKokomi(creature);
+        !KokomiOverhaul.Enabled && KokomiResources.IsKokomi(creature);
 
     /// <summary>
     /// THE ONE "is the jellyfish here" PREDICATE, and deliberately the only

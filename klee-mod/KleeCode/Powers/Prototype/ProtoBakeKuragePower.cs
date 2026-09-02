@@ -183,11 +183,24 @@ public static class KokomiTide
             applier: kokomi, cardSource: null, silent: true);
     }
 
+    private static ICombatState? _combat;
+
+    /// <summary>
+    /// STASH ONLY, and it is the arrangement <c>KurageMemory.NoteCombat</c>
+    /// already has for the same reason: <c>KokomiResourceHooks.Subscribe</c> is
+    /// the one place the mod is handed a <c>CombatState</c>, but the game
+    /// re-enumerates its hook listeners on EVERY hook broadcast, so that
+    /// delegate is not a per-fight seam. The per-fight work is
+    /// <see cref="InstallAll"/>'s, called from <c>BeforeCombatStart</c>.
+    /// </summary>
+    public static void NoteCombat(ICombatState? combat) => _combat = combat;
+
     /// <summary>Every seat in this combat opens with a jellyfish and a captured
     /// entry HP. Twin of <c>KurageMemory.InstallAll</c>, called from the same
     /// hook and for the same reason.</summary>
-    public static async Task InstallAll(ICombatState? combat)
+    public static async Task InstallAll()
     {
+        var combat = _combat;
         if (combat == null) return;
         foreach (var player in combat.Players)
         {
@@ -211,6 +224,24 @@ public static class KokomiTide
     {
         if (!KokomiOverhaul.LiveFor(kokomi) || amount <= 0) return;
         await Install(kokomi);
+        Kurage(kokomi)?.AddTide(amount);
+    }
+
+    /// <summary>
+    /// RULE 7's landing site: Tide added from a SYNCHRONOUS chokepoint.
+    ///
+    /// <c>KokomiResourceHooks.TryModifyPowerAmountReceived</c> is the game's
+    /// power-application hook and it is not async, so the Strength conversion
+    /// cannot await an install. It does not need to: rule 1 puts the jellyfish
+    /// on her before the first turn opens, so by the time any Strength can
+    /// arrive there is always one to feed. With no jellyfish this is a no-op
+    /// rather than a silent detour into some other bank -- the Strength is
+    /// still refused either way, which is the half of rule 7 that must not
+    /// depend on anything.
+    /// </summary>
+    public static void GainImmediate(Creature? kokomi, int amount)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi) || amount <= 0) return;
         Kurage(kokomi)?.AddTide(amount);
     }
 

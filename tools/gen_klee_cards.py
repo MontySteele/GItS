@@ -305,6 +305,19 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                   "remove_bomb_for_block", "damage_set_off_total",
                   "double_set_off", "draw_per_set_off",
+                  # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
+                  # same terms and the same quarantine as the block above: the
+                  # rules engine lives in klee-mod/KleeCode/Powers/Prototype
+                  # and is Compile Remove'd out of a release build, so the only
+                  # rows that may print these are `proto_` rows on the
+                  # prototype surface, compiled under the same switch. Ten
+                  # verbs, every one with a verified call site on `KokomiTide`,
+                  # `KokomiPlan` or `KokomiOverhaulKit`; the whitelist stays
+                  # honest. `play_top_of_draw` is legal ONLY inside a `plan`
+                  # body, which `blocked_reason` enforces by name.
+                  "gain_tide", "surge", "block_half_surge", "exert", "mend",
+                  "plan", "draw_companion_from_draw", "next_companion_free",
+                  "draw_per_tide", "play_top_of_draw",
                   # EB-122 (EB-69's fill): the turn-scoped Sly grant. Rides
                   # SlyGrant.Grant, whose whole shape is Hand Trick's --
                   # CardSelectCmd.FromHand filtered to non-Sly Skills, then
@@ -982,6 +995,32 @@ MOVE_BOMBS_FIELDS = {"op", "target", "bonus"}
 MODIFY_BOMBS_FIELDS = {"op", "scope", "bonus"}
 CHANCE_BOMB_FIELDS = {"op", "chance", "bomb_damage"}
 
+# The Kokomi overhaul's own, same discipline (QUARANTINED, C.KOKOMI_OVERHAUL).
+GAIN_TIDE_FIELDS = {"op", "amount", "per"}
+GAIN_TIDE_PER = {None, "enemies_hit"}
+SURGE_FIELDS = {"op", "target"}
+EXERT_FIELDS = {"op", "amount"}
+MEND_FIELDS = {"op", "amount"}
+PLAN_FIELDS = {"op", "then"}
+DRAW_PER_TIDE_FIELDS = {"op", "amount", "per"}
+PLAY_TOP_OF_DRAW_FIELDS = {"op", "amount"}
+#: What a `plan:` body may say, and the `KokomiPlan.Kind` each spelling maps
+#: to. Slice one prints exactly these seven clauses, one per Plan card, and a
+#: body outside this table is a build failure rather than an approximation --
+#: the same UNPARSEABLE discipline the field whitelists above keep, one level
+#: down. A `damage` body is split by TARGET because the two are different
+#: kinds: `enemy` is Feint's "the same enemy", remembered on the queue, and
+#: `random_enemy` is Ambush's roll.
+PLAN_BODY_KINDS = {
+    ("draw", None): "Draw",
+    ("energy", None): "Energy",
+    ("block", None): "Block",
+    ("mend", None): "Mend",
+    ("play_top_of_draw", None): "PlayTopOfDraw",
+    ("damage", "enemy"): "DamageStoredTarget",
+    ("damage", "random_enemy"): "DamageRandomEnemy",
+}
+
 # apply_power (power-card pass): sheet power id -> (C# PowerModel class,
 # stack cap or None, card-text template with {X} for the amount). Stackable
 # powers normally use None, matching native Slay the Spire power stacking;
@@ -1057,6 +1096,31 @@ APPLY_POWERS = {
     "ko_grounded": ("GroundedPower", None,
         "At the start of your turn, if none of your [gold]Bombs[/gold] went "
         "off last turn, gain {X} Block."),
+    # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B). Every class below
+    # lives in klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out
+    # of a release build, so the only rows that may name one are `proto_` rows
+    # on the prototype surface -- compiled under the same switch. The {X}
+    # templates are here for form; every slice row carries its own
+    # `description:`, which is the surface's own face channel (EB-215).
+    "kk_garment": ("ProtoGarmentPower", None,
+        "Each of your Attacks that hits [gold]Mends[/gold] you 2. Lasts {X} "
+        "more turns."),
+    "kk_song_of_pearls": ("SongOfPearlsPower", None,
+        "The pulse [gold]Mends[/gold] 3, and its budget is 12."),
+    "kk_clouds_like_waves": ("CloudsLikeWavesPower", None,
+        "While you are under half HP, the pulse [gold]Mends[/gold] {X}."),
+    "kk_sango_isshin": ("SangoIsshinPower", None,
+        "[gold]Mend[/gold] that would go past your entry HP becomes Hydro "
+        "damage to a random enemy."),
+    "kk_treatise": ("TreatisePower", None,
+        "Whenever a [gold]Plan[/gold] resolves, draw {X} cards."),
+    "kk_art_of_war": ("TheArtOfWarPower", None,
+        "[gold]Plans[/gold] also happen now."),
+    "kk_orders": ("OrdersPower", None,
+        "Whenever you play a [gold]Companion[/gold], [gold]Tide[/gold] +{X}."),
+    "kk_generals_banner": ("GeneralsBannerPower", None,
+        "The first [gold]Companion[/gold] you play each turn is played "
+        "twice."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
@@ -1532,7 +1596,12 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # wherever it sits, so a card whose ONLY aimed op is one of
               # these would otherwise emit `TargetType.Self` and throw on
               # every play.
-              "set_off", "plant_bomb", "grow_bombs", "merge_bombs")
+              "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+              # The Kokomi overhaul's one aimed verb, here for the same
+              # reason: `surge` dereferences `cardPlay.Target`, so Rising
+              # Tide -- whose only aimed op is the Surge on some boards --
+              # must declare an enemy TargetType or throw on every play.
+              "surge")
 
 
 def _aims_at_chosen_enemy(eff: dict) -> bool:
@@ -1999,6 +2068,100 @@ def blocked_reason(
                         "not understood")
             if eff.get("target") not in {"enemy", "all_enemies"}:
                 return f"damage_set_off_total target '{eff.get('target')}'"
+        # THE KOKOMI OVERHAUL'S TEN (QUARANTINED, C.KOKOMI_OVERHAUL). Same
+        # UNPARSEABLE discipline as the Klee arm's eight above: a field the
+        # emitter does not understand encodes a mechanic, and every number is
+        # required to be a literal int because a prototype whose printed
+        # number the emitter cannot read is one the player cannot be shown.
+        if op == "gain_tide":
+            unknown = set(eff) - GAIN_TIDE_FIELDS
+            if unknown:
+                return f"gain_tide field(s) {sorted(unknown)} not understood"
+            amount = eff.get("amount")
+            if not isinstance(amount, int) or isinstance(amount, bool) \
+                    or amount <= 0:
+                return "gain_tide amount must be a positive literal int"
+            if eff.get("per") not in GAIN_TIDE_PER:
+                return f"gain_tide per '{eff.get('per')}'"
+        if op == "surge":
+            unknown = set(eff) - SURGE_FIELDS
+            if unknown:
+                return f"surge field(s) {sorted(unknown)} not understood"
+            if eff.get("target") != "enemy":
+                # Rule 3 is "deals Hydro damage equal to the Tide TO THE
+                # TARGET". There is no all-enemies or random Surge in the
+                # slice, and inventing one would be a rule rather than a card.
+                return f"surge target '{eff.get('target')}'"
+        if op == "exert":
+            unknown = set(eff) - EXERT_FIELDS
+            if unknown:
+                return f"exert field(s) {sorted(unknown)} not understood"
+            amount = eff.get("amount")
+            if not isinstance(amount, int) or isinstance(amount, bool) \
+                    or amount <= 0:
+                return "exert amount must be a positive literal int"
+            if card.get("type") == "attack":
+                # RULE 5, enforced where a card is built rather than trusted
+                # to an author: "on Skills and Powers only, never Attacks".
+                return "exert on an Attack (rule 5: Skills and Powers only)"
+        if op == "mend":
+            unknown = set(eff) - MEND_FIELDS
+            if unknown:
+                return f"mend field(s) {sorted(unknown)} not understood"
+            amount = eff.get("amount")
+            if not isinstance(amount, int) or isinstance(amount, bool) \
+                    or amount <= 0:
+                return "mend amount must be a positive literal int"
+        if op == "draw_per_tide":
+            unknown = set(eff) - DRAW_PER_TIDE_FIELDS
+            if unknown:
+                return (f"draw_per_tide field(s) {sorted(unknown)} "
+                        "not understood")
+            for key, floor in (("amount", 1), ("per", 1)):
+                value = eff.get(key)
+                if not isinstance(value, int) or isinstance(value, bool) \
+                        or value < floor:
+                    return f"draw_per_tide {key} must be a literal int >= {floor}"
+        if op in {"block_half_surge", "draw_companion_from_draw",
+                  "next_companion_free"}:
+            # No fields at all: each is one whole printed clause, and any
+            # number they might carry is a rule's, not a card's.
+            unknown = set(eff) - {"op"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+        if op == "play_top_of_draw":
+            # LEGAL ONLY INSIDE A `plan` BODY, which is where the one card
+            # that prints it puts it (War Council). A top-level spelling would
+            # be a different, unpriced card, and `KokomiPlan` is the only
+            # caller of the free-play door.
+            return "play_top_of_draw outside a `plan` body"
+        if op == "plan":
+            unknown = set(eff) - PLAN_FIELDS
+            if unknown:
+                return f"plan field(s) {sorted(unknown)} not understood"
+            body = eff.get("then")
+            if not isinstance(body, list) or len(body) != 1:
+                # ONE CLAUSE PER PLAN. Every Plan card in slice one prints
+                # exactly one, the queue stores one, and a two-clause Plan
+                # would need an ordering rule nothing has ruled.
+                return "plan `then:` must be exactly one effect"
+            inner = body[0]
+            if not isinstance(inner, dict):
+                return "plan `then:` entry must be an effect map"
+            key = (inner.get("op"),
+                   inner.get("target") if inner.get("op") == "damage" else None)
+            if key not in PLAN_BODY_KINDS:
+                return (f"plan body {key} is not one of the seven planned "
+                        f"clauses {sorted(PLAN_BODY_KINDS)}")
+            allowed = {"op", "amount"} | (
+                {"target"} if inner.get("op") == "damage" else set())
+            unknown = set(inner) - allowed
+            if unknown:
+                return f"plan body field(s) {sorted(unknown)} not understood"
+            amount = inner.get("amount")
+            if not isinstance(amount, int) or isinstance(amount, bool) \
+                    or amount <= 0:
+                return "plan body amount must be a positive literal int"
         if op in {"salon_rotate", "salon_perform"}:
             # EB-118 §5.5. Same field discipline as the meter ops above,
             # with `amount` OPTIONAL: one rotation and one act are the
@@ -4871,6 +5034,18 @@ def build_body(
            for e in _effects_everywhere(card)):
         lines.append(
             "KleeOverhaulLedger.For(Owner.Creature).BeginPlay();")
+    # THE KOKOMI OVERHAUL's per-PLAY memory, opened at the same place and for
+    # the same two reasons (QUARANTINED). Undertow asks "half the damage
+    # dealt" about THIS play, and Deep Current asks how many enemies it hit --
+    # which has to be the count BEFORE its own all-enemies damage resolves,
+    # because an enemy the damage killed was still hit. Emitted only for a
+    # card that asks.
+    if any(e.get("op") == "block_half_surge"
+           or (e.get("op") == "gain_tide" and e.get("per") == "enemies_hit")
+           for e in _effects_everywhere(card)):
+        lines.append(
+            "KokomiOverhaulLedger.For(Owner.Creature).BeginPlay("
+            "CombatState?.HittableEnemies.Count(e => !e.IsDead) ?? 0);")
     preds = {e["if"] for e in card["effects"] if e.get("op") == "conditional"}
     if "reaction_triggered_by_this" in preds:
         lines.append("var reactionsAtStart = ReactionEffects.TotalResolved;")
@@ -5388,6 +5563,86 @@ def build_body(
             lines.append(
                 "await ProtoBombPower.DrawPerSetOff("
                 "choiceContext, Owner);")
+
+        # ---- THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED) -----------------
+        # Every arm below is ONE awaited call into `KokomiTide`, `KokomiPlan`
+        # or `KokomiOverhaulKit`, and that is deliberate rather than tidy: the
+        # rules live in those files, so a card cannot express a variant of a
+        # rule by being generated differently. In particular the entry-HP cap
+        # is inside `KokomiTide.Mend` and NOT at any call site, which is what
+        # makes "no Mend goes above entry HP" a property of the code.
+        elif op == "gain_tide":
+            amount = int(eff["amount"])
+            if eff.get("per") == "enemies_hit":
+                lines.append(
+                    "await KokomiTide.GainPerEnemyHit("
+                    f"choiceContext, Owner.Creature, {amount});")
+            else:
+                lines.append(
+                    "await KokomiTide.Gain("
+                    f"choiceContext, Owner.Creature, {amount});")
+
+        elif op == "surge":
+            _target_guard(lines, ctx)
+            lines.append(
+                "await KokomiTide.Surge("
+                "choiceContext, Owner.Creature, cardPlay.Target);")
+
+        elif op == "block_half_surge":
+            # The Block IS half the Tide this play surged, so the two halves
+            # are one call and cannot disagree; there is no printed number
+            # here for a face to get wrong.
+            lines.append(
+                "await KokomiTide.BlockHalfSurge("
+                "choiceContext, Owner.Creature);")
+
+        elif op == "exert":
+            lines.append(
+                "await KokomiTide.Exert(choiceContext, Owner.Creature, "
+                f'{int(eff["amount"])}, this, cardPlay);')
+
+        elif op == "mend":
+            lines.append(
+                "await KokomiTide.Mend(choiceContext, Owner.Creature, "
+                f'{int(eff["amount"])});')
+
+        elif op == "draw_per_tide":
+            lines.append(
+                "await KokomiTide.DrawPerTide(choiceContext, Owner.Creature, "
+                f'{int(eff["amount"])}, {int(eff["per"])});')
+
+        elif op == "draw_companion_from_draw":
+            lines.append(
+                "await KokomiOverhaulKit.DrawCompanionFromDraw("
+                "choiceContext, Owner, this);")
+
+        elif op == "next_companion_free":
+            lines.append(
+                "await KokomiOverhaulKit.NextCompanionFree("
+                "choiceContext, Owner.Creature, this);")
+
+        elif op == "plan":
+            # RULE 8. The body is ONE typed clause -- `blocked_reason` has
+            # already refused anything else -- so this is one enqueue call and
+            # never a captured closure over a context the Plan will not have
+            # when it resolves.
+            inner = eff["then"][0]
+            kind = PLAN_BODY_KINDS[(
+                inner["op"],
+                inner.get("target") if inner["op"] == "damage" else None)]
+            if kind == "DamageStoredTarget":
+                # Feint's "the same enemy": the target is remembered ON THE
+                # QUEUE at the moment the card was aimed, and rule 8's own
+                # sentence covers the rest ("A Plan whose target is dead
+                # retargets randomly").
+                _target_guard(lines, ctx)
+                aim = "cardPlay.Target"
+            else:
+                aim = "null"
+            lines.append(
+                "await KokomiPlan.Schedule(choiceContext, Owner.Creature, "
+                f"KokomiPlan.Kind.{kind}, {int(inner['amount'])}, {aim}, "
+                "this);")
 
         elif op == "discard":
             # G6: an upgradeable count reads the VAR, so the loop bound and
