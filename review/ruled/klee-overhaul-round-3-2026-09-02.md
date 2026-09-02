@@ -1,4 +1,4 @@
-Status: OPEN (round three; both seats played; the read and the picks at the end)
+Status: SUPERSEDED by review/active/klee-overhaul-round-4-2026-09-02.md
 
 # Klee overhaul, round three: two seats on starter draft 3
 

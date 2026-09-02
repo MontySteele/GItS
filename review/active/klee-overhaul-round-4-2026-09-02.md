@@ -3,7 +3,7 @@ Status: OPEN (round four; the Opus seat played, the Codex seat is owed; the read
 # Klee overhaul, round four: growth 3, one seat so far
 
 2026-09-02. Round three's applied default was Bombs growing by 3 a turn
-instead of 2 (`review/active/klee-overhaul-round-3-2026-09-02.md`,
+instead of 2 (`review/ruled/klee-overhaul-round-3-2026-09-02.md`,
 section 3). Round four is that build: PR #265 on top of the round-three
 branch, deployed as 0.2.1993+proto.dirty, soaked with no defects (the
 soak bot died in its second fight, which is a floor and not a finding).
