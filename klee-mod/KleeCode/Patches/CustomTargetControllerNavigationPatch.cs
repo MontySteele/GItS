@@ -4,6 +4,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Nodes.Combat;
+using MegaCrit.Sts2.Core.Nodes.GodotExtensions;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
 using MegaCrit.Sts2.Core.Nodes.Screens.ScreenContext;
 
@@ -92,8 +93,22 @@ internal static class NCardPlay_TryPlayCard_RestoreControllerNavigation_Patch
         try
         {
             if (!ShouldRestore(__instance.Holder?.CardModel)) return;
-            NCombatRoom.Instance?.EnableControllerNavigation();
-            ActiveScreenContext.Instance?.FocusOnDefaultControl();
+            var room = NCombatRoom.Instance;
+            if (room == null) return;
+            room.EnableControllerNavigation();
+
+            // AND THEN THE GRAB THE LIBRARY ALREADY TRIED AND LOST. Its prefix
+            // calls `Ui.Hand.TryGrabFocus()` BEFORE the hand is enabled, which
+            // is the "This control can't grab focus" warning godot.log prints
+            // under `StopPlayIfCustomTargetInvalid`; making the same call one
+            // line after `EnableControllerNavigation` is that call at the
+            // moment it can succeed. `FocusOnDefaultControl` stays as the
+            // fallback for a hand that is legitimately empty.
+            room.Ui.Hand.TryGrabFocus();
+            if (room.GetViewport()?.GuiGetFocusOwner() == null)
+            {
+                ActiveScreenContext.Instance?.FocusOnDefaultControl();
+            }
         }
         catch (Exception e)
         {
