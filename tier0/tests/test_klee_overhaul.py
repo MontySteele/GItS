@@ -203,7 +203,8 @@ def test_the_numbers_are_the_briefs_placeholders():
     """Slice packet sec.1: no number in it is a claim. These four are the
     rules' own, and they are named so `lint_constant_parity` can compare the
     C# mirrors BY VALUE."""
-    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 3
+    # FIVE since the Klee round-5 packet sec.3 (2026-09-02); it was 3.
+    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 5
     assert C.KLEE_OVERHAUL_WORKSHOP_GROWTH == 1
     # A MULTIPLIER since the 2026-09-02 balance pass: Alice's Recipe doubles
     # the turn's growth ("your Bombs grow twice each turn") instead of

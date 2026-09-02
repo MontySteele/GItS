@@ -90,15 +90,16 @@ public class KleeOverhaulRuleTests
 
         pile.GrowBy(KleeOverhaulLaw.BombGrowth);
 
-        Assert.Equal(new[] { 8, 11 }, pile.Charges.Select(c => c.Size));
-        Assert.Equal(19, pile.TotalSize);
+        Assert.Equal(new[] { 10, 13 }, pile.Charges.Select(c => c.Size));
+        Assert.Equal(23, pile.TotalSize);
     }
 
     [Fact]
-    public void Rule1_growth_is_three_by_default()
+    public void Rule1_growth_is_five_by_default()
     {
+        // FIVE since the Klee round-5 packet sec.3 (2026-09-02); it was 3.
         var klee = Seat.Klee();
-        Assert.Equal(3, KleeOverhaulLaw.BombGrowth);
+        Assert.Equal(5, KleeOverhaulLaw.BombGrowth);
         Assert.Equal(KleeOverhaulLaw.BombGrowth,
                      GrowthFor(klee.Creature));
     }
@@ -321,7 +322,7 @@ public class KleeOverhaulRuleTests
 
         pile.GrowBy(KleeOverhaulLaw.BombGrowth);
 
-        Assert.Equal(new[] { 7, 7 }, pile.Charges.Select(c => c.Size));
+        Assert.Equal(new[] { 9, 9 }, pile.Charges.Select(c => c.Size));
         Assert.True(pile.Charges[0].IsMine);
     }
 
