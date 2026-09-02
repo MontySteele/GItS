@@ -1,6 +1,6 @@
-Status: OPEN (the Plan build's first round; the Opus seat played and the game hung, guarded since; the Codex seat's record and your run follow)
+Status: OPEN (the Plan build's first round; both seats played; the read, the guarded hang, and the four questions for your run)
 
-# Kokomi overhaul, round two: the Plan build's first seat
+# Kokomi overhaul, round two: the Plan build's first seats
 
 2026-09-02. Draft 6 (brief approved R241, slice on it) is built as PR
 #266 and deployed as 0.2.2001+proto.dirty: the Bake-Kurage as a pet, a
@@ -12,10 +12,11 @@ plays a card on the jellyfish, so it never touched the new path.
 | Seat | Seed | Actions | Fights | Stopped by |
 |---|---|---|---|---|
 | Opus | DLTN172Y4QDB | 40 | fight 1 won at 56/80; fight 2 one blow from won | the game hung (section 2) |
-| GPT (Codex) | after the fix | | | |
+| GPT (Codex) | 0TY6NNVRM7L1 | 100 | 3, the elite among them, on the guarded build | its action budget |
 
-Record: `review/qa/blindplay/kokomi-overhaul-r2-opus/record.md`. Seat
-numbers are floors, not fun claims (Guardrail 7).
+Records: `review/qa/blindplay/kokomi-overhaul-r2-opus/record.md` and
+`review/qa/blindplay/kokomi-overhaul-r2-codex/record.md` (with its wire).
+Seat numbers are floors, not fun claims (Guardrail 7).
 
 ## 1. What the Opus seat found in forty actions
 
@@ -49,6 +50,30 @@ numbers are floors, not fun claims (Guardrail 7).
    Plans are Skills, which the seat liked; Coral Guard is "the flattest
    thing in the deck."
 
+## 1b. What the Codex seat found, on the guarded build
+
+1. **The same tension, named the same way.** "Immediate survival versus
+   delayed efficiency. Plans were excellent during buff or Status intents,
+   especially against several enemies, but aggressive turns demanded
+   Block, Weak, or immediate kills."
+2. **The relic and Weak carry the fights.** "Slack Water+ defined most
+   fights because it combined good damage, Weak, Hydro, and a casket
+   trigger. Sea-Salt Prayer+ became the best defensive card by pairing 7
+   Block with Weak and extra relic damage." Kurage's Oath was weak against
+   one enemy and excellent against groups; Ambush supplied efficient
+   delayed damage.
+3. **A companion was the automatic play.** Sucrose, "an automatic free
+   energy-and-draw play." Worth an eye: the Mondstadt Universals were
+   offered to Kokomi, and one of them reads as free.
+4. **Repetition by fight three:** Slack Water first, Water's Edge with the
+   rest, guards to cover the intent. The elite broke the pattern and then
+   made a harsher one with its Infection cards.
+5. **Hydro reads wrong twice over.** All three fights: "Hydro Aura is
+   labeled a buff, so applying it did not trigger the relic despite
+   Water's Edge saying it applies Hydro." The seat expected the aura to
+   count as a debuff for the relic. By the law it is not one, and the
+   render's `(buff)` tag makes that read as a contradiction (EB-294).
+
 ## 2. The hang, and the other defects
 
 - **EB-292, the game hang.** The first non-finite value appears the
@@ -60,7 +85,10 @@ numbers are floors, not fun claims (Guardrail 7).
   scenario that plays two Plans on the pet and crosses the turn passes on
   0.2.2007+proto.dirty (PR #268). The source of the bad number was not
   reproduced in four targeted attempts on the seat's own seed, so the row
-  stays open; the guard means it cannot take the game down again.
+  stays open; the guard means it cannot take the game down again. It
+  fired once in the Codex seat's run and named the chain: the base game's
+  card trail node sitting at an astronomical position after a plain,
+  no-target Coral Guard play, so the bad number is not the pet's.
 - **EB-293, text.** Vanguard prints "Exhaust." twice on one line; the Plan-only
   cards say nothing about having one target and the grammar offers them
   the normal play; the relic's text reads as 4 where it pays 6.
