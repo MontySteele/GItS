@@ -51,6 +51,12 @@ internal static class ElementalHit
                 choiceContext, reaction, target, applier, null, consumed);
         }
 
+        // The two halves and their order are the pipeline's, and they are what
+        // `SimDamagePipeline.Resolve` composes so a FACE can predict this
+        // number without re-deriving it (EB-265). Do not fold this call into
+        // `Resolve`: `tier0/tests/test_reaction_phase_parity.py` pins the
+        // TargetMods read as happening after `ReactionEffects.Resolve`, which
+        // is what makes a Superconduct's Vulnerable amplify this same hit.
         await CreatureCmd.Damage(
             choiceContext, target, (int)SimDamagePipeline.TargetMods(target, dealt),
             ValueProp.Unpowered, dealer: null, cardSource: null, cardPlay: null);
