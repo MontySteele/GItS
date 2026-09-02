@@ -153,9 +153,12 @@ are in [`workstreams.md`](workstreams.md).
   twin runs beside the C# (`tier0/engine/kokomi_plan.py`), every drafter
   price still ZERO. Beside it the Kurage memory is base kit behind
   `C.KURAGE_MEMORY`, display rebuild `EB-198`, cadence read `EB-234`.
-- **Seats** — two games at once (`--lane 1` / `GITS_LANE`, PR #274), a
-  local-model seat (`blindplay session --backend local`, PR #269, live proof
-  owed), and the render fixes `EB-290`/`EB-294`/`EB-298`/`EB-299` (PR #272).
+- **Seats** — two games at once (`--lane 1` / `GITS_LANE`, PR #274), proven
+  end to end on lane 1 2026-09-02 (`review/qa/lane1-live-reads-2026-09-02/`,
+  which also took the map and arm-keyword live reads and found `EB-310`: no
+  teardown may remove the SHARED bridge); a local-model seat (`blindplay
+  session --backend local`, PR #269, live proof owed); and the render fixes
+  `EB-290`/`EB-294`/`EB-299` (PR #272).
 - **Furina** — the reframe is countersigned (R220 A), slice 1 is built in the
   sim behind five flags that all ship OFF, Spotlight is ruled one-mode priced
   (R228), and the C# arm is deferred.

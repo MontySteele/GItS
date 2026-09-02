@@ -26,12 +26,13 @@ nothing torn down. What comes next is a person running
 install (port 15527, its own disposable user tree) so an agent's run can play
 beside a game somebody else is playing. It prints the `GITS_LANE` export line,
 which is how the three `blindplay` commands -- which take no flag -- find the
-same game. The shared halves are refcounted by pre-existence: a bridge already
-installed with a game up on it is REUSED and never rewritten (so a lane can
-start beside a game that has it loaded), `steam_appid.txt` found in place is
-left in place, and one deployed `mods\\klee` serves every lane. A lane's
-teardown therefore touches its own process, port and profile and nothing it
-did not install. A lane-1 run is NOT a run of record.
+same game. The shared halves stay shared: the bridge under `mods\\STS2_MCP` is
+reused when a game is up on it and refreshed when none is, and either way it is
+recorded *shared, left in place* and NEVER removed by a teardown (`EB-310` --
+the owner's own Steam launch reads that directory); `steam_appid.txt` found in
+place is left in place; and one deployed `mods\\klee` serves every lane. A
+teardown therefore touches its own process, port and profile and nothing else.
+A lane-1 run is NOT a run of record.
 
 THE PROTOTYPE ARM DOOR (`EB-188`). The gate after a pair read reads an arm PLAYABLE
 is whole-fight blind play, automatically -- and it could not run for any arm,
@@ -112,11 +113,16 @@ PROTO_TAG = "+proto"
 # recorded `change` text because that text is what the ledger persists -- the
 # alternative is a second copy of the step order living here, drifting from
 # soak's.
+#
+# THERE IS NO BRIDGE SLOT, AND LEAVING IT OUT IS THE POINT (`EB-310`). Nothing
+# in this harness removes `mods\\STS2_MCP`; the row `_deploy_bridge` writes is
+# reverted the instant it is written, and a slot here would re-arm the removal
+# for any ledger -- including one written before that rule existed -- that
+# still carries a `Deployed mods` row marked APPLIED.
 _LEDGER_SLOTS = (
     ("_seed_entry", "May set a chosen run seed"),
     ("_speed_entry", "Set FastMode=Instant"),
     ("_launch_entry", "Launched `"),
-    ("_bridge_entry", "Deployed `mods"),
     ("_appid_entry", "Created `steam_appid.txt`"),
 )
 
@@ -296,10 +302,11 @@ def embark(character: str, *, hold: bool = False,
 
     `instance` is the lane (`None` for lane 0, which is every embark that ever
     ran before this flag existed). `install_bridge` is the hard OFF switch for
-    the shared `mods\\STS2_MCP`: a caller that KNOWS another lane owns it
-    passes `False`, while `soak.lane_setup` leaves it on, because the
-    session's own refcount -- an install with a game up on it is left alone --
-    is a rule that can see the machine rather than guess at it.
+    WRITING the shared `mods\\STS2_MCP`: a caller that KNOWS another lane is
+    driving it passes `False`, while `soak.lane_setup` leaves it on, because
+    the session's own rule -- an install with a game up on it is left alone,
+    one with nothing holding it is refreshed, and neither is ever removed
+    (`EB-310`) -- can see the machine rather than guess at it.
     """
     who = option_id(character)
     wanted = list(arms or [])
@@ -436,11 +443,13 @@ def teardown(stamp: str = "", lane: object = None) -> str:
     a lane-0 teardown run in a shell with `GITS_LANE=1` exported still talks
     to lane 0.
 
-    A lane-1 teardown then touches lane 1's process, port and profile and
-    nothing else, because the shared halves are not on its ledger at all: it
-    found `steam_appid.txt` already there, and it found a bridge with another
-    lane's game up on it, so both rows were reverted at setup as
-    "pre-existing, left in place" and there is nothing here to remove.
+    ANY teardown then touches its own process, port and profile and nothing
+    else, because the shared halves were settled at setup: `steam_appid.txt`
+    found in place was reverted then as "pre-existing, left in place", and the
+    bridge row is reverted as "shared, left in place" on every branch there is.
+    `mods\\STS2_MCP` is what the owner's own Steam launch reads, so this
+    harness never removes it (`EB-310`) -- `deploy_bridge.ps1 -Remove` is the
+    only remover, and it is run by hand.
     """
     label = instances.label_for(lane) if lane is not None else ""
     stamp = stamp or latest_stamp(label)
@@ -500,7 +509,10 @@ def main(argv: list[str] | None = None) -> int:
                          "rolls; the read-back still decides what is recorded")
     ap.add_argument("--teardown", action="store_true",
                     help="revert an earlier embark: seed, speed, process, "
-                         "bridge, steam_appid.txt, in that order")
+                         "steam_appid.txt, in that order. The shared bridge "
+                         "under mods\\STS2_MCP is NOT removed -- the owner's "
+                         "own Steam launch reads it; take it out by hand with "
+                         "deploy_bridge.ps1 -Remove")
     ap.add_argument("--stamp", default="",
                     help="which embark to tear down; the newest by default")
     ap.add_argument("--lane", default=0, metavar="N",
@@ -511,10 +523,11 @@ def main(argv: list[str] | None = None) -> int:
                          "and its own disposable user tree "
                          "(%%LOCALAPPDATA%%\\gits-lanes\\lane1), so an agent's "
                          "run can play beside a game somebody else is "
-                         "playing. A bridge that is already installed and "
-                         "current is reused, never rewritten, so this cannot "
-                         "pull the mods directory out from under a running "
-                         "game. A lane-1 run is NOT a run of record. With "
+                         "playing. A bridge with a game up on it is reused, "
+                         "never rewritten, so this cannot pull the mods "
+                         "directory out from under a running game -- and no "
+                         "teardown removes it either. A lane-1 run is NOT a "
+                         "run of record. With "
                          "--teardown it names WHICH lane's embark to revert")
     args = ap.parse_args(argv)
 

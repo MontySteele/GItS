@@ -21,7 +21,9 @@ never the wire.
 from __future__ import annotations
 
 import ast
+import inspect
 import json
+import re
 import time
 from pathlib import Path
 
@@ -379,12 +381,21 @@ def test_every_soak_ledger_row_has_an_embark_teardown_slot():
     """`--teardown` runs in a DIFFERENT PROCESS from the embark, so it rebinds
     `Session`'s undo entries by the ledger text on disk. A row soak learns to
     write that this map does not know would be left APPLIED forever, which is a
-    teardown that silently keeps a mod in somebody's game directory."""
+    teardown that silently keeps a mod in somebody's game directory.
+
+    READ OFF `Session.__init__` RATHER THAN LISTED HERE, so the day soak grows
+    an entry this map does not carry, this goes red on its own. `_bridge_entry`
+    is gone from BOTH sides since `EB-310` -- the shared `mods\\STS2_MCP` is
+    never removed by a teardown, so there is no entry to rebind.
+    """
+    held = set(re.findall(r"self\.(_\w+_entry)\b",
+                          inspect.getsource(soak.Session.__init__)))
     slots = [attr for attr, _ in embark._LEDGER_SLOTS]
-    for attr in ("_seed_entry", "_speed_entry", "_launch_entry",
-                 "_bridge_entry", "_appid_entry"):
-        assert attr in slots, attr
+    assert held == {"_seed_entry", "_speed_entry", "_launch_entry",
+                    "_appid_entry"}, held
+    assert held == set(slots)
     assert len(slots) == len(set(slots))
+    assert "_bridge_entry" not in slots
 
 
 def test_the_hazard_register_covers_soak_s():

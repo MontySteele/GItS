@@ -154,8 +154,10 @@ def test_a_soak_session_holds_the_request_from_setup_to_teardown(monkeypatch):
     assert events == ["acquire session 20260830-000000"]
 
     s.ledger = None
+    # No `_bridge_entry` since `EB-310`: the shared bridge is never removed by
+    # a teardown, so there is no entry for one.
     for attr in ("_seed_entry", "_speed_entry", "_launch_entry",
-                 "_bridge_entry", "_appid_entry"):
+                 "_appid_entry"):
         setattr(s, attr, None)
     s.teardown()
     assert events == ["acquire session 20260830-000000", "release"]
@@ -169,8 +171,10 @@ def test_a_session_that_never_set_up_releases_nothing(monkeypatch):
                         lambda: events.append("release"))
     s = soak.Session.__new__(soak.Session)
     s.wire = lambda: None
+    # No `_bridge_entry` since `EB-310`: the shared bridge is never removed by
+    # a teardown, so there is no entry for one.
     for attr in ("_seed_entry", "_speed_entry", "_launch_entry",
-                 "_bridge_entry", "_appid_entry"):
+                 "_appid_entry"):
         setattr(s, attr, None)
     s.teardown()
     assert events == []

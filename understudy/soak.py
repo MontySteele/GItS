@@ -118,9 +118,10 @@ LOCAL_PROPS = REPO / "klee-mod" / "local.props"
 DEPLOY_BRIDGE = REPO / "klee-mod" / "build" / "deploy_bridge.ps1"
 
 # Where `deploy_bridge.ps1` stages the vendored bridge, relative to the game
-# directory, and the two files it stages there. ONE directory for every lane --
-# that is what "shared install" means in practice, and it is why a lane that
-# finds one with a game already up on it leaves it alone.
+# directory, and the two files it stages there. ONE directory for every lane
+# AND for the owner's own Steam launches -- that is what "shared install" means
+# in practice, and it is why no session in this harness ever removes it
+# (`EB-310`).
 BRIDGE_RELATIVE = Path("mods") / "STS2_MCP"
 BRIDGE_DLL = "STS2_MCP.dll"
 BRIDGE_MANIFEST = "STS2_MCP.json"
@@ -404,17 +405,31 @@ def game_dir() -> Path:
 
 # ----------------------------------------------------------- the lanes ----
 #
-# ONE INSTALL, TWO PROCESSES, AND THE SHARED HALVES BELONG TO WHOEVER GOT
-# THERE FIRST. Three things live in the game DIRECTORY rather than in a lane's
-# own user tree, so they are one copy for every lane: `steam_appid.txt`, the
-# bridge under `mods\STS2_MCP`, and the deployed klee build under `mods\klee`.
-# `Session` refcounts the first two BY PRE-EXISTENCE -- a lane that finds one
-# already there records nothing on its ledger and therefore removes nothing at
-# teardown -- which is how a `--lane 1` run, a whole process later than the
-# lane 0 that installed them, can know something else holds them. (The
-# in-memory version of the same rule is `local_tester._live_lanes`'s
-# `install_bridge=(i == 0)`, which is a two-lane ROUND deciding it once for
-# both its lanes; the flag still exists and still binds.)
+# ONE INSTALL, TWO PROCESSES, AND THE SHARED HALVES ARE NOBODY'S TO TAKE AWAY.
+# Three things live in the game DIRECTORY rather than in a lane's own user
+# tree, so they are one copy for every lane AND for the game the owner launches
+# from Steam: `steam_appid.txt`, the bridge under `mods\STS2_MCP`, and the
+# deployed klee build under `mods\klee`.
+#
+# `steam_appid.txt` is refcounted BY PRE-EXISTENCE -- a lane that finds one
+# already there records nothing to revert -- which is how a `--lane 1` run, a
+# whole process later than the lane 0 that wrote it, can know something else
+# holds it. (The in-memory version of the same rule is
+# `local_tester._live_lanes`'s `install_bridge=(i == 0)`, which is a two-lane
+# ROUND deciding it once for both its lanes; the flag still exists and still
+# binds.)
+#
+# THE BRIDGE IS NOT REFCOUNTED, BECAUSE IT IS NOT A LANE'S TO OWN, AND `EB-310`
+# IS WHAT THE OTHER RULE COST. It used to count as pre-existing only when a
+# game was UP on it, so on 2026-09-02, with no game running and the bridge
+# already staged by `deploy_proto.ps1`, an `embark --lane 1` re-deployed it and
+# wrote it down as ITS OWN install -- and the matching `--teardown --lane 1`
+# printed "Deployed mods\STS2_MCP ... REVERTED" and took it out. The owner's
+# next Steam launch would have had no bridge. The rule now has no such window:
+# a session REFRESHES the shared install when nothing holds the dll, records
+# that as `pre_existing` -- *shared, left in place* -- and NOTHING in this
+# harness removes it. `deploy_bridge.ps1 -Remove` is the only remover, run by
+# hand by whoever decides the machine is done with it.
 #
 # THE THIRD IS NOT REFCOUNTED AND CANNOT BE: `mods\klee` is ONE deployed build
 # for every lane, so a lane cannot be given a different one. `deploy_proto.ps1`
@@ -432,11 +447,12 @@ def game_dir() -> Path:
 # with a game up on it.
 #
 # WHICH IS THE WHOLE OF THE REUSE RULE, AND ITS SAFETY ARGUMENT IS THAT IT
-# FIRES NOWHERE A DEPLOY USED TO SUCCEED. A session redeploys the bridge every
+# FIRES NOWHERE A DEPLOY USED TO SUCCEED. A session refreshes the bridge every
 # time, as it always has, EXCEPT when the bridge is already installed AND a
 # game is running -- which until today was a hard failure, not a fresh deploy.
 # So nothing that worked before is now reusing a stale install; the only
-# behaviour that changed is the behaviour that was a `SystemExit`.
+# behaviour that changed is the behaviour that was a `SystemExit`. What the
+# refresh no longer buys is a claim on the directory: see `EB-310` above.
 
 
 def bridge_installed(where: Path | None = None) -> bool:
@@ -488,14 +504,14 @@ def lane_setup(value: object, *,
     thread, stamps no lane infix on its logs, and behaves in every respect as
     it did before lanes existed.
 
-    EVERY LANE ASKS FOR THE BRIDGE AND THE SECOND ONE DOES NOT GET IT, which
-    is the refcount rather than a contradiction: `Session._deploy_bridge`
-    leaves an install with a game already up on it alone and records nothing,
-    so the second lane's request costs a `stat` and a `tasklist` and changes
-    nothing. What a higher lane must NEVER do is rewrite an install another
-    lane's game has loaded, and the last lock on that is the deploy script's
-    own -- it is the only party that can see whether a file is actually
-    held.
+    EVERY LANE ASKS FOR THE BRIDGE AND NO LANE EVER OWNS IT: an install with a
+    game already up on it is left alone, an install with nothing holding it is
+    refreshed, and either way the row is recorded `pre_existing` -- *shared,
+    left in place* -- so no teardown removes it (`EB-310`). The second lane's
+    request therefore costs a `stat` and a `tasklist` and changes nothing. What
+    a higher lane must NEVER do is rewrite an install another lane's game has
+    loaded, and the last lock on that is the deploy script's own -- it is the
+    only party that can see whether a file is actually held.
     """
     inst = instances.cli_lane(value, game_dir=game_dir_override)
     return (None, True) if inst is None else (inst, True)
@@ -548,17 +564,20 @@ class Session:
         self.instance = instance
         # TWO LANES SHARE ONE INSTALL, SO ONLY ONE OF THEM MAY DEPLOY.
         # `deploy_bridge.ps1` deletes and rewrites `mods\STS2_MCP` and refuses
-        # outright while a game is running -- so lane 1, which launches while
-        # lane 0's game is already up, must not run it. It is also lane 1's
-        # teardown that must NOT remove the shared directory out from under
-        # lane 0. One flag says both.
+        # while a file it is about to rewrite is HELD -- so lane 1, which
+        # launches while lane 0's game is already up, must not run it. The
+        # teardown half of this flag is gone: no lane's teardown removes the
+        # shared directory any more, whether it deployed or not (`EB-310`).
         self.install_bridge = install_bridge
         self.dir = (self.instance.game_dir if self.instance is not None
                     else game_dir())
         self.ledger = Reversibility(LOG_DIR / f"reversibility-{stamp}.json")
         self.proc: subprocess.Popen | None = None
         self._appid_entry: dict | None = None
-        self._bridge_entry: dict | None = None
+        # NO `_bridge_entry`. The bridge row is reverted the moment it is
+        # written (`_deploy_bridge`), so there is never anything for a teardown
+        # to hold on to -- and an attribute that existed would be an invitation
+        # to wire the removal back up. `EB-310`.
         self._speed_entry: dict | None = None
         self._seed_entry: dict | None = None
         self._launch_entry: dict | None = None
@@ -623,43 +642,55 @@ class Session:
         p.write_text(STEAM_APPID, encoding="ascii")
 
     def _deploy_bridge(self) -> None:
+        """Put the SHARED bridge in front of the launch, and never claim it.
+
+        THE BRIDGE IS INFRASTRUCTURE, NOT THIS RUN'S PROPERTY. Every lane's
+        game reads it, and so does the game the owner starts from Steam --
+        `deploy_proto.ps1` installs it as its last step precisely so that the
+        owner's next launch carries it. So every branch below records the row
+        `pre_existing` and reverts it as *shared, left in place*: the ledger
+        says what happened, and nothing on it asks a teardown to undo it.
+        `EB-310` is the bill for the other rule -- see the lanes block above.
+        """
         if not self.install_bridge:
-            # Nothing recorded, so nothing is reverted: this lane did not
-            # install the bridge and may not remove it.
+            # Nothing recorded, so nothing is claimed: this lane did not touch
+            # the shared mods directory at all.
             print(f"lane {self.label}: bridge deploy skipped "
                   f"(another lane owns the shared mods directory)")
             return
-        # AN INSTALL WITH A GAME UP ON IT IS PRE-EXISTING, and pre-existing is
-        # left in place -- the identical rule `_steam_appid` above follows,
-        # applied to the other shared half. It is what lets a lane start
-        # beside a game that has the bridge LOADED (and therefore locked): the
-        # deploy would be refused, and it does not need to happen. It is also
-        # what makes `deploy_proto.ps1`'s bridge install stick instead of
-        # being torn out by the first teardown after it.
-        pids = game_is_running() if bridge_installed(self.dir) else ""
+        installed = bridge_installed(self.dir)
+        # A GAME UP ON AN EXISTING INSTALL IS THE ONE BRANCH THAT WRITES
+        # NOTHING TO DISK. It is what lets a lane start beside a game that has
+        # the bridge LOADED (and therefore locked): the deploy would be
+        # refused, and it does not need to happen.
+        pids = game_is_running() if installed else ""
+        entry = self.ledger.record(
+            "Deployed `mods\\STS2_MCP\\` from vendor pin 55e0648",
+            "`.\\build\\deploy_bridge.ps1 -Remove`, BY HAND -- no teardown in "
+            "this harness removes the shared bridge (`EB-310`)",
+            pre_existing=True)
         if pids:
-            entry = self.ledger.record(
-                "Deployed `mods\\STS2_MCP\\` from vendor pin 55e0648",
-                "`.\\build\\deploy_bridge.ps1 -Remove`", pre_existing=True)
             self.ledger.revert(
-                entry, f"pre-existing, left in place: a game was already "
-                       f"running (PID {pids}) on this install")
+                entry, f"shared, left in place: a game was already running "
+                       f"(PID {pids}) on this install")
             print(f"lane {self.label}: bridge already installed and a game is "
                   f"up (PID {pids}); reusing it rather than rewriting a dll "
                   f"that game may hold")
             return
-        self._bridge_entry = self.ledger.record(
-            "Deployed `mods\\STS2_MCP\\` from vendor pin 55e0648",
-            "`.\\build\\deploy_bridge.ps1 -Remove`")
         r = subprocess.run(
             ["powershell.exe", "-NoProfile", "-NonInteractive",
              "-ExecutionPolicy", "Bypass", "-File", str(DEPLOY_BRIDGE)],
             cwd=str(REPO / "klee-mod"), capture_output=True, text=True)
         if r.returncode != 0:
-            self.ledger.fail(self._bridge_entry,
-                             "deploy failed; nothing was installed")
-            self._bridge_entry = None
+            self.ledger.fail(
+                entry, "deploy failed; the shared install was left as it was "
+                       "found")
             raise SystemExit(f"bridge deploy failed:\n{r.stdout}\n{r.stderr}")
+        note = ("refreshed from the vendor pin with no game holding the dll"
+                if installed else
+                "installed here, and left for the owner's next launch and for "
+                "every other lane")
+        self.ledger.revert(entry, f"shared, left in place: {note}")
 
     def _launch(self) -> None:
         exe = self.dir / GAME_EXE
@@ -808,8 +839,27 @@ class Session:
         self.wire()
         self._step(self._seed_entry, self._release_seed)
         self._step(self._speed_entry, self._restore_speed)
+        # THE SIDECAR IS READ HERE BECAUSE NOTHING DELETES IT ANY MORE. It
+        # lives inside `mods/STS2_MCP`, which this teardown no longer removes
+        # (`EB-310`), so `GitsSpeed.cs` will restore from it in the next
+        # process (EB-87). It is read only to SAY SO: its presence proves the
+        # in-process restore above never landed, and the ledger's NOT REVERTED
+        # row does not carry the captured value a person would need to set
+        # FastMode back by hand. Gated on the speed ENTRY, like every step
+        # around it -- a session that never set the speed has nothing to say
+        # about a sidecar it did not write.
+        if self._speed_entry:
+            outstanding = self._read_speed_sidecar()
+            if outstanding:
+                print(f"WARNING: the in-process FastMode restore never ran, "
+                      f"so `{SPEED_SIDECAR}` is still in the game directory. "
+                      f"The next launch restores from it; the captured "
+                      f"original was {outstanding}.")
         self._step(self._launch_entry, self._stop_game)
-        self._step(self._bridge_entry, self._remove_bridge)
+        # NO BRIDGE STEP, AND ITS ABSENCE IS THE RULE (`EB-310`): the shared
+        # `mods\STS2_MCP` is what the owner's own Steam launch reads, so this
+        # harness never takes it out. `deploy_bridge.ps1 -Remove` is the only
+        # remover, by hand.
         self._step(self._appid_entry, self._remove_appid)
         # EB-226, LAST and outside the ledger: the power request is not a
         # change to the game directory, it is a change to this machine, and
@@ -888,40 +938,6 @@ class Session:
                 "original_fast_mode")
         except Exception:                                    # noqa: BLE001
             return "unreadable sidecar"
-
-    def _remove_bridge(self) -> str:
-        # THE SIDECAR IS READ BEFORE THE DIRECTORY THAT HOLDS IT GOES. It lives
-        # inside `mods/STS2_MCP`, so this step destroys the only durable record
-        # of what FastMode was before the soak; if the disable never landed
-        # (dead wire, killed process) the person putting their game back needs
-        # that value, and it belongs in the ledger rather than in a file this
-        # line is about to delete.
-        outstanding = self._read_speed_sidecar()
-        r = subprocess.run(
-            ["powershell.exe", "-NoProfile", "-NonInteractive",
-             "-ExecutionPolicy", "Bypass", "-File", str(DEPLOY_BRIDGE),
-             "-Remove"],
-            cwd=str(REPO / "klee-mod"), capture_output=True, text=True)
-        if r.returncode != 0:
-            raise RuntimeError(r.stderr.strip()[:300] or "deploy_bridge -Remove failed")
-        if outstanding:
-            # THE WARNING CLAIMS ONLY WHAT THE SIDECAR PROVES. Its presence
-            # proves the in-process disable never ran; it says NOTHING about
-            # disk. `SaveManager.SavePrefsFile()` has two callers -- NGame.Quit
-            # (reached only from _Notification(1006), i.e. WM_CLOSE_REQUEST)
-            # and NSettingsScreen.OnSubmenuClosed -- and `_kill()` is
-            # TerminateProcess, which is neither. So on the ordinary teardown
-            # path nothing was flushed and `prefs.save` is already correct.
-            return (f"mods/STS2_MCP removed -- WARNING: the GitsSpeed sidecar "
-                    f"was still present, so the in-process FastMode restore "
-                    f"NEVER ran. The process was force-killed, which flushes "
-                    f"no prefs, so `prefs.save` was almost certainly not "
-                    f"written on this path; if a settings screen happened to "
-                    f"be closed during the soak it may hold Instant, which "
-                    f"the next launch silently rewrites to Fast. Captured "
-                    f"original: {outstanding} -- check FastMode in the "
-                    f"in-game settings")
-        return "mods/STS2_MCP removed"
 
     def _remove_appid(self) -> str:
         p = self.dir / "steam_appid.txt"
