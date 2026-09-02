@@ -65,13 +65,37 @@ Seat numbers are floors, not fun claims (Guardrail 7).
   remaining allowance while its sentence says 20; Ravenous is worded in the
   singular and every survivor eats.
 
+**What round four found when it went to fix them** (2026-09-02, all six
+built or answered):
+
+- **EB-288 is not a defect.** Weak multiplies by 0.75 and a card's damage
+  slot prints the whole number truncated, so Ka-pow! at 7 prints 5 and
+  Ka-pow!+ at 10 prints 7. Both faces were reading the debuff; 7 happens to
+  be the base card's own printed number too, and that collision is what the
+  seat read. It is pinned now, against the game's own multiplier.
+- **EB-285 was twenty-four rows, not one.** The raw template appears
+  wherever a prototype row's own text names `{Damage}` or `{Block}` over a
+  card that declares the base game's *calculated* damage var instead —
+  fifteen companion Attacks and seven companion Skills besides Fuuin Dash.
+  The name did not resolve, the description threw, and the bridge printed
+  the template. The generator picks the right name now, and the structural
+  lint that would always have caught it was pointed at the quarantined
+  surface, which it never had been.
+- **Two of the screen defects are the bridge's, and are named as such.** A
+  shop stops carrying a card's name, text and cost the moment it is bought —
+  the game clears the card, so nothing can print it — and the enchant picker
+  carries no per-card selection state at all. The page says both out loud
+  rather than inventing a card called *Card* or a marker it does not have.
+  Everything else on those two rows was ours and is fixed off nine live
+  screen captures (`review/qa/blindplay/eb263-live-shapes/`).
+
 ## 3. Applied for round four (D, disclosed, yours to veto)
 
 Bombs grow by 3 a turn instead of 2. A number, taken at its default and
 run by the seats: the read above says the growth is worth less than the
 Spark a cash pays, and 3 is the smallest move that changes the arithmetic
-without touching a rule. EB-286 and EB-288 are fixed in the same round so
-the seats can read a Spark price and a debuffed face.
+without touching a rule. EB-286 lands in the same round, so the seats can
+read a Spark price before they play it.
 
 ## 4. Picks
 
