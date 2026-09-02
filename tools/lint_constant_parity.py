@@ -235,6 +235,84 @@ MIRRORED: dict[str, object] = {
     "KurageMemoryLaw.CostPerEnergy": C.KURAGE_MEMORY_COST_PER_ENERGY,
     "KurageMemoryLaw.PulseBlock": C.KURAGE_MEMORY_PULSE_BLOCK,
     "KurageMemoryLaw.QueueCap": C.KURAGE_QUEUE_CAP,
+    # The Klee overhaul, slice one (QUARANTINED, R213 B -- the rules engine
+    # lives under klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd
+    # out of a release build). Quarantined is not exempt, for the same reason
+    # the Kurage's three above are not: these four numbers ARE the rules
+    # (`review/active/klee-brief-2026-09-01.md` sec.3), and a prototype played
+    # on a number the sim never declared is exactly this lint's failure. They
+    # are placeholders and not claims -- but they are the placeholders both
+    # sides have to agree on.
+    "KleeOverhaulLaw.BombGrowth": C.KLEE_OVERHAUL_BOMB_GROWTH,
+    "KleeOverhaulLaw.WorkshopGrowth": C.KLEE_OVERHAUL_WORKSHOP_GROWTH,
+    "KleeOverhaulLaw.AliceGrowth": C.KLEE_OVERHAUL_ALICE_GROWTH,
+    "KleeOverhaulLaw.SparkPerExplosion": C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION,
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, `C.COMPANION_OVERHAUL`).
+    # Same terms as the four above and for the same reason: quarantined is not
+    # exempt. Every number here is the approved workshop's own printed text
+    # (its sec.3, re-priced in its sec.8), and BOTH engines play these cards --
+    # so the two implementations have to agree on them by value, or a seat is
+    # grading a different card from the one the sim scored.
+    "CompanionOverhaulLaw.SignatureMixBlock": C.MC_SIGNATURE_MIX_BLOCK,
+    "CompanionOverhaulLaw.GlacialWaltzDamage": C.MC_GLACIAL_WALTZ_DMG,
+    "CompanionOverhaulLaw.IsotomaDamage": C.MC_ISOTOMA_DMG,
+    "CompanionOverhaulLaw.IsotomaBlock": C.MC_ISOTOMA_BLOCK,
+    "CompanionOverhaulLaw.DandelionBreezeBlock": C.MC_DANDELION_BREEZE_BLOCK,
+    "CompanionOverhaulLaw.OzDamage": C.MC_OZ_DMG,
+    "CompanionOverhaulLaw.RevelationBlock": C.MC_REVELATION_BLOCK,
+    "CompanionOverhaulLaw.RevelationStrength": C.MC_REVELATION_STRENGTH,
+    "CompanionOverhaulLaw.OmenVulnerable": C.MC_OMEN_VULNERABLE,
+    "CompanionOverhaulLaw.LightningRoseDamage": C.MC_LIGHTNING_ROSE_DMG,
+    "CompanionOverhaulLaw.LightningRoseVulnerable": C.MC_LIGHTNING_ROSE_VULN,
+    # The same arm's SECOND WAVE -- the seven numbers its thirteen new rows
+    # hand to a POWER rather than print on a card. Same terms again.
+    "CompanionOverhaulLaw.ShowerDamage": C.MC_SHOWER_DMG,
+    "CompanionOverhaulLaw.BinaryWhiteReactionMult":
+        C.MC_BINARY_WHITE_REACTION_MULT,
+    "CompanionOverhaulLaw.LightningFangDamage": C.MC_LIGHTNING_FANG_BONUS,
+    "CompanionOverhaulLaw.BaronBunnyReduction": C.MC_BARON_BUNNY_REDUCTION,
+    "CompanionOverhaulLaw.BaronBunnyDamage": C.MC_BARON_BUNNY_DMG,
+    "CompanionOverhaulLaw.LightfallBase": C.MC_LIGHTFALL_BASE,
+    "CompanionOverhaulLaw.LightfallPerAttack": C.MC_LIGHTFALL_PER_ATTACK,
+    # THE SAME ARM'S SECOND NATION -- the twenty numbers the approved Inazuma
+    # workshop hands to a POWER rather than prints on a card. Same terms again,
+    # and the same reason: BOTH engines play these cards, so the two
+    # implementations have to agree on them by value or a seat is grading a
+    # different card from the one the sim scored.
+    "CompanionOverhaulLaw.WarBannerDexterity": C.MI_WAR_BANNER_DEXTERITY,
+    "CompanionOverhaulLaw.JuugaDamage": C.MI_JUUGA_DMG,
+    "CompanionOverhaulLaw.DarumaDamage": C.MI_DARUMA_DMG,
+    "CompanionOverhaulLaw.DarumaBlock": C.MI_DARUMA_BLOCK,
+    "CompanionOverhaulLaw.SanctifyingRingDamage": C.MI_SANCTIFYING_RING_DMG,
+    "CompanionOverhaulLaw.SanctifyingRingBlock": C.MI_SANCTIFYING_RING_BLOCK,
+    "CompanionOverhaulLaw.BlazingBarrierBlock": C.MI_BLAZING_BARRIER_BLOCK,
+    "CompanionOverhaulLaw.OoyoroiDamage": C.MI_OOYOROI_DMG,
+    "CompanionOverhaulLaw.OoyoroiBlock": C.MI_OOYOROI_BLOCK,
+    "CompanionOverhaulLaw.StormcallBonus": C.MI_STORMCALL_BONUS,
+    "CompanionOverhaulLaw.SakuraDamage": C.MI_SAKURA_DMG,
+    "CompanionOverhaulLaw.SakuraBonus": C.MI_SAKURA_BONUS,
+    "CompanionOverhaulLaw.SakuraCap": C.MI_SAKURA_CAP,
+    "CompanionOverhaulLaw.AurousBlazeDamage": C.MI_AUROUS_BLAZE_DMG,
+    "CompanionOverhaulLaw.SoumetsuDamage": C.MI_SOUMETSU_DMG,
+    "CompanionOverhaulLaw.SoumetsuFinale": C.MI_SOUMETSU_FINALE,
+    "CompanionOverhaulLaw.KyoukaDamage": C.MI_KYOUKA_BONUS,
+    "CompanionOverhaulLaw.KyoukaFinale": C.MI_KYOUKA_FINALE,
+    "CompanionOverhaulLaw.SurpriseDispatchDamage": C.MI_SURPRISE_DISPATCH_DMG,
+    "CompanionOverhaulLaw.TamotoDamage": C.MI_TAMOTO_DMG,
+    # THE KOKOMI OVERHAUL (QUARANTINED, `C.KOKOMI_OVERHAUL`). Same terms again
+    # and for the same reason: quarantined is not exempt. These six numbers ARE
+    # the rules (`review/active/kokomi-brief-2026-09-01.md` sec.4) -- the
+    # pulse's size and its per-combat ceiling, the two Song of Pearls replaces
+    # them with, the Garment's per-Attack chip, and the Tide a card costs to
+    # read -- and a prototype played on a number the sim never declared is
+    # exactly this lint's failure. They are placeholders and not claims, but
+    # they are the placeholders both sides have to agree on.
+    "KokomiOverhaulLaw.PulseMend": C.KOKOMI_OVERHAUL_PULSE_MEND,
+    "KokomiOverhaulLaw.PulseBudget": C.KOKOMI_OVERHAUL_PULSE_BUDGET,
+    "KokomiOverhaulLaw.SongOfPearlsMend": C.KOKOMI_OVERHAUL_SONG_MEND,
+    "KokomiOverhaulLaw.SongOfPearlsBudget": C.KOKOMI_OVERHAUL_SONG_BUDGET,
+    "KokomiOverhaulLaw.GarmentMend": C.KOKOMI_OVERHAUL_GARMENT_MEND,
+    "KokomiOverhaulLaw.TidePerCard": C.KOKOMI_OVERHAUL_TIDE_PER_CARD,
 }
 
 # --------------------------------------------------------------------------

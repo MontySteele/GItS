@@ -93,46 +93,67 @@ public sealed class Klee : CustomCharacterModel
     /// exists. Keeping the template here makes character-select/self-check
     /// reads stable; only actual new-run creation resolves the random pair.
     /// </remarks>
-    public override IEnumerable<CardModel> StartingDeck => new CardModel[]
+    public override IEnumerable<CardModel> StartingDeck
     {
+        get
+        {
 #if PROTOTYPE_CARDS
-        // QUARANTINED, THE SPARKS ARM'S ONE STARTER SEAM
-        // (review/ruled/klee-sparks-2026-08-29.md sec.10.10 item 4; sim twin
-        // `tier0/content/loader._starter_ids`, which is the ONE seam both the
-        // tier 0 battery and the tier 0.5 run read so they cannot disagree
-        // about what she opens with). With the flag on these two slots are the
-        // PRICED twins and with it off they are Ka-boom! and Pop, byte for
-        // byte. THE SHEET DOES NOT MOVE -- only this list does, and only under
-        // the flag.
-        //
-        // ONE Kaboom of the four, not four (sec.10.11 item 2, and it goes back
-        // to [USER]): Regent's ten cards ship ONE sink, and four would make
-        // four of her ten opening cards unplayable on an empty bank. Pop's twin
-        // is a straight substitution -- Powder Pop carries pop's body unmoved
-        // and adds the Spark it needs to pay for the sink.
-        Powers.SparkStarter.PricedKaboom(),
-        ModelDb.Card<Kaboom>(),
-        ModelDb.Card<Kaboom>(),
-        ModelDb.Card<Kaboom>(),
-        ModelDb.Card<DuckAndCover>(),
-        ModelDb.Card<DuckAndCover>(),
-        ModelDb.Card<DuckAndCover>(),
-        ModelDb.Card<DuckAndCover>(),
-        ModelDb.Card<JumpyDumpty>(),
-        Powers.SparkStarter.SparkingPop(),
-#else
-        ModelDb.Card<Kaboom>(),
-        ModelDb.Card<Kaboom>(),
-        ModelDb.Card<Kaboom>(),
-        ModelDb.Card<Kaboom>(),
-        ModelDb.Card<DuckAndCover>(),
-        ModelDb.Card<DuckAndCover>(),
-        ModelDb.Card<DuckAndCover>(),
-        ModelDb.Card<DuckAndCover>(),
-        ModelDb.Card<JumpyDumpty>(),
-        ModelDb.Card<Pop>(),
+            // QUARANTINED, THE KLEE OVERHAUL'S ONE STARTER SEAM (the ruled
+            // brief klee-brief-2026-09-01.md sec.8; sim twin
+            // `tier0/content/loader._starter_ids`, the same one seam). It comes
+            // FIRST because the two prototype arms are ALTERNATIVES, not
+            // layers: the Sparks substitutions below are priced inside rules
+            // this arm retires, and a dev build compiles both. With
+            // `KleeOverhaul.Enabled` off -- which is every build that did not
+            // ask for `-p:KleeOverhaul=true` -- this branch does not run and
+            // the list below is byte for byte what it was.
+            if (Powers.KleeOverhaul.Enabled)
+            {
+                return Powers.KleeOverhaulRoster.StartingDeck();
+            }
 #endif
-    };
+            return new CardModel[]
+            {
+#if PROTOTYPE_CARDS
+                // QUARANTINED, THE SPARKS ARM'S ONE STARTER SEAM
+                // (review/ruled/klee-sparks-2026-08-29.md sec.10.10 item 4; sim twin
+                // `tier0/content/loader._starter_ids`, which is the ONE seam both the
+                // tier 0 battery and the tier 0.5 run read so they cannot disagree
+                // about what she opens with). With the flag on these two slots are the
+                // PRICED twins and with it off they are Ka-boom! and Pop, byte for
+                // byte. THE SHEET DOES NOT MOVE -- only this list does, and only under
+                // the flag.
+                //
+                // ONE Kaboom of the four, not four (sec.10.11 item 2, and it goes back
+                // to [USER]): Regent's ten cards ship ONE sink, and four would make
+                // four of her ten opening cards unplayable on an empty bank. Pop's twin
+                // is a straight substitution -- Powder Pop carries pop's body unmoved
+                // and adds the Spark it needs to pay for the sink.
+                Powers.SparkStarter.PricedKaboom(),
+                ModelDb.Card<Kaboom>(),
+                ModelDb.Card<Kaboom>(),
+                ModelDb.Card<Kaboom>(),
+                ModelDb.Card<DuckAndCover>(),
+                ModelDb.Card<DuckAndCover>(),
+                ModelDb.Card<DuckAndCover>(),
+                ModelDb.Card<DuckAndCover>(),
+                ModelDb.Card<JumpyDumpty>(),
+                Powers.SparkStarter.SparkingPop(),
+#else
+                ModelDb.Card<Kaboom>(),
+                ModelDb.Card<Kaboom>(),
+                ModelDb.Card<Kaboom>(),
+                ModelDb.Card<Kaboom>(),
+                ModelDb.Card<DuckAndCover>(),
+                ModelDb.Card<DuckAndCover>(),
+                ModelDb.Card<DuckAndCover>(),
+                ModelDb.Card<DuckAndCover>(),
+                ModelDb.Card<JumpyDumpty>(),
+                ModelDb.Card<Pop>(),
+#endif
+            };
+        }
+    }
 
     /// <remarks>
     /// Pounding Surprise (+1 Spark per Bomb detonation) — the real starting

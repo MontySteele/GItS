@@ -123,8 +123,25 @@ _LOC_RE = re.compile(r'\(\s*"(title|description)"\s*,\s*"((?:[^"\\]|\\.)*)"\s*\)
 # `1` on a discounted Kaboom!; the page shows it anyway, because the
 # alternative -- proven twice over in round 1 -- is a page that reads as an
 # offer the board will refuse.
+#
+# `EB-267`: KEYED BY CARD ID, NOT BY PRINTED TITLE, and that is the whole row.
+# The prototype surface deliberately ships a re-priced twin of a shipped card
+# under the SAME printed name -- `Flame Dance` is `flame_dance` at cost 2 and
+# `proto_ko_flame_dance` at cost 1 -- so a title-keyed map answered the proto
+# card with the shipped card's number and the page told a blind reader its
+# cost was wrong when nothing was. The key is the wire's own `Id.Entry` with
+# the mod prefix off (`KLEEMOD-PROTO_KO_FLAME_DANCE` -> `PROTO_KO_FLAME_DANCE`),
+# which BaseLib derives from the C# CLASS NAME (`DuckAndCover` ->
+# `DUCK_AND_COVER`, `KleeMod.cs:81`) -- so the class name in the file the cost
+# comment sits in IS the key, for a generated card and a hand-written one
+# alike, and the prototype rows are already in this glob rather than needing a
+# sheet this module may not open.
 _CARD_SOURCE_GLOB = "KleeCode/Cards/**/*.cs"
 _SHEET_COST_RE = re.compile(r"[Ss]heet[^\n]*?\bcost[=:]?\s*(\d+)")
+_CLASS_RE = re.compile(
+    r"^\s*(?:public|internal)\s+(?:sealed\s+|abstract\s+|static\s+|partial\s+)*"
+    r"class\s+([A-Za-z_][A-Za-z0-9_]*)", re.M)
+_MOD_ID_PREFIXES = ("KLEEMOD_",)
 
 # The one power whose cost hook this note exists for, matched on the PRINTED
 # name the wire carries (`Spark`), never on a power id.
@@ -234,6 +251,40 @@ def localization_index(repo: Path) -> dict[str, str]:
     return index
 
 
+def card_key(raw: Any) -> str:
+    """The wire's card id as `printed_cost_index` keys it (`EB-267`).
+
+    `KLEEMOD-PROTO_KO_FLAME_DANCE` -> `PROTO_KO_FLAME_DANCE`. The mod prefix
+    comes off because a plain `CardModel` stub ships without one
+    (`KleeMod.cs:98`) and the two spellings name the same face; nothing else
+    is folded, so two ids that differ still key differently. This is a key on
+    the TOOL side and never reaches a page -- `_hand` reads it off the wire
+    entry and copies only the number it found.
+    """
+    s = str(raw or "").strip().upper().replace("-", "_")
+    for prefix in _MOD_ID_PREFIXES:
+        if s.startswith(prefix):
+            return s[len(prefix):]
+    return s
+
+
+def _class_key(src: str) -> str:
+    """The first class declared in a C# file, as its `ModelId.Entry` spelling.
+
+    `ProtoKoFlameDance` -> `PROTO_KO_FLAME_DANCE`. BaseLib derives the entry
+    from the class name and the generator derives the class name from the
+    sheet id, so this agrees with the `id=` the generated header prints for
+    all 336 generated faces -- which is what
+    `test_the_printed_cost_index_is_keyed_by_id` checks, rather than trusting
+    it.
+    """
+    m = _CLASS_RE.search(src)
+    if m is None:
+        return ""
+    name = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", m.group(1))
+    return re.sub(r"(?<=[A-Z])(?=[A-Z][a-z])", "_", name).upper()
+
+
 @lru_cache(maxsize=4)
 def _printed_cost_index_cached(repo: Path) -> tuple[tuple[str, int], ...]:
     index: dict[str, int] = {}
@@ -248,24 +299,81 @@ def _printed_cost_index_cached(repo: Path) -> tuple[tuple[str, int], ...]:
         cost = _SHEET_COST_RE.search(src)
         if cost is None:
             continue
-        # The FIRST title in the file. A modal card's file holds several
-        # classes and only the outer one carries the sheet comment, so the
-        # first title is the one that comment is about.
-        for m in _LOC_RE.finditer(src):
-            if m.group(1) == "title":
-                index.setdefault(m.group(2), int(cost.group(1)))
-                break
+        # The FIRST class in the file. A modal card's file holds several and
+        # only the outer one carries the sheet comment, so the first class is
+        # the one that comment is about -- the same rule the title-keyed
+        # version used, moved onto the key that is actually unique.
+        key = _class_key(src)
+        if key:
+            index.setdefault(key, int(cost.group(1)))
     return tuple(sorted(index.items()))
 
 
 def printed_cost_index(repo: Path | None = None) -> dict[str, int]:
-    """`{printed title: the cost printed on the shipped face}` (EB-186).
+    """`{card id: the cost printed on the shipped face}` (EB-186, EB-267).
+
+    Keyed by `card_key`'s spelling of the wire's own card id, NOT by printed
+    title: a prototype row may share a shipped card's name and carry a
+    different price, and a title-keyed map answered the wrong one.
 
     A card the index has no row for gets NO note -- an absent number is
     silence, never a guess.
     """
     root = repo if repo is not None else Path(__file__).resolve().parents[1]
     return dict(_printed_cost_index_cached(root))
+
+
+# `EB-264`. THE WIRE'S UNPLAYABLE REASON IS AN ENUM NAME, AND A PLAYER CANNOT
+# READ IT. `unplayable_reason` on a hand entry is `UnplayableReason.ToString()`
+# (`McpMod.StateBuilder.cs:1324`), so the page printed
+# `CANNOT BE PLAYED: BlockedByCardLogic` at a blind tester, who reported it as
+# the least readable thing on the screen and could not tell it from
+# `EnergyCostTooHigh`, which at least guesses. These are the plain sentences,
+# keyed on the enum name folded to lower case.
+#
+# THE MAP IS NOT THE ONLY PATH, DELIBERATELY. A reason the wire spells as a
+# SENTENCE -- anything carrying a space -- is kept verbatim, because the mod
+# side is growing reasons of its own ("you have no Spark") and a page that
+# mapped those would be overwriting the game's own words with ours. An enum
+# name this map has never seen is rendered as its own words rather than
+# dropped: a tester who reports `blocked by hook` has reported something a
+# reader of this file can act on, and silence there would hide the next enum
+# the same way this row's three were hidden.
+UNPLAYABLE_REASONS: dict[str, str] = {
+    "energycosttoohigh": "you do not have enough energy",
+    "notenoughenergy": "you do not have enough energy",
+    "starcosttoohigh": "you do not have enough Stars",
+    "blockedbycardlogic": "this card's own rule is stopping you right now",
+    "blockedbyhook": "something else on the board is stopping you right now",
+    "unplayable": "this card cannot be played at all",
+    "none": "",
+}
+_ENUM_TOKEN = re.compile(r"^[A-Za-z][A-Za-z0-9]*$")
+
+
+def unplayable_reason(raw: Any) -> str:
+    """The game's refusal in words a player can read (`EB-264`).
+
+    A `[Flags]` enum prints as `A, B`, so each part is read on its own.
+    """
+    text = _text(raw)
+    if not text:
+        return ""
+    out: list[str] = []
+    for part in (p.strip() for p in text.split(",")):
+        if not part:
+            continue
+        if not _ENUM_TOKEN.match(part):
+            out.append(part)                 # the wire's own sentence, kept
+            continue
+        known = UNPLAYABLE_REASONS.get(part.lower())
+        if known is not None:
+            if known:
+                out.append(known)
+            continue
+        spaced = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", part)
+        out.append(re.sub(r"(?<=[A-Z])(?=[A-Z][a-z])", " ", spaced).lower())
+    return "; ".join(out)
 
 
 def _discounted(card: dict[str, Any]) -> bool:
@@ -420,11 +528,14 @@ def _hand(state: dict[str, Any], loc: dict[str, str],
             "text_source": source,
             "cost": _text(entry.get("cost")),
             # EB-186. `None` where the shipped face gives no number.
-            "printed_cost": costs.get(title),
+            # EB-267: BY ID. The id is read here, on the tool side, and never
+            # copied into the packet -- only the integer it found is.
+            "printed_cost": costs.get(card_key(entry.get("id"))),
             "upgraded": bool(entry.get("is_upgraded")),
             "playable": entry.get("can_play") is not False,
             # The game's own printed refusal, not ours.
-            "unplayable_reason": _text(entry.get("unplayable_reason")),
+            "unplayable_reason": _text(entry.get("unplayable_reason_text")
+                                       or entry.get("unplayable_reason")),
         })
     return cards
 
@@ -526,8 +637,12 @@ def _render_card(c: dict[str, Any]) -> list[str]:
     if note:
         lines.insert(3, f"- {note}")
     if not c["playable"]:
+        # `EB-264`: the enum name becomes a sentence here, at the one place it
+        # is printed, so the packet JSON keeps the wire's own word for a
+        # falsifier to read and the PAGE carries the words a player can.
+        why = unplayable_reason(c["unplayable_reason"])
         lines.append(f"- Cannot be played right now: "
-                     f"{c['unplayable_reason'] or 'the game gives no reason'}")
+                     f"{why or 'the game gives no reason'}")
     lines.append(f"- (card text read from: {c['text_source']})")
     lines.append("")
     return lines

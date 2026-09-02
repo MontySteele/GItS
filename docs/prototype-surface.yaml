@@ -177,3 +177,922 @@
    authored_by: [claude],
    cost: 2, type: skill, rarity: uncommon,
    effects: [{op: conscript, amount: 2, subsidy: waived}]}
+
+# THE KLEE OVERHAUL, SLICE ONE. Reachable rows, not staged ones: under
+# `C.KLEE_OVERHAUL` these ARE Klee's starter and her whole pool. Why each row
+# reads as it does: docs/notes/prototype-surface-provenance.md.
+
+# --- the starter, ten cards, five ids (packet sec.3) ---
+
+- {id: proto_ko_kaboom, name: "Kaboom!", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: basic,
+   description: "[gold]Set off[/gold]. Deal 6 damage.",
+   effects: [{op: set_off, target: enemy, damage: 6}]}
+
+- {id: proto_ko_kapow, name: "Ka-pow!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: basic,
+   description: "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold]. Deal 7 damage.",
+   effects: [{op: spend_spark, amount: 1},
+             {op: set_off, target: enemy, damage: 7}]}
+
+- {id: proto_ko_duck_and_cover, name: "Duck and Cover", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: basic,
+   description: "Gain 5 Block.",
+   effects: [{op: block, amount: 5}]}
+
+- {id: proto_ko_pop, name: "Pop!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: basic,
+   description: "Place a [gold]Bomb[/gold] 5.",
+   effects: [{op: plant_bomb, target: enemy, size: 5}]}
+
+- {id: proto_ko_jumpy_dumpty, name: "Jumpy Dumpty", character: klee,
+   authored_by: [claude],
+   cost: 2, type: skill, rarity: basic,
+   description: "Place a [gold]Bomb[/gold] 8 on a random enemy. When it goes off, place a [gold]Mine[/gold] 3 on every enemy.",
+   effects: [{op: plant_bomb, target: random_enemy, size: 8, payload_mine_all: 3}]}
+
+# --- Cook, the starter's plan (packet sec.4) ---
+
+- {id: proto_ko_fish_flavored_bait, name: "Fish-Flavored Bait", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 5 damage. Place a [gold]Bomb[/gold] 5.",
+   effects: [{op: damage, amount: 5, target: enemy},
+             {op: plant_bomb, target: enemy, size: 5}]}
+
+- {id: proto_ko_pocket_fireworks, name: "Pocket Fireworks", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 9 damage.",
+   effects: [{op: damage, amount: 9, target: enemy}]}
+
+- {id: proto_ko_chain_fuse, name: "Chain Fuse", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Each [gold]Bomb[/gold] on target enemy grows by 3.",
+   effects: [{op: grow_bombs, target: enemy, amount: 3}]}
+
+- {id: proto_ko_explosives_workshop, name: "Explosives Workshop", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "At the start of your turn, your [gold]Bombs[/gold] grow by 1 more.",
+   effects: [{op: apply_power, power: ko_bomb_growth_up, amount: 1, target: self}]}
+
+- {id: proto_ko_careful_arrangement, name: "Careful Arrangement", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Move all your [gold]Bombs[/gold] onto target enemy as one [gold]Bomb[/gold]. It grows by 2.",
+   effects: [{op: merge_bombs, target: enemy, growth: 2}]}
+
+- {id: proto_ko_big_badda_boom, name: "Big Badda Boom", character: klee,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: uncommon,
+   description: "[gold]Set off[/gold]. Deal 12 damage. Then deal damage equal to the total size of the [gold]Bombs[/gold] set off.",
+   effects: [{op: set_off, target: enemy, damage: 12},
+             {op: damage_set_off_total, target: enemy}]}
+
+- {id: proto_ko_the_big_one, name: "The Big One", character: klee,
+   authored_by: [claude],
+   cost: 3, type: attack, rarity: rare,
+   description: "[gold]Set off[/gold]. [gold]Bombs[/gold] set off this way deal double. Deal 10 damage.",
+   effects: [{op: double_set_off},
+             {op: set_off, target: enemy, damage: 10}]}
+
+- {id: proto_ko_alices_recipe, name: "Alice's Recipe", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   description: "Your [gold]Bombs[/gold] grow by 4 instead of 2.",
+   effects: [{op: apply_power, power: ko_alices_recipe, amount: 1, target: self}]}
+
+# --- Spray, everything explodes now (packet sec.4) ---
+
+- {id: proto_ko_mine_toss, name: "Mine Toss", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Place a [gold]Mine[/gold] 4 on every enemy.",
+   effects: [{op: plant_bomb, target: all_enemies, size: 4, mine: true}]}
+
+- {id: proto_ko_fwoosh, name: "Fwoosh!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common,
+   description: "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold] and deal 5 damage to a random enemy.",
+   effects: [{op: spend_spark, amount: 1},
+             {op: set_off, target: random_enemy, damage: 5}]}
+
+- {id: proto_ko_tinder_toss, name: "Tinder Toss", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common,
+   description: "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold] and deal 4 damage, to two random enemies.",
+   effects: [{op: spend_spark, amount: 1},
+             {op: set_off, target: random_enemy, damage: 4, times: 2}]}
+
+- {id: proto_ko_quick_fuse, name: "Quick Fuse", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold] target enemy's [gold]Bombs[/gold].",
+   effects: [{op: spend_spark, amount: 1},
+             {op: set_off, target: enemy}]}
+
+- {id: proto_ko_bang_bang, name: "Bang Bang!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: uncommon,
+   description: "Spend 2 [gold]Sparks[/gold]. [gold]Set off[/gold]. Deal 8 damage. Place a [gold]Bomb[/gold] 4.",
+   effects: [{op: spend_spark, amount: 2},
+             {op: set_off, target: enemy, damage: 8},
+             {op: plant_bomb, target: enemy, size: 4}]}
+
+- {id: proto_ko_rapid_fire, name: "Rapid Fire", character: klee,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: uncommon,
+   description: "Deal 3 damage to a random enemy four times. [gold]Set off[/gold] each enemy hit.",
+   effects: [{op: set_off, target: random_enemy, damage: 3, times: 4}]}
+
+- {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   description: "Whenever one of your [gold]Bombs[/gold] goes off, place a [gold]Bomb[/gold] 3 on a random enemy.",
+   effects: [{op: apply_power, power: ko_chained_reactions, amount: 3, target: self}]}
+
+- {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash (proto)", character: klee,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "At the end of your turn, [gold]Set off[/gold] a random enemy's [gold]Bombs[/gold].",
+   effects: [{op: apply_power, power: ko_end_turn_set_off, amount: 1, target: self}]}
+
+# --- React, the one that goes off twice (packet sec.4) ---
+
+- {id: proto_ko_sizzle, name: "Sizzle", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "[gold]Set off[/gold]. Deal 6 damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal 6 more.",
+   effects: [{op: set_off, target: enemy, damage: 6},
+             {op: conditional, if: bomb_reacted_this_turn,
+              then: [{op: damage, amount: 6, target: enemy}]}]}
+
+- {id: proto_ko_perfect_timing, name: "Perfect Timing", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "[gold]Set off[/gold]. Deal 8 damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, play this again.",
+   effects: [{op: set_off, target: enemy, damage: 8},
+             {op: conditional, if: bomb_reacted_this_turn,
+              then: [{op: repeat_this, times: 1}]}]}
+
+- {id: proto_ko_flame_dance, name: "Flame Dance", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 5 damage to ALL enemies. [gold]Set off[/gold] each enemy that has a non-Pyro aura.",
+   effects: [{op: damage, amount: 5, target: all_enemies},
+             {op: set_off, target: all_enemies, aura: non_pyro}]}
+
+- {id: proto_ko_catalytic_converter, name: "Catalytic Converter", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], gain 1 extra [gold]Spark[/gold].",
+   effects: [{op: apply_power, power: ko_bomb_reaction_spark, amount: 1, target: self}]}
+
+# --- currencies and defence (packet sec.4) ---
+
+- {id: proto_ko_ammo_scavenging, name: "Ammo Scavenging", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Place a [gold]Bomb[/gold] 4. Draw a card for each of your [gold]Bombs[/gold] that went off this turn.",
+   effects: [{op: plant_bomb, target: enemy, size: 4},
+             {op: draw_per_set_off}]}
+
+- {id: proto_ko_powder_charge, name: "Powder Charge", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Spend 1 [gold]Spark[/gold]. Place a [gold]Bomb[/gold] 6.",
+   effects: [{op: spend_spark, amount: 1},
+             {op: plant_bomb, target: enemy, size: 6}]}
+
+- {id: proto_ko_dig_in, name: "Dig In", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Spend 1 [gold]Spark[/gold]. Gain 8 Block.",
+   effects: [{op: spend_spark, amount: 1},
+             {op: block, amount: 8}]}
+
+- {id: proto_ko_sugar_rush, name: "Sugar Rush", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: rare, exhaust: true,
+   description: "Spend 2 [gold]Sparks[/gold]. Gain 2 [gold]Energy[/gold]. Draw 1 card. Exhaust.",
+   effects: [{op: spend_spark, amount: 2},
+             {op: energy, amount: 2},
+             {op: draw, amount: 1}]}
+
+- {id: proto_ko_run_away, name: "Run Away!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "Gain 3 Block. If a [gold]Bomb[/gold] went off this turn, gain 4 more.",
+   effects: [{op: block, amount: 3},
+             {op: conditional, if: bomb_went_off_this_turn,
+              then: [{op: block, amount: 4}]}]}
+
+- {id: proto_ko_grounded, name: "Grounded", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 6 Block.",
+   effects: [{op: apply_power, power: ko_grounded, amount: 6, target: self}]}
+
+- {id: proto_ko_sorry_jean, name: "Sorry, Jean...", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Remove one of your [gold]Bombs[/gold]. Gain Block equal to its size.",
+   effects: [{op: remove_bomb_for_block}]}
+
+# THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
+# Mondstadt's Universal companion pool. Why each row reads as it does, and
+# which 13 of the workshop's 34 are absent: docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_mc_diona_signature_mix, name: "Diona — Signature Mix", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: cryo,
+   cost: 1, type: skill, exhaust: true,
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. For 2 turns, at the start of your turn gain 4 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies},
+             {op: apply_power, power: mc_signature_mix, amount: 2, target: self}]}
+
+- {id: proto_mc_noelle_breastplate, name: "Noelle — Breastplate", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: geo,
+   cost: 1, type: skill,
+   description: "Gain 6 [gold]Block[/gold]. If you are below half HP, gain 4 more.",
+   effects: [{op: block, amount: 6},
+             {op: conditional, if: hp_pct_below_50,
+              then: [{op: block, amount: 4}]}]}
+
+- {id: proto_mc_kaeya_frostgnaw, name: "Kaeya — Frostgnaw (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
+   cost: 1, type: attack,
+   description: "Deal 8 damage. Gain 3 [gold]Block[/gold].",
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
+             {op: block, amount: 3}]}
+
+- {id: proto_mc_kaeya_glacial_waltz, name: "Kaeya — Glacial Waltz", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: cryo,
+   cost: 1, type: skill, exhaust: true,
+   description: "For 3 turns, at the end of your turn deal 6 [gold]Cryo[/gold] damage to a random enemy.",
+   effects: [{op: apply_power, power: mc_glacial_waltz, amount: 3, target: self}]}
+
+- {id: proto_mc_barbara_show_begin, name: "Barbara — Let the Show Begin♪ (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
+   cost: 1, type: skill,
+   description: "Gain 6 [gold]Block[/gold]. Apply [gold]Hydro[/gold] to target enemy.",
+   effects: [{op: block, amount: 6},
+             {op: apply_aura, element: hydro, target: enemy}]}
+
+- {id: proto_mc_albedo_solar_isotoma, name: "Albedo — Solar Isotoma (proto)", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
+   cost: 1, type: power,
+   description: "At the end of your turn, if any enemy has an aura, deal 8 damage to that enemy and gain 4 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: mc_isotoma_bloom, amount: 1, target: self}]}
+
+- {id: proto_mc_jean_gale_blade, name: "Jean — Gale Blade", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 5, rarity: uncommon, role_c: trigger, element: anemo,
+   cost: 1, type: attack,
+   description: "Deal 10 damage. [gold]Swirl[/gold] an enemy's aura.",
+   effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
+             {op: swirl, target: enemy}]}
+
+- {id: proto_mc_jean_dandelion_breeze, name: "Jean — Dandelion Breeze", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
+   cost: 2, type: power,
+   description: "At the end of your turn, [gold]Swirl[/gold] the enemy with the most auras and gain 6 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: mc_dandelion_breeze, amount: 1, target: self}]}
+
+- {id: proto_mc_fischl_nightrider, name: "Fischl — Nightrider (proto)", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
+   cost: 1, type: attack,
+   description: "Deal 7 damage. If Oz is out, Oz attacks now.",
+   effects: [{op: damage, amount: 7, target: enemy, applies_element: true},
+             {op: conditional, if: self_has_power_mc_oz,
+              then: [{op: damage, amount: 5, target: random_enemy, applies_element: true}]}]}
+
+- {id: proto_mc_fischl_oz, name: "Fischl — Oz, at Your Side (proto)", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
+   cost: 1, type: power,
+   description: "At the end of your turn, Oz deals 5 [gold]Electro[/gold] damage to a random enemy.",
+   effects: [{op: apply_power, power: mc_oz, amount: 1, target: self}]}
+
+- {id: proto_mc_sucrose_gust, name: "Sucrose — Wind Spirit Creation (proto)", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
+   cost: 0, type: skill,
+   description: "[gold]Swirl[/gold] an enemy's aura. Draw 1 card.",
+   effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
+
+- {id: proto_mc_sucrose_astable, name: "Sucrose — Astable Anemohypostasis (proto)", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
+   cost: 0, type: skill, exhaust: true,
+   description: "[gold]Swirl[/gold] the aura of ALL enemies.",
+   effects: [{op: swirl, target: all_enemies}]}
+
+- {id: proto_mc_sucrose_catalyst_conversion, name: "Sucrose — Catalyst Conversion (proto)", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
+   cost: 0, type: skill, exhaust: true,
+   description: "Gain 1 [gold]Energy[/gold]. Draw 1 card.",
+   effects: [{op: energy, amount: 1}, {op: draw, amount: 1}]}
+
+- {id: proto_mc_bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: pyro,
+   cost: 1, type: skill, exhaust: true,
+   description: "If you are above 70% HP, gain 3 [gold]Strength[/gold]. Otherwise gain 10 [gold]Block[/gold].",
+   effects: [{op: conditional, if: hp_pct_above_70,
+              then: [{op: apply_power, power: strength, amount: 3, target: self}],
+              else: [{op: block, amount: 10}]}]}
+
+- {id: proto_mc_nicole_revelation, name: "Nicole — Revelation, Uncreated Light", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: buffer, element: pyro,
+   cost: 2, type: power,
+   description: "At the start of your turn, gain 5 [gold]Block[/gold]. If you had [gold]Block[/gold] left at the end of your last turn, also gain 2 [gold]Strength[/gold].",
+   effects: [{op: apply_power, power: mc_revelation, amount: 1, target: self}]}
+
+- {id: proto_mc_mona_stellaris_phantasm, name: "Mona — Stellaris Phantasm", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: applier, element: hydro,
+   cost: 2, type: skill, exhaust: true,
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, enemies take 50% more damage.",
+   effects: [{op: apply_aura, element: hydro, target: all_enemies},
+             {op: apply_power, power: mc_omen, amount: 1, target: self}]}
+
+- {id: proto_mc_venti_grand_ode, name: "Venti — Wind's Grand Ode", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
+   cost: 2, type: skill, exhaust: true,
+   description: "Deal 8 damage to ALL enemies. For 2 turns, at the end of your turn [gold]Swirl[/gold] the aura of ALL enemies.",
+   effects: [{op: damage, amount: 8, target: all_enemies, applies_element: true},
+             {op: apply_power, power: mc_grand_ode, amount: 2, target: self}]}
+
+- {id: proto_mc_amber_fiery_rain, name: "Amber — Fiery Rain", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: pyro,
+   cost: 1, type: attack,
+   description: "Deal 4 damage to ALL enemies three times.",
+   effects: [{op: damage, amount: 4, target: all_enemies, times: 3, applies_element: true}]}
+
+- {id: proto_mc_lisa_violet_arc, name: "Lisa — Violet Arc", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
+   cost: 1, type: skill,
+   description: "Apply [gold]Electro[/gold] to ALL enemies. Draw 1 card.",
+   effects: [{op: apply_aura, element: electro, target: all_enemies},
+             {op: draw, amount: 1}]}
+
+- {id: proto_mc_lisa_lightning_rose, name: "Lisa — Lightning Rose", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
+   cost: 1, type: skill, exhaust: true,
+   description: "For 3 turns, at the end of your turn deal 5 [gold]Electro[/gold] damage to a random enemy and apply 1 [gold]Vulnerable[/gold].",
+   effects: [{op: apply_power, power: mc_lightning_rose, amount: 3, target: self}]}
+
+- {id: proto_mc_rosaria_ravaging_confession, name: "Rosaria — Ravaging Confession", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
+   cost: 1, type: attack,
+   description: "Deal 9 damage. If the enemy has an aura, apply 1 [gold]Vulnerable[/gold].",
+   effects: [{op: damage, amount: 9, target: enemy, applies_element: true},
+             {op: conditional, if: target_has_aura,
+              then: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}]}]}
+
+# THE SAME OVERHAUL'S THIRTEEN ROWS THAT NEEDED ENGINE HOOKS. Same source and
+# same terms; the hooks are built now, in both engines, and which hook each row
+# spends is in docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_mc_diona_icy_paws, name: "Diona — Icy Paws (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
+   cost: 1, type: skill,
+   description: "Gain 6 [gold]Block[/gold]. When this [gold]Block[/gold] absorbs damage, apply [gold]Cryo[/gold] to the attacker.",
+   effects: [{op: block, amount: 6},
+             {op: apply_power, power: mc_icy_paws, amount: 6, target: self}]}
+
+- {id: proto_mc_noelle_sweeping_time, name: "Noelle — Sweeping Time", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: geo,
+   cost: 2, type: attack,
+   description: "Deal damage equal to your [gold]Block[/gold] to ALL enemies.",
+   effects: [{op: damage, target: all_enemies, applies_element: true,
+              amount_formula: {base: 0, per: 1, count: player_block}}]}
+
+- {id: proto_mc_barbara_melody_loop, name: "Barbara — Melody Loop", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: hydro,
+   cost: 1, type: skill, exhaust: true,
+   description: "Gain 4 [gold]Block[/gold]. For 3 turns, at the start of your turn apply [gold]Hydro[/gold] to target enemy.",
+   effects: [{op: block, amount: 4},
+             {op: apply_power, power: mc_melody_loop, amount: 3, target: enemy}]}
+
+- {id: proto_mc_bennett_passion_overload, name: "Bennett — Passion Overload (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: pyro,
+   cost: 0, type: skill,
+   description: "Your next [gold]Attack[/gold] this turn deals 4 more damage and applies [gold]Pyro[/gold].",
+   effects: [{op: apply_power, power: mc_passion_overload, amount: 4, target: self}]}
+
+- {id: proto_mc_dahlia_sacramental_shower, name: "Dahlia — Sacramental Shower (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
+   cost: 1, type: skill,
+   description: "Place a [gold]Shower[/gold]: the next time an enemy attacks you, deal 9 [gold]Hydro[/gold] damage to it first.",
+   effects: [{op: apply_power, power: mc_sacramental_shower, amount: 1, target: self}]}
+
+- {id: proto_mc_dahlia_favonian_favor, name: "Dahlia — Favonian Favor (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: hydro,
+   cost: 1, type: skill,
+   description: "Gain 7 [gold]Block[/gold]. Whenever a reaction happens this turn, gain 3 [gold]Block[/gold].",
+   effects: [{op: block, amount: 7},
+             {op: apply_power, power: mc_favonian_favor, amount: 3, target: self}]}
+
+- {id: proto_mc_durin_binary_form, name: "Durin — Binary Form", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
+   cost: 2, type: power,
+   description: "Deal 10 damage to ALL enemies, then choose one for the fight. [gold]White[/gold]: enemies take 50% more damage from reactions. [gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage.",
+   effects: [{op: damage, amount: 10, target: all_enemies, applies_element: true},
+             {op: choose_one, modes: [
+              {label: "[gold]White[/gold]: enemies take 50% more damage from reactions",
+               effects: [{op: apply_power, power: mc_binary_white, amount: 1, target: self}]},
+              {label: "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage",
+               effects: [{op: apply_power, power: mc_binary_dark, amount: 8, target: self}]}]}]}
+
+- {id: proto_mc_razor_claw_and_thunder, name: "Razor — Claw and Thunder", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
+   cost: 1, type: attack,
+   description: "Deal 8 damage. If this is the third [gold]Attack[/gold] you played this turn, gain 1 [gold]Energy[/gold].",
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
+             {op: conditional, if: nth_attack_this_turn_3,
+              then: [{op: energy, amount: 1}]}]}
+
+- {id: proto_mc_razor_lightning_fang, name: "Razor — Lightning Fang", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
+   cost: 1, type: skill, exhaust: true,
+   description: "For 2 turns, your [gold]Attacks[/gold] apply [gold]Electro[/gold] and deal 3 more damage.",
+   effects: [{op: apply_power, power: mc_lightning_fang, amount: 2, target: self}]}
+
+- {id: proto_mc_varka_sturm_und_drang, name: "Varka — Sturm und Drang", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
+   cost: 2, type: power,
+   description: "Whenever a [gold]Swirl[/gold] happens, your next [gold]Attack[/gold] deals 6 more damage of the swirled element.",
+   effects: [{op: apply_power, power: mc_sturm_und_drang, amount: 6, target: self}]}
+
+- {id: proto_mc_amber_explosive_puppet, name: "Amber — Explosive Puppet", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: pyro,
+   cost: 1, type: skill,
+   description: "Place [gold]Baron Bunny[/gold]: the next time an enemy attacks you, take 3 less damage and deal 8 [gold]Pyro[/gold] damage to ALL enemies.",
+   effects: [{op: apply_power, power: mc_baron_bunny, amount: 1, target: self}]}
+
+- {id: proto_mc_eula_glacial_illumination, name: "Eula — Glacial Illumination", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: cryo,
+   cost: 1, type: skill, exhaust: true,
+   description: "Place a [gold]Lightfall Sword[/gold] on target enemy: for 2 turns it counts your [gold]Attacks[/gold]; then it deals 8 damage plus 5 per [gold]Attack[/gold] counted.",
+   effects: [{op: apply_power, power: mc_lightfall_sword, amount: 2, target: enemy}]}
+
+- {id: proto_mc_mika_starfrost_swirl, name: "Mika — Starfrost Swirl", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
+   cost: 1, type: attack,
+   description: "Deal 5 damage to ALL enemies. Your next [gold]Attack[/gold] costs 1 less.",
+   effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
+             {op: apply_power, power: mc_starfrost_discount, amount: 1, target: self}]}
+
+# THE KOKOMI OVERHAUL, SLICE ONE. Reachable rows, not staged ones: under
+# `C.KOKOMI_OVERHAUL` these ARE her starter and her whole pool. Why each row
+# reads as it does: docs/notes/prototype-surface-provenance.md.
+
+# --- the starter, ten cards, five ids (packet sec.3) ---
+
+- {id: proto_kk_waters_edge, name: "Water's Edge (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: basic,
+   description: "Deal 6 damage.",
+   effects: [{op: damage, amount: 6, target: enemy}]}
+
+- {id: proto_kk_coral_guard, name: "Coral Guard (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: basic,
+   description: "Gain 5 Block.",
+   effects: [{op: block, amount: 5}]}
+
+- {id: proto_kk_kurages_oath, name: "Kurage's Oath (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: basic,
+   description: "[gold]Exert[/gold] 2. [gold]Tide[/gold] +5.",
+   effects: [{op: exert, amount: 2},
+             {op: gain_tide, amount: 5}]}
+
+- {id: proto_kk_rising_tide, name: "Rising Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: basic,
+   description: "Deal 4 damage. [gold]Surge[/gold].",
+   effects: [{op: damage, amount: 4, target: enemy},
+             {op: surge, target: enemy}]}
+
+- {id: proto_kk_stolen_chapter, name: "Stolen Chapter (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: basic,
+   description: "Draw 1 card. [gold]Plan[/gold]: draw 1 card.",
+   effects: [{op: draw, amount: 1},
+             {op: plan, then: [{op: draw, amount: 1}]}]}
+
+# --- Priestess: feed, hold, surge (packet sec.4) ---
+
+- {id: proto_kk_tidal_prayer, name: "Tidal Prayer", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "[gold]Exert[/gold] 1. [gold]Tide[/gold] +4. Draw 1 card.",
+   effects: [{op: exert, amount: 1},
+             {op: gain_tide, amount: 4},
+             {op: draw, amount: 1}]}
+
+- {id: proto_kk_sea_spray, name: "Sea Spray", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 5 damage. [gold]Tide[/gold] +2.",
+   effects: [{op: damage, amount: 5, target: enemy},
+             {op: gain_tide, amount: 2}]}
+
+- {id: proto_kk_deep_current, name: "Deep Current", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 4 damage to every enemy. [gold]Tide[/gold] +1 per enemy hit.",
+   effects: [{op: damage, amount: 4, target: all_enemies},
+             {op: gain_tide, amount: 1, per: enemies_hit}]}
+
+- {id: proto_kk_breaker, name: "Breaker", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: common,
+   description: "[gold]Surge[/gold], then deal 8 damage.",
+   effects: [{op: surge, target: enemy},
+             {op: damage, amount: 8, target: enemy}]}
+
+- {id: proto_kk_high_tide, name: "High Tide (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "[gold]Exert[/gold] 3. [gold]Tide[/gold] +10.",
+   effects: [{op: exert, amount: 3},
+             {op: gain_tide, amount: 10}]}
+
+- {id: proto_kk_undertow, name: "Undertow (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "[gold]Surge[/gold]. Gain Block equal to half the damage dealt.",
+   effects: [{op: surge, target: enemy},
+             {op: block_half_surge}]}
+
+- {id: proto_kk_song_of_pearls, name: "Song of Pearls (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "The pulse [gold]Mends[/gold] 3, and its budget is 12.",
+   effects: [{op: apply_power, power: kk_song_of_pearls, amount: 1, target: self}]}
+
+- {id: proto_kk_nereids_ascension, name: "Nereid's Ascension (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Exhaust. Wear the [gold]Garment[/gold] for 2 turns.",
+   effects: [{op: apply_power, power: kk_garment, amount: 2, target: self}]}
+
+- {id: proto_kk_sango_isshin, name: "Sango Isshin (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "[gold]Mend[/gold] that would go past your entry HP becomes Hydro damage to a random enemy.",
+   effects: [{op: apply_power, power: kk_sango_isshin, amount: 1, target: self}]}
+
+# --- Strategist: the plan was written last turn (packet sec.4) ---
+
+- {id: proto_kk_battle_plan, name: "Battle Plan", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "[gold]Plan[/gold]: gain 2 [gold]Energy[/gold].",
+   effects: [{op: plan, then: [{op: energy, amount: 2}]}]}
+
+- {id: proto_kk_ambush, name: "Ambush", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "[gold]Plan[/gold]: deal 10 damage to a random enemy.",
+   effects: [{op: plan, then: [{op: damage, amount: 10, target: random_enemy}]}]}
+
+- {id: proto_kk_read_the_field, name: "Read the Field", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 3 Block. [gold]Plan[/gold]: gain 4 Block.",
+   effects: [{op: block, amount: 3},
+             {op: plan, then: [{op: block, amount: 4}]}]}
+
+- {id: proto_kk_feint, name: "Feint", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 4 damage. [gold]Plan[/gold]: deal 8 damage to the same enemy.",
+   effects: [{op: damage, amount: 4, target: enemy},
+             {op: plan, then: [{op: damage, amount: 8, target: enemy}]}]}
+
+- {id: proto_kk_contingency, name: "Contingency", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Exhaust. [gold]Plan[/gold]: [gold]Mend[/gold] 6.",
+   effects: [{op: plan, then: [{op: mend, amount: 6}]}]}
+
+- {id: proto_kk_treatise, name: "Treatise", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever a [gold]Plan[/gold] resolves, draw 1 card.",
+   effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}]}
+
+- {id: proto_kk_war_council, name: "War Council", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "[gold]Exert[/gold] 2. [gold]Plan[/gold]: play the top 2 cards of your draw pile for free.",
+   effects: [{op: exert, amount: 2},
+             {op: plan, then: [{op: play_top_of_draw, amount: 2}]}]}
+
+- {id: proto_kk_the_art_of_war, name: "The Art of War", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "[gold]Plans[/gold] also happen now.",
+   effects: [{op: apply_power, power: kk_art_of_war, amount: 1, target: self}]}
+
+# --- Commander: Gorou, go (packet sec.4) ---
+
+- {id: proto_kk_rally, name: "Rally", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Draw a [gold]Companion[/gold] card from your draw pile. [gold]Tide[/gold] +2.",
+   effects: [{op: draw_companion_from_draw},
+             {op: gain_tide, amount: 2}]}
+
+- {id: proto_kk_vanguard, name: "Vanguard", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "[gold]Exert[/gold] 1. The next [gold]Companion[/gold] you play this turn costs 0.",
+   effects: [{op: exert, amount: 1},
+             {op: next_companion_free}]}
+
+- {id: proto_kk_orders, name: "Orders", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you play a [gold]Companion[/gold], [gold]Tide[/gold] +2.",
+   effects: [{op: apply_power, power: kk_orders, amount: 2, target: self}]}
+
+- {id: proto_kk_the_generals_banner, name: "The General's Banner", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "The first [gold]Companion[/gold] you play each turn is played twice.",
+   effects: [{op: apply_power, power: kk_generals_banner, amount: 1, target: self}]}
+
+# --- currencies and defence (packet sec.4) ---
+
+- {id: proto_kk_quiet_study, name: "Quiet Study", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 4 Block. [gold]Tide[/gold] +2.",
+   effects: [{op: block, amount: 4},
+             {op: gain_tide, amount: 2}]}
+
+- {id: proto_kk_salt_line, name: "Salt Line (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common, exhaust: true,
+   description: "Exhaust. Gain 7 Block.",
+   effects: [{op: block, amount: 7}]}
+
+- {id: proto_kk_cleansing_tide, name: "Cleansing Tide (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Exhaust. [gold]Mend[/gold] 6.",
+   effects: [{op: mend, amount: 6}]}
+
+- {id: proto_kk_the_clouds_like_waves, name: "The Clouds Like Waves", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "While you are under half HP, the pulse [gold]Mends[/gold] 4.",
+   effects: [{op: apply_power, power: kk_clouds_like_waves, amount: 4, target: self}]}
+
+- {id: proto_kk_reading_the_tide, name: "Reading the Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Draw 1 card per 5 [gold]Tide[/gold].",
+   effects: [{op: draw_per_tide, amount: 1, per: 5}]}
+
+- {id: proto_kk_coral_bulwark, name: "Coral Bulwark", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: skill, rarity: uncommon,
+   description: "Gain 6 Block. [gold]Tide[/gold] +6.",
+   effects: [{op: block, amount: 6},
+             {op: gain_tide, amount: 6}]}
+
+- {id: proto_kk_watatsumis_blessing, name: "Watatsumi's Blessing", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: skill, rarity: rare, exhaust: true,
+   description: "Exhaust. [gold]Mend[/gold] 12. [gold]Tide[/gold] +6.",
+   effects: [{op: mend, amount: 12},
+             {op: gain_tide, amount: 6}]}
+
+# THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
+# under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.
+# Source, readings and hooks: docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_mi_gorou_inuzaka, name: "Gorou — Inuzaka All-Round Defense (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: applier, element: geo,
+   cost: 1, type: attack,
+   description: "Deal 8 damage. Gain [gold]Block[/gold] equal to half the damage dealt.",
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
+             {op: block_half_damage}]}
+
+- {id: proto_mi_gorou_war_banner, name: "Gorou — General's War Banner (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: buffer, element: geo,
+   cost: 1, type: skill,
+   description: "Gain 2 [gold]Dexterity[/gold] for 2 turns.",
+   effects: [{op: apply_power, power: dexterity, amount: 2, target: self},
+             {op: apply_power, power: mi_war_banner, amount: 2, target: self}]}
+
+- {id: proto_mi_gorou_juuga, name: "Gorou — Juuga: Forward Unto Victory", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
+   cost: 1, type: skill, exhaust: true,
+   description: "For 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy.",
+   effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}]}
+
+- {id: proto_mi_sayu_fuuin_dash, name: "Sayu — Yoohoo Art: Fuuin Dash (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
+   cost: 1, type: attack,
+   description: "Deal 8 damage to a random enemy. [gold]Swirl[/gold].",
+   effects: [{op: damage, amount: 8, target: random_enemy, applies_element: true}]}
+
+- {id: proto_mi_sayu_daruma, name: "Sayu — Muji-Muji Daruma (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
+   cost: 1, type: skill, exhaust: true,
+   description: "Summon the [gold]Daruma[/gold]: for 2 turns, at the end of your turn, if you are above 70% HP deal 6 damage to a random enemy; otherwise gain 6 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: mi_daruma, amount: 2, target: self}]}
+
+- {id: proto_mi_sayu_naptime, name: "Sayu — Naptime (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: buffer, element: anemo,
+   cost: 0, type: skill,
+   description: "Gain 4 [gold]Block[/gold]. At the start of your next turn, draw 2 if you played no [gold]Attacks[/gold] this turn.",
+   effects: [{op: block, amount: 4},
+             {op: apply_power, power: mi_naptime, amount: 2, target: self}]}
+
+- {id: proto_mi_shinobu_sanctifying_ring, name: "Shinobu — Sanctifying Ring (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: electro,
+   cost: 1, type: skill, exhaust: true,
+   description: "Lose 3 HP. For 3 turns, at the end of your turn deal 5 [gold]Electro[/gold] damage to ALL enemies and gain 5 [gold]Block[/gold].",
+   effects: [{op: damage, amount: 3, target: self},
+             {op: apply_power, power: mi_sanctifying_ring, amount: 3, target: self}]}
+
+- {id: proto_mi_shinobu_grass_ring, name: "Shinobu — Grass Ring of Sanctification (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: buffer, element: electro,
+   cost: 0, type: skill,
+   description: "Gain 4 [gold]Block[/gold]. If you lost HP this turn, gain 4 more.",
+   effects: [{op: block, amount: 4},
+             {op: conditional, if: hp_lost_this_turn,
+              then: [{op: block, amount: 4}]}]}
+
+- {id: proto_mi_shinobu_thundergrust, name: "Shinobu — Thundergrust (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro,
+   cost: 1, type: attack,
+   description: "Deal 8 damage. If you are below half HP, deal 5 more.",
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
+             {op: conditional, if: hp_pct_below_50,
+              then: [{op: damage, amount: 5, target: enemy, applies_element: true}]}]}
+
+- {id: proto_mi_thoma_blazing_barrier, name: "Thoma — Blazing Barrier (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: buffer, element: pyro,
+   cost: 1, type: skill,
+   description: "Gain 6 [gold]Block[/gold]. Whenever this [gold]Block[/gold] absorbs damage, gain 3 [gold]Block[/gold].",
+   effects: [{op: block, amount: 6},
+             {op: apply_power, power: mi_blazing_barrier, amount: 6, target: self}]}
+
+- {id: proto_mi_thoma_crimson_ooyoroi, name: "Thoma — Crimson Ooyoroi (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: pyro,
+   cost: 1, type: skill, exhaust: true,
+   description: "For 2 turns, whenever you play an [gold]Attack[/gold], deal 5 [gold]Pyro[/gold] damage to a random enemy and gain 3 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: mi_crimson_ooyoroi, amount: 2, target: self}]}
+
+- {id: proto_mi_sara_crowfeather_cover, name: "Kujou Sara — Crowfeather Cover (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: buffer, element: electro,
+   cost: 0, type: skill,
+   description: "Your next [gold]Attack[/gold] this turn deals 4 more damage and applies [gold]Electro[/gold].",
+   effects: [{op: apply_power, power: mi_crowfeather, amount: 4, target: self}]}
+
+- {id: proto_mi_sara_tengu_stormcall, name: "Kujou Sara — Tengu Stormcall (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: electro,
+   cost: 1, type: attack,
+   description: "Deal 5 damage. Next turn, your [gold]Attacks[/gold] deal 5 more damage.",
+   effects: [{op: damage, amount: 5, target: enemy, applies_element: true},
+             {op: apply_power, power: mi_stormcall, amount: 1, target: self}]}
+
+- {id: proto_mi_itto_superlative_superstrength, name: "Itto — Superlative Superstrength (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo,
+   cost: 2, type: attack,
+   description: "Deal 14 damage. Gain 12 [gold]Block[/gold].",
+   effects: [{op: damage, amount: 14, target: enemy, applies_element: true},
+             {op: block, amount: 12}]}
+
+- {id: proto_mi_raiden_musou_no_hitotachi, name: "Raiden Shogun — Musou no Hitotachi (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: applier, element: electro,
+   cost: 3, type: attack,
+   description: "Deal 20 damage. Deals 5 more for each [gold]Companion[/gold] card you played this combat.",
+   effects: [{op: damage, target: enemy, applies_element: true,
+              amount_formula: {base: 20, per: 5, count: companions_played_this_combat}}]}
+
+- {id: proto_mi_kazuha_slash, name: "Kaedehara Kazuha — Kazuha Slash", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: anemo,
+   cost: 1, type: attack, exhaust: true,
+   description: "Deal 10 damage to ALL enemies. [gold]Swirl[/gold] each.",
+   effects: [{op: damage, amount: 10, target: all_enemies, applies_element: true}]}
+
+- {id: proto_mi_yae_sesshou_sakura, name: "Yae Miko — Sesshou Sakura", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: electro,
+   cost: 1, type: skill,
+   description: "Place a [gold]Sakura[/gold]: at the end of your turn it deals 4 [gold]Electro[/gold] damage plus your [gold]Strength[/gold] to a random enemy. Each [gold]Sakura[/gold] you place while one is out deals 3 more. Up to 3.",
+   effects: [{op: apply_power, power: mi_sesshou_sakura, amount: 1, target: self}]}
+
+- {id: proto_mi_yoimiya_aurous_blaze, name: "Yoimiya — Aurous Blaze", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: pyro,
+   cost: 1, type: skill, exhaust: true,
+   description: "Mark an enemy for 2 turns. Whenever it takes damage from a card that is not an [gold]Attack[/gold], deal 6 [gold]Pyro[/gold] damage to ALL enemies.",
+   effects: [{op: apply_power, power: mi_aurous_blaze, amount: 2, target: enemy}]}
+
+- {id: proto_mi_ayaka_soumetsu, name: "Kamisato Ayaka — Soumetsu", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: cryo,
+   cost: 2, type: skill, exhaust: true,
+   description: "For 2 turns, at the end of your turn deal 8 [gold]Cryo[/gold] damage to ALL enemies. Then deal 16 [gold]Cryo[/gold] damage to ALL enemies.",
+   effects: [{op: apply_power, power: mi_soumetsu, amount: 2, target: self}]}
+
+- {id: proto_mi_ayato_kyouka, name: "Kamisato Ayato — Kyouka", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: buffer, element: hydro,
+   cost: 1, type: skill, exhaust: true,
+   description: "For 2 turns, your [gold]Attacks[/gold] apply [gold]Hydro[/gold] and deal 4 more damage. When it ends, deal 12 [gold]Hydro[/gold] damage to a random enemy.",
+   effects: [{op: apply_power, power: mi_kyouka, amount: 2, target: self}]}
+
+- {id: proto_mi_heizou_heartstopper, name: "Shikanoin Heizou — Heartstopper Strike", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
+   cost: 1, type: attack,
+   description: "Deal 6 damage. Deals 4 more for each [gold]Swirl[/gold] this turn.",
+   effects: [{op: damage, target: enemy, applies_element: true,
+              amount_formula: {base: 6, per: 4, count: swirls_this_turn}}]}
+
+- {id: proto_mi_kirara_surprise_dispatch, name: "Kirara — Surprise Dispatch", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: buffer,
+   cost: 1, type: skill,
+   description: "Gain 8 [gold]Block[/gold]. Next turn, deal 10 damage to a random enemy.",
+   effects: [{op: block, amount: 8},
+             {op: apply_power, power: mi_surprise_dispatch, amount: 1, target: self}]}
+
+- {id: proto_mi_mizuki_anraku, name: "Yumemizuki Mizuki — Anraku Secret Spring Therapy", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: anemo,
+   cost: 2, type: skill, exhaust: true,
+   description: "[gold]Swirl[/gold] the aura of ALL enemies. If you are above 70% HP, deal 18 damage to ALL enemies. Otherwise, [gold]Mend[/gold] 10.",
+   effects: [{op: swirl, target: all_enemies},
+             {op: conditional, if: hp_pct_above_70,
+              then: [{op: damage, amount: 18, target: all_enemies, applies_element: true}],
+              else: [{op: mend, amount: 10}]}]}
+
+- {id: proto_mi_chiori_hasode, name: "Chiori — Fluttering Hasode", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: geo,
+   cost: 1, type: skill, exhaust: true,
+   description: "Summon [gold]Tamoto[/gold]: for 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold].",
+   effects: [{op: apply_power, power: mi_tamoto, amount: 3, target: self}]}

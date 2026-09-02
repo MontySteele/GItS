@@ -63,7 +63,45 @@ param(
     [string]$Configuration = 'Release',
     # Passed through to validate.ps1 S7, same meaning as on deploy.ps1: an
     # acknowledgement of a stale local game_ref, not a fix.
-    [switch]$AllowIncompleteGameRef
+    [switch]$AllowIncompleteGameRef,
+    # THE KLEE OVERHAUL ARM (the ruled brief klee-brief-2026-09-01.md sec.3,
+    # slice one klee-overhaul-slice-1-2026-09-01.md). Adds -p:KleeOverhaul=true
+    # to the build below, which is the ONLY thing that turns the arm on:
+    # without it a dev build compiles the arm's types and never reaches them,
+    # and Klee's starter and pool are the Sparks arm's exactly as before. Sim
+    # twin: C.KLEE_OVERHAUL, which ships False.
+    #
+    # A SWITCH HERE AND NOWHERE ELSE, the same arrangement the prototype
+    # property has: the release scripts must not be able to name it, and this
+    # is the one file the release path never calls.
+    [switch]$KleeOverhaul,
+    # THE MONDSTADT COMPANION OVERHAUL ARM (the approved workshop
+    # companion-workshop-mondstadt-2026-09-01.md sec.3). Adds
+    # -p:CompanionOverhaul=true to the build below, which is the ONLY thing
+    # that turns the arm on: without it a dev build compiles the arm's types
+    # and never reaches them, and the companion reward slot offers the
+    # seventeen shipped Mondstadt rows exactly as before. Sim twin:
+    # C.COMPANION_OVERHAUL, which ships False.
+    #
+    # INDEPENDENT OF -KleeOverhaul, and the two are meant to be passed
+    # together: that arm replaces Klee's starter and pool, this one replaces
+    # Mondstadt's companion pool, and the two sets do not intersect. A dev
+    # build that carries both is the supported dev build.
+    [switch]$CompanionOverhaul,
+    # THE KOKOMI OVERHAUL ARM (the ruled brief kokomi-brief-2026-09-01.md
+    # sec.4, slice one kokomi-overhaul-slice-1-2026-09-01.md). Adds
+    # -p:KokomiOverhaul=true to the build below, which is the ONLY thing that
+    # turns the arm on: without it a dev build compiles the arm's types and
+    # never reaches them, and Kokomi's starter, starting relic and pool are the
+    # shipped ones exactly as before. Sim twin: C.KOKOMI_OVERHAUL, which ships
+    # False.
+    #
+    # INDEPENDENT OF THE OTHER TWO, and all three are meant to be passed
+    # together: the Klee arm replaces Klee's starter and pool, the companion
+    # arm replaces Mondstadt's companion pool, this one replaces Kokomi's
+    # starter, relic and pool, and the three sets do not intersect. A dev build
+    # that carries all three is the supported dev build.
+    [switch]$KokomiOverhaul
 )
 
 $ErrorActionPreference = 'Stop'
@@ -135,8 +173,17 @@ if ($LASTEXITCODE -ne 0) {
 }
 $genOut | ForEach-Object { Write-Host "  $_" }
 
-Write-Host "Building ($Configuration) WITH the prototype surface..." -ForegroundColor Magenta
-& dotnet build $csproj -c $Configuration -v minimal --nologo -p:PrototypeCards=true
+$arms = @()
+if ($KleeOverhaul) { $arms += 'the Klee overhaul arm' }
+if ($CompanionOverhaul) { $arms += 'the Mondstadt companion overhaul arm' }
+if ($KokomiOverhaul) { $arms += 'the Kokomi overhaul arm' }
+$armLabel = if ($arms.Count) { ' AND ' + ($arms -join ' AND ') } else { '' }
+Write-Host "Building ($Configuration) WITH the prototype surface$armLabel..." -ForegroundColor Magenta
+$buildArgs = @('-p:PrototypeCards=true')
+if ($KleeOverhaul) { $buildArgs += '-p:KleeOverhaul=true' }
+if ($CompanionOverhaul) { $buildArgs += '-p:CompanionOverhaul=true' }
+if ($KokomiOverhaul) { $buildArgs += '-p:KokomiOverhaul=true' }
+& dotnet build $csproj -c $Configuration -v minimal --nologo @buildArgs
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
 
 $dll = Join-Path $root "KleeCode\bin\$Configuration\klee.dll"
@@ -166,7 +213,32 @@ Write-Host "  ordinary play is unchanged and no reward roll can offer one." -For
 Write-Host "  Reach a row only by id, through the understudy grant tooling." -ForegroundColor Magenta
 Write-Host "  DO NOT hand this build to a co-op partner, and run" -ForegroundColor Magenta
 Write-Host "  klee-mod\build\deploy.ps1 to put the release build back." -ForegroundColor Magenta
+if ($KleeOverhaul) {
+    Write-Host ""
+    Write-Host "*** KLEE OVERHAUL ARM ON ***" -ForegroundColor Magenta
+    Write-Host "  Klee's starter and her WHOLE reward pool are slice one's rows." -ForegroundColor Magenta
+    Write-Host "  Her shipped 79 cards cannot be offered while this build is in." -ForegroundColor Magenta
+    Write-Host "  Bombs never go off by themselves; only a Set off card pops one." -ForegroundColor Magenta
+}
+if ($CompanionOverhaul) {
+    Write-Host ""
+    Write-Host "*** MONDSTADT COMPANION OVERHAUL ARM ON ***" -ForegroundColor Magenta
+    Write-Host "  The companion reward slot offers the workshop's rewritten" -ForegroundColor Magenta
+    Write-Host "  Mondstadt Universals; the 17 shipped Mondstadt rows cannot" -ForegroundColor Magenta
+    Write-Host "  be offered. Inazuma and Fontaine are untouched." -ForegroundColor Magenta
+}
 Write-Host ""
+
+if ($KokomiOverhaul) {
+    Write-Host ""
+    Write-Host "*** KOKOMI OVERHAUL ARM ON ***" -ForegroundColor Magenta
+    Write-Host "  Kokomi's starter, her starting relic and her WHOLE reward" -ForegroundColor Magenta
+    Write-Host "  pool are slice one's rows. Her shipped 76 cards cannot be" -ForegroundColor Magenta
+    Write-Host "  offered while this build is in, and the Pearl of Wisdom is" -ForegroundColor Magenta
+    Write-Host "  replaced by Tamanooya's Casket." -ForegroundColor Magenta
+    Write-Host "  The Bake-Kurage is always out and holds Tide; nothing" -ForegroundColor Magenta
+    Write-Host "  Exhausts for Charge and the Burst gate does not fill." -ForegroundColor Magenta
+}
 
 if ($version.IsDirty) {
     Write-Host "*** DIRTY WORKING TREE ***" -ForegroundColor Red

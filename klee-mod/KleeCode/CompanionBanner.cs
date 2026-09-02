@@ -86,13 +86,20 @@ public static class CompanionBanner
     private static HashSet<string> Roll(ulong seed, Player player)
     {
         // Grouped by nation and SORTED BY ID inside each group before the
-        // draw. CompanionRoster.All has no guaranteed order, and an unsorted
-        // input would make the "deterministic" draw depend on class-scan
+        // draw. The roster has no guaranteed order, and an unsorted input
+        // would make the "deterministic" draw depend on class-scan
         // order -- deterministic per build, and silently different after any
         // edit that reorders the roster. tier05's five_star_roster sorts for
         // the same reason.
+        //
+        // CompanionPool.All, not CompanionRoster.All: the pool class is the ONE
+        // door to "which companions exist for this run" and the Mondstadt
+        // companion overhaul (QUARANTINED, R213 B) redirects it. The banner has
+        // to read the same roster the reward slot does or it would feature
+        // five-stars that cannot be offered and gate out ones that can -- the
+        // exact split R64 shipped this class to close.
         var byNation = new SortedDictionary<string, List<CardModel>>();
-        foreach (var card in CompanionRoster.All)
+        foreach (var card in CompanionPool.All)
         {
             if (card is not ICompanionCard comp) continue;
             if (comp.Star != 5) continue;

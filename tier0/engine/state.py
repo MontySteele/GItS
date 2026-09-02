@@ -185,6 +185,17 @@ class Card:
     personal_pool: Optional[str] = None
     requires: Optional[str] = None        # e.g. burst_energy_full
     nation: Optional[str] = None          # set by the loader from the sheet name
+    # THE HEXEREI FAMILY MARK -- ONE WORD, NO EFFECT (the approved Mondstadt
+    # companion workshop, sec.1 pick 2: "Hexerei is one word on a Universal.
+    # It does nothing by itself. Klee's own readers and any future Hexerei
+    # character's carry the payoff"). NOTHING in either engine reads this
+    # field today; it is carried so a later reader can see which rows the
+    # family owns without the mark having to be re-derived from a character
+    # list. A field rather than a `tags:` entry because `tags` is already read
+    # by four unrelated predicates (`is_companion`, `is_ethereal`, the sly
+    # view, the skill_tag rail) and adding an inert word to a list that four
+    # things filter is how an inert word stops being inert.
+    hexerei: bool = False
     # principles v1.9: kit, not loot. Never in the draftable pool or the
     # starting deck; granted to hand when the Burst meter first fills, and
     # returns to the kit (no pile) after play so a refill re-grants it.
@@ -595,6 +606,31 @@ class Player(Fighter):
     # deletes BOTH entries at expiry, so nothing lingers even within a combat.
     timed_power_amounts: dict[str, int] = field(default_factory=dict)
     first_hp_loss_fired: bool = False        # on_first_hp_loss_draw, per combat
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL).
+    # Nicole's Revelation asks whether you "had Block left at the end of your
+    # last turn", and that cannot be read at the START of this one: the turn
+    # tick clears Block before any start-of-turn power runs. So the answer is
+    # LATCHED at the tail of `player_turn_end_triggers` and read at the head of
+    # the next turn.
+    #
+    # A FIELD RATHER THAN A POWER STACK, on `first_hp_loss_fired`'s precedent
+    # one line up: it is a per-combat yes/no about the player, not a stack that
+    # anything applies, ticks or displays, and a fake power in `powers` would
+    # show up in every digest that counts them. False on a freshly built Player
+    # and re-zeroed in `run_fight` beside the other per-combat resources, so a
+    # reused Player cannot carry one fight's answer into the next.
+    mc_held_block_at_turn_end: bool = False
+    # THE SAME ARM'S SECOND WAVE. Varka's Sturm und Drang says "your next
+    # Attack deals 6 more damage OF THE SWIRLED ELEMENT", so the charge it
+    # banks carries TWO numbers -- how much, and which element. The AMOUNT is
+    # an ordinary power stack (`mc_swirl_charge`, so a second Swirl adds to it
+    # exactly the way every other stack does); the ELEMENT has no stack to
+    # live in, so it is latched here, on `mc_held_block_at_turn_end`'s own
+    # precedent one line up. Overwritten by the LATEST Swirl, which is what
+    # "the swirled element" names on a card that has just watched one happen.
+    # Empty string means no charge is banked; the amount is the authority and
+    # this is only read while it is non-zero.
+    mc_swirl_element: str = ""
     relic_conditional_applied: dict[str, int] = field(default_factory=dict)
     #                                        # conditional_power (Red Skull):
     #                                        # key -> delta currently applied,
@@ -728,6 +764,16 @@ class Enemy(Fighter):
     # lands after the enemy has already acted is spent by that same side-end.
     frozen: int = 0
     frozen_by_companion: bool = False   # control_uptime provenance (§2.2a)
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL).
+    # Eula's Lightfall Sword is PLACED ON A TARGET and "for 2 turns it counts
+    # your Attacks". The turns live in the ordinary power stack
+    # (`powers['mc_lightfall_sword']`, ticked like every other duration); the
+    # TALLY has no stack to live in, so it is a field on the body carrying the
+    # blade -- `Player.mc_held_block_at_turn_end`'s precedent, on the other
+    # side of the board. A second power id would have shown up as a power in
+    # every digest that counts them, which a counter inside another power is
+    # not. Zero on a fresh Enemy, and an Enemy is built per fight.
+    mc_lightfall_tally: int = 0
     # Base-game parity: ShouldOwnerDeathTriggerFatal. The game gates Fatal
     # effects (Feed) on the target's powers all agreeing the death counts --
     # summoned adds do not. Defaults True; the summon intent in
@@ -889,6 +935,14 @@ class CombatState:
     detonations_total: int = 0            # The Big One formula
     reactions_this_card: int = 0          # reaction_triggered_by_this
     reactions_this_turn: int = 0          # reaction_triggered_this_turn
+    # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL). The
+    # SWIRLS this player turn, which is the count Heizou's Heartstopper Strike
+    # prints ("deals 4 more for each Swirl this turn"). A second counter beside
+    # `reactions_this_turn` rather than a filter over it, because that one is a
+    # bare integer with no reaction names in it; written at the one site each
+    # engine resolves a reaction, inside the arm's flag branch, and cleared
+    # with the reaction window at the top of the player turn.
+    mi_swirls_this_turn: int = 0
     encore_spend_draws_this_turn: int = 0  # encore_spend_draw once-per-turn
     #                                        latch (Curtain Call, R85)
     # INSTRUMENT ONLY (EB-78 (2); resources.note_charge_read writes it and
@@ -976,6 +1030,31 @@ class CombatState:
     card_aim: Optional[Enemy] = None
     card_aim_bound: bool = False
     current_card_cost: int = 0            # this_cost_zero
+    # THE MONDSTADT COMPANION OVERHAUL'S ELEMENT OVERRIDE (QUARANTINED,
+    # C.COMPANION_OVERHAUL). Which element THIS Attack applies, when a rewritten
+    # companion power has changed the answer -- "" while none has, which is
+    # every board in every release build. Snapshotted once per play beside
+    # `current_attack_bonus` and read by `_element_for`, for the reason that
+    # bonus is snapshotted: the riders that set it are CONSUMED by the play, so
+    # a per-hit re-read would apply the element to the first hit of a multi-hit
+    # Attack and nothing else. Saved and restored across a free play with the
+    # rest of the per-card context (`combat._FREE_PLAY_CONTEXT`).
+    mc_attack_element_override: str = ""
+    # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL). Damage
+    # this CARD PLAY has actually put on enemy HP, which is what Gorou's Inuzaka
+    # All-Round Defense reads: "Gain Block equal to half the damage dealt". A
+    # per-play counter beside `block_gained_this_card` above and saved with it
+    # across a free play, for the same reason -- an auto-play in the middle of
+    # an outer card would otherwise leave its number behind for the outer card
+    # to bank. Written only inside a flag branch (`deal_damage_to_enemy`).
+    mi_damage_dealt_this_card: int = 0
+    # THE MEND CEILING (QUARANTINED, C.COMPANION_OVERHAUL). The HP the player
+    # walked into this fight with, which is the Kokomi brief's one rule for the
+    # keyword and therefore the bound on Mizuki's Universal in ANYONE's hands.
+    # Per COMBAT, so it lives here and not on Player, which survives the fight.
+    # Zero means "not captured yet"; `effects.companion_overhaul_entry_hp` is
+    # the one reader and captures on first ask.
+    mi_entry_hp: int = 0
     current_x: int = 0                    # X-cost cards
     sparks_at_play: int = 0               # bank BEFORE this card's own spark
                                           # spend (Gleeful Barrage; R39)

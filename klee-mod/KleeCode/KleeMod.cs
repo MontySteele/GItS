@@ -64,6 +64,29 @@ public static class KleeMod
                     // board no longer each override BeforeSideTurnEnd. This
                     // one listener drives them in the sim's fixed order.
                     .Concat(Powers.TurnEndSequencer.Subscribe(combatState))
+#if PROTOTYPE_CARDS
+                    // QUARANTINED (R213 B). The Mondstadt companion overhaul's
+                    // own end-of-turn tenant, on the same argument one line up:
+                    // six of its powers fire at the end of the player's turn,
+                    // four of the six put an element on the board and five draw
+                    // from Rng.CombatTargets, so they get ONE listener in a
+                    // fixed order. Not compiled at all in a release build, and
+                    // inert with the arm off -- the powers it drives can only
+                    // reach a creature that played an overhaul card, and with
+                    // the arm off no such card is offerable.
+                    .Concat(Powers.CompanionOverhaulTurnEnd.Subscribe(combatState))
+                    // The same arm's SECOND WAVE, on the same argument again.
+                    // Three of its powers answer an enemy's hit and two of the
+                    // three can kill the attacker and put an element on the
+                    // board, so they get ONE listener in a fixed order. The
+                    // play watcher counts Attacks for two cards that can be in
+                    // a deck while no power of this arm is on anybody -- one of
+                    // them lives on the ENEMY -- which is why it cannot be a
+                    // power. Both are inert on a board carrying none of the
+                    // arm's rows, which is every board with the arm off.
+                    .Concat(Powers.CompanionOverhaulIncomingHit.Subscribe(combatState))
+                    .Concat(Powers.CompanionOverhaulPlayWatcher.Subscribe(combatState))
+#endif
                     // Track B's human feed: per-fight telemetry from normal
                     // play, in the schema the soak writes. Reads only -- see
                     // the three rules in PlayTelemetry.cs, the first of which
@@ -124,6 +147,17 @@ public static class KleeMod
                     Powers.RecallFromDiscard.PromptText,
                 [Powers.RecallFromExhaust.PromptKey] =
                     Powers.RecallFromExhaust.PromptText,
+#if PROTOTYPE_CARDS
+                // QUARANTINED (the Kokomi overhaul, slice one). Rally's
+                // pile-selection screen, on exactly the terms the three rows
+                // above have: a LocString is a table plus a key with no
+                // raw-text constructor, so the copy can only reach the screen
+                // as a row, and this dictionary is its only source. Inside the
+                // compile switch because the verb it names does not exist in a
+                // release build.
+                [Powers.KokomiOverhaulKit.CompanionSearchPromptKey] =
+                    Powers.KokomiOverhaulKit.CompanionSearchPromptText,
+#endif
             });
 
             // Runtime copy of the custom-keyword loc. The pck carries the

@@ -703,6 +703,18 @@ def test_no_doc_reasserts_the_refuted_pre_draw_order():
 
 CO_TENANCY_LEDGER = {
     "BeforeSideTurnStart": {
+        ("Powers/Prototype/ProtoBombPower.cs", "ProtoBombPower"):
+            "QUARANTINED (the Klee overhaul, C.KLEE_OVERHAUL). Enemy-attached, "
+            "and it GROWS rather than detonating -- rule 7 of the ruled brief "
+            "is that nothing fires by itself, so this tenant deals no damage "
+            "and applies no element. THE ORDERING QUESTION, answered: the "
+            "resource it writes is its own charge list, which no co-tenant of "
+            "this broadcast reads or writes; the shipped BombPower beside it "
+            "owns a DIFFERENT power and under the arm no card places one. The "
+            "corpse sweep it runs first can PLACE a charge (rule 3's jump), "
+            "and that is likewise private to this power. No sim twin orders "
+            "it, because slice one is C# first and tier0 refuses the arm's "
+            "ops",
         ("Powers/BombPower.cs", "BombPower"):
             "turn-start detonation of last turn's bombs (enemy-attached; "
             "sim: combat.py detonate_bombs)",
@@ -759,9 +771,95 @@ CO_TENANCY_LEDGER = {
             "the broadcast",
     },
     "AfterPlayerTurnStart": {
+        ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
+            "QUARANTINED (the Kokomi overhaul, C.KOKOMI_OVERHAUL). RULE 8's "
+            "resolution point: the Plans she wrote last turn happen here, in "
+            "the order she wrote them. THE ORDERING QUESTION, answered: the "
+            "queue is per seat and this power is its only reader, so no "
+            "co-tenant of this broadcast can see or move it; what a resolved "
+            "Plan then WRITES is Block, Energy, cards drawn, HP or one Hydro "
+            "hit, and the only co-tenant that shares any of those is the "
+            "shipped `KokomiResourceHooks` beside it -- whose whole body under "
+            "this arm is switched off (the exhaust funnel, the memory fire and "
+            "the kit grant all read the flag), so it writes nothing at all. "
+            "WHY THIS BROADCAST and not the pre-draw one the slice packet's "
+            "sec.5 names: there is no broadcast between the ENERGY RESET and "
+            "the HAND DRAW (see TURN_START_BROADCAST_ORDER above), so a Plan "
+            "resolved before the draw is a Plan resolved before the block "
+            "clear and the energy reset, and Read the Field's Block and Battle "
+            "Plan's Energy would both be wiped by the setup that follows them. "
+            "The brief's own script C requires the later hook -- its turn 2 "
+            "opens on FIVE energy, which is three plus the Plan's two. The "
+            "reading is recorded in full on the method",
+        ("Powers/Prototype/KleeOverhaulPowers.cs", "GroundedPower"):
+            "QUARANTINED (the Klee overhaul). Raw per-turn Block mint on a "
+            "condition, the same shape as MetallicizePower below. THE "
+            "ORDERING QUESTION, answered: it READS the overhaul ledger's "
+            "last-turn explosion count and WRITES only Block. Nothing else "
+            "in the mod writes that ledger outside a card play or an "
+            "explosion, both of which are strictly later than this broadcast, "
+            "so no co-tenant can move the number it reads",
         ("Powers/CompanionPowers.cs", "CelestialGiftPower"):
             "per-turn Strength + Block mint; its body notes the sim's "
             "Strength-then-Block order is bookkeeping, not a dependency",
+        ("Powers/Prototype/CompanionOverhaulPowers.cs", "SignatureMixPower"):
+            "QUARANTINED (the Mondstadt companion overhaul). Raw per-turn "
+            "Block mint plus its own duration tick, the same shape as "
+            "MetallicizePower below. THE ORDERING QUESTION, answered: it "
+            "reads nothing and writes only Block, so no co-tenant can move an "
+            "input it does not have",
+        ("Powers/Prototype/CompanionOverhaulPowers.cs", "RevelationPower"):
+            "QUARANTINED (the Mondstadt companion overhaul). Per-turn Block "
+            "plus conditional Strength. THE ORDERING QUESTION, answered: the "
+            "condition is a LATCH written at the PREVIOUS turn's end (see "
+            "CompanionOverhaulTurnEnd) and never read live, so no co-tenant "
+            "of this broadcast can change the answer -- which is exactly why "
+            "the latch exists instead of a live Block read",
+        ("Powers/Prototype/CompanionOverhaulPowers.cs", "StellarisOmenPower"):
+            "QUARANTINED (the Mondstadt companion overhaul). Applies "
+            "Vulnerable to every enemy, then removes itself. THE ORDERING "
+            "QUESTION, answered: it writes an ENEMY debuff and reads nothing, "
+            "and no co-tenant of this broadcast deals damage -- every volley "
+            "that would care about a Vulnerable fires at turn END, a "
+            "broadcast away",
+        ("Powers/Prototype/CompanionOverhaulHooks.cs", "MelodyLoopPower"):
+            "QUARANTINED (the Mondstadt companion overhaul, second wave). "
+            "Applies Hydro to the ENEMY it is hosted on, then ticks its own "
+            "duration. THE ORDERING QUESTION, answered: it touches only its "
+            "own host and reads nothing, and the three overhaul co-tenants "
+            "one block up write the player's Block, the player's Strength and "
+            "an enemy debuff -- none of which an aura landing on one enemy "
+            "can change, and none of which changes what aura this power puts "
+            "up. Two Melody Loops are on two different enemies by "
+            "construction, because the card places the power on the body it "
+            "targeted",
+        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "NaptimePower"):
+            "QUARANTINED (the Inazuma companion overhaul). Draws its promised "
+            "cards and removes itself. THE ORDERING QUESTION, answered: it "
+            "reads nothing this broadcast can move -- the condition it depends "
+            "on (did an Attack get played last turn) was settled at the "
+            "PREVIOUS turn's end, where the power deletes itself if it was "
+            "broken -- and drawing cards changes no input any co-tenant here "
+            "has",
+        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "TenguStormcallPower"):
+            "QUARANTINED (the Inazuma companion overhaul). Pays its promise "
+            "into the shipped AttackUpThisTurnPower and removes itself. THE "
+            "ORDERING QUESTION, answered: nothing in this broadcast reads an "
+            "attack rider -- every volley that could is at turn END, a "
+            "broadcast away -- and it reads nothing itself",
+        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "SurpriseDispatchPower"):
+            "QUARANTINED (the Inazuma companion overhaul). One unelemented "
+            "hit at a random enemy, then it removes itself. THE ORDERING "
+            "QUESTION, answered, and it is the only one of the four Inazuma "
+            "start-of-turn readers that needs more than a sentence: it DEALS "
+            "DAMAGE, so it can kill a body another tenant would have touched, "
+            "and it draws from Rng.CombatTargets. It carries NO element (the "
+            "card names none), so it can neither consume an aura nor create "
+            "one and cannot change which reaction any co-tenant fires; the "
+            "only co-tenant that touches an enemy at all is MelodyLoopPower, "
+            "whose Hydro lands on its own host and pays nothing that a dead "
+            "host would have paid. The rng draw is the residual, and it is "
+            "the same residual the shipped per-turn bomb mint already has",
         ("Powers/CompanionPowers.cs", "MetallicizePower"):
             "raw per-turn Block mint (R116)",
         ("Powers/DemolitionPowers.cs", "BombAndSparkPerTurnPower"):
@@ -812,6 +910,32 @@ CO_TENANCY_LEDGER = {
             "there is nothing here to model",
     },
     "BeforeSideTurnEnd": {
+        ("Relics/TamanooyasCasket.cs", "TamanooyasCasket"):
+            "QUARANTINED (the Kokomi overhaul; the whole class is `#if "
+            "PROTOTYPE_CARDS`). RULE 4, the pulse: on a turn she did not "
+            "Surge, the jellyfish Mends her, bounded by her entry HP and by a "
+            "per-combat budget the relic holds. THE ORDERING QUESTION, "
+            "answered: it reads the arm's own per-turn Surge latch, which only "
+            "a card play writes and every card play is strictly earlier than "
+            "this broadcast; it writes HP and the budget, and the budget is "
+            "read by nothing else. The one co-tenant that touches HP at turn "
+            "end is TurnEndSequencer, whose four ordered steps are Klee's two "
+            "volleys, Oz's, and KurageSummonPower.FirePulse -- and under this "
+            "arm no card summons a KurageSummonPower and the base kit's "
+            "install is gated off, so that step cannot fire on her. Sango "
+            "Isshin can turn the pulse's excess into a Hydro hit, which "
+            "touches the shared aura state; the same argument covers it, "
+            "because the only aura-writing co-tenants here are those same "
+            "volleys and they belong to a different character",
+        ("Powers/Prototype/KleeOverhaulPowers.cs", "EndOfTurnSetOffPower"):
+            "QUARANTINED (the Klee overhaul). Sparks 'n' Splash, the ONE "
+            "power in the slice that fires without a card saying so -- the "
+            "brief's own 'Breaks rule 7'. THE ORDERING QUESTION, answered: it "
+            "sets off one random enemy's overhaul Bombs, which is damage plus "
+            "a Spark plus the ledger's counters, and no co-tenant of this "
+            "broadcast reads any of the three. It shares the Spark bank with "
+            "nothing here (the kit-grant check reads the BURST meter) and the "
+            "overhaul Bomb pile with nothing at all",
         ("Powers/CompanionPowers.cs", "SolarIsotomaPower"):
             "duration tick-down of itself, player side",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
@@ -844,6 +968,17 @@ CO_TENANCY_LEDGER = {
             "test_the_sequencer_walks_the_table",
     },
     "AfterSideTurnEnd": {
+        ("Powers/Prototype/KokomiOverhaulPowers.cs", "ProtoGarmentPower"):
+            "QUARANTINED (the Kokomi overhaul). Duration tick-down of itself, "
+            "player side -- the same shape and the same broadcast as the "
+            "shipped CeremonialGarmentPower below, which is the power it takes "
+            "over from. Touches nothing but its own Amount",
+        ("Powers/Prototype/KokomiOverhaulPowers.cs", "NextCompanionFreePower"):
+            "QUARANTINED (the Kokomi overhaul). Vanguard's grant, expiring at "
+            "the end of the turn that wrote it -- the ratified same-turn "
+            "boundary (FLAG-1 / R114), and the identical shape and broadcast "
+            "as CompanionCostThisTurnPower and ReplayNextCompanionPower below. "
+            "Removes itself and touches nothing else",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
             "diagnostics observer; reads, never writes board state",
         ("Powers/CompanionPowers.cs", "CompanionCostThisTurnPower"):
@@ -888,6 +1023,54 @@ CO_TENANCY_LEDGER = {
             "with WitchsFlamePower's aura consumption or the this-turn "
             "expiries in this broadcast, and has no position to defend in "
             "their order",
+        ("Powers/Prototype/CompanionOverhaulPowers.cs",
+         "CompanionOverhaulTurnEnd"):
+            "QUARANTINED (the Mondstadt companion overhaul). THE ANSWER TO "
+            "THE ORDERING QUESTION RATHER THAN AN INSTANCE OF IT: six of the "
+            "arm's powers fire at the end of the player's turn, four of them "
+            "put an element on an enemy that may already carry one and three "
+            "draw from Rng.CombatTargets, so they do NOT each override this "
+            "broadcast -- this ONE tenant drives all six in the sim's order "
+            "(tier0 effects.companion_overhaul_turn_end), exactly as "
+            "TurnEndSequencer does for the shipped four one broadcast "
+            "earlier. Its only co-tenants here are WitchsFlamePower, whose "
+            "card (Durin's Witch's Flame) is one of the seventeen Mondstadt "
+            "rows this arm takes out of the pool and so cannot be drafted "
+            "while it is on, and the pure this-turn expiries above, which "
+            "read nothing this writes",
+        ("Powers/Prototype/CompanionOverhaulHooks.cs", "PassionOverloadPower"):
+            "QUARANTINED (the Mondstadt companion overhaul, second wave). A "
+            "this-turn EXPIRY and nothing else -- it removes itself, exactly "
+            "as the shipped AttackUpThisTurnPower above it does. THE ORDERING "
+            "QUESTION, answered: a removal reads nothing and writes only its "
+            "own existence, so it has no position to defend. It is NOT in "
+            "CompanionOverhaulTurnEnd's walk for that reason",
+        ("Powers/Prototype/CompanionOverhaulHooks.cs", "FavonianFavorPower"):
+            "QUARANTINED (the Mondstadt companion overhaul, second wave). The "
+            "same this-turn expiry, one card over: the Block it pays is paid "
+            "per REACTION during the turn (CompanionOverhaulReactions), never "
+            "in this broadcast, so all that happens here is the removal",
+        ("Powers/Prototype/CompanionOverhaulHooks.cs", "LightningFangPower"):
+            "QUARANTINED (the Mondstadt companion overhaul, second wave). A "
+            "duration TICK and nothing else -- what the power does happens on "
+            "every Attack the player makes, in ModifyDamageAdditive and in "
+            "AuraCmd.ElementOfPlay, both a broadcast away. THE ORDERING "
+            "QUESTION, answered: ticking a clock reads nothing and writes "
+            "only its own stack",
+        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "NaptimePower"):
+            "QUARANTINED (the Inazuma companion overhaul). A conditional "
+            "REMOVAL and nothing else: the promise breaks here if an Attack "
+            "was played this turn. THE ORDERING QUESTION, answered: it reads "
+            "the Attack counter, which is written at AfterCardPlayed and not "
+            "by anything in this broadcast, and it writes only its own "
+            "existence. It is NOT in CompanionOverhaulTurnEnd's walk for the "
+            "reason PassionOverloadPower is not: a removal has no position to "
+            "defend",
+        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "CrowfeatherCoverPower"):
+            "QUARANTINED (the Inazuma companion overhaul). The same this-turn "
+            "EXPIRY PassionOverloadPower above it is, one nation over -- it "
+            "removes itself and does nothing else, and what it pays is paid "
+            "on the Attack that spends it, a broadcast away",
     },
 }
 

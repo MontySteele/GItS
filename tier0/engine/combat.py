@@ -366,6 +366,17 @@ def card_cost(state: CombatState, card: Card) -> int:
     if (effects.is_spotlighted(state, card)
             and state.spotlighted_paid_cards_this_turn == 0):
         cost = max(0, cost - p.powers.get("spotlight_discount", 0))
+    # QUARANTINED (C.COMPANION_OVERHAUL). Mika's Starfrost Swirl: "your next
+    # Attack costs 1 less". Beside the Leading Role discount because it is the
+    # same kind of thing and must compose with it the same way -- subtractive,
+    # floored at zero, and read by the playability gate as well as by the
+    # payment, since a discount the gate cannot see is a card the pilot will
+    # not play. THIS SITE IS PURE: the stack is consumed by the next Attack
+    # RESOLVING (`effects.companion_overhaul_card_start`), never by being
+    # priced, so `card_playable` can ask as often as it likes.
+    if (C.COMPANION_OVERHAUL and card.type == "attack"
+            and p.powers.get("mc_starfrost_discount", 0)):
+        cost = max(0, cost - p.powers["mc_starfrost_discount"])
     # THE STRICT RARE POWER'S ENERGY HALF (PICK 5): "...instead of their
     # Energy cost". A converted Attack costs 0 Energy; the Sparks are taken in
     # `play_card`. Checked BEFORE the retired zeroing branch below so the two
@@ -605,6 +616,14 @@ def _finish_play(state: CombatState, card: Card,
         snap = refpowers.before_card_played(state, card)
         effects.resolve_card(state, card)
         refpowers.after_card_played(state, card, snap)
+        # QUARANTINED (C.COMPANION_OVERHAUL). Thoma's Crimson Ooyoroi, on the
+        # broadcast the mod gives it (`AfterCardPlayed`) and beside the site
+        # this engine already counts an Attack at. INSIDE the replay loop and
+        # NOT gated to the first pass, unlike the two companion triggers below
+        # it: the card says "whenever you play an Attack", and a replayed
+        # Attack is an Attack played again -- the same index rule Rage and
+        # Juggling take three lines up.
+        effects.companion_overhaul_card_played(state, card)
         if replay_index == 0 and card.is_companion:
             # FURINA REFRAME (§4.3, `F3` (1) / `F4` (1)): a Companion play
             # makes the FRONT Salon member perform, then rotates it to the
@@ -674,11 +693,20 @@ _FREE_PLAY_CONTEXT = (
     "salon_replacements_this_card", "detonations_at_card_start",
     "repeat_requested", "target_had_offelement_aura", "target_had_aura",
     "current_attack_bonus",
+    # QUARANTINED (C.COMPANION_OVERHAUL). The element override is per-CARD, set
+    # in the same breath as the bonus above, so it is saved with it: a free
+    # play that consumed Bennett's rider would otherwise hand the element to
+    # the outer Attack as well.
+    "mc_attack_element_override",
     "sparks_at_play", "current_x", "current_card_cost",
     # Coverage pass 4's three per-card reads. Same hazard as the rest: a Sly
     # auto-play that discards or gains block in the middle of an outer card
     # would otherwise leave its numbers behind for the outer card to read.
     "block_gained_this_card", "discards_this_card", "last_drawn_type",
+    # QUARANTINED (C.COMPANION_OVERHAUL). Gorou's per-play damage total, saved
+    # for the reason its three neighbours are: an auto-play that dealt damage
+    # inside an outer card would otherwise hand the outer card its number.
+    "mi_damage_dealt_this_card",
     # EB-118's identity context. The saved value is the LIST OBJECT, which is
     # why every writer rebinds instead of clearing in place: a free play that
     # exhausts mid-resolution opens its own list, and the restore below hands
@@ -802,6 +830,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # discount to the current turn? Yes." One boundary idiom, used twice.
     state.splash_procs_this_turn = 0             # detonation_splash cap
     state.reactions_this_turn = 0                # Chevreuse predicate window
+    # QUARANTINED (C.COMPANION_OVERHAUL). Heizou's Swirl window, cleared on the
+    # same line as the reaction window it counts a subset of -- one turn
+    # boundary for both, so the two can never disagree about which turn it is.
+    state.mi_swirls_this_turn = 0
     state.spotlighted_cards_this_turn = 0        # Ovation / reserve cap
     state.spotlighted_paid_cards_this_turn = 0   # B2: Leading Role's window
     state.spotlight_moved_this_turn = False      # selector-payoff window
@@ -1135,9 +1167,26 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # lands on its owner).
             dmg = powers.modify_damage_taken(state.player, dmg, enemy)
             dmg = int(dmg)
+            # QUARANTINED (C.COMPANION_OVERHAUL). The two TRAPS -- Dahlia's
+            # Sacramental Shower and Amber's Baron Bunny -- fire HERE, after
+            # the hit's number is settled and before Block is spent, which is
+            # the moment the mod's `BeforeDamageReceived` gives Klee's Mine.
+            # Baron Bunny's "take 3 less" is why this returns the damage
+            # rather than returning None.
+            dmg = effects.companion_overhaul_before_enemy_hit(
+                state, enemy, dmg)
+            if not enemy.alive:
+                # A trap killed the attacker before its hit landed. Same exit
+                # the FlameBarrier case takes at the foot of this loop.
+                break
             block_before = state.player.block
             blocked = min(state.player.block, dmg)
             state.player.block -= blocked
+            # QUARANTINED (C.COMPANION_OVERHAUL). Diona's Icy Paws: the ONE
+            # site in this engine that can say "this Block absorbed damage",
+            # because `blocked` exists nowhere else.
+            effects.companion_overhaul_block_absorbed(
+                state, enemy, blocked, block_before)
             # Kokomi's prevention ward (kickoff §2.4): after Block, before
             # anything reaches HP — the first unblocked hit each round is
             # prevented up to the ward's stacks, priced as one random
@@ -1374,6 +1423,20 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     player.fanfare_cap = player.fanfare_cap_base
     player.fanfare_floor = 0
     player.charge = 0            # Kokomi: the meter is per-combat (§2.1)
+    # QUARANTINED (C.COMPANION_OVERHAUL). Nicole's end-of-turn Block latch is
+    # per-combat like everything else on this line: a fight opens with no
+    # previous turn, so nobody has held the line yet.
+    player.mc_held_block_at_turn_end = False
+    # QUARANTINED (C.COMPANION_OVERHAUL). The Mend ceiling, captured at the top
+    # of the fight -- "the HP you entered the fight with", which is the whole of
+    # the keyword's one rule. Written unconditionally, like every other line in
+    # this block: it is a new per-combat field nothing else reads, and a
+    # conditional capture would leave the ceiling at whatever HP the first Mend
+    # happened to find.
+    state.mi_entry_hp = player.hp
+    # Same line, same reason: Varka's swirled element is per-combat, and a
+    # reused Player must not carry one fight's Swirl into the next.
+    player.mc_swirl_element = ""
     # QUARANTINED (C.KURAGE_MEMORY + C.KURAGE_ALWAYS_ON): THE BASE KIT.
     # [USER], 2026-08-29 -- "make Bake-Kurage part of the base kit (always on)
     # rather than a separate card". The jellyfish is installed HERE, at true

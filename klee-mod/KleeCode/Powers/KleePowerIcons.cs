@@ -41,6 +41,117 @@ internal static class KleePowerIcons
         // spark_threshold_down and the re-authored card keeps the id, the
         // rarity and the cost. No new art for a prototype row, per the slice.
         SparkAttackCostPower => KleePck.Path("klee/powers/spark_threshold_down.png"),
+        // QUARANTINED (the Klee overhaul, slice one). Every one of these borrows
+        // the icon of the shipped power whose job it takes over, for the reason
+        // the row above gives: art is commissioned when a slice is ACCEPTED, and
+        // a prototype that shipped new art would be paying for a card that may
+        // be deleted next week. The Bomb itself borrows the shipped Bomb badge,
+        // which is also the "reuse the existing badge rendering" the slice's
+        // sec.5 asks for in as many words.
+        ProtoBombPower => KleePck.Path("klee/powers/bomb.png"),
+        ExplosivesWorkshopGrowthPower =>
+            KleePck.Path("klee/powers/bomb_damage_up.png"),
+        AlicesRecipePower =>
+            KleePck.Path("klee/powers/bomb_damage_up.png"),
+        ChainedReactionsPower =>
+            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
+        EndOfTurnSetOffPower =>
+            KleePck.Path("klee/powers/sparks_n_splash.png"),
+        BombReactionSparkPower =>
+            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        GroundedPower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        // QUARANTINED (the Kokomi overhaul, slice one). Every one of these
+        // borrows the icon of the SHIPPED Kokomi power whose job it takes over,
+        // on the block above's argument verbatim: art is commissioned when a
+        // slice is ACCEPTED, and a prototype that shipped new art would be
+        // paying for a card that may be deleted next week. The jellyfish itself
+        // borrows the shipped Bake-Kurage badge, which is also the "Tide on the
+        // jellyfish" the slice's sec.5 asks for -- the same badge, a different
+        // number on it. Named individually rather than grouped, for the reason
+        // the Kokomi block further down records: one shared icon across
+        // unrelated effects reads as intentional.
+        ProtoBakeKuragePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        ProtoGarmentPower => KleePck.Path(
+            "kokomi/powers/ceremonial_garment.png"),
+        SongOfPearlsPower => KleePck.Path("kokomi/powers/kurages_oath.png"),
+        CloudsLikeWavesPower => KleePck.Path(
+            "kokomi/powers/vigil_of_the_deep.png"),
+        SangoIsshinPower => KleePck.Path(
+            "kokomi/powers/before_sun_and_moon.png"),
+        // The five with no shipped Kokomi power to borrow from -- the Plan
+        // badge, its draw rider, its Rare and the two Commander powers -- take
+        // the nearest shipped SHAPE instead: a Klee companion power for the
+        // two that read Companions, and her own Ancient's drip for the badge
+        // that counts something waiting to arrive.
+        PendingPlansPower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
+        TreatisePower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        TheArtOfWarPower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
+        OrdersPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        GeneralsBannerPower => KleePck.Path("klee/powers/study_buddy.png"),
+        NextCompanionFreePower => KleePck.Path("klee/powers/friendly_visit.png"),
+        // QUARANTINED (the Mondstadt companion overhaul). Every one of these
+        // borrows the icon of the SHIPPED companion power whose job it takes
+        // over, on the block above's argument verbatim: art is commissioned
+        // when a slice is ACCEPTED, and the workshop's own sec.5 defers all
+        // sixteen new illustrations to the Balance stage. Wiring a path ahead
+        // of an asset is the established shape in this file -- KleePck.Path
+        // returns null while a file is absent, so a missing PNG changes
+        // nothing and the miss is logged once by name.
+        SignatureMixPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        RevelationPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        StellarisOmenPower => KleePck.Path("klee/powers/detonation_vuln.png"),
+        GlacialWaltzPower => KleePck.Path("klee/powers/oz_summon.png"),
+        MondstadtOzPower => KleePck.Path("klee/powers/oz_summon.png"),
+        LightningRosePower => KleePck.Path("klee/powers/oz_summon.png"),
+        GrandOdePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        DandelionBreezePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        SolarIsotomaBloomPower =>
+            KleePck.Path("klee/powers/solar_isotoma.png"),
+        // The same arm's SECOND WAVE, on the same terms: each borrows the
+        // shipped icon of the power whose job it takes over, or of the shipped
+        // companion power it is the rewrite of.
+        IcyPawsPower => KleePck.Path("klee/powers/frozen.png"),
+        MelodyLoopPower => KleePck.Path("klee/powers/oz_summon.png"),
+        PassionOverloadPower =>
+            KleePck.Path("klee/powers/passion_overload.png"),
+        SwirlChargePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        StarfrostDiscountPower =>
+            KleePck.Path("klee/powers/zero_cost_attacks_up.png"),
+        LightningFangPower =>
+            KleePck.Path("klee/powers/passion_overload.png"),
+        SturmUndDrangPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        FavonianFavorPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        BinaryFormWhitePower => KleePck.Path("klee/powers/witchs_flame.png"),
+        BinaryFormDarkPower => KleePck.Path("klee/powers/witchs_flame.png"),
+        SacramentalShowerPower =>
+            KleePck.Path("klee/powers/detonation_splash.png"),
+        BaronBunnyPower => KleePck.Path("klee/powers/detonation_splash.png"),
+        LightfallSwordPower =>
+            KleePck.Path("klee/powers/shattering_pressure.png"),
+        // THE INAZUMA ARM, on the same terms again: each borrows the shipped
+        // icon of the power whose job it takes over, and the workshop's own
+        // illustrations are deferred to the Balance stage.
+        WarBannerPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        JuugaPower => KleePck.Path("klee/powers/oz_summon.png"),
+        MujiMujiDarumaPower => KleePck.Path("klee/powers/oz_summon.png"),
+        NaptimePower => KleePck.Path("klee/powers/celestial_gift.png"),
+        SanctifyingRingPower => KleePck.Path("klee/powers/oz_summon.png"),
+        BlazingBarrierPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        CrimsonOoyoroiPower =>
+            KleePck.Path("klee/powers/passion_overload.png"),
+        CrowfeatherCoverPower =>
+            KleePck.Path("klee/powers/passion_overload.png"),
+        TenguStormcallPower =>
+            KleePck.Path("klee/powers/passion_overload.png"),
+        SesshouSakuraPower => KleePck.Path("klee/powers/oz_summon.png"),
+        AurousBlazePower => KleePck.Path("klee/powers/detonation_splash.png"),
+        SoumetsuPower => KleePck.Path("klee/powers/oz_summon.png"),
+        KyoukaPower => KleePck.Path("klee/powers/passion_overload.png"),
+        SurpriseDispatchPower =>
+            KleePck.Path("klee/powers/detonation_splash.png"),
+        TamotoPower => KleePck.Path("klee/powers/shattering_pressure.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

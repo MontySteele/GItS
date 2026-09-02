@@ -765,7 +765,8 @@ def _card_prototype(card_id: str) -> Card:
         base = copy.deepcopy(index[base_id] if base_id in index
                              else _substituted_card_index()[base_id])
         card = upgrades.apply_upgrade(base)
-    elif (C.SPARK_ALT_COST_ENABLED
+    elif ((C.SPARK_ALT_COST_ENABLED or C.KLEE_OVERHAUL
+           or C.COMPANION_OVERHAUL or C.KOKOMI_OVERHAUL)
             and plain.startswith(PROTOTYPE_ID_PREFIX)):
         # THE ONE DOOR THE SPARK ARM OPENS INTO THE QUARANTINE, and it is
         # exactly as wide as it has to be. `_starter_ids` substitutes two
@@ -781,6 +782,20 @@ def _card_prototype(card_id: str) -> Card:
         # still not populated with prototypes, so pools, rewards, drafts and
         # digests remain structurally unable to see them -- the quarantine
         # that matters is membership, and membership does not move here.
+        #
+        # THE KLEE OVERHAUL RIDES THE SAME DOOR, for the same reason and no
+        # wider: `_starter_ids` returns ten `proto_ko_` id STRINGS and
+        # `pool_replacement` returns twenty-eight more, and every one of them
+        # is resolved back through here by the run layer on each reward screen.
+        #
+        # AND SO DOES THE MONDSTADT COMPANION OVERHAUL, third arm, same door,
+        # no wider: `companion_roster_replacement` returns `proto_mc_` id
+        # STRINGS for the companion slot, and the reward layer resolves each of
+        # them back through here.
+        #
+        # AND THE KOKOMI OVERHAUL, fourth arm, same door, no wider again:
+        # `_starter_ids` returns ten `proto_kk_` id STRINGS and
+        # `pool_replacement` returns twenty-eight more.
         card = _prototype_index()[plain]
     else:
         index = _card_index()
@@ -947,6 +962,31 @@ def _starter_ids(spec: dict) -> list[str]:
                 f"the {add!r} substitution has nothing to replace")
         ids[ids.index(drop)] = add
 
+    # THE KLEE OVERHAUL takes the starter WHOLE, and it is tested FIRST because
+    # it and the Sparks arm cannot both own these ten slots. The overhaul
+    # retires the rules the Sparks substitutions are priced inside -- Ka-boom!
+    # gains a *Set off* clause it never had and Pop!'s bomb stops detonating
+    # itself -- so the two are ALTERNATIVES, not layers, and a tree with both
+    # flags on is the overhaul's tree. Nothing about the Sparks arm is edited:
+    # with `KLEE_OVERHAUL` off the branch below is reached exactly as before.
+    if character == "klee" and C.KLEE_OVERHAUL:
+        return list(C.KLEE_OVERHAUL_STARTER_IDS)
+
+    # THE KOKOMI OVERHAUL takes the starter WHOLE, and it is tested BEFORE the
+    # Kurage base kit's own substitution above would matter, for the reason the
+    # Klee branch above gives one character over: the two Kokomi arms cannot
+    # both own these slots. The overhaul retires the Charge bank the memory is
+    # priced inside, so they are ALTERNATIVES, not layers, and a tree with both
+    # flags on is the overhaul's tree. Nothing about the memory arm is edited:
+    # with `KOKOMI_OVERHAUL` off the branch above is reached exactly as before.
+    #
+    # THE DECK SHRINKS FROM TWELVE TO TEN, which is the slice packet's own
+    # sec.3 count and a real consequence rather than an oversight: the
+    # twelve-card shape was ruled for a deck that mills itself, and nothing in
+    # this arm exhausts.
+    if character == "kokomi" and C.KOKOMI_OVERHAUL:
+        return list(C.KOKOMI_OVERHAUL_STARTER_IDS)
+
     if character == "klee" and C.SPARK_ALT_COST_ENABLED:
         for drop, add in C.SPARK_ALT_STARTER_SUBS:
             if drop not in ids:
@@ -1008,6 +1048,91 @@ def pool_substitutions(character_id: str) -> dict[str, str]:
     `starting_deck` is the door onto `_starter_ids`."""
     spec = _character_index().get(character_id)
     return _pool_substitutions(spec) if spec else {}
+
+
+def pool_replacement(character_id: str) -> list[str] | None:
+    """The character's WHOLE offerable pool, or None to keep the shipped one.
+
+    THE SIBLING OF `pool_substitutions`, AND IT EXISTS BECAUSE THE OTHER SHAPE
+    CANNOT SAY THIS. `_pool_substitutions` is a one-for-one map: it swaps a
+    shipped id for a prototype at the same rarity and leaves everything else
+    where it was. The Klee overhaul's slice one asks for something the map has
+    no grammar for -- "her offerable pool is these 28 rows and nothing else" --
+    because the overhaul retires the rules every other Klee card is written
+    against (a shipped bomb detonates itself; an overhaul bomb waits to be
+    *Set off*), so a run that could still be offered the shipped 79 would be
+    offered cards that no longer describe what happens.
+
+    IT IS THE SAME SINGLE DOOR. `tier05.rewards.character_pool` is the one
+    source of truth for "which ids can be offered to this character" -- fight
+    rewards, the shop, every event card screen and the tier 0.5 drafter read it
+    and nothing else -- and this is read THERE, beside `pool_substitutions`,
+    rather than at the five mouths. Two seams at one door, not a second door.
+
+    WITH `C.KLEE_OVERHAUL` OFF this returns None for every character and
+    `character_pool` is byte-for-byte what it has always been. That is the
+    acceptance condition on the flag, pinned by
+    `tier0/tests/test_klee_overhaul.py` rather than intended.
+    """
+    if character_id == "klee" and C.KLEE_OVERHAUL:
+        return list(C.KLEE_OVERHAUL_POOL_IDS)
+    # The Kokomi overhaul's own, on identical terms: her offerable pool is the
+    # slice's 28 rows and nothing else, because the overhaul retires the rules
+    # every other Kokomi card is written against (an Exhaust that pays Charge,
+    # a Muster that transforms, a Burst that gates).
+    if character_id == "kokomi" and C.KOKOMI_OVERHAUL:
+        return list(C.KOKOMI_OVERHAUL_POOL_IDS)
+    return None
+
+
+def companion_roster_replacement() -> list[Card] | None:
+    """Every COMPANION an offer surface may see, or None to keep the shipped
+    roster.
+
+    THE ONE DOOR, and its C# twin is `KleeMod.CompanionPool.All`. Both offer
+    surfaces in the sim read it -- `tier05.rewards.companion_pool` (the reward
+    slot and the shop) and `tier05.rewards.five_star_roster` (the Featured
+    Banner) -- so a build cannot feature a five-star the reward slot has no
+    way to hand out, which is precisely the split R64 shipped the banner to
+    close.
+
+    A REPLACEMENT OF TWO NATIONS, NOT OF THE ROSTER. Two approved workshops,
+    one per nation, both Paper artefacts on the companion-workshop branches and
+    neither in this tree: `companion-workshop-mondstadt-2026-09-01.md` (approved
+    2026-09-01) rewrites MONDSTADT's Universals, and
+    `companion-workshop-inazuma-2026-09-01.md` (approved the same day at its
+    four default picks, its sec.9) rewrites INAZUMA's. Fontaine has no workshop
+    yet -- both documents say so in their own sec.6 -- so its rows come through
+    untouched, and the seventeen shipped Mondstadt rows and the fifteen shipped
+    Inazuma rows do not come through at all.
+
+    THE KEPT HALF IS FILTERED BY NATION and the ADDED HALF IS LISTED BY ID
+    (`C.MONDSTADT_OVERHAUL_POOL_IDS`, `C.INAZUMA_OVERHAUL_POOL_IDS`), the same
+    asymmetry the C# twin argues: the rule about the other nations is literally
+    "not one of ours", and a hand-copied list of their rows would silently drop
+    the next row somebody ships; the rule about a replaced nation is "these rows
+    and nothing else", where a prefix match would be a second, softer definition
+    that fails the day a row is renamed.
+
+    ONE FLAG FOR BOTH NATIONS. A second property would let a build offer one
+    workshop's rewrites beside the other nation's shipped rows -- a state no
+    document describes and no seat would be asked to grade.
+
+    Returns CARDS rather than ids because its callers tier the result by
+    rarity and nation, and the ids are resolved here once through the same
+    `peek_card` door `character_pool` uses for the other arms.
+
+    WITH `C.COMPANION_OVERHAUL` OFF this returns None and both callers are
+    byte-for-byte what they have always been. That is the acceptance condition
+    on the flag, pinned by `tier0/tests/test_companion_overhaul.py`.
+    """
+    if not C.COMPANION_OVERHAUL:
+        return None
+    kept = [c for c in _card_index().values()
+            if c.is_companion and c.nation not in C.COMPANION_OVERHAUL_NATIONS]
+    added = [peek_card(cid) for cid in (C.MONDSTADT_OVERHAUL_POOL_IDS
+                                        + C.INAZUMA_OVERHAUL_POOL_IDS)]
+    return sorted(kept + added, key=lambda c: c.id)
 
 
 @lru_cache(maxsize=1)

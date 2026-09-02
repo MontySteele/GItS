@@ -166,6 +166,440 @@ SPARK_ALT_POOL_SUBS: dict[str, str] = {
     "hold_the_line": "proto_hold_the_line_spark",        # Dig In,       uncommon
     "smoke_and_sparks": "proto_smoke_and_sparks_spark",  # Powder Smoke, uncommon
 }
+
+# =============================================================================
+# THE KLEE OVERHAUL, SLICE ONE -- R213 B PROTOTYPE ARM, QUARANTINED.
+#
+# The ruled brief `review/active/klee-brief-2026-09-01.md` sec.3 replaces Klee's
+# whole rule set: a Bomb is a numbered charge that GROWS and never goes off by
+# itself, only a card that says *Set off* pops one, a Bomb whose enemy dies
+# JUMPS, each explosion mints one Spark, a Mine is a Bomb that also answers the
+# enemy's attack on her, and nothing fires by itself.
+#
+# THE ARM IS A THIRD ARM, NOT A REPLACEMENT. `SPARK_ALT_COST_ENABLED` above and
+# `KURAGE_MEMORY` below are untouched and their rows, constants and tests stand:
+# a flag whose purpose is to let two economies be measured side by side cannot
+# be edited by the arm that came after it.
+#
+# WHAT MOVES WHEN IT IS ON, exhaustively (every site names this constant):
+#   * loader._starter_ids       -- Klee's ten opening cards become the slice's
+#                                  ten (WHOLE replacement, not a substitution:
+#                                  the brief sec.8 prints all ten).
+#   * loader.pool_replacement   -- her offerable pool becomes the 28 slice rows
+#                                  and nothing else. Read at the ONE seam
+#                                  `tier05.rewards.character_pool` already
+#                                  reads, so every offer surface moves at once.
+#   * loader._card_prototype    -- `proto_` ids resolve, the way the Sparks arm
+#                                  opens the same door for its two starter rows.
+# Nothing else in either engine reads it. FLAG OFF IS BYTE-IDENTICAL TO TODAY,
+# pinned by `tier0/tests/test_klee_overhaul.py` rather than intended.
+#
+# THE C# TWIN is `KleeMod.Powers.Prototype.KleeOverhaul.Enabled`, compiled only
+# under `-p:PrototypeCards=true` and defaulted from the `KLEE_OVERHAUL` compile
+# constant (`-p:KleeOverhaul=true`). The sim is NOT brought up for slice one
+# (the slice packet sec.5: "C# first, per the ruled process"), so tier0
+# registers the new ops and refuses to resolve them rather than guessing at a
+# second implementation of an unplayed rule.
+KLEE_OVERHAUL = False
+
+# THE FOUR NUMBERS THE RULES CARRY, and they are the brief's placeholders, not
+# claims (slice packet sec.1: "No number in it is a claim"). They are named here
+# because the C# mirrors must be compared BY VALUE -- an unnamed literal in the
+# mod is exactly what `tools/lint_constant_parity.py` exists to refuse.
+KLEE_OVERHAUL_BOMB_GROWTH = 2        # rule 1: every Bomb, start of her turn
+KLEE_OVERHAUL_WORKSHOP_GROWTH = 1    # Explosives Workshop: +1 more
+KLEE_OVERHAUL_ALICE_GROWTH = 4       # Alice's Recipe: 4 INSTEAD of 2
+KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
+
+# THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, five ids, in
+# the printed order. This is a REPLACEMENT and not a substitution list because
+# every one of the ten moves: the shipped Ka-boom! has no *Set off* clause and
+# the shipped Pop! places a bomb that detonates itself, so there is no shipped
+# starter card the new rules leave standing.
+KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
+    "proto_ko_kaboom", "proto_ko_kaboom", "proto_ko_kaboom",
+    "proto_ko_kapow",
+    "proto_ko_duck_and_cover", "proto_ko_duck_and_cover",
+    "proto_ko_duck_and_cover", "proto_ko_duck_and_cover",
+    "proto_ko_pop",
+    "proto_ko_jumpy_dumpty",
+)
+
+# THE OFFERABLE POOL, WHOLE (slice packet sec.4). `_pool_substitutions` cannot
+# express this -- it is a one-for-one map and this is "her pool is these and
+# nothing else" -- so `loader.pool_replacement` is its sibling seam, read at the
+# same single door.
+#
+# TWENTY-SEVEN OF THE PACKET'S TWENTY-EIGHT. Vermillion Pact is NOT here, and
+# the packet's own sec.5 is what leaves it out: "Vermillion Pact is the one item
+# on this list that touches shared reaction code; if it costs more than a day it
+# drops out of slice one and is tested in slice two." It does. Its rule is not
+# "react twice", it is "the aura the explosion CONSUMED is still there for the
+# Attack behind it", and every reaction in the mod runs through one funnel that
+# removes the aura and pays out Burst, Courtroom Drama and the amplifier
+# multiplier on the way past -- so making one hit not consume means either
+# re-applying between the explosion and the card's damage (which moves what a
+# third hit sees and re-fires every on-apply hook) or threading a flag through
+# shared code every character's reactions would have to be re-checked against.
+# The reasoning is recorded in `VermillionPactNotBuilt`, and the row is off the
+# surface rather than staged as a card whose face would lie. The pool is
+# therefore 11 Common, 11 Uncommon, 5 Rare.
+KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
+    # Cook (8)
+    "proto_ko_fish_flavored_bait",
+    "proto_ko_pocket_fireworks",
+    "proto_ko_chain_fuse",
+    "proto_ko_explosives_workshop",
+    "proto_ko_careful_arrangement",
+    "proto_ko_big_badda_boom",
+    "proto_ko_the_big_one",
+    "proto_ko_alices_recipe",
+    # Spray (8)
+    "proto_ko_mine_toss",
+    "proto_ko_fwoosh",
+    "proto_ko_tinder_toss",
+    "proto_ko_quick_fuse",
+    "proto_ko_bang_bang",
+    "proto_ko_rapid_fire",
+    "proto_ko_chained_reactions",
+    "proto_ko_sparks_n_splash",
+    # React (4 of 5; Vermillion Pact is out, see above)
+    "proto_ko_sizzle",
+    "proto_ko_perfect_timing",
+    "proto_ko_flame_dance",
+    "proto_ko_catalytic_converter",
+    # Currencies and defence (7)
+    "proto_ko_ammo_scavenging",
+    "proto_ko_powder_charge",
+    "proto_ko_dig_in",
+    "proto_ko_sugar_rush",
+    "proto_ko_run_away",
+    "proto_ko_grounded",
+    "proto_ko_sorry_jean",
+)
+
+# =============================================================================
+# THE MONDSTADT COMPANION OVERHAUL -- QUARANTINED (R213 B, BACKLOG EB-147).
+#
+# The approved workshop `companion-workshop-mondstadt-2026-09-01.md` rewrites
+# Mondstadt's Universal companion pool: twelve Commons that beat a Strike,
+# Uncommons in the base game's colorless shape, one bespoke Rare per 5-star.
+# Twelve of the seventeen shipped rows fail its bar and three of them carry a
+# rider on Burst Energy, a meter R220 retired.
+#
+# WHAT MOVES WHEN IT IS ON, exhaustively (every site names this constant):
+#   * loader.companion_roster_replacement -- the MONDSTADT half of the
+#     companion roster becomes `MONDSTADT_OVERHAUL_POOL_IDS` and nothing else.
+#     Read at the two doors `tier05.rewards` already reads (the reward/shop
+#     pool and the Featured Banner's 5-star roster), so both offer surfaces
+#     move together.
+#   * loader._card_prototype -- `proto_mc_` ids resolve, the same door the
+#     Sparks and Klee-overhaul arms open for their own rows.
+# Inazuma and Fontaine are untouched in every build; the workshop is a
+# Mondstadt document and says so. Nothing else in either engine reads this.
+# FLAG OFF IS BYTE-IDENTICAL TO TODAY, pinned by
+# `tier0/tests/test_companion_overhaul.py` rather than intended.
+#
+# THE C# TWIN is `KleeMod.Powers.CompanionOverhaul.Enabled`, compiled only
+# under `-p:PrototypeCards=true` and defaulted from the `COMPANION_OVERHAUL`
+# compile constant (`-p:CompanionOverhaul=true`).
+COMPANION_OVERHAUL = False
+
+# THE NUMBERS THE REWRITTEN POWERS CARRY. Every one is lifted verbatim off the
+# workshop's own printed text (sec.3, re-priced in its sec.8) -- nothing here
+# is derived and nothing is picked. They are NAMED rather than left as literals
+# because the C# mirrors must be compared BY VALUE
+# (`tools/lint_constant_parity.py`); the numbers a CARD prints stay on the card
+# row, and only a number a POWER carries lands here.
+MC_SIGNATURE_MIX_BLOCK = 4      # Diona: Block per turn, 2 turns
+MC_GLACIAL_WALTZ_DMG = 6        # Kaeya: Cryo damage per turn, 3 turns
+MC_ISOTOMA_DMG = 8              # Albedo: end-of-turn damage on an aura'd enemy
+MC_ISOTOMA_BLOCK = 4            # Albedo: the Crystallize half
+MC_DANDELION_BREEZE_BLOCK = 6   # Jean: Block per end of turn
+MC_OZ_DMG = 5                   # Fischl: Oz's Electro volley, no turn limit
+MC_REVELATION_BLOCK = 5         # Nicole: Block at the start of your turn
+MC_REVELATION_STRENGTH = 2      # Nicole: Theosis, for holding the line
+MC_OMEN_VULNERABLE = 1          # Mona: the delayed doom, one turn of it
+MC_LIGHTNING_ROSE_DMG = 5       # Lisa: Electro damage per turn, 3 turns
+MC_LIGHTNING_ROSE_VULN = 1      # Lisa: the Vulnerable that rides it
+# THE SECOND WAVE -- the thirteen rows the first pass left out. Same rule as
+# the eleven above: a number the CARD prints stays on the card row (Diona's 6
+# Block, Bennett's 4, Favonian Favor's 3, Sturm und Drang's 6, Mika's 1) and
+# only a number a POWER carries is named here, because these are the ones no
+# row can render.
+MC_SHOWER_DMG = 9               # Dahlia: the Shower's answer to one attack
+MC_BINARY_WHITE_REACTION_MULT = 1.50  # Durin, White: reactions on enemies
+MC_LIGHTNING_FANG_BONUS = 3     # Razor: damage his Attacks gain, 2 turns
+MC_BARON_BUNNY_REDUCTION = 3    # Amber: damage the decoy eats
+MC_BARON_BUNNY_DMG = 8          # Amber: the Pyro the decoy answers with
+MC_LIGHTFALL_BASE = 8           # Eula: the blade's own damage
+MC_LIGHTFALL_PER_ATTACK = 5     # Eula: per Attack the blade counted
+
+# THE MONDSTADT UNIVERSALS, WHOLE. This is a REPLACEMENT and not a
+# substitution map: the workshop retires twelve of the seventeen shipped rows
+# outright and adds nine characters, so there is no one-for-one correspondence
+# to write down. Ordered by character in the workshop's sec.3 order.
+#
+# THE WORKSHOP'S THIRTY-FOUR, WHOLE. Twenty-one landed first; the other
+# THIRTEEN were held back because their printed text needed an engine hook
+# neither engine had, and those hooks are now built in both engines (a
+# per-instance Block-absorption trigger, a pre-enemy-attack trap, a next-Attack
+# element override, a Swirl event that remembers its element, an Attack
+# counter, a next-Attack cost discount, a Block-reading damage formula, a
+# power on a chosen body, a counting delayed blade and two damage-pipeline
+# modifiers behind a modal Power). Which row spends which hook is in
+# `docs/notes/prototype-surface-provenance.md`. The rule that held them out is
+# unchanged and still binds anything later: a row whose text cannot be printed
+# is left OUT rather than replaced by a simpler card, which is the same rule
+# `KLEE_OVERHAUL_POOL_IDS` applied to Vermillion Pact.
+MONDSTADT_OVERHAUL_POOL_IDS: tuple[str, ...] = (
+    "proto_mc_diona_signature_mix",
+    "proto_mc_noelle_breastplate",
+    "proto_mc_kaeya_frostgnaw",
+    "proto_mc_kaeya_glacial_waltz",
+    "proto_mc_barbara_show_begin",
+    "proto_mc_albedo_solar_isotoma",
+    "proto_mc_jean_gale_blade",
+    "proto_mc_jean_dandelion_breeze",
+    "proto_mc_fischl_nightrider",
+    "proto_mc_fischl_oz",
+    "proto_mc_sucrose_gust",
+    "proto_mc_sucrose_astable",
+    "proto_mc_sucrose_catalyst_conversion",
+    "proto_mc_bennett_fantastic_voyage",
+    "proto_mc_nicole_revelation",
+    "proto_mc_mona_stellaris_phantasm",
+    "proto_mc_venti_grand_ode",
+    "proto_mc_amber_fiery_rain",
+    "proto_mc_lisa_violet_arc",
+    "proto_mc_lisa_lightning_rose",
+    "proto_mc_rosaria_ravaging_confession",
+    # The thirteen the hooks unblocked, in the workshop's sec.3 order.
+    "proto_mc_diona_icy_paws",
+    "proto_mc_noelle_sweeping_time",
+    "proto_mc_barbara_melody_loop",
+    "proto_mc_bennett_passion_overload",
+    "proto_mc_dahlia_sacramental_shower",
+    "proto_mc_dahlia_favonian_favor",
+    "proto_mc_durin_binary_form",
+    "proto_mc_razor_claw_and_thunder",
+    "proto_mc_razor_lightning_fang",
+    "proto_mc_varka_sturm_und_drang",
+    "proto_mc_amber_explosive_puppet",
+    "proto_mc_eula_glacial_illumination",
+    "proto_mc_mika_starfrost_swirl",
+)
+
+# The nation the FIRST workshop owns. Named rather than spelled "mondstadt"
+# at the seam, so the one line that decides which nation moves is greppable.
+COMPANION_OVERHAUL_NATION = "mondstadt"
+
+# =============================================================================
+# THE INAZUMA COMPANION OVERHAUL -- SAME FLAG, SECOND NATION (QUARANTINED).
+#
+# The approved workshop `companion-workshop-inazuma-2026-09-01.md` (approved
+# 2026-09-01 at its four default picks, its sec.9) rewrites Inazuma's Universal
+# companion pool the way the Mondstadt document rewrote Mondstadt's: fifteen
+# shipped rows re-authored and nine characters with no row today given one. Its
+# sec.2 nation shape is "Inazuma reads the HP bar", and eight of the rows do.
+#
+# ONE FLAG, NOT A SECOND ONE. `C.COMPANION_OVERHAUL` already means "the
+# companion pool is the approved workshops' pool"; a second property would let
+# a build offer one nation's rewrites and not the other's, which is a state no
+# document describes and no seat would be asked to grade.
+#
+# WHAT MOVES, and it is the same two sites the Mondstadt block names:
+#   * loader.companion_roster_replacement -- the INAZUMA half of the roster
+#     becomes `INAZUMA_OVERHAUL_POOL_IDS` and nothing else, beside the
+#     Mondstadt half. Fontaine is still untouched in every build.
+#   * loader._card_prototype -- `proto_mi_` ids resolve, the same door every
+#     other arm opens for its own rows.
+# FLAG OFF IS BYTE-IDENTICAL TO TODAY, pinned by
+# `tier0/tests/test_inazuma_companion_overhaul.py` rather than intended.
+
+# THE NUMBERS THE REWRITTEN POWERS CARRY. Same rule as the Mondstadt block
+# above: a number the CARD prints stays on the card row, and only a number a
+# POWER carries lands here, because the C# mirrors are compared BY VALUE
+# (`tools/lint_constant_parity.py`). Every one is the workshop's sec.3 printed
+# text, re-priced in its sec.8 -- nothing is derived and nothing is picked.
+MI_WAR_BANNER_DEXTERITY = 2     # Gorou: Dexterity while the banner stands
+MI_JUUGA_DMG = 6                # Gorou: Geo damage per turn, 3 turns
+MI_DARUMA_DMG = 6               # Sayu: the Daruma's hit above 70% HP
+MI_DARUMA_BLOCK = 6             # Sayu: and the Block below it
+MI_SANCTIFYING_RING_DMG = 5     # Shinobu: Electro to ALL, per turn, 3 turns
+MI_SANCTIFYING_RING_BLOCK = 5   # Shinobu: and the Block that rides it
+MI_BLAZING_BARRIER_BLOCK = 3    # Thoma: Block per absorbing hit
+MI_OOYOROI_DMG = 5              # Thoma: Pyro per Attack you play, 2 turns
+MI_OOYOROI_BLOCK = 3            # Thoma: and the Block per Attack
+MI_STORMCALL_BONUS = 5          # Sara: damage your Attacks gain, next turn
+MI_SAKURA_DMG = 4               # Yae: a Sakura's own Electro volley
+MI_SAKURA_BONUS = 3             # Yae: more, for a Sakura placed beside one
+MI_SAKURA_CAP = 3               # Yae: "Up to 3"
+MI_AUROUS_BLAZE_DMG = 6         # Yoimiya: the Pyro the mark answers with
+MI_SOUMETSU_DMG = 8             # Ayaka: Cryo to ALL, per turn, 2 turns
+MI_SOUMETSU_FINALE = 16         # Ayaka: and the hit it ends on
+MI_KYOUKA_BONUS = 4             # Ayato: damage your Attacks gain, 2 turns
+MI_KYOUKA_FINALE = 12           # Ayato: the illusion that pops when it ends
+MI_SURPRISE_DISPATCH_DMG = 10   # Kirara: the parcel, next turn
+MI_TAMOTO_DMG = 6               # Chiori: Geo per turn, ignoring Block
+
+# THE INAZUMA UNIVERSALS, WHOLE -- the workshop's sec.3 in its own character
+# order. TWENTY-FOUR, and the number is worth writing down: its sec.4 counts
+# "25 Universals, 1 Personal" while its sec.3 enumerates 24 Universals plus
+# Gorou's Kokomi-side Personal, and the rarity split it prints (9 Common, 12
+# Uncommon, 4 Rare) only closes when the Personal is counted among the
+# Uncommons. The ENUMERATION is what is built; the Personal is not a Universal
+# and is not here, and neither is any stand-in.
+INAZUMA_OVERHAUL_POOL_IDS: tuple[str, ...] = (
+    "proto_mi_gorou_inuzaka",
+    "proto_mi_gorou_war_banner",
+    "proto_mi_gorou_juuga",
+    "proto_mi_sayu_fuuin_dash",
+    "proto_mi_sayu_daruma",
+    "proto_mi_sayu_naptime",
+    "proto_mi_shinobu_sanctifying_ring",
+    "proto_mi_shinobu_grass_ring",
+    "proto_mi_shinobu_thundergrust",
+    "proto_mi_thoma_blazing_barrier",
+    "proto_mi_thoma_crimson_ooyoroi",
+    "proto_mi_sara_crowfeather_cover",
+    "proto_mi_sara_tengu_stormcall",
+    "proto_mi_itto_superlative_superstrength",
+    "proto_mi_raiden_musou_no_hitotachi",
+    "proto_mi_kazuha_slash",
+    "proto_mi_yae_sesshou_sakura",
+    "proto_mi_yoimiya_aurous_blaze",
+    "proto_mi_ayaka_soumetsu",
+    "proto_mi_ayato_kyouka",
+    "proto_mi_heizou_heartstopper",
+    "proto_mi_kirara_surprise_dispatch",
+    "proto_mi_mizuki_anraku",
+    "proto_mi_chiori_hasode",
+)
+
+# The nation this second replacement owns.
+INAZUMA_OVERHAUL_NATION = "inazuma"
+
+# THE NATIONS THE ARM REPLACES, and the one list `companion_roster_replacement`
+# filters the kept half against. Fontaine is deliberately absent: its workshop
+# does not exist yet (the Mondstadt document's sec.6 and the Inazuma
+# document's sec.6 both say so), so its shipped rows come through untouched.
+COMPANION_OVERHAUL_NATIONS: tuple[str, ...] = (
+    COMPANION_OVERHAUL_NATION, INAZUMA_OVERHAUL_NATION)
+
+# =============================================================================
+# THE KOKOMI OVERHAUL, SLICE ONE -- QUARANTINED (R213 B, BACKLOG EB-147).
+#
+# The ruled brief `review/active/kokomi-brief-2026-09-01.md` (all eight picks
+# ruled at their defaults 2026-09-01) replaces her whole rule set: the
+# Bake-Kurage is always on the field and holds TIDE, which never resets on its
+# own; her cards add Tide; SURGE spends the whole of it as one Hydro hit; on a
+# turn she did not Surge the jellyfish MENDS her a chip, capped per combat on
+# the relic; EXERT N is an HP cost on Skills and Powers taken from Block first;
+# the GARMENT is a short window where her Attacks Mend; Strength becomes Tide;
+# and a PLAN happens at the start of her next turn. Slice one
+# (`kokomi-overhaul-slice-1-2026-09-01.md`) is the ten-card starter, 28 pool
+# rows, the relic and the engine list in its sec.5.
+#
+# WHAT MOVES WHEN IT IS ON, exhaustively (every site names this constant):
+#   * loader._starter_ids       -- her ten opening cards become
+#                                  `KOKOMI_OVERHAUL_STARTER_IDS`, WHOLE. Read
+#                                  by `build_player` (tier 0) and
+#                                  `starting_deck` (tier 0.5), the one seam.
+#   * loader.pool_replacement   -- her offerable pool becomes
+#                                  `KOKOMI_OVERHAUL_POOL_IDS` and nothing else,
+#                                  read at the one door
+#                                  `tier05.rewards.character_pool` already
+#                                  reads, so every offer surface moves at once.
+#   * loader._card_prototype    -- `proto_kk_` ids resolve, the same door the
+#                                  other three arms open for their own rows.
+# Nothing else in either engine reads it. FLAG OFF IS BYTE-IDENTICAL TO TODAY,
+# pinned by `tier0/tests/test_kokomi_overhaul.py` rather than intended.
+#
+# THE C# TWIN is `KleeMod.Powers.KokomiOverhaul.Enabled`, compiled only under
+# `-p:PrototypeCards=true` and defaulted from the `KOKOMI_OVERHAUL` compile
+# constant (`-p:KokomiOverhaul=true`). The mod ALSO moves her starting relic
+# and turns her shipped Charge/Burst funnel off; neither has a sim seam,
+# because the sim is NOT brought up for slice one (the slice packet sec.5:
+# "All of it behind the prototype switch, C# first. The Python sim is not
+# brought up for slice one"), so tier0 registers the new ops and refuses to
+# resolve them rather than guessing at a second implementation of an unplayed
+# rule -- exactly the arrangement `KLEE_OVERHAUL` makes.
+KOKOMI_OVERHAUL = False
+
+# THE NUMBERS THE RULES CARRY, and they are the brief's placeholders, not
+# claims (slice packet sec.1: "No number in it is a claim"). They are named
+# here because the C# mirrors must be compared BY VALUE -- an unnamed literal
+# in the mod is exactly what `tools/lint_constant_parity.py` exists to refuse.
+# A number a CARD prints stays on its row; only a number a RULE or a POWER
+# carries lands here, which is why Exert 2, Tide +5 and Mend 12 are absent.
+KOKOMI_OVERHAUL_PULSE_MEND = 2      # rule 4: the pulse, on a held turn
+KOKOMI_OVERHAUL_PULSE_BUDGET = 8    # rule 4: and never more, in one combat
+KOKOMI_OVERHAUL_SONG_MEND = 3       # Song of Pearls: the pulse INSTEAD Mends 3
+KOKOMI_OVERHAUL_SONG_BUDGET = 12    # Song of Pearls: and the budget IS 12
+KOKOMI_OVERHAUL_GARMENT_MEND = 2    # rule 6: per Attack that hits
+KOKOMI_OVERHAUL_TIDE_PER_CARD = 5   # Reading the Tide: one card per 5 Tide
+
+# THE STARTER, WHOLE (brief sec.9; slice packet sec.3). Ten cards, five ids, in
+# the printed order. A REPLACEMENT and not a substitution list because every
+# one of the ten moves: the shipped Water's Edge and Coral Guard are priced
+# inside an exhaust-for-Charge economy this arm retires, and the shipped
+# Kurage's Oath is a Power that wards per jellyfish pulse rather than a Skill
+# that Exerts for Tide. There is no shipped starter card the new rules leave
+# meaning what it printed.
+KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
+    "proto_kk_waters_edge", "proto_kk_waters_edge", "proto_kk_waters_edge",
+    "proto_kk_coral_guard", "proto_kk_coral_guard", "proto_kk_coral_guard",
+    "proto_kk_kurages_oath", "proto_kk_kurages_oath",
+    "proto_kk_rising_tide",
+    "proto_kk_stolen_chapter",
+)
+
+# THE OFFERABLE POOL, WHOLE (slice packet sec.4). Twenty-eight rows: 12 Common,
+# 12 Uncommon, 4 Rare, in the packet's own order -- Priestess, Strategist,
+# Commander, then the currencies and defences. `_pool_substitutions` cannot
+# express this (it is a one-for-one map and this is "her pool is these and
+# nothing else"), so `loader.pool_replacement` is its sibling seam, read at the
+# same single door.
+#
+# ALL TWENTY-EIGHT ARE HERE. Unlike the Klee overhaul, which dropped Vermillion
+# Pact on its packet's own sec.5 escape, every row in this slice prints inside
+# the grammar the emitter already speaks once the arm's ten ops exist.
+KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
+    # Priestess -- feed, hold, surge (9)
+    "proto_kk_tidal_prayer",
+    "proto_kk_sea_spray",
+    "proto_kk_deep_current",
+    "proto_kk_breaker",
+    "proto_kk_high_tide",
+    "proto_kk_undertow",
+    "proto_kk_song_of_pearls",
+    "proto_kk_nereids_ascension",
+    "proto_kk_sango_isshin",
+    # Strategist -- the plan was written last turn (8)
+    "proto_kk_battle_plan",
+    "proto_kk_ambush",
+    "proto_kk_read_the_field",
+    "proto_kk_feint",
+    "proto_kk_contingency",
+    "proto_kk_treatise",
+    "proto_kk_war_council",
+    "proto_kk_the_art_of_war",
+    # Commander -- Gorou, go (4)
+    "proto_kk_rally",
+    "proto_kk_vanguard",
+    "proto_kk_orders",
+    "proto_kk_the_generals_banner",
+    # Currencies and defence (7)
+    "proto_kk_quiet_study",
+    "proto_kk_salt_line",
+    "proto_kk_cleansing_tide",
+    "proto_kk_the_clouds_like_waves",
+    "proto_kk_reading_the_tide",
+    "proto_kk_coral_bulwark",
+    "proto_kk_watatsumis_blessing",
+)
+
 BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played
 BURST_PER_REACTION = 5        # burst energy per reaction triggered
 

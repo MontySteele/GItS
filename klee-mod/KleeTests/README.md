@@ -127,7 +127,9 @@ those types do not exist, so a pin against them could not compile either.
 | `KurageMemoryPinTests.cs` | 21 | `EB-181`'s Kurage-memory rule, the Kokomi arm. |
 | `SparkAlternativeCostPinTests.cs` | 27 | The Klee Sparks alternative cost (`review/ruled/klee-sparks-2026-08-29.md` §10; sim twin `tier0/tests/test_spark_alt_cost.py`). REAL, not structural, for almost all of it: the base rule's zeroing hook declining at any bank, the derived price of every proto row read off the emitted class, the strict Rare Power's gate at 2 vs 3 Sparks, its 0-Energy conversion, the X-cost exemption, Skills untouched, already-priced Attacks unaffected (sub-pick (a)), the co-op ownership clause, and a canonical card's price readable with its affordability false (`EB-94`'s throw from the other side). Structural where a live `CombatState` is needed: the payment routing through `SparkPower.Spend`, the badge reading `SparkCost.PriceOf`, and the starter seam's copy counts. |
 
-**With the flag: 211 tests, all green.**
+| `KleeOverhaulRuleTests.cs` | 26 | The Klee overhaul, slice one (`review/active/klee-brief-2026-09-01.md` sec.3; sim twin `tier0/tests/test_klee_overhaul.py`). REAL, not structural, for every DECISION the rules take: growth and how the Workshop and Alice's Recipe compose, the whole-pile take, the Mine split that leaves plain Bombs where they are, the single removal Sorry, Jean... makes, both per-turn counters, the turn roll on a skipped round, the per-play size memory, and the doubling. Structural where a live `CombatState` is needed, and those three are the ones that had to be: Set off resolves every explosion BEFORE the card's own damage (the call SEQUENCE, not a comment), the turn-start hook reaches `GrowBy` and nothing that deals damage (rule 7 at the one place the shipped Bomb fires by itself), and no generated slice card calls `SparkPower.Gain` (swept over all thirty-two, so a future row cannot quietly open a second income). Plus the flag-off pin on both wiring seams and a guard that the arm never reaches into `BombPower`. |
+
+**With the flag: 358 tests, all green.**
 
 ## Co-op coverage
 

@@ -591,6 +591,25 @@ def _added_card_value(fx: dict) -> float:
     return STATIC_GENERATED_CARD_VALUE
 
 
+#: The Klee overhaul's eight verbs (slice one, QUARANTINED behind
+#: `C.KLEE_OVERHAUL`). Named as a set rather than eight `if op ==` arms because
+#: they take ONE pricing decision between them -- see `_op_price`.
+KLEE_OVERHAUL_OPS = frozenset((
+    "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+    "remove_bomb_for_block", "damage_set_off_total", "double_set_off",
+    "draw_per_set_off"))
+
+#: The Kokomi overhaul's ten verbs (slice one, QUARANTINED behind
+#: `C.KOKOMI_OVERHAUL`). A second set beside the one above rather than a merged
+#: one, because the two arms are independent and a merged set would make either
+#: one's pricing decision look like the other's when the first of them is
+#: eventually taken.
+KOKOMI_OVERHAUL_OPS = frozenset((
+    "gain_tide", "surge", "block_half_surge", "exert", "mend", "plan",
+    "draw_companion_from_draw", "next_companion_free", "draw_per_tide",
+    "play_top_of_draw"))
+
+
 def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
     """The DRAFTER_VERSION 13 static price of one effect dict.
 
@@ -694,6 +713,59 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         return STATIC_SALON_ROTATE_VALUE
     if op == "spotlight_designate":
         return STATIC_SPOTLIGHT_DESIGNATE_VALUE
+
+    # -- the Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) --------
+    if op in KLEE_OVERHAUL_OPS:
+        # ZERO, and a DELIBERATE zero. The arm is C# FIRST (the slice packet
+        # sec.5) -- tier0 registers these eight verbs and REFUSES to resolve
+        # them, so there is no sim behaviour for a price to approximate and a
+        # guessed number would be a claim about a rule this engine has never
+        # run. No `docs/*-cards.yaml` row prints any of them, no pool, digest
+        # or stamp can see one, and with `C.KLEE_OVERHAUL` off the rows are
+        # unreachable by draft at all -- so every drafted number in the world
+        # is byte-identical with and without this branch, and DRAFTER_VERSION
+        # does not move. When the slice survives the Prototype gate and the
+        # sim arm is built, THAT is the change that prices these and archives
+        # the old world.
+        return 0.0
+
+    # -- the Kokomi overhaul, slice one (QUARANTINED, C.KOKOMI_OVERHAUL) ----
+    if op in KOKOMI_OVERHAUL_OPS:
+        # ZERO, and a DELIBERATE zero, on exactly the argument the branch above
+        # makes: the arm is C# FIRST (its slice packet sec.5), tier0 registers
+        # these ten verbs and REFUSES to resolve them, so there is no sim
+        # behaviour for a price to approximate and a guessed number would be a
+        # claim about a rule this engine has never run. No `docs/*-cards.yaml`
+        # row prints any of them, no pool, digest or stamp can see one, and
+        # with `C.KOKOMI_OVERHAUL` off the rows are unreachable by draft at
+        # all -- so every drafted number in the world is byte-identical with
+        # and without this branch, and DRAFTER_VERSION does not move.
+        #
+        # `mend` IS IN THAT SET AND IS NOW ALSO REACHABLE FROM THE OTHER ARM
+        # (a rewritten Inazuma Universal prints it, and `effects._op_mend`
+        # resolves it behind `C.COMPANION_OVERHAUL`), so the "tier0 refuses to
+        # resolve it" half of the argument stopped covering it on 2026-09-02.
+        # The ZERO stands on the OTHER half, which is the one that decides:
+        # only a `proto_` row prints the keyword, no offerable pool the drafter
+        # reads can hold one with the flag off, and healing has no priced
+        # channel in this table at all -- `heal` itself is `_PRICED_INLINE`.
+        # Pricing a bounded heal is acceptance work, and it moves `D` then.
+        return 0.0
+
+    # -- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
+    if op == "block_half_damage":
+        # ZERO, and a DELIBERATE zero, for a reason NEITHER branch above
+        # gives: this op RESOLVES in tier0 -- Gorou's Inuzaka All-Round Defense
+        # is played by both engines -- and it really does grant Block. What
+        # cannot be priced is the AMOUNT, because it is not on the card: it is
+        # half of what the card's own damage line actually landed, which
+        # depends on Strength, Weak, an amplifier and the target's Block at
+        # resolution time. The three honest options were a guess, the printed
+        # damage halved (a guess wearing an argument), and zero; zero is the
+        # one that makes no claim. The row is a `proto_` row and no offerable
+        # pool holds one with the flag off, so every drafted number in the
+        # world is unchanged and DRAFTER_VERSION does not move.
+        return 0.0
 
     # -- cards from nowhere ------------------------------------------------
     if op in ("generate_guest_star", "generate_from_pool"):
@@ -1894,6 +1966,38 @@ STATIC_OP_PRICING: dict[str, str] = {
                          "and no drafted number moves)",
     "gain_fanfare_floor": "STATIC_FANFARE_FLOOR_VALUE per point (v9)",
     "grow_damage": "one discounted future redraw",
+    # --- the Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) ------
+    # One rationale, eight ops, because it is ONE decision: the arm is C#
+    # first, tier0 refuses to resolve any of them, and a price is an estimate
+    # of behaviour that does not exist here yet. See `_op_price`.
+    **{op: "ZERO: the KLEE_OVERHAUL arm is C# FIRST and tier0 refuses to "
+            "resolve it, so there is no sim behaviour to price (slice packet "
+            "sec.5; prototype surface only -- no shipped row prints it and no "
+            "drafted number moves)"
+       for op in ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+                  "remove_bomb_for_block", "damage_set_off_total",
+                  "double_set_off", "draw_per_set_off")},
+    # --- the Kokomi overhaul, slice one (QUARANTINED, C.KOKOMI_OVERHAUL) --
+    # One rationale, ten ops, and the same one decision for the same reason.
+    **{op: "ZERO: the KOKOMI_OVERHAUL arm is C# FIRST and tier0 refuses to "
+            "resolve it, so there is no sim behaviour to price (slice packet "
+            "sec.5; prototype surface only -- no shipped row prints it and no "
+            "drafted number moves)"
+       for op in ("gain_tide", "surge", "block_half_surge", "exert",
+                  "plan", "draw_companion_from_draw", "next_companion_free",
+                  "draw_per_tide", "play_top_of_draw")},
+    # `mend` OUT OF THAT BULK, because half of its rationale stopped being
+    # true: it is the one Kokomi verb a rewritten Inazuma UNIVERSAL prints, so
+    # tier0 does resolve it behind `C.COMPANION_OVERHAUL`.
+    "mend": "ZERO: healing has no priced channel in this table at all "
+            "(`heal` is _PRICED_INLINE), and only a `proto_` row prints the "
+            "keyword -- no offerable pool holds one with the flag off, so no "
+            "drafted number moves",
+    # --- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
+    "block_half_damage": "ZERO: the amount is half of what the card's own "
+                         "damage line LANDED, which no static pricer can see "
+                         "(prototype surface only -- no shipped row prints it "
+                         "and no drafted number moves)",
     # --- damage/Block-shaped, new in v13 ---------------------------------
     "block_next_turn": "printed Block at STATIC_DELAYED_BLOCK_SHARE",
     "block_at_turn_start": "printed Block at STATIC_DELAYED_BLOCK_SHARE, once "

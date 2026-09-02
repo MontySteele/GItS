@@ -73,6 +73,78 @@ in C# — Klee's three hybrid Spark spenders (`powder_charge`, `hold_the_line`,
 twins and a release build cannot reach them; flag off, the pool is
 byte-identical to shipped (`tier0/tests/test_eb218_hybrid_migration.py`).
 
+**A dev build can also REPLACE THE COMPANION POOL OF TWO NATIONS.** Third arm,
+third property, same terms as the second:
+
+```sh
+dotnet build klee-mod/KleeCode -p:PrototypeCards=true -p:CompanionOverhaul=true
+klee-mod\build\deploy_proto.ps1 -KleeOverhaul -CompanionOverhaul   # both arms
+```
+
+`-p:CompanionOverhaul=true` defines `COMPANION_OVERHAUL`, which moves
+`KleeMod.Powers.CompanionOverhaul.Enabled`; the sim twin is
+`C.COMPANION_OVERHAUL`. With it on, the companion reward slot, the shop channel
+and the Featured Banner all read the approved workshops' rewritten Universals —
+Mondstadt's 34 (`proto_mc_` rows, `C.MONDSTADT_OVERHAUL_POOL_IDS`) and
+Inazuma's 24 (`proto_mi_` rows, `C.INAZUMA_OVERHAUL_POOL_IDS`) — and the 17
+shipped Mondstadt rows and 15 shipped Inazuma rows cannot be offered. Fontaine
+is untouched: it has no workshop yet, and `C.COMPANION_OVERHAUL_NATIONS` is the
+one list that decides. The seam is ONE property in each engine —
+`CompanionPool.All` and `loader.companion_roster_replacement` — because the
+banner and the slot must never read different rosters (R64). Flag off, both are
+byte-identical to shipped (`tier0/tests/test_companion_overhaul.py`,
+`tier0/tests/test_inazuma_companion_overhaul.py`,
+`klee-mod/KleeTests/Prototype/CompanionOverhaulTests.cs`). **Unlike the Klee
+overhaul this arm is built in BOTH engines**, because it needed almost no new
+op: every Mondstadt row is written in the grammar the sheets already speak, and
+Inazuma adds exactly one verb (`block_half_damage`).
+
+**ONE FLAG FOR BOTH NATIONS, deliberately.** There is no `InazumaOverhaul`
+property: the arm means "the companion pool is the approved workshops' pool",
+and a second property would let a build offer one nation's rewrites beside the
+other nation's shipped rows — a state no document describes and no seat would
+be asked to grade.
+
+**Inazuma's twenty-four (2026-09-02)** are the approved workshop
+`companion-workshop-inazuma-2026-09-01.md` sec.3 — fifteen re-authored shipped
+rows and nine characters given their first. Twelve of them spend a hook the
+Mondstadt second wave already built (the end-of-turn volley, the start-of-turn
+payout, the Block-absorption mark, the next-Attack element override, the
+reaction event, a power hosted on a chosen body, `AfterCardPlayed`); FOUR
+things are new — a per-play damage total (Gorou's "Block equal to half the
+damage dealt"), a hit that ignores Block (Chiori's Tamoto), a per-turn Swirl
+count (Heizou) and a companions-played count that needed no new state at all
+(Raiden). **Mend became character-agnostic** in the same change and by one
+line: Mizuki's Rare is a Universal that prints the Kokomi arm's keyword, so
+`KokomiTide.Mend` asks `MendIsLive` — either arm, any player's creature —
+while the rule under it ("never above the HP you entered the fight with") stays
+written once. Six shipped paths carry a flag-guarded branch or a defaulted
+parameter for the arm — the damage tail, the card-play loop, the turn-start
+counter clear, the combat-start Mend ceiling, `ElementalHit.Deal` and
+`KokomiTide` — and each is pinned byte-identical with the flag off rather than
+assumed. The per-row reasoning and the fourteen ambiguities the printed text
+left open are in `docs/notes/prototype-surface-provenance.md`.
+
+**All thirty-four MONDSTADT Universals, in two waves.** The first twenty-one rode the two
+turn hooks the engine already ran. The other THIRTEEN were held back because
+their printed text wanted a hook that existed in neither engine, and those
+hooks are now built — a per-instance Block-absorption trigger, a
+pre-enemy-attack trap (the hook Klee's Mine already uses,
+`BeforeDamageReceived`), a next-Attack element override behind ONE element
+funnel per engine, a Swirl event that remembers its element, an
+Attacks-played-this-turn counter, a next-Attack cost discount, a Block-reading
+damage formula, a power hosted on its chosen target, a counting delayed blade,
+and two damage-pipeline modifiers behind a modal Power. **Still no new op and
+no new target spelling:** the thirteen rows are `apply_power`, `damage` and
+`conditional`, plus one new predicate (`nth_attack_this_turn_<N>`) and one new
+C# reader for a count tier0 already had (`player_block`). Sim
+`tier0/tests/test_companion_overhaul_hooks.py`, mod
+`klee-mod/KleeTests/Prototype/CompanionOverhaulHookTests.cs`; the per-row
+reasoning is in `docs/notes/prototype-surface-provenance.md`. Five shipped
+paths carry a flag-guarded branch for it — the enemy-attack loop, `card_cost`,
+`_element_for`, `deal_damage_to_enemy` and `_react` — and each is pinned
+byte-identical with the flag off rather than assumed.
+
 **THE DELETION RULE (R213 B).** *Once a slice is accepted or rejected, its rows
 LEAVE the surface.* Accepted rows are re-authored onto the owning character's
 real sheet — ruled numbers, stamp bump, art — and deleted here in the same

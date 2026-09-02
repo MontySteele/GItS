@@ -990,3 +990,589 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 # arm is accepted or rejected.
 # =============================================================================
 ```
+
+## before proto_ko_kaboom
+
+```
+# =============================================================================
+# THE KLEE OVERHAUL, SLICE ONE (`review/active/klee-overhaul-slice-1-2026-09-01.md`,
+# against the ruled brief `klee-brief-2026-09-01.md` sec.3 and sec.8).
+#
+# NO NUMBER BELOW IS A CLAIM. The slice packet says so in its sec.1: the numbers
+# are placeholders so the cards can be played, and the Balance stage prices them
+# later with the measurement law.
+#
+# THESE ROWS ARE REACHABLE, unlike every row above them. Under `C.KLEE_OVERHAUL`
+# / `-p:KleeOverhaul=true` the first five ARE Klee's ten-card starter and the
+# rest ARE her whole offerable pool -- `loader._starter_ids` and
+# `loader.pool_replacement` in the sim, `Klee.StartingDeck` and
+# `KleeCardPool.FilterThroughEpochs` in the mod. With the flag off none of them
+# can be reached by any path, which is the acceptance condition
+# (`tier0/tests/test_klee_overhaul.py`).
+#
+# EVERY ROW CARRIES ITS OWN `description:`. That is the surface's own face
+# channel (EB-215) and here it is load-bearing twice over: the printed text is
+# the SLICE PACKET's, so what a seat plays is what the packet ruled; and the
+# arm's eight ops have no renderer in `build_description`, because writing one
+# would be inventing English for rules that may not survive the Prototype gate.
+#
+# VERMILLION PACT IS NOT HERE. The packet's sec.5 lets it drop -- "the one item
+# on this list that touches shared reaction code; if it costs more than a day it
+# drops out of slice one" -- and it does; the reasoning is in
+# `KleeOverhaulPowers.VermillionPactNotBuilt`. A row for an unbuilt rule would
+# be a face that lies.
+#
+# ONE DISPLAY NAME IS SUFFIXED. "Sparks 'n' Splash (proto)": the shipped card of
+# that name is Klee's KIT Burst card, which is granted by the meter and is
+# therefore still reachable in the same run as this Power. Every other name here
+# is the packet's own, because the shipped card that shares it cannot be reached
+# while the flag is on.
+```
+
+## before proto_mc_diona_signature_mix
+
+```
+# THE MONDSTADT COMPANION OVERHAUL. Reachable rows, not staged ones: under
+# `C.COMPANION_OVERHAUL` these ARE Mondstadt's Universal companion pool, and
+# the seventeen shipped Mondstadt rows cannot be offered. Source: the approved
+# workshop `companion-workshop-mondstadt-2026-09-01.md` sec.3 (a Paper
+# artefact on the companion-workshop branch, not in this tree), whose printed
+# text every face below carries.
+#
+# `hexerei: true` is ONE WORD WITH NO EFFECT (the workshop's sec.1, pick 2:
+# "Hexerei is one word on a Universal. It does nothing by itself. Klee's own
+# readers and any future Hexerei character's carry the payoff"). The mark is
+# carried so a later reader can see which rows the family owns; nothing in
+# either engine reads it today, and nothing here pays out on it. A field
+# rather than a `tags:` entry because `tags` is already read by four unrelated
+# predicates, and adding an inert word to a list four things filter is how an
+# inert word stops being inert.
+#
+# WHAT A ROW HERE IS. Universals only. Every line the workshop's sec.3 marks
+# as a STAND-IN is a Klee-only replacement card and is not a Universal; its
+# sec.4 coven Personals are Klee's kit rather than companion offers; the Klee
+# Hexerei readers are a separate slice. None of the three is on this sheet.
+# Inazuma and Fontaine are untouched in every build.
+#
+# EVERY ROW CARRIES ITS OWN `description:` (EB-215). The face is the
+# workshop's printed sentence, with this repo's rendering conventions applied:
+# an Attack's element rides the AppliesX keyword chip rather than the text
+# (the shipped companion sheet's convention), Block and the named keywords are
+# golded, and Exhaust is the keyword rail's.
+#
+# TEN DISPLAY NAMES CARRY A "(proto)" SUFFIX. Those ten rewrite a SHIPPED row
+# whose display name they keep, and `tools/lint_unique_names.py` holds one
+# namespace across all six sheets -- so the suffix is what lets the rewritten
+# Frostgnaw and the shipped one coexist while the arm is being graded. It is
+# the same device `proto_ko_sparks_n_splash` already uses. The other eleven
+# names are new and carry no suffix.
+#
+# THIRTEEN OF THE WORKSHOP'S THIRTY-FOUR UNIVERSALS LANDED IN A SECOND WAVE,
+# each because its printed text wanted an engine hook that existed in NEITHER
+# engine when the first twenty-one were built. The hooks are built now, in both
+# engines, and the rule that held the rows out is unchanged and still binds
+# anything later: a card that cannot be printed as written is left OUT rather
+# than replaced by a simpler card -- the same rule the Klee overhaul applied to
+# Vermillion Pact. What each row wanted, and what it now spends:
+#
+#   Diona, Icy Paws           "when THIS Block absorbs damage": a per-instance
+#                             Block-absorption trigger. Neither engine can name
+#                             which Block a hit ate.
+#   Noelle, Sweeping Time     damage equal to your Block: the C# amount-formula
+#                             grammar has no `player_block` count (tier0 does).
+#   Barbara, Melody Loop      a persistent power that re-applies to the CARD's
+#                             chosen target each turn; a power holds no target.
+#   Bennett, Passion Overload "your next Attack ... applies Pyro": an element
+#                             override on a next-attack buff.
+#   Dahlia, Sacramental Shower a trap that resolves BEFORE an enemy attack;
+#                             there is no pre-enemy-attack counter hook.
+#   Dahlia, Favonian Favor    "whenever a reaction happens this turn, gain 3
+#                             Block": a per-reaction event, turn-scoped. The
+#                             mod counts reactions but broadcasts none.
+#   Durin, Binary Form        a modal Power choosing one of two damage-pipeline
+#                             modifiers (reactions deal 50% more to enemies;
+#                             Pyro Attacks that react deal 8 more).
+#   Razor, Claw and Thunder   "the third Attack you played this turn": no
+#                             Attacks-played-this-turn counter in the mod.
+#   Razor, Lightning Fang     a timed rider that adds damage AND overrides the
+#                             element your Attacks apply.
+#   Varka, Sturm und Drang    a Swirl event that remembers the swirled element
+#                             for the next Attack.
+#   Amber, Explosive Puppet   the same pre-enemy-attack counter as the Shower,
+#                             plus incoming-damage reduction.
+#   Eula, Glacial Illumination a placed counter that tallies Attacks for two
+#                             turns and then pays 8 plus 5 per Attack counted.
+#   Mika, Starfrost Swirl     "your next Attack costs 1 less": no next-Attack
+#                             cost-discount power exists.
+#
+# THE `star` FIELD IS THE CHARACTER'S, NOT THE CARD'S, and the workshop gives
+# Jean a five-star Uncommon (Gale Blade) beside her five-star Rare. Both
+# engines gate the Featured Banner on `star == 5`, so under this arm Gale Blade
+# is banner-eligible -- and Mondstadt now designs SIX five-star cards against
+# BANNER_FEATURED_SLOTS = 3, so the banner binds on Mondstadt for the first
+# time. That is the shipped law applied to a bigger roster, not a new rule, and
+# it is written down here because it is the arm's most visible side effect.
+```
+
+## before proto_mc_diona_icy_paws
+
+```
+# THE SAME OVERHAUL'S SECOND WAVE -- THE THIRTEEN ROWS THAT NEEDED ENGINE
+# HOOKS. Same source, same terms and the same deletion rule as the block
+# above; what is different is that each of these thirteen was held out of the
+# first pass because its printed text wanted a hook that existed in NEITHER
+# engine. The hooks are built now, in both, and this block records WHICH HOOK
+# EACH ROW SPENDS -- so a later slice can price the hook rather than
+# rediscover it.
+#
+# THE HOOKS, and what was REUSED rather than built:
+#
+#   THE PRE-ENEMY-ATTACK TRAP (Dahlia's Sacramental Shower, Amber's Explosive
+#   Puppet) is the hook Klee's Mine already answers an enemy attack with --
+#   `PowerModel.BeforeDamageReceived` in the mod, and the same moment in the
+#   sim (`combat._enemy_turn`, after the hit's number is settled and before
+#   Block is spent). The traps sit on the PLAYER and read that broadcast from
+#   the other side. The intent-based predicate that already exists
+#   (`enemy_intends_attack`) was refused for the Mine's own reason: an intent
+#   can be answered and then not happen, while a hit about to land cannot.
+#   `effects.companion_overhaul_before_enemy_hit`.
+#
+#   THE INCOMING-DAMAGE REDUCTION (Amber's "take 3 less") is
+#   `ModifyDamageAdditive` returning a negative -- `PreventExhaustWardPower`'s
+#   shape. It is PURE, because the engine asks it speculatively for the intent
+#   preview; the consumption and the volley are one phase later, which is why
+#   the C# splits Baron Bunny in two where the sim does not.
+#
+#   THE BLOCK-ABSORPTION TRIGGER (Diona's Icy Paws) is new. The engine has ONE
+#   Block pool, so "this Block" is a MARK on the pool rather than a pile, and
+#   a hit that spends Block spends the mark with it -- marked-Block-eaten-first,
+#   which is the conservative reading of a question a single pool cannot
+#   answer (R212's one-way rule). `effects.companion_overhaul_block_absorbed`.
+#
+#   THE NEXT-ATTACK ELEMENT OVERRIDE (Bennett's Passion Overload, Razor's
+#   Lightning Fang, Varka's banked Swirl charge) is new, and it is the change
+#   with the widest blast radius: the element a play applies used to be read
+#   straight off the card at three sites, and is now read through ONE funnel
+#   in each engine (`effects._element_for`, `AuraCmd.ElementOfPlay`). An
+#   application site and a reaction site that disagreed about a card's element
+#   would apply one aura and react with another. ORDER IS LAW -- blanket
+#   first, one-shots after, LAST WINS -- and both engines assert it against
+#   the other's source.
+#
+#   THE SWIRL EVENT THAT REMEMBERS ITS ELEMENT (Varka) and THE PER-REACTION
+#   PAYOUT (Dahlia's Favonian Favor) ride ONE call from the single place each
+#   engine resolves a reaction (`reactions._react`,
+#   `ReactionEffects.Resolve`), where the CONSUMED element is still in hand.
+#   A call to one owner, not a bus: two readers do not earn an interface
+#   fanned over every power.
+#
+#   THE ATTACKS-PLAYED-THIS-TURN COUNTER (Razor's Claw and Thunder, and Eula's
+#   tally) is `state.attacks_played_this_turn` in the sim and a new
+#   round-rolling `CompanionOverhaulLedger` in the mod. NOT
+#   `CurtainCallHooks.AttacksPlayed`, which counts the same thing and is
+#   cleared only for Furina -- a Klee key would accumulate all fight, which is
+#   the defect that map's own `Purge` comment already records once.
+#   Both engines read the counter PLUS ONE, because both count an Attack after
+#   it resolves and the card asking is itself the Attack.
+#
+#   THE NEXT-ATTACK COST DISCOUNT (Mika) is `combat.card_cost` beside the
+#   Leading Role discount, and `TryModifyEnergyCostInCombat` in the mod --
+#   `SpotlightDiscountPower`'s shape. Both are PURE: the stack is spent by the
+#   Attack that takes it, never by being priced, so the playability gate may
+#   ask as often as it likes.
+#
+#   THE BLOCK-READING DAMAGE FORMULA (Noelle's Sweeping Time) is
+#   `amount_formula: {count: player_block}`, which tier0 has had since the
+#   reference pool's Body Slam and which the C# amount grammar had no reader
+#   for. `player_block_calc_rider` is that reader, on the same
+#   CalculatedDamageVar path the four riders beside it use.
+#
+#   A POWER ON A CHOSEN BODY (Barbara's Melody Loop, Eula's Lightfall Sword).
+#   A power holds no target, so the TARGET HOLDS THE POWER: both land on the
+#   enemy the card named, which is the workshop's own gloss for Barbara ("a
+#   persistent applier on a chosen body") and the literal reading of Eula's
+#   "place a Lightfall Sword ON TARGET". A body that dies takes the loop or
+#   the blade with it. The seam is `ENEMY_APPLY_POWERS`, which also makes the
+#   two cards declare `TargetType.AnyEnemy`.
+#
+#   TWO DAMAGE-PIPELINE MODIFIERS BEHIND A MODAL POWER (Durin's Binary Form).
+#   The modal surface itself is EB-118's and needed nothing: `choose_one` in
+#   the sheet, `ModalChoice` in the mod. WHITE multiplies the REACTION'S OWN
+#   damage -- a Vaporize that turns 10 into 20 has dealt 10 as a reaction, and
+#   White makes that 15 -- and it reaches exactly two places in each engine,
+#   the amplifier and the Overload splash. Electro-Charged applies a dot POWER
+#   rather than damage and is left alone; Superconduct, Frozen, Crystallize and
+#   Swirl deal no damage of their own. DARK adds its 8 in the ADDITIVE phase,
+#   off a FORECAST of the reaction the standing aura is about to produce,
+#   which is the same read `AuraPower.ModifyDamageMultiplicative` makes one
+#   phase later.
+#
+# READ AMBIGUOUSLY, AND HOW.
+#
+#   1. "WHEN THIS BLOCK ABSORBS DAMAGE" -- one pool, so the marked Block is
+#      taken as eaten FIRST. One-way: the paws bite on fewer hits than the
+#      other reading would give, and no third reading exists.
+#   2. "THE NEXT TIME AN ENEMY ATTACKS YOU" is one HIT, not one intent. A
+#      multi-hit intent spends one trap on its first hit and finds none on the
+#      second -- the Mine's own consumption rule, met again.
+#   3. "TAKE 3 LESS" applies to the hit the trap answers and floors at zero.
+#   4. TWO NEXT-ATTACK ELEMENT RIDERS AT ONCE: the damage halves STACK (three
+#      separate sentences, three separate numbers) and only the ELEMENT is
+#      exclusive, because an Attack applies one. Blanket first, one-shots
+#      after, last wins.
+#   5. AN OVERRIDE BEATS `applies_element: false`. "Your next Attack applies
+#      Pyro" is a statement about the Attack, not a modifier to one it was
+#      already making.
+#   6. "IF THIS IS THE THIRD ATTACK YOU PLAYED THIS TURN" counts the card
+#      asking. Both engines count an Attack after it resolves, so both read
+#      the counter plus one.
+#   7. "FOR 2 TURNS IT COUNTS YOUR ATTACKS; THEN IT DEALS ..." -- TICK, THEN
+#      FIRE AT ZERO, the opposite order from the arm's volleys, because the
+#      sentence says "then". Placed on your turn with 2 turns it counts this
+#      turn's Attacks and next turn's and pays at the end of the second. The
+#      blade's damage carries NO ELEMENT, because the card names none --
+#      Solar Isotoma's call, made again.
+#   8. "ENEMIES TAKE 50% MORE DAMAGE FROM REACTIONS" scales the REACTION'S
+#      contribution, not the hit that triggered it. Stacks ADD (two Durins are
+#      +100%, not +125%).
+#   9. MIKA'S DISCOUNT DOES NOT DISCOUNT HER OWN CARD. She is the first
+#      Attack in the repo to apply a next-Attack rider, which is why the mod
+#      needed a latch: the amount standing BEFORE the play is what the play
+#      spends, and anything the play itself added survives.
+#  10. `role_c` ON A REWRITTEN ROW IS DERIVED FROM THE BODY, not inherited
+#      from the shipped twin. Favonian Favor stops applying an element and
+#      becomes `buffer`; the shipped row was `applier`.
+#
+# WHAT THIS BLOCK COST THE SHIPPED PATHS, exhaustively, and every one of them
+# is byte-identical with the flag off (pinned, not intended, by
+# `tier0/tests/test_companion_overhaul_hooks.py` and
+# `KleeTests/Prototype/CompanionOverhaulHookTests.cs`):
+#   `combat._enemy_turn`      two guarded calls
+#   `combat.card_cost`        one guarded discount, beside Leading Role's
+#   `effects._element_for`    one guarded override, read off a per-play snapshot
+#   `effects.deal_damage_to_enemy`  one guarded additive term (Durin, Dark)
+#   `reactions._react`        one guarded multiplier and one guarded call
+#   `AuraPower` / `KleeElementalHooks`  the element read moved behind one funnel
+#   `ReactionTable` / `ReactionEffects` two `#if PROTOTYPE_CARDS` blocks
+```
+
+## The Kokomi overhaul, slice one — `proto_kk_` (2026-09-01)
+
+Thirty-three rows: the ten-card starter (five ids) and all twenty-eight pool
+rows of `review/active/kokomi-overhaul-slice-1-2026-09-01.md`, written against
+the ruled brief `kokomi-brief-2026-09-01.md` (all eight picks ruled at their
+defaults on 2026-09-01). Under `C.KOKOMI_OVERHAUL` /
+`-p:KokomiOverhaul=true` these ARE her starter and her whole reward pool; with
+the flag off they are unreachable, like every other row on this surface.
+
+```
+NOTHING DROPS. The Klee overhaul left Vermillion Pact off its own surface
+because its rule wanted shared reaction code. Every row of this slice prints
+inside the grammar the emitter already speaks once the arm's ten verbs exist,
+so all twenty-eight are here and the packet's own rarity split -- 12 Common,
+12 Uncommon, 4 Rare -- is the pool's.
+
+EVERY ROW CARRIES ITS OWN `description:` (EB-215). The face is the packet's
+printed text with this repo's rendering conventions applied: "Deal 6." becomes
+"Deal 6 damage.", the six keywords are golded, and Exhaust is the keyword
+rail's -- the same treatment the Klee slice's "Set off. Deal 6." got. No
+number moves and no clause is added or dropped.
+
+ELEVEN DISPLAY NAMES CARRY A "(proto)" SUFFIX, and they are:
+  Water's Edge, Coral Guard, Kurage's Oath, Stolen Chapter, Song of Pearls,
+  Nereid's Ascension, Sango Isshin, Undertow, Salt Line, Cleansing Tide
+  -- ten names already owned by a SHIPPED Kokomi row, and
+  High Tide -- owned by a shipped FURINA row (`furina-cards.yaml:high_tide`).
+`tools/lint_unique_names.py` holds one namespace across all six sheets plus
+the relics, so the suffix is what lets the rewritten card and the shipped one
+coexist while the arm is being graded. It is the same device
+`proto_ko_sparks_n_splash` and the ten `proto_mc_` rewrites already use. The
+packet's sec.8 names seven of the ten Kokomi collisions; the other three
+(Song of Pearls, Undertow, Cleansing Tide) and the Furina one were found by
+running the lint over the six sheets and this surface together, and the same
+rule was applied to them. The remaining twenty-two names are new.
+
+THE TEN VERBS, and what each row's clause resolves to:
+  gain_tide                 Tide +N. `per: enemies_hit` is Deep Current's
+                            "per enemy hit", read off a snapshot taken at the
+                            TOP of the body -- an enemy the card's own AoE
+                            killed was still hit.
+  surge                     rule 3: the whole Tide as one Hydro hit, then 0.
+  block_half_surge          Undertow's second clause, read off the play's own
+                            Surge total because the jellyfish is empty by the
+                            time it asks.
+  exert                     rule 5, and it is DAMAGE rather than an HP loss:
+                            dropping `Unblockable` is what lets Block eat it.
+                            Refused on an Attack by the emitter, which is
+                            rule 5's second half enforced where a card is
+                            built.
+  mend                      heal, capped at her entry HP -- one function, so
+                            the cap cannot be forgotten at a call site.
+  plan                      rule 8, ONE clause from a table of seven, spelled
+                            `then:` so the repo's one effect walk sees it.
+  draw_companion_from_draw  Rally's search, through the game's own
+                            pile-selection screen filtered to Companions.
+  next_companion_free       Vanguard's grant. It ZEROES rather than discounts,
+                            because the card prints "costs 0".
+  draw_per_tide             Reading the Tide. A read, not a spend.
+  play_top_of_draw          War Council's clause, and legal ONLY inside a
+                            `plan` body -- a top-level spelling would be a
+                            different, unpriced card.
+
+THE READINGS TAKEN, each because the printed text does not settle it:
+  Deep Current    "per enemy hit" is every living enemy when the card was
+                  played, snapshotted before its own AoE resolves.
+  Undertow        "half the damage dealt" is half the TIDE that went out,
+                  rounded down -- not the number that landed after the shared
+                  pipeline's amplifier and the target's Vulnerable, neither of
+                  which is a fact about her Tide.
+  Ambush / Feint  a Plan's damage is HYDRO, through the same funnel the Surge
+                  and Sango Isshin's overflow use. The cards name no element;
+                  Hydro is the only choice that leaves Feint's two halves
+                  behaving alike, the printed one applying an element and the
+                  delayed one not.
+  The Art of War  "Plans ALSO happen now" is read as now AND next turn. As
+                  "instead" it would delete rule 8 rather than break it, and
+                  the brief's gloss is "Rule 8's delay is gone".
+  Song of Pearls  vs The Clouds Like Waves: both make a flat statement about
+                  the pulse's size and neither prints an order, so the larger
+                  applicable number wins. Under 4 the Clouds card would be a
+                  lie; under 3 Song of Pearls would be one. The budget is
+                  Song's alone, because only Song mentions it.
+  The pulse       spends its per-combat budget in HP THAT LANDED. Script A's
+                  turn-1 pulse "would Mend 2, but she is at 80, so nothing",
+                  and after three effective pulses "the pulse paid 6 of its
+                  8". A consequence, reported rather than hidden: the damage
+                  Sango Isshin makes out of the excess costs no budget either.
+  The Garment     "each Attack that HITS" is per Attack CARD PLAY that landed
+                  on something, not per hit -- sec.6.1's "three Attacks each
+                  put 2 back" and script B's "Water's Edge twice (12, Mend 4)".
+                  Blocked damage still counts as a hit.
+  The Plan hook   resolves at `AfterPlayerTurnStart`, NOT before the draw as
+                  the packet's sec.5 asks. There is no broadcast between the
+                  game's energy reset and its hand draw, so "before draw"
+                  means before the block clear and the energy reset too, and
+                  Read the Field's Block and Battle Plan's Energy would both
+                  be wiped. The brief's own script C requires the later hook:
+                  its turn 2 opens on five energy, which is three plus the
+                  Plan's two. Recorded in full on the method.
+
+WHAT THE STARTER COSTS, stated: her opening deck goes from TWELVE cards to
+TEN, which is the packet's own sec.3 count -- the twelve-card shape was ruled
+for a deck that mills itself, and nothing in this arm exhausts. And the
+starting-companion roll finds no slot to take, because it matches on the
+shipped `SayuDarumaGift` type and none of the ten is that type: under this arm
+she opens with no companions, and the Commander loop draws its army from the
+reward slot, which is what the packet says it does.
+
+THE RELIC. Tamanooya's Casket replaces the Pearl of Wisdom, because the
+Pearl's printed body IS the exhaust funnel the brief retires. It carries the
+pulse and both its numbers, keeps the companion reward slot (that hook is not
+a Charge rule, and the Commander loop's whole army comes through it), and has
+no upgraded form -- a curated absence in
+`tier0/tests/test_starter_relic_upgrades.py` with its reason and the gate that
+clears it.
+```
+
+## The Inazuma companion overhaul — `proto_mi_` (2026-09-02)
+
+Twenty-four Universals, on the SAME flag as the Mondstadt block above
+(`C.COMPANION_OVERHAUL` / `-p:CompanionOverhaul=true`). Source: the approved
+workshop `companion-workshop-inazuma-2026-09-01.md` sec.3, approved 2026-09-01
+at its four default picks (its sec.9), with two edits already in that text —
+Itto's Superlative Superstrength loses its Exhaust, and Mizuki's Mend stays at
+10 because the keyword is bounded at entry HP. A Paper artefact on another
+branch and not in this tree.
+
+```
+ONE FLAG, TWO NATIONS. There is no `INAZUMA_OVERHAUL` property. The arm already
+means "the companion pool is the approved workshops' pool", and a second
+property would let a build offer one nation's rewrites beside the other
+nation's shipped rows -- a state no document describes and no seat would be
+asked to grade. `C.COMPANION_OVERHAUL_NATIONS` is the one list the kept half of
+the roster is filtered against, and Fontaine is deliberately not in it: its
+workshop does not exist yet and both approved documents say so in their sec.6.
+
+TWENTY-FOUR AND NOT TWENTY-FIVE. The document's sec.4 counts "25 Universals, 1
+Personal" while its sec.3 enumerates 24 Universals plus Gorou's Kokomi-side
+Personal (Crystal Collapse), and the rarity split it prints -- 9 Common, 12
+Uncommon, 4 Rare -- only closes when the Personal is counted among the
+Uncommons. The ENUMERATION is what is built, so the pool is 9 Common, 11
+Uncommon and 4 Rare. A Personal is Kokomi's kit rather than a companion offer;
+no stand-in is a Universal either; neither is on this sheet.
+
+NOTHING WAS DROPPED. Every one of the twenty-four prints inside the grammar the
+emitter speaks once the arm's fifteen powers exist, so the rule the Mondstadt
+waves kept -- "a card that cannot be printed as written is left OUT rather than
+replaced by a simpler card", the rule that left Vermillion Pact off the Klee
+surface -- bit on nothing here.
+
+FIFTEEN DISPLAY NAMES CARRY A "(proto)" SUFFIX, and they are the fifteen
+rewrites of shipped Inazuma rows, whose printed names they keep.
+`tools/lint_unique_names.py` holds one namespace across all six sheets plus
+this surface, so the suffix is what lets the rewritten Thundergrust and the
+shipped one coexist while the arm is graded. It is the same device the ten
+`proto_mc_` rewrites and the eleven `proto_kk_` rows already use. Gorou's
+Uncommon is NOT suffixed: the workshop renames it "Juuga: Forward Unto Victory"
+where the shipped row is "Forward Unto Victory", so the two names differ
+already. The other eight new characters' names are new.
+
+EVERY ROW CARRIES ITS OWN `description:` (EB-215), the workshop's printed
+sentence with this repo's rendering conventions applied: an Attack's element
+rides the AppliesX keyword chip rather than the text, a POWER's volley names
+its element in the sentence (the shipped `proto_mc_` convention), Block and the
+named keywords are golded, and Exhaust is the keyword rail's. No number moves
+and no clause is added or dropped.
+
+WHAT THE HOOKS COST, and the headline is how little. Thirteen hooks were built
+for the Mondstadt second wave and TWELVE of this pool's rows spend one without
+a line of new plumbing:
+
+  end-of-turn volley       Gorou's Juuga, Sayu's Daruma, Shinobu's ring,
+                           Yae's Sakura, Ayaka's Soumetsu, Ayato's clock,
+                           Chiori's Tamoto
+  start-of-turn payout     Sayu's Naptime, Sara's Stormcall, Kirara's parcel
+  Block-absorption mark    Thoma's Blazing Barrier (Diona's Icy Paws)
+  next-Attack element      Sara's Crowfeather Cover, Ayato's Kyouka
+                           (Bennett's Passion Overload, Razor's Lightning Fang)
+  the reaction event       Heizou's Swirl count (Dahlia's Favonian Favor)
+  a power on a chosen body Yoimiya's Aurous Blaze (Barbara's Melody Loop)
+  AfterCardPlayed          Thoma's Crimson Ooyoroi
+
+FOUR THINGS ARE NEW, and each is small:
+
+  A PER-PLAY DAMAGE TOTAL. Gorou's Inuzaka All-Round Defense prints "Gain Block
+  equal to half the damage dealt", and the printed 8 is not what landed once
+  Strength, Weak, an amplifier and the target's Block have spoken. The total is
+  `state.mi_damage_dealt_this_card` in the sim (written at the tail of
+  `deal_damage_to_enemy`, zeroed at the head of `resolve_card`, saved across a
+  free play with `block_gained_this_card`'s neighbours) and
+  `CompanionOverhaulLedger.DamageDealtThisPlay` in the mod (totalled from
+  `CompanionOverhaulPlayWatcher.AfterDamageReceived`). It counts HP damage from
+  a CARD, which is the conservative reading of "the damage dealt" (R212's
+  one-way rule -- the doubt pays LESS Block) and is also what keeps the two
+  engines counting the same thing: the arm's power-sourced hits pass neither a
+  dealer nor a card source, so neither engine counts them. The op is
+  `block_half_damage`, Kokomi's `block_half_surge` asking about a different
+  total.
+
+  A HIT THAT IGNORES BLOCK. Chiori's Tamoto, "ignoring Block": one optional
+  parameter on `deal_damage_to_enemy` and one on `ElementalHit.Deal`, both
+  defaulted off, adding `ValueProp.Unblockable` beside the `Unpowered` a
+  power-sourced hit already carries. The hit still reacts, still counts as a
+  hit and is still capped by Intangible -- unblockable is not uncappable
+  (R128).
+
+  A SWIRL COUNT. Heizou's Heartstopper Strike, "4 more for each Swirl this
+  turn": one integer written at the ONE site each engine resolves a reaction,
+  beside Varka's latch and off the same event, so the two readers cannot
+  disagree about what a Swirl was. `swirls_this_turn` in the amount grammar.
+
+  A COMPANIONS-PLAYED COUNT. Raiden's Musou no Hitotachi, "5 more for each
+  Companion card you played this combat": no new state at all, because both
+  engines already keep the list -- `state.companions_played` and
+  `CompanionPlays.PlayedThisCombat`, both unique by base id under the
+  BFF-dedupe ruling of 2026-08-06. So the count is CARDS and not PLAYS, which
+  is what "each Companion card" names.
+
+MEND, MADE CHARACTER-AGNOSTIC, AND THE RULE NOT DUPLICATED. Mizuki's Anraku
+Secret Spring Therapy is a UNIVERSAL that prints the Kokomi arm's keyword, so
+Klee or Furina can draft it and "the one true heal in the pool" has to mean the
+same thing in whoever's hands it lands. Exactly ONE LINE moved in the mod:
+`KokomiTide.Mend` stops asking `KokomiOverhaul.LiveFor(creature)` and asks
+`MendIsLive(creature)`, which is that OR "the companion arm is on and this
+creature is a player's". The bound itself -- heal, never above the HP you
+entered the fight with -- is still written once, in that same function, and no
+second Mend was authored. What the widening costs is one more seat's ledger
+entry: `KokomiTide.InstallAll` now captures EntryHp for every seat either arm
+reaches, at the same combat-start moment it always did, because a lazily
+captured ceiling taken at the first Mend would be the HP the fight had already
+lowered. The sim had no Mend at all (the Kokomi arm is C# first and its ten
+verbs raise), so `effects.mend` is that rule's first spelling there, and
+`_op_mend` resolves under `C.COMPANION_OVERHAUL` while still raising the Kokomi
+arm's own error when only that flag is on.
+
+READ AMBIGUOUSLY, AND HOW. Every one of these is a place the printed text does
+not settle the question, and the reading taken is the most literal one.
+
+ 1. "GAIN BLOCK EQUAL TO HALF THE DAMAGE DEALT" is half the damage that reached
+    HP, rounded down -- not the swing. One-way: the doubt pays LESS Block.
+ 2. "GAIN 2 DEXTERITY FOR 2 TURNS" lasts THIS turn and the next, which is the
+    reading Razor's Lightning Fang already gives the identical construction.
+    The workshop's italic gloss says "applies this turn too, so THREE turns of
+    Block"; the first half is true under this reading and the arithmetic in the
+    second half is not. The PRINTED text is what is built (its sec.3 preamble:
+    "Printed text only"), and the discrepancy is disclosed rather than settled
+    by moving a number nobody ruled.
+ 3. "DEAL 8, ANEMO, TO A RANDOM ENEMY. SWIRL." is ONE op: the Anemo the Attack
+    applies to the body it hit IS the Swirl. A separate `swirl` op would
+    re-roll the random target and swirl a different body. Kazuha's "Swirl each"
+    is the same reading over an AoE, where a second op would instead be a no-op
+    on bodies the hit has already cleared.
+ 4. "EACH SAKURA YOU PLACE WHILE ONE IS OUT DEALS 3 MORE" is a statement about
+    the SAKURA BEING PLACED, which is what its subject says: the first out
+    deals 4 and every later one deals 7, whether one or two were already
+    standing. So three Sakura are volleys of 4, 7 and 7. The workshop's italic
+    gloss ("totems that level up together") suggests the other reading, where
+    every placement raises every Sakura; the printed sentence does not say
+    that, and the printed sentence is what is built.
+ 5. "UP TO 3" is read at the FIRE, not at the placement: a fourth Sakura can be
+    placed and simply never pays. Conservative, and it needs no stack cap in
+    either engine.
+ 6. "PLUS YOUR STRENGTH" (Yae) is PRINTED, NOT IMPLEMENTED. Every power-sourced
+    hit in this arm already runs the dealer's modifiers, in both engines, so
+    the clause describes what the volley was always going to do.
+ 7. "FOR 2 TURNS ... THEN DEAL 16" (Ayaka) fires, ticks, and fires the finale
+    AT ZERO -- both on the same turn the clock runs out, because "then" is what
+    happens after the two turns and the second turn's own 8 is one of them.
+ 8. "FOR EACH COMPANION CARD YOU PLAYED THIS COMBAT" (Raiden) counts CARDS, not
+    plays: both engines' lists are unique by base id already.
+ 9. "WHENEVER IT TAKES DAMAGE FROM A CARD THAT IS NOT AN ATTACK" (Yoimiya) is a
+    three-way test, not a two-way one. A Skill's damage line and an Attack's
+    both arrive as powered card damage; a bomb, a volley or a Shatter arrives
+    with no card at all. So the mark fires when a card is present AND its type
+    is not Attack -- which also means the blast cannot re-trigger any mark, its
+    own included.
+10. "AT THE START OF YOUR NEXT TURN, DRAW 2 IF YOU PLAYED NO ATTACKS THIS TURN"
+    (Sayu) answers "this turn" at the END of the turn the card was played: an
+    Attack there deletes the promise, and anything still standing at the next
+    turn's start has already earned its draw.
+11. "IF YOU ARE ABOVE 70% HP" (Sayu's Daruma) is read when the Daruma ACTS, not
+    when it was summoned. Present tense, and the whole point of the nation's
+    shape is that the split follows the fight.
+12. "LOSE 3 HP" (Shinobu) is plain HP loss -- `{op: damage, target: self}`, the
+    shipped Hot Hands line, Unblockable and Unpowered -- and NOT Kokomi's Exert,
+    which is damage Block can eat.
+13. TWO MORE ELEMENT RIDERS AT ONCE. Five riders can now claim the element an
+    Attack applies and the order is unchanged law: BLANKET first (Razor, then
+    Ayato), ONE-SHOTS after (Bennett, then Sara), Varka's banked Swirl last of
+    all, LAST WINS. The damage halves all stack; only the element is exclusive.
+14. KIRARA CARRIES NO ELEMENT. She is Dendro, this engine has six elements and
+    no Dendro aura, and her card names no element at all -- so the row declares
+    none and `CompanionElement` is `Element.None`. Inventing one of the six
+    would be a design decision wearing a schema default.
+
+WHAT THIS BLOCK COST THE SHIPPED PATHS, exhaustively, and every one is
+byte-identical with the flag off (pinned by
+`tier0/tests/test_inazuma_companion_overhaul.py` and
+`KleeTests/Prototype/InazumaCompanionOverhaulTests.cs`, not intended):
+  `effects.deal_damage_to_enemy`   one guarded call at the tail, and one
+                                   defaulted `ignore_block` parameter
+  `combat._finish_play`            one guarded call beside after_card_played
+  `combat._player_turn`            one new per-turn counter cleared
+  `combat.new_combat`              the Mend ceiling captured
+  `ElementalHit.Deal`              one defaulted `ignoreBlock` parameter
+  `KokomiTide.Mend` / `InstallAll` the gate widened; the RULE unchanged
+
+THE BANNER BINDS HARDER. `star` is the CHARACTER's rarity, not the card's, and
+this pool designs ELEVEN five-star cards against `BANNER_FEATURED_SLOTS = 3` --
+so on any given run the Featured Banner shows three of them and the rest are
+unoffered, exactly as it now does for Mondstadt's six. Four of Inazuma's rows
+are Rare and all four are five-star, so a run whose banner features no Rare
+falls through to Uncommon, which is the ladder's shipped behaviour (R64). That
+is the shipped law applied to a bigger roster, not a new rule, and it is
+written down here because it is the arm's most visible side effect.
+
+THE DELETION RULE AT THE TOP OF THE SHEET BINDS THIS BLOCK: these rows leave
+when the arm is accepted or rejected.
+```

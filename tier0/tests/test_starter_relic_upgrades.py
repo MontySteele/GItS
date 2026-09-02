@@ -55,7 +55,30 @@ STARTERS: dict[str, str] = {
 # Kept as an empty dict rather than deleted, per the standing curated-set
 # discipline: the invariant is then asserted positively and the next gap has
 # somewhere to be named instead of becoming a silent Circlet.
-NO_UPGRADED_FORM: dict[str, str] = {}
+NO_UPGRADED_FORM: dict[str, str] = {
+    # THE KOKOMI OVERHAUL'S STARTING RELIC (QUARANTINED, C.KOKOMI_OVERHAUL --
+    # the whole class is `#if PROTOTYPE_CARDS`, so no release build contains
+    # it). A CURATED ABSENCE, which is what this dict is for, and the reason is
+    # the slice packet's own sec.7: "Upgrades. The smith is closed in the
+    # prototype run." An upgraded Casket would be a new relic with new numbers
+    # -- design, and not a build branch's to author -- and pointing it at the
+    # shipped `PearlOfInsightRelic` would be worse than nothing, because that
+    # relic's whole body is the exhaust-for-Charge funnel this very arm
+    # retires: a face that lies, which is the defect D4 already names.
+    #
+    # WHAT IT COSTS, stated: Touch of Orobas is an act-2 Ancient, and a dev
+    # build running the arm that takes it hands back the no-effect Circlet and
+    # loses the pulse. The slice's own gate is an ACT-ONE run (its sec.6 items
+    # 2 and 3), so no graded round reaches the event.
+    #
+    # THE GATE THAT CLEARS IT: the slice reaching Balance. Accepted rows move
+    # to her real sheet with ruled numbers and the smith opens, and the
+    # upgraded starter is authored there with everything else.
+    "TamanooyasCasket":
+        "prototype-only (KOKOMI_OVERHAUL); the smith is closed in the "
+        "prototype run (slice one sec.7), and an upgraded form would be a "
+        "design act. Clears when the slice reaches Balance.",
+}
 
 
 def _classes() -> dict[str, str]:

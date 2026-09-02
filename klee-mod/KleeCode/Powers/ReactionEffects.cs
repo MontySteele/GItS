@@ -309,6 +309,20 @@ internal static class ReactionEffects
                         choiceContext, target, dealer, cardSource);
                 }
             }
+
+#if PROTOTYPE_CARDS
+            // QUARANTINED (the Mondstadt companion overhaul). THE MOD COUNTS
+            // REACTIONS AND BROADCASTS NONE, which is why two of the workshop's
+            // cards -- Dahlia's Favonian Favor and Varka's Sturm und Drang --
+            // could not be built at all. This call is the broadcast, and it is
+            // one call to one owner rather than a bus: this is the single site
+            // a reaction resolves in the mod, and `consumedAura` is the only
+            // surviving handle on the element that was swirled. Sim twin:
+            // `effects.companion_overhaul_reaction`, called from
+            // `reactions._react` at the site that already counts.
+            await CompanionOverhaulReactions.Note(
+                choiceContext, reaction, target, dealer, consumedAura);
+#endif
         }
 
         // Burst economy, reaction half: +5 for EVERY named reaction --
@@ -416,12 +430,21 @@ internal static class ReactionEffects
                 // Unblockable | Unpowered with no dealer -- which also keeps
                 // splash from early-detonating bombs or counting as an attack.
                 var splashTargets = target.CombatState?.HittableEnemies.ToList();
+                var splash = ReactionConstants.OverloadSplash;
+#if PROTOTYPE_CARDS
+                // QUARANTINED. The other half of Durin's White form: the splash
+                // IS damage a reaction deals, so it takes the same factor the
+                // amplifier takes, at the one site that computes it. Truncated
+                // like the sim's `int(C.OVERLOAD_SPLASH * mult)`.
+                splash = (int)(splash
+                    * CompanionOverhaulReactions.DamageMultiplier(dealer));
+#endif
                 if (splashTargets != null)
                 {
                     foreach (var e in splashTargets)
                     {
                         await CreatureCmd.Damage(
-                            choiceContext, e, ReactionConstants.OverloadSplash,
+                            choiceContext, e, splash,
                             ValueProp.Unblockable | ValueProp.Unpowered,
                             dealer: null, cardSource: null, cardPlay: null);
                     }

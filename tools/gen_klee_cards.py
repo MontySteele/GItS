@@ -294,6 +294,39 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # KokomiConscript.Run. All three have verified call sites in
                   # klee-mod/KleeCode/Powers -- the whitelist stays honest.
                   "gain_charge", "summon_kurage", "conscript",
+                  # THE KLEE OVERHAUL, SLICE ONE (QUARANTINED, R213 B -- the
+                  # rules engine lives in klee-mod/KleeCode/Powers/Prototype
+                  # and is Compile Remove'd out of a release build, so the only
+                  # rows that may print these are `proto_` rows on the
+                  # prototype surface, compiled under the same switch). Eight
+                  # verbs, every one with a verified call site on
+                  # `ProtoBombPower` or `KleeOverhaulLedger`; the whitelist
+                  # stays honest.
+                  "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+                  "remove_bomb_for_block", "damage_set_off_total",
+                  "double_set_off", "draw_per_set_off",
+                  # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
+                  # same terms and the same quarantine as the block above: the
+                  # rules engine lives in klee-mod/KleeCode/Powers/Prototype
+                  # and is Compile Remove'd out of a release build, so the only
+                  # rows that may print these are `proto_` rows on the
+                  # prototype surface, compiled under the same switch. Ten
+                  # verbs, every one with a verified call site on `KokomiTide`,
+                  # `KokomiPlan` or `KokomiOverhaulKit`; the whitelist stays
+                  # honest. `play_top_of_draw` is legal ONLY inside a `plan`
+                  # body, which `blocked_reason` enforces by name.
+                  "gain_tide", "surge", "block_half_surge", "exert", "mend",
+                  "plan", "draw_companion_from_draw", "next_companion_free",
+                  "draw_per_tide", "play_top_of_draw",
+                  # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, R213 B) --
+                  # ONE verb, on the same terms as the two blocks above. Gorou's
+                  # Inuzaka All-Round Defense prints "Gain Block equal to half
+                  # the damage dealt", and the total it halves is this play's
+                  # own, kept by `CompanionOverhaulLedger` and read by
+                  # `InazumaCompanion.BlockHalfDamage` -- one verified call
+                  # site, Compile Remove'd out of a release build like the rest
+                  # of Powers/Prototype.
+                  "block_half_damage",
                   # EB-122 (EB-69's fill): the turn-scoped Sly grant. Rides
                   # SlyGrant.Grant, whose whole shape is Hand Trick's --
                   # CardSelectCmd.FromHand filtered to non-Sly Skills, then
@@ -411,6 +444,33 @@ def is_companion(card: dict) -> bool:
     return "star" in card
 
 
+# A cost op is not a thing the card DOES; it is what the card charges. Both
+# have their own IsPlayable gate already (EB-118 §4.5, R213 E1).
+_COST_OPS = ("spend_spark", "spend_charge")
+
+
+def card_is_set_off_only(card: dict) -> bool:
+    """Does this row do NOTHING on a board with no Bomb on it? (`EB-261`.)
+
+    True when every top-level effect that is not a cost is a `set_off` that
+    deals no damage of its own. Such a card pays its price and resolves to
+    nothing, which is the same silent no-play the Spark cost line refuses one
+    resource over -- so it takes the same gate, on the same extension point.
+
+    Derived from the ROW rather than declared per card, so a future Set-off
+    row that happens to have the same shape cannot be given the gate by
+    remembering to. A `set_off` carrying `damage` is NOT covered: Kaboom! with
+    no Bombs on the board is still an Attack, and refusing it would be a
+    balance change, not a legibility fix.
+    """
+    rest = [eff for eff in card.get("effects", [])
+            if eff.get("op") not in _COST_OPS]
+    if not rest:
+        return False
+    return all(eff.get("op") == "set_off" and not int(eff.get("damage", 0) or 0)
+               for eff in rest)
+
+
 ELEMENT_CS = {"pyro": "Element.Pyro", "hydro": "Element.Hydro",
               "electro": "Element.Electro", "cryo": "Element.Cryo",
               "anemo": "Element.Anemo", "geo": "Element.Geo"}
@@ -500,6 +560,29 @@ PREDICATES_CS = {
         "CurtainCallHooks.EnemyIntendsAttack(Owner.Creature)",
     "hp_lost_this_turn":
         "CurtainCallHooks.HpLostThisTurn(Owner.Creature)",
+    # THE KLEE OVERHAUL's two per-turn reads (QUARANTINED). Both come off
+    # `KleeOverhaulLedger`, which is the ONE place the arm's counters are
+    # written, so a card and the power that feeds it cannot disagree about
+    # what an explosion was. `bomb_reacted_this_turn` is NOT a synonym for
+    # `reaction_triggered_this_turn`: that one counts every reaction and this
+    # one counts a BOMB's, which is the whole of the React loop.
+    "bomb_went_off_this_turn":
+        "KleeOverhaulLedger.For(Owner.Creature).SetOffThisTurn > 0",
+    "bomb_reacted_this_turn":
+        "KleeOverhaulLedger.For(Owner.Creature).ReactedThisTurn > 0",
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). tier0's own
+    # `target_has_aura` predicate, which had no C# read until a companion row
+    # printed it (Rosaria's Ravaging Confession).
+    #
+    # A SNAPSHOT LOCAL, not a live lookup, because the sim's answer is a
+    # snapshot: `_predicate` returns `state.target_had_aura`, captured at
+    # `resolve_card` START. That distinction is the whole card -- Rosaria is
+    # an Attack that APPLIES Cryo, so a live read would find the aura she just
+    # left and the branch would fire every time. `targetHadAura` is emitted at
+    # the top of OnPlay beside `reactionsAtStart` (see `build_body`), off the
+    # same `AuraCmd.Find` reader `NightVigilPower` and `FlameDance` use, so
+    # there is no second definition of "holds an aura".
+    "target_has_aura": "targetHadAura",
 }
 
 # The if-clause each predicate renders on the card.
@@ -514,6 +597,11 @@ PREDICATE_TEXT = {
         "If you moved the [gold]Spotlight[/gold] this turn",
     "enemy_intends_attack": "If an enemy intends to attack",
     "hp_lost_this_turn": "If you have lost HP this turn",
+    "bomb_went_off_this_turn": "If a [gold]Bomb[/gold] went off this turn",
+    "bomb_reacted_this_turn":
+        "If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] "
+        "this turn",
+    "target_has_aura": "If the enemy holds an elemental aura",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -532,6 +620,24 @@ _ENCORE_BAR = re.compile(r"^encore_at_least_(\d+)$")
 # unknown name blocks the card instead of generating a branch that can never
 # fire. The display names are the faces' own: "the Usher" carries its article.
 _LEFTMOST_MEMBER = re.compile(r"^leftmost_salon_member_([a-z]+)$")
+# THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). An HP fraction, parametric
+# for exactly the reason the meter bars above are: the threshold is a balance
+# number authored per card (the workshop prints "below half HP" on Noelle's
+# Breastplate and "above 70% HP" on Bennett's Fantastic Voyage), so moving one
+# must be a card edit and never a codegen edit. Compared by CROSS-MULTIPLYING
+# rather than dividing, so there is no integer-division rounding to disagree
+# about across the two engines: `hp * 100 < max * N`.
+_HP_PCT_BELOW = re.compile(r"^hp_pct_below_(\d+)$")
+_HP_PCT_ABOVE = re.compile(r"^hp_pct_above_(\d+)$")
+# The same arm's second wave. Razor's Claw and Thunder: "If this is the third
+# Attack you played this turn." Parametric for the reason its neighbours are --
+# the ordinal is the card's number, never the engine's.
+_NTH_ATTACK = re.compile(r"^nth_attack_this_turn_(\d+)$")
+# tier0's `self_has_power_<id>` prefix, given its C# read. The class comes out
+# of APPLY_POWERS, which is already the one power-id -> PowerModel map the
+# emitter uses, so a predicate cannot invent a second spelling of a power; an
+# id nothing in that registry names returns None and BLOCKS the card.
+_SELF_HAS_POWER = re.compile(r"^self_has_power_(.+)$")
 
 
 def predicate_cs(name: str) -> str | None:
@@ -555,6 +661,30 @@ def predicate_cs(name: str) -> str | None:
     hit = _ENCORE_BAR.match(name)
     if hit:
         return f"FurinaResources.Encore(Owner.Creature) >= {hit.group(1)}"
+    hit = _HP_PCT_BELOW.match(name)
+    if hit:
+        return (f"Owner.Creature.CurrentHp * 100m < "
+                f"Owner.Creature.MaxHp * {hit.group(1)}m")
+    hit = _HP_PCT_ABOVE.match(name)
+    if hit:
+        return (f"Owner.Creature.CurrentHp * 100m > "
+                f"Owner.Creature.MaxHp * {hit.group(1)}m")
+    hit = _NTH_ATTACK.match(name)
+    if hit:
+        # THE `+ 1` IS THE CARD ASKING THE QUESTION, and it is the SAME
+        # expression the sim writes (`state.attacks_played_this_turn + 1 == n`)
+        # for the same reason: both engines count an Attack AFTER it resolves,
+        # so while the branch is being evaluated the counter holds the Attacks
+        # played BEFORE this one -- and the card asking whether it is the third
+        # is itself the third.
+        return (f"CompanionOverhaulLedger.For(Owner.Creature)"
+                f".AttacksPlayedThisTurn + 1 == {hit.group(1)}")
+    hit = _SELF_HAS_POWER.match(name)
+    if hit:
+        entry = APPLY_POWERS.get(hit.group(1))
+        if entry:
+            return f"Owner.Creature.Powers.OfType<{entry[0]}>().Any()"
+        return None
     hit = _LEFTMOST_MEMBER.match(name)
     # SALON_MEMBER_CS is the one member->enum map, shared with `member:` on
     # the deploy op: a predicate must not grow a second spelling of the same
@@ -602,7 +732,42 @@ def predicate_text(name: str) -> str | None:
         # of play. The stage names are B5's, so the face and the tooltip that
         # explains the member are titled the same thing.
         return f"If {SALON_MEMBER_NAMES[hit.group(1)]} is next to perform"
+    hit = _HP_PCT_BELOW.match(name)
+    if hit:
+        return f"If you are below {hit.group(1)}% HP"
+    hit = _HP_PCT_ABOVE.match(name)
+    if hit:
+        return f"If you are above {hit.group(1)}% HP"
+    hit = _NTH_ATTACK.match(name)
+    if hit:
+        return (f"If this is the {_ORDINALS.get(hit.group(1), hit.group(1))} "
+                "[gold]Attack[/gold] you played this turn")
+    hit = _SELF_HAS_POWER.match(name)
+    if hit:
+        # HAND-WRITTEN, one entry at a time, exactly like
+        # PREDICATE_TEXT_NEGATED below and for the same reason: the C# read
+        # can be derived from a power id, and English about that power cannot.
+        # A power with no entry blocks the card loudly rather than printing a
+        # sentence the generator made up out of an identifier.
+        return SELF_HAS_POWER_TEXT.get(hit.group(1))
     return PREDICATE_TEXT.get(name)
+
+
+#: English for the ordinals `nth_attack_this_turn_<N>` can carry. A CLOSED map,
+#: not a suffix rule: "3" -> "3rd" is easy and "11" -> "11th" is where a rule
+#: written from three examples goes wrong, and a face that says "the 3 Attack"
+#: is worse than a row that blocks by name. An ordinal with no entry returns
+#: the bare numeral, which `blocked_reason` then never sees -- so add the word
+#: here when a row wants one.
+_ORDINALS = {"1": "first", "2": "second", "3": "third", "4": "fourth",
+             "5": "fifth"}
+
+
+#: The if-clause `self_has_power_<id>` renders, per power. See `predicate_text`.
+SELF_HAS_POWER_TEXT = {
+    # Fischl's raven, the workshop's own words on Nightrider.
+    "mc_oz": "If Oz is out",
+}
 
 
 # EB-219. A conditional whose THEN-branch is EMPTY is a real shape, not a stub:
@@ -682,7 +847,13 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # a bank that could pay it, and then paid out without debiting
               # that bank. An op a price table knows and an emitter does not
               # is an unpaid payoff, not a blocked one.
-              "spend_spark"}
+              "spend_spark",
+              # THE INAZUMA COMPANION OVERHAUL (QUARANTINED). Mizuki's Anraku
+              # Secret Spring Therapy is "deal 18 to ALL, OTHERWISE Mend 10",
+              # so the keyword lands in an ELSE branch -- and the top-level arm
+              # it copies is a single awaited call with no locals, which is the
+              # whole branch-legality criterion.
+              "mend"}
 
 # The exact key set each branch op may carry. Module-level because a modal's
 # mode body is emitted through the same `_emit_branch_op` resolvers as a
@@ -704,6 +875,9 @@ BRANCH_FIELDS = {
     "spend_encore": {"op", "amount"},
     "spend_charge": {"op", "amount"},
     "spend_spark": {"op", "amount"},
+    # Same key set the top-level `mend` validator enforces, so the two cannot
+    # disagree about what a Mend is.
+    "mend": {"op", "amount"},
     "burst_energy": {"op", "amount"},
     "energy": {"op", "amount"},
     "place_bomb": {"op", "amount", "target", "bomb_damage"},
@@ -749,15 +923,32 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
             and eff.get("target") not in BOMB_TARGETS):
         return f"branch place_bomb target '{eff.get('target')}'"
     if eff.get("op") == "apply_power":
-        # EB-125. Self only -- see the BRANCH_OPS note. `salon_member` is a
-        # typed DEPLOY that also carries the salonReplacements counter, so it
-        # is not the plain Apply this resolver emits even though its target
-        # reads self.
+        # EB-125. Self, plus the CHOSEN enemy -- see the BRANCH_OPS note.
+        # `salon_member` is a typed DEPLOY that also carries the
+        # salonReplacements counter, so it is not the plain Apply this
+        # resolver emits even though its target reads self.
         if eff.get("power") not in APPLY_POWERS:
             return f"branch apply_power power '{eff.get('power')}'"
         if eff.get("power") == "salon_member":
             return "branch apply_power power 'salon_member' (typed deploy)"
-        if eff.get("target") != "self":
+        # THE MONDSTADT COMPANION OVERHAUL widened this from self-only to
+        # self-or-chosen-enemy, and by exactly one target. Rosaria's Ravaging
+        # Confession is the first row to print a debuff behind a condition
+        # ("If the enemy has an aura, apply 1 Vulnerable"), and the chosen
+        # arm is the one the EB-125 note said was merely missing a target
+        # guard rather than a resolver: `_target_guard` is ctx-tracked, so it
+        # works from inside a branch sub-list, and the emitted call is
+        # byte-for-byte the top-level `enemy` arm's.
+        #
+        # `random_enemy` and `all_enemies` are STILL blocked here, unchanged
+        # and for their original reason: both declare locals inside their own
+        # blocks, and emitting either a second, subtly different way is the
+        # drift this table exists to prevent.
+        if eff.get("target") == "enemy":
+            if eff["power"] not in ENEMY_APPLY_POWERS:
+                return ("branch apply_power target 'enemy' for self power "
+                        f"'{eff['power']}'")
+        elif eff.get("target") != "self":
             return f"branch apply_power target '{eff.get('target')}'"
     if eff["op"] in SALON_BRANCH_VERBS:
         # EB-137. These two are the only branch ops whose `amount` is
@@ -847,7 +1038,13 @@ def _modal_reason(eff: dict) -> str | None:
 # resolve_card: the repeat excludes only the repeat machinery). The repeated
 # body lands inside a for-block, so those other effects must not declare
 # method-scope locals a second time -- restrict them to declaration-free ops.
-REPEAT_SAFE_OPS = {"damage", "block", "draw", "gain_spark", "burst_energy"}
+REPEAT_SAFE_OPS = {"damage", "block", "draw", "gain_spark", "burst_energy",
+                   # The Klee overhaul (QUARANTINED). Perfect Timing is
+                   # the slice's one repeat-conditional and its body is a
+                   # Set off plus damage, so `set_off` has to be legal
+                   # inside the repeated block. It qualifies on the rule
+                   # as written: one awaited call, no method-scope local.
+                   "set_off"}
 
 # The same restriction for a repeat an UPGRADE appends (`add: {op:
 # repeat_this}`, R130's take_your_bow+). Superset of REPEAT_SAFE_OPS by
@@ -860,9 +1057,42 @@ UPGRADE_REPEAT_OPS = REPEAT_SAFE_OPS | {"salon_bow", "salon_rotate",
 # Field whitelists for the bomb ops (UNPARSEABLE discipline: an unknown
 # field encodes a mechanic; block loudly, never approximate).
 DETONATE_FIELDS = {"op", "target", "bonus"}
+# The Klee overhaul's own, same discipline (QUARANTINED, C.KLEE_OVERHAUL).
+SET_OFF_FIELDS = {"op", "target", "times", "damage", "aura"}
+PLANT_BOMB_FIELDS = {"op", "target", "size", "mine", "payload_mine_all"}
+GROW_BOMBS_FIELDS = {"op", "target", "amount"}
+MERGE_BOMBS_FIELDS = {"op", "target", "growth"}
+SET_OFF_TARGETS = {"enemy", "random_enemy", "all_enemies"}
+PLANT_BOMB_TARGETS = {"enemy", "random_enemy", "all_enemies"}
 MOVE_BOMBS_FIELDS = {"op", "target", "bonus"}
 MODIFY_BOMBS_FIELDS = {"op", "scope", "bonus"}
 CHANCE_BOMB_FIELDS = {"op", "chance", "bomb_damage"}
+
+# The Kokomi overhaul's own, same discipline (QUARANTINED, C.KOKOMI_OVERHAUL).
+GAIN_TIDE_FIELDS = {"op", "amount", "per"}
+GAIN_TIDE_PER = {None, "enemies_hit"}
+SURGE_FIELDS = {"op", "target"}
+EXERT_FIELDS = {"op", "amount"}
+MEND_FIELDS = {"op", "amount"}
+PLAN_FIELDS = {"op", "then"}
+DRAW_PER_TIDE_FIELDS = {"op", "amount", "per"}
+PLAY_TOP_OF_DRAW_FIELDS = {"op", "amount"}
+#: What a `plan:` body may say, and the `KokomiPlan.Kind` each spelling maps
+#: to. Slice one prints exactly these seven clauses, one per Plan card, and a
+#: body outside this table is a build failure rather than an approximation --
+#: the same UNPARSEABLE discipline the field whitelists above keep, one level
+#: down. A `damage` body is split by TARGET because the two are different
+#: kinds: `enemy` is Feint's "the same enemy", remembered on the queue, and
+#: `random_enemy` is Ambush's roll.
+PLAN_BODY_KINDS = {
+    ("draw", None): "Draw",
+    ("energy", None): "Energy",
+    ("block", None): "Block",
+    ("mend", None): "Mend",
+    ("play_top_of_draw", None): "PlayTopOfDraw",
+    ("damage", "enemy"): "DamageStoredTarget",
+    ("damage", "random_enemy"): "DamageRandomEnemy",
+}
 
 # apply_power (power-card pass): sheet power id -> (C# PowerModel class,
 # stack cap or None, card-text template with {X} for the amount). Stackable
@@ -917,6 +1147,53 @@ APPLY_POWERS = {
     "spark_attack_cost": ("SparkAttackCostPower", None,
         "Your Attacks that do not already cost [gold]Spark[/gold] cost 3 "
         "[gold]Spark[/gold] instead of their [gold]Energy[/gold] cost."),
+    # THE KLEE OVERHAUL, SLICE ONE (QUARANTINED, R213 B). Every class below
+    # lives in klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out of
+    # a release build, so the only rows that may name one are `proto_` rows on
+    # the prototype surface -- compiled under the same switch. The {X} templates
+    # are here for form; every slice row carries its own `description:`, which is
+    # the surface's own face channel (EB-215).
+    "ko_bomb_growth_up": ("ExplosivesWorkshopGrowthPower", None,
+        "At the start of your turn, your [gold]Bombs[/gold] grow by {X} more."),
+    "ko_alices_recipe": ("AlicesRecipePower", None,
+        "Your [gold]Bombs[/gold] grow by 4 instead of 2."),
+    "ko_chained_reactions": ("ChainedReactionsPower", None,
+        "Whenever one of your [gold]Bombs[/gold] goes off, place a {X} "
+        "[gold]Bomb[/gold] on a random enemy."),
+    "ko_end_turn_set_off": ("EndOfTurnSetOffPower", None,
+        "At the end of your turn, [gold]Set off[/gold] a random enemy's "
+        "[gold]Bombs[/gold]."),
+    "ko_bomb_reaction_spark": ("BombReactionSparkPower", None,
+        "Whenever one of your [gold]Bombs[/gold] triggers an "
+        "[gold]Elemental Reaction[/gold], gain {X} extra [gold]Spark[/gold]."),
+    "ko_grounded": ("GroundedPower", None,
+        "At the start of your turn, if none of your [gold]Bombs[/gold] went "
+        "off last turn, gain {X} Block."),
+    # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B). Every class below
+    # lives in klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out
+    # of a release build, so the only rows that may name one are `proto_` rows
+    # on the prototype surface -- compiled under the same switch. The {X}
+    # templates are here for form; every slice row carries its own
+    # `description:`, which is the surface's own face channel (EB-215).
+    "kk_garment": ("ProtoGarmentPower", None,
+        "Each of your Attacks that hits [gold]Mends[/gold] you 2. Lasts {X} "
+        "more turns."),
+    "kk_song_of_pearls": ("SongOfPearlsPower", None,
+        "The pulse [gold]Mends[/gold] 3, and its budget is 12."),
+    "kk_clouds_like_waves": ("CloudsLikeWavesPower", None,
+        "While you are under half HP, the pulse [gold]Mends[/gold] {X}."),
+    "kk_sango_isshin": ("SangoIsshinPower", None,
+        "[gold]Mend[/gold] that would go past your entry HP becomes Hydro "
+        "damage to a random enemy."),
+    "kk_treatise": ("TreatisePower", None,
+        "Whenever a [gold]Plan[/gold] resolves, draw {X} cards."),
+    "kk_art_of_war": ("TheArtOfWarPower", None,
+        "[gold]Plans[/gold] also happen now."),
+    "kk_orders": ("OrdersPower", None,
+        "Whenever you play a [gold]Companion[/gold], [gold]Tide[/gold] +{X}."),
+    "kk_generals_banner": ("GeneralsBannerPower", None,
+        "The first [gold]Companion[/gold] you play each turn is played "
+        "twice."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
@@ -979,6 +1256,154 @@ APPLY_POWERS = {
         "Your Attacks deal {X} more damage this turn."),
     "strength": ("StrengthPower", None,
         "Gain {X} [gold]Strength[/gold]."),
+    # The base game's other flat stat, given a sheet spelling by the Inazuma
+    # companion overhaul: Gorou's General's War Banner is the first row in the
+    # repo to print Dexterity. REAL Dexterity, not a private modifier, so it
+    # means what every other Dexterity in the engine means; the card's "for 2
+    # turns" is a SECOND power beside it (`mi_war_banner`), which takes these
+    # two stacks back when its clock runs out. tier0 has read a `dexterity`
+    # power stack since the block funnel was written.
+    "dexterity": ("DexterityPower", None,
+        "Gain {X} [gold]Dexterity[/gold]."),
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, R213 B). Every class below
+    # lives in klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulPowers.cs and
+    # is Compile Remove'd out of a release build, so the only rows that may name
+    # one are `proto_mc_` rows on the prototype surface -- compiled under the
+    # same switch. Each is one of two shapes the engine already runs: a
+    # start-of-turn payout (CelestialGiftPower's shape) or an end-of-turn volley
+    # (OzSummonPower's). The {X} templates are here for form; every overhaul row
+    # carries its own `description:`, which is the surface's own face channel
+    # (EB-215). Sim twins: tier0.engine.effects.player_turn_start_triggers /
+    # player_turn_end_triggers, one branch each.
+    "mc_signature_mix": ("SignatureMixPower", None,
+        "At the start of your turn, gain 4 [gold]Block[/gold]. Lasts {X} more "
+        "turn(s)."),
+    "mc_glacial_waltz": ("GlacialWaltzPower", None,
+        "At the end of your turn, deal 6 damage and apply [gold]Cryo[/gold] to "
+        "a random enemy. Lasts {X} more turn(s)."),
+    "mc_isotoma_bloom": ("SolarIsotomaBloomPower", None,
+        "At the end of your turn, if any enemy has an aura, deal 8 damage to "
+        "that enemy and gain 4 [gold]Block[/gold]."),
+    "mc_dandelion_breeze": ("DandelionBreezePower", None,
+        "At the end of your turn, [gold]Swirl[/gold] the enemy with the most "
+        "auras and gain 6 [gold]Block[/gold]."),
+    "mc_oz": ("MondstadtOzPower", None,
+        "At the end of your turn, Oz deals 5 damage and applies "
+        "[gold]Electro[/gold] to a random enemy."),
+    "mc_revelation": ("RevelationPower", None,
+        "At the start of your turn, gain 5 [gold]Block[/gold]. If you had "
+        "[gold]Block[/gold] left at the end of your last turn, also gain 2 "
+        "[gold]Strength[/gold]."),
+    "mc_omen": ("StellarisOmenPower", None,
+        "At the start of your next turn, apply 1 [gold]Vulnerable[/gold] to "
+        "ALL enemies."),
+    "mc_grand_ode": ("GrandOdePower", None,
+        "At the end of your turn, [gold]Swirl[/gold] the aura of ALL enemies. "
+        "Lasts {X} more turn(s)."),
+    "mc_lightning_rose": ("LightningRosePower", None,
+        "At the end of your turn, deal 5 damage, apply [gold]Electro[/gold] "
+        "and apply 1 [gold]Vulnerable[/gold] to a random enemy. Lasts {X} more "
+        "turn(s)."),
+    # THE SAME ARM'S SECOND WAVE (QUARANTINED). Thirteen more rows, and these
+    # are the powers whose HOOKS had to be built:
+    # klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulHooks.cs, compiled
+    # under the same switch as the eleven above. Two of them land on the CHOSEN
+    # ENEMY rather than on the player (see ENEMY_APPLY_POWERS) -- that is what
+    # "apply Hydro to target enemy each turn" and "place a Lightfall Sword on
+    # target" mean when a power holds no target: the target holds the power.
+    # Sim twins: tier0.engine.effects' `companion_overhaul_*` block.
+    "mc_icy_paws": ("IcyPawsPower", None,
+        "When this [gold]Block[/gold] absorbs damage, apply [gold]Cryo[/gold] "
+        "to the attacker. {X} [gold]Block[/gold] still bites."),
+    "mc_melody_loop": ("MelodyLoopPower", None,
+        "At the start of its owner's turn, apply [gold]Hydro[/gold] to this "
+        "enemy. Lasts {X} more turn(s)."),
+    "mc_passion_overload": ("PassionOverloadPower", None,
+        "Your next [gold]Attack[/gold] this turn deals {X} more damage and "
+        "applies [gold]Pyro[/gold]."),
+    "mc_sacramental_shower": ("SacramentalShowerPower", None,
+        "The next time an enemy attacks you, deal 9 damage and apply "
+        "[gold]Hydro[/gold] to it first."),
+    "mc_favonian_favor": ("FavonianFavorPower", None,
+        "Whenever a reaction happens this turn, gain {X} [gold]Block[/gold]."),
+    "mc_binary_white": ("BinaryFormWhitePower", None,
+        "Enemies take 50% more damage from reactions."),
+    "mc_binary_dark": ("BinaryFormDarkPower", None,
+        "Your [gold]Pyro[/gold] [gold]Attacks[/gold] that react deal {X} more "
+        "damage."),
+    "mc_lightning_fang": ("LightningFangPower", None,
+        "Your [gold]Attacks[/gold] apply [gold]Electro[/gold] and deal 3 more "
+        "damage. Lasts {X} more turn(s)."),
+    "mc_sturm_und_drang": ("SturmUndDrangPower", None,
+        "Whenever a [gold]Swirl[/gold] happens, your next [gold]Attack[/gold] "
+        "deals {X} more damage of the swirled element."),
+    "mc_baron_bunny": ("BaronBunnyPower", None,
+        "The next time an enemy attacks you, take 3 less damage and deal 8 "
+        "damage and [gold]Pyro[/gold] to ALL enemies."),
+    "mc_lightfall_sword": ("LightfallSwordPower", None,
+        "Counts its owner's [gold]Attacks[/gold]. When it falls, deals 8 "
+        "damage plus 5 per [gold]Attack[/gold] counted. Falls in {X} turn(s)."),
+    "mc_starfrost_discount": ("StarfrostDiscountPower", None,
+        "Your next [gold]Attack[/gold] costs {X} less."),
+    # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, R213 B), on the SAME flag
+    # pair as the Mondstadt rows above. Every class lives in
+    # klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulInazuma.cs and is
+    # Compile Remove'd out of a release build, so the only rows that may name
+    # one are `proto_mi_` rows on the prototype surface. Most are one of the
+    # two shapes this arm already runs -- a start-of-turn payout and an
+    # end-of-turn volley -- and the four that are not each reuse a hook the
+    # Mondstadt second wave built. The {X} templates are here for form; every
+    # row carries its own `description:` (EB-215). Sim twins:
+    # tier0.engine.effects' `inazuma_overhaul_*` block.
+    "mi_war_banner": ("WarBannerPower", None,
+        "You have 2 more [gold]Dexterity[/gold]. Lasts {X} more turn(s)."),
+    "mi_juuga": ("JuugaPower", None,
+        "At the end of your turn, deal 6 damage and apply [gold]Geo[/gold] to "
+        "a random enemy. Lasts {X} more turn(s)."),
+    "mi_daruma": ("MujiMujiDarumaPower", None,
+        "At the end of your turn, if you are above 70% HP deal 6 damage to a "
+        "random enemy; otherwise gain 6 [gold]Block[/gold]. Lasts {X} more "
+        "turn(s)."),
+    "mi_naptime": ("NaptimePower", None,
+        "At the start of your next turn, draw {X} -- unless you play an "
+        "[gold]Attack[/gold] this turn."),
+    "mi_sanctifying_ring": ("SanctifyingRingPower", None,
+        "At the end of your turn, deal 5 damage and apply [gold]Electro[/gold] "
+        "to ALL enemies, then gain 5 [gold]Block[/gold]. Lasts {X} more "
+        "turn(s)."),
+    "mi_blazing_barrier": ("BlazingBarrierPower", None,
+        "When this [gold]Block[/gold] absorbs damage, gain 3 "
+        "[gold]Block[/gold]. {X} [gold]Block[/gold] still burns."),
+    "mi_crimson_ooyoroi": ("CrimsonOoyoroiPower", None,
+        "Whenever you play an [gold]Attack[/gold], deal 5 damage and apply "
+        "[gold]Pyro[/gold] to a random enemy and gain 3 [gold]Block[/gold]. "
+        "Lasts {X} more turn(s)."),
+    "mi_crowfeather": ("CrowfeatherCoverPower", None,
+        "Your next [gold]Attack[/gold] this turn deals {X} more damage and "
+        "applies [gold]Electro[/gold]."),
+    "mi_stormcall": ("TenguStormcallPower", None,
+        "At the start of your next turn, your [gold]Attacks[/gold] deal 5 "
+        "more damage for that turn."),
+    "mi_sesshou_sakura": ("SesshouSakuraPower", None,
+        "At the end of your turn, each [gold]Sakura[/gold] deals 4 damage and "
+        "applies [gold]Electro[/gold] to a random enemy; every one placed "
+        "beside another deals 3 more. {X} out."),
+    "mi_aurous_blaze": ("AurousBlazePower", None,
+        "Whenever this enemy takes damage from a card that is not an "
+        "[gold]Attack[/gold], deal 6 damage and apply [gold]Pyro[/gold] to "
+        "ALL enemies. Lasts {X} more turn(s)."),
+    "mi_soumetsu": ("SoumetsuPower", None,
+        "At the end of your turn, deal 8 damage and apply [gold]Cryo[/gold] "
+        "to ALL enemies; when it ends, 16 more. Lasts {X} more turn(s)."),
+    "mi_kyouka": ("KyoukaPower", None,
+        "Your [gold]Attacks[/gold] apply [gold]Hydro[/gold] and deal 4 more "
+        "damage; when it ends, deal 12 damage and apply [gold]Hydro[/gold] to "
+        "a random enemy. Lasts {X} more turn(s)."),
+    "mi_surprise_dispatch": ("SurpriseDispatchPower", None,
+        "At the start of your next turn, deal 10 damage to a random enemy."),
+    "mi_tamoto": ("TamotoPower", None,
+        "At the end of your turn, deal 6 damage and apply [gold]Geo[/gold] to "
+        "a random enemy, ignoring [gold]Block[/gold]. Lasts {X} more turn(s)."),
     # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
@@ -1075,9 +1500,25 @@ APPLY_POWERS = {
         "[gold]Block[/gold]."),
 }
 
-# Powers applied to ENEMIES (native debuffs). Everything else in APPLY_POWERS
-# is a self power; blocked_reason enforces the split both ways.
-ENEMY_APPLY_POWERS = {"weak", "vulnerable"}
+# Powers applied to ENEMIES (native debuffs, plus the two quarantined
+# companion powers that are HOSTED on their target). Everything else in
+# APPLY_POWERS is a self power; blocked_reason enforces the split both ways.
+#
+# THE TWO `mc_` ENTRIES ARE NOT DEBUFFS, and that is the point rather than an
+# exception. Barbara's Melody Loop ("at the start of your turn apply Hydro to
+# TARGET enemy") and Eula's Glacial Illumination ("place a Lightfall Sword ON
+# TARGET") both name a chosen body, and a PowerModel holds no target -- so the
+# body holds the power. Landing them on the enemy is what makes the card's own
+# words expressible, and it is also what makes the card declare
+# `TargetType.AnyEnemy`, which is the same seam every aimed op already uses.
+#
+# `mi_aurous_blaze` IS THE THIRD, and the same argument makes it one: "MARK AN
+# ENEMY for 2 turns. Whenever IT takes damage ..." names a chosen body twice
+# over, so the body holds the mark -- and the card declares
+# `TargetType.AnyEnemy` through the same seam.
+ENEMY_APPLY_POWERS = {"weak", "vulnerable",
+                      "mc_melody_loop", "mc_lightfall_sword",
+                      "mi_aurous_blaze"}
 
 # Sheet fields apply_power may carry. Anything else encodes a mechanic this
 # generator does not understand -- fail loudly (UNPARSEABLE discipline).
@@ -1346,7 +1787,19 @@ TARGET_CS = {
 # therefore reads `cardPlay.Target` at resolution. Kept beside TARGET_CS so
 # the two cannot drift: every entry here maps through TARGET_CS["enemy"].
 AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
-              "apply_aura", "swirl")
+              "apply_aura", "swirl",
+              # The Klee overhaul's aimed verbs. EB-142 is the reason these
+              # are here on the day the ops land rather than the day a card
+              # softlocks: an aiming op dereferences `cardPlay.Target`
+              # wherever it sits, so a card whose ONLY aimed op is one of
+              # these would otherwise emit `TargetType.Self` and throw on
+              # every play.
+              "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+              # The Kokomi overhaul's one aimed verb, here for the same
+              # reason: `surge` dereferences `cardPlay.Target`, so Rising
+              # Tide -- whose only aimed op is the Surge on some boards --
+              # must declare an enemy TargetType or throw on every play.
+              "surge")
 
 
 def _aims_at_chosen_enemy(eff: dict) -> bool:
@@ -1437,6 +1890,15 @@ CARD_FIELDS = {
     # card's face with it. See `build_description`; the no-shipped-carrier
     # rule is pinned in tier0/tests/test_prototype_surface.py.
     "description",
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). One word, no effect --
+    # the workshop's sec.1 pick 2: "Hexerei is one word on a Universal. It
+    # does nothing by itself. Klee's own readers and any future Hexerei
+    # character's carry the payoff." Whitelisted as INERT, exactly like
+    # `register` and `tempo_band` above: there is nothing mechanical to emit,
+    # and a family mark that BLOCKED every row carrying it would be a worse
+    # answer than one that is simply carried. The reader that makes it
+    # mechanical is a later change, and it is that change's job to move this.
+    "hexerei",
 }
 
 
@@ -1651,7 +2113,10 @@ def blocked_reason(
                 and exhaust_pile_calc_rider(card, effect) is None
                 and exhaust_selection_calc_rider(card, effect) is None
                 and discards_turn_calc_rider(card, effect) is None
-                and exhausts_turn_calc_rider(card, effect) is None):
+                and exhausts_turn_calc_rider(card, effect) is None
+                and player_block_calc_rider(card, effect) is None
+                and companions_played_calc_rider(card, effect) is None
+                and swirls_turn_calc_rider(card, effect) is None):
             formula = effect["amount_formula"]
             return (f"amount_formula (reads {formula.get('count')}) -- needs a "
                     "CalculatedVar bound to that count, not a literal")
@@ -1736,6 +2201,168 @@ def blocked_reason(
             amt = eff.get("amount")
             if not isinstance(amt, int) and _x_formula_reason(card, amt):
                 return _x_formula_reason(card, amt)
+        # THE KLEE OVERHAUL'S EIGHT (QUARANTINED, C.KLEE_OVERHAUL). UNPARSEABLE
+        # discipline throughout: a field the emitter does not understand
+        # encodes a mechanic, and every number is required to be a literal int
+        # because a prototype whose printed number the emitter cannot read is a
+        # prototype the player cannot be shown.
+        if op == "set_off":
+            unknown = set(eff) - SET_OFF_FIELDS
+            if unknown:
+                return f"set_off field(s) {sorted(unknown)} not understood"
+            if eff.get("target") not in SET_OFF_TARGETS:
+                return f"set_off target '{eff.get('target')}'"
+            for key in ("times", "damage"):
+                value = eff.get(key)
+                if value is not None and (not isinstance(value, int)
+                                          or value <= 0):
+                    return f"set_off {key} must be a positive literal int"
+            if eff.get("aura") not in (None, "non_pyro"):
+                return f"set_off aura filter '{eff.get('aura')}'"
+            if eff.get("times", 1) > 1 and eff.get("target") != "random_enemy":
+                # `times` is a re-ROLL, not a repeat: Tinder Toss hits two
+                # random enemies. On an aimed or all-enemies Set off it would
+                # mean something else on each engine, so it is refused.
+                return "set_off times is random_enemy only"
+        if op == "plant_bomb":
+            unknown = set(eff) - PLANT_BOMB_FIELDS
+            if unknown:
+                return f"plant_bomb field(s) {sorted(unknown)} not understood"
+            if eff.get("target") not in PLANT_BOMB_TARGETS:
+                return f"plant_bomb target '{eff.get('target')}'"
+            size = eff.get("size")
+            if not isinstance(size, int) or size <= 0:
+                return "plant_bomb size must be a positive literal int"
+            if not isinstance(eff.get("mine", False), bool):
+                return "plant_bomb mine must be a literal bool"
+            payload = eff.get("payload_mine_all", 0)
+            if not isinstance(payload, int) or payload < 0:
+                return "plant_bomb payload_mine_all must be a literal int >= 0"
+        if op == "grow_bombs":
+            unknown = set(eff) - GROW_BOMBS_FIELDS
+            if unknown:
+                return f"grow_bombs field(s) {sorted(unknown)} not understood"
+            if eff.get("target") != "enemy":
+                return f"grow_bombs target '{eff.get('target')}'"
+            if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
+                return "grow_bombs amount must be a positive literal int"
+        if op == "merge_bombs":
+            unknown = set(eff) - MERGE_BOMBS_FIELDS
+            if unknown:
+                return f"merge_bombs field(s) {sorted(unknown)} not understood"
+            if eff.get("target") != "enemy":
+                return f"merge_bombs target '{eff.get('target')}'"
+            growth = eff.get("growth", 0)
+            if not isinstance(growth, int) or growth < 0:
+                return "merge_bombs growth must be a literal int >= 0"
+        if op in {"remove_bomb_for_block", "double_set_off",
+                  "draw_per_set_off"}:
+            # No fields at all: each is one whole printed clause, and any
+            # number they might carry is a rule's, not a card's.
+            unknown = set(eff) - {"op"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+        if op == "damage_set_off_total":
+            unknown = set(eff) - {"op", "target"}
+            if unknown:
+                return (f"damage_set_off_total field(s) {sorted(unknown)} "
+                        "not understood")
+            if eff.get("target") not in {"enemy", "all_enemies"}:
+                return f"damage_set_off_total target '{eff.get('target')}'"
+        # THE KOKOMI OVERHAUL'S TEN (QUARANTINED, C.KOKOMI_OVERHAUL). Same
+        # UNPARSEABLE discipline as the Klee arm's eight above: a field the
+        # emitter does not understand encodes a mechanic, and every number is
+        # required to be a literal int because a prototype whose printed
+        # number the emitter cannot read is one the player cannot be shown.
+        if op == "gain_tide":
+            unknown = set(eff) - GAIN_TIDE_FIELDS
+            if unknown:
+                return f"gain_tide field(s) {sorted(unknown)} not understood"
+            amount = eff.get("amount")
+            if not isinstance(amount, int) or isinstance(amount, bool) \
+                    or amount <= 0:
+                return "gain_tide amount must be a positive literal int"
+            if eff.get("per") not in GAIN_TIDE_PER:
+                return f"gain_tide per '{eff.get('per')}'"
+        if op == "surge":
+            unknown = set(eff) - SURGE_FIELDS
+            if unknown:
+                return f"surge field(s) {sorted(unknown)} not understood"
+            if eff.get("target") != "enemy":
+                # Rule 3 is "deals Hydro damage equal to the Tide TO THE
+                # TARGET". There is no all-enemies or random Surge in the
+                # slice, and inventing one would be a rule rather than a card.
+                return f"surge target '{eff.get('target')}'"
+        if op == "exert":
+            unknown = set(eff) - EXERT_FIELDS
+            if unknown:
+                return f"exert field(s) {sorted(unknown)} not understood"
+            amount = eff.get("amount")
+            if not isinstance(amount, int) or isinstance(amount, bool) \
+                    or amount <= 0:
+                return "exert amount must be a positive literal int"
+            if card.get("type") == "attack":
+                # RULE 5, enforced where a card is built rather than trusted
+                # to an author: "on Skills and Powers only, never Attacks".
+                return "exert on an Attack (rule 5: Skills and Powers only)"
+        if op == "mend":
+            unknown = set(eff) - MEND_FIELDS
+            if unknown:
+                return f"mend field(s) {sorted(unknown)} not understood"
+            amount = eff.get("amount")
+            if not isinstance(amount, int) or isinstance(amount, bool) \
+                    or amount <= 0:
+                return "mend amount must be a positive literal int"
+        if op == "draw_per_tide":
+            unknown = set(eff) - DRAW_PER_TIDE_FIELDS
+            if unknown:
+                return (f"draw_per_tide field(s) {sorted(unknown)} "
+                        "not understood")
+            for key, floor in (("amount", 1), ("per", 1)):
+                value = eff.get(key)
+                if not isinstance(value, int) or isinstance(value, bool) \
+                        or value < floor:
+                    return f"draw_per_tide {key} must be a literal int >= {floor}"
+        if op in {"block_half_surge", "draw_companion_from_draw",
+                  "next_companion_free", "block_half_damage"}:
+            # No fields at all: each is one whole printed clause, and any
+            # number they might carry is a rule's, not a card's.
+            unknown = set(eff) - {"op"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+        if op == "play_top_of_draw":
+            # LEGAL ONLY INSIDE A `plan` BODY, which is where the one card
+            # that prints it puts it (War Council). A top-level spelling would
+            # be a different, unpriced card, and `KokomiPlan` is the only
+            # caller of the free-play door.
+            return "play_top_of_draw outside a `plan` body"
+        if op == "plan":
+            unknown = set(eff) - PLAN_FIELDS
+            if unknown:
+                return f"plan field(s) {sorted(unknown)} not understood"
+            body = eff.get("then")
+            if not isinstance(body, list) or len(body) != 1:
+                # ONE CLAUSE PER PLAN. Every Plan card in slice one prints
+                # exactly one, the queue stores one, and a two-clause Plan
+                # would need an ordering rule nothing has ruled.
+                return "plan `then:` must be exactly one effect"
+            inner = body[0]
+            if not isinstance(inner, dict):
+                return "plan `then:` entry must be an effect map"
+            key = (inner.get("op"),
+                   inner.get("target") if inner.get("op") == "damage" else None)
+            if key not in PLAN_BODY_KINDS:
+                return (f"plan body {key} is not one of the seven planned "
+                        f"clauses {sorted(PLAN_BODY_KINDS)}")
+            allowed = {"op", "amount"} | (
+                {"target"} if inner.get("op") == "damage" else set())
+            unknown = set(inner) - allowed
+            if unknown:
+                return f"plan body field(s) {sorted(unknown)} not understood"
+            amount = inner.get("amount")
+            if not isinstance(amount, int) or isinstance(amount, bool) \
+                    or amount <= 0:
+                return "plan body amount must be a positive literal int"
         if op in {"salon_rotate", "salon_perform"}:
             # EB-118 §5.5. Same field discipline as the meter ops above,
             # with `amount` OPTIONAL: one rotation and one act are the
@@ -2302,6 +2929,85 @@ def exhaust_selection_calc_rider(card: dict,
         return None
     return (int(formula.get("base", 0)), int(formula.get("per", 1)),
             f"static (card, _) => ExhaustSelection.{accessor}(card)")
+
+
+def player_block_calc_rider(card: dict,
+                            eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: player_block}` -- damage priced off
+    the Block you are standing behind. Noelle's Sweeping Time is the first row
+    to print it, and it is the count tier0 has had since the reference pool's
+    Body Slam while the C# amount-formula grammar had none.
+
+    Same CalculatedDamageVar triple as the four riders above it, and the same
+    damage-only restriction. The reason it belongs on that path rather than
+    being emitted as a literal is sharper here than anywhere else on the list:
+    the number changes every time the player gains or spends Block, so a face
+    printing `base` would be wrong on the turn it is drawn and wrong again on
+    every turn after.
+
+    `Block` is a decimal on the creature and every other multiplier here is an
+    int, so it is truncated once, at the read, exactly as the sim's
+    `_runtime_count` hands back `p.block` as an int.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict) or formula.get("count") != "player_block":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "static (card, _) => (int)card.Owner.Creature.Block")
+
+
+def companions_played_calc_rider(card: dict,
+                                 eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: companions_played_this_combat}` --
+    Raiden's Musou no Hitotachi, "deals 5 more for each Companion card you
+    played this combat" (QUARANTINED, the Inazuma companion overhaul).
+
+    THE COUNT IS CARDS, NOT PLAYS, and both engines already answer it that way:
+    `CompanionPlays` records `(Owner, ModelId)` once per companion and the
+    sim's `state.companions_played` is unique by base id, both under the
+    BFF-dedupe ruling of 2026-08-06. So the reader is the shipped one and no
+    second definition of "a Companion you played" is minted here.
+
+    Same CalculatedDamageVar triple as the riders around it, and the same
+    damage-only restriction. It cannot be a literal for the obvious reason:
+    the number is different on every turn of every fight.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict):
+        return None
+    if formula.get("count") != "companions_played_this_combat":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "static (card, _) => CompanionPlays.PlayedThisCombat("
+            "card.Owner.Creature.CombatState, card.Owner).Count")
+
+
+def swirls_turn_calc_rider(card: dict,
+                           eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: swirls_this_turn}` -- Heizou's
+    Heartstopper Strike, "deals 4 more for each Swirl this turn" (QUARANTINED,
+    the Inazuma companion overhaul).
+
+    The count comes off `CompanionOverhaulLedger`, which is where this arm
+    already keeps its per-turn numbers, written at the ONE place the mod
+    resolves a reaction (`CompanionOverhaulReactions.Note`) -- the same site
+    the sim counts it at, so "a Swirl happened" has one definition per engine
+    and the two agree.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict):
+        return None
+    if formula.get("count") != "swirls_this_turn":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "static (card, _) => CompanionOverhaulLedger.For("
+            "card.Owner.Creature).SwirlsThisTurn")
 
 
 def discards_turn_calc_rider(card: dict,
@@ -2909,6 +3615,23 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     exhausts_turn = exhausts_turn_calc_rider(card, eff)
     if exhausts_turn is not None:
         return exhausts_turn
+    # QUARANTINED USE ONLY as this lands: no shipped row prints `player_block`.
+    # Beside the four above it because it is the same triple and the same
+    # damage-only rule; see `player_block_calc_rider` for why the number cannot
+    # be a literal.
+    player_block = player_block_calc_rider(card, eff)
+    if player_block is not None:
+        return player_block
+    # QUARANTINED USE ONLY, and beside the four above for the same two reasons:
+    # the same triple, and the same damage-only rule. Neither number can be a
+    # literal -- one moves every time a Companion is played and the other every
+    # time a Swirl happens.
+    companions_played = companions_played_calc_rider(card, eff)
+    if companions_played is not None:
+        return companions_played
+    swirls_turn = swirls_turn_calc_rider(card, eff)
+    if swirls_turn is not None:
+        return swirls_turn
     charge = charge_calc_rider(card, eff)
     if charge is not None:
         base, per_n, div = charge
@@ -3378,12 +4101,18 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or exhaust_selection_calc_rider(card, e) is not None
             or discards_turn_calc_rider(card, e) is not None
             or exhausts_turn_calc_rider(card, e) is not None
+            or player_block_calc_rider(card, e) is not None
+            or companions_played_calc_rider(card, e) is not None
+            or swirls_turn_calc_rider(card, e) is not None
             for e in effects),
         "formula_base": any(
             exhaust_pile_calc_rider(card, e) is not None
             or exhaust_selection_calc_rider(card, e) is not None
             or discards_turn_calc_rider(card, e) is not None
             or exhausts_turn_calc_rider(card, e) is not None
+            or player_block_calc_rider(card, e) is not None
+            or companions_played_calc_rider(card, e) is not None
+            or swirls_turn_calc_rider(card, e) is not None
             for e in effects),
     }
     # tier0 binds every POWER_UPGRADE_KEYS delta to the first TOP-LEVEL
@@ -4354,6 +5083,15 @@ def _emit_branch_op(
         # play whose price failed instead of handing out the payoff for free.
         # Sim twin: `effects.spend_sparks`, which refuses the same way.
         lines.append(_stmt_spend_spark_guarded(card, eff))
+    elif op == "mend":
+        # THE INAZUMA COMPANION OVERHAUL (QUARANTINED). Byte-for-byte the call
+        # `build_body`'s top-level arm makes, because it IS the same rule: one
+        # awaited `KokomiTide.Mend`, which is where "never above the HP you
+        # entered the fight with" lives for every character that plays a card
+        # printing the keyword. Literal, like every other branch resolver.
+        lines.append(
+            "await KokomiTide.Mend(choiceContext, Owner.Creature, "
+            f'{int(eff["amount"])});')
     elif op == "salon_rotate":
         # EB-118 §5.5. Literal in a branch, like every other branch resolver:
         # no delta grammar reaches a rotation count.
@@ -4386,18 +5124,28 @@ def _emit_branch_op(
         )
     elif op == "apply_power":
         # EB-125. Byte-for-byte the SELF arm of build_body's top-level
-        # apply_power, which is the only arm _branch_op_reason lets through.
+        # apply_power, and (the Mondstadt companion overhaul) byte-for-byte
+        # its `enemy` arm -- the two arms _branch_op_reason lets through.
         # Literal for the same reason buff_next_attack is: power_upgrade_effect
         # searches TOP-LEVEL effects only, so a nested apply_power is never the
         # effect a ruled power delta binds to -- and a card whose delta finds no
         # top-level home stops loudly there rather than rendering a wrong var
         # here. Stack caps stay with the power's own
         # TryModifyPowerAmountReceived, so the call site is a plain Apply.
-        lines.append(
-            f"await PowerCmd.Apply<{APPLY_POWERS[eff['power']][0]}>("
-            f'choiceContext, Owner.Creature, {int(eff["amount"])}, '
-            "applier: Owner.Creature, cardSource: this);"
-        )
+        cls = APPLY_POWERS[eff["power"]][0]
+        if eff.get("target") == "enemy":
+            _target_guard(lines, ctx)
+            lines.append(
+                f"await PowerCmd.Apply<{cls}>(choiceContext, cardPlay.Target, "
+                f'{int(eff["amount"])}, applier: Owner.Creature, '
+                "cardSource: this);"
+            )
+        else:
+            lines.append(
+                f"await PowerCmd.Apply<{cls}>("
+                f'choiceContext, Owner.Creature, {int(eff["amount"])}, '
+                "applier: Owner.Creature, cardSource: this);"
+            )
 
 
 def _conditional_block(pred: str, then_lines: list[str],
@@ -4589,11 +5337,52 @@ def build_body(
     # Predicate snapshots: the sim resets its per-card counters at
     # resolve_card START, so the C# diff bases are captured at the top of
     # OnPlay, before any effect resolves -- not at the conditional's site.
+    # THE KLEE OVERHAUL's per-PLAY memory, opened at the top of the body for
+    # the same reason the snapshots below are (QUARANTINED). "The total size of
+    # the Bombs set off" is a question about THIS play, and the ledger's counter
+    # is otherwise per turn -- so a second Big Badda Boom in one turn would read
+    # the first one's explosions too. Emitted only for a card that asks.
+    if any(e.get("op") == "damage_set_off_total"
+           for e in _effects_everywhere(card)):
+        lines.append(
+            "KleeOverhaulLedger.For(Owner.Creature).BeginPlay();")
+    # THE KOKOMI OVERHAUL's per-PLAY memory, opened at the same place and for
+    # the same two reasons (QUARANTINED). Undertow asks "half the damage
+    # dealt" about THIS play, and Deep Current asks how many enemies it hit --
+    # which has to be the count BEFORE its own all-enemies damage resolves,
+    # because an enemy the damage killed was still hit. Emitted only for a
+    # card that asks.
+    if any(e.get("op") == "block_half_surge"
+           or (e.get("op") == "gain_tide" and e.get("per") == "enemies_hit")
+           for e in _effects_everywhere(card)):
+        lines.append(
+            "KokomiOverhaulLedger.For(Owner.Creature).BeginPlay("
+            "CombatState?.HittableEnemies.Count(e => !e.IsDead) ?? 0);")
+    # THE INAZUMA ARM's per-PLAY total, opened the same way and for the same
+    # reason (QUARANTINED): Gorou asks "half the damage dealt" about THIS play,
+    # so the running total has to start at zero when the play does. Emitted
+    # only for a card that asks. Sim twin: `state.mi_damage_dealt_this_card`,
+    # zeroed at the head of `effects.resolve_card`.
+    if any(e.get("op") == "block_half_damage"
+           for e in _effects_everywhere(card)):
+        lines.append(
+            "CompanionOverhaulLedger.For(Owner.Creature).BeginPlay();")
     preds = {e["if"] for e in card["effects"] if e.get("op") == "conditional"}
     if "reaction_triggered_by_this" in preds:
         lines.append("var reactionsAtStart = ReactionEffects.TotalResolved;")
     if "killed_target" in preds:
         lines.append("var enemiesAtStart = CombatState!.HittableEnemies.ToList();")
+    if "target_has_aura" in preds:
+        # SNAPSHOT, not a live read, and the sim is what decides that: tier0's
+        # `target_has_aura` returns `state.target_had_aura`, which
+        # `resolve_card` captures at card START. So an Attack that applies its
+        # own element cannot turn its own branch on, and Rosaria's Ravaging
+        # Confession asks about the aura she found rather than the Cryo she
+        # just left. A live `AuraCmd.Find` here would have read the second and
+        # made the branch unconditional on every elemental attacker.
+        lines.append(
+            "var targetHadAura = cardPlay.Target != null "
+            "&& AuraCmd.Find(cardPlay.Target) != null;")
     if str(card.get("cost")) == "X":
         # tier0 play_card: current_x = energy actually spent. The captured
         # X value (through Hook.ModifyXValue) is the game's same number.
@@ -5008,6 +5797,183 @@ def build_body(
                 "Owner.Creature, this);\n"
                 "        }"
             )
+
+        # ---- THE KLEE OVERHAUL, SLICE ONE (QUARANTINED) -------------------
+        # Every arm below is ONE awaited call into `ProtoBombPower` or one
+        # read off `KleeOverhaulLedger`, and that is deliberate rather than
+        # tidy: the rules live in the power, so a card cannot express a
+        # variant of a rule by being generated differently. It is also what
+        # makes `set_off` legal inside a repeat-conditional (Perfect Timing):
+        # no method-scope local is declared.
+        elif op == "set_off":
+            damage = int(eff.get("damage", 0))
+            times = int(eff.get("times", 1))
+            aura = "true" if eff.get("aura") == "non_pyro" else "false"
+            if eff["target"] == "enemy":
+                _target_guard(lines, ctx)
+                lines.append(
+                    "await ProtoBombPower.SetOffAimed("
+                    "choiceContext, cardPlay.Target, Owner.Creature, this, "
+                    f"cardPlay, {damage});")
+            elif eff["target"] == "all_enemies":
+                lines.append(
+                    "await ProtoBombPower.SetOffAll("
+                    "choiceContext, Owner.Creature, this, cardPlay, "
+                    f"{damage}, nonPyroAuraOnly: {aura});")
+            else:   # random_enemy, re-rolled per `times` (Tinder Toss)
+                lines.append(
+                    "await ProtoBombPower.SetOffRandom("
+                    "choiceContext, Owner.Creature, this, cardPlay, "
+                    f"{damage}, {times});")
+
+        elif op == "plant_bomb":
+            size = int(eff["size"])
+            mine = "true" if eff.get("mine") else "false"
+            payload = int(eff.get("payload_mine_all", 0))
+            if eff["target"] == "enemy":
+                _target_guard(lines, ctx)
+                lines.append(
+                    "await ProtoBombPower.Place(choiceContext, "
+                    f"cardPlay.Target, {size}, isMine: {mine}, "
+                    f"payloadMineAll: {payload}, Owner.Creature, this);")
+            elif eff["target"] == "all_enemies":
+                lines.append(
+                    "await ProtoBombPower.PlaceOnAll(choiceContext, "
+                    f"Owner.Creature, {size}, isMine: {mine}, "
+                    f"payloadMineAll: {payload}, cardSource: this);")
+            else:
+                lines.append(
+                    "await ProtoBombPower.PlaceOnRandom("
+                    f"choiceContext, Owner.Creature, {size}, isMine: {mine}, "
+                    f"payloadMineAll: {payload}, cardSource: this);")
+
+        elif op == "grow_bombs":
+            _target_guard(lines, ctx)
+            lines.append(
+                "ProtoBombPower.GrowOn(cardPlay.Target, "
+                f'Owner.Creature, {int(eff["amount"])});')
+
+        elif op == "merge_bombs":
+            _target_guard(lines, ctx)
+            lines.append(
+                "await ProtoBombPower.MergeAllTo(choiceContext, "
+                f'cardPlay.Target, Owner.Creature, {int(eff.get("growth", 0))}, '
+                "this);")
+
+        elif op == "remove_bomb_for_block":
+            # The Block IS the removed Bomb's own size, so the two halves are
+            # one call and cannot disagree; there is no printed number here for
+            # a face to get wrong.
+            lines.append(
+                "await ProtoBombPower.RemoveLargestForBlockAndGain("
+                "choiceContext, Owner.Creature);")
+
+        elif op == "damage_set_off_total":
+            _target_guard(lines, ctx)
+            lines.append(
+                "await ProtoBombPower.DealSetOffTotal("
+                "choiceContext, cardPlay.Target, Owner.Creature, this, "
+                "cardPlay);")
+
+        elif op == "double_set_off":
+            lines.append(
+                "KleeOverhaulLedger.For(Owner.Creature)"
+                ".ArmDoubling();")
+
+        elif op == "draw_per_set_off":
+            lines.append(
+                "await ProtoBombPower.DrawPerSetOff("
+                "choiceContext, Owner);")
+
+        # ---- THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED) -----------------
+        # Every arm below is ONE awaited call into `KokomiTide`, `KokomiPlan`
+        # or `KokomiOverhaulKit`, and that is deliberate rather than tidy: the
+        # rules live in those files, so a card cannot express a variant of a
+        # rule by being generated differently. In particular the entry-HP cap
+        # is inside `KokomiTide.Mend` and NOT at any call site, which is what
+        # makes "no Mend goes above entry HP" a property of the code.
+        elif op == "gain_tide":
+            amount = int(eff["amount"])
+            if eff.get("per") == "enemies_hit":
+                lines.append(
+                    "await KokomiTide.GainPerEnemyHit("
+                    f"choiceContext, Owner.Creature, {amount});")
+            else:
+                lines.append(
+                    "await KokomiTide.Gain("
+                    f"choiceContext, Owner.Creature, {amount});")
+
+        elif op == "surge":
+            _target_guard(lines, ctx)
+            lines.append(
+                "await KokomiTide.Surge("
+                "choiceContext, Owner.Creature, cardPlay.Target);")
+
+        elif op == "block_half_surge":
+            # The Block IS half the Tide this play surged, so the two halves
+            # are one call and cannot disagree; there is no printed number
+            # here for a face to get wrong.
+            lines.append(
+                "await KokomiTide.BlockHalfSurge("
+                "choiceContext, Owner.Creature);")
+
+        elif op == "exert":
+            lines.append(
+                "await KokomiTide.Exert(choiceContext, Owner.Creature, "
+                f'{int(eff["amount"])}, this, cardPlay);')
+
+        elif op == "mend":
+            lines.append(
+                "await KokomiTide.Mend(choiceContext, Owner.Creature, "
+                f'{int(eff["amount"])});')
+
+        elif op == "block_half_damage":
+            # THE INAZUMA ARM (QUARANTINED). Gorou's second clause. No number
+            # here for a face to get wrong -- the amount is half of what this
+            # play's damage actually landed, which the ledger opened at the top
+            # of the body has been keeping. Its Kokomi cousin `block_half_surge`
+            # two arms up is the same shape asking about a different total.
+            lines.append(
+                "await InazumaCompanion.BlockHalfDamage("
+                "choiceContext, Owner.Creature, cardPlay);")
+
+        elif op == "draw_per_tide":
+            lines.append(
+                "await KokomiTide.DrawPerTide(choiceContext, Owner.Creature, "
+                f'{int(eff["amount"])}, {int(eff["per"])});')
+
+        elif op == "draw_companion_from_draw":
+            lines.append(
+                "await KokomiOverhaulKit.DrawCompanionFromDraw("
+                "choiceContext, Owner, this);")
+
+        elif op == "next_companion_free":
+            lines.append(
+                "await KokomiOverhaulKit.NextCompanionFree("
+                "choiceContext, Owner.Creature, this);")
+
+        elif op == "plan":
+            # RULE 8. The body is ONE typed clause -- `blocked_reason` has
+            # already refused anything else -- so this is one enqueue call and
+            # never a captured closure over a context the Plan will not have
+            # when it resolves.
+            inner = eff["then"][0]
+            kind = PLAN_BODY_KINDS[(
+                inner["op"],
+                inner.get("target") if inner["op"] == "damage" else None)]
+            if kind == "DamageStoredTarget":
+                # Feint's "the same enemy": the target is remembered ON THE
+                # QUEUE at the moment the card was aimed, and rule 8's own
+                # sentence covers the rest ("A Plan whose target is dead
+                # retargets randomly").
+                _target_guard(lines, ctx)
+                aim = "cardPlay.Target"
+            else:
+                aim = "null"
+            lines.append(
+                "await KokomiPlan.Schedule(choiceContext, Owner.Creature, "
+                f"KokomiPlan.Kind.{kind}, {int(inner['amount'])}, {aim}, "
+                "this);")
 
         elif op == "discard":
             # G6: an upgradeable count reads the VAR, so the loop bound and
@@ -5751,6 +6717,28 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
             body.append(
                 "await SalonMemberPower.PerformLeftmost("
                 f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
+        elif op == "set_off":
+            # The Klee overhaul's Perfect Timing is the slice's one repeat, and
+            # its replayed body IS a Set off plus the card's own hit -- both of
+            # which the one call below carries. An op listed in REPEAT_SAFE_OPS
+            # and missing here would emit an EMPTY repeat block, which is a
+            # card that says "play this again" and replays nothing.
+            damage = int(eff.get("damage", 0))
+            times = int(eff.get("times", 1))
+            aura = "true" if eff.get("aura") == "non_pyro" else "false"
+            if eff["target"] == "enemy":
+                body.append(
+                    "await ProtoBombPower.SetOffAimed(choiceContext, "
+                    f"cardPlay.Target, Owner.Creature, this, cardPlay, {damage});")
+            elif eff["target"] == "all_enemies":
+                body.append(
+                    "await ProtoBombPower.SetOffAll(choiceContext, "
+                    f"Owner.Creature, this, cardPlay, {damage}, "
+                    f"nonPyroAuraOnly: {aura});")
+            else:
+                body.append(
+                    "await ProtoBombPower.SetOffRandom(choiceContext, "
+                    f"Owner.Creature, this, cardPlay, {damage}, {times});")
     pad = " " * indent
     return "\n".join(pad + s.replace("\n", "\n" + " " * 4) for s in body)
 
@@ -7249,7 +8237,15 @@ def emit(
     if is_companion(card):
         elemental = any(e.get("applies_element")
                         for e in companion_damage_effects(card))
-        element_cs = ELEMENT_CS[card["element"]]
+        # A COMPANION ROW MAY CARRY NO ELEMENT, and exactly one does: Kirara is
+        # Dendro, this engine has six elements and no Dendro aura, and her card
+        # ("Gain 8 Block. Next turn, deal 10 damage to a random enemy.") names
+        # no element at all. `Element.None` is the honest rendering -- inventing
+        # one of the six would be a design decision wearing a schema default --
+        # and `blocked_reason` still refuses a row that APPLIES an element it
+        # has not declared, so this cannot become a silent hole.
+        element_cs = (ELEMENT_CS[card["element"]] if card.get("element")
+                      else "Element.None")
     else:
         elemental = profile.damage_applies_element(card)
         element_cs = ELEMENT_CS[profile.native_element]
@@ -7430,6 +8426,12 @@ def emit(
     # the number is already on the card where `MeterCost` reads it.
     if any(eff.get("op") == "spend_charge" for eff in card["effects"]):
         interfaces += ", IMeterPricedCard"
+
+    # EB-261 / EB-264. A card refused by its OWN gate carries the sentence the
+    # page prints, because `CardModel.CanPlay` collapses every mod-side refusal
+    # into `BlockedByCardLogic` and has no slot for what the reason was.
+    if card_is_set_off_only(card):
+        interfaces += ", IUnplayableReasonCard"
 
     # EB-184: a modal card DECLARES what each of its modes does about aiming,
     # because its own TargetType cannot -- that is the card's, fixed before a
@@ -7870,6 +8872,18 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # SparkPower.Spend refuses it there instead.
     spark_price = sum(int(eff["amount"]) for eff in card["effects"]
                       if eff.get("op") == "spend_spark")
+    # EB-261, THE OTHER HALF OF THE SAME GATE. A card whose whole body is a
+    # damage-less `set_off` does NOTHING on a board with no Bomb on it -- it
+    # pays its price and resolves to nothing, which is the play the cost line
+    # above exists to prevent one resource over. Quick Fuse was exactly that,
+    # and the blind tester had to infer its no-op behaviour from the result
+    # because the card looked playable (`klee-overhaul-r1-codex-b`, fight 3).
+    # DERIVED FROM THE ROW, never a per-card flag: the condition is "every
+    # top-level effect that is not a cost is a Set off that deals nothing".
+    bomb_gated = card_is_set_off_only(card)
+    bomb_gate_expr = (
+        "ProtoBombPower.AnyPlacedBy(SparkCost.OwnerCreatureOf(this))")
+    bomb_clause = f"\n        && {bomb_gate_expr}" if bomb_gated else ""
     spark_gate_member = (
         "\n\n    // The Spark cost line (EB-118): unplayable below the price,\n"
         "    // which is how the cost is shown rather than silently failing.\n"
@@ -7882,8 +8896,25 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "    // here (tier0 twin: combat.spark_price, sub-pick (a)).\n"
         f"    public int PrintedSparkPrice => {spark_price};\n\n"
         "    protected override bool IsPlayable =>\n"
-        "        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this));"
+        "        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this))"
+        f"{bomb_clause};"
         if spark_price else "")
+    # The same gate on a card that prints no price at all: its own IsPlayable.
+    bomb_gate_member = (
+        "\n\n    // EB-261, the Set-off gate: a card whose whole body is a\n"
+        "    // Set off is unplayable while no enemy holds one of this Klee's\n"
+        "    // Bombs, rather than resolving to nothing.\n"
+        "    protected override bool IsPlayable =>\n"
+        f"        {bomb_gate_expr};"
+        if bomb_gated and not spark_price else "")
+    # EB-264's channel: the refusal above says WHY in words the page can
+    # print, because CardModel.CanPlay collapses it to BlockedByCardLogic.
+    bomb_reason_member = (
+        "\n\n    public string? UnplayableReason =>\n"
+        f"        {bomb_gate_expr}\n"
+        "            ? null\n"
+        '            : "no enemy is holding a Bomb";'
+        if bomb_gated else "")
     # R213 E1, QUARANTINED: the same cost line one meter over, and the mirror
     # of tier0 combat.charge_cost. TOP-LEVEL spends only, the sim's rule --
     # a price at the head of a `choose_one` MODE is that mode's cost line and
@@ -7978,10 +9009,15 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             f"        new[] {{ {labels_cs} }};\n\n"
             "    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>\n"
             f"        new[] {{ {flags_cs} }};")
-    if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member)) > 1:
+    if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member,
+                             bomb_gate_member)) > 1:
         raise ValueError(
             f"{card['id']}: two resource cost lines on one card -- only one "
             "IsPlayable override can be emitted")
+    if bomb_gated and (charge_price or modal_gate_member):
+        raise ValueError(
+            f"{card['id']}: the Set-off gate (EB-261) and a Charge or modal "
+            "cost line cannot share one IsPlayable override")
     resource_cost_setup = []
     if int(card.get("encore_cost", 0)) > 0:
         resource_cost_setup.append(
@@ -8034,7 +9070,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{card["name"].replace('"', chr(92) + chr(34))}"),
         ("description", "{desc}"),
-    }};{tags_member}{spark_gate_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}
+    }};{tags_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
