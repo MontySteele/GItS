@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using BaseLib.Abstracts;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Elements;
@@ -197,7 +198,7 @@ public class BaseBasicsTests
     // ---- rule 5: the element is the character's ---------------------------
 
     [Fact]
-    public void A_base_strike_applies_the_characters_element_under_her_arm()
+    public void A_base_strike_applies_nothing_for_anybody()
     {
         var klee = KleeOverhaul.Enabled;
         var kokomi = KokomiOverhaul.Enabled;
@@ -206,23 +207,24 @@ public class BaseBasicsTests
             KleeOverhaul.Enabled = true;
             KokomiOverhaul.Enabled = true;
 
-            // THE WHOLE OF `EB-307`. A base Strike declares nothing, so the
-            // per-card read gave it `Element.None` and rule 5 quietly stopped
-            // being true of half her deck.
-            Assert.Equal(Element.Pyro, CatalystCadence.PrintedElement(
+            // [USER], 2026-09-02: "I think we actually SHOULD remove the
+            // elemental application from the basic Strikes for all characters.
+            // Those cards are supposed to be bad!" `EB-307` read R242's swap
+            // the other way -- that her Strikes had to keep applying -- and
+            // this is the ruled reading of the same swap. LAW's cadence line
+            // now carries the exemption.
+            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
                 new StrikeIronclad(), Seat.Klee().Creature));
-            Assert.Equal(Element.Hydro, CatalystCadence.PrintedElement(
+            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
                 new StrikeSilent(), Seat.Kokomi().Creature));
 
-            // A DEFEND STILL APPLIES NOTHING: the cadence is about Attacks,
-            // which is the sim's rule too (`_element_for` guards on
-            // `card.type == "attack"`).
+            // A DEFEND applied nothing before the ruling either: the cadence
+            // is about Attacks, which is the sim's rule too (`_element_for`
+            // guards on `card.type == "attack"`).
             Assert.Equal(Element.None, CatalystCadence.PrintedElement(
                 new DefendIronclad(), Seat.Klee().Creature));
 
-            // AND IT IS HERS, NOT ANY SEAT'S. Furina is Skill-grade, not
-            // catalyst; in co-op her Strike must not start applying Pyro
-            // because Klee is at the table.
+            // Furina is Skill-grade and was never in this branch at all.
             Assert.Equal(Element.None, CatalystCadence.PrintedElement(
                 new StrikeIronclad(), Seat.Furina().Creature));
         }
@@ -230,6 +232,41 @@ public class BaseBasicsTests
         {
             KleeOverhaul.Enabled = klee;
             KokomiOverhaul.Enabled = kokomi;
+        }
+    }
+
+    [Fact]
+    public void The_exemption_is_the_base_games_basics_and_not_her_own_attacks()
+    {
+        // THE CADENCE IS STILL A CHARACTER RULE. What the ruling removed is the
+        // base game's card from it, so the two tests that say "the base game
+        // wrote this basic" are what the exemption is made of -- and a card of
+        // this mod's own is untouched whether it declares an element or leans
+        // on the fallback.
+        var klee = KleeOverhaul.Enabled;
+        try
+        {
+            KleeOverhaul.Enabled = true;
+            var seat = Seat.Klee().Creature;
+
+            // Her own Attack, which declares Pyro through the codegen.
+            Assert.Equal(Element.Pyro, CatalystCadence.PrintedElement(
+                new ProtoKoFishFlavoredBait(), seat));
+
+            // AND THE FALLBACK IS STILL THERE for a card this mod authored
+            // that names nothing: the Ancient is a `CustomCardModel` and not
+            // Basic, so neither test catches it. (It declares Pyro outright,
+            // which is why this asserts the predicate rather than the card.)
+            Assert.IsAssignableFrom<CustomCardModel>(new JumpyDumptyMkOmega());
+            Assert.NotEqual(CardRarity.Basic, new JumpyDumptyMkOmega().Rarity);
+
+            // The base game's Strike is both, which is the whole exemption.
+            Assert.IsNotAssignableFrom<CustomCardModel>(new StrikeIronclad());
+            Assert.Equal(CardRarity.Basic, new StrikeIronclad().Rarity);
+        }
+        finally
+        {
+            KleeOverhaul.Enabled = klee;
         }
     }
 

@@ -225,11 +225,11 @@ def test_the_starter_resolves_to_the_slices_ten_cards(overhaul):
     assert loader.get_card("defend+").effects[0]["amount"] == 8
 
 
-def test_a_base_strike_in_her_hand_applies_hydro(overhaul):
-    """HER CADENCE IS ABOUT HER, NOT ABOUT THE CARD (slice sec.3: "her Attacks
-    still apply Hydro by the catalyst rule, which the build checks on a base
-    Strike"). `_element_for` has always read the PLAYER's cadence; `EB-307` is
-    the mod catching up, and `CatalystCadence.PrintedElement` is its twin."""
+def test_a_base_strike_in_her_hand_applies_nothing(overhaul):
+    """[USER], 2026-09-02: "the basic Strikes ... are supposed to be bad!" Her
+    cadence is still about HER and not about the card -- her own Attacks apply
+    Hydro with nothing printed -- but the base game's basics are outside the
+    dial (LAW's cadence line; `CatalystCadence.IsBaseGameBasic` is the twin)."""
     from tier0.tests.conftest import make_state
     from tier0.engine import effects as fx_mod
 
@@ -238,9 +238,16 @@ def test_a_base_strike_in_her_hand_applies_hydro(overhaul):
     assert (state.player.cadence, state.player.element) == ("catalyst", "hydro")
     strike = loader.get_card("strike")
     assert strike.element == "none"
-    assert fx_mod._element_for(state, strike.effects[0], strike) == "hydro"
+    assert fx_mod._element_for(state, strike.effects[0], strike) is None
     defend = loader.get_card("defend")
     assert fx_mod._element_for(state, defend.effects[0], defend) is None
+
+    # Her own Attack is unmoved: Slack Water names no element and still lands
+    # Hydro, which is what the exemption leaves alone.
+    slack = next(c for c in loader.prototype_cards()
+                 if c.id == "proto_kk_slack_water")
+    assert slack.element == "none"
+    assert fx_mod._element_for(state, slack.effects[0], slack) == "hydro"
 
 
 def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
