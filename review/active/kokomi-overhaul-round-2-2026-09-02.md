@@ -1,4 +1,4 @@
-Status: OPEN (the Plan build's first round; both seats played; the read, the guarded hang, and the four questions for your run)
+Status: OPEN (the Plan build's first round; both seats played; your first run's finds are built into the deployed build; the four questions for your fresh run)
 
 # Kokomi overhaul, round two: the Plan build's first seats
 
@@ -96,9 +96,10 @@ Seat numbers are floors, not fun claims (Guardrail 7).
   `(debuff)`s, so the aura you applied reads as helping them; the bundle
   chooser prints no mark after a pick; an emptied reward screen still
   advertises `choose`.
-- **EB-295, an HP question.** The first combat screen printed 64/80 with no HP
-  cost taken; the seat's fight-one arithmetic (finished at 56 after one 8)
-  confirms it started at 64. Something took 16 HP before the first fight.
+- **EB-295, not a defect.** The first combat screen printed 64/80 with no HP
+  cost taken, and your run opened the same way. Ascension 3's Weary
+  Traveler starts every run at 80 percent of Max HP; your Klee runs opened
+  at 49 of 62 for the same reason.
 - Not ours: Shrink rewriting the printed damage without a marker is the
   game's own preview; a second Weak not moving the intent is Weak's
   duration stacking; the map render is the known limitation.
@@ -107,7 +108,8 @@ Seat numbers are floors, not fun claims (Guardrail 7).
 
 The rules changed, so this is the "first build of a kit's rules" gate.
 One act-one run, three or four fights including an elite, on the build
-that carries the fix. A sentence each:
+that carries the fixes, 0.2.2024+proto.dirty (main e9870ad0), deployed
+with the bridge in place. A sentence each:
 
 1. Did "now or at dawn" come up as a choice, and when did you plan?
 2. Did a morning ever feel like a payoff?
@@ -119,9 +121,20 @@ Two things to watch while you play: whether Battle Plan is ever not the
 play, and whether Vanguard at 0 energy reads as a status card or as free
 damage.
 
-## 4. Picks
+## 4. Applied from your play (D, disclosed), and picks
 
-None owed. Two numbers are watch items for the next round, applied only
+Applied: Read the Field is 4 Block now and 10 at dawn (was 3 and 8), on
+your "looks a bit weak"; one Block under Coral Guard now, double it at
+dawn. Filed from your run and fixed in PR #271, in the build you play
+next: two-line cards refused the jellyfish by drag and Ambush had no
+selector at all (EB-296), and the pet trapped controller focus (EB-300),
+one cause, the base library's controller-targeting patch never handing
+navigation back to the room; the Burst meter showed under the arm
+(EB-297), now hidden while the arm is on. On your "has no upgrade?",
+Change of Plans+ loses Exhaust and Rally+ applies 2 Weak, and the doubled
+"Exhaust." on Change of Plans and Vanguard is gone (EB-293).
+
+Picks: none owed. Two numbers are watch items for the next round, applied only
 if the seats and your run agree: Battle Plan's rate (a Plan paying 2
 energy for 1 is a loan at plus one; "Plan: gain 1 Energy and draw 2" is
 the one-line change) and Vanguard's cost.
