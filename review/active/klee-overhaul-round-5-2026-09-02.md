@@ -1,4 +1,4 @@
-Status: OPEN (round five, the draft-4 starter: both seats played; growth 5 applied as the default; three picks at the end)
+Status: OPEN (round five, the draft-4 starter: both seats played; growth 4 applied as the default; three picks at the end)
 
 # Klee overhaul, round five: the canonical starter, two seats
 
@@ -80,14 +80,15 @@ the GPT budget.
 
 ## 3. Applied as the default (D), disclosed
 
-**Bombs grow by 5 a turn, not 3** (`KLEE_OVERHAUL_BOMB_GROWTH`, the
+**Bombs grow by 4 a turn, not 3** (`KLEE_OVERHAUL_BOMB_GROWTH`, the
 brief's "placeholder"). Round three moved it 2 to 3; round five says 3
-is under the free pop. At 5, one dawn's wait is worth a Defend and two
-are worth a Strike and a half: Jumpy Dumpty reads 8, 13, 18, and its
-Mine 3, 8, 13. The balance pass
+is under the free pop. The first draft of this packet applied 5; you
+read that as a free Strike every turn per Bomb per enemy, so it is 4:
+Jumpy Dumpty reads 8, 12, 16, and its Mine 3, 7, 11, two dawns' wait
+worth a Strike and a bit. The balance pass
 (`review/active/prototype-balance-2026-09-02.md`) was priced at growth
-3 and its Rares scale with it: Alice's Recipe doubles to 10 a turn,
-Explosives Workshop adds 1. Round six reads growth 5 with the balance
+3 and its Rares scale with it: Alice's Recipe doubles to 8 a turn,
+Explosives Workshop adds 1. Round six reads growth 4 with the balance
 numbers in one build.
 
 Routed, not applied: Gorou at 8 and 4 for 1 energy sits two above Iron
@@ -102,7 +103,7 @@ level with it is the companion workshop's, and it is noted there.
    **Ka-pow! has Retain at base; the upgrade adds damage, 4 to 7**
    [default]: the hold becomes a real turn-by-turn choice, pop for
    tempo or hold for size, and the 0 cost stays. (2) Keep R242: Retain
-   on the upgrade only, and let growth 5 carry the wait.
+   on the upgrade only, and let growth 4 carry the wait.
 2. **The opening Spark with nothing to spend it on.** Re-ask of R242's
    four-four-two on one new fact: both seats finished every fight with
    unspent Sparks and no Spark card. (1) **Keep the shape; the draft
@@ -112,5 +113,5 @@ level with it is the companion workshop's, and it is noted there.
    shape.
 3. **Your play.** Rule 4 changed, so this build is yours to play. (1)
    **Skip round five; rule picks 1 and 2, and play round six**, which
-   carries the balance pass, growth 5 and your pick 1 in one run
+   carries the balance pass, growth 4 and your pick 1 in one run
    [default]. (2) Play round five as it stands first.
