@@ -1227,7 +1227,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # skipped_under_the_arm`), and every surviving `Tide` in the mod
         # is a SHIPPED card's name (Ebb Tide, Tide of Names), which the
         # arm's pool replacement puts out of reach anyway.
-        259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 277, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
+        259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 272, 273, 274, 275, 277, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
         # 292: the `NCardTrail` hang off the Kokomi round-two blind session.
         # BUILT in the commit that mints it -- the guard refuses the
         # non-finite value at three doors and names the node chain -- and it

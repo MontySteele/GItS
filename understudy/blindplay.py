@@ -657,6 +657,11 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         "playable": entry.get("can_play") is not False,
         "unplayable_reason": _text(entry.get("unplayable_reason_text")
                                    or entry.get("unplayable_reason")),
+        # `EB-271`: filled in by `_combat`, where the board this refusal is
+        # about is in hand. Empty on every face built off a screen that has no
+        # board -- a reward, a shop shelf -- and empty on every card that is
+        # not refusing.
+        "unplayable_note": "",
     }
 
 
@@ -897,6 +902,164 @@ def _number_faces(faces: list[dict[str, Any]], field: str
     return faces
 
 
+# `EB-271`, THE OTHER HALF, AND THIS ONE MISTARGETS IN SILENCE.
+#
+# `_number_names` numbers a repeat by its PLACE IN THE LIST IT IS GIVEN, and
+# the enemy list is not the same list from one screen to the next: the feed
+# drops a body once its death finishes (the kokomi r1 pair reported "enemies
+# are renumbered when one dies"). With TWO enemies of a name that is only the
+# stale-number problem the other half of this row closes -- the survivor
+# prints bare and the number the tester last saw still finds it, because one
+# copy remains. With THREE it is worse than a refusal: kill `Slug (1)` and the
+# two survivors reprint as `Slug (1)` and `Slug (2)`, so `attack "Slug (2)"`
+# now names the creature the page called `Slug (3)` one screen earlier and the
+# command SUCCEEDS against the wrong body. Nothing on the page says so.
+#
+# So the number is assigned once and KEPT FOR THE FIGHT. The identity it is
+# kept against is `combat_id`, the game's own per-creature id
+# (`BuildEnemyState`, `McpMod.StateBuilder.cs:1444`) -- NOT `entity_id`, which
+# the same builder derives by counting names as it walks the live list
+# (`jaw_worm_0`, `jaw_worm_1`) and which therefore renumbers with everything
+# else.
+#
+# THE FIGHT'S IDENTITY IS ITS ROSTER, on the `_SHELF_MEMORY` pattern above and
+# for the same reason: this module is handed one snapshot at a time and is
+# told nothing about boundaries. A `combat_id` counts from 1 inside each
+# combat, so the ids alone would carry numbering from one fight into the next.
+# The roster remembers `(fold, max_hp)` beside each id, and the memory is
+# dropped whenever the board in hand shares NO remembered creature, or claims
+# a remembered id for a DIFFERENT creature. A board that is a subset of the
+# roster is the same fight with bodies gone; a board that adds an id beside
+# remembered ones is a summon, and the newcomer takes the next free number.
+_FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {}, "numbered": set()}
+
+
+def forget_fight() -> None:
+    """Drop the remembered enemy numbers. The operator's reset, and the tests'."""
+    _FIGHT_MEMORY["roster"] = {}
+    _FIGHT_MEMORY["ordinals"] = {}
+    _FIGHT_MEMORY["numbered"] = set()
+
+
+def _enemy_key(entry: dict[str, Any]) -> str:
+    """The creature's identity for the fight.
+
+    `combat_id` where the wire carries it, and `entity_id` only as the
+    fallback for a feed that does not -- a fallback that is worth having
+    because it is still right while nothing has died, and wrong in exactly the
+    way this whole function exists to fix once something has.
+    """
+    cid = entry.get("combat_id")
+    return f"c{cid}" if cid is not None else f"e{_entity_id(entry)}"
+
+
+def _enemy_names(enemies: list[dict[str, Any]]) -> list[str]:
+    """The printed enemy names, numbered ONCE and kept for the fight.
+
+    Same output as `_number_names` on the opening board of any fight, which is
+    the point: nothing about a first screen changes. What changes is every
+    screen after a death.
+
+    A name that has ever repeated in this fight stays numbered even when one
+    body is left, because the number is the handle the tester has been using
+    and taking it away is the stale-number refusal this row's first half had
+    to paper over. A name that has never repeated is left exactly as the game
+    printed it.
+    """
+    if not enemies:
+        return []
+    names = [_text(e.get("name")) for e in enemies]
+    # An id the feed repeats on ONE board cannot identify a creature, and
+    # collapsing two bodies onto one key would print one number twice -- the
+    # silent-mistarget failure this function exists to remove, arriving by the
+    # other door. `CombatId` is unique per creature so the game cannot produce
+    # it; the slot breaks the tie anyway, and those enemies simply keep the
+    # old positional behaviour rather than a wrong one.
+    keys, seen_key = [], {}
+    for entry in enemies:
+        key = _enemy_key(entry)
+        nth = seen_key.get(key, 0)
+        seen_key[key] = nth + 1
+        keys.append(key if nth == 0 else f"{key}#{nth}")
+    ident = [(_fold(n), _int(e.get("max_hp", e.get("hp"))))
+             for n, e in zip(names, enemies)]
+
+    roster: dict[str, tuple[str, int]] = _FIGHT_MEMORY["roster"]
+    shared = any(roster.get(k) == i for k, i in zip(keys, ident))
+    clash = any(k in roster and roster[k] != i for k, i in zip(keys, ident))
+    if clash or not shared:
+        forget_fight()
+    roster = _FIGHT_MEMORY["roster"]
+    ordinals: dict[str, int] = _FIGHT_MEMORY["ordinals"]
+    numbered: set[str] = _FIGHT_MEMORY["numbered"]
+
+    for key, (fold, hp) in zip(keys, ident):
+        if key in roster or not fold:
+            continue
+        roster[key] = (fold, hp)
+        seen = sum(1 for f, _ in roster.values() if f == fold)
+        ordinals[key] = seen
+        if seen > 1:
+            numbered.add(fold)
+    return [f"{n} ({ordinals[k]})" if _fold(n) in numbered and k in ordinals
+            else n for k, n in zip(keys, names)]
+
+
+# `EB-271`, THE SECOND HANDLE. THE ONE REFUSAL ON THE SCREEN THAT NAMED
+# NOTHING.
+#
+# The r2 Opus seat put it exactly: *"every other refusal on this screen names
+# its reason (`you have no Spark; and this costs 1`, `no enemy is holding a
+# Bomb`, `you do not have enough energy`). This one does not."* The one that
+# does not is `BlockedByHook`, which the wire spells as that bare enum name
+# and `qa_packet.UNPLAYABLE_REASONS` renders as *"something else on the board
+# is stopping you right now"* -- true, and a sentence a tester cannot act on.
+#
+# `CardModel.CanPlay` reports the flag and has no slot for WHICH model
+# refused, so the sentence cannot come off the wire and this page must not
+# invent one. What it can do is stop being vague with facts it is already
+# printing:
+#
+#   * an ARM GATE, and this is the one the row names. A Spark-priced card
+#     refuses through `SparkAttackCostPower.ShouldPlay`, a hook, so a shortfall
+#     that the mod's own `KleeUnplayableReason` did not reach the page for
+#     still arrives as the bare enum -- while the price and the bank are BOTH
+#     on this screen already (`printed_spark` on the face, `Spark` in the
+#     powers). Two numbers the page prints, subtracted.
+#   * otherwise the honest half: a hook is something ALREADY ON THE BOARD, and
+#     the statuses on the player are the board's own list. Naming them is not
+#     a guess at which one refused -- the note says the feed does not name it
+#     -- it is telling a reader where to look, which is what the seat was
+#     asking for.
+#
+# `BlockedByCardLogic` is deliberately NOT here: the card's own rule is its
+# printed text, two lines above on the same page.
+_BARE_HOOK = "blockedbyhook"
+_SPARK_POWER = "spark"
+
+
+def _hook_note(card: dict[str, Any],
+               powers: list[dict[str, Any]]) -> str:
+    """The extra clause for a refusal the feed would not explain. `""` mostly."""
+    if card["playable"] or _fold(card["unplayable_reason"]) != _BARE_HOOK:
+        return ""
+    price = card.get("printed_spark")
+    bank = next((_int(p.get("stacks")) for p in powers
+                 if _fold(p.get("name")) == _SPARK_POWER), None)
+    if isinstance(price, int) and price > 0 and bank is not None \
+            and bank < price:
+        return (f"This card is priced at {price} Spark and your bank is "
+                f"{bank}.")
+    on_you = ", ".join(
+        f"{p['name']} {p['stacks']}" if p.get("stacks") else p["name"]
+        for p in powers if p.get("name"))
+    if not on_you:
+        return ""
+    return ("The feed does not say which thing is stopping it. A hook is "
+            f"something already on the board, and what is on YOU right now "
+            f"is: {on_you}.")
+
+
 def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
     """`qa_packet._powers` plus the `type` the wire has always carried.
 
@@ -994,14 +1157,20 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         "piles": {"draw": _int(p.get("draw_pile_count")),
                   "discard": _int(p.get("discard_pile_count")),
                   "exhaust": _int(p.get("exhaust_pile_count"))},
-        "enemies": _number_faces(
-            [{"name": _text(e.get("name")),
-              "hp": _int(e.get("hp")),
-              "max_hp": _int(e.get("max_hp", e.get("hp"))),
-              "block": _int(e.get("block")),
-              "intent": _intent(e.get("intents") or e.get("intent")),
-              "powers": _powers(e)} for e in _enemies(state)], "name"),
+        # `EB-271`: numbered through the fight's memory, not by place in the
+        # list the feed happens to be sending this screen.
+        "enemies": [{"name": name,
+                     "hp": _int(e.get("hp")),
+                     "max_hp": _int(e.get("max_hp", e.get("hp"))),
+                     "block": _int(e.get("block")),
+                     "intent": _intent(e.get("intents") or e.get("intent")),
+                     "powers": _powers(e)}
+                    for e, name in zip(_enemies(state),
+                                       _enemy_names(_enemies(state)))],
     }
+    # `EB-271`: the refusal that named nothing, given the board it is about.
+    for face in combat["hand"]:
+        face["unplayable_note"] = _hook_note(face, combat["you"]["powers"])
     # `EB-186`: the once-per-screen Spark line, built from the printed powers
     # and the printed hand this screen already carries. Empty -- and so
     # printed nowhere -- on every screen where no card is being shown cheaper
@@ -1696,6 +1865,11 @@ def _render_card(c: dict[str, Any], bullet: str = "-") -> list[str]:
         out.append("    CANNOT BE PLAYED: "
                    + (qa_packet.unplayable_reason(c["unplayable_reason"])
                       or "the game gives no reason"))
+        # `EB-271`: and the clause that stops the vague one being vague, on
+        # its own line under it, because it is this page's sentence and not
+        # the game's.
+        if c.get("unplayable_note"):
+            out.append(f"    {c['unplayable_note']}")
     return out
 
 
@@ -2697,7 +2871,10 @@ def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     # survivors alone would rename `Slug (2)` to `Slug` the moment the first
     # slug died -- the page and the grammar would disagree about which one the
     # tester is looking at, which is the whole defect this closes.
-    names = _number_names([_text(e.get("name")) for e in enemies])
+    # `EB-271`: and through the fight's memory, so the same is true of the
+    # corpse the feed stops sending. Both sides read the same function off the
+    # same list, which is what keeps the page and the grammar in step.
+    names = _enemy_names(enemies)
     living = [i for i, e in enumerate(enemies) if _int(e.get("hp")) > 0]
     if not name:
         if len(living) == 1:
@@ -2758,8 +2935,8 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
             return _refuse(why)
         post["target"] = eid
         printed["target"] = next(
-            (n for e, n in zip(_enemies(state), _number_names(
-                [_text(x.get("name")) for x in _enemies(state)]))
+            (n for e, n in zip(_enemies(state),
+                               _enemy_names(_enemies(state)))
              if _entity_id(e) == eid), "")
     return Resolution(True, "play", post, printed)
 
@@ -2809,8 +2986,8 @@ def _use_potion(state: dict[str, Any], cmd: Command) -> Resolution:
             return _refuse(why)
         post["target"] = eid
         printed["target"] = next(
-            (n for e, n in zip(_enemies(state), _number_names(
-                [_text(x.get("name")) for x in _enemies(state)]))
+            (n for e, n in zip(_enemies(state),
+                               _enemy_names(_enemies(state)))
              if _entity_id(e) == eid), cmd.target)
     return Resolution(True, "use potion", post, printed)
 

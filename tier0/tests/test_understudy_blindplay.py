@@ -3306,6 +3306,176 @@ def test_a_stale_number_names_the_last_enemy_standing():
     assert res["post"]["target"] == "NIBBIT_0"
 
 
+# --------------------- EB-271: the number an enemy keeps for the whole fight
+
+
+def slug_fight(combat_ids: list[int]) -> dict:
+    """A combat whose enemies all print one name, `BuildEnemyState`'s shape.
+
+    Derived from the recorded Nibbit rather than written out, so every key on
+    every enemy is one the bridge really emits. `entity_id` is rebuilt the way
+    `McpMod.StateBuilder.cs:1436` builds it -- by COUNTING the live list as it
+    walks -- which is exactly why it cannot be the fight's memory key, and
+    `combat_id` is the game's own per-creature id, which can.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    proto = state["battle"]["enemies"][0]
+    enemies = []
+    for slot, cid in enumerate(combat_ids):
+        body = json.loads(json.dumps(proto))
+        body["name"] = "Sea Slug"
+        body["combat_id"] = cid
+        body["entity_id"] = f"SEA_SLUG_{slot}"
+        enemies.append(body)
+    state["battle"]["enemies"] = enemies
+    return state
+
+
+def test_an_enemy_keeps_its_number_when_a_body_leaves():
+    """`EB-271`, THE HALF THAT MISTARGETS IN SILENCE.
+
+    With three enemies of one name the feed drops the first body once its
+    death finishes, and `_number_names` renumbers what is left from 1. The
+    survivors the page called `(2)` and `(3)` reprint as `(1)` and `(2)`, so
+    `on "Sea Slug (2)"` -- refused for a card, but ACCEPTED for an enemy --
+    lands on the creature that was `(3)` one screen earlier and says nothing.
+
+    Seen to FAIL: with the numbering read off the live list, the second
+    resolve below returns `SEA_SLUG_1`, the wrong body.
+    """
+    blindplay.forget_fight()
+    three = slug_fight([1, 2, 3])
+    page = blindplay.observe(three)
+    assert "Sea Slug (1)" in page and "Sea Slug (3)" in page
+    first = blindplay.act(three, 'play "Pearl Barrage" on "Sea Slug (2)"')
+    assert first["ok"], first["refusal"]
+    assert first["post"]["target"] == "SEA_SLUG_1"
+
+    # The first slug dies and the feed stops sending it. The two that remain
+    # are the same two creatures, at new places in the list.
+    two = slug_fight([2, 3])
+    page = blindplay.observe(two)
+    assert "Sea Slug (2)" in page and "Sea Slug (3)" in page
+    assert "Sea Slug (1)" not in page
+    again = blindplay.act(two, 'play "Pearl Barrage" on "Sea Slug (2)"')
+    assert again["ok"], again["refusal"]
+    # `combat_id` 2 is at slot 0 on this board, so this is the same creature
+    # the first resolve hit -- and NOT `SEA_SLUG_1`, which is now `combat_id`
+    # 3 and is what the unfixed page would have aimed at.
+    assert again["post"]["target"] == "SEA_SLUG_0"
+
+
+def test_a_pair_that_becomes_one_keeps_the_number_it_had():
+    """Down to a single survivor the number is KEPT, not withdrawn.
+
+    The stale-number retry above would have found it either way; this is the
+    difference between a tester's handle staying good and a tester's handle
+    working by apology.
+    """
+    blindplay.forget_fight()
+    blindplay.observe(slug_fight([1, 2]))
+    page = blindplay.observe(slug_fight([2]))
+    assert "Sea Slug (2)" in page
+    res = blindplay.act(slug_fight([2]),
+                        'play "Pearl Barrage" on "Sea Slug (2)"')
+    assert res["ok"], res["refusal"]
+    assert res["post"]["target"] == "SEA_SLUG_0"
+
+
+def test_a_summoned_enemy_takes_the_next_number():
+    """A body arriving mid-fight is numbered after the ones already there,
+    never into a gap a death left."""
+    blindplay.forget_fight()
+    blindplay.observe(slug_fight([1, 2]))
+    page = blindplay.observe(slug_fight([2, 5]))
+    assert "Sea Slug (2)" in page and "Sea Slug (3)" in page
+
+
+def test_the_next_fight_numbers_from_one_again():
+    """A `combat_id` counts from 1 inside each combat, so the memory has to
+    end at the fight. Both endings: a board that claims a remembered id for a
+    different creature, and a board that shares no remembered creature at
+    all."""
+    blindplay.forget_fight()
+    blindplay.observe(slug_fight([1, 2, 3]))
+    page = blindplay.observe(combat_state())        # id 1, and not a slug
+    assert "Nibbit" in page and "Nibbit (1)" not in page
+
+    blindplay.forget_fight()
+    blindplay.observe(slug_fight([1, 2, 3]))
+    page = blindplay.observe(slug_fight([7, 8]))    # nothing in common
+    assert "Sea Slug (1)" in page and "Sea Slug (2)" in page
+
+
+# ------------------- EB-271: the refusal that would not say what stopped you
+
+
+def hook_hand_state(*, reason: str, spark_price=None,
+                    status: list[dict] | None = None) -> dict:
+    """A combat holding one refused card, `BuildCardState`'s shape.
+
+    `spark_price` is the key the bridge's GItS edit emits beside the price
+    (`vendor/STS2_MCP/gits/GitsSparkPrice.cs`), and `status` is the player's
+    own row shape off a recorded capture.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    card = {"id": "KLEEMOD-PROTO_KO_BANG_BANG", "name": "Bang Bang!",
+            "type": "Attack", "cost": "0", "can_play": False, "index": 0,
+            "target_type": "AnyEnemy", "is_upgraded": False, "keywords": [],
+            "unplayable_reason": reason,
+            "description": "Deal 9 damage. Applies Pyro."}
+    if spark_price is not None:
+        card["spark_price"] = spark_price
+        card["spark_affordable"] = False
+    state["player"]["hand"] = [card]
+    state["player"]["status"] = status or []
+    return state
+
+
+def test_a_hook_refusal_names_the_price_it_cannot_pay():
+    """`EB-271`. The r2 Opus seat: "every other refusal on this screen names
+    its reason. This one does not." `BlockedByHook` is what an arm's Spark
+    gate reports, and the price and the bank are both already on the page.
+
+    Seen to FAIL: without the note the page stops at "something else on the
+    board is stopping you right now".
+    """
+    page = blindplay.observe(hook_hand_state(
+        reason="BlockedByHook", spark_price=2,
+        status=[{"id": "SPARK_POWER", "name": "Spark", "amount": 1,
+                 "type": "Buff", "keywords": [],
+                 "description": "A resource. Cards that print a Spark price "
+                                "spend it."}]))
+    assert "CANNOT BE PLAYED" in page
+    assert "priced at 2 Spark and your bank is 1" in page
+
+
+def test_a_hook_refusal_with_no_price_points_at_the_board():
+    """No Spark price to name, so the page says where to look instead -- and
+    says, in the same breath, that the feed did not name the thing itself.
+    `Smoggy` is the base game's, and it is what stopped the seat's Skill."""
+    page = blindplay.observe(hook_hand_state(
+        reason="BlockedByHook",
+        status=[{"id": "SMOGGY", "name": "Smoggy", "amount": 1,
+                 "type": "Debuff", "keywords": [],
+                 "description": "You cannot play additional Skills."}]))
+    assert "does not say which thing is stopping it" in page
+    assert "Smoggy 1" in page
+
+
+def test_a_refusal_that_already_has_a_sentence_gains_nothing():
+    """The mod's own words win. A reason the wire spells as a sentence is not
+    vague and must not be padded, and neither is the card's own rule
+    (`BlockedByCardLogic`), whose text is two lines above on the same page."""
+    for reason in ("you have no Spark, and this costs 1",
+                   "BlockedByCardLogic"):
+        page = blindplay.observe(hook_hand_state(
+            reason=reason,
+            status=[{"id": "SMOGGY", "name": "Smoggy", "amount": 1,
+                     "type": "Debuff", "keywords": [], "description": ""}]))
+        assert "does not say which thing is stopping it" not in page, reason
+
+
 # ------------------------------- EB-272: the arm keywords, defined per screen
 
 
