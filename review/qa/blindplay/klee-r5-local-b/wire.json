@@ -1,0 +1,7524 @@
+{
+ "session_id": "klee-r5-local-b",
+ "snapshots": [
+  {
+   "index": 1,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 61,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 35,
+     "max_hp": 45,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "verb": "play",
+   "command": "play \"Strike (1)\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 61,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 35,
+     "max_hp": 45,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 61,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 29,
+     "max_hp": 45,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 61,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 23,
+     "max_hp": 45,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": []
+  },
+  {
+   "index": 5,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 53,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 23,
+     "max_hp": 45,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      },
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "verb": "play",
+   "command": "play \"Strike (1)\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 53,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 8,
+     "max_hp": 45,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      },
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 10,
+     "meter": "spark",
+     "turn": 3,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 53,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 2,
+     "max_hp": 45,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      },
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 11,
+     "meter": "spark",
+     "turn": 3,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 53,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "verb": "play",
+   "command": "play \"Strike (1)\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 53,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 53,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 31,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 11,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 53,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 25,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 12,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1,
+     "WEAK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 25,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 13,
+   "verb": "play",
+   "command": "play \"Strike (1)\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2,
+     "WEAK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 14,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 14,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2,
+     "WEAK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 10,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 15,
+   "verb": "play",
+   "command": "play \"Defend (1)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2,
+     "WEAK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 6,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 16,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2,
+     "WEAK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 0,
+    "discard": 9,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 6,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 17,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 39,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 4,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 18,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Corpse Slug (2)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 39,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "SPOILS_MAP",
+     "name": "Spoils Map",
+     "kind": "Quest",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 19,
+   "verb": "play",
+   "command": "play \"Defend+\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 39,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "SPOILS_MAP",
+     "name": "Spoils Map",
+     "kind": "Quest",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 20,
+   "verb": "play",
+   "command": "play \"Defend\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 39,
+   "max_hp": 62,
+   "block": 8,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "SPOILS_MAP",
+     "name": "Spoils Map",
+     "kind": "Quest",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 21,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 39,
+   "max_hp": 62,
+   "block": 13,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "SPOILS_MAP",
+     "name": "Spoils Map",
+     "kind": "Quest",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 22,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Corpse Slug (2)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 38,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 23,
+   "verb": "play",
+   "command": "play \"Strike (1)\" on \"Corpse Slug (2)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 38,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 12,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 24,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Corpse Slug (2)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 38,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 6,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 25,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 38,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 26,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 38,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike+",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 27,
+   "verb": "play",
+   "command": "play \"Strike+\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 38,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike+",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 10,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    },
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike+",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 28,
+   "verb": "play",
+   "command": "play \"Strike (1)\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 38,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 1,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    },
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike+",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 10,
+     "meter": "spark",
+     "turn": 3,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 29,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Calcified Cultist\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 56,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "SPOILS_MAP",
+     "name": "Spoils Map",
+     "kind": "Quest",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 38,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 52,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 30,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 56,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "SPOILS_MAP",
+     "name": "Spoils Map",
+     "kind": "Quest",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 32,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 52,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 31,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Damp Cultist\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 56,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike+",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 32,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 52,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "1",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 32,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Damp Cultist\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 56,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike+",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 32,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 52,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "1",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 33,
+   "verb": "play",
+   "command": "play \"Strike+\" on \"Damp Cultist\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 56,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike+",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 32,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 40,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "1",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike+",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 34,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Damp Cultist\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 56,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 32,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 31,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "1",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike+",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 35,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 56,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 9,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 32,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 25,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "1",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike+",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 36,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Damp Cultist\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 46,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "SPOILS_MAP",
+     "name": "Spoils Map",
+     "kind": "Quest",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 29,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 22,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike+",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 3,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 37,
+   "verb": "play",
+   "command": "play \"Defend+\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 46,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "SPOILS_MAP",
+     "name": "Spoils Map",
+     "kind": "Quest",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 29,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 16,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike+",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 3,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 38,
+   "verb": "play",
+   "command": "play \"Defend (1)\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 46,
+   "max_hp": 62,
+   "block": 8,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "SPOILS_MAP",
+     "name": "Spoils Map",
+     "kind": "Quest",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 29,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 16,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike+",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 3,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 39,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 46,
+   "max_hp": 62,
+   "block": 13,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "SPOILS_MAP",
+     "name": "Spoils Map",
+     "kind": "Quest",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 29,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 16,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike+",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 3,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 40,
+   "verb": "play",
+   "command": "play \"Strike+\" on \"Damp Cultist\"",
+   "state_type": "monster",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 42,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike+",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 29,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "13",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 16,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike+",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 3,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend+",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 10,
+     "meter": "spark",
+     "turn": 4,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike+",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 41,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Damp Cultist\"",
+   "state_type": "monster",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 42,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 29,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "13",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 7,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": []
+  },
+  {
+   "index": 42,
+   "verb": "play",
+   "command": "play \"Strike (1)\" on \"Damp Cultist\"",
+   "state_type": "monster",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 42,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 29,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "13",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "DAMP_CULTIST_0",
+     "name": "Damp Cultist",
+     "hp": 3,
+     "max_hp": 52,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 12,
+     "meter": "spark",
+     "turn": 4,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 43,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Calcified Cultist\"",
+   "state_type": "monster",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 42,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 29,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "13",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 13,
+     "meter": "spark",
+     "turn": 4,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 44,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 42,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 9,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 29,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "13",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": []
+  },
+  {
+   "index": 45,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Calcified Cultist\"",
+   "state_type": "monster",
+   "turn": 5,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 29,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CALCIFIED_CULTIST_0",
+     "name": "Calcified Cultist",
+     "hp": 29,
+     "max_hp": 38,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "15",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 14,
+     "meter": "spark",
+     "turn": 5,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 5,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 4
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
