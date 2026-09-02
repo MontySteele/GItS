@@ -650,6 +650,10 @@ _OPTION_TEXT_KEYS = ("description", "body", "text",
 # invented here.
 _OPTION_KIND_KEYS = ("type", "kind", "room_type", "category")
 
+# What a card shelf reads as once the game has cleared its card, and the key
+# `_shop_options` looks a remembered face up by. See `EB-262` below.
+EMPTY_SHELF = "(this shelf is empty)"
+
 
 def _named_option(entry: Any) -> dict[str, Any]:
     """One printed option -- a rest choice, a reward, a relic, a menu button.
@@ -722,7 +726,7 @@ def _named_option(entry: Any) -> dict[str, Any]:
                    and not _text(entry.get("card_name")))
     note = ""
     if empty_shelf:
-        name = "(this shelf is empty)"
+        name = EMPTY_SHELF
         note = ("Bought, or never stocked. The game clears a shelf's card the "
                 "moment it is sold, and the name, the text and the cost all "
                 "live on that card, so nothing on the feed can say which one "
@@ -732,11 +736,122 @@ def _named_option(entry: Any) -> dict[str, Any]:
         "text": text,
         "enabled": enabled,
         "cost": cost if cost != "-" else "",
+        # `EB-268`: the shelf's card TYPE, which the wire sends beside its
+        # cost under the same prefixed spelling (`card_type`,
+        # `BuildShopState`) and which a HAND line has always printed. The r1
+        # Opus seat bought two cards "without knowing what they cost to
+        # play"; a shelf reads the way a hand line does now.
+        "kind": _text(entry.get("card_type")).lower(),
         "note": note,
+        # What the row says INSTEAD of a price when it cannot be taken. Empty
+        # means the default, `(not available)`; `_shop_options` sets `sold`
+        # on a shelf it can prove was bought.
+        "unavailable": "",
         "price": _int(entry.get("price", entry.get("cost")), 0)
         if entry.get("price") is not None or entry.get("cost") is not None
         else None,
     }
+
+
+# `EB-290`. A REWARD ROW IS NAMED BY ITS `description` AND BY NOTHING ELSE.
+# `BuildRewardsState` (`McpMod.StateBuilder.cs:1932`) emits `index`, `type`
+# and `description` for every reward and a printed NAME for exactly one kind
+# of them, the potion. So a relic reward reaches this page as
+# `{"type": "relic", "description": "Golden Pearl"}`, `_named_option`'s
+# kind fallback printed it `**Relic**` with the relic's own name below as body
+# text, and `choose "Golden Pearl"` was refused *"nothing here is called
+# 'Golden Pearl'. What is on the screen: Relic"* -- at a tester reading the
+# words Golden Pearl off the screen in front of them. `Reward.Description` IS
+# the reward's printed face ("Golden Pearl", "12 Gold", "40 Gold (stolen
+# back)"), so it is the NAME here; the type word survives only where the row
+# prints nothing else, which is where it is all there is.
+def _reward_option(entry: Any) -> dict[str, Any]:
+    """One reward row, named by the thing it hands over (`EB-290`)."""
+    option = _named_option(entry)
+    if not isinstance(entry, dict):
+        return option
+    if any(_text(entry.get(k)) for k in _OPTION_NAME_KEYS):
+        return option                        # a potion: it printed its name
+    described = _text(entry.get("description"))
+    if described and "\n" not in described:
+        option["name"] = described
+        option["text"] = ""                  # it is the heading now
+    return option
+
+
+def _dedupe_text(option: dict[str, Any]) -> dict[str, Any]:
+    """Drop a body line that only repeats the heading above it.
+
+    A potion reward carries its title under BOTH `potion_name` and the
+    reward's own `description`, so the row printed the name and then printed
+    it again as its own text.
+    """
+    if _fold(option.get("text")) == _fold(option.get("name")):
+        option["text"] = ""
+    return option
+
+
+# `EB-262`, THE HALF THAT IS OURS AFTER ALL. The lost name is the GAME's --
+# `MerchantCardEntry.IsStocked` IS `CreationResult != null`, so a purchase
+# clears the only field the shelf's face was read from and the bridge can only
+# emit what is left. But this page has SEEN that shelf: it rendered the same
+# shop, from the same wire, before the purchase. So the shelf is remembered
+# between renders and a bought row prints the name it had, marked `sold`,
+# instead of `(this shelf is empty)`.
+#
+# THE SHOP'S IDENTITY IS ITS OWN FINGERPRINT and not a screen counter: the
+# `(index, category, price)` of every shelf, which is exactly the part a
+# purchase does NOT change (proven on the two live captures, which differ in
+# `is_stocked`, `card_name` and `card_cost` and in nothing else). A different
+# shop fingerprints differently and the memory is dropped, so nothing can
+# carry a name from one shop to another, and a session that arrives at a shop
+# already sold out has no memory to draw on and says so as it did before.
+_SHELF_MEMORY: dict[str, Any] = {"shop": (), "shelves": {}}
+
+
+def forget_shelves() -> None:
+    """Drop the remembered shop shelves. The operator's reset, and the tests'."""
+    _SHELF_MEMORY["shop"] = ()
+    _SHELF_MEMORY["shelves"] = {}
+
+
+def _shop_fingerprint(items: list[dict[str, Any]]) -> tuple[Any, ...]:
+    return tuple((_int(i.get("index"), -1), _text(i.get("category")),
+                  _int(i.get("price"), -1)) for i in items)
+
+
+def _shop_options(state: dict[str, Any]) -> list[dict[str, Any]]:
+    """The shelves, with a bought one wearing the face it had (`EB-262`)."""
+    items = _shop_items(state)
+    fingerprint = _shop_fingerprint(items)
+    if _SHELF_MEMORY["shop"] != fingerprint:
+        forget_shelves()
+        _SHELF_MEMORY["shop"] = fingerprint
+    shelves: dict[int, dict[str, str]] = _SHELF_MEMORY["shelves"]
+
+    options = [_named_option(i) for i in items]
+    for entry, option in zip(items, options):
+        index = _int(entry.get("index"), -1)
+        if option["name"] != EMPTY_SHELF:
+            if option["name"]:
+                shelves[index] = {"name": option["name"],
+                                  "text": option["text"],
+                                  "cost": option["cost"],
+                                  "kind": option["kind"]}
+            continue
+        seen = shelves.get(index)
+        if seen is None:
+            continue
+        option["name"] = seen["name"]
+        option["text"] = seen["text"]
+        option["cost"] = seen["cost"]
+        option["kind"] = seen["kind"]
+        option["unavailable"] = "sold"
+        option["note"] = ("Sold. The game clears a shelf's card the moment it "
+                          "is bought, so this name, this text and this cost "
+                          "are what this page printed for the same shelf "
+                          "before the purchase -- not what the feed says now.")
+    return options
 
 
 def _number_faces(faces: list[dict[str, Any]], field: str
@@ -766,12 +881,47 @@ def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
              if isinstance(row, dict)
              and (_text(row.get("title")) or _label(row.get("name")))]
     for power, kind in zip(out, kinds):
-        power["kind"] = kind
+        power["kind"] = "aura" if _is_aura(power["name"]) else kind
     return out
 
 
+def _is_aura(name: str) -> bool:
+    """Is this printed power an elemental AURA? (`EB-294`)
+
+    THE WIRE SAYS `Buff` AND IT IS NOT LYING, WHICH IS THE WHOLE TRAP.
+    `AuraPower.Type` is `PowerType.Buff` on purpose and the reason is written
+    at the property: elemental application has to COEXIST with Artifact
+    ([USER] 2026-08-23), and `ArtifactPower` negates on
+    `GetTypeForAmount(amount) == PowerType.Debuff`, so a positive counter that
+    must not be eaten has to declare itself a buff. That is a rule about
+    Artifact, not a statement to a reader -- and the page printed it as one:
+    `Hydro Aura 2 (buff)` sat in the same block as `Vulnerable 1 (debuff)`,
+    and the r2 Opus seat read the aura it had just applied as something
+    helping the enemy.
+
+    Read off the PRINTED TITLE, which is the only handle this side of the line
+    has: `AuraPower.Localization` writes `("title", $"{Element} Aura")` for
+    every element, so every aura on the board prints a name ending in the word
+    Aura and nothing else does. An id would be the sturdier key, and an id may
+    not reach this module at all.
+    """
+    words = _fold(name).split()
+    return bool(words) and words[-1] == "aura"
+
+
 def _intent(blob: Any) -> dict[str, str]:
-    return qa_packet._intent(blob)
+    """`qa_packet._intent` plus the wire's own `type` (`EB-299`).
+
+    A telegraph on the wire is `type` (`Attack`, `Debuff`, ...), `label` (the
+    number the game draws ON the icon), `title` (the hover tip's heading --
+    `Aggressive`, `Strategic`) and `description` (its sentence). The page
+    printed title, label and description comma-joined and dropped `type`
+    entirely, which is `EB-179`'s power defect one field over.
+    """
+    out = qa_packet._intent(blob)
+    row = blob[0] if isinstance(blob, list) and blob else blob
+    out["type"] = _text(row.get("type")) if isinstance(row, dict) else ""
+    return out
 
 
 # ------------------------------------------------------------ observations --
@@ -1010,10 +1160,89 @@ def _map_options(state: dict[str, Any]) -> list[dict[str, Any]]:
     every option nameable without teaching the tester a coordinate, an id or
     anything about what is down either path.
     """
-    nodes = [_named_option(n) for n in _map_nodes(state)]
-    for i, o in enumerate(nodes, 1):
+    raw = _map_nodes(state)
+    nodes = [_named_option(n) for n in raw]
+    for i, (entry, o) in enumerate(zip(raw, nodes), 1):
         o["name"] = f"{o['name'] or 'Path'} (path {i})"
+        # `EB-298`: the wire's OWN one-level lookahead, which nothing read.
+        # `BuildMapState` puts each travelable point's children on the option
+        # as `leads_to`, room type and all, so the page can say what a fork
+        # opens onto instead of leaving the tester to pick blind.
+        leads = [_label((c or {}).get("type"))
+                 for c in (entry.get("leads_to") or [])
+                 if isinstance(c, dict)]
+        if leads:
+            o["text"] = "leads on to: " + ", ".join(leads)
     return nodes
+
+
+def _map_ahead(state: dict[str, Any]) -> list[dict[str, Any]]:
+    """Every floor between here and the boss, nearest first (`EB-298`).
+
+    THE WHOLE MAP IS ON THE WIRE AND THE PAGE PRINTED TWO NODES OF IT.
+    `BuildMapState` sends `nodes` -- every point of the act with its `col`,
+    its `row`, its room `type` and its `children` -- plus `current_position`,
+    `visited`, and a `boss` block carrying the boss's own printed name. The
+    render read `next_options` and nothing else, so the r2 Opus seat had "no
+    floors ahead and no elite/shop/campfire distinction, so route choice is a
+    coin flip", and took an `Unknown` that turned out to be an event.
+
+    A row is a floor, and the direction of travel is read rather than
+    assumed: the next options sit one step from where you are, so their row
+    against the current row says which way the numbers run. With no current
+    position on the feed the nearest next option is the datum and travel is
+    taken to run away from it in the same direction, which is the only
+    reading a single row supports.
+
+    THIS IS WHAT A SIGHTED PLAYER SEES, and no more: the rooms on each floor,
+    in the order they are drawn left to right. It is not a route -- the
+    `children` edges that would make one are on the feed too, and printing a
+    reachability graph as prose is a page nobody can read. The floors and the
+    one-level `leads_to` on each option are what the seat asked for.
+    """
+    nodes = [n for n in _listing(state, "map.nodes", "nodes")
+             if isinstance(n, dict)]
+    if not nodes:
+        return []
+    options = [n for n in _map_nodes(state) if isinstance(n, dict)]
+    here = _blob(state, "map").get("current_position")
+    here_row = (_int(here.get("row"), -1) if isinstance(here, dict) else -1)
+    option_rows = sorted({_int(o.get("row"), -1) for o in options
+                          if o.get("row") is not None})
+    if not option_rows:
+        return []
+    step = 1 if here_row < 0 or option_rows[0] > here_row else -1
+    if here_row < 0:
+        here_row = option_rows[0] - step
+
+    floors: dict[int, list[tuple[int, str]]] = {}
+    for node in nodes:
+        row, col = _int(node.get("row"), -1), _int(node.get("col"), -1)
+        if row < 0 or (row - here_row) * step <= 0:
+            continue
+        kind = _label(node.get("type"))
+        if kind:
+            floors.setdefault(row, []).append((col, kind))
+    # A floor is named by its DISTANCE and never by the wire's `row`. The row
+    # is a grid coordinate: nothing on the feed says it is the floor number
+    # the game prints, and a page that guessed would be teaching the tester a
+    # coordinate -- which is the one thing `_map_options` exists not to do.
+    return [{"floors_ahead": (row - here_row) * step,
+             "kinds": [k for _, k in sorted(floors[row])]}
+            for row in sorted(floors, key=lambda r: (r - here_row) * step)]
+
+
+def _map_boss(state: dict[str, Any]) -> str:
+    """The boss at the top of this act, by its PRINTED name (`EB-298`).
+
+    `AddBossIdentity` writes both an `id` and a `name` and only the second one
+    is a thing the game prints, so only the second one is read. A `bosses`
+    list with a second entry means the act has two and both are named.
+    """
+    blob = _blob(state, "map")
+    bosses = [b for b in (blob.get("bosses") or [blob.get("boss")])
+              if isinstance(b, dict)]
+    return ", ".join(n for n in (_text(b.get("name")) for b in bosses) if n)
 
 
 def _bundle_cards(bundle: Any) -> list[dict[str, Any]]:
@@ -1021,6 +1250,25 @@ def _bundle_cards(bundle: Any) -> list[dict[str, Any]]:
     if not isinstance(bundle, dict):
         return []
     return [c for c in (bundle.get("cards") or []) if isinstance(c, dict)]
+
+
+def _selected_bundle(bundles: list[dict[str, Any]],
+                     preview: list[dict[str, Any]]) -> int:
+    """Which bundle the preview is showing, or `-1` (`EB-294`).
+
+    The preview holds CARDS, not a bundle index, so the pick is the bundle
+    whose printed titles are the preview's -- as a multiset, because a bundle
+    may hold two copies of one card. Two bundles that print the same titles
+    are not told apart and answer `-1`: the render then says a pick has
+    landed and that the page cannot say which, which is the same honesty the
+    enchant picker gets and for the same reason.
+    """
+    want = sorted(_fold(_card_title(c)) for c in preview)
+    if not want:
+        return -1
+    hits = [i for i, b in enumerate(bundles)
+            if sorted(_fold(_card_title(c)) for c in _bundle_cards(b)) == want]
+    return hits[0] if len(hits) == 1 else -1
 
 
 def _screen_cards(state: dict[str, Any]) -> list[dict[str, Any]]:
@@ -1160,6 +1408,9 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     elif st == "map":
         obs["screen"] = "map"
         obs["nodes"] = _map_options(state)
+        # `EB-298`: the floors ahead and the boss, both already on the feed.
+        obs["ahead"] = _map_ahead(state)
+        obs["boss"] = _map_boss(state)
         obs["commands"] = ['go "<node>"']
     elif st == "card_reward":
         blob = _blob(state, "card_reward")
@@ -1214,15 +1465,31 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         blob = _blob(state, "bundle_select")
         obs["screen"] = "bundle_select"
         obs["prompt"] = _text(blob.get("prompt")) or "Choose a bundle."
+        bundles = _screen_cards(state)
         obs["offers"] = [{"cards": [_card_face(c) for c in _bundle_cards(b)]}
-                         for b in _screen_cards(state)]
-        obs["can_confirm"] = bool(blob.get("preview_showing"))
+                         for b in bundles]
+        # `EB-294`. THE SCREEN NEVER SAID WHICH BUNDLE WAS ARMED. `choose`
+        # answered `ok Selecting bundle 0` and the re-render was the same page
+        # with no mark on either offer: "I had to send `confirm` on faith that
+        # the right one was armed" (r2 Opus seat). The wire does answer --
+        # `BuildBundleSelectState` fills `preview_cards` from the preview
+        # container the moment a bundle is picked -- so the pick is found by
+        # matching those printed titles against each bundle's own, and the
+        # render marks it. `can_confirm` is the CONFIRM BUTTON's own state
+        # where the wire sends it, with `preview_showing` behind it for a
+        # state saved before that key was read.
+        obs["selected"] = _selected_bundle(bundles, _preview_cards(
+            state, "bundle_select"))
+        obs["can_confirm"] = bool(blob.get("can_confirm")
+                                  if blob.get("can_confirm") is not None
+                                  else blob.get("preview_showing"))
+        obs["preview_showing"] = bool(blob.get("preview_showing"))
         obs["commands"] = ['choose "<any card title in the bundle you want>"',
                            "confirm"]
     elif st in ("shop", "fake_merchant"):
         obs["screen"] = "shop"
         obs["gold"] = _int(_player(state).get("gold"))
-        obs["items"] = [_named_option(i) for i in _shop_items(state)]
+        obs["items"] = _shop_options(state)
         obs["commands"] = ['buy "<item>"', "proceed"]
     elif st == "rest_site":
         obs["screen"] = "rest_site"
@@ -1276,8 +1543,23 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             obs["commands"].append("proceed")
     elif st == "rewards":
         obs["screen"] = "rewards"
-        obs["items"] = [_named_option(r) for r in _reward_items(state)]
-        obs["commands"] = ['choose "<reward>"', "proceed"]
+        # `EB-290`: named by what each row hands over, and the repeats
+        # numbered the way every other list on this page is numbered. Two
+        # rewards that print one name -- the run that met `12 Gold` and
+        # `40 Gold (stolen back)` -- were both called `Gold`, the documented
+        # `Gold (1)` was refused, and the tester could only take them one at a
+        # time by naming the pair and trusting which one came first.
+        obs["items"] = _number_faces(
+            [_dedupe_text(_reward_option(r)) for r in _reward_items(state)],
+            "name")
+        # `EB-294`. THE VERB WAS A CONSTANT HERE TOO. Once both rewards were
+        # taken the page printed `- (nothing here to take)` and still offered
+        # `choose "<reward>"` under "What you can say", which is the same
+        # defect `EB-263` closed one screen over on a spent rest site.
+        obs["commands"] = []
+        if any(i["enabled"] for i in obs["items"]):
+            obs["commands"].append('choose "<reward>"')
+        obs["commands"].append("proceed")
     elif st in ("treasure", "relic_select"):
         obs["screen"] = st
         obs["items"] = [_named_option(r) for r in _relic_options(state)]
@@ -1423,9 +1705,36 @@ SELECTION_NOTE = ("*This screen's data feed carries no per-card selection "
                   "one you picked. The `Confirm is` line below is the only "
                   "thing that moves when a pick lands.*")
 
-HAND_REPEAT_NOTE = ("*Two cards here print the same name. The game's data "
-                    "feed does not report a card's enchantment, so if one of "
-                    "them is enchanted, this page cannot show which.*")
+# `EB-299`. THE NOTE WAS WRONG IN BOTH DIRECTIONS AND THE r2 OPUS SEAT CAUGHT
+# BOTH. It said *"Two cards here print the same name"* over a hand holding
+# THREE Coral Guards, over a hand with two separate duplicate PAIRS, and over
+# three Water's Edge beside two Slimed -- "It says 'Two cards' regardless."
+# And it implied the page cannot tell the copies apart when `EB-177` had
+# already numbered them: what the page cannot do is say which copy carries an
+# ENCHANTMENT, because no field on the feed reports one. The same seat found
+# the other half unprompted -- "the numbered suffixes renumber inside a turn",
+# so `(1)` names a different card the moment the first one is played -- and
+# that is a fact about the handle, which belongs beside it.
+HAND_REPEAT_NOTE = ("*More than one card in this hand prints the same name. "
+                    "The copies are numbered in the order they are listed, "
+                    "and that number is a place in this list rather than "
+                    "anything the card carries: it is re-counted on every "
+                    "screen, so `(1)` names a different copy once one of them "
+                    "leaves your hand. The game's data feed does not report a "
+                    "card's enchantment either, so where two copies differ "
+                    "only by one, this page cannot say which is which.*")
+
+# `EB-294`. AN AURA IS NOT A BUFF, AND THE FEED SAYS BUFF. `AuraPower.Type` is
+# `PowerType.Buff` so that Artifact does not eat an elemental application
+# ([USER] 2026-08-23), which is a rule about Artifact and reads on a page as a
+# statement about who is being helped: `Hydro Aura 2 (buff)` sat beside
+# `Vulnerable 1 (debuff)` and the r2 Opus seat read "the aura I put on them to
+# set up a Reaction" as something helping the enemy. The tag is `(aura)` on
+# the line, and this says once per screen what that third tag means.
+AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
+             "`(debuff)`, because it is neither: it is the element left "
+             "clinging to a body, and it is what an Elemental Reaction needs "
+             "-- a hit of a different element consumes it and reacts.*")
 
 
 def _render_power(power: dict[str, Any], indent: str) -> str:
@@ -1439,6 +1748,29 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
     return line
 
 
+def _render_intent(intent: dict[str, str]) -> str:
+    """One telegraph, with every field saying what it is (`EB-299`).
+
+    The line used to be `kind`, `label` and `text` joined by commas, so a
+    debuff turn read `Strategic, 2, This enemy intends to apply a Debuff to
+    you` and the r2 Codex seat reported that "the Strategic intent's number
+    was understandable only from its accompanying sentence". That is three
+    different grammars in one comma list, which is `EB-198`'s lesson: the
+    number is the one the game DRAWS ON THE ICON and the feed gives it no
+    unit, so the page says that is what it is instead of setting it beside a
+    word it does not modify. The wire's `type` -- the mechanical kind, which
+    the page dropped the way it dropped a power's (`EB-179`) -- goes back on
+    beside the hover tip's heading where the two differ.
+    """
+    head = intent.get("kind") or intent.get("type") or ""
+    kind = intent.get("type") or ""
+    if head and kind and _fold(head) != _fold(kind):
+        head = f"{head} ({kind})"
+    bits = [head, (f"the number on its icon is {intent['label']}"
+                   if intent.get("label") else ""), intent.get("text") or ""]
+    return " — ".join(b for b in bits if b) or "(no intent shown)"
+
+
 def _render_options(items: list[dict[str, Any]], bullet: str = "-") -> list[str]:
     out = []
     for o in items:
@@ -1447,12 +1779,17 @@ def _render_options(items: list[dict[str, Any]], bullet: str = "-") -> list[str]
         # two different prices and a row that printed only the gold is what
         # bought a 3-energy card blind.
         bits = [b for b in (f"cost {o['cost']}" if o.get("cost") else "",
+                            o.get("kind") or "",
                             f"{o['price']} gold"
                             if o.get("price") is not None else "") if b]
         if bits:
             line += " — " + ", ".join(bits)
         if not o.get("enabled", True):
-            line += " (not available)"
+            # `EB-262`: `sold` where the page can prove the shelf was bought
+            # -- it printed the card itself before the purchase -- and the
+            # unchanged `not available` everywhere else, which covers a shelf
+            # that was never stocked and a row priced out of reach.
+            line += f" ({o.get('unavailable') or 'not available'})"
         out.append(line)
         if o.get("text"):
             out.append(f"    {o['text']}")
@@ -1619,17 +1956,27 @@ def render(obs: dict[str, Any]) -> str:
             if e["block"]:
                 line += f", Block {e['block']}"
             out.append(line)
-            telegraph = ", ".join(x for x in (e["intent"]["kind"],
-                                              e["intent"]["label"],
-                                              e["intent"]["text"]) if x)
-            out.append(f"    Intent: {telegraph or '(no intent shown)'}")
+            out.append(f"    Intent: {_render_intent(e['intent'])}")
             for pw in e["powers"]:
                 out.append(_render_power(pw, "    "))
         if you["powers"] or any(e["powers"] for e in c["enemies"]):
             out += ["", POWER_NOTE]
+        if any(p.get("kind") == "aura"
+               for p in you["powers"] + [x for e in c["enemies"]
+                                         for x in e["powers"]]):
+            out += ["", AURA_NOTE]
     elif obs["screen"] == "map":
         out += ["# The map", "",
                 "Where you can go next:", ""] + _render_options(obs["nodes"])
+        # `EB-298`: the rest of the act, which was on the feed all along.
+        if obs.get("ahead"):
+            out += ["", "The floors ahead of you, nearest first — every room "
+                        "on each, in the order they are drawn:", ""]
+            out += [f"- {f['floors_ahead']} floor"
+                    f"{'' if f['floors_ahead'] == 1 else 's'} ahead: "
+                    + ", ".join(f["kinds"]) for f in obs["ahead"]]
+        if obs.get("boss"):
+            out += ["", f"At the top of this act: **{obs['boss']}**"]
     elif obs["screen"] in ("card_reward", "card_select"):
         out += [f"# {obs['prompt']}", ""]
         for card in obs["offers"]:
@@ -1646,13 +1993,24 @@ def render(obs: dict[str, Any]) -> str:
             out += ["", "You may skip this."]
     elif obs["screen"] == "bundle_select":
         out += [f"# {obs['prompt']}", ""]
-        for offer in obs["offers"]:
+        for i, offer in enumerate(obs["offers"]):
             titles = ", ".join(c["title"] for c in offer["cards"]
                                if c["title"])
-            out += [f"## A bundle of: {titles or '(nothing printed)'}", ""]
+            head = f"## A bundle of: {titles or '(nothing printed)'}"
+            # `EB-294`: the mark the screen never had.
+            if i == obs.get("selected", -1):
+                head += " — PICKED"
+            out += [head, ""]
             for card in offer["cards"]:
                 out += _render_card(card)
             out.append("")
+        if obs.get("selected", -1) < 0 and obs.get("preview_showing"):
+            out += ["*A bundle has been picked and this page cannot say "
+                    "which: the screen shows the picked cards rather than "
+                    "marking the bundle, and the cards it is showing match "
+                    "no single bundle above.*", ""]
+        elif obs.get("selected", -1) < 0:
+            out += ["*Nothing is picked yet.*", ""]
     elif obs["screen"] == "shop":
         out += ["# The shop", "", f"You have {obs['gold']} gold.", "",
                 "On the shelves:", ""] + _render_options(obs["items"])
@@ -2261,7 +2619,10 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
         return _index_choice(state, cmd, _rest_options(state),
                              "choose_rest_option")
     if st == "rewards":
-        return _index_choice(state, cmd, _reward_items(state), "claim_reward")
+        # `EB-290`: the same namer and the same numbering the render uses --
+        # a page and a grammar that number differently are two screens.
+        return _index_choice(state, cmd, _reward_items(state), "claim_reward",
+                             namer=_reward_option, number=True)
     if st == "treasure":
         return _index_choice(state, cmd, _relic_options(state),
                              "claim_treasure_relic")
@@ -2271,7 +2632,9 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
 
 
 def _index_choice(state: dict[str, Any], cmd: Command, entries: list[Any],
-                  action: str) -> Resolution:
+                  action: str, *,
+                  namer: Callable[[Any], dict[str, Any]] = _named_option,
+                  number: bool = False) -> Resolution:
     """A `choose` that posts an index into a list of PRINTED options.
 
     The index posted is the option's own `index` field where the wire supplies
@@ -2279,21 +2642,29 @@ def _index_choice(state: dict[str, Any], cmd: Command, entries: list[Any],
     index and the walker in `soak` reads it, while a rest site is indexed by
     position. Resolved here, at the moment of posting, for `naming.py:14-17`'s
     reason.
+
+    `namer` and `number` (`EB-290`) exist so that a screen whose RENDER names
+    its rows differently resolves them the same way. They are passed by the
+    caller that renders that screen and by no other: a caller whose page does
+    not number must not number its grammar (`_match`'s own rule).
     """
-    options = [_named_option(o) for o in entries]
-    idx, why = _match([{"n": o["name"]} for o in options], cmd.name,
+    options = [namer(o) for o in entries]
+    names = [o["name"] for o in options]
+    if number:
+        names = _number_names(names)
+    idx, why = _match([{"n": n} for n in names], cmd.name,
                       key=lambda e: e["n"])
     if idx < 0:
         return _refuse(why)
     if not options[idx]["enabled"]:
-        return _refuse(f"{options[idx]['name']!r} is on the screen but not "
+        return _refuse(f"{names[idx]!r} is on the screen but not "
                        f"available to take")
     raw = entries[idx]
     posted = raw.get("index") if isinstance(raw, dict) else None
     return Resolution(True, "choose",
                       {"action": action,
                        "index": posted if isinstance(posted, int) else idx},
-                      {"option": options[idx]["name"]})
+                      {"option": names[idx]})
 
 
 def _go(state: dict[str, Any], cmd: Command) -> Resolution:
@@ -2312,7 +2683,10 @@ def _buy(state: dict[str, Any], cmd: Command) -> Resolution:
     items = _shop_items(state)
     if not items:
         return _refuse("there is nothing on the shelves")
-    options = [_named_option(i) for i in items]
+    # `EB-262`: the SAME reader the page uses, remembered shelves and all --
+    # a grammar that could not name a row the page printed would be a second
+    # screen. `_shop_options` only ever adds a name it printed itself.
+    options = _shop_options(state)
     idx, why = _match([{"n": o["name"]} for o in options], cmd.name,
                       key=lambda e: e["n"])
     if idx < 0:
@@ -2358,6 +2732,30 @@ def _rest_keyword(state: dict[str, Any], cmd: Command,
                    + ", ".join(o["name"] for o in options))
 
 
+def _not_in_battle(obs: dict[str, Any]) -> str:
+    """Why a combat verb cannot be taken on THIS screen (`EB-290`).
+
+    THE FLAT REFUSAL WAS FACTUALLY WRONG. `use potion "Touch of Insanity"`
+    opened *"Choose a card to make free."*, which is a combat overlay the wire
+    names `hand_select` and this page renders as a card chooser; the next
+    `play "Big Badda Boom" on "Sewer Clam"` came back *"you are not in a
+    battle"* at a tester who was in one, round one, with the Sewer Clam on the
+    screen. The r4 Opus seat filed it as a wrong answer, which is what it was:
+    the true reason is that a chooser is open and wants an answer first, and
+    the way out is the grammar the page is already offering three lines above.
+    An overlay this page renders as a chooser therefore names itself, quotes
+    its own prompt and lists its own verbs; every other screen keeps the old
+    sentence, because there it is true.
+    """
+    if obs["screen"] not in ("card_select", "bundle_select", "card_reward"):
+        return "you are not in a battle"
+    prompt = str(obs.get("prompt") or "").strip()
+    verbs = ", ".join(f"`{c}`" for c in obs["commands"])
+    return ("a card chooser is open and has to be answered first"
+            + (f' — "{prompt}"' if prompt else "")
+            + (f". What you can say here: {verbs}" if verbs else ""))
+
+
 def act(state: dict[str, Any], command: str) -> dict[str, Any]:
     """Resolve one player-language command against the CURRENT state.
 
@@ -2371,19 +2769,19 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
         return _refuse(str(exc)).as_dict()
 
     st = _screen(state)
-    obs_blocked = observation(state)["blocked"]
-    if obs_blocked:
-        return _refuse(f"this screen is not being driven: {obs_blocked}"
+    obs = observation(state)
+    if obs["blocked"]:
+        return _refuse(f"this screen is not being driven: {obs['blocked']}"
                        ).as_dict()
 
     if cmd.verb == "play":
         res = (_play(state, cmd) if st in COMBAT_SCREENS
-               else _refuse("you are not in a battle"))
+               else _refuse(_not_in_battle(obs)))
     elif cmd.verb == "use potion":
         res = _use_potion(state, cmd)
     elif cmd.verb == "end turn":
         res = (Resolution(True, "end turn", {"action": "end_turn"}, {})
-               if st in COMBAT_SCREENS else _refuse("you are not in a battle"))
+               if st in COMBAT_SCREENS else _refuse(_not_in_battle(obs)))
     elif cmd.verb == "choose":
         res = _choose(state, cmd)
     elif cmd.verb == "go":

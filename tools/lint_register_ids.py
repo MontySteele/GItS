@@ -336,6 +336,18 @@ CEILINGS: dict[str, int] = {
     # holds 298 and 299. The ceiling carries all five whether or not the branch
     # reading it holds their rows -- the alternative is two branches each
     # thinking 296 is free.
+    # 298 and 299, from the blind-render burn, are the two findings in the r4
+    # Klee and r2 Kokomi records that no row carried. 298 is the MAP: the page
+    # printed the adjacent nodes as bare labels while the feed was already
+    # sending each option's `leads_to`, `nodes` for the whole act,
+    # `current_position` and the boss's printed name -- "route choice is a
+    # coin flip". 299 is TWO PRINTED LINES whose grammar a reader could not
+    # read: the duplicate-name footnote, which said "Two cards" over three
+    # copies and denied a numbering `EB-177` had already shipped, and the
+    # telegraph, whose bare label was "understandable only from its
+    # accompanying sentence". Both rows land with the commit that mints them,
+    # both BUILT, 298 with a live map read still owed. The burn's other three
+    # findings folded into `EB-290`, `EB-294` and `EB-268` rather than mint.
     "EB": 300,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
@@ -1187,9 +1199,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # stays OPEN because the SOURCE of that value was not reproduced.
         292, 293, 294, 295,  # 293-295: Kokomi round-two seat, text, render, HP
         # 296/297/300: [USER]'s own controller session on the deployed arm.
-        # 298 and 299 are the blind-render branch's and are listed THERE; the
-        # ceiling above carries them so neither branch re-takes the other's.
-        296, 297, 300,
+        # 298/299: the blind-render burn, 2026-09-02, both BUILT in the commit
+        # that mints them and both still OPEN -- 298 because a fixture written
+        # from the vendored builder is a statement about the builder and a
+        # live map read is owed (`EB-262` and `EB-263` both closed that way
+        # once and reopened on the wire's own bytes), 299 because its two
+        # lines wait on the next seat reading them.
+        296, 297, 298, 299, 300,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
