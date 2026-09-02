@@ -24,7 +24,7 @@ world where it found it.
 
 BOTH ARMS RUN NOW. `KLEE_OVERHAUL`'s eight ops (`set_off`, `plant_bomb`,
 `grow_bombs`, `merge_bombs`, `remove_bomb_for_block`, `damage_set_off_total`,
-`double_set_off`, `draw_per_set_off`) used to be registered in `effects.OPS` as
+`multiply_set_off`, `draw_per_set_off`) used to be registered in `effects.OPS` as
 a handler that RAISED -- that arm was C# first and the sim had not been brought
 up for it -- and `EB-312` raised the twin (`tier0/engine/klee_overhaul.py`)
 after the C# had proved the rules. `probe_arm_runnable` is still what a caller

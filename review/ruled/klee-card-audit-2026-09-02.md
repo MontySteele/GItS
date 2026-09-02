@@ -1,4 +1,4 @@
-Status: OPEN (the Klee card audit; D defaults applied; picks at the end)
+Status: RULED R243 2026-09-02
 
 # Klee card audit: every prototype row's base and upgrade, read by design
 
@@ -9,10 +9,10 @@ against the base game's own conventions. The yardstick is the one the balance
 read used (`review/records/balance-read-prototype-2026-09-02.md` sec.1):
 Strike 6 and Defend 5 for 1 energy, Bombs grow by 4 a turn
 (`KLEE_OVERHAUL_BOMB_GROWTH`), and Ka-pow! cashes any Bomb for 0 energy, so
-a plant is credited its growth. Nothing R242 or R243 ruled today is reopened;
-the starter's four cards, growth 4, Sparks 'n' Splash, Alice's Recipe, Chain
-Fuse 6, Fish-Flavored Bait 4/4, Careful Arrangement 5 and Sorry, Jean... at 0
-stand as ruled.
+a plant is credited its growth. Nothing R242 or R243 ruled earlier today is
+reopened; the starter's four cards, growth 4, Sparks 'n' Splash, Alice's
+Recipe, Chain Fuse 6, Fish-Flavored Bait 4/4, Careful Arrangement 5 and
+Sorry, Jean... at 0 stand as ruled.
 
 The Opus pass derived every upgrade from one rule
 (`tier0/content/upgrades.py`, `prototype_default_delta`): +3 damage, +3
@@ -25,11 +25,15 @@ of 2; and two rows took the rule's blind last clause where a designer has a
 real lever (Sugar Rush lost Exhaust, which makes Sparks the second energy bar
 the brief forbids; Sorry, Jean... became a cantrip). One row was broken by
 construction, not by the upgrade pass: Flame Dance's rider could never fire.
+Two more rows were redundancies rather than numbers and went to you as picks;
+both are ruled (section 4) and built (section 1).
 
-## 1. Rows changed (D defaults, applied and disclosed)
+## 1. Rows changed
 
-Base numbers are unchanged on every row. "Was" is the upgraded card the
-smith handed back before this pass; "now" is what it hands back after.
+Base numbers are unchanged on every row except the two ruled in section 4.
+"Was" is the upgraded card the smith handed back before this pass; "now" is
+what it hands back after. The first fourteen are D defaults, applied and
+disclosed; the last two are your rulings.
 
 | Card | Was (upgraded) | Now (upgraded) | Why |
 |---|---|---|---|
@@ -47,16 +51,24 @@ smith handed back before this pass; "now" is what it hands back after.
 | Sugar Rush (R, 2 Sparks) | Exhaust removed | 3 Energy, Exhaust stays | Adrenaline's shape. A repeatable Spark-to-Energy card is the second energy bar the brief's rule 4 forbids; the brief lets Sparks become energy at Rare ONCE. |
 | Sorry, Jean... (C, 0) | plus "Draw 1 card" | Retain | The emergency exit is held while you cook, not cycled. |
 | Flame Dance (U, 1) | 8 to ALL, rider unchanged | 8 to ALL, rider now reachable | Not an upgrade fix. The row dealt its 5 Pyro damage FIRST, and a Pyro hit consumes any foreign aura (`AuraPower.cs:205`), so "Set off each enemy with a non-Pyro aura" read the board after the card had eaten the aura it needed. Three seats called it a trap; it was. Effects reordered to rule 2's order (explosions before the rest of the card); face: "Set off each enemy whose aura is not Pyro. Deal 5 damage to ALL enemies." |
+| **The Big One** (R, 3) | double, then 10; upgrade 13 | **"Set off for quadruple damage."**, no hit of its own; upgrade cost 2 | **Ruled** (section 4, pick 1). On a Bomb B it is 4B for 3 energy against Big Badda Boom's 2B + 12 for 2: ahead from a Bomb 7, and a Rare payoff for the cook. The upgrade is the base game's lever for a 3-cost (Barricade, Corruption: 3 to 2), and the visible one on a card with no number. With no Bomb on the board it is refused the way Quick Fuse is (`EB-261`), since 3 energy for nothing is not a play. |
+| **Fwoosh!** (C, 1 Spark) | 5 to a random enemy; upgrade 8 | **"Set off. Deal 6 damage."**, on the enemy you choose; upgrade 9 | **Ruled** (section 4, pick 2). The aimed Spark-priced detonator against Tinder Toss's random two hits: Strike against Sword Boomerang. |
 
-Two things had to move in the generator for the sheet to say this: the
+Three things moved in the engines for the sheet to say this. The
 authored-face walker in `tools/gen_klee_cards.py` (`_authored_face_numbers`)
-now prints an `energy` var when an `energy:` delta moves it, and it no longer
+now prints an `energy` var when an `energy:` delta moves it, and no longer
 steps its cursor past a Spark price the face does not print (on Sugar Rush
-the price 2 matched "Gain 2 Energy" and the `+` face kept the literal). Both
-are visible in the generated `ProtoKoSugarRush.cs`.
+the price 2 matched "Gain 2 Energy" and the `+` face kept the literal). The
+Big One's op became `multiply_set_off` with the number on the row
+(`multiplier: 4`): the ledger's doubling flag is an integer multiplier on
+both sides (`KleeOverhaulLedger.ArmMultiplier` / `TakeMultiplier` /
+`PeekMultiplier`; `klee_overhaul.arm_multiplier` and its twins), an unarmed
+Set off multiplies by 1, and a Mine still peeks it without spending it. The
+set-off-only gate (`card_is_set_off_only`, `klee_overhaul.set_off_only`)
+covers a multiplier ahead of a Set off exactly as it covers Quick Fuse's grow.
 
-Every change is a row-level `upgrade:` block, so the Prototype rule itself is
-untouched and Kokomi's rows are not affected.
+Every upgrade change is a row-level `upgrade:` block, so the Prototype rule
+itself is untouched and Kokomi's rows are not affected.
 
 ## 2. Rows read and left alone
 
@@ -81,8 +93,6 @@ untouched and Kokomi's rows are not affected.
   both can satisfy their own condition because the explosion resolves first.
 - **Dig In** (1 Spark, 8 Block; upgrade 11) and **Run Away!** (0: 3 Block, +4
   after an explosion; upgrade 6 and 4): fine.
-- **The Big One** and **Fwoosh!**: untouched, because each is a redundancy
-  rather than a number. Picks 1 and 2.
 
 Two notes with no action. Explosives Workshop's base +1 per Bomb per turn
 reads thin beside Inflame (one Bomb over three turns is +3 damage for a card
@@ -98,51 +108,49 @@ note for the shipped sheet, not a defect.
 included, so a starter fight with Jumpy Dumpty mints 2 to 5. Seven rows cost
 Sparks: five at 1 (Fwoosh!, Tinder Toss, Quick Fuse, Powder Charge, Dig In),
 two at 2 (Bang Bang!, Sugar Rush). One Spark buys roughly one energy's worth
-(Dig In's 8 Block, Fwoosh!'s Set off + 5, Powder Charge's Bomb 6 against
-Pop!'s free 5), and that is the design: the price is scarcity, not a cap.
-None of the seven reads as a second energy bar; Sugar Rush would have, once
-upgraded, and now does not.
+(Dig In's 8 Block, Fwoosh!'s aimed Set off + 6, Powder Charge's Bomb 6
+against Pop!'s free 5), and that is the design: the price is scarcity, not a
+cap. None of the seven reads as a second energy bar; Sugar Rush would have,
+once upgraded, and now does not.
 
 **Redundancy.** Explosives Workshop and Alice's Recipe were the same card
-until R243. The next two pairs are worse, because one card strictly dominates
-the other at the same price and rarity:
+until R243. The next two pairs were worse, because one card strictly
+dominated the other at the same price and rarity, and both are now resolved:
 
 - *The Big One* (R, 3: Set off for double, then 10) against *Big Badda Boom*
-  (U, 2: Set off, 12, then the damage the Bombs dealt). On a Bomb B they are
-  2B + 10 for 3 energy and 2B + 12 for 2. The Uncommon is cheaper and hits
-  harder at every B, and its echo repeats even a reaction's multiplier
-  (`EB-270`). The Rare cannot be drafted on purpose.
+  (U, 2: Set off, 12, then the damage the Bombs dealt) was 2B + 10 for 3
+  energy against 2B + 12 for 2, the Uncommon cheaper and harder-hitting at
+  every B, its echo repeating even a reaction's multiplier (`EB-270`). At 4B
+  the Rare is ahead from a Bomb 7 and pulls away with every dawn: on Jumpy
+  Dumpty after two dawns and a Chain Fuse (22) it is 88 to the Uncommon's 56.
 - *Fwoosh!* (C, 1 Spark: Set off and 5 to a random enemy) against *Tinder
-  Toss* (C, 1 Spark: Set off and 4 to a random enemy, twice). Alone, Tinder
-  Toss is Set off + 8 to Fwoosh!'s Set off + 5; in a crowd it rolls two Set
-  offs to Fwoosh!'s one. Both are random, so Fwoosh! has no aim to sell.
+  Toss* (C, 1 Spark: Set off and 4 to a random enemy, twice) was Set off + 5
+  against Set off + 8 alone, one roll against two in a crowd, both random.
+  Aimed at 6, Fwoosh! sells the thing Tinder Toss cannot: the pile you chose.
 
 **Rares need setup (R243).** Alice's Recipe, Chained Reactions, Sparks 'n'
 Splash, The Big One and Sugar Rush all pay only on a board with Bombs or
-Sparks already on it. None is "press button, delete act one".
+Sparks already on it. None is "press button, delete act one", and The Big
+One now has no number to press at all.
 
 **Grow versus cash.** Every row lands on one side of the bet or pays for
 choosing it: Grounded and Alice's for the wait, Run Away! and the Spark
 Attacks for the cash, Sorry, Jean... (now held) as the exit, Mines as both.
 
-## 4. Picks
+## 4. Picks, ruled R243 (2026-09-02)
 
-1. **The Big One.** Dominated by Big Badda Boom (section 3). (1) **Default:
-   it triples.** "Set off for triple damage. Deal 10 damage." at 3 energy:
-   3B + 10, the Red Knight of Stormbearer Mountains the brief names, and it
-   needs a cooked Bomb to be anything. On Jumpy Dumpty after two dawns and a
-   Chain Fuse (22) it is 76 to Big Badda Boom's 56. Upgrade stays 13. (2)
-   Keep double, own hit 10 to 20: 2B + 20 for 3, a Strike's edge over the
-   Uncommon and no new rule word. (3) Cut it; the Rare slot waits for
-   Vermillion Pact. Any of the three is a C# change in
-   `KleeOverhaulLedger` (the doubling flag) and a sheet row, built with the
-   round-six build.
-2. **Fwoosh!.** Dominated by Tinder Toss. (1) **Default: it aims.** "Set
-   off. Deal 6 damage." for 1 Spark, on the enemy you choose: the Spark-priced
-   Ka-pow! every seat since round three has asked for ("a huge stack and
-   nothing to light it with"), and the aimed-versus-random trade the base
-   game prices Strike against Sword Boomerang by. Upgrade 9. (2) Cut it;
-   R243 pick 2's "four of the twelve Commons cost Sparks" becomes three. (3)
-   Leave both and move Tinder Toss to Uncommon beside Bang Bang!.
+[USER], verbatim: "For the Klee audit - 1) I would move The Big One to 4x
+with no flat number (Rare payoff for massive scaling), 2) default looks
+good".
 
-Everything in section 1 is applied; veto by card name.
+1. **The Big One.** RULED, your own shape: "Set off for quadruple damage."
+   at 3 energy, Rare, no flat number. The options were (1) triple with the
+   10, (2) double with a 20, (3) cut; you took none of them and named the
+   card's job instead, a Rare payoff for massive scaling, which is what 4B
+   with nothing else on the card is. Upgrade: cost 3 to 2, the base game's
+   lever for a 3-cost and the only visible one on a card with no number.
+2. **Fwoosh!.** RULED at the default ("default looks good"): "Set off. Deal
+   6 damage." for 1 Spark, on the enemy you choose; upgrade 9.
+
+Both are built in this packet's branch; round six carries them with the
+fourteen rows above.

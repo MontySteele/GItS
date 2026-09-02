@@ -376,7 +376,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "remove_bomb_for_block": [_hook("private", "bombs", "use"),
                               _hook("shared", "block_held", "write")],
     "damage_set_off_total": [_hook("private", "bombs", "read")],
-    "double_set_off": [_hook("private", "bombs", "read")],
+    "multiply_set_off": [_hook("private", "bombs", "read")],
     "draw_per_set_off": [_hook("private", "bombs", "read"),
                          _hook("shared", "draw_pile", "use"),
                          _hook("shared", "hand_contents", "write")],

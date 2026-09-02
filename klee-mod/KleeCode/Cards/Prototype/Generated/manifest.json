@@ -504,7 +504,7 @@
       "energy": 1
     },
     "proto_ko_the_big_one": {
-      "damage": 3
+      "cost": -1
     },
     "proto_ko_tinder_toss": {
       "damage": 2

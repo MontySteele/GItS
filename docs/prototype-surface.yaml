@@ -246,9 +246,10 @@
 - {id: proto_ko_the_big_one, name: "The Big One", character: klee,
    authored_by: [claude],
    cost: 3, type: attack, rarity: rare,
-   description: "[gold]Set off[/gold] for double damage. Deal 10 damage.",
-   effects: [{op: double_set_off},
-             {op: set_off, target: enemy, damage: 10}]}
+   description: "[gold]Set off[/gold] for quadruple damage.",
+   upgrade: {cost: -1},
+   effects: [{op: multiply_set_off, multiplier: 4},
+             {op: set_off, target: enemy}]}
 
 - {id: proto_ko_alices_recipe, name: "Alice's Recipe", character: klee,
    authored_by: [claude],
@@ -277,9 +278,9 @@
 - {id: proto_ko_fwoosh, name: "Fwoosh!", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "[gold]Set off[/gold] and deal 5 damage to a random enemy.",
+   description: "[gold]Set off[/gold]. Deal 6 damage.",
    effects: [{op: spend_spark, amount: 1},
-             {op: set_off, target: random_enemy, damage: 5}]}
+             {op: set_off, target: enemy, damage: 6}]}
 
 - {id: proto_ko_tinder_toss, name: "Tinder Toss", character: klee,
    authored_by: [claude],
