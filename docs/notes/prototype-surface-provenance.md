@@ -1028,3 +1028,86 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 # is the packet's own, because the shipped card that shares it cannot be reached
 # while the flag is on.
 ```
+
+## before proto_mc_diona_signature_mix
+
+```
+# THE MONDSTADT COMPANION OVERHAUL. Reachable rows, not staged ones: under
+# `C.COMPANION_OVERHAUL` these ARE Mondstadt's Universal companion pool, and
+# the seventeen shipped Mondstadt rows cannot be offered. Source: the approved
+# workshop `companion-workshop-mondstadt-2026-09-01.md` sec.3 (a Paper
+# artefact on the companion-workshop branch, not in this tree), whose printed
+# text every face below carries.
+#
+# `hexerei: true` is ONE WORD WITH NO EFFECT (the workshop's sec.1, pick 2:
+# "Hexerei is one word on a Universal. It does nothing by itself. Klee's own
+# readers and any future Hexerei character's carry the payoff"). The mark is
+# carried so a later reader can see which rows the family owns; nothing in
+# either engine reads it today, and nothing here pays out on it. A field
+# rather than a `tags:` entry because `tags` is already read by four unrelated
+# predicates, and adding an inert word to a list four things filter is how an
+# inert word stops being inert.
+#
+# WHAT A ROW HERE IS. Universals only. Every line the workshop's sec.3 marks
+# as a STAND-IN is a Klee-only replacement card and is not a Universal; its
+# sec.4 coven Personals are Klee's kit rather than companion offers; the Klee
+# Hexerei readers are a separate slice. None of the three is on this sheet.
+# Inazuma and Fontaine are untouched in every build.
+#
+# EVERY ROW CARRIES ITS OWN `description:` (EB-215). The face is the
+# workshop's printed sentence, with this repo's rendering conventions applied:
+# an Attack's element rides the AppliesX keyword chip rather than the text
+# (the shipped companion sheet's convention), Block and the named keywords are
+# golded, and Exhaust is the keyword rail's.
+#
+# TEN DISPLAY NAMES CARRY A "(proto)" SUFFIX. Those ten rewrite a SHIPPED row
+# whose display name they keep, and `tools/lint_unique_names.py` holds one
+# namespace across all six sheets -- so the suffix is what lets the rewritten
+# Frostgnaw and the shipped one coexist while the arm is being graded. It is
+# the same device `proto_ko_sparks_n_splash` already uses. The other eleven
+# names are new and carry no suffix.
+#
+# THIRTEEN OF THE WORKSHOP'S THIRTY-FOUR UNIVERSALS ARE NOT HERE, each because
+# its printed text wants an engine hook that exists in NEITHER engine. A card
+# that cannot be printed as written is left OUT rather than replaced by a
+# simpler card -- the same rule the Klee overhaul applied to Vermillion Pact --
+# and the hook each one wants is named so the next slice can price it:
+#
+#   Diona, Icy Paws           "when THIS Block absorbs damage": a per-instance
+#                             Block-absorption trigger. Neither engine can name
+#                             which Block a hit ate.
+#   Noelle, Sweeping Time     damage equal to your Block: the C# amount-formula
+#                             grammar has no `player_block` count (tier0 does).
+#   Barbara, Melody Loop      a persistent power that re-applies to the CARD's
+#                             chosen target each turn; a power holds no target.
+#   Bennett, Passion Overload "your next Attack ... applies Pyro": an element
+#                             override on a next-attack buff.
+#   Dahlia, Sacramental Shower a trap that resolves BEFORE an enemy attack;
+#                             there is no pre-enemy-attack counter hook.
+#   Dahlia, Favonian Favor    "whenever a reaction happens this turn, gain 3
+#                             Block": a per-reaction event, turn-scoped. The
+#                             mod counts reactions but broadcasts none.
+#   Durin, Binary Form        a modal Power choosing one of two damage-pipeline
+#                             modifiers (reactions deal 50% more to enemies;
+#                             Pyro Attacks that react deal 8 more).
+#   Razor, Claw and Thunder   "the third Attack you played this turn": no
+#                             Attacks-played-this-turn counter in the mod.
+#   Razor, Lightning Fang     a timed rider that adds damage AND overrides the
+#                             element your Attacks apply.
+#   Varka, Sturm und Drang    a Swirl event that remembers the swirled element
+#                             for the next Attack.
+#   Amber, Explosive Puppet   the same pre-enemy-attack counter as the Shower,
+#                             plus incoming-damage reduction.
+#   Eula, Glacial Illumination a placed counter that tallies Attacks for two
+#                             turns and then pays 8 plus 5 per Attack counted.
+#   Mika, Starfrost Swirl     "your next Attack costs 1 less": no next-Attack
+#                             cost-discount power exists.
+#
+# THE `star` FIELD IS THE CHARACTER'S, NOT THE CARD'S, and the workshop gives
+# Jean a five-star Uncommon (Gale Blade) beside her five-star Rare. Both
+# engines gate the Featured Banner on `star == 5`, so under this arm Gale Blade
+# is banner-eligible -- and Mondstadt now designs SIX five-star cards against
+# BANNER_FEATURED_SLOTS = 3, so the banner binds on Mondstadt for the first
+# time. That is the shipped law applied to a bigger roster, not a new rule, and
+# it is written down here because it is the arm's most visible side effect.
+```

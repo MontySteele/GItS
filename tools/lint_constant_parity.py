@@ -247,6 +247,23 @@ MIRRORED: dict[str, object] = {
     "KleeOverhaulLaw.WorkshopGrowth": C.KLEE_OVERHAUL_WORKSHOP_GROWTH,
     "KleeOverhaulLaw.AliceGrowth": C.KLEE_OVERHAUL_ALICE_GROWTH,
     "KleeOverhaulLaw.SparkPerExplosion": C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION,
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, `C.COMPANION_OVERHAUL`).
+    # Same terms as the four above and for the same reason: quarantined is not
+    # exempt. Every number here is the approved workshop's own printed text
+    # (its sec.3, re-priced in its sec.8), and BOTH engines play these cards --
+    # so the two implementations have to agree on them by value, or a seat is
+    # grading a different card from the one the sim scored.
+    "CompanionOverhaulLaw.SignatureMixBlock": C.MC_SIGNATURE_MIX_BLOCK,
+    "CompanionOverhaulLaw.GlacialWaltzDamage": C.MC_GLACIAL_WALTZ_DMG,
+    "CompanionOverhaulLaw.IsotomaDamage": C.MC_ISOTOMA_DMG,
+    "CompanionOverhaulLaw.IsotomaBlock": C.MC_ISOTOMA_BLOCK,
+    "CompanionOverhaulLaw.DandelionBreezeBlock": C.MC_DANDELION_BREEZE_BLOCK,
+    "CompanionOverhaulLaw.OzDamage": C.MC_OZ_DMG,
+    "CompanionOverhaulLaw.RevelationBlock": C.MC_REVELATION_BLOCK,
+    "CompanionOverhaulLaw.RevelationStrength": C.MC_REVELATION_STRENGTH,
+    "CompanionOverhaulLaw.OmenVulnerable": C.MC_OMEN_VULNERABLE,
+    "CompanionOverhaulLaw.LightningRoseDamage": C.MC_LIGHTNING_ROSE_DMG,
+    "CompanionOverhaulLaw.LightningRoseVulnerable": C.MC_LIGHTNING_ROSE_VULN,
 }
 
 # --------------------------------------------------------------------------

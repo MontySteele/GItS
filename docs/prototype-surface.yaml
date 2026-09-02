@@ -404,3 +404,169 @@
    cost: 1, type: skill, rarity: common,
    description: "Remove one of your [gold]Bombs[/gold]. Gain Block equal to its size.",
    effects: [{op: remove_bomb_for_block}]}
+
+# THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
+# Mondstadt's Universal companion pool. Why each row reads as it does, and
+# which 13 of the workshop's 34 are absent: docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_mc_diona_signature_mix, name: "Diona — Signature Mix", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: cryo,
+   cost: 1, type: skill, exhaust: true,
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. For 2 turns, at the start of your turn gain 4 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies},
+             {op: apply_power, power: mc_signature_mix, amount: 2, target: self}]}
+
+- {id: proto_mc_noelle_breastplate, name: "Noelle — Breastplate", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: geo,
+   cost: 1, type: skill,
+   description: "Gain 6 [gold]Block[/gold]. If you are below half HP, gain 4 more.",
+   effects: [{op: block, amount: 6},
+             {op: conditional, if: hp_pct_below_50,
+              then: [{op: block, amount: 4}]}]}
+
+- {id: proto_mc_kaeya_frostgnaw, name: "Kaeya — Frostgnaw (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
+   cost: 1, type: attack,
+   description: "Deal 8 damage. Gain 3 [gold]Block[/gold].",
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
+             {op: block, amount: 3}]}
+
+- {id: proto_mc_kaeya_glacial_waltz, name: "Kaeya — Glacial Waltz", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: cryo,
+   cost: 1, type: skill, exhaust: true,
+   description: "For 3 turns, at the end of your turn deal 6 [gold]Cryo[/gold] damage to a random enemy.",
+   effects: [{op: apply_power, power: mc_glacial_waltz, amount: 3, target: self}]}
+
+- {id: proto_mc_barbara_show_begin, name: "Barbara — Let the Show Begin♪ (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
+   cost: 1, type: skill,
+   description: "Gain 6 [gold]Block[/gold]. Apply [gold]Hydro[/gold] to target enemy.",
+   effects: [{op: block, amount: 6},
+             {op: apply_aura, element: hydro, target: enemy}]}
+
+- {id: proto_mc_albedo_solar_isotoma, name: "Albedo — Solar Isotoma (proto)", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
+   cost: 1, type: power,
+   description: "At the end of your turn, if any enemy has an aura, deal 8 damage to that enemy and gain 4 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: mc_isotoma_bloom, amount: 1, target: self}]}
+
+- {id: proto_mc_jean_gale_blade, name: "Jean — Gale Blade", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 5, rarity: uncommon, role_c: trigger, element: anemo,
+   cost: 1, type: attack,
+   description: "Deal 10 damage. [gold]Swirl[/gold] an enemy's aura.",
+   effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
+             {op: swirl, target: enemy}]}
+
+- {id: proto_mc_jean_dandelion_breeze, name: "Jean — Dandelion Breeze", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
+   cost: 2, type: power,
+   description: "At the end of your turn, [gold]Swirl[/gold] the enemy with the most auras and gain 6 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: mc_dandelion_breeze, amount: 1, target: self}]}
+
+- {id: proto_mc_fischl_nightrider, name: "Fischl — Nightrider (proto)", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
+   cost: 1, type: attack,
+   description: "Deal 7 damage. If Oz is out, Oz attacks now.",
+   effects: [{op: damage, amount: 7, target: enemy, applies_element: true},
+             {op: conditional, if: self_has_power_mc_oz,
+              then: [{op: damage, amount: 5, target: random_enemy, applies_element: true}]}]}
+
+- {id: proto_mc_fischl_oz, name: "Fischl — Oz, at Your Side (proto)", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
+   cost: 1, type: power,
+   description: "At the end of your turn, Oz deals 5 [gold]Electro[/gold] damage to a random enemy.",
+   effects: [{op: apply_power, power: mc_oz, amount: 1, target: self}]}
+
+- {id: proto_mc_sucrose_gust, name: "Sucrose — Wind Spirit Creation (proto)", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
+   cost: 0, type: skill,
+   description: "[gold]Swirl[/gold] an enemy's aura. Draw 1 card.",
+   effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
+
+- {id: proto_mc_sucrose_astable, name: "Sucrose — Astable Anemohypostasis (proto)", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
+   cost: 0, type: skill, exhaust: true,
+   description: "[gold]Swirl[/gold] the aura of ALL enemies.",
+   effects: [{op: swirl, target: all_enemies}]}
+
+- {id: proto_mc_sucrose_catalyst_conversion, name: "Sucrose — Catalyst Conversion (proto)", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
+   cost: 0, type: skill, exhaust: true,
+   description: "Gain 1 [gold]Energy[/gold]. Draw 1 card.",
+   effects: [{op: energy, amount: 1}, {op: draw, amount: 1}]}
+
+- {id: proto_mc_bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage (proto)", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: pyro,
+   cost: 1, type: skill, exhaust: true,
+   description: "If you are above 70% HP, gain 3 [gold]Strength[/gold]. Otherwise gain 10 [gold]Block[/gold].",
+   effects: [{op: conditional, if: hp_pct_above_70,
+              then: [{op: apply_power, power: strength, amount: 3, target: self}],
+              else: [{op: block, amount: 10}]}]}
+
+- {id: proto_mc_nicole_revelation, name: "Nicole — Revelation, Uncreated Light", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: buffer, element: pyro,
+   cost: 2, type: power,
+   description: "At the start of your turn, gain 5 [gold]Block[/gold]. If you had [gold]Block[/gold] left at the end of your last turn, also gain 2 [gold]Strength[/gold].",
+   effects: [{op: apply_power, power: mc_revelation, amount: 1, target: self}]}
+
+- {id: proto_mc_mona_stellaris_phantasm, name: "Mona — Stellaris Phantasm", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: applier, element: hydro,
+   cost: 2, type: skill, exhaust: true,
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, enemies take 50% more damage.",
+   effects: [{op: apply_aura, element: hydro, target: all_enemies},
+             {op: apply_power, power: mc_omen, amount: 1, target: self}]}
+
+- {id: proto_mc_venti_grand_ode, name: "Venti — Wind's Grand Ode", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
+   cost: 2, type: skill, exhaust: true,
+   description: "Deal 8 damage to ALL enemies. For 2 turns, at the end of your turn [gold]Swirl[/gold] the aura of ALL enemies.",
+   effects: [{op: damage, amount: 8, target: all_enemies, applies_element: true},
+             {op: apply_power, power: mc_grand_ode, amount: 2, target: self}]}
+
+- {id: proto_mc_amber_fiery_rain, name: "Amber — Fiery Rain", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: pyro,
+   cost: 1, type: attack,
+   description: "Deal 4 damage to ALL enemies three times.",
+   effects: [{op: damage, amount: 4, target: all_enemies, times: 3, applies_element: true}]}
+
+- {id: proto_mc_lisa_violet_arc, name: "Lisa — Violet Arc", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
+   cost: 1, type: skill,
+   description: "Apply [gold]Electro[/gold] to ALL enemies. Draw 1 card.",
+   effects: [{op: apply_aura, element: electro, target: all_enemies},
+             {op: draw, amount: 1}]}
+
+- {id: proto_mc_lisa_lightning_rose, name: "Lisa — Lightning Rose", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
+   cost: 1, type: skill, exhaust: true,
+   description: "For 3 turns, at the end of your turn deal 5 [gold]Electro[/gold] damage to a random enemy and apply 1 [gold]Vulnerable[/gold].",
+   effects: [{op: apply_power, power: mc_lightning_rose, amount: 3, target: self}]}
+
+- {id: proto_mc_rosaria_ravaging_confession, name: "Rosaria — Ravaging Confession", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
+   cost: 1, type: attack,
+   description: "Deal 9 damage. If the enemy has an aura, apply 1 [gold]Vulnerable[/gold].",
+   effects: [{op: damage, amount: 9, target: enemy, applies_element: true},
+             {op: conditional, if: target_has_aura,
+              then: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}]}]}

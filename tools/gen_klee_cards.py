@@ -521,6 +521,19 @@ PREDICATES_CS = {
         "KleeOverhaulLedger.For(Owner.Creature).SetOffThisTurn > 0",
     "bomb_reacted_this_turn":
         "KleeOverhaulLedger.For(Owner.Creature).ReactedThisTurn > 0",
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). tier0's own
+    # `target_has_aura` predicate, which had no C# read until a companion row
+    # printed it (Rosaria's Ravaging Confession).
+    #
+    # A SNAPSHOT LOCAL, not a live lookup, because the sim's answer is a
+    # snapshot: `_predicate` returns `state.target_had_aura`, captured at
+    # `resolve_card` START. That distinction is the whole card -- Rosaria is
+    # an Attack that APPLIES Cryo, so a live read would find the aura she just
+    # left and the branch would fire every time. `targetHadAura` is emitted at
+    # the top of OnPlay beside `reactionsAtStart` (see `build_body`), off the
+    # same `AuraCmd.Find` reader `NightVigilPower` and `FlameDance` use, so
+    # there is no second definition of "holds an aura".
+    "target_has_aura": "targetHadAura",
 }
 
 # The if-clause each predicate renders on the card.
@@ -539,6 +552,7 @@ PREDICATE_TEXT = {
     "bomb_reacted_this_turn":
         "If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] "
         "this turn",
+    "target_has_aura": "If the enemy holds an elemental aura",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -557,6 +571,20 @@ _ENCORE_BAR = re.compile(r"^encore_at_least_(\d+)$")
 # unknown name blocks the card instead of generating a branch that can never
 # fire. The display names are the faces' own: "the Usher" carries its article.
 _LEFTMOST_MEMBER = re.compile(r"^leftmost_salon_member_([a-z]+)$")
+# THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). An HP fraction, parametric
+# for exactly the reason the meter bars above are: the threshold is a balance
+# number authored per card (the workshop prints "below half HP" on Noelle's
+# Breastplate and "above 70% HP" on Bennett's Fantastic Voyage), so moving one
+# must be a card edit and never a codegen edit. Compared by CROSS-MULTIPLYING
+# rather than dividing, so there is no integer-division rounding to disagree
+# about across the two engines: `hp * 100 < max * N`.
+_HP_PCT_BELOW = re.compile(r"^hp_pct_below_(\d+)$")
+_HP_PCT_ABOVE = re.compile(r"^hp_pct_above_(\d+)$")
+# tier0's `self_has_power_<id>` prefix, given its C# read. The class comes out
+# of APPLY_POWERS, which is already the one power-id -> PowerModel map the
+# emitter uses, so a predicate cannot invent a second spelling of a power; an
+# id nothing in that registry names returns None and BLOCKS the card.
+_SELF_HAS_POWER = re.compile(r"^self_has_power_(.+)$")
 
 
 def predicate_cs(name: str) -> str | None:
@@ -580,6 +608,20 @@ def predicate_cs(name: str) -> str | None:
     hit = _ENCORE_BAR.match(name)
     if hit:
         return f"FurinaResources.Encore(Owner.Creature) >= {hit.group(1)}"
+    hit = _HP_PCT_BELOW.match(name)
+    if hit:
+        return (f"Owner.Creature.CurrentHp * 100m < "
+                f"Owner.Creature.MaxHp * {hit.group(1)}m")
+    hit = _HP_PCT_ABOVE.match(name)
+    if hit:
+        return (f"Owner.Creature.CurrentHp * 100m > "
+                f"Owner.Creature.MaxHp * {hit.group(1)}m")
+    hit = _SELF_HAS_POWER.match(name)
+    if hit:
+        entry = APPLY_POWERS.get(hit.group(1))
+        if entry:
+            return f"Owner.Creature.Powers.OfType<{entry[0]}>().Any()"
+        return None
     hit = _LEFTMOST_MEMBER.match(name)
     # SALON_MEMBER_CS is the one member->enum map, shared with `member:` on
     # the deploy op: a predicate must not grow a second spelling of the same
@@ -627,7 +669,28 @@ def predicate_text(name: str) -> str | None:
         # of play. The stage names are B5's, so the face and the tooltip that
         # explains the member are titled the same thing.
         return f"If {SALON_MEMBER_NAMES[hit.group(1)]} is next to perform"
+    hit = _HP_PCT_BELOW.match(name)
+    if hit:
+        return f"If you are below {hit.group(1)}% HP"
+    hit = _HP_PCT_ABOVE.match(name)
+    if hit:
+        return f"If you are above {hit.group(1)}% HP"
+    hit = _SELF_HAS_POWER.match(name)
+    if hit:
+        # HAND-WRITTEN, one entry at a time, exactly like
+        # PREDICATE_TEXT_NEGATED below and for the same reason: the C# read
+        # can be derived from a power id, and English about that power cannot.
+        # A power with no entry blocks the card loudly rather than printing a
+        # sentence the generator made up out of an identifier.
+        return SELF_HAS_POWER_TEXT.get(hit.group(1))
     return PREDICATE_TEXT.get(name)
+
+
+#: The if-clause `self_has_power_<id>` renders, per power. See `predicate_text`.
+SELF_HAS_POWER_TEXT = {
+    # Fischl's raven, the workshop's own words on Nightrider.
+    "mc_oz": "If Oz is out",
+}
 
 
 # EB-219. A conditional whose THEN-branch is EMPTY is a real shape, not a stub:
@@ -774,15 +837,32 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
             and eff.get("target") not in BOMB_TARGETS):
         return f"branch place_bomb target '{eff.get('target')}'"
     if eff.get("op") == "apply_power":
-        # EB-125. Self only -- see the BRANCH_OPS note. `salon_member` is a
-        # typed DEPLOY that also carries the salonReplacements counter, so it
-        # is not the plain Apply this resolver emits even though its target
-        # reads self.
+        # EB-125. Self, plus the CHOSEN enemy -- see the BRANCH_OPS note.
+        # `salon_member` is a typed DEPLOY that also carries the
+        # salonReplacements counter, so it is not the plain Apply this
+        # resolver emits even though its target reads self.
         if eff.get("power") not in APPLY_POWERS:
             return f"branch apply_power power '{eff.get('power')}'"
         if eff.get("power") == "salon_member":
             return "branch apply_power power 'salon_member' (typed deploy)"
-        if eff.get("target") != "self":
+        # THE MONDSTADT COMPANION OVERHAUL widened this from self-only to
+        # self-or-chosen-enemy, and by exactly one target. Rosaria's Ravaging
+        # Confession is the first row to print a debuff behind a condition
+        # ("If the enemy has an aura, apply 1 Vulnerable"), and the chosen
+        # arm is the one the EB-125 note said was merely missing a target
+        # guard rather than a resolver: `_target_guard` is ctx-tracked, so it
+        # works from inside a branch sub-list, and the emitted call is
+        # byte-for-byte the top-level `enemy` arm's.
+        #
+        # `random_enemy` and `all_enemies` are STILL blocked here, unchanged
+        # and for their original reason: both declare locals inside their own
+        # blocks, and emitting either a second, subtly different way is the
+        # drift this table exists to prevent.
+        if eff.get("target") == "enemy":
+            if eff["power"] not in ENEMY_APPLY_POWERS:
+                return ("branch apply_power target 'enemy' for self power "
+                        f"'{eff['power']}'")
+        elif eff.get("target") != "self":
             return f"branch apply_power target '{eff.get('target')}'"
     if eff["op"] in SALON_BRANCH_VERBS:
         # EB-137. These two are the only branch ops whose `amount` is
@@ -1039,6 +1119,45 @@ APPLY_POWERS = {
         "Your Attacks deal {X} more damage this turn."),
     "strength": ("StrengthPower", None,
         "Gain {X} [gold]Strength[/gold]."),
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, R213 B). Every class below
+    # lives in klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulPowers.cs and
+    # is Compile Remove'd out of a release build, so the only rows that may name
+    # one are `proto_mc_` rows on the prototype surface -- compiled under the
+    # same switch. Each is one of two shapes the engine already runs: a
+    # start-of-turn payout (CelestialGiftPower's shape) or an end-of-turn volley
+    # (OzSummonPower's). The {X} templates are here for form; every overhaul row
+    # carries its own `description:`, which is the surface's own face channel
+    # (EB-215). Sim twins: tier0.engine.effects.player_turn_start_triggers /
+    # player_turn_end_triggers, one branch each.
+    "mc_signature_mix": ("SignatureMixPower", None,
+        "At the start of your turn, gain 4 [gold]Block[/gold]. Lasts {X} more "
+        "turn(s)."),
+    "mc_glacial_waltz": ("GlacialWaltzPower", None,
+        "At the end of your turn, deal 6 damage and apply [gold]Cryo[/gold] to "
+        "a random enemy. Lasts {X} more turn(s)."),
+    "mc_isotoma_bloom": ("SolarIsotomaBloomPower", None,
+        "At the end of your turn, if any enemy has an aura, deal 8 damage to "
+        "that enemy and gain 4 [gold]Block[/gold]."),
+    "mc_dandelion_breeze": ("DandelionBreezePower", None,
+        "At the end of your turn, [gold]Swirl[/gold] the enemy with the most "
+        "auras and gain 6 [gold]Block[/gold]."),
+    "mc_oz": ("MondstadtOzPower", None,
+        "At the end of your turn, Oz deals 5 damage and applies "
+        "[gold]Electro[/gold] to a random enemy."),
+    "mc_revelation": ("RevelationPower", None,
+        "At the start of your turn, gain 5 [gold]Block[/gold]. If you had "
+        "[gold]Block[/gold] left at the end of your last turn, also gain 2 "
+        "[gold]Strength[/gold]."),
+    "mc_omen": ("StellarisOmenPower", None,
+        "At the start of your next turn, apply 1 [gold]Vulnerable[/gold] to "
+        "ALL enemies."),
+    "mc_grand_ode": ("GrandOdePower", None,
+        "At the end of your turn, [gold]Swirl[/gold] the aura of ALL enemies. "
+        "Lasts {X} more turn(s)."),
+    "mc_lightning_rose": ("LightningRosePower", None,
+        "At the end of your turn, deal 5 damage, apply [gold]Electro[/gold] "
+        "and apply 1 [gold]Vulnerable[/gold] to a random enemy. Lasts {X} more "
+        "turn(s)."),
     # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
@@ -1504,6 +1623,15 @@ CARD_FIELDS = {
     # card's face with it. See `build_description`; the no-shipped-carrier
     # rule is pinned in tier0/tests/test_prototype_surface.py.
     "description",
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). One word, no effect --
+    # the workshop's sec.1 pick 2: "Hexerei is one word on a Universal. It
+    # does nothing by itself. Klee's own readers and any future Hexerei
+    # character's carry the payoff." Whitelisted as INERT, exactly like
+    # `register` and `tempo_band` above: there is nothing mechanical to emit,
+    # and a family mark that BLOCKED every row carrying it would be a worse
+    # answer than one that is simply carried. The reader that makes it
+    # mechanical is a later change, and it is that change's job to move this.
+    "hexerei",
 }
 
 
@@ -4521,18 +4649,28 @@ def _emit_branch_op(
         )
     elif op == "apply_power":
         # EB-125. Byte-for-byte the SELF arm of build_body's top-level
-        # apply_power, which is the only arm _branch_op_reason lets through.
+        # apply_power, and (the Mondstadt companion overhaul) byte-for-byte
+        # its `enemy` arm -- the two arms _branch_op_reason lets through.
         # Literal for the same reason buff_next_attack is: power_upgrade_effect
         # searches TOP-LEVEL effects only, so a nested apply_power is never the
         # effect a ruled power delta binds to -- and a card whose delta finds no
         # top-level home stops loudly there rather than rendering a wrong var
         # here. Stack caps stay with the power's own
         # TryModifyPowerAmountReceived, so the call site is a plain Apply.
-        lines.append(
-            f"await PowerCmd.Apply<{APPLY_POWERS[eff['power']][0]}>("
-            f'choiceContext, Owner.Creature, {int(eff["amount"])}, '
-            "applier: Owner.Creature, cardSource: this);"
-        )
+        cls = APPLY_POWERS[eff["power"]][0]
+        if eff.get("target") == "enemy":
+            _target_guard(lines, ctx)
+            lines.append(
+                f"await PowerCmd.Apply<{cls}>(choiceContext, cardPlay.Target, "
+                f'{int(eff["amount"])}, applier: Owner.Creature, '
+                "cardSource: this);"
+            )
+        else:
+            lines.append(
+                f"await PowerCmd.Apply<{cls}>("
+                f'choiceContext, Owner.Creature, {int(eff["amount"])}, '
+                "applier: Owner.Creature, cardSource: this);"
+            )
 
 
 def _conditional_block(pred: str, then_lines: list[str],
@@ -4738,6 +4876,17 @@ def build_body(
         lines.append("var reactionsAtStart = ReactionEffects.TotalResolved;")
     if "killed_target" in preds:
         lines.append("var enemiesAtStart = CombatState!.HittableEnemies.ToList();")
+    if "target_has_aura" in preds:
+        # SNAPSHOT, not a live read, and the sim is what decides that: tier0's
+        # `target_has_aura` returns `state.target_had_aura`, which
+        # `resolve_card` captures at card START. So an Attack that applies its
+        # own element cannot turn its own branch on, and Rosaria's Ravaging
+        # Confession asks about the aura she found rather than the Cryo she
+        # just left. A live `AuraCmd.Find` here would have read the second and
+        # made the branch unconditional on every elemental attacker.
+        lines.append(
+            "var targetHadAura = cardPlay.Target != null "
+            "&& AuraCmd.Find(cardPlay.Target) != null;")
     if str(card.get("cost")) == "X":
         # tier0 play_card: current_x = energy actually spent. The captured
         # X value (through Hook.ModifyXValue) is the game's same number.

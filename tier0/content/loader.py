@@ -765,7 +765,8 @@ def _card_prototype(card_id: str) -> Card:
         base = copy.deepcopy(index[base_id] if base_id in index
                              else _substituted_card_index()[base_id])
         card = upgrades.apply_upgrade(base)
-    elif ((C.SPARK_ALT_COST_ENABLED or C.KLEE_OVERHAUL)
+    elif ((C.SPARK_ALT_COST_ENABLED or C.KLEE_OVERHAUL
+           or C.COMPANION_OVERHAUL)
             and plain.startswith(PROTOTYPE_ID_PREFIX)):
         # THE ONE DOOR THE SPARK ARM OPENS INTO THE QUARANTINE, and it is
         # exactly as wide as it has to be. `_starter_ids` substitutes two
@@ -786,6 +787,11 @@ def _card_prototype(card_id: str) -> Card:
         # wider: `_starter_ids` returns ten `proto_ko_` id STRINGS and
         # `pool_replacement` returns twenty-eight more, and every one of them
         # is resolved back through here by the run layer on each reward screen.
+        #
+        # AND SO DOES THE MONDSTADT COMPANION OVERHAUL, third arm, same door,
+        # no wider: `companion_roster_replacement` returns `proto_mc_` id
+        # STRINGS for the companion slot, and the reward layer resolves each of
+        # them back through here.
         card = _prototype_index()[plain]
     else:
         index = _card_index()
@@ -1052,6 +1058,48 @@ def pool_replacement(character_id: str) -> list[str] | None:
     if character_id == "klee" and C.KLEE_OVERHAUL:
         return list(C.KLEE_OVERHAUL_POOL_IDS)
     return None
+
+
+def companion_roster_replacement() -> list[Card] | None:
+    """Every COMPANION an offer surface may see, or None to keep the shipped
+    roster.
+
+    THE ONE DOOR, and its C# twin is `KleeMod.CompanionPool.All`. Both offer
+    surfaces in the sim read it -- `tier05.rewards.companion_pool` (the reward
+    slot and the shop) and `tier05.rewards.five_star_roster` (the Featured
+    Banner) -- so a build cannot feature a five-star the reward slot has no
+    way to hand out, which is precisely the split R64 shipped the banner to
+    close.
+
+    A REPLACEMENT OF ONE NATION, NOT OF THE ROSTER. The approved workshop
+    (`companion-workshop-mondstadt-2026-09-01.md`, approved 2026-09-01; a
+    Paper artefact on the companion-workshop branch, not in this tree) rewrites
+    MONDSTADT's Universals and says in its own sec.6 that Inazuma is a separate
+    document, so the other two nations come through untouched and the seventeen
+    shipped Mondstadt rows do not come through at all.
+
+    THE KEPT HALF IS FILTERED BY NATION and the ADDED HALF IS LISTED BY ID
+    (`C.MONDSTADT_OVERHAUL_POOL_IDS`), the same asymmetry the C# twin argues:
+    the rule about the other nations is literally "not Mondstadt", and a
+    hand-copied list of their rows would silently drop the next row somebody
+    ships; the rule about Mondstadt is "these rows and nothing else", where a
+    prefix match would be a second, softer definition that fails the day a row
+    is renamed.
+
+    Returns CARDS rather than ids because its callers tier the result by
+    rarity and nation, and the ids are resolved here once through the same
+    `peek_card` door `character_pool` uses for the other arms.
+
+    WITH `C.COMPANION_OVERHAUL` OFF this returns None and both callers are
+    byte-for-byte what they have always been. That is the acceptance condition
+    on the flag, pinned by `tier0/tests/test_companion_overhaul.py`.
+    """
+    if not C.COMPANION_OVERHAUL:
+        return None
+    kept = [c for c in _card_index().values()
+            if c.is_companion and c.nation != C.COMPANION_OVERHAUL_NATION]
+    added = [peek_card(cid) for cid in C.MONDSTADT_OVERHAUL_POOL_IDS]
+    return sorted(kept + added, key=lambda c: c.id)
 
 
 @lru_cache(maxsize=1)
