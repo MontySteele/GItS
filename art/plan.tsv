@@ -1149,17 +1149,34 @@ breathless	ImageGen/images/cards/furina/breathless.png	500	380	cover_autocrop	co
 breathless	ImageGen/images/cards/furina/breathless.png	500	380	cover_autocrop	cover@0.06	shortlist	4	png	Icon Emoji Paimon's Paintings 28 Furina 3.png		sticker	furina_pool
 breathless	ImageGen/images/cards/furina/breathless.png	500	380	cover_autocrop	cover@0.06	shortlist	5	png	Icon Emoji Paimon's Paintings 28 Furina 4.png		sticker	furina_pool
 # -- run 7: A7 + six Curtain Call power sigils (validate.ps1 $pckDeferred) --
-#    NO rank 1 on purpose: a rank-1 row would write the out-path, and S12 fails a
-#    deferred path that IS in the pck. The deferral stays valid until a pick lands.
-#    ONE HAS LANDED: R231 picked stagehands_encore's sigil (see its rows below),
-#    so that face carries a rank 1 and its $pckDeferred entry is gone. The other
-#    six in this block are unchanged and still deferred.
-power_furina_unheard_confession	ImageGen/images/furina/powers/unheard_confession.png	256	256	contain	center	shortlist	2	png	Animula Choragi.png		icon
-power_furina_unheard_confession	ImageGen/images/furina/powers/unheard_confession.png	256	256	contain	center	shortlist	3	png	Item Fontaine Attunement.png		icon
-power_furina_fortissimo_guard	ImageGen/images/furina/powers/fortissimo_guard.png	256	256	contain	center	shortlist	2	png	Item Fontaine Completeness.png		icon
-power_furina_fortissimo_guard	ImageGen/images/furina/powers/fortissimo_guard.png	256	256	contain	center	shortlist	3	png	Sword Hydro.png		icon
-power_furina_stagehands	ImageGen/images/furina/powers/stagehands.png	256	256	contain	center	shortlist	2	png	Item Movable Small Spotlight.png		icon
-power_furina_stagehands	ImageGen/images/furina/powers/stagehands.png	256	256	contain	center	shortlist	3	png	Icon Opera Epiclese.png		icon
+#    HISTORY: this block shipped with NO rank 1 on purpose -- a rank-1 row writes
+#    the out-path, and S12 fails a deferred path that IS in the pck, so the
+#    deferral stayed valid until a pick landed. R231 landed the first of them
+#    (stagehands_encore, see its rows below). EB-65 lands the other six.
+# EB-65, 2026-09-02, R212(1) -- THE SIX REMAINING SIGILS TAKE A RANK 1.
+# `KleePowerIcons.PathFor` wires furina/powers/{fortissimo_guard, stagehands,
+# courtroom_drama, the_gallery_stirs, quick_change, unheard_confession}.png, and
+# every one of those keys carried ranks 2 and 3 and no rank 1. So nothing was
+# ever staged, `KleePck.Path` returned null, and six badges rendered the
+# base-game placeholder -- the miss EB-65 names.
+# The empty rank-1 slot was never a taste verdict. No ruling was ever held on
+# these six; the slot was left empty for the S12 reason in the history above,
+# and that reason is discharged the moment the art lands. R212(1)'s art ladder
+# is 'apply shortlist rank 1', and with nothing retired the first surviving
+# candidate on each key is its rank 2. So each key's rank 2 is promoted to rank
+# 1 and its rank 3 renumbered to 2. No candidate is retired, no title changes
+# hands, and no crop, mode or focus moves. [USER] vetoes on the contact sheet.
+# ALL SIX LEAVE THE DEFERRED LIST, and $pckDeferred is now EMPTY.
+# klee-mod/build/validate.ps1 carried all six paths as art deliberately not made
+# yet, and S12 checks that list in BOTH directions -- a deferred path that IS in
+# the pck is a failure. The picks have landed, so the entries go in the same
+# commit, exactly as stagehands_encore's did at R231.
+power_furina_unheard_confession	ImageGen/images/furina/powers/unheard_confession.png	256	256	contain	center	shortlist	1	png	Animula Choragi.png		icon
+power_furina_unheard_confession	ImageGen/images/furina/powers/unheard_confession.png	256	256	contain	center	shortlist	2	png	Item Fontaine Attunement.png		icon
+power_furina_fortissimo_guard	ImageGen/images/furina/powers/fortissimo_guard.png	256	256	contain	center	shortlist	1	png	Item Fontaine Completeness.png		icon
+power_furina_fortissimo_guard	ImageGen/images/furina/powers/fortissimo_guard.png	256	256	contain	center	shortlist	2	png	Sword Hydro.png		icon
+power_furina_stagehands	ImageGen/images/furina/powers/stagehands.png	256	256	contain	center	shortlist	1	png	Item Movable Small Spotlight.png		icon
+power_furina_stagehands	ImageGen/images/furina/powers/stagehands.png	256	256	contain	center	shortlist	2	png	Icon Opera Epiclese.png		icon
 # R231, 2026-08-30, Art-debt pick 1 -- THE SIGIL COLLISION IS RULED.
 # power_furina_ovation_trickle and power_furina_stagehands_encore both nominated
 # `Item Ovations That Ceased Upon Festivity` at rank 2, which is the collision the
@@ -1178,12 +1195,12 @@ power_furina_stagehands	ImageGen/images/furina/powers/stagehands.png	256	256	con
 # lands; a pick has landed, so the entry is removed in the same commit.
 # power_furina_stagehands_encore	ImageGen/images/furina/powers/stagehands_encore.png	256	256	contain	center	shortlist	2	png	Item Ovations That Ceased Upon Festivity.png		icon
 power_furina_stagehands_encore	ImageGen/images/furina/powers/stagehands_encore.png	256	256	contain	center	shortlist	1	png	Item Festival Spotlight.png		icon
-power_furina_courtroom_drama	ImageGen/images/furina/powers/courtroom_drama.png	256	256	contain	center	shortlist	2	png	Item Fontaine Judgment.png		icon
-power_furina_courtroom_drama	ImageGen/images/furina/powers/courtroom_drama.png	256	256	contain	center	shortlist	3	png	Icon The Duke's Office.png		icon
-power_furina_the_gallery_stirs	ImageGen/images/furina/powers/the_gallery_stirs.png	256	256	contain	center	shortlist	2	png	Item Fontaine Big News.png		icon
-power_furina_the_gallery_stirs	ImageGen/images/furina/powers/the_gallery_stirs.png	256	256	contain	center	shortlist	3	png	Item Theater Tickets.png		icon
-power_furina_quick_change	ImageGen/images/furina/powers/quick_change.png	256	256	contain	center	shortlist	2	png	Item Fontaine Redemption.png		icon
-power_furina_quick_change	ImageGen/images/furina/powers/quick_change.png	256	256	contain	center	shortlist	3	png	Item Fontaine Lucine.png		icon
+power_furina_courtroom_drama	ImageGen/images/furina/powers/courtroom_drama.png	256	256	contain	center	shortlist	1	png	Item Fontaine Judgment.png		icon
+power_furina_courtroom_drama	ImageGen/images/furina/powers/courtroom_drama.png	256	256	contain	center	shortlist	2	png	Icon The Duke's Office.png		icon
+power_furina_the_gallery_stirs	ImageGen/images/furina/powers/the_gallery_stirs.png	256	256	contain	center	shortlist	1	png	Item Fontaine Big News.png		icon
+power_furina_the_gallery_stirs	ImageGen/images/furina/powers/the_gallery_stirs.png	256	256	contain	center	shortlist	2	png	Item Theater Tickets.png		icon
+power_furina_quick_change	ImageGen/images/furina/powers/quick_change.png	256	256	contain	center	shortlist	1	png	Item Fontaine Redemption.png		icon
+power_furina_quick_change	ImageGen/images/furina/powers/quick_change.png	256	256	contain	center	shortlist	2	png	Item Fontaine Lucine.png		icon
 # -- run 8 (EB-36 hunt half): the three placeholder-rendering mod art keys --
 spotlight_center_stage	ImageGen/images/cards/furina/spotlight_center_stage.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Tabletop Troupe Pros Furina.png		splash	furina_pool
 spotlight_center_stage	ImageGen/images/cards/furina/spotlight_center_stage.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Festival Spotlight.png		item	furina_pool
@@ -1253,8 +1270,8 @@ watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500
 # rank-1 row for a title with no raw file would render nothing and lie in the plan.
 # NEXT ACTION when a fetch window opens: fetch Details 1, hand-crop it under the
 # R151 exception, and swap this rank 1. Same shape and the same blocker as
-# what_the_tokoyo_returns, whose rank-1 source is on disk but cleared nowhere
-# (EB-163's one live gap).
+# what_the_tokoyo_returns was, until its rank-1 clearance landed at 478b83a6
+# and shut EB-163's last PROVENANCE-GAP.
 the_gunbai_turns	ImageGen/images/cards/kokomi/the_gunbai_turns.png	500	380	cover	y0.22	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
 the_gunbai_turns	ImageGen/images/cards/kokomi/the_gunbai_turns.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
 the_gunbai_turns	ImageGen/images/cards/kokomi/the_gunbai_turns.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
