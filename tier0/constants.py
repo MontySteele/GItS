@@ -390,9 +390,102 @@ MONDSTADT_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mc_mika_starfrost_swirl",
 )
 
-# The nation the replacement above owns. Named rather than spelled "mondstadt"
+# The nation the FIRST workshop owns. Named rather than spelled "mondstadt"
 # at the seam, so the one line that decides which nation moves is greppable.
 COMPANION_OVERHAUL_NATION = "mondstadt"
+
+# =============================================================================
+# THE INAZUMA COMPANION OVERHAUL -- SAME FLAG, SECOND NATION (QUARANTINED).
+#
+# The approved workshop `companion-workshop-inazuma-2026-09-01.md` (approved
+# 2026-09-01 at its four default picks, its sec.9) rewrites Inazuma's Universal
+# companion pool the way the Mondstadt document rewrote Mondstadt's: fifteen
+# shipped rows re-authored and nine characters with no row today given one. Its
+# sec.2 nation shape is "Inazuma reads the HP bar", and eight of the rows do.
+#
+# ONE FLAG, NOT A SECOND ONE. `C.COMPANION_OVERHAUL` already means "the
+# companion pool is the approved workshops' pool"; a second property would let
+# a build offer one nation's rewrites and not the other's, which is a state no
+# document describes and no seat would be asked to grade.
+#
+# WHAT MOVES, and it is the same two sites the Mondstadt block names:
+#   * loader.companion_roster_replacement -- the INAZUMA half of the roster
+#     becomes `INAZUMA_OVERHAUL_POOL_IDS` and nothing else, beside the
+#     Mondstadt half. Fontaine is still untouched in every build.
+#   * loader._card_prototype -- `proto_mi_` ids resolve, the same door every
+#     other arm opens for its own rows.
+# FLAG OFF IS BYTE-IDENTICAL TO TODAY, pinned by
+# `tier0/tests/test_inazuma_companion_overhaul.py` rather than intended.
+
+# THE NUMBERS THE REWRITTEN POWERS CARRY. Same rule as the Mondstadt block
+# above: a number the CARD prints stays on the card row, and only a number a
+# POWER carries lands here, because the C# mirrors are compared BY VALUE
+# (`tools/lint_constant_parity.py`). Every one is the workshop's sec.3 printed
+# text, re-priced in its sec.8 -- nothing is derived and nothing is picked.
+MI_WAR_BANNER_DEXTERITY = 2     # Gorou: Dexterity while the banner stands
+MI_JUUGA_DMG = 6                # Gorou: Geo damage per turn, 3 turns
+MI_DARUMA_DMG = 6               # Sayu: the Daruma's hit above 70% HP
+MI_DARUMA_BLOCK = 6             # Sayu: and the Block below it
+MI_SANCTIFYING_RING_DMG = 5     # Shinobu: Electro to ALL, per turn, 3 turns
+MI_SANCTIFYING_RING_BLOCK = 5   # Shinobu: and the Block that rides it
+MI_BLAZING_BARRIER_BLOCK = 3    # Thoma: Block per absorbing hit
+MI_OOYOROI_DMG = 5              # Thoma: Pyro per Attack you play, 2 turns
+MI_OOYOROI_BLOCK = 3            # Thoma: and the Block per Attack
+MI_STORMCALL_BONUS = 5          # Sara: damage your Attacks gain, next turn
+MI_SAKURA_DMG = 4               # Yae: a Sakura's own Electro volley
+MI_SAKURA_BONUS = 3             # Yae: more, for a Sakura placed beside one
+MI_SAKURA_CAP = 3               # Yae: "Up to 3"
+MI_AUROUS_BLAZE_DMG = 6         # Yoimiya: the Pyro the mark answers with
+MI_SOUMETSU_DMG = 8             # Ayaka: Cryo to ALL, per turn, 2 turns
+MI_SOUMETSU_FINALE = 16         # Ayaka: and the hit it ends on
+MI_KYOUKA_BONUS = 4             # Ayato: damage your Attacks gain, 2 turns
+MI_KYOUKA_FINALE = 12           # Ayato: the illusion that pops when it ends
+MI_SURPRISE_DISPATCH_DMG = 10   # Kirara: the parcel, next turn
+MI_TAMOTO_DMG = 6               # Chiori: Geo per turn, ignoring Block
+
+# THE INAZUMA UNIVERSALS, WHOLE -- the workshop's sec.3 in its own character
+# order. TWENTY-FOUR, and the number is worth writing down: its sec.4 counts
+# "25 Universals, 1 Personal" while its sec.3 enumerates 24 Universals plus
+# Gorou's Kokomi-side Personal, and the rarity split it prints (9 Common, 12
+# Uncommon, 4 Rare) only closes when the Personal is counted among the
+# Uncommons. The ENUMERATION is what is built; the Personal is not a Universal
+# and is not here, and neither is any stand-in.
+INAZUMA_OVERHAUL_POOL_IDS: tuple[str, ...] = (
+    "proto_mi_gorou_inuzaka",
+    "proto_mi_gorou_war_banner",
+    "proto_mi_gorou_juuga",
+    "proto_mi_sayu_fuuin_dash",
+    "proto_mi_sayu_daruma",
+    "proto_mi_sayu_naptime",
+    "proto_mi_shinobu_sanctifying_ring",
+    "proto_mi_shinobu_grass_ring",
+    "proto_mi_shinobu_thundergrust",
+    "proto_mi_thoma_blazing_barrier",
+    "proto_mi_thoma_crimson_ooyoroi",
+    "proto_mi_sara_crowfeather_cover",
+    "proto_mi_sara_tengu_stormcall",
+    "proto_mi_itto_superlative_superstrength",
+    "proto_mi_raiden_musou_no_hitotachi",
+    "proto_mi_kazuha_slash",
+    "proto_mi_yae_sesshou_sakura",
+    "proto_mi_yoimiya_aurous_blaze",
+    "proto_mi_ayaka_soumetsu",
+    "proto_mi_ayato_kyouka",
+    "proto_mi_heizou_heartstopper",
+    "proto_mi_kirara_surprise_dispatch",
+    "proto_mi_mizuki_anraku",
+    "proto_mi_chiori_hasode",
+)
+
+# The nation this second replacement owns.
+INAZUMA_OVERHAUL_NATION = "inazuma"
+
+# THE NATIONS THE ARM REPLACES, and the one list `companion_roster_replacement`
+# filters the kept half against. Fontaine is deliberately absent: its workshop
+# does not exist yet (the Mondstadt document's sec.6 and the Inazuma
+# document's sec.6 both say so), so its shipped rows come through untouched.
+COMPANION_OVERHAUL_NATIONS: tuple[str, ...] = (
+    COMPANION_OVERHAUL_NATION, INAZUMA_OVERHAUL_NATION)
 
 # =============================================================================
 # THE KOKOMI OVERHAUL, SLICE ONE -- QUARANTINED (R213 B, BACKLOG EB-147).

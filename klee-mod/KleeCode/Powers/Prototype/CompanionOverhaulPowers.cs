@@ -600,6 +600,66 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
                     }
                 }
             }
+            // THE INAZUMA ARM'S END-OF-TURN BLOCK, still before the latch and
+            // for the reason the second wave's four are: Shinobu's ring GRANTS
+            // Block, and Nicole's question is whether the player ended the turn
+            // holding any -- so it has to be asked after everything that could
+            // answer it. The sequence is the workshop's sec.3 character order,
+            // and the sim walks the identical list
+            // (`effects.inazuma_overhaul_turn_end`).
+            foreach (var juuga in creature.Powers.OfType<JuugaPower>().ToList())
+            {
+                await juuga.FireVolley(choiceContext);
+            }
+            foreach (var daruma in creature.Powers.OfType<MujiMujiDarumaPower>().ToList())
+            {
+                await daruma.FireVolley(choiceContext);
+            }
+            foreach (var ring in creature.Powers.OfType<SanctifyingRingPower>().ToList())
+            {
+                await ring.FireVolley(choiceContext);
+            }
+            foreach (var sakura in creature.Powers.OfType<SesshouSakuraPower>().ToList())
+            {
+                await sakura.FireVolley(choiceContext);
+            }
+            foreach (var soumetsu in creature.Powers.OfType<SoumetsuPower>().ToList())
+            {
+                await soumetsu.FireVolley(choiceContext);
+            }
+            foreach (var kyouka in creature.Powers.OfType<KyoukaPower>().ToList())
+            {
+                await kyouka.Tick(choiceContext);
+            }
+            foreach (var tamoto in creature.Powers.OfType<TamotoPower>().ToList())
+            {
+                await tamoto.FireVolley(choiceContext);
+            }
+            // The three clocks that fire nothing here: a tick, a tick that
+            // hands back its Dexterity, and a mark on an enemy body. Grouped
+            // last because none of them can change an outcome by running in a
+            // different order.
+            foreach (var ooyoroi in creature.Powers.OfType<CrimsonOoyoroiPower>().ToList())
+            {
+                await PowerCmd.TickDownDuration(ooyoroi);
+            }
+            foreach (var banner in creature.Powers.OfType<WarBannerPower>().ToList())
+            {
+                await banner.Tick(choiceContext);
+            }
+            var marked = creature.CombatState?.HittableEnemies.ToList();
+            if (marked != null)
+            {
+                foreach (var enemy in marked)
+                {
+                    foreach (var blaze in enemy.Powers
+                                 .OfType<AurousBlazePower>().ToList())
+                    {
+                        if (blaze.Applier != creature) continue;
+                        await blaze.Tick();
+                    }
+                }
+            }
             foreach (var rev in creature.Powers.OfType<RevelationPower>().ToList())
             {
                 rev.NoteEndOfTurn();

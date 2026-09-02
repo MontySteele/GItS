@@ -120,10 +120,49 @@ public sealed class CompanionOverhaulLedger
     /// </summary>
     public int AttacksPlayedThisTurn { get; private set; }
 
+    /// <summary>
+    /// SWIRLS resolved for this creature this turn -- the count Heizou's
+    /// Heartstopper Strike prints (the Inazuma companion overhaul). Written at
+    /// the ONE place the mod resolves a reaction
+    /// (<see cref="CompanionOverhaulReactions.Note"/>), which is the site the
+    /// sim counts it at too, so neither engine grows a second definition of
+    /// "a Swirl happened".
+    /// </summary>
+    public int SwirlsThisTurn { get; private set; }
+
+    /// <summary>
+    /// Damage this creature's CURRENT CARD PLAY has put on enemy HP -- the
+    /// total Gorou's Inuzaka All-Round Defense halves. Opened by the emitted
+    /// body of any card that reads it and totalled by
+    /// <see cref="CompanionOverhaulPlayWatcher"/>, so a card that never asks
+    /// pays nothing for the machinery.
+    ///
+    /// HP, not the swing: it is the conservative reading of "the damage dealt"
+    /// (R212's one-way rule -- the doubt pays LESS Block), and it is the number
+    /// <c>DamageResult.UnblockedDamage</c> already hands over without a second
+    /// definition. Sim twin: `state.mi_damage_dealt_this_card`.
+    /// </summary>
+    public int DamageDealtThisPlay { get; private set; }
+
     private int _round = -1;
 
     /// <summary>One Attack finished. The one write site.</summary>
     public void NoteAttack() => AttacksPlayedThisTurn++;
+
+    /// <summary>One Swirl resolved. The one write site.</summary>
+    public void NoteSwirl() => SwirlsThisTurn++;
+
+    /// <summary>A card play begins: the play-scoped total starts clean.
+    /// `KokomiOverhaulLedger.BeginPlay`'s shape, and emitted the same way --
+    /// at the top of the body of any card that reads it.</summary>
+    public void BeginPlay() => DamageDealtThisPlay = 0;
+
+    /// <summary>Damage that reached an enemy's HP during the current play.
+    /// The one write site.</summary>
+    public void NoteDamage(int hp)
+    {
+        if (hp > 0) DamageDealtThisPlay += hp;
+    }
 
     /// <summary>Roll the per-turn counter to <paramref name="round"/>. Public
     /// to the pins so a turn boundary can be exercised without a combat.</summary>
@@ -131,6 +170,11 @@ public sealed class CompanionOverhaulLedger
     {
         if (round == _round) return;
         AttacksPlayedThisTurn = 0;
+        SwirlsThisTurn = 0;
+        // Per PLAY rather than per turn, but zeroed here as well as at the top
+        // of a play: a turn boundary is a play boundary too, and a total left
+        // standing across one is a number nothing would ever clear.
+        DamageDealtThisPlay = 0;
         _round = round;
     }
 }
@@ -181,8 +225,18 @@ public static class CompanionOverhaulRiders
             return printed;
         }
         var over = Element.None;
+        // BLANKET RIDERS FIRST, in nation order, then the ONE-SHOTS, then
+        // Varka's banked Swirl last of all. The Inazuma arm adds one of each --
+        // Ayato's Kyouka ("for 2 turns, your Attacks apply Hydro") and Sara's
+        // Crowfeather Cover ("your next Attack ... applies Electro") -- and
+        // they join the sequence at their own tier rather than at the end,
+        // which is what keeps "last wins" meaning the most specific claim
+        // rather than the most recently written class. Sim twin:
+        // `effects.companion_overhaul_card_start`, same order.
         if (dealer.Powers.OfType<LightningFangPower>().Any()) over = Element.Electro;
+        if (dealer.Powers.OfType<KyoukaPower>().Any()) over = Element.Hydro;
         if (dealer.Powers.OfType<PassionOverloadPower>().Any()) over = Element.Pyro;
+        if (dealer.Powers.OfType<CrowfeatherCoverPower>().Any()) over = Element.Electro;
         var charge = dealer.Powers.OfType<SwirlChargePower>().FirstOrDefault();
         if (charge != null && charge.SwirledElement != Element.None)
         {
@@ -228,9 +282,16 @@ public static class CompanionOverhaulReactions
                 dealer, favor.Amount, ValueProp.Unpowered, null, fast: true);
         }
 
+        if (reaction != Reaction.Swirl) return;
+
+        // THE INAZUMA ARM'S Swirl WINDOW, counted here and nowhere else:
+        // Heizou's Heartstopper Strike prints "deals 4 more for each Swirl this
+        // turn", and this is the one site the mod resolves a reaction, so the
+        // count and Varka's latch below it read the same event.
+        CompanionOverhaulLedger.For(dealer).NoteSwirl();
+
         // Varka, Sturm und Drang: "Whenever a Swirl happens, your next Attack
         // deals 6 more damage OF THE SWIRLED ELEMENT."
-        if (reaction != Reaction.Swirl) return;
         var stacks = dealer.Powers.OfType<SturmUndDrangPower>().Sum(p => (int)p.Amount);
         if (stacks <= 0) return;
         var charge = await PowerCmd.Apply<SwirlChargePower>(
@@ -940,6 +1001,16 @@ public sealed class CompanionOverhaulIncomingHit : AbstractModel
         {
             await paws.Bite(choiceContext, dealer, amount);
         }
+        // THE INAZUMA ARM'S ONE INCOMING READER, LAST. Thoma's Blazing Barrier
+        // is the paws' construction with a Block payout instead of an aura, and
+        // it goes after them for the reason they go after the two traps: it
+        // reads the absorption everything above it has already re-priced. It
+        // cannot change what the paws saw either -- both read `Owner.Block`,
+        // which no reader in this list moves.
+        foreach (var barrier in target.Powers.OfType<BlazingBarrierPower>().ToList())
+        {
+            await barrier.Thicken(choiceContext, amount);
+        }
     }
 }
 
@@ -1004,6 +1075,32 @@ public sealed class CompanionOverhaulPlayWatcher : AbstractModel
             return Task.CompletedTask;
         }
         CompanionOverhaulLedger.For(owner).NoteAttack();
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// THE INAZUMA ARM'S PER-PLAY DAMAGE TOTAL, for Gorou's "Block equal to
+    /// half the damage dealt". Totalled here rather than on a power because
+    /// the card that reads it carries none: it is an Attack that banks its own
+    /// hit, and there is nothing on the player to hang the count off.
+    ///
+    /// CARD-SOURCED AND OWNED, which is what the sentence names and what keeps
+    /// the two engines counting the same thing: the sim adds `hp_dmg` for
+    /// `source in ("card", "attack")`, and this arm's own power-sourced hits go
+    /// through <c>ElementalHit.Deal</c>, which passes no dealer and no card
+    /// source, so neither engine counts them.
+    /// </summary>
+    public override Task AfterDamageReceived(
+        PlayerChoiceContext choiceContext, Creature target, DamageResult result,
+        ValueProp props, Creature? dealer, CardModel? cardSource)
+    {
+        if (dealer == null || dealer.Player == null) return Task.CompletedTask;
+        if (cardSource == null || ReferenceEquals(target, dealer))
+        {
+            return Task.CompletedTask;
+        }
+        CompanionOverhaulLedger.For(dealer)
+            .NoteDamage((int)result.UnblockedDamage);
         return Task.CompletedTask;
     }
 }

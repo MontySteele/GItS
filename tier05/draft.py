@@ -740,6 +740,31 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # with `C.KOKOMI_OVERHAUL` off the rows are unreachable by draft at
         # all -- so every drafted number in the world is byte-identical with
         # and without this branch, and DRAFTER_VERSION does not move.
+        #
+        # `mend` IS IN THAT SET AND IS NOW ALSO REACHABLE FROM THE OTHER ARM
+        # (a rewritten Inazuma Universal prints it, and `effects._op_mend`
+        # resolves it behind `C.COMPANION_OVERHAUL`), so the "tier0 refuses to
+        # resolve it" half of the argument stopped covering it on 2026-09-02.
+        # The ZERO stands on the OTHER half, which is the one that decides:
+        # only a `proto_` row prints the keyword, no offerable pool the drafter
+        # reads can hold one with the flag off, and healing has no priced
+        # channel in this table at all -- `heal` itself is `_PRICED_INLINE`.
+        # Pricing a bounded heal is acceptance work, and it moves `D` then.
+        return 0.0
+
+    # -- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
+    if op == "block_half_damage":
+        # ZERO, and a DELIBERATE zero, for a reason NEITHER branch above
+        # gives: this op RESOLVES in tier0 -- Gorou's Inuzaka All-Round Defense
+        # is played by both engines -- and it really does grant Block. What
+        # cannot be priced is the AMOUNT, because it is not on the card: it is
+        # half of what the card's own damage line actually landed, which
+        # depends on Strength, Weak, an amplifier and the target's Block at
+        # resolution time. The three honest options were a guess, the printed
+        # damage halved (a guess wearing an argument), and zero; zero is the
+        # one that makes no claim. The row is a `proto_` row and no offerable
+        # pool holds one with the flag off, so every drafted number in the
+        # world is unchanged and DRAFTER_VERSION does not move.
         return 0.0
 
     # -- cards from nowhere ------------------------------------------------
@@ -1958,9 +1983,21 @@ STATIC_OP_PRICING: dict[str, str] = {
             "resolve it, so there is no sim behaviour to price (slice packet "
             "sec.5; prototype surface only -- no shipped row prints it and no "
             "drafted number moves)"
-       for op in ("gain_tide", "surge", "block_half_surge", "exert", "mend",
+       for op in ("gain_tide", "surge", "block_half_surge", "exert",
                   "plan", "draw_companion_from_draw", "next_companion_free",
                   "draw_per_tide", "play_top_of_draw")},
+    # `mend` OUT OF THAT BULK, because half of its rationale stopped being
+    # true: it is the one Kokomi verb a rewritten Inazuma UNIVERSAL prints, so
+    # tier0 does resolve it behind `C.COMPANION_OVERHAUL`.
+    "mend": "ZERO: healing has no priced channel in this table at all "
+            "(`heal` is _PRICED_INLINE), and only a `proto_` row prints the "
+            "keyword -- no offerable pool holds one with the flag off, so no "
+            "drafted number moves",
+    # --- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
+    "block_half_damage": "ZERO: the amount is half of what the card's own "
+                         "damage line LANDED, which no static pricer can see "
+                         "(prototype surface only -- no shipped row prints it "
+                         "and no drafted number moves)",
     # --- damage/Block-shaped, new in v13 ---------------------------------
     "block_next_turn": "printed Block at STATIC_DELAYED_BLOCK_SHARE",
     "block_at_turn_start": "printed Block at STATIC_DELAYED_BLOCK_SHARE, once "

@@ -318,6 +318,15 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "gain_tide", "surge", "block_half_surge", "exert", "mend",
                   "plan", "draw_companion_from_draw", "next_companion_free",
                   "draw_per_tide", "play_top_of_draw",
+                  # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, R213 B) --
+                  # ONE verb, on the same terms as the two blocks above. Gorou's
+                  # Inuzaka All-Round Defense prints "Gain Block equal to half
+                  # the damage dealt", and the total it halves is this play's
+                  # own, kept by `CompanionOverhaulLedger` and read by
+                  # `InazumaCompanion.BlockHalfDamage` -- one verified call
+                  # site, Compile Remove'd out of a release build like the rest
+                  # of Powers/Prototype.
+                  "block_half_damage",
                   # EB-122 (EB-69's fill): the turn-scoped Sly grant. Rides
                   # SlyGrant.Grant, whose whole shape is Hand Trick's --
                   # CardSelectCmd.FromHand filtered to non-Sly Skills, then
@@ -811,7 +820,13 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # a bank that could pay it, and then paid out without debiting
               # that bank. An op a price table knows and an emitter does not
               # is an unpaid payoff, not a blocked one.
-              "spend_spark"}
+              "spend_spark",
+              # THE INAZUMA COMPANION OVERHAUL (QUARANTINED). Mizuki's Anraku
+              # Secret Spring Therapy is "deal 18 to ALL, OTHERWISE Mend 10",
+              # so the keyword lands in an ELSE branch -- and the top-level arm
+              # it copies is a single awaited call with no locals, which is the
+              # whole branch-legality criterion.
+              "mend"}
 
 # The exact key set each branch op may carry. Module-level because a modal's
 # mode body is emitted through the same `_emit_branch_op` resolvers as a
@@ -833,6 +848,9 @@ BRANCH_FIELDS = {
     "spend_encore": {"op", "amount"},
     "spend_charge": {"op", "amount"},
     "spend_spark": {"op", "amount"},
+    # Same key set the top-level `mend` validator enforces, so the two cannot
+    # disagree about what a Mend is.
+    "mend": {"op", "amount"},
     "burst_energy": {"op", "amount"},
     "energy": {"op", "amount"},
     "place_bomb": {"op", "amount", "target", "bomb_damage"},
@@ -1211,6 +1229,15 @@ APPLY_POWERS = {
         "Your Attacks deal {X} more damage this turn."),
     "strength": ("StrengthPower", None,
         "Gain {X} [gold]Strength[/gold]."),
+    # The base game's other flat stat, given a sheet spelling by the Inazuma
+    # companion overhaul: Gorou's General's War Banner is the first row in the
+    # repo to print Dexterity. REAL Dexterity, not a private modifier, so it
+    # means what every other Dexterity in the engine means; the card's "for 2
+    # turns" is a SECOND power beside it (`mi_war_banner`), which takes these
+    # two stacks back when its clock runs out. tier0 has read a `dexterity`
+    # power stack since the block funnel was written.
+    "dexterity": ("DexterityPower", None,
+        "Gain {X} [gold]Dexterity[/gold]."),
     # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulPowers.cs and
     # is Compile Remove'd out of a release build, so the only rows that may name
@@ -1291,6 +1318,65 @@ APPLY_POWERS = {
         "damage plus 5 per [gold]Attack[/gold] counted. Falls in {X} turn(s)."),
     "mc_starfrost_discount": ("StarfrostDiscountPower", None,
         "Your next [gold]Attack[/gold] costs {X} less."),
+    # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, R213 B), on the SAME flag
+    # pair as the Mondstadt rows above. Every class lives in
+    # klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulInazuma.cs and is
+    # Compile Remove'd out of a release build, so the only rows that may name
+    # one are `proto_mi_` rows on the prototype surface. Most are one of the
+    # two shapes this arm already runs -- a start-of-turn payout and an
+    # end-of-turn volley -- and the four that are not each reuse a hook the
+    # Mondstadt second wave built. The {X} templates are here for form; every
+    # row carries its own `description:` (EB-215). Sim twins:
+    # tier0.engine.effects' `inazuma_overhaul_*` block.
+    "mi_war_banner": ("WarBannerPower", None,
+        "You have 2 more [gold]Dexterity[/gold]. Lasts {X} more turn(s)."),
+    "mi_juuga": ("JuugaPower", None,
+        "At the end of your turn, deal 6 damage and apply [gold]Geo[/gold] to "
+        "a random enemy. Lasts {X} more turn(s)."),
+    "mi_daruma": ("MujiMujiDarumaPower", None,
+        "At the end of your turn, if you are above 70% HP deal 6 damage to a "
+        "random enemy; otherwise gain 6 [gold]Block[/gold]. Lasts {X} more "
+        "turn(s)."),
+    "mi_naptime": ("NaptimePower", None,
+        "At the start of your next turn, draw {X} -- unless you play an "
+        "[gold]Attack[/gold] this turn."),
+    "mi_sanctifying_ring": ("SanctifyingRingPower", None,
+        "At the end of your turn, deal 5 damage and apply [gold]Electro[/gold] "
+        "to ALL enemies, then gain 5 [gold]Block[/gold]. Lasts {X} more "
+        "turn(s)."),
+    "mi_blazing_barrier": ("BlazingBarrierPower", None,
+        "When this [gold]Block[/gold] absorbs damage, gain 3 "
+        "[gold]Block[/gold]. {X} [gold]Block[/gold] still burns."),
+    "mi_crimson_ooyoroi": ("CrimsonOoyoroiPower", None,
+        "Whenever you play an [gold]Attack[/gold], deal 5 damage and apply "
+        "[gold]Pyro[/gold] to a random enemy and gain 3 [gold]Block[/gold]. "
+        "Lasts {X} more turn(s)."),
+    "mi_crowfeather": ("CrowfeatherCoverPower", None,
+        "Your next [gold]Attack[/gold] this turn deals {X} more damage and "
+        "applies [gold]Electro[/gold]."),
+    "mi_stormcall": ("TenguStormcallPower", None,
+        "At the start of your next turn, your [gold]Attacks[/gold] deal 5 "
+        "more damage for that turn."),
+    "mi_sesshou_sakura": ("SesshouSakuraPower", None,
+        "At the end of your turn, each [gold]Sakura[/gold] deals 4 damage and "
+        "applies [gold]Electro[/gold] to a random enemy; every one placed "
+        "beside another deals 3 more. {X} out."),
+    "mi_aurous_blaze": ("AurousBlazePower", None,
+        "Whenever this enemy takes damage from a card that is not an "
+        "[gold]Attack[/gold], deal 6 damage and apply [gold]Pyro[/gold] to "
+        "ALL enemies. Lasts {X} more turn(s)."),
+    "mi_soumetsu": ("SoumetsuPower", None,
+        "At the end of your turn, deal 8 damage and apply [gold]Cryo[/gold] "
+        "to ALL enemies; when it ends, 16 more. Lasts {X} more turn(s)."),
+    "mi_kyouka": ("KyoukaPower", None,
+        "Your [gold]Attacks[/gold] apply [gold]Hydro[/gold] and deal 4 more "
+        "damage; when it ends, deal 12 damage and apply [gold]Hydro[/gold] to "
+        "a random enemy. Lasts {X} more turn(s)."),
+    "mi_surprise_dispatch": ("SurpriseDispatchPower", None,
+        "At the start of your next turn, deal 10 damage to a random enemy."),
+    "mi_tamoto": ("TamotoPower", None,
+        "At the end of your turn, deal 6 damage and apply [gold]Geo[/gold] to "
+        "a random enemy, ignoring [gold]Block[/gold]. Lasts {X} more turn(s)."),
     # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
@@ -1398,8 +1484,14 @@ APPLY_POWERS = {
 # body holds the power. Landing them on the enemy is what makes the card's own
 # words expressible, and it is also what makes the card declare
 # `TargetType.AnyEnemy`, which is the same seam every aimed op already uses.
+#
+# `mi_aurous_blaze` IS THE THIRD, and the same argument makes it one: "MARK AN
+# ENEMY for 2 turns. Whenever IT takes damage ..." names a chosen body twice
+# over, so the body holds the mark -- and the card declares
+# `TargetType.AnyEnemy` through the same seam.
 ENEMY_APPLY_POWERS = {"weak", "vulnerable",
-                      "mc_melody_loop", "mc_lightfall_sword"}
+                      "mc_melody_loop", "mc_lightfall_sword",
+                      "mi_aurous_blaze"}
 
 # Sheet fields apply_power may carry. Anything else encodes a mechanic this
 # generator does not understand -- fail loudly (UNPARSEABLE discipline).
@@ -1995,7 +2087,9 @@ def blocked_reason(
                 and exhaust_selection_calc_rider(card, effect) is None
                 and discards_turn_calc_rider(card, effect) is None
                 and exhausts_turn_calc_rider(card, effect) is None
-                and player_block_calc_rider(card, effect) is None):
+                and player_block_calc_rider(card, effect) is None
+                and companions_played_calc_rider(card, effect) is None
+                and swirls_turn_calc_rider(card, effect) is None):
             formula = effect["amount_formula"]
             return (f"amount_formula (reads {formula.get('count')}) -- needs a "
                     "CalculatedVar bound to that count, not a literal")
@@ -2203,7 +2297,7 @@ def blocked_reason(
                         or value < floor:
                     return f"draw_per_tide {key} must be a literal int >= {floor}"
         if op in {"block_half_surge", "draw_companion_from_draw",
-                  "next_companion_free"}:
+                  "next_companion_free", "block_half_damage"}:
             # No fields at all: each is one whole printed clause, and any
             # number they might carry is a rule's, not a card's.
             unknown = set(eff) - {"op"}
@@ -2837,6 +2931,58 @@ def player_block_calc_rider(card: dict,
             "static (card, _) => (int)card.Owner.Creature.Block")
 
 
+def companions_played_calc_rider(card: dict,
+                                 eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: companions_played_this_combat}` --
+    Raiden's Musou no Hitotachi, "deals 5 more for each Companion card you
+    played this combat" (QUARANTINED, the Inazuma companion overhaul).
+
+    THE COUNT IS CARDS, NOT PLAYS, and both engines already answer it that way:
+    `CompanionPlays` records `(Owner, ModelId)` once per companion and the
+    sim's `state.companions_played` is unique by base id, both under the
+    BFF-dedupe ruling of 2026-08-06. So the reader is the shipped one and no
+    second definition of "a Companion you played" is minted here.
+
+    Same CalculatedDamageVar triple as the riders around it, and the same
+    damage-only restriction. It cannot be a literal for the obvious reason:
+    the number is different on every turn of every fight.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict):
+        return None
+    if formula.get("count") != "companions_played_this_combat":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "static (card, _) => CompanionPlays.PlayedThisCombat("
+            "card.Owner.Creature.CombatState, card.Owner).Count")
+
+
+def swirls_turn_calc_rider(card: dict,
+                           eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: swirls_this_turn}` -- Heizou's
+    Heartstopper Strike, "deals 4 more for each Swirl this turn" (QUARANTINED,
+    the Inazuma companion overhaul).
+
+    The count comes off `CompanionOverhaulLedger`, which is where this arm
+    already keeps its per-turn numbers, written at the ONE place the mod
+    resolves a reaction (`CompanionOverhaulReactions.Note`) -- the same site
+    the sim counts it at, so "a Swirl happened" has one definition per engine
+    and the two agree.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict):
+        return None
+    if formula.get("count") != "swirls_this_turn":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "static (card, _) => CompanionOverhaulLedger.For("
+            "card.Owner.Creature).SwirlsThisTurn")
+
+
 def discards_turn_calc_rider(card: dict,
                              eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: discards_this_turn}` (EB-122, for
@@ -3449,6 +3595,16 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     player_block = player_block_calc_rider(card, eff)
     if player_block is not None:
         return player_block
+    # QUARANTINED USE ONLY, and beside the four above for the same two reasons:
+    # the same triple, and the same damage-only rule. Neither number can be a
+    # literal -- one moves every time a Companion is played and the other every
+    # time a Swirl happens.
+    companions_played = companions_played_calc_rider(card, eff)
+    if companions_played is not None:
+        return companions_played
+    swirls_turn = swirls_turn_calc_rider(card, eff)
+    if swirls_turn is not None:
+        return swirls_turn
     charge = charge_calc_rider(card, eff)
     if charge is not None:
         base, per_n, div = charge
@@ -3919,6 +4075,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or discards_turn_calc_rider(card, e) is not None
             or exhausts_turn_calc_rider(card, e) is not None
             or player_block_calc_rider(card, e) is not None
+            or companions_played_calc_rider(card, e) is not None
+            or swirls_turn_calc_rider(card, e) is not None
             for e in effects),
         "formula_base": any(
             exhaust_pile_calc_rider(card, e) is not None
@@ -3926,6 +4084,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or discards_turn_calc_rider(card, e) is not None
             or exhausts_turn_calc_rider(card, e) is not None
             or player_block_calc_rider(card, e) is not None
+            or companions_played_calc_rider(card, e) is not None
+            or swirls_turn_calc_rider(card, e) is not None
             for e in effects),
     }
     # tier0 binds every POWER_UPGRADE_KEYS delta to the first TOP-LEVEL
@@ -4896,6 +5056,15 @@ def _emit_branch_op(
         # play whose price failed instead of handing out the payoff for free.
         # Sim twin: `effects.spend_sparks`, which refuses the same way.
         lines.append(_stmt_spend_spark_guarded(card, eff))
+    elif op == "mend":
+        # THE INAZUMA COMPANION OVERHAUL (QUARANTINED). Byte-for-byte the call
+        # `build_body`'s top-level arm makes, because it IS the same rule: one
+        # awaited `KokomiTide.Mend`, which is where "never above the HP you
+        # entered the fight with" lives for every character that plays a card
+        # printing the keyword. Literal, like every other branch resolver.
+        lines.append(
+            "await KokomiTide.Mend(choiceContext, Owner.Creature, "
+            f'{int(eff["amount"])});')
     elif op == "salon_rotate":
         # EB-118 §5.5. Literal in a branch, like every other branch resolver:
         # no delta grammar reaches a rotation count.
@@ -5162,6 +5331,15 @@ def build_body(
         lines.append(
             "KokomiOverhaulLedger.For(Owner.Creature).BeginPlay("
             "CombatState?.HittableEnemies.Count(e => !e.IsDead) ?? 0);")
+    # THE INAZUMA ARM's per-PLAY total, opened the same way and for the same
+    # reason (QUARANTINED): Gorou asks "half the damage dealt" about THIS play,
+    # so the running total has to start at zero when the play does. Emitted
+    # only for a card that asks. Sim twin: `state.mi_damage_dealt_this_card`,
+    # zeroed at the head of `effects.resolve_card`.
+    if any(e.get("op") == "block_half_damage"
+           for e in _effects_everywhere(card)):
+        lines.append(
+            "CompanionOverhaulLedger.For(Owner.Creature).BeginPlay();")
     preds = {e["if"] for e in card["effects"] if e.get("op") == "conditional"}
     if "reaction_triggered_by_this" in preds:
         lines.append("var reactionsAtStart = ReactionEffects.TotalResolved;")
@@ -5721,6 +5899,16 @@ def build_body(
             lines.append(
                 "await KokomiTide.Mend(choiceContext, Owner.Creature, "
                 f'{int(eff["amount"])});')
+
+        elif op == "block_half_damage":
+            # THE INAZUMA ARM (QUARANTINED). Gorou's second clause. No number
+            # here for a face to get wrong -- the amount is half of what this
+            # play's damage actually landed, which the ledger opened at the top
+            # of the body has been keeping. Its Kokomi cousin `block_half_surge`
+            # two arms up is the same shape asking about a different total.
+            lines.append(
+                "await InazumaCompanion.BlockHalfDamage("
+                "choiceContext, Owner.Creature, cardPlay);")
 
         elif op == "draw_per_tide":
             lines.append(
@@ -8022,7 +8210,15 @@ def emit(
     if is_companion(card):
         elemental = any(e.get("applies_element")
                         for e in companion_damage_effects(card))
-        element_cs = ELEMENT_CS[card["element"]]
+        # A COMPANION ROW MAY CARRY NO ELEMENT, and exactly one does: Kirara is
+        # Dendro, this engine has six elements and no Dendro aura, and her card
+        # ("Gain 8 Block. Next turn, deal 10 damage to a random enemy.") names
+        # no element at all. `Element.None` is the honest rendering -- inventing
+        # one of the six would be a design decision wearing a schema default --
+        # and `blocked_reason` still refuses a row that APPLIES an element it
+        # has not declared, so this cannot become a silent hole.
+        element_cs = (ELEMENT_CS[card["element"]] if card.get("element")
+                      else "Element.None")
     else:
         elemental = profile.damage_applies_element(card)
         element_cs = ELEMENT_CS[profile.native_element]

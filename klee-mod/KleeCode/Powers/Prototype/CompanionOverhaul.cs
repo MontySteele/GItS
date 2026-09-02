@@ -150,4 +150,90 @@ public static class CompanionOverhaulLaw
     /// <summary>Eula, Lightfall Sword: per Attack the blade counted.
     /// Mirrors <c>C.MC_LIGHTFALL_PER_ATTACK</c>.</summary>
     public const int LightfallPerAttack = 5;
+
+    // THE INAZUMA WORKSHOP'S NUMBERS, on the same terms as the twenty above:
+    // every one is that document's own printed text (its sec.3, re-priced in
+    // its sec.8), a number the CARD prints stays on the card row, and only a
+    // number a POWER carries lands here. Mirrored by value from tier0's `MI_*`
+    // block by <c>tools/lint_constant_parity.py</c>.
+
+    /// <summary>Gorou, General's War Banner: the Dexterity it lends and takes
+    /// back. Mirrors <c>C.MI_WAR_BANNER_DEXTERITY</c>.</summary>
+    public const int WarBannerDexterity = 2;
+
+    /// <summary>Gorou, Juuga: Geo damage per end of turn, 3 turns.
+    /// Mirrors <c>C.MI_JUUGA_DMG</c>.</summary>
+    public const int JuugaDamage = 6;
+
+    /// <summary>Sayu, Muji-Muji Daruma: the hit above 70% HP.
+    /// Mirrors <c>C.MI_DARUMA_DMG</c>.</summary>
+    public const int DarumaDamage = 6;
+
+    /// <summary>Sayu, Muji-Muji Daruma: and the Block below it.
+    /// Mirrors <c>C.MI_DARUMA_BLOCK</c>.</summary>
+    public const int DarumaBlock = 6;
+
+    /// <summary>Kuki Shinobu, Sanctifying Ring: Electro to ALL, per turn.
+    /// Mirrors <c>C.MI_SANCTIFYING_RING_DMG</c>.</summary>
+    public const int SanctifyingRingDamage = 5;
+
+    /// <summary>Kuki Shinobu, Sanctifying Ring: the Block that rides it.
+    /// Mirrors <c>C.MI_SANCTIFYING_RING_BLOCK</c>.</summary>
+    public const int SanctifyingRingBlock = 5;
+
+    /// <summary>Thoma, Blazing Barrier: Block per absorbing hit.
+    /// Mirrors <c>C.MI_BLAZING_BARRIER_BLOCK</c>.</summary>
+    public const int BlazingBarrierBlock = 3;
+
+    /// <summary>Thoma, Crimson Ooyoroi: Pyro per Attack you play.
+    /// Mirrors <c>C.MI_OOYOROI_DMG</c>.</summary>
+    public const int OoyoroiDamage = 5;
+
+    /// <summary>Thoma, Crimson Ooyoroi: and the Block per Attack.
+    /// Mirrors <c>C.MI_OOYOROI_BLOCK</c>.</summary>
+    public const int OoyoroiBlock = 3;
+
+    /// <summary>Kujou Sara, Tengu Stormcall: damage your Attacks gain next
+    /// turn. Mirrors <c>C.MI_STORMCALL_BONUS</c>.</summary>
+    public const int StormcallBonus = 5;
+
+    /// <summary>Yae Miko, Sesshou Sakura: a Sakura's own volley.
+    /// Mirrors <c>C.MI_SAKURA_DMG</c>.</summary>
+    public const int SakuraDamage = 4;
+
+    /// <summary>Yae Miko, Sesshou Sakura: more, for one placed beside another.
+    /// Mirrors <c>C.MI_SAKURA_BONUS</c>.</summary>
+    public const int SakuraBonus = 3;
+
+    /// <summary>Yae Miko, Sesshou Sakura: "Up to 3".
+    /// Mirrors <c>C.MI_SAKURA_CAP</c>.</summary>
+    public const int SakuraCap = 3;
+
+    /// <summary>Yoimiya, Aurous Blaze: the Pyro the mark answers with.
+    /// Mirrors <c>C.MI_AUROUS_BLAZE_DMG</c>.</summary>
+    public const int AurousBlazeDamage = 6;
+
+    /// <summary>Kamisato Ayaka, Soumetsu: Cryo to ALL, per turn.
+    /// Mirrors <c>C.MI_SOUMETSU_DMG</c>.</summary>
+    public const int SoumetsuDamage = 8;
+
+    /// <summary>Kamisato Ayaka, Soumetsu: and the hit it ends on.
+    /// Mirrors <c>C.MI_SOUMETSU_FINALE</c>.</summary>
+    public const int SoumetsuFinale = 16;
+
+    /// <summary>Kamisato Ayato, Kyouka: damage your Attacks gain, 2 turns.
+    /// Mirrors <c>C.MI_KYOUKA_BONUS</c>.</summary>
+    public const int KyoukaDamage = 4;
+
+    /// <summary>Kamisato Ayato, Kyouka: the illusion that pops at the end.
+    /// Mirrors <c>C.MI_KYOUKA_FINALE</c>.</summary>
+    public const int KyoukaFinale = 12;
+
+    /// <summary>Kirara, Surprise Dispatch: the parcel, next turn.
+    /// Mirrors <c>C.MI_SURPRISE_DISPATCH_DMG</c>.</summary>
+    public const int SurpriseDispatchDamage = 10;
+
+    /// <summary>Chiori, Tamoto: Geo per turn, ignoring Block.
+    /// Mirrors <c>C.MI_TAMOTO_DMG</c>.</summary>
+    public const int TamotoDamage = 6;
 }
