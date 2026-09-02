@@ -637,6 +637,38 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_moons_reflection",
 )
 
+# THE ONE INSTRUMENT DIAL THIS ARM ADDS, AND IT IS NOT A BALANCE NUMBER
+# (`EB-311`). Nothing on any sheet, in the brief or in the slice says what a
+# Plan is WORTH; what draft 6 says is only that it lands a turn late and costs
+# the card's whole now-line. Two instruments have to have an opinion anyway --
+# `tier05.draft._static_power`, which ranks an offer screen, and
+# `tier0.pilot.policy._active_effects`, which ranks a hand -- and until now
+# they had opposite ones: the drafter priced a `plan:` list at ZERO (sixteen of
+# the twenty-eight `proto_kk_` rows scored 0.00, so the read's pick rates were
+# the instrument's and not the cards') and the pilot priced it at FACE, as
+# though it landed now. This is the ONE number both of them now read, so they
+# can be wrong together instead of wrong in two directions.
+#
+# WHAT IT IS NOT. It is not a card number, not a rule number, not a C# mirror
+# (`tools/lint_constant_parity.py` compares NAMED C# members and the mod holds
+# no such member -- the mod has a human in the seat, and a human does not need
+# a discount to decide whether to plan). It moves NOTHING in the published
+# world: only a `proto_` row carries a `plan:` list, no offerable pool holds
+# one with `KOKOMI_OVERHAUL` off, and the pilot's swap is gated on
+# `kokomi_plan.plan_aimed_at_pet`, which returns False without the flag AND
+# without Kokomi in the seat. So no stamp moves -- `spend_charge`'s argument
+# unchanged -- and `tier05/tests/test_eb311_plan_pricing.py` pins that as a
+# fixture hash over every shipped row rather than asserting it.
+#
+# 0.75 IS A JUDGEMENT AND IS DISCLOSED AS ONE. It is the crude reading of "one
+# turn late" against this engine's own measured fight length -- 5.91 turns
+# (`review/records/balance-read-prototype-2026-09-02.md` sec.2), so a turn is
+# roughly a sixth of a fight and a quarter is the conservative side of that --
+# and its error is one-directional in the direction this repo already accepts:
+# a planned clause is UNDER-credited, so the drafter passes on a Plan card
+# rather than paying for one. Move it and both instruments move together.
+PLAN_DELAY_DISCOUNT = 0.75
+
 BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played
 BURST_PER_REACTION = 5        # burst energy per reaction triggered
 

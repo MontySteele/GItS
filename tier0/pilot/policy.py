@@ -230,6 +230,44 @@ def predicate_is_declared_blind(name: str) -> bool:
                 and name.startswith(BLIND_PREDICATE_PREFIXES)))
 
 
+#: Planned clauses whose `amount` is NOT a magnitude, so the delay discount
+#: must not touch it. `plan_twice`'s amount is the LENGTH OF NEREID'S WINDOW IN
+#: TURNS (`kokomi_plan.wear_plan_twice` tops a standing window up to it), and
+#: three-quarters of a turn is not a thing. A closed set rather than a
+#: check-what-looks-numeric, because a duration wearing an `amount:` key is
+#: exactly the kind of thing a blanket scale gets silently wrong.
+_PLAN_DURATION_OPS = frozenset(("plan_twice",))
+
+
+def _plan_discounted(fx: dict) -> dict:
+    """One planned clause, at `C.PLAN_DELAY_DISCOUNT` of its printed face.
+
+    EB-311. THE DISCOUNT IS APPLIED TO THE AMOUNT rather than to each scoring
+    term, and the reason is arithmetic rather than taste: every term downstream
+    of `_active_effects` that prices one of these clauses is LINEAR in
+    `amount` (`_expected_damage` multiplies it by hits, `_raw_block` by times,
+    `_scaling_value` by the debuff dial, `_tempo_value` reads it straight), so
+    scaling the amount once here is the same number as scaling five terms and
+    it cannot fall out of step with a sixth added later.
+
+    A COPY, NEVER THE CARD'S OWN DICT. `card.plan` is the sheet's list, shared
+    by every instance of the row and read again by
+    `kokomi_plan._resolve_clause` when the Plan is actually carried out;
+    scaling it in place would make the forecast rewrite the card it forecast.
+
+    A clause with no numeric `amount` -- the Max-HP fraction, the exhaust
+    replay -- passes through untouched, and so does a duration
+    (`_PLAN_DURATION_OPS`). Neither is priced by any term today; the discount
+    declines to invent a price for them on the way past.
+    """
+    amount = fx.get("amount")
+    if (fx.get("op") in _PLAN_DURATION_OPS
+            or isinstance(amount, bool)
+            or not isinstance(amount, (int, float))):
+        return fx
+    return {**fx, "amount": amount * C.PLAN_DELAY_DISCOUNT}
+
+
 def _active_effects(state: CombatState, effect_list: list[dict],
                     card: Optional[Card] = None):
     """Yield runtime-formula branches the pilot is explicitly able to read.
@@ -259,15 +297,28 @@ def _active_effects(state: CombatState, effect_list: list[dict],
     four rows (Ambush, War Council, Chain of Command, Battle Plan) print an
     EMPTY body, so without the swap they would score zero and never be played.
 
-    WHAT THE SWAP DOES NOT MODEL is the TURN of delay: a planned clause is
-    valued at its face, as though it landed now. That is the crude direction
-    and it is stated rather than hidden -- discounting it is a
-    `POLICY_VERSION` question, and no number taken on this arm is quotable
-    anyway (R215 B).
+    THE TURN OF DELAY IS NOW MODELLED (`EB-311`), and this paragraph used to
+    say the opposite: a planned clause was valued at FACE, as though it landed
+    now, and the note called discounting it a `POLICY_VERSION` question. It is
+    discounted here by `C.PLAN_DELAY_DISCOUNT` -- the SAME constant
+    `tier05.draft._static_power` prices a `plan:` list with, so the pilot that
+    ranks a hand and the drafter that ranks an offer screen have one opinion
+    about what a Plan is worth between them instead of two opposite ones (the
+    drafter's was ZERO).
+
+    NO `POLICY_VERSION` BUMP, and that is a claim about OUTPUT rather than an
+    exemption. The swap this rides is gated on `plan_aimed_at_pet`, which is
+    False without `C.KOKOMI_OVERHAUL` AND without Kokomi in the seat, and only
+    a `proto_` row carries a `plan:` list at all -- so every pilot decision in
+    the published world is byte-identical with and without this discount, which
+    `tier05/tests/test_eb311_plan_pricing.py` pins rather than asserts. When
+    the arm leaves quarantine, THAT is the change that moves `P`.
     """
+    planned = False
     if (card is not None and card.plan and effect_list is card.effects
             and effects.kokomi_plan.plan_aimed_at_pet(state, card)):
         effect_list = card.plan
+        planned = True
     for fx in effect_list:
         if fx["op"] == "conditional":
             name = fx["if"]
@@ -349,7 +400,7 @@ def _active_effects(state: CombatState, effect_list: list[dict],
             index = effects._chosen_mode(state, modes, None)
             yield from _active_effects(state, modes[index]["effects"], card)
         else:
-            yield fx
+            yield _plan_discounted(fx) if planned else fx
 
 
 def _salon_verb_yield(state: CombatState, card: Card
