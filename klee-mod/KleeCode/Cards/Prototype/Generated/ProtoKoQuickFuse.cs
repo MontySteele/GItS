@@ -31,7 +31,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoQuickFuse : CustomCardModel, ISparkPricedCard
+public sealed class ProtoKoQuickFuse : CustomCardModel, ISparkPricedCard, IUnplayableReasonCard
 {
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_quick_fuse");
 
@@ -53,7 +53,13 @@ public sealed class ProtoKoQuickFuse : CustomCardModel, ISparkPricedCard
     public int PrintedSparkPrice => 1;
 
     protected override bool IsPlayable =>
-        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this));
+        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this))
+        && ProtoBombPower.AnyPlacedBy(SparkCost.OwnerCreatureOf(this));
+
+    public string? UnplayableReason =>
+        ProtoBombPower.AnyPlacedBy(SparkCost.OwnerCreatureOf(this))
+            ? null
+            : "no enemy is holding a Bomb";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

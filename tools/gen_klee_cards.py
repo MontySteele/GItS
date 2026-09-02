@@ -422,6 +422,33 @@ def is_companion(card: dict) -> bool:
     return "star" in card
 
 
+# A cost op is not a thing the card DOES; it is what the card charges. Both
+# have their own IsPlayable gate already (EB-118 §4.5, R213 E1).
+_COST_OPS = ("spend_spark", "spend_charge")
+
+
+def card_is_set_off_only(card: dict) -> bool:
+    """Does this row do NOTHING on a board with no Bomb on it? (`EB-261`.)
+
+    True when every top-level effect that is not a cost is a `set_off` that
+    deals no damage of its own. Such a card pays its price and resolves to
+    nothing, which is the same silent no-play the Spark cost line refuses one
+    resource over -- so it takes the same gate, on the same extension point.
+
+    Derived from the ROW rather than declared per card, so a future Set-off
+    row that happens to have the same shape cannot be given the gate by
+    remembering to. A `set_off` carrying `damage` is NOT covered: Kaboom! with
+    no Bombs on the board is still an Attack, and refusing it would be a
+    balance change, not a legibility fix.
+    """
+    rest = [eff for eff in card.get("effects", [])
+            if eff.get("op") not in _COST_OPS]
+    if not rest:
+        return False
+    return all(eff.get("op") == "set_off" and not int(eff.get("damage", 0) or 0)
+               for eff in rest)
+
+
 ELEMENT_CS = {"pyro": "Element.Pyro", "hydro": "Element.Hydro",
               "electro": "Element.Electro", "cryo": "Element.Cryo",
               "anemo": "Element.Anemo", "geo": "Element.Geo"}
@@ -7684,6 +7711,12 @@ def emit(
     if any(eff.get("op") == "spend_charge" for eff in card["effects"]):
         interfaces += ", IMeterPricedCard"
 
+    # EB-261 / EB-264. A card refused by its OWN gate carries the sentence the
+    # page prints, because `CardModel.CanPlay` collapses every mod-side refusal
+    # into `BlockedByCardLogic` and has no slot for what the reason was.
+    if card_is_set_off_only(card):
+        interfaces += ", IUnplayableReasonCard"
+
     # EB-184: a modal card DECLARES what each of its modes does about aiming,
     # because its own TargetType cannot -- that is the card's, fixed before a
     # mode is chosen. See `mode_aims` for the defect this repairs and
@@ -8123,6 +8156,18 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # SparkPower.Spend refuses it there instead.
     spark_price = sum(int(eff["amount"]) for eff in card["effects"]
                       if eff.get("op") == "spend_spark")
+    # EB-261, THE OTHER HALF OF THE SAME GATE. A card whose whole body is a
+    # damage-less `set_off` does NOTHING on a board with no Bomb on it -- it
+    # pays its price and resolves to nothing, which is the play the cost line
+    # above exists to prevent one resource over. Quick Fuse was exactly that,
+    # and the blind tester had to infer its no-op behaviour from the result
+    # because the card looked playable (`klee-overhaul-r1-codex-b`, fight 3).
+    # DERIVED FROM THE ROW, never a per-card flag: the condition is "every
+    # top-level effect that is not a cost is a Set off that deals nothing".
+    bomb_gated = card_is_set_off_only(card)
+    bomb_gate_expr = (
+        "ProtoBombPower.AnyPlacedBy(SparkCost.OwnerCreatureOf(this))")
+    bomb_clause = f"\n        && {bomb_gate_expr}" if bomb_gated else ""
     spark_gate_member = (
         "\n\n    // The Spark cost line (EB-118): unplayable below the price,\n"
         "    // which is how the cost is shown rather than silently failing.\n"
@@ -8135,8 +8180,25 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "    // here (tier0 twin: combat.spark_price, sub-pick (a)).\n"
         f"    public int PrintedSparkPrice => {spark_price};\n\n"
         "    protected override bool IsPlayable =>\n"
-        "        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this));"
+        "        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this))"
+        f"{bomb_clause};"
         if spark_price else "")
+    # The same gate on a card that prints no price at all: its own IsPlayable.
+    bomb_gate_member = (
+        "\n\n    // EB-261, the Set-off gate: a card whose whole body is a\n"
+        "    // Set off is unplayable while no enemy holds one of this Klee's\n"
+        "    // Bombs, rather than resolving to nothing.\n"
+        "    protected override bool IsPlayable =>\n"
+        f"        {bomb_gate_expr};"
+        if bomb_gated and not spark_price else "")
+    # EB-264's channel: the refusal above says WHY in words the page can
+    # print, because CardModel.CanPlay collapses it to BlockedByCardLogic.
+    bomb_reason_member = (
+        "\n\n    public string? UnplayableReason =>\n"
+        f"        {bomb_gate_expr}\n"
+        "            ? null\n"
+        '            : "no enemy is holding a Bomb";'
+        if bomb_gated else "")
     # R213 E1, QUARANTINED: the same cost line one meter over, and the mirror
     # of tier0 combat.charge_cost. TOP-LEVEL spends only, the sim's rule --
     # a price at the head of a `choose_one` MODE is that mode's cost line and
@@ -8231,10 +8293,15 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             f"        new[] {{ {labels_cs} }};\n\n"
             "    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>\n"
             f"        new[] {{ {flags_cs} }};")
-    if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member)) > 1:
+    if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member,
+                             bomb_gate_member)) > 1:
         raise ValueError(
             f"{card['id']}: two resource cost lines on one card -- only one "
             "IsPlayable override can be emitted")
+    if bomb_gated and (charge_price or modal_gate_member):
+        raise ValueError(
+            f"{card['id']}: the Set-off gate (EB-261) and a Charge or modal "
+            "cost line cannot share one IsPlayable override")
     resource_cost_setup = []
     if int(card.get("encore_cost", 0)) > 0:
         resource_cost_setup.append(
@@ -8287,7 +8354,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{card["name"].replace('"', chr(92) + chr(34))}"),
         ("description", "{desc}"),
-    }};{tags_member}{spark_gate_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}
+    }};{tags_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
