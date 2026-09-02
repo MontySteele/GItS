@@ -32,9 +32,34 @@ build is identifiable on sight. It runs the SAME `validate.ps1`, whole;
 which every other path refuses by name. Prototype rows are off-pool, so
 ordinary play is unchanged. **To restore the release build run
 `klee-mod\build\deploy.ps1`**: it overwrites the same `mods\klee`, and the
-absence of `+proto` in the in-game version is the confirmation. Do that before
-any measured run, handoff or co-op session. No `-Package` switch, deliberately
-— a dev build is never handed to a peer.
+absence of `+proto` in the in-game version is the confirmation. No `-Package`
+switch, deliberately — a dev build is never handed to a peer.
+
+**WHEN THE DEV BUILD STAYS, AND WHEN THE RELEASE BUILD GOES BACK (`EB-257`).**
+R217 D marks a dev package `+proto` so that *"which build is installed" has an
+answer on screen when both paths write the same `mods\klee` directory* — an
+answer a player has to go and look for, and the rule that sent them looking
+said only *"before any measured run or handoff"*. **A manual playtest is
+neither**, so `bt3-w5-2026-08-30` tore down and deliberately left
+`0.2.1786+proto.dirty` installed; [USER] sat down the next day, played a solo
+run on two prototype arms with no signal, and the triage had to read
+`mods\klee\manifest.json` off disk to learn what had been played. So the rule
+is stated by what the NEXT session is, not by what the last one was:
+
+- **The dev build stays** only when the arm is the SUBJECT of what happens
+  next — a seat round, a scenario, a soak, or [USER] playing the arm because a
+  rule changed — **and the packet handing the machine over says so in its own
+  "What is installed right now" section, naming the version string**. Both
+  round packets do; that line is the handover, and a dev build left installed
+  without one is a defect in the packet that closed the window.
+- **The release build goes back at teardown** in every other case, and that is
+  the default a window ends on: before a measured run or a registered cell,
+  before any handoff or co-op session, and **before any play the arm is not the
+  subject of** — the case the old wording missed and the one that cost a run.
+
+A dev build is identifiable on sight from `+proto`, so a session that finds one
+installed and no packet naming it restores before playing rather than reports
+on it.
 **After every dev deploy, run `python -m understudy.soak --runs 1 --character
 KLEEMOD-KLEE --max-fights 3` and read `fights=3 defects=0` before any
 registered run (R225).**

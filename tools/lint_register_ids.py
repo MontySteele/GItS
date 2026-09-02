@@ -1213,7 +1213,16 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # the whole frozen battery x 3 characters x 3 seeds asserting it stays
         # silent. `act1_pool.yaml`'s UNIMPLEMENTED Plating 12 keeps its note
         # on the enemy, which is that sheet's own convention for a skip.
-        257,
+        # 257 LEFT OPEN_IDS 2026-09-02 with its row, on its acceptance:
+        # a manual session can name its build. R217 D's restore rule was
+        # stated by what the LAST session was -- "before any measured
+        # run or handoff" -- and a manual playtest is neither, so a
+        # `+proto` package survived a teardown into a solo run.
+        # `operations/prototype.md` now states it by what the NEXT
+        # session is: the dev build stays only where the arm is the
+        # subject AND the handover packet names the version string, and
+        # the release build goes back at teardown in every other case,
+        # including play the arm is not the subject of.
         # 276 and 278 LEFT OPEN_IDS 2026-09-02 with their rows. Both were
         # about draft 2's TIDE -- a Strength gain converting into it, and
         # Tide-scaled cards playable at Tide 0 -- and R240/R241 deleted
