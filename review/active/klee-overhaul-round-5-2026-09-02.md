@@ -1,4 +1,4 @@
-Status: OPEN (round five, the draft-4 starter: both seats played; growth 4 applied as the default; three picks at the end)
+Status: OPEN (round five, the draft-4 starter: both seats played; growth 4 applied; pick 1 ruled at its default, picks 2 and 3 open)
 
 # Klee overhaul, round five: the canonical starter, two seats
 
@@ -65,8 +65,9 @@ the GPT budget.
 - **A plain Strike applies Pyro and says nothing** (rule 5 is the
   catalyst cadence; the base game's Strike carries no tip). Opus then
   read Gorou's "supplies Geo" preview against that Pyro aura and could
-  not make the two screens agree. `EB-313`: print the cadence once,
-  on the base Strike face or the relic.
+  not make the two screens agree. Ruled: the base game's Strike applies
+  no element for any character, since the basic cards are supposed to
+  be bad; `EB-313` is that removal, built in the balance PR.
 - **The Neow transform screen re-rolls on re-select and names the wrong
   source card.** Opus confirmed "Strike to Hemokinesis" and the deck came
   out with Stomp and one Defend short. `EB-314`, the blind render.
@@ -97,13 +98,12 @@ level with it is the companion workshop's, and it is noted there.
 
 ## 4. Picks
 
-1. **Ka-pow! keeps its card when held.** Re-ask of R242 pick 3 on one
-   new fact: both seats popped the Bomb the turn Ka-pow! appeared,
-   because holding the Bomb means discarding the only detonator. (1)
-   **Ka-pow! has Retain at base; the upgrade adds damage, 4 to 7**
-   [default]: the hold becomes a real turn-by-turn choice, pop for
-   tempo or hold for size, and the 0 cost stays. (2) Keep R242: Retain
-   on the upgrade only, and let growth 4 carry the wait.
+1. **Ka-pow! keeps its card when held.** RULED at the default
+   ([USER], 2026-09-02: "I'm fine with the default on Ka-Pow!"): Ka-pow!
+   has Retain at base and the upgrade adds damage, 4 to 7, built in the
+   balance PR. The new fact that reopened R242 pick 3: both seats popped
+   the Bomb the turn Ka-pow! appeared, because holding the Bomb meant
+   discarding the only detonator.
 2. **The opening Spark with nothing to spend it on.** Re-ask of R242's
    four-four-two on one new fact: both seats finished every fight with
    unspent Sparks and no Spark card. (1) **Keep the shape; the draft
