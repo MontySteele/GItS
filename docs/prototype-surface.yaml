@@ -742,9 +742,7 @@
    cost: 1, type: power, rarity: uncommon,
    description: "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
-   # Card audit 2026-09-02: an engine Power's upgrade is Innate, the base
-   # game's shape for its 1-cost setup Powers; a second draw walks back the
-   # once-per-turn ruling (R243) and a draw-on-play is nobody's lever.
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {innate: true}}
 
 - {id: proto_kk_song_of_pearls, name: "Song of Pearls (proto)", character: kokomi,
@@ -760,10 +758,7 @@
    effects: [],
    plan: [{op: damage, amount: 5, target: all_enemies},
           {op: apply_power, power: weak, amount: 1, target: all_enemies}],
-   # Card audit 2026-09-02: 5 with the Casket's 2 is Kurage's Oath's 7 plus
-   # a Weak on everyone, the Uncommon's step over the basic (at 4 it trailed
-   # it). One axis on the upgrade, Thunderclap's shape: the damage, not the
-   # Weak.
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {plan_damage: 3}}
 
 - {id: proto_kk_nereids_ascension, name: "Nereid's Ascension (proto)", character: kokomi,
@@ -853,8 +848,7 @@
    cost: 1, type: power, rarity: uncommon,
    description: "Once per turn, when you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy.",
    effects: [{op: apply_power, power: kk_generals_banner, amount: 1, target: self}],
-   # Card audit 2026-09-02: Innate, as Treatise. A second Weak per turn is
-   # the volume R243 capped; a draw-on-play is not this card's lever.
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {innate: true}}
 
 - {id: proto_kk_chain_of_command, name: "Chain of Command", character: kokomi,
@@ -863,9 +857,7 @@
    description: "[gold]Plan[/gold]: Deal 6 damage for each [gold]Companion[/gold] card you played last turn.",
    effects: [],
    plan: [{op: damage_per_companion_last_turn, amount: 6, target: front_enemy}],
-   # Card audit 2026-09-02: at 4 it needed three Companions in one turn to
-   # match Ambush's 12; at 6, two Companions are Ambush and three are the
-   # Commander's morning. Per-instance +2 is Flechettes' delta.
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {plan_damage: 2}}
 
 # --- currencies, tempo, and the one replay (packet sec.4) ---
@@ -876,10 +868,7 @@
    description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Draw 4 cards.",
    effects: [{op: draw, amount: 2}],
    plan: [{op: draw, amount: 4}],
-   # Card audit 2026-09-02: "Draw 1 for 1" was a tax, the reading R243 gave
-   # Feint's 4; Draw 2 is a card, and the Plan doubles it as Read the Field's
-   # does. Both lines take +1. The now-line's token is written by hand: the
-   # authored-face walk keys no draw on a now-line.
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {draw: 1, plan_draw: 1}}
 
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
@@ -895,9 +884,7 @@
    effects: [{op: conditional, if: target_has_debuff,
               then: [{op: damage, amount: 10, target: enemy}],
               else: [{op: damage, amount: 7, target: enemy}]}],
-   # Card audit 2026-09-02: a Strike-shaped Common upgrades its damage (+3 on
-   # both branches, the base game's conditional-attack shape), not a draw.
-   # The face states its own swaps because the branch numbers are literals.
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {conditional_damage: 3}}
 
 - {id: proto_kk_salt_line, name: "Salt Line (proto)", character: kokomi,
@@ -919,9 +906,7 @@
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
    description: "Exhaust. Choose a card in your [gold]Exhaust Pile[/gold]. Next turn, the [gold]Bake-Kurage[/gold] carries out its [gold]Plan[/gold] line, or plays it if it has none.",
    effects: [{op: plan_from_exhaust}],
-   # Card audit 2026-09-02: the replay keeps Exhaust and gets cheaper, the
-   # base game's Exhume+ shape. Without Exhaust it replays Nereid's Ascension
-   # every cycle, which is the chassis the brief demoted (sec.6).
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {cost: -1}}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
