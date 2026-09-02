@@ -140,11 +140,14 @@ are in [`workstreams.md`](workstreams.md).
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside: quarantined prototype surface, the independent seat, Kokomi → Klee
   → Furina in sequence with the shared Burst retirement last (R220 B).
-- **Klee** — brief draft 4 is the live Paper artefact; slice 1's three arms are
-  through their pair reads; the Sparks re-author is built behind
-  `SPARK_ALT_COST_ENABLED`; *Bag of Tricks* is `EB-224` under R230.
-- **Kokomi** — slice 1 done, slice 2 RETIRED (R227); the Kurage memory is base
-  kit behind `C.KURAGE_MEMORY`, display rebuild `EB-198`, cadence read `EB-234`.
+- **Klee** — the overhaul is at Prototype: R237's draft-3 starter (Set off
+  only on Ka-pow!) is built and deployed as round 3 (PR #261,
+  0.2.1966+proto); the seats are playing it and [USER]'s run follows;
+  `EB-285` to `EB-287` are the Opus seat's finds.
+- **Kokomi** — the overhaul went back to the brief: R240 makes the Plan her
+  chassis (a card played on the Bake-Kurage is carried out next turn at its
+  Plan line); brief draft 6 is the live Paper artefact (PR #258, [USER]
+  reads it before the slice). The shipped kit and `C.KURAGE_MEMORY` stand.
 - **Furina** — the reframe is countersigned (R220 A), slice 1 is built in the
   sim behind five flags that all ship OFF, Spotlight is ruled one-mode priced
   (R228), and the C# arm is deferred.
