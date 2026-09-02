@@ -221,3 +221,80 @@ def test_target_type_derivation_reads_the_whole_effect_tree():
         "reconstruction is stale"
     )
     assert any(_aims_at_chosen_enemy(e) for e in _effects_everywhere(row))
+
+
+# --------------------------------------------------------------------------
+# EB-285: the raw template on a reward screen, and the two reasons it got out
+# --------------------------------------------------------------------------
+
+def test_an_authored_face_names_the_var_the_card_actually_declares():
+    """`EB-285`, at the derivation.
+
+    A prototype row states its own face (`EB-215`) and the generator swaps a
+    token in wherever the upgrade moves a printed number. It used to name
+    `Damage` and `Block` unconditionally -- but `build_vars` emits the base
+    game's `Calculated*Var` TRIPLE for a Spotlight-scaled companion attack,
+    and that var is named `CalculatedDamage`. Twenty-four rows therefore
+    printed a token no card declared.
+
+    Asserted against a synthetic row so it keeps proving the rule after the
+    surface moves.
+    """
+    from tools.gen_klee_cards import _authored_face_numbers, calc_rider
+
+    row = {
+        "id": "proto_synthetic_companion_hit",
+        "character": "klee",
+        "nation": "inazuma",
+        "star": 4,
+        "cost": 1,
+        "type": "attack",
+        "rarity": "common",
+        "description": "Deal 8 damage to a random enemy.",
+        "effects": [{"op": "damage", "amount": 8, "target": "random_enemy",
+                     "applies_element": True}],
+        "upgrade": {"damage": 3},
+    }
+    assert calc_rider(row, row["effects"][0]) is not None, (
+        "the Spotlight rider no longer applies to a companion attack; the "
+        "reconstruction is stale, so it is no longer proving anything"
+    )
+    names = [var for _key, var, _lit in _authored_face_numbers(row)]
+    assert names == ["CalculatedDamage"], names
+
+
+def test_the_gate_fires_on_the_fuuin_dash_defect():
+    """The "seen to fail" evidence for `EB-285`.
+
+    The r3 Opus seat was offered `Deal {Damage:diff()} damage to a random
+    enemy.` on a reward screen -- the RAW TEMPLATE, because SmartFormat cannot
+    resolve a name the card does not declare, `GetDescriptionForPile` throws,
+    and the bridge's `SafeGetCardDescription` catches and falls back to
+    `card.Description`. L1 was already the right law; it had simply never been
+    pointed at the prototype surface.
+    """
+    source = (CARDS / "Prototype" / "Generated"
+              / "ProtoMiSayuFuuinDash.cs").read_text(encoding="utf-8")
+    broken = source.replace("{CalculatedDamage:diff()}", "{Damage:diff()}")
+    assert broken != source, (
+        "Fuuin Dash's face no longer prints the calculated token; the "
+        "reconstruction is stale"
+    )
+
+    assert not structural_problems(source, "ProtoMiSayuFuuinDash.cs")
+    found = structural_problems(broken, "ProtoMiSayuFuuinDash.cs")
+    assert any("L1 DANGLING VAR" in line and "'Damage'" in line
+               for line in found), found
+
+
+def test_the_quarantined_surface_is_inside_the_gate():
+    """The other half of `EB-285`: the surface was OUTSIDE the sweep.
+
+    `gen_prototype_cards` is a separate entry point for R213 B's reason, and
+    the lint's profile list was the three characters'. A hundred and forty-odd
+    emitted cards were therefore never read by L1 at all.
+    """
+    ids = [p.character_id for p in PROFILES]
+    assert "prototype" in ids, ids
+    proto = next(p for p in PROFILES if p.character_id == "prototype")
+    assert len(generated_sources(proto)) > 100

@@ -59,7 +59,7 @@ public sealed class ProtoMcRosariaRavagingConfession : CustomCardModel, IElement
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rosaria — Ravaging Confession"),
-        ("description", "Deal {Damage:diff()} damage. If the enemy has an aura, apply 1 [gold]Vulnerable[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. If the enemy has an aura, apply 1 [gold]Vulnerable[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

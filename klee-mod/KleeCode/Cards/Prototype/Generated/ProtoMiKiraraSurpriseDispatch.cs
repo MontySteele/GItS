@@ -49,7 +49,7 @@ public sealed class ProtoMiKiraraSurpriseDispatch : CustomCardModel, ICompanionC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kirara — Surprise Dispatch"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Next turn, deal 10 damage to a random enemy."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, deal 10 damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -59,7 +59,7 @@ public sealed class ProtoMcAmberFieryRain : CustomCardModel, IElementalCard, ICo
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Amber — Fiery Rain"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies three times."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies three times."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

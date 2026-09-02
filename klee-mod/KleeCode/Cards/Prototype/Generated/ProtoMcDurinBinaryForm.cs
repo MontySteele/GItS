@@ -59,7 +59,7 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Durin — Binary Form"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies, then choose one for the fight. [gold]White[/gold]: enemies take 50% more damage from reactions. [gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies, then choose one for the fight. [gold]White[/gold]: enemies take 50% more damage from reactions. [gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
