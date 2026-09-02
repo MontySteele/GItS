@@ -48,7 +48,7 @@ public sealed class ProtoKoBangBang : CustomCardModel, IElementalCard, ISparkPri
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bang Bang!"),
-        ("description", "Spend 2 [gold]Sparks[/gold]. [gold]Set off[/gold]. Deal 8 damage. Place a [gold]Bomb[/gold] 4."),
+        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. Place a [gold]Bomb[/gold] {BombSize:diff()}."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -68,7 +68,8 @@ public sealed class ProtoKoBangBang : CustomCardModel, IElementalCard, ISparkPri
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DamageVar(8m, ValueProp.Move),
+            new DynamicVar("BombSize", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -82,12 +83,13 @@ public sealed class ProtoKoBangBang : CustomCardModel, IElementalCard, ISparkPri
     {
         await SparkPower.Spend(choiceContext, Owner.Creature, 2, this);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ProtoBombPower.SetOffAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, 8);
-        await ProtoBombPower.Place(choiceContext, cardPlay.Target, 4, isMine: false, payloadMineAll: 0, Owner.Creature, this);
+        await ProtoBombPower.SetOffAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue);
+        await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: 0, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars["BombSize"].UpgradeValueBy(2m);
     }
 }

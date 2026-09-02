@@ -52,13 +52,13 @@ public sealed class ProtoMcDionaSignatureMix : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Diona — Signature Mix"),
-        ("description", "Apply 2 [gold]Weak[/gold] to ALL enemies. For 2 turns, at the start of your turn gain 4 [gold]Block[/gold]."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. For 2 turns, at the start of your turn gain 4 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -72,13 +72,13 @@ public sealed class ProtoMcDionaSignatureMix : CustomCardModel, ICompanionCard
     {
         foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())
         {
-            await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, 2, applier: Owner.Creature, cardSource: this);
+            await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
         }
         await PowerCmd.Apply<SignatureMixPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

@@ -42,7 +42,7 @@ bar; and being squishy is a problem with three answers rather than a death.
 Keywords with tooltips: Bomb, Set off, Spark, Mine. Pick 5 raised the
 keyword limit for exactly this.
 
-## 3. The starter (ten cards, five ids)
+## 3. The starter (ten cards, six ids)
 
 | Card | Cost | Type | Printed text | Copies |
 |---|---|---|---|---|
@@ -122,7 +122,8 @@ Appliers come from the Mondstadt Universals already in her pool: Dahlia
 | Grounded | U | 1 | Power | At the start of your turn, if none of your Bombs went off last turn, gain 6 Block. | Pays for the quiet turn |
 | Sorry, Jean... | C | 1 | Skill | Remove one of your Bombs. Gain Block equal to its size. | The emergency exit |
 
-Pool by rarity: 11 Common, 11 Uncommon, 6 Rare. The full sheet will tilt
+Pool by rarity: 11 Common, 10 Uncommon, 6 Rare (Dig In left the count
+when it joined the starter at draft 3). The full sheet will tilt
 that toward Common; a slice cannot, because each loop needs its Uncommon
 engine card and its rule-breaking Rare to be testable at all.
 

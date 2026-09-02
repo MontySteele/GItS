@@ -49,7 +49,7 @@ public sealed class ProtoMcNoelleBreastplate : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Noelle — Breastplate"),
-        ("description", "Gain 6 [gold]Block[/gold]. If you are below half HP, gain 4 more."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you are below half HP, gain 4 more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -78,6 +78,6 @@ public sealed class ProtoMcNoelleBreastplate : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

@@ -51,7 +51,7 @@ public sealed class ProtoKkRisingTide : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rising Tide"),
-        ("description", "Deal 4 damage. [gold]Surge[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. [gold]Surge[/gold]."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
@@ -82,6 +82,6 @@ public sealed class ProtoKkRisingTide : CustomCardModel, IElementalCard, ICharac
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

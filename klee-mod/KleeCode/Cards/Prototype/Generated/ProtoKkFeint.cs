@@ -51,7 +51,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Feint"),
-        ("description", "Deal 4 damage. [gold]Plan[/gold]: deal 8 damage to the same enemy."),
+        ("description", "Deal {Damage:diff()} damage. [gold]Plan[/gold]: deal 8 damage to the same enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -80,6 +80,6 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

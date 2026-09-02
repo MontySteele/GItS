@@ -48,7 +48,7 @@ public sealed class ProtoKoFlameDance : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Flame Dance"),
-        ("description", "Deal 5 damage to ALL enemies. [gold]Set off[/gold] each enemy that has a non-Pyro aura."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. [gold]Set off[/gold] each enemy that has a non-Pyro aura."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -77,6 +77,6 @@ public sealed class ProtoKoFlameDance : CustomCardModel, IElementalCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

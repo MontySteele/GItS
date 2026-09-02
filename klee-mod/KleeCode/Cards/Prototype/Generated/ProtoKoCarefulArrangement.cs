@@ -38,13 +38,13 @@ public sealed class ProtoKoCarefulArrangement : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Careful Arrangement"),
-        ("description", "Move all your [gold]Bombs[/gold] onto target enemy as one [gold]Bomb[/gold]. It grows by 2."),
+        ("description", "Move all your [gold]Bombs[/gold] onto target enemy as one [gold]Bomb[/gold]. It grows by {Grow:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("Grow", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -57,11 +57,11 @@ public sealed class ProtoKoCarefulArrangement : CustomCardModel
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ProtoBombPower.MergeAllTo(choiceContext, cardPlay.Target, Owner.Creature, 2, this);
+        await ProtoBombPower.MergeAllTo(choiceContext, cardPlay.Target, Owner.Creature, DynamicVars["Grow"].IntValue, this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["Grow"].UpgradeValueBy(1m);
     }
 }

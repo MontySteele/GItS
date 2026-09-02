@@ -56,7 +56,7 @@ public sealed class ProtoMiIttoSuperlativeSuperstrength : CustomCardModel, IElem
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Itto — Superlative Superstrength (proto)"),
-        ("description", "Deal 14 damage. Gain 12 [gold]Block[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -88,6 +88,7 @@ public sealed class ProtoMiIttoSuperlativeSuperstrength : CustomCardModel, IElem
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

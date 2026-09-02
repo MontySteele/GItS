@@ -38,13 +38,13 @@ public sealed class ProtoKoChainedReactions : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chained Reactions"),
-        ("description", "Whenever one of your [gold]Bombs[/gold] goes off, place a [gold]Bomb[/gold] 3 on a random enemy."),
+        ("description", "Whenever one of your [gold]Bombs[/gold] goes off, place a [gold]Bomb[/gold] {PowerAmount:diff()} on a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -56,11 +56,11 @@ public sealed class ProtoKoChainedReactions : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<ChainedReactionsPower>(choiceContext, Owner.Creature, 3, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<ChainedReactionsPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

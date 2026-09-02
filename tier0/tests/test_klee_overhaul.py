@@ -144,32 +144,45 @@ def test_the_sparks_arm_is_untouched():
 
 # --- 2. THE ARM'S OWN SHAPE ------------------------------------------------
 
-def test_the_starter_is_ten_cards_five_ids():
-    """Slice packet sec.3: Kaboom! x3, Ka-pow! x1, Duck and Cover x4, Pop!,
-    Jumpy Dumpty."""
+def test_the_starter_is_ten_cards_six_ids():
+    """Slice packet sec.3, DRAFT 3: Kaboom! x2, Ka-pow! x2, Duck and Cover x3,
+    Dig In, Pop!, Jumpy Dumpty.
+
+    The two copy counts are the draft's whole point: draft 2 put *Set off* on
+    every starter Attack, so the plain hit and the cash button were one card
+    and nothing ever grew. Dig In moved in from the pool, which is why it is
+    also absent from `KLEE_OVERHAUL_POOL_IDS` below.
+    """
     ids = C.KLEE_OVERHAUL_STARTER_IDS
     assert len(ids) == 10
-    assert len(set(ids)) == 5
-    assert ids.count("proto_ko_kaboom") == 3
-    assert ids.count("proto_ko_kapow") == 1
-    assert ids.count("proto_ko_duck_and_cover") == 4
+    assert len(set(ids)) == 6
+    assert ids.count("proto_ko_kaboom") == 2
+    assert ids.count("proto_ko_kapow") == 2
+    assert ids.count("proto_ko_duck_and_cover") == 3
+    assert ids.count("proto_ko_dig_in") == 1
     assert ids.count("proto_ko_pop") == 1
     assert ids.count("proto_ko_jumpy_dumpty") == 1
 
 
 def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
-    """Slice packet sec.4, less the one row its sec.5 allows to drop.
+    """Slice packet sec.4, less the one row its sec.5 allows to drop and the
+    one draft 3 moved into the starter.
 
     The count is pinned rather than described because it is the slice's own
     scope statement, and because the ABSENCE is the load-bearing half: an
     unbuilt rule staged as a live card would be a face that lies (D4). See
     `VermillionPactNotBuilt` for the reasoning and `C.KLEE_OVERHAUL_POOL_IDS`
     for the record.
+
+    The last assertion is the one that says Dig In left: the starter and the
+    offer pool are disjoint, so a card in both would fail here rather than
+    quietly double as a reward.
     """
     ids = C.KLEE_OVERHAUL_POOL_IDS
-    assert len(ids) == 27
-    assert len(set(ids)) == 27
+    assert len(ids) == 26
+    assert len(set(ids)) == 26
     assert "proto_ko_vermillion_pact" not in ids
+    assert "proto_ko_dig_in" not in ids
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
 
 
@@ -210,12 +223,14 @@ def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
 
 
 def test_the_pool_keeps_the_packets_rarity_split(overhaul):
-    """11 Common, 11 Uncommon, 5 Rare -- the packet's sec.4 count with
-    Vermillion Pact removed. Pinned because the rarity buckets ARE the offer
-    odds: a row filed in the wrong tier changes how often it is seen."""
+    """11 Common, 10 Uncommon, 5 Rare -- the packet's sec.4 count with
+    Vermillion Pact removed and Dig In moved into the starter (draft 3, which
+    is also what made its row `rarity: basic`). Pinned because the rarity
+    buckets ARE the offer odds: a row filed in the wrong tier changes how often
+    it is seen."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 11, "uncommon": 11, "rare": 5}
+        "common": 11, "uncommon": 10, "rare": 5}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):
@@ -258,3 +273,131 @@ def test_the_new_ops_refuse_to_resolve():
         with pytest.raises(NotImplementedError) as excinfo:
             effects.OPS[op](state, {"op": op}, card)
         assert "KLEE_OVERHAUL" in str(excinfo.value)
+
+
+# --- 5. THE PROTOTYPE-STAGE UPGRADE RULE (EB-283, closing EB-277) ----------
+#
+# The rule lives in `tier0.content.upgrades` and `tools/gen_prototype_cards.py`
+# IMPORTS it, so there is one implementation and no mirror to keep in step.
+# That is what these pins are about: the numbers the row states, the clause
+# that leaves a row alone, and the fact that the whole thing is still behind
+# the flag.
+
+def test_the_prototype_rule_states_the_rows_own_numbers():
+    """`EB-283` verbatim: damage +3 (+1 per hit on multi-hit), Block +3,
+    Bomb/Mine size +2 (payload Mine +1), grow and power amounts +1, Tide and
+    Mend +2. Read off the rows themselves rather than retyped, so a sheet edit
+    that moved one of these ops would move the assertion with it."""
+    from tier0.content import upgrades
+
+    def delta(card_id):
+        card = next(c for c in loader.prototype_cards() if c.id == card_id)
+        return upgrades.prototype_default_delta(card.id, card.cost, card.effects)
+
+    assert delta("proto_ko_kaboom") == {"damage": 3}
+    assert delta("proto_ko_kapow") == {"damage": 3}          # a set_off's hit
+    assert delta("proto_ko_rapid_fire") == {"damage": 1}     # 4 hits: +1 each
+    assert delta("proto_ko_duck_and_cover") == {"block": 3}
+    assert delta("proto_ko_pop") == {"bomb_size": 2}
+    assert delta("proto_ko_jumpy_dumpty") == {"bomb_size": 2, "payload_mine": 1}
+    assert delta("proto_ko_chain_fuse") == {"grow": 1}
+    assert delta("proto_ko_careful_arrangement") == {"grow": 1}
+    assert delta("proto_ko_grounded") == {"power_amount": 1}
+    assert delta("proto_kk_kurages_oath") == {"tide": 2}
+    assert delta("proto_kk_cleansing_tide") == {"mend": 2}
+    assert delta("proto_kk_coral_bulwark") == {"block": 3, "tide": 2}
+
+
+def test_the_cost_clause_is_the_last_resort_and_only_at_two():
+    """"A card of cost 2 or more WITH NO NUMBER costs 1 less" -- so the clause
+    fires only when nothing else did, and a 0- or 1-cost row with no printed
+    number gets no upgrade rather than an invented one. That is why a handful
+    of rows are still base-only, and it is a decision rather than a gap."""
+    from tier0.content import upgrades
+
+    assert upgrades.prototype_default_delta(
+        "proto_kk_the_art_of_war", 2, [
+            {"op": "apply_power", "power": "kk_art_of_war", "amount": 1,
+             "target": "self"}]) == {"cost": -1}
+    # The same row at cost 1: nothing to move, and nothing invented.
+    assert upgrades.prototype_default_delta(
+        "proto_kk_treatise", 1, [
+            {"op": "apply_power", "power": "kk_treatise", "amount": 1,
+             "target": "self"}]) == {}
+    # A row that DID find a number never also gets the discount.
+    assert "cost" not in upgrades.prototype_default_delta(
+        "proto_kk_breaker", 2, [{"op": "surge", "target": "enemy"},
+                                {"op": "damage", "amount": 8,
+                                 "target": "enemy"}])
+
+
+def test_a_power_amount_of_one_is_read_as_no_number():
+    """The `> 1` test, which is the rule's one judgement call and is made in
+    one place. A power's `amount` is a printed number on some rows (Grounded's
+    6 Block) and a bare ON FLAG on others (Alice's Recipe, Sparks 'n' Splash,
+    The Art of War), and nothing on the row tells them apart -- so a 1 is read
+    as "prints no power number" and a Balance-stage `upgrade:` block is what
+    gives such a card a real one."""
+    from tier0.content import upgrades
+
+    flag = [{"op": "apply_power", "power": "ko_alices_recipe", "amount": 1,
+             "target": "self"}]
+    printed = [{"op": "apply_power", "power": "ko_grounded", "amount": 6,
+                "target": "self"}]
+    assert upgrades.prototype_default_delta("proto_ko_x", 1, flag) == {}
+    assert upgrades.prototype_default_delta("proto_ko_x", 1, printed) == {
+        "power_amount": 1}
+
+
+def test_the_rule_reaches_only_the_four_overhaul_prefixes():
+    """The staged Sparks rows and the two Kokomi probes are not overhaul rows
+    and are not the rule's to price: they were staged base-only on purpose and
+    stay that way."""
+    from tier0.content import upgrades
+
+    hit = [{"op": "damage", "amount": 6, "target": "enemy"}]
+    assert upgrades.prototype_default_delta("proto_spark_strike", 1, hit) == {}
+    assert upgrades.prototype_default_delta("kaboom", 1, hit) == {}
+    for prefix in upgrades.PROTOTYPE_DEFAULT_PREFIXES:
+        assert upgrades.prototype_default_delta(prefix + "x", 1, hit) == {
+            "damage": 3}
+
+
+def test_no_prototype_row_is_upgradable_with_the_flags_off():
+    """The quarantine, unmoved. `_prototype_deltas` registers a row only if a
+    live flag already resolves its id, so on a shipped tree the index is
+    byte-identical to what it was before this rule existed."""
+    from tier0.content import upgrades
+
+    upgrades._prototype_upgrade_index.cache_clear()
+    upgrades._upgrade_index.cache_clear()
+    try:
+        assert not upgrades.has_upgrade("proto_ko_kapow")
+        assert not upgrades.has_upgrade("proto_kk_coral_bulwark")
+    finally:
+        upgrades._prototype_upgrade_index.cache_clear()
+        upgrades._upgrade_index.cache_clear()
+
+
+def test_under_the_flag_a_prototype_row_smiths_into_a_different_card(overhaul):
+    """`EB-277`'s close in the sim: the upgraded card is NOT the base card.
+    Through the real applier, so this is the rest-smith's own result."""
+    from tier0.content import upgrades
+
+    upgrades._prototype_upgrade_index.cache_clear()
+    upgrades._upgrade_index.cache_clear()
+    try:
+        assert upgrades.has_upgrade("proto_ko_kapow")
+        upgraded = loader.get_card("proto_ko_kapow+")
+        base = loader.get_card("proto_ko_kapow")
+        assert upgraded.effects != base.effects
+        assert upgraded.effects[0]["damage"] == 10      # 7 + 3
+        assert base.effects[0]["damage"] == 7
+        # The Spark price is never what the campfire moved.
+        dig = loader.get_card("proto_ko_dig_in+")
+        assert [f for f in dig.effects if f["op"] == "spend_spark"] == [
+            {"op": "spend_spark", "amount": 1}]
+        assert [f["amount"] for f in dig.effects if f["op"] == "block"] == [11]
+    finally:
+        upgrades._prototype_upgrade_index.cache_clear()
+        upgrades._upgrade_index.cache_clear()

@@ -41,13 +41,13 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage's Oath (proto)"),
-        ("description", "[gold]Exert[/gold] 2. [gold]Tide[/gold] +5."),
+        ("description", "[gold]Exert[/gold] 2. [gold]Tide[/gold] +{Tide:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("Tide", 8m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,11 +60,11 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await KokomiTide.Exert(choiceContext, Owner.Creature, 2, this, cardPlay);
-        await KokomiTide.Gain(choiceContext, Owner.Creature, 5);
+        await KokomiTide.Gain(choiceContext, Owner.Creature, DynamicVars["Tide"].IntValue);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["Tide"].UpgradeValueBy(2m);
     }
 }

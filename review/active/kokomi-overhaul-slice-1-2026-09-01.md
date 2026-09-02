@@ -1,4 +1,4 @@
-Status: OPEN (Prototype built and played; starter draft 3 for round two, sec.3)
+Status: OPEN (returned to the brief by [USER] 2026-09-02; the sec.3 draft 3 starter is not built)
 
 # Kokomi overhaul, slice one: the rules, the starter, and 28 cards (Paper stage)
 

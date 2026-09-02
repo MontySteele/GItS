@@ -51,7 +51,7 @@ public sealed class ProtoKkWatersEdge : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Water's Edge (proto)"),
-        ("description", "Deal 6 damage."),
+        ("description", "Deal {Damage:diff()} damage."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
@@ -81,6 +81,6 @@ public sealed class ProtoKkWatersEdge : CustomCardModel, IElementalCard, ICharac
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

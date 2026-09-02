@@ -1329,6 +1329,66 @@ def test_the_class_name_key_agrees_with_every_generated_sheet_id():
     assert checked > 300, f"only {checked} generated faces carried an id"
 
 
+# ------------------------ EB-282, the Spark price in the cost slot ---
+
+def test_the_printed_spark_index_reads_the_shipped_face():
+    """`EB-282`. The row's own body no longer says "Spend 1 Spark." -- the
+    price is on the badge in game, and on THIS page it has to come from
+    somewhere or the seats are reading a card whose cost they cannot see.
+
+    It comes off the same faces `printed_cost_index` reads, out of the one
+    place the generator writes the number: `ISparkPricedCard.PrintedSparkPrice`,
+    which the card's own playability gate reads back through
+    `SparkCost.PriceOf`. Cross-checked against the surface here, in a test that
+    MAY import a loader, for the reason the energy twin above gives.
+    """
+    from tier0.content import loader
+    index = qa_packet.printed_spark_index(REPO)
+    assert index["PROTO_KO_FWOOSH"] == 1
+    assert index["PROTO_KO_BANG_BANG"] == 2
+    # A card with no Spark price has NO row -- silence, never a zero.
+    assert "KABOOM" not in index
+    assert "PROTO_KO_KAPOW" not in index, (
+        "draft 3 made Ka-pow! pay energy; a stale Spark price would print a "
+        "cost the card does not charge")
+
+    disagree = []
+    for card in loader.prototype_cards():
+        priced = [f for f in card.effects if f.get("op") == "spend_spark"]
+        want = int(priced[0]["amount"]) if priced else None
+        got = index.get(card.id.upper())
+        if want != got:
+            disagree.append((card.id, got, want))
+    assert not disagree, f"the face and the surface disagree: {disagree}"
+
+
+def test_the_cost_slot_prints_the_spark_price():
+    """The page says the price in the same slot the game paints the badge in,
+    and in the keyword's own words. Singular and plural are the card's, not a
+    grammar rule this page invented for it."""
+    assert qa_packet.cost_label({"cost": "0", "printed_spark": 1}) == "1 Spark"
+    assert qa_packet.cost_label({"cost": "0", "printed_spark": 2}) == "2 Sparks"
+    # No Spark price: exactly what the slot always said.
+    assert qa_packet.cost_label({"cost": "1"}) == "1"
+    assert qa_packet.cost_label({"cost": "", "printed_spark": None}) == "-"
+    # Priced in both -- no row is today, and a page that dropped half a price
+    # is the defect this function exists to repair.
+    assert qa_packet.cost_label({"cost": "2", "printed_spark": 1})         == "2 and 1 Spark"
+
+
+def test_the_rendered_page_shows_a_spark_priced_card_at_its_price():
+    """End to end on the page an agent is handed: a Spark row is drawn at 0
+    energy, and before this it read as free."""
+    state = banked_state(0)
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-PROTO_KO_FWOOSH", "name": "Fwoosh!", "type": "Attack",
+         "cost": "0", "can_play": True, "is_upgraded": False,
+         "description": "Set off and deal 5 damage to a random enemy."},
+    ]
+    page = qa_packet.render(qa_packet.build(state, "t", repo=REPO))
+    assert "- Cost: 1 Spark" in page
+
+
 def test_a_same_named_proto_row_prints_no_discrepancy():
     """`EB-267`'s acceptance, both directions. The proto *Flame Dance* is
     drawn at the cost its own row prints, so the page says nothing about it; a

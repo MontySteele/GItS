@@ -52,13 +52,13 @@ public sealed class ProtoMiGorouJuuga : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — Juuga: Forward Unto Victory"),
-        ("description", "For 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy."),
+        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -70,11 +70,11 @@ public sealed class ProtoMiGorouJuuga : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<JuugaPower>(choiceContext, Owner.Creature, 3, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<JuugaPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

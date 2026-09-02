@@ -462,13 +462,35 @@ def card_is_set_off_only(card: dict) -> bool:
     remembering to. A `set_off` carrying `damage` is NOT covered: Kaboom! with
     no Bombs on the board is still an Attack, and refusing it would be a
     balance change, not a legibility fix.
+
+    A `grow_bombs` AHEAD OF A SET OFF ON THE SAME TARGET IS COVERED, and that
+    is round three's whole extension (draft 3: "Quick Fuse grows the Bombs by 3
+    before it sets them off"). Growing a pile that is not there does exactly as
+    little as setting off a pile that is not there -- the card still pays its
+    Spark and still resolves to nothing -- so the row's shape has not changed
+    even though its effect list has, and the gate must not fall off it. The
+    clause is deliberately narrow: the grow must feed a LATER `set_off` aimed
+    at the SAME target, so a row that grows one enemy's Bombs and sets off
+    another's, or that grows after the cash, is not silently covered.
     """
     rest = [eff for eff in card.get("effects", [])
             if eff.get("op") not in _COST_OPS]
     if not rest:
         return False
-    return all(eff.get("op") == "set_off" and not int(eff.get("damage", 0) or 0)
-               for eff in rest)
+    if not any(eff.get("op") == "set_off" for eff in rest):
+        return False
+    for index, eff in enumerate(rest):
+        if eff.get("op") == "set_off":
+            if int(eff.get("damage", 0) or 0):
+                return False
+            continue
+        if eff.get("op") != "grow_bombs":
+            return False
+        if not any(later.get("op") == "set_off"
+                   and later.get("target") == eff.get("target")
+                   for later in rest[index + 1:]):
+            return False
+    return True
 
 
 ELEMENT_CS = {"pyro": "Element.Pyro", "hydro": "Element.Hydro",
@@ -1753,6 +1775,13 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                          # are different rulings: per is a slope on something
                          # that only grows, base pays once and stops.
                          "formula_base"}
+                      # EB-283, the Prototype-stage rule's five own numbers.
+                      # They exist because the two overhaul arms print numbers
+                      # no shipped op carries -- a Bomb's size, a grow amount,
+                      # Tide, Mend -- and a proto row with none of the shipped
+                      # keys had no campfire path at all, which is EB-277 read
+                      # from the other side.
+                      | {"bomb_size", "payload_mine", "grow", "tide", "mend"}
                       | POWER_UPGRADE_KEYS)
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
@@ -3751,6 +3780,34 @@ def build_vars(card: dict) -> list[str]:
                     'SpotlightSystem.PrintedBlockDelta(card))')
             else:
                 out.append(f'new BlockVar({eff["amount"]}m, ValueProp.Move)')
+        elif op == "set_off" and eff is set_off_damage_var_effect(card):
+            # EB-280. A Set off Attack's own hit is card damage and takes the
+            # SAME var an `op: damage` hit takes -- the face reads
+            # {Damage:diff()} and the play passes the var into
+            # ProtoBombPower, so Strength moves both together. The explosions
+            # ahead of it are not card damage and are not in this number.
+            out.append(f'new DamageVar({int(eff["damage"])}m, ValueProp.Move)')
+        elif op == "plant_bomb":
+            # EB-283. The Sparks idiom: a var only when the upgrade has to
+            # render, so every row without a delta keeps its literal. A plain
+            # DynamicVar and never an attack var, for EB-230's reason one arm
+            # over -- a Bomb's size is banked literally and must not resolve
+            # against the player's attack modifiers at print time.
+            if eff is plant_bomb_var_effect(card):
+                if bomb_size_upgrade(card):
+                    out.append(
+                        f'new DynamicVar("BombSize", {int(eff["size"])}m)')
+                if payload_mine_upgrade(card) and eff.get("payload_mine_all"):
+                    out.append('new DynamicVar("PayloadMine", '
+                               f'{int(eff["payload_mine_all"])}m)')
+        elif op in ("grow_bombs", "merge_bombs") and grow_upgrade(card) \
+                and eff is grow_var_effect(card):
+            literal = eff["amount"] if op == "grow_bombs" else eff["growth"]
+            out.append(f'new DynamicVar("Grow", {int(literal)}m)')
+        elif op == "gain_tide" and tide_upgrade(card):
+            out.append(f'new DynamicVar("Tide", {int(eff["amount"])}m)')
+        elif op == "mend" and mend_upgrade(card):
+            out.append(f'new DynamicVar("Mend", {int(eff["amount"])}m)')
         elif op == "draw":
             out.append(f'new CardsVar({int(eff["amount"])})')
         elif op == "discard" and plain_discard_upgrade(card):
@@ -3978,7 +4035,13 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
     cond_reason = {k: _conditional_delta_reason(card, k, deltas)
                    for k in _CONDITIONAL_DELTA_OPS if k in deltas}
     has = {
-        "damage": any(e["op"] == "damage" and e["target"] != "self" for e in effects),
+        # EB-280 widened this: a `set_off` carrying `damage` prints its number
+        # in the same slot an `op: damage` prints one, through the same var, so
+        # a `damage` delta lands on it the same way. Ka-pow! is the first card
+        # whose whole printed hit is a Set off's.
+        "damage": any((e["op"] == "damage" and e["target"] != "self")
+                      or (e["op"] == "set_off" and int(e.get("damage", 0) or 0))
+                      for e in effects),
         "block": any(e["op"] == "block" for e in effects),
         "draw": any(e["op"] == "draw" for e in everywhere),
         # conditional_bonus: tier0 bumps the then-branch's first damage|block;
@@ -4032,6 +4095,15 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             e["op"] == "gain_fanfare_floor" for e in effects),
         "heal": any(e["op"] == "heal" for e in effects),
         "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
+        # EB-283. Each binds to the op that PRINTS the number, so a delta on a
+        # row without that op is reported unexpressible rather than dropped.
+        "bomb_size": any(e["op"] == "plant_bomb" for e in effects),
+        "payload_mine": any(e["op"] == "plant_bomb"
+                            and int(e.get("payload_mine_all", 0)) > 0
+                            for e in effects),
+        "grow": grow_var_effect(card) is not None,
+        "tide": any(e["op"] == "gain_tide" for e in effects),
+        "mend": any(e["op"] == "mend" for e in effects),
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
         "cost": str(card.get("cost")) != "X",
         # R36: both keys ride the one discard_for_sparks effect.
@@ -4641,6 +4713,29 @@ def damage_var_effect(card: dict) -> dict | None:
                  and fx.get("target") != "self"), None)
 
 
+def set_off_damage_var_effect(card: dict) -> dict | None:
+    """The ONE top-level `set_off` whose own damage owns the `Damage` var.
+
+    `EB-280`. A Set off Attack's hit is CARD DAMAGE -- Strength, Vulnerable and
+    the Effigy's mark all move it -- but the emitter used to hand
+    `ProtoBombPower.SetOffAimed` a bare literal, so nine faces printed a number
+    the card did not deal ("Ka-pow! at Strength 2 prints 9"). It is the same
+    number in the same slot as an `op: damage` hit, so it takes the same var
+    and the same `{Damage:diff()}` token rather than a second spelling.
+
+    ONE OWNER PER CARD, exactly as <see cref="damage_var_effect"/> rules it:
+    two effects declaring "Damage" is a `DynamicVarSet` constructor throw on
+    the reward screen. A plain `damage` op wins where a row carries both
+    (Flame Dance: its AoE hit is the printed number and its Set off deals
+    nothing of its own), so this returns None there.
+    """
+    if damage_var_effect(card) is not None:
+        return None
+    return next((fx for fx in card.get("effects", [])
+                 if fx.get("op") == "set_off"
+                 and int(fx.get("damage", 0) or 0)), None)
+
+
 def power_upgrade_effect(card: dict) -> dict | None:
     """The ONE top-level effect the ruled power delta binds to, mirroring
     tier0/content/upgrades.py exactly: `weak`/`vulnerable` bump the first
@@ -4919,6 +5014,94 @@ def exhaust_upgrade(card: dict) -> int:
 def kurage_turns_upgrade(card: dict) -> int:
     """Ruled Bake-Kurage duration delta: `kurage_turns: +N`. 0 = none."""
     return int(upgrade_plan(card)[0].get("kurage_turns", 0))
+
+
+# ---- the prototype arms' five upgradeable numbers (EB-283) -------------------
+#
+# Each is the Sparks/BurstEnergy idiom one op over, and for the same reason:
+# a var ONLY when the upgrade has to render, so a row with no delta keeps its
+# literal and its generated file does not churn. The names collide with no
+# base-game var (checked against the `DynamicVars` accessors the emitter
+# already spells: Damage, Block, Cards, Heal, Energy, ExtraDamage,
+# CalculationBase, CalculationExtra).
+
+def bomb_size_upgrade(card: dict) -> int:
+    """`bomb_size: +N` -- the overhaul Bomb's or Mine's printed size."""
+    return int(upgrade_plan(card)[0].get("bomb_size", 0))
+
+
+def payload_mine_upgrade(card: dict) -> int:
+    """`payload_mine: +N` -- the Mine a Bomb's payload leaves behind."""
+    return int(upgrade_plan(card)[0].get("payload_mine", 0))
+
+
+def grow_upgrade(card: dict) -> int:
+    """`grow: +N` -- a printed grow amount (`grow_bombs`, `merge_bombs`)."""
+    return int(upgrade_plan(card)[0].get("grow", 0))
+
+
+def tide_upgrade(card: dict) -> int:
+    """`tide: +N` -- Kokomi's printed Tide grant."""
+    return int(upgrade_plan(card)[0].get("tide", 0))
+
+
+def mend_upgrade(card: dict) -> int:
+    """`mend: +N` -- Kokomi's printed Mend."""
+    return int(upgrade_plan(card)[0].get("mend", 0))
+
+
+def _var_or_literal(active: int, var: str, literal) -> str:
+    """`DynamicVars["X"].IntValue` when the delta must render, else the
+    printed literal. The `kurage_turns_expr` idiom, factored because five ops
+    now need it and five copies of a two-line rule is how two of them come to
+    disagree."""
+    return f'DynamicVars["{var}"].IntValue' if active else str(int(literal))
+
+
+def plant_bomb_var_effect(card: dict) -> dict | None:
+    """The ONE `plant_bomb` a `bomb_size` / `payload_mine` delta binds to: the
+    first top-level one, mirroring tier0's `_bump_first`. Only it may declare
+    the var, for the reason `damage_var_effect` states -- two effects sharing
+    one var name is a `DynamicVarSet` throw on the reward screen."""
+    return next((fx for fx in card.get("effects", [])
+                 if fx.get("op") == "plant_bomb"), None)
+
+
+def bomb_size_expr(card: dict, eff: dict) -> str:
+    active = bomb_size_upgrade(card) and eff is plant_bomb_var_effect(card)
+    return _var_or_literal(active, "BombSize", eff["size"])
+
+
+def payload_mine_expr(card: dict, eff: dict) -> str:
+    payload = int(eff.get("payload_mine_all", 0))
+    active = (payload_mine_upgrade(card) and payload
+              and eff is plant_bomb_var_effect(card))
+    return _var_or_literal(active, "PayloadMine", payload)
+
+
+def grow_var_effect(card: dict) -> dict | None:
+    """The ONE effect a `grow` delta binds to: the first top-level printed
+    grow amount, whichever of the two ops prints it. tier0's applier bumps the
+    first `amount`/`growth` in the same order, so the two engines cannot land
+    the delta on different effects."""
+    return next((fx for fx in card.get("effects", [])
+                 if (fx.get("op") == "grow_bombs" and "amount" in fx)
+                 or (fx.get("op") == "merge_bombs" and "growth" in fx)), None)
+
+
+def grow_expr(card: dict, eff: dict) -> str:
+    active = grow_upgrade(card) and eff is grow_var_effect(card)
+    literal = (eff["amount"] if eff["op"] == "grow_bombs"
+               else eff.get("growth", 0))
+    return _var_or_literal(active, "Grow", literal)
+
+
+def tide_expr(card: dict, eff: dict) -> str:
+    return _var_or_literal(tide_upgrade(card), "Tide", eff["amount"])
+
+
+def mend_expr(card: dict, eff: dict) -> str:
+    return _var_or_literal(mend_upgrade(card), "Mend", eff["amount"])
 
 
 def kurage_turns_expr(card: dict, eff: dict) -> str:
@@ -5806,7 +5989,15 @@ def build_body(
         # makes `set_off` legal inside a repeat-conditional (Perfect Timing):
         # no method-scope local is declared.
         elif op == "set_off":
-            damage = int(eff.get("damage", 0))
+            # EB-280: the card's own hit goes in as the DAMAGE VAR when this
+            # effect owns it, so the number the face prints and the number
+            # ProtoBombPower deals are one value. A damage-less Set off passes
+            # a literal 0, which is what "a Set off with no Attack behind it"
+            # means.
+            damage = (
+                "DynamicVars.Damage.BaseValue"
+                if eff is set_off_damage_var_effect(card)
+                else str(int(eff.get("damage", 0))))
             times = int(eff.get("times", 1))
             aura = "true" if eff.get("aura") == "non_pyro" else "false"
             if eff["target"] == "enemy":
@@ -5827,9 +6018,9 @@ def build_body(
                     f"{damage}, {times});")
 
         elif op == "plant_bomb":
-            size = int(eff["size"])
+            size = bomb_size_expr(card, eff)
             mine = "true" if eff.get("mine") else "false"
-            payload = int(eff.get("payload_mine_all", 0))
+            payload = payload_mine_expr(card, eff)
             if eff["target"] == "enemy":
                 _target_guard(lines, ctx)
                 lines.append(
@@ -5851,13 +6042,13 @@ def build_body(
             _target_guard(lines, ctx)
             lines.append(
                 "ProtoBombPower.GrowOn(cardPlay.Target, "
-                f'Owner.Creature, {int(eff["amount"])});')
+                f'Owner.Creature, {grow_expr(card, eff)});')
 
         elif op == "merge_bombs":
             _target_guard(lines, ctx)
             lines.append(
                 "await ProtoBombPower.MergeAllTo(choiceContext, "
-                f'cardPlay.Target, Owner.Creature, {int(eff.get("growth", 0))}, '
+                f'cardPlay.Target, Owner.Creature, {grow_expr(card, eff)}, '
                 "this);")
 
         elif op == "remove_bomb_for_block":
@@ -5893,7 +6084,7 @@ def build_body(
         # is inside `KokomiTide.Mend` and NOT at any call site, which is what
         # makes "no Mend goes above entry HP" a property of the code.
         elif op == "gain_tide":
-            amount = int(eff["amount"])
+            amount = tide_expr(card, eff)
             if eff.get("per") == "enemies_hit":
                 lines.append(
                     "await KokomiTide.GainPerEnemyHit("
@@ -5925,7 +6116,7 @@ def build_body(
         elif op == "mend":
             lines.append(
                 "await KokomiTide.Mend(choiceContext, Owner.Creature, "
-                f'{int(eff["amount"])});')
+                f'{mend_expr(card, eff)});')
 
         elif op == "block_half_damage":
             # THE INAZUMA ARM (QUARANTINED). Gorou's second clause. No number
@@ -6723,7 +6914,15 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
             # which the one call below carries. An op listed in REPEAT_SAFE_OPS
             # and missing here would emit an EMPTY repeat block, which is a
             # card that says "play this again" and replays nothing.
-            damage = int(eff.get("damage", 0))
+            #
+            # EB-280: the replay reads the same Damage var the printed play
+            # does, exactly as the `damage` arm at the top of this function
+            # already does -- a replay that re-hit for a literal would ignore
+            # the smith and the face alike.
+            damage = (
+                "DynamicVars.Damage.BaseValue"
+                if eff is set_off_damage_var_effect(card)
+                else str(int(eff.get("damage", 0))))
             times = int(eff.get("times", 1))
             aura = "true" if eff.get("aura") == "non_pyro" else "false"
             if eff["target"] == "enemy":
@@ -6932,6 +7131,100 @@ def _upgrade_add_text(card: dict) -> list[str]:
     return out
 
 
+def _authored_face_numbers(card: dict):
+    """Every number a row's AUTHORED face is expected to print, in print
+    order, as `(delta_key_or_None, var_name_or_None, literal)`.
+
+    A number with no key is still yielded, and that is the point: the walk in
+    `_authored_face_with_tokens` uses the whole ordered run to place its
+    cursor, so a Spark price or an Exert cost ahead of the number being
+    upgraded cannot be mistaken for it. Only TOP-LEVEL effects are here,
+    because only a top-level effect owns a var -- a branch's number renders as
+    the literal it is.
+    """
+    for eff in card.get("effects", []):
+        op = eff.get("op")
+        if op in _COST_OPS:
+            yield None, None, int(eff.get("amount", 0))
+        elif op == "damage" and isinstance(eff.get("amount"), int):
+            owns = (eff.get("target") != "self"
+                    and eff is damage_var_effect(card))
+            yield ("damage", "Damage", eff["amount"]) if owns \
+                else (None, None, eff["amount"])
+        elif op == "set_off" and int(eff.get("damage", 0) or 0):
+            owns = eff is set_off_damage_var_effect(card)
+            yield ("damage", "Damage", int(eff["damage"])) if owns \
+                else (None, None, int(eff["damage"]))
+        elif op == "block" and isinstance(eff.get("amount"), int):
+            owns = eff is next((f for f in card["effects"]
+                                if f.get("op") == "block"), None)
+            yield ("block", "Block", eff["amount"]) if owns \
+                else (None, None, eff["amount"])
+        elif op == "plant_bomb":
+            owns = eff is plant_bomb_var_effect(card)
+            yield ("bomb_size", "BombSize", int(eff["size"])) if owns \
+                else (None, None, int(eff["size"]))
+            payload = int(eff.get("payload_mine_all", 0))
+            if payload:
+                yield ("payload_mine", "PayloadMine", payload) if owns \
+                    else (None, None, payload)
+        elif op in ("grow_bombs", "merge_bombs"):
+            literal = (eff.get("amount") if op == "grow_bombs"
+                       else eff.get("growth"))
+            if isinstance(literal, int):
+                owns = eff is grow_var_effect(card)
+                yield ("grow", "Grow", literal) if owns \
+                    else (None, None, literal)
+        elif op in POWER_UPGRADE_OPS and isinstance(eff.get("amount"), int):
+            owns = eff is power_upgrade_effect(card)
+            yield ("power_amount", "PowerAmount", eff["amount"]) if owns \
+                else (None, None, eff["amount"])
+        elif op == "gain_tide" and isinstance(eff.get("amount"), int):
+            yield "tide", "Tide", eff["amount"]
+        elif op == "mend" and isinstance(eff.get("amount"), int):
+            yield "mend", "Mend", eff["amount"]
+        elif op in ("draw", "energy", "exert") \
+                and isinstance(eff.get("amount"), int):
+            yield None, None, eff["amount"]
+
+
+def _authored_face_with_tokens(card: dict) -> str:
+    """A row's own face with a `{Var:diff()}` token wherever this card's
+    upgrade moves a number the face PRINTS.
+
+    `EB-280` and `EB-283`. A row states its own text (`EB-215`), so the
+    generated face is the authored string and not a rendering of the body --
+    which means an upgrade that bumped a var would leave the printed literal
+    behind and the card would deal one number while printing another. This
+    walks the row's numbers in print order and swaps the ones the upgrade
+    moves.
+
+    A NUMBER THE FACE DOES NOT PRINT IS LEFT ALONE, and that is not a hole:
+    several prototype powers carry an internal amount their text never states
+    (Diona's Icy Paws watches the Block it granted), and there is nothing for
+    a token to be wrong about. The cursor only ever moves FORWARD, past each
+    number the row is expected to print, so a later clause's literal cannot be
+    mistaken for an earlier one and the Spark price a row prints ahead of its
+    damage is skipped rather than swapped.
+    """
+    text = card["description"]
+    deltas = upgrade_plan(card)[0]
+    if not deltas:
+        return text
+    cursor = 0
+    for key, var, literal in _authored_face_numbers(card):
+        match = re.compile(rf"(?<!\d){literal}(?!\d)").search(text, cursor)
+        if match is None:
+            continue
+        if key in deltas and var:
+            token = f"{{{var}:diff()}}"
+            text = text[:match.start()] + token + text[match.end():]
+            cursor = match.start() + len(token)
+        else:
+            cursor = match.end()
+    return text
+
+
 def build_description(card: dict) -> str:
     """
     Card text. Syntax is copied from base-game strings observed at runtime:
@@ -6956,7 +7249,7 @@ def build_description(card: dict) -> str:
     row carries the key.
     """
     if card.get("description"):
-        return card["description"]
+        return _authored_face_with_tokens(card)
     parts = []
     deltas = upgrade_plan(card)[0]
     for field, label in (("encore_cost", "Encore"),
@@ -7905,8 +8198,15 @@ def build_upgrade(card: dict) -> list[str]:
                # (plain_discard_upgrade returns 0 if it does), so the name is
                # unambiguous per card and the two grammars read alike.
                "discard": "discard",
+               # EB-283, the prototype arms' own printed numbers.
+               "grow_bombs": "grow", "merge_bombs": "grow",
+               "gain_tide": "tide", "mend": "mend",
                "exhaust_from": "exhaust"}
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
+               "grow_bombs": 'DynamicVars["Grow"]',
+               "merge_bombs": 'DynamicVars["Grow"]',
+               "gain_tide": 'DynamicVars["Tide"]',
+               "mend": 'DynamicVars["Mend"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
                "buff_next_attack": 'DynamicVars["PowerAmount"]',
                "heal": 'DynamicVars["Heal"]',
@@ -7932,6 +8232,17 @@ def build_upgrade(card: dict) -> list[str]:
             lines.append(
                 f'DynamicVars["Bonus"].UpgradeValueBy({int(deltas["bonus"])}m);')
             continue
+        if op == "plant_bomb" and eff is plant_bomb_var_effect(card):
+            # EB-283: one effect, two keys -- the Bomb's own size and the Mine
+            # its payload leaves. Same shape as discard_for_sparks above, and
+            # for the same reason: both vars move together or the face and the
+            # play disagree about one of them.
+            for key, var in (("bomb_size", 'DynamicVars["BombSize"]'),
+                             ("payload_mine", 'DynamicVars["PayloadMine"]')):
+                if key in deltas and key not in done:
+                    done.add(key)
+                    lines.append(f"{var}.UpgradeValueBy({int(deltas[key])}m);")
+            continue
         if op == "chance_bomb_per_detonation" and "chance" in deltas \
                 and "chance" not in done:
             # tier0 upgrades.py REPLACES chance; a DynamicVar only bumps, so
@@ -7951,6 +8262,12 @@ def build_upgrade(card: dict) -> list[str]:
                    if eff is power_upgrade_effect(card) else None)
         elif op == "damage" and eff["target"] != "self":
             key = "damage"
+        elif op == "set_off":
+            # EB-280: only the Set off that OWNS the Damage var takes the
+            # delta -- the same one-owner rule the `damage` arm above obeys.
+            key = "damage" if eff is set_off_damage_var_effect(card) else None
+        elif op in ("grow_bombs", "merge_bombs"):
+            key = "grow" if eff is grow_var_effect(card) else None
         else:
             key = key_for.get(op)
         if key is None or key not in deltas or key in done:
@@ -7962,9 +8279,11 @@ def build_upgrade(card: dict) -> list[str]:
             var = "DynamicVars.CalculationBase"
         elif key == "damage":
             # Converted riders have no "Damage" var -- their base lives in
-            # CalculationBase (the CalculatedDamageVar's base term).
+            # CalculationBase (the CalculatedDamageVar's base term). A
+            # `set_off` never converts: it carries a plain literal `damage`
+            # field and no formula, so it is always the plain var.
             var = ("DynamicVars.CalculationBase"
-                   if calc_rider(card, eff) is not None
+                   if op != "set_off" and calc_rider(card, eff) is not None
                    else "DynamicVars.Damage")
         elif key == "block" and (spotlight_block_rider(card, eff) is not None
                                  or block_calc_rider(card, eff) is not None):

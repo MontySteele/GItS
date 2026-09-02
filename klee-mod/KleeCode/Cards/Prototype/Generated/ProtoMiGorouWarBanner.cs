@@ -49,13 +49,13 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — General's War Banner (proto)"),
-        ("description", "Gain 2 [gold]Dexterity[/gold] for 2 turns."),
+        ("description", "Gain {PowerAmount:diff()} [gold]Dexterity[/gold] for 2 turns."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -67,12 +67,12 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<DexterityPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<DexterityPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
         await PowerCmd.Apply<WarBannerPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

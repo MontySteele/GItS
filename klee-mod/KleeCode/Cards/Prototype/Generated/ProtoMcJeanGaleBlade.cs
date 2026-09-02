@@ -56,7 +56,7 @@ public sealed class ProtoMcJeanGaleBlade : CustomCardModel, IElementalCard, ICom
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jean — Gale Blade"),
-        ("description", "Deal 10 damage. [gold]Swirl[/gold] an enemy's aura."),
+        ("description", "Deal {Damage:diff()} damage. [gold]Swirl[/gold] an enemy's aura."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -87,6 +87,6 @@ public sealed class ProtoMcJeanGaleBlade : CustomCardModel, IElementalCard, ICom
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

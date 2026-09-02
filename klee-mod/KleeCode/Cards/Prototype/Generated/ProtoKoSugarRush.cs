@@ -41,7 +41,7 @@ public sealed class ProtoKoSugarRush : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sugar Rush"),
-        ("description", "Spend 2 [gold]Sparks[/gold]. Gain 2 [gold]Energy[/gold]. Draw 1 card. Exhaust."),
+        ("description", "Gain 2 [gold]Energy[/gold]. Draw 1 card. Exhaust."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,

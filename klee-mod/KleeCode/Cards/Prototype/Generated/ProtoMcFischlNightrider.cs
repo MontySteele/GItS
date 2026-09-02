@@ -59,7 +59,7 @@ public sealed class ProtoMcFischlNightrider : CustomCardModel, IElementalCard, I
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fischl — Nightrider (proto)"),
-        ("description", "Deal 7 damage. If Oz is out, Oz attacks now."),
+        ("description", "Deal {Damage:diff()} damage. If Oz is out, Oz attacks now."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -97,6 +97,6 @@ public sealed class ProtoMcFischlNightrider : CustomCardModel, IElementalCard, I
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

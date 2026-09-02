@@ -280,21 +280,21 @@
 - {id: proto_ko_fwoosh, name: "Fwoosh!", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold] and deal 5 damage to a random enemy.",
+   description: "[gold]Set off[/gold] and deal 5 damage to a random enemy.",
    effects: [{op: spend_spark, amount: 1},
              {op: set_off, target: random_enemy, damage: 5}]}
 
 - {id: proto_ko_tinder_toss, name: "Tinder Toss", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold] and deal 4 damage, to two random enemies.",
+   description: "[gold]Set off[/gold] and deal 4 damage, to two random enemies.",
    effects: [{op: spend_spark, amount: 1},
              {op: set_off, target: random_enemy, damage: 4, times: 2}]}
 
 - {id: proto_ko_quick_fuse, name: "Quick Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Spend 1 [gold]Spark[/gold]. Target enemy's [gold]Bombs[/gold] grow by 3, then [gold]Set off[/gold].",
+   description: "Target enemy's [gold]Bombs[/gold] grow by 3, then [gold]Set off[/gold].",
    effects: [{op: spend_spark, amount: 1},
              {op: grow_bombs, target: enemy, amount: 3},
              {op: set_off, target: enemy}]}
@@ -302,7 +302,7 @@
 - {id: proto_ko_bang_bang, name: "Bang Bang!", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: uncommon,
-   description: "Spend 2 [gold]Sparks[/gold]. [gold]Set off[/gold]. Deal 8 damage. Place a [gold]Bomb[/gold] 4.",
+   description: "[gold]Set off[/gold]. Deal 8 damage. Place a [gold]Bomb[/gold] 4.",
    effects: [{op: spend_spark, amount: 2},
              {op: set_off, target: enemy, damage: 8},
              {op: plant_bomb, target: enemy, size: 4}]}
@@ -368,21 +368,21 @@
 - {id: proto_ko_powder_charge, name: "Powder Charge", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Spend 1 [gold]Spark[/gold]. Place a [gold]Bomb[/gold] 6.",
+   description: "Place a [gold]Bomb[/gold] 6.",
    effects: [{op: spend_spark, amount: 1},
              {op: plant_bomb, target: enemy, size: 6}]}
 
 - {id: proto_ko_dig_in, name: "Dig In", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: basic,
-   description: "Spend 1 [gold]Spark[/gold]. Gain 8 Block.",
+   description: "Gain 8 Block.",
    effects: [{op: spend_spark, amount: 1},
              {op: block, amount: 8}]}
 
 - {id: proto_ko_sugar_rush, name: "Sugar Rush", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: rare, exhaust: true,
-   description: "Spend 2 [gold]Sparks[/gold]. Gain 2 [gold]Energy[/gold]. Draw 1 card. Exhaust.",
+   description: "Gain 2 [gold]Energy[/gold]. Draw 1 card. Exhaust.",
    effects: [{op: spend_spark, amount: 2},
              {op: energy, amount: 2},
              {op: draw, amount: 1}]}

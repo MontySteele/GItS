@@ -762,8 +762,21 @@ def _card_prototype(card_id: str) -> Card:
         # deltas (`upgrades._prototype_deltas`), so `has_upgrade` is true of
         # such a row and the campfire will ask for `<proto id>+`; before this
         # it asked and got a KeyError, which is why the row was base-only.
-        base = copy.deepcopy(index[base_id] if base_id in index
-                             else _substituted_card_index()[base_id])
+        # EB-283: and the same door once more for a row an OVERHAUL arm makes
+        # reachable. Those rows are not in the substitution table -- the arms
+        # replace a whole starter and a whole pool rather than swapping ids one
+        # for one -- so `_prototype_index` is the third and last place a base
+        # id may be answered from. It is reached only under a flag, because
+        # `upgrades._prototype_deltas` registers a row only when a live flag
+        # already resolves its plain id, so with every flag off `has_upgrade`
+        # is false here and this branch is unreachable.
+        if base_id in index:
+            base = copy.deepcopy(index[base_id])
+        else:
+            substituted = _substituted_card_index()
+            base = copy.deepcopy(
+                substituted[base_id] if base_id in substituted
+                else _prototype_index()[base_id])
         card = upgrades.apply_upgrade(base)
     elif ((C.SPARK_ALT_COST_ENABLED or C.KLEE_OVERHAUL
            or C.COMPANION_OVERHAUL or C.KOKOMI_OVERHAUL)

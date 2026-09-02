@@ -56,7 +56,7 @@ public sealed class ProtoMcBarbaraShowBegin : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara — Let the Show Begin♪ (proto)"),
-        ("description", "Gain 6 [gold]Block[/gold]. Apply [gold]Hydro[/gold] to target enemy."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to target enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -83,6 +83,6 @@ public sealed class ProtoMcBarbaraShowBegin : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

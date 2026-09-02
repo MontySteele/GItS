@@ -59,7 +59,7 @@ public sealed class ProtoMcMikaStarfrostSwirl : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mika — Starfrost Swirl"),
-        ("description", "Deal 5 damage to ALL enemies. Your next [gold]Attack[/gold] costs 1 less."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. Your next [gold]Attack[/gold] costs 1 less."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -90,6 +90,6 @@ public sealed class ProtoMcMikaStarfrostSwirl : CustomCardModel, IElementalCard,
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

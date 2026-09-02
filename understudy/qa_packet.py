@@ -138,6 +138,26 @@ _LOC_RE = re.compile(r'\(\s*"(title|description)"\s*,\s*"((?:[^"\\]|\\.)*)"\s*\)
 # sheet this module may not open.
 _CARD_SOURCE_GLOB = "KleeCode/Cards/**/*.cs"
 _SHEET_COST_RE = re.compile(r"[Ss]heet[^\n]*?\bcost[=:]?\s*(\d+)")
+
+# `EB-282`. THE OTHER HALF OF A SPARK-PRICED CARD'S COST, WHICH THE `cost=`
+# COMMENT ABOVE STRUCTURALLY CANNOT CARRY.
+#
+# A Spark-priced row prints `cost: 0` on the sheet and charges its Sparks
+# through `spend_spark`, so the number the regex above finds is 0 -- true, and
+# not the price. In the game the cost slot shows the SPARK BADGE for those
+# rows, which is why the row asks for the body sentence ("Spend 1 Spark.") to
+# come off the face: it is text overhead restating the badge. On this page
+# there was no badge and no number, so dropping the sentence would have taken
+# the price off the page entirely and the seats would have been reading a card
+# whose cost they could not see.
+#
+# So the price is read the same way, off the same faces, out of the ONE place
+# the generator writes it: `ISparkPricedCard.PrintedSparkPrice`, which the
+# card's own playability gate reads back through `SparkCost.PriceOf` (the
+# generated comment beside it says why it is declared once). Same key as the
+# energy index -- the class name, which is what BaseLib derives `Id.Entry`
+# from -- so a proto row and its same-named shipped twin cannot be confused.
+_SPARK_PRICE_RE = re.compile(r"PrintedSparkPrice\s*=>\s*(\d+)\s*;")
 _CLASS_RE = re.compile(
     r"^\s*(?:public|internal)\s+(?:sealed\s+|abstract\s+|static\s+|partial\s+)*"
     r"class\s+([A-Za-z_][A-Za-z0-9_]*)", re.M)
@@ -323,6 +343,36 @@ def printed_cost_index(repo: Path | None = None) -> dict[str, int]:
     return dict(_printed_cost_index_cached(root))
 
 
+@lru_cache(maxsize=4)
+def _printed_spark_index_cached(repo: Path) -> tuple[tuple[str, int], ...]:
+    index: dict[str, int] = {}
+    root = repo / "klee-mod"
+    if not root.is_dir():
+        return ()
+    for path in sorted(root.glob(_CARD_SOURCE_GLOB)):
+        try:
+            src = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        price = _SPARK_PRICE_RE.search(src)
+        if price is None:
+            continue
+        key = _class_key(src)
+        if key:
+            index.setdefault(key, int(price.group(1)))
+    return tuple(sorted(index.items()))
+
+
+def printed_spark_index(repo: Path | None = None) -> dict[str, int]:
+    """`{card id: the Spark price printed on the face}` (`EB-282`).
+
+    Same glob, same key and same silence rule as `printed_cost_index`: a card
+    the index has no row for gets nothing, never a zero and never a guess.
+    """
+    root = repo if repo is not None else Path(__file__).resolve().parents[1]
+    return dict(_printed_spark_index_cached(root))
+
+
 # `EB-264`. THE WIRE'S UNPLAYABLE REASON IS AN ENUM NAME, AND A PLAYER CANNOT
 # READ IT. `unplayable_reason` on a hand entry is `UnplayableReason.ToString()`
 # (`McpMod.StateBuilder.cs:1324`), so the page printed
@@ -381,6 +431,27 @@ def _discounted(card: dict[str, Any]) -> bool:
     shown, printed = _text(card.get("cost")), card.get("printed_cost")
     return (isinstance(printed, int) and shown.isdigit()
             and int(shown) < printed)
+
+
+def cost_label(card: dict[str, Any]) -> str:
+    """The COST SLOT for one card, as the game paints it (`EB-282`).
+
+    The game's cost slot shows the Spark badge on a Spark-priced card, so the
+    page says the price in the same place and in the same words the keyword
+    already uses. A card with no Spark price reads exactly as it always did --
+    the rendered energy cost, or `-` when the wire sent none.
+
+    A row priced in BOTH prints both, in the order the badge stacks them. No
+    row is priced that way today; the branch is here because a page that
+    silently dropped half a price is the defect this whole function exists to
+    repair.
+    """
+    shown = _text(card.get("cost")) or "-"
+    price = card.get("printed_spark")
+    if not isinstance(price, int) or price <= 0:
+        return shown
+    sparks = f"{price} Spark" if price == 1 else f"{price} Sparks"
+    return sparks if shown in ("0", "-") else f"{shown} and {sparks}"
 
 
 def cost_note(card: dict[str, Any]) -> str:
@@ -509,8 +580,10 @@ def _intent(blob: Any) -> dict[str, str]:
 
 
 def _hand(state: dict[str, Any], loc: dict[str, str],
-          costs: dict[str, int] | None = None) -> list[dict[str, Any]]:
+          costs: dict[str, int] | None = None,
+          sparks: dict[str, int] | None = None) -> list[dict[str, Any]]:
     costs = costs or {}
+    sparks = sparks or {}
     cards = []
     for entry in (state.get("player") or {}).get("hand") or []:
         if not isinstance(entry, dict):
@@ -531,6 +604,10 @@ def _hand(state: dict[str, Any], loc: dict[str, str],
             # EB-267: BY ID. The id is read here, on the tool side, and never
             # copied into the packet -- only the integer it found is.
             "printed_cost": costs.get(card_key(entry.get("id"))),
+            # `EB-282`. The Spark half of the same price, read the same way.
+            # `None` on every card that prints no Spark price, which is every
+            # card outside the Spark rows.
+            "printed_spark": sparks.get(card_key(entry.get("id"))),
             "upgraded": bool(entry.get("is_upgraded")),
             "playable": entry.get("can_play") is not False,
             # The game's own printed refusal, not ours.
@@ -569,6 +646,7 @@ def build(state: dict[str, Any], turn_id: str, *, repo: Path | None = None,
     """
     loc = localization_index(repo) if repo is not None else {}
     costs = printed_cost_index(repo)
+    sparks = printed_spark_index(repo)
     p = state.get("player") or {}
     resources = p.get("resources")
     packet = {
@@ -610,7 +688,7 @@ def build(state: dict[str, Any], turn_id: str, *, repo: Path | None = None,
                 # does not put on the screen.
                 "relics": _relics(p),
             },
-            "hand": _hand(state, loc, costs),
+            "hand": _hand(state, loc, costs, sparks),
             "enemies": _enemies(state),
         },
         "disclosures": list(disclosures or []),
@@ -632,7 +710,8 @@ def _render_card(c: dict[str, Any]) -> list[str]:
     head = f"### {c['title']}"
     if c["upgraded"]:
         head += " (upgraded)"
-    lines = [head, "", f"- Cost: {c['cost'] or '-'}", f"- {c['text'] or '(no printed text)'}"]
+    lines = [head, "", f"- Cost: {cost_label(c)}",
+             f"- {c['text'] or '(no printed text)'}"]
     note = cost_note(c)
     if note:
         lines.insert(3, f"- {note}")

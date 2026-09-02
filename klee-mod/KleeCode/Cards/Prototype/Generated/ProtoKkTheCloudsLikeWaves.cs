@@ -41,13 +41,13 @@ public sealed class ProtoKkTheCloudsLikeWaves : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Clouds Like Waves"),
-        ("description", "While you are under half HP, the pulse [gold]Mends[/gold] 4."),
+        ("description", "While you are under half HP, the pulse [gold]Mends[/gold] {PowerAmount:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -59,11 +59,11 @@ public sealed class ProtoKkTheCloudsLikeWaves : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<CloudsLikeWavesPower>(choiceContext, Owner.Creature, 4, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<CloudsLikeWavesPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

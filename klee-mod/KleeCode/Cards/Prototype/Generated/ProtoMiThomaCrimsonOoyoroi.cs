@@ -52,13 +52,13 @@ public sealed class ProtoMiThomaCrimsonOoyoroi : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thoma — Crimson Ooyoroi (proto)"),
-        ("description", "For 2 turns, whenever you play an [gold]Attack[/gold], deal 5 [gold]Pyro[/gold] damage to a random enemy and gain 3 [gold]Block[/gold]."),
+        ("description", "For {PowerAmount:diff()} turns, whenever you play an [gold]Attack[/gold], deal 5 [gold]Pyro[/gold] damage to a random enemy and gain 3 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -70,11 +70,11 @@ public sealed class ProtoMiThomaCrimsonOoyoroi : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<CrimsonOoyoroiPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<CrimsonOoyoroiPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

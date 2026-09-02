@@ -56,7 +56,7 @@ public sealed class ProtoMiSayuFuuinDash : CustomCardModel, IElementalCard, ICom
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sayu — Yoohoo Art: Fuuin Dash (proto)"),
-        ("description", "Deal 8 damage to a random enemy. [gold]Swirl[/gold]."),
+        ("description", "Deal {Damage:diff()} damage to a random enemy. [gold]Swirl[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -85,6 +85,6 @@ public sealed class ProtoMiSayuFuuinDash : CustomCardModel, IElementalCard, ICom
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

@@ -48,13 +48,14 @@ public sealed class ProtoKoFishFlavoredBait : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fish-Flavored Bait"),
-        ("description", "Deal 5 damage. Place a [gold]Bomb[/gold] 5."),
+        ("description", "Deal {Damage:diff()} damage. Place a [gold]Bomb[/gold] {BombSize:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move)
+            new DamageVar(5m, ValueProp.Move),
+            new DynamicVar("BombSize", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -72,11 +73,12 @@ public sealed class ProtoKoFishFlavoredBait : CustomCardModel, IElementalCard
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        await ProtoBombPower.Place(choiceContext, cardPlay.Target, 5, isMine: false, payloadMineAll: 0, Owner.Creature, this);
+        await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: 0, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars["BombSize"].UpgradeValueBy(2m);
     }
 }

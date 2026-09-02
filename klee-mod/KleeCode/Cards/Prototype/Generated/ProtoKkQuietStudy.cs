@@ -41,13 +41,14 @@ public sealed class ProtoKkQuietStudy : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Quiet Study"),
-        ("description", "Gain 4 Block. [gold]Tide[/gold] +2."),
+        ("description", "Gain {Block:diff()} Block. [gold]Tide[/gold] +{Tide:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(4m, ValueProp.Move)
+            new BlockVar(4m, ValueProp.Move),
+            new DynamicVar("Tide", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,11 +61,12 @@ public sealed class ProtoKkQuietStudy : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await KokomiTide.Gain(choiceContext, Owner.Creature, 2);
+        await KokomiTide.Gain(choiceContext, Owner.Creature, DynamicVars["Tide"].IntValue);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Block.UpgradeValueBy(3m);
+        DynamicVars["Tide"].UpgradeValueBy(2m);
     }
 }
