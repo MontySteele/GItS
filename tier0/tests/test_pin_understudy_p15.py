@@ -445,8 +445,12 @@ def test_the_seed_release_is_the_first_step_of_teardown(tmp_path):
     `debug_override` route is a global, sticky property on NGame: left set,
     every later run in the session -- including one a person starts by hand --
     is the same run. Every other teardown step can take the game away
-    (stopping the process, removing the bridge), and a release that runs after
-    them is a release with nothing left to talk to.
+    (stopping the process), and a release that runs after them is a release
+    with nothing left to talk to.
+
+    THE BRIDGE STEP IS NOT IN THIS ORDER ANY MORE and its absence is `EB-310`:
+    `mods\\STS2_MCP` is shared with the owner's own Steam launches, so no
+    teardown removes it.
     """
     sess = soak.Session.__new__(soak.Session)
     sess.ledger = soak.Reversibility(tmp_path / "rev.json")
@@ -456,17 +460,16 @@ def test_the_seed_release_is_the_first_step_of_teardown(tmp_path):
     sess._seed_entry = sess.ledger.record("seed", "seed:null")
     sess._speed_entry = sess.ledger.record("speed", "enabled:false")
     sess._launch_entry = sess.ledger.record("launch", "terminate")
-    sess._bridge_entry = sess.ledger.record("bridge", "-Remove")
     sess._appid_entry = sess.ledger.record("appid", "delete")
 
     sess._release_seed = lambda: order.append("seed") or "released"
     sess._restore_speed = lambda: order.append("speed") or "restored"
     sess._stop_game = lambda: order.append("stop") or "terminated"
-    sess._remove_bridge = lambda: order.append("bridge") or "removed"
+    sess._remove_appid = lambda: order.append("appid") or "removed"
     sess.teardown()
 
     assert order[0] == "seed", order
-    assert order == ["seed", "speed", "stop", "bridge"]
+    assert order == ["seed", "speed", "stop", "appid"]
 
 
 def test_run_one_takes_the_first_named_seed(monkeypatch, tmp_path):

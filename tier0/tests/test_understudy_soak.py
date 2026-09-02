@@ -522,7 +522,12 @@ def test_a_socket_failure_is_a_bridge_error(monkeypatch):
 
 
 def test_every_teardown_step_runs_even_when_an_earlier_one_raises(tmp_path):
-    """A teardown that abandons its own ledger is worse than no teardown."""
+    """A teardown that abandons its own ledger is worse than no teardown.
+
+    Three steps rather than four since `EB-310`: the bridge is shared with the
+    owner's own launches and no teardown removes it, so there is no bridge
+    step to fail here.
+    """
     sess = soak.Session.__new__(soak.Session)
     sess.ledger = soak.Reversibility(tmp_path / "rev.json")
     sess.dir = tmp_path
@@ -532,7 +537,6 @@ def test_every_teardown_step_runs_even_when_an_earlier_one_raises(tmp_path):
     sess._seed_entry = None              # P1.5: no seed was ever chosen
     sess._speed_entry = sess.ledger.record("speed", "enabled:false")
     sess._launch_entry = sess.ledger.record("launch", "terminate")
-    sess._bridge_entry = sess.ledger.record("bridge", "-Remove")
     sess._appid_entry = sess.ledger.record("appid", "delete")
 
     def explode():
@@ -540,14 +544,12 @@ def test_every_teardown_step_runs_even_when_an_earlier_one_raises(tmp_path):
 
     sess._restore_speed = explode
     sess._stop_game = lambda: "process terminated"
-    sess._remove_bridge = explode
     sess.teardown()
 
     states = [e["state"] for e in sess.ledger.entries]
     assert states[0] == "NOT REVERTED"          # speed, honestly recorded
     assert states[1] == "REVERTED"              # and the rest still ran
-    assert states[2] == "NOT REVERTED"
-    assert states[3] == "REVERTED"
+    assert states[2] == "REVERTED"
     assert not appid.exists(), "the appid file survived a failing teardown"
     assert "ConnectionResetError" in sess.ledger.table()
 

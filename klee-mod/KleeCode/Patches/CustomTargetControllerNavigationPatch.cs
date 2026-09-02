@@ -4,6 +4,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Nodes.Combat;
+using MegaCrit.Sts2.Core.Nodes.GodotExtensions;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
 using MegaCrit.Sts2.Core.Nodes.Screens.ScreenContext;
 
@@ -92,8 +93,24 @@ internal static class NCardPlay_TryPlayCard_RestoreControllerNavigation_Patch
         try
         {
             if (!ShouldRestore(__instance.Holder?.CardModel)) return;
-            NCombatRoom.Instance?.EnableControllerNavigation();
-            ActiveScreenContext.Instance?.FocusOnDefaultControl();
+
+            // SCHEDULED, NOT RUN, AND THAT IS THE 2026-09-02 CORRECTION. This
+            // postfix is one of the INNERMOST frames of the play, not one of
+            // the last: the completion source runs its continuation
+            // synchronously, so `TryPlayCard` is nested inside
+            // `NTargetManager.FinishTargeting` and the library's coroutine tail
+            // and the screen-context change both run after this returns and put
+            // the hand back at `FocusMode.None`. The restore has to land a
+            // frame later, which is what `Schedule` buys.
+            //
+            // This seam is also no longer load-bearing: `ShouldRestore` reads
+            // the HOLDER's model, and a played card's holder no longer carries
+            // one by the time BaseLib's `Cleanup(true)` has run -- which is why
+            // `PR #271` never fired on the path it was written for. The
+            // `FinishTargeting` postfix is the seam that actually covers every
+            // exit; this one is kept because it is free, it is idempotent
+            // within a frame, and it is the record of what EB-300 was.
+            CustomTargetNavigationRestore.Schedule();
         }
         catch (Exception e)
         {
