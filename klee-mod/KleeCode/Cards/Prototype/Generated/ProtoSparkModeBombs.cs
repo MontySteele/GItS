@@ -35,7 +35,7 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoSparkModeBombs : CustomCardModel, IModalCard
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.None, includesBombRules: true);
+        ArmKeywordTips.ForSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.None, includesBombRules: true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_spark_mode_bombs");
 
