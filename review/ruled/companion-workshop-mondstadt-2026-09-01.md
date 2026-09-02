@@ -391,13 +391,16 @@ Approved at all six defaults, and built the same night as a flag-gated
 prototype (`COMPANION_OVERHAUL`, PR #250, merged). The §5 table said 33
 rows over 18 characters; §3 prints 34 over 21, because Mona, Venti and
 Varka came after the table, so the table now says 34 and 21. Of the 34, 21
-are built; 13 wait on engine hooks neither engine has yet (a per-instance
+were built that night and the other 13 the next day, once the ten engine
+hooks they needed existed in both engines (PR #253: a per-instance
 Block-absorption trigger, a trap that fires before an enemy's attack, a
 next-Attack element override, a Swirl that remembers its element, an
 Attacks-played counter, a next-Attack discount, a Block count in the C#
 amount grammar, a Power holding a chosen target, a counting delayed blade,
-and Durin's two damage modifiers behind a modal Power); each is named in
-`docs/notes/prototype-surface-provenance.md` and is a follow-up build, not
+and Durin's two damage modifiers behind a modal Power), so every Mondstadt
+row is built; the Inazuma build reuses twelve of those hooks. Each is named
+in `docs/notes/prototype-surface-provenance.md`. That was a follow-up build,
+not
 a redesign. One side effect to know: the Featured Banner samples 3 of a
 nation's 5-star cards per run (`BANNER_FEATURED_SLOTS`), and Mondstadt now
 has six 5-star Universals, so a given run offers half of them. That is the
