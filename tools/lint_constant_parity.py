@@ -274,6 +274,20 @@ MIRRORED: dict[str, object] = {
     "CompanionOverhaulLaw.BaronBunnyDamage": C.MC_BARON_BUNNY_DMG,
     "CompanionOverhaulLaw.LightfallBase": C.MC_LIGHTFALL_BASE,
     "CompanionOverhaulLaw.LightfallPerAttack": C.MC_LIGHTFALL_PER_ATTACK,
+    # THE KOKOMI OVERHAUL (QUARANTINED, `C.KOKOMI_OVERHAUL`). Same terms again
+    # and for the same reason: quarantined is not exempt. These six numbers ARE
+    # the rules (`review/active/kokomi-brief-2026-09-01.md` sec.4) -- the
+    # pulse's size and its per-combat ceiling, the two Song of Pearls replaces
+    # them with, the Garment's per-Attack chip, and the Tide a card costs to
+    # read -- and a prototype played on a number the sim never declared is
+    # exactly this lint's failure. They are placeholders and not claims, but
+    # they are the placeholders both sides have to agree on.
+    "KokomiOverhaulLaw.PulseMend": C.KOKOMI_OVERHAUL_PULSE_MEND,
+    "KokomiOverhaulLaw.PulseBudget": C.KOKOMI_OVERHAUL_PULSE_BUDGET,
+    "KokomiOverhaulLaw.SongOfPearlsMend": C.KOKOMI_OVERHAUL_SONG_MEND,
+    "KokomiOverhaulLaw.SongOfPearlsBudget": C.KOKOMI_OVERHAUL_SONG_BUDGET,
+    "KokomiOverhaulLaw.GarmentMend": C.KOKOMI_OVERHAUL_GARMENT_MEND,
+    "KokomiOverhaulLaw.TidePerCard": C.KOKOMI_OVERHAUL_TIDE_PER_CARD,
 }
 
 # --------------------------------------------------------------------------

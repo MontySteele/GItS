@@ -1255,3 +1255,121 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 #   `AuraPower` / `KleeElementalHooks`  the element read moved behind one funnel
 #   `ReactionTable` / `ReactionEffects` two `#if PROTOTYPE_CARDS` blocks
 ```
+
+## The Kokomi overhaul, slice one — `proto_kk_` (2026-09-01)
+
+Thirty-three rows: the ten-card starter (five ids) and all twenty-eight pool
+rows of `review/active/kokomi-overhaul-slice-1-2026-09-01.md`, written against
+the ruled brief `kokomi-brief-2026-09-01.md` (all eight picks ruled at their
+defaults on 2026-09-01). Under `C.KOKOMI_OVERHAUL` /
+`-p:KokomiOverhaul=true` these ARE her starter and her whole reward pool; with
+the flag off they are unreachable, like every other row on this surface.
+
+```
+NOTHING DROPS. The Klee overhaul left Vermillion Pact off its own surface
+because its rule wanted shared reaction code. Every row of this slice prints
+inside the grammar the emitter already speaks once the arm's ten verbs exist,
+so all twenty-eight are here and the packet's own rarity split -- 12 Common,
+12 Uncommon, 4 Rare -- is the pool's.
+
+EVERY ROW CARRIES ITS OWN `description:` (EB-215). The face is the packet's
+printed text with this repo's rendering conventions applied: "Deal 6." becomes
+"Deal 6 damage.", the six keywords are golded, and Exhaust is the keyword
+rail's -- the same treatment the Klee slice's "Set off. Deal 6." got. No
+number moves and no clause is added or dropped.
+
+ELEVEN DISPLAY NAMES CARRY A "(proto)" SUFFIX, and they are:
+  Water's Edge, Coral Guard, Kurage's Oath, Stolen Chapter, Song of Pearls,
+  Nereid's Ascension, Sango Isshin, Undertow, Salt Line, Cleansing Tide
+  -- ten names already owned by a SHIPPED Kokomi row, and
+  High Tide -- owned by a shipped FURINA row (`furina-cards.yaml:high_tide`).
+`tools/lint_unique_names.py` holds one namespace across all six sheets plus
+the relics, so the suffix is what lets the rewritten card and the shipped one
+coexist while the arm is being graded. It is the same device
+`proto_ko_sparks_n_splash` and the ten `proto_mc_` rewrites already use. The
+packet's sec.8 names seven of the ten Kokomi collisions; the other three
+(Song of Pearls, Undertow, Cleansing Tide) and the Furina one were found by
+running the lint over the six sheets and this surface together, and the same
+rule was applied to them. The remaining twenty-two names are new.
+
+THE TEN VERBS, and what each row's clause resolves to:
+  gain_tide                 Tide +N. `per: enemies_hit` is Deep Current's
+                            "per enemy hit", read off a snapshot taken at the
+                            TOP of the body -- an enemy the card's own AoE
+                            killed was still hit.
+  surge                     rule 3: the whole Tide as one Hydro hit, then 0.
+  block_half_surge          Undertow's second clause, read off the play's own
+                            Surge total because the jellyfish is empty by the
+                            time it asks.
+  exert                     rule 5, and it is DAMAGE rather than an HP loss:
+                            dropping `Unblockable` is what lets Block eat it.
+                            Refused on an Attack by the emitter, which is
+                            rule 5's second half enforced where a card is
+                            built.
+  mend                      heal, capped at her entry HP -- one function, so
+                            the cap cannot be forgotten at a call site.
+  plan                      rule 8, ONE clause from a table of seven, spelled
+                            `then:` so the repo's one effect walk sees it.
+  draw_companion_from_draw  Rally's search, through the game's own
+                            pile-selection screen filtered to Companions.
+  next_companion_free       Vanguard's grant. It ZEROES rather than discounts,
+                            because the card prints "costs 0".
+  draw_per_tide             Reading the Tide. A read, not a spend.
+  play_top_of_draw          War Council's clause, and legal ONLY inside a
+                            `plan` body -- a top-level spelling would be a
+                            different, unpriced card.
+
+THE READINGS TAKEN, each because the printed text does not settle it:
+  Deep Current    "per enemy hit" is every living enemy when the card was
+                  played, snapshotted before its own AoE resolves.
+  Undertow        "half the damage dealt" is half the TIDE that went out,
+                  rounded down -- not the number that landed after the shared
+                  pipeline's amplifier and the target's Vulnerable, neither of
+                  which is a fact about her Tide.
+  Ambush / Feint  a Plan's damage is HYDRO, through the same funnel the Surge
+                  and Sango Isshin's overflow use. The cards name no element;
+                  Hydro is the only choice that leaves Feint's two halves
+                  behaving alike, the printed one applying an element and the
+                  delayed one not.
+  The Art of War  "Plans ALSO happen now" is read as now AND next turn. As
+                  "instead" it would delete rule 8 rather than break it, and
+                  the brief's gloss is "Rule 8's delay is gone".
+  Song of Pearls  vs The Clouds Like Waves: both make a flat statement about
+                  the pulse's size and neither prints an order, so the larger
+                  applicable number wins. Under 4 the Clouds card would be a
+                  lie; under 3 Song of Pearls would be one. The budget is
+                  Song's alone, because only Song mentions it.
+  The pulse       spends its per-combat budget in HP THAT LANDED. Script A's
+                  turn-1 pulse "would Mend 2, but she is at 80, so nothing",
+                  and after three effective pulses "the pulse paid 6 of its
+                  8". A consequence, reported rather than hidden: the damage
+                  Sango Isshin makes out of the excess costs no budget either.
+  The Garment     "each Attack that HITS" is per Attack CARD PLAY that landed
+                  on something, not per hit -- sec.6.1's "three Attacks each
+                  put 2 back" and script B's "Water's Edge twice (12, Mend 4)".
+                  Blocked damage still counts as a hit.
+  The Plan hook   resolves at `AfterPlayerTurnStart`, NOT before the draw as
+                  the packet's sec.5 asks. There is no broadcast between the
+                  game's energy reset and its hand draw, so "before draw"
+                  means before the block clear and the energy reset too, and
+                  Read the Field's Block and Battle Plan's Energy would both
+                  be wiped. The brief's own script C requires the later hook:
+                  its turn 2 opens on five energy, which is three plus the
+                  Plan's two. Recorded in full on the method.
+
+WHAT THE STARTER COSTS, stated: her opening deck goes from TWELVE cards to
+TEN, which is the packet's own sec.3 count -- the twelve-card shape was ruled
+for a deck that mills itself, and nothing in this arm exhausts. And the
+starting-companion roll finds no slot to take, because it matches on the
+shipped `SayuDarumaGift` type and none of the ten is that type: under this arm
+she opens with no companions, and the Commander loop draws its army from the
+reward slot, which is what the packet says it does.
+
+THE RELIC. Tamanooya's Casket replaces the Pearl of Wisdom, because the
+Pearl's printed body IS the exhaust funnel the brief retires. It carries the
+pulse and both its numbers, keeps the companion reward slot (that hook is not
+a Charge rule, and the Commander loop's whole army comes through it), and has
+no upgraded form -- a curated absence in
+`tier0/tests/test_starter_relic_upgrades.py` with its reason and the gate that
+clears it.
+```

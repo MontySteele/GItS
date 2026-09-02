@@ -599,6 +599,16 @@ KLEE_OVERHAUL_OPS = frozenset((
     "remove_bomb_for_block", "damage_set_off_total", "double_set_off",
     "draw_per_set_off"))
 
+#: The Kokomi overhaul's ten verbs (slice one, QUARANTINED behind
+#: `C.KOKOMI_OVERHAUL`). A second set beside the one above rather than a merged
+#: one, because the two arms are independent and a merged set would make either
+#: one's pricing decision look like the other's when the first of them is
+#: eventually taken.
+KOKOMI_OVERHAUL_OPS = frozenset((
+    "gain_tide", "surge", "block_half_surge", "exert", "mend", "plan",
+    "draw_companion_from_draw", "next_companion_free", "draw_per_tide",
+    "play_top_of_draw"))
+
 
 def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
     """The DRAFTER_VERSION 13 static price of one effect dict.
@@ -717,6 +727,19 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # does not move. When the slice survives the Prototype gate and the
         # sim arm is built, THAT is the change that prices these and archives
         # the old world.
+        return 0.0
+
+    # -- the Kokomi overhaul, slice one (QUARANTINED, C.KOKOMI_OVERHAUL) ----
+    if op in KOKOMI_OVERHAUL_OPS:
+        # ZERO, and a DELIBERATE zero, on exactly the argument the branch above
+        # makes: the arm is C# FIRST (its slice packet sec.5), tier0 registers
+        # these ten verbs and REFUSES to resolve them, so there is no sim
+        # behaviour for a price to approximate and a guessed number would be a
+        # claim about a rule this engine has never run. No `docs/*-cards.yaml`
+        # row prints any of them, no pool, digest or stamp can see one, and
+        # with `C.KOKOMI_OVERHAUL` off the rows are unreachable by draft at
+        # all -- so every drafted number in the world is byte-identical with
+        # and without this branch, and DRAFTER_VERSION does not move.
         return 0.0
 
     # -- cards from nowhere ------------------------------------------------
@@ -1929,6 +1952,15 @@ STATIC_OP_PRICING: dict[str, str] = {
        for op in ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                   "remove_bomb_for_block", "damage_set_off_total",
                   "double_set_off", "draw_per_set_off")},
+    # --- the Kokomi overhaul, slice one (QUARANTINED, C.KOKOMI_OVERHAUL) --
+    # One rationale, ten ops, and the same one decision for the same reason.
+    **{op: "ZERO: the KOKOMI_OVERHAUL arm is C# FIRST and tier0 refuses to "
+            "resolve it, so there is no sim behaviour to price (slice packet "
+            "sec.5; prototype surface only -- no shipped row prints it and no "
+            "drafted number moves)"
+       for op in ("gain_tide", "surge", "block_half_surge", "exert", "mend",
+                  "plan", "draw_companion_from_draw", "next_companion_free",
+                  "draw_per_tide", "play_top_of_draw")},
     # --- damage/Block-shaped, new in v13 ---------------------------------
     "block_next_turn": "printed Block at STATIC_DELAYED_BLOCK_SHARE",
     "block_at_turn_start": "printed Block at STATIC_DELAYED_BLOCK_SHARE, once "

@@ -4689,6 +4689,23 @@ def _op_klee_overhaul_unbuilt(state: CombatState, fx: dict,
         "numbers for a rule this engine never ran.")
 
 
+# The Kokomi overhaul's ten, on exactly the terms above and for the same one
+# sentence (its slice packet sec.5: "All of it behind the prototype switch, C#
+# first. The Python sim is not brought up for slice one"). A second function
+# rather than a shared one because the MESSAGE is what a reader gets when a
+# probe or a stray row reaches here, and it has to name the right arm and the
+# right build line.
+def _op_kokomi_overhaul_unbuilt(state: CombatState, fx: dict,
+                                card: Card) -> None:
+    raise NotImplementedError(
+        f"card {card.id!r}: op {fx['op']!r} belongs to the KOKOMI_OVERHAUL "
+        "arm, which is C# FIRST -- the mod implements it behind "
+        "`-p:PrototypeCards=true -p:KokomiOverhaul=true` and the sim is not "
+        "brought up for slice one (the slice packet sec.5). Registering the "
+        "op lets the row be staged and priced; resolving it here would report "
+        "numbers for a rule this engine never ran.")
+
+
 OPS = {
     "damage": _op_damage,
     "block": _op_block,
@@ -4756,6 +4773,19 @@ OPS = {
     "damage_set_off_total": _op_klee_overhaul_unbuilt,
     "double_set_off": _op_klee_overhaul_unbuilt,
     "draw_per_set_off": _op_klee_overhaul_unbuilt,
+    # --- Kokomi overhaul, slice one (QUARANTINED, C.KOKOMI_OVERHAUL) ---
+    # Registered so the rows load, priced so the drafter is honest, resolved by
+    # nothing -- see `_op_kokomi_overhaul_unbuilt` for why raising is the shape.
+    "gain_tide": _op_kokomi_overhaul_unbuilt,
+    "surge": _op_kokomi_overhaul_unbuilt,
+    "block_half_surge": _op_kokomi_overhaul_unbuilt,
+    "exert": _op_kokomi_overhaul_unbuilt,
+    "mend": _op_kokomi_overhaul_unbuilt,
+    "plan": _op_kokomi_overhaul_unbuilt,
+    "draw_companion_from_draw": _op_kokomi_overhaul_unbuilt,
+    "next_companion_free": _op_kokomi_overhaul_unbuilt,
+    "draw_per_tide": _op_kokomi_overhaul_unbuilt,
+    "play_top_of_draw": _op_kokomi_overhaul_unbuilt,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,

@@ -677,3 +677,233 @@
    description: "Deal 5 damage to ALL enemies. Your next [gold]Attack[/gold] costs 1 less.",
    effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
              {op: apply_power, power: mc_starfrost_discount, amount: 1, target: self}]}
+
+# THE KOKOMI OVERHAUL, SLICE ONE. Reachable rows, not staged ones: under
+# `C.KOKOMI_OVERHAUL` these ARE her starter and her whole pool. Why each row
+# reads as it does: docs/notes/prototype-surface-provenance.md.
+
+# --- the starter, ten cards, five ids (packet sec.3) ---
+
+- {id: proto_kk_waters_edge, name: "Water's Edge (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: basic,
+   description: "Deal 6 damage.",
+   effects: [{op: damage, amount: 6, target: enemy}]}
+
+- {id: proto_kk_coral_guard, name: "Coral Guard (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: basic,
+   description: "Gain 5 Block.",
+   effects: [{op: block, amount: 5}]}
+
+- {id: proto_kk_kurages_oath, name: "Kurage's Oath (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: basic,
+   description: "[gold]Exert[/gold] 2. [gold]Tide[/gold] +5.",
+   effects: [{op: exert, amount: 2},
+             {op: gain_tide, amount: 5}]}
+
+- {id: proto_kk_rising_tide, name: "Rising Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: basic,
+   description: "Deal 4 damage. [gold]Surge[/gold].",
+   effects: [{op: damage, amount: 4, target: enemy},
+             {op: surge, target: enemy}]}
+
+- {id: proto_kk_stolen_chapter, name: "Stolen Chapter (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: basic,
+   description: "Draw 1 card. [gold]Plan[/gold]: draw 1 card.",
+   effects: [{op: draw, amount: 1},
+             {op: plan, then: [{op: draw, amount: 1}]}]}
+
+# --- Priestess: feed, hold, surge (packet sec.4) ---
+
+- {id: proto_kk_tidal_prayer, name: "Tidal Prayer", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "[gold]Exert[/gold] 1. [gold]Tide[/gold] +4. Draw 1 card.",
+   effects: [{op: exert, amount: 1},
+             {op: gain_tide, amount: 4},
+             {op: draw, amount: 1}]}
+
+- {id: proto_kk_sea_spray, name: "Sea Spray", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 5 damage. [gold]Tide[/gold] +2.",
+   effects: [{op: damage, amount: 5, target: enemy},
+             {op: gain_tide, amount: 2}]}
+
+- {id: proto_kk_deep_current, name: "Deep Current", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 4 damage to every enemy. [gold]Tide[/gold] +1 per enemy hit.",
+   effects: [{op: damage, amount: 4, target: all_enemies},
+             {op: gain_tide, amount: 1, per: enemies_hit}]}
+
+- {id: proto_kk_breaker, name: "Breaker", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: common,
+   description: "[gold]Surge[/gold], then deal 8 damage.",
+   effects: [{op: surge, target: enemy},
+             {op: damage, amount: 8, target: enemy}]}
+
+- {id: proto_kk_high_tide, name: "High Tide (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "[gold]Exert[/gold] 3. [gold]Tide[/gold] +10.",
+   effects: [{op: exert, amount: 3},
+             {op: gain_tide, amount: 10}]}
+
+- {id: proto_kk_undertow, name: "Undertow (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "[gold]Surge[/gold]. Gain Block equal to half the damage dealt.",
+   effects: [{op: surge, target: enemy},
+             {op: block_half_surge}]}
+
+- {id: proto_kk_song_of_pearls, name: "Song of Pearls (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "The pulse [gold]Mends[/gold] 3, and its budget is 12.",
+   effects: [{op: apply_power, power: kk_song_of_pearls, amount: 1, target: self}]}
+
+- {id: proto_kk_nereids_ascension, name: "Nereid's Ascension (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Exhaust. Wear the [gold]Garment[/gold] for 2 turns.",
+   effects: [{op: apply_power, power: kk_garment, amount: 2, target: self}]}
+
+- {id: proto_kk_sango_isshin, name: "Sango Isshin (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "[gold]Mend[/gold] that would go past your entry HP becomes Hydro damage to a random enemy.",
+   effects: [{op: apply_power, power: kk_sango_isshin, amount: 1, target: self}]}
+
+# --- Strategist: the plan was written last turn (packet sec.4) ---
+
+- {id: proto_kk_battle_plan, name: "Battle Plan", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "[gold]Plan[/gold]: gain 2 [gold]Energy[/gold].",
+   effects: [{op: plan, then: [{op: energy, amount: 2}]}]}
+
+- {id: proto_kk_ambush, name: "Ambush", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "[gold]Plan[/gold]: deal 10 damage to a random enemy.",
+   effects: [{op: plan, then: [{op: damage, amount: 10, target: random_enemy}]}]}
+
+- {id: proto_kk_read_the_field, name: "Read the Field", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 3 Block. [gold]Plan[/gold]: gain 4 Block.",
+   effects: [{op: block, amount: 3},
+             {op: plan, then: [{op: block, amount: 4}]}]}
+
+- {id: proto_kk_feint, name: "Feint", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 4 damage. [gold]Plan[/gold]: deal 8 damage to the same enemy.",
+   effects: [{op: damage, amount: 4, target: enemy},
+             {op: plan, then: [{op: damage, amount: 8, target: enemy}]}]}
+
+- {id: proto_kk_contingency, name: "Contingency", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Exhaust. [gold]Plan[/gold]: [gold]Mend[/gold] 6.",
+   effects: [{op: plan, then: [{op: mend, amount: 6}]}]}
+
+- {id: proto_kk_treatise, name: "Treatise", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever a [gold]Plan[/gold] resolves, draw 1 card.",
+   effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}]}
+
+- {id: proto_kk_war_council, name: "War Council", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "[gold]Exert[/gold] 2. [gold]Plan[/gold]: play the top 2 cards of your draw pile for free.",
+   effects: [{op: exert, amount: 2},
+             {op: plan, then: [{op: play_top_of_draw, amount: 2}]}]}
+
+- {id: proto_kk_the_art_of_war, name: "The Art of War", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "[gold]Plans[/gold] also happen now.",
+   effects: [{op: apply_power, power: kk_art_of_war, amount: 1, target: self}]}
+
+# --- Commander: Gorou, go (packet sec.4) ---
+
+- {id: proto_kk_rally, name: "Rally", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Draw a [gold]Companion[/gold] card from your draw pile. [gold]Tide[/gold] +2.",
+   effects: [{op: draw_companion_from_draw},
+             {op: gain_tide, amount: 2}]}
+
+- {id: proto_kk_vanguard, name: "Vanguard", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "[gold]Exert[/gold] 1. The next [gold]Companion[/gold] you play this turn costs 0.",
+   effects: [{op: exert, amount: 1},
+             {op: next_companion_free}]}
+
+- {id: proto_kk_orders, name: "Orders", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you play a [gold]Companion[/gold], [gold]Tide[/gold] +2.",
+   effects: [{op: apply_power, power: kk_orders, amount: 2, target: self}]}
+
+- {id: proto_kk_the_generals_banner, name: "The General's Banner", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "The first [gold]Companion[/gold] you play each turn is played twice.",
+   effects: [{op: apply_power, power: kk_generals_banner, amount: 1, target: self}]}
+
+# --- currencies and defence (packet sec.4) ---
+
+- {id: proto_kk_quiet_study, name: "Quiet Study", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 4 Block. [gold]Tide[/gold] +2.",
+   effects: [{op: block, amount: 4},
+             {op: gain_tide, amount: 2}]}
+
+- {id: proto_kk_salt_line, name: "Salt Line (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common, exhaust: true,
+   description: "Exhaust. Gain 7 Block.",
+   effects: [{op: block, amount: 7}]}
+
+- {id: proto_kk_cleansing_tide, name: "Cleansing Tide (proto)", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Exhaust. [gold]Mend[/gold] 6.",
+   effects: [{op: mend, amount: 6}]}
+
+- {id: proto_kk_the_clouds_like_waves, name: "The Clouds Like Waves", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "While you are under half HP, the pulse [gold]Mends[/gold] 4.",
+   effects: [{op: apply_power, power: kk_clouds_like_waves, amount: 4, target: self}]}
+
+- {id: proto_kk_reading_the_tide, name: "Reading the Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Draw 1 card per 5 [gold]Tide[/gold].",
+   effects: [{op: draw_per_tide, amount: 1, per: 5}]}
+
+- {id: proto_kk_coral_bulwark, name: "Coral Bulwark", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: skill, rarity: uncommon,
+   description: "Gain 6 Block. [gold]Tide[/gold] +6.",
+   effects: [{op: block, amount: 6},
+             {op: gain_tide, amount: 6}]}
+
+- {id: proto_kk_watatsumis_blessing, name: "Watatsumi's Blessing", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: skill, rarity: rare, exhaust: true,
+   description: "Exhaust. [gold]Mend[/gold] 12. [gold]Tide[/gold] +6.",
+   effects: [{op: mend, amount: 12},
+             {op: gain_tide, amount: 6}]}
