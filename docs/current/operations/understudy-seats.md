@@ -845,9 +845,30 @@ NUMBERED, in printed order, the way a map fork's nodes carry `(path N)`:
 `Water's Edge (1)` / `Water's Edge (2)`, `Slug (1)` / `Slug (2)`. The render
 prints the number and the grammar accepts it; a name that is unique on its
 screen is never numbered and stays valid bare; a bare name that is not unique
-is refused with the numbered forms listed back (`EB-177`). The `(upgraded)` /
+is refused with the numbered forms listed back (`EB-177`). **A number that has
+gone STALE is accepted where one copy remains** (`EB-271`): the page re-counts
+its list on every screen, so `Duck and Cover (1)` names a different card once
+the other copy leaves, and the suffix is stripped and retried when the bare
+name resolves to exactly one thing — a number that is still ambiguous is still
+refused, with the names that would have worked. The `(upgraded)` /
 `(not upgraded)` qualifier (`EB-173`) is unchanged and still separates a base
-copy from an upgraded one, which the fold keeps as two different names. **session** is the driver: one `codex exec` thread for the
+copy from an upgraded one, which the fold keeps as two different names.
+
+**Three more things the page and the grammar now do.** The game's rich-text
+markup is folded out of every printed name and body through
+`qa_packet.strip_markup` (`EB-246`) — the SAME fold `scenario.card_key` uses,
+so a *Choose one* option has one printed name rather than one on the staged
+packet and another here; an UNPAIRED bracketed token is left alone on purpose,
+so a bracketed card id is never laundered past the leak guard. A potion is
+posted into the slot the WIRE gave it rather than its position in the belt,
+and an aimed potion is aimed before it is posted while a self-aimed one carries
+no target (`EB-269`, `ExecuteUsePotion`'s own table) — and the game's refusal
+reaches the page as WORDS, because the bridge writes its reason under `error`
+and this read only `message`. And the six LIVE arm keywords — Bomb, Set off,
+Spark, Mine, Plan, Mend — get **one definition each, once per screen**, under
+*Words on this screen* (`EB-272`), wherever the word reaches the page; the
+sentences are `Cards/Prototype/ArmKeywordTips.cs`'s own, held in step from the
+test side. **session** is the driver: one `codex exec` thread for the
 whole run, one command per screen, the fight and run records at the ends, and
 budgets on actions, wall time and consecutive refusals. All of it is built on
 `naming` / `staged_turn.execute`'s title resolution and **never on
@@ -887,7 +908,7 @@ labelled with the file it came from, `mods\klee\manifest.json` and
 `release_info.json`, never the bridge's health payload, which carries the
 vendored bridge's own version and never ours — run seed read back off the
 wire, prompt sha256, action count, termination reason) and the model's
-records verbatim under the R217 G label. The author's own model family is refused as tester (R217 C). Beside it, `wire.json` carries the **per-turn wire snapshot** (`EB-216` / `M56`): one machine-written row per play and per `end turn` — turn, energy, every meter (BaseLib's registered resources AND the power-shaped ones, which is where Sparks ride), the hand with its printed energy and Spark prices, the Kurage queue strip where the build serves one, and the enemy count with intents — lifted off the API and **never shown to the tester**, because the tester's page is the grading surface and this is the grader's (R101b); each row also carries the **meter ledger** the play minted (R225: `before / price paid / gains by source / after`, read after the POST off `GET /api/v1/gits/meter_ledger`, with `blindplay.read_snapshots` and `blindplay.meter_plays` as the grader's read — instrument only, and nothing already published is re-graded on it).
+records verbatim under the R217 G label. The author's own model family is refused as tester (R217 C). Beside it, `wire.json` carries the **per-turn wire snapshot** (`EB-216` / `M56`): one machine-written row per play and per `end turn` — turn, energy, every meter (BaseLib's registered resources AND the power-shaped ones, which is where Sparks ride), the hand with its printed energy and Spark prices, the Kurage queue strip and the pending PLANS with their targets where the build serves them (`EB-273`, the same absent / empty / populated contract), and the enemy count with intents — lifted off the API and **never shown to the tester**, because the tester's page is the grading surface and this is the grader's (R101b); each row also carries the **meter ledger** the play minted (R225: `before / price paid / gains by source / after`, read after the POST off `GET /api/v1/gits/meter_ledger`, with `blindplay.read_snapshots` and `blindplay.meter_plays` as the grader's read — instrument only, and nothing already published is re-graded on it).
 
 **After PLAYABLE.** A prototype arm the pair read calls PLAYABLE goes to **whole-fight
 blind play on a dev build**, automatically. It is the next gate, not a pick, and
