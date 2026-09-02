@@ -180,6 +180,15 @@ REGISTRY: tuple[Lint, ...] = (
     # seatless combat: d217b4f, two whole blind sessions). Exemptions are
     # `// lint: no-seat` markers and are printed on every run, green or red.
     _ci("prototype-patch-scope", "tools/lint_prototype_patch_scope.py"),
+    # 2026-09-02, the fourth row on the same surface for the fourth hazard:
+    # the codegen gate asks whether the surface matches the C#, authorship who
+    # wrote it, patch-scope whether the C# is safe to run, and this asks
+    # whether what it PRINTS is a card and not a paragraph -- every
+    # prototype-arm face, tip, badge, relic and prompt against the ceilings
+    # measured on the base game's own loc tables and the spellings
+    # `docs/current/text-conventions.md` fixes. Carries a curated exception
+    # list with a reason per entry and rot semantics, so it can only shrink.
+    _ci("text-conventions",     "tools/lint_text_conventions.py"),
     _ci("pool-membership",      "tools/lint_pool_membership.py"),
     _ci("ancient-coverage",     "tools/lint_ancient_coverage.py"),
     # EB-255, beside pool-membership's family because it asks the other

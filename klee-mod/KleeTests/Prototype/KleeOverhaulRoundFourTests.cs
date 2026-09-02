@@ -69,12 +69,12 @@ public class KleeOverhaulRoundFourTests
 
         Assert.DoesNotContain("(", face);
         Assert.DoesNotContain("of them", face);
-        Assert.Contains("A [gold]Set off[/gold] here deals {Size} Pyro damage "
-                        + "in total.", face);
+        Assert.Contains("[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
+                        + "Pyro damage.", face);
         // `EB-289`: `{Count}`, not `{Amount}` -- see the test below and
         // `ProtoBombPower.Bombs` for why the stack amount could not be it.
-        Assert.Contains(" Bombs here: {Count}.", face);
-        Assert.EndsWith(" Each grows at the start of your turn, and none goes "
+        Assert.Contains(" Bombs here: [blue]{Count}[/blue].", face);
+        Assert.EndsWith(" Each grows at the start of your turn. None goes "
                         + "off by itself.", face);
     }
 
@@ -119,7 +119,7 @@ public class KleeOverhaulRoundFourTests
         // The seat's own board: Bomb 17, Set off deals 12.
         Assert.Equal(12, pile.PredictedSetOffDamage());
         Assert.EndsWith(".smartDescriptionWeak", LocKey(pile));
-        Assert.Contains("{Size} Pyro damage in total, after [gold]Weak[/gold].",
+        Assert.Contains("[blue]{Size}[/blue] Pyro damage after [gold]Weak[/gold].",
                         Row(pile, "smartDescriptionWeak"));
     }
 
@@ -150,11 +150,11 @@ public class KleeOverhaulRoundFourTests
         Assert.Equal(
             Row(pile, "smartDescription"),
             Row(pile, "smartDescriptionWeak")
-                .Replace(", after [gold]Weak[/gold]", string.Empty));
+                .Replace(" after [gold]Weak[/gold]", string.Empty));
         Assert.Equal(
             Row(pile, "smartDescriptionMines"),
             Row(pile, "smartDescriptionMinesWeak")
-                .Replace(", after [gold]Weak[/gold]", string.Empty));
+                .Replace(" after [gold]Weak[/gold]", string.Empty));
     }
 
     [Fact]
@@ -179,9 +179,8 @@ public class KleeOverhaulRoundFourTests
         var printed = string.Concat(Il.Strings(
             typeof(ArmKeywordTips).GetMethod("ForBomb", HeadlessGame.All)!));
 
-        Assert.Contains("A Bomb placed on an enemy that already has one joins "
-                        + "it there: the badge shows their total, and a single "
-                        + "[gold]Set off[/gold] pops them all.", printed);
+        Assert.Contains("Bombs on one enemy go off together when "
+                        + "[gold]Set off[/gold].", printed);
     }
 
     [Fact]

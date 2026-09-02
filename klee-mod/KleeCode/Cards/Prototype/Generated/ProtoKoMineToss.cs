@@ -42,7 +42,7 @@ public sealed class ProtoKoMineToss : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mine Toss"),
-        ("description", "Place a [gold]Mine[/gold] {BombSize:diff()} on every enemy."),
+        ("description", "Place a [gold]Mine[/gold] {BombSize:diff()} on ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

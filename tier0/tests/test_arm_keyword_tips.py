@@ -264,25 +264,26 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
     packets; `Mend`'s bound is the one `EB-272` names outright."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     for clause in (
-            # Klee, klee-overhaul-slice-1-2026-09-01.md sec.2 rules 1/2/4/6.
-            "A numbered charge on an enemy. It grows by ",
-            " at the start of your turn and never ",
-            "goes off by itself.",
-            "on the target goes off, one at a time, ",
-            "each a Pyro hit for its size, before the rest of the card.",
-            " whenever a ",
-            "instead of energy. No cap; ",
-            "gone at the end of combat.",
+            # Klee, klee-overhaul-slice-1-2026-09-01.md sec.2 rules 1/2/4/6,
+            # in the shape docs/current/text-conventions.md sets (one clause
+            # per sentence, under the keyword-tip ceiling).
+            "A charge on an enemy. Grows by ",
+            " at the start of your turn. Never goes off by itself. Bombs on ",
+            "one enemy go off together when [gold]Set off[/gold].",
+            "on the target goes off first, one at a ",
+            "time, each a Pyro hit for its size.",
+            "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
+            "Start each combat with ",
+            ". Pounding Surprise grants more. ",
+            "Gone after combat.",
             "that also goes off when its enemy attacks ",
             "you, before the hit lands.",
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.
-            "Play this on the [gold]Bake-Kurage[/gold] instead and the ",
-            "jellyfish carries out the [gold]Plan[/gold] line at the start of ",
-            "your next turn.",
-            "The cost is paid now either way, and planned hits ",
-            "land on the front enemy unless the line says every enemy.",
+            "Play this on the [gold]Bake-Kurage[/gold]: it carries out the ",
+            "[gold]Plan[/gold] line at the start of your next turn. Cost is ",
+            "paid now. Plans hit the front enemy.",
             "heal N HP, never above the HP you entered ",
     ):
         assert clause in tips, clause

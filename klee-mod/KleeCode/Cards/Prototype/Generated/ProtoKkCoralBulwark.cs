@@ -45,7 +45,7 @@ public sealed class ProtoKkCoralBulwark : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Coral Bulwark"),
-        ("description", "Gain {Block:diff()} Block. [gold]Plan[/gold]: Gain 6 Block and the front enemy gains 1 Weak."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] and apply 1 [gold]Weak[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

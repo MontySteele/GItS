@@ -42,7 +42,7 @@ public sealed class ProtoKoGrounded : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grounded"),
-        ("description", "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain {PowerAmount:diff()} Block."),
+        ("description", "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

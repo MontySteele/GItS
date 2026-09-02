@@ -56,7 +56,7 @@ public sealed class ProtoMcSucroseAstable : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Astable Anemohypostasis (proto)"),
-        ("description", "[gold]Swirl[/gold] the aura of ALL enemies."),
+        ("description", "[gold]Swirl[/gold] ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

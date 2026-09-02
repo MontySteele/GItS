@@ -56,7 +56,7 @@ public sealed class ProtoMcBarbaraShowBegin : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara — Let the Show Begin♪ (proto)"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to target enemy."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

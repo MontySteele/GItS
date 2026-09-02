@@ -51,7 +51,7 @@ public sealed class ProtoKkSangoIsshin : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sango Isshin (proto)"),
-        ("description", "Deal damage equal to a quarter of your Max HP. [gold]Plan[/gold]: the same to every enemy."),
+        ("description", "Deal damage equal to a quarter of your Max HP. [gold]Plan[/gold]: Deal the same to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

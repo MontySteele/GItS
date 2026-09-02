@@ -31,7 +31,7 @@ public sealed class ExplosivesWorkshopGrowthPower : PowerModel, ILocalizationPro
         ("title", "Explosives Workshop"),
         ("description",
             "At the start of your turn, your [gold]Bombs[/gold] grow by "
-          + "{Amount} more."),
+          + "[blue]{Amount}[/blue] more."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -50,9 +50,8 @@ public sealed class AlicesRecipePower : PowerModel, ILocalizationProvider
     {
         ("title", "Alice's Recipe"),
         ("description",
-            "Your [gold]Bombs[/gold] grow by " + KleeOverhaulLaw.AliceGrowth
-          + " at the start of your turn instead of "
-          + KleeOverhaulLaw.BombGrowth + "."),
+            "Your [gold]Bombs[/gold] grow by [blue]" + KleeOverhaulLaw.AliceGrowth
+          + "[/blue] instead of [blue]" + KleeOverhaulLaw.BombGrowth + "[/blue]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -80,7 +79,7 @@ public sealed class ChainedReactionsPower
         ("title", "Chained Reactions"),
         ("description",
             "Whenever one of your [gold]Bombs[/gold] goes off, place a "
-          + "{Amount} [gold]Bomb[/gold] on a random enemy."),
+          + "[gold]Bomb[/gold] [blue]{Amount}[/blue] on a random enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -166,8 +165,8 @@ public sealed class BombReactionSparkPower
         ("title", "Catalytic Converter"),
         ("description",
             "Whenever one of your [gold]Bombs[/gold] triggers an "
-          + "[gold]Elemental Reaction[/gold], gain {Amount} extra "
-          + "[gold]Spark[/gold]."),
+          + "[gold]Elemental Reaction[/gold], gain [blue]{Amount}[/blue] "
+          + "additional [gold]Spark[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -200,7 +199,7 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
         ("title", "Grounded"),
         ("description",
             "At the start of your turn, if none of your [gold]Bombs[/gold] "
-          + "went off last turn, gain {Amount} Block."),
+          + "went off last turn, gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

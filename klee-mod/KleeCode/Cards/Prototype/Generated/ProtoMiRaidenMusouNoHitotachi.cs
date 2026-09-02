@@ -59,7 +59,7 @@ public sealed class ProtoMiRaidenMusouNoHitotachi : CustomCardModel, IElementalC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Raiden Shogun — Musou no Hitotachi (proto)"),
-        ("description", "Deal 20 damage. Deals 5 more for each [gold]Companion[/gold] card you played this combat."),
+        ("description", "Deal 20 damage. Deals 5 additional damage for each [gold]Companion[/gold] card you played this combat."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -24,6 +24,14 @@ patch there must be character-scoped and seat-guarded (`LocalContext.GetMe`
 THROWS on a seatless combat — `d217b4f`), and the only exemption is a
 `// lint: no-seat: <reason>` marker, which the tool prints on every run.
 
+`lint_text_conventions.py` (2026-09-02) is in the `ci` lane too: every
+prototype-arm face, keyword tip, power badge, relic and prompt against the
+length ceilings measured on the base game's own loc tables and the spellings
+`docs/current/text-conventions.md` fixes, with a curated exception list (a
+reason per entry, rot semantics). `--self-test` fails it on a fixture,
+`--shipped` reports the shipped sheets without gating them, `--census` prints
+every string with its length.
+
 Local-only (not in CI): `lint_text_encoding.py`, `lint_generated_structure.py`,
 `art_lint.py`, `card_distinctness_report.py --gate`,
 `lint_game_ref_backup.py`, `dump_claimed_sources.py`.

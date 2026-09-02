@@ -59,7 +59,7 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Durin — Binary Form"),
-        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies, then choose one for the fight. [gold]White[/gold]: enemies take 50% more damage from reactions. [gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies, then choose one for the combat. [gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
@@ -69,7 +69,7 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "[gold]White[/gold]: enemies take 50% more damage from reactions", "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage" };
+        new[] { "[gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]", "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };
@@ -103,7 +103,7 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
             ModalChoice.CreateOption<ProtoMcDurinBinaryFormModeB>(Owner),
         };
         var modeIndex = await ModalChoice.SelectMode(choiceContext, Owner, modeOptions);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "[gold]White[/gold]: enemies take 50% more damage from reactions", "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "[gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]", "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage" }[modeIndex]);
         if (modeIndex == 0)
         {
             await PowerCmd.Apply<BinaryFormWhitePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
@@ -129,8 +129,8 @@ public sealed class ProtoMcDurinBinaryFormModeA : ModalOptionCard
 {
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "[gold]White[/gold]: enemies take 50% more damage from reactions"),
-        ("description", "[gold]White[/gold]: enemies take 50% more damage from reactions"),
+        ("title", "[gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]"),
+        ("description", "[gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]"),
     };
 }
 
@@ -143,7 +143,7 @@ public sealed class ProtoMcDurinBinaryFormModeB : ModalOptionCard
 {
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage"),
-        ("description", "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 more damage"),
+        ("title", "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage"),
+        ("description", "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage"),
     };
 }

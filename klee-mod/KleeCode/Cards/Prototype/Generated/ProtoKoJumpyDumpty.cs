@@ -42,7 +42,7 @@ public sealed class ProtoKoJumpyDumpty : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Dumpty"),
-        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. When it goes off, place a [gold]Mine[/gold] {PayloadMine:diff()} on every enemy."),
+        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. When it goes off, place a [gold]Mine[/gold] {PayloadMine:diff()} on ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

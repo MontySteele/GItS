@@ -48,7 +48,7 @@ public sealed class ProtoKkMoonsReflection : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Moon's Reflection"),
-        ("description", "Choose a card in your exhaust pile: [gold]Plan[/gold]: the jellyfish carries out its [gold]Plan[/gold] line, or the card itself if it has none."),
+        ("description", "Choose a card in your [gold]Exhaust Pile[/gold]. Next turn, the [gold]Bake-Kurage[/gold] carries out its [gold]Plan[/gold] line, or the card if it has none."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

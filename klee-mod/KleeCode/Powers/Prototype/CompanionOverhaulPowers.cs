@@ -97,8 +97,8 @@ public sealed class SignatureMixPower : PowerModel, ILocalizationProvider
         ("title", "Signature Mix"),
         ("description",
             "At the start of your turn, gain "
-          + $"{CompanionOverhaulLaw.SignatureMixBlock} [gold]Block[/gold]. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+          + $"[blue]{CompanionOverhaulLaw.SignatureMixBlock}[/blue] [gold]Block[/gold]. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -144,10 +144,9 @@ public sealed class RevelationPower : PowerModel, ILocalizationProvider
         ("title", "Revelation, Uncreated Light"),
         ("description",
             "At the start of your turn, gain "
-          + $"{CompanionOverhaulLaw.RevelationBlock} [gold]Block[/gold]. If "
-          + "you had [gold]Block[/gold] left at the end of your last turn, "
-          + $"also gain {CompanionOverhaulLaw.RevelationStrength} "
-          + "[gold]Strength[/gold]."),
+          + $"[blue]{CompanionOverhaulLaw.RevelationBlock}[/blue] [gold]Block[/gold], "
+          + $"and [blue]{CompanionOverhaulLaw.RevelationStrength}[/blue] "
+          + "[gold]Strength[/gold] if you ended last turn with [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -202,7 +201,7 @@ public sealed class StellarisOmenPower : PowerModel, ILocalizationProvider
         ("title", "Stellaris Phantasm"),
         ("description",
             "At the start of your next turn, apply "
-          + $"{CompanionOverhaulLaw.OmenVulnerable} [gold]Vulnerable[/gold] "
+          + $"[blue]{CompanionOverhaulLaw.OmenVulnerable}[/blue] [gold]Vulnerable[/gold] "
           + "to ALL enemies."),
     };
 
@@ -242,9 +241,9 @@ public sealed class GlacialWaltzPower : PowerModel, ILocalizationProvider
         ("title", "Glacial Waltz"),
         ("description",
             "At the end of your turn, deal "
-          + $"{CompanionOverhaulLaw.GlacialWaltzDamage} damage and apply "
-          + "[gold]Cryo[/gold] to a random enemy. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+          + $"[blue]{CompanionOverhaulLaw.GlacialWaltzDamage}[/blue] [gold]Cryo[/gold] "
+          + "damage to a random enemy. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -283,8 +282,8 @@ public sealed class MondstadtOzPower : PowerModel, ILocalizationProvider
         ("title", "Oz, at Your Side"),
         ("description",
             "At the end of your turn, Oz deals "
-          + $"{CompanionOverhaulLaw.OzDamage} damage and applies "
-          + "[gold]Electro[/gold] to a random enemy."),
+          + $"[blue]{CompanionOverhaulLaw.OzDamage}[/blue] [gold]Electro[/gold] "
+          + "damage to a random enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -325,11 +324,11 @@ public sealed class LightningRosePower : PowerModel, ILocalizationProvider
         ("title", "Lightning Rose"),
         ("description",
             "At the end of your turn, deal "
-          + $"{CompanionOverhaulLaw.LightningRoseDamage} damage, apply "
-          + "[gold]Electro[/gold], and apply "
-          + $"{CompanionOverhaulLaw.LightningRoseVulnerable} "
+          + $"[blue]{CompanionOverhaulLaw.LightningRoseDamage}[/blue] "
+          + "[gold]Electro[/gold] damage and apply "
+          + $"[blue]{CompanionOverhaulLaw.LightningRoseVulnerable}[/blue] "
           + "[gold]Vulnerable[/gold] to a random enemy. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -376,8 +375,8 @@ public sealed class GrandOdePower : PowerModel, ILocalizationProvider
     {
         ("title", "Wind's Grand Ode"),
         ("description",
-            "At the end of your turn, [gold]Swirl[/gold] the aura of ALL "
-          + "enemies. Lasts {Amount} more turn{Amount:plural:|s}."),
+            "At the end of your turn, [gold]Swirl[/gold] ALL enemies. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -412,7 +411,7 @@ public sealed class DandelionBreezePower : PowerModel, ILocalizationProvider
         ("description",
             "At the end of your turn, [gold]Swirl[/gold] the enemy with the "
           + "most auras and gain "
-          + $"{CompanionOverhaulLaw.DandelionBreezeBlock} [gold]Block[/gold]."),
+          + $"[blue]{CompanionOverhaulLaw.DandelionBreezeBlock}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -463,8 +462,8 @@ public sealed class SolarIsotomaBloomPower : PowerModel, ILocalizationProvider
         ("title", "Solar Isotoma"),
         ("description",
             "At the end of your turn, if any enemy has an aura, deal "
-          + $"{CompanionOverhaulLaw.IsotomaDamage} damage to that enemy and "
-          + $"gain {CompanionOverhaulLaw.IsotomaBlock} [gold]Block[/gold]."),
+          + $"[blue]{CompanionOverhaulLaw.IsotomaDamage}[/blue] damage to that enemy and "
+          + $"gain [blue]{CompanionOverhaulLaw.IsotomaBlock}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

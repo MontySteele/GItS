@@ -90,11 +90,9 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForBomb(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
-            "A numbered charge on an enemy. It grows by "
-          + KleeOverhaulLaw.BombGrowth + " at the start of your turn and never "
-          + "goes off by itself. A Bomb placed on an enemy that already has "
-          + "one joins it there: the badge shows their total, and a single "
-          + "[gold]Set off[/gold] pops them all.");
+            "A charge on an enemy. Grows by " + KleeOverhaulLaw.BombGrowth
+          + " at the start of your turn. Never goes off by itself. Bombs on "
+          + "one enemy go off together when [gold]Set off[/gold].");
 
     /// <summary>Rule 2, and the one [USER] named ("Set Off has no tooltip
     /// text"). The ORDER clause is the load-bearing half: the explosions land
@@ -103,8 +101,8 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForSetOff(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SetOffKey,
-            "Every [gold]Bomb[/gold] on the target goes off, one at a time, "
-          + "each a Pyro hit for its size, before the rest of the card.");
+            "Every [gold]Bomb[/gold] on the target goes off first, one at a "
+          + "time, each a Pyro hit for its size.");
 
     /// <summary>Rule 4. The gain rate is read from
     /// <see cref="KleeOverhaulLaw.SparkPerExplosion"/>, which is also
@@ -131,18 +129,17 @@ public static class ArmKeywordTips
     /// </summary>
     private static string SparkBody()
     {
-        const string shared =
-            "Some cards cost [gold]Sparks[/gold] instead of energy. No cap; "
-          + "gone at the end of combat.";
-        if (!KleeOverhaul.Enabled) return shared;
+        const string word =
+            "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ";
+        const string shared = "Gone after combat.";
+        if (!KleeOverhaul.Enabled) return word + shared;
         // R242 pick 1 put the opening bank INTO rule 4, and the tip is where a
         // player meets the word: a Spark-priced card in an opening hand is
         // exactly the moment the r4 seat found unplayable by construction, and
         // the sentence that fixes it belongs beside the one that was already
         // there rather than on a relic the player may not have read.
-        return "You start each combat with " + KleeOverhaulLaw.OpeningSpark
-             + " and gain " + KleeOverhaulLaw.SparkPerExplosion
-             + " whenever a [gold]Bomb[/gold] goes off. " + shared;
+        return word + "Start each combat with " + KleeOverhaulLaw.OpeningSpark
+             + ". Pounding Surprise grants more. " + shared;
     }
 
     /// <summary>
@@ -164,9 +161,8 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
-          + "you, before the hit lands. It is the same Pyro hit for its own "
-          + "size, so [gold]Weak[/gold] shrinks it exactly as it shrinks a "
-          + "[gold]Set off[/gold]; the enemy's badge prints the number.");
+          + "you, before the hit lands. [gold]Weak[/gold] shrinks it like any "
+          + "Bomb; the badge shows the number.");
 
     // ---------------------------------------------------------- Kokomi -----
     //
@@ -193,12 +189,9 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "Play this on the [gold]Bake-Kurage[/gold] instead and the "
-          + "jellyfish carries out the [gold]Plan[/gold] line at the start of "
-          + "your next turn. The cost is paid now either way, and planned hits "
-          + "land on the front enemy unless the line says every enemy. A card "
-          + "with nothing but a [gold]Plan[/gold] line can only be played on "
-          + "the jellyfish, and says so.");
+            "Play this on the [gold]Bake-Kurage[/gold]: it carries out the "
+          + "[gold]Plan[/gold] line at the start of your next turn. Cost is "
+          + "paid now. Plans hit the front enemy.");
 
     /// <summary>
     /// THE BOUND IS THE WHOLE POINT OF THIS ROW'S SECOND HALF. The Casket read
@@ -228,8 +221,8 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForSwirl(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SwirlKey,
-            "Anemo meets an existing aura: the aura is consumed and copied "
-          + "onto all enemies. An enemy carrying no aura is unchanged.");
+            "The enemy's aura is consumed and copied onto ALL enemies. No "
+          + "aura, no effect.");
 
     /// <summary>
     /// One tip, appended after whatever the card already carries.

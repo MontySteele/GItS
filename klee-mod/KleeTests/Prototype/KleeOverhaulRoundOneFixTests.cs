@@ -93,9 +93,12 @@ public class KleeOverhaulRoundOneFixTests
         // The mutation guard on both rows at once: they may not drift into two
         // descriptions of the same power. `EB-287` moved the Mine COUNT out of
         // the old parenthetical and into the sentence that counts the Bombs,
-        // so the mined row differs in exactly two places instead of one -- and
-        // this says which two by subtracting them and demanding what is left
-        // be the plain row, character for character.
+        // and the text-conventions pass made the Mine sentence REPLACE "none
+        // goes off by itself" rather than follow it (a pile holding a Mine
+        // does answer the enemy's attack, which is `EB-260`'s whole point) --
+        // so the mined row differs in exactly two places, and this says which
+        // two by substituting them back and demanding what is left be the
+        // plain row, character for character.
         var klee = Seat.Klee();
         var enemy = Seat.Klee(30).Creature;
         var pile = ProtoBombs.Place(enemy, klee.Creature,
@@ -104,10 +107,11 @@ public class KleeOverhaulRoundOneFixTests
         var mined = Row(pile, "smartDescriptionMines");
         Assert.Equal(
             Row(pile, "smartDescription"),
-            mined.Replace(", including {Mines} [gold]Mine{Mines:plural:|s}[/gold]",
-                          string.Empty)
+            mined.Replace(", including [blue]{Mines}[/blue] "
+                          + "[gold]Mine{Mines:plural:|s}[/gold]", string.Empty)
                  .Replace(" A [gold]Mine[/gold] also goes off when this enemy "
-                          + "attacks you, before the hit lands.", string.Empty));
+                          + "attacks you, before the hit lands.",
+                          " None goes off by itself."));
         // And the static tooltip carries the identical sentence -- one clause,
         // two surfaces, which is what stopped them disagreeing in the first
         // place.

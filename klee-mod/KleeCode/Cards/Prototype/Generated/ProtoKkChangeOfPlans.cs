@@ -48,7 +48,7 @@ public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Change of Plans"),
-        ("description", "The jellyfish carries out your front [gold]Plan[/gold] now."),
+        ("description", "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

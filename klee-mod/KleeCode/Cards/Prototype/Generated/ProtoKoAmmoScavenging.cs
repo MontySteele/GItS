@@ -42,7 +42,7 @@ public sealed class ProtoKoAmmoScavenging : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ammo Scavenging"),
-        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. Draw a card for each of your [gold]Bombs[/gold] that went off this turn."),
+        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. Draw 1 card for each of your [gold]Bombs[/gold] that went off this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

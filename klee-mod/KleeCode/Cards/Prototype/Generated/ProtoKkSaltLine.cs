@@ -44,7 +44,7 @@ public sealed class ProtoKkSaltLine : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Salt Line (proto)"),
-        ("description", "Gain {Block:diff()} Block."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

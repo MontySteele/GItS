@@ -52,7 +52,7 @@ public sealed class ProtoMiYoimiyaAurousBlaze : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yoimiya — Aurous Blaze"),
-        ("description", "Mark an enemy for {PowerAmount:diff()} turns. Whenever it takes damage from a card that is not an [gold]Attack[/gold], deal 6 [gold]Pyro[/gold] damage to ALL enemies."),
+        ("description", "For {PowerAmount:diff()} turns, whenever the enemy takes damage from a non-Attack card, deal 6 [gold]Pyro[/gold] damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -51,7 +51,7 @@ public sealed class ProtoKkDeepCurrent : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deep Current"),
-        ("description", "Deal {Damage:diff()} damage to every enemy."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

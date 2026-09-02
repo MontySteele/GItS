@@ -73,8 +73,8 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
             // Neither sentence is wrong and neither can be deleted -- the
             // keyword has to define the word for a player who has not read the
             // relic -- so the relic says which one of them it is.
-            "Sparks come from this: whenever a [gold]Bomb[/gold] goes off, "
-          + "gain 1 [gold]Spark[/gold]. "
+            "Whenever a [gold]Bomb[/gold] goes off, gain [blue]"
+          + KleeOverhaulLaw.SparkPerExplosion + "[/blue] [gold]Spark[/gold]. "
 #else
             "Whenever a [gold]Bomb[/gold] detonates, gain 1 [gold]Spark[/gold]. "
 #endif

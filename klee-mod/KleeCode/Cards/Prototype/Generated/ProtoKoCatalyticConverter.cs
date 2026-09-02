@@ -42,7 +42,7 @@ public sealed class ProtoKoCatalyticConverter : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Catalytic Converter"),
-        ("description", "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], gain 1 extra [gold]Spark[/gold]. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], gain 1 additional [gold]Spark[/gold]. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
