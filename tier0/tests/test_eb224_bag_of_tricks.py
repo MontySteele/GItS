@@ -211,8 +211,12 @@ def test_no_offer_surface_can_reach_the_row_on_either_flag(flag, monkeypatch):
     with the Spark arm ON as well as off, because this row is not in the
     substitution map at all -- the flag is not what is keeping it away."""
     monkeypatch.setattr(C, "SPARK_ALT_COST_ENABLED", flag)
-    loader._card_prototype.cache_clear()
-    loader._substituted_card_index.cache_clear()
+    # `loader.reset_caches()` rather than two loader memos by name: its own
+    # docstring is the rule, and clearing `_substituted_card_index` alone
+    # leaves `upgrades._upgrade_index` memoized against a substitution table
+    # that no longer exists -- an id it says can be smithed and `get_card` can
+    # then no longer resolve.
+    loader.reset_caches()
     rewards.character_pool.cache_clear()
     try:
         pool = [c.id for cards in rewards.character_pool("klee").values()
@@ -220,8 +224,7 @@ def test_no_offer_surface_can_reach_the_row_on_either_flag(flag, monkeypatch):
         assert ROW_ID not in pool
         assert ROW_ID not in loader._card_index()
     finally:
-        loader._card_prototype.cache_clear()
-        loader._substituted_card_index.cache_clear()
+        loader.reset_caches()
         rewards.character_pool.cache_clear()
 
 
