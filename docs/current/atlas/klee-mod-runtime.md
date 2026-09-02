@@ -65,6 +65,21 @@ In-game there is no CLI: `KleeMod.Initialize` is the only entry
 - **Element travels on the CARD, not the damage instance** (`IElementalCard`);
   card-less damage (bombs, the Burst volley, DoT ticks) routes through
   `ElementalHit` — `Elements/Element.cs:20-34`, `Powers/ElementalHit.cs:10-23`.
+- **The element a card applies is a GEM on the face, never a sentence in the
+  rules box.** [USER], 2026-09-01: *"instead of saying 'applies pyro' - maybe
+  make it a card indicator as well to remove text overhead? That would be a
+  universal shift."* The four `KleeKeywords.Applies*` fields carry
+  `AutoKeywordPosition.None`; `After` is what fed BaseLib's
+  `AdditionalAfterKeywords` and made `CardModel.BuildDescription` append the
+  line, so that one attribute is the whole of the removal — 114 faces across
+  every sheet and both quarantined arms at once. **The TIP is untouched:**
+  `CardModel.HoverTips` walks `Keywords` and never the printed text, which is
+  why `Bomb` and the eight reaction previews have always hovered at `None`.
+  `Vfx/ElementBadge.cs` reads the SAME keyword to hang the aura's own icon on
+  `%TypePlaque` — ANCHORED to the plaque, never positioned from its rect,
+  because `NCard.UpdateTypePlaqueSizeAndPosition` is deferred — so the gem, the
+  tip and the sheet's cadence are one declaration. Pinned at
+  `KleeTests/ElementBadgeTests.cs` and `tier0/tests/test_element_badge.py`.
 - **Unpowered mirror hits re-apply Strength/Weak/Vulnerable by hand** (native
   powers gate on `IsPoweredAttack()`, which these deliberately fail) and truncate
   exactly ONCE — `Powers/SimDamagePipeline.cs:12-28`, `Powers/ElementalHit.cs:16-23`.
