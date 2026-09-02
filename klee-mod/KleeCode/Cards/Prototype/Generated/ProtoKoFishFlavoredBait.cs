@@ -54,8 +54,8 @@ public sealed class ProtoKoFishFlavoredBait : CustomCardModel, IElementalCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move),
-            new DynamicVar("BombSize", 5m)
+            new DamageVar(4m, ValueProp.Move),
+            new DynamicVar("BombSize", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

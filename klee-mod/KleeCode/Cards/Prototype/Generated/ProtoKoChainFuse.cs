@@ -48,7 +48,7 @@ public sealed class ProtoKoChainFuse : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Grow", 3m)
+            new DynamicVar("Grow", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

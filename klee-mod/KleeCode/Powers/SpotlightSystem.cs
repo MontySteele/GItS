@@ -136,8 +136,20 @@ public static class SpotlightSystem
 
     /// <summary>Is Center Stage's half in force -- her own cards generate
     /// Fanfare? True under the mode, or unconditionally when upgraded.</summary>
-    private static bool CenterStageActive(Creature creature) =>
-        Mode(creature) == SpotlightMode.CenterStage || BothModes(creature);
+    private static bool CenterStageActive(Creature creature)
+    {
+#if PROTOTYPE_CARDS
+        // R228 (1): Center Stage RETIRES, so its half is False everywhere --
+        // including under the upgraded relic, which is why this test sits
+        // ABOVE the both-modes branch. "Both modes at once" is meaningless
+        // with one mode, and the relic's re-authoring is deferred with the
+        // rest of the sheet work (packet §11). Mirrors tier0
+        // `effects.center_stage_active`, which puts its flag test in exactly
+        // the same place for exactly this reason.
+        if (FurinaReframe.SpotlightLiveFor(creature)) return false;
+#endif
+        return Mode(creature) == SpotlightMode.CenterStage || BothModes(creature);
+    }
 
     /// <summary>Is Guest Cast's half in force -- Companions are multiplied?
     /// True under the mode, or unconditionally when upgraded.</summary>
@@ -201,6 +213,66 @@ public static class SpotlightSystem
                 applier: creature, cardSource: cardSource);
         }
     }
+
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// THE ONE-MODE, PRICED SELECTOR -- R228 option (1), and the whole of the
+    /// reframe's SPOTLIGHT leg beside <see cref="CenterStageActive"/>'s
+    /// retirement.
+    ///
+    /// Center Stage retires; Guest Cast and
+    /// <see cref="GuestCastBaseMultiplier"/> stay exactly as they ship; and
+    /// the selector stops running a heuristic between two modes and instead
+    /// COSTS Encore. The ruling names the risk itself -- a THIRD claim on one
+    /// unbounded buffer, beside Encore's deferred Block and the Evoke price --
+    /// and rules that the price is MEASURED rather than assumed away.
+    ///
+    /// RE-AIMING AT THE SAME TARGET BILLS NOTHING. It buys nothing, so it
+    /// cannot be allowed to bill for nothing either; the early-out is above
+    /// the price for that reason and not for tidiness.
+    ///
+    /// UNPAID IS A NO-OP, NOT A DISCOUNT. A designation that could not be paid
+    /// for leaves the Spotlight where it was and says so, because the
+    /// alternative -- aiming for free when the buffer is empty -- is exactly
+    /// the "free when under-priced" failure the ruling flags.
+    ///
+    /// THE SPEND IS THE SHIPPED SPEND, through
+    /// <see cref="FurinaResources.SpendEncore"/>, which under the shipped rule
+    /// mints Fanfare and feeds Burst. That is the sim's call too
+    /// (<c>resources.spend_encore(state, price, "spotlight_designate")</c>):
+    /// the SPOTLIGHT leg prices a designation, and whether an Encore spend
+    /// still mints is the METER leg's question, asked in one place.
+    ///
+    /// WHAT IS DEFERRED, so the absence is not read as a decision: R228's
+    /// selector "aims a Companion", and this slice aims the Companion CATEGORY
+    /// -- the shipped Guest Cast mode -- rather than a named Companion. The
+    /// named-target half needs a new target type on the designation and a face
+    /// that can print it; §11 of the packet carries it as deferred with its
+    /// reason, and the sim's slice stops at the same line.
+    ///
+    /// Mirrors tier0 <c>effects._spotlight_designate_one_mode</c>.
+    /// </summary>
+    public static async Task DesignateOneMode(
+        PlayerChoiceContext choiceContext, Creature creature,
+        CardModel? cardSource)
+    {
+        if (!FurinaReframe.SpotlightLiveFor(creature)) return;
+        if (Mode(creature) == SpotlightMode.GuestCast)
+        {
+            FurinaReframeLedger.For(creature).NoteDesignationRedundant();
+            return;
+        }
+        var price = FurinaReframeLaw.SpotlightDesignateEncoreCost;
+        if (FurinaResources.Encore(creature) < price)
+        {
+            FurinaReframeLedger.For(creature).NoteDesignationUnpaid();
+            return;
+        }
+        FurinaResources.SpendEncore(creature, price);
+        await Designate(
+            choiceContext, creature, SpotlightMode.GuestCast, cardSource);
+    }
+#endif
 
     /// <summary>
     /// R2 reading 1 ([USER], 2026-07-26): the upgrade removes the
@@ -366,8 +438,16 @@ public static class SpotlightSystem
         // is what keeps Guest Cast's "their plays generate no Fanfare" clause
         // true for Companions even when R2's upgrade has both halves live --
         // the upgrade drops the exclusivity, not the targeting.
+        //
+        // RETIRED UNDER THE REFRAME'S METER LEG TOO (packet §4.1, leg 4 of 4),
+        // and by TWO flags for two different reasons -- either alone is enough
+        // to empty this leg, exactly as the sim's `combat._finish_play` has it.
+        // The METER leg retires "a Spotlighted card played" as a Fanfare
+        // source; R228's one-mode SPOTLIGHT leg retires Center Stage outright,
+        // which `CenterStageActive` answers for above.
         if (CenterStageActive(owner)
-            && card is ICharacterCard { CharacterId: "furina" })
+            && card is ICharacterCard { CharacterId: "furina" }
+            && !FurinaResources.ReframeRetiresTheShippedMintLegs(owner))
         {
             FurinaResources.GainFanfare(owner, FanfarePerCenterStagePlay);
         }

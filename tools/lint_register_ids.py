@@ -378,7 +378,10 @@ CEILINGS: dict[str, int] = {
     # `review/qa/lane1-live-reads-2026-09-02/`: the arm-keyword definition
     # printed once on a fight page (272), and the map printed per-option
     # `leads on to`, the floors by distance and `16 floors ahead: Boss` (298).
-    "EB": 310,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    "EB": 317,   # EB-316/317 minted 2026-09-02 by the Kokomi round-3 packet (the
+                 # casket hit and the morning have no visible moment). 311/312 are
+                 # the balance packet's (PR #294), 313/314 the Klee round-5
+                 # packet's (PR #292), 315 the plan-upgrades build's.   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -1319,6 +1322,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 310: the lane-1 live session's one defect -- a teardown removed the
         # SHARED bridge. Fixed in the minting commit; open on a live re-check.
         310,
+        # 316/317: the Kokomi round-3 packet's two legibility rows.
+        316, 317,
+        # 313/314: the Klee round-5 seats' two surface finds.
+        313, 314,
+        # 311/312: the balance read's two instrument gaps (Plan pricing in the
+        # drafter, a tier-0 Bomb twin for the Klee arm).
+        311, 312,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

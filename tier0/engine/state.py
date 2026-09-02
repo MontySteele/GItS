@@ -1209,6 +1209,20 @@ class CombatState:
     # seat's Plans are never another's -- holds by construction here, and the
     # per-FIGHT half is what `CombatState` being rebuilt by `run_fight` buys.
     kk_plan_queue: list[PlanEntry] = field(default_factory=list)
+    # QUARANTINED (C.KOKOMI_OVERHAUL): THE ONCE-PER-TURN LATCHES, one set for
+    # every payoff of hers that has one ([USER], live 2026-09-02: Treatise,
+    # Song of Pearls and The General's Banner all paid per trigger and all
+    # three are now capped at one a turn). Keyed by the power's own id, and
+    # the twin of `KokomiOverhaulLedger`'s `_claimed`; both are cleared at the
+    # ONE turn boundary this arm has (`kokomi_plan.roll_turn`), so the three
+    # cards can never come to disagree about when a turn began.
+    kk_once_per_turn: set[str] = field(default_factory=set)
+    # QUARANTINED (C.KOKOMI_OVERHAUL): did the Bake-Kurage carry out a Plan
+    # this turn? Sango Isshin's condition, written at the ONE place a Plan is
+    # carried out (`kokomi_plan._resolve_entry`) so the dawn resolution, Change
+    # of Plans' early one and The Moon Overlooks the Waters' play-time one all
+    # count -- they all carry a Plan out. `KokomiOverhaulLedger`'s twin.
+    kk_plan_carried_out_this_turn: bool = False
     # QUARANTINED (C.KLEE_OVERHAUL): RULE 7'S TWO COUNTERS AND THE TWO
     # MEMORIES, the twin of `KleeOverhaulLedger`. Per FIGHT and per SEAT for
     # the reason `kk_plan_queue` above is: tier 0 runs one seat, so the C#'s

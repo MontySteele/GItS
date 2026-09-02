@@ -4,6 +4,7 @@ using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -173,6 +174,31 @@ public class KleeOverhaulRoundFourTests
 
     // ---- EB-287: the keyword tip says the Bombs join --------------------
 
+    // ---- ROUND 5 PICK 1: Ka-pow! retains from print ----------------------
+
+    [Fact]
+    public void Kapow_retains_at_base_and_its_upgrade_buys_damage_instead()
+    {
+        // [USER] 2026-09-02: "I'm fine with the default on Ka-Pow!" The card
+        // is the arm's only detonator in the starter, so a hand held for the
+        // Bomb to cook used to mean discarding it -- Retain from print is the
+        // pick, and the game owns the whole behaviour from the keyword
+        // (CombatManager keeps a Retain card in hand at end of turn), so the
+        // keyword on the base card IS the rule.
+        var card = new ProtoKoKapow();
+        Assert.Contains(CardKeyword.Retain, card.CanonicalKeywords);
+
+        // The upgrade is the default rule's again -- a set_off's hit, +3 --
+        // because the row's authored `upgrade:` block went with the move.
+        Assert.Equal(4m, card.DynamicVars["Damage"].BaseValue);
+        var upgraded = new ProtoKoKapow();
+        Seat.Set(upgraded, "IsMutable", true);
+        typeof(CardModel).GetMethod("UpgradeInternal", HeadlessGame.All)!
+            .Invoke(upgraded, new object?[] { });
+        Assert.Equal(7m, upgraded.DynamicVars["Damage"].BaseValue);
+        Assert.Contains(CardKeyword.Retain, upgraded.CanonicalKeywords);
+    }
+
     [Fact]
     public void The_bomb_keyword_tip_says_a_second_bomb_joins_the_first()
     {
@@ -236,7 +262,7 @@ public class KleeOverhaulRoundFourTests
 
     [Theory]
     [InlineData(false, 4, "3")]    // 4 x 0.75 = 3
-    [InlineData(true, 4, "3")]     // R242: the upgrade buys Retain, not damage
+    [InlineData(true, 7, "5")]     // round 5 pick 1: the upgrade buys damage
     public void Both_ka_pow_faces_read_weak_and_one_of_them_looks_like_it_does_not(
         bool upgraded, int printedBase, string underWeak)
     {
@@ -247,12 +273,14 @@ public class KleeOverhaulRoundFourTests
         // truncated was 7, which was also what the base card printed unweakened
         // -- a collision, not a bug.
         //
-        // THE COLLISION IS GONE AT DRAFT 4 (R242) BECAUSE THE NUMBER STOPPED
-        // MOVING: Ka-pow! is 0 energy for 4 and its upgrade is Retain. What
-        // this pin is FOR survives the change and is the reason it is kept: the
-        // face has to keep reading the debuff. It nearly stopped -- `EB-308` --
-        // because the emitter only tokenised a number the UPGRADE moved, and
-        // this card no longer has one.
+        // THE COLLISION IS GONE, and it stayed gone through two moves of this
+        // card. Draft 4 (R242) stopped the number moving at all -- 0 energy
+        // for 4, upgrade Retain -- and round 5 pick 1 put Retain on the base
+        // card and handed the upgrade back to damage, 4 -> 7. The old
+        // collision was the upgraded face printing 7 unweakened where the base
+        // printed 7 Weakened from 10; at 4 and 7 no such pair exists. What
+        // this pin is FOR survives both moves and is the reason it is kept:
+        // the face has to keep reading the debuff.
         var klee = Seat.Klee().WithPower<WeakPower>(1);
         var enemy = Seat.Klee(30).Creature;
         var weak = klee.Creature.Powers.OfType<WeakPower>().Single();
@@ -276,18 +304,20 @@ public class KleeOverhaulRoundFourTests
     [Fact]
     public void The_face_still_carries_a_token_after_the_upgrade_stopped_moving_it()
     {
-        // `EB-308`, and it is the other half of EB-288's answer under draft 4.
-        // The seat's doubt was about whether a face reads its debuff; the
-        // emitter used to answer that only for a number some upgrade moved, so
-        // R242's Retain-only upgrade would have printed a dead literal 4 that
-        // Strength and Weak could never touch. The var and the token are what
-        // make the number live, so both are asserted.
+        // `EB-308`, and it is the other half of EB-288's answer. The seat's
+        // doubt was about whether a face reads its debuff; the emitter used to
+        // answer that only for a number some upgrade moved, so R242's
+        // Retain-only upgrade would have printed a dead literal 4 that
+        // Strength and Weak could never touch. Round 5 pick 1 gave this card a
+        // moving number back, but the defect it names is not about THIS card
+        // having one -- the token has to be there for the same reason on every
+        // row whose upgrade moves something else, so both are still asserted.
         var baseCard = new ProtoKoKapow();
         var upgraded = new ProtoKoKapow();
         Upgrade(upgraded);
 
         Assert.Equal(4m, baseCard.DynamicVars["Damage"].BaseValue);
-        Assert.Equal(4m, upgraded.DynamicVars["Damage"].BaseValue);
+        Assert.Equal(7m, upgraded.DynamicVars["Damage"].BaseValue);
         Assert.Contains("{Damage:diff()}", baseCard.Localization!
             .First(r => r.Item1 == "description").Item2);
     }

@@ -918,15 +918,22 @@ CO_TENANCY_LEDGER = {
             "there is nothing here to model",
     },
     "BeforeSideTurnEnd": {
-        ("Powers/Prototype/KleeOverhaulPowers.cs", "EndOfTurnSetOffPower"):
-            "QUARANTINED (the Klee overhaul). Sparks 'n' Splash, the ONE "
-            "power in the slice that fires without a card saying so -- the "
-            "brief's own 'Breaks rule 7'. THE ORDERING QUESTION, answered: it "
-            "sets off one random enemy's overhaul Bombs, which is damage plus "
-            "a Spark plus the ledger's counters, and no co-tenant of this "
-            "broadcast reads any of the three. It shares the Spark bank with "
-            "nothing here (the kit-grant check reads the BURST meter) and the "
-            "overhaul Bomb pile with nothing at all",
+        ("Powers/Prototype/KleeOverhaulPowers.cs", "BombEchoPower"):
+            "QUARANTINED (the Klee overhaul). Sparks 'n' Splash, and it is "
+            "[USER]'s own 2026-09-02 design: one random BOMBED enemy takes "
+            "Pyro damage equal to the Bombs on it. IT READS THE PILE AND DOES "
+            "NOT SPEND IT -- no charge is taken, so no Spark is minted, no "
+            "Mine answers and neither of rule 7's counters moves; the arm's "
+            "ledger is not touched at all, which is what makes it a co-tenant "
+            "with nothing to order against. THE ORDERING QUESTION, answered: "
+            "what it READS is a charge list, and the only writers of a charge "
+            "list are card plays and the turn-start growth, both outside this "
+            "broadcast; what it WRITES is one Pyro hit, and the co-tenant "
+            "that also deals damage here is TurnEndSequencer's volleys, which "
+            "belong to the SHIPPED kit and cannot be in a deck this power is "
+            "in (the overhaul arm's pool holds neither). If one ever could, "
+            "the interaction is a dead enemy dropping out of this power's own "
+            "candidate list, which it re-reads",
         ("Powers/CompanionPowers.cs", "SolarIsotomaPower"):
             "duration tick-down of itself, player side",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):

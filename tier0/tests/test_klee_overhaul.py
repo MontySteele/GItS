@@ -203,9 +203,14 @@ def test_the_numbers_are_the_briefs_placeholders():
     """Slice packet sec.1: no number in it is a claim. These four are the
     rules' own, and they are named so `lint_constant_parity` can compare the
     C# mirrors BY VALUE."""
-    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 3
+    # FOUR: the round-5 packet raised it from 3 to 5 and [USER] read 5 back
+    # down on the same day ("growth 5 is likely too much").
+    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 4
     assert C.KLEE_OVERHAUL_WORKSHOP_GROWTH == 1
-    assert C.KLEE_OVERHAUL_ALICE_GROWTH == 4
+    # A MULTIPLIER since the 2026-09-02 balance pass: Alice's Recipe doubles
+    # the turn's growth ("your Bombs grow twice each turn") instead of
+    # replacing the base 3 with a 4 a second Explosives Workshop beat.
+    assert C.KLEE_OVERHAUL_ALICE_MULTIPLIER == 2
     assert C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION == 1
     # FIVE since R242 pick 1: rule 4's opening bank. [USER]: "Regent starts
     # with 3 stars ... so 1 is a reasonable compromise."
@@ -239,12 +244,16 @@ def test_the_starter_resolves_to_the_slices_ten_cards(overhaul):
     assert loader.get_card("defend+").effects[0]["amount"] == 8
 
 
-def test_a_base_strike_in_her_hand_applies_pyro(overhaul):
-    """RULE 5 IS ABOUT THE CHARACTER, NOT THE CARD, and R242's base Strike is
-    what proves it. She is catalyst cadence, so `_element_for` answers a
-    damaging Attack that names no element with the PLAYER's own element -- and
-    `strike` names none. The mod read this per-card until `EB-307`; this is the
-    assertion its C# twin (`CatalystCadence.PrintedElement`) mirrors."""
+def test_a_base_strike_in_her_hand_applies_nothing(overhaul):
+    """[USER], 2026-09-02: "I think we actually SHOULD remove the elemental
+    application from the basic Strikes for all characters. Those cards are
+    supposed to be bad!" R242 put the base game's Strike in her starter and
+    `EB-307` read that as "her Strikes must keep applying Pyro"; this is the
+    ruled reading of the same swap, and LAW's cadence line now carries it.
+
+    RULE 5 IS STILL ABOUT THE CHARACTER: her OWN Attacks apply with nothing
+    printed, which is what the second half of this pin holds. The C# twin is
+    `CatalystCadence.IsBaseGameBasic`."""
     from tier0.tests.conftest import make_state
     from tier0.engine import effects as fx_mod
 
@@ -253,10 +262,18 @@ def test_a_base_strike_in_her_hand_applies_pyro(overhaul):
     assert (state.player.cadence, state.player.element) == ("catalyst", "pyro")
     strike = loader.get_card("strike")
     assert strike.element == "none"
-    assert fx_mod._element_for(state, strike.effects[0], strike) == "pyro"
-    # And a DEFEND still applies nothing: the cadence is about Attacks.
+    assert fx_mod._element_for(state, strike.effects[0], strike) is None
+    # A DEFEND applied nothing before the ruling either: the cadence is about
+    # Attacks, and this is the second reason it does not.
     defend = loader.get_card("defend")
     assert fx_mod._element_for(state, defend.effects[0], defend) is None
+
+    # AND HER OWN ATTACK IS UNMOVED, which is the whole point of the exemption
+    # being about the base game's card rather than about her cadence.
+    bait = next(c for c in loader.prototype_cards()
+                if c.id == "proto_ko_fish_flavored_bait")
+    assert bait.element == "none"
+    assert fx_mod._element_for(state, bait.effects[0], bait) == "pyro"
 
 
 def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
@@ -516,13 +533,14 @@ def test_under_the_flag_a_prototype_row_smiths_into_a_different_card(overhaul):
         assert upgrades.has_upgrade("proto_ko_kapow")
         upgraded = loader.get_card("proto_ko_kapow+")
         base = loader.get_card("proto_ko_kapow")
-        # DRAFT 4 (R242): "Ka-pow!+ gains Retain and keeps its numbers." The
-        # row's OWN `upgrade:` block wins over the Prototype default rule --
-        # which would still have said `damage +3` -- so the assertion is that
-        # the keyword moved and the number did not.
-        assert upgraded.retain is True and base.retain is False
-        assert upgraded.effects == base.effects
+        # ROUND 5 PICK 1, taken at its default ([USER] 2026-09-02: "I'm fine
+        # with the default on Ka-Pow!"): Retain moved onto the BASE card, so
+        # holding a Bomb no longer means discarding the only detonator. The
+        # row's `upgrade:` block went with it, which hands the upgrade back to
+        # the Prototype default rule -- a set_off's hit, +3.
+        assert base.retain is True and upgraded.retain is True
         assert base.effects[0]["damage"] == 4
+        assert upgraded.effects[0]["damage"] == 7
         # Jumpy Dumpty's authored block beats the default the same way: the
         # default is +2/+1, the ruling is Bomb 11 and Mine 4.
         jd = loader.get_card("proto_ko_jumpy_dumpty+")

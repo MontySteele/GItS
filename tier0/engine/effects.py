@@ -616,12 +616,39 @@ def _pick_targets(state: CombatState, spec: str,
     raise ValueError(f"unknown target spec {spec!r}")
 
 
+def _is_base_game_basic(card: Card) -> bool:
+    """The base game's own basic cards -- Strike, Defend and their kin.
+
+    [USER], 2026-09-02: "I think we actually SHOULD remove the elemental
+    application from the basic Strikes for all characters. Those cards are
+    supposed to be bad!" R242 put the base game's Strike and Defend into both
+    overhaul starters, and `EB-307` read that as "her Strikes must keep
+    applying her element"; this is the other reading of the same swap, and it
+    is the ruled one -- a base Strike is the base game's card, weak on purpose,
+    and the element is what her OWN Attacks are for.
+
+    TWO TESTS, AND BOTH ARE LOAD-BEARING. No owning `character:` is what makes
+    it the base game's rather than a kit's; `basic` is what keeps the exemption
+    to the BASICS rather than sweeping in a base colorless or event card a run
+    might hand her (`squash`, `exterminate` -- unmoved, and unmoved on the mod
+    side too). An Ancient is neither: it is the mod's own card and carries
+    `rarity: ancient`, so `jumpy_dumpty_mk_omega` still applies her Pyro here
+    exactly as its C# twin declares `Element.Pyro` outright.
+
+    `CatalystCadence.IsBaseGameBasic` is the mod's twin, the same two tests.
+    """
+    return (getattr(card, "rarity", None) == "basic"
+            and not getattr(card, "character", None))
+
+
 def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
     """Cadence dial (design doc §2.3; Furina kickoff §1).
 
     catalyst: every attack applies the character's element unless the
     sheet says applies_element: false. Cards with their own element
-    (companions) apply that instead.
+    (companions) apply that instead. THE BASE GAME'S OWN BASICS ARE OUTSIDE IT
+    ([USER] 2026-09-02, LAW's cadence line): a base Strike applies nothing --
+    see `_is_base_game_basic`.
 
     skill (Furina, Skill-grade): only Skill/Burst-tagged cards apply the
     CHARACTER's element -- attacks never auto-apply, which is what buys
@@ -652,7 +679,8 @@ def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
     if "applies_element" in fx:
         return card.element if fx["applies_element"] else None
     if (card.type == "attack" and fx["op"] == "damage"
-            and state.player.cadence == "catalyst"):
+            and state.player.cadence == "catalyst"
+            and not _is_base_game_basic(card)):
         return card.element if card.element != "none" else state.player.element
     if (state.player.cadence == "skill" and fx["op"] == "damage"
             and not card.is_companion
@@ -3195,6 +3223,11 @@ PREDICATE_NAMES = frozenset({
     # slice one is C# first and the sim is not brought up.
     "bomb_went_off_this_turn",
     "bomb_reacted_this_turn",
+    # The Kokomi overhaul's own per-turn read (QUARANTINED,
+    # C.KOKOMI_OVERHAUL): Sango Isshin's "if the Bake-Kurage carried out a
+    # Plan this turn". Unlike the two above this one IS answered -- draft 6
+    # runs in both engines.
+    "plan_carried_out_this_turn",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -3432,6 +3465,13 @@ def _predicate(state: CombatState, name: str) -> bool:
         return (state.ko_set_off_this_turn > 0
                 if name == "bomb_went_off_this_turn"
                 else state.ko_reacted_this_turn > 0)
+    if name == "plan_carried_out_this_turn":
+        # SANGO ISSHIN's condition (QUARANTINED, C.KOKOMI_OVERHAUL). Written
+        # at the ONE place a Plan is carried out (`kokomi_plan._resolve_entry`)
+        # so the morning queue, Change of Plans' early resolution and The Moon
+        # Overlooks the Waters' play-time one all count -- they all carry a
+        # Plan out, which is the phrase the card prints.
+        return state.kk_plan_carried_out_this_turn
     if name == "killed_target":
         return state.kills_this_card > 0
     if name == "drew_skill_this_card":
