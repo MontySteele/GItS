@@ -158,9 +158,60 @@ def test_a_debt_entry_for_a_row_that_now_passes_is_a_finding():
     generated = {paid: _emitted("Deal {Damage:diff()} damage.",
                                 "        DynamicVars.Damage.UpgradeValueBy(3m);")}
     findings = gp.upgrade_face_findings(rows, {paid: {"damage": 3}}, generated)
-    assert [f for f in findings if f.startswith(f"{paid}: UPGRADE_DEBT still")]
+    assert [f for f in findings
+            if f.startswith(f"{paid}: this row is still excused")]
 
 
 def test_every_debt_entry_states_a_reason():
     for card_id, reason in gp.UPGRADE_DEBT.items():
         assert isinstance(reason, str) and len(reason.split()) >= 8, card_id
+
+
+# --- `EB-315`: the ROW's own opt-out, and its own anti-rot rule -------------
+#
+# `no_upgrade:` is where a new exemption goes: it travels with the row under
+# R213 B's deletion rule, and both engines read it (the codegen through
+# `effective_upgrade`, the sim through `upgrades._prototype_deltas`). The debt
+# dict above is what is left of the same idea kept in a file, and it is now the
+# Spark arm's alone.
+
+def _about(findings: list[str], card_id: str) -> list[str]:
+    """Only the findings about one row.
+
+    A one-row fixture always also reports every `UPGRADE_DEBT` id as "not on
+    the surface", which is that register's own rot rule doing its job and is
+    not what these three are asking about.
+    """
+    return [f for f in findings if f.startswith(f"{card_id}: ")]
+
+
+def test_a_row_that_states_why_it_cannot_upgrade_is_not_a_finding():
+    row = {"id": "proto_kk_fixture", "cost": 0, "effects": [],
+           "no_upgrade": "the row prints no number the rule may move"}
+    generated = {"proto_kk_fixture": _emitted("Draw 1 card.", "")}
+    findings = gp.upgrade_face_findings([row], {}, generated)
+    assert _about(findings, "proto_kk_fixture") == []
+
+
+def test_the_same_row_without_the_key_is_a_finding():
+    """Red-first: the opt-out is what silences the gate, not the row's shape."""
+    row = {"id": "proto_kk_fixture", "cost": 0, "effects": []}
+    generated = {"proto_kk_fixture": _emitted("Draw 1 card.", "")}
+    findings = _about(gp.upgrade_face_findings([row], {}, generated),
+                      "proto_kk_fixture")
+    assert findings and "no upgrade at all" in findings[0]
+
+
+def test_an_opt_out_the_rule_has_caught_up_with_is_a_finding():
+    """A paid debt is deleted, one register over.
+
+    The rule reaches a row's `plan:` line since `EB-315`, so an opt-out
+    written before that would now be suppressing a real campfire choice --
+    silently, which is the whole failure mode this file exists to catch.
+    """
+    row = {"id": "proto_kk_fixture", "cost": 1,
+           "effects": [{"op": "block", "amount": 5}],
+           "no_upgrade": "written when the rule could not reach this row"}
+    generated = {"proto_kk_fixture": _emitted("Gain 5 [gold]Block[/gold].", "")}
+    findings = gp.upgrade_face_findings([row], {}, generated)
+    assert [f for f in findings if "the Prototype-stage rule now derives" in f]

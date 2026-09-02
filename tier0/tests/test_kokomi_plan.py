@@ -814,3 +814,96 @@ def test_a_plan_only_clause_refuses_from_a_body(overhaul):
                     effects=[{"op": op, "amount": 1}])
         with pytest.raises(NotImplementedError, match="PLAN-ONLY"):
             effects.OPS[op](st, card.effects[0], card)
+
+
+# --- 12. THE PLAN LINE UPGRADES (`EB-315`) ---------------------------------
+#
+# [USER], playing the arm: *"Plan cards often seem to lack upgrades, though
+# (Kurage's Oath, Ambush) - I thought we had a test for that?"* The
+# Prototype-stage rule read a row's `effects:` and nothing else, so a
+# Plan-ONLY row had no printed number it could see and a TWO-LINE row upgraded
+# only its now-line -- `Feint+` dealt 6+3 when played and a literal 9 at dawn,
+# for ever. The rule reads both printed lines now, under `plan_*` keys, and
+# these pin the applier half: which clause moves, and that nothing else does.
+#
+# The C# twin is `gen_klee_cards.plan_var_effects` (one table, imported from
+# `upgrades.PLAN_DELTA_OPS`, so neither engine can bind a key to a different
+# clause) and `tier0/tests/test_prototype_surface.py` holds every arm row to
+# having a path at all.
+
+def test_a_plan_only_rows_upgrade_moves_its_plan_number(monkeypatch):
+    from tier0.content import upgrades
+
+    monkeypatch.setattr(upgrades, "_upgrade_index",
+                        lambda: {"proto_kk_probe": {"plan_damage": 3}})
+    card = plan_card([{"op": "damage", "amount": 12, "target": "front_enemy"}])
+    upgraded = upgrades.apply_upgrade(card)
+    assert upgraded.id == "proto_kk_probe+"
+    assert upgraded.plan == [{"op": "damage", "amount": 15,
+                              "target": "front_enemy"}]
+
+
+def test_a_two_line_row_upgrades_both_lines(monkeypatch):
+    """The half that LOOKED fine: the now-line moved, the plan clause did
+    not, and only a played turn could tell."""
+    from tier0.content import upgrades
+
+    monkeypatch.setattr(
+        upgrades, "_upgrade_index",
+        lambda: {"proto_kk_probe": {"damage": 3, "plan_damage": 3}})
+    card = plan_card([{"op": "damage", "amount": 10, "target": "front_enemy"}],
+                     effects_=[{"op": "damage", "amount": 6,
+                                "target": "enemy"}])
+    upgraded = upgrades.apply_upgrade(card)
+    assert upgraded.effects[0]["amount"] == 9
+    assert upgraded.plan[0]["amount"] == 13
+
+
+def test_a_plan_key_binds_only_the_first_clause_of_its_op(monkeypatch):
+    """The one-owner rule every other key keeps, one printed line over: the
+    C# declares ONE var per key and the face prints it once, so a delta that
+    moved every matching clause would upgrade numbers the card never shows."""
+    from tier0.content import upgrades
+
+    monkeypatch.setattr(upgrades, "_upgrade_index",
+                        lambda: {"proto_kk_probe": {"plan_power_amount": 1}})
+    card = plan_card([
+        {"op": "apply_power", "power": "vulnerable", "amount": 1,
+         "target": "front_enemy"},
+        {"op": "apply_power", "power": "weak", "amount": 1,
+         "target": "front_enemy"}])
+    upgraded = upgrades.apply_upgrade(card)
+    assert [c["amount"] for c in upgraded.plan] == [2, 1]
+
+
+def test_a_plan_key_on_a_row_with_no_such_clause_raises(monkeypatch):
+    """Loud, not silent -- R24's no-partial-upgrades discipline. The codegen
+    refuses the same row at `upgrade_plan` ("has no matching effect on this
+    card"), so neither engine can ship the half-upgrade."""
+    from tier0.content import upgrades
+
+    monkeypatch.setattr(upgrades, "_upgrade_index",
+                        lambda: {"proto_kk_probe": {"plan_block": 3}})
+    card = plan_card([{"op": "damage", "amount": 8, "target": "front_enemy"}])
+    with pytest.raises(ValueError, match="found no matching effect"):
+        upgrades.apply_upgrade(card)
+
+
+def test_the_upgraded_plan_is_what_the_jellyfish_carries_out(overhaul,
+                                                             monkeypatch):
+    """End to end in this engine, which is the whole point of the key: the
+    queue is written from the card's OWN clauses, so a smithed card schedules
+    the smithed number. The mod's twin is `PlanClauses` being a PROPERTY that
+    reads `DynamicVars["PlanDamage"].IntValue` -- before `EB-315` it carried a
+    literal, and `Feint+` dealt its base number at dawn for ever."""
+    from tier0.content import upgrades
+
+    monkeypatch.setattr(upgrades, "_upgrade_index",
+                        lambda: {"proto_kk_probe": {"plan_damage": 3}})
+    target = make_enemy(hp=60, name="front")
+    st = kokomi_state(enemies=[target])
+    card = upgrades.apply_upgrade(
+        plan_card([{"op": "damage", "amount": 12, "target": "front_enemy"}]))
+    kokomi_plan.schedule(st, card)
+    kokomi_plan.resolve_all(st)
+    assert target.hp == 60 - 15
