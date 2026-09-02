@@ -206,6 +206,16 @@ that run the whole loop without the game or codex (`blindplay.py`).
   (`policy_v0.py:134-137`); the aura is `"Cryo Aura"`, not `"cryo"`
   (`adapter.py:183-195`); the label already folds in the attacker's Strength, so
   **all** enemy powers are dropped (`adapter.py:229-245`).
+- **Three more, and each cost a blind RUN** (`EB-262`/`EB-263`/`EB-259`, all
+  found on `klee-overhaul-r1`). A SHOP item carries its printed name under its
+  category's own key — `card_name` / `relic_name` / `potion_name`, never
+  `name` — beside `price`, `is_stocked` (false is SOLD) and `can_afford`
+  (`McpMod.StateBuilder.cs:1636`). An opened CHEST's relics are
+  `treasure.relics` and a relic-select screen's are `relic_select.relics`;
+  neither is a top-level key. And an EVENT room has no proceed button at all —
+  `ExecuteProceed` walks rewards, rest, both merchants and the treasure room
+  and stops (`McpMod.Actions.cs:600-663`) — so leaving an event is
+  `choose_event_option` on the option the screen prints *Proceed*.
 - **`deckwatch` snapshots are accepted only at round 1 or when strictly larger** —
   otherwise the victory-screen union (3 cards) replaces the real deck (13)
   (`deckwatch.py:45-54`). Out of combat the wire carries no deck, so the draft
