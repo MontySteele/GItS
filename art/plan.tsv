@@ -1530,62 +1530,61 @@ proto_mc_dahlia_favonian_favor	ImageGen/images/cards/companions/proto_mc_dahlia_
 # proto_mc_durin_binary_form: the Durin item render; Binary Form is the dragon's two halves and this is his only free source
 proto_mc_durin_binary_form	ImageGen/images/cards/companions/proto_mc_durin_binary_form.png	500	380	contain	center	shortlist	1	png	Durin Item.png		item	durin
 # ---------- Kokomi overhaul (proto_kk_) ----------
+# Re-picked for the DRAFT-6 ids (docs/prototype-surface.yaml, and
+# review/active/kokomi-overhaul-slice-1-2026-09-01.md sec.3-4). A row whose
+# name matches a shipped Kokomi card takes that card's source and crop and
+# carries no comment; every other row borrows a shipped Kokomi card the
+# overhaul retires, and the line above it names the donor and why it fits.
 proto_kk_waters_edge	ImageGen/images/cards/kokomi/proto_kk_waters_edge.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
 proto_kk_coral_guard	ImageGen/images/cards/kokomi/proto_kk_coral_guard.png	500	380	cover	y0.41	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
 proto_kk_kurages_oath	ImageGen/images/cards/kokomi/proto_kk_kurages_oath.png	500	380	cover	y0.24	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
-# proto_kk_rising_tide <- tideturn: the tide turning; Rising Tide is the starter Attack that Surges
-proto_kk_rising_tide	ImageGen/images/cards/kokomi/proto_kk_rising_tide.png	500	380	cover	y0.38	shortlist	1	png	Sangonomiya Kokomi Introduction Card.jpg		splash	kokomi_pool
-proto_kk_stolen_chapter	ImageGen/images/cards/kokomi/proto_kk_stolen_chapter.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
-# proto_kk_tidal_prayer <- votive_offering: an offering at the shrine -- the prayer that feeds the Tide
-proto_kk_tidal_prayer	ImageGen/images/cards/kokomi/proto_kk_tidal_prayer.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Sangonomiya Kokomi Item.png		item	kokomi_pool
-# proto_kk_sea_spray <- scattering_spray: the same spray motif under a shorter name
-proto_kk_sea_spray	ImageGen/images/cards/kokomi/proto_kk_sea_spray.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
-# proto_kk_deep_current <- pulsing_current: the current that runs through every enemy
-proto_kk_deep_current	ImageGen/images/cards/kokomi/proto_kk_deep_current.png	500	380	cover	y0.34	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
-# proto_kk_breaker <- surging_shoal: a breaker IS a surging wave hitting the shoal
-proto_kk_breaker	ImageGen/images/cards/kokomi/proto_kk_breaker.png	500	380	cover	y0.74	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
-# proto_kk_high_tide <- ebb_tide: the other half of the same tide; no shipped Kokomi card is named High Tide
-proto_kk_high_tide	ImageGen/images/cards/kokomi/proto_kk_high_tide.png	500	380	cover	x0.62	shortlist	1	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
-proto_kk_undertow	ImageGen/images/cards/kokomi/proto_kk_undertow.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
-proto_kk_song_of_pearls	ImageGen/images/cards/kokomi/proto_kk_song_of_pearls.png	500	380	cover	x0.33	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
-proto_kk_nereids_ascension	ImageGen/images/cards/kokomi/proto_kk_nereids_ascension.png	500	380	cover	y0.79	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
-proto_kk_sango_isshin	ImageGen/images/cards/kokomi/proto_kk_sango_isshin.png	500	380	cover	y0.62	shortlist	1	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
-# proto_kk_battle_plan <- the_gunbai_turns: the war fan that signals the plan a turn before it lands
-proto_kk_battle_plan	ImageGen/images/cards/kokomi/proto_kk_battle_plan.png	500	380	cover	y0.22	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+proto_kk_slack_water	ImageGen/images/cards/kokomi/proto_kk_slack_water.png	500	380	cover	y0.54	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+# proto_kk_feint <- press_the_advantage: the follow-up blow a feint sets up
+proto_kk_feint	ImageGen/images/cards/kokomi/proto_kk_feint.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
 # proto_kk_ambush <- signal_arrow: the loosed arrow -- damage that arrives after the card is gone
 proto_kk_ambush	ImageGen/images/cards/kokomi/proto_kk_ambush.png	500	380	cover	y0.56	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
 # proto_kk_read_the_field <- read_the_current: the shipped 'Read the ...' card, one noun over
 proto_kk_read_the_field	ImageGen/images/cards/kokomi/proto_kk_read_the_field.png	500	380	cover	y0.44	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
-# proto_kk_feint <- press_the_advantage: the follow-up blow a feint sets up
-proto_kk_feint	ImageGen/images/cards/kokomi/proto_kk_feint.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
-# proto_kk_contingency <- mercy_of_the_deep: the heal motif; Contingency is the scheduled Mend
-proto_kk_contingency	ImageGen/images/cards/kokomi/proto_kk_contingency.png	500	380	cover	y0.74	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+# proto_kk_exposed_flank <- exposing_current: the shipped card whose whole job is exposing the enemy, one noun over
+proto_kk_exposed_flank	ImageGen/images/cards/kokomi/proto_kk_exposed_flank.png	500	380	cover	y0.58	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
 # proto_kk_treatise <- watch_of_the_shallows: Power donor for a Power card, same rarity, same watchful register
 proto_kk_treatise	ImageGen/images/cards/kokomi/proto_kk_treatise.png	500	380	cover	x0.55	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+proto_kk_song_of_pearls	ImageGen/images/cards/kokomi/proto_kk_song_of_pearls.png	500	380	cover	x0.33	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
 # proto_kk_war_council <- council_at_bourou: the council itself -- the shipped card of that name
 proto_kk_war_council	ImageGen/images/cards/kokomi/proto_kk_war_council.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
-# proto_kk_the_art_of_war <- vigil_of_the_deep: Rare Power donor for a Rare Power; the doctrine standing over the fight
-proto_kk_the_art_of_war	ImageGen/images/cards/kokomi/proto_kk_the_art_of_war.png	500	380	cover	x0.53	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+proto_kk_nereids_ascension	ImageGen/images/cards/kokomi/proto_kk_nereids_ascension.png	500	380	cover	y0.79	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+# proto_kk_the_moon_overlooks_the_waters <- vigil_of_the_deep: Rare Power donor for a Rare Power; the vigil kept over the fight is the same act as the moon overlooking it
+proto_kk_the_moon_overlooks_the_waters	ImageGen/images/cards/kokomi/proto_kk_the_moon_overlooks_the_waters.png	500	380	cover	x0.53	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+# proto_kk_sea_salt_prayer <- votive_offering: same type and same rarity -- the offering at the shrine IS the prayer
+proto_kk_sea_salt_prayer	ImageGen/images/cards/kokomi/proto_kk_sea_salt_prayer.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Sangonomiya Kokomi Item.png		item	kokomi_pool
+# proto_kk_deep_current <- pulsing_current: the current that runs through every enemy
+proto_kk_deep_current	ImageGen/images/cards/kokomi/proto_kk_deep_current.png	500	380	cover	y0.34	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+# proto_kk_coral_bulwark <- jade_bulwark: the shipped Bulwark; the same word and the same job
+proto_kk_coral_bulwark	ImageGen/images/cards/kokomi/proto_kk_coral_bulwark.png	500	380	cover	y0.10	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+# proto_kk_cleansing_wave <- cleansing_tide: the shipped 'Cleansing ...' card, one noun over, same type
+proto_kk_cleansing_wave	ImageGen/images/cards/kokomi/proto_kk_cleansing_wave.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sango Pearl Wild.png		item	kokomi_pool
+# proto_kk_the_clouds_like_waves <- pearl_current: the Power donor whose drip runs for as long as the fight does
+proto_kk_the_clouds_like_waves	ImageGen/images/cards/kokomi/proto_kk_the_clouds_like_waves.png	500	380	cover	y0.33	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+# proto_kk_the_moon_a_ship <- prayer_to_the_moon: Rare Skill donor for a Rare Skill, and the moon is the object of both
+proto_kk_the_moon_a_ship	ImageGen/images/cards/kokomi/proto_kk_the_moon_a_ship.png	500	380	cover	x0.40	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+proto_kk_sango_isshin	ImageGen/images/cards/kokomi/proto_kk_sango_isshin.png	500	380	cover	y0.62	shortlist	1	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
 # proto_kk_rally <- mass_mobilization: the shipped 'Rally the Isles'; the same word and the same act
 proto_kk_rally	ImageGen/images/cards/kokomi/proto_kk_rally.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
 # proto_kk_vanguard <- to_the_front: the vanguard IS the troop sent to the front
 proto_kk_vanguard	ImageGen/images/cards/kokomi/proto_kk_vanguard.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
-# proto_kk_orders <- standing_orders: the shipped orders card; Orders is its Power form
-proto_kk_orders	ImageGen/images/cards/kokomi/proto_kk_orders.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
 # proto_kk_the_generals_banner <- raise_the_sashimono: a sashimono is a war banner -- the same object
 proto_kk_the_generals_banner	ImageGen/images/cards/kokomi/proto_kk_the_generals_banner.png	500	380	cover	x0.36	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
-# proto_kk_quiet_study <- quiet_harbor: the same quiet register, Block plus a small feed
-proto_kk_quiet_study	ImageGen/images/cards/kokomi/proto_kk_quiet_study.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 13 Sangonomiya Kokomi 3.png		sticker	kokomi_pool
+# proto_kk_chain_of_command <- standing_orders: the chain of command IS the standing order passed down the line
+proto_kk_chain_of_command	ImageGen/images/cards/kokomi/proto_kk_chain_of_command.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+proto_kk_stolen_chapter	ImageGen/images/cards/kokomi/proto_kk_stolen_chapter.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+# proto_kk_change_of_plans <- wheel_the_ranks: wheeling the ranks mid-fight is changing the plan
+proto_kk_change_of_plans	ImageGen/images/cards/kokomi/proto_kk_change_of_plans.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Sangonomiya Kokomi Expression 3.png		sticker	kokomi_pool
+proto_kk_undertow	ImageGen/images/cards/kokomi/proto_kk_undertow.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
 proto_kk_salt_line	ImageGen/images/cards/kokomi/proto_kk_salt_line.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Sangonomiya Kokomi Expression 2.png		sticker	kokomi_pool
-proto_kk_cleansing_tide	ImageGen/images/cards/kokomi/proto_kk_cleansing_tide.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sango Pearl Wild.png		item	kokomi_pool
-# proto_kk_the_clouds_like_waves <- pearl_current: Uncommon Power donor for an Uncommon Power; the drip that runs while you are low
-proto_kk_the_clouds_like_waves	ImageGen/images/cards/kokomi/proto_kk_the_clouds_like_waves.png	500	380	cover	y0.33	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
-# proto_kk_reading_the_tide <- tideline_watch: reading the tideline is the card's whole text
-proto_kk_reading_the_tide	ImageGen/images/cards/kokomi/proto_kk_reading_the_tide.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sangonomiya Kokomi The Deep.png		item	kokomi_pool
-# proto_kk_coral_bulwark <- jade_bulwark: the shipped Bulwark; the same word and the same job
-proto_kk_coral_bulwark	ImageGen/images/cards/kokomi/proto_kk_coral_bulwark.png	500	380	cover	y0.10	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
-# proto_kk_watatsumis_blessing <- prayer_to_the_moon: Rare Skill donor for a Rare Skill; the blessing is the prayer answered
-proto_kk_watatsumis_blessing	ImageGen/images/cards/kokomi/proto_kk_watatsumis_blessing.png	500	380	cover	x0.40	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+# proto_kk_battle_plan <- the_gunbai_turns: the war fan that signals the plan a turn before it lands
+proto_kk_battle_plan	ImageGen/images/cards/kokomi/proto_kk_battle_plan.png	500	380	cover	y0.22	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+# proto_kk_moons_reflection <- moon_signal: the moon on the water is the reflection this card reads
+proto_kk_moons_reflection	ImageGen/images/cards/kokomi/proto_kk_moons_reflection.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 09 Sangonomiya Kokomi 1.png		sticker	kokomi_pool
 # ---------- Inazuma companion overhaul (proto_mi_) ----------
 proto_mi_gorou_inuzaka	ImageGen/images/cards/companions/proto_mi_gorou_inuzaka.png	500	380	cover	y0.16	shortlist	1	png	Gorou Character Card.png		tcg	gorou
 proto_mi_gorou_war_banner	ImageGen/images/cards/companions/proto_mi_gorou_war_banner.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Gorou Wish.png		splash	gorou
@@ -1603,13 +1602,3 @@ proto_mi_sara_crowfeather_cover	ImageGen/images/cards/companions/proto_mi_sara_c
 proto_mi_sara_tengu_stormcall	ImageGen/images/cards/companions/proto_mi_sara_tengu_stormcall.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Kujou Sara Wish.png		splash	sara
 proto_mi_itto_superlative_superstrength	ImageGen/images/cards/companions/proto_mi_itto_superlative_superstrength.png	500	380	cover	y0.16	shortlist	1	png	Arataki Itto Character Card.png		tcg	itto
 proto_mi_raiden_musou_no_hitotachi	ImageGen/images/cards/companions/proto_mi_raiden_musou_no_hitotachi.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Raiden Shogun Full Wish.png		splash	raiden
-#
-# The Kokomi draft-4 slice (review/active/kokomi-overhaul-slice-1-2026-09-01.md
-# sec.4) adds two cards this branch's surface does not carry yet -- Change of
-# Plans and Moon's Reflection -- and drops Coral Bulwark. The two picks are
-# made and left COMMENTED rather than live, because a plan row that writes a
-# file for an id no card requests is a STALE finding in art_coverage, not
-# coverage. Uncomment them in the same commit that mints the ids; delete
-# proto_kk_coral_bulwark's row in the commit that deletes its surface row.
-# proto_kk_change_of_plans	ImageGen/images/cards/kokomi/proto_kk_change_of_plans.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Sangonomiya Kokomi Expression 3.png		sticker	kokomi_pool
-# proto_kk_moons_reflection	ImageGen/images/cards/kokomi/proto_kk_moons_reflection.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 09 Sangonomiya Kokomi 1.png		sticker	kokomi_pool
