@@ -2654,8 +2654,31 @@ def archetype_shares(deck: list[Card], *, companions: bool = True) -> dict[str, 
     drafting "converged" on demolition in 100% of runs -- which was the
     starting deck being read back, not a pool finding. Spec §4 asks for
     commitment emerging from *what has been drafted*, and the starter was not
-    drafted. Rarity separates the two exactly: every starter card is basic and
-    basic never appears in the draftable pool.
+    drafted.
+
+    RARITY WAS SAID TO SEPARATE THE TWO EXACTLY -- "every starter card is
+    basic and basic never appears in the draftable pool" -- and the second
+    half is true while THE FIRST IS NOT (`EB-255`; [USER]'s solo playtest
+    2026-08-31, finding `B1`). Thirteen starter rows across the three
+    characters are not basic. Twelve are companions, which the
+    `companions=False` classification call below already drops for its own
+    reason, so they cannot reach this number; ONE can, and does.
+    `an_invitation` is a common carrying the `spotlight` tag, shipped in
+    Furina's starter AND in her reward pool, so every Furina run is credited
+    with a drafted spotlight card before a reward screen is shown -- the exact
+    contamination the basics exclusion exists to prevent, arriving through the
+    door the exclusion leaves open. `to_the_front` is the same shape for
+    Kokomi, one flag away (`C.KURAGE_MEMORY`).
+
+    `tools/lint_starter_pool_overlap.py` is that invariant made checkable, and
+    it carries the thirteen rows as curated debt. THE FIX IS NOT HERE YET, and
+    deliberately: excluding by starter MEMBERSHIP instead of by rarity moves
+    this number for Furina and Kokomi, hence `dominant_archetype`, hence the
+    rest plan and the adaptive drafter -- a `POLICY_VERSION` window with a
+    re-baseline. Which copies a later draft of a starter id should count is a
+    design call the row still gates on. The line below is the one every
+    published table was measured through, and it stands until that window
+    opens.
 
     Klee's starter does give demolition a real head start in play, and that is
     deliberate design. It is a fact about her kit, not evidence about whether
