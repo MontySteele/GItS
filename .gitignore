@@ -74,4 +74,17 @@ card_gallery.html
 # third party's system prompt exactly as `understudy/logs/seat/` does.
 review/qa/*.stdout.txt
 review/qa/*.stderr.txt
+
+# `EB-189`: the QA pilot's per-turn regrowth. `understudy/staged_turn.py` writes
+# `observed.json` (the raw wire behind a staged board) and `closeness.json` (the
+# declared-vs-observed diff) into `review/qa/<turn>/` on EVERY stage, and the
+# committed artifact of a closed round is `review/qa/ledger.tsv` plus the round
+# summary and pair-review files -- not the per-turn directory. 57 dirs / 476
+# files / 51,726 lines left HEAD on 2026-09-02 (`git show e85d1309:<path>`) and
+# this is the line that stops them growing back. The ~40 that stay are FIXTURES
+# for the qualify battery and its regression set: they are already TRACKED and a
+# gitignore does not untrack, so they are unaffected, and a deliberate NEW
+# fixture is `git add -f <path>`.
+review/qa/*/observed.json
+review/qa/*/closeness.json
 .gates/
