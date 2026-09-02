@@ -73,6 +73,29 @@ in C# — Klee's three hybrid Spark spenders (`powder_charge`, `hold_the_line`,
 twins and a release build cannot reach them; flag off, the pool is
 byte-identical to shipped (`tier0/tests/test_eb218_hybrid_migration.py`).
 
+**A dev build can also REPLACE MONDSTADT'S COMPANION POOL.** Third arm, third
+property, same terms as the second:
+
+```sh
+dotnet build klee-mod/KleeCode -p:PrototypeCards=true -p:CompanionOverhaul=true
+klee-mod\build\deploy_proto.ps1 -KleeOverhaul -CompanionOverhaul   # both arms
+```
+
+`-p:CompanionOverhaul=true` defines `COMPANION_OVERHAUL`, which moves
+`KleeMod.Powers.CompanionOverhaul.Enabled`; the sim twin is
+`C.COMPANION_OVERHAUL`. With it on, the companion reward slot, the shop channel
+and the Featured Banner all read the approved workshop's rewritten Mondstadt
+Universals (`proto_mc_` rows, `C.MONDSTADT_OVERHAUL_POOL_IDS`) and the 17
+shipped Mondstadt rows cannot be offered; Inazuma and Fontaine are untouched.
+The seam is ONE property in each engine — `CompanionPool.All` and
+`loader.companion_roster_replacement` — because the banner and the slot must
+never read different rosters (R64). Flag off, both are byte-identical to
+shipped (`tier0/tests/test_companion_overhaul.py`,
+`klee-mod/KleeTests/Prototype/CompanionOverhaulTests.cs`). **Unlike the Klee
+overhaul this arm is built in BOTH engines**, because it needed no new op: every
+row is written in the grammar the sheets already speak and its nine powers ride
+the two turn hooks the engine already runs.
+
 **THE DELETION RULE (R213 B).** *Once a slice is accepted or rejected, its rows
 LEAVE the surface.* Accepted rows are re-authored onto the owning character's
 real sheet — ruled numbers, stamp bump, art — and deleted here in the same

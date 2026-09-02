@@ -64,6 +64,18 @@ public static class KleeMod
                     // board no longer each override BeforeSideTurnEnd. This
                     // one listener drives them in the sim's fixed order.
                     .Concat(Powers.TurnEndSequencer.Subscribe(combatState))
+#if PROTOTYPE_CARDS
+                    // QUARANTINED (R213 B). The Mondstadt companion overhaul's
+                    // own end-of-turn tenant, on the same argument one line up:
+                    // six of its powers fire at the end of the player's turn,
+                    // four of the six put an element on the board and five draw
+                    // from Rng.CombatTargets, so they get ONE listener in a
+                    // fixed order. Not compiled at all in a release build, and
+                    // inert with the arm off -- the powers it drives can only
+                    // reach a creature that played an overhaul card, and with
+                    // the arm off no such card is offerable.
+                    .Concat(Powers.CompanionOverhaulTurnEnd.Subscribe(combatState))
+#endif
                     // Track B's human feed: per-fight telemetry from normal
                     // play, in the schema the soak writes. Reads only -- see
                     // the three rules in PlayTelemetry.cs, the first of which

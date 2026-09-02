@@ -50,6 +50,15 @@
     <DefineConstants>$(DefineConstants);KLEE_OVERHAUL</DefineConstants>
   </PropertyGroup>
 
+  <!-- The Mondstadt companion overhaul arm, mirrored here on exactly the terms
+       above and for the same reason. Its pins do not need the property either:
+       `CompanionOverhaul.Enabled` is settable, so one build asserts both sides
+       of the switch, including the flag-off acceptance condition: that
+       CompanionPool.All is the generated roster, unchanged. -->
+  <PropertyGroup Condition="'$(CompanionOverhaul)' == 'true'">
+    <DefineConstants>$(DefineConstants);COMPANION_OVERHAUL</DefineConstants>
+  </PropertyGroup>
+
   <!-- THE BRIDGE'S PORT RESOLVER, compiled into this assembly rather than
        referenced. `vendor/STS2_MCP/gits/GitsPort.cs` is deliberately free of
        Godot, Harmony and game types precisely so the one decision that must

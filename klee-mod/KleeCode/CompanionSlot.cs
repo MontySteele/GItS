@@ -71,7 +71,12 @@ public static class CompanionSlot
         // starter relic, so CharacterId below has three live arms and the
         // filter is doing real work.
         var tiers = new Dictionary<CardRarity, List<CardModel>>();
-        foreach (var canonical in CompanionRoster.All)
+        // CompanionPool.All, not CompanionRoster.All: the pool class is the ONE
+        // door to "which companions exist for this run", and the Mondstadt
+        // companion overhaul (QUARANTINED, R213 B) redirects exactly it. The
+        // same object on every build that does not turn that arm on, so this
+        // is a rename and not a behaviour change.
+        foreach (var canonical in CompanionPool.All)
         {
             if (canonical is not ICompanionCard comp) continue;
             var characterId = CharacterId(player);
