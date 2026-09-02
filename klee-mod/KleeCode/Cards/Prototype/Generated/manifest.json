@@ -319,7 +319,7 @@
       "plan_draw": 1
     },
     "proto_kk_chain_of_command": {
-      "plan_damage": 1
+      "plan_damage": 2
     },
     "proto_kk_change_of_plans": {
       "remove": "exhaust"
@@ -348,7 +348,7 @@
       "plan_damage": 3
     },
     "proto_kk_moons_reflection": {
-      "remove": "exhaust"
+      "cost": -1
     },
     "proto_kk_nereids_ascension": {
       "cost": -1
@@ -372,23 +372,20 @@
     },
     "proto_kk_slack_water": {
       "damage": 3,
-      "power_amount": 1,
       "plan_power_amount": 1
     },
     "proto_kk_song_of_pearls": {
       "power_amount": 1
     },
     "proto_kk_stolen_chapter": {
+      "draw": 1,
       "plan_draw": 1
     },
     "proto_kk_the_clouds_like_waves": {
       "power_amount": 1
     },
     "proto_kk_the_generals_banner": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "innate": true
     },
     "proto_kk_the_moon_a_ship": {
       "mend": 2,
@@ -398,23 +395,16 @@
       "cost": -1
     },
     "proto_kk_treatise": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "innate": true
     },
     "proto_kk_undertow": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "conditional_damage": 3
     },
     "proto_kk_vanguard": {
       "plan_power_amount": 1
     },
     "proto_kk_war_council": {
-      "plan_damage": 3,
-      "plan_power_amount": 1
+      "plan_damage": 3
     },
     "proto_ko_alices_recipe": {
       "cost": -1

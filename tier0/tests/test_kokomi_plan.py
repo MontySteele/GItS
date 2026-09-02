@@ -830,7 +830,7 @@ def test_planned_block_and_energy_survive_the_turn_setup(overhaul):
     run_fight(player, [make_enemy(hp=400, intents=BLOCKER)], pilot, seed=3)
     # Turn 2 opens with BOTH: the Block turn 1's Read the Field Plans wrote
     # (8 apiece, past a block clear that would have zeroed it) and the Energy
-    # its Battle Plan Plans wrote (2 apiece, past an energy reset that would
+    # its Battle Plan Plans wrote (1 apiece, past an energy reset that would
     # have overwritten it). Under the pre-draw hook the slice's prose asks for,
     # both of these read exactly the turn's own defaults.
     block, energy = seen[2]

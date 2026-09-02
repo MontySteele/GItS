@@ -45,7 +45,7 @@ public sealed class ProtoKkStolenChapter : CustomCardModel, ICharacterCard, IPla
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stolen Chapter (proto)"),
-        ("description", "Draw 1 card. [gold]Plan[/gold]: Draw {PlanCards:diff()} card{PlanCards:plural:|s}."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Draw {PlanCards:diff()} card{PlanCards:plural:|s}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,8 +60,8 @@ public sealed class ProtoKkStolenChapter : CustomCardModel, ICharacterCard, IPla
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1),
-            new DynamicVar("PlanCards", 3m)
+            new CardsVar(2),
+            new DynamicVar("PlanCards", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -83,6 +83,7 @@ public sealed class ProtoKkStolenChapter : CustomCardModel, ICharacterCard, IPla
 
     protected override void OnUpgrade()
     {
+        DynamicVars.Cards.UpgradeValueBy(1m);
         DynamicVars["PlanCards"].UpgradeValueBy(1m);
     }
 }

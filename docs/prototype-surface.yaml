@@ -702,10 +702,12 @@
 - {id: proto_kk_slack_water, name: "Slack Water (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: basic,
-   description: "Deal 4 damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Weak[/gold] to ALL enemies.",
+   description: "Deal 4 damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
    effects: [{op: damage, amount: 4, target: enemy},
              {op: apply_power, power: weak, amount: 1, target: enemy}],
-   plan: [{op: apply_power, power: weak, amount: 2, target: all_enemies}]}
+   plan: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
+   # R243 card audit pick 2: 4 and Weak 1 / Plan Weak 1 to ALL; upgrade 7 / Plan Weak 2.
+   upgrade: {damage: 3, plan_power_amount: 1}}
 
 # --- the Tactician: Plans, and the cards that pay per Plan (packet sec.4) ---
 
@@ -741,7 +743,9 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    description: "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], draw 1 card.",
-   effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}]}
+   effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
+   upgrade: {innate: true}}
 
 - {id: proto_kk_song_of_pearls, name: "Song of Pearls (proto)", character: kokomi,
    authored_by: [claude],
@@ -752,10 +756,12 @@
 - {id: proto_kk_war_council, name: "War Council", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Plan[/gold]: Deal 4 damage and apply 1 [gold]Weak[/gold] to ALL enemies.",
+   description: "[gold]Plan[/gold]: Deal 5 damage and apply 1 [gold]Weak[/gold] to ALL enemies.",
    effects: [],
-   plan: [{op: damage, amount: 4, target: all_enemies},
-          {op: apply_power, power: weak, amount: 1, target: all_enemies}]}
+   plan: [{op: damage, amount: 5, target: all_enemies},
+          {op: apply_power, power: weak, amount: 1, target: all_enemies}],
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
+   upgrade: {plan_damage: 3}}
 
 - {id: proto_kk_nereids_ascension, name: "Nereid's Ascension (proto)", character: kokomi,
    authored_by: [claude],
@@ -843,23 +849,29 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    description: "Once per turn, when you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy.",
-   effects: [{op: apply_power, power: kk_generals_banner, amount: 1, target: self}]}
+   effects: [{op: apply_power, power: kk_generals_banner, amount: 1, target: self}],
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
+   upgrade: {innate: true}}
 
 - {id: proto_kk_chain_of_command, name: "Chain of Command", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Plan[/gold]: Deal 4 damage for each [gold]Companion[/gold] card you played last turn.",
+   description: "[gold]Plan[/gold]: Deal 6 damage for each [gold]Companion[/gold] card you played last turn.",
    effects: [],
-   plan: [{op: damage_per_companion_last_turn, amount: 4, target: front_enemy}]}
+   plan: [{op: damage_per_companion_last_turn, amount: 6, target: front_enemy}],
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
+   upgrade: {plan_damage: 2}}
 
 # --- currencies, tempo, and the one replay (packet sec.4) ---
 
 - {id: proto_kk_stolen_chapter, name: "Stolen Chapter (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Draw 1 card. [gold]Plan[/gold]: Draw 3 cards.",
-   effects: [{op: draw, amount: 1}],
-   plan: [{op: draw, amount: 3}]}
+   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Draw 4 cards.",
+   effects: [{op: draw, amount: 2}],
+   plan: [{op: draw, amount: 4}],
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
+   upgrade: {draw: 1, plan_draw: 1}}
 
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
@@ -870,10 +882,12 @@
 - {id: proto_kk_undertow, name: "Undertow (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 7 damage. If the enemy has a debuff, deal 10 instead.",
+   description: "Deal {IfUpgraded:show:10|7} damage. If the enemy has a debuff, deal {IfUpgraded:show:13|10} instead.",
    effects: [{op: conditional, if: target_has_debuff,
               then: [{op: damage, amount: 10, target: enemy}],
-              else: [{op: damage, amount: 7, target: enemy}]}]}
+              else: [{op: damage, amount: 7, target: enemy}]}],
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
+   upgrade: {conditional_damage: 3}}
 
 - {id: proto_kk_salt_line, name: "Salt Line (proto)", character: kokomi,
    authored_by: [claude],
@@ -884,16 +898,19 @@
 - {id: proto_kk_battle_plan, name: "Battle Plan", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw 1 card.",
+   description: "[gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw 2 cards.",
    effects: [],
-   plan: [{op: energy, amount: 2},
-          {op: draw, amount: 1}]}
+   # R243 card audit pick 1: 1 Energy and 2 cards; the upgrade stays on the draw.
+   plan: [{op: energy, amount: 1},
+          {op: draw, amount: 2}]}
 
 - {id: proto_kk_moons_reflection, name: "Moon's Reflection", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Exhaust. Choose a card in your [gold]Exhaust Pile[/gold]. Next turn, the [gold]Bake-Kurage[/gold] carries out its [gold]Plan[/gold] line, or the card if it has none.",
-   effects: [{op: plan_from_exhaust}]}
+   description: "Exhaust. Choose a card in your [gold]Exhaust Pile[/gold]. Next turn, the [gold]Bake-Kurage[/gold] carries out its [gold]Plan[/gold] line, or plays it if it has none.",
+   effects: [{op: plan_from_exhaust}],
+   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
+   upgrade: {cost: -1}}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.
