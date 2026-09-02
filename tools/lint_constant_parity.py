@@ -57,6 +57,22 @@ def _salon(member: str, phase: str, key: str):
     return C.SALON_MEMBERS[member][phase][key]
 
 
+def _reframe(name: str):
+    """A number out of the Furina reframe's quarantined engine module.
+
+    NOT `constants.py`, and that is the countersigned packet's own decision
+    (its sec.6.1): the reframe's flags and seeds are "a module constant in the
+    reframe module, **not** in `constants.py`", so that a quarantined slice
+    moves neither the constant census nor the world stamp. Mirroring is a
+    different question from stamping -- the C# arm PLAYS these numbers, so the
+    two engines have to agree on them by value or a seat grades a rule the sim
+    never scored. Reading them from where the sim keeps them is what lets both
+    facts be true at once.
+    """
+    from tier0.engine import furina_reframe as _fr
+    return getattr(_fr, name)
+
+
 # --------------------------------------------------------------------------
 # MIRRORED: C# constant -> the tier0 value it copies.
 #
@@ -308,6 +324,28 @@ MIRRORED: dict[str, object] = {
     # other figure is a CARD's, on its own row. The six draft 2 declared went
     # with the pulse, the Garment and the Tide.
     "KokomiOverhaulLaw.CasketStrike": C.KOKOMI_OVERHAUL_CASKET_STRIKE,
+    # THE FURINA REFRAME, SLICE ONE (QUARANTINED -- the C# arm lives under
+    # klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out of a
+    # release build; the sim half is tier0/engine/furina_reframe.py, every flag
+    # False). Same terms as the four arms above and for the same reason:
+    # quarantined is not exempt. These FIVE numbers ARE the slice's rules --
+    # the two mint amounts, the LAW:145 bound, the Evoke's Focus multiplier and
+    # the one-mode selector's price -- and the sim declared every one of them
+    # first, because R220 B sequenced the C# leg last. See `_reframe` for why
+    # they are read out of the reframe module rather than constants.py.
+    "FurinaReframeLaw.FanfarePerTrigger": _reframe("FANFARE_PER_TRIGGER"),
+    "FurinaReframeLaw.FanfarePerEvoke": _reframe("FANFARE_PER_EVOKE"),
+    "FurinaReframeLaw.FanfarePerCompanionTriggerMax":
+        _reframe("FANFARE_PER_COMPANION_TRIGGER_MAX"),
+    "FurinaReframeLaw.EvokeFocusMult": _reframe("EVOKE_FOCUS_MULT"),
+    "FurinaReframeLaw.SpotlightDesignateEncoreCost":
+        _reframe("SPOTLIGHT_DESIGNATE_ENCORE_COST"),
+    # A SENTINEL rather than a balance number, and mirrored anyway because it
+    # HAS a sim counterpart -- "the named member is not on the stage" is a
+    # value both engines return and both engines test against, so filing it
+    # UNMIRRORED as "not balance" would be true and useless. The classification
+    # this table asks for is where the number came from.
+    "FurinaReframe.EvokeTargetAbsent": _reframe("EVOKE_TARGET_ABSENT"),
     # Rally prints "costs 1 less" but the op carries no amount (it is one
     # whole printed clause), so the number lives on the power and is
     # mirrored like every other rule number.

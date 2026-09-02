@@ -69,6 +69,17 @@
     <DefineConstants>$(DefineConstants);KOKOMI_OVERHAUL</DefineConstants>
   </PropertyGroup>
 
+  <!-- The Furina reframe arm, mirrored here on exactly the terms above and
+       for the same reason. Its pins do not need the property either: the five
+       `FurinaReframe` flags are settable, so one build asserts both sides of
+       every leg, including the flag-off acceptance condition: that the
+       turn-start upkeep runs, a Companion play touches the stage not at all, a
+       deploy performs nobody, a bow is the shipped bow and all four shipped
+       Fanfare mint legs pay. -->
+  <PropertyGroup Condition="'$(FurinaReframe)' == 'true'">
+    <DefineConstants>$(DefineConstants);FURINA_REFRAME</DefineConstants>
+  </PropertyGroup>
+
   <!-- THE BRIDGE'S PORT RESOLVER, compiled into this assembly rather than
        referenced. `vendor/STS2_MCP/gits/GitsPort.cs` is deliberately free of
        Godot, Harmony and game types precisely so the one decision that must
