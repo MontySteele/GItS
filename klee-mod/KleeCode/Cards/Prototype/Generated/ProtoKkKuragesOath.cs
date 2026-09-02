@@ -32,43 +32,51 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard
+public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlannedCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForExert(ArmKeywordTips.ForTide(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_kurages_oath");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage's Oath (proto)"),
-        ("description", "[gold]Exert[/gold] 2. [gold]Tide[/gold] +{Tide:diff()}."),
+        ("description", "[gold]Plan[/gold]: Deal 5 damage to every enemy."),
     };
+
+    /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
+    /// was written. Carried out by the Bake-Kurage at the start of her next
+    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
+    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
+        new[]
+        {
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, 5, KokomiPlan.Aim.AllEnemies),
+        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Tide", 8m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkKuragesOath()
-        : base(1, CardType.Skill, CardRarity.Basic, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Basic, KokomiTargets.PetOnly, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiTide.Exert(choiceContext, Owner.Creature, 2, this, cardPlay);
-        await KokomiTide.Gain(choiceContext, Owner.Creature, DynamicVars["Tide"].IntValue);
+        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Tide"].UpgradeValueBy(2m);
+        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
     }
 }

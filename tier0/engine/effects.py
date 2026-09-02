@@ -2503,14 +2503,14 @@ def mend(state: CombatState, amount: int) -> int:
 
     ONE FUNCTION, AND IT IS THE KOKOMI ARM'S KEYWORD, NOT A SECOND ONE. The
     rule is the Kokomi brief's ("heal never above entry HP", its sec.4 rule 4),
-    the C# implementation is `KokomiTide.Mend`, and this is that rule's only
+    the C# implementation is `KokomiRules.Mend`, and this is that rule's only
     spelling in this engine -- so a Universal that prints Mend and one of her
     own cards that prints it cannot come to mean different things.
 
     CHARACTER-AGNOSTIC ON PURPOSE. Mizuki's Anraku Secret Spring Therapy is a
     UNIVERSAL: Klee or Furina can draft it, and "the one true heal in the pool"
     has to be the same keyword with the same bound in whoever's hands it lands.
-    The C# half is the same change made from the other side -- `KokomiTide.Mend`
+    The C# half is the same change made from the other side -- `KokomiRules.Mend`
     stops asking whether the creature is Kokomi and starts asking whether
     EITHER arm is live for it -- rather than a second Mend written for the
     companion pool.
@@ -3140,6 +3140,11 @@ PREDICATE_NAMES = frozenset({
     "has_spark",
     "target_has_nonpyro_aura",
     "target_has_aura",
+    # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED). Undertow's "if the enemy has
+    # a debuff". A LIVE read and not a snapshot, unlike its two aura siblings
+    # above: the card that prints it applies nothing before the branch, and
+    # what it is asking about is the board as the hit lands.
+    "target_has_debuff",
     "reaction_triggered_by_this",
     "reaction_triggered_this_turn",
     "killed_target",
@@ -3345,6 +3350,12 @@ def _predicate(state: CombatState, name: str) -> bool:
         # Snapshotted at card start — the card's own first hit may consume
         # the aura via reaction, which is exactly what the bonus rewards.
         return state.target_had_offelement_aura
+    if name == "target_has_debuff":
+        # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, C# first). The mod asks
+        # the engine's own PowerType.Debuff classification; tier0 has no
+        # aggregate debuff query and this arm is not brought up here, so the
+        # name exists to be VALIDATED on a staged row and refuses to answer.
+        _op_kokomi_overhaul_unbuilt(state, {"op": "target_has_debuff"}, None)
     if name == "target_has_aura":
         # The any-aura sibling (R189's Option C2 for `elemental_ecstasy`).
         # ANY element counts, INCLUDING the player's own: LAW says no
@@ -4921,21 +4932,32 @@ OPS = {
     "damage_set_off_total": _op_klee_overhaul_unbuilt,
     "double_set_off": _op_klee_overhaul_unbuilt,
     "draw_per_set_off": _op_klee_overhaul_unbuilt,
-    # --- Kokomi overhaul, slice one (QUARANTINED, C.KOKOMI_OVERHAUL) ---
+    # --- Kokomi overhaul, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) -----
     # Registered so the rows load, priced so the drafter is honest, resolved by
     # nothing -- see `_op_kokomi_overhaul_unbuilt` for why raising is the shape.
-    "gain_tide": _op_kokomi_overhaul_unbuilt,
-    "surge": _op_kokomi_overhaul_unbuilt,
-    "block_half_surge": _op_kokomi_overhaul_unbuilt,
-    "exert": _op_kokomi_overhaul_unbuilt,
+    #
+    # DRAFT 6 REPLACED THE VERBS, IT DID NOT ADD TO THEM. `gain_tide`,
+    # `surge`, `block_half_surge`, `exert`, `draw_per_tide`,
+    # `play_top_of_draw`, `draw_companion_from_draw` and the old `plan` OP are
+    # gone: the ruled brief's sec.6 cuts Tide, Surge, Exert and the pulse by
+    # name, and draft 6's Plan is a top-level `plan:` LIST on the row rather
+    # than a clause inside a body. An op left registered for a rule nothing has
+    # is a row waiting to print it.
     # RESOLVED under `C.COMPANION_OVERHAUL` (a Universal prints it) and
     # still unbuilt under the Kokomi arm alone -- see `_op_mend`.
     "mend": _op_mend,
-    "plan": _op_kokomi_overhaul_unbuilt,
-    "draw_companion_from_draw": _op_kokomi_overhaul_unbuilt,
-    "next_companion_free": _op_kokomi_overhaul_unbuilt,
-    "draw_per_tide": _op_kokomi_overhaul_unbuilt,
-    "play_top_of_draw": _op_kokomi_overhaul_unbuilt,
+    "next_companion_discount": _op_kokomi_overhaul_unbuilt,
+    "remove_debuff": _op_kokomi_overhaul_unbuilt,
+    "carry_out_front_plan": _op_kokomi_overhaul_unbuilt,
+    "plan_from_exhaust": _op_kokomi_overhaul_unbuilt,
+    "damage_quarter_max_hp": _op_kokomi_overhaul_unbuilt,
+    # The two PLAN-ONLY clauses. They never appear in an `effects:` list -- the
+    # codegen refuses one there by name -- but they are registered here anyway,
+    # because `loader.prototype_cards` validates a row's `plan:` list through
+    # the same vocabulary check the body takes and an unregistered clause could
+    # not be staged at all.
+    "plan_twice": _op_kokomi_overhaul_unbuilt,
+    "damage_per_companion_last_turn": _op_kokomi_overhaul_unbuilt,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,

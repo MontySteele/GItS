@@ -481,7 +481,7 @@ public sealed class KokomiResourceHooks : AbstractModel
         // The Kokomi overhaul's own stash, on exactly the same terms and for
         // the same reason: STASH ONLY, because this delegate runs on every
         // hook broadcast. Its per-fight work is BeforeCombatStart's.
-        KokomiTide.NoteCombat(combatState);
+        KokomiRules.NoteCombat(combatState);
 #endif
         yield return _instance;
     }
@@ -524,7 +524,7 @@ public sealed class KokomiResourceHooks : AbstractModel
         // no-op with the arm on (the base kit's own gate reads
         // `C.KURAGE_ALWAYS_ON`, which this arm switches off at the funnel
         // below), so the two never both install.
-        await KokomiTide.InstallAll();
+        await KokomiRules.InstallAll();
     }
 #endif
 
@@ -740,12 +740,14 @@ public sealed class KokomiResourceHooks : AbstractModel
         // for the base kit (sec.12.6 item 1). Idempotent by construction, and
         // here so that a combat whose setup order ever changes still opens
         // with a jellyfish rather than silently without one -- the failure
-        // mode otherwise is a fight in which nothing can hold Tide. The Plans
-        // do NOT resolve here: they resolve before the draw, on the
-        // jellyfish's own BeforeSideTurnStart, and this hook is after it.
+        // mode otherwise is a fight with no jellyfish to send a Plan to. The
+        // Plans DO resolve on this same hook, but on the marker power's own
+        // override rather than here -- see
+        // `ProtoBakeKuragePower.AfterPlayerTurnStart` for why the late hook
+        // and not the pre-draw one.
         if (KokomiOverhaul.LiveFor(player.Creature))
         {
-            await KokomiTide.Install(player.Creature);
+            await KokomiRules.Install(player.Creature);
         }
 #endif
         await GrantKitIfLive(choiceContext, player);
@@ -811,19 +813,22 @@ public sealed class KokomiResourceHooks : AbstractModel
         if (amount <= 0) return false;      // Strength LOSS still lands
 
 #if PROTOTYPE_CARDS
-        // QUARANTINED, RULE 7 UNDER THE KOKOMI OVERHAUL: "she cannot gain
-        // Strength; Strength she would gain becomes TIDE." The refusal is the
-        // SAME refusal -- Flawless Strategy is one of the two things the
-        // brief's sec.4 keeps -- and only the bank it pays into moves. This is
-        // the one seam the brief's sec.6.5 names as "how any shared Strength
-        // source in the mod reaches her without a card", so it has to sit at
-        // the chokepoint rather than on a card, exactly as the Charge version
-        // does.
+        // QUARANTINED, THE KOKOMI OVERHAUL'S FOURTH OFF-SWITCH, and it is the
+        // one that turns a SHIPPED rule off rather than an arm rule.
+        //
+        // Draft 2 sent her Strength to the Tide here. Draft 6 has no Tide, and
+        // its rule 3 says the opposite in the brief's own words: "your Strength
+        // and Dexterity count, since the plans are hers". A planned hit goes
+        // out through `ElementalHit` with her as the applier, so Strength is
+        // load-bearing for the whole Tactician loop -- and the shipped refusal
+        // below would have quietly deleted it.
+        //
+        // RETURNING FALSE IS THE WHOLE CHANGE: no modification, so the Strength
+        // lands exactly as it does on any other character, and neither the
+        // Charge conversion below nor any arm bank ever sees it.
         if (KokomiOverhaul.LiveFor(target))
         {
-            KokomiTide.GainImmediate(target, (int)amount);
-            modifiedAmount = 0;
-            return true;
+            return false;
         }
 #endif
         KokomiResources.GainCharge(target, (int)amount);

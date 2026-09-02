@@ -3,17 +3,23 @@ namespace KleeMod.Powers;
 /// <summary>
 /// THE KOKOMI OVERHAUL SWITCH, C# side. Twin of tier0's <c>C.KOKOMI_OVERHAUL</c>.
 ///
-/// The ruled brief (<c>review/active/kokomi-brief-2026-09-01.md</c> sec.4, all
-/// eight picks ruled at their defaults 2026-09-01) replaces her whole rule set:
-/// the Bake-Kurage is always on the field and holds <b>Tide</b>, which never
-/// resets on its own; her cards add Tide; <b>Surge</b> spends the whole of it as
-/// one Hydro hit; on a turn she did not Surge the jellyfish <b>Mends</b> her a
-/// chip, capped per combat on the relic; <b>Exert N</b> is an HP cost on Skills
-/// and Powers taken from Block first; the <b>Garment</b> is a short window where
-/// her Attacks Mend; Strength becomes Tide; and a <b>Plan</b> happens at the
-/// start of her next turn. Slice one
-/// (<c>kokomi-overhaul-slice-1-2026-09-01.md</c>) is the ten-card starter, 28
-/// pool rows, the relic and the engine list in its sec.5.
+/// The ruled brief (<c>review/active/kokomi-brief-2026-09-01.md</c> DRAFT 6,
+/// direction ruled R240 and approved R241) replaces her whole rule set with ONE
+/// idea: the <b>Bake-Kurage</b> is a pet on her side of the field for the whole
+/// combat that enemies cannot touch; a card with a <b>Plan</b> line can be
+/// played on the jellyfish instead of where it would normally go, its cost paid
+/// now, and at the start of her next turn the jellyfish carries out the Plan
+/// line; a planned hit lands on the front enemy unless the line says every
+/// enemy, and her Strength and Dexterity count; nothing happens by itself.
+/// <b>Mend</b> heals and never above the HP she entered the fight with. Slice
+/// one (<c>kokomi-overhaul-slice-1-2026-09-01.md</c> draft 6) is the ten-card
+/// starter, 26 pool rows, Tamakushi Casket and the engine list in its sec.5.
+///
+/// DRAFT 2's RULES ARE GONE, NOT OFF. Tide, Surge, Exert, the pulse and its
+/// budget, the Garment, Strength-to-Tide, Orders and Tactics are cut by the
+/// brief's sec.6 by name, so their ops, their constants and their C# are
+/// deleted rather than left inert behind a second switch. What survives from
+/// draft 2 is the typed Plan queue, Mend, and this switch.
 ///
 /// TWO SWITCHES, NOT ONE, AND THEY DO DIFFERENT JOBS -- the same arrangement
 /// <see cref="KleeOverhaul"/> and <see cref="CompanionOverhaul"/> make, for the
@@ -29,28 +35,31 @@ namespace KleeMod.Powers;
 ///     rules AND assert the flag-off wiring in one build.
 ///
 /// WHAT MOVES WHEN IT IS ON, exhaustively. Every seam is one <c>if</c> on this
-/// property and there are seven of them, in two groups.
+/// property and there are eight of them, in two groups.
 ///
 /// The four that REPLACE:
 ///   * <c>Kokomi.StartingDeck</c> -- the slice's ten cards
 ///     (<see cref="KokomiOverhaulRoster.StartingDeck"/>).
-///   * <c>Kokomi.StartingRelics</c> -- Tamanooya's Casket instead of the Pearl
+///   * <c>Kokomi.StartingRelics</c> -- Tamakushi Casket instead of the Pearl
 ///     of Wisdom, because the Pearl IS the exhaust funnel this arm retires.
 ///   * <c>KokomiCardPool.FilterThroughEpochs</c> -- her whole offerable pool is
-///     the slice's 28 rows (<see cref="KokomiOverhaulRoster.OfferablePool"/>).
-///   * <c>KokomiResourceHooks.BeforeCombatStart</c> -- the jellyfish is
-///     installed and her entry HP is captured.
+///     the slice's 26 rows (<see cref="KokomiOverhaulRoster.OfferablePool"/>).
+///   * <c>KokomiResourceHooks.BeforeCombatStart</c> -- the Bake-Kurage pet is
+///     summoned, its marker power installed and her entry HP captured.
 ///
-/// The three that TURN OFF, all in <c>KokomiResourceHooks</c> and all for the
-/// same one sentence in the brief's sec.4 ("What leaves: the Charge bank, ...
-/// Muster as a transform, ... the Burst gate"):
+/// The four that TURN OFF, all in <c>KokomiResourceHooks</c> and all because
+/// the brief retires the rules they are priced inside:
 ///   * the Charge and Burst accrual on exhaust,
 ///   * the Kurage's memory (its entry rules, its fire and its install),
-///   * the skill-tag Burst particle and the kit-Burst grant check.
-/// Rule 7 (Strength becomes Tide) REPLACES the shipped Strength-to-Charge
-/// conversion at the same chokepoint, so that hook moves rather than stopping.
+///   * the skill-tag Burst particle and the kit-Burst grant check,
+///   * the STRENGTH REFUSAL itself. Draft 2 converted Strength to Tide at the
+///     power-application chokepoint; draft 6's rule 3 says "your Strength and
+///     Dexterity count, since the plans are hers", so under this arm the
+///     shipped refusal is skipped and Strength simply lands. That is the one
+///     off-switch that changes what a SHIPPED hook does rather than what an
+///     arm rule does, and it is why it is named here.
 ///
-/// FLAG OFF IS BYTE-IDENTICAL. Every one of those seven is an early branch on
+/// FLAG OFF IS BYTE-IDENTICAL. Every one of those eight is an early branch on
 /// this property, so with it off her starter, her relic, her pool and her
 /// funnel are exactly what they were, and no card applies a power from this
 /// arm. That is the acceptance condition and it is pinned by
@@ -87,39 +96,18 @@ public static class KokomiOverhaul
 }
 
 /// <summary>
-/// The numbers the overhaul's RULES carry. Placeholders, not claims (slice
-/// packet sec.1: "No number in it is a claim") -- and MIRRORED BY VALUE from
-/// tier0, which is why they are named constants rather than literals at the
-/// call sites (<c>tools/lint_constant_parity.py</c>).
+/// The number the overhaul's RULES carry, and it is ONE. Draft 6's rules are
+/// structural -- where a card lands and when -- so almost every figure is a
+/// CARD's and stays on its row. The relic's strike is the exception: it is a
+/// rule Tamakushi Casket carries, printed on the relic and on no card.
 ///
-/// A number a CARD prints stays on the card row, where the codegen renders it
-/// into a DynamicVar or a literal; only a number a RULE or a POWER carries
-/// lands here. That is why Exert 2, Tide +5 and Mend 12 are absent and the
-/// pulse's 2-and-8 are present: the pulse is the relic's rule, not a card's.
+/// MIRRORED BY VALUE from tier0, which is why it is a named constant rather
+/// than a literal at the call site (<c>tools/lint_constant_parity.py</c>).
 /// </summary>
 public static class KokomiOverhaulLaw
 {
-    /// <summary>Rule 4: the pulse Mends this on a turn she did not Surge.
-    /// Mirrors <c>C.KOKOMI_OVERHAUL_PULSE_MEND</c>.</summary>
-    public const int PulseMend = 2;
-
-    /// <summary>Rule 4: and never more than this in one combat. Mirrors
-    /// <c>C.KOKOMI_OVERHAUL_PULSE_BUDGET</c>.</summary>
-    public const int PulseBudget = 8;
-
-    /// <summary>Song of Pearls: the pulse Mends this instead. Mirrors
-    /// <c>C.KOKOMI_OVERHAUL_SONG_MEND</c>.</summary>
-    public const int SongOfPearlsMend = 3;
-
-    /// <summary>Song of Pearls: and the budget is this instead. Mirrors
-    /// <c>C.KOKOMI_OVERHAUL_SONG_BUDGET</c>.</summary>
-    public const int SongOfPearlsBudget = 12;
-
-    /// <summary>Rule 6: each Attack that hits Mends this while the Garment is
-    /// worn. Mirrors <c>C.KOKOMI_OVERHAUL_GARMENT_MEND</c>.</summary>
-    public const int GarmentMend = 2;
-
-    /// <summary>Reading the Tide: one card per this much Tide. Mirrors
-    /// <c>C.KOKOMI_OVERHAUL_TIDE_PER_CARD</c>.</summary>
-    public const int TidePerCard = 5;
+    /// <summary>Tamakushi Casket: the jellyfish's Hydro strike, per debuff she
+    /// applies to an enemy. Mirrors
+    /// <c>C.KOKOMI_OVERHAUL_CASKET_STRIKE</c>.</summary>
+    public const int CasketStrike = 2;
 }

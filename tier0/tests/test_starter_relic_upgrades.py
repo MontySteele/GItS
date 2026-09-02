@@ -74,7 +74,7 @@ NO_UPGRADED_FORM: dict[str, str] = {
     # THE GATE THAT CLEARS IT: the slice reaching Balance. Accepted rows move
     # to her real sheet with ruled numbers and the smith opens, and the
     # upgraded starter is authored there with everything else.
-    "TamanooyasCasket":
+    "TamakushiCasket":
         "prototype-only (KOKOMI_OVERHAUL); the smith is closed in the "
         "prototype run (slice one sec.7), and an upgraded form would be a "
         "design act. Clears when the slice reaches Balance.",

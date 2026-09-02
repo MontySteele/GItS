@@ -1,193 +1,178 @@
-Status: OPEN (draft 4, Paper; to be rewritten on brief draft 6 once read)
+Status: OPEN (draft 6, Paper; written on the R241 brief; the Opus build follows)
 
-# Kokomi overhaul, slice one: the rules, the starter, and 28 cards (draft 4)
+# Kokomi overhaul, slice one: the rules, the starter, and 26 cards (draft 6)
 
-Draft 4, 2026-09-02, rewritten whole on the brief's draft 4
-(`review/active/kokomi-brief-2026-09-01.md`). The draft-2 slice was built,
-played by two seats and by you, and failed its gate question 1; its
-records are `review/ruled/kokomi-overhaul-round-1-2026-09-02.md` (R237).
-This is the Paper artefact for the rebuild: the same starter shape, the
-same 28-card pool size, the exhaust pile as the jellyfish's memory and
-the Tide as what it costs to read from it.
+Draft 6, 2026-09-02, written whole on brief draft 6
+(`review/active/kokomi-brief-2026-09-01.md`, approved R241). Earlier
+slices were built on the Tide (draft 2, played and failed its gate,
+`review/ruled/kokomi-overhaul-round-1-2026-09-02.md`) and on the exhaust
+row (draft 4, never built). This one is the Plan: one keyword, a pet, and
+a relic that makes the jellyfish strike.
 
-## 1. What the slice is for
+## 1. What the slice must show
 
-**What the slice must show:** a player who has never read the brief can
-find "Exhaust it, feed, Surge it back" in fight one; the order of the pile
-is felt at least once per fight; the Tide reads as fuel and never as a
-tax; and Surge has a right turn.
+A player who has never read the brief can find "play it on the jellyfish
+and it lands at dawn" in fight one; the morning where two or three Plans
+land together happens at least once per fight; the jellyfish's strikes
+off a debuff are felt; and "now or at dawn" is a real choice on the cards
+that carry both lines.
 
-## 2. The rules, one line each (the brief's §4, unchanged)
+## 2. The rules (the brief's section 2)
 
-1. **The Bake-Kurage** is always out and holds **Tide** (a number from 0,
-   never resetting on its own).
-2. **Tide**: her cards add it; any card of hers that Exhausts adds 1.
-3. **Surge**: the jellyfish plays the top card of her exhaust pile (the
-   last card exhausted) at no energy, with its own target and choices,
-   paying its price from the Tide: 3 per energy of printed cost, 0-cost
-   free. If the Tide cannot pay, it plays nothing and the rest of the
-   card still happens.
-4. **Plan**: paid and Exhausted now, doing nothing yet; at the start of
-   her next turn the jellyfish plays it at no Tide price, unless a Surge
-   already has.
-5. **Tactics**: a card the jellyfish has played. When it would go to the
-   exhaust pile, it leaves the fight instead.
-6. **Mend**: heal, never above entry HP; Uncommon and up only.
-7. **Garment**: a state for N turns; each Attack that hits Mends 2.
-8. **Flawless Strategy**: no Strength; Strength becomes Tide.
+1. **The Bake-Kurage** is a pet on your side of the field for the whole
+   combat. Enemies cannot touch it. It is where a Plan is sent.
+2. **Plan.** A card with a **Plan:** line can be played on the jellyfish
+   instead of where it would normally go; its cost is paid now, and at the
+   start of your next turn, before you draw, the jellyfish carries out the
+   Plan line. A card with only a Plan line can only be planned.
+3. **The jellyfish acts by the book.** A planned hit lands on the front
+   enemy (leftmost alive) unless the line says every enemy. Plans are
+   carried out in the order they were written. Your Strength and Dexterity
+   count, and planned damage from an Attack applies Hydro the way her
+   Attacks do.
+4. **Nothing happens by itself.** No bank, no pulse, no automatic replay.
 
-A dead target is replaced by a random living one. Keywords with tooltips:
-Tide, Surge, Plan, Tactics, Mend, Garment.
+**Mend** heals, never above the HP you entered the fight with, and appears
+only on Rare cards that Exhaust. Keywords with tooltips: Plan, Mend.
 
-## 3. The starter (ten cards, six ids)
+## 3. The starter (ten cards, four ids)
 
 | Card | Cost | Type | Printed text | Copies |
 |---|---|---|---|---|
-| Water's Edge | 1 | Attack | Deal 6. | 3 |
-| Coral Guard | 1 | Skill | Gain 5 Block. | 2 |
-| Salt Line | 1 | Skill | Exhaust. Gain 7 Block. | 1 |
-| Kurage's Oath | 1 | Skill | Tide +4. | 2 |
-| Rising Tide | 1 | Attack | Deal 4. Surge. | 1 |
-| Stolen Chapter | 1 | Skill | Plan: draw 2. | 1 |
+| Water's Edge | 1 | Attack | Deal 6 damage. | 4 |
+| Coral Guard | 1 | Skill | Gain 5 Block. | 4 |
+| Kurage's Oath | 1 | Skill | Plan: Deal 5 damage to every enemy. | 1 |
+| Slack Water | 1 | Attack | Deal 4 damage. Apply 1 Weak. Plan: every enemy gains 2 Weak. | 1 |
 
-Relic: **Tamanooya's Casket**. The jellyfish is out from the start of
-combat, and the first card it plays each combat costs no Tide. It pays
-for the first Surge: fight one's turn two brings Salt Line back whatever
-the Tide, and the second Surge teaches the price. Script A in the brief
-(§12) plays fight one out.
+Relic, **Tamakushi Casket**: the Bake-Kurage is out from the start of
+every combat. Whenever you apply a debuff to an enemy, it strikes that
+enemy for 2 Hydro damage. (The relic replaces the misspelled Tamanooya's
+Casket and the Pearl of Wisdom under the arm.)
 
-## 4. The pool (28 cards)
+## 4. The pool (26 cards)
 
-Prototype numbers, generous on purpose. Every Exhaust card below is also
-one Surge away from a second play; the job column says what the second
-play is for.
+Prototype numbers. Every Plan line is bigger than the now-line it sits
+beside; a Plan-only card is priced as a card that does nothing this turn.
 
-### Priestess, Exhaust it, feed, Surge it back (9)
+### The Tactician: Plans, and the cards that pay per Plan (9)
 
-| Card | R | Cost | Type | Printed text | Job |
-|---|---|---|---|---|---|
-| Tidal Prayer | C | 1 | Skill | Tide +3. Draw 1. | The cheap feed that replaces itself |
-| Sea Spray | C | 1 | Attack | Deal 5. Tide +2. | The Attack that feeds |
-| Deep Current | C | 1 | Attack | Deal 4 to every enemy. Tide +1 per enemy hit. | Hallway feed |
-| Breaker | C | 2 | Attack | Deal 8. Surge. | The big cash at Common |
-| Undertow | C | 1 | Skill | Gain 3 Block. Surge. | The Surge that defends |
-| High Tide | U | 1 | Skill | Exhaust. Tide +8. | Fuel that comes back as fuel, for 3 |
-| Song of Pearls | U | 1 | Power | Whenever the jellyfish plays a card, Tide +2. | Surges pay part of the next |
-| Nereid's Ascension | U | 1 | Skill | Exhaust. Wear the Garment for 2 turns. | The lifesteal window, twice |
-| Sango Isshin | R | 2 | Power | Mend that would go past your entry HP becomes Hydro damage to a random enemy. | Breaks rule 6's ceiling |
+| Card | R | Cost | Type | Printed text |
+|---|---|---|---|---|
+| Feint | C | 1 | Attack | Deal 4 damage. Plan: Deal 9 damage. |
+| Ambush | C | 1 | Skill | Plan: Deal 12 damage. |
+| Read the Field | C | 1 | Skill | Gain 3 Block. Plan: Gain 8 Block. |
+| Exposed Flank | C | 1 | Skill | Apply 1 Vulnerable. Plan: every enemy gains 2 Vulnerable. |
+| Treatise | U | 1 | Power | Whenever the jellyfish carries out a Plan, draw 1. |
+| Song of Pearls | U | 1 | Power | Whenever the jellyfish carries out a Plan, gain 3 Block. |
+| War Council | U | 1 | Skill | Plan: Deal 4 damage to every enemy and apply 1 Weak to each. |
+| Nereid's Ascension | R | 2 | Skill | Exhaust. Plan: for 2 turns, the jellyfish carries out every Plan twice. |
+| The Moon Overlooks the Waters | R | 2 | Power | Plans also happen now. |
 
-### Strategist, the plan was written last turn (8)
+### The Priestess: Block through the jellyfish, Mend at Rare (7)
 
-| Card | R | Cost | Type | Printed text | Job |
-|---|---|---|---|---|---|
-| Battle Plan | C | 1 | Skill | Plan: gain 2 Energy. | Delayed energy, the one net-positive card |
-| Ambush | C | 1 | Skill | Plan: deal 12 to a random enemy. | Delayed damage, better rate than now |
-| Read the Field | C | 1 | Skill | Gain 3 Block. Plan: gain 5 Block. | Defence now and later |
-| Feint | C | 1 | Attack | Deal 4. Plan: deal 8 to the same enemy. | The Attack version |
-| Contingency | U | 1 | Skill | Plan: Mend 6. | The scheduled heal |
-| Treatise | U | 1 | Power | Whenever the jellyfish plays a card, draw 1. | Replays into cards |
-| War Council | U | 1 | Skill | Plan: Surge twice. | A delayed double, paid in Tide then |
-| The Art of War | R | 2 | Power | Plans also happen now. | Breaks rule 4 |
+| Card | R | Cost | Type | Printed text |
+|---|---|---|---|---|
+| Sea-Salt Prayer | C | 1 | Skill | Gain 4 Block. Apply 1 Weak. |
+| Deep Current | C | 1 | Attack | Deal 4 damage to every enemy. |
+| Coral Bulwark | C | 1 | Skill | Gain 6 Block. Plan: Gain 6 Block and the front enemy gains 1 Weak. |
+| Cleansing Wave | U | 1 | Skill | Gain 5 Block. Remove a debuff from yourself. Plan: Gain 10 Block. |
+| The Clouds Like Waves Rippling | R | 2 | Power | Whenever you apply a debuff to an enemy, gain 2 Block. |
+| The Moon, A Ship O'er the Seas | R | 2 | Skill | Exhaust. Mend 10. Plan: Mend 15. |
+| Sango Isshin | R | 2 | Attack | Deal damage equal to a quarter of your Max HP. Plan: the same to every enemy. |
 
-### Commander, Gorou, go (4)
+### The Commander: Gorou, go (4)
 
-Companions come from the Inazuma Universals (R236) already in the pool;
-no Personal and no stand-in is authored for slice one.
+Companions are the Inazuma Universals (R236) already in the pool; no
+Personal and no stand-in is authored for slice one. No play is free.
 
-| Card | R | Cost | Type | Printed text | Job |
-|---|---|---|---|---|---|
-| Rally | C | 1 | Skill | Exhaust a Companion card from your hand. Tide +2. | The one door for companions, chosen |
-| Vanguard | C | 0 | Skill | The next Companion you play this turn costs 0. | Tempo |
-| Orders | U | 1 | Power | Whenever you play a Companion, Tide +2. | Companions into Tide |
-| The General's Banner | R | 2 | Power | Companions the jellyfish plays are not Tactics. | Breaks rule 5, for companions |
+| Card | R | Cost | Type | Printed text |
+|---|---|---|---|---|
+| Rally | C | 1 | Skill | Apply 1 Weak. The next Companion card you play this turn costs 1 less. |
+| Vanguard | C | 0 | Skill | Exhaust. Plan: the front enemy gains 1 Vulnerable and 1 Weak. |
+| The General's Banner | U | 1 | Power | Whenever you play a Companion card, the front enemy gains 1 Weak. |
+| Chain of Command | U | 1 | Skill | Plan: Deal 4 damage for each Companion card you played last turn. |
 
-### Currencies and defence (7)
+### Currencies, tempo, and the one replay (6)
 
-| Card | R | Cost | Type | Printed text | Job |
-|---|---|---|---|---|---|
-| Quiet Study | C | 1 | Skill | Gain 4 Block. Tide +2. | Block and feed; the plain turn |
-| Change of Plans | C | 1 | Skill | Choose a card in your exhaust pile and put it on top. Draw 1. | The reorder |
-| Moon's Reflection | U | 1 | Skill | Put a card from your exhaust pile into your hand. | The one door to a second replay |
-| Cleansing Tide | U | 1 | Skill | Exhaust. Mend 6. | The true heal, twice at most |
-| Reading the Tide | U | 0 | Skill | Draw 1, plus 1 per 5 Tide. | Tide into cards; never a blank |
-| The Clouds Like Waves | U | 1 | Power | While you are under half HP, each card the jellyfish plays Mends you 2. | The comeback |
-| Watatsumi's Blessing | R | 2 | Skill | Exhaust. Mend 12. Draw 2. | The big heal, twice at most, for 6 Tide the second time |
+| Card | R | Cost | Type | Printed text |
+|---|---|---|---|---|
+| Stolen Chapter | C | 1 | Skill | Draw 1. Plan: Draw 3. |
+| Change of Plans | C | 0 | Skill | Exhaust. The jellyfish carries out your front Plan now. |
+| Undertow | C | 1 | Attack | Deal 7 damage. If the enemy has a debuff, deal 10 instead. |
+| Salt Line | C | 1 | Skill | Exhaust. Gain 8 Block. |
+| Battle Plan | U | 1 | Skill | Plan: Gain 2 Energy and draw 1. |
+| Moon's Reflection | U | 1 | Skill | Exhaust. Choose a card in your exhaust pile: Plan: the jellyfish carries out its Plan line, or the card itself if it has none. |
 
-Pool by rarity: 13 Common, 11 Uncommon, 4 Rare. Block in the pool: four
-cards, one of them a Plan; the scarcity the brief asks for.
+Pool by rarity: 13 Common, 8 Uncommon, 5 Rare. Rares carry constellation
+names but Nereid's Ascension, her Burst, the way Sparks 'n' Splash is
+Klee's. Status lines feed the relic on purpose: Slack Water, Exposed
+Flank, War Council, Vanguard, Sea-Salt Prayer, Rally and the Banner all
+make the jellyfish strike.
 
 ## 5. What the engine has to do (the C# build list)
 
-Most of this exists. The Memory arm
-(`klee-mod/KleeCode/Powers/Prototype/KurageMemory.cs`, tier0's
-`C.KURAGE_MEMORY`) carries "the jellyfish plays a card with its stored
-target and choices," the price at 3 per energy, same-target with random
-fallback, and the never-re-remembered rule, which is Tactics by another
-name. The draft-2 arm (`KokomiOverhaul*.cs`, `KokomiPlan.cs`) carries
-Tide, Mend with the entry-HP cap, Garment, Strength → Tide, and a Plan
-queue. The build joins them under `KOKOMI_OVERHAUL` and retires what
-draft 2 had that draft 4 does not.
+The decompile read of 2026-09-02 (brief section 7) settled the shape.
 
-- **Tide** stays the jellyfish's counter, fed by cards and by 1 per
-  Exhaust; **Exert** and **the pulse** and its budget are removed; the
-  Casket's text becomes the free first replay.
-- **No automatic replay.** The old arm's start-of-turn spend is removed.
-  The jellyfish plays only from **Surge** (the top of the exhaust pile,
-  paying the Tide, nothing if short) and from a **Plan**'s morning (free).
-- **The exhaust pile's order** is the memory: the game's pile in exhaust
-  order, top = last. Change of Plans reorders it; Moon's Reflection takes
-  from it to hand.
-- **Tactics**: a flag set on the card instance when the jellyfish plays
-  it; on that card's next Exhaust it is removed from combat instead. The
-  General's Banner exempts Companions.
-- **Plan**: paid now, Exhausted to the pile with its target, played by the
-  jellyfish at the start of her next turn at no Tide unless already
-  Surged; The Art of War also resolves it now; War Council's Plan is two
-  Surges.
-- **Hooks on "the jellyfish played a card"** for Song of Pearls, Treatise
-  and The Clouds Like Waves; **Orders** on Companion play; **Vanguard** as
-  next-Companion-free (exists in the companion arm); **Rally** as a hand
-  pick that Exhausts.
-- **Mend**, **Garment**, **Sango Isshin**, **Strength → Tide** as built.
-- **UI**: the Tide number on the jellyfish, the top card of the pile face
-  up beside it with its price, the Tactics tag, the Garment count. The
-  wire carries the Tide, the pile in order with prices, and the tag
-  (EB-273's fix widens to these).
-- **Off under the switch:** Charge accrual, Muster, the Burst gate, the
-  draft-2 pulse and Exert, the draft-3 row. The shipped 76-card Kokomi
-  stays in the release build untouched.
+- **The pet.** The Bake-Kurage is a `CustomPetModel` with its HP bar
+  hidden (the 9999-HP no-bar pattern the base library's own pets use),
+  added to Kokomi's side at combat start under `KOKOMI_OVERHAUL`. Enemies
+  cannot target pets by construction. Its field position is bespoke code,
+  the way every pet's is; the art is a placeholder for slice one.
+- **Targeting.** A card with both lines targets "an enemy or the
+  Bake-Kurage" (Attacks) or "you or the Bake-Kurage" (Skills); a Plan-only
+  card targets the jellyfish alone. The base library's `Pet` target type
+  and its targeting patches carry the jellyfish half; the "or" needs one
+  custom target type per pairing, built on the same patches.
+- **The Plan queue** is `Powers/Prototype/KokomiPlan.cs`: typed clauses,
+  per player, resolved at the start of her turn before the draw, in
+  order. The surface gains a `plan` effects list per row in the same op
+  vocabulary as `effects` (damage to `front_enemy` / `all_enemies`, block,
+  draw, energy, apply_power Weak / Vulnerable, mend, carry-out-front-now,
+  and the two Rare flags: twice for 2 turns, also-now), and the codegen
+  emits the play-on-pet branch that enqueues them. Kokomi is the dealer
+  of planned damage so Strength and Hydro apply; the jellyfish is the
+  visual source.
+- **Hooks:** "the jellyfish carried out a Plan" (Treatise, Song of Pearls);
+  "you applied a debuff to an enemy" (the relic, The Clouds Like Waves);
+  "you played a Companion" (the Banner, Chain of Command's count).
+- **The relic** `TamakushiCasket.cs` replaces `TamanooyasCasket.cs`: on a
+  debuff applied to an enemy by her, the pet deals 2 Hydro damage to that
+  enemy (a real hit: Block, Vulnerable and the aura apply).
+- **UI:** the pending Plans drawn face up in order on the jellyfish (the
+  EB-198 strip, re-pointed), the count badge that exists, the Plan and
+  Mend tooltips. The wire carries the pending Plans with their targets so
+  the seats' pages and `wire.json` show them; the blind grammar accepts
+  `play "<title>" on "Bake-Kurage"`.
+- **Off under the switch:** Tide, Surge, Exert, the pulse and its budget,
+  the Garment power, Strength to Tide, Orders and Tactics, Charge, Muster
+  and the Burst gate. The shipped 76-card Kokomi stays in the release
+  build untouched.
 
-All of it behind the prototype switch, C# first; the sim twin follows for
-the rows the sim can carry, since the Memory's play-with-stored-target
-already lives in tier0.
+C# first; the sim twin follows for the rows it can carry.
 
 ## 6. The Prototype gate, and who plays
 
 1. Opus builds the slice under `KOKOMI_OVERHAUL` from this document's
-   surface rows, and runs the soak and the lints.
-2. Seats play first: Opus, GPT and Qwen each play an act-one run on the
-   build with this 28-card pool as Kokomi's only reward pool, with the
-   Inazuma companions offered. They catch soft-locks, text that lies,
-   Surges that played nothing, and cards nobody plays.
+   surface rows and runs the soak and the lints.
+2. The seats play first: Opus and GPT each play an act-one run with this
+   pool as Kokomi's only reward pool and the Inazuma companions offered.
 3. Then you play: one act-one run, three or four fights including an
    elite. The rules changed, so this is the "first build of a kit's
    rules" gate.
 4. You answer four questions, in a sentence each:
-   1. Did you choose what went on top of the pile, and did the order
+   1. Did "now or at dawn" come up as a choice, and when did you plan?
+   2. Did a morning ever feel like a payoff?
+   3. Did the jellyfish's strikes off a debuff register, and did the 2
       matter?
-   2. Did the Tide feel like fuel or like a tax?
-   3. Did Surge have a right turn, and was one ever wasted on the wrong
-      top or a short Tide?
    4. Which card did you never want to play?
 
-A pass is not a number. It is your four answers plus the seats' defect
-list. A fail on question 1 or 3 goes back to the brief's rules, not to
-the card numbers.
+A pass is your four answers plus the seats' defect list. A fail on
+question 1 goes back to the brief's rules, not to the numbers.
 
 ## 7. Not in slice one, on purpose
 
-- The remaining own cards: Commons to bring each loop to 14 to 16, more
-  Rares, the stand-ins (Thoma's barrier, Shinobu's ring, Sara's stormcall)
-  and Gorou's Personal.
+- The rest of the pool: Commons to bring each loop to 14 to 16, Gorou's
+  Personal, the stand-ins.
 - Any Watatsumi relic beyond the Casket.
 - Upgrades beyond the Prototype-stage rule (EB-283).
+- Art for the pet beyond a placeholder.

@@ -10,15 +10,15 @@ namespace KleeMod.Tests.Harness;
 /// The overhaul's Bake-Kurage, for the slice-one rule pins.
 ///
 /// Same shape and the same reason as <see cref="ProtoBombs"/> one file over:
-/// the real installer is <c>KokomiTide.Install</c>, which routes through
+/// the real installer is <c>KokomiRules.Install</c>, which routes through
 /// <c>PowerCmd.Apply</c> and needs a live <c>CombatState</c> -- outside the
 /// headless boundary (README). So the power is allocated the way
 /// <see cref="Seat.WithPower{T}"/> allocates any power and the fields the rule
 /// code reads are seeded: <c>_owner</c>, <c>_applier</c> and <c>_amount</c>.
 ///
 /// What is bypassed is the APPLY pipeline. What is exercised is everything the
-/// rules do to a jellyfish once it exists: the Tide going up, the whole of it
-/// coming off, and the badge that shows it.
+/// rules do once the marker exists: the Plan queue's drain hangs off it, and
+/// under draft 6 that is the whole of its job.
 /// </summary>
 internal static class ProtoKurage
 {
@@ -26,9 +26,8 @@ internal static class ProtoKurage
     /// why a test seeds one at all).</summary>
     internal static readonly ModelId Id = new("POWER", "KOKOMI_PROTO_KURAGE_TEST");
 
-    /// <summary>Put a jellyfish on <paramref name="kokomi"/>, holding
-    /// <paramref name="tide"/>.</summary>
-    internal static ProtoBakeKuragePower Field(Creature kokomi, int tide = 0)
+    /// <summary>Put the Bake-Kurage marker on <paramref name="kokomi"/>.</summary>
+    internal static ProtoBakeKuragePower Field(Creature kokomi)
     {
         var kurage = (ProtoBakeKuragePower)RuntimeHelpers
             .GetUninitializedObject(typeof(ProtoBakeKuragePower));
@@ -44,7 +43,6 @@ internal static class ProtoKurage
             .GetValue(kokomi)!;
         powers.Add(kurage);
 
-        if (tide > 0) kurage.AddTide(tide);
         return kurage;
     }
 

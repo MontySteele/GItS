@@ -399,6 +399,10 @@ public static class GaugeBridge
         // creature-tracked Node2D, which is why it is a call here rather than
         // one more GaugeSpec.
         KurageMemoryCard.Refresh(creature);
+        // The Kokomi overhaul's Plan strip rides the SAME funnel, for the
+        // same reason and with the same shape. The two never both draw:
+        // each asks its own arm's gate at its own door.
+        KokomiPlanStrip.Refresh(creature);
 #endif
     }
 
@@ -542,6 +546,7 @@ internal static class NCombatUi_Activate_GaugeSetup
         // exactly as `NCombatUi.Activate` does. [USER]: "Local only is fine
         // (partner doesn't need to see the queue)."
         KurageMemoryCard.Setup(state);
+        KokomiPlanStrip.Setup(state);
 #endif
     }
 }

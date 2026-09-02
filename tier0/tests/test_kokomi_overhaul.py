@@ -1,9 +1,9 @@
 """The Kokomi overhaul arm (slice one) -- the flag, and both sides of it.
 
-The ruled brief is `review/active/kokomi-brief-2026-09-01.md` (sec.4, the eight
-rules; sec.8 and sec.9, the relic and the starter) and the slice is
-`review/active/kokomi-overhaul-slice-1-2026-09-01.md` (sec.3 the ten-card
-starter, sec.4 the 28 pool rows, sec.5 the engine build list).
+The ruled brief is `review/active/kokomi-brief-2026-09-01.md` DRAFT 6
+(direction ruled R240, brief approved R241) and the slice is
+`review/active/kokomi-overhaul-slice-1-2026-09-01.md` draft 6 (sec.3 the
+ten-card starter, sec.4 the 26 pool rows, sec.5 the engine build list).
 
 THE FIRST SECTION IS THE ONE THAT MATTERS. `C.KOKOMI_OVERHAUL` ships OFF, and
 with it off every Kokomi number ever measured is still comparable and the
@@ -40,9 +40,10 @@ SEED = 11
 #: Every op slice one adds. Registered in `effects.OPS` so the loader's
 #: vocabulary check accepts a row, priced in `draft.STATIC_OP_PRICING` so
 #: `lint_op_parity` stays green, and resolved by nothing.
-OVERHAUL_OPS = ("gain_tide", "surge", "block_half_surge", "exert", "mend",
-                "plan", "draw_companion_from_draw", "next_companion_free",
-                "draw_per_tide", "play_top_of_draw")
+OVERHAUL_OPS = ("mend", "next_companion_discount", "remove_debuff",
+                "carry_out_front_plan", "plan_from_exhaust",
+                "damage_quarter_max_hp", "plan_twice",
+                "damage_per_companion_last_turn")
 
 
 @pytest.fixture
@@ -144,39 +145,41 @@ def test_the_kurage_memory_arm_is_untouched():
 
 # --- 2. THE ARM'S OWN SHAPE ------------------------------------------------
 
-def test_the_starter_is_ten_cards_five_ids():
-    """Slice packet sec.3: Water's Edge x3, Coral Guard x3, Kurage's Oath x2,
-    Rising Tide, Stolen Chapter."""
+def test_the_starter_is_ten_cards_four_ids():
+    """Slice draft 6 sec.3: Water's Edge x4, Coral Guard x4, Kurage's Oath,
+    Slack Water."""
     ids = C.KOKOMI_OVERHAUL_STARTER_IDS
     assert len(ids) == 10
-    assert len(set(ids)) == 5
-    assert ids.count("proto_kk_waters_edge") == 3
-    assert ids.count("proto_kk_coral_guard") == 3
-    assert ids.count("proto_kk_kurages_oath") == 2
-    assert ids.count("proto_kk_rising_tide") == 1
-    assert ids.count("proto_kk_stolen_chapter") == 1
+    assert len(set(ids)) == 4
+    assert ids.count("proto_kk_waters_edge") == 4
+    assert ids.count("proto_kk_coral_guard") == 4
+    assert ids.count("proto_kk_kurages_oath") == 1
+    assert ids.count("proto_kk_slack_water") == 1
 
 
-def test_the_pool_is_all_twenty_eight_of_the_slices_rows():
-    """Slice packet sec.4, whole. Pinned rather than described because it is
+def test_the_pool_is_all_twenty_six_of_the_slices_rows():
+    """Slice draft 6 sec.4, whole. Pinned rather than described because it is
     the slice's own scope statement, and because -- unlike the Klee arm, which
     dropped Vermillion Pact on its packet's own escape -- NOTHING drops here."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 28
-    assert len(set(ids)) == 28
+    assert len(ids) == 26
+    assert len(set(ids)) == 26
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
 
 
-def test_the_numbers_are_the_briefs_placeholders():
-    """Slice packet sec.1: no number in it is a claim. These six are the rules'
-    own, and they are named so `lint_constant_parity` can compare the C#
-    mirrors BY VALUE."""
-    assert C.KOKOMI_OVERHAUL_PULSE_MEND == 2
-    assert C.KOKOMI_OVERHAUL_PULSE_BUDGET == 8
-    assert C.KOKOMI_OVERHAUL_SONG_MEND == 3
-    assert C.KOKOMI_OVERHAUL_SONG_BUDGET == 12
-    assert C.KOKOMI_OVERHAUL_GARMENT_MEND == 2
-    assert C.KOKOMI_OVERHAUL_TIDE_PER_CARD == 5
+def test_the_arm_carries_exactly_two_rule_numbers():
+    """Draft 6's rules are STRUCTURAL -- where a card lands and when -- so
+    almost every figure is a card's and stays on its row. Two are not: the
+    relic's strike and Rally's discount, both printed on a face with no
+    `amount` field behind them. They are named so `lint_constant_parity` can
+    compare the C# mirrors BY VALUE."""
+    assert C.KOKOMI_OVERHAUL_CASKET_STRIKE == 2
+    assert C.KOKOMI_OVERHAUL_RALLY_DISCOUNT == 1
+    named = {n for n in dir(C) if n.startswith("KOKOMI_OVERHAUL")}
+    assert named == {"KOKOMI_OVERHAUL", "KOKOMI_OVERHAUL_POOL_IDS",
+                     "KOKOMI_OVERHAUL_STARTER_IDS",
+                     "KOKOMI_OVERHAUL_CASKET_STRIKE",
+                     "KOKOMI_OVERHAUL_RALLY_DISCOUNT"}
 
 
 # --- 3. THE FLAG ON: the rows are reachable, and only these rows -----------
@@ -204,12 +207,12 @@ def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
 
 
 def test_the_pool_keeps_the_packets_rarity_split(overhaul):
-    """12 Common, 12 Uncommon, 4 Rare -- the packet's sec.4 count. Pinned
+    """13 Common, 8 Uncommon, 5 Rare -- the packet's sec.4 count. Pinned
     because the rarity buckets ARE the offer odds: a row filed in the wrong
     tier changes how often it is seen."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 12, "uncommon": 12, "rare": 4}
+        "common": 13, "uncommon": 8, "rare": 5}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):
@@ -239,38 +242,68 @@ def test_every_row_prints_its_own_face():
         assert faces.get(cid), cid
 
 
-# --- 4. THE ONE C# FACT NO IL SCAN CAN SEE ---------------------------------
+# --- 4. THE TWO C# FACTS NO IL SCAN CAN SEE --------------------------------
 
-def test_exert_is_block_first_and_not_an_hp_loss():
-    """RULE 5, source-level, because a ValueProp is invisible to an IL scan.
+def test_a_planned_block_is_powered_and_a_planned_hit_is_hers():
+    """RULE 3, source-level, because a ValueProp is invisible to an IL scan.
 
-    The one word that IS the rule. The mod's shipped self-cost
-    (`{op: damage, target: self}`, Hot Hands) is `Unblockable | Unpowered`,
-    which is how the base game models an HP cost -- it walks PAST Block on
-    purpose. Exert must not: the brief's contested thing (sec.5) is that "a
-    Block card is worth two things and she picks which", and dropping
-    `Unblockable` is the whole of what makes Block fuel.
+    "Your Strength and Dexterity count, since the plans are hers" is the whole
+    of it, and it takes two spellings no compiler can check for us:
 
-    A ValueProp is an enum literal, so `Il.Calls` cannot see it and the C# pin
-    can only assert that a damage command is reached. Source-level here, for
-    the same reason `test_starter_relic_upgrades.py` is source-level: the
-    logic is C#, the fact is a constant, and the absence is exactly what a
-    compiler cannot see.
+      * a planned Block is `ValueProp.Move` and NOT `Unpowered`. Draft 2's Plan
+        Block took the NC-11 power-sourced line (`Unpowered`, so neither Frail
+        nor Dexterity sees it); draft 6 states the opposite rule in the brief
+        itself, so the prop had to move with it.
+      * a planned hit names KOKOMI as the applier of the elemental hit, which
+        is what runs her Strength and her Weak through the shared pipeline.
+
+    Source-level here for the same reason `test_starter_relic_upgrades.py` is:
+    the logic is C#, the fact is an enum literal, and the absence is exactly
+    what a compiler cannot see.
     """
     from pathlib import Path
     import re
     root = Path(__file__).resolve().parents[2]
     src = (root / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
-           / "ProtoBakeKuragePower.cs").read_text(encoding="utf-8")
-    body = re.search(r"public static async Task Exert\(.*?\n    \}",
-                     src, re.DOTALL)
-    assert body, "KokomiTide.Exert is gone -- rule 5 moved under this pin"
-    call = body.group(0)
-    assert "ValueProp.Unpowered" in call
-    assert "Unblockable" not in call, (
-        "KokomiTide.Exert marks its damage Unblockable, which walks past "
-        "Block -- rule 5 is 'Lose N HP, taken from Block FIRST', and the "
-        "brief's contested thing depends on Block being able to eat it")
+           / "KokomiPlan.cs").read_text(encoding="utf-8")
+
+    block = re.search(r"case Kind\.Block:.*?break;", src, re.DOTALL)
+    assert block, "the planned Block clause is gone -- rule 3 moved under this pin"
+    # CODE ONLY: the clause's own comment names the prop it does NOT take, and
+    # that sentence is the record of the change rather than a second rule.
+    code = chr(10).join(
+        line for line in block.group(0).splitlines()
+        if not line.strip().startswith("//"))
+    assert "ValueProp.Move" in code
+    assert "Unpowered" not in code, (
+        "a planned Block is marked Unpowered, which is the prop Dexterity does "
+        "NOT see -- rule 3 is 'your Strength and Dexterity count, since the "
+        "plans are hers'")
+
+    hit = re.search(r"private static async Task Hit\(.*?\n    \}", src,
+                    re.DOTALL)
+    assert hit, "KokomiPlan.Hit is gone -- rule 3's damage half moved"
+    assert "Element.Hydro, amount, kokomi)" in hit.group(0), (
+        "a planned hit does not name her as the applier, so her Strength and "
+        "her Weak do not reach it")
+
+
+def test_the_shipped_strength_refusal_is_off_under_the_arm():
+    """The one SHIPPED hook this arm turns off, source-level for the same
+    reason. `TryModifyPowerAmountReceived` refuses Strength for Kokomi and pays
+    Charge instead; draft 6's rule 3 needs it to land. What that costs is one
+    early `return false`, and its absence would be SILENT -- the Tactician loop
+    would simply never scale and nothing on screen would say so."""
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2]
+    src = (root / "klee-mod" / "KleeCode" / "Powers"
+           / "KokomiResources.cs").read_text(encoding="utf-8")
+    marker = "if (KokomiOverhaul.LiveFor(target))"
+    assert marker in src
+    tail = src[src.index(marker):src.index(marker) + 120]
+    assert "return false;" in tail, (
+        "the arm no longer skips the shipped Strength refusal, so her Strength "
+        "is being eaten and rule 3 does not hold")
 
 
 # --- 5. THE OPS ARE REGISTERED AND REFUSE TO RUN ---------------------------

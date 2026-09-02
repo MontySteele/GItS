@@ -139,6 +139,13 @@ internal static class KurageMemoryCard
             // table has no memory and must not get an empty one.
             return;
         }
+        // NOR UNDER THE OVERHAUL ARM. A dev build compiles the memory and the
+        // overhaul together, and the overhaul retires the memory's rules at the
+        // funnel -- so this strip would draw a Charge count that never moves
+        // beside a queue that can never fill. `KokomiPlanStrip` has the band
+        // under that arm; this is the third door where that scope is spelled
+        // rather than inferred (`EB-207`'s correction).
+        if (KokomiOverhaul.LiveFor(creature)) return;
 
         if (NCombatRoom.Instance?.Ui is not { } ui)
         {
@@ -178,6 +185,7 @@ internal static class KurageMemoryCard
         var player = creature?.Player;
         if (player == null || !LocalContext.IsMe(player)) return;
         if (!KokomiResources.IsKokomi(creature)) return;
+        if (KokomiOverhaul.LiveFor(creature)) return;
 
         var root = Displays.Get(player);
         if (root == null)

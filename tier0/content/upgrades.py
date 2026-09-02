@@ -106,7 +106,6 @@ PROTOTYPE_BOMB_SIZE_DELTA = 2
 PROTOTYPE_PAYLOAD_MINE_DELTA = 1
 PROTOTYPE_GROW_DELTA = 1
 PROTOTYPE_POWER_DELTA = 1
-PROTOTYPE_TIDE_DELTA = 2
 PROTOTYPE_MEND_DELTA = 2
 PROTOTYPE_COST_DELTA = -1
 PROTOTYPE_COST_FLOOR = 2                 # "a card of cost 2 or more"
@@ -200,9 +199,6 @@ def prototype_default_delta(card_id: str, cost, effects: list[dict]) -> dict:
         delta["grow"] = PROTOTYPE_GROW_DELTA
     if _proto_power(effects) is not None:
         delta["power_amount"] = PROTOTYPE_POWER_DELTA
-    if any(fx.get("op") == "gain_tide" and isinstance(fx.get("amount"), int)
-           for fx in effects):
-        delta["tide"] = PROTOTYPE_TIDE_DELTA
     if any(fx.get("op") == "mend" and isinstance(fx.get("amount"), int)
            for fx in effects):
         delta["mend"] = PROTOTYPE_MEND_DELTA
@@ -569,9 +565,6 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                 ok = _bump_first((fx for fx in top
                                   if fx.get("op") == "merge_bombs"),
                                  "growth", val)
-        elif key == "tide":
-            ok = _bump_first((fx for fx in top if fx.get("op") == "gain_tide"),
-                             "amount", val)
         elif key == "mend":
             ok = _bump_first((fx for fx in top if fx.get("op") == "mend"),
                              "amount", val)

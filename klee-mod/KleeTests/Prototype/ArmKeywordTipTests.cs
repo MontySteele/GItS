@@ -117,7 +117,7 @@ public class ArmKeywordTipTests
     {
         // THE ROW'S SECOND HALF. The Casket read as broken at full HP because
         // a Mend at the ceiling does nothing and nothing on screen said there
-        // was a ceiling. The sentence is `KokomiTide.Mend`'s own.
+        // was a ceiling. The sentence is `KokomiRules.Mend`'s own.
         Assert.Contains("never above the HP you entered the fight with",
                         Printed("ForMend"));
     }
@@ -189,7 +189,12 @@ public class ArmKeywordTipTests
         // cannot arrive with a different shape by accident.
         var attaches = Attaches().ToList();
 
-        Assert.Equal(11, attaches.Count);
+        // SEVEN, not eleven: draft 6 cut Tide, Surge, Exert and the Garment
+        // as keywords, and their four `For*` methods left with the rules they
+        // defined. The number is the TABLE's length
+        // (`gen_klee_cards.ARM_KEYWORDS`), which is what the python half of
+        // this pin walks.
+        Assert.Equal(7, attaches.Count);
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
                                          System.StringComparison.Ordinal)));

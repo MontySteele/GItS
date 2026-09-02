@@ -50,7 +50,7 @@ public sealed class ProtoKkSaltLine : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(7m, ValueProp.Move)
+            new BlockVar(8m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

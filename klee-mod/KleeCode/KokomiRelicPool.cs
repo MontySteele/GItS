@@ -40,7 +40,7 @@ public sealed class KokomiRelicPool : RelicPoolModel
         // is the quarantine here as everywhere else -- a release build does
         // not contain the type -- and Starter rarity keeps it out of every
         // reward roll in a dev build, exactly as it keeps the Pearl out.
-        relics = relics.Append(ModelDb.Relic<Relics.TamanooyasCasket>());
+        relics = relics.Append(ModelDb.Relic<Relics.TamakushiCasket>());
 #endif
         return relics;
     }
