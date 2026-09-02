@@ -277,6 +277,93 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_grounded",
     "proto_ko_sorry_jean",
 )
+
+# =============================================================================
+# THE MONDSTADT COMPANION OVERHAUL -- QUARANTINED (R213 B, BACKLOG EB-147).
+#
+# The approved workshop `companion-workshop-mondstadt-2026-09-01.md` rewrites
+# Mondstadt's Universal companion pool: twelve Commons that beat a Strike,
+# Uncommons in the base game's colorless shape, one bespoke Rare per 5-star.
+# Twelve of the seventeen shipped rows fail its bar and three of them carry a
+# rider on Burst Energy, a meter R220 retired.
+#
+# WHAT MOVES WHEN IT IS ON, exhaustively (every site names this constant):
+#   * loader.companion_roster_replacement -- the MONDSTADT half of the
+#     companion roster becomes `MONDSTADT_OVERHAUL_POOL_IDS` and nothing else.
+#     Read at the two doors `tier05.rewards` already reads (the reward/shop
+#     pool and the Featured Banner's 5-star roster), so both offer surfaces
+#     move together.
+#   * loader._card_prototype -- `proto_mc_` ids resolve, the same door the
+#     Sparks and Klee-overhaul arms open for their own rows.
+# Inazuma and Fontaine are untouched in every build; the workshop is a
+# Mondstadt document and says so. Nothing else in either engine reads this.
+# FLAG OFF IS BYTE-IDENTICAL TO TODAY, pinned by
+# `tier0/tests/test_companion_overhaul.py` rather than intended.
+#
+# THE C# TWIN is `KleeMod.Powers.CompanionOverhaul.Enabled`, compiled only
+# under `-p:PrototypeCards=true` and defaulted from the `COMPANION_OVERHAUL`
+# compile constant (`-p:CompanionOverhaul=true`).
+COMPANION_OVERHAUL = False
+
+# THE NUMBERS THE REWRITTEN POWERS CARRY. Every one is lifted verbatim off the
+# workshop's own printed text (sec.3, re-priced in its sec.8) -- nothing here
+# is derived and nothing is picked. They are NAMED rather than left as literals
+# because the C# mirrors must be compared BY VALUE
+# (`tools/lint_constant_parity.py`); the numbers a CARD prints stay on the card
+# row, and only a number a POWER carries lands here.
+MC_SIGNATURE_MIX_BLOCK = 4      # Diona: Block per turn, 2 turns
+MC_GLACIAL_WALTZ_DMG = 6        # Kaeya: Cryo damage per turn, 3 turns
+MC_ISOTOMA_DMG = 8              # Albedo: end-of-turn damage on an aura'd enemy
+MC_ISOTOMA_BLOCK = 4            # Albedo: the Crystallize half
+MC_DANDELION_BREEZE_BLOCK = 6   # Jean: Block per end of turn
+MC_OZ_DMG = 5                   # Fischl: Oz's Electro volley, no turn limit
+MC_REVELATION_BLOCK = 5         # Nicole: Block at the start of your turn
+MC_REVELATION_STRENGTH = 2      # Nicole: Theosis, for holding the line
+MC_OMEN_VULNERABLE = 1          # Mona: the delayed doom, one turn of it
+MC_LIGHTNING_ROSE_DMG = 5       # Lisa: Electro damage per turn, 3 turns
+MC_LIGHTNING_ROSE_VULN = 1      # Lisa: the Vulnerable that rides it
+
+# THE MONDSTADT UNIVERSALS, WHOLE. This is a REPLACEMENT and not a
+# substitution map: the workshop retires twelve of the seventeen shipped rows
+# outright and adds nine characters, so there is no one-for-one correspondence
+# to write down. Ordered by character in the workshop's sec.3 order.
+#
+# TWENTY-ONE OF THE WORKSHOP'S THIRTY-FOUR. The thirteen that are absent are
+# absent because their printed text needs an engine hook neither engine has
+# (a Block-absorption trigger, a pre-enemy-attack trap, a next-Attack element
+# override, a Swirl event, an Attack counter, a next-Attack discount); the
+# per-card reason is in `docs/notes/prototype-surface-provenance.md`. A row
+# whose text cannot be printed is left OUT rather than replaced by a simpler
+# card, which is the same rule `KLEE_OVERHAUL_POOL_IDS` applied to Vermillion
+# Pact.
+MONDSTADT_OVERHAUL_POOL_IDS: tuple[str, ...] = (
+    "proto_mc_diona_signature_mix",
+    "proto_mc_noelle_breastplate",
+    "proto_mc_kaeya_frostgnaw",
+    "proto_mc_kaeya_glacial_waltz",
+    "proto_mc_barbara_show_begin",
+    "proto_mc_albedo_solar_isotoma",
+    "proto_mc_jean_gale_blade",
+    "proto_mc_jean_dandelion_breeze",
+    "proto_mc_fischl_nightrider",
+    "proto_mc_fischl_oz",
+    "proto_mc_sucrose_gust",
+    "proto_mc_sucrose_astable",
+    "proto_mc_sucrose_catalyst_conversion",
+    "proto_mc_bennett_fantastic_voyage",
+    "proto_mc_nicole_revelation",
+    "proto_mc_mona_stellaris_phantasm",
+    "proto_mc_venti_grand_ode",
+    "proto_mc_amber_fiery_rain",
+    "proto_mc_lisa_violet_arc",
+    "proto_mc_lisa_lightning_rose",
+    "proto_mc_rosaria_ravaging_confession",
+)
+
+# The nation the replacement above owns. Named rather than spelled "mondstadt"
+# at the seam, so the one line that decides which nation moves is greppable.
+COMPANION_OVERHAUL_NATION = "mondstadt"
+
 BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played
 BURST_PER_REACTION = 5        # burst energy per reaction triggered
 

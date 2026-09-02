@@ -60,6 +60,24 @@ internal static class KleePowerIcons
         BombReactionSparkPower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         GroundedPower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        // QUARANTINED (the Mondstadt companion overhaul). Every one of these
+        // borrows the icon of the SHIPPED companion power whose job it takes
+        // over, on the block above's argument verbatim: art is commissioned
+        // when a slice is ACCEPTED, and the workshop's own sec.5 defers all
+        // sixteen new illustrations to the Balance stage. Wiring a path ahead
+        // of an asset is the established shape in this file -- KleePck.Path
+        // returns null while a file is absent, so a missing PNG changes
+        // nothing and the miss is logged once by name.
+        SignatureMixPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        RevelationPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        StellarisOmenPower => KleePck.Path("klee/powers/detonation_vuln.png"),
+        GlacialWaltzPower => KleePck.Path("klee/powers/oz_summon.png"),
+        MondstadtOzPower => KleePck.Path("klee/powers/oz_summon.png"),
+        LightningRosePower => KleePck.Path("klee/powers/oz_summon.png"),
+        GrandOdePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        DandelionBreezePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        SolarIsotomaBloomPower =>
+            KleePck.Path("klee/powers/solar_isotoma.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

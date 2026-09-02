@@ -56,8 +56,34 @@ public static class CompanionPool
     /// Every companion card, canonical instances. Same list the reward slot
     /// draws from -- ONE roster, two channels (§4.7's whole point is that the
     /// channels differ in economy, not in contents).
+    ///
+    /// AND IT IS THE ONE DOOR. <see cref="CompanionSlot"/> and
+    /// <see cref="CompanionBanner"/> read this property rather than
+    /// <c>CompanionRoster.All</c> directly, so "which companions exist for this
+    /// run" has a single definition and the reward slot, the banner and the
+    /// shop cannot be given different answers. That was already true by
+    /// coincidence -- all three read the same generated list -- and it is now
+    /// true by construction, because the Mondstadt companion overhaul
+    /// (QUARANTINED, R213 B) redirects exactly this property.
+    ///
+    /// WITHOUT the prototype switch the branch below is not compiled and this
+    /// returns the generated list itself, the same object it always returned.
+    /// With the switch and the arm off, <c>CompanionOverhaul.Enabled</c> is
+    /// false and it still does.
     /// </summary>
-    public static IReadOnlyList<CardModel> All => CompanionRoster.All;
+    public static IReadOnlyList<CardModel> All
+    {
+        get
+        {
+#if PROTOTYPE_CARDS
+            if (Powers.CompanionOverhaul.Enabled)
+            {
+                return Powers.CompanionOverhaulRoster.Roster();
+            }
+#endif
+            return CompanionRoster.All;
+        }
+    }
 
     /// <summary>
     /// Is this one of OUR characters? The mod must not change anything for a

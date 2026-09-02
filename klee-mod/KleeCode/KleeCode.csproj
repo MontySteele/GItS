@@ -53,6 +53,32 @@
   <PropertyGroup Condition="'$(KleeOverhaul)' == 'true'">
     <DefineConstants>$(DefineConstants);KLEE_OVERHAUL</DefineConstants>
   </PropertyGroup>
+
+  <!-- THE MONDSTADT COMPANION OVERHAUL ARM (the approved workshop
+       review/active/companion-workshop-mondstadt-2026-09-01.md sec.3).
+
+           dotnet build ... -p:PrototypeCards=true -p:CompanionOverhaul=true
+
+       A THIRD property, on exactly the terms the second one has and for the
+       same reason: it gates an ARM and not a compilation unit. Everything the
+       arm owns already lives under Powers/Prototype/** and Cards/Prototype/**,
+       which the block below removes from a release build, so this property
+       compiles nothing new and cannot reach a release build even if somebody
+       passes it alone. All it moves is CompanionOverhaul.Enabled's default,
+       which the ONE wiring seam (CompanionPool.All) reads at runtime. The
+       powers compile either way on purpose: the headless pins must exercise
+       the rules AND assert the flag-off wiring in one build, the same argument
+       KleeTests.csproj already makes for PROTOTYPE_CARDS.
+
+       INDEPENDENT OF THE KLEE OVERHAUL, and the next dev deploy carries both:
+       that arm replaces KLEE's starter and pool, this one replaces MONDSTADT's
+       companion pool, and the two sets do not intersect: no companion is in
+       a character pool and no character card is in the companion slot. Passing
+       both is a supported combination and is one of the build configurations
+       the branch is gated on. -->
+  <PropertyGroup Condition="'$(CompanionOverhaul)' == 'true'">
+    <DefineConstants>$(DefineConstants);COMPANION_OVERHAUL</DefineConstants>
+  </PropertyGroup>
   <ItemGroup Condition="'$(PrototypeCards)' != 'true'">
     <Compile Remove="Cards/Prototype/**/*.cs" />
     <!-- The same quarantine, for a RULE rather than a card. Two arms use it and
