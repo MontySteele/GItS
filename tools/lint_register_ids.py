@@ -330,7 +330,7 @@ CEILINGS: dict[str, int] = {
     # branches each thinking 285 is free.
     # EB-292 minted 2026-09-02 by the Kokomi round-two blind session: the
     # `NCardTrail` hang. Its row is in this same commit.
-    "EB": 292,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    "EB": 295,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -1179,7 +1179,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # BUILT in the commit that mints it -- the guard refuses the
         # non-finite value at three doors and names the node chain -- and it
         # stays OPEN because the SOURCE of that value was not reproduced.
-        292,
+        292, 293, 294, 295,  # 293-295: Kokomi round-two seat, text, render, HP
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
