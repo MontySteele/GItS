@@ -1,6 +1,8 @@
-Status: OPEN (picks 1 to 4)
+Status: RULED R238 2026-09-02
 
 # Kokomi goes back in the oven: what failed, and three ways out
+
+Ruled R238 on [USER]'s "I think that could potentially work, as long as we avoid the trap" of 2026-09-02: direction A, with picks 2 to 4 at their defaults; the trap is closed in the brief's draft 3, §7 and §10.
 
 Written 2026-09-02, the night you played her prototype. The slice's own gate
 says a fail on question 1 goes back to the brief's rules, not to the card
