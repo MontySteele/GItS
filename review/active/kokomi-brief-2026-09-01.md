@@ -1,4 +1,4 @@
-Status: OPEN (draft 6, Paper; the Plan is the chassis, R240; read before the slice)
+Status: OPEN (draft 6, approved R241 for the Prototype build; the slice is written on it next)
 
 # Kokomi overhaul brief, draft 6: the Plan
 

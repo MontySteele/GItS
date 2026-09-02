@@ -245,8 +245,14 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R233 | 2026-08-30 | landed: the countersign batch, three revised slates signed as one | `0fb6417` |
 | R234 | 2026-08-30 | landed: the companion-cards slate ruled whole, and the program runs parallel | `630234b` |
 | R235 | 2026-08-31 | landed: Klee's two Personal Companion faces signed on all six defaults | `3ec41b7` |
+| R236 | 2026-09-01 | the Mondstadt and Inazuma companion workshops, ruled and moved to review/ruled | `cd532fd` |
+| R237 | 2026-09-01 | [USER]'s Klee run rules round one; starter draft 3, six rows EB-279 to EB-284 | `c49685f` |
+| R238 | 2026-09-02 | Kokomi's rework direction accepted; the brief's draft 3 and the slice rewritten on the Memory | `8c3f30a` |
+| R239 | 2026-09-02 | Kokomi draft 4; the Tide stays, the jellyfish spends nothing by itself, Surge plays the top of the exhaust pile, Tactics is once-only | `a42eda6` |
+| R240 | 2026-09-02 | Kokomi's chassis is the Plan; the exhaust replay and Mend step down to payoff cards | `e33bb94` |
+| R241 | 2026-09-02 | Kokomi brief draft 6 approved for the Prototype build; picks 1 to 3 at their defaults | `c892ff7` |
 
-234 rows over the R1..R235 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 123 from a commit message, 0 unresolved.
+240 rows over the R1..R241 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 129 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
