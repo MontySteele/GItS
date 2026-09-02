@@ -47,32 +47,21 @@ public class KleeOverhaulRoundThreeTests
     // ---- the starter, draft 3 --------------------------------------------
 
     [Fact]
-    public void The_starter_is_ten_cards_and_six_ids()
+    public void Dig_in_and_pop_are_back_in_the_offer_pool_at_draft_four()
     {
-        // Read off the IL rather than by building the models, which needs
-        // ModelDb (see PrototypeRoster's header for the poisoned-type trap).
-        // The COUNTS are the draft: two plain hits beside two cash buttons,
-        // one Block fewer, and the Spark sink moved in from the pool.
-        var deck = Cards("KleeOverhaulRoster", "StartingDeck");
-        Assert.Equal(10, deck.Count);
-        Assert.Equal(2, deck.Count(c => c.Contains("ProtoKoKaboom")));
-        Assert.Equal(2, deck.Count(c => c.Contains("ProtoKoKapow")));
-        Assert.Equal(3, deck.Count(c => c.Contains("ProtoKoDuckAndCover")));
-        Assert.Equal(1, deck.Count(c => c.Contains("ProtoKoDigIn")));
-        Assert.Equal(1, deck.Count(c => c.Contains("ProtoKoPop")));
-        Assert.Equal(1, deck.Count(c => c.Contains("ProtoKoJumpyDumpty")));
-        Assert.Equal(6, deck.Distinct().Count());
-    }
-
-    [Fact]
-    public void Dig_in_left_the_offer_pool_when_it_joined_the_starter()
-    {
-        // The other half of the same move, and the one that would go unnoticed:
-        // a card in both lists is a starter the reward screen also sells.
+        // DRAFT 3 moved Dig In OUT of the offer pool and into the starter, and
+        // this pin was the half that would otherwise go unnoticed: a card in
+        // both lists is a starter the reward screen also sells. R242's
+        // canonical starter has room for neither, so both are back and the
+        // disjointness still has to hold -- which the draft-4 starter pin in
+        // `BaseBasicsTests` asserts from the other end.
         var slice = Cards("KleeOverhaulRoster", "Slice");
-        Assert.Equal(26, slice.Count);
-        Assert.DoesNotContain(slice, c => c.Contains("ProtoKoDigIn"));
-        Assert.Equal(CardRarity.Basic, new ProtoKoDigIn().Rarity);
+        Assert.Equal(28, slice.Count);
+        Assert.Contains(slice, c => c.Contains("ProtoKoDigIn"));
+        Assert.Contains(slice, c => c.Contains("ProtoKoPop"));
+        // OFFERABLE means not Basic: a Basic row cannot be rolled.
+        Assert.Equal(CardRarity.Common, new ProtoKoDigIn().Rarity);
+        Assert.Equal(CardRarity.Common, new ProtoKoPop().Rarity);
     }
 
     // ---- EB-284: the Ancient tail ----------------------------------------
@@ -113,9 +102,9 @@ public class KleeOverhaulRoundThreeTests
         // together, which is what "printed 10, dealt 14" was not.
         var card = new ProtoKoKapow();
         var damage = Vars(card).OfType<DamageVar>().Single();
-        Assert.Equal(7m, damage.BaseValue);
+        Assert.Equal(4m, damage.BaseValue);          // R242: 0 energy for 4
         Assert.Contains("{Damage:diff()}", Face(card));
-        Assert.DoesNotContain("7", Face(card));
+        Assert.DoesNotContain("4", Face(card));
     }
 
     [Fact]
@@ -361,9 +350,13 @@ public class KleeOverhaulRoundThreeTests
         // random cards" had no visible effect. Through the game's OWN
         // `UpgradeInternal`, so this is the smith's result and not the
         // emitter's intention.
-        AssertUpgradeMoves<ProtoKkWatersEdge>("Damage", 6m, 9m);
+        // Water's Edge, the row `EB-277` was found on, is GONE (R242): her
+        // basics are the base game's Strike and Defend, whose +3 the base game
+        // owns. Coral Bulwark carries the Block half of the same pin.
         AssertUpgradeMoves<ProtoKkCoralBulwark>("Block", 6m, 9m);
-        AssertUpgradeMoves<ProtoKoKapow>("Damage", 7m, 10m);
+        // Ka-pow!'s draft-4 upgrade is Retain with its numbers unchanged, so
+        // the row that carries the `set_off`-hit clause is now Fwoosh!.
+        AssertUpgradeMoves<ProtoKoFwoosh>("Damage", 5m, 8m);
         AssertUpgradeMoves<ProtoKoPop>("BombSize", 5m, 7m);
         AssertUpgradeMoves<ProtoKoChainFuse>("Grow", 3m, 4m);
         // The Mend clause, on draft 6's carrier. `Tide` left this pin with the

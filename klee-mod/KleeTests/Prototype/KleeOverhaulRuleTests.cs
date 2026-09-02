@@ -349,7 +349,11 @@ public class KleeOverhaulRuleTests
             .GetType("KleeMod.Cards.Prototype.Generated.ProtoKoJumpyDumpty")!;
         var play = jumpy.GetMethod("OnPlay", HeadlessGame.All)!;
         var calls = Il.Calls(play);
-        Assert.Contains("ProtoBombPower.PlaceOnRandom", calls);
+        // R242: the plant is on the enemy you CHOOSE, so the one detonator can
+        // line up with it. Draft 3 placed it at random, which made the
+        // starter's whole plan a coin flip.
+        Assert.Contains("ProtoBombPower.Place", calls);
+        Assert.DoesNotContain(calls, c => c.Contains("PlaceOnRandom"));
         Assert.DoesNotContain(calls, c => c.Contains("PlaceOnAll"));
     }
 

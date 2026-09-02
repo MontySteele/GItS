@@ -787,7 +787,9 @@ def test_every_row_in_her_pool_resolves(overhaul):
                                       make_enemy(hp=200, name="b")])
         state.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
         state.mi_entry_hp = 80
-        state.player.draw_pile = [loader.get_card("proto_kk_waters_edge")
+        # R242: her basics are the BASE GAME's Strike and Defend, so the pile
+        # a draw-reading row looks at is built from `strike`.
+        state.player.draw_pile = [loader.get_card("strike")
                                   for _ in range(5)]
         state.player.exhaust_pile = [loader.get_card("proto_kk_salt_line")]
         state.kk_plan_queue = []

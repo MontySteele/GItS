@@ -16,7 +16,6 @@
     "proto_kk_change_of_plans",
     "proto_kk_cleansing_wave",
     "proto_kk_coral_bulwark",
-    "proto_kk_coral_guard",
     "proto_kk_deep_current",
     "proto_kk_exposed_flank",
     "proto_kk_feint",
@@ -39,7 +38,6 @@
     "proto_kk_undertow",
     "proto_kk_vanguard",
     "proto_kk_war_council",
-    "proto_kk_waters_edge",
     "proto_ko_alices_recipe",
     "proto_ko_ammo_scavenging",
     "proto_ko_bang_bang",
@@ -49,14 +47,12 @@
     "proto_ko_chain_fuse",
     "proto_ko_chained_reactions",
     "proto_ko_dig_in",
-    "proto_ko_duck_and_cover",
     "proto_ko_explosives_workshop",
     "proto_ko_fish_flavored_bait",
     "proto_ko_flame_dance",
     "proto_ko_fwoosh",
     "proto_ko_grounded",
     "proto_ko_jumpy_dumpty",
-    "proto_ko_kaboom",
     "proto_ko_kapow",
     "proto_ko_mine_toss",
     "proto_ko_perfect_timing",
@@ -162,7 +158,6 @@
     "proto_kk_change_of_plans": "kokomi",
     "proto_kk_cleansing_wave": "kokomi",
     "proto_kk_coral_bulwark": "kokomi",
-    "proto_kk_coral_guard": "kokomi",
     "proto_kk_deep_current": "kokomi",
     "proto_kk_exposed_flank": "kokomi",
     "proto_kk_feint": "kokomi",
@@ -185,7 +180,6 @@
     "proto_kk_undertow": "kokomi",
     "proto_kk_vanguard": "kokomi",
     "proto_kk_war_council": "kokomi",
-    "proto_kk_waters_edge": "kokomi",
     "proto_ko_alices_recipe": "klee",
     "proto_ko_ammo_scavenging": "klee",
     "proto_ko_bang_bang": "klee",
@@ -195,14 +189,12 @@
     "proto_ko_chain_fuse": "klee",
     "proto_ko_chained_reactions": "klee",
     "proto_ko_dig_in": "klee",
-    "proto_ko_duck_and_cover": "klee",
     "proto_ko_explosives_workshop": "klee",
     "proto_ko_fish_flavored_bait": "klee",
     "proto_ko_flame_dance": "klee",
     "proto_ko_fwoosh": "klee",
     "proto_ko_grounded": "klee",
     "proto_ko_jumpy_dumpty": "klee",
-    "proto_ko_kaboom": "klee",
     "proto_ko_kapow": "klee",
     "proto_ko_mine_toss": "klee",
     "proto_ko_perfect_timing": "klee",
@@ -329,9 +321,6 @@
     "proto_kk_coral_bulwark": {
       "block": 3
     },
-    "proto_kk_coral_guard": {
-      "block": 3
-    },
     "proto_kk_deep_current": {
       "damage": 3
     },
@@ -400,9 +389,6 @@
     "proto_kk_vanguard": {
       "remove": "exhaust"
     },
-    "proto_kk_waters_edge": {
-      "damage": 3
-    },
     "proto_ko_alices_recipe": {
       "add": {
         "op": "draw",
@@ -437,9 +423,6 @@
     "proto_ko_dig_in": {
       "block": 3
     },
-    "proto_ko_duck_and_cover": {
-      "block": 3
-    },
     "proto_ko_explosives_workshop": {
       "add": {
         "op": "draw",
@@ -460,14 +443,11 @@
       "power_amount": 1
     },
     "proto_ko_jumpy_dumpty": {
-      "bomb_size": 2,
+      "bomb_size": 3,
       "payload_mine": 1
     },
-    "proto_ko_kaboom": {
-      "damage": 3
-    },
     "proto_ko_kapow": {
-      "damage": 3
+      "retain": true
     },
     "proto_ko_mine_toss": {
       "bomb_size": 2
