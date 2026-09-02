@@ -71,7 +71,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     puts them through. Read off the loaded cards, which is the whole point of
     `plan:` no longer being stripped."""
     planned = [c for c in loader.prototype_cards() if c.plan]
-    assert len(planned) == 16
+    # FIFTEEN since 2026-09-02: Sango Isshin traded its Plan line for a
+    # condition on one ([USER]: "this requires absolutely 0 setup or combo").
+    assert len(planned) == 15
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -235,6 +237,47 @@ def test_damage_quarter_max_hp_rounds_down(overhaul):
     assert kokomi_plan.quarter_of_max_hp(st) == 20
     carry_out(st, [{"op": "damage_quarter_max_hp", "target": "all_enemies"}])
     assert enemy.hp == 40
+
+
+def test_sango_isshin_pays_the_quarter_only_after_a_plan_was_carried_out(overhaul):
+    """[USER], live 2026-09-02: "It's fine if Rares are strong (see: Knife
+    Trap), but this requires absolutely 0 setup or combo - it's just 'press
+    button, delete act 1'." So the quarter is now the PAYOFF of a morning she
+    planned for, and the card's floor is a plain 8 to one enemy."""
+    a, b = make_enemy(hp=60, name="a"), make_enemy(hp=60, name="b")
+    st = kokomi_state(enemies=[a, b], hp=80)
+    card = loader.get_card("proto_kk_sango_isshin")
+
+    # No Plan carried out this turn: the floor, aimed, and only at one enemy.
+    assert st.kk_plan_carried_out_this_turn is False
+    effects.resolve_card(st, card)
+    assert (a.hp, b.hp) == (52, 60)
+
+    # A Plan carried out this morning turns it into the wall.
+    carry_out(st, [{"op": "draw", "amount": 1}])
+    assert st.kk_plan_carried_out_this_turn is True
+    effects.resolve_card(st, card)
+    assert (a.hp, b.hp) == (32, 40)          # 20 apiece at 80 Max HP
+
+
+def test_the_condition_is_written_wherever_a_plan_is_carried_out(overhaul):
+    """"Carried out" is one event with three doors -- the morning queue,
+    Change of Plans and The Moon Overlooks the Waters -- and the flag is
+    written at the bottom of `_resolve_entry`, which all three pass through.
+    It is also a per-TURN fact: the boundary clears it."""
+    st = kokomi_state()
+    kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 1}]))
+    assert st.kk_plan_carried_out_this_turn is False   # written, not carried
+    kokomi_plan.resolve_front(st)                      # Change of Plans' door
+    assert st.kk_plan_carried_out_this_turn is True
+
+    kokomi_plan.roll_turn(st)
+    assert st.kk_plan_carried_out_this_turn is False
+
+    # And Moon's play-time resolution is the third door.
+    st.player.powers[kokomi_plan.PLANS_ALSO_NOW] = 1
+    kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 1}]))
+    assert st.kk_plan_carried_out_this_turn is True
 
 
 def test_damage_per_companion_last_turn_reads_last_turn(overhaul):
@@ -433,9 +476,9 @@ def test_an_empty_exhaust_pile_is_a_no_op_and_not_a_screen(overhaul):
 # --- 7. THE PLAN BUS: Treatise and Song of Pearls --------------------------
 
 def test_treatise_draws_once_per_plan_and_not_once_per_clause(overhaul):
-    """'Whenever the jellyfish carries out a Plan' is once per ENTRY. War
-    Council prints two clauses and is ONE Plan, which is what its face says --
-    "Deal 4 damage to every enemy AND apply 1 Weak to each" is one sentence."""
+    """'When the jellyfish carries out a Plan' is once per ENTRY. War Council
+    prints two clauses and is ONE Plan, which is what its face says -- "Deal 4
+    damage to every enemy AND apply 1 Weak to each" is one sentence."""
     st = kokomi_state()
     st.player.draw_pile = [plan_card([], cid=f"proto_kk_f{i}")
                            for i in range(6)]
@@ -453,17 +496,52 @@ def test_song_of_pearls_blocks_once_per_plan(overhaul):
     assert st.player.block == 3
 
 
+def test_two_plans_in_one_morning_pay_the_bus_once(overhaul):
+    """[USER], live 2026-09-02: "Treatise looks too good (one draw per turn if
+    a Plan fired might be ok; one draw per Plan is too abuseable)", and
+    "Likewise" of Song of Pearls. TWO Plans carried out in one morning, which
+    is the ordinary case the cards were written for, and both pay once."""
+    st = kokomi_state()
+    st.player.draw_pile = [plan_card([], cid=f"proto_kk_f{i}")
+                           for i in range(6)]
+    st.player.powers[kokomi_plan.TREATISE] = 1
+    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 3
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_a"))
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_b"))
+    kokomi_plan.resolve_all(st)
+    assert len(st.player.hand) == 1
+    assert st.player.block == 3
+    # And it is a CAP and not a one-shot: the next turn pays again.
+    kokomi_plan.roll_turn(st)
+    st.player.block = 0
+    carry_out(st, [{"op": "energy", "amount": 1}])
+    assert len(st.player.hand) == 2
+    assert st.player.block == 3
+
+
 def test_the_bus_pays_the_also_now_resolution_too(overhaul):
     """The C#: "the notify at the bottom is the only place that fires -- so The Moon
     Overlooks the Waters' extra resolution pays them too, which is what 'also
-    happen now' says."""
+    happen now' says."
+
+    SINCE 2026-09-02 THE TURN IS THE CAP, so what "pays them too" now means is
+    that the extra resolution is what CLAIMS the turn's payout when it happens
+    first -- the morning that follows it in the same turn adds nothing, and the
+    NEXT turn pays again. The alternative reading, a bus that skipped the
+    now-resolution, would make Moon turn Song of Pearls off for a turn.
+    """
     st = kokomi_state()
     st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 3
     st.player.powers[kokomi_plan.PLANS_ALSO_NOW] = 1
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
     assert st.player.block == 3                 # the now-resolution
     kokomi_plan.resolve_all(st)
-    assert st.player.block == 6                 # and the morning's
+    assert st.player.block == 3                 # the morning's is the cap
+    kokomi_plan.roll_turn(st)
+    carry_out(st, [{"op": "energy", "amount": 1}])
+    assert st.player.block == 6                 # a new turn, a new payout
 
 
 # --- 8. THE TAMAKUSHI CASKET ----------------------------------------------
@@ -574,18 +652,25 @@ def companion_card(cid="proto_kk_ally"):
     return Card(id=cid, name="ally", cost=1, type="skill", role_c="applier")
 
 
-def test_the_generals_banner_weaks_the_front_enemy_per_companion_play(overhaul):
-    """PER PLAY AND NOT PER CARD, and the front enemy is `front_enemy`'s --
-    the same reader a planned hit uses, so "the front enemy" means one thing
-    in this arm and is defined once."""
+def test_the_generals_banner_weaks_the_front_enemy_once_a_turn(overhaul):
+    """[USER], live 2026-09-02: "The General's Banner applies a LOT of Weak.
+    Probably too strong." TWO Companion plays in one turn apply ONE Weak, and
+    the next turn applies one more -- a cap, not a one-shot.
+
+    The front enemy is `front_enemy`'s, the same reader a planned hit uses, so
+    "the front enemy" means one thing in this arm and is defined once."""
     front, back = make_enemy(name="front"), make_enemy(name="back")
     st = kokomi_state(enemies=[front, back])
     st.player.powers[kokomi_plan.GENERALS_BANNER] = 1
     card = companion_card()
     kokomi_plan.note_companion_played(st, card)
     kokomi_plan.note_companion_played(st, card)
-    assert front.powers["weak"] == 2
+    assert front.powers["weak"] == 1
     assert "weak" not in back.powers
+
+    kokomi_plan.roll_turn(st)
+    kokomi_plan.note_companion_played(st, card)
+    assert front.powers["weak"] == 2
 
 
 def test_the_banner_ignores_a_card_that_is_not_a_companion(overhaul):

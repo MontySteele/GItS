@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using BaseLib.Abstracts;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Elements;
@@ -146,22 +147,29 @@ public class BaseBasicsTests
     // ---- the two cards of her own -----------------------------------------
 
     [Fact]
-    public void Ka_pow_is_free_to_play_and_the_upgrade_buys_retain()
+    public void Ka_pow_is_free_to_play_and_retains_from_print()
     {
         // Slice sec.3, draft 4: "Ka-pow! is the detonator at 0 energy: cashing
-        // costs a card and a moment, never energy, and the upgrade's Retain
-        // lets a cooked Bomb be held for." So the NUMBER must not move.
+        // costs a card and a moment, never energy." The ENERGY is still the
+        // assertion, and it does not move.
+        //
+        // ROUND 5 PICK 1, at its default ([USER] 2026-09-02: "I'm fine with
+        // the default on Ka-Pow!"): Retain is on the BASE card now, not the
+        // upgrade. Draft 4's reasoning was "the upgrade's Retain lets a cooked
+        // Bomb be held for" -- and holding the Bomb is the arm's whole tempo,
+        // so paying an upgrade for it made the base card fight its own kit.
+        // The upgrade buys damage instead, 4 -> 7, by the default rule.
         var card = new ProtoKoKapow();
         Assert.Equal(0, (int)typeof(CardModel)
             .GetProperty("CanonicalEnergyCost", HeadlessGame.All)!
             .GetValue(card)!);
         Assert.Equal(4m, card.DynamicVars.Damage.BaseValue);
-        Assert.DoesNotContain(CardKeyword.Retain, card.Keywords);
+        Assert.Contains(CardKeyword.Retain, card.Keywords);
 
         var upgraded = new ProtoKoKapow();
         Upgrade(upgraded);
         Assert.Contains(CardKeyword.Retain, upgraded.Keywords);
-        Assert.Equal(4m, upgraded.DynamicVars.Damage.BaseValue);
+        Assert.Equal(7m, upgraded.DynamicVars.Damage.BaseValue);
     }
 
     [Fact]
@@ -190,7 +198,7 @@ public class BaseBasicsTests
     // ---- rule 5: the element is the character's ---------------------------
 
     [Fact]
-    public void A_base_strike_applies_the_characters_element_under_her_arm()
+    public void A_base_strike_applies_nothing_for_anybody()
     {
         var klee = KleeOverhaul.Enabled;
         var kokomi = KokomiOverhaul.Enabled;
@@ -199,23 +207,24 @@ public class BaseBasicsTests
             KleeOverhaul.Enabled = true;
             KokomiOverhaul.Enabled = true;
 
-            // THE WHOLE OF `EB-307`. A base Strike declares nothing, so the
-            // per-card read gave it `Element.None` and rule 5 quietly stopped
-            // being true of half her deck.
-            Assert.Equal(Element.Pyro, CatalystCadence.PrintedElement(
+            // [USER], 2026-09-02: "I think we actually SHOULD remove the
+            // elemental application from the basic Strikes for all characters.
+            // Those cards are supposed to be bad!" `EB-307` read R242's swap
+            // the other way -- that her Strikes had to keep applying -- and
+            // this is the ruled reading of the same swap. LAW's cadence line
+            // now carries the exemption.
+            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
                 new StrikeIronclad(), Seat.Klee().Creature));
-            Assert.Equal(Element.Hydro, CatalystCadence.PrintedElement(
+            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
                 new StrikeSilent(), Seat.Kokomi().Creature));
 
-            // A DEFEND STILL APPLIES NOTHING: the cadence is about Attacks,
-            // which is the sim's rule too (`_element_for` guards on
-            // `card.type == "attack"`).
+            // A DEFEND applied nothing before the ruling either: the cadence
+            // is about Attacks, which is the sim's rule too (`_element_for`
+            // guards on `card.type == "attack"`).
             Assert.Equal(Element.None, CatalystCadence.PrintedElement(
                 new DefendIronclad(), Seat.Klee().Creature));
 
-            // AND IT IS HERS, NOT ANY SEAT'S. Furina is Skill-grade, not
-            // catalyst; in co-op her Strike must not start applying Pyro
-            // because Klee is at the table.
+            // Furina is Skill-grade and was never in this branch at all.
             Assert.Equal(Element.None, CatalystCadence.PrintedElement(
                 new StrikeIronclad(), Seat.Furina().Creature));
         }
@@ -223,6 +232,41 @@ public class BaseBasicsTests
         {
             KleeOverhaul.Enabled = klee;
             KokomiOverhaul.Enabled = kokomi;
+        }
+    }
+
+    [Fact]
+    public void The_exemption_is_the_base_games_basics_and_not_her_own_attacks()
+    {
+        // THE CADENCE IS STILL A CHARACTER RULE. What the ruling removed is the
+        // base game's card from it, so the two tests that say "the base game
+        // wrote this basic" are what the exemption is made of -- and a card of
+        // this mod's own is untouched whether it declares an element or leans
+        // on the fallback.
+        var klee = KleeOverhaul.Enabled;
+        try
+        {
+            KleeOverhaul.Enabled = true;
+            var seat = Seat.Klee().Creature;
+
+            // Her own Attack, which declares Pyro through the codegen.
+            Assert.Equal(Element.Pyro, CatalystCadence.PrintedElement(
+                new ProtoKoFishFlavoredBait(), seat));
+
+            // AND THE FALLBACK IS STILL THERE for a card this mod authored
+            // that names nothing: the Ancient is a `CustomCardModel` and not
+            // Basic, so neither test catches it. (It declares Pyro outright,
+            // which is why this asserts the predicate rather than the card.)
+            Assert.IsAssignableFrom<CustomCardModel>(new JumpyDumptyMkOmega());
+            Assert.NotEqual(CardRarity.Basic, new JumpyDumptyMkOmega().Rarity);
+
+            // The base game's Strike is both, which is the whole exemption.
+            Assert.IsNotAssignableFrom<CustomCardModel>(new StrikeIronclad());
+            Assert.Equal(CardRarity.Basic, new StrikeIronclad().Rarity);
+        }
+        finally
+        {
+            KleeOverhaul.Enabled = klee;
         }
     }
 

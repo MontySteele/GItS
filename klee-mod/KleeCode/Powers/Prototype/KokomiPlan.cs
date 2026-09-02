@@ -339,6 +339,13 @@ public static class KokomiPlan
             await ResolveOne(choiceContext, kokomi, clause);
         }
 
+        // SANGO ISSHIN's condition, written HERE because this is the one place
+        // a Plan is carried out: the morning queue, Change of Plans' early
+        // resolution and The Moon Overlooks the Waters' play-time one all pass
+        // through, and all three are the card's printed "carried out a Plan
+        // this turn".
+        KokomiOverhaulLedger.For(kokomi).NotePlanCarriedOut();
+
         foreach (var power in kokomi.Powers.ToList())
         {
             if (power is IKokomiPlanListener listener)

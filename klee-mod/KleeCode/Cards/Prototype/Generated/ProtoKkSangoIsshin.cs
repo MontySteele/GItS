@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkSangoIsshin : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard
+public sealed class ProtoKkSangoIsshin : CustomCardModel, IElementalCard, ICharacterCard
 {
     /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
     public Element Element => Element.Hydro;
@@ -51,17 +51,8 @@ public sealed class ProtoKkSangoIsshin : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sango Isshin (proto)"),
-        ("description", "Deal damage equal to a quarter of your Max HP. [gold]Plan[/gold]: Deal the same to ALL enemies."),
+        ("description", "Deal 8 damage. If the [gold]Bake-Kurage[/gold] carried out a [gold]Plan[/gold] this turn, deal a quarter of your Max HP to ALL enemies instead."),
     };
-
-    /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
-    /// was written. Carried out by the Bake-Kurage at the start of her next
-    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
-    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
-        new[]
-        {
-            new KokomiPlan.Planned(KokomiPlan.Kind.DamageQuarterMaxHp, 0, KokomiPlan.Aim.AllEnemies),
-        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -72,19 +63,25 @@ public sealed class ProtoKkSangoIsshin : CustomCardModel, IElementalCard, IChara
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkSangoIsshin()
-        : base(2, CardType.Attack, CardRarity.Rare, KokomiTargets.PetOrEnemy, autoAdd: false)
+        : base(2, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
+        if (KokomiOverhaulLedger.For(Owner.Creature).PlanCarriedOutThisTurn)
         {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
-            return;
+            await KokomiRules.QuarterMaxHpAll(choiceContext, Owner.Creature);
         }
-        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await KokomiRules.QuarterMaxHp(choiceContext, Owner.Creature, cardPlay.Target);
+        else
+        {
+            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+            await DamageCmd.Attack(8m)
+                .FromCard(this, cardPlay)
+                .Targeting(cardPlay.Target)
+                .WithHitFx("vfx/vfx_attack_slash")
+                .Execute(choiceContext);
+        }
     }
 
     protected override void OnUpgrade()

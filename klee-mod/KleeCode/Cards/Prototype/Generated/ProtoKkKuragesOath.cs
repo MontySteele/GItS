@@ -45,7 +45,7 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlann
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage's Oath (proto)"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal 5 damage to ALL enemies."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal 7 damage to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,7 +54,7 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlann
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, 5, KokomiPlan.Aim.AllEnemies),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, 7, KokomiPlan.Aim.AllEnemies),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

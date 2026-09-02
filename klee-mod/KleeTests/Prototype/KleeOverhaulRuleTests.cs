@@ -90,15 +90,17 @@ public class KleeOverhaulRuleTests
 
         pile.GrowBy(KleeOverhaulLaw.BombGrowth);
 
-        Assert.Equal(new[] { 8, 11 }, pile.Charges.Select(c => c.Size));
-        Assert.Equal(19, pile.TotalSize);
+        Assert.Equal(new[] { 9, 12 }, pile.Charges.Select(c => c.Size));
+        Assert.Equal(21, pile.TotalSize);
     }
 
     [Fact]
-    public void Rule1_growth_is_three_by_default()
+    public void Rule1_growth_is_four_by_default()
     {
+        // FOUR: the round-5 packet raised it from 3 to 5 and [USER] read 5
+        // back down the same day ("growth 5 is likely too much").
         var klee = Seat.Klee();
-        Assert.Equal(3, KleeOverhaulLaw.BombGrowth);
+        Assert.Equal(4, KleeOverhaulLaw.BombGrowth);
         Assert.Equal(KleeOverhaulLaw.BombGrowth,
                      GrowthFor(klee.Creature));
     }
@@ -117,18 +119,23 @@ public class KleeOverhaulRuleTests
     }
 
     [Fact]
-    public void Rule1_alices_recipe_replaces_the_base_and_the_workshop_still_adds()
+    public void Rule1_alices_recipe_doubles_the_turns_growth_workshop_included()
     {
-        // "Grow by 4 INSTEAD of 3" -- replace, not add; and the two compose
-        // the only way that leaves both printed faces true.
+        // "Your Bombs grow TWICE each turn" (balance pass 2026-09-02) --
+        // multiply, and multiply what the Workshop already added, which is the
+        // only reading that leaves both printed faces true. The row used to
+        // read "grow by 4 instead of 3", a Rare a second Workshop beat.
         var alice = Seat.Klee().WithPower<AlicesRecipePower>(1);
-        Assert.Equal(KleeOverhaulLaw.AliceGrowth, GrowthFor(alice.Creature));
+        Assert.Equal(KleeOverhaulLaw.BombGrowth * KleeOverhaulLaw.AliceMultiplier,
+                     GrowthFor(alice.Creature));
 
         var both = Seat.Klee()
             .WithPower<AlicesRecipePower>(1)
             .WithPower<ExplosivesWorkshopGrowthPower>(1);
-        Assert.Equal(KleeOverhaulLaw.AliceGrowth + KleeOverhaulLaw.WorkshopGrowth,
-                     GrowthFor(both.Creature));
+        Assert.Equal(
+            (KleeOverhaulLaw.BombGrowth + KleeOverhaulLaw.WorkshopGrowth)
+                * KleeOverhaulLaw.AliceMultiplier,
+            GrowthFor(both.Creature));
     }
 
     [Fact]
@@ -316,7 +323,7 @@ public class KleeOverhaulRuleTests
 
         pile.GrowBy(KleeOverhaulLaw.BombGrowth);
 
-        Assert.Equal(new[] { 7, 7 }, pile.Charges.Select(c => c.Size));
+        Assert.Equal(new[] { 8, 8 }, pile.Charges.Select(c => c.Size));
         Assert.True(pile.Charges[0].IsMine);
     }
 
@@ -486,6 +493,57 @@ public class KleeOverhaulRuleTests
         Assert.Equal(13, pile.DisplayAmount);
         Assert.Equal(13, pile.TotalSize);
         Assert.Equal(1, pile.MineCount);
+    }
+
+    // ---- SPARKS 'N' SPLASH, [USER]'s 2026-09-02 design -------------------
+
+    [Fact]
+    public void The_echo_reads_this_klees_pile_and_leaves_every_charge_on_it()
+    {
+        // [USER]: "I think auto-detonation on Sparks n' Splash completely
+        // bricks the growth build. How about instead 'a random enemy takes
+        // damage equal to the amount of Bomb on them'?" So the Rare READS the
+        // pile: 5 and 3 is an 8-point hit, and the pile is still 8 afterwards,
+        // 12 after the next morning's growth.
+        var klee = Seat.Klee();
+        var other = Seat.Klee();
+        var enemy = Seat.Klee(30).Creature;
+        var pile = ProtoBombs.Place(enemy, klee.Creature,
+            new ProtoBombs.Charge(5), new ProtoBombs.Charge(3));
+
+        Assert.Equal(8, ProtoBombPower.TotalPlacedBy(enemy, klee.Creature));
+        Assert.Equal(8, pile.TotalSize);
+        Assert.Equal(2, pile.Charges.Count);
+
+        pile.GrowBy(KleeOverhaulLaw.BombGrowth);
+        Assert.Equal(16, ProtoBombPower.TotalPlacedBy(enemy, klee.Creature));
+
+        // R205, like every other read in this file: another Klee's pile is
+        // not hers to echo.
+        Assert.Equal(0, ProtoBombPower.TotalPlacedBy(enemy, other.Creature));
+    }
+
+    [Fact]
+    public void The_echo_is_a_pyro_hit_and_not_a_set_off()
+    {
+        // The whole of what makes it playable in a growth deck: nothing is
+        // taken, so no Spark is minted (rule 4 pays per EXPLOSION), no Mine
+        // answers, rule 7's counters do not move, and rule 2 -- "only a card
+        // that says Set off" -- is untouched.
+        var hook = typeof(BombEchoPower)
+            .GetMethod("BeforeSideTurnEnd", HeadlessGame.All)!;
+        var calls = Il.Calls(hook);
+
+        Assert.Contains("ProtoBombPower.HoldsChargeFrom", calls);
+        Assert.Contains("ProtoBombPower.TotalPlacedBy", calls);
+        Assert.Contains("ElementalHit.Deal", calls);
+
+        Assert.DoesNotContain("ProtoBombPower.SetOff", calls);
+        Assert.DoesNotContain("ProtoBombPower.TakeAll", calls);
+        Assert.DoesNotContain("SparkPower.Gain", calls);
+        Assert.DoesNotContain(calls,
+                              c => c.StartsWith("KleeOverhaulLedger."));
+        Assert.DoesNotContain("DamageCmd.Attack", calls);
     }
 
     // ---- helpers ---------------------------------------------------------
