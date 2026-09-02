@@ -108,7 +108,8 @@ Seat numbers are floors, not fun claims (Guardrail 7).
 
 The rules changed, so this is the "first build of a kit's rules" gate.
 One act-one run, three or four fights including an elite, on the build
-that carries the fix. A sentence each:
+that carries the fixes, 0.2.2024+proto.dirty (main e9870ad0), deployed
+with the bridge in place. A sentence each:
 
 1. Did "now or at dawn" come up as a choice, and when did you plan?
 2. Did a morning ever feel like a payoff?
