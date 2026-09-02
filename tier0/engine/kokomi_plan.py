@@ -93,11 +93,11 @@ QUARTER = 4
 #: The player-side powers this arm reads. Named here rather than spelled at
 #: each site so the sheet's `power:` values and the readers cannot drift.
 #: Every one of them is applied by an ordinary `apply_power` op off a card row.
-TREATISE = "kk_treatise"                     # draw N per Plan carried out
-SONG_OF_PEARLS = "kk_song_of_pearls"         # gain N Block per Plan
+TREATISE = "kk_treatise"                     # draw N once a turn, on a Plan
+SONG_OF_PEARLS = "kk_song_of_pearls"         # N Block once a turn, on a Plan
 PLANS_ALSO_NOW = "kk_plans_also_now"         # Plans also happen now
 CLOUDS_LIKE_WAVES = "kk_clouds_like_waves"   # Block per debuff she applies
-GENERALS_BANNER = "kk_generals_banner"       # Weak to the front on a Companion
+GENERALS_BANNER = "kk_generals_banner"       # Weak to the front, once a turn
 #: Nereid's Ascension's window. STACKS ARE TURNS, the engine's own grammar
 #: (`kurage_summon`, `intangible`, `double_damage`), which is also the C#'s
 #: (`PlanTwicePower.Amount` is turns remaining and ticks at her turn end).
@@ -424,20 +424,46 @@ def _resolve_entry(state: CombatState, entry: PlanEntry, why: str) -> None:
     _note_plan_resolved(state)
 
 
-def _note_plan_resolved(state: CombatState) -> None:
-    """The plan bus: Treatise draws and Song of Pearls blocks, once per Plan.
+def claim_once_per_turn(state: CombatState, key: str) -> bool:
+    """THE ONE ONCE-PER-TURN GATE, and the three powers that cap a payoff at a
+    turn all call it: True the FIRST time `key` is claimed in a turn and False
+    for the rest of it. `KokomiOverhaulLedger.ClaimOncePerTurn`'s twin, cleared
+    by `roll_turn` beside every other per-turn half of this arm.
 
-    ONE PAYMENT PER PLAN, NOT PER CLAUSE -- War Council prints two clauses and
-    is one Plan, so it draws one. That is true because of WHERE this is called
-    (the tail of `_resolve_entry`) rather than because of anything here.
+    A CLAIM AND NOT A QUESTION: the caller that gets True has taken the turn's
+    payout, so no second reader can see the latch open behind it.
+    """
+    if key in state.kk_once_per_turn:
+        return False
+    state.kk_once_per_turn.add(key)
+    return True
+
+
+def _note_plan_resolved(state: CombatState) -> None:
+    """The plan bus: Treatise draws and Song of Pearls blocks, ONCE A TURN.
+
+    ONCE A TURN SINCE 2026-09-02, [USER]'s own ruling off live play: "Treatise
+    looks too good (one draw per turn if a Plan fired might be ok; one draw per
+    Plan is too abuseable)", and "Likewise" of Song of Pearls, which is the
+    same card in Block. The cards still ride the PLAN and not the turn -- a
+    morning she planned nothing for pays nothing -- and the turn is only the
+    cap.
+
+    ONE PAYMENT PER PLAN, NOT PER CLAUSE, is unchanged underneath that cap:
+    War Council prints two clauses and is one Plan. That is true because of
+    WHERE this is called (the tail of `_resolve_entry`) rather than because of
+    anything here.
     """
     p = state.player
+    # Sango Isshin's condition, written here because this is the one place a
+    # Plan is carried out -- dawn, Change of Plans and Moon all reach it.
+    state.kk_plan_carried_out_this_turn = True
     n = p.powers.get(TREATISE, 0)
-    if n:
+    if n and claim_once_per_turn(state, TREATISE):
         state.draw(n)
         state.emit("plan_treatise", amount=n)
     n = p.powers.get(SONG_OF_PEARLS, 0)
-    if n:
+    if n and claim_once_per_turn(state, SONG_OF_PEARLS):
         # POWERED, and rule 3 is why: "your Strength and Dexterity count, since
         # the plans are hers". `SongOfPearlsPower` gains its Block at
         # `ValueProp.Move` and its header records the same argument -- the
@@ -615,8 +641,17 @@ def roll_turn(state: CombatState) -> None:
     reason `KokomiOverhaulLedger.RollTo` rolls on read: a rule asked from a
     card body, a power and a relic must never see three different turns. With
     the flag off nothing reads the result.
+
+    THE ARM'S ONE TURN BOUNDARY, and it carries three things rather than one
+    since 2026-09-02: the Companion handover, the once-per-turn latches
+    (Treatise, Song of Pearls and The General's Banner) and Sango Isshin's
+    "did a Plan happen this morning". One line for all three, so no two of them
+    can come to disagree about when a turn began -- `KokomiOverhaulLedger.RollTo`
+    clears the same three.
     """
     state.companion_plays_last_turn = state.companion_plays_this_turn
+    state.kk_once_per_turn.clear()
+    state.kk_plan_carried_out_this_turn = False
 
 
 def tick_windows(state: CombatState) -> None:
@@ -645,11 +680,18 @@ def tick_windows(state: CombatState) -> None:
 def note_companion_played(state: CombatState, card: Card) -> None:
     """"You played a Companion card" -- The General's Banner's hook.
 
-    PER PLAY AND NOT PER CARD, the C#'s own sentence: a Companion played twice
-    pays twice. It rides `combat._finish_play`, the one site a manual play and
-    an auto-play both enter, beside the counter Chain of Command reads -- so
-    "she played a Companion" has ONE definition in this engine and the Banner
-    and the ledger cannot come to disagree about it.
+    ONCE A TURN SINCE 2026-09-02 ([USER], live: "The General's Banner applies
+    a LOT of Weak. Probably too strong."). It used to pay per PLAY, so a hand
+    full of Companions was a stack of Weak nothing else in the arm can match.
+
+    THE COMPANION COUNTER IS NOT CAPPED WITH IT: `companion_plays_this_turn` is
+    moved by `combat._finish_play` for every play, because that count is Chain
+    of Command's. Only the Weak is capped here.
+
+    It rides `combat._finish_play`, the one site a manual play and an auto-play
+    both enter, beside the counter Chain of Command reads -- so "she played a
+    Companion" has ONE definition in this engine and the Banner and the ledger
+    cannot come to disagree about it.
 
     THE FRONT ENEMY IS `front_enemy`'s, the same reader a planned hit uses.
     """
@@ -659,7 +701,11 @@ def note_companion_played(state: CombatState, card: Card) -> None:
     if not n:
         return
     front = front_enemy(state)
+    # The claim is taken AFTER the board question, so a Companion played on an
+    # empty board does not spend the turn's Weak on nothing.
     if front is None:
+        return
+    if not claim_once_per_turn(state, GENERALS_BANNER):
         return
     state.emit("plan_banner", card=card.id, amount=n)
     powers.apply_power(state, front, "weak", n, applier=state.player)

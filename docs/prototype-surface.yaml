@@ -729,13 +729,13 @@
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], draw 1 card.",
+   description: "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}]}
 
 - {id: proto_kk_song_of_pearls, name: "Song of Pearls (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain 3 [gold]Block[/gold].",
+   description: "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain 3 [gold]Block[/gold].",
    effects: [{op: apply_power, power: kk_song_of_pearls, amount: 3, target: self}]}
 
 - {id: proto_kk_war_council, name: "War Council", character: kokomi,
@@ -830,7 +830,7 @@
 - {id: proto_kk_the_generals_banner, name: "The General's Banner", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy.",
+   description: "Once per turn, when you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy.",
    effects: [{op: apply_power, power: kk_generals_banner, amount: 1, target: self}]}
 
 - {id: proto_kk_chain_of_command, name: "Chain of Command", character: kokomi,

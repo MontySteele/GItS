@@ -22,6 +22,12 @@ Under R212 these are D picks: applied at the default, disclosed here,
 yours to veto. Nothing moves in the game until the next deploy, which
 waits for a closed-game window.
 
+Four rows in section 1 are NOT D picks and are marked in their own line:
+Treatise, Song of Pearls, The General's Banner and The Moon, A Ship
+O'er the Seas are yours, ruled from live play on 2026-09-02 and built as
+you called them. Sango Isshin is a redesign rather than a number, on
+your verdict that it needed no setup.
+
 ## 1. Kokomi
 
 **Applied.**
@@ -34,6 +40,9 @@ waits for a closed-game window.
 | Deep Current | 4 to every enemy | 6 to every enemy | 4 to one enemy was two under a Strike; the Opus seat called it dead in a single-target fight. |
 | Coral Bulwark | 6 Block; Plan 6 Block and 1 Weak | 6 Block; Plan 8 Block and 1 Weak | The Plan line was the now-line plus a Weak, too thin to wait for. 8 and a Weak is Read the Field's 10 in a different shape. |
 | Change of Plans | 0 energy, Exhaust | 1 energy, Exhaust | The wait is the kit's price, worth about 1 energy on the two-line cards. A free skip was the one card that beat the rule for nothing. The upgrade still loses Exhaust, as ruled in round 2. |
+| Treatise | draw 1 per Plan carried out | draw 1 once per turn, on the first Plan carried out | [USER], live: one draw per Plan is too abusable; one per turn if a Plan fired is fine. |
+| Song of Pearls | 3 Block per Plan carried out | 3 Block once per turn, on the first Plan | [USER]: likewise. |
+| The General's Banner | 1 Weak per Companion card played | 1 Weak once per turn, on the first Companion card | [USER]: applies a lot of Weak, too strong; once per turn applied as the default. |
 
 Upgrades keep their current deltas over the new bases.
 

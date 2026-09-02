@@ -16,16 +16,28 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// Treatise: "Whenever the jellyfish carries out a Plan, draw 1." The card that
-/// turns the Tactician's delay into cards.
+/// Treatise: "Once per turn, when the Bake-Kurage carries out a Plan, draw 1
+/// card." The card that turns the Tactician's delay into cards.
 ///
-/// It rides the plan bus rather than the turn, which is what "whenever" has to
-/// mean under rule 2: three Plans carried out in one morning is three draws,
-/// and The Moon Overlooks the Waters' extra now-resolution pays too.
+/// ONCE PER TURN SINCE 2026-09-02, and it is [USER]'s ruling off live play:
+/// "Treatise looks too good (one draw per turn if a Plan fired might be ok;
+/// one draw per Plan is too abuseable)." It used to pay on EVERY Plan carried
+/// out, which a morning holding three Plans turned into three cards, and
+/// Nereid's Ascension doubled again.
 ///
-/// ONE PAYMENT PER PLAN, NOT PER CLAUSE, and <see cref="KokomiPlan"/>'s
-/// resolution loop is what makes that true rather than a comment here: War
-/// Council prints two clauses and is one Plan, so it draws one.
+/// STILL ON THE PLAN BUS AND NOT ON THE TURN: the draw is owed only if a Plan
+/// was actually carried out, so a turn she wrote nothing on still pays
+/// nothing. The turn is the CAP, not the trigger.
+///
+/// THE LATCH IS THE LEDGER'S SHARED ONE
+/// (<see cref="KokomiOverhaulLedger.ClaimOncePerTurn"/>), for the reason its
+/// own header gives: the bus fires from <c>AfterPlayerTurnStart</c> for the
+/// queue and from inside a card play for The Moon Overlooks the Waters' extra
+/// resolution, and both are the same turn's one draw.
+///
+/// ONE PAYMENT PER PLAN, NOT PER CLAUSE, is unchanged underneath the cap, and
+/// <see cref="KokomiPlan"/>'s resolution loop is what makes that true rather
+/// than a comment here: War Council prints two clauses and is one Plan.
 /// </summary>
 public sealed class TreatisePower
     : PowerModel, ILocalizationProvider, IKokomiPlanListener
@@ -34,7 +46,7 @@ public sealed class TreatisePower
     {
         ("title", "Treatise"),
         ("description",
-            "Whenever the [gold]Bake-Kurage[/gold] carries out a "
+            "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a "
           + "[gold]Plan[/gold], draw [blue]{Amount}[/blue] card{Amount:plural:|s}."),
     };
 
@@ -48,13 +60,23 @@ public sealed class TreatisePower
         if (kokomi != Owner) return;                 // co-op: your plans only
         var player = Owner?.Player;
         if (player == null) return;
+        if (!KokomiOverhaulLedger.ClaimOncePerTurn(Owner, nameof(TreatisePower)))
+        {
+            return;
+        }
         await CardPileCmd.Draw(choiceContext, Amount, player);
     }
 }
 
 /// <summary>
-/// Song of Pearls: "Whenever the jellyfish carries out a Plan, gain 3 Block."
-/// Treatise's defensive twin, on the same bus and priced in the same unit.
+/// Song of Pearls: "Once per turn, when the Bake-Kurage carries out a Plan,
+/// gain 3 Block." Treatise's defensive twin, on the same bus, priced in the
+/// same unit and capped the same way.
+///
+/// ONCE PER TURN SINCE 2026-09-02, and [USER] ruled it in one word --
+/// "Likewise" -- of Treatise's own verdict: the two cards are the same shape,
+/// so a fix that left one of them paying per Plan would just move the
+/// abusable line onto the other.
 ///
 /// THE BLOCK IS POWERED (<c>ValueProp.Move</c>) for the reason a planned Block
 /// is: rule 3 says "your Strength and Dexterity count, since the plans are
@@ -70,7 +92,7 @@ public sealed class SongOfPearlsPower
     {
         ("title", "Song of Pearls"),
         ("description",
-            "Whenever the [gold]Bake-Kurage[/gold] carries out a "
+            "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a "
           + "[gold]Plan[/gold], gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
@@ -83,6 +105,11 @@ public sealed class SongOfPearlsPower
     {
         if (kokomi != Owner) return;                 // co-op: your plans only
         if (Owner == null || Amount <= 0) return;
+        if (!KokomiOverhaulLedger.ClaimOncePerTurn(
+                Owner, nameof(SongOfPearlsPower)))
+        {
+            return;
+        }
         await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null);
     }
 }
@@ -152,12 +179,20 @@ public sealed class CloudsLikeWavesPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// The General's Banner: "Whenever you play a Companion card, the front enemy
-/// gains 1 Weak."
+/// The General's Banner: "Once per turn, when you play a Companion card, apply
+/// 1 Weak to the front enemy."
 ///
-/// PER PLAY AND NOT PER CARD: a Companion played twice pays twice, because the
-/// game raises this hook once per play in a series and each of those is a
-/// Companion being played.
+/// ONCE PER TURN SINCE 2026-09-02 ([USER], live: "The General's Banner applies
+/// a LOT of Weak. Probably too strong."). It used to pay per PLAY, which a
+/// Commander hand full of Companions turned into a stack of Weak nothing else
+/// in the arm can match, and a replayed Companion paid twice on top.
+///
+/// THE COMPANION COUNTER IS NOT CAPPED WITH IT, and the two lines below are
+/// deliberately in this order: <see cref="KokomiOverhaulLedger"/> counts EVERY
+/// Companion play because that count is Chain of Command's ("for each
+/// Companion card you played last turn"), and this hook is its only writer.
+/// Capping the count with the Weak would have silently re-priced a different
+/// card.
 ///
 /// THE FRONT ENEMY IS <see cref="KokomiPlan.FrontEnemy"/>'s, which is the same
 /// reader a planned hit uses -- so "the front enemy" means one thing in this
@@ -169,7 +204,7 @@ public sealed class GeneralsBannerPower : PowerModel, ILocalizationProvider
     {
         ("title", "The General's Banner"),
         ("description",
-            "Whenever you play a [gold]Companion[/gold] card, apply "
+            "Once per turn, when you play a [gold]Companion[/gold] card, apply "
           + "[blue]{Amount}[/blue] [gold]Weak[/gold] to the front enemy."),
     };
 
@@ -185,7 +220,14 @@ public sealed class GeneralsBannerPower : PowerModel, ILocalizationProvider
         if (Owner == null || Amount <= 0) return;
         KokomiOverhaulLedger.For(Owner).NoteCompanionPlayed();
         var front = KokomiPlan.FrontEnemy(Owner);
+        // The claim is taken AFTER the board question, so a Companion played
+        // on an empty board does not spend the turn's Weak on nothing.
         if (front == null) return;
+        if (!KokomiOverhaulLedger.ClaimOncePerTurn(
+                Owner, nameof(GeneralsBannerPower)))
+        {
+            return;
+        }
         await PowerCmd.Apply<WeakPower>(
             choiceContext, front, Amount, applier: Owner, cardSource: null);
     }

@@ -1506,17 +1506,18 @@ APPLY_POWERS = {
     # pulse (Song of Pearls and The Clouds Like Waves both rewrote it), Sango
     # Isshin's Mend overflow and Orders' Tide.
     "kk_treatise": ("TreatisePower", None,
-        "Whenever the jellyfish carries out a [gold]Plan[/gold], draw {X}."),
+        "Once per turn, when the jellyfish carries out a [gold]Plan[/gold], "
+        "draw {X}."),
     "kk_song_of_pearls": ("SongOfPearlsPower", None,
-        "Whenever the jellyfish carries out a [gold]Plan[/gold], gain {X} "
-        "Block."),
+        "Once per turn, when the jellyfish carries out a [gold]Plan[/gold], "
+        "gain {X} Block."),
     "kk_plans_also_now": ("PlansAlsoNowPower", None,
         "[gold]Plans[/gold] also happen now."),
     "kk_clouds_like_waves": ("CloudsLikeWavesPower", None,
         "Whenever you apply a debuff to an enemy, gain {X} Block."),
     "kk_generals_banner": ("GeneralsBannerPower", None,
-        "Whenever you play a [gold]Companion[/gold] card, the front enemy "
-        "gains {X} Weak."),
+        "Once per turn, when you play a [gold]Companion[/gold] card, the front "
+        "enemy gains {X} Weak."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,

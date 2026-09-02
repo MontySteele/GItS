@@ -433,9 +433,9 @@ def test_an_empty_exhaust_pile_is_a_no_op_and_not_a_screen(overhaul):
 # --- 7. THE PLAN BUS: Treatise and Song of Pearls --------------------------
 
 def test_treatise_draws_once_per_plan_and_not_once_per_clause(overhaul):
-    """'Whenever the jellyfish carries out a Plan' is once per ENTRY. War
-    Council prints two clauses and is ONE Plan, which is what its face says --
-    "Deal 4 damage to every enemy AND apply 1 Weak to each" is one sentence."""
+    """'When the jellyfish carries out a Plan' is once per ENTRY. War Council
+    prints two clauses and is ONE Plan, which is what its face says -- "Deal 4
+    damage to every enemy AND apply 1 Weak to each" is one sentence."""
     st = kokomi_state()
     st.player.draw_pile = [plan_card([], cid=f"proto_kk_f{i}")
                            for i in range(6)]
@@ -453,17 +453,52 @@ def test_song_of_pearls_blocks_once_per_plan(overhaul):
     assert st.player.block == 3
 
 
+def test_two_plans_in_one_morning_pay_the_bus_once(overhaul):
+    """[USER], live 2026-09-02: "Treatise looks too good (one draw per turn if
+    a Plan fired might be ok; one draw per Plan is too abuseable)", and
+    "Likewise" of Song of Pearls. TWO Plans carried out in one morning, which
+    is the ordinary case the cards were written for, and both pay once."""
+    st = kokomi_state()
+    st.player.draw_pile = [plan_card([], cid=f"proto_kk_f{i}")
+                           for i in range(6)]
+    st.player.powers[kokomi_plan.TREATISE] = 1
+    st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 3
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_a"))
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_b"))
+    kokomi_plan.resolve_all(st)
+    assert len(st.player.hand) == 1
+    assert st.player.block == 3
+    # And it is a CAP and not a one-shot: the next turn pays again.
+    kokomi_plan.roll_turn(st)
+    st.player.block = 0
+    carry_out(st, [{"op": "energy", "amount": 1}])
+    assert len(st.player.hand) == 2
+    assert st.player.block == 3
+
+
 def test_the_bus_pays_the_also_now_resolution_too(overhaul):
     """The C#: "the notify at the bottom is the only place that fires -- so The Moon
     Overlooks the Waters' extra resolution pays them too, which is what 'also
-    happen now' says."""
+    happen now' says."
+
+    SINCE 2026-09-02 THE TURN IS THE CAP, so what "pays them too" now means is
+    that the extra resolution is what CLAIMS the turn's payout when it happens
+    first -- the morning that follows it in the same turn adds nothing, and the
+    NEXT turn pays again. The alternative reading, a bus that skipped the
+    now-resolution, would make Moon turn Song of Pearls off for a turn.
+    """
     st = kokomi_state()
     st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 3
     st.player.powers[kokomi_plan.PLANS_ALSO_NOW] = 1
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
     assert st.player.block == 3                 # the now-resolution
     kokomi_plan.resolve_all(st)
-    assert st.player.block == 6                 # and the morning's
+    assert st.player.block == 3                 # the morning's is the cap
+    kokomi_plan.roll_turn(st)
+    carry_out(st, [{"op": "energy", "amount": 1}])
+    assert st.player.block == 6                 # a new turn, a new payout
 
 
 # --- 8. THE TAMAKUSHI CASKET ----------------------------------------------
@@ -574,18 +609,25 @@ def companion_card(cid="proto_kk_ally"):
     return Card(id=cid, name="ally", cost=1, type="skill", role_c="applier")
 
 
-def test_the_generals_banner_weaks_the_front_enemy_per_companion_play(overhaul):
-    """PER PLAY AND NOT PER CARD, and the front enemy is `front_enemy`'s --
-    the same reader a planned hit uses, so "the front enemy" means one thing
-    in this arm and is defined once."""
+def test_the_generals_banner_weaks_the_front_enemy_once_a_turn(overhaul):
+    """[USER], live 2026-09-02: "The General's Banner applies a LOT of Weak.
+    Probably too strong." TWO Companion plays in one turn apply ONE Weak, and
+    the next turn applies one more -- a cap, not a one-shot.
+
+    The front enemy is `front_enemy`'s, the same reader a planned hit uses, so
+    "the front enemy" means one thing in this arm and is defined once."""
     front, back = make_enemy(name="front"), make_enemy(name="back")
     st = kokomi_state(enemies=[front, back])
     st.player.powers[kokomi_plan.GENERALS_BANNER] = 1
     card = companion_card()
     kokomi_plan.note_companion_played(st, card)
     kokomi_plan.note_companion_played(st, card)
-    assert front.powers["weak"] == 2
+    assert front.powers["weak"] == 1
     assert "weak" not in back.powers
+
+    kokomi_plan.roll_turn(st)
+    kokomi_plan.note_companion_played(st, card)
+    assert front.powers["weak"] == 2
 
 
 def test_the_banner_ignores_a_card_that_is_not_a_companion(overhaul):
