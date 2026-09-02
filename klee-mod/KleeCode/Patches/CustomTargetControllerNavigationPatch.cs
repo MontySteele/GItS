@@ -93,22 +93,24 @@ internal static class NCardPlay_TryPlayCard_RestoreControllerNavigation_Patch
         try
         {
             if (!ShouldRestore(__instance.Holder?.CardModel)) return;
-            var room = NCombatRoom.Instance;
-            if (room == null) return;
-            room.EnableControllerNavigation();
 
-            // AND THEN THE GRAB THE LIBRARY ALREADY TRIED AND LOST. Its prefix
-            // calls `Ui.Hand.TryGrabFocus()` BEFORE the hand is enabled, which
-            // is the "This control can't grab focus" warning godot.log prints
-            // under `StopPlayIfCustomTargetInvalid`; making the same call one
-            // line after `EnableControllerNavigation` is that call at the
-            // moment it can succeed. `FocusOnDefaultControl` stays as the
-            // fallback for a hand that is legitimately empty.
-            room.Ui.Hand.TryGrabFocus();
-            if (room.GetViewport()?.GuiGetFocusOwner() == null)
-            {
-                ActiveScreenContext.Instance?.FocusOnDefaultControl();
-            }
+            // SCHEDULED, NOT RUN, AND THAT IS THE 2026-09-02 CORRECTION. This
+            // postfix is one of the INNERMOST frames of the play, not one of
+            // the last: the completion source runs its continuation
+            // synchronously, so `TryPlayCard` is nested inside
+            // `NTargetManager.FinishTargeting` and the library's coroutine tail
+            // and the screen-context change both run after this returns and put
+            // the hand back at `FocusMode.None`. The restore has to land a
+            // frame later, which is what `Schedule` buys.
+            //
+            // This seam is also no longer load-bearing: `ShouldRestore` reads
+            // the HOLDER's model, and a played card's holder no longer carries
+            // one by the time BaseLib's `Cleanup(true)` has run -- which is why
+            // `PR #271` never fired on the path it was written for. The
+            // `FinishTargeting` postfix is the seam that actually covers every
+            // exit; this one is kept because it is free, it is idempotent
+            // within a frame, and it is the record of what EB-300 was.
+            CustomTargetNavigationRestore.Schedule();
         }
         catch (Exception e)
         {

@@ -7,7 +7,9 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Nodes.Combat;
+using MegaCrit.Sts2.Core.Nodes.GodotExtensions;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
+using MegaCrit.Sts2.Core.Nodes.Screens.ScreenContext;
 
 namespace KleeMod.Patches;
 
@@ -201,12 +203,23 @@ internal static class PetMouseReach
     /// </summary>
     private static readonly List<NCreature> Opened = new();
 
+    /// <summary>
+    /// Was the session now running a mod-registered single-target one? Recorded
+    /// here rather than read back off <c>NTargetManager._validTargetsType</c>
+    /// because <c>Open</c> is handed the value by the seam itself, and because
+    /// this is the flag the navigation restore is scoped by -- it must be
+    /// answerable AFTER the session has ended, when the manager has already
+    /// cleared its target mode.
+    /// </summary>
+    internal static bool SessionWasCustom { get; private set; }
+
     internal static void Open(TargetType targetType)
     {
         try
         {
             Close();
-            if (!CustomTargetType.IsCustomSingleTargetType(targetType)) return;
+            SessionWasCustom = CustomTargetType.IsCustomSingleTargetType(targetType);
+            if (!SessionWasCustom) return;
 
             var room = NCombatRoom.Instance;
             var manager = NTargetManager.Instance;
@@ -253,6 +266,12 @@ internal static class PetMouseReach
                 if (node.IsInteractable) continue;
                 node.Hitbox.MouseFilter = Control.MouseFilterEnum.Ignore;
             }
+
+            if (Opened.Count > 0)
+            {
+                Log.Info($"[{KleeMod.ModId}] EB-296 mouse: closed {Opened.Count} "
+                       + "creature(s) again");
+            }
         }
         catch (Exception e)
         {
@@ -262,6 +281,109 @@ internal static class PetMouseReach
         finally
         {
             Opened.Clear();
+        }
+    }
+}
+
+/// <summary>
+/// `EB-300`, REBUILT ON THE LIVE FAILURE. THE RESTORE HAS TO HAPPEN AFTER
+/// EVERYTHING UNWINDS, AND ONE FRAME LATER.
+///
+/// The owner's soft-lock on `0.2.2060+proto` says why, in one stack. Every
+/// frame of the play is INSIDE <c>NTargetManager.FinishTargeting</c>:
+///
+///     FinishTargeting -> TaskCompletionSource.SetResult -> SelectionFinished
+///       -> FilteredControllerTargeting.MoveNext -> NCardPlay.TryPlayCard
+///       -> BaseLib TryPlayCardPatch -> Ui.Hand.TryGrabFocus  (WARNS)
+///
+/// -- the completion source runs its continuation synchronously, so the whole
+/// card play is a nested call and a postfix on <c>TryPlayCard</c> is one of the
+/// INNERMOST frames, not one of the last. Whatever the library's coroutine tail
+/// and the screen-context change that follows it do, they run AFTER that
+/// postfix and put the hand's holders back at <c>FocusMode.None</c>: the log's
+/// final warning is the GAME's own
+/// <c>NControllerManager.OnScreenContextChanged -&gt; FocusOnDefaultControl</c>
+/// failing, which is the whole screen unfocusable.
+///
+/// AND THE OLD CONDITION NEVER FIRED ANYWAY. `PR #271` asked
+/// <c>__instance.Holder?.CardModel</c>, on the reasoning that the holder
+/// outlives the play -- but BaseLib invokes <c>Cleanup(true)</c> before the
+/// postfix is reached and a played card's holder no longer carries its model,
+/// so <c>ShouldRestore</c> answered false on exactly the path it was written
+/// for. Nothing in the owner's log shows the restore's own grab attempting and
+/// failing; it shows it never attempting.
+///
+/// SO: schedule, do not call. The restore runs on the next
+/// <c>SceneTree.ProcessFrame</c> -- strictly later than every deferred call
+/// queued during this frame, which is later than the coroutine tail and later
+/// than the screen-context change. It re-enables the room (which is what puts
+/// the hand's holders back), then asks the hand for focus, and only falls back
+/// to the screen's default control if nothing took it.
+/// </summary>
+internal static class CustomTargetNavigationRestore
+{
+    private static bool _scheduled;
+
+    /// <summary>
+    /// Ask for a restore on the next frame. Idempotent within a frame: the two
+    /// seams that call it (the end of targeting, and the play itself) both fire
+    /// for one play and one restore is what that should mean.
+    /// </summary>
+    internal static void Schedule()
+    {
+        try
+        {
+            if (_scheduled) return;
+            var tree = NCombatRoom.Instance?.GetTree();
+            if (tree == null)
+            {
+                // No tree to wait on means nothing is going to change the
+                // focus state after us either, so running now is the same
+                // answer, arrived at sooner.
+                Run();
+                return;
+            }
+
+            _scheduled = true;
+            tree.Connect(SceneTree.SignalName.ProcessFrame, Callable.From(Run),
+                (uint)GodotObject.ConnectFlags.OneShot);
+        }
+        catch (Exception e)
+        {
+            _scheduled = false;
+            Log.Warn($"[{KleeMod.ModId}] EB-300: could not schedule the navigation "
+                   + $"restore: {e}");
+        }
+    }
+
+    internal static void Run()
+    {
+        _scheduled = false;
+        try
+        {
+            var room = NCombatRoom.Instance;
+            if (room == null || !room.IsInsideTree()) return;
+
+            room.EnableControllerNavigation();
+            room.Ui.Hand.TryGrabFocus();
+
+            var focused = room.GetViewport()?.GuiGetFocusOwner();
+            if (focused == null)
+            {
+                ActiveScreenContext.Instance?.FocusOnDefaultControl();
+                focused = room.GetViewport()?.GuiGetFocusOwner();
+            }
+
+            Log.Info($"[{KleeMod.ModId}] EB-300 restore: navigation re-enabled, "
+                   + $"focus now {(focused == null ? "NOBODY" : focused.Name.ToString())}");
+        }
+        catch (Exception e)
+        {
+            // A focus restore may not cost a run. Naming it is the whole of
+            // what this catch buys, and the pre-patch behaviour is "focus is
+            // wherever it was", which is what a swallowed throw leaves.
+            Log.Warn($"[{KleeMod.ModId}] EB-300: could not restore controller "
+                   + $"navigation after a custom-target play: {e}");
         }
     }
 }
@@ -289,13 +411,26 @@ internal static class NTargetManager_StartTargeting_Position_OpenPet_Patch
 }
 
 /// <summary>
-/// `EB-296`: the close. <c>FinishTargeting</c> is the single exit of every
-/// session -- play, cancel and early-exit alike all resolve the completion
-/// source through it -- so one postfix cannot leave a hitbox open.
+/// `EB-296`'s close AND `EB-300`'s restore, on the one seam that is the single
+/// exit of every targeting session -- play, cancel and early-exit alike all
+/// resolve the completion source through <c>FinishTargeting</c>, so nothing can
+/// leave a hitbox open and nothing can end targeting without the restore being
+/// asked for.
+///
+/// The restore is SCHEDULED, not run: this postfix is still inside the play
+/// (the completion source's continuation runs synchronously from
+/// <c>SetResult</c>, several frames deeper), and the state that has to be
+/// repaired is not written until after it. See
+/// <see cref="CustomTargetNavigationRestore"/>.
 /// </summary>
 [HarmonyPatch(typeof(NTargetManager), "FinishTargeting")]
 internal static class NTargetManager_FinishTargeting_ClosePet_Patch
 {
     [HarmonyPostfix]
-    public static void Postfix() => PetMouseReach.Close();
+    public static void Postfix()
+    {
+        var wasCustom = PetMouseReach.SessionWasCustom;
+        PetMouseReach.Close();
+        if (wasCustom) CustomTargetNavigationRestore.Schedule();
+    }
 }

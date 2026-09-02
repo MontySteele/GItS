@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using KleeMod.Tests.Harness;
 using Xunit;
@@ -102,5 +103,44 @@ public class PetTargetReachTests
         // And the session's own predicate still decides: a `Pet` card does not
         // open anything the predicate refuses.
         Assert.False(ShouldOpen(custom: true, interactable: false, allowed: false));
+    }
+
+    [Fact]
+    public void The_navigation_restore_hangs_off_the_end_of_targeting_and_is_deferred()
+    {
+        // `EB-300`'s 2026-09-02 correction, pinned STRUCTURALLY because the
+        // thing that was wrong is a call graph and a frame, neither of which
+        // this host can execute.
+        //
+        // The owner's soft-lock stack showed the whole card play nested INSIDE
+        // `NTargetManager.FinishTargeting` -- the completion source runs its
+        // continuation synchronously -- so a `TryPlayCard` postfix is one of
+        // the innermost frames and everything that unwinds after it puts the
+        // hand back at `FocusMode.None`. Two facts have to hold, and both are
+        // readable off the compiled bodies:
+        //
+        //   1. the end of EVERY targeting session asks for a restore, so a
+        //      cancel and an early exit are covered as well as a play;
+        //   2. the restore SCHEDULES rather than running, so it lands after
+        //      the coroutine tail and the screen-context change.
+        var exit = Il.Method("NTargetManager_FinishTargeting_ClosePet_Patch", "Postfix");
+        Assert.Contains(Il.Calls(exit),
+            c => c.EndsWith("CustomTargetNavigationRestore.Schedule", StringComparison.Ordinal));
+
+        // The old seam still delegates to the same scheduler rather than
+        // restoring inline -- it may not re-introduce the innermost-frame
+        // restore by another route.
+        var play = Il.Method(
+            "NCardPlay_TryPlayCard_RestoreControllerNavigation_Patch", "Postfix");
+        Assert.Contains(Il.Calls(play),
+            c => c.EndsWith("CustomTargetNavigationRestore.Schedule", StringComparison.Ordinal));
+        Assert.DoesNotContain(Il.Calls(play),
+            c => c.EndsWith("NCombatRoom.EnableControllerNavigation", StringComparison.Ordinal));
+
+        // And the scheduler waits on a frame before it touches focus.
+        var schedule = Il.Method("CustomTargetNavigationRestore", "Schedule");
+        Assert.Contains(Il.Calls(schedule),
+            c => c.EndsWith("SceneTree.Connect", StringComparison.Ordinal)
+              || c.EndsWith("GodotObject.Connect", StringComparison.Ordinal));
     }
 }
