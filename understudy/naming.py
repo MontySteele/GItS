@@ -92,6 +92,14 @@ def _screen_cards(state: dict[str, Any], key: str) -> list:
     return []
 
 
+def _relics(state: dict[str, Any], key: str) -> list:
+    """`state[key]["relics"]`, which is where the wire keeps a chest's."""
+    blob = state.get(key) or {}
+    if isinstance(blob, dict) and isinstance(blob.get("relics"), list):
+        return blob["relics"]
+    return []
+
+
 def _options(state: dict[str, Any], key: str) -> list:
     blob = state.get(key) or {}
     if isinstance(blob, dict) and isinstance(blob.get("options"), list):
@@ -104,7 +112,13 @@ def _label(opt: Any) -> str | None:
         return opt
     if not isinstance(opt, dict):
         return None
-    for k in ("name", "title", "label", "type", "kind", "room_type"):
+    # `EB-262` / `EB-263`: a shop item and an event option that hands over a
+    # relic carry their printed name under a CATEGORY-PREFIXED key
+    # (`card_name` / `relic_name` / `potion_name`,
+    # `McpMod.StateBuilder.cs:1636`), and a chest's relic rows are plain
+    # `name`. The plain spellings stay first so no existing row changes.
+    for k in ("name", "title", "label", "card_name", "relic_name",
+              "potion_name", "type", "kind", "room_type", "category"):
         v = opt.get(k)
         if v:
             return str(v)
@@ -205,13 +219,17 @@ def _describe(state: dict[str, Any], action: dict[str, Any]) -> dict[str, Any]:
         item = _at(items, idx)
         out["option_index"] = idx
         if isinstance(item, dict):
-            out["item_name"] = item.get("name")
-            out["item_type"] = item.get("type")
+            # `EB-262`: the shelf's name is under its category's key.
+            out["item_name"] = _label(item)
+            out["item_type"] = item.get("type") or item.get("category")
             out["item_price"] = item.get("price", item.get("cost"))
 
     elif verb in ("select_relic", "claim_treasure_relic"):
         idx = action.get("index")
-        relics = state.get("relics") or state.get("options") or []
+        # `EB-263`: the chest writes `treasure.relics` and the relic-select
+        # screen writes `relic_select.relics`; neither is a top-level key.
+        relics = (_relics(state, "treasure") or _relics(state, "relic_select")
+                  or state.get("relics") or state.get("options") or [])
         out["option_index"] = idx
         out["relic_name"] = _label(_at(relics, idx))
 
