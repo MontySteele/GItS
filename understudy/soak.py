@@ -117,12 +117,20 @@ LOG_DIR = Path(__file__).resolve().parent / "logs" / "soak"
 LOCAL_PROPS = REPO / "klee-mod" / "local.props"
 DEPLOY_BRIDGE = REPO / "klee-mod" / "build" / "deploy_bridge.ps1"
 
+# Where `deploy_bridge.ps1` stages the vendored bridge, relative to the game
+# directory, and the two files it stages there. ONE directory for every lane --
+# that is what "shared install" means in practice, and it is why a lane that
+# finds one with a game already up on it leaves it alone.
+BRIDGE_RELATIVE = Path("mods") / "STS2_MCP"
+BRIDGE_DLL = "STS2_MCP.dll"
+BRIDGE_MANIFEST = "STS2_MCP.json"
+
 # Where `GitsSpeed.cs` persists the pre-soak `PrefsSave.FastMode` (EB-87),
 # relative to the game directory. It is written on enable and deleted by a
 # successful disable, so its PRESENCE at teardown means the disable never
 # landed and the setting is still changed. JSON content under a `.conf` name:
 # ModManager parses every `*.json` under `mods/` as a mod manifest.
-SPEED_SIDECAR = Path("mods") / "STS2_MCP" / "GitsSpeed.original.conf"
+SPEED_SIDECAR = BRIDGE_RELATIVE / "GitsSpeed.original.conf"
 
 STEAM_APPID = "2868840"
 GAME_EXE = "SlayTheSpire2.exe"
@@ -394,6 +402,105 @@ def game_dir() -> Path:
     raise SystemExit("GameDir is empty in local.props.")
 
 
+# ----------------------------------------------------------- the lanes ----
+#
+# ONE INSTALL, TWO PROCESSES, AND THE SHARED HALVES BELONG TO WHOEVER GOT
+# THERE FIRST. Three things live in the game DIRECTORY rather than in a lane's
+# own user tree, so they are one copy for every lane: `steam_appid.txt`, the
+# bridge under `mods\STS2_MCP`, and the deployed klee build under `mods\klee`.
+# `Session` refcounts the first two BY PRE-EXISTENCE -- a lane that finds one
+# already there records nothing on its ledger and therefore removes nothing at
+# teardown -- which is how a `--lane 1` run, a whole process later than the
+# lane 0 that installed them, can know something else holds them. (The
+# in-memory version of the same rule is `local_tester._live_lanes`'s
+# `install_bridge=(i == 0)`, which is a two-lane ROUND deciding it once for
+# both its lanes; the flag still exists and still binds.)
+#
+# THE THIRD IS NOT REFCOUNTED AND CANNOT BE: `mods\klee` is ONE deployed build
+# for every lane, so a lane cannot be given a different one. `deploy_proto.ps1`
+# refuses while ANY `SlayTheSpire2` process is up, by image name -- and that is
+# why it must stay by image name rather than by pid.
+#
+# AND THE REFUSAL THAT USED TO STAND HERE IS GONE, BECAUSE A LIVE ATTEMPT SHOWED
+# IT WAS OURS. `deploy_bridge.ps1` refused whenever ANY game process existed,
+# on the assumption that a running game holds the bridge dll. An install with
+# no `mods\STS2_MCP` in it holds nothing, so that refusal blocked a lane that
+# was in no danger -- and Steam's tolerance of a second instance went untested
+# for a reason that was never Steam's. The script now asks the only question
+# that matters, whether the files it is about to rewrite are LOCKED, and this
+# module's job is to not ask it to rewrite an install that is already there
+# with a game up on it.
+#
+# WHICH IS THE WHOLE OF THE REUSE RULE, AND ITS SAFETY ARGUMENT IS THAT IT
+# FIRES NOWHERE A DEPLOY USED TO SUCCEED. A session redeploys the bridge every
+# time, as it always has, EXCEPT when the bridge is already installed AND a
+# game is running -- which until today was a hard failure, not a fresh deploy.
+# So nothing that worked before is now reusing a stale install; the only
+# behaviour that changed is the behaviour that was a `SystemExit`.
+
+
+def bridge_installed(where: Path | None = None) -> bool:
+    """Is the vendored bridge staged in the shared game directory?
+
+    BOTH files, because both are what `deploy_bridge.ps1` stages: a directory
+    holding one of them is a half-install and not an install.
+    """
+    root = Path(where if where is not None else game_dir())
+    return ((root / BRIDGE_RELATIVE / BRIDGE_DLL).is_file()
+            and (root / BRIDGE_RELATIVE / BRIDGE_MANIFEST).is_file())
+
+
+def game_is_running(probe=None) -> str:
+    """The pids of every live `SlayTheSpire2.exe`, or `""` when there are none.
+
+    THE ONE PLACE IN THIS MODULE THAT STILL ASKS BY IMAGE NAME, and it is the
+    question that needs it: a kill takes a pid (`_kill`, and `EB-206` is why),
+    but "is ANY game up" is asked about a DIRECTORY every lane shares, and a
+    pid cannot answer it.
+
+    AN UNREADABLE PROBE ANSWERS YES, the same way `pid_image` treats a failed
+    probe as alive. This is asked in order NOT to rewrite files a running game
+    might hold; a probe that could not run has not shown that nothing is
+    running.
+    """
+    run = probe if probe is not None else subprocess.run
+    try:
+        done = run(["tasklist", "/FI", f"IMAGENAME eq {GAME_EXE}", "/NH",
+                    "/FO", "CSV"], capture_output=True, text=True, timeout=30)
+    except Exception as exc:                                 # noqa: BLE001
+        return f"<probe failed: {type(exc).__name__}: {exc}>"
+    if getattr(done, "returncode", 1) != 0:
+        return f"<probe exited {done.returncode}>"
+    # `"SlayTheSpire2.exe","4740","Console","1","1,234,567 K"`, and the
+    # not-found answer is a prose line with no quotes in it at all.
+    return ", ".join(row.split('","')[1]
+                     for row in (done.stdout or "").splitlines()
+                     if row.lower().startswith(f'"{GAME_EXE.lower()}"')
+                     and '","' in row)
+
+
+def lane_setup(value: object, *,
+               game_dir_override: Path | None = None
+               ) -> tuple[Any, bool]:
+    """`--lane N` -> `(instance, install_bridge)`.
+
+    Lane 0 answers `(None, True)`: no instance, so the session binds no
+    thread, stamps no lane infix on its logs, and behaves in every respect as
+    it did before lanes existed.
+
+    EVERY LANE ASKS FOR THE BRIDGE AND THE SECOND ONE DOES NOT GET IT, which
+    is the refcount rather than a contradiction: `Session._deploy_bridge`
+    leaves an install with a game already up on it alone and records nothing,
+    so the second lane's request costs a `stat` and a `tasklist` and changes
+    nothing. What a higher lane must NEVER do is rewrite an install another
+    lane's game has loaded, and the last lock on that is the deploy script's
+    own -- it is the only party that can see whether a file is actually
+    held.
+    """
+    inst = instances.cli_lane(value, game_dir=game_dir_override)
+    return (None, True) if inst is None else (inst, True)
+
+
 # -------------------------------------------------------------- session ----
 
 class Session:
@@ -521,6 +628,25 @@ class Session:
             # install the bridge and may not remove it.
             print(f"lane {self.label}: bridge deploy skipped "
                   f"(another lane owns the shared mods directory)")
+            return
+        # AN INSTALL WITH A GAME UP ON IT IS PRE-EXISTING, and pre-existing is
+        # left in place -- the identical rule `_steam_appid` above follows,
+        # applied to the other shared half. It is what lets a lane start
+        # beside a game that has the bridge LOADED (and therefore locked): the
+        # deploy would be refused, and it does not need to happen. It is also
+        # what makes `deploy_proto.ps1`'s bridge install stick instead of
+        # being torn out by the first teardown after it.
+        pids = game_is_running() if bridge_installed(self.dir) else ""
+        if pids:
+            entry = self.ledger.record(
+                "Deployed `mods\\STS2_MCP\\` from vendor pin 55e0648",
+                "`.\\build\\deploy_bridge.ps1 -Remove`", pre_existing=True)
+            self.ledger.revert(
+                entry, f"pre-existing, left in place: a game was already "
+                       f"running (PID {pids}) on this install")
+            print(f"lane {self.label}: bridge already installed and a game is "
+                  f"up (PID {pids}); reusing it rather than rewriting a dll "
+                  f"that game may hold")
             return
         self._bridge_entry = self.ledger.record(
             "Deployed `mods\\STS2_MCP\\` from vendor pin 55e0648",
@@ -2424,14 +2550,36 @@ def soak(runs: int, character: str, do_setup: bool,
          seeds: list[str] | None = None,
          max_fights: int | None = None,
          hazard_guard: bool = True,
-         p2_capture: bool = False) -> dict:
+         p2_capture: bool = False,
+         lane: object = 0) -> dict:
     from understudy import committed as _committed
     commit = _committed.normalise(commit)          # refuses an unknown word
     stamp = time.strftime("%Y%m%d-%H%M%S")
     LOG_DIR.mkdir(parents=True, exist_ok=True)
-    session = Session(stamp, do_setup=do_setup, intent=commit)
+    # `--lane N`. Lane 0 is `(None, True)` -- no instance, so everything below
+    # is byte-for-byte the soak that ran before lanes existed, file names
+    # included.
+    instance, install_bridge = lane_setup(lane)
+    # THE LANE KWARGS ARE PASSED ONLY WHEN THERE IS A LANE, the same way
+    # `p2_capture` is passed to `RunDriver` below: a lane-0 soak calls this
+    # constructor with the argument list it used before the flag existed,
+    # which is what keeps the `Session` doubles in the pins working -- and is
+    # the same claim as "lane 0 is unchanged", made where it can be checked.
+    session = Session(stamp, do_setup=do_setup, intent=commit,
+                      **({} if instance is None
+                         else {"instance": instance,
+                               "install_bridge": install_bridge}))
     summaries: list[dict] = []
-    index = LOG_DIR / f"soak-{stamp}-index.json"
+    # THE LANE IS IN THIS NAME TOO, for the reason `RunDriver.log` carries it:
+    # two soaks starting in the same second would otherwise write one index
+    # over the other. A lane-0 soak adds no infix.
+    infix = f"-{instance.label}" if instance is not None else ""
+    index = LOG_DIR / f"soak-{stamp}{infix}-index.json"
+    # READ OFF THE INSTANCE AND NOT OFF THE SESSION, because a soak's Session
+    # is a test double in half a dozen pins and a double has no `label`. Same
+    # answer either way: `Session.label` is its instance's, or the thread's.
+    lane_label = (instance.label if instance is not None
+                  else bridge.current_label())
     shapes: dict[str, int] = {}
     stopped = None
     # EB-117. The character the runs ACTUALLY flew, read off the wire by the
@@ -2463,7 +2611,7 @@ def soak(runs: int, character: str, do_setup: bool,
                 {"stamp": stamp, "character": verified,
                  "character_requested": character,
                  "policy": policy_v1.POLICY_VERSION, "commit": commit,
-                 "seeds": seeds,
+                 "seeds": seeds, "instance": lane_label,
                  "requested_runs": runs, "runs": summaries}, indent=1),
                 encoding="utf-8")
 
@@ -2508,7 +2656,7 @@ def soak(runs: int, character: str, do_setup: bool,
     result = {"stamp": stamp, "character": verified,
               "character_requested": character,
               "policy": policy_v1.POLICY_VERSION, "commit": commit,
-              "seeds": seeds,
+              "seeds": seeds, "instance": lane_label,
               "requested_runs": runs, "runs": summaries,
               "hazard_guard": hazard_guard,
               "stopped_on": stopped,
@@ -2600,6 +2748,15 @@ def main(argv: list[str] | None = None) -> int:
                          "called from the run loop. The thresholds are a "
                          "PLACEHOLDER, not a ratified definition, and every "
                          "record says so (understudy/p2capture.py)")
+    ap.add_argument("--lane", default=0, metavar="N",
+                    help="which game instance to run in. 0 (the default) is "
+                         "the machine's own %%APPDATA%% and port 15526 -- the "
+                         "single-instance soak exactly as it was. 1 launches "
+                         "a SECOND game out of the same install, on port "
+                         "15527 and its own disposable user tree "
+                         "(%%LOCALAPPDATA%%\\gits-lanes\\lane1), so a run can "
+                         "play beside a game somebody else is playing. A "
+                         "lane-1 run is NOT a run of record")
     ap.add_argument("--allow-hazard-events", action="store_true",
                     help="EB-1: drive the events on the hazard register "
                          "instead of stopping the run at them. It exists for "
@@ -2614,11 +2771,19 @@ def main(argv: list[str] | None = None) -> int:
     from understudy import report as _report
     _report.console_safe()
 
-    result = soak(args.runs, args.character, do_setup=not args.no_setup,
-                  commit=args.commit, seeds=args.seed,
-                  max_fights=args.max_fights,
-                  hazard_guard=not args.allow_hazard_events,
-                  p2_capture=args.p2_capture)
+    try:
+        # THE LANE IS CHECKED BEFORE ANYTHING HAPPENS. A typo'd number should
+        # not create a log directory, resolve a game directory or open a
+        # Session before it is refused.
+        instances.label_for(args.lane)
+        result = soak(args.runs, args.character, do_setup=not args.no_setup,
+                      commit=args.commit, seeds=args.seed,
+                      max_fights=args.max_fights,
+                      hazard_guard=not args.allow_hazard_events,
+                      p2_capture=args.p2_capture, lane=args.lane)
+    except ValueError as exc:
+        print(f"lane error: {exc}", file=sys.stderr)
+        return 2
     if args.report:
         from understudy import report
         print()

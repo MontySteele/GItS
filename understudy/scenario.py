@@ -132,7 +132,7 @@ from typing import Any, Callable
 
 import yaml
 
-from understudy import adapter, bridge, naming
+from understudy import adapter, bridge, instances, naming
 
 SCENARIO_DIR = Path(__file__).resolve().parent / "scenarios"
 # Gitignored, like `logs/soak/` and for the same reason: a reading taken on a
@@ -1357,10 +1357,28 @@ def cmd_run(args) -> int:
     from understudy import soak
 
     scenario = load(args.file)
+    # THE LANE IS BOUND BEFORE THE `Runner` IS BUILT, and that ordering is the
+    # whole of it. `Runner.__init__` resets `LOG_WINDOW`, which resolves WHICH
+    # `godot.log` to read through `bridge.current_instance()` -- so a thread
+    # still unbound at that moment takes its cursor from LANE 0's file, and
+    # every `log_lacks` check then reads a stretch of somebody else's game.
+    # `run_scripted` binds the thread as well, through the Session, but it
+    # binds it too late for the cursor.
+    try:
+        instance, install_bridge = soak.lane_setup(getattr(args, "lane", 0))
+    except ValueError as exc:
+        print(f"lane error: {exc}", file=sys.stderr)
+        return 2
+    if instance is not None:
+        bridge.use(instance)
     stamp = time.strftime("%Y%m%d-%H%M%S")
     LOG_DIR.mkdir(parents=True, exist_ok=True)
+    # The lane goes in the file name for the reason `soak.RunDriver.log`
+    # carries it: two scenarios starting in the same second would otherwise
+    # write one file over the other. Lane 0 adds no infix.
+    infix = f"-{instance.label}" if instance is not None else ""
     out_path = Path(args.out) if args.out else \
-        LOG_DIR / f"scenario-{scenario.name}-{stamp}.jsonl"
+        LOG_DIR / f"scenario-{scenario.name}-{stamp}{infix}.jsonl"
 
     print(f"scenario: {scenario.name}  ({scenario.character})")
     if scenario.notes:
@@ -1368,6 +1386,10 @@ def cmd_run(args) -> int:
     for a in scenario.assumptions:
         print(f"  ASSUMES: {a}")
     print(f"GUARDRAIL: {bridge.GRANT_GUARDRAIL}")
+    if instance is not None:
+        print(f"lane:      {instance.label}  port {instance.port}  "
+              f"log {instance.log_path()}")
+        print(f"GUARDRAIL: {instances.LANE_GUARDRAIL}")
 
     summary: dict[str, Any] = {}
     with out_path.open("w", encoding="utf-8") as fh:
@@ -1380,7 +1402,9 @@ def cmd_run(args) -> int:
                                     character=scenario.character,
                                     max_fights=1,
                                     chosen_seed=scenario.seed,
-                                    do_setup=not args.no_setup)
+                                    do_setup=not args.no_setup,
+                                    instance=instance,
+                                    install_bridge=install_bridge)
         runner.emit({"step": "scenario_end", "ok": policy.ok,
                      "failures": len(runner.failures), "run": summary})
 
@@ -1408,6 +1432,14 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--out", default="")
     r.add_argument("--no-setup", action="store_true",
                    help="attach to a game that is already up")
+    r.add_argument("--lane", default=0, metavar="N",
+                   help="which game instance to run in. 0 (the default) is "
+                        "the machine's own %%APPDATA%% and port 15526 -- a "
+                        "scenario exactly as it ran before. 1 launches a "
+                        "SECOND game from the same install (port 15527, its "
+                        "own disposable user tree), so a scenario can run "
+                        "beside a game somebody else is playing; its "
+                        "`log_lacks` checks read that lane's own godot.log")
     r.set_defaults(func=cmd_run)
 
     c = sub.add_parser("check", help="parse only; no game involved")
