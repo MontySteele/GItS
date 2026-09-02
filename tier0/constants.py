@@ -206,9 +206,12 @@ KLEE_OVERHAUL = False
 # claims (slice packet sec.1: "No number in it is a claim"). They are named here
 # because the C# mirrors must be compared BY VALUE -- an unnamed literal in the
 # mod is exactly what `tools/lint_constant_parity.py` exists to refuse.
-KLEE_OVERHAUL_BOMB_GROWTH = 3        # rule 1: every Bomb, start of her turn
+KLEE_OVERHAUL_BOMB_GROWTH = 4        # rule 1: every Bomb, start of her turn
 KLEE_OVERHAUL_WORKSHOP_GROWTH = 1    # Explosives Workshop: +1 more
-KLEE_OVERHAUL_ALICE_GROWTH = 4       # Alice's Recipe: 4 INSTEAD of 3
+# Alice's Recipe MULTIPLIES the turn's growth ("your Bombs grow twice each
+# turn"), balance pass 2026-09-02. It used to REPLACE the base with 4, which
+# read as a strictly weaker Explosives Workshop at Rare.
+KLEE_OVERHAUL_ALICE_MULTIPLIER = 2
 KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
 # RULE 4's OPENING SPARK (R242 pick 1, [USER]: "Regent starts with 3 stars and
 # has to generate more through cards, so 1 is a reasonable compromise"). It is a

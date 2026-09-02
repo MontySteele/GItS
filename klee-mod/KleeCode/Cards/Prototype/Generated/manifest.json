@@ -390,10 +390,7 @@
       "remove": "exhaust"
     },
     "proto_ko_alices_recipe": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "cost": -1
     },
     "proto_ko_ammo_scavenging": {
       "bomb_size": 2
@@ -447,7 +444,7 @@
       "payload_mine": 1
     },
     "proto_ko_kapow": {
-      "retain": true
+      "damage": 3
     },
     "proto_ko_mine_toss": {
       "bomb_size": 2

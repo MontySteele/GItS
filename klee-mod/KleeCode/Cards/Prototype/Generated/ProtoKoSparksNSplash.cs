@@ -35,14 +35,14 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoSparksNSplash : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_sparks_n_splash");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sparks 'n' Splash (proto)"),
-        ("description", "At the end of your turn, [gold]Set off[/gold] a random enemy's [gold]Bombs[/gold]."),
+        ("description", "At the end of your turn, deal [gold]Pyro[/gold] damage to a random enemy equal to the [gold]Bombs[/gold] on it."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -60,7 +60,7 @@ public sealed class ProtoKoSparksNSplash : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<EndOfTurnSetOffPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<BombEchoPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

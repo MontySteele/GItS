@@ -1324,6 +1324,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         310,
         # 313/314: the Klee round-5 seats' two surface finds.
         313, 314,
+        # 311/312: the balance read's two instrument gaps (Plan pricing in the
+        # drafter, a tier-0 Bomb twin for the Klee arm).
+        311, 312,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

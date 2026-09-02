@@ -2,6 +2,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using BaseLib.Abstracts;
+using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using Xunit;
@@ -307,6 +308,173 @@ public class KokomiOverhaulRuleTests
         Assert.Contains("CreatureCmd.GainBlock",
                         Il.Calls(typeof(SongOfPearlsPower)
                             .GetMethod("OnPlanResolved", HeadlessGame.All)!));
+    }
+
+    // ---- THE ONCE-PER-TURN CAPS ([USER], live 2026-09-02) ----------------
+
+    /// <summary>One ledger, rolled to a round, for the cap pins below. The
+    /// instance is driven directly for the reason
+    /// `Chain_of_command_reads_the_turn_that_just_ended` drives it directly:
+    /// a headless seat has no `CombatState`, so `For` would re-roll to round
+    /// zero on every read and clear the very latch under test.</summary>
+    private static KokomiOverhaulLedger RolledLedger(int round = 3)
+    {
+        KokomiOverhaulLedger.ResetAll();
+        var ledger = KokomiOverhaulLedger.For(Seat.Kokomi().Creature);
+        ledger.RollTo(round);
+        return ledger;
+    }
+
+    [Fact]
+    public void Treatise_draws_once_a_turn_and_a_second_plan_draws_nothing()
+    {
+        // [USER], live: "Treatise looks too good (one draw per turn if a Plan
+        // fired might be ok; one draw per Plan is too abuseable)."
+        var ledger = RolledLedger();
+        Assert.True(ledger.Claim(nameof(TreatisePower)));
+        Assert.False(ledger.Claim(nameof(TreatisePower)));
+
+        // A CAP AND NOT A ONE-SHOT: the next morning pays again.
+        ledger.RollTo(4);
+        Assert.True(ledger.Claim(nameof(TreatisePower)));
+
+        // And the hook CLAIMS BEFORE IT DRAWS, so the second Plan of a
+        // morning reaches no draw at all rather than drawing and refunding.
+        var hook = typeof(TreatisePower)
+            .GetMethod("OnPlanResolved", HeadlessGame.All)!;
+        var calls = Il.CallSequence(hook).ToList();
+        Assert.True(calls.IndexOf("KokomiOverhaulLedger.ClaimOncePerTurn")
+                    < calls.IndexOf("CardPileCmd.Draw"));
+        KokomiOverhaulLedger.ResetAll();
+    }
+
+    [Fact]
+    public void Song_of_pearls_blocks_once_a_turn_and_a_second_plan_does_not()
+    {
+        // [USER], live, in one word -- "Likewise" -- of Treatise's verdict:
+        // the two cards are the same shape, so capping one and not the other
+        // would just move the abusable line across.
+        var ledger = RolledLedger();
+        Assert.True(ledger.Claim(nameof(SongOfPearlsPower)));
+        Assert.False(ledger.Claim(nameof(SongOfPearlsPower)));
+        ledger.RollTo(4);
+        Assert.True(ledger.Claim(nameof(SongOfPearlsPower)));
+
+        var hook = typeof(SongOfPearlsPower)
+            .GetMethod("OnPlanResolved", HeadlessGame.All)!;
+        var calls = Il.CallSequence(hook).ToList();
+        Assert.True(calls.IndexOf("KokomiOverhaulLedger.ClaimOncePerTurn")
+                    < calls.IndexOf("CreatureCmd.GainBlock"));
+        KokomiOverhaulLedger.ResetAll();
+    }
+
+    [Fact]
+    public void The_generals_banner_weaks_once_a_turn_and_still_counts_them_all()
+    {
+        // [USER], live: "The General's Banner applies a LOT of Weak. Probably
+        // too strong."
+        var ledger = RolledLedger();
+        Assert.True(ledger.Claim(nameof(GeneralsBannerPower)));
+        Assert.False(ledger.Claim(nameof(GeneralsBannerPower)));
+        ledger.RollTo(4);
+        Assert.True(ledger.Claim(nameof(GeneralsBannerPower)));
+
+        // THE COUNTER IS NOT CAPPED WITH THE WEAK, and the order in the hook
+        // is what says so: every Companion play is counted (Chain of Command
+        // reads that count) and only the Weak is claimed.
+        var hook = typeof(GeneralsBannerPower)
+            .GetMethod("AfterCardPlayed", HeadlessGame.All)!;
+        var calls = Il.CallSequence(hook).ToList();
+        Assert.True(calls.IndexOf("KokomiOverhaulLedger.NoteCompanionPlayed")
+                    < calls.IndexOf("KokomiOverhaulLedger.ClaimOncePerTurn"));
+        Assert.True(calls.IndexOf("KokomiOverhaulLedger.ClaimOncePerTurn")
+                    < calls.IndexOf("PowerCmd.Apply<WeakPower>"));
+        KokomiOverhaulLedger.ResetAll();
+    }
+
+    // ---- SANGO ISSHIN'S CONDITION ([USER], live 2026-09-02) --------------
+
+    [Fact]
+    public void A_carried_out_plan_is_remembered_for_the_turn_and_no_longer()
+    {
+        // [USER], live: "It's fine if Rares are strong (see: Knife Trap), but
+        // this requires absolutely 0 setup or combo - it's just 'press button,
+        // delete act 1'." So the Rare's payoff now asks a per-turn question,
+        // and the ledger is what answers it.
+        var ledger = RolledLedger();
+        Assert.False(ledger.PlanCarriedOutThisTurn);
+        ledger.NotePlanCarriedOut();
+        Assert.True(ledger.PlanCarriedOutThisTurn);
+
+        // A second Plan in the same turn changes nothing, and the turn
+        // boundary forgets it -- a morning is not a combat.
+        ledger.NotePlanCarriedOut();
+        Assert.True(ledger.PlanCarriedOutThisTurn);
+        ledger.RollTo(4);
+        Assert.False(ledger.PlanCarriedOutThisTurn);
+        KokomiOverhaulLedger.ResetAll();
+    }
+
+    [Fact]
+    public void The_flag_is_written_where_a_plan_is_carried_out_and_nowhere_else()
+    {
+        // ONE EVENT, THREE DOORS: the morning queue, Change of Plans and The
+        // Moon Overlooks the Waters all reach `ResolveEntry`, so writing the
+        // flag there is what makes the card's printed "carried out a Plan this
+        // turn" true of all three without naming any of them.
+        var entry = typeof(KokomiPlan)
+            .GetMethod("ResolveEntry", HeadlessGame.All)!;
+        Assert.Contains("KokomiOverhaulLedger.NotePlanCarriedOut",
+                        Il.Calls(entry));
+
+        var writers = typeof(KokomiPlan).GetMethods(HeadlessGame.All)
+            .Where(m => m.Name != "ResolveEntry"
+                        && Il.Calls(m).Contains(
+                            "KokomiOverhaulLedger.NotePlanCarriedOut"))
+            .Select(m => m.Name)
+            .ToList();
+        Assert.Empty(writers);
+    }
+
+    [Fact]
+    public void Sango_isshin_reads_the_flag_and_hits_all_enemies_behind_it()
+    {
+        // The card, as generated: 8 to the aimed enemy is the floor, and the
+        // quarter -- computed by the ONE rule, so the face and the hit cannot
+        // round differently -- is what a planned morning buys. It is an
+        // ordinary aimed Attack now, not a card played on the jellyfish.
+        var play = typeof(ProtoKkSangoIsshin)
+            .GetMethod("OnPlay", HeadlessGame.All)!;
+        var calls = Il.Calls(play);
+        Assert.Contains("KokomiOverhaulLedger.get_PlanCarriedOutThisTurn",
+                        calls);
+        Assert.Contains("KokomiRules.QuarterMaxHpAll", calls);
+        Assert.Contains("DamageCmd.Attack", calls);
+        // No Plan line left: it is not playable on the pet.
+        Assert.DoesNotContain("KokomiPlan.Schedule", calls);
+        Assert.DoesNotContain(typeof(ProtoKkSangoIsshin).GetInterfaces(),
+                              i => i.Name == "IPlannedCard");
+    }
+
+    [Fact]
+    public void The_three_caps_are_one_latch_set_and_do_not_shadow_each_other()
+    {
+        // ONE helper shared by three powers, keyed by the power's own name --
+        // so a morning that pays Treatise still pays Song of Pearls, and a
+        // Companion played after both still applies its Weak.
+        var ledger = RolledLedger();
+        Assert.True(ledger.Claim(nameof(TreatisePower)));
+        Assert.True(ledger.Claim(nameof(SongOfPearlsPower)));
+        Assert.True(ledger.Claim(nameof(GeneralsBannerPower)));
+        Assert.False(ledger.Claim(nameof(TreatisePower)));
+
+        // And the turn boundary clears all three at once, which is why they
+        // cannot come to disagree about when a turn began.
+        ledger.RollTo(4);
+        Assert.True(ledger.Claim(nameof(TreatisePower)));
+        Assert.True(ledger.Claim(nameof(SongOfPearlsPower)));
+        Assert.True(ledger.Claim(nameof(GeneralsBannerPower)));
+        KokomiOverhaulLedger.ResetAll();
     }
 
     [Fact]

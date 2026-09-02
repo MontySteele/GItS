@@ -60,7 +60,7 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(4m, ValueProp.Move)
+            new BlockVar(5m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
