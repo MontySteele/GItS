@@ -67,6 +67,23 @@ instead of a canon comparison. Gated by
 red fixture, the op table pinned against `effects.OPS`, and the canon reader
 exercised against a synthetic decompiled tree.)
 
+## Agent rituals (the seven a sitting repeats — `operations/agent-rituals.md`)
+Each takes `--help` and `--oneline`; each has a `.claude/skills/` entry.
+`gates.py` (run the gate wall and print ONE LINE per gate with the counts and
+the failing test names, raw output to `.gates/<stamp>.log` — the token saver;
+`--fast` is the inner loop and never the pre-push gate),
+`row.py` (print one register row instead of opening a 170-line register),
+`mint_row.py` (mint a row: the derived id, the pipe syntax, the 600-char gate,
+both register lints) over `register_io.py` (the shared table reader/writer),
+`agent_worktree.py` (sibling worktree + `local.props` + CLAUDE.md's read order
+for the task; refuses while a seat is live), `open_pr.py` (the `gh` full path
+and the mandatory footer; prints the number and URL only), `land_pr.py` (a
+PLUMBING land: checks, `--merge`, purge, fast-forward, and the untracked-file
+trap), `seat.py` (embark / `blindplay session` / teardown with the lane
+environment, or `--opus-brief`), `deploy_round.py` (the pck-staleness decision,
+`deploy_proto` with the arm switches, then three verification lines off disk;
+main checkout only). Gated by `tier0/tests/test_agent_rituals.py`.
+
 ## Safety guards (run by hand; each exists for one refusal)
 `purge_worktree.py` (EB-128 — removes a worktree and REFUSES, exit 2, when it
 holds gitignored data it was not told to expect. `git worktree remove` deletes

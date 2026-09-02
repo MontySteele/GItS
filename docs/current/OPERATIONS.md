@@ -20,6 +20,9 @@ the one your task reaches; never all of them. Depth for any subsystem is in
 | build the pck and deploy into the game | `operations/build-deploy.md` |
 | run a scenario, a staged round, a seat or blind play | `operations/understudy-seats.md` |
 | brief an agent, or work out what it should read | `operations/briefing.md` |
+| repeat a ritual every sitting does by hand | `operations/agent-rituals.md` |
+| mint or retire a register id | `operations/register-ids.md` |
+| brief an Opus seat for a blind lane | `operations/seat-brief.md` |
 | run the lints, or add one | `operations/lints.md` |
 | add or retire a worktree | `operations/worktrees.md` |
 | read or change what CI runs | `operations/ci.md` |
