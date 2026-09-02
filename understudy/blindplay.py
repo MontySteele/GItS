@@ -1714,10 +1714,32 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # lands and not only once a preview opens over it. `selection_known`
         # is whether the bridge could ask at all; where it could not, the page
         # says so (`SELECTION_NOTE`) rather than printing "nothing is picked".
-        obs["selected"] = _number_faces(
-            [_card_face(c) for c in _preview_cards(state, st)], "title")
+        #
+        # `EB-314`. A PREVIEW IS NOT ALWAYS A RESULT, and on the transform
+        # screen it is half a snapshot and half a slot machine. The screen is
+        # named on the wire (`screen_type`) and whether its preview is up
+        # (`preview_showing`), and both are needed below: what the preview
+        # holds means different things on a transform screen than on the
+        # other four, and a pick that is already made may not be re-taken.
+        obs["select_kind"] = _text(blob.get("screen_type"))
+        obs["preview_showing"] = bool(blob.get("preview_showing"))
+        picked = [_card_face(c) for c in _preview_cards(state, st)]
+        # How many results the transform screen has NOT chosen yet, and
+        # whether its preview came through in a shape this page can read at
+        # all. Zero and False on every other screen, whose preview is the
+        # decided thing it looks like.
+        obs["undecided"] = 0
+        obs["preview_unnamed"] = False
+        if obs["select_kind"] == "transform" and picked:
+            half, odd = divmod(len(picked), 2)
+            if odd or not half:
+                picked, obs["preview_unnamed"] = [], True
+            else:
+                picked, obs["undecided"] = picked[:half], half
+        obs["selected"] = _number_faces(picked, "title")
         obs["selection_known"] = bool(blob.get("selection_known"))
-        if not obs["selected"] and obs["selection_known"]:
+        if not obs["selected"] and obs["selection_known"] \
+                and not obs["preview_unnamed"]:
             obs["selected"] = [c for c in obs["offers"] if c.get("selected")]
         obs["can_confirm"] = bool(blob.get("can_confirm"))
         obs["can_skip"] = bool(blob.get("can_skip") or blob.get("can_cancel"))
@@ -1731,7 +1753,12 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # is the grammar the wire says will work -- and `_confirm` / `_skip`
         # still refuse on their own, because a screen can move between the
         # render and the command.
-        obs["commands"] = ['choose "<card title>"']
+        #
+        # `EB-314`'s half of the same rule: ONCE THE PREVIEW IS UP THE PICK IS
+        # MADE, and naming another card is not a way to change it -- see
+        # `_choose`. The verb is not offered where it does not work.
+        obs["commands"] = ([] if obs["preview_showing"]
+                           else ['choose "<card title>"'])
         if obs["can_confirm"]:
             obs["commands"].append("confirm")
         if obs["can_skip"]:
@@ -2017,6 +2044,56 @@ SELECTION_NOTE = ("*This screen's data feed did not answer which card is "
                   "picked, so nothing in the list above can be marked as the "
                   "one you chose. The `Confirm is` line below is the only "
                   "thing that moves when a pick lands.*")
+
+# `EB-314`. THE CARD ON THE RIGHT OF A TRANSFORM SCREEN IS A SLOT MACHINE.
+#
+# What the r5 Opus seat saw: it picked `Strike (1)` and the page printed the
+# result **Barricade**; the next two observations of the SAME screen printed
+# **Dark Embrace** and then **Hemokinesis**. It confirmed on "Strike to
+# Hemokinesis" and the deck came out with **Stomp**, one Defend short and
+# four Strikes intact -- both halves of the line it was shown were wrong.
+#
+# Neither half was a re-roll. `NDeckTransformSelectScreen.OpenPreviewScreen`
+# hands `NTransformPreview.Initialize` one `CardTransformation` per picked
+# card; where the transformation carries no `Replacement` -- which is every
+# random transform, and this screen's own doc comment says random is what it
+# is FOR -- the preview starts `CycleThroughCards`, a loop that reassigns the
+# right-hand holder to another card out of `CardFactory.GetDefaultTransform-
+# ationOptions` EVERY 0.2 SECONDS until the screen closes. It is an animation
+# on `Rng.Chaotic`, it is not the run's roll, and nothing it lands on is ever
+# committed: `CompleteSelection` returns the SELECTED CARDS and the caller
+# rolls the replacement afterwards. So three observations of one unchanged
+# screen printed three frames of a reel as if each were the outcome.
+#
+# The page prints the left half -- `%Before`, which holds the cards actually
+# picked -- and says in words that the right half has not been decided.
+TRANSFORM_NOTE = ("*The card this becomes has NOT been chosen yet. This "
+                  "screen rolls it at random when you confirm, and the card "
+                  "it is showing on the right is an animation cycling "
+                  "through the possibilities several times a second — it is "
+                  "not the result, so it is not printed here. Confirming "
+                  "means accepting an unknown card.*")
+# The shape this has never been seen in: a transform preview whose cards do
+# not pair off into a before half and an after half. Rather than guess which
+# is which and risk naming a reel frame as the pick, the page names none.
+TRANSFORM_UNREADABLE = ("*This transform screen is showing a preview whose "
+                        "cards this page cannot sort into the ones you "
+                        "picked and the ones it is cycling through, so it is "
+                        "naming none of them. Say `skip` to go back to the "
+                        "grid and pick again.*")
+# `EB-314`'s other half. Every one of the five selection screens keeps its own
+# `_selectedCards` set while its preview is open, and only the real UI's mouse
+# block (`MouseFilter = Stop`, grid focus disabled) stops a further click
+# reaching `OnCardClicked`. The bridge's `select_card` does not go through the
+# mouse -- it emits `NCardGrid.HolderPressed` at the grid directly -- so a
+# `choose` taken over an open preview silently changed WHICH card would be
+# transformed while the preview went on showing the first one. That is exactly
+# how the r5 seat confirmed "Strike" and lost a Defend.
+PREVIEW_LOCKED = ("your pick is already made and this screen is showing it "
+                  "back to you; naming another card here would change what "
+                  "gets taken without changing what you are being shown. Say "
+                  "`confirm` to take it, or `skip` to put it back and choose "
+                  "again")
 
 # `EB-299`. THE NOTE WAS WRONG IN BOTH DIRECTIONS AND THE r2 OPUS SEAT CAUGHT
 # BOTH. It said *"Two cards here print the same name"* over a hand holding
@@ -2394,6 +2471,12 @@ def render(obs: dict[str, Any]) -> str:
                 out += ["", "## What you have picked", ""]
                 for card in obs["selected"]:
                     out += _render_card(card)
+                # `EB-314`: on a transform screen the cards above are the ones
+                # going IN, and what comes out is still unrolled.
+                if obs.get("undecided"):
+                    out += ["", TRANSFORM_NOTE]
+            elif obs.get("preview_unnamed"):
+                out += ["", TRANSFORM_UNREADABLE]
             elif obs.get("selection_known"):
                 # `EB-263`: asked, and the answer is nothing. That is a fact
                 # about the board, not a hole in the feed, and it is worth one
@@ -2402,7 +2485,13 @@ def render(obs: dict[str, Any]) -> str:
             elif obs["can_confirm"]:
                 out += ["", SELECTION_NOTE]
             out += ["", f"Confirm is {'available' if obs['can_confirm'] else 'not available'}."]
-        if obs.get("can_skip"):
+        # `EB-314`: over an open preview `skip` does not leave the screen --
+        # it cancels the pick and puts the grid back (`ExecuteCancelSelection`
+        # presses the preview's own Cancel), so the page says which one it is.
+        if obs.get("can_skip") and obs.get("preview_showing"):
+            out += ["", "You may say `skip` to undo this pick and choose "
+                        "again; it does not leave the screen."]
+        elif obs.get("can_skip"):
             out += ["", "You may skip this."]
     elif obs["screen"] == "bundle_select":
         out += [f"# {obs['prompt']}", ""]
@@ -3117,6 +3206,13 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
                           {"action": "select_card_reward", "card_index": idx},
                           {"card": _numbered_titles(entries)[idx]})
     if st in SELECT_SCREENS:
+        # `EB-314`. THE PICK IS ALREADY TAKEN. See `PREVIEW_LOCKED`: the five
+        # grid screens keep their selection while the preview is up, only the
+        # mouse block stops a second click reaching it, and `select_card`
+        # does not go through the mouse. The way out is `skip`, which presses
+        # the preview's own Cancel and clears the selection with it.
+        if _blob(state, st).get("preview_showing"):
+            return _refuse(PREVIEW_LOCKED)
         entries = _screen_cards(state)
         idx, why = _match(entries, cmd.name, key=_card_title,
                           face=_card_face_key, number=True)

@@ -2682,6 +2682,151 @@ def test_an_asked_screen_with_nothing_picked_says_so():
     assert "Nothing on this screen is picked yet." in page
     assert "data feed did not answer which card is picked" not in page
 
+
+# ------------------- EB-314: the transform screen, captured 2026-09-02 -----
+#
+# THREE RAW ENVELOPES OFF ONE SCREEN, and the whole diagnosis is that two of
+# them are the SAME screen a second apart. `review/qa/eb314-transform-2026-
+# 09-02/` holds them, captured on lane 1 against `0.2.2083+proto.dirty` /
+# game `v0.111.0`, seed `GXRJRQVLUL1G`, and its record says how.
+#
+# What the r5 Opus seat reported: it picked `Strike (1)` and the page printed
+# the result **Barricade**, then **Dark Embrace**, then **Hemokinesis** on
+# re-selections, while naming Strike as the source throughout; it confirmed on
+# "Strike to Hemokinesis" and got **Stomp**, one Defend short.
+#
+# Neither half was a roll. `NDeckTransformSelectScreen.OpenPreviewScreen`
+# hands `NTransformPreview.Initialize` one `CardTransformation` per pick, and
+# where that carries no `Replacement` -- every random transform, which is what
+# the screen's own doc comment says it is FOR -- the preview starts
+# `CycleThroughCards`, reassigning the right-hand holder to another card off
+# `CardFactory.GetDefaultTransformationOptions` EVERY 0.2 SECONDS on
+# `Rng.Chaotic`. `CompleteSelection` then returns the SELECTED CARDS and the
+# caller rolls the replacement, so nothing the reel lands on is ever taken.
+# `transform-picked.json` and `transform-picked-later.json` are that reel,
+# one frame apart.
+
+LIVE314 = (Path(__file__).resolve().parents[2] / "review" / "qa"
+           / "eb314-transform-2026-09-02")
+
+
+def live314(name: str) -> dict:
+    return json.loads((LIVE314 / f"{name}.json").read_text(encoding="utf-8"))
+
+
+def test_the_live_transform_reel_moves_while_the_screen_does_not():
+    """The fixtures' own claim, before any page is rendered: two reads of ONE
+    unchanged screen, whose preview's SECOND card is a different card."""
+    one = live314("transform-picked")["card_select"]
+    two = live314("transform-picked-later")["card_select"]
+    assert one["screen_type"] == "transform" and one["preview_showing"] is True
+    assert one["cards"] == two["cards"]
+    assert [c["name"] for c in one["preview_cards"]] == \
+        ["Strike", "Tools of the Trade"]
+    assert [c["name"] for c in two["preview_cards"]] == \
+        ["Strike", "Fan of Knives"]
+    # And the grid's own selection channel is EMPTY on both, because
+    # `OpenPreviewScreen` unhighlights every picked card as it opens. The
+    # preview's left half is the only thing on this wire that names the pick.
+    assert one["selection_known"] is True
+    assert not [c for c in one["cards"] if c.get("selected")]
+
+
+def test_a_live_transform_screen_names_the_source_and_not_the_reel():
+    """`EB-314`. The page prints what the screen HOLDS -- the card going in --
+    and says in words that what comes out has not been chosen.
+
+    Seen to FAIL: before this row the reel's frame was printed under
+    *What you have picked* as though it were the result, which is how a seat
+    came to confirm a card the run never rolled.
+    """
+    page = blindplay.observe(live314("transform-picked"))
+    assert "## What you have picked" in page
+    assert "- **Strike** — cost 1, attack" in page
+    assert "Tools of the Trade" not in page
+    assert "has NOT been chosen yet" in page
+    assert "Confirming means accepting an unknown card." in page
+
+
+def test_two_reads_of_one_transform_screen_render_the_same_page():
+    """The regression the r5 seat's three observations are: a page that moves
+    when nothing on the board has is a page reporting an animation."""
+    assert blindplay.observe(live314("transform-picked")) == \
+        blindplay.observe(live314("transform-picked-later"))
+
+
+def test_a_transform_pick_already_made_cannot_be_re_taken():
+    """`EB-314`'s other half. Every one of the five grid screens keeps its own
+    `_selectedCards` while its preview is open and only the real UI's mouse
+    block stops a second click reaching `OnCardClicked` -- and `select_card`
+    does not go through the mouse, it emits `NCardGrid.HolderPressed` at the
+    grid. So a `choose` over an open preview changed WHICH card would be
+    transformed while the preview went on showing the first one.
+
+    Seen to FAIL: before this row the command resolved and posted, and the
+    r5 seat lost a Defend it had never confirmed.
+    """
+    state = live314("transform-picked")
+    res = blindplay.act(state, 'choose "Defend (1)"')
+    assert res["ok"] is False and res["post"] is None
+    assert "your pick is already made" in res["refusal"]
+    assert "`skip` to put it back" in res["refusal"]
+    # And the page does not offer the verb it would refuse (`EB-259`'s rule).
+    page = blindplay.observe(state)
+    assert 'choose "<card title>"' not in page
+    assert "- `confirm`" in page and "- `skip`" in page
+    assert "does not leave the screen" in page
+
+
+def test_a_fresh_transform_screen_still_takes_a_pick():
+    """The screen BEFORE a preview opens is unchanged: the deck is listed, the
+    verb is offered, and the pick resolves to the grid index it always did."""
+    fresh = live314("transform-fresh")
+    assert fresh["card_select"]["preview_showing"] is False
+    page = blindplay.observe(fresh)
+    assert "# Choose a card to Transform." in page
+    assert 'choose "<card title>"' in page
+    assert "Nothing on this screen is picked yet." in page
+    assert "has NOT been chosen yet" not in page
+    res = blindplay.act(fresh, 'choose "Strike (1)"')
+    assert res["ok"] is True
+    assert res["post"] == {"action": "select_card", "index": 0}
+
+
+def test_an_unpairable_transform_preview_names_none_of_it():
+    """The shape this has never been seen in. `NTransformPreview` builds one
+    holder under `%Before` and one under `%After` per pick, so the container's
+    cards pair off; a preview that does not is not guessed at, because the
+    guess that goes wrong prints a reel frame as the tester's own card."""
+    odd = json.loads(json.dumps(live314("transform-picked")))
+    odd["card_select"]["preview_cards"] = \
+        odd["card_select"]["preview_cards"][:1]
+    page = blindplay.observe(odd)
+    assert "cannot sort into the ones you" in page
+    assert "## What you have picked" not in page
+    assert "Nothing on this screen is picked yet." not in page
+
+
+def test_the_upgrade_preview_keeps_its_result_and_loses_its_re_pick():
+    """`EB-314` reaches the campfire smith too, and differently on each half.
+
+    An UPGRADE preview's second card is decided -- `_singlePreview.Card` is
+    the clicked card and the `+` face is the game's own -- so it is still
+    printed. But `NDeckUpgradeSelectScreen.OnCardClicked` has the same
+    `_selectedCards` shape, and `CompleteSelection` upgrades everything in
+    that set, so a second `choose` over the open preview would have upgraded
+    TWO cards on a one-card boon. The verb goes on this screen as well.
+    """
+    page = blindplay.observe(live("upgrade-chosen"))
+    assert "## What you have picked" in page
+    assert "**Kaboom!+** (upgraded)" in page      # the decided half, kept
+    assert "has NOT been chosen yet" not in page  # and no transform sentence
+    assert 'choose "<card title>"' not in page
+    res = blindplay.act(live("upgrade-chosen"), 'choose "Kaboom!"')
+    assert res["ok"] is False and res["post"] is None
+    assert "your pick is already made" in res["refusal"]
+
+
 # --------------------------------------------------------------------------
 # THE KOKOMI OVERHAUL, DRAFT 6: the Plans on the page, and the pet as a target
 # (`EB-216`). Same posture as the memory block above and the same contract
