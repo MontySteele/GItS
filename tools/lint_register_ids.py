@@ -1324,6 +1324,8 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         310,
         # 316/317: the Kokomi round-3 packet's two legibility rows.
         316, 317,
+        # 313/314: the Klee round-5 seats' two surface finds.
+        313, 314,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

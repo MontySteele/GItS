@@ -111,7 +111,9 @@ Seven sentences. If a rule is not here, it is a card.
 4. **Spark.** Each Bomb that goes off gives Klee 1 Spark, and she starts
    every combat with 1 (R242). Some cards cost Sparks instead of energy,
    printed as a badge. No cap. Lost at the end of combat.
-5. **Pyro.** Every Klee Attack applies Pyro, and so does every explosion. An
+5. **Pyro.** Every Klee Attack applies Pyro, except the base game's Strike,
+   which applies nothing ([USER], 2026-09-02: the basic cards are supposed
+   to be bad), and so does every explosion. An
    explosion is an ordinary Pyro hit: Vulnerable and Weak on the enemy,
    Strength on Klee, and every reaction in the element table apply to a
    cooked bomb without a word printed on her cards. Off-element auras come
