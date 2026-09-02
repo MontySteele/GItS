@@ -96,14 +96,18 @@ the pulse, Orders, Tactics, Spent, Garment as a keyword, Flawless Strategy.
 
 ## 7. What the engine has to do
 
-1. **The first question, answered in the decompile before anything is
-   built:** can a card be aimed at a creature on the player's side? The
-   source game's Necrobinder fights beside a summoned creature, Osty, so an
-   ally on the field exists; whether her cards can target it is what the
-   build checks first. Yes: the Bake-Kurage becomes such a creature, with
-   no HP bar and no enemy targeting, and her Plan cards target "an enemy or
-   the Bake-Kurage" (Attacks) or "you or the Bake-Kurage" (Skills). No:
-   pick 1's second option.
+1. **The first question, answered in the decompile (2026-09-02): yes.**
+   The engine has pets: a creature spawned on the player's side for the
+   whole combat that enemies structurally cannot target, since their moves
+   only ever aim at players; the Necrobinder's Osty is one. The mod's base
+   library ships the seam already: a pet model with its HP bar hidden, and
+   a Pet target type with the validation, selection and drag-to-target
+   patches in place, so a card can be aimed at the jellyfish unmodified,
+   and its play hands the card the jellyfish as the target creature. The
+   Bake-Kurage becomes such a pet; her Plan cards target "an enemy or the
+   Bake-Kurage" (Attacks) or "you or the Bake-Kurage" (Skills). Effort:
+   small to medium, about two days. The risk is the creature's art and its
+   placement on the field, which is bespoke code per pet.
 2. The typed Plan queue exists (`Powers/Prototype/KokomiPlan.cs`: seven
    clauses, resolved at the start of her turn before the draw, per player,
    with a pending-count badge). It gains the starter's four clauses and a
@@ -127,11 +131,12 @@ its file moves to `review/ruled/`.
 
 ## 9. Picks
 
-1. **How a card becomes a Plan.** (1) Play it on the Bake-Kurage, a target
-   on your side of the field, as you suggested. **Default**, subject to the
-   engine question in section 7. (2) Plan is a property of certain cards
-   only; the starter mixes now-cards and Plan-cards and there is no
-   per-card choice. The fallback if the engine says no.
+1. **How a card becomes a Plan.** (1) Play it on the Bake-Kurage, a pet
+   on your side of the field, as you suggested. **Default**; the engine
+   supports it (section 7). (2) Plan is a property of certain cards only;
+   the starter mixes now-cards and Plan-cards and there is no per-card
+   choice. The smaller game, if you would rather not have the choice on
+   every card.
 2. **The jellyfish's body.** (1) Untouchable: no HP, enemies cannot hit
    it, it is only where a Plan is sent. **Default.** (2) A creature with HP
    that enemies can hit and you can lose, so a plan can be disrupted. A
