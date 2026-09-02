@@ -42,7 +42,7 @@ public sealed class ProtoKoRunAway : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Run Away!"),
-        ("description", "Gain 3 Block. If a [gold]Bomb[/gold] went off this turn, gain 4 more."),
+        ("description", "Gain {Block:diff()} Block. If a [gold]Bomb[/gold] went off this turn, gain 4 more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -69,6 +69,6 @@ public sealed class ProtoKoRunAway : CustomCardModel
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

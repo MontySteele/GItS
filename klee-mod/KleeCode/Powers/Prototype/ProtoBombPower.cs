@@ -386,10 +386,17 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// held HERE rather than by the order two emitted statements happen to sit
     /// in, so a card cannot get it wrong by being generated differently.
     /// <paramref name="damage"/> of 0 is a Set off with no Attack behind it.
+    ///
+    /// <c>EB-280</c>: <paramref name="damage"/> is a <c>decimal</c> because the
+    /// generated card hands in <c>DynamicVars.Damage.BaseValue</c> -- the very
+    /// var its face renders -- rather than a literal. The Strength and
+    /// Vulnerable arithmetic still happens where it always did, inside
+    /// <c>DamageCmd.Attack</c>; what changed is that the number entering that
+    /// pipeline is now the printed one, so the face and the hit cannot drift.
     /// </summary>
     public static async Task SetOffAimed(
         PlayerChoiceContext choiceContext, Creature? target, Creature applier,
-        CardModel cardSource, CardPlay cardPlay, int damage)
+        CardModel cardSource, CardPlay cardPlay, decimal damage)
     {
         if (target == null) return;
         await SetOff(choiceContext, target, applier, cardSource);
@@ -406,7 +413,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     public static async Task SetOffAll(
         PlayerChoiceContext choiceContext, Creature applier,
-        CardModel cardSource, CardPlay cardPlay, int damage,
+        CardModel cardSource, CardPlay cardPlay, decimal damage,
         bool nonPyroAuraOnly)
     {
         var combat = applier.CombatState;
@@ -437,7 +444,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     public static async Task SetOffRandom(
         PlayerChoiceContext choiceContext, Creature applier,
-        CardModel cardSource, CardPlay cardPlay, int damage, int times)
+        CardModel cardSource, CardPlay cardPlay, decimal damage, int times)
     {
         var combat = applier.CombatState;
         if (combat == null) return;
@@ -459,7 +466,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// of hers does; the explosions above went through the elemental pipeline
     /// directly, because they are not card damage.</summary>
     private static async Task DealCardDamage(
-        PlayerChoiceContext choiceContext, Creature target, int damage,
+        PlayerChoiceContext choiceContext, Creature target, decimal damage,
         CardModel cardSource, CardPlay cardPlay)
     {
         if (damage <= 0 || target.IsDead) return;

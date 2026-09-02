@@ -66,6 +66,155 @@ EXTERNAL_UPGRADE_SHEETS = (_GAME_REF / "ironclad-upgrades.yaml",
 SUFFIX = "+"
 
 
+# =============================================================================
+# THE PROTOTYPE-STAGE DEFAULT UPGRADE (EB-283 / EB-277)
+# =============================================================================
+#
+# WHAT WENT WRONG. No prototype row upgraded. Klee's offered none at a campfire
+# or a reward (`OnUpgrade` was an empty body under R24's "no ratified delta"
+# comment) and Kokomi's upgraded to a card identical to the base (`EB-277`), so
+# a run under either arm had no campfire choice at all and the Light Door's
+# "Upgrade 2 random cards" did nothing anybody could see.
+#
+# WHY A RULE AND NOT A SHEET. R24 abolished codegen upgrade DEFAULTS for
+# SHIPPED cards, and that stands: a shipped upgrade is a ruled number, and a
+# default is how `cant_catch_me` shipped +3 against a ruled +2. A prototype row
+# is the opposite kind of object -- the slice packets say in their own sec.1
+# that no number in them is a claim, and their sec.7 puts upgrades out of scope
+# at Paper. So the choice here is not "ruled number versus default", it is "a
+# campfire that does something versus a campfire that does nothing", and a
+# stated blanket rule is the honest form of the first. An AUTHORED `upgrade:`
+# block on the row always wins, which is how a Balance-stage ruling replaces
+# this without the rule having to be removed.
+#
+# WHERE IT LIVES, AND WHY HERE. Both engines have to apply the SAME deltas or a
+# smithed prototype is two different cards. This module is the sim's applier
+# and `tools/gen_prototype_cards.py` imports this function for the mod's, so
+# there is one implementation and no mirror to keep in step. It reads EFFECTS
+# AND COST ONLY -- never the row's `description`, which the sim strips at load
+# (loader, EB-215) and therefore cannot see. That is the whole reason the rule
+# is written in terms of ops rather than of printed text.
+PROTOTYPE_DEFAULT_PREFIXES = ("proto_ko_", "proto_kk_", "proto_mc_",
+                              "proto_mi_")
+
+#: The rule, as the `EB-283` row states it, named rather than buried in the
+#: walk below.
+PROTOTYPE_DAMAGE_DELTA = 3
+PROTOTYPE_MULTI_HIT_DAMAGE_DELTA = 1     # +1 PER HIT, the base game's own idiom
+PROTOTYPE_BLOCK_DELTA = 3
+PROTOTYPE_BOMB_SIZE_DELTA = 2
+PROTOTYPE_PAYLOAD_MINE_DELTA = 1
+PROTOTYPE_GROW_DELTA = 1
+PROTOTYPE_POWER_DELTA = 1
+PROTOTYPE_TIDE_DELTA = 2
+PROTOTYPE_MEND_DELTA = 2
+PROTOTYPE_COST_DELTA = -1
+PROTOTYPE_COST_FLOOR = 2                 # "a card of cost 2 or more"
+
+
+def _proto_hit(effects: list[dict]) -> dict | None:
+    """The one effect a prototype `damage` delta binds to.
+
+    The first top-level non-self `damage` carrying a literal amount, else the
+    first `set_off` carrying literal damage of its own (`EB-280` made those the
+    same number in the same var). A formula-scaled hit has no literal to bump
+    and is skipped: `formula_base` is its key, and that is a ruling rather than
+    a default.
+    """
+    hit = next((fx for fx in effects
+                if fx.get("op") == "damage" and fx.get("target") != "self"
+                and isinstance(fx.get("amount"), int)), None)
+    if hit is not None:
+        return hit
+    return next((fx for fx in effects
+                 if fx.get("op") == "set_off"
+                 and isinstance(fx.get("damage"), int)
+                 and fx["damage"] > 0), None)
+
+
+def _proto_grow(effects: list[dict]) -> dict | None:
+    """The one effect a prototype `grow` delta binds to: the first printed
+    grow amount, whichever of the two overhaul ops prints it."""
+    return next((fx for fx in effects
+                 if (fx.get("op") == "grow_bombs"
+                     and isinstance(fx.get("amount"), int))
+                 or (fx.get("op") == "merge_bombs"
+                     and isinstance(fx.get("growth"), int))), None)
+
+
+def _proto_power(effects: list[dict]) -> dict | None:
+    """The one effect a prototype `power_amount` delta binds to, or None.
+
+    THE `> 1` TEST IS THE LOAD-BEARING PART. A power's `amount` is a printed
+    number on some rows (Grounded's 6 Block, Orders' Tide +2, a Garment's 2
+    turns) and a bare ON FLAG on others -- Alice's Recipe, Sparks 'n' Splash,
+    The Art of War and Treatise all apply `amount: 1` to a power whose whole
+    body is a rule with no number in it. Bumping a flag to 2 means nothing at
+    best and stacks a rule at worst, and no field on the row tells the two
+    apart. So `amount: 1` reads as "this row prints no power number", the row
+    falls through to the cost clause, and a Balance-stage `upgrade:` block is
+    what gives such a card a real one.
+
+    THE FIRST top-level application is tested and no other, because that is the
+    one BOTH appliers bind a `power_amount` delta to (this module's
+    `power_amount` branch, and the codegen's `power_upgrade_effect`). Asking
+    the question of a later effect would decide the key off one number and
+    then move a different one.
+    """
+    first = next((fx for fx in effects
+                  if fx.get("op") in ("apply_power", "buff_next_attack")), None)
+    if first is None or not isinstance(first.get("amount"), int):
+        return None
+    return first if first["amount"] > 1 else None
+
+
+def prototype_default_delta(card_id: str, cost, effects: list[dict]) -> dict:
+    """The Prototype-stage upgrade for one row, or `{}`.
+
+    Pure, and effects+cost only (see the block comment above). Empty for any id
+    outside `PROTOTYPE_DEFAULT_PREFIXES`, and empty for a row the rule finds no
+    printed number on whose cost is below `PROTOTYPE_COST_FLOOR` -- the rule's
+    own last clause is "a card of cost 2 or more WITH NO NUMBER costs 1 less",
+    so a 0- or 1-cost row with no number has nothing to move and gets no
+    upgrade rather than an invented one.
+    """
+    if not card_id.startswith(PROTOTYPE_DEFAULT_PREFIXES):
+        return {}
+    delta: dict = {}
+
+    hit = _proto_hit(effects)
+    if hit is not None:
+        times = hit.get("times", 1)
+        delta["damage"] = (PROTOTYPE_MULTI_HIT_DAMAGE_DELTA
+                           if isinstance(times, int) and times > 1
+                           else PROTOTYPE_DAMAGE_DELTA)
+    if any(fx.get("op") == "block" and isinstance(fx.get("amount"), int)
+           for fx in effects):
+        delta["block"] = PROTOTYPE_BLOCK_DELTA
+    bomb = next((fx for fx in effects if fx.get("op") == "plant_bomb"), None)
+    if bomb is not None:
+        delta["bomb_size"] = PROTOTYPE_BOMB_SIZE_DELTA
+        if int(bomb.get("payload_mine_all", 0)) > 0:
+            delta["payload_mine"] = PROTOTYPE_PAYLOAD_MINE_DELTA
+    if _proto_grow(effects) is not None:
+        delta["grow"] = PROTOTYPE_GROW_DELTA
+    if _proto_power(effects) is not None:
+        delta["power_amount"] = PROTOTYPE_POWER_DELTA
+    if any(fx.get("op") == "gain_tide" and isinstance(fx.get("amount"), int)
+           for fx in effects):
+        delta["tide"] = PROTOTYPE_TIDE_DELTA
+    if any(fx.get("op") == "mend" and isinstance(fx.get("amount"), int)
+           for fx in effects):
+        delta["mend"] = PROTOTYPE_MEND_DELTA
+
+    # "Spark costs unchanged": `spend_spark` is never a key here, and the
+    # clause below reads the ENERGY cost, which is the only cost this rule
+    # moves.
+    if not delta and isinstance(cost, int) and cost >= PROTOTYPE_COST_FLOOR:
+        delta["cost"] = PROTOTYPE_COST_DELTA
+    return delta
+
+
 def _external_pool_for(sheet: Path) -> Path:
     """The pool an external upgrades sheet rides with (<char>_pool.yaml).
 
@@ -199,15 +348,38 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
         # `proto_` id resolves, because its starter substitution hands one out
         # by id string.
         reachable |= {c.id for c in loader.prototype_cards()}
+    # EB-283. The three OVERHAUL arms open the same door by id -- their whole
+    # starter and pool ARE prototype rows -- so a row those flags make
+    # reachable is a row a rest site can offer to smith, and it has to have an
+    # answer here or the campfire is empty. Same reachability discipline as the
+    # two clauses above: on a flag-off tree (every shipped tree) none of these
+    # sets contributes and the index is byte-identical to what it was.
+    if C.KLEE_OVERHAUL:
+        reachable |= set(C.KLEE_OVERHAUL_STARTER_IDS)
+        reachable |= set(C.KLEE_OVERHAUL_POOL_IDS)
+    if C.KOKOMI_OVERHAUL:
+        reachable |= set(C.KOKOMI_OVERHAUL_STARTER_IDS)
+        reachable |= set(C.KOKOMI_OVERHAUL_POOL_IDS)
+    if C.COMPANION_OVERHAUL:
+        reachable |= set(C.MONDSTADT_OVERHAUL_POOL_IDS)
+        reachable |= set(C.INAZUMA_OVERHAUL_POOL_IDS)
     deltas: dict[str, dict] = {}
     for card in loader.prototype_cards():
-        if not card.upgrade or card.id not in reachable:
+        if card.id not in reachable:
+            continue
+        # EB-283: the row's own block wins; the Prototype rule fills in for a
+        # row that has none, so a staged card is never un-smithable for want
+        # of a number nobody has ruled yet.
+        authored = dict(card.upgrade) if card.upgrade else {}
+        delta = authored or prototype_default_delta(
+            card.id, card.cost, card.effects)
+        if not delta:
             continue
         if card.id in merged:
             raise ValueError(
                 f"prototype row {card.id!r} carries an `upgrade:` block and "
                 "an upgrades sheet already rules that id -- one id, one delta")
-        deltas[card.id] = dict(card.upgrade)
+        deltas[card.id] = delta
     return deltas
 
 
@@ -368,6 +540,41 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in top
                               if fx.get("op") in ("damage", "chain_attack")
                               and fx.get("target") != "self"), "amount", val)
+            if not ok:
+                # EB-280 / EB-283: a Set off Attack's own hit is card damage
+                # in the same slot and the same var, so a `damage` delta lands
+                # on it when the row has no plain damage op (Ka-pow!). The
+                # codegen binds it the same way round -- plain damage first --
+                # so the two engines cannot upgrade different numbers.
+                ok = _bump_first((fx for fx in top
+                                  if fx.get("op") == "set_off"
+                                  and int(fx.get("damage", 0) or 0) > 0),
+                                 "damage", val)
+        elif key == "bomb_size":
+            # EB-283, the overhaul Bomb's printed size (`plant_bomb.size`).
+            # Distinct from `bomb_damage`, which is the SHIPPED Bomb's
+            # `place_bomb.bomb_damage` -- two ops, two fields, two arms.
+            ok = _bump_first((fx for fx in top if fx.get("op") == "plant_bomb"),
+                             "size", val)
+        elif key == "payload_mine":
+            ok = _bump_first((fx for fx in top if fx.get("op") == "plant_bomb"),
+                             "payload_mine_all", val)
+        elif key == "grow":
+            # One key, two ops: `grow_bombs.amount` and `merge_bombs.growth`
+            # are both "how much the Bombs grow", and a row carries at most
+            # one of them.
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "grow_bombs"), "amount", val)
+            if not ok:
+                ok = _bump_first((fx for fx in top
+                                  if fx.get("op") == "merge_bombs"),
+                                 "growth", val)
+        elif key == "tide":
+            ok = _bump_first((fx for fx in top if fx.get("op") == "gain_tide"),
+                             "amount", val)
+        elif key == "mend":
+            ok = _bump_first((fx for fx in top if fx.get("op") == "mend"),
+                             "amount", val)
         elif key == "block":
             ok = _bump_first((fx for fx in top if fx.get("op") == "block"),
                              "amount", val)

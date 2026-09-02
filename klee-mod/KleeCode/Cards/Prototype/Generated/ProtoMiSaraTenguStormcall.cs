@@ -59,7 +59,7 @@ public sealed class ProtoMiSaraTenguStormcall : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kujou Sara — Tengu Stormcall (proto)"),
-        ("description", "Deal 5 damage. Next turn, your [gold]Attacks[/gold] deal 5 more damage."),
+        ("description", "Deal {Damage:diff()} damage. Next turn, your [gold]Attacks[/gold] deal 5 more damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -90,6 +90,6 @@ public sealed class ProtoMiSaraTenguStormcall : CustomCardModel, IElementalCard,
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

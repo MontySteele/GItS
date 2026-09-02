@@ -42,13 +42,13 @@ public sealed class ProtoKoChainFuse : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chain Fuse"),
-        ("description", "Each [gold]Bomb[/gold] on target enemy grows by 3."),
+        ("description", "Each [gold]Bomb[/gold] on target enemy grows by {Grow:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("Grow", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,11 +61,11 @@ public sealed class ProtoKoChainFuse : CustomCardModel
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        ProtoBombPower.GrowOn(cardPlay.Target, Owner.Creature, 3);
+        ProtoBombPower.GrowOn(cardPlay.Target, Owner.Creature, DynamicVars["Grow"].IntValue);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["Grow"].UpgradeValueBy(1m);
     }
 }

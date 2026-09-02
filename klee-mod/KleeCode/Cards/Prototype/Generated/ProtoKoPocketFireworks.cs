@@ -48,7 +48,7 @@ public sealed class ProtoKoPocketFireworks : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pocket Fireworks"),
-        ("description", "Deal 9 damage."),
+        ("description", "Deal {Damage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -76,6 +76,6 @@ public sealed class ProtoKoPocketFireworks : CustomCardModel, IElementalCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

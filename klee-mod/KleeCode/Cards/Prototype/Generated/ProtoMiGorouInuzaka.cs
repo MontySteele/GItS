@@ -56,7 +56,7 @@ public sealed class ProtoMiGorouInuzaka : CustomCardModel, IElementalCard, IComp
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — Inuzaka All-Round Defense (proto)"),
-        ("description", "Deal 8 damage. Gain [gold]Block[/gold] equal to half the damage dealt."),
+        ("description", "Deal {Damage:diff()} damage. Gain [gold]Block[/gold] equal to half the damage dealt."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -88,6 +88,6 @@ public sealed class ProtoMiGorouInuzaka : CustomCardModel, IElementalCard, IComp
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

@@ -52,13 +52,13 @@ public sealed class ProtoMcEulaGlacialIllumination : CustomCardModel, ICompanion
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Eula — Glacial Illumination"),
-        ("description", "Place a [gold]Lightfall Sword[/gold] on target enemy: for 2 turns it counts your [gold]Attacks[/gold]; then it deals 8 damage plus 5 per [gold]Attack[/gold] counted."),
+        ("description", "Place a [gold]Lightfall Sword[/gold] on target enemy: for {PowerAmount:diff()} turns it counts your [gold]Attacks[/gold]; then it deals 8 damage plus 5 per [gold]Attack[/gold] counted."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -71,11 +71,11 @@ public sealed class ProtoMcEulaGlacialIllumination : CustomCardModel, ICompanion
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await PowerCmd.Apply<LightfallSwordPower>(choiceContext, cardPlay.Target, 2, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<LightfallSwordPower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

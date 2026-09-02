@@ -48,13 +48,13 @@ public sealed class ProtoKoRapidFire : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rapid Fire"),
-        ("description", "Deal 3 damage to a random enemy four times. [gold]Set off[/gold] each enemy hit."),
+        ("description", "Deal {Damage:diff()} damage to a random enemy four times. [gold]Set off[/gold] each enemy hit."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DamageVar(3m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -66,11 +66,11 @@ public sealed class ProtoKoRapidFire : CustomCardModel, IElementalCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await ProtoBombPower.SetOffRandom(choiceContext, Owner.Creature, this, cardPlay, 3, 4);
+        await ProtoBombPower.SetOffRandom(choiceContext, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue, 4);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(1m);
     }
 }

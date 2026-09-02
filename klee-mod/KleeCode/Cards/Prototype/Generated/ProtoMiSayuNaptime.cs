@@ -49,7 +49,7 @@ public sealed class ProtoMiSayuNaptime : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sayu — Naptime (proto)"),
-        ("description", "Gain 4 [gold]Block[/gold]. At the start of your next turn, draw 2 if you played no [gold]Attacks[/gold] this turn."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. At the start of your next turn, draw {PowerAmount:diff()} if you played no [gold]Attacks[/gold] this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -57,7 +57,8 @@ public sealed class ProtoMiSayuNaptime : CustomCardModel, ICompanionCard
         {
             new CalculationBaseVar(4m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -70,11 +71,12 @@ public sealed class ProtoMiSayuNaptime : CustomCardModel, ICompanionCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
-        await PowerCmd.Apply<NaptimePower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<NaptimePower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

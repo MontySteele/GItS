@@ -42,13 +42,13 @@ public sealed class ProtoKoMineToss : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mine Toss"),
-        ("description", "Place a [gold]Mine[/gold] 4 on every enemy."),
+        ("description", "Place a [gold]Mine[/gold] {BombSize:diff()} on every enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("BombSize", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,11 +60,11 @@ public sealed class ProtoKoMineToss : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await ProtoBombPower.PlaceOnAll(choiceContext, Owner.Creature, 4, isMine: true, payloadMineAll: 0, cardSource: this);
+        await ProtoBombPower.PlaceOnAll(choiceContext, Owner.Creature, DynamicVars["BombSize"].IntValue, isMine: true, payloadMineAll: 0, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["BombSize"].UpgradeValueBy(2m);
     }
 }

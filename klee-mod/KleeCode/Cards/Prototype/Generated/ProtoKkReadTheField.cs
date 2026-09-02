@@ -45,7 +45,7 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Read the Field"),
-        ("description", "Gain 3 Block. [gold]Plan[/gold]: gain 4 Block."),
+        ("description", "Gain {Block:diff()} Block. [gold]Plan[/gold]: gain 4 Block."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -69,6 +69,6 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

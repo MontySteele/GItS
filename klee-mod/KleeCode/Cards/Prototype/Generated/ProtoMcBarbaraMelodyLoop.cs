@@ -52,7 +52,7 @@ public sealed class ProtoMcBarbaraMelodyLoop : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara — Melody Loop"),
-        ("description", "Gain 4 [gold]Block[/gold]. For 3 turns, at the start of your turn apply [gold]Hydro[/gold] to target enemy."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. For {PowerAmount:diff()} turns, at the start of your turn apply [gold]Hydro[/gold] to target enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -60,7 +60,8 @@ public sealed class ProtoMcBarbaraMelodyLoop : CustomCardModel, ICompanionCard
         {
             new CalculationBaseVar(4m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new DynamicVar("PowerAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -74,11 +75,12 @@ public sealed class ProtoMcBarbaraMelodyLoop : CustomCardModel, ICompanionCard
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await PowerCmd.Apply<MelodyLoopPower>(choiceContext, cardPlay.Target, 3, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<MelodyLoopPower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

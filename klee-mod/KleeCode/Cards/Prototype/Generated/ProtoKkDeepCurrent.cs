@@ -51,13 +51,14 @@ public sealed class ProtoKkDeepCurrent : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deep Current"),
-        ("description", "Deal 4 damage to every enemy. [gold]Tide[/gold] +1 per enemy hit."),
+        ("description", "Deal {Damage:diff()} damage to every enemy. [gold]Tide[/gold] +{Tide:diff()} per enemy hit."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move)
+            new DamageVar(4m, ValueProp.Move),
+            new DynamicVar("Tide", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -76,11 +77,12 @@ public sealed class ProtoKkDeepCurrent : CustomCardModel, IElementalCard, IChara
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        await KokomiTide.GainPerEnemyHit(choiceContext, Owner.Creature, 1);
+        await KokomiTide.GainPerEnemyHit(choiceContext, Owner.Creature, DynamicVars["Tide"].IntValue);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars["Tide"].UpgradeValueBy(2m);
     }
 }

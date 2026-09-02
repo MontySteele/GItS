@@ -59,7 +59,7 @@ public sealed class ProtoMcRosariaRavagingConfession : CustomCardModel, IElement
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rosaria — Ravaging Confession"),
-        ("description", "Deal 9 damage. If the enemy has an aura, apply 1 [gold]Vulnerable[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. If the enemy has an aura, apply 1 [gold]Vulnerable[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -94,6 +94,6 @@ public sealed class ProtoMcRosariaRavagingConfession : CustomCardModel, IElement
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

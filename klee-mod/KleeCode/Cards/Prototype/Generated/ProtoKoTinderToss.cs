@@ -48,7 +48,7 @@ public sealed class ProtoKoTinderToss : CustomCardModel, IElementalCard, ISparkP
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tinder Toss"),
-        ("description", "Spend 1 [gold]Spark[/gold]. [gold]Set off[/gold] and deal 4 damage, to two random enemies."),
+        ("description", "[gold]Set off[/gold] and deal {Damage:diff()} damage, to two random enemies."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -68,7 +68,7 @@ public sealed class ProtoKoTinderToss : CustomCardModel, IElementalCard, ISparkP
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DamageVar(4m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,11 +81,11 @@ public sealed class ProtoKoTinderToss : CustomCardModel, IElementalCard, ISparkP
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await SparkPower.Spend(choiceContext, Owner.Creature, 1, this);
-        await ProtoBombPower.SetOffRandom(choiceContext, Owner.Creature, this, cardPlay, 4, 2);
+        await ProtoBombPower.SetOffRandom(choiceContext, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue, 2);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(1m);
     }
 }

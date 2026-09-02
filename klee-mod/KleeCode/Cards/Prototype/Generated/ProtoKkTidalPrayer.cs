@@ -45,12 +45,13 @@ public sealed class ProtoKkTidalPrayer : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Prayer"),
-        ("description", "[gold]Exert[/gold] 1. [gold]Tide[/gold] +4. Draw 1 card."),
+        ("description", "[gold]Exert[/gold] 1. [gold]Tide[/gold] +{Tide:diff()}. Draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new DynamicVar("Tide", 4m),
             new CardsVar(1)
         };
 
@@ -64,12 +65,12 @@ public sealed class ProtoKkTidalPrayer : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await KokomiTide.Exert(choiceContext, Owner.Creature, 1, this, cardPlay);
-        await KokomiTide.Gain(choiceContext, Owner.Creature, 4);
+        await KokomiTide.Gain(choiceContext, Owner.Creature, DynamicVars["Tide"].IntValue);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["Tide"].UpgradeValueBy(2m);
     }
 }

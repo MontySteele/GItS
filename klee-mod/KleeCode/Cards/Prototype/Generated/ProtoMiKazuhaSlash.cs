@@ -59,7 +59,7 @@ public sealed class ProtoMiKazuhaSlash : CustomCardModel, IElementalCard, ICompa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaedehara Kazuha — Kazuha Slash"),
-        ("description", "Deal 10 damage to ALL enemies. [gold]Swirl[/gold] each."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. [gold]Swirl[/gold] each."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -89,6 +89,6 @@ public sealed class ProtoMiKazuhaSlash : CustomCardModel, IElementalCard, ICompa
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

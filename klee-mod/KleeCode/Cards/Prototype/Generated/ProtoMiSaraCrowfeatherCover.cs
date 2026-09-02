@@ -49,13 +49,13 @@ public sealed class ProtoMiSaraCrowfeatherCover : CustomCardModel, ICompanionCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kujou Sara — Crowfeather Cover (proto)"),
-        ("description", "Your next [gold]Attack[/gold] this turn deals 4 more damage and applies [gold]Electro[/gold]."),
+        ("description", "Your next [gold]Attack[/gold] this turn deals {PowerAmount:diff()} more damage and applies [gold]Electro[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -67,11 +67,11 @@ public sealed class ProtoMiSaraCrowfeatherCover : CustomCardModel, ICompanionCar
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<CrowfeatherCoverPower>(choiceContext, Owner.Creature, 4, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<CrowfeatherCoverPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

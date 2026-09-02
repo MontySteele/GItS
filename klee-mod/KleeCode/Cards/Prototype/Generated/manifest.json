@@ -326,8 +326,315 @@
     ]
   },
   "upgrades": {
+    "proto_kk_breaker": {
+      "damage": 3
+    },
+    "proto_kk_cleansing_tide": {
+      "mend": 2
+    },
+    "proto_kk_coral_bulwark": {
+      "block": 3,
+      "tide": 2
+    },
+    "proto_kk_coral_guard": {
+      "block": 3
+    },
+    "proto_kk_deep_current": {
+      "damage": 3,
+      "tide": 2
+    },
+    "proto_kk_feint": {
+      "damage": 3
+    },
+    "proto_kk_high_tide": {
+      "tide": 2
+    },
+    "proto_kk_kurages_oath": {
+      "tide": 2
+    },
+    "proto_kk_nereids_ascension": {
+      "power_amount": 1
+    },
+    "proto_kk_orders": {
+      "power_amount": 1
+    },
+    "proto_kk_quiet_study": {
+      "block": 3,
+      "tide": 2
+    },
+    "proto_kk_rally": {
+      "tide": 2
+    },
+    "proto_kk_read_the_field": {
+      "block": 3
+    },
+    "proto_kk_rising_tide": {
+      "damage": 3
+    },
+    "proto_kk_salt_line": {
+      "block": 3
+    },
+    "proto_kk_sango_isshin": {
+      "cost": -1
+    },
+    "proto_kk_sea_spray": {
+      "damage": 3,
+      "tide": 2
+    },
+    "proto_kk_the_art_of_war": {
+      "cost": -1
+    },
+    "proto_kk_the_clouds_like_waves": {
+      "power_amount": 1
+    },
+    "proto_kk_the_generals_banner": {
+      "cost": -1
+    },
+    "proto_kk_tidal_prayer": {
+      "tide": 2
+    },
+    "proto_kk_watatsumis_blessing": {
+      "tide": 2,
+      "mend": 2
+    },
+    "proto_kk_waters_edge": {
+      "damage": 3
+    },
+    "proto_ko_ammo_scavenging": {
+      "bomb_size": 2
+    },
+    "proto_ko_bang_bang": {
+      "damage": 3,
+      "bomb_size": 2
+    },
+    "proto_ko_big_badda_boom": {
+      "damage": 3
+    },
+    "proto_ko_careful_arrangement": {
+      "grow": 1
+    },
+    "proto_ko_chain_fuse": {
+      "grow": 1
+    },
+    "proto_ko_chained_reactions": {
+      "power_amount": 1
+    },
+    "proto_ko_dig_in": {
+      "block": 3
+    },
+    "proto_ko_duck_and_cover": {
+      "block": 3
+    },
+    "proto_ko_fish_flavored_bait": {
+      "damage": 3,
+      "bomb_size": 2
+    },
+    "proto_ko_flame_dance": {
+      "damage": 3
+    },
+    "proto_ko_fwoosh": {
+      "damage": 3
+    },
+    "proto_ko_grounded": {
+      "power_amount": 1
+    },
+    "proto_ko_jumpy_dumpty": {
+      "bomb_size": 2,
+      "payload_mine": 1
+    },
+    "proto_ko_kaboom": {
+      "damage": 3
+    },
+    "proto_ko_kapow": {
+      "damage": 3
+    },
+    "proto_ko_mine_toss": {
+      "bomb_size": 2
+    },
+    "proto_ko_perfect_timing": {
+      "damage": 3
+    },
+    "proto_ko_pocket_fireworks": {
+      "damage": 3
+    },
+    "proto_ko_pop": {
+      "bomb_size": 2
+    },
+    "proto_ko_powder_charge": {
+      "bomb_size": 2
+    },
+    "proto_ko_quick_fuse": {
+      "grow": 1
+    },
+    "proto_ko_rapid_fire": {
+      "damage": 1
+    },
+    "proto_ko_run_away": {
+      "block": 3
+    },
+    "proto_ko_sizzle": {
+      "damage": 3
+    },
+    "proto_ko_sparks_n_splash": {
+      "cost": -1
+    },
+    "proto_ko_the_big_one": {
+      "damage": 3
+    },
+    "proto_ko_tinder_toss": {
+      "damage": 1
+    },
     "proto_kurages_oath_memory": {
       "kurage_ward": 2
+    },
+    "proto_mc_amber_fiery_rain": {
+      "damage": 1
+    },
+    "proto_mc_barbara_melody_loop": {
+      "block": 3,
+      "power_amount": 1
+    },
+    "proto_mc_barbara_show_begin": {
+      "block": 3
+    },
+    "proto_mc_bennett_passion_overload": {
+      "power_amount": 1
+    },
+    "proto_mc_dahlia_favonian_favor": {
+      "block": 3,
+      "power_amount": 1
+    },
+    "proto_mc_diona_icy_paws": {
+      "block": 3,
+      "power_amount": 1
+    },
+    "proto_mc_diona_signature_mix": {
+      "power_amount": 1
+    },
+    "proto_mc_durin_binary_form": {
+      "damage": 3
+    },
+    "proto_mc_eula_glacial_illumination": {
+      "power_amount": 1
+    },
+    "proto_mc_fischl_nightrider": {
+      "damage": 3
+    },
+    "proto_mc_jean_dandelion_breeze": {
+      "cost": -1
+    },
+    "proto_mc_jean_gale_blade": {
+      "damage": 3
+    },
+    "proto_mc_kaeya_frostgnaw": {
+      "damage": 3,
+      "block": 3
+    },
+    "proto_mc_kaeya_glacial_waltz": {
+      "power_amount": 1
+    },
+    "proto_mc_lisa_lightning_rose": {
+      "power_amount": 1
+    },
+    "proto_mc_mika_starfrost_swirl": {
+      "damage": 3
+    },
+    "proto_mc_mona_stellaris_phantasm": {
+      "cost": -1
+    },
+    "proto_mc_nicole_revelation": {
+      "cost": -1
+    },
+    "proto_mc_noelle_breastplate": {
+      "block": 3
+    },
+    "proto_mc_noelle_sweeping_time": {
+      "cost": -1
+    },
+    "proto_mc_razor_claw_and_thunder": {
+      "damage": 3
+    },
+    "proto_mc_razor_lightning_fang": {
+      "power_amount": 1
+    },
+    "proto_mc_rosaria_ravaging_confession": {
+      "damage": 3
+    },
+    "proto_mc_varka_sturm_und_drang": {
+      "power_amount": 1
+    },
+    "proto_mc_venti_grand_ode": {
+      "damage": 3,
+      "power_amount": 1
+    },
+    "proto_mi_ayaka_soumetsu": {
+      "power_amount": 1
+    },
+    "proto_mi_ayato_kyouka": {
+      "power_amount": 1
+    },
+    "proto_mi_chiori_hasode": {
+      "power_amount": 1
+    },
+    "proto_mi_gorou_inuzaka": {
+      "damage": 3
+    },
+    "proto_mi_gorou_juuga": {
+      "power_amount": 1
+    },
+    "proto_mi_gorou_war_banner": {
+      "power_amount": 1
+    },
+    "proto_mi_itto_superlative_superstrength": {
+      "damage": 3,
+      "block": 3
+    },
+    "proto_mi_kazuha_slash": {
+      "damage": 3
+    },
+    "proto_mi_kirara_surprise_dispatch": {
+      "block": 3
+    },
+    "proto_mi_mizuki_anraku": {
+      "cost": -1
+    },
+    "proto_mi_raiden_musou_no_hitotachi": {
+      "cost": -1
+    },
+    "proto_mi_sara_crowfeather_cover": {
+      "power_amount": 1
+    },
+    "proto_mi_sara_tengu_stormcall": {
+      "damage": 3
+    },
+    "proto_mi_sayu_daruma": {
+      "power_amount": 1
+    },
+    "proto_mi_sayu_fuuin_dash": {
+      "damage": 3
+    },
+    "proto_mi_sayu_naptime": {
+      "block": 3,
+      "power_amount": 1
+    },
+    "proto_mi_shinobu_grass_ring": {
+      "block": 3
+    },
+    "proto_mi_shinobu_sanctifying_ring": {
+      "power_amount": 1
+    },
+    "proto_mi_shinobu_thundergrust": {
+      "damage": 3
+    },
+    "proto_mi_thoma_blazing_barrier": {
+      "block": 3,
+      "power_amount": 1
+    },
+    "proto_mi_thoma_crimson_ooyoroi": {
+      "power_amount": 1
+    },
+    "proto_mi_yoimiya_aurous_blaze": {
+      "power_amount": 1
     }
   }
 }

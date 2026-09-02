@@ -86,6 +86,17 @@ public static class KleeMod
                     // arm's rows, which is every board with the arm off.
                     .Concat(Powers.CompanionOverhaulIncomingHit.Subscribe(combatState))
                     .Concat(Powers.CompanionOverhaulPlayWatcher.Subscribe(combatState))
+                    // EB-279. The Klee overhaul's rule-3 sweep, on the same
+                    // argument as the three lines above: the two moments a
+                    // Bomb can be orphaned that the arm itself does not cause
+                    // -- any creature's death, and any card play -- are
+                    // BROADCAST hooks, and a power on the dying enemy cannot
+                    // hear either of them. Not compiled in a release build,
+                    // and inert with the arm off: with no proto Bomb on any
+                    // board the register is empty and the sweep is a walk over
+                    // nothing. See KleeOverhaulSweep.cs for why AfterDeath is
+                    // trustworthy where the enemy's own hooks are not.
+                    .Concat(Powers.KleeOverhaulSweepHooks.Subscribe(combatState))
 #endif
                     // Track B's human feed: per-fight telemetry from normal
                     // play, in the schema the soak writes. Reads only -- see

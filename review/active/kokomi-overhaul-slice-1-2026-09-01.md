@@ -1,4 +1,4 @@
-Status: OPEN (Paper artefact; build not started)
+Status: OPEN (returned to the brief by [USER] 2026-09-02; the sec.3 draft 3 starter is not built)
 
 # Kokomi overhaul, slice one: the rules, the starter, and 28 cards (Paper stage)
 
@@ -39,16 +39,27 @@ Exhaust. Keywords with tooltips: Tide, Surge, Exert, Mend, Plan, Garment.
 
 | Card | Cost | Type | Printed text | Copies |
 |---|---|---|---|---|
-| Water's Edge | 1 | Attack | Deal 6. | 3 |
+| Water's Edge | 1 | Attack | Deal 6. | 2 |
 | Coral Guard | 1 | Skill | Gain 5 Block. | 3 |
-| Kurage's Oath | 1 | Skill | Exert 2. Tide +5. | 2 |
-| Rising Tide | 1 | Attack | Deal 4. Surge. | 1 |
+| Kurage's Oath | 1 | Skill | Exert 2. Tide +8. | 2 |
+| Rising Tide | 1 | Attack | Deal 4. Surge. | 2 |
 | Stolen Chapter | 1 | Skill | Draw 1. Plan: draw 1. | 1 |
 
 Relic: **Tamanooya's Casket**. The jellyfish is out from the start of
 combat; at the end of each turn she did not Surge, it Mends her 2, up to
 8 per combat. It pays for the hold verb. Script A in the brief plays fight
 one out.
+
+**Draft 3, 2026-09-02, after [USER]'s first run.** Both seats and then
+[USER] did the same arithmetic: an Oath into a Rising Tide was 1 energy and
+2 HP for 5 stored damage against Water's Edge's 6 for 1 energy now, so the
+signature line was strictly worse than the basic attack and the bank never
+paid. Oath is now Tide +8, so one builder into one outlet matches two
+Water's Edges and the second builder pulls ahead (two Oaths and a Rising
+Tide: 20 for 3 energy against 18), with the 2 HP and the wait as the price;
+and Rising Tide is two copies, replacing one Water's Edge, so the outlet is
+in hand about once a turn and holding is a choice rather than a draw. Exert
+and the pulse are unchanged. Card numbers only, so the seats play round two.
 
 ## 4. The pool (28 cards)
 

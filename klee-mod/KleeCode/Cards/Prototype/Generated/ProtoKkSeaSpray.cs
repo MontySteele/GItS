@@ -51,13 +51,14 @@ public sealed class ProtoKkSeaSpray : CustomCardModel, IElementalCard, ICharacte
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sea Spray"),
-        ("description", "Deal 5 damage. [gold]Tide[/gold] +2."),
+        ("description", "Deal {Damage:diff()} damage. [gold]Tide[/gold] +{Tide:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move)
+            new DamageVar(5m, ValueProp.Move),
+            new DynamicVar("Tide", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -75,11 +76,12 @@ public sealed class ProtoKkSeaSpray : CustomCardModel, IElementalCard, ICharacte
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        await KokomiTide.Gain(choiceContext, Owner.Creature, 2);
+        await KokomiTide.Gain(choiceContext, Owner.Creature, DynamicVars["Tide"].IntValue);
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars["Tide"].UpgradeValueBy(2m);
     }
 }

@@ -49,7 +49,7 @@ public sealed class ProtoMiKiraraSurpriseDispatch : CustomCardModel, ICompanionC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kirara — Surprise Dispatch"),
-        ("description", "Gain 8 [gold]Block[/gold]. Next turn, deal 10 damage to a random enemy."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Next turn, deal 10 damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -75,6 +75,6 @@ public sealed class ProtoMiKiraraSurpriseDispatch : CustomCardModel, ICompanionC
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }
