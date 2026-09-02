@@ -148,7 +148,33 @@ def test_no_shipped_sheet_prints_a_prototype_only_predicate():
 # ---------------------------------------------------------------------------
 
 def _proto(cid: str) -> Card:
-    return loader.peek_card(cid)
+    """The row as `docs/prototype-surface.yaml` SPELLS it, re-parsed.
+
+    Deliberately NOT `loader.peek_card`. That door hands out the shared
+    `_prototype_index()` template -- the one branch of `_card_prototype` that
+    does not deep-copy on the way out, because its contract says read-only --
+    and a template some other module in the same xdist worker has played,
+    grown or upgraded re-prices every assertion in this file. That is not
+    hypothetical: this file's first CI run failed exactly four rows under
+    `-n auto --dist loadscope` and passed all of them serially. What these
+    tests are about is the SHEET, so they read the sheet:
+    `loader.prototype_cards()` re-parses it on every call and builds fresh
+    `Card`s, and it needs no flag to do so.
+    """
+    return {c.id: c for c in loader.prototype_cards()}[cid]
+
+
+def _priced(cid: str) -> tuple[float, str]:
+    """`(price, a description of the row it was taken off)`.
+
+    The second half is only ever read by a failing assertion, and it earns its
+    place: a wrong number here is nearly always a wrong CARD, and a bare
+    `assert 13.5 == 10.75` cannot say which row it priced.
+    """
+    card = _proto(cid)
+    return draft._static_power(card), (
+        f"{cid} cost={card.cost} effects={card.effects} plan={card.plan} "
+        f"character={card.character!r}")
 
 
 @pytest.fixture
@@ -168,26 +194,26 @@ def test_no_prototype_kokomi_row_raises(overhaul):
         draft._static_power(card)
 
 
-def test_a_plan_only_row_is_no_longer_worth_nothing(overhaul):
+def test_a_plan_only_row_is_no_longer_worth_nothing():
     """Ambush prints an EMPTY body and "Plan: deal 12 to the front enemy". It
     priced at 0.00 -- blank cardboard to the drafter -- and now prices at its
     planned damage, discounted once for the turn of delay."""
-    assert draft._static_power(_proto("proto_kk_ambush")) == \
-        12 * C.PLAN_DELAY_DISCOUNT
+    price, row = _priced("proto_kk_ambush")
+    assert price == 12 * C.PLAN_DELAY_DISCOUNT, row
 
 
-def test_both_halves_of_a_printed_face_are_counted(overhaul):
+def test_both_halves_of_a_printed_face_are_counted():
     """Feint: 4 now, 9 planned, cost 1. The sum, not the max -- the argument
     for crediting the CHOICE is at the call site."""
-    assert draft._static_power(_proto("proto_kk_feint")) == \
-        4 + 9 * C.PLAN_DELAY_DISCOUNT
+    price, row = _priced("proto_kk_feint")
+    assert price == 4 + 9 * C.PLAN_DELAY_DISCOUNT, row
 
 
-def test_a_planned_aoe_line_takes_the_same_aoe_multiple(overhaul):
+def test_a_planned_aoe_line_takes_the_same_aoe_multiple():
     """Kurage's Oath: 5 to all enemies, planned. Same per-op prices as the
     now-line gets -- that is the whole design of the plan branch."""
-    assert draft._static_power(_proto("proto_kk_kurages_oath")) == \
-        5 * draft.STATIC_AOE_MULT * C.PLAN_DELAY_DISCOUNT
+    price, row = _priced("proto_kk_kurages_oath")
+    assert price == 5 * draft.STATIC_AOE_MULT * C.PLAN_DELAY_DISCOUNT, row
 
 
 def test_the_delay_discount_is_the_only_difference_between_the_halves():
@@ -221,21 +247,23 @@ def test_a_plan_line_reaches_the_tempo_and_block_classifiers():
 # 3. THE OPS THAT HAD NO PRICE
 # ---------------------------------------------------------------------------
 
-def test_mend_prices_one_for_one_with_block(overhaul):
+def test_mend_prices_one_for_one_with_block():
     """The Moon, A Ship: Mend 10 now, Mend 15 planned, cost 2."""
     assert draft.STATIC_MEND_VALUE == 1.0
-    assert draft._static_power(_proto("proto_kk_the_moon_a_ship")) == \
-        (10 + 15 * C.PLAN_DELAY_DISCOUNT) / 2
+    price, row = _priced("proto_kk_the_moon_a_ship")
+    assert price == (10 + 15 * C.PLAN_DELAY_DISCOUNT) / 2, row
 
 
-def test_the_max_hp_fraction_reads_the_character_sheet(overhaul):
+def test_the_max_hp_fraction_reads_the_character_sheet():
     """Sango Isshin: a quarter of her Max HP now, the same to all enemies
     planned. The 80 is `tier0/content/characters/kokomi.yaml`, the same key
     `build_player` seats her with -- not a constant invented here."""
     quarter = loader._character_index()["kokomi"]["hp"] // kokomi_plan.QUARTER
     assert quarter == 20
-    assert draft._static_power(_proto("proto_kk_sango_isshin")) == \
-        (quarter + quarter * draft.STATIC_AOE_MULT * C.PLAN_DELAY_DISCOUNT) / 2
+    price, row = _priced("proto_kk_sango_isshin")
+    assert price == (
+        quarter + quarter * draft.STATIC_AOE_MULT * C.PLAN_DELAY_DISCOUNT
+    ) / 2, row
 
 
 def test_the_renamed_max_hp_spelling_prices_the_same():
@@ -258,48 +286,52 @@ def test_a_row_whose_character_is_unknown_refuses_rather_than_guesses():
     assert draft._static_power(card) == 0.0
 
 
-def test_undertow_is_priced_at_the_mean_of_its_branches(overhaul):
+def test_undertow_is_priced_at_the_mean_of_its_branches():
     """The record's own proof that the zeros were the instrument: 7 damage
     rising to 10 against a debuff, above Strike on either branch, priced
     0.00 because `target_has_debuff` had no entry."""
-    assert draft._static_power(_proto("proto_kk_undertow")) == (7 + 10) / 2
+    price, row = _priced("proto_kk_undertow")
+    assert price == (7 + 10) / 2, row
 
 
-def test_the_queue_verbs_price_off_dials_this_table_already_holds(overhaul):
+def test_the_queue_verbs_price_off_dials_this_table_already_holds():
     """Nereid's window, Change of Plans and Moon's Reflection, each derived
     from `STATIC_AUTOPLAY_VALUE` -- one neutral card resolved without being
     paid for, which is what all three of them hand you."""
     # Nereid's: 2 turns of doubling, one extra Plan a turn, inside a plan line
-    assert draft._static_power(_proto("proto_kk_nereids_ascension")) == \
-        2 * draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT / 2
+    price, row = _priced("proto_kk_nereids_ascension")
+    assert price == (
+        2 * draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT / 2), row
     # Change of Plans: one resolution moved a turn earlier, cost 0
-    assert draft._static_power(_proto("proto_kk_change_of_plans")) == \
-        draft.STATIC_AUTOPLAY_VALUE * (1 - C.PLAN_DELAY_DISCOUNT)
+    price, row = _priced("proto_kk_change_of_plans")
+    assert price == (
+        draft.STATIC_AUTOPLAY_VALUE * (1 - C.PLAN_DELAY_DISCOUNT)), row
     # Moon's Reflection: one card out of exhaust, a turn late
-    assert draft._static_power(_proto("proto_kk_moons_reflection")) == \
-        draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT
+    price, row = _priced("proto_kk_moons_reflection")
+    assert price == draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT, row
 
 
-def test_chain_of_command_prices_against_one_companion(overhaul):
+def test_chain_of_command_prices_against_one_companion():
     """The neutral single-unit estimate every live count in the file takes."""
-    assert draft._static_power(_proto("proto_kk_chain_of_command")) == \
-        4 * C.PLAN_DELAY_DISCOUNT
+    price, row = _priced("proto_kk_chain_of_command")
+    assert price == 4 * C.PLAN_DELAY_DISCOUNT, row
 
 
-def test_rally_takes_cost_mods_measured_dead_dial(overhaul):
+def test_rally_takes_cost_mods_measured_dead_dial():
     """Its discount is a `cost_mod` wearing a kit name, so it takes cost_mod's
     zero: Rally's whole price is the Weak it applies."""
-    assert draft._static_power(_proto("proto_kk_rally")) == \
-        draft.STATIC_DEBUFF_VALUE
+    price, row = _priced("proto_kk_rally")
+    assert price == draft.STATIC_DEBUFF_VALUE, row
 
 
-def test_cleansing_wave_credits_the_debuff_it_removes(overhaul):
+def test_cleansing_wave_credits_the_debuff_it_removes():
     """5 Block and one debuff off her now, 10 Block planned, cost 1."""
-    assert draft._static_power(_proto("proto_kk_cleansing_wave")) == \
-        5 + draft.STATIC_DEBUFF_VALUE + 10 * C.PLAN_DELAY_DISCOUNT
+    price, row = _priced("proto_kk_cleansing_wave")
+    assert price == (
+        5 + draft.STATIC_DEBUFF_VALUE + 10 * C.PLAN_DELAY_DISCOUNT), row
 
 
-def test_the_arm_has_no_unpriced_verb_left(overhaul):
+def test_the_arm_has_no_unpriced_verb_left():
     """Every verb in the arm's index answers, and none of them answers with the
     blanket zero this row replaced."""
     priced = {op: draft.STATIC_OP_PRICING[op]
