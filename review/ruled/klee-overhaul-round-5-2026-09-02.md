@@ -1,4 +1,4 @@
-Status: OPEN (round five, the draft-4 starter: both seats played; growth 4 applied; pick 1 ruled at its default, picks 2 and 3 open)
+Status: RULED R243 2026-09-02
 
 # Klee overhaul, round five: the canonical starter, two seats
 
@@ -87,7 +87,7 @@ is under the free pop. The first draft of this packet applied 5; you
 read that as a free Strike every turn per Bomb per enemy, so it is 4:
 Jumpy Dumpty reads 8, 12, 16, and its Mine 3, 7, 11, two dawns' wait
 worth a Strike and a bit. The balance pass
-(`review/active/prototype-balance-2026-09-02.md`) was priced at growth
+(`review/ruled/prototype-balance-2026-09-02.md`) was priced at growth
 3 and its Rares scale with it: Alice's Recipe doubles to 8 a turn,
 Explosives Workshop adds 1. Round six reads growth 4 with the balance
 numbers in one build.
@@ -96,7 +96,7 @@ Routed, not applied: Gorou at 8 and 4 for 1 energy sits two above Iron
 Wave; whether the Companion Commons should be a notch above Strike or
 level with it is the companion workshop's, and it is noted there.
 
-## 4. Picks
+## 4. Picks, ruled R243 (2026-09-02)
 
 1. **Ka-pow! keeps its card when held.** RULED at the default
    ([USER], 2026-09-02: "I'm fine with the default on Ka-Pow!"): Ka-pow!
@@ -104,14 +104,13 @@ level with it is the companion workshop's, and it is noted there.
    balance PR. The new fact that reopened R242 pick 3: both seats popped
    the Bomb the turn Ka-pow! appeared, because holding the Bomb meant
    discarding the only detonator.
-2. **The opening Spark with nothing to spend it on.** Re-ask of R242's
-   four-four-two on one new fact: both seats finished every fight with
-   unspent Sparks and no Spark card. (1) **Keep the shape; the draft
-   supplies the sinks** (four of the twelve Commons cost Sparks)
-   [default]. (2) One Defend becomes Dig In (1 Spark: 8 Block), so the
-   opening Spark has a use from turn one, at the cost of the canonical
-   shape.
-3. **Your play.** Rule 4 changed, so this build is yours to play. (1)
-   **Skip round five; rule picks 1 and 2, and play round six**, which
-   carries the balance pass, growth 4 and your pick 1 in one run
-   [default]. (2) Play round five as it stands first.
+2. **The opening Spark with nothing to spend it on.** RULED at the
+   default ([USER]: "4-4-2 is correct"): the starter keeps its shape and
+   the draft supplies the Spark sinks (four of the twelve Commons cost
+   Sparks). The new fact that reopened it: both seats finished every
+   fight with unspent Sparks and no Spark card.
+3. **Your play.** RULED at the default ([USER]: "let's do round 6 after
+   all of these edits"): round five is not played by [USER]; round six
+   carries the balance pass, growth 4, Ka-pow!'s Retain and the base
+   Strike's exemption in one build, seats first on the lanes, then
+   [USER].
