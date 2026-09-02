@@ -512,7 +512,8 @@ def arm_keywords_printed(description: str) -> list[ArmKeyword]:
 
 
 def arm_keyword_tip_calls(description: str,
-                          includes_bomb_rules: bool = False) -> list[str]:
+                          includes_bomb_rules: bool = False,
+                          spark_priced: bool = False) -> list[str]:
     """The tip calls this face owes, in table order.
 
     `includes_bomb_rules` is the ONE exclusion, and it is a real one rather
@@ -525,9 +526,25 @@ def arm_keyword_tip_calls(description: str,
     bomb-placing rows are exactly the rows this excludes today, and the two
     sets cannot drift together: an overhaul row places its Bomb with
     `plant_bomb` and a shipped one with `place_bomb`.
+
+    `spark_priced` is the ONE ADDITION, and `EB-282` is why. The rule above is
+    "the face PRINTS the word", and it was written while every Spark-priced row
+    restated "Spend 1 [gold]Spark[/gold]." in its body. EB-282 took those seven
+    sentences off, because the cost slot already shows the badge -- and with
+    the sentence went the word, and with the word the tooltip, off the seven
+    cards that most need it. A price shown AS A BADGE is still the keyword
+    printed on the card, so a row that charges Sparks owes the Spark tip
+    whether or not its sentence survived. Derived from the row's `spend_spark`
+    cost op, which is the same declaration `PrintedSparkPrice` and the
+    playability gate read.
     """
+    printed = arm_keywords_printed(description)
+    if spark_priced and not any(k.word == "Spark" for k in printed):
+        printed = sorted(
+            printed + [k for k in ARM_KEYWORDS if k.word == "Spark"],
+            key=ARM_KEYWORDS.index)
     return [keyword.attach
-            for keyword in arm_keywords_printed(description)
+            for keyword in printed
             if not (keyword.word == "Bomb" and includes_bomb_rules)]
 
 
@@ -9248,7 +9265,10 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # word is the thing a player reads second. The rule and the exclusion are
     # `arm_keyword_tip_calls`'; nothing about them is decided here.
     if profile.arm_keyword_tips:
-        for attach in arm_keyword_tip_calls(desc, includes_bomb_rules):
+        spark_priced = any(eff.get("op") == "spend_spark"
+                           for eff in card["effects"])
+        for attach in arm_keyword_tip_calls(desc, includes_bomb_rules,
+                                            spark_priced):
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
     if tips_expr:

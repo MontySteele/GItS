@@ -41,7 +41,7 @@ public sealed class ProtoKoKaboom : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSetOff(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_kaboom");
 

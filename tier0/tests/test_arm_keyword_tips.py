@@ -156,15 +156,50 @@ def test_every_prototype_face_printing_a_keyword_attaches_its_tip(keyword):
 
 
 def test_the_two_faces_the_row_names_render_their_keyword():
-    """`EB-272`'s acceptance, by name: Kaboom! a *Set off* line and Kurage's
-    Oath an *Exert* line."""
+    """`EB-272`'s acceptance, by name: a *Set off* line and an *Exert* line.
+
+    THE SET-OFF FACE MOVED, and the move is the point rather than an
+    inconvenience. The row named Kaboom!, which under draft 2 said "Set off.
+    Deal 6." Draft 3 (2026-09-02) made Kaboom! the PLAIN hit and Ka-pow! the
+    cash button, so the keyword left one face and landed on the other. The tip
+    follows the printed word, which is exactly the rule EB-272 built, so this
+    now asserts BOTH ends of the move: Ka-pow! gained the line, and Kaboom! no
+    longer carries the definition of a word it does not print.
+    """
+    kapow = (PROTOTYPE_DIR / "ProtoKoKapow.cs").read_text(encoding="utf-8")
+    assert "[gold]Set off[/gold]" in kapow
+    assert "ArmKeywordTips.ForSetOff(" in kapow
+
     kaboom = (PROTOTYPE_DIR / "ProtoKoKaboom.cs").read_text(encoding="utf-8")
-    assert "[gold]Set off[/gold]" in kaboom
-    assert "ArmKeywordTips.ForSetOff(" in kaboom
+    assert "[gold]Set off[/gold]" not in kaboom
+    assert "ArmKeywordTips.ForSetOff(" not in kaboom
 
     oath = (PROTOTYPE_DIR / "ProtoKkKuragesOath.cs").read_text(encoding="utf-8")
     assert "[gold]Exert[/gold]" in oath
     assert "ArmKeywordTips.ForExert(" in oath
+
+
+def test_a_spark_priced_row_keeps_its_tip_without_the_sentence():
+    """`EB-282` met `EB-272` head on. The Spark price came off the seven bodies
+    because the cost slot already shows the badge -- and the tip rule is "the
+    face PRINTS the word", so all seven silently lost the definition of the
+    word they charge in. A price shown as a badge is still the keyword on the
+    card, so the row's own `spend_spark` raises the tip instead."""
+    for stem in ("ProtoKoFwoosh", "ProtoKoTinderToss", "ProtoKoQuickFuse",
+                 "ProtoKoBangBang", "ProtoKoPowderCharge", "ProtoKoDigIn",
+                 "ProtoKoSugarRush"):
+        text = (PROTOTYPE_DIR / f"{stem}.cs").read_text(encoding="utf-8")
+        # The FACE, not the file: `SparkPower.CanSpend` is in every one of
+        # these bodies and always was.
+        face = re.search(r'\("description", "(.*)"\),', text).group(1)
+        assert "Spend" not in face, stem
+        assert "ArmKeywordTips.ForSpark(" in text, stem
+        assert "PrintedSparkPrice" in text, stem
+
+    # And it is a ROW-level fact rather than a blanket: a row that charges no
+    # Sparks and prints none gains nothing.
+    kaboom = (PROTOTYPE_DIR / "ProtoKoKaboom.cs").read_text(encoding="utf-8")
+    assert "ArmKeywordTips.ForSpark(" not in kaboom
 
 
 def test_the_sparks_arms_bomb_rows_keep_the_shipped_definition():

@@ -30,7 +30,7 @@ and only the second one is worth anything to a reader.
 ```
 cd klee-mod/KleeTests
 dotnet test                       # 222 tests, ~0.4s after build
-dotnet test -p:PrototypeCards=true # 518: the 222 plus Prototype/
+dotnet test -p:PrototypeCards=true # 539: the 222 plus Prototype/
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -130,7 +130,9 @@ those types do not exist, so a pin against them could not compile either.
 | `KleeOverhaulRuleTests.cs` | 26 | The Klee overhaul, slice one (`review/active/klee-brief-2026-09-01.md` sec.3; sim twin `tier0/tests/test_klee_overhaul.py`). REAL, not structural, for every DECISION the rules take: growth and how the Workshop and Alice's Recipe compose, the whole-pile take, the Mine split that leaves plain Bombs where they are, the single removal Sorry, Jean... makes, both per-turn counters, the turn roll on a skipped round, the per-play size memory, and the doubling. Structural where a live `CombatState` is needed, and those three are the ones that had to be: Set off resolves every explosion BEFORE the card's own damage (the call SEQUENCE, not a comment), the turn-start hook reaches `GrowBy` and nothing that deals damage (rule 7 at the one place the shipped Bomb fires by itself), and no generated slice card calls `SparkPower.Gain` (swept over all thirty-two, so a future row cannot quietly open a second income). Plus the flag-off pin on both wiring seams and a guard that the arm never reaches into `BombPower`. |
 | `SparkGaugePinTests.cs` | 13 | `EB-281`: the Spark bank drawn as a DEDICATED resource gauge under the Klee overhaul arm instead of as a status-strip badge. REAL for every decision the change takes -- who gets the gauge (and that Furina and Kokomi at the same table never do), the number it draws, whose badge is suppressed and whose is not, a second seat's Spark counter judged by its own owner, a canonical power asked without throwing, and the arm-off acceptance condition on all of them. Plus the WIRE's own precondition, which is why the badge is suppressed at the container rather than at the model: `SparkPower` still takes `PowerModel`'s visibility and never overrides it, so the bridge's `if (!power.IsVisible) continue;` keeps the bank on the observed board under the name "Spark". Structural where drawing would be Godot: the gauge's spec is read out of `GaugeBridge` rather than rendered, and the refresh funnels are call sets. |
 
-**With the flag: 518 tests, all green** (measured 2026-09-02, `dotnet test -p:PrototypeCards=true`).
+| `KleeOverhaulRoundThreeTests.cs` | 12 | The Klee overhaul, ROUND THREE -- [USER]'s own run of the arm (`review/active/klee-overhaul-slice-1-2026-09-01.md` sec.3, draft 3; rows `EB-279`/`EB-280`/`EB-282`/`EB-283`/`EB-284`, closing `EB-277`). REAL for every decision that is one: the starter's copy counts and Dig In's move out of the offer pool, Ka-pow!'s `DamageVar` and the token its face renders, the `decimal` parameter that lets a card hand the var to `ProtoBombPower`, Quick Fuse still refusing on a Bomb-less board now that it grows first, the register owing a jump the moment a Bombed enemy is killed by anything at all, and the smith moving a prototype card's numbers through the game's own `UpgradeInternal`. Structural where a live `CombatState` is needed: the sweep's two new moments (`AfterDeath`, `AfterCardPlayed`) and the Ancient tail on the arm pool, both of which place or draw a model. |
+
+**With the flag: 539 tests, all green** (measured 2026-09-02, `dotnet test -p:PrototypeCards=true`).
 
 ## Co-op coverage
 
