@@ -50,4 +50,33 @@ public static class SimDamagePipeline
         }
         return damage;
     }
+
+    /// <summary>
+    /// What a hit of <paramref name="baseDamage"/> from
+    /// <paramref name="dealer"/> lands on <paramref name="target"/> for, given
+    /// a reaction <paramref name="amplifier"/> -- 1 for no reaction.
+    ///
+    /// THE WHOLE PIPELINE IN ONE CALL, and it exists for <c>EB-265</c>: the
+    /// overhaul Bomb's face printed the raw charge sizes while the explosion
+    /// applied Strength PER Bomb, so a Strength-2 pair of Bombs printed 10 and
+    /// dealt 14 and the tester stopped trusting the character's central number.
+    /// <c>ProtoBombPower.PredictedSetOffDamage</c> asks THIS rather than
+    /// re-deriving Strength on the face's side.
+    ///
+    /// IT IS <c>ElementalHit.Deal</c>'S OWN THREE STEPS, in Deal's own order:
+    /// <see cref="DealerMods"/>, the amplifier, then the single truncation of
+    /// <see cref="TargetMods"/>. Deal spells them out inline rather than
+    /// calling this, because `tier0/tests/test_reaction_phase_parity.py` pins
+    /// the TargetMods read as happening AFTER `ReactionEffects.Resolve` -- the
+    /// ordering that lets a Superconduct's Vulnerable amplify the same hit.
+    /// `KleeOverhaulRoundOneFixTests` pins the two against each other so the
+    /// two spellings cannot drift into two pipelines.
+    ///
+    /// The amplifier is the one term a face cannot know: the first explosion
+    /// of a Set off consumes the aura the rest would have reacted with, so
+    /// there is no single multiplier for a pile.
+    /// </summary>
+    public static int Resolve(
+        Creature? dealer, Creature target, decimal baseDamage, decimal amplifier) =>
+        (int)TargetMods(target, DealerMods(dealer, baseDamage) * amplifier);
 }

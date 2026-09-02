@@ -23,6 +23,7 @@ namespace KleeMod.Tests.Prototype;
 /// landing, the aura it consumes, the badge redrawing, and the enemy attack
 /// that a Mine answers. Those need a combat, and none of them needs a decision.
 /// </summary>
+[Collection(KleeOverhaulArm.Name)]
 public class KleeOverhaulRuleTests
 {
     private static MethodBase Method(string name) =>

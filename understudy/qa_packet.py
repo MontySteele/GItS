@@ -534,7 +534,8 @@ def _hand(state: dict[str, Any], loc: dict[str, str],
             "upgraded": bool(entry.get("is_upgraded")),
             "playable": entry.get("can_play") is not False,
             # The game's own printed refusal, not ours.
-            "unplayable_reason": _text(entry.get("unplayable_reason")),
+            "unplayable_reason": _text(entry.get("unplayable_reason_text")
+                                       or entry.get("unplayable_reason")),
         })
     return cards
 

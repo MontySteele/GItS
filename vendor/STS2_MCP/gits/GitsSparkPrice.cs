@@ -51,14 +51,29 @@ public static partial class McpMod
 {
     private const string GitsSparkCostType = "KleeMod.Powers.SparkCost";
 
+    // EB-264. `CardModel.CanPlay` collapses every mod-side refusal into
+    // `BlockedByCardLogic`, which is the token the blind render printed at the
+    // tester ("tells a player nothing, and the actual reason -- you have no
+    // Spark -- is printed nowhere"). The klee mod answers the same question in
+    // words; this is the third accessor on the same reflection contract:
+    //
+    //     public static string? For(CardModel card)   // null = nothing to say
+    //
+    // ADDITIVE. The enum still rides as `unplayable_reason`, which several
+    // understudy scenarios assert on by name; the sentence rides beside it as
+    // `unplayable_reason_text` and is omitted whenever there is none.
+    private const string GitsUnplayableReasonType =
+        "KleeMod.Powers.KleeUnplayableReason";
+
     private static bool _gitsSparkProbed;
     private static MethodInfo? _gitsSparkPriceOf;
     private static MethodInfo? _gitsSparkAffordable;
+    private static MethodInfo? _gitsUnplayableReasonFor;
 
     /// <summary>
-    /// Locate the two accessors once. A null result is cached too: a game with
-    /// no klee mod will not grow one mid-session, and a state read should not
-    /// pay for an assembly walk on every poll.
+    /// Locate the three accessors once. A null result is cached too: a game
+    /// with no klee mod will not grow one mid-session, and a state read should
+    /// not pay for an assembly walk on every poll.
     /// </summary>
     private static void GitsProbeSparkCost()
     {
@@ -68,11 +83,18 @@ public static partial class McpMod
         try
         {
             Type? type = null;
+            Type? reasonType = null;
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
-                type = asm.GetType(GitsSparkCostType, throwOnError: false);
-                if (type != null) break;
+                type ??= asm.GetType(GitsSparkCostType, throwOnError: false);
+                reasonType ??= asm.GetType(
+                    GitsUnplayableReasonType, throwOnError: false);
+                if (type != null && reasonType != null) break;
             }
+
+            _gitsUnplayableReasonFor = reasonType?.GetMethod(
+                "For", BindingFlags.Public | BindingFlags.Static,
+                null, new[] { typeof(CardModel) }, null);
 
             if (type == null) return;
 
@@ -87,6 +109,29 @@ public static partial class McpMod
         {
             _gitsSparkPriceOf = null;
             _gitsSparkAffordable = null;
+            _gitsUnplayableReasonFor = null;
+        }
+    }
+
+    /// <summary>
+    /// Why this card is refusing, in words a page can print, or null when the
+    /// mod has nothing to say about it (and when there is no klee mod to ask).
+    /// Asked only of a card the game has ALREADY refused, so a non-null answer
+    /// is always about a refusal that happened.
+    /// </summary>
+    private static string? GitsUnplayableReasonText(CardModel card)
+    {
+        GitsProbeSparkCost();
+        if (_gitsUnplayableReasonFor == null) return null;
+
+        try
+        {
+            return _gitsUnplayableReasonFor.Invoke(
+                null, new object?[] { card }) as string;
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 

@@ -1337,6 +1337,21 @@ public static partial class McpMod
             state["spark_affordable"] = GitsSparkAffordable(card);
         }
 
+        // GItS LOCAL EDIT (EB-264). `unplayable_reason` above is the game's own
+        // enum, and `BlockedByCardLogic` -- the value EVERY mod-side gate
+        // produces -- names no reason at all; the blind render printed it
+        // verbatim at a tester holding a Spark-priced card with an empty bank.
+        // The mod answers the same question in words. Emitted only when the
+        // game has already refused the card AND the mod has something to say,
+        // so an ABSENT key means "no sentence available" and the enum beside it
+        // is unchanged for every reader that already asserts on it.
+        // Implementation and its reflection contract: gits/GitsSparkPrice.cs.
+        if (unplayableReason != UnplayableReason.None
+            && GitsUnplayableReasonText(card) is { } unplayableText)
+        {
+            state["unplayable_reason_text"] = unplayableText;
+        }
+
         return state;
     }
 

@@ -530,7 +530,8 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
         "keywords": kws,
         "playable": entry.get("can_play") is not False,
-        "unplayable_reason": _text(entry.get("unplayable_reason")),
+        "unplayable_reason": _text(entry.get("unplayable_reason_text")
+                                   or entry.get("unplayable_reason")),
     }
 
 
@@ -1832,7 +1833,8 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
     if entry.get("can_play") is False:
         # `EB-264`: the same translation the page uses, so a refusal and the
         # card's own line cannot disagree about why.
-        reason = qa_packet.unplayable_reason(entry.get("unplayable_reason"))
+        reason = qa_packet.unplayable_reason(
+            entry.get("unplayable_reason_text") or entry.get("unplayable_reason"))
         return _refuse(f"{titles[idx]!r} cannot be played right now"
                        + (f": {reason}" if reason else ""))
     post: dict[str, Any] = {"action": "play_card", "card_index": idx}

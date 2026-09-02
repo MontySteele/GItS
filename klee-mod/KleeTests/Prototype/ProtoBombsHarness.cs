@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 
@@ -64,6 +65,30 @@ internal static class ProtoBombs
         powers.Add(bomb);
 
         return bomb;
+    }
+
+    /// <summary>
+    /// A REAL <c>CombatState</c> with <paramref name="enemies"/> on the enemy
+    /// side, and every creature pointed back at it.
+    ///
+    /// The game's OWN constructor, not an allocation and not a mock: it takes
+    /// no Godot object and reaches no <c>SaveManager</c> -- it assigns five
+    /// fields and defaults <c>RunState</c> to <c>NullRunState.Instance</c>.
+    /// What it does not do is run a combat, so this board answers exactly the
+    /// two questions asked of it -- who the enemies are, and whether they are
+    /// alive -- which is what <c>ProtoBombPower.AnyPlacedBy</c> reads.
+    /// </summary>
+    internal static CombatState Board(Creature klee, params Creature[] enemies)
+    {
+        var combat = new CombatState();
+        var side = (List<Creature>)typeof(CombatState)
+            .GetField("_enemies", HeadlessGame.All)!
+            .GetValue(combat)!;
+        side.AddRange(enemies);
+
+        klee.CombatState = combat;
+        foreach (var enemy in enemies) enemy.CombatState = combat;
+        return combat;
     }
 
     private static object Charges(IReadOnlyList<Charge> charges)
