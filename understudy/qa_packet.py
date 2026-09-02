@@ -405,17 +405,29 @@ def unplayable_reason(raw: Any) -> str:
     """The game's refusal in words a player can read (`EB-264`).
 
     A `[Flags]` enum prints as `A, B`, so each part is read on its own.
+
+    `EB-290`, AND THE TRUNCATION WAS OURS. A reason the mod writes as a
+    SENTENCE has its own commas -- `KleeUnplayableReason.For` says *"you have
+    no Spark, and this costs 1"* -- and splitting that at the comma and
+    rejoining the halves with `"; "` is what put *"you have no Spark; and this
+    costs 1"* on a blind page. The r4 Opus seat read the tail as a truncated
+    sentence and filed it, which is exactly what a semicolon before a
+    conjunction reads as. So the flags split is taken ONLY where every part is
+    an enum token; anything else is the game's own words and is kept whole,
+    punctuation included. A mixed string (an enum name beside a sentence) is
+    not a shape either side emits -- `_card_face` reads
+    `unplayable_reason_text` OR `unplayable_reason`, never both -- and is kept
+    whole for the same reason: it is safer to print one of the game's words
+    unrewritten than to shred a sentence at a comma that belongs to it.
     """
     text = _text(raw)
     if not text:
         return ""
+    parts = [p.strip() for p in text.split(",") if p.strip()]
+    if not all(_ENUM_TOKEN.match(p) for p in parts):
+        return text
     out: list[str] = []
-    for part in (p.strip() for p in text.split(",")):
-        if not part:
-            continue
-        if not _ENUM_TOKEN.match(part):
-            out.append(part)                 # the wire's own sentence, kept
-            continue
+    for part in parts:
         known = UNPLAYABLE_REASONS.get(part.lower())
         if known is not None:
             if known:

@@ -44,14 +44,45 @@ def combat_state() -> dict:
 
 
 def map_state() -> dict:
-    """SYNTHETIC. `map.next_options`, named by room type (`naming.py:170`)."""
+    """SYNTHETIC, BUILT FROM THE BRIDGE'S OWN BUILDER (`EB-298`).
+
+    `BuildMapState` (`vendor/STS2_MCP/McpMod.StateBuilder.cs:1784`) sends far
+    more than the two adjacent labels this page used to print: each travelable
+    option carries a one-level `leads_to` lookahead with the children's room
+    types, `nodes` is EVERY point of the act with its `col`, `row`, `type` and
+    `children`, `current_position` says where you are standing, and `boss` /
+    `bosses` carry the act boss's own printed name. This fixture is that
+    shape. A LIVE capture is still owed and the row says so -- `EB-262` and
+    `EB-263` both closed on a fixture written from this same file and both
+    reopened on the wire's own bytes.
+    """
     return {"state_type": "map",
             "run": {"act": 1, "floor": 3},
             "player": {"hp": 40, "max_hp": 70, "gold": 99},
-            "map": {"next_options": [
-                {"index": 0, "type": "Monster", "col": 1, "row": 4},
-                {"index": 1, "type": "Monster", "col": 2, "row": 4},
-                {"index": 2, "type": "rest_site", "col": 3, "row": 4}]}}
+            "map": {
+                "current_position": {"col": 2, "row": 3, "type": "Monster"},
+                "next_options": [
+                    {"index": 0, "type": "Monster", "col": 1, "row": 4,
+                     "leads_to": [{"col": 1, "row": 5, "type": "Elite"},
+                                  {"col": 2, "row": 5, "type": "Unknown"}]},
+                    {"index": 1, "type": "Monster", "col": 2, "row": 4,
+                     "leads_to": [{"col": 2, "row": 5, "type": "Unknown"}]},
+                    {"index": 2, "type": "rest_site", "col": 3, "row": 4,
+                     "leads_to": [{"col": 3, "row": 5, "type": "Merchant"}]}],
+                "nodes": [
+                    {"col": 2, "row": 3, "type": "Monster",
+                     "children": [[1, 4], [2, 4], [3, 4]]},
+                    {"col": 1, "row": 4, "type": "Monster", "children": []},
+                    {"col": 2, "row": 4, "type": "Monster", "children": []},
+                    {"col": 3, "row": 4, "type": "rest_site", "children": []},
+                    {"col": 1, "row": 5, "type": "Elite", "children": []},
+                    {"col": 2, "row": 5, "type": "Unknown", "children": []},
+                    {"col": 3, "row": 5, "type": "Merchant", "children": []},
+                    {"col": 2, "row": 6, "type": "Boss",
+                     "id": "GREMLIN_MATRIARCH", "name": "Gremlin Matriarch",
+                     "children": []}],
+                "boss": {"col": 2, "row": 6, "id": "GREMLIN_MATRIARCH",
+                         "name": "Gremlin Matriarch"}}}
 
 
 def shop_state() -> dict:
@@ -145,10 +176,37 @@ def card_select_state() -> dict:
 
 
 def rewards_state() -> dict:
-    """SYNTHETIC. `rewards.items` (`naming.py:218`)."""
+    """SYNTHETIC, BUILT FROM THE BRIDGE'S OWN BUILDER (`EB-290`).
+
+    `BuildRewardsState` (`vendor/STS2_MCP/McpMod.StateBuilder.cs:1932`) emits
+    `index`, `type` and `description` for every reward and a printed NAME for
+    exactly one kind of them, the potion (`potion_name`). There is no
+    `relic_name`, no `card_name` and no plain `name` anywhere -- so the
+    `{"name": "Gold"}` shape this file used to carry is a shape the wire has
+    never sent, and it kept the render tests green while the r4 Opus seat's
+    reward screen printed `**Relic**` over the words `Golden Pearl` and
+    refused `choose "Golden Pearl"`. Two Gold rows because that run met two,
+    which is the case that wanted the numbering.
+    """
     return {"state_type": "rewards",
-            "rewards": {"items": [{"name": "Gold", "description": "25 gold"},
-                                  {"name": "Card"}]}}
+            "rewards": {"can_proceed": True, "items": [
+                {"index": 0, "type": "gold", "description": "12 Gold",
+                 "gold_amount": 12},
+                {"index": 1, "type": "gold",
+                 "description": "40 Gold (stolen back)", "gold_amount": 40},
+                {"index": 2, "type": "relic", "description": "Golden Pearl"},
+                {"index": 3, "type": "potion", "potion_id": "FIRE_POTION",
+                 "potion_name": "Fire Potion", "description": "Fire Potion",
+                 "potion_description": "Deal 20 damage to one enemy."},
+                {"index": 4, "type": "card", "description": "Card"}]}}
+
+
+def empty_rewards_state() -> dict:
+    """SYNTHETIC (`EB-294`). Both rewards taken: `BuildRewardsState` skips a
+    button that is not enabled, so a spent screen sends an EMPTY item list and
+    a live proceed -- and the page was still advertising a chooser over it."""
+    return {"state_type": "rewards",
+            "rewards": {"can_proceed": True, "items": []}}
 
 
 def treasure_state() -> dict:
@@ -358,7 +416,9 @@ def test_the_recorded_combat_screen_prints_the_faces_and_no_ids():
     """A render that leaks nothing by being empty is not a render."""
     page = blindplay.observe(combat_state())
     assert "Pearl Barrage" in page and "Nibbit" in page
-    assert "Intent: Aggressive, 12" in page
+    # `EB-299` re-cut this line: every field on it now says what it is.
+    assert ("Intent: Aggressive (Attack) — the number on its icon is 12 — "
+            "This enemy intends to Attack for 12 damage." in page)
     assert "Charge: 8" in page                    # a meter that holds something
     # ...and one that does not. `EB-238` NARROWED THIS ASSERTION FROM THE
     # WHOLE PAGE TO THE METER LINES, deliberately: the claim was always "a
@@ -662,8 +722,12 @@ def test_the_screen_decides_the_verb_not_the_command():
          {"action": "choose_event_option", "index": 1}),
         (rest_state(), "rest", {"action": "choose_rest_option", "index": 0}),
         (rest_state(), "upgrade", {"action": "choose_rest_option", "index": 1}),
-        (rewards_state(), 'choose "Gold"',
+        # `EB-290`: a reward is named by what it hands over, so this row is
+        # `12 Gold` and not the word `Gold` twice.
+        (rewards_state(), 'choose "12 Gold"',
          {"action": "claim_reward", "index": 0}),
+        (rewards_state(), 'choose "Golden Pearl"',
+         {"action": "claim_reward", "index": 2}),
         (treasure_state(), 'choose "Pearl Diver\'s Charm"',
          {"action": "claim_treasure_relic", "index": 0}),
         (card_select_state(), 'choose "Send the Runner"',
@@ -703,7 +767,9 @@ def test_every_shelf_in_a_shop_is_named_and_buyable():
     # the shelf under `card_cost` and was never read, so The Big One was
     # bought for 73 gold and its 3 energy discovered a screen later. Two
     # prices, both printed, the card's first.
-    assert "**Coral Guard** — cost 1, 75 gold" in page
+    assert "**Coral Guard** — cost 1, skill, 75 gold" in page
+    # `EB-268`: and the card TYPE beside it, which the wire sends as
+    # `card_type` and the hand line has always printed.
     assert "**Bottled Tide** — 160 gold" in page
     assert "At the start of each combat, gain 3 Block." in page
     # The card-removal shelf has no model and therefore no title; the wire's
@@ -911,7 +977,7 @@ def test_a_scripted_fight_runs_end_to_end(tmp_path):
         {"command": 'play "Pearl Barrage" on "Nibbit"', "thinking": "chip"},
         {"command": "end turn", "thinking": "nothing left"},
         {"record": "I opened with the exhaust attack."},
-        {"command": 'choose "Gold"', "thinking": "take it"},
+        {"command": 'choose "12 Gold"', "thinking": "take it"},
         {"record": "Kokomi seems to want a full rotation."},
     ]
     s, summary, wire, thread = _session(tmp_path, replies)
@@ -1239,7 +1305,7 @@ def test_a_victory_renders_once_as_the_rewards_screen(tmp_path):
     thread = blindplay.ScriptedThread(
         [{"command": 'play "Pearl Barrage"', "thinking": "."},
          {"record": "fight"},
-         {"command": 'choose "Gold"', "thinking": "."},
+         {"command": 'choose "12 Gold"', "thinking": "."},
          {"record": "run"}])
     s = blindplay.Session(thread, wire=wire, session_id="t",
                           budget=blindplay.Budget(max_actions=2),
@@ -1821,7 +1887,7 @@ def test_the_wire_snapshot_is_taken_on_every_play_and_every_end_turn(tmp_path):
         {"command": 'play "Pearl Barrage" on "Nibbit"', "thinking": "chip"},
         {"command": "end turn", "thinking": "done"},
         {"record": "fight"},
-        {"command": 'choose "Gold"', "thinking": "take it"},
+        {"command": 'choose "12 Gold"', "thinking": "take it"},
         {"record": "run"},
     ]
     _s, summary, _wire, _thread = _session(tmp_path, replies)
@@ -1946,7 +2012,7 @@ def test_each_snapshot_carries_the_ledger_rows_that_action_minted(tmp_path):
         {"command": 'play "Pearl Barrage" on "Nibbit"', "thinking": "chip"},
         {"command": "end turn", "thinking": "done"},
         {"record": "fight"},
-        {"command": 'choose "Gold"', "thinking": "take it"},
+        {"command": 'choose "12 Gold"', "thinking": "take it"},
         {"record": "run"},
     ]
     first = _row(1, "kapow", 4, 1, {"relic:pounding_surprise/detonation": 2}, 5)
@@ -2367,11 +2433,11 @@ def test_a_live_shop_prints_every_card_cost_beside_the_gold():
     energy -- a whole turn -- when I next saw it on a card-selection screen."
     The energy cost is on the shelf under `card_cost` and always was."""
     page = blindplay.observe(live("shop-stocked"))
-    assert "**Pocket Fireworks** — cost 1, 25 gold" in page
-    assert "**Mine Toss** — cost 1, 51 gold" in page
+    assert "**Pocket Fireworks** — cost 1, attack, 25 gold" in page
+    assert "**Mine Toss** — cost 1, skill, 51 gold" in page
     # `EB-286` reaches the shelves too: a Spark-priced card charges no energy,
     # so its shelf would otherwise have printed a price of nothing at all.
-    assert "**Powder Charge** — cost 1 Spark, 77 gold" in page
+    assert "**Powder Charge** — cost 1 Spark, skill, 77 gold" in page
     # A relic and a potion have no card cost and read exactly as before.
     assert "**Bag of Preparation** — 192 gold" in page
 
@@ -2385,7 +2451,13 @@ def test_a_live_bought_shelf_says_what_it_is_instead_of_calling_itself_card():
     nothing else. The live capture is exactly that. The page used to fall back
     to the category and print `**Card** — 73 gold`, which reads as a card
     called "Card"; it now says what the feed can and cannot say.
+
+    THIS IS THE CASE WITH NO MEMORY -- a page that arrives at a shop already
+    sold out, which is why the shelf memory is dropped first. The other case,
+    where this page rendered the same shop before the purchase, is the test
+    below.
     """
+    blindplay.forget_shelves()
     shelf = live("shop-bought")["shop"]["items"][0]
     assert shelf["category"] == "card" and shelf["is_stocked"] is False
     assert "card_name" not in shelf and "card_cost" not in shelf
@@ -2394,6 +2466,46 @@ def test_a_live_bought_shelf_says_what_it_is_instead_of_calling_itself_card():
     assert "**Card** —" not in page
     assert "**(this shelf is empty)** — 76 gold (not available)" in page
     assert "The game clears a shelf's card the moment it is sold" in page
+
+
+def test_a_bought_shelf_keeps_the_name_this_page_printed_before_the_sale():
+    """`EB-262`'s vendor half, and the part of it that IS ours (`EB-262`).
+
+    The lost name is the game's -- `IsStocked` IS `CreationResult != null` --
+    but this page had already read that shelf off the same wire one render
+    earlier. So the shop is remembered by its own fingerprint (the
+    `(index, category, price)` of every shelf, which a purchase does not
+    touch: these two captures differ in `is_stocked`, `card_name` and
+    `card_cost` and in nothing else) and a bought row prints the face it had,
+    marked `sold`.
+    """
+    blindplay.forget_shelves()
+    before = blindplay.observe(live("shop-stocked"))
+    assert "**Perfect Timing** — cost 1, attack, 76 gold" in before
+
+    after = blindplay.observe(live("shop-bought"))
+    assert "**Perfect Timing** — cost 1, attack, 76 gold (sold)" in after
+    assert "(this shelf is empty)" not in after
+    assert "what this page printed for the same shelf before the purchase" \
+        in after
+    # And the grammar agrees with the page: the shelf is named, and refused.
+    res = blindplay.act(live("shop-bought"), 'buy "Perfect Timing"')
+    assert res["ok"] is False
+    assert "not available to buy" in res["refusal"]
+
+
+def test_a_remembered_shelf_never_crosses_from_one_shop_to_another():
+    """The memory's own guard. A second shop fingerprints differently, so the
+    first shop's names are dropped rather than printed over it."""
+    blindplay.forget_shelves()
+    blindplay.observe(live("shop-stocked"))
+    # The synthetic shop is a different set of shelves at different prices.
+    page = blindplay.observe(shop_state())
+    assert "Perfect Timing" not in page
+    # ...and coming back to a bought shelf with the memory gone says so.
+    assert "(this shelf is empty)" not in page
+    assert "**(this shelf is empty)** — 76 gold" in blindplay.observe(
+        live("shop-bought"))
 
 
 def test_a_spent_live_rest_site_offers_only_proceed():
@@ -2567,3 +2679,388 @@ def test_naming_no_target_still_plays_the_card_now():
                                'on "Nibbit"')
     assert res["ok"], res
     assert res["post"]["target"] == "NIBBIT_0"
+
+
+# ==== The blind-render burn, rounds four (Klee) and two (Kokomi), 2026-09-02 =
+#
+# Five rows, all of them read off seat records rather than off this file:
+# `review/qa/blindplay/klee-overhaul-r4-opus/record.md` and the two
+# `kokomi-overhaul-r2-*` records. Each test below quotes the sentence the seat
+# wrote and pins the line that answers it.
+
+
+# ------------------------------------------- EB-290: the three r4 render gaps
+
+def test_a_relic_reward_is_named_by_the_relic():
+    """`EB-290` (1). "The Neow reward screen printed `**Relic**` with `Golden
+    Pearl` beneath it. `choose "Golden Pearl"` was refused: *nothing here is
+    called 'Golden Pearl'. What is on the screen: Relic*."
+
+    `BuildRewardsState` gives a relic reward a `type` and a `description` and
+    no name field at all, so the description IS the printed face."""
+    page = blindplay.observe(rewards_state())
+    assert "**Golden Pearl**" in page
+    assert "**Relic**" not in page
+
+    res = blindplay.act(rewards_state(), 'choose "Golden Pearl"')
+    assert res["ok"], res["refusal"]
+    assert res["post"] == {"action": "claim_reward", "index": 2}
+    assert res["printed"] == {"option": "Golden Pearl"}
+
+
+def test_two_gold_rewards_are_two_different_names():
+    """`EB-290` (1), the other half the same run met: "two rewards printed
+    `12 Gold` and `40 Gold (stolen back)`: `choose "Gold (1)"` was refused and
+    only bare `choose "Gold"` worked, taking them one at a time."
+
+    Each row is named by what it hands over, so they are simply two names --
+    and the bare word they share refuses by naming both back."""
+    page = blindplay.observe(rewards_state())
+    assert "**12 Gold**" in page and "**40 Gold (stolen back)**" in page
+
+    res = blindplay.act(rewards_state(), 'choose "Gold"')
+    assert not res["ok"]
+    assert "12 Gold" in res["refusal"]
+    assert "40 Gold (stolen back)" in res["refusal"]
+
+
+def test_reward_rows_printing_one_name_are_numbered_like_every_other_list():
+    """And where two rewards genuinely print ONE name, the render numbers them
+    and the grammar reads the numbers back -- which is what the seat tried
+    (`Gold (1)`) and was refused, because this screen alone was not
+    numbering."""
+    state = rewards_state()
+    for item in state["rewards"]["items"][:2]:
+        item["description"] = "Gold"
+    page = blindplay.observe(state)
+    assert "**Gold (1)**" in page and "**Gold (2)**" in page
+    res = blindplay.act(state, 'choose "Gold (2)"')
+    assert res["ok"], res["refusal"]
+    assert res["post"] == {"action": "claim_reward", "index": 1}
+
+
+def chooser_over_combat_state() -> dict:
+    """A combat card-chooser: `hand_select` WITH the battle still on the wire.
+
+    `EB-290` (2). This is the shape the r4 Opus seat was looking at when
+    `play` answered *"you are not in a battle"* -- `GetState` sets
+    `state_type` to `hand_select` and still sends `battle`, because the fight
+    is very much in progress (`McpMod.StateBuilder.cs:488-493`).
+    """
+    state = json.loads(json.dumps(spark_priced_state()))
+    state["state_type"] = "hand_select"
+    state["hand_select"] = {"prompt": "Choose a card to make free.",
+                            "cards": state["player"]["hand"]}
+    return state
+
+
+def test_play_during_a_combat_chooser_names_the_chooser():
+    """`EB-290` (2). "Posting `play "Big Badda Boom" on "Sewer Clam"` returned
+    *you are not in a battle*. I was in a battle, round 1 against the Sewer
+    Clam; the true reason is that a selection screen was open."
+
+    The refusal now says which screen is open, quotes its prompt and lists the
+    verbs the page is already offering three lines above."""
+    state = chooser_over_combat_state()
+    res = blindplay.act(state, 'play "Kaboom!" on "Corpse Slug"')
+    assert not res["ok"]
+    assert "you are not in a battle" not in res["refusal"]
+    assert "a card chooser is open" in res["refusal"]
+    assert "Choose a card to make free." in res["refusal"]
+    assert 'choose "<card title>"' in res["refusal"]
+    # `end turn` is the same mistake and gets the same answer.
+    assert "a card chooser is open" in blindplay.act(state,
+                                                     "end turn")["refusal"]
+
+
+def test_the_flat_refusal_survives_where_it_is_true():
+    """The narrowing is only the chooser screens: a map really is not a battle
+    and still says so."""
+    assert blindplay.act(map_state(), "end turn")["refusal"] \
+        == "you are not in a battle"
+
+
+def test_the_spark_refusal_is_one_sentence():
+    """`EB-290` (3). "*CANNOT BE PLAYED: you have no Spark; and this costs 1*
+    -- the trailing '; and this costs 1' reads like a truncated sentence."
+
+    AND THE TRUNCATION WAS OURS. `KleeUnplayableReason.For` writes ONE
+    sentence with a comma in it; `unplayable_reason` split it on that comma as
+    if it were a `[Flags]` enum and rejoined the halves with `"; "`.
+    """
+    state = spark_priced_state()
+    card = state["player"]["hand"][0]
+    card["unplayable_reason_text"] = "you have no Spark, and this costs 1"
+    page = blindplay.observe(state)
+    assert "CANNOT BE PLAYED: you have no Spark, and this costs 1" in page
+    assert "; and this costs" not in page
+    # The flags split still works where the wire really does send flags.
+    assert qa_packet.unplayable_reason(
+        "BlockedByCardLogic, EnergyCostTooHigh") == (
+        "this card's own rule is stopping you right now; you do not have "
+        "enough energy")
+
+
+def test_a_card_shelf_prints_its_type_sold_or_not():
+    """`EB-268`'s acceptance, word for word: "the shop fixture's card shelves
+    print `cost N, <type>`, sold or not."
+
+    The r1 Opus seat bought two cards "without knowing what they cost to
+    play". The energy cost landed with `EB-262`; the TYPE is the other field
+    the wire sends beside it (`card_type`) and the page was dropping, and the
+    sold half rides `EB-262`'s shelf memory.
+    """
+    blindplay.forget_shelves()
+    stocked = blindplay.observe(live("shop-stocked"))
+    assert "**Perfect Timing** — cost 1, attack, 76 gold" in stocked
+    assert "**Mine Toss** — cost 1, skill, 51 gold" in stocked
+    assert "**Grounded** — cost 1, power, 74 gold" in stocked
+    # A relic and a potion have no card type and read exactly as before.
+    assert "**Bag of Preparation** — 192 gold" in stocked
+    assert "**Flex Potion** — 48 gold" in stocked
+
+    sold = blindplay.observe(live("shop-bought"))
+    assert "**Perfect Timing** — cost 1, attack, 76 gold (sold)" in sold
+
+
+# --------------------------------- EB-294: the three Kokomi r2 render gaps --
+
+def aura_combat_state() -> dict:
+    """An enemy carrying the aura the player just applied (`EB-294`).
+
+    `AuraPower.Type` is `PowerType.Buff` -- deliberately, so Artifact does not
+    eat an elemental application -- so the wire says `Buff` and the page said
+    `(buff)`.
+    """
+    state = json.loads(json.dumps(spark_priced_state()))
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "KLEEMOD-HYDRO_AURA", "title": "Hydro Aura", "amount": 2,
+         "type": "Buff",
+         "description": "Hydro clings to this enemy for 2 more turns. A hit "
+                        "of a different element consumes the aura and "
+                        "triggers an Elemental Reaction; a Hydro hit "
+                        "refreshes its duration."},
+        {"id": "VULNERABLE", "title": "Vulnerable", "amount": 1,
+         "type": "Debuff", "description": "Takes 50% more attack damage."}]
+    return state
+
+
+def test_an_aura_is_not_tagged_as_the_enemys_buff():
+    """`EB-294` (1). "`Hydro Aura 2 (buff)` appears in the same block as
+    `Vulnerable 1 (debuff)`. The aura I put on them to set up a Reaction reads
+    as something helping them." """
+    page = blindplay.observe(aura_combat_state())
+    assert "Hydro Aura 2 (aura)" in page
+    assert "Hydro Aura 2 (buff)" not in page
+    # The debuff beside it is untouched, and the clause is said once.
+    assert "Vulnerable 1 (debuff)" in page
+    assert page.count("An aura is tagged") == 1
+    assert "what an Elemental Reaction needs" in page
+
+
+def test_a_board_with_no_aura_says_nothing_about_auras():
+    """The note is printed where it bites and nowhere else."""
+    assert "An aura is tagged" not in blindplay.observe(spark_priced_state())
+
+
+def bundle_state(picked=None) -> dict:
+    """`bundle_select` as `BuildBundleSelectState` sends it (`EB-294`).
+
+    `preview_cards` is filled from the preview container the moment a bundle
+    is picked, and `can_confirm` is the confirm button's own state.
+    """
+    bundles = [
+        {"index": 0, "card_count": 2, "cards": [
+            {"name": "Deep Current", "cost": "1", "type": "Attack",
+             "description": "Deal 4 damage to every enemy."},
+            {"name": "Slack Water", "cost": "1", "type": "Attack",
+             "description": "Deal 2 damage. Apply 1 Weak."}]},
+        {"index": 1, "card_count": 2, "cards": [
+            {"name": "Coral Guard", "cost": "1", "type": "Skill",
+             "description": "Gain 5 Block."},
+            {"name": "Sea-Salt Prayer", "cost": "1", "type": "Skill",
+             "description": "Gain 7 Block."}]}]
+    blob = {"screen_type": "bundle", "prompt": "Choose a bundle.",
+            "bundles": bundles, "preview_showing": picked is not None,
+            "preview_cards": ([dict(c) for c in bundles[picked]["cards"]]
+                              if picked is not None else []),
+            "can_cancel": True, "can_confirm": picked is not None}
+    return {"state_type": "bundle_select", "bundle_select": blob}
+
+
+def test_a_picked_bundle_is_marked():
+    """`EB-294` (2). "`choose "Deep Current"` answered `ok Selecting bundle
+    0`, but re-observing printed the identical page with no mark on either
+    bundle. I had to send `confirm` on faith that the right one was armed."
+
+    The wire DOES answer -- `preview_cards` holds the picked bundle's cards --
+    so the pick is matched back to the bundle and marked."""
+    before = blindplay.observe(bundle_state())
+    assert "PICKED" not in before and "Nothing is picked yet." in before
+
+    after = blindplay.observe(bundle_state(picked=0))
+    assert "## A bundle of: Deep Current, Slack Water — PICKED" in after
+    assert "## A bundle of: Coral Guard, Sea-Salt Prayer" in after
+    assert after.count("PICKED") == 1
+
+
+def test_a_preview_that_matches_no_bundle_says_so_instead_of_guessing():
+    """The honest arm, and the same one the enchant picker gets: a preview the
+    page cannot attribute is reported as a pick it cannot place."""
+    state = bundle_state(picked=1)
+    state["bundle_select"]["preview_cards"] = [
+        {"name": "Something Else", "cost": "0", "type": "Skill",
+         "description": "Draw 1 card."}]
+    page = blindplay.observe(state)
+    assert "PICKED" not in page
+    assert "cannot say which" in page
+
+
+def test_an_emptied_reward_screen_drops_the_chooser():
+    """`EB-294` (3). "After taking both fight-1 rewards the page printed
+    `- (nothing here to take)` and still listed `choose "<reward>"` under
+    'What you can say'." """
+    page = blindplay.observe(empty_rewards_state())
+    assert "(nothing here to take)" in page
+    assert 'choose "<reward>"' not in page
+    assert page.count("- `") == 1 and "- `proceed`" in page
+    # And the verb is still there while anything is left to take.
+    assert 'choose "<reward>"' in blindplay.observe(rewards_state())
+
+
+# ------------------------------------ EB-298: the map, and what it carries --
+
+def test_the_map_prints_the_floors_ahead_and_the_boss():
+    """`EB-298`. "It prints only the immediately adjacent nodes as bare labels
+    with no floors ahead and no elite/shop/campfire distinction, so route
+    choice is a coin flip. The `Unknown (path 1)` I took turned out to be a
+    `# Wellspring` event."
+
+    Everything below was already on the feed: `leads_to` per option, `nodes`
+    for the whole act, and the boss's own printed name."""
+    page = blindplay.observe(map_state())
+    assert "leads on to: Elite, Unknown" in page
+    assert "- 1 floor ahead: Monster, Monster, Rest Site" in page
+    assert "- 2 floors ahead: Elite, Unknown, Merchant" in page
+    assert "- 3 floors ahead: Boss" in page
+    assert "At the top of this act: **Gremlin Matriarch**" in page
+    # The path handles are unchanged, and so is the one verb.
+    assert "**Monster (path 1)**" in page
+    assert blindplay.act(map_state(), 'go "Rest Site (path 3)"')["post"] == \
+        {"action": "choose_map_node", "index": 2}
+
+
+def test_the_map_never_prints_a_boss_id_or_a_coordinate():
+    """The boss block carries an `id` beside its `name` and the nodes carry
+    grid coordinates; neither is a thing the game prints, so neither reaches
+    the page. A floor is named by DISTANCE for the same reason."""
+    page = blindplay.observe(map_state())
+    assert "GREMLIN_MATRIARCH" not in page
+    assert "Floor 4" not in page
+
+
+def test_a_map_with_nothing_but_next_options_still_renders():
+    """A state saved before any of this was read -- and the pre-round-four
+    shape -- prints the options and simply says nothing more."""
+    state = {"state_type": "map",
+             "map": {"next_options": [{"index": 0, "type": "Monster",
+                                       "col": 1, "row": 4}]}}
+    page = blindplay.observe(state)
+    assert "**Monster (path 1)**" in page
+    assert "floors ahead" not in page
+    assert "At the top of this act" not in page
+
+
+def test_the_floors_ahead_are_read_from_the_direction_of_travel():
+    """A map whose rows COUNT DOWN toward the boss is read the same way: the
+    next options are one step from where you stand, and that step is the
+    direction. Nothing here assumes the numbers rise."""
+    state = json.loads(json.dumps(map_state()))
+    blob = state["map"]
+    for row in (blob["nodes"] + blob["next_options"]
+                + [blob["current_position"], blob["boss"]]):
+        row["row"] = 20 - row["row"]
+    for opt in blob["next_options"]:
+        for child in opt["leads_to"]:
+            child["row"] = 20 - child["row"]
+    page = blindplay.observe(state)
+    assert "- 1 floor ahead: Monster, Monster, Rest Site" in page
+    assert "- 3 floors ahead: Boss" in page
+
+
+# ------------ EB-299: two lines whose grammar the reader could not read -----
+
+def test_the_duplicate_name_note_does_not_say_two():
+    """`EB-299` (1). "*Two cards here print the same name*... printed on a
+    hand holding three Coral Guards already disambiguated as `(1) (2) (3)`, on
+    a hand with two separate duplicate pairs, and on a hand with three Water's
+    Edge and two Slimed. It says 'Two cards' regardless."
+
+    And the second half the same seat found unprompted: "the numbered suffixes
+    renumber inside a turn", so the number is a place in a list and the note
+    has to say so."""
+    state = json.loads(json.dumps(spark_priced_state()))
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-CORAL_GUARD", "name": "Coral Guard", "type": "Skill",
+         "cost": "1", "can_play": True, "description": "Gain 5 Block."}
+        for _ in range(3)]
+    page = blindplay.observe(state)
+    assert "**Coral Guard (1)**" in page and "**Coral Guard (3)**" in page
+    assert "Two cards here print the same name" not in page
+    assert "More than one card in this hand prints the same name" in page
+    assert "names a different copy once one of them leaves your hand" in page
+    assert "does not report a card's enchantment" in page
+
+
+def test_the_duplicate_name_note_stays_off_a_hand_with_no_repeat():
+    assert "More than one card in this hand" not in blindplay.observe(
+        spark_priced_state())
+
+
+def test_an_intent_number_says_what_it_is():
+    """`EB-299` (2). "The Strategic intent's number was understandable only
+    from its accompanying sentence" (r2 Codex seat, question 6).
+
+    The line was `kind`, `label` and `text` comma-joined: three grammars in
+    one list. The label is the number the game draws ON the icon and the feed
+    gives it no unit, so the page says that is what it is -- and the `type`
+    the page used to drop goes back beside the hover tip's heading."""
+    state = json.loads(json.dumps(spark_priced_state()))
+    state["battle"]["enemies"][0]["intents"] = [
+        {"type": "Debuff", "label": "2", "title": "Strategic",
+         "description": "This enemy intends to apply a Debuff to you."}]
+    page = blindplay.observe(state)
+    assert ("Intent: Strategic (Debuff) — the number on its icon is 2 — "
+            "This enemy intends to apply a Debuff to you." in page)
+    assert "Intent: Strategic, 2," not in page
+
+
+def test_an_intent_with_no_number_prints_no_number():
+    """A telegraph the wire gives no label prints the heading and the sentence
+    and invents nothing between them."""
+    state = json.loads(json.dumps(spark_priced_state()))
+    state["battle"]["enemies"][0]["intents"] = [
+        {"type": "Buff", "title": "Strategic",
+         "description": "This enemy intends to buff itself."}]
+    page = blindplay.observe(state)
+    assert ("Intent: Strategic (Buff) — This enemy intends to buff itself."
+            in page)
+    assert "the number on its icon" not in page
+
+
+def test_an_intent_whose_heading_is_its_type_is_not_printed_twice():
+    """Where the hover tip's heading and the wire's `type` are the same word,
+    the page says it once."""
+    state = json.loads(json.dumps(spark_priced_state()))
+    state["battle"]["enemies"][0]["intents"] = [
+        {"type": "Attack", "title": "Attack", "label": "8",
+         "description": "Attack for 8 damage."}]
+    page = blindplay.observe(state)
+    assert "Intent: Attack — the number on its icon is 8" in page
+    assert "Attack (Attack)" not in page
+
+
+def test_an_enemy_with_no_intent_at_all_still_renders():
+    state = json.loads(json.dumps(spark_priced_state()))
+    state["battle"]["enemies"][0].pop("intents")
+    assert "Intent: (no intent shown)" in blindplay.observe(state)
