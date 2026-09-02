@@ -326,10 +326,10 @@ would be dead text most of the time.
 | | Rows | Characters | Commons that beat a Strike | Hexerei-tagged rows | Stand-ins |
 |---|---|---|---|---|---|
 | Today | 17 | 11 | 0 of 7 | 0 | 0 |
-| Proposed | 33 Universals | 18 | 12 of 12 | 14 | 8 (4 caretaker, 4 Hexerei) plus 4 Personals |
+| Proposed | 34 Universals | 21 | 12 of 12 | 14 | 8 (4 caretaker, 4 Hexerei) plus 4 Personals |
 
-Rarity: 12 Common, 13 Uncommon, 8 Rare. The Rare count is high because
-eight of the eighteen are 5-star, and the sheet's star-to-rarity rule
+Rarity: 12 Common, 14 Uncommon, 8 Rare. The Rare count is high because
+eight of the twenty-one are 5-star, and the sheet's star-to-rarity rule
 stands. Art: 16 new Universals need illustration; stand-ins and rewrites
 need none.
 
@@ -352,7 +352,7 @@ here is a ruling.
    Mondstadt sheet, before Klee's prototype gate, so her seats draft real
    companions* [default]. (2) After the gate.
 4. **The coven second line.** (1) *No* [default]. (2) Yes, on all four.
-5. **New characters.** (1) *All seven (Noelle, Jean, Razor, Amber, Lisa,
+5. **New characters.** (1) *All eight (Noelle, Jean, Razor, Amber, Lisa,
    Eula, Rosaria, Mika) enter; 16 new illustrations* [default]. (2) The
    caretakers and the two returning Personals only (Noelle, Jean, Razor,
    Amber); the rest wait.
@@ -384,3 +384,21 @@ as a Power that pays Block every turn and Strength for holding it;
 every Hydro and Cryo applier now targets a chosen enemy, and Klee's own
 stand-ins and Personals apply twice, because a random application lands
 on her Pyro and wastes the reaction; Prune gets an 8-damage body.
+
+## 9. Built (2026-09-01, same night)
+
+Approved at all six defaults, and built the same night as a flag-gated
+prototype (`COMPANION_OVERHAUL`, PR #250, merged). The §5 table said 33
+rows over 18 characters; §3 prints 34 over 21, because Mona, Venti and
+Varka came after the table, so the table now says 34 and 21. Of the 34, 21
+are built; 13 wait on engine hooks neither engine has yet (a per-instance
+Block-absorption trigger, a trap that fires before an enemy's attack, a
+next-Attack element override, a Swirl that remembers its element, an
+Attacks-played counter, a next-Attack discount, a Block count in the C#
+amount grammar, a Power holding a chosen target, a counting delayed blade,
+and Durin's two damage modifiers behind a modal Power); each is named in
+`docs/notes/prototype-surface-provenance.md` and is a follow-up build, not
+a redesign. One side effect to know: the Featured Banner samples 3 of a
+nation's 5-star cards per run (`BANNER_FEATURED_SLOTS`), and Mondstadt now
+has six 5-star Universals, so a given run offers half of them. That is the
+banner doing its job; the number is the sim's if it ever needs moving.
