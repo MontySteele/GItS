@@ -1373,3 +1373,206 @@ no upgraded form -- a curated absence in
 `tier0/tests/test_starter_relic_upgrades.py` with its reason and the gate that
 clears it.
 ```
+
+## The Inazuma companion overhaul — `proto_mi_` (2026-09-02)
+
+Twenty-four Universals, on the SAME flag as the Mondstadt block above
+(`C.COMPANION_OVERHAUL` / `-p:CompanionOverhaul=true`). Source: the approved
+workshop `companion-workshop-inazuma-2026-09-01.md` sec.3, approved 2026-09-01
+at its four default picks (its sec.9), with two edits already in that text —
+Itto's Superlative Superstrength loses its Exhaust, and Mizuki's Mend stays at
+10 because the keyword is bounded at entry HP. A Paper artefact on another
+branch and not in this tree.
+
+```
+ONE FLAG, TWO NATIONS. There is no `INAZUMA_OVERHAUL` property. The arm already
+means "the companion pool is the approved workshops' pool", and a second
+property would let a build offer one nation's rewrites beside the other
+nation's shipped rows -- a state no document describes and no seat would be
+asked to grade. `C.COMPANION_OVERHAUL_NATIONS` is the one list the kept half of
+the roster is filtered against, and Fontaine is deliberately not in it: its
+workshop does not exist yet and both approved documents say so in their sec.6.
+
+TWENTY-FOUR AND NOT TWENTY-FIVE. The document's sec.4 counts "25 Universals, 1
+Personal" while its sec.3 enumerates 24 Universals plus Gorou's Kokomi-side
+Personal (Crystal Collapse), and the rarity split it prints -- 9 Common, 12
+Uncommon, 4 Rare -- only closes when the Personal is counted among the
+Uncommons. The ENUMERATION is what is built, so the pool is 9 Common, 11
+Uncommon and 4 Rare. A Personal is Kokomi's kit rather than a companion offer;
+no stand-in is a Universal either; neither is on this sheet.
+
+NOTHING WAS DROPPED. Every one of the twenty-four prints inside the grammar the
+emitter speaks once the arm's fifteen powers exist, so the rule the Mondstadt
+waves kept -- "a card that cannot be printed as written is left OUT rather than
+replaced by a simpler card", the rule that left Vermillion Pact off the Klee
+surface -- bit on nothing here.
+
+FIFTEEN DISPLAY NAMES CARRY A "(proto)" SUFFIX, and they are the fifteen
+rewrites of shipped Inazuma rows, whose printed names they keep.
+`tools/lint_unique_names.py` holds one namespace across all six sheets plus
+this surface, so the suffix is what lets the rewritten Thundergrust and the
+shipped one coexist while the arm is graded. It is the same device the ten
+`proto_mc_` rewrites and the eleven `proto_kk_` rows already use. Gorou's
+Uncommon is NOT suffixed: the workshop renames it "Juuga: Forward Unto Victory"
+where the shipped row is "Forward Unto Victory", so the two names differ
+already. The other eight new characters' names are new.
+
+EVERY ROW CARRIES ITS OWN `description:` (EB-215), the workshop's printed
+sentence with this repo's rendering conventions applied: an Attack's element
+rides the AppliesX keyword chip rather than the text, a POWER's volley names
+its element in the sentence (the shipped `proto_mc_` convention), Block and the
+named keywords are golded, and Exhaust is the keyword rail's. No number moves
+and no clause is added or dropped.
+
+WHAT THE HOOKS COST, and the headline is how little. Thirteen hooks were built
+for the Mondstadt second wave and TWELVE of this pool's rows spend one without
+a line of new plumbing:
+
+  end-of-turn volley       Gorou's Juuga, Sayu's Daruma, Shinobu's ring,
+                           Yae's Sakura, Ayaka's Soumetsu, Ayato's clock,
+                           Chiori's Tamoto
+  start-of-turn payout     Sayu's Naptime, Sara's Stormcall, Kirara's parcel
+  Block-absorption mark    Thoma's Blazing Barrier (Diona's Icy Paws)
+  next-Attack element      Sara's Crowfeather Cover, Ayato's Kyouka
+                           (Bennett's Passion Overload, Razor's Lightning Fang)
+  the reaction event       Heizou's Swirl count (Dahlia's Favonian Favor)
+  a power on a chosen body Yoimiya's Aurous Blaze (Barbara's Melody Loop)
+  AfterCardPlayed          Thoma's Crimson Ooyoroi
+
+FOUR THINGS ARE NEW, and each is small:
+
+  A PER-PLAY DAMAGE TOTAL. Gorou's Inuzaka All-Round Defense prints "Gain Block
+  equal to half the damage dealt", and the printed 8 is not what landed once
+  Strength, Weak, an amplifier and the target's Block have spoken. The total is
+  `state.mi_damage_dealt_this_card` in the sim (written at the tail of
+  `deal_damage_to_enemy`, zeroed at the head of `resolve_card`, saved across a
+  free play with `block_gained_this_card`'s neighbours) and
+  `CompanionOverhaulLedger.DamageDealtThisPlay` in the mod (totalled from
+  `CompanionOverhaulPlayWatcher.AfterDamageReceived`). It counts HP damage from
+  a CARD, which is the conservative reading of "the damage dealt" (R212's
+  one-way rule -- the doubt pays LESS Block) and is also what keeps the two
+  engines counting the same thing: the arm's power-sourced hits pass neither a
+  dealer nor a card source, so neither engine counts them. The op is
+  `block_half_damage`, Kokomi's `block_half_surge` asking about a different
+  total.
+
+  A HIT THAT IGNORES BLOCK. Chiori's Tamoto, "ignoring Block": one optional
+  parameter on `deal_damage_to_enemy` and one on `ElementalHit.Deal`, both
+  defaulted off, adding `ValueProp.Unblockable` beside the `Unpowered` a
+  power-sourced hit already carries. The hit still reacts, still counts as a
+  hit and is still capped by Intangible -- unblockable is not uncappable
+  (R128).
+
+  A SWIRL COUNT. Heizou's Heartstopper Strike, "4 more for each Swirl this
+  turn": one integer written at the ONE site each engine resolves a reaction,
+  beside Varka's latch and off the same event, so the two readers cannot
+  disagree about what a Swirl was. `swirls_this_turn` in the amount grammar.
+
+  A COMPANIONS-PLAYED COUNT. Raiden's Musou no Hitotachi, "5 more for each
+  Companion card you played this combat": no new state at all, because both
+  engines already keep the list -- `state.companions_played` and
+  `CompanionPlays.PlayedThisCombat`, both unique by base id under the
+  BFF-dedupe ruling of 2026-08-06. So the count is CARDS and not PLAYS, which
+  is what "each Companion card" names.
+
+MEND, MADE CHARACTER-AGNOSTIC, AND THE RULE NOT DUPLICATED. Mizuki's Anraku
+Secret Spring Therapy is a UNIVERSAL that prints the Kokomi arm's keyword, so
+Klee or Furina can draft it and "the one true heal in the pool" has to mean the
+same thing in whoever's hands it lands. Exactly ONE LINE moved in the mod:
+`KokomiTide.Mend` stops asking `KokomiOverhaul.LiveFor(creature)` and asks
+`MendIsLive(creature)`, which is that OR "the companion arm is on and this
+creature is a player's". The bound itself -- heal, never above the HP you
+entered the fight with -- is still written once, in that same function, and no
+second Mend was authored. What the widening costs is one more seat's ledger
+entry: `KokomiTide.InstallAll` now captures EntryHp for every seat either arm
+reaches, at the same combat-start moment it always did, because a lazily
+captured ceiling taken at the first Mend would be the HP the fight had already
+lowered. The sim had no Mend at all (the Kokomi arm is C# first and its ten
+verbs raise), so `effects.mend` is that rule's first spelling there, and
+`_op_mend` resolves under `C.COMPANION_OVERHAUL` while still raising the Kokomi
+arm's own error when only that flag is on.
+
+READ AMBIGUOUSLY, AND HOW. Every one of these is a place the printed text does
+not settle the question, and the reading taken is the most literal one.
+
+ 1. "GAIN BLOCK EQUAL TO HALF THE DAMAGE DEALT" is half the damage that reached
+    HP, rounded down -- not the swing. One-way: the doubt pays LESS Block.
+ 2. "GAIN 2 DEXTERITY FOR 2 TURNS" lasts THIS turn and the next, which is the
+    reading Razor's Lightning Fang already gives the identical construction.
+    The workshop's italic gloss says "applies this turn too, so THREE turns of
+    Block"; the first half is true under this reading and the arithmetic in the
+    second half is not. The PRINTED text is what is built (its sec.3 preamble:
+    "Printed text only"), and the discrepancy is disclosed rather than settled
+    by moving a number nobody ruled.
+ 3. "DEAL 8, ANEMO, TO A RANDOM ENEMY. SWIRL." is ONE op: the Anemo the Attack
+    applies to the body it hit IS the Swirl. A separate `swirl` op would
+    re-roll the random target and swirl a different body. Kazuha's "Swirl each"
+    is the same reading over an AoE, where a second op would instead be a no-op
+    on bodies the hit has already cleared.
+ 4. "EACH SAKURA YOU PLACE WHILE ONE IS OUT DEALS 3 MORE" is a statement about
+    the SAKURA BEING PLACED, which is what its subject says: the first out
+    deals 4 and every later one deals 7, whether one or two were already
+    standing. So three Sakura are volleys of 4, 7 and 7. The workshop's italic
+    gloss ("totems that level up together") suggests the other reading, where
+    every placement raises every Sakura; the printed sentence does not say
+    that, and the printed sentence is what is built.
+ 5. "UP TO 3" is read at the FIRE, not at the placement: a fourth Sakura can be
+    placed and simply never pays. Conservative, and it needs no stack cap in
+    either engine.
+ 6. "PLUS YOUR STRENGTH" (Yae) is PRINTED, NOT IMPLEMENTED. Every power-sourced
+    hit in this arm already runs the dealer's modifiers, in both engines, so
+    the clause describes what the volley was always going to do.
+ 7. "FOR 2 TURNS ... THEN DEAL 16" (Ayaka) fires, ticks, and fires the finale
+    AT ZERO -- both on the same turn the clock runs out, because "then" is what
+    happens after the two turns and the second turn's own 8 is one of them.
+ 8. "FOR EACH COMPANION CARD YOU PLAYED THIS COMBAT" (Raiden) counts CARDS, not
+    plays: both engines' lists are unique by base id already.
+ 9. "WHENEVER IT TAKES DAMAGE FROM A CARD THAT IS NOT AN ATTACK" (Yoimiya) is a
+    three-way test, not a two-way one. A Skill's damage line and an Attack's
+    both arrive as powered card damage; a bomb, a volley or a Shatter arrives
+    with no card at all. So the mark fires when a card is present AND its type
+    is not Attack -- which also means the blast cannot re-trigger any mark, its
+    own included.
+10. "AT THE START OF YOUR NEXT TURN, DRAW 2 IF YOU PLAYED NO ATTACKS THIS TURN"
+    (Sayu) answers "this turn" at the END of the turn the card was played: an
+    Attack there deletes the promise, and anything still standing at the next
+    turn's start has already earned its draw.
+11. "IF YOU ARE ABOVE 70% HP" (Sayu's Daruma) is read when the Daruma ACTS, not
+    when it was summoned. Present tense, and the whole point of the nation's
+    shape is that the split follows the fight.
+12. "LOSE 3 HP" (Shinobu) is plain HP loss -- `{op: damage, target: self}`, the
+    shipped Hot Hands line, Unblockable and Unpowered -- and NOT Kokomi's Exert,
+    which is damage Block can eat.
+13. TWO MORE ELEMENT RIDERS AT ONCE. Five riders can now claim the element an
+    Attack applies and the order is unchanged law: BLANKET first (Razor, then
+    Ayato), ONE-SHOTS after (Bennett, then Sara), Varka's banked Swirl last of
+    all, LAST WINS. The damage halves all stack; only the element is exclusive.
+14. KIRARA CARRIES NO ELEMENT. She is Dendro, this engine has six elements and
+    no Dendro aura, and her card names no element at all -- so the row declares
+    none and `CompanionElement` is `Element.None`. Inventing one of the six
+    would be a design decision wearing a schema default.
+
+WHAT THIS BLOCK COST THE SHIPPED PATHS, exhaustively, and every one is
+byte-identical with the flag off (pinned by
+`tier0/tests/test_inazuma_companion_overhaul.py` and
+`KleeTests/Prototype/InazumaCompanionOverhaulTests.cs`, not intended):
+  `effects.deal_damage_to_enemy`   one guarded call at the tail, and one
+                                   defaulted `ignore_block` parameter
+  `combat._finish_play`            one guarded call beside after_card_played
+  `combat._player_turn`            one new per-turn counter cleared
+  `combat.new_combat`              the Mend ceiling captured
+  `ElementalHit.Deal`              one defaulted `ignoreBlock` parameter
+  `KokomiTide.Mend` / `InstallAll` the gate widened; the RULE unchanged
+
+THE BANNER BINDS HARDER. `star` is the CHARACTER's rarity, not the card's, and
+this pool designs ELEVEN five-star cards against `BANNER_FEATURED_SLOTS = 3` --
+so on any given run the Featured Banner shows three of them and the rest are
+unoffered, exactly as it now does for Mondstadt's six. Four of Inazuma's rows
+are Rare and all four are five-star, so a run whose banner features no Rare
+falls through to Uncommon, which is the ladder's shipped behaviour (R64). That
+is the shipped law applied to a bigger roster, not a new rule, and it is
+written down here because it is the arm's most visible side effect.
+
+THE DELETION RULE AT THE TOP OF THE SHEET BINDS THIS BLOCK: these rows leave
+when the arm is accepted or rejected.
+```

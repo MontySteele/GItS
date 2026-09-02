@@ -602,7 +602,12 @@ def test_the_incoming_hit_order_is_the_one_the_mod_walks():
     walk = walk.split("\n    }")[0]         # the method body, not the file
     cs_order = re.findall(r"OfType<(\w+Power)>", walk)
     assert cs_order == ["SacramentalShowerPower", "BaronBunnyPower",
-                        "IcyPawsPower"], cs_order
+                        "IcyPawsPower",
+                        # THE INAZUMA ARM'S ONE INCOMING READER, last: Thoma's
+                        # Blazing Barrier is the paws' construction with a Block
+                        # payout, and it reads the absorption everything above
+                        # it has already re-priced.
+                        "BlazingBarrierPower"], cs_order
 
 
 def test_the_element_override_order_is_the_one_the_mod_walks():

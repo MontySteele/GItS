@@ -833,6 +833,33 @@ CO_TENANCY_LEDGER = {
             "up. Two Melody Loops are on two different enemies by "
             "construction, because the card places the power on the body it "
             "targeted",
+        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "NaptimePower"):
+            "QUARANTINED (the Inazuma companion overhaul). Draws its promised "
+            "cards and removes itself. THE ORDERING QUESTION, answered: it "
+            "reads nothing this broadcast can move -- the condition it depends "
+            "on (did an Attack get played last turn) was settled at the "
+            "PREVIOUS turn's end, where the power deletes itself if it was "
+            "broken -- and drawing cards changes no input any co-tenant here "
+            "has",
+        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "TenguStormcallPower"):
+            "QUARANTINED (the Inazuma companion overhaul). Pays its promise "
+            "into the shipped AttackUpThisTurnPower and removes itself. THE "
+            "ORDERING QUESTION, answered: nothing in this broadcast reads an "
+            "attack rider -- every volley that could is at turn END, a "
+            "broadcast away -- and it reads nothing itself",
+        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "SurpriseDispatchPower"):
+            "QUARANTINED (the Inazuma companion overhaul). One unelemented "
+            "hit at a random enemy, then it removes itself. THE ORDERING "
+            "QUESTION, answered, and it is the only one of the four Inazuma "
+            "start-of-turn readers that needs more than a sentence: it DEALS "
+            "DAMAGE, so it can kill a body another tenant would have touched, "
+            "and it draws from Rng.CombatTargets. It carries NO element (the "
+            "card names none), so it can neither consume an aura nor create "
+            "one and cannot change which reaction any co-tenant fires; the "
+            "only co-tenant that touches an enemy at all is MelodyLoopPower, "
+            "whose Hydro lands on its own host and pays nothing that a dead "
+            "host would have paid. The rng draw is the residual, and it is "
+            "the same residual the shipped per-turn bomb mint already has",
         ("Powers/CompanionPowers.cs", "MetallicizePower"):
             "raw per-turn Block mint (R116)",
         ("Powers/DemolitionPowers.cs", "BombAndSparkPerTurnPower"):
@@ -1030,6 +1057,20 @@ CO_TENANCY_LEDGER = {
             "AuraCmd.ElementOfPlay, both a broadcast away. THE ORDERING "
             "QUESTION, answered: ticking a clock reads nothing and writes "
             "only its own stack",
+        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "NaptimePower"):
+            "QUARANTINED (the Inazuma companion overhaul). A conditional "
+            "REMOVAL and nothing else: the promise breaks here if an Attack "
+            "was played this turn. THE ORDERING QUESTION, answered: it reads "
+            "the Attack counter, which is written at AfterCardPlayed and not "
+            "by anything in this broadcast, and it writes only its own "
+            "existence. It is NOT in CompanionOverhaulTurnEnd's walk for the "
+            "reason PassionOverloadPower is not: a removal has no position to "
+            "defend",
+        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "CrowfeatherCoverPower"):
+            "QUARANTINED (the Inazuma companion overhaul). The same this-turn "
+            "EXPIRY PassionOverloadPower above it is, one nation over -- it "
+            "removes itself and does nothing else, and what it pays is paid "
+            "on the Attack that spends it, a broadcast away",
     },
 }
 
