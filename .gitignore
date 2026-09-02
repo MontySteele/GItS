@@ -1,9 +1,0 @@
-__pycache__/
-bin/
-obj/
-local.props
-*.pck
-game_ref/
-game_ref_backup/
-art/raw/
-*.zip
