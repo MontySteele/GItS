@@ -799,9 +799,9 @@
 - {id: proto_kk_the_moon_a_ship, name: "The Moon, A Ship O'er the Seas", character: kokomi,
    authored_by: [claude],
    cost: 2, type: skill, rarity: rare, exhaust: true,
-   description: "Exhaust. [gold]Mend[/gold] 10. [gold]Plan[/gold]: [gold]Mend[/gold] 15.",
-   effects: [{op: mend, amount: 10}],
-   plan: [{op: mend, amount: 15}]}
+   description: "Exhaust. [gold]Mend[/gold] 3. [gold]Plan[/gold]: [gold]Mend[/gold] 6.",
+   effects: [{op: mend, amount: 3}],
+   plan: [{op: mend, amount: 6}]}
 
 - {id: proto_kk_sango_isshin, name: "Sango Isshin (proto)", character: kokomi,
    authored_by: [claude],

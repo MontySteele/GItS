@@ -43,6 +43,7 @@ your verdict that it needed no setup.
 | Treatise | draw 1 per Plan carried out | draw 1 once per turn, on the first Plan carried out | [USER], live: one draw per Plan is too abusable; one per turn if a Plan fired is fine. |
 | Song of Pearls | 3 Block per Plan carried out | 3 Block once per turn, on the first Plan | [USER]: likewise. |
 | The General's Banner | 1 Weak per Companion card played | 1 Weak once per turn, on the first Companion card | [USER]: applies a lot of Weak, too strong; once per turn applied as the default. |
+| The Moon, A Ship O'er the Seas | Mend 10; Plan: Mend 15 | Mend 3; Plan: Mend 6 | [USER]: 15 is a lot; in-combat healing is nearly absent from the base game outside Ironclad, so the small numbers are the point. |
 | Sango Isshin | a quarter of Max HP now, and to every enemy at dawn, no setup | 8 damage; on a turn the Bake-Kurage carried out a Plan, a quarter of Max HP to every enemy instead | [USER]: strong Rares are fine, but this one needed no setup; now it pays only on a morning you planned for, and combos with Moon and Nereid. |
 
 Upgrades keep their current deltas over the new bases.

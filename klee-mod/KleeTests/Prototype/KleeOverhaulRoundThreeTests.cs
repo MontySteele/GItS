@@ -364,7 +364,10 @@ public class KleeOverhaulRoundThreeTests
         // The Mend clause, on draft 6's carrier. `Tide` left this pin with the
         // verb it read: the rule's key list is written over OPS, so retiring
         // `gain_tide` retired the delta and nothing here had to be re-decided.
-        AssertUpgradeMoves<ProtoKkTheMoonAShip>("Mend", 10m, 12m);
+        // Mend 3 since 2026-09-02 ([USER]: "15 is a lot. Maybe 3 (6 on
+        // Plan)"), and the +2 rides the new base like every other delta in
+        // this pass.
+        AssertUpgradeMoves<ProtoKkTheMoonAShip>("Mend", 3m, 5m);
         // The multi-hit clause: +1 PER HIT rather than +3 once.
         AssertUpgradeMoves<ProtoKoRapidFire>("Damage", 3m, 4m);
     }
