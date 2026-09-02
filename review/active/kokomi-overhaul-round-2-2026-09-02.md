@@ -1,4 +1,4 @@
-Status: OPEN (the Plan build's first round; both seats played; the read, the guarded hang, and the four questions for your run)
+Status: OPEN (the Plan build's first round; both seats played; your first run's finds are built into the deployed build; the four questions for your fresh run)
 
 # Kokomi overhaul, round two: the Plan build's first seats
 
@@ -96,9 +96,10 @@ Seat numbers are floors, not fun claims (Guardrail 7).
   `(debuff)`s, so the aura you applied reads as helping them; the bundle
   chooser prints no mark after a pick; an emptied reward screen still
   advertises `choose`.
-- **EB-295, an HP question.** The first combat screen printed 64/80 with no HP
-  cost taken; the seat's fight-one arithmetic (finished at 56 after one 8)
-  confirms it started at 64. Something took 16 HP before the first fight.
+- **EB-295, not a defect.** The first combat screen printed 64/80 with no HP
+  cost taken, and your run opened the same way. Ascension 3's Weary
+  Traveler starts every run at 80 percent of Max HP; your Klee runs opened
+  at 49 of 62 for the same reason.
 - Not ours: Shrink rewriting the printed damage without a marker is the
   game's own preview; a second Weak not moving the intent is Weak's
   duration stacking; the map render is the known limitation.
@@ -123,10 +124,14 @@ damage.
 
 Applied: Read the Field is 4 Block now and 10 at dawn (was 3 and 8), on
 your "looks a bit weak"; one Block under Coral Guard now, double it at
-dawn. Filed from your run: two-line cards refuse the jellyfish by drag and
-Ambush has no selector at all (EB-296), the Burst meter shows under the
-arm (EB-297), the pet traps controller focus (EB-300), and 64/80 is
-confirmed on a human run (EB-295).
+dawn. Filed from your run and fixed in PR #271, in the build you play
+next: two-line cards refused the jellyfish by drag and Ambush had no
+selector at all (EB-296), and the pet trapped controller focus (EB-300),
+one cause, the base library's controller-targeting patch never handing
+navigation back to the room; the Burst meter showed under the arm
+(EB-297), now hidden while the arm is on. On your "has no upgrade?",
+Change of Plans+ loses Exhaust and Rally+ applies 2 Weak, and the doubled
+"Exhaust." on Change of Plans and Vanguard is gone (EB-293).
 
 Picks: none owed. Two numbers are watch items for the next round, applied only
 if the seats and your run agree: Battle Plan's rate (a Plan paying 2
