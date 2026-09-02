@@ -45,7 +45,7 @@ public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard, IPlannedCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ambush"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal 12 damage."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,13 +54,13 @@ public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard, IPlannedCar
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, 12, KokomiPlan.Aim.FrontEnemy),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PlanDamage", 12m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -77,6 +77,6 @@ public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard, IPlannedCar
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PlanDamage"].UpgradeValueBy(3m);
     }
 }

@@ -45,7 +45,7 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "War Council"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal 4 damage and apply 1 [gold]Weak[/gold] to ALL enemies."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage and apply {PlanPowerAmount:diff()} [gold]Weak[/gold] to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,14 +54,15 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlanne
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, 4, KokomiPlan.Aim.AllEnemies),
-            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, 1, KokomiPlan.Aim.AllEnemies),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.AllEnemies),
+            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.AllEnemies),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PlanDamage", 4m),
+            new DynamicVar("PlanPowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,6 +79,7 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlanne
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PlanDamage"].UpgradeValueBy(3m);
+        DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
     }
 }

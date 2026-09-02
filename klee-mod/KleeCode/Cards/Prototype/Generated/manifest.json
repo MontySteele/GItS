@@ -312,23 +312,40 @@
     ]
   },
   "upgrades": {
+    "proto_kk_ambush": {
+      "plan_damage": 3
+    },
+    "proto_kk_battle_plan": {
+      "plan_draw": 1
+    },
+    "proto_kk_chain_of_command": {
+      "plan_damage": 1
+    },
     "proto_kk_change_of_plans": {
       "remove": "exhaust"
     },
     "proto_kk_cleansing_wave": {
-      "block": 3
+      "block": 3,
+      "plan_block": 3
     },
     "proto_kk_coral_bulwark": {
-      "block": 3
+      "block": 3,
+      "plan_block": 3,
+      "plan_power_amount": 1
     },
     "proto_kk_deep_current": {
       "damage": 3
     },
     "proto_kk_exposed_flank": {
-      "power_amount": 1
+      "power_amount": 1,
+      "plan_power_amount": 1
     },
     "proto_kk_feint": {
-      "damage": 3
+      "damage": 3,
+      "plan_damage": 3
+    },
+    "proto_kk_kurages_oath": {
+      "plan_damage": 3
     },
     "proto_kk_moons_reflection": {
       "remove": "exhaust"
@@ -340,7 +357,8 @@
       "power_amount": 1
     },
     "proto_kk_read_the_field": {
-      "block": 3
+      "block": 3,
+      "plan_block": 3
     },
     "proto_kk_salt_line": {
       "block": 3
@@ -354,10 +372,14 @@
     },
     "proto_kk_slack_water": {
       "damage": 3,
-      "power_amount": 1
+      "power_amount": 1,
+      "plan_power_amount": 1
     },
     "proto_kk_song_of_pearls": {
       "power_amount": 1
+    },
+    "proto_kk_stolen_chapter": {
+      "plan_draw": 1
     },
     "proto_kk_the_clouds_like_waves": {
       "power_amount": 1
@@ -369,7 +391,8 @@
       }
     },
     "proto_kk_the_moon_a_ship": {
-      "mend": 2
+      "mend": 2,
+      "plan_mend": 2
     },
     "proto_kk_the_moon_overlooks_the_waters": {
       "cost": -1
@@ -387,7 +410,11 @@
       }
     },
     "proto_kk_vanguard": {
-      "remove": "exhaust"
+      "plan_power_amount": 1
+    },
+    "proto_kk_war_council": {
+      "plan_damage": 3,
+      "plan_power_amount": 1
     },
     "proto_ko_alices_recipe": {
       "cost": -1
@@ -688,5 +715,9 @@
     "proto_mi_yoimiya_aurous_blaze": {
       "power_amount": 1
     }
+  },
+  "no_upgrade": {
+    "proto_mc_lisa_violet_arc": "the same shape as Sucrose's Gust one arm over: the aura carries no amount, and the printed draw is the one number the Prototype-stage rule refuses to bump (its last clause ADDS a draw, and both appliers bind that to the same Cards var). At cost 1 the row is under the rule's cost floor, so a real upgrade here is a ruled `upgrade:` block.",
+    "proto_mc_sucrose_gust": "the row prints two numbers and the Prototype-stage rule may move neither. Swirl carries no amount, and the printed draw is the one number the rule refuses to bump: its last clause ADDS a draw, both appliers bind an added draw to the same Cards var, and a second one is a collision the codegen names outright. At cost 0 the cost clause cannot reach the row either. A real upgrade here is a ruled `upgrade:` block."
   }
 }

@@ -48,7 +48,7 @@ public sealed class ProtoKkTheMoonAShip : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Moon, A Ship O'er the Seas"),
-        ("description", "[gold]Mend[/gold] {Mend:diff()}. [gold]Plan[/gold]: [gold]Mend[/gold] 15."),
+        ("description", "[gold]Mend[/gold] {Mend:diff()}. [gold]Plan[/gold]: [gold]Mend[/gold] {PlanMend:diff()}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -57,13 +57,14 @@ public sealed class ProtoKkTheMoonAShip : CustomCardModel, ICharacterCard, IPlan
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Mend, 15, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Mend, DynamicVars["PlanMend"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Mend", 10m)
+            new DynamicVar("Mend", 10m),
+            new DynamicVar("PlanMend", 15m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -86,5 +87,6 @@ public sealed class ProtoKkTheMoonAShip : CustomCardModel, ICharacterCard, IPlan
     protected override void OnUpgrade()
     {
         DynamicVars["Mend"].UpgradeValueBy(2m);
+        DynamicVars["PlanMend"].UpgradeValueBy(2m);
     }
 }

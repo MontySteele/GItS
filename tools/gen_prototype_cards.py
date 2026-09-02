@@ -161,17 +161,37 @@ def effective_upgrade(card: dict) -> dict | None:
     the two engines apply one implementation and not two spellings of one. An
     authored block always wins, which is how a Balance-stage ruling replaces
     the default without removing it.
+
+    `EB-315`. `no_upgrade:` is the row's OPT-OUT and beats both: a row that
+    states, in a sentence, why it cannot upgrade is base-only by declaration
+    and the rule is not consulted. It is popped for `upgrade:`'s reason -- the
+    emitter's field whitelist is deliberately total -- and read back off the
+    committed sheet by the gate and by `tier0.content.loader`, which is what
+    keeps the two engines and the register on one answer.
     """
     upgrade = card.pop("upgrade", None)
+    no_upgrade = card.pop("no_upgrade", None)
     if upgrade is not None and (not isinstance(upgrade, dict) or not upgrade):
         raise SystemExit(
             f"gen_prototype_cards: {card['id']}: `upgrade:` must be a "
             "non-empty map of delta keys, as an upgrades sheet's entry is; "
             "drop the key for a base-only row.")
+    if no_upgrade is not None:
+        if upgrade is not None:
+            raise SystemExit(
+                f"gen_prototype_cards: {card['id']}: carries BOTH `upgrade:` "
+                "and `no_upgrade:` -- a row either has a delta or states why "
+                "it has none, never both.")
+        if not isinstance(no_upgrade, str) or not no_upgrade.strip():
+            raise SystemExit(
+                f"gen_prototype_cards: {card['id']}: `no_upgrade:` must be "
+                "the REASON this row cannot upgrade, as a non-empty string; "
+                "a bare flag is the silent exemption this key exists to stop.")
+        return None
     if upgrade is None:
         upgrade = prototype_default_delta(
             card["id"], card.get("cost"), card.get("effects", []),
-            bool(card.get("exhaust"))) or None
+            bool(card.get("exhaust")), card.get("plan") or []) or None
     return upgrade
 
 
@@ -199,18 +219,6 @@ _DEBT_SPARK_ARM = (
     "(`upgrades.PROTOTYPE_DEFAULT_PREFIXES`) are the four overhaul arms. "
     "Their upgrades are the SHIPPED rows' and are a Balance-stage ruling, not "
     "a default this generator may invent")
-_DEBT_ALREADY_DRAWS = (
-    "the Prototype-stage rule's last clause is `the card draws one more`, and "
-    "both appliers bind an added draw to ONE `Cards` var -- so a row that "
-    "already draws would be a collision the codegen refuses by name. Bumping "
-    "the printed draw instead is a number nobody has ruled")
-_DEBT_PLAN_ONLY = (
-    "a Plan-only row: its whole body is `KokomiPlan.Schedule` and it has no "
-    "now-line for an added effect to be appended to, so the rule withholds "
-    "the draw rather than declaring a var nothing reads "
-    "(`upgrades.prototype_default_delta`, the second withholding clause). Its "
-    "delta wants to move a `plan:` number, which neither engine can express "
-    "yet")
 
 #: THE DEBT, CURATED AND CHECKED BOTH WAYS.
 #:
@@ -225,6 +233,14 @@ _DEBT_PLAN_ONLY = (
 #: an id here that is not on the sheet is a finding (R213 B deletes rows
 #: whole, and an exemption must go with its row), and an id here whose row now
 #: passes is a finding too (a paid debt is deleted, never left standing).
+#:
+#: `EB-315` EMPTIED THE OVERHAUL-ARM HALF OF IT, two ways. The five Plan-only
+#: rows and Stolen Chapter now upgrade for real -- the rule reads a row's
+#: `plan:` line -- so their entries were DELETED rather than reworded. The two
+#: that still cannot (`proto_mc_lisa_violet_arc`, `proto_mc_sucrose_gust`) say
+#: so ON THE ROW with `no_upgrade:`, which travels with the row under R213 B's
+#: deletion rule and is read by both engines; this dict is now the Spark
+#: arm's alone, which is the one arm the Prototype-stage rule never claimed.
 UPGRADE_DEBT: dict[str, str] = {
     # The Spark arm and its migration twins (`EB-218`, R224).
     "proto_hold_the_line_spark": _DEBT_SPARK_ARM,
@@ -250,15 +266,6 @@ UPGRADE_DEBT: dict[str, str] = {
     "proto_thoma_crimson_ooyoroi_either": _DEBT_SPARK_ARM,
     "proto_thoma_crimson_ooyoroi_priced": _DEBT_SPARK_ARM,
     "proto_true_spark_knight": _DEBT_SPARK_ARM,
-    # Inside the rule's reach, withheld by its own two named clauses.
-    "proto_mc_lisa_violet_arc": _DEBT_ALREADY_DRAWS,
-    "proto_mc_sucrose_gust": _DEBT_ALREADY_DRAWS,
-    "proto_kk_stolen_chapter": _DEBT_ALREADY_DRAWS,
-    "proto_kk_ambush": _DEBT_PLAN_ONLY,
-    "proto_kk_battle_plan": _DEBT_PLAN_ONLY,
-    "proto_kk_chain_of_command": _DEBT_PLAN_ONLY,
-    "proto_kk_kurages_oath": _DEBT_PLAN_ONLY,
-    "proto_kk_war_council": _DEBT_PLAN_ONLY,
 }
 
 
@@ -321,6 +328,12 @@ def upgrade_face_findings(
     Returns rendered lines; empty is green. Split out of `plan()` so a test can
     run it against a synthetic row and watch it go red, which is the only way
     to know a gate is a gate (`understudy` red-first discipline).
+
+    `EB-315`. TWO REGISTERS ARE CONSULTED, and the row's own beats the file's:
+    `no_upgrade:` is written on the row, travels with it under R213 B's
+    deletion rule, and is read by both engines -- so it is where a NEW
+    exemption goes. `UPGRADE_DEBT` is what is left of the same idea kept in a
+    dict, and it is now the Spark arm's alone (see its own note).
     """
     findings: list[str] = []
     ids = {row["id"] for row in rows}
@@ -330,14 +343,25 @@ def upgrade_face_findings(
         if source is None:
             continue
         why = _upgrade_face_finding(deltas.get(card_id), source)
-        excused = UPGRADE_DEBT.get(card_id)
+        excused = UPGRADE_DEBT.get(card_id) or row.get("no_upgrade")
         if why and excused is None:
             findings.append(f"{card_id}: {why}")
         elif why is None and excused is not None:
             findings.append(
-                f"{card_id}: UPGRADE_DEBT still excuses this row, and the row "
-                "now prints its upgrade -- delete the entry "
-                "(gen_prototype_cards.UPGRADE_DEBT)")
+                f"{card_id}: this row is still excused, and it now prints its "
+                "upgrade -- delete the exemption (the row's `no_upgrade:` key, "
+                "or gen_prototype_cards.UPGRADE_DEBT)")
+        # `EB-315`, the same anti-rot rule the debt dict keeps, for the key
+        # that replaced it: an opt-out the RULE has since caught up with is an
+        # opt-out that would quietly suppress a real campfire choice. A paid
+        # debt is deleted, never left standing.
+        if row.get("no_upgrade") and prototype_default_delta(
+                card_id, row.get("cost"), row.get("effects", []),
+                bool(row.get("exhaust")), row.get("plan") or []):
+            findings.append(
+                f"{card_id}: `no_upgrade:` still excuses this row, and the "
+                "Prototype-stage rule now derives a delta for it -- delete "
+                "the key so the row takes the upgrade the rule gives it")
     for card_id in sorted(UPGRADE_DEBT):
         if card_id not in ids:
             findings.append(
@@ -355,6 +379,11 @@ def plan() -> gen.ProfilePlan:
     # card be smithed, and to what?" is answerable from the manifest rather
     # than by re-reading the sheet.
     upgrades: dict[str, dict] = {}
+    # EB-315: the rows that OPTED OUT, with the reason, so "which staged rows
+    # ship base-only, and why?" is one manifest read rather than a grep. The
+    # shipped sheets answer the same question with `upgrades.no_upgrade_path`;
+    # this is that ledger for a surface whose upgrades live on the row.
+    no_upgrade: dict[str, str] = {}
     # EB-150's lesson, carried onto this surface: a choose-one card's MODE
     # FACES are pool members too. `CardModel.Pool` falls through to
     # MockCardPool and throws "You monster!" inside
@@ -395,6 +424,10 @@ def plan() -> gen.ProfilePlan:
         # key could silently diverge from the ratified upgrades file. Here the
         # row IS the ratified home, so the block is lifted by taking the key
         # off the card and putting it in the index the shipped path reads.
+        # EB-315: `no_upgrade:` is read (and popped) by the same call, so the
+        # reason is recorded here where the delta would have been.
+        if row.get("no_upgrade"):
+            no_upgrade[card_id] = row["no_upgrade"]
         upgrade = effective_upgrade(card)
         if upgrade is not None:
             gen.register_upgrade_deltas(card_id, upgrade)
@@ -450,11 +483,14 @@ def plan() -> gen.ProfilePlan:
         "mode_faces": {cid: names
                        for cid, names in sorted(mode_faces.items()) if names},
         # EB-213. Keyed on the row, not on a `docs/<character>-upgrades.yaml`
-        # entry, so a row's deletion takes its upgrade with it (R213 B). An
-        # id absent here is base-only by declaration; there is no
-        # `no_upgrade_path` on this surface, because a declared delta the
-        # emitter cannot express stops the run instead.
+        # entry, so a row's deletion takes its upgrade with it (R213 B). A
+        # declared delta the emitter cannot express stops the run rather than
+        # landing here as a flag.
         "upgrades": dict(sorted(upgrades.items())),
+        # EB-315. The rows that ship base-only ON PURPOSE, with the reason
+        # each states. An id in neither block is a defect the surface's gate
+        # (`tier0/tests/test_prototype_surface.py`) reports by name.
+        "no_upgrade": dict(sorted(no_upgrade.items())),
     }
 
     count = len(owners)

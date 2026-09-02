@@ -48,7 +48,7 @@ public sealed class ProtoKkVanguard : CustomCardModel, ICharacterCard, IPlannedC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Vanguard"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] and 1 [gold]Weak[/gold]."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold] and 1 [gold]Weak[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -57,14 +57,14 @@ public sealed class ProtoKkVanguard : CustomCardModel, ICharacterCard, IPlannedC
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyVulnerable, 1, KokomiPlan.Aim.FrontEnemy),
+            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyVulnerable, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.FrontEnemy),
             new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, 1, KokomiPlan.Aim.FrontEnemy),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PlanPowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,6 +81,6 @@ public sealed class ProtoKkVanguard : CustomCardModel, ICharacterCard, IPlannedC
 
     protected override void OnUpgrade()
     {
-        RemoveKeyword(CardKeyword.Exhaust);
+        DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
     }
 }

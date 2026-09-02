@@ -51,7 +51,7 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Slack Water (proto)"),
-        ("description", "Deal {Damage:diff()} damage. Apply {PowerAmount:diff()} [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Weak[/gold] to ALL enemies."),
+        ("description", "Deal {Damage:diff()} damage. Apply {PowerAmount:diff()} [gold]Weak[/gold]. [gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold] to ALL enemies."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
@@ -62,14 +62,15 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, 2, KokomiPlan.Aim.AllEnemies),
+            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.AllEnemies),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(4m, ValueProp.Move),
-            new DynamicVar("PowerAmount", 1m)
+            new DynamicVar("PowerAmount", 1m),
+            new DynamicVar("PlanPowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -99,5 +100,6 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
     {
         DynamicVars.Damage.UpgradeValueBy(3m);
         DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
     }
 }

@@ -486,6 +486,12 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 0, type: skill,
+   no_upgrade: "the row prints two numbers and the Prototype-stage rule may
+     move neither. Swirl carries no amount, and the printed draw is the one
+     number the rule refuses to bump: its last clause ADDS a draw, both
+     appliers bind an added draw to the same Cards var, and a second one is a
+     collision the codegen names outright. At cost 0 the cost clause cannot
+     reach the row either. A real upgrade here is a ruled `upgrade:` block.",
    description: "[gold]Swirl[/gold] the enemy. Draw 1 card.",
    effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
 
@@ -546,6 +552,12 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: skill,
+   no_upgrade: "the same shape as Sucrose's Gust one arm over: the aura
+     carries no amount, and the printed draw is the one number the
+     Prototype-stage rule refuses to bump (its last clause ADDS a draw, and
+     both appliers bind that to the same Cards var). At cost 1 the row is
+     under the rule's cost floor, so a real upgrade here is a ruled
+     `upgrade:` block.",
    description: "Apply [gold]Electro[/gold] to ALL enemies. Draw 1 card.",
    effects: [{op: apply_aura, element: electro, target: all_enemies},
              {op: draw, amount: 1}]}

@@ -45,7 +45,7 @@ public sealed class ProtoKkBattlePlan : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Battle Plan"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw 1 card."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} card{PlanCards:plural:|s}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -55,13 +55,13 @@ public sealed class ProtoKkBattlePlan : CustomCardModel, ICharacterCard, IPlanne
         new[]
         {
             new KokomiPlan.Planned(KokomiPlan.Kind.Energy, 2, KokomiPlan.Aim.Self),
-            new KokomiPlan.Planned(KokomiPlan.Kind.Draw, 1, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Draw, DynamicVars["PlanCards"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PlanCards", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,6 +78,6 @@ public sealed class ProtoKkBattlePlan : CustomCardModel, ICharacterCard, IPlanne
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars["PlanCards"].UpgradeValueBy(1m);
     }
 }
