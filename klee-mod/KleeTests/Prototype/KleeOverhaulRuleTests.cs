@@ -458,21 +458,23 @@ public class KleeOverhaulRuleTests
     }
 
     [Fact]
-    public void The_doubling_is_armed_by_the_card_and_spent_by_its_set_off()
+    public void The_multiplier_is_armed_by_the_card_and_spent_by_its_set_off()
     {
+        // R243 ([USER]: "move The Big One to 4x with no flat number"): the
+        // flag became the row's own number, and an unarmed Set off is x1.
         var ledger = NewLedger();
-        Assert.False(ledger.PeekDoubling());
+        Assert.Equal(1, ledger.PeekMultiplier());
 
-        ledger.ArmDoubling();
-        Assert.True(ledger.PeekDoubling());     // a Mine may not eat it
-        Assert.True(ledger.TakeDoubling());
-        Assert.False(ledger.TakeDoubling());    // "this way" means this card
+        ledger.ArmMultiplier(4);
+        Assert.Equal(4, ledger.PeekMultiplier());   // a Mine may not eat it
+        Assert.Equal(4, ledger.TakeMultiplier());
+        Assert.Equal(1, ledger.TakeMultiplier());   // "this way" means this card
 
         var bigOne = typeof(ProtoBombPower).Assembly
             .GetType("KleeMod.Cards.Prototype.Generated.ProtoKoTheBigOne")!;
         var seq = Il.CallSequence(
             bigOne.GetMethod("OnPlay", HeadlessGame.All)!).ToList();
-        var arm = seq.FindIndex(c => c.EndsWith("ArmDoubling"));
+        var arm = seq.FindIndex(c => c.EndsWith("ArmMultiplier"));
         var setOff = seq.FindIndex(c => c.EndsWith("SetOffAimed"));
         Assert.True(arm >= 0 && setOff > arm, string.Join(", ", seq));
     }

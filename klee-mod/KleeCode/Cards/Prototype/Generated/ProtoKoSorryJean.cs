@@ -42,13 +42,13 @@ public sealed class ProtoKoSorryJean : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sorry, Jean..."),
-        ("description", "Remove one of your [gold]Bombs[/gold]. Gain [gold]Block[/gold] equal to its size. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Remove one of your [gold]Bombs[/gold]. Gain [gold]Block[/gold] equal to its size."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,14 +61,10 @@ public sealed class ProtoKoSorryJean : CustomCardModel
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await ProtoBombPower.RemoveLargestForBlockAndGain(choiceContext, Owner.Creature);
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        AddKeyword(CardKeyword.Retain);
     }
 }

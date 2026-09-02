@@ -43,7 +43,7 @@ SEED = 7
 #: `lint_op_parity` stays green, and resolved by nothing.
 OVERHAUL_OPS = ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                 "remove_bomb_for_block", "damage_set_off_total",
-                "double_set_off", "draw_per_set_off")
+                "multiply_set_off", "draw_per_set_off")
 
 
 @pytest.fixture

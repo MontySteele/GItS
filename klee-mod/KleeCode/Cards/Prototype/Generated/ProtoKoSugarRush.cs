@@ -45,7 +45,7 @@ public sealed class ProtoKoSugarRush : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sugar Rush"),
-        ("description", "Gain 2 [gold]Energy[/gold]. Draw 1 card."),
+        ("description", "Gain {Energy:diff()} [gold]Energy[/gold]. Draw 1 card."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -65,6 +65,7 @@ public sealed class ProtoKoSugarRush : CustomCardModel, ISparkPricedCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new DynamicVar("Energy", 2m),
             new CardsVar(1)
         };
 
@@ -78,12 +79,12 @@ public sealed class ProtoKoSugarRush : CustomCardModel, ISparkPricedCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await SparkPower.Spend(choiceContext, Owner.Creature, 2, this);
-        await PlayerCmd.GainEnergy(2, Owner);
+        await PlayerCmd.GainEnergy(DynamicVars["Energy"].IntValue, Owner);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        RemoveKeyword(CardKeyword.Exhaust);
+        DynamicVars["Energy"].UpgradeValueBy(1m);
     }
 }

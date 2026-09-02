@@ -725,7 +725,7 @@ def _max_hp_hit(card: Card, fx: dict) -> float:
 #: they take ONE pricing decision between them -- see `_op_price`.
 KLEE_OVERHAUL_OPS = frozenset((
     "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
-    "remove_bomb_for_block", "damage_set_off_total", "double_set_off",
+    "remove_bomb_for_block", "damage_set_off_total", "multiply_set_off",
     "draw_per_set_off"))
 
 #: The Kokomi overhaul's verbs (DRAFT 6, QUARANTINED behind
@@ -2248,7 +2248,7 @@ STATIC_OP_PRICING: dict[str, str] = {
             "drafted number moves)"
        for op in ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                   "remove_bomb_for_block", "damage_set_off_total",
-                  "double_set_off", "draw_per_set_off")},
+                  "multiply_set_off", "draw_per_set_off")},
     # --- the Kokomi overhaul, draft 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ----
     # EB-311: the blanket ZERO these eight rows used to share is gone. One
     # rationale apiece now, each derived from a dial already in this table, and

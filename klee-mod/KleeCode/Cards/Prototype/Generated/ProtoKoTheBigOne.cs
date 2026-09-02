@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoTheBigOne : CustomCardModel, IElementalCard
+public sealed class ProtoKoTheBigOne : CustomCardModel, IElementalCard, IUnplayableReasonCard
 {
     /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>
     public Element Element => Element.Pyro;
@@ -48,13 +48,24 @@ public sealed class ProtoKoTheBigOne : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Big One"),
-        ("description", "[gold]Set off[/gold] for double damage. Deal {Damage:diff()} damage."),
+        ("description", "[gold]Set off[/gold] for quadruple damage."),
     };
+
+    // EB-261, the Set-off gate: a card whose whole body is a
+    // Set off is unplayable while no enemy holds one of this Klee's
+    // Bombs, rather than resolving to nothing.
+    protected override bool IsPlayable =>
+        ProtoBombPower.AnyPlacedBy(SparkCost.OwnerCreatureOf(this));
+
+    public string? UnplayableReason =>
+        ProtoBombPower.AnyPlacedBy(SparkCost.OwnerCreatureOf(this))
+            ? null
+            : "no enemy is holding a Bomb";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(10m, ValueProp.Move)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -66,13 +77,13 @@ public sealed class ProtoKoTheBigOne : CustomCardModel, IElementalCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        KleeOverhaulLedger.For(Owner.Creature).ArmDoubling();
+        KleeOverhaulLedger.For(Owner.Creature).ArmMultiplier(4);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ProtoBombPower.SetOffAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue);
+        await ProtoBombPower.SetOffAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, 0);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

@@ -23,9 +23,10 @@ namespace KleeMod.Powers;
 ///     8+9 Bombs deals 12 and banked 17. It now banks what
 ///     <c>ElementalHit.Deal</c> returned, so the bonus line, the badge and the
 ///     tooltip are three readings of one number.
-///   * <see cref="TakeDoubling"/> -- The Big One's "Bombs set off this way deal
-///     double". Armed by the card and spent BY the Set off, so "this way" means
-///     this card rather than the rest of the turn.
+///   * <see cref="TakeMultiplier"/> -- The Big One's "Set off for quadruple
+///     damage" (R243, [USER]: "move The Big One to 4x with no flat number";
+///     the row carries the number). Armed by the card and spent BY the Set
+///     off, so "this way" means this card rather than the rest of the turn.
 ///
 /// PER PLAYER, keyed the way <c>BombPower</c>'s detonation counters are keyed
 /// and for the same reason (D2, and R205 behind it): in co-op the other Klee's
@@ -97,7 +98,7 @@ public sealed class KleeOverhaulLedger
     /// promises.</summary>
     public int DamageSetOffThisPlay { get; private set; }
 
-    private bool _doubleNextSetOff;
+    private int _setOffMultiplier = 1;
     private int _round = -1;
 
     /// <summary>One explosion landed, for <paramref name="damageDealt"/> --
@@ -115,20 +116,23 @@ public sealed class KleeOverhaulLedger
     /// Emitted at the top of the body of any card that reads it.</summary>
     public void BeginPlay() => DamageSetOffThisPlay = 0;
 
-    /// <summary>The Big One arms this; the next Set off spends it.</summary>
-    public void ArmDoubling() => _doubleNextSetOff = true;
+    /// <summary>The Big One arms this with the row's own number; the next Set
+    /// off spends it. An int rather than the flag it replaced: R243's card
+    /// audit ruling made the multiplier the card's ("4x with no flat
+    /// number"), so the engine multiplies by whatever the row says.</summary>
+    public void ArmMultiplier(int multiplier) => _setOffMultiplier = multiplier;
 
-    /// <summary>Read and clear. The Set off that consumes it is "this way".</summary>
-    public bool TakeDoubling()
+    /// <summary>Read and clear (to 1). The Set off that consumes it is "this way".</summary>
+    public int TakeMultiplier()
     {
-        var armed = _doubleNextSetOff;
-        _doubleNextSetOff = false;
+        var armed = _setOffMultiplier;
+        _setOffMultiplier = 1;
         return armed;
     }
 
     /// <summary>Read without clearing: a Mine answering an enemy attack must
-    /// not eat the doubling a card armed for its own Set off.</summary>
-    public bool PeekDoubling() => _doubleNextSetOff;
+    /// not eat the multiplier a card armed for its own Set off.</summary>
+    public int PeekMultiplier() => _setOffMultiplier;
 
     /// <summary>Roll the per-turn counters to <paramref name="round"/>. Public
     /// to the pins so a turn boundary can be exercised without a combat.</summary>
@@ -139,7 +143,7 @@ public sealed class KleeOverhaulLedger
         SetOffThisTurn = 0;
         ReactedThisTurn = 0;
         DamageSetOffThisPlay = 0;
-        _doubleNextSetOff = false;
+        _setOffMultiplier = 1;
         _round = round;
     }
 }

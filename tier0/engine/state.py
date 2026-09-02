@@ -1255,7 +1255,7 @@ class CombatState:
     # this play began actually LANDED for, post-Strength, post-Weak,
     # post-reaction, post-Vulnerable (`EB-270`) -- never the charge sizes.
     ko_damage_set_off_this_play: int = 0
-    ko_double_next_set_off: bool = False    # The Big One arms, a Set off spends
+    ko_set_off_multiplier: int = 1          # The Big One arms N, a Set off spends it
     # Blocking Notes' slope (rework Track C.3, 2026-07-28). A per-TURN count
     # where companions_played above is a per-COMBAT list, so the two cannot be
     # derived from each other and both have to exist.

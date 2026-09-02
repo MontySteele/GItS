@@ -316,7 +316,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # stays honest.
                   "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                   "remove_bomb_for_block", "damage_set_off_total",
-                  "double_set_off", "draw_per_set_off",
+                  "multiply_set_off", "draw_per_set_off",
                   # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
                   # same terms and the same quarantine as the block above: the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
@@ -694,6 +694,11 @@ def card_is_set_off_only(card: dict) -> bool:
     clause is deliberately narrow: the grow must feed a LATER `set_off` aimed
     at the SAME target, so a row that grows one enemy's Bombs and sets off
     another's, or that grows after the cash, is not silently covered.
+
+    A `multiply_set_off` AHEAD OF A SET OFF IS COVERED the same way (The Big
+    One since R243, "4x with no flat number"): the card's whole body is the
+    Set off, so on a Bomb-less board it is a 3-energy nothing and takes the
+    same gate. Twin: `klee_overhaul.set_off_only`.
     """
     rest = [eff for eff in card.get("effects", [])
             if eff.get("op") not in _COST_OPS]
@@ -704,6 +709,11 @@ def card_is_set_off_only(card: dict) -> bool:
     for index, eff in enumerate(rest):
         if eff.get("op") == "set_off":
             if int(eff.get("damage", 0) or 0):
+                return False
+            continue
+        if eff.get("op") == "multiply_set_off":
+            if not any(later.get("op") == "set_off"
+                       for later in rest[index + 1:]):
                 return False
             continue
         if eff.get("op") != "grow_bombs":
@@ -2708,13 +2718,22 @@ def blocked_reason(
             growth = eff.get("growth", 0)
             if not isinstance(growth, int) or growth < 0:
                 return "merge_bombs growth must be a literal int >= 0"
-        if op in {"remove_bomb_for_block", "double_set_off",
-                  "draw_per_set_off"}:
+        if op in {"remove_bomb_for_block", "draw_per_set_off"}:
             # No fields at all: each is one whole printed clause, and any
             # number they might carry is a rule's, not a card's.
             unknown = set(eff) - {"op"}
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
+        if op == "multiply_set_off":
+            # The Big One's number IS the card's (R243, [USER]: "move The Big
+            # One to 4x with no flat number"), so the row carries it and the
+            # emitter hands it to the ledger as a literal.
+            unknown = set(eff) - {"op", "multiplier"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            if not isinstance(eff.get("multiplier"), int) \
+                    or eff["multiplier"] < 2:
+                return "multiply_set_off multiplier must be a literal int >= 2"
         if op == "damage_set_off_total":
             unknown = set(eff) - {"op", "target"}
             if unknown:
@@ -6432,10 +6451,10 @@ def build_body(
                 "choiceContext, cardPlay.Target, Owner.Creature, this, "
                 "cardPlay);")
 
-        elif op == "double_set_off":
+        elif op == "multiply_set_off":
             lines.append(
                 "KleeOverhaulLedger.For(Owner.Creature)"
-                ".ArmDoubling();")
+                f".ArmMultiplier({int(eff['multiplier'])});")
 
         elif op == "draw_per_set_off":
             lines.append(
@@ -7516,15 +7535,23 @@ def _authored_face_numbers(card: dict):
 
     A number with no key is still yielded, and that is the point: the walk in
     `_authored_face_with_tokens` uses the whole ordered run to place its
-    cursor, so a Spark price or an Exert cost ahead of the number being
-    upgraded cannot be mistaken for it. Only TOP-LEVEL effects are here,
+    cursor, so an unowned literal ahead of the number being upgraded cannot
+    be mistaken for it. A Spark price is NOT yielded, because the face does
+    not print it (see the cost branch). Only TOP-LEVEL effects are here,
     because only a top-level effect owns a var -- a branch's number renders as
     the literal it is.
     """
     for eff in card.get("effects", []):
         op = eff.get("op")
         if op in _COST_OPS:
-            yield None, None, int(eff.get("amount", 0))
+            # NOT a number the face prints: the price sits in the cost slot
+            # and the body does not restate it (`docs/current/text-conventions.md`,
+            # the Spark row). Yielding it stepped the cursor past the first
+            # matching digit in the text, which on Sugar Rush ("Gain 2
+            # Energy" behind a 2-Spark price) was the one number the upgrade
+            # moves, so the `+` face kept its literal (Klee card audit,
+            # 2026-09-02).
+            continue
         elif op == "damage" and isinstance(eff.get("amount"), int):
             owns = (eff.get("target") != "self"
                     and eff is damage_var_effect(card))
@@ -7562,8 +7589,17 @@ def _authored_face_numbers(card: dict):
                 else (None, None, eff["amount"])
         elif op == "mend" and isinstance(eff.get("amount"), int):
             yield "mend", "Mend", eff["amount"]
-        elif op in ("draw", "energy") \
-                and isinstance(eff.get("amount"), int):
+        elif op == "energy" and isinstance(eff.get("amount"), int):
+            # An `energy: +N` delta binds to the FIRST energy op (tier0's
+            # `energy` branch), whose amount the emitter already reads back
+            # through the `Energy` var; the authored face has to print that
+            # var or the `+` card says one number and pays another (Sugar
+            # Rush, the Klee card audit of 2026-09-02).
+            owns = eff is next((f for f in card["effects"]
+                                if f.get("op") == "energy"), None)
+            yield ("energy", "Energy", eff["amount"]) if owns \
+                else (None, None, eff["amount"])
+        elif op == "draw" and isinstance(eff.get("amount"), int):
             yield None, None, eff["amount"]
     # EB-315. THE PLAN LINE'S NUMBERS, AFTER THE NOW-LINE'S, because that is
     # the order a Plan row's own face prints them in ("Deal 6 damage. Plan:

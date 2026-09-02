@@ -42,13 +42,13 @@ public sealed class ProtoKoExplosivesWorkshop : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Explosives Workshop"),
-        ("description", "At the start of your turn, your [gold]Bombs[/gold] grow by 1 more. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "At the start of your turn, your [gold]Bombs[/gold] grow by {PowerAmount:diff()} more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -60,15 +60,11 @@ public sealed class ProtoKoExplosivesWorkshop : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<ExplosivesWorkshopGrowthPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
+        await PowerCmd.Apply<ExplosivesWorkshopGrowthPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

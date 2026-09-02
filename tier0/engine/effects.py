@@ -5079,13 +5079,16 @@ def _op_damage_set_off_total(state: CombatState, fx: dict,
                        "target": fx.get("target", "enemy")}, card)
 
 
-def _op_double_set_off(state: CombatState, fx: dict, card: Card) -> None:
-    """The Big One arms the doubling; the Set off behind it on the same row
-    spends it, which is what "set off this way" means."""
+def _op_multiply_set_off(state: CombatState, fx: dict, card: Card) -> None:
+    """The Big One arms the multiplier -- the ROW's number (`multiplier`, 4
+    since R243: "move The Big One to 4x with no flat number") -- and the Set
+    off behind it on the same row spends it, which is what "set off this way"
+    means."""
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
-    state.emit("ko_doubling_armed")
-    klee_overhaul.arm_doubling(state)
+    multiplier = int(fx["multiplier"])
+    state.emit("ko_multiplier_armed", multiplier=multiplier)
+    klee_overhaul.arm_multiplier(state, multiplier)
 
 
 def _op_draw_per_set_off(state: CombatState, fx: dict, card: Card) -> None:
@@ -5256,7 +5259,7 @@ OPS = {
     "merge_bombs": _op_merge_bombs,
     "remove_bomb_for_block": _op_remove_bomb_for_block,
     "damage_set_off_total": _op_damage_set_off_total,
-    "double_set_off": _op_double_set_off,
+    "multiply_set_off": _op_multiply_set_off,
     "draw_per_set_off": _op_draw_per_set_off,
     # --- Kokomi overhaul, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) -----
     # Registered so the rows load, priced so the drafter is honest, resolved by

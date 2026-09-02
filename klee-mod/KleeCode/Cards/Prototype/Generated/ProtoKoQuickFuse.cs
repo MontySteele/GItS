@@ -42,7 +42,7 @@ public sealed class ProtoKoQuickFuse : CustomCardModel, ISparkPricedCard, IUnpla
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Quick Fuse"),
-        ("description", "Each [gold]Bomb[/gold] on the enemy grows by {Grow:diff()}, then [gold]Set off[/gold]."),
+        ("description", "Each [gold]Bomb[/gold] on the enemy grows by {Grow:diff()}. [gold]Set off[/gold]."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -88,6 +88,6 @@ public sealed class ProtoKoQuickFuse : CustomCardModel, ISparkPricedCard, IUnpla
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Grow"].UpgradeValueBy(1m);
+        DynamicVars["Grow"].UpgradeValueBy(3m);
     }
 }

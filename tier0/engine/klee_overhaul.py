@@ -33,7 +33,7 @@ the ones a reader should know before reading anything else:
   * A SET OFF AIMED AT A CORPSE JUMPS the whole pile rather than fizzling;
     `SetOff` takes the charges first and its per-charge death test then sends
     every one of them to `JumpCharges`. See `set_off`.
-  * THE MINE READS THE DOUBLING WITHOUT SPENDING IT (`PeekDoubling`), so an
+  * THE MINE READS THE MULTIPLIER WITHOUT SPENDING IT (`PeekMultiplier`), so an
     enemy attack cannot eat the window The Big One armed for its own card.
 
 A SEPARATE MODULE, not a section of `effects.py`, for the reason
@@ -66,7 +66,7 @@ from tier0.engine.state import Card, CombatState, Enemy, KleeCharge
 #: `draft.STATIC_OP_PRICING`, and resolved by this module and nothing else.
 OVERHAUL_OPS = frozenset((
     "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
-    "remove_bomb_for_block", "damage_set_off_total", "double_set_off",
+    "remove_bomb_for_block", "damage_set_off_total", "multiply_set_off",
     "draw_per_set_off"))
 
 #: The player-side powers this arm reads, named here rather than spelled at
@@ -277,7 +277,7 @@ def roll_to(state: CombatState, round_: int) -> None:
     state.ko_set_off_this_turn = 0
     state.ko_reacted_this_turn = 0
     state.ko_damage_set_off_this_play = 0
-    state.ko_double_next_set_off = False
+    state.ko_set_off_multiplier = 1
     state.ko_round = round_
 
 
@@ -310,22 +310,29 @@ def begin_play(state: CombatState, card: Card) -> None:
         state.ko_damage_set_off_this_play = 0
 
 
-def arm_doubling(state: CombatState) -> None:
-    """The Big One arms it; the next Set off spends it. `ArmDoubling`."""
-    state.ko_double_next_set_off = True
+def arm_multiplier(state: CombatState, multiplier: int) -> None:
+    """The Big One arms it; the next Set off spends it. `ArmMultiplier`.
+
+    An INT rather than the flag it replaced. R243's Klee card audit ruling
+    ([USER], 2026-09-02: "move The Big One to 4x with no flat number") made
+    the number the card's own, so the row carries it
+    (`multiply_set_off.multiplier`) and the engine multiplies by whatever
+    the row says; unarmed is 1.
+    """
+    state.ko_set_off_multiplier = int(multiplier)
 
 
-def take_doubling(state: CombatState) -> bool:
-    """Read and clear. The Set off that consumes it is "this way"."""
-    armed = state.ko_double_next_set_off
-    state.ko_double_next_set_off = False
+def take_multiplier(state: CombatState) -> int:
+    """Read and clear (to 1). The Set off that consumes it is "this way"."""
+    armed = state.ko_set_off_multiplier
+    state.ko_set_off_multiplier = 1
     return armed
 
 
-def peek_doubling(state: CombatState) -> bool:
+def peek_multiplier(state: CombatState) -> int:
     """Read WITHOUT clearing: a Mine answering an enemy attack must not eat the
-    doubling a card armed for its own Set off. `PeekDoubling`."""
-    return state.ko_double_next_set_off
+    multiplier a card armed for its own Set off. `PeekMultiplier`."""
+    return state.ko_set_off_multiplier
 
 
 # ---------------------------------------------------------------------------
@@ -356,13 +363,13 @@ def set_off(state: CombatState, enemy: Optional[Enemy]) -> int:
         return 0
     state.emit("ko_set_off", target=enemy.name, charges=len(taken),
                size=sum(c.size for c in taken))
-    doubled = take_doubling(state)
+    multiplier = take_multiplier(state)
     exploded = 0
     for index, charge in enumerate(taken):
         if not enemy.alive:
             jump_charges(state, enemy, taken[index:])
             break
-        _explode(state, enemy, charge, doubled)
+        _explode(state, enemy, charge, multiplier)
         exploded += 1
         if state.over or not state.player.alive:
             break
@@ -371,7 +378,7 @@ def set_off(state: CombatState, enemy: Optional[Enemy]) -> int:
 
 
 def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
-             doubled: bool) -> None:
+             multiplier: int) -> None:
     """ONE explosion, which is the unit every other rule is priced in: one Pyro
     hit for the charge's size, one Spark, one payload, one entry in both of
     rule 7's counters. `Explode`'s twin.
@@ -390,10 +397,10 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     """
     from tier0.engine import effects                # late import: cycle
 
-    size = charge.size * 2 if doubled else charge.size
+    size = charge.size * multiplier
     before = state.reactions_this_turn
     state.emit("ko_explosion", target=enemy.name, size=size,
-               mine=charge.is_mine, doubled=doubled)
+               mine=charge.is_mine, multiplier=multiplier)
     dealt = effects.deal_damage_to_enemy(state, enemy, size, element="pyro",
                                          source=EXPLOSION_SOURCE)
     reacted = state.reactions_this_turn > before
@@ -524,8 +531,8 @@ def mines_answer_attack(state: CombatState, enemy: Enemy) -> None:
     Mines are CONSUMED, so the second hit of a multi-hit intent finds none. The
     rule is self-limiting.
 
-    THE DOUBLING IS PEEKED, NOT TAKEN (`PeekDoubling`): an enemy's attack must
-    not eat the window The Big One armed for its own Set off.
+    THE MULTIPLIER IS PEEKED, NOT TAKEN (`PeekMultiplier`): an enemy's attack
+    must not eat the window The Big One armed for its own Set off.
     """
     if not live(state) or not enemy.alive:
         return
@@ -533,12 +540,12 @@ def mines_answer_attack(state: CombatState, enemy: Enemy) -> None:
     if not mines:
         return
     state.emit("ko_mines_answer", target=enemy.name, count=len(mines))
-    doubled = peek_doubling(state)
+    multiplier = peek_multiplier(state)
     for index, mine in enumerate(mines):
         if not enemy.alive:
             jump_charges(state, enemy, mines[index:])
             break
-        _explode(state, enemy, mine, doubled)
+        _explode(state, enemy, mine, multiplier)
         if state.over or not state.player.alive:
             break
     sweep_jumps(state)
@@ -771,7 +778,9 @@ def set_off_only(card: Card) -> bool:
     three's extension, Quick Fuse): growing a pile that is not there does
     exactly as little as setting off a pile that is not there. The clause is
     deliberately narrow -- the grow must feed a LATER `set_off` aimed at the
-    SAME target.
+    SAME target. A `multiply_set_off` ahead of a Set off is covered the same
+    way (The Big One since R243, "4x with no flat number": the card's whole
+    body is the Set off, so a Bomb-less board makes it a 3-energy nothing).
     """
     rest = [fx for fx in card.effects if fx.get("op") not in _COST_OPS]
     if not rest:
@@ -781,6 +790,11 @@ def set_off_only(card: Card) -> bool:
     for index, fx in enumerate(rest):
         if fx.get("op") == "set_off":
             if int(fx.get("damage", 0) or 0):
+                return False
+            continue
+        if fx.get("op") == "multiply_set_off":
+            if not any(later.get("op") == "set_off"
+                       for later in rest[index + 1:]):
                 return False
             continue
         if fx.get("op") != "grow_bombs":

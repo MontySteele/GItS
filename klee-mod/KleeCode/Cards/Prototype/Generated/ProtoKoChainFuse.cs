@@ -66,6 +66,6 @@ public sealed class ProtoKoChainFuse : CustomCardModel
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Grow"].UpgradeValueBy(1m);
+        DynamicVars["Grow"].UpgradeValueBy(3m);
     }
 }

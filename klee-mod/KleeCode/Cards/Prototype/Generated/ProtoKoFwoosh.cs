@@ -48,7 +48,7 @@ public sealed class ProtoKoFwoosh : CustomCardModel, IElementalCard, ISparkPrice
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fwoosh!"),
-        ("description", "[gold]Set off[/gold] and deal {Damage:diff()} damage to a random enemy."),
+        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -68,20 +68,21 @@ public sealed class ProtoKoFwoosh : CustomCardModel, IElementalCard, ISparkPrice
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move)
+            new DamageVar(6m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKoFwoosh()
-        : base(0, CardType.Attack, CardRarity.Common, TargetType.Self, autoAdd: false)
+        : base(0, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await SparkPower.Spend(choiceContext, Owner.Creature, 1, this);
-        await ProtoBombPower.SetOffRandom(choiceContext, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue, 1);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await ProtoBombPower.SetOffAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue);
     }
 
     protected override void OnUpgrade()

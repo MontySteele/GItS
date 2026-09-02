@@ -904,45 +904,55 @@ def test_big_badda_boom_hits_again_for_what_the_bombs_dealt(overhaul):
     assert dealt < 17, "Weak reduced what the charges landed for"
 
 
-def test_the_doubling_is_armed_by_the_card_and_spent_by_its_set_off(overhaul):
-    """`The_doubling_is_armed_by_the_card_and_spent_by_its_set_off`."""
+def test_the_multiplier_is_armed_by_the_card_and_spent_by_its_set_off(overhaul):
+    """`The_multiplier_is_armed_by_the_card_and_spent_by_its_set_off`. R243
+    ([USER]: "move The Big One to 4x with no flat number"): the flag became
+    the row's own number, and an unarmed Set off is x1."""
     state = klee_state()
-    assert klee_overhaul.peek_doubling(state) is False
+    assert klee_overhaul.peek_multiplier(state) == 1
 
-    klee_overhaul.arm_doubling(state)
-    assert klee_overhaul.peek_doubling(state) is True    # a Mine may not eat it
-    assert klee_overhaul.take_doubling(state) is True
-    assert klee_overhaul.take_doubling(state) is False   # "this way" = this card
+    klee_overhaul.arm_multiplier(state, 4)
+    assert klee_overhaul.peek_multiplier(state) == 4     # a Mine may not eat it
+    assert klee_overhaul.take_multiplier(state) == 4
+    assert klee_overhaul.take_multiplier(state) == 1     # "this way" = this card
 
 
-def test_the_big_one_doubles_only_its_own_set_off(overhaul):
-    """The row's order IS the rule: `double_set_off` sits ahead of the
-    `set_off` it pays for, and the next Set off after that one is unaffected."""
+def test_the_big_one_multiplies_only_its_own_set_off(overhaul):
+    """The row's order IS the rule: `multiply_set_off` sits ahead of the
+    `set_off` it pays for, and the next Set off after that one is unaffected.
+    The row's multiplier is 4 and the card has no hit of its own (R243), so
+    on a Bomb-less board it is refused like Quick Fuse (`EB-261`)."""
     enemy = make_enemy(hp=400)
     state = klee_state([enemy])
+    card = load("proto_ko_the_big_one")
+    assert klee_overhaul.refuses_for_no_bomb(state, card)
     klee_overhaul.place(state, enemy, 10)
+    assert not klee_overhaul.refuses_for_no_bomb(state, card)
 
-    effects.resolve_card(state, load("proto_ko_the_big_one"))
-    assert [e["size"] for e in state.log if e["event"] == "ko_explosion"] == [20]
+    effects.resolve_card(state, card)
+    assert [e["size"] for e in state.log if e["event"] == "ko_explosion"] == [40]
+    assert not [e for e in state.log
+                if e["event"] == "damage" and e["source"] == "attack"], \
+        "no flat number: the card's whole body is the Set off"
 
     klee_overhaul.place(state, enemy, 10)
     klee_overhaul.set_off(state, enemy)
     assert [e["size"] for e in state.log
-            if e["event"] == "ko_explosion"] == [20, 10]
+            if e["event"] == "ko_explosion"] == [40, 10]
 
 
-def test_a_mine_peeks_the_doubling_without_spending_it(overhaul):
-    """`PeekDoubling`'s whole reason: an enemy attack must not eat the window
+def test_a_mine_peeks_the_multiplier_without_spending_it(overhaul):
+    """`PeekMultiplier`'s whole reason: an enemy attack must not eat the window
     The Big One armed for its own Set off."""
     enemy = make_enemy(hp=200, name="attacker", intents=ATTACKER)
     state = klee_state([enemy])
-    klee_overhaul.arm_doubling(state)
+    klee_overhaul.arm_multiplier(state, 4)
     klee_overhaul.place(state, enemy, 5, is_mine=True)
 
     combat._enemy_turn(state, enemy)
 
-    assert klee_overhaul.peek_doubling(state) is True
-    assert [e["size"] for e in state.log if e["event"] == "ko_explosion"] == [10]
+    assert klee_overhaul.peek_multiplier(state) == 4
+    assert [e["size"] for e in state.log if e["event"] == "ko_explosion"] == [20]
 
 
 # ---------------------------------------------------------------------------

@@ -661,7 +661,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         if (taken.Count == 0) return 0;
 
         var ledger = KleeOverhaulLedger.For(applier);
-        var doubled = ledger.TakeDoubling();
+        var multiplier = ledger.TakeMultiplier();
         var exploded = 0;
 
         for (var i = 0; i < taken.Count; i++)
@@ -677,7 +677,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
                 break;
             }
             await Explode(choiceContext, target, taken[i], applier, cardSource,
-                          doubled);
+                          multiplier);
             exploded++;
         }
 
@@ -699,10 +699,10 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     private static async Task Explode(
         PlayerChoiceContext choiceContext, Creature target, ProtoCharge charge,
-        Creature applier, CardModel? cardSource, bool doubled)
+        Creature applier, CardModel? cardSource, int multiplier)
     {
         var ledger = KleeOverhaulLedger.For(applier);
-        var size = doubled ? charge.Size * 2 : charge.Size;
+        var size = charge.Size * multiplier;
 
         Vfx.KleeCombatVfx.SpawnBombLob(applier, target);
 
@@ -866,7 +866,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         if (_charges.Count == 0) await PowerCmd.Remove(this);
 
         var ledger = KleeOverhaulLedger.For(Applier);
-        var doubled = ledger.PeekDoubling();
+        var multiplier = ledger.PeekMultiplier();
         var enemy = Owner;
         for (var i = 0; i < mines.Count; i++)
         {
@@ -877,7 +877,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
                 break;
             }
             await Explode(choiceContext, enemy, mines[i], Applier,
-                          cardSource: null, doubled);
+                          cardSource: null, multiplier);
         }
         await SweepJumps(choiceContext, Applier.CombatState);
     }

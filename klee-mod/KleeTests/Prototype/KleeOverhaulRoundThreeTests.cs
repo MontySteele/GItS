@@ -121,12 +121,14 @@ public class KleeOverhaulRoundThreeTests
             .Where(c => Vars(c).OfType<DamageVar>().Any())
             .ToList();
 
-        // TEN, not the row's nine: Flame Dance is the tenth and its Damage
-        // var is its AoE hit's rather than its Set off's (its Set off deals
-        // nothing of its own). It belongs here anyway -- what is being pinned
-        // is that a Set off row's printed number is a var, whichever clause
-        // owns it.
-        Assert.Equal(10, carriers.Count);
+        // NINE. Flame Dance is in: its Damage var is its AoE hit's rather
+        // than its Set off's (its Set off deals nothing of its own), and what
+        // is being pinned is that a Set off row's printed number is a var,
+        // whichever clause owns it. The Big One is OUT since R243 ([USER]:
+        // "move The Big One to 4x with no flat number"): it calls SetOffAimed
+        // with no hit of its own, declares no Damage var, and the filter
+        // above drops it -- a card with no number has no number to print.
+        Assert.Equal(9, carriers.Count);
         foreach (var card in carriers)
         {
             Assert.Contains("{Damage:diff()}", Face(card));
@@ -356,13 +358,28 @@ public class KleeOverhaulRoundThreeTests
         AssertUpgradeMoves<ProtoKkCoralBulwark>("Block", 6m, 9m);
         // Ka-pow! carries the `set_off`-hit clause again: round 5 pick 1 moved
         // Retain onto the BASE card, which handed its upgrade back to the
-        // default rule. Fwoosh! prints the same clause beside it.
+        // default rule. Fwoosh! prints the same clause beside it: aimed and
+        // 6 since R243's card-audit ruling ("default looks good").
         AssertUpgradeMoves<ProtoKoKapow>("Damage", 4m, 7m);
-        AssertUpgradeMoves<ProtoKoFwoosh>("Damage", 5m, 8m);
+        AssertUpgradeMoves<ProtoKoFwoosh>("Damage", 6m, 9m);
         AssertUpgradeMoves<ProtoKoPop>("BombSize", 5m, 7m);
-        // Chain Fuse grows by 6 since the 2026-09-02 balance pass; the
-        // upgrade's +1 rides the new base, which is that pass's own rule.
-        AssertUpgradeMoves<ProtoKoChainFuse>("Grow", 6m, 7m);
+        // Chain Fuse grows by 6 since the 2026-09-02 balance pass. Its
+        // upgrade is the row's OWN `grow: +3` (the Klee card audit of the
+        // same day, `review/active/klee-card-audit-2026-09-02.md`): a grow is
+        // damage to be and takes a Strike's +3, where the rule's default +1
+        // was an upgrade nobody could see.
+        AssertUpgradeMoves<ProtoKoChainFuse>("Grow", 6m, 9m);
+        // The same audit's other three levers, one pin each. A power whose
+        // printed number IS 1 moves that number (the rule read it as a
+        // switch and appended a draw); an `energy:` delta moves the Energy
+        // var the authored face now prints; Sorry, Jean...'s upgrade is a
+        // keyword, not a number.
+        AssertUpgradeMoves<ProtoKoExplosivesWorkshop>("PowerAmount", 1m, 2m);
+        AssertUpgradeMoves<ProtoKoSugarRush>("Energy", 2m, 3m);
+        var sorryJean = new ProtoKoSorryJean();
+        Assert.False(sorryJean.Keywords.Contains(CardKeyword.Retain));
+        Upgrade(sorryJean);
+        Assert.True(sorryJean.Keywords.Contains(CardKeyword.Retain));
         // The Mend clause, on draft 6's carrier. `Tide` left this pin with the
         // verb it read: the rule's key list is written over OPS, so retiring
         // `gain_tide` retired the delta and nothing here had to be re-decided.
