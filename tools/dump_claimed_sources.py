@@ -16,6 +16,15 @@ Blocks:
            /cards/) as `wiki_title <TAB> card_id`. A title here is TAKEN;
            proposing it for a second card needs a red-pen ruling that
            displaces the incumbent.
+  PLACEHOLDER
+           effective card picks belonging to the quarantined prototype
+           surface (`proto_*`), as `wiki_title <TAB> proto_id`. Kept OUT of
+           CLAIMED on purpose: a placeholder BORROWS a shipped card's source
+           by design (art_lint's is_prototype partition), so counting it as a
+           claim would report ~145 phantom double-claims and hide the real
+           ones. It is not FREE either -- taking one of these titles for a
+           new card silently re-points a prototype's face, so a hunt should
+           see it and choose deliberately.
   FREE     titles already fetched into art/raw but claimed by no card --
            dead shortlist ranks and non-card registers. Cheap candidates:
            the file is on disk already. `[non-card]` marks a title that IS
@@ -29,6 +38,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from art_fetch import read_plan          # noqa: E402
+from art_lint import is_prototype       # noqa: E402
 
 OUT = ROOT / "docs" / "art-claimed-sources.tsv"
 
@@ -39,13 +49,17 @@ def main() -> int:
     def effective(r):
         return r["pick"] == "auto" or r["rank"] == 1
 
-    claimed = sorted(
-        {(r["title"], r["asset_id"]) for r in rows
-         if "/cards/" in r["out"] and effective(r)})
+    cards = [r for r in rows if "/cards/" in r["out"] and effective(r)]
+    claimed = sorted({(r["title"], r["asset_id"]) for r in cards
+                      if not is_prototype(r["asset_id"])})
+    placeholder = sorted({(r["title"], r["asset_id"]) for r in cards
+                          if is_prototype(r["asset_id"])})
     claimed_titles = {t for t, _ in claimed}
+    placeholder_titles = {t for t, _ in placeholder}
     noncard = {r["title"] for r in rows
                if "/cards/" not in r["out"] and effective(r)}
-    free = sorted({r["title"] for r in rows} - claimed_titles)
+    free = sorted({r["title"] for r in rows}
+                  - claimed_titles - placeholder_titles)
 
     lines = [
         "# DERIVED FILE -- regenerate with tools/dump_claimed_sources.py.",
@@ -56,13 +70,19 @@ def main() -> int:
     ]
     lines += [f"{t}\t{cid}" for t, cid in claimed]
     lines += ["#",
+              f"# PLACEHOLDER: {len(placeholder)} prototype picks, "
+              f"{len(placeholder_titles - claimed_titles)} of them on a title "
+              f"no shipped card claims"]
+    lines += [f"# {t}\t{cid}" for t, cid in placeholder]
+    lines += ["#",
               f"# FREE: {len(free)} fetched titles no card claims"]
     lines += [f"# {t}" + ("\t[non-card]" if t in noncard else "")
               for t in free]
 
     OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
     dupes = len(claimed) - len(claimed_titles)
-    print(f"{OUT}: {len(claimed)} claimed, {len(free)} free"
+    print(f"{OUT}: {len(claimed)} claimed, {len(placeholder)} placeholder, "
+          f"{len(free)} free"
           + (f", {dupes} title(s) claimed twice (see art_lint L1)"
              if dupes else ""))
     return 0

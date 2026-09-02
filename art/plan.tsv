@@ -1424,3 +1424,192 @@ hold_the_line	ImageGen/images/cards/klee/hold_the_line.png	500	380	cover	y0.50	s
 smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y0.50	shortlist	1	png	Klee Shorts 2023-06-12.png		splash
 smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y0.38	shortlist	2	png	Klee Birthday 2022 - Shorts.png		splash
 smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y0.65	shortlist	3	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash
+# ================================================================
+# PROTOTYPE PLACEHOLDERS (2026-09-02). Quarantined surface, borrowed art.
+# ================================================================
+# docs/prototype-surface.yaml is a staging surface, not a sheet: a row there
+# is a question put to the engine and its art is commissioned only if the
+# slice is ACCEPTED (R213 B, and the KleePowerIcons.cs policy for power
+# sigils). Until then the prototype cards rendered the base-game BETA
+# placeholder, which is what a playtest seat reads as "this card is broken"
+# rather than "this card has no art yet". These rows give every prototype
+# card a face WITHOUT commissioning anything: no fetch, no new asset, no
+# generated art. Two kinds of pick and nothing else:
+#
+#   NAME MATCH  the prototype row's card name is a shipped card's name, so it
+#               wears the shipped card's source and the shipped card's crop.
+#               The picture is deliberately the same picture; that IS the
+#               placeholder. Uncommented rows below are all of this kind.
+#   REUSE       no name match, so the pick is a DEPRECATED source -- a shipped
+#               card that the arm's flag takes out of the pool, or a painted
+#               asset already cleared through art/SOURCES.tsv that no card
+#               claims. Every reuse row carries its one-line reason above it.
+#
+# THE ROWS ARE `shortlist` RANK 1, not `auto`, so the whole set renders to
+# art/candidates/ and onto ONE contact sheet ([USER] vetoes on the sheet,
+# R212's art rung) while rank 1 still lands in the shipping tree.
+#
+# art_lint knows about these rows: L1/L7 dedupe runs INSIDE the prototype
+# partition and inside the shipped partition, never across, and L12 allows a
+# group of pixel-identical files to contain at most one prototype stem. Both
+# rules are stated in art_lint.py -- read them there, not here.
+#
+# WHEN A SLICE IS ACCEPTED OR REJECTED, THESE ROWS LEAVE with the surface
+# rows they serve. They are placeholders, and a placeholder that outlives its
+# card is how a pool ends up wearing the wrong faces.
+#
+# NOT COVERED, and the reason is one fact: 25 companion rows name a character
+# with no cleared asset at all (Jean, Lisa, Amber, Razor, Eula, Mika, Rosaria,
+# Noelle, Mona, Venti, Varka, Kazuha, Yae, Yoimiya, Ayaka, Ayato, Heizou,
+# Kirara, Mizuki, Chiori). A companion card IS its character, so another
+# character's portrait would be worse than none -- it would read as a bug.
+# They stay on the bill until a fetch lands, which is not this pass's job.
+#
+# ---------- Klee overhaul (proto_ko_) ----------
+proto_ko_kaboom	ImageGen/images/cards/klee/proto_ko_kaboom.png	500	380	cover	top	shortlist	1	png	Klee Character Card.png		tcg	
+# proto_ko_kapow <- crackle: Klee's shipped spark-burst VFX; Ka-pow! is the second face of the basic Attack
+proto_ko_kapow	ImageGen/images/cards/klee/proto_ko_kapow.png	500	380	contain	center	shortlist	1	png	Pounding Surprise Explosive Spark Effect.png		vfx	
+proto_ko_duck_and_cover	ImageGen/images/cards/klee/proto_ko_duck_and_cover.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 2.png		sticker	
+proto_ko_pop	ImageGen/images/cards/klee/proto_ko_pop.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 11.png		splash	
+proto_ko_jumpy_dumpty	ImageGen/images/cards/klee/proto_ko_jumpy_dumpty.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty.png		item	
+proto_ko_fish_flavored_bait	ImageGen/images/cards/klee/proto_ko_fish_flavored_bait.png	500	380	contain	center	shortlist	1	png	Item Fish-Flavored Toast.png		item	
+proto_ko_pocket_fireworks	ImageGen/images/cards/klee/proto_ko_pocket_fireworks.png	500	380	contain	center	shortlist	1	png	Item Fizzy Fireworks.png		item	
+proto_ko_chain_fuse	ImageGen/images/cards/klee/proto_ko_chain_fuse.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 3.png		splash	
+proto_ko_explosives_workshop	ImageGen/images/cards/klee/proto_ko_explosives_workshop.png	500	380	cover	center	shortlist	1	png	Namecard Background Klee Explosive.png		splash	
+proto_ko_careful_arrangement	ImageGen/images/cards/klee/proto_ko_careful_arrangement.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 4.png		splash	
+proto_ko_big_badda_boom	ImageGen/images/cards/klee/proto_ko_big_badda_boom.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Klee Wish.png		splash	
+proto_ko_the_big_one	ImageGen/images/cards/klee/proto_ko_the_big_one.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 8.png		splash	
+# proto_ko_alices_recipe <- alchemical_curiosity: a written alchemy note -- Alice's Recipe is a formula on paper
+proto_ko_alices_recipe	ImageGen/images/cards/klee/proto_ko_alices_recipe.png	500	380	contain	center	shortlist	1	png	Item Naganohara Fireworks Note.png		item	
+proto_ko_mine_toss	ImageGen/images/cards/klee/proto_ko_mine_toss.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine.png		item	
+# proto_ko_fwoosh <- tail_of_flame: a firework streak, which is what a Fwoosh looks like
+proto_ko_fwoosh	ImageGen/images/cards/klee/proto_ko_fwoosh.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 9.png		splash	
+# proto_ko_tinder_toss <- combustion_study: the thrown explosive charge itself
+proto_ko_tinder_toss	ImageGen/images/cards/klee/proto_ko_tinder_toss.png	500	380	contain	center	shortlist	1	png	Item Klee Explosive.png		item	
+proto_ko_quick_fuse	ImageGen/images/cards/klee/proto_ko_quick_fuse.png	500	380	contain	center	shortlist	1	png	Item Special Jumpy Dumpty Dodoco.png		item	
+# proto_ko_bang_bang <- double_pop: the shipped DOUBLE-bomb item; Bang Bang! is the two-hit Attack
+proto_ko_bang_bang	ImageGen/images/cards/klee/proto_ko_bang_bang.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Mint Jelly Jumpy Dumpty.png		item	
+proto_ko_rapid_fire	ImageGen/images/cards/klee/proto_ko_rapid_fire.png	500	380	cover	center	shortlist	1	png	Sparkling Steps 2021-06-09 - Klee Emoji 3.png		sticker	
+proto_ko_chained_reactions	ImageGen/images/cards/klee/proto_ko_chained_reactions.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 7.png		splash	
+proto_ko_sparks_n_splash	ImageGen/images/cards/klee/proto_ko_sparks_n_splash.png	500	380	cover	top	shortlist	1	png	Character Klee Full Wish.png		splash	
+proto_ko_sizzle	ImageGen/images/cards/klee/proto_ko_sizzle.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Dodo Stove.png		item	
+proto_ko_perfect_timing	ImageGen/images/cards/klee/proto_ko_perfect_timing.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 3.png		sticker	
+proto_ko_flame_dance	ImageGen/images/cards/klee/proto_ko_flame_dance.png	500	380	contain	center	shortlist	1	png	Item Fireworks Dance Amidst a Snowy Sky.png		item	
+proto_ko_catalytic_converter	ImageGen/images/cards/klee/proto_ko_catalytic_converter.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Marvelous Magic.png		item	
+proto_ko_ammo_scavenging	ImageGen/images/cards/klee/proto_ko_ammo_scavenging.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Travel Bag.png		item	
+proto_ko_powder_charge	ImageGen/images/cards/klee/proto_ko_powder_charge.png	500	380	cover	y0.44	shortlist	1	png	Klee Portrait.png		splash	
+# proto_ko_dig_in <- hold_the_line: the statue that holds its ground; Dig In is the overhaul's basic Block
+proto_ko_dig_in	ImageGen/images/cards/klee/proto_ko_dig_in.png	500	380	cover	y0.45	shortlist	1	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash	
+proto_ko_sugar_rush	ImageGen/images/cards/klee/proto_ko_sugar_rush.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sparkling Steps 2021-06-09 - Klee Emoji 1.png		sticker	
+proto_ko_run_away	ImageGen/images/cards/klee/proto_ko_run_away.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 46 Klee 1.png		sticker	
+# proto_ko_grounded <- hide_and_seek: Klee tucked into a corner; Grounded is the confinement Power
+proto_ko_grounded	ImageGen/images/cards/klee/proto_ko_grounded.png	500	380	cover	center	shortlist	1	png	Namecard Background Celebration Peekaboo!.png		splash	
+proto_ko_sorry_jean	ImageGen/images/cards/klee/proto_ko_sorry_jean.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 2.png		sticker	
+# ---------- Mondstadt companion overhaul (proto_mc_) ----------
+# proto_mc_diona_signature_mix: Diona pouring the drink -- Signature Mix is that cocktail; her only other cleared source
+proto_mc_diona_signature_mix	ImageGen/images/cards/companions/proto_mc_diona_signature_mix.png	500	380	cover	y0.35	shortlist	1	png	Diona Card.png		tcg	diona
+proto_mc_kaeya_frostgnaw	ImageGen/images/cards/companions/proto_mc_kaeya_frostgnaw.png	500	380	cover	center	shortlist	1	png	Cold-Blooded Strike Equipment Card.png		tcg	kaeya
+# proto_mc_kaeya_glacial_waltz: the only cleared Kaeya source; the TOP band is the ice-phoenix art, a different crop from Frostgnaw's centre
+proto_mc_kaeya_glacial_waltz	ImageGen/images/cards/companions/proto_mc_kaeya_glacial_waltz.png	500	380	cover	top	shortlist	1	png	Cold-Blooded Strike Equipment Card.png		tcg	kaeya
+proto_mc_barbara_show_begin	ImageGen/images/cards/companions/proto_mc_barbara_show_begin.png	500	380	cover	center	shortlist	1	png	Glorious Season Equipment Card.png		tcg	barbara
+proto_mc_albedo_solar_isotoma	ImageGen/images/cards/companions/proto_mc_albedo_solar_isotoma.png	500	380	cover	y0.16	shortlist	1	png	Albedo Character Card.png		tcg	albedo
+proto_mc_fischl_nightrider	ImageGen/images/cards/companions/proto_mc_fischl_nightrider.png	500	380	cover	center	shortlist	1	png	Stellar Predator Equipment Card.png		tcg	fischl
+proto_mc_fischl_oz	ImageGen/images/cards/companions/proto_mc_fischl_oz.png	500	380	cover	y0.16	shortlist	1	png	Fischl Character Card.png		tcg	fischl
+proto_mc_sucrose_gust	ImageGen/images/cards/companions/proto_mc_sucrose_gust.png	500	380	cover	center	shortlist	1	png	Chaotic Entropy Equipment Card.png		tcg	sucrose
+proto_mc_sucrose_astable	ImageGen/images/cards/companions/proto_mc_sucrose_astable.png	500	380	cover	y0.16	shortlist	1	png	Sucrose Character Card.png		tcg	sucrose
+proto_mc_sucrose_catalyst_conversion	ImageGen/images/cards/companions/proto_mc_sucrose_catalyst_conversion.png	500	380	cover	y0.30	shortlist	1	png	Sucrose Card.png		tcg	sucrose
+proto_mc_bennett_fantastic_voyage	ImageGen/images/cards/companions/proto_mc_bennett_fantastic_voyage.png	500	380	cover	y0.16	shortlist	1	png	Bennett Character Card.png		tcg	bennett
+# proto_mc_nicole_revelation: Nicole's second cleared source; the left crop keeps the figure and clears the burnt-in name plate
+proto_mc_nicole_revelation	ImageGen/images/cards/companions/proto_mc_nicole_revelation.png	500	380	cover	x0.30	shortlist	1	png	Nicole Introduction Card.png		splash	nicole
+proto_mc_diona_icy_paws	ImageGen/images/cards/companions/proto_mc_diona_icy_paws.png	500	380	cover	y0.16	shortlist	1	png	Diona Character Card.png		tcg	diona
+# proto_mc_barbara_melody_loop: Barbara's third cleared source, cropped below the wordmark like the shipped Sucrose Card row
+proto_mc_barbara_melody_loop	ImageGen/images/cards/companions/proto_mc_barbara_melody_loop.png	500	380	cover	y0.35	shortlist	1	png	Barbara Card.png		tcg	barbara
+proto_mc_bennett_passion_overload	ImageGen/images/cards/companions/proto_mc_bennett_passion_overload.png	500	380	cover	center	shortlist	1	png	Grand Expectation Equipment Card.png		tcg	bennett
+proto_mc_dahlia_sacramental_shower	ImageGen/images/cards/companions/proto_mc_dahlia_sacramental_shower.png	500	380	cover	top	shortlist	1	png	Dahlia Character Card.png		tcg	dahlia
+proto_mc_dahlia_favonian_favor	ImageGen/images/cards/companions/proto_mc_dahlia_favonian_favor.png	500	380	cover	y0.16	shortlist	1	png	Dahlia Wish.png		splash	dahlia
+# proto_mc_durin_binary_form: the Durin item render; Binary Form is the dragon's two halves and this is his only free source
+proto_mc_durin_binary_form	ImageGen/images/cards/companions/proto_mc_durin_binary_form.png	500	380	contain	center	shortlist	1	png	Durin Item.png		item	durin
+# ---------- Kokomi overhaul (proto_kk_) ----------
+proto_kk_waters_edge	ImageGen/images/cards/kokomi/proto_kk_waters_edge.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+proto_kk_coral_guard	ImageGen/images/cards/kokomi/proto_kk_coral_guard.png	500	380	cover	y0.41	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+proto_kk_kurages_oath	ImageGen/images/cards/kokomi/proto_kk_kurages_oath.png	500	380	cover	y0.24	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+# proto_kk_rising_tide <- tideturn: the tide turning; Rising Tide is the starter Attack that Surges
+proto_kk_rising_tide	ImageGen/images/cards/kokomi/proto_kk_rising_tide.png	500	380	cover	y0.38	shortlist	1	png	Sangonomiya Kokomi Introduction Card.jpg		splash	kokomi_pool
+proto_kk_stolen_chapter	ImageGen/images/cards/kokomi/proto_kk_stolen_chapter.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+# proto_kk_tidal_prayer <- votive_offering: an offering at the shrine -- the prayer that feeds the Tide
+proto_kk_tidal_prayer	ImageGen/images/cards/kokomi/proto_kk_tidal_prayer.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Sangonomiya Kokomi Item.png		item	kokomi_pool
+# proto_kk_sea_spray <- scattering_spray: the same spray motif under a shorter name
+proto_kk_sea_spray	ImageGen/images/cards/kokomi/proto_kk_sea_spray.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+# proto_kk_deep_current <- pulsing_current: the current that runs through every enemy
+proto_kk_deep_current	ImageGen/images/cards/kokomi/proto_kk_deep_current.png	500	380	cover	y0.34	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+# proto_kk_breaker <- surging_shoal: a breaker IS a surging wave hitting the shoal
+proto_kk_breaker	ImageGen/images/cards/kokomi/proto_kk_breaker.png	500	380	cover	y0.74	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+# proto_kk_high_tide <- ebb_tide: the other half of the same tide; no shipped Kokomi card is named High Tide
+proto_kk_high_tide	ImageGen/images/cards/kokomi/proto_kk_high_tide.png	500	380	cover	x0.62	shortlist	1	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
+proto_kk_undertow	ImageGen/images/cards/kokomi/proto_kk_undertow.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+proto_kk_song_of_pearls	ImageGen/images/cards/kokomi/proto_kk_song_of_pearls.png	500	380	cover	x0.33	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+proto_kk_nereids_ascension	ImageGen/images/cards/kokomi/proto_kk_nereids_ascension.png	500	380	cover	y0.79	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+proto_kk_sango_isshin	ImageGen/images/cards/kokomi/proto_kk_sango_isshin.png	500	380	cover	y0.62	shortlist	1	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
+# proto_kk_battle_plan <- the_gunbai_turns: the war fan that signals the plan a turn before it lands
+proto_kk_battle_plan	ImageGen/images/cards/kokomi/proto_kk_battle_plan.png	500	380	cover	y0.22	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+# proto_kk_ambush <- signal_arrow: the loosed arrow -- damage that arrives after the card is gone
+proto_kk_ambush	ImageGen/images/cards/kokomi/proto_kk_ambush.png	500	380	cover	y0.56	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+# proto_kk_read_the_field <- read_the_current: the shipped 'Read the ...' card, one noun over
+proto_kk_read_the_field	ImageGen/images/cards/kokomi/proto_kk_read_the_field.png	500	380	cover	y0.44	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+# proto_kk_feint <- press_the_advantage: the follow-up blow a feint sets up
+proto_kk_feint	ImageGen/images/cards/kokomi/proto_kk_feint.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
+# proto_kk_contingency <- mercy_of_the_deep: the heal motif; Contingency is the scheduled Mend
+proto_kk_contingency	ImageGen/images/cards/kokomi/proto_kk_contingency.png	500	380	cover	y0.74	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+# proto_kk_treatise <- watch_of_the_shallows: Power donor for a Power card, same rarity, same watchful register
+proto_kk_treatise	ImageGen/images/cards/kokomi/proto_kk_treatise.png	500	380	cover	x0.55	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+# proto_kk_war_council <- council_at_bourou: the council itself -- the shipped card of that name
+proto_kk_war_council	ImageGen/images/cards/kokomi/proto_kk_war_council.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+# proto_kk_the_art_of_war <- vigil_of_the_deep: Rare Power donor for a Rare Power; the doctrine standing over the fight
+proto_kk_the_art_of_war	ImageGen/images/cards/kokomi/proto_kk_the_art_of_war.png	500	380	cover	x0.53	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+# proto_kk_rally <- mass_mobilization: the shipped 'Rally the Isles'; the same word and the same act
+proto_kk_rally	ImageGen/images/cards/kokomi/proto_kk_rally.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
+# proto_kk_vanguard <- to_the_front: the vanguard IS the troop sent to the front
+proto_kk_vanguard	ImageGen/images/cards/kokomi/proto_kk_vanguard.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+# proto_kk_orders <- standing_orders: the shipped orders card; Orders is its Power form
+proto_kk_orders	ImageGen/images/cards/kokomi/proto_kk_orders.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+# proto_kk_the_generals_banner <- raise_the_sashimono: a sashimono is a war banner -- the same object
+proto_kk_the_generals_banner	ImageGen/images/cards/kokomi/proto_kk_the_generals_banner.png	500	380	cover	x0.36	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+# proto_kk_quiet_study <- quiet_harbor: the same quiet register, Block plus a small feed
+proto_kk_quiet_study	ImageGen/images/cards/kokomi/proto_kk_quiet_study.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 13 Sangonomiya Kokomi 3.png		sticker	kokomi_pool
+proto_kk_salt_line	ImageGen/images/cards/kokomi/proto_kk_salt_line.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Sangonomiya Kokomi Expression 2.png		sticker	kokomi_pool
+proto_kk_cleansing_tide	ImageGen/images/cards/kokomi/proto_kk_cleansing_tide.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sango Pearl Wild.png		item	kokomi_pool
+# proto_kk_the_clouds_like_waves <- pearl_current: Uncommon Power donor for an Uncommon Power; the drip that runs while you are low
+proto_kk_the_clouds_like_waves	ImageGen/images/cards/kokomi/proto_kk_the_clouds_like_waves.png	500	380	cover	y0.33	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+# proto_kk_reading_the_tide <- tideline_watch: reading the tideline is the card's whole text
+proto_kk_reading_the_tide	ImageGen/images/cards/kokomi/proto_kk_reading_the_tide.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sangonomiya Kokomi The Deep.png		item	kokomi_pool
+# proto_kk_coral_bulwark <- jade_bulwark: the shipped Bulwark; the same word and the same job
+proto_kk_coral_bulwark	ImageGen/images/cards/kokomi/proto_kk_coral_bulwark.png	500	380	cover	y0.10	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+# proto_kk_watatsumis_blessing <- prayer_to_the_moon: Rare Skill donor for a Rare Skill; the blessing is the prayer answered
+proto_kk_watatsumis_blessing	ImageGen/images/cards/kokomi/proto_kk_watatsumis_blessing.png	500	380	cover	x0.40	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+# ---------- Inazuma companion overhaul (proto_mi_) ----------
+proto_mi_gorou_inuzaka	ImageGen/images/cards/companions/proto_mi_gorou_inuzaka.png	500	380	cover	y0.16	shortlist	1	png	Gorou Character Card.png		tcg	gorou
+proto_mi_gorou_war_banner	ImageGen/images/cards/companions/proto_mi_gorou_war_banner.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Gorou Wish.png		splash	gorou
+# proto_mi_gorou_juuga <- gorou_heart_of_the_clan: the shipped 'Gorou -- Forward Unto Victory'; Juuga is that line renamed
+proto_mi_gorou_juuga	ImageGen/images/cards/companions/proto_mi_gorou_juuga.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Gorou Introduction Card.png		splash	gorou
+proto_mi_sayu_fuuin_dash	ImageGen/images/cards/companions/proto_mi_sayu_fuuin_dash.png	500	380	cover	y0.16	shortlist	1	png	Sayu Character Card.png		tcg	sayu
+proto_mi_sayu_daruma	ImageGen/images/cards/companions/proto_mi_sayu_daruma.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sayu Wish.png		splash	sayu
+proto_mi_sayu_naptime	ImageGen/images/cards/companions/proto_mi_sayu_naptime.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Sayu Full Wish.png		splash	sayu
+proto_mi_shinobu_sanctifying_ring	ImageGen/images/cards/companions/proto_mi_shinobu_sanctifying_ring.png	500	380	cover	y0.16	shortlist	1	png	Kuki Shinobu Character Card.png		tcg	shinobu
+proto_mi_shinobu_grass_ring	ImageGen/images/cards/companions/proto_mi_shinobu_grass_ring.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Kuki Shinobu Wish.png		splash	shinobu
+proto_mi_shinobu_thundergrust	ImageGen/images/cards/companions/proto_mi_shinobu_thundergrust.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Kuki Shinobu Full Wish.png		splash	shinobu
+proto_mi_thoma_blazing_barrier	ImageGen/images/cards/companions/proto_mi_thoma_blazing_barrier.png	500	380	cover	y0.16	shortlist	1	png	Thoma Character Card.png		tcg	thoma
+proto_mi_thoma_crimson_ooyoroi	ImageGen/images/cards/companions/proto_mi_thoma_crimson_ooyoroi.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Thoma Wish.png		splash	thoma
+proto_mi_sara_crowfeather_cover	ImageGen/images/cards/companions/proto_mi_sara_crowfeather_cover.png	500	380	cover	y0.16	shortlist	1	png	Kujou Sara Character Card.png		tcg	sara
+proto_mi_sara_tengu_stormcall	ImageGen/images/cards/companions/proto_mi_sara_tengu_stormcall.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Kujou Sara Wish.png		splash	sara
+proto_mi_itto_superlative_superstrength	ImageGen/images/cards/companions/proto_mi_itto_superlative_superstrength.png	500	380	cover	y0.16	shortlist	1	png	Arataki Itto Character Card.png		tcg	itto
+proto_mi_raiden_musou_no_hitotachi	ImageGen/images/cards/companions/proto_mi_raiden_musou_no_hitotachi.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Raiden Shogun Full Wish.png		splash	raiden
+#
+# The Kokomi draft-4 slice (review/active/kokomi-overhaul-slice-1-2026-09-01.md
+# sec.4) adds two cards this branch's surface does not carry yet -- Change of
+# Plans and Moon's Reflection -- and drops Coral Bulwark. The two picks are
+# made and left COMMENTED rather than live, because a plan row that writes a
+# file for an id no card requests is a STALE finding in art_coverage, not
+# coverage. Uncomment them in the same commit that mints the ids; delete
+# proto_kk_coral_bulwark's row in the commit that deletes its surface row.
+# proto_kk_change_of_plans	ImageGen/images/cards/kokomi/proto_kk_change_of_plans.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Sangonomiya Kokomi Expression 3.png		sticker	kokomi_pool
+# proto_kk_moons_reflection	ImageGen/images/cards/kokomi/proto_kk_moons_reflection.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 09 Sangonomiya Kokomi 1.png		sticker	kokomi_pool
