@@ -157,6 +157,15 @@ ELSEWHERE = {
     "apply_power": "APPLY_POWER_FIELDS totality",
     "repeat_this": "literal-int check in the conditional arm",
     "replay_next_companion": "literal-int check in its own arm",
+    # QUARANTINED (C.KLEE_OVERHAUL), `EB-312`. `set_off` began honouring
+    # `times:` when the sim twin was built; its answer was already written on
+    # the emitter side the day the op landed, and this is the row that says so.
+    # SET_OFF_FIELDS totality, plus a positive-literal-int check on `times` and
+    # the narrowing that a `times` above 1 is `random_enemy` ONLY -- because
+    # `times` is a RE-ROLL there and would mean something else on an aimed or
+    # all-enemies Set off.
+    "set_off": "SET_OFF_FIELDS totality + the literal-int and random-only "
+               "checks in its own arm",
 }
 
 
@@ -197,6 +206,8 @@ def test_the_ops_answered_elsewhere_really_do_refuse(op):
                         "then": [{"op": "repeat_this", "times": "exhaust_pile"}]},
         "replay_next_companion": {"op": "replay_next_companion",
                                   "times": "exhaust_pile"},
+        "set_off": {"op": "set_off", "target": "random_enemy", "damage": 4,
+                    "times": "exhaust_pile"},
     }
     card = {
         "id": "fabricated_elsewhere", "name": "Fabricated", "cost": 1,

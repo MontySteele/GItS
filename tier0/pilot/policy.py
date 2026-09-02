@@ -14,7 +14,7 @@ import contextlib
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine import effects, powers, resources
+from tier0.engine import effects, klee_overhaul, powers, resources
 from tier0.engine.combat import (card_cost, card_playable, spark_cost,
                                  spark_price, spark_threshold)
 from tier0.engine.state import Card, CombatState
@@ -494,6 +494,62 @@ def _expected_damage(state: CombatState, card: Card) -> float:
                 total += per_hit * times * n_targets
         elif fx["op"] == "place_bomb":
             total += fx["bomb_damage"] * _est(state, fx.get("amount", 1), 1)
+        # --- THE KLEE OVERHAUL'S FOUR DAMAGE VERBS (QUARANTINED,
+        # C.KLEE_OVERHAUL). REACHABLE ONLY ON THE ARM BY CONSTRUCTION: no
+        # shipped row prints one of these ops, and `loader._card_prototype`
+        # refuses a `proto_ko_` id with the flag off, so every shipped arm's
+        # score is byte-identical and `POLICY_VERSION` covers the same
+        # decisions it covered before.
+        #
+        # WHY THEY ARE HERE AT ALL. Without them the pilot priced Ka-pow! and
+        # Jumpy Dumpty at ZERO and played neither: a first read of the arm
+        # reported 27 plays, all of them Strike and Defend, and 18 dead in
+        # hand. That is an instrument artifact, not a design finding, and it
+        # would have been quoted as one.
+        #
+        # WHAT THEY DELIBERATELY UNDERSTATE, stated rather than left to be
+        # discovered -- the `summon_kurage` arm's own posture, and the safe
+        # direction: GROWTH (a Bomb left to cook is worth more than its size
+        # today), the SPARK an explosion mints, Jumpy Dumpty's Mine PAYLOAD,
+        # the Mine's defensive half, and every reaction. The pilot has no
+        # cook-or-cash policy; it reads the board's numbers and nothing else.
+        elif fx["op"] == "set_off":
+            # THE PILE IS THE CARD'S REAL DAMAGE, and it is a plain board read
+            # rather than a forecast -- exactly the number the mod's badge
+            # shows on the enemy. The card's own printed hit rides on top,
+            # through the same `per_hit` arithmetic a `damage` row takes.
+            printed = int(fx.get("damage", 0) or 0)
+            times = _est(state, fx.get("times", 1), 1)
+            hit_targets = (living if fx.get("target") == "all_enemies"
+                           else [effects._default_target(state)])
+            hit_targets = [t for t in hit_targets if t is not None]
+            for enemy in hit_targets:
+                total += klee_overhaul.total_size(enemy)
+            if printed:
+                per_hit = powers.modify_damage_dealt(
+                    state.player, printed) + flat
+                total += per_hit * times * max(1, len(hit_targets))
+        elif fx["op"] == "plant_bomb":
+            # `place_bomb`'s line one op over, at its own face value: the size
+            # planted, per body it lands on. Undiscounted for the same reason
+            # the shipped line is -- a Bomb that is never cashed is a play the
+            # pilot got wrong, not a number this function should hedge.
+            n = len(living) if fx.get("target") == "all_enemies" else 1
+            total += int(fx.get("size", 0)) * n
+        elif fx["op"] in ("grow_bombs", "merge_bombs"):
+            # Growth is damage the pile will deal when it is finally cashed,
+            # and it is worth nothing at all on a board with no pile -- which
+            # is the same sentence `EB-261` gates Quick Fuse's playability on.
+            amount = int(fx.get("amount", fx.get("growth", 0)) or 0)
+            if any(klee_overhaul.holds_charge(e) for e in living):
+                total += amount
+        elif fx["op"] == "damage_set_off_total":
+            # Big Badda Boom's second clause hits again for what the Bombs
+            # dealt, so the pile counts TWICE on that row -- once for the Set
+            # off above it and once here.
+            enemy = effects._default_target(state)
+            if enemy is not None:
+                total += klee_overhaul.total_size(enemy)
         elif (fx["op"] == "apply_power"
               and fx.get("power") == "sparks_n_splash"):
             # The Burst payoff: stacks x 4 hits x 5 dmg over coming turns.

@@ -13,8 +13,8 @@ import copy
 from typing import Optional, Sequence
 
 from tier0 import constants as C
-from tier0.engine import (furina_reframe, kokomi_plan, powers, reactions,
-                          resources, statuses)
+from tier0.engine import (furina_reframe, klee_overhaul, kokomi_plan, powers,
+                          reactions, resources, statuses)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, KurageMemory,
                                 grant_sly_autoplay,
@@ -396,7 +396,15 @@ def _power_amount_formula(state: CombatState, formula: dict) -> int:
 # closes: the sheet row that makes a card declare `TargetType.AnyEnemy` in the
 # mod is the sheet row that binds the aim in the sim.
 AIMING_OPS = frozenset(("damage", "place_bomb", "detonate", "move_bombs",
-                        "apply_aura", "swirl", "apply_power"))
+                        "apply_aura", "swirl", "apply_power",
+                        # QUARANTINED (C.KLEE_OVERHAUL). The arm's four aimed
+                        # verbs, restoring the "same list the emitter carries"
+                        # promise above -- `gen_klee_cards.AIMING_OPS` has held
+                        # them since the ops landed, on EB-142's argument (an
+                        # aiming op dereferences `cardPlay.Target` wherever it
+                        # sits). No shipped row prints one, so this widening is
+                        # unreachable outside the arm.
+                        "set_off", "plant_bomb", "grow_bombs", "merge_bombs"))
 
 # Ops whose aimed target may be a CORPSE. C#'s dead-target rule is op-dependent
 # and this frozenset is that asymmetry, written down once:
@@ -3402,18 +3410,28 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.reactions_this_turn > 0
     if name == "bomb_went_off_this_turn" or name == "bomb_reacted_this_turn":
         # THE KLEE OVERHAUL'S TWO PER-TURN READS (QUARANTINED,
-        # C.KLEE_OVERHAUL). Registered above so the slice's rows load and
-        # validate, and REFUSED here for the reason its ops are refused: the
-        # arm is C# first and the sim is not brought up for slice one, so the
-        # honest answer is not False -- False would let Run Away!, Sizzle and
-        # Grounded report a game this engine never played. Neither predicate
-        # is a synonym for `reaction_triggered_this_turn`, which counts every
-        # reaction rather than a BOMB's.
-        raise NotImplementedError(
-            f"predicate {name!r} belongs to the KLEE_OVERHAUL arm, which is "
-            "C# FIRST -- the mod answers it behind "
-            "`-p:PrototypeCards=true -p:KleeOverhaul=true` "
-            "(KleeOverhaulLedger) and the sim is not brought up for slice one.")
+        # C.KLEE_OVERHAUL), and they are rule 7's two counters read off the
+        # arm's ledger -- `KleeOverhaulLedger.SetOffThisTurn > 0` for Run Away!
+        # and `.ReactedThisTurn > 0` for Sizzle and Perfect Timing, which is
+        # the same pair of expressions the emitter writes into those three
+        # cards (`gen_klee_cards.PREDICATE_CS`).
+        #
+        # NEITHER IS A SYNONYM FOR `reaction_triggered_this_turn`, which counts
+        # every reaction rather than a BOMB's -- that is the whole reason the
+        # arm carries its own counter instead of reading the engine's.
+        #
+        # REFUSED with the flag off or on a seat that is not Klee, for the
+        # reason the arm's ops refuse there: the rows are unreachable, so a
+        # False would be a game this engine never played rather than an answer.
+        if not klee_overhaul.live(state):
+            raise NotImplementedError(
+                f"predicate {name!r} belongs to the KLEE_OVERHAUL arm. It is "
+                "answered only with `C.KLEE_OVERHAUL` on and Klee in the seat "
+                "-- the mod answers it off `KleeOverhaulLedger` behind "
+                "`-p:PrototypeCards=true -p:KleeOverhaul=true`.")
+        return (state.ko_set_off_this_turn > 0
+                if name == "bomb_went_off_this_turn"
+                else state.ko_reacted_this_turn > 0)
     if name == "killed_target":
         return state.kills_this_card > 0
     if name == "drew_skill_this_card":
@@ -4841,34 +4859,200 @@ def _op_remember_card(state: CombatState, fx: dict, card: Card) -> None:
 
 
 # ---------------------------------------------------------------------------
-# THE KLEE OVERHAUL'S OPS -- REGISTERED AND UNIMPLEMENTED, ON PURPOSE.
+# THE KLEE OVERHAUL'S OPS (QUARANTINED, C.KLEE_OVERHAUL).
 #
-# Slice one of the overhaul (`review/active/klee-overhaul-slice-1-2026-09-01.md`
-# sec.5) is C# FIRST by the ruled process: "All of it goes behind the prototype
-# switch, C# first... The Python sim is not brought up for slice one." The mod
-# owns these eight verbs; tier0 owns none of them yet.
+# THE ARM IS BUILT NOW (`EB-312`). These eight used to RAISE, on the slice
+# packet's sec.5 ("All of it goes behind the prototype switch, C# first... The
+# Python sim is not brought up for slice one"), and the twin was raised
+# deliberately after the C# had proved the rules through five prototype rounds:
+# `engine/klee_overhaul.py` is that build, and it mirrors
+# `KleeCode/Powers/Prototype/ProtoBombPower.cs` and its neighbours clause for
+# clause.
 #
-# THEY ARE STILL REGISTERED, because the loader validates op NAMES at load
-# (`_validate_effect_vocabulary`), so an unregistered op means the slice's rows
-# cannot be STAGED at all -- not loaded, not validated, not emitted. Registering
-# them is what lets `docs/prototype-surface.yaml` carry the slice and what makes
-# `tools/lint_op_parity.py` force a drafter pricing decision for each one now,
-# while the author still knows the answer.
+# WHAT STILL REFUSES: every verb, WITH THE FLAG OFF or on a seat that is not
+# Klee. The rows are unreachable there (`loader._card_prototype` refuses a
+# `proto_ko_` id with the flag off), so reaching one is a DEFECT and not a
+# degradation -- a silent no-op would be the worst possible stand-in, since the
+# sim would keep running and keep reporting numbers for a card whose printed
+# text never happened.
 #
-# THEY RAISE RATHER THAN NO-OP, and that is the whole point of the shape. A
-# silent stub is the worst possible stand-in: the sim would keep running, keep
-# emitting, and keep reporting numbers for a card whose printed text never
-# happened. `UNPARSEABLE` discipline, one layer down -- an unimplemented rule
-# fails loudly at the moment somebody tries to measure it.
-def _op_klee_overhaul_unbuilt(state: CombatState, fx: dict,
-                              card: Card) -> None:
+# EVERY ARM BELOW IS ONE CALL INTO `klee_overhaul`, deliberately rather than
+# tidily: the rules live in that module, so a card cannot express a variant of
+# a rule by being resolved differently here. It is the same discipline
+# `gen_klee_cards` keeps on the other side, where every one of these ops emits
+# exactly one awaited call into `ProtoBombPower`.
+def _op_klee_overhaul_off(state: CombatState, fx: dict, card: Card) -> None:
     raise NotImplementedError(
-        f"card {card.id!r}: op {fx['op']!r} belongs to the KLEE_OVERHAUL arm, "
-        "which is C# FIRST -- the mod implements it behind "
-        "`-p:PrototypeCards=true -p:KleeOverhaul=true` and the sim is not "
-        "brought up for slice one (the slice packet sec.5). Registering the "
-        "op lets the row be staged and priced; resolving it here would report "
-        "numbers for a rule this engine never ran.")
+        f"card {card.id!r}: op {fx['op']!r} belongs to the KLEE_OVERHAUL arm "
+        "(slice one, the Bomb). It resolves only with `C.KLEE_OVERHAUL` on "
+        "and Klee in the seat -- the mod's `KleeOverhaul.Enabled` plus its "
+        "`IKleeCharacter` test, mirrored. With the flag off her `proto_ko_` "
+        "rows do not resolve at all, so reaching this is a defect rather than "
+        "a degradation.")
+
+
+def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
+    """RULE 2, in its four card-facing spellings (`SetOffAimed`, `SetOffAll`,
+    `SetOffRandom`).
+
+    THE ORDER IS HELD HERE, not by the order two rows happen to sit in: the
+    Bombs go off first, one at a time, and the card's own damage lands after.
+    `damage: 0` -- the sheet's absent key -- is "a Set off with no Attack
+    behind it".
+
+    THE CARD'S OWN HIT GOES BACK THROUGH `_op_damage`, which is the whole
+    reason this op does not deal it itself: the mod hands the printed number to
+    `DamageCmd.Attack(...).FromCard(...)`, the same pipeline any other Attack
+    row takes, so Strength, the flat per-card bonus, the Pyro cadence,
+    Vulnerable and the enchantment riders all apply exactly as they do to a
+    printed `damage` row. A second, smaller copy of that pipeline here is the
+    drift the delegation exists to prevent.
+    """
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    damage = int(fx.get("damage", 0) or 0)
+    spec = fx.get("target", "enemy")
+
+    def hit(enemy) -> None:
+        if damage <= 0 or not enemy.alive:
+            return
+        with klee_overhaul.aimed_at(state, enemy):
+            _op_damage(state, {"op": "damage", "amount": damage,
+                               "target": "enemy"}, card)
+
+    if spec == "all_enemies":
+        # Flame Dance: "Set off each enemy that has a non-Pyro aura." The
+        # filter reads the board AS IT STANDS when each enemy is reached, so an
+        # enemy whose aura an earlier explosion consumed is no longer eligible
+        # -- which is what "each enemy that HAS" says.
+        for enemy in list(state.living_enemies):
+            if not enemy.alive:
+                continue
+            if fx.get("aura") == "non_pyro" and (
+                    enemy.aura is None or enemy.aura == "pyro"):
+                continue
+            klee_overhaul.set_off(state, enemy)
+            hit(enemy)
+        return
+
+    if spec in ("random_enemy", "random_enemies"):
+        # RULE 2's LAST SENTENCE: "For random-target Attacks, per target hit."
+        # The roll happens once per hit and each rolled enemy's Bombs go off
+        # before that hit lands -- four rolls is four Set offs, not one Set off
+        # and four hits. The candidates are re-read each time, so a hit that
+        # killed its target cannot be rolled again.
+        for _ in range(int(fx.get("times", 1))):
+            living = state.living_enemies
+            if not living:
+                return
+            enemy = state.rng.choice(living)
+            klee_overhaul.set_off(state, enemy)
+            hit(enemy)
+        return
+
+    # `allow_dead=True`, and it is rule 3 rather than a shrug: `SetOff` takes
+    # the pile before it looks at anything, and its per-charge death test then
+    # sends every charge to `JumpCharges`. A Set off aimed at a body that died
+    # earlier in the same play therefore MOVES the pile instead of losing it,
+    # which is the case R210's bind makes reachable (one creature for the whole
+    # play, dead or alive). The card's own hit still fizzles on the corpse,
+    # because `_op_damage` picks its targets with `allow_dead` False.
+    for enemy in _pick_targets(state, spec, allow_dead=True):
+        klee_overhaul.set_off(state, enemy)
+        hit(enemy)
+
+
+def _op_plant_bomb(state: CombatState, fx: dict, card: Card) -> None:
+    """Rule 1's charge, planted. `Place` / `PlaceOnAll` / `PlaceOnRandom`.
+
+    `allow_dead=True` on the aimed spelling for the reason `place_bomb` already
+    carries in `CORPSE_TARGETABLE_OPS`: placing reaches the target through
+    `PowerCmd.Apply`, whose only guard is `CanReceivePowers`, and the game's own
+    doc says dead creatures can still have powers applied to them. The sweep is
+    what moves it off the corpse again.
+    """
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    size = int(fx["size"])
+    is_mine = bool(fx.get("mine", False))
+    payload = int(fx.get("payload_mine_all", 0))
+    spec = fx.get("target", "enemy")
+    if spec == "all_enemies":
+        # Mine Toss: a SNAPSHOT, so a payload firing mid-sweep cannot change
+        # who is swept.
+        for enemy in list(state.living_enemies):
+            klee_overhaul.place(state, enemy, size, is_mine, payload)
+        return
+    for enemy in _pick_targets(state, spec, allow_dead=(spec == "enemy")):
+        klee_overhaul.place(state, enemy, size, is_mine, payload)
+
+
+def _op_grow_bombs(state: CombatState, fx: dict, card: Card) -> None:
+    """Chain Fuse: every Bomb on ONE enemy grows by `amount`. `GrowOn`'s twin,
+    and it reads no aliveness test on the target for the same reason the C#
+    does not: the pile is a power on the creature, corpse or not."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    amount = int(fx["amount"])
+    for enemy in _pick_targets(state, fx.get("target", "enemy"),
+                               allow_dead=True):
+        klee_overhaul.grow_pile(enemy, amount)
+        state.emit("ko_bombs_grew", amount=amount, target=enemy.name,
+                   charges=len(enemy.ko_charges))
+
+
+def _op_merge_bombs(state: CombatState, fx: dict, card: Card) -> None:
+    """Careful Arrangement. See `klee_overhaul.merge_all_to` for the two
+    defaults the card text does not state."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    dest = _pick_targets(state, fx.get("target", "enemy"), allow_dead=True)
+    klee_overhaul.merge_all_to(state, dest[0] if dest else None,
+                               int(fx.get("growth", 0)))
+
+
+def _op_remove_bomb_for_block(state: CombatState, fx: dict,
+                              card: Card) -> None:
+    """Sorry, Jean...: remove the largest Bomb and gain Block equal to its
+    size. ONE call, so the number removed and the number gained cannot drift."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.remove_largest_for_block(state)
+
+
+def _op_damage_set_off_total(state: CombatState, fx: dict,
+                             card: Card) -> None:
+    """Big Badda Boom's second clause: "Then deal damage equal to what the
+    Bombs dealt." `DealSetOffTotal`'s twin.
+
+    READ OFF THE LEDGER, because by now the pile is gone -- which is exactly
+    why the number is remembered rather than recomputed. `EB-270`: the ledger
+    banks what each explosion LANDED for, so this is the card's printed promise
+    and not the raw charge sum it used to be.
+    """
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    total = state.ko_damage_set_off_this_play
+    if total <= 0:
+        return
+    _op_damage(state, {"op": "damage", "amount": total,
+                       "target": fx.get("target", "enemy")}, card)
+
+
+def _op_double_set_off(state: CombatState, fx: dict, card: Card) -> None:
+    """The Big One arms the doubling; the Set off behind it on the same row
+    spends it, which is what "set off this way" means."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    state.emit("ko_doubling_armed")
+    klee_overhaul.arm_doubling(state)
+
+
+def _op_draw_per_set_off(state: CombatState, fx: dict, card: Card) -> None:
+    """Ammo Scavenging: rule 7's first counter, spent."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.draw_per_set_off(state)
 
 
 # --- THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ---------
@@ -5023,16 +5207,17 @@ OPS = {
     # acceleration keyword ("Stir", provisional) will call if it is authored.
     "play_front_memory": _op_play_front_memory,
     # --- Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) ---
-    # Registered so the rows load, priced so the drafter is honest, resolved by
-    # nothing -- see `_op_klee_overhaul_unbuilt` for why raising is the shape.
-    "set_off": _op_klee_overhaul_unbuilt,
-    "plant_bomb": _op_klee_overhaul_unbuilt,
-    "grow_bombs": _op_klee_overhaul_unbuilt,
-    "merge_bombs": _op_klee_overhaul_unbuilt,
-    "remove_bomb_for_block": _op_klee_overhaul_unbuilt,
-    "damage_set_off_total": _op_klee_overhaul_unbuilt,
-    "double_set_off": _op_klee_overhaul_unbuilt,
-    "draw_per_set_off": _op_klee_overhaul_unbuilt,
+    # BUILT (`EB-312`): `engine/klee_overhaul.py` is the twin, and every arm
+    # here is one call into it. They refuse with the flag off or on a seat that
+    # is not Klee -- see `_op_klee_overhaul_off`.
+    "set_off": _op_set_off,
+    "plant_bomb": _op_plant_bomb,
+    "grow_bombs": _op_grow_bombs,
+    "merge_bombs": _op_merge_bombs,
+    "remove_bomb_for_block": _op_remove_bomb_for_block,
+    "damage_set_off_total": _op_damage_set_off_total,
+    "double_set_off": _op_double_set_off,
+    "draw_per_set_off": _op_draw_per_set_off,
     # --- Kokomi overhaul, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) -----
     # Registered so the rows load, priced so the drafter is honest, resolved by
     # nothing -- see `_op_kokomi_overhaul_unbuilt` for why raising is the shape.
@@ -5146,6 +5331,14 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     state.last_drawn_type = ""
     state.salon_replacements_this_card = 0
     state.detonations_at_card_start = state.detonations_total
+    # QUARANTINED (C.KLEE_OVERHAUL). Big Badda Boom's play-scoped memory,
+    # opened BY THE CARD THAT READS IT and by no other row -- the emitter
+    # prepends `KleeOverhaulLedger.For(...).BeginPlay()` to exactly the rows
+    # carrying `damage_set_off_total`, and `klee_overhaul.begin_play` asks the
+    # same question of the same effect list. On the line beside
+    # `detonations_at_card_start` because it is the same idiom one arm over: a
+    # per-play memory opened at the top of the play that reads it.
+    klee_overhaul.begin_play(state, card)
     state.repeat_requested = 0
     # Predicate snapshot: does the default target hold an off-element aura?
     # Reads the BOUND aim (R210) rather than re-deriving the lowest-HP pick,

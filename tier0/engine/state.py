@@ -515,6 +515,35 @@ class Bomb:
     turn_placed: int = 0          # for modify_bombs scope: placed_this_turn
 
 
+@dataclass
+class KleeCharge:
+    """ONE overhaul Bomb (QUARANTINED, `C.KLEE_OVERHAUL`) -- the twin of
+    `ProtoBombPower.ProtoCharge`.
+
+    A SECOND TYPE BESIDE `Bomb`, not a mode on it, and the argument is
+    `ProtoBombPower`'s own header: the shipped Bomb's whole lifecycle is two
+    automatic detonations, and rule 7 is "nothing fires by itself". Teaching
+    one type to be both would put a runtime branch inside every reader of
+    `Enemy.bombs`; a second field buys the acceptance condition outright,
+    because "no automatic detonation of any kind" becomes a property of what
+    is on the board rather than of a branch somebody remembers. The shipped
+    `Bomb` is not edited by this arm in any build.
+
+      size              -- rule 1's number: what grows and what it deals.
+      is_mine           -- rule 6's flag, and it is a FLAG ON A BOMB rather
+                           than a second type because the brief says so in as
+                           many words ("A Mine is a Bomb that ALSO goes off
+                           when...") and because Mines grow, merge and jump
+                           exactly like Bombs.
+      payload_mine_all  -- Jumpy Dumpty's charge: when it goes off it puts a
+                           Mine of this size on every enemy. 0 is "no
+                           payload", which is every other charge in the slice.
+    """
+    size: int
+    is_mine: bool = False
+    payload_mine_all: int = 0
+
+
 def fanfare_cap_base_term(max_hp: int) -> int:
     """The Fanfare ceiling's BASE term, taken from LIVE max HP (EB-97).
 
@@ -751,6 +780,23 @@ class Enemy(Fighter):
     aura: Optional[str] = None
     aura_turns_left: int = 0
     bombs: list[Bomb] = field(default_factory=list)
+    # QUARANTINED (C.KLEE_OVERHAUL): THE OVERHAUL'S PILE, in placement order.
+    # `ProtoBombPower._charges`' twin, and a SEPARATE list from `bombs` above
+    # for the reason `KleeCharge` gives -- no card places both, and with the
+    # flag off nothing ever appends to this one.
+    #
+    # ONE PILE PER ENEMY, where the mod has one per PLACER
+    # (`PowerInstanceType.InstancedPerApplier`, R205). tier 0 runs ONE seat, so
+    # a per-applier table would be a dictionary with one key and the property
+    # that matters -- one Klee never spends another's charges -- holds by
+    # construction here.
+    #
+    # IT SURVIVES THE CORPSE, which is what makes rule 3's jump need no
+    # register on this side: `ProtoBombPower.Register` exists because the game
+    # strips a dead creature's powers inline before control returns, and
+    # nothing in tier 0 tears an `Enemy` down -- `alive` is a read of `hp`. So
+    # a dead enemy still holding charges IS the thing a sweep looks for.
+    ko_charges: list[KleeCharge] = field(default_factory=list)
     # Klee survival sprint: the first attack action this enemy makes while
     # Bombed is suppressed. This per-enemy combat latch keeps an armed-Bomb
     # engine from becoming permanent Weak against bosses.
@@ -1163,6 +1209,23 @@ class CombatState:
     # seat's Plans are never another's -- holds by construction here, and the
     # per-FIGHT half is what `CombatState` being rebuilt by `run_fight` buys.
     kk_plan_queue: list[PlanEntry] = field(default_factory=list)
+    # QUARANTINED (C.KLEE_OVERHAUL): RULE 7'S TWO COUNTERS AND THE TWO
+    # MEMORIES, the twin of `KleeOverhaulLedger`. Per FIGHT and per SEAT for
+    # the reason `kk_plan_queue` above is: tier 0 runs one seat, so the C#'s
+    # per-Creature table is a dictionary with one key here.
+    #
+    # THE ROLL IS ON A ROUND STAMP, `RollTo`'s own shape rather than a bare
+    # "copy at turn start", and the stamp is what makes a SKIPPED round report
+    # an honest zero instead of a stale count from three rounds ago.
+    ko_round: int = -1
+    ko_set_off_this_turn: int = 0        # Run Away!, Ammo Scavenging
+    ko_reacted_this_turn: int = 0        # Sizzle, Perfect Timing
+    ko_set_off_last_turn: int = 0        # Grounded, and only Grounded
+    # Big Badda Boom's "the damage the Bombs dealt": what the explosions since
+    # this play began actually LANDED for, post-Strength, post-Weak,
+    # post-reaction, post-Vulnerable (`EB-270`) -- never the charge sizes.
+    ko_damage_set_off_this_play: int = 0
+    ko_double_next_set_off: bool = False    # The Big One arms, a Set off spends
     # Blocking Notes' slope (rework Track C.3, 2026-07-28). A per-TURN count
     # where companions_played above is a per-COMBAT list, so the two cannot be
     # derived from each other and both have to exist.
