@@ -25,6 +25,10 @@ namespace KleeMod.Powers;
 ///     count for the turn the player was looking at when they wrote it. The
 ///     roll below is the only place that number moves, which is what keeps the
 ///     card and the counter from disagreeing about which turn "last" was.
+///   * the ONCE-PER-TURN latches (<see cref="ClaimOncePerTurn"/>) -- Treatise,
+///     Song of Pearls and The General's Banner, capped at one payout a turn
+///     each by [USER]'s live 2026-09-02 verdict.
+///   * <see cref="PlanCarriedOutThisTurn"/> -- Sango Isshin's condition.
 ///
 /// PER PLAYER, keyed the way <c>KleeOverhaulLedger</c> is keyed and for the
 /// same reason (R205): in co-op the other seat's turn is not hers.
@@ -95,10 +99,66 @@ public sealed class KokomiOverhaulLedger
     /// Chain of Command's Plan reads when it is carried out.</summary>
     public int CompanionsPlayedLastTurn { get; private set; }
 
+    /// <summary>
+    /// THE ONCE-PER-TURN LATCHES, one set shared by every payoff that has one
+    /// ([USER], live 2026-09-02). Keyed by the claiming power's own name.
+    /// </summary>
+    private readonly HashSet<string> _claimed = new();
+
+    /// <summary>
+    /// Has the Bake-Kurage carried out a Plan this turn? Sango Isshin's
+    /// condition, and it is a per-turn FACT rather than a latch: reading it
+    /// spends nothing.
+    ///
+    /// Written by <see cref="NotePlanCarriedOut"/> from
+    /// <c>KokomiPlan.ResolveEntry</c>, the one place a Plan is carried out --
+    /// so the morning queue, Change of Plans' early resolution and The Moon
+    /// Overlooks the Waters' play-time one all count. All three carry a Plan
+    /// out, which is the phrase the card prints.
+    /// </summary>
+    public bool PlanCarriedOutThisTurn { get; private set; }
+
     private int _round = -1;
 
     /// <summary>One Companion play finished.</summary>
     public void NoteCompanionPlayed() => CompanionsPlayedThisTurn++;
+
+    /// <summary>
+    /// THE ONE ONCE-PER-TURN GATE, and the three powers that cap a payoff at a
+    /// turn all call it: true the FIRST time <paramref name="key"/> is claimed
+    /// in a round and false for the rest of that round.
+    ///
+    /// [USER], live 2026-09-02, on the shape all three had: "Treatise looks
+    /// too good (one draw per turn if a Plan fired might be ok; one draw per
+    /// Plan is too abuseable)", "Likewise" of Song of Pearls, and "The
+    /// General's Banner applies a LOT of Weak. Probably too strong."
+    ///
+    /// ON THE LEDGER RATHER THAN ON EACH POWER, because the ledger is the one
+    /// thing in this arm that knows what turn it is: <see cref="For"/> ROLLS
+    /// ON READ, so a latch clears itself at the first ask of a new round no
+    /// matter which broadcast asks first. Nothing has to remember to clear it,
+    /// and the three cannot drift apart into three answers about when a turn
+    /// began.
+    ///
+    /// IT IS A CLAIM AND NOT A QUESTION: the caller that gets `true` has taken
+    /// the turn's payout, so the read and the write cannot be separated by an
+    /// `await` that another listener could slip through.
+    /// </summary>
+    public static bool ClaimOncePerTurn(Creature? kokomi, string key)
+    {
+        if (kokomi == null) return false;
+        return For(kokomi).Claim(key);
+    }
+
+    /// <summary>One Plan carried out. Sango Isshin's condition, and nothing
+    /// else, so a second Plan in the same turn changes nothing.</summary>
+    public void NotePlanCarriedOut() => PlanCarriedOutThisTurn = true;
+
+    /// <summary>The claim itself, on the ledger a caller already holds. Public
+    /// to the pins for the reason <see cref="RollTo"/> is: a turn boundary can
+    /// then be exercised without a combat, which is what the headless suite
+    /// has.</summary>
+    public bool Claim(string key) => _claimed.Add(key);
 
     /// <summary>
     /// Roll the per-turn state to <paramref name="round"/>. Public to the pins
@@ -116,6 +176,8 @@ public sealed class KokomiOverhaulLedger
         // zero it never counted is exactly right.
         CompanionsPlayedLastTurn = CompanionsPlayedThisTurn;
         CompanionsPlayedThisTurn = 0;
+        _claimed.Clear();
+        PlanCarriedOutThisTurn = false;
         _round = round;
     }
 }

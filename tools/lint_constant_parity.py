@@ -245,7 +245,7 @@ MIRRORED: dict[str, object] = {
     # sides have to agree on.
     "KleeOverhaulLaw.BombGrowth": C.KLEE_OVERHAUL_BOMB_GROWTH,
     "KleeOverhaulLaw.WorkshopGrowth": C.KLEE_OVERHAUL_WORKSHOP_GROWTH,
-    "KleeOverhaulLaw.AliceGrowth": C.KLEE_OVERHAUL_ALICE_GROWTH,
+    "KleeOverhaulLaw.AliceMultiplier": C.KLEE_OVERHAUL_ALICE_MULTIPLIER,
     "KleeOverhaulLaw.SparkPerExplosion": C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION,
     # FIVE now: R242 pick 1 gave rule 4 a second number, the opening bank.
     "KleeOverhaulLaw.OpeningSpark": C.KLEE_OVERHAUL_OPENING_SPARK,
