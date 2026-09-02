@@ -142,7 +142,10 @@ def test_combat_scenes_carry_the_four_router_states():
         for states, _ in scene.state_machines().values():
             trees += 1
             assert set(scene_deps.CREATURE_STATES) <= states, path
-    assert trees == 2, "klee and furina combat scenes both drive a state machine"
+    assert trees == 3, (
+        "klee's and furina's combat scenes drive a state machine, and so does "
+        "the Bake-Kurage pet's (kokomi/model/bake_kurage.tscn) -- one router, "
+        "one four-state contract, no per-creature code")
 
 
 def test_empty_tree_fails_rather_than_passing(tmp_path):

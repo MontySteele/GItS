@@ -64,11 +64,12 @@ def test_the_sample_contract_is_well_formed():
     assert report.errors == [], report.render(verbose=True)
     assert parsed.version == "roster-pck-v3"
     # 22 until EB-40, then +6: furina/ui/energy_counter.tscn and the five
-    # energy_orb layers it references. Asserted as a number rather than
-    # derived, so a scene that gains a texture nobody added to the fixture
-    # universe fails HERE, beside the file, and not only in the scene-deps
-    # gate downstream that resolves against it.
-    assert len(parsed.resources) == 28
+    # energy_orb layers it references. Then +2 for the Bake-Kurage pet's
+    # creature scene and the summon sprite it draws. Asserted as a number
+    # rather than derived, so a scene that gains a texture nobody added to the
+    # fixture universe fails HERE, beside the file, and not only in the
+    # scene-deps gate downstream that resolves against it.
+    assert len(parsed.resources) == 30
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -168,5 +169,5 @@ def test_end_to_end_on_a_staged_package(tmp_path):
                                         payload), payload)
     report = contract.run(None, ROOT, package_dir=package, pck_src=PCK_SRC)
     assert report.errors == [], report.render(verbose=True)
-    assert report.checked["contract_resources"] == 28   # +6 at EB-40
+    assert report.checked["contract_resources"] == 30   # +6 at EB-40, +2 for the pet
     assert report.checked["package_files"] == 3

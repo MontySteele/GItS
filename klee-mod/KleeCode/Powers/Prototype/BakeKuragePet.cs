@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
+using BaseLib.Extensions;
 using BaseLib.Patches.Content;
 using BaseLib.Patches.Features;
 using HarmonyLib;
@@ -11,6 +12,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Nodes.Combat;
 
 namespace KleeMod.Powers;
 
@@ -45,16 +47,50 @@ namespace KleeMod.Powers;
 /// which is the branch Byrdpip takes and the one this takes. The slice's sec.5
 /// expected to write placement code; the engine did not need it.
 ///
-/// THE ART IS A PLACEHOLDER, named as one (slice sec.7: "Art for the pet beyond
-/// a placeholder" is out of scope). <see cref="CustomVisualPath"/> borrows
-/// Osty's creature-visuals scene, which is the base game's own pet rig and
-/// carries every animation state <c>MonsterModel.GenerateAnimator</c> asks for
-/// (<c>idle_loop</c>, <c>cast</c>, <c>attack</c>, <c>hurt</c>, <c>die</c>). A
-/// missing scene would fall back to the engine's error creature rather than
-/// throw, so the failure mode of getting this wrong is visible, not fatal.
+/// IT WEARS THE MOD'S OWN JELLYFISH, not Osty's rig. <see cref="CustomVisualPath"/>
+/// borrowed <c>creature_visuals/osty</c> while the pet was first built; it now points
+/// at <see cref="ModVisualsResource"/>, a convention combat scene wrapped around the
+/// SAME sprite the shipped <c>KurageSummonPower</c> already draws in the end-of-turn
+/// docket -- <c>kokomi/summon/bake_kurage.png</c>, cut from the Bake-Kurage summon art
+/// by <c>tools/cut_kurage_summon.py</c>. One producer, one silhouette, two consumers.
+///
+/// WHY A SCENE AND NOT A <c>CreateCustomVisuals</c> OVERRIDE: <c>MonsterModel.CreateVisuals</c>
+/// is <c>PreloadManager.Cache.GetScene(VisualsPath).Instantiate&lt;NCreatureVisuals&gt;()</c>,
+/// and BaseLib's <c>VisualsPath</c> prefix feeds it <c>CustomVisualPath</c>. The engine
+/// wants a path. The scene is the SMALLEST <c>NCreatureVisualsFactory</c> accepts:
+/// <c>%Visuals</c> is the one mandatory node (<c>NCreatureVisuals._Ready</c> hard-fetches
+/// it and throws without it), and the factory GENERATES <c>%CenterPos</c>,
+/// <c>IntentPos</c> and <c>%FormVfx</c> off <c>Bounds</c>. So the scene ships
+/// <c>Visuals/Rig/Body</c>, a <c>Bounds</c> box and the animation pair, and lets the
+/// library build the three markers it knows how to build.
+///
+/// <c>Bounds</c> IS THE PLACEMENT, which is why it is authored and not defaulted.
+/// <c>NCombatRoom.PositionPlayersAndPets</c>'s generic branch puts a pet at
+/// <c>-targetX + 20 - Bounds.Size.X * 0.5</c>, <c>player.Y + 10</c>: the box's WIDTH is
+/// the only dial it reads, and the factory's default box is Klee-sized 240x280.
+/// 120x160 is cut to the 64x128 sprite, so the jellyfish sits beside Kokomi rather than
+/// a character-width step away, and floats 16px clear of the ground line.
+///
+/// STATIC ART PLUS THE SCENE'S OWN IDLE -- motion, not new art. The docket sprite does
+/// not move; here <c>Visuals/Rig</c> carries a 3s bob and sway, and the
+/// attack / hurt / death states <see cref="KleeMod.Vfx.CreatureAnimationRouter"/>
+/// travels to. That is the same four-state scene contract Klee's and Furina's combat
+/// scenes carry, driven by the same router, with no code anywhere that knows this
+/// creature exists. No Spine rig is involved, so <c>MonsterModel.GenerateAnimator</c> is
+/// never reached: <c>NCreature</c> builds <c>_spineAnimator</c> only when
+/// <c>Visuals.HasSpineAnimation</c>, and <c>SetAnimationTrigger</c> is a no-op without it.
+///
+/// THE FALLBACK IS STILL OSTY, and deliberately. <c>KleePck.Path</c> returns null while
+/// the pack is absent or stale; a null <c>CustomVisualPath</c> sends
+/// <c>MonsterModel.VisualsPath</c> to an id-derived scene that does not exist, which is
+/// the engine's error creature. Falling through to Osty's rig keeps the pre-repack
+/// failure mode exactly what it was before this change.
 /// </summary>
 public sealed class BakeKurageMonster : CustomPetModel, ILocalizationProvider
 {
+    /// <summary>The mod's jellyfish creature scene, inside the pack.</summary>
+    internal const string ModVisualsResource = "kokomi/model/bake_kurage.tscn";
+
     public BakeKurageMonster() : base(visibleHp: false)
     {
     }
@@ -63,10 +99,18 @@ public sealed class BakeKurageMonster : CustomPetModel, ILocalizationProvider
 
     public override int MaxInitialHp => 9999;
 
-    /// <summary>Placeholder art: the base game's own pet rig. See the class
-    /// header.</summary>
+    /// <summary>
+    /// The mod's own scene when the pack carries it, else null. Also what
+    /// <see cref="BakeKuragePet.Summon"/> registers for node conversion -- the
+    /// Osty fallback must NOT be registered, since it is already an
+    /// <c>NCreatureVisuals</c> and the base game owns that path.
+    /// </summary>
+    internal static string? ModVisualsPath => KleePck.Path(ModVisualsResource);
+
+    /// <summary>The mod's jellyfish; Osty's rig only while the pack is stale.
+    /// See the class header.</summary>
     public override string? CustomVisualPath =>
-        SceneHelper.GetScenePath("creature_visuals/osty");
+        ModVisualsPath ?? SceneHelper.GetScenePath("creature_visuals/osty");
 
     public List<(string, string)>? Localization => new()
     {
@@ -115,7 +159,44 @@ public static class BakeKuragePet
         {
             ModelDb.Inject(typeof(BakeKurageMonster));
         }
+        EnsureVisualsConverted();
         await PlayerCmd.AddPet<BakeKurageMonster>(player);
+    }
+
+    private static bool _visualsRegistered;
+
+    /// <summary>
+    /// Teach BaseLib that the pet's scene is an <c>NCreatureVisuals</c>.
+    ///
+    /// WITHOUT THIS THE JELLYFISH IS THE ERROR CREATURE, and silently:
+    /// <c>MonsterModel.CreateVisuals</c> does
+    /// <c>GetScene(path).Instantiate&lt;NCreatureVisuals&gt;()</c> against a
+    /// script-less <c>Node2D</c> scene (pck-src rule: no scripts in pck scenes),
+    /// which is an invalid cast that <c>CreateVisuals</c>'s own catch turns into the
+    /// fallback creature. BaseLib's <c>SceneConversionPatch</c> is what makes the cast
+    /// succeed, and it only converts scenes REGISTERED with <c>NodeFactory</c>.
+    ///
+    /// THE LIBRARY'S OWN AUTOMATIC PASS CANNOT COVER US, which is why this is here and
+    /// not free like it is for Klee: <c>PostModInitPatch.RegisterSceneConversions</c>
+    /// runs on <c>ModelDb.Preload</c> and calls
+    /// <c>ModelDb.GetById(...) as ISceneConversions</c> -- a null-conditional on a model
+    /// that is not in <c>ModelDb</c> yet. This model is INJECTED at first combat (see
+    /// <see cref="Summon"/>), so at that pass it is not there and the registration is a
+    /// no-op. Registering here, one call before the pet exists, is the same door
+    /// (<c>CustomMonsterModel.RegisterSceneConversions</c> is this one line) opened at a
+    /// moment the model is real.
+    ///
+    /// Guarded by a bool rather than left to run per combat only because the registry
+    /// logs a line on every write; the write itself is an idempotent dictionary
+    /// assignment. The Osty fallback is deliberately NOT registered -- it is a
+    /// base-game scene that already instantiates as <c>NCreatureVisuals</c>.
+    /// </summary>
+    private static void EnsureVisualsConverted()
+    {
+        if (_visualsRegistered) return;
+        if (BakeKurageMonster.ModVisualsPath is not { } scene) return;
+        _visualsRegistered = true;
+        scene.RegisterSceneForConversion<NCreatureVisuals>();
     }
 }
 

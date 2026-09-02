@@ -1602,3 +1602,51 @@ proto_mi_sara_crowfeather_cover	ImageGen/images/cards/companions/proto_mi_sara_c
 proto_mi_sara_tengu_stormcall	ImageGen/images/cards/companions/proto_mi_sara_tengu_stormcall.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Kujou Sara Wish.png		splash	sara
 proto_mi_itto_superlative_superstrength	ImageGen/images/cards/companions/proto_mi_itto_superlative_superstrength.png	500	380	cover	y0.16	shortlist	1	png	Arataki Itto Character Card.png		tcg	itto
 proto_mi_raiden_musou_no_hitotachi	ImageGen/images/cards/companions/proto_mi_raiden_musou_no_hitotachi.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Raiden Shogun Full Wish.png		splash	raiden
+# ---------- Companion overhaul round 2: the 25 rows with no art (2026-09-02) ----------
+# Completes the two blocks above. Every character here had NO cleared source in
+# art/raw or SOURCES.tsv, so each row is a fresh fetch of that character's own
+# art -- no borrowed faces. Two conventions, both inherited from the rows above:
+# a Genius Invokation TCG `<Name> Character Card.png` is the character's own
+# full illustration inside a printed frame (process() trims the frame, `cover`
+# at y0.16 lands the face), and a `Wish` splash floats the figure in a void so
+# it takes `cover_autocrop`. Characters with TWO cards get two DIFFERENT
+# sources -- the TCG card for the Skill, the Wish splash for the Burst -- and
+# share a source_group so the pair is reviewed together.
+# --- Mondstadt (proto_mc_) ---
+# proto_mc_amber_explosive_puppet: Amber's TCG card; Explosive Puppet is her Skill
+proto_mc_amber_explosive_puppet	ImageGen/images/cards/companions/proto_mc_amber_explosive_puppet.png	500	380	cover	y0.16	shortlist	1	png	Amber Character Card.png		tcg	amber
+# proto_mc_amber_fiery_rain: her Wish splash, the Burst half of the pair
+proto_mc_amber_fiery_rain	ImageGen/images/cards/companions/proto_mc_amber_fiery_rain.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Amber Wish.png		splash	amber
+proto_mc_eula_glacial_illumination	ImageGen/images/cards/companions/proto_mc_eula_glacial_illumination.png	500	380	cover	y0.16	shortlist	1	png	Eula Character Card.png		tcg	eula
+# proto_mc_jean_gale_blade: Jean's TCG card; Gale Blade is her Skill
+proto_mc_jean_gale_blade	ImageGen/images/cards/companions/proto_mc_jean_gale_blade.png	500	380	cover	y0.16	shortlist	1	png	Jean Character Card.png		tcg	jean
+# proto_mc_jean_dandelion_breeze: her Wish splash, the Burst half of the pair
+proto_mc_jean_dandelion_breeze	ImageGen/images/cards/companions/proto_mc_jean_dandelion_breeze.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Jean Wish.png		splash	jean
+# proto_mc_lisa_violet_arc: Lisa's TCG card; Violet Arc is her Skill
+proto_mc_lisa_violet_arc	ImageGen/images/cards/companions/proto_mc_lisa_violet_arc.png	500	380	cover	y0.16	shortlist	1	png	Lisa Character Card.png		tcg	lisa
+# proto_mc_lisa_lightning_rose: her Wish splash, the Burst half of the pair
+proto_mc_lisa_lightning_rose	ImageGen/images/cards/companions/proto_mc_lisa_lightning_rose.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Lisa Wish.png		splash	lisa
+proto_mc_mika_starfrost_swirl	ImageGen/images/cards/companions/proto_mc_mika_starfrost_swirl.png	500	380	cover	y0.16	shortlist	1	png	Mika Character Card.png		tcg	mika
+proto_mc_mona_stellaris_phantasm	ImageGen/images/cards/companions/proto_mc_mona_stellaris_phantasm.png	500	380	cover	y0.16	shortlist	1	png	Mona Character Card.png		tcg	mona
+# proto_mc_noelle_breastplate: Noelle's TCG card; Breastplate is her Skill
+proto_mc_noelle_breastplate	ImageGen/images/cards/companions/proto_mc_noelle_breastplate.png	500	380	cover	y0.16	shortlist	1	png	Noelle Character Card.png		tcg	noelle
+# proto_mc_noelle_sweeping_time: her Wish splash, the Burst half of the pair
+proto_mc_noelle_sweeping_time	ImageGen/images/cards/companions/proto_mc_noelle_sweeping_time.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Noelle Wish.png		splash	noelle
+# proto_mc_razor_claw_and_thunder: Razor's TCG card; Claw and Thunder is his Skill
+proto_mc_razor_claw_and_thunder	ImageGen/images/cards/companions/proto_mc_razor_claw_and_thunder.png	500	380	cover	y0.16	shortlist	1	png	Razor Character Card.png		tcg	razor
+# proto_mc_razor_lightning_fang: his Wish splash, the Burst half of the pair
+proto_mc_razor_lightning_fang	ImageGen/images/cards/companions/proto_mc_razor_lightning_fang.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Razor Wish.png		splash	razor
+proto_mc_rosaria_ravaging_confession	ImageGen/images/cards/companions/proto_mc_rosaria_ravaging_confession.png	500	380	cover	y0.16	shortlist	1	png	Rosaria Character Card.png		tcg	rosaria
+# proto_mc_varka_sturm_und_drang: Varka has no TCG card -- the full Wish splash is his only clean single-figure source
+proto_mc_varka_sturm_und_drang	ImageGen/images/cards/companions/proto_mc_varka_sturm_und_drang.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Varka Full Wish.png		splash	varka
+proto_mc_venti_grand_ode	ImageGen/images/cards/companions/proto_mc_venti_grand_ode.png	500	380	cover	y0.16	shortlist	1	png	Venti Character Card.png		tcg	venti
+# --- Inazuma (proto_mi_) ---
+proto_mi_ayaka_soumetsu	ImageGen/images/cards/companions/proto_mi_ayaka_soumetsu.png	500	380	cover	y0.16	shortlist	1	png	Kamisato Ayaka Character Card.png		tcg	ayaka
+proto_mi_ayato_kyouka	ImageGen/images/cards/companions/proto_mi_ayato_kyouka.png	500	380	cover	y0.16	shortlist	1	png	Kamisato Ayato Character Card.png		tcg	ayato
+proto_mi_chiori_hasode	ImageGen/images/cards/companions/proto_mi_chiori_hasode.png	500	380	cover	y0.16	shortlist	1	png	Chiori Character Card.png		tcg	chiori
+proto_mi_heizou_heartstopper	ImageGen/images/cards/companions/proto_mi_heizou_heartstopper.png	500	380	cover	y0.16	shortlist	1	png	Shikanoin Heizou Character Card.png		tcg	heizou
+proto_mi_kazuha_slash	ImageGen/images/cards/companions/proto_mi_kazuha_slash.png	500	380	cover	y0.16	shortlist	1	png	Kaedehara Kazuha Character Card.png		tcg	kazuha
+proto_mi_kirara_surprise_dispatch	ImageGen/images/cards/companions/proto_mi_kirara_surprise_dispatch.png	500	380	cover	y0.16	shortlist	1	png	Kirara Character Card.png		tcg	kirara
+proto_mi_mizuki_anraku	ImageGen/images/cards/companions/proto_mi_mizuki_anraku.png	500	380	cover	y0.16	shortlist	1	png	Yumemizuki Mizuki Character Card.png		tcg	mizuki
+proto_mi_yae_sesshou_sakura	ImageGen/images/cards/companions/proto_mi_yae_sesshou_sakura.png	500	380	cover	y0.16	shortlist	1	png	Yae Miko Character Card.png		tcg	yae
+proto_mi_yoimiya_aurous_blaze	ImageGen/images/cards/companions/proto_mi_yoimiya_aurous_blaze.png	500	380	cover	y0.16	shortlist	1	png	Yoimiya Character Card.png		tcg	yoimiya
