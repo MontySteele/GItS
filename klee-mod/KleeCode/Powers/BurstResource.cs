@@ -214,6 +214,32 @@ public sealed class KleeBurstResource : BasicCustomResource
     public static int AmountFor(Creature player) => Find(player)?.Amount ?? 0;
 
     /// <summary>
+    /// Does this creature get the Burst GAUGE at all? (`EB-281`.)
+    ///
+    /// <see cref="Find"/> already answers "does this creature have a Burst
+    /// meter", arm guard included, and the gauge's predicate used to be a bare
+    /// <c>is Klee</c> written out in <c>GaugeBridge</c>. Under the arm that
+    /// disagreed with this file: nothing fed the meter, so the gauge built
+    /// itself and drew <i>0/40</i> with a bomb on the end of it for the whole
+    /// run -- a permanent, unexplained bar, which is the display half of the
+    /// same `EB-266` complaint the feed guard closed.
+    ///
+    /// It is spelled here rather than as <c>Find(player) != null</c> because a
+    /// DISPLAY predicate must not require a live <c>PlayerCombatState</c>:
+    /// <c>GaugeBridge.Setup</c> runs at <c>NCombatUi.Activate</c> and is not
+    /// guaranteed one, and a gauge that declined to exist for that reason would
+    /// never be rebuilt for a creature the bridge had stopped enumerating.
+    /// Same two clauses as <see cref="Find"/>, minus the lookup.
+    /// </summary>
+    public static bool GaugeApplies(Creature player)
+    {
+#if PROTOTYPE_CARDS
+        if (KleeOverhaul.Enabled) return false;
+#endif
+        return player.Player?.Character is Klee;
+    }
+
+    /// <summary>
     /// The gain path for every context-carrying source (reactions, the
     /// burst_energy op, and future powers) -- mirrors SparkPower.Gain so the
     /// economy stays easy to instrument. The context/cardSource parameters

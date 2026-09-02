@@ -53,6 +53,30 @@ public class SparkSinkPinTests
 #endif
     }
 
+    [Fact]
+    public void The_gauge_sync_is_the_quarantine_seam_and_a_release_build_has_none()
+    {
+        // `EB-281`, and THE HALF THAT ONLY THIS FILE CAN SAY, on the argument
+        // above verbatim. The Spark bank is drawn as a dedicated resource gauge
+        // under the Klee overhaul arm, and `SparkPower` calls `SyncGauge` from
+        // each of its three mutation funnels. `Vfx/SparkGauge` lives under
+        // `Vfx/Prototype/`, which is `Compile Remove`d without the switch, so
+        // the seam is guarded ONCE inside `SyncGauge` rather than at each call
+        // site -- and the acceptance condition is that in a RELEASE build the
+        // method therefore calls nothing at all and a shipped Spark gain does
+        // no gauge work. `Prototype/SparkGaugePinTests` asserts the other half;
+        // it is not compiled here, which is why this half lives in this file.
+        var sync = typeof(SparkPower).GetMethod("SyncGauge", All)
+            ?? throw new System.InvalidOperationException(
+                "SparkPower.SyncGauge is gone -- the gauge seam moved under this pin.");
+        var calls = Il.Calls(sync);
+#if PROTOTYPE_CARDS
+        Assert.Contains("SparkGauge.Refresh", calls);
+#else
+        Assert.Empty(calls);
+#endif
+    }
+
     // --- the gate --------------------------------------------------------
 
     [Fact]
