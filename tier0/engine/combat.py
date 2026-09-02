@@ -1079,11 +1079,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     refpowers.before_side_turn_end_early(state)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
     # QUARANTINED (C.KLEE_OVERHAUL). The OVERHAUL's Sparks 'n' Splash -- "at
-    # the end of your turn, Set off a random enemy's Bombs" -- beside the
-    # shipped card of the same name and at the same site, which is
-    # `EndOfTurnSetOffPower.BeforeSideTurnEnd`'s twin. The brief's gloss on it
-    # is "Breaks rule 7", and it is the ONE power in the slice that fires
-    # without a card saying so, which is why it is a Rare.
+    # the end of your turn, deal Pyro damage to a random enemy equal to the
+    # Bombs on it" -- beside the shipped card of the same name and at the same
+    # site, which is `BombEchoPower.BeforeSideTurnEnd`'s twin. It READS the
+    # pile and does not spend it, so rule 7 is untouched: nothing goes off,
+    # no Spark is minted and the arm's ledger never moves.
     klee_overhaul.turn_end(state)
     _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
     #                              drop a phased boss

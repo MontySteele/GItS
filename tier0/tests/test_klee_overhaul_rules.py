@@ -114,6 +114,57 @@ def test_the_shipped_bomb_is_not_touched_by_the_arm(overhaul):
 
 
 # ---------------------------------------------------------------------------
+# RULE 5's OTHER HALF -- whose Attacks apply Pyro, and whose do not
+# ---------------------------------------------------------------------------
+
+def test_the_base_games_strike_applies_nothing_and_hers_still_do(overhaul):
+    """[USER], 2026-09-02: "I think we actually SHOULD remove the elemental
+    application from the basic Strikes for all characters. Those cards are
+    supposed to be bad!" R242 put the base game's Strike and Defend into her
+    starter, and `_is_base_game_basic` is the exemption's two tests: `basic`
+    rarity AND no owning `character:`. `CatalystCadence.IsBaseGameBasic` is the
+    mod's twin.
+
+    THE ARM'S OWN ATTACKS ARE UNMOVED, which is the half that matters here:
+    `proto_ko_kapow` is `rarity: basic` too and it carries `character: klee`,
+    so it fails the second test and still applies her Pyro -- and an explosion
+    never asks the cadence at all, because it names Pyro outright."""
+    state = klee_state([make_enemy(hp=200)])
+
+    strike, defend = load("strike"), load("defend")
+    assert effects._is_base_game_basic(strike) is True
+    assert effects._element_for(state, strike.effects[0], strike) is None
+
+    kapow = load("proto_ko_kapow")
+    assert (kapow.rarity, kapow.character) == ("basic", "klee")
+    assert effects._is_base_game_basic(kapow) is False
+    assert effects._element_for(
+        state, {"op": "damage", "amount": 4, "target": "enemy"},
+        kapow) == "pyro"
+    assert effects._is_base_game_basic(defend) is True
+
+
+def test_kapow_retains_at_base_and_the_upgrade_moves_its_damage(overhaul):
+    """The 2026-09-02 balance pass moved the starter's detonator: Retain is
+    PRINTED now (it used to be what the upgrade bought), and the upgrade buys
+    the number instead. Read off the sheet rather than retyped, so a further
+    move follows the yaml."""
+    from tier0.content import upgrades
+
+    upgrades._prototype_upgrade_index.cache_clear()
+    upgrades._upgrade_index.cache_clear()
+    try:
+        base = load("proto_ko_kapow")
+        upgraded = load("proto_ko_kapow+")
+        assert base.retain is True and upgraded.retain is True
+        assert base.effects[0]["damage"] == 4
+        assert upgraded.effects[0]["damage"] == 7
+    finally:
+        upgrades._prototype_upgrade_index.cache_clear()
+        upgrades._upgrade_index.cache_clear()
+
+
+# ---------------------------------------------------------------------------
 # RULE 1 -- the Bomb grows, and never goes off by itself
 # ---------------------------------------------------------------------------
 
@@ -151,23 +202,35 @@ def test_rule1_the_workshop_adds_one_more_per_stack(overhaul):
         C.KLEE_OVERHAUL_BOMB_GROWTH + 3 * C.KLEE_OVERHAUL_WORKSHOP_GROWTH)
 
 
-def test_rule1_alices_recipe_replaces_the_base_and_the_workshop_still_adds(
-        overhaul):
-    """`Rule1_alices_recipe_replaces_the_base_and_the_workshop_still_adds`.
+def test_rule1_alices_recipe_doubles_the_workshops_growth_too(overhaul):
+    """`Rule1_alices_recipe_multiplies_the_whole_growth` -- the 2026-09-02
+    balance pass, which turned the Rare from "grow by 4 instead of 3" (a
+    strictly weaker Explosives Workshop: a second Workshop reached 5 and a
+    second Recipe still read 4) into "your Bombs grow twice each turn".
 
-    "Grow by 4 INSTEAD of 3" -- REPLACE, not add, and not a multiplier either;
-    the two compose the only way that leaves both printed faces true. This is
-    also the one place the brief and the C# part company, and the C# wins: the
-    task that commissioned this twin described Alice as DOUBLING the growth,
-    and both `GrowthFor` and the power's own face say "instead of"."""
+    ADD-THEN-MULTIPLY is the composition, and `GrowthFor` is where it lives:
+    "twice" is twice the growth the turn would otherwise have had, the
+    Workshop's +1 included. The other order would make the Rare read "twice the
+    base and the Workshop once", which neither card says."""
     state = klee_state()
     state.player.powers[klee_overhaul.ALICES_RECIPE] = 1
-    assert klee_overhaul.growth_for(state) == klee_overhaul.alice_growth()
-    assert klee_overhaul.alice_growth() == C.KLEE_OVERHAUL_ALICE_GROWTH
+    assert klee_overhaul.growth_for(state) == (
+        C.KLEE_OVERHAUL_BOMB_GROWTH * C.KLEE_OVERHAUL_ALICE_MULTIPLIER)
 
     state.player.powers[klee_overhaul.BOMB_GROWTH_UP] = 1
     assert klee_overhaul.growth_for(state) == (
-        klee_overhaul.alice_growth() + C.KLEE_OVERHAUL_WORKSHOP_GROWTH)
+        (C.KLEE_OVERHAUL_BOMB_GROWTH + C.KLEE_OVERHAUL_WORKSHOP_GROWTH)
+        * C.KLEE_OVERHAUL_ALICE_MULTIPLIER)
+
+    # THE WORKED EXAMPLE, at today's constants and stated as an arithmetic
+    # identity rather than as two bare literals: growth 4 gives Recipe alone 8
+    # and Recipe-plus-one-Workshop 10. If the constants move the identity
+    # follows them, which is what the whole rule-1 placeholder note asks for.
+    assert (C.KLEE_OVERHAUL_BOMB_GROWTH, C.KLEE_OVERHAUL_ALICE_MULTIPLIER,
+            C.KLEE_OVERHAUL_WORKSHOP_GROWTH) == (4, 2, 1)
+    assert klee_overhaul.growth_for(state) == 10
+    state.player.powers.pop(klee_overhaul.BOMB_GROWTH_UP)
+    assert klee_overhaul.growth_for(state) == 8
 
 
 def test_rule1_the_turn_start_hook_grows_and_does_not_detonate(overhaul):
@@ -961,19 +1024,77 @@ def test_ammo_scavenging_draws_one_per_bomb_that_went_off_this_turn(overhaul):
     assert len(state.player.hand) == hand_before + 3
 
 
-def test_sparks_n_splash_sets_off_at_the_end_of_her_turn(overhaul):
-    """`EndOfTurnSetOffPower`: the ONE power in the slice that fires without a
-    card saying so, which is why it is a Rare -- the brief's gloss on it is
-    "Breaks rule 7"."""
+def test_sparks_n_splash_echoes_the_pile_without_spending_it(overhaul):
+    """`BombEchoPower`, [USER]'s own 2026-09-02 design: "at the end of your
+    turn, deal Pyro damage to a random enemy equal to the Bombs on it".
+
+    IT READS THE PILE AND DOES NOT SPEND IT, which is the whole card and the
+    whole of why rule 7 survives it. The row printed an automatic Set off
+    before this, and the Rare the growth deck most wants was the one card that
+    cashed its pile without being asked ("auto-detonation on Sparks n' Splash
+    completely bricks the growth build")."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
-    state.player.powers[klee_overhaul.END_TURN_SET_OFF] = 1
-    klee_overhaul.place(state, enemy, 7)
+    state.player.powers[klee_overhaul.BOMB_ECHO] = 1
+    klee_overhaul.place(state, enemy, 4)
+    klee_overhaul.place(state, enemy, 3)
 
     klee_overhaul.turn_end(state)
 
-    assert enemy.ko_charges == []
-    assert enemy.hp == 193
+    assert sizes(enemy) == [4, 3], "the Bombs stay and keep growing"
+    assert enemy.hp == 193, "and the echo dealt their total once"
+    # NOTHING EXPLODED, so rule 4 mints nothing and neither of rule 7's
+    # counters moves -- the ledger is not touched at all.
+    assert state.player.sparks == 0
+    assert (state.ko_set_off_this_turn, state.ko_reacted_this_turn) == (0, 0)
+    assert counts(state)["ko_explosion"] == 0
+    # It pays AGAIN next turn, and bigger, because the pile grew.
+    klee_overhaul.turn_start(state)
+    klee_overhaul.turn_end(state)
+    assert enemy.hp == 193 - (7 + 2 * C.KLEE_OVERHAUL_BOMB_GROWTH)
+
+
+def test_the_echo_rolls_only_over_bombed_enemies(overhaul):
+    """"A random enemy ... equal to the Bombs on it" -- so the roll is over the
+    enemies that actually hold one, and a board with none does nothing at all.
+    The auto-detonation it replaces rolled over EVERY enemy."""
+    bare, loaded = make_enemy(hp=200, name="bare"), make_enemy(hp=200,
+                                                              name="loaded")
+    state = klee_state([bare, loaded])
+    state.player.powers[klee_overhaul.BOMB_ECHO] = 1
+
+    klee_overhaul.turn_end(state)
+    assert counts(state)["ko_bomb_echo"] == 0
+
+    klee_overhaul.place(state, loaded, 6)
+    for _ in range(8):
+        klee_overhaul.turn_end(state)
+    assert bare.hp == 200, "an unbombed enemy is never rolled"
+    assert loaded.hp == 200 - 8 * 6
+
+
+def test_the_echo_is_pyro_and_is_not_an_attack(overhaul):
+    """`ElementalHit.Deal`, the same funnel an explosion takes: the echo reacts
+    with an aura and carries her Strength, and no card is being played so
+    nothing that keys off Attacks sees it. A THIRD source name, because the
+    echo is not an explosion and a log that conflated them could not answer
+    "how many Bombs went off"."""
+    enemy = make_enemy(hp=200)
+    enemy.skittish = 5
+    state = klee_state([enemy])
+    state.player.powers[klee_overhaul.BOMB_ECHO] = 1
+    state.player.powers["strength"] = 2
+    klee_overhaul.place(state, enemy, 6)
+
+    klee_overhaul.turn_end(state)
+
+    hit = next(e for e in state.log if e["event"] == "damage")
+    assert hit["source"] == klee_overhaul.ECHO_SOURCE
+    assert klee_overhaul.ECHO_SOURCE not in ("attack",
+                                             klee_overhaul.EXPLOSION_SOURCE)
+    assert hit["amount"] == 8, "Strength rode it"
+    assert enemy.aura == "pyro"
+    assert enemy.block == 0, "Skittish is an Attack-card rule and did not fire"
 
 
 def test_chained_reactions_re_bombs_once_per_explosion(overhaul):

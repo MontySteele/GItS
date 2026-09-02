@@ -6,7 +6,7 @@ slice one (`review/active/klee-overhaul-slice-1-2026-09-01.md`):
 
   1. **Bomb.** A numbered charge on an enemy. Every Bomb grows by
      `C.KLEE_OVERHAUL_BOMB_GROWTH` at the start of Klee's turn, plus one per
-     Explosives Workshop stack, with Alice's Recipe REPLACING the base. A Bomb
+     Explosives Workshop stack, the whole doubled by Alice's Recipe. A Bomb
      never goes off on its own.
   2. **Set off.** Only a card that says *Set off* makes Bombs go off. Every
      Bomb on the target goes off ONE AT A TIME, each a Pyro hit for its own
@@ -27,10 +27,9 @@ THE C# IS THE SPEC, and where its prose and its code disagree the CODE is what
 this file mirrors. The places that matters are recorded at their sites below;
 the ones a reader should know before reading anything else:
 
-  * ALICE'S RECIPE REPLACES, IT DOES NOT MULTIPLY. `GrowthFor` reads
-    `KleeOverhaulLaw.AliceGrowth` INSTEAD of `BombGrowth` and then adds the
-    Workshop -- "grow by 4 instead of 3", the card's own face. See
-    `alice_growth`.
+  * ALICE'S RECIPE MULTIPLIES, AND THE WORKSHOP IS ADDED FIRST. `GrowthFor`
+    sums the base and the Workshop stacks and doubles the result -- "your Bombs
+    grow twice each turn", the card's own face. See `growth_for`.
   * A SET OFF AIMED AT A CORPSE JUMPS the whole pile rather than fizzling;
     `SetOff` takes the charges first and its per-charge death test then sends
     every one of them to `JumpCharges`. See `set_off`.
@@ -77,7 +76,7 @@ OVERHAUL_OPS = frozenset((
 BOMB_GROWTH_UP = "ko_bomb_growth_up"          # Explosives Workshop: +1 growth
 ALICES_RECIPE = "ko_alices_recipe"            # growth 4 INSTEAD of 3
 CHAINED_REACTIONS = "ko_chained_reactions"    # re-Bomb per explosion
-END_TURN_SET_OFF = "ko_end_turn_set_off"      # Sparks 'n' Splash
+BOMB_ECHO = "ko_bomb_echo"                    # Sparks 'n' Splash's echo
 BOMB_REACTION_SPARK = "ko_bomb_reaction_spark"   # Catalytic Converter
 GROUNDED = "ko_grounded"                      # Block for the quiet turn
 
@@ -103,6 +102,13 @@ SPARK_RELIC_HOOK = "spark_on_detonation"
 #: different rules and a log that spelled them the same could not be read.
 EXPLOSION_SOURCE = "set_off"
 
+#: `source=` for Sparks 'n' Splash's echo, and a THIRD name rather than
+#: `EXPLOSION_SOURCE`, because the echo is not an explosion: it spends no
+#: charge, mints no Spark and moves neither of rule 7's counters. A log that
+#: called them the same thing would make "how many Bombs went off" unreadable.
+#: Same non-Attack posture as an explosion, for the same reason.
+ECHO_SOURCE = "bomb_echo"
+
 
 # ---------------------------------------------------------------------------
 # THE GATE
@@ -124,44 +130,37 @@ def live(state: CombatState) -> bool:
 # RULE 1 -- GROWTH
 # ---------------------------------------------------------------------------
 
-def alice_growth() -> int:
-    """Alice's Recipe's BASE growth -- "grow by 4 instead of 3".
-
-    A REPLACEMENT AND NOT A MULTIPLIER, which is the C#'s reading and the one
-    this file mirrors: `GrowthFor` picks `KleeOverhaulLaw.AliceGrowth` INSTEAD
-    of `BombGrowth`, the power's own face says "instead of", and the brief's
-    gloss on the card is "Breaks rule 1". Replace-then-add is then the only
-    composition that leaves both printed faces true.
-
-    READ, NEVER HARDCODED, and read through BOTH spellings the constant has
-    worn: `KLEE_OVERHAUL_ALICE_GROWTH` is the value on this tree, and a
-    `KLEE_OVERHAUL_ALICE_MULTIPLIER` -- the same rule stated as a factor on the
-    base -- answers first if a later ruling mints one. The two are the same
-    number said two ways, so reading whichever exists is what keeps this
-    function true across a re-baseline of rule 1's growth.
-    """
-    multiplier = getattr(C, "KLEE_OVERHAUL_ALICE_MULTIPLIER", None)
-    if multiplier is not None:
-        return int(C.KLEE_OVERHAUL_BOMB_GROWTH * int(multiplier))
-    return int(C.KLEE_OVERHAUL_ALICE_GROWTH)
-
-
 def growth_for(state: CombatState) -> int:
     """Rule 1's growth NUMBER for this Klee, right now. `GrowthFor`'s twin.
 
     ONE function, because the two modifiers compose in one printed way:
     Explosives Workshop ADDS `C.KLEE_OVERHAUL_WORKSHOP_GROWTH` per stack ("your
-    Bombs grow by 1 more"), Alice's Recipe REPLACES the base (see
-    `alice_growth`). Replace-then-add, and a Bomb armed before the Workshop and
-    one armed after it grow at the same rate -- the identical argument the
-    shipped `bomb_damage_up` makes for having one bomb-damage stat.
+    Bombs grow by 1 more"), Alice's Recipe MULTIPLIES what is left by
+    `C.KLEE_OVERHAUL_ALICE_MULTIPLIER` ("your Bombs grow twice each turn").
+
+    ADD-THEN-MULTIPLY, and it is the only reading that leaves both faces true:
+    "twice" is twice the growth the turn would otherwise have had, the
+    Workshop's +1 included. At today's constants the Recipe alone grows 4 x 2 =
+    8 and the Recipe with one Workshop grows (4 + 1) x 2 = 10. The other order
+    would make the Rare read "twice the base and the Workshop once", which
+    neither card says.
+
+    A MULTIPLIER SINCE THE 2026-09-02 BALANCE PASS, replacing an earlier "grow
+    by 4 instead of 3": the replacement reading made the Rare a strictly weaker
+    Explosives Workshop, because a second Workshop reached 5 and a second
+    Recipe still read 4.
+
+    EVERY NUMBER IS READ, NEVER HARDCODED. Rule 1's growth is a placeholder the
+    brief says is not a claim, and it has already moved once (3 to 4) inside
+    this branch's own lifetime.
     """
     powers_ = state.player.powers
-    base = alice_growth() if powers_.get(ALICES_RECIPE, 0) \
-        else int(C.KLEE_OVERHAUL_BOMB_GROWTH)
-    workshop = (powers_.get(BOMB_GROWTH_UP, 0)
-                * int(C.KLEE_OVERHAUL_WORKSHOP_GROWTH))
-    return base + workshop
+    growth = (int(C.KLEE_OVERHAUL_BOMB_GROWTH)
+              + powers_.get(BOMB_GROWTH_UP, 0)
+              * int(C.KLEE_OVERHAUL_WORKSHOP_GROWTH))
+    if powers_.get(ALICES_RECIPE, 0):
+        growth *= int(C.KLEE_OVERHAUL_ALICE_MULTIPLIER)
+    return growth
 
 
 def grow_pile(enemy: Enemy, amount: int) -> None:
@@ -618,26 +617,48 @@ def turn_start_late(state: CombatState) -> None:
 
 
 def turn_end(state: CombatState) -> None:
-    """The end of Klee's turn: Sparks 'n' Splash. `EndOfTurnSetOffPower
+    """The end of Klee's turn: Sparks 'n' Splash's ECHO. `BombEchoPower
     .BeforeSideTurnEnd`'s twin.
 
-    THE ONE POWER IN THE SLICE THAT FIRES WITHOUT A CARD SAYING SO, which is
-    exactly why it is a Rare -- the brief's own gloss on it is "Breaks rule 7".
+    "At the end of your turn, deal Pyro damage to a random enemy equal to the
+    Bombs on it." [USER]'s OWN DESIGN, 2026-09-02: "I think auto-detonation on
+    Sparks n' Splash completely bricks the growth build. How about instead 'a
+    random enemy takes damage equal to the amount of Bomb on them'?" The row
+    printed an automatic Set off before that, and the Rare the growth deck most
+    wants was the one card that cashed its pile without being asked.
 
-    A RANDOM ENEMY, not a random BOMBED enemy: the card says what it says, and
-    picking only from bombed enemies would make it strictly better than printed
-    on a board where one enemy is loaded and three are not.
+    IT READS THE PILE AND DOES NOT SPEND IT, which is the whole card, and it is
+    why rule 7 is untouched by it. Nothing is taken, so:
+      * the Bombs stay and keep growing -- the echo pays again next turn, and
+        bigger;
+      * NO SPARK, because rule 4 pays one per EXPLOSION and nothing exploded;
+      * no Mine answers, no explosion bus, and NEITHER of rule 7's counters
+        moves -- the ledger is not touched at all. This is not a Set off.
+
+    PYRO THROUGH THE SHARED HIT FUNNEL, so the echo reacts with an aura exactly
+    as an explosion does and carries her Strength the same way; and NOT an
+    Attack, because no card is being played.
+
+    A RANDOM BOMBED ENEMY, unlike the auto-detonation it replaces: an echo of
+    nothing is not a printed effect, so the roll is over the enemies that
+    actually hold a charge, and a board with none does nothing at all.
     """
+    from tier0.engine import effects                # late import: cycle
+
     if not live(state):
         return
-    if not state.player.powers.get(END_TURN_SET_OFF, 0):
+    if not state.player.powers.get(BOMB_ECHO, 0):
         return
-    living = list(state.living_enemies)
-    if not living:
+    candidates = [e for e in state.living_enemies if e.ko_charges]
+    if not candidates:
         return
-    target = state.rng.choice(living)
-    state.emit("ko_end_turn_set_off", target=target.name)
-    set_off(state, target)
+    target = state.rng.choice(candidates)
+    size = total_size(target)
+    if size <= 0:
+        return
+    state.emit("ko_bomb_echo", target=target.name, amount=size)
+    effects.deal_damage_to_enemy(state, target, size, element="pyro",
+                                 source=ECHO_SOURCE)
 
 
 # ---------------------------------------------------------------------------
