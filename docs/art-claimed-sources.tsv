@@ -1,7 +1,7 @@
 # DERIVED FILE -- regenerate with tools/dump_claimed_sources.py.
 # Diff every art candidate against the CLAIMED block before proposing it.
 # See the tool's docstring for what each block means.
-# CLAIMED: 285 effective card picks
+# CLAIMED: 289 effective card picks
 2024 7 5 amusement park art.png	universal_revelry
 4th Anniversary Wallpaper 1.png	thunderous_ovation
 A Commemorative Photo Aether 1.png	audience_participation
@@ -167,6 +167,8 @@ Klee Character Card Golden.png	true_spark_knight
 Klee Character Card.png	kaboom
 Klee Item.png	patched_dress
 Klee Multi Wish.png	no_holding_back
+Klee Portrait.png	powder_charge
+Klee Shorts 2023-06-12.png	smoke_and_sparks
 Klee Wish.png	big_badda_boom
 Kujou Sara Character Card.png	sara_crowfeather_cover
 Kujou Sara Wish.png	sara_tengu_stormcall
@@ -223,7 +225,6 @@ Sangonomiya Kokomi Character Card Platinum.png	grand_conscription
 Sangonomiya Kokomi Character Card Platinum.png	honor_guard
 Sangonomiya Kokomi Character Card Platinum.png	mass_mobilization
 Sangonomiya Kokomi Character Card Platinum.png	press_the_advantage
-Sangonomiya Kokomi Character Card Platinum.png	raise_the_sashimono
 Sangonomiya Kokomi Character Card Platinum.png	reinforcements
 Sangonomiya Kokomi Character Card Showcase.png	all_streams_flow
 Sangonomiya Kokomi Character Card Showcase.png	communion_of_tides
@@ -249,7 +250,9 @@ Sangonomiya Kokomi Portrait.png	tactical_retreat
 Sangonomiya Kokomi Portrait.png	tide_reading
 Sangonomiya Kokomi Portrait.png	waters_edge
 Sangonomiya Kokomi Profile.png	hold_the_narrows
+Sangonomiya Kokomi Profile.png	raise_the_sashimono
 Sangonomiya Kokomi Profile.png	undertow
+Sangonomiya Kokomi Profile.png	watch_of_the_shallows
 Sangonomiya Kokomi Vision.png	pearl_diver
 Sangonomiya Kokomi Wish.png	crane_wing
 Sangonomiya Kokomi Wish.png	epiphany_of_the_deep
@@ -277,6 +280,7 @@ Starlit Sky Firework Card 6.png	controlled_demolition
 Starlit Sky Firework Card 7.png	chained_reactions
 Starlit Sky Firework Card 8.png	grand_finale
 Starlit Sky Firework Card 9.png	tail_of_flame
+Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png	hold_the_line
 Stellar Predator Equipment Card.png	fischl_nightrider
 Sucrose Card.png	sucrose_catalyst_conversion
 Sucrose Character Card.png	sucrose_astable
@@ -288,7 +292,107 @@ VIPAD Furina.png	showstopper
 Version 4.2 Wallpaper 2.png	waters_embrace
 Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 #
-# FREE: 184 fetched titles no card claims
+# PLACEHOLDER: 98 prototype picks, 4 of them on a title no shipped card claims
+# Albedo Character Card.png	proto_mc_albedo_solar_isotoma
+# Arataki Itto Character Card.png	proto_mi_itto_superlative_superstrength
+# Barbara Card.png	proto_mc_barbara_melody_loop
+# Bennett Character Card.png	proto_mc_bennett_fantastic_voyage
+# Chaotic Entropy Equipment Card.png	proto_mc_sucrose_gust
+# Character Klee Full Wish.png	proto_ko_sparks_n_splash
+# Character Kuki Shinobu Full Wish.png	proto_mi_shinobu_thundergrust
+# Character Raiden Shogun Full Wish.png	proto_mi_raiden_musou_no_hitotachi
+# Character Sangonomiya Kokomi Full Wish.png	proto_kk_sango_isshin
+# Character Sangonomiya Kokomi Game.png	proto_kk_nereids_ascension
+# Character Sangonomiya Kokomi Game.png	proto_kk_read_the_field
+# Character Sangonomiya Kokomi Game.png	proto_kk_the_clouds_like_waves
+# Character Sayu Full Wish.png	proto_mi_sayu_naptime
+# Cold-Blooded Strike Equipment Card.png	proto_mc_kaeya_frostgnaw
+# Cold-Blooded Strike Equipment Card.png	proto_mc_kaeya_glacial_waltz
+# Dahlia Character Card.png	proto_mc_dahlia_sacramental_shower
+# Dahlia Wish.png	proto_mc_dahlia_favonian_favor
+# Diona Card.png	proto_mc_diona_signature_mix
+# Diona Character Card.png	proto_mc_diona_icy_paws
+# Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine.png	proto_ko_mine_toss
+# Dodoco's Bomb-Tastic Adventure Mint Jelly Jumpy Dumpty.png	proto_ko_bang_bang
+# Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty.png	proto_ko_jumpy_dumpty
+# Durin Item.png	proto_mc_durin_binary_form
+# Fischl Character Card.png	proto_mc_fischl_oz
+# Glorious Season Equipment Card.png	proto_mc_barbara_show_begin
+# Gorou Character Card.png	proto_mi_gorou_inuzaka
+# Gorou Introduction Card.png	proto_mi_gorou_juuga
+# Gorou Wish.png	proto_mi_gorou_war_banner
+# Grand Expectation Equipment Card.png	proto_mc_bennett_passion_overload
+# Icon Emoji Paimon's Paintings 07 Klee 2.png	proto_ko_sorry_jean
+# Icon Emoji Paimon's Paintings 13 Sangonomiya Kokomi 3.png	proto_kk_quiet_study
+# Icon Emoji Paimon's Paintings 25 Klee 2.png	proto_ko_duck_and_cover
+# Icon Emoji Paimon's Paintings 25 Klee 3.png	proto_ko_perfect_timing
+# Icon Emoji Paimon's Paintings 46 Klee 1.png	proto_ko_run_away
+# Item Dodoco's Dodo Stove.png	proto_ko_sizzle
+# Item Dodoco's Marvelous Magic.png	proto_ko_catalytic_converter
+# Item Dodoco's Travel Bag.png	proto_ko_ammo_scavenging
+# Item Fireworks Dance Amidst a Snowy Sky.png	proto_ko_flame_dance
+# Item Fish-Flavored Toast.png	proto_ko_fish_flavored_bait
+# Item Fizzy Fireworks.png	proto_ko_pocket_fireworks
+# Item Klee Explosive.png	proto_ko_tinder_toss
+# Item Naganohara Fireworks Note.png	proto_ko_alices_recipe
+# Item Sango Pearl Wild.png	proto_kk_cleansing_tide
+# Item Sangonomiya Kokomi The Deep.png	proto_kk_reading_the_tide
+# Item Special Jumpy Dumpty Dodoco.png	proto_ko_quick_fuse
+# Klee Character Card.png	proto_ko_kaboom
+# Klee Portrait.png	proto_ko_powder_charge
+# Klee Wish.png	proto_ko_big_badda_boom
+# Kujou Sara Character Card.png	proto_mi_sara_crowfeather_cover
+# Kujou Sara Wish.png	proto_mi_sara_tengu_stormcall
+# Kuki Shinobu Character Card.png	proto_mi_shinobu_sanctifying_ring
+# Kuki Shinobu Wish.png	proto_mi_shinobu_grass_ring
+# Namecard Background Celebration Peekaboo!.png	proto_ko_grounded
+# Namecard Background Klee Explosive.png	proto_ko_explosives_workshop
+# Namecard Background Sangonomiya Kokomi The Deep.png	proto_kk_high_tide
+# Nicole Introduction Card.png	proto_mc_nicole_revelation
+# Pounding Surprise Explosive Spark Effect.png	proto_ko_kapow
+# Sangonomiya Kokomi Card.png	proto_kk_breaker
+# Sangonomiya Kokomi Card.png	proto_kk_deep_current
+# Sangonomiya Kokomi Card.png	proto_kk_kurages_oath
+# Sangonomiya Kokomi Card.png	proto_kk_sea_spray
+# Sangonomiya Kokomi Character Card Golden.png	proto_kk_battle_plan
+# Sangonomiya Kokomi Character Card Golden.png	proto_kk_war_council
+# Sangonomiya Kokomi Character Card Platinum.png	proto_kk_feint
+# Sangonomiya Kokomi Character Card Platinum.png	proto_kk_rally
+# Sangonomiya Kokomi Character Card Showcase.png	proto_kk_contingency
+# Sangonomiya Kokomi Character Card Showcase.png	proto_kk_coral_bulwark
+# Sangonomiya Kokomi Character Card.png	proto_kk_ambush
+# Sangonomiya Kokomi Character Card.png	proto_kk_orders
+# Sangonomiya Kokomi Character Card.png	proto_kk_vanguard
+# Sangonomiya Kokomi Expression 2.png	proto_kk_salt_line
+# Sangonomiya Kokomi Introduction Card.jpg	proto_kk_rising_tide
+# Sangonomiya Kokomi Item.png	proto_kk_tidal_prayer
+# Sangonomiya Kokomi Portrait.png	proto_kk_coral_guard
+# Sangonomiya Kokomi Portrait.png	proto_kk_stolen_chapter
+# Sangonomiya Kokomi Portrait.png	proto_kk_waters_edge
+# Sangonomiya Kokomi Profile.png	proto_kk_the_generals_banner
+# Sangonomiya Kokomi Profile.png	proto_kk_treatise
+# Sangonomiya Kokomi Profile.png	proto_kk_undertow
+# Sangonomiya Kokomi Wish.png	proto_kk_song_of_pearls
+# Sangonomiya Kokomi Wish.png	proto_kk_the_art_of_war
+# Sangonomiya Kokomi Wish.png	proto_kk_watatsumis_blessing
+# Sayu Character Card.png	proto_mi_sayu_fuuin_dash
+# Sayu Wish.png	proto_mi_sayu_daruma
+# Sparkling Steps 2021-06-09 - Klee Emoji 1.png	proto_ko_sugar_rush
+# Sparkling Steps 2021-06-09 - Klee Emoji 3.png	proto_ko_rapid_fire
+# Starlit Sky Firework Card 11.png	proto_ko_pop
+# Starlit Sky Firework Card 3.png	proto_ko_chain_fuse
+# Starlit Sky Firework Card 4.png	proto_ko_careful_arrangement
+# Starlit Sky Firework Card 7.png	proto_ko_chained_reactions
+# Starlit Sky Firework Card 8.png	proto_ko_the_big_one
+# Starlit Sky Firework Card 9.png	proto_ko_fwoosh
+# Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png	proto_ko_dig_in
+# Stellar Predator Equipment Card.png	proto_mc_fischl_nightrider
+# Sucrose Card.png	proto_mc_sucrose_catalyst_conversion
+# Sucrose Character Card.png	proto_mc_sucrose_astable
+# Thoma Character Card.png	proto_mi_thoma_blazing_barrier
+# Thoma Wish.png	proto_mi_thoma_crimson_ooyoroi
+#
+# FREE: 177 fetched titles no card claims
 # 4th Anniversary Wallpaper 3.jpg
 # A Commemorative Photo Aether 2.png
 # A Commemorative Photo Lumine 1.png
@@ -303,14 +407,13 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Arlecchino Card.png
 # Arlecchino Portrait.png
 # Astra Carnival Cat's Tail Gathering 2024 S4 Artwork.png
-# Barbara Card.png
 # Barbara Introduction Card.png
 # Bennett Card.png
 # Bennett Introduction Card.png
 # Book Ragged Notebook.png
 # Calamitous Tread Graphic 2.png
 # Calamitous Tread Graphic 4.png
-# Ceremonial Garment Buff Icon.png
+# Ceremonial Garment Buff Icon.png	[non-card]
 # Character Clorinde Full Wish.png
 # Character Dahlia Full Wish.png
 # Character Navia Full Wish.png
@@ -337,10 +440,8 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Constellation They Know Not Life, Who Dwelt in the Netherworld Not!.png	[non-card]
 # Coronated Prima Donna Ousia Turnaround.png
 # Coronated Prima Donna Pneuma Turnaround.png
-# Diona Card.png
 # Diona Introduction Card.png
 # Durin Character Details 1.png
-# Durin Item.png	[non-card]
 # Element Anemo.svg	[non-card]
 # Element Cryo.svg	[non-card]
 # Element Electro.svg	[non-card]
@@ -373,7 +474,7 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Icon The Duke's Office.png
 # Item Celebration Lavish Gala.png
 # Item Embroidered Curtains.png
-# Item Festival Spotlight.png
+# Item Festival Spotlight.png	[non-card]
 # Item Fontaine Attunement.png
 # Item Fontaine Big News.png
 # Item Fontaine Completeness.png
@@ -392,8 +493,6 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Jumpy Dumpty Preview.gif
 # Klee Birthday 2022 - Shorts.png
 # Klee Icon.png	[non-card]
-# Klee Portrait.png
-# Klee Shorts 2023-06-12.png
 # Klee Side Icon.png	[non-card]
 # Kujou Sara Character Card Golden.png
 # Kujou Sara Character Card Platinum.png
@@ -412,7 +511,6 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Neuvillette Character Card Showcase 1.png
 # New Year's Advice from Teyvat Furina.png
 # Nicole Icon.png	[non-card]
-# Nicole Introduction Card.png
 # Opera Epiclese - Neuvillette's Seat.png
 # Oz Summon.png	[non-card]
 # Paimon's Paintings Set 26.png
@@ -433,7 +531,6 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Solar Isotoma Summon.png
 # Sparks 'n' Splash Buff Icon.png	[non-card]
 # Starlit Letter Wallpaper Furina.png
-# Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png
 # Status Frozen Enemy.gif
 # Status Frozen Player.gif	[non-card]
 # Sucrose Introduction Card.png
@@ -445,14 +542,14 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Talent Conclusive Ovation.png
 # Talent Endless Waltz.png	[non-card]
 # Talent Fantastic Voyage.png	[non-card]
-# Talent Kurage's Oath.png
+# Talent Kurage's Oath.png	[non-card]
 # Talent Let the People Rejoice.png	[non-card]
 # Talent Nereid's Ascension.png
 # Talent Nightrider.png
 # Talent Passion Overload.png	[non-card]
 # Talent Pressurized Floe 2.png
 # Talent Pressurized Floe 3.png	[non-card]
-# Talent Princess of Watatsumi.png
+# Talent Princess of Watatsumi.png	[non-card]
 # Talent Salon Solitaire 2.png	[non-card]
 # Talent Salon Solitaire.png	[non-card]
 # Talent Sparks 'n' Splash.png	[non-card]
