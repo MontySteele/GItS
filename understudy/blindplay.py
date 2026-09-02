@@ -662,7 +662,46 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         # board -- a reward, a shop shelf -- and empty on every card that is
         # not refusing.
         "unplayable_note": "",
+        # `EB-181`. THE FIELD THAT DID NOT EXIST. Run B6 held a Sharp *Water's
+        # Edge* and reached none of the fields that exist, because a card face
+        # on this wire carried `is_upgraded` and nothing at all about an
+        # enchantment. The bridge now emits `enchantment` from the game's own
+        # `CardModel.Enchantment` and emits it ONLY when there is one
+        # (`McpMod.StateBuilder.cs`, `GitsEnchantmentInfo`), so an absent key
+        # is the positive statement "not enchanted" -- and on a bridge too old
+        # to carry it, no face on the page claims one either way.
+        "enchantment": _enchantment(entry.get("enchantment")),
+        # `EB-263`: whether THIS screen says the card is picked. `None` on
+        # every screen and every bridge that does not answer, which is a third
+        # state and not a `False`.
+        "selected": (bool(entry["selected"])
+                     if entry.get("selected") is not None else None),
     }
+
+
+def _enchantment(blob: Any) -> dict[str, Any] | None:
+    """The card's enchantment as a printed row, or `None` (`EB-181`).
+
+    The bridge sends `{id, name, description, amount, shows_amount}`; `id` is
+    an internal token and does not cross. `shows_amount` is the GAME's own
+    `ShowAmount`, so a stacking enchantment prints its number and a
+    one-and-done one does not -- which is not this page's call to make.
+
+    The DESCRIPTION is carried here but not printed twice: `CardModel.HoverTips`
+    already appends the enchantment's own tips, so the rule reaches the page as
+    a keyword row under the card and what was missing was only the NAME beside
+    the title.
+    """
+    if not isinstance(blob, dict):
+        return None
+    name = _text(blob.get("name")) or _label(blob.get("id"))
+    if not name:
+        return None
+    row: dict[str, Any] = {"name": name,
+                           "text": _text(blob.get("description"))}
+    if blob.get("shows_amount") and _int(blob.get("amount")):
+        row["amount"] = _int(blob.get("amount"))
+    return row
 
 
 # `EB-262`, AND IT IS THE WHOLE ROW. A SHOP ITEM CARRIES ITS NAME UNDER ITS
@@ -1060,6 +1099,34 @@ def _hook_note(card: dict[str, Any],
             f"is: {on_you}.")
 
 
+def _meter_max(player: dict[str, Any]) -> dict[str, int]:
+    """`{printed meter name: its maximum}` for every meter that declares one.
+
+    `EB-181`. `player.resources` is `{id: amount}` and carries no ceiling, so
+    every meter row on this page has had to say so. The bridge's
+    `resource_info` is the fuller row per id -- `amount`, `max`, `resets_to`
+    -- with `max` filled only where the RESOURCE ITSELF declares one, since a
+    ceiling is the mod's fact and never BaseLib's
+    (`vendor/STS2_MCP/gits/GitsResources.cs`).
+
+    A meter that answers `null` is left OUT of this map rather than entered as
+    0: a zero would print `Charge: 8/0`, and "this meter declares no maximum"
+    is the thing the row still has to be able to say.
+    """
+    info = player.get("resource_info")
+    if not isinstance(info, dict):
+        return {}
+    out: dict[str, int] = {}
+    for key, row in info.items():
+        if not isinstance(row, dict):
+            continue
+        top = row.get("max")
+        if isinstance(top, bool) or not isinstance(top, int) or top <= 0:
+            continue
+        out[_label(key)] = top
+    return out
+
+
 def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
     """`qa_packet._powers` plus the `type` the wire has always carried.
 
@@ -1139,6 +1206,11 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             # something this screen does not show.
             "meters": ({_label(k): _int(v) for k, v in resources.items()
                         if _int(v)} if isinstance(resources, dict) else {}),
+            # `EB-181`: the CEILING beside the amount, per meter, where the
+            # meter declares one. `{printed name: max}`, and a meter that
+            # declares none is simply absent from this map -- so the row for
+            # it keeps saying, honestly, that the feed reports no maximum.
+            "meter_max": _meter_max(p),
             "powers": _powers(p),
             "potions": [{"title": _text(x.get("name")),
                          "text": _text(x.get("description"))}
@@ -1630,15 +1702,23 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["prompt"] = _text(blob.get("prompt")) or "Choose a card."
         obs["offers"] = _number_faces(
             [_card_face(c) for c in _screen_cards(state)], "title")
-        # `EB-263`. WHAT THE SCREEN SAYS IS PICKED, where it says anything.
-        # `BuildCardSelectState` puts the chosen card(s) in `preview_cards`
-        # while a preview container is open (`McpMod.StateBuilder.cs:2021`),
-        # and that is the ONLY selection state on the wire -- no grid row
-        # carries a selected flag. The upgrade and transform screens open a
-        # preview and therefore have one; the enchant picker does not, which
-        # is `SELECTION_NOTE` below.
+        # `EB-263`. WHAT THE SCREEN SAYS IS PICKED. Two channels now, and the
+        # older one first: `BuildCardSelectState` puts the chosen card(s) in
+        # `preview_cards` while a preview container is open, which the upgrade
+        # and transform screens open and -- since this row's bridge half --
+        # the enchant picker does too, under its own two container names.
+        #
+        # The second channel is the GRID's own selection, `selected` per card,
+        # read off `NCardGrid._highlightedCards`: the one list all five
+        # selection screens write through, so a pick is legible the moment it
+        # lands and not only once a preview opens over it. `selection_known`
+        # is whether the bridge could ask at all; where it could not, the page
+        # says so (`SELECTION_NOTE`) rather than printing "nothing is picked".
         obs["selected"] = _number_faces(
             [_card_face(c) for c in _preview_cards(state, st)], "title")
+        obs["selection_known"] = bool(blob.get("selection_known"))
+        if not obs["selected"] and obs["selection_known"]:
+            obs["selected"] = [c for c in obs["offers"] if c.get("selected")]
         obs["can_confirm"] = bool(blob.get("can_confirm"))
         obs["can_skip"] = bool(blob.get("can_skip") or blob.get("can_cancel"))
         # `EB-259`. THE PAGE MAY NOT OFFER WHAT THE STATE WILL REFUSE. This
@@ -1839,6 +1919,14 @@ def _render_card(c: dict[str, Any], bullet: str = "-") -> list[str]:
     # line is the glance, not the explanation.
     if c.get("element"):
         head += f" [{c['element']}]"
+    # `EB-181`: the enchantment beside the title, where the game paints it and
+    # where `(upgraded)` already sits -- the two facts a copy of a card can
+    # differ by, on one line, so two copies of one title are told apart at a
+    # glance instead of by a paragraph explaining that they cannot be.
+    ench = c.get("enchantment")
+    if ench:
+        head += (f" ({ench['name']} {ench['amount']})" if ench.get("amount")
+                 else f" ({ench['name']})")
     # `EB-286`: the COST SLOT as the game paints it, energy and Spark
     # together, through the one formatter the staged page already uses.
     # `qa_packet.cost_label` answers `-` when the wire sent no cost at all,
@@ -1907,17 +1995,27 @@ POWER_NOTE = ("*A power's number is what the game's data feed reports for it. "
               "either.*")
 METER_NOTE = ("the game's data feed carries this meter's amount only: no "
               "maximum, and no rule for how it is spent")
+# `EB-181`. The same row where the meter DOES declare a ceiling. The second
+# half of the sentence stands untouched -- a maximum is not a spending rule,
+# and nothing on this wire says what fills or empties a meter.
+METER_CAPPED_NOTE = ("the game's data feed carries this meter's amount and "
+                     "its maximum, and no rule for how it is spent")
 # `EB-263`. THE ENCHANT PICKER MARKS NOTHING, and the r3 Opus seat found out
 # the hard way: after `choose "Flame Dance"` "the whole list reprinted
 # byte-identically; the only change anywhere on the screen was the footer
 # going from `Confirm is not available.` to `Confirm is available.`". The
-# reason is on the bridge and not here -- `BuildCardSelectState` reads every
-# grid card through `BuildCardInfo`, which has no selected flag, and the
-# enchant screen opens no preview container for `preview_cards` to hold. So
-# the page says which signal it HAS rather than implying it has none.
-SELECTION_NOTE = ("*This screen's data feed carries no per-card selection "
-                  "state, so nothing in the list above can be marked as the "
-                  "one you picked. The `Confirm is` line below is the only "
+# reason was on the bridge and not here -- `BuildCardSelectState` read every
+# grid card through `BuildCardInfo`, which had no selected flag, and the
+# enchant screen's two preview containers were never looked up for
+# `preview_cards` to hold. Both are closed on the bridge side of this row.
+#
+# THE NOTE STAYS, for the case that is left: a bridge that could not ask.
+# `selection_known` is false when the grid's own selection could not be read
+# at all, and "nothing is picked" and "I could not find out" are different
+# things to tell a tester who is about to spend a turn confirming.
+SELECTION_NOTE = ("*This screen's data feed did not answer which card is "
+                  "picked, so nothing in the list above can be marked as the "
+                  "one you chose. The `Confirm is` line below is the only "
                   "thing that moves when a pick lands.*")
 
 # `EB-299`. THE NOTE WAS WRONG IN BOTH DIRECTIONS AND THE r2 OPUS SEAT CAUGHT
@@ -1935,9 +2033,10 @@ HAND_REPEAT_NOTE = ("*More than one card in this hand prints the same name. "
                     "and that number is a place in this list rather than "
                     "anything the card carries: it is re-counted on every "
                     "screen, so `(1)` names a different copy once one of them "
-                    "leaves your hand. The game's data feed does not report a "
-                    "card's enchantment either, so where two copies differ "
-                    "only by one, this page cannot say which is which.*")
+                    "leaves your hand. An enchantment prints beside the "
+                    "title where a card carries one, so where two copies show "
+                    "none and differ only by one, this page cannot say which "
+                    "is which.*")
 
 # `EB-294`. AN AURA IS NOT A BUFF, AND THE FEED SAYS BUFF. `AuraPower.Type` is
 # `PowerType.Buff` so that Artifact does not eat an elemental application
@@ -2125,7 +2224,14 @@ def render(obs: dict[str, Any]) -> str:
                 f"- Block {you['block']}",
                 f"- Energy {you['energy']}/{you['max_energy']}"]
         for name, amount in sorted(you["meters"].items()):
-            out.append(f"- {name}: {amount} — {METER_NOTE}")
+            # `EB-181`: with a ceiling the row reads like the HP and Energy
+            # rows above it and the note narrows to the half still true; with
+            # none it is exactly the row it always was.
+            top = you.get("meter_max", {}).get(name)
+            if top:
+                out.append(f"- {name}: {amount}/{top} — {METER_CAPPED_NOTE}")
+            else:
+                out.append(f"- {name}: {amount} — {METER_NOTE}")
         for pw in you["powers"]:
             out.append(_render_power(pw, "- "))
         out.append(f"- Piles: {c['piles']['draw']} in the draw pile, "
@@ -2292,6 +2398,11 @@ def render(obs: dict[str, Any]) -> str:
                 out += ["", "## What you have picked", ""]
                 for card in obs["selected"]:
                     out += _render_card(card)
+            elif obs.get("selection_known"):
+                # `EB-263`: asked, and the answer is nothing. That is a fact
+                # about the board, not a hole in the feed, and it is worth one
+                # line because the screen looks identical either way.
+                out += ["", "Nothing on this screen is picked yet."]
             elif obs["can_confirm"]:
                 out += ["", SELECTION_NOTE]
             out += ["", f"Confirm is {'available' if obs['can_confirm'] else 'not available'}."]

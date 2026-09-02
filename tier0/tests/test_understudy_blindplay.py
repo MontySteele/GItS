@@ -2608,26 +2608,68 @@ def test_a_live_upgrade_picker_prints_what_it_has_marked_as_picked():
 
 
 def test_a_live_enchant_picker_says_it_cannot_mark_the_pick():
-    """`EB-263`'s picker half where the wire has NO answer, and it is the
-    vendored bridge's gap rather than ours.
+    """`EB-263`'s picker half, ON THE BRIDGE THAT HAD THE GAP -- which is what
+    these two captures are, and why they stay exactly as recorded.
 
-    `BuildCardSelectState` reads every grid row through `BuildCardInfo`, which
-    carries no selected flag, and `NDeckEnchantSelectScreen` opens no preview
-    container -- so the two live captures below differ in ONE field. The r3
-    Opus seat: "the whole list reprinted byte-identically; the only change
-    anywhere on the screen was the footer going from `Confirm is not
-    available.` to `Confirm is available.`"
+    The old `BuildCardSelectState` read every grid row through `BuildCardInfo`,
+    which carried no selected flag, and never looked up
+    `NDeckEnchantSelectScreen`'s two preview containers -- so the captures
+    differ in ONE field. The r3 Opus seat: "the whole list reprinted
+    byte-identically; the only change anywhere on the screen was the footer
+    going from `Confirm is not available.` to `Confirm is available.`"
+
+    Both halves are closed on the bridge side of this row, and the page must
+    still DEGRADE HONESTLY against a bridge that predates the fix: a feed that
+    does not answer is not a board with nothing picked.
     """
     before, after = live("enchant-fresh"), live("enchant-chosen")
     assert before["card_select"]["cards"] == after["card_select"]["cards"]
     assert before["card_select"]["can_confirm"] is False
     assert after["card_select"]["can_confirm"] is True
     assert "preview_cards" not in after["card_select"]
+    assert "selection_known" not in after["card_select"]
 
     page = blindplay.observe(after)
-    assert "This screen's data feed carries no per-card selection state" in page
+    assert "data feed did not answer which card is picked" in page
     assert "Confirm is available." in page
     assert "## What you have picked" not in page
+    assert "Nothing on this screen is picked yet." not in page
+
+
+def test_the_enchant_picker_marks_the_pick_once_the_bridge_carries_it():
+    """`EB-263`, THE BRIDGE HALF, on the shape `BuildCardSelectState` now
+    builds: `selection_known` beside the grid, and `selected` per card off
+    `NCardGrid._highlightedCards` -- the one list all five selection screens
+    write through (`vendor/STS2_MCP/gits/GitsCardSelection.cs`).
+
+    Built by adding those two keys to the live pre-fix capture, since the
+    LIVE capture of the fixed bridge is what this row still owes: what is
+    pinned here is that the page reads them, not that the game sent them.
+
+    Seen to FAIL: without the reader the page falls back to the note.
+    """
+    after = live("enchant-chosen")
+    after["card_select"]["selection_known"] = True
+    for i, card in enumerate(after["card_select"]["cards"]):
+        card["selected"] = i == 1
+    page = blindplay.observe(after)
+    assert "## What you have picked" in page
+    assert "data feed did not answer which card is picked" not in page
+    picked = after["card_select"]["cards"][1]["name"]
+    assert page.index("## What you have picked") < page.rindex(picked)
+
+
+def test_an_asked_screen_with_nothing_picked_says_so():
+    """"Nothing is picked" and "I could not find out" are different things to
+    tell a tester who is about to spend a turn confirming, and only one of them
+    is about the board."""
+    fresh = live("enchant-fresh")
+    fresh["card_select"]["selection_known"] = True
+    for card in fresh["card_select"]["cards"]:
+        card["selected"] = False
+    page = blindplay.observe(fresh)
+    assert "Nothing on this screen is picked yet." in page
+    assert "data feed did not answer which card is picked" not in page
 
 # --------------------------------------------------------------------------
 # THE KOKOMI OVERHAUL, DRAFT 6: the Plans on the page, and the pet as a target
@@ -3057,7 +3099,10 @@ def test_the_duplicate_name_note_does_not_say_two():
     assert "Two cards here print the same name" not in page
     assert "More than one card in this hand prints the same name" in page
     assert "names a different copy once one of them leaves your hand" in page
-    assert "does not report a card's enchantment" in page
+    # `EB-181` narrowed the enchantment clause rather than dropping it: the
+    # bridge now carries an enchantment, so the note claims only what is
+    # still true -- that copies showing NONE cannot be told apart here.
+    assert "where two copies show none and differ only by one" in page
 
 
 def test_the_duplicate_name_note_stays_off_a_hand_with_no_repeat():
@@ -3405,6 +3450,120 @@ def test_the_next_fight_numbers_from_one_again():
     blindplay.observe(slug_fight([1, 2, 3]))
     page = blindplay.observe(slug_fight([7, 8]))    # nothing in common
     assert "Sea Slug (1)" in page and "Sea Slug (2)" in page
+
+
+# ---------------- EB-181: the enchantment on a face, the ceiling on a meter
+
+
+def enchanted_hand_state() -> dict:
+    """A combat holding two copies of one title, one of them enchanted.
+
+    `BuildCardInfo`'s shape as it now builds it: `enchantment` is
+    `{id, name, description, amount, shows_amount}` off the game's own
+    `CardModel.Enchantment` and is EMITTED ONLY WHEN THERE IS ONE, so the
+    plain copy simply has no such key. The enchantment's rule also rides in
+    `keywords`, because `CardModel.HoverTips` appends `Enchantment.HoverTips`
+    -- that half was never missing and is not added twice here.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    plain = {"id": "KLEEMOD-WATERS_EDGE", "name": "Water's Edge",
+             "type": "Attack", "cost": "1", "can_play": True, "index": 0,
+             "target_type": "AnyEnemy", "is_upgraded": False, "keywords": [],
+             "description": "Deal 7 damage."}
+    sharp = json.loads(json.dumps(plain))
+    sharp["index"] = 1
+    sharp["enchantment"] = {"id": "SHARP", "name": "Sharp",
+                            "description": "Deals 3 more damage.",
+                            "amount": 3, "shows_amount": True}
+    sharp["keywords"] = [{"name": "Sharp",
+                          "description": "Deals 3 more damage."}]
+    state["player"]["hand"] = [plain, sharp]
+    return state
+
+
+def test_an_enchanted_card_says_so_on_its_own_line():
+    """`EB-181`. Run B6 held a Sharp *Water's Edge* and "reached none of the
+    fields that exist": a card face on this wire carried `is_upgraded` and
+    nothing at all about an enchantment, so the two copies below were one face
+    printed twice and the page had to explain in a paragraph that it could not
+    tell them apart.
+
+    Seen to FAIL: without the reader both copies print bare.
+    """
+    page = blindplay.observe(enchanted_hand_state())
+    assert "**Water's Edge (2)** (Sharp 3)" in page
+    assert "**Water's Edge (1)** (Sharp" not in page
+
+
+def test_an_enchantment_the_game_does_not_number_prints_no_number():
+    """`shows_amount` is the game's own `ShowAmount` and it decides this, not
+    the page: a one-and-done enchantment carries an `Amount` internally and
+    shows the player none."""
+    state = enchanted_hand_state()
+    state["player"]["hand"][1]["enchantment"]["shows_amount"] = False
+    page = blindplay.observe(state)
+    assert "**Water's Edge (2)** (Sharp)" in page
+    assert "(Sharp 3)" not in page
+
+
+def test_a_card_with_no_enchantment_key_claims_nothing():
+    """An absent key is the positive statement "not enchanted", and it is also
+    what every bridge older than this row sends for every card. Neither may
+    become a claim on the page."""
+    state = enchanted_hand_state()
+    del state["player"]["hand"][1]["enchantment"]
+    page = blindplay.observe(state)
+    assert "Sharp 3" not in page
+    # And the duplicate-name note still says what is true of THIS page.
+    assert "where two copies show none and differ only by one" in page
+
+
+def metered_state(info: dict) -> dict:
+    """A combat whose player carries `resource_info` beside `resources`.
+
+    The shape `GitsResourceInfo` builds (`vendor/STS2_MCP/gits/GitsResources.cs`):
+    per resource id, `amount`, `max` -- null unless the resource itself
+    declares one -- and `resets_to`, BaseLib's per-turn refill under the name
+    it actually means.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["resource_info"] = info
+    return state
+
+
+def test_a_meter_that_declares_a_maximum_prints_it():
+    """`EB-181`'s second half. `player.resources` is `{id: amount}`, so every
+    meter row said "the game's data feed carries this meter's amount only: no
+    maximum" -- true, and the reason a blind seat cannot tell a meter from a
+    score.
+
+    Seen to FAIL: without the reader the row prints the bare amount.
+    """
+    page = blindplay.observe(metered_state({
+        "KLEEMOD_CHARGE": {"amount": 8, "max": 20, "resets_to": None}}))
+    assert "- Charge: 8/20" in page
+    assert "carries this meter's amount and its maximum" in page
+    assert "no maximum" not in page
+
+
+def test_a_meter_that_declares_none_keeps_the_honest_row():
+    """A ceiling is the MOD's fact and BaseLib guarantees none, so a resource
+    that declares no `Max` reports `null` -- and the row it prints is exactly
+    the row it always was, rather than a `/0` invented to fill the slot."""
+    page = blindplay.observe(metered_state({
+        "KLEEMOD_CHARGE": {"amount": 8, "max": None, "resets_to": None}}))
+    assert "- Charge: 8 —" in page
+    assert "no maximum" in page
+    assert "Charge: 8/" not in page
+
+
+def test_a_bridge_with_no_resource_info_prints_what_it_always_did():
+    """The key is new, and every recorded capture predates it. An absent
+    `resource_info` is not an empty one and must not read as a meter with no
+    ceiling that was ASKED."""
+    page = blindplay.observe(combat_state())
+    assert "- Charge: 8 —" in page
+    assert "no maximum" in page
 
 
 # ------------------- EB-271: the refusal that would not say what stopped you
