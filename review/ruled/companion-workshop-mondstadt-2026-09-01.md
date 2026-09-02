@@ -1,4 +1,4 @@
-Status: OPEN (picks 1 to 6)
+Status: RULED R236 2026-09-01
 
 # Companion workshop, Mondstadt: the bar, the rewrites, and Klee's stand-ins
 

@@ -1,4 +1,4 @@
-Status: OPEN (picks 1 to 4)
+Status: RULED R236 2026-09-01
 
 # Companion workshop, Inazuma: the rewrites, the nation's shape, and Kokomi's army
 
@@ -252,3 +252,25 @@ fight with, fine if so, otherwise 5 (it is, by the keyword's one rule, and
 §3 now says so on the row, so the 10 stays); the four picks in §7 at their
 defaults. The document is approved on those terms, and the build follows
 the Mondstadt one under the same flag.
+
+## 10. Built (2026-09-02, the next night)
+
+Built on the approval above as the second nation under the same flag
+(`COMPANION_OVERHAUL`, PR #255, merged as plumbing): all 24 Universals that
+§3 enumerates, 15 rewrites of shipped rows and 9 first rows, at 9 Common,
+11 Uncommon and 4 Rare. §4 says 25 and prints 9/12/4; the 12 closes only by
+counting Gorou's Kokomi-side Personal among the Uncommons, and that
+Personal, like every stand-in, is not built here. Four engine hooks were
+added in both engines for the rows that needed them; twelve rows reuse the
+Mondstadt ones. The Mend rule ("never above the HP you entered with") is
+still written once and now serves either arm.
+
+Two readings the build took where the row and its gloss disagree, each a
+one-line change if the gloss was the intent: "Gain 2 Dexterity for 2 turns"
+is this turn and the next, which is what the printed text says, not the
+gloss's three turns of Block; "each Sakura you place while one is out deals
+3 more" scales the Sakura being placed (4, then 7, then 7), not the ones
+already out. Also: Kirara's card names no element, since she is Dendro and
+the engine has six; and Inazuma now has eleven 5-star cards against the
+Featured Banner's three slots, so a run offers under a third of them, the
+banner doing its job (R64), not a new rule.
