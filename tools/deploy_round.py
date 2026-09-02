@@ -140,7 +140,7 @@ def verification(root: Path = REPO) -> list[str]:
 
     manifest = game_dir / "mods" / "klee" / "manifest.json"
     try:
-        version = json.loads(manifest.read_text(encoding="utf-8")).get(
+        version = json.loads(manifest.read_text(encoding="utf-8-sig")).get(
             "version", "?")
     except (OSError, ValueError):
         version = "NOT INSTALLED"
