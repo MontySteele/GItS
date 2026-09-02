@@ -40,10 +40,11 @@ public class CompanionOverhaulTests
 {
     private const BindingFlags All = HeadlessGame.All;
 
-    /// <summary>Every generated row of the arm, by class. The compiler holds
-    /// the correspondence with the sheet -- a deleted row takes its class with
-    /// it and this file stops building -- which is the same guarantee
-    /// <see cref="CompanionOverhaulRoster"/> buys by listing types.</summary>
+    /// <summary>Every generated row of the arm, by class -- all thirty-four,
+    /// in two waves. The compiler holds the correspondence with the sheet -- a
+    /// deleted row takes its class with it and this file stops building --
+    /// which is the same guarantee <see cref="CompanionOverhaulRoster"/> buys
+    /// by listing types.</summary>
     private static readonly Type[] Universals =
     {
         typeof(ProtoMcDionaSignatureMix),
@@ -67,6 +68,24 @@ public class CompanionOverhaulTests
         typeof(ProtoMcLisaVioletArc),
         typeof(ProtoMcLisaLightningRose),
         typeof(ProtoMcRosariaRavagingConfession),
+        // THE SECOND WAVE: the thirteen rows whose printed text needed an
+        // engine hook. Their own pins are in CompanionOverhaulHookTests; they
+        // are listed here because THIS file owns the "the assembly holds no
+        // overhaul row the roster forgot" sweep, which is a statement about
+        // every ProtoMc row there is.
+        typeof(ProtoMcDionaIcyPaws),
+        typeof(ProtoMcNoelleSweepingTime),
+        typeof(ProtoMcBarbaraMelodyLoop),
+        typeof(ProtoMcBennettPassionOverload),
+        typeof(ProtoMcDahliaSacramentalShower),
+        typeof(ProtoMcDahliaFavonianFavor),
+        typeof(ProtoMcDurinBinaryForm),
+        typeof(ProtoMcRazorClawAndThunder),
+        typeof(ProtoMcRazorLightningFang),
+        typeof(ProtoMcVarkaSturmUndDrang),
+        typeof(ProtoMcAmberExplosivePuppet),
+        typeof(ProtoMcEulaGlacialIllumination),
+        typeof(ProtoMcMikaStarfrostSwirl),
     };
 
     /// <summary>The six powers that fire at the end of the player's turn, in
@@ -166,7 +185,7 @@ public class CompanionOverhaulTests
     [Fact]
     public void Every_row_is_an_offerable_mondstadt_companion()
     {
-        Assert.Equal(21, Universals.Length);
+        Assert.Equal(34, Universals.Length);
         foreach (var type in Universals)
         {
             var card = (CardModel)Activator.CreateInstance(type)!;
@@ -192,7 +211,12 @@ public class CompanionOverhaulTests
         // fine, load fine, and simply never be offered.
         var generated = typeof(ProtoMcDionaSignatureMix).Assembly.GetTypes()
             .Where(t => t.Namespace == "KleeMod.Cards.Prototype.Generated"
-                        && t.Name.StartsWith("ProtoMc", StringComparison.Ordinal))
+                        && t.Name.StartsWith("ProtoMc", StringComparison.Ordinal)
+                        // A modal row's MODE FACES are generated beside it and
+                        // are pool members (EB-150), but they are not rows: no
+                        // reward slot may offer one, so the roster does not
+                        // list them and this sweep does not ask about them.
+                        && !typeof(ModalOptionCard).IsAssignableFrom(t))
             .ToList();
         Assert.Equal(
             Universals.OrderBy(t => t.Name).Select(t => t.Name).ToList(),
@@ -200,17 +224,19 @@ public class CompanionOverhaulTests
     }
 
     [Fact]
-    public void The_five_rares_are_the_five_star_characters()
+    public void Every_rare_belongs_to_a_five_star_character()
     {
         // The sheet's star-to-rarity rule, which the workshop's sec.5 says
         // stands. Jean is the one five-star with a second, Uncommon card
         // (Gale Blade), so this asserts the RARE tier rather than the star
-        // tier -- and the asymmetry is recorded in the provenance note.
+        // tier -- and the asymmetry is recorded in the provenance note. Eight
+        // across the two waves: Albedo, Jean, Nicole, Mona and Venti first,
+        // then Durin, Varka and Eula.
         var rares = Universals
             .Select(t => (CardModel)Activator.CreateInstance(t)!)
             .Where(c => c.Rarity == CardRarity.Rare)
             .ToList();
-        Assert.Equal(5, rares.Count);
+        Assert.Equal(8, rares.Count);
         Assert.All(rares, c => Assert.Equal(5, ((ICompanionCard)c).Star));
     }
 

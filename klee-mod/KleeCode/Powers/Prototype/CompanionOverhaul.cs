@@ -116,4 +116,38 @@ public static class CompanionOverhaulLaw
     /// <summary>Lisa, Lightning Rose: the Vulnerable that rides it.
     /// Mirrors <c>C.MC_LIGHTNING_ROSE_VULN</c>.</summary>
     public const int LightningRoseVulnerable = 1;
+
+    // THE SECOND WAVE -- the thirteen rows whose printed text needed an engine
+    // hook. Same rule as the eleven above: a number the CARD prints stays on
+    // the card row and is rendered into a DynamicVar, and only a number a
+    // POWER carries lands here.
+
+    /// <summary>Dahlia, Sacramental Shower: what the trap answers with.
+    /// Mirrors <c>C.MC_SHOWER_DMG</c>.</summary>
+    public const int ShowerDamage = 9;
+
+    /// <summary>Durin, White: "enemies take 50% more damage from reactions",
+    /// as a multiplier on the reaction's own damage.
+    /// Mirrors <c>C.MC_BINARY_WHITE_REACTION_MULT</c>.</summary>
+    public const decimal BinaryWhiteReactionMult = 1.50m;
+
+    /// <summary>Razor, Lightning Fang: damage his Attacks gain, 2 turns.
+    /// Mirrors <c>C.MC_LIGHTNING_FANG_BONUS</c>.</summary>
+    public const int LightningFangDamage = 3;
+
+    /// <summary>Amber, Baron Bunny: the damage the decoy eats.
+    /// Mirrors <c>C.MC_BARON_BUNNY_REDUCTION</c>.</summary>
+    public const int BaronBunnyReduction = 3;
+
+    /// <summary>Amber, Baron Bunny: the Pyro the decoy answers with.
+    /// Mirrors <c>C.MC_BARON_BUNNY_DMG</c>.</summary>
+    public const int BaronBunnyDamage = 8;
+
+    /// <summary>Eula, Lightfall Sword: the blade's own damage.
+    /// Mirrors <c>C.MC_LIGHTFALL_BASE</c>.</summary>
+    public const int LightfallBase = 8;
+
+    /// <summary>Eula, Lightfall Sword: per Attack the blade counted.
+    /// Mirrors <c>C.MC_LIGHTFALL_PER_ATTACK</c>.</summary>
+    public const int LightfallPerAttack = 5;
 }

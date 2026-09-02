@@ -620,6 +620,17 @@ class Player(Fighter):
     # and re-zeroed in `run_fight` beside the other per-combat resources, so a
     # reused Player cannot carry one fight's answer into the next.
     mc_held_block_at_turn_end: bool = False
+    # THE SAME ARM'S SECOND WAVE. Varka's Sturm und Drang says "your next
+    # Attack deals 6 more damage OF THE SWIRLED ELEMENT", so the charge it
+    # banks carries TWO numbers -- how much, and which element. The AMOUNT is
+    # an ordinary power stack (`mc_swirl_charge`, so a second Swirl adds to it
+    # exactly the way every other stack does); the ELEMENT has no stack to
+    # live in, so it is latched here, on `mc_held_block_at_turn_end`'s own
+    # precedent one line up. Overwritten by the LATEST Swirl, which is what
+    # "the swirled element" names on a card that has just watched one happen.
+    # Empty string means no charge is banked; the amount is the authority and
+    # this is only read while it is non-zero.
+    mc_swirl_element: str = ""
     relic_conditional_applied: dict[str, int] = field(default_factory=dict)
     #                                        # conditional_power (Red Skull):
     #                                        # key -> delta currently applied,
@@ -753,6 +764,16 @@ class Enemy(Fighter):
     # lands after the enemy has already acted is spent by that same side-end.
     frozen: int = 0
     frozen_by_companion: bool = False   # control_uptime provenance (§2.2a)
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL).
+    # Eula's Lightfall Sword is PLACED ON A TARGET and "for 2 turns it counts
+    # your Attacks". The turns live in the ordinary power stack
+    # (`powers['mc_lightfall_sword']`, ticked like every other duration); the
+    # TALLY has no stack to live in, so it is a field on the body carrying the
+    # blade -- `Player.mc_held_block_at_turn_end`'s precedent, on the other
+    # side of the board. A second power id would have shown up as a power in
+    # every digest that counts them, which a counter inside another power is
+    # not. Zero on a fresh Enemy, and an Enemy is built per fight.
+    mc_lightfall_tally: int = 0
     # Base-game parity: ShouldOwnerDeathTriggerFatal. The game gates Fatal
     # effects (Feed) on the target's powers all agreeing the death counts --
     # summoned adds do not. Defaults True; the summon intent in
@@ -1001,6 +1022,16 @@ class CombatState:
     card_aim: Optional[Enemy] = None
     card_aim_bound: bool = False
     current_card_cost: int = 0            # this_cost_zero
+    # THE MONDSTADT COMPANION OVERHAUL'S ELEMENT OVERRIDE (QUARANTINED,
+    # C.COMPANION_OVERHAUL). Which element THIS Attack applies, when a rewritten
+    # companion power has changed the answer -- "" while none has, which is
+    # every board in every release build. Snapshotted once per play beside
+    # `current_attack_bonus` and read by `_element_for`, for the reason that
+    # bonus is snapshotted: the riders that set it are CONSUMED by the play, so
+    # a per-hit re-read would apply the element to the first hit of a multi-hit
+    # Attack and nothing else. Saved and restored across a free play with the
+    # rest of the per-card context (`combat._FREE_PLAY_CONTEXT`).
+    mc_attack_element_override: str = ""
     current_x: int = 0                    # X-cost cards
     sparks_at_play: int = 0               # bank BEFORE this card's own spark
                                           # spend (Gleeful Barrage; R39)

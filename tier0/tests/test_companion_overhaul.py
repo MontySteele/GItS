@@ -174,7 +174,7 @@ def test_the_banner_roster_moves_with_the_pool(overhaul):
 # HEXEREI: ONE WORD, NO EFFECT
 # ---------------------------------------------------------------------------
 
-#: The rows the workshop's sec.3 marks Hexerei, among the twenty-one built.
+#: The rows the workshop's sec.3 marks Hexerei, across all thirty-four.
 HEXEREI_ROWS = {
     "proto_mc_albedo_solar_isotoma",
     "proto_mc_fischl_nightrider",
@@ -185,6 +185,12 @@ HEXEREI_ROWS = {
     "proto_mc_nicole_revelation",
     "proto_mc_mona_stellaris_phantasm",
     "proto_mc_venti_grand_ode",
+    # The second wave's four, off the same sec.3 lines: Durin, Razor twice,
+    # and Varka are all tagged characters in the workshop's own list.
+    "proto_mc_durin_binary_form",
+    "proto_mc_razor_claw_and_thunder",
+    "proto_mc_razor_lightning_fang",
+    "proto_mc_varka_sturm_und_drang",
 }
 
 
@@ -401,11 +407,18 @@ def test_the_isotoma_hits_the_aura_bearer_and_pays_block(overhaul):
 
 
 def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
-    """The C# twin (`CompanionOverhaulTurnEnd`) walks the six power types in
-    one fixed sequence. This asserts the sim's source declares the same one --
-    four of the six put an element on the board and three draw from the rng,
+    """The C# twin (`CompanionOverhaulTurnEnd`) walks the power types in one
+    fixed sequence. This asserts the sim's source declares the same one --
+    several of them put an element on the board and three draw from the rng,
     so a divergence here is a divergence in which reactions fire and in every
-    later roll of the fight."""
+    later roll of the fight.
+
+    THE SECOND WAVE ADDED FOUR AND ONLY ONE OF THEM JOINS THE WALK. Eula's
+    Lightfall Sword deals damage and is hosted on an enemy, so its position
+    matters and it is driven by the listener like the six; the other three are
+    a tick and two removals, which cannot change an outcome by running in a
+    different order, so they keep their own `AfterSideTurnEnd` broadcast in the
+    mod exactly as the shipped `AttackUpThisTurnPower` does."""
     src = (REPO / "tier0" / "engine" / "effects.py").read_text(
         encoding="utf-8")
     body = src.split("def companion_overhaul_turn_end(")[1]
@@ -414,7 +427,9 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
     seen = list(dict.fromkeys(order))
     assert seen == ["mc_glacial_waltz", "mc_oz", "mc_lightning_rose",
                     "mc_grand_ode", "mc_dandelion_breeze",
-                    "mc_isotoma_bloom"], seen
+                    "mc_isotoma_bloom",
+                    "mc_lightfall_sword", "mc_favonian_favor",
+                    "mc_passion_overload", "mc_lightning_fang"], seen
 
     cs = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
           / "CompanionOverhaulPowers.cs").read_text(encoding="utf-8")
@@ -423,6 +438,7 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
     assert cs_order == ["GlacialWaltzPower", "MondstadtOzPower",
                         "LightningRosePower", "GrandOdePower",
                         "DandelionBreezePower", "SolarIsotomaBloomPower",
+                        "LightfallSwordPower",
                         "RevelationPower"], cs_order
 
 

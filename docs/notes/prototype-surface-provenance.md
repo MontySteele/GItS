@@ -1067,11 +1067,13 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 # the same device `proto_ko_sparks_n_splash` already uses. The other eleven
 # names are new and carry no suffix.
 #
-# THIRTEEN OF THE WORKSHOP'S THIRTY-FOUR UNIVERSALS ARE NOT HERE, each because
-# its printed text wants an engine hook that exists in NEITHER engine. A card
-# that cannot be printed as written is left OUT rather than replaced by a
-# simpler card -- the same rule the Klee overhaul applied to Vermillion Pact --
-# and the hook each one wants is named so the next slice can price it:
+# THIRTEEN OF THE WORKSHOP'S THIRTY-FOUR UNIVERSALS LANDED IN A SECOND WAVE,
+# each because its printed text wanted an engine hook that existed in NEITHER
+# engine when the first twenty-one were built. The hooks are built now, in both
+# engines, and the rule that held the rows out is unchanged and still binds
+# anything later: a card that cannot be printed as written is left OUT rather
+# than replaced by a simpler card -- the same rule the Klee overhaul applied to
+# Vermillion Pact. What each row wanted, and what it now spends:
 #
 #   Diona, Icy Paws           "when THIS Block absorbs damage": a per-instance
 #                             Block-absorption trigger. Neither engine can name
@@ -1110,6 +1112,148 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 # BANNER_FEATURED_SLOTS = 3, so the banner binds on Mondstadt for the first
 # time. That is the shipped law applied to a bigger roster, not a new rule, and
 # it is written down here because it is the arm's most visible side effect.
+```
+
+## before proto_mc_diona_icy_paws
+
+```
+# THE SAME OVERHAUL'S SECOND WAVE -- THE THIRTEEN ROWS THAT NEEDED ENGINE
+# HOOKS. Same source, same terms and the same deletion rule as the block
+# above; what is different is that each of these thirteen was held out of the
+# first pass because its printed text wanted a hook that existed in NEITHER
+# engine. The hooks are built now, in both, and this block records WHICH HOOK
+# EACH ROW SPENDS -- so a later slice can price the hook rather than
+# rediscover it.
+#
+# THE HOOKS, and what was REUSED rather than built:
+#
+#   THE PRE-ENEMY-ATTACK TRAP (Dahlia's Sacramental Shower, Amber's Explosive
+#   Puppet) is the hook Klee's Mine already answers an enemy attack with --
+#   `PowerModel.BeforeDamageReceived` in the mod, and the same moment in the
+#   sim (`combat._enemy_turn`, after the hit's number is settled and before
+#   Block is spent). The traps sit on the PLAYER and read that broadcast from
+#   the other side. The intent-based predicate that already exists
+#   (`enemy_intends_attack`) was refused for the Mine's own reason: an intent
+#   can be answered and then not happen, while a hit about to land cannot.
+#   `effects.companion_overhaul_before_enemy_hit`.
+#
+#   THE INCOMING-DAMAGE REDUCTION (Amber's "take 3 less") is
+#   `ModifyDamageAdditive` returning a negative -- `PreventExhaustWardPower`'s
+#   shape. It is PURE, because the engine asks it speculatively for the intent
+#   preview; the consumption and the volley are one phase later, which is why
+#   the C# splits Baron Bunny in two where the sim does not.
+#
+#   THE BLOCK-ABSORPTION TRIGGER (Diona's Icy Paws) is new. The engine has ONE
+#   Block pool, so "this Block" is a MARK on the pool rather than a pile, and
+#   a hit that spends Block spends the mark with it -- marked-Block-eaten-first,
+#   which is the conservative reading of a question a single pool cannot
+#   answer (R212's one-way rule). `effects.companion_overhaul_block_absorbed`.
+#
+#   THE NEXT-ATTACK ELEMENT OVERRIDE (Bennett's Passion Overload, Razor's
+#   Lightning Fang, Varka's banked Swirl charge) is new, and it is the change
+#   with the widest blast radius: the element a play applies used to be read
+#   straight off the card at three sites, and is now read through ONE funnel
+#   in each engine (`effects._element_for`, `AuraCmd.ElementOfPlay`). An
+#   application site and a reaction site that disagreed about a card's element
+#   would apply one aura and react with another. ORDER IS LAW -- blanket
+#   first, one-shots after, LAST WINS -- and both engines assert it against
+#   the other's source.
+#
+#   THE SWIRL EVENT THAT REMEMBERS ITS ELEMENT (Varka) and THE PER-REACTION
+#   PAYOUT (Dahlia's Favonian Favor) ride ONE call from the single place each
+#   engine resolves a reaction (`reactions._react`,
+#   `ReactionEffects.Resolve`), where the CONSUMED element is still in hand.
+#   A call to one owner, not a bus: two readers do not earn an interface
+#   fanned over every power.
+#
+#   THE ATTACKS-PLAYED-THIS-TURN COUNTER (Razor's Claw and Thunder, and Eula's
+#   tally) is `state.attacks_played_this_turn` in the sim and a new
+#   round-rolling `CompanionOverhaulLedger` in the mod. NOT
+#   `CurtainCallHooks.AttacksPlayed`, which counts the same thing and is
+#   cleared only for Furina -- a Klee key would accumulate all fight, which is
+#   the defect that map's own `Purge` comment already records once.
+#   Both engines read the counter PLUS ONE, because both count an Attack after
+#   it resolves and the card asking is itself the Attack.
+#
+#   THE NEXT-ATTACK COST DISCOUNT (Mika) is `combat.card_cost` beside the
+#   Leading Role discount, and `TryModifyEnergyCostInCombat` in the mod --
+#   `SpotlightDiscountPower`'s shape. Both are PURE: the stack is spent by the
+#   Attack that takes it, never by being priced, so the playability gate may
+#   ask as often as it likes.
+#
+#   THE BLOCK-READING DAMAGE FORMULA (Noelle's Sweeping Time) is
+#   `amount_formula: {count: player_block}`, which tier0 has had since the
+#   reference pool's Body Slam and which the C# amount grammar had no reader
+#   for. `player_block_calc_rider` is that reader, on the same
+#   CalculatedDamageVar path the four riders beside it use.
+#
+#   A POWER ON A CHOSEN BODY (Barbara's Melody Loop, Eula's Lightfall Sword).
+#   A power holds no target, so the TARGET HOLDS THE POWER: both land on the
+#   enemy the card named, which is the workshop's own gloss for Barbara ("a
+#   persistent applier on a chosen body") and the literal reading of Eula's
+#   "place a Lightfall Sword ON TARGET". A body that dies takes the loop or
+#   the blade with it. The seam is `ENEMY_APPLY_POWERS`, which also makes the
+#   two cards declare `TargetType.AnyEnemy`.
+#
+#   TWO DAMAGE-PIPELINE MODIFIERS BEHIND A MODAL POWER (Durin's Binary Form).
+#   The modal surface itself is EB-118's and needed nothing: `choose_one` in
+#   the sheet, `ModalChoice` in the mod. WHITE multiplies the REACTION'S OWN
+#   damage -- a Vaporize that turns 10 into 20 has dealt 10 as a reaction, and
+#   White makes that 15 -- and it reaches exactly two places in each engine,
+#   the amplifier and the Overload splash. Electro-Charged applies a dot POWER
+#   rather than damage and is left alone; Superconduct, Frozen, Crystallize and
+#   Swirl deal no damage of their own. DARK adds its 8 in the ADDITIVE phase,
+#   off a FORECAST of the reaction the standing aura is about to produce,
+#   which is the same read `AuraPower.ModifyDamageMultiplicative` makes one
+#   phase later.
+#
+# READ AMBIGUOUSLY, AND HOW.
+#
+#   1. "WHEN THIS BLOCK ABSORBS DAMAGE" -- one pool, so the marked Block is
+#      taken as eaten FIRST. One-way: the paws bite on fewer hits than the
+#      other reading would give, and no third reading exists.
+#   2. "THE NEXT TIME AN ENEMY ATTACKS YOU" is one HIT, not one intent. A
+#      multi-hit intent spends one trap on its first hit and finds none on the
+#      second -- the Mine's own consumption rule, met again.
+#   3. "TAKE 3 LESS" applies to the hit the trap answers and floors at zero.
+#   4. TWO NEXT-ATTACK ELEMENT RIDERS AT ONCE: the damage halves STACK (three
+#      separate sentences, three separate numbers) and only the ELEMENT is
+#      exclusive, because an Attack applies one. Blanket first, one-shots
+#      after, last wins.
+#   5. AN OVERRIDE BEATS `applies_element: false`. "Your next Attack applies
+#      Pyro" is a statement about the Attack, not a modifier to one it was
+#      already making.
+#   6. "IF THIS IS THE THIRD ATTACK YOU PLAYED THIS TURN" counts the card
+#      asking. Both engines count an Attack after it resolves, so both read
+#      the counter plus one.
+#   7. "FOR 2 TURNS IT COUNTS YOUR ATTACKS; THEN IT DEALS ..." -- TICK, THEN
+#      FIRE AT ZERO, the opposite order from the arm's volleys, because the
+#      sentence says "then". Placed on your turn with 2 turns it counts this
+#      turn's Attacks and next turn's and pays at the end of the second. The
+#      blade's damage carries NO ELEMENT, because the card names none --
+#      Solar Isotoma's call, made again.
+#   8. "ENEMIES TAKE 50% MORE DAMAGE FROM REACTIONS" scales the REACTION'S
+#      contribution, not the hit that triggered it. Stacks ADD (two Durins are
+#      +100%, not +125%).
+#   9. MIKA'S DISCOUNT DOES NOT DISCOUNT HER OWN CARD. She is the first
+#      Attack in the repo to apply a next-Attack rider, which is why the mod
+#      needed a latch: the amount standing BEFORE the play is what the play
+#      spends, and anything the play itself added survives.
+#  10. `role_c` ON A REWRITTEN ROW IS DERIVED FROM THE BODY, not inherited
+#      from the shipped twin. Favonian Favor stops applying an element and
+#      becomes `buffer`; the shipped row was `applier`.
+#
+# WHAT THIS BLOCK COST THE SHIPPED PATHS, exhaustively, and every one of them
+# is byte-identical with the flag off (pinned, not intended, by
+# `tier0/tests/test_companion_overhaul_hooks.py` and
+# `KleeTests/Prototype/CompanionOverhaulHookTests.cs`):
+#   `combat._enemy_turn`      two guarded calls
+#   `combat.card_cost`        one guarded discount, beside Leading Role's
+#   `effects._element_for`    one guarded override, read off a per-play snapshot
+#   `effects.deal_damage_to_enemy`  one guarded additive term (Durin, Dark)
+#   `reactions._react`        one guarded multiplier and one guarded call
+#   `AuraPower` / `KleeElementalHooks`  the element read moved behind one funnel
+#   `ReactionTable` / `ReactionEffects` two `#if PROTOTYPE_CARDS` blocks
 ```
 
 ## The Kokomi overhaul, slice one — `proto_kk_` (2026-09-01)

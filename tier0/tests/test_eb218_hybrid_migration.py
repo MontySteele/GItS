@@ -51,9 +51,18 @@ SHIPPED_POOL_DIGEST = (
 def _clear():
     """Every memo a flag flip invalidates. `character_pool` is `lru_cache`d
     and reads the substitution map, so a test that flips without clearing it
-    reads the other arm."""
-    loader._card_prototype.cache_clear()
-    loader._substituted_card_index.cache_clear()
+    reads the other arm.
+
+    THROUGH `loader.reset_caches()`, not by naming two loader memos: that
+    function's own docstring is the rule ("Anything that changes what is on
+    disk, or monkeypatches where the loader looks, must call this rather than
+    picking caches by hand"), and clearing `_substituted_card_index` ALONE
+    leaves `upgrades._upgrade_index` memoized against a substitution table
+    that no longer exists -- an id it says can be smithed and `get_card` can
+    then no longer resolve. That inconsistency is invisible in this module and
+    surfaces in `test_upgrades`, whichever xdist worker happens to run the two
+    in that order."""
+    loader.reset_caches()
     rewards.character_pool.cache_clear()
 
 
