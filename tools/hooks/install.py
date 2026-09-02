@@ -92,6 +92,19 @@ fi
 
 cd "$top" || exit 1
 
+# git EXPORTS these to its hooks, and the checks below shell out to git in
+# temporary repositories of their own -- with GIT_DIR still pointing at the
+# real one, those tests operate on THIS repo instead. Measured 2026-09-02, and
+# it is not merely noisy: `tier0/tests/test_rulings_index.py` builds a fake
+# history by committing, so the first run of this hook without the scrub wrote
+# six fixture commits onto the pushing worktree's branch, re-inited the shared
+# repo bare, and did the same to three sibling worktrees whose agents pushed in
+# the same minutes. 26 tests failed and the damage was real. Scrub first.
+# (pre_push_gate.py scrubs the same list in the child environment it builds;
+# this is the shell half, for the inline arm below.)
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_QUARANTINE_PATH
+unset GIT_REFLOG_ACTION GIT_INTERNAL_GETTEXT_TEST_FALLBACKS
+
 if [ -f "$gate" ]; then
   exec "$PY" "$gate" "$@"
 fi
@@ -297,6 +310,16 @@ def self_test() -> int:
     if "--git-common-dir" not in SHIM:
         failures.append("self-test FAIL [fallback]: the shim no longer looks "
                         "for the main worktree's copy of the gate")
+    # THE SCRUB. git exports GIT_DIR to its hooks; the checks make their own
+    # temporary repositories, and with GIT_DIR still set they write to THIS
+    # one -- six fixture commits onto a live branch and a bare re-init, on the
+    # first run without it (2026-09-02). This is the highest-consequence line
+    # in the shim.
+    cases += 1
+    if "unset GIT_DIR" not in SHIM:
+        failures.append("self-test FAIL [env]: the shim does not scrub GIT_DIR, "
+                        "so every test that makes its own repository will "
+                        "write into this one")
 
     for line in failures:
         print(line)
