@@ -907,3 +907,192 @@
    description: "Exhaust. [gold]Mend[/gold] 12. [gold]Tide[/gold] +6.",
    effects: [{op: mend, amount: 12},
              {op: gain_tide, amount: 6}]}
+
+# THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
+# under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.
+# Source, readings and hooks: docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_mi_gorou_inuzaka, name: "Gorou — Inuzaka All-Round Defense (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: applier, element: geo,
+   cost: 1, type: attack,
+   description: "Deal 8 damage. Gain [gold]Block[/gold] equal to half the damage dealt.",
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
+             {op: block_half_damage}]}
+
+- {id: proto_mi_gorou_war_banner, name: "Gorou — General's War Banner (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: buffer, element: geo,
+   cost: 1, type: skill,
+   description: "Gain 2 [gold]Dexterity[/gold] for 2 turns.",
+   effects: [{op: apply_power, power: dexterity, amount: 2, target: self},
+             {op: apply_power, power: mi_war_banner, amount: 2, target: self}]}
+
+- {id: proto_mi_gorou_juuga, name: "Gorou — Juuga: Forward Unto Victory", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
+   cost: 1, type: skill, exhaust: true,
+   description: "For 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy.",
+   effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}]}
+
+- {id: proto_mi_sayu_fuuin_dash, name: "Sayu — Yoohoo Art: Fuuin Dash (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
+   cost: 1, type: attack,
+   description: "Deal 8 damage to a random enemy. [gold]Swirl[/gold].",
+   effects: [{op: damage, amount: 8, target: random_enemy, applies_element: true}]}
+
+- {id: proto_mi_sayu_daruma, name: "Sayu — Muji-Muji Daruma (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
+   cost: 1, type: skill, exhaust: true,
+   description: "Summon the [gold]Daruma[/gold]: for 2 turns, at the end of your turn, if you are above 70% HP deal 6 damage to a random enemy; otherwise gain 6 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: mi_daruma, amount: 2, target: self}]}
+
+- {id: proto_mi_sayu_naptime, name: "Sayu — Naptime (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: buffer, element: anemo,
+   cost: 0, type: skill,
+   description: "Gain 4 [gold]Block[/gold]. At the start of your next turn, draw 2 if you played no [gold]Attacks[/gold] this turn.",
+   effects: [{op: block, amount: 4},
+             {op: apply_power, power: mi_naptime, amount: 2, target: self}]}
+
+- {id: proto_mi_shinobu_sanctifying_ring, name: "Shinobu — Sanctifying Ring (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: electro,
+   cost: 1, type: skill, exhaust: true,
+   description: "Lose 3 HP. For 3 turns, at the end of your turn deal 5 [gold]Electro[/gold] damage to ALL enemies and gain 5 [gold]Block[/gold].",
+   effects: [{op: damage, amount: 3, target: self},
+             {op: apply_power, power: mi_sanctifying_ring, amount: 3, target: self}]}
+
+- {id: proto_mi_shinobu_grass_ring, name: "Shinobu — Grass Ring of Sanctification (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: buffer, element: electro,
+   cost: 0, type: skill,
+   description: "Gain 4 [gold]Block[/gold]. If you lost HP this turn, gain 4 more.",
+   effects: [{op: block, amount: 4},
+             {op: conditional, if: hp_lost_this_turn,
+              then: [{op: block, amount: 4}]}]}
+
+- {id: proto_mi_shinobu_thundergrust, name: "Shinobu — Thundergrust (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro,
+   cost: 1, type: attack,
+   description: "Deal 8 damage. If you are below half HP, deal 5 more.",
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
+             {op: conditional, if: hp_pct_below_50,
+              then: [{op: damage, amount: 5, target: enemy, applies_element: true}]}]}
+
+- {id: proto_mi_thoma_blazing_barrier, name: "Thoma — Blazing Barrier (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: buffer, element: pyro,
+   cost: 1, type: skill,
+   description: "Gain 6 [gold]Block[/gold]. Whenever this [gold]Block[/gold] absorbs damage, gain 3 [gold]Block[/gold].",
+   effects: [{op: block, amount: 6},
+             {op: apply_power, power: mi_blazing_barrier, amount: 6, target: self}]}
+
+- {id: proto_mi_thoma_crimson_ooyoroi, name: "Thoma — Crimson Ooyoroi (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: pyro,
+   cost: 1, type: skill, exhaust: true,
+   description: "For 2 turns, whenever you play an [gold]Attack[/gold], deal 5 [gold]Pyro[/gold] damage to a random enemy and gain 3 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: mi_crimson_ooyoroi, amount: 2, target: self}]}
+
+- {id: proto_mi_sara_crowfeather_cover, name: "Kujou Sara — Crowfeather Cover (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: buffer, element: electro,
+   cost: 0, type: skill,
+   description: "Your next [gold]Attack[/gold] this turn deals 4 more damage and applies [gold]Electro[/gold].",
+   effects: [{op: apply_power, power: mi_crowfeather, amount: 4, target: self}]}
+
+- {id: proto_mi_sara_tengu_stormcall, name: "Kujou Sara — Tengu Stormcall (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: electro,
+   cost: 1, type: attack,
+   description: "Deal 5 damage. Next turn, your [gold]Attacks[/gold] deal 5 more damage.",
+   effects: [{op: damage, amount: 5, target: enemy, applies_element: true},
+             {op: apply_power, power: mi_stormcall, amount: 1, target: self}]}
+
+- {id: proto_mi_itto_superlative_superstrength, name: "Itto — Superlative Superstrength (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo,
+   cost: 2, type: attack,
+   description: "Deal 14 damage. Gain 12 [gold]Block[/gold].",
+   effects: [{op: damage, amount: 14, target: enemy, applies_element: true},
+             {op: block, amount: 12}]}
+
+- {id: proto_mi_raiden_musou_no_hitotachi, name: "Raiden Shogun — Musou no Hitotachi (proto)", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: applier, element: electro,
+   cost: 3, type: attack,
+   description: "Deal 20 damage. Deals 5 more for each [gold]Companion[/gold] card you played this combat.",
+   effects: [{op: damage, target: enemy, applies_element: true,
+              amount_formula: {base: 20, per: 5, count: companions_played_this_combat}}]}
+
+- {id: proto_mi_kazuha_slash, name: "Kaedehara Kazuha — Kazuha Slash", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: anemo,
+   cost: 1, type: attack, exhaust: true,
+   description: "Deal 10 damage to ALL enemies. [gold]Swirl[/gold] each.",
+   effects: [{op: damage, amount: 10, target: all_enemies, applies_element: true}]}
+
+- {id: proto_mi_yae_sesshou_sakura, name: "Yae Miko — Sesshou Sakura", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: electro,
+   cost: 1, type: skill,
+   description: "Place a [gold]Sakura[/gold]: at the end of your turn it deals 4 [gold]Electro[/gold] damage plus your [gold]Strength[/gold] to a random enemy. Each [gold]Sakura[/gold] you place while one is out deals 3 more. Up to 3.",
+   effects: [{op: apply_power, power: mi_sesshou_sakura, amount: 1, target: self}]}
+
+- {id: proto_mi_yoimiya_aurous_blaze, name: "Yoimiya — Aurous Blaze", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: pyro,
+   cost: 1, type: skill, exhaust: true,
+   description: "Mark an enemy for 2 turns. Whenever it takes damage from a card that is not an [gold]Attack[/gold], deal 6 [gold]Pyro[/gold] damage to ALL enemies.",
+   effects: [{op: apply_power, power: mi_aurous_blaze, amount: 2, target: enemy}]}
+
+- {id: proto_mi_ayaka_soumetsu, name: "Kamisato Ayaka — Soumetsu", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: cryo,
+   cost: 2, type: skill, exhaust: true,
+   description: "For 2 turns, at the end of your turn deal 8 [gold]Cryo[/gold] damage to ALL enemies. Then deal 16 [gold]Cryo[/gold] damage to ALL enemies.",
+   effects: [{op: apply_power, power: mi_soumetsu, amount: 2, target: self}]}
+
+- {id: proto_mi_ayato_kyouka, name: "Kamisato Ayato — Kyouka", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: buffer, element: hydro,
+   cost: 1, type: skill, exhaust: true,
+   description: "For 2 turns, your [gold]Attacks[/gold] apply [gold]Hydro[/gold] and deal 4 more damage. When it ends, deal 12 [gold]Hydro[/gold] damage to a random enemy.",
+   effects: [{op: apply_power, power: mi_kyouka, amount: 2, target: self}]}
+
+- {id: proto_mi_heizou_heartstopper, name: "Shikanoin Heizou — Heartstopper Strike", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
+   cost: 1, type: attack,
+   description: "Deal 6 damage. Deals 4 more for each [gold]Swirl[/gold] this turn.",
+   effects: [{op: damage, target: enemy, applies_element: true,
+              amount_formula: {base: 6, per: 4, count: swirls_this_turn}}]}
+
+- {id: proto_mi_kirara_surprise_dispatch, name: "Kirara — Surprise Dispatch", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: buffer,
+   cost: 1, type: skill,
+   description: "Gain 8 [gold]Block[/gold]. Next turn, deal 10 damage to a random enemy.",
+   effects: [{op: block, amount: 8},
+             {op: apply_power, power: mi_surprise_dispatch, amount: 1, target: self}]}
+
+- {id: proto_mi_mizuki_anraku, name: "Yumemizuki Mizuki — Anraku Secret Spring Therapy", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: anemo,
+   cost: 2, type: skill, exhaust: true,
+   description: "[gold]Swirl[/gold] the aura of ALL enemies. If you are above 70% HP, deal 18 damage to ALL enemies. Otherwise, [gold]Mend[/gold] 10.",
+   effects: [{op: swirl, target: all_enemies},
+             {op: conditional, if: hp_pct_above_70,
+              then: [{op: damage, amount: 18, target: all_enemies, applies_element: true}],
+              else: [{op: mend, amount: 10}]}]}
+
+- {id: proto_mi_chiori_hasode, name: "Chiori — Fluttering Hasode", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: geo,
+   cost: 1, type: skill, exhaust: true,
+   description: "Summon [gold]Tamoto[/gold]: for 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold].",
+   effects: [{op: apply_power, power: mi_tamoto, amount: 3, target: self}]}
