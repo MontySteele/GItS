@@ -429,55 +429,45 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # but the table is total by construction and a missing row is a finding.
     "play_front_memory": [_hook("private", "charge", "use"),
                           _hook("private", "kurage", "use")],
-    # --- Kokomi overhaul, slice one (QUARANTINED, C.KOKOMI_OVERHAUL) ---
-    # The arm is C# first and tier0 refuses to resolve these ten, but the
+    # --- Kokomi overhaul, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ---
+    # The arm is C# first and tier0 refuses to resolve these, but the
     # connectivity vocabulary is about what state an op MOVES, which the
-    # printed rule already settles (`kokomi-brief-2026-09-01.md` sec.4) and
-    # which does not wait on an implementation -- the same argument the Klee
-    # arm's eight make one block up.
+    # printed rule already settles (`kokomi-brief-2026-09-01.md` draft 6 sec.2)
+    # and which does not wait on an implementation -- the same argument the
+    # Klee arm's eight make one block up.
     #
-    # THE TIDE IS FILED UNDER `kurage`, and that is a decision rather than a
-    # shortcut. The vocabulary is FROZEN at v3 by
+    # THE PLAN QUEUE IS FILED UNDER `kurage`, and that is a decision rather
+    # than a shortcut. The vocabulary is FROZEN at v3 by
     # `test_v3_added_exactly_one_power_row_and_no_vocabulary_entry`, which
     # exists so a baseline re-run's relabel-only argument holds -- minting a
-    # `tide` entry would break that argument, and a measurement-law change is
-    # not a build branch's to take. Filing it under the jellyfish is the
-    # honest reading available: rule 1 says the Bake-Kurage HOLDS the Tide, so
-    # every hook below really is a hook on the jellyfish's own state.
-    "gain_tide": [_hook("private", "kurage", "write")],
-    # A Surge SPENDS what the jellyfish holds: rule 3 is the whole of the
-    # hold-or-surge decision, and `use` is the verb `competing_uses` counts.
-    "surge": [_hook("private", "kurage", "use")],
-    "block_half_surge": [_hook("private", "kurage", "read"),
-                         _hook("shared", "block_held", "write")],
-    # RULE 5, and it is TWO competing uses on purpose: Exert takes HP, out of
-    # Block first, so the Block card she played is a Block card she cannot also
-    # spend on the raider. That is the brief's contested thing (sec.5) and this
-    # row is where the report can see it.
-    "exert": [_hook("shared", "hp_ledger", "use"),
-              _hook("shared", "block_held", "use")],
+    # `plan_queue` entry would break that argument, and a measurement-law
+    # change is not a build branch's to take. Filing it under the jellyfish is
+    # the honest reading available and a better one than draft 2 had: rule 1
+    # says the Bake-Kurage is WHERE A PLAN IS SENT, so the queue really is the
+    # jellyfish's own state.
     "mend": [_hook("shared", "hp_ledger", "write")],
-    # EMPTY, and DISCLOSED rather than approximated. A Plan writes into a
-    # per-seat queue of delayed effects, which is a real state and one this
-    # vocabulary has no entry for -- and the vocabulary is frozen at v3 for the
-    # reason recorded above, so a `plan_queue` entry is not this branch's to
-    # mint. The alternatives were both worse than an honest zero: filing it
-    # under `card_timing` would claim a Plan moves a CARD's Retain/Innate
-    # fields, which it does not, and filing it under a private meter would
-    # report the Strategist loop as feeding the Priestess one. `energy` is the
-    # registered precedent for an empty list (see this table's header). When
-    # the arm reaches Balance and the sim is brought up, the vocabulary bump
-    # and its re-baseline are the same act.
-    "plan": [],
-    "draw_companion_from_draw": [_hook("shared", "draw_pile", "use"),
-                                 _hook("shared", "hand_contents", "write")],
+    # Sango Isshin's now-line. Damage, refined by target below like every other
+    # damage row -- the Max-HP read moves nothing.
+    "damage_quarter_max_hp": [],
     # A cost change, which is what `cost_mod` is filed under.
-    "next_companion_free": [_hook("shared", "card_identity", "write")],
-    "draw_per_tide": [_hook("private", "kurage", "read"),
-                      _hook("shared", "draw_pile", "use"),
-                      _hook("shared", "hand_contents", "write")],
-    "play_top_of_draw": [_hook("shared", "draw_pile", "use"),
-                         _hook("shared", "plays_this_turn", "write")],
+    "next_companion_discount": [_hook("shared", "card_identity", "write")],
+    # Cleansing Wave takes a debuff off HER. The nearest grounded entry is the
+    # HP ledger's sibling for statuses, which this vocabulary does not have --
+    # so it is EMPTY and disclosed, on `plan`'s own argument below.
+    "remove_debuff": [],
+    # Change of Plans pulls one Plan forward: it USES the queue and nothing
+    # else. What the Plan then does is the Plan's own row.
+    "carry_out_front_plan": [_hook("private", "kurage", "use")],
+    # Moon's Reflection reads the exhaust pile and writes the queue.
+    "plan_from_exhaust": [_hook("shared", "exhaust_pile", "use"),
+                          _hook("private", "kurage", "write")],
+    # THE PLAN-ONLY CLAUSES. `plan_twice` is a modifier on the queue's own
+    # resolution, so it writes the jellyfish; the per-Companion hit reads a
+    # per-turn count this vocabulary has no entry for and is damage otherwise,
+    # so it is `plays_this_turn` read and nothing else.
+    "plan_twice": [_hook("private", "kurage", "write")],
+    "damage_per_companion_last_turn": [
+        _hook("shared", "plays_this_turn", "read")],
 }
 
 # Ops whose value arrives at a card the player PICKS, through the pilot's

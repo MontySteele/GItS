@@ -303,9 +303,12 @@ def test_the_prototype_rule_states_the_rows_own_numbers():
     assert delta("proto_ko_chain_fuse") == {"grow": 1}
     assert delta("proto_ko_careful_arrangement") == {"grow": 1}
     assert delta("proto_ko_grounded") == {"power_amount": 1}
-    assert delta("proto_kk_kurages_oath") == {"tide": 2}
-    assert delta("proto_kk_cleansing_tide") == {"mend": 2}
-    assert delta("proto_kk_coral_bulwark") == {"block": 3, "tide": 2}
+    # Kokomi's half of the rule, on DRAFT 6's rows. `tide` left the key list
+    # with the verb it read (`gain_tide`), so what is left of her side is the
+    # shared Block and Mend clauses -- which is the whole point of a rule
+    # written over ops rather than over characters.
+    assert delta("proto_kk_coral_bulwark") == {"block": 3}
+    assert delta("proto_kk_the_moon_a_ship") == {"mend": 2}
 
 
 def test_the_cost_clause_is_the_last_resort_and_only_at_two():
@@ -316,8 +319,8 @@ def test_the_cost_clause_is_the_last_resort_and_only_at_two():
     from tier0.content import upgrades
 
     assert upgrades.prototype_default_delta(
-        "proto_kk_the_art_of_war", 2, [
-            {"op": "apply_power", "power": "kk_art_of_war", "amount": 1,
+        "proto_kk_the_moon_overlooks_the_waters", 2, [
+            {"op": "apply_power", "power": "kk_plans_also_now", "amount": 1,
              "target": "self"}]) == {"cost": -1}
     # The same row at cost 1: nothing to move, and nothing invented.
     assert upgrades.prototype_default_delta(
@@ -326,9 +329,7 @@ def test_the_cost_clause_is_the_last_resort_and_only_at_two():
              "target": "self"}]) == {}
     # A row that DID find a number never also gets the discount.
     assert "cost" not in upgrades.prototype_default_delta(
-        "proto_kk_breaker", 2, [{"op": "surge", "target": "enemy"},
-                                {"op": "damage", "amount": 8,
-                                 "target": "enemy"}])
+        "proto_kk_the_moon_a_ship", 2, [{"op": "mend", "amount": 10}])
 
 
 def test_a_power_amount_of_one_is_read_as_no_number():
@@ -373,7 +374,7 @@ def test_no_prototype_row_is_upgradable_with_the_flags_off():
     upgrades._upgrade_index.cache_clear()
     try:
         assert not upgrades.has_upgrade("proto_ko_kapow")
-        assert not upgrades.has_upgrade("proto_kk_coral_bulwark")
+        assert not upgrades.has_upgrade("proto_kk_treatise")
     finally:
         upgrades._prototype_upgrade_index.cache_clear()
         upgrades._upgrade_index.cache_clear()

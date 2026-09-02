@@ -186,6 +186,29 @@ public static partial class McpMod
                 inertAim = true;
             }
         }
+        else if (data.TryGetValue("target", out var anyTargetElem)
+                 && anyTargetElem.ValueKind == JsonValueKind.String)
+        {
+            // GItS LOCAL EDIT (`EB-216`, the Kokomi draft-6 half). A CUSTOM
+            // single-target type -- BaseLib's `Pet` and `PetOrSelf`, and the
+            // Kokomi arm's `PetOrEnemy` -- is not `TargetType.AnyEnemy`, so the
+            // branch above never ran and the play arrived with a NULL target.
+            // For a Plan card that is the difference between writing a Plan and
+            // throwing on its own null check in front of a seat.
+            //
+            // THE CARD IS THE GATE, not this branch: `IsValidTarget` is the
+            // game's own check and BaseLib prefixes it for every custom type,
+            // so a target this bridge resolves is refused here if the card
+            // would refuse it in the UI. A card that names no target still
+            // reaches the untargeted path exactly as before.
+            string anyId = anyTargetElem.GetString() ?? "";
+            target = ResolveAnyCreature(combatState, anyId);
+            if (target == null)
+                return Error($"Target '{anyId}' not found in this combat");
+            if (!card.IsValidTarget(target))
+                return Error($"Card '{card.Title}' cannot be played on "
+                           + $"'{SafeGetText(() => target.Name) ?? anyId}'");
+        }
 
         // Play the card via the action queue (same path as the game UI)
         RunManager.Instance.ActionQueueSynchronizer.RequestEnqueue(new PlayCardAction(card, target));
@@ -1104,6 +1127,24 @@ public static partial class McpMod
 
         return FindAll<NProceedButton>(screen)
             .FirstOrDefault(IsControlVisibleOrActionable);
+    }
+
+    /// <summary>
+    /// GItS LOCAL ADDITION (`EB-216`, the Kokomi draft-6 half). Any creature in
+    /// the combat, by the id the wire published -- allies and pets included.
+    ///
+    /// A SECOND FUNCTION rather than a widened `ResolveTarget`, deliberately:
+    /// that one is the ENEMY resolver and the `AnyEnemy` branch above leans on
+    /// it refusing everything else. Widening it would let a mistyped ally id
+    /// pass an attack's aim, which is a class of defect the narrow one cannot
+    /// have.
+    /// </summary>
+    private static Creature? ResolveAnyCreature(ICombatState combatState,
+                                                string entityId)
+    {
+        if (uint.TryParse(entityId, out uint combatId))
+            return combatState.GetCreature(combatId);
+        return ResolveTarget(combatState, entityId);
     }
 
     private static Creature? ResolveTarget(ICombatState combatState, string entityId)

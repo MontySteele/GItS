@@ -159,15 +159,15 @@ public static class KleeMod
                 [Powers.RecallFromExhaust.PromptKey] =
                     Powers.RecallFromExhaust.PromptText,
 #if PROTOTYPE_CARDS
-                // QUARANTINED (the Kokomi overhaul, slice one). Rally's
-                // pile-selection screen, on exactly the terms the three rows
+                // QUARANTINED (the Kokomi overhaul, draft 6). Moon's
+                // Reflection's exhaust-pile screen, on exactly the terms the three rows
                 // above have: a LocString is a table plus a key with no
                 // raw-text constructor, so the copy can only reach the screen
                 // as a row, and this dictionary is its only source. Inside the
                 // compile switch because the verb it names does not exist in a
                 // release build.
-                [Powers.KokomiOverhaulKit.CompanionSearchPromptKey] =
-                    Powers.KokomiOverhaulKit.CompanionSearchPromptText,
+                [Powers.KokomiPlan.ReflectionPromptKey] =
+                    Powers.KokomiPlan.ReflectionPromptText,
 #endif
             });
 
@@ -327,7 +327,7 @@ public static class KleeMod
                     // reason Rally's prompt is: `Cards/Prototype/**` is
                     // Compile Remove'd from a release build, so
                     // `Cards.ArmKeywordTips` does not exist there and these
-                    // eleven keys name nothing. Under the switch they are the
+                    // seven keys name nothing. Under the switch they are the
                     // only source of the titles, exactly as the four rider
                     // rows above are -- the pck's card_keywords.json carries
                     // none of them, and a missing row renders as the raw key
@@ -347,12 +347,8 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.SetOffKey + ".title"] = "Set off",
                     [Cards.ArmKeywordTips.SparkKey + ".title"] = "Spark",
                     [Cards.ArmKeywordTips.MineKey + ".title"] = "Mine",
-                    [Cards.ArmKeywordTips.TideKey + ".title"] = "Tide",
-                    [Cards.ArmKeywordTips.SurgeKey + ".title"] = "Surge",
-                    [Cards.ArmKeywordTips.ExertKey + ".title"] = "Exert",
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
-                    [Cards.ArmKeywordTips.GarmentKey + ".title"] = "Garment",
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
 #endif
                 };

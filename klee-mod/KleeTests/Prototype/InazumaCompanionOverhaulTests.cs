@@ -189,24 +189,24 @@ public class InazumaCompanionOverhaulTests
         var play = typeof(ProtoMiShinobuSanctifyingRing).GetMethod("OnPlay", All)!;
         var calls = Il.Calls(play);
         Assert.Contains(calls, c => c.Contains("CreatureCmd.Damage"));
-        Assert.DoesNotContain(calls, c => c.Contains("KokomiTide.Exert"));
+        Assert.DoesNotContain(calls, c => c.Contains("KokomiRules.Exert"));
     }
 
     [Fact]
     public void Mizukis_snack_is_the_one_row_that_mends()
     {
-        // And it goes through KokomiTide.Mend -- the ONE place "never above
+        // And it goes through KokomiRules.Mend -- the ONE place "never above
         // the HP you entered the fight with" is written. A second Mend for the
         // companion pool is exactly what this asserts did not happen.
         var play = typeof(ProtoMiMizukiAnraku).GetMethod("OnPlay", All)!;
-        Assert.Contains(Il.Calls(play), c => c.Contains("KokomiTide.Mend"));
+        Assert.Contains(Il.Calls(play), c => c.Contains("KokomiRules.Mend"));
 
         foreach (var type in Rows.Where(t => t != typeof(ProtoMiMizukiAnraku)))
         {
             var other = type.GetMethod("OnPlay", All);
             if (other == null) continue;
             Assert.DoesNotContain(Il.Calls(other),
-                c => c.Contains("KokomiTide.Mend"));
+                c => c.Contains("KokomiRules.Mend"));
         }
     }
 
@@ -216,10 +216,10 @@ public class InazumaCompanionOverhaulTests
         // THE ONE LINE THAT MOVED for the companion arm. The rule below it is
         // unchanged and unduplicated; what widened is the gate, because
         // Mizuki's row is a UNIVERSAL and Klee or Furina can draft it.
-        var mend = Il.Method("KokomiTide", "Mend");
+        var mend = Il.Method("KokomiRules", "Mend");
         Assert.Contains(Il.Calls(mend), c => c.Contains("MendIsLive"));
 
-        var live = Il.Method("KokomiTide", "MendIsLive");
+        var live = Il.Method("KokomiRules", "MendIsLive");
         var calls = Il.Calls(live);
         Assert.Contains(calls, c => c.Contains("KokomiOverhaul.LiveFor"));
         Assert.Contains(calls, c => c.Contains("CompanionOverhaul.get_Enabled"));

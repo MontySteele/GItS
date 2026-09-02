@@ -5,7 +5,7 @@ tooltip -- in the game or on the blind-play page -- while every shipped keyword
 beside them did. [USER] hit it on the dev build ("Set Off has no tooltip
 text"); both Kokomi seats in round one inferred `Exert` from watching their own
 HP drop; and the Casket's `Mend` read as broken at full HP because the entry-HP
-bound is enforced in `KokomiTide.Mend` and was printed nowhere.
+bound is enforced in `KokomiRules.Mend` and was printed nowhere.
 
 WHY A TEST AND NOT ONLY A LINT. The failure is invisible by construction: a
 missing hover tip renders as NOTHING AT ALL -- no wrong number, no exception,
@@ -89,11 +89,11 @@ def test_plurals_are_the_same_keyword():
 
 
 def test_a_face_naming_several_keywords_owes_several_tips_in_table_order():
+    """TABLE ORDER, not face order, and the pair below is what shows it: the
+    face names Mend first and the table lists Bomb first."""
     calls = gen.arm_keyword_tip_calls(
-        "[gold]Set off[/gold]. [gold]Exert[/gold] 2. [gold]Tide[/gold] +5.")
-    assert calls == ["ArmKeywordTips.ForSetOff",
-                     "ArmKeywordTips.ForTide",
-                     "ArmKeywordTips.ForExert"]
+        "[gold]Mend[/gold] 10. Place a [gold]Bomb[/gold] dealing 5.")
+    assert calls == ["ArmKeywordTips.ForBomb", "ArmKeywordTips.ForMend"]
 
 
 def test_the_shipped_bomb_keeps_its_own_definition_and_the_arm_stands_down():
@@ -174,9 +174,13 @@ def test_the_two_faces_the_row_names_render_their_keyword():
     assert "[gold]Set off[/gold]" not in kaboom
     assert "ArmKeywordTips.ForSetOff(" not in kaboom
 
+    # THE KOKOMI HALF MOVED TOO, and further: draft 6 cut Exert with the rest
+    # of draft 2's rules, so the row that carried the acceptance face is gone.
+    # `Plan` is the keyword the arm has now, and Kurage's Oath -- a Plan-only
+    # Skill under draft 6 -- is the row that prints it.
     oath = (PROTOTYPE_DIR / "ProtoKkKuragesOath.cs").read_text(encoding="utf-8")
-    assert "[gold]Exert[/gold]" in oath
-    assert "ArmKeywordTips.ForExert(" in oath
+    assert "[gold]Plan[/gold]" in oath
+    assert "ArmKeywordTips.ForPlan(" in oath
 
 
 def test_a_spark_priced_row_keeps_its_tip_without_the_sentence():
@@ -266,14 +270,15 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "gone at the end of combat.",
             "that also goes off when its enemy attacks ",
             "you, before the hit lands.",
-            # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md sec.2 rules 1-8.
-            "is always on the field and holds ",
-            "starting at 0, never resetting on its own. ",
-            "The jellyfish deals Hydro damage equal to the ",
-            "on Skills and Powers only, never Attacks. ",
-            "Lose N HP, Block first.",
-            "happens at the start of her next turn.",
-            "For a stated number of turns, each Attack that hits ",
+            # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
+            # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
+            # Garment, and their four sentences left with them.
+            "Play this on the [gold]Bake-Kurage[/gold] instead and the ",
+            "jellyfish carries out the [gold]Plan[/gold] line at the start of ",
+            "your next turn.",
+            "The cost is paid now either way, and planned hits ",
+            "land on the front enemy unless the line says every enemy.",
+            "heal N HP, never above the HP you entered ",
     ):
         assert clause in tips, clause
 
@@ -281,7 +286,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
 def test_the_mend_tip_carries_the_entry_hp_bound():
     """THE ROW'S SECOND HALF. The Casket read as broken at full HP because
     nothing on screen said there was a ceiling; the sentence is
-    `KokomiTide.Mend`'s own."""
+    `KokomiRules.Mend`'s own."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert "never above the HP you entered " in tips
     assert "the fight with." in tips
@@ -297,7 +302,13 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert "KleeOverhaulLaw.BombGrowth" in tips
     assert "KleeOverhaulLaw.SparkPerExplosion" in tips
-    assert "KokomiOverhaulLaw.GarmentMend" in tips
+    # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
+    # structural and the Mend rule's bound is her entry HP, not a constant.
+    # The arm's one number lives on the relic, whose face interpolates it
+    # (`KokomiOverhaulLaw.CasketStrike`, TamakushiCasket.cs).
+    casket = (REPO / "klee-mod" / "KleeCode" / "Relics"
+              / "TamakushiCasket.cs").read_text(encoding="utf-8")
+    assert "KokomiOverhaulLaw.CasketStrike" in casket
 
 
 def test_the_tips_are_quarantined_out_of_a_release_build():

@@ -441,8 +441,23 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
         # same kind of fact -- the row's own FACE, which only the mod prints.
         # tier0 has no card text and never renders one, so a `description` on
         # `Card` would be a field the engine carries and nothing reads.
+        # THE KOKOMI OVERHAUL, DRAFT 6: `plan:` is the row's OTHER printed
+        # half -- what the card does if it is played on the Bake-Kurage. It is
+        # stripped for the same reason `description:` is, and it is
+        # VOCABULARY-CHECKED first for the same reason the body is: a clause
+        # naming an op nothing registers is a row that cannot be staged, and
+        # the check has to happen where the sheet is read rather than in the
+        # emitter alone (the sim must refuse a row it could not print either).
+        plan = d.get("plan")
+        if plan is not None:
+            if not isinstance(plan, list) or not plan:
+                raise ValueError(
+                    f"{path.name}: {card_id!r}: `plan:` must be a non-empty "
+                    "list of effects")
+            _validate_effect_vocabulary(card_id, plan)
         card = Card.from_dict({k: v for k, v in d.items()
-                               if k not in ("authored_by", "description")})
+                               if k not in ("authored_by", "description",
+                                            "plan")})
         _validate_card_shape(card)
         cards.append(card)
     return cards

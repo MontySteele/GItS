@@ -12,36 +12,33 @@
     "proto_kaboom_sink",
     "proto_kk_ambush",
     "proto_kk_battle_plan",
-    "proto_kk_breaker",
-    "proto_kk_cleansing_tide",
-    "proto_kk_contingency",
+    "proto_kk_chain_of_command",
+    "proto_kk_change_of_plans",
+    "proto_kk_cleansing_wave",
     "proto_kk_coral_bulwark",
     "proto_kk_coral_guard",
     "proto_kk_deep_current",
+    "proto_kk_exposed_flank",
     "proto_kk_feint",
-    "proto_kk_high_tide",
     "proto_kk_kurages_oath",
+    "proto_kk_moons_reflection",
     "proto_kk_nereids_ascension",
-    "proto_kk_orders",
-    "proto_kk_quiet_study",
     "proto_kk_rally",
     "proto_kk_read_the_field",
-    "proto_kk_reading_the_tide",
-    "proto_kk_rising_tide",
     "proto_kk_salt_line",
     "proto_kk_sango_isshin",
-    "proto_kk_sea_spray",
+    "proto_kk_sea_salt_prayer",
+    "proto_kk_slack_water",
     "proto_kk_song_of_pearls",
     "proto_kk_stolen_chapter",
-    "proto_kk_the_art_of_war",
     "proto_kk_the_clouds_like_waves",
     "proto_kk_the_generals_banner",
-    "proto_kk_tidal_prayer",
+    "proto_kk_the_moon_a_ship",
+    "proto_kk_the_moon_overlooks_the_waters",
     "proto_kk_treatise",
     "proto_kk_undertow",
     "proto_kk_vanguard",
     "proto_kk_war_council",
-    "proto_kk_watatsumis_blessing",
     "proto_kk_waters_edge",
     "proto_ko_alices_recipe",
     "proto_ko_ammo_scavenging",
@@ -161,36 +158,33 @@
     "proto_kaboom_sink": "klee",
     "proto_kk_ambush": "kokomi",
     "proto_kk_battle_plan": "kokomi",
-    "proto_kk_breaker": "kokomi",
-    "proto_kk_cleansing_tide": "kokomi",
-    "proto_kk_contingency": "kokomi",
+    "proto_kk_chain_of_command": "kokomi",
+    "proto_kk_change_of_plans": "kokomi",
+    "proto_kk_cleansing_wave": "kokomi",
     "proto_kk_coral_bulwark": "kokomi",
     "proto_kk_coral_guard": "kokomi",
     "proto_kk_deep_current": "kokomi",
+    "proto_kk_exposed_flank": "kokomi",
     "proto_kk_feint": "kokomi",
-    "proto_kk_high_tide": "kokomi",
     "proto_kk_kurages_oath": "kokomi",
+    "proto_kk_moons_reflection": "kokomi",
     "proto_kk_nereids_ascension": "kokomi",
-    "proto_kk_orders": "kokomi",
-    "proto_kk_quiet_study": "kokomi",
     "proto_kk_rally": "kokomi",
     "proto_kk_read_the_field": "kokomi",
-    "proto_kk_reading_the_tide": "kokomi",
-    "proto_kk_rising_tide": "kokomi",
     "proto_kk_salt_line": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
-    "proto_kk_sea_spray": "kokomi",
+    "proto_kk_sea_salt_prayer": "kokomi",
+    "proto_kk_slack_water": "kokomi",
     "proto_kk_song_of_pearls": "kokomi",
     "proto_kk_stolen_chapter": "kokomi",
-    "proto_kk_the_art_of_war": "kokomi",
     "proto_kk_the_clouds_like_waves": "kokomi",
     "proto_kk_the_generals_banner": "kokomi",
-    "proto_kk_tidal_prayer": "kokomi",
+    "proto_kk_the_moon_a_ship": "kokomi",
+    "proto_kk_the_moon_overlooks_the_waters": "kokomi",
     "proto_kk_treatise": "kokomi",
     "proto_kk_undertow": "kokomi",
     "proto_kk_vanguard": "kokomi",
     "proto_kk_war_council": "kokomi",
-    "proto_kk_watatsumis_blessing": "kokomi",
     "proto_kk_waters_edge": "kokomi",
     "proto_ko_alices_recipe": "klee",
     "proto_ko_ammo_scavenging": "klee",
@@ -326,50 +320,26 @@
     ]
   },
   "upgrades": {
-    "proto_kk_breaker": {
-      "damage": 3
-    },
-    "proto_kk_cleansing_tide": {
-      "mend": 2
+    "proto_kk_cleansing_wave": {
+      "block": 3
     },
     "proto_kk_coral_bulwark": {
-      "block": 3,
-      "tide": 2
+      "block": 3
     },
     "proto_kk_coral_guard": {
       "block": 3
     },
     "proto_kk_deep_current": {
-      "damage": 3,
-      "tide": 2
+      "damage": 3
     },
     "proto_kk_feint": {
       "damage": 3
     },
-    "proto_kk_high_tide": {
-      "tide": 2
-    },
-    "proto_kk_kurages_oath": {
-      "tide": 2
-    },
     "proto_kk_nereids_ascension": {
-      "power_amount": 1
-    },
-    "proto_kk_orders": {
-      "power_amount": 1
-    },
-    "proto_kk_quiet_study": {
-      "block": 3,
-      "tide": 2
-    },
-    "proto_kk_rally": {
-      "tide": 2
+      "cost": -1
     },
     "proto_kk_read_the_field": {
       "block": 3
-    },
-    "proto_kk_rising_tide": {
-      "damage": 3
     },
     "proto_kk_salt_line": {
       "block": 3
@@ -377,25 +347,23 @@
     "proto_kk_sango_isshin": {
       "cost": -1
     },
-    "proto_kk_sea_spray": {
-      "damage": 3,
-      "tide": 2
+    "proto_kk_sea_salt_prayer": {
+      "block": 3
     },
-    "proto_kk_the_art_of_war": {
-      "cost": -1
+    "proto_kk_slack_water": {
+      "damage": 3
+    },
+    "proto_kk_song_of_pearls": {
+      "power_amount": 1
     },
     "proto_kk_the_clouds_like_waves": {
       "power_amount": 1
     },
-    "proto_kk_the_generals_banner": {
-      "cost": -1
-    },
-    "proto_kk_tidal_prayer": {
-      "tide": 2
-    },
-    "proto_kk_watatsumis_blessing": {
-      "tide": 2,
+    "proto_kk_the_moon_a_ship": {
       "mend": 2
+    },
+    "proto_kk_the_moon_overlooks_the_waters": {
+      "cost": -1
     },
     "proto_kk_waters_edge": {
       "damage": 3

@@ -502,16 +502,22 @@ COMPANION_OVERHAUL_NATIONS: tuple[str, ...] = (
 # =============================================================================
 # THE KOKOMI OVERHAUL, SLICE ONE -- QUARANTINED (R213 B, BACKLOG EB-147).
 #
-# The ruled brief `review/active/kokomi-brief-2026-09-01.md` (all eight picks
-# ruled at their defaults 2026-09-01) replaces her whole rule set: the
-# Bake-Kurage is always on the field and holds TIDE, which never resets on its
-# own; her cards add Tide; SURGE spends the whole of it as one Hydro hit; on a
-# turn she did not Surge the jellyfish MENDS her a chip, capped per combat on
-# the relic; EXERT N is an HP cost on Skills and Powers taken from Block first;
-# the GARMENT is a short window where her Attacks Mend; Strength becomes Tide;
-# and a PLAN happens at the start of her next turn. Slice one
-# (`kokomi-overhaul-slice-1-2026-09-01.md`) is the ten-card starter, 28 pool
-# rows, the relic and the engine list in its sec.5.
+# The ruled brief `review/active/kokomi-brief-2026-09-01.md` DRAFT 6 (ruled
+# direction R240, approved R241) replaces her whole rule set with ONE idea: the
+# BAKE-KURAGE is a pet on her side of the field for the whole combat that
+# enemies cannot touch; a card with a PLAN line can be played on the jellyfish
+# instead of where it would normally go, its cost paid now, and at the start of
+# her next turn the jellyfish carries the Plan out; a planned hit lands on the
+# front enemy unless the line says every enemy, and her Strength and Dexterity
+# count; nothing happens by itself. MEND heals and never above the HP she
+# entered the fight with. Slice one
+# (`kokomi-overhaul-slice-1-2026-09-01.md` draft 6) is the ten-card starter,
+# 26 pool rows, Tamakushi Casket and the engine list in its sec.5.
+#
+# DRAFT 2's rules are GONE, not off: Tide, Surge, Exert, the pulse and its
+# budget, the Garment, Strength-to-Tide, Orders and Tactics are cut by the
+# brief's sec.6 by name, so their ops, their constants and their C# are
+# deleted rather than left inert behind a second switch.
 #
 # WHAT MOVES WHEN IT IS ON, exhaustively (every site names this constant):
 #   * loader._starter_ids       -- her ten opening cards become
@@ -539,77 +545,65 @@ COMPANION_OVERHAUL_NATIONS: tuple[str, ...] = (
 # rule -- exactly the arrangement `KLEE_OVERHAUL` makes.
 KOKOMI_OVERHAUL = False
 
-# THE NUMBERS THE RULES CARRY, and they are the brief's placeholders, not
-# claims (slice packet sec.1: "No number in it is a claim"). They are named
-# here because the C# mirrors must be compared BY VALUE -- an unnamed literal
-# in the mod is exactly what `tools/lint_constant_parity.py` exists to refuse.
-# A number a CARD prints stays on its row; only a number a RULE or a POWER
-# carries lands here, which is why Exert 2, Tide +5 and Mend 12 are absent.
-KOKOMI_OVERHAUL_PULSE_MEND = 2      # rule 4: the pulse, on a held turn
-KOKOMI_OVERHAUL_PULSE_BUDGET = 8    # rule 4: and never more, in one combat
-KOKOMI_OVERHAUL_SONG_MEND = 3       # Song of Pearls: the pulse INSTEAD Mends 3
-KOKOMI_OVERHAUL_SONG_BUDGET = 12    # Song of Pearls: and the budget IS 12
-KOKOMI_OVERHAUL_GARMENT_MEND = 2    # rule 6: per Attack that hits
-KOKOMI_OVERHAUL_TIDE_PER_CARD = 5   # Reading the Tide: one card per 5 Tide
+# THE NUMBER THE RULES CARRY, and it is one. Draft 6's rules are structural --
+# where a card lands and when -- so almost every figure is a CARD's and stays
+# on its row. The relic's strike is the exception: it is a rule the Tamakushi
+# Casket carries, printed on the relic and on no card, so it is named here for
+# `tools/lint_constant_parity.py` to compare the C# mirror BY VALUE.
+KOKOMI_OVERHAUL_CASKET_STRIKE = 2   # Hydro, per debuff she applies to an enemy
+KOKOMI_OVERHAUL_RALLY_DISCOUNT = 1  # Rally: the next Companion costs this less
 
-# THE STARTER, WHOLE (brief sec.9; slice packet sec.3). Ten cards, five ids, in
-# the printed order. A REPLACEMENT and not a substitution list because every
-# one of the ten moves: the shipped Water's Edge and Coral Guard are priced
-# inside an exhaust-for-Charge economy this arm retires, and the shipped
-# Kurage's Oath is a Power that wards per jellyfish pulse rather than a Skill
-# that Exerts for Tide. There is no shipped starter card the new rules leave
-# meaning what it printed.
+# THE STARTER, WHOLE (brief draft 6 sec.4; slice draft 6 sec.3). Ten cards,
+# FOUR ids, in the printed order. A REPLACEMENT and not a substitution list
+# because every one of the ten moves: there is no shipped starter card the new
+# rules leave meaning what it printed, and Kurage's Oath is now a Plan-only
+# Skill rather than a Power.
 KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
-    "proto_kk_waters_edge", "proto_kk_waters_edge", "proto_kk_waters_edge",
-    "proto_kk_coral_guard", "proto_kk_coral_guard", "proto_kk_coral_guard",
-    "proto_kk_kurages_oath", "proto_kk_kurages_oath",
-    "proto_kk_rising_tide",
-    "proto_kk_stolen_chapter",
+    "proto_kk_waters_edge", "proto_kk_waters_edge",
+    "proto_kk_waters_edge", "proto_kk_waters_edge",
+    "proto_kk_coral_guard", "proto_kk_coral_guard",
+    "proto_kk_coral_guard", "proto_kk_coral_guard",
+    "proto_kk_kurages_oath",
+    "proto_kk_slack_water",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice packet sec.4). Twenty-eight rows: 12 Common,
-# 12 Uncommon, 4 Rare, in the packet's own order -- Priestess, Strategist,
-# Commander, then the currencies and defences. `_pool_substitutions` cannot
-# express this (it is a one-for-one map and this is "her pool is these and
-# nothing else"), so `loader.pool_replacement` is its sibling seam, read at the
-# same single door.
-#
-# ALL TWENTY-EIGHT ARE HERE. Unlike the Klee overhaul, which dropped Vermillion
-# Pact on its packet's own sec.5 escape, every row in this slice prints inside
-# the grammar the emitter already speaks once the arm's ten ops exist.
+# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). Twenty-six rows: 13 Common,
+# 8 Uncommon, 5 Rare, in the packet's own order -- the Tactician, the
+# Priestess, the Commander, then the currencies and the one replay.
+# `_pool_substitutions` cannot express this (it is a one-for-one map and this
+# is "her pool is these and nothing else"), so `loader.pool_replacement` is its
+# sibling seam, read at the same single door.
 KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
-    # Priestess -- feed, hold, surge (9)
-    "proto_kk_tidal_prayer",
-    "proto_kk_sea_spray",
-    "proto_kk_deep_current",
-    "proto_kk_breaker",
-    "proto_kk_high_tide",
-    "proto_kk_undertow",
-    "proto_kk_song_of_pearls",
-    "proto_kk_nereids_ascension",
-    "proto_kk_sango_isshin",
-    # Strategist -- the plan was written last turn (8)
-    "proto_kk_battle_plan",
+    # The Tactician -- Plans, and the cards that pay per Plan (9)
+    "proto_kk_feint",
     "proto_kk_ambush",
     "proto_kk_read_the_field",
-    "proto_kk_feint",
-    "proto_kk_contingency",
+    "proto_kk_exposed_flank",
     "proto_kk_treatise",
+    "proto_kk_song_of_pearls",
     "proto_kk_war_council",
-    "proto_kk_the_art_of_war",
-    # Commander -- Gorou, go (4)
+    "proto_kk_nereids_ascension",
+    "proto_kk_the_moon_overlooks_the_waters",
+    # The Priestess -- Block through the jellyfish, Mend at Rare (7)
+    "proto_kk_sea_salt_prayer",
+    "proto_kk_deep_current",
+    "proto_kk_coral_bulwark",
+    "proto_kk_cleansing_wave",
+    "proto_kk_the_clouds_like_waves",
+    "proto_kk_the_moon_a_ship",
+    "proto_kk_sango_isshin",
+    # The Commander -- Gorou, go (4)
     "proto_kk_rally",
     "proto_kk_vanguard",
-    "proto_kk_orders",
     "proto_kk_the_generals_banner",
-    # Currencies and defence (7)
-    "proto_kk_quiet_study",
+    "proto_kk_chain_of_command",
+    # Currencies, tempo, and the one replay (6)
+    "proto_kk_stolen_chapter",
+    "proto_kk_change_of_plans",
+    "proto_kk_undertow",
     "proto_kk_salt_line",
-    "proto_kk_cleansing_tide",
-    "proto_kk_the_clouds_like_waves",
-    "proto_kk_reading_the_tide",
-    "proto_kk_coral_bulwark",
-    "proto_kk_watatsumis_blessing",
+    "proto_kk_battle_plan",
+    "proto_kk_moons_reflection",
 )
 
 BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played

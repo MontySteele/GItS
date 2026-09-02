@@ -143,8 +143,11 @@ are in [`workstreams.md`](workstreams.md).
 - **Klee** — brief draft 4 is the live Paper artefact; slice 1's three arms are
   through their pair reads; the Sparks re-author is built behind
   `SPARK_ALT_COST_ENABLED`; *Bag of Tricks* is `EB-224` under R230.
-- **Kokomi** — slice 1 done, slice 2 RETIRED (R227); the Kurage memory is base
-  kit behind `C.KURAGE_MEMORY`, display rebuild `EB-198`, cadence read `EB-234`.
+- **Kokomi** — the OVERHAUL is at draft 6, *the Plan* (brief approved R241):
+  the Bake-Kurage is a real pet, a card played on it writes its Plan line, and
+  draft 2's Tide/Surge/Exert are deleted. Built behind `KOKOMI_OVERHAUL`,
+  awaiting its Prototype gate. Beside it the Kurage memory is base kit behind
+  `C.KURAGE_MEMORY`, display rebuild `EB-198`, cadence read `EB-234`.
 - **Furina** — the reframe is countersigned (R220 A), slice 1 is built in the
   sim behind five flags that all ship OFF, Spotlight is ruled one-mode priced
   (R228), and the C# arm is deferred.

@@ -32,21 +32,36 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkSangoIsshin : CustomCardModel, ICharacterCard
+public sealed class ProtoKkSangoIsshin : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard
 {
+    /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
+    public Element Element => Element.Hydro;
+
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesHydro };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForMend(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_sango_isshin");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sango Isshin (proto)"),
-        ("description", "[gold]Mend[/gold] that would go past your entry HP becomes Hydro damage to a random enemy."),
+        ("description", "Deal damage equal to a quarter of your Max HP. [gold]Plan[/gold]: the same to every enemy."),
     };
+
+    /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
+    /// was written. Carried out by the Bake-Kurage at the start of her next
+    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
+    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
+        new[]
+        {
+            new KokomiPlan.Planned(KokomiPlan.Kind.DamageQuarterMaxHp, 0, KokomiPlan.Aim.AllEnemies),
+        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -57,13 +72,19 @@ public sealed class ProtoKkSangoIsshin : CustomCardModel, ICharacterCard
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkSangoIsshin()
-        : base(2, CardType.Power, CardRarity.Rare, TargetType.Self, autoAdd: false)
+        : base(2, CardType.Attack, CardRarity.Rare, KokomiTargets.PetOrEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<SangoIsshinPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            return;
+        }
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await KokomiRules.QuarterMaxHp(choiceContext, Owner.Creature, cardPlay.Target);
     }
 
     protected override void OnUpgrade()

@@ -235,7 +235,7 @@ if ($KokomiOverhaul) {
     Write-Host "  Kokomi's starter, her starting relic and her WHOLE reward" -ForegroundColor Magenta
     Write-Host "  pool are slice one's rows. Her shipped 76 cards cannot be" -ForegroundColor Magenta
     Write-Host "  offered while this build is in, and the Pearl of Wisdom is" -ForegroundColor Magenta
-    Write-Host "  replaced by Tamanooya's Casket." -ForegroundColor Magenta
+    Write-Host "  replaced by Tamakushi Casket." -ForegroundColor Magenta
     Write-Host "  The Bake-Kurage is always out and holds Tide; nothing" -ForegroundColor Magenta
     Write-Host "  Exhausts for Charge and the Burst gate does not fill." -ForegroundColor Magenta
 }
