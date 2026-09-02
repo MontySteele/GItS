@@ -55,13 +55,37 @@ def map_state() -> dict:
 
 
 def shop_state() -> dict:
-    """SYNTHETIC. `items` with `name`/`type`/`price` (`naming.py:202`)."""
+    """SYNTHETIC, BUILT FROM THE BRIDGE'S OWN BUILDER (`EB-262`).
+
+    `BuildShopState` (`vendor/STS2_MCP/McpMod.StateBuilder.cs:1636`) puts the
+    shelves under `shop.items` and merges each thing's face in under a
+    CATEGORY-PREFIXED key -- `card_name`, `relic_name`, `potion_name` -- with
+    no plain `name` anywhere, and closes with the card-removal shelf, which
+    carries a price and no model at all. This fixture is that shape, item for
+    item, because the one this file used to carry (`items` with `name`) was a
+    shape the wire has never sent: it kept every render test green while both
+    of a live run's shops printed fourteen rows of `(unnamed)`.
+    """
     return {"state_type": "shop",
             "player": {"hp": 40, "max_hp": 70, "gold": 120},
-            "items": [{"name": "Coral Guard", "type": "card", "price": 75},
-                      {"name": "Bottled Tide", "type": "relic", "price": 160,
-                       "description": "At the start of each combat, gain 3 "
-                                      "Block."}]}
+            "shop": {"can_proceed": True, "items": [
+                {"index": 0, "category": "card", "price": 75,
+                 "is_stocked": True, "can_afford": True, "on_sale": False,
+                 "card_id": "KLEEMOD-CORAL_GUARD", "card_name": "Coral Guard",
+                 "card_type": "Skill", "card_cost": "1", "card_rarity": "Common",
+                 "card_description": "Gain 5 Block."},
+                {"index": 1, "category": "relic", "price": 160,
+                 "is_stocked": True, "can_afford": False,
+                 "relic_id": "KLEEMOD-BOTTLED_TIDE",
+                 "relic_name": "Bottled Tide",
+                 "relic_description": "At the start of each combat, gain 3 "
+                                      "Block."},
+                {"index": 2, "category": "potion", "price": 50,
+                 "is_stocked": False, "can_afford": True,
+                 "potion_id": "FIRE_POTION", "potion_name": "Fire Potion",
+                 "potion_description": "Deal 20 damage to one enemy."},
+                {"index": 3, "category": "card_removal", "price": 90,
+                 "is_stocked": True, "can_afford": True}]}}
 
 
 def rest_state() -> dict:
@@ -128,10 +152,33 @@ def rewards_state() -> dict:
 
 
 def treasure_state() -> dict:
-    """SYNTHETIC. `relics` (`naming.py:212`)."""
+    """SYNTHETIC, BUILT FROM THE BRIDGE'S OWN BUILDER (`EB-263`).
+
+    `BuildTreasureState` (`McpMod.StateBuilder.cs:2362`) writes the opened
+    chest's relics under `treasure.relics`, each row carrying its own `index`,
+    printed `name` and printed `description`. The top-level `relics` this file
+    used to carry is a key the wire does not send, which is why a live chest
+    rendered as `# An open chest` with nothing under it.
+    """
     return {"state_type": "treasure",
-            "relics": [{"name": "Pearl Diver's Charm",
-                        "description": "Start each combat with 1 Charge."}]}
+            "treasure": {"can_proceed": True, "relics": [
+                {"index": 0, "id": "KLEEMOD-PEARL_DIVERS_CHARM",
+                 "name": "Pearl Diver's Charm", "rarity": "Common",
+                 "description": "Start each combat with 1 Charge."}]}}
+
+
+def relic_select_state() -> dict:
+    """SYNTHETIC. `relic_select.relics` (`McpMod.StateBuilder.cs:2230`), the
+    same blob one screen over -- and it was reading the same absent key."""
+    return {"state_type": "relic_select",
+            "relic_select": {"prompt": "Choose a relic.", "can_skip": True,
+                             "relics": [
+                                 {"index": 0, "id": "KLEEMOD-TIDE_GLASS",
+                                  "name": "Tide Glass", "rarity": "Rare",
+                                  "description": "Draw 1 more card."},
+                                 {"index": 1, "id": "KLEEMOD-SALT_LANTERN",
+                                  "name": "Salt Lantern", "rarity": "Common",
+                                  "description": "Gain 1 Charge."}]}}
 
 
 def game_over_state() -> dict:
@@ -156,6 +203,7 @@ SCREENS = [
     ("card_select", card_select_state, "synthetic", True),
     ("rewards", rewards_state, "synthetic", True),
     ("treasure", treasure_state, "synthetic", True),
+    ("relic_select", relic_select_state, "synthetic", True),
     ("game_over", game_over_state, "synthetic", False),
     ("menu", menu_state, "synthetic", False),
     ("hazard", hazard_event_state, "synthetic", False),
@@ -211,8 +259,19 @@ def test_a_base_game_sprite_tag_renders_instead_of_refusing():
                                            "draw 2 additional cards and gain "
                                            "[silent_energy_icon.png]."}]}}
     page = blindplay.observe(state)                  # would raise PacketLeak
-    assert "[silent energy icon]" in page
-    assert ".png" not in page
+    # `EB-264` NARROWED THIS FROM THE FILE NAME'S WORDS TO THE ICON ITSELF.
+    # The tag is namespaced by the art set it was drawn for, so on a KLEE run
+    # the Energy Potion read "Gain [ironclad energy icon][ironclad energy
+    # icon]" -- a token naming a character who is not in the run, for a pip
+    # that is the same on every character's screen. The subject is what the
+    # player is looking at; the namespace is a fact about the asset.
+    assert "[Energy]" in page
+    assert "silent" not in page and ".png" not in page
+
+    # A tag naming no icon the register knows keeps the old rendering rather
+    # than being guessed at.
+    state["event"]["options"][0]["description"] = "gain [boss_relic_icon.png]"
+    assert "[boss relic icon]" in blindplay.observe(state)
 
     # And the narrowness is the point: a bracketed token WITHOUT an image
     # extension is still an id, and still refuses.
@@ -628,6 +687,196 @@ def test_a_command_on_the_wrong_screen_is_refused():
     assert not blindplay.act(map_state(), "end turn")["ok"]
     assert not blindplay.act(combat_state(), 'go "Monster (path 1)"')["ok"]
     assert not blindplay.act(shop_state(), 'play "Coral Guard"')["ok"]
+
+
+# ------------------------- EB-262 / EB-263: the two screens with no names ---
+
+def test_every_shelf_in_a_shop_is_named_and_buyable():
+    """`EB-262`'s acceptance, on the shape the bridge actually sends. A shop
+    item carries its printed name under its CATEGORY's key, so every shelf of
+    both of a live run's shops rendered as `(unnamed)` with a price and `buy`
+    answered *"nothing here is called '(unnamed)'"*. The tester finished the
+    run holding 164 gold it could not spend."""
+    page = blindplay.observe(shop_state())
+    assert "(unnamed)" not in page
+    assert "**Coral Guard** — 75 gold" in page
+    assert "**Bottled Tide** — 160 gold" in page
+    assert "At the start of each combat, gain 3 Block." in page
+    # The card-removal shelf has no model and therefore no title; the wire's
+    # own word for it is rendered rather than a label invented here.
+    assert "**Card Removal** — 90 gold" in page
+    # And a shelf already bought says so rather than offering a refused buy.
+    assert "**Fire Potion** — 50 gold (not available)" in page
+
+    res = blindplay.act(shop_state(), 'buy "Coral Guard"')
+    assert res["ok"] and res["post"] == {"action": "shop_purchase", "index": 0}
+    assert res["printed"] == {"item": "Coral Guard", "price": 75}
+    assert blindplay.act(shop_state(), 'buy "Card Removal"')["ok"]
+    sold = blindplay.act(shop_state(), 'buy "Fire Potion"')
+    assert not sold["ok"] and "not available to buy" in sold["refusal"]
+
+
+def test_an_opened_chest_prints_its_relic_and_choose_takes_it():
+    """`EB-263`'s acceptance. The chest's relics are under `treasure.relics`,
+    which this reader did not have, so the whole screen was `# An open chest`
+    while still advertising `choose "<relic>"`: there was no name to say and
+    the tester never learned whether a relic had been taken."""
+    page = blindplay.observe(treasure_state())
+    assert "# An open chest" in page
+    assert "**Pearl Diver's Charm**" in page
+    assert "Start each combat with 1 Charge." in page
+    res = blindplay.act(treasure_state(), 'choose "Pearl Diver\'s Charm"')
+    assert res["ok"]
+    assert res["post"] == {"action": "claim_treasure_relic", "index": 0}
+
+
+def test_a_relic_select_screen_reads_the_same_blob():
+    """The screen one over had the same hole and is fixed by the same read."""
+    page = blindplay.observe(relic_select_state())
+    assert "**Tide Glass**" in page and "**Salt Lantern**" in page
+    res = blindplay.act(relic_select_state(), 'choose "Salt Lantern"')
+    assert res["ok"] and res["post"] == {"action": "select_relic", "index": 1}
+
+
+def test_the_shop_and_the_chest_still_read_as_blind():
+    """The nested faces come off the wire, so the scrubber is what says they
+    may be printed -- not the fact that this file wrote the fixture."""
+    for state in (shop_state(), treasure_state(), relic_select_state()):
+        page = blindplay.observe(state)
+        assert "KLEEMOD" not in page and "_" not in page
+
+
+# --------------------------- EB-259: the render offers what the state takes --
+
+def proceed_event_state() -> dict:
+    """SYNTHETIC. `BuildEventState` flags the Proceed button on the option
+    itself (`McpMod.StateBuilder.cs:1490`)."""
+    return {"state_type": "event",
+            "event": {"event_id": "GOLDEN_IDOL", "event_name": "Golden Idol",
+                      "in_dialogue": False,
+                      "body": "The idol is gone. Nothing else is here.",
+                      "options": [{"index": 0, "title": "Proceed",
+                                   "is_proceed": True, "is_locked": False}]}}
+
+
+def test_bare_proceed_on_an_event_takes_the_printed_proceed_option():
+    """`EB-259`'s first desk check. An event room has NO proceed button --
+    `ExecuteProceed` walks rewards, rest, both merchants and the treasure room
+    and stops (`McpMod.Actions.cs:600-663`) -- so the bare verb posted an
+    action the event refused and a run lost two actions to it. It now resolves
+    to the option the screen prints."""
+    res = blindplay.act(proceed_event_state(), "proceed")
+    assert res["ok"]
+    assert res["post"] == {"action": "choose_event_option", "index": 0}
+    assert res["printed"] == {"option": "Proceed"}
+    # ...and the page offers it, because that is where a player would type it.
+    assert "- `proceed`" in blindplay.observe(proceed_event_state())
+
+
+def test_an_event_with_no_proceed_says_so_and_offers_none():
+    """The other direction, and it is the half that keeps the first honest:
+    an event with real choices is not given a Proceed this tool invented."""
+    obs = blindplay.observation(event_state())
+    assert "proceed" not in obs["commands"]
+    res = blindplay.act(event_state(), "proceed")
+    assert not res["ok"]
+    assert "no Proceed" in res["refusal"]
+    assert "Offer a card" in res["refusal"] and "Leave" in res["refusal"]
+
+
+def test_a_dialogue_event_still_advances_on_proceed():
+    """`advance_dialogue` is a different verb on the same word and is
+    untouched: an ancient still being told is not choosing anything."""
+    state = event_state()
+    state["event"]["in_dialogue"] = True
+    assert "proceed" in blindplay.observation(state)["commands"]
+    assert blindplay.act(state, "proceed")["post"] == {
+        "action": "advance_dialogue"}
+
+
+def test_confirm_is_offered_only_where_the_wire_says_it_works():
+    """`EB-259`'s second desk check. The Gorge card-select printed *Confirm is
+    not available.* in its body and listed `confirm` under "What you can say"
+    three lines later; the tester typed it and got *"there is nothing waiting
+    to be confirmed"*. The page now offers the grammar the wire says will
+    work."""
+    page = blindplay.observe(card_select_state())
+    assert "Confirm is not available." in page
+    assert "- `confirm`" not in page
+    assert "- `skip`" in page                      # `can_cancel` is true here
+
+    ready = card_select_state()
+    ready["card_select"]["can_confirm"] = True
+    ready["card_select"]["can_cancel"] = False
+    page = blindplay.observe(ready)
+    assert "Confirm is available." in page
+    assert "- `confirm`" in page and "- `skip`" not in page
+    # The command itself still refuses on its own: a screen can move between
+    # the render and the reply, which is exactly what happened live.
+    assert blindplay.act(ready, "confirm")["ok"]
+
+
+# ------------------------------- EB-264: no wire tokens on a player's page --
+
+def test_the_unplayable_enums_never_reach_the_page():
+    """`EB-264`'s acceptance, one lock per string the tester quoted. The
+    translation lives in `qa_packet` so the staged page and this one cannot
+    disagree about one refusal; a reason the wire spells as a SENTENCE comes
+    through in the game's own words, which is the door the mod's own Spark
+    refusal comes through."""
+    state = combat_state()
+    hand = state["player"]["hand"]
+    hand[0]["can_play"], hand[0]["unplayable_reason"] = \
+        False, "BlockedByCardLogic"
+    hand[1]["can_play"], hand[1]["unplayable_reason"] = \
+        False, "EnergyCostTooHigh"
+    page = blindplay.observe(state)
+    assert "BlockedByCardLogic" not in page and "EnergyCostTooHigh" not in page
+    assert "CANNOT BE PLAYED: this card's own rule is stopping you right " \
+           "now" in page
+    assert "CANNOT BE PLAYED: you do not have enough energy" in page
+    # The refusal a play gets back says the same thing as the card's own line.
+    res = blindplay.act(state, f'play "{hand[0]["name"]}"')
+    assert not res["ok"] and "this card's own rule" in res["refusal"]
+
+
+def test_a_reason_the_wire_writes_in_words_is_kept_verbatim():
+    state = combat_state()
+    state["player"]["hand"][0]["can_play"] = False
+    state["player"]["hand"][0]["unplayable_reason"] = "you have no Spark"
+    assert "CANNOT BE PLAYED: you have no Spark" in blindplay.observe(state)
+
+
+def test_a_same_named_proto_card_prints_no_cost_discrepancy():
+    """`EB-267` on the screen it was FOUND on -- a card reward. The prototype
+    surface ships a re-priced twin of a shipped card under the same printed
+    name, and the title-keyed cost map answered the shipped card's 2 for the
+    proto card's 1: the page told the tester the cost on the card in front of
+    them was wrong when nothing was wrong with it."""
+    state = {"state_type": "card_reward",
+             "card_reward": {"can_skip": True, "cards": [
+                 {"id": "KLEEMOD-PROTO_KO_FLAME_DANCE", "name": "Flame Dance",
+                  "cost": "1", "type": "Attack",
+                  "description": "Deal 9 damage to ALL enemies."}]}}
+    page = blindplay.observe(state)
+    assert "The cost printed on this card" not in page
+    # ...and a card the board really is discounting still says so.
+    state["card_reward"]["cards"][0]["cost"] = "0"
+    assert "The cost printed on this card is 1; it is showing 0 here." \
+        in blindplay.observe(state)
+
+
+def test_an_icon_token_names_the_icon_and_not_the_art_set():
+    """The third string: `[ironclad energy icon]` in Energy Potion's text, on
+    a run with no Ironclad in it."""
+    state = combat_state()
+    state["player"]["potions"] = [
+        {"name": "Energy Potion",
+         "description": "Gain [ironclad_energy_icon.png]"
+                        "[ironclad_energy_icon.png]."}]
+    page = blindplay.observe(state)
+    assert "ironclad" not in page and ".png" not in page
+    assert "Gain [Energy][Energy]." in page
 
 
 # -------------------------------------------------------------- session ----

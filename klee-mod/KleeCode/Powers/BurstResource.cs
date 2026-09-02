@@ -174,9 +174,32 @@ public sealed class KleeBurstResource : BasicCustomResource
     /// Klee's meter for this combat, or null when no gain should happen.
     /// Gates on the owner being Klee: the sim guards every gain site with
     /// `if p.burst_max`, i.e. characters without a meter gain nothing.
+    ///
+    /// AND ON THE OVERHAUL ARM (<c>EB-266</c>). Under
+    /// <c>KleeOverhaul.Enabled</c> Klee's rules are rewritten and Sparks are
+    /// her only meter: no card in the slice reads Burst and no rule spends it.
+    /// The shipped meter went on filling anyway -- <c>ReactionEffects.Resolve</c>
+    /// credits <c>BurstConstants.PerReaction</c> for every reaction with no arm
+    /// guard, so the blind tester's first reaction put <i>Burst: 5</i> on the
+    /// screen and it sat there for four more fights with "no idea what it was"
+    /// (`klee-overhaul-r1-opus`).
+    ///
+    /// THE GUARD IS HERE, at the one funnel, rather than at the reported site.
+    /// <see cref="Gain"/>, <see cref="GainPreResolution"/>,
+    /// <see cref="AmountFor"/>, <see cref="SyncGauge"/> and
+    /// <see cref="DrainOnPlay"/> all pass through this method, so "the arm
+    /// neither feeds nor shows Burst" is ONE decision instead of five that can
+    /// be retired by halves. Nothing feeds it, so the meter stays at 0 -- and 0
+    /// is the value the blind render already drops from the meter list.
+    ///
+    /// Behind <c>PROTOTYPE_CARDS</c> because the arm's switch lives in the
+    /// quarantined directory; a release build compiles the method unchanged.
     /// </summary>
     private static KleeBurstResource? Find(Creature player)
     {
+#if PROTOTYPE_CARDS
+        if (KleeOverhaul.Enabled) return null;
+#endif
         var owner = player.Player;
         if (owner?.Character is not Klee) return null;
         var combatState = owner.PlayerCombatState;

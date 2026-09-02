@@ -77,14 +77,51 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             "A charge on this enemy. It grows at the start of your turn and "
           + "never goes off by itself. A card that says [gold]Set off[/gold] "
           + "pops every Bomb here, one at a time, each dealing its own size as "
-          + "Pyro damage. A [gold]Mine[/gold] also goes off when this enemy "
-          + "attacks you, before the hit lands."),
-        ("smartDescription",
-            "[gold]Set off[/gold] deals {Size} total Pyro damage here "
-          + "({Amount} Bomb{Amount:plural:|s}, {Mines} of them "
-          + "[gold]Mine{Mines:plural:|s}[/gold]). Grows at the start of your "
-          + "turn; never goes off by itself."),
+          + "Pyro damage." + MineClause),
+        ("smartDescription", SmartFace),
+        // EB-260. THE SAME FACE PLUS THE ONE CLAUSE A STACK WITH MINES IN IT
+        // MAKES FALSE. Selected by <see cref="SmartDescriptionLocKey"/> off the
+        // live Mine count, so a player never reads "never goes off by itself"
+        // over a pile that answers the enemy's next attack.
+        ("smartDescriptionMines", SmartFace + MineClause),
     };
+
+    /// <summary>
+    /// Rule 6, in the words the static face already used. ONE sentence, two
+    /// surfaces: the tooltip carried it and the smart face did not, which is
+    /// the whole of <c>EB-260</c> -- the Codex tester read the contradiction
+    /// twice and called it the most confusing thing on the screen
+    /// (`klee-overhaul-r1-codex-b`, fights 4 and 5).
+    /// </summary>
+    private const string MineClause =
+        " A [gold]Mine[/gold] also goes off when this enemy attacks you, "
+      + "before the hit lands.";
+
+    /// <summary>
+    /// The face the wire prints (<c>PowerModel.HoverTips</c> uses the SMART
+    /// description for any mutable power that has one). <c>{Size}</c> is the
+    /// number the Set off will actually deal, Strength included -- see
+    /// <see cref="PredictedSetOffDamage"/>, <c>EB-265</c>.
+    /// </summary>
+    private const string SmartFace =
+        "[gold]Set off[/gold] deals {Size} total Pyro damage here "
+      + "({Amount} Bomb{Amount:plural:|s}, {Mines} of them "
+      + "[gold]Mine{Mines:plural:|s}[/gold]). Grows at the start of your "
+      + "turn; never goes off by itself.";
+
+    /// <summary>
+    /// EB-260, the selector. <c>PowerModel.SmartDescription</c> resolves this
+    /// key on EVERY read of <c>HoverTips</c>, so the face follows the pile:
+    /// the moment a Mine lands here the printed text gains rule 6's sentence,
+    /// and the moment the last one fires it loses it again. Two rows and a
+    /// key, rather than a conditional inside one row, because a headless pin
+    /// can read a row and cannot run <c>LocManager</c> (KleeTests README, "The
+    /// headless boundary").
+    /// </summary>
+    protected override string SmartDescriptionLocKey =>
+        MineCount > 0
+            ? Id.Entry + ".smartDescriptionMines"
+            : Id.Entry + ".smartDescription";
 
     public override PowerType Type => PowerType.Buff;
 
@@ -143,7 +180,83 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     public override int DisplayAmount => TotalSize;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new[] { new DynamicVar("Size", 0m), new DynamicVar("Mines", 0m) };
+        new DynamicVar[] { new SetOffDamageVar(), new DynamicVar("Mines", 0m) };
+
+    /// <summary>
+    /// <c>{Size}</c>, READ LIVE. <c>EB-265</c>.
+    ///
+    /// A plain <see cref="DynamicVar"/> is a stored number, written by
+    /// <see cref="SyncDisplay"/> when the pile changes -- and Strength does not
+    /// change the pile. So a Klee who gained Strength after her Bombs were
+    /// planted would read a face that was right when it was written and wrong
+    /// when she read it, which is the same defect one turn later. This subclass
+    /// asks the pile at FORMAT time instead: the game hands the var itself to
+    /// SmartFormat (<c>LocString.Add(DynamicVar)</c>) and formats it through
+    /// <c>ToString()</c>, converting through <c>IConvertible</c> only for the
+    /// numeric formatters, so both are overridden and both answer the same
+    /// number.
+    ///
+    /// The stored <c>BaseValue</c> is kept in step by <see cref="SyncDisplay"/>
+    /// as the fallback, which is what a canonical (compendium) copy with no
+    /// owner reads.
+    /// </summary>
+    private sealed class SetOffDamageVar : DynamicVar
+    {
+        public SetOffDamageVar() : base("Size", 0m)
+        {
+        }
+
+        private int Live =>
+            (_owner as ProtoBombPower)?.PredictedSetOffDamage() ?? (int)BaseValue;
+
+        protected override decimal GetBaseValueForIConvertible() => Live;
+
+        public override string ToString() =>
+            Live.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// WHAT A SET OFF HERE ACTUALLY DEALS, right now -- <c>EB-265</c>.
+    ///
+    /// The face used to print <see cref="TotalSize"/>, the raw sum of the
+    /// charges, while <see cref="Explode"/> sends every charge through
+    /// <c>ElementalHit.Deal</c>, which adds Strength PER HIT. With Strength 2
+    /// and two Bombs the face printed 10 and the set-off dealt 14, and the
+    /// blind tester called it "the one number I learned not to trust"
+    /// (`klee-overhaul-r1-opus`, fight 2).
+    ///
+    /// SHARED, NOT RE-DERIVED: <c>SimDamagePipeline.Resolve</c> is the same
+    /// dealer-mods / amplifier / one-truncation chain <c>ElementalHit.Deal</c>
+    /// runs, called once per charge exactly as the explosion loop does -- so
+    /// per-charge truncation and per-charge Strength are the pipeline's, not a
+    /// second copy of them here.
+    ///
+    /// TWO TERMS ARE DELIBERATELY LEFT OUT, and both are one-shot rather than
+    /// standing state:
+    ///   * the REACTION amplifier, because the first explosion of a Set off
+    ///     consumes the aura the rest would have reacted with -- there is no
+    ///     one multiplier for the pile;
+    ///   * The Big One's DOUBLING, because reading it means
+    ///     <c>KleeOverhaulLedger.For</c>, which rolls per-turn counters, and a
+    ///     face is read on every state poll -- a tooltip may not have side
+    ///     effects.
+    /// </summary>
+    public int PredictedSetOffDamage()
+    {
+        if (_charges.Count == 0) return 0;
+        // A canonical (compendium) copy has no owner and its getter asserts;
+        // the stored BaseValue is what such a copy prints.
+        if (!IsMutable) return TotalSize;
+        var target = Owner;
+        if (target == null) return TotalSize;
+
+        var total = 0;
+        foreach (var charge in _charges)
+        {
+            total += SimDamagePipeline.Resolve(Applier, target, charge.Size, 1m);
+        }
+        return total;
+    }
 
     /// <summary>Called after EVERY mutation of <see cref="_charges"/>. The badge
     /// and the tooltip both derive from the list the explosions consume, so the
@@ -151,7 +264,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     private void SyncDisplay()
     {
         var size = DynamicVars["Size"];
-        size.BaseValue = TotalSize;
+        size.BaseValue = PredictedSetOffDamage();
         size.ResetToBase();
         var mines = DynamicVars["Mines"];
         mines.BaseValue = MineCount;
@@ -693,6 +806,59 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         if (target == null) return;
         await Place(choiceContext, target, size, isMine, payloadMineAll,
                     applier, cardSource);
+    }
+
+    /// <summary>
+    /// Does ANY living enemy hold a charge this Klee placed? <c>EB-261</c>.
+    ///
+    /// The gate behind a card whose whole body is a Set off. <i>Quick Fuse</i>
+    /// ("Spend 1 [Spark]. Set off target enemy's Bombs.") was playable on a
+    /// Bomb-less board: it spent the Spark and did nothing, and the Codex
+    /// tester had to INFER that from the result rather than read it off the
+    /// card (`klee-overhaul-r1-codex-b`, fight 3). <c>CardModel.IsPlayable</c>
+    /// is the extension point the base game documents for exactly this shape
+    /// (Grand Finale's empty draw pile), and it is the one the Spark price
+    /// already uses, so a card that cannot do anything refuses in the same
+    /// place and the same way as one that cannot pay.
+    ///
+    /// BOARD-WIDE, not per-target, because <c>IsPlayable</c> is asked without
+    /// a target -- the same question the acceptance asks ("unplayable on a
+    /// Bomb-less board, playable once any enemy holds one"). Aiming at the
+    /// wrong enemy stays the player's to get right.
+    ///
+    /// R205's per-placer rule applies here as everywhere: another Klee's pile
+    /// is not one this seat can set off, so it does not make her card playable.
+    ///
+    /// <c>Enemies</c> AND NOT <c>HittableEnemies</c>, unlike the sweeps above,
+    /// and deliberately: those ACT on every enemy, while this only asks what is
+    /// on the board, and <see cref="SetOff"/> -- the thing the card actually
+    /// does -- takes an aimed target and never consults hittability either. A
+    /// Bomb on a living enemy a hook is currently shielding is still a Bomb
+    /// this card can set off, so it still makes the card playable.
+    /// </summary>
+    public static bool AnyPlacedBy(Creature? applier)
+    {
+        var combat = applier?.CombatState;
+        if (applier == null || combat == null) return false;
+
+        foreach (var enemy in combat.Enemies)
+        {
+            if (enemy.IsDead) continue;
+            if (HoldsChargeFrom(enemy, applier)) return true;
+        }
+        return false;
+    }
+
+    /// <summary>Does <paramref name="enemy"/> hold a live charge that
+    /// <paramref name="applier"/> placed? The per-enemy half of
+    /// <see cref="AnyPlacedBy"/>, pure and R205-scoped.</summary>
+    public static bool HoldsChargeFrom(Creature enemy, Creature applier)
+    {
+        foreach (var pile in enemy.Powers.OfType<ProtoBombPower>())
+        {
+            if (pile.Applier == applier && pile._charges.Count > 0) return true;
+        }
+        return false;
     }
 
     /// <summary>

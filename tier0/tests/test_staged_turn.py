@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import ast
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -1283,14 +1284,101 @@ def test_the_printed_cost_index_reads_the_shipped_face():
     exactly why the cross-check lives here."""
     from tier0.content import loader
     index = qa_packet.printed_cost_index(REPO)
-    assert index["Kaboom!"] == 1 and index["Rapid Fire"] == 2
-    assert index["Flame on the Wick"] == 0
-    disagree = [(c.name, index[c.name], c.cost)
+    assert index["KABOOM"] == 1 and index["RAPID_FIRE"] == 2
+    assert index["FLAME_ON_THE_WICK"] == 0
+    disagree = [(c.id, index[c.id.upper()], c.cost)
                 for c in loader._card_index().values()
-                if c.name in index and isinstance(c.cost, int)
-                and index[c.name] != c.cost]
+                if c.id.upper() in index and isinstance(c.cost, int)
+                and index[c.id.upper()] != c.cost]
     assert not disagree, f"the face and the sheet disagree: {disagree}"
     assert len(index) > 200, f"only {len(index)} faces carried a cost"
+
+
+def test_the_printed_cost_index_is_keyed_by_id_not_by_title():
+    """`EB-267`. The prototype surface ships a re-priced twin of a shipped
+    card under the SAME printed name, so a title-keyed map had one row where
+    the game has two faces: *Flame Dance* is cost 2 shipped and cost 1 on the
+    proto row, and the page told a blind reader the proto card's own printed
+    cost was wrong. Both rows are here, under the ids the wire sends."""
+    index = qa_packet.printed_cost_index(REPO)
+    assert index["FLAME_DANCE"] == 2
+    assert index["PROTO_KO_FLAME_DANCE"] == 1
+    # The key is the wire's `Id.Entry` with the mod prefix off, which is what
+    # every hand entry carries.
+    assert qa_packet.card_key("KLEEMOD-PROTO_KO_FLAME_DANCE") \
+        == "PROTO_KO_FLAME_DANCE"
+    assert qa_packet.card_key("KLEEMOD-KABOOM") == "KABOOM"
+    assert qa_packet.card_key(None) == ""
+
+
+def test_the_class_name_key_agrees_with_every_generated_sheet_id():
+    """The key is derived from the C# CLASS NAME because that is what BaseLib
+    derives `ModelId.Entry` from (`KleeMod.cs:81`). The generated header also
+    prints the sheet id it came from, so the two can be checked against each
+    other on every generated face -- which is the pin that keeps the
+    derivation honest rather than a guess this file made once."""
+    ids = re.compile(r"Sheet entry:\s*id=([a-z0-9_]+)")
+    checked = 0
+    for path in sorted((REPO / "klee-mod").glob("KleeCode/Cards/**/*.cs")):
+        src = path.read_text(encoding="utf-8")
+        m = ids.search(src)
+        if m is None:
+            continue
+        checked += 1
+        assert qa_packet._class_key(src) == m.group(1).upper(), path.name
+    assert checked > 300, f"only {checked} generated faces carried an id"
+
+
+def test_a_same_named_proto_row_prints_no_discrepancy():
+    """`EB-267`'s acceptance, both directions. The proto *Flame Dance* is
+    drawn at the cost its own row prints, so the page says nothing about it; a
+    card the board really is discounting still says so on its own line."""
+    state = banked_state(0)
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-PROTO_KO_FLAME_DANCE", "name": "Flame Dance",
+         "type": "Attack", "cost": "1", "can_play": True, "is_upgraded": False,
+         "description": "Deal 9 damage to ALL enemies."},
+        {"id": "KLEEMOD-KABOOM", "name": "Kaboom!", "type": "Attack",
+         "cost": "0", "can_play": True, "is_upgraded": False,
+         "description": "Deal 7 damage. Applies Pyro."},
+    ]
+    page = qa_packet.render(qa_packet.build(state, "t", repo=REPO))
+    assert "The cost printed on this card is 2" not in page
+    assert "The cost printed on this card is 1; it is showing 0 here." in page
+    assert page.count("The cost printed on this card") == 1
+
+
+def test_the_unplayable_enum_reaches_the_page_as_plain_words():
+    """`EB-264`. The wire's reason is `UnplayableReason.ToString()`, and a
+    blind tester reported `CANNOT BE PLAYED: BlockedByCardLogic` as the least
+    readable thing on the screen. Neither enum name reaches a page; a reason
+    the wire spells as a SENTENCE is kept in the game's own words, which is
+    the door the mod's own Spark refusal comes through."""
+    state = banked_state(0)
+    for card in state["player"]["hand"]:
+        card["can_play"] = False
+    state["player"]["hand"][0]["unplayable_reason"] = "BlockedByCardLogic"
+    state["player"]["hand"][1]["unplayable_reason"] = "EnergyCostTooHigh"
+    state["player"]["hand"][2]["unplayable_reason"] = "you have no Spark"
+    page = qa_packet.render(qa_packet.build(state, "t", repo=REPO))
+    assert "BlockedByCardLogic" not in page
+    assert "EnergyCostTooHigh" not in page
+    assert "this card's own rule is stopping you right now" in page
+    assert "you do not have enough energy" in page
+    assert "you have no Spark" in page
+
+
+def test_an_unmapped_enum_is_spelled_out_rather_than_dropped():
+    """A reason this map has never seen is still legible AND still reported:
+    silence would hide the next enum exactly the way this row's three were
+    hidden. A `[Flags]` combination prints as `A, B` and each part is read."""
+    assert qa_packet.unplayable_reason("BlockedByHook") \
+        == "something else on the board is stopping you right now"
+    assert qa_packet.unplayable_reason("SomeNewReason") == "some new reason"
+    assert qa_packet.unplayable_reason("EnergyCostTooHigh, StarCostTooHigh") \
+        == "you do not have enough energy; you do not have enough Stars"
+    assert qa_packet.unplayable_reason("None") == ""
+    assert qa_packet.unplayable_reason(None) == ""
 
 
 def test_a_banked_board_prints_the_rule_and_names_every_discount():
