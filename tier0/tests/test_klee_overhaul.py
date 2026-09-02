@@ -313,23 +313,65 @@ def test_the_prototype_rule_states_the_rows_own_numbers():
 
 def test_the_cost_clause_is_the_last_resort_and_only_at_two():
     """"A card of cost 2 or more WITH NO NUMBER costs 1 less" -- so the clause
-    fires only when nothing else did, and a 0- or 1-cost row with no printed
-    number gets no upgrade rather than an invented one. That is why a handful
-    of rows are still base-only, and it is a decision rather than a gap."""
+    fires only when nothing else did.
+
+    AMENDED 2026-09-02 by [USER]'s own play ("'Change of Plans' has no
+    upgrade?", "Neither does Rally"). The clause is no longer the last one:
+    below it sit two more, so a 0- or 1-cost row printing no number loses
+    Exhaust if it has it and otherwise draws one more. What is unchanged is
+    this clause's own shape -- it still fires only on a numberless row, and
+    still only at cost 2 or more."""
     from tier0.content import upgrades
 
     assert upgrades.prototype_default_delta(
         "proto_kk_the_moon_overlooks_the_waters", 2, [
             {"op": "apply_power", "power": "kk_plans_also_now", "amount": 1,
              "target": "self"}]) == {"cost": -1}
-    # The same row at cost 1: nothing to move, and nothing invented.
+    # The same row at cost 1: no discount -- it falls to the added draw.
     assert upgrades.prototype_default_delta(
         "proto_kk_treatise", 1, [
             {"op": "apply_power", "power": "kk_treatise", "amount": 1,
-             "target": "self"}]) == {}
+             "target": "self"}]) == {"add": {"op": "draw", "amount": 1}}
     # A row that DID find a number never also gets the discount.
     assert "cost" not in upgrades.prototype_default_delta(
         "proto_kk_the_moon_a_ship", 2, [{"op": "mend", "amount": 10}])
+
+
+def test_the_two_last_clauses_are_exhaust_then_a_draw():
+    """`EB-283`'s two APPLIED DEFAULTS, from [USER] playing the arm. Before
+    them a 0- or 1-cost row printing no number got nothing at all, which is an
+    upgrade slot that is a blank rather than a choice.
+
+    Both named rows are [USER]'s own examples, pinned by id."""
+    from tier0.content import upgrades
+
+    def delta(card_id):
+        card = next(c for c in loader.prototype_cards() if c.id == card_id)
+        return upgrades.prototype_default_delta(
+            card.id, card.cost, card.effects, bool(card.exhaust))
+
+    # Change of Plans keeps its text and loses Exhaust.
+    assert delta("proto_kk_change_of_plans") == {"remove": "exhaust"}
+    assert delta("proto_kk_vanguard") == {"remove": "exhaust"}
+
+    # Rally is the counted-power half: `weak` at 1 IS a printed number, so it
+    # never reaches the two clauses at all -- Rally+ applies 2 Weak.
+    assert delta("proto_kk_rally") == {"power_amount": 1}
+    assert delta("proto_kk_exposed_flank") == {"power_amount": 1}
+
+    # And a row with a now-line, no Exhaust and no number draws one more.
+    assert upgrades.prototype_default_delta(
+        "proto_ko_x", 1, [{"op": "apply_power", "power": "ko_alices_recipe",
+                           "amount": 1, "target": "self"}]) == {
+        "add": {"op": "draw", "amount": 1}}
+
+    # TWO SILENCES, and both are the codegen refusing rather than the rule
+    # declining. A row that already draws would collide on the one `Cards`
+    # var; a PLAN-ONLY row has no effects walk to hang the added draw on, and
+    # a now-line draw would contradict the "Play on the Bake-Kurage." its
+    # target type earns it.
+    assert delta("proto_kk_stolen_chapter") == {}
+    assert delta("proto_kk_ambush") == {}
 
 
 def test_a_power_amount_of_one_is_read_as_no_number():
@@ -345,9 +387,22 @@ def test_a_power_amount_of_one_is_read_as_no_number():
              "target": "self"}]
     printed = [{"op": "apply_power", "power": "ko_grounded", "amount": 6,
                 "target": "self"}]
-    assert upgrades.prototype_default_delta("proto_ko_x", 1, flag) == {}
+    counted = [{"op": "apply_power", "power": "weak", "amount": 1,
+                "target": "enemy"}]
+    # A FLAG finds no power number and falls through to the added-draw clause
+    # below the cost one; the key that matters here is that it is not
+    # `power_amount`.
+    assert "power_amount" not in upgrades.prototype_default_delta(
+        "proto_ko_x", 1, flag)
     assert upgrades.prototype_default_delta("proto_ko_x", 1, printed) == {
         "power_amount": 1}
+    # AMENDED 2026-09-02: a COUNTED power prints its amount even at 1
+    # (`upgrades.COUNTED_POWERS`), which is the half `> 1` alone got wrong --
+    # Rally's "Apply 1 Weak" is a number and Alice's Recipe's 1 is a switch.
+    assert upgrades.prototype_default_delta("proto_ko_x", 1, counted) == {
+        "power_amount": 1}
+    assert "weak" in upgrades.COUNTED_POWERS
+    assert "ko_alices_recipe" not in upgrades.COUNTED_POWERS
 
 
 def test_the_rule_reaches_only_the_four_overhaul_prefixes():

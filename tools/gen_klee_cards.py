@@ -521,6 +521,72 @@ def golded_tokens(description: str) -> list[str]:
             for span in GOLD_SPAN.findall(description)]
 
 
+# --- the ELEMENT INDICATOR's one declaration --------------------------------
+#
+# [USER], 2026-09-01, after playing Klee: "instead of saying 'applies pyro' -
+# maybe make it a card indicator as well to remove text overhead? That would be
+# a universal shift."
+#
+# THE SENTENCE WAS NEVER EMITTED TEXT, which is the fact that decided the shape
+# of the change. No sheet row and no generated `Localization` has ever contained
+# the words "Applies Pyro": they came from `KleeKeywords.AppliesPyro`'s
+# `AutoKeywordPosition.After`, which BaseLib feeds into the base game's
+# `CardKeywordOrder.afterDescription` and `CardModel.BuildDescription` appends
+# to the rules box. Those four fields now carry `AutoKeywordPosition.None`, so
+# the same keyword prints nothing, still HOVERS (`CardModel.HoverTips` walks
+# `Keywords` and never the printed text), and is what `Vfx/ElementBadge.cs`
+# reads to paint the aura's own icon beside the type plaque.
+#
+# So this table is now BOTH the tip and the indicator, and a row cannot wear a
+# gem it does not explain. The prototype rows came along under the same one
+# switch as the three shipped sheets: there is one keyword per element and every
+# profile declares the same four.
+#
+# ANEMO AND GEO ARE ABSENT ON PURPOSE, here as before: they leave no aura (LAW,
+# combat: "Anemo/Geo leave no aura -- they only trigger"), so they have no
+# keyword, no tip and now no gem.
+AURA_KEYWORD_BY_ELEMENT = {
+    "pyro": "KleeKeywords.AppliesPyro",
+    "hydro": "KleeKeywords.AppliesHydro",
+    "electro": "KleeKeywords.AppliesElectro",
+    "cryo": "KleeKeywords.AppliesCryo",
+}
+
+
+def aura_elements_for(card: dict, profile: "CharacterProfile",
+                      elemental: bool) -> list[str]:
+    """The aura-leaving elements this card's face DECLARES, in face order.
+
+    LIFTED OUT OF `emit` SO A TEST CAN ASK IT (`tier0/tests/
+    test_element_badge.py`). The join it has to prove -- every row that applies
+    an element carries the keyword that draws the gem and raises the tip -- is
+    only worth proving against ONE rule; a test carrying its own copy of these
+    six lines would pass a generator that had stopped obeying them.
+
+    `elemental` is the caller's answer to "does this card's DAMAGE carry an
+    element", which differs by profile: a character card takes its cadence
+    (`CharacterProfile.damage_applies_element`), a companion takes the per-
+    effect `applies_element` flag its card-level `IElementalCard` carries.
+
+    ORDER IS LOAD-BEARING and it is the card's OWN element first, then anything
+    its printed `apply_aura` adds. `ElementBadge.ElementOf` draws the first, so
+    a companion that hits with its own element and applies a second aura wears
+    the element its damage carries.
+    """
+    elements: list[str] = []
+    if elemental:
+        source_element = (
+            card["element"] if is_companion(card) else profile.native_element
+        )
+        if source_element in AURA_KEYWORD_BY_ELEMENT:
+            elements.append(source_element)
+    for effect in card.get("effects", []):
+        if (effect.get("op") == "apply_aura"
+                and effect.get("element") in AURA_KEYWORD_BY_ELEMENT):
+            elements.append(effect["element"])
+    return list(dict.fromkeys(elements))
+
+
 def arm_keywords_printed(description: str) -> list[ArmKeyword]:
     """The arm keywords this face prints as keywords, in table order."""
     printed = set(golded_tokens(description))
@@ -7427,7 +7493,7 @@ def build_description(card: dict) -> str:
     row carries the key.
     """
     if card.get("description"):
-        return _authored_face_with_tokens(card)
+        return _face_riders(card, _authored_face_with_tokens(card))
     parts = []
     deltas = upgrade_plan(card)[0]
     for field, label in (("encore_cost", "Encore"),
@@ -8275,7 +8341,72 @@ def build_description(card: dict) -> str:
         if sly_text:
             parts.append(f"[gold]Sly[/gold]: {sly_text}")
 
-    return " ".join(parts)
+    return _face_riders(card, " ".join(parts))
+
+
+# `Exhaust.` as the face's OWN first or last sentence, which is the only place
+# the keyword banner is ever written. Deliberately anchored rather than swept:
+# `Bounty of the Isles` ends a clause with "...when they Exhaust." and
+# `Moon's Reflection` names "your exhaust pile" mid-sentence, and neither is the
+# banner. An anchored pattern cannot reach either.
+_PRINTED_EXHAUST = re.compile(r"^Exhaust\.\s*|\s*(?<=\.)\s*Exhaust\.$")
+
+
+def _face_riders(card: dict, text: str) -> str:
+    """The two clauses a row's face gets from its own FIELDS rather than from
+    its words. Applied to both faces -- the rendered one and a row's authored
+    one -- because a defect that only bites authored rows today is still a
+    defect the next rendered row inherits.
+
+    `EB-293`. Both are live defects from [USER]'s own play of the arm.
+    """
+    return _plan_only_line(card, _dedupe_printed_exhaust(card, text))
+
+
+def _dedupe_printed_exhaust(card: dict, text: str) -> str:
+    """`EB-293`, first half: a face may not print `Exhaust.` at all when the
+    row already declares `exhaust: true`.
+
+    THE KEYWORD RAIL ALREADY PRINTS IT. `exhaust: true` emits
+    `CardKeyword.Exhaust` into `CanonicalKeywords`, and the game's own
+    auto-keyword pipeline renders the banner from there -- which is why the
+    rendered path has never hand-written the word (see the note beside the
+    `keywords` list in `emit`). A row that states its OWN face (`EB-215`) has
+    no such discipline behind it, and six of the seven prototype rows carrying
+    both spellings duly printed the word twice: [USER] read
+    `Exhaust. The jellyfish carries out your front Plan now. Exhaust.` off a
+    reward screen, and the r2 Opus seat read the same on `Vanguard`.
+
+    FIXED HERE AND NOT IN THE ROWS, once, because "never both" has to be a
+    property of the generator rather than of seven hand-edits: an eighth row
+    written next week gets it for free. The sheet keeps its human-readable
+    sentence and the emitted face drops it.
+    """
+    if not card.get("exhaust"):
+        return text
+    return _PRINTED_EXHAUST.sub("", text).strip()
+
+
+def _plan_only_line(card: dict, text: str) -> str:
+    """`EB-293`, second half: a PLAN-ONLY row says where it is played.
+
+    THE RULE IS ALREADY IN THE CARD'S TYPE and was printed nowhere. A row with
+    a `plan:` and no now-line declares `KokomiTargets.PetOnly`
+    (`CustomTargetType.Pet`), so the jellyfish is its only legal target -- but
+    the face said only what the Plan does, and the blind grammar offered
+    `play "<card>" [on "<enemy>"]` for it like any other card. The r2 Opus
+    seat: "Plan-only cards never say what happens if you play them normally...
+    I never risked finding out, which means the screen made a legal-looking
+    action untestable."
+
+    DERIVED FROM THE SAME TEST THE TARGET TYPE IS DERIVED FROM (`plan` and no
+    `effects`, in `emit`), so the sentence and the target can never disagree,
+    and it leads rather than trails: it is the instruction, and what the
+    jellyfish then does is the consequence.
+    """
+    if not card.get("plan") or card.get("effects"):
+        return text
+    return ("Play on the [gold]Bake-Kurage[/gold]. " + text).strip()
 
 
 def _is_sly_branch(card: dict) -> bool:
@@ -8759,23 +8890,7 @@ def emit(
                 if elemental_effect["op"] == "apply_aura"
                 else "Element.Anemo")
 
-    aura_keyword_by_element = {
-        "pyro": "KleeKeywords.AppliesPyro",
-        "hydro": "KleeKeywords.AppliesHydro",
-        "electro": "KleeKeywords.AppliesElectro",
-        "cryo": "KleeKeywords.AppliesCryo",
-    }
-    aura_elements = []
-    if elemental:
-        source_element = (
-            card["element"] if is_companion(card) else profile.native_element
-        )
-        if source_element in aura_keyword_by_element:
-            aura_elements.append(source_element)
-    for e in card.get("effects", []):
-        if e.get("op") == "apply_aura" and e.get("element") in aura_keyword_by_element:
-            aura_elements.append(e["element"])
-    aura_elements = list(dict.fromkeys(aura_elements))
+    aura_elements = aura_elements_for(card, profile, elemental)
     # L4: the Bomb rules text is a question about the WHOLE effect tree, not
     # about the top level. `sparkly_explosion` places its two Bombs inside the
     # kill-conditional's `then:`, so the flat scan this replaced shipped the
@@ -9256,7 +9371,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         keywords.append("CardKeyword.Sly")
     if "skill_tag" in card.get("tags", []):
         keywords.append("KleeKeywords.ElementalSkill")
-    keywords.extend(aura_keyword_by_element[e] for e in aura_elements)
+    keywords.extend(AURA_KEYWORD_BY_ELEMENT[e] for e in aura_elements)
     keywords_member = ""
     if keywords:
         keywords_member = (

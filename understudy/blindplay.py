@@ -526,6 +526,45 @@ def _hazard(state: dict[str, Any]) -> tuple[str, str] | None:
 
 # ------------------------------------------------------- printed fragments --
 
+# THE ELEMENT, AS A TAG ([USER], 2026-09-01, after playing Klee: "instead of
+# saying 'applies pyro' - maybe make it a card indicator as well to remove text
+# overhead? That would be a universal shift").
+#
+# The game now says it with a picture: `KleeKeywords.Applies*` moved to
+# `AutoKeywordPosition.None`, so `Applies Pyro` left the rules box and
+# `Vfx/ElementBadge.cs` paints the aura's own icon beside the type plaque
+# instead. A picture does not cross this wire. The seat reading this page would
+# have lost the element from the card LINE and kept it only in the keyword
+# block below -- so the tag puts it back where the indicator is, at a glance,
+# beside the title.
+#
+# READ OFF THE KEYWORD, which is the same declaration the badge reads. The wire
+# sends a card's keywords resolved (`CardModel.HoverTips` walks `Keywords`, and
+# that walk is untouched by the position flip), so `Applies Pyro` is still on
+# every elemental face as a keyword row and this is the surface that survives.
+# No bridge change, and it reads correctly against a build from either side of
+# the flip.
+#
+# ANCHORED AND ONE WORD WIDE: `Applies Electro-Charged`, a Kokomi companion's
+# printed reaction, is not an element and must not become one.
+_ELEMENT_KEYWORD = re.compile(r"^Applies (Pyro|Hydro|Electro|Cryo)$")
+
+
+def _element(keywords: list[dict[str, str]]) -> str:
+    """The element this face applies (`Pyro`), or `""`.
+
+    First match wins, in the order the game listed them -- the badge's own rule
+    (`ElementBadge.ElementOf` takes the card's own element, which is the first
+    keyword codegen emits) for the handful of companion rows that apply a
+    second aura on top of their own.
+    """
+    for k in keywords:
+        m = _ELEMENT_KEYWORD.match(k["name"])
+        if m:
+            return m.group(1)
+    return ""
+
+
 def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
     """One card as the game prints it. Field by field, never spread.
 
@@ -576,6 +615,10 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         "kind": _text(entry.get("type")),
         "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
         "keywords": kws,
+        # The card's element indicator, as a word. `""` on every face that
+        # applies none, which is every base-game card and every skill of ours
+        # that only blocks or draws.
+        "element": _element(kws),
         "playable": entry.get("can_play") is not False,
         "unplayable_reason": _text(entry.get("unplayable_reason_text")
                                    or entry.get("unplayable_reason")),
@@ -1578,6 +1621,14 @@ def _render_card(c: dict[str, Any], bullet: str = "-") -> list[str]:
     head = f"{bullet} **{c['title']}**"
     if c["upgraded"]:
         head += " (upgraded)"
+    # The element INDICATOR's twin on this page: the card now carries a gem
+    # rather than a sentence, and a gem does not cross a text wire. Beside the
+    # title, in brackets, because that is where the card carries it -- next to
+    # the type plaque, at a glance, before the rules. The keyword's own row
+    # further down still carries the aura duration and the reaction rule; this
+    # line is the glance, not the explanation.
+    if c.get("element"):
+        head += f" [{c['element']}]"
     # `EB-286`: the COST SLOT as the game paints it, energy and Spark
     # together, through the one formatter the staged page already uses.
     # `qa_packet.cost_label` answers `-` when the wire sent no cost at all,

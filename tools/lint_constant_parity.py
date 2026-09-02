@@ -438,6 +438,20 @@ UNMIRRORED: dict[str, str] = {
         "presentation: the header line's own height, in pixels.",
     "KleeCombatVfx.LobApexLift":
         "presentation: bomb-toss arc height in pixels.",
+    # The element indicator ([USER], 2026-09-01: "instead of saying 'applies
+    # pyro' - maybe make it a card indicator as well to remove text overhead").
+    # Both numbers are the gem's rect against the type plaque it hangs on, and
+    # they are the ONLY geometry in that file -- everything else about where it
+    # sits is anchors, resolved by the engine's own layout pass. The sim has no
+    # card face, so there is nothing to compare by value; what the gem MEANS is
+    # the element keyword, which IS mirrored (the sheet's cadence decides it)
+    # and carries no constant of its own.
+    "ElementBadge.Side":
+        "presentation: the element gem's side in card pixels, against NCard's "
+        "own 300x422 face.",
+    "ElementBadge.Gap":
+        "presentation: pixels between the gem's right edge and the type "
+        "plaque's left, so the pair reads as one row.",
     "KleeCombatVfx.LobDuration":
         "presentation: bomb-toss animation length in seconds.",
     "KleeCombatVfx.MaxConcurrentPops":

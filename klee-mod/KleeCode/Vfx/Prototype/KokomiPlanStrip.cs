@@ -154,6 +154,17 @@ internal static class KokomiPlanStrip
         {
             Name = RootName,
             MouseFilter = Control.MouseFilterEnum.Ignore,
+            // `EB-300`, THE STRIP'S HALF. It is display only: nothing in it may
+            // enter the controller's focus graph, or a player walking the HUD
+            // lands on a picture of a card with no way back to the hand.
+            // `FocusMode` already defaults to `None` on every Control -- this
+            // states it rather than inheriting it, because the invariant is the
+            // point and a node added here later should read the rule off its
+            // neighbours. `SetFocusBehaviorRecursive` below is the belt to this
+            // brace, and it is the game's OWN seam for the same job:
+            // `NCombatRoom.RestrictControllerNavigation` takes the orb manager
+            // out of the walk with exactly that call.
+            FocusMode = Control.FocusModeEnum.None,
             // Left edge, vertically centred -- the anchor
             // `KurageMemoryCard.Build` argues for, so the two elements occupy
             // the same band and a resize moves them together.
@@ -173,6 +184,7 @@ internal static class KokomiPlanStrip
             {
                 Name = "Plan" + i,
                 MouseFilter = Control.MouseFilterEnum.Ignore,
+                FocusMode = Control.FocusModeEnum.None,
                 ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
                 StretchMode = TextureRect.StretchModeEnum.KeepAspectCovered,
                 Position = new Vector2(0f, i * (ThumbHeight + ThumbGap)),
@@ -186,6 +198,7 @@ internal static class KokomiPlanStrip
         {
             Name = "Count",
             MouseFilter = Control.MouseFilterEnum.Ignore,
+            FocusMode = Control.FocusModeEnum.None,
             HorizontalAlignment = HorizontalAlignment.Center,
             Position = new Vector2(
                 0f, MaxDrawn * (ThumbHeight + ThumbGap) + 4f),
@@ -195,6 +208,12 @@ internal static class KokomiPlanStrip
                                        CountFontSize);
         count.AddThemeColorOverride(ThemeConstants.Label.FontColor, CountColor);
         root.AddChildSafely(count);
+        // The whole subtree, in one call, AFTER the children exist -- the
+        // recursive flag is a property of the node it is set on and is read
+        // through the tree, so setting it last covers what was added above and
+        // anything a future edit adds beside them.
+        root.SetFocusBehaviorRecursive(
+            Control.FocusBehaviorRecursiveEnum.Disabled);
         return root;
     }
 

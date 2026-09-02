@@ -432,6 +432,54 @@ def test_the_recorded_combat_screen_prints_the_faces_and_no_ids():
     assert "KLEEMOD" not in page and "_" not in page.replace("state_type", "")
 
 
+def test_the_element_a_card_applies_is_a_tag_on_its_line():
+    """The element INDICATOR's twin on the blind page.
+
+    [USER], 2026-09-01, after playing Klee: *"instead of saying 'applies pyro'
+    - maybe make it a card indicator as well to remove text overhead? That
+    would be a universal shift."* The game now says it with a picture --
+    `KleeKeywords.Applies*` moved to `AutoKeywordPosition.None`, so the
+    sentence left the rules box and `Vfx/ElementBadge.cs` paints the aura's own
+    icon beside the type plaque -- and a picture does not cross this wire. So
+    the element rides the card LINE as a tag, read off the same keyword the
+    badge reads.
+
+    THE FIXTURE IS RECORDED, which is what makes this a pin rather than a
+    restatement: `Pearl Barrage` came off the live bridge on 2026-08-28
+    carrying `Applies Hydro` as a KEYWORD, and that keyword is untouched by the
+    position flip (`CardModel.HoverTips` walks `Keywords`, never the printed
+    text). So the same assertion holds against a build from either side of it.
+    """
+    page = blindplay.observe(combat_state())
+    lines = [ln for ln in page.splitlines() if "**Pearl Barrage**" in ln]
+
+    assert lines, "the recorded hand's Hydro card must be on the page"
+    assert all("[Hydro]" in ln for ln in lines)
+    # The tag is the GLANCE, not the explanation: the keyword's own row still
+    # carries the aura duration and the reaction rule, which is the half a
+    # player gets by hovering the gem.
+    assert "*Applies Hydro*" in page
+    # And a card that applies nothing wears no tag. `Coral Guard` blocks.
+    for ln in page.splitlines():
+        if "**Coral Guard**" in ln:
+            assert "[" not in ln.split("**Coral Guard**", 1)[1]
+
+
+def test_the_element_tag_is_never_read_off_a_reaction_word():
+    """`Applies Electro-Charged` is a REACTION a companion prints, not an
+    element, and the six elements are not the seven words that follow the verb.
+    The tag's pattern is anchored and element-named for exactly this row, which
+    ships on the Mondstadt companion arm."""
+    state = combat_state()
+    state["player"]["hand"][2]["keywords"] = [
+        {"name": "Applies Electro-Charged",
+         "description": "A stacking damage-over-time."}]
+
+    faces = blindplay.observation(state)["combat"]["hand"]
+
+    assert [f["element"] for f in faces] == ["Hydro", "", "", "", "Hydro"]
+
+
 def test_a_card_face_carrying_an_internal_id_is_refused():
     """The belt to the allowlist's brace, exactly as in `qa_packet`: a wire
     that started printing ids would be refused rather than rendered."""
