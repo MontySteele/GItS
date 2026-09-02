@@ -162,6 +162,7 @@ class Instance:
 LANES: dict[str, tuple[int, Path | None]] = {
     "lane0": (DEFAULT_PORT, None),
     "lane1": (DEFAULT_PORT + 1, LANE_ROOT / "lane1"),
+    "lane2": (DEFAULT_PORT + 2, LANE_ROOT / "lane2"),
 }
 
 

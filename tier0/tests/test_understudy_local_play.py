@@ -643,3 +643,29 @@ def test_the_codex_path_still_gets_its_default_model(monkeypatch, tmp_path):
     assert seen["model"] == blindplay.seat.DEFAULT_MODEL
     blindplay.build_thread(tmp_path, "codex", "gpt-5.6-sol")
     assert seen["model"] == "gpt-5.6-sol"
+
+
+def test_a_reply_whose_json_is_the_tail_of_the_reasoning_is_read(tmp_path):
+    """Seen live 2026-09-02 (`kokomi-r3-local-a`, turn 7): the served model
+    wrote its whole JSON reply as the last line of its thinking, closed the
+    block and stopped with an EMPTY `content`. The command is read from the
+    scratchpad's tail, once, and the record says so in its own row."""
+    scratch = ("Enemy is weak and only hits for 8. Need exactly one command.\n"
+               '{"command":"end turn","thinking":"spend on damage, not block"}')
+    replies = [_reply(text="", reasoning_content=scratch), _reply(record="w")]
+    with _StubEndpoint(replies) as stub:
+        _s, summary, wire, _t = _session(tmp_path, stub,
+                                         states=[combat_state()],
+                                         max_actions=1)
+    assert summary["actions"] == 1 and len(wire.posts) == 1
+    kinds = [r["kind"] for r in _rows(tmp_path)]
+    assert "local_answer_from_reasoning" in kinds
+
+
+def test_a_schema_quoted_mid_thought_is_not_mistaken_for_the_answer(tmp_path):
+    scratch = ('The schema is {"command": "", "thinking": ""} and I have not '
+               "decided yet.")
+    with _StubEndpoint([_reply(text="", reasoning_content=scratch)]) as stub:
+        _s, summary, wire, _t = _session(tmp_path, stub,
+                                         states=[combat_state()])
+    assert summary["termination"] == "seat_refused" and wire.posts == []
