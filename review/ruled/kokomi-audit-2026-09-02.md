@@ -1,6 +1,7 @@
-Status: OPEN (audit; picks at the end)
+Status: RULED R240 2026-09-02
 
 # Kokomi, draft 5: a fresh audit
+Ruled by R240 (2026-09-02): the Plan is the chassis; the exhaust replay and Mend step down to payoff cards. The picks below are answered by brief draft 6.
 
 Written 2026-09-02 by a Fable session with no prior context, on your
 question: is this the best version of the character, and can we do better.

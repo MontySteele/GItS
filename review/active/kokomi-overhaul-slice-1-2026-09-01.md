@@ -1,4 +1,4 @@
-Status: OPEN (draft 4, Paper; built once the brief's draft-4 picks are ruled)
+Status: OPEN (draft 4, Paper; to be rewritten on brief draft 6 once read)
 
 # Kokomi overhaul, slice one: the rules, the starter, and 28 cards (draft 4)
 
