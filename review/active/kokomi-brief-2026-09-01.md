@@ -1,11 +1,13 @@
-Status: OPEN (draft 3 picks 1 to 7; the live Paper artefact through the Prototype build)
+Status: OPEN (draft 4 picks 1 to 7; the live Paper artefact through the Prototype build)
 
-# Sangonomiya Kokomi: the brief, draft 3
+# Sangonomiya Kokomi: the brief, draft 4
 
-Draft 3, 2026-09-02, after [USER]'s own prototype run sent draft 2 back to
-the rules (`review/ruled/kokomi-overhaul-round-1-2026-09-02.md`, R237, and
-the rework packet `review/ruled/kokomi-rework-2026-09-02.md`, R238, whose
-direction A this is). §16 lists what moved. Everything a build needs is in
+Draft 4, 2026-09-02, on [USER]'s second thought about draft 3 (R239, in
+the commit): the Tide stays as the fuel, but the jellyfish never spends it
+by itself; Surge plays one card, the top of her exhaust pile, and pays its
+price; and a card the jellyfish has played is a Tactic that never comes
+back. Draft 3's row and its one-a-turn replay are gone, and the exhaust
+pile is the memory. §17 lists what moved. Everything a build needs is in
 §4, §6 and §9; the rest is the reasoning.
 
 ## 0. The test this brief has to pass
@@ -16,24 +18,24 @@ breaks (§6), what the relic pays for (§9), and lore (§3).
 
 ## 1. The promise
 
-You are the Divine Priestess of Watatsumi, and you do not fight. You give
-orders, and the Bake-Kurage carries them out. Everything you let go of, it
-remembers, and it does it again: the Block you raised, the prayer you
-said, the companion you sent in. It acts once a turn, when the Tide can
-pay for it, and when you tell it to Surge it does everything it remembers
-at once. **Your deck is a set of orders. The jellyfish is the one who
-executes them. Feed it, choose what it keeps, and pick the turn it sends
-the whole wave.**
+You are the Divine Priestess of Watatsumi, and you do not fight. You write
+the orders, and the Bake-Kurage carries them out. What you have already
+used is not gone: it is on the pile, and when you say the word and the
+Tide is high enough, the jellyfish picks up the last thing you did and
+does it again. Once. **Your exhaust pile is your book of tactics. The
+jellyfish reads from the top, and the Tide is what it costs to read.
+What you put there last, how high the Tide is, and when you say the word
+is the whole game.**
 
-In play: Kokomi's cards come back. A card that Exhausts is not gone, it is
-queued; a Plan is a card you pay for now and collect next turn; a
-companion you Rally is a companion the jellyfish will play again. The Tide
-is the fuel that keeps the queue moving, her Skills raise it, and Surge
-spends all of it in one turn. She is a turn slow by nature and she wins by
-having written the right things in the right order.
+In play: Kokomi's Exhaust cards are one-shots that come back one more
+time, on the turn she chooses, through a Surge card, if the Tide can pay.
+Her Skills raise the Tide; Exhausting anything raises it by one. A Plan is
+an order she pays for now and the jellyfish carries out next turn. A
+companion she Rallies is a companion the jellyfish will send in again.
+Every card the jellyfish plays becomes a Tactic, spent for the fight.
 
-**The obvious plan, from the starter:** do a thing, the jellyfish does it
-again, feed it so it can, Surge when the row is full.
+**The obvious plan, from the starter:** Exhaust the Block, feed the Tide,
+Surge it back.
 
 ## 2. What the shipped kit is, and why it is one-dimensional
 
@@ -50,25 +52,26 @@ Exhaust, so a cold start never meets the kit. Underneath: the no-healing
 law removed the thing she is, and the kit was rebuilt from Silent verbs
 around a bank with no spend.
 
-Draft 2 replaced the bank with Tide, a number spent once by Surge, and
-priced every step of it in HP (Exert) and turns (the pulse). Your run and
-both seats did the same arithmetic and it lost to the basic attack; the
-payoff was a ledger, not a moment. Draft 3 keeps the jellyfish and the
-Tide and puts your Kurage's Memory back at the centre, with her own cards
-in it.
+Draft 2 made the bank a number Surge dealt once and priced every step in
+HP and turns; your run and both seats did the arithmetic and it lost to
+the basic attack. Draft 3 brought your Kurage's Memory back as a priced
+row the jellyfish worked through by itself, one a turn; you read that as
+"automatically spend to play one card per turn," which is energy cheating
+with a timer on it. Draft 4 keeps the bank and the spend and puts the
+spend in your hand: a Surge card, one replay, paid.
 
 ## 3. The lore audit
 
 | Source | Fact | What it becomes |
 |---|---|---|
-| Kurage's Oath (Skill) | The Bake-Kurage sits on the field, hits on an interval, heals on an interval | The jellyfish is always out. It **remembers** what she gives up and does it again, once a turn, when the **Tide** pays (rules 1 to 4); **Surge** is the wave (rule 5) |
-| Her "energy" | She tracks her own energy: duties drain it, doing what she likes refills it | Retired in draft 3. Draft 2's Exert (rituals cost HP) read as a tax; her vitality is her HP bar, not a price |
+| Kurage's Oath (Skill) | The Bake-Kurage sits on the field, hits on an interval, heals on an interval | The jellyfish is always out and holds the **Tide**; when a card tells it to and the Tide can pay, it plays a card from her exhaust pile (rules 1 to 3). Kurage's Oath is the starter's feed |
+| Her "energy" | She tracks her own energy: duties drain it, doing what she likes refills it | Retired in draft 3. Her vitality is her HP bar, not a price |
 | Highest base HP in the source game | Her vitality is her stat | The biggest HP bar in the roster, and the worst Block (§8) |
-| Nereid's Ascension (Burst) | The Ceremonial Garment: her attacks heal while she wears it | **Garment**: a short window where her Attacks Mend a chip per hit (rule 7's Mend) |
+| Nereid's Ascension (Burst) | The Ceremonial Garment: her attacks heal while she wears it | **Garment**: a short window where her Attacks Mend a chip per hit |
 | Sango Isshin (C6) | A heal on someone at 80%+ HP becomes Hydro damage | The Priestess Rare: Mend past her entry HP becomes the jellyfish's hit |
 | Tamanooya's Casket (passive) | Casting the Burst keeps the jellyfish out | The relic: the jellyfish never leaves, and the first card it plays each fight costs no Tide |
 | Crit Rate −100%, "Flawless Strategy" | She cannot crit; her numbers are planned, not lucky | She cannot gain Strength; Strength becomes Tide (rule 8) |
-| Strategist of the Resistance, raised on treatises | She wins the fight before it starts | **Plan**: a card paid for now that the jellyfish carries out at the start of her next turn (rule 6) |
+| Strategist of the Resistance, raised on treatises | She wins the fight before it starts | **Plan**: an order paid for now that the jellyfish carries out at the start of her next turn (rule 4); **Tactics** is what a carried-out order is (rule 5) |
 | Gorou, her general | He executes what she writes | Gorou's Personal is a Plan: play a copy of the last Companion she played (§7) |
 | The Clouds Like Waves Rippling (C2) | Heals more on those under half HP | An Uncommon: under half HP, every card the jellyfish plays Mends her 2 |
 | Water's Edge (C1) | Her basic attack ends with a fish | Water's Edge is the basic Attack |
@@ -80,168 +83,171 @@ speed.
 
 Eight sentences. If a rule is not here, it is a card.
 
-1. **The Bake-Kurage** is on the field for the whole combat. It holds
-   **Tide**, a number from 0 that never resets on its own, and its
-   **Memory**, a row of cards in the order they arrived.
+1. **The Bake-Kurage** is on the field for the whole combat and holds
+   **Tide**, a number from 0 that never resets on its own.
 2. **Tide** is added by her cards ("Tide +N"), and by 1 whenever a card of
    hers Exhausts.
-3. **Remember**: when a card she owns Exhausts (her own or a Companion),
-   the jellyfish remembers it, with its target and its choices. A card the
-   jellyfish played is never remembered again.
-4. **The replay**: at the start of her turn, if the Tide covers the front
-   memory's price (3 per energy of its printed cost; a 0-cost card is
-   free), the jellyfish pays it, plays the card, and forgets it. One a
-   turn. A front card it cannot afford holds the row.
-5. **Surge**: a card that says it makes the jellyfish play remembered cards
-   from the front, paying each from the Tide, until it cannot; then the
-   Tide is 0.
-6. **Plan**: a card that says it is paid for now and not played now; it
-   goes into the Memory at no price, and the jellyfish carries it out.
-7. **Mend**: heal, never above the HP she entered the combat with. Only
-   Uncommon-and-up cards Mend, and all of them Exhaust, so each Mends
-   twice at most (once by her, once by the jellyfish).
+3. **Surge**: a card that says it makes the jellyfish play the top card of
+   her exhaust pile (the card exhausted most recently) at no energy, with
+   the card's own target and choices, paying its price from the Tide: 3
+   per energy of its printed cost, a 0-cost card free. If the Tide cannot
+   pay, the jellyfish does nothing and the rest of the card still happens.
+4. **Plan**: a card that says it is paid for and Exhausted when played,
+   doing nothing yet; at the start of her next turn the jellyfish plays it
+   at no Tide price, unless a Surge already has.
+5. **Tactics**: a card the jellyfish has played. When it would go to the
+   exhaust pile, it leaves the fight instead. So every card comes back
+   once, and only a card that returns it from the exhaust pile to her hand
+   can earn it a second time.
+6. **Mend**: heal, never above the HP she entered the combat with. Card
+   Mends are Uncommon and up.
+7. **Garment**: a state for a stated number of turns; while she wears it,
+   each of her Attacks that hits Mends her 2.
 8. **Flawless Strategy**: she cannot gain Strength; Strength she would gain
    becomes Tide.
 
-**Garment** is a card state, not a rule: for a stated number of turns each
-of her Attacks that hits Mends her 2. A remembered card keeps its target;
-if the target is dead or gone the jellyfish picks a living one at random.
-The one thing that fires by itself is the jellyfish's one replay a turn,
-and that is what a summoned jellyfish does.
+Exhaust is the game's own keyword and the jellyfish's only door: nothing
+enters the pile except by Exhausting, and the order of the pile is the
+order she exhausted. A dead target is replaced by a random living one. The
+one thing that fires by itself is a Plan at the start of her turn, which
+she paid for in energy, never in Tide.
 
-Persistent UI: the Tide number on the jellyfish, the row of remembered
-faces beside it with each card's price, and the Garment turn count. The
-memory strip already exists (EB-198, live-accepted on `0.2.1506+proto`).
+Persistent UI: the Tide number on the jellyfish; the top card of the
+exhaust pile shown beside it, face up, with its Tide price, as "what it
+will do next"; the Garment turn count; the Tactics tag on a card the
+jellyfish has played. Nothing else.
 
-**What leaves from draft 2:** Exert, the pulse and its budget, the
-Priestess's "hold" verb, Surge as a damage number, Plan as a separate
-queue. **What stays:** the jellyfish, Tide, Surge's name and job (cash),
-Mend bounded at entry HP, Garment, Flawless Strategy, Hydro on every
-Attack. **What returns from the shipped kit:** the Memory (your spec,
-`review/ruled/kokomi-kurage-memory-2026-08-29.md` §11.1), with one door
-instead of Muster's random one.
+**What leaves from draft 3:** the row as a second structure, the
+one-a-turn replay, Surge as "play the row," the jam and its eject. **What
+stays:** the jellyfish, the Tide and its feeds, the price at 3 per energy,
+Surge's name, Plan, Mend bounded at entry HP, Garment, Flawless Strategy,
+Hydro on every Attack. **What is new:** Tactics, your once-only tag, and
+the exhaust pile as the memory.
 
 ## 5. The contested thing
 
-**What you let it remember, and in what order.** The row is first in,
-first out, and the jellyfish plays one a turn. So the order you Exhaust
-and Plan is the order the fight replays: a Salt Line queued before an
-Ambush means Block next turn and the 12 the turn after; a High Tide
-queued behind three Plans is fuel that arrives late. The Tide is the other
-half: a row that outruns the Tide stalls, and a Tide with nothing queued
-is wasted, so her Skills are split between feeding the jellyfish and
-giving it something to do.
+**What is on top, how high the Tide is, and when you say the word.** The
+jellyfish reads the last card she exhausted, at a price. So three things
+are hers every turn: the order she exhausts in (Salt Line then Cleansing
+Tide means a Surge now Mends 6 for 3 Tide and a Surge later Blocks 7 for
+3); whether the Tide covers the top (a Blessing on top at 6 Tide is a
+Surge that does nothing at 5, and two Oaths of feeding before it does);
+and whether to Surge now at the top's value or feed first and Surge
+bigger.
 
-- **Remember or keep.** Exhausting a card is giving it to the jellyfish.
-  Cleansing Tide Mends 6 now and 6 again in a turn or two; Salt Line is 7
-  Block and 7 Block again. The price is the card's absence from her deck
-  for the rest of the fight and its Tide price when it comes round.
+- **Exhaust it or keep it.** Her Exhaust cards are the good ones. Playing
+  one puts it where the jellyfish can reach it, adds 1 to the Tide, and
+  takes it out of her deck; the second play, when it comes, is final.
+- **Feed or spend.** A Skill that raises the Tide is a turn's energy spent
+  on next turn's Surge. A Surge with the Tide short is a Strike with a
+  promise on it.
+- **Surge now or wait.** The top card and its price are known. Surge it
+  now, or play another Exhaust card first and Surge that instead, at the
+  cost of the first one sliding under.
 - **Plan or play.** A Plan is the same card a turn late for the same
-  energy, in exchange for the jellyfish carrying it out with no Tide and
-  with the enemy's intent known.
-- **Surge now or let it run.** The replay is one card a turn. Surge is the
-  whole row as far as the Tide reaches, on the turn you choose, and it
-  empties the Tide whether or not it reached the end. A full row and a
-  deep Tide on the boss's big turn is the payoff; a Surge into a short row
-  is a wasted Tide.
+  energy, no Tide, with the intent known, and it sits on top until it
+  fires, so a Surge can collect it early for nothing.
 
-The cost is real in both directions because the jellyfish is slow: a card
-you queue is a card that will not help you this turn, and a fight that
-ends in two turns never pays for anything it remembered. The question she
-answers every turn is the strategist's: what do I want done next turn,
-and can the Tide pay for it?
+The cost is real in both directions because nothing is free twice: every
+card the jellyfish plays is a card gone from the fight, every Tide spent
+on a small card is Tide not there for a big one, and every Surge card in
+hand is one she could have used on a better top. The question she answers
+every turn is the strategist's: what do I want done again, and have I
+paid for it?
 
-**Calibration.** The Necrobinder's Osty is the shape: an always-out
-creature the kit gives orders to, with cards that make it act. The
-difference is that Osty has its own attacks and the jellyfish has none;
-everything it does is one of her cards, so the jellyfish is exactly as
-strong as the deck she wrote.
+**Calibration.** Ironclad's Exhume (1 energy: return a card from the
+exhaust pile to your hand) is the price anchor: a Surge is an Exhume that
+also plays the card, for the card never coming back and a Tide price the
+deck has to raise. Rising Tide (1 energy: Deal 4, Surge) is Exhume plus
+half a Strike, gated twice.
 
 ## 6. The three loops
 
-### 6.1 Priestess — "feed, remember, surge" (the starter's plan)
+### 6.1 Priestess — "Exhaust it, feed, Surge it back" (the starter's plan)
 
-- **A turn looks like:** Salt Line (7 Block, remembered), Kurage's Oath
-  (Tide +4), Water's Edge; next turn opens with the jellyfish paying 3
-  and raising 7 Block before the hand is played. Two turns of that, then
-  Rising Tide Surges a row of three into the raider.
+- **A turn looks like:** Salt Line (7 Block, to the pile, Tide 1), Kurage's
+  Oath (Tide 5), Water's Edge; next turn Rising Tide: 4 damage and the
+  jellyfish raises the 7 again for 3 Tide, Salt Line leaves the fight.
+  Two turns of that, then Watatsumi's Blessing goes on the pile and the
+  Tide is fed to 6 for the Surge that Mends 12 and draws 2.
 - **You draft:** Tidal Prayer (Tide +3, draw 1), Sea Spray (Deal 5, Tide
-  +2), High Tide (Uncommon, Exhaust: Tide +8, so the jellyfish's replay of
-  it is fuel), Undertow (the jellyfish plays the front memory now, paying;
-  Block 3), Breaker (Deal 8, Surge), Song of Pearls (Power: each card the
+  +2), Deep Current (Deal 4 to all, Tide +1 per hit), Breaker (Deal 8,
+  Surge), Undertow (Block 3, Surge), High Tide (Uncommon, Exhaust: Tide
+  +8, so its replay is fuel), Song of Pearls (Power: each card the
   jellyfish plays is Tide +2), Nereid's Ascension (Uncommon, Exhaust: the
-  Garment for 2 turns, and again when it comes round), Cleansing Tide
-  (Uncommon, Exhaust: Mend 6).
-- **The payoff moment:** a five-card row and a 15 Tide on the turn the
-  boss winds up, Breaker Surges the lot: Block, a Mend, the Garment, an
-  Ambush, and the 8 on top.
-- **The decision every turn:** feed or queue. A Skill that raises the Tide
-  keeps the row moving; a card that Exhausts gives the row something to
-  do; Surge cashes both.
+  Garment for 2 turns), Cleansing Tide (Uncommon, Exhaust: Mend 6).
+- **The payoff moment:** Blessing on top and the Tide at 9 on the boss's
+  wind-up: Breaker for 8, the jellyfish Mends 12 and draws 2 for 6 Tide,
+  and the draw finds Undertow for the Cleansing Tide underneath.
+- **The decision every turn:** what goes on top, and whether the Tide is
+  there for it.
 - **The Rare that breaks a rule:** *Sango Isshin* (Power): Mend that would
-  go past her entry HP becomes Hydro damage to a random enemy. Rule 7's
+  go past her entry HP becomes Hydro damage to a random enemy. Rule 6's
   ceiling is gone, and a full bar is a weapon.
-- **Weakness:** fights that end before the row pays, and a spike before
-  the row is built.
+- **Weakness:** a deck that thins itself has no third play of anything;
+  a long fight runs her out of tactics, and a fast one out of Tide.
 
 ### 6.2 Strategist — "the plan was written last turn"
 
 - **A turn looks like:** two Plans and a Block, end turn, take the hit;
   next turn the jellyfish opens with a free 12 and a free 5 Block before
-  the hand is played.
+  the hand is played, no Tide spent, and both cards are Tactics.
 - **You draft:** Battle Plan (Plan: gain 2 energy), Ambush (Plan: deal 12
   to a random enemy), Read the Field (Block 3 now, Plan: Block 5), Feint
-  (Deal 4, Plan: 8 to the same enemy), Contingency (Uncommon, Exhaust,
-  Plan: Mend 6), Treatise (Power: each card the jellyfish plays draws 1),
-  War Council (Uncommon, Plan: play the top two cards of the draw pile
-  free).
+  (Deal 4, Plan: 8 to the same enemy), Contingency (Uncommon, Plan: Mend
+  6), Treatise (Power: each card the jellyfish plays draws 1), War Council
+  (Uncommon, Plan: Surge twice).
 - **The payoff moment:** the cultists' ramp lands on the turn her Plans
-  do, and she wrote them a turn ago knowing the intent.
-- **The decision every turn:** now or next turn. A Plan costs the same
-  energy as its now-version and arrives a turn late with the information
-  paid for; and a Plan at the front of the row is one the Tide never has
-  to pay for, so a Strategist deck runs on a shallow Tide.
+  do, and she wrote them a turn ago knowing the intent; or a Surge collects
+  the Ambush on the same turn it was written, free, because it was on top.
+- **The decision every turn:** now or next turn, and whether to leave the
+  Plan on top for the jellyfish or Surge it early and leave the Tide for
+  the card underneath.
 - **The Rare that breaks a rule:** *The Art of War* (Power): Plans also
-  happen now. Rule 6's delay is gone.
-- **Weakness:** intent changes, and the row jams behind a memory the Tide
-  cannot pay, which a Strategist with no Tide cards will feel.
+  happen now. Rule 4's delay is gone.
+- **Weakness:** intent changes, fights that end before the Plans fire, and
+  a shallow Tide, since a Strategist deck feeds it only by Exhausting.
 
 ### 6.3 Commander — "Gorou, go"
 
 The smallest loop until the companion layer proves itself (§7). Her cards
-choose which companion the jellyfish plays again.
+choose which companion the jellyfish sends in again.
 
-- **You draft:** Rally (Exhaust a Companion card from your hand; the
-  jellyfish remembers it; Tide +2), Orders (Power: a Companion play is Tide
-  +2), Vanguard (the next Companion this turn costs 0), Gorou's Personal
-  (Plan: play a copy of the last Companion you played this turn), the
-  Inazuma pool at its home weighting.
-- **The payoff moment:** Raiden Rallied on turn two, and the jellyfish
-  plays her again on turn three and once more in the Surge.
-- **The Rare that breaks a rule:** *The General's Banner* (Power): the
-  jellyfish plays two memories a turn. Rule 4's one is gone.
-- **Weakness:** she cannot draft the army herself, and every companion in
-  the row is one she chose to give up; Priestess and Strategist must each
-  win without a single companion.
+- **You draft:** Rally (Exhaust a Companion card from your hand; Tide +2),
+  Vanguard (the next Companion this turn costs 0), Orders (Power: each
+  Companion you play is Tide +2), Gorou's Personal (Plan: play a copy of
+  the last Companion you played this turn), the Inazuma pool at its home
+  weighting.
+- **The payoff moment:** Raiden Rallied on turn two, on top at 3; Breaker
+  on turn three: 8, and Raiden again.
+- **The Rare that breaks a rule:** *The General's Banner* (Power):
+  Companions the jellyfish plays are not Tactics. Rule 5's once is gone,
+  for companions.
+- **Weakness:** she cannot draft the army herself, and every companion the
+  jellyfish plays is one she gave up from hand and paid the Tide for;
+  Priestess and Strategist must each win without a single companion.
 
 ### 6.4 Bridges
 
-- Undertow: the front memory now, paying. The Priestess's tempo and the
-  Strategist's way to collect a Plan on the turn it was written.
-- Contingency: an Exhaust Plan, so it Mends now-ish and again later.
-- Orders: companions become Tide, so the Commander's row keeps moving.
-- Change of Plans (Common, 0): forget the front memory, draw 1. The eject
-  for a jammed row, in every loop.
+- Undertow: a Surge that Blocks. The Priestess's defence and the
+  Strategist's early collection.
+- Moon's Reflection (Uncommon): put a card from your exhaust pile into
+  your hand. The one door to a second replay, in every loop; and the way
+  to move a card back to the top.
+- Change of Plans (Common): choose a card in your exhaust pile and put it
+  on top. Draw 1. The reorder, in every loop.
+- Orders and Song of Pearls: companions and replays into Tide, so the
+  Commander's and the Priestess's Surges keep paying.
 
 ### 6.5 Currencies, and which way they cross
 
-- **Cards → the row** (Exhaust, Plan, Rally); **the row → plays** (the
-  replay, Undertow, Surge).
+- **Cards → the pile** (Exhaust, Plan, Rally); **the pile → plays** (Surge,
+  a Plan's morning); **the pile → hand** (Moon's Reflection).
 - **Skills → Tide** (Oath, Tidal Prayer, Quiet Study, Coral Bulwark);
   **Exhaust → Tide** (rule 2); **Companions → Tide** (Orders); **the
   jellyfish's plays → Tide** (Song of Pearls).
-- **Tide → plays** (the replay, Surge), **→ cards** (Reading the Tide:
-  draw 1, plus 1 per 5 Tide).
+- **Tide → plays** (Surge), **→ cards** (Reading the Tide: draw 1, plus 1
+  per 5 Tide).
 - **The jellyfish's plays → cards** (Treatise), **→ HP** (The Clouds Like
   Waves, under half).
 - **Damage dealt → HP** (the Garment), in chips.
@@ -261,41 +267,44 @@ Shinobu's ring as a chip Mend on Exhaust, Sara's stormcall as a Plan.
 Nothing here is authored. She has no tag; her readers, if any, read
 "Companion."
 
-The trap you named: the shipped kit converged on "spam Muster, random bad
-companion cards go." Here no companion enters the row by chance or by
-being played: the only door is Rally, which Exhausts one chosen Companion
-card from her hand for a card and an energy, or a Companion that itself
-says Exhaust. Every companion the jellyfish plays is one she picked.
+The trap you named: "spam Muster a million times, random bad companion
+cards GO." Here no companion enters the pile by chance or by being
+played: the doors are Rally, which Exhausts one chosen Companion card from
+her hand for a card and an energy, and a Companion that itself says
+Exhaust; the jellyfish plays it only when a Surge card says so and the
+Tide pays its price; and once it has, it is a Tactic and gone. Every
+companion the jellyfish plays is one she picked, paid for, once.
 
 ## 8. The intended weakness, and how she survives anyway
 
-**She is a turn slow, and her Block is the worst in the roster.** Coral
-Guard is 5 for 1 and there are few Block cards in her pool; everything
-good she does arrives at the start of the next turn, through the
-jellyfish, one card at a time. Against a long fight she outbuilds anyone.
-Against a fight that hits for 20 on turn two, or ends on turn two, she is
-the character with the least between her and the hit and the least to
-show for her setup.
+**Her Block is the worst in the roster, and her deck eats itself.** Coral
+Guard is 5 for 1 and there are few Block cards in her pool; her best cards
+Exhaust, come back once through a Surge she has to draw and a Tide she has
+to raise, and then leave. Against a fight of three or four turns she has
+more plays than anyone. Against a fight that hits for 20 on turn two she
+is the character with the least between her and the hit, and against a
+long fight she is the character who runs out.
 
 | Defence | Trigger | Lore | Which loop |
 |---|---|---|---|
 | **Block** | Standard, scarce | She is not a fighter | All |
-| **Salt Line** (starter, Exhaust) | 7 Block, and 7 again when it comes round | The tide line on the shore | Priestess |
+| **Salt Line** (starter, Exhaust) | 7 Block, and 7 again on a Surge for 3 | The tide line on the shore | Priestess |
 | **Read the Field** (Common) | Block 3 now, Plan: Block 5 | The defence she wrote | Strategist |
-| **Undertow** (Common) | The front memory now, and Block 3 | The wave that recedes | Bridge |
-| **Contingency** (Uncommon, Exhaust) | Plan: Mend 6, twice at most | The fallback in the plan | Strategist |
-| **Cleansing Tide** (Uncommon, Exhaust) | Mend 6 now, and again | Her own prayer | Priestess |
+| **Undertow** (Common) | Block 3 and a Surge | The wave that recedes | Bridge |
+| **Contingency** (Uncommon, Plan) | Mend 6 next turn | The fallback in the plan | Strategist |
+| **Cleansing Tide** (Uncommon, Exhaust) | Mend 6 now, and again on a Surge for 3 | Her own prayer | Priestess |
 | **The Clouds Like Waves** (Uncommon Power) | Under half HP, each card the jellyfish plays Mends 2 | C2 | Comeback |
 | **The Garment** (Uncommon, Exhaust) | Two turns of Attacks that Mend 2, twice at most | Nereid's Ascension | Priestess |
 
 **Where the player feels it.** On the draft screen: Block cards are rare
-in her pool and half her good cards say "next turn." On the map: a
-two-turn hallway fight is a fight she wins without the jellyfish, so she
-takes hallway chip like a character with a weaker deck than hers; elites
-and bosses are where the row pays. Rest sites are hers because her entry
-HP is the cap on every Mend in the fight after. She feels the missing
-Block the way Ironclad feels the missing draw, and she feels the delay
-the way the Defect feels an empty orb slot.
+in her pool and half her good cards say Exhaust. On the map: hallway
+fights are hers, since two plays of a Salt Line is 14 Block for 2 energy
+and 3 Tide; elites and bosses are where the pile runs dry, the Tide runs
+short, and the last Surge finds a Strike on top. Rest sites are hers
+because her entry HP is the cap on every Mend in the fight after. She
+feels the missing Block the way Ironclad feels the missing draw, and she
+feels the thinning deck the way the Silent feels a discard pile she
+cannot reach.
 
 ## 9. What fight one teaches
 
@@ -306,134 +315,140 @@ Surge), Stolen Chapter (1 energy: Plan, draw 2).
 
 Relic, **Tamanooya's Casket**: the jellyfish is on the field from the
 start of every combat, and the first card it plays each combat costs no
-Tide. It pays for the first replay: without it, fight one's Salt Line
-comes back only if an Oath was drawn first; with it, the jellyfish acts on
-turn two of every fight no matter what, which is the first thing the
-player learns.
+Tide. It pays for the first Surge: without it, fight one's Salt Line
+comes back only if an Oath was played first; with it, the first Surge of
+every fight works whatever the Tide, which is the first thing the player
+learns, and the second is that the next one has a price.
 
 Turn one, fight one, the player sees: Attacks, Block, one Block card that
-says Exhaust, a card that feeds the jellyfish, one card that says Surge,
-one Plan. Playing Salt Line puts its face beside the jellyfish with a
-price on it. Turn two opens with the jellyfish playing it: 7 Block before
-the hand. Do a thing, the jellyfish does it again, is on the table with
-nothing hidden, and the Plan and the Surge are the two things left to
-try. Script A plays it out.
+says Exhaust, a card that feeds the Tide, one card that says Surge, one
+Plan. Playing Salt Line puts its face beside the jellyfish with a 3 on it
+and the Tide ticks to 1. Turn two, Rising Tide: the jellyfish plays Salt
+Line for free, 7 Block, and Salt Line is gone. Exhaust it, feed, Surge it
+back, is on the table with nothing hidden, and the Plan is the one thing
+left to try. Script A plays it out.
 
 ## 10. Failure modes, named
 
-- **The spam.** Your trap: "spam Muster a million times, random bad
-  companion cards GO." Closed five ways: nothing enters the row at random
-  (Muster is gone; the doors are her own Exhaust cards, her Plans, and a
-  Rally that Exhausts one chosen Companion); a card the jellyfish played is
-  never remembered again; the jellyfish plays one a turn (two under one
-  Rare); Surge reaches only as far as the Tide; and the row is first in,
-  first out, so junk in front is a cost, not a resource.
-- **The jam.** A front memory the Tide cannot pay holds the row. Kept on
-  purpose, since it is the price of queuing what you cannot fund; Change
-  of Plans at Common is the eject, and a Strategist row of Plans never
-  jams because Plans have no price.
-- **The infinite.** One replay a turn, replays never re-enter, prices are
-  three per energy, and Surge empties the Tide. A long row slow-plays over
-  many turns, which is the shape you asked for; EB-234 measured the old
-  memory's queue at a 95th percentile of 9 and a worst of 31, and Surge is
-  the new answer to a long row. A cap is a Balance number.
+- **The spam.** Your trap. Closed five ways: nothing enters the pile at
+  random (Muster is gone; the doors are Exhaust, Plan and Rally); the
+  jellyfish plays only when a Surge card or a paid Plan says so, one card
+  per Surge; every Surge pays the Tide; a card the jellyfish has played is
+  a Tactic and leaves; and Moon's Reflection, the only second chance,
+  costs a card and an energy per card.
+- **Energy cheating.** Your other word for it. Nothing the jellyfish does
+  is automatic and unpaid: a Surge is a card, an energy and the Tide for
+  one play of a card she already paid for once, and the card is gone
+  after; a Plan is paid in energy the turn before. Battle Plan (pay 1 now,
+  2 next turn) is the one net-positive energy card and it is a Plan, so it
+  is a turn late and a Tactic after.
+- **The empty pile, the short Tide.** A Surge with nothing exhausted, or
+  a top it cannot pay for, plays nothing and the card's other half still
+  happens. Kept: the top card and its price are on screen, and the blind
+  page prints both.
+- **The wrong top.** A Strike exhausted by an enemy's effect on top of her
+  Blessing. Change of Plans is the reorder; otherwise it is a real cost
+  and the Priestess feels it.
 - **The doom clock.** Tide that grows every turn and pays once. Tide grows
-  only by her cards, and it is spent every turn the jellyfish acts.
+  only by her cards, and it is spent every time she says the word.
 - **Companion-locked.** Two loops win without a companion.
-- **Plans that never fire.** The Strategist's weakness, kept: a fight that
-  ends on turn two paid for nothing.
-- **Word salad.** Six keywords: Tide, Memory, Surge, Plan, Mend, Garment.
-  Pick 7. "Remember" is the verb of Memory, not a seventh keyword.
+- **Plans that never fire.** The Strategist's weakness, kept.
+- **Word salad.** Six keywords: Tide, Surge, Plan, Tactics, Mend, Garment;
+  Exhaust is the game's. Pick 7.
 
 ## 11. The three-board test (turn five)
 
 **Board one, the Priestess.** Two Axe Raiders, one at 9 and one at 20,
-both intending 8. Row: Salt Line (price 3), Cleansing Tide (price 3). Tide
-7. Hand: Water's Edge, Kurage's Oath, Breaker, Coral Guard, Sea Spray.
-Right play: Sea Spray the 9 (dead, Tide 9), Breaker the 20 (8, then
-Surge: Salt Line for 3, Cleansing Tide for 3, Tide 0), Coral Guard. She
-ends at 12 Block with 6 Mended and the row empty; the raider hits for 8
-into 12. Wrong play: Oath and hold, and the jellyfish plays Salt Line
-alone next turn while the 20 keeps swinging.
+both intending 8. Exhaust pile, top first: Cleansing Tide (3), Salt Line
+(3). Tide 7. Hand: Water's Edge, Breaker, Undertow, Sea Spray, Coral
+Guard. HP 52 of 80. Right play: Sea Spray the 9 (dead; Tide 9), Breaker
+the 20 (8; the jellyfish plays Cleansing Tide for 3: Mend 6, Tide 6),
+Undertow (3 Block; the jellyfish plays Salt Line for 3: 7 Block, Tide 3).
+Ten Block against 8, 6 Mended, the pile empty. Wrong play: Breaker first
+and Sea Spray second, which puts Sea Spray on top and spends the Undertow
+on a Strike.
 
 **Board two, the Strategist.** A Cultist at 30, ramping, intending 6.
-Row: Ambush (free), Read the Field's Plan (free). Tide 2. Hand: Feint,
-Battle Plan, Water's Edge, Coral Guard, Stolen Chapter. Right play: Feint
-(4 now, its 8 queued), Battle Plan (2 energy queued), Coral Guard. Next
-turn opens with 12, 5 Block, 8 and 2 energy before a card is drawn, with
-the Tide untouched; the Cultist dies to the first Attack. Wrong play:
-Water's Edge and Coral Guard now, and the row waits a turn for nothing.
+Pile, top first: Ambush (a Plan, free), Read the Field's Plan (free). Tide
+2. Hand: Feint, Battle Plan, Rising Tide, Coral Guard, Stolen Chapter.
+Right play: Rising Tide (4; the jellyfish plays Ambush now, free: 12;
+Cultist 14), Feint (4 now, its 8 written; Cultist 10), Coral Guard. Next
+turn opens with Read the Field's 5 Block and Feint's 8: dead, and the
+Tide never moved. Wrong play: leave Ambush for the morning and take the
+ramped hit first.
 
 **Board three, the Commander.** Gremlin Nob at 40, Enraged, intending 14.
-Row: Raiden's Universal (price 3). Tide 4. Hand: Rally, Vanguard, a Thoma
-Universal, Water's Edge, Salt Line. Right play: Salt Line (7 Block,
-queued behind Raiden), Vanguard, Thoma free (Block and Tide), and hold
-Rally; the jellyfish plays Raiden next turn for 3, and the Nob's Enrage
-never sees it, because the jellyfish's plays are not hers. Wrong play:
-Rally the Thoma card for a second copy and eat the Enrage on two Skills.
+Pile, top first: Raiden's Universal (3). Tide 4. Hand: Breaker, Vanguard,
+a Thoma Universal, Water's Edge, Salt Line. Right play: Breaker (8; the
+jellyfish plays Raiden for 3: her Universal's damage again; the Nob's
+Enrage never sees it, because the jellyfish's plays are not hers),
+Vanguard, Thoma free. Wrong play: Salt Line first, which puts 7 Block on
+top of Raiden and the Breaker buys Block.
 
 ## 12. Turn script A, fight one (Jaw Worm, 42 HP)
 
 **Turn 1.** Hand: Water's Edge, Water's Edge, Salt Line, Kurage's Oath,
-Stolen Chapter. The Worm intends 11. Play Salt Line (7 Block; its face
-appears by the jellyfish, price 3), Kurage's Oath (Tide 4), Water's Edge
-(6; Worm 36). Take 4. The player has seen the row and the Tide.
+Stolen Chapter. The Worm intends 11. Play Salt Line (7 Block; it Exhausts,
+its face appears by the jellyfish with a 3 on it, Tide 1), Water's Edge
+×2 (Worm 30). Take 4. The player has seen the pile's top and its price.
 
-**Turn 2.** The jellyfish plays Salt Line for free (the relic): 7 Block
-before the hand. Hand: Coral Guard, Water's Edge, Rising Tide, Kurage's
-Oath, Coral Guard. The Worm intends 7. Rising Tide (4; Surge: the row is
-empty, Tide 4 to 0; the player learns Surge wants a full row), Oath (Tide
-4), Water's Edge (6; Worm 26). Take 0.
+**Turn 2.** Hand: Coral Guard, Water's Edge, Rising Tide, Kurage's Oath,
+Coral Guard. The Worm intends 7. Rising Tide (4; the jellyfish plays Salt
+Line for free, the relic: 7 Block; Salt Line is a Tactic and gone; Worm
+26), Kurage's Oath (Tide 5), Water's Edge (6; Worm 20). Take 0.
 
-**Turn 3.** Nothing queued, the jellyfish waits. Hand: Salt Line, Stolen
-Chapter, Water's Edge, Water's Edge, Coral Guard. The Worm intends 11.
-Stolen Chapter (its face joins the row at no price: Plan), Salt Line (7
-Block, queued behind it, price 3), Water's Edge (6; Worm 20). Take 4.
+**Turn 3.** Hand: Stolen Chapter, Water's Edge, Water's Edge, Coral Guard,
+Kurage's Oath. The Worm intends 11. Stolen Chapter (Plan: it goes on top
+at no price, Tide 6), Kurage's Oath (Tide 10), Water's Edge ×2 (Worm 8).
+Take 11. The player has learned that a Plan waits on top for the morning.
 
-**Turn 4.** The jellyfish plays Stolen Chapter: draw 2. Hand of seven.
-Tide 4. Water's Edge ×2 (Worm 8), Oath (Tide 8), Coral Guard. Take 2.
-
-**Turn 5.** The jellyfish plays Salt Line for 3 (Tide 5): 7 Block. Water's
-Edge, Rising Tide: Worm dead. Fight one taught: the row, the price, the
-free first replay, a Plan, and one wasted Surge.
+**Turn 4.** The jellyfish plays Stolen Chapter: draw 2, hand of seven,
+Stolen Chapter is a Tactic. Water's Edge ×2: dead, with the Tide at 10 and
+nothing on the pile, which is the third lesson: a fed Tide with an empty
+pile was wasted, and next fight the Salt Line goes on late.
 
 ## 13. Defaults taken, and the things that are genuinely yours
 
-Applied from the rework packet at their defaults, on your "I think that
-could potentially work": direction A; Exert leaves the base loop; the
-pulse is gone and Mend lives on Uncommon-and-up Exhaust cards; the starter
-is Salt Line plus one Surge card. Draft 3's own picks:
+Applied on your note: the Tide stays and nothing spends it but a card you
+play; Surge plays one card, the top of the exhaust pile, and pays its
+price; a card the jellyfish has played carries a once-only tag. Draft 4's
+own picks:
 
-1. **Plan's price.** (1) *Paid now in energy, free in the row* [default: a
-   Strategist deck runs on a shallow Tide and never jams]. (2) Written for
-   0 energy and priced in Tide like a memory.
-2. **Surge's reach.** (1) *From the front, paying each, as far as the Tide
-   goes; the rest of the Tide is lost* [default: Surge has a right size].
-   (2) The whole row, free, then Tide 0.
-3. **The jam.** (1) *An unaffordable front memory holds the row, and
-   Change of Plans at Common ejects it* [default; your "blocks Memory until
-   it's played"]. (2) An unaffordable front memory is forgotten at the end
-   of her turn.
-4. **The relic.** (1) *The first card the jellyfish plays each combat is
-   free* [default: fight one always shows the replay]. (2) Start each
-   combat at Tide 3.
-5. **The Commander's door.** (1) *Rally-type cards Exhaust one chosen
-   Companion from hand* [default]. (2) Every Companion play is remembered,
-   which is the spam.
-6. **The replay rate.** (1) *One a turn; The General's Banner makes it two*
-   [default: your number]. (2) Two a turn as the base.
-7. **Keyword budget.** (1) *Six: Tide, Memory, Surge, Plan, Mend, Garment*
+1. **The tag's name.** (1) *Tactics* [default: yours; "her book of
+   tactics" is the pile, and a Tactic is an order carried out]. (2)
+   *Executed*, which says the rule in the word. (3) *Spent*.
+2. **The short Tide.** (1) *A Surge the Tide cannot pay plays nothing, and
+   the card's other half still happens* [default: legible, and the price
+   is on screen]. (2) It plays the top card anyway and the Tide goes to
+   0, a discount for the desperate.
+3. **Plan.** (1) *Paid and Exhausted now, played by the jellyfish next
+   morning at no Tide, on top until then so a Surge can collect it early*
+   [default]. (2) Plan cards are Surge-only: they never fire on their own
+   and cost no Tide when Surged.
+4. **The relic.** (1) *The first card the jellyfish plays each combat costs
+   no Tide* [default: fight one's first Surge always works]. (2) Start
+   each combat at Tide 3. (3) Every card the jellyfish plays Mends her 1.
+5. **The second chance.** (1) *One Uncommon, Moon's Reflection, returns a
+   card from the exhaust pile to hand* [default: your "unless a Skill
+   draws the card back"]. (2) None; once means once.
+6. **The replay's price.** (1) *3 per energy, 0-cost free* [default: your
+   number from the Memory]. (2) 2 per energy, 0-cost 1, so nothing is
+   ever free and cheap cards are the cheap replays.
+7. **Keyword budget.** (1) *Six: Tide, Surge, Plan, Tactics, Mend, Garment*
    [default]. (2) Fold Garment into its one card: five.
 
 Picks 6 and 7 are taken at their defaults unless you say otherwise. The
-rest are design picks. Prices (3 per energy) and the pool's numbers are
-the prototype's and err generous on purpose; Balance prices them.
+rest are design picks. The pool's numbers are the prototype's and err
+generous on purpose; Balance prices them.
 
 ## 14. What this document does not do, and two things to watch
 
-- **The row's length.** EB-234's read of the old memory (a 95th percentile
-  of 9, a worst of 31) is the number to re-measure: if rows routinely
-  outrun the Tide, the price or the feed moves before anything else.
+- **How often the top is the wrong card, and how often the Tide is
+  short.** Enemy effects that Exhaust her cards, her Strikes never
+  Exhausting, and a Strategist deck that feeds nothing decide whether
+  Change of Plans and the Oaths are bridges or necessities; the seats'
+  records will say how many Surges hit a card the player did not choose,
+  and how many played nothing.
 - **The Commander loop is only as good as the companion cards.** Its
   strength is measured against the R236 companions, and a weak Commander
   read before the Inazuma prototype is in the build is not a Kokomi
@@ -470,18 +485,31 @@ which makes rest sites hers. Nothing here is a ruling.
 
 ## 16. What your run changed (draft 2 → draft 3)
 
-- **The Memory is back, and her own cards go in.** Your 2026-08-29 spec
-  (one replay a turn, three Tide per energy, 0-cost free, an unaffordable
-  front card blocks, no cap) with Exhaust as the one door and Muster gone.
-  Salt Line, the card you called barely better than a Defend, is the first
-  thing the jellyfish does again.
-- **Plan is a door into the same row,** not a second queue. Paid now, free
-  later, same target.
-- **Surge plays the row** instead of dealing a number. The Tide is fuel,
-  not damage.
-- **Exert and the pulse are gone.** You called one a tax and the other
-  incomprehensible; both priced a bet that had no side worth taking. Her
-  HP is her bar again, and healing is only the bounded Mend cards.
-- **The calibration moved** from the Slime Boss to the Necrobinder's
-  Osty: an always-out creature the kit gives orders to.
-- **The keyword budget is the same six** with Memory replacing Exert.
+- **The Memory came back, and her own cards went in.** Your 2026-08-29
+  spec (one replay a turn, three Tide per energy, 0-cost free, an
+  unaffordable front card blocks, no cap) with Exhaust as the one door and
+  Muster gone.
+- **Plan became a door into the same row,** not a second queue.
+- **Surge played the row** instead of dealing a number; the Tide became
+  fuel.
+- **Exert and the pulse went.** A tax and an incomprehensible chip.
+- **The calibration moved** from the Slime Boss to the Necrobinder's Osty.
+
+## 17. What your second thought changed (draft 3 → draft 4)
+
+- **The jellyfish spends nothing by itself.** Your "we still want the
+  system we're fueling, we just don't want automatically spend to play one
+  card per turn." The one-a-turn replay is gone; the Tide is spent only
+  when a Surge card you play says so.
+- **Surge plays one card, the top of the exhaust pile, at its price.**
+  Your "Surge just plays the top card from the Exhaust pile." The row is
+  the pile itself, so there is no second structure, and no free plays:
+  "play a card for free is already built-in energy cheating."
+- **Tactics.** Your once-only tag: a card the jellyfish has played leaves
+  the fight instead of returning to the pile, and only a card that returns
+  it to hand earns a second replay.
+- **The calibration moved** to Ironclad's Exhume, the price of reaching
+  into the exhaust pile.
+- **The name.** You asked for a lore-compliant rename of "Memory"; draft 4
+  needs no name for the mechanic, since the exhaust pile is the game's own
+  and the Tide already has one, and the tag takes yours. Pick 1.
