@@ -535,9 +535,23 @@ def gain_burst(state: CombatState, n: int, source: str) -> None:
     do other work under the same gate, so folding it in would leave those
     conditionals half-migrated and their intent less obvious, not more.
 
+    QUARANTINED (C.KLEE_OVERHAUL), `EB-266`: THE ARM NEITHER FEEDS NOR SHOWS
+    BURST. Under the overhaul Klee's rules are rewritten and Sparks are her
+    only meter -- no card in the slice reads Burst and no rule spends it -- but
+    the shipped meter went on filling anyway, because reactions credit it with
+    no arm guard, and the blind tester's first reaction put "Burst: 5" on the
+    screen where it sat for four more fights with "no idea what it was". The
+    mod's guard is one line inside `BurstResource.Find`, the funnel every gain
+    and every display passes through; this is that one line at this engine's
+    own funnel, so "the arm neither feeds nor shows Burst" is ONE decision
+    instead of ten that can be retired by halves.
+
     R14: diagnostic. Nothing reads these events to make a decision.
     """
     if n <= 0:
+        return
+    from tier0.engine import klee_overhaul         # late import (cycle)
+    if klee_overhaul.live(state):
         return
     p = state.player
     p.burst_energy += n

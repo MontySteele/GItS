@@ -14,7 +14,7 @@ import contextlib
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine import effects, powers, resources
+from tier0.engine import effects, klee_overhaul, powers, resources
 from tier0.engine.combat import (card_cost, card_playable, spark_cost,
                                  spark_price, spark_threshold)
 from tier0.engine.state import Card, CombatState
@@ -230,6 +230,44 @@ def predicate_is_declared_blind(name: str) -> bool:
                 and name.startswith(BLIND_PREDICATE_PREFIXES)))
 
 
+#: Planned clauses whose `amount` is NOT a magnitude, so the delay discount
+#: must not touch it. `plan_twice`'s amount is the LENGTH OF NEREID'S WINDOW IN
+#: TURNS (`kokomi_plan.wear_plan_twice` tops a standing window up to it), and
+#: three-quarters of a turn is not a thing. A closed set rather than a
+#: check-what-looks-numeric, because a duration wearing an `amount:` key is
+#: exactly the kind of thing a blanket scale gets silently wrong.
+_PLAN_DURATION_OPS = frozenset(("plan_twice",))
+
+
+def _plan_discounted(fx: dict) -> dict:
+    """One planned clause, at `C.PLAN_DELAY_DISCOUNT` of its printed face.
+
+    EB-311. THE DISCOUNT IS APPLIED TO THE AMOUNT rather than to each scoring
+    term, and the reason is arithmetic rather than taste: every term downstream
+    of `_active_effects` that prices one of these clauses is LINEAR in
+    `amount` (`_expected_damage` multiplies it by hits, `_raw_block` by times,
+    `_scaling_value` by the debuff dial, `_tempo_value` reads it straight), so
+    scaling the amount once here is the same number as scaling five terms and
+    it cannot fall out of step with a sixth added later.
+
+    A COPY, NEVER THE CARD'S OWN DICT. `card.plan` is the sheet's list, shared
+    by every instance of the row and read again by
+    `kokomi_plan._resolve_clause` when the Plan is actually carried out;
+    scaling it in place would make the forecast rewrite the card it forecast.
+
+    A clause with no numeric `amount` -- the Max-HP fraction, the exhaust
+    replay -- passes through untouched, and so does a duration
+    (`_PLAN_DURATION_OPS`). Neither is priced by any term today; the discount
+    declines to invent a price for them on the way past.
+    """
+    amount = fx.get("amount")
+    if (fx.get("op") in _PLAN_DURATION_OPS
+            or isinstance(amount, bool)
+            or not isinstance(amount, (int, float))):
+        return fx
+    return {**fx, "amount": amount * C.PLAN_DELAY_DISCOUNT}
+
+
 def _active_effects(state: CombatState, effect_list: list[dict],
                     card: Optional[Card] = None):
     """Yield runtime-formula branches the pilot is explicitly able to read.
@@ -259,15 +297,28 @@ def _active_effects(state: CombatState, effect_list: list[dict],
     four rows (Ambush, War Council, Chain of Command, Battle Plan) print an
     EMPTY body, so without the swap they would score zero and never be played.
 
-    WHAT THE SWAP DOES NOT MODEL is the TURN of delay: a planned clause is
-    valued at its face, as though it landed now. That is the crude direction
-    and it is stated rather than hidden -- discounting it is a
-    `POLICY_VERSION` question, and no number taken on this arm is quotable
-    anyway (R215 B).
+    THE TURN OF DELAY IS NOW MODELLED (`EB-311`), and this paragraph used to
+    say the opposite: a planned clause was valued at FACE, as though it landed
+    now, and the note called discounting it a `POLICY_VERSION` question. It is
+    discounted here by `C.PLAN_DELAY_DISCOUNT` -- the SAME constant
+    `tier05.draft._static_power` prices a `plan:` list with, so the pilot that
+    ranks a hand and the drafter that ranks an offer screen have one opinion
+    about what a Plan is worth between them instead of two opposite ones (the
+    drafter's was ZERO).
+
+    NO `POLICY_VERSION` BUMP, and that is a claim about OUTPUT rather than an
+    exemption. The swap this rides is gated on `plan_aimed_at_pet`, which is
+    False without `C.KOKOMI_OVERHAUL` AND without Kokomi in the seat, and only
+    a `proto_` row carries a `plan:` list at all -- so every pilot decision in
+    the published world is byte-identical with and without this discount, which
+    `tier05/tests/test_eb311_plan_pricing.py` pins rather than asserts. When
+    the arm leaves quarantine, THAT is the change that moves `P`.
     """
+    planned = False
     if (card is not None and card.plan and effect_list is card.effects
             and effects.kokomi_plan.plan_aimed_at_pet(state, card)):
         effect_list = card.plan
+        planned = True
     for fx in effect_list:
         if fx["op"] == "conditional":
             name = fx["if"]
@@ -349,7 +400,7 @@ def _active_effects(state: CombatState, effect_list: list[dict],
             index = effects._chosen_mode(state, modes, None)
             yield from _active_effects(state, modes[index]["effects"], card)
         else:
-            yield fx
+            yield _plan_discounted(fx) if planned else fx
 
 
 def _salon_verb_yield(state: CombatState, card: Card
@@ -494,6 +545,62 @@ def _expected_damage(state: CombatState, card: Card) -> float:
                 total += per_hit * times * n_targets
         elif fx["op"] == "place_bomb":
             total += fx["bomb_damage"] * _est(state, fx.get("amount", 1), 1)
+        # --- THE KLEE OVERHAUL'S FOUR DAMAGE VERBS (QUARANTINED,
+        # C.KLEE_OVERHAUL). REACHABLE ONLY ON THE ARM BY CONSTRUCTION: no
+        # shipped row prints one of these ops, and `loader._card_prototype`
+        # refuses a `proto_ko_` id with the flag off, so every shipped arm's
+        # score is byte-identical and `POLICY_VERSION` covers the same
+        # decisions it covered before.
+        #
+        # WHY THEY ARE HERE AT ALL. Without them the pilot priced Ka-pow! and
+        # Jumpy Dumpty at ZERO and played neither: a first read of the arm
+        # reported 27 plays, all of them Strike and Defend, and 18 dead in
+        # hand. That is an instrument artifact, not a design finding, and it
+        # would have been quoted as one.
+        #
+        # WHAT THEY DELIBERATELY UNDERSTATE, stated rather than left to be
+        # discovered -- the `summon_kurage` arm's own posture, and the safe
+        # direction: GROWTH (a Bomb left to cook is worth more than its size
+        # today), the SPARK an explosion mints, Jumpy Dumpty's Mine PAYLOAD,
+        # the Mine's defensive half, and every reaction. The pilot has no
+        # cook-or-cash policy; it reads the board's numbers and nothing else.
+        elif fx["op"] == "set_off":
+            # THE PILE IS THE CARD'S REAL DAMAGE, and it is a plain board read
+            # rather than a forecast -- exactly the number the mod's badge
+            # shows on the enemy. The card's own printed hit rides on top,
+            # through the same `per_hit` arithmetic a `damage` row takes.
+            printed = int(fx.get("damage", 0) or 0)
+            times = _est(state, fx.get("times", 1), 1)
+            hit_targets = (living if fx.get("target") == "all_enemies"
+                           else [effects._default_target(state)])
+            hit_targets = [t for t in hit_targets if t is not None]
+            for enemy in hit_targets:
+                total += klee_overhaul.total_size(enemy)
+            if printed:
+                per_hit = powers.modify_damage_dealt(
+                    state.player, printed) + flat
+                total += per_hit * times * max(1, len(hit_targets))
+        elif fx["op"] == "plant_bomb":
+            # `place_bomb`'s line one op over, at its own face value: the size
+            # planted, per body it lands on. Undiscounted for the same reason
+            # the shipped line is -- a Bomb that is never cashed is a play the
+            # pilot got wrong, not a number this function should hedge.
+            n = len(living) if fx.get("target") == "all_enemies" else 1
+            total += int(fx.get("size", 0)) * n
+        elif fx["op"] in ("grow_bombs", "merge_bombs"):
+            # Growth is damage the pile will deal when it is finally cashed,
+            # and it is worth nothing at all on a board with no pile -- which
+            # is the same sentence `EB-261` gates Quick Fuse's playability on.
+            amount = int(fx.get("amount", fx.get("growth", 0)) or 0)
+            if any(klee_overhaul.holds_charge(e) for e in living):
+                total += amount
+        elif fx["op"] == "damage_set_off_total":
+            # Big Badda Boom's second clause hits again for what the Bombs
+            # dealt, so the pile counts TWICE on that row -- once for the Set
+            # off above it and once here.
+            enemy = effects._default_target(state)
+            if enemy is not None:
+                total += klee_overhaul.total_size(enemy)
         elif (fx["op"] == "apply_power"
               and fx.get("power") == "sparks_n_splash"):
             # The Burst payoff: stacks x 4 hits x 5 dmg over coming turns.

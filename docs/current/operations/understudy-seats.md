@@ -900,7 +900,24 @@ and this read only `message`. And the six LIVE arm keywords — Bomb, Set off,
 Spark, Mine, Plan, Mend — get **one definition each, once per screen**, under
 *Words on this screen* (`EB-272`), wherever the word reaches the page; the
 sentences are `Cards/Prototype/ArmKeywordTips.cs`'s own, held in step from the
-test side. **session** is the driver: one `codex exec` thread for the
+test side.
+
+**A pick made is a pick taken, and a transform's result is not printed**
+(`EB-314`). Once a card-selection screen's preview is open the game has the
+pick — every one of the five grid screens keeps its own `_selectedCards`, and
+only the real UI's mouse block stops a second click reaching `OnCardClicked`,
+which `select_card` does not go through. So `choose` is refused over an open
+preview and not offered on the page; `skip` cancels the preview and puts the
+grid back, which is the way to change a pick. On a **transform** screen the
+preview's right-hand card is an ANIMATION —
+`NTransformPreview.CycleThroughCards` reassigns it out of the transformation
+options every 0.2 seconds on `Rng.Chaotic`, and `CompleteSelection` hands back
+the selected cards for the caller to roll a replacement for — so the page
+prints the source and says in words that the result has not been chosen. The
+live proof, the wire fixtures and the deck read that closed it are
+`review/qa/eb314-transform-2026-09-02/`.
+
+**session** is the driver: one `codex exec` thread for the
 whole run, one command per screen, the fight and run records at the ends, and
 budgets on actions, wall time and consecutive refusals. All of it is built on
 `naming` / `staged_turn.execute`'s title resolution and **never on
