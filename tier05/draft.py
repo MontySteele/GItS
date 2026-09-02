@@ -200,6 +200,14 @@ STATIC_PROTOTYPE_CONDITIONS = frozenset({
     # `kokomi_plan.has_debuff`, which the drafter cannot answer at offer time
     # because there is no enemy yet.
     "target_has_debuff",
+    # Sango Isshin (`proto_kk_sango_isshin`), R243. "If the jellyfish carried
+    # out a Plan this turn" -- `state.kk_plan_carried_out_this_turn`, a fact
+    # about the TURN the card is played on, and a reward screen has no turn.
+    # The row traded its own Plan line for this condition, so its whole body is
+    # one branch and without an entry here the whole card prices at 0.00 --
+    # which is the defect this set exists to end, arriving a second time in the
+    # same week on the same arm.
+    "plan_carried_out_this_turn",
 })
 # Half: the MEAN of the two branches, which is what a share of 0.5 computes in
 # the blend below. The honest share for a predicate nobody has measured -- the

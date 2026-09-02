@@ -153,28 +153,12 @@ def _proto(cid: str) -> Card:
     Deliberately NOT `loader.peek_card`. That door hands out the shared
     `_prototype_index()` template -- the one branch of `_card_prototype` that
     does not deep-copy on the way out, because its contract says read-only --
-    and a template some other module in the same xdist worker has played,
-    grown or upgraded re-prices every assertion in this file. That is not
-    hypothetical: this file's first CI run failed exactly four rows under
-    `-n auto --dist loadscope` and passed all of them serially. What these
-    tests are about is the SHEET, so they read the sheet:
-    `loader.prototype_cards()` re-parses it on every call and builds fresh
-    `Card`s, and it needs no flag to do so.
+    and it is a template, so it can also be one CI's checkout has and another's
+    does not. What these tests are about is the SHEET, so they read the sheet:
+    `loader.prototype_cards()` re-parses `docs/prototype-surface.yaml` on every
+    call and builds fresh `Card`s, and it needs no flag to do so.
     """
     return {c.id: c for c in loader.prototype_cards()}[cid]
-
-
-def _priced(cid: str) -> tuple[float, str]:
-    """`(price, a description of the row it was taken off)`.
-
-    The second half is only ever read by a failing assertion, and it earns its
-    place: a wrong number here is nearly always a wrong CARD, and a bare
-    `assert 13.5 == 10.75` cannot say which row it priced.
-    """
-    card = _proto(cid)
-    return draft._static_power(card), (
-        f"{cid} cost={card.cost} effects={card.effects} plan={card.plan} "
-        f"character={card.character!r}")
 
 
 @pytest.fixture
@@ -195,25 +179,40 @@ def test_no_prototype_kokomi_row_raises(overhaul):
 
 
 def test_a_plan_only_row_is_no_longer_worth_nothing():
-    """Ambush prints an EMPTY body and "Plan: deal 12 to the front enemy". It
+    """Ambush prints an EMPTY body and "Plan: deal N to the front enemy". It
     priced at 0.00 -- blank cardboard to the drafter -- and now prices at its
-    planned damage, discounted once for the turn of delay."""
-    price, row = _priced("proto_kk_ambush")
-    assert price == 12 * C.PLAN_DELAY_DISCOUNT, row
+    planned damage, discounted once for the turn of delay.
+
+    THE PRINTED NUMBER IS READ OFF THE ROW rather than typed in, here and in
+    every sheet-derived assertion below. The prototype surface is rebalanced by
+    ruling (R243 moved eleven of these rows the week this landed); a test that
+    hard-codes 12 goes red on a card edit that has nothing to do with the
+    pricing RULE, and the rule is what is being pinned.
+    """
+    card = _proto("proto_kk_ambush")
+    assert not card.effects
+    planned = card.plan[0]["amount"]
+    assert draft._static_power(card) == planned * C.PLAN_DELAY_DISCOUNT
 
 
 def test_both_halves_of_a_printed_face_are_counted():
-    """Feint: 4 now, 9 planned, cost 1. The sum, not the max -- the argument
-    for crediting the CHOICE is at the call site."""
-    price, row = _priced("proto_kk_feint")
-    assert price == 4 + 9 * C.PLAN_DELAY_DISCOUNT, row
+    """Feint: a damage line now, a bigger one planned, cost 1. The SUM, not the
+    max -- the argument for crediting the CHOICE is at the call site."""
+    card = _proto("proto_kk_feint")
+    now = card.effects[0]["amount"]
+    planned = card.plan[0]["amount"]
+    assert card.cost == 1 and planned > now
+    assert draft._static_power(card) == now + planned * C.PLAN_DELAY_DISCOUNT
 
 
 def test_a_planned_aoe_line_takes_the_same_aoe_multiple():
-    """Kurage's Oath: 5 to all enemies, planned. Same per-op prices as the
+    """Kurage's Oath: damage to ALL enemies, planned. Same per-op prices as the
     now-line gets -- that is the whole design of the plan branch."""
-    price, row = _priced("proto_kk_kurages_oath")
-    assert price == 5 * draft.STATIC_AOE_MULT * C.PLAN_DELAY_DISCOUNT, row
+    card = _proto("proto_kk_kurages_oath")
+    clause = card.plan[0]
+    assert clause["target"] == "all_enemies"
+    assert draft._static_power(card) == (
+        clause["amount"] * draft.STATIC_AOE_MULT * C.PLAN_DELAY_DISCOUNT)
 
 
 def test_the_delay_discount_is_the_only_difference_between_the_halves():
@@ -248,22 +247,39 @@ def test_a_plan_line_reaches_the_tempo_and_block_classifiers():
 # ---------------------------------------------------------------------------
 
 def test_mend_prices_one_for_one_with_block():
-    """The Moon, A Ship: Mend 10 now, Mend 15 planned, cost 2."""
+    """The Moon, A Ship: Mend now, more Mend planned. Every point of it is one
+    point of Block."""
     assert draft.STATIC_MEND_VALUE == 1.0
-    price, row = _priced("proto_kk_the_moon_a_ship")
-    assert price == (10 + 15 * C.PLAN_DELAY_DISCOUNT) / 2, row
+    card = _proto("proto_kk_the_moon_a_ship")
+    now = card.effects[0]
+    planned = card.plan[0]
+    assert now["op"] == planned["op"] == "mend"
+    assert draft._static_power(card) == (
+        now["amount"] + planned["amount"] * C.PLAN_DELAY_DISCOUNT) / card.cost
 
 
 def test_the_max_hp_fraction_reads_the_character_sheet():
-    """Sango Isshin: a quarter of her Max HP now, the same to all enemies
-    planned. The 80 is `tier0/content/characters/kokomi.yaml`, the same key
-    `build_player` seats her with -- not a constant invented here."""
+    """Sango Isshin, R243: a quarter of her Max HP to ALL enemies if the
+    jellyfish already carried out a Plan this turn, a flat hit otherwise.
+
+    The 80 is `tier0/content/characters/kokomi.yaml`, the same key
+    `build_player` seats her with -- not a constant invented here. The row's
+    own shape supplies everything else, including which branch is which, so
+    this survives the next time the sheet moves.
+    """
     quarter = loader._character_index()["kokomi"]["hp"] // kokomi_plan.QUARTER
     assert quarter == 20
-    price, row = _priced("proto_kk_sango_isshin")
-    assert price == (
-        quarter + quarter * draft.STATIC_AOE_MULT * C.PLAN_DELAY_DISCOUNT
-    ) / 2, row
+    card = _proto("proto_kk_sango_isshin")
+    branch = card.effects[0]
+    assert branch["if"] in draft.STATIC_PROTOTYPE_CONDITIONS
+    hit = branch["then"][0]
+    assert hit["op"] == "damage_quarter_max_hp"
+    assert hit["target"] == "all_enemies"
+    then_power = quarter * draft.STATIC_AOE_MULT
+    else_power = branch["else"][0]["amount"]
+    assert draft._static_power(card) == (
+        else_power + draft.STATIC_PROTOTYPE_CONDITIONAL_SHARE
+        * (then_power - else_power)) / card.cost
 
 
 def test_the_renamed_max_hp_spelling_prices_the_same():
@@ -287,48 +303,65 @@ def test_a_row_whose_character_is_unknown_refuses_rather_than_guesses():
 
 
 def test_undertow_is_priced_at_the_mean_of_its_branches():
-    """The record's own proof that the zeros were the instrument: 7 damage
-    rising to 10 against a debuff, above Strike on either branch, priced
-    0.00 because `target_has_debuff` had no entry."""
-    price, row = _priced("proto_kk_undertow")
-    assert price == (7 + 10) / 2, row
+    """The record's own proof that the zeros were the instrument: damage that
+    RISES against a debuff, above Strike on either branch, priced 0.00 because
+    `target_has_debuff` had no entry anywhere."""
+    card = _proto("proto_kk_undertow")
+    branch = card.effects[0]
+    assert branch["if"] == "target_has_debuff"
+    hi = branch["then"][0]["amount"]
+    lo = branch["else"][0]["amount"]
+    assert draft._static_power(card) == (hi + lo) / 2 / card.cost
 
 
 def test_the_queue_verbs_price_off_dials_this_table_already_holds():
     """Nereid's window, Change of Plans and Moon's Reflection, each derived
     from `STATIC_AUTOPLAY_VALUE` -- one neutral card resolved without being
     paid for, which is what all three of them hand you."""
-    # Nereid's: 2 turns of doubling, one extra Plan a turn, inside a plan line
-    price, row = _priced("proto_kk_nereids_ascension")
-    assert price == (
-        2 * draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT / 2), row
-    # Change of Plans: one resolution moved a turn earlier, cost 0
-    price, row = _priced("proto_kk_change_of_plans")
-    assert price == (
-        draft.STATIC_AUTOPLAY_VALUE * (1 - C.PLAN_DELAY_DISCOUNT)), row
-    # Moon's Reflection: one card out of exhaust, a turn late
-    price, row = _priced("proto_kk_moons_reflection")
-    assert price == draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT, row
+    # Nereid's: one extra Plan carried out per turn of the window, and the
+    # clause that installs it is itself planned.
+    card = _proto("proto_kk_nereids_ascension")
+    turns = card.plan[0]["amount"]
+    assert draft._static_power(card) == (
+        turns * draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT
+        / card.cost)
+    # Change of Plans: one resolution moved a turn earlier, not created.
+    card = _proto("proto_kk_change_of_plans")
+    assert draft._static_power(card) == (
+        draft.STATIC_AUTOPLAY_VALUE * (1 - C.PLAN_DELAY_DISCOUNT) / card.cost)
+    # Moon's Reflection: one card out of the exhaust pile, a turn late.
+    card = _proto("proto_kk_moons_reflection")
+    assert draft._static_power(card) == (
+        draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT / card.cost)
 
 
 def test_chain_of_command_prices_against_one_companion():
     """The neutral single-unit estimate every live count in the file takes."""
-    price, row = _priced("proto_kk_chain_of_command")
-    assert price == 4 * C.PLAN_DELAY_DISCOUNT, row
+    card = _proto("proto_kk_chain_of_command")
+    per_companion = card.plan[0]["amount"]
+    assert draft._static_power(card) == (
+        per_companion * C.PLAN_DELAY_DISCOUNT / card.cost)
 
 
 def test_rally_takes_cost_mods_measured_dead_dial():
     """Its discount is a `cost_mod` wearing a kit name, so it takes cost_mod's
     zero: Rally's whole price is the Weak it applies."""
-    price, row = _priced("proto_kk_rally")
-    assert price == draft.STATIC_DEBUFF_VALUE, row
+    card = _proto("proto_kk_rally")
+    weak = next(fx for fx in card.effects if fx.get("power") == "weak")
+    assert any(fx["op"] == "next_companion_discount" for fx in card.effects)
+    assert draft._static_power(card) == (
+        weak["amount"] * draft.STATIC_DEBUFF_VALUE / card.cost)
 
 
 def test_cleansing_wave_credits_the_debuff_it_removes():
-    """5 Block and one debuff off her now, 10 Block planned, cost 1."""
-    price, row = _priced("proto_kk_cleansing_wave")
-    assert price == (
-        5 + draft.STATIC_DEBUFF_VALUE + 10 * C.PLAN_DELAY_DISCOUNT), row
+    """Block and one debuff off her now, more Block planned."""
+    card = _proto("proto_kk_cleansing_wave")
+    now_block = card.effects[0]["amount"]
+    planned_block = card.plan[0]["amount"]
+    assert any(fx["op"] == "remove_debuff" for fx in card.effects)
+    assert draft._static_power(card) == (
+        now_block + draft.STATIC_DEBUFF_VALUE
+        + planned_block * C.PLAN_DELAY_DISCOUNT) / card.cost
 
 
 def test_the_arm_has_no_unpriced_verb_left():
