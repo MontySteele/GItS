@@ -45,7 +45,7 @@ public sealed class ProtoKoSugarRush : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sugar Rush"),
-        ("description", "Gain 2 [gold]Energy[/gold]. Draw 1 card. Exhaust."),
+        ("description", "Gain 2 [gold]Energy[/gold]. Draw 1 card."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -84,6 +84,6 @@ public sealed class ProtoKoSugarRush : CustomCardModel, ISparkPricedCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        RemoveKeyword(CardKeyword.Exhaust);
     }
 }

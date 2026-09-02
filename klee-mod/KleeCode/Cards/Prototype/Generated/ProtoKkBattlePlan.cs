@@ -45,7 +45,7 @@ public sealed class ProtoKkBattlePlan : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Battle Plan"),
-        ("description", "[gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw 1."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw 1."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

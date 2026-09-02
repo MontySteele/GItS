@@ -48,7 +48,7 @@ public sealed class ProtoKkTheMoonAShip : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Moon, A Ship O'er the Seas"),
-        ("description", "Exhaust. [gold]Mend[/gold] {Mend:diff()}. [gold]Plan[/gold]: [gold]Mend[/gold] 15."),
+        ("description", "[gold]Mend[/gold] {Mend:diff()}. [gold]Plan[/gold]: [gold]Mend[/gold] 15."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

@@ -73,13 +73,26 @@ public sealed class TamakushiCasket : CustomRelicModel
 
     public override RelicRarity Rarity => RelicRarity.Starter;
 
+    /// <summary>
+    /// `EB-293`. "STRIKES THAT ENEMY FOR 2 HYDRO DAMAGE" READ AS A FIXED 2 and
+    /// is not one. The ping is a real hit through the shared pipeline, so the
+    /// Vulnerable a card applied a moment earlier amplifies the ping that same
+    /// card's next debuff causes: Vanguard's two debuffs paid 6, not 4, and the
+    /// r2 Opus seat priced the card off the text and was "wrong by 50%".
+    ///
+    /// "A Hydro hit for 2" is the mod's own idiom for a printed BASE (the Bomb
+    /// badge's "{Size} Pyro damage" is the same distinction one arm over), and
+    /// it is the honest short form: the number is what the hit starts at, and
+    /// every modifier on the board moves it from there.
+    /// </summary>
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tamakushi Casket"),
         ("description",
             "The [gold]Bake-Kurage[/gold] is out from the start of every "
-          + "combat. Whenever you apply a debuff to an enemy, it strikes that "
-          + "enemy for " + KokomiOverhaulLaw.CasketStrike + " Hydro damage. "
+          + "combat. Whenever you apply a debuff to an enemy, it answers with "
+          + "a Hydro hit for " + KokomiOverhaulLaw.CasketStrike + " on that "
+          + "enemy. "
           + CompanionSlot.RewardSlotDescription),
     };
 

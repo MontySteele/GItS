@@ -29,8 +29,8 @@ and only the second one is worth anything to a reader.
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 222 tests, ~0.4s after build
-dotnet test -p:PrototypeCards=true # 550: the 222 plus Prototype/
+dotnet test                       # 231 tests, ~0.4s after build
+dotnet test -p:PrototypeCards=true # 563: the 231 plus Prototype/
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -114,7 +114,7 @@ either pinned structurally and labelled, or left out.
 | `CanonicalHoverTipTests.cs` | 9 | `EB-94`: the hover tips a CANONICAL card could not be asked for. `CardModel.Owner`'s getter asserts mutability, so every tip body that read it threw on the models the compendium hands out (`NCardLibraryGrid._Ready` -> `ModelDb.AllCards` -> `NCard.Create` -> `NCardHolder.CreateHoverTips`) and took the card's WHOLE tip set with it. Real, not structural: the models, the throw and the bodies all run headlessly. The three wire-measured cards (Endless Waltz, Dress Rehearsal, Dinner Service) are pinned by name, the owned-card case is the mutation guard, and one class-wide IL gate bans `CardModel.get_Owner` from the tip classes. |
 | `BombInstancingTests.cs` | 18 | `EB-130` / R205's per-placer bomb piles. The instance type itself; the base game's OWN `PowerCmd.FindExistingInstanceForStacking` answering that two placers get two piles, one placer still gets one, and a gather does not land in another placer's pile on the destination; the SUPPRESSION ARBITER (two piles fold to one 0.75, never 0.5625 — the preview and the hit elect the same pile, and the creature-keyed latch is spent once); and `ModifyAll` reaching every pile with the solo total unmoved. Structural where a live `CombatState` is needed: the `DetonateOn`/`MoveAllTo` loops, and the DEATH-TEARDOWN finding pinned on the game's own kill and hook-broadcast machinery. |
 
-**222 tests, all green** (measured 2026-09-02, `dotnet test`).
+**231 tests, all green** (measured 2026-09-02, `dotnet test`).
 
 ## The prototype suite (`Prototype/`, opt-in with the rest)
 
@@ -134,7 +134,11 @@ those types do not exist, so a pin against them could not compile either.
 
 | `KleeOverhaulRoundFourTests.cs` | 11 | The Klee overhaul, ROUND FOUR -- the two seats' blind act-one runs (`review/active/klee-overhaul-round-3-2026-09-02.md`). `EB-287`: the Bomb face is prose over four rows now, and the two axes it is selected on -- the live Mine count and whether the printed total is the Weak-reduced one -- compose into rows that all exist, with a canonical copy answering the selector without throwing. `EB-288`: NOT A DEFECT, shown rather than asserted -- the game's own `WeakPower.ModifyDamageMultiplicative` against a real Creature, the game's own `DynamicVar.ToHighlightedString` printing the result, and Ka-pow!'s 7 -> 5 beside Ka-pow!+'s 10 -> 7 on the same board. REAL throughout; what is NOT reachable is `DamageVar.UpdateCardPreview` itself, which needs a RunState and a live `CombatState`, so the preview value is composed here from the two halves the game composes it from. |
 
-**With the flag: 550 tests, all green** (measured 2026-09-02, `dotnet test -p:PrototypeCards=true`).
+| `LiveBurn20260902Tests.cs` | 7 | THE 2026-09-02 LIVE BURN -- six defects found by PLAYING. `EB-289`: the Bomb badge's count is the live charge list and not the power's stack, which the three pure takes cannot lower, plus the structural read that one Bomb is one explosion is one Spark. `EB-291` and `EB-293`: the Mine tip names Weak and the Plan tip covers a plan-only card, both read off the compiled `ldstr` set. `EB-297`: the Burst gauge predicate, both ways round and never for another character. `EB-300`: the navigation restore fires on a custom target type and on nothing else, against a real registration in the library's own table. What is NOT here is named in the file: the controller walk, the drawn gauge and `EB-292`'s source are all live checks. |
+
+**With the flag: 563 tests, all green** (measured 2026-09-02,
+`dotnet test -p:PrototypeCards=true`). With all four arm switches on, the
+three `The_arm_ships_off` pins fail BY CONSTRUCTION and nothing else does.
 
 ## Co-op coverage
 
