@@ -78,12 +78,16 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
           + "never goes off by itself. A card that says [gold]Set off[/gold] "
           + "pops every Bomb here, one at a time, each dealing its own size as "
           + "Pyro damage." + MineClause),
-        ("smartDescription", SmartFace),
-        // EB-260. THE SAME FACE PLUS THE ONE CLAUSE A STACK WITH MINES IN IT
-        // MAKES FALSE. Selected by <see cref="SmartDescriptionLocKey"/> off the
-        // live Mine count, so a player never reads "never goes off by itself"
-        // over a pile that answers the enemy's next attack.
-        ("smartDescriptionMines", SmartFace + MineClause),
+        // EB-260 and EB-287. FOUR ROWS, not one row with conditionals in it,
+        // for the reason <see cref="SmartDescriptionLocKey"/> gives: a headless
+        // pin can read a row and cannot run `LocManager`. The two axes are the
+        // live Mine count (EB-260 -- a player must never read "never goes off
+        // by itself" over a pile that answers the enemy's next attack) and
+        // whether the total above is the Weak-reduced one (EB-287).
+        ("smartDescription", Face(mines: false, weak: false)),
+        ("smartDescriptionWeak", Face(mines: false, weak: true)),
+        ("smartDescriptionMines", Face(mines: true, weak: false)),
+        ("smartDescriptionMinesWeak", Face(mines: true, weak: true)),
     };
 
     /// <summary>
@@ -100,28 +104,69 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <summary>
     /// The face the wire prints (<c>PowerModel.HoverTips</c> uses the SMART
     /// description for any mutable power that has one). <c>{Size}</c> is the
-    /// number the Set off will actually deal, Strength included -- see
-    /// <see cref="PredictedSetOffDamage"/>, <c>EB-265</c>.
+    /// number the Set off will actually deal, Strength and Weak included --
+    /// see <see cref="PredictedSetOffDamage"/>, <c>EB-265</c>.
+    ///
+    /// EB-287: IT IS PROSE NOW. The r3 Opus seat read the old parenthetical
+    /// -- "(2 Bombs, 0 of them Mines)" -- as a debug string, and the r3 Codex
+    /// seat had to REASON OUT that the total was the Weak-adjusted one
+    /// ("I inferred [it] was the Weak-adjusted amount but had to reason
+    /// through"). So the count is a sentence, the Mine clause appears only
+    /// when there is a Mine to talk about, and the Weak term says its own
+    /// name.
     /// </summary>
-    private const string SmartFace =
-        "[gold]Set off[/gold] deals {Size} total Pyro damage here "
-      + "({Amount} Bomb{Amount:plural:|s}, {Mines} of them "
-      + "[gold]Mine{Mines:plural:|s}[/gold]). Grows at the start of your "
-      + "turn; never goes off by itself.";
+    private static string Face(bool mines, bool weak) =>
+        "A [gold]Set off[/gold] here deals " + (weak ? WeakTotal : PlainTotal)
+      + (mines ? BombsWithMines : Bombs) + GrowthSentence
+      + (mines ? MineClause : string.Empty);
+
+    /// <summary>The total, and the one term a player cannot see in it. The
+    /// clause is chosen off <see cref="TotalIsAfterWeak"/>, which reads the
+    /// same pile state <see cref="PredictedSetOffDamage"/> reads, so the
+    /// sentence and the number can never disagree.</summary>
+    private const string PlainTotal = "{Size} Pyro damage in total.";
+
+    private const string WeakTotal =
+        "{Size} Pyro damage in total, after [gold]Weak[/gold].";
+
+    private const string Bombs = " Bombs here: {Amount}.";
+
+    private const string BombsWithMines =
+        " Bombs here: {Amount}, including {Mines} "
+      + "[gold]Mine{Mines:plural:|s}[/gold].";
+
+    private const string GrowthSentence =
+        " Each grows at the start of your turn, and none goes off by itself.";
 
     /// <summary>
-    /// EB-260, the selector. <c>PowerModel.SmartDescription</c> resolves this
-    /// key on EVERY read of <c>HoverTips</c>, so the face follows the pile:
-    /// the moment a Mine lands here the printed text gains rule 6's sentence,
-    /// and the moment the last one fires it loses it again. Two rows and a
-    /// key, rather than a conditional inside one row, because a headless pin
-    /// can read a row and cannot run <c>LocManager</c> (KleeTests README, "The
-    /// headless boundary").
+    /// EB-260 and EB-287, the selector. <c>PowerModel.SmartDescription</c>
+    /// resolves this key on EVERY read of <c>HoverTips</c>, so the face
+    /// follows the pile: the moment a Mine lands here the printed text gains
+    /// rule 6's sentence and the moment the last one fires it loses it again,
+    /// and the total names Weak exactly while Weak is what is shrinking it.
+    /// Rows and a key, rather than conditionals inside one row, because a
+    /// headless pin can read a row and cannot run <c>LocManager</c> (KleeTests
+    /// README, "The headless boundary").
     /// </summary>
     protected override string SmartDescriptionLocKey =>
-        MineCount > 0
-            ? Id.Entry + ".smartDescriptionMines"
-            : Id.Entry + ".smartDescription";
+        Id.Entry + ".smartDescription"
+      + (MineCount > 0 ? "Mines" : string.Empty)
+      + (TotalIsAfterWeak ? "Weak" : string.Empty);
+
+    /// <summary>
+    /// Is the printed total the Weak-REDUCED one? EB-287's second half.
+    ///
+    /// The guards are <see cref="PredictedSetOffDamage"/>'s own, in its own
+    /// order and for its own reasons: an empty pile prints 0 and no modifier
+    /// touches it, and a canonical (compendium) copy prints the stored
+    /// <c>TotalSize</c> because <see cref="PowerModel.Owner"/>'s getter
+    /// asserts mutability. <c>Applier</c>'s getter does not assert, so it is
+    /// safe on either copy -- and <c>HasSmartDescription</c> reads this key
+    /// BEFORE the mutability check that gates the smart face, so it has to be.
+    /// </summary>
+    private bool TotalIsAfterWeak =>
+        _charges.Count > 0 && IsMutable && Owner != null
+        && (Applier?.Powers.OfType<WeakPower>().FirstOrDefault()?.Amount ?? 0) > 0;
 
     public override PowerType Type => PowerType.Buff;
 
@@ -337,7 +382,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// Explosives Workshop ADDS <see cref="KleeOverhaulLaw.WorkshopGrowth"/>
     /// per stack ("your Bombs grow by 1 more"), Alice's Recipe REPLACES the
     /// base with <see cref="KleeOverhaulLaw.AliceGrowth"/> ("grow by 4 instead
-    /// of 2"). Replace-then-add is the only reading that leaves both faces
+    /// of 3"). Replace-then-add is the only reading that leaves both faces
     /// true, and the brief's own gloss on Alice is "Breaks rule 1".
     /// </summary>
     public static int GrowthFor(Creature? klee)

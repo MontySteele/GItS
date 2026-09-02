@@ -56,7 +56,7 @@ public sealed class ProtoMiSayuFuuinDash : CustomCardModel, IElementalCard, ICom
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sayu — Yoohoo Art: Fuuin Dash (proto)"),
-        ("description", "Deal {Damage:diff()} damage to a random enemy. [gold]Swirl[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to a random enemy. [gold]Swirl[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

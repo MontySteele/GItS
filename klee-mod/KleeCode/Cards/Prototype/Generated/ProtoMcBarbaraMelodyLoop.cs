@@ -52,7 +52,7 @@ public sealed class ProtoMcBarbaraMelodyLoop : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara — Melody Loop"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. For {PowerAmount:diff()} turns, at the start of your turn apply [gold]Hydro[/gold] to target enemy."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. For {PowerAmount:diff()} turns, at the start of your turn apply [gold]Hydro[/gold] to target enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

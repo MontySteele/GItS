@@ -59,7 +59,7 @@ public sealed class ProtoMcMikaStarfrostSwirl : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mika — Starfrost Swirl"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. Your next [gold]Attack[/gold] costs 1 less."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. Your next [gold]Attack[/gold] costs 1 less."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

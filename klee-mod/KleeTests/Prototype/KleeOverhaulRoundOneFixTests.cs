@@ -88,17 +88,26 @@ public class KleeOverhaulRoundOneFixTests
     }
 
     [Fact]
-    public void The_mine_face_is_the_plain_face_plus_that_one_clause()
+    public void The_mine_face_is_the_plain_face_plus_the_count_and_that_clause()
     {
         // The mutation guard on both rows at once: they may not drift into two
-        // descriptions of the same power.
+        // descriptions of the same power. `EB-287` moved the Mine COUNT out of
+        // the old parenthetical and into the sentence that counts the Bombs,
+        // so the mined row differs in exactly two places instead of one -- and
+        // this says which two by subtracting them and demanding what is left
+        // be the plain row, character for character.
         var klee = Seat.Klee();
         var enemy = Seat.Klee(30).Creature;
         var pile = ProtoBombs.Place(enemy, klee.Creature,
             new ProtoBombs.Charge(4, IsMine: true));
 
-        Assert.StartsWith(Row(pile, "smartDescription"),
-                          Row(pile, "smartDescriptionMines"));
+        var mined = Row(pile, "smartDescriptionMines");
+        Assert.Equal(
+            Row(pile, "smartDescription"),
+            mined.Replace(", including {Mines} [gold]Mine{Mines:plural:|s}[/gold]",
+                          string.Empty)
+                 .Replace(" A [gold]Mine[/gold] also goes off when this enemy "
+                          + "attacks you, before the hit lands.", string.Empty));
         // And the static tooltip carries the identical sentence -- one clause,
         // two surfaces, which is what stopped them disagreeing in the first
         // place.

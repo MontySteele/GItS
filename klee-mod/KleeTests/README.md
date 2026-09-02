@@ -30,7 +30,7 @@ and only the second one is worth anything to a reader.
 ```
 cd klee-mod/KleeTests
 dotnet test                       # 222 tests, ~0.4s after build
-dotnet test -p:PrototypeCards=true # 539: the 222 plus Prototype/
+dotnet test -p:PrototypeCards=true # 550: the 222 plus Prototype/
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -132,7 +132,9 @@ those types do not exist, so a pin against them could not compile either.
 
 | `KleeOverhaulRoundThreeTests.cs` | 12 | The Klee overhaul, ROUND THREE -- [USER]'s own run of the arm (`review/active/klee-overhaul-slice-1-2026-09-01.md` sec.3, draft 3; rows `EB-279`/`EB-280`/`EB-282`/`EB-283`/`EB-284`, closing `EB-277`). REAL for every decision that is one: the starter's copy counts and Dig In's move out of the offer pool, Ka-pow!'s `DamageVar` and the token its face renders, the `decimal` parameter that lets a card hand the var to `ProtoBombPower`, Quick Fuse still refusing on a Bomb-less board now that it grows first, the register owing a jump the moment a Bombed enemy is killed by anything at all, and the smith moving a prototype card's numbers through the game's own `UpgradeInternal`. Structural where a live `CombatState` is needed: the sweep's two new moments (`AfterDeath`, `AfterCardPlayed`) and the Ancient tail on the arm pool, both of which place or draw a model. |
 
-**With the flag: 539 tests, all green** (measured 2026-09-02, `dotnet test -p:PrototypeCards=true`).
+| `KleeOverhaulRoundFourTests.cs` | 11 | The Klee overhaul, ROUND FOUR -- the two seats' blind act-one runs (`review/active/klee-overhaul-round-3-2026-09-02.md`). `EB-287`: the Bomb face is prose over four rows now, and the two axes it is selected on -- the live Mine count and whether the printed total is the Weak-reduced one -- compose into rows that all exist, with a canonical copy answering the selector without throwing. `EB-288`: NOT A DEFECT, shown rather than asserted -- the game's own `WeakPower.ModifyDamageMultiplicative` against a real Creature, the game's own `DynamicVar.ToHighlightedString` printing the result, and Ka-pow!'s 7 -> 5 beside Ka-pow!+'s 10 -> 7 on the same board. REAL throughout; what is NOT reachable is `DamageVar.UpdateCardPreview` itself, which needs a RunState and a live `CombatState`, so the preview value is composed here from the two halves the game composes it from. |
+
+**With the flag: 550 tests, all green** (measured 2026-09-02, `dotnet test -p:PrototypeCards=true`).
 
 ## Co-op coverage
 

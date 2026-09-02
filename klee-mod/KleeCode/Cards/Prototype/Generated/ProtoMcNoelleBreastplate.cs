@@ -49,7 +49,7 @@ public sealed class ProtoMcNoelleBreastplate : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Noelle — Breastplate"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you are below half HP, gain 4 more."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If you are below half HP, gain 4 more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

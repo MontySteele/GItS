@@ -90,15 +90,15 @@ public class KleeOverhaulRuleTests
 
         pile.GrowBy(KleeOverhaulLaw.BombGrowth);
 
-        Assert.Equal(new[] { 7, 10 }, pile.Charges.Select(c => c.Size));
-        Assert.Equal(17, pile.TotalSize);
+        Assert.Equal(new[] { 8, 11 }, pile.Charges.Select(c => c.Size));
+        Assert.Equal(19, pile.TotalSize);
     }
 
     [Fact]
-    public void Rule1_growth_is_two_by_default()
+    public void Rule1_growth_is_three_by_default()
     {
         var klee = Seat.Klee();
-        Assert.Equal(2, KleeOverhaulLaw.BombGrowth);
+        Assert.Equal(3, KleeOverhaulLaw.BombGrowth);
         Assert.Equal(KleeOverhaulLaw.BombGrowth,
                      GrowthFor(klee.Creature));
     }
@@ -119,7 +119,7 @@ public class KleeOverhaulRuleTests
     [Fact]
     public void Rule1_alices_recipe_replaces_the_base_and_the_workshop_still_adds()
     {
-        // "Grow by 4 INSTEAD of 2" -- replace, not add; and the two compose
+        // "Grow by 4 INSTEAD of 3" -- replace, not add; and the two compose
         // the only way that leaves both printed faces true.
         var alice = Seat.Klee().WithPower<AlicesRecipePower>(1);
         Assert.Equal(KleeOverhaulLaw.AliceGrowth, GrowthFor(alice.Creature));
@@ -316,7 +316,7 @@ public class KleeOverhaulRuleTests
 
         pile.GrowBy(KleeOverhaulLaw.BombGrowth);
 
-        Assert.Equal(new[] { 6, 6 }, pile.Charges.Select(c => c.Size));
+        Assert.Equal(new[] { 7, 7 }, pile.Charges.Select(c => c.Size));
         Assert.True(pile.Charges[0].IsMine);
     }
 

@@ -56,7 +56,7 @@ public sealed class ProtoMiIttoSuperlativeSuperstrength : CustomCardModel, IElem
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Itto — Superlative Superstrength (proto)"),
-        ("description", "Deal {Damage:diff()} damage. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

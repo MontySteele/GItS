@@ -49,7 +49,7 @@ public sealed class ProtoMcDionaIcyPaws : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Diona — Icy Paws (proto)"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. When this [gold]Block[/gold] absorbs damage, apply [gold]Cryo[/gold] to the attacker."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. When this [gold]Block[/gold] absorbs damage, apply [gold]Cryo[/gold] to the attacker."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
