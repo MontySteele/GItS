@@ -223,12 +223,29 @@ public static class KokomiResources
     /// (refpowers.after_card_exhausted) and card-side gain_charge lines are
     /// premiums on top, so both paths land here.
     /// </summary>
-    public static void GainCharge(Creature? creature, int amount)
+    public static void GainCharge(Creature? creature, int amount,
+                                  string? source = null)
     {
         if (amount <= 0) return;
         var resource = Find(creature);
         if (resource == null) return;
+        // `EB-273`. THE LEDGER RIDES THE CHOKEPOINT the doc comment above
+        // already promised is one ("both paths land here"), on exactly
+        // `SparkPower.Gain`'s terms: the bank is read either side of the
+        // mutation, so what is recorded is the delta that LANDED and not the
+        // delta that was asked for.
+        //
+        // THE DEFAULT SOURCE IS THE CARD, unnamed. A generated `gain_charge`
+        // line calls this with no context of its own and does not need one:
+        // the ledger ROW carries the card, opened at the play boundary in
+        // `PlayTelemetryHooks.BeforeCardPlayed`. The named sources below are
+        // for the gains that are NOT a card -- the exhaust funnel, the
+        // Strength conversion, a turn-start power -- which land in the same
+        // row and would otherwise be indistinguishable from the card's own.
+        int before = resource.Amount;
         resource.ModifyAmount(amount);
+        Diagnostics.MeterLedger.Note(Diagnostics.MeterLedger.Charge,
+            source ?? "card", resource.Amount - before, before);
         Vfx.GaugeBridge.Refresh(creature!);
         // EB-53/N1: Charge IS the Bake-Kurage pulse's variable, so the docket's
         // pulse number moves on every gain. Same funnel and the same reason as
@@ -278,7 +295,18 @@ public static class KokomiResources
         if (!CanSpendCharge(creature, amount)) return Task.FromResult(false);
         var resource = Find(creature);
         if (resource == null) return Task.FromResult(false);
+        // `EB-273`, and it is `SparkPower.Spend`'s rule verbatim: A REFUSED
+        // SPEND WRITES NOTHING AT ALL. The two returns above mutate nothing,
+        // and a ledger row reading "paid 0" would read as a free play rather
+        // than as a play that never happened.
+        //
+        // ONE SPELLING OF `card:<id>` ACROSS THE WHOLE LEDGER, which is why
+        // `SparkPower.SourceOf` is reached across for rather than copied: a
+        // second spelling of the same fact would make a grader's group-by lie.
+        int before = resource.Amount;
         resource.ModifyAmount(-amount);
+        Diagnostics.MeterLedger.Note(Diagnostics.MeterLedger.Charge,
+            SparkPower.SourceOf(cardSource), resource.Amount - before, before);
         Vfx.GaugeBridge.Refresh(creature!);
         // The pulse reads the bank, so a spend moves the end-of-turn preview
         // for exactly the reason a gain does. Same funnel, same rule: a
@@ -631,7 +659,7 @@ public sealed class KokomiResourceHooks : AbstractModel
             exhaustCharge = 0;
         }
 #endif
-        KokomiResources.GainCharge(owner, exhaustCharge);
+        KokomiResources.GainCharge(owner, exhaustCharge, "rule:exhaust");
         KokomiResources.GainBurst(owner, ExhaustBurst(owner));
 #if PROTOTYPE_CARDS
         // RULE 2 -- ENTRY ON EXHAUST. OUTSIDE the relic gate above,
@@ -854,7 +882,7 @@ public sealed class KokomiResourceHooks : AbstractModel
             return false;
         }
 #endif
-        KokomiResources.GainCharge(target, (int)amount);
+        KokomiResources.GainCharge(target, (int)amount, "rule:strength_to_charge");
         modifiedAmount = 0;
         return true;
     }
@@ -910,7 +938,7 @@ public sealed class ChargePerTurnPower : PowerModel, ILocalizationProvider
     {
         if (side != CombatSide.Player) return Task.CompletedTask;
         if (Owner?.Player == null) return Task.CompletedTask;
-        KokomiResources.GainCharge(Owner, (int)Amount);
+        KokomiResources.GainCharge(Owner, (int)Amount, "power:charge_per_turn");
         return Task.CompletedTask;
     }
 }

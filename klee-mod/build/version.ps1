@@ -170,6 +170,114 @@ function Get-PackageVersion {
     }
 }
 
+function Get-AssemblyStamp {
+    <#
+      EB-161. THE SAME VERSION, IN THE SHAPE AN ASSEMBLY CAN CARRY.
+
+      klee.dll shipped AssemblyVersion 1.0.0.0 on every build ever made: the
+      csproj sets no version property, GenerateAssemblyInfo defaults ON, and
+      the SDK's default is 1.0.0.0. So the one artifact a player's crash log,
+      a support question or a co-op desync report actually names carried no
+      build identity at all, while the manifest beside it carried the right
+      one.
+
+      THE STAMP IS DERIVED, NEVER TYPED. LAW's clause is that version stamps
+      are "read live at call time from the canonical source, never stored or
+      read from a comment/exe", so a <Version> in the csproj would be the
+      defect wearing the fix's clothes. This composes the properties from the
+      Get-PackageVersion hashtable and the deploy scripts pass them on the
+      build line, which means the stamp cannot drift from the manifest: one
+      call produces both.
+
+      TWO SHAPES, BECAUSE THE ATTRIBUTES TAKE DIFFERENT THINGS.
+      AssemblyVersion and FileVersion accept 2-4 dotted NUMERICS and nothing
+      else, so '0.2.1786+proto.dirty' cannot go in either; they get
+      MAJOR.COUNT, which is the same number with the build metadata dropped.
+      AssemblyInformationalVersion takes an arbitrary string, so it carries
+      the package version VERBATIM -- including +proto and +dirty, which is
+      the half that answers "which build is installed" (R217 D).
+
+      IncludeSourceRevisionInInformationalVersion=false is load-bearing and
+      not tidiness: the SDK otherwise appends '+<commit sha>' to whatever
+      InformationalVersion is set to, which would make the dll's string stop
+      matching the manifest's and turn the assertion below into a permanent
+      red.
+    #>
+    param([hashtable]$Version)
+    if ($null -eq $Version) { throw 'Get-AssemblyStamp needs a Get-PackageVersion hashtable.' }
+    # MAJOR is two dotted integers by Get-ManifestMajor's own gate, and Count
+    # is a commit count, so this is three numeric parts by construction.
+    $numeric = "$($Version.Major).$(($Version.Auto -split '\+')[0])"
+    return @{
+        Numeric       = $numeric
+        Informational = $Version.Version
+        BuildArgs     = @(
+            "-p:AssemblyVersion=$numeric",
+            "-p:FileVersion=$numeric",
+            "-p:InformationalVersion=$($Version.Version)",
+            '-p:IncludeSourceRevisionInInformationalVersion=false'
+        )
+    }
+}
+
+function Test-AssemblyStamp {
+    <#
+      EB-161's assertion, as a function returning finding strings.
+
+      validate.ps1 calls this and pipes the result into Fail, so this IS the
+      gate rather than a description of it -- the same arrangement
+      Test-VersionPolicy has, and for the same reason: the pytest arms in
+      tier0/tests/test_manifest_version_gate.py drive the shipped function
+      instead of reimplementing its rules and agreeing with themselves.
+
+      WHAT IT ASSERTS. The dll in the staged package carries THIS build's
+      version: its informational string is the staged manifest's version
+      verbatim, and its numeric file version is that string with the build
+      metadata dropped. A dll left over from an earlier build, or one built
+      without the properties at all (the 1.0.0.0 case this row is about),
+      fails on the first comparison.
+
+      NULL DLL PATH IS A NO-OP RATHER THAN A FINDING: whether the package is
+      supposed to have a dll at all is S2's question, already asked, and
+      answering it twice would report one defect as two.
+    #>
+    param([string]$DllPath, [string]$Expected)
+    $out = New-Object System.Collections.Generic.List[string]
+    if ([string]::IsNullOrWhiteSpace($DllPath) -or -not (Test-Path $DllPath)) {
+        return $out
+    }
+    if ([string]::IsNullOrWhiteSpace($Expected)) {
+        $out.Add('no expected version was supplied, so the assembly stamp could not be checked.')
+        return $out
+    }
+
+    $info = $null
+    try {
+        $info = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($DllPath)
+    } catch {
+        $out.Add("could not read version info from '$DllPath': $($_.Exception.Message)")
+        return $out
+    }
+
+    # ProductVersion carries AssemblyInformationalVersion; FileVersion carries
+    # AssemblyFileVersion. Windows pads a short numeric to four parts in some
+    # readings, so the numeric half compares as a [version] rather than as a
+    # string -- 0.2.1786 and 0.2.1786.0 are the same stamp.
+    $product = "$($info.ProductVersion)".Trim()
+    if ($product -ne $Expected) {
+        $out.Add("klee.dll carries informational version '$product' but the staged package is '$Expected'. The deploy stamps this from the same Get-PackageVersion call that stamps manifest.json; a mismatch means the dll was not built by this deploy (EB-161: an unstamped build reports 1.0.0.0).")
+    }
+
+    $numeric = ($Expected -split '\+')[0]
+    $wanted = ConvertTo-ComparableVersion $numeric
+    $got = ConvertTo-ComparableVersion "$($info.FileVersion)".Trim()
+    if ($null -eq $got -or $null -eq $wanted -or $got -ne $wanted) {
+        $out.Add("klee.dll carries file version '$($info.FileVersion)' but this build is '$numeric'. AssemblyVersion and FileVersion take dotted numerics only, so they carry MAJOR.AUTO with the build metadata dropped (EB-161).")
+    }
+
+    return $out
+}
+
 function ConvertTo-ComparableVersion {
     <#
       "v3.3.8" / "3.3.6" / "0.107.1" -> [version], for real >= comparisons.
