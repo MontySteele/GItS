@@ -119,9 +119,16 @@ Two things to watch while you play: whether Battle Plan is ever not the
 play, and whether Vanguard at 0 energy reads as a status card or as free
 damage.
 
-## 4. Picks
+## 4. Applied from your play (D, disclosed), and picks
 
-None owed. Two numbers are watch items for the next round, applied only
+Applied: Read the Field is 4 Block now and 10 at dawn (was 3 and 8), on
+your "looks a bit weak"; one Block under Coral Guard now, double it at
+dawn. Filed from your run: two-line cards refuse the jellyfish by drag and
+Ambush has no selector at all (EB-296), the Burst meter shows under the
+arm (EB-297), the pet traps controller focus (EB-300), and 64/80 is
+confirmed on a human run (EB-295).
+
+Picks: none owed. Two numbers are watch items for the next round, applied only
 if the seats and your run agree: Battle Plan's rate (a Plan paying 2
 energy for 1 is a loan at plus one; "Plan: gain 1 Energy and draw 2" is
 the one-line change) and Vanguard's cost.
