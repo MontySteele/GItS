@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,8 +12,10 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.Combat;
+using MegaCrit.Sts2.Core.Nodes.Rooms;
 
 namespace KleeMod.Powers;
 
@@ -161,6 +164,52 @@ public static class BakeKuragePet
         }
         EnsureVisualsConverted();
         await PlayerCmd.AddPet<BakeKurageMonster>(player);
+        LogHitboxProbe(player);
+    }
+
+    /// <summary>
+    /// `EB-296`'s probe: one line per combat, kept in the build on purpose.
+    ///
+    /// The wire supplies its target explicitly, so no scenario and no seat can
+    /// ever see a hitbox defect -- the whole class of "the card resolves but
+    /// you cannot AIM it" is invisible to every automated arm this repo has.
+    /// This prints the numbers that decide it, for the pet and for one enemy
+    /// beside it as the control: whether the hitbox node exists, its size and
+    /// global position (which come from the visuals scene's <c>Bounds</c> box
+    /// through <c>NCreature.UpdateBounds</c>), and the two flags
+    /// <c>NCreature.ToggleIsInteractable</c> writes -- <c>MouseFilter</c>,
+    /// which decides the drag, and <c>FocusMode</c>, which decides the D-pad.
+    /// A future report of "it will not take my drop" is then one grep of
+    /// godot.log rather than a session.
+    /// </summary>
+    private static void LogHitboxProbe(Player player)
+    {
+        try
+        {
+            var room = NCombatRoom.Instance;
+            if (room == null) return;
+
+            var pet = room.GetCreatureNode(Of(player.Creature));
+            var enemy = room.CreatureNodes.FirstOrDefault(
+                n => n?.Entity?.IsEnemy == true);
+            Log.Info($"[{KleeMod.ModId}] EB-296 hitbox probe: "
+                   + $"pet[{Describe(pet)}] enemy[{Describe(enemy)}]");
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] EB-296 hitbox probe failed: {e}");
+        }
+    }
+
+    private static string Describe(NCreature? node)
+    {
+        if (node == null) return "no node";
+        var hitbox = node.Hitbox;
+        var who = node.Entity?.Monster?.GetType().Name ?? "?";
+        if (hitbox == null) return $"{who} no hitbox";
+        return $"{who} {hitbox.GetType().Name} size={hitbox.Size} "
+             + $"pos={hitbox.GlobalPosition} mouse={hitbox.MouseFilter} "
+             + $"focus={hitbox.FocusMode} interactable={node.IsInteractable}";
     }
 
     private static bool _visualsRegistered;
