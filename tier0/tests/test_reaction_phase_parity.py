@@ -36,6 +36,14 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "klee-mod" / "KleeCode"
 
 
+#: `ElementalHit.Deal`'s signature. `Task<int>` since `EB-270`, which made the
+#: funnel return the number it landed so the overhaul Bomb's badge, tooltip and
+#: Big Badda Boom line could be three readings of ONE number. The generic arg is
+#: optional here so the pins below are about the ORDER of the pipeline, which is
+#: what they claim to be, and not about a return type.
+DEAL_SIGNATURE = r"public\s+static\s+async\s+Task(?:<int>)?\s+Deal\s*\("
+
+
 def method_body(source: str, signature_re: str) -> str:
     """The braced body of the first method whose signature matches.
 
@@ -292,7 +300,7 @@ def test_the_reaction_vulnerable_mirror_cannot_double_pay_the_bomb_path():
     assert gate < aura.index("ReactionConstants.VulnerableTakenMult"), aura
 
     hit = (SOURCE / "Powers" / "ElementalHit.cs").read_text(encoding="utf-8")
-    deal = method_body(hit, r"public\s+static\s+async\s+Task\s+Deal\s*\(")
+    deal = method_body(hit, DEAL_SIGNATURE)
     assert "ValueProp.Unpowered" in deal, deal
     # ...and the order that makes the bomb path's amplification real.
     assert deal.index("ReactionEffects.Resolve") < deal.index(
@@ -425,7 +433,7 @@ def test_the_boss_frozen_mirror_cannot_double_pay_the_bomb_path():
     assert gate < aura.index("ReactionEffects.FrozenBossVulnWillApply"), aura
 
     hit = (SOURCE / "Powers" / "ElementalHit.cs").read_text(encoding="utf-8")
-    deal = method_body(hit, r"public\s+static\s+async\s+Task\s+Deal\s*\(")
+    deal = method_body(hit, DEAL_SIGNATURE)
     assert "ValueProp.Unpowered" in deal, deal
     assert deal.index("ReactionEffects.Resolve") < deal.index(
         "SimDamagePipeline.TargetMods"), deal

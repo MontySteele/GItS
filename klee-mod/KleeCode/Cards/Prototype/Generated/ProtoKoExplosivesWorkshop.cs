@@ -42,7 +42,7 @@ public sealed class ProtoKoExplosivesWorkshop : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Explosives Workshop"),
-        ("description", "At the start of your turn, your [gold]Bombs[/gold] grow by 1 more."),
+        ("description", "At the start of your turn, your [gold]Bombs[/gold] grow by 1 more. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

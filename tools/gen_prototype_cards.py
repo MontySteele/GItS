@@ -67,12 +67,19 @@ transforms. And the whole directory is `Compile Remove`d from
 `KleeCode.csproj` unless `PrototypeCards=true`, so a release build does not
 contain the classes at all: there is no id a shipped mod could be talked into
 granting.
+
+EVERY ROW'S UPGRADE MUST SHOW ON THE CARD (`EB-283` / `EB-277`)
+---------------------------------------------------------------
+The rows below the `plan()` walk are checked one further way, and this is the
+only gate on this surface that is about what a card LOOKS LIKE rather than
+about whether it can be emitted at all. See `upgrade_face_findings`.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -139,6 +146,207 @@ def _rows() -> list[dict]:
     return yaml.safe_load(SHEET.read_text(encoding="utf-8")) or []
 
 
+def effective_upgrade(card: dict) -> dict | None:
+    """This row's delta after the Prototype-stage rule, or None. MUTATES.
+
+    `EB-213`, and it happens BEFORE `blocked_reason`: R20 blocks a card
+    carrying an inline `upgrade:` key, because on a shipped sheet that key
+    could silently diverge from the ratified upgrades file. Here the row IS the
+    ratified home, so the block is lifted by taking the key off the card and
+    putting it in the index the shipped path reads -- which is why this pops
+    rather than reads.
+
+    `EB-283`. A row with NO authored block takes the Prototype-stage rule, and
+    it is imported from `tier0.content.upgrades` rather than written here so
+    the two engines apply one implementation and not two spellings of one. An
+    authored block always wins, which is how a Balance-stage ruling replaces
+    the default without removing it.
+    """
+    upgrade = card.pop("upgrade", None)
+    if upgrade is not None and (not isinstance(upgrade, dict) or not upgrade):
+        raise SystemExit(
+            f"gen_prototype_cards: {card['id']}: `upgrade:` must be a "
+            "non-empty map of delta keys, as an upgrades sheet's entry is; "
+            "drop the key for a base-only row.")
+    if upgrade is None:
+        upgrade = prototype_default_delta(
+            card["id"], card.get("cost"), card.get("effects", []),
+            bool(card.get("exhaust"))) or None
+    return upgrade
+
+
+# --- EB-283 / EB-277: the upgrade has to show on the card -------------------
+
+#: The three shapes read off the EMITTED C#. Deliberately read off the emitted
+#: source rather than off the row: the row says what was ASKED for, and the
+#: whole defect class is an ask that the emitter turned into nothing visible.
+_ON_UPGRADE = re.compile(
+    r"protected override void OnUpgrade\(\)\s*\{(.*?)\n    \}", re.S)
+_DESCRIPTION = re.compile(r'\("description", (".*?")\),\n', re.S)
+_VAR_MOVED = re.compile(r'DynamicVars(?:\.(\w+)|\["(\w+)"\])\s*\.\s*Upgrade')
+_VAR_PRINTED = re.compile(r"\{(\w+):diff\(\)\}")
+
+#: A var that FEEDS a printed one. The base game's `Calculated*Var` is a
+#: TRIPLE -- `CalculationBase` holds the number an upgrade moves and
+#: `CalculatedDamage` / `CalculatedBlock` is what the face prints -- so a
+#: literal name match would call every scaled companion row invisible. Mirrors
+#: `gen_klee_cards.build_vars`' own branch; the two move together.
+_VAR_FEEDS = {"CalculationBase": {"CalculatedDamage", "CalculatedBlock"}}
+
+_DEBT_SPARK_ARM = (
+    "outside the Prototype-stage rule by declaration: `EB-218`'s Spark-arm "
+    "migration twins and the Spark surface predate `EB-283`, whose prefixes "
+    "(`upgrades.PROTOTYPE_DEFAULT_PREFIXES`) are the four overhaul arms. "
+    "Their upgrades are the SHIPPED rows' and are a Balance-stage ruling, not "
+    "a default this generator may invent")
+_DEBT_ALREADY_DRAWS = (
+    "the Prototype-stage rule's last clause is `the card draws one more`, and "
+    "both appliers bind an added draw to ONE `Cards` var -- so a row that "
+    "already draws would be a collision the codegen refuses by name. Bumping "
+    "the printed draw instead is a number nobody has ruled")
+_DEBT_PLAN_ONLY = (
+    "a Plan-only row: its whole body is `KokomiPlan.Schedule` and it has no "
+    "now-line for an added effect to be appended to, so the rule withholds "
+    "the draw rather than declaring a var nothing reads "
+    "(`upgrades.prototype_default_delta`, the second withholding clause). Its "
+    "delta wants to move a `plan:` number, which neither engine can express "
+    "yet")
+
+#: THE DEBT, CURATED AND CHECKED BOTH WAYS.
+#:
+#: `EB-277` was "an upgraded prototype card was identical to its base", and
+#: `EB-283` answered it with a default rule -- but a rule with declared reach
+#: leaves rows outside that reach, and nothing said which rows those were.
+#: [USER] found two of them by playing ("'Change of Plans' has no upgrade?",
+#: "Neither does Rally"), which is the sign that the register was a human's
+#: memory. It is a file now.
+#:
+#: Two rules keep it from rotting, both enforced in `upgrade_face_findings`:
+#: an id here that is not on the sheet is a finding (R213 B deletes rows
+#: whole, and an exemption must go with its row), and an id here whose row now
+#: passes is a finding too (a paid debt is deleted, never left standing).
+UPGRADE_DEBT: dict[str, str] = {
+    # The Spark arm and its migration twins (`EB-218`, R224).
+    "proto_hold_the_line_spark": _DEBT_SPARK_ARM,
+    "proto_itto_superlative_superstrength_either": _DEBT_SPARK_ARM,
+    "proto_itto_superlative_superstrength_priced": _DEBT_SPARK_ARM,
+    "proto_kaboom_sink": _DEBT_SPARK_ARM,
+    "proto_muster_subsidy_funnel": _DEBT_SPARK_ARM,
+    "proto_pearl_barrage_turn": _DEBT_SPARK_ARM,
+    "proto_pop_spark": _DEBT_SPARK_ARM,
+    "proto_powder_charge_spark": _DEBT_SPARK_ARM,
+    "proto_shinobu_sanctifying_ring_either": _DEBT_SPARK_ARM,
+    "proto_shinobu_sanctifying_ring_priced": _DEBT_SPARK_ARM,
+    "proto_smoke_and_sparks_spark": _DEBT_SPARK_ARM,
+    "proto_spark_blast": _DEBT_SPARK_ARM,
+    "proto_spark_burst_conversion": _DEBT_SPARK_ARM,
+    "proto_spark_double_tap": _DEBT_SPARK_ARM,
+    "proto_spark_finisher": _DEBT_SPARK_ARM,
+    "proto_spark_mode_bombs": _DEBT_SPARK_ARM,
+    "proto_spark_priced_draw": _DEBT_SPARK_ARM,
+    "proto_spark_priced_strike": _DEBT_SPARK_ARM,
+    "proto_spark_strike": _DEBT_SPARK_ARM,
+    "proto_spark_sweep": _DEBT_SPARK_ARM,
+    "proto_thoma_crimson_ooyoroi_either": _DEBT_SPARK_ARM,
+    "proto_thoma_crimson_ooyoroi_priced": _DEBT_SPARK_ARM,
+    "proto_true_spark_knight": _DEBT_SPARK_ARM,
+    # Inside the rule's reach, withheld by its own two named clauses.
+    "proto_mc_lisa_violet_arc": _DEBT_ALREADY_DRAWS,
+    "proto_mc_sucrose_gust": _DEBT_ALREADY_DRAWS,
+    "proto_kk_stolen_chapter": _DEBT_ALREADY_DRAWS,
+    "proto_kk_ambush": _DEBT_PLAN_ONLY,
+    "proto_kk_battle_plan": _DEBT_PLAN_ONLY,
+    "proto_kk_chain_of_command": _DEBT_PLAN_ONLY,
+    "proto_kk_kurages_oath": _DEBT_PLAN_ONLY,
+    "proto_kk_war_council": _DEBT_PLAN_ONLY,
+}
+
+
+def _upgrade_face_finding(delta: dict | None, source: str) -> str | None:
+    """Why this emitted card's `+` face is the same as its base, or None.
+
+    PURE, and it reads only the two strings the player is shown: the card's
+    emitted `description` rows and its emitted `OnUpgrade` body. That is the
+    point -- "the smith gave me back the card I put in" is a fact about the
+    printed face, and every other reading of it (a delta exists, a delta was
+    expressible, a var moved) was true of `EB-277`'s own two cards while they
+    printed identical text.
+
+    Four ways an upgrade shows, and any one is enough:
+
+      * an `{IfUpgraded:show:...}` clause in the face -- an APPENDED effect,
+        or a cost the face states in words;
+      * `RemoveKeyword` / `AddKeyword` -- the keyword rail under the art;
+      * `EnergyCost.Upgrade*` -- the cost pip in the corner;
+      * a `DynamicVars` move whose var the face prints as `{Var:diff()}`,
+        directly or through `_VAR_FEEDS`.
+    """
+    if not delta:
+        return ("no upgrade at all -- the smith would hand back a copy of the "
+                "card (`EB-277`)")
+    match = _ON_UPGRADE.search(source)
+    body = match.group(1) if match else ""
+    face = " ".join(_DESCRIPTION.findall(source))
+
+    if "{IfUpgraded:" in face:
+        return None
+    if ("RemoveKeyword(" in body or "AddKeyword(" in body
+            or "EnergyCost.Upgrade" in body):
+        return None
+    moved: set[str] = set()
+    for dotted, indexed in _VAR_MOVED.findall(body):
+        name = dotted or indexed
+        moved.add(name)
+        moved |= _VAR_FEEDS.get(name, set())
+    printed = set(_VAR_PRINTED.findall(face))
+    if moved & printed:
+        return None
+
+    statements = [line for line in body.strip().splitlines()
+                  if line.strip() and not line.strip().startswith("//")]
+    if not statements:
+        return (f"declares {sorted(delta)} and emits an OnUpgrade that does "
+                "nothing")
+    return (f"declares {sorted(delta)}; OnUpgrade moves "
+            f"{sorted(moved) or 'no var'} and the face prints "
+            f"{sorted(printed) or 'no upgradable number'} -- the `+` card is "
+            "printed identically to its base")
+
+
+def upgrade_face_findings(
+        rows: list[dict], deltas: dict[str, dict],
+        generated: dict[str, str]) -> list[str]:
+    """Every row whose upgrade a player could not see, plus every stale debt.
+
+    Returns rendered lines; empty is green. Split out of `plan()` so a test can
+    run it against a synthetic row and watch it go red, which is the only way
+    to know a gate is a gate (`understudy` red-first discipline).
+    """
+    findings: list[str] = []
+    ids = {row["id"] for row in rows}
+    for row in rows:
+        card_id = row["id"]
+        source = generated.get(card_id)
+        if source is None:
+            continue
+        why = _upgrade_face_finding(deltas.get(card_id), source)
+        excused = UPGRADE_DEBT.get(card_id)
+        if why and excused is None:
+            findings.append(f"{card_id}: {why}")
+        elif why is None and excused is not None:
+            findings.append(
+                f"{card_id}: UPGRADE_DEBT still excuses this row, and the row "
+                "now prints its upgrade -- delete the entry "
+                "(gen_prototype_cards.UPGRADE_DEBT)")
+    for card_id in sorted(UPGRADE_DEBT):
+        if card_id not in ids:
+            findings.append(
+                f"{card_id}: UPGRADE_DEBT names a row that is not on the "
+                "surface -- a deleted row takes its exemption with it "
+                "(R213 B)")
+    return findings
+
+
 def plan() -> gen.ProfilePlan:
     rows = _rows()
     generated: dict[str, str] = {}
@@ -187,23 +395,7 @@ def plan() -> gen.ProfilePlan:
         # key could silently diverge from the ratified upgrades file. Here the
         # row IS the ratified home, so the block is lifted by taking the key
         # off the card and putting it in the index the shipped path reads.
-        upgrade = card.pop("upgrade", None)
-        if upgrade is not None and (not isinstance(upgrade, dict)
-                                    or not upgrade):
-            raise SystemExit(
-                f"gen_prototype_cards: {card_id}: `upgrade:` must be a "
-                "non-empty map of delta keys, as an upgrades sheet's "
-                "entry is; drop the key for a base-only row.")
-        # EB-283. A row with NO authored block takes the Prototype-stage rule,
-        # and it is imported from `tier0.content.upgrades` rather than written
-        # here so the two engines apply one implementation and not two
-        # spellings of one. An authored block always wins, which is how a
-        # Balance-stage ruling replaces the default without removing it.
-        if upgrade is None:
-            default = prototype_default_delta(
-                card_id, card.get("cost"), card.get("effects", []),
-                bool(card.get("exhaust")))
-            upgrade = default or None
+        upgrade = effective_upgrade(card)
         if upgrade is not None:
             gen.register_upgrade_deltas(card_id, upgrade)
             upgrades[card_id] = dict(upgrade)
@@ -368,6 +560,37 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     built = plan()
+
+    # EB-283 / EB-277. The last gate, and the only one about what a card LOOKS
+    # like: a staged row whose `+` face is printed identically to its base is a
+    # campfire choice that does nothing, and it has shipped twice. Raised, not
+    # reported, on this file's own standing rule -- a prototype that cannot be
+    # TRIED is a build failure, and a card whose upgrade nobody can see cannot
+    # be graded on its upgrade.
+    #
+    # IN `main` AND NOT IN `plan`, because `UPGRADE_DEBT` is keyed to the
+    # COMMITTED surface's ids and `plan()` is called by
+    # `tier0/tests/test_prototype_surface.py` against a temporary one-row sheet
+    # -- which is the emitter under test, not the surface. Both doors that read
+    # the real sheet come through here: `--check` (the `prototype-codegen` CI
+    # lint) and the write. `tier0/tests/test_prototype_upgrade_visible.py` runs
+    # the finder against the committed sheet directly, which is the suite's
+    # copy of this gate.
+    # The manifest's `upgrades` block IS the effective delta per row (the
+    # authored one, or the Prototype-stage default that stood in for it), so
+    # the gate reads what was actually registered rather than re-deriving it.
+    deltas = json.loads(built.manifest_src)["upgrades"]
+    face_findings = upgrade_face_findings(_rows(), deltas, built.generated)
+    if face_findings:
+        raise SystemExit(
+            "gen_prototype_cards: an upgrade that does not show on the "
+            "card is an upgrade nobody can grade (`EB-283`):" + gen.NEWLINE
+            + gen.NEWLINE.join("  " + f for f in face_findings) + gen.NEWLINE
+            + "Give the row an `upgrade:` block that moves a printed "
+              "number or keyword, or -- if the Prototype-stage rule "
+              "genuinely cannot reach it -- add the id to "
+              "`UPGRADE_DEBT` with the reason.")
+
     if args.check:
         return gen._check_plan(DIR_PROFILE, built)
     gen._write_plan(DIR_PROFILE, built)

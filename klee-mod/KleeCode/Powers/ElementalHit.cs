@@ -33,8 +33,19 @@ internal static class ElementalHit
     /// still counts as a hit, and is still capped by Intangible, because
     /// unblockable is not uncappable (R128). Defaulted false, so every shipped
     /// caller is byte-identical. Sim twin: `deal_damage_to_enemy(...,
-    /// ignore_block=True)`.</summary>
-    public static async Task Deal(
+    /// ignore_block=True)`.
+    ///
+    /// IT RETURNS THE NUMBER IT DEALT -- the truncated amount handed to
+    /// <c>CreatureCmd.Damage</c>: after Strength/Weak, after the reaction
+    /// amplifier, after Vulnerable. <c>EB-270</c> is why. Klee's overhaul Bomb
+    /// prints a number on the badge, a number in the tooltip and a number on
+    /// Big Badda Boom's bonus line, and the only way all three can be the SAME
+    /// number is for the one that LANDED to be readable from the one place
+    /// that computes it -- rather than each surface re-deriving its own
+    /// arithmetic and disagreeing under Weak. Every existing caller ignores the
+    /// result and is behaviour-identical; nothing in the pipeline moved.
+    /// </summary>
+    public static async Task<int> Deal(
         PlayerChoiceContext choiceContext, Creature target, Element element,
         decimal baseDamage, Creature? applier, bool ignoreBlock = false)
     {
@@ -67,11 +78,13 @@ internal static class ElementalHit
         // `Resolve`: `tier0/tests/test_reaction_phase_parity.py` pins the
         // TargetMods read as happening after `ReactionEffects.Resolve`, which
         // is what makes a Superconduct's Vulnerable amplify this same hit.
+        var landed = (int)SimDamagePipeline.TargetMods(target, dealt);
         await CreatureCmd.Damage(
-            choiceContext, target, (int)SimDamagePipeline.TargetMods(target, dealt),
+            choiceContext, target, landed,
             ignoreBlock ? ValueProp.Unpowered | ValueProp.Unblockable
                         : ValueProp.Unpowered,
             dealer: null, cardSource: null, cardPlay: null);
+        return landed;
     }
 
     /// <summary>

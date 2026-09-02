@@ -49,7 +49,7 @@ public sealed class ProtoMcAlbedoSolarIsotoma : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Albedo — Solar Isotoma (proto)"),
-        ("description", "At the end of your turn, if any enemy has an aura, deal 8 damage to that enemy and gain 4 [gold]Block[/gold]."),
+        ("description", "At the end of your turn, if any enemy has an aura, deal 8 damage to that enemy and gain 4 [gold]Block[/gold]. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

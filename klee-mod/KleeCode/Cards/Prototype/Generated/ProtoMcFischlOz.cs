@@ -49,7 +49,7 @@ public sealed class ProtoMcFischlOz : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fischl — Oz, at Your Side (proto)"),
-        ("description", "At the end of your turn, Oz deals 5 [gold]Electro[/gold] damage to a random enemy."),
+        ("description", "At the end of your turn, Oz deals 5 [gold]Electro[/gold] damage to a random enemy. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
