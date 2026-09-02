@@ -799,24 +799,6 @@ CO_TENANCY_LEDGER = {
             "The brief's own script C requires the later hook -- its turn 2 "
             "opens on FIVE energy, which is three plus the Plan's two. The "
             "reading is recorded in full on the method",
-        ("Powers/Prototype/KleeOverhaulPowers.cs", "StartOfTurnSetOffPower"):
-            "QUARANTINED (the Klee overhaul). Sparks 'n' Splash, the ONE "
-            "power in the slice that fires without a card saying so -- rule 7 "
-            "names her Rare as the one allowed explosion source. MOVED HERE "
-            "FROM BeforeSideTurnEnd by the 2026-09-02 balance pass, and the "
-            "broadcast IS the card's printed 'after your Bombs grow': growth "
-            "runs in ProtoBombPower.BeforeSideTurnStart, which "
-            "TURN_START_BROADCAST_ORDER above puts strictly earlier, so no "
-            "tenant of either broadcast can reverse the order the card "
-            "prints. THE ORDERING QUESTION, answered: it sets off one random "
-            "enemy's overhaul Bombs, which is damage plus a Spark plus the "
-            "overhaul ledger's counters. The one co-tenant that reads that "
-            "ledger is GroundedPower below, and it reads SetOffLastTurn -- a "
-            "number this power cannot move: the roll to this round happens on "
-            "the first KleeOverhaulLedger.For of the turn, whichever tenant "
-            "asks first, and every explosion after it lands in "
-            "SetOffThisTurn. The Bomb piles and the Spark bank are shared "
-            "with no other tenant here",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "GroundedPower"):
             "QUARANTINED (the Klee overhaul). Raw per-turn Block mint on a "
             "condition, the same shape as MetallicizePower below. THE "
@@ -936,6 +918,22 @@ CO_TENANCY_LEDGER = {
             "there is nothing here to model",
     },
     "BeforeSideTurnEnd": {
+        ("Powers/Prototype/KleeOverhaulPowers.cs", "BombEchoPower"):
+            "QUARANTINED (the Klee overhaul). Sparks 'n' Splash, and it is "
+            "[USER]'s own 2026-09-02 design: one random BOMBED enemy takes "
+            "Pyro damage equal to the Bombs on it. IT READS THE PILE AND DOES "
+            "NOT SPEND IT -- no charge is taken, so no Spark is minted, no "
+            "Mine answers and neither of rule 7's counters moves; the arm's "
+            "ledger is not touched at all, which is what makes it a co-tenant "
+            "with nothing to order against. THE ORDERING QUESTION, answered: "
+            "what it READS is a charge list, and the only writers of a charge "
+            "list are card plays and the turn-start growth, both outside this "
+            "broadcast; what it WRITES is one Pyro hit, and the co-tenant "
+            "that also deals damage here is TurnEndSequencer's volleys, which "
+            "belong to the SHIPPED kit and cannot be in a deck this power is "
+            "in (the overhaul arm's pool holds neither). If one ever could, "
+            "the interaction is a dead enemy dropping out of this power's own "
+            "candidate list, which it re-reads",
         ("Powers/CompanionPowers.cs", "SolarIsotomaPower"):
             "duration tick-down of itself, player side",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):

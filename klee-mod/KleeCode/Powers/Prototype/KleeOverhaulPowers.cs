@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
+using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -107,57 +108,75 @@ public sealed class ChainedReactionsPower
 }
 
 /// <summary>
-/// Sparks 'n' Splash: "At the start of your turn, after your Bombs grow, Set
-/// off a random enemy's Bombs." The brief's gloss is "Breaks rule 7" -- rule 7
-/// names her Rare as the one allowed explosion source, and this is that Rare
-/// and the ONLY such hook here.
+/// Sparks 'n' Splash: "At the end of your turn, deal Pyro damage to a random
+/// enemy equal to the Bombs on it."
 ///
-/// IT MOVED FROM THE END OF THE TURN TO THE START (balance pass 2026-09-02).
-/// Firing at the end of the turn, ahead of the growth that happens at the
-/// start of the next one, meant no Bomb it touched ever saw a dawn: it popped
-/// what had just been planted, at its planted size, and the Sparks it minted
-/// arrived when the turn was already over. At the start of the turn the Bombs
-/// it pops have grown and the Sparks arrive when she can spend them.
+/// [USER]'s OWN DESIGN, 2026-09-02: "I think auto-detonation on Sparks n'
+/// Splash completely bricks the growth build. How about instead 'a random
+/// enemy takes damage equal to the amount of Bomb on them'?" The row printed
+/// an automatic Set off before this -- first at the end of the turn, then at
+/// the start of it -- and either way the Rare that the growth deck most wants
+/// was the one card that cashed its pile without being asked.
 ///
-/// <c>AfterPlayerTurnStart</c> IS THE "after your Bombs grow" HALF, and it is
-/// the hook rather than a comment: growth runs in
-/// <c>ProtoBombPower.BeforeSideTurnStart</c>, which is a strictly earlier
-/// broadcast (<c>TURN_START_BROADCAST_ORDER</c> in
-/// <c>tier0/tests/test_reaction_phase_parity.py</c>), so the order the card
-/// prints is the order the engine runs and no tenant of either broadcast can
-/// reverse it.
+/// IT READS THE PILE AND DOES NOT SPEND IT, which is the whole card. Nothing
+/// is taken, so:
+///   * the Bombs stay and keep growing -- the echo pays again next turn, and
+///     bigger;
+///   * NO SPARK, because rule 4 pays one per EXPLOSION and nothing exploded;
+///   * no Mine answers, no explosion bus, no per-turn counters move. This is
+///     not a Set off, and rule 2's "only a card that says Set off" is
+///     untouched by it.
 ///
-/// A RANDOM ENEMY, not a random BOMBED enemy: the card says what it says, and
-/// picking only from bombed enemies would make it strictly better than printed
-/// on a board where one enemy is loaded and three are not.
+/// PYRO THROUGH <c>ElementalHit.Deal</c>, the same funnel an explosion and any
+/// of Klee's own hits use, so the echo reacts with an aura exactly as they do
+/// and carries her Strength the same way. It is NOT an Attack: no card is
+/// being played, so nothing that keys off attacks sees it.
+///
+/// A RANDOM BOMBED ENEMY, unlike the auto-detonation it replaces: an echo of
+/// nothing is not a printed effect, so the roll is over the enemies that
+/// actually hold one of her charges, and a board with none does nothing at
+/// all.
 /// </summary>
-public sealed class StartOfTurnSetOffPower : PowerModel, ILocalizationProvider
+public sealed class BombEchoPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Sparks 'n' Splash"),
         ("description",
-            "At the start of your turn, after your [gold]Bombs[/gold] grow, "
-          + "[gold]Set off[/gold] a random enemy's [gold]Bombs[/gold]."),
+            "At the end of your turn, deal [gold]Pyro[/gold] damage to a "
+          + "random enemy equal to the [gold]Bombs[/gold] on it."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
+    public override async Task BeforeSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
     {
-        if (Owner == null || player.Creature != Owner) return;
-        if (Owner.CombatState == null) return;
+        if (side != CombatSide.Player) return;
+        if (Owner?.CombatState == null) return;
 
-        var candidates = Owner.CombatState.HittableEnemies
-            .Where(e => !e.IsDead).ToList();
+        // An explicit walk rather than a `Where` lambda: the candidate rule is
+        // the card's own printed one ("a random enemy ... equal to the Bombs
+        // on it" -- so, an enemy that has some), and a closure would hide it
+        // from the IL pin that reads this method.
+        var candidates = new List<Creature>();
+        foreach (var enemy in Owner.CombatState.HittableEnemies)
+        {
+            if (enemy.IsDead) continue;
+            if (!ProtoBombPower.HoldsChargeFrom(enemy, Owner)) continue;
+            candidates.Add(enemy);
+        }
         if (candidates.Count == 0) return;
         var target = Owner.CombatState.RunState.Rng.CombatTargets
             .NextItem(candidates);
         if (target == null) return;
 
-        await ProtoBombPower.SetOff(choiceContext, target, Owner, cardSource: null);
+        var size = ProtoBombPower.TotalPlacedBy(target, Owner);
+        if (size <= 0) return;
+        await ElementalHit.Deal(
+            choiceContext, target, Element.Pyro, size, Owner);
     }
 }
 

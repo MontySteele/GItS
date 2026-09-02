@@ -1,4 +1,4 @@
-Status: OPEN (the number changes below are applied as D defaults in the next build; two watch items wait on your Kokomi run; picks at the end)
+Status: RULED R243 2026-09-02
 
 # Prototype balance pass: Klee and Kokomi, 2026-09-02
 
@@ -22,6 +22,12 @@ Under R212 these are D picks: applied at the default, disclosed here,
 yours to veto. Nothing moves in the game until the next deploy, which
 waits for a closed-game window.
 
+Four rows in section 1 are NOT D picks and are marked in their own line:
+Treatise, Song of Pearls, The General's Banner and The Moon, A Ship
+O'er the Seas are yours, ruled from live play on 2026-09-02 and built as
+you called them. Sango Isshin is a redesign rather than a number, on
+your verdict that it needed no setup.
+
 ## 1. Kokomi
 
 **Applied.**
@@ -34,6 +40,11 @@ waits for a closed-game window.
 | Deep Current | 4 to every enemy | 6 to every enemy | 4 to one enemy was two under a Strike; the Opus seat called it dead in a single-target fight. |
 | Coral Bulwark | 6 Block; Plan 6 Block and 1 Weak | 6 Block; Plan 8 Block and 1 Weak | The Plan line was the now-line plus a Weak, too thin to wait for. 8 and a Weak is Read the Field's 10 in a different shape. |
 | Change of Plans | 0 energy, Exhaust | 1 energy, Exhaust | The wait is the kit's price, worth about 1 energy on the two-line cards. A free skip was the one card that beat the rule for nothing. The upgrade still loses Exhaust, as ruled in round 2. |
+| Treatise | draw 1 per Plan carried out | draw 1 once per turn, on the first Plan carried out | [USER], live: one draw per Plan is too abusable; one per turn if a Plan fired is fine. |
+| Song of Pearls | 3 Block per Plan carried out | 3 Block once per turn, on the first Plan | [USER]: likewise. |
+| The General's Banner | 1 Weak per Companion card played | 1 Weak once per turn, on the first Companion card | [USER]: applies a lot of Weak, too strong; once per turn applied as the default. |
+| The Moon, A Ship O'er the Seas | Mend 10; Plan: Mend 15 | Mend 3; Plan: Mend 6 | [USER]: 15 is a lot; in-combat healing is nearly absent from the base game outside Ironclad, so the small numbers are the point. |
+| Sango Isshin | a quarter of Max HP now, and to every enemy at dawn, no setup | 8 damage; on a turn the Bake-Kurage carried out a Plan, a quarter of Max HP to every enemy instead | [USER]: strong Rares are fine, but this one needed no setup; now it pays only on a morning you planned for, and combos with Moon and Nereid. |
 
 Upgrades keep their current deltas over the new bases.
 
@@ -64,7 +75,10 @@ few Companions.
 | Alice's Recipe | Bombs grow by 4 instead of 3, 1 energy | Bombs grow twice each turn, 2 energy | It was Explosives Workshop's twin at Rare and strictly weaker (a second Workshop reaches 5; a second Recipe still reads 4). Doubling growth is the Rare; Workshop stays the stacking +1. |
 | Careful Arrangement | merge onto one enemy, grows by 2 | grows by 5 | +2 for 1 energy was the weakest line on the sheet; the merge is the card's point and it now pays close to Chain Fuse for setting up the big cash. |
 | Sorry, Jean... | 1 energy | 0 energy | Ka-pow! cashes a Bomb for damage for free; paying 1 to cash it for Block instead made the safe play the expensive one. Free, it is Ka-pow!'s defensive twin, and it still forfeits the Spark, since the Bomb is removed rather than set off. |
-| Sparks 'n' Splash | 2: at the end of your turn, Set off a random enemy's Bombs | 2: at the start of your turn, after your Bombs grow, Set off a random enemy's Bombs | Rule 7 grants the Rare its own explosion, so the auto-detonation stays; but firing at the end of the turn, before growth, it meant no Bomb it touched ever saw a dawn. At the start of the turn the Bombs it pops have grown, and the Sparks arrive when she can spend them. |
+| Sparks 'n' Splash | 2: at the end of your turn, Set off a random enemy's Bombs | 2: at the end of your turn, a random enemy takes damage equal to the Bombs on it | [USER]: auto-detonation bricks the growth build; the new one reads the Bomb without cashing it, so the growth build's Rare pays every turn and the Bomb keeps cooking. |
+| Base Strike (both characters) | applies the character's element by the catalyst cadence | applies nothing | [USER]: the basic cards are supposed to be bad; the element belongs to the kit's own Attacks. |
+| Ka-pow! | 0: Set off, 4 damage; Retain when upgraded | 0: Set off, 4 damage, Retain; upgrade 7 damage | Klee round-5 pick 1, at its default ([USER]: fine with the default): holding the Bomb no longer means discarding the only detonator. |
+| Bomb growth | 3 a turn | 4 a turn | The round-5 packet raised it to 5; [USER] read that back down the same day ("growth 5 is likely too much: basically a free Strike every turn, per bomb, per enemy"). |
 
 **Left alone, with the reason.** Big Badda Boom (14 per energy on a
 grown Bomb) and The Big One (22 on two) read "over" only because the

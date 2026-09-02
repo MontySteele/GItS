@@ -188,9 +188,8 @@
 
 - {id: proto_ko_kapow, name: "Ka-pow!", character: klee,
    authored_by: [claude],
-   cost: 0, type: attack, rarity: basic,
+   cost: 0, type: attack, rarity: basic, retain: true,
    description: "[gold]Set off[/gold]. Deal 4 damage.",
-   upgrade: {retain: true},
    effects: [{op: set_off, target: enemy, damage: 4}]}
 
 - {id: proto_ko_jumpy_dumpty, name: "Jumpy Dumpty", character: klee,
@@ -315,8 +314,8 @@
 - {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash (proto)", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, after your [gold]Bombs[/gold] grow, [gold]Set off[/gold] a random enemy's [gold]Bombs[/gold].",
-   effects: [{op: apply_power, power: ko_start_turn_set_off, amount: 1, target: self}]}
+   description: "At the end of your turn, deal [gold]Pyro[/gold] damage to a random enemy equal to the [gold]Bombs[/gold] on it.",
+   effects: [{op: apply_power, power: ko_bomb_echo, amount: 1, target: self}]}
 
 # --- React, the one that goes off twice (packet sec.4) ---
 
@@ -741,13 +740,13 @@
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], draw 1 card.",
+   description: "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}]}
 
 - {id: proto_kk_song_of_pearls, name: "Song of Pearls (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain 3 [gold]Block[/gold].",
+   description: "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain 3 [gold]Block[/gold].",
    effects: [{op: apply_power, power: kk_song_of_pearls, amount: 3, target: self}]}
 
 - {id: proto_kk_war_council, name: "War Council", character: kokomi,
@@ -811,16 +810,17 @@
 - {id: proto_kk_the_moon_a_ship, name: "The Moon, A Ship O'er the Seas", character: kokomi,
    authored_by: [claude],
    cost: 2, type: skill, rarity: rare, exhaust: true,
-   description: "Exhaust. [gold]Mend[/gold] 10. [gold]Plan[/gold]: [gold]Mend[/gold] 15.",
-   effects: [{op: mend, amount: 10}],
-   plan: [{op: mend, amount: 15}]}
+   description: "Exhaust. [gold]Mend[/gold] 3. [gold]Plan[/gold]: [gold]Mend[/gold] 6.",
+   effects: [{op: mend, amount: 3}],
+   plan: [{op: mend, amount: 6}]}
 
 - {id: proto_kk_sango_isshin, name: "Sango Isshin (proto)", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   description: "Deal damage equal to a quarter of your Max HP. [gold]Plan[/gold]: Deal the same to ALL enemies.",
-   effects: [{op: damage_quarter_max_hp, target: enemy}],
-   plan: [{op: damage_quarter_max_hp, target: all_enemies}]}
+   description: "Deal 8 damage. If the [gold]Bake-Kurage[/gold] carried out a [gold]Plan[/gold] this turn, deal a quarter of your Max HP to ALL enemies instead.",
+   effects: [{op: conditional, if: plan_carried_out_this_turn,
+              then: [{op: damage_quarter_max_hp, target: all_enemies}],
+              else: [{op: damage, amount: 8, target: enemy}]}]}
 
 # --- the Commander: Gorou, go (packet sec.4) ---
 
@@ -842,7 +842,7 @@
 - {id: proto_kk_the_generals_banner, name: "The General's Banner", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy.",
+   description: "Once per turn, when you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy.",
    effects: [{op: apply_power, power: kk_generals_banner, amount: 1, target: self}]}
 
 - {id: proto_kk_chain_of_command, name: "Chain of Command", character: kokomi,

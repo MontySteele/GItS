@@ -354,8 +354,10 @@ public class KleeOverhaulRoundThreeTests
         // basics are the base game's Strike and Defend, whose +3 the base game
         // owns. Coral Bulwark carries the Block half of the same pin.
         AssertUpgradeMoves<ProtoKkCoralBulwark>("Block", 6m, 9m);
-        // Ka-pow!'s draft-4 upgrade is Retain with its numbers unchanged, so
-        // the row that carries the `set_off`-hit clause is now Fwoosh!.
+        // Ka-pow! carries the `set_off`-hit clause again: round 5 pick 1 moved
+        // Retain onto the BASE card, which handed its upgrade back to the
+        // default rule. Fwoosh! prints the same clause beside it.
+        AssertUpgradeMoves<ProtoKoKapow>("Damage", 4m, 7m);
         AssertUpgradeMoves<ProtoKoFwoosh>("Damage", 5m, 8m);
         AssertUpgradeMoves<ProtoKoPop>("BombSize", 5m, 7m);
         // Chain Fuse grows by 6 since the 2026-09-02 balance pass; the
@@ -364,7 +366,10 @@ public class KleeOverhaulRoundThreeTests
         // The Mend clause, on draft 6's carrier. `Tide` left this pin with the
         // verb it read: the rule's key list is written over OPS, so retiring
         // `gain_tide` retired the delta and nothing here had to be re-decided.
-        AssertUpgradeMoves<ProtoKkTheMoonAShip>("Mend", 10m, 12m);
+        // Mend 3 since 2026-09-02 ([USER]: "15 is a lot. Maybe 3 (6 on
+        // Plan)"), and the +2 rides the new base like every other delta in
+        // this pass.
+        AssertUpgradeMoves<ProtoKkTheMoonAShip>("Mend", 3m, 5m);
         // The multi-hit clause: +1 PER HIT rather than +3 once.
         AssertUpgradeMoves<ProtoKoRapidFire>("Damage", 3m, 4m);
     }

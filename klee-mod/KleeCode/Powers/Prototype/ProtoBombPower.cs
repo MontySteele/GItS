@@ -995,6 +995,28 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
+    /// What this placer's charges on <paramref name="enemy"/> add up to, RAW.
+    /// Sparks 'n' Splash's echo reads it ("damage equal to the Bombs on it")
+    /// and hands it to the same <c>ElementalHit.Deal</c> an explosion hands a
+    /// charge's size to -- so Strength, Weak and the reaction all land on the
+    /// echo exactly as they land on a Bomb going off, and the raw sum is what
+    /// enters that pipeline in both cases.
+    ///
+    /// PURE, and R205-scoped like every other read here: another Klee's pile
+    /// is not hers to echo.
+    /// </summary>
+    public static int TotalPlacedBy(Creature? enemy, Creature? applier)
+    {
+        if (enemy == null || applier == null) return 0;
+        var total = 0;
+        foreach (var pile in enemy.Powers.OfType<ProtoBombPower>())
+        {
+            if (pile.Applier == applier) total += pile.TotalSize;
+        }
+        return total;
+    }
+
+    /// <summary>
     /// Chain Fuse: every Bomb on ONE enemy grows by <paramref name="amount"/>.
     /// This placer's piles only, for the same reason Set off reads only hers.
     /// </summary>

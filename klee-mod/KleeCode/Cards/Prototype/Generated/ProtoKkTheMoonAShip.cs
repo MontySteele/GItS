@@ -63,8 +63,8 @@ public sealed class ProtoKkTheMoonAShip : CustomCardModel, ICharacterCard, IPlan
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Mend", 10m),
-            new DynamicVar("PlanMend", 15m)
+            new DynamicVar("Mend", 3m),
+            new DynamicVar("PlanMend", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
