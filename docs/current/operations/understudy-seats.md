@@ -141,6 +141,25 @@ prompt inlines the packet and the rollout carries a third party's system
 prompt and raw output. The committed artifact is the form and the verdict
 under `review/qa/<turn-id>/`.
 
+**A closed round's per-turn directories leave HEAD (`EB-189`).** On
+2026-09-02, 57 of them — 476 files, 51,726 lines of `packet`, `observed`,
+`closeness`, `form-*` and `verdict-*` JSON from rounds already graded and
+ruled — were removed. What each turn decided stays: `review/qa/ledger.tsv`,
+the round's `*-round-summary.json` and its pair-review file, all at the top of
+`review/qa/`. The raw bytes are retrieved from git, which is where closed
+items live (CLAUDE.md §History retrieval):
+
+```
+git fetch --depth=1 origin e85d1309
+git show e85d1309:review/qa/<turn-id>/observed.json
+```
+
+Forty per-turn directories were **kept** because a test or a lint reads them —
+`understudy/qualify.py`'s battery and its regression set, the recorded-combat
+fixture `kokomi-slice1-r3-t01/observed.json`, the authorship fixtures and the
+`kokomi-slice2-t0*` set — as were `review/qa/blindplay/`, the two-instance
+proof and the `kokomi-eb183-*` turns, whose packet is still open.
+
 `closeness` is the one number (R213 F): the gap between the top two lines on
 the pilot's own score surface, quotable under R215 B's exception because it
 reads the TURN. SURVIVES means **not yet falsified** — nothing here rates a

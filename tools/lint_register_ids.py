@@ -720,7 +720,18 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # aims at one enemy". A fix that switched aiming off would pass the
         # first file and fail the second, which is why there are two.
         180, 181, 183,
-        189, 191, 193, 194, 195, 196, 197, 198,
+        # 194 LEFT OPEN_IDS 2026-09-02 with its row, on its acceptance word
+        # for word -- "both locks seen to FAIL pre-fix then green, a `+proto`
+        # build starts a run". The fix landed at `2ce95640` ("the loc merge
+        # moves off the boot path, and the roster stops poisoning itself") and
+        # `2d1ffde9` (EB-215) then deleted the boot-time loc merge outright.
+        # Both locks stand in `KleeTests/Prototype/KurageMemoryPinTests.cs`
+        # -- `Loc_injection_never_touches_the_prototype_surface` and
+        # `The_prototype_roster_survives_a_touch_with_an_empty_model_db` --
+        # and `PrototypeRoster` is lazy and per character with the trap in its
+        # own header. Every seat round since 2026-09-01 has started runs on a
+        # `+proto` build, which is the live half.
+        189, 191, 193, 195, 196, 197, 198,
         # 192 was minted 2026-08-29 and CLOSED 2026-08-30 by R231 A8: the
         # `regent_forge` canon package -- a regex union of Regent's Stars
         # with the unrelated Forge card -- was rebuilt as `regent_stars`
@@ -1242,12 +1253,23 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # skipped_under_the_arm`), and every surviving `Tide` in the mod
         # is a SHIPPED card's name (Ebb Tide, Tide of Names), which the
         # arm's pool replacement puts out of reach anyway.
-        259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 277, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
+        # 259/267/268/290 LEFT OPEN_IDS 2026-09-02 with their rows. Each row's
+        # own four parts said it was finished -- next action NONE, gate NONE,
+        # acceptance MET on named locks -- so each was closed work living in
+        # HEAD under the closed-items-leave-HEAD norm: 259 the commands the
+        # state rejects (`proceed` on an EVENT), 267 the printed-cost map keyed
+        # by title rather than card id, 268 the shop line's missing cost and
+        # type, 290 the r4 reward/chooser/refusal render gaps (6 locks, 5 seen
+        # to FAIL). Ceilings never come down and none may be re-minted.
+        260, 261, 262, 263, 264, 265, 266, 269, 270, 271, 272, 273, 274, 275, 277, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
         # 292: the `NCardTrail` hang off the Kokomi round-two blind session.
         # BUILT in the commit that mints it -- the guard refuses the
         # non-finite value at three doors and names the node chain -- and it
         # stays OPEN because the SOURCE of that value was not reproduced.
-        292, 293, 294, 295,  # 293-295: Kokomi round-two seat, text, render, HP
+        # 294 LEFT OPEN_IDS 2026-09-02 with its row -- next action NONE, gate
+        # NONE, acceptance met on 5 locks: the aura tag, the marked bundle
+        # pick and the emptied reward screen.
+        292, 293, 295,  # 293/295: Kokomi round-two seat, text, HP
         # 296/297/300: [USER]'s own controller session on the deployed arm.
         # 298/299: the blind-render burn, 2026-09-02, both BUILT in the commit
         # that mints them and both still OPEN -- 298 because a fixture written
