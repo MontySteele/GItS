@@ -164,7 +164,11 @@ def test_existing_portrait_is_not_rebilled_as_missing():
     res = run_tool()
     body = res.stdout
     missing_section = body.split("MISSING (the art bill)")[1].split("STALE")[0]
-    assert "dahlia_sacramental_shower" not in missing_section
+    # The shipped row's id exactly: `proto_mc_dahlia_sacramental_shower`, the
+    # companion prototype's own row (2026-09-02), is a different row that may
+    # legitimately sit on the bill, and a substring test read it as this one.
+    assert not re.search(r"(?<![A-Za-z0-9_])dahlia_sacramental_shower",
+                         missing_section)
     covered = "".join(ln for ln in body.splitlines() if ln.strip().startswith("have:"))
     assert "dahlia_sacramental_shower" in covered, "the existing portrait must read as covered"
 

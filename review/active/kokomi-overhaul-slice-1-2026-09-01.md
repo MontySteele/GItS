@@ -121,7 +121,9 @@ This is the whole of the new machinery. Anything not here is a card.
   kill her, the way Tackle can; a default for Balance to revisit.
 - **Garment** as a timed state with an on-hit hook (Mend 2 per Attack hit).
 - **Plan** as a queue: effects stored on play, resolved in order at the
-  start of her next turn, before draw. A Plan whose target is dead retargets
+  start of her next turn, after the draw (the engine has no seam between
+  the energy reset and the draw, and the brief's script C already counts a
+  Plan's energy on top of the reset, so "before draw" was the wrong word). A Plan whose target is dead retargets
   randomly.
 - **Strength → Tide** at the existing apply-power chokepoint (this exists
   today as Strength → Charge; retargeted).
