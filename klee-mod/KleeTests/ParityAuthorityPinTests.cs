@@ -88,7 +88,17 @@ public class ParityAuthorityPinTests
     // BothModes. This runs the real card model and the real predicate.
     // ---------------------------------------------------------------
 
+    // SHIPPED BEHAVIOUR, so `-p:FurinaReframe=true` is the one build line where
+    // this pin cannot hold: that arm retires Center Stage and aims the selector
+    // at Guest Cast, which is its whole point. Arm properties are DEPLOY-LINE
+    // ONLY (docs/current/operations/prototype.md) and the supported test
+    // configurations are none and `-p:PrototypeCards=true` -- this runs, and is
+    // green, in both.
+#if FURINA_REFRAME
+    [Fact(Skip = "-p:FurinaReframe=true replaces the shipped Spotlight rule this pin asserts. Arm properties are deploy-line only: see docs/current/operations/prototype.md.")]
+#else
     [Fact]
+#endif
     public void M2_authority_a_furina_card_is_spotlighted_under_the_both_modes_relic()
     {
         var seat = Seat.Furina().WithRelic<CurtainNeverFalls>();

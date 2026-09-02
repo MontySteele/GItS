@@ -17,8 +17,27 @@ and from PowerShell.
 | event | matcher | script | what it refuses / does |
 |---|---|---|---|
 | PreToolUse | `Bash\|PowerShell` | `tools/hooks/deny_dangerous_git.py` | `git add -A` / `.` / `--all`; `git worktree remove`; `git push` at `main` or forced; `--no-verify` on `commit` or `push` |
-| PreToolUse | `Bash\|PowerShell` | `tools/hooks/push_gate.py` | a real `git push` runs the fast lane + `run_lints --lane ci` first (~21 s measured) **in the tree the push targets** — resolved from `git -C`, then the last in-line `cd`, then the payload's `cwd`, and NAMED in the note — and is BLOCKED on red, on timeout, or when that tree holds no `tools/run_lints.py` / `tier0/tests` |
+| PreToolUse | `Bash\|PowerShell` | `tools/hooks/push_gate.py` | installs the `pre-push` hook below when it is missing, and REFUSES `git push --no-verify` — the one flag that turns that hook off. It runs no tests itself any more |
+| git `pre-push` | every push, every worktree | `tools/hooks/pre_push_gate.py` | the fast lane (`-n auto --dist loadscope -m "not battery"`, 57.1 s measured 2026-09-02) + `run_lints --lane ci`, over **the tree being pushed** — git runs the hook with the working directory at that worktree's top, so nothing has to parse a command line to find it. BLOCKED on red, on timeout, or when the tree holds no `tools/run_lints.py` / `tier0/tests`. A pure ref DELETION carries no code and is allowed |
 | PostToolUse | `Edit\|Write\|NotebookEdit` | `tools/hooks/game_ref_backup_reminder.py` | an edit under `game_ref/` prints the vault-backup reminder; `GITS_HOOK_RUN_BACKUP=1` runs the mirror instead |
+
+**The push gate is a git hook now (2026-09-02).** It was a `PreToolUse` hook,
+which fires BEFORE the command runs — so `edit && commit && push` on one line
+was judged on the PRE-EDIT tree, and was refused over the state of a file the
+same command was about to fix. `pre-push` runs when git holds the refs, in the
+worktree being pushed, so the tree checked is the tree pushed. Install it with
+
+```sh
+python tools/hooks/install.py          # --check to report, never installs twice
+```
+
+which writes `<git-common-dir>/hooks/pre-push` — **the shared one, so a single
+run covers every existing and future worktree of this clone.** A fresh clone
+owes exactly that one command (the `PreToolUse` shim also runs it on the first
+push of a session, so a session that forgets still ends up gated). A worktree
+cut from a commit older than `tools/hooks/pre_push_gate.py` is NOT waved
+through: the shim falls back to the main worktree's copy, and failing that runs
+the same two checks inline.
 
 Skills (`.claude/skills/<name>/SKILL.md`) carry the procedures this file used
 to narrate: **`sitting`** — a registered experiment's run, world-check to

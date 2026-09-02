@@ -21,6 +21,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 VALIDATE = (ROOT / "klee-mod" / "build" / "validate.ps1").read_text(
     encoding="utf-8")
+# S4, S5 and S8 moved out of validate.ps1 on 2026-09-02 into
+# klee-mod/build/static_rules.ps1, so the SAME code could run on a Linux CI
+# runner under pwsh -- S5 had just refused a deploy over a `[blue]` tag that a
+# green CI had merged, because a regex over committed C# was reachable only
+# through a Windows-only gate. validate.ps1 still calls them and still reports
+# under the same S-numbers; the pins below follow the rule to where it lives,
+# and each one also asserts the gate still CALLS it.
+STATIC_RULES = (ROOT / "klee-mod" / "build" / "static_rules.ps1").read_text(
+    encoding="utf-8")
 BUILD_PCK = (ROOT / "tools" / "build_pck.ps1").read_text(encoding="utf-8")
 
 
@@ -45,11 +54,15 @@ def test_s8_scans_the_repo_root_not_the_csharp_source_tree():
     strings in build_pck.ps1, the only place this repo writes game-visible
     text from PowerShell -- was never checked.
     """
-    block = VALIDATE[VALIDATE.index("$asciiExempt = "):]
-    block = block[:block.index("# ------", 10)]
-    assert "Get-ChildItem $repoRoot -Recurse -Filter *.ps1" in block, block
+    block = STATIC_RULES[STATIC_RULES.index("$asciiExempt = "):]
+    assert "Get-ChildItem $RepoRoot -Recurse -Filter *.ps1" in block, block
     assert "$SourceDir" not in code_only(block), (
         "S8 is aimed at the C# source tree again; it contains no .ps1 files")
+    # And the deploy gate still RUNS it, under S8. An extraction that quietly
+    # dropped the rule from validate.ps1 on its way to CI would satisfy every
+    # assertion above.
+    assert "Test-ScriptsAscii -RepoRoot $repoRoot" in VALIDATE
+    assert "Fail 'S8'" in VALIDATE
 
 
 def test_s8_fails_when_its_sweep_is_empty():
@@ -58,14 +71,24 @@ def test_s8_fails_when_its_sweep_is_empty():
     A rule that iterates an empty set reports exactly what a rule that
     iterates a clean set reports. Now zero files is itself the finding.
     """
-    assert re.search(r"if \(\$ps1Files\.Count -eq 0\) \{\s*\n?\s*Fail 'S8'",
-                     VALIDATE), VALIDATE[VALIDATE.index("$asciiSkip"):][:600]
+    assert re.search(r"if \(\$ps1Files\.Count -eq 0\) \{\s*\n?\s*\$out\.Add",
+                     STATIC_RULES), \
+        STATIC_RULES[STATIC_RULES.index("$asciiSkip"):][:600]
 
 
 def test_s8_does_not_police_other_peoples_trees():
-    """`.venv` ships Activate.ps1, which is not this repo's to keep ASCII."""
-    assert "'*\\.venv\\*'" in VALIDATE.replace("\\\\", "\\") or \
-        "*\\.venv\\*" in VALIDATE
+    """`.venv` ships Activate.ps1, which is not this repo's to keep ASCII.
+
+    FORWARD SLASHES since 2026-09-02: the exclude list is matched against a
+    forward-slashed copy of each path, because the same sweep now runs on a
+    Linux runner where a backslash pattern matches nothing at all -- an
+    exclude list that excluded nothing, silently. Both halves are pinned, and
+    they have to be: either alone is a list that never fires.
+    """
+    assert "'*/.venv/*'" in STATIC_RULES, STATIC_RULES
+    assert ".Replace('\\', '/')" in STATIC_RULES, (
+        "the exclude patterns are forward-slashed but the path is not, so on "
+        "Windows they now match nothing")
 
 
 # --- C2: S9's inverted guard ---------------------------------------------

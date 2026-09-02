@@ -21,6 +21,10 @@ param(
     # exists but is incomplete (falls back to committed-only with a loud
     # banner instead of failing validation).
     [switch]$AllowIncompleteGameRef,
+    # Passed through to validate.ps1 S7 (2026-09-02): run the WHOLE repo
+    # suite here, serially, instead of letting a green CI run on this exact
+    # commit stand in for it. See klee-mod/build/ci_trust.ps1.
+    [switch]$FullGate,
     # Also zip the validated stage into dist\klee-v<version>.zip for handoff.
     # The zip is the EXACT package that deploys locally (same validate gates),
     # including all card art and the pck -- recipients extract it into the
@@ -105,7 +109,7 @@ if ($version.IsDirty) {
     # contents -- two "+dirty" zips can share a name and differ.
     Write-Host ""
     Write-Host "*** DIRTY WORKING TREE ***" -ForegroundColor Red
-    Write-Host ("  $($version.DirtyFiles.Count) uncommitted change(s); version stamped +dirty.") -ForegroundColor Red
+    Write-Host ("  $($version.DirtyFiles.Count) uncommitted change(s) to TRACKED files; version stamped +dirty.") -ForegroundColor Red
     Write-Host "  DO NOT hand this build to a co-op partner. Commit first, then rebuild." -ForegroundColor Red
     foreach ($f in ($version.DirtyFiles | Select-Object -First 10)) {
         Write-Host "    $f" -ForegroundColor DarkYellow
@@ -114,6 +118,14 @@ if ($version.IsDirty) {
         Write-Host ("    ... and " + ($version.DirtyFiles.Count - 10) + " more") -ForegroundColor DarkYellow
     }
     Write-Host ""
+}
+
+# Untracked files are NOT dirt (2026-09-02; see Get-AutoVersion). They are
+# still worth one line, because an untracked .cs under KleeCode/ is compiled
+# by the csproj's default glob and so can change this build without moving the
+# mark above.
+if ($version.UntrackedFiles.Count -gt 0) {
+    Write-Host ("note: $($version.UntrackedFiles.Count) untracked file(s) in the tree; they do not affect the version stamp.") -ForegroundColor DarkGray
 }
 
 # Card art ships as loose PNGs next to the dll -- no .pck needed, because
@@ -181,7 +193,8 @@ Write-Host "Validating package..." -ForegroundColor Cyan
     -StageDir $stage `
     -SourceDir (Join-Path $root 'KleeCode') `
     -GameDir $gameDir `
-    -AllowIncompleteGameRef:$AllowIncompleteGameRef
+    -AllowIncompleteGameRef:$AllowIncompleteGameRef `
+    -FullGate:$FullGate
 
 if ($Package) {
     # Read the version from the STAGED manifest so the zip name can never

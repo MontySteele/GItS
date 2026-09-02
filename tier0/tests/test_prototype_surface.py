@@ -596,13 +596,21 @@ def test_version_stamps_cannot_see_the_prototype_surface():
     assert loader.PROTOTYPE_SHEET not in lint_sheet_stamp.sheets()
     assert "docs/prototype-surface.yaml" in lint_sheet_stamp.EXCLUDED
     before = lint_sheet_stamp.digest()
-    text = loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")
+    # BYTES, NOT TEXT (2026-09-02). This writes a TRACKED sheet in the real
+    # checkout and puts it back, and `write_text` on Windows translates "\n"
+    # into "\r\n" -- so the "restore" left the file byte-DIFFERENT from HEAD,
+    # which `.gitattributes`' LF working tree reports as a standing
+    # modification. Under `-n auto` it was worse than cosmetic while it lasted:
+    # a tracked file flickering modified is a working tree flickering DIRTY,
+    # and `test_manifest_version_gate` read exactly that flicker between two
+    # `Get-AutoVersion` calls and went red once for it.
+    raw = loader.PROTOTYPE_SHEET.read_bytes()
     try:
-        loader.PROTOTYPE_SHEET.write_text(
-            text + "\n# staged, for one assertion\n", encoding="utf-8")
+        loader.PROTOTYPE_SHEET.write_bytes(
+            raw + b"\n# staged, for one assertion\n")
         assert lint_sheet_stamp.digest() == before
     finally:
-        loader.PROTOTYPE_SHEET.write_text(text, encoding="utf-8")
+        loader.PROTOTYPE_SHEET.write_bytes(raw)
 
 
 def test_distinctness_report_cannot_see_the_prototype_surface():

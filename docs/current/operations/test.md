@@ -76,10 +76,14 @@ date-attributed shape the C11 ruling took):
 - **before any push** — the FULL suite (`-n auto --dist loadscope`) and the
   full lint battery. The fast lane is never the gate: the deselected 82 items
   are the calibration bands, and a band that was not run is not a band. Since
-  Correction D a push that ran NOTHING is refused outright by
-  `tools/hooks/push_gate.py`, which runs the fast lane and the `ci` lint lane
-  in ~21 s — **a floor under this rule, not a substitute for it.** The hook
-  cannot afford the bands; you can.
+  Correction D a push that ran NOTHING is refused outright — since 2026-09-02
+  by the git `pre-push` hook (`tools/hooks/pre_push_gate.py`, installed once
+  per clone with `python tools/hooks/install.py`), which runs the fast lane and
+  the `ci` lint lane in ~60 s — **a floor under this rule, not a substitute for
+  it.** The hook cannot afford the bands; you can. It left `PreToolUse` because
+  such a hook necessarily judged the tree as it stood BEFORE the command: an
+  `edit && commit && push` one-liner was gated on the pre-edit tree, and often
+  refused over the state of a file that same command was fixing.
 - **bare `pytest` stays bare.** No `addopts`. Anyone who types the CI line
   gets the CI run.
 

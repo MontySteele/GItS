@@ -27,6 +27,13 @@ param(
     # that could be mistaken for a full pass would be the R70 failure class
     # wearing the opposite coat.
     [switch]$StaticOnly,
+    # 2026-09-02. Force S7's OLD arm: the whole repo suite, serially, in
+    # process, no matter what CI already proved about this commit. The escape
+    # hatch for the day the CI trust is itself the thing under suspicion --
+    # and a switch rather than the default, because the default was spending
+    # 399 s per deploy re-deriving a fact GitHub was already holding. The rule
+    # is in ci_trust.ps1 and docs/current/operations/build-deploy.md.
+    [switch]$FullGate,
     # S16 (EB-105). Run the C# test project, klee-mod/KleeTests. OPTIONAL and
     # OFF by default, deliberately: it is brand new, it needs the game install
     # and the Workshop BaseLib the way the bite-check does, and whether a C#
@@ -58,6 +65,18 @@ $suiteSeconds = 0.0
 # stamp and the gate that checks it cannot compute it differently. Also
 # supplies Read-JsonFile (BOM-tolerant) and ConvertTo-ComparableVersion.
 . (Join-Path $PSScriptRoot 'version.ps1')
+
+# S7's arm decision (2026-09-02): may a green CI run on this exact commit
+# stand in for running the suite again here? Same arrangement version.ps1 has
+# -- the rule lives in a dot-sourced function so it can be unit-tested and so
+# this file states the decision rather than re-deriving it.
+. (Join-Path $PSScriptRoot 'ci_trust.ps1')
+
+# The STATIC source rules (S4, S5, S8), extracted 2026-09-02 so the SAME code
+# runs on a Linux CI runner under pwsh. See static_rules.ps1's header for the
+# defect that made it necessary; the rules are unchanged and are still called
+# from their own numbered sections below.
+. (Join-Path $PSScriptRoot 'static_rules.ps1')
 
 # ---------------------------------------------------------------------------
 # S1. No stray *.json in the staged package.
@@ -205,73 +224,26 @@ if (-not (Test-Path $manifestPath)) {
 # ---------------------------------------------------------------------------
 # S4. BaseLib custom models must resolve their pool registration.
 #
-# CustomCardModel's ctor defaults autoAdd:true, which calls
-# CustomContentDictionary.AddModel and THROWS unless the class carries a
-# [Pool(typeof(...))] attribute. This is a startup crash, not a soft failure:
-# it happens during model construction and takes the game to an error screen.
-# Shipped 2026-07-20 on DuckAndCover.
-#
-# Heuristic by necessity -- proving it properly means reading IL for the base
-# ctor's bool argument. It catches the shape we actually hit and is honest
-# about being a lint, not a proof.
+# THE RULE LIVES IN static_rules.ps1 (Test-PoolRegistration) so the SAME code
+# runs in CI's `lints` job under pwsh on Linux. This file calls it and reports
+# its findings under S4, exactly as when the loop was inline -- the same
+# arrangement version.ps1's Test-VersionPolicy has at S3.
 # ---------------------------------------------------------------------------
-$customBases = 'CustomCardModel|CustomRelicModel|CustomPotionModel'
-foreach ($f in Get-ChildItem $SourceDir -Recurse -Filter *.cs) {
-    $text = Get-Content $f.FullName -Raw
-    if ($text -notmatch "class\s+\w+\s*:\s*($customBases)") { continue }
-
-    $hasPoolAttr = $text -match '\[\s*Pool\s*\('
-    $optsOut     = $text -match 'autoAdd\s*:\s*false'
-
-    if (-not $hasPoolAttr -and -not $optsOut) {
-        Fail 'S4' "$($f.Name): derives from a BaseLib Custom*Model but has neither a [Pool(typeof(...))] attribute nor autoAdd: false. Its constructor will throw at startup."
-    }
+foreach ($finding in (Test-PoolRegistration -SourceDir $SourceDir)) {
+    Fail 'S4' $finding
 }
 
 # ---------------------------------------------------------------------------
 # S5. Loc strings declared in source use the right template syntax.
 #
-# Two distinct syntaxes, both of which bit us:
-#   - SmartFormat uses SINGLE braces. "{{Damage}}" renders literally.
-#   - Square brackets are BBCode. "[Block]" collides with the [center] wrapper
-#     the card renderer adds and throws "Found end tag center, expected Block".
-# The runtime check covers strings after they land in the table; this catches
-# them at author time.
+# In static_rules.ps1 (Test-LocTemplates) and in CI as of 2026-09-02: this is
+# the rule that refused the round-six deploy over a '[blue]' that PR #291 had
+# merged past a green CI, because a regex over committed C# was reachable only
+# through a Windows-only deploy gate. It is the whole reason the extraction
+# happened.
 # ---------------------------------------------------------------------------
-$knownTags = @('center','left','right','b','i','u','s','color','bgcolor','fgcolor',
-               'font','img','url','gold','keyword','wave','shake','p')
-
-foreach ($f in Get-ChildItem $SourceDir -Recurse -Filter *.cs) {
-    $n = 0
-    foreach ($line in (Get-Content $f.FullName)) {
-        $n++
-        # Only look at lines that are plausibly loc values.
-        if ($line -notmatch '"(title|description)"|\.description"\]|\.title"\]') {
-            if ($line -notmatch '\("(title|description)",') { continue }
-        }
-
-        if ($line -match '\{\{') {
-            Fail 'S5' "$($f.Name):$n uses doubled braces; SmartFormat placeholders are single-braced and {{X}} renders literally."
-        }
-        # Scan only the STRING LITERALS on the line, never the surrounding C#.
-        # BBCode can only ever appear inside a literal, and scanning the raw
-        # line made a dictionary-initializer KEY look like a tag: the line
-        #     [Cards.FurinaRiderTips.FanfareKey + ".title"] = "Fanfare scaling"
-        # passes the loc-value filter above on its `.title"]`, and then `[Cards`
-        # reads as an unknown BBCode tag. That false positive has blocked every
-        # deploy since 0b33ffd. Narrowing to literals keeps the gate's reach --
-        # a real '[Block]' inside any loc string is still caught -- while
-        # dropping a class of finding that cannot be a render bug.
-        foreach ($lit in [regex]::Matches($line, '"([^"\\]*(?:\\.[^"\\]*)*)"')) {
-            foreach ($mm in [regex]::Matches($lit.Groups[1].Value,
-                                             '\[/?([A-Za-z_][A-Za-z0-9_]*)')) {
-                $tag = $mm.Groups[1].Value
-                if ($knownTags -notcontains $tag.ToLower()) {
-                    Fail 'S5' "$($f.Name):$n uses '[$tag]', which is not a known BBCode tag. If it is a variable write {$tag}; an unknown tag throws at render time."
-                }
-            }
-        }
-    }
+foreach ($finding in (Test-LocTemplates -SourceDir $SourceDir)) {
+    Fail 'S5' $finding
 }
 
 # ---------------------------------------------------------------------------
@@ -665,32 +637,108 @@ if (Test-Path $venvPython) {
         Write-Host '===============================================================' -ForegroundColor Yellow
         $referenceMode = $null
     }
+    # -----------------------------------------------------------------------
+    # WHICH ARM OF S7 RUNS (2026-09-02). Three, and the choice is DERIVED, not
+    # remembered:
+    #
+    #   TRUSTED   the working tree is clean, HEAD is on origin/main, and
+    #             GitHub's `pytest` and `lints` check runs for THAT EXACT SHA
+    #             are green. The suite does not run and one line says which
+    #             run it stood on. ci_trust.ps1 owns the three conditions and
+    #             every failure to establish one is "not proven", never
+    #             "assume yes".
+    #   FAST      anything else. `-n auto --dist loadscope -m "not battery"`
+    #             over tier0/tests + tier05/tests -- the exact arm
+    #             tools/hooks/push_gate.py runs, ~57 s against ~399 s.
+    #   FULL      -FullGate, or the fast arm's xdist missing. The old
+    #             behaviour, whole repo, serial.
+    #
+    # WHY THE FAST ARM IS AN HONEST DEFAULT AND THE SKIP IS NOT A HOLE. The
+    # deploy machine is not the only gate this tree passes: push_gate ran the
+    # fast lane before the push, CI ran the WHOLE suite in parallel on the
+    # merge, and the three conditions above are exactly the ones under which
+    # this tree and that commit are the same bytes. What S7 was doing before
+    # was running it a third time, serially, at eight minutes a deploy.
+    # -----------------------------------------------------------------------
     if ($null -ne $referenceMode) {
-        $swSuite = [Diagnostics.Stopwatch]::StartNew()
-        $oldReferenceMode = [Environment]::GetEnvironmentVariable(
-            'GITS_REFERENCE_MODE', 'Process')
-        $env:GITS_REFERENCE_MODE = $referenceMode
+        $trust = $null
+        if (-not $FullGate) {
+            try {
+                $trust = Get-CiSuiteTrust -RepoRoot $repoRoot
+            } catch {
+                $trust = @{ Trusted = $false
+                            Reason = "the CI-trust check itself failed: $($_.Exception.Message)" }
+            }
+        }
 
-        # Invoke-RepoPython DOES redirect 2>&1 -- safely, because it drops
-        # ErrorActionPreference to 'Continue' for the duration of the call.
-        # (This comment used to say "No 2>&1", directly above a helper that
-        # does exactly that: it was written for the bare call site the helper
-        # replaced and was never updated. Audit sec.3.4.) -q keeps the output
-        # to the summary line plus failures.
-        try {
-            $pytestOut = Invoke-RepoPython -m pytest $repoRoot -q
-            if ($LASTEXITCODE -ne 0) {
-                $tail = ($pytestOut | Select-Object -Last 25) -join "`n    "
-                Fail 'S7' "portable repo suite not green (pytest exit $LASTEXITCODE):`n    $tail"
+        if ($trust -and $trust.Trusted) {
+            Write-Host ("S7 SKIPPED: trusting GitHub check run '" + $trust.RunName +
+                        "' (" + $trust.RunId + ", completed " + $trust.RunEnd +
+                        ") on this exact commit " + $trust.Sha.Substring(0, 8) +
+                        " -- clean tree, HEAD on origin/main. " + $trust.RunUrl) `
+                       -ForegroundColor Green
+            if ($trust.Untracked -gt 0) {
+                Write-Host ("  note: " + $trust.Untracked + " untracked file(s) present; CI never saw those and they are not compiled unless they are under KleeCode/.") -ForegroundColor DarkGray
             }
-        } finally {
-            if ($null -eq $oldReferenceMode) {
-                Remove-Item Env:GITS_REFERENCE_MODE -ErrorAction SilentlyContinue
+            Write-Host '  Pass -FullGate to run the whole suite here anyway.' -ForegroundColor DarkGray
+        } else {
+            $swSuite = [Diagnostics.Stopwatch]::StartNew()
+            $oldReferenceMode = [Environment]::GetEnvironmentVariable(
+                'GITS_REFERENCE_MODE', 'Process')
+            $env:GITS_REFERENCE_MODE = $referenceMode
+
+            # pytest-xdist decides whether the fast arm is available at all.
+            # Without it the fast arm's whole saving is gone, so the honest
+            # move is the full serial suite rather than a "fast" lane that is
+            # not fast.
+            $haveXdist = $false
+            if (-not $FullGate) {
+                Invoke-RepoPython -c 'import xdist' | Out-Null
+                $haveXdist = ($LASTEXITCODE -eq 0)
+            }
+
+            if ($haveXdist) {
+                $arm = 'FAST'
+                $laneArgs = @('-m', 'pytest',
+                              (Join-Path $repoRoot 'tier0\tests'),
+                              (Join-Path $repoRoot 'tier05\tests'),
+                              '-q', '-m', 'not battery',
+                              '-n', 'auto', '--dist', 'loadscope')
+                Write-Host ("S7 FAST ARM: " + $trust.Reason +
+                            ", so the suite runs here -- tier0+tier05, -n auto --dist loadscope, battery deselected.") -ForegroundColor Yellow
             } else {
-                $env:GITS_REFERENCE_MODE = $oldReferenceMode
+                $arm = 'FULL'
+                $laneArgs = @('-m', 'pytest', $repoRoot, '-q')
+                $why = if ($FullGate) { '-FullGate' } else { 'pytest-xdist is not installed in the repo venv' }
+                Write-Host ("S7 FULL ARM ($why): the whole repo suite, serially.") -ForegroundColor Yellow
             }
-            $swSuite.Stop()
-            $suiteSeconds = $swSuite.Elapsed.TotalSeconds
+
+            # Invoke-RepoPython DOES redirect 2>&1 -- safely, because it drops
+            # ErrorActionPreference to 'Continue' for the duration of the call.
+            # (This comment used to say "No 2>&1", directly above a helper that
+            # does exactly that: it was written for the bare call site the helper
+            # replaced and was never updated. Audit sec.3.4.) -q keeps the output
+            # to the summary line plus failures.
+            try {
+                $pytestOut = Invoke-RepoPython @laneArgs
+                if ($LASTEXITCODE -ne 0) {
+                    $tail = ($pytestOut | Select-Object -Last 25) -join "`n    "
+                    Fail 'S7' "portable repo suite not green ($arm arm, pytest exit $LASTEXITCODE):`n    $tail"
+                }
+            } finally {
+                if ($null -eq $oldReferenceMode) {
+                    Remove-Item Env:GITS_REFERENCE_MODE -ErrorAction SilentlyContinue
+                } else {
+                    $env:GITS_REFERENCE_MODE = $oldReferenceMode
+                }
+                $swSuite.Stop()
+                $suiteSeconds = $swSuite.Elapsed.TotalSeconds
+            }
+            if ($arm -eq 'FAST') {
+                Write-Host ('  NOT RUN by the fast arm: the `battery` calibration bands, and ' +
+                            'every test outside tier0/tests and tier05/tests (tools, understudy). ' +
+                            'CI ran all of them on this branch; -FullGate runs them here.') -ForegroundColor DarkGray
+            }
         }
     }
 } elseif (-not $StaticOnly) {
@@ -769,56 +817,13 @@ if (Test-Path $cardsRoot) {
 # ---------------------------------------------------------------------------
 # S8. Build scripts are pure ASCII.
 #
-# Every .ps1 in this repo says so in its own header, and the rule was still
-# broken -- Furina's Architect finale line carried an em-dash, and because
-# Windows PowerShell 5.1 reads a BOM-less .ps1 as ANSI, the UTF-8 bytes were
-# decoded as cp1252 and re-encoded as UTF-8 on the way into the pck. The line
-# shipped reading "Now a<euro>" the people rejoice" on the WIN SCREEN, which
-# is the last text a player sees after beating Act 3. Caught 2026-07-25 by
-# reading the built json, not by any gate.
-#
-# The failure is silent by construction: the mangling happens at PARSE time,
-# so nothing downstream can tell a mojibake string from an intended one. The
-# only place to catch it is the bytes on disk, here.
-#
-# A line may opt out with the marker below when a non-ASCII byte is the
-# POINT (validate.ps1's own literal-BOM regex is the one case today).
+# In static_rules.ps1 (Test-ScriptsAscii), and in CI, for the reason S4 and S5
+# are: it reads bytes off disk and needs nothing else. Its exclude list is
+# matched against forward-slashed paths there so the same sweep works on a
+# Linux runner.
 # ---------------------------------------------------------------------------
-$asciiExempt = '# ascii-exempt:'
-# C1 (audit sec.3.1): this walked $SourceDir (= KleeCode), which contains ZERO
-# .ps1 files -- all three live in klee-mod\build\ and tools\. The loop found
-# nothing and the rule passed, every run, since the day it was written. The
-# mojibake class it exists for (build_pck.ps1's heredoc strings, which are the
-# ONLY place this repo writes game-visible text from PowerShell) was never
-# checked at all.
-#
-# Scanned from the repo root instead of from a list of directories, because a
-# list is the same defect one level up: a .ps1 added somewhere new would be
-# unchecked and nothing would say so. Excludes are for trees that are not ours
-# -- .venv ships Activate.ps1, which is not this repo's to keep ASCII.
-$asciiSkip = @('*\.venv\*', '*\dist\*', '*\obj\*', '*\bin\*',
-               '*\pck-work\*', '*\node_modules\*')
-$ps1Files = @(Get-ChildItem $repoRoot -Recurse -Filter *.ps1 -ErrorAction SilentlyContinue |
-    Where-Object { $p = $_.FullName; -not ($asciiSkip | Where-Object { $p -like $_ }) })
-if ($ps1Files.Count -eq 0) {
-    Fail 'S8' ("found no .ps1 files under $repoRoot to check. This rule scanned " +
-        "a directory with none in it for its entire life; an empty sweep is " +
-        "the failure mode, not a pass.")
-}
-foreach ($script in $ps1Files) {
-    $lineNo = 0
-    foreach ($line in [IO.File]::ReadAllLines($script.FullName)) {
-        $lineNo++
-        if ($line -match $asciiExempt) { continue }
-        $offenders = [char[]]$line | Where-Object { [int]$_ -gt 127 }
-        if ($offenders.Count -gt 0) {
-            $codes = ($offenders | ForEach-Object { 'U+{0:X4}' -f [int]$_ }) -join ', '
-            Fail 'S8' ("$($script.Name):$lineNo has non-ASCII characters ($codes). " +
-                "PowerShell 5.1 reads a BOM-less .ps1 as ANSI, so these are decoded as " +
-                "cp1252 and ship as mojibake wherever the string lands. Use ASCII, or " +
-                "mark the line '$asciiExempt <reason>' if the byte is deliberate.")
-        }
-    }
+foreach ($finding in (Test-ScriptsAscii -RepoRoot $repoRoot)) {
+    Fail 'S8' $finding
 }
 
 # ---------------------------------------------------------------------------

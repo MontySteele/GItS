@@ -87,7 +87,24 @@ function Get-ManifestMajor {
 function Get-AutoVersion {
     <#
       Commit count, plus "+dirty" when the working tree has uncommitted
-      changes. Returns Auto / IsDirty / DirtyFiles.
+      changes. Returns Auto / Count / IsDirty / DirtyFiles / UntrackedFiles.
+
+      WHAT "DIRTY" MEANS, fixed 2026-09-02: UNCOMMITTED CHANGES TO TRACKED
+      FILES, and nothing else. `git status --porcelain` also lists untracked
+      files (`??`), and the deploy machine always has some -- seat logs under
+      `understudy/logs/`, capture packets under `review/qa/`, a scratch note.
+      So every build ever made from a clean `main` stamped `+proto.dirty`; the
+      mark meant "this checkout has scratch files in it" rather than "this
+      build is not reproducible from a commit", and the one question it exists
+      to answer -- does the commit count identify these contents? -- it could
+      not answer. `--untracked-files=no` is the whole fix.
+
+      THE ONE THING THIS GIVES UP, said out loud rather than found later: an
+      untracked `.cs` file under `klee-mod/KleeCode/` IS compiled (the csproj
+      globs by default), so it can change the build without moving the mark.
+      That is why UntrackedFiles is returned too -- the deploy scripts print
+      the count as a NOTE. A note is the right weight: it is visible, and it
+      does not put `.dirty` on a package that was built from a commit.
     #>
     param([string]$RepoRoot)
 
@@ -103,11 +120,19 @@ function Get-AutoVersion {
         }
         $count = "$count".Trim()
 
-        $status = @(& git status --porcelain)
+        $status = @(& git status --porcelain --untracked-files=no)
         if ($LASTEXITCODE -ne 0) {
-            throw "git status --porcelain failed in $RepoRoot."
+            throw "git status --porcelain --untracked-files=no failed in $RepoRoot."
         }
         $dirtyFiles = @($status | Where-Object { $_ -and "$_".Trim() })
+
+        # Reported, never stamped. `--exclude-standard` so a gitignored build
+        # artifact (bin/, obj/, dist/, local.props) stays out of the count as
+        # well: those are ignored deliberately, and naming them would make the
+        # note as unreadable as the mark it replaces.
+        $others = @(& git ls-files --others --exclude-standard)
+        if ($LASTEXITCODE -ne 0) { $others = @() }
+        $untrackedFiles = @($others | Where-Object { $_ -and "$_".Trim() })
     } finally {
         Pop-Location
     }
@@ -115,10 +140,11 @@ function Get-AutoVersion {
     $isDirty = $dirtyFiles.Count -gt 0
     $auto = if ($isDirty) { "$count+dirty" } else { $count }
     return @{
-        Auto       = $auto
-        Count      = $count
-        IsDirty    = $isDirty
-        DirtyFiles = $dirtyFiles
+        Auto           = $auto
+        Count          = $count
+        IsDirty        = $isDirty
+        DirtyFiles     = $dirtyFiles
+        UntrackedFiles = $untrackedFiles
     }
 }
 
@@ -161,12 +187,13 @@ function Get-PackageVersion {
         $autoText = $auto.Auto
     }
     return @{
-        Version     = "$major.$autoText"
-        Major       = $major
-        Auto        = $autoText
-        IsPrototype = [bool]$Prototype
-        IsDirty     = $auto.IsDirty
-        DirtyFiles  = $auto.DirtyFiles
+        Version        = "$major.$autoText"
+        Major          = $major
+        Auto           = $autoText
+        IsPrototype    = [bool]$Prototype
+        IsDirty        = $auto.IsDirty
+        DirtyFiles     = $auto.DirtyFiles
+        UntrackedFiles = $auto.UntrackedFiles
     }
 }
 
