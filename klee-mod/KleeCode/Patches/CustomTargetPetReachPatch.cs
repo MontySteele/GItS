@@ -161,6 +161,14 @@ internal static class NCombatRoom_RestrictControllerNavigation_RingTheWhitelist_
                     ordered[i].Hitbox.FocusNeighborTop = ordered[i].Hitbox.GetPath();
                 }
             }
+
+            // One line per ring actually built, which is one per custom-typed
+            // controller play and never otherwise. The live acceptance is an
+            // input-level check no automated arm can make -- this is what lets
+            // it be read back out of godot.log instead of taken on trust.
+            Log.Info($"[{KleeMod.ModId}] EB-296 ring: {ordered.Count} candidate(s) "
+                   + $"linked, {ordered.Count(n => !n.IsInteractable)} of them closed "
+                   + "to the game's own ring");
         }
         catch (Exception e)
         {
@@ -214,6 +222,15 @@ internal static class PetMouseReach
 
                 node.Hitbox.MouseFilter = Control.MouseFilterEnum.Stop;
                 Opened.Add(node);
+            }
+
+            // Same reason as the ring's line: silent unless something was
+            // actually opened, so it is one line per custom-typed targeting
+            // session and zero on every vanilla one.
+            if (Opened.Count > 0)
+            {
+                Log.Info($"[{KleeMod.ModId}] EB-296 mouse: opened {Opened.Count} "
+                       + "closed creature(s) to the drag for this session");
             }
         }
         catch (Exception e)
