@@ -250,7 +250,7 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R238 | 2026-09-02 | Kokomi's rework direction accepted; the brief's draft 3 and the slice rewritten on the Memory | `8c3f30a` |
 | R239 | 2026-09-02 | Kokomi draft 4; the Tide stays, the jellyfish spends nothing by itself, Surge plays the top of the exhaust pile, Tactics is once-only | `a42eda6` |
 | R240 | 2026-09-02 | Kokomi's chassis is the Plan; the exhaust replay and Mend step down to payoff cards | `e33bb94` |
-| R241 | 2026-09-02 | Kokomi brief draft 6 approved for the Prototype build; picks 1 to 3 at their defaults | `ee27074` |
+| R241 | 2026-09-02 | Kokomi brief draft 6 approved for the Prototype build; picks 1 to 3 at their defaults | `c892ff7` |
 
 240 rows over the R1..R241 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 129 from a commit message, 0 unresolved.
 
