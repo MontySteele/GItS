@@ -136,15 +136,13 @@ ALLOWED: dict[tuple[str, str, str], str] = {
         "The 1 is the floor on a card's energy cost -- a rule of the base "
         "game's cost arithmetic, with no constant behind it -- and again it "
         "is the word `cost` doing the joining.",
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKkSeaSaltPrayer.cs",
-     "ReactionConstants.OverloadWeak", "1"):
-        "Sea-Salt Prayer reads 'Gain 4 Block. Apply 1 Weak.' -- that 1 is the "
-        "card's own printed Weak, authored on the row "
-        "(`docs/prototype-surface.yaml`, the Kokomi draft-6 block), and the "
-        "word `Weak` is the only thing joining it to Overloaded's splash "
-        "debuff. Repricing the reaction must not touch this card, and "
-        "repricing this card must not touch the reaction. The card face is "
-        "the row's `description:`; move the number there.",
+    # DROPPED 2026-09-02, and by the excuse's own last sentence. It said "the
+    # card face is the row's `description:`; move the number there" -- and the
+    # `EB-283` counted/flag split did exactly that: `weak` is a COUNTED power,
+    # so Sea-Salt Prayer's printed 1 became the `{PowerAmount:diff()}` token
+    # its upgrade moves and the bare numeral left the string. The coincidence
+    # cannot arise any more, and the lint reported the entry as stale, which is
+    # the whole point of it reporting stale entries.
     # DROPPED by `EB-258`. The entry excused Deep Breath's "Spend 3 Encore"
     # against `KurageMemoryLaw.CostPerEnergy`, and the ONLY thing that ever
     # joined them was the bare word `Energy` sitting in the face's other
