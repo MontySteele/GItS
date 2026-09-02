@@ -263,6 +263,17 @@ public sealed class FurinaBurstResource : BasicCustomResource
     {
     }
 
+    /// <summary>
+    /// The meter's ceiling, on the wire (`EB-181`). The bridge's resource
+    /// snapshot is an id and an amount, so a meter reached a blind page with
+    /// no maximum and the render had to say so on every meter row it printed.
+    /// A ceiling is the MOD's fact and never BaseLib's, so the bridge asks for
+    /// a public int `Max` and reports `null` for any resource that declares
+    /// none (`vendor/STS2_MCP/gits/GitsResources.cs`, `GitsResourceInfo`).
+    /// This exposes the constant that is already the gate; it decides nothing.
+    /// </summary>
+    public int Max => FurinaResourceConstants.BurstMax;
+
     /// <summary>Meter, not energy: opt out of BaseLib's SetToFree forwarding.
     /// See <see cref="KleeBurstResource.ApplySharedModification"/>.</summary>
     public override bool ApplySharedModification => false;

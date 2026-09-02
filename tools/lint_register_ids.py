@@ -859,9 +859,14 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # FAIL on three real prototype patches first, and all three were
         # fixed. The ceiling stays at 225 -- ceilings never come down.
         224,
-        # 228 minted 2026-08-30 by the Kokomi slice-2 round-2 job: the lint
-        # for a packet that HOLDS live work on an unminted pick.
-        228,
+        # 228 minted 2026-08-30 by the Kokomi slice-2 round-2 job and LEFT
+        # OPEN_IDS 2026-09-02 on its acceptance word for word -- red on the
+        # packet at `a1df7d6`, green at HEAD. `tools/lint_packet_holds.py`
+        # reads every `review/active/*.md` paragraph for the PHRASE a hold
+        # is made of (hold verb + preposition + decision noun within one
+        # sentence) rather than a word list: the word list was written
+        # first and measured at 53 lines and zero real holds, and a gate
+        # with that false-positive rate is a gate somebody deletes.
         # 230/231/232 minted 2026-08-30 by the overnight integration, from the
         # night's two live runs and from the integration's own suite: the
         # `place_bomb` face, the teardown that reports a kill it did not make,
@@ -1254,7 +1259,16 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # the whole frozen battery x 3 characters x 3 seeds asserting it stays
         # silent. `act1_pool.yaml`'s UNIMPLEMENTED Plating 12 keeps its note
         # on the enemy, which is that sheet's own convention for a skip.
-        257,
+        # 257 LEFT OPEN_IDS 2026-09-02 with its row, on its acceptance:
+        # a manual session can name its build. R217 D's restore rule was
+        # stated by what the LAST session was -- "before any measured
+        # run or handoff" -- and a manual playtest is neither, so a
+        # `+proto` package survived a teardown into a solo run.
+        # `operations/prototype.md` now states it by what the NEXT
+        # session is: the dev build stays only where the arm is the
+        # subject AND the handover packet names the version string, and
+        # the release build goes back at teardown in every other case,
+        # including play the arm is not the subject of.
         # 276 and 278 LEFT OPEN_IDS 2026-09-02 with their rows. Both were
         # about draft 2's TIDE -- a Strength gain converting into it, and
         # Tide-scaled cards playable at Tide 0 -- and R240/R241 deleted
@@ -1276,10 +1290,15 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # by title rather than card id, 268 the shop line's missing cost and
         # type, 290 the r4 reward/chooser/refusal render gaps (6 locks, 5 seen
         # to FAIL). Ceilings never come down and none may be re-minted.
+        # 271 LEFT OPEN_IDS 2026-09-02 with its row, on its acceptance --
+        # desk checks of the two handles that remained. An enemy's number
+        # is now assigned once and kept for the fight against `combat_id`,
+        # and the one refusal that named nothing names the Spark price it
+        # cannot pay, or the board to look at.
         # 272 LEFT OPEN_IDS 2026-09-02 with its row, on its live acceptance:
         # the arm-keyword definition printed once on a Kokomi fight page
         # (`review/qa/lane1-live-reads-2026-09-02/fight1-round1.md`).
-        260, 261, 262, 263, 264, 265, 266, 269, 270, 271, 273, 274, 275, 277, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
+        260, 261, 262, 263, 264, 265, 266, 269, 270, 273, 274, 275, 277, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 291,  # Klee/Kokomi overhaul rounds, 2026-09-01/02
         # 292: the `NCardTrail` hang off the Kokomi round-two blind session.
         # BUILT in the commit that mints it -- the guard refuses the
         # non-finite value at three doors and names the node chain -- and it

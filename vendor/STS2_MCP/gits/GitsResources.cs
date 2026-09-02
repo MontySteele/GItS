@@ -154,4 +154,108 @@ public static partial class McpMod
         }
         return snapshot;
     }
+
+    // `EB-181`, THE METER HALF. A METER HAS NO MAXIMUM ON THIS WIRE.
+    //
+    // The snapshot above is `{ id -> amount }`, which is everything BaseLib's
+    // own abstraction guarantees, and it is why the blind render prints "the
+    // game's data feed carries this meter's amount only: no maximum, and no
+    // rule for how it is spent" beside every meter row. A number with no
+    // ceiling is not a meter to a reader; it is a score.
+    //
+    // WHERE A MAXIMUM CAN HONESTLY COME FROM. Not from BaseLib:
+    // `CustomResource` declares `Id` and `Amount` and nothing else, and
+    // `BasicCustomResource.DefaultMax` is NOT a ceiling despite the name -- it
+    // is the `setEachTurn` value `StartOfTurnReset` refills the meter to, and
+    // reporting it as a maximum would be a lie the page then repeats. So it
+    // rides under its own honest name, `resets_to`, and only when the resource
+    // actually refills (`>= 0`).
+    //
+    // The ceiling itself is the MOD's fact -- Klee's Burst is 40, Kokomi's 20,
+    // Furina's 70, each already a constant in the mod that owns it -- so this
+    // is an OPT-IN CONTRACT rather than a guess: a resource that declares a
+    // public int `Max` (or `MaxAmount`) has that number reported, and one that
+    // does not reports `max: null`, which the page prints as the honest
+    // absence it prints today. Nothing here knows what any meter IS.
+    private static readonly string[] GitsResourceMaxNames = { "Max", "MaxAmount" };
+
+    /// <summary>
+    /// `{ resource id -> { amount, max, resets_to } }` for one player's combat
+    /// state (`EB-181`). Same walk, same guards and same never-throws rule as
+    /// <see cref="GitsResourceSnapshot"/>; `max` and `resets_to` are null
+    /// wherever the resource does not answer, which is a positive statement
+    /// and not a gap.
+    /// </summary>
+    internal static Dictionary<string, object?> GitsResourceInfo(
+        object? playerCombatState)
+    {
+        var info = new Dictionary<string, object?>();
+        if (playerCombatState == null) return info;
+
+        var registry = GitsResourceRegistry();
+        if (registry == null) return info;
+
+        try
+        {
+            if (registry.GetValue(null) is not IEnumerable handlers) return info;
+            foreach (var handler in handlers)
+            {
+                if (handler == null) continue;
+                try
+                {
+                    var getter = handler.GetType().GetProperty("GetResource")
+                        ?.GetValue(handler) as Delegate;
+                    if (getter == null) continue;
+                    var resource = getter.DynamicInvoke(playerCombatState);
+                    if (resource == null) continue;
+                    var resourceType = resource.GetType();
+                    var id = resourceType.GetProperty("Id")?.GetValue(resource)
+                        as string;
+                    if (string.IsNullOrEmpty(id)) continue;
+                    if (resourceType.GetProperty("Amount")?.GetValue(resource)
+                        is not int amount)
+                    {
+                        continue;
+                    }
+
+                    int? max = null;
+                    foreach (var name in GitsResourceMaxNames)
+                    {
+                        if (resourceType.GetProperty(name)?.GetValue(resource)
+                            is int declared)
+                        {
+                            max = declared;
+                            break;
+                        }
+                    }
+
+                    // BaseLib's own per-turn refill, under the name it means.
+                    // Negative is its "does not refill" sentinel.
+                    int? resetsTo = null;
+                    if (resourceType.GetProperty("DefaultMax")?.GetValue(resource)
+                        is int defaultMax && defaultMax >= 0)
+                    {
+                        resetsTo = defaultMax;
+                    }
+
+                    info[id!] = new Dictionary<string, object?>
+                    {
+                        ["amount"] = amount,
+                        ["max"] = max,
+                        ["resets_to"] = resetsTo
+                    };
+                }
+                catch
+                {
+                    // One misbehaving mod's resource must not cost the state
+                    // read every other mod's. Skip it and keep walking.
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr($"[STS2 MCP][GItS] resource info failed: {ex.Message}");
+        }
+        return info;
+    }
 }
