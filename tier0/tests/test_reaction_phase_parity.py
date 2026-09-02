@@ -782,6 +782,26 @@ CO_TENANCY_LEDGER = {
         ("Powers/CompanionPowers.cs", "CelestialGiftPower"):
             "per-turn Strength + Block mint; its body notes the sim's "
             "Strength-then-Block order is bookkeeping, not a dependency",
+        ("Powers/Prototype/CompanionOverhaulPowers.cs", "SignatureMixPower"):
+            "QUARANTINED (the Mondstadt companion overhaul). Raw per-turn "
+            "Block mint plus its own duration tick, the same shape as "
+            "MetallicizePower below. THE ORDERING QUESTION, answered: it "
+            "reads nothing and writes only Block, so no co-tenant can move an "
+            "input it does not have",
+        ("Powers/Prototype/CompanionOverhaulPowers.cs", "RevelationPower"):
+            "QUARANTINED (the Mondstadt companion overhaul). Per-turn Block "
+            "plus conditional Strength. THE ORDERING QUESTION, answered: the "
+            "condition is a LATCH written at the PREVIOUS turn's end (see "
+            "CompanionOverhaulTurnEnd) and never read live, so no co-tenant "
+            "of this broadcast can change the answer -- which is exactly why "
+            "the latch exists instead of a live Block read",
+        ("Powers/Prototype/CompanionOverhaulPowers.cs", "StellarisOmenPower"):
+            "QUARANTINED (the Mondstadt companion overhaul). Applies "
+            "Vulnerable to every enemy, then removes itself. THE ORDERING "
+            "QUESTION, answered: it writes an ENEMY debuff and reads nothing, "
+            "and no co-tenant of this broadcast deals damage -- every volley "
+            "that would care about a Vulnerable fires at turn END, a "
+            "broadcast away",
         ("Powers/CompanionPowers.cs", "MetallicizePower"):
             "raw per-turn Block mint (R116)",
         ("Powers/DemolitionPowers.cs", "BombAndSparkPerTurnPower"):
@@ -917,6 +937,21 @@ CO_TENANCY_LEDGER = {
             "with WitchsFlamePower's aura consumption or the this-turn "
             "expiries in this broadcast, and has no position to defend in "
             "their order",
+        ("Powers/Prototype/CompanionOverhaulPowers.cs",
+         "CompanionOverhaulTurnEnd"):
+            "QUARANTINED (the Mondstadt companion overhaul). THE ANSWER TO "
+            "THE ORDERING QUESTION RATHER THAN AN INSTANCE OF IT: six of the "
+            "arm's powers fire at the end of the player's turn, four of them "
+            "put an element on an enemy that may already carry one and three "
+            "draw from Rng.CombatTargets, so they do NOT each override this "
+            "broadcast -- this ONE tenant drives all six in the sim's order "
+            "(tier0 effects.companion_overhaul_turn_end), exactly as "
+            "TurnEndSequencer does for the shipped four one broadcast "
+            "earlier. Its only co-tenants here are WitchsFlamePower, whose "
+            "card (Durin's Witch's Flame) is one of the seventeen Mondstadt "
+            "rows this arm takes out of the pool and so cannot be drafted "
+            "while it is on, and the pure this-turn expiries above, which "
+            "read nothing this writes",
     },
 }
 

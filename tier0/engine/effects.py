@@ -3005,6 +3005,13 @@ PREDICATE_PREFIXES = frozenset({
     "exhaust_selection_has_type_",
     "exhaust_selection_cost_at_least_",
     "exhaust_selection_size_at_least_",
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL).
+    # An HP fraction, parameterised on the percentage for the same reason the
+    # meter bars are: the threshold is a printed balance number (Noelle's
+    # "below half HP", Bennett's "above 70% HP"), so moving one is a card edit
+    # and never an engine edit.
+    "hp_pct_below_",
+    "hp_pct_above_",
 })
 
 # The card types `exhaust_selection_has_type_` may name. Closed on purpose:
@@ -3289,6 +3296,24 @@ def _predicate(state: CombatState, name: str) -> bool:
         return resources.readable(state.player) >= int(name.rsplit("_", 1)[1])
     if name.startswith("encore_at_least_"):
         return state.player.encore >= int(name.rsplit("_", 1)[1])
+    if name.startswith("hp_pct_below_"):
+        # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). Noelle's
+        # Breastplate: "If you are below half HP, gain 4 more."
+        #
+        # CROSS-MULTIPLIED, never divided. `hp / max_hp` is a float here and
+        # `CurrentHp / MaxHp` is a decimal in C#, and a card whose branch flips
+        # at exactly half would then be at the mercy of two different rounding
+        # stories at the one HP value a player notices. `hp * 100 < max * N` is
+        # exact in both engines.
+        n = int(name.rsplit("_", 1)[1])
+        return state.player.hp * 100 < state.player.max_hp * n
+    if name.startswith("hp_pct_above_"):
+        # Bennett's Fantastic Voyage: "If you are above 70% HP". STRICTLY
+        # above, and the sibling above is STRICTLY below, so AT the bar both
+        # read False -- which is what the printed words say, and is why these
+        # are two predicates rather than one with a flipped sense.
+        n = int(name.rsplit("_", 1)[1])
+        return state.player.hp * 100 > state.player.max_hp * n
     raise ValueError(f"unknown predicate {name!r}")
 
 
@@ -5024,6 +5049,74 @@ def player_turn_start_triggers(state: CombatState) -> None:
             state.emit("bomb_placed", target=enemy.name,
                        damage=C.PLAYTIME_BOMB_DAMAGE)
         gain_sparks(state, 1)
+    companion_overhaul_turn_start(state)
+
+
+def companion_overhaul_turn_start(state: CombatState) -> None:
+    """THE MONDSTADT COMPANION OVERHAUL's start-of-turn block (QUARANTINED,
+    `C.COMPANION_OVERHAUL`). Three powers, and no other engine site reads them.
+
+    A SEPARATE FUNCTION, called from the tail of
+    `player_turn_start_triggers`, for two reasons that agree. It keeps a
+    quarantined arm's whole start-of-turn behaviour in one greppable place, the
+    way the C# side keeps its end-of-turn behaviour in one listener; and it
+    makes "does the arm run at all" a single call a reader can follow, rather
+    than three branches interleaved with the shipped income group.
+
+    AFTER the shipped block, not before. The two overhaul powers that grant
+    Block are new income, and every existing income power already sits after
+    the upkeep by the EB-2 ruling recorded above -- inserting a fourth income
+    source in the middle of that group would be re-opening a settled race.
+
+    C# twins: `SignatureMixPower`, `RevelationPower` and `StellarisOmenPower`,
+    each overriding `AfterPlayerTurnStart`. The three are COMMUTATIVE -- none
+    reads a value another writes -- which is why the C# side lets them keep
+    their own broadcast while the end-of-turn six get one listener.
+    """
+    if not C.COMPANION_OVERHAUL:
+        return
+    p = state.player
+    # Diona, Signature Mix -- stacks are TURNS REMAINING (the `oz_summon`
+    # grammar). PAY, THEN TICK, THEN EXPIRE, exactly as `block_at_turn_start`
+    # above does: applied on turn N during the player's own turn, `turns: 2`
+    # pays at the start of N+1 and N+2 and is gone before N+3.
+    n = p.powers.get("mc_signature_mix", 0)
+    if n:
+        # RAW, sharing `block_next_turn`'s argument verbatim: neither block
+        # funnel may touch a gain the card that banked it is no longer the
+        # source of.
+        p.block += C.MC_SIGNATURE_MIX_BLOCK
+        state.emit("block", amount=C.MC_SIGNATURE_MIX_BLOCK)
+        if n > 1:
+            p.powers["mc_signature_mix"] = n - 1
+        else:
+            del p.powers["mc_signature_mix"]
+    # Nicole, Revelation Uncreated Light -- PERMANENT, stacks are COPIES. The
+    # Strength half reads the latch written at the end of the previous turn
+    # (see `Player.mc_held_block_at_turn_end`); on the turn the card is played
+    # the latch is False, because there was no previous turn to hold Block
+    # through.
+    n = p.powers.get("mc_revelation", 0)
+    if n:
+        blk = C.MC_REVELATION_BLOCK * n
+        p.block += blk
+        state.emit("block", amount=blk)
+        if p.mc_held_block_at_turn_end:
+            powers.apply_power(state, p, "strength",
+                               C.MC_REVELATION_STRENGTH * n, applier=p)
+    # Mona, Stellaris Phantasm -- the delayed doom. Vulnerable IS "take 50%
+    # more damage" in this engine (`C.VULNERABLE_TAKEN_MULT` is 1.50), so the
+    # card needs no private multiplier; what it needs is the DELAY, because
+    # Vulnerable applied on the turn the card is played would cover the rest of
+    # THIS turn and the card says next.
+    #
+    # POPPED WHOLE, not ticked: the promise is kept once however many copies
+    # were played, so a two-stack omen must not stretch across two turns.
+    n = p.powers.pop("mc_omen", 0)
+    if n:
+        for enemy in list(state.living_enemies):
+            powers.apply_power(state, enemy, "vulnerable",
+                               C.MC_OMEN_VULNERABLE * n, applier=p)
 
 
 def salon_tick_amount(state: CombatState, member: str, paid: bool,
@@ -5272,3 +5365,137 @@ def player_turn_end_triggers(state: CombatState) -> None:
     if p.powers.get("solar_isotoma", 0):                # Albedo, 3 turns
         p.powers["solar_isotoma"] -= 1
     p.powers.pop("attack_up_this_turn", None)           # Bennett burst
+    companion_overhaul_turn_end(state)
+
+
+def companion_overhaul_turn_end(state: CombatState) -> None:
+    """THE MONDSTADT COMPANION OVERHAUL's end-of-turn block (QUARANTINED,
+    `C.COMPANION_OVERHAUL`). Six powers and one latch, in this order:
+
+        mc_glacial_waltz     Cryo volley, one target
+        mc_oz                Electro volley, one target per stack
+        mc_lightning_rose    Electro volley + Vulnerable, one target
+        mc_grand_ode         Anemo Swirl, every enemy
+        mc_dandelion_breeze  Anemo Swirl on the aura-bearer, then Block
+        mc_isotoma_bloom     unelemented damage on the aura-bearer, then Block
+        mc_revelation        the LATCH, last
+
+    THE ORDER IS LAW, and the C# twin (`CompanionOverhaulTurnEnd`) walks the
+    same list. Four of the six put an ELEMENT on an enemy that may already
+    carry one, so the order decides which reactions fire; three of them draw
+    from `state.rng`, so it also decides every later roll in the fight. That
+    is EB-19/races-c, and this arm answers it the same way the shipped chain
+    does: one sequence, written down once per engine.
+
+    THE LATCH IS LAST because two of the six GRANT Block, and Nicole's
+    question is whether the player ENDED the turn holding any.
+
+    AFTER the shipped chain, not interleaved with it. This block is appended
+    to `player_turn_end_triggers`, and the C# twin rides `AfterSideTurnEnd`
+    while `TurnEndSequencer` owns `BeforeSideTurnEnd` -- so the two engines
+    put this arm in the same place relative to Klee's Burst volley and
+    Kokomi's pulse, which are the shipped tenants a flagged run can still hold.
+    """
+    if not C.COMPANION_OVERHAUL:
+        return
+    p = state.player
+
+    # Kaeya, Glacial Waltz -- stacks are TURNS REMAINING. FIRE, THEN TICK (the
+    # AuraPower own-decay idiom the shipped volleys use), so a stack count
+    # still means "this many more turns, including this one".
+    if p.powers.get("mc_glacial_waltz", 0):
+        if state.living_enemies:
+            enemy = state.rng.choice(state.living_enemies)
+            deal_damage_to_enemy(state, enemy, C.MC_GLACIAL_WALTZ_DMG,
+                                 element="cryo", source="companion")
+        p.powers["mc_glacial_waltz"] -= 1
+        if p.powers["mc_glacial_waltz"] <= 0:
+            del p.powers["mc_glacial_waltz"]
+
+    # Fischl, Oz at Your Side -- PERMANENT, stacks are COPIES. No tick: the
+    # workshop's sec.1 rule is that a Power has no turn limit, and its sec.3
+    # note says so about this card by name ("a Power cannot be reapplied, so
+    # Oz stays out"). Re-rolled per volley, because a volley can kill.
+    for _ in range(p.powers.get("mc_oz", 0)):
+        if not state.living_enemies:
+            break
+        enemy = state.rng.choice(state.living_enemies)
+        deal_damage_to_enemy(state, enemy, C.MC_OZ_DMG,
+                             element="electro", source="companion")
+
+    # Lisa, Lightning Rose -- stacks are TURNS REMAINING. The Vulnerable lands
+    # on the SAME enemy the damage hit and AFTER it: the printed sentence is
+    # one clause about one enemy, and debuffing first would amplify the card's
+    # own hit by 50% on a card that does not say so.
+    if p.powers.get("mc_lightning_rose", 0):
+        if state.living_enemies:
+            enemy = state.rng.choice(state.living_enemies)
+            deal_damage_to_enemy(state, enemy, C.MC_LIGHTNING_ROSE_DMG,
+                                 element="electro", source="companion")
+            if enemy.hp > 0:
+                powers.apply_power(state, enemy, "vulnerable",
+                                   C.MC_LIGHTNING_ROSE_VULN, applier=p)
+        p.powers["mc_lightning_rose"] -= 1
+        if p.powers["mc_lightning_rose"] <= 0:
+            del p.powers["mc_lightning_rose"]
+
+    # Venti, Wind's Grand Ode -- stacks are TURNS REMAINING. Swirl is a
+    # damage-less Anemo application, which is exactly what the `swirl` op is,
+    # so the two cannot mean different things.
+    if p.powers.get("mc_grand_ode", 0):
+        for enemy in list(state.living_enemies):
+            reactions.resolve_hit(state, enemy, "anemo", 0, "swirl_op")
+        p.powers["mc_grand_ode"] -= 1
+        if p.powers["mc_grand_ode"] <= 0:
+            del p.powers["mc_grand_ode"]
+
+    # Jean, Dandelion Breeze -- PERMANENT, stacks are COPIES. The Block is
+    # paid whether or not a Swirl landed: the sentence is two clauses joined
+    # by a bare "and", not a consequence, and that is also the reading that
+    # keeps a Rare Power from being dead against an aura-less board.
+    for _ in range(p.powers.get("mc_dandelion_breeze", 0)):
+        target = _mc_most_auras(state)
+        if target is not None:
+            reactions.resolve_hit(state, target, "anemo", 0, "swirl_op")
+        p.block += C.MC_DANDELION_BREEZE_BLOCK
+        state.emit("block", amount=C.MC_DANDELION_BREEZE_BLOCK)
+
+    # Albedo, Solar Isotoma -- PERMANENT, stacks are COPIES. BOTH halves are
+    # inside the condition ("if any enemy has an aura, deal 8 damage to that
+    # enemy AND gain 4 Block" is one guarded sentence, unlike Jean's), so no
+    # aura on the board means no damage and no Block. The damage carries NO
+    # element, because the card's text names none, and it runs the pipeline
+    # (NC-1: power-sourced damage scales with the player) while the Block
+    # stays raw (NC-11).
+    for _ in range(p.powers.get("mc_isotoma_bloom", 0)):
+        target = _mc_most_auras(state)
+        if target is None:
+            break
+        deal_damage_to_enemy(state, target, C.MC_ISOTOMA_DMG,
+                             element=None, source="companion")
+        p.block += C.MC_ISOTOMA_BLOCK
+        state.emit("block", amount=C.MC_ISOTOMA_BLOCK)
+
+    # Nicole's latch, LAST. Written unconditionally rather than only while she
+    # is on the board: a card drafted mid-fight must not read a stale answer
+    # from the turn before it existed, and the field is per-combat anyway.
+    p.mc_held_block_at_turn_end = p.block > 0
+
+
+def _mc_most_auras(state: CombatState):
+    """The living enemy holding the most elemental auras, or None.
+
+    An enemy in this engine holds AT MOST ONE aura (`Enemy.aura` is a single
+    field), so "the most" is a count over {0, 1} and this is really "the first
+    aura-bearer in board order". It is written as a max anyway, and the C#
+    twin (`CompanionOverhaulTargeting.MostAuras`) is written the same way,
+    because Jean's card prints "the most" and an engine that grew a second
+    aura slot must not silently keep answering the one-slot question.
+
+    `max` returns the FIRST maximal element and .NET's `OrderByDescending` is
+    documented stable, so the two engines break a tie the same way.
+    """
+    if not state.living_enemies:
+        return None
+    best = max(state.living_enemies, key=lambda e: 1 if e.aura else 0)
+    return best if best.aura else None

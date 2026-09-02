@@ -185,6 +185,17 @@ class Card:
     personal_pool: Optional[str] = None
     requires: Optional[str] = None        # e.g. burst_energy_full
     nation: Optional[str] = None          # set by the loader from the sheet name
+    # THE HEXEREI FAMILY MARK -- ONE WORD, NO EFFECT (the approved Mondstadt
+    # companion workshop, sec.1 pick 2: "Hexerei is one word on a Universal.
+    # It does nothing by itself. Klee's own readers and any future Hexerei
+    # character's carry the payoff"). NOTHING in either engine reads this
+    # field today; it is carried so a later reader can see which rows the
+    # family owns without the mark having to be re-derived from a character
+    # list. A field rather than a `tags:` entry because `tags` is already read
+    # by four unrelated predicates (`is_companion`, `is_ethereal`, the sly
+    # view, the skill_tag rail) and adding an inert word to a list that four
+    # things filter is how an inert word stops being inert.
+    hexerei: bool = False
     # principles v1.9: kit, not loot. Never in the draftable pool or the
     # starting deck; granted to hand when the Burst meter first fills, and
     # returns to the kit (no pile) after play so a refill re-grants it.
@@ -595,6 +606,20 @@ class Player(Fighter):
     # deletes BOTH entries at expiry, so nothing lingers even within a combat.
     timed_power_amounts: dict[str, int] = field(default_factory=dict)
     first_hp_loss_fired: bool = False        # on_first_hp_loss_draw, per combat
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL).
+    # Nicole's Revelation asks whether you "had Block left at the end of your
+    # last turn", and that cannot be read at the START of this one: the turn
+    # tick clears Block before any start-of-turn power runs. So the answer is
+    # LATCHED at the tail of `player_turn_end_triggers` and read at the head of
+    # the next turn.
+    #
+    # A FIELD RATHER THAN A POWER STACK, on `first_hp_loss_fired`'s precedent
+    # one line up: it is a per-combat yes/no about the player, not a stack that
+    # anything applies, ticks or displays, and a fake power in `powers` would
+    # show up in every digest that counts them. False on a freshly built Player
+    # and re-zeroed in `run_fight` beside the other per-combat resources, so a
+    # reused Player cannot carry one fight's answer into the next.
+    mc_held_block_at_turn_end: bool = False
     relic_conditional_applied: dict[str, int] = field(default_factory=dict)
     #                                        # conditional_power (Red Skull):
     #                                        # key -> delta currently applied,

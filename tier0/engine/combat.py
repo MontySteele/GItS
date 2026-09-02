@@ -1374,6 +1374,10 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     player.fanfare_cap = player.fanfare_cap_base
     player.fanfare_floor = 0
     player.charge = 0            # Kokomi: the meter is per-combat (§2.1)
+    # QUARANTINED (C.COMPANION_OVERHAUL). Nicole's end-of-turn Block latch is
+    # per-combat like everything else on this line: a fight opens with no
+    # previous turn, so nobody has held the line yet.
+    player.mc_held_block_at_turn_end = False
     # QUARANTINED (C.KURAGE_MEMORY + C.KURAGE_ALWAYS_ON): THE BASE KIT.
     # [USER], 2026-08-29 -- "make Bake-Kurage part of the base kit (always on)
     # rather than a separate card". The jellyfish is installed HERE, at true
