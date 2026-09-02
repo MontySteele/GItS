@@ -1,0 +1,169 @@
+{
+ "state_type": "card_select",
+ "card_select": {
+  "screen_type": "NDeckEnchantSelectScreen",
+  "prompt": "Choose a card to Enchant.",
+  "cards": [
+   {
+    "id": "KLEEMOD-PROTO_KO_KABOOM",
+    "name": "Kaboom!",
+    "type": "Attack",
+    "cost": "1",
+    "star_cost": null,
+    "description": "Deal 6 damage. Applies Pyro.",
+    "rarity": "Basic",
+    "is_upgraded": false,
+    "keywords": [
+     {
+      "name": "Applies Pyro",
+      "description": "If the target has no aura, this applies Pyro for 2 turns. A different aura is consumed to trigger a Reaction instead."
+     }
+    ],
+    "index": 0
+   },
+   {
+    "id": "KLEEMOD-PROTO_KO_KABOOM",
+    "name": "Kaboom!",
+    "type": "Attack",
+    "cost": "1",
+    "star_cost": null,
+    "description": "Deal 6 damage. Applies Pyro.",
+    "rarity": "Basic",
+    "is_upgraded": false,
+    "keywords": [
+     {
+      "name": "Applies Pyro",
+      "description": "If the target has no aura, this applies Pyro for 2 turns. A different aura is consumed to trigger a Reaction instead."
+     }
+    ],
+    "index": 1
+   },
+   {
+    "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+    "name": "Duck and Cover",
+    "type": "Skill",
+    "cost": "1",
+    "star_cost": null,
+    "description": "Gain 5 Block.",
+    "rarity": "Basic",
+    "is_upgraded": false,
+    "keywords": [
+     {
+      "name": "Block",
+      "description": "Until next turn, prevents damage."
+     }
+    ],
+    "index": 2
+   },
+   {
+    "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+    "name": "Duck and Cover",
+    "type": "Skill",
+    "cost": "1",
+    "star_cost": null,
+    "description": "Gain 5 Block.",
+    "rarity": "Basic",
+    "is_upgraded": false,
+    "keywords": [
+     {
+      "name": "Block",
+      "description": "Until next turn, prevents damage."
+     }
+    ],
+    "index": 3
+   },
+   {
+    "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
+    "name": "Duck and Cover",
+    "type": "Skill",
+    "cost": "1",
+    "star_cost": null,
+    "description": "Gain 5 Block.",
+    "rarity": "Basic",
+    "is_upgraded": false,
+    "keywords": [
+     {
+      "name": "Block",
+      "description": "Until next turn, prevents damage."
+     }
+    ],
+    "index": 4
+   },
+   {
+    "id": "KLEEMOD-PROTO_KO_DIG_IN",
+    "name": "Dig In",
+    "type": "Skill",
+    "cost": "0",
+    "star_cost": null,
+    "description": "Gain 8 Block.",
+    "rarity": "Basic",
+    "is_upgraded": false,
+    "keywords": [
+     {
+      "name": "Spark",
+      "description": "You gain 1 whenever a Bomb goes off. Some cards cost Sparks instead of energy. No cap; gone at the end of combat."
+     },
+     {
+      "name": "Block",
+      "description": "Until next turn, prevents damage."
+     }
+    ],
+    "index": 5
+   }
+  ],
+  "preview_showing": false,
+  "can_cancel": false,
+  "can_confirm": true
+ },
+ "run": {
+  "act": 1,
+  "floor": 8,
+  "ascension": 0
+ },
+ "player": {
+  "character": "Klee",
+  "hp": 33,
+  "max_hp": 62,
+  "block": 0,
+  "gold": 181,
+  "status": [],
+  "relics": [
+   {
+    "id": "KLEEMOD-POUNDING_SURPRISE",
+    "name": "Pounding Surprise",
+    "description": "Whenever a Bomb goes off, gain 1 Spark. Card rewards after a fight offer a fourth Companion choice.",
+    "counter": null,
+    "keywords": []
+   },
+   {
+    "id": "BOOMING_CONCH",
+    "name": "Booming Conch",
+    "description": "At the start of Elite combats, draw 2 additional cards and gain [ironclad_energy_icon.png].",
+    "counter": null,
+    "keywords": [
+     {
+      "name": "Energy",
+      "description": "Energy is used to play cards from your Hand."
+     }
+    ]
+   }
+  ],
+  "potions": [
+   {
+    "id": "SHIP_IN_A_BOTTLE",
+    "name": "Ship in a Bottle",
+    "description": "Gain 10 Block. Next turn, gain 10 Block.",
+    "slot": 0,
+    "can_use_in_combat": true,
+    "target_type": "AnyPlayer",
+    "keywords": [
+     {
+      "name": "Block",
+      "description": "Until next turn, prevents damage."
+     }
+    ]
+   }
+  ],
+  "max_potion_slots": 3
+ }
+}
