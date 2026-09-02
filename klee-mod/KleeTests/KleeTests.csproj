@@ -62,7 +62,7 @@
   <!-- The Kokomi overhaul arm, mirrored here on exactly the terms above and
        for the same reason. Its pins do not need the property either:
        `KokomiOverhaul.Enabled` is settable, so one build asserts both sides of
-       the switch, including the flag-off acceptance condition -- that her
+       the switch, including the flag-off acceptance condition: that her
        starter, her starting relic and her offerable pool are the shipped ones,
        unchanged. -->
   <PropertyGroup Condition="'$(KokomiOverhaul)' == 'true'">
