@@ -98,7 +98,7 @@ the cook-or-cash decision, and none of them is "the bomb is a shield."
 Seven sentences. If a rule is not here, it is a card.
 
 1. **Bomb.** A numbered charge on an enemy. At the start of Klee's turn every
-   Bomb grows by **2** (placeholder). A Bomb never goes off on its own.
+   Bomb grows by **3** (placeholder). A Bomb never goes off on its own.
 2. **Set off.** Only a card that says *Set off* makes Bombs go off. It sets
    off every Bomb on the target, **one at a time, before the rest of the card
    resolves**, each dealing its number as Pyro damage. Plain Attacks, a co-op
@@ -709,7 +709,7 @@ applier, then *Set off*, with the bomb in between.
 Under the ladder I have taken every default below and will build on it. You
 veto on sight; a veto is one line.
 
-**Defaults taken (Claude's):** growth 2 per turn; explosions one at a time,
+**Defaults taken (Claude's):** growth 3 per turn; explosions one at a time,
 before the rest of the card; one Spark per explosion; Spark cost as a badge;
 the starter in §8; Grounded at Uncommon, Run Away! and Sorry, Jean... at
 Common; Hide and Seek (Block per Bomb on the board) **dropped** as
@@ -795,7 +795,7 @@ modes, three-board test and scripts all stood.
    pressure cards (Fish-Flavored Bait, Pocket Fireworks); Spray's Spark
    Attacks all print *Set off*; co-op cannot detonate her. The Cook Rare
    changed from "your Attacks no longer set off" (now the default) to
-   Alice's Recipe (growth doubles).
+   Alice's Recipe (growth becomes 4).
 3. **The lore audit and the squishiness question (your note 3).** §2 is the
    audit. The survival answer moved off "bombs are her shield" onto four
    things from her story, each keyed to the cook-or-cash decision: Mines

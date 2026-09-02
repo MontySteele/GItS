@@ -190,7 +190,7 @@ def test_the_numbers_are_the_briefs_placeholders():
     """Slice packet sec.1: no number in it is a claim. These four are the
     rules' own, and they are named so `lint_constant_parity` can compare the
     C# mirrors BY VALUE."""
-    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 2
+    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 3
     assert C.KLEE_OVERHAUL_WORKSHOP_GROWTH == 1
     assert C.KLEE_OVERHAUL_ALICE_GROWTH == 4
     assert C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION == 1

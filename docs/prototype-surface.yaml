@@ -266,7 +266,7 @@
 - {id: proto_ko_alices_recipe, name: "Alice's Recipe", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Your [gold]Bombs[/gold] grow by 4 instead of 2.",
+   description: "Your [gold]Bombs[/gold] grow by 4 instead of 3.",
    effects: [{op: apply_power, power: ko_alices_recipe, amount: 1, target: self}]}
 
 # --- Spray, everything explodes now (packet sec.4) ---

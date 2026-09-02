@@ -206,9 +206,9 @@ KLEE_OVERHAUL = False
 # claims (slice packet sec.1: "No number in it is a claim"). They are named here
 # because the C# mirrors must be compared BY VALUE -- an unnamed literal in the
 # mod is exactly what `tools/lint_constant_parity.py` exists to refuse.
-KLEE_OVERHAUL_BOMB_GROWTH = 2        # rule 1: every Bomb, start of her turn
+KLEE_OVERHAUL_BOMB_GROWTH = 3        # rule 1: every Bomb, start of her turn
 KLEE_OVERHAUL_WORKSHOP_GROWTH = 1    # Explosives Workshop: +1 more
-KLEE_OVERHAUL_ALICE_GROWTH = 4       # Alice's Recipe: 4 INSTEAD of 2
+KLEE_OVERHAUL_ALICE_GROWTH = 4       # Alice's Recipe: 4 INSTEAD of 3
 KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
 
 # THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, SIX ids, in

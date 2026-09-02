@@ -42,7 +42,7 @@ public sealed class ProtoKoAlicesRecipe : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Alice's Recipe"),
-        ("description", "Your [gold]Bombs[/gold] grow by 4 instead of 2."),
+        ("description", "Your [gold]Bombs[/gold] grow by 4 instead of 3."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
