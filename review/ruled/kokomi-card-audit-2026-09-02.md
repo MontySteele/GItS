@@ -1,4 +1,4 @@
-Status: OPEN (the Kokomi card audit; D defaults applied; picks at the end)
+Status: RULED R243 2026-09-02
 
 # Kokomi card audit: every prototype row's base and upgrade, read by design
 
@@ -16,9 +16,10 @@ and 3 and the balance record
 (`review/records/balance-read-prototype-2026-09-02.md`) are the play
 evidence quoted below.
 
-Seven rows change, all as D defaults under R212 (applied, disclosed, yours to
-veto by card name). Twenty-one are left as they are, each with its reason.
-Three picks close the page.
+Nine rows change: seven as D defaults under R212 (applied, disclosed, yours
+to veto by card name) and two on your ruling of the picks in section 4
+(2026-09-02, verbatim there). Nineteen are left as they are, each with its
+reason.
 
 ## 1. Rows changed
 
@@ -31,6 +32,8 @@ Three picks close the page.
 | War Council (U, 1, Skill, Plan-only) | Plan: 4 damage and 1 Weak to ALL; upgrade +3 damage and +1 Weak | Plan: 5 damage and 1 Weak to ALL; upgrade +3 damage only (8 and 1 Weak) | Kurage's Oath, a basic, went to 7 to ALL today. At 4 the Uncommon trailed the basic on damage and only just passed it with the Casket's 2. At 5 the Casket makes it Oath's 7 plus a Weak on everyone, the Uncommon's step; upgraded it is Oath+'s 10 plus the Weak. One axis on the upgrade, Thunderclap's shape. |
 | Chain of Command (U, 1, Skill, Plan-only) | Plan: 4 damage per Companion played last turn; upgrade +1 | Plan: 6 per Companion; upgrade +2 (8) | At 4 it needed three Companions in one turn to match Ambush's 12, which does not happen; the sim never played it (0 of 18 draws). At 6, two Companions are an Ambush and three are the Commander's morning (18). Per-instance +2 is Flechettes' delta. |
 | Stolen Chapter (C, 1, Skill) | Draw 1; Plan: Draw 3; upgrade: Plan Draw 4 | Draw 2; Plan: Draw 4; upgrade: Draw 3 / Plan Draw 5 | "Draw 1 for 1" is a tax, the reading today's pass gave Feint's 4 and Read the Field's 4. Draw 2 is a card; the Plan doubles it, Read the Field's 5 / 10 shape. Both lines take +1. The round-3 Opus seat named this the one Plan whose trade read right and then found the delayed cards worthless on three energy, which is the Plan line's honest role: the spare-energy turn. |
+| Battle Plan (U, 1, Skill, Plan-only) | Plan: Gain 2 Energy and draw 1 card; upgrade: draw 2 | Plan: Gain 1 Energy and draw 2 cards; upgrade: draw 3 | Your ruling on pick 1: "Let's take the change now." A Plan that paid back more energy than it cost was the one card never a choice (round 2); at 1 Energy the loan is repaid, not profited on, and under Nereid's Ascension it pays 2 Energy and 4 cards, under The Moon net +1. The upgrade stays on the draw, since R243 refuses energy engines. |
+| Slack Water (basic, 1, Attack) | 4 and 1 Weak; Plan: 2 Weak to ALL; upgrade: 7, 2 Weak, Plan 3 Weak | 4 and 1 Weak; Plan: 1 Weak to ALL; upgrade: 7 and 1 Weak, Plan 2 Weak to ALL | Your ruling on pick 2, a third shape: "that sounds too strong, honestly. Let's move the base version to (4 damage and Weak 1 or Plan: Weak 1 all) and upgrade to (7 damage and Weak 1 or Plan: Weak 2 all)". Written as an explicit `upgrade: {damage: 3, plan_power_amount: 1}`; the now-line Weak never moves. |
 
 Every number above is on the row; every upgrade is in the row's `upgrade:`
 block and in the emitted `OnUpgrade`
@@ -57,8 +60,6 @@ as derived; the base stays a watch item (R243, round 3).
 ## 3. Read and left alone
 
 - **Kurage's Oath** 7 to ALL at dawn, +3: today's number; +3 is Cleave's.
-- **Slack Water** 4 and 1 Weak, Plan 2 Weak to ALL: the signature basic; its
-  three bumps are pick 2.
 - **Feint** 6 / 10, +3 / +3: today's numbers; each mode gets a Strike's +3.
 - **Ambush** 12 at dawn, +3: the commit card, 2 over Feint's dawn line for
   giving up the now-line; on the 2x line, not over it.
@@ -86,9 +87,8 @@ as derived; the base stays a watch item (R243, round 3).
 - **Change of Plans** 1, Exhaust, loses Exhaust: today's cost, round 2's upgrade.
 - **Salt Line** 8 Block, Exhaust, +3: Ghostly Armor's shape; Moon's
   Reflection can fetch it back.
-- **Battle Plan** 2 Energy and 1 card at dawn, +1 card: the rule refuses an
-  energy delta and the draw is the right half to move; the base is pick 1.
-- **Sango Isshin** and **Vanguard**: section 2.
+- **Sango Isshin** and **Vanguard**: section 2; **Battle Plan** and **Slack
+  Water**: section 1, on your ruling.
 
 Text: all 28 faces pass `tools/lint_text_conventions.py` (186 prototype-arm
 strings, every face under the 120-character ceiling). One legibility note,
@@ -97,7 +97,7 @@ turn you write it, but it is exact, since the count is always the turn before
 the carry-out, which is why Change of Plans and The Moon read the previous
 turn's Companions.
 
-## 4. Picks
+## 4. Picks, ruled R243 (2026-09-02)
 
 1. **Battle Plan under the two Rares.** Nereid's Ascension carries out every
    Plan twice, so a Battle Plan written under it pays 4 Energy and 2 cards
@@ -105,28 +105,33 @@ turn's Companions.
    dawn, net +3 for a 1-cost card. That is the extra-energy engine you
    refused as a rule today, reached through two Rares and the one card
    already on watch. The new fact is the Rare interaction; the round-2 and
-   round-3 reads priced Battle Plan alone. (1) **Hold; the three-act seat
-   runs read it, as R243 round 3 already says. Default.** (2) "Plan: Gain 1
+   round-3 reads priced Battle Plan alone. (1) Hold; the three-act seat
+   runs read it, as R243 round 3 already says. Default. (2) "Plan: Gain 1
    Energy and draw 2 cards" now, the one-line change on the table since
-   round 2.
+   round 2. **RULED (2): "Let's take the change now." Applied, section 1.**
 2. **Slack Water's upgrade moves three numbers:** 7 damage, 2 Weak, and the
    Plan's 3 Weak to ALL. Bash's dual bump is the signature-basic precedent;
    the third is the Plan line, and the Codex seat called Slack Water+ the card
-   that "defined most fights". (1) **Leave it; the signature basic is meant
-   to be the starter's best card. Default.** (2) Bash-exact: 7 and 2 Weak
+   that "defined most fights". (1) Leave it; the signature basic is meant
+   to be the starter's best card. Default. (2) Bash-exact: 7 and 2 Weak
    now, the Plan line unchanged at 2 Weak
-   (`upgrade: {damage: 3, power_amount: 1}`).
+   (`upgrade: {damage: 3, power_amount: 1}`). **RULED, neither: "that
+   sounds too strong, honestly. Let's move the base version to (4 damage and
+   Weak 1 or Plan: Weak 1 all) and upgrade to (7 damage and Weak 1 or Plan:
+   Weak 2 all)". Applied, section 1.**
 3. **Cleansing Wave's dawn line is Read the Field's** ("Plan: Gain 10
-   Block" on both). (1) **Leave it; the Uncommon is Read the Field plus a
-   cleanse, a legal Uncommon step. Default.** (2) Give it its own morning:
-   "Plan: Gain 8 Block and draw 1 card".
+   Block" on both). (1) Leave it; the Uncommon is Read the Field plus a
+   cleanse, a legal Uncommon step. Default. (2) Give it its own morning:
+   "Plan: Gain 8 Block and draw 1 card". **RULED at the default: "Default
+   is fine." Unchanged.**
 
 ## 5. Gates
 
 `python tools/run_lints.py --lane ci` 35 of 35; `pytest tier0/tests -q -p
 no:cacheprovider -k "prototype or kokomi or upgrade or face or keyword"` 663
-passed, 0 failed; `python tools/gen_prototype_cards.py --check` up to date;
+passed, 0 failed; the whole suite 4995 passed, 0 failed;
+`python tools/gen_prototype_cards.py --check` up to date;
 `dotnet build klee-mod/KleeCode -p:PrototypeCards=true` 0 errors; `dotnet
 test klee-mod/KleeTests -p:PrototypeCards=true` 629 passed, 0 failed.
-Nothing deployed, nothing played: the seven changes meet a player at the
-next dev build and the three-act seat runs.
+All re-run on the ruled tree. Nothing deployed, nothing played: the nine
+changes meet a player at the next dev build and the three-act seat runs.

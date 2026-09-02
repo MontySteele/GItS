@@ -372,7 +372,6 @@
     },
     "proto_kk_slack_water": {
       "damage": 3,
-      "power_amount": 1,
       "plan_power_amount": 1
     },
     "proto_kk_song_of_pearls": {

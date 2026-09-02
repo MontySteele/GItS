@@ -702,10 +702,12 @@
 - {id: proto_kk_slack_water, name: "Slack Water (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: basic,
-   description: "Deal 4 damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Weak[/gold] to ALL enemies.",
+   description: "Deal 4 damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
    effects: [{op: damage, amount: 4, target: enemy},
              {op: apply_power, power: weak, amount: 1, target: enemy}],
-   plan: [{op: apply_power, power: weak, amount: 2, target: all_enemies}]}
+   plan: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
+   # R243 card audit pick 2: 4 and Weak 1 / Plan Weak 1 to ALL; upgrade 7 / Plan Weak 2.
+   upgrade: {damage: 3, plan_power_amount: 1}}
 
 # --- the Tactician: Plans, and the cards that pay per Plan (packet sec.4) ---
 
@@ -896,10 +898,11 @@
 - {id: proto_kk_battle_plan, name: "Battle Plan", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw 1 card.",
+   description: "[gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw 2 cards.",
    effects: [],
-   plan: [{op: energy, amount: 2},
-          {op: draw, amount: 1}]}
+   # R243 card audit pick 1: 1 Energy and 2 cards; the upgrade stays on the draw.
+   plan: [{op: energy, amount: 1},
+          {op: draw, amount: 2}]}
 
 - {id: proto_kk_moons_reflection, name: "Moon's Reflection", character: kokomi,
    authored_by: [claude],
