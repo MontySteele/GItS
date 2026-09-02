@@ -1417,7 +1417,71 @@ def surface_innate(draw_pile: list) -> None:
         draw_pile[:] = innate + [c for c in draw_pile if not c.innate]
 
 
+# EB-256: how many CONSECUTIVE rounds of literally nothing happening end the
+# fight as a STALL. Deliberately not in `constants.py`, for the reason
+# `STOKE_*` is not: it is an instrument threshold, not a world number. It
+# cannot change the result of any fight that makes progress, it is mirrored by
+# nothing in the C#, and `lint_constant_parity` has no partner to hold it
+# against -- putting it there would claim a balance decision that was never
+# made.
+#
+# TEN, against `C.MAX_TURNS` = 30. The detector must be reachable before the
+# turn cap or it reports nothing, and it must be far enough above a legitimate
+# quiet patch that it never fires on one. Ten identical rounds is not a quiet
+# patch: it is a third of the fight's whole clock spent with neither side's HP,
+# neither side's Block and no pile in the deck moving by a single point.
+STALL_ROUNDS = 10
+
+
+def _stall_fingerprint(state: CombatState) -> tuple:
+    """Everything a fight can make progress ON, sampled at round end.
+
+    HP and Block on both sides, and the deck. That is the whole of it, and the
+    omissions are the design: POWERS are deliberately not here, because the
+    stall `EB-256` was opened for is a Metallicize stack GROWING every turn
+    against an enemy damage number growing to match it. A detector that asked
+    for a frozen board would be blind to exactly the loop it exists to see --
+    the stall is the OUTCOMES not moving, not the state sitting still.
+
+    The deck leg is the full sorted id list rather than four pile lengths,
+    because a transform or a card-generation loop can hold the sizes constant
+    while the deck changes underneath. It costs one sort of ~30 short strings
+    per round, at most `C.MAX_TURNS` times per fight.
+
+    Dead enemies are included by name and HP so a corpse cannot mask a living
+    body's movement, and `max_hp` is here because Feed-style permanent raises
+    are progress the player paid for.
+    """
+    p = state.player
+    return (
+        p.hp, p.max_hp, p.block,
+        tuple((e.name, e.hp, e.block, e.alive) for e in state.enemies),
+        tuple(sorted(c.id for c in p.draw_pile)),
+        tuple(sorted(c.id for c in p.hand)),
+        tuple(sorted(c.id for c in p.discard_pile)),
+        tuple(sorted(c.id for c in p.exhaust_pile)),
+    )
+
+
 def _run_rounds(state: CombatState, pilot: Pilot) -> None:
+    # EB-256, THE NO-PROGRESS DETECTOR. An unwinnable-AND-unloseable line is
+    # reachable in the shipped content -- a 0-cost mustered companion stacking
+    # Block faster than the boss's damage grows while a Strength drain floors
+    # the player's own -- and until this landed nothing in either engine could
+    # SEE it. The turn cap above stopped it running forever and then filed it
+    # as a loss, which is the wrong word for a fight nobody could lose.
+    #
+    # WHAT THIS DOES NOT DO, and the reason it is written this narrowly: it
+    # never reclassifies a fight that moves. `STALL_ROUNDS` consecutive rounds
+    # must be BYTE-IDENTICAL on every quantity a fight can progress on
+    # (`_stall_fingerprint`) before it fires, so a fight that is merely slow,
+    # or grinding, or spending three turns setting up, is untouched. No
+    # shipped measurement has ever reached this branch (`EB-256`'s close
+    # evidence), and the fight it does reach still ends `won=False` -- the
+    # STALL is recorded BESIDE that word, not instead of it, because
+    # re-lettering a run outcome is a measurement change and this is not one.
+    last: tuple | None = None
+    frozen = 0
     while not state.over and state.turn < C.MAX_TURNS:
         _player_turn(state, pilot)
         if not state.over:
@@ -1460,6 +1524,21 @@ def _run_rounds(state: CombatState, pilot: Pilot) -> None:
         # the `break` it replaced (the loop condition re-tests `state.over`);
         # it exists so the final, possibly lethal, round is sampled too.
         state.emit("round_hp", hp=max(0, state.player.hp))
+        # EB-256, sampled after `round_hp` so a stalled fight's last round is
+        # in the trajectory like any other. A fight that is already over never
+        # reaches a second identical round, so the detector cannot pre-empt a
+        # win or a death: the loop condition above has already left.
+        if state.over:
+            continue
+        fingerprint = _stall_fingerprint(state)
+        frozen = frozen + 1 if fingerprint == last else 0
+        last = fingerprint
+        if frozen >= STALL_ROUNDS:
+            state.stalled = True
+            state.emit("fight_stall", rounds=frozen + 1, turn=state.turn,
+                       hp=max(0, state.player.hp),
+                       enemies_alive=len(state.living_enemies))
+            return
 
 
 def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
@@ -1579,6 +1658,14 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     if state.player.fanfare_cap:
         state.emit("encore_end", encore=state.player.encore,
                    members=len(state.player.salon), won=won)
+    # EB-256 DELIBERATELY DOES NOT ADD A KEY HERE. `fight_stall` above is the
+    # stall's record and `CombatState.stalled` is the field the run layer
+    # reads; a `stalled=` key on this row would have been tidier to consume
+    # and would have changed the log of EVERY fight, stalled or not -- which
+    # two acceptance digests pin byte for byte (`test_klee_overhaul`,
+    # `test_spark_alt_cost`) precisely so that an instrument change cannot
+    # pass itself off as no change. A fight that does not stall emits exactly
+    # what it emitted before this row landed.
     state.emit("fight_end", won=won, turns=state.turn,
                hp_left=max(0, state.player.hp))
     return state

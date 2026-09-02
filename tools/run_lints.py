@@ -182,6 +182,16 @@ REGISTRY: tuple[Lint, ...] = (
     _ci("prototype-patch-scope", "tools/lint_prototype_patch_scope.py"),
     _ci("pool-membership",      "tools/lint_pool_membership.py"),
     _ci("ancient-coverage",     "tools/lint_ancient_coverage.py"),
+    # EB-255, beside pool-membership's family because it asks the other
+    # question about the same two lists: that one asks whether every card is
+    # IN a pool, this asks whether the STARTER and the draftable pool are the
+    # disjoint, rarity-separated sets `tier05.draft.archetype_shares` says
+    # they are. [USER]'s solo playtest found it from the far end -- a starter
+    # card read back as a card the drafter chose. Carries a curated debt set
+    # (thirteen rows, one of them the live contamination) so it is green today
+    # and bites on the fourteenth; the flagged arms are walked too, because
+    # the second contaminator is one flag away.
+    _ci("starter-pool-overlap", "tools/lint_starter_pool_overlap.py"),
     _ci("role-tempo-artifacts", "tools/suggest_role_tempo_tags.py", "--check"),
     _ci("role-tempo-coverage",  "tools/lint_role_tempo_coverage.py", "--gate"),
     _ci("roster-registry",      "tools/lint_roster_registry.py"),

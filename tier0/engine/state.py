@@ -1272,6 +1272,19 @@ class CombatState:
     #                    about the turn it happened to arrive on.
     drawn_in_hand: dict[int, tuple] = field(default_factory=dict)
     first_copy_drawn: dict[str, "Card"] = field(default_factory=dict)
+    # EB-256: the fight stopped because nothing was moving, not because
+    # somebody won it. Written ONCE by `combat._run_rounds`' no-progress
+    # detector, beside the `fight_stall` row it files, and read by
+    # `tier05.model`, which takes the run's outcome kind off it. It is the
+    # FIELD half deliberately: `fight_end` grew no key, so the log of a fight
+    # that does not stall is byte-identical to what it was before this landed
+    # and the two whole-log acceptance digests still hold.
+    #
+    # NOT a game-state field: `over` does not consult it, no effect reads it,
+    # and a stalled fight leaves the loop through the same condition every
+    # other fight leaves it through. See `combat.STALL_ROUNDS` for the
+    # detector, and for why a stall is neither a win nor a loss.
+    stalled: bool = False
 
     def emit(self, event: str, **data: Any) -> None:
         self.log.append({"turn": self.turn, "event": event, **data})

@@ -269,6 +269,30 @@ class RunResult:
     conditional_traces: list = field(default_factory=list)  # Salon UI Track 4:
     #                    (act_index, ConditionalTrace) per fight -- rider
     #                    fire-rates, D4's near-dead-condition question.
+    stall_node: Optional[int] = None    # EB-256: the node whose fight ended
+    #                    because nothing was moving (`CombatState.stalled`,
+    #                    `combat.STALL_ROUNDS`), or None -- which is what it
+    #                    is on every run ever measured. A stalled fight is
+    #                    still not won, so the run ends exactly where it ended
+    #                    before this field existed and `death_node` is written
+    #                    too: it is the same exit through the same door. What
+    #                    this adds is the ability to TELL THE TWO APART, which
+    #                    is the whole of EB-256 -- the loop was reachable and
+    #                    unreportable. Prefer `outcome` below to reading it.
+
+    @property
+    def outcome(self) -> str:
+        """`"won"` / `"stalled"` / `"died"` -- the run's outcome KIND.
+
+        EB-256. `won` and `death_node` predate this and are untouched, so
+        every existing reader keeps its exact meaning and every published
+        table stays valid; this is the third word those two cannot say
+        between them. To a `won`-only reader a stall still reads as a
+        not-won run, which is what it read before the detector existed.
+        """
+        if self.won:
+            return "won"
+        return "stalled" if self.stall_node is not None else "died"
 
 
 def node_template() -> list[str]:
@@ -651,6 +675,13 @@ class _RunCtx:
             self._pay_fight_win(kind, player)
         self.res.hp_by_node.append(max(0, self.hp))
         if not fight_won:                   # death OR stall-out = run over
+            # EB-256: the run ends the same way it always did -- through the
+            # one death exit, with `won` False -- and the KIND is filed
+            # beside it. Written before `exit_dead` only so the two sit
+            # together; `exit_dead` never reads it. `RunResult.outcome` is
+            # what readers ask.
+            if state.stalled:
+                self.res.stall_node = i
             self.exit_dead(i)
             return True
         final_act = self.act_i == self.n - 1

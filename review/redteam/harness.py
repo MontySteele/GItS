@@ -20,7 +20,10 @@ READ-ONLY with respect to the repo. A line is a JSON object:
   "script_default": "pass" | "auto:N",     # turns beyond script length (default pass)
   "claim": {
     "kind": "infinite",                    # engine degeneracy event must fire
-    OR "kind": "stall",                    # fight hits MAX_TURNS, both sides alive
+    OR "kind": "stall",                    # nobody can finish: the engine's
+                                           # no-progress detector fired, OR
+                                           # the fight hit MAX_TURNS -- with
+                                           # both sides still alive (EB-256)
     OR "kind": "metric", "metric": "...", "op": ">=", "value": N, "turn": T(optional)
   }
 }
@@ -191,10 +194,20 @@ def run_line(line):
                             [sum(1 for p in pilot.plays if p["turn"] == t)
                              for t in range(1, state.turn + 1)] or [0])}
         elif kind == "stall":
-            holds = (state.turn >= C.MAX_TURNS
+            # EB-256: a stall is "the fight ended with nobody able to finish
+            # it", and there are now TWO ways out of one -- the turn cap, and
+            # the engine's own no-progress detector, which ends a frozen fight
+            # around round 11 instead of letting it grind to 30. The claim
+            # asked for the cap because the cap was the only exit that
+            # existed; asking for either keeps the ledger's meaning exactly
+            # and stops a detected stall from reading as "the exploit is
+            # fixed". `stall_softlock_3` is the line that moved.
+            holds = ((bool(getattr(state, "stalled", False))
+                      or state.turn >= C.MAX_TURNS)
                      and bool(state.player.alive) and bool(state.living_enemies))
             observed = {"turns": state.turn, "player_alive": bool(state.player.alive),
-                        "enemies_alive": len(state.living_enemies)}
+                        "enemies_alive": len(state.living_enemies),
+                        "detected_stall": bool(getattr(state, "stalled", False))}
         elif kind == "metric":
             val = _metric(claim["metric"], claim.get("turn"), state, stats, pilot)
             holds = _OPS[claim["op"]](val, claim["value"])
