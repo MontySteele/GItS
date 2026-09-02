@@ -478,6 +478,10 @@ public sealed class KokomiResourceHooks : AbstractModel
         // pair of hooks and nothing could ever stay remembered. The per-fight
         // clear is BeforeCombatStart's, below.
         KurageMemory.NoteCombat(combatState);
+        // The Kokomi overhaul's own stash, on exactly the same terms and for
+        // the same reason: STASH ONLY, because this delegate runs on every
+        // hook broadcast. Its per-fight work is BeforeCombatStart's.
+        KokomiTide.NoteCombat(combatState);
 #endif
         yield return _instance;
     }
@@ -511,6 +515,16 @@ public sealed class KokomiResourceHooks : AbstractModel
         // would be a slow leak of dead CardModels and, worse, a stale waiver.
         MusterSubsidy.ClearForNewCombat();
         await KurageMemory.InstallAll();
+        // THE KOKOMI OVERHAUL'S OWN INSTALL, at the same hook and for the same
+        // reason: rule 1's jellyfish is not summoned by a card, so somebody has
+        // to put it on the field before the first turn opens. It also CAPTURES
+        // HER ENTRY HP, which is the ceiling on every Mend in the fight and is
+        // only simply her current HP at this one moment. `InstallAll` is a
+        // no-op with the arm off, and `KurageMemory.InstallAll` above is a
+        // no-op with the arm on (the base kit's own gate reads
+        // `C.KURAGE_ALWAYS_ON`, which this arm switches off at the funnel
+        // below), so the two never both install.
+        await KokomiTide.InstallAll();
     }
 #endif
 
@@ -542,6 +556,16 @@ public sealed class KokomiResourceHooks : AbstractModel
 
         var owner = card.Owner?.Creature;
         if (!KokomiResources.IsKokomi(owner)) return Task.CompletedTask;
+#if PROTOTYPE_CARDS
+        // QUARANTINED, THE KOKOMI OVERHAUL'S FIRST OFF-SWITCH. The ruled
+        // brief's sec.4 retires "the Charge bank, Exhaust as the engine and its
+        // rotation voice law" outright, and this method IS that engine. So
+        // under the arm an Exhaust pays nothing: no Charge, no Burst particle,
+        // and no relic read. The per-turn tally above is left standing on
+        // purpose -- it counts CARDS THAT LEFT and takes no view on what they
+        // were worth, which is still true under any rule set.
+        if (KokomiOverhaul.LiveFor(owner)) return Task.CompletedTask;
+#endif
 
         // ROTATION LAW ([USER] 2026-08-23): "one of YOUR cards" is literal.
         // A Status or a Curse pays nothing here whichever route exhausted it
@@ -646,6 +670,15 @@ public sealed class KokomiResourceHooks : AbstractModel
         if (!cardPlay.IsFirstInSeries) return Task.CompletedTask;
         KokomiBurstResource.DrainOnPlay(cardPlay.Card);
         var owner = cardPlay.Card.Owner?.Creature;
+#if PROTOTYPE_CARDS
+        // QUARANTINED, THE KOKOMI OVERHAUL'S SECOND OFF-SWITCH: the brief's
+        // sec.4 retires "the Burst gate", so her meter does not fill. The
+        // DrainOnPlay above is left standing because it is a REFUSAL rather
+        // than an income -- it empties the meter for a card that requires a
+        // full one, and no row in slice one requires one, so it is inert under
+        // the arm rather than switched off by hand.
+        if (KokomiOverhaul.LiveFor(owner)) return Task.CompletedTask;
+#endif
         if (cardPlay.Card is ISkillTagCard && KokomiResources.IsKokomi(owner))
         {
             KokomiResources.GainBurst(owner, BurstConstants.PerSkillTag);
@@ -668,7 +701,7 @@ public sealed class KokomiResourceHooks : AbstractModel
         // the one site both a manual play and an auto-play pass through.
         KurageMemory.NotePlay(cardPlay);
 #endif
-        await KokomiKitGrant.GrantIfCharged(choiceContext, cardPlay.Card.Owner);
+        await GrantKitIfLive(choiceContext, cardPlay.Card.Owner);
     }
 
     public override async Task AfterPlayerTurnStart(
@@ -702,8 +735,40 @@ public sealed class KokomiResourceHooks : AbstractModel
             await KurageMemory.Install(player.Creature);
             await KurageMemory.Fire(choiceContext, player);
         }
+        // THE KOKOMI OVERHAUL'S OWN TURN-START WORK, and it is one line: the
+        // BELT to BeforeCombatStart's braces, exactly as the Install above is
+        // for the base kit (sec.12.6 item 1). Idempotent by construction, and
+        // here so that a combat whose setup order ever changes still opens
+        // with a jellyfish rather than silently without one -- the failure
+        // mode otherwise is a fight in which nothing can hold Tide. The Plans
+        // do NOT resolve here: they resolve before the draw, on the
+        // jellyfish's own BeforeSideTurnStart, and this hook is after it.
+        if (KokomiOverhaul.LiveFor(player.Creature))
+        {
+            await KokomiTide.Install(player.Creature);
+        }
 #endif
-        await KokomiKitGrant.GrantIfCharged(choiceContext, player);
+        await GrantKitIfLive(choiceContext, player);
+    }
+
+    /// <summary>
+    /// The kit-Burst grant, with the Kokomi overhaul's THIRD off-switch on it.
+    ///
+    /// All three grant-check sites route here rather than each carrying its
+    /// own guard, which is the same "one door" argument the sites themselves
+    /// make. The brief's sec.4 retires the Burst gate, so under the arm her
+    /// meter never fills and the kit card has nothing to arrive from --
+    /// guarded rather than left to be inert, because "the Ceremonial Garment
+    /// cannot arrive" is a rule of this arm and not an accident of the
+    /// arithmetic. With the arm off this is `GrantIfCharged` and nothing else.
+    /// </summary>
+    private static async Task GrantKitIfLive(
+        PlayerChoiceContext choiceContext, Player? owner)
+    {
+#if PROTOTYPE_CARDS
+        if (KokomiOverhaul.LiveFor(owner?.Creature)) return;
+#endif
+        await KokomiKitGrant.GrantIfCharged(choiceContext, owner);
     }
 
     public override async Task BeforeSideTurnEnd(
@@ -715,7 +780,7 @@ public sealed class KokomiResourceHooks : AbstractModel
         {
             if (creature.Player is { } player && KokomiResources.IsKokomi(creature))
             {
-                await KokomiKitGrant.GrantIfCharged(choiceContext, player);
+                await GrantKitIfLive(choiceContext, player);
             }
         }
     }
@@ -745,6 +810,22 @@ public sealed class KokomiResourceHooks : AbstractModel
         }
         if (amount <= 0) return false;      // Strength LOSS still lands
 
+#if PROTOTYPE_CARDS
+        // QUARANTINED, RULE 7 UNDER THE KOKOMI OVERHAUL: "she cannot gain
+        // Strength; Strength she would gain becomes TIDE." The refusal is the
+        // SAME refusal -- Flawless Strategy is one of the two things the
+        // brief's sec.4 keeps -- and only the bank it pays into moves. This is
+        // the one seam the brief's sec.6.5 names as "how any shared Strength
+        // source in the mod reaches her without a card", so it has to sit at
+        // the chokepoint rather than on a card, exactly as the Charge version
+        // does.
+        if (KokomiOverhaul.LiveFor(target))
+        {
+            KokomiTide.GainImmediate(target, (int)amount);
+            modifiedAmount = 0;
+            return true;
+        }
+#endif
         KokomiResources.GainCharge(target, (int)amount);
         modifiedAmount = 0;
         return true;

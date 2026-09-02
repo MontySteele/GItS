@@ -136,6 +136,17 @@ public static class KleeMod
                     Powers.RecallFromDiscard.PromptText,
                 [Powers.RecallFromExhaust.PromptKey] =
                     Powers.RecallFromExhaust.PromptText,
+#if PROTOTYPE_CARDS
+                // QUARANTINED (the Kokomi overhaul, slice one). Rally's
+                // pile-selection screen, on exactly the terms the three rows
+                // above have: a LocString is a table plus a key with no
+                // raw-text constructor, so the copy can only reach the screen
+                // as a row, and this dictionary is its only source. Inside the
+                // compile switch because the verb it names does not exist in a
+                // release build.
+                [Powers.KokomiOverhaulKit.CompanionSearchPromptKey] =
+                    Powers.KokomiOverhaulKit.CompanionSearchPromptText,
+#endif
             });
 
             // Runtime copy of the custom-keyword loc. The pck carries the

@@ -45,6 +45,30 @@ public sealed class KokomiCardPool : CardPoolModel
     protected override IEnumerable<CardModel> FilterThroughEpochs(
         UnlockState unlockState, IEnumerable<CardModel> cards)
     {
+#if PROTOTYPE_CARDS
+        // QUARANTINED, THE KOKOMI OVERHAUL'S ONE POOL SEAM (slice one sec.6:
+        // the 28 rows are her only reward pool for the prototype run; sim twin
+        // `tier0.content.loader.pool_replacement`, read at the one door
+        // `tier05.rewards.character_pool` already reads).
+        //
+        // A REPLACEMENT AND NOT A FILTER, and it comes FIRST -- above the Oath
+        // substitution below -- because the two arms are alternatives: every
+        // shipped Kokomi card is written against rules this arm retires (an
+        // Exhaust that pays Charge, a Muster that transforms, a Burst that
+        // gates), so a reward screen that could still offer one would be
+        // offering a card whose printed text is no longer what happens, and
+        // substituting one row inside a pool that is being replaced whole
+        // would be a no-op with a misleading name. `GenerateAllCards` is
+        // UNTOUCHED, so `CardModel.Pool` still resolves for every shipped card
+        // and nothing throws "You monster!"; only what may be GENERATED moves,
+        // which is the same split the off-pool list below uses.
+        //
+        // With `KokomiOverhaul.Enabled` off this branch does not run.
+        if (Powers.KokomiOverhaul.Enabled)
+        {
+            return Powers.KokomiOverhaulRoster.OfferablePool();
+        }
+#endif
         var offered = base.FilterThroughEpochs(unlockState, cards)
             .Where(card => !KokomiOffPoolCards.Ids.Contains(card.Id));
 #if PROTOTYPE_CARDS

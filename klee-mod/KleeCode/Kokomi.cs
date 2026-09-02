@@ -94,7 +94,30 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
     /// happens in KokomiStartingCompanionsPatch, because seeded RNG does not
     /// exist yet at the moment this property is read.
     /// </summary>
-    public override IEnumerable<CardModel> StartingDeck => new CardModel[]
+    public override IEnumerable<CardModel> StartingDeck
+    {
+        get
+        {
+#if PROTOTYPE_CARDS
+            // QUARANTINED, THE KOKOMI OVERHAUL'S ONE STARTER SEAM (the ruled
+            // brief kokomi-brief-2026-09-01.md sec.9; sim twin
+            // `tier0/content/loader._starter_ids`, the same one seam). It comes
+            // FIRST because the two prototype arms on this character are
+            // ALTERNATIVES, not layers: the Kurage's memory is priced inside
+            // the Charge bank this arm retires, and a dev build compiles both.
+            // With `KokomiOverhaul.Enabled` off -- which is every build that
+            // did not ask for `-p:KokomiOverhaul=true` -- this branch does not
+            // run and the list below is byte for byte what it was.
+            if (Powers.KokomiOverhaul.Enabled)
+            {
+                return Powers.KokomiOverhaulRoster.StartingDeck();
+            }
+#endif
+            return Template;
+        }
+    }
+
+    private static CardModel[] Template => new CardModel[]
     {
         ModelDb.Card<WatersEdge>(),
         ModelDb.Card<WatersEdge>(),
@@ -126,11 +149,28 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
     /// in KokomiResourceHooks, so a player who somehow loses the relic does
     /// not lose the character.
     /// </summary>
-    public override IReadOnlyList<RelicModel> StartingRelics =>
-        new RelicModel[]
+    public override IReadOnlyList<RelicModel> StartingRelics
+    {
+        get
         {
-            ModelDb.Relic<Relics.PearlOfWisdomRelic>(),
-        };
+#if PROTOTYPE_CARDS
+            // QUARANTINED, THE KOKOMI OVERHAUL'S ONE RELIC SEAM (the ruled
+            // brief sec.8: Tamanooya's Casket). The Pearl's printed body IS the
+            // exhaust funnel the brief retires, so a run holding it would print
+            // a rule that no longer happens; the Casket takes the slot and
+            // carries the pulse instead. Reasoning in full on
+            // KokomiOverhaulRoster. With the arm off this branch does not run.
+            if (Powers.KokomiOverhaul.Enabled)
+            {
+                return Powers.KokomiOverhaulRoster.StartingRelics();
+            }
+#endif
+            return new RelicModel[]
+            {
+                ModelDb.Relic<Relics.PearlOfWisdomRelic>(),
+            };
+        }
+    }
 
     // ART: none of these files exist yet (Track D). Every KleePck.Path call
     // returns null on a miss and the game falls back to its own defaults, so

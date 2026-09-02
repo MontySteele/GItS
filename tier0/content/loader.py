@@ -766,7 +766,7 @@ def _card_prototype(card_id: str) -> Card:
                              else _substituted_card_index()[base_id])
         card = upgrades.apply_upgrade(base)
     elif ((C.SPARK_ALT_COST_ENABLED or C.KLEE_OVERHAUL
-           or C.COMPANION_OVERHAUL)
+           or C.COMPANION_OVERHAUL or C.KOKOMI_OVERHAUL)
             and plain.startswith(PROTOTYPE_ID_PREFIX)):
         # THE ONE DOOR THE SPARK ARM OPENS INTO THE QUARANTINE, and it is
         # exactly as wide as it has to be. `_starter_ids` substitutes two
@@ -792,6 +792,10 @@ def _card_prototype(card_id: str) -> Card:
         # no wider: `companion_roster_replacement` returns `proto_mc_` id
         # STRINGS for the companion slot, and the reward layer resolves each of
         # them back through here.
+        #
+        # AND THE KOKOMI OVERHAUL, fourth arm, same door, no wider again:
+        # `_starter_ids` returns ten `proto_kk_` id STRINGS and
+        # `pool_replacement` returns twenty-eight more.
         card = _prototype_index()[plain]
     else:
         index = _card_index()
@@ -968,6 +972,21 @@ def _starter_ids(spec: dict) -> list[str]:
     if character == "klee" and C.KLEE_OVERHAUL:
         return list(C.KLEE_OVERHAUL_STARTER_IDS)
 
+    # THE KOKOMI OVERHAUL takes the starter WHOLE, and it is tested BEFORE the
+    # Kurage base kit's own substitution above would matter, for the reason the
+    # Klee branch above gives one character over: the two Kokomi arms cannot
+    # both own these slots. The overhaul retires the Charge bank the memory is
+    # priced inside, so they are ALTERNATIVES, not layers, and a tree with both
+    # flags on is the overhaul's tree. Nothing about the memory arm is edited:
+    # with `KOKOMI_OVERHAUL` off the branch above is reached exactly as before.
+    #
+    # THE DECK SHRINKS FROM TWELVE TO TEN, which is the slice packet's own
+    # sec.3 count and a real consequence rather than an oversight: the
+    # twelve-card shape was ruled for a deck that mills itself, and nothing in
+    # this arm exhausts.
+    if character == "kokomi" and C.KOKOMI_OVERHAUL:
+        return list(C.KOKOMI_OVERHAUL_STARTER_IDS)
+
     if character == "klee" and C.SPARK_ALT_COST_ENABLED:
         for drop, add in C.SPARK_ALT_STARTER_SUBS:
             if drop not in ids:
@@ -1057,6 +1076,12 @@ def pool_replacement(character_id: str) -> list[str] | None:
     """
     if character_id == "klee" and C.KLEE_OVERHAUL:
         return list(C.KLEE_OVERHAUL_POOL_IDS)
+    # The Kokomi overhaul's own, on identical terms: her offerable pool is the
+    # slice's 28 rows and nothing else, because the overhaul retires the rules
+    # every other Kokomi card is written against (an Exhaust that pays Charge,
+    # a Muster that transforms, a Burst that gates).
+    if character_id == "kokomi" and C.KOKOMI_OVERHAUL:
+        return list(C.KOKOMI_OVERHAUL_POOL_IDS)
     return None
 
 
