@@ -1,11 +1,12 @@
-Status: OPEN (picks 1 to 2)
+Status: OPEN (pick 2; pick 1 applied)
 
-# Klee overhaul, round one: what the seats found
+# Klee overhaul, rounds one and two: what the seats found
 
-Written 2026-09-01, the night the prototype first ran. This is the Prototype
-stage, so nothing here is a measurement (R217 G): the seats' words are
-feedback for iteration, the defect rows are the deliverable, and your act-one
-run is the gate (`review/active/klee-overhaul-slice-1-2026-09-01.md` §6).
+Written 2026-09-01, the night the prototype first ran, and extended the
+same night with round two on the fix build. This is the Prototype stage, so
+nothing here is a measurement (R217 G): the seats' words are feedback for
+iteration, the defect rows are the deliverable, and your act-one run is the
+gate (`review/active/klee-overhaul-slice-1-2026-09-01.md` §6).
 
 ## 1. What ran
 
@@ -24,6 +25,20 @@ run is the gate (`review/active/klee-overhaul-slice-1-2026-09-01.md` §6).
   soft-lock, no stalled screen. The Qwen seat is staged turns only under the
   standing condition (R224, `M64`), and nothing was staged tonight, so it did
   not play.
+
+**Round two, same night.** The arm fixes (EB-260, 261, 265, 266), the
+render fixes and the Mondstadt companion prototype were merged onto the round
+branch and deployed as `0.2.1911+proto.dirty` with both arms on; the soak
+read `fights=3 defects=0` on its second run (the first ended with the bot
+dead on floor three after two clean fights, a bot outcome, not a defect).
+Codex played again (seed `JHZ4W7H7M9KM`, 80 actions, three fights, zero
+command errors against round one's two; record in
+`review/qa/blindplay/klee-overhaul-r2-codex/`) and so did the Opus seat (94
+actions, four fights won including the Living Fog elite, alive at 3/62 at
+the budget; `klee-overhaul-r2-opus/`, seed not read back at embark, the
+EB-191 race). Both drafted Mondstadt prototype companions from the reward
+slot and the shop, and the shop, the chest and the Mine clause on the Bomb
+face all read correctly live.
 
 ## 2. What the testers said
 
@@ -63,10 +78,26 @@ Subjective, and the four gate questions are yours to answer, not theirs.
    survival" with Dig In and Duck and Cover; Opus never dropped below 37/62
    and deleted 44 HP in one turn on three energy. Bot-limited, not evidence,
    but question 3 will be about this.
+7. **Round two, on the fix build.** The bet got played this time. Codex
+   blocked instead of detonating in fight 3, watched the stack grow "from 13
+   to 17", and cashed 23 with one Kaboom!; it named the tension as "whether
+   to detonate immediately or block and let Bombs grow", with the added cost
+   that waiting risks drawing no set-off card. Opus banked a Bomb on an
+   enemy's Empower or Stunned turn and cashed 22 with one card, "the best
+   moment in the run". Both again said play flattened into a fixed rotation
+   by the third fight. Two card-level reads for question 4: Quick Fuse never
+   fired in four fights (its two gates, a Spark in hand and a live Bomb, are
+   nearly exclusive, since the ordinary way to get the Spark is to set off
+   the Bomb it wants), and Sparks 'n' Splash "reads as an engine and is a
+   tax", because its forced end-of-turn set-off deletes the growth that makes
+   holding interesting. One read for question 3: the Living Fog's Smoggy,
+   which stops a second Skill, is a precise counter to a deck whose every
+   Block card is a Skill, and turned a survivable elite into a 3 HP finish.
 
 ## 3. Defects, filed
 
-Nine rows, EB-259 to EB-267 in `docs/current/BACKLOG.md`. Two are lies on
+Twelve rows, EB-259 to EB-271 in `docs/current/BACKLOG.md`. Round one's
+nine first. Two are lies on
 the arm's own faces and matter for your run: the Bomb badge says "never goes
 off by itself" while a Mine goes off when its enemy attacks (EB-260), and
 the badge's damage total leaves Strength out, so it printed 10 and dealt 14
@@ -81,24 +112,31 @@ shipped name (EB-267). Known and unchanged: enchantments missing from the
 battle hand (EB-181); the "(proto)" in Sparks 'n' Splash's name is the
 surface's collision suffix and goes away at Balance.
 
-Two Opus agents are fixing them now, one per group. Each lands as a plumbing
-PR, then the dev build redeploys with the fixes and, once its own PR is
-green, the Mondstadt companion prototype.
+All nine were built the same night (PRs #249 and #251, merged onto the round
+branch as plumbing) and are in the installed build; the live reads in round
+two confirmed the Mine clause, the shop, the chest, the Spark gate's "you
+have no Spark" and Quick Fuse's "no enemy is holding a Bomb". Round two
+added three: the Dexterity Potion cannot be used through the render while
+the Energy Potion can (EB-269); the Bomb badge now prints two numbers that
+disagree under Weak, the stack's 17 in bold and the face's 12 after the
+modifier, a consequence of the EB-265 fix (EB-270); and a numbered card name
+goes stale mid-turn plus one arm gate still refuses without a sentence
+(EB-271). None blocks your run; EB-270 is the one to read around, since the
+face's number is the true one.
 
 ## 4. What is installed right now
 
-The dev build with the overhaul arm, not the release build, on purpose, so
-your run needs no deploy. `mods\klee\manifest.json` says
-`0.2.1879+proto.dirty`. To put the release build back at any time:
-`klee-mod\build\deploy.ps1`. Do not hand this build to a co-op partner.
+The dev build with both arms on (Klee overhaul, Mondstadt companions), not
+the release build, on purpose, so your run needs no deploy.
+`mods\klee\manifest.json` says `0.2.1911+proto.dirty`. To put the release
+build back at any time: `klee-mod\build\deploy.ps1`. Do not hand this build
+to a co-op partner.
 
 ## 5. Picks
 
-1. **Which build you play.** (1) *The fix build (EB-260, 261, 265, 266 and
-   the render fixes), which redeploys as soon as its PR is green* [default,
-   APPLIED as a process call: the two lying faces are the very numbers your
-   four questions ask about]. (2) The installed build now, reading those
-   two numbers with the correction in mind.
+1. **Which build you play.** APPLIED and done: the fix build is the
+   installed one (`0.2.1911+proto.dirty`), so the two lying faces your four
+   questions depend on are corrected before you play. Nothing to pick.
 2. **Rule 2, Bombs grow at the start of your turn.** The seats say holding
    never paid in act-one hallway fights. (1) *Leave the rule; your run and
    question 1 decide, as the gate says* [default]. (2) Send rule 2 back to
