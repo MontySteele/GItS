@@ -308,7 +308,7 @@ def test_no_other_character_moves_under_the_flag(overhaul):
         assert not any(cid.startswith("proto_ko_") for cid in ids)
 
 
-# --- 4. THE OPS ARE REGISTERED AND REFUSE TO RUN ---------------------------
+# --- 4. THE OPS ARE REGISTERED AND REFUSE OFF THE ARM ----------------------
 
 def test_every_new_op_is_registered():
     """The loader validates `op:` NAMES at load (`_validate_effect_vocabulary`),
@@ -324,20 +324,43 @@ def test_every_new_op_is_priced_for_the_drafter():
         assert op in draft.STATIC_OP_PRICING, op
 
 
-def test_the_new_ops_refuse_to_resolve():
-    """C# FIRST, said out loud. The slice packet does not bring the sim up,
-    and a silently no-op resolver would be the worst possible stand-in: a
-    prototype that reports numbers for rules it never ran."""
+def test_the_new_ops_refuse_to_resolve_off_the_arm():
+    """THE QUARANTINE, AT THE RESOLVER. `EB-312` built the twin
+    (`tier0/engine/klee_overhaul.py`), so these eight resolve now -- but only
+    with the flag ON and Klee in the seat, which is the mod's
+    `KleeOverhaul.Enabled` plus the `IKleeCharacter` test every seam carries
+    beside it. Off the arm they still raise, because a silently no-op resolver
+    is the worst possible stand-in: a prototype that reports numbers for rules
+    it never ran.
+
+    BOTH CLAUSES OF THE GATE are asserted, a default seat and a KLEE seat with
+    the flag still off, so neither can be dropped without this failing. The ON
+    side lives in `tier0/tests/test_klee_overhaul_rules.py`."""
     from tier0.tests.conftest import make_state
     from tier0.engine.state import Card
 
     for op in OVERHAUL_OPS:
-        state = make_state()
-        card = Card(id="probe", name="probe", cost=1, type="attack",
-                    effects=[{"op": op}])
-        with pytest.raises(NotImplementedError) as excinfo:
-            effects.OPS[op](state, {"op": op}, card)
-        assert "KLEE_OVERHAUL" in str(excinfo.value)
+        for character in (None, "klee"):
+            state = make_state()
+            if character:
+                state.player.character_id = character
+            card = Card(id="probe", name="probe", cost=1, type="attack",
+                        effects=[{"op": op}])
+            with pytest.raises(NotImplementedError) as excinfo:
+                effects.OPS[op](state, {"op": op}, card)
+            assert "KLEE_OVERHAUL" in str(excinfo.value)
+
+
+def test_the_two_predicates_refuse_off_the_arm():
+    """Rule 7's two per-turn reads, on the same gate the ops take. Neither is a
+    synonym for `reaction_triggered_this_turn`, so answering False off the arm
+    would report a game this engine never played."""
+    from tier0.tests.conftest import make_state
+
+    for name in ("bomb_went_off_this_turn", "bomb_reacted_this_turn"):
+        assert name in effects.PREDICATE_NAMES
+        with pytest.raises(NotImplementedError):
+            effects._predicate(make_state(), name)
 
 
 # --- 5. THE PROTOTYPE-STAGE UPGRADE RULE (EB-283, closing EB-277) ----------

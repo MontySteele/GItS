@@ -772,13 +772,20 @@ def test_the_pilots_forecast_and_the_play_read_the_same_function(overhaul):
     """The Track C.2 lesson. `policy._active_effects` swaps in the Plan line
     for a pet-bound play by asking `plan_aimed_at_pet`, which is the SAME pure
     function `effects._resolve_card_bound` asks a moment later -- so the half
-    the pilot priced is the half that runs."""
+    the pilot priced is the half that runs.
+
+    EB-311 PUT A PRICE ON THE TURN OF DELAY, so the planned half is now
+    forecast at `C.PLAN_DELAY_DISCOUNT` of its face and the now-line still at
+    face. The assertion is written against the constant rather than against
+    6.75, because what it pins is WHICH HALF is read and that the delay is
+    charged at all -- the dial's value is an instrument question and moving it
+    should move this test with it, not break it."""
     from tier0.pilot import policy
     quiet = kokomi_state(enemies=[make_enemy(intents=BLOCKER)])
     card = plan_card([{"op": "damage", "amount": 9, "target": "front_enemy"}],
                      effects_=[{"op": "damage", "amount": 4,
                                 "target": "enemy"}])
-    assert policy._expected_damage(quiet, card) == 9
+    assert policy._expected_damage(quiet, card) == 9 * C.PLAN_DELAY_DISCOUNT
     attacking = kokomi_state(enemies=[make_enemy(intents=ATTACKER)])
     assert policy._expected_damage(attacking, card) == 4
 

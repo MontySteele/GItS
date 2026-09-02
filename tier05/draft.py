@@ -160,10 +160,68 @@ STATIC_STATE_CONDITIONS = frozenset({
     "target_has_aura",
 })
 
+# EB-311 -- PREDICATES THAT ONLY THE PROTOTYPE SURFACE SPELLS, priced at the
+# MEAN OF THEIR BRANCHES.
+#
+# The state of play the balance read found: `proto_kk_undertow` prints "7
+# damage, 10 if the enemy has a debuff" -- above Strike on either branch -- and
+# priced at 0.0000, because its whole body is one `conditional` on
+# `target_has_debuff`, which the set above does not name. Sixteen `proto_kk_`
+# rows scored 0.00 and Undertow was the proof that the zeros were the
+# instrument rather than the cards
+# (`review/records/balance-read-prototype-2026-09-02.md` sec.3).
+#
+# WHY THE ENTRY IS A NAME AND NOT A GENERAL FALLBACK, which was the first thing
+# tried and the thing that was REFUSED. "An unpriced predicate prices at the
+# mean of its branches", made the global default, re-prices `big_badda_boom`,
+# `sparkly_explosion` and `showstopper` (`killed_target`), `sudden_downpour`
+# (`reaction_triggered_by_this`), and a dozen Furina rows (`fanfare_at_least_*`,
+# `encore_at_least_*`, `has_salon_members`) -- every one of them a SHIPPED
+# number published under `D18`. That is a `DRAFTER_VERSION` bump archiving
+# every measured table in the repo, taken as a side effect of instrument work
+# on a Prototype arm. The zero-credit convention above is [USER]'s, in writing,
+# at R194, and this does not touch it.
+#
+# NOR IS THE SCOPE THE ROW, which was the second thing tried and is subtler.
+# Gating on a `proto_` id would credit `enemy_intends_attack` on Klee's
+# `proto_hold_the_line_spark` while leaving it at zero on the shipped
+# `hold_the_line` it is a twin of -- and EB-233's whole pin is that the
+# prototype twin reproduces its shipped original's published figure. A price
+# that splits a card from its own twin is a worse instrument than the zero.
+#
+# So the scope is the PREDICATE: a name no shipped sheet spells cannot move a
+# shipped price, whoever prints it. `tier05/tests/test_eb311_plan_pricing.py`
+# checks that emptiness against every committed sheet rather than trusting this
+# sentence, and the day one of these is authored onto a shipped row that check
+# goes red -- which is the moment the name earns a `STATIC_STATE_CONDITIONS`
+# row, a share of its own, and a `DRAFTER_VERSION` bump.
+STATIC_PROTOTYPE_CONDITIONS = frozenset({
+    # Undertow (`proto_kk_undertow`). "If the enemy has a debuff" --
+    # `kokomi_plan.has_debuff`, which the drafter cannot answer at offer time
+    # because there is no enemy yet.
+    "target_has_debuff",
+    # Sango Isshin (`proto_kk_sango_isshin`), R243. "If the jellyfish carried
+    # out a Plan this turn" -- `state.kk_plan_carried_out_this_turn`, a fact
+    # about the TURN the card is played on, and a reward screen has no turn.
+    # The row traded its own Plan line for this condition, so its whole body is
+    # one branch and without an entry here the whole card prices at 0.00 --
+    # which is the defect this set exists to end, arriving a second time in the
+    # same week on the same arm.
+    "plan_carried_out_this_turn",
+})
+# Half: the MEAN of the two branches, which is what a share of 0.5 computes in
+# the blend below. The honest share for a predicate nobody has measured -- the
+# drafter cannot see the board, so it assumes neither branch. Deliberately the
+# same number as `STATIC_KLEE_CONDITIONAL_SHARE` and NOT that constant, because
+# the two would move for different reasons: Klee's is a claim about how often
+# Sparks and auras are available, this one is the absence of a claim.
+STATIC_PROTOTYPE_CONDITIONAL_SHARE = 0.5
+
 
 def _static_condition(name: str) -> bool:
     return (
         name in STATIC_STATE_CONDITIONS
+        or name in STATIC_PROTOTYPE_CONDITIONS
         or name.startswith("target_has_power_")
         or name.startswith("exhaust_pile_at_least_")
     )
@@ -174,6 +232,8 @@ def _static_condition_share(name: str) -> float:
         return STATIC_KLEE_CONDITIONAL_SHARE
     if name == "spotlight_moved_this_turn":
         return STATIC_SPOTLIGHT_MOVED_SHARE
+    if name in STATIC_PROTOTYPE_CONDITIONS:
+        return STATIC_PROTOTYPE_CONDITIONAL_SHARE
     return 1.0
 
 
@@ -207,11 +267,29 @@ def _neutral_amount(fx: dict, default: float = 1.0) -> float:
 AMP_PAYOFF_POWERS = C.AMP_PAYOFF_POWERS   # shared with the content loader
 
 
+def _printed_faces(card: Card) -> tuple[list[dict], list[dict]]:
+    """BOTH HALVES OF A PRINTED FACE: the now-line and the `plan:` line.
+
+    EB-311. A `plan:` list is not a side table, it is the second half of what
+    is printed on the card (`state.Card.plan`'s own header), so every
+    "does this card print X anywhere" classifier has to read it or Battle Plan
+    -- whose entire printed text is "Plan: gain 2 Energy and draw 1" -- is not
+    a tempo card to a drafter that only reads `effects:`.
+
+    INERT ON EVERY SHIPPED ROW by construction: `plan:` is prototype-surface
+    only (`tools/gen_klee_cards.card_level_reason` refuses one on any character
+    but Kokomi and no `docs/*-cards.yaml` row carries the key), so the second
+    list is empty everywhere a published number is measured.
+    """
+    return card.effects, card.plan
+
+
 def _has_tempo(card: Card) -> bool:
     """Draw / energy anywhere in the printed text -- the velocity class the
     late-run discipline (DRAFTER_VERSION 5) still takes past the lean cap."""
     return any(fx.get("op") in ("draw", "energy")
-               for fx in _nested_effects(card.effects))
+               for face in _printed_faces(card)
+               for fx in _nested_effects(face))
 
 
 def _has_block(card: Card) -> bool:
@@ -226,7 +304,7 @@ def _has_block(card: Card) -> bool:
                 return True
         return False
 
-    return contains(card.effects)
+    return any(contains(face) for face in _printed_faces(card))
 
 
 def _block_density(deck: list[Card]) -> float:
@@ -563,6 +641,10 @@ _PRICED_INLINE = frozenset({
     "damage", "chain_attack", "block", "place_bomb", "apply_power",
     "conditional", "choose_one", "conscript", "gain_charge", "summon_kurage",
     "gain_fanfare_floor", "grow_damage", "repeat_this",
+    # EB-311: the Max-HP fraction needs the CARD -- whose Max HP the fraction
+    # is taken of is a fact about the character the row belongs to and is not
+    # on the effect dict.
+    "damage_quarter_max_hp", "damage_max_hp_fraction",
 })
 
 
@@ -591,6 +673,53 @@ def _added_card_value(fx: dict) -> float:
     return STATIC_GENERATED_CARD_VALUE
 
 
+def _max_hp_fraction(fx: dict) -> float:
+    """WHAT FRACTION OF MAX HP this clause hits for.
+
+    `damage_quarter_max_hp` carries no field at all -- the quarter is in its
+    NAME, and `kokomi_plan.QUARTER` is the divisor both engines write inline
+    (its header says why it is not a `lint_constant_parity` row). The rename
+    spelling is read from the dict if it brings one, under either of the two
+    shapes a rename plausibly takes, and falls back to the same quarter.
+    """
+    from tier0.engine import kokomi_plan            # late import: cycle
+
+    fraction = fx.get("fraction")
+    if isinstance(fraction, (int, float)) and not isinstance(fraction, bool):
+        return float(fraction)
+    divisor = fx.get("divisor", fx.get("denominator"))
+    if isinstance(divisor, int) and not isinstance(divisor, bool) and divisor:
+        return 1.0 / divisor
+    return 1.0 / kokomi_plan.QUARTER
+
+
+def _max_hp_hit(card: Card, fx: dict) -> float:
+    """EB-311. Sango Isshin's "damage equal to a quarter of your Max HP",
+    priced as MAX HP TIMES THE FRACTION -- printed damage, arrived at by the
+    one multiplication the card's own text spells out, and then treated exactly
+    like a printed damage line (the AoE multiple on the planned all-enemies
+    half, face value on the single-target now-line).
+
+    THE MAX HP IS THE CHARACTER SHEET'S, read through the loader rather than
+    guessed: `tier0/content/characters/<id>.yaml` is the ratified artifact and
+    `build_player` reads the same `hp` key to seat her, so the drafter's
+    arithmetic and the fight's cannot come apart. A quarter of Kokomi's 80 is
+    20, which is the number the balance read's sec.2 column already quotes.
+
+    A ROW WHOSE CHARACTER THE LOADER CANNOT ANSWER prices at ZERO, and that is
+    the honest refusal rather than a fallback constant: "a quarter of your Max
+    HP" is meaningless without a `your`, and inventing a neutral body would be
+    a claim about a character that does not exist.
+    """
+    from tier0.content import loader                # late import: cycle
+
+    try:
+        max_hp = loader._character_index()[card.character]["hp"]
+    except Exception:                     # noqa: BLE001 -- unknown seat
+        return 0.0
+    return max_hp * _max_hp_fraction(fx)
+
+
 #: The Klee overhaul's eight verbs (slice one, QUARANTINED behind
 #: `C.KLEE_OVERHAUL`). Named as a set rather than eight `if op ==` arms because
 #: they take ONE pricing decision between them -- see `_op_price`.
@@ -604,10 +733,26 @@ KLEE_OVERHAUL_OPS = frozenset((
 #: one, because the two arms are independent and a merged set would make either
 #: one's pricing decision look like the other's when the first of them is
 #: eventually taken.
+#:
+#: EB-311: this set is no longer ONE pricing decision -- each verb has its own
+#: branch in `_op_price` (or, for the Max-HP hit, its own branch in
+#: `effect_power`, because it needs the card). It is kept as the arm's INDEX,
+#: which is what `STATIC_OP_PRICING` and the test read it as.
 KOKOMI_OVERHAUL_OPS = frozenset((
     "mend", "next_companion_discount", "remove_debuff",
     "carry_out_front_plan", "plan_from_exhaust", "damage_quarter_max_hp",
     "plan_twice", "damage_per_companion_last_turn"))
+
+#: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
+#: is what the sheet writes today (Sango Isshin, now-line and planned half);
+#: `damage_max_hp_fraction` is the rename a parallel branch may land, and it is
+#: priced HERE rather than waited for, so the rename cannot arrive as a silent
+#: zero on a row whose price the read already quotes. Only the spelling the
+#: engine registers reaches `STATIC_OP_PRICING` -- `tools/lint_op_parity.py`
+#: calls an entry with no registered op a STALE PRICE -- so the second name
+#: lives in this set and in `effect_power`'s branch and nowhere else.
+MAX_HP_FRACTION_OPS = frozenset(("damage_quarter_max_hp",
+                                 "damage_max_hp_fraction"))
 
 
 def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
@@ -729,34 +874,82 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # the old world.
         return 0.0
 
-    # -- the Kokomi overhaul, slice one (QUARANTINED, C.KOKOMI_OVERHAUL) ----
-    if op in KOKOMI_OVERHAUL_OPS:
-        # ZERO, and a DELIBERATE zero -- but NOT on the branch above's argument
-        # any more, and the difference is worth the paragraph.
-        #
-        # "TIER0 REFUSES TO RESOLVE THEM" STOPPED BEING TRUE ON 2026-09-02, the
-        # way it had already stopped covering `mend` when a rewritten Inazuma
-        # Universal started printing that one. The sim twin of draft 6's Plan
-        # landed (`tier0/engine/kokomi_plan.py`, mirroring
-        # `KleeCode/Powers/Prototype/KokomiPlan.cs`), so every verb in this set
-        # now RUNS -- with `C.KOKOMI_OVERHAUL` on and Kokomi in the seat.
-        #
-        # THE ZERO STANDS ON THE OTHER HALF, which is the half that decides:
-        # only a `proto_` row prints any of them, no `docs/*-cards.yaml` row
-        # spells one, and with the flag off no offerable pool the drafter reads
-        # can hold one (`loader.pool_replacement` is the seam and it answers
-        # None). So every drafted number in the world is byte-identical with
-        # and without this branch and DRAFTER_VERSION does not move.
-        #
-        # PRICING THEM IS ACCEPTANCE WORK AND IT MOVES `D` THEN. A planned
-        # clause is not the same thing as the clause played now -- it lands a
-        # turn late, it costs the card's whole now-line, and Nereid's window
-        # doubles it -- so a price for it is a drafter DECISION rather than a
-        # translation of behaviour, and it belongs to the change that takes the
-        # arm out of quarantine and archives the old world. `heal` being
-        # `_PRICED_INLINE` is the same story for `mend`: healing has no priced
-        # channel in this table at all.
-        return 0.0
+    # -- the Kokomi overhaul, draft 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ------
+    #
+    # EB-311 ENDED THE BLANKET ZERO THAT USED TO SIT HERE. The note it replaces
+    # said the whole set priced at zero because pricing a PLANNED clause is a
+    # drafter DECISION rather than a translation of behaviour, and named the
+    # change that would take it: "the change that takes the arm out of
+    # quarantine". That was half right and the balance read is what showed
+    # which half. The arm is still quarantined -- only a `proto_` row prints
+    # any of these verbs, no `docs/*-cards.yaml` row spells one, and with the
+    # flag off no offerable pool the drafter reads can hold one
+    # (`loader.pool_replacement` answers None) -- so DRAFTER_VERSION still does
+    # not move and every drafted number in the published world is
+    # byte-identical with and without these branches, which
+    # `tier05/tests/test_eb311_plan_pricing.py` pins as a fixture hash.
+    #
+    # What the zero cost was the READ. Sixteen of the twenty-eight `proto_kk_`
+    # rows scored exactly 0.00 at offer, under `DRAFT_SKIP_THRESHOLD`, so
+    # eleven of them were never drafted at all and the balance read's pick
+    # rates were a measurement of this function rather than of the cards
+    # (`review/records/balance-read-prototype-2026-09-02.md` sec.3, which says
+    # so in its own first line). A deliberate zero that makes an instrument
+    # unable to see the thing it was pointed at is not conservative, it is
+    # blind -- so each verb below takes the SMALLEST rule that is a price
+    # rather than a guess, every one of them derived from a dial this table
+    # already holds. `C.PLAN_DELAY_DISCOUNT` is the one new number and it is an
+    # instrument dial, documented as one at the constant.
+    if op == "mend":
+        # One point of Block per point Mended. See STATIC_MEND_VALUE for why
+        # this is not `heal`'s share and what the cap does to the direction.
+        return _neutral_amount(fx, 0) * STATIC_MEND_VALUE
+    if op == "damage_per_companion_last_turn":
+        # Chain of Command. ONE companion is the same neutral single-unit
+        # estimate every live count in this file takes (`amount_formula`'s
+        # "one unit of the live count is a conservative neutral offer-state
+        # estimate", `copy_companions_played_this_combat`'s "ONE unique
+        # companion"): a reward screen cannot see how many Companions the deck
+        # will end up playing in a turn, and guessing more would price the
+        # Commander plan's best case as its printed case.
+        return _neutral_amount(fx, 0) * aoe
+    if op == "plan_twice":
+        # Nereid's Ascension's window: "for N turns the jellyfish carries out
+        # every Plan twice". The value is ONE EXTRA PLAN CARRIED OUT PER TURN
+        # of the window -- `STATIC_AUTOPLAY_VALUE`, this table's existing price
+        # for one neutral card resolved without being paid for, which is
+        # exactly what a doubled Plan is. One per turn and not one per Plan,
+        # because Plan DENSITY is a deck fact an offer screen cannot read; the
+        # same single-unit refusal the line above makes.
+        return _neutral_amount(fx, 0) * STATIC_AUTOPLAY_VALUE
+    if op == "carry_out_front_plan":
+        # Change of Plans: the front Plan is carried out NOW instead of at the
+        # top of her next turn, and it leaves the queue (`resolve_front`), so
+        # nothing is created -- one resolution is MOVED A TURN EARLIER. Its
+        # price is therefore exactly the delay it cancels on one neutral Plan,
+        # which is the discount's complement and needs no dial of its own.
+        return STATIC_AUTOPLAY_VALUE * (1.0 - C.PLAN_DELAY_DISCOUNT)
+    if op == "plan_from_exhaust":
+        # Moon's Reflection: one card in the exhaust pile contributes its Plan
+        # line, or is replayed whole if it has none. Either shape is one
+        # neutral card resolved out of a pile it was already in --
+        # `autoplay_from_exhaust`'s price, one turn late, so it takes the delay
+        # discount the printed `plan:` lists take.
+        return STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT
+    if op == "next_companion_discount":
+        # Rally's grant, and it is a `cost_mod` wearing a kit name: "the next
+        # Companion card you play this turn costs 1 less", ONE stack, always
+        # (`kokomi_plan.next_companion_discount`). So it takes `cost_mod`'s
+        # rule and `cost_mod`'s dial -- which is the measured dead zero, and
+        # that is the answer rather than a gap in it. Deviating here would
+        # price one character's energy discount above every other card's.
+        return C.KOKOMI_OVERHAUL_RALLY_DISCOUNT * STATIC_ENERGY_VALUE
+    if op == "remove_debuff":
+        # Cleansing Wave: one debuff off HER. The mirror of putting one onto an
+        # enemy, at the same rate -- `STATIC_DEBUFF_VALUE` is what this table
+        # thinks one duration debuff is worth, and which side of the field it
+        # sits on does not change that. One, because the card removes one.
+        return STATIC_DEBUFF_VALUE
 
     # -- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
     if op == "block_half_damage":
@@ -899,6 +1092,11 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
     # down to `_op_price` so the `spend_spark` branch can charge a sink at the
     # rate its own body is denominated in. Whole-card context by construction:
     # a nested `damage` still makes the card an Attack body for this purpose.
+    #
+    # EB-311 deliberately leaves this walk on the NOW-LINE. It feeds exactly
+    # one branch (`spend_spark`'s rate), no `plan:` clause can be a Spark sink
+    # (`kokomi_plan.PLAN_KINDS` is closed and holds neither Spark verb), and
+    # widening it would be a change to a shipped arm's rate for no reader.
     has_attack_body = any(fx.get("op") in STATIC_ATTACK_BODY_OPS
                           for fx in all_effects)
 
@@ -918,6 +1116,15 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                     share = _static_condition_share(name)
                     total += (else_power
                               + share * (then_power - else_power))
+            elif fx.get("op") in MAX_HP_FRACTION_OPS:
+                # EB-311. A printed damage line whose number is on the
+                # character sheet instead of the card; priced there and then
+                # treated as damage, AoE multiple included.
+                amt = _max_hp_hit(card, fx)
+                if fx.get("target") == "all_enemies":
+                    total += amt * STATIC_AOE_MULT
+                else:
+                    total += amt
             elif fx.get("op") == "choose_one":
                 # EB-118 sec.5.4. One shipped card carries a `choose_one`:
                 # `deep_breath`, the Phase-2C prototype (R192 picked the card,
@@ -1104,6 +1311,40 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
         return total
 
     total = effect_power(card.effects)
+    # EB-311 -- THE SECOND HALF OF THE PRINTED FACE, at the SAME per-op prices
+    # the now-line gets and one discount for the turn of delay.
+    #
+    # It is one line here rather than a parallel pricer because that IS the
+    # design claim: a planned clause is the same clause, resolved by the
+    # jellyfish at the top of her next turn (`kokomi_plan._resolve_clause`
+    # dispatches to the engine's own `mend`, `deal_damage_to_enemy`,
+    # `modify_block_gained` and `apply_power`), so anything the drafter would
+    # pay for the clause now it should pay for the clause late, less the delay.
+    # Re-deriving a second price table for the same eight verbs is how the two
+    # halves of one card come to disagree about what a Weak is worth.
+    #
+    # ADDED, NOT MAXED. Draft 6's rule is that playing a card ON the jellyfish
+    # gives up the now-line entirely, so a card with both halves is worth ONE
+    # of them and a MAX would be the literal reading. The sum is taken anyway
+    # and it is a deliberate over-credit of exactly one thing -- THE CHOICE.
+    # That is `choose_one`'s question with the roles reversed: there the modes
+    # are always both available and the file takes the MAX because a share
+    # blend "would be modelling a coin flip that does not exist"; here BOTH
+    # halves are always available too, and the card's whole design is that the
+    # player picks the half the board wants. A max would price a Plan card
+    # identically to a card printing only its better half, which is the one
+    # thing that is certainly wrong. The direction is disclosed rather than
+    # hidden: this is the one term in the function that can OVER-value a row,
+    # its size is bounded by the weaker half, and it lands only on quarantined
+    # rows.
+    #
+    # THE DISCOUNT IS A CONSTANT AND NOT A CURVE. It does not model Nereid's
+    # window (a Plan doubled is worth more than a Plan), the Casket, or the
+    # fact that an empty now-line means the delay is free rather than paid --
+    # all three are board and deck facts an offer screen cannot read, which is
+    # the same refusal every live count in this function already makes.
+    if card.plan:
+        total += effect_power(card.plan) * C.PLAN_DELAY_DISCOUNT
     # v13: `repeat_this` re-resolves the card's OWN effects, so it is a
     # MULTIPLIER on what the rest of the card printed rather than a term
     # beside it -- which is why it is applied here and not in `effect_power`,
@@ -1596,6 +1837,31 @@ STATIC_HEAL_SHARE = 0.5            # heal, per point. Under the R52 healing
 STATIC_MAX_HP_VALUE = 1.0          # gain_max_hp, per point: permanent HP
                                    # AND an immediate heal of the same size,
                                    # priced at one point of Block each.
+STATIC_MEND_VALUE = 1.0            # EB-311. `mend`, per point: ONE POINT OF
+                                   # BLOCK, the same rate STATIC_MAX_HP_VALUE
+                                   # already pays a point of HP, and the rate
+                                   # the balance record's own arithmetic reads
+                                   # the keyword at ("Mend counts 1:1",
+                                   # review/records/
+                                   # balance-read-prototype-2026-09-02.md
+                                   # sec.2) -- so the paper read of a row and
+                                   # the drafter's read of it agree.
+                                   #
+                                   # DELIBERATELY NOT `heal`'s 0.5 SHARE, and
+                                   # the difference is DISCLOSED rather than
+                                   # argued: `heal` is discounted because
+                                   # out-of-combat HP is a run resource the
+                                   # drafter cannot see the level of, and Mend
+                                   # is a COMBAT keyword capped at the HP she
+                                   # entered the fight with (`effects.mend`) --
+                                   # it undoes damage already taken in the
+                                   # fight the drafter is pricing for. The cap
+                                   # makes this an UPPER bound, which is the
+                                   # one place in this table the error points
+                                   # the other way; it is the arm's own dial
+                                   # and only `proto_` rows print the op, so
+                                   # halving it to `heal`'s share is a
+                                   # one-line change if a read asks for it.
 # -- structural -----------------------------------------------------------
 STATIC_ETHEREAL_SHARE = 0.6        # EB-118. Ethereal is a DOWNSIDE and the
                                    # drafter must price it, or a card whose
@@ -1983,29 +2249,34 @@ STATIC_OP_PRICING: dict[str, str] = {
        for op in ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                   "remove_bomb_for_block", "damage_set_off_total",
                   "double_set_off", "draw_per_set_off")},
-    # --- the Kokomi overhaul, slice one (QUARANTINED, C.KOKOMI_OVERHAUL) --
-    # One rationale, seven ops, and the same one decision for the same reason.
-    # THE ARM RESOLVES NOW (`tier0/engine/kokomi_plan.py`, 2026-09-02), so the
-    # "no sim behaviour to price" half is gone and the QUARANTINE half is the
-    # whole of the argument -- see `_op_price`'s branch for the long form,
-    # including why a planned clause is a drafter decision rather than a
-    # translation of what it does.
-    **{op: "ZERO: prototype surface only -- only a `proto_` row prints it and "
-            "no offerable pool holds one with `C.KOKOMI_OVERHAUL` off, so no "
-            "drafted number moves. Pricing a PLANNED clause (a turn late, the "
-            "whole now-line given up, doubled inside Nereid's window) is "
-            "acceptance work and moves `D` then"
-       for op in ("next_companion_discount", "remove_debuff",
-                  "carry_out_front_plan", "plan_from_exhaust",
-                  "damage_quarter_max_hp", "plan_twice",
-                  "damage_per_companion_last_turn")},
-    # `mend` OUT OF THAT BULK, because it is the one Kokomi verb a rewritten
-    # Inazuma UNIVERSAL prints, so it is reachable behind a SECOND flag
-    # (`C.COMPANION_OVERHAUL`) and its zero rests on a different sentence.
-    "mend": "ZERO: healing has no priced channel in this table at all "
-            "(`heal` is _PRICED_INLINE), and only a `proto_` row prints the "
-            "keyword -- no offerable pool holds one with the flag off, so no "
-            "drafted number moves",
+    # --- the Kokomi overhaul, draft 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ----
+    # EB-311: the blanket ZERO these eight rows used to share is gone. One
+    # rationale apiece now, each derived from a dial already in this table, and
+    # the arm is still quarantined -- no shipped row prints any of them and no
+    # drafted number in the published world moves. The long form, including why
+    # a deliberate zero that blinds the instrument is not conservative, is at
+    # `_op_price`'s Kokomi block.
+    "mend": "one point of Block per point Mended (STATIC_MEND_VALUE); "
+            "deliberately NOT `heal`'s share, and the constant says why",
+    "damage_quarter_max_hp": "printed damage: the character sheet's Max HP "
+                             "times the fraction the op names, then the AoE "
+                             "multiple -- _PRICED_INLINE, it needs the card",
+    "damage_per_companion_last_turn": "its printed damage against ONE "
+                                      "companion, the neutral single-unit "
+                                      "estimate every live count here takes",
+    "plan_twice": "STATIC_AUTOPLAY_VALUE per turn of the window: one extra "
+                  "Plan carried out a turn, not one per Plan (density is a "
+                  "deck fact an offer screen cannot read)",
+    "carry_out_front_plan": "one resolution moved a turn EARLIER, not created "
+                            "-- STATIC_AUTOPLAY_VALUE times the delay it "
+                            "cancels (1 - C.PLAN_DELAY_DISCOUNT)",
+    "plan_from_exhaust": "`autoplay_from_exhaust`'s price, one turn late: "
+                         "STATIC_AUTOPLAY_VALUE x C.PLAN_DELAY_DISCOUNT",
+    "next_companion_discount": "ZERO: it is a `cost_mod` wearing a kit name, "
+                               "so it takes cost_mod's rule and cost_mod's "
+                               "measured dead dial (STATIC_ENERGY_VALUE)",
+    "remove_debuff": "STATIC_DEBUFF_VALUE, one debuff off HER -- the mirror "
+                     "of putting one onto an enemy, at the same rate",
     # --- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
     "block_half_damage": "ZERO: the amount is half of what the card's own "
                          "damage line LANDED, which no static pricer can see "

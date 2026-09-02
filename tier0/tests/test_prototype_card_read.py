@@ -30,10 +30,16 @@ def test_the_flag_is_restored_and_the_caches_cleared():
     assert rewards.character_pool.cache_info().currsize == 0
 
 
-def test_the_klee_arm_reports_its_refusal_rather_than_running():
-    reason = pcr.probe_arm_runnable("klee")
-    assert reason and "KLEE_OVERHAUL" in reason and "set_off" in reason
+def test_both_arms_run_and_the_probe_still_asks_the_ops_table():
+    """`EB-312`: the Klee arm used to report a refusal here, on the slice
+    packet's C#-first sentence, and `tier0/engine/klee_overhaul.py` is the twin
+    that closed it. The probe is KEPT rather than deleted -- it answers "does
+    this engine run the arm", which a future arm will ask again -- and it still
+    reads `effects.OPS` rather than a list of its own, which is what makes a
+    re-quarantined arm report itself."""
+    assert pcr.probe_arm_runnable("klee") is None
     assert pcr.probe_arm_runnable("kokomi") is None
+    assert set(pcr._UNBUILT_MARKERS) == set(pcr.ARMS)
 
 
 def test_a_small_kokomi_cohort_produces_the_four_rates():
