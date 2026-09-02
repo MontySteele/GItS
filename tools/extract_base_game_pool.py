@@ -103,9 +103,29 @@ POOL_NS = "MegaCrit.Sts2.Core.Models.CardPools."
 CTOR = re.compile(r":\s*base\(\s*(-?\d+)\s*,\s*CardType\.(\w+)\s*,\s*"
                   r"CardRarity\.(\w+)")
 # `new DamageVar(6m, ...)` / `new BlockVar(5m, ...)` / `new MagicVar(...)`
-VAR = re.compile(r"new (\w+)Var\(\s*(-?[\d.]+)m")
-# `DynamicVars.Damage.UpgradeValueBy(2m)`
-UPG = re.compile(r"DynamicVars\.(\w+)\.UpgradeValueBy\((-?[\d.]+)m\)")
+#
+# THE `m` IS OPTIONAL, AND IT USED TO BE MANDATORY (EB-193). A CanonicalVar
+# whose backing type is `int` is constructed from a bare int literal and
+# carries no decimal suffix, so demanding one dropped every int-typed var
+# from the JSON extract without a word. The Regent's Star amounts were the
+# whole class: `game_ref/regent.json` carried no Star number anywhere, its
+# Basic generator reading `"vars": {}` while its `upgrades` showed the delta
+# (that OnUpgrade happens to spell its number as a decimal), so every Star
+# figure in docs/current/research/regent-stars-economy.md had to be
+# re-decompiled by hand.
+#
+# OPTIONAL, NOT DELETED, and the alternation is what keeps the widening
+# honest. The `m` branch matches exactly what it always matched; a bare
+# literal is admitted only when the number is followed by the END of the
+# argument. Without that terminator the greedy `[\d.]+` would take the
+# trailing dot off a member access on a numeric literal (`2.5.ToString()` ->
+# `2.5.`) and hand `float()` a string it cannot parse -- the mandatory `m`
+# had been serving as the terminator, so removing it needs one back.
+VAR = re.compile(r"new (\w+)Var\(\s*(-?[\d.]+)(?:m|\s*[,)])")
+# `DynamicVars.Damage.UpgradeValueBy(2m)` -- and `(1)`, for the EB-193 reason
+# above. Here the closing paren is already the terminator, so the suffix is a
+# plain `m?` and no alternation is needed.
+UPG = re.compile(r"DynamicVars\.(\w+)\.UpgradeValueBy\((-?[\d.]+)m?\)")
 # Every `SomethingCmd.Method(` call in the body -- the effect vocabulary.
 CMD = re.compile(r"\b(\w+Cmd)\.(\w+)\(")
 # The power vocabulary. Powers are reached three ways and all three matter:
@@ -822,12 +842,16 @@ VARREF = re.compile(r'base\.DynamicVars(?:\.(\w+)|\["(\w+)"\])'
                     r'(?:\.(?:BaseValue|IntValue))?$')
 NUMBER = re.compile(r"(-?\d+(?:\.\d+)?)m?$")
 
-# CanonicalVars shapes. Note `new CardsVar(1)` / `new RepeatVar(3)` carry NO
-# `m` suffix -- the summary regex above misses them, which is harmless for
-# statistics and fatal for a sheet, so this mode parses vars itself.
+# CanonicalVars shapes. `new CardsVar(1)` / `new RepeatVar(3)` carry NO `m`
+# suffix; this mode has always read them, and since EB-193 so does the
+# summary regex above. The two sets stay separate because this mode needs the
+# PowerVar and named-DynamicVar spellings the summary does not, and reads
+# every number through `_num` so an int literal stays an `int`.
 VAR_PLAIN = re.compile(r"new (\w+)Var\(\s*(-?[\d.]+)m?\s*[,)]")
-VAR_POWER = re.compile(r"new PowerVar<(\w+)Power>\(\s*(-?[\d.]+)m")
-VAR_NAMED = re.compile(r'new DynamicVar\("(\w+)",\s*(-?[\d.]+)m\)')
+# The same optional suffix, for the same EB-193 reason: a PowerVar or a named
+# DynamicVar over an int-backed quantity is written without the `m`.
+VAR_POWER = re.compile(r"new PowerVar<(\w+)Power>\(\s*(-?[\d.]+)(?:m|\s*[,)])")
+VAR_NAMED = re.compile(r'new DynamicVar\("(\w+)",\s*(-?[\d.]+)m?\)')
 # Runtime-computed damage/block/hits (Body Slam, Perfected Strike, ...).
 VAR_CALC = re.compile(r"new Calculated\w*Var\(")
 
@@ -1277,8 +1301,11 @@ def _upgrade_delta(src: str, fed: dict) -> dict:
         if m:
             delta["cost"] = int(m.group(1))
             continue
+        # `m?`, not `m` (EB-193): an int-backed var's OnUpgrade writes a bare
+        # int literal, and demanding the decimal suffix filed those upgrades
+        # under "unrecognised upgrade statement" instead of reading them.
         m = re.search(r'base\.DynamicVars(?:\.(\w+)|\["(\w+)"\])'
-                      r'\.UpgradeValueBy\((-?[\d.]+)m\)', stmt)
+                      r'\.UpgradeValueBy\((-?[\d.]+)m?\)', stmt)
         if not m:
             unexpressible.append("unrecognised upgrade statement")
             continue
@@ -1436,8 +1463,9 @@ def _supplement_upgrade_delta(row: dict, src: str) -> dict:
         if m:
             delta["cost"] = int(m.group(1))
             continue
+        # `m?` for the same EB-193 reason as its twin in `_upgrade_delta`.
         m = re.search(r'base\.DynamicVars(?:\.(\w+)|\["(\w+)"\])'
-                      r'\.UpgradeValueBy\((-?[\d.]+)m\)', stmt)
+                      r'\.UpgradeValueBy\((-?[\d.]+)m?\)', stmt)
         if not m:
             unexpressible.append("unrecognised upgrade statement")
             continue
