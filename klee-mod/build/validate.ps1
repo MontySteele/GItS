@@ -238,7 +238,7 @@ foreach ($f in Get-ChildItem $SourceDir -Recurse -Filter *.cs) {
 # The runtime check covers strings after they land in the table; this catches
 # them at author time.
 # ---------------------------------------------------------------------------
-$knownTags = @('center','left','right','b','i','u','s','color','bgcolor','fgcolor',
+$knownTags = @('center','left','right','b','i','u','s','color','bgcolor','fgcolor','blue',
                'font','img','url','gold','keyword','wave','shake','p')
 
 foreach ($f in Get-ChildItem $SourceDir -Recurse -Filter *.cs) {
