@@ -135,8 +135,14 @@ public static class ArmKeywordTips
             "Some cards cost [gold]Sparks[/gold] instead of energy. No cap; "
           + "gone at the end of combat.";
         if (!KleeOverhaul.Enabled) return shared;
-        return "You gain " + KleeOverhaulLaw.SparkPerExplosion + " whenever a "
-             + "[gold]Bomb[/gold] goes off. " + shared;
+        // R242 pick 1 put the opening bank INTO rule 4, and the tip is where a
+        // player meets the word: a Spark-priced card in an opening hand is
+        // exactly the moment the r4 seat found unplayable by construction, and
+        // the sentence that fixes it belongs beside the one that was already
+        // there rather than on a relic the player may not have read.
+        return "You start each combat with " + KleeOverhaulLaw.OpeningSpark
+             + " and gain " + KleeOverhaulLaw.SparkPerExplosion
+             + " whenever a [gold]Bomb[/gold] goes off. " + shared;
     }
 
     /// <summary>

@@ -991,7 +991,7 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 # =============================================================================
 ```
 
-## before proto_ko_kaboom
+## before proto_ko_kapow
 
 ```
 # =============================================================================
@@ -1003,12 +1003,30 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 # later with the measurement law.
 #
 # THESE ROWS ARE REACHABLE, unlike every row above them. Under `C.KLEE_OVERHAUL`
-# / `-p:KleeOverhaul=true` the first five ARE Klee's ten-card starter and the
-# rest ARE her whole offerable pool -- `loader._starter_ids` and
-# `loader.pool_replacement` in the sim, `Klee.StartingDeck` and
-# `KleeCardPool.FilterThroughEpochs` in the mod. With the flag off none of them
-# can be reached by any path, which is the acceptance condition
-# (`tier0/tests/test_klee_overhaul.py`).
+# / `-p:KleeOverhaul=true` the first two ARE the two cards of her own that her
+# ten-card starter carries, and the rest ARE her whole offerable pool --
+# `loader._starter_ids` and `loader.pool_replacement` in the sim,
+# `Klee.StartingDeck` and `KleeCardPool.FilterThroughEpochs` in the mod. With
+# the flag off none of them can be reached by any path, which is the acceptance
+# condition (`tier0/tests/test_klee_overhaul.py`).
+#
+# THE OTHER EIGHT STARTER SLOTS ARE NOT ROWS HERE, and that is DRAFT 4 (ruled
+# R242 pick 3). [USER]: "the starting deck already does too much; base
+# characters open with four Strikes, four Defends and two good cards of their
+# own, and Klee had three, two and five." Strike x4 and Defend x4 are the BASE
+# GAME's own cards -- `ModelDb.Card<StrikeIronclad>()` in the mod, the `strike`
+# and `defend` rows tier0 has carried since `ironclad_starter.yaml` in the sim
+# -- so there is nothing for this sheet to say about them. `proto_ko_kaboom`
+# and `proto_ko_duck_and_cover` were the renamed twins they replace and are
+# DELETED (R213 B); `proto_ko_pop` and `proto_ko_dig_in` left the starter for
+# the POOL as Commons, because the canonical shape has no room for either.
+#
+# TWO NUMBERS MOVED WITH THE SHAPE, both applied defaults disclosed in the
+# slice's sec.3. Ka-pow! is 0 energy for 4 -- "cashing costs a card and a
+# moment, never energy" -- and its upgrade is Retain with the numbers
+# unchanged. Jumpy Dumpty plants a Bomb 8 on the enemy you CHOOSE rather than a
+# 6 at random, so the starter's one detonator can line up with it, and its
+# upgrade is Bomb 11 / Mine 4 rather than the Prototype rule's default +2/+1.
 #
 # EVERY ROW CARRIES ITS OWN `description:`. That is the surface's own face
 # channel (EB-215) and here it is load-bearing twice over: the printed text is
@@ -1258,12 +1276,26 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 
 ## The Kokomi overhaul, slice one, draft 6 — `proto_kk_` (2026-09-02)
 
-Thirty rows: the ten-card starter (FOUR ids) and all twenty-six pool rows of
+Twenty-eight rows: the two cards of her own that the ten-card starter carries,
+and all twenty-six pool rows of
 `review/active/kokomi-overhaul-slice-1-2026-09-01.md` **draft 6**, written
 against the ruled brief `kokomi-brief-2026-09-01.md` draft 6 (direction ruled
 R240, brief approved R241). Under `C.KOKOMI_OVERHAUL` /
 `-p:KokomiOverhaul=true` these ARE her starter and her whole reward pool; with
 the flag off they are unreachable, like every other row on this surface.
+
+**The other eight starter slots are the BASE GAME's Strike and Defend** (R242,
+ruled in the same breath as Klee's draft-4 starter: "where a character's basics
+are a renamed Strike or Defend with the same stat line, the base game's Strike
+and Defend replace them"). `proto_kk_waters_edge` and `proto_kk_coral_guard`
+printed exactly the base line -- 1 energy for 6 damage, 1 energy for 5 Block --
+so they are DELETED rather than re-priced (R213 B), and the two names come off
+the suffix list below with them. The mod uses `StrikeSilent` / `DefendSilent`,
+whose frame and energy colour `KokomiCardPool` already borrows; the sim uses
+the `strike` and `defend` rows of `content/cards/ironclad_starter.yaml`, at the
+base numbers with the base +3 deltas. Her Attacks still apply Hydro, because
+the catalyst cadence reads the CHARACTER and not the card -- which the mod only
+learned to do here (`EB-307`, `Powers/Prototype/CatalystCadence.cs`).
 
 ```
 DRAFT 6 REPLACED THE SLICE, IT DID NOT EDIT IT. Draft 2's thirty-three rows
@@ -1316,10 +1348,11 @@ printed text with this repo's rendering conventions applied -- Plan and Mend
 golded, Exhaust on the keyword rail. No number moves and no clause is added or
 dropped.
 
-TEN DISPLAY NAMES CARRY A "(proto)" SUFFIX, and they are: Water's Edge, Coral
-Guard, Kurage's Oath, Slack Water, Song of Pearls, Nereid's Ascension, Sango
-Isshin, Stolen Chapter, Undertow and Salt Line -- ten names already owned by a
-SHIPPED Kokomi row. `tools/lint_unique_names.py` holds one namespace across
+EIGHT DISPLAY NAMES CARRY A "(proto)" SUFFIX, and they are: Kurage's Oath,
+Slack Water, Song of Pearls, Nereid's Ascension, Sango Isshin, Stolen Chapter,
+Undertow and Salt Line -- eight names already owned by a SHIPPED Kokomi row.
+(Water's Edge and Coral Guard were two more until R242 replaced them with the
+base game's own basics and deleted their rows.) `tools/lint_unique_names.py` holds one namespace across
 all six sheets plus the relics, so the suffix is what lets the rewritten card
 and the shipped one coexist while the arm is being graded. The other twenty
 names are free, including the two Rares that took constellation names (The

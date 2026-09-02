@@ -236,22 +236,24 @@ public class KleeOverhaulRoundFourTests
     }
 
     [Theory]
-    [InlineData(false, 7, "5")]    // 7 x 0.75 = 5.25 -> 5
-    [InlineData(true, 10, "7")]    // 10 x 0.75 = 7.5 -> 7
+    [InlineData(false, 4, "3")]    // 4 x 0.75 = 3
+    [InlineData(true, 4, "3")]     // R242: the upgrade buys Retain, not damage
     public void Both_ka_pow_faces_read_weak_and_one_of_them_looks_like_it_does_not(
         bool upgraded, int printedBase, string underWeak)
     {
         // EB-288, the r3 Codex seat: "The upgraded Ka-pow! still printed 7
         // damage while the unupgraded one printed 5 under Weak, making it
         // unclear whether the upgrade had actually increased base damage or
-        // simply resisted the debuff."
+        // simply resisted the debuff." NEITHER FACE WAS WRONG: 10 Weakened and
+        // truncated was 7, which was also what the base card printed unweakened
+        // -- a collision, not a bug.
         //
-        // NEITHER FACE IS WRONG. The upgraded card's base is 10 (EB-283's
-        // delta, +3 damage), and 10 Weakened and truncated is 7 -- which is
-        // also, by coincidence, the number the BASE card prints unweakened.
-        // The seat read a collision, not a bug. This pins the collision so
-        // that a face which really did stop reading the debuff would print 10
-        // here and fail.
+        // THE COLLISION IS GONE AT DRAFT 4 (R242) BECAUSE THE NUMBER STOPPED
+        // MOVING: Ka-pow! is 0 energy for 4 and its upgrade is Retain. What
+        // this pin is FOR survives the change and is the reason it is kept: the
+        // face has to keep reading the debuff. It nearly stopped -- `EB-308` --
+        // because the emitter only tokenised a number the UPGRADE moved, and
+        // this card no longer has one.
         var klee = Seat.Klee().WithPower<WeakPower>(1);
         var enemy = Seat.Klee(30).Creature;
         var weak = klee.Creature.Powers.OfType<WeakPower>().Single();
@@ -273,19 +275,22 @@ public class KleeOverhaulRoundFourTests
     }
 
     [Fact]
-    public void The_upgrade_really_did_move_the_number_it_looked_like_it_had_not()
+    public void The_face_still_carries_a_token_after_the_upgrade_stopped_moving_it()
     {
-        // The other half of the seat's doubt, said out loud: +3, through the
-        // game's own `UpgradeInternal`, so 7 under Weak is 10 reduced and not
-        // 7 unreduced. (`KleeOverhaulRoundThreeTests` pins the same pair for
-        // EB-283; it is repeated here because it is half of EB-288's answer
-        // and a reader of this file needs both halves in front of them.)
+        // `EB-308`, and it is the other half of EB-288's answer under draft 4.
+        // The seat's doubt was about whether a face reads its debuff; the
+        // emitter used to answer that only for a number some upgrade moved, so
+        // R242's Retain-only upgrade would have printed a dead literal 4 that
+        // Strength and Weak could never touch. The var and the token are what
+        // make the number live, so both are asserted.
         var baseCard = new ProtoKoKapow();
         var upgraded = new ProtoKoKapow();
         Upgrade(upgraded);
 
-        Assert.Equal(7m, baseCard.DynamicVars["Damage"].BaseValue);
-        Assert.Equal(10m, upgraded.DynamicVars["Damage"].BaseValue);
+        Assert.Equal(4m, baseCard.DynamicVars["Damage"].BaseValue);
+        Assert.Equal(4m, upgraded.DynamicVars["Damage"].BaseValue);
+        Assert.Contains("{Damage:diff()}", baseCard.Localization!
+            .First(r => r.Item1 == "description").Item2);
     }
 
     private static void Upgrade(CardModel card)

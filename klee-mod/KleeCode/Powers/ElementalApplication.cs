@@ -144,6 +144,9 @@ public sealed class KleeElementalHooks : AbstractModel
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
+#if PROTOTYPE_CARDS
+        await KleeOverhaulOpening.GrantSpark(choiceContext, player);
+#endif
         await KitGrant.GrantIfCharged(choiceContext, player);
     }
 

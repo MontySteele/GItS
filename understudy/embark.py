@@ -568,8 +568,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  python -m understudy.embark --teardown{lane_arg}")
     if lane_arg:
         print()
-        print("LANE 1 IS NOT A RUN OF RECORD: its profile is disposable and "
-              "nothing in it is read back.")
+        print(f"LANE {lane_arg.rsplit(' ', 1)[-1]} IS NOT A RUN OF RECORD: "
+              f"its profile is disposable and nothing in it is read back.")
     return 0
 
 

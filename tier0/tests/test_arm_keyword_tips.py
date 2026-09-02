@@ -163,16 +163,20 @@ def test_the_two_faces_the_row_names_render_their_keyword():
     Deal 6." Draft 3 (2026-09-02) made Kaboom! the PLAIN hit and Ka-pow! the
     cash button, so the keyword left one face and landed on the other. The tip
     follows the printed word, which is exactly the rule EB-272 built, so this
-    now asserts BOTH ends of the move: Ka-pow! gained the line, and Kaboom! no
-    longer carries the definition of a word it does not print.
+    now asserts BOTH ends of the move: Ka-pow! gained the line, and a row that
+    does not print the word does not carry its definition.
+
+    KABOOM! IS GONE (R242): draft 4 took the starter to the canonical shape and
+    the plain hit left the sheet with Duck and Cover, so the negative half is
+    now made on Pop!, which places a Bomb and never sets one off.
     """
     kapow = (PROTOTYPE_DIR / "ProtoKoKapow.cs").read_text(encoding="utf-8")
     assert "[gold]Set off[/gold]" in kapow
     assert "ArmKeywordTips.ForSetOff(" in kapow
 
-    kaboom = (PROTOTYPE_DIR / "ProtoKoKaboom.cs").read_text(encoding="utf-8")
-    assert "[gold]Set off[/gold]" not in kaboom
-    assert "ArmKeywordTips.ForSetOff(" not in kaboom
+    pop = (PROTOTYPE_DIR / "ProtoKoPop.cs").read_text(encoding="utf-8")
+    assert "[gold]Set off[/gold]" not in pop
+    assert "ArmKeywordTips.ForSetOff(" not in pop
 
     # THE KOKOMI HALF MOVED TOO, and further: draft 6 cut Exert with the rest
     # of draft 2's rules, so the row that carried the acceptance face is gone.
@@ -201,9 +205,10 @@ def test_a_spark_priced_row_keeps_its_tip_without_the_sentence():
         assert "PrintedSparkPrice" in text, stem
 
     # And it is a ROW-level fact rather than a blanket: a row that charges no
-    # Sparks and prints none gains nothing.
-    kaboom = (PROTOTYPE_DIR / "ProtoKoKaboom.cs").read_text(encoding="utf-8")
-    assert "ArmKeywordTips.ForSpark(" not in kaboom
+    # Sparks and prints none gains nothing. Kaboom! used to make this point and
+    # left the sheet at R242; Pop! is the row that makes it now.
+    pop = (PROTOTYPE_DIR / "ProtoKoPop.cs").read_text(encoding="utf-8")
+    assert "ArmKeywordTips.ForSpark(" not in pop
 
 
 def test_the_sparks_arms_bomb_rows_keep_the_shipped_definition():

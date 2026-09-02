@@ -42,31 +42,32 @@ public sealed class ProtoKoJumpyDumpty : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Dumpty"),
-        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()} on a random enemy. When it goes off, place a [gold]Mine[/gold] {PayloadMine:diff()} on every enemy."),
+        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. When it goes off, place a [gold]Mine[/gold] {PayloadMine:diff()} on every enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("BombSize", 6m),
+            new DynamicVar("BombSize", 8m),
             new DynamicVar("PayloadMine", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKoJumpyDumpty()
-        : base(1, CardType.Skill, CardRarity.Basic, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Basic, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await ProtoBombPower.PlaceOnRandom(choiceContext, Owner.Creature, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: DynamicVars["PayloadMine"].IntValue, cardSource: this);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: DynamicVars["PayloadMine"].IntValue, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["BombSize"].UpgradeValueBy(2m);
+        DynamicVars["BombSize"].UpgradeValueBy(3m);
         DynamicVars["PayloadMine"].UpgradeValueBy(1m);
     }
 }

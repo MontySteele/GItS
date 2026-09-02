@@ -154,7 +154,7 @@ def test_the_variable_reaches_a_worker_thread_too(monkeypatch):
 
 
 def test_a_mistyped_variable_is_refused_rather_than_dialled(monkeypatch):
-    monkeypatch.setenv(instances.LANE_ENV, "2")
+    monkeypatch.setenv(instances.LANE_ENV, "7")
     with pytest.raises(ValueError):
         bridge.current_base()
 

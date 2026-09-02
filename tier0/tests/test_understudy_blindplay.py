@@ -3159,6 +3159,77 @@ def test_an_enemy_with_no_intent_at_all_still_renders():
     assert "Intent: (no intent shown)" in blindplay.observe(state)
 
 
+# ------------------------------------ the base game's basics (R242) --------
+#
+# Both overhaul starters open with four Strikes and four Defends that are the
+# BASE GAME's cards, not mod rows. The render needed no change for them and
+# this is why: repeats are numbered by `_number_names`, and `printed_cost` is
+# a klee-mod-sourced index whose silence rule ("a card the index has no row
+# for gets NO note") is exactly right for a card the mod did not author.
+
+
+def base_basics_combat_state() -> dict:
+    """A Klee overhaul hand as the wire draws it: four base Strikes, a base
+    Defend and her one detonator. Ids are the base game's own `ModelId.Entry`
+    spellings, with no `KLEEMOD-` prefix, because the models are the base
+    game's (`StrikeIronclad`, `DefendIronclad`)."""
+    strike = {"id": "STRIKE_IRONCLAD", "name": "Strike", "type": "Attack",
+              "cost": "1", "can_play": True, "description": "Deal 6 damage."}
+    return {
+        "state_type": "monster",
+        "battle": {"round": 1, "enemies": [
+            {"name": "Seapunk", "hp": 45, "max_hp": 45, "block": 0,
+             "intents": [{"type": "Attack", "label": "11",
+                          "description": "Attack for 11 damage."}]}]},
+        "player": {
+            "hp": 62, "max_hp": 62, "block": 0, "energy": 3, "max_energy": 3,
+            "resources": {}, "draw_pile_count": 5,
+            "discard_pile_count": 0, "exhaust_pile_count": 0,
+            "status": [{"name": "Spark", "amount": 1, "type": "Buff",
+                        "description": "You start each combat with 1 and gain "
+                                       "1 whenever a Bomb goes off."}],
+            "hand": [
+                json.loads(json.dumps(strike)),
+                json.loads(json.dumps(strike)),
+                json.loads(json.dumps(strike)),
+                json.loads(json.dumps(strike)),
+                {"id": "DEFEND_IRONCLAD", "name": "Defend", "type": "Skill",
+                 "cost": "1", "can_play": True,
+                 "description": "Gain 5 Block."},
+                {"id": "KLEEMOD-PROTO_KO_KAPOW", "name": "Ka-pow!",
+                 "type": "Attack", "cost": "0", "can_play": True,
+                 "description": "Set off. Deal 4 damage."},
+            ]},
+    }
+
+
+def test_the_base_basics_render_with_their_faces_and_no_invented_note():
+    page = blindplay.render(
+        blindplay.observation(base_basics_combat_state()))
+    assert "Deal 6 damage." in page and "Gain 5 Block." in page
+    # The silence rule: the mod authored neither card, so nothing claims to
+    # know a printed cost for them.
+    assert "The cost printed on this card" not in page
+    # And the arm's own row still reads: 0 energy for the detonator.
+    assert "Ka-pow!" in page
+
+
+def test_four_base_strikes_are_each_nameable_and_playable():
+    """Four interchangeable copies must not be four unplayable cards. The
+    numbering `EB-177` built for two enchanted Water's Edges is what carries
+    R242's four Strikes, so the bare title takes the first copy and every
+    numbered name resolves to its own index."""
+    state = base_basics_combat_state()
+    page = blindplay.render(blindplay.observation(state))
+    assert "Strike (1)" in page and "Strike (4)" in page
+    # Defend appears once on this screen, so it is NOT numbered.
+    assert "Defend (1)" not in page
+
+    first = blindplay.act(state, 'play "Strike"')
+    assert first["ok"] and first["post"]["card_index"] == 0
+    for i in range(4):
+        res = blindplay.act(state, f'play "Strike ({i + 1})"')
+        assert res["ok"] and res["post"]["card_index"] == i
 # --------------------------------------------------------------------------
 # `EB-269` / `EB-271` / `EB-272` / `EB-273` / `EB-245` / `EB-246`: the render
 # and driver defects the Klee r2 and Kokomi r1 blind runs filed. Every fixture
