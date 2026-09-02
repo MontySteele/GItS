@@ -97,7 +97,7 @@ belongs to; a bridge belongs to two.
 
 | Card | R | Cost | Type | Printed text | Job |
 |---|---|---|---|---|---|
-| Pop! | C | 0 | Skill | Place a Bomb 5. | The cheapest plant; in the pool since draft 4 |
+| Pop! | C | 0 | Skill | Place a Bomb 5. | The cheapest plant; back in the pool at draft 4 |
 | Mine Toss | C | 1 | Skill | Mine 4 on every enemy. | Cheap bombs that also defend |
 | Fwoosh! | C | 1 Spark | Attack | Set off. Deal 5 to a random enemy. | The Spark Attack |
 | Tinder Toss | C | 1 Spark | Attack | Set off and deal 4, to two random enemies. | Two explosions for one Spark |
@@ -132,8 +132,10 @@ Appliers come from the Mondstadt Universals already in her pool: Dahlia
 | Grounded | U | 1 | Power | At the start of your turn, if none of your Bombs went off last turn, gain 6 Block. | Pays for the quiet turn |
 | Sorry, Jean... | C | 1 | Skill | Remove one of your Bombs. Gain Block equal to its size. | The emergency exit |
 
-Pool by rarity: 11 Common, 10 Uncommon, 6 Rare (Dig In left the count
-when it joined the starter at draft 3). The full sheet will tilt
+Pool by rarity: 13 Common, 10 Uncommon, 6 Rare at draft 4 — Pop! and Dig In
+are back in the count, because the canonical starter has room for neither.
+Twenty-eight of those twenty-nine are BUILT; Vermillion Pact is the Rare
+sec.5 lets drop, so the arm ships 13 / 10 / 5. The full sheet will tilt
 that toward Common; a slice cannot, because each loop needs its Uncommon
 engine card and its rule-breaking Rare to be testable at all.
 

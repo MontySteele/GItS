@@ -210,27 +210,46 @@ KLEE_OVERHAUL_BOMB_GROWTH = 3        # rule 1: every Bomb, start of her turn
 KLEE_OVERHAUL_WORKSHOP_GROWTH = 1    # Explosives Workshop: +1 more
 KLEE_OVERHAUL_ALICE_GROWTH = 4       # Alice's Recipe: 4 INSTEAD of 3
 KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
+# RULE 4's OPENING SPARK (R242 pick 1, [USER]: "Regent starts with 3 stars and
+# has to generate more through cards, so 1 is a reasonable compromise"). It is a
+# KIT rule and not a relic clause -- the brief's rule 4 carries the line -- so
+# the mod grants it from the arm's own turn-1 site and the relic's face is
+# unchanged. C# twin `KleeOverhaulLaw.OpeningSpark`.
+KLEE_OVERHAUL_OPENING_SPARK = 1
 
-# THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, SIX ids, in
-# the printed order. This is a REPLACEMENT and not a substitution list because
-# every one of the ten moves: the shipped Ka-boom! has no *Set off* clause and
-# the shipped Pop! places a bomb that detonates itself, so there is no shipped
-# starter card the new rules leave standing.
+# THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, in the
+# printed order.
 #
-# DRAFT 3 (2026-09-02, after [USER]'s first run; slice packet sec.3). Draft 2
-# put *Set off* on every starter Attack, so attacking and cashing were one act
-# and nothing ever grew. The plain hit and the cash button are now different
-# cards (Kaboom! x2 beside Ka-pow! x2), and `proto_ko_dig_in` moves IN from the
-# pool as the starter's one Spark sink -- which is why it is `rarity: basic` on
-# the surface and is absent from `KLEE_OVERHAUL_POOL_IDS` below.
+# DRAFT 4 (2026-09-02, ruled R242 pick 3). [USER]: "the starting deck already
+# does too much; base characters open with four Strikes, four Defends and two
+# good cards of their own, and Klee had three, two and five." So the starter
+# takes the CANONICAL SHAPE and the two cards of her own are the plant and the
+# cash button: Jumpy Dumpty and Ka-pow! at 0 energy.
+#
+# `strike` AND `defend` ARE THE BASE GAME's CARDS, NOT PROTO ROWS, and that is
+# the ruling's own word ("Strike and Defend are the base game's cards"). tier0
+# has carried both since the ref_ironclad starter sheet
+# (`content/cards/ironclad_starter.yaml`) at exactly the base stat line -- 6
+# damage, 5 Block -- with the base deltas in `docs/ref-ironclad-upgrades.yaml`
+# (+3 each, so Strike+ 9 and Defend+ 8). They are `rarity: basic`, so no reward
+# roll, transform or shop can offer them; only this list hands them out. The
+# mod's twin is `ModelDb.Card<StrikeIronclad>()` / `<DefendIronclad>()`, whose
+# frame and energy colour Klee's pool already borrows.
+#
+# THE ELEMENT COMES FROM THE CHARACTER, NOT THE CARD. A base Strike prints no
+# element; `effects._element_for` has always given a catalyst character's Attack
+# her element when the card names none, so Klee's Strike applies Pyro. The mod
+# had it per-card and now mirrors the sim (`CatalystCadence.PrintedElement`).
+#
+# WHAT LEFT WITH DRAFT 4: `proto_ko_kaboom` and `proto_ko_duck_and_cover` are
+# deleted outright (R213 B -- a rejected row leaves the surface), and
+# `proto_ko_pop` and `proto_ko_dig_in` go back to the POOL as Commons, so they
+# are in `KLEE_OVERHAUL_POOL_IDS` below rather than here.
 KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
-    "proto_ko_kaboom", "proto_ko_kaboom",
-    "proto_ko_kapow", "proto_ko_kapow",
-    "proto_ko_duck_and_cover", "proto_ko_duck_and_cover",
-    "proto_ko_duck_and_cover",
-    "proto_ko_dig_in",
-    "proto_ko_pop",
+    "strike", "strike", "strike", "strike",
+    "defend", "defend", "defend", "defend",
     "proto_ko_jumpy_dumpty",
+    "proto_ko_kapow",
 )
 
 # THE OFFERABLE POOL, WHOLE (slice packet sec.4). `_pool_substitutions` cannot
@@ -238,11 +257,11 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # nothing else" -- so `loader.pool_replacement` is its sibling seam, read at the
 # same single door.
 #
-# TWENTY-SIX OF THE PACKET'S TWENTY-SEVEN. Two rows are absent and for two
-# different reasons. `proto_ko_dig_in` left the OFFER pool at draft 3 because it
-# joined the starter (sec.3: "the Spark buys Block, with Dig In moved from the
-# pool into the starter"), so the packet's sec.4 table now lists 27 offerable
-# rows rather than 28. Vermillion Pact is the other, and
+# TWENTY-EIGHT OF THE PACKET'S TWENTY-NINE, and the count moved at DRAFT 4
+# (R242). Draft 3 had taken `proto_ko_dig_in` out of the offer pool and into the
+# starter; the canonical starter has no room for it, so it comes BACK as the
+# Spark sink it was, and `proto_ko_pop` joins it as a Common for the same
+# reason. Only Vermillion Pact is now absent, and
 # the packet's own sec.5 is what leaves it out: "Vermillion Pact is the one item
 # on this list that touches shared reaction code; if it costs more than a day it
 # drops out of slice one and is tested in slice two." It does. Its rule is not
@@ -255,8 +274,7 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # shared code every character's reactions would have to be re-checked against.
 # The reasoning is recorded in `VermillionPactNotBuilt`, and the row is off the
 # surface rather than staged as a card whose face would lie. The pool is
-# therefore 11 Common, 10 Uncommon, 5 Rare -- one Uncommon fewer than draft 2,
-# and it is Dig In.
+# therefore 13 Common, 10 Uncommon, 5 Rare.
 KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Cook (8)
     "proto_ko_fish_flavored_bait",
@@ -267,7 +285,9 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_big_badda_boom",
     "proto_ko_the_big_one",
     "proto_ko_alices_recipe",
-    # Spray (8)
+    # Spray (9 -- Pop! is the packet sec.4 table's first Spray row and it
+    # OFFERS from draft 4, R242)
+    "proto_ko_pop",
     "proto_ko_mine_toss",
     "proto_ko_fwoosh",
     "proto_ko_tinder_toss",
@@ -281,9 +301,10 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_perfect_timing",
     "proto_ko_flame_dance",
     "proto_ko_catalytic_converter",
-    # Currencies and defence (6 of 7; Dig In is in the starter since draft 3)
+    # Currencies and defence (7 of 7; Dig In is back in the pool at draft 4)
     "proto_ko_ammo_scavenging",
     "proto_ko_powder_charge",
+    "proto_ko_dig_in",
     "proto_ko_sugar_rush",
     "proto_ko_run_away",
     "proto_ko_grounded",
@@ -553,16 +574,26 @@ KOKOMI_OVERHAUL = False
 KOKOMI_OVERHAUL_CASKET_STRIKE = 2   # Hydro, per debuff she applies to an enemy
 KOKOMI_OVERHAUL_RALLY_DISCOUNT = 1  # Rally: the next Companion costs this less
 
-# THE STARTER, WHOLE (brief draft 6 sec.4; slice draft 6 sec.3). Ten cards,
-# FOUR ids, in the printed order. A REPLACEMENT and not a substitution list
-# because every one of the ten moves: there is no shipped starter card the new
-# rules leave meaning what it printed, and Kurage's Oath is now a Plan-only
-# Skill rather than a Power.
+# THE STARTER, WHOLE (brief draft 6 sec.4; slice draft 6 sec.3). Ten cards, in
+# the printed order. A REPLACEMENT and not a substitution list because every one
+# of the ten moves: there is no shipped starter card the new rules leave meaning
+# what it printed, and Kurage's Oath is now a Plan-only Skill rather than a
+# Power.
+#
+# `strike` AND `defend` ARE THE BASE GAME's CARDS (R242, same breath as Klee's
+# draft 4): "where a character's basics are a renamed Strike or Defend with the
+# same stat line, the base game's Strike and Defend replace them". Water's Edge
+# and Coral Guard were exactly that -- 6 damage and 5 Block, byte for byte the
+# base line -- so the twins are deleted rather than re-priced. tier0's rows are
+# `content/cards/ironclad_starter.yaml`'s, at the base numbers and with the base
+# +3 deltas; the mod's are `ModelDb.Card<StrikeSilent>()` /
+# `<DefendSilent>()`, whose frame and energy colour Kokomi's pool already
+# borrows. Her Attacks still apply Hydro, because the catalyst cadence reads
+# the CHARACTER and not the card (`effects._element_for`,
+# `CatalystCadence.PrintedElement`), which the build checks on a base Strike.
 KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
-    "proto_kk_waters_edge", "proto_kk_waters_edge",
-    "proto_kk_waters_edge", "proto_kk_waters_edge",
-    "proto_kk_coral_guard", "proto_kk_coral_guard",
-    "proto_kk_coral_guard", "proto_kk_coral_guard",
+    "strike", "strike", "strike", "strike",
+    "defend", "defend", "defend", "defend",
     "proto_kk_kurages_oath",
     "proto_kk_slack_water",
 )
