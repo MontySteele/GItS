@@ -49,7 +49,7 @@ public sealed class ProtoMiShinobuGrassRing : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shinobu — Grass Ring of Sanctification (proto)"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you lost HP this turn, gain 4 more."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If you lost HP this turn, gain 4 more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

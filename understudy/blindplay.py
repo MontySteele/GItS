@@ -363,6 +363,8 @@ def transient(state: dict[str, Any]) -> str:
         return "the wire could not name this screen"
     if _combat_torn_down(state):
         return "the fight is over and the next screen is not up yet"
+    if _chest_opening(state):
+        return "the chest is still opening"
     if (str(state.get("state_type")) in COMBAT_SCREENS
             and _blob(state, "battle").get("is_play_phase") is False):
         return "the game has not handed the turn back to the player yet"
@@ -373,6 +375,34 @@ def _combat_torn_down(state: dict[str, Any]) -> bool:
     """`EB-178`: a combat screen whose `battle` block the game has removed."""
     return (str(state.get("state_type")) in COMBAT_SCREENS
             and not isinstance(state.get("battle"), dict))
+
+
+def _chest_opening(state: dict[str, Any]) -> bool:
+    """`EB-263`: a treasure room the bridge caught mid-open.
+
+    `BuildTreasureState` answers a BARE `{message}` twice -- once while the
+    room is still loading and once for the frame in which it force-clicks the
+    chest itself -- and writes `relics` only after the relic collection is
+    visible (`McpMod.StateBuilder.cs:2384-2427`). So the opening frame carries
+    no relics, no `can_proceed` and nothing to choose.
+
+    CAPTURED LIVE, 2026-09-02: `{"treasure": {"message": "Opening chest..."}}`
+    and no other key, which is byte for byte what the r3 Opus seat was handed
+    -- "The screen printed `# An open chest` with a blank body, and advertised
+    `choose \"<relic>\"` with no relics listed ... I never saw whether the
+    chest contained anything or whether I received it." Riding it out is what
+    it needs: the fixture is beside this file's tests, and the frame is gone in
+    under a second.
+
+    Checked on the ABSENCE of `relics` rather than on the message's words: the
+    message is loc-free English written by the bridge and a wording pass would
+    move it, and a chest that has BOTH a message and a relic list has a screen
+    to draw.
+    """
+    if str(state.get("state_type")) != "treasure":
+        return False
+    blob = _blob(state, "treasure")
+    return bool(_text(blob.get("message"))) and "relics" not in blob
 
 
 def settle(state: dict[str, Any], wire: Any = bridge,
@@ -526,6 +556,23 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         # is read here, on the tool side, and only the number crosses.
         "printed_cost": qa_packet.printed_cost_index().get(
             qa_packet.card_key(entry.get("id"))),
+        # `EB-286`. THE SPARK HALF OF THE PRICE. `cost` above is the ENERGY
+        # cost and it is 0 on every Spark-priced card, so a hand line built
+        # from it alone printed `Bang Bang!` at `cost 0` while the board
+        # refused it -- the r3 Opus seat called a card that "prints cost 0"
+        # and "sat unplayable in my hand across two entire fights" a trap,
+        # and half of that was this render. Same index and same id key the
+        # staged page uses (`printed_spark`, `EB-282`), so the two pages
+        # cannot say different things about one price; the WIRE's own
+        # `spark_price` is the fallback, because a hand entry carries it live
+        # (`BuildCardState`, the GItS local edit) and a reward or shop row
+        # never does. `None` where neither answers, and an absent price
+        # prints nothing.
+        "printed_spark": (
+            qa_packet.printed_spark_index().get(
+                qa_packet.card_key(entry.get("id")))
+            or (_int(entry.get("spark_price"))
+                if entry.get("spark_price") is not None else None)),
         "kind": _text(entry.get("type")),
         "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
         "keywords": kws,
@@ -598,10 +645,51 @@ def _named_option(entry: Any) -> dict[str, Any]:
         enabled = False
     if entry.get("is_locked"):
         enabled = False
+    # `EB-262`. A SHOP CARD SHELF CARRIES THE CARD'S ENERGY COST, and it is
+    # under the same prefixed spelling its name is: `card_cost`
+    # (`BuildShopState`, `McpMod.StateBuilder.cs:1686`). Nothing here read it,
+    # so the r3 Opus seat bought The Big One for 73 gold and "only discovered
+    # it costs 3 energy -- a whole turn -- when I next saw it on a
+    # card-selection screen".
+    #
+    # The SPARK half cannot come off the shelf: `spark_price` is emitted on a
+    # HAND card only (`BuildCardState`), so a shelf is read through the same
+    # id-keyed index the hand and the reward rows use. `card_id` is the only
+    # key that names a card here, which is also what keeps this lookup off a
+    # rest option or a map node -- those carry no `card_id` and get nothing.
+    card_id = entry.get("card_id")
+    energy = ""
+    for key in ("card_cost", "energy_cost"):
+        if _text(entry.get(key)):
+            energy = _text(entry.get(key))
+            break
+    spark = (qa_packet.printed_spark_index().get(qa_packet.card_key(card_id))
+             if card_id is not None else None)
+    cost = qa_packet.cost_label({"cost": energy, "printed_spark": spark})
+    # `EB-262`, the other half, AND IT IS NOT OURS TO FIX. A card shelf's
+    # name, text and cost all live behind `entry.CreationResult?.Card`, and
+    # `MerchantCardEntry.IsStocked` IS `CreationResult != null` -- so the
+    # moment a card is bought the game clears the only field the shelf's face
+    # was ever read from, and the bridge emits a row with a price and nothing
+    # else. The page used to fall back to the shelf's category and print
+    # `**Card** - 73 gold`, which reads as a card called "Card". It says what
+    # is true instead.
+    empty_shelf = (entry.get("category") == "card"
+                   and entry.get("is_stocked") is False
+                   and not _text(entry.get("card_name")))
+    note = ""
+    if empty_shelf:
+        name = "(this shelf is empty)"
+        note = ("Bought, or never stocked. The game clears a shelf's card the "
+                "moment it is sold, and the name, the text and the cost all "
+                "live on that card, so nothing on the feed can say which one "
+                "it was.")
     return {
         "name": name,
         "text": text,
         "enabled": enabled,
+        "cost": cost if cost != "-" else "",
+        "note": note,
         "price": _int(entry.get("price", entry.get("cost")), 0)
         if entry.get("price") is not None or entry.get("cost") is not None
         else None,
@@ -914,6 +1002,18 @@ def _shop_items(state: dict[str, Any]) -> list[dict[str, Any]]:
             if isinstance(i, dict)]
 
 
+def _preview_cards(state: dict[str, Any], st: str) -> list[dict[str, Any]]:
+    """The card(s) a selection screen is SHOWING AS PICKED, if it shows any.
+
+    `EB-263`. The only selection state the wire carries: `preview_cards`, and
+    only while `preview_showing` is true. A screen without a preview container
+    -- the deck enchant picker is one -- sends nothing at all, and that is
+    what `SELECTION_NOTE` is for.
+    """
+    return [c for c in _listing(state, f"{st}.preview_cards")
+            if isinstance(c, dict)]
+
+
 def _rest_options(state: dict[str, Any]) -> list[Any]:
     return _listing(state, "rest_site.options", "options")
 
@@ -1032,6 +1132,15 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["prompt"] = _text(blob.get("prompt")) or "Choose a card."
         obs["offers"] = _number_faces(
             [_card_face(c) for c in _screen_cards(state)], "title")
+        # `EB-263`. WHAT THE SCREEN SAYS IS PICKED, where it says anything.
+        # `BuildCardSelectState` puts the chosen card(s) in `preview_cards`
+        # while a preview container is open (`McpMod.StateBuilder.cs:2021`),
+        # and that is the ONLY selection state on the wire -- no grid row
+        # carries a selected flag. The upgrade and transform screens open a
+        # preview and therefore have one; the enchant picker does not, which
+        # is `SELECTION_NOTE` below.
+        obs["selected"] = _number_faces(
+            [_card_face(c) for c in _preview_cards(state, st)], "title")
         obs["can_confirm"] = bool(blob.get("can_confirm"))
         obs["can_skip"] = bool(blob.get("can_skip") or blob.get("can_cancel"))
         # `EB-259`. THE PAGE MAY NOT OFFER WHAT THE STATE WILL REFUSE. This
@@ -1077,8 +1186,32 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["options"] = [_named_option(o) for o in _rest_options(state)]
         obs["hp"] = _int(_player(state).get("hp"))
         obs["max_hp"] = _int(_player(state).get("max_hp"))
-        obs["commands"] = ['choose "<option>"', "rest", "upgrade", "remove",
-                           "proceed"]
+        # `EB-263`. THE VERBS WERE A CONSTANT. A SPENT rest site sends an
+        # empty `options` list -- the room drops them once one is taken -- and
+        # this screen still printed `choose "<option>"`, `rest`, `upgrade` and
+        # `remove` over nothing at all: "Four verbs and nothing to choose"
+        # (r3 Opus seat). Each verb is now offered only when an ENABLED option
+        # answers to it, by the same keyword match `_rest_keyword` resolves
+        # with, so the grammar on the page is the grammar the screen will
+        # take. `proceed` is always last and always there: it is the one
+        # button a rest site has whatever else it has.
+        obs["commands"] = []
+        live = [o for o in obs["options"] if o["enabled"]]
+        if live:
+            obs["commands"].append('choose "<option>"')
+        for verb, words in (("rest", ("rest", "sleep", "heal")),
+                            ("upgrade", ("upgrade", "smith", "forge")),
+                            ("remove", ("remove", "purge", "toss"))):
+            if any(any(w in _fold(o["name"]) for w in words) for o in live):
+                obs["commands"].append(verb)
+        # A FRESH rest site sends `can_proceed: false` -- the room will not let
+        # you leave until its one choice is taken -- and a SPENT one sends
+        # `true` with an empty option list. Captured live, both of them
+        # (`review/qa/blindplay/eb263-live-shapes/`). The fallback is the
+        # safety rail: a screen this tool can say nothing at all about is worse
+        # than a verb that might be refused.
+        if _blob(state, "rest_site").get("can_proceed") is not False                 or not obs["commands"]:
+            obs["commands"].append("proceed")
     elif st == "event":
         ev = _blob(state, "event")
         obs["screen"] = "event"
@@ -1105,8 +1238,21 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     elif st in ("treasure", "relic_select"):
         obs["screen"] = st
         obs["items"] = [_named_option(r) for r in _relic_options(state)]
-        obs["commands"] = ['choose "<relic>"'] + (
-            ["skip"] if st == "relic_select" else ["proceed"])
+        # `EB-263`, the chest half. `BuildTreasureState` writes `relics` ONLY
+        # while the relic collection is on screen, and writes a `message`
+        # instead while the chest is still opening or the room is still
+        # loading (`McpMod.StateBuilder.cs:2381-2399`). The page had a reader
+        # for neither case, so an empty chest rendered as `# An open chest`
+        # with a blank body while still advertising `choose "<relic>"`: "I
+        # never saw whether the chest contained anything or whether I received
+        # it" (r3 Opus seat). The message is the feed's own sentence, printed
+        # verbatim, and the verb is offered only when there is something to
+        # aim it at.
+        obs["message"] = _text(_blob(state, st).get("message"))
+        obs["commands"] = []
+        if any(i["enabled"] for i in obs["items"]):
+            obs["commands"].append('choose "<relic>"')
+        obs["commands"].append("skip" if st == "relic_select" else "proceed")
     elif st == "game_over":
         blob = _blob(state, "game_over")
         obs["screen"] = "game_over"
@@ -1150,7 +1296,12 @@ def _render_card(c: dict[str, Any], bullet: str = "-") -> list[str]:
     head = f"{bullet} **{c['title']}**"
     if c["upgraded"]:
         head += " (upgraded)"
-    bits = [b for b in (f"cost {c['cost']}" if c["cost"] else "",
+    # `EB-286`: the COST SLOT as the game paints it, energy and Spark
+    # together, through the one formatter the staged page already uses.
+    # `qa_packet.cost_label` answers `-` when the wire sent no cost at all,
+    # which is the case this line has always printed nothing for.
+    price = qa_packet.cost_label(c)
+    bits = [b for b in (f"cost {price}" if price != "-" else "",
                         c["kind"].lower() if c["kind"] else "") if b]
     if bits:
         head += f" — {', '.join(bits)}"
@@ -1208,6 +1359,19 @@ POWER_NOTE = ("*A power's number is what the game's data feed reports for it. "
               "either.*")
 METER_NOTE = ("the game's data feed carries this meter's amount only: no "
               "maximum, and no rule for how it is spent")
+# `EB-263`. THE ENCHANT PICKER MARKS NOTHING, and the r3 Opus seat found out
+# the hard way: after `choose "Flame Dance"` "the whole list reprinted
+# byte-identically; the only change anywhere on the screen was the footer
+# going from `Confirm is not available.` to `Confirm is available.`". The
+# reason is on the bridge and not here -- `BuildCardSelectState` reads every
+# grid card through `BuildCardInfo`, which has no selected flag, and the
+# enchant screen opens no preview container for `preview_cards` to hold. So
+# the page says which signal it HAS rather than implying it has none.
+SELECTION_NOTE = ("*This screen's data feed carries no per-card selection "
+                  "state, so nothing in the list above can be marked as the "
+                  "one you picked. The `Confirm is` line below is the only "
+                  "thing that moves when a pick lands.*")
+
 HAND_REPEAT_NOTE = ("*Two cards here print the same name. The game's data "
                     "feed does not report a card's enchantment, so if one of "
                     "them is enchanted, this page cannot show which.*")
@@ -1228,13 +1392,21 @@ def _render_options(items: list[dict[str, Any]], bullet: str = "-") -> list[str]
     out = []
     for o in items:
         line = f"{bullet} **{o['name'] or '(unnamed)'}**"
-        if o.get("price") is not None:
-            line += f" — {o['price']} gold"
+        # `EB-262`: the card's own cost first, then the gold, because they are
+        # two different prices and a row that printed only the gold is what
+        # bought a 3-energy card blind.
+        bits = [b for b in (f"cost {o['cost']}" if o.get("cost") else "",
+                            f"{o['price']} gold"
+                            if o.get("price") is not None else "") if b]
+        if bits:
+            line += " — " + ", ".join(bits)
         if not o.get("enabled", True):
             line += " (not available)"
         out.append(line)
         if o.get("text"):
             out.append(f"    {o['text']}")
+        if o.get("note"):
+            out.append(f"    *{o['note']}*")
     return out
 
 
@@ -1412,6 +1584,12 @@ def render(obs: dict[str, Any]) -> str:
         for card in obs["offers"]:
             out += _render_card(card)
         if obs["screen"] == "card_select":
+            if obs.get("selected"):
+                out += ["", "## What you have picked", ""]
+                for card in obs["selected"]:
+                    out += _render_card(card)
+            elif obs["can_confirm"]:
+                out += ["", SELECTION_NOTE]
             out += ["", f"Confirm is {'available' if obs['can_confirm'] else 'not available'}."]
         if obs.get("can_skip"):
             out += ["", "You may skip this."]
@@ -1430,7 +1608,9 @@ def render(obs: dict[str, Any]) -> str:
     elif obs["screen"] == "rest_site":
         out += ["# A place to rest", "",
                 f"HP {obs['hp']}/{obs['max_hp']}", ""] \
-            + _render_options(obs["options"])
+            + (_render_options(obs["options"]) if obs["options"]
+               else ["- (this rest site has nothing left to offer; "
+                     "its choice has already been taken)"])
     elif obs["screen"] == "event":
         out += [f"# {obs['title'] or 'Something happens'}", ""]
         if obs["text"]:
@@ -1442,7 +1622,11 @@ def render(obs: dict[str, Any]) -> str:
         titles = {"rewards": "# What the fight left behind",
                   "treasure": "# An open chest",
                   "relic_select": "# Choose one"}
-        out += [titles[obs["screen"]], ""] + _render_options(obs["items"])
+        out += [titles[obs["screen"]], ""]
+        if obs.get("message"):
+            out += [obs["message"], ""]
+        out += (_render_options(obs["items"]) if obs["items"]
+                else ["- (nothing here to take)"])
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
 

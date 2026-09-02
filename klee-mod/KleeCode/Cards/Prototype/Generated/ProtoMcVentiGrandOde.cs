@@ -59,7 +59,7 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Venti — Wind's Grand Ode"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. For {PowerAmount:diff()} turns, at the end of your turn [gold]Swirl[/gold] the aura of ALL enemies."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. For {PowerAmount:diff()} turns, at the end of your turn [gold]Swirl[/gold] the aura of ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

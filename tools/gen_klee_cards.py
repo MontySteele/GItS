@@ -7271,6 +7271,44 @@ def _upgrade_add_text(card: dict) -> list[str]:
     return out
 
 
+def _authored_face_var(card: dict, eff: dict, plain: str) -> str:
+    """The var an AUTHORED face must name for one effect's number -- `EB-285`.
+
+    A face token is a LOOKUP, and the number is only rendered if the name it
+    quotes is a var this card declares. `build_vars` does not always emit the
+    plain `DamageVar`/`BlockVar`: a Spotlight-scaled companion attack, a
+    Fanfare or Charge rider, an aura reader and a salon-scaled number all emit
+    the base game's `Calculated*Var` TRIPLE instead, whose var is named
+    `CalculatedDamage` / `CalculatedBlock` and NOT `Damage` / `Block`. So this
+    mirrors `build_vars`'s own branch order, and the two must move together.
+
+    WHAT IT COST TO LEARN. Twenty-two prototype companion rows printed
+    `{Damage:diff()}` or `{Block:diff()}` over a `Calculated*Var`. SmartFormat
+    cannot resolve a name that is not there, `CardModel.GetDescriptionForPile`
+    throws, and the bridge's `SafeGetCardDescription` catches it and falls
+    back to `card.Description` -- the RAW TEMPLATE. The r3 Opus seat was
+    offered `Deal {Damage:diff()} damage to a random enemy.` on a reward
+    screen (`EB-285`). Nothing else in the pipeline says a word: the card
+    compiles, the play deals the right number, and only the printed face is
+    gibberish. `tools/lint_generated_structure.py` L1 is the gate that now
+    catches the class, on this surface as well as the shipped ones.
+
+    The rendered (non-authored) path already asks the same question at each
+    of its own token sites; this is that question for a row that states its
+    own face.
+    """
+    salon = salon_calc_rider(card, eff)
+    if salon is not None:
+        return salon[2]
+    op = eff.get("op")
+    if op == "damage" and calc_rider(card, eff) is not None:
+        return "CalculatedDamage"
+    if op == "block" and (block_calc_rider(card, eff) is not None
+                          or spotlight_block_rider(card, eff) is not None):
+        return "CalculatedBlock"
+    return plain
+
+
 def _authored_face_numbers(card: dict):
     """Every number a row's AUTHORED face is expected to print, in print
     order, as `(delta_key_or_None, var_name_or_None, literal)`.
@@ -7289,7 +7327,8 @@ def _authored_face_numbers(card: dict):
         elif op == "damage" and isinstance(eff.get("amount"), int):
             owns = (eff.get("target") != "self"
                     and eff is damage_var_effect(card))
-            yield ("damage", "Damage", eff["amount"]) if owns \
+            yield ("damage", _authored_face_var(card, eff, "Damage"),
+                   eff["amount"]) if owns \
                 else (None, None, eff["amount"])
         elif op == "set_off" and int(eff.get("damage", 0) or 0):
             owns = eff is set_off_damage_var_effect(card)
@@ -7298,7 +7337,8 @@ def _authored_face_numbers(card: dict):
         elif op == "block" and isinstance(eff.get("amount"), int):
             owns = eff is next((f for f in card["effects"]
                                 if f.get("op") == "block"), None)
-            yield ("block", "Block", eff["amount"]) if owns \
+            yield ("block", _authored_face_var(card, eff, "Block"),
+                   eff["amount"]) if owns \
                 else (None, None, eff["amount"])
         elif op == "plant_bomb":
             owns = eff is plant_bomb_var_effect(card)

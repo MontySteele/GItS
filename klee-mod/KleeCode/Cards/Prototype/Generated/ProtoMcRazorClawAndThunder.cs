@@ -59,7 +59,7 @@ public sealed class ProtoMcRazorClawAndThunder : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Razor — Claw and Thunder"),
-        ("description", "Deal {Damage:diff()} damage. If this is the third [gold]Attack[/gold] you played this turn, gain 1 [gold]Energy[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. If this is the third [gold]Attack[/gold] you played this turn, gain 1 [gold]Energy[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

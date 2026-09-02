@@ -25,7 +25,7 @@ bar; and being squishy is a problem with three answers rather than a death.
 
 ## 2. The rules, one line each (the brief's §3, unchanged)
 
-1. **Bomb N**: a numbered charge on an enemy. Grows by 2 at the start of
+1. **Bomb N**: a numbered charge on an enemy. Grows by 3 at the start of
    Klee's turn. Never goes off by itself.
 2. **Set off**: only a card that says it. Every Bomb on the target goes off
    one at a time, each a Pyro hit for its size, before the rest of the card.
@@ -82,7 +82,7 @@ belongs to; a bridge belongs to two.
 | Careful Arrangement | U | 1 | Skill | Move all your Bombs onto target enemy as one Bomb. It grows by 2. | One big number; React's best friend |
 | Big Badda Boom | U | 2 | Attack | Set off. Deal 12. Then deal damage equal to the total size of the Bombs set off. | The cash button that reads the bombs twice |
 | The Big One | R | 3 | Attack | Set off. Bombs set off this way deal double. Deal 10. | The boss turn |
-| Alice's Recipe | R | 1 | Power | Your Bombs grow by 4 instead of 2. | Breaks rule 1 |
+| Alice's Recipe | R | 1 | Power | Your Bombs grow by 4 instead of 3. | Breaks rule 1 |
 
 ### Spray, everything explodes now (8)
 
@@ -132,7 +132,7 @@ engine card and its rule-breaking Rare to be testable at all.
 This is the whole of the new machinery. Anything not here is a card.
 
 - **Bomb** as a per-enemy stack with a size; growth at the start of her
-  turn (2, plus Explosives Workshop, replaced by Alice's Recipe).
+  turn (3, plus Explosives Workshop, replaced by Alice's Recipe).
 - **Set off** as a card keyword: resolve each Bomb on the target as a Pyro
   hit for its size, one at a time, before the card's own damage. For
   random-target Attacks, per target hit.

@@ -56,7 +56,7 @@ public sealed class ProtoMiGorouInuzaka : CustomCardModel, IElementalCard, IComp
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — Inuzaka All-Round Defense (proto)"),
-        ("description", "Deal {Damage:diff()} damage. Gain [gold]Block[/gold] equal to half the damage dealt."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Gain [gold]Block[/gold] equal to half the damage dealt."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

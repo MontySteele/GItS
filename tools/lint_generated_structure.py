@@ -94,8 +94,17 @@ from tools.gen_klee_cards import (  # noqa: E402
     CharacterProfile,
     pascal,
 )
+# `EB-285`. The quarantined prototype surface is emitted by its own entry
+# point (`tools/gen_prototype_cards.py`, for R213 B's reason) through the SAME
+# emitter -- and it was outside this gate, which is how twenty-four prototype
+# companion faces came to print `{Damage:diff()}` and `{Block:diff()}` over a
+# `Calculated*Var` named neither. L1 is exactly that check and had been right
+# about it all along; it was simply never pointed here. The profile is the
+# generator's own directory identity, so the sheet, the manifest and the out
+# dir cannot drift apart from what actually shipped.
+from tools.gen_prototype_cards import DIR_PROFILE as PROTOTYPE_PROFILE  # noqa: E402
 
-PROFILES = (KLEE_PROFILE, FURINA_PROFILE, KOKOMI_PROFILE)
+PROFILES = (KLEE_PROFILE, FURINA_PROFILE, KOKOMI_PROFILE, PROTOTYPE_PROFILE)
 
 # `new DamageVar(...)` declares the var named "Damage"; the typed subclasses
 # are uniformly <Name>Var. `new DynamicVar("Foo", ...)` / `new

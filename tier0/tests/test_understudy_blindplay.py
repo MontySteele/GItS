@@ -699,7 +699,11 @@ def test_every_shelf_in_a_shop_is_named_and_buyable():
     run holding 164 gold it could not spend."""
     page = blindplay.observe(shop_state())
     assert "(unnamed)" not in page
-    assert "**Coral Guard** — 75 gold" in page
+    # `EB-262`, REOPENED ON THE LIVE SCREEN: the card's own ENERGY cost is on
+    # the shelf under `card_cost` and was never read, so The Big One was
+    # bought for 73 gold and its 3 energy discovered a screen later. Two
+    # prices, both printed, the card's first.
+    assert "**Coral Guard** — cost 1, 75 gold" in page
     assert "**Bottled Tide** — 160 gold" in page
     assert "At the start of each combat, gain 3 Block." in page
     # The card-removal shelf has no model and therefore no title; the wire's
@@ -2262,6 +2266,208 @@ def test_a_forecast_question_answers_to_the_pages_own_leak_rule(tmp_path):
                           forecast=["will kurage_memory fire?"])
     assert "leaks design vocabulary" in str(exc.value)
 
+
+# --------------------------------------- EB-286: the Spark half of a price --
+
+def spark_priced_state() -> dict:
+    """A Klee-overhaul hand as the live bridge draws it (`EB-286`).
+
+    Every Spark-priced row prints ENERGY 0 and charges Sparks instead, so a
+    hand line built from `cost` alone said `cost 0` about a card the board
+    then refused. `Bang Bang!` is the two-Spark row the r3 Opus seat called a
+    trap ("sat unplayable in my hand across two entire fights, which for a
+    card that prints cost 0 is a trap"); `Dig In` is the starter's one-Spark
+    sink. The wire's `spark_price` / `spark_affordable` pair is the GItS local
+    edit in `BuildCardState`, present only on a card that charges Sparks --
+    which is why `Kaboom!` below carries neither.
+    """
+    return {
+        "state_type": "monster",
+        "battle": {"round": 2, "enemies": [
+            {"name": "Corpse Slug", "hp": 25, "max_hp": 27, "block": 0,
+             "intents": [{"type": "Attack", "label": "8",
+                          "description": "Attack for 8 damage."}]}]},
+        "player": {
+            "hp": 55, "max_hp": 62, "block": 0, "energy": 3, "max_energy": 3,
+            "resources": {}, "draw_pile_count": 5,
+            "discard_pile_count": 3, "exhaust_pile_count": 0,
+            "status": [],
+            "hand": [
+                {"id": "KLEEMOD-PROTO_KO_BANG_BANG", "name": "Bang Bang!",
+                 "type": "Attack", "cost": "0", "can_play": False,
+                 "spark_price": 2, "spark_affordable": False,
+                 "unplayable_reason": "BlockedByCardLogic",
+                 "unplayable_reason_text": "this costs 2 Sparks and you have 0",
+                 "description": "Set off. Deal 8 damage. Place a Bomb 4."},
+                {"id": "KLEEMOD-PROTO_KO_DIG_IN", "name": "Dig In",
+                 "type": "Skill", "cost": "0", "can_play": False,
+                 "spark_price": 1, "spark_affordable": False,
+                 "description": "Gain 8 Block."},
+                {"id": "KLEEMOD-PROTO_KO_KABOOM", "name": "Kaboom!",
+                 "type": "Attack", "cost": "1", "can_play": True,
+                 "description": "Deal 6 damage. Applies Pyro."},
+            ]},
+    }
+
+
+def test_a_spark_priced_hand_line_prints_its_spark_price():
+    """`EB-286`'s acceptance: the seat's `Bang Bang!` line names its price."""
+    page = blindplay.observe(spark_priced_state())
+    assert "**Bang Bang!** — cost 2 Sparks, attack" in page
+    assert "**Dig In** — cost 1 Spark, skill" in page
+    # A card with no Spark price reads exactly as it always did.
+    assert "**Kaboom!** — cost 1, attack" in page
+    # And `cost 0` is gone from the page entirely -- it was never true.
+    assert "cost 0" not in page
+
+
+def test_the_spark_price_comes_off_the_shipped_face_when_the_wire_is_silent():
+    """A REWARD or SHOP row carries no `spark_price`: the bridge emits that
+    pair on a HAND card only. So the price is read from the same id-keyed
+    index the staged page uses, and a reward offer prints it too."""
+    state = spark_priced_state()
+    for card in state["player"]["hand"]:
+        card.pop("spark_price", None)
+        card.pop("spark_affordable", None)
+    page = blindplay.observe(state)
+    assert "**Bang Bang!** — cost 2 Sparks, attack" in page
+    assert "**Dig In** — cost 1 Spark, skill" in page
+
+    reward = {"state_type": "card_reward",
+              "player": {"hp": 55, "max_hp": 62},
+              "card_reward": {"prompt": "Add a card to your deck.",
+                              "can_skip": True,
+                              "cards": [
+                                  {"id": "KLEEMOD-PROTO_KO_BANG_BANG",
+                                   "name": "Bang Bang!", "type": "Attack",
+                                   "cost": "0", "rarity": "Uncommon",
+                                   "description": "Set off. Deal 8 damage."}]}}
+    assert "**Bang Bang!** — cost 2 Sparks, attack" in blindplay.observe(reward)
+
+
+# ------------------ EB-262 / EB-263: the LIVE shapes, captured 2026-09-02 ---
+#
+# The fixtures above these lines are SYNTHETIC, built from the bridge's own
+# builder, and they were green while the live screens were not. So round four
+# went and got the wire's own bytes: `review/qa/blindplay/eb263-live-shapes/`
+# holds nine raw envelopes captured off a real Klee run on
+# `0.2.1966+proto.dirty`, one per screen the r3 Opus seat reported. Its
+# README says how, and every test below reads one of them unedited.
+
+LIVE = (Path(__file__).resolve().parents[2] / "review" / "qa" / "blindplay"
+        / "eb263-live-shapes")
+
+
+def live(name: str) -> dict:
+    return json.loads((LIVE / f"{name}.json").read_text(encoding="utf-8"))
+
+
+def test_a_live_shop_prints_every_card_cost_beside_the_gold():
+    """`EB-262`, reopened. "I paid 73 gold and only discovered it costs 3
+    energy -- a whole turn -- when I next saw it on a card-selection screen."
+    The energy cost is on the shelf under `card_cost` and always was."""
+    page = blindplay.observe(live("shop-stocked"))
+    assert "**Pocket Fireworks** — cost 1, 25 gold" in page
+    assert "**Mine Toss** — cost 1, 51 gold" in page
+    # `EB-286` reaches the shelves too: a Spark-priced card charges no energy,
+    # so its shelf would otherwise have printed a price of nothing at all.
+    assert "**Powder Charge** — cost 1 Spark, 77 gold" in page
+    # A relic and a potion have no card cost and read exactly as before.
+    assert "**Bag of Preparation** — 192 gold" in page
+
+
+def test_a_live_bought_shelf_says_what_it_is_instead_of_calling_itself_card():
+    """`EB-262`'s other half, and the answer is that it is NOT OURS.
+
+    `MerchantCardEntry.IsStocked` IS `CreationResult != null`, so buying a
+    card clears the only field its name, text and cost were ever read from,
+    and `BuildShopState` emits a row with an index, a category and a price and
+    nothing else. The live capture is exactly that. The page used to fall back
+    to the category and print `**Card** — 73 gold`, which reads as a card
+    called "Card"; it now says what the feed can and cannot say.
+    """
+    shelf = live("shop-bought")["shop"]["items"][0]
+    assert shelf["category"] == "card" and shelf["is_stocked"] is False
+    assert "card_name" not in shelf and "card_cost" not in shelf
+
+    page = blindplay.observe(live("shop-bought"))
+    assert "**Card** —" not in page
+    assert "**(this shelf is empty)** — 76 gold (not available)" in page
+    assert "The game clears a shelf's card the moment it is sold" in page
+
+
+def test_a_spent_live_rest_site_offers_only_proceed():
+    """`EB-263`'s acceptance, on the shape the wire actually sends: a spent
+    rest site is `{"options": [], "can_proceed": true}`. The page used to
+    print no options while still advertising four verbs."""
+    assert live("rest-spent")["rest_site"] == {"options": [],
+                                               "can_proceed": True}
+    page = blindplay.observe(live("rest-spent"))
+    assert "nothing left to offer" in page
+    assert page.count("- `") == 1 and "- `proceed`" in page
+
+
+def test_a_fresh_live_rest_site_offers_the_verbs_it_actually_has():
+    """The same rule from the other side. This room offers Rest and Smith and
+    no card removal, and says `can_proceed: false` -- so `remove` and
+    `proceed` are both absent, and neither would have worked."""
+    page = blindplay.observe(live("rest-fresh"))
+    assert "- `rest`" in page and "- `upgrade`" in page
+    assert "- `remove`" not in page
+    assert "- `proceed`" not in page
+
+
+def test_an_opening_chest_is_a_moment_and_not_an_empty_screen():
+    """`EB-263`'s chest half, and the live capture is the whole diagnosis:
+    `{"treasure": {"message": "Opening chest..."}}` and no other key. The
+    bridge force-clicks the chest itself and answers a bare message for the
+    frames that takes, so the page drew an open chest with a blank body and
+    offered `choose "<relic>"` over nothing."""
+    state = live("chest-opening")
+    assert state["treasure"] == {"message": "Opening chest..."}
+    assert blindplay.transient(state) == "the chest is still opening"
+
+    # Rendered anyway (a saved file never settles), it says which moment it is
+    # and offers only the verb that exists.
+    page = blindplay.observe(state)
+    assert "Opening chest..." in page
+    assert "(nothing here to take)" in page
+    assert 'choose "<relic>"' not in page
+
+
+def test_a_live_upgrade_picker_prints_what_it_has_marked_as_picked():
+    """`EB-263`'s picker half, where the wire HAS an answer. The upgrade
+    screen opens a preview container, so `preview_cards` carries the chosen
+    card and its `+` face and the page can show both."""
+    blob = live("upgrade-chosen")["card_select"]
+    assert blob["preview_showing"] is True and len(blob["preview_cards"]) == 2
+    page = blindplay.observe(live("upgrade-chosen"))
+    assert "## What you have picked" in page
+    assert "**Kaboom!+** (upgraded)" in page
+    assert "This screen's data feed carries no per-card selection" not in page
+
+
+def test_a_live_enchant_picker_says_it_cannot_mark_the_pick():
+    """`EB-263`'s picker half where the wire has NO answer, and it is the
+    vendored bridge's gap rather than ours.
+
+    `BuildCardSelectState` reads every grid row through `BuildCardInfo`, which
+    carries no selected flag, and `NDeckEnchantSelectScreen` opens no preview
+    container -- so the two live captures below differ in ONE field. The r3
+    Opus seat: "the whole list reprinted byte-identically; the only change
+    anywhere on the screen was the footer going from `Confirm is not
+    available.` to `Confirm is available.`"
+    """
+    before, after = live("enchant-fresh"), live("enchant-chosen")
+    assert before["card_select"]["cards"] == after["card_select"]["cards"]
+    assert before["card_select"]["can_confirm"] is False
+    assert after["card_select"]["can_confirm"] is True
+    assert "preview_cards" not in after["card_select"]
+
+    page = blindplay.observe(after)
+    assert "This screen's data feed carries no per-card selection state" in page
+    assert "Confirm is available." in page
+    assert "## What you have picked" not in page
 
 # --------------------------------------------------------------------------
 # THE KOKOMI OVERHAUL, DRAFT 6: the Plans on the page, and the pet as a target

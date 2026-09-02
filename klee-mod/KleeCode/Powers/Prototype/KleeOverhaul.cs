@@ -68,7 +68,7 @@ public static class KleeOverhaulLaw
 {
     /// <summary>Rule 1: every Bomb grows by this at the start of Klee's turn.
     /// Mirrors <c>C.KLEE_OVERHAUL_BOMB_GROWTH</c>.</summary>
-    public const int BombGrowth = 2;
+    public const int BombGrowth = 3;
 
     /// <summary>Explosives Workshop: this much growth on top, per stack.
     /// Mirrors <c>C.KLEE_OVERHAUL_WORKSHOP_GROWTH</c>.</summary>

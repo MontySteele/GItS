@@ -39,7 +39,7 @@ public sealed class ExplosivesWorkshopGrowthPower : PowerModel, ILocalizationPro
 }
 
 /// <summary>
-/// Alice's Recipe: "Your Bombs grow by 4 instead of 2." The brief's own gloss
+/// Alice's Recipe: "Your Bombs grow by 4 instead of 3." The brief's own gloss
 /// is "Breaks rule 1", and it breaks it by REPLACING the base rather than
 /// adding to it -- see <c>ProtoBombPower.GrowthFor</c>, which is the one place
 /// the two modifiers compose.
