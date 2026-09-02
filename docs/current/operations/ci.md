@@ -8,6 +8,23 @@ required on `main` in branch protection ([USER]'s to click). **Those three job
 names are load-bearing** — they may be required checks, and a renamed job
 reports nothing and blocks every pull request. Rename nothing here.
 
+### The deploy gate's static rules run here too (2026-09-02)
+
+The `lints` job gained one step, `deploy gate static rules`: `pwsh
+./klee-mod/build/validate_static.ps1`, which runs `validate.ps1`'s S4 (pool
+registration), S5 (loc template syntax) and S8 (build scripts pure ASCII) in
+about 4 s. They read committed text and nothing else, and they call the SAME
+functions the deploy gate calls (`klee-mod/build/static_rules.ps1`) — one
+implementation, two callers, so a finding here is the string that would refuse
+the deploy.
+
+A STEP, not a job, because the three job names above are load-bearing. Why it
+exists: PR #291 put the base game's `[blue]` numeral colour on every power
+face, this workflow was green, it merged, and the next deploy was refused by
+S5 — a regex over C# that a runner executes in seconds. Rules that need the
+staged package, the game install, the built pck or the pytest suite stay at
+deploy time; `static_rules.ps1`'s header has the table and the reason for each.
+
 ### Speed pass, 2026-08-29
 
 Three changes, no jobs added or renamed:

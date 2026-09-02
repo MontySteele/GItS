@@ -290,6 +290,28 @@ jobs:
         run: python tools/lint_review_status.py
       - name: hook self-tests
         run: python tools/hooks/selftest_all.py
+      # 2026-09-02. THE DEPLOY GATE'S SOURCE-ONLY RULES, HERE AT LAST.
+      #
+      # klee-mod/build/validate.ps1 holds rules that read committed text and
+      # nothing else, and until today the only way to reach any of them was a
+      # Windows machine with the game installed. On 2026-09-02 PR #291 put the
+      # base game's `[blue]` numeral colour on every power face, this workflow
+      # was green, it merged, and the round-six deploy was refused by S5 -- a
+      # regex over C# this runner executes in four seconds. The wrapper was
+      # what made it unreachable; it was never what made it correct, which is
+      # the argument the header of this job already makes about the python
+      # lints above.
+      #
+      # A STEP, NOT A JOB: the three job names are load-bearing (see the file
+      # header), and this belongs to the question `lints` already asks.
+      # S4/S5/S8 only. Everything needing the staged package, the game install,
+      # the built pck or the pytest suite stays at deploy time --
+      # klee-mod/build/static_rules.ps1 carries the table and the reason for
+      # each. ONE implementation: validate.ps1 calls the same functions, so a
+      # finding here is the string that would refuse the deploy.
+      - name: deploy gate static rules (S4 pool, S5 loc syntax, S8 ascii)
+        shell: pwsh
+        run: ./klee-mod/build/validate_static.ps1
 
   # (c) Patch sentinel -- ADVISORY, NEVER BLOCKING (S12, 2026-08-05).
   #

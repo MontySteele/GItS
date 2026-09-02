@@ -34,7 +34,24 @@ public class KleeOverhaulRuleTests
 
     // ---- THE FLAG, OFF --------------------------------------------------
 
+    // THE ONE PIN AN ARM PROPERTY MAKES DISHONEST (2026-09-02).
+    //
+    // `dotnet test -p:KleeOverhaul=true` defines `KLEE_OVERHAUL`, which is what MOVES
+    // `DefaultEnabled` -- the exact value this pin asserts. So under that
+    // property the pin cannot say anything true: green would mean the property
+    // did nothing, and red is the property working. It is skipped there rather
+    // than left to fail, because a red that means "the switch works" trains
+    // everyone to ignore reds.
+    //
+    // ARM PROPERTIES ARE DEPLOY-LINE ONLY. The supported test configurations
+    // are `dotnet test` and `dotnet test -p:PrototypeCards=true`, and this pin
+    // runs in both -- which is where the acceptance condition has to hold.
+    // docs/current/operations/prototype.md carries the rule.
+#if KLEE_OVERHAUL
+    [Fact(Skip = "-p:KleeOverhaul=true moves KleeOverhaul.DefaultEnabled, which is the value this pin asserts. Arm properties are deploy-line only: see docs/current/operations/prototype.md.")]
+#else
     [Fact]
+#endif
     public void The_arm_ships_off()
     {
         // The acceptance condition, and everything else here only matters

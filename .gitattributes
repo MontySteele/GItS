@@ -1,0 +1,52 @@
+# LINE ENDINGS. Every commit in this repo printed a wall of
+#
+#   warning: in the working copy of '<file>', LF will be replaced by CRLF
+#            the next time Git touches it
+#
+# because this machine's git carries `core.autocrlf = true` (from
+# C:/Program Files/Git/etc/gitconfig -- the Git for Windows installer's own
+# system config, not a repo choice) while every tool that writes files here --
+# the agent editors, python, the codegen -- writes LF. `core.safecrlf`
+# defaults to `warn`, so git said so on every add. The warning was correct and
+# useless: nothing was ever lost, and it buried real output.
+#
+# WHAT THIS CHOOSES, and why not the other spellings:
+#
+#   * text=auto eol=lf   <- this file
+#         Normalise to LF in the object store (which is already what is
+#         stored: autocrlf has been converting on the way in for the whole
+#         life of the repo, so NO BLOB CHANGES and no history is rewritten),
+#         and check out LF in the working tree. An LF file then round-trips
+#         with no conversion, so no warning.
+#   * text=auto eol=crlf / plain `text=auto`
+#         Keeps the CRLF working tree, so it keeps the warning: the tools
+#         still write LF and checkout would still put the CRLF back.
+#   * `* -text` (no conversion at all)
+#         Would compare the CRLF working tree byte-for-byte against LF blobs
+#         and report EVERY TRACKED FILE AS MODIFIED. Not a candidate.
+#
+# ONE STEP IS OWED PER CHECKOUT, once. A checkout made before this file
+# existed still holds CRLF files, and adding one of those (an edit that
+# preserved its line endings) warns the other way round -- "CRLF will be
+# replaced by LF". Refresh the working tree from the index. It changes no
+# blob, no commit and no file CONTENT -- only the bytes between the lines:
+#
+#     git rm --cached -r -q . && git reset --hard
+#
+# `git checkout-index -f -a` is the gentler-looking spelling and it is not
+# enough: measured here 2026-09-02, it rewrote one file out of 2694 and left
+# every entry whose cached stat still matched the index untouched. Refuse it.
+# The same line is in docs/current/operations/worktrees.md.
+#
+# NOTHING HERE NEEDS CRLF. There is no tracked .bat, .cmd or .sln. The .ps1
+# build scripts are read by Windows PowerShell 5.1, which parses LF fine (what
+# it cannot do is guess a non-ASCII encoding without a BOM -- that is
+# validate.ps1's S8 rule, and it is about bytes, not line breaks).
+* text=auto eol=lf
+
+# The tracked binaries: live-capture PNGs under review/qa/. `text=auto` would
+# detect these by content anyway; they are named so a future reader does not
+# have to trust the detector.
+*.png binary
+*.jpg binary
+*.ico binary

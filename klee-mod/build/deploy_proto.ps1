@@ -37,9 +37,18 @@
        already deployed by then, and the bridge is a harness.
 
   WHAT IS NOT DIFFERENT, deliberately: the gate. validate.ps1 runs whole --
-  every S-rule and the full pytest suite, with no fast mode requested and
-  nothing skipped. A prototype build that skipped gates would prove nothing
-  about the cards it exists to try.
+  every S-rule, no rule relaxed and no static-only mode requested. A prototype
+  build that skipped gates would prove nothing about the cards it exists to
+  try.
+
+  S7's ARM IS THE ONE THING THAT MOVED (2026-09-02), and it moved for both
+  paths alike rather than as a dev-build concession. The suite still has to be
+  green; what changed is WHERE that is established. When the tree is clean,
+  HEAD is on origin/main and GitHub's check runs for that exact sha are green,
+  S7 stands on that run and says which one; otherwise it runs the tests here,
+  as the fast lane or -- with -FullGate -- the old whole-repo serial suite.
+  The three conditions are in klee-mod/build/ci_trust.ps1 and every failure to
+  establish one runs the tests.
 
   A DEV PACKAGE CHANGES NOTHING FOR ORDINARY PLAY. Prototype rows are
   off-pool: in each character's off-pool list so CardModel.Pool resolves, out
@@ -75,6 +84,12 @@ param(
     # Passed through to validate.ps1 S7, same meaning as on deploy.ps1: an
     # acknowledgement of a stale local game_ref, not a fix.
     [switch]$AllowIncompleteGameRef,
+    # Passed through to validate.ps1 S7 (2026-09-02): run the WHOLE repo
+    # suite here, serially, instead of letting a green CI run on this exact
+    # commit stand in for it. Off by default because the default was costing
+    # 399 s of every dev deploy to re-derive a fact GitHub already held; see
+    # klee-mod/build/ci_trust.ps1 for the three conditions a skip needs.
+    [switch]$FullGate,
     # THE KLEE OVERHAUL ARM (the ruled brief klee-brief-2026-09-01.md sec.3,
     # slice one klee-overhaul-slice-1-2026-09-01.md). Adds -p:KleeOverhaul=true
     # to the build below, which is the ONLY thing that turns the arm on:
@@ -299,7 +314,7 @@ if ($FurinaReframe) {
 
 if ($version.IsDirty) {
     Write-Host "*** DIRTY WORKING TREE ***" -ForegroundColor Red
-    Write-Host ("  $($version.DirtyFiles.Count) uncommitted change(s); version stamped +proto.dirty.") -ForegroundColor Red
+    Write-Host ("  $($version.DirtyFiles.Count) uncommitted change(s) to TRACKED files; version stamped +proto.dirty.") -ForegroundColor Red
     foreach ($f in ($version.DirtyFiles | Select-Object -First 10)) {
         Write-Host "    $f" -ForegroundColor DarkYellow
     }
@@ -307,6 +322,16 @@ if ($version.IsDirty) {
         Write-Host ("    ... and " + ($version.DirtyFiles.Count - 10) + " more") -ForegroundColor DarkYellow
     }
     Write-Host ""
+}
+
+# Untracked files are NOT dirt (2026-09-02; see Get-AutoVersion). Until then
+# this machine's seat logs and capture packets made EVERY dev package
+# "+proto.dirty" from a clean main, which is exactly as informative as no mark
+# at all. One grey line, because an untracked .cs under KleeCode/ is compiled
+# by the csproj's default glob and so can move this build without moving the
+# mark.
+if ($version.UntrackedFiles.Count -gt 0) {
+    Write-Host ("note: $($version.UntrackedFiles.Count) untracked file(s) in the tree; they do not affect the version stamp.") -ForegroundColor DarkGray
 }
 
 # Card art, the same flat destination deploy.ps1 stages into and the same
@@ -358,6 +383,7 @@ Write-Host "Validating package (full gate)..." -ForegroundColor Cyan
     -SourceDir (Join-Path $root 'KleeCode') `
     -GameDir $gameDir `
     -AllowIncompleteGameRef:$AllowIncompleteGameRef `
+    -FullGate:$FullGate `
     -PrototypeBuild
 
 $target = Join-Path $gameDir 'mods\klee'

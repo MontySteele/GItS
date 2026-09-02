@@ -621,45 +621,33 @@ texture = ExtResource("1_tex")
 texture = ExtResource("1_tex")
 '@)
 
-# Loc rows for the ElementalSkill custom keyword (KleeKeywords.cs). The game
-# merges res://<modid>/localization/<lang>/<table>.json into the base table of
-# the same name; the key prefix KLEEMOD-ELEMENTAL_SKILL comes from BaseLib's
-# GenEnumValues (namespace prefix + CustomEnum name). The 5 is LAW: tier0
-# constants.py BURST_PER_SKILL_TAG (mirrored, never re-derived).
+# THE CUSTOM-KEYWORD LOC ROWS ARE NOT TYPED HERE ANY MORE (2026-09-02).
+#
+# They used to be a heredoc right here, hand-typed, WITH THE NUMERALS AS
+# LITERALS -- a second copy of the `keywordFallback` dictionary in
+# klee-mod/KleeCode/KleeMod.cs, whose numerals are interpolated from the
+# constants they quote (`EB-89`). The game merges the packaged table OVER the
+# dll's, so the copy a player actually read was the copy no constant fed: a
+# repricing would have left the pck telling them a retired number with every
+# gate green.
+#
+# ONE SOURCE NOW. `tools/gen_keyword_loc.py` derives
+# klee-mod/pck-src/klee/localization/eng/card_keywords.json from the C#, with
+# `--check` as the staleness gate (pinned by
+# tier0/tests/test_keyword_loc_single_source.py), and the file reaches the pack
+# through the pck-src overlay below like every other tracked resource. The
+# check here is that it EXISTS: an overlay that silently supplies nothing would
+# ship a pack whose keyword tips render as raw keys.
+#
+# The game merges res://<modid>/localization/<lang>/<table>.json into the base
+# table of the same name; the key prefix KLEEMOD-ELEMENTAL_SKILL comes from
+# BaseLib's GenEnumValues (namespace prefix + CustomEnum name).
 $locDir = Join-Path $work 'klee\localization\eng'
 New-Item -ItemType Directory -Force $locDir | Out-Null
-[IO.File]::WriteAllText((Join-Path $locDir 'card_keywords.json'), @'
-{
-  "KLEEMOD-ELEMENTAL_SKILL.title": "Elemental Skill",
-  "KLEEMOD-ELEMENTAL_SKILL.description": "Playing this card grants 5 Burst Energy.",
-  "KLEEMOD-APPLIES_PYRO.title": "Applies Pyro",
-  "KLEEMOD-APPLIES_PYRO.description": "If the target has no aura, this applies Pyro for 2 turns. A different aura is consumed to trigger a Reaction instead.",
-  "KLEEMOD-APPLIES_HYDRO.title": "Applies Hydro",
-  "KLEEMOD-APPLIES_HYDRO.description": "If the target has no aura, this applies Hydro for 2 turns. A different aura is consumed to trigger a Reaction instead.",
-  "KLEEMOD-APPLIES_ELECTRO.title": "Applies Electro",
-  "KLEEMOD-APPLIES_ELECTRO.description": "If the target has no aura, this applies Electro for 2 turns. A different aura is consumed to trigger a Reaction instead.",
-  "KLEEMOD-APPLIES_CRYO.title": "Applies Cryo",
-  "KLEEMOD-APPLIES_CRYO.description": "If the target has no aura, this applies Cryo for 2 turns. A different aura is consumed to trigger a Reaction instead.",
-  "KLEEMOD-BOMB.title": "Bomb",
-  "KLEEMOD-BOMB.description": "Detonates at the start of your turn or early when its enemy takes unblocked Attack damage. The first attack that enemy makes while Bombed each combat deals 25% less damage.",
-  "KLEEMOD-VAPORIZE_PREVIEW.title": "Reaction preview: Vaporize",
-  "KLEEMOD-VAPORIZE_PREVIEW.description": "This card supplies Pyro or Hydro while an enemy has the other aura. The triggering hit deals 1.5x damage and consumes the aura.",
-  "KLEEMOD-MELT_PREVIEW.title": "Reaction preview: Melt",
-  "KLEEMOD-MELT_PREVIEW.description": "This card supplies Pyro or Cryo while an enemy has the other aura. The triggering hit deals 1.75x damage and consumes the aura.",
-  "KLEEMOD-OVERLOAD_PREVIEW.title": "Reaction preview: Overloaded",
-  "KLEEMOD-OVERLOAD_PREVIEW.description": "This card supplies Pyro or Electro while an enemy has the other aura. It deals 6 splash damage to all enemies and applies 1 Weak to the reacted enemy.",
-  "KLEEMOD-SUPERCONDUCT_PREVIEW.title": "Reaction preview: Superconduct",
-  "KLEEMOD-SUPERCONDUCT_PREVIEW.description": "This card supplies Electro or Cryo while an enemy has the other aura. The reacted enemy gains 2 Vulnerable.",
-  "KLEEMOD-ELECTRO_CHARGED_PREVIEW.title": "Reaction preview: Electro-Charged",
-  "KLEEMOD-ELECTRO_CHARGED_PREVIEW.description": "This card supplies Hydro or Electro while an enemy has the other aura. The reacted enemy gains a 4-damage decaying damage-over-time effect.",
-  "KLEEMOD-FROZEN_PREVIEW.title": "Reaction preview: Frozen",
-  "KLEEMOD-FROZEN_PREVIEW.description": "This card supplies Hydro or Cryo while an enemy has the other aura. Its next action deals half damage; attacking it Shatters for 6 damage.",
-  "KLEEMOD-SWIRL_PREVIEW.title": "Reaction preview: Swirl",
-  "KLEEMOD-SWIRL_PREVIEW.description": "This card supplies Anemo to an existing aura. The aura is consumed and copied onto all enemies.",
-  "KLEEMOD-CRYSTALLIZE_PREVIEW.title": "Reaction preview: Crystallize",
-  "KLEEMOD-CRYSTALLIZE_PREVIEW.description": "This card supplies Geo to an existing aura. The aura is consumed and you gain 4 Block."
+$keywordSrc = Join-Path $repo 'klee-mod\pck-src\klee\localization\eng\card_keywords.json'
+if (-not (Test-Path $keywordSrc)) {
+    throw "missing $keywordSrc. It is generated from KleeMod.cs: run .venv\Scripts\python tools\gen_keyword_loc.py"
 }
-'@)
 
 # Architect finale dialogue (2026-07-23 softlock). The base game's
 # TheArchitect.WinRun() dereferences Dialogue unconditionally, and

@@ -23,6 +23,38 @@ is settled is a tax on the stage that wants taste, not numbers.
 dotnet build klee-mod/KleeCode -p:PrototypeCards=true       # the DEV build
 ```
 
+**ARM PROPERTIES ARE DEPLOY-LINE ONLY. There are exactly two supported test
+configurations** (2026-09-02):
+
+```sh
+dotnet test klee-mod/KleeTests                              # 262 tests
+dotnet test klee-mod/KleeTests -p:PrototypeCards=true       # 674 tests
+```
+
+`-p:KleeOverhaul=true` and its three siblings belong on a `dotnet build` or a
+`deploy_proto.ps1` line and nowhere else. Each exists to MOVE an arm's
+`DefaultEnabled`, and each arm's suite opens with `The_arm_ships_off`,
+asserting that default is `false` — the acceptance condition the whole
+quarantine rests on. Under the property that pin cannot say anything true:
+green would mean the property did nothing, and red is the property working. So
+it is **skipped there by an `#if`, not left to fail**, because a red that means
+"the switch works" teaches everyone to ignore reds. The pins run, and must be
+green, in both supported configurations, which is where the condition has to
+hold.
+
+The arms' rules are exercised in both directions without any property:
+`Enabled` is a settable static, so one build asserts both sides of every
+switch. That is the only reason `KleeTests.csproj` mirrors the arm properties
+at all — a dev running the game's own build line over the tests gets the same
+`DefineConstants` and no "this property means nothing here" surprise — and not
+because any pin needs one.
+
+One arm has a second casualty, honest for the same reason:
+`ParityAuthorityPinTests.M2_authority_a_furina_card_is_spotlighted_under_the_both_modes_relic`
+asserts the SHIPPED Spotlight rule, which `-p:FurinaReframe=true` deliberately
+replaces (Center Stage retires, the selector aims Guest Cast). It carries the
+same `#if` skip.
+
 **Deploying a dev build** — `klee-mod\build\deploy_proto.ps1`, from the
 art-bearing main checkout, game closed. It is `deploy.ps1` plus three things:
 `gen_prototype_cards.py --check` first, `-p:PrototypeCards=true` on the build,

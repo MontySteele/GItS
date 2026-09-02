@@ -5,6 +5,33 @@
   <Import Project="$(MSBuildThisFileDirectory)local.props"
           Condition="Exists('$(MSBuildThisFileDirectory)local.props')" />
 
+  <!-- THE MACHINE-LEVEL FALLBACK (2026-09-02). local.props is gitignored, so
+       EVERY new worktree started life with no build at all until somebody
+       remembered to copy the file across by hand — a per-worktree ritual that
+       exists only because the file cannot be tracked. It is machine state,
+       not workstream state: one install of the game, one BaseLib, however
+       many worktrees.
+
+       So: the worktree's own local.props still wins (an unusual per-tree
+       override stays possible), and otherwise the build reads
+       %LOCALAPPDATA%\gits\local.props. Same file format — copy
+       local.props.example there once per machine and every worktree, present
+       and future, builds.
+
+       $(GitsLocalProps) overrides the location, and reads an environment
+       variable of that name as well, which is how CI or a second install
+       points somewhere else without editing this file.
+
+       Order matters: the worktree copy is imported ABOVE, and MSBuild lets
+       the first definition of a property stand only if the later one is
+       conditioned — so this import is skipped entirely when the local file
+       exists, rather than allowed to overwrite it. -->
+  <PropertyGroup>
+    <GitsLocalProps Condition="'$(GitsLocalProps)' == ''">$(LOCALAPPDATA)\gits\local.props</GitsLocalProps>
+  </PropertyGroup>
+  <Import Project="$(GitsLocalProps)"
+          Condition="!Exists('$(MSBuildThisFileDirectory)local.props') and '$(GitsLocalProps)' != '' and Exists('$(GitsLocalProps)')" />
+
   <!-- EB-172 / R218 C — BUILD AGAINST THE PINNED ASSEMBLIES INSTEAD OF THE
        LIVE GAME.
 
@@ -52,7 +79,7 @@
          worktree has no local.props, which is exactly the case the switch exists
          for. Slice-2 packet §6: the first Error fired unconditionally. -->
     <Error Condition="'$(GameDir)' == '' and '$(GameDataDir)' == ''"
-           Text="GameDir is not set. Copy local.props.example to local.props and point GameDir at your Slay the Spire 2 install root." />
+           Text="GameDir is not set. Copy klee-mod/local.props.example to $(GitsLocalProps) (once per machine, and every worktree then builds) or to klee-mod/local.props (this worktree only), and point GameDir at your Slay the Spire 2 install root." />
     <Error Condition="'$(GameDataDir)' == ''"
            Text="Could not locate the game's managed assembly directory under GameDir. Set GameDataDir explicitly in local.props." />
     <Error Condition="'$(BaseLibDll)' == '' or !Exists('$(BaseLibDll)')"

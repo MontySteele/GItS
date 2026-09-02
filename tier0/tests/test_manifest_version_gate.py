@@ -96,6 +96,59 @@ def _manifest(**overrides) -> dict:
     return m
 
 
+# --- a repository of our own ------------------------------------------------
+#
+# THE VERSION FUNCTIONS READ A GIT TREE, so an arm asking "what does this say
+# about a CLEAN tree?" cannot ask it of THIS repo: whoever runs the suite has
+# edits, and `-n auto` puts fifteen other workers in the same checkout while
+# the question is being asked. `test_get_package_version_composes_the_four_-
+# shapes` failed exactly that way once on 2026-09-02 (red under `-n auto`,
+# green run alone): two `Get-AutoVersion` calls one line apart, and the tree
+# moved between them.
+#
+# THE SHARED-STATE CAUSE WAS FOUND AND FIXED, so this is not a shrug:
+# `test_prototype_surface.test_version_stamps_cannot_see_the_prototype_surface`
+# appends a line to the TRACKED sheet `docs/prototype-surface.yaml` in the real
+# checkout and puts it back. For the length of that window the working tree is
+# genuinely dirty, and any worker asking `Get-AutoVersion` during it gets a
+# different answer from one asking a moment later. (It also restored through
+# `write_text`, which on Windows put CRLF back into an LF file -- so the
+# "restore" was not one. Both halves are fixed there.)
+#
+# The dirtiness arms below still run against a throwaway repository under
+# tmp_path, because a pin whose answer depends on what another process is doing
+# is not a pin however well-behaved the other process is today.
+
+def _scratch_repo(tmp_path, major: str = "0.2") -> Path:
+    """A one-commit git repo carrying a MAJOR-only manifest."""
+    root = tmp_path / "scratch"
+    root.mkdir()
+    (root / "manifest.json").write_text(
+        json.dumps({"id": "Klee", "version": major}), encoding="utf-8")
+    (root / "tracked.txt").write_text("one\n", encoding="utf-8")
+    git = ["git", "-c", "user.email=t@example.invalid", "-c", "user.name=t",
+           "-c", "commit.gpgsign=false", "-C", str(root)]
+    subprocess.run(git + ["init", "-q"], check=True, capture_output=True)
+    subprocess.run(git + ["add", "manifest.json", "tracked.txt"],
+                   check=True, capture_output=True)
+    subprocess.run(git + ["commit", "-q", "-m", "one"],
+                   check=True, capture_output=True)
+    return root
+
+
+def _auto(root: Path) -> dict:
+    """`Get-AutoVersion` over `root`, as a dict of strings."""
+    res = _ps(f". '{VERSION_PS1}'\n"
+              f"$a = Get-AutoVersion -RepoRoot '{root}'\n"
+              'Write-Output "AUTO: $($a.Auto)"\n'
+              'Write-Output "ISDIRTY: $($a.IsDirty)"\n'
+              'Write-Output "DIRTYCOUNT: $(@($a.DirtyFiles).Count)"\n'
+              'Write-Output "UNTRACKED: $(@($a.UntrackedFiles).Count)"\n')
+    assert res.returncode == 0, res.stdout + res.stderr
+    return dict(ln.split(": ", 1) for ln in res.stdout.splitlines()
+                if ": " in ln)
+
+
 # An INSTALLED BaseLib that satisfies the manifest's floor. Raised from
 # v3.3.8 to v3.4.5 by `EB-157`, which reconciled that floor from an
 # unchecked 3.3.6 to the release the repo actually builds against; these
@@ -303,6 +356,100 @@ def test_a_dirty_tree_is_marked_and_announced():
     assert res.stdout.strip() in ("marked", "clean"), res.stdout + res.stderr
 
 
+# --- what "dirty" means (2026-09-02) ---------------------------------------
+#
+# THE DEFECT: every build ever made from a clean `main` stamped `+proto.dirty`
+# or `+dirty`, because `git status --porcelain` lists UNTRACKED files and the
+# deploy machine always has some (seat logs under understudy/logs/, capture
+# packets under review/qa/, a scratch note). The mark was on every package, so
+# it distinguished nothing -- and the one question it exists to answer, "does
+# the commit count identify these contents?", it answered wrong in the safe
+# direction on every single build.
+
+def test_a_clean_checkout_is_not_marked_dirty(tmp_path):
+    """The presenting symptom, from the other end. This is the arm that could
+    not be written against the repo itself: nobody's working copy is clean."""
+    root = _scratch_repo(tmp_path)
+    out = _auto(root)
+    assert out["ISDIRTY"] == "False", out
+    assert out["DIRTYCOUNT"] == "0", out
+    assert "+dirty" not in out["AUTO"], out
+
+
+def test_an_untracked_file_is_not_a_dirty_tree(tmp_path):
+    """A seat log is not an uncommitted change. It is reported (the deploy
+    scripts print the count) and it does not move the stamp."""
+    root = _scratch_repo(tmp_path)
+    (root / "seat.log").write_text("a round\n", encoding="utf-8")
+    out = _auto(root)
+    assert out["ISDIRTY"] == "False", out
+    assert out["UNTRACKED"] == "1", out
+    assert "+dirty" not in out["AUTO"], out
+
+
+def test_an_uncommitted_tracked_change_is_still_dirty(tmp_path):
+    """The positive control, and the half that must not have been thrown out
+    with the fix: a mark that never fires is the same nothing as a mark that
+    always fires."""
+    root = _scratch_repo(tmp_path)
+    (root / "tracked.txt").write_text("two\n", encoding="utf-8")
+    out = _auto(root)
+    assert out["ISDIRTY"] == "True", out
+    assert out["DIRTYCOUNT"] == "1", out
+    assert out["AUTO"].endswith("+dirty"), out
+
+
+def test_a_staged_but_uncommitted_change_is_dirty(tmp_path):
+    """`--untracked-files=no` still reports the index. A file added but not
+    committed is an uncommitted change to a tracked file the moment it is
+    staged, and the stamp has to see it."""
+    root = _scratch_repo(tmp_path)
+    (root / "new.cs").write_text("class X {}\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(root), "add", "new.cs"],
+                   check=True, capture_output=True)
+    out = _auto(root)
+    assert out["ISDIRTY"] == "True", out
+    assert out["UNTRACKED"] == "0", out
+
+
+def test_the_four_shapes_compose_over_a_clean_and_a_dirty_tree(tmp_path):
+    """`Get-PackageVersion`'s four shapes, asserted where the tree's state is
+    KNOWN rather than observed -- see the scratch-repo note above."""
+    root = _scratch_repo(tmp_path)
+    manifest = root / "manifest.json"
+    script = f"""
+. '{VERSION_PS1}'
+$plain = Get-PackageVersion -SourceManifest '{manifest}' -RepoRoot '{root}'
+$proto = Get-PackageVersion -SourceManifest '{manifest}' -RepoRoot '{root}' -Prototype
+Write-Output "PLAIN: $($plain.Version)"
+Write-Output "PROTO: $($proto.Version)"
+"""
+    res = _ps(script)
+    assert res.returncode == 0, res.stdout + res.stderr
+    clean = dict(ln.split(": ", 1) for ln in res.stdout.splitlines()
+                 if ": " in ln)
+    assert clean["PLAIN"] == "0.2.1", clean
+    assert clean["PROTO"] == "0.2.1+proto", clean
+
+    (root / "tracked.txt").write_text("two\n", encoding="utf-8")
+    res = _ps(script)
+    assert res.returncode == 0, res.stdout + res.stderr
+    dirty = dict(ln.split(": ", 1) for ln in res.stdout.splitlines()
+                 if ": " in ln)
+    assert dirty["PLAIN"] == "0.2.1+dirty", dirty
+    assert dirty["PROTO"] == "0.2.1+proto.dirty", dirty
+
+
+def test_the_deploy_scripts_report_untracked_files_without_stamping_them():
+    """The trade this fix makes, kept visible. An untracked .cs under
+    KleeCode/ IS compiled (the csproj globs), so it can move the build without
+    moving the mark -- which is why both deploy paths print the count."""
+    for name in ("deploy.ps1", "deploy_proto.ps1"):
+        src = (BUILD / name).read_text(encoding="utf-8")
+        assert "UntrackedFiles.Count" in src, name
+        assert "do not affect the version stamp" in src, name
+
+
 def test_deploy_and_validate_share_one_version_implementation():
     """Two copies of "compute the version" is the drift this gate cannot
     survive: the stamp and the check would disagree about what is correct."""
@@ -387,7 +534,19 @@ def test_a_prototype_stamp_is_still_a_parseable_semantic_version():
 def test_get_package_version_composes_the_four_shapes():
     """The non-prototype string must be BYTE-IDENTICAL to what shipped before
     the switch existed -- that is why it is composed from Count/IsDirty and
-    the plain path still returns Auto untouched."""
+    the plain path still returns Auto untouched.
+
+    THIS ARM RUNS AGAINST THE REAL REPO, so it asserts only what is true
+    however the tree happens to be: the two SHAPES, the shared MAJOR.COUNT,
+    and the IsPrototype flags. The dirtiness EQUALITY between the two readings
+    used to be asserted here and is the line that failed once under `-n auto`
+    on 2026-09-02 and passed alone -- two `Get-AutoVersion` calls one line
+    apart, with another worker's `test_version_stamps_cannot_see_the_prototype_-
+    surface` writing and restoring a tracked sheet in between. That worker was
+    fixed; this assertion still moved, to
+    `test_the_four_shapes_compose_over_a_clean_and_a_dirty_tree`, which owns a
+    repository nothing else can touch and therefore states the stronger fact:
+    the exact string on each side."""
     script = f"""
 . '{VERSION_PS1}'
 $src = '{SOURCE_MANIFEST}'
@@ -407,8 +566,6 @@ Write-Output "PLAINISPROTO: $($plain.IsPrototype)"
     assert re.fullmatch(r"\d+\.\d+\.\d+\+proto(\.dirty)?", proto), proto
     # Same MAJOR and same AUTO count; only the metadata differs.
     assert proto.split("+")[0] == plain.split("+")[0]
-    # And dirtiness agrees between them, whichever way this tree happens to be.
-    assert plain.endswith("+dirty") == proto.endswith(".dirty")
     assert out["ISPROTO"] == "True" and out["PLAINISPROTO"] == "False"
 
 
