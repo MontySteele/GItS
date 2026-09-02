@@ -38,7 +38,7 @@ public sealed class ProtoKoKapow : CustomCardModel, IElementalCard
     public Element Element => Element.Pyro;
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesPyro };
+        new[] { CardKeyword.Retain, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSetOff(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this);
@@ -72,6 +72,6 @@ public sealed class ProtoKoKapow : CustomCardModel, IElementalCard
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Retain);
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

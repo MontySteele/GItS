@@ -76,6 +76,7 @@ few Companions.
 | Careful Arrangement | merge onto one enemy, grows by 2 | grows by 5 | +2 for 1 energy was the weakest line on the sheet; the merge is the card's point and it now pays close to Chain Fuse for setting up the big cash. |
 | Sorry, Jean... | 1 energy | 0 energy | Ka-pow! cashes a Bomb for damage for free; paying 1 to cash it for Block instead made the safe play the expensive one. Free, it is Ka-pow!'s defensive twin, and it still forfeits the Spark, since the Bomb is removed rather than set off. |
 | Sparks 'n' Splash | 2: at the end of your turn, Set off a random enemy's Bombs | 2: at the end of your turn, a random enemy takes damage equal to the Bombs on it | [USER]: auto-detonation bricks the growth build; the new one reads the Bomb without cashing it, so the growth build's Rare pays every turn and the Bomb keeps cooking. |
+| Ka-pow! | 0: Set off, 4 damage; Retain when upgraded | 0: Set off, 4 damage, Retain; upgrade 7 damage | Klee round-5 pick 1, at its default ([USER]: fine with the default): holding the Bomb no longer means discarding the only detonator. |
 | Bomb growth | 3 a turn | 4 a turn | The round-5 packet raised it to 5; [USER] read that back down the same day ("growth 5 is likely too much: basically a free Strike every turn, per bomb, per enemy"). |
 
 **Left alone, with the reason.** Big Badda Boom (14 per energy on a

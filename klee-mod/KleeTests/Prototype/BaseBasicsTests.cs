@@ -146,22 +146,29 @@ public class BaseBasicsTests
     // ---- the two cards of her own -----------------------------------------
 
     [Fact]
-    public void Ka_pow_is_free_to_play_and_the_upgrade_buys_retain()
+    public void Ka_pow_is_free_to_play_and_retains_from_print()
     {
         // Slice sec.3, draft 4: "Ka-pow! is the detonator at 0 energy: cashing
-        // costs a card and a moment, never energy, and the upgrade's Retain
-        // lets a cooked Bomb be held for." So the NUMBER must not move.
+        // costs a card and a moment, never energy." The ENERGY is still the
+        // assertion, and it does not move.
+        //
+        // ROUND 5 PICK 1, at its default ([USER] 2026-09-02: "I'm fine with
+        // the default on Ka-Pow!"): Retain is on the BASE card now, not the
+        // upgrade. Draft 4's reasoning was "the upgrade's Retain lets a cooked
+        // Bomb be held for" -- and holding the Bomb is the arm's whole tempo,
+        // so paying an upgrade for it made the base card fight its own kit.
+        // The upgrade buys damage instead, 4 -> 7, by the default rule.
         var card = new ProtoKoKapow();
         Assert.Equal(0, (int)typeof(CardModel)
             .GetProperty("CanonicalEnergyCost", HeadlessGame.All)!
             .GetValue(card)!);
         Assert.Equal(4m, card.DynamicVars.Damage.BaseValue);
-        Assert.DoesNotContain(CardKeyword.Retain, card.Keywords);
+        Assert.Contains(CardKeyword.Retain, card.Keywords);
 
         var upgraded = new ProtoKoKapow();
         Upgrade(upgraded);
         Assert.Contains(CardKeyword.Retain, upgraded.Keywords);
-        Assert.Equal(4m, upgraded.DynamicVars.Damage.BaseValue);
+        Assert.Equal(7m, upgraded.DynamicVars.Damage.BaseValue);
     }
 
     [Fact]

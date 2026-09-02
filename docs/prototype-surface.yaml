@@ -188,9 +188,8 @@
 
 - {id: proto_ko_kapow, name: "Ka-pow!", character: klee,
    authored_by: [claude],
-   cost: 0, type: attack, rarity: basic,
+   cost: 0, type: attack, rarity: basic, retain: true,
    description: "[gold]Set off[/gold]. Deal 4 damage.",
-   upgrade: {retain: true},
    effects: [{op: set_off, target: enemy, damage: 4}]}
 
 - {id: proto_ko_jumpy_dumpty, name: "Jumpy Dumpty", character: klee,

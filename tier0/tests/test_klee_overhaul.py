@@ -498,13 +498,14 @@ def test_under_the_flag_a_prototype_row_smiths_into_a_different_card(overhaul):
         assert upgrades.has_upgrade("proto_ko_kapow")
         upgraded = loader.get_card("proto_ko_kapow+")
         base = loader.get_card("proto_ko_kapow")
-        # DRAFT 4 (R242): "Ka-pow!+ gains Retain and keeps its numbers." The
-        # row's OWN `upgrade:` block wins over the Prototype default rule --
-        # which would still have said `damage +3` -- so the assertion is that
-        # the keyword moved and the number did not.
-        assert upgraded.retain is True and base.retain is False
-        assert upgraded.effects == base.effects
+        # ROUND 5 PICK 1, taken at its default ([USER] 2026-09-02: "I'm fine
+        # with the default on Ka-Pow!"): Retain moved onto the BASE card, so
+        # holding a Bomb no longer means discarding the only detonator. The
+        # row's `upgrade:` block went with it, which hands the upgrade back to
+        # the Prototype default rule -- a set_off's hit, +3.
+        assert base.retain is True and upgraded.retain is True
         assert base.effects[0]["damage"] == 4
+        assert upgraded.effects[0]["damage"] == 7
         # Jumpy Dumpty's authored block beats the default the same way: the
         # default is +2/+1, the ruling is Bomb 11 and Mine 4.
         jd = loader.get_card("proto_ko_jumpy_dumpty+")
