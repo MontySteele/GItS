@@ -41,7 +41,7 @@ public sealed class ProtoSparkPricedStrike : CustomCardModel, IElementalCard, IS
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
+        ArmKeywordTips.ForSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_spark_priced_strike");
 

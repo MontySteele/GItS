@@ -311,6 +311,39 @@ public static class KleeMod
                     // until now.
                     [Cards.KleeCardTooltips.BurstKey + ".title"] =
                         "Burst Energy",
+#if PROTOTYPE_CARDS
+                    // `EB-272`. QUARANTINED, and inside the switch for the
+                    // reason Rally's prompt is: `Cards/Prototype/**` is
+                    // Compile Remove'd from a release build, so
+                    // `Cards.ArmKeywordTips` does not exist there and these
+                    // eleven keys name nothing. Under the switch they are the
+                    // only source of the titles, exactly as the four rider
+                    // rows above are -- the pck's card_keywords.json carries
+                    // none of them, and a missing row renders as the raw key
+                    // on a card face (0.2-589, 0.2-634).
+                    //
+                    // TITLES ONLY, the bargain every tip in this block makes:
+                    // the bodies are built in ArmKeywordTips because two of
+                    // them interpolate an arm's law constant and one of them
+                    // reads which Klee arm is live.
+                    //
+                    // `ARM_BOMB` is titled "Bomb" and `KLEEMOD-BOMB` is too,
+                    // which is correct rather than a collision: they are the
+                    // same WORD under two different rules, and no single face
+                    // ever raises both (see the attach rule in
+                    // `gen_klee_cards.arm_keyword_tip_calls`).
+                    [Cards.ArmKeywordTips.BombKey + ".title"] = "Bomb",
+                    [Cards.ArmKeywordTips.SetOffKey + ".title"] = "Set off",
+                    [Cards.ArmKeywordTips.SparkKey + ".title"] = "Spark",
+                    [Cards.ArmKeywordTips.MineKey + ".title"] = "Mine",
+                    [Cards.ArmKeywordTips.TideKey + ".title"] = "Tide",
+                    [Cards.ArmKeywordTips.SurgeKey + ".title"] = "Surge",
+                    [Cards.ArmKeywordTips.ExertKey + ".title"] = "Exert",
+                    [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
+                    [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
+                    [Cards.ArmKeywordTips.GarmentKey + ".title"] = "Garment",
+                    [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
+#endif
                 };
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))

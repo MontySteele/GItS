@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -33,6 +34,9 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoSparkPricedDraw : CustomCardModel, ISparkPricedCard
 {
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForSpark(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_spark_priced_draw");
 
     public override List<(string, string)>? Localization => new()
