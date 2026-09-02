@@ -199,12 +199,36 @@ def _is_rate_limited(stderr_text: str) -> bool:
 _SPRITE_TAG = re.compile(r"\[([A-Za-z0-9_]+)\.(?:png|jpg|jpeg|svg|webp)\]",
                          re.I)
 
+# `EB-264`, the second half, and it is the same tag one step further on. The
+# file NAME is namespaced by the art set it was drawn for, so a Klee run's
+# Energy Potion read `Gain [ironclad energy icon][ironclad energy icon]` --
+# a token naming a character who is not in the run, for an icon that is the
+# same pip on every character's screen. The blind tester filed it as an
+# unlocalised placeholder and could not tell what it was granting.
+#
+# So a sprite tag whose file name CONTAINS one of these subjects is rendered
+# as that subject and nothing else: `[Energy]`, twice, which is what the
+# screen draws and lets a reader count them. It is a REGISTER, like
+# `HAZARD_EVENTS` -- one row per inline icon the game actually draws in place
+# of a word, and a tag naming none of them keeps the old rendering (its own
+# words, spaced) rather than being guessed at.
+_ICON_SUBJECTS = {"energy": "Energy"}
+
+
+def _icon_name(stem: str) -> str:
+    words = [w for w in stem.split("_") if w]
+    for w in words:
+        subject = _ICON_SUBJECTS.get(w.lower())
+        if subject:
+            return subject
+    return " ".join(words)
+
 
 def _despritify(blob: Any) -> Any:
     """Rewrite every sprite tag in a finished structure. Values only."""
     if isinstance(blob, str):
         return _SPRITE_TAG.sub(
-            lambda m: "[" + m.group(1).replace("_", " ") + "]", blob)
+            lambda m: "[" + _icon_name(m.group(1)) + "]", blob)
     if isinstance(blob, dict):
         return {k: _despritify(v) for k, v in blob.items()}
     if isinstance(blob, list):
@@ -495,14 +519,45 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         # is a page offering plays the board will refuse. Read from the
         # shipped face in `klee-mod`; `None` where that face gives no number,
         # and an absent number prints nothing.
+        # `EB-267`: KEYED BY ID. A prototype row may print a shipped card's
+        # name at a different price -- `Flame Dance` is 2 shipped and 1 on the
+        # proto surface -- and a title-keyed lookup told a blind reader the
+        # cost on the card in front of them was wrong when nothing was. The id
+        # is read here, on the tool side, and only the number crosses.
         "printed_cost": qa_packet.printed_cost_index().get(
-            _text(entry.get("name"))),
+            qa_packet.card_key(entry.get("id"))),
         "kind": _text(entry.get("type")),
         "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
         "keywords": kws,
         "playable": entry.get("can_play") is not False,
         "unplayable_reason": _text(entry.get("unplayable_reason")),
     }
+
+
+# `EB-262`, AND IT IS THE WHOLE ROW. A SHOP ITEM CARRIES ITS NAME UNDER ITS
+# CATEGORY'S OWN KEY. `BuildShopState` (`McpMod.StateBuilder.cs:1636`) emits
+# one flat row per shelf item -- `category`, `price`, `is_stocked`,
+# `can_afford` -- and then merges the thing's face in under a PREFIXED
+# spelling: `card_name` / `card_description`, `relic_name` /
+# `relic_description`, `potion_name` / `potion_description`. None of those is
+# `name`, so every item on both of the run's shops rendered as `(unnamed)` and
+# `buy` answered *"nothing here is called '(unnamed)'"* at a tester holding
+# 164 gold. The event screen has the same shape for an option that hands over
+# a relic (`optData["relic_name"]`, `:1553`).
+#
+# So the readers below are ORDERED lists rather than one key, and the first
+# that answers wins -- the plain spelling first, so nothing that already
+# worked changes.
+_OPTION_NAME_KEYS = ("name", "title", "label", "display_name",
+                     "card_name", "relic_name", "potion_name")
+_OPTION_TEXT_KEYS = ("description", "body", "text",
+                     "card_description", "relic_description",
+                     "potion_description")
+# Read only when the entry printed no name of its own: the shop's card-removal
+# shelf carries no model and therefore no title, and `Card Removal` is
+# `qa_packet.label`'s rendering of the wire's own word for it, not a label
+# invented here.
+_OPTION_KIND_KEYS = ("type", "kind", "room_type", "category")
 
 
 def _named_option(entry: Any) -> dict[str, Any]:
@@ -517,25 +572,34 @@ def _named_option(entry: Any) -> dict[str, Any]:
     if not isinstance(entry, dict):
         return {"name": _label(entry), "text": "", "enabled": True}
     name = ""
-    for key in ("name", "title", "label", "display_name"):
+    for key in _OPTION_NAME_KEYS:
         if _text(entry.get(key)):
             name = _text(entry.get(key))
             break
     if not name:
-        for key in ("type", "kind", "room_type"):
+        for key in _OPTION_KIND_KEYS:
             if entry.get(key):
                 name = _label(entry.get(key))
                 break
+    text = ""
+    for key in _OPTION_TEXT_KEYS:
+        if _text(entry.get(key)):
+            text = _text(entry.get(key))
+            break
     enabled = True
     for key in ("is_enabled", "enabled"):
         if entry.get(key) is False:
             enabled = False
+    # `is_stocked: false` is a shelf whose item has already been bought. The
+    # game greys it; the page says so rather than offering a purchase the
+    # bridge will refuse.
+    if entry.get("is_stocked") is False:
+        enabled = False
     if entry.get("is_locked"):
         enabled = False
     return {
         "name": name,
-        "text": _text(entry.get("description") or entry.get("body")
-                      or entry.get("text")),
+        "text": text,
         "enabled": enabled,
         "price": _int(entry.get("price", entry.get("cost")), 0)
         if entry.get("price") is not None or entry.get("cost") is not None
@@ -811,12 +875,49 @@ def _event_options(state: dict[str, Any]) -> list[Any]:
     return _listing(state, "event.options", "options")
 
 
+def _proceed_option(state: dict[str, Any]) -> int:
+    """The list position of the event option that IS *Proceed*, or `-1`.
+
+    `EB-259`. Two readings, in this order, and no third: the wire's own
+    `is_proceed` flag, which `BuildEventState` sets off the button's model
+    (`McpMod.StateBuilder.cs:1490`), and failing that an option the screen
+    PRINTS as *Proceed*. Ambiguity is not resolved -- two proceed-ish options
+    answer `-1` and the tester is asked to name one, because picking between
+    two buttons is the decision this tool exists not to make.
+    """
+    options = _event_options(state)
+    flagged = [i for i, o in enumerate(options)
+               if isinstance(o, dict) and o.get("is_proceed")]
+    if len(flagged) != 1:
+        named = [i for i, o in enumerate(options)
+                 if _fold(_named_option(o)["name"]) == "proceed"]
+        flagged = named
+    if len(flagged) != 1:
+        return -1
+    return flagged[0] if _named_option(options[flagged[0]])["enabled"] else -1
+
+
 def _reward_items(state: dict[str, Any]) -> list[Any]:
     return _listing(state, "rewards.items", "rewards")
 
 
 def _relic_options(state: dict[str, Any]) -> list[Any]:
-    return _listing(state, "relics", "options")
+    """The relics a chest or a relic-select screen is offering.
+
+    `EB-263`. THE CHEST'S RELICS ARE UNDER THE SCREEN'S OWN BLOB, and this
+    read had only the top-level spellings. `BuildTreasureState`
+    (`McpMod.StateBuilder.cs:2362`) writes `treasure.relics` and
+    `BuildRelicSelectState` (`:2230`) writes `relic_select.relics`, each row
+    carrying `name`, `description` and its own `index`. Reading `state["relics"]`
+    found neither, so an opened chest rendered as `# An open chest` with
+    nothing under it while still advertising `choose "<relic>"`: the tester
+    could only `proceed` and never learned whether a relic had been taken.
+    The screen blobs go FIRST because they are what the wire actually sends;
+    the two bare spellings stay behind them so a state saved before this is
+    still readable.
+    """
+    return _listing(state, "treasure.relics", "relic_select.relics",
+                    "relics", "options")
 
 
 def observation(state: dict[str, Any]) -> dict[str, Any]:
@@ -877,7 +978,21 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             [_card_face(c) for c in _screen_cards(state)], "title")
         obs["can_confirm"] = bool(blob.get("can_confirm"))
         obs["can_skip"] = bool(blob.get("can_skip") or blob.get("can_cancel"))
-        obs["commands"] = ['choose "<card title>"', "confirm", "skip"]
+        # `EB-259`. THE PAGE MAY NOT OFFER WHAT THE STATE WILL REFUSE. This
+        # screen said *Confirm is not available* in its body and listed
+        # `confirm` under "What you can say" three lines later; the tester
+        # typed it, the screen had already advanced on its own, and the
+        # command came back *"there is nothing waiting to be confirmed"*. The
+        # wire answers the question outright (`can_confirm` /
+        # `can_cancel`, `McpMod.StateBuilder.cs:2065`), so the grammar offered
+        # is the grammar the wire says will work -- and `_confirm` / `_skip`
+        # still refuse on their own, because a screen can move between the
+        # render and the command.
+        obs["commands"] = ['choose "<card title>"']
+        if obs["can_confirm"]:
+            obs["commands"].append("confirm")
+        if obs["can_skip"]:
+            obs["commands"].append("skip")
     elif st == "bundle_select":
         # `EB-173`: A BUNDLE HAS NO NAME, and asking for one printed
         # `- **(unnamed)**` twice, on a screen whose only verb is
@@ -916,7 +1031,17 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
                             or ev.get("description"))
         obs["in_dialogue"] = bool(ev.get("in_dialogue"))
         obs["options"] = [_named_option(o) for o in _event_options(state)]
-        obs["commands"] = ['choose "<option>"', "proceed"]
+        # `EB-259`, the other half. An event room has NO proceed button --
+        # `ExecuteProceed` walks rewards, rest, both merchants and the
+        # treasure room and stops (`McpMod.Actions.cs:600-663`) -- so a bare
+        # `proceed` here posted an action the game answered *"No proceed
+        # button available or enabled"*, and a run lost two actions to it. The
+        # verb is still offered, because an event whose only button reads
+        # *Proceed* is exactly where a player would type it; `_proceed`
+        # resolves it to THAT PRINTED OPTION instead of the proceed action.
+        obs["commands"] = ['choose "<option>"']
+        if obs["in_dialogue"] or _proceed_option(state) >= 0:
+            obs["commands"].append("proceed")
     elif st == "rewards":
         obs["screen"] = "rewards"
         obs["items"] = [_named_option(r) for r in _reward_items(state)]
@@ -981,8 +1106,15 @@ def _render_card(c: dict[str, Any], bullet: str = "-") -> list[str]:
         out.append(f"    *{k['name']}* — {k['text']}" if k["text"]
                    else f"    *{k['name']}*")
     if not c["playable"]:
+        # `EB-264`. The wire's reason is an ENUM NAME
+        # (`McpMod.StateBuilder.cs:1324`), and `CANNOT BE PLAYED:
+        # BlockedByCardLogic` told a blind tester nothing at all. The
+        # translation lives in `qa_packet` so the staged page and this one
+        # cannot say different things about one refusal; a reason the wire
+        # spells as a sentence still comes through in the game's own words.
         out.append("    CANNOT BE PLAYED: "
-                   + (c["unplayable_reason"] or "the game gives no reason"))
+                   + (qa_packet.unplayable_reason(c["unplayable_reason"])
+                      or "the game gives no reason"))
     return out
 
 
@@ -1698,7 +1830,9 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
         return _refuse(why)
     entry = hand[idx]
     if entry.get("can_play") is False:
-        reason = _text(entry.get("unplayable_reason"))
+        # `EB-264`: the same translation the page uses, so a refusal and the
+        # card's own line cannot disagree about why.
+        reason = qa_packet.unplayable_reason(entry.get("unplayable_reason"))
         return _refuse(f"{titles[idx]!r} cannot be played right now"
                        + (f": {reason}" if reason else ""))
     post: dict[str, Any] = {"action": "play_card", "card_index": idx}
@@ -1836,6 +1970,11 @@ def _buy(state: dict[str, Any], cmd: Command) -> Resolution:
                       key=lambda e: e["n"])
     if idx < 0:
         return _refuse(why)
+    if not options[idx]["enabled"]:
+        # `EB-262`: a shelf the wire marks `is_stocked: false` has already been
+        # bought. The page prints it as not available; the grammar agrees.
+        return _refuse(f"{options[idx]['name']!r} is on the shelf but not "
+                       f"available to buy")
     price = options[idx]["price"]
     gold = _int(_player(state).get("gold"))
     if price is not None and price > gold:
@@ -1963,8 +2102,28 @@ def _proceed(state: dict[str, Any]) -> Resolution:
     st = _screen(state)
     if st == "event" and _blob(state, "event").get("in_dialogue"):
         return Resolution(True, "proceed", {"action": "advance_dialogue"}, {})
-    if st in ("rewards", "treasure", "shop", "fake_merchant", "rest_site",
-              "event"):
+    if st == "event":
+        # `EB-259`. AN EVENT ROOM HAS NO PROCEED BUTTON. `ExecuteProceed`
+        # never looks at one (`McpMod.Actions.cs:600-663`), so the bare verb
+        # used to post an action the event refused outright and the tester
+        # lost the action. Where the screen prints a *Proceed* option, that is
+        # what the word means here, and it is posted as the choice it is.
+        entries = _event_options(state)
+        idx = _proceed_option(state)
+        if idx < 0:
+            offered = ", ".join(o["name"]
+                                for o in (_named_option(x) for x in entries)
+                                if o["name"])
+            return _refuse("this event has no Proceed to take; choose one of "
+                           f"its options: {offered or '(nothing printed)'}")
+        option = _named_option(entries[idx])
+        posted = entries[idx].get("index") if isinstance(entries[idx],
+                                                         dict) else None
+        return Resolution(True, "proceed",
+                          {"action": "choose_event_option",
+                           "index": posted if isinstance(posted, int) else idx},
+                          {"option": option["name"]})
+    if st in ("rewards", "treasure", "shop", "fake_merchant", "rest_site"):
         return Resolution(True, "proceed", {"action": "proceed"}, {})
     return _refuse("there is nothing to leave from this screen")
 
