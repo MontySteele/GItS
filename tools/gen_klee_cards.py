@@ -521,6 +521,72 @@ def golded_tokens(description: str) -> list[str]:
             for span in GOLD_SPAN.findall(description)]
 
 
+# --- the ELEMENT INDICATOR's one declaration --------------------------------
+#
+# [USER], 2026-09-01, after playing Klee: "instead of saying 'applies pyro' -
+# maybe make it a card indicator as well to remove text overhead? That would be
+# a universal shift."
+#
+# THE SENTENCE WAS NEVER EMITTED TEXT, which is the fact that decided the shape
+# of the change. No sheet row and no generated `Localization` has ever contained
+# the words "Applies Pyro": they came from `KleeKeywords.AppliesPyro`'s
+# `AutoKeywordPosition.After`, which BaseLib feeds into the base game's
+# `CardKeywordOrder.afterDescription` and `CardModel.BuildDescription` appends
+# to the rules box. Those four fields now carry `AutoKeywordPosition.None`, so
+# the same keyword prints nothing, still HOVERS (`CardModel.HoverTips` walks
+# `Keywords` and never the printed text), and is what `Vfx/ElementBadge.cs`
+# reads to paint the aura's own icon beside the type plaque.
+#
+# So this table is now BOTH the tip and the indicator, and a row cannot wear a
+# gem it does not explain. The prototype rows came along under the same one
+# switch as the three shipped sheets: there is one keyword per element and every
+# profile declares the same four.
+#
+# ANEMO AND GEO ARE ABSENT ON PURPOSE, here as before: they leave no aura (LAW,
+# combat: "Anemo/Geo leave no aura -- they only trigger"), so they have no
+# keyword, no tip and now no gem.
+AURA_KEYWORD_BY_ELEMENT = {
+    "pyro": "KleeKeywords.AppliesPyro",
+    "hydro": "KleeKeywords.AppliesHydro",
+    "electro": "KleeKeywords.AppliesElectro",
+    "cryo": "KleeKeywords.AppliesCryo",
+}
+
+
+def aura_elements_for(card: dict, profile: "CharacterProfile",
+                      elemental: bool) -> list[str]:
+    """The aura-leaving elements this card's face DECLARES, in face order.
+
+    LIFTED OUT OF `emit` SO A TEST CAN ASK IT (`tier0/tests/
+    test_element_badge.py`). The join it has to prove -- every row that applies
+    an element carries the keyword that draws the gem and raises the tip -- is
+    only worth proving against ONE rule; a test carrying its own copy of these
+    six lines would pass a generator that had stopped obeying them.
+
+    `elemental` is the caller's answer to "does this card's DAMAGE carry an
+    element", which differs by profile: a character card takes its cadence
+    (`CharacterProfile.damage_applies_element`), a companion takes the per-
+    effect `applies_element` flag its card-level `IElementalCard` carries.
+
+    ORDER IS LOAD-BEARING and it is the card's OWN element first, then anything
+    its printed `apply_aura` adds. `ElementBadge.ElementOf` draws the first, so
+    a companion that hits with its own element and applies a second aura wears
+    the element its damage carries.
+    """
+    elements: list[str] = []
+    if elemental:
+        source_element = (
+            card["element"] if is_companion(card) else profile.native_element
+        )
+        if source_element in AURA_KEYWORD_BY_ELEMENT:
+            elements.append(source_element)
+    for effect in card.get("effects", []):
+        if (effect.get("op") == "apply_aura"
+                and effect.get("element") in AURA_KEYWORD_BY_ELEMENT):
+            elements.append(effect["element"])
+    return list(dict.fromkeys(elements))
+
+
 def arm_keywords_printed(description: str) -> list[ArmKeyword]:
     """The arm keywords this face prints as keywords, in table order."""
     printed = set(golded_tokens(description))
@@ -8759,23 +8825,7 @@ def emit(
                 if elemental_effect["op"] == "apply_aura"
                 else "Element.Anemo")
 
-    aura_keyword_by_element = {
-        "pyro": "KleeKeywords.AppliesPyro",
-        "hydro": "KleeKeywords.AppliesHydro",
-        "electro": "KleeKeywords.AppliesElectro",
-        "cryo": "KleeKeywords.AppliesCryo",
-    }
-    aura_elements = []
-    if elemental:
-        source_element = (
-            card["element"] if is_companion(card) else profile.native_element
-        )
-        if source_element in aura_keyword_by_element:
-            aura_elements.append(source_element)
-    for e in card.get("effects", []):
-        if e.get("op") == "apply_aura" and e.get("element") in aura_keyword_by_element:
-            aura_elements.append(e["element"])
-    aura_elements = list(dict.fromkeys(aura_elements))
+    aura_elements = aura_elements_for(card, profile, elemental)
     # L4: the Bomb rules text is a question about the WHOLE effect tree, not
     # about the top level. `sparkly_explosion` places its two Bombs inside the
     # kill-conditional's `then:`, so the flat scan this replaced shipped the
@@ -9256,7 +9306,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         keywords.append("CardKeyword.Sly")
     if "skill_tag" in card.get("tags", []):
         keywords.append("KleeKeywords.ElementalSkill")
-    keywords.extend(aura_keyword_by_element[e] for e in aura_elements)
+    keywords.extend(AURA_KEYWORD_BY_ELEMENT[e] for e in aura_elements)
     keywords_member = ""
     if keywords:
         keywords_member = (

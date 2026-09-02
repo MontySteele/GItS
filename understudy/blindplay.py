@@ -526,6 +526,45 @@ def _hazard(state: dict[str, Any]) -> tuple[str, str] | None:
 
 # ------------------------------------------------------- printed fragments --
 
+# THE ELEMENT, AS A TAG ([USER], 2026-09-01, after playing Klee: "instead of
+# saying 'applies pyro' - maybe make it a card indicator as well to remove text
+# overhead? That would be a universal shift").
+#
+# The game now says it with a picture: `KleeKeywords.Applies*` moved to
+# `AutoKeywordPosition.None`, so `Applies Pyro` left the rules box and
+# `Vfx/ElementBadge.cs` paints the aura's own icon beside the type plaque
+# instead. A picture does not cross this wire. The seat reading this page would
+# have lost the element from the card LINE and kept it only in the keyword
+# block below -- so the tag puts it back where the indicator is, at a glance,
+# beside the title.
+#
+# READ OFF THE KEYWORD, which is the same declaration the badge reads. The wire
+# sends a card's keywords resolved (`CardModel.HoverTips` walks `Keywords`, and
+# that walk is untouched by the position flip), so `Applies Pyro` is still on
+# every elemental face as a keyword row and this is the surface that survives.
+# No bridge change, and it reads correctly against a build from either side of
+# the flip.
+#
+# ANCHORED AND ONE WORD WIDE: `Applies Electro-Charged`, a Kokomi companion's
+# printed reaction, is not an element and must not become one.
+_ELEMENT_KEYWORD = re.compile(r"^Applies (Pyro|Hydro|Electro|Cryo)$")
+
+
+def _element(keywords: list[dict[str, str]]) -> str:
+    """The element this face applies (`Pyro`), or `""`.
+
+    First match wins, in the order the game listed them -- the badge's own rule
+    (`ElementBadge.ElementOf` takes the card's own element, which is the first
+    keyword codegen emits) for the handful of companion rows that apply a
+    second aura on top of their own.
+    """
+    for k in keywords:
+        m = _ELEMENT_KEYWORD.match(k["name"])
+        if m:
+            return m.group(1)
+    return ""
+
+
 def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
     """One card as the game prints it. Field by field, never spread.
 
@@ -576,6 +615,10 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         "kind": _text(entry.get("type")),
         "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
         "keywords": kws,
+        # The card's element indicator, as a word. `""` on every face that
+        # applies none, which is every base-game card and every skill of ours
+        # that only blocks or draws.
+        "element": _element(kws),
         "playable": entry.get("can_play") is not False,
         "unplayable_reason": _text(entry.get("unplayable_reason_text")
                                    or entry.get("unplayable_reason")),
@@ -1296,6 +1339,14 @@ def _render_card(c: dict[str, Any], bullet: str = "-") -> list[str]:
     head = f"{bullet} **{c['title']}**"
     if c["upgraded"]:
         head += " (upgraded)"
+    # The element INDICATOR's twin on this page: the card now carries a gem
+    # rather than a sentence, and a gem does not cross a text wire. Beside the
+    # title, in brackets, because that is where the card carries it -- next to
+    # the type plaque, at a glance, before the rules. The keyword's own row
+    # further down still carries the aura duration and the reaction rule; this
+    # line is the glance, not the explanation.
+    if c.get("element"):
+        head += f" [{c['element']}]"
     # `EB-286`: the COST SLOT as the game paints it, energy and Spark
     # together, through the one formatter the staged page already uses.
     # `qa_packet.cost_label` answers `-` when the wire sent no cost at all,
@@ -3379,7 +3430,18 @@ def record_markdown(summary: dict[str, Any], identity: dict[str, Any]) -> str:
            "balance evidence, not approval. It never enters an Understudy "
            "report, a win-rate table or a measurement register.**", "",
            "## Identity", ""]
-    for key in ("model_requested", "model_observed", "codex_version",
+    for key in ("model_requested", "model_observed",
+                # The LOCAL backend's four, and they are absent from a codex
+                # run's identity entirely, so a codex record is byte-identical
+                # to what this function has always written. `seat_family` is
+                # the VENDOR family R217 C is read off, which the authorship
+                # family (`local`) names a chair rather than answering;
+                # `blindness` says out loud that this backend's claim is
+                # structural where the codex seat's is transcript-proved.
+                "backend", "seat_family", "endpoint",
+                "server_version", "server_version_source",
+                "schema_enforced", "blindness", "seat_status",
+                "codex_version",
                 "build_version", "build_version_source",
                 "game_version", "game_version_source", "run_seed",
                 "arms_granted", "arms_granted_source",
@@ -3511,19 +3573,47 @@ def cmd_act(args) -> int:
     return 0
 
 
+def build_thread(log_dir: Path, backend: str, model: str) -> Any:
+    """The tester for one run: the Codex seat, or the local backend.
+
+    ONE function so the two cannot drift on the things they share. Both are
+    handed the same `log_dir`, both answer `identity()` / `send()` /
+    `close()`, and `Session` -- which owns the prompt, the schema, the loop,
+    the records and the budgets -- never learns which it got. The CODEX PATH
+    IS UNCHANGED and is what an unflagged `session` still runs.
+
+    `local_play` is imported HERE rather than at module scope so this module's
+    import list stays what `test_blindplay_cannot_reach_a_sheet_or_a_policy`
+    reads it as, and so an operator with no local endpoint configured never
+    pays for the import.
+    """
+    if backend == "local":
+        from understudy import local_play
+        return local_play.thread(log_dir, model=model)
+    # R217 C, asked before a process is started. The LOCAL path asks the same
+    # question inside `LocalThread.__init__`, where the served model's own
+    # name is finally known.
+    resolved = model or seat.DEFAULT_MODEL
+    check_independent(resolved)
+    return CodexThread(log_dir, model=resolved)
+
+
 def cmd_session(args) -> int:
     session_id = args.session_id or time.strftime("%Y%m%d-%H%M%S",
                                                   time.gmtime())
     log_dir = LOG_ROOT / session_id
+    from understudy import local_play
     try:
-        check_independent(args.model)
+        thread = build_thread(log_dir, args.backend, args.model)
     except BlindPlayError as exc:
         print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
+    except local_play.LocalPlayError as exc:
+        print(f"local backend: {exc}", file=sys.stderr)
         return 2
     version, source = build_version()
     game, game_source = game_version()
     seed = bridge.current_seed() or ""
-    thread = CodexThread(log_dir, model=args.model)
     budget = Budget(max_actions=args.max_actions,
                     max_wall_s=args.max_wall_s,
                     max_refusals=args.max_refusals,
@@ -3532,6 +3622,13 @@ def cmd_session(args) -> int:
         session = Session(thread, wire=bridge, session_id=session_id,
                           budget=budget,
                           forecast=list(args.forecast or []))
+        # The local backend keeps its per-screen reply row -- the scratchpad
+        # it stripped, the token counts, the wall clock -- in the SESSION's
+        # transcript rather than a second log, so a reader follows one file.
+        # Attached rather than passed, because `Session` builds the transcript
+        # and the thread is older than the session it is handed to.
+        if hasattr(thread, "transcript"):
+            thread.transcript = session.transcript
         summary = session.run()
     finally:
         thread.close()
@@ -3655,8 +3752,19 @@ def main(argv: list[str] | None = None) -> int:
                    help="resolve against the live state and post nothing")
     a.set_defaults(func=cmd_act)
 
-    s = sub.add_parser("session", help="one blind Codex thread plays the run")
-    s.add_argument("--model", default=seat.DEFAULT_MODEL)
+    s = sub.add_parser("session", help="one blind thread plays the run")
+    s.add_argument("--backend", choices=("codex", "local"), default="codex",
+                   help="who plays. `codex` is the seat and the default and "
+                        "is unchanged. `local` plays the same pages through "
+                        "the OpenAI-compatible endpoint at "
+                        "$GITS_LOCAL_MODEL_URL -- AN OPTION, not a seat: "
+                        "the 2026-08-29 ADVANCE covered the staged "
+                        "single-turn tester only and whole-run blind play by "
+                        "a local model is a pick for [USER]")
+    s.add_argument("--model", default="",
+                   help=f"the codex model (default {seat.DEFAULT_MODEL}), or "
+                        f"with --backend local the served model to ask for "
+                        f"(default: whatever /v1/models reports)")
     s.add_argument("--session-id", default="")
     s.add_argument("--max-actions", type=int, default=60)
     s.add_argument("--max-wall-s", type=float, default=3600.0)
