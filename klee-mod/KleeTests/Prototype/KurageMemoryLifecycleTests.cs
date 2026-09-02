@@ -42,8 +42,26 @@ namespace KleeMod.Tests;
 /// mean neither a re-enumeration nor a reused CombatState instance can lose or
 /// keep a memory it should not.
 /// </summary>
-public class KurageMemoryLifecycleTests
+public class KurageMemoryLifecycleTests : System.IDisposable
 {
+    /// <summary>
+    /// THE KOKOMI OVERHAUL IS OFF FOR EVERY PIN IN THIS FILE, and it is stated
+    /// rather than assumed. That arm and this one are ALTERNATIVES (its brief's
+    /// sec.4 retires the Charge bank this mechanic is priced inside), so
+    /// `KurageMemory.IsLive` reads its flag -- and a build that happened to be
+    /// made with `-p:KokomiOverhaul=true` would otherwise turn every assertion
+    /// here into a check that the memory is switched off, which is the OTHER
+    /// arm's pin and not this one's. Writing it here is the contract
+    /// `KokomiOverhaul.Enabled` was made settable for: one build, both sides.
+    /// </summary>
+    private readonly bool _overhaulWas = KokomiOverhaul.Enabled;
+
+    public KurageMemoryLifecycleTests() => KokomiOverhaul.Enabled = false;
+
+    /// <summary>Put it back, so a build made with the other arm's
+    /// property still lets that arm's own pins read their default.</summary>
+    public void Dispose() => KokomiOverhaul.Enabled = _overhaulWas;
+
     private static CombatState Fight() =>
         (CombatState)RuntimeHelpers.GetUninitializedObject(typeof(CombatState));
 

@@ -60,6 +60,37 @@ internal static class KleePowerIcons
         BombReactionSparkPower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         GroundedPower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        // QUARANTINED (the Kokomi overhaul, slice one). Every one of these
+        // borrows the icon of the SHIPPED Kokomi power whose job it takes over,
+        // on the block above's argument verbatim: art is commissioned when a
+        // slice is ACCEPTED, and a prototype that shipped new art would be
+        // paying for a card that may be deleted next week. The jellyfish itself
+        // borrows the shipped Bake-Kurage badge, which is also the "Tide on the
+        // jellyfish" the slice's sec.5 asks for -- the same badge, a different
+        // number on it. Named individually rather than grouped, for the reason
+        // the Kokomi block further down records: one shared icon across
+        // unrelated effects reads as intentional.
+        ProtoBakeKuragePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        ProtoGarmentPower => KleePck.Path(
+            "kokomi/powers/ceremonial_garment.png"),
+        SongOfPearlsPower => KleePck.Path("kokomi/powers/kurages_oath.png"),
+        CloudsLikeWavesPower => KleePck.Path(
+            "kokomi/powers/vigil_of_the_deep.png"),
+        SangoIsshinPower => KleePck.Path(
+            "kokomi/powers/before_sun_and_moon.png"),
+        // The five with no shipped Kokomi power to borrow from -- the Plan
+        // badge, its draw rider, its Rare and the two Commander powers -- take
+        // the nearest shipped SHAPE instead: a Klee companion power for the
+        // two that read Companions, and her own Ancient's drip for the badge
+        // that counts something waiting to arrive.
+        PendingPlansPower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
+        TreatisePower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        TheArtOfWarPower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
+        OrdersPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        GeneralsBannerPower => KleePck.Path("klee/powers/study_buddy.png"),
+        NextCompanionFreePower => KleePck.Path("klee/powers/friendly_visit.png"),
         // QUARANTINED (the Mondstadt companion overhaul). Every one of these
         // borrows the icon of the SHIPPED companion power whose job it takes
         // over, on the block above's argument verbatim: art is commissioned

@@ -49,8 +49,26 @@ namespace KleeMod.Tests;
 ///   * THE STRIP. It draws into a Godot Label out of the pck, and no test may
 ///     touch a Godot object at all.
 /// </summary>
-public class KurageMemoryPinTests
+public class KurageMemoryPinTests : System.IDisposable
 {
+    /// <summary>
+    /// THE KOKOMI OVERHAUL IS OFF FOR EVERY PIN IN THIS FILE, and it is stated
+    /// rather than assumed. That arm and this one are ALTERNATIVES (its brief's
+    /// sec.4 retires the Charge bank this mechanic is priced inside), so
+    /// `KurageMemory.IsLive` reads its flag -- and a build that happened to be
+    /// made with `-p:KokomiOverhaul=true` would otherwise turn every assertion
+    /// here into a check that the memory is switched off, which is the OTHER
+    /// arm's pin and not this one's. Writing it here is the contract
+    /// `KokomiOverhaul.Enabled` was made settable for: one build, both sides.
+    /// </summary>
+    private readonly bool _overhaulWas = KokomiOverhaul.Enabled;
+
+    public KurageMemoryPinTests() => KokomiOverhaul.Enabled = false;
+
+    /// <summary>Put it back, so a build made with the other arm's
+    /// property still lets that arm's own pins read their default.</summary>
+    public void Dispose() => KokomiOverhaul.Enabled = _overhaulWas;
+
     /// <summary>A 2-cost Skill, standing in for any remembered face. Built
     /// here rather than borrowed from a sheet so a repricing of a shipped card
     /// cannot silently move what this file asserts.</summary>
@@ -417,7 +435,18 @@ public class KurageMemoryPinTests
         // about what she opens with. If a second site ever swaps a starter
         // card, this pin does not catch it -- but the authored deck reaching
         // the seam at all is what makes there be only one.
-        var calls = Il.Calls(Il.Method("Kokomi", "get_StartingDeck"));
+        //
+        // READ OFF `Kokomi.Template` SINCE THE KOKOMI OVERHAUL. That arm added
+        // a THIRD Kokomi starter shape, and the two prototype arms are
+        // alternatives rather than layers, so the getter became one `if` on the
+        // overhaul flag over the authored list -- which now lives in
+        // `Template`. This memory arm's seam did not move; the list it edits
+        // simply has a name now, and the getter reaching it is pinned beside
+        // this line.
+        var getter = Il.Calls(Il.Method("Kokomi", "get_StartingDeck"));
+        Assert.Contains("Kokomi.get_Template", getter);
+
+        var calls = Il.Calls(Il.Method("Kokomi", "get_Template"));
 
         Assert.Contains("KurageMemory.StarterSlotEleven", calls);
     }

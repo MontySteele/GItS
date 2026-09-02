@@ -87,7 +87,21 @@ param(
     # together: that arm replaces Klee's starter and pool, this one replaces
     # Mondstadt's companion pool, and the two sets do not intersect. A dev
     # build that carries both is the supported dev build.
-    [switch]$CompanionOverhaul
+    [switch]$CompanionOverhaul,
+    # THE KOKOMI OVERHAUL ARM (the ruled brief kokomi-brief-2026-09-01.md
+    # sec.4, slice one kokomi-overhaul-slice-1-2026-09-01.md). Adds
+    # -p:KokomiOverhaul=true to the build below, which is the ONLY thing that
+    # turns the arm on: without it a dev build compiles the arm's types and
+    # never reaches them, and Kokomi's starter, starting relic and pool are the
+    # shipped ones exactly as before. Sim twin: C.KOKOMI_OVERHAUL, which ships
+    # False.
+    #
+    # INDEPENDENT OF THE OTHER TWO, and all three are meant to be passed
+    # together: the Klee arm replaces Klee's starter and pool, the companion
+    # arm replaces Mondstadt's companion pool, this one replaces Kokomi's
+    # starter, relic and pool, and the three sets do not intersect. A dev build
+    # that carries all three is the supported dev build.
+    [switch]$KokomiOverhaul
 )
 
 $ErrorActionPreference = 'Stop'
@@ -162,11 +176,13 @@ $genOut | ForEach-Object { Write-Host "  $_" }
 $arms = @()
 if ($KleeOverhaul) { $arms += 'the Klee overhaul arm' }
 if ($CompanionOverhaul) { $arms += 'the Mondstadt companion overhaul arm' }
+if ($KokomiOverhaul) { $arms += 'the Kokomi overhaul arm' }
 $armLabel = if ($arms.Count) { ' AND ' + ($arms -join ' AND ') } else { '' }
 Write-Host "Building ($Configuration) WITH the prototype surface$armLabel..." -ForegroundColor Magenta
 $buildArgs = @('-p:PrototypeCards=true')
 if ($KleeOverhaul) { $buildArgs += '-p:KleeOverhaul=true' }
 if ($CompanionOverhaul) { $buildArgs += '-p:CompanionOverhaul=true' }
+if ($KokomiOverhaul) { $buildArgs += '-p:KokomiOverhaul=true' }
 & dotnet build $csproj -c $Configuration -v minimal --nologo @buildArgs
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
 
@@ -212,6 +228,17 @@ if ($CompanionOverhaul) {
     Write-Host "  be offered. Inazuma and Fontaine are untouched." -ForegroundColor Magenta
 }
 Write-Host ""
+
+if ($KokomiOverhaul) {
+    Write-Host ""
+    Write-Host "*** KOKOMI OVERHAUL ARM ON ***" -ForegroundColor Magenta
+    Write-Host "  Kokomi's starter, her starting relic and her WHOLE reward" -ForegroundColor Magenta
+    Write-Host "  pool are slice one's rows. Her shipped 76 cards cannot be" -ForegroundColor Magenta
+    Write-Host "  offered while this build is in, and the Pearl of Wisdom is" -ForegroundColor Magenta
+    Write-Host "  replaced by Tamanooya's Casket." -ForegroundColor Magenta
+    Write-Host "  The Bake-Kurage is always out and holds Tide; nothing" -ForegroundColor Magenta
+    Write-Host "  Exhausts for Charge and the Burst gate does not fill." -ForegroundColor Magenta
+}
 
 if ($version.IsDirty) {
     Write-Host "*** DIRTY WORKING TREE ***" -ForegroundColor Red
