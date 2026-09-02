@@ -701,6 +701,68 @@ playtest. M43/M44 minted by R206 (4ff9f90) and settled by
 R207 with no surviving HEAD citation — the exact blind spot
 this constant covers. A HEAD scan reads 40; the ceiling is
 the ISSUED high-water, so history outranks the scan here.
+EB-189/196/197/288/295/310/311/312/314/315 RETIRED 2026-09-02 by the
+register-hygiene pass -- ten rows closed on the day's landings and
+deleted from HEAD, one commit, no other row touched:
+189 -- the QA pilot's `review/qa/` regrowth. The compaction itself landed
+2026-09-02 (57 dirs / 476 files / 51,726 lines out of HEAD, retrievable
+at `git show e85d1309:<path>`) and the row's remaining next action was
+the one-line gitignore, which is in this commit: `review/qa/*/observed.json`
+and `review/qa/*/closeness.json` are ignored, so a fresh round adds a
+`ledger.tsv` row and not a directory. The ~40 committed fixtures stay
+tracked -- a gitignore does not untrack -- and a deliberate new fixture is
+`git add -f`.
+196 -- the C# memory could never hold an entry, because the per-fight
+clear sat in `KokomiResourceHooks.Subscribe`, which the combat re-invokes
+on every hook broadcast. CLOSED on its acceptance word for word: the
+clear now lives in `KokomiResourceHooks.BeforeCombatStart` (Subscribe
+stashes only, plus the identity guard), the locks in
+`KleeTests/Prototype/KurageMemoryLifecycleTests.cs` were seen to FAIL
+pre-fix (`Assert.DoesNotContain ... Found: "KurageMemory.ResetForCombat"`),
+and the live half is the Gate B re-run on `0.2.1456+proto`, captured in
+`review/qa/eb196-gateb/`: an ENTRY (`gateB-state3-two-entries.md`), a
+FIRING front (`Charge 4 / 3 -- Coral Guard fires next turn`) and a
+BLOCKED front (`BLOCKED: nothing behind it fires`).
+197 -- the Bake-Kurage buff printed "Lasts 1 more turn" under a flag that
+never ticks it down. CLOSED on the same acceptance: `KurageBuffFaceTests`
+failed pre-fix on `Found: "Lasts"` / `Not found: "whole fight"`, the
+release face is byte-identical, and the buff was read live off that same
+`+proto` build -- `review/qa/eb196-gateb/gateB-state0-turn1-empty.md`
+prints `It stays on the field for the whole fight` and no countdown.
+288 -- NOT A DEFECT: the upgraded Ka-pow! printing 7 under Weak where the
+base printed 5 is `WeakPower` multiplying a `ValueProp.Move` by 0.75 with
+the slot printing `(int)` of the preview, so both faces read the debuff
+and the collision is the base card's own number. A false positive goes
+nowhere permanent (CLAUDE.md audit triage), so the row leaves HEAD and the
+number stays un-re-mintable.
+295 -- NOT A DEFECT: `HP 64/80` on the first combat screen is
+`AncientEventModel.BeforeEventStarted` healing `MaxHp - CurrentHp` times
+`0.8m` under `AscensionLevel.WearyTraveler`, and the profile's
+`current_run.save` reads ascension 3. Same triage, same retirement.
+310 -- an `embark --lane 1` counted the shared bridge as its own install
+and `--teardown` then removed `mods\STS2_MCP` out from under the owner's
+own Steam launch. Fixed in the commit that minted it; the live re-check
+the row was held open for was MET 2026-09-02 -- two lane teardowns, the
+bridge on disk after both.
+311 -- `tier05/draft._static_power` priced a row's `effects:` and never
+its `plan:`, so 16 of 28 Kokomi proto rows scored 0.00 at offer. BUILT in
+PR #299, and the shipped scores came out byte-identical, which is the
+no-drift half of the same acceptance.
+312 -- the Klee overhaul arm had no sim: eight Bomb ops raised
+`_op_klee_overhaul_unbuilt`, so the balance read priced every Klee row by
+hand. BUILT in PR #300 -- the tier-0 Bomb twin runs and
+`tools/prototype_card_read.py --arm klee` is the acceptance it meets.
+314 -- the blind render's Neow transform screen re-rolled its result on
+every re-selection and named the wrong source. BUILT and LIVE-ACCEPTED in
+PR #297.
+315 -- the Prototype-stage upgrade rule read `effects:` and never `plan:`,
+so seven Plan-only rows had no campfire choice and nine two-line rows
+upgraded only the now-line. BUILT in PR #295 (`upgrades.PLAN_DELTA_OPS`
+in both engines, a `PlanClauses` DynamicVar per moved clause, every arm
+row needing a path or a `no_upgrade:` reason). Its EYES-ON -- a smithed
+Plan row at a rest site -- is owed on the next dev build and was CARRIED
+INTO `EB-283`, which is the same upgrade machinery one layer down and was
+already owed an eyes-on at the next deploy.
 ```
 
 ## Retirement notes (from the `OPEN_IDS` block)
