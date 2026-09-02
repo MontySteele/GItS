@@ -580,6 +580,10 @@ _LEFTMOST_MEMBER = re.compile(r"^leftmost_salon_member_([a-z]+)$")
 # about across the two engines: `hp * 100 < max * N`.
 _HP_PCT_BELOW = re.compile(r"^hp_pct_below_(\d+)$")
 _HP_PCT_ABOVE = re.compile(r"^hp_pct_above_(\d+)$")
+# The same arm's second wave. Razor's Claw and Thunder: "If this is the third
+# Attack you played this turn." Parametric for the reason its neighbours are --
+# the ordinal is the card's number, never the engine's.
+_NTH_ATTACK = re.compile(r"^nth_attack_this_turn_(\d+)$")
 # tier0's `self_has_power_<id>` prefix, given its C# read. The class comes out
 # of APPLY_POWERS, which is already the one power-id -> PowerModel map the
 # emitter uses, so a predicate cannot invent a second spelling of a power; an
@@ -616,6 +620,16 @@ def predicate_cs(name: str) -> str | None:
     if hit:
         return (f"Owner.Creature.CurrentHp * 100m > "
                 f"Owner.Creature.MaxHp * {hit.group(1)}m")
+    hit = _NTH_ATTACK.match(name)
+    if hit:
+        # THE `+ 1` IS THE CARD ASKING THE QUESTION, and it is the SAME
+        # expression the sim writes (`state.attacks_played_this_turn + 1 == n`)
+        # for the same reason: both engines count an Attack AFTER it resolves,
+        # so while the branch is being evaluated the counter holds the Attacks
+        # played BEFORE this one -- and the card asking whether it is the third
+        # is itself the third.
+        return (f"CompanionOverhaulLedger.For(Owner.Creature)"
+                f".AttacksPlayedThisTurn + 1 == {hit.group(1)}")
     hit = _SELF_HAS_POWER.match(name)
     if hit:
         entry = APPLY_POWERS.get(hit.group(1))
@@ -675,6 +689,10 @@ def predicate_text(name: str) -> str | None:
     hit = _HP_PCT_ABOVE.match(name)
     if hit:
         return f"If you are above {hit.group(1)}% HP"
+    hit = _NTH_ATTACK.match(name)
+    if hit:
+        return (f"If this is the {_ORDINALS.get(hit.group(1), hit.group(1))} "
+                "[gold]Attack[/gold] you played this turn")
     hit = _SELF_HAS_POWER.match(name)
     if hit:
         # HAND-WRITTEN, one entry at a time, exactly like
@@ -684,6 +702,16 @@ def predicate_text(name: str) -> str | None:
         # sentence the generator made up out of an identifier.
         return SELF_HAS_POWER_TEXT.get(hit.group(1))
     return PREDICATE_TEXT.get(name)
+
+
+#: English for the ordinals `nth_attack_this_turn_<N>` can carry. A CLOSED map,
+#: not a suffix rule: "3" -> "3rd" is easy and "11" -> "11th" is where a rule
+#: written from three examples goes wrong, and a face that says "the 3 Attack"
+#: is worse than a row that blocks by name. An ordinal with no entry returns
+#: the bare numeral, which `blocked_reason` then never sees -- so add the word
+#: here when a row wants one.
+_ORDINALS = {"1": "first", "2": "second", "3": "third", "4": "fourth",
+             "5": "fifth"}
 
 
 #: The if-clause `self_has_power_<id>` renders, per power. See `predicate_text`.
@@ -1158,6 +1186,47 @@ APPLY_POWERS = {
         "At the end of your turn, deal 5 damage, apply [gold]Electro[/gold] "
         "and apply 1 [gold]Vulnerable[/gold] to a random enemy. Lasts {X} more "
         "turn(s)."),
+    # THE SAME ARM'S SECOND WAVE (QUARANTINED). Thirteen more rows, and these
+    # are the powers whose HOOKS had to be built:
+    # klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulHooks.cs, compiled
+    # under the same switch as the eleven above. Two of them land on the CHOSEN
+    # ENEMY rather than on the player (see ENEMY_APPLY_POWERS) -- that is what
+    # "apply Hydro to target enemy each turn" and "place a Lightfall Sword on
+    # target" mean when a power holds no target: the target holds the power.
+    # Sim twins: tier0.engine.effects' `companion_overhaul_*` block.
+    "mc_icy_paws": ("IcyPawsPower", None,
+        "When this [gold]Block[/gold] absorbs damage, apply [gold]Cryo[/gold] "
+        "to the attacker. {X} [gold]Block[/gold] still bites."),
+    "mc_melody_loop": ("MelodyLoopPower", None,
+        "At the start of its owner's turn, apply [gold]Hydro[/gold] to this "
+        "enemy. Lasts {X} more turn(s)."),
+    "mc_passion_overload": ("PassionOverloadPower", None,
+        "Your next [gold]Attack[/gold] this turn deals {X} more damage and "
+        "applies [gold]Pyro[/gold]."),
+    "mc_sacramental_shower": ("SacramentalShowerPower", None,
+        "The next time an enemy attacks you, deal 9 damage and apply "
+        "[gold]Hydro[/gold] to it first."),
+    "mc_favonian_favor": ("FavonianFavorPower", None,
+        "Whenever a reaction happens this turn, gain {X} [gold]Block[/gold]."),
+    "mc_binary_white": ("BinaryFormWhitePower", None,
+        "Enemies take 50% more damage from reactions."),
+    "mc_binary_dark": ("BinaryFormDarkPower", None,
+        "Your [gold]Pyro[/gold] [gold]Attacks[/gold] that react deal {X} more "
+        "damage."),
+    "mc_lightning_fang": ("LightningFangPower", None,
+        "Your [gold]Attacks[/gold] apply [gold]Electro[/gold] and deal 3 more "
+        "damage. Lasts {X} more turn(s)."),
+    "mc_sturm_und_drang": ("SturmUndDrangPower", None,
+        "Whenever a [gold]Swirl[/gold] happens, your next [gold]Attack[/gold] "
+        "deals {X} more damage of the swirled element."),
+    "mc_baron_bunny": ("BaronBunnyPower", None,
+        "The next time an enemy attacks you, take 3 less damage and deal 8 "
+        "damage and [gold]Pyro[/gold] to ALL enemies."),
+    "mc_lightfall_sword": ("LightfallSwordPower", None,
+        "Counts its owner's [gold]Attacks[/gold]. When it falls, deals 8 "
+        "damage plus 5 per [gold]Attack[/gold] counted. Falls in {X} turn(s)."),
+    "mc_starfrost_discount": ("StarfrostDiscountPower", None,
+        "Your next [gold]Attack[/gold] costs {X} less."),
     # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
@@ -1254,9 +1323,19 @@ APPLY_POWERS = {
         "[gold]Block[/gold]."),
 }
 
-# Powers applied to ENEMIES (native debuffs). Everything else in APPLY_POWERS
-# is a self power; blocked_reason enforces the split both ways.
-ENEMY_APPLY_POWERS = {"weak", "vulnerable"}
+# Powers applied to ENEMIES (native debuffs, plus the two quarantined
+# companion powers that are HOSTED on their target). Everything else in
+# APPLY_POWERS is a self power; blocked_reason enforces the split both ways.
+#
+# THE TWO `mc_` ENTRIES ARE NOT DEBUFFS, and that is the point rather than an
+# exception. Barbara's Melody Loop ("at the start of your turn apply Hydro to
+# TARGET enemy") and Eula's Glacial Illumination ("place a Lightfall Sword ON
+# TARGET") both name a chosen body, and a PowerModel holds no target -- so the
+# body holds the power. Landing them on the enemy is what makes the card's own
+# words expressible, and it is also what makes the card declare
+# `TargetType.AnyEnemy`, which is the same seam every aimed op already uses.
+ENEMY_APPLY_POWERS = {"weak", "vulnerable",
+                      "mc_melody_loop", "mc_lightfall_sword"}
 
 # Sheet fields apply_power may carry. Anything else encodes a mechanic this
 # generator does not understand -- fail loudly (UNPARSEABLE discipline).
@@ -1846,7 +1925,8 @@ def blocked_reason(
                 and exhaust_pile_calc_rider(card, effect) is None
                 and exhaust_selection_calc_rider(card, effect) is None
                 and discards_turn_calc_rider(card, effect) is None
-                and exhausts_turn_calc_rider(card, effect) is None):
+                and exhausts_turn_calc_rider(card, effect) is None
+                and player_block_calc_rider(card, effect) is None):
             formula = effect["amount_formula"]
             return (f"amount_formula (reads {formula.get('count')}) -- needs a "
                     "CalculatedVar bound to that count, not a literal")
@@ -2567,6 +2647,33 @@ def exhaust_selection_calc_rider(card: dict,
             f"static (card, _) => ExhaustSelection.{accessor}(card)")
 
 
+def player_block_calc_rider(card: dict,
+                            eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: player_block}` -- damage priced off
+    the Block you are standing behind. Noelle's Sweeping Time is the first row
+    to print it, and it is the count tier0 has had since the reference pool's
+    Body Slam while the C# amount-formula grammar had none.
+
+    Same CalculatedDamageVar triple as the four riders above it, and the same
+    damage-only restriction. The reason it belongs on that path rather than
+    being emitted as a literal is sharper here than anywhere else on the list:
+    the number changes every time the player gains or spends Block, so a face
+    printing `base` would be wrong on the turn it is drawn and wrong again on
+    every turn after.
+
+    `Block` is a decimal on the creature and every other multiplier here is an
+    int, so it is truncated once, at the read, exactly as the sim's
+    `_runtime_count` hands back `p.block` as an int.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict) or formula.get("count") != "player_block":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "static (card, _) => (int)card.Owner.Creature.Block")
+
+
 def discards_turn_calc_rider(card: dict,
                              eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: discards_this_turn}` (EB-122, for
@@ -3172,6 +3279,13 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     exhausts_turn = exhausts_turn_calc_rider(card, eff)
     if exhausts_turn is not None:
         return exhausts_turn
+    # QUARANTINED USE ONLY as this lands: no shipped row prints `player_block`.
+    # Beside the four above it because it is the same triple and the same
+    # damage-only rule; see `player_block_calc_rider` for why the number cannot
+    # be a literal.
+    player_block = player_block_calc_rider(card, eff)
+    if player_block is not None:
+        return player_block
     charge = charge_calc_rider(card, eff)
     if charge is not None:
         base, per_n, div = charge
@@ -3641,12 +3755,14 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or exhaust_selection_calc_rider(card, e) is not None
             or discards_turn_calc_rider(card, e) is not None
             or exhausts_turn_calc_rider(card, e) is not None
+            or player_block_calc_rider(card, e) is not None
             for e in effects),
         "formula_base": any(
             exhaust_pile_calc_rider(card, e) is not None
             or exhaust_selection_calc_rider(card, e) is not None
             or discards_turn_calc_rider(card, e) is not None
             or exhausts_turn_calc_rider(card, e) is not None
+            or player_block_calc_rider(card, e) is not None
             for e in effects),
     }
     # tier0 binds every POWER_UPGRADE_KEYS delta to the first TOP-LEVEL

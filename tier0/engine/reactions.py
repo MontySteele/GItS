@@ -151,10 +151,23 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
     elif pair in _AMPLIFY:
         name = _AMPLIFY[pair][0]
         out = damage * _amp_mult(state, name)
+        # QUARANTINED (C.COMPANION_OVERHAUL). Durin's White form -- "enemies
+        # take 50% more damage FROM REACTIONS" -- multiplies the REACTION'S OWN
+        # contribution, `out - damage`, and leaves the hit that triggered it
+        # alone. Written as an adjustment to the amplified total rather than
+        # folded into `_amp_mult` because `_amp_mult` is the AMPLIFIER, which
+        # scales the whole hit; these are two different sentences and a card
+        # printing one must not silently get the other. Returns `out` unmoved
+        # while the flag is off (`companion_overhaul_reaction_mult` -> 1.0).
+        out = damage + (out - damage) * _mc_reaction_mult(state)
     elif pair == frozenset(("pyro", "electro")):
         name = "overload"
+        # QUARANTINED (C.COMPANION_OVERHAUL). The other half of White: the
+        # splash IS damage a reaction deals, so it is scaled by the same
+        # factor, at the one site that computes it.
+        splash = int(C.OVERLOAD_SPLASH * _mc_reaction_mult(state))
         for other in state.living_enemies:
-            _splash(state, other, C.OVERLOAD_SPLASH)
+            _splash(state, other, splash)
         # The explosion staggers the reacted target. This is ordinary Weak,
         # so it uses the shared debuff rules and never multiplies with Klee's
         # armed-Bomb suppression.
@@ -195,6 +208,13 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         state.reactions_this_card += 1
         state.reactions_this_turn += 1
         p = state.player
+        # QUARANTINED (C.COMPANION_OVERHAUL). The arm's two reaction readers --
+        # Dahlia's Favonian Favor and Varka's Sturm und Drang -- ride the site
+        # that already counts a reaction, so "a reaction happened" keeps one
+        # definition. `aura` is the CONSUMED element and is the only surviving
+        # handle on it (`enemy.aura` was cleared before this call), which is
+        # exactly what Varka's "of the swirled element" needs.
+        _mc_reaction(state, enemy, name, aura)
         # Courtroom Drama (Curtain Call B, R85): the FIRST reaction each
         # turn puts its target on the stand -- Vulnerable + Weak per stack.
         # Gated on the existing reactions_this_turn counter (== 1 is the
@@ -224,6 +244,23 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
                    # realized uplift for that caller by construction.
                    amp_delta=(out - damage) if out != damage else 0)
     return out
+
+
+def _mc_reaction_mult(state: CombatState) -> float:
+    """QUARANTINED (C.COMPANION_OVERHAUL). Durin's White multiplier, behind a
+    late import so `reactions` keeps importing nothing from `effects` at module
+    level -- the same cycle `_splash` already steps around. 1.0 with the flag
+    off, which is what makes this file byte-identical in a release build."""
+    from tier0.engine import effects                  # late import (cycle)
+    return effects.companion_overhaul_reaction_mult(state)
+
+
+def _mc_reaction(state: CombatState, enemy: Enemy, name: str,
+                 aura: str) -> None:
+    """QUARANTINED (C.COMPANION_OVERHAUL). The arm's reaction readers; see
+    `effects.companion_overhaul_reaction`. Late import, same cycle."""
+    from tier0.engine import effects                  # late import (cycle)
+    effects.companion_overhaul_reaction(state, enemy, name, aura)
 
 
 def settle_amp_delta(state: CombatState, log_mark: int, realized: int) -> None:

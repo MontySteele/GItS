@@ -597,7 +597,28 @@ def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
     CHARACTER's element -- attacks never auto-apply, which is what buys
     the higher base numbers within her low-statline identity. Companion
     cards are exempt from cadence entirely: what a companion applies is
-    the sheet's explicit call (application budgets depend on it)."""
+    the sheet's explicit call (application budgets depend on it).
+
+    THE MONDSTADT COMPANION OVERHAUL'S ELEMENT OVERRIDE (QUARANTINED) is read
+    FIRST and on damage from an Attack only. Three rewritten cards print an
+    element on the ATTACK rather than on themselves -- Bennett's "your next
+    Attack ... applies Pyro", Razor's "for 2 turns, your Attacks apply
+    Electro", Varka's "your next Attack deals 6 more damage of the swirled
+    element" -- and none of them can be said in the cadence dial, which asks
+    only what the PLAYING card is. The override is snapshotted once per play
+    (`state.mc_attack_element_override`, set beside `current_attack_bonus`),
+    so every hit of a multi-hit Attack applies the same element and a card
+    that consumes the rider cannot half-apply it.
+
+    IT OVERRIDES AN `applies_element: false` ROW TOO. "Your next Attack applies
+    Pyro" is a statement about the Attack, not a modifier to a statement the
+    Attack was already making, so a row that would have applied nothing applies
+    Pyro. That is the literal reading; the alternative -- the override only
+    replacing an element that was already going to land -- would make the three
+    cards silently dead against the sheet's several no-element Attacks."""
+    if (state.mc_attack_element_override
+            and fx["op"] == "damage" and card.type == "attack"):
+        return state.mc_attack_element_override
     if "applies_element" in fx:
         return card.element if fx["applies_element"] else None
     if (card.type == "attack" and fx["op"] == "damage"
@@ -745,6 +766,26 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     was_frozen = enemy.frozen > 0   # snapshot: a hit can't shatter the
     dmg = powers.modify_damage_dealt(state.player, base)  # freeze it applies
     unamped = dmg                   # EB-57: the pre-amplifier counterfactual
+    # QUARANTINED (C.COMPANION_OVERHAUL). Durin's DARK form: "your Pyro Attacks
+    # that react deal 8 more damage."
+    #
+    # ALL THREE CLAUSES ARE READ HERE AND NOWHERE ELSE. "Pyro" is the element
+    # this hit actually applies -- which is what an override on the Attack
+    # (Bennett's, Razor's, Varka's) can change, so reading `element` rather than
+    # the card's printed element is what keeps those three honest. "Attack" is
+    # `source == "attack"`, the sim's own name for a hit from an Attack card.
+    #
+    # "THAT REACT" IS A FORECAST, not a look back, and it is the same forecast
+    # `resolve_hit` is about to make one line down: a differently-elemented aura
+    # is standing, so the hit will consume it. Forecasting is what lets the 8
+    # land in the ADDITIVE phase, before the amplifier -- which is where the
+    # flat bonuses live in this engine and where the C# twin's
+    # `ModifyDamageAdditive` necessarily puts it, the C# multiplicative phase
+    # being a later hook. A Vaporize therefore amplifies the 8 along with the
+    # rest of the hit, in both engines.
+    if (C.COMPANION_OVERHAUL and element == "pyro" and source == "attack"
+            and enemy.aura and enemy.aura != element):
+        dmg += state.player.powers.get("mc_binary_dark", 0)
     log_mark = len(state.log)
     dmg = reactions.resolve_hit(state, enemy, element, dmg)
     amped = dmg != unamped
@@ -3012,6 +3053,11 @@ PREDICATE_PREFIXES = frozenset({
     # and never an engine edit.
     "hp_pct_below_",
     "hp_pct_above_",
+    # The same arm's second wave. Razor's Claw and Thunder: "If this is the
+    # third Attack you played this turn". Parameterised on the ordinal for the
+    # same reason as its neighbours -- the number is the card's, not the
+    # engine's.
+    "nth_attack_this_turn_",
 })
 
 # The card types `exhaust_selection_has_type_` may name. Closed on purpose:
@@ -3314,6 +3360,24 @@ def _predicate(state: CombatState, name: str) -> bool:
         # are two predicates rather than one with a flipped sense.
         n = int(name.rsplit("_", 1)[1])
         return state.player.hp * 100 > state.player.max_hp * n
+    if name.startswith("nth_attack_this_turn_"):
+        # Razor's Claw and Thunder: "If this is the third Attack you played
+        # this turn."
+        #
+        # THE `+ 1` IS THE CARD ASKING THE QUESTION, and it is arithmetic
+        # rather than a choice. `state.attacks_played_this_turn` is incremented
+        # in `refpowers.after_card_played`, which runs AFTER
+        # `effects.resolve_card` -- so while this predicate is being evaluated
+        # the counter holds the Attacks played BEFORE this one, and the card
+        # asking whether it is the third is itself the third.
+        #
+        # The C# twin counts at the OTHER end (`CompanionOverhaulLedger` notes
+        # the play in `BeforeCardPlayed`, so its number already includes the
+        # card) and therefore compares without the `+ 1`. Two spellings, one
+        # value, each written down against the other -- and the pin that they
+        # agree is `tier0/tests/test_companion_overhaul_hooks.py`.
+        n = int(name.rsplit("_", 1)[1])
+        return state.attacks_played_this_turn + 1 == n
     raise ValueError(f"unknown predicate {name!r}")
 
 
@@ -4814,6 +4878,7 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
             KNOB_READS["GARMENT_ATTACK_BLOCK"] = (
                 KNOB_READS.get("GARMENT_ATTACK_BLOCK", 0) + 1)
     state.current_attack_bonus = bonus
+    state.mc_attack_element_override = companion_overhaul_card_start(state, card)
 
     try:
         _resolve_effects(state, card.effects, card)
@@ -4881,6 +4946,26 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int) -> int:
     # double-count class the AoE-blindness finding warned about.
     bonus = (p.powers.get("next_attack_up", 0)
              + p.powers.get("attack_up_this_turn", 0))
+    if C.COMPANION_OVERHAUL:
+        # THE MONDSTADT COMPANION OVERHAUL'S THREE ATTACK RIDERS (QUARANTINED).
+        # Flat, and folded in exactly where `next_attack_up` is folded in --
+        # they say the same English ("deals N more") and a second summing site
+        # is how two riders come to disagree about whether Strength lands
+        # before or after them. All three STACK with each other and with the
+        # shipped pair: three separate sentences, three separate numbers, and
+        # nothing on any of the three faces says otherwise.
+        #
+        #   mc_passion_overload   Bennett -- one Attack, consumed on it
+        #   mc_lightning_fang     Razor   -- every Attack, 2 turns
+        #   mc_swirl_charge       Varka   -- one Attack, banked per Swirl
+        #
+        # `mc_lightning_fang`'s stack is TURNS REMAINING, not damage, so its
+        # contribution is the constant rather than the stack; the other two
+        # hold their own printed number, so a second copy pays twice.
+        bonus += p.powers.get("mc_passion_overload", 0)
+        bonus += p.powers.get("mc_swirl_charge", 0)
+        if p.powers.get("mc_lightning_fang", 0):
+            bonus += C.MC_LIGHTNING_FANG_BONUS
     if cost == 0:
         bonus += p.powers.get("zero_cost_attacks_up", 0)
     # Rapturous Applause: attacks +N per 10 Fanfare ("stacks grant flat
@@ -5117,6 +5202,42 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
         for enemy in list(state.living_enemies):
             powers.apply_power(state, enemy, "vulnerable",
                                C.MC_OMEN_VULNERABLE * n, applier=p)
+    # ---- the second wave's two start-of-turn readers ----------------------
+    # Diona, Icy Paws -- CLAMP, not a payout. `mc_icy_paws` marks how much of
+    # the standing Block came from that card; Block is cleared at the top of
+    # the player's turn (`combat._player_turn`, before this runs), so the mark
+    # is clamped to what is actually left. Written as a clamp rather than as a
+    # clear beside the block reset so it stays correct under Barricade, which
+    # suppresses the reset: the mark then survives exactly as far as the Block
+    # it names does.
+    n = p.powers.get("mc_icy_paws", 0)
+    if n:
+        left = min(n, p.block)
+        if left > 0:
+            p.powers["mc_icy_paws"] = left
+        else:
+            del p.powers["mc_icy_paws"]
+    # Barbara, Melody Loop -- LAST, and hosted on the ENEMY. "For 3 turns, at
+    # the start of your turn apply Hydro to target enemy": the target is a
+    # CHOSEN body, and a power that lives ON that body needs no machinery to
+    # remember which one it was. Stacks are TURNS REMAINING; FIRE, THEN TICK.
+    #
+    # LAST BECAUSE IT IS THE ONE THAT APPLIES AN ELEMENT, and the three above
+    # it do not: two grant the player Block or Strength and the third applies
+    # Vulnerable to enemies, so none of them can be changed by an aura landing
+    # or a reaction firing. Two Melody Loops cannot disturb each other either
+    # -- each applies to its own host and nothing else -- which is why the C#
+    # twin is allowed to keep its own `AfterPlayerTurnStart` broadcast beside
+    # the other three rather than joining the end-of-turn listener.
+    for enemy in list(state.living_enemies):
+        n = enemy.powers.get("mc_melody_loop", 0)
+        if not n:
+            continue
+        reactions.resolve_hit(state, enemy, "hydro", 0, "mc_melody_loop")
+        if n > 1:
+            enemy.powers["mc_melody_loop"] = n - 1
+        else:
+            del enemy.powers["mc_melody_loop"]
 
 
 def salon_tick_amount(state: CombatState, member: str, paid: bool,
@@ -5476,6 +5597,52 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
         p.block += C.MC_ISOTOMA_BLOCK
         state.emit("block", amount=C.MC_ISOTOMA_BLOCK)
 
+    # ---- the second wave's four end-of-turn readers, still before the latch -
+    # THE LATCH STAYS LAST, which is why these go here rather than after it:
+    # none of the four grants the player Block, so inserting them changes no
+    # answer, and Nicole's question is still asked of the board the player
+    # actually ended the turn holding.
+    #
+    # Eula, Glacial Illumination -- the counting blade, hosted on the ENEMY the
+    # card chose. Stacks are TURNS REMAINING; TICK, THEN FIRE AT ZERO, which is
+    # the opposite order from the volleys above and is what the printed
+    # sentence says: "for 2 turns it counts your Attacks; THEN it deals 8 plus
+    # 5 per Attack counted". Placed on your turn with 2 turns, it counts this
+    # turn's Attacks and next turn's, and pays at the end of the second.
+    #
+    # THE BLADE'S DAMAGE CARRIES NO ELEMENT, because the card's text names
+    # none -- Albedo's Solar Isotoma above it made the same call for the same
+    # reason. It runs the pipeline (NC-1: power-sourced damage scales with the
+    # player) like every other power-sourced hit in this block.
+    for enemy in list(state.living_enemies):
+        n = enemy.powers.get("mc_lightfall_sword", 0)
+        if not n:
+            continue
+        if n > 1:
+            enemy.powers["mc_lightfall_sword"] = n - 1
+            continue
+        del enemy.powers["mc_lightfall_sword"]
+        deal_damage_to_enemy(
+            state, enemy,
+            C.MC_LIGHTFALL_BASE
+            + C.MC_LIGHTFALL_PER_ATTACK * enemy.mc_lightfall_tally,
+            element=None, source="companion")
+        enemy.mc_lightfall_tally = 0
+    # Dahlia, Favonian Favor and Bennett, Passion Overload -- both say THIS
+    # TURN, and both are therefore popped whole here whether or not they ever
+    # paid. Bennett's is the one that can also be spent early: an Attack
+    # consumes it at `companion_overhaul_card_start`, and this is the other
+    # end of the same promise.
+    p.powers.pop("mc_favonian_favor", None)
+    p.powers.pop("mc_passion_overload", None)
+    # Razor, Lightning Fang -- stacks are TURNS REMAINING, and unlike the
+    # volleys above it fires nothing here: what it does happens on every Attack
+    # the player makes (`flat_attack_bonus`, `_element_for`), so end of turn is
+    # only where the clock runs down.
+    if p.powers.get("mc_lightning_fang", 0):
+        p.powers["mc_lightning_fang"] -= 1
+        if p.powers["mc_lightning_fang"] <= 0:
+            del p.powers["mc_lightning_fang"]
     # Nicole's latch, LAST. Written unconditionally rather than only while she
     # is on the board: a card drafted mid-fight must not read a stale answer
     # from the turn before it existed, and the field is per-combat anyway.
@@ -5499,3 +5666,249 @@ def _mc_most_auras(state: CombatState):
         return None
     best = max(state.living_enemies, key=lambda e: 1 if e.aura else 0)
     return best if best.aura else None
+
+
+# =============================================================================
+# THE MONDSTADT COMPANION OVERHAUL, SECOND WAVE -- THE HOOKS (QUARANTINED,
+# `C.COMPANION_OVERHAUL`).
+#
+# The first pass shipped twenty-one of the approved workshop's thirty-four
+# Universals and left THIRTEEN out, each because its printed text wanted an
+# engine hook that existed in neither engine. These are those hooks. Every one
+# is written so that with the flag off it returns before touching anything --
+# the same acceptance condition the arm's two turn blocks carry, pinned in
+# `tier0/tests/test_companion_overhaul_hooks.py` rather than intended.
+#
+# NO NEW OP AND NO NEW TARGET SPELLING. Every one of the thirteen rows is an
+# `apply_power` (or a `damage` with the shipped `amount_formula` grammar), so
+# the sheets' vocabulary is unchanged; what is new is WHERE the resulting
+# powers are read. The five call sites are named here once:
+#
+#   companion_overhaul_card_start        effects._resolve_card_bound, beside
+#                                        `next_attack_up`'s consuming pop
+#   companion_overhaul_before_enemy_hit  combat._enemy_turn, after the hit's
+#                                        damage is computed and before Block
+#   companion_overhaul_block_absorbed    combat._enemy_turn, immediately after
+#                                        Block is spent
+#   companion_overhaul_reaction          reactions._react, at the counter site
+#   companion_overhaul_reaction_mult     reactions._react and reactions._splash
+# =============================================================================
+
+
+def companion_overhaul_card_start(state: CombatState, card: Card) -> str:
+    """The arm's per-PLAY block: returns the element THIS Attack applies.
+
+    Called from `_resolve_card_bound` right after `current_attack_bonus` is
+    snapshotted, which is the one moment that satisfies all three of its jobs
+    at once -- the bonus has already been read (so a rider may be consumed),
+    the card's effects have not run (so the element is settled before the
+    first hit), and both play paths pass through it (so an auto-play cannot
+    skip the consumption).
+
+    THREE RIDERS CAN CLAIM THE ELEMENT AND THE ORDER IS LAW, written here and
+    mirrored in the C# `CompanionOverhaulRiders.ElementFor`:
+
+        mc_lightning_fang     Razor   -- Electro, every Attack, 2 turns
+        mc_passion_overload   Bennett -- Pyro, one Attack
+        mc_swirl_charge       Varka   -- the swirled element, one Attack
+
+    LAST WINS, and the sequence is blanket first, one-shots after, because a
+    one-shot the player has just bought and is spending on THIS Attack is the
+    more specific claim; Varka's is last of the two because its element is the
+    one the board produced a moment ago and is the only one that can differ
+    from play to play. The DAMAGE halves of all three stack and are summed in
+    `flat_attack_bonus`; only the element is exclusive, because an Attack
+    applies one element.
+
+    Returns "" -- meaning "no override, the cadence dial answers" -- for every
+    non-Attack, for every board with none of the three up, and always while
+    the flag is off.
+    """
+    if not C.COMPANION_OVERHAUL or card.type != "attack":
+        return ""
+    p = state.player
+    # Eula, Glacial Illumination -- "for 2 turns it COUNTS YOUR ATTACKS". The
+    # tally is taken here, before the Attack resolves, so an Attack that kills
+    # the blade's host is not counted by a blade that will never pay out.
+    for enemy in state.living_enemies:
+        if enemy.powers.get("mc_lightfall_sword", 0):
+            enemy.mc_lightfall_tally += 1
+    # Mika, Starfrost Swirl -- "your next Attack costs 1 less". The DISCOUNT is
+    # read in `combat.card_cost`, which is pure and is called by the playability
+    # gate as well; the CONSUMPTION is here, at the one site both play paths
+    # reach, so a card cannot be priced twice or refunded.
+    p.powers.pop("mc_starfrost_discount", None)
+    override = ""
+    if p.powers.get("mc_lightning_fang", 0):
+        override = "electro"
+    if p.powers.pop("mc_passion_overload", 0):
+        override = "pyro"
+    if p.powers.pop("mc_swirl_charge", 0):
+        override = p.mc_swirl_element or override
+        p.mc_swirl_element = ""
+    return override
+
+
+def companion_overhaul_before_enemy_hit(state: CombatState, enemy: Enemy,
+                                        dmg: int) -> int:
+    """The two TRAPS, fired before an enemy's hit lands. Returns the damage
+    that hit now deals.
+
+    THE HOOK IS THE ONE KLEE'S MINE ALREADY USES, and that is reuse rather
+    than a parallel: the mod answers "an enemy is about to hit you" with
+    `PowerModel.BeforeDamageReceived`, which fires after the damage number is
+    settled and before Block is spent, and this is the sim's same moment
+    (`combat._enemy_turn`, after `powers.modify_damage_taken` and before
+    `blocked = min(...)`). A second, earlier "an enemy INTENDS to attack"
+    trigger was available -- the intent is known thirty lines further up, and
+    `enemy_intends_attack` already reads it -- and was refused for exactly the
+    reason the Mine refuses it: an intent can be answered and then not happen,
+    while a hit about to land cannot.
+
+    ONE STACK PER HIT, and the traps are self-limiting the way the Mine is.
+    "The next time an enemy attacks you" is one attack, so two copies of the
+    card are two traps that answer two hits -- never one hit twice. A
+    multi-hit intent spends one trap on its first hit and finds none on the
+    second, which is the Mine's own consumption rule met again.
+
+    ORDER IS LAW: the Shower first, Baron Bunny second, in sheet order. Both
+    put an element on a board that may already carry one and both can kill, so
+    the order decides which reactions fire -- EB-19/races-c, answered the way
+    the arm's end-of-turn block answers it. The C# twin
+    (`CompanionOverhaulIncomingHit`) walks the same list.
+
+    THE C# SIDE SPLITS THIS IN TWO AND THIS ENGINE DOES NOT, which is a fact
+    about the mod rather than a difference in the rule. `ModifyDamageAdditive`
+    is called SPECULATIVELY there (the intent preview asks it what a hit would
+    cost), so it has to be pure -- Baron Bunny's "take 3 less" is returned from
+    it and its consumption plus its volley happen in `BeforeDamageReceived`.
+    The sim previews no incoming damage, so both halves sit here.
+    """
+    if not C.COMPANION_OVERHAUL:
+        return dmg
+    p = state.player
+    # Dahlia, Sacramental Shower: "the next time an enemy attacks you, deal 9
+    # Hydro damage to it FIRST" -- to IT, the attacker, and before its hit.
+    if p.powers.get("mc_sacramental_shower", 0):
+        _mc_spend_one(p, "mc_sacramental_shower")
+        deal_damage_to_enemy(state, enemy, C.MC_SHOWER_DMG,
+                             element="hydro", source="companion")
+    # Amber, Explosive Puppet: "take 3 less and deal 8 Pyro damage to ALL
+    # enemies". The reduction is on THIS hit only -- the trap answers one
+    # attack -- and floors at zero rather than healing the player.
+    if p.powers.get("mc_baron_bunny", 0):
+        _mc_spend_one(p, "mc_baron_bunny")
+        dmg = max(0, dmg - C.MC_BARON_BUNNY_REDUCTION)
+        for other in list(state.living_enemies):
+            deal_damage_to_enemy(state, other, C.MC_BARON_BUNNY_DMG,
+                                 element="pyro", source="companion")
+    return dmg
+
+
+def _mc_spend_one(fighter, power: str) -> None:
+    """Spend one stack of a trap, deleting the key at zero."""
+    n = fighter.powers.get(power, 0)
+    if n > 1:
+        fighter.powers[power] = n - 1
+    else:
+        fighter.powers.pop(power, None)
+
+
+def companion_overhaul_block_absorbed(state: CombatState, enemy: Enemy,
+                                      blocked: int, block_before: int) -> None:
+    """Diona, Icy Paws: "When THIS Block absorbs damage, apply Cryo to the
+    attacker."
+
+    THE ENGINE HAS ONE BLOCK POOL, so "this Block" cannot be a separate pile;
+    it is a MARK on the pool, `mc_icy_paws`, holding how much of the standing
+    Block the card put there. A hit that spends any Block spends the mark with
+    it, floored at zero -- which is the reading where the marked Block is
+    eaten FIRST.
+
+    THAT CHOICE IS ONE-WAY AND IT IS THE CONSERVATIVE ONE (R212's
+    derived-not-picked rule). Marked-first means the mark runs out sooner and
+    the paws bite on FEWER hits than marked-last would; there is no third
+    reading, because a single pool cannot say which coin was spent. The mark is
+    also clamped to the standing Block on the way in, so Block cleared at turn
+    start takes the mark with it whether or not Barricade suppressed the clear.
+
+    Fires ONCE PER ABSORBING HIT while the mark stands, which is what "when
+    this Block absorbs damage" says: it is a trigger on the absorption, not on
+    the card and not on the turn.
+    """
+    if not C.COMPANION_OVERHAUL:
+        return
+    p = state.player
+    mark = min(p.powers.get("mc_icy_paws", 0), block_before)
+    if mark <= 0 or blocked <= 0:
+        return
+    if enemy.alive:
+        reactions.resolve_hit(state, enemy, "cryo", 0, "mc_icy_paws")
+    left = mark - blocked
+    if left > 0:
+        p.powers["mc_icy_paws"] = left
+    else:
+        p.powers.pop("mc_icy_paws", None)
+
+
+def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
+                                name: str, aura: str) -> None:
+    """The two REACTION readers, called from `reactions._react` at the site
+    that already counts a reaction -- so "a reaction happened" has one
+    definition in this engine, and these two cannot disagree with
+    `reaction_triggered_this_turn` about it.
+
+    C# twin: `CompanionOverhaulReactions.Note`, called from the single
+    `ReactionEffects.Resolve`, which is that engine's same one site. The mod
+    counts reactions there and broadcasts none; this call is the broadcast,
+    kept to one consumer class so it does not become a bus nobody owns.
+    """
+    if not C.COMPANION_OVERHAUL:
+        return
+    p = state.player
+    # Dahlia, Favonian Favor: "Whenever a reaction happens this turn, gain 3
+    # Block." The stack IS the 3, so a second copy pays twice. ANY reaction
+    # counts, exactly as `reaction_triggered_this_turn` counts any; the card
+    # names none.
+    n = p.powers.get("mc_favonian_favor", 0)
+    if n:
+        # RAW, like every other power-sourced Block in this arm (NC-11).
+        p.block += n
+        state.emit("block", amount=n)
+    # Varka, Sturm und Drang: "Whenever a Swirl happens, your next Attack deals
+    # 6 more damage OF THE SWIRLED ELEMENT." The amount banks as an ordinary
+    # stack (so two Swirls before one Attack bank twice, which is what
+    # "whenever" says); the element is latched on the player, LAST WINS.
+    if name == "swirl":
+        n = p.powers.get("mc_sturm_und_drang", 0)
+        if n:
+            p.powers["mc_swirl_charge"] = p.powers.get("mc_swirl_charge", 0) + n
+            p.mc_swirl_element = aura
+
+
+def companion_overhaul_reaction_mult(state: CombatState) -> float:
+    """Durin, Binary Form / WHITE: "enemies take 50% more damage from
+    reactions."
+
+    THE MULTIPLIER IS ON THE REACTION'S OWN DAMAGE, not on the hit that
+    triggered it, and that is the literal reading of the printed words: a
+    Vaporize that turns a 10 into a 20 has dealt 10 damage AS A REACTION, and
+    White makes that 15 rather than making the whole 20 a 30.
+
+    WHAT IT REACHES, exhaustively, and both engines reach the same two places:
+    the AMPLIFIER's contribution (Vaporize and Melt) and the OVERLOAD splash.
+    Superconduct, Frozen, Crystallize and Swirl deal no damage of their own,
+    and Electro-Charged applies a dot POWER rather than damage -- multiplying a
+    stack count is not what "more damage" says, so it is left alone. Written
+    down here so the boundary is a decision rather than a consequence of where
+    the code happened to be.
+
+    STACKS ARE COPIES and each copy is another 50 percentage points, added
+    rather than compounded: two Durins are +100%, not +125%.
+    """
+    if not C.COMPANION_OVERHAUL:
+        return 1.0
+    n = state.player.powers.get("mc_binary_white", 0)
+    if not n:
+        return 1.0
+    return 1.0 + (C.MC_BINARY_WHITE_REACTION_MULT - 1.0) * n

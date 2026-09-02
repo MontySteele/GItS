@@ -264,6 +264,16 @@ MIRRORED: dict[str, object] = {
     "CompanionOverhaulLaw.OmenVulnerable": C.MC_OMEN_VULNERABLE,
     "CompanionOverhaulLaw.LightningRoseDamage": C.MC_LIGHTNING_ROSE_DMG,
     "CompanionOverhaulLaw.LightningRoseVulnerable": C.MC_LIGHTNING_ROSE_VULN,
+    # The same arm's SECOND WAVE -- the seven numbers its thirteen new rows
+    # hand to a POWER rather than print on a card. Same terms again.
+    "CompanionOverhaulLaw.ShowerDamage": C.MC_SHOWER_DMG,
+    "CompanionOverhaulLaw.BinaryWhiteReactionMult":
+        C.MC_BINARY_WHITE_REACTION_MULT,
+    "CompanionOverhaulLaw.LightningFangDamage": C.MC_LIGHTNING_FANG_BONUS,
+    "CompanionOverhaulLaw.BaronBunnyReduction": C.MC_BARON_BUNNY_REDUCTION,
+    "CompanionOverhaulLaw.BaronBunnyDamage": C.MC_BARON_BUNNY_DMG,
+    "CompanionOverhaulLaw.LightfallBase": C.MC_LIGHTFALL_BASE,
+    "CompanionOverhaulLaw.LightfallPerAttack": C.MC_LIGHTFALL_PER_ATTACK,
 }
 
 # --------------------------------------------------------------------------

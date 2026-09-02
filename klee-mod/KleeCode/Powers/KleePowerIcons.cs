@@ -78,6 +78,27 @@ internal static class KleePowerIcons
         DandelionBreezePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
         SolarIsotomaBloomPower =>
             KleePck.Path("klee/powers/solar_isotoma.png"),
+        // The same arm's SECOND WAVE, on the same terms: each borrows the
+        // shipped icon of the power whose job it takes over, or of the shipped
+        // companion power it is the rewrite of.
+        IcyPawsPower => KleePck.Path("klee/powers/frozen.png"),
+        MelodyLoopPower => KleePck.Path("klee/powers/oz_summon.png"),
+        PassionOverloadPower =>
+            KleePck.Path("klee/powers/passion_overload.png"),
+        SwirlChargePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        StarfrostDiscountPower =>
+            KleePck.Path("klee/powers/zero_cost_attacks_up.png"),
+        LightningFangPower =>
+            KleePck.Path("klee/powers/passion_overload.png"),
+        SturmUndDrangPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        FavonianFavorPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        BinaryFormWhitePower => KleePck.Path("klee/powers/witchs_flame.png"),
+        BinaryFormDarkPower => KleePck.Path("klee/powers/witchs_flame.png"),
+        SacramentalShowerPower =>
+            KleePck.Path("klee/powers/detonation_splash.png"),
+        BaronBunnyPower => KleePck.Path("klee/powers/detonation_splash.png"),
+        LightfallSwordPower =>
+            KleePck.Path("klee/powers/shattering_pressure.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

@@ -322,20 +322,36 @@ MC_REVELATION_STRENGTH = 2      # Nicole: Theosis, for holding the line
 MC_OMEN_VULNERABLE = 1          # Mona: the delayed doom, one turn of it
 MC_LIGHTNING_ROSE_DMG = 5       # Lisa: Electro damage per turn, 3 turns
 MC_LIGHTNING_ROSE_VULN = 1      # Lisa: the Vulnerable that rides it
+# THE SECOND WAVE -- the thirteen rows the first pass left out. Same rule as
+# the eleven above: a number the CARD prints stays on the card row (Diona's 6
+# Block, Bennett's 4, Favonian Favor's 3, Sturm und Drang's 6, Mika's 1) and
+# only a number a POWER carries is named here, because these are the ones no
+# row can render.
+MC_SHOWER_DMG = 9               # Dahlia: the Shower's answer to one attack
+MC_BINARY_WHITE_REACTION_MULT = 1.50  # Durin, White: reactions on enemies
+MC_LIGHTNING_FANG_BONUS = 3     # Razor: damage his Attacks gain, 2 turns
+MC_BARON_BUNNY_REDUCTION = 3    # Amber: damage the decoy eats
+MC_BARON_BUNNY_DMG = 8          # Amber: the Pyro the decoy answers with
+MC_LIGHTFALL_BASE = 8           # Eula: the blade's own damage
+MC_LIGHTFALL_PER_ATTACK = 5     # Eula: per Attack the blade counted
 
 # THE MONDSTADT UNIVERSALS, WHOLE. This is a REPLACEMENT and not a
 # substitution map: the workshop retires twelve of the seventeen shipped rows
 # outright and adds nine characters, so there is no one-for-one correspondence
 # to write down. Ordered by character in the workshop's sec.3 order.
 #
-# TWENTY-ONE OF THE WORKSHOP'S THIRTY-FOUR. The thirteen that are absent are
-# absent because their printed text needs an engine hook neither engine has
-# (a Block-absorption trigger, a pre-enemy-attack trap, a next-Attack element
-# override, a Swirl event, an Attack counter, a next-Attack discount); the
-# per-card reason is in `docs/notes/prototype-surface-provenance.md`. A row
-# whose text cannot be printed is left OUT rather than replaced by a simpler
-# card, which is the same rule `KLEE_OVERHAUL_POOL_IDS` applied to Vermillion
-# Pact.
+# THE WORKSHOP'S THIRTY-FOUR, WHOLE. Twenty-one landed first; the other
+# THIRTEEN were held back because their printed text needed an engine hook
+# neither engine had, and those hooks are now built in both engines (a
+# per-instance Block-absorption trigger, a pre-enemy-attack trap, a next-Attack
+# element override, a Swirl event that remembers its element, an Attack
+# counter, a next-Attack cost discount, a Block-reading damage formula, a
+# power on a chosen body, a counting delayed blade and two damage-pipeline
+# modifiers behind a modal Power). Which row spends which hook is in
+# `docs/notes/prototype-surface-provenance.md`. The rule that held them out is
+# unchanged and still binds anything later: a row whose text cannot be printed
+# is left OUT rather than replaced by a simpler card, which is the same rule
+# `KLEE_OVERHAUL_POOL_IDS` applied to Vermillion Pact.
 MONDSTADT_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mc_diona_signature_mix",
     "proto_mc_noelle_breastplate",
@@ -358,6 +374,20 @@ MONDSTADT_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mc_lisa_violet_arc",
     "proto_mc_lisa_lightning_rose",
     "proto_mc_rosaria_ravaging_confession",
+    # The thirteen the hooks unblocked, in the workshop's sec.3 order.
+    "proto_mc_diona_icy_paws",
+    "proto_mc_noelle_sweeping_time",
+    "proto_mc_barbara_melody_loop",
+    "proto_mc_bennett_passion_overload",
+    "proto_mc_dahlia_sacramental_shower",
+    "proto_mc_dahlia_favonian_favor",
+    "proto_mc_durin_binary_form",
+    "proto_mc_razor_claw_and_thunder",
+    "proto_mc_razor_lightning_fang",
+    "proto_mc_varka_sturm_und_drang",
+    "proto_mc_amber_explosive_puppet",
+    "proto_mc_eula_glacial_illumination",
+    "proto_mc_mika_starfrost_swirl",
 )
 
 # The nation the replacement above owns. Named rather than spelled "mondstadt"

@@ -75,6 +75,17 @@ public static class KleeMod
                     // reach a creature that played an overhaul card, and with
                     // the arm off no such card is offerable.
                     .Concat(Powers.CompanionOverhaulTurnEnd.Subscribe(combatState))
+                    // The same arm's SECOND WAVE, on the same argument again.
+                    // Three of its powers answer an enemy's hit and two of the
+                    // three can kill the attacker and put an element on the
+                    // board, so they get ONE listener in a fixed order. The
+                    // play watcher counts Attacks for two cards that can be in
+                    // a deck while no power of this arm is on anybody -- one of
+                    // them lives on the ENEMY -- which is why it cannot be a
+                    // power. Both are inert on a board carrying none of the
+                    // arm's rows, which is every board with the arm off.
+                    .Concat(Powers.CompanionOverhaulIncomingHit.Subscribe(combatState))
+                    .Concat(Powers.CompanionOverhaulPlayWatcher.Subscribe(combatState))
 #endif
                     // Track B's human feed: per-fight telemetry from normal
                     // play, in the schema the soak writes. Reads only -- see

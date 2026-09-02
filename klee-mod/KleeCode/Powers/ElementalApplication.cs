@@ -226,7 +226,10 @@ public sealed class KleeElementalHooks : AbstractModel
         if (dealer?.Player == null || target.Player != null) return;
         if (target.IsDead) return;
 
-        var element = cardSource is IElementalCard elemental ? elemental.Element : Element.None;
+        // Through the one funnel (AuraCmd.ElementOfPlay), so the aura applied
+        // here and the reaction AuraPower reads later cannot be different
+        // elements. Identical to the old inline read with no rider standing.
+        var element = AuraCmd.ElementOfPlay(cardSource, dealer);
         if (!element.LeavesAura()) return;   // None, and trigger-only Anemo/Geo
 
         // An existing aura owns this hit (refresh or reaction); one aura per
@@ -247,6 +250,35 @@ public static class AuraCmd
     /// <summary>The creature's aura, or null. One aura per enemy.</summary>
     public static AuraPower? Find(Creature creature) =>
         creature.Powers.OfType<AuraPower>().FirstOrDefault();
+
+    /// <summary>
+    /// WHICH ELEMENT THIS PLAY APPLIES. The one answer, for the application
+    /// listener and for <see cref="AuraPower"/>'s two reaction reads alike.
+    ///
+    /// It used to be <c>cardSource is IElementalCard</c> written out at each of
+    /// those three sites, which was correct while the element was a property of
+    /// the CARD alone. The quarantined Mondstadt companion overhaul prints
+    /// three cards that change what an Attack applies -- "your next Attack ...
+    /// applies Pyro", "for 2 turns, your Attacks apply Electro", "6 more damage
+    /// of the swirled element" -- so the answer now depends on the DEALER too,
+    /// and a site that applied one aura while another reacted with a different
+    /// element would be the worst kind of bug to find in play. One funnel.
+    ///
+    /// PURE, because every caller is reached from a preview path.
+    ///
+    /// WITHOUT the prototype switch this is character for character the
+    /// expression the three sites carried before, so a release build is
+    /// unchanged and the arm's classes are not compiled at all.
+    /// </summary>
+    public static Element ElementOfPlay(CardModel? cardSource, Creature? dealer)
+    {
+#if PROTOTYPE_CARDS
+        return CompanionOverhaulRiders.ElementFor(cardSource, dealer);
+#else
+        return cardSource is IElementalCard elemental
+            ? elemental.Element : Element.None;
+#endif
+    }
 
     /// <summary>
     /// How long an aura applied or refreshed by <paramref name="applier"/>
