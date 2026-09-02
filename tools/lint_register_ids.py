@@ -818,9 +818,14 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # FAIL on three real prototype patches first, and all three were
         # fixed. The ceiling stays at 225 -- ceilings never come down.
         224,
-        # 228 minted 2026-08-30 by the Kokomi slice-2 round-2 job: the lint
-        # for a packet that HOLDS live work on an unminted pick.
-        228,
+        # 228 minted 2026-08-30 by the Kokomi slice-2 round-2 job and LEFT
+        # OPEN_IDS 2026-09-02 on its acceptance word for word -- red on the
+        # packet at `a1df7d6`, green at HEAD. `tools/lint_packet_holds.py`
+        # reads every `review/active/*.md` paragraph for the PHRASE a hold
+        # is made of (hold verb + preposition + decision noun within one
+        # sentence) rather than a word list: the word list was written
+        # first and measured at 53 lines and zero real holds, and a gate
+        # with that false-positive rate is a gate somebody deletes.
         # 230/231/232 minted 2026-08-30 by the overnight integration, from the
         # night's two live runs and from the integration's own suite: the
         # `place_bomb` face, the teardown that reports a kill it did not make,
