@@ -1,4 +1,4 @@
-Status: OPEN (Prototype built and played; starter draft 3 for round three, sec.3)
+Status: OPEN (Prototype built and played; starter draft 4 for round five, sec.3, ruled R242)
 
 # Klee overhaul, slice one: the rules, the starter, and 28 cards (Paper stage)
 
@@ -42,29 +42,38 @@ bar; and being squishy is a problem with three answers rather than a death.
 Keywords with tooltips: Bomb, Set off, Spark, Mine. Pick 5 raised the
 keyword limit for exactly this.
 
-## 3. The starter (ten cards, six ids)
+## 3. The starter (ten cards, four ids)
 
 | Card | Cost | Type | Printed text | Copies |
 |---|---|---|---|---|
-| Kaboom! | 1 | Attack | Deal 6. | 2 |
-| Ka-pow! | 1 | Attack | Set off. Deal 7. | 2 |
-| Duck and Cover | 1 | Skill | Gain 5 Block. | 3 |
-| Dig In | 1 Spark | Skill | Gain 8 Block. | 1 |
-| Pop! | 0 | Skill | Bomb 5. | 1 |
-| Jumpy Dumpty | 1 | Skill | Bomb 6 on a random enemy. When it goes off, Mine 3 on every enemy. | 1 |
+| Strike | 1 | Attack | Deal 6 damage. | 4 |
+| Defend | 1 | Skill | Gain 5 Block. | 4 |
+| Jumpy Dumpty | 1 | Skill | Place a Bomb 8. When it goes off, place a Mine 3 on every enemy. | 1 |
+| Ka-pow! | 0 | Attack | Set off. Deal 4 damage. | 1 |
 
-Relic: **Pounding Surprise**, the Spark rule itself. Turn one shows a plant,
-two plain Attacks, two Set off Attacks, one Spark card the player cannot
-afford yet, and a promise of Mines.
+Upgrades: Strike+ and Defend+ are the game's (9 and 8); Jumpy Dumpty+ is
+Bomb 11 and Mine 4; Ka-pow!+ gains Retain and keeps its numbers.
 
-**Draft 3, 2026-09-02, after [USER]'s first run.** Draft 2 put Set off on
-every starter Attack, so attacking and cashing were one act and nothing ever
-grew. Now the plain hit and the cash button are different cards; Ka-pow!
-pays energy rather than a Spark, so cashing has a price; the Spark buys
-Block, with Dig In moved from the pool into the starter (27 pool rows);
-Jumpy Dumpty is 1 energy for a Bomb 6, having read as underpowered at 2; and
-Quick Fuse grows the Bombs by 3 before it sets them off, since at 1 Spark it
-was a Fwoosh! without the hit. The seven rules are unchanged.
+Relic: **Pounding Surprise**, the Spark rule itself, and rule 4's opening
+Spark: Klee starts every combat with 1 Spark.
+
+**Draft 4, 2026-09-02, after round four and [USER]'s ruling (R242).** The
+starter takes the canonical shape: four Strikes, four Defends, two cards of
+her own, the way every base character opens with two. Strike and Defend are
+the base game's cards, not renamed twins; Kaboom! and Duck and Cover leave
+the sheet. Jumpy Dumpty is the bomb, placed on the enemy you choose so the
+one detonator lines up with it, and its Mines are still its payload.
+Ka-pow! is the detonator at 0 energy: cashing costs a card and a moment,
+never energy, and the upgrade's Retain lets a cooked Bomb be held for. Pop!
+moves to the pool as a Common and Dig In goes back to the pool as the Spark
+sink it was. The starter itself has no Spark sink; the opening Spark means
+the first Spark card drafted is live on arrival, and that is the price of
+the plainer deck, disclosed here. Numbers applied as defaults (D): Ka-pow!'s
+4, since 0 energy buys the Set off and not a Strike; Jumpy Dumpty's 8, a
+plant that beats a Strike only after one night (8 now, 11 at the next dawn
+and 14 the one after, then cashed for 4 more). Draft 3's lesson stands: the
+plain hit and the cash button are different cards. The seven rules are
+unchanged except rule 4's opening Spark.
 
 ## 4. The pool (27 cards)
 
@@ -88,6 +97,7 @@ belongs to; a bridge belongs to two.
 
 | Card | R | Cost | Type | Printed text | Job |
 |---|---|---|---|---|---|
+| Pop! | C | 0 | Skill | Place a Bomb 5. | The cheapest plant; in the pool since draft 4 |
 | Mine Toss | C | 1 | Skill | Mine 4 on every enemy. | Cheap bombs that also defend |
 | Fwoosh! | C | 1 Spark | Attack | Set off. Deal 5 to a random enemy. | The Spark Attack |
 | Tinder Toss | C | 1 Spark | Attack | Set off and deal 4, to two random enemies. | Two explosions for one Spark |
@@ -116,7 +126,7 @@ Appliers come from the Mondstadt Universals already in her pool: Dahlia
 |---|---|---|---|---|---|
 | Ammo Scavenging | C | 1 | Skill | Bomb 4. Draw a card for each of your Bombs that went off this turn. | Bombs into cards |
 | Powder Charge | U | 1 Spark | Skill | Bomb 6. | Sparks into setup |
-| Dig In | starter | 1 Spark | Skill | Gain 8 Block. | Sparks into defence; in the starter since draft 3, not offered |
+| Dig In | C | 1 Spark | Skill | Gain 8 Block. | Sparks into defence; back in the pool at draft 4 |
 | Sugar Rush | R | 2 Sparks | Skill | Exhaust. Gain 2 Energy. Draw 1. | Sparks into energy, Rare only |
 | Run Away! | C | 0 | Skill | Gain 3 Block. If a Bomb went off this turn, gain 4 more. | Pays for the loud turn |
 | Grounded | U | 1 | Power | At the start of your turn, if none of your Bombs went off last turn, gain 6 Block. | Pays for the quiet turn |

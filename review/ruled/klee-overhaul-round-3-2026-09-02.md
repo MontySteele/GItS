@@ -1,4 +1,4 @@
-Status: SUPERSEDED by review/active/klee-overhaul-round-4-2026-09-02.md
+Status: SUPERSEDED by review/ruled/klee-overhaul-round-4-2026-09-02.md
 
 # Klee overhaul, round three: two seats on starter draft 3
 

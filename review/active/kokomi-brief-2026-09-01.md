@@ -52,12 +52,12 @@ becomes one Uncommon or Rare (section 6), and the heal becomes one Rare.
 
 | Card | Cost | Type | Printed text | Copies |
 |---|---|---|---|---|
-| Water's Edge | 1 | Attack | Deal 6. | 4 |
-| Coral Guard | 1 | Skill | Gain 5 Block. | 4 |
+| Strike | 1 | Attack | Deal 6. | 4 |
+| Defend | 1 | Skill | Gain 5 Block. | 4 |
 | Kurage's Oath | 1 | Skill | Plan: Deal 5 to every enemy. | 1 |
 | Slack Water | 1 | Attack | Deal 4 damage. Apply 1 Weak. Plan: every enemy gains 2 Weak. | 1 |
 
-The basics are plain; her Attacks apply Hydro the way every catalyst
+The basics are the base game's Strike and Defend (R242); her Attacks apply Hydro the way every catalyst
 character's do, which is what a companion's Pyro, Electro or Cryo card
 reacts with. Kurage's Oath has no now-line: it is the jellyfish's own
 strike and the only way to play it is to plan it. Slack Water is the one

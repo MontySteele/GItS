@@ -108,9 +108,9 @@ Seven sentences. If a rule is not here, it is a card.
    current size instead of going off. (The second of three Bombs killed the
    enemy: the third jumps. A partner or a poison killed the enemy: all of them
    jump.)
-4. **Spark.** Each Bomb that goes off gives Klee 1 Spark. Some cards cost
-   Sparks instead of energy, printed as a badge. No cap. Lost at the end of
-   combat.
+4. **Spark.** Each Bomb that goes off gives Klee 1 Spark, and she starts
+   every combat with 1 (R242). Some cards cost Sparks instead of energy,
+   printed as a badge. No cap. Lost at the end of combat.
 5. **Pyro.** Every Klee Attack applies Pyro, and so does every explosion. An
    explosion is an ordinary Pyro hit: Vulnerable and Weak on the enemy,
    Strength on Klee, and every reaction in the element table apply to a
@@ -514,16 +514,12 @@ the source game's own most recent chapter.
 
 ## 8. What fight one teaches
 
-Starter deck, ten cards: Kaboom! ×2 (1 energy: 6 damage), Ka-pow! ×2 (1
-energy: 7 damage, *Set off*), Duck and Cover ×3 (1 energy: 5 Block), Dig In
-×1 (1 Spark: 8 Block), Pop! (0 energy: plant a Bomb 5), Jumpy Dumpty (1
-energy: plant a Bomb 6 on a random enemy; when it goes off, plant a Mine 3
-on every enemy).
-
-Draft 3, 2026-09-02, after [USER]'s first run: draft 2 gave every starter
-Attack *Set off*, so hitting and cashing were the same act and no Bomb ever
-grew. The plain hit and the cash button are now different cards, the cash
-costs energy, and the Spark buys Block.
+Starter deck, ten cards (draft 4, R242): Strike x4, Defend x4, Jumpy
+Dumpty (1 energy: place a Bomb 8; when it goes off, a Mine 3 on every enemy)
+and Ka-pow! (0 energy: *Set off*, 4 damage; Retain when upgraded). Strike
+and Defend are the base game's cards. Draft 3 had split the plain hit from
+the cash button; draft 4 keeps that and takes the canonical four-four-two
+shape, since the starter was doing too much.
 
 Relic, Pounding Surprise: the Spark rule in §3. It is the only free Spark
 source, and it **pays for a whole verb**: every Spark-priced card in the pool
@@ -533,11 +529,10 @@ Ironclad's Bleed. The player meets the relic's job on turn two of fight one,
 when the first explosion turns Dig In from a blank into 8 Block for no
 energy.
 
-Turn one, fight one, the player sees: a 0-cost card that puts a 5 on an
-enemy, two plain Attacks, two Attacks that say *Set off*, a Spark card they
-cannot afford yet, and Jumpy Dumpty promising Mines. The obvious plan is on
-the table: plant, hit with Kaboom!, Duck, and next turn Ka-pow! collects a
-7, or hit again and let it become a 9. Every verb is visible, the badge
+Turn one, fight one, the player sees a hand of Strikes and Defends with,
+half the time, Jumpy Dumpty or Ka-pow! among them: plant the 8, Strike,
+Defend, and at the next dawn the badge reads 11; Ka-pow! collects it for
+nothing when it turns up, or the Bomb keeps cooking until it does. Every verb is visible, the badge
 shows the bomb growing, and nothing is hidden. Script A plays it out. The
 boards in §10 were written against draft 2 and read Kaboom! as the *Set
 off* card; read Ka-pow! for it there.
