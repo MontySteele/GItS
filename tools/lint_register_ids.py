@@ -378,7 +378,16 @@ CEILINGS: dict[str, int] = {
     # `review/qa/lane1-live-reads-2026-09-02/`: the arm-keyword definition
     # printed once on a fight page (272), and the map printed per-option
     # `leads on to`, the floors by distance and `16 floors ahead: Boss` (298).
-    "EB": 312,   # EB-311/312 minted 2026-09-02 by the prototype balance
+    "EB": 315,   # EB-315 minted 2026-09-02 by [USER]'s Kokomi run: the
+                 # Prototype-stage upgrade rule read a row's `effects:` and
+                 # never its `plan:`, so a Plan-only row had no campfire
+                 # choice and a two-line row upgraded only its now-line.
+                 # EB-313/314 belong to the unmerged PR #292 (Klee round
+                 # five). The ceiling is a floor on "ever issued" and only
+                 # moves forward, so it carries them whether or not the
+                 # branch reading this holds their rows; the one-line
+                 # conflict is resolved at merge.
+                 # EB-311/312 minted 2026-09-02 by the prototype balance
                  # packet (the read's two instrument gaps: Plan pricing, the
                  # Klee Bomb twin). EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
@@ -1305,6 +1314,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 311/312: the balance read's two instrument gaps (Plan pricing in the
         # drafter, a tier-0 Bomb twin for the Klee arm).
         311, 312,
+        # 315: [USER]'s Kokomi run -- "Plan cards often seem to lack
+        # upgrades". BUILT in the commit that mints it and still OPEN,
+        # because its acceptance is eyes-on: the smith offering a real `+`
+        # face on a Plan row in the next dev build. 313/314 are PR #292's
+        # (Klee round five) and are unmerged as this row is written, so they
+        # are absent here on purpose while the ceiling above carries them.
+        315,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
