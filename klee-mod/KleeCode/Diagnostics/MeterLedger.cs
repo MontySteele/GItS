@@ -71,6 +71,29 @@ public static class MeterLedger
     public const string Spark = "spark";
 
     /// <summary>
+    /// Kokomi's Charge bank (`EB-273`). Point 1 above promised this: "Charge
+    /// and Encore are the same shape and will want the same rows", and the
+    /// Python reader took the meter as a PARAMETER for the same reason
+    /// (<c>understudy/blindplay.meter_plays(meter=...)</c>), so naming it here
+    /// is the whole of the wiring on that side -- no shape moves.
+    /// </summary>
+    public const string Charge = "charge";
+
+    /// <summary>
+    /// The Kokomi overhaul's Plan queue (`EB-273`), whose BANK is the number of
+    /// Plans waiting on the jellyfish.
+    ///
+    /// A QUEUE IS A METER, and that is a reading rather than a stretch: the
+    /// arm's brief prices cards in Plans ("the jellyfish carries out your front
+    /// Plan now"), the queue depth is what the strip draws and what
+    /// <c>player.kokomi_plans</c> already carries on the wire, and R240/R241
+    /// retired the Tide that used to be her number. The four fields say exactly
+    /// what a grader needs of it -- the depth before a play, what the play
+    /// spent, what it wrote, the depth after.
+    /// </summary>
+    public const string Plan = "plan";
+
+    /// <summary>
     /// How many rows are kept. A whole fight is tens of plays; the cap exists
     /// so a long unattended session cannot grow this without bound, and the
     /// OLDEST rows are the ones a grader has already read.

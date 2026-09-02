@@ -1180,6 +1180,16 @@ public sealed class PlayTelemetryHooks : AbstractModel
     /// they chose the card. <c>IsFirstInSeries</c> keeps it to one row per
     /// play across replays, the same gate <c>SparkPower.BeforeCardPlayed</c>
     /// and the fight record already use.
+    ///
+    /// KOKOMI'S TWO METERS OPEN A ROW HERE TOO (`EB-273`), and they are gated
+    /// on her identity where Spark's row is not. That asymmetry is deliberate
+    /// rather than inherited: the Spark row predates the second meter and its
+    /// `before` is a plain 0 for anyone who has no bank, which cost nothing
+    /// while it was the only meter. A THIRD unconditional row would spend the
+    /// 400-row cap three times over on plays that can never move the meter, and
+    /// the rows a grader has not read yet are the ones the cap drops. Her
+    /// Charge asks the shipped identity; her Plan queue asks the ARM, because
+    /// off the arm there is no queue to have a depth at all.
     /// </summary>
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
@@ -1191,12 +1201,27 @@ public sealed class PlayTelemetryHooks : AbstractModel
             }
             var creature = cardPlay.Card.Owner?.Creature;
             if (creature == null) return Task.CompletedTask;
+            string id = cardPlay.Card.Id.Entry;
+            string title = cardPlay.Card.Title ?? id;
+            int turn = CombatManager.Instance?.DebugOnlyGetState()?.RoundNumber ?? 0;
             MeterLedger.OpenPlay(
-                MeterLedger.Spark,
-                cardPlay.Card.Id.Entry,
-                cardPlay.Card.Title ?? cardPlay.Card.Id.Entry,
-                CombatManager.Instance?.DebugOnlyGetState()?.RoundNumber ?? 0,
+                MeterLedger.Spark, id, title, turn,
                 SparkPower.SparksAtPlay(creature));
+
+            if (creature.Player?.Character is IKokomiCharacter)
+            {
+                MeterLedger.OpenPlay(
+                    MeterLedger.Charge, id, title, turn,
+                    KokomiResources.GetCharge(creature));
+#if PROTOTYPE_CARDS
+                if (KokomiOverhaul.LiveFor(creature))
+                {
+                    MeterLedger.OpenPlay(
+                        MeterLedger.Plan, id, title, turn,
+                        KokomiPlan.Pending(creature.Player).Count);
+                }
+#endif
+            }
         }
         catch (Exception e)
         {
