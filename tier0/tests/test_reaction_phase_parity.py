@@ -771,6 +771,26 @@ CO_TENANCY_LEDGER = {
             "the broadcast",
     },
     "AfterPlayerTurnStart": {
+        ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
+            "QUARANTINED (the Kokomi overhaul, C.KOKOMI_OVERHAUL). RULE 8's "
+            "resolution point: the Plans she wrote last turn happen here, in "
+            "the order she wrote them. THE ORDERING QUESTION, answered: the "
+            "queue is per seat and this power is its only reader, so no "
+            "co-tenant of this broadcast can see or move it; what a resolved "
+            "Plan then WRITES is Block, Energy, cards drawn, HP or one Hydro "
+            "hit, and the only co-tenant that shares any of those is the "
+            "shipped `KokomiResourceHooks` beside it -- whose whole body under "
+            "this arm is switched off (the exhaust funnel, the memory fire and "
+            "the kit grant all read the flag), so it writes nothing at all. "
+            "WHY THIS BROADCAST and not the pre-draw one the slice packet's "
+            "sec.5 names: there is no broadcast between the ENERGY RESET and "
+            "the HAND DRAW (see TURN_START_BROADCAST_ORDER above), so a Plan "
+            "resolved before the draw is a Plan resolved before the block "
+            "clear and the energy reset, and Read the Field's Block and Battle "
+            "Plan's Energy would both be wiped by the setup that follows them. "
+            "The brief's own script C requires the later hook -- its turn 2 "
+            "opens on FIVE energy, which is three plus the Plan's two. The "
+            "reading is recorded in full on the method",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "GroundedPower"):
             "QUARANTINED (the Klee overhaul). Raw per-turn Block mint on a "
             "condition, the same shape as MetallicizePower below. THE "
@@ -852,6 +872,23 @@ CO_TENANCY_LEDGER = {
             "there is nothing here to model",
     },
     "BeforeSideTurnEnd": {
+        ("Relics/TamanooyasCasket.cs", "TamanooyasCasket"):
+            "QUARANTINED (the Kokomi overhaul; the whole class is `#if "
+            "PROTOTYPE_CARDS`). RULE 4, the pulse: on a turn she did not "
+            "Surge, the jellyfish Mends her, bounded by her entry HP and by a "
+            "per-combat budget the relic holds. THE ORDERING QUESTION, "
+            "answered: it reads the arm's own per-turn Surge latch, which only "
+            "a card play writes and every card play is strictly earlier than "
+            "this broadcast; it writes HP and the budget, and the budget is "
+            "read by nothing else. The one co-tenant that touches HP at turn "
+            "end is TurnEndSequencer, whose four ordered steps are Klee's two "
+            "volleys, Oz's, and KurageSummonPower.FirePulse -- and under this "
+            "arm no card summons a KurageSummonPower and the base kit's "
+            "install is gated off, so that step cannot fire on her. Sango "
+            "Isshin can turn the pulse's excess into a Hydro hit, which "
+            "touches the shared aura state; the same argument covers it, "
+            "because the only aura-writing co-tenants here are those same "
+            "volleys and they belong to a different character",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "EndOfTurnSetOffPower"):
             "QUARANTINED (the Klee overhaul). Sparks 'n' Splash, the ONE "
             "power in the slice that fires without a card saying so -- the "
@@ -893,6 +930,17 @@ CO_TENANCY_LEDGER = {
             "test_the_sequencer_walks_the_table",
     },
     "AfterSideTurnEnd": {
+        ("Powers/Prototype/KokomiOverhaulPowers.cs", "ProtoGarmentPower"):
+            "QUARANTINED (the Kokomi overhaul). Duration tick-down of itself, "
+            "player side -- the same shape and the same broadcast as the "
+            "shipped CeremonialGarmentPower below, which is the power it takes "
+            "over from. Touches nothing but its own Amount",
+        ("Powers/Prototype/KokomiOverhaulPowers.cs", "NextCompanionFreePower"):
+            "QUARANTINED (the Kokomi overhaul). Vanguard's grant, expiring at "
+            "the end of the turn that wrote it -- the ratified same-turn "
+            "boundary (FLAG-1 / R114), and the identical shape and broadcast "
+            "as CompanionCostThisTurnPower and ReplayNextCompanionPower below. "
+            "Removes itself and touches nothing else",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
             "diagnostics observer; reads, never writes board state",
         ("Powers/CompanionPowers.cs", "CompanionCostThisTurnPower"):

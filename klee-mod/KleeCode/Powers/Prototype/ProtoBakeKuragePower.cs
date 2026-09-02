@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
@@ -48,8 +49,9 @@ namespace KleeMod.Powers;
 /// arm could not use: <c>KleeOverhaulLedger</c>'s header explains that under
 /// rule 7 there is no power guaranteed to be on Klee, so its turn boundary had
 /// to roll on a round stamp. Here rule 1 GUARANTEES this power is on her for
-/// every turn of every combat, so the one hook that must fire before her draw
-/// can hang off it honestly.
+/// every turn of every combat, so the turn-start hook the Plans need can hang
+/// off it honestly. Which turn-start hook, and why it is not the one the slice
+/// packet names, is on <see cref="AfterPlayerTurnStart"/>.
 /// </summary>
 public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
 {
@@ -127,22 +129,39 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
 
     /// <summary>
     /// RULE 8's resolution point: the Plans she wrote last turn happen at the
-    /// START of this one, BEFORE the draw.
+    /// START of this one.
     ///
-    /// <c>BeforeSideTurnStart</c> and not <c>AfterPlayerTurnStart</c>, which is
-    /// the hook the shipped Kokomi funnel uses: that one runs AFTER the
-    /// turn-start draw (<c>KokomiResourceHooks.AfterPlayerTurnStart</c> says so
-    /// in as many words), and the slice's sec.5 asks for "the start of her next
-    /// turn, before draw". This is the earlier of the two turn-start hooks that
-    /// carries a <c>PlayerChoiceContext</c>, which a Plan needs because a Plan
-    /// can deal damage and draw cards.
+    /// <c>AfterPlayerTurnStart</c>, AND NOT THE PRE-DRAW HOOK THE SLICE'S
+    /// sec.5 ASKS FOR -- a reading, recorded here because the packet's own
+    /// arithmetic is what settles it against its own wording.
+    ///
+    /// The game's turn-start order is fixed and written down
+    /// (<c>tier0/tests/test_reaction_phase_parity.TURN_START_BROADCAST_ORDER</c>,
+    /// read off the decompile): <c>BeforeSideTurnStart</c>, BLOCK CLEAR,
+    /// <c>AfterBlockCleared</c>, ENERGY RESET, HAND DRAW,
+    /// <c>AfterPlayerTurnStart</c>. There is NO broadcast between the energy
+    /// reset and the draw. So a Plan resolved "before draw" resolves before the
+    /// block clear and the energy reset too, and Read the Field's "Plan: gain 4
+    /// Block" and Battle Plan's "Plan: gain 2 Energy" would both be wiped by
+    /// the turn setup that follows them -- two of the eight Strategist cards,
+    /// silently doing nothing.
+    ///
+    /// THE BRIEF'S OWN SCRIPTS REQUIRE THE LATER HOOK. Script C's turn 2
+    /// "opens: Ambush fires (10 into a cultist), Battle Plan pays 2, Treatise
+    /// draws 2. FIVE ENERGY, SEVEN CARDS" -- five is three plus the Plan's two,
+    /// which is only true if the Plan lands after the reset; seven is five
+    /// drawn plus Treatise's two, which is only true if the draw has happened.
+    /// Sec.6.2 says the same thing in words: "before the hand is PLAYED".
+    ///
+    /// What the later hook costs is one turn's card ORDER: a Plan-drawn card
+    /// arrives after the turn's five rather than before them. Nothing in the
+    /// slice reads that difference.
     /// </summary>
-    public override async Task BeforeSideTurnStart(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IReadOnlyList<Creature> participants, ICombatState combatState)
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
     {
-        if (side != CombatSide.Player) return;
-        if (Owner == null || !KokomiOverhaul.LiveFor(Owner)) return;
+        if (Owner == null || player.Creature != Owner) return;
+        if (!KokomiOverhaul.LiveFor(Owner)) return;
         await KokomiPlan.ResolveAll(choiceContext, Owner);
     }
 }
