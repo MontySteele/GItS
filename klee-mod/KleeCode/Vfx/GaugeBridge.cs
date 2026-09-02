@@ -149,12 +149,66 @@ public static class GaugeBridge
             AnchorOffset = OverheadBurstAnchor,
             VisualSpan = BurstConstants.KleeMax,
             LabelMax = BurstConstants.KleeMax,
-            AppliesTo = creature => creature.Player?.Character is Klee,
+            // NOT a bare `is Klee` any more (`EB-281`). Under the Klee overhaul
+            // arm she has no Burst at all -- `KleeBurstResource.Find` returns
+            // null there, so nothing feeds the meter -- and a spec that still
+            // APPLIED built an overhead bar pinned at 0/40, bomb cap and all,
+            // for the whole run. That is the DISPLAY half of the `EB-266`
+            // finding (a meter the blind tester "had no idea what it was"), and
+            // the guard now lives beside the feed's own, in the file that owns
+            // the resource, rather than as a character test written out here.
+            AppliesTo = KleeBurstResource.GaugeApplies,
             ReadValue = KleeBurstResource.AmountFor,
             ShouldFlash = (previous, current) =>
                 previous < BurstConstants.KleeMax
                 && current >= BurstConstants.KleeMax,
         },
+#if PROTOTYPE_CARDS
+        // KLEE'S SPARK BANK, under the overhaul arm only (`EB-281`). It takes
+        // the OVERHEAD SLOT rather than the second row, and that is a reading
+        // of the C1 convention rather than a breach of it: the slot means "this
+        // creature's primary meter", it has meant Burst for everybody because
+        // Burst was everybody's, and under this arm Klee has no Burst to put
+        // there (the spec above now stands down). Leaving the slot empty and
+        // hanging her ONE meter in the row above it would put the number where
+        // the eye does not go, to protect a convention from a character who no
+        // longer has the resource it names.
+        //
+        // BAR-LESS, on `kokomi_charge`'s argument verbatim: Sparks are uncapped,
+        // so there is no ceiling to draw against and a bar would invent a
+        // target. What renders is the glyph and the number -- which is exactly
+        // the shape the base game gives a character resource in the Regent's
+        // star counter, and the shape [USER] asked for.
+        //
+        // NO FLASH, and it is a deliberate omission rather than a default. The
+        // shared scene's flash overlay is a BAR-SHAPED ColorRect sized to the
+        // track; with no bar drawn, a mint would strobe a white rectangle where
+        // the player has never seen a bar. A glyph-shaped overlay is scene work
+        // (`pck-src/shared/gauge.tscn`, shared with every other gauge), so the
+        // beat waits for eyes-on rather than shipping an artefact nobody
+        // reviewed.
+        new()
+        {
+            Key = "klee_spark",
+            Skin = new GaugeSkin
+            {
+                // Neither rect is drawn while VisualSpan is null; the colours
+                // are the ones a Spark bar WOULD wear -- Klee's warm ember,
+                // one step brighter and yellower than the fuse orange the
+                // Burst bar carries -- and they exist so a future ceiling does
+                // not have to invent a palette at the same time.
+                FillColor = new Color(1.0f, 0.78f, 0.28f),
+                TrackColor = new Color(0.10f, 0.07f, 0.05f, 0.0f),
+                CapIconPath = SparkGauge.GlyphPath,
+            },
+            AnchorOffset = OverheadBurstAnchor,
+            VisualSpan = null,
+            LabelMax = null,
+            AppliesTo = SparkGauge.AppliesTo,
+            ReadValue = SparkGauge.Read,
+            ShouldFlash = static (_, _) => false,
+        },
+#endif
         // Furina's Burst, at the SAME overhead slot. Skin: hydro ribbon —
         // a banner plate with swallow-tail ends, deliberately sharing its
         // visual language with the Salon stage's Encore ribbon (D3) so the two

@@ -13,6 +13,26 @@ using MegaCrit.Sts2.Core.Models.Powers;
 namespace KleeMod.Powers;
 
 /// <summary>
+/// Marker for Klee's CharacterModel. Same reason Furina and Kokomi have one,
+/// arrived at from the other end: a prototype patch runs on EVERY seat at the
+/// table under the single <c>PROTOTYPE_CARDS</c> switch, so one arm's UI change
+/// can take down a run belonging to a different character
+/// (<c>EB-194</c>, <c>EB-221</c>), and <c>tools/lint_prototype_patch_scope.py</c>
+/// requires every such patch to say whose creature it is about in an identity
+/// idiom the mod owns. Klee was the last of the three without one -- she is the
+/// compatibility baseline and every shipped site tests <c>is Klee</c> directly
+/// -- and the lint's allowlist has been holding <c>IKleeCharacter</c>'s two
+/// spellings open since it was written.
+///
+/// EMPTY, AND NOTHING SHIPPED READS IT YET. The shipped identity tests are
+/// deliberately left as they are: this arrives for `EB-281`, whose acceptance
+/// condition is that a flag-off build behaves exactly as it did.
+/// </summary>
+public interface IKleeCharacter
+{
+}
+
+/// <summary>
 /// Klee's Spark counter (spec C2.3; reference implementation
 /// tier0/engine/combat.py card_cost/play_card, constants.py
 /// SPARKS_FOR_FREE_ATTACK).
@@ -31,6 +51,15 @@ namespace KleeMod.Powers;
 /// (pre-resolution, the sim's timing); the consume executes in
 /// AfterCardPlayed. See the method comments for the Snap finding that
 /// forced the split.
+///
+/// DISPLAY. This power IS the bank on every build, and off the Klee overhaul
+/// arm it is also its own display -- the status-strip badge, with the rule text
+/// below on its hover tip. UNDER THE ARM (`EB-281`) the bank is drawn instead as
+/// a dedicated resource gauge over Klee's head, glyph and number, and the badge
+/// is suppressed at the one container that makes it (<c>Vfx.SparkGauge</c>).
+/// Nothing about the resource moves: the model stays visible -- which is what
+/// keeps it on the understudy wire under the name "Spark" -- and every rule,
+/// price, refusal and ledger row below still reads and moves this power.
 ///
 /// X-cost attacks are EXEMPT from both sides, deliberately: zeroing an X-card
 /// sets X = 0 and makes the card do nothing, which converts the buff into a
@@ -124,6 +153,64 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
             choiceContext, player, amount, applier: player, cardSource: cardSource);
         Diagnostics.MeterLedger.Note(Diagnostics.MeterLedger.Spark,
             source ?? SourceOf(cardSource), Bank(player) - before, before);
+        SyncGauge(player);
+    }
+
+    /// <summary>
+    /// Redraw the Spark gauge (`EB-281`). Called from every funnel that MOVES
+    /// the bank -- the same three chokepoints the <c>spark</c> meter ledger
+    /// rides, and nothing else -- so the number on screen and the number in the
+    /// ledger cannot come from different reads. The fourth call site is
+    /// <see cref="AfterPowerAmountChanged"/>, which is not a funnel but a net.
+    ///
+    /// NO CATCH-UP SITE, unlike <c>KleeBurstResource.SyncGauge</c>, and the
+    /// difference is real rather than an omission: Burst needs one because
+    /// BaseLib's cost machinery spends that meter outside the mod's funnels
+    /// entirely. Nothing outside this file moves a Spark bank -- every gain is
+    /// <see cref="Gain"/> and every spend is <see cref="Spend"/> or the
+    /// threshold consume below -- so there is nothing for an after-every-play
+    /// sync to catch. <see cref="AfterPowerAmountChanged"/> covers the one
+    /// exception, a bank moved by something that is not this mod at all.
+    ///
+    /// EMPTY IN A RELEASE BUILD. The gauge lives in <c>Vfx/Prototype/</c>, which
+    /// is <c>Compile Remove</c>d without <c>-p:PrototypeCards=true</c>, so the
+    /// seam is guarded here once instead of at each call site -- the same shape
+    /// <c>KleeBurstResource.Find</c> uses for the arm read it needs.
+    /// </summary>
+    private static void SyncGauge(Creature? player)
+    {
+#if PROTOTYPE_CARDS
+        Vfx.SparkGauge.Refresh(player);
+#endif
+    }
+
+    /// <summary>
+    /// The bank moved by something that is not this mod (`EB-281`): the
+    /// understudy's <c>set_power</c> door is the one that exists today, and it
+    /// applies through the game's own mutators rather than through
+    /// <see cref="Gain"/>. <c>Hook.AfterPowerAmountChanged</c> fans to every
+    /// model in the combat and fires on both <c>PowerCmd</c> paths, so the
+    /// display cannot be left stale by a mutator nobody here knows about.
+    ///
+    /// The guard is <c>power == this</c> and not a type test: the hook is fanned
+    /// to the OTHER seat's powers too (<c>Hook.IterateCombatHookListeners</c>),
+    /// and it is also what keeps a canonical model from reaching
+    /// <c>Owner</c>'s mutability assert.
+    ///
+    /// Redundant with the funnels for every ordinary gain and spend, which is
+    /// deliberate: a redraw writes the same value twice and costs nothing, and
+    /// the funnels stay the sites a reader can point at.
+    /// </summary>
+    public override Task AfterPowerAmountChanged(
+        PlayerChoiceContext choiceContext, PowerModel power, decimal amount,
+        Creature? applier, CardModel? cardSource)
+    {
+        if (power == this)
+        {
+            SyncGauge(Owner);
+        }
+
+        return Task.CompletedTask;
     }
 
     /// <summary>The bank right now, 0 when the counter is not on the creature
@@ -219,6 +306,7 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
             choiceContext, power, -amount, applier: null, cardSource: cardSource);
         Diagnostics.MeterLedger.Note(Diagnostics.MeterLedger.Spark,
             source ?? SourceOf(cardSource), power.Amount - before, before);
+        SyncGauge(player);
         return true;
     }
 
@@ -353,6 +441,11 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
         // printed price the face never showed.
         Diagnostics.MeterLedger.Note(Diagnostics.MeterLedger.Spark,
             "rule:threshold_consume", Amount - before, before);
+        // The third funnel. UNREACHABLE under the overhaul arm -- the base rule
+        // is retired wherever the gauge compiles (BaseRuleActive is false under
+        // PROTOTYPE_CARDS) -- and refreshed anyway, so "every funnel that moves
+        // the bank redraws it" stays one fact rather than two-thirds of one.
+        SyncGauge(Owner);
 
         // Sparks-spend VFX (sprint plan E3); concurrency-capped in the
         // spawner so burst turns cannot particle-storm the screen.
