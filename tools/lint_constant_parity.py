@@ -300,19 +300,16 @@ MIRRORED: dict[str, object] = {
     "CompanionOverhaulLaw.SurpriseDispatchDamage": C.MI_SURPRISE_DISPATCH_DMG,
     "CompanionOverhaulLaw.TamotoDamage": C.MI_TAMOTO_DMG,
     # THE KOKOMI OVERHAUL (QUARANTINED, `C.KOKOMI_OVERHAUL`). Same terms again
-    # and for the same reason: quarantined is not exempt. These six numbers ARE
-    # the rules (`review/active/kokomi-brief-2026-09-01.md` sec.4) -- the
-    # pulse's size and its per-combat ceiling, the two Song of Pearls replaces
-    # them with, the Garment's per-Attack chip, and the Tide a card costs to
-    # read -- and a prototype played on a number the sim never declared is
-    # exactly this lint's failure. They are placeholders and not claims, but
-    # they are the placeholders both sides have to agree on.
-    "KokomiOverhaulLaw.PulseMend": C.KOKOMI_OVERHAUL_PULSE_MEND,
-    "KokomiOverhaulLaw.PulseBudget": C.KOKOMI_OVERHAUL_PULSE_BUDGET,
-    "KokomiOverhaulLaw.SongOfPearlsMend": C.KOKOMI_OVERHAUL_SONG_MEND,
-    "KokomiOverhaulLaw.SongOfPearlsBudget": C.KOKOMI_OVERHAUL_SONG_BUDGET,
-    "KokomiOverhaulLaw.GarmentMend": C.KOKOMI_OVERHAUL_GARMENT_MEND,
-    "KokomiOverhaulLaw.TidePerCard": C.KOKOMI_OVERHAUL_TIDE_PER_CARD,
+    # and for the same reason: quarantined is not exempt. Draft 6 left the arm
+    # with exactly ONE rule number -- Tamakushi Casket's Hydro strike, printed
+    # on the relic and on no card -- because its rules are structural and every
+    # other figure is a CARD's, on its own row. The six draft 2 declared went
+    # with the pulse, the Garment and the Tide.
+    "KokomiOverhaulLaw.CasketStrike": C.KOKOMI_OVERHAUL_CASKET_STRIKE,
+    # Rally prints "costs 1 less" but the op carries no amount (it is one
+    # whole printed clause), so the number lives on the power and is
+    # mirrored like every other rule number.
+    "NextCompanionDiscountPower.Discount": C.KOKOMI_OVERHAUL_RALLY_DISCOUNT,
 }
 
 # --------------------------------------------------------------------------
@@ -394,6 +391,27 @@ UNMIRRORED: dict[str, str] = {
         "presentation: the Charge count's font size.",
     "KurageMemoryCard.BadgeFontSize":
         "presentation: the price badge's font size.",
+    # The Kokomi Plan strip (`EB-216`), on the same terms one element over:
+    # every number is SCREEN GEOMETRY or a font size for a HUD element the sim
+    # has no notion of. The one that is nearly a rule -- how many Plans get a
+    # picture -- is still presentation: the queue's LENGTH is the rule and the
+    # element prints the overflow as "+N" rather than dropping it.
+    "KokomiPlanStrip.EdgeMargin":
+        "presentation: distance from the left edge of the screen, in pixels.",
+    "KokomiPlanStrip.ThumbWidth":
+        "presentation: card-thumbnail width in pixels.",
+    "KokomiPlanStrip.ThumbHeight":
+        "presentation: thumbnail height, on the same 300x422 aspect the memory "
+        "card's is, so a Plan and a memory draw the same size card.",
+    "KokomiPlanStrip.ThumbGap":
+        "presentation: vertical gap between stacked thumbnails, in pixels.",
+    "KokomiPlanStrip.CountFontSize":
+        "presentation: the overflow count's font size.",
+    "KokomiPlanStrip.MaxDrawn":
+        "presentation: how many pending Plans get a picture before the column "
+        "runs off the band. Not a cap on the queue -- nothing limits how many "
+        "Plans she may write -- and the overflow is printed as `+N`, so the "
+        "sim has nothing to compare and no rule is hiding here.",
     "KurageMemoryPileRing.RingWidth":
         "presentation: ring thickness on a full-size card in the pile viewer, "
         "thicker than the HUD's because the card is.",

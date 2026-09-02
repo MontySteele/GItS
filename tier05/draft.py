@@ -599,15 +599,15 @@ KLEE_OVERHAUL_OPS = frozenset((
     "remove_bomb_for_block", "damage_set_off_total", "double_set_off",
     "draw_per_set_off"))
 
-#: The Kokomi overhaul's ten verbs (slice one, QUARANTINED behind
+#: The Kokomi overhaul's verbs (DRAFT 6, QUARANTINED behind
 #: `C.KOKOMI_OVERHAUL`). A second set beside the one above rather than a merged
 #: one, because the two arms are independent and a merged set would make either
 #: one's pricing decision look like the other's when the first of them is
 #: eventually taken.
 KOKOMI_OVERHAUL_OPS = frozenset((
-    "gain_tide", "surge", "block_half_surge", "exert", "mend", "plan",
-    "draw_companion_from_draw", "next_companion_free", "draw_per_tide",
-    "play_top_of_draw"))
+    "mend", "next_companion_discount", "remove_debuff",
+    "carry_out_front_plan", "plan_from_exhaust", "damage_quarter_max_hp",
+    "plan_twice", "damage_per_companion_last_turn"))
 
 
 def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
@@ -1983,9 +1983,10 @@ STATIC_OP_PRICING: dict[str, str] = {
             "resolve it, so there is no sim behaviour to price (slice packet "
             "sec.5; prototype surface only -- no shipped row prints it and no "
             "drafted number moves)"
-       for op in ("gain_tide", "surge", "block_half_surge", "exert",
-                  "plan", "draw_companion_from_draw", "next_companion_free",
-                  "draw_per_tide", "play_top_of_draw")},
+       for op in ("next_companion_discount", "remove_debuff",
+                  "carry_out_front_plan", "plan_from_exhaust",
+                  "damage_quarter_max_hp", "plan_twice",
+                  "damage_per_companion_last_turn")},
     # `mend` OUT OF THAT BULK, because half of its rationale stopped being
     # true: it is the one Kokomi verb a rewritten Inazuma UNIVERSAL prints, so
     # tier0 does resolve it behind `C.COMPANION_OVERHAUL`.

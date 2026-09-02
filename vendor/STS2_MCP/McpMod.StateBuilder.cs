@@ -1166,6 +1166,20 @@ public static partial class McpMod
                 state["kurage_memory"] = kurageMemory;
             }
 
+            // GItS LOCAL EDIT (`EB-216`, the Kokomi draft-6 half). The same
+            // gap one rule over: the arm's pending-Plans badge reaches the
+            // wire as a COUNT, and what the next morning WILL BE is the list
+            // behind it -- which Plans, in what order, and whether Nereid's
+            // Ascension has made each of them happen twice. The pet's entity
+            // id rides here too, because a Plan is played ON the jellyfish and
+            // a seat with no id to aim at cannot write one at all. Emitted
+            // only when this build HAS the rule. Implementation and its
+            // reflection contract: gits/GitsKokomiPlan.cs.
+            if (GitsKokomiPlanState(player) is { } kokomiPlans)
+            {
+                state["kokomi_plans"] = kokomiPlans;
+            }
+
             // Stars (The Regent's resource, conditionally shown)
             if (player.Character.ShouldAlwaysShowStarCounter || combatState.Stars > 0)
             {
@@ -1320,6 +1334,15 @@ public static partial class McpMod
         state["index"] = index;
         state["description"] = SafeGetCardDescription(card); // hand cards use default pile
         state["target_type"] = card.TargetType.ToString();
+        // GItS LOCAL EDIT (`EB-216`, the Kokomi draft-6 half). A CUSTOM target
+        // type has no enum NAME -- BaseLib mints the value at ModelDb.Init, so
+        // `ToString()` renders a bare number -- and the three the Plan uses
+        // (`Pet`, `PetOrSelf`, the arm's `PetOrEnemy`) are exactly the ones a
+        // seat has to be able to read. Rather than teach the bridge the mod's
+        // enum table, this asks the CARD the question the UI asks it:
+        // `IsValidTarget` is the game's own gate and BaseLib prefixes it for
+        // every custom type, so a `true` here means the drag would land.
+        state["can_target_pet"] = GitsCanTargetPet(card);
         state["can_play"] = unplayableReason == UnplayableReason.None;
         state["unplayable_reason"] = unplayableReason != UnplayableReason.None ? unplayableReason.ToString() : null;
 
@@ -2491,19 +2514,30 @@ public static partial class McpMod
         var combatState = player.PlayerCombatState;
         if (combatState == null) return pets;
 
-        // Check Osty specifically (Byrdpip/PaelsLegion are cosmetic with no real combat state)
-        var osty = combatState.GetPet<Osty>();
-        if (osty != null)
+        // GItS LOCAL EDIT (`EB-216`, the Kokomi draft-6 half). EVERY PET, not
+        // just Osty. Upstream checked Osty by type on the argument that
+        // "Byrdpip/PaelsLegion are cosmetic with no real combat state", which
+        // was true of the two pets that existed -- and stopped being true the
+        // moment a mod pet became a TARGET. The Bake-Kurage is where a Plan is
+        // sent, so a seat that cannot see it cannot play the character.
+        //
+        // `entity_id` IS THE COMBAT ID, as a string, and that is the whole
+        // point of the field: `ResolveTarget` parses a numeric id straight
+        // through `ICombatState.GetCreature`, so a pet is aimed at through
+        // exactly the door an enemy is aimed at through. Osty keeps every
+        // field it had and gains this one.
+        foreach (var pet in combatState.Pets)
         {
             pets.Add(new Dictionary<string, object?>
             {
-                ["id"] = osty.Monster?.Id.Entry ?? "OSTY",
-                ["name"] = SafeGetText(() => osty.Monster?.Title) ?? "Otsy",
-                ["alive"] = osty.IsAlive,
-                ["hp"] = osty.CurrentHp,
-                ["max_hp"] = osty.MaxHp,
-                ["block"] = osty.Block,
-                ["status"] = BuildPowersState(osty)
+                ["id"] = pet.Monster?.Id.Entry ?? "PET",
+                ["entity_id"] = pet.CombatId.ToString(),
+                ["name"] = SafeGetText(() => pet.Monster?.Title) ?? "Pet",
+                ["alive"] = pet.IsAlive,
+                ["hp"] = pet.CurrentHp,
+                ["max_hp"] = pet.MaxHp,
+                ["block"] = pet.Block,
+                ["status"] = BuildPowersState(pet)
             });
         }
 

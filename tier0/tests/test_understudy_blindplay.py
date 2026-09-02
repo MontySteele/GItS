@@ -2468,3 +2468,102 @@ def test_a_live_enchant_picker_says_it_cannot_mark_the_pick():
     assert "This screen's data feed carries no per-card selection state" in page
     assert "Confirm is available." in page
     assert "## What you have picked" not in page
+
+# --------------------------------------------------------------------------
+# THE KOKOMI OVERHAUL, DRAFT 6: the Plans on the page, and the pet as a target
+# (`EB-216`). Same posture as the memory block above and the same contract
+# shape, one rule over: `vendor/STS2_MCP/gits/GitsKokomiPlan.cs` lifts
+# `KokomiPlan.Snapshot` by reflection onto `player.kokomi_plans`, so what is
+# pinned here is which fields exist, that an absent key stays absent, and that
+# the queue and the jellyfish both reach the tester.
+# --------------------------------------------------------------------------
+
+
+def plans_combat_state(plans: dict | None) -> dict:
+    """A Kokomi combat with (or without) `player.kokomi_plans` on the wire."""
+    state = combat_state()
+    player = dict(state["player"])
+    player.pop("kokomi_plans", None)
+    if plans is not None:
+        player["kokomi_plans"] = plans
+    state = dict(state)
+    state["player"] = player
+    return state
+
+
+TWO_PLANS = {
+    "pet": True, "pet_name": "Bake-Kurage", "pet_entity_id": "41",
+    "pending": 2, "twice": False, "also_now": False,
+    "queue": [{"name": "Kurage's Oath (proto)", "clauses": 1},
+              {"name": "War Council", "clauses": 2}],
+}
+
+
+def test_a_board_with_no_plan_rule_carries_no_plan_section():
+    """The ABSENT / EMPTY split, and it is the same one the memory makes: a
+    release build has no Plan rule and a Klee at this table is not playing it,
+    and neither must be shown an empty jellyfish."""
+    for wire in (None, {}):
+        obs = blindplay.observation(plans_combat_state(wire))
+        assert "plans" not in obs["combat"]
+        assert "Bake-Kurage" not in blindplay.render(obs)
+
+
+def test_the_page_lists_the_pending_plans_front_first():
+    """The HUD draws them face up, front at the top, so the page numbers them
+    the same way -- a blind reader gets what a sighted player sees."""
+    page = blindplay.render(blindplay.observation(plans_combat_state(TWO_PLANS)))
+    assert "## The Bake-Kurage" in page
+    assert "1. **Kurage's Oath (proto)**" in page
+    assert "2. **War Council**" in page
+    assert "Enemies cannot touch it" in page
+
+
+def test_an_empty_morning_says_so_rather_than_printing_a_zero():
+    """`EB-198`'s lesson, carried: a HUD element showing a number over an empty
+    state reads as a state. Nothing pending is nothing to say."""
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(dict(TWO_PLANS, pending=0, queue=[]))))
+    assert "Nothing is planned. The morning is empty." in page
+    assert "in this order" not in page
+
+
+def test_the_two_rares_that_change_what_the_queue_means_are_printed():
+    """Nereid's Ascension makes the queue's LENGTH stop being the number of
+    things that will happen, and The Moon Overlooks the Waters makes a Plan
+    happen as it is written. Neither is visible from a count."""
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(dict(TWO_PLANS, twice=True, also_now=True))))
+    assert "carries out EVERY Plan twice" in page
+    assert "Plans also happen NOW" in page
+
+
+def test_the_grammar_offers_the_jellyfish_only_where_there_is_one():
+    with_pet = blindplay.observation(plans_combat_state(TWO_PLANS))
+    assert any('on "Bake-Kurage"' in c for c in with_pet["commands"])
+    without = blindplay.observation(plans_combat_state(None))
+    assert not any("Bake-Kurage" in c for c in without["commands"])
+
+
+def test_a_card_played_on_the_jellyfish_posts_the_pets_entity_id():
+    """The seat's whole route to writing a Plan, and it is the SAME `target`
+    field an attack aims through -- `pet_entity_id` is the pet's combat id, and
+    the bridge resolves a numeric id straight through `GetCreature`."""
+    state = plans_combat_state(TWO_PLANS)
+    res = blindplay.act(state, 'play "All Streams Flow to the Sea" '
+                               'on "Bake-Kurage"')
+    assert res["ok"], res
+    assert res["post"]["action"] == "play_card"
+    assert res["post"]["target"] == "41"
+    assert res["printed"]["target"] == "Bake-Kurage"
+
+
+def test_naming_no_target_still_plays_the_card_now():
+    """NAMED, NEVER DEFAULTED. "Now or at dawn" is the choice the slice exists
+    to test, so a card aimed at nothing is played NOW and only the tester's own
+    word sends it to the jellyfish."""
+    state = plans_combat_state(TWO_PLANS)
+    res = blindplay.act(state, 'play "All Streams Flow to the Sea" '
+                               'on "Nibbit"')
+    assert res["ok"], res
+    assert res["post"]["target"] == "NIBBIT_0"

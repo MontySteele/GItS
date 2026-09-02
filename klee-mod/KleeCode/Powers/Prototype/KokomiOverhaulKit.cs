@@ -1,100 +1,134 @@
 using System.Linq;
 using System.Threading.Tasks;
-using KleeMod.Cards;
-using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
-using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
-using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Powers;
 
 /// <summary>
-/// The two Commander verbs that belong to no rule -- Rally's search and
-/// Vanguard's grant -- kept out of <see cref="KokomiTide"/> because that file
-/// is the RULES and these are two cards.
+/// The verbs that belong to no rule -- Rally's discount, Cleansing Wave's
+/// cleanse -- and the ONE definition of "she applied a debuff to an enemy",
+/// which two different things read.
+///
+/// Kept out of <see cref="KokomiRules"/> because that file is the RULES and
+/// these are cards, with one exception: <see cref="IsHerDebuffOnEnemy"/> is a
+/// shared EVENT rather than a card, and it lives here so the relic and The
+/// Clouds Like Waves ask one question instead of two that drift.
 /// </summary>
 public static class KokomiOverhaulKit
 {
     /// <summary>
-    /// The loc table the prompt lives in, and it is the base game's own. Same
-    /// shape and the same reason as <see cref="RecallFromDiscard"/>'s:
-    /// <c>&lt;ENTRY&gt;.selectionScreenPrompt</c> in the <c>cards</c> table is
-    /// how the base game names a selection screen, and a <c>LocString</c> is a
-    /// table plus a key with no raw-text constructor, so copy can only reach
-    /// the screen as a row.
-    /// </summary>
-    private const string Table = "cards";
-
-    /// <summary>Keyed on the VERB rather than on a card id -- one screen, one
-    /// string, however many carriers eventually print it.</summary>
-    public const string CompanionSearchPromptKey =
-        "KLEEMOD-KOKOMI_COMPANION_SEARCH.selectionScreenPrompt";
-
-    /// <summary>The prompt text. Merged into the table by
-    /// <c>KleeMod.InjectLocStrings</c>, which is its only source.</summary>
-    public const string CompanionSearchPromptText =
-        "Choose a Companion card from your Draw Pile. Draw it.";
-
-    /// <summary>The selection prompt. One member, so the copy lands in one
-    /// place.</summary>
-    public static LocString CompanionSearchPrompt =>
-        new LocString(Table, CompanionSearchPromptKey);
-
-    /// <summary>Which cards Rally can find. Read-only, and present so a pin and
-    /// any future count surface read the claim rather than restating it.</summary>
-    public static bool IsCompanion(CardModel card) => card is ICompanionCard;
-
-    /// <summary>
-    /// Rally: "Draw a Companion card from your draw pile."
+    /// Rally: "The next Companion card you play this turn costs 1 less."
     ///
-    /// THE PLAYER CHOOSES, through the game's own pile-selection screen -- the
-    /// same door <c>RecallFromExhaust</c> uses, filtered by predicate. The card
-    /// says "a Companion", not "a random Companion", and this is the Commander
-    /// loop's one search: a coin flip would make the card find the army rather
-    /// than let her pick which part of it arrives.
-    ///
-    /// AN EMPTY POOL IS A NO-OP and not a screen. A selection over nothing is
-    /// a click the player cannot answer.
-    /// </summary>
-    public static async Task DrawCompanionFromDraw(
-        PlayerChoiceContext choiceContext, Player? owner, CardModel source)
-    {
-        if (owner == null) return;
-        var pile = CardPile.Get(PileType.Draw, owner);
-        if (pile == null) return;
-        if (!pile.Cards.Any(IsCompanion)) return;
-
-        var pick = (await CardSelectCmd.FromCombatPile(
-            choiceContext, pile, owner,
-            new CardSelectorPrefs(CompanionSearchPrompt, 1),
-            IsCompanion)).FirstOrDefault();
-        if (pick == null) return;
-
-        // "DRAW IT" IS A MOVE TO HAND, which is what the base game's own
-        // search cards do: the card leaves the draw pile and arrives in hand,
-        // and nothing else about the turn's draw changes.
-        await CardPileCmd.Add(pick, PileType.Hand, CardPilePosition.Top);
-    }
-
-    /// <summary>
-    /// Vanguard: "The next Companion you play this turn costs 0."
-    ///
-    /// ONE STACK, ALWAYS. The grant is a switch, not a counter -- a second
-    /// Vanguard in one turn cannot make the next Companion cost less than 0 --
-    /// so this applies at 1 whether or not the power is already there, and
-    /// <see cref="NextCompanionFreePower"/> removes itself on the play that
+    /// ONE STACK, ALWAYS. The grant is a switch, not a counter -- two Rallies
+    /// in one turn do not make the next Companion cost two less, because the
+    /// card says "costs 1 less" and not "costs 1 less per Rally" -- so this
+    /// applies at 1 whether or not the power is already there, and
+    /// <see cref="NextCompanionDiscountPower"/> removes itself on the play that
     /// spends it.
     /// </summary>
-    public static async Task NextCompanionFree(
+    public static async Task NextCompanionDiscount(
         PlayerChoiceContext choiceContext, Creature? kokomi, CardModel? cardSource)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (kokomi!.Powers.OfType<NextCompanionFreePower>().Any()) return;
-        await PowerCmd.Apply<NextCompanionFreePower>(
+        if (kokomi!.Powers.OfType<NextCompanionDiscountPower>().Any()) return;
+        await PowerCmd.Apply<NextCompanionDiscountPower>(
             choiceContext, kokomi, 1, applier: kokomi, cardSource: cardSource);
+    }
+
+    /// <summary>
+    /// Cleansing Wave: "Remove a debuff from yourself."
+    ///
+    /// A READING, recorded because the card says "a debuff" and not "the worst
+    /// one": the FIRST debuff on her power list goes, which is the oldest one
+    /// still standing, and the card gives the player no choice. A selection
+    /// screen would be a different card, and picking "the largest" would be a
+    /// rule nothing printed. The alternative is one line away if play says so.
+    ///
+    /// AN AURA IS NOT A DEBUFF and cannot be cleansed by this: the mod's
+    /// <c>AuraPower</c> is <c>PowerType.Buff</c> (decompile-checked; the base
+    /// game's own aura reads as a debuff only through its per-amount helper),
+    /// and it lives on enemies anyway.
+    /// </summary>
+    public static async Task RemoveOneDebuff(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var debuff = kokomi!.Powers
+            .FirstOrDefault(p => p.Type == PowerType.Debuff);
+        if (debuff == null) return;
+        await PowerCmd.Remove(debuff);
+    }
+
+    /// <summary>
+    /// Undertow's "if the enemy has a debuff". The definition is the ENGINE'S
+    /// OWN -- <c>PowerType.Debuff</c> -- rather than a list of names this file
+    /// would have to keep current as the arm, the companions and the base game
+    /// each add one.
+    /// </summary>
+    public static bool HasDebuff(Creature? creature) =>
+        creature != null && creature.Powers.Any(p => p.Type == PowerType.Debuff);
+
+    /// <summary>
+    /// Re-entrancy latch for <see cref="IsHerDebuffOnEnemy"/>'s consumers.
+    ///
+    /// IT IS NOT PARANOIA. The Casket's answer to a debuff is a HYDRO hit, and
+    /// a Hydro hit can meet a Cryo aura and Freeze -- and Frozen is a debuff,
+    /// applied by her, to an enemy. Without this the relic would answer its own
+    /// answer until the stack ran out. The latch is a plain static because the
+    /// whole event is synchronous within one hook broadcast and the mod is
+    /// single-threaded; it is cleared in a `finally` so a throw inside a strike
+    /// cannot leave the relic permanently deaf.
+    /// </summary>
+    private static bool _answering;
+
+    /// <summary>Is the arm's debuff answer allowed to fire right now?</summary>
+    public static bool Answering => _answering;
+
+    /// <summary>Run <paramref name="answer"/> with the latch held.</summary>
+    public static async Task Answer(System.Func<Task> answer)
+    {
+        if (_answering) return;
+        _answering = true;
+        try
+        {
+            await answer();
+        }
+        finally
+        {
+            _answering = false;
+        }
+    }
+
+    /// <summary>
+    /// "SHE APPLIED A DEBUFF TO AN ENEMY", once, for everything that reads it.
+    ///
+    /// The hook is <c>AfterPowerAmountChanged</c>, which the game fans to every
+    /// model in the combat and raises on both <c>PowerCmd</c> paths, so nothing
+    /// that puts a debuff on an enemy can slip past -- a card, a Plan, a
+    /// companion or a reaction.
+    ///
+    /// FOUR CLAUSES AND EVERY ONE OF THEM EARNS ITS PLACE:
+    ///   * <c>amount &gt; 0</c> -- a debuff being REMOVED or ticking down is
+    ///     not one being applied;
+    ///   * <c>power.Type == Debuff</c> -- the engine's own classification, so a
+    ///     Buff on an enemy (an aura, which this mod files as a Buff) does not
+    ///     count and the list never needs maintaining;
+    ///   * the carrier is an ENEMY -- her own Weak is not a debuff she applied
+    ///     to an enemy;
+    ///   * the applier is HER -- in co-op the other seat's Weak is not hers,
+    ///     and an enemy debuffing another enemy is nobody's.
+    /// </summary>
+    public static bool IsHerDebuffOnEnemy(
+        PowerModel power, decimal amount, Creature? applier, Creature? kokomi)
+    {
+        if (kokomi == null || amount <= 0m) return false;
+        if (applier != kokomi) return false;
+        if (power.Type != PowerType.Debuff) return false;
+        var carrier = power.Owner;
+        return carrier != null && carrier.IsEnemy && !carrier.IsDead;
     }
 }

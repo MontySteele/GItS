@@ -18,7 +18,7 @@ namespace KleeMod.Cards;
 /// and both Kokomi seats in round one inferred `Exert` from watching their own
 /// HP drop, which is the only way the rule was ever stated to them. The
 /// Casket's `Mend` read as BROKEN at full HP for the same reason: the
-/// entry-HP bound is real, it is enforced in <see cref="KokomiTide.Mend"/>,
+/// entry-HP bound is real, it is enforced in <see cref="KokomiRules.Mend"/>,
 /// and it was printed nowhere.
 ///
 /// A MISSING HOVER TIP RENDERS AS NOTHING AT ALL. There is no wrong number to
@@ -39,15 +39,15 @@ namespace KleeMod.Cards;
 ///
 /// WHAT THESE ARE NOT. They are NOT the badge. `ProtoBombPower` prints the
 /// Bomb rules on the ENEMY, live, with the pile's own numbers in them, and
-/// `ProtoBakeKuragePower` does the same for the Tide on the jellyfish. Those
-/// stay exactly as they are. A badge can only be read once the thing exists on
+/// `PendingPlansPower` does the same for the Plans she is holding. Those stay
+/// exactly as they are. A badge can only be read once the thing exists on
 /// the board; the card-side keyword is what a player reads in HAND, in a
 /// reward, in a shop and on the blind-play page -- which is where the word was
 /// first met and where it explained nothing.
 ///
 /// THE NUMERALS ARE INTERPOLATED FROM THE CONSTANTS THEY QUOTE (`EB-89`), so a
-/// retune of `KleeOverhaulLaw.BombGrowth` or `KokomiOverhaulLaw.GarmentMend`
-/// cannot leave one of these sentences telling a player a retired number.
+/// retune of `KleeOverhaulLaw.BombGrowth` cannot leave one of these
+/// sentences telling a player a retired number.
 /// </summary>
 public static class ArmKeywordTips
 {
@@ -65,12 +65,8 @@ public static class ArmKeywordTips
     public const string SetOffKey = "KLEEMOD-ARM_SET_OFF";
     public const string SparkKey = "KLEEMOD-ARM_SPARK";
     public const string MineKey = "KLEEMOD-ARM_MINE";
-    public const string TideKey = "KLEEMOD-ARM_TIDE";
-    public const string SurgeKey = "KLEEMOD-ARM_SURGE";
-    public const string ExertKey = "KLEEMOD-ARM_EXERT";
     public const string MendKey = "KLEEMOD-ARM_MEND";
     public const string PlanKey = "KLEEMOD-ARM_PLAN";
-    public const string GarmentKey = "KLEEMOD-ARM_GARMENT";
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
 
     // ----------------------------------------------------------- Klee ------
@@ -152,60 +148,38 @@ public static class ArmKeywordTips
 
     // ---------------------------------------------------------- Kokomi -----
     //
-    // Her six are the slice's own rules section, verbatim
-    // (`review/active/kokomi-overhaul-slice-1-2026-09-01.md` sec.2,
-    // "Keywords with tooltips: Tide, Surge, Exert, Mend, Plan, Garment").
+    // Her TWO, and the slice's own rules section is what makes it two
+    // (`review/active/kokomi-overhaul-slice-1-2026-09-01.md` draft 6 sec.2,
+    // "Keywords with tooltips: Plan, Mend"). Draft 2 printed six; Tide, Surge,
+    // Exert and Garment left with the rules they named.
 
-    /// <summary>Rules 1 and 2.</summary>
-    public static IEnumerable<IHoverTip> ForTide(
+    /// <summary>
+    /// RULE 2, and it is the whole kit in two sentences. The SECOND one is the
+    /// load-bearing half: a player who has never read the brief has to be able
+    /// to find "play it on the jellyfish" from the card in their hand, which is
+    /// the slice's own first acceptance sentence (sec.1).
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, TideKey,
-            "The [gold]Bake-Kurage[/gold] is always on the field and holds "
-          + "[gold]Tide[/gold], starting at 0, never resetting on its own. "
-          + "Her cards add Tide.");
-
-    /// <summary>Rule 3.</summary>
-    public static IEnumerable<IHoverTip> ForSurge(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, SurgeKey,
-            "The jellyfish deals Hydro damage equal to the [gold]Tide[/gold] "
-          + "to the target; Tide is 0.");
-
-    /// <summary>Rule 5, and the one both round-one seats had to infer from
-    /// watching their own HP drop.</summary>
-    public static IEnumerable<IHoverTip> ForExert(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, ExertKey,
-            "[gold]Exert N[/gold]: on Skills and Powers only, never Attacks. "
-          + "Lose N HP, Block first.");
+        With(inherited, PlanKey,
+            "Play this on the [gold]Bake-Kurage[/gold] instead and the "
+          + "jellyfish carries out the [gold]Plan[/gold] line at the start of "
+          + "your next turn. The cost is paid now either way, and planned hits "
+          + "land on the front enemy unless the line says every enemy.");
 
     /// <summary>
     /// THE BOUND IS THE WHOLE POINT OF THIS ROW'S SECOND HALF. The Casket read
     /// as broken at full HP because a Mend at the ceiling does nothing and
     /// nothing on screen said there was a ceiling. The sentence is
-    /// <see cref="KokomiTide.Mend"/>'s own ("never above the HP you entered the
-    /// fight with"), so the rule and its only explanation are one line apart.
+    /// <see cref="KokomiRules.Mend"/>'s own ("never above the HP you entered
+    /// the fight with"), so the rule and its only explanation are one line
+    /// apart.
     /// </summary>
     public static IEnumerable<IHoverTip> ForMend(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MendKey,
             "[gold]Mend N[/gold]: heal N HP, never above the HP you entered "
           + "the fight with.");
-
-    /// <summary>Rule 8.</summary>
-    public static IEnumerable<IHoverTip> ForPlan(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, PlanKey,
-            "[gold]Plan[/gold]: happens at the start of her next turn.");
-
-    /// <summary>Rule 6. Distinct from `KLEEMOD-GARMENT_RIDER`, which is raised
-    /// on her ATTACKS and only while the state is UP: this one is the word's
-    /// definition and is raised by the face that grants it.</summary>
-    public static IEnumerable<IHoverTip> ForGarment(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, GarmentKey,
-            "For a stated number of turns, each Attack that hits "
-          + "[gold]Mends[/gold] " + KokomiOverhaulLaw.GarmentMend + ".");
 
     // ------------------------------------------------------- companions ----
 
@@ -228,7 +202,7 @@ public static class ArmKeywordTips
     /// One tip, appended after whatever the card already carries.
     ///
     /// APPENDED RATHER THAN PREPENDED so a card's own live-arithmetic riders
-    /// (the Charge rate, the Garment window, a reaction preview) stay at the
+    /// (the Charge rate, a reaction preview) stay at the
     /// top of the stack: those say what THIS play will do, and a definition of
     /// a word is the thing you read second.
     /// </summary>

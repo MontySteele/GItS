@@ -44,7 +44,14 @@ from art_fetch import read_plan  # noqa: E402
 DOCS = ROOT / "docs"
 SHEETS = ("furina-cards.yaml", "klee-cards.yaml", "kokomi-cards.yaml",
           "mondstadt-companions.yaml", "fontaine-companions.yaml",
-          "inazuma-companions.yaml")
+          "inazuma-companions.yaml",
+          # NOT a canonical sheet -- the quarantined staging surface (R213 B).
+          # Listed for one reason: its rows carry `name`, and a placeholder
+          # sheet that labels a card `proto_kk_the_generals_banner` and
+          # nothing else cannot be vetoed by eye. Membership is unaffected:
+          # `batch_of` routes every proto_* id into its own batch before it
+          # consults a sheet, so no existing batch changes.
+          "prototype-surface.yaml")
 
 BATCH_TITLES = {
     "identity": "Furina identity — basics, generic/courtroom, and all 15 rares",
@@ -56,6 +63,8 @@ BATCH_TITLES = {
     "kokomi-priest": "Kokomi Priest — rituals, offerings, prayer (item + environment)",
     "kokomi-assist": "Kokomi Assist — quiet moments and tricks (the sticker pool lives here)",
     "klee": "Klee — the original sprint's card slice",
+    "prototype": "Prototype placeholders — borrowed art for the quarantined "
+                 "surface: name match first, deprecated-source reuse second",
     "assets": "UI / powers / relics / model — reviewed at native size",
     "unsorted": "Unsorted — no canonical sheet row and no known output path",
     "all": "All shortlists",
@@ -69,7 +78,7 @@ BATCH_TITLES = {
 BATCH_ORDER = ["identity", "salon-fanfare", "spotlight",
                "kokomi-identity", "kokomi-commander", "kokomi-priest",
                "kokomi-assist", "companions",
-               "klee", "assets", "unsorted"]
+               "klee", "prototype", "assets", "unsorted"]
 
 
 def card_meta():
@@ -107,6 +116,14 @@ def card_meta():
 def batch_of(asset_id, out_path, meta):
     """Which review batch an asset belongs to. First match wins -- see docstring."""
     out = out_path.replace("\\", "/")
+    # BEFORE the output-path routing, on purpose. A prototype placeholder is
+    # filed in the out-dir of the character it borrows from, so path routing
+    # would scatter the set across three batches -- and the review question is
+    # "does every prototype card now have a face", which is one page or it is
+    # nothing. The prefix is the quarantined surface's own id convention
+    # (docs/prototype-surface.yaml); art_lint keys on the same one.
+    if asset_id.startswith("proto_"):
+        return "prototype"
     if "/cards/companions/" in out:
         return "companions"
     if "/cards/klee/" in out:

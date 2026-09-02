@@ -326,8 +326,18 @@ public class KleeOverhaulRoundThreeTests
             .ToList();
         Assert.True(rows.Count > 100, $"only {rows.Count} rows in the rule's set");
 
+        // TWO THIRDS, not three quarters, and draft 6 is why the bar moved.
+        // The Prototype-stage rule reads a row's `effects:` -- its NOW-line --
+        // and Kokomi's rewrite put sixteen rows' numbers in a `plan:` list
+        // instead, seven of them with no now-line at all. Those numbers are
+        // deliberately NOT upgradeable: a planned clause is emitted as a
+        // literal on `PlanClauses`, so a `plan`-derived delta would be a
+        // declared upgrade the emitter cannot express, which stops the run by
+        // name. So the rule's coverage of HER rows fell honestly, and the two
+        // assertions that carry the weight are unchanged: a majority upgrade,
+        // and every exception is a row the rule's own last clause allows.
         var upgraded = rows.Where(HasUpgradeBody).ToList();
-        Assert.True(upgraded.Count * 4 >= rows.Count * 3,
+        Assert.True(upgraded.Count * 3 >= rows.Count * 2,
                     $"only {upgraded.Count} of {rows.Count} rows upgrade");
 
         // AND THE EXCEPTIONS ARE EXACTLY THE ONES THE RULE ALLOWS, which is
@@ -353,11 +363,13 @@ public class KleeOverhaulRoundThreeTests
         // emitter's intention.
         AssertUpgradeMoves<ProtoKkWatersEdge>("Damage", 6m, 9m);
         AssertUpgradeMoves<ProtoKkCoralBulwark>("Block", 6m, 9m);
-        AssertUpgradeMoves<ProtoKkCoralBulwark>("Tide", 6m, 8m);
         AssertUpgradeMoves<ProtoKoKapow>("Damage", 7m, 10m);
         AssertUpgradeMoves<ProtoKoPop>("BombSize", 5m, 7m);
         AssertUpgradeMoves<ProtoKoChainFuse>("Grow", 3m, 4m);
-        AssertUpgradeMoves<ProtoKkCleansingTide>("Mend", 6m, 8m);
+        // The Mend clause, on draft 6's carrier. `Tide` left this pin with the
+        // verb it read: the rule's key list is written over OPS, so retiring
+        // `gain_tide` retired the delta and nothing here had to be re-decided.
+        AssertUpgradeMoves<ProtoKkTheMoonAShip>("Mend", 10m, 12m);
         // The multi-hit clause: +1 PER HIT rather than +3 once.
         AssertUpgradeMoves<ProtoKoRapidFire>("Damage", 3m, 4m);
     }

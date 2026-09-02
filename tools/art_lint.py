@@ -32,6 +32,11 @@ Rules, each a defect that actually shipped in the first art sprint:
       read as a violation. The group makes that reuse legal -- but only when
       the crop actually changes, or the two cards are the same picture twice.
 
+L1, L7 and L12 all partition on `is_prototype` (see that function). A
+placeholder for a quarantined prototype row deliberately wears a shipped
+card's source, crop and pixels, so the three duplicate rules compare
+prototypes with prototypes and shipped with shipped, never across.
+
 The `source_group` column carries the character family. Rows LEAVE IT BLANK
 by default, and blank keeps strict L1. That default is load-bearing: Furina's
 own 76 cards are one character but must never share a source with each other
@@ -58,6 +63,35 @@ import sys
 from pathlib import Path
 
 REGISTERS = {"sticker", "item", "vfx", "tcg", "splash", "icon"}
+
+# The quarantined prototype surface (docs/prototype-surface.yaml, R213 B). Its
+# ids all carry this prefix, and the codegen that emits their C# reads the same
+# file, so the prefix is the surface's own name for itself rather than a
+# convention this file invented.
+PROTOTYPE_PREFIX = "proto_"
+
+
+def is_prototype(asset_id: str) -> bool:
+    """Is this a placeholder for a quarantined prototype row?
+
+    Prototype rows are cards being TRIED. Their art is commissioned only if
+    the slice is accepted, so until then they wear a SHIPPED card's picture
+    -- the same source, the same crop, the same pixels -- chosen by name
+    match where the names agree and by deprecated-source reuse where they do
+    not (art/plan.tsv, the PROTOTYPE PLACEHOLDERS block).
+
+    That makes the dedupe rules read the wrong thing unless they know about
+    it. L1 would call the mirror a duplicate source, L7 would call it an
+    undifferentiated sibling crop, and L12 would call the file a duplicate
+    picture -- three findings about the one property the pass exists to
+    create. So the rules partition instead of exempting: prototype picks are
+    deduped against prototype picks, shipped picks against shipped picks, and
+    a prototype wearing a shipped card's face is legal BY CONSTRUCTION. Two
+    prototype cards wearing one face is still a finding, because that is the
+    real defect (a seat cannot tell two cards apart), and it is the reason
+    this is a partition and not a blanket exemption.
+    """
+    return asset_id.startswith(PROTOTYPE_PREFIX)
 
 # L4: item renders must FIT, never FILL. `contain` has always been legal;
 # `cover_autocrop` joined it (2026-07-21) because autocrop attacks L4's actual
@@ -322,9 +356,14 @@ def lint(rows, *, pixel_check: bool = True) -> list[str]:
         if "/cards/" in r["out"] and (r["pick"] == "auto" or r["rank"] == 1)
     ]
 
+    # L1/L7 run inside the PROTOTYPE partition and inside the SHIPPED
+    # partition, never across -- which is why the partition is in the key.
+    # See is_prototype() for the argument; in one line, a prototype
+    # placeholder is SUPPOSED to be the shipped card's picture, and a rule
+    # that forbade it would forbid the whole point of the pass.
     seen: dict[tuple, dict] = {}
     for r in effective:
-        key = (r["title"], r["frame"])
+        key = (r["title"], r["frame"], is_prototype(r["asset_id"]))
         if key in seen:
             prev = seen[key]
             frame = f" @{r['frame']}%" if r["frame"] is not None else ""
@@ -827,11 +866,30 @@ def identical_crops() -> list[str]:
     for ids in seen.values():
         if len(ids) < 2:
             continue
-        if frozenset(ids) in KNOWN_IDENTICAL:
-            print(f"KNOWN IDENTICAL (allowlisted): L12 {' == '.join(ids)}")
+        # Split the group the way L1/L7 split the plan (see is_prototype).
+        # A prototype placeholder IS the shipped card's pixels on purpose, so
+        # one prototype stem sitting in a group with shipped stems is the
+        # designed outcome and not a finding. TWO prototype stems in one group
+        # is a finding, and it is the finding that matters here: two cards a
+        # seat has to tell apart rendering the same picture.
+        protos = [i for i in ids if is_prototype(i)]
+        others = [i for i in ids if not is_prototype(i)]
+        if len(protos) > 1:
+            problems.append(
+                f"L12 {' == '.join(protos)}: two PROTOTYPE placeholders render "
+                f"the same picture. Give one of them a different deprecated "
+                f"source, or a different crop of the same one."
+            )
+        if protos and others:
+            print(f"PROTOTYPE PLACEHOLDER (by design): L12 "
+                  f"{' == '.join(protos)} wears {' / '.join(others)}")
+        if len(others) < 2:
+            continue
+        if frozenset(others) in KNOWN_IDENTICAL:
+            print(f"KNOWN IDENTICAL (allowlisted): L12 {' == '.join(others)}")
             continue
         problems.append(
-            f"L12 {' == '.join(ids)}: effective crops are PIXEL-IDENTICAL. "
+            f"L12 {' == '.join(others)}: effective crops are PIXEL-IDENTICAL. "
             f"Both crop modes clamp, so differing focus strings do not "
             f"guarantee differing art -- re-anchor within the source's valid "
             f"range, or give one of them a different source."

@@ -910,23 +910,6 @@ CO_TENANCY_LEDGER = {
             "there is nothing here to model",
     },
     "BeforeSideTurnEnd": {
-        ("Relics/TamanooyasCasket.cs", "TamanooyasCasket"):
-            "QUARANTINED (the Kokomi overhaul; the whole class is `#if "
-            "PROTOTYPE_CARDS`). RULE 4, the pulse: on a turn she did not "
-            "Surge, the jellyfish Mends her, bounded by her entry HP and by a "
-            "per-combat budget the relic holds. THE ORDERING QUESTION, "
-            "answered: it reads the arm's own per-turn Surge latch, which only "
-            "a card play writes and every card play is strictly earlier than "
-            "this broadcast; it writes HP and the budget, and the budget is "
-            "read by nothing else. The one co-tenant that touches HP at turn "
-            "end is TurnEndSequencer, whose four ordered steps are Klee's two "
-            "volleys, Oz's, and KurageSummonPower.FirePulse -- and under this "
-            "arm no card summons a KurageSummonPower and the base kit's "
-            "install is gated off, so that step cannot fire on her. Sango "
-            "Isshin can turn the pulse's excess into a Hydro hit, which "
-            "touches the shared aura state; the same argument covers it, "
-            "because the only aura-writing co-tenants here are those same "
-            "volleys and they belong to a different character",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "EndOfTurnSetOffPower"):
             "QUARANTINED (the Klee overhaul). Sparks 'n' Splash, the ONE "
             "power in the slice that fires without a card saying so -- the "
@@ -968,17 +951,21 @@ CO_TENANCY_LEDGER = {
             "test_the_sequencer_walks_the_table",
     },
     "AfterSideTurnEnd": {
-        ("Powers/Prototype/KokomiOverhaulPowers.cs", "ProtoGarmentPower"):
-            "QUARANTINED (the Kokomi overhaul). Duration tick-down of itself, "
-            "player side -- the same shape and the same broadcast as the "
-            "shipped CeremonialGarmentPower below, which is the power it takes "
-            "over from. Touches nothing but its own Amount",
-        ("Powers/Prototype/KokomiOverhaulPowers.cs", "NextCompanionFreePower"):
-            "QUARANTINED (the Kokomi overhaul). Vanguard's grant, expiring at "
-            "the end of the turn that wrote it -- the ratified same-turn "
-            "boundary (FLAG-1 / R114), and the identical shape and broadcast "
-            "as CompanionCostThisTurnPower and ReplayNextCompanionPower below. "
-            "Removes itself and touches nothing else",
+        ("Powers/Prototype/KokomiPlan.cs", "PlanTwicePower"):
+            "QUARANTINED (the Kokomi overhaul, draft 6). Nereid's Ascension's "
+            "window, ticking itself down on the player side -- the same shape "
+            "and the same broadcast as the shipped CeremonialGarmentPower "
+            "below. Touches nothing but its own Amount, and the thing it "
+            "modifies (how many times a Plan is carried out) is read at the "
+            "START of her next turn, strictly after every tenant here",
+        ("Powers/Prototype/KokomiOverhaulPowers.cs",
+         "NextCompanionDiscountPower"):
+            "QUARANTINED (the Kokomi overhaul, draft 6). Rally's grant, "
+            "expiring at the end of the turn that wrote it -- the ratified "
+            "same-turn boundary (FLAG-1 / R114), and the identical shape and "
+            "broadcast as CompanionCostThisTurnPower and "
+            "ReplayNextCompanionPower below. Removes itself and touches "
+            "nothing else",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
             "diagnostics observer; reads, never writes board state",
         ("Powers/CompanionPowers.cs", "CompanionCostThisTurnPower"):

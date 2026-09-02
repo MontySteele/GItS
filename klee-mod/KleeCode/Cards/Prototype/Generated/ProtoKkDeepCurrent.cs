@@ -44,21 +44,20 @@ public sealed class ProtoKkDeepCurrent : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForTide(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
+        KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_deep_current");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deep Current"),
-        ("description", "Deal {Damage:diff()} damage to every enemy. [gold]Tide[/gold] +{Tide:diff()} per enemy hit."),
+        ("description", "Deal {Damage:diff()} damage to every enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move),
-            new DynamicVar("Tide", 1m)
+            new DamageVar(4m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -70,19 +69,16 @@ public sealed class ProtoKkDeepCurrent : CustomCardModel, IElementalCard, IChara
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        KokomiOverhaulLedger.For(Owner.Creature).BeginPlay(CombatState?.HittableEnemies.Count(e => !e.IsDead) ?? 0);
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        await KokomiTide.GainPerEnemyHit(choiceContext, Owner.Creature, DynamicVars["Tide"].IntValue);
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(3m);
-        DynamicVars["Tide"].UpgradeValueBy(2m);
     }
 }

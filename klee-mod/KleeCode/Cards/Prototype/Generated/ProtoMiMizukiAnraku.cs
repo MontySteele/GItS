@@ -89,7 +89,7 @@ public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard
         }
         else
         {
-            await KokomiTide.Mend(choiceContext, Owner.Creature, 10);
+            await KokomiRules.Mend(choiceContext, Owner.Creature, 10);
         }
     }
 

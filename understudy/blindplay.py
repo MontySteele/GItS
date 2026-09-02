@@ -783,7 +783,53 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     memory = kurage_memory(p)
     if memory is not None:
         combat["memory"] = memory
+    plans = kokomi_plans(p)
+    if plans is not None:
+        combat["plans"] = plans
     return combat
+
+
+def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
+    """The pending Plans as the observed board sees them (`EB-216`).
+
+    THE ABSENT / EMPTY SPLIT IS THE SAME ONE `kurage_memory` MAKES, and for the
+    same reason: an ABSENT key is "no Plan rule in this build", an EMPTY map is
+    "the rule is here and this seat is not playing it", and a POPULATED map is
+    her queue. `None` here keeps the section off the page in both of the first
+    two cases -- a Klee at this table must not be shown an empty jellyfish.
+
+    Emitted by `vendor/STS2_MCP/gits/GitsKokomiPlan.cs`, which lifts it by
+    reflection from `KleeMod.Powers.KokomiPlan.Snapshot`. Every field name below
+    is that method's, and the two together are the contract:
+
+      pet / pet_name / pet_entity_id -- the Bake-Kurage, and the id a play aims
+        at. `pet_entity_id` is null on a board with no jellyfish, which is a
+        state rule 1 says cannot happen and this reader does not assume.
+      pending -- how many Plans are waiting.
+      twice -- Nereid's Ascension is up, so every Plan below happens TWICE. It
+        is the one thing that makes the count stop being the number of things
+        that will happen, which is why it is a field and not an inference.
+      also_now -- The Moon Overlooks the Waters is out, so a Plan written this
+        turn also happens immediately.
+      queue -- ordered, front first: the card's name and how many clauses its
+        Plan line carries.
+    """
+    raw = player.get("kokomi_plans")
+    if not isinstance(raw, dict) or not raw:
+        return None
+    queue = [{"name": _text(row.get("name")),
+              "clauses": _int(row.get("clauses"))}
+             for row in (raw.get("queue") or []) if isinstance(row, dict)]
+    pet_id = raw.get("pet_entity_id")
+    return {
+        "pet": bool(raw.get("pet")),
+        "pet_name": _text(raw.get("pet_name")) or "Bake-Kurage",
+        "pet_entity_id": None if pet_id is None else _text(pet_id),
+        "pending": _int(raw.get("pending")),
+        "twice": bool(raw.get("twice")),
+        "also_now": bool(raw.get("also_now")),
+        "queue": queue,
+    }
 
 
 def _pulse_phrase(memory: dict[str, Any]) -> str:
@@ -1059,6 +1105,15 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["commands"] = ['play "<card title>" [on "<enemy>"]',
                            'use potion "<potion>" [on "<enemy>"]',
                            "end turn"]
+        # `EB-216`, the Kokomi draft-6 half. The jellyfish is a TARGET, and
+        # naming it is how a Plan is written -- so the grammar has to say so
+        # on the screen where it can be used, and only there. A board with no
+        # pet never sees this line.
+        plans = obs["combat"].get("plans")
+        if plans and plans.get("pet"):
+            obs["commands"].insert(
+                1, f'play "<card title>" on "{plans["pet_name"]}"'
+                   "   (writes its Plan instead of playing it now)")
     elif st == "map":
         obs["screen"] = "map"
         obs["nodes"] = _map_options(state)
@@ -1392,6 +1447,38 @@ def render(obs: dict[str, Any]) -> str:
                 + (f" ({r['counter']})" if r.get("counter") else "")
                 + (f" — {r['text']}" if r["text"] else "")
                 for r in you["relics"]]
+        if c.get("plans"):
+            # `EB-216`, the Kokomi draft-6 half, and the page's contract is
+            # `EB-198`'s lesson restated: ONE FACT PER LINE. The strip that
+            # preceded this put a bank, a price and a state into one sentence
+            # with three grammars and both readings of it were true; what
+            # replaced it says the jellyfish is there, then what is waiting on
+            # it, then in what order.
+            #
+            # THE ORDER IS THE ELEMENT'S. The HUD draws the pending Plans face
+            # up, front at the top, so the page numbers them the same way -- a
+            # blind reader is given what a sighted player sees and nothing
+            # else.
+            pl = c["plans"]
+            out += ["", f"## The {pl['pet_name']}", ""]
+            if pl["pet"]:
+                out.append(f"- The {pl['pet_name']} is on the field for the "
+                           "whole fight. Enemies cannot touch it. Play a card "
+                           "on it to write its **Plan** line instead of "
+                           "playing the card now.")
+            if not pl["queue"]:
+                out.append("- Nothing is planned. The morning is empty.")
+            else:
+                out.append(
+                    f"- Planned, and carried out at the start of your next "
+                    f"turn in this order ({pl['pending']}):")
+                for i, e in enumerate(pl["queue"], 1):
+                    out.append(f"  {i}. **{e['name']}**")
+                if pl["twice"]:
+                    out.append("- The jellyfish carries out EVERY Plan twice "
+                               "while Nereid's Ascension lasts.")
+            if pl["also_now"]:
+                out.append("- Plans also happen NOW as you write them.")
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page
@@ -2006,6 +2093,21 @@ def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     return _entity_id(enemies[living[idx]]), ""
 
 
+def _pet_target(state: dict[str, Any], name: str) -> str | None:
+    """`EB-216`. The jellyfish's entity id when the tester named IT, else None.
+
+    NAMED, NEVER DEFAULTED, and that is the whole decision: "now or at dawn" is
+    the choice the slice exists to test (its sec.1), so a card that could go
+    either way and was aimed at nothing is played NOW. Only the tester's own
+    word sends it to the jellyfish.
+    """
+    plans = _combat(state).get("plans") if state else None
+    if not plans or not plans.get("pet_entity_id") or not name:
+        return None
+    idx, _ = _match([{"n": plans["pet_name"]}], name, key=lambda e: e["n"])
+    return plans["pet_entity_id"] if idx == 0 else None
+
+
 def _play(state: dict[str, Any], cmd: Command) -> Resolution:
     hand = _hand(state)
     titles = _numbered_titles(hand)
@@ -2023,6 +2125,14 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
                        + (f": {reason}" if reason else ""))
     post: dict[str, Any] = {"action": "play_card", "card_index": idx}
     printed = {"card": titles[idx]}
+    # `EB-216`. THE JELLYFISH FIRST, because it is the one target that is not
+    # an enemy and the refusal a tester would otherwise get ("there is more
+    # than one enemy, so say which") would be about the wrong board.
+    pet = _pet_target(state, cmd.target)
+    if pet is not None:
+        post["target"] = pet
+        printed["target"] = (_combat(state)["plans"]["pet_name"])
+        return Resolution(True, "play", post, printed)
     needs_target = str(entry.get("target_type") or "").lower() in (
         "anyenemy", "enemy", "singleenemy", "targetenemy")
     if cmd.target or needs_target:

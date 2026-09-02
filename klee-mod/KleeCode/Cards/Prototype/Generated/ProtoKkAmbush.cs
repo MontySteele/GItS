@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard
+public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard, IPlannedCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
@@ -45,8 +45,17 @@ public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ambush"),
-        ("description", "[gold]Plan[/gold]: deal 10 damage to a random enemy."),
+        ("description", "[gold]Plan[/gold]: Deal 12 damage."),
     };
+
+    /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
+    /// was written. Carried out by the Bake-Kurage at the start of her next
+    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
+    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
+        new[]
+        {
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, 12, KokomiPlan.Aim.FrontEnemy),
+        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -57,13 +66,13 @@ public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkAmbush()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOnly, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, KokomiPlan.Kind.DamageRandomEnemy, 10, null, this);
+        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
     }
 
     protected override void OnUpgrade()

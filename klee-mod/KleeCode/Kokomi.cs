@@ -155,7 +155,7 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
         {
 #if PROTOTYPE_CARDS
             // QUARANTINED, THE KOKOMI OVERHAUL'S ONE RELIC SEAM (the ruled
-            // brief sec.8: Tamanooya's Casket). The Pearl's printed body IS the
+            // brief draft 6 sec.4: Tamakushi Casket). The Pearl's printed body IS the
             // exhaust funnel the brief retires, so a run holding it would print
             // a rule that no longer happens; the Casket takes the slot and
             // carries the pulse instead. Reasoning in full on

@@ -32,21 +32,31 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard
+public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlannedCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(ArmKeywordTips.ForExert(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_war_council");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "War Council"),
-        ("description", "[gold]Exert[/gold] 2. [gold]Plan[/gold]: play the top 2 cards of your draw pile for free."),
+        ("description", "[gold]Plan[/gold]: Deal 4 damage to every enemy and apply 1 Weak to each."),
     };
+
+    /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
+    /// was written. Carried out by the Bake-Kurage at the start of her next
+    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
+    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
+        new[]
+        {
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, 4, KokomiPlan.Aim.AllEnemies),
+            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, 1, KokomiPlan.Aim.AllEnemies),
+        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -57,14 +67,13 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkWarCouncil()
-        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Uncommon, KokomiTargets.PetOnly, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiTide.Exert(choiceContext, Owner.Creature, 2, this, cardPlay);
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, KokomiPlan.Kind.PlayTopOfDraw, 2, null, this);
+        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
     }
 
     protected override void OnUpgrade()

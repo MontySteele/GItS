@@ -93,9 +93,12 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     hits, markers, count = lint.scan()
     assert hits == [], hits
     assert count >= 3, "the prototype directories must still hold patches"
-    # Every exemption is visible: the one marked patch is the pile-screen
-    # teardown, and a second one appearing here is a review question.
-    assert len(markers) == 1, markers
+    # Every exemption is visible, and there are THREE: the pile-screen
+    # teardown, the Kokomi Plan strip's teardown (whose character scope is one
+    # call in, on the guarded seat resolver), and the Kokomi arm's target-type
+    # registration, which runs at `ModelDb.Init` before any run exists. A
+    # FOURTH appearing here is a review question.
+    assert len(markers) == 3, markers
 
 
 def test_registered_in_the_ci_lane() -> None:

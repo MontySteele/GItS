@@ -52,7 +52,7 @@ second channel; `description:` is the prototype surface's field alone and no
 keyword as `[gold]Keyword[/gold]` gets that keyword's hover tip attached by
 codegen — nothing to remember, no per-row field. The table is
 `gen_klee_cards.ARM_KEYWORDS` (Klee: `Bomb`, `Set off`, `Spark`, `Mine`;
-Kokomi: `Tide`, `Surge`, `Exert`, `Mend`, `Plan`, `Garment`; companions:
+Kokomi: `Mend`, `Plan`; companions:
 `Swirl`), the sentences are `Cards/Prototype/ArmKeywordTips.cs`, and their
 titles are registered under `#if PROTOTYPE_CARDS` in
 `KleeMod.InjectLocStrings` — so a release build carries neither. The tip
@@ -116,6 +116,50 @@ overhaul this arm is built in BOTH engines**, because it needed almost no new
 op: every Mondstadt row is written in the grammar the sheets already speak, and
 Inazuma adds exactly one verb (`block_half_damage`).
 
+**A dev build can also REPLACE KOKOMI'S WHOLE KIT.** Fourth arm, fourth
+property, same terms as the others:
+
+```sh
+dotnet build klee-mod/KleeCode -p:PrototypeCards=true -p:KokomiOverhaul=true
+```
+
+`-p:KokomiOverhaul=true` defines `KOKOMI_OVERHAUL`, which moves
+`KleeMod.Powers.KokomiOverhaul.Enabled`; the sim twin is `C.KOKOMI_OVERHAUL`.
+With it on, her starter is the slice's ten cards on four ids
+(`C.KOKOMI_OVERHAUL_STARTER_IDS`), her starting relic is **Tamakushi Casket**
+instead of the Pearl of Wisdom, and her whole offerable pool is the slice's 26
+rows plus the Ancient tail (`C.KOKOMI_OVERHAUL_POOL_IDS`, `EB-284`). Flag off,
+all three are byte-identical to shipped
+(`tier0/tests/test_kokomi_overhaul.py`,
+`klee-mod/KleeTests/Prototype/KokomiOverhaulRuleTests.cs`).
+
+**DRAFT 6 IS ONE RULE, AND IT NEEDED A CREATURE.** The **Bake-Kurage** is a
+real PET (`Powers/Prototype/BakeKuragePet.cs`): a `CustomPetModel` on her side
+of the field that enemies cannot target — free by construction, because an
+enemy move only ever sees `CombatState.PlayerCreatures` and a pet has no
+`Player`. A card with a **Plan** line is played ON it, and at the start of her
+next turn the jellyfish carries that line out. The queue is
+`Powers/Prototype/KokomiPlan.cs`: typed clauses, per player, one ENTRY per
+card, drained on the marker power's `AfterPlayerTurnStart`.
+
+**THE SHEET GAINED ONE KEY.** A row's Plan line is a TOP-LEVEL `plan:` list in
+the same op vocabulary `effects:` speaks, with the targets `front_enemy` /
+`all_enemies` / `self`; the codegen emits it as typed `KokomiPlan.Planned`
+records on the card plus the one-`if` play-on-the-jellyfish branch at the top
+of `OnPlay`, and it decides the row's TargetType — `CustomTargetType.Pet` for a
+Plan-only row, the arm's own `KokomiTargets.PetOrEnemy` when the now-line aims,
+`CustomTargetType.PetOrSelf` otherwise. The base library ships the predicates
+and every targeting patch for two of the three.
+
+**WHAT DRAFT 6 RETIRED, and it is deleted rather than switched off:** Tide,
+Surge, Exert, the pulse and its budget, the Garment, Strength-to-Tide, Orders
+and Tactics. Their ops are gone from both engines' vocabularies, their
+constants from both sides of `lint_constant_parity`, and their C# from
+`Powers/Prototype/`. One SHIPPED hook changes behaviour under the arm rather
+than stopping: `KokomiResourceHooks.TryModifyPowerAmountReceived` skips its
+Strength refusal, because draft 6's rule 3 is "your Strength and Dexterity
+count, since the plans are hers".
+
 **ONE FLAG FOR BOTH NATIONS, deliberately.** There is no `InazumaOverhaul`
 property: the arm means "the companion pool is the approved workshops' pool",
 and a second property would let a build offer one nation's rewrites beside the
@@ -133,12 +177,12 @@ damage dealt"), a hit that ignores Block (Chiori's Tamoto), a per-turn Swirl
 count (Heizou) and a companions-played count that needed no new state at all
 (Raiden). **Mend became character-agnostic** in the same change and by one
 line: Mizuki's Rare is a Universal that prints the Kokomi arm's keyword, so
-`KokomiTide.Mend` asks `MendIsLive` — either arm, any player's creature —
+`KokomiRules.Mend` asks `MendIsLive` — either arm, any player's creature —
 while the rule under it ("never above the HP you entered the fight with") stays
 written once. Six shipped paths carry a flag-guarded branch or a defaulted
 parameter for the arm — the damage tail, the card-play loop, the turn-start
 counter clear, the combat-start Mend ceiling, `ElementalHit.Deal` and
-`KokomiTide` — and each is pinned byte-identical with the flag off rather than
+`KokomiRules` — and each is pinned byte-identical with the flag off rather than
 assumed. The per-row reasoning and the fourteen ambiguities the printed text
 left open are in `docs/notes/prototype-surface-provenance.md`.
 

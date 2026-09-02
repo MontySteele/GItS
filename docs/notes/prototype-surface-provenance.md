@@ -1256,122 +1256,86 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 #   `ReactionTable` / `ReactionEffects` two `#if PROTOTYPE_CARDS` blocks
 ```
 
-## The Kokomi overhaul, slice one — `proto_kk_` (2026-09-01)
+## The Kokomi overhaul, slice one, draft 6 — `proto_kk_` (2026-09-02)
 
-Thirty-three rows: the ten-card starter (five ids) and all twenty-eight pool
-rows of `review/active/kokomi-overhaul-slice-1-2026-09-01.md`, written against
-the ruled brief `kokomi-brief-2026-09-01.md` (all eight picks ruled at their
-defaults on 2026-09-01). Under `C.KOKOMI_OVERHAUL` /
+Thirty rows: the ten-card starter (FOUR ids) and all twenty-six pool rows of
+`review/active/kokomi-overhaul-slice-1-2026-09-01.md` **draft 6**, written
+against the ruled brief `kokomi-brief-2026-09-01.md` draft 6 (direction ruled
+R240, brief approved R241). Under `C.KOKOMI_OVERHAUL` /
 `-p:KokomiOverhaul=true` these ARE her starter and her whole reward pool; with
 the flag off they are unreachable, like every other row on this surface.
 
 ```
-NOTHING DROPS. The Klee overhaul left Vermillion Pact off its own surface
-because its rule wanted shared reaction code. Every row of this slice prints
-inside the grammar the emitter already speaks once the arm's ten verbs exist,
-so all twenty-eight are here and the packet's own rarity split -- 12 Common,
-12 Uncommon, 4 Rare -- is the pool's.
+DRAFT 6 REPLACED THE SLICE, IT DID NOT EDIT IT. Draft 2's thirty-three rows
+were built on the Tide, played, and failed their gate
+(review/ruled/kokomi-overhaul-round-1-2026-09-02.md). The ruled brief's sec.6
+cuts Tide, Surge, Exert, the pulse, Orders, Tactics, Spent and the Garment by
+name, so every row that printed one of them is GONE rather than rewritten --
+which is the deletion rule applied to a slice that was rejected, one draft
+before it reached the sheet.
+
+THE `plan:` KEY IS THE SHEET'S ONE NEW FIELD. Draft 6's Plan is not a clause
+inside a body: it is the second HALF of a printed face -- what the card does
+if it is played on the Bake-Kurage instead of where it would normally go -- so
+it is a TOP-LEVEL list of effects in the SAME op vocabulary `effects:` speaks.
+Sixteen of the thirty rows carry one, and seven of those sixteen carry
+`effects: []` beside it, which is not an omission: a Plan-only card does
+nothing this turn, and every reader that indexes `effects` should see that
+rather than a missing key.
+
+WHY A LIST AND NOT AN OP. Draft 2 spelled it `{op: plan, then: [...]}` with
+exactly one clause, and that was already straining: War Council prints two
+clauses ("Deal 4 damage to every enemy AND apply 1 Weak to each") and Battle
+Plan prints two ("Gain 2 Energy and draw 1"), which the one-clause rule could
+not say. More decisively, the OP spelling could not move the card's declared
+TargetType -- and under draft 6 a Plan card has to be AIMABLE AT THE PET,
+which is a fact about the whole card and not about one effect in its body.
+
+THE THREE TARGET SPELLINGS, decided by what the card does when it is NOT
+planned: a Plan-only row takes `CustomTargetType.Pet`; a row whose now-line
+aims at an enemy takes the arm's own `KokomiTargets.PetOrEnemy`; anything else
+takes `CustomTargetType.PetOrSelf`. The base library ships the predicates and
+every targeting patch for the first and third, so only the middle one is new.
+
+`front_enemy` IS A PLAN-ONLY TARGET SPELLING and the codegen refuses it in an
+`effects:` list by name. Rule 3 says a planned hit lands on the front enemy
+(leftmost alive); a NOW-line lands where the player pointed, which is what
+`enemy` already means everywhere on this surface.
+
+FIVE NEW NOW-VERBS AND TWO PLAN-ONLY CLAUSES. `damage_quarter_max_hp` (Sango
+Isshin's "a quarter of your Max HP", floored, computed in one place so the two
+halves cannot round differently), `remove_debuff` (Cleansing Wave),
+`next_companion_discount` (Rally; a DISCOUNT, where draft 2's Vanguard zeroed),
+`carry_out_front_plan` (Change of Plans) and `plan_from_exhaust` (Moon's
+Reflection). The two that are legal only inside a `plan:` list are
+`plan_twice` (Nereid's Ascension) and `damage_per_companion_last_turn` (Chain
+of Command).
 
 EVERY ROW CARRIES ITS OWN `description:` (EB-215). The face is the packet's
-printed text with this repo's rendering conventions applied: "Deal 6." becomes
-"Deal 6 damage.", the six keywords are golded, and Exhaust is the keyword
-rail's -- the same treatment the Klee slice's "Set off. Deal 6." got. No
-number moves and no clause is added or dropped.
+printed text with this repo's rendering conventions applied -- Plan and Mend
+golded, Exhaust on the keyword rail. No number moves and no clause is added or
+dropped.
 
-ELEVEN DISPLAY NAMES CARRY A "(proto)" SUFFIX, and they are:
-  Water's Edge, Coral Guard, Kurage's Oath, Stolen Chapter, Song of Pearls,
-  Nereid's Ascension, Sango Isshin, Undertow, Salt Line, Cleansing Tide
-  -- ten names already owned by a SHIPPED Kokomi row, and
-  High Tide -- owned by a shipped FURINA row (`furina-cards.yaml:high_tide`).
-`tools/lint_unique_names.py` holds one namespace across all six sheets plus
-the relics, so the suffix is what lets the rewritten card and the shipped one
-coexist while the arm is being graded. It is the same device
-`proto_ko_sparks_n_splash` and the ten `proto_mc_` rewrites already use. The
-packet's sec.8 names seven of the ten Kokomi collisions; the other three
-(Song of Pearls, Undertow, Cleansing Tide) and the Furina one were found by
-running the lint over the six sheets and this surface together, and the same
-rule was applied to them. The remaining twenty-two names are new.
+TEN DISPLAY NAMES CARRY A "(proto)" SUFFIX, and they are: Water's Edge, Coral
+Guard, Kurage's Oath, Slack Water, Song of Pearls, Nereid's Ascension, Sango
+Isshin, Stolen Chapter, Undertow and Salt Line -- ten names already owned by a
+SHIPPED Kokomi row. `tools/lint_unique_names.py` holds one namespace across
+all six sheets plus the relics, so the suffix is what lets the rewritten card
+and the shipped one coexist while the arm is being graded. The other twenty
+names are free, including the two Rares that took constellation names (The
+Moon Overlooks the Waters, The Moon, A Ship O'er the Seas) and The Clouds Like
+Waves Rippling, which is distinct from the shipped Kokomi row of a similar
+shape only by its last word -- the lint reads exact names and both stand.
 
-THE TEN VERBS, and what each row's clause resolves to:
-  gain_tide                 Tide +N. `per: enemies_hit` is Deep Current's
-                            "per enemy hit", read off a snapshot taken at the
-                            TOP of the body -- an enemy the card's own AoE
-                            killed was still hit.
-  surge                     rule 3: the whole Tide as one Hydro hit, then 0.
-  block_half_surge          Undertow's second clause, read off the play's own
-                            Surge total because the jellyfish is empty by the
-                            time it asks.
-  exert                     rule 5, and it is DAMAGE rather than an HP loss:
-                            dropping `Unblockable` is what lets Block eat it.
-                            Refused on an Attack by the emitter, which is
-                            rule 5's second half enforced where a card is
-                            built.
-  mend                      heal, capped at her entry HP -- one function, so
-                            the cap cannot be forgotten at a call site.
-  plan                      rule 8, ONE clause from a table of seven, spelled
-                            `then:` so the repo's one effect walk sees it.
-  draw_companion_from_draw  Rally's search, through the game's own
-                            pile-selection screen filtered to Companions.
-  next_companion_free       Vanguard's grant. It ZEROES rather than discounts,
-                            because the card prints "costs 0".
-  draw_per_tide             Reading the Tide. A read, not a spend.
-  play_top_of_draw          War Council's clause, and legal ONLY inside a
-                            `plan` body -- a top-level spelling would be a
-                            different, unpriced card.
-
-THE READINGS TAKEN, each because the printed text does not settle it:
-  Deep Current    "per enemy hit" is every living enemy when the card was
-                  played, snapshotted before its own AoE resolves.
-  Undertow        "half the damage dealt" is half the TIDE that went out,
-                  rounded down -- not the number that landed after the shared
-                  pipeline's amplifier and the target's Vulnerable, neither of
-                  which is a fact about her Tide.
-  Ambush / Feint  a Plan's damage is HYDRO, through the same funnel the Surge
-                  and Sango Isshin's overflow use. The cards name no element;
-                  Hydro is the only choice that leaves Feint's two halves
-                  behaving alike, the printed one applying an element and the
-                  delayed one not.
-  The Art of War  "Plans ALSO happen now" is read as now AND next turn. As
-                  "instead" it would delete rule 8 rather than break it, and
-                  the brief's gloss is "Rule 8's delay is gone".
-  Song of Pearls  vs The Clouds Like Waves: both make a flat statement about
-                  the pulse's size and neither prints an order, so the larger
-                  applicable number wins. Under 4 the Clouds card would be a
-                  lie; under 3 Song of Pearls would be one. The budget is
-                  Song's alone, because only Song mentions it.
-  The pulse       spends its per-combat budget in HP THAT LANDED. Script A's
-                  turn-1 pulse "would Mend 2, but she is at 80, so nothing",
-                  and after three effective pulses "the pulse paid 6 of its
-                  8". A consequence, reported rather than hidden: the damage
-                  Sango Isshin makes out of the excess costs no budget either.
-  The Garment     "each Attack that HITS" is per Attack CARD PLAY that landed
-                  on something, not per hit -- sec.6.1's "three Attacks each
-                  put 2 back" and script B's "Water's Edge twice (12, Mend 4)".
-                  Blocked damage still counts as a hit.
-  The Plan hook   resolves at `AfterPlayerTurnStart`, NOT before the draw as
-                  the packet's sec.5 asks. There is no broadcast between the
-                  game's energy reset and its hand draw, so "before draw"
-                  means before the block clear and the energy reset too, and
-                  Read the Field's Block and Battle Plan's Energy would both
-                  be wiped. The brief's own script C requires the later hook:
-                  its turn 2 opens on five energy, which is three plus the
-                  Plan's two. Recorded in full on the method.
-
-WHAT THE STARTER COSTS, stated: her opening deck goes from TWELVE cards to
-TEN, which is the packet's own sec.3 count -- the twelve-card shape was ruled
-for a deck that mills itself, and nothing in this arm exhausts. And the
-starting-companion roll finds no slot to take, because it matches on the
-shipped `SayuDarumaGift` type and none of the ten is that type: under this arm
-she opens with no companions, and the Commander loop draws its army from the
-reward slot, which is what the packet says it does.
-
-THE RELIC. Tamanooya's Casket replaces the Pearl of Wisdom, because the
-Pearl's printed body IS the exhaust funnel the brief retires. It carries the
-pulse and both its numbers, keeps the companion reward slot (that hook is not
-a Charge rule, and the Commander loop's whole army comes through it), and has
-no upgraded form -- a curated absence in
-`tier0/tests/test_starter_relic_upgrades.py` with its reason and the gate that
-clears it.
+THE RELIC. Tamakushi Casket replaces BOTH Tamanooya's Casket (a misspelling
+and a retired rule: the pulse) and the Pearl of Wisdom (whose printed body IS
+the exhaust-for-Charge funnel the arm turns off). It carries one number, the
+jellyfish's 2 Hydro strike per debuff she applies to an enemy; the jellyfish
+is the DEALER, so a pet's absent Strength keeps the 2 a flat 2. It keeps the
+companion reward slot (that hook is not a Charge rule, and the Commander
+loop's whole army comes through it), and has no upgraded form -- a curated
+absence in `tier0/tests/test_starter_relic_upgrades.py` with its reason and
+the gate that clears it.
 ```
 
 ## The Inazuma companion overhaul — `proto_mi_` (2026-09-02)
@@ -1479,12 +1443,12 @@ MEND, MADE CHARACTER-AGNOSTIC, AND THE RULE NOT DUPLICATED. Mizuki's Anraku
 Secret Spring Therapy is a UNIVERSAL that prints the Kokomi arm's keyword, so
 Klee or Furina can draft it and "the one true heal in the pool" has to mean the
 same thing in whoever's hands it lands. Exactly ONE LINE moved in the mod:
-`KokomiTide.Mend` stops asking `KokomiOverhaul.LiveFor(creature)` and asks
+`KokomiRules.Mend` stops asking `KokomiOverhaul.LiveFor(creature)` and asks
 `MendIsLive(creature)`, which is that OR "the companion arm is on and this
 creature is a player's". The bound itself -- heal, never above the HP you
 entered the fight with -- is still written once, in that same function, and no
 second Mend was authored. What the widening costs is one more seat's ledger
-entry: `KokomiTide.InstallAll` now captures EntryHp for every seat either arm
+entry: `KokomiRules.InstallAll` now captures EntryHp for every seat either arm
 reaches, at the same combat-start moment it always did, because a lazily
 captured ceiling taken at the first Mend would be the HP the fight had already
 lowered. The sim had no Mend at all (the Kokomi arm is C# first and its ten
@@ -1562,7 +1526,7 @@ byte-identical with the flag off (pinned by
   `combat._player_turn`            one new per-turn counter cleared
   `combat.new_combat`              the Mend ceiling captured
   `ElementalHit.Deal`              one defaulted `ignoreBlock` parameter
-  `KokomiTide.Mend` / `InstallAll` the gate widened; the RULE unchanged
+  `KokomiRules.Mend` / `InstallAll` the gate widened; the RULE unchanged
 
 THE BANNER BINDS HARDER. `star` is the CHARACTER's rarity, not the card's, and
 this pool designs ELEVEN five-star cards against `BANNER_FEATURED_SLOTS = 3` --
