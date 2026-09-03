@@ -2,7 +2,7 @@
 
 The backlog row opened this as a port ("no C# enchant surface exists at
 all"). It does exist: `sts2.dll` ships `EnchantmentModel`, a class for each
-of the eight enchantments tier0's CATALOG names, the deck enchant screen, the
+of the nine enchantments tier0's CATALOG names, the deck enchant screen, the
 save format, and the payout hooks -- `Hook.ModifyDamage` and
 `Hook.ModifyBlock` both consult `cardSource.Enchantment` before any other
 modifier, so a mod card that deals its damage `.FromCard(this)` or gains its
@@ -36,14 +36,21 @@ def test_the_parity_lint_passes():
     assert res.returncode == 0, res.stdout + res.stderr
     # A verdict with no denominator is the confident half of a partial check
     # (the house reading of the strict-domination defect).
-    assert "8 enchantments" in res.stdout, res.stdout
+    # NINE since EB-83 (2026-09-02): `slither` joined the CATALOG the day
+    # Wood Carvings converted and started granting it.
+    assert "9 enchantments" in res.stdout, res.stdout
 
 
 def test_every_shipped_enchantment_names_the_card_fact_its_game_rule_reads():
     """The vocabulary is the base game's; the mapping is what we maintain."""
     assert set(lep.GAME_RULES) == set(enchantments.CATALOG)
     for name, rule in lep.GAME_RULES.items():
-        assert rule in (None, "attack", "block", "exhaust"), (name, rule)
+        assert rule in (None, "attack", "block", "exhaust",
+                        "fixed_cost"), (name, rule)
+        # ...and the fact has to be one `cs_facts` can actually answer, or the
+        # rule reads `False` for every card and the lint fails everywhere.
+        if rule is not None:
+            assert rule in lep.cs_facts(""), (name, rule)
 
 
 def test_a_recorded_divergence_carries_its_reason():

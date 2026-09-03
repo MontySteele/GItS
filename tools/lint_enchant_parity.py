@@ -13,21 +13,25 @@ decompiled game before building infrastructure -- says the mod must not grow
 a second one. So there is nothing to *port*.
 
 What there IS, and what this lint holds, is an ELIGIBILITY correspondence.
-Every one of the eight gates on a fact about the card:
+Every one of the nine gates on a fact about the card:
 
     Sharp / Vigorous / Corrupted   CanEnchantCardType == Attack
     Souls' Power                   card carries the LOCAL Exhaust keyword
     Nimble                         card.GainsBlock
+    Slither                        !card.EnergyCost.CostsX
     Swift / Sown / Perfect Fit     no card-level restriction at all
 
-and tier0 gates the same eight on its own predicates in
+and tier0 gates the same nine on its own predicates in
 `tier0.content.enchantments.CATALOG`. Where the two disagree, one of two
 things is true and both are worth knowing: either a mod card is misreporting
 a fact about itself to the game (a defect this repo can fix), or tier0's
 predicate does not match the enchantment the game actually ships (a sim-side
 finding, and NOT something to paper over on the C# side).
 
-The three card-level facts are readable from committed source, so this runs
+(EIGHT until EB-83, 2026-09-02: Slither joined the CATALOG the day Wood
+Carvings converted, because that event is the only thing that grants it.)
+
+The four card-level facts are readable from committed source, so this runs
 on a runner with no game installed -- the same bargain
 `test_roster_runtime_contracts.py` takes. The game-side rules are transcribed
 into GAME_RULES below with their decompiled citation; that table is the part
@@ -67,13 +71,15 @@ MANIFESTS = [
 ]
 
 # The game's own eligibility rule for each shipped enchantment, transcribed
-# from the decompiled `MegaCrit.Sts2.Core.Models.Enchantments.*` (v0.107.1,
-# the build STATE pins). The value is the card fact the rule reads:
+# from the decompiled `MegaCrit.Sts2.Core.Models.Enchantments.*` (v0.107.1 for
+# the eight EB-84/EB-85 rows; `slither` re-read off v0.111.0, the build STATE
+# pins, on 2026-09-02). The value is the card fact the rule reads:
 #
-#   "attack"  -> CanEnchantCardType(cardType) == CardType.Attack
-#   "exhaust" -> CanEnchant: GetKeywordsWithSources(Local) has Exhaust
-#   "block"   -> CanEnchant: card.GainsBlock
-#   None      -> base CanEnchant only (no card-level restriction)
+#   "attack"      -> CanEnchantCardType(cardType) == CardType.Attack
+#   "exhaust"     -> CanEnchant: GetKeywordsWithSources(Local) has Exhaust
+#   "block"       -> CanEnchant: card.GainsBlock
+#   "fixed_cost"  -> CanEnchant: !card.EnergyCost.CostsX
+#   None          -> base CanEnchant only (no card-level restriction)
 #
 # Base CanEnchant additionally refuses Status / Curse / Quest and a card that
 # already holds an enchantment; tier0's `eligible` refuses curse / status /
@@ -85,6 +91,15 @@ GAME_RULES = {
     "corrupted": "attack",      # Corrupted.CanEnchantCardType
     "souls_power": "exhaust",   # SoulsPower.CanEnchant
     "nimble": "block",          # Nimble.CanEnchant -> card.GainsBlock
+    # EB-83. `Slither.CanEnchant` is
+    #     base.CanEnchant(card) && !card.Keywords.Contains(Unplayable)
+    #         ? !card.EnergyCost.CostsX : false
+    # -- two clauses, of which only the X-cost one is a fact this lint can
+    # read off a class. The Unplayable clause is base CanEnchant's own for a
+    # deck card (base already refuses an Unplayable card whose Pile is the
+    # Deck) and no card in this mod carries `CardKeyword.Unplayable` at all,
+    # so it is in the same "agree by construction" bucket as Status / Curse.
+    "slither": "fixed_cost",    # Slither.CanEnchant -> !EnergyCost.CostsX
     "swift": None,              # Swift: no override
     "sown": None,               # Sown: no override
     "perfect_fit": None,        # PerfectFit: no override
@@ -207,10 +222,11 @@ _CANONICAL_VARS = re.compile(
     re.S)
 _BLOCK_VAR = re.compile(r"\bnew (?:Calculated)?BlockVar\(")
 _CTOR_TYPE = re.compile(r":\s*base\([^)]*?CardType\.(\w+)")
+_COST_X = re.compile(r"protected override bool HasEnergyCostX\s*=>\s*true")
 
 
 def cs_facts(text: str) -> dict:
-    """The three card-level facts the game's enchant rules read.
+    """The four card-level facts the game's enchant rules read.
 
     Read from source text rather than from the sheet on purpose: the sheet is
     what tier0 already knows, and the whole question is whether what the mod
@@ -229,6 +245,13 @@ def cs_facts(text: str) -> dict:
         # `exhaust: true` rides CanonicalKeywords, which is a LOCAL keyword
         # source -- the one SoulsPower.CanEnchant reads.
         "exhaust": "CardKeyword.Exhaust" in text,
+        # EB-83, Slither. `cost: X` emits `HasEnergyCostX => true` and a
+        # canonical cost of 0 (gen_klee_cards: "the CardEnergyCost ctor
+        # ignores the canonical when CostsX"), so the OVERRIDE is the fact and
+        # the constructor's 0 is not -- reading the ctor here would call every
+        # free card X-cost. Stated positively, as the other three are: True
+        # means the game will let Slither on, i.e. the cost is a number.
+        "fixed_cost": not _COST_X.search(text),
         "type_found": ctor is not None,
     }
 

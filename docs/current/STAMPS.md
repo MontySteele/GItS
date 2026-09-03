@@ -8,7 +8,7 @@
 > citability and when a standing baseline is owed are in
 > [`EXPERIMENTS.md`](EXPERIMENTS.md).
 
-Live cell **`RT12 / D18 / P11 / C20`**, read live via `tier05/cells.py`, with
+Live cell **`RT13 / D18 / P11 / C21`**, read live via `tier05/cells.py`, with
 `PILOT_WEIGHTS_VERSION` **6**. Numbers are never comparable across a stamp
 boundary unless labeled, and a report without a stamp is not citable.
 
@@ -17,7 +17,35 @@ boundary unless labeled, and a report without a stamp is not citable.
 spell them `W1`–`W3` / `W10` / `W11`; in `STATE.md` and here, `W1`–`W9` are the
 watch register and `W4` is separately the pilot-weight sweep (EXPERIMENTS `W4`).
 
-## `RT` — `RUNTEMPLATE_VERSION` (`tier0/constants.py`), live **12**
+## `RT` — `RUNTEMPLATE_VERSION` (`tier0/constants.py`), live **13**
+
+### `RT13` — `EB-83`: Wood Carvings, the last unconverted event
+
+`EB-83`, 2026-09-02. ONE change, and the same shape `RT9`'s single act-2
+addition and `RT11`'s single act-3 addition were: **Wood Carvings joins the
+act-1 pool** (12 own → 13 own; 16 → 17 reachable with the four all-acts
+events), so act-1 event odds move for every character and **no `RT12` act-1
+event number carries across.** It closes `EB-68`'s conversion sweep — the skip
+list in `tier05/content/events.yaml` now holds no event that was blocked on an
+enchantment or on a colorless card.
+
+What it puts into a run that `RT12` could not: two colorless event cards no
+other door can reach (`tengu_flurry`, `chinju_ward` — the R184 reskins of
+*Peck* and *Toric Toughness*, named at R231), a NINTH enchantment
+(`slither`, the first to touch a card's cost at all), and the **first printed
+carrier of `block_at_turn_start`**, the delayed-Block power that had been inert
+since 2026-08-26. All three engine surfaces predate this bump and none was
+invented inside the conversion (`EB-82`'s admission rule); what moved is the
+content that reaches them. The event layer gained one key,
+`transform_starter_into`.
+
+No drafter or pilot code moved — enchantments are still post-draft only, and
+both new cards are `rarity: event`, so no reward, shop, Neow or Ancient roll
+can see them — so `DRAFTER_VERSION` and `draft.POLICY_VERSION` are untouched
+and the payoff-reach `D14` pin stands. `CONSTANTS_VERSION` did not move: no
+tier0 engine rule changed. **RE-BASELINE OWED, not taken in this window:** the
+standing twelve-arm table (`review/records/sitting-reads-2026-08-26-c20-d18-p11.md`)
+is an `RT12` read and every arm's act-1 numbers are now stale under R68.
 
 ### `RT12` — the run-layer half of the window-2 correctness batch
 
@@ -196,7 +224,18 @@ not an unreachable condition). `P6` was `EB-29t`'s Enrage/Intangible reads; `P5`
 was `EB-24p`'s `reaction_triggered_this_turn` read; `P4` was R124's
 both-Spotlight-modes read.
 
-## `C` — `CONSTANTS_VERSION` (`tier0/constants.py`), live **20**
+## `C` — `CONSTANTS_VERSION` (`tier0/constants.py`), live **21**
+
+### `C21` — `EB-219`: Prune's Spark grant becomes Klee's kit declaration
+
+**Entry owed, and this is a hygiene note rather than that entry.**
+`tier0/constants.py` has read **21** since `EB-219` landed, and
+[`STATE.md`](STATE.md) carries the one-line summary — Prune's printed
+`gain_spark` ops leave the sheet, her Spark grant becoming Klee's own kit
+declaration (`KLEE_COMPANION_SPARK_*`, `LAW.md:145`). This heading and the live
+cell at the top of the file were both left at **20** by that bump and are
+corrected here (`EB-83`, 2026-09-02); the window's own account stays `EB-219`'s
+to write, because nothing in this file may restate a window second-hand.
 
 ### `C20` — `EB-139`'s Swirl aura-aware bind (R211; built 2026-08-26)
 

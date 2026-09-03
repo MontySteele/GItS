@@ -10,14 +10,14 @@
 
 ## Live cell
 
-**`RT12 / D18 / P11 / C21`**, read live via `tier05/cells.py`, with
+**`RT13 / D18 / P11 / C21`**, read live via `tier05/cells.py`, with
 `PILOT_WEIGHTS_VERSION` **6**. A number is not comparable across a stamp
 boundary unless labeled, and a report without a stamp is not citable. What each
 level covered and archived is in [`STAMPS.md`](STAMPS.md), not here.
 
 | stamp | value | source | what this value covers |
 |---|---|---|---|
-| `RT` `RUNTEMPLATE_VERSION` | **12** | `tier0/constants.py` | `EB-104`'s run-layer half: banner-aware shop, relic-derived potion capacity, floored rest heal, one-door Book of Five Rings, event rewards rolling `RARITY_ODDS`. |
+| `RT` `RUNTEMPLATE_VERSION` | **13** | `tier0/constants.py` | `EB-83`: Wood Carvings joins the act-1 event pool (12 own → 13), the last of `EB-68`'s conversions — two colorless reskin cards, a ninth enchantment, and the first printed carrier of `block_at_turn_start`. |
 | `D` `DRAFTER_VERSION` | **18** | `tier0/constants.py` | `EB-28`: the drafter prices Furina's Salon deploy through one [USER]-overridable dial, `STATIC_SALON_MEMBER_VALUE = 1.5`. |
 | `P` `POLICY_VERSION` | **11** | `tier05/draft.py` | R207's scorer-literacy window: Spark hold-versus-spend, five state predicates, payout-aware selection scoring. |
 | `C` `CONSTANTS_VERSION` | **21** | `tier0/constants.py` | `EB-219`: Prune's printed `gain_spark` ops leave the sheet, her Spark grant becoming Klee's own kit declaration (`KLEE_COMPANION_SPARK_*`, LAW:145). |
@@ -27,7 +27,9 @@ twelve arms at `RT12/D18/P11/C20` (`main` = `190e598`) in ONE pass with
 `game_ref/` present: `real_ironclad` **5.2%** / **65.5%** act-1, `real_silent`
 **1.1%** / **54.0%**; **no interval separation on any arm and no control set**,
 which it says itself. Under R211 item 7 it is both the standing re-baseline and
-the Phase-4 milestone table, **and that read is TAKEN**.
+the Phase-4 milestone table, **and that read is TAKEN**. It is an `RT12` read
+and the world is now `RT13` (`EB-83`, act-1 event odds), so under R68 it is
+stale rather than wrong: **the re-baseline that bump owes has not been run.**
 
 Pinned, and NOT part of the run-cell stamp: `A6_INSTRUMENT_VERSION = 2`
 (`tier0/harness/axes.py`, anchored additively so `ref_ironclad` stays 3.00; v1
@@ -74,8 +76,8 @@ that no roster arm reads, [USER]'s to supply (`EB-128`).
 
 ## Content inventory
 
-Live sim inventory (`atlas/tier0-pilot-roster.md` §2): **322 cards in the
-loader index** (3 acquisition-only Ancient rows, leaving the 319 the atlas
+Live sim inventory (`atlas/tier0-pilot-roster.md` §2): **324 cards in the
+loader index** (3 acquisition-only Ancient rows, leaving the 321 the atlas
 quotes), **5 character sheets**, **6 encounters, 15 pilot weight sets**;
 battery encounters FROZEN (`content/encounters/battery.yaml`). The three card
 sheets carry `tempo_band:` and hold **239 personal rows** (79 / 84 / 76).

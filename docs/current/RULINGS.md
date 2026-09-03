@@ -256,8 +256,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R244 | 2026-09-02 | the night's sitting ruled: Klee round seven at its defaults, the Hexerei readers with Alice's Introduction Magic in place of Alice's Letters | `489e42c` |
 | R245 | 2026-09-03 | the Furina card audit is ruled -- defaults on Full Ensemble and The Final Verdict, Singer of Many Waters on [USER]'s own shape | `3f294fd` |
 | R246 | 2026-09-03 | Kokomi round 4c is ruled at its defaults -- the Bake-Kurage deals Plan damage, and the kit's own defence scales in act 2 | `561a899` |
+| R247 | 2026-09-03 | Chinju Ward stacks as independent instances, the game's own rule | `5a7ed52` |
 
-245 rows over the R1..R246 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 134 from a commit message, 0 unresolved.
+246 rows over the R1..R247 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 135 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 

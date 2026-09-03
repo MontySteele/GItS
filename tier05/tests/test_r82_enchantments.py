@@ -16,10 +16,14 @@ Three claims, and the file is laid out as three sections in that order:
   3. the attachment is a decoration on the deck-list ID, so it persists --
      across upgrades, across deck mutations, and across fights in a run.
 
-Six of the seven have now converted -- Grave of the Forgotten joined them
-once EB-82's `damage_per_exhaust` hook existed to carry Forgotten Soul. The
-one that still has not is pinned in section 4: a skip that is not asserted is
-a skip that quietly un-skips itself.
+ALL SEVEN have now converted. Grave of the Forgotten joined them once EB-82's
+`damage_per_exhaust` hook existed to carry Forgotten Soul, and Wood Carvings
+last of all (EB-83, 2026-09-02) once its two colorless cards were ruled to
+reskins, its delayed-Block power was built and its enchantment finally had a
+granting event to serve. Section 4 used to be the SKIP pin -- a skip that is
+not asserted is a skip that quietly un-skips itself -- and is now the pin that
+the last skip is gone. The conversion's own three-option pins live beside it in
+`test_eb83_wood_carvings.py`.
 """
 
 from __future__ import annotations
@@ -36,7 +40,8 @@ from tier05 import events
 
 
 CONVERTED = ("sapphire_seed", "field_of_man_sized_holes", "stone_of_all_time",
-             "symbiote", "self_help_book", "grave_of_the_forgotten")
+             "symbiote", "self_help_book", "grave_of_the_forgotten",
+             "wood_carvings")
 
 
 def _st(**kw):
@@ -538,15 +543,32 @@ def test_normality_caps_the_turn_at_three_plays():
 
 
 # ---------------------------------------------------------------------------
-# 4. The one that still has not converted, and why.
+# 4. The skip list is empty (EB-83).
 # ---------------------------------------------------------------------------
 
-def test_the_last_unconverted_enchant_event_is_still_out_of_every_pool():
+def test_every_enchant_event_the_gallery_names_is_now_in_a_pool():
+    """The last skip closed on 2026-09-02, and the assertion inverts.
+
+    This test used to say `"wood_carvings" not in reachable`, and it earned
+    its keep three times over while it said that -- the event stayed out for
+    reasons that changed twice (a [USER] colorless call, then an engine op,
+    then a name eye-read) and an unasserted skip would have drifted back in
+    unnoticed at any of them. The claim it makes now is the same claim in the
+    other direction: every one of the seven enchant events the conversion
+    gallery names reaches a run.
+    """
     reachable = {e["id"] for act in range(len(C.RUN_ACTS))
                  for e in events.pool_for(act)}
-    assert "wood_carvings" not in reachable            # needs Slither + 2 cards
+    assert set(CONVERTED) <= reachable
 
 
-def test_slither_is_named_as_unexpressed_rather_than_approximated():
-    assert "slither" in enchantments.UNEXPRESSED
-    assert "slither" not in enchantments.CATALOG
+def test_slither_left_unexpressed_when_its_granting_event_landed():
+    """The module's rule, exercised: a CATALOG row serves a granting event.
+
+    Slither was `UNEXPRESSED`'s only row for its whole life, and it did not
+    leave when the ENGINE became able to express it (the on-draw hook landed
+    2026-08-26 and it stayed out for six more days). It left when Wood
+    Carvings converted, because that is the rule the dict encodes.
+    """
+    assert "slither" in enchantments.CATALOG
+    assert enchantments.UNEXPRESSED == {}

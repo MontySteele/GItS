@@ -8,14 +8,25 @@ one-shot bank popped whole at the next turn start, and `powers` is a
 `name -> int` map, so a power carrying *(amount, turns remaining)* had nowhere
 to put its second number.
 
-It is built FIRST AND ALONE, on the EB-82 admission rule: an engine surface is
-never invented inline inside a conversion. The two replacement cards and the
-Wood Carvings conversion are [USER]-gated (the RT window; the S4-G11 name
-eye-read was discharged by R231), so this lands with NO CARRIER at all.
+It was built FIRST AND ALONE, on the EB-82 admission rule: an engine surface
+is never invented inline inside a conversion. For six days it had NO CARRIER
+at all, and the first tests below pinned that carrier-lessness -- the
+stamp-free claim, and therefore the claim that no measured number had moved.
 
-The first tests below pin that carrier-lessness -- which is the stamp-free
-claim, and therefore the claim that no measured number moved. The rest drive
-the op by hand, which is the only way the machinery runs at all today.
+IT HAS EXACTLY ONE CARRIER NOW. Wood Carvings converted on 2026-09-02 at
+RUNTEMPLATE 13, and `chinju_ward` -- the R184 reskin of Toric Toughness, named
+at R231 -- prints `{amount: 5, turns: 2}`. So those first tests now pin
+EXACTLY ONE rather than none, which is the same guard doing the same job: an
+op that quietly acquires a second carrier changes what the stacking rule
+decides, and that rule is now RULED rather than free to drift.
+
+STACKING IS R247 ([USER], 2026-09-03: "For wood carvings - agreed, 2
+independent instances (5 for 2)"). The placeholder the earlier revision of this
+file pinned -- additive amount, `max` turns -- is gone; the stacking section at
+the foot pins independent instances instead, in the numbers the ruling used.
+Everything between is unchanged, because the op itself did not move when its
+carrier arrived or when its stacking was ruled, which is the whole point of
+having built it alone.
 """
 
 from pathlib import Path
@@ -47,20 +58,51 @@ def play(state, fx, **kw):
     return c
 
 
-# --- what reaches the op: nothing -----------------------------------------
+# --- what reaches the op: exactly one card (EB-83, RT13) -------------------
 
-def test_no_loaded_card_prints_the_op_anywhere_in_its_tree():
-    """The stamp-free claim, at the loader. Walked as a TREE, not a flat list:
-    a `conditional`'s `then:` and a `choose_one`'s mode body are as printed as
-    anything at the top level, and a flat read is exactly how an op hides."""
+# The one row allowed to print it, and the one sheet allowed to hold that row.
+# Named rather than counted, because "one carrier" and "the RIGHT carrier" are
+# different claims and only the second one is worth having.
+CARRIER = "chinju_ward"
+CARRIER_SHEET = "tier0/content/cards/colorless_event.yaml"
+# The event that hands the carrier out. Its own file mentions the op in prose
+# (the conversion's account of which blocker cleared when) and never as an
+# effect row -- events have no effect trees, so the text sweep below allows the
+# path and the structural sweep above cannot be fooled by it.
+CARRIER_EVENT_SHEET = "tier05/content/events.yaml"
+
+
+def test_exactly_one_loaded_card_prints_the_op_and_it_is_the_named_one():
+    """Walked as a TREE, not a flat list: a `conditional`'s `then:` and a
+    `choose_one`'s mode body are as printed as anything at the top level, and
+    a flat read is exactly how an op hides.
+
+    This asserted ZERO until 2026-09-02 and asserts ONE now. What it is really
+    holding has only sharpened: R247 ruled the stacking rule against THIS
+    carrier's numbers (two 5-for-2 instances), so a second printed row is a row
+    the ruling never looked at. It should not arrive because somebody added a
+    card without noticing.
+    """
+    printed = set()
     for cid, c in loader._card_index().items():
         for field in (c.effects, c.sly, c.enchant_effects,
                       c.enchant_first_play_effects):
-            assert all(fx.get("op") != OP
-                       for fx in effect_walk.iter_effects(field)), cid
+            if any(fx.get("op") == OP
+                   for fx in effect_walk.iter_effects(field)):
+                printed.add(cid)
+    assert printed == {CARRIER}, printed
 
 
-def test_no_committed_sheet_mentions_the_op_at_all():
+def test_the_carrier_prints_the_decompiled_numbers_and_nothing_else_does():
+    """`Models.Cards.ToricToughness`: `Turns 2m`, `BlockVar(5m, Move)`, and an
+    `OnPlay` that gains the Block and then applies the power for `Turns`."""
+    fx = [f for f in loader.peek_card(CARRIER).effects if f["op"] == OP]
+    assert fx == [{"op": OP, "amount": 5, "turns": 2}]
+    # ...beside its immediate half, which is an ordinary printed Block row.
+    assert {"op": "block", "amount": 5} in loader.peek_card(CARRIER).effects
+
+
+def test_no_other_committed_sheet_mentions_the_op_at_all():
     """The same claim one level below the loader, as raw text, so it also
     covers the sheets the card index does not build: every `*-upgrades.yaml`
     delta key, the tier 0.5 relic / potion / event content, and any sheet a
@@ -68,14 +110,25 @@ def test_no_committed_sheet_mentions_the_op_at_all():
 
     Text rather than structure ON PURPOSE. The question is not "does a card
     resolve this op" -- it is "did any number that a measured world is made of
-    move", and for that the honest test is that the string does not occur.
+    move", and for that the honest test is that the string does not occur
+    anywhere but the two files that are supposed to say it.
+
+    TWO ALLOWED PATHS, and they are allowed for different reasons: the sheet
+    that prints the carrier, and the event file that hands the carrier out and
+    explains in a comment why it took three years of blockers to get there.
+    The second is prose only -- an `events.yaml` option has no effect tree at
+    all -- so the structural sweep above is what actually guards it.
     """
+    allowed = {REPO / CARRIER_SHEET, REPO / CARRIER_EVENT_SHEET}
     roots = [REPO / "docs", REPO / "tier05" / "content", REPO / "tier0" /
              "content"]
     scanned = 0
     for root in roots:
         for path in sorted(root.rglob("*.yaml")):
             scanned += 1
+            if path in allowed:
+                assert OP in path.read_text(encoding="utf-8"), path
+                continue
             assert OP not in path.read_text(encoding="utf-8"), path
     assert scanned > 10, "the sheet sweep found almost nothing; it has rotted"
 
@@ -99,7 +152,7 @@ def test_it_pays_at_the_start_of_exactly_the_printed_number_of_turns():
     # this turn's has already gone by.
     assert st.player.block == 0
     assert st.player.powers[OP] == 2
-    assert st.player.timed_power_amounts[OP] == 5
+    assert st.player.timed_power_amounts[OP] == [[5, 2]]
 
     combat._player_turn(st, lambda s: None)      # resets block, then triggers
     assert st.player.block == 5
@@ -143,13 +196,14 @@ def test_the_amount_is_snapshotted_at_play_time_and_never_re_read():
     powers.apply_power(st, st.player, "dexterity", 3)
     play(st, [{"op": "block", "amount": 4},
               {"op": OP, "amount": "block_gained_this_card", "turns": 2}])
-    assert st.player.timed_power_amounts[OP] == 7
+    assert st.player.timed_power_amounts[OP] == [[7, 2]]
     play(st, [])                                 # any next card clears it
     assert st.block_gained_this_card == 0        # the source is already gone
 
     combat._player_turn(st, lambda s: None)
     assert st.player.block == 7
-    assert st.player.timed_power_amounts[OP] == 7    # the carrier is unmoved
+    # The carrier is unmoved: one instance, its snapshotted 7 intact.
+    assert st.player.timed_power_amounts[OP] == [[7, 1]]
     combat._player_turn(st, lambda s: None)
     assert st.player.block == 7
 
@@ -178,28 +232,101 @@ def test_the_payout_is_raw_like_its_one_shot_sibling():
     assert other.player.block == 10              # not 7
 
 
-# --- stacking (PLACEHOLDER: additive amount, max turns) --------------------
+# --- stacking: INDEPENDENT INSTANCES (R247) --------------------------------
 
-def test_stacking_is_additive_on_amount_and_max_on_turns():
-    """PLACEHOLDER -- sheet-pass sweep, user pick. No ratified rule for
-    same-name *(amount, turns)* effects exists to inherit: the engine's
-    ratified duration rules are all single-field refreshes and settle only the
-    turns half. This pins the placeholder so a change to it is a deliberate
-    edit rather than a quiet one."""
+def test_two_castings_are_two_independent_instances():
+    """R247 ([USER], 2026-09-03): "For wood carvings - agreed, 2 independent
+    instances (5 for 2)". Not a merge of any kind -- each application is its
+    own *(amount, turns)* pair with its own clock.
+
+    This replaced a PLACEHOLDER (additive amount, `max` turns) that had shipped
+    inert since 2026-08-26 and became reachable the moment `chinju_ward` was
+    printed. The two rules differ exactly when the durations differ, which is
+    what this case is built out of: additive-on-amount would have stretched the
+    2 over all three turns for 21 Block, where independent instances pay 7, 5,
+    5 = 17.
+    """
     st = make_state(enemies=[make_enemy(hp=400)])
     play(st, [{"op": OP, "amount": 5, "turns": 3}])
     play(st, [{"op": OP, "amount": 2, "turns": 1}])
-    assert st.player.timed_power_amounts[OP] == 7     # additive
-    assert st.player.powers[OP] == 3                  # max, never shortened
+    assert st.player.timed_power_amounts[OP] == [[5, 3], [2, 1]]
+    # `powers` is the DERIVED summary, and it is the longest instance's clock.
+    assert st.player.powers[OP] == 3
+
     combat._player_turn(st, lambda s: None)
-    assert st.player.block == 7
+    assert st.player.block == 7                  # both instances pay
+    assert st.player.timed_power_amounts[OP] == [[5, 2]]   # the 1-turn expired
+    combat._player_turn(st, lambda s: None)
+    assert st.player.block == 5                  # ...and stays expired
+    combat._player_turn(st, lambda s: None)
+    assert st.player.block == 5
+    combat._player_turn(st, lambda s: None)
+    assert st.player.block == 0
+    assert OP not in st.player.powers
+
+
+def test_two_chinju_wards_on_one_turn_pay_ten_then_ten_then_nothing():
+    """The ruling in the numbers [USER] used: 2 independent instances, 5 for 2.
+
+    Driven off the real card rather than a fabricated row, because the whole
+    reason the rule needed ruling is that a printed carrier finally existed.
+    """
+    st = make_state(enemies=[make_enemy(hp=400)])
+    for _ in range(2):
+        c = loader.get_card("chinju_ward")
+        st.player.hand.append(c)
+        st.player.energy += c.cost
+        combat.play_card(st, c)
+    assert st.player.block == 10                 # the two immediate halves
+    assert st.player.timed_power_amounts[OP] == [[5, 2], [5, 2]]
+
+    paid = []
+    for _ in range(3):
+        combat._player_turn(st, lambda s: None)
+        paid.append(st.player.block)
+    assert paid == [10, 10, 0]
+    assert OP not in st.player.powers
+    assert OP not in st.player.timed_power_amounts
+
+
+def test_one_on_each_of_two_turns_pays_five_then_ten_then_five():
+    """The other half of the ruling, and the one a merged power cannot say:
+    the instances are OFFSET, so the overlap turn pays double and the tail
+    pays single. A `max`-on-turns merge would have paid 5, 10, 10."""
+    st = make_state(enemies=[make_enemy(hp=400)])
+    play(st, [{"op": OP, "amount": 5, "turns": 2}])          # turn 1
+    combat._player_turn(st, lambda s: None)
+    first = st.player.block
+    play(st, [{"op": OP, "amount": 5, "turns": 2}])          # turn 2
+    combat._player_turn(st, lambda s: None)
+    second = st.player.block
+    combat._player_turn(st, lambda s: None)
+    third = st.player.block
+    assert [first, second, third] == [5, 10, 5]
+    combat._player_turn(st, lambda s: None)
+    assert st.player.block == 0
 
 
 def test_a_second_casting_never_shortens_a_standing_one():
+    """True before R247 by a `max`, and true after it by construction: a
+    shorter instance cannot touch a longer one it never merges with."""
     st = make_state(enemies=[make_enemy(hp=400)])
     play(st, [{"op": OP, "amount": 4, "turns": 4}])
     play(st, [{"op": OP, "amount": 4, "turns": 2}])
     assert st.player.powers[OP] == 4
+
+
+def test_each_instance_pays_its_own_block_row():
+    """One `block` row per instance, not one summed row. The game pays each
+    `ToricToughnessPower` through its own `CreatureCmd.GainBlock` in its own
+    `AfterBlockCleared`, so a reader counting Block gains sees two."""
+    st = make_state(enemies=[make_enemy(hp=400)])
+    play(st, [{"op": OP, "amount": 5, "turns": 1}])
+    play(st, [{"op": OP, "amount": 3, "turns": 1}])
+    before = len(st.log)
+    combat._player_turn(st, lambda s: None)
+    rows = [e for e in st.log[before:] if e["event"] == "block"]
+    assert [e["amount"] for e in rows] == [5, 3]
 
 
 # --- the duration is printed text, and it is checked at LOAD --------------

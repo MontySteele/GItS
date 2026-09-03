@@ -55,12 +55,28 @@ def test_exactly_one_shipped_relic_carries_the_exhaust_damage_hook():
 
 
 def test_no_shipped_card_declares_the_on_draw_randomiser():
+    """The randomiser reaches a card ONLY through Slither, never off a sheet.
+
+    Unchanged by EB-83's conversion, and that is the point of keeping it: the
+    enchantment now exists (the assertion below moved when Wood Carvings
+    converted and started granting it), but the hook is still per-INSTANCE
+    machinery a sheet cannot print. A row that declared `on_draw_randomise_cost`
+    would be a card whose cost re-rolls itself for free, with no enchantment
+    to explain it on the deck-list id.
+    """
     assert all(c.on_draw_randomise_cost is None
                and c.cost_set_this_combat is None
                for c in loader._card_index().values())
-    # Slither stays unexpressed for a REASON that is no longer the engine's.
-    assert "slither" in enchantments.UNEXPRESSED
-    assert "slither" not in enchantments.CATALOG
+    # Slither LEFT `UNEXPRESSED` at EB-83 (2026-09-02), because Wood Carvings
+    # converted and an enchantment with a granting event is a name with a
+    # caller. The dict is now empty and stays that way until an event names an
+    # enchantment this repo cannot express.
+    assert "slither" in enchantments.CATALOG
+    assert enchantments.UNEXPRESSED == {}
+    # ...and the rider it writes is the roll's exclusive bound, `NextInt(4)`.
+    enchanted = loader.peek_card(enchantments.decorate("kaboom", "slither"))
+    assert enchanted.on_draw_randomise_cost == 4
+    assert enchanted.cost_set_this_combat is None      # written on DRAW only
 
 
 # --- EB-82: damage_per_exhaust --------------------------------------------

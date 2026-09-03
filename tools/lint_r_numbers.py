@@ -38,7 +38,14 @@ DOCS = "docs/current"
 
 # Highest number issued under each prefix. Frozen namespace below these lives
 # at tag pre-simplification-2026-08-06; bump in the same commit as the ruling.
-R_CEILING = 246
+#
+# 247 is R247 (`EB-83`, block_at_turn_start stacks as independent instances).
+# R244-R246 are issued on another branch that has not merged yet, so this
+# ceiling runs three ahead of the numbers `main` can currently resolve -- which
+# is the direction the ceiling is allowed to run: it bounds what may be CITED,
+# and an unissued number below it is not a finding here. It resolves when the
+# branches meet.
+R_CEILING = 247
 D_CEILING = 15
 
 HEADING = re.compile(r"(?m)^##\s+([RD]\d+)\b")

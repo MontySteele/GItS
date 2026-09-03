@@ -9,12 +9,21 @@
 # WHY THEY ARE HERE AT ALL: Bugslayer's whole content is "which of these two
 # cards do you want", so the event cannot ship as a real choice unless both
 # cards are real. Both are published with exact numbers, so both are exact.
+# Wood Carvings (EB-83) is the same shape twice over -- two of its three
+# options ARE a named card apiece -- so its two rows are here for the same
+# reason.
 #
 # NO UPGRADE PATHS. The wiki gives upgraded numbers (Exterminate 4x4, Squash
-# 12 damage / 3 Vulnerable) but neither card is in an upgrade sheet, so
+# 12 damage / 3 Vulnerable; the decompile gives Peck 2x4 and Toric Toughness 7
+# Block) but none of these four is in an upgrade sheet, so
 # `upgrades.has_upgrade` is False and a rest site or Tablet of Truth will never
 # improve them. That is a PENALTY relative to the real game, not a buff -- the
-# safe direction -- and it is one sheet entry away from being exact.
+# safe direction -- and it is one sheet entry away from being exact. For the
+# two EB-83 rows it is also the ONLY honest option today: `chinju_ward`'s bump
+# would need a `block_at_turn_start` upgrade-delta key in content/upgrades.py,
+# and the delta keys are a shared schema with tools/gen_klee_cards.py's C#
+# emitter, which R20/R92 says lands atomically with every consumer or not at
+# all (atlas/tier0-engine.md sec.7 names it as still-owed).
 
 - id: exterminate
   name: "Exterminate"
@@ -36,3 +45,65 @@
   effects:
     - {op: damage, amount: 10, target: enemy}
     - {op: apply_power, power: vulnerable, amount: 2, target: enemy}
+
+# --- Wood Carvings (EB-83). RESKINS, ruled R184 and named R231 -------------
+# R184 ruled the event converts with MOD content rather than with the base
+# game's colorless cards, so design principles sec.4.7 holds unamended: the
+# rows below are Peck and Toric Toughness by FUNCTION and by NUMBER, and
+# Teyvat by name. R231 fixed the two names at the S4-G11 eye-read -- *Peck*
+# -> "Tengu Flurry" (Tengu is established in Teyvat through Kujou Sara),
+# *Toric Toughness* -> "Chinju Ward" (the ward anchors to Chinju Forest, the
+# gallery entry's own setting, rather than to a real-world ritual term).
+#
+# THE NUMBERS ARE THE BINARY'S, not the wiki's, read from sts2.dll v0.111.0
+# (the build STATE pins) on 2026-09-02:
+#
+#   Models.Cards.Peck            : base(1, CardType.Attack, CardRarity.Event,
+#                                       TargetType.AnyEnemy)
+#                                  CanonicalVars = DamageVar(2m, Move),
+#                                                  RepeatVar(3)
+#                                  OnUpgrade: Repeat +1
+#   Models.Cards.ToricToughness  : base(2, CardType.Skill, CardRarity.Event,
+#                                       TargetType.Self), GainsBlock => true
+#                                  CanonicalVars = Turns 2m, BlockVar(5m, Move)
+#                                  OnPlay: GainBlock(Block), then
+#                                          Apply<ToricToughnessPower>(Turns)
+#                                          .SetBlock(the block just gained)
+#                                  OnUpgrade: Block +2  (5 -> 7)
+#
+# ONE NAMED DIVERGENCE on `chinju_ward`, and it is the one `block_next_turn`
+# already carries: the game snapshots the block the card ACTUALLY gained
+# (post-Dexterity, post-Frail) into the power, where the row below snapshots
+# the PRINTED 5, Spotlight-scaled once at play like every other printed Block
+# in this engine. Expressing the game's exact number would mean writing
+# `amount: block_gained_this_card`, which `_op_block_at_turn_start` would then
+# Spotlight-scale a SECOND time -- a bigger error, in the generous direction,
+# on the one character who can reach it. Named rather than papered over.
+
+- id: tengu_flurry
+  name: "Tengu Flurry"
+  cost: 1
+  type: attack
+  rarity: event
+  solve: [frontload]
+  role: glue
+  effects:
+    - {op: damage, amount: 2, times: 3, target: enemy}
+
+- id: chinju_ward
+  name: "Chinju Ward"
+  cost: 2
+  type: skill
+  rarity: event
+  solve: [block]
+  role: glue
+  # THE FIRST PRINTED CARRIER of `block_at_turn_start` (EB-83, built alone in
+  # the 2026-08-26 window on EB-82's admission rule). Printing it made the op's
+  # stacking rule reachable for the first time, and R247 ruled it ([USER],
+  # 2026-09-03): two of these are two INDEPENDENT instances -- 5 for 2 apiece,
+  # so a pair played together pays 10, then 10, then nothing -- which is the
+  # shipped game's own rule (`ToricToughnessPower` is
+  # `PowerInstanceType.Instanced`).
+  effects:
+    - {op: block, amount: 5}
+    - {op: block_at_turn_start, amount: 5, turns: 2}
