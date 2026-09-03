@@ -410,6 +410,35 @@ internal static class BlockMark
             ? power.Amount
             : System.Math.Min(power.Amount, power.Owner.Block);
 
+    /// <summary>
+    /// ONE ABSORPTION, SPENT AGAINST THIS MARK -- `EB-353`. Returns the mark's
+    /// new amount, or <c>null</c> when this hit does not touch the mark at all
+    /// (nothing marked is standing, or nothing was absorbed) and the rider
+    /// must not fire.
+    ///
+    /// PURE, and that is the point: <c>BlazingBarrierPower.Thicken</c> and
+    /// <see cref="IcyPawsPower.Bite"/> both need a live combat to spend their
+    /// commands, so the arithmetic is the only half a headless pin can read.
+    /// Both call this, so the two marks cannot drift apart again.
+    ///
+    /// <paramref name="payout"/> IS WHAT MAKES A RIDER FIRE PER ABSORPTION.
+    /// Marked-Block-eaten-FIRST means an absorption spends the mark by what it
+    /// absorbed; a rider that pays BLOCK puts that Block back under the SAME
+    /// mark, because it is the same "this Block" the card is talking about, so
+    /// the next hit of a multi-hit attack is another absorption of it. The
+    /// paws pass 0 -- their payout is an aura on the attacker, not Block --
+    /// which is exactly the marked-first spend they always had, down to and
+    /// including the 0 that means "gone".
+    /// </summary>
+    internal static int? Absorb(int mark, int standing, int incoming,
+                                int payout)
+    {
+        var marked = System.Math.Min(mark, standing);
+        var absorbed = System.Math.Min(standing, incoming);
+        if (marked <= 0 || absorbed <= 0) return null;
+        return System.Math.Max(marked - absorbed, 0) + payout;
+    }
+
     /// <summary>The start-of-turn housekeeping, shared by both marks: a mark
     /// with nothing behind it is gone. Written as a CLAMP rather than as a
     /// clear beside the block reset so it stays correct under Barricade, which
@@ -476,7 +505,17 @@ public sealed class IcyPawsPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Icy Paws"),
+        // THE STATIC (compendium) ROW CARRIES NO VAR TOKEN -- `EB-353`, found
+        // on Thoma's twin and fixed on both because both are the one
+        // construction. `PowerModel.HoverTips` calls `DynamicVars.AddTo` on
+        // the SMART branch alone (`HasSmartDescription && IsMutable`); the
+        // static branch binds the game's own three dumb variables and nothing
+        // else, so `{Left}` written here was never bound and the placeholder
+        // itself reached the screen.
         ("description",
+            "Marks your [gold]Block[/gold]. When it absorbs damage, apply "
+          + "[gold]Cryo[/gold] to the attacker."),
+        ("smartDescription",
             "[blue]{Left}[/blue] [gold]Block[/gold] left. When it absorbs "
           + "damage, apply [gold]Cryo[/gold] to the attacker."),
     };
@@ -513,20 +552,22 @@ public sealed class IcyPawsPower : PowerModel, ILocalizationProvider
         // in KuragePowers.cs establishes it), so `Owner.Block` here is the
         // standing Block and `min(Block, amount)` is exactly what will be
         // absorbed -- the sim's `blocked = min(player.block, dmg)`.
-        var standing = (int)Owner.Block;
-        var mark = System.Math.Min((int)Amount, standing);
-        var absorbed = (int)System.Math.Min(standing, amount);
-        if (mark <= 0 || absorbed <= 0) return;
+        // `EB-353`: the spend is `BlockMark.Absorb` now, with a payout of 0 --
+        // the paws pay an aura and no Block, so there is nothing to put back
+        // under the mark and the arithmetic is the marked-first spend it
+        // always was.
+        var left = BlockMark.Absorb((int)Amount, (int)Owner.Block,
+                                    (int)amount, payout: 0);
+        if (left == null) return;
         if (!attacker.IsDead)
         {
             await ElementalHit.ApplyOnly(
                 choiceContext, attacker, Element.Cryo, Owner);
         }
-        var left = mark - absorbed;
-        if (left > 0)
+        if (left.Value > 0)
         {
             await PowerCmd.ModifyAmount(
-                choiceContext, this, left - (int)Amount,
+                choiceContext, this, left.Value - (int)Amount,
                 applier: Owner, cardSource: null, silent: true);
         }
         else
