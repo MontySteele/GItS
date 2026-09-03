@@ -214,6 +214,16 @@ foreach ($d in 'ui', 'powers', 'relics', 'model') {
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
+# EB-161 (S20 P5): the Mods screen loads res://<mod id>/mod_image.png at the
+# pck ROOT -- unlike every surface above, NOT under klee\ui -- so it needs its
+# own copy block rather than folding into the loop. Produced by
+# tools/gen_mod_image.py (GENERATOR_OWNED in art_lint.py) from the three
+# characters' already-approved select_portrait.png crops; no plan.tsv row.
+$modImageSrc = Join-Path $src 'mod_image.png'
+if (-not (Test-Path $modImageSrc)) { Note-Skip 'klee\mod_image.png' $modImageSrc } else {
+    Copy-Item $modImageSrc -Destination (Join-Path $work 'klee\mod_image.png')
+}
+
 # Animation sprint 1 (Track B): pre-scaled combat layer sprites for the
 # animated combat scene. Full-res layer masters live in ImageGen/images/model
 # /layers; only the combat-scale derivatives in layers/combat ship, matching
