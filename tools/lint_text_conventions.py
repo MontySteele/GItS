@@ -73,17 +73,38 @@ EXCEPTIONS = {
         "the Bomb badge's static face carries rules 1, 2 and 6 in one "
         "paragraph because a canonical copy has no live pile to quote; the "
         "in-combat smart faces without a Mine meet the ceiling"),
-    "ProtoBombPower.smartDescriptionMines": (
-        "a live total, a live count, a Mine count and rule 6, which fires on "
-        "the enemy's turn when no card is in front of the player (EB-260)"),
-    "ProtoBombPower.smartDescriptionMinesWeak": (
-        "the Mine face plus the one term a player cannot see in the total "
-        "(EB-287)"),
     "TamakushiCasket.description": (
         "a two-rule starting relic plus the shared 59-character "
         "Companion-slot sentence every starting relic in this mod appends; "
         "its own two rules are under the ceiling on their own"),
 }
+
+#: THE BOMB BADGE'S GRID (`EB-343`, R248). The badge is the one surface in the
+#: mod that prints LIVE ARITHMETIC, and R248 requires it to name every one of
+#: the target's modifiers folded into the total it shows -- a Vulnerable folded
+#: in silently is the defect the row was raised on. Naming them costs
+#: characters, and the Mine axis multiplies whatever the modifier axis costs.
+#:
+#: THE PLAIN FACE IS NOT HERE and that is the point: `smartDescription`, the
+#: face a player reads on an unmodified enemy with no Mine in the pile, is 111
+#: of 125 and stays gated. Every entry below is that face plus a clause it is
+#: required to carry. Written as the grid rather than fifteen typed keys so it
+#: cannot fall out of step with `ProtoBombPower.Localization`, which builds its
+#: rows from the same two axes; the rot check still runs per key.
+_BOMB_FACE_REASON = (
+    "the Bomb badge is the arm's one live-arithmetic surface, and R248 "
+    "requires it to name every modifier folded into the number it prints "
+    "(EB-343); the Mine axis is EB-260's, rule 6 firing on the enemy's turn "
+    "when no card is in front of the player. The unmodified face with no Mine "
+    "is under the ceiling and is not excepted")
+EXCEPTIONS.update({
+    "ProtoBombPower.smartDescription" + mines + vulnerable + cap:
+        _BOMB_FACE_REASON
+    for mines in ("", "Mines")
+    for vulnerable in ("", "Vulnerable")
+    for cap in ("", "HardToKill", "Intangible", "Capped")
+    if (mines or vulnerable or cap)
+})
 
 # --- the spellings ----------------------------------------------------------
 #: (name, regex over the RENDERED text, what the page says instead)
@@ -199,7 +220,16 @@ def tip_rows() -> list[Row]:
     src = re.sub(r"^\s*//.*$", "", read(path), flags=re.M)
     where = str(path.relative_to(REPO))
     rows: list[Row] = []
-    for name, body in re.findall(r"With\(inherited, (\w+Key),\s*((?:[^;]|\n)*?)\);", src):
+    # NON-GREEDY TO THE CALL'S OWN `);`, and not "any character except a
+    # semicolon". The older pattern could not cross a semicolon INSIDE a
+    # literal, so a tip whose prose used one was not matched at all and
+    # never reached its ceiling: `MineKey` sat outside this census in both
+    # of its wordings until `EB-343` went looking. A missing row is silent
+    # here, exactly like the missing hover tip `EB-272` was filed on, so
+    # the pattern now stops at the statement rather than at a character
+    # the prose is allowed to contain.
+    for name, body in re.findall(
+            r"With\(inherited, (\w+Key),\s*(.*?)\);", src, re.S):
         if "SparkBody()" in body:
             continue
         rows.append(Row("tip", name, csharp_text(body), where))
@@ -241,16 +271,37 @@ def loc_rows(paths: list[Path], surface: str, slot_sentence: str) -> list[Row]:
                 text += consts.get("MineClause", "")
             rows.append(Row(surface, f"{cls}.{key}", text, where))
         if path.name == "ProtoBombPower.cs":
+            # `EB-343` widened the second axis. The badge's face used to be two
+            # by two -- a Mine in the pile, and Klee's Weak in the total -- and
+            # R248 took Klee out of a Bomb entirely and made every one of the
+            # TARGET's terms say its own name, so the grid is now the Mine axis
+            # by Vulnerable by the four cap spellings. Rebuilt from the same
+            # constants `ProtoBombPower.Face` composes, because this lint reads
+            # SOURCE and cannot run `LocManager`.
+            caps = (("", ""),
+                    ("HardToKill", consts["HardToKillClause"]),
+                    ("Intangible", consts["IntangibleClause"]),
+                    ("Capped", consts["UnnamedCapClause"]))
             for mines in (False, True):
-                for weak in (False, True):
-                    face = ("[gold]Set off[/gold] here deals "
-                            + (consts["WeakTotal"] if weak else consts["PlainTotal"])
-                            + (consts["BombsWithMines"] if mines else consts["Bombs"])
-                            + consts["GrowthSentence"]
-                            + (consts["MineClause"] if mines else consts["NoSelfSentence"]))
-                    rows.append(Row("power", "ProtoBombPower.smartDescription"
-                                    + ("Mines" if mines else "") + ("Weak" if weak else ""),
-                                    face, where))
+                for vulnerable in (False, True):
+                    for cap_key, cap_text in caps:
+                        clause = consts["VulnerableClause"] if vulnerable else ""
+                        if cap_text:
+                            clause += ("," + cap_text) if vulnerable else cap_text
+                        face = ("[gold]Set off[/gold] here deals "
+                                + consts["PyroTotal"] + clause + "."
+                                + (consts["BombsWithMines"] if mines
+                                   else consts["Bombs"])
+                                + consts["GrowthSentence"]
+                                + (consts["MineClause"] if mines
+                                   else consts["NoSelfSentence"]))
+                        rows.append(Row(
+                            "power",
+                            "ProtoBombPower.smartDescription"
+                            + ("Mines" if mines else "")
+                            + ("Vulnerable" if vulnerable else "")
+                            + cap_key,
+                            face, where))
     return rows
 
 

@@ -219,6 +219,13 @@ KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
 # the mod grants it from the arm's own turn-1 site and the relic's face is
 # unchanged. C# twin `KleeOverhaulLaw.OpeningSpark`.
 KLEE_OVERHAUL_OPENING_SPARK = 1
+# GROUNDED'S SPARK (`EB-344`, ruled R248). The held turn pays a Spark as well as
+# the Block: "At the start of your turn, if none of your Bombs went off last
+# turn, gain 6 Block and 1 Spark." The Block is the CARD's number and moves on
+# upgrade (`power_amount: +2`); the Spark is the KIT's and does not, which is
+# why it is named here beside rule 4's other two rates rather than riding the
+# power's amount. C# twin `KleeOverhaulLaw.GroundedSpark`.
+KLEE_OVERHAUL_GROUNDED_SPARK = 1
 
 # THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, in the
 # printed order.

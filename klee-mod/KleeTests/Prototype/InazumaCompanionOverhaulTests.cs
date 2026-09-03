@@ -259,6 +259,11 @@ public class InazumaCompanionOverhaulTests
         var volley = Il.Method("TamotoPower", "FireVolley");
         Assert.Contains(Il.Calls(volley), c => c.Contains("ElementalHit.Deal"));
 
+        // SEVEN, and `EB-343` is why that is still seven: the overhaul
+        // Bomb wanted the same pipeline edit `powered` already made
+        // and JOINED that flag rather than adding a second one, so a
+        // count here is a real guard against a third. Every read is by
+        // NAME; only the count is positional.
         var deal = Il.Method("ElementalHit", "Deal");
         Assert.Equal(7, deal.GetParameters().Length);
         var ignore = deal.GetParameters().Single(p => p.Name == "ignoreBlock");

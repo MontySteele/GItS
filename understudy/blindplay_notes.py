@@ -195,15 +195,19 @@ AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
 # otherwise. It is the ONE row with a hole in it, and the hole is a number the
 # card face already prints.
 ARM_KEYWORDS: dict[str, str] = {
-    "Bomb": ("A charge on an enemy. Each Bomb grows by {growth} at the start "
-             "of your turn. Never goes off by itself. Bombs on one enemy go "
-             "off together when Set off."),
+    # "EACH" IS `EB-340`'s, and it stays: the act-1 seat found growth is
+    # +{growth} PER BOMB (Bomb 5 + Bomb 8 -> 21, not 17) and no wording said
+    # so. In game the badge carries that fact ("Each grows at the start of
+    # your turn"); the seat page has no badge, so the glossary says it.
+    "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
+             "only when Set off, all at once. Its hit takes the enemy's "
+             "debuffs, not yours."),
     "Set off": ("Every Bomb on the target goes off first, one at a time, "
                 "each a Pyro hit for its size."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
     "Mine": ("A Bomb that also goes off when its enemy attacks you, before "
-             "the hit lands. Weak shrinks it like any Bomb; the badge shows "
+             "the hit lands. The enemy's debuffs move it, and the badge has "
              "the number."),
     "Plan": ("On the Bake-Kurage, paid now; the Plan lands first thing next "
              "turn on the front enemy. Enemy Vulnerable raises it; your Weak "
@@ -300,7 +304,13 @@ REACTION_KEYWORDS: dict[str, str] = {
 # `ArmKeywordTips.ForBomb` builds it as "Grows by <n> at the start of your
 # turn", so this is an exact read of the game's own sentence and never a guess
 # at what a stray numeral near the word Bomb might have meant.
-_BOMB_GROWTH_RE = re.compile(r"\bGrows by (\d+) at the start of your turn\b")
+# `EB-340` reads the rate off the SCREEN's own Bomb tip so the page quotes
+# what this build prints rather than what tier0 believes. `EB-343` (R248)
+# rewrote that tip to fit its ceiling, so the pattern follows it: anchored
+# on the tip's own opening, because a bare "grows N a turn" is a phrase a
+# card face could reach one day and a wrong match here is silent.
+_BOMB_GROWTH_RE = re.compile(
+    r"charge on an enemy: grows (\d+) a turn\b")
 
 
 def _every_string(blob: Any):

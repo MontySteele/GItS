@@ -829,16 +829,28 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     (R128, the rule the Shatter path below already keeps). Default False, so
     every shipped caller is byte-identical.
 
-    `powered` is QUARANTINED (C.KOKOMI_OVERHAUL) and has exactly TWO callers,
-    both of them hits the BAKE-KURAGE deals rather than she does: the Tamakushi
-    Casket's strike, and -- since `EB-334`, R246 pick 1 -- every Plan's damage.
-    False drops the dealer's Strength and Weak (`ValueProp.Unpowered` on the
-    dealer's side) and nothing else -- the aura still lands, the reaction still
-    fires, the target's Vulnerable and Block still apply -- so it is NOT
+    `powered` is QUARANTINED and has exactly THREE callers, across both
+    prototype arms. False drops the dealer's Strength and Weak
+    (`ValueProp.Unpowered` on the dealer's side) and nothing else -- the aura
+    still lands, the reaction still fires, and the target's Vulnerable,
+    Intangible cap and Block still apply -- so it is NOT
     `refpowers.unpowered_damage`, which skips all of those and is what a
-    Power's own damage takes. The distinction is the C#'s: both go out through
-    `ElementalHit.Deal` with the dealer's mods off, and a pet carries no
-    Strength. Default True, so every shipped caller is byte-identical."""
+    Power's own damage takes. Default True, so every shipped caller is
+    byte-identical, and the C# twin is one flag as well
+    (`ElementalHit.Deal(..., powered: false)`).
+
+    THE TWO ARMS ASK FOR IT FOR DIFFERENT REASONS, which is worth keeping
+    straight because the flag reads as a fact about the DEALER and only one of
+    them means it that way:
+
+      * C.KOKOMI_OVERHAUL -- the Tamakushi Casket's strike and, since `EB-334`
+        (R246 pick 1), every Plan's damage. Both are hits the BAKE-KURAGE deals
+        rather than she does, and a pet carries no Strength. Here the flag is
+        a fact about who is swinging.
+      * C.KLEE_OVERHAUL -- `klee_overhaul._explode`, `EB-343` (ruled R248): a
+        Bomb carries the TARGET's modifiers only, so a charge enters at its
+        printed size. Here the dealer IS Klee, and the flag states the RULE
+        instead."""
     # THE DEAD TAKE NOTHING (EB-136 / R210, C18). `CreatureCmd.Damage` opens
     # its per-target loop with `if (originalTarget2.IsDead) continue;`, so a
     # corpse absorbs no damage, fires no reaction and pays no on-hit rider --

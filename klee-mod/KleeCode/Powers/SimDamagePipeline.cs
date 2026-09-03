@@ -1,7 +1,9 @@
 using System.Linq;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
 
@@ -49,6 +51,74 @@ public static class SimDamagePipeline
             damage *= ReactionConstants.VulnerableTakenMult;
         }
         return damage;
+    }
+
+    /// <summary>
+    /// The per-hit damage CAP the target itself imposes, <c>decimal.MaxValue</c>
+    /// when it imposes none. `EB-343`.
+    ///
+    /// NOT A NEW RULE -- IT IS THE ENGINE'S OWN, READ EARLY. `CreatureCmd.Damage`
+    /// already runs <c>Hook.ModifyDamage(..., ModifyDamageHookType.All, ...)</c>,
+    /// whose Cap phase takes the MINIMUM <see cref="AbstractModel.ModifyDamageCap"/>
+    /// over every hook listener, and unlike the Weak/Vulnerable/Strength hooks it
+    /// carries NO <c>IsPoweredAttack()</c> gate -- so a cap already bites an
+    /// Unpowered elemental hit today. What this adds is a way for a FACE to know
+    /// it: a badge that promised 17 into an <c>Exoskeleton</c>'s Hard To Kill 3
+    /// was promising three times what would land.
+    ///
+    /// THE TARGET'S OWN POWERS, and that is exact rather than an approximation:
+    /// the 0.111.0 decompile carries exactly two <c>ModifyDamageCap</c> overrides,
+    /// <c>HardToKillPower</c> and <c>IntangiblePower</c>, and BOTH answer
+    /// <c>decimal.MaxValue</c> unless <c>target == Owner</c>. So scanning the
+    /// target's powers finds every cap the engine's full sweep would find, and
+    /// anything a future build adds elsewhere is still applied by the engine --
+    /// this read would simply not predict it, which is the safe direction.
+    ///
+    /// <c>ValueProp.Unpowered</c> and null dealer/card are what
+    /// <see cref="ElementalHit.Deal"/> passes to <c>CreatureCmd.Damage</c>, so
+    /// the question asked here is the question the hit will ask. Neither cap
+    /// power reads any of them.
+    /// </summary>
+    public static decimal TargetCap(Creature target)
+    {
+        var cap = decimal.MaxValue;
+        foreach (var power in target.Powers)
+        {
+            var one = power.ModifyDamageCap(
+                target, ValueProp.Unpowered, dealer: null, cardSource: null,
+                cardPlay: null);
+            if (one < cap) cap = one;
+        }
+        return cap;
+    }
+
+    /// <summary>
+    /// THE OVERHAUL BOMB'S PIPELINE (`EB-343`, R248): the TARGET'S modifiers and
+    /// nothing of the dealer's.
+    ///
+    /// A Bomb is the enemy's burden. Its printed size is its size -- Klee's
+    /// Strength and Weak are hers and do not travel to a charge sitting on an
+    /// enemy -- and what a Set off pays is that size through the target's own
+    /// terms: <see cref="TargetMods"/>'s Vulnerable, then
+    /// <see cref="TargetCap"/>'s cap.
+    ///
+    /// THE ORDER AND THE TRUNCATION ARE <see cref="ElementalHit.Deal"/>'s, not a
+    /// second arithmetic: Deal truncates once at <see cref="TargetMods"/> and
+    /// hands the int to <c>CreatureCmd.Damage</c>, whose own Cap phase then
+    /// clamps it. So the cap is applied to the TRUNCATED number here for the same
+    /// reason, and per charge, because the explosion loop calls this once per
+    /// charge.
+    ///
+    /// The amplifier is the one term a face cannot know -- the first explosion of
+    /// a Set off consumes the aura the rest would have reacted with -- so callers
+    /// predicting a pile pass 1.
+    /// </summary>
+    public static int ResolveOnTarget(
+        Creature target, decimal baseDamage, decimal amplifier)
+    {
+        var landed = (int)TargetMods(target, baseDamage * amplifier);
+        var cap = TargetCap(target);
+        return landed > cap ? (int)cap : landed;
     }
 
     /// <summary>

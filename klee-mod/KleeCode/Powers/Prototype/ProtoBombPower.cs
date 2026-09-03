@@ -57,6 +57,25 @@ namespace KleeMod.Powers;
 /// WHAT IS NOT INHERITED: the shipped Bomb's "first attack while Bombed deals
 /// 25% less" suppression. It is not in the brief's seven rules, so under rule 7
 /// it is not a rule -- it would be a card.
+///
+/// A BOMB CARRIES THE TARGET'S MODIFIERS ONLY (`EB-343`, ruled R248). A charge
+/// is planted at its PRINTED size and nothing of Klee's changes it -- a printed
+/// 6 is a Bomb 6 under minus 5 Strength and under Weak alike -- and what it
+/// pays when it goes off is that size through the ENEMY's own terms: Vulnerable
+/// and the enemy's per-hit cap. Weak has no target-side reading at all, because
+/// the game's <c>WeakPower</c> reduces what its OWNER deals and never what its
+/// owner takes.
+///
+/// WHY THE RULE MOVED. The badge is priced off the pile, so every dealer term
+/// in the pipeline showed up on an enemy-side number that a player reads as
+/// incoming damage: [USER] planted three Bombs of printed 6, 4 and 4 into
+/// Tender's minus 5 Strength and read `Bomb -1`, and a Weak on Klee shrank a
+/// banked stack at the badge without a card saying so. A charge already sitting
+/// on an enemy is not a swing Klee is taking, and pricing it as one made the
+/// character's central number unreadable in exactly the fights that are hard.
+/// The costs of the reading are the two things a player CAN see: the badge and
+/// the tooltip now name every modifier folded into them
+/// (<see cref="Localization"/>), rather than the one that used to be named.
 /// </summary>
 public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
 {
@@ -73,24 +92,51 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// because two numbers on one pile is one too many -- see
     /// <see cref="DisplayAmount"/>.
     /// </summary>
-    public List<(string, string)>? Localization => new()
+    public List<(string, string)>? Localization
     {
-        ("title", "Bomb"),
-        ("description",
-            "A charge on this enemy. It grows at the start of your turn. "
-          + "Every [gold]Bomb[/gold] here goes off as Pyro damage when "
-          + "[gold]Set off[/gold], never by itself." + MineClause),
-        // EB-260 and EB-287. FOUR ROWS, not one row with conditionals in it,
-        // for the reason <see cref="SmartDescriptionLocKey"/> gives: a headless
-        // pin can read a row and cannot run `LocManager`. The two axes are the
-        // live Mine count (EB-260 -- a player must never read "never goes off
-        // by itself" over a pile that answers the enemy's next attack) and
-        // whether the total above is the Weak-reduced one (EB-287).
-        ("smartDescription", Face(mines: false, weak: false)),
-        ("smartDescriptionWeak", Face(mines: false, weak: true)),
-        ("smartDescriptionMines", Face(mines: true, weak: false)),
-        ("smartDescriptionMinesWeak", Face(mines: true, weak: true)),
-    };
+        get
+        {
+            var rows = new List<(string, string)>
+            {
+                ("title", "Bomb"),
+                // FOUR SENTENCES, which is the ceiling, so `EB-343`'s clause
+                // is paid for by merging the first two rather than added to
+                // them. NO SEMICOLON, and that is not a style note:
+                // `tools/lint_text_conventions.py` reads these literals out of
+                // the SOURCE with a regex that stops at one, so a semicolon
+                // makes a player-facing string invisible to its own ceiling.
+                ("description",
+                    "A charge on this enemy that grows at the start of your "
+                  + "turn. Every [gold]Bomb[/gold] here goes off as Pyro "
+                  + "damage when [gold]Set off[/gold], never by itself. It "
+                  + "takes the enemy's debuffs, not your [gold]Strength[/gold] "
+                  + "or [gold]Weak[/gold]." + MineClause),
+            };
+            // EB-260, EB-287 and `EB-343`. ROWS, not one row with conditionals
+            // in it, for the reason <see cref="SmartDescriptionLocKey"/> gives:
+            // a headless pin can read a row and cannot run `LocManager`. TWO
+            // axes, and the second one GREW: the live Mine count (EB-260 -- a
+            // player must never read "never goes off by itself" over a pile
+            // that answers the enemy's next attack) and which of the target's
+            // modifiers the printed total has folded in (EB-287 asked for one
+            // of them by name and R248 asks for all of them).
+            //
+            // GENERATED RATHER THAN TYPED, which is what keeps the grid honest
+            // now that it is a grid: every key the selector below can compose
+            // has a row, because both come off <see cref="FoldedMods.All"/>. A
+            // key with no row behind it falls back to the static description
+            // (`PowerModel.HasSmartDescription` is a `LocString.Exists` probe),
+            // so a hole here is a silently blank face rather than a crash.
+            foreach (var mines in new[] { false, true })
+            {
+                foreach (var mods in FoldedMods.All)
+                {
+                    rows.Add((SmartKey(mines, mods), Face(mines, mods)));
+                }
+            }
+            return rows;
+        }
+    }
 
     /// <summary>
     /// Rule 6, in the words the static face already used. ONE sentence, two
@@ -103,33 +149,66 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         " A [gold]Mine[/gold] also goes off when this enemy attacks you, "
       + "before the hit lands.";
 
+    // `EB-343`'s sentence is written INTO the static description above rather
+    // than pulled out as a constant beside `MineClause`, and the reason is the
+    // measuring rule: `tools/lint_text_conventions.py` counts a bare
+    // identifier in a concatenation as ONE numeral, so a named constant would
+    // hide 65 characters of player-facing text from its own ceiling. The Bomb
+    // keyword tip states the same rule in ITS own words and shorter -- "Its
+    // hit takes the enemy's debuffs, not yours" (`ArmKeywordTips.ForBomb`),
+    // written to fit the tip ceiling -- while this face, read on the enemy
+    // where the modifiers actually are, names Strength and Weak outright. Same
+    // rule, two surfaces, the arrangement `MineClause` already has.
+
     /// <summary>
     /// The face the wire prints (<c>PowerModel.HoverTips</c> uses the SMART
     /// description for any mutable power that has one). <c>{Size}</c> is the
-    /// number the Set off will actually deal, Strength and Weak included --
-    /// see <see cref="PredictedSetOffDamage"/>, <c>EB-265</c>.
+    /// number the Set off will actually deal -- see
+    /// <see cref="PredictedSetOffDamage"/>, <c>EB-265</c> and <c>EB-343</c>.
     ///
     /// EB-287: IT IS PROSE NOW. The r3 Opus seat read the old parenthetical
     /// -- "(2 Bombs, 0 of them Mines)" -- as a debug string, and the r3 Codex
     /// seat had to REASON OUT that the total was the Weak-adjusted one
     /// ("I inferred [it] was the Weak-adjusted amount but had to reason
     /// through"). So the count is a sentence, the Mine clause appears only
-    /// when there is a Mine to talk about, and the Weak term says its own
+    /// when there is a Mine to talk about, and each modifier term says its own
     /// name.
     /// </summary>
-    private static string Face(bool mines, bool weak) =>
-        "[gold]Set off[/gold] here deals " + (weak ? WeakTotal : PlainTotal)
+    private static string Face(bool mines, FoldedMods mods) =>
+        "[gold]Set off[/gold] here deals " + PyroTotal + mods.Clause + "."
       + (mines ? BombsWithMines : Bombs) + GrowthSentence
       + (mines ? MineClause : NoSelfSentence);
 
-    /// <summary>The total, and the one term a player cannot see in it. The
-    /// clause is chosen off <see cref="TotalIsAfterWeak"/>, which reads the
-    /// same pile state <see cref="PredictedSetOffDamage"/> reads, so the
-    /// sentence and the number can never disagree.</summary>
-    private const string PlainTotal = "[blue]{Size}[/blue] Pyro damage.";
+    /// <summary>The total, with no full stop: a modifier clause may follow it.
+    ///
+    /// EVERY PIECE OF THE GRID IS A NAMED CONSTANT, this one included, and it
+    /// is not decoration. `tools/lint_text_conventions.py` reads the player's
+    /// whole text off the SOURCE -- it cannot run `LocManager` any more than a
+    /// headless pin can -- and rebuilds these faces from these names. A clause
+    /// spelled inline would be text the ceilings never measured.</summary>
+    private const string PyroTotal = "[blue]{Size}[/blue] Pyro damage";
 
-    private const string WeakTotal =
-        "[blue]{Size}[/blue] Pyro damage after [gold]Weak[/gold].";
+    /// <summary>`EB-343`'s four clauses, one per term the total can pass
+    /// through. See <see cref="FoldedMods.Clause"/> for how they compose.
+    /// </summary>
+    private const string VulnerableClause = " after [gold]Vulnerable[/gold]";
+
+    private const string HardToKillClause =
+        " capped by [gold]Hard To Kill[/gold]";
+
+    private const string IntangibleClause =
+        " capped by [gold]Intangible[/gold]";
+
+    /// <summary>A cap this build does not know the name of. See
+    /// <see cref="CapKind"/> for why it is worth a clause at all.</summary>
+    private const string UnnamedCapClause = " capped by this enemy";
+
+    /// <summary>The row key <see cref="Face"/> is filed under, and the ONE
+    /// place the two axes are spelled into a key -- <see cref="Localization"/>
+    /// writes the rows with it and <see cref="SmartDescriptionLocKey"/> reads
+    /// one back, so a row and its selector cannot drift apart.</summary>
+    private static string SmartKey(bool mines, FoldedMods mods) =>
+        "smartDescription" + (mines ? "Mines" : string.Empty) + mods.KeySuffix;
 
     /// <summary>
     /// `EB-289`. <c>{Count}</c> AND NOT <c>{Amount}</c>, and the difference is
@@ -171,34 +250,146 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     private const string NoSelfSentence = " None goes off by itself.";
 
     /// <summary>
-    /// EB-260 and EB-287, the selector. <c>PowerModel.SmartDescription</c>
-    /// resolves this key on EVERY read of <c>HoverTips</c>, so the face
-    /// follows the pile: the moment a Mine lands here the printed text gains
-    /// rule 6's sentence and the moment the last one fires it loses it again,
-    /// and the total names Weak exactly while Weak is what is shrinking it.
-    /// Rows and a key, rather than conditionals inside one row, because a
-    /// headless pin can read a row and cannot run <c>LocManager</c> (KleeTests
-    /// README, "The headless boundary").
+    /// EB-260, EB-287 and `EB-343`, the selector.
+    /// <c>PowerModel.SmartDescription</c> resolves this key on EVERY read of
+    /// <c>HoverTips</c>, so the face follows the pile AND the enemy under it:
+    /// the moment a Mine lands here the printed text gains rule 6's sentence
+    /// and the moment the last one fires it loses it again, and the total
+    /// names each of the enemy's modifiers exactly while that modifier is
+    /// moving it. Rows and a key, rather than conditionals inside one row,
+    /// because a headless pin can read a row and cannot run <c>LocManager</c>
+    /// (KleeTests README, "The headless boundary").
     /// </summary>
     protected override string SmartDescriptionLocKey =>
-        Id.Entry + ".smartDescription"
-      + (MineCount > 0 ? "Mines" : string.Empty)
-      + (TotalIsAfterWeak ? "Weak" : string.Empty);
+        Id.Entry + "." + SmartKey(MineCount > 0, LiveMods);
 
     /// <summary>
-    /// Is the printed total the Weak-REDUCED one? EB-287's second half.
+    /// WHICH OF THE TARGET'S MODIFIERS THE PRINTED TOTAL HAS FOLDED IN, right
+    /// now. EB-287's half, widened by R248 from "Weak, and Vulnerable in
+    /// silence" to every term the number passed through.
     ///
     /// The guards are <see cref="PredictedSetOffDamage"/>'s own, in its own
     /// order and for its own reasons: an empty pile prints 0 and no modifier
     /// touches it, and a canonical (compendium) copy prints the stored
     /// <c>TotalSize</c> because <see cref="PowerModel.Owner"/>'s getter
-    /// asserts mutability. <c>Applier</c>'s getter does not assert, so it is
-    /// safe on either copy -- and <c>HasSmartDescription</c> reads this key
-    /// BEFORE the mutability check that gates the smart face, so it has to be.
+    /// asserts mutability -- and <c>HasSmartDescription</c> reads this key
+    /// BEFORE the mutability check that gates the smart face, so the read has
+    /// to survive one.
+    ///
+    /// <c>Applier</c> IS NO LONGER CONSULTED, and that is the rule: a Bomb is
+    /// the enemy's burden, so nothing about Klee is in this number to name.
     /// </summary>
-    private bool TotalIsAfterWeak =>
-        _charges.Count > 0 && IsMutable && Owner != null
-        && (Applier?.Powers.OfType<WeakPower>().FirstOrDefault()?.Amount ?? 0) > 0;
+    private FoldedMods LiveMods
+    {
+        get
+        {
+            if (_charges.Count == 0 || !IsMutable) return FoldedMods.None;
+            var target = Owner;
+            return target == null ? FoldedMods.None : FoldedMods.For(target);
+        }
+    }
+
+    /// <summary>
+    /// The modifiers one Set off here passes through, as a value the face and
+    /// the selector both read. `EB-343`.
+    ///
+    /// TWO AXES AND NOT A LIST, because the printed sentence is a sentence:
+    /// Vulnerable multiplies and a cap clamps, in that order, and the clause
+    /// below reads in that order too.
+    ///
+    /// PRESENCE, NOT EFFECT. A modifier is named while it is ON the enemy and
+    /// applies to this hit -- not only when it happened to change the total.
+    /// "Name what the number went through" is a rule a player can check against
+    /// the enemy's own badges; "name what moved it" would make the sentence
+    /// blink out on the boards where two modifiers happen to cancel, which is
+    /// exactly when a player most wants to know both are there.
+    /// </summary>
+    private readonly record struct FoldedMods(bool Vulnerable, CapKind Cap)
+    {
+        internal static readonly FoldedMods None = new(false, CapKind.None);
+
+        /// <summary>Every combination the selector can produce, so
+        /// <see cref="Localization"/> can emit a row for each.</summary>
+        internal static IEnumerable<FoldedMods> All =>
+            from vulnerable in new[] { false, true }
+            from cap in new[] { CapKind.None, CapKind.HardToKill,
+                                CapKind.Intangible, CapKind.Other }
+            select new FoldedMods(vulnerable, cap);
+
+        /// <summary>What is standing on <paramref name="target"/> right now.
+        /// The Vulnerable read is <c>SimDamagePipeline.TargetMods</c>' own, and
+        /// the cap is whichever power SET the minimum
+        /// <c>SimDamagePipeline.TargetCap</c> returns -- found by the same scan,
+        /// so the named power is the one whose number the face is printing.
+        /// </summary>
+        internal static FoldedMods For(Creature target)
+        {
+            var vulnerable =
+                (target.Powers.OfType<VulnerablePower>()
+                    .FirstOrDefault()?.Amount ?? 0) > 0;
+
+            var best = decimal.MaxValue;
+            var cap = CapKind.None;
+            foreach (var power in target.Powers)
+            {
+                var one = power.ModifyDamageCap(
+                    target, ValueProp.Unpowered, dealer: null,
+                    cardSource: null, cardPlay: null);
+                if (one >= best) continue;
+                best = one;
+                cap = power switch
+                {
+                    IntangiblePower => CapKind.Intangible,
+                    HardToKillPower => CapKind.HardToKill,
+                    _ => CapKind.Other,
+                };
+            }
+            return new FoldedMods(vulnerable, cap);
+        }
+
+        internal string KeySuffix =>
+            (Vulnerable ? "Vulnerable" : string.Empty) + Cap switch
+            {
+                CapKind.HardToKill => "HardToKill",
+                CapKind.Intangible => "Intangible",
+                CapKind.Other => "Capped",
+                _ => string.Empty,
+            };
+
+        /// <summary>The clause that goes after <see cref="PyroTotal"/>, empty
+        /// on an unmodified enemy, and in PIPELINE ORDER: Vulnerable
+        /// multiplies, then the cap clamps, so the sentence reads that way
+        /// too.</summary>
+        internal string Clause
+        {
+            get
+            {
+                var capped = Cap switch
+                {
+                    CapKind.HardToKill => HardToKillClause,
+                    CapKind.Intangible => IntangibleClause,
+                    CapKind.Other => UnnamedCapClause,
+                    _ => string.Empty,
+                };
+                if (!Vulnerable) return capped;
+                return VulnerableClause
+                     + (capped.Length > 0 ? "," + capped : string.Empty);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Which power is doing the capping, because the face has to say its name.
+    ///
+    /// The 0.111.0 decompile carries exactly two <c>ModifyDamageCap</c>
+    /// overrides -- <c>HardToKillPower</c> (Exoskeleton) and
+    /// <c>IntangiblePower</c> (Soul Fysh, Test Subject, Nemesis) -- and
+    /// <see cref="CapKind.Other"/> is for a cap this build does not know about.
+    /// It is not dead weight and it is not a guess: an unrecognised cap would
+    /// otherwise be folded into the printed number in SILENCE, which is the
+    /// exact defect R248 is fixing, so it gets a clause that claims no name.
+    /// </summary>
+    private enum CapKind { None, HardToKill, Intangible, Other }
 
     public override PowerType Type => PowerType.Buff;
 
@@ -268,6 +459,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// number too many, and the survivor has to be the one the Set off actually
     /// PAYS.
     ///
+    /// `EB-343` narrowed WHAT CAN MOVE IT rather than which number is shown:
+    /// under R248 the two agree on an unmodified board and part company only
+    /// over the ENEMY's Vulnerable and cap, never over anything of Klee's. The
+    /// [USER]-reported board this closes is Tender's minus 5 Strength turning
+    /// three Bombs of printed 6, 4 and 4 into a badge that read `Bomb -1`.
+    ///
     /// So the badge, the tooltip's <c>{Size}</c> and Big Badda Boom's bonus
     /// line now all come off the same arithmetic: this getter and
     /// <c>SetOffDamageVar</c> both call <see cref="PredictedSetOffDamage"/>,
@@ -296,10 +493,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <c>{Size}</c>, READ LIVE. <c>EB-265</c>.
     ///
     /// A plain <see cref="DynamicVar"/> is a stored number, written by
-    /// <see cref="SyncDisplay"/> when the pile changes -- and Strength does not
-    /// change the pile. So a Klee who gained Strength after her Bombs were
-    /// planted would read a face that was right when it was written and wrong
-    /// when she read it, which is the same defect one turn later. This subclass
+    /// <see cref="SyncDisplay"/> when the pile changes -- and a modifier does
+    /// not change the pile. So an enemy that gained Vulnerable after the Bombs
+    /// were planted would show a face that was right when it was written and
+    /// wrong when it was read, which is the same defect one turn later. (Before
+    /// <c>EB-343</c> the stale term was Klee's own Strength; the rule moved,
+    /// the staleness problem did not.) This subclass
     /// asks the pile at FORMAT time instead: the game hands the var itself to
     /// SmartFormat (<c>LocString.Add(DynamicVar)</c>) and formats it through
     /// <c>ToString()</c>, converting through <c>IConvertible</c> only for the
@@ -326,20 +525,28 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// WHAT A SET OFF HERE ACTUALLY DEALS, right now -- <c>EB-265</c>.
+    /// WHAT A SET OFF HERE ACTUALLY DEALS, right now -- <c>EB-265</c>, and the
+    /// arithmetic R248 re-ruled at <c>EB-343</c>.
     ///
     /// The face used to print <see cref="TotalSize"/>, the raw sum of the
-    /// charges, while <see cref="Explode"/> sends every charge through
-    /// <c>ElementalHit.Deal</c>, which adds Strength PER HIT. With Strength 2
-    /// and two Bombs the face printed 10 and the set-off dealt 14, and the
-    /// blind tester called it "the one number I learned not to trust"
-    /// (`klee-overhaul-r1-opus`, fight 2).
+    /// charges, while <see cref="Explode"/> sent every charge through a
+    /// pipeline that moved it. With Strength 2 and two Bombs the face printed
+    /// 10 and the set-off dealt 14, and the blind tester called it "the one
+    /// number I learned not to trust" (`klee-overhaul-r1-opus`, fight 2). The
+    /// answer then was to put the dealer's terms ON the face; R248's answer is
+    /// to take them out of the RULE, and this number follows the rule.
     ///
-    /// SHARED, NOT RE-DERIVED: <c>SimDamagePipeline.Resolve</c> is the same
-    /// dealer-mods / amplifier / one-truncation chain <c>ElementalHit.Deal</c>
-    /// runs, called once per charge exactly as the explosion loop does -- so
-    /// per-charge truncation and per-charge Strength are the pipeline's, not a
-    /// second copy of them here.
+    /// THE TARGET'S TERMS AND NOTHING OF KLEE'S. A Bomb is the enemy's burden:
+    /// a printed 6 is a Bomb 6 whatever Klee's Strength and Weak are doing, and
+    /// what a Set off pays is that size through the enemy's own Vulnerable and
+    /// the enemy's own per-hit cap.
+    ///
+    /// SHARED, NOT RE-DERIVED: <c>SimDamagePipeline.ResolveOnTarget</c> is the
+    /// same target-mods / one-truncation / cap chain the explosion takes --
+    /// <c>ElementalHit.Deal</c> with <c>applyDealerMods: false</c>, then
+    /// <c>CreatureCmd.Damage</c>'s own Cap phase -- called once per charge
+    /// exactly as the explosion loop does, so per-charge truncation and the
+    /// per-HIT cap are the pipeline's rather than a second copy of them here.
     ///
     /// TWO TERMS ARE DELIBERATELY LEFT OUT, and both are one-shot rather than
     /// standing state:
@@ -363,7 +570,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         var total = 0;
         foreach (var charge in _charges)
         {
-            total += SimDamagePipeline.Resolve(Applier, target, charge.Size, 1m);
+            total += SimDamagePipeline.ResolveOnTarget(target, charge.Size, 1m);
         }
         return total;
     }
@@ -711,14 +918,21 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         // computed it. Big Badda Boom's second clause reads this through the
         // ledger and its face says "the damage the Bombs dealt", so the two
         // have to be one number -- `size` is the charge, not the damage, and
-        // under Weak (or Strength, or Vulnerable) they are different.
+        // under the target's Vulnerable they are different.
         // PYRO, UNLESS A COVEN PERSONAL SAYS OTHERWISE (R236). Prune's
         // Hexhunter Chime is the one thing in either engine that moves rule 5's
         // element, and it moves it for ONE explosion; the call answers Pyro on
         // every other board and with the companion arm off. Sim twin:
         // `companion_coven.bomb_element`, read at `klee_overhaul._explode`.
         var element = await CompanionCovenBombs.ElementFor(choiceContext, applier);
-        var dealt = await ElementalHit.Deal(
+        // `EB-343` / R248: THIS DOOR IS THE WHOLE OF "a Bomb carries the
+        // target's modifiers only". The charge enters the funnel at its printed
+        // size -- Klee's Strength and Weak are hers and never travelled to a
+        // charge sitting on an enemy -- and everything the funnel does after
+        // that is the target's: the aura, the reaction, the Vulnerable and the
+        // per-hit cap. It is the ONE caller of this entry point; the echo two
+        // files over is a card's own damage and keeps hers.
+        var dealt = await ElementalHit.DealWithoutDealerMods(
             choiceContext, target, element, size, applier);
         var reacted = ReactionEffects.TotalResolved > reactionsBefore;
 
@@ -1095,9 +1309,16 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// What this placer's charges on <paramref name="enemy"/> add up to, RAW.
     /// Sparks 'n' Splash's echo reads it ("damage equal to the Bombs on it")
     /// and hands it to the same <c>ElementalHit.Deal</c> an explosion hands a
-    /// charge's size to -- so Strength, Weak and the reaction all land on the
-    /// echo exactly as they land on a Bomb going off, and the raw sum is what
-    /// enters that pipeline in both cases.
+    /// charge's size to, and the raw sum is what enters that pipeline in both
+    /// cases.
+    ///
+    /// THE ECHO KEEPS KLEE'S OWN TERMS AND AN EXPLOSION NO LONGER DOES
+    /// (<c>EB-343</c>), which is not an inconsistency: the echo is the CARD's
+    /// damage, sized off the pile, dealt by Klee at the end of her turn -- the
+    /// pile is read and not spent, no Bomb goes off, no Spark is paid and
+    /// neither of rule 7's counters moves. R248 is a rule about Bombs going
+    /// off. What the echo shares with an explosion is the element and the
+    /// reaction, not the dealer.
     ///
     /// PURE, and R205-scoped like every other read here: another Klee's pile
     /// is not hers to echo.

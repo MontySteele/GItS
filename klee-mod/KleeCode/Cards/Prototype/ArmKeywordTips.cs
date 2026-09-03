@@ -90,13 +90,37 @@ public static class ArmKeywordTips
     /// and one <i>Set off</i> pops all of them, but they stay separate charges
     /// and each grows on its own -- fusing them into a single charge is
     /// Careful Arrangement's whole card, and a tip claiming the kit did it for
-    /// free would print that card as a blank.</summary>
+    /// free would print that card as a blank.
+    ///
+    /// THE LAST CLAUSE IS `EB-343` (R248), and it is the one thing a player
+    /// cannot get from the badge: the badge shows the number, this says whose
+    /// number it is. A Bomb is the ENEMY'S burden, their debuffs moving it
+    /// while Klee's Strength and Weak do not, which is the opposite of what
+    /// every other damage source in her deck does. A rule that runs backwards
+    /// to the rest of the game cannot be inferred from a total that did not
+    /// change, so it is printed where the word is met.
+    ///
+    /// IT IS TWO SENTENCES AND IT FITS, which is the point of the rewrite
+    /// ([USER], PR #340, the same call as the Plan tip in #335). The four rules
+    /// used to be four sentences and 195 characters, over a ceiling that is the
+    /// base game's own longest mechanic tip -- and a seat reads this word every
+    /// turn. The compression is in the grammar, not in the content: rule 1's
+    /// rate, rule 7, rule 2's "all at once" and R248's burden are all still
+    /// here, and the growth rate is still interpolated so a repricing cannot
+    /// leave the sentence lying (`EB-89`).
+    ///
+    /// "not yours" RATHER THAN NAMING STRENGTH AND WEAK, and it costs nothing
+    /// true: the enemy's debuffs are what DOES move the number, so what is left
+    /// to say about the player's own modifiers is that none of them count. The
+    /// static badge face beside it (`ProtoBombPower`'s `description`) names the
+    /// two by name for the reader who wants them.
+    /// </summary>
     public static IEnumerable<IHoverTip> ForBomb(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
-            "A charge on an enemy. Grows by " + KleeOverhaulLaw.BombGrowth
-          + " at the start of your turn. Never goes off by itself. Bombs on "
-          + "one enemy go off together when [gold]Set off[/gold].");
+            "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
+          + " a turn, goes off only when [gold]Set off[/gold], all at once. "
+          + "Its hit takes the enemy's debuffs, not yours.");
 
     /// <summary>Rule 2, and the one [USER] named ("Set Off has no tooltip
     /// text"). The ORDER clause is the load-bearing half: the explosions land
@@ -160,13 +184,28 @@ public static class ArmKeywordTips
     /// in hand where there is no pile to quote: a Mine IS a Bomb, so it is the
     /// same Pyro hit for its own size and the same modifiers move it. The live
     /// arithmetic stays where it can be right -- on the badge.
+    ///
+    /// THE SECOND SENTENCE NAMES THE ENEMY NOW (`EB-343`, R248). It used to say
+    /// "[gold]Weak[/gold] shrinks it like any Bomb", which was true of the old
+    /// rule and is false of this one -- Weak on Klee no longer reaches a Bomb
+    /// at all. What survives is the half the r4 seat actually needed: a Mine's
+    /// number is on the badge, and it is not the printed size when the enemy
+    /// carries a modifier.
+    ///
+    /// AND THE SEMICOLON WENT WITH IT, which is not a style note.
+    /// `tools/lint_text_conventions.py` reads these bodies out of the SOURCE
+    /// with a regex that stops at a semicolon, so the one this sentence
+    /// carried had kept the whole Mine tip out of the census -- it was never
+    /// measured against the tip ceiling in either wording. The regex is fixed
+    /// in the same change; this sentence is a comma now and the tip is 134 of
+    /// 135.
     /// </summary>
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
-          + "you, before the hit lands. [gold]Weak[/gold] shrinks it like any "
-          + "Bomb; the badge shows the number.");
+          + "you, before the hit lands. The enemy's debuffs move it, and the "
+          + "badge has the number.");
 
     /// <summary>
     /// KLEE'S FIFTH, R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`

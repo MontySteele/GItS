@@ -45,26 +45,40 @@ internal static class ElementalHit
     /// arithmetic and disagreeing under Weak. Every existing caller ignores the
     /// result and is behaviour-identical; nothing in the pipeline moved.
     ///
-    /// <paramref name="powered"/> is QUARANTINED (the Kokomi overhaul) and has
-    /// exactly one caller: <c>KokomiPlan.Hit</c>, since <c>EB-334</c> ruled
-    /// (R246 pick 1) that the BAKE-KURAGE deals a Plan's damage. False skips
-    /// <see cref="SimDamagePipeline.DealerMods"/> -- the dealer's Strength and
-    /// Weak, and with them every flat attack buff the mirror carries -- and
-    /// changes nothing else: the aura still lands, the reaction still fires
-    /// and its amplifier is still read off the applier, and the target's
-    /// Vulnerable still multiplies through
-    /// <see cref="SimDamagePipeline.TargetMods"/>.
+    /// <paramref name="powered"/> is QUARANTINED and, since `EB-343`,
+    /// has TWO callers -- one per Klee-and-Kokomi prototype arm, asking
+    /// the same thing for two different reasons. False skips
+    /// <see cref="SimDamagePipeline.DealerMods"/> -- the dealer's Strength
+    /// and Weak, and with them every flat attack buff the mirror carries --
+    /// and changes nothing else: the aura still lands, the reaction still
+    /// fires and its amplifier is still read off the applier, and the
+    /// target's Vulnerable still multiplies through
+    /// <see cref="SimDamagePipeline.TargetMods"/>. Defaulted true, so every
+    /// shipped caller is byte-identical.
+    ///
+    ///   * <c>KokomiPlan.Hit</c>, since <c>EB-334</c> ruled (R246 pick 1)
+    ///     that the BAKE-KURAGE deals a Plan's damage.
+    ///   * <see cref="DealWithoutDealerMods"/>, the overhaul Bomb's own
+    ///     door, since <c>EB-343</c> ruled (R248) that a Bomb carries the
+    ///     TARGET's modifiers only -- the placer's Strength and Weak never
+    ///     enter it, at placement or at set-off.
+    ///
+    /// ONE FLAG AND NOT TWO, which is worth saying because the two arms
+    /// reached it a day apart and each could have spelled its own: what
+    /// they want is the same edit to the same pipeline stage, and a second
+    /// parameter meaning the same thing is a second thing to keep in step
+    /// with `deal_damage_to_enemy(..., powered=False)` on the sim side.
     ///
     /// WHY A FLAG AND NOT "PASS THE PET AS THE APPLIER", which is how the
-    /// Tamakushi Casket says the same thing one file over: the applier is also
-    /// who applies the AURA and who owns the REACTION's debuff, and a
-    /// Plan-caused Freeze has to stay a debuff SHE applied or the Casket would
-    /// stop answering it and The Clouds Like Waves Rippling would stop paying
-    /// for it. Draft 6 gives the jellyfish the arithmetic, not the authorship.
-    /// It is also the exact sim twin: `deal_damage_to_enemy(...,
-    /// powered=False)` keeps the applier and drops `modify_damage_dealt`, and
-    /// tier0 has no pet object to hand over. Defaulted true, so every shipped
-    /// caller is byte-identical.
+    /// Tamakushi Casket says the same thing one file over: the applier is
+    /// also who applies the AURA and who owns the REACTION's debuff, and a
+    /// Plan-caused Freeze has to stay a debuff SHE applied or the Casket
+    /// would stop answering it and The Clouds Like Waves Rippling would
+    /// stop paying for it. Draft 6 gives the jellyfish the arithmetic, not
+    /// the authorship. It is also the exact sim twin:
+    /// `deal_damage_to_enemy(..., powered=False)` keeps the applier and
+    /// drops `modify_damage_dealt`, and tier0 has no pet object to hand
+    /// over.
     /// </summary>
     public static async Task<int> Deal(
         PlayerChoiceContext choiceContext, Creature target, Element element,
@@ -110,6 +124,30 @@ internal static class ElementalHit
             dealer: null, cardSource: null, cardPlay: null);
         return landed;
     }
+
+    /// <summary>
+    /// THE OVERHAUL BOMB'S DOOR INTO <see cref="Deal"/> (`EB-343`, R248), and
+    /// it is a named method rather than a named argument for one reason: an
+    /// argument's value is invisible to every check the headless suite can
+    /// make. An explosion needs a live <c>CombatState</c>, so no test can watch
+    /// one land; what a test CAN read is which method a call site calls
+    /// (<c>KleeTests.Harness.Il</c>). Spelling the exception as a method makes
+    /// "a Bomb does not carry Klee's Strength and Weak" a fact about the call
+    /// graph, so deleting it fails a pin instead of quietly restoring the old
+    /// rule.
+    ///
+    /// ONE CALLER, <c>ProtoBombPower.Explode</c>. Everything else in the mod
+    /// goes through <see cref="Deal"/> and keeps the dealer's terms.
+    ///
+    /// THE KOKOMI ARM PASSES <c>powered: false</c> DIRECTLY and does not need a
+    /// door, which is not an inconsistency: a Plan's hit is reachable from the
+    /// headless suite through <c>KokomiPlan</c>'s own pins, and this one is
+    /// not. The door buys a structural pin where no value pin can exist.
+    public static Task<int> DealWithoutDealerMods(
+        PlayerChoiceContext choiceContext, Creature target, Element element,
+        decimal baseDamage, Creature? applier) =>
+        Deal(choiceContext, target, element, baseDamage, applier,
+             ignoreBlock: false, powered: false);
 
     /// <summary>
     /// Damage-less element application: tier0 resolve_hit(enemy, element, 0)
