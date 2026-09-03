@@ -1111,6 +1111,28 @@ CO_TENANCY_LEDGER = {
             "same this-turn expiry, one card over: the Block it pays is paid "
             "per REACTION during the turn (CompanionOverhaulReactions), never "
             "in this broadcast, so all that happens here is the removal",
+        ("Powers/Prototype/CompanionHexerei.cs", "SinfulHexPower"):
+            "QUARANTINED (the Hexerei family stand-ins, R236 sec.3). Fischl's "
+            "this-turn watcher CLOSING, and Favonian Favor's expiry one row "
+            "up is the shape it copies -- a reaction card's window ends where "
+            "the arm's other this-turn promises do, not at the turn START the "
+            "CARETAKERS close at (a Mine goes off when an ENEMY attacks; a "
+            "reaction does not). THE ORDERING QUESTION, answered: the "
+            "override reads nothing and writes only its own removal. What "
+            "pays it happens per REACTION during the turn "
+            "(CompanionHexerei.OnReaction), never in this broadcast, and the "
+            "sim closes the same window at one sequential point "
+            "(companion_hexerei.roll_turn_end, called from "
+            "effects.companion_overhaul_turn_end beside the pops for Dahlia "
+            "and Bennett), so there is no order for it to disagree with",
+        ("Powers/Prototype/CompanionHexerei.cs", "MollisFavoniusPower"):
+            "QUARANTINED (the Hexerei family stand-ins). Sucrose's this-turn "
+            "window closing, the same removal at the same boundary and for "
+            "the same reason as SinfulHexPower above -- it differs only in "
+            "what pays it, which is likewise a reaction and never this "
+            "broadcast. Neither reads the other, so their relative order "
+            "inside this broadcast is not a question the two engines can "
+            "answer differently",
         ("Powers/Prototype/CompanionOverhaulHooks.cs", "LightningFangPower"):
             "QUARANTINED (the Mondstadt companion overhaul, second wave). A "
             "duration TICK and nothing else -- what the power does happens on "

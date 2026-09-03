@@ -1627,6 +1627,27 @@ APPLY_POWERS = {
     "mc_lions_fang": ("LionsFangPower", None,
         "At the start of your turn, if none of your [gold]Bombs[/gold] went "
         "off last turn, gain {X} Block and draw 1 card."),
+    # THE HEXEREI FAMILY STAND-INS' FOUR (QUARANTINED, R213 B). Every class
+    # lives in klee-mod/KleeCode/Powers/Prototype/CompanionHexerei.cs, compiled
+    # only under `-p:PrototypeCards=true`, so the only rows that may name one
+    # are `proto_mc_` stand-ins on the prototype surface. They are here rather
+    # than in the caretakers' block above because they read the REACTION and
+    # the family mark instead of the Klee arm's explosion ledger -- which is
+    # what a family stand-in is for. The {X} templates are for form; every row
+    # carries its own `description:` (EB-215).
+    "mc_tectonic_tide": ("TectonicTidePower", None,
+        "Whenever an [gold]Elemental Reaction[/gold] happens, deal {X} damage "
+        "to that enemy."),
+    "mc_sinful_hex": ("SinfulHexPower", None,
+        "Whenever an [gold]Electro[/gold] [gold]Elemental Reaction[/gold] "
+        "happens this turn, deal {X} [gold]Electro[/gold] damage to a random "
+        "enemy."),
+    "mc_mollis_favonius": ("MollisFavoniusPower", None,
+        "This turn, [gold]Elemental Reactions[/gold] deal {X} additional "
+        "damage."),
+    "mc_ladder_of_ascent": ("LadderOfAscentPower", None,
+        "Whenever you play a [gold]Hexerei[/gold] card, deal {X} damage of "
+        "that card's element to a random enemy."),
     # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out
     # of a release build, so the only rows that may name one are `proto_` rows
@@ -2400,14 +2421,17 @@ CARD_FIELDS = {
     # card's face with it. See `build_description`; the no-shipped-carrier
     # rule is pinned in tier0/tests/test_prototype_surface.py.
     "description",
-    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). One word, no effect --
-    # the workshop's sec.1 pick 2: "Hexerei is one word on a Universal. It
+    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED), and it is READ NOW --
+    # the workshop's sec.1 pick 2 was "Hexerei is one word on a Universal. It
     # does nothing by itself. Klee's own readers and any future Hexerei
-    # character's carry the payoff." Whitelisted as INERT, exactly like
-    # `register` and `tempo_band` above: there is nothing mechanical to emit,
-    # and a family mark that BLOCKED every row carrying it would be a worse
-    # answer than one that is simply carried. The reader that makes it
-    # mechanical is a later change, and it is that change's job to move this.
+    # character's carry the payoff", and R236 sec.3 authored the first of those
+    # readers (Nicole's Ladder of Divine Ascent, "whenever you play a Hexerei
+    # card"). So the mark is no longer inert: a row carrying it emits the
+    # `IHexereiCard` marker, which is how THIS engine answers a question the
+    # sim answers with `Card.hexerei`. By interface rather than by a bool
+    # property or a list of ids, for `CompanionStandIns`' reason -- the
+    # compiler owns the correspondence, and a deleted row takes its class with
+    # it instead of leaving a string behind.
     "hexerei",
     # THE COMPANION STAND-IN SEAM (QUARANTINED), and the two halves differ.
     #
@@ -9335,6 +9359,15 @@ def emit(
         interfaces += ", ICompanionCard"
     elif profile.emit_character_identity:
         interfaces += ", ICharacterCard"
+    # QUARANTINED (the Mondstadt companion overhaul, R236 sec.3). Sheet
+    # `hexerei` -> IHexereiCard, a MARKER with no members: the family mark
+    # decides one rule, Nicole's Ladder of Divine Ascent, and that power asks
+    # "is the played card in the family" and nothing else. The interface is
+    # declared in Powers/Prototype, which a release build removes -- and every
+    # row that carries the mark is a `proto_` row, compiled under the same
+    # switch, so a shipped card can never implement it.
+    if card.get("hexerei"):
+        interfaces += ", IHexereiCard"
     # Sheet `skill_tag` -> ISkillTagCard: worth BURST_PER_SKILL_TAG burst
     # energy when played (KleeElementalHooks.AfterCardPlayed reads the marker).
     if "skill_tag" in card.get("tags", []):
@@ -9639,6 +9672,21 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         )
     if is_companion(card):
         personal = card.get("personal_pool")
+        # THE ONE-MEMBER LIST IS THE SAME VALUE AS THE BARE STRING, and it has
+        # to be normalised HERE too. `personal_pool:` accepts both spellings
+        # and the sim normalises at load (`Card.from_dict`, pinned by
+        # `test_personal_pool_normalises_a_one_member_list`); this emitter
+        # reads the RAW row, so without the same step a family stand-in wrote
+        # `PersonalPool => "['klee']"` and `CompanionStandIns.HandOff`, which
+        # compares that string to the run's character id, could never swap.
+        # Refused rather than joined for a longer list, exactly as the loader
+        # refuses one: a stand-in is handed to ONE character.
+        if isinstance(personal, list):
+            if len(personal) != 1:
+                raise SystemExit(
+                    f"{card['id']}: `personal_pool:` names exactly ONE "
+                    f"character id, got {personal!r}")
+            personal = personal[0]
         personal_cs = f'"{personal}"' if personal else "null"
         element_member += (
             "\n    /// <summary>Companion identity (companion sheet): star drives the\n"
@@ -10303,10 +10351,19 @@ def _write_plan(profile: CharacterProfile, plan: ProfilePlan) -> None:
     # Clear stale files so a card removed from the sheet does not linger.
     for old in profile.out_dir.glob("*.cs"):
         old.unlink()
+    # LF, EXPLICITLY, AND ON WINDOWS THAT IS THE WHOLE POINT. `write_text`
+    # defaults to `newline=None`, which translates every "\n" to `os.linesep`
+    # -- so a regen on Windows rewrote every generated file with CRLF while git
+    # holds LF, and a fresh worktree read the entire Generated/ tree as
+    # modified before anyone had touched a sheet. The `--check` path compares
+    # the emitted STRING against the file's decoded text, so it never saw the
+    # difference and the noise was invisible until `git status`. The bytes are
+    # what git stores, so the writer names them.
     for card_id, source in plan.generated.items():
         path = profile.out_dir / f"{pascal(card_id)}.cs"
-        path.write_text(source, encoding="utf-8")
-    profile.manifest.write_text(plan.manifest_src, encoding="utf-8")
+        path.write_text(source, encoding="utf-8", newline="\n")
+    profile.manifest.write_text(plan.manifest_src, encoding="utf-8",
+                                newline="\n")
 
 
 def _plan_klee(profile: CharacterProfile) -> ProfilePlan:

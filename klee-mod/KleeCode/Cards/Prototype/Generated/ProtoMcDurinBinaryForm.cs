@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, ICompanionCard, IModalCard
+public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, ICompanionCard, IHexereiCard, IModalCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Pyro;

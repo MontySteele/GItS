@@ -454,6 +454,16 @@ COMPANION_STANDIN_IDS: tuple[str, ...] = (
     "proto_mc_jean_lions_fang",             # for proto_mc_jean_dandelion_breeze
     "proto_mc_kaeya_cold_blooded_strike",   # for proto_mc_kaeya_frostgnaw
     "proto_mc_noelle_i_got_your_back",      # for proto_mc_noelle_breastplate
+    # THE HEXEREI FAMILY'S FOUR (R236 sec.3), a second contiguous block rather
+    # than four ids folded into the caretakers' above: the two groups read
+    # different events and leave the surface separately when the slice is
+    # ruled. The caretakers read the Klee arm's explosion ledger; these four
+    # read the REACTION -- and Nicole's reads the family mark itself, which is
+    # what makes that mark mechanical for the first time.
+    "proto_mc_albedo_tectonic_tide",        # for proto_mc_albedo_solar_isotoma
+    "proto_mc_fischl_sinful_hex",           # for proto_mc_fischl_nightrider
+    "proto_mc_nicole_ladder_of_ascent",     # for proto_mc_nicole_revelation
+    "proto_mc_sucrose_mollis_favonius",     # for proto_mc_sucrose_gust
 )
 
 # JEAN'S DRAW IS A LITERAL 1 IN BOTH ENGINES, AND DELIBERATELY NOT A CONSTANT.

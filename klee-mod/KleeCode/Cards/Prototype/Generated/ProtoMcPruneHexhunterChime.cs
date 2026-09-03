@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcPruneHexhunterChime : CustomCardModel, IElementalCard, ICompanionCard
+public sealed class ProtoMcPruneHexhunterChime : CustomCardModel, IElementalCard, ICompanionCard, IHexereiCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Anemo;

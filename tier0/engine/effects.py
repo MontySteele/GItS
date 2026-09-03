@@ -13,7 +13,8 @@ import copy
 from typing import Optional, Sequence
 
 from tier0 import constants as C
-from tier0.engine import (companion_coven, companion_standins, furina_reframe,
+from tier0.engine import (companion_coven, companion_hexerei,
+                          companion_standins, furina_reframe,
                           klee_overhaul, kokomi_plan, powers, reactions,
                           resources, statuses)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
@@ -6295,6 +6296,9 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
     # end of the same promise.
     p.powers.pop("mc_favonian_favor", None)
     p.powers.pop("mc_passion_overload", None)
+    # The Hexerei stand-ins' two this-turn windows close on the same line and
+    # for the same reading. `tier0.engine.companion_hexerei`.
+    companion_hexerei.roll_turn_end(state)
     # Razor, Lightning Fang -- stacks are TURNS REMAINING, and unlike the
     # volleys above it fires nothing here: what it does happens on every Attack
     # the player makes (`flat_attack_bonus`, `_element_for`), so end of turn is
@@ -6767,6 +6771,13 @@ def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
     # 6 more damage OF THE SWIRLED ELEMENT." The amount banks as an ordinary
     # stack (so two Swirls before one Attack bank twice, which is what
     # "whenever" says); the element is latched on the player, LAST WINS.
+    # KLEE'S HEXEREI FAMILY, the third and fourth readers of this event
+    # (QUARANTINED, R236 sec.3): Albedo's Tectonic Tide pays on ANY reaction,
+    # Fischl's Sinful Hex on an ELECTRO one -- which is derived from `name` and
+    # `aura` rather than passed, so no signature here widened for the slice.
+    # `tier0.engine.companion_hexerei` argues both, and why a volley that can
+    # react again is safe to fire from inside this site.
+    companion_hexerei.note_reaction(state, enemy, name, aura)
     if name == "swirl":
         # THE INAZUMA ARM'S Swirl WINDOW (QUARANTINED). Heizou's Heartstopper
         # Strike prints "deals 4 more for each Swirl this turn", so the count
