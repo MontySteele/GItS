@@ -1,9 +1,9 @@
-Status: OPEN (PR = [USER]; two picks in §6)
+Status: RULED R248 2026-09-03
 
 # Klee round seven-b: four Opus seats, three acts, and a death two floors below Aeonglass
 
-Two picks in §6, each with a marked default. Everything else is a default,
-applied and disclosed in §5.
+Ruled R248 (§6): pick 1 at its default, pick 2 in part. Everything else is
+a default, applied and disclosed in §5.
 
 Written 2026-09-03. Four chained Opus seats played one run on lane 2 of the
 build installed on 2026-09-02 (R243's numbers, the Fable card audit, the coven
@@ -139,29 +139,21 @@ not isolated. Aeonglass was never seen.
 - **E:** seven rows minted here, `EB-336` to `EB-342`; four widened. No agent
   minted an id tonight.
 
-## 6. Picks
+## 6. Picks, ruled R248 (2026-09-03)
 
-1. **Whose modifiers a Bomb carries.** (1) *The target's only: the enemy's
-   Vulnerable, Weak and Hard To Kill apply at set-off, Klee's own Strength and
-   Weak leave the stack alone, and the badge names every modifier it folds
-   in. One sentence in the Bomb tip. The same rule as R246 one kit over*
-   [default]. (2) Keep the code's rule, Strength and Weak at placement, and
-   print it: the seats' case is that a bomb deck hunting Strength relics is a
-   real draft axis, and Weak devaluing a banked stack was act 3's sharpest
-   pressure. The one-line new fact: `Bomb -1` on the screen, and two seats
-   pricing relics off a printed rule the kit does not follow.
-2. **Block on a schedule.** The new fact reopening R244's F pick: the survival
-   set was drafted this time and the run died holding Dig In unplayable,
-   because the kit's block is funded by detonating while its engine pays for
-   holding. (1) *Grounded's held turn also grants 1 Spark ("gain 6 Block and 1
-   Spark"), so a holding deck funds Dig In and Powder Charge and the two
-   currencies meet; plus one new Uncommon Skill, Take Cover! (1): "Gain 4
-   Block. Gain 2 Block for each of your Bombs." Upgrade 6 and 3. On the
-   five-bomb board every seat built that is 14 Block for one energy, the hold
-   archetype's burst block, scaling with what it already does* [default].
-   (2) Hold the shape as R244 set it; round 8 reads the Hexerei readers first.
-   (3) Pounding Surprise grants 1 Spark at the start of each turn as well, a
-   starter-relic change that funds every archetype and repeats the rules gate.
+[USER], verbatim: "On 332 - 1) Agreed with the default, 2) I agree with the
+Grounded buff but not with the Take Cover! addition - a bomb-throwing Klee
+should look for block from Hexerei support or companion cards instead."
 
-Both numbers in (1) are prototype numbers, D by the ladder, and ride the
-round-8 build with `EB-326`; the seats read them before you do.
+1. **Whose modifiers a Bomb carries.** RULED at the default: the target's
+   only. The enemy's Vulnerable, Weak and Hard To Kill apply at set-off,
+   Klee's own Strength and Weak leave the stack alone, and the badge names
+   every modifier it folds in. One sentence in the Bomb tip. Build row
+   `EB-343`.
+2. **Block on a schedule.** RULED in part. Grounded's held turn also grants
+   1 Spark ("gain 6 Block and 1 Spark"), so a holding deck funds Dig In and
+   Powder Charge and the two currencies meet. Take Cover! is struck: a
+   bomb-throwing Klee looks for block in the Hexerei readers (`EB-326`) and
+   the companion cards, not in her own pool. Build row `EB-344`.
+
+Both ride the round-8 build with `EB-326`; the seats read it before you do.

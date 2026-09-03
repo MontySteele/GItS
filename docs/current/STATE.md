@@ -135,11 +135,12 @@ are in [`workstreams.md`](workstreams.md).
 
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
-- **Klee** — Prototype round 7b is read: four Opus seats played three acts
-  on the R243 numbers, the Fable card audit and the stand-ins, and died two
-  floors below Aeonglass (`review/active/klee-overhaul-round-7b-2026-09-03.md`,
-  two picks: whose modifiers a Bomb carries, block on a schedule). Round 8
-  builds the picks and the Hexerei readers (`EB-326`); [USER] plays it.
+- **Klee** — Prototype round 7b is read and ruled (R248,
+  `review/ruled/klee-overhaul-round-7b-2026-09-03.md`): four Opus seats
+  played three acts on the R243 numbers, the Fable card audit and the
+  stand-ins, and died two floors below Aeonglass. Round 8 builds a Bomb
+  carrying the target's modifiers only (`EB-343`), Grounded's Spark
+  (`EB-344`) and the Hexerei readers (`EB-326`); [USER] plays it.
 - **Kokomi** — Prototype round 4c is read and ruled (R246,
   `review/ruled/kokomi-overhaul-round-4c-2026-09-02.md`): three Opus seats
   died on floor 24 with the Plan layer answering act 2's damage and none of
