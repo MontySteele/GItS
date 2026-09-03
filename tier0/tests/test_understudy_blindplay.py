@@ -1869,6 +1869,48 @@ def test_the_pile_views_charge_source_header_reaches_the_blind_page():
         blindplay.observation(memory_combat_state(empty)))
 
 
+def test_a_discounted_memory_prints_the_cost_it_was_multiplied_by():
+    """`EB-248`. The price is derivable from what the queue prints.
+
+    A Muster recruit is discounted by one, so *Thoma - Crimson Ooyoroi* prints
+    a face of 2 and enrols at `cost: 1, price: 3`: the rule reads the EFFECTIVE
+    cost, and a tester holding the card and the queue side by side has no route
+    from the 2 to the 3. `KURAGECAD-W1`'s tester named exactly that. Each queue
+    line now carries the cost the rule multiplied, in
+    `KurageMemory.PriceText`'s words, so the arithmetic is on the page.
+
+    The rate is the sim's rather than a number typed twice, and this assertion
+    is the pin: `blindplay` may not import `tier0` itself.
+    """
+    assert blindplay.KURAGE_COST_PER_ENERGY == C.KURAGE_MEMORY_COST_PER_ENERGY
+    discounted = dict(
+        BLOCKED_MEMORY, bank=3, front_price=3, blocked=False, fires_next=True,
+        run_out_index=-1,
+        reading="Charge 3 / 3 — Thoma - Crimson Ooyoroi fires next turn",
+        queue=[
+            {"name": "Thoma - Crimson Ooyoroi", "cost": 1, "price": 3,
+             "target": "Slime", "blocked": False, "affordable": True,
+             "ephemeral": False, "rule": "muster"},
+            {"name": "Gorou", "cost": 0, "price": 0, "target": None,
+             "blocked": False, "affordable": True, "ephemeral": True,
+             "rule": "muster"},
+        ])
+    page = blindplay.render(blindplay.observation(
+        memory_combat_state(discounted)))
+    assert ("1. **Thoma - Crimson Ooyoroi** — 3 Charge, cost 1 x 3 — "
+            "aims at Slime" in page)
+    assert f"cost 1 x {C.KURAGE_MEMORY_COST_PER_ENERGY}" in page
+    # A free memory reads as free and carries no derivation: a zero price is a
+    # zero cost, and "cost 0 x 3" would restate the answer rather than explain
+    # it.
+    assert "2. **Gorou** — free — aims at random" in page
+    # EVERY entry carries its own, front or not.
+    blocked = blindplay.render(blindplay.observation(
+        memory_combat_state(BLOCKED_MEMORY)))
+    assert ("1. **Raiden Shogun** — 9 Charge, cost 3 x 3 — aims at Slime"
+            in blocked)
+
+
 def test_the_page_says_a_payable_front_fires_and_names_no_run_out():
     """The other side of the same element: a bank that covers the whole queue
     draws blue throughout, and the page must not invent a shortfall."""
