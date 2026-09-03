@@ -84,8 +84,24 @@ def _text(value: Any) -> str:
     and it is applied HERE, at the one door every printed value on this page
     comes through, for the reason `_despritify` gives one screen over: a rule
     applied in one reader is a rule the next reader somebody adds will miss.
+
+    `EB-375` MOVED THE SPRITE PASS THROUGH THIS DOOR TOO, and the reason is
+    that the boundary pass was not the only exit. `observation` rewrites its
+    finished structure, so every SCREEN was clean -- and the two lines a
+    command answers with are not part of an observation: `taken_line` prints
+    the row a choice took, and `_result_line` the game's own answer, both
+    built out of `_text` and neither passing through that boundary. So the
+    control run's second seat read `The next Attack you play costs 0
+    [ironclad_energy_icon.png]` off the reward it had just claimed, and
+    Venerable Tea Set's relic face printed the file name twice, while the same
+    cards printed `[Energy]` in combat one screen later.
+
+    THE BOUNDARY PASS STAYS. It is idempotent -- a rewritten tag no longer
+    matches -- and it still covers the values that never go through here, a
+    `_label` off an id among them. Two doors, one rule, and neither is the
+    place a reader has to remember.
     """
-    return qa_packet._text(qa_packet.strip_markup(value))
+    return _despritify(qa_packet._text(qa_packet.strip_markup(value)))
 
 
 def _int(value: Any, default: int = 0) -> int:
@@ -114,8 +130,14 @@ def _fold(text: Any) -> str:
     same key as the bare name this page now prints. Without it the tag WORDS
     survived the punctuation fold -- `[gold]Charge[/gold]` folded to
     `gold charge gold` -- and the two spellings were two different names.
+
+    `EB-375`: and the sprite tags go with them, for that same reason one row
+    on. A tester types back what the page PRINTED, so a name carrying an icon
+    has to fold the way the printed spelling does -- `[Energy]` folds to
+    `energy` and the raw `[ironclad_energy_icon.png]` to four words, and a
+    matcher reading the wire's spelling would refuse the tester's.
     """
-    s = qa_packet.strip_markup(text).casefold()
+    s = qa_packet.strip_markup(_despritify(text)).casefold()
     s = s.replace("—", " ").replace("–", " ").replace("-", " ")
     s = re.sub(r"[^a-z0-9+ ]+", " ", s)
     return " ".join(s.split())

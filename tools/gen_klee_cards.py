@@ -532,6 +532,12 @@ ARM_KEYWORDS = (
     # anywhere on screen until now. NO PLURAL: the word is a family name, and
     # every face that prints it prints "a Hexerei card".
     ArmKeyword("Hexerei", ("Hexerei",), "ArmKeywordTips.ForHexerei"),
+    # Klee's SIXTH, `EB-372`. `Grounded` is a Power of hers, and Kaeya's
+    # Cold-Blooded Strike is written against it by name -- so a player who
+    # drafted Kaeya without ever drafting Grounded met the word with nothing
+    # on the screen saying what it is, and the r9 seat read it as noise in
+    # both acts. NO PLURAL: the word names one Power.
+    ArmKeyword("Grounded", ("Grounded",), "ArmKeywordTips.ForGrounded"),
     # Kokomi's TWO (kokomi-overhaul-slice-1-2026-09-01.md draft 6 sec.2:
     # "Keywords with tooltips: Plan, Mend"). Draft 6 cut Tide, Surge, Exert
     # and Garment as keywords, so their four rows left this table with the

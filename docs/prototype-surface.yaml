@@ -758,7 +758,7 @@
    cost: 1, type: attack,
    personal_pool: [klee],
    replaces: proto_mc_kaeya_frostgnaw, art_of: proto_mc_kaeya_frostgnaw,
-   description: "Deal 8 damage. Apply [gold]Cryo[/gold]. This turn, Grounded counts nothing as having gone off.",
+   description: "Deal 8 damage. Apply [gold]Cryo[/gold]. This turn, [gold]Grounded[/gold] counts nothing as having gone off.",
    upgrade: {damage: 3},
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: apply_power, power: mc_cold_blooded, amount: 1, target: self}]}
