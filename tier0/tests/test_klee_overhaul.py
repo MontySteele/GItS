@@ -446,7 +446,16 @@ def test_the_two_last_clauses_are_exhaust_then_a_draw():
     them a 0- or 1-cost row printing no number got nothing at all, which is an
     upgrade slot that is a blank rather than a choice.
 
-    Both named rows are [USER]'s own examples, pinned by id."""
+    Both named rows are [USER]'s own examples, pinned by id. `proto_kk_vanguard`
+    left this pair under `R250` pick 1 (round-4d sec.6): it gained a now-line
+    with its own printed number, so the RAW default (this probe's whole
+    subject, and it deliberately reads `effects:` alone -- no `plan:` -- the
+    same as the day this test was written) now reads `power_amount` off that
+    line; the row itself keeps "remove exhaust" off the table by declaring its
+    own `upgrade:` (`test_prototype_surface.py` pins that). Moon's Reflection
+    -- `exhaust: true`, no printed number on either line -- is the same shape
+    Vanguard used to be.
+    """
     from tier0.content import upgrades
 
     def delta(card_id):
@@ -456,7 +465,7 @@ def test_the_two_last_clauses_are_exhaust_then_a_draw():
 
     # Change of Plans keeps its text and loses Exhaust.
     assert delta("proto_kk_change_of_plans") == {"remove": "exhaust"}
-    assert delta("proto_kk_vanguard") == {"remove": "exhaust"}
+    assert delta("proto_kk_moons_reflection") == {"remove": "exhaust"}
 
     # Rally is the counted-power half: `weak` at 1 IS a printed number, so it
     # never reaches the two clauses at all -- Rally+ applies 2 Weak.
@@ -473,9 +482,12 @@ def test_the_two_last_clauses_are_exhaust_then_a_draw():
     # declining. A row that already draws would collide on the one `Cards`
     # var; a PLAN-ONLY row has no effects walk to hang the added draw on, and
     # a now-line draw would contradict the "Play on the Bake-Kurage." its
-    # target type earns it.
+    # target type earns it. `proto_kk_ambush` left this second example under
+    # `R250` pick 1, the same as Vanguard above -- a real Plan-only shape,
+    # not a real row, since round-4d left only Nereid's Ascension (cost 2,
+    # which reaches the cost clause first) with an empty now-line.
     assert delta("proto_kk_stolen_chapter") == {}
-    assert delta("proto_kk_ambush") == {}
+    assert upgrades.prototype_default_delta("proto_kk_x", 1, []) == {}
 
 
 def test_a_power_amount_of_one_is_read_as_no_number():

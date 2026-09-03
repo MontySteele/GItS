@@ -18,14 +18,20 @@ namespace KleeMod.Powers;
 ///     anything inside the fight.
 ///
 /// PER TURN
-///   * <see cref="CompanionsPlayedThisTurn"/> -- written by The General's
-///     Banner's play hook, and it exists for what it becomes at the boundary:
-///   * <see cref="CompanionsPlayedLastTurn"/> -- Chain of Command's "Deal 4
-///     damage for each Companion card you played LAST turn". A Plan written on
-///     turn N is carried out at the top of N+1, so what the clause needs is the
-///     count for the turn the player was looking at when they wrote it. The
-///     roll below is the only place that number moves, which is what keeps the
-///     card and the counter from disagreeing about which turn "last" was.
+///   * <see cref="CompanionsPlayedThisTurn"/> -- Chain of Command's own
+///     now-line ("deal 3 damage for each Companion card you played THIS
+///     turn"), written by <c>ProtoBakeKuragePower.AfterCardPlayed</c> (rule 1
+///     guarantees that marker is on her every turn of every combat --
+///     `EB-362`: it used to be written by The General's Banner's play hook
+///     alone, a card she may never draw, so the count read a permanent zero
+///     on most boards) -- and it exists for what it becomes at the boundary:
+///   * <see cref="CompanionsPlayedLastTurn"/> -- the same card's Plan line,
+///     "Deal 6 damage for each Companion card you played LAST turn". A Plan
+///     written on turn N is carried out at the top of N+1, so what the clause
+///     needs is the count for the turn the player was looking at when they
+///     wrote it. The roll below is the only place that number moves, which is
+///     what keeps the card and the counter from disagreeing about which turn
+///     "last" was.
 ///   * the ONCE-PER-TURN latches (<see cref="ClaimOncePerTurn"/>) -- Treatise,
 ///     Song of Pearls and The General's Banner, capped at one payout a turn
 ///     each by [USER]'s live 2026-09-02 verdict.

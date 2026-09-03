@@ -48,7 +48,7 @@ public sealed class ProtoKkVanguard : CustomCardModel, ICharacterCard, IPlannedC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Vanguard"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold] and 1 [gold]Weak[/gold]."),
+        ("description", "Apply 1 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold] and 1 [gold]Weak[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -70,13 +70,19 @@ public sealed class ProtoKkVanguard : CustomCardModel, ICharacterCard, IPlannedC
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkVanguard()
-        : base(0, CardType.Skill, CardRarity.Common, KokomiTargets.PetOnly, autoAdd: false)
+        : base(0, CardType.Skill, CardRarity.Common, KokomiTargets.PetOrEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            return;
+        }
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

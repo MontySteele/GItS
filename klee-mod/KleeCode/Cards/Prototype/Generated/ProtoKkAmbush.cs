@@ -45,7 +45,7 @@ public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard, IPlannedCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ambush"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,19 +60,30 @@ public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard, IPlannedCar
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new DamageVar(5m, ValueProp.Move),
             new KokomiPlan.PlanDamageVar(12m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkAmbush()
-        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOnly, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOrEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            return;
+        }
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()

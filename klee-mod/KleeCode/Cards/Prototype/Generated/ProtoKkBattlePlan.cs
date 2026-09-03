@@ -45,7 +45,7 @@ public sealed class ProtoKkBattlePlan : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Battle Plan"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw {PlanCards:diff()} card{PlanCards:plural:|s}."),
+        ("description", "Draw 1 card. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw {PlanCards:diff()} card{PlanCards:plural:|s}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -61,19 +61,25 @@ public sealed class ProtoKkBattlePlan : CustomCardModel, ICharacterCard, IPlanne
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new CardsVar(1),
             new DynamicVar("PlanCards", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkBattlePlan()
-        : base(1, CardType.Skill, CardRarity.Uncommon, KokomiTargets.PetOnly, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Uncommon, KokomiTargets.PetOrSelf, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            return;
+        }
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()

@@ -212,6 +212,31 @@ def test_damage_lands_on_the_front_enemy_meaning_leftmost_alive(overhaul):
     assert back.hp == 1
 
 
+def test_front_enemy_skips_a_minion(overhaul):
+    """`R250`, round-5 sec.6 pick 1 at its default. Two round-5 formations put
+    a Minion-flagged decoy on the leftmost slot on purpose -- The Kin's
+    Followers absorbed a Feint Plan meant for the Priest, and Queen's Torch
+    Head Amalgam took every single-target Plan for a whole fight (round-5
+    packet sec.2) -- so `front_enemy` now reads `is_minion`, the sim's own
+    mirror of the game's `MinionPower` (state.py, NC-7 alpha), rather than the
+    raw leftmost-alive read `KokomiPlan.FrontEnemy`'s header used to state
+    alone."""
+    decoy = make_enemy(hp=40, name="decoy")
+    decoy.is_minion = True
+    boss = make_enemy(hp=40, name="boss")
+    st = kokomi_state(enemies=[decoy, boss])
+    carry_out(st, [{"op": "damage", "amount": 9, "target": "front_enemy"}])
+    assert boss.hp == 31 and decoy.hp == 40
+
+    # A board of Minions ALONE still takes the hit -- landing on nothing
+    # would be worse than landing on the decoy.
+    only_minion = make_enemy(hp=40, name="only-minion")
+    only_minion.is_minion = True
+    st2 = kokomi_state(enemies=[only_minion])
+    carry_out(st2, [{"op": "damage", "amount": 9, "target": "front_enemy"}])
+    assert only_minion.hp == 31
+
+
 def test_damage_to_every_enemy(overhaul):
     a, b = make_enemy(hp=40, name="a"), make_enemy(hp=40, name="b")
     st = kokomi_state(enemies=[a, b])
@@ -498,6 +523,20 @@ def test_damage_per_companion_last_turn_reads_last_turn(overhaul):
     carry_out(st, [{"op": "damage_per_companion_last_turn", "amount": 4,
                     "target": "front_enemy"}])
     assert enemy.hp == 40 - 8
+
+
+def test_chain_of_command_now_line_reads_companions_played_this_turn(overhaul):
+    """`R250` pick 1 (round-4d sec.6, default): the now-line beside the Plan
+    clause above, "Deal 3 damage for each Companion card you played this
+    turn" -- the live half, read off the real sheet row through the ordinary
+    `damage` + `amount_formula` rail (the same shape
+    `test_inazuma_companion_overhaul.test_heartstopper_reads_the_swirls_this_turn`
+    exercises for `swirls_this_turn`), not `damage_per_companion_last_turn`'s
+    Plan-only handover."""
+    st = kokomi_state(enemies=[make_enemy(hp=90, name="only")])
+    st.companion_plays_this_turn = 2
+    effects.resolve_card(st, loader.get_card("proto_kk_chain_of_command"))
+    assert st.enemies[0].hp == 90 - 6
 
 
 def test_applying_weak_and_vulnerable(overhaul):
