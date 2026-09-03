@@ -263,8 +263,11 @@ MIRRORED: dict[str, object] = {
     "KleeOverhaulLaw.WorkshopGrowth": C.KLEE_OVERHAUL_WORKSHOP_GROWTH,
     "KleeOverhaulLaw.AliceMultiplier": C.KLEE_OVERHAUL_ALICE_MULTIPLIER,
     "KleeOverhaulLaw.SparkPerExplosion": C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION,
-    # FIVE now: R242 pick 1 gave rule 4 a second number, the opening bank.
+    # SIX now: R242 pick 1 gave rule 4 a second number, the opening bank, and
+    # R248 (`EB-344`) a third -- the Spark Grounded pays on a held turn, which
+    # is the one turn rule 4's per-explosion rate mints nothing.
     "KleeOverhaulLaw.OpeningSpark": C.KLEE_OVERHAUL_OPENING_SPARK,
+    "KleeOverhaulLaw.GroundedSpark": C.KLEE_OVERHAUL_GROUNDED_SPARK,
     # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, `C.COMPANION_OVERHAUL`).
     # Same terms as the four above and for the same reason: quarantined is not
     # exempt. Every number here is the approved workshop's own printed text

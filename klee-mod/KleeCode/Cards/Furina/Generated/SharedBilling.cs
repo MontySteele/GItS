@@ -41,14 +41,14 @@ public sealed class SharedBilling : CustomCardModel, ICharacterCard
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("shared_billing");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shared Billing"),
-        ("description", "Apply [gold]Hydro[/gold] to a random enemy. [gold]Spotlighted[/gold] Companion numbers are 25% stronger this turn. Gain 1 [gold]Energy[/gold]."),
+        ("description", "Apply [gold]Hydro[/gold] to a random enemy. [gold]Spotlighted[/gold] Companions are 25% stronger this turn. Gain 1 [gold]Energy[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

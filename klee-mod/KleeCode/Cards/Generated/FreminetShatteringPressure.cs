@@ -48,7 +48,7 @@ public sealed class FreminetShatteringPressure : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Freminet — Shattering Pressure"),
-        ("description", "Your [gold]Shatters[/gold] deal {PowerAmount:diff()} more damage."),
+        ("description", "Your [gold]Shatters[/gold] deal {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

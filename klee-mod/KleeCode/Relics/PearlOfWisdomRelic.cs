@@ -47,10 +47,11 @@ public sealed class PearlOfWisdomRelic : CustomRelicModel
     {
         ("title", "Pearl of Wisdom"),
         ("description",
-            "Whenever a card is [gold]Exhausted[/gold], gain "
-          + $"{Powers.KokomiConstants.ChargePerExhaust} [gold]Charge[/gold] "
-          + $"and {Powers.KokomiConstants.BurstPerExhaust} Burst Energy. "
-          + CompanionSlot.RewardSlotDescription),
+            "Whenever a card is [gold]Exhausted[/gold], gain [blue]"
+          + $"{Powers.KokomiConstants.ChargePerExhaust}[/blue] "
+          + "[gold]Charge[/gold] and [blue]"
+          + $"{Powers.KokomiConstants.BurstPerExhaust}[/blue] "
+          + "[gold]Burst Energy[/gold]."),
     };
 
     /// <summary>

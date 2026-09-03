@@ -48,7 +48,7 @@ public sealed class GorouWarBanner : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — General's War Banner"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Your next Attack deals {PowerAmount:diff()} more damage."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Your next Attack deals {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

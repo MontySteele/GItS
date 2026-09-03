@@ -829,15 +829,28 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     (R128, the rule the Shatter path below already keeps). Default False, so
     every shipped caller is byte-identical.
 
-    `powered` is QUARANTINED (C.KOKOMI_OVERHAUL) and likewise has exactly one
-    caller: the Tamakushi Casket's strike, whose DEALER is the Bake-Kurage and
-    not her. False drops the dealer's Strength and Weak (`ValueProp.Unpowered`
-    on the dealer's side) and nothing else -- the aura still lands, the
-    reaction still fires, the target's Vulnerable and Block still apply -- so
-    it is NOT `refpowers.unpowered_damage`, which skips all of those and is
-    what a Power's own damage takes. The distinction is the C#'s: the Casket
-    goes through `ElementalHit.Deal` with the PET as applier, and a pet carries
-    no Strength. Default True, so every shipped caller is byte-identical."""
+    `powered` is QUARANTINED and has exactly THREE callers, across both
+    prototype arms. False drops the dealer's Strength and Weak
+    (`ValueProp.Unpowered` on the dealer's side) and nothing else -- the aura
+    still lands, the reaction still fires, and the target's Vulnerable,
+    Intangible cap and Block still apply -- so it is NOT
+    `refpowers.unpowered_damage`, which skips all of those and is what a
+    Power's own damage takes. Default True, so every shipped caller is
+    byte-identical, and the C# twin is one flag as well
+    (`ElementalHit.Deal(..., powered: false)`).
+
+    THE TWO ARMS ASK FOR IT FOR DIFFERENT REASONS, which is worth keeping
+    straight because the flag reads as a fact about the DEALER and only one of
+    them means it that way:
+
+      * C.KOKOMI_OVERHAUL -- the Tamakushi Casket's strike and, since `EB-334`
+        (R246 pick 1), every Plan's damage. Both are hits the BAKE-KURAGE deals
+        rather than she does, and a pet carries no Strength. Here the flag is
+        a fact about who is swinging.
+      * C.KLEE_OVERHAUL -- `klee_overhaul._explode`, `EB-343` (ruled R248): a
+        Bomb carries the TARGET's modifiers only, so a charge enters at its
+        printed size. Here the dealer IS Klee, and the flag states the RULE
+        instead."""
     # THE DEAD TAKE NOTHING (EB-136 / R210, C18). `CreatureCmd.Damage` opens
     # its per-target loop with `if (originalTarget2.IsDead) continue;`, so a
     # corpse absorbs no damage, fires no reaction and pays no on-hit rider --
@@ -5428,6 +5441,12 @@ OPS = {
     # list through the body's own vocabulary check, and it refuses when it is
     # reached from an `effects:` list.
     "play_copy_of_companion": _op_kokomi_plan_only,
+    # FOUR, and the fourth is Tide Wall's (`EB-335`, R246 pick 2): "Gain N
+    # Block for each Plan the Bake-Kurage carries out this morning". Same
+    # terms, and plan-only for a reason of its own -- the count it multiplies
+    # is a fact about a MORNING, so a now-line spelling would print a number
+    # that is zero every time it is read.
+    "block_per_plan_this_morning": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,

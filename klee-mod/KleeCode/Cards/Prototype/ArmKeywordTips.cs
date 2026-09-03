@@ -90,13 +90,37 @@ public static class ArmKeywordTips
     /// and one <i>Set off</i> pops all of them, but they stay separate charges
     /// and each grows on its own -- fusing them into a single charge is
     /// Careful Arrangement's whole card, and a tip claiming the kit did it for
-    /// free would print that card as a blank.</summary>
+    /// free would print that card as a blank.
+    ///
+    /// THE LAST CLAUSE IS `EB-343` (R248), and it is the one thing a player
+    /// cannot get from the badge: the badge shows the number, this says whose
+    /// number it is. A Bomb is the ENEMY'S burden, their debuffs moving it
+    /// while Klee's Strength and Weak do not, which is the opposite of what
+    /// every other damage source in her deck does. A rule that runs backwards
+    /// to the rest of the game cannot be inferred from a total that did not
+    /// change, so it is printed where the word is met.
+    ///
+    /// IT IS TWO SENTENCES AND IT FITS, which is the point of the rewrite
+    /// ([USER], PR #340, the same call as the Plan tip in #335). The four rules
+    /// used to be four sentences and 195 characters, over a ceiling that is the
+    /// base game's own longest mechanic tip -- and a seat reads this word every
+    /// turn. The compression is in the grammar, not in the content: rule 1's
+    /// rate, rule 7, rule 2's "all at once" and R248's burden are all still
+    /// here, and the growth rate is still interpolated so a repricing cannot
+    /// leave the sentence lying (`EB-89`).
+    ///
+    /// "not yours" RATHER THAN NAMING STRENGTH AND WEAK, and it costs nothing
+    /// true: the enemy's debuffs are what DOES move the number, so what is left
+    /// to say about the player's own modifiers is that none of them count. The
+    /// static badge face beside it (`ProtoBombPower`'s `description`) names the
+    /// two by name for the reader who wants them.
+    /// </summary>
     public static IEnumerable<IHoverTip> ForBomb(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
-            "A charge on an enemy. Grows by " + KleeOverhaulLaw.BombGrowth
-          + " at the start of your turn. Never goes off by itself. Bombs on "
-          + "one enemy go off together when [gold]Set off[/gold].");
+            "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
+          + " a turn, goes off only when [gold]Set off[/gold], all at once. "
+          + "Its hit takes the enemy's debuffs, not yours.");
 
     /// <summary>Rule 2, and the one [USER] named ("Set Off has no tooltip
     /// text"). The ORDER clause is the load-bearing half: the explosions land
@@ -160,13 +184,28 @@ public static class ArmKeywordTips
     /// in hand where there is no pile to quote: a Mine IS a Bomb, so it is the
     /// same Pyro hit for its own size and the same modifiers move it. The live
     /// arithmetic stays where it can be right -- on the badge.
+    ///
+    /// THE SECOND SENTENCE NAMES THE ENEMY NOW (`EB-343`, R248). It used to say
+    /// "[gold]Weak[/gold] shrinks it like any Bomb", which was true of the old
+    /// rule and is false of this one -- Weak on Klee no longer reaches a Bomb
+    /// at all. What survives is the half the r4 seat actually needed: a Mine's
+    /// number is on the badge, and it is not the printed size when the enemy
+    /// carries a modifier.
+    ///
+    /// AND THE SEMICOLON WENT WITH IT, which is not a style note.
+    /// `tools/lint_text_conventions.py` reads these bodies out of the SOURCE
+    /// with a regex that stops at a semicolon, so the one this sentence
+    /// carried had kept the whole Mine tip out of the census -- it was never
+    /// measured against the tip ceiling in either wording. The regex is fixed
+    /// in the same change; this sentence is a comma now and the tip is 134 of
+    /// 135.
     /// </summary>
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
-          + "you, before the hit lands. [gold]Weak[/gold] shrinks it like any "
-          + "Bomb; the badge shows the number.");
+          + "you, before the hit lands. The enemy's debuffs move it, and the "
+          + "badge has the number.");
 
     /// <summary>
     /// KLEE'S FIFTH, R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`
@@ -201,26 +240,48 @@ public static class ArmKeywordTips
     // Exert and Garment left with the rules they named.
 
     /// <summary>
-    /// RULE 2, and it is the whole kit in three sentences. The SECOND is the
+    /// RULE 2, THE WHOLE KIT, IN TWO SENTENCES AND UNDER THE CEILING. Five
+    /// clauses have to fit: where the card is played, that its cost is paid
+    /// now, when the line happens, what it aims at, and who deals its damage.
+    ///
+    /// THE FIFTH CLAUSE IS `EB-334`, and R246 pick 1 asks for it in as many
+    /// words. Three seats derived the Plan's arithmetic from the board and got
+    /// three different answers, because the rule was stated nowhere: one found
+    /// that Plans keep their full number while she is Weak, one that they pay
+    /// x0.75 against a Strategic enemy, and one that Vulnerable did not
+    /// multiply a Plan at all
+    /// (`review/ruled/kokomi-overhaul-round-4c-2026-09-02.md` sec.2). The rule
+    /// is now the honest one -- the Bake-Kurage deals it -- and this is where
+    /// the player reads it, beside the word it belongs to.
+    ///
+    /// THE PROSE IS COMPRESSED RATHER THAN EXEMPTED. The four older clauses
+    /// used the whole 135-character tip ceiling on their own, so the fifth
+    /// briefly took a named exception in `tools/lint_text_conventions.py`.
+    /// That was the wrong trade and it was reverted: the ceiling is the base
+    /// game's own longest tip (CHANNELING, 134) and THIS tip is read every
+    /// turn, so the sentences were rewritten to carry all five clauses in 134
+    /// characters instead. Nothing was dropped -- "on the Bake-Kurage" is
+    /// still where it is played, "paid now" is still the cost, "lands first
+    /// thing next turn" is still the delay, "on the front enemy" is still the
+    /// aim, and the second sentence is the new rule.
+    ///
+    /// "ON THE BAKE-KURAGE" IS STILL `EB-293`'s ANSWER, and it is still the
     /// load-bearing half: a player who has never read the brief has to be able
     /// to find "play it on the jellyfish" from the card in their hand, which is
-    /// the slice's own first acceptance sentence (sec.1).
-    ///
-    /// THE THIRD IS `EB-293`. "instead" presumes a normal play to do instead
-    /// of, and a card with no now-line has none -- its target type is
-    /// <c>KokomiTargets.PetOnly</c> and the jellyfish is the only legal drop.
-    /// The r2 Opus seat could not tell: "Plan-only cards never say what happens
-    /// if you play them normally... I never risked finding out." The row's own
-    /// face now leads with "Play on the Bake-Kurage." (the codegen's
-    /// <c>_plan_only_line</c>) and the word's definition says why some rows
-    /// carry that line and others do not.
+    /// the slice's own first acceptance sentence (sec.1). The r2 Opus seat
+    /// could not tell -- "Plan-only cards never say what happens if you play
+    /// them normally... I never risked finding out" -- so a Plan-only row's own
+    /// face also leads with "Play on the Bake-Kurage." (the codegen's
+    /// <c>_plan_only_line</c>), and this definition is why some rows carry that
+    /// line and others do not.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "Play this on the [gold]Bake-Kurage[/gold]: it carries out the "
-          + "[gold]Plan[/gold] line at the start of your next turn. Cost is "
-          + "paid now. Plans hit the front enemy.");
+            "On the [gold]Bake-Kurage[/gold], paid now; the [gold]Plan[/gold] "
+          + "lands first thing next turn on the front enemy. Enemy "
+          + "[gold]Vulnerable[/gold] raises it; your [gold]Weak[/gold] does "
+          + "not.");
 
     /// <summary>
     /// THE BOUND IS THE WHOLE POINT OF THIS ROW'S SECOND HALF. The Casket read

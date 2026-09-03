@@ -48,7 +48,7 @@ public sealed class GorouHeartOfTheClan : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — Forward Unto Victory"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. At the start of your turn, gain {PowerAmount:diff()} Block."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. At the start of your turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

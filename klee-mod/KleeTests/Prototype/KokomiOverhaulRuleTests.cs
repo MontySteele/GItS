@@ -5,6 +5,7 @@ using BaseLib.Abstracts;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Models.Powers;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -246,20 +247,23 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void Rule2_the_twelve_planned_clauses_are_the_slices_eleven_and_gorous()
+    public void Rule2_the_thirteen_planned_clauses_are_the_slices_eleven_and_two_more()
     {
         // A card cannot schedule anything else: the enum IS the whitelist the
         // codegen validates a row's `plan:` list against
         // (`gen_klee_cards.PLAN_CLAUSE_KINDS`). The twelfth is R236's
         // `PlayCopyOfCompanion` -- Gorou's Crystal Collapse, the Inazuma
         // workshop's one Personal, which plays a copy of the Companion card
-        // captured when the Plan was WRITTEN. Eleven was the SLICE's number
-        // and never a ceiling: a thirteenth kind owes this list a line too.
+        // captured when the Plan was WRITTEN. The thirteenth is `EB-335`'s
+        // `BlockPerPlanThisMorning`, Tide Wall's per-Plan scaler. Eleven was
+        // the SLICE's number and never a ceiling: a fourteenth kind owes this
+        // list a line too.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
                     "ApplyWeak", "ApplyVulnerable", "PlanTwice",
-                    "ReplayExhausted", "PlayCopyOfCompanion" },
+                    "ReplayExhausted", "PlayCopyOfCompanion",
+                    "BlockPerPlanThisMorning" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -693,7 +697,7 @@ public class KokomiOverhaulRuleTests
     // ---- the roster ------------------------------------------------------
 
     [Fact]
-    public void The_starter_is_ten_cards_and_the_pool_is_twenty_six()
+    public void The_starter_is_ten_cards_and_the_pool_is_twenty_eight()
     {
         // Read off the IL rather than by building the models, which needs
         // ModelDb: `ModelDb.Card<T>()` throws until the game's pool build has
@@ -702,10 +706,11 @@ public class KokomiOverhaulRuleTests
         Assert.Equal(10, Il.CallSequence(deck)
             .Count(c => c.StartsWith("ModelDb.Card")));
 
-        // EB-284 split the pool in two: `Slice` is the packet's 26 rows and
-        // `OfferablePool` is that plus the Ancient tail below.
+        // EB-284 split the pool in two: `Slice` is the packet's rows and
+        // `OfferablePool` is that plus the Ancient tail below. TWENTY-EIGHT
+        // since `EB-335` (R246 pick 2) added Tide Wall and Shell Guard.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(26, Il.CallSequence(slice)
+        Assert.Equal(28, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 
@@ -721,6 +726,133 @@ public class KokomiOverhaulRuleTests
         var pool = Il.Method("KokomiOverhaulRoster", "OfferablePool");
         Assert.Contains("RosterAncientCards.get_Kokomi", Il.Calls(pool));
         Assert.Contains("KokomiOverhaulRoster.Slice", Il.Calls(pool));
+    }
+
+    // --- `EB-334`: who deals Plan damage (R246 pick 1) -------------------
+    //
+    // ONE PIN PER MODIFIER, which is what the row asks for, and each is a REAL
+    // call on a REAL creature carrying a REAL power. `KokomiPlan.PlannedDamage`
+    // is the arithmetic the face and the pins share (`EB-265`'s rule); the
+    // morning reaches the same number through `ElementalHit.Deal`, which is
+    // outside the headless boundary and is pinned structurally below instead.
+
+    [Fact]
+    public void EB334_her_weak_does_not_shrink_a_planned_hit()
+    {
+        // The seat's own arithmetic: "Plan: Deal 12 damage" paid 9 the next
+        // morning against a Strategic enemy whose Weak landed at the end of
+        // her turn, exactly x0.75, with no screen showing it
+        // (`opus-act2b.md` finding 3).
+        var kokomi = Seat.Kokomi().WithPower<WeakPower>(2);
+        var enemy = Seat.Kokomi(40).Creature;
+
+        // The term is REAL and would have bitten: this is the dealer half a
+        // planned hit no longer runs.
+        Assert.Equal(9m, SimDamagePipeline.DealerMods(kokomi.Creature, 12m));
+        // And this is what the Plan deals.
+        Assert.Equal(12, KokomiPlan.PlannedDamage(enemy, 12));
+    }
+
+    [Fact]
+    public void EB334_enemy_vulnerable_multiplies_a_planned_hit()
+    {
+        // The half that paid nothing before: "27 landed where x1.5 would have
+        // been 40" (`opus-act2.md` sec.(c)5).
+        var enemy = Seat.Kokomi(60).WithPower<VulnerablePower>(2).Creature;
+        Assert.Equal(18, KokomiPlan.PlannedDamage(enemy, 12));
+    }
+
+    [Fact]
+    public void EB334_an_attack_buff_on_kokomi_does_not_reach_a_planned_hit()
+    {
+        // Strength is the mirror's whole vocabulary for a flat attack buff --
+        // `SimDamagePipeline.DealerMods` is where every one of them lands, and
+        // Fantastic Voyage is the base game's name for the same term, which
+        // the seat watched add to card attacks and not to Plans.
+        var kokomi = Seat.Kokomi().WithPower<StrengthPower>(5);
+        var enemy = Seat.Kokomi(40).Creature;
+
+        Assert.Equal(12m, SimDamagePipeline.DealerMods(kokomi.Creature, 7m));
+        Assert.Equal(7, KokomiPlan.PlannedDamage(enemy, 7));
+    }
+
+    [Fact]
+    public void EB334_the_planned_hit_is_unpowered_and_still_hers()
+    {
+        // STRUCTURAL, because `ElementalHit.Deal` needs a live combat. The two
+        // halves of the ruling are one call each: the flag that drops the
+        // dealer's mods, and the applier that stays her so a Plan-caused
+        // Freeze is still a debuff SHE applied and the Casket answers it.
+        var deal = Il.Method("ElementalHit", "Deal");
+        var powered = deal.GetParameters().Single(p => p.Name == "powered");
+        Assert.True(powered.HasDefaultValue);
+        Assert.Equal(true, powered.DefaultValue);
+
+        var hit = Il.Method("KokomiPlan", "Hit");
+        Assert.Contains(Il.Calls(hit), c => c.Contains("ElementalHit.Deal"));
+
+        // The face reads the SAME arithmetic the pins above read, so it cannot
+        // drift from the morning.
+        var preview = typeof(KokomiPlan.PlanDamageVar)
+            .GetMethod("UpdateCardPreview", HeadlessGame.All)!;
+        Assert.Contains("KokomiPlan.PlannedDamage", Il.Calls(preview));
+    }
+
+    // --- `EB-335`: the kit's own defence in act 2 (R246 pick 2) -----------
+
+    [Fact]
+    public void EB335_tide_wall_multiplies_the_whole_mornings_depth()
+    {
+        // The count is written once, at the drain, so a Tide Wall written
+        // first, second or last in the queue pays the same number. Real
+        // ledger, real turn boundary.
+        var ledger = new KokomiOverhaulLedger();
+        Assert.Equal(0, ledger.PlansThisMorning);
+        ledger.NoteMorning(3);
+        Assert.Equal(3, ledger.PlansThisMorning);
+        // A morning that drains nothing reads an honest zero rather than
+        // yesterday's depth: the roll clears it and `ResolveAll` writes it.
+        ledger.RollTo(2);
+        Assert.Equal(0, ledger.PlansThisMorning);
+
+        Assert.Contains("KokomiOverhaulLedger.NoteMorning",
+                        Il.Calls(Il.Method("KokomiPlan", "ResolveAll")));
+        Assert.Contains("KokomiOverhaulLedger.get_PlansThisMorning",
+                        Il.Calls(Il.Method("KokomiPlan", "ResolveOne")));
+    }
+
+    [Fact]
+    public void EB335_shell_guard_reads_the_casket_strike_and_closes_after_the_morning()
+    {
+        // The card names the RELIC, so the payout hangs off the strike itself
+        // and not off the debuff that caused it -- which is what keeps it
+        // separable from The Clouds Like Waves Rippling.
+        Assert.Contains("ShellGuardPower.Pay",
+                        Il.Calls(Il.Method("TamakushiCasket", "Strike")));
+        // "Until your next turn" INCLUDES that turn's morning: R246 pick 2
+        // says the morning's Plans strike it too, so the window closes one
+        // line after the drain rather than on the turn-start roll.
+        var turnStart = Il.CallSequence(
+            Il.Method("ProtoBakeKuragePower", "AfterPlayerTurnStart")).ToList();
+        var drain = turnStart.FindIndex(c => c.Contains("KokomiPlan.ResolveAll"));
+        var close = turnStart.FindIndex(c => c.Contains("ShellGuardPower.Close"));
+        Assert.True(drain >= 0, "the morning is gone");
+        Assert.True(close > drain,
+                    "the window closes before the morning it is meant to cover");
+    }
+
+    [Fact]
+    public void EB335_shell_guard_pays_nothing_without_the_card()
+    {
+        // A run that never drew Shell Guard, and a run that traded the Casket
+        // away, both pay nothing -- the guard is the power's presence and its
+        // amount, checked before any command is reached.
+        var bare = Seat.Kokomi();
+        Assert.Empty(bare.Creature.Powers.OfType<ShellGuardPower>());
+        Assert.Null(Record.Exception(
+            () => ShellGuardPower.Pay(null, bare.Creature).Wait()));
+        Assert.Null(Record.Exception(
+            () => ShellGuardPower.Close(bare.Creature).Wait()));
     }
 
     [Fact]

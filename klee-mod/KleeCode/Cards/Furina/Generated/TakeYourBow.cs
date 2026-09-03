@@ -41,7 +41,7 @@ public sealed class TakeYourBow : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Take Your Bow"),
-        ("description", "The leftmost member of your [gold]Salon[/gold] takes their bow. {IfUpgraded:show:Play this card again.|}"),
+        ("description", "The leftmost member of your [gold]Salon[/gold] takes their bow. {IfUpgraded:show:Play it again.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -38,9 +38,10 @@ card the screen marks `(upgraded)` can also be named that way, and
 `(not upgraded)` names the other copy.
 
 Every screen lists the commands it accepts under **What you can say**. A
-command the screen cannot take is refused and told back to you in one line;
-read the refusal and try something else. Nothing is hidden from you as a
-punishment — a refusal means the game itself would not accept that click.
+command the screen cannot take is refused and told back to you in one line,
+and **every refusal ends with the form that would resolve** — take that
+literally and send it. Nothing is hidden from you as a punishment; a refusal
+means the game itself would not accept that click.
 
 Answer as JSON: `command` is the one command, and `thinking` is one or two
 sentences on why. Keep `thinking` short; it is recorded, not graded.

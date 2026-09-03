@@ -48,7 +48,7 @@ public sealed class ProtoMcFischlOz : CustomCardModel, ICompanionCard, IHexereiC
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Fischl — Oz, at Your Side (proto)"),
+        ("title", "Fischl — Oz, at Your Side"),
         ("description", "At the end of your turn, Oz deals 5 [gold]Electro[/gold] damage to a random enemy. {IfUpgraded:show:Draw 1 card.|}"),
     };
 

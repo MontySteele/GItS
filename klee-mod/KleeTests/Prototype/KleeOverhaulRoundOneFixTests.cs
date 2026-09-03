@@ -146,14 +146,26 @@ public class KleeOverhaulRoundOneFixTests
 
     [Theory]
     [InlineData(0, 10)]   // two Bombs of 5: what the face always said
-    [InlineData(2, 14)]   // the tester's board: printed 10, dealt 14
+    [InlineData(1, 14)]   // the enemy's Vulnerable, which IS the Bomb's now
     public void The_face_prints_the_total_the_set_off_will_deal(
-        int strength, int dealt)
+        int vulnerable, int dealt)
     {
+        // `EB-343` RE-AIMED THIS TEST WITHOUT CHANGING ITS CLAIM. EB-265's
+        // claim is that the face prints what the Set off will PAY rather than
+        // the raw pile, and it used Strength to make the two differ because
+        // Strength was in the pipeline then. R248 took Klee's terms out of a
+        // Bomb, so the term that makes the two differ is now the enemy's own
+        // Vulnerable -- see `The_bomb_is_the_enemys_burden_and_not_hers` below
+        // for the other direction, which is the rule itself.
+        //
+        // 14 AND NOT 15, and the difference is the rule this file already
+        // pinned: the pipeline truncates PER CHARGE, exactly as the explosion
+        // loop calls it once per charge. Two Bombs of 5 into Vulnerable are
+        // 7.5 twice and land as 7 twice, not 15.
         var klee = Seat.Klee();
-        if (strength > 0) klee.WithPower<StrengthPower>(strength);
-        var enemy = Seat.Klee(30).Creature;
-        var pile = ProtoBombs.Place(enemy, klee.Creature,
+        var enemy = Seat.Klee(30);
+        if (vulnerable > 0) enemy.WithPower<VulnerablePower>(vulnerable);
+        var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
             new ProtoBombs.Charge(5));
         // Through the power's own mutator, so the STORED fallback is written
         // by the real SyncDisplay rather than seeded by the harness.
@@ -162,7 +174,8 @@ public class KleeOverhaulRoundOneFixTests
         // Against the pipeline the explosion itself runs, per charge, exactly
         // as ProtoBombPower.Explode calls it -- not against a number retyped
         // here.
-        var perCharge = SimDamagePipeline.Resolve(klee.Creature, enemy, 5, 1m);
+        var perCharge =
+            SimDamagePipeline.ResolveOnTarget(enemy.Creature, 5, 1m);
         Assert.Equal(dealt, perCharge * 2);
 
         Assert.Equal(dealt, pile.PredictedSetOffDamage());
@@ -181,35 +194,36 @@ public class KleeOverhaulRoundOneFixTests
         // on the raw sum. That is the two-number board the r2 and r3 seats then
         // read as a contradiction, so EB-270 moved the badge onto the same
         // arithmetic; `KleeOverhaulOneNumberTests` owns that fact now. What
-        // this test still pins is EB-265's own claim: `TotalSize` is 10 and the
-        // number a Set off pays is 14, so the two are not the same number and
-        // no player-facing surface may print the first.
-        var klee = Seat.Klee().WithPower<StrengthPower>(2);
-        var enemy = Seat.Klee(30).Creature;
-        var pile = ProtoBombs.Place(enemy, klee.Creature,
+        // this test still pins is EB-265's own claim: `TotalSize` is the raw
+        // sum and the number a Set off pays is not, so no player-facing surface
+        // may print the first. `EB-343` moved which modifier does the parting.
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(30).WithPower<VulnerablePower>(1);
+        var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
             new ProtoBombs.Charge(5), new ProtoBombs.Charge(5));
 
         Assert.Equal(10, pile.TotalSize);
-        Assert.Equal(14, pile.PredictedSetOffDamage());
+        Assert.Equal(14, pile.PredictedSetOffDamage());   // 7 + 7, per charge
         Assert.Equal(14, pile.DisplayAmount);      // EB-270: the badge follows
     }
 
     [Fact]
-    public void The_face_is_read_live_so_strength_gained_later_moves_it()
+    public void The_face_is_read_live_so_a_modifier_gained_later_moves_it()
     {
-        // Strength does not touch the pile, so a number STORED when the Bomb
-        // was planted would be stale the moment Klee buffed herself -- the
-        // same defect one turn later.
+        // A modifier does not touch the pile, so a number STORED when the Bomb
+        // was planted would be stale the moment the enemy was debuffed -- the
+        // same defect one turn later. (Before `EB-343` the stale term was
+        // Klee's own Strength; the rule moved, the staleness did not.)
         var klee = Seat.Klee();
-        var enemy = Seat.Klee(30).Creature;
-        var pile = ProtoBombs.Place(enemy, klee.Creature,
+        var enemy = Seat.Klee(30);
+        var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
             new ProtoBombs.Charge(5));
         pile.AddCharge(new ProtoBombPower.ProtoCharge(5, false, 0));
 
         Assert.Equal((10, 10), FaceSize(pile));
         Assert.Equal(10, (int)pile.DynamicVars["Size"].BaseValue);
 
-        klee.WithPower<StrengthPower>(2);           // nothing touches the pile
+        enemy.WithPower<VulnerablePower>(1);        // nothing touches the pile
 
         // The stored number is now the stale one, and the face does not read
         // it: this is why the var computes rather than remembers.
@@ -220,27 +234,144 @@ public class KleeOverhaulRoundOneFixTests
     [Fact]
     public void The_face_and_the_explosion_run_the_same_pipeline()
     {
-        // The anti-drift lock. `ElementalHit.Deal` spells the three steps out
-        // inline rather than calling `Resolve`, because
+        // The anti-drift lock. `ElementalHit.Deal` spells its steps out inline
+        // rather than calling a composer, because
         // `tier0/tests/test_reaction_phase_parity.py` pins its TargetMods read
         // as happening after `ReactionEffects.Resolve`. So the two spellings
-        // are held to the SAME two halves in the SAME order here instead.
+        // are held to the same halves in the same order here instead.
+        //
+        // `EB-343`: Deal still CARRIES `DealerMods` -- every other caller wants
+        // it -- and the explosion asks for the branch that skips it, which is
+        // what `The_explosion_asks_the_funnel_to_leave_klee_out` below pins.
+        // What the face composes is therefore the target-only chain.
         var deal = Il.CallSequence(Il.Method("ElementalHit", "Deal"))
             .Where(c => c.StartsWith("SimDamagePipeline.")).ToList();
         var resolve = Il.CallSequence(
                 typeof(SimDamagePipeline).GetMethod(
-                    nameof(SimDamagePipeline.Resolve), HeadlessGame.All)!)
+                    nameof(SimDamagePipeline.ResolveOnTarget), HeadlessGame.All)!)
             .Where(c => c.StartsWith("SimDamagePipeline.")).ToList();
 
         Assert.Equal(
             new[] { "SimDamagePipeline.DealerMods", "SimDamagePipeline.TargetMods" },
             deal);
-        Assert.Equal(deal, resolve);
+        Assert.Equal(
+            new[] { "SimDamagePipeline.TargetMods", "SimDamagePipeline.TargetCap" },
+            resolve);
 
         // And the face is the ONE caller that asks for the whole chain.
-        Assert.Contains("SimDamagePipeline.Resolve",
+        Assert.Contains("SimDamagePipeline.ResolveOnTarget",
             Il.Calls(typeof(ProtoBombPower).GetMethod(
                 nameof(ProtoBombPower.PredictedSetOffDamage), HeadlessGame.All)!));
+    }
+
+    // ---- EB-343 / R248: a Bomb carries the target's modifiers only --------
+
+    [Fact]
+    public void The_bomb_is_the_enemys_burden_and_not_hers()
+    {
+        // [USER]'s OWN BOARD, 2026-09-03: three Bombs of printed 6, 4 and 4
+        // into Tender's minus 5 Strength read `Bomb -1`. A printed 6 is a Bomb
+        // 6, always -- the placer's Strength is not in this number at any sign,
+        // and neither is her Weak.
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(30).Creature;
+        var pile = ProtoBombs.Place(enemy, klee.Creature,
+            new ProtoBombs.Charge(6), new ProtoBombs.Charge(4),
+            new ProtoBombs.Charge(4));
+
+        Assert.Equal(14, pile.DisplayAmount);
+
+        klee.WithPower<StrengthPower>(-5);
+        Assert.Equal(14, pile.DisplayAmount);
+        Assert.Equal(14, pile.PredictedSetOffDamage());
+
+        klee.WithPower<WeakPower>(1);               // the banked-stack half
+        Assert.Equal(14, pile.DisplayAmount);
+        Assert.Equal(14, pile.PredictedSetOffDamage());
+
+        // Positive Strength is the same rule read the other way: a Bomb is not
+        // a swing she is taking, so nothing of hers reaches it.
+        var other = Seat.Klee().WithPower<StrengthPower>(3);
+        var otherPile = ProtoBombs.Place(Seat.Klee(30).Creature,
+            other.Creature, new ProtoBombs.Charge(6));
+        Assert.Equal(6, otherPile.DisplayAmount);
+    }
+
+    [Fact]
+    public void The_explosion_asks_the_funnel_to_leave_klee_out()
+    {
+        // STRUCTURAL (Il), because an explosion needs a live CombatState (the
+        // README's headless boundary) -- which is also why the exception is a
+        // named METHOD and not a named argument: `Il` can read which method a
+        // call site calls and can read nothing about an argument's value.
+        var explode = typeof(ProtoBombPower)
+            .GetMethod("Explode", HeadlessGame.All)!;
+        // A POSITIVE assertion only, which is `Il`'s own rule: the scan is
+        // byte-wise, so "does call X" cannot be passed by a stray match while
+        // "does not call Y" could be failed by one.
+        Assert.Contains(Il.Calls(explode),
+                        c => c == "ElementalHit.DealWithoutDealerMods");
+
+        // And the default is the OTHER way, so every source that is not a Bomb
+        // -- the echo, the Burst volley, the companion arms, Oz -- still
+        // carries her Strength without saying anything.
+        //
+        // `powered` IS THE KOKOMI ARM'S FLAG AND THIS ARM JOINED IT rather
+        // than adding a second parameter meaning the same thing: `EB-334`
+        // gives the Bake-Kurage a Plan's damage, `EB-343` takes Klee out of a
+        // Bomb, and both are the same edit to the same pipeline stage. The
+        // door above is what keeps THIS caller readable to a pin.
+        var powered = Il.Method("ElementalHit", "Deal").GetParameters()
+            .Single(p => p.Name == "powered");
+        Assert.True(powered.HasDefaultValue);
+        Assert.Equal(true, powered.DefaultValue);
+    }
+
+    [Fact]
+    public void The_target_cap_is_folded_into_the_badge_per_hit()
+    {
+        // Hard To Kill is `ModifyDamageCap`, which the engine applies to EVERY
+        // hit that reaches `CreatureCmd.Damage` -- it carries no
+        // `IsPoweredAttack()` gate, unlike Weak, Vulnerable and Strength -- so
+        // a pile of three 6s into an Exoskeleton's Hard To Kill 3 has always
+        // landed for 9 while the badge promised 18. PER HIT is the rule: the
+        // cap clamps each charge, not the pile.
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(30);
+        var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
+            new ProtoBombs.Charge(6), new ProtoBombs.Charge(6),
+            new ProtoBombs.Charge(6));
+
+        Assert.Equal(18, pile.DisplayAmount);
+
+        enemy.WithPower<HardToKillPower>(3);
+
+        Assert.Equal(9, pile.DisplayAmount);
+        Assert.Equal(9, pile.PredictedSetOffDamage());
+        Assert.Equal(18, pile.TotalSize);           // the rules are still raw
+
+        // And Vulnerable resolves BEFORE the cap, exactly as the engine orders
+        // its multiplicative and cap phases: 6 -> 9 -> clamped to 3.
+        enemy.WithPower<VulnerablePower>(1);
+        Assert.Equal(9, pile.DisplayAmount);
+    }
+
+    [Fact]
+    public void Intangible_is_a_cap_the_badge_reads_too()
+    {
+        // The other `ModifyDamageCap` override the 0.111.0 decompile carries,
+        // and the reason `SimDamagePipeline.TargetCap` scans rather than asks
+        // for one power by name.
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(30);
+        var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
+            new ProtoBombs.Charge(9), new ProtoBombs.Charge(9));
+
+        Assert.Equal(18, pile.DisplayAmount);
+
+        enemy.WithPower<IntangiblePower>(1);
+
+        Assert.Equal(2, pile.DisplayAmount);        // 1 per hit, two hits
     }
 
     [Fact]

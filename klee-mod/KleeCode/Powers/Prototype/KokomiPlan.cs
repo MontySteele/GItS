@@ -12,6 +12,7 @@ using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -46,12 +47,15 @@ namespace KleeMod.Powers;
 /// point and its header says why that hook and not the one the packet's prose
 /// names.
 ///
-/// KOKOMI IS THE DEALER, THE JELLYFISH IS THE SOURCE (slice sec.5). Rule 3 says
-/// "Your Strength and Dexterity count, and planned damage from an Attack
-/// applies Hydro the way her Attacks do", so a planned hit goes out through
-/// <see cref="ElementalHit"/> with HER as the applier -- which is what makes
-/// Strength, Weak, the aura and the reaction all behave exactly as they do on a
-/// card she played. The pet is where the plan was SENT, not who is fighting.
+/// THE JELLYFISH IS THE DEALER, KOKOMI IS THE APPLIER (`EB-334`, R246 pick 1).
+/// The slice's sec.5 gave a planned hit her Strength and her Weak; round four-c
+/// watched a Strategic enemy's Weak shrink two banked Plans while the enemy's
+/// own Vulnerable raised none, which is the wrong way round if the Bake-Kurage
+/// is the one hitting. So a planned hit goes out through
+/// <see cref="ElementalHit"/> UNPOWERED -- no Strength, no Weak, no attack buff
+/// of hers -- while the APPLIER stays her, which keeps the aura, the reaction
+/// and the debuffs a reaction applies exactly where rule 3 put them. The whole
+/// argument, both halves, is on <see cref="Hit"/>.
 ///
 /// PER PLAYER, for the reason every other per-seat table in this mod is per
 /// player (R205): in co-op the other seat's plans are not hers.
@@ -92,6 +96,12 @@ public static class KokomiPlan
         // WRITTEN -- see <see cref="Schedule"/> -- and a copy of it is played
         // for free at the morning.
         PlayCopyOfCompanion,
+        // `EB-335`, R246 pick 2. Tide Wall: "Plan: Gain 3 Block for each Plan
+        // the Bake-Kurage carries out this morning." The count is the whole
+        // morning's depth, taken once at the drain
+        // (<see cref="KokomiOverhaulLedger.PlansThisMorning"/>), so a Tide Wall
+        // written first, second or last in the queue pays the same number.
+        BlockPerPlanThisMorning,
     }
 
     /// <summary>
@@ -407,6 +417,13 @@ public static class KokomiPlan
         }
         var due = new List<Entry>(queue);
         queue.Clear();
+        // `EB-335`. THE MORNING'S DEPTH, recorded on the line the queue is
+        // drained on and before the first clause runs -- Tide Wall's "for each
+        // Plan the Bake-Kurage carries out this morning". Written once rather
+        // than counted up inside the loop, so the answer does not depend on
+        // where in the queue the Tide Wall sits. `kokomi_plan.resolve_all`
+        // records the same number in the same place.
+        KokomiOverhaulLedger.For(kokomi).NoteMorning(due.Count);
         // The display list is handed over BEFORE the sync, because `Sync`
         // refreshes the strip and the strip reads `Showing`: the badge goes
         // away in the same beat the column stays up, which is the true
@@ -595,6 +612,21 @@ public static class KokomiPlan
                 return (int)await CreatureCmd.GainBlock(
                     kokomi, plan.Amount, ValueProp.Move, null);
 
+            case Kind.BlockPerPlanThisMorning:
+                // TIDE WALL (`EB-335`). POWERED, exactly as the flat planned
+                // Block above is and for the same reason: rule 3 says her
+                // Dexterity counts, and two Block clauses of one morning
+                // scaling differently is what `SongOfPearlsPower`'s header
+                // refuses. A morning that drained nothing pays nothing, which
+                // is a printed no-op rather than a failure -- Change of Plans
+                // can carry this Plan out on a turn whose own morning was
+                // empty, and zero times three is the honest answer.
+                return (int)await CreatureCmd.GainBlock(
+                    kokomi,
+                    plan.Amount * KokomiOverhaulLedger.For(kokomi)
+                                      .PlansThisMorning,
+                    ValueProp.Move, null);
+
             case Kind.Mend:
                 // Mend returns the HP that actually landed, which is the
                 // honest number: "Mend 10" into 4 points of room says 4.
@@ -672,14 +704,29 @@ public static class KokomiPlan
     }
 
     /// <summary>
-    /// A Plan's damage, and it is HYDRO with KOKOMI as the applier.
+    /// A Plan's damage, and it is HYDRO, DEALT BY THE BAKE-KURAGE.
     ///
-    /// Rule 3 settles both halves in one sentence: "Your Strength and Dexterity
-    /// count, and planned damage from an Attack applies Hydro the way her
-    /// Attacks do." <see cref="ElementalHit.Deal"/> is the funnel that makes
-    /// both true at once -- it runs the dealer's Strength and Weak, resolves
-    /// the aura and its reaction, then the target's Vulnerable -- so a planned
-    /// hit and a played one differ in nothing but when they land.
+    /// <c>EB-334</c>, RULED R246 PICK 1 AT ITS DEFAULT: "the Bake-Kurage deals
+    /// it. The enemy's debuffs apply, Kokomi's own Weak and her attack buffs
+    /// do not, and the Plan line prints the number it will deal against the
+    /// enemy's current state." Round four-c found the arithmetic exactly the
+    /// wrong way round: a Strategic enemy's Weak cut two banked Plans to x0.75
+    /// the next morning -- 12 to 9 and 5 to 3, with no screen showing it --
+    /// while the enemy's own Vulnerable multiplied nothing
+    /// (`review/ruled/kokomi-overhaul-round-4c-2026-09-02.md` sec.2, sec.6).
+    ///
+    /// <c>powered: false</c> IS THAT SENTENCE. It drops
+    /// <see cref="SimDamagePipeline.DealerMods"/> and nothing else, so the
+    /// aura still lands, the reaction still fires and the TARGET's Vulnerable
+    /// still multiplies -- and <see cref="ElementalHit.Deal"/>'s own header
+    /// carries the argument for why a flag rather than swapping the applier to
+    /// the pet: a Plan-caused Freeze has to stay a debuff SHE applied, or the
+    /// Casket stops answering it. Sim twin: `kokomi_plan._hit`, one flag of
+    /// the same name on the same funnel.
+    ///
+    /// THE FACE SAYS THE SAME NUMBER, which is the row's other half:
+    /// <see cref="PlanDamageVar"/> previews this hit's one remaining live term
+    /// against the front enemy, so the printed Plan line and the morning agree.
     /// </summary>
     /// <remarks>
     /// RETURNS THE FIRST TARGET'S LANDED NUMBER (`EB-317`). An ALL-enemies
@@ -698,7 +745,8 @@ public static class KokomiPlan
         {
             if (target.IsDead) continue;
             var landed = await ElementalHit.Deal(
-                choiceContext, target, Element.Hydro, amount, kokomi);
+                choiceContext, target, Element.Hydro, amount, kokomi,
+                powered: false);
             first ??= landed;
         }
         return first;
@@ -902,6 +950,90 @@ public static class KokomiPlan
         await PowerCmd.ModifyAmount(
             choiceContext, badge, count - badge.Amount, applier: kokomi,
             cardSource: null, silent: true);
+    }
+
+    /// <summary>
+    /// WHAT A PLANNED HIT OF <paramref name="amount"/> LANDS FOR RIGHT NOW --
+    /// the whole of what `EB-334` left live on a Plan's damage.
+    ///
+    /// ONE TERM, and naming it is the point: R246 pick 1 took the dealer's
+    /// side off a planned hit, so the only modifier between the printed number
+    /// and the board is the TARGET's, which is
+    /// <see cref="SimDamagePipeline.TargetMods"/> -- the same call
+    /// <see cref="ElementalHit.Deal"/> makes on the same target a beat later.
+    /// SHARED AND NOT RE-DERIVED, `EB-265`'s rule: the face
+    /// (<see cref="PlanDamageVar"/>) and the pins read this, so a face that
+    /// disagrees with the morning is a red test rather than a number a seat
+    /// stops trusting.
+    ///
+    /// THE REACTION AMPLIFIER IS DELIBERATELY LEFT OUT, exactly as
+    /// <c>ProtoBombPower.PredictedSetOffDamage</c> leaves it out and for the
+    /// same reason: it is one-shot rather than standing state, and an
+    /// all-enemies Plan consumes the aura the rest of the volley would have
+    /// reacted with, so there is no one multiplier for the line.
+    /// </summary>
+    public static int PlannedDamage(Creature? target, int amount) =>
+        target == null
+            ? amount
+            : (int)SimDamagePipeline.TargetMods(target, amount);
+
+    /// <summary>
+    /// THE PLAN LINE'S PRINTED HIT, READ AGAINST THE BOARD -- `EB-334`'s third
+    /// clause, and the one a seat can check in one glance: "the Plan line on
+    /// the card face prints the number it will deal against the enemy's current
+    /// state" (R246 pick 1).
+    ///
+    /// A PLAIN <see cref="DynamicVar"/> COULD NOT DO IT, and a
+    /// <see cref="DamageVar"/> would have been worse. The plain var prints its
+    /// stored base, which is what round four-c read while the morning dealt
+    /// something else; the game's own attack var runs the ATTACKER's hooks --
+    /// her Strength, her Weak, Fantastic Voyage -- which are exactly the terms
+    /// the ruling took OFF a planned hit. What is left is one term, the
+    /// target's, so this previews one term.
+    ///
+    /// <c>UpdateCardPreview</c> IS THE SEAM THE GAME ALREADY OWNS: the engine
+    /// calls it on every var of a card in hand or in play whenever it refreshes
+    /// a face, and <c>PreviewValue</c> is the number <c>{Var:diff()}</c> prints
+    /// -- green when it is above the card's own, which is exactly the read a
+    /// Vulnerable enemy should produce. <c>IntValue</c> is untouched and stays
+    /// <c>BaseValue</c>, which is what matters: the emitted <c>PlanClauses</c>
+    /// property builds the queued clause off <c>IntValue</c>, so the number
+    /// WRITTEN into the Plan is still the printed base and the multiplier is
+    /// applied once, at the morning, by the pipeline.
+    ///
+    /// THE FRONT ENEMY, not the card's drag target, and for two reasons: a Plan
+    /// card is dragged onto the PET, so the target the preview is handed is
+    /// never the enemy that will be hit; and an all-enemies clause lands a
+    /// different number on each body, so the face takes the front enemy's --
+    /// the same enemy <see cref="Hit"/> reports for the same reason (`EB-317`).
+    ///
+    /// OUTSIDE COMBAT IT PRINTS ITS BASE. A compendium or reward copy has no
+    /// combat and no enemies, and `runGlobalHooks` is false off the hand, so
+    /// every such read falls through to <c>BaseValue</c> exactly as a plain var
+    /// would.
+    /// </summary>
+    public sealed class PlanDamageVar : DynamicVar
+    {
+        public PlanDamageVar(decimal amount) : base("PlanDamage", amount)
+        {
+        }
+
+        public override void UpdateCardPreview(
+            CardModel card, CardPreviewMode previewMode, Creature? target,
+            bool runGlobalHooks)
+        {
+            PreviewValue = BaseValue;
+            if (!runGlobalHooks) return;
+            // A canonical (compendium) copy has no owner and the getter
+            // ASSERTS rather than returning null, which is why this guard is
+            // the shape `ProtoBombPower.PredictedSetOffDamage` uses.
+            if (!card.IsMutable) return;
+            var kokomi = card.Owner?.Creature;
+            if (!KokomiOverhaul.LiveFor(kokomi)) return;
+            var front = FrontEnemy(kokomi);
+            if (front == null) return;
+            PreviewValue = PlannedDamage(front, (int)BaseValue);
+        }
     }
 }
 

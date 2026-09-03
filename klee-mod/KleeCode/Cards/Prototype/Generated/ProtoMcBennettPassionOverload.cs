@@ -48,7 +48,7 @@ public sealed class ProtoMcBennettPassionOverload : CustomCardModel, ICompanionC
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Bennett — Passion Overload (proto)"),
+        ("title", "Bennett — Passion Overload"),
         ("description", "Your next Attack this turn deals {PowerAmount:diff()} additional damage and applies [gold]Pyro[/gold]."),
     };
 

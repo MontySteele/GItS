@@ -262,10 +262,10 @@ public sealed class OzSummonPower : PowerModel, ILocalizationProvider
     {
         ("title", "Oz, at Your Side"),
         ("description",
-            "At the end of your turn, Oz deals "
-          + $"{CompanionConstants.OzDamage} damage and applies "
+            "At the end of your turn, Oz deals [blue]"
+          + $"{CompanionConstants.OzDamage}[/blue] damage and applies "
           + "[gold]Electro[/gold] to a random enemy. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -310,9 +310,10 @@ public sealed class WitchsFlamePower : PowerModel, ILocalizationProvider
     {
         ("title", "Witch's Flame"),
         ("description",
-            "At the end of your turn, consume [gold]Pyro[/gold] from each "
-          + "enemy. For each aura consumed, deal {Amount} damage and gain "
-          + $"{CompanionConstants.WitchsFlameBurst} [gold]Burst Energy[/gold]."),
+            "At the end of your turn, consume each enemy's [gold]Pyro[/gold]: "
+          + "deal [blue]{Amount}[/blue] damage to it and gain [blue]"
+          + $"{CompanionConstants.WitchsFlameBurst}[/blue] "
+          + "[gold]Burst Energy[/gold] per aura."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -374,8 +375,9 @@ public sealed class SolarIsotomaPower : PowerModel, ILocalizationProvider
         ("title", "Solar Isotoma"),
         ("description",
             "Your Attacks against enemies holding an elemental aura grant "
-          + $"{CompanionConstants.SolarIsotomaBlock} [gold]Block[/gold] per "
-          + "hit. Lasts {Amount} more turn{Amount:plural:|s}."),
+          + $"[blue]{CompanionConstants.SolarIsotomaBlock}[/blue] "
+          + "[gold]Block[/gold] per hit. Lasts for [blue]{Amount}[/blue] "
+          + "{Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -456,7 +458,9 @@ public sealed class AttackUpThisTurnPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Fantastic Voyage"),
-        ("description", "Your Attacks deal {Amount} more damage this turn."),
+        ("description",
+            "Your Attacks deal [blue]{Amount}[/blue] additional damage this "
+          + "turn."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -495,7 +499,8 @@ public sealed class NextAttackUpPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Passion Overload"),
-        ("description", "Your next Attack deals {Amount} more damage."),
+        ("description",
+            "Your next Attack deals [blue]{Amount}[/blue] additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -565,7 +570,9 @@ public sealed class ShatterBonusPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Shattering Pressure"),
-        ("description", "Your [gold]Shatters[/gold] deal {Amount} more damage."),
+        ("description",
+            "Your [gold]Shatters[/gold] deal [blue]{Amount}[/blue] additional "
+          + "damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -597,7 +604,9 @@ public sealed class MetallicizePower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Metallicize"),
-        ("description", "At the start of your turn, gain {Amount} Block."),
+        ("description",
+            "At the start of your turn, gain [blue]{Amount}[/blue] "
+          + "[gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

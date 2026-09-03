@@ -41,7 +41,7 @@ public sealed class FortissimoGuard : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fortissimo Guard"),
-        ("description", "Whenever you deploy a [gold]Salon Member[/gold], gain {PowerAmount:diff()} Block."),
+        ("description", "Whenever you deploy a [gold]Salon Member[/gold], gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

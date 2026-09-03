@@ -109,8 +109,13 @@ PROFILES = (KLEE_PROFILE, FURINA_PROFILE, KOKOMI_PROFILE, PROTOTYPE_PROFILE)
 # `new DamageVar(...)` declares the var named "Damage"; the typed subclasses
 # are uniformly <Name>Var. `new DynamicVar("Foo", ...)` / `new
 # CalculatedVar("Foo", ...)` declare the name they are handed.
+#
+# A TYPED VAR MAY BE QUALIFIED (`EB-334`): `KokomiPlan.PlanDamageVar` is nested
+# inside the arm's own class, so the dotted prefix is skipped and the class
+# name is read -- which is exactly the derivation the naming rule above states,
+# and `gen_klee_cards.build_vars` reads the same shape from the other side.
 _NAMED_DECL = re.compile(r'new\s+(?:Dynamic|Calculated)Var\(\s*"([A-Za-z]\w*)"')
-_TYPED_DECL = re.compile(r"new\s+([A-Za-z]\w*)Var\(\s*(?!\")")
+_TYPED_DECL = re.compile(r"new\s+(?:[A-Za-z]\w*\.)*([A-Za-z]\w*)Var\(\s*(?!\")")
 
 # References: body lookups in either idiom, plus localization text tokens.
 _BODY_REF = re.compile(r'DynamicVars(?:\.([A-Za-z]\w*)|\[\s*"([A-Za-z]\w*)"\s*\])')

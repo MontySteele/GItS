@@ -154,10 +154,9 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         // Rare Power card of that name. See the class summary.
         ("title", "Dodoco Tales"),
         ("description",
-            $"At the start of combat, gain {OpeningSparks} "
-          + "[gold]Spark[/gold]. Whenever a [gold]Bomb[/gold] detonates, gain "
-          + $"{SparksPerDetonation} [gold]Spark[/gold]. "
-          + CompanionSlot.RewardSlotDescription),
+            $"Start each combat with [blue]{OpeningSparks}[/blue] "
+          + "[gold]Sparks[/gold]. Whenever a [gold]Bomb[/gold] detonates, "
+          + $"gain [blue]{SparksPerDetonation}[/blue] [gold]Spark[/gold]."),
     };
 
     protected override string IconBaseName => "burning_blood";
@@ -335,9 +334,9 @@ public sealed class PearlOfInsightRelic : CustomRelicModel
     {
         ("title", "Pearl of Insight"),
         ("description",
-            "Whenever a card is [gold]Exhausted[/gold], gain "
-          + $"{ChargePerExhaust} [gold]Charge[/gold] "
-          + $"and {BurstPerExhaust} Burst Energy."),
+            "Whenever a card is [gold]Exhausted[/gold], gain [blue]"
+          + $"{ChargePerExhaust}[/blue] [gold]Charge[/gold] and [blue]"
+          + $"{BurstPerExhaust}[/blue] [gold]Burst Energy[/gold]."),
     };
 
     /// <summary>
@@ -451,10 +450,9 @@ public sealed class CurtainNeverFalls : CustomRelicModel
     {
         ("title", "The Curtain Never Falls"),
         ("description",
-            "[gold]Center Stage[/gold] and [gold]Guest Cast[/gold] are both "
-          + "always active, and you always count as having moved the "
-          + "[gold]Spotlight[/gold] this turn. "
-          + CompanionSlot.RewardSlotDescription),
+            "[gold]Center Stage[/gold] and [gold]Guest Cast[/gold] are always "
+          + "active. You always count as having moved the "
+          + "[gold]Spotlight[/gold]."),
     };
 
     protected override string IconBaseName => "snake_ring";

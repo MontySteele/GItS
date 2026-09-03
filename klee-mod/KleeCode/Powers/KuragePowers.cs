@@ -59,6 +59,15 @@ public sealed class KurageSummonPower : PowerModel, ILocalizationProvider
             // Every number is interpolated from the law it is printed from,
             // the discipline the tips already keep, and the Power branch reads
             // its MODE rather than assuming one.
+            // `EB-345` / R249 LEFT THIS FACE ALONE. The shipped text pass
+            // proposed a one-line rewrite of it (packet row 1), and applying
+            // that would have deleted two printed RULES this arm's own
+            // rulings put here and pin: "If you played no card at all, it
+            // does nothing." (`EB-247`'s null branch) and the lifetime
+            // sentence in the strip's own words (`EB-197`), both asserted in
+            // `KurageBuffFaceTests`. It is also arm text rather than shipped
+            // text: the `#else` below is what a release build prints, and
+            // that is the face the pass rewrote.
             "At the end of your turn, the jellyfish answers the last card you "
           + "played this turn. After an Attack: it deals "
           + $"{KokomiConstants.KuragePulseBase} damage and applies "
@@ -79,14 +88,21 @@ public sealed class KurageSummonPower : PowerModel, ILocalizationProvider
             // same frame -- caught eyes-on at Gate B. A duration this power does
             // not have is not printed at all; the sentence says the lifetime it
             // DOES have, in the strip's words.
-          + "It stays on the field for the whole fight."),
+          + "It stays on the field for the whole fight."
 #else
-            "At the end of your turn, the jellyfish deals "
-          + $"{KokomiConstants.KuragePulseBase} plus "
-          + $"{KokomiConstants.KuragePulsePerCharge} per [gold]Charge[/gold] "
-          + "damage and applies [gold]Hydro[/gold] to a random enemy. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+            // `EB-345` / R249. The released face, on the same rules: the pet
+            // is named (rule 12), the duration takes the base game's own
+            // spelling (rule 9, "Lasts for {Amount} turns."), and the element
+            // rides the hit rather than a second clause -- the conventions'
+            // form for a card-less hit that applies its aura.
+            "At the end of your turn, the [gold]Bake-Kurage[/gold] deals "
+          + $"[blue]{KokomiConstants.KuragePulseBase}[/blue] "
+          + "[gold]Hydro[/gold] damage to a random enemy, plus "
+          + $"[blue]{KokomiConstants.KuragePulsePerCharge}[/blue] per "
+          + "[gold]Charge[/gold]. Lasts for [blue]{Amount}[/blue] "
+          + "{Amount:plural:turn|turns}."
 #endif
+            ),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -281,7 +297,8 @@ public sealed class KurageWardPower : PowerModel, ILocalizationProvider
     {
         ("title", "Kurage's Oath"),
         ("description",
-            "Each [gold]Bake-Kurage[/gold] pulse also grants {Amount} Block."),
+            "Each [gold]Bake-Kurage[/gold] pulse also grants "
+          + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -335,7 +352,8 @@ public sealed class KurageAmpPower : PowerModel, ILocalizationProvider
         ("title", "Before Sun and Moon"),
         ("description",
             "Each [gold]Bake-Kurage[/gold] pulse reads your "
-          + "[gold]Charge[/gold] for {Amount} more damage per point."),
+          + "[gold]Charge[/gold] for [blue]{Amount}[/blue] additional damage "
+          + "per point."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -379,10 +397,12 @@ public sealed class CeremonialGarmentPower : PowerModel, ILocalizationProvider
     {
         ("title", "Ceremonial Garment"),
         ("description",
-            "Your Attacks deal 1 more damage per "
-          + $"{KokomiConstants.GarmentChargeDivisor} [gold]Charge[/gold] and "
-          + $"grant {KokomiConstants.GarmentAttackBlock} Block. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+            "Your Attacks deal [blue]1[/blue] additional damage per "
+          + $"[blue]{KokomiConstants.GarmentChargeDivisor}[/blue] "
+          + "[gold]Charge[/gold] and grant "
+          + $"[blue]{KokomiConstants.GarmentAttackBlock}[/blue] "
+          + "[gold]Block[/gold]. Lasts for [blue]{Amount}[/blue] "
+          + "{Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -491,9 +511,9 @@ public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
     {
         ("title", "Vigil of the Deep"),
         ("description",
-            "The first time you would take unblocked attack damage each turn, "
-          + "prevent up to {Amount} of it and [gold]Exhaust[/gold] a random "
-          + "card from your draw pile."),
+            "The first unblocked Attack damage each turn is reduced by up to "
+          + "[blue]{Amount}[/blue], and a random card in your "
+          + "[gold]Draw Pile[/gold] is [gold]Exhausted[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -44,7 +44,7 @@ public sealed class GracefulRetreat : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Slip Backstage"),
-        ("description", "Spend 5 [gold]Encore[/gold]; lose HP for any shortfall. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Spend 5 [gold]Encore[/gold], or HP for any shortfall. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

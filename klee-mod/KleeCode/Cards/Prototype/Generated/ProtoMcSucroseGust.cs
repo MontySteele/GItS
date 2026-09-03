@@ -46,13 +46,13 @@ public sealed class ProtoMcSucroseGust : CustomCardModel, ICompanionCard, IHexer
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
+        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_gust");
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Sucrose — Wind Spirit Creation (proto)"),
+        ("title", "Sucrose — Wind Spirit Creation"),
         ("description", "[gold]Swirl[/gold] the enemy. Draw 1 card."),
     };
 

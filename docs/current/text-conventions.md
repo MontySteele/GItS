@@ -7,8 +7,15 @@ base game's own English strings and measured on them. The corpus is the
 `card_keywords.json` (7) and `static_hover_tips.json` (48). Strings are cited
 by their loc id. Lengths are RENDERED characters: BBCode tags stripped, every
 `{hole}` counted as one numeral, newlines as spaces. `tools/lint_text_conventions.py`
-enforces the ceilings and spellings on the prototype arms; the shipped sheets
-were proposed and ruled (R249) in `review/ruled/text-conventions-shipped-2026-09-02.md`.
+enforces the ceilings and spellings on the prototype arms and reports the
+shipped surfaces (`--shipped`). **The shipped pass is ruled and applied
+(`EB-345`):** the Furina sheet, the companion rows, the shared keyword tips,
+the shipped powers and the shipped relics read clean against this page. Two
+things stay where they were, by the same ruling: the shipped **Klee and Kokomi
+card rows** are not rewritten — the overhauls being played replace them, so the
+report skips them by id off those two sheets — and the shipped Klee kit keeps
+**"detonates"** until the overhaul replaces it, two Bombs being two rules.
+The ruling is R249 (`review/ruled/text-conventions-shipped-2026-09-02.md`).
 
 ## Ceilings, measured
 
@@ -75,9 +82,11 @@ its TARGET is what a rewrite aims below.
     [gold]Block[/gold]", "[blue]{Amount}[/blue]".
 11. **A relic is one sentence in the same shapes.** `BAG_OF_MARBLES`: "At the
     start of each combat, apply 1 Vulnerable to ALL enemies."
-    `BLOOD_VIAL`: "At the start of each combat, heal 2 HP." The mod's starting
-    relics append the shared Companion-slot sentence (59 characters), which is
-    why they are held to a longer ceiling by exception.
+    `BLOOD_VIAL`: "At the start of each combat, heal 2 HP." A relic states its
+    OWN rule and never a fact about the whole mod: the fourth-Companion reward
+    slot is one, so it is stated once in `klee-mod/Klee/manifest.json` and no
+    relic prints it (`EB-346`). Those 59 shared characters on four starting
+    relics were what put three of them over this ceiling.
 12. **A pet is named.** `FETCH`: "Osty deals 6 damage." `BONE_SHARDS`: "If Osty
     is alive, he deals 6 damage to ALL enemies." Never "the jellyfish", never
     "your pet".
@@ -96,7 +105,7 @@ its TARGET is what a rewrite aims below.
 
 | word | on a card | as an event or in prose |
 |---|---|---|
-| `[gold]Bomb[/gold]` / `[gold]Bombs[/gold]` | "Place a [gold]Bomb[/gold] 5." (the number is its size); "Each [gold]Bomb[/gold] on the enemy grows by 3." | a Bomb "goes off"; never detonates, pops, fires or explodes |
+| `[gold]Bomb[/gold]` / `[gold]Bombs[/gold]` | "Place a [gold]Bomb[/gold] 5." (the number is its size); "Each [gold]Bomb[/gold] on the enemy grows by 3." | a Bomb "goes off"; never pops, fires or explodes. **The SHIPPED Klee kit still says "detonates"** and keeps it until the overhaul replaces that kit (`EB-345`), which is why the shipped read does not carry the `goes-off` spelling and the prototype gate does |
 | `[gold]Set off[/gold]` | the verb, sentence-initial: "[gold]Set off[/gold]. Deal 4 damage."; "[gold]Set off[/gold] a random enemy's [gold]Bombs[/gold]." | never as prose; the event is "goes off" |
 | `[gold]Mine[/gold]` | "Place a [gold]Mine[/gold] 4 on ALL enemies." | a Mine is a Bomb; "goes off when its enemy attacks you" |
 | `[gold]Spark[/gold]` / `[gold]Sparks[/gold]` | the price sits in the cost slot; the body does not restate it; "gain 1 [gold]Spark[/gold]" | "Some cards cost Sparks instead of Energy." |
@@ -113,9 +122,16 @@ its TARGET is what a rewrite aims below.
 
 ## Exceptions the lint carries (each with its reason in the lint)
 
-`proto_mc_durin_binary_form` (a two-mode Power must print both modes on the
-reward screen; the base has no static modal card); the Bomb badge's static
-`description` and its two Mine smart faces (a live total, a live count, a Mine
-count and rule 6, which fires on the enemy's turn when no card is in front of
-the player; the plain and Weak faces meet the ceiling); `TamakushiCasket` (a
-two-rule starting relic plus the shared 59-character Companion-slot sentence).
+**The prototype gate:** `proto_mc_durin_binary_form` (a two-mode Power must
+print both modes on the reward screen; the base has no static modal card); the
+prototype Bomb badge's static `description` and its two Mine smart faces (a
+live total, a live count, a Mine count and rule 6, which fires on the enemy's
+turn when no card is in front of the player; the plain and Weak faces meet the
+ceiling). `TamakushiCasket` left the list with `EB-346`: its own two rules
+were always under the ceiling and the shared slot sentence is gone.
+
+**The shipped report:** both faces of the shipped Bomb badge, `BombPower`'s
+static `description` and its `smartDescription`, which carry all three of the
+Bomb's rules between them (`EB-345`); the `KLEEMOD-BOMB` keyword tip
+beside them is a primer and drops the last rule's once-per-combat scope to
+stay under its own ceiling.

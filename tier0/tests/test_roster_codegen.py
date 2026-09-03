@@ -1584,3 +1584,50 @@ def test_every_sheet_bomb_amount_reaches_its_face_unmodified():
                                 f"declared at {sorted(amounts)}")
     assert checked, "no Bomb faces found -- the sweep is not looking at them"
     assert not offenders, "\n  ".join(offenders)
+
+
+def test_eb338_the_no_hit_preview_flag_follows_the_op_that_applies():
+    """`EB-338`. Which cards carry `appliesWithoutHit`, derived from the sheet.
+
+    THE SPLIT IS ALREADY IN THE EMITTER and this row only spends it: a row
+    whose element rides its own damage (`damage_applies_element`) has a hit for
+    a reaction to multiply, and a row whose element comes from an `apply_aura`
+    or a `swirl` does not -- the reaction is triggered by the APPLICATION.
+    Barbara's stand-in is the second shape ("Gain 6 Block. Apply Hydro") and
+    its Vaporize preview promised 1.5x on a card with no damage at all.
+
+    ATTACHED, NOT REMEMBERED, which is `ArmKeywordTips`' bargain one attach
+    over: the sheet knows which op puts the element on the board, so a new
+    apply-only row carries the corrected preview because of what it does.
+
+    The C# half -- what the corrected body SAYS -- is
+    `klee-mod/KleeTests/ReactionPreviewNoHitTests.cs`.
+    """
+    generated = [
+        gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated",
+        gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated",
+        gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Kokomi" / "Generated",
+        gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated",
+    ]
+    flagged, previewed = set(), set()
+    for folder in generated:
+        for path in sorted(folder.glob("*.cs")):
+            src = path.read_text(encoding="utf-8")
+            for call in re.findall(
+                    r"KleeCardTooltips\.ForCard\([^;]*?\)", src):
+                if "Element.None" in call:
+                    continue
+                previewed.add(path.name)
+                if "appliesWithoutHit: true" in call:
+                    flagged.add(path.name)
+
+    assert previewed, "no reaction previews found -- the sweep sees nothing"
+    # The seat's own card, and Diona's twin beside it: apply-only skills.
+    assert "ProtoMcBarbaraShowBegin.cs" in flagged
+    assert "DionaIcyPaws.cs" in flagged
+    # A companion attack whose damage carries the element keeps its preview:
+    # the hit is real and 1.5x is a true promise about it.
+    assert "ProtoMcAmberFieryRain.cs" in previewed
+    assert "ProtoMcAmberFieryRain.cs" not in flagged
+    # And the flag is never raised where no preview is drawn at all.
+    assert flagged <= previewed

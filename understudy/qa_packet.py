@@ -417,6 +417,49 @@ def printed_spark_index(repo: Path | None = None) -> dict[str, int]:
     return dict(_printed_spark_index_cached(root))
 
 
+# `EB-342`. THE CARDS THIS BUILD DEFINES NO UPGRADE FOR.
+#
+# `tools/gen_prototype_cards.UPGRADE_DEBT` is the register of them, and since
+# `EB-315` emptied the overhaul half it is the Spark arm's alone -- which is
+# exactly where the r7b act-3 seat's two silently-omitted cards live
+# (`proto_powder_charge_spark`, `proto_shinobu_sanctifying_ring_*`).
+#
+# ONLY THE IDS CROSS. Each row's VALUE is register prose that names ruling and
+# row numbers, which is precisely what may not reach a blind page; the page
+# writes its own plain sentence and reads nothing from here but the key set.
+# Parsed with a regex rather than imported for `printed_cost_index`'s reason
+# one function up: the module that owns it reaches a sheet loader, and this
+# index is read from a page that may not.
+_UPGRADE_DEBT_BLOCK = re.compile(
+    r"^UPGRADE_DEBT[^{]*\{(.*?)^\}", re.M | re.S)
+_UPGRADE_DEBT_KEY = re.compile(r'^\s*"([a-z0-9_]+)"\s*:', re.M)
+
+
+@lru_cache(maxsize=4)
+def _no_upgrade_index_cached(repo: Path) -> tuple[str, ...]:
+    src = repo / "tools" / "gen_prototype_cards.py"
+    try:
+        text = src.read_text(encoding="utf-8")
+    except OSError:
+        return ()
+    block = _UPGRADE_DEBT_BLOCK.search(text)
+    if block is None:
+        return ()
+    return tuple(sorted(card_key(k)
+                        for k in _UPGRADE_DEBT_KEY.findall(block.group(1))))
+
+
+def no_upgrade_index(repo: Path | None = None) -> frozenset[str]:
+    """`{card id}` for every row this build defines no upgrade for (`EB-342`).
+
+    Keyed the way `printed_cost_index` is -- `card_key`'s spelling of the
+    wire's own id -- so a face on a screen looks up by the same handle. An
+    empty set on a checkout with no `tools/` tree is silence, never a guess.
+    """
+    root = repo if repo is not None else Path(__file__).resolve().parents[1]
+    return frozenset(_no_upgrade_index_cached(root))
+
+
 # `EB-264`. THE WIRE'S UNPLAYABLE REASON IS AN ENUM NAME, AND A PLAYER CANNOT
 # READ IT. `unplayable_reason` on a hand entry is `UnplayableReason.ToString()`
 # (`McpMod.StateBuilder.cs:1324`), so the page printed
@@ -510,14 +553,86 @@ def cost_label(card: dict[str, Any]) -> str:
     return sparks if shown in ("0", "-") else f"{shown} and {sparks}"
 
 
-def cost_note(card: dict[str, Any]) -> str:
-    """The one sentence a discounted card carries. `""` when it is not one."""
-    if not _discounted(card):
+def _spark_price(card: dict[str, Any]) -> int:
+    price = card.get("printed_spark")
+    return price if isinstance(price, int) and price > 0 else 0
+
+
+def spark_discount_note(card: dict[str, Any]) -> str:
+    """`EB-339`. WHAT A COST-TO-ZERO EFFECT DOES NOT COVER.
+
+    WHAT THE SEAT SAW (`klee round 7b, opus-act2.md`,
+    section (c), last bullet). `Vexing Puzzlebox` prints "It's free to play
+    this turn"; the card it handed over arrived as `Powder Charge -- cost 1
+    Spark`, with none of the "the cost printed on this card is X; it is showing
+    Y here" line the energy cards get. The seat wrote the rule out for
+    themselves -- "free apparently means free of ENERGY" -- which is a rule a
+    page should not make a player derive from a card that silently did not
+    work.
+
+    AND THE REASON IS STRUCTURAL, not a display slip. A Spark price is an
+    EFFECT (`op: spend_spark` at the head of the row), not a cost, so
+    `printed_cost` is 0 on every Spark-priced row in the pool
+    (`proto_ko_powder_charge`, `proto_ko_dig_in`, and the rest). A cost-to-zero
+    effect moves the ENERGY cost from 0 to 0, `_discounted` is correctly False,
+    and there was nothing on the wire for either page to notice.
+
+    SO IT IS SAID WHENEVER THE ENERGY SLOT READS ZERO, which is exactly when a
+    relic, a potion or a power can claim the card is free -- and not only while
+    a discount happens to be running, because nothing on the wire says one is.
+    The sentence is true either way, so a page carrying it cannot mislead; the
+    page withholding it already did.
+    """
+    price = _spark_price(card)
+    if not price:
         return ""
-    return (f"The cost printed on this card is {card['printed_cost']}; it is "
-            f"showing {_text(card['cost'])} here.")
+    shown = _text(card.get("cost"))
+    if shown not in ("", "-", "0"):
+        return ""
+    sparks = f"{price} Spark" if price == 1 else f"{price} Sparks"
+    return (f"Its {sparks} is a price, not an Energy cost: an effect that "
+            f"makes a card free to play, or cuts its cost to 0, covers Energy "
+            f"only, and the {sparks} is still spent.")
 
 
+def cost_note(card: dict[str, Any]) -> str:
+    """The one sentence a discounted card carries, and `EB-339`'s beside it.
+
+    `""` when the card is neither discounted nor Spark-priced. Where both
+    apply they are ONE line in the order the price is read: what the Energy
+    slot is doing, then what the Spark slot is not.
+
+    `EB-342`. THE FIRST HALF DID DUTY FOR TWO DIFFERENT FACTS. On a single r7b
+    fight-15 screen `The Big One+` read *"The cost printed on this card is 3;
+    it is showing 2 here"* -- a PERMANENT Smith upgrade -- and `Flame Dance`
+    read *"The cost printed on this card is 1; it is showing 0 here"* -- a
+    one-turn `Vexing Puzzlebox` discount that evaporates at end of turn.
+    Identical phrasing for a property of the CARD and a property of THIS TURN,
+    with the `(upgraded)` tag the only distinguisher and sitting in the title
+    rather than beside the cost line being explained.
+
+    The number the discount is measured against is the cost on the SHIPPED
+    FACE (`printed_cost_index`, read off the card's own C# sheet row), so an
+    upgraded copy showing less than its base is showing the upgrade and an
+    un-upgraded one showing less is showing something on the board. That is
+    the whole distinction, and it is read off `upgraded`, which the wire
+    carries per card -- nothing here guesses at a duration the feed does not
+    send, so the board half says where to look rather than how long it lasts.
+    """
+    parts: list[str] = []
+    if _discounted(card):
+        opening = (f"The cost printed on this card is {card['printed_cost']}; "
+                   f"it is showing {_text(card['cost'])} here")
+        parts.append(
+            f"{opening}, because this copy is upgraded — that is permanent."
+            if card.get("upgraded") else
+            f"{opening}. This copy is not upgraded, so the cut is this turn's "
+            f"board and not the card: it is what this card costs now, not "
+            f"what it costs.")
+    spark = spark_discount_note(card)
+    if spark:
+        parts.append(spark)
+    return " ".join(parts)
 def spark_note(powers: list[dict[str, Any]],
                hand: list[dict[str, Any]]) -> str:
     """The once-per-page Spark line (EB-186). `""` when nothing is discounted.

@@ -97,6 +97,12 @@ from tier0.constants import BURST_PER_SKILL_TAG                 # noqa: E402
 # clause by clause, and a second table here could bind one of them to a
 # different clause -- which is a smithed prototype that is two different cards.
 from tier0.content.upgrades import PLAN_DELTA_OPS               # noqa: E402
+# EB-322. The player-facing title for a sheet `name:`. Imported for the reason
+# the two above are: a prototype row that shadows a shipped row of the same
+# name declares that with a ` (proto)` suffix, the suffix is a SHEET device,
+# and a second copy of the rule here is what would let the mod print a title
+# the sim does not -- which is exactly what the row forbids.
+from tier0.content.loader import display_name                   # noqa: E402
 
 SHEET = REPO / "docs" / "klee-cards.yaml"
 # Mirrors tier0/content/upgrades.py UPGRADE_SHEETS, in the same order.
@@ -357,6 +363,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # nowhere else, which `plan_reason` and `blocked_reason`
                   # enforce by name. Each is one `KokomiPlan.Kind`.
                   "plan_twice", "damage_per_companion_last_turn",
+                  # `EB-335`: Tide Wall's per-Plan Block scaler, plan-only for
+                  # a reason of its own -- the count it multiplies is a fact
+                  # about a MORNING.
+                  "block_per_plan_this_morning",
                   # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, R213 B) --
                   # ONE verb, on the same terms as the two blocks above. Gorou's
                   # Inuzaka All-Round Defense prints "Gain Block equal to half
@@ -1432,6 +1442,7 @@ PLAN_CLAUSE_KINDS = {
     "damage_per_companion_last_turn": "DamagePerCompanionLastTurn",
     "plan_twice": "PlanTwice",
     "play_copy_of_companion": "PlayCopyOfCompanion",
+    "block_per_plan_this_morning": "BlockPerPlanThisMorning",
     "apply_power": None,
 }
 
@@ -1457,7 +1468,7 @@ PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
 #: Legal inside a `plan:` list and NOWHERE else -- a top-level spelling would
 #: be a different, unpriced card, and `KokomiPlan` is the only caller of both.
 PLAN_ONLY_OPS = {"plan_twice", "damage_per_companion_last_turn",
-                 "play_copy_of_companion"}
+                 "play_copy_of_companion", "block_per_plan_this_morning"}
 
 
 def plan_reason(card: dict) -> str | None:
@@ -1719,6 +1730,13 @@ APPLY_POWERS = {
     "kk_generals_banner": ("GeneralsBannerPower", None,
         "Once per turn, when you play a [gold]Companion[/gold] card, the front "
         "enemy gains {X} Weak."),
+    # `EB-335`, R246 pick 2. THE AMOUNT IS BLOCK PER STRIKE and not a duration:
+    # the window is "until your next turn" and is closed by
+    # `ProtoBakeKuragePower.AfterPlayerTurnStart`, one line after the morning
+    # the packet says strikes inside it.
+    "kk_shell_guard": ("ShellGuardPower", None,
+        "Until your next turn, whenever the [gold]Tamakushi Casket[/gold] "
+        "strikes, gain {X} [gold]Block[/gold]."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
@@ -1735,24 +1753,26 @@ APPLY_POWERS = {
     # for exactly their semantics and a private copy would be a second
     # implementation of a rule the engine already owns.
     "metallicize": ("MetallicizePower", None,
-        "At the start of your turn, gain {X} Block."),
+        "At the start of your turn, gain {X} [gold]Block[/gold]."),
     # Cap 6 mirrors the sheet's `max_stacks: 6` -- a single-application ward,
     # not a stacking one. Vigil's upgrade moves amount AND cap together
     # (test_vigil_upgrade_moves_the_cap_with_the_amount pins that), so the
     # registry cap has to move with them or the upgrade is silently swallowed.
     "prevent_exhaust_ward": ("PreventExhaustWardPower", 6,
-        "The first time you would take unblocked attack damage each turn, "
-        "prevent up to {X} of it and [gold]Exhaust[/gold] a random card from "
-        "your draw pile."),
+        "The first unblocked Attack damage each turn is reduced by up to "
+        "{X}, and a random card in your [gold]Draw Pile[/gold] is "
+        "[gold]Exhausted[/gold]."),
     "kurage_ward": ("KurageWardPower", None,
-        "Each [gold]Bake-Kurage[/gold] pulse also grants {X} Block."),
+        "Each [gold]Bake-Kurage[/gold] pulse also grants {X} "
+        "[gold]Block[/gold]."),
     # R73/G2. No cap: the stacking is the ruling, not an oversight, and a cap
     # here would implement the ban [USER] considered and rejected.
     "kurage_amp": ("KurageAmpPower", None,
         "Each [gold]Bake-Kurage[/gold] pulse reads your [gold]Charge[/gold] "
-        "for {X} more damage per point."),
+        "for {X} additional damage per point."),
     "feel_no_pain": ("FeelNoPainPower", None,
-        "Whenever a card is [gold]Exhausted[/gold], gain {X} Block."),
+        "Whenever a card is [gold]Exhausted[/gold], gain {X} "
+        "[gold]Block[/gold]."),
     "dark_embrace": ("DarkEmbracePower", None,
         "Whenever a card is [gold]Exhausted[/gold], draw {X} card{XS}."),
     "weak": ("WeakPower", None,
@@ -1950,7 +1970,7 @@ APPLY_POWERS = {
     # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
-        "Your [gold]Shatters[/gold] deal {X} more damage."),
+        "Your [gold]Shatters[/gold] deal {X} additional damage."),
     # Fontaine 5-star Rares (R64, 2026-07-25). Amounts live on the cards, so
     # none of these adds a constant for the parity lint to drift on.
     "cannon_fire_support": ("CannonFireSupportPower", None,
@@ -1958,15 +1978,15 @@ APPLY_POWERS = {
         "[gold]Block[/gold]."),
     "night_vigil": ("NightVigilPower", None,
         "Your Attacks against enemies holding an elemental aura deal {X} "
-        "more damage."),
+        "additional damage."),
     "ancient_sea_authority": ("AncientSeaAuthorityPower", None,
-        "Elemental auras you apply last {X} extra turn(s)."),
+        "Elemental auras you apply last {X} extra turn{XS}."),
     "masque_red_death": ("MasqueRedDeathPower", None,
-        "At the start of each turn, gain {X} [gold]Strength[/gold]. Each turn "
-        "your [gold]Bond of Life[/gold] consumes the first 5 "
-        "[gold]Block[/gold] you gain."),
+        "At the start of your turn, gain {X} [gold]Strength[/gold]. Your "
+        "[gold]Bond of Life[/gold] eats the first 5 [gold]Block[/gold] you "
+        "gain each turn."),
     "fanfare_attack_per10": ("FanfareAttackPer10Power", None,
-        "Your Attacks deal {X} more damage per 10 [gold]Fanfare[/gold]."),
+        "Your Attacks deal {X} additional damage per 10 [gold]Fanfare[/gold]."),
     # B5 (2026-07-28): the face NAMES the member and says nothing else. The
     # member's act, its bow, and the cap rules moved to hover tips
     # (SalonMemberTips) -- eight cards were reprinting one paragraph that
@@ -1978,7 +1998,7 @@ APPLY_POWERS = {
     # A12 (2026-07-28): the stage's size stops being a constant.
     "salon_cap_up": ("SalonCapUpPower", None,
         "Your [gold]Salon[/gold] has room for {X} more "
-        "[gold]Salon Member(s)[/gold]."),
+        "[gold]Salon Member{XS}[/gold]."),
     # ALL max_stacks DROPPED across Furina's sheet (user ruling 2026-07-24).
     # Two rounds: the first dropped the four non-compounding powers; this one
     # drops the rest, matching base StS where Power dupes always stack. An A/B
@@ -1996,19 +2016,16 @@ APPLY_POWERS = {
     "spotlight_draw": ("SpotlightDrawPower", None,
         "The first [gold]Spotlighted[/gold] card each turn draws {X} card{XS}."),
     "spotlight_mult_bonus": ("SpotlightMultBonusPower", None,
-        "[gold]Spotlighted[/gold] Companion numbers are {X}% stronger "
-        "this combat."),
+        "[gold]Spotlighted[/gold] Companions are {X}% stronger this combat."),
     "spotlight_mult_bonus_turn": ("SpotlightMultBonusTurnPower", None,
-        "[gold]Spotlighted[/gold] Companion numbers are {X}% stronger "
-        "this turn."),
+        "[gold]Spotlighted[/gold] Companions are {X}% stronger this turn."),
     "spotlight_flat_damage": ("SpotlightFlatDamagePower", None,
         "[gold]Spotlighted[/gold] Companion damage gains {X}."),
     "spotlight_flat_damage_turn": ("SpotlightFlatDamageTurnPower", None,
         "[gold]Spotlighted[/gold] Companion damage gains {X} this turn."),
     "ovation_spend_boost": ("OvationSpendBoostPower", None,
-        "Whenever you spend [gold]Encore[/gold], [gold]Spotlighted[/gold] "
-        "Companion "
-        "numbers are {X}% stronger this turn."),
+        "[gold]Spotlighted[/gold] Companions are {X}% stronger on turns you "
+        "spend [gold]Encore[/gold]."),
     "spotlight_encore_first": ("SpotlightEncoreFirstPower", None,
         "The first [gold]Spotlighted[/gold] card each turn grants {X} "
         "[gold]Encore[/gold]."),
@@ -2018,10 +2035,11 @@ APPLY_POWERS = {
     # the trigger sites and their tier0 mirrors. No caps: the activity gate IS
     # the rate limit, so a stack ceiling would be a second, redundant one.
     "salon_deploy_block": ("SalonDeployBlockPower", None,
-        "Whenever you deploy a [gold]Salon Member[/gold], gain {X} Block."),
+        "Whenever you deploy a [gold]Salon Member[/gold], gain {X} "
+        "[gold]Block[/gold]."),
     "salon_bow_block": ("SalonBowBlockPower", None,
         "Whenever a [gold]Salon Member[/gold] takes its final bow, gain "
-        "{X} Block."),
+        "{X} [gold]Block[/gold]."),
     "salon_bow_encore": ("SalonBowEncorePower", None,
         "Whenever a [gold]Salon Member[/gold] takes its final bow, gain "
         "{X} [gold]Encore[/gold]."),
@@ -4063,8 +4081,22 @@ def rider_tip_args(card: dict) -> tuple[str, str]:
     return ", ".join(args), ", ".join(kokomi_args)
 
 
-def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int]]:
+def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int],
+                                            dict[int, list[int]]]:
     """B5: consecutive deploys of the SAME member render as one sentence.
+
+    `EB-345` / R249 widened it one step: a consecutive RUN of deploys of
+    DIFFERENT members is also one sentence, a list rather than three copies of
+    "Add 1 X." Grand Gala printed five sentences and 127 characters against a
+    four-sentence, 120-character ceiling purely by repeating the verb and the
+    prepositional phrase. The third return is that run: {first anchor ->
+    [every anchor in the run]}, and every anchor after the first is in `skip`
+    so the loop emits the run once, at its head.
+
+    The names in the list stay the FULL ones. They are the member cards' own
+    titles and the tip titles (`SalonMemberTips.DisplayName`, pinned in
+    `InterpolationPinTests`), and a card that named them differently from the
+    tooltip explaining them is the defect B5 fixed.
 
     Grand Gala deploys Crabaletta twice in a row, which read as "Add 1
     Mademoiselle Crabaletta. Add 1 Mademoiselle Crabaletta." -- the same
@@ -4093,9 +4125,12 @@ def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int]]:
                 and salon_calc_rider(card, eff) is None)
 
     anchor = None
+    runs: dict[int, list[int]] = {}
+    head = None
     for i, eff in enumerate(effects):
         if not plain_deploy(eff):
             anchor = None
+            head = None
             continue
         if (anchor is not None
                 and effects[anchor].get("member") == eff.get("member")):
@@ -4104,7 +4139,13 @@ def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int]]:
             continue
         anchor = i
         merged[i] = int(eff["amount"])
-    return merged, skip
+        if head is None:
+            head = i
+            runs[head] = [i]
+        else:
+            runs[head].append(i)
+            skip.add(i)
+    return merged, skip, runs
 
 
 def salon_member_tip_args(card: dict) -> str:
@@ -4599,14 +4640,29 @@ def build_vars(card: dict) -> list[str]:
         out.append(f"new CardsVar({added_draw_upgrade(card)})")
     # EB-315. The PLAN line's upgradeable clauses, in the order the row wrote
     # them and AFTER the now-line's vars, which is the order the face prints
-    # the two halves in. A plain `DynamicVar` and never an attack var: a
-    # planned hit is dealt by the jellyfish at the start of the next turn, so
-    # resolving the printed number against the player's live attack modifiers
-    # at print time would show a number nobody will get (the same argument
+    # the two halves in. NEVER AN ATTACK VAR: a planned hit is dealt by the
+    # jellyfish at the start of the next turn, so the game's own attack preview
+    # -- which resolves the player's Strength, Weak and attack buffs at print
+    # time -- would show a number nobody will get (the same argument
     # `plant_bomb` above makes about a banked Bomb).
-    for index, (_key, var) in sorted(plan_var_effects(card).items()):
-        amount = int((card.get("plan") or [])[index]["amount"])
-        out.append(f'new DynamicVar("{var}", {amount}m)')
+    #
+    # `EB-334`. A PLANNED HIT IS THE ONE PLAN CLAUSE WHOSE PRINTED NUMBER IS
+    # STILL LIVE, and R246 pick 1 is what made it one: the Bake-Kurage deals a
+    # Plan, so her Weak and her buffs no longer touch it, but the TARGET's
+    # Vulnerable still multiplies it. `KokomiPlan.PlanDamageVar` is that one
+    # term and nothing else, resolved against the front enemy at preview time
+    # -- so the Plan line prints what the morning will deal against the board
+    # as it stands, which is the row's own acceptance sentence. Only the flat
+    # `damage` clause takes it: `damage_per_companion_last_turn` prints a
+    # PER-COMPANION rate rather than a hit, and multiplying a rate by the
+    # target's Vulnerable would print a number the card never deals.
+    plan_line = card.get("plan") or []
+    for index, (key, var) in sorted(plan_var_effects(card).items()):
+        amount = int(plan_line[index]["amount"])
+        if key == "plan_damage" and plan_line[index].get("op") == "damage":
+            out.append(f'new KokomiPlan.PlanDamageVar({amount}m)')
+        else:
+            out.append(f'new DynamicVar("{var}", {amount}m)')
     if added_encore_salon(card) is not None:
         base, deploys = added_encore_salon(card)
         # Same trio as salon_calc_var_decls, for the upgrade-appended encore
@@ -4630,10 +4686,15 @@ def build_vars(card: dict) -> list[str]:
     # softlock on whatever run happens to roll the card. Fail the GENERATOR
     # instead. Typed vars carry their class-derived name (DamageVar ->
     # "Damage"), named vars declare theirs.
+    #
+    # THE TYPE MAY BE QUALIFIED (`EB-334`): `KokomiPlan.PlanDamageVar` lives
+    # inside the arm's own class, so the pattern skips any dotted prefix and
+    # reads the class name -- and the class is named for the var it carries,
+    # which is what keeps that derivation honest.
     names = [
         (m.group(1)
          if (m := re.search(r'(?:DynamicVar|CalculatedVar)\("(\w+)"', decl))
-         else re.match(r"new (\w+?)Var\(", decl).group(1))
+         else re.match(r"new (?:\w+\.)*(\w+?)Var\(", decl).group(1))
         for decl in out
     ]
     dupes = sorted({n for n in names if names.count(n) > 1})
@@ -7754,7 +7815,7 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
             # Literal: POWER_UPGRADE_KEYS deltas bind to the first TOP-LEVEL
             # effect, so a branch rider never renders a var.
             bits.append(
-                f'your next Attack deals {int(e["amount"])} more damage')
+                f'your next Attack deals {int(e["amount"])} additional damage')
         elif op == "apply_power":
             # EB-125. The power's own template, lowercased into the branch
             # clause and stripped of its full stop, so "If your Exhaust pile
@@ -8177,7 +8238,7 @@ def build_description(card: dict) -> str:
     deltas = upgrade_plan(card)[0]
     parts = list(meter_price_clauses(card, deltas))
     salon_named = False          # B5: has a deploy already said "your Salon"?
-    deploy_amounts, deploy_skip = merged_deploy_text(card)
+    deploy_amounts, deploy_skip, deploy_runs = merged_deploy_text(card)
     add_anchor = added_effect_anchor(card)
     for eff_index, eff in enumerate(card["effects"]):
         if eff_index in deploy_skip:
@@ -8502,9 +8563,14 @@ def build_description(card: dict) -> str:
             parts.append(f"Gain {amount} [gold]Encore[/gold].")
 
         elif op == "spend_encore":
+            # `EB-345` / R249. The semicolon goes (rule 14 allows one only
+            # between the halves of an either/or) and the shortfall becomes a
+            # trailing clause on the spend it prices. The rule is unchanged
+            # and still printed -- `EB-119`'s whole point is that this clause
+            # is the difference between this op and the encore_cost gate.
             parts.append(
-                f"Spend {int(eff['amount'])} [gold]Encore[/gold]; "
-                "lose HP for any shortfall.")
+                f"Spend {int(eff['amount'])} [gold]Encore[/gold], or HP for "
+                "any shortfall.")
 
         elif op == "spend_charge":
             # The price is printed FIRST because it is a cost line, the
@@ -8576,6 +8642,27 @@ def build_description(card: dict) -> str:
 
         elif op == "apply_power":
             template = APPLY_POWERS[eff["power"]][2]
+            # `EB-345` / R249. A run of deploys is ONE sentence naming each
+            # member once. Only a run of two or more takes this path; a lone
+            # deploy renders through the template below exactly as it did.
+            run = deploy_runs.get(eff_index)
+            if run is not None and len(run) > 1:
+                names = [
+                    f'{deploy_amounts[i]} '
+                    f'[gold]{SALON_MEMBER_NAMES[card["effects"][i]["member"]]}'
+                    f'[/gold]'
+                    for i in run]
+                # Two are joined by "and"; three or more are a comma list.
+                # The members keep their FULL names (they are the member
+                # cards' own titles), and three of those plus Grand Gala's
+                # Encore and Burst riders leave no room for a conjunction
+                # under the 120-character ceiling.
+                listed = (" and ".join(names) if len(names) == 2
+                          else ", ".join(names))
+                where = "" if salon_named else " to your [gold]Salon[/gold]"
+                salon_named = True
+                parts.append(f"Add {listed}{where}.")
+                continue
             if "member" in eff:
                 # B5: name WHO. A11's random deploy says so instead -- it can
                 # field any of the three, and the tooltip lists all three.
@@ -8645,15 +8732,19 @@ def build_description(card: dict) -> str:
             amount = int(eff.get("amount", 1))
             rarity = eff["rarity"].capitalize()
             noun = "card" if amount == 1 else "cards"
+            # `EB-345` / R249. The upgrade's own sentence ("It costs 0 this
+            # turn." / "They cost 0 this turn.") was 21 and 22 rendered
+            # characters against a 20-character add-clause ceiling, and it
+            # needed number agreement with the count to say "It" or "They".
+            # As a trailing modifier on the sentence it modifies it is 16
+            # characters, needs no pronoun at either count, and keeps "this
+            # turn" -- which is the rule (`EnergyCost.SetThisTurn`), not
+            # decoration.
+            free = ("{IfUpgraded:show:, free this turn|}"
+                    if "generate_cost_override" in deltas else "")
             parts.append(
                 f"Add {amount} random {rarity} [gold]Companion[/gold] "
-                f"{noun} to your hand.")
-            if "generate_cost_override" in deltas:
-                # Number agreement with the generated count (SYS-9:
-                # an_invitation adds ONE guest and said "They").
-                pronoun = "It costs" if amount == 1 else "They cost"
-                parts.append(
-                    "{IfUpgraded:show:" + pronoun + " 0 this turn.|}")
+                f"{noun} to your hand{free}.")
 
         elif op == "cost_mod":
             n = -int(eff["delta"])
@@ -8728,7 +8819,7 @@ def build_description(card: dict) -> str:
         elif op == "buff_next_attack":
             n = ("{PowerAmount:diff()}" if eff is power_upgrade_effect(card)
                  else str(int(eff["amount"])))
-            parts.append(f"Your next Attack deals {n} more damage.")
+            parts.append(f"Your next Attack deals {n} additional damage.")
 
         elif op == "energy":
             n = int(eff["amount"])
@@ -8838,6 +8929,26 @@ def build_description(card: dict) -> str:
         elif op == "conditional":
             pred_txt = predicate_text(eff["if"])
             then = eff.get("then", [])
+            # `EB-345` / R249. THE SAME RIDER TWICE IS ONE SENTENCE. Chevreuse
+            # printed "Your next Attack deals 3 more damage. If an Elemental
+            # Reaction triggered this turn: your next Attack deals 3 more
+            # damage." -- 121 rendered characters saying one thing twice, in a
+            # shape rule 7 already has a shorter form for ("... trails as
+            # '... if ...'"). A single-armed conditional whose one effect
+            # REPEATS the effect immediately before it folds into that
+            # sentence as a trailing "plus N if ...". Both numbers stay
+            # printed and both stay literal (POWER_UPGRADE_KEYS binds to the
+            # first top-level effect, so a branch rider never renders a var).
+            if (not eff.get("else") and len(then) == 1
+                    and then[0].get("op") == "buff_next_attack"
+                    and eff_index > 0
+                    and card["effects"][eff_index - 1].get("op")
+                        == "buff_next_attack"
+                    and parts and parts[-1].endswith(" damage.")):
+                parts[-1] = (parts[-1][:-1]
+                             + f', plus {int(then[0]["amount"])} '
+                             + pred_txt[0].lower() + pred_txt[1:] + ".")
+                continue
             if any(e.get("op") == "repeat_this" for e in then):
                 parts.append(f"{pred_txt}: play this card again.")
             else:
@@ -8955,8 +9066,13 @@ def build_description(card: dict) -> str:
         # again"), swapped in on upgrade. Pipe-free payload, as the swap-parse
         # requires.
         n = added_repeat_upgrade(card)
-        again = ("Play this card again." if n == 1
-                 else f"Play this card {n} more times.")
+        # `EB-345` / R249. "Play this card again." was 21 rendered characters
+        # in a `{IfUpgraded:show:}` clause whose base-game ceiling is 20 (the
+        # longest the base prints is 18). "it" is the card, unambiguously --
+        # the clause sits on the card's own face -- and the sentence is the
+        # printed repeat-conditional's own words either way.
+        again = ("Play it again." if n == 1
+                 else f"Play it {n} more times.")
         parts.append("{IfUpgraded:show:" + again + "|}")
 
     # Sly. DEFECT FIX (v0.5 fill): the discard hook generated correctly from
@@ -9567,6 +9683,19 @@ def emit(
     # UI affordances derive from the same mechanics as play resolution.
     # A damage-bearing IElementalCard supplies its card element; apply-only
     # skills supply the element written on their effect; Swirl supplies Anemo.
+    #
+    # `EB-338`: AND THAT SPLIT IS THE FLAG. A row whose element rides its own
+    # damage (`elemental`) has a hit for a reaction to multiply. A row whose
+    # element comes from an `apply_aura` or a `swirl` does NOT: the reaction is
+    # triggered by the APPLICATION, and any damage the row also carries applies
+    # no element and so triggers nothing of its own. Barbara's stand-in is the
+    # second shape -- "Gain 6 Block. Apply Hydro" -- and its Vaporize preview
+    # promised 1.5x on a card with no damage on it at all.
+    #
+    # DERIVED HERE, NEVER REMEMBERED ON THE CARD, which is the `ArmKeywordTips`
+    # bargain one attach over: the sheet knows which op puts the element on the
+    # board and the C# tooltip cannot.
+    applies_without_hit = not elemental
     preview_element_cs = element_cs if elemental else None
     if preview_element_cs is None:
         elemental_effect = next((e for e in card.get("effects", [])
@@ -10111,10 +10240,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         confiscated_arg = (
             ", includesConfiscatedRules: true"
             if includes_confiscated_rules else "")
+        # `EB-338`, and it rides the PREVIEW rather than the card: a row with
+        # no reaction preview has nothing to correct, so the argument is only
+        # emitted where one is drawn.
+        no_hit_arg = (
+            ", appliesWithoutHit: true"
+            if applies_without_hit and preview_element_cs is not None else "")
         tips_expr = (
             "KleeCardTooltips.ForCard(base.ExtraHoverTips, this, "
             f"{trigger_arg}, includesBombRules: {bomb_arg}"
-            f"{confiscated_arg})")
+            f"{confiscated_arg}{no_hit_arg})")
     # Track L-C: the arithmetic the card text no longer carries. Wraps the
     # element/bomb tips when both apply, so one override yields both lists.
     rider_args, charge_rider_args = rider_tip_args(card)
@@ -10453,6 +10588,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # plain interpolation.
     art_id = card.get("art_of") or card["id"]
 
+    # EB-322. THE TITLE IS THE DISPLAY NAME, not the sheet's `name:`. A
+    # prototype row that shadows a shipped row of the same name declares the
+    # shadow with a ` (proto)` suffix so the sheet namespace stays legible to
+    # `tools/lint_unique_names.py`; the player never sees it, because under
+    # the arm the shipped row is substituted out and there is nothing left to
+    # disambiguate. Three seats read the suffix off the card face as part of
+    # the card's name. Resolved here rather than inline for the reason
+    # `art_id` above is.
+    title_cs = cs_escape(display_name(card["name"]))
+
     return f'''// <auto-generated>
 {source_header.rstrip()}
 //     DO NOT EDIT. Edits are lost on the next regen -- change the sheet instead.
@@ -10490,7 +10635,7 @@ public sealed class {cls} : {interfaces}
 
     public override List<(string, string)>? Localization => new()
     {{
-        ("title", "{card["name"].replace('"', chr(92) + chr(34))}"),
+        ("title", "{title_cs}"),
         ("description", "{desc}"),
     }};{tags_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 

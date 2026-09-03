@@ -58,7 +58,9 @@ public sealed class ZeroCostAttacksUpPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Spark Knight Style"),
-        ("description", "Your Attacks that cost 0 deal {Amount} more damage."),
+        ("description",
+            "Your Attacks that cost 0 deal [blue]{Amount}[/blue] additional "
+          + "damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -89,8 +91,9 @@ public sealed class SparkThresholdDownPower : PowerModel, ILocalizationProvider
     {
         ("title", "True Spark Knight"),
         ("description",
-            "You need {Amount} fewer [gold]Spark[/gold]{Amount:plural:|s} "
-          + "for your Attacks to cost 0 (minimum 1)."),
+            "You need [blue]{Amount}[/blue] fewer "
+          + "[gold]{Amount:plural:Spark|Sparks}[/gold] for your Attacks to "
+          + "cost 0, never fewer than 1."),
     };
 
     public override PowerType Type => PowerType.Buff;

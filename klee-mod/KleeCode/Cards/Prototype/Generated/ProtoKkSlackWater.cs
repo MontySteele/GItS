@@ -50,7 +50,7 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Slack Water (proto)"),
+        ("title", "Slack Water"),
         ("description", "Deal {Damage:diff()} damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold] to ALL enemies."),
     };
 

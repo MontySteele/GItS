@@ -88,6 +88,22 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
     return line
 
 
+def _render_intents(intents: list[dict[str, str]]) -> list[str]:
+    """Every component of one telegraph, one line each (`EB-342`).
+
+    A move with one component reads exactly as it always did -- `Intent:` and
+    the line. A move with several prints each component under its own
+    `and also:` continuation, because the seat that read `Attack for 8` and
+    then opened the next round with four `Burn`s in hand was reading the FIRST
+    of two rows the wire sent, and there is no shape of one line that can hold
+    two telegraphs without inventing a grammar for joining them.
+    """
+    rows = list(intents) or [{}]
+    out = [f"    Intent: {_render_intent(rows[0])}"]
+    out += [f"      and also: {_render_intent(row)}" for row in rows[1:]]
+    return out
+
+
 def _render_intent(intent: dict[str, str]) -> str:
     """One telegraph, with every field saying what it is (`EB-299`).
 
@@ -111,10 +127,34 @@ def _render_intent(intent: dict[str, str]) -> str:
     return " — ".join(b for b in bits if b) or "(no intent shown)"
 
 
+def _colliding(items: list[dict[str, Any]]) -> bool:
+    """Do two of these options print the same name? (`EB-341`)
+
+    The Future of Potions printed three options, two of them
+    character-for-character identical (`Insert Common Potion`, losing a
+    different potion each), and the only grammar was `choose "<option>"`. The
+    r7b act-2b seat sent the title, it was "accepted with an empty refusal",
+    and no screen ever said which of the two it took: "If the roll had gone the
+    other way I would have lost a potion I meant to keep and been told
+    nothing."
+    """
+    names = [_fold(o.get("name")) for o in items if _fold(o.get("name"))]
+    return len(set(names)) < len(names)
+
+
 def _render_options(items: list[dict[str, Any]], bullet: str = "-") -> list[str]:
+    # `EB-341`: the ordinal in front of the title, and ONLY where two titles
+    # collide -- a number on every row of every screen would be furniture, and
+    # `choose <number>` works whether or not the number is printed. The
+    # ordinal is the row's place in this list, which is the number the grammar
+    # resolves, so the page and the resolver cannot mean different things by 2.
+    ordinals = _colliding(items)
     out = []
-    for o in items:
-        line = f"{bullet} **{o['name'] or '(unnamed)'}**"
+    for i, o in enumerate(items, 1):
+        line = f"{bullet} "
+        if ordinals:
+            line += f"{i}. "
+        line += f"**{o['name'] or '(unnamed)'}**"
         # `EB-262`: the card's own cost first, then the gold, because they are
         # two different prices and a row that printed only the gold is what
         # bought a 3-energy card blind.
@@ -310,6 +350,12 @@ def render(obs: dict[str, Any]) -> str:
                        f"{_pulse_phrase(m)}.")
         if you["potions"]:
             out += ["", "## Potions", ""]
+            # `EB-341`: how many slots there are, beside how many are used.
+            # A tester who cannot see the denominator cannot know that the
+            # next potion offered has nowhere to go.
+            if you.get("potion_slots"):
+                out += [f"- {len(you['potions'])} of "
+                        f"{you['potion_slots']} slots are full.", ""]
             for p in you["potions"]:
                 out.append(f"- **{p['title']}** — {p['text']}" if p["text"]
                            else f"- **{p['title']}**")
@@ -328,7 +374,7 @@ def render(obs: dict[str, Any]) -> str:
             if e["block"]:
                 line += f", Block {e['block']}"
             out.append(line)
-            out.append(f"    Intent: {_render_intent(e['intent'])}")
+            out += _render_intents(e["intents"])
             for pw in e["powers"]:
                 out.append(_render_power(pw, "    "))
         if you["powers"] or any(e["powers"] for e in c["enemies"]):
@@ -371,6 +417,22 @@ def render(obs: dict[str, Any]) -> str:
                 out += ["", "Nothing on this screen is picked yet."]
             elif obs["can_confirm"]:
                 out += ["", SELECTION_NOTE]
+            # `EB-342`: WHAT THE SMITH IS NOT OFFERING, and why. The grid holds
+            # the cards the game will upgrade; the deck is not on this screen's
+            # feed at all, so the subtraction is against the deck this page
+            # printed for itself in the last fight -- and it says so, because a
+            # card drafted since that fight is in neither half of it.
+            if obs.get("omitted"):
+                out += ["", "## Not on this list, and why", ""]
+                out += [f"- **{o['title']}** — {o['reason']}"
+                        for o in obs["omitted"]]
+                floor = obs.get("deck_floor")
+                out += ["", "*This page has no deck on this screen's data "
+                           "feed: the list above is your deck as it stood in "
+                           "the last fight"
+                        + (f" (floor {floor})" if floor else "")
+                        + ", minus the cards the screen is offering. Anything "
+                          "you have picked up since is in neither list.*"]
             out += ["", f"Confirm is {'available' if obs['can_confirm'] else 'not available'}."]
         # `EB-314`: over an open preview `skip` does not leave the screen --
         # it cancels the pick and puts the grid back (`ExecuteCancelSelection`
@@ -425,6 +487,16 @@ def render(obs: dict[str, Any]) -> str:
             out += [obs["message"], ""]
         out += (_render_options(obs["items"]) if obs["items"]
                 else ["- (nothing here to take)"])
+        # `EB-341`: said on the screen where the claim is made, and only where
+        # a potion is actually on offer -- a run with a free slot reads
+        # exactly as it always did.
+        if obs.get("potion_offered") and obs.get("potion_slots") \
+                and obs["potions_held"] >= obs["potion_slots"]:
+            out += ["", f"*Your potion slots are full: "
+                        f"{obs['potions_held']} of {obs['potion_slots']}. A "
+                        f"potion claimed now has nowhere to go, and the game "
+                        f"says nothing when one is dropped -- so this page "
+                        f"will not claim it until a slot is free.*"]
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
 

@@ -60,9 +60,9 @@ public sealed class SparksNSplashPower : PowerModel, ILocalizationProvider
     {
         ("title", "Sparks 'n' Splash"),
         ("description",
-            "At the end of your turn, deal "
-          + "5 damage to a random enemy 4 times, applying [gold]Pyro[/gold]. "
-          + "Lasts {Amount} more turn{Amount:plural:|s}."),
+            "At the end of your turn, deal [blue]5[/blue] damage to a random "
+          + "enemy 4 times, applying [gold]Pyro[/gold]. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -50,7 +50,7 @@ public sealed class ProtoKkSangoIsshin : CustomCardModel, IElementalCard, IChara
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Sango Isshin (proto)"),
+        ("title", "Sango Isshin"),
         ("description", "Deal 8 damage. If the [gold]Bake-Kurage[/gold] carried out a [gold]Plan[/gold] this turn, deal a quarter of your Max HP to ALL enemies instead."),
     };
 

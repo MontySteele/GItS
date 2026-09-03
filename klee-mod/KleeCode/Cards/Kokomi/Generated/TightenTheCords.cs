@@ -41,7 +41,7 @@ public sealed class TightenTheCords : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tighten the Cords"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If 3 or more cards are [gold]Exhausted[/gold]: at the start of your turn, gain 1 Block."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If 3 or more cards are [gold]Exhausted[/gold]: at the start of your turn, gain 1 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -67,7 +67,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
         new List<DynamicVar>
         {
             new DamageVar(6m, ValueProp.Move),
-            new DynamicVar("PlanDamage", 10m)
+            new KokomiPlan.PlanDamageVar(10m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

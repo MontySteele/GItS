@@ -373,8 +373,8 @@ def test_the_prototypes_face_prints_the_choice_as_ordinary_text():
     """
     src = _deep_breath_cs()
     assert ('("description", "Choose one: Gain 1 [gold]Energy[/gold] and 2 '
-            '[gold]Encore[/gold] | Spend 3 [gold]Encore[/gold]: draw 3."),'
-            ) in src
+            '[gold]Encore[/gold] | Spend 3 [gold]Encore[/gold]: draw 3 '
+            'cards."),') in src
     assert "KleeKeywords" not in src
 
 

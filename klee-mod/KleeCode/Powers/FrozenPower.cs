@@ -33,9 +33,16 @@ public sealed class FrozenPower : PowerModel, ILocalizationProvider
     {
         ("title", "Frozen"),
         ("description",
-            "This creature's next action deals 50% less damage. "
-          + "The first Attack that hits it Shatters for unblockable damage "
-          + "and removes Frozen."),
+            // `EB-345` / R249. The badge names the Shatter number instead of
+            // calling it "unblockable damage" and leaving the player to
+            // guess it, the same discipline the tips keep -- and it is the
+            // one the tip beside it already prints
+            // (`KLEEMOD-FROZEN_PREVIEW`). "and removes Frozen" is a RULE, so
+            // it stays: the packet's shorter form dropped it and the
+            // sentence fits with it kept.
+            "Its next action deals 50% less damage. The first Attack to hit "
+          + $"it Shatters for [blue]{ReactionConstants.ShatterDamage}[/blue] "
+          + "unblockable damage and removes Frozen."),
     };
 
     public override PowerType Type => PowerType.Debuff;

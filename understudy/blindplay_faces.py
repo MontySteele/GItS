@@ -13,8 +13,11 @@ their resets and are beside them.
 """
 from __future__ import annotations
 
+import json
+import os
 import re
 from dataclasses import field
+from pathlib import Path
 from typing import Any
 
 from understudy import qa_packet
@@ -251,6 +254,31 @@ _OPTION_KIND_KEYS = ("type", "kind", "room_type", "category")
 EMPTY_SHELF = "(this shelf is empty)"
 
 
+# `EB-341`. THE SHELF SAID WHAT IT WAS ONLY ONCE IT COULD NOT BE BOUGHT.
+#
+# `Fysh Oil` printed as `**Fysh Oil** -- 74 gold / Gain 1 Strength and 1
+# Dexterity`, in the identical format used by `Vambrace`, `Stone Calendar` and
+# `Royal Stamp` one line above -- a bare name, a price and an effect. The r7b
+# act-3 seat bought it as a permanent Strength relic, which in that deck is the
+# best 74 gold in the act. It is a potion, and the ONLY disclosure was the
+# sold-out line: `**Potion** -- 74 gold (not available)`. "The screen is
+# scrupulous about what it cannot tell you and careless about what it can."
+#
+# `category` is on every shelf row (`BuildShopState`: `card`, `relic`,
+# `potion`, `card_removal`) and is the one field that separates them. It goes
+# where the card TYPE already went, in front of it, because a card shelf wants
+# both -- `card (skill)` -- and a relic or potion shelf has only the one. The
+# category is dropped where it merely repeats the shelf's own printed name, so
+# the removal shelf does not read `Card Removal -- card removal`.
+def _shelf_kind(entry: dict[str, Any], name: str) -> str:
+    """`card (skill)` / `relic` / `potion`, or the card type alone. `EB-341`."""
+    kind = _text(entry.get("card_type")).lower()
+    category = _text(entry.get("category")).replace("_", " ").lower().strip()
+    if not category or _fold(name) == _fold(category):
+        return kind
+    return f"{category} ({kind})" if kind else category
+
+
 def _named_option(entry: Any) -> dict[str, Any]:
     """One printed option -- a rest choice, a reward, a relic, a menu button.
 
@@ -337,7 +365,8 @@ def _named_option(entry: Any) -> dict[str, Any]:
         # `BuildShopState`) and which a HAND line has always printed. The r1
         # Opus seat bought two cards "without knowing what they cost to
         # play"; a shelf reads the way a hand line does now.
-        "kind": _text(entry.get("card_type")).lower(),
+        # `EB-341`: with the shelf's CATEGORY in front of it.
+        "kind": _shelf_kind(entry, name),
         "note": note,
         # What the row says INSTEAD of a price when it cannot be taken. Empty
         # means the default, `(not available)`; `_shop_options` sets `sold`
@@ -448,6 +477,148 @@ def _shop_options(state: dict[str, Any]) -> list[dict[str, Any]]:
                           "are what this page printed for the same shelf "
                           "before the purchase -- not what the feed says now.")
     return options
+
+
+# `EB-342`. THE SMITH OMITS CARDS AND SAYS NOTHING.
+#
+# The r7b act-3 seat's upgrade screen listed 25 cards against a deck of 35 or
+# 36. Eight of the missing were already upgraded, "which is obviously right";
+# the rest -- `Powder Charge`, `Shinobu -- Sanctifying Ring (proto)` -- were
+# neither upgraded nor listed, and no line explained the absence. "On a screen
+# that is otherwise the most scrupulous in the bridge, a silent omission is
+# conspicuous."
+#
+# THE DECK IS NOT ON THE WIRE OUTSIDE COMBAT. `BuildPlayerState` sends the four
+# PILES, and a selection screen is not a combat, so nothing on the upgrade
+# screen's own feed can name a card that is not in its grid --
+# `deckwatch.py`'s opening paragraph is the same finding from the policy side.
+# What this page HAS is the same thing it has for a sold shop shelf: it printed
+# the board itself, one screen earlier. So the deck is remembered off the last
+# COMBAT the page rendered -- hand plus draw plus discard plus exhaust, which
+# inside a fight IS the deck -- and the upgrade screen subtracts its grid from
+# it. The staleness is real and the page says it out loud rather than papering
+# over it: a card drafted since that fight is not in the memory.
+#
+# ROUND 1 IS THE AUTHORITATIVE READ, for `deckwatch.record`'s reason: at round
+# one every card is in hand or draw, so the union is exactly the deck and it is
+# the only reading that can observe a REMOVAL. A later round can lose cards to
+# an exhaust-and-clear or to a torn-down pile, so it is taken only when it is
+# BIGGER than what is already held -- without that, the union read at a victory
+# screen replaces the real deck with three cards.
+_DECK_PILES = ("hand", "draw_pile", "discard_pile", "exhaust_pile")
+
+# ON DISK, and that is not a convenience -- it is what makes the row's answer
+# reachable at all. A blind seat drives this tool as `python -m
+# understudy.blindplay observe` and `... act "<command>"`, one PROCESS PER
+# CALL, so an in-memory note taken during a fight is gone before the Smith's
+# screen is rendered. `deckwatch.py` keeps its own snapshot in this same
+# directory for the same reason and under the same staleness caveat; this is
+# a second store rather than a read of that one because that one keeps IDS for
+# a draft policy and this needs the PRINTED FACE.
+#
+# PER LANE. Two seats play beside each other on `GITS_LANE=1` and `=2`, and one
+# lane's deck answering the other's Smith screen would be worse than no answer.
+# The variable is read raw and scrubbed to a filename rather than resolved
+# through `instances`, which this module does not import.
+_DECK_STORE_DIR = Path(__file__).resolve().parent / "logs"
+_DECK_MEMORY: dict[str, Any] = {}
+
+
+def _deck_store() -> Path:
+    lane = re.sub(r"[^A-Za-z0-9]", "", os.environ.get("GITS_LANE", "")) or "0"
+    return _DECK_STORE_DIR / f"_blindplay-deck-lane{lane}.json"
+
+
+def _held_deck() -> dict[str, Any]:
+    """Whatever is in the store, as a row. `{}` when there is nothing to read.
+
+    The in-process copy is a cache over it and never an alternative to it: a
+    session that renders every screen in one process and a seat that spawns a
+    process per call have to see the same deck.
+    """
+    store = _deck_store()
+    try:
+        held = json.loads(store.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        held = _DECK_MEMORY
+    return held if isinstance(held, dict) and held.get("cards") else {}
+
+
+def forget_deck() -> None:
+    """Drop the remembered deck. The operator's reset, and the tests'."""
+    _DECK_MEMORY.clear()
+    store = _deck_store()
+    try:
+        store.unlink()
+    except OSError:
+        pass
+
+
+def remember_deck(state: dict[str, Any]) -> None:
+    """Snapshot the deck from a COMBAT state's four piles (`EB-342`).
+
+    ROUND 1 IS THE AUTHORITATIVE READ, for `deckwatch.record`'s reason: at
+    round one every card is in hand or draw, so the union is exactly the deck
+    and it is the only reading that can observe a REMOVAL. A later round can
+    lose cards to an exhaust-and-clear or to a pile the game has already torn
+    down, so it is taken only when it is BIGGER than what is held -- without
+    that, the union read at a victory screen replaces a 13-card deck with 3.
+    A board belonging to a DIFFERENT character is a different run and simply
+    replaces what is held.
+    """
+    player = _blob(state, "player")
+    if not any(isinstance(player.get(p), list) for p in _DECK_PILES):
+        return
+    cards: list[dict[str, Any]] = []
+    for pile in _DECK_PILES:
+        for entry in player.get(pile) or []:
+            if isinstance(entry, dict) and _text(entry.get("name")):
+                cards.append({"title": _text(entry.get("name")),
+                              "key": qa_packet.card_key(entry.get("id")),
+                              "upgraded": bool(entry.get("is_upgraded")
+                                               or entry.get("upgraded"))})
+    if not cards:
+        return
+    held = _held_deck()
+    same_run = _fold(held.get("character")) == _fold(player.get("character"))
+    if same_run and _int(_blob(state, "battle").get("round")) != 1             and len(cards) <= len(held.get("cards") or []):
+        return
+    row = {"cards": cards,
+           "character": _text(player.get("character")),
+           "act": _int(_blob(state, "run").get("act")),
+           "floor": _int(_blob(state, "run").get("floor"))}
+    _DECK_MEMORY.clear()
+    _DECK_MEMORY.update(row)
+    try:
+        _DECK_STORE_DIR.mkdir(parents=True, exist_ok=True)
+        _deck_store().write_text(json.dumps(row), encoding="utf-8")
+    except OSError:
+        pass                       # a read-only tree still gets the in-process copy
+
+
+def remembered_deck(state: dict[str, Any]) -> dict[str, Any]:
+    """The deck this page last read, IF it is about the run on `state`.
+
+    Two guards, and both of them refuse rather than guess. The CHARACTER has
+    to match the board in hand -- a deck remembered from another run, or from
+    the other lane's game, is not this player's. And the FLOOR may not have
+    gone backwards: a run only ever climbs, so a screen below the floor the
+    deck was read on belongs to a run that started since.
+
+    Returns `{}` where nothing applies, which is what a fresh session, a
+    changed character and a first fight all look like -- and the caller prints
+    nothing at all rather than an empty list of omissions.
+    """
+    held = _held_deck()
+    if not held:
+        return {}
+    if _fold(held.get("character")) != _fold(_blob(state, "player")
+                                             .get("character")):
+        return {}
+    floor, here = _int(held.get("floor")), _int(_blob(state, "run").get("floor"))
+    if floor and here and here < floor:
+        return {}
+    return {"cards": [dict(c) for c in held["cards"]], "floor": floor}
 
 
 def _number_faces(faces: list[dict[str, Any]], field: str
@@ -658,12 +829,22 @@ def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
     to both.
     """
     out = qa_packet._powers(blob)
-    kinds = [_text(row.get("type"))
-             for row in (blob.get("status") or [])
-             if isinstance(row, dict)
-             and (_text(row.get("title")) or _label(row.get("name")))]
-    for power, kind in zip(out, kinds):
+    rows = [row for row in (blob.get("status") or [])
+            if isinstance(row, dict)
+            and (_text(row.get("title")) or _label(row.get("name")))]
+    for power, row in zip(out, rows):
+        kind = _text(row.get("type"))
         power["kind"] = "aura" if _is_aura(power["name"]) else kind
+        # `EB-340`: the tips the wire hangs on the status row, carried through
+        # so the glossary can define a word an enemy's buff line announced.
+        # `Galvanic 6 -- Powers are afflicted with Galvanized` reached a blind
+        # seat with `Galvanized` defined nowhere, on the turn whose whole
+        # decision was whether to play a Power. Same shape as a card face's
+        # `keywords`, read the same way, and absent where the feed sends none.
+        power["keywords"] = [
+            {"name": _text(k.get("name")), "text": _text(k.get("description"))}
+            for k in (row.get("keywords") or [])
+            if isinstance(k, dict) and _text(k.get("name"))]
     return out
 
 
@@ -704,6 +885,28 @@ def _intent(blob: Any) -> dict[str, str]:
     row = blob[0] if isinstance(blob, list) and blob else blob
     out["type"] = _text(row.get("type")) if isinstance(row, dict) else ""
     return out
+
+
+# `EB-342`. A TELEGRAPH IS A LIST AND THE PAGE PRINTED ITS FIRST ROW.
+#
+# `BuildEnemyState` walks `moveState.Intents` and sends `intents` as a LIST --
+# one entry per component of the move -- and `qa_packet._intent` takes
+# `blob[0]` and drops the rest, which is right for the staged packet's one-line
+# telegraph and wrong for a page a tester plans a turn on. The r7b act-3 seat
+# read `Aggressive (Attack) -- the number on its icon is 8 -- This enemy
+# intends to Attack for 8 damage`, and the round that followed opened with FOUR
+# `Burn`s in hand, 8 more HP a turn, at 18/56, in the fight that ended the run.
+# The bridge already has the vocabulary for the second half -- seat 3 was shown
+# `Strategic (StatusCard)` on another enemy -- so the components existed and
+# the page was printing one of them.
+#
+# Every component, in the order the move declares them. A single-component move
+# renders exactly as it always did: one row, one line, unchanged.
+def _intents(blob: Any) -> list[dict[str, str]]:
+    """Every component of one telegraph, in the move's own order (`EB-342`)."""
+    rows = blob if isinstance(blob, list) else [blob]
+    out = [_intent(row) for row in rows if isinstance(row, dict)]
+    return out or [_intent(None)]
 
 
 def _shop_items(state: dict[str, Any]) -> list[dict[str, Any]]:
