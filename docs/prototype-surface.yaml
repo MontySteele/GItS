@@ -1114,3 +1114,16 @@
    cost: 1, type: skill, exhaust: true,
    description: "For 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_tamoto, amount: 3, target: self}]}
+
+# Kokomi's Personal, PR: gorou-personal
+# THE INAZUMA WORKSHOP'S ONE PERSONAL (R236 sec.3 Gorou). Not a Universal and
+# not in `C.INAZUMA_OVERHAUL_POOL_IDS`; reasoning in docs/notes/.
+- {id: proto_mi_gorou_crystal_collapse, name: "Gorou — Crystal Collapse", character: kokomi,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
+   personal_pool: kokomi, art_of: proto_mi_gorou_juuga,
+   cost: 1, type: skill,
+   description: "[gold]Plan[/gold]: play a copy of the last other [gold]Companion[/gold] card you played this turn.",
+   effects: [],
+   plan: [{op: play_copy_of_companion}],
+   upgrade: {cost: -1}}

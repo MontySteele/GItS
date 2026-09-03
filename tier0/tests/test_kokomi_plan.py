@@ -73,7 +73,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     planned = [c for c in loader.prototype_cards() if c.plan]
     # FIFTEEN since 2026-09-02: Sango Isshin traded its Plan line for a
     # condition on one ([USER]: "this requires absolutely 0 setup or combo").
-    assert len(planned) == 15
+    # SIXTEEN with R236's Gorou Personal, the first Plan line on a COMPANION
+    # row -- the shape check is the row's owner's, not the row's kind's.
+    assert len(planned) == 16
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -999,3 +1001,136 @@ def test_the_upgraded_plan_is_what_the_jellyfish_carries_out(overhaul,
     kokomi_plan.schedule(st, card)
     kokomi_plan.resolve_all(st)
     assert target.hp == 60 - 15
+
+
+# --- 6b. CRYSTAL COLLAPSE: the Plan that HOLDS a card (R236) ---------------
+#
+# `proto_mi_gorou_crystal_collapse`, the Inazuma workshop's one Personal:
+# "Plan: play a copy of the last other Companion card you played this turn."
+# The capture happens when the Plan is WRITTEN and the copy is played at the
+# morning, which is the whole shape of the card -- so the two halves are
+# pinned separately below.
+
+
+def a_companion(cid, name, damage=6):
+    """A Companion card that hits, so a copy of it is visible in the HP."""
+    return Card(id=cid, name=name, cost=1, type="attack", role_c="applier",
+                effects=[{"op": "damage", "amount": damage,
+                          "target": "enemy"}])
+
+
+def crystal_collapse():
+    return Card(id="proto_mi_gorou_crystal_collapse",
+                name="Gorou — Crystal Collapse", cost=1, type="skill",
+                role_c="trigger",
+                plan=[{"op": kokomi_plan.PLAY_COPY_OF_COMPANION}])
+
+
+def play_companions(state, cards):
+    """`combat._finish_play`'s half of a Companion play, which is where the
+    arm records one -- and it runs BEFORE the card's body, which is why the
+    card writing the Plan is already on the list when it asks."""
+    for card in cards:
+        kokomi_plan.note_companion_played(state, card)
+
+
+def test_crystal_collapse_captures_the_last_other_companion(overhaul):
+    """"The last OTHER Companion card", and the word other is load-bearing:
+    `combat._finish_play` records the play before the body resolves, so this
+    card is already the last one on the list when its own Plan is written."""
+    st = kokomi_state(enemies=[make_enemy(hp=40)])
+    first = a_companion("proto_mi_a", "Gorou — Inuzaka")
+    second = a_companion("proto_mi_b", "Gorou — Juuga")
+    card = crystal_collapse()
+    play_companions(st, [first, second, card])
+    kokomi_plan.schedule(st, card)
+    entry = st.kk_plan_queue[0]
+    assert entry.card is second
+    assert entry.label == "Crystal Collapse: Gorou — Juuga"
+
+
+def test_a_non_companion_play_is_not_what_it_catches(overhaul):
+    """The face says Companion card, so an ordinary Skill played after one
+    does not move what the Plan will hold."""
+    st = kokomi_state(enemies=[make_enemy(hp=40)])
+    comp = a_companion("proto_mi_a", "Gorou — Juuga")
+    plain = Card(id="proto_kk_plain", name="plain", cost=1, type="skill")
+    card = crystal_collapse()
+    play_companions(st, [comp, plain, card])
+    kokomi_plan.schedule(st, card)
+    assert st.kk_plan_queue[0].card is comp
+
+
+def test_a_turn_with_no_other_companion_writes_an_empty_plan(overhaul):
+    """THE EMPTY CASE IS WRITTEN DOWN, not refused: the face says what it does
+    with nothing, and a Plan that silently declined to queue would make the
+    strip lie about the queue's depth."""
+    st = kokomi_state(enemies=[make_enemy(hp=40)])
+    card = crystal_collapse()
+    play_companions(st, [card])
+    kokomi_plan.schedule(st, card)
+    entry = st.kk_plan_queue[0]
+    assert entry.card is None
+    assert entry.label == "Crystal Collapse: nothing"
+    kokomi_plan.resolve_all(st)
+    assert counts(st)["plan_copy_empty"] == 1
+    assert counts(st)["plan_copy"] == 0
+    assert st.enemies[0].hp == 40
+
+
+def test_the_morning_plays_a_free_copy_and_keeps_the_original(overhaul):
+    """A COPY, which is the difference from Moon's Reflection's replay: the
+    card it caught stays where the first play sent it, and the copy is
+    exhausted after so the deck is not one card longer either."""
+    enemy = make_enemy(hp=40)
+    st = kokomi_state(enemies=[enemy])
+    caught = a_companion("proto_mi_b", "Gorou — Juuga")
+    st.player.discard_pile = [caught]
+    card = crystal_collapse()
+    play_companions(st, [caught, card])
+    kokomi_plan.schedule(st, card)
+    kokomi_plan.resolve_all(st)
+    assert enemy.hp == 34                       # the copy hit for its 6
+    assert caught in st.player.discard_pile     # the original never moved
+    copies = [c for c in st.player.exhaust_pile if c.id == "proto_mi_b"]
+    assert len(copies) == 1
+    assert copies[0] is not caught
+
+
+def test_the_copy_is_doubled_by_nereids_ascension(overhaul):
+    """Nereid's window carries out every Plan twice, and this Plan is not
+    special: two carry-outs, two copies, two hits."""
+    enemy = make_enemy(hp=40)
+    st = kokomi_state(enemies=[enemy])
+    caught = a_companion("proto_mi_b", "Gorou — Juuga")
+    card = crystal_collapse()
+    play_companions(st, [caught, card])
+    kokomi_plan.schedule(st, card)
+    powers.apply_power(st, st.player, kokomi_plan.PLAN_TWICE, 2)
+    kokomi_plan.resolve_all(st)
+    assert enemy.hp == 28
+    assert counts(st)["plan_copy"] == 2
+
+
+def test_nothing_is_recorded_or_planned_with_the_flag_off():
+    """The arm's own gate, and it is the whole file's rule one card over: with
+    `C.KOKOMI_OVERHAUL` off the recorder records nothing and the Plan is never
+    written, so the row cannot be reached at all."""
+    st = kokomi_state(enemies=[make_enemy(hp=40)])
+    caught = a_companion("proto_mi_b", "Gorou — Juuga")
+    card = crystal_collapse()
+    play_companions(st, [caught, card])
+    kokomi_plan.schedule(st, card)
+    assert st.kk_companions_this_turn == []
+    assert st.kk_plan_queue == []
+
+
+def test_the_memory_is_cleared_at_the_turn_boundary(overhaul):
+    """"This turn" is cleared rather than handed over, unlike the Companion
+    COUNT beside it: the capture already happened when the Plan was written,
+    so what survives the boundary is the card on the entry."""
+    st = kokomi_state()
+    play_companions(st, [a_companion("proto_mi_b", "Gorou — Juuga")])
+    assert st.kk_companions_this_turn
+    kokomi_plan.roll_turn(st)
+    assert st.kk_companions_this_turn == []

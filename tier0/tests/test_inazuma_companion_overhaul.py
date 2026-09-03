@@ -153,10 +153,21 @@ def test_all_twenty_four_are_offerable_and_the_shipped_fifteen_are_not(overhaul)
 
 
 def test_the_pool_ids_and_the_sheet_agree(overhaul):
+    """Every `proto_mi_` row is on exactly one of the arm's two lists.
+
+    TWO LISTS SINCE R236, and the split is the point: the twenty-four
+    Universals are the pool any character may be offered from, and the one
+    Personal is Kokomi's kit. A row on the sheet and on neither list could
+    not be offered at all; a row on a list and not on the sheet does not
+    exist."""
     on_sheet = {c.id for c in loader.prototype_cards()
                 if c.id.startswith("proto_mi_")}
-    assert on_sheet == set(C.INAZUMA_OVERHAUL_POOL_IDS)
+    assert on_sheet == (set(C.INAZUMA_OVERHAUL_POOL_IDS)
+                        | set(C.INAZUMA_OVERHAUL_PERSONAL_IDS))
+    assert not (set(C.INAZUMA_OVERHAUL_POOL_IDS)
+                & set(C.INAZUMA_OVERHAUL_PERSONAL_IDS))
     assert len(C.INAZUMA_OVERHAUL_POOL_IDS) == 24
+    assert len(C.INAZUMA_OVERHAUL_PERSONAL_IDS) == 1
 
 
 def test_the_rarity_split_is_the_workshops_enumeration(overhaul):

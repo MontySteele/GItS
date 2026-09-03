@@ -69,6 +69,7 @@ internal static class CompanionOverhaulRoster
             .Where(c => !Nations.Contains((c as ICompanionCard)?.Nation))
             .Concat(Universals())
             .Concat(InazumaUniversals())
+            .Concat(InazumaPersonals())
             .ToList();
 
     /// <summary>
@@ -177,5 +178,26 @@ internal static class CompanionOverhaulRoster
         ModelDb.Card<ProtoMiKiraraSurpriseDispatch>(),
         ModelDb.Card<ProtoMiMizukiAnraku>(),
         ModelDb.Card<ProtoMiChioriHasode>(),
+    };
+
+    /// <summary>
+    /// The Inazuma workshop's ONE Personal (R236, its sec.3 Gorou), and it is
+    /// a separate list because it is a different kind of row.
+    ///
+    /// A PERSONAL IS IN THE ROSTER AND NOT IN THE POOL. The roster is what an
+    /// offer surface may SEE; which of those rows a given character may be
+    /// OFFERED is <see cref="CompanionPool"/>'s question, and it already
+    /// answers it -- a row's <c>PersonalPool</c> gates it to its own character,
+    /// the door Prune has come through since the shipped Mondstadt sheet. A
+    /// Personal left out of the roster entirely could not be offered to its
+    /// own character either, which is why it is here rather than nowhere.
+    ///
+    /// tier0 twin: <c>C.INAZUMA_OVERHAUL_PERSONAL_IDS</c>, added to
+    /// <c>companion_roster_replacement</c> beside the two pool lists and kept
+    /// out of both.
+    /// </summary>
+    private static IEnumerable<CardModel> InazumaPersonals() => new CardModel[]
+    {
+        ModelDb.Card<ProtoMiGorouCrystalCollapse>(),
     };
 }

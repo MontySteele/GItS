@@ -468,6 +468,14 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "plan_twice": [_hook("private", "kurage", "write")],
     "damage_per_companion_last_turn": [
         _hook("shared", "plays_this_turn", "read")],
+    # Crystal Collapse (R236) READS the same shared play stream the count above
+    # reads -- "the last other Companion card you played this turn" -- and then
+    # resolves a card, which is `plays_this_turn` WRITE the way every free play
+    # in this table is. It does not touch the queue: the Plan it rides was
+    # written by the ordinary Plan machinery.
+    "play_copy_of_companion": [
+        _hook("shared", "plays_this_turn", "read"),
+        _hook("shared", "plays_this_turn", "write")],
 }
 
 # Ops whose value arrives at a card the player PICKS, through the pilot's

@@ -5289,6 +5289,11 @@ OPS = {
     # a property of the code.
     "plan_twice": _op_kokomi_plan_only,
     "damage_per_companion_last_turn": _op_kokomi_plan_only,
+    # THREE now, and the third is Crystal Collapse's (R236). Same terms: it is
+    # registered so `loader.prototype_cards` can validate the row's `plan:`
+    # list through the body's own vocabulary check, and it refuses when it is
+    # reached from an `effects:` list.
+    "play_copy_of_companion": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,

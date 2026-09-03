@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Powers;
 
@@ -120,8 +121,33 @@ public sealed class KokomiOverhaulLedger
 
     private int _round = -1;
 
+    /// <summary>
+    /// The last Companion card she played this turn, or null (R236).
+    ///
+    /// Crystal Collapse's whole reading, and it is a CARD rather than a count
+    /// because the Plan plays a copy of it. Written by
+    /// <c>ProtoBakeKuragePower.AfterCardPlayed</c> -- the marker power rule 1
+    /// guarantees is on her -- rather than by The General's Banner's hook
+    /// beside the counter above, because the Banner is a card she may not
+    /// have and a memory that only exists while a Power is out is a memory
+    /// that reads null on most boards.
+    ///
+    /// "OTHER" IS THE CALLER'S. This is the last Companion, full stop; the
+    /// identity test that makes it the last OTHER one lives at the single
+    /// site that reads it (<c>KokomiPlan.Schedule</c>), so the fact and the
+    /// card's reading of it stay separable.
+    /// </summary>
+    public CardModel? LastCompanionPlayedThisTurn { get; private set; }
+
     /// <summary>One Companion play finished.</summary>
     public void NoteCompanionPlayed() => CompanionsPlayedThisTurn++;
+
+    /// <summary>One Companion play finished, and this is the card. Separate
+    /// from the counter above because the two have different writers: the
+    /// counter is The General's Banner's hook and this is the marker
+    /// power's.</summary>
+    public void NoteCompanionCard(CardModel card) =>
+        LastCompanionPlayedThisTurn = card;
 
     /// <summary>
     /// THE ONE ONCE-PER-TURN GATE, and the three powers that cap a payoff at a
@@ -178,6 +204,10 @@ public sealed class KokomiOverhaulLedger
         CompanionsPlayedThisTurn = 0;
         _claimed.Clear();
         PlanCarriedOutThisTurn = false;
+        // CLEARED rather than handed over, unlike the count above: Crystal
+        // Collapse captures while the Plan is WRITTEN, so what survives the
+        // boundary is the card on the entry and never this slot.
+        LastCompanionPlayedThisTurn = null;
         _round = round;
     }
 }

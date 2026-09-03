@@ -741,7 +741,8 @@ KLEE_OVERHAUL_OPS = frozenset((
 KOKOMI_OVERHAUL_OPS = frozenset((
     "mend", "next_companion_discount", "remove_debuff",
     "carry_out_front_plan", "plan_from_exhaust", "damage_quarter_max_hp",
-    "plan_twice", "damage_per_companion_last_turn"))
+    "plan_twice", "damage_per_companion_last_turn",
+    "play_copy_of_companion"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -929,6 +930,22 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # price is therefore exactly the delay it cancels on one neutral Plan,
         # which is the discount's complement and needs no dial of its own.
         return STATIC_AUTOPLAY_VALUE * (1.0 - C.PLAN_DELAY_DISCOUNT)
+    if op == "play_copy_of_companion":
+        # Crystal Collapse (R236): "Plan: play a copy of the last other
+        # Companion card you played this turn." ONE NEUTRAL CARD RESOLVED
+        # WITHOUT BEING PAID FOR, which is `STATIC_AUTOPLAY_VALUE` and the same
+        # price `plan_twice` puts on the extra Plan it buys.
+        #
+        # NO DELAY DISCOUNT APPLIED HERE, unlike `plan_from_exhaust` below: this
+        # is a PLANNED clause, and the `plan:` list already takes the discount
+        # once. Applying it twice would under-credit the card in a direction
+        # nothing measured asked for.
+        #
+        # THE CONDITION IS NOT PRICED DOWN, the single-unit refusal this file
+        # already makes twice (`damage_per_companion_last_turn`, `plan_twice`):
+        # how often a deck has another Companion to catch is a deck fact an
+        # offer screen cannot read, so the neutral estimate is the printed one.
+        return STATIC_AUTOPLAY_VALUE
     if op == "plan_from_exhaust":
         # Moon's Reflection: one card in the exhaust pile contributes its Plan
         # line, or is replayed whole if it has none. Either shape is one
@@ -2272,6 +2289,10 @@ STATIC_OP_PRICING: dict[str, str] = {
                             "cancels (1 - C.PLAN_DELAY_DISCOUNT)",
     "plan_from_exhaust": "`autoplay_from_exhaust`'s price, one turn late: "
                          "STATIC_AUTOPLAY_VALUE x C.PLAN_DELAY_DISCOUNT",
+    "play_copy_of_companion": "STATIC_AUTOPLAY_VALUE, one neutral card "
+                              "resolved free -- a PLANNED clause, so the "
+                              "`plan:` list's delay discount is not applied "
+                              "a second time here",
     "next_companion_discount": "ZERO: it is a `cost_mod` wearing a kit name, "
                                "so it takes cost_mod's rule and cost_mod's "
                                "measured dead dial (STATIC_ENERGY_VALUE)",
