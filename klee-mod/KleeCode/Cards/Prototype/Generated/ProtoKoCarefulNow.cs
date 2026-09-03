@@ -45,7 +45,7 @@ public sealed class ProtoKoCarefulNow : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Careful Now"),
-        ("description", "Gain [gold]Block[/gold] equal to your largest [gold]Bomb[/gold], up to {BombCap:diff()}."),
+        ("description", "Gain [gold]Block[/gold] equal to your largest [gold]Bomb[/gold] when played, up to {BombCap:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

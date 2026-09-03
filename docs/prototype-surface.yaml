@@ -428,7 +428,7 @@
 - {id: proto_ko_careful_now, name: "Careful Now", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, retain: true,
-   description: "Gain [gold]Block[/gold] equal to your largest [gold]Bomb[/gold], up to 10.",
+   description: "Gain [gold]Block[/gold] equal to your largest [gold]Bomb[/gold] when played, up to 10.",
    upgrade: {cap: +3},
    effects: [{op: block_largest_bomb, cap: 10}]}
 

@@ -1571,7 +1571,7 @@ def test_dodoco_covers_upgrade_moves_both_printed_numbers(overhaul):
 
 
 def test_careful_now_blocks_for_the_largest_bomb_and_spends_nothing(overhaul):
-    """Careful Now: "Gain Block equal to your largest Bomb, up to 10."
+    """Careful Now: "Gain Block equal to your largest Bomb when played, up to 10."
 
     THE LARGEST SINGLE CHARGE, BOARD-WIDE (`klee_overhaul.largest_size`, the
     Splash's own reader since R250) -- not the sum, and not one enemy's.
