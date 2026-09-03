@@ -824,9 +824,10 @@ public sealed class KyoukaPower : PowerModel, ILocalizationProvider
         ("title", "Kyouka"),
         ("description",
             "Your Attacks apply [gold]Hydro[/gold] and deal "
-          + $"[blue]{CompanionOverhaulLaw.KyoukaDamage}[/blue] additional damage. "
-          + $"When it ends, deal [blue]{CompanionOverhaulLaw.KyoukaFinale}[/blue] "
-          + "[gold]Hydro[/gold] damage to a random enemy. "
+          + $"[blue]{CompanionOverhaulLaw.KyoukaDamage}[/blue] additional "
+          + "damage, then "
+          + $"[blue]{CompanionOverhaulLaw.KyoukaFinale}[/blue] "
+          + "[gold]Hydro[/gold] damage to a random enemy when it ends. "
           + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
 

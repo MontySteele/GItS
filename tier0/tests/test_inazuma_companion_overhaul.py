@@ -778,6 +778,12 @@ def test_the_two_delayed_finales_say_when_they_land(overhaul):
         face = _proto_face(card_id)
         assert "Then deal" not in face, card_id
         assert f"After 2 turns, deal {finale}" in face, card_id
+        # The window is stated ONCE, by the clause that says when the finale
+        # lands: "For 2 turns" and "After 2 turns" together ran both faces
+        # over the 120-character card ceiling
+        # (`tools/lint_text_conventions.py`), and the second sentence is the
+        # one a reader was missing.
+        assert "For 2 turns" not in face, card_id
 
 
 def test_the_badge_says_when_it_ends_rather_than_then(overhaul):
@@ -790,6 +796,6 @@ def test_the_badge_says_when_it_ends_rather_than_then(overhaul):
     src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
     kyouka = src.split("class KyoukaPower")[1].split("class ")[0]
-    assert "When it ends, deal" in kyouka
+    assert "when it ends" in kyouka
     assert "Then deal" not in kyouka
     assert "{Amount:plural:turn|turns}" in kyouka
