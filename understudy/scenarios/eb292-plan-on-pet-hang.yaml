@@ -104,10 +104,10 @@ steps:
   # ---- the board opened clean, so a later hit is this file's own ----------
   - expect:
       log_lacks: {text: "non-finite"}
-      can_play: {card: "Kurage's Oath (proto)", value: true}
+      can_play: {card: "Kurage's Oath", value: true}
 
   # ---- ONE Plan card on the jellyfish. THIS is the step that broke. -------
-  - play: {card: "Kurage's Oath (proto)", target: "Bake-Kurage"}
+  - play: {card: "Kurage's Oath", target: "Bake-Kurage"}
   - wait: 2
   - expect:
       power: {who: player, name: "Plan", stacks: 1}

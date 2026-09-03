@@ -48,7 +48,7 @@ public sealed class ProtoMcDionaIcyPaws : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Diona — Icy Paws (proto)"),
+        ("title", "Diona — Icy Paws"),
         ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. When this [gold]Block[/gold] absorbs damage, apply [gold]Cryo[/gold] to the attacker."),
     };
 

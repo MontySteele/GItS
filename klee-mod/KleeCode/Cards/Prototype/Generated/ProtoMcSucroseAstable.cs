@@ -55,7 +55,7 @@ public sealed class ProtoMcSucroseAstable : CustomCardModel, ICompanionCard, IHe
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Sucrose — Astable Anemohypostasis (proto)"),
+        ("title", "Sucrose — Astable Anemohypostasis"),
         ("description", "[gold]Swirl[/gold] ALL enemies."),
     };
 

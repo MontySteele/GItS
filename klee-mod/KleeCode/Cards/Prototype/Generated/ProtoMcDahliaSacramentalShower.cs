@@ -48,7 +48,7 @@ public sealed class ProtoMcDahliaSacramentalShower : CustomCardModel, ICompanion
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Dahlia — Sacramental Shower (proto)"),
+        ("title", "Dahlia — Sacramental Shower"),
         ("description", "The next time an enemy attacks you, deal 9 [gold]Hydro[/gold] damage to it first. {IfUpgraded:show:Draw 1 card.|}"),
     };
 

@@ -41,7 +41,7 @@ public sealed class ProtoKoSparksNSplash : CustomCardModel
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Sparks 'n' Splash (proto)"),
+        ("title", "Sparks 'n' Splash"),
         ("description", "At the end of your turn, deal [gold]Pyro[/gold] damage to a random enemy equal to the [gold]Bombs[/gold] on it."),
     };
 
