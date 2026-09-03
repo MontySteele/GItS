@@ -925,42 +925,27 @@ if (-not (Test-Path $venvPython)) {
 # PROMISE that the miss is known and degrades safely, not a way to silence the
 # rule. Checked in both directions below.
 $pckDeferred = @{
-    # Curtain Call consolidation ("Take a Bow", 2026-07-27). Six new
-    # activity-triggered Powers shipped their MECHANICS; the sprint was
-    # explicitly mechanical and carried no art budget, and its art track was
-    # the rehunt for nine renamed cards, not new power sigils.
+    # EMPTY, AND THAT IS A RESULT, NOT A DELETED RULE. This list held seven
+    # entries and now holds none, because every path in it has its art.
     #
-    # Every one degrades to the base-game placeholder through KleePck.Path,
-    # which is the honest render for "no art yet" -- the alternative that R13
-    # exists to forbid is inheriting a sibling's sigil, which reads as
-    # intentional. Wiring the path now rather than later is what makes each
-    # miss a NAMED, logged one instead of a silent fallthrough.
-    'furina/powers/fortissimo_guard.png' =
-        'Curtain Call power, mechanics-only sprint. Block per Salon deploy.'
-    'furina/powers/stagehands.png' =
-        'Curtain Call power, mechanics-only sprint. Block per Salon bow.'
-    # 'furina/powers/stagehands_encore.png' LEFT THIS LIST on 2026-08-30. R231
-    # (Art-debt pick 1) ruled the sigil collision: Ovation Trickle keeps
-    # `Ovations That Ceased`, and the Encore half moves to `Item Festival
-    # Spotlight`, which is applied. The art has landed, so the promise this
-    # entry made is discharged -- and the entry had to go rather than stay,
-    # because S12 checks the list in BOTH directions and a deferred path that
-    # IS in the pck is a failure.
-    'furina/powers/courtroom_drama.png' =
-        'Curtain Call power, mechanics-only sprint. First reaction each turn.'
-    'furina/powers/the_gallery_stirs.png' =
-        'Curtain Call power, mechanics-only sprint. First Encore spend draws.'
-    'furina/powers/quick_change.png' =
-        'Curtain Call power, mechanics-only sprint. First Attack each turn draws.'
-
-    # A7, the last sheet card to reach C# (2026-07-29). Same policy and the
-    # same honest degrade as the six above: the sprint's art budget was the
-    # five missing CARD portraits, which it spent, and a power sigil was never
-    # in it. KleePck.Path returns null until the PNG lands, so this renders
-    # the base-game placeholder rather than borrowing another power's icon.
-    'furina/powers/unheard_confession.png' =
-        'A7 port sprint, card-art budget spent on the five missing portraits. ' +
-        'Block whenever Fanfare changes amount.'
+    # The seven were the Curtain Call consolidation's six power sigils
+    # ("Take a Bow", 2026-07-27 -- activity-triggered Powers that shipped their
+    # MECHANICS on a sprint with no art budget) plus A7's unheard_confession
+    # (2026-07-29, whose art budget went to the five missing CARD portraits).
+    # Each degraded to the base-game placeholder through KleePck.Path, which is
+    # the honest render for "no art yet"; wiring the path early is what made
+    # each miss a NAMED, logged one instead of a silent fallthrough.
+    #
+    # stagehands_encore left on 2026-08-30 (R231 ruled the sigil collision).
+    # The other six -- fortissimo_guard, stagehands, courtroom_drama,
+    # the_gallery_stirs, quick_change and unheard_confession -- left on
+    # 2026-09-02 (EB-65), when each took its shortlist rank 1 under R212(1) and
+    # art_process placed the PNG. An entry had to GO rather than stay in each
+    # case, because S12 below checks this list in BOTH directions and a
+    # deferred path that IS in the pck is a failure.
+    #
+    # The rule itself is untouched and still bites: the next referenced-but-
+    # unmade path fails S12 until someone adds it here WITH a reason.
 }
 
 $stagedContractS12 = Get-ChildItem $StageDir -Filter *.pck.contract.txt -ErrorAction SilentlyContinue |

@@ -668,12 +668,21 @@ class Ledger:
         """The `$pckExclude` patterns build_pck.ps1 filters out of the copy.
 
         A file the build DELIBERATELY leaves out (the cached governing render
-        each still generator caches beside its outputs) is a working file, not
-        a stale output. Read from the script so the two cannot drift.
+        each still generator caches beside its outputs; the two Klee source
+        masters of `EB-158`) is a working file, not a stale output. Read from
+        the script so the two cannot drift.
         """
         globs = []
-        for m in re.finditer(r"\$pckExclude\s*=\s*'([^']+)'", self._text(BUILD_PCK)):
-            globs.append(m.group(1))
+        # TWO SPELLINGS, because the list grew past one entry (`EB-158`): the
+        # original scalar `$pckExclude = '*_cutout.png'` and the array form
+        # `$pckExclude = @('a', 'b')`. Match the right-hand side first, then
+        # take every quoted string out of it -- so a THIRD spelling has to be
+        # taught here rather than silently reading as NO exclusions, which
+        # would report every deliberately-unshipped working file as a
+        # STALE-OUTPUT finding.
+        for m in re.finditer(r"\$pckExclude\s*=\s*(@\([^)]*\)|'[^']*')",
+                             self._text(BUILD_PCK), re.S):
+            globs.extend(re.findall(r"'([^']+)'", m.group(1)))
         return globs
 
     def _review_state(self, key: str) -> str:

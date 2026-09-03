@@ -513,6 +513,22 @@ INAZUMA_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mi_chiori_hasode",
 )
 
+# THE INAZUMA WORKSHOP'S ONE PERSONAL, and it is a SEPARATE list because it is
+# a different kind of row (R236, sec.3 Gorou; the workshop's own sec.4 counts
+# it among the Uncommons and its sec.3 enumerates it apart from the 24).
+#
+# A PERSONAL IS NOT A UNIVERSAL. `INAZUMA_OVERHAUL_POOL_IDS` above is the pool
+# every character may be offered from, and `test_every_row_is_an_inazuma_-
+# universal` asserts `personal_pool is None` of every id on it. Crystal
+# Collapse carries `personal_pool: kokomi`, so it goes in the ROSTER (a
+# Personal that never entered it could not be offered to its own character
+# either) and the offer layer's `personal_pool in (None, character_id)` filter
+# is what keeps it out of anybody else's slot -- the same door Prune has come
+# through since the shipped Mondstadt sheet.
+INAZUMA_OVERHAUL_PERSONAL_IDS: tuple[str, ...] = (
+    "proto_mi_gorou_crystal_collapse",
+)
+
 # The nation this second replacement owns.
 INAZUMA_OVERHAUL_NATION = "inazuma"
 

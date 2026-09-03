@@ -1015,11 +1015,17 @@ class PlanEntry:
                   keeps `Source` for the strip, and for nothing else.
       clauses  -- the whole of what will happen: the row's own `plan:` list,
                   verbatim. NOT a closure and NOT a snapshot of the board.
-      card     -- set for a `replay_exhausted` clause ONLY (Moon's
-                  Reflection's chosen card), the one place a Plan holds an
-                  object instead of a number. It is the instance that was
-                  taken OUT of the exhaust pile, so the replay plays the card
-                  the player chose rather than a fresh copy of its id.
+      card     -- set for a `replay_exhausted` clause (Moon's Reflection's
+                  chosen card) or a `play_copy_of_companion` one (Crystal
+                  Collapse's captured Companion), the one field a Plan uses to
+                  hold an object instead of a number. Moon's Reflection's is
+                  the instance taken OUT of the exhaust pile, so the replay
+                  plays the card the player chose; Crystal Collapse's stays
+                  where it went and a COPY of it is played.
+      label    -- what the strip prints instead of the writing card's name,
+                  and `KokomiPlan.Entry.Label`'s twin. Only a Plan that HOLDS
+                  a card sets one, because only such a Plan means something
+                  different every time it is written.
 
     NO STORED ENEMY, deliberately, and it is the C#'s own reason: a Plan
     written last turn cannot hold a reference to an enemy that may be dead by
@@ -1029,6 +1035,7 @@ class PlanEntry:
     card_id: str
     clauses: list[dict] = field(default_factory=list)
     card: Optional["Card"] = None
+    label: Optional[str] = None
 
 @dataclass
 class CombatState:
@@ -1254,6 +1261,15 @@ class CombatState:
     # of Plans' early one and The Moon Overlooks the Waters' play-time one all
     # count -- they all carry a Plan out. `KokomiOverhaulLedger`'s twin.
     kk_plan_carried_out_this_turn: bool = False
+    # QUARANTINED (C.KOKOMI_OVERHAUL): THE COMPANION CARDS SHE PLAYED THIS
+    # TURN, in play order -- Crystal Collapse's "the last other Companion card
+    # you played this turn". A LIST rather than a single slot, because the
+    # card that reads it has already been recorded by the time it asks (see
+    # `kokomi_plan.last_other_companion`), so "other" needs the one before.
+    # Cleared at the ONE turn boundary this arm has, beside everything else
+    # that means "this turn"; the twin of
+    # `KokomiOverhaulLedger.LastCompanionPlayedThisTurn`.
+    kk_companions_this_turn: list["Card"] = field(default_factory=list)
     # QUARANTINED (C.KLEE_OVERHAUL): RULE 7'S TWO COUNTERS AND THE TWO
     # MEMORIES, the twin of `KleeOverhaulLedger`. Per FIGHT and per SEAT for
     # the reason `kk_plan_queue` above is: tier 0 runs one seat, so the C#'s

@@ -110,6 +110,7 @@
     "proto_mi_ayaka_soumetsu",
     "proto_mi_ayato_kyouka",
     "proto_mi_chiori_hasode",
+    "proto_mi_gorou_crystal_collapse",
     "proto_mi_gorou_inuzaka",
     "proto_mi_gorou_juuga",
     "proto_mi_gorou_war_banner",
@@ -256,6 +257,7 @@
     "proto_mi_ayaka_soumetsu": "klee",
     "proto_mi_ayato_kyouka": "klee",
     "proto_mi_chiori_hasode": "klee",
+    "proto_mi_gorou_crystal_collapse": "kokomi",
     "proto_mi_gorou_inuzaka": "klee",
     "proto_mi_gorou_juuga": "klee",
     "proto_mi_gorou_war_banner": "klee",
@@ -643,6 +645,9 @@
     },
     "proto_mi_chiori_hasode": {
       "power_amount": 1
+    },
+    "proto_mi_gorou_crystal_collapse": {
+      "cost": -1
     },
     "proto_mi_gorou_inuzaka": {
       "damage": 3
