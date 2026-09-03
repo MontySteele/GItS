@@ -41,6 +41,9 @@ class Command:
     verb: str
     names: list[str] = field(default_factory=list)
     raw: str = ""
+    # `EB-341`: `choose 2`, the row's PLACE in the list the page printed.
+    # 0 means the tester named a thing instead, which is every other command.
+    ordinal: int = 0
 
     @property
     def name(self) -> str:
@@ -78,9 +81,29 @@ def parse_command(text: str) -> Command:
             + ", ".join(VERBS))
     if verb in ("play", "go", "buy") and not names:
         raise BlindPlayError(f"`{verb}` needs a name in quotes")
+    # `EB-341`. THE ORDINAL, AND WHY THE GRAMMAR NEEDED A SECOND HANDLE.
+    #
+    # The Future of Potions printed two options titled, character for
+    # character, `Insert Common Potion` -- one losing a Flex Potion, one losing
+    # a Dexterity Potion -- and a grammar that addresses options by title has
+    # no way to say which. The r7b act-2b seat sent the title, was "accepted
+    # with an empty refusal", and inferred which one had been taken from the
+    # rarity of the reward pool afterwards.
+    #
+    # So a printed row may also be named by its PLACE, which is the one handle
+    # every screen has and no screen can print twice. Quoted names still win
+    # wherever the tester gave one; a bare number is only ever read as an
+    # ordinal, because no screen names a row `2`.
+    ordinal = 0
     if verb == "choose" and not names:
-        raise BlindPlayError("`choose` needs a name in quotes")
-    return Command(verb=verb, names=names, raw=raw)
+        m = re.fullmatch(r"choose\s+#?(\d+)", head)
+        if m is None:
+            raise BlindPlayError("`choose` needs a name in quotes, or the "
+                                 "number of a row on the screen (`choose 2`)")
+        ordinal = int(m.group(1))
+        if ordinal < 1:
+            raise BlindPlayError("the rows on a screen are counted from 1")
+    return Command(verb=verb, names=names, raw=raw, ordinal=ordinal)
 
 
 # ------------------------------------------------------------- resolution --
@@ -137,7 +160,8 @@ _STALE_NUMBER = re.compile(r"\s*\((\d+)\)\s*$")
 def _match(entries: list[dict[str, Any]], name: str, *,
            key: Callable[[dict[str, Any]], str],
            face: Callable[[dict[str, Any]], str] | None = None,
-           number: bool = False) -> tuple[int, str]:
+           number: bool = False, ordinal: int = 0,
+           advice: str = "") -> tuple[int, str]:
     """`(index, refusal)` for `name` among `entries`, by PRINTED name only.
 
     Exact fold first, unique substring second. Two entries whose printed FACE
@@ -171,6 +195,18 @@ def _match(entries: list[dict[str, Any]], name: str, *,
     printed = [key(e) for e in entries]
     if number:
         printed = _number_names(printed)
+    # `EB-341`: the ordinal FIRST, because it is the handle a tester reaches
+    # for exactly when the printed names cannot separate two rows. It is the
+    # place in the same list the render printed, counted from 1, and a number
+    # off the end is refused with the count rather than clamped.
+    if ordinal:
+        if 1 <= ordinal <= len(printed):
+            return ordinal - 1, ""
+        return -1, (f"there is no row {ordinal} on this screen; it has "
+                    f"{len(printed)}"
+                    + (": " + ", ".join(f"{i}. {p}"
+                                        for i, p in enumerate(printed, 1) if p)
+                       if printed else ""))
     name, want_upgraded = _split_qualifier(name)
     want = _fold(name)
     if not want:
@@ -246,6 +282,18 @@ def _match(entries: list[dict[str, Any]], name: str, *,
             return -1, (f"{name!r} matches more than one thing on this "
                         f"screen; name one exactly: {', '.join(choices)}"
                         + qualifier)
+        # `EB-341`. ONE PRINTED NAME, TWO ROWS, DIFFERENT BODIES -- and the
+        # old answer was to TAKE THE FIRST, silently: `choices` has collapsed
+        # to one name by here, the upgrade qualifier means nothing on an event
+        # option, and with `face` unset the walk fell through to `hits[0]` at
+        # the bottom of this function. That is what handed a seat `Insert
+        # Common Potion` and never said which. A caller with an ordinal to
+        # advertise refuses instead, and says how to be exact. It sits BELOW
+        # the branch above on purpose: where the printed names still differ,
+        # naming one of them back is better advice than a number.
+        if advice:
+            return -1, (f"{name!r} names more than one row on this screen and "
+                        f"they do different things. {advice}")
         if face is not None:
             # One printed name over different faces, and this caller does not
             # number: the upgrade qualifier is the only handle there is.
@@ -436,6 +484,20 @@ def _use_potion(state: dict[str, Any], cmd: Command) -> Resolution:
     return Resolution(True, "use potion", post, printed)
 
 
+def _card_taken(entries: list[dict[str, Any]], idx: int) -> dict[str, Any]:
+    """The card a `choose` took, printed (`EB-341`).
+
+    The title the page numbered, plus the card's own body where it has one --
+    so the line after a pick names the thing that was added rather than only
+    its name, which is the half a seat was reading off a later screen.
+    """
+    printed: dict[str, Any] = {"card": _numbered_titles(entries)[idx]}
+    body = _card_face(entries[idx])["text"]
+    if body:
+        printed["text"] = body
+    return printed
+
+
 def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
     """`choose` on whichever screen is up. One verb, six wire actions.
 
@@ -447,12 +509,13 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
     if st == "card_reward":
         entries = _screen_cards(state)
         idx, why = _match(entries, cmd.name, key=_card_title,
-                          face=_card_face_key, number=True)
+                          face=_card_face_key, number=True,
+                          ordinal=cmd.ordinal)
         if idx < 0:
             return _refuse(why)
         return Resolution(True, "choose",
                           {"action": "select_card_reward", "card_index": idx},
-                          {"card": _numbered_titles(entries)[idx]})
+                          _card_taken(entries, idx))
     if st in SELECT_SCREENS:
         # `EB-314`. THE PICK IS ALREADY TAKEN. See `PREVIEW_LOCKED`: the five
         # grid screens keep their selection while the preview is up, only the
@@ -463,19 +526,26 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
             return _refuse(PREVIEW_LOCKED)
         entries = _screen_cards(state)
         idx, why = _match(entries, cmd.name, key=_card_title,
-                          face=_card_face_key, number=True)
+                          face=_card_face_key, number=True,
+                          ordinal=cmd.ordinal)
         if idx < 0:
             return _refuse(why)
         verb = "select_card" if st == "card_select" else "combat_select_card"
         key = "index" if st == "card_select" else "card_index"
         return Resolution(True, "choose", {"action": verb, key: idx},
-                          {"card": _numbered_titles(entries)[idx]})
+                          _card_taken(entries, idx))
     if st == "bundle_select":
         # `EB-173`: match on the printed title of any card IN a bundle, the
         # only name this screen has. `_match` is deliberately not reused: its
         # `key` is one string per entry, and a bundle is a set of names.
         entries = _screen_cards(state)
-        idx, why = _match_bundle(entries, cmd.name)
+        if cmd.ordinal:
+            # `EB-341`: a bundle has no name of its own (`EB-173`), so its
+            # place on the screen is the second handle here too.
+            idx, why = _match([{"n": ""} for _ in entries], "",
+                              key=lambda e: e["n"], ordinal=cmd.ordinal)
+        else:
+            idx, why = _match_bundle(entries, cmd.name)
         if idx < 0:
             return _refuse(why)
         return Resolution(True, "choose",
@@ -490,14 +560,62 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
     if st == "rewards":
         # `EB-290`: the same namer and the same numbering the render uses --
         # a page and a grammar that number differently are two screens.
-        return _index_choice(state, cmd, _reward_items(state), "claim_reward",
-                             namer=_reward_option, number=True)
+        res = _index_choice(state, cmd, _reward_items(state), "claim_reward",
+                            namer=_reward_option, number=True)
+        return _full_slots(state, res) or res
     if st == "treasure":
         return _index_choice(state, cmd, _relic_options(state),
                              "claim_treasure_relic")
     if st == "relic_select":
         return _index_choice(state, cmd, _relic_options(state), "select_relic")
     return _refuse("there is nothing to choose on this screen")
+
+
+def _full_slots(state: dict[str, Any], res: Resolution) -> Resolution | None:
+    """Refuse a potion claim the run has no slot for. `None` otherwise.
+
+    `EB-341`. THE POTION THAT VANISHED. The r7b act-3 seat claimed `Fire
+    Potion` off a reward screen; the tool answered `ok Claiming reward: potion
+    (Fire Potion)`; the next combat listed three potions and `Fire Potion` was
+    not among them. Three slots, four potions, "and no line on either screen
+    saying the claim had failed or that a slot was full".
+
+    BOTH NUMBERS ARE ON THE FEED -- `potions` holds the FILLED slots and
+    `max_potion_slots` the count of them (`BuildPlayerState`) -- so the page
+    can say what the game is about to do instead of reporting `ok` for
+    something that did not happen. Refused rather than warned: an accepted
+    claim that drops the potion spends an action and teaches the tester a
+    board that is not there, which is the same defect one screen further on.
+
+    NARROW ON PURPOSE. It fires only on a reward the wire TYPES as a potion,
+    only where the wire sends a slot count at all, and only when the held
+    count has reached it. Every other claim resolves exactly as before.
+    """
+    if not res.ok or not isinstance(res.post, dict):
+        return None
+    index = res.post.get("index")
+    items = _reward_items(state)
+    row = next((r for r in items
+                if isinstance(r, dict) and r.get("index") == index), None)
+    if row is None and isinstance(index, int) and 0 <= index < len(items):
+        row = items[index] if isinstance(items[index], dict) else None
+    if row is None or _fold(row.get("type")) != "potion":
+        return None
+    slots = _int(_player(state).get("max_potion_slots"), 0)
+    held = len(_potions(state))
+    if not slots or held < slots:
+        return None
+    return _refuse(
+        f"your potion slots are full: {held} of {slots}, and this reward is a "
+        f"potion. Use one first, or leave this on the screen -- claiming it "
+        f"now is how a potion disappears with the game saying nothing.")
+
+
+# `EB-341`: what an ambiguous option refusal tells the tester to do instead.
+# One sentence, and it names the handle the page prints beside those very rows.
+ORDINAL_ADVICE = ("Say `choose <number>` for the row you want, counting from "
+                  "the top of the list on this screen; the numbers are "
+                  "printed beside the titles wherever two of them collide.")
 
 
 def _index_choice(state: dict[str, Any], cmd: Command, entries: list[Any],
@@ -516,13 +634,21 @@ def _index_choice(state: dict[str, Any], cmd: Command, entries: list[Any],
     its rows differently resolves them the same way. They are passed by the
     caller that renders that screen and by no other: a caller whose page does
     not number must not number its grammar (`_match`'s own rule).
+
+    `EB-341`: the TEXT rides beside the name into `_match`, so two rows that
+    print one title and do different things are told apart rather than
+    collapsed onto the first -- and `cmd.ordinal` is the way out the refusal
+    then advertises.
     """
     options = [namer(o) for o in entries]
     names = [o["name"] for o in options]
     if number:
         names = _number_names(names)
-    idx, why = _match([{"n": n} for n in names], cmd.name,
-                      key=lambda e: e["n"])
+    rows = [{"n": n, "t": o.get("text") or ""}
+            for n, o in zip(names, options)]
+    idx, why = _match(rows, cmd.name, key=lambda e: e["n"],
+                      face=lambda e: f"{e['n']}|{e['t']}",
+                      ordinal=cmd.ordinal, advice=ORDINAL_ADVICE)
     if idx < 0:
         return _refuse(why)
     if not options[idx]["enabled"]:
@@ -530,10 +656,17 @@ def _index_choice(state: dict[str, Any], cmd: Command, entries: list[Any],
                        f"available to take")
     raw = entries[idx]
     posted = raw.get("index") if isinstance(raw, dict) else None
+    # `EB-341`: the row's own body rides along so the line after the command
+    # can say what the screen said this option does. Present only where the
+    # row HAS a body -- an absent key is the page saying nothing, which is
+    # what a row with no printed text leaves it able to say.
+    printed = {"option": names[idx]}
+    if options[idx].get("text"):
+        printed["text"] = options[idx]["text"]
     return Resolution(True, "choose",
                       {"action": action,
                        "index": posted if isinstance(posted, int) else idx},
-                      {"option": names[idx]})
+                      printed)
 
 
 def _go(state: dict[str, Any], cmd: Command) -> Resolution:
@@ -571,7 +704,23 @@ def _buy(state: dict[str, Any], cmd: Command) -> Resolution:
         return _refuse(f"{options[idx]['name']!r} costs {price} gold and you "
                        f"have {gold}")
     return Resolution(True, "buy", {"action": "shop_purchase", "index": idx},
-                      {"item": options[idx]["name"], "price": price})
+                      _bought(options[idx], price))
+
+
+def _bought(option: dict[str, Any], price: Any) -> dict[str, Any]:
+    """The shelf a `buy` took, printed (`EB-341`).
+
+    Name and gold as before, plus the two fields that answer "what did I just
+    buy" -- the shelf's CATEGORY (`_shelf_kind`: `potion`, `relic`,
+    `card (skill)`) and its body. `Fysh Oil` was bought as a relic because the
+    row printed like the relics beside it; the answer line now says `potion`
+    at the moment of purchase rather than on the sold-out shelf afterwards.
+    """
+    printed: dict[str, Any] = {"item": option["name"], "price": price}
+    for key in ("kind", "text"):
+        if option.get(key):
+            printed[key] = option[key]
+    return printed
 
 
 def _rest_keyword(state: dict[str, Any], cmd: Command,
