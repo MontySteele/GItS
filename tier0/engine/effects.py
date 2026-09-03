@@ -347,6 +347,16 @@ def _runtime_count(state: CombatState, token: str,
         # names. The C# twin reads `CompanionPlays.PlayedThisCombat`, which is
         # deduped by `(Owner, ModelId)` for the same ruling (2026-08-06).
         return len(state.companions_played)
+    if token == "companions_played_this_turn":
+        # QUARANTINED USE ONLY (R250, round-4d sec.6 pick 1): Chain of
+        # Command's now-line, "deal 3 damage for each Companion card you
+        # played this turn" -- the live half beside the Plan clause's
+        # `damage_per_companion_last_turn`. `state.companion_plays_this_turn`
+        # is the same unconditional per-play counter `_finish_play` already
+        # keeps for Blocking Notes and for the Plan line's own morning
+        # handover (`kokomi_plan.roll_turn`), so this reads the one count
+        # rather than minting a second.
+        return state.companion_plays_this_turn
     if token == "swirls_this_turn":
         # Heizou's Heartstopper Strike: "4 more for each Swirl this turn".
         return state.mi_swirls_this_turn
@@ -3430,6 +3440,9 @@ RUNTIME_COUNT_NAMES = frozenset({
     # played (EB-135, the defect this registry exists for).
     "companions_played_this_combat",
     "swirls_this_turn",
+    # QUARANTINED USE ONLY (R250) -- the Kokomi overhaul's Chain of Command,
+    # the now-line twin of the Plan clause's `damage_per_companion_last_turn`.
+    "companions_played_this_turn",
     # QUARANTINED USE ONLY (R213 B) -- the FURINA REFRAME's drain slice. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.

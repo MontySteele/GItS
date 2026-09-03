@@ -2762,6 +2762,7 @@ def blocked_reason(
                 and exhausts_turn_calc_rider(card, effect) is None
                 and player_block_calc_rider(card, effect) is None
                 and companions_played_calc_rider(card, effect) is None
+                and kokomi_companions_this_turn_calc_rider(card, effect) is None
                 and swirls_turn_calc_rider(card, effect) is None
                 and fanfare_drained_calc_rider(card, effect) is None
                 and fanfare_drained_block_rider(card, effect) is None):
@@ -3624,6 +3625,40 @@ def companions_played_calc_rider(card: dict,
             "card.Owner.Creature.CombatState, card.Owner).Count")
 
 
+def kokomi_companions_this_turn_calc_rider(
+        card: dict, eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: companions_played_this_turn}` --
+    Chain of Command's now-line (`R250`, round-4d sec.6 pick 1), "deal 3
+    damage for each Companion card you played this turn". The Plan half of
+    the same card reads `damage_per_companion_last_turn`, whose C# twin is
+    `KokomiOverhaulLedger.CompanionsPlayedLastTurn`; this is the SAME
+    ledger's `CompanionsPlayedThisTurn`, the live half rather than the
+    handed-over one, so a smith cannot move the two counts apart by reading
+    them off two different objects.
+
+    THE COUNT IS PLAYS, NOT CARDS, unlike the per-COMBAT rider above: the
+    ledger counts every Companion play (`EB-362`'s fix moved its writer to
+    the always-on marker power precisely so this stays true off General's
+    Banner), and a replayed Companion is two plays in one turn -- which is
+    the arithmetic the card's own printed "for each ... card you played"
+    already commits to matching the Plan clause it sits beside.
+
+    Same CalculatedDamageVar triple as the riders around it, and the same
+    damage-only restriction: the number moves every turn of the fight, so it
+    cannot be a literal.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict):
+        return None
+    if formula.get("count") != "companions_played_this_turn":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "static (card, _) => KokomiOverhaulLedger.For("
+            "card.Owner.Creature).CompanionsPlayedThisTurn")
+
+
 def swirls_turn_calc_rider(card: dict,
                            eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: swirls_this_turn}` -- Heizou's
@@ -4382,6 +4417,9 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     companions_played = companions_played_calc_rider(card, eff)
     if companions_played is not None:
         return companions_played
+    companions_this_turn = kokomi_companions_this_turn_calc_rider(card, eff)
+    if companions_this_turn is not None:
+        return companions_this_turn
     swirls_turn = swirls_turn_calc_rider(card, eff)
     if swirls_turn is not None:
         return swirls_turn

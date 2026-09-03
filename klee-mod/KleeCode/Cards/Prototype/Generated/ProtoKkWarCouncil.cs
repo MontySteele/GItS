@@ -45,7 +45,7 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "War Council"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage and apply 1 [gold]Weak[/gold] to ALL enemies."),
+        ("description", "Apply 1 [gold]Weak[/gold] to ALL enemies. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage and apply 1 [gold]Weak[/gold] to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -67,13 +67,21 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlanne
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkWarCouncil()
-        : base(1, CardType.Skill, CardRarity.Uncommon, KokomiTargets.PetOnly, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Uncommon, KokomiTargets.PetOrSelf, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            return;
+        }
+        foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())
+        {
+            await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, 1, applier: Owner.Creature, cardSource: this);
+        }
     }
 
     protected override void OnUpgrade()

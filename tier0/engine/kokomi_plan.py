@@ -237,15 +237,24 @@ def live(state: CombatState) -> bool:
 # ---------------------------------------------------------------------------
 
 def front_enemy(state: CombatState) -> Optional[Enemy]:
-    """The front enemy: LEFTMOST ALIVE.
+    """The front enemy: LEFTMOST ALIVE, SKIPPING A MINION (`R250`, round-5
+    sec.6 pick 1 at its default).
 
     `CombatState.living_enemies` preserves `enemies` order, which is encounter
     slot order, so "leftmost" is the first living one and needs no second
     definition -- the same sentence `KokomiPlan.FrontEnemy` writes about
-    `HittableEnemies`.
+    `HittableEnemies`. Two round-5 formations put a Minion-flagged decoy
+    there on purpose (The Kin's Followers, Queen's Torch Head Amalgam), so
+    this reads `is_minion` -- the sim's own mirror of the game's
+    `MinionPower` (state.py, NC-7 alpha) -- rather than inventing a second
+    "secondary enemy" concept. Falls back to the leftmost Minion when the
+    board is Minions alone, because a Plan that lands on nothing is worse
+    than one that lands on the decoy.
     """
     living = state.living_enemies
-    return living[0] if living else None
+    if not living:
+        return None
+    return next((e for e in living if not e.is_minion), living[0])
 
 
 def _aimed(state: CombatState, aim: Optional[str]) -> list[Enemy]:

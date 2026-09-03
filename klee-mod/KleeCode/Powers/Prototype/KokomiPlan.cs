@@ -863,11 +863,34 @@ public static class KokomiPlan
         return null;
     }
 
-    /// <summary>The front enemy: leftmost alive. <c>CombatState.Enemies</c> is
-    /// board order (it is sorted by encounter slot), so "leftmost" is the first
-    /// hittable one and needs no second definition.</summary>
-    public static Creature? FrontEnemy(Creature? kokomi) =>
-        kokomi?.CombatState?.HittableEnemies.FirstOrDefault(e => !e.IsDead);
+    /// <summary>
+    /// The front enemy: leftmost alive, SKIPPING A MINION (`R250`, round-5
+    /// sec.6 pick 1 at its default). <c>CombatState.Enemies</c> is board order
+    /// (it is sorted by encounter slot), so "leftmost" is the first hittable
+    /// one and needs no second definition -- but two round-5 formations put a
+    /// decoy there on purpose: The Kin's Followers absorbed a Feint Plan for
+    /// the Priest, and Queen's Torch Head Amalgam took every single-target
+    /// Plan for a whole fight (round-5 packet sec.2). Both already carry
+    /// <see cref="MinionPower"/>, the base game's own "secondary enemy" mark,
+    /// so this reads it rather than inventing a second one. Falls back to the
+    /// leftmost Minion when the board is Minions alone, because a Plan that
+    /// lands on nothing is worse than one that lands on the decoy.
+    /// </summary>
+    public static Creature? FrontEnemy(Creature? kokomi)
+    {
+        var hittable = kokomi?.CombatState?.HittableEnemies
+            .Where(IsAlive).ToList();
+        if (hittable == null || hittable.Count == 0) return null;
+        return hittable.FirstOrDefault(IsNotMinion) ?? hittable[0];
+    }
+
+    private static bool IsAlive(Creature e) => !e.IsDead;
+
+    /// <summary>Named rather than inline so the Minion read is one call a
+    /// structural pin can see directly, the same reason the base library's
+    /// own predicates are named methods.</summary>
+    private static bool IsNotMinion(Creature e) =>
+        !e.Powers.OfType<MinionPower>().Any();
 
     private static IEnumerable<Creature> Aimed(Creature kokomi, Aim aim)
     {

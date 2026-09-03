@@ -290,12 +290,20 @@ public static class ArmKeywordTips
     /// face also leads with "Play on the Bake-Kurage." (the codegen's
     /// <c>_plan_only_line</c>), and this definition is why some rows carry that
     /// line and others do not.
+    ///
+    /// "NEVER A MINION" IS `R250`, round-5 sec.6 pick 1 at its default. The
+    /// front enemy was leftmost alive, full stop, and two round-5 formations
+    /// put a decoy there on purpose -- The Kin's Followers absorbed a Feint
+    /// Plan meant for the Priest, and Queen's Torch Head Amalgam took every
+    /// single-target Plan for a whole fight (round-5 packet sec.2). The
+    /// sixth clause cost room, so "lands next turn on" compressed to "next
+    /// turn:" -- nothing else in the first four clauses moved.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "On the [gold]Bake-Kurage[/gold], paid now; lands next turn on "
-          + "the front enemy, or ALL if it says so. Enemy "
+            "On the [gold]Bake-Kurage[/gold], paid now; next turn: front "
+          + "enemy, or ALL if it says so; never a Minion. "
           + "[gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] does "
           + "not.");
 
