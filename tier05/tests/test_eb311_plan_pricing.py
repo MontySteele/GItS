@@ -214,17 +214,21 @@ def test_no_prototype_kokomi_row_raises(overhaul):
 
 
 def test_a_plan_only_row_is_no_longer_worth_nothing():
-    """Ambush prints an EMPTY body and "Plan: deal N to the front enemy". It
-    priced at 0.00 -- blank cardboard to the drafter -- and now prices at its
-    planned damage, discounted once for the turn of delay.
+    """A Plan-only row -- EMPTY body, "Plan: deal N to the front enemy" --
+    used to price at 0.00: blank cardboard to the drafter. It now prices at
+    its planned damage, discounted once for the turn of delay.
 
-    THE PRINTED NUMBER IS READ OFF THE ROW rather than typed in, here and in
-    every sheet-derived assertion below. The prototype surface is rebalanced by
-    ruling (R243 moved eleven of these rows the week this landed); a test that
-    hard-codes 12 goes red on a card edit that has nothing to do with the
-    pricing RULE, and the rule is what is being pinned.
+    SYNTHETIC, not a real row: `R250` pick 1 (round-4d sec.6) moved six of the
+    seven Plan-only Kokomi rows onto Feint's two-halved shape (Ambush was this
+    test's row before it), so the surviving real example carries a duration
+    rather than damage. The RULE under test is "an empty now-line still prices
+    its Plan", which is a fact about the pricing function and not about which
+    row happens to have this shape today -- the same argument the sheet
+    rebalance note beside this file already makes about NUMBERS.
     """
-    card = _proto("proto_kk_ambush")
+    card = Card(id="proto_kk_t_plan_only", name="t", cost=1, type="skill",
+                effects=[],
+                plan=[{"op": "damage", "amount": 12, "target": "front_enemy"}])
     assert not card.effects
     planned = card.plan[0]["amount"]
     assert draft._static_power(card) == planned * C.PLAN_DELAY_DISCOUNT
@@ -240,10 +244,29 @@ def test_both_halves_of_a_printed_face_are_counted():
     assert draft._static_power(card) == now + planned * C.PLAN_DELAY_DISCOUNT
 
 
+def test_chain_of_command_sums_its_now_line_and_its_plan():
+    """`R250` pick 1 (round-4d sec.6): Chain of Command gained a now-line
+    priced through `amount_formula`'s neutral one-unit read, beside the Plan
+    line's own `damage_per_companion_last_turn` read -- SUMMED, the same rule
+    `test_both_halves_of_a_printed_face_are_counted` pins for Feint's plain
+    damage, now over the `amount_formula` rail too."""
+    card = _proto("proto_kk_chain_of_command")
+    now = card.effects[0]
+    assert now["op"] == "damage" and "amount_formula" in now
+    now_price = now["amount_formula"]["per"]        # one neutral Companion
+    planned = card.plan[0]["amount"]
+    assert draft._static_power(card) == (
+        now_price + planned * C.PLAN_DELAY_DISCOUNT)
+
+
 def test_a_planned_aoe_line_takes_the_same_aoe_multiple():
-    """Kurage's Oath: damage to ALL enemies, planned. Same per-op prices as the
-    now-line gets -- that is the whole design of the plan branch."""
-    card = _proto("proto_kk_kurages_oath")
+    """A Plan-only AoE line takes the same `STATIC_AOE_MULT` the now-line
+    does -- the whole design of the plan branch. Synthetic for the reason
+    `test_a_plan_only_row_is_no_longer_worth_nothing` gives (Kurage's Oath
+    was this test's row before `R250` pick 1 gave it a now-line too)."""
+    card = Card(id="proto_kk_t_plan_aoe", name="t", cost=1, type="skill",
+                effects=[],
+                plan=[{"op": "damage", "amount": 7, "target": "all_enemies"}])
     clause = card.plan[0]
     assert clause["target"] == "all_enemies"
     assert draft._static_power(card) == (
@@ -370,9 +393,16 @@ def test_the_queue_verbs_price_off_dials_this_table_already_holds():
         draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT / card.cost)
 
 
-def test_chain_of_command_prices_against_one_companion():
-    """The neutral single-unit estimate every live count in the file takes."""
-    card = _proto("proto_kk_chain_of_command")
+def test_damage_per_companion_last_turn_prices_against_one_companion():
+    """The neutral single-unit estimate every live count in the file takes,
+    off `damage_per_companion_last_turn` directly. Synthetic rather than
+    Chain of Command (`test_chain_of_command_sums_its_now_line_and_its_plan`
+    covers the real row): `R250` pick 1 gave it a now-line of its own, whose
+    separate price this test has no business depending on."""
+    card = Card(id="proto_kk_t_per_companion", name="t", cost=1, type="skill",
+                effects=[],
+                plan=[{"op": "damage_per_companion_last_turn", "amount": 6,
+                       "target": "front_enemy"}])
     per_companion = card.plan[0]["amount"]
     assert draft._static_power(card) == (
         per_companion * C.PLAN_DELAY_DISCOUNT / card.cost)

@@ -308,6 +308,45 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
+    public void Rule3_the_front_enemy_skips_a_minion()
+    {
+        // `R250`, round-5 sec.6 pick 1 at its default: The Kin's Followers
+        // absorbed a Feint Plan meant for the Priest, and Queen's Torch Head
+        // Amalgam took every single-target Plan for a whole fight, because
+        // "leftmost alive" used to be the whole rule. Both carry the base
+        // game's MinionPower, so FrontEnemy now reads it -- a structural pin,
+        // since the headless boundary has no HittableEnemies to enumerate.
+        var front = typeof(KokomiPlan)
+            .GetMethod("FrontEnemy", HeadlessGame.All)!;
+        Assert.Contains("KokomiPlan.IsNotMinion", Il.Calls(front));
+
+        var isNotMinion = typeof(KokomiPlan)
+            .GetMethod("IsNotMinion", HeadlessGame.All)!;
+        Assert.Contains(
+            Il.CallSequence(isNotMinion), c => c.Contains("MinionPower"));
+    }
+
+    [Fact]
+    public void EB362_the_companion_counter_moved_off_the_banner()
+    {
+        // The counter used to be written ONLY by The General's Banner's own
+        // AfterCardPlayed -- a card she may never draw -- so Chain of
+        // Command's "for each Companion card you played last/this turn" read
+        // a permanent zero on any board without it (round-5 run 3, act 3,
+        // finding 7; the seat had declined the Banner outright). It now lives
+        // on the marker power rule 1 guarantees is on her every turn.
+        var marker = typeof(ProtoBakeKuragePower)
+            .GetMethod("AfterCardPlayed", HeadlessGame.All)!;
+        Assert.Contains("KokomiOverhaulLedger.NoteCompanionPlayed", Il.Calls(marker));
+        Assert.Contains("KokomiOverhaulLedger.NoteCompanionCard", Il.Calls(marker));
+
+        var banner = typeof(GeneralsBannerPower)
+            .GetMethod("AfterCardPlayed", HeadlessGame.All)!;
+        Assert.DoesNotContain(
+            "KokomiOverhaulLedger.NoteCompanionPlayed", Il.Calls(banner));
+    }
+
+    [Fact]
     public void The_moon_overlooks_the_waters_resolves_a_plan_now_as_well()
     {
         // "ALSO happen now" taken at its word: the Plan happens now AND is

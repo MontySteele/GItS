@@ -45,7 +45,7 @@ public sealed class ProtoKkChainOfCommand : CustomCardModel, ICharacterCard, IPl
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chain of Command"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage for each [gold]Companion[/gold] card you played last turn."),
+        ("description", "Deal 3 damage for each [gold]Companion[/gold] you played this turn. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage for each [gold]Companion[/gold] you played last turn."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,19 +60,32 @@ public sealed class ProtoKkChainOfCommand : CustomCardModel, ICharacterCard, IPl
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new CalculationBaseVar(0m),
+            new ExtraDamageVar(3m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).CompanionsPlayedThisTurn),
             new DynamicVar("PlanDamage", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkChainOfCommand()
-        : base(1, CardType.Skill, CardRarity.Uncommon, KokomiTargets.PetOnly, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Uncommon, KokomiTargets.PetOrEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            return;
+        }
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()

@@ -45,7 +45,7 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlann
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage's Oath"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,19 +60,30 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlann
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new DamageVar(3m, ValueProp.Move),
             new KokomiPlan.PlanDamageVar(7m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkKuragesOath()
-        : base(1, CardType.Skill, CardRarity.Basic, KokomiTargets.PetOnly, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Basic, KokomiTargets.PetOrSelf, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            return;
+        }
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+            .FromCard(this, cardPlay)
+            .TargetingAllOpponents(CombatState!)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .SpawningHitVfxOnEachCreature()
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()

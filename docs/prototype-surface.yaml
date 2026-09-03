@@ -783,9 +783,12 @@
 - {id: proto_kk_kurages_oath, name: "Kurage's Oath (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   description: "[gold]Plan[/gold]: Deal 7 damage to ALL enemies.",
-   effects: [],
-   plan: [{op: damage, amount: 7, target: all_enemies}]}
+   description: "Deal 3 damage to ALL enemies. [gold]Plan[/gold]: Deal 7 damage to ALL enemies.",
+   effects: [{op: damage, amount: 3, target: all_enemies}],
+   plan: [{op: damage, amount: 7, target: all_enemies}],
+   # R250 pick 1 (round 4d sec.6, default): a now-line makes writing this
+   # card a trade, Feint's shape; the now-line does not upgrade.
+   upgrade: {plan_damage: 3}}
 
 - {id: proto_kk_slack_water, name: "Slack Water (proto)", character: kokomi,
    authored_by: [claude],
@@ -809,9 +812,12 @@
 - {id: proto_kk_ambush, name: "Ambush", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "[gold]Plan[/gold]: Deal 12 damage.",
-   effects: [],
-   plan: [{op: damage, amount: 12, target: front_enemy}]}
+   description: "Deal 5 damage. [gold]Plan[/gold]: Deal 12 damage.",
+   effects: [{op: damage, amount: 5, target: enemy}],
+   plan: [{op: damage, amount: 12, target: front_enemy}],
+   # R250 pick 1 (round 4d sec.6, default): a now-line makes writing this
+   # card a trade, Feint's shape; the now-line does not upgrade.
+   upgrade: {plan_damage: 3}}
 
 - {id: proto_kk_read_the_field, name: "Read the Field", character: kokomi,
    authored_by: [claude],
@@ -844,11 +850,13 @@
 - {id: proto_kk_war_council, name: "War Council", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Plan[/gold]: Deal 5 damage and apply 1 [gold]Weak[/gold] to ALL enemies.",
-   effects: [],
+   description: "Apply 1 [gold]Weak[/gold] to ALL enemies. [gold]Plan[/gold]: Deal 5 damage and apply 1 [gold]Weak[/gold] to ALL enemies.",
+   effects: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
    plan: [{op: damage, amount: 5, target: all_enemies},
           {op: apply_power, power: weak, amount: 1, target: all_enemies}],
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
+   # R250 pick 1 (round 4d sec.6, default): now-line added, the now-line
+   # does not upgrade -- the delta below stays on the Plan half.
    upgrade: {plan_damage: 3}}
 
 - {id: proto_kk_nereids_ascension, name: "Nereid's Ascension (proto)", character: kokomi,
@@ -950,10 +958,13 @@
 - {id: proto_kk_vanguard, name: "Vanguard", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common, exhaust: true,
-   description: "Exhaust. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] and 1 [gold]Weak[/gold].",
-   effects: [],
+   description: "Exhaust. Apply 1 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] and 1 [gold]Weak[/gold].",
+   effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}],
    plan: [{op: apply_power, power: vulnerable, amount: 1, target: front_enemy},
-          {op: apply_power, power: weak, amount: 1, target: front_enemy}]}
+          {op: apply_power, power: weak, amount: 1, target: front_enemy}],
+   # R250 pick 1 (round 4d sec.6, default): a now-line makes writing this
+   # card a trade, Feint's shape; the now-line does not upgrade.
+   upgrade: {plan_power_amount: 1}}
 
 - {id: proto_kk_the_generals_banner, name: "The General's Banner", character: kokomi,
    authored_by: [claude],
@@ -966,10 +977,13 @@
 - {id: proto_kk_chain_of_command, name: "Chain of Command", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Plan[/gold]: Deal 6 damage for each [gold]Companion[/gold] card you played last turn.",
-   effects: [],
+   description: "Deal 3 damage for each [gold]Companion[/gold] you played this turn. [gold]Plan[/gold]: Deal 6 damage for each [gold]Companion[/gold] you played last turn.",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 0, per: 3, count: companions_played_this_turn}}],
    plan: [{op: damage_per_companion_last_turn, amount: 6, target: front_enemy}],
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
+   # R250 pick 1 (round 4d sec.6): now-line added, the delta stays on the
+   # Plan half; EB-362 fixed "last turn" to the write turn, both engines.
    upgrade: {plan_damage: 2}}
 
 # --- currencies, tempo, and the one replay (packet sec.4) ---
@@ -1008,9 +1022,11 @@
 - {id: proto_kk_battle_plan, name: "Battle Plan", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw 2 cards.",
-   effects: [],
+   description: "Draw 1 card. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw 2 cards.",
+   effects: [{op: draw, amount: 1}],
    # R243 card audit pick 1: 1 Energy and 2 cards; the upgrade stays on the draw.
+   # R250 pick 1 (round 4d sec.6, default): now-line added ("Draw 1 card");
+   # the default rule has no now-line key for `draw`, so this stays true.
    plan: [{op: energy, amount: 1},
           {op: draw, amount: 2}]}
 
