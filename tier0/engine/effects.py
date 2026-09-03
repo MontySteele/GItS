@@ -13,8 +13,9 @@ import copy
 from typing import Optional, Sequence
 
 from tier0 import constants as C
-from tier0.engine import (companion_coven, furina_reframe, klee_overhaul,
-                          kokomi_plan, powers, reactions, resources, statuses)
+from tier0.engine import (companion_coven, companion_standins, furina_reframe,
+                          klee_overhaul, kokomi_plan, powers, reactions,
+                          resources, statuses)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, KurageMemory,
                                 grant_sly_autoplay,
@@ -5829,6 +5830,11 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
     # above applies Vulnerable to ALL enemies -- so the two are not commutative
     # and one sequence is written down. `tier0.engine.companion_coven`.
     companion_coven.turn_start(state)
+    # THE STAND-IN SEAM's one start-of-turn rule after it -- Jean's Lion's
+    # Fang, Fair Protector, Grounded's shape with a card on it. LAST, and
+    # commutative with everything above: it grants Block and a draw and reads
+    # only the explosion counter, which nothing here writes.
+    companion_standins.turn_start(state)
 
 
 def inazuma_overhaul_turn_start(state: CombatState) -> None:

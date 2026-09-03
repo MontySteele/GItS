@@ -414,6 +414,13 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     # computed it (`EB-270`): Big Badda Boom's face says "the damage the Bombs
     # dealt", and under Weak (or Strength, or Vulnerable) that is not `size`.
     note_explosion(state, reacted, int(dealt))
+    # QUARANTINED (C.COMPANION_OVERHAUL). The stand-in seam's two this-turn
+    # watchers (Diona's Bomb, Noelle's Mine), here rather than on
+    # `_notify_explosion` below because that bus carries no Mine flag and
+    # widening it for one card would put a stand-in's rule inside this arm's
+    # own hook. A no-op with the companion arm off.
+    from tier0.engine import companion_standins    # late import: cycle
+    companion_standins.note_explosion(state, charge.is_mine)
 
     # THE BOMB PAYLOAD (Jumpy Dumpty). It rides the EXPLOSION rather than the
     # card, which is the whole of what makes the starter's promise legible: the
@@ -622,8 +629,16 @@ def turn_start_late(state: CombatState) -> None:
     # UNPOWERED (`ValueProp.Unpowered` in `CreatureCmd.GainBlock`), so no
     # Dexterity feeds it and no Frail bites it: it is a POWER's Block, not a
     # card's printed Block.
+    # THE ONE READER OF KAEYA'S BLIND (QUARANTINED, C.COMPANION_OVERHAUL).
+    # Cold-Blooded Strike's stand-in prints "This turn, Grounded counts nothing
+    # as having gone off", and it names Grounded -- so the cover story is read
+    # HERE and not by zeroing the counter, which Jean's stand-in also reads.
+    # `grounded_blind` is False on every tree with the companion arm off.
+    from tier0.engine import companion_standins    # late import: cycle
+
     n = state.player.powers.get(GROUNDED, 0)
-    if n and state.ko_set_off_last_turn == 0:
+    if n and (state.ko_set_off_last_turn == 0
+              or companion_standins.grounded_blind(state)):
         state.player.block += n
         state.emit("block", amount=n)
         state.emit("ko_grounded", amount=n)

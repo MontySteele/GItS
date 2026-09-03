@@ -723,6 +723,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         var reacted = ReactionEffects.TotalResolved > reactionsBefore;
 
         ledger.NoteExplosion(reacted, dealt);
+        // THE COMPANION STAND-INS' two this-turn watchers (QUARANTINED,
+        // COMPANION_OVERHAUL): Diona's Bomb and Noelle's Mine. Here rather than
+        // on `NotifyExplosionListeners` below, because that bus carries no Mine
+        // flag and widening this arm's own interface for one companion card
+        // would put that arm's rule inside this one. A no-op with it off.
+        await CompanionStandIns.OnExplosion(choiceContext, applier, charge.IsMine);
 
         // THE BOMB PAYLOAD (Jumpy Dumpty). It rides the explosion rather than
         // the card, which is the whole of what makes the starter's promise

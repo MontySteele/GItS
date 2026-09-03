@@ -879,6 +879,54 @@ CO_TENANCY_LEDGER = {
             "whose Hydro lands on its own host and pays nothing that a dead "
             "host would have paid. The rng draw is the residual, and it is "
             "the same residual the shipped per-turn bomb mint already has",
+        ("Powers/Prototype/CompanionStandIns.cs", "ShakenNotPurredPower"):
+            "QUARANTINED (the companion stand-in seam, COMPANION_OVERHAUL). "
+            "Diona's one-shot watcher CLOSING, and nothing else: \"this turn\" "
+            "ends where the Klee arm's explosion counters roll, so the window "
+            "shuts at the same boundary they do and the enemy's half stays "
+            "inside it (a Mine goes off when an ENEMY attacks). THE ORDERING "
+            "QUESTION, answered: the override reads nothing and writes only "
+            "its own removal. The one reader of the power's presence is its "
+            "payer, CompanionStandIns.OnExplosion, which fires from an "
+            "explosion during card play -- strictly later than every tenant "
+            "of this broadcast. The sim closes the same window at one "
+            "sequential point (companion_standins.roll_turn, called from "
+            "combat._player_turn under klee_overhaul.roll_to), so there is no "
+            "order for it to disagree with",
+        ("Powers/Prototype/CompanionStandIns.cs", "IGotYourBackPower"):
+            "QUARANTINED (the companion stand-in seam). Noelle's repeating "
+            "watcher closing, the same removal at the same boundary and for "
+            "the same reason as ShakenNotPurredPower above -- it differs only "
+            "in what pays it (Mines, and per Mine), which happens on an "
+            "explosion and never in this broadcast",
+        ("Powers/Prototype/CompanionStandIns.cs", "ColdBloodedPower"):
+            "QUARANTINED (the companion stand-in seam). Kaeya's marker being "
+            "SPENT, and it is the one row of the four with a co-tenant that "
+            "shares its resource: GroundedPower, one block up, asks "
+            "CompanionStandIns.GroundedBlind, whose whole answer is \"is a "
+            "ColdBloodedPower still on this creature\". THE ORDERING QUESTION, "
+            "answered by CACHING rather than by order -- this override calls "
+            "GroundedBlind BEFORE it removes itself, which forces "
+            "StandInLedger to roll and cache the round's answer while the "
+            "marker is still there, so Grounded reads the same true whichever "
+            "of the two the listener iteration ran first. It touches nothing "
+            "else. The sim has no race to answer: it spends the marker into "
+            "state.mc_grounded_blind at the single sequential roll "
+            "(companion_standins.roll_turn)",
+        ("Powers/Prototype/CompanionStandIns.cs", "LionsFangPower"):
+            "QUARANTINED (the companion stand-in seam). Jean's conditional "
+            "per-turn Block mint plus one draw -- GroundedPower's shape with a "
+            "card on it, and it reads the overhaul ledger exactly as Grounded "
+            "does. THE ORDERING QUESTION, answered: its input is the "
+            "last-turn explosion count, which nothing writes outside a card "
+            "play or an explosion and both are strictly later than this "
+            "broadcast (the same answer GroundedPower gives above); it does "
+            "NOT read Kaeya's blind, by design, so ColdBloodedPower's removal "
+            "cannot move it either way. It writes raw Block and one drawn "
+            "card, and the draw is the write NaptimePower already makes here "
+            "on the same terms: no co-tenant of this broadcast reads the "
+            "hand's contents, and the two that touch the hand at all (the "
+            "Klee and Kokomi kit-grants) ADD a card and read nothing back",
         ("Powers/CompanionPowers.cs", "MetallicizePower"):
             "raw per-turn Block mint (R116)",
         ("Powers/DemolitionPowers.cs", "BombAndSparkPerTurnPower"):

@@ -517,6 +517,10 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     if C.COMPANION_OVERHAUL:
         reachable |= set(C.MONDSTADT_OVERHAUL_POOL_IDS)
         reachable |= set(C.INAZUMA_OVERHAUL_POOL_IDS)
+        # The stand-ins are in NO pool by design (see `COMPANION_STANDIN_IDS`),
+        # and they are still REACHABLE: the hand-off puts one in a deck, and a
+        # card in a deck must have a campfire answer like any other.
+        reachable |= set(C.COMPANION_STANDIN_IDS)
     deltas: dict[str, dict] = {}
     for card in loader.prototype_cards():
         if card.id not in reachable:

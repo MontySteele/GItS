@@ -1574,6 +1574,102 @@ THE DELETION RULE AT THE TOP OF THE SHEET BINDS THIS BLOCK: these rows leave
 when the arm is accepted or rejected.
 ```
 
+## The companion stand-ins — the caretakers (2026-09-02)
+
+```
+THE SEAM, AND IT IS THE POINT OF THE SLICE. A stand-in is a whole Klee-only
+card, with its own unique name, handed to Klee IN PLACE of one named Universal
+(Klee brief pick 6; the approved Mondstadt workshop sec.1; R236 sec.3). It is
+NOT a rewrite of the Universal and NOT a second pool: every other character is
+handed the Universal and never sees the stand-in.
+
+THREE KEYS ON THE ROW CARRY THE WHOLE CONTRACT, and the two later slices that
+add stand-ins use the same three unchanged:
+
+  personal_pool: klee   who may be handed it. A string, or a LIST of character
+                        ids (a family stand-in writes `[klee]`). `Card.from_dict`
+                        normalises a one-member list to the string, so all six
+                        existing readers of the field are byte-identical; a
+                        longer list is refused BY NAME rather than silently
+                        matching nobody, and the day one is wanted those six
+                        comparisons move to a membership predicate first.
+  replaces: <id>        the `proto_mc_` Universal it stands in for. Prototype
+                        surface only, and it must have a `personal_pool:` --
+                        a row that replaces a Universal for everybody is a pool
+                        replacement, which the arm already has.
+  art_of: <id>          whose illustration it wears. NO plan.tsv row and NO new
+                        image: the codegen emits that id into
+                        `RosterArt.CardPortrait`, deploy stages ONE flat
+                        `images/cards` dir keyed by id (so the Universal's own
+                        png is already the file that resolves), and
+                        `tools/art_coverage.py` bills exactly the literals the
+                        codegen emits -- so the art debt does not move.
+
+IT IS IN NO POOL, and that is structural rather than filtered. The four ids are
+absent from `C.MONDSTADT_OVERHAUL_POOL_IDS` and the four types are absent from
+`CompanionOverhaulRoster.Universals()`, which are the ONE door each engine's
+offer surfaces read. So no reward tier, no shop slot, no Featured Banner roster
+and no event pool can contain one.
+
+THE HAND-OFF IS ONE PLACE PER ENGINE, and it runs on the PICK rather than on
+the candidate list, which is what makes "the offer odds do not move" a property
+instead of a hope: the tiers, the rarity roll and the nation-weighted draw all
+happen on the Universals, and the swap is the last thing before the card is
+handed over.
+  sim   `tier0.engine.companion_standins.hand_off`, called by
+        `tier05.rewards.roll_rewards` and `tier05.shop.companion_offers`.
+  mod   `KleeMod.Powers.CompanionStandIns.HandOff`, called by
+        `CompanionSlot.Roll` and `MerchantCompanionSlots.AddSlot`.
+The ONE asymmetry: `MerchantCardEntry` does its own draw, so the shop's mod
+side maps the candidate LIST. The map is injective and no stand-in is in
+`Eligible`, so the list keeps its length; it is applied BEFORE the `stocked`
+filter, because `stocked` holds what the other slots actually shelved -- which
+for Klee is the stand-in. tier05/shop.py excludes the same row from the other
+direction (its `taken` keeps the Universal), and the two agree.
+
+WHY THE FOUR ARE CARETAKERS. Each reads the Klee overhaul's explosion ledger,
+which is what a stand-in is for: the Universal is a good card for anybody, and
+the stand-in is the same card written for the character whose Bombs are on the
+board.
+
+  proto_mc_diona_shaken_not_purred   for Icy Paws. ONE-SHOT. "If a Bomb goes
+    off this turn" carries no ordering word, so the condition is about the TURN:
+    the card pays at once when one already has (read at `AfterCardPlayed` in the
+    mod, `combat._finish_play` in the sim) and otherwise arms a watcher for the
+    rest of the turn. A watcher alone would print a card that reads true and
+    does nothing.
+  proto_mc_noelle_i_got_your_back    for Breastplate. REPEATING, and Mines only.
+    "Whenever" is forward-looking and pays per Mine.
+  proto_mc_kaeya_cold_blooded_strike for Frostgnaw. A MARKER, spent at the turn
+    roll. The card NAMES Grounded, so the blind is a READ by Grounded rather
+    than a write to `ko_set_off_last_turn` -- which Jean's stand-in also reads,
+    and would have been paid by a write it was never shown.
+  proto_mc_jean_lions_fang           for Dandelion Breeze. Grounded's shape with
+    a card on it. Its draw is a literal 1 in both engines and deliberately not a
+    named constant: it would be the slice's only law number, and naming a `1`
+    tagged "draw" makes `lint_prose_constants` read every "Draw 1 card" in the
+    mod -- Elemental Ecstasy's included -- as an un-interpolated copy of it.
+
+"THIS TURN" IS THE ROUND, the enemy's half included, and that is not a liberty.
+Klee's Mines go off when an ENEMY attacks, so a window that closed at the end of
+her own turn would leave "whenever a Mine goes off this turn" unable to fire at
+all. Both watchers therefore close where the arm's explosion counters roll --
+the start of her next turn (`combat._player_turn` under `klee_overhaul.roll_to`
+in the sim, `AfterPlayerTurnStart` in the mod).
+
+WHAT THE SLICE COST THE SHARED PATHS, exhaustively, and each is inert with the
+arm off (pinned by `tier0/tests/test_companion_standins.py`):
+  `klee_overhaul._explode`       one call, carrying the Mine flag the explosion
+                                 bus does not (`ProtoBombPower.Explode` twin)
+  `klee_overhaul.turn_start_late` / `GroundedPower`  one `or` on Grounded's test
+  `combat._player_turn`          the turn roll, and the played-card retro-pay
+  `effects.companion_overhaul_turn_start`  Jean's payout, last and commutative
+  `loader._validate_card_shape`  the row's two-line schema rule
+  `Card.from_dict`               the `personal_pool` list normalisation
+  `CompanionSlot.Roll` / `MerchantCompanionSlots.AddSlot`  the hand-off
+
+THE DELETION RULE AT THE TOP OF THE SHEET BINDS THIS BLOCK: these rows leave
+when the arm is accepted or rejected.
 ## before proto_mc_prune_hexhunter_chime
 
 ```

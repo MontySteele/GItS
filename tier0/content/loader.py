@@ -17,6 +17,7 @@ from tier0 import constants as C
 from tier0.content import enchantments
 from tier0.content import local_reference
 from tier0.content import upgrades
+from tier0.engine import companion_standins
 from tier0.engine import state as state_mod
 from tier0.engine.state import Card, Enemy, Player, sly_riders
 
@@ -373,6 +374,10 @@ def _validate_card_shape(c: Card) -> None:
     _validate_recall_shape(c)
     _validate_plan_shape(c)
     _validate_no_upgrade_shape(c)
+    # THE STAND-IN SEAM's own two-line schema rule (`replaces:` is prototype
+    # surface only, and it needs a `personal_pool:`), stated where the arm's
+    # rules are rather than as a fourth `_validate_*` in this file.
+    companion_standins.validate_row(c)
 
 
 def prototype_cards(sheet: Path | None = None) -> list[Card]:
@@ -470,6 +475,8 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
         # Only the mod loads an image (`RosterArt.CardPortrait` keys on the id
         # the emitter prints), tier0 has no art and never will, so a field on
         # `Card` would be one the engine carries and nothing reads.
+        # `replaces:` is KEPT, because the sim's stand-in hand-off is a rule
+        # and reads it (`tier0.engine.companion_standins`).
         card = Card.from_dict({k: v for k, v in d.items()
                                if k not in ("authored_by", "description",
                                             "art_of")})
@@ -1537,6 +1544,10 @@ def reset_caches() -> None:
     upgrades._upgrade_index.cache_clear()
     upgrades._shipped_upgrade_index.cache_clear()
     upgrades._prototype_upgrade_index.cache_clear()
+    # The stand-in map is derived from the surface (`replaces:` +
+    # `personal_pool:`), so it is a memoized view of the content tree like the
+    # rest and belongs behind the same one door.
+    companion_standins._replacements.cache_clear()
 
 
 def pilot_weights(pilot_id: str) -> dict:

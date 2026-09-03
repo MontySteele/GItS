@@ -161,18 +161,25 @@ def test_the_pool_ids_and_the_sheet_agree(overhaul):
     where the rows live; a row on one and not the other is a row that either
     cannot be offered or does not exist.
 
-    TWO LISTS SINCE R236, and the split is what a `proto_mc_` row can be. The
-    Mondstadt workshop's sec.3 rewrites the nation's UNIVERSALS and its sec.4
-    gives Klee four PERSONALS; both are that document's rows and both carry its
-    prefix, and the difference is `personal_pool`, which every offer site
-    already filters. A row on neither list is still the defect this asks
+    THREE LISTS SINCE R236, and the split is what a `proto_mc_` row can be. The
+    Mondstadt workshop's sec.3 rewrites the nation's UNIVERSALS, its sec.4 gives
+    Klee four PERSONALS (`personal_pool`, filtered at every offer site), and its
+    sec.3 stand-ins are handed to Klee IN PLACE of a Universal and are a member
+    of no pool -- on the sheet and deliberately on neither pool list, subtracted
+    by `C.COMPANION_STANDIN_IDS` rather than by their `replaces:` key, so a
+    stand-in that fell off that list fails here instead of quietly joining the
+    offerable pool. A row on none of the three is still the defect this asks
     about."""
     on_sheet = {c.id for c in loader.prototype_cards()
                 if c.id.startswith("proto_mc_")}
-    assert on_sheet == (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
-                        | set(C.COVEN_PERSONAL_POOL_IDS))
+    assert set(C.COMPANION_STANDIN_IDS) <= on_sheet
+    assert on_sheet - set(C.COMPANION_STANDIN_IDS) == (
+        set(C.MONDSTADT_OVERHAUL_POOL_IDS) | set(C.COVEN_PERSONAL_POOL_IDS))
     assert not (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
                 & set(C.COVEN_PERSONAL_POOL_IDS))
+    assert not (set(C.COMPANION_STANDIN_IDS)
+                & (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
+                   | set(C.COVEN_PERSONAL_POOL_IDS)))
 
 
 def test_the_banner_roster_moves_with_the_pool(overhaul):
