@@ -44,12 +44,27 @@ internal static class ElementalHit
     /// that computes it -- rather than each surface re-deriving its own
     /// arithmetic and disagreeing under Weak. Every existing caller ignores the
     /// result and is behaviour-identical; nothing in the pipeline moved.
+    ///
+    /// <paramref name="applyDealerMods"/> is QUARANTINED (the Klee overhaul) and
+    /// has exactly one caller: <c>ProtoBombPower.Explode</c>. `EB-343` / R248
+    /// ruled that a Bomb carries the TARGET's modifiers only -- the placer's
+    /// Strength and Weak never enter it, at placement or at set-off -- so the
+    /// explosion asks for the pipeline WITHOUT
+    /// <see cref="SimDamagePipeline.DealerMods"/>. Everything else about the hit
+    /// is unchanged: the aura still lands, the reaction still fires and
+    /// amplifies, and the target's Vulnerable and cap still apply. Defaulted
+    /// true, so every other caller -- the Burst volley, the echo, the companion
+    /// arms, Oz -- is byte-identical. Sim twin: `deal_damage_to_enemy(...,
+    /// powered=False)`, which the sheet's other quarantined arm already used.
     /// </summary>
     public static async Task<int> Deal(
         PlayerChoiceContext choiceContext, Creature target, Element element,
-        decimal baseDamage, Creature? applier, bool ignoreBlock = false)
+        decimal baseDamage, Creature? applier, bool ignoreBlock = false,
+        bool applyDealerMods = true)
     {
-        var dealt = SimDamagePipeline.DealerMods(applier, baseDamage);
+        var dealt = applyDealerMods
+            ? SimDamagePipeline.DealerMods(applier, baseDamage)
+            : baseDamage;
 
         var aura = AuraCmd.Find(target);
         if (aura == null)
@@ -86,6 +101,26 @@ internal static class ElementalHit
             dealer: null, cardSource: null, cardPlay: null);
         return landed;
     }
+
+    /// <summary>
+    /// THE OVERHAUL BOMB'S DOOR INTO <see cref="Deal"/> (`EB-343`, R248), and
+    /// it is a named method rather than a named argument for one reason: an
+    /// argument's value is invisible to every check the headless suite can
+    /// make. An explosion needs a live <c>CombatState</c>, so no test can watch
+    /// one land; what a test CAN read is which method a call site calls
+    /// (<c>KleeTests.Harness.Il</c>). Spelling the exception as a method makes
+    /// "a Bomb does not carry Klee's Strength and Weak" a fact about the call
+    /// graph, so deleting it fails a pin instead of quietly restoring the old
+    /// rule.
+    ///
+    /// ONE CALLER, <c>ProtoBombPower.Explode</c>. Everything else in the mod
+    /// goes through <see cref="Deal"/> and keeps the dealer's terms.
+    /// </summary>
+    public static Task<int> DealWithoutDealerMods(
+        PlayerChoiceContext choiceContext, Creature target, Element element,
+        decimal baseDamage, Creature? applier) =>
+        Deal(choiceContext, target, element, baseDamage, applier,
+             ignoreBlock: false, applyDealerMods: false);
 
     /// <summary>
     /// Damage-less element application: tier0 resolve_hit(enemy, element, 0)

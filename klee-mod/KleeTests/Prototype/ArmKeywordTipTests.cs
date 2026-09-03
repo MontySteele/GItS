@@ -153,7 +153,10 @@ public class ArmKeywordTipTests
         // other one if the two were ever merged.
         var printed = Printed("ForBomb");
 
-        Assert.Contains("A charge on an enemy. Grows by ", printed);
+        // `EB-343` merged the word's first two sentences: it gained a fourth
+        // rule and the four-sentence ceiling had no room for one, so "A charge
+        // on an enemy." and "Grows by N at the start of your turn." became one.
+        Assert.Contains("A charge on an enemy that grows by ", printed);
         Assert.Contains(" at the start of your turn. Never goes off by "
                       + "itself.", printed);
 

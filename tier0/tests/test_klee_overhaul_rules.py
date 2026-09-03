@@ -614,12 +614,12 @@ def test_the_arm_neither_feeds_nor_shows_burst(overhaul):
 # ---------------------------------------------------------------------------
 
 def test_rule5_an_explosion_is_an_ordinary_pyro_hit(overhaul):
-    """Rule 5: "Vulnerable and Weak on the enemy, Strength on Klee, and every
-    reaction in the element table apply to a cooked bomb without a word printed
-    on her cards."""
+    """Rule 5 as R248 left it: every reaction in the element table and the
+    TARGET's own modifiers apply to a cooked bomb without a word printed on her
+    cards. The brief's "Strength on Klee" is the half `EB-343` overturned, and
+    `test_eb343_*` below is where that is pinned."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
-    state.player.powers["strength"] = 2
     enemy.powers["vulnerable"] = 1
     klee_overhaul.place(state, enemy, 10)
 
@@ -627,8 +627,66 @@ def test_rule5_an_explosion_is_an_ordinary_pyro_hit(overhaul):
 
     hit = next(e for e in state.log if e["event"] == "damage")
     assert hit["base"] == 10
-    assert hit["amount"] > 10, "Strength and Vulnerable both rode the charge"
+    assert hit["amount"] == 15, "the enemy's Vulnerable rode the charge"
     assert enemy.aura == "pyro", "the explosion applied Pyro"
+
+
+def test_eb343_a_bomb_carries_the_targets_modifiers_only(overhaul):
+    """`EB-343` (ruled R248): a Bomb is the enemy's burden.
+
+    [USER]'s OWN BOARD, 2026-09-03: three Bombs of printed 6, 4 and 4 into
+    Tender's minus 5 Strength put `Bomb -1` on the badge. A printed 6 is a Bomb
+    6, always -- PLACEMENT stores the printed size (which this engine always
+    did) and the SET OFF no longer adds her Strength or takes her Weak (which
+    it did until now).
+    """
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    state.player.powers["strength"] = -5
+    state.player.powers["weak"] = 2
+    klee_overhaul.place(state, enemy, 6)
+    klee_overhaul.place(state, enemy, 4)
+    klee_overhaul.place(state, enemy, 4)
+
+    # PLACEMENT: the printed size, at any Strength.
+    assert [c.size for c in enemy.ko_charges] == [6, 4, 4]
+    assert klee_overhaul.total_size(enemy) == 14
+
+    klee_overhaul.set_off(state, enemy)
+
+    hits = [e for e in state.log if e["event"] == "damage"
+            and e["source"] == klee_overhaul.EXPLOSION_SOURCE]
+    assert [h["amount"] for h in hits] == [6, 4, 4], \
+        "nothing of Klee's reached the charges"
+
+    # And the other direction: positive Strength does not inflate one either.
+    other = make_enemy(hp=400)
+    state = klee_state([other])
+    state.player.powers["strength"] = 3
+    klee_overhaul.place(state, other, 6)
+
+    klee_overhaul.set_off(state, other)
+
+    hit = next(e for e in state.log if e["event"] == "damage")
+    assert hit["amount"] == 6
+
+
+def test_eb343_the_targets_own_terms_still_bite_per_hit(overhaul):
+    """The other side of the same rule: the ENEMY's terms do apply, and a cap
+    applies per HIT rather than to the pile. Intangible is this engine's cap
+    (`refpowers._intangible_cap`); the mod's twin reads the same hook and finds
+    Hard To Kill there too, which tier 0 has no enemy for."""
+    enemy = make_enemy(hp=400)
+    enemy.powers["intangible"] = 1
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 9)
+    klee_overhaul.place(state, enemy, 9)
+
+    klee_overhaul.set_off(state, enemy)
+
+    hits = [e for e in state.log if e["event"] == "damage"
+            and e["source"] == klee_overhaul.EXPLOSION_SOURCE]
+    assert [h["amount"] for h in hits] == [1, 1], "capped per hit, not per pile"
 
 
 def test_rule5_an_explosion_is_not_an_attack_card_hit(overhaul):
@@ -829,6 +887,53 @@ def test_rule7_grounded_pays_for_the_quiet_turn_and_not_the_loud_one(overhaul):
     assert state.player.block == 0, "it went off last turn: Grounded stays quiet"
 
 
+def test_eb344_the_held_turn_also_grants_one_spark(overhaul):
+    """`EB-344` (ruled R248): "gain 6 Block AND 1 Spark".
+
+    ONE CONDITION, TWO PAYOUTS -- a turn after a detonation grants NEITHER,
+    which is what makes the Spark part of the same decision rather than a
+    second rule to keep in step. Rule 4 mints one Spark per EXPLOSION, so the
+    held turn this card is written for is the one turn that mints none.
+    """
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.player.powers[klee_overhaul.GROUNDED] = 6
+    sparks_before = state.player.sparks
+
+    klee_overhaul.roll_to(state, 1)
+    klee_overhaul.turn_start_late(state)
+    assert state.player.block == 6
+    assert state.player.sparks == sparks_before + C.KLEE_OVERHAUL_GROUNDED_SPARK
+
+    banked = state.player.sparks
+    state.player.block = 0
+    klee_overhaul.place(state, enemy, 5)
+    klee_overhaul.set_off(state, enemy)          # a loud turn
+    sparks_after_explosions = state.player.sparks
+    klee_overhaul.roll_to(state, 2)
+    klee_overhaul.turn_start_late(state)
+
+    assert state.player.block == 0, "no Block after a detonation"
+    assert state.player.sparks == sparks_after_explosions, \
+        "and no Spark either: one condition, both halves"
+    assert banked <= sparks_after_explosions      # the explosion paid its own
+
+
+def test_eb344_the_upgrade_moves_the_block_and_not_the_spark(overhaul):
+    """The number's home. `power_amount: +2` is the BLOCK (6 -> 8); the Spark
+    is the kit's rate and is 1 at both levels."""
+    state = klee_state()
+    state.player.powers[klee_overhaul.GROUNDED] = 8      # the upgraded card
+    sparks_before = state.player.sparks
+
+    klee_overhaul.roll_to(state, 1)
+    klee_overhaul.turn_start_late(state)
+
+    assert state.player.block == 8
+    assert state.player.sparks == sparks_before + C.KLEE_OVERHAUL_GROUNDED_SPARK
+    assert C.KLEE_OVERHAUL_GROUNDED_SPARK == 1
+
+
 def test_rule7_run_away_reads_the_turn_counter(overhaul):
     """The other half of the contested thing: Run Away! pays for the turn in
     which something DID go off. The predicate is the ledger's own counter, the
@@ -884,13 +989,15 @@ def test_the_per_play_memory_is_opened_by_the_card_that_reads_it(overhaul):
 
 def test_big_badda_boom_hits_again_for_what_the_bombs_dealt(overhaul):
     """`EB-270`: the ledger banks what each explosion LANDED for, so the second
-    clause is the card's printed promise and not the raw charge sum. Under Weak
-    the two part company, which is the whole reason the number is banked."""
+    clause is the card's printed promise and not the raw charge sum. Under the
+    ENEMY's Vulnerable the two part company, which is the whole reason the
+    number is banked -- `EB-343` (R248) moved which modifier can do the parting
+    and not the claim, Klee's own Weak no longer reaching a Bomb at all."""
     enemy = make_enemy(hp=400)
+    enemy.powers["vulnerable"] = 1        # the charges land BIGGER
     state = klee_state([enemy])
     klee_overhaul.place(state, enemy, 8)
     klee_overhaul.place(state, enemy, 9)
-    state.player.powers["weak"] = 2       # her Weak: the charges land smaller
 
     effects.resolve_card(state, load("proto_ko_big_badda_boom"))
 
@@ -901,7 +1008,7 @@ def test_big_badda_boom_hits_again_for_what_the_bombs_dealt(overhaul):
             if e["event"] == "damage" and e["source"] == "attack"]
     assert len(hits) == 2, "the printed 12, then the banked total"
     assert hits[1]["base"] == dealt
-    assert dealt < 17, "Weak reduced what the charges landed for"
+    assert dealt > 17, "Vulnerable moved what the charges landed for"
 
 
 def test_the_multiplier_is_armed_by_the_card_and_spent_by_its_set_off(overhaul):

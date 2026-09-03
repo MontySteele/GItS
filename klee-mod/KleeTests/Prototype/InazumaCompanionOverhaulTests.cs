@@ -255,10 +255,15 @@ public class InazumaCompanionOverhaulTests
         var volley = Il.Method("TamotoPower", "FireVolley");
         Assert.Contains(Il.Calls(volley), c => c.Contains("ElementalHit.Deal"));
 
-        var deal = Il.Method("ElementalHit", "Deal");
-        Assert.Equal(6, deal.GetParameters().Length);
-        Assert.True(deal.GetParameters()[5].HasDefaultValue);
-        Assert.Equal(false, deal.GetParameters()[5].DefaultValue);
+        // BY NAME and not by position: `EB-343` gave the funnel a second
+        // defaulted flag (`applyDealerMods`, the overhaul Bomb's), and a
+        // positional read would have failed on a change that has nothing to do
+        // with this card. What matters here is that `ignoreBlock` exists, is
+        // optional, and is OFF unless a caller asks for it.
+        var ignoreBlock = Il.Method("ElementalHit", "Deal").GetParameters()
+            .Single(p => p.Name == "ignoreBlock");
+        Assert.True(ignoreBlock.HasDefaultValue);
+        Assert.Equal(false, ignoreBlock.DefaultValue);
     }
 
     // ---- THE POWERS -----------------------------------------------------

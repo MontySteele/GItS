@@ -89,13 +89,31 @@ public static class ArmKeywordTips
     /// and one <i>Set off</i> pops all of them, but they stay separate charges
     /// and each grows on its own -- fusing them into a single charge is
     /// Careful Arrangement's whole card, and a tip claiming the kit did it for
-    /// free would print that card as a blank.</summary>
+    /// free would print that card as a blank.
+    ///
+    /// THE LAST SENTENCE IS `EB-343` (R248), and it is the one clause a player
+    /// cannot get from the badge: the badge shows the number, this says whose
+    /// number it is. A Bomb is the ENEMY'S burden, their debuffs moving it
+    /// while Klee's Strength and Weak do not, which is the opposite of what
+    /// every other damage source in her deck does. A rule that runs backwards
+    /// to the rest of the game cannot be inferred from a total that did not
+    /// change, so it is printed where the word is met.
+    ///
+    /// THE FIRST TWO SENTENCES MERGED TO PAY FOR IT. The word carries four
+    /// rules now and `MAX_SENTENCES` is four, so "A charge on an enemy." and
+    /// "Grows by N at the start of your turn." became one clause. The LENGTH
+    /// ceiling it then broke is carried as a named exception in
+    /// `tools/lint_text_conventions.py` rather than paid for by dropping one
+    /// of the four.
+    /// </summary>
     public static IEnumerable<IHoverTip> ForBomb(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
-            "A charge on an enemy. Grows by " + KleeOverhaulLaw.BombGrowth
+            "A charge on an enemy that grows by " + KleeOverhaulLaw.BombGrowth
           + " at the start of your turn. Never goes off by itself. Bombs on "
-          + "one enemy go off together when [gold]Set off[/gold].");
+          + "one enemy go off together when [gold]Set off[/gold]. It takes "
+          + "the enemy's debuffs, not your [gold]Strength[/gold] or "
+          + "[gold]Weak[/gold].");
 
     /// <summary>Rule 2, and the one [USER] named ("Set Off has no tooltip
     /// text"). The ORDER clause is the load-bearing half: the explosions land
@@ -159,13 +177,20 @@ public static class ArmKeywordTips
     /// in hand where there is no pile to quote: a Mine IS a Bomb, so it is the
     /// same Pyro hit for its own size and the same modifiers move it. The live
     /// arithmetic stays where it can be right -- on the badge.
+    ///
+    /// THE SECOND SENTENCE NAMES THE ENEMY NOW (`EB-343`, R248). It used to say
+    /// "[gold]Weak[/gold] shrinks it like any Bomb", which was true of the old
+    /// rule and is false of this one -- Weak on Klee no longer reaches a Bomb
+    /// at all. What survives is the half the r4 seat actually needed: a Mine's
+    /// number is on the badge, and it is not the printed size when the enemy
+    /// carries a modifier.
     /// </summary>
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
-          + "you, before the hit lands. [gold]Weak[/gold] shrinks it like any "
-          + "Bomb; the badge shows the number.");
+          + "you, before the hit lands. The enemy's own debuffs move it like "
+          + "any Bomb; the badge shows the number.");
 
     // ---------------------------------------------------------- Kokomi -----
     //

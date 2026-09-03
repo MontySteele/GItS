@@ -220,13 +220,23 @@ public sealed class BombReactionSparkPower
 
 /// <summary>
 /// Grounded: "At the start of your turn, if none of your Bombs went off last
-/// turn, gain 6 Block." The card that pays for the quiet turn -- the cook half
-/// of the contested thing, with Run Away! paying for the loud one.
+/// turn, gain 6 Block and 1 Spark." The card that pays for the quiet turn --
+/// the cook half of the contested thing, with Run Away! paying for the loud
+/// one.
 ///
 /// LAST turn, not this one, and that is the whole design: the decision it pays
 /// for was made a turn ago, so the Block arrives before this turn's decision
 /// rather than as a reward for one already taken. <c>SetOffLastTurn</c> is the
 /// ledger's own read, rolled on the round stamp.
+///
+/// THE SPARK IS `EB-344` (ruled R248). Rule 4 mints a Spark per EXPLOSION, so
+/// the turn this card is written for -- the one where nothing went off -- is by
+/// construction the turn that mints none, and the cook half of the loop paid
+/// for itself in Block alone. A Spark on the held turn is what makes holding a
+/// PLAY rather than a pause. It is a flat
+/// <see cref="KleeOverhaulLaw.GroundedSpark"/> and NOT <c>Amount</c>, because
+/// the upgrade is <c>{power_amount: +2}</c> -- that is the Block, 6 to 8 -- and
+/// the Spark is 1 at both levels.
 /// </summary>
 public sealed class GroundedPower : PowerModel, ILocalizationProvider
 {
@@ -235,7 +245,9 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
         ("title", "Grounded"),
         ("description",
             "At the start of your turn, if none of your [gold]Bombs[/gold] "
-          + "went off last turn, gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
+          + "went off last turn, gain [blue]{Amount}[/blue] [gold]Block[/gold] "
+          + "and [blue]" + KleeOverhaulLaw.GroundedSpark + "[/blue] "
+          + "[gold]Spark[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -257,6 +269,12 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
         if (KleeOverhaulLedger.For(Owner).SetOffLastTurn > 0
             && !CompanionStandIns.GroundedBlind(Owner)) return;
         await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null);
+        // `EB-344`. ONE CONDITION, TWO PAYOUTS: both are behind the same test,
+        // so a turn that grants no Block grants no Spark either and there is no
+        // second reading of "held" to keep in step.
+        await SparkPower.Gain(
+            choiceContext, Owner, KleeOverhaulLaw.GroundedSpark,
+            cardSource: null, source: "power:grounded/held_turn");
     }
 }
 

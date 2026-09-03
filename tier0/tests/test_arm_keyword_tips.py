@@ -267,9 +267,17 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # Klee, klee-overhaul-slice-1-2026-09-01.md sec.2 rules 1/2/4/6,
             # in the shape docs/current/text-conventions.md sets (one clause
             # per sentence, under the keyword-tip ceiling).
-            "A charge on an enemy. Grows by ",
+            #
+            # `EB-343` (R248) gave the Bomb a FOURTH rule -- a Bomb takes the
+            # enemy's debuffs and none of Klee's -- and the four-sentence
+            # ceiling had no room for a fifth, so rule 1's two sentences became
+            # one clause. Nothing was dropped, and the LENGTH ceiling it broke
+            # is carried by name in `tools/lint_text_conventions.py`.
+            "A charge on an enemy that grows by ",
             " at the start of your turn. Never goes off by itself. Bombs on ",
-            "one enemy go off together when [gold]Set off[/gold].",
+            "one enemy go off together when [gold]Set off[/gold]. It takes ",
+            "the enemy's debuffs, not your [gold]Strength[/gold] or ",
+            "[gold]Weak[/gold].",
             "on the target goes off first, one at a ",
             "time, each a Pyro hit for its size.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",

@@ -95,71 +95,124 @@ public class KleeOverhaulRoundFourTests
         Assert.Contains("{Mines}", Row(pile, "smartDescriptionMines"));
     }
 
-    // ---- EB-287: "after Weak", and only while it is true -----------------
+    // ---- EB-287 / EB-343: every modifier named, and only while true ------
 
     [Fact]
-    public void The_total_names_weak_exactly_when_weak_is_shrinking_it()
+    public void The_total_names_vulnerable_exactly_when_it_is_moving_it()
     {
         // The r3 Codex seat: "The Bomb display showed Bomb 17 but said Set off
         // would deal 12 total, which I inferred was the Weak-adjusted amount
         // but had to reason through." The face says it now, and says it only
-        // while it is true -- the key is chosen off the same pile state
+        // while it is true -- the key is chosen off the same state
         // `PredictedSetOffDamage` reads.
+        //
+        // `EB-343` (R248) moved WHOSE modifier that is. Klee's Weak no longer
+        // reaches a Bomb at all, so the term the sentence has to name is the
+        // ENEMY's Vulnerable -- which this same face used to fold in silently,
+        // which is the other half of what R248 calls a defect.
         var klee = Seat.Klee();
-        var enemy = Seat.Klee(30).Creature;
-        var pile = ProtoBombs.Place(enemy, klee.Creature,
+        var enemy = Seat.Klee(30);
+        var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
             new ProtoBombs.Charge(8), new ProtoBombs.Charge(9));
 
         Assert.EndsWith(".smartDescription", LocKey(pile));
-        Assert.DoesNotContain("after [gold]Weak[/gold]",
+        Assert.DoesNotContain("after [gold]Vulnerable[/gold]",
                               Row(pile, "smartDescription"));
         Assert.Equal(17, pile.PredictedSetOffDamage());
 
-        klee.WithPower<WeakPower>(1);
+        enemy.WithPower<VulnerablePower>(1);
 
-        // The seat's own board: Bomb 17, Set off deals 12.
-        Assert.Equal(12, pile.PredictedSetOffDamage());
-        Assert.EndsWith(".smartDescriptionWeak", LocKey(pile));
-        Assert.Contains("[blue]{Size}[/blue] Pyro damage after [gold]Weak[/gold].",
-                        Row(pile, "smartDescriptionWeak"));
+        Assert.Equal(25, pile.PredictedSetOffDamage());   // 12 + 13, per charge
+        Assert.EndsWith(".smartDescriptionVulnerable", LocKey(pile));
+        Assert.Contains("[blue]{Size}[/blue] Pyro damage after "
+                        + "[gold]Vulnerable[/gold].",
+                        Row(pile, "smartDescriptionVulnerable"));
     }
 
     [Fact]
-    public void The_two_axes_compose_into_the_four_rows_that_exist()
+    public void The_cap_is_named_too_and_by_the_power_that_set_it()
+    {
+        // `EB-343`'s other half. A cap folded into the printed number in
+        // silence is the same defect as a silent Vulnerable, and the pinned
+        // build has two powers that can set one -- so the sentence names
+        // whichever of them the number actually went through.
+        var klee = Seat.Klee();
+        var hardToKill = Seat.Klee(30).WithPower<HardToKillPower>(3);
+        var capped = ProtoBombs.Place(hardToKill.Creature, klee.Creature,
+            new ProtoBombs.Charge(9));
+
+        Assert.EndsWith(".smartDescriptionHardToKill", LocKey(capped));
+        Assert.Contains("capped by [gold]Hard To Kill[/gold]",
+                        Row(capped, "smartDescriptionHardToKill"));
+
+        var intangible = Seat.Klee(30).WithPower<IntangiblePower>(1);
+        var ghost = ProtoBombs.Place(intangible.Creature, klee.Creature,
+            new ProtoBombs.Charge(9));
+
+        Assert.EndsWith(".smartDescriptionIntangible", LocKey(ghost));
+        Assert.Contains("capped by [gold]Intangible[/gold]",
+                        Row(ghost, "smartDescriptionIntangible"));
+
+        // Both terms at once read as ONE sentence, in pipeline order.
+        var both = Seat.Klee(30).WithPower<VulnerablePower>(1)
+                                .WithPower<HardToKillPower>(3);
+        var pile = ProtoBombs.Place(both.Creature, klee.Creature,
+            new ProtoBombs.Charge(9));
+
+        Assert.EndsWith(".smartDescriptionVulnerableHardToKill", LocKey(pile));
+        Assert.Contains("Pyro damage after [gold]Vulnerable[/gold], capped by "
+                        + "[gold]Hard To Kill[/gold].",
+                        Row(pile, "smartDescriptionVulnerableHardToKill"));
+    }
+
+    [Fact]
+    public void The_two_axes_compose_into_the_rows_that_exist()
     {
         // A key with no row behind it falls back to the STATIC description
         // (`PowerModel.HasSmartDescription` is a `LocString.Exists` probe), so
         // a missing row is a silently blank face rather than a crash. Every
-        // combination the selector can produce must therefore be present.
-        var klee = Seat.Klee().WithPower<WeakPower>(1);
-        var enemy = Seat.Klee(30).Creature;
-        var pile = ProtoBombs.Place(enemy, klee.Creature,
+        // combination the selector can produce must therefore be present --
+        // which is why `EB-343` GENERATES the grid off the same table the
+        // selector reads instead of listing it by hand.
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(30).WithPower<VulnerablePower>(1);
+        var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
             new ProtoBombs.Charge(4, IsMine: true), new ProtoBombs.Charge(6));
 
-        Assert.EndsWith(".smartDescriptionMinesWeak", LocKey(pile));
+        Assert.EndsWith(".smartDescriptionMinesVulnerable", LocKey(pile));
 
         var rows = pile.Localization!.Select(r => r.Item1).ToList();
-        foreach (var key in new[] { "smartDescription", "smartDescriptionWeak",
-                                    "smartDescriptionMines",
-                                    "smartDescriptionMinesWeak" })
+        var caps = new[] { "", "HardToKill", "Intangible", "Capped" };
+        foreach (var mines in new[] { "", "Mines" })
         {
-            Assert.Contains(key, rows);
+            foreach (var vulnerable in new[] { "", "Vulnerable" })
+            {
+                foreach (var cap in caps)
+                {
+                    Assert.Contains(
+                        "smartDescription" + mines + vulnerable + cap, rows);
+                }
+            }
         }
+        // And no more than the grid: two axes, nothing hand-added beside them.
+        Assert.Equal(2 * 2 * caps.Length,
+                     rows.Count(r => r.StartsWith("smartDescription")));
 
-        // And the Weak row is the plain row with exactly that one clause in
+        // Each modified row is the plain row with exactly its own clause in
         // it -- the mutation guard across the whole grid.
         Assert.Equal(
             Row(pile, "smartDescription"),
-            Row(pile, "smartDescriptionWeak")
-                .Replace(" after [gold]Weak[/gold]", string.Empty));
+            Row(pile, "smartDescriptionVulnerable")
+                .Replace(" after [gold]Vulnerable[/gold]", string.Empty));
         Assert.Equal(
             Row(pile, "smartDescriptionMines"),
-            Row(pile, "smartDescriptionMinesWeak")
-                .Replace(" after [gold]Weak[/gold]", string.Empty));
+            Row(pile, "smartDescriptionMinesVulnerableHardToKill")
+                .Replace(" after [gold]Vulnerable[/gold], capped by "
+                         + "[gold]Hard To Kill[/gold]", string.Empty));
     }
 
     [Fact]
-    public void A_canonical_pile_never_claims_a_weak_it_cannot_read()
+    public void A_canonical_pile_never_claims_a_modifier_it_cannot_read()
     {
         // `HasSmartDescription` resolves this key BEFORE the mutability check
         // that gates the smart face, so the selector runs on a compendium copy

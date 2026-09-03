@@ -829,15 +829,23 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     (R128, the rule the Shatter path below already keeps). Default False, so
     every shipped caller is byte-identical.
 
-    `powered` is QUARANTINED (C.KOKOMI_OVERHAUL) and likewise has exactly one
-    caller: the Tamakushi Casket's strike, whose DEALER is the Bake-Kurage and
-    not her. False drops the dealer's Strength and Weak (`ValueProp.Unpowered`
-    on the dealer's side) and nothing else -- the aura still lands, the
-    reaction still fires, the target's Vulnerable and Block still apply -- so
-    it is NOT `refpowers.unpowered_damage`, which skips all of those and is
-    what a Power's own damage takes. The distinction is the C#'s: the Casket
-    goes through `ElementalHit.Deal` with the PET as applier, and a pet carries
-    no Strength. Default True, so every shipped caller is byte-identical."""
+    `powered` is QUARANTINED and has exactly two callers, one per prototype
+    arm. False drops the dealer's Strength and Weak (`ValueProp.Unpowered` on
+    the dealer's side) and nothing else -- the aura still lands, the reaction
+    still fires, the target's Vulnerable, Intangible cap and Block still apply
+    -- so it is NOT `refpowers.unpowered_damage`, which skips all of those and
+    is what a Power's own damage takes. Default True, so every shipped caller
+    is byte-identical.
+
+      * C.KOKOMI_OVERHAUL -- the Tamakushi Casket's strike, whose DEALER is the
+        Bake-Kurage and not her. The distinction is the C#'s: the Casket goes
+        through `ElementalHit.Deal` with the PET as applier, and a pet carries
+        no Strength.
+      * C.KLEE_OVERHAUL -- `klee_overhaul._explode`, `EB-343` (ruled R248): a
+        Bomb carries the TARGET's modifiers only, so a charge enters at its
+        printed size. Here the dealer IS Klee, so the flag states the RULE
+        rather than a fact about who is swinging. C# twin: the same one call,
+        `ElementalHit.Deal(..., applyDealerMods: false)`."""
     # THE DEAD TAKE NOTHING (EB-136 / R210, C18). `CreatureCmd.Damage` opens
     # its per-target loop with `if (originalTarget2.IsDead) continue;`, so a
     # corpse absorbs no damage, fires no reaction and pays no on-hit rider --

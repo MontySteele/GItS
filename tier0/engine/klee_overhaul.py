@@ -16,8 +16,11 @@ slice one (`review/active/klee-overhaul-slice-1-2026-09-01.md`):
   4. **Spark.** Each explosion gives Klee `C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION`
      Spark, and she starts every combat with `C.KLEE_OVERHAUL_OPENING_SPARK`.
      Cards that print a Spark price spend Sparks instead of energy.
-  5. **Pyro.** An explosion is an ordinary Pyro hit -- Vulnerable and Weak on
-     the enemy, Strength on Klee, and every reaction in the table.
+  5. **Pyro.** An explosion is an ordinary Pyro hit -- every reaction in the
+     table, and the TARGET's own modifiers. Klee's Strength and Weak are not
+     among them: `EB-343` (R248) rules that a Bomb carries the target's
+     modifiers only, at placement and at set-off alike. The brief's own wording
+     of this rule ("Strength on Klee") is what R248 overturned.
   6. **Mine.** A Mine is a Bomb that ALSO goes off when its enemy attacks Klee,
      before the attack lands.
   7. **Nothing fires by itself.** No start-of-turn detonation, no automatic
@@ -388,6 +391,20 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     the amplifier and the reaction, so a cooked Bomb Vaporizes exactly as one
     of Klee's Attacks would.
 
+    `powered=False` IS `EB-343` (ruled R248), AND IT IS THE WHOLE RULE: a Bomb
+    carries the TARGET's modifiers only. The charge enters the funnel at its
+    printed size -- Klee's Strength and Weak are hers and do not travel to a
+    charge sitting on an enemy -- and everything the funnel does after that is
+    the enemy's: the aura, the reaction and the amplifier, then
+    `modify_damage_taken`'s Vulnerable and Intangible cap, then Block. Weak has
+    no target-side reading in either engine, because `WeakPower` reduces what
+    its OWNER deals and never what its owner takes.
+
+    THE PLACEMENT HALF NEEDS NO CODE HERE and that is worth saying: `place`
+    stores the printed size and always has, so this engine never had the badge
+    defect the mod had. What it had was this hit, which added her Strength per
+    charge. C# twin: `ElementalHit.Deal(..., applyDealerMods: false)`.
+
     THE REACTION IS DETECTED BY DIFFING `state.reactions_this_turn` across the
     hit, which is this engine's nearest thing to the C#'s
     `ReactionEffects.TotalResolved`: it is the one counter every reaction in
@@ -408,11 +425,12 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     # answers "pyro" on every other board and with the companion arm off.
     element = companion_coven.bomb_element(state)
     dealt = effects.deal_damage_to_enemy(state, enemy, size, element=element,
-                                         source=EXPLOSION_SOURCE)
+                                         source=EXPLOSION_SOURCE,
+                                         powered=False)
     reacted = state.reactions_this_turn > before
     # `dealt` is the number the hit LANDED for, straight off the funnel that
     # computed it (`EB-270`): Big Badda Boom's face says "the damage the Bombs
-    # dealt", and under Weak (or Strength, or Vulnerable) that is not `size`.
+    # dealt", and under the target's Vulnerable that is not `size`.
     note_explosion(state, reacted, int(dealt))
     # QUARANTINED (C.COMPANION_OVERHAUL). The stand-in seam's two this-turn
     # watchers (Diona's Bomb, Noelle's Mine), here rather than on
@@ -597,7 +615,7 @@ def turn_start(state: CombatState) -> None:
 
 def turn_start_late(state: CombatState) -> None:
     """The two rules that read the turn AFTER it is set up -- rule 4's opening
-    Spark and Grounded's Block.
+    Spark and Grounded's Block and Spark.
 
     THE SITE IS `AfterPlayerTurnStart` on both sides, and both halves of the
     mod say why they need it rather than `BeforeCombatStart` or site A:
@@ -621,10 +639,17 @@ def turn_start_late(state: CombatState) -> None:
                    amount=int(C.KLEE_OVERHAUL_OPENING_SPARK))
         effects.gain_sparks(state, int(C.KLEE_OVERHAUL_OPENING_SPARK))
 
-    # GROUNDED: "if none of your Bombs went off LAST turn, gain N Block." Last
-    # turn and not this one is the whole design -- the decision it pays for was
-    # made a turn ago, so the Block arrives before this turn's decision rather
-    # than as a reward for one already taken.
+    # GROUNDED: "if none of your Bombs went off LAST turn, gain N Block and 1
+    # Spark." Last turn and not this one is the whole design -- the decision it
+    # pays for was made a turn ago, so the payout arrives before this turn's
+    # decision rather than as a reward for one already taken.
+    #
+    # THE SPARK IS `EB-344` (ruled R248) AND IT RIDES THE SAME CONDITION, so a
+    # turn that grants no Block grants no Spark either and there is no second
+    # reading of "held" to keep in step. Rule 4 mints a Spark per EXPLOSION, so
+    # the held turn this card is written for is by construction the one turn
+    # that mints none. A flat `C.KLEE_OVERHAUL_GROUNDED_SPARK` and not `n`,
+    # because the upgrade moves the BLOCK (6 -> 8) and leaves the Spark at 1.
     #
     # UNPOWERED (`ValueProp.Unpowered` in `CreatureCmd.GainBlock`), so no
     # Dexterity feeds it and no Frail bites it: it is a POWER's Block, not a
@@ -641,7 +666,9 @@ def turn_start_late(state: CombatState) -> None:
               or companion_standins.grounded_blind(state)):
         state.player.block += n
         state.emit("block", amount=n)
-        state.emit("ko_grounded", amount=n)
+        state.emit("ko_grounded", amount=n,
+                   spark=int(C.KLEE_OVERHAUL_GROUNDED_SPARK))
+        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_GROUNDED_SPARK))
 
 
 def turn_end(state: CombatState) -> None:

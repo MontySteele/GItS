@@ -402,7 +402,7 @@
 - {id: proto_ko_grounded, name: "Grounded", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 6 [gold]Block[/gold].",
+   description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 6 [gold]Block[/gold] and 1 [gold]Spark[/gold].",
    upgrade: {power_amount: +2},
    effects: [{op: apply_power, power: ko_grounded, amount: 6, target: self}]}
 

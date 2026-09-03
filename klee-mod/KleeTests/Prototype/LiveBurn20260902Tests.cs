@@ -79,12 +79,16 @@ public class LiveBurn20260902Tests
         var pile = ProtoBombs.Place(enemy, klee.Creature,
             new ProtoBombs.Charge(5));
 
-        foreach (var key in new[] { "smartDescription", "smartDescriptionWeak",
-                                    "smartDescriptionMines",
-                                    "smartDescriptionMinesWeak" })
+        // EVERY smart row, whatever the grid's shape: `EB-343` widened the
+        // modifier axis, and the claim here is about all of them at once, so
+        // the rows are read off the power rather than listed.
+        var smart = pile.Localization!
+            .Where(r => r.Item1.StartsWith("smartDescription")).ToList();
+        Assert.True(smart.Count >= 4);
+        foreach (var (_, face) in smart)
         {
-            Assert.Contains("{Count}", Row(pile, key));
-            Assert.DoesNotContain("{Amount}", Row(pile, key));
+            Assert.Contains("{Count}", face);
+            Assert.DoesNotContain("{Amount}", face);
         }
     }
 
@@ -114,19 +118,41 @@ public class LiveBurn20260902Tests
     // ---- EB-291: the Mine's number is not a fixed number ------------------
 
     [Fact]
-    public void The_mine_tip_says_that_weak_shrinks_it()
+    public void The_mine_tip_says_its_number_is_not_the_printed_one()
     {
         // The r4 Opus seat left a Gremlin Merc at 3 HP under a "Mine 3" as a
         // free kill; the Mine dealt 2 and the enemy survived and hit him. The
         // Bomb badge had learned to name Weak at `EB-287`; the Mine, which
         // fires on the ENEMY's turn with no badge in front of the player, had
         // not.
+        //
+        // `EB-343` (R248) changed WHICH modifier that sentence names, not that
+        // it names one: Klee's Weak no longer reaches a Bomb, so the tip says
+        // the enemy's own debuffs do -- and still sends the reader to the badge
+        // for the live number, which is the half the seat actually needed.
         var body = string.Concat(Il.Strings(
             typeof(ArmKeywordTips)
                 .GetMethod("ForMine", HeadlessGame.All)!));
 
-        Assert.Contains("[gold]Weak[/gold]", body);
-        Assert.Contains("shrinks it like any Bomb", body);
+        Assert.Contains("The enemy's own debuffs move it like any Bomb", body);
+        Assert.Contains("the badge shows the number", body);
+        Assert.DoesNotContain("[gold]Weak[/gold]", body);
+    }
+
+    [Fact]
+    public void The_bomb_tip_says_whose_burden_a_bomb_is()
+    {
+        // `EB-343`'s card-side half. The badge shows the NUMBER; only the
+        // keyword tip can say whose number it is, and this is the one rule in
+        // the deck that runs opposite to every other damage source she has --
+        // so it is printed where the word is met rather than inferred from a
+        // total that did not move.
+        var body = string.Concat(Il.Strings(
+            typeof(ArmKeywordTips)
+                .GetMethod("ForBomb", HeadlessGame.All)!));
+
+        Assert.Contains("It takes the enemy's debuffs, not your "
+                        + "[gold]Strength[/gold] or [gold]Weak[/gold].", body);
     }
 
     // ---- EB-293: the Plan keyword covers the plan-only case ---------------
