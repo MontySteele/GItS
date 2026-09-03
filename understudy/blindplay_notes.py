@@ -266,9 +266,12 @@ ARM_KEYWORDS: dict[str, str] = {
     # act-1 seat watched one Plan take two Toadpoles and then four Phantasmal
     # Gardeners while this line said "the front enemy" and nothing else. The
     # card face was right the whole time; the word now defers to it.
-    "Plan": ("On the Bake-Kurage, paid now; lands next turn on the front "
-             "enemy, or ALL if it says so. Enemy Vulnerable counts; your "
-             "Weak does not."),
+    # `R250` (round-5 sec.6 pick 1) ADDED "NEVER A MINION": The Kin's
+    # Followers and Queen's Torch Head Amalgam put a decoy on the leftmost
+    # slot on purpose, and every single-target Plan landed on it.
+    "Plan": ("On the Bake-Kurage, paid now; next turn: front enemy, or ALL "
+             "if it says so; never a Minion. Vulnerable counts; your Weak "
+             "does not."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
     # The Furina reframe's three (slice two, R220 A). The same sentences

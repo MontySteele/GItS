@@ -107,15 +107,19 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// CRYSTAL COLLAPSE'S MEMORY (R236): the last Companion card she played
-    /// this turn.
+    /// CRYSTAL COLLAPSE'S MEMORY (R236) AND CHAIN OF COMMAND'S COUNT
+    /// (`EB-362`): the last Companion card she played this turn, and how many.
     ///
     /// HOSTED HERE FOR THE REASON THE RESOLUTION ABOVE IS. Rule 1 guarantees
     /// this power is on her for every turn of every combat, so a per-turn fact
-    /// hung off it is recorded on every board; The General's Banner's own
-    /// <c>AfterCardPlayed</c> -- which writes the COUNT beside this -- is a
-    /// card she may never draw, and a memory that only exists while a Power is
-    /// out would read null on most boards and make the card's face a lie.
+    /// hung off it is recorded on every board. The COUNT used to be written by
+    /// The General's Banner's own <c>AfterCardPlayed</c> beside this, and that
+    /// was the defect: The General's Banner is a card she may never draw, and
+    /// a counter that only moves while a Power is out reads a permanent zero
+    /// on most boards -- Chain of Command's Plan "counting the wrong turn"
+    /// was in fact this, not a timing bug (round-5 run 3, act 3, finding 7;
+    /// the seat had declined The General's Banner). Both writes belong on the
+    /// marker every board has.
     ///
     /// IT RECORDS AND NOTHING ELSE. The "other" half of "the last other
     /// Companion card" is applied where the memory is READ
@@ -129,7 +133,9 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         if (!KokomiOverhaul.LiveFor(Owner)) return Task.CompletedTask;
         if (cardPlay.Card is not ICompanionCard) return Task.CompletedTask;
         if (cardPlay.Card.Owner?.Creature != Owner) return Task.CompletedTask;
-        KokomiOverhaulLedger.For(Owner).NoteCompanionCard(cardPlay.Card);
+        var ledger = KokomiOverhaulLedger.For(Owner);
+        ledger.NoteCompanionCard(cardPlay.Card);
+        ledger.NoteCompanionPlayed();
         return Task.CompletedTask;
     }
 }

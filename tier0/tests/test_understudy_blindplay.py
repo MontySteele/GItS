@@ -4431,8 +4431,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-329`: the aim clause now defers to the face, because a Plan
         # that says ALL hits every enemy and this sentence said otherwise on
         # every battle screen of the run.
-        "Plan": [", paid now; lands next turn on ",
-                 "the front enemy, or ALL if it says so. Enemy ",
+        "Plan": [", paid now; next turn: front ",
+                 "enemy, or ALL if it says so; never a Minion. ",
                  "counts; your "],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],

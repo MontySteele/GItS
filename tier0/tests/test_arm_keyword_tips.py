@@ -296,8 +296,13 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # to the face, which was right all along. "First thing" and
             # "raises it" paid for the room: 144 characters with them, 132
             # without, against a ceiling of 135 and no exception taken.
-            "On the [gold]Bake-Kurage[/gold], paid now; lands next turn on ",
-            "the front enemy, or ALL if it says so. Enemy ",
+            #
+            # `R250` (round-5 sec.6 pick 1) ADDED "NEVER A MINION": two
+            # formations put a decoy on the leftmost slot on purpose, and the
+            # sixth clause compressed "lands next turn on" to "next turn:" to
+            # stay under the same 135-character ceiling.
+            "On the [gold]Bake-Kurage[/gold], paid now; next turn: front ",
+            "enemy, or ALL if it says so; never a Minion. ",
             "[gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] does ",
             "not.",
             "heal N HP, never above the HP you entered ",

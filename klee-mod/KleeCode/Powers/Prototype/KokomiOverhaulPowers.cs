@@ -187,12 +187,15 @@ public sealed class CloudsLikeWavesPower : PowerModel, ILocalizationProvider
 /// Commander hand full of Companions turned into a stack of Weak nothing else
 /// in the arm can match, and a replayed Companion paid twice on top.
 ///
-/// THE COMPANION COUNTER IS NOT CAPPED WITH IT, and the two lines below are
-/// deliberately in this order: <see cref="KokomiOverhaulLedger"/> counts EVERY
-/// Companion play because that count is Chain of Command's ("for each
-/// Companion card you played last turn"), and this hook is its only writer.
-/// Capping the count with the Weak would have silently re-priced a different
-/// card.
+/// THE COMPANION COUNTER MOVED OFF THIS HOOK (`EB-362`). It used to be
+/// written here and ONLY here, which meant Chain of Command's "for each
+/// Companion card you played last/this turn" read a permanent zero on any
+/// board without The General's Banner in play -- the seat that found it had
+/// declined the card outright (round-5 run 3, act 3, finding 7). The counter
+/// is now <see cref="ProtoBakeKuragePower.AfterCardPlayed"/>'s, beside
+/// <see cref="KokomiOverhaulLedger.NoteCompanionCard"/>, because rule 1
+/// guarantees that marker is on her every turn of every combat and this Power
+/// is a card she may never draw.
 ///
 /// THE FRONT ENEMY IS <see cref="KokomiPlan.FrontEnemy"/>'s, which is the same
 /// reader a planned hit uses -- so "the front enemy" means one thing in this
@@ -218,7 +221,6 @@ public sealed class GeneralsBannerPower : PowerModel, ILocalizationProvider
         if (cardPlay.Card is not ICompanionCard) return;
         if (cardPlay.Card.Owner?.Creature != Owner) return;
         if (Owner == null || Amount <= 0) return;
-        KokomiOverhaulLedger.For(Owner).NoteCompanionPlayed();
         var front = KokomiPlan.FrontEnemy(Owner);
         // The claim is taken AFTER the board question, so a Companion played
         // on an empty board does not spend the turn's Weak on nothing.
