@@ -153,8 +153,11 @@ are in [`workstreams.md`](workstreams.md).
   2's five `proto_fr_` rows are built** (2026-09-02): the named deploy, two
   Evokes and the drain pair, on a new `drain_fanfare` op and the
   `Deploy`/`Evoke`/`Drain` tips. R250 (2026-09-04) LIFTS the R220 B sequence: the arm is on in the
-  installed dev build, soaked, and the first blind seat round runs on it;
-  no stamp moves, nothing measured.
+  installed dev build, soaked, and **round one is read**
+  (`review/active/furina-reframe-round-1-2026-09-04.md`): one Sonnet seat
+  cleared act 1 at 8 of 78, the reframe's rules read true, and the shipped
+  Burst won the boss fight; one pick, the shipped Burst under the arm.
+  [USER]'s act-1 run is due on this build. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4: one base-game Ironclad run by the same
   Opus seats on the same lane and harness (`review/qa/control-ironclad-2026-09-04/`),
   ascension recorded. The kit clears (Kokomi 4d, 5; Klee 8) are read against
