@@ -295,6 +295,15 @@ def process(row, dest):
     # pixels come out fully opaque -- see contain() note.
     if "/cards/" in row["out"]:
         out = Image.alpha_composite(Image.new("RGBA", out.size, CARD_BG), out)
+        # ...and so they are written WITHOUT an alpha channel (`EB-158`). The
+        # composite above sets every pixel to alpha=255, so the alpha band that
+        # was still being saved was a constant plane -- a quarter of the raw
+        # pixel data paying for information the line above had just destroyed,
+        # across 887 planned card rows. Pillow's RGBA->RGB copies R, G and B
+        # and drops the band; it does not premultiply or otherwise touch a
+        # colour value, so the portrait is byte-for-byte the same picture.
+        # Icons and every non-card surface stay RGBA: their alpha is real.
+        out = out.convert("RGB")
     for i in range(n0, len(flags)):
         flags[i] = f"{row['asset_id']} r{row['rank']}: {flags[i]}"
     dest.parent.mkdir(parents=True, exist_ok=True)

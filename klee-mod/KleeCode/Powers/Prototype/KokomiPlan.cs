@@ -145,14 +145,55 @@ public static class KokomiPlan
         public string Title => Label ?? Source?.Title.ToString() ?? "Plan";
     }
 
+    /// <summary>
+    /// ONE PLAN THAT HAS BEEN CARRIED OUT, as the screen said it (`EB-317`).
+    ///
+    /// THREE FIELDS AND ONE OF THEM IS THE OTHER TWO. <paramref name="Card"/>
+    /// and <paramref name="Number"/> are the row's own shape -- the card that
+    /// was carried out and the number its clause produced, null when the
+    /// clause produced none. <paramref name="Line"/> is the string the
+    /// jellyfish actually SAID, built by <c>Vfx.KurageBeat.Line</c>, and it
+    /// rides the wire because the blind page's contract is that it prints the
+    /// ON-SCREEN TEXT rather than a second composition of the same parts. Two
+    /// composers in two languages is exactly how a page and a screen come to
+    /// disagree about words; there is one, and it is C#.
+    /// </summary>
+    public readonly record struct CarriedOutPlan(
+        string Card, int? Number, string Line);
+
     private static object? _combat;
     private static readonly Dictionary<Player, List<Entry>> _queues = new();
+
+    /// <summary>
+    /// WHAT THE STRIP SHOWS WHILE A MORNING IS RUNNING, and it exists only so
+    /// the strip can empty ONE ENTRY AT A TIME IN VIEW (`EB-317`).
+    ///
+    /// THE QUEUE ITSELF STILL DRAINS IN ONE MOVE, which is the point of doing
+    /// it this way rather than popping the real queue per entry. Two rules
+    /// depend on the queue being empty for the whole drain -- a Plan written
+    /// DURING resolution waits for the next turn, and Change of Plans reached
+    /// through Moon's Reflection finds nothing to pull forward -- and the
+    /// meter ledger's morning row is ONE note of the whole depth
+    /// (`KokomiPlanLedgerTests`). Popping the real queue per entry would move
+    /// both. So the DISPLAY gets its own list, and it is display-only:
+    /// nothing reads it but <c>Vfx.KokomiPlanStrip</c> through
+    /// <see cref="Showing"/>.
+    /// </summary>
+    private static readonly Dictionary<Player, List<Entry>> _showing = new();
+
+    /// <summary>This turn's carry-out lines, in the order they were said.
+    /// Cleared at the top of every morning, so a page never shows yesterday's.
+    /// </summary>
+    private static readonly
+        Dictionary<Player, List<CarriedOutPlan>> _carriedOut = new();
 
     /// <summary>Test seam: forget everything. The mod never calls it.</summary>
     public static void ResetAll()
     {
         _combat = null;
         _queues.Clear();
+        _showing.Clear();
+        _carriedOut.Clear();
     }
 
     private static void Rebase(Creature kokomi)
@@ -161,6 +202,8 @@ public static class KokomiPlan
         if (ReferenceEquals(_combat, combat)) return;
         _combat = combat;
         _queues.Clear();
+        _showing.Clear();
+        _carriedOut.Clear();
     }
 
     /// <summary>This seat's queue, front first. Never null.</summary>
@@ -168,6 +211,26 @@ public static class KokomiPlan
         player != null && _queues.TryGetValue(player, out var q)
             ? q
             : (IReadOnlyList<Entry>)System.Array.Empty<Entry>();
+
+    /// <summary>
+    /// WHAT TO DRAW ON THE JELLYFISH RIGHT NOW: the morning's remaining Plans
+    /// while one is running, and the pending queue every other moment.
+    ///
+    /// The badge is deliberately NOT switched over: `PendingPlansPower` says
+    /// "carries out N Plans at the start of your NEXT turn", and during the
+    /// drain that number really is zero. The strip says what is happening now.
+    /// </summary>
+    public static IReadOnlyList<Entry> Showing(Player? player) =>
+        player != null && _showing.TryGetValue(player, out var drain)
+            ? drain
+            : Pending(player);
+
+    /// <summary>This turn's carry-out lines. Never null.</summary>
+    public static IReadOnlyList<CarriedOutPlan> CarriedOut(Player? player) =>
+        player != null && _carriedOut.TryGetValue(player, out var said)
+            ? said
+            : (IReadOnlyList<CarriedOutPlan>)
+              System.Array.Empty<CarriedOutPlan>();
 
     /// <summary>
     /// WAS THIS PLAY AIMED AT THE JELLYFISH? The one question the generated
@@ -333,21 +396,50 @@ public static class KokomiPlan
         if (player == null) return;
 
         Rebase(kokomi);
+        // `EB-317`: the morning's own record starts empty, and it starts empty
+        // whether or not anything is due -- otherwise a turn with no Plans
+        // would leave yesterday's lines on the blind page as if the jellyfish
+        // had just said them.
+        _carriedOut.Remove(player);
         if (!_queues.TryGetValue(player, out var queue) || queue.Count == 0)
         {
             return;
         }
         var due = new List<Entry>(queue);
         queue.Clear();
+        // The display list is handed over BEFORE the sync, because `Sync`
+        // refreshes the strip and the strip reads `Showing`: the badge goes
+        // away in the same beat the column stays up, which is the true
+        // statement (nothing is pending; four things are happening).
+        _showing[player] = new List<Entry>(due);
         await Sync(choiceContext, kokomi, "rule:morning_drain", due.Count);
 
-        foreach (var entry in due)
+        try
         {
-            var times = CarryOutTimes(kokomi);
-            for (var i = 0; i < times; i++)
+            foreach (var entry in due)
             {
-                await ResolveEntry(choiceContext, kokomi, entry);
+                var times = CarryOutTimes(kokomi);
+                for (var i = 0; i < times; i++)
+                {
+                    await ResolveEntry(choiceContext, kokomi, entry);
+                }
+                // ONE THUMBNAIL LEAVES, AFTER ITS PLAN HAS HAPPENED. Front
+                // first, so the column shortens from the top in the order the
+                // Plans were written -- the order the page prints.
+                if (_showing.TryGetValue(player, out var shown)
+                    && shown.Count > 0)
+                {
+                    shown.RemoveAt(0);
+                }
+                Vfx.KokomiPlanStrip.Refresh(kokomi);
             }
+        }
+        finally
+        {
+            // A throw inside a Plan must not leave the strip drawing a morning
+            // that is over; the display list is torn down on every path.
+            _showing.Remove(player);
+            Vfx.KokomiPlanStrip.Refresh(kokomi);
         }
     }
 
@@ -399,10 +491,27 @@ public static class KokomiPlan
     private static async Task ResolveEntry(
         PlayerChoiceContext choiceContext, Creature kokomi, Entry entry)
     {
+        // `EB-317`, the first half of the beat: THE JELLYFISH ACTS BEFORE THE
+        // PLAN LANDS. Awaited, so the clause's damage number arrives after the
+        // lunge rather than inside it -- the same argument the casket's strike
+        // makes one file over.
+        await Vfx.KurageBeat.Act(BakeKuragePet.Of(kokomi));
+
+        // THE NUMBER ON THE LINE IS THE FIRST ONE THE PLAN PRODUCED, and
+        // "first" is a reading of a card face: War Council prints "Deal 4
+        // damage to ALL enemies and apply 1 Weak to each" and is ONE Plan, so
+        // the number a player is watching for is the hit, which is also the
+        // clause the sheet wrote first. A Plan whose clauses produce nothing at
+        // all (Moon's Reflection's replay, Nereid's window) says its name and
+        // no number, which is what the row asks for.
+        int? number = null;
         foreach (var clause in entry.Clauses)
         {
-            await ResolveOne(choiceContext, kokomi, clause);
+            var produced = await ResolveOne(choiceContext, kokomi, clause);
+            number ??= produced;
         }
+
+        Announce(kokomi, entry.Title, number);
 
         // SANGO ISSHIN's condition, written HERE because this is the one place
         // a Plan is carried out: the morning queue, Change of Plans' early
@@ -420,21 +529,61 @@ public static class KokomiPlan
         }
     }
 
-    private static async Task ResolveOne(
+    /// <summary>
+    /// `EB-317`'s second half: SAY WHAT JUST HAPPENED, AND RECORD IT.
+    ///
+    /// ONE STRING, TWO SURFACES. <c>Vfx.KurageBeat.Line</c> builds the ruled
+    /// format once; the bubble over the jellyfish shows it and the wire
+    /// carries the same characters to the blind page. The pet says it when
+    /// there is a pet -- and Kokomi says it when there is not, the same honest
+    /// degradation the casket's dealer takes.
+    ///
+    /// NOT ON THE LEDGER, and that is `R101b` rather than an oversight: the
+    /// meter ledger stays off the page, so what a seat is shown here is the
+    /// on-screen line and nothing else.
+    /// </summary>
+    private static void Announce(Creature kokomi, string card, int? number)
+    {
+        var line = Vfx.KurageBeat.Line(card, number);
+        Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi, line);
+
+        var player = kokomi.Player;
+        if (player == null) return;
+        if (!_carriedOut.TryGetValue(player, out var said))
+        {
+            said = new List<CarriedOutPlan>();
+            _carriedOut[player] = said;
+        }
+        said.Add(new CarriedOutPlan(card, number, line));
+    }
+
+    /// <summary>
+    /// One clause, and THE NUMBER IT PRODUCED -- damage that landed, Block
+    /// that stuck, HP that was Mended, cards drawn -- or null when the clause
+    /// produces no number a player could read off the board.
+    ///
+    /// THE RETURN IS A DISPLAY VALUE AND NOTHING ELSE. Every call below is the
+    /// call that was already here; what changed is that the number each one
+    /// already computed is now handed back instead of dropped, so the line the
+    /// jellyfish says is the number that LANDED rather than the number the
+    /// sheet printed. `EB-270` makes the same argument for the Bomb badge, and
+    /// <c>ElementalHit.Deal</c> returns its truncated total for exactly this.
+    /// </summary>
+    private static async Task<int?> ResolveOne(
         PlayerChoiceContext choiceContext, Creature kokomi, Planned plan)
     {
         var player = kokomi.Player;
-        if (player == null) return;
+        if (player == null) return null;
 
         switch (plan.Kind)
         {
             case Kind.Draw:
                 await CardPileCmd.Draw(choiceContext, plan.Amount, player);
-                break;
+                return plan.Amount;
 
             case Kind.Energy:
                 await PlayerCmd.GainEnergy(plan.Amount, player);
-                break;
+                return plan.Amount;
 
             case Kind.Block:
                 // POWERED, and rule 3 is why: "your Strength and Dexterity
@@ -443,53 +592,60 @@ public static class KokomiPlan
                 // states the opposite rule in the brief itself, so a planned
                 // Block is `ValueProp.Move` -- the same prop a card's own Block
                 // carries, and the same one Dexterity reads.
-                await CreatureCmd.GainBlock(
+                return (int)await CreatureCmd.GainBlock(
                     kokomi, plan.Amount, ValueProp.Move, null);
-                break;
 
             case Kind.Mend:
-                await KokomiRules.Mend(choiceContext, kokomi, plan.Amount);
-                break;
+                // Mend returns the HP that actually landed, which is the
+                // honest number: "Mend 10" into 4 points of room says 4.
+                return await KokomiRules.Mend(
+                    choiceContext, kokomi, plan.Amount);
 
             case Kind.Damage:
-                await Hit(choiceContext, kokomi, plan.Aim, plan.Amount);
-                break;
+                return await Hit(choiceContext, kokomi, plan.Aim, plan.Amount);
 
             case Kind.DamageQuarterMaxHp:
-                await Hit(choiceContext, kokomi, plan.Aim,
-                          KokomiRules.QuarterOfMaxHp(kokomi));
-                break;
+                return await Hit(choiceContext, kokomi, plan.Aim,
+                                 KokomiRules.QuarterOfMaxHp(kokomi));
 
             case Kind.DamagePerCompanionLastTurn:
                 // Chain of Command. "Last turn" is read at CARRY-OUT: the Plan
                 // was written on turn N and resolves at the top of N+1, and the
                 // ledger has rolled by then, so the count it holds is turn N's
                 // -- the turn the player was looking at when they wrote it.
-                await Hit(choiceContext, kokomi, plan.Aim,
-                          plan.Amount * KokomiOverhaulLedger.For(kokomi)
-                                            .CompanionsPlayedLastTurn);
-                break;
+                return await Hit(choiceContext, kokomi, plan.Aim,
+                                 plan.Amount * KokomiOverhaulLedger.For(kokomi)
+                                                   .CompanionsPlayedLastTurn);
 
             case Kind.ApplyWeak:
                 await Debuff<WeakPower>(choiceContext, kokomi, plan);
-                break;
+                return plan.Amount;
 
             case Kind.ApplyVulnerable:
                 await Debuff<VulnerablePower>(choiceContext, kokomi, plan);
-                break;
+                return plan.Amount;
 
             case Kind.PlanTwice:
+                // NO NUMBER. Nereid's Ascension's amount is a window in TURNS,
+                // not something the Plan produced on the board, and printing it
+                // beside a card name would read as damage.
                 await PlanTwicePower.Wear(choiceContext, kokomi, plan.Amount);
-                break;
+                return null;
 
             case Kind.ReplayExhausted:
+                // The replayed card prints its own numbers as it resolves; this
+                // clause produced none of its own.
                 await Replay(choiceContext, player, plan.Card);
-                break;
+                return null;
 
             case Kind.PlayCopyOfCompanion:
+                // The copy prints its own numbers as it resolves; this
+                // clause produced none of its own (`EB-317`'s line names
+                // the card alone).
                 await PlayCopy(choiceContext, kokomi, plan.Card);
-                break;
+                return null;
         }
+        return null;
     }
 
     /// <summary>The front enemy: leftmost alive. <c>CombatState.Enemies</c> is
@@ -525,16 +681,27 @@ public static class KokomiPlan
     /// the aura and its reaction, then the target's Vulnerable -- so a planned
     /// hit and a played one differ in nothing but when they land.
     /// </summary>
-    private static async Task Hit(
+    /// <remarks>
+    /// RETURNS THE FIRST TARGET'S LANDED NUMBER (`EB-317`). An ALL-enemies
+    /// clause prints a different number over each enemy -- one aura reacts,
+    /// another is Vulnerable -- and the line has room for one. The front
+    /// enemy's is the one taken, because that is the enemy a single-target
+    /// Plan would have hit and the one the player is looking at; every number
+    /// is still on screen over its own enemy, drawn by the engine.
+    /// </remarks>
+    private static async Task<int?> Hit(
         PlayerChoiceContext choiceContext, Creature kokomi, Aim aim, int amount)
     {
-        if (amount <= 0) return;
+        if (amount <= 0) return null;
+        int? first = null;
         foreach (var target in Aimed(kokomi, aim))
         {
             if (target.IsDead) continue;
-            await ElementalHit.Deal(
+            var landed = await ElementalHit.Deal(
                 choiceContext, target, Element.Hydro, amount, kokomi);
+            first ??= landed;
         }
+        return first;
     }
 
     private static async Task Debuff<T>(
@@ -607,6 +774,24 @@ public static class KokomiPlan
         await CardCmd.AutoPlay(choiceContext, copy, FrontEnemy(kokomi));
     }
 
+    /// One carried-out Plan on the wire (`EB-317`).
+    ///
+    /// A NAMED METHOD RATHER THAN A LAMBDA INSIDE <see cref="Snapshot"/>, and
+    /// the reason is the pin: these three key names are the contract with
+    /// `understudy/blindplay.py`, and the only way a headless test can read
+    /// them is <c>Il.Strings</c> over the method that holds them. A lambda
+    /// compiles into a display class whose name a pin cannot ask for, so the
+    /// literals would sit somewhere no test could see -- which is how a
+    /// renamed key becomes a silent hole on a seat's page.
+    /// </summary>
+    private static object? CarriedOutRow(CarriedOutPlan said) =>
+        new Dictionary<string, object?>
+        {
+            ["card"] = said.Card,
+            ["number"] = said.Number,
+            ["line"] = said.Line,
+        };
+
     /// <summary>
     /// THE WIRE'S VIEW of the queue (`EB-216`, the draft-6 half).
     ///
@@ -656,6 +841,19 @@ public static class KokomiPlan
                 ["clauses"] = entry.Clauses.Count,
             })
             .ToList();
+        // `EB-317`. WHAT THE JELLYFISH HAS ALREADY DONE THIS TURN, in the
+        // order it did it, and in the WORDS IT SAID: `line` is the very string
+        // the speech bubble carried, so `understudy/blindplay.render` prints
+        // the screen's text rather than recomposing it. `card` and `number`
+        // ride alongside because a reader that wants the parts should not have
+        // to parse the sentence back apart; `number` is null for a Plan whose
+        // clauses produced none.
+        //
+        // PRESENT AND EMPTY ON A TURN WITH NO CARRY-OUT, which is the same
+        // three-state discipline the whole snapshot takes: the key is here
+        // because the rule is here, and its emptiness is a fact.
+        snapshot["carried_out"] =
+            CarriedOut(player).Select(CarriedOutRow).ToList();
         return snapshot;
     }
 

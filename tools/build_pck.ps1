@@ -158,6 +158,50 @@ function Note-Skip([string]$what, [string]$path) {
     Write-Host "SKIPPED: $what -- no source at $path" -ForegroundColor Yellow
 }
 
+# WORKING FILES MUST NOT SHIP. The still generators (gen_furina_stills.py,
+# gen_kokomi_stills.py) cache their governing render next to the outputs, in
+# model\, because that is where the source of truth for a character's framing
+# belongs. Nothing in the game ever loads them -- the game loads the 240x280
+# combat_model.png that gets CUT FROM them -- but a blanket *.png copy shipped
+# them anyway. Kokomi's cached cutout is 8.6 MB against a whole pck of 8.3 MB,
+# so this silently doubled the download for a file with no consumer. Excluded
+# by suffix rather than by name so the next character's cutout is covered
+# before anyone notices it exists.
+#
+# Filtered with Where-Object, NOT with -Exclude. Get-ChildItem -Filter *.png
+# -Exclude <pattern> against a DIRECTORY path returns nothing at all: -Exclude
+# matches the path item, which is the directory, so the directory is excluded
+# and no files are enumerated. That silently copied zero images and dropped
+# BOTH characters back onto the Klee fallbacks -- a green build that shipped
+# the wrong art, caught only because the fallback lines are printed.
+#
+# EB-158 adds the two Klee SOURCE MASTERS to the same list, for the same
+# reason and with one difference. res://klee/model/character_klee_full_wish.png
+# (727 KB) and res://klee/model/klee_character_card.png (451 KB) were 1.18 MB
+# of a 9.14 MB pack, and NOTHING loads them: no C#, no .tscn, no .tres, no
+# localization row -- verified against klee.pck.contract.txt, which listed both
+# because this blanket *.png copy put them there. The difference is that
+# character_klee_full_wish.png IS STILL PRODUCED ON PURPOSE: it is the source
+# tools/combat_layer_fences/klee.yaml reads to cut the five combat layers that
+# DO ship, so its plan.tsv row stays and only the pck copy goes. It is a
+# working file in exactly the sense the cutouts above are.
+# klee_character_card.png has no such consumer, so its plan.tsv row is gone too
+# and this entry is the belt to that braces: ImageGen is gitignored, so a
+# machine that already has the file on disk would keep packing it.
+$pckExclude = @('*_cutout.png',
+                'character_klee_full_wish.png',
+                'klee_character_card.png')
+
+# The list moved ABOVE the Klee loop, which is the other half of the fix: the
+# Klee loop predates $pckExclude entirely and filtered nothing, which is how
+# both masters shipped while Furina's and Kokomi's cutouts did not. Both loops
+# go through this one helper now, so the next name added to the list covers
+# every character at once instead of the two that happen to be filtered.
+function Select-PackablePngs([string]$dir) {
+    Get-ChildItem $dir -Filter *.png -ErrorAction SilentlyContinue |
+        Where-Object { $n = $_.Name; -not ($pckExclude | Where-Object { $n -like $_ }) }
+}
+
 # Klee's historical art layout predates the roster and stays at ImageGen/images
 # /<surface>. Furina and later characters use ImageGen/images/<character>
 # /<surface>. Both land in character namespaces inside the merged pack.
@@ -166,7 +210,7 @@ foreach ($d in 'ui', 'powers', 'relics', 'model') {
     if (-not (Test-Path $from)) { Note-Skip "klee\$d" $from; continue }
     $to = Join-Path $work "klee\$d"
     New-Item -ItemType Directory -Force -Path $to | Out-Null
-    $files = Get-ChildItem $from -Filter *.png -ErrorAction SilentlyContinue
+    $files = Select-PackablePngs $from
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
@@ -213,24 +257,6 @@ if (-not (Test-Path $kurageSrc)) { Note-Skip 'kokomi\summon' $kurageSrc } else {
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
-# WORKING FILES MUST NOT SHIP. The still generators (gen_furina_stills.py,
-# gen_kokomi_stills.py) cache their governing render next to the outputs, in
-# model\, because that is where the source of truth for a character's framing
-# belongs. Nothing in the game ever loads them -- the game loads the 240x280
-# combat_model.png that gets CUT FROM them -- but a blanket *.png copy shipped
-# them anyway. Kokomi's cached cutout is 8.6 MB against a whole pck of 8.3 MB,
-# so this silently doubled the download for a file with no consumer. Excluded
-# by suffix rather than by name so the next character's cutout is covered
-# before anyone notices it exists.
-#
-# Filtered with Where-Object, NOT with -Exclude. Get-ChildItem -Filter *.png
-# -Exclude <pattern> against a DIRECTORY path returns nothing at all: -Exclude
-# matches the path item, which is the directory, so the directory is excluded
-# and no files are enumerated. That silently copied zero images and dropped
-# BOTH characters back onto the Klee fallbacks -- a green build that shipped
-# the wrong art, caught only because the fallback lines are printed.
-$pckExclude = '*_cutout.png'
-
 foreach ($character in 'furina', 'kokomi') {
     $charSrc = Join-Path $src $character
     foreach ($d in 'ui', 'powers', 'relics', 'model') {
@@ -238,8 +264,7 @@ foreach ($character in 'furina', 'kokomi') {
         if (-not (Test-Path $from)) { Note-Skip "$character\$d" $from; continue }
         $to = Join-Path $work "$character\$d"
         New-Item -ItemType Directory -Force -Path $to | Out-Null
-        $files = Get-ChildItem $from -Filter *.png -ErrorAction SilentlyContinue |
-            Where-Object { $_.Name -notlike $pckExclude }
+        $files = Select-PackablePngs $from
         if ($files) { Copy-Item $files.FullName -Destination $to }
     }
 }

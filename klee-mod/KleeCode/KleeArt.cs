@@ -25,10 +25,48 @@ internal static class RosterArt
     /// <summary>
     /// Cached because CustomPortrait is a property getter the UI hits
     /// repeatedly -- rebuilding a texture per access would be a per-frame
-    /// decode. The FALLBACK is cached too (`EB-275`), so an uncovered row
-    /// resolves its portrait once and never asks the disk again.
+    /// decode.
+    ///
+    /// BOUNDED (`EB-158`). This was one plain Dictionary that only ever grew:
+    /// every portrait a session had drawn stayed resident for as long as the
+    /// process lived. A decoded portrait is 500x380 RGBA8 =
+    /// <see cref="PortraitBytes"/> ~= 0.73 MB and `art/plan.tsv` carries 887
+    /// card rows, so a long sitting that browsed the pools could pin ~645 MB
+    /// of texture memory nothing was going to ask for again.
+    ///
+    /// LRU with capacity <see cref="CacheCapacity"/>, and the capacity is
+    /// chosen off what the UI can want AT ONCE rather than off a memory
+    /// target: the largest simultaneous demand is a browsed end-of-run deck
+    /// (~40-60) alongside a combat hand, a shop row and a reward screen. 128
+    /// clears that with headroom and bounds the cache at ~93 MB. Past it, an
+    /// eviction costs ONE PNG decode the next time that card is shown -- which
+    /// is the cost this cache exists to avoid per FRAME, not per re-show.
     /// </summary>
-    private static readonly Dictionary<string, Texture2D?> Cache = new();
+    private const int CacheCapacity = 128;
+
+    /// <summary>Decoded size of one portrait: <see cref="PortraitWidth"/> x
+    /// <see cref="PortraitHeight"/> x 4 bytes (RGBA8). It records the
+    /// arithmetic behind <see cref="CacheCapacity"/>; no code reads it.
+    /// </summary>
+    private const int PortraitBytes = PortraitWidth * PortraitHeight * 4;
+
+    private static readonly Dictionary<string, LinkedListNode<KeyValuePair<string, Texture2D>>>
+        Cache = new();
+
+    /// <summary>Most-recently-used first. The node IS the dictionary's value,
+    /// so a hit is O(1) to find and O(1) to re-order.</summary>
+    private static readonly LinkedList<KeyValuePair<string, Texture2D>> Recency = new();
+
+    /// <summary>
+    /// Rows that resolved to the blank -- or, with no engine behind the native
+    /// calls, to null -- and they are kept OUT of the bounded cache on
+    /// purpose. `EB-275`'s guarantee is that an uncovered row says so ONCE; an
+    /// id evicted from the LRU and re-resolved would say it again, which would
+    /// make a bounded cache a way to re-open a closed defect. These entries
+    /// are a string each, bounded by the roster, and hold no texture: the
+    /// blank is one shared instance.
+    /// </summary>
+    private static readonly HashSet<string> Unresolved = new();
 
     /// <summary>
     /// The card-art window's authored size. `tools/art_lint.py` bills every
@@ -126,7 +164,14 @@ internal static class RosterArt
     /// </summary>
     public static Texture2D? CardPortrait(string cardId)
     {
-        if (Cache.TryGetValue(cardId, out var cached)) return cached;
+        if (Cache.TryGetValue(cardId, out var node))
+        {
+            Recency.Remove(node);
+            Recency.AddFirst(node);
+            return node.Value.Value;
+        }
+        // Resolved-to-blank rows never reach the LRU -- see Unresolved.
+        if (Unresolved.Contains(cardId)) return Blank();
 
         var path = Path.Combine(ImageRoot, "cards", cardId + ".png");
         Texture2D? texture = null;
@@ -151,14 +196,39 @@ internal static class RosterArt
         }
 
         // ONCE PER ROW, which is the whole of `EB-275`. The two Log.Warn lines
-        // above are already once-per-row by the cache below; what was not was
-        // the game's own per-frame atlas miss, and it is a texture -- any
-        // texture -- that stops that. The bill this leaves is
-        // `tools/art_coverage.py`'s to state.
-        texture ??= Blank();
+        // above are once-per-row because `Unresolved` below remembers the id
+        // FOREVER -- the bounded LRU holds decoded textures only, so no
+        // eviction can make an uncovered row warn a second time. What the
+        // texture stops is the game's own per-frame atlas miss, and any
+        // texture does it. The bill this leaves is `tools/art_coverage.py`'s
+        // to state.
+        if (texture != null)
+        {
+            Remember(cardId, texture);
+            return texture;
+        }
 
-        Cache[cardId] = texture;
-        return texture;
+        Unresolved.Add(cardId);
+        return Blank();
+    }
+
+    /// <summary>
+    /// Insert at the head and drop the tail past <see cref="CacheCapacity"/>.
+    /// The evicted entry is simply forgotten: the Texture2D is a managed
+    /// RefCounted, so once the UI has let go of it Godot frees it -- there is
+    /// nothing here to Dispose, and disposing a texture a card is still
+    /// holding is how you get a blank card rather than a smaller heap.
+    /// </summary>
+    private static void Remember(string cardId, Texture2D texture)
+    {
+        Cache[cardId] = Recency.AddFirst(
+            new KeyValuePair<string, Texture2D>(cardId, texture));
+        while (Cache.Count > CacheCapacity)
+        {
+            var oldest = Recency.Last!;   // Count > capacity >= 1, so non-null
+            Recency.RemoveLast();
+            Cache.Remove(oldest.Value.Key);
+        }
     }
 
     /// <summary>Test seam: forget the cache and the blank. The mod never calls
@@ -166,6 +236,8 @@ internal static class RosterArt
     internal static void ResetAll()
     {
         Cache.Clear();
+        Recency.Clear();
+        Unresolved.Clear();
         _blank = null;
     }
 }

@@ -1433,4 +1433,12 @@ harmless headroom; and the energy orb takes A Fontaine Hydro, which
 lifts EB-40's gate. Ceilings never come down.
 M69 minted 2026-08-30 by the X9READ-S1 graded read and OPEN with its
 row: R188's watch trigger fired, so X9 returns as a numbered pick.
+EB-163 RETIRED 2026-09-02 on its own acceptance -- art_ledger --strict
+reports PROVENANCE-GAP -- 0. The row was the provenance gap in three
+kinds; two were joins the ledger never made and shut when the reader
+learned to read a candidate key. The third and last was one live gap,
+what_the_tokoyo_returns, which shipped bytes whose rank-1 source was
+cleared nowhere in SOURCES.tsv. It closed without the fetch window the
+row asked for: 478b83a6, filling the uncovered companion rows, landed
+that clearance too. Ceilings never come down.
 ```

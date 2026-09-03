@@ -65,8 +65,14 @@ def test_deferred_entries_are_still_referenced():
     be deleted. S12 fails on this too, but only where a staged pck exists;
     this is the copy that runs on a clean checkout.
     """
+    # The list may legitimately be EMPTY -- it was, from EB-65 on 2026-09-02,
+    # when the last seven entries' art landed. Emptiness is the goal state of
+    # a deferral list, not a parse failure, so this asserts the hashtable is
+    # still THERE (test_the_gate_is_wired) and that whatever it holds is live.
+    assert "$pckDeferred = @{" in VALIDATE, (
+        "the deferred hashtable moved or was renamed; _deferred_paths parses "
+        "it by that literal and would silently return [] for a real list")
     deferred = _deferred_paths()
-    assert deferred, "no deferred entries parsed -- did the hashtable move?"
 
     cs = _cs_text()
     orphans = [p for p in deferred if p not in cs]
