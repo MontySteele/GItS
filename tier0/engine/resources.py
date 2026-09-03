@@ -546,7 +546,7 @@ def gain_burst(state: CombatState, n: int, source: str) -> None:
     own funnel, so "the arm neither feeds nor shows Burst" is ONE decision
     instead of ten that can be retired by halves.
 
-    QUARANTINED (C.KOKOMI_OVERHAUL), `EB-318`: THE SAME DEFECT ONE CHARACTER
+    QUARANTINED (C.KOKOMI_OVERHAUL), `EB-327`: THE SAME DEFECT ONE CHARACTER
     OVER, FOUND THE SAME WAY. The Kokomi overhaul's brief retires the Burst
     gate outright -- no card, relic or keyword in the slice names the meter --
     and the mod had already turned off the three income sites it knew about

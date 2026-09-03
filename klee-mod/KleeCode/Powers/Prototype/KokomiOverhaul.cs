@@ -62,7 +62,7 @@ namespace KleeMod.Powers;
 /// The other two sit beside the RESOURCE, in <c>KokomiResources</c>, because
 /// each is an answer to "does she have a Burst meter at all" and that question
 /// should have one home rather than one per caller:
-///   * the Burst FEED -- <c>KokomiResources.GainBurst</c> (`EB-318`), the one
+///   * the Burst FEED -- <c>KokomiResources.GainBurst</c> (`EB-327`), the one
 ///     funnel every income source lands in. Three of the four sources were
 ///     already off at their own seams; REACTIONS were not, and a blind seat
 ///     read the retired meter filling on the status line.

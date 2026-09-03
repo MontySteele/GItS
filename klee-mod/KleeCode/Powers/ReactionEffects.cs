@@ -346,7 +346,7 @@ internal static class ReactionEffects
             // income is a large share of her fill rate; leaving her off this
             // line left the Burst reachable on paper and rare in play.
             //
-            // `EB-318`: under KOKOMI_OVERHAUL this pays nothing, and the guard
+            // `EB-327`: under KOKOMI_OVERHAUL this pays nothing, and the guard
             // is inside GainBurst rather than written out here -- same place,
             // same reason, as KleeBurstResource.Find's (`EB-266`). Read that
             // header for why the arm answers "no meter" once instead of at

@@ -179,7 +179,7 @@ public class LiveBurn20260902Tests
         Assert.False(KokomiResources.BurstGaugeApplies(Seat.Furina().Creature));
     }
 
-    // ---- EB-318: and nothing FILLS the meter the gauge stood down from -----
+    // ---- EB-327: and nothing FILLS the meter the gauge stood down from -----
 
     [Fact]
     public void A_reaction_pays_no_burst_under_her_own_arm()
