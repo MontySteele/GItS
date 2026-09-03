@@ -18,7 +18,6 @@ from dataclasses import field
 from typing import Any
 
 from understudy import qa_packet
-
 from understudy.blindplay_read import (_blob, _entity_id, _fold, _int, _label,
                                        _listing, _number_names, _relics,
                                        _screen, _text)

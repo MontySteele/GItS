@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from understudy import bridge, qa_packet
-
 from understudy.staged_turn_shape import (is_negative, _norm, USER_GRADER,
                                           WEIGHT_DISAGREE, WEIGHT_WINDOW)
 

@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any
 
 from understudy import authorship, bridge, qa_packet, seat
-
 from understudy.blindplay_grammar import act
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _int, settle, _text

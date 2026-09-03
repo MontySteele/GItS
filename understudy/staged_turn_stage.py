@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any
 
 from understudy import face_defects, qa_packet, scenario
-
 from understudy.staged_turn_model import StagedTurn, TurnError
 from understudy.staged_turn_parse import turn_dir, wire_assumption_preflight
 from understudy.staged_turn_shape import DOMINANCE_GAP, REPO

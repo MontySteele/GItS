@@ -11,7 +11,6 @@ from __future__ import annotations
 from typing import Any
 
 from understudy import qa_packet
-
 from understudy.blindplay_board import (_bundle_cards, _combat,
                                         _event_options, _map_ahead, _map_boss,
                                         _map_options, _preview_cards,

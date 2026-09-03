@@ -10,7 +10,6 @@ from __future__ import annotations
 from typing import Any
 
 from understudy import bridge
-
 from understudy.blindplay_read import (_blob, _enemies, _entity_id, _hand,
                                        _int, _player, _text)
 

@@ -13,7 +13,6 @@ import time
 from typing import Any
 
 from understudy import bridge, qa_packet
-
 from understudy.blindplay_shape import (COMBAT_SCREENS, SETTLE_DELAY_S,
                                         SETTLE_TRIES)
 

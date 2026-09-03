@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any
 
 from understudy import qa_packet
-
 from understudy.staged_turn_closeness import closeness
 from understudy.staged_turn_ledger import is_down_weighted
 from understudy.staged_turn_model import FormError

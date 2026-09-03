@@ -18,7 +18,6 @@ from pathlib import Path
 from typing import Any
 
 from understudy import qa_packet
-
 from understudy.blindplay_read import _int, _text
 from understudy.blindplay_shape import RECORD_ROOT
 

@@ -11,7 +11,6 @@ import hashlib
 from typing import Any
 
 from understudy import qa_packet
-
 from understudy.blindplay_board import _pulse_phrase
 from understudy.blindplay_notes import (AURA_NOTE, HAND_REPEAT_NOTE,
                                         METER_CAPPED_NOTE, METER_NOTE,

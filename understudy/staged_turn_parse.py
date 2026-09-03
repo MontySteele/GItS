@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any
 
 from understudy import adapter, qa_packet, scenario
-
 from understudy.staged_turn_model import (Board, _ID_RE, StagedTurn,
                                           STAGING_VERBS, TurnError)
 from understudy.staged_turn_shape import SLOT_FILE_NAME, TURN_DIR

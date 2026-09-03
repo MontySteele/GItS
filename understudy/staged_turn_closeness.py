@@ -15,7 +15,6 @@ import copy
 from typing import Any
 
 from understudy import adapter, qa_packet
-
 from understudy.staged_turn_model import Board, TurnError
 from understudy.staged_turn_shape import DOMINANCE_GAP, FALSIFIERS, MAX_LINES
 

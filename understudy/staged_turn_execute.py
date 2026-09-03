@@ -10,7 +10,6 @@ from __future__ import annotations
 from typing import Any
 
 from understudy import adapter, qa_packet, scenario
-
 from understudy.staged_turn_model import FormError, StagedTurn
 from understudy.staged_turn_shape import (FALSIFIERS, MAX_MODALS_PER_PLAY,
                                           MODAL_KEY_FOR_SCREEN, MODAL_KEYS)

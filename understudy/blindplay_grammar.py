@@ -12,7 +12,6 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from understudy import qa_packet
-
 from understudy.blindplay_board import (_bundle_cards, _combat,
                                         _event_options, _map_nodes,
                                         _map_options, _proceed_option,

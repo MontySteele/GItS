@@ -11,7 +11,6 @@ from __future__ import annotations
 from typing import Any
 
 from understudy import qa_packet
-
 from understudy.blindplay_faces import (_card_face, _card_title, _enemy_names,
                                         _hook_note, _intent, _meter_max,
                                         _named_option, _number_faces, _powers,
