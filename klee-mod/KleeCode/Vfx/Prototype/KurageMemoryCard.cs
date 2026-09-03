@@ -500,15 +500,21 @@ internal static class KurageMemoryCard
             queue, KokomiResources.GetCharge(creature));
 
         var projection = new Dictionary<CardModel, KurageMemory.EntryState>();
+        // `EB-248`: the price sentence beside the state, built from the SAME
+        // entry in the same pass, so the band and the ring cannot describe
+        // different memories.
+        var prices = new Dictionary<CardModel, string>();
         for (var i = 0; i < queue.Count; i++)
         {
             pile.AddInternal(queue[i].Card);
             // Identity, not id: an Entry holds the live CardModel instance
             // deliberately, so the same instance is what the grid renders.
             projection[queue[i].Card] = states[i];
+            prices[queue[i].Card] = KurageMemory.PriceText(
+                queue[i].Cost, queue[i].Price);
         }
 
-        KurageMemoryPileRing.Arm(pile, projection);
+        KurageMemoryPileRing.Arm(pile, projection, prices);
         NCardPileScreen.ShowScreen(pile, CloseHotkeys);
     }
 
@@ -593,6 +599,38 @@ internal static class KurageMemoryPileRing
 
     private const int RingWidth = 8;
 
+    // ------------------------------------------ the price on the card --
+
+    /// <summary>
+    /// `EB-248`. THE PRICE, AND THE COST IT WAS MULTIPLIED FROM, on each card
+    /// in the view.
+    ///
+    /// The ring says whether the bank reaches this entry; it never said what
+    /// the entry costs, and the card underneath prints its OWN face -- which,
+    /// for a Muster recruit, is not the face the rule priced. So the queue
+    /// showed a two and charged a three with nothing on screen joining them,
+    /// and `KURAGECAD-W1`'s tester said so unprompted. This band is the join,
+    /// and it is <see cref="KurageMemory.PriceText"/>'s sentence, the same one
+    /// the strip and the blind page carry.
+    ///
+    /// IT GOES HERE AND NOT ON THE HUD. §14.3's division of labour is that the
+    /// resting element answers "does the next one fire" and the pile answers
+    /// "how far do I get"; [USER] dropped the parenthesised spend from under
+    /// the HUD badge on exactly that ground, so the derivation lives on the
+    /// surface the player opened on purpose, beside every entry rather than
+    /// only the front.
+    /// </summary>
+    private const string PriceName = "KleeKurageQueuePrice";
+
+    private const int PriceFontSize = 26;
+
+    /// <summary>The band's height, in the card's own coordinates.</summary>
+    private const float PriceHeight = 36f;
+
+    /// <summary>How far the band sits above the bottom edge of the card face,
+    /// clear of the card's own cost star and its frame.</summary>
+    private const float PriceInset = 12f;
+
     // ------------------------------------------- the head of the view --
 
     /// <summary>
@@ -629,6 +667,12 @@ internal static class KurageMemoryPileRing
     private static Dictionary<CardModel, KurageMemory.EntryState> _projection
         = new();
 
+    /// <summary>`EB-248`: each entry's price sentence, keyed by the same live
+    /// instance the projection is. Built at <see cref="Arm"/> from the queue
+    /// itself, never re-derived here -- the same posture the ring takes toward
+    /// <see cref="KurageMemory.Affordability"/>.</summary>
+    private static Dictionary<CardModel, string> _prices = new();
+
     /// <summary>Entries painted since the last <see cref="Arm"/>, so one line
     /// of live evidence says whether the hook reached the grid at all. This is
     /// the reading EB-201 had to deploy twice to get.</summary>
@@ -656,12 +700,27 @@ internal static class KurageMemoryPileRing
     internal static Rect2 RectFor(Vector2 cardSize)
         => new Rect2(-cardSize * 0.5f, cardSize);
 
+    /// <summary>`EB-248`: the price band's rect, IN THE RING'S OWN
+    /// COORDINATES -- the band is a child of the ring, so it inherits the
+    /// ring's placement and its visibility and cannot be left painted on a
+    /// pooled card the ring has already released.</summary>
+    internal static Rect2 PriceRect() => PriceRectFor(NCard.defaultSize);
+
+    /// <summary>Split from the constant it reads for the same headless reason
+    /// <see cref="RectFor"/> is: a test may assert the VALUE without touching
+    /// `NCard`.</summary>
+    internal static Rect2 PriceRectFor(Vector2 cardSize)
+        => new Rect2(new Vector2(0f, cardSize.Y - PriceHeight - PriceInset),
+                     new Vector2(cardSize.X, PriceHeight));
+
     internal static void Arm(
         CardPile pile,
-        Dictionary<CardModel, KurageMemory.EntryState> projection)
+        Dictionary<CardModel, KurageMemory.EntryState> projection,
+        Dictionary<CardModel, string> prices)
     {
         _pile = pile;
         _projection = projection;
+        _prices = prices;
         _painted.Clear();
         _reported = false;
     }
@@ -716,6 +775,7 @@ internal static class KurageMemoryPileRing
     {
         _pile = null;
         _projection = new Dictionary<CardModel, KurageMemory.EntryState>();
+        _prices = new Dictionary<CardModel, string>();
         _painted.Clear();
         _reported = false;
     }
@@ -793,7 +853,67 @@ internal static class KurageMemoryPileRing
         ring.Visible = true;
         ring.AddThemeStyleboxOverride(PanelStyleBox, style);
 
+        PaintPrice(ring, card);
         Report(card);
+    }
+
+    /// <summary>
+    /// `EB-248`: the price band on one card, built on first sight and
+    /// re-texted every paint -- a pooled `NCard` arrives carrying whatever the
+    /// last screen left on it, which is the same reason the ring's rect is set
+    /// every paint rather than only on creation.
+    ///
+    /// A card with no price on the map keeps a HIDDEN band rather than a stale
+    /// one. That state is not reachable today -- <see cref="Arm"/> fills both
+    /// maps from the same queue in the same loop -- and it is written anyway,
+    /// because "not reachable" is what the ring assumed before EB-201.
+    /// </summary>
+    private static void PaintPrice(Panel ring, CardModel card)
+    {
+        var band = ring.GetNodeOrNull<Panel>(PriceName);
+        if (band == null)
+        {
+            band = new Panel
+            {
+                Name = PriceName,
+                MouseFilter = Control.MouseFilterEnum.Ignore,
+            };
+            var label = new Label
+            {
+                Name = "Text",
+                MouseFilter = Control.MouseFilterEnum.Ignore,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            label.AddThemeFontSizeOverride(ThemeConstants.Label.FontSize,
+                                           PriceFontSize);
+            label.AddThemeColorOverride(ThemeConstants.Label.FontColor,
+                                        StsColors.cream);
+            band.AddChildSafely(label);
+            ring.AddChildSafely(band);
+        }
+
+        var text = band.GetNodeOrNull<Label>("Text");
+        if (text == null) return;
+
+        if (!_prices.TryGetValue(card, out var price))
+        {
+            band.Visible = false;
+            return;
+        }
+
+        var rect = PriceRect();
+        band.Position = rect.Position;
+        band.Size = rect.Size;
+        text.Position = Vector2.Zero;
+        text.Size = rect.Size;
+
+        var backing = new StyleBoxFlat { BgColor = StsColors.transparentBlack };
+        backing.SetCornerRadiusAll(6);
+        band.AddThemeStyleboxOverride(PanelStyleBox, backing);
+
+        text.Text = price;
+        band.Visible = true;
     }
 
     /// <summary>One INFO line per pile open, once the whole projection has been

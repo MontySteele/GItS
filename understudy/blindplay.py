@@ -102,6 +102,15 @@ from understudy import authorship, bridge, qa_packet, report, seat
 # retune, the same way `lint_constant_parity` holds the C# copy.
 CHARGE_SOURCE_LINE = "Gain 1 Charge when a card of yours Exhausts"
 
+# `EB-248`. What a memory's price is a multiple OF, spelled on the same terms
+# as the line above and for the same reason: this module may not import
+# `tier0`, so `test_a_discounted_memory_prints_the_cost_it_was_multiplied_by`
+# reads `C.KURAGE_MEMORY_COST_PER_ENERGY` and fails if the two fall apart.
+# The C# half interpolates it from `KurageMemoryLaw.CostPerEnergy`, which
+# `lint_constant_parity` already pins to the same sim constant, so all three
+# move on a retune or none do.
+KURAGE_COST_PER_ENERGY = 3
+
 REPO = Path(__file__).resolve().parents[1]
 LOG_ROOT = Path(__file__).resolve().parent / "logs" / "blindplay"
 RECORD_ROOT = REPO / "review" / "qa" / "blindplay"
@@ -2445,8 +2454,20 @@ def render(obs: dict[str, Any]) -> str:
                 out.append(
                     f"- Opening the memory shows “{CHARGE_SOURCE_LINE}”, "
                     "and then the whole memory, front first:")
+                # `EB-248`: THE COST THE RULE MULTIPLIED, beside the price it
+                # produced. The price is three times the EFFECTIVE face, so a
+                # Muster recruit printing 2 enrols at 3 and the tester who read
+                # both numbers had no route from one to the other -- the defect
+                # was named unprompted, and it is legibility rather than
+                # arithmetic. This is `KurageMemory.PriceText`'s sentence,
+                # word for word, so the page and the pile view say the same
+                # thing. A free memory carries no derivation: a zero price
+                # means a zero cost, and "cost 0 x 3" would restate the answer
+                # rather than explain it.
                 for i, e in enumerate(m["queue"], 1):
-                    price = "free" if not e["price"] else f"{e['price']} Charge"
+                    price = ("free" if not e["price"] else
+                             f"{e['price']} Charge, cost {e['cost']} x "
+                             f"{KURAGE_COST_PER_ENERGY}")
                     out.append(f"  {i}. **{e['name']}** — {price} — "
                                f"aims at {e['target']}")
                 # §14.4's running subtraction, the pile view's own colouring:

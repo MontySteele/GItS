@@ -874,3 +874,64 @@ def test_the_docket_previews_the_pulse_the_memory_rule_actually_fires():
 def test_the_docket_row_prints_no_countdown_under_the_memory_rule():
     """EB-197's fact, on the surface that still appended it."""
     assert "Lasts" not in _prototype_span(_kurage_docket_row())
+
+
+# --------------------------------------------------------------------------
+# EB-248: THE QUEUE PRINTS THE COST IT MULTIPLIED
+#
+# The price is 3x the EFFECTIVE face, so a Muster recruit printing 2 enrols at
+# 3, and `KURAGECAD-W1`'s tester read both numbers with no route from one to
+# the other. The repair is one sentence -- `KurageMemory.PriceText` -- and the
+# defect it would come back through is a SECOND copy of it: a surface that
+# formats its own price drifts from the others silently, which is the shape
+# EB-247 was one element over. So the pin is structural and it is on the join:
+# every queue surface routes through the one formatter, and none of them types
+# the multiplier.
+#
+# The blind page's half is pinned from the other side, in
+# `test_understudy_blindplay.py`, because `blindplay` may not import `tier0`.
+
+MEMORY_RULE = (
+    pathlib.Path(__file__).resolve().parents[2]
+    / "klee-mod" / "KleeCode" / "Powers" / "Prototype" / "KurageMemory.cs")
+
+MEMORY_CARD = (
+    pathlib.Path(__file__).resolve().parents[2]
+    / "klee-mod" / "KleeCode" / "Vfx" / "Prototype" / "KurageMemoryCard.cs")
+
+
+def _uncommented(path):
+    """A C# source with its comment lines dropped: the prose beside a rule
+    explains it and must not be read as the rule."""
+    return "\n".join(
+        line for line in path.read_text(encoding="utf-8-sig").splitlines()
+        if not line.lstrip().startswith(("//", "///")))
+
+
+def test_the_one_price_sentence_interpolates_the_rate():
+    """`PriceText` is the sentence, and the multiplier is read from the law
+    constant rather than typed -- the same discipline the Muster keyword
+    above keeps, so a retune moves every surface at once."""
+    body = _uncommented(MEMORY_RULE)
+    start = body.index("public static string PriceText(")
+    sentence = body[start:body.index(";", start)]
+
+    assert "Charge, cost {cost} x {KurageMemoryLaw.CostPerEnergy}" in sentence
+    assert '"free"' in sentence
+    assert "x 3" not in sentence, "the multiplier must not be hand-typed"
+
+
+def test_both_queue_surfaces_route_through_the_one_sentence():
+    """The strip and the pile view print the price the same way because they
+    print it from the same place. A surface that formatted its own would be
+    free to fall behind, which is exactly what EB-248 is."""
+    rule = _uncommented(MEMORY_RULE)
+    strip = rule[rule.index("public static string StripText("):]
+    assert "PriceText(e.Cost, e.Price)" in strip
+    # The retired formatter, by name: "no derivation" is the defect rather
+    # than "a wrong derivation", so its absence is asserted.
+    assert '$"{e.Price} Charge"' not in strip
+
+    card = _uncommented(MEMORY_CARD)
+    assert "KurageMemory.PriceText(" in card
+    assert "Charge\"" not in card, "the pile view must not word its own price"
