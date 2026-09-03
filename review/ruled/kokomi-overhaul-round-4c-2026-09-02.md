@@ -1,9 +1,9 @@
-Status: OPEN (2 picks, both design directions)
+Status: RULED R246 2026-09-03
 
 # Kokomi round four-c: three Opus seats, a death on floor 24, and what act 2 asked that the kit could not answer
 
-Two picks, both design directions. Everything else is a default, applied and
-disclosed in §5.
+Ruled R246 (§6): both picks at their defaults. Everything else is a default,
+applied and disclosed in §5.
 
 Written 2026-09-03. Three chained Opus seats played one run on lane 1 of the
 build installed on 2026-09-02 (R243's numbers, the Fable card audit, the
@@ -141,35 +141,36 @@ entering act 2 that no screen announced.
 - **E:** the six rows above are minted here; no id was minted by any agent
   tonight, so the numbers follow `EB-327`.
 
-## 6. Picks
+## 6. Picks, ruled R246 (2026-09-03)
 
-**1. Who deals Plan damage.** Today Kokomi's Weak reduces a Plan at the
-morning, enemy Vulnerable does not raise it, Fantastic Voyage does not add
-to it, and no line shows the reduced number.
+[USER], verbatim: "On Kokomi - I agree with the defaults."
 
-  1. **The Bake-Kurage deals it (default).** The enemy's debuffs apply,
-     Kokomi's own Weak and her attack buffs do not, and the Plan line
-     prints the number it will deal against the enemy's current state. One
-     sentence on the Plan tip. This keeps seat two's discovery true
-     everywhere: being debuffed is a reason to bank.
-  2. **Snapshot at writing.** The number you paid for is the number you
-     get, whatever lands on either side before the morning. Simplest to
-     print; it makes a Plan immune to the enemy's play, which is stronger
-     than it looks against Strategic intents.
-  3. **Status quo, printed.** Resolution-time against everything, and the
-     Plan line reprints under Weak the way attack faces do. Cheapest;
-     leaves the Vulnerable asymmetry as it is.
+1. **Who deals Plan damage.** RULED at the default: the Bake-Kurage deals
+   it. The enemy's debuffs apply, Kokomi's own Weak and her attack buffs
+   do not, and the Plan line prints the number it will deal against the
+   enemy's current state. One sentence on the Plan tip. Build row
+   `EB-334`.
+2. **The kit's own defence scales in act 2.** RULED at the default: two
+   defensive Plan payoffs for round five, designed here, build row
+   `EB-335`.
 
-**2. Does the kit's own defence scale in act 2, or is that the Companion
-layer's job?**
+**Tide Wall** (Uncommon Skill, 1): "Gain 4 Block. Plan: Gain 3 Block for
+each Plan the Bake-Kurage carries out this morning." Upgrade 6 and 4. The
+Plan-count scaler: on a three-Plan morning it is 9 Block that arrives with
+the damage, and it rewards the deck the seats built, three Plans a turn,
+rather than a fourth Defend. The Block lands at the start of the turn, so
+it guards that turn's hit exactly as a Defend would, one turn later and
+bigger for the wait.
 
-  1. **The kit's (default).** I design two defensive Plan payoffs for
-     round five, in the Hexerei readers' build shape: one whose Block
-     scales with the Plans carried out that morning, one on the Casket's
-     side of the kit. Sheet rows, seats first, your play after.
-  2. **The Companions'.** Leave the starter and the Plan cards as they are,
-     and read act 3 of the second run before deciding; Dahlia and Coral
-     Bulwark are the defence, drafted.
-  3. **Numbers only.** Raise Defend's replacement, Song of Pearls and Coral
-     Bulwark, no new shape. The seats say act 2 attacks the shape, not the
-     size, so I do not recommend it.
+**Shell Guard** (Uncommon Skill, 1): "Gain 5 Block. Until your next turn,
+whenever the Tamakushi Casket strikes, gain 3 Block." Upgrade 7 and 4. The
+Casket's side: every debuff the deck applies already makes the Casket
+strike, and the seats watched it strike five and six times a turn on
+Slack Water, War Council and Rosaria. Three Block a strike turns the
+kit's best engine into its block engine for one turn, and the morning's
+Plans that apply Weak strike it too, so the Block is there before the
+enemy swings.
+
+Both are prototype numbers, D by the ladder, and both ride the round-five
+build with `EB-334` and #321's Burst gate; the seats read them before you
+do.
