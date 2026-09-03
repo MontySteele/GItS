@@ -413,6 +413,32 @@
    upgrade: {retain: true},
    effects: [{op: remove_bomb_for_block}]}
 
+# the coven readers, PR: eb326-hexerei-readers. R244 sec.2: Klee's three
+# Hexerei readers, in her OWN pool.
+# Per-row reasoning: docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_ko_coven_errand, name: "Coven Errand", character: klee,
+   authored_by: [claude], art_of: proto_ko_mine_toss,
+   cost: 1, type: skill, rarity: common,
+   upgrade: {bomb_size: +2},
+   description: "Place a [gold]Bomb[/gold] 5. If you played a [gold]Hexerei[/gold] card this turn, place it on ALL enemies instead.",
+   effects: [{op: plant_bomb, target: enemy, size: 5,
+              wide_if: hexerei_played_this_turn}]}
+
+- {id: proto_ko_witches_circle, name: "Witches' Circle", character: klee,
+   authored_by: [claude], art_of: proto_ko_chained_reactions,
+   cost: 1, type: power, rarity: uncommon,
+   upgrade: {power_amount: +2},
+   description: "Whenever you play a [gold]Hexerei[/gold] card, place a [gold]Bomb[/gold] 3 on a random enemy.",
+   effects: [{op: apply_power, power: ko_witches_circle, amount: 3, target: self}]}
+
+- {id: proto_ko_alices_introduction_magic, name: "Alice's Introduction Magic", character: klee,
+   authored_by: [claude], hexerei: true, art_of: proto_ko_alices_recipe,
+   cost: 1, type: skill, rarity: rare,
+   upgrade: {retain: true},
+   description: "All cards in your hand count as [gold]Hexerei[/gold] cards this turn.",
+   effects: [{op: hexerei_mark_hand}]}
+
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and
 # which 13 of the workshop's 34 are absent: docs/notes/prototype-surface-provenance.md.

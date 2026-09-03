@@ -3300,6 +3300,11 @@ PREDICATE_NAMES = frozenset({
     # slice one is C# first and the sim is not brought up.
     "bomb_went_off_this_turn",
     "bomb_reacted_this_turn",
+    # R244's third, on the same gate and for the same reason: Coven Errand's
+    # "if you played a Hexerei card this turn". Reachable from a `conditional`
+    # like its two neighbours AND from `plant_bomb`'s `wide_if:`, which is one
+    # vocabulary read at two doors rather than two vocabularies.
+    "hexerei_played_this_turn",
     # The Kokomi overhaul's own per-turn read (QUARANTINED,
     # C.KOKOMI_OVERHAUL): Sango Isshin's "if the Bake-Kurage carried out a
     # Plan this turn". Unlike the two above this one IS answered -- draft 6
@@ -3546,6 +3551,21 @@ def _predicate(state: CombatState, name: str) -> bool:
         return (state.ko_set_off_this_turn > 0
                 if name == "bomb_went_off_this_turn"
                 else state.ko_reacted_this_turn > 0)
+    if name == "hexerei_played_this_turn":
+        # COVEN ERRAND's read (R244), on the same gate its two neighbours take
+        # and for the same reason: the row is unreachable off the arm, so a
+        # False would be a game this engine never played rather than an answer.
+        # The counter is the arm's ledger, written at the one site a Hexerei
+        # play is noticed -- `klee_overhaul.note_hexerei_played`, which is what
+        # `companion_hexerei.note_card_played` calls once it has asked the
+        # mark's one question.
+        if not klee_overhaul.live(state):
+            raise NotImplementedError(
+                "predicate 'hexerei_played_this_turn' belongs to the "
+                "KLEE_OVERHAUL arm. It is answered only with "
+                "`C.KLEE_OVERHAUL` on and Klee in the seat -- the mod answers "
+                "it off `KleeOverhaulLedger` behind `-p:PrototypeCards=true`.")
+        return klee_overhaul.played_hexerei_this_turn(state)
     if name == "plan_carried_out_this_turn":
         # SANGO ISSHIN's condition (QUARANTINED, C.KOKOMI_OVERHAUL). Written
         # at the ONE place a Plan is carried out (`kokomi_plan._resolve_entry`)
@@ -5091,6 +5111,17 @@ def _op_plant_bomb(state: CombatState, fx: dict, card: Card) -> None:
     `PowerCmd.Apply`, whose only guard is `CanReceivePowers`, and the game's own
     doc says dead creatures can still have powers applied to them. The sweep is
     what moves it off the corpse again.
+
+    `wide_if:` -- COVEN ERRAND (R244). "Place a Bomb 5. If you played a Hexerei
+    card this turn, place it on ALL enemies instead." The widening is a FIELD ON
+    THE OP rather than a `conditional` wrapping two `plant_bomb`s, and the
+    printed face is the argument: there is ONE Bomb here and one printed size,
+    so there must be one op owning one upgradable number. Two ops would need a
+    branch to own a var it cannot own (`gen_klee_cards._authored_face_numbers`:
+    only a top-level effect does), and the `+` card would print 7 in one clause
+    while placing 5 in the other -- `EB-288`'s defect class exactly. The
+    predicate is the same vocabulary a `conditional` reads, checked at LOAD by
+    `loader._validate_effect_vocabulary` for the same reason the `if:` key is.
     """
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
@@ -5098,6 +5129,9 @@ def _op_plant_bomb(state: CombatState, fx: dict, card: Card) -> None:
     is_mine = bool(fx.get("mine", False))
     payload = int(fx.get("payload_mine_all", 0))
     spec = fx.get("target", "enemy")
+    wide = fx.get("wide_if")
+    if wide and _predicate(state, wide):
+        spec = "all_enemies"
     if spec == "all_enemies":
         # Mine Toss: a SNAPSHOT, so a payload firing mid-sweep cannot change
         # who is swept.
@@ -5177,6 +5211,20 @@ def _op_draw_per_set_off(state: CombatState, fx: dict, card: Card) -> None:
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
     klee_overhaul.draw_per_set_off(state)
+
+
+def _op_hexerei_mark_hand(state: CombatState, fx: dict, card: Card) -> None:
+    """Alice's Introduction Magic (R244): "All cards in your hand count as
+    Hexerei cards this turn." `IntroductionMagicPower`'s twin.
+
+    THE ONLY ARM VERB THAT TOUCHES NO BOMB, and it is Klee's anyway: the family
+    mark is printed on companion rows, but every card that READS it is hers.
+    The rule itself lives in `companion_hexerei` beside the mark; this is the
+    op, and `klee_overhaul.mark_hand_hexerei` is the arm's gate between them.
+    """
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.mark_hand_hexerei(state)
 
 
 # --- THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ---------
@@ -5344,6 +5392,10 @@ OPS = {
     "damage_set_off_total": _op_damage_set_off_total,
     "multiply_set_off": _op_multiply_set_off,
     "draw_per_set_off": _op_draw_per_set_off,
+    # R244's one new verb, the coven readers' enabler. It touches no Bomb and
+    # is still the arm's, because the cards that READ the Hexerei family are
+    # Klee's -- see `_op_hexerei_mark_hand`.
+    "hexerei_mark_hand": _op_hexerei_mark_hand,
     # --- Kokomi overhaul, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) -----
     # Registered so the rows load, priced so the drafter is honest, resolved by
     # nothing -- see `_op_kokomi_overhaul_unbuilt` for why raising is the shape.

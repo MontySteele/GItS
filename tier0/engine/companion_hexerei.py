@@ -1,13 +1,30 @@
-"""THE HEXEREI FAMILY STAND-INS' RULES (QUARANTINED, `C.COMPANION_OVERHAUL`).
+"""THE HEXEREI MARK AND ITS READERS (QUARANTINED, two arms).
 
 Four stand-ins on the seam `companion_standins` opened, and the file exists for
 that module's reason: a quarantined arm's whole behaviour should be greppable
 in one place. `companion_standins` holds the SEAM (the sheet contract, the
 hand-off, the map derived from `replaces:`) and the FOUR CARETAKERS' rules;
-this file holds the four FAMILY stand-ins' rules and nothing else. Nothing here
-is reachable with the flag off -- every function returns at the top, checked
-rather than assumed by its callers, which is what keeps the byte-identity pin a
-property of the module.
+this file holds the four FAMILY stand-ins' rules, THE FAMILY MARK ITSELF, and
+nothing else. Nothing here is reachable with both flags off -- every function
+returns at the top, checked rather than assumed by its callers, which is what
+keeps the byte-identity pin a property of the module.
+
+THE MARK IS SHARED AND THE READERS ARE NOT (R244). `hexerei:` is one word on a
+row with no effect of its own, and until R244 it had exactly one reader:
+Nicole's Ladder of Divine Ascent, a `C.COMPANION_OVERHAUL` stand-in. The three
+Klee readers the ruling adds (`review/ruled/klee-hexerei-readers-2026-09-02.md`)
+sit on `C.KLEE_OVERHAUL` instead, so "is this play a Hexerei card?" is now a
+question two arms ask -- and it is answered HERE, once, by `is_hexerei`, with
+each reader gated on its own flag afterwards. A second definition of the family
+is exactly what the field exists to prevent.
+
+ALICE'S INTRODUCTION MAGIC WIDENS THE MARK FOR ONE TURN, which is why the
+answer takes the STATE and not just the card: "All cards in your hand count as
+Hexerei cards this turn" is a window over the card INSTANCES that were in hand
+when it resolved (the ruling's own derived reading -- a card drawn later this
+turn is not counted, which is why the upgrade is Retain), and
+`state.ko_hexerei_marked` is that list. It is dropped whole at the arm's turn
+end, so nothing outlives the turn that wrote it.
 
 WHAT A FAMILY STAND-IN IS. The caretakers read the Klee overhaul's explosion
 ledger, which is what a caretaker is for. These four read the REACTION, because
@@ -122,6 +139,62 @@ _ELECTRO_REACTIONS = frozenset(("overload", "superconduct", "electrocharged"))
 _DAMAGING_REACTIONS = frozenset(("vaporize", "melt", "overload"))
 
 
+def is_hexerei(state: "CombatState", card: "Card") -> bool:
+    """Is this card in the Hexerei family RIGHT NOW? The mark's ONE reader.
+
+    Two ways in, and they are deliberately different kinds of thing:
+
+      * `card.hexerei` -- the PRINTED mark, one word on the row, read off the
+        sheet key rather than off a list of ids kept in a reader (which is what
+        the field exists to avoid);
+      * the this-turn window Alice's Introduction Magic opens (R244), which is
+        a list of card INSTANCES rather than ids, so a second copy drawn after
+        the spell is not counted.
+
+    UNGATED, and the two callers are what makes that right: this is a question
+    about a card, not a rule that pays out, and every reader below it is gated
+    on its own arm's flag. With both arms off `card.hexerei` is False on every
+    shipped row and the list is empty on every tree, so the answer is False by
+    construction rather than by a flag test written twice.
+    """
+    if card.hexerei:
+        return True
+    return any(marked is card for marked in state.ko_hexerei_marked)
+
+
+def mark_hand(state: "CombatState") -> int:
+    """Alice's Introduction Magic: every card in hand joins the family for this
+    turn. Returns how many were marked. `IntroductionMagicPower`'s twin.
+
+    THE CARDS IN HAND WHEN IT RESOLVES, and no others -- the ruling's first
+    derived reading. The card marks the hand it was played from, so the way to
+    hold it for a big hand is the upgrade's Retain and not a later draw.
+
+    THE SPELL COUNTS ITSELF, which is the ruling's second derived reading, and
+    it needs no line here: the row carries `hexerei: true`, so it is in the
+    family printed rather than by this list -- and a card that is being played
+    has already left the hand, so marking the hand could not have reached it.
+    """
+    marked = [card for card in state.player.hand
+              if not any(seen is card for seen in state.ko_hexerei_marked)]
+    state.ko_hexerei_marked.extend(marked)
+    state.emit("ko_hexerei_marked", count=len(marked))
+    return len(marked)
+
+
+def roll_hand_marks(state: "CombatState") -> None:
+    """The this-turn window closes. Called from `klee_overhaul.turn_end`.
+
+    DROPPED WHOLE rather than un-stamped card by card, which is the reason the
+    marks are a list on the state instead of a flag on the `Card`: a marked
+    card that was discarded, exhausted or shuffled away during the turn is
+    reached by this line without the engine having to walk every pile to find
+    it, and a stamp that survived into the next turn would be a rule nobody
+    printed.
+    """
+    state.ko_hexerei_marked.clear()
+
+
 def is_electro_reaction(name: str, aura: str) -> bool:
     """"An Electro reaction is any reaction with Electro as either element"
     (R236 sec.3), answered from the reaction's name and the consumed aura."""
@@ -174,40 +247,63 @@ def note_reaction(state: "CombatState", enemy: "Enemy", name: str,
 
 
 def note_card_played(state: "CombatState", card: "Card") -> None:
-    """Nicole: a Hexerei card was played, so one random enemy takes its element.
+    """A card was played: if it is Hexerei, pay every arm that reads the mark.
 
     Called from `combat._finish_play` beside
     `effects.companion_overhaul_card_played`, the one site both play paths
     reach and the site the mod's `AfterCardPlayed` answers.
 
-    THIS IS THE FAMILY MARK'S FIRST READER, and it is read off the CARD rather
-    than off a list of ids kept here: `hexerei:` is on the row precisely so a
-    reader can see which rows the family owns without re-deriving it from a
-    character list, and a second copy of that list would be the thing the field
-    exists to avoid. `tier0/tests/test_companion_overhaul.py` pinned the mark
-    as inert and names this module as the one reader that moved it.
+    ONE MOUTH, TWO ARMS (R244). The question is asked once, by `is_hexerei`,
+    and each reader is gated on its own flag underneath: Nicole's Ladder is a
+    `C.COMPANION_OVERHAUL` stand-in and the Klee readers this ruling adds are
+    `C.KLEE_OVERHAUL`. The packet's sec.4 says why it lands here rather than as
+    a second hook -- "a Hexerei-play trigger, which the Nicole stand-in already
+    needs, so it lands once".
 
-    NICOLE'S OWN CARD IS HEXEREI, so playing it pays once for itself. That is
-    not a special case: this site runs after the card's effects, so the power
-    the body just applied is standing -- the same contract Diona's stand-in
-    leans on (`companion_standins.on_played`) and the same one
-    `AfterCardPlayed` gives the mod.
+    THE OWN-CARD CASE IS NOT A SPECIAL CASE, for either reader. This site runs
+    after the card's effects, so a power the body just applied is standing --
+    the same contract Diona's stand-in leans on
+    (`companion_standins.on_played`) and the same one `AfterCardPlayed` gives
+    the mod. Nicole's Hexerei-tagged card therefore pays once for itself, and
+    Witches' Circle does not (it is not Hexerei and it is a Power, so the play
+    that sets it up plants nothing).
+    """
+    if not is_hexerei(state, card):
+        return
+    _pay_ladder(state, card)
+    from tier0.engine import klee_overhaul           # late import (cycle)
+
+    klee_overhaul.note_hexerei_played(state, card)
+
+
+def _pay_ladder(state: "CombatState", card: "Card") -> None:
+    """Nicole: a Hexerei card was played, so one random enemy takes its element.
+
+    THE MARK'S FIRST READER, and it is read off the CARD rather than off a list
+    of ids kept here: `hexerei:` is on the row precisely so a reader can see
+    which rows the family owns without re-deriving it from a character list,
+    and a second copy of that list would be the thing the field exists to
+    avoid. `tier0/tests/test_companion_overhaul.py` pinned the mark as inert
+    and names this module as the one reader that moved it.
 
     A HEXEREI CARD WITH NO ELEMENT DEALS PLAIN DAMAGE (R236 pick 6), which is
-    `element=None` here and the shipped `deal_damage_to_enemy` default.
+    `element=None` here and the shipped `deal_damage_to_enemy` default. A Klee
+    pool row that joins the family through R244 carries no `element:` at all,
+    so the sheet's `"none"` is the same answer spelled the sheet's way.
     """
-    if not C.COMPANION_OVERHAUL or not card.hexerei:
+    if not C.COMPANION_OVERHAUL:
         return
     n = state.player.powers.get(LADDER_OF_ASCENT, 0)
     if not n or not state.living_enemies:
         return
     from tier0.engine import effects                # late import (cycle)
 
+    element = card.element if card.element and card.element != "none" else None
     target = state.rng.choice(state.living_enemies)
-    effects.deal_damage_to_enemy(state, target, n, element=card.element,
+    effects.deal_damage_to_enemy(state, target, n, element=element,
                                  source="companion")
     state.emit("mc_ladder_of_ascent", amount=n, target=target.name,
-               element=card.element or "none")
+               element=element or "none")
 
 
 def roll_turn_end(state: "CombatState") -> None:

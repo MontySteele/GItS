@@ -1047,6 +1047,95 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 # while the flag is on.
 ```
 
+## Klee's Hexerei readers — `proto_ko_` (R244, 2026-09-02)
+
+```
+THE RULED PACKET IS `review/ruled/klee-hexerei-readers-2026-09-02.md`, and it
+is "slice two" of the Klee brief's sec.7.4: Hexerei is a one-word tag on
+companion cards with no effect of its own, and the payoff was always meant to
+live in three or four cards inside her OWN pool. Those cards did not exist.
+Picks 1, 2 and 4 were taken at their defaults; pick 3 is [USER]'s own card,
+replacing the drafted "Alice's Letters".
+
+NO NUMBER HERE IS A CLAIM, on the slice packet's terms: they are a first
+honest price against her live pool (Pop! is a 0-cost Bomb 5; Fish-Flavored Bait
+is 1 for 4 damage and a Bomb 4; Chained Reactions is a Rare Power at 1 that
+places a Bomb 3 whenever a Bomb goes off).
+
+  proto_ko_coven_errand                Common, 1, Skill    upgrade Bomb 7
+  proto_ko_witches_circle              Uncommon, 1, Power  upgrade Bomb 5
+  proto_ko_alices_introduction_magic   Rare, 1, Skill      upgrade Retain
+
+ONE PER RARITY, and the packet's sec.2 is what makes it three rather than four:
+"Hex and Wick" is its sec.3 fourth and stays OUT at pick 1's default, "until
+the round-8 read says the coven wants a cheaper fuse". A row for a card the
+ruling left out would be scope the packet did not grant.
+
+COVEN ERRAND'S WIDENING IS A FIELD ON THE OP (`wide_if:`) AND NOT A
+CONDITIONAL, and the printed face is the whole argument. The card prints ONE
+Bomb with one size, so there must be one op owning the one var that size
+upgrades through: only a TOP-LEVEL effect owns a var
+(`gen_klee_cards._authored_face_numbers`), so a `conditional` wrapping two
+`plant_bomb`s would leave the branch's number a literal -- and the `+` card
+would print 7 in one clause while placing 5 in the other, which is `EB-288`'s
+defect class arriving through the grammar. The predicate is read through the
+same registry a `conditional`'s `if:` is read through, and checked at load in
+both engines, so the widening cannot invent a spelling the conditional grammar
+does not have.
+
+ITS FACE SAYS "place it on ALL enemies instead" WHERE THE PACKET SAID "place a
+Bomb 5 on ALL enemies instead", and that is the same rule with the number
+printed once. A face that printed the 5 twice would have had one of the two
+swapped for the upgrade token and the other left behind as a literal, for the
+reason above; "it" is the pronoun that keeps the sentence about one Bomb.
+
+WITCHES' CIRCLE IS DEAD ALONE, AND THAT IS PICK 2 AT ITS DEFAULT. The brief's
+own sketch accepted a dead-alone Power as the bridge card, drafted only by a
+deck that already holds witches; the packet records the alternative it did not
+take ("When you play this, gain 1 Spark", so it is never a blank draw). Klee is
+herself Hexerei (brief sec.7.4), so "two witches make a circle" is her plus any
+one Hexerei card. Its shape is Chained Reactions' one trigger over, which is
+why it sits one rarity down.
+
+ALICE'S INTRODUCTION MAGIC CARRIES TWO DERIVED READINGS, both APPLIED as D
+defaults by the packet and both built as written:
+  * THE WINDOW IS THIS TURN, over the cards in hand WHEN IT IS PLAYED. A card
+    drawn later this turn is not counted, which is why the upgrade is Retain --
+    holding it for the big hand is the play. The mark is therefore on card
+    INSTANCES (a `HashSet<CardModel>` on the power; a list on the sim's
+    CombatState), never on ids, so a second copy of a marked card is not
+    marked.
+  * IT COUNTS AS HEXEREI ITSELF, so it does not need a second witch to start a
+    circle. That is the row's own `hexerei: true` and needs no rule: the row is
+    a Klee POOL card carrying a companion sheet key, which the codegen turns
+    into `IHexereiCard` exactly as it does for a Universal.
+
+THE MARK HAS ONE READER IN EACH ENGINE, and R244 is what made that matter.
+Until now the family had a single reader -- Nicole's Ladder, on
+`C.COMPANION_OVERHAUL` -- so `card.hexerei` could be tested inline. Three of
+the readers are now on `C.KLEE_OVERHAUL` instead, and one of them widens the
+family, so "is this play a Hexerei card?" is answered once
+(`companion_hexerei.is_hexerei` / `CompanionHexerei.IsHexerei`) and every
+reader is gated on its own arm underneath. Nicole's power was MOVED onto that
+reader in the same change; a payoff that still tested the interface itself
+would have been the definition that disagreed.
+
+THE PLAY HOOK LANDS ONCE, which is the packet's sec.4 in as many words ("a
+Hexerei-play trigger, which the Nicole stand-in already needs, so it lands
+once"). The sim has one sequential site (`combat._finish_play` ->
+`companion_hexerei.note_card_played`, which counts and then pays both arms);
+the mod hangs each PAYOUT on its own power's `AfterCardPlayed` and puts the
+COUNT on the arm's one standing card-play listener, because Coven Errand's read
+has to be answerable whether or not any power is on the board.
+
+THREE ILLUSTRATIONS ARE OWED. Each row wears the nearest Klee illustration
+through `art_of:` -- Mine Toss for the Errand (a Bomb going wide), Chained
+Reactions for the Circle (the power whose job it takes over one trigger away),
+Alice's Recipe for the Introduction Magic (the same Alice) -- on the standing
+terms: art is commissioned when a slice is ACCEPTED, and a prototype that
+shipped new art would be paying for a card that may be deleted next week.
+```
+
 ## before proto_mc_diona_signature_mix
 
 ```

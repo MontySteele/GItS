@@ -392,7 +392,9 @@ def test_a_close_that_records_no_retirement_leaves_a_hole_the_lint_finds(
     numbers = sorted(n for cid, _ in module.row_ids(text)
                      for s, n in [module.parse(cid)] if s == "EB")
     victim = numbers[len(numbers) // 2]
-    kept = [l for l in lines if f"`EB-{victim}`" not in l]
+    # The victim's OWN row only: another row may cite the victim in
+    # backticks, and dropping that line too would open a second hole.
+    kept = [l for l in lines if not l.startswith(f"| `EB-{victim}`")]
     assert len(kept) == len(lines) - 1, victim
     page.write_text("\n".join(kept), encoding="utf-8")
 

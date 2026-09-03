@@ -315,13 +315,17 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
                   # and is Compile Remove'd out of a release build, so the only
                   # rows that may print these are `proto_` rows on the
-                  # prototype surface, compiled under the same switch). Eight
+                  # prototype surface, compiled under the same switch). Nine
                   # verbs, every one with a verified call site on
-                  # `ProtoBombPower` or `KleeOverhaulLedger`; the whitelist
-                  # stays honest.
+                  # `ProtoBombPower`, `KleeOverhaulLedger` or
+                  # `CompanionHexerei`; the whitelist stays honest.
                   "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                   "remove_bomb_for_block", "damage_set_off_total",
                   "multiply_set_off", "draw_per_set_off",
+                  # R244's Hexerei reader (Alice's Introduction Magic). The one
+                  # arm verb that touches no Bomb: it widens the family mark
+                  # for a turn, and the cards that READ the mark are Klee's.
+                  "hexerei_mark_hand",
                   # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
                   # same terms and the same quarantine as the block above: the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
@@ -515,6 +519,13 @@ ARM_KEYWORDS = (
                "ArmKeywordTips.ForSetOff"),
     ArmKeyword("Spark", ("Spark", "Sparks"), "ArmKeywordTips.ForSpark"),
     ArmKeyword("Mine", ("Mine", "Mines"), "ArmKeywordTips.ForMine"),
+    # Klee's FIFTH, R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`
+    # sec.4). `Hexerei` is a one-word family mark printed on companion rows
+    # and paid for by three cards in Klee's own pool -- the word a player meets
+    # on a Universal, on a coven Personal and on the readers, with no rule
+    # anywhere on screen until now. NO PLURAL: the word is a family name, and
+    # every face that prints it prints "a Hexerei card".
+    ArmKeyword("Hexerei", ("Hexerei",), "ArmKeywordTips.ForHexerei"),
     # Kokomi's TWO (kokomi-overhaul-slice-1-2026-09-01.md draft 6 sec.2:
     # "Keywords with tooltips: Plan, Mend"). Draft 6 cut Tide, Surge, Exert
     # and Garment as keywords, so their four rows left this table with the
@@ -842,6 +853,13 @@ PREDICATES_CS = {
         "KleeOverhaulLedger.For(Owner.Creature).SetOffThisTurn > 0",
     "bomb_reacted_this_turn":
         "KleeOverhaulLedger.For(Owner.Creature).ReactedThisTurn > 0",
+    # R244's third, off the same ledger and for the same reason: Coven Errand
+    # asks "did a witch go first this turn?", and the count is written at the
+    # ONE site a Hexerei play is noticed (`CompanionHexerei.NoteCardPlayed`),
+    # so the card and Witches' Circle beside it cannot disagree about what a
+    # Hexerei card is.
+    "hexerei_played_this_turn":
+        "KleeOverhaulLedger.For(Owner.Creature).HexereiPlayedThisTurn > 0",
     # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). tier0's own
     # `target_has_aura` predicate, which had no C# read until a companion row
     # printed it (Rosaria's Ravaging Confession).
@@ -892,6 +910,8 @@ PREDICATE_TEXT = {
     "bomb_reacted_this_turn":
         "If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] "
         "this turn",
+    "hexerei_played_this_turn":
+        "If you played a [gold]Hexerei[/gold] card this turn",
     "target_has_aura": "If the enemy holds an elemental aura",
     "target_has_debuff": "If the enemy has a debuff",
     "plan_carried_out_this_turn":
@@ -1375,7 +1395,14 @@ UPGRADE_REPEAT_OPS = REPEAT_SAFE_OPS | {"salon_bow", "salon_rotate",
 DETONATE_FIELDS = {"op", "target", "bonus"}
 # The Klee overhaul's own, same discipline (QUARANTINED, C.KLEE_OVERHAUL).
 SET_OFF_FIELDS = {"op", "target", "times", "damage", "aura"}
-PLANT_BOMB_FIELDS = {"op", "target", "size", "mine", "payload_mine_all"}
+#: `wide_if` is R244's (Coven Errand): the printed target WIDENS to ALL enemies
+#: when the named predicate holds. A field on the op rather than a
+#: `conditional` around two `plant_bomb`s, because the card prints ONE Bomb
+#: with one size and only a top-level effect can own the var that size upgrades
+#: through (`_authored_face_numbers`) -- two ops would print 7 in one clause
+#: and place 5 in the other. Sim twin: `effects._op_plant_bomb`.
+PLANT_BOMB_FIELDS = {"op", "target", "size", "mine", "payload_mine_all",
+                     "wide_if"}
 GROW_BOMBS_FIELDS = {"op", "target", "amount"}
 MERGE_BOMBS_FIELDS = {"op", "target", "growth"}
 SET_OFF_TARGETS = {"enemy", "random_enemy", "all_enemies"}
@@ -1627,6 +1654,13 @@ APPLY_POWERS = {
     "ko_grounded": ("GroundedPower", None,
         "At the start of your turn, if none of your [gold]Bombs[/gold] went "
         "off last turn, gain {X} Block."),
+    # R244's coven reader. Chained Reactions' grammar one trigger over, and
+    # DEAD ALONE by the ruling's own pick 2 -- a deck with no witch in it never
+    # sets this off, which is what makes it the bridge card rather than a
+    # fourth loop.
+    "ko_witches_circle": ("WitchesCirclePower", None,
+        "Whenever you play a [gold]Hexerei[/gold] card, place a {X} "
+        "[gold]Bomb[/gold] on a random enemy."),
     # THE COMPANION STAND-INS' FOUR (QUARANTINED, R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype/CompanionStandIns.cs and is
     # compiled only under `-p:PrototypeCards=true`, so the only rows that may
@@ -2846,6 +2880,20 @@ def blocked_reason(
             payload = eff.get("payload_mine_all", 0)
             if not isinstance(payload, int) or payload < 0:
                 return "plant_bomb payload_mine_all must be a literal int >= 0"
+            wide = eff.get("wide_if")
+            if wide is not None:
+                # R244. The predicate goes through the SAME reader a
+                # `conditional`'s `if:` goes through, so a widening cannot
+                # invent a spelling the conditional grammar does not have --
+                # and an unreadable one blocks the row rather than emitting a
+                # branch that can never fire. The aimed spelling is the only
+                # one a widening makes sense of: the other two already reach
+                # more than one body.
+                if predicate_cs(wide) is None:
+                    return f"plant_bomb wide_if predicate '{wide}'"
+                if eff.get("target") != "enemy":
+                    return ("plant_bomb wide_if is the aimed spelling only "
+                            f"(target '{eff.get('target')}')")
         if op == "grow_bombs":
             unknown = set(eff) - GROW_BOMBS_FIELDS
             if unknown:
@@ -2863,7 +2911,11 @@ def blocked_reason(
             growth = eff.get("growth", 0)
             if not isinstance(growth, int) or growth < 0:
                 return "merge_bombs growth must be a literal int >= 0"
-        if op in {"remove_bomb_for_block", "draw_per_set_off"}:
+        if op in {"remove_bomb_for_block", "draw_per_set_off",
+                  # R244's Alice's Introduction Magic: the window is a rule and
+                  # the hand is whatever the hand is, so there is nothing for
+                  # the row to say.
+                  "hexerei_mark_hand"}:
             # No fields at all: each is one whole printed clause, and any
             # number they might carry is a rule's, not a card's.
             unknown = set(eff) - {"op"}
@@ -6707,7 +6759,23 @@ def build_body(
             size = bomb_size_expr(card, eff)
             mine = "true" if eff.get("mine") else "false"
             payload = payload_mine_expr(card, eff)
-            if eff["target"] == "enemy":
+            if eff["target"] == "enemy" and eff.get("wide_if"):
+                # R244 (Coven Errand). ONE Bomb, one size, one var -- the
+                # predicate decides how many bodies it lands on and nothing
+                # else. Both arms read the same `{size}` expression, so the
+                # upgraded number cannot reach one arm and miss the other.
+                _target_guard(lines, ctx)
+                lines.append(f"if ({predicate_cs(eff['wide_if'])})")
+                lines.append(
+                    "    await ProtoBombPower.PlaceOnAll(choiceContext, "
+                    f"Owner.Creature, {size}, isMine: {mine}, "
+                    f"payloadMineAll: {payload}, cardSource: this);")
+                lines.append("else")
+                lines.append(
+                    "    await ProtoBombPower.Place(choiceContext, "
+                    f"cardPlay.Target, {size}, isMine: {mine}, "
+                    f"payloadMineAll: {payload}, Owner.Creature, this);")
+            elif eff["target"] == "enemy":
                 _target_guard(lines, ctx)
                 lines.append(
                     "await ProtoBombPower.Place(choiceContext, "
@@ -6760,6 +6828,15 @@ def build_body(
         elif op == "draw_per_set_off":
             lines.append(
                 "await ProtoBombPower.DrawPerSetOff("
+                "choiceContext, Owner);")
+
+        elif op == "hexerei_mark_hand":
+            # R244 (Alice's Introduction Magic). ONE awaited call into
+            # `CompanionHexerei`, which is where the family mark lives -- the
+            # widening is the mark's rule and not this card's, so the two arms
+            # that read the family read one definition of it.
+            lines.append(
+                "await CompanionHexerei.MarkHand("
                 "choiceContext, Owner);")
 
         # ---- THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED) -------------------

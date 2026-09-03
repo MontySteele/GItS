@@ -720,13 +720,14 @@ def _max_hp_hit(card: Card, fx: dict) -> float:
     return max_hp * _max_hp_fraction(fx)
 
 
-#: The Klee overhaul's eight verbs (slice one, QUARANTINED behind
-#: `C.KLEE_OVERHAUL`). Named as a set rather than eight `if op ==` arms because
-#: they take ONE pricing decision between them -- see `_op_price`.
+#: The Klee overhaul's nine verbs (slice one, plus R244's `hexerei_mark_hand`;
+#: QUARANTINED behind `C.KLEE_OVERHAUL`). Named as a set rather than nine
+#: `if op ==` arms because they take ONE pricing decision between them -- see
+#: `_op_price`.
 KLEE_OVERHAUL_OPS = frozenset((
     "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
     "remove_bomb_for_block", "damage_set_off_total", "multiply_set_off",
-    "draw_per_set_off"))
+    "draw_per_set_off", "hexerei_mark_hand"))
 
 #: The Kokomi overhaul's verbs (DRAFT 6, QUARANTINED behind
 #: `C.KOKOMI_OVERHAUL`). A second set beside the one above rather than a merged
@@ -2285,16 +2286,19 @@ STATIC_OP_PRICING: dict[str, str] = {
     "gain_fanfare_floor": "STATIC_FANFARE_FLOOR_VALUE per point (v9)",
     "grow_damage": "one discounted future redraw",
     # --- the Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) ------
-    # One rationale, eight ops, because it is ONE decision: the arm is C#
-    # first, tier0 refuses to resolve any of them, and a price is an estimate
-    # of behaviour that does not exist here yet. See `_op_price`.
+    # One rationale, nine ops, because it is ONE decision: the arm is C#
+    # first, tier0 refuses to resolve any of them off the arm, and a price is
+    # an estimate of behaviour the published world does not have. See
+    # `_op_price`. `hexerei_mark_hand` is R244's and takes the same zero for
+    # the same reason.
     **{op: "ZERO: the KLEE_OVERHAUL arm is C# FIRST and tier0 refuses to "
             "resolve it, so there is no sim behaviour to price (slice packet "
             "sec.5; prototype surface only -- no shipped row prints it and no "
             "drafted number moves)"
        for op in ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                   "remove_bomb_for_block", "damage_set_off_total",
-                  "multiply_set_off", "draw_per_set_off")},
+                  "multiply_set_off", "draw_per_set_off",
+                  "hexerei_mark_hand")},
     # --- the Kokomi overhaul, draft 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ----
     # EB-311: the blanket ZERO these eight rows used to share is gone. One
     # rationale apiece now, each derived from a dial already in this table, and
