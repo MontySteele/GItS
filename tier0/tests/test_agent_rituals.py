@@ -122,11 +122,64 @@ def test_gates_optional_lanes_are_off_by_default():
         fast, full, serial, dotnet, codegen, only = True, False, False, False, False, set()
 
     names = [g.name for g in gates.gates(Args())]
-    assert names == ["lints", "pytest"]
+    assert names == ["lints", "pytest", "dotnet-test"]
     Args.dotnet = Args.codegen = True
     assert [g.name for g in gates.gates(Args())] == [
         "lints", "pytest", "codegen-roster", "codegen-prototype",
         "dotnet-build", "dotnet-test"]
+
+
+def test_the_csharp_suite_is_in_both_lanes_with_the_prototype_switch():
+    """The mod's C# suite is a GATE, and it is the LOCAL one.
+
+    KleeTests references four assemblies out of a Steam install, so no GitHub
+    runner can hold this check -- which is how two pins stayed red on main for
+    days with CI green. It is therefore not optional here, it runs in `--fast`
+    as well as `--full`, and it carries `-p:PrototypeCards=true`: without the
+    property the whole `Prototype/` tree is `Compile Remove`d and the arms
+    every live workstream builds against are pinned by nothing.
+    """
+    gates = _module("gates")
+
+    class Args:
+        fast, full, serial, dotnet, codegen, only = True, False, False, False, False, set()
+
+    for lane in (True, False):
+        Args.fast, Args.full = lane, not lane
+        picked = [g for g in gates.gates(Args()) if g.name == "dotnet-test"]
+        assert len(picked) == 1, f"fast={lane}: the C# suite is not in the lane"
+        assert picked[0].optional == ""
+        assert "-p:PrototypeCards=true" in picked[0].argv
+
+    # And it says which gate it is, on its own line, green or red.
+    out = ("Passed!  - Failed:     0, Passed:   563, Skipped:     0, "
+           "Total:   563, Duration: 2 s")
+    summary, _ = gates.summarise(gates.Gate("dotnet-test", []), out, 0)
+    assert summary.startswith("563 passed, 0 failed, 0 skipped")
+    assert "local-only" in summary
+
+
+def test_a_machine_without_the_game_skips_the_csharp_gate_rather_than_passing(
+        tmp_path, monkeypatch):
+    """A skip is a skip, and it is not a block.
+
+    A checkout with no `local.props` cannot resolve `sts2.dll`, so the gate has
+    nothing to run against. Refusing that machine's pushes over a check it
+    structurally cannot run is the fastest way to get the gate turned off; the
+    honest answer is a SKIP carrying its reason, which `Result.ok` treats as
+    passing and the summary line still names.
+    """
+    gates = _module("gates")
+    monkeypatch.setattr(gates, "dotnet_unavailable",
+                        lambda: "no local.props -- no game assemblies")
+    gate = [g for g in gates.gates(_FastArgs()) if g.name == "dotnet-test"][0]
+    res = gates.run(gate, tmp_path / "log.txt")
+    assert res.skipped and res.ok and res.code == 0
+    assert "skipped" in res.summary and "local.props" in res.summary
+
+
+class _FastArgs:
+    fast, full, serial, dotnet, codegen, only = True, False, False, False, False, set()
 
 
 # --- row.py and mint_row.py ------------------------------------------------

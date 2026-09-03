@@ -246,16 +246,20 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void Rule2_the_eleven_planned_clauses_are_the_slices_eleven()
+    public void Rule2_the_twelve_planned_clauses_are_the_slices_eleven_and_gorous()
     {
         // A card cannot schedule anything else: the enum IS the whitelist the
         // codegen validates a row's `plan:` list against
-        // (`gen_klee_cards.PLAN_CLAUSE_KINDS`).
+        // (`gen_klee_cards.PLAN_CLAUSE_KINDS`). The twelfth is R236's
+        // `PlayCopyOfCompanion` -- Gorou's Crystal Collapse, the Inazuma
+        // workshop's one Personal, which plays a copy of the Companion card
+        // captured when the Plan was WRITTEN. Eleven was the SLICE's number
+        // and never a ceiling: a thirteenth kind owes this list a line too.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
                     "ApplyWeak", "ApplyVulnerable", "PlanTwice",
-                    "ReplayExhausted" },
+                    "ReplayExhausted", "PlayCopyOfCompanion" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 

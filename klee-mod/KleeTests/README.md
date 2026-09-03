@@ -45,6 +45,17 @@ Requires the same two machine-local things as the build: `GameDir` and
 `BaseLibDll` in `klee-mod/local.props`. `Directory.Build.props` resolves them,
 so nothing here hardcodes a Steam path (spec §0.3).
 
+### A PUSH gate since 2026-09-02, and still not a deploy gate
+
+`tools/gates.py` runs this project in both lanes (`dotnet test
+klee-mod/KleeTests -p:PrototypeCards=true`), no longer behind `--dotnet`, and
+the git `pre-push` hook runs it through that same wrapper. Before that it was in
+no gate anywhere -- optional locally, impossible in CI -- and two pins sat red on
+`main` for days. It cannot be a CI job: the four references above live in a
+Steam install and are not ours to publish, so the gate line says `local-only`
+and a machine with no `dotnet` or no `local.props` SKIPS with the reason rather
+than blocking a push. See `docs/current/operations/ci.md`.
+
 ### Not a deploy gate yet
 
 `deploy.ps1` does **not** run this, and `validate.ps1` only runs it when asked.

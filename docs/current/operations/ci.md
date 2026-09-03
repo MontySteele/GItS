@@ -25,6 +25,28 @@ S5 — a regex over C# that a runner executes in seconds. Rules that need the
 staged package, the game install, the built pck or the pytest suite stay at
 deploy time; `static_rules.ps1`'s header has the table and the reason for each.
 
+### The one gate that is NOT here: the mod's C# suite (2026-09-02)
+
+`klee-mod/KleeTests` runs locally and only locally, and that is a fact about
+the assemblies rather than a preference: the project references `sts2.dll`,
+`0Harmony.dll`, `GodotSharp.dll` and the Workshop `BaseLib.dll` — four binaries
+that live in a Steam install, are gitignored, and are not ours to publish — so
+no `ubuntu-latest` runner can hold the check at all (the same reason
+`patch-sentinel` prints `skipped` here, and the reason the NOT-doing list at the
+head of `repo.yml` refuses a Windows runner). Until 2026-09-02 that meant it was
+in **no** gate: optional behind `gates.py --dotnet`, absent from this workflow,
+absent from the push hook — and two pins sat red on `main` for days with every
+badge green (a roster sweep in `CompanionOverhaulTests`, and the Kokomi Plan
+clause-count pin that R236's twelfth clause moved). It is now a first-class gate
+in `tools/gates.py`, in **both** lanes and no longer optional, running `dotnet
+test klee-mod/KleeTests -p:PrototypeCards=true` (without the property the whole
+`Prototype/` tree is `Compile Remove`d and every live arm is pinned by nothing),
+and the git `pre-push` hook runs it through that same wrapper — one
+implementation, two callers. Its line in the gates output says `local-only: no
+game dlls on a runner` every time, green or red, so a green CI run is never read
+as evidence about it; a machine with no `dotnet` or no `local.props` gets a
+**skip with its reason**, never a silent pass and never a blocked push.
+
 ### Speed pass, 2026-08-29
 
 Three changes, no jobs added or renamed:
