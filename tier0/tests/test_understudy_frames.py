@@ -258,10 +258,11 @@ def test_the_frame_directory_is_gitignored():
 def test_the_soak_cannot_take_pictures():
     """Same fence as `give-card`: the unattended loop does not produce material
     nobody asked for on somebody's disk overnight."""
+    from tier0.tests.conftest import seam_source
     from understudy import soak
     assert not hasattr(soak, "frames"), "the soak imported the capture leg"
-    src = soak.Path(soak.__file__).read_text(encoding="utf-8")
-    assert "frames.capture" not in src
+    # The FAMILY, not the facade: `EB-180` moved the driver next door.
+    assert "frames.capture" not in seam_source("soak")
 
 
 # ------------------------------------------------------------- the route ----

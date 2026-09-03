@@ -606,11 +606,16 @@ def test_blindplay_reaches_the_local_backend_lazily():
     NOT import it back at module scope -- and the driver's import list is what
     the no-leak pin reads, so a new module-level import there is a change to
     a tested surface."""
+    # The FAMILY `EB-180` split the blind module into: a module-scope import
+    # in any seam carries the same weight the facade's would.
+    from tier0.tests.conftest import seam_files
+    for path in seam_files("blindplay"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        top = [n for n in tree.body
+               if isinstance(n, (ast.Import, ast.ImportFrom))]
+        assert not [n for n in top if "local_play" in ast.dump(n)], \
+            f"{path} imports local_play at module scope"
     source = Path(blindplay.__file__).read_text(encoding="utf-8")
-    tree = ast.parse(source)
-    top = [n for n in tree.body if isinstance(n, (ast.Import, ast.ImportFrom))]
-    assert not [n for n in top
-                if "local_play" in ast.dump(n)], "imported at module scope"
     assert "local_play" in source
 
 

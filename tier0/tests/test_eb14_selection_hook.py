@@ -36,7 +36,8 @@ from understudy import replay, trace_replay
 REPO = Path(__file__).resolve().parents[2]
 HOOK = REPO / "klee-mod" / "KleeCode" / "Diagnostics" / "SelectionTelemetry.cs"
 TELEMETRY = REPO / "klee-mod" / "KleeCode" / "Diagnostics" / "PlayTelemetry.cs"
-SOAK = REPO / "understudy" / "soak.py"
+# The soak is read through `conftest.seam_source("soak")`: `EB-180` split it
+# into a facade and seven seams, and both claims below live in a seam now.
 
 
 def _hook() -> str:
@@ -227,7 +228,10 @@ def test_a_soak_driven_game_labels_its_mod_written_rows_bot():
 
     Now that BOTH writers see the same selections, the label is what keeps one
     soak from looking like a soak plus a playtest."""
-    soak = SOAK.read_text(encoding="utf-8")
+    # The FAMILY `EB-180` split the soak into: the launch moved to
+    # `soak_session.py` and the selector row to `soak_driver.py`.
+    from tier0.tests.conftest import seam_source
+    soak = seam_source("soak")
     assert 'env["GITS_TELEMETRY_FEED"] = "bot"' in soak
     telemetry = _telemetry()
     assert 'FeedEnvVar = "GITS_TELEMETRY_FEED"' in telemetry
@@ -240,7 +244,8 @@ def test_the_two_writers_are_distinguishable_within_one_feed():
     """A soak-driven session now has two instruments describing the same
     choices: the soak (`source: soak`) and the mod (`source: mod`). Both are
     `feed: bot`, so `source` is what stops a reader double-counting."""
-    assert '"source": "soak"' in SOAK.read_text(encoding="utf-8")
+    from tier0.tests.conftest import seam_source
+    assert '"source": "soak"' in seam_source("soak")
     assert 'Str(sb, "source", "mod")' in _telemetry()
 
 

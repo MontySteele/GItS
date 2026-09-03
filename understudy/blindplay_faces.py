@@ -1,0 +1,715 @@
+"""One card, one option, one enemy, as the game prints it.
+
+Cut out of `blindplay.py` by `EB-180`: the field-by-field readers that
+turn a wire blob into a printed FACE -- a card, a shop shelf, a relic,
+a power, a telegraph, an enemy's numbered name. Re-exported from
+`blindplay.py`, so `blindplay._card_face(entry)` and
+`blindplay.forget_fight()` still resolve.
+
+TWO MODULE-LEVEL MEMORIES LIVE HERE, and they live here because their
+readers do: the shop's shelves (`_SHELF_MEMORY`) and the fight's enemy
+ordinals (`_FIGHT_MEMORY`). `forget_shelves` and `forget_fight` are
+their resets and are beside them.
+"""
+from __future__ import annotations
+
+import re
+from dataclasses import field
+from typing import Any
+
+from understudy import qa_packet
+from understudy.blindplay_read import (_blob, _entity_id, _fold, _int, _label,
+                                       _listing, _number_names, _relics,
+                                       _screen, _text)
+from understudy.blindplay_shape import HAZARD_EVENT_TITLES, HAZARD_EVENTS
+
+
+def relic_faces(state: dict[str, Any]) -> list[dict[str, str]]:
+    """The run's relics as PRINTED name and one-line effect. `EB-238`.
+
+    THE DEFECT THIS CLOSES. Until now the page showed a relic on the reward
+    and relic-select screens -- the moment it is OFFERED -- and never again.
+    So a blind reader played every combat of a run without the one part of
+    the board that is on screen for the whole of it, and `KLEESPARK-BT1`
+    §22.4 is what that cost: Klee's starter *Pounding Surprise* pays +1 Spark
+    per Bomb detonated, the priced mode under test placed three Bombs, and
+    the mode REFUNDED ITS OWN PRICE inside the turn in front of eight readers
+    none of whom could see why. A registration cannot control a relic the
+    page does not print.
+
+    IT PRINTS WHAT THE GAME PRINTS AND NOTHING ELSE (R217's quarantine): the
+    relic's own title and its own hover description, off the wire, exactly as
+    the HUD shows them on a mouse-over. No id, no rarity, no pool, no sim
+    hook name -- and the `counter` the wire carries only when the relic draws
+    one on its own icon.
+    """
+    out: list[dict[str, str]] = []
+    for r in _relics(state):
+        name = _text(r.get("name")) or _label(r.get("id"))
+        if not name:
+            continue
+        row = {"name": name, "text": _text(r.get("description"))}
+        counter = r.get("counter")
+        if counter is not None:
+            row["counter"] = _text(counter)
+        out.append(row)
+    return out
+
+
+def _hazard(state: dict[str, Any]) -> tuple[str, str] | None:
+    """`(id, why)` when this event is on the hazard register, else `None`.
+
+    Matched on the wire id first and the display title second -- the same
+    read-by-id-then-by-name shape `soak._hazard_event` uses, and for the same
+    reason: a title is loc data that a wording pass moves, and a screen this
+    tool must not drive is worth catching twice.
+    """
+    if _screen(state) != "event":
+        return None
+    ev = _blob(state, "event")
+    ident = str(ev.get("event_id") or "").strip().upper()
+    if ident in HAZARD_EVENTS:
+        return ident, HAZARD_EVENTS[ident]
+    by_title = HAZARD_EVENT_TITLES.get(_text(ev.get("event_name")).lower())
+    if by_title:
+        return by_title, HAZARD_EVENTS.get(by_title, "on the hazard register")
+    return None
+
+
+# ------------------------------------------------------- printed fragments --
+
+# THE ELEMENT, AS A TAG ([USER], 2026-09-01, after playing Klee: "instead of
+# saying 'applies pyro' - maybe make it a card indicator as well to remove text
+# overhead? That would be a universal shift").
+#
+# The game now says it with a picture: `KleeKeywords.Applies*` moved to
+# `AutoKeywordPosition.None`, so `Applies Pyro` left the rules box and
+# `Vfx/ElementBadge.cs` paints the aura's own icon beside the type plaque
+# instead. A picture does not cross this wire. The seat reading this page would
+# have lost the element from the card LINE and kept it only in the keyword
+# block below -- so the tag puts it back where the indicator is, at a glance,
+# beside the title.
+#
+# READ OFF THE KEYWORD, which is the same declaration the badge reads. The wire
+# sends a card's keywords resolved (`CardModel.HoverTips` walks `Keywords`, and
+# that walk is untouched by the position flip), so `Applies Pyro` is still on
+# every elemental face as a keyword row and this is the surface that survives.
+# No bridge change, and it reads correctly against a build from either side of
+# the flip.
+#
+# ANCHORED AND ONE WORD WIDE: `Applies Electro-Charged`, a Kokomi companion's
+# printed reaction, is not an element and must not become one.
+_ELEMENT_KEYWORD = re.compile(r"^Applies (Pyro|Hydro|Electro|Cryo)$")
+
+
+def _element(keywords: list[dict[str, str]]) -> str:
+    """The element this face applies (`Pyro`), or `""`.
+
+    First match wins, in the order the game listed them -- the badge's own rule
+    (`ElementBadge.ElementOf` takes the card's own element, which is the first
+    keyword codegen emits) for the handful of companion rows that apply a
+    second aura on top of their own.
+    """
+    for k in keywords:
+        m = _ELEMENT_KEYWORD.match(k["name"])
+        if m:
+            return m.group(1)
+    return ""
+
+
+def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
+    """One card as the game prints it. Field by field, never spread.
+
+    `keywords` is included because the live wire resolves a keyword's text with
+    the board's numbers in it (`+1 damage per 2 Charge you hold. You hold 8
+    Charge: ...`), which is part of the face a player is reading. `id`,
+    `target_type` and `index` are read on the TOOL side and never copied here.
+    """
+    kws = []
+    for k in entry.get("keywords") or []:
+        if isinstance(k, dict) and _text(k.get("name")):
+            kws.append({"name": _text(k.get("name")),
+                        "text": _text(k.get("description"))})
+    return {
+        "title": _text(entry.get("name")),
+        "text": _text(entry.get("description")),
+        "cost": _text(entry.get("cost")),
+        # `EB-186`, and the same number for the same reason as on the staged
+        # page: at a full Spark bank the game draws EVERY Attack at 0 while
+        # the rule frees one, so a page that prints only what the game draws
+        # is a page offering plays the board will refuse. Read from the
+        # shipped face in `klee-mod`; `None` where that face gives no number,
+        # and an absent number prints nothing.
+        # `EB-267`: KEYED BY ID. A prototype row may print a shipped card's
+        # name at a different price -- `Flame Dance` is 2 shipped and 1 on the
+        # proto surface -- and a title-keyed lookup told a blind reader the
+        # cost on the card in front of them was wrong when nothing was. The id
+        # is read here, on the tool side, and only the number crosses.
+        "printed_cost": qa_packet.printed_cost_index().get(
+            qa_packet.card_key(entry.get("id"))),
+        # `EB-286`. THE SPARK HALF OF THE PRICE. `cost` above is the ENERGY
+        # cost and it is 0 on every Spark-priced card, so a hand line built
+        # from it alone printed `Bang Bang!` at `cost 0` while the board
+        # refused it -- the r3 Opus seat called a card that "prints cost 0"
+        # and "sat unplayable in my hand across two entire fights" a trap,
+        # and half of that was this render. Same index and same id key the
+        # staged page uses (`printed_spark`, `EB-282`), so the two pages
+        # cannot say different things about one price; the WIRE's own
+        # `spark_price` is the fallback, because a hand entry carries it live
+        # (`BuildCardState`, the GItS local edit) and a reward or shop row
+        # never does. `None` where neither answers, and an absent price
+        # prints nothing.
+        "printed_spark": (
+            qa_packet.printed_spark_index().get(
+                qa_packet.card_key(entry.get("id")))
+            or (_int(entry.get("spark_price"))
+                if entry.get("spark_price") is not None else None)),
+        "kind": _text(entry.get("type")),
+        "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
+        "keywords": kws,
+        # The card's element indicator, as a word. `""` on every face that
+        # applies none, which is every base-game card and every skill of ours
+        # that only blocks or draws.
+        "element": _element(kws),
+        "playable": entry.get("can_play") is not False,
+        "unplayable_reason": _text(entry.get("unplayable_reason_text")
+                                   or entry.get("unplayable_reason")),
+        # `EB-271`: filled in by `_combat`, where the board this refusal is
+        # about is in hand. Empty on every face built off a screen that has no
+        # board -- a reward, a shop shelf -- and empty on every card that is
+        # not refusing.
+        "unplayable_note": "",
+        # `EB-181`. THE FIELD THAT DID NOT EXIST. Run B6 held a Sharp *Water's
+        # Edge* and reached none of the fields that exist, because a card face
+        # on this wire carried `is_upgraded` and nothing at all about an
+        # enchantment. The bridge now emits `enchantment` from the game's own
+        # `CardModel.Enchantment` and emits it ONLY when there is one
+        # (`McpMod.StateBuilder.cs`, `GitsEnchantmentInfo`), so an absent key
+        # is the positive statement "not enchanted" -- and on a bridge too old
+        # to carry it, no face on the page claims one either way.
+        "enchantment": _enchantment(entry.get("enchantment")),
+        # `EB-263`: whether THIS screen says the card is picked. `None` on
+        # every screen and every bridge that does not answer, which is a third
+        # state and not a `False`.
+        "selected": (bool(entry["selected"])
+                     if entry.get("selected") is not None else None),
+    }
+
+
+def _enchantment(blob: Any) -> dict[str, Any] | None:
+    """The card's enchantment as a printed row, or `None` (`EB-181`).
+
+    The bridge sends `{id, name, description, amount, shows_amount}`; `id` is
+    an internal token and does not cross. `shows_amount` is the GAME's own
+    `ShowAmount`, so a stacking enchantment prints its number and a
+    one-and-done one does not -- which is not this page's call to make.
+
+    The DESCRIPTION is carried here but not printed twice: `CardModel.HoverTips`
+    already appends the enchantment's own tips, so the rule reaches the page as
+    a keyword row under the card and what was missing was only the NAME beside
+    the title.
+    """
+    if not isinstance(blob, dict):
+        return None
+    name = _text(blob.get("name")) or _label(blob.get("id"))
+    if not name:
+        return None
+    row: dict[str, Any] = {"name": name,
+                           "text": _text(blob.get("description"))}
+    if blob.get("shows_amount") and _int(blob.get("amount")):
+        row["amount"] = _int(blob.get("amount"))
+    return row
+
+
+# `EB-262`, AND IT IS THE WHOLE ROW. A SHOP ITEM CARRIES ITS NAME UNDER ITS
+# CATEGORY'S OWN KEY. `BuildShopState` (`McpMod.StateBuilder.cs:1636`) emits
+# one flat row per shelf item -- `category`, `price`, `is_stocked`,
+# `can_afford` -- and then merges the thing's face in under a PREFIXED
+# spelling: `card_name` / `card_description`, `relic_name` /
+# `relic_description`, `potion_name` / `potion_description`. None of those is
+# `name`, so every item on both of the run's shops rendered as `(unnamed)` and
+# `buy` answered *"nothing here is called '(unnamed)'"* at a tester holding
+# 164 gold. The event screen has the same shape for an option that hands over
+# a relic (`optData["relic_name"]`, `:1553`).
+#
+# So the readers below are ORDERED lists rather than one key, and the first
+# that answers wins -- the plain spelling first, so nothing that already
+# worked changes.
+_OPTION_NAME_KEYS = ("name", "title", "label", "display_name",
+                     "card_name", "relic_name", "potion_name")
+_OPTION_TEXT_KEYS = ("description", "body", "text",
+                     "card_description", "relic_description",
+                     "potion_description")
+# Read only when the entry printed no name of its own: the shop's card-removal
+# shelf carries no model and therefore no title, and `Card Removal` is
+# `qa_packet.label`'s rendering of the wire's own word for it, not a label
+# invented here.
+_OPTION_KIND_KEYS = ("type", "kind", "room_type", "category")
+
+# What a card shelf reads as once the game has cleared its card, and the key
+# `_shop_options` looks a remembered face up by. See `EB-262` below.
+EMPTY_SHELF = "(this shelf is empty)"
+
+
+def _named_option(entry: Any) -> dict[str, Any]:
+    """One printed option -- a rest choice, a reward, a relic, a menu button.
+
+    A wire option is sometimes a bare string and sometimes a dict under one of
+    half a dozen key spellings; every one of them is a PRINTED label, so all of
+    them are read and the first that answers wins. A label that arrives
+    id-shaped goes through `qa_packet.label`, which strips the mod prefix and
+    title-cases the rest -- a rendering, not a lookup.
+    """
+    if not isinstance(entry, dict):
+        return {"name": _label(entry), "text": "", "enabled": True}
+    name = ""
+    for key in _OPTION_NAME_KEYS:
+        if _text(entry.get(key)):
+            name = _text(entry.get(key))
+            break
+    if not name:
+        for key in _OPTION_KIND_KEYS:
+            if entry.get(key):
+                name = _label(entry.get(key))
+                break
+    text = ""
+    for key in _OPTION_TEXT_KEYS:
+        if _text(entry.get(key)):
+            text = _text(entry.get(key))
+            break
+    enabled = True
+    for key in ("is_enabled", "enabled"):
+        if entry.get(key) is False:
+            enabled = False
+    # `is_stocked: false` is a shelf whose item has already been bought. The
+    # game greys it; the page says so rather than offering a purchase the
+    # bridge will refuse.
+    if entry.get("is_stocked") is False:
+        enabled = False
+    if entry.get("is_locked"):
+        enabled = False
+    # `EB-262`. A SHOP CARD SHELF CARRIES THE CARD'S ENERGY COST, and it is
+    # under the same prefixed spelling its name is: `card_cost`
+    # (`BuildShopState`, `McpMod.StateBuilder.cs:1686`). Nothing here read it,
+    # so the r3 Opus seat bought The Big One for 73 gold and "only discovered
+    # it costs 3 energy -- a whole turn -- when I next saw it on a
+    # card-selection screen".
+    #
+    # The SPARK half cannot come off the shelf: `spark_price` is emitted on a
+    # HAND card only (`BuildCardState`), so a shelf is read through the same
+    # id-keyed index the hand and the reward rows use. `card_id` is the only
+    # key that names a card here, which is also what keeps this lookup off a
+    # rest option or a map node -- those carry no `card_id` and get nothing.
+    card_id = entry.get("card_id")
+    energy = ""
+    for key in ("card_cost", "energy_cost"):
+        if _text(entry.get(key)):
+            energy = _text(entry.get(key))
+            break
+    spark = (qa_packet.printed_spark_index().get(qa_packet.card_key(card_id))
+             if card_id is not None else None)
+    cost = qa_packet.cost_label({"cost": energy, "printed_spark": spark})
+    # `EB-262`, the other half, AND IT IS NOT OURS TO FIX. A card shelf's
+    # name, text and cost all live behind `entry.CreationResult?.Card`, and
+    # `MerchantCardEntry.IsStocked` IS `CreationResult != null` -- so the
+    # moment a card is bought the game clears the only field the shelf's face
+    # was ever read from, and the bridge emits a row with a price and nothing
+    # else. The page used to fall back to the shelf's category and print
+    # `**Card** - 73 gold`, which reads as a card called "Card". It says what
+    # is true instead.
+    empty_shelf = (entry.get("category") == "card"
+                   and entry.get("is_stocked") is False
+                   and not _text(entry.get("card_name")))
+    note = ""
+    if empty_shelf:
+        name = EMPTY_SHELF
+        note = ("Bought, or never stocked. The game clears a shelf's card the "
+                "moment it is sold, and the name, the text and the cost all "
+                "live on that card, so nothing on the feed can say which one "
+                "it was.")
+    return {
+        "name": name,
+        "text": text,
+        "enabled": enabled,
+        "cost": cost if cost != "-" else "",
+        # `EB-268`: the shelf's card TYPE, which the wire sends beside its
+        # cost under the same prefixed spelling (`card_type`,
+        # `BuildShopState`) and which a HAND line has always printed. The r1
+        # Opus seat bought two cards "without knowing what they cost to
+        # play"; a shelf reads the way a hand line does now.
+        "kind": _text(entry.get("card_type")).lower(),
+        "note": note,
+        # What the row says INSTEAD of a price when it cannot be taken. Empty
+        # means the default, `(not available)`; `_shop_options` sets `sold`
+        # on a shelf it can prove was bought.
+        "unavailable": "",
+        "price": _int(entry.get("price", entry.get("cost")), 0)
+        if entry.get("price") is not None or entry.get("cost") is not None
+        else None,
+    }
+
+
+# `EB-290`. A REWARD ROW IS NAMED BY ITS `description` AND BY NOTHING ELSE.
+# `BuildRewardsState` (`McpMod.StateBuilder.cs:1932`) emits `index`, `type`
+# and `description` for every reward and a printed NAME for exactly one kind
+# of them, the potion. So a relic reward reaches this page as
+# `{"type": "relic", "description": "Golden Pearl"}`, `_named_option`'s
+# kind fallback printed it `**Relic**` with the relic's own name below as body
+# text, and `choose "Golden Pearl"` was refused *"nothing here is called
+# 'Golden Pearl'. What is on the screen: Relic"* -- at a tester reading the
+# words Golden Pearl off the screen in front of them. `Reward.Description` IS
+# the reward's printed face ("Golden Pearl", "12 Gold", "40 Gold (stolen
+# back)"), so it is the NAME here; the type word survives only where the row
+# prints nothing else, which is where it is all there is.
+def _reward_option(entry: Any) -> dict[str, Any]:
+    """One reward row, named by the thing it hands over (`EB-290`)."""
+    option = _named_option(entry)
+    if not isinstance(entry, dict):
+        return option
+    if any(_text(entry.get(k)) for k in _OPTION_NAME_KEYS):
+        return option                        # a potion: it printed its name
+    described = _text(entry.get("description"))
+    if described and "\n" not in described:
+        option["name"] = described
+        option["text"] = ""                  # it is the heading now
+    return option
+
+
+def _dedupe_text(option: dict[str, Any]) -> dict[str, Any]:
+    """Drop a body line that only repeats the heading above it.
+
+    A potion reward carries its title under BOTH `potion_name` and the
+    reward's own `description`, so the row printed the name and then printed
+    it again as its own text.
+    """
+    if _fold(option.get("text")) == _fold(option.get("name")):
+        option["text"] = ""
+    return option
+
+
+# `EB-262`, THE HALF THAT IS OURS AFTER ALL. The lost name is the GAME's --
+# `MerchantCardEntry.IsStocked` IS `CreationResult != null`, so a purchase
+# clears the only field the shelf's face was read from and the bridge can only
+# emit what is left. But this page has SEEN that shelf: it rendered the same
+# shop, from the same wire, before the purchase. So the shelf is remembered
+# between renders and a bought row prints the name it had, marked `sold`,
+# instead of `(this shelf is empty)`.
+#
+# THE SHOP'S IDENTITY IS ITS OWN FINGERPRINT and not a screen counter: the
+# `(index, category, price)` of every shelf, which is exactly the part a
+# purchase does NOT change (proven on the two live captures, which differ in
+# `is_stocked`, `card_name` and `card_cost` and in nothing else). A different
+# shop fingerprints differently and the memory is dropped, so nothing can
+# carry a name from one shop to another, and a session that arrives at a shop
+# already sold out has no memory to draw on and says so as it did before.
+_SHELF_MEMORY: dict[str, Any] = {"shop": (), "shelves": {}}
+
+
+def forget_shelves() -> None:
+    """Drop the remembered shop shelves. The operator's reset, and the tests'."""
+    _SHELF_MEMORY["shop"] = ()
+    _SHELF_MEMORY["shelves"] = {}
+
+
+def _shop_fingerprint(items: list[dict[str, Any]]) -> tuple[Any, ...]:
+    return tuple((_int(i.get("index"), -1), _text(i.get("category")),
+                  _int(i.get("price"), -1)) for i in items)
+
+
+def _shop_options(state: dict[str, Any]) -> list[dict[str, Any]]:
+    """The shelves, with a bought one wearing the face it had (`EB-262`)."""
+    items = _shop_items(state)
+    fingerprint = _shop_fingerprint(items)
+    if _SHELF_MEMORY["shop"] != fingerprint:
+        forget_shelves()
+        _SHELF_MEMORY["shop"] = fingerprint
+    shelves: dict[int, dict[str, str]] = _SHELF_MEMORY["shelves"]
+
+    options = [_named_option(i) for i in items]
+    for entry, option in zip(items, options):
+        index = _int(entry.get("index"), -1)
+        if option["name"] != EMPTY_SHELF:
+            if option["name"]:
+                shelves[index] = {"name": option["name"],
+                                  "text": option["text"],
+                                  "cost": option["cost"],
+                                  "kind": option["kind"]}
+            continue
+        seen = shelves.get(index)
+        if seen is None:
+            continue
+        option["name"] = seen["name"]
+        option["text"] = seen["text"]
+        option["cost"] = seen["cost"]
+        option["kind"] = seen["kind"]
+        option["unavailable"] = "sold"
+        option["note"] = ("Sold. The game clears a shelf's card the moment it "
+                          "is bought, so this name, this text and this cost "
+                          "are what this page printed for the same shelf "
+                          "before the purchase -- not what the feed says now.")
+    return options
+
+
+def _number_faces(faces: list[dict[str, Any]], field: str
+                  ) -> list[dict[str, Any]]:
+    """`_number_names` over one field of a list of already-built faces."""
+    for face, name in zip(faces, _number_names([f[field] for f in faces])):
+        face[field] = name
+    return faces
+
+
+# `EB-271`, THE OTHER HALF, AND THIS ONE MISTARGETS IN SILENCE.
+#
+# `_number_names` numbers a repeat by its PLACE IN THE LIST IT IS GIVEN, and
+# the enemy list is not the same list from one screen to the next: the feed
+# drops a body once its death finishes (the kokomi r1 pair reported "enemies
+# are renumbered when one dies"). With TWO enemies of a name that is only the
+# stale-number problem the other half of this row closes -- the survivor
+# prints bare and the number the tester last saw still finds it, because one
+# copy remains. With THREE it is worse than a refusal: kill `Slug (1)` and the
+# two survivors reprint as `Slug (1)` and `Slug (2)`, so `attack "Slug (2)"`
+# now names the creature the page called `Slug (3)` one screen earlier and the
+# command SUCCEEDS against the wrong body. Nothing on the page says so.
+#
+# So the number is assigned once and KEPT FOR THE FIGHT. The identity it is
+# kept against is `combat_id`, the game's own per-creature id
+# (`BuildEnemyState`, `McpMod.StateBuilder.cs:1444`) -- NOT `entity_id`, which
+# the same builder derives by counting names as it walks the live list
+# (`jaw_worm_0`, `jaw_worm_1`) and which therefore renumbers with everything
+# else.
+#
+# THE FIGHT'S IDENTITY IS ITS ROSTER, on the `_SHELF_MEMORY` pattern above and
+# for the same reason: this module is handed one snapshot at a time and is
+# told nothing about boundaries. A `combat_id` counts from 1 inside each
+# combat, so the ids alone would carry numbering from one fight into the next.
+# The roster remembers `(fold, max_hp)` beside each id, and the memory is
+# dropped whenever the board in hand shares NO remembered creature, or claims
+# a remembered id for a DIFFERENT creature. A board that is a subset of the
+# roster is the same fight with bodies gone; a board that adds an id beside
+# remembered ones is a summon, and the newcomer takes the next free number.
+_FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {}, "numbered": set()}
+
+
+def forget_fight() -> None:
+    """Drop the remembered enemy numbers. The operator's reset, and the tests'."""
+    _FIGHT_MEMORY["roster"] = {}
+    _FIGHT_MEMORY["ordinals"] = {}
+    _FIGHT_MEMORY["numbered"] = set()
+
+
+def _enemy_key(entry: dict[str, Any]) -> str:
+    """The creature's identity for the fight.
+
+    `combat_id` where the wire carries it, and `entity_id` only as the
+    fallback for a feed that does not -- a fallback that is worth having
+    because it is still right while nothing has died, and wrong in exactly the
+    way this whole function exists to fix once something has.
+    """
+    cid = entry.get("combat_id")
+    return f"c{cid}" if cid is not None else f"e{_entity_id(entry)}"
+
+
+def _enemy_names(enemies: list[dict[str, Any]]) -> list[str]:
+    """The printed enemy names, numbered ONCE and kept for the fight.
+
+    Same output as `_number_names` on the opening board of any fight, which is
+    the point: nothing about a first screen changes. What changes is every
+    screen after a death.
+
+    A name that has ever repeated in this fight stays numbered even when one
+    body is left, because the number is the handle the tester has been using
+    and taking it away is the stale-number refusal this row's first half had
+    to paper over. A name that has never repeated is left exactly as the game
+    printed it.
+    """
+    if not enemies:
+        return []
+    names = [_text(e.get("name")) for e in enemies]
+    # An id the feed repeats on ONE board cannot identify a creature, and
+    # collapsing two bodies onto one key would print one number twice -- the
+    # silent-mistarget failure this function exists to remove, arriving by the
+    # other door. `CombatId` is unique per creature so the game cannot produce
+    # it; the slot breaks the tie anyway, and those enemies simply keep the
+    # old positional behaviour rather than a wrong one.
+    keys, seen_key = [], {}
+    for entry in enemies:
+        key = _enemy_key(entry)
+        nth = seen_key.get(key, 0)
+        seen_key[key] = nth + 1
+        keys.append(key if nth == 0 else f"{key}#{nth}")
+    ident = [(_fold(n), _int(e.get("max_hp", e.get("hp"))))
+             for n, e in zip(names, enemies)]
+
+    roster: dict[str, tuple[str, int]] = _FIGHT_MEMORY["roster"]
+    shared = any(roster.get(k) == i for k, i in zip(keys, ident))
+    clash = any(k in roster and roster[k] != i for k, i in zip(keys, ident))
+    if clash or not shared:
+        forget_fight()
+    roster = _FIGHT_MEMORY["roster"]
+    ordinals: dict[str, int] = _FIGHT_MEMORY["ordinals"]
+    numbered: set[str] = _FIGHT_MEMORY["numbered"]
+
+    for key, (fold, hp) in zip(keys, ident):
+        if key in roster or not fold:
+            continue
+        roster[key] = (fold, hp)
+        seen = sum(1 for f, _ in roster.values() if f == fold)
+        ordinals[key] = seen
+        if seen > 1:
+            numbered.add(fold)
+    return [f"{n} ({ordinals[k]})" if _fold(n) in numbered and k in ordinals
+            else n for k, n in zip(keys, names)]
+
+
+# `EB-271`, THE SECOND HANDLE. THE ONE REFUSAL ON THE SCREEN THAT NAMED
+# NOTHING.
+#
+# The r2 Opus seat put it exactly: *"every other refusal on this screen names
+# its reason (`you have no Spark; and this costs 1`, `no enemy is holding a
+# Bomb`, `you do not have enough energy`). This one does not."* The one that
+# does not is `BlockedByHook`, which the wire spells as that bare enum name
+# and `qa_packet.UNPLAYABLE_REASONS` renders as *"something else on the board
+# is stopping you right now"* -- true, and a sentence a tester cannot act on.
+#
+# `CardModel.CanPlay` reports the flag and has no slot for WHICH model
+# refused, so the sentence cannot come off the wire and this page must not
+# invent one. What it can do is stop being vague with facts it is already
+# printing:
+#
+#   * an ARM GATE, and this is the one the row names. A Spark-priced card
+#     refuses through `SparkAttackCostPower.ShouldPlay`, a hook, so a shortfall
+#     that the mod's own `KleeUnplayableReason` did not reach the page for
+#     still arrives as the bare enum -- while the price and the bank are BOTH
+#     on this screen already (`printed_spark` on the face, `Spark` in the
+#     powers). Two numbers the page prints, subtracted.
+#   * otherwise the honest half: a hook is something ALREADY ON THE BOARD, and
+#     the statuses on the player are the board's own list. Naming them is not
+#     a guess at which one refused -- the note says the feed does not name it
+#     -- it is telling a reader where to look, which is what the seat was
+#     asking for.
+#
+# `BlockedByCardLogic` is deliberately NOT here: the card's own rule is its
+# printed text, two lines above on the same page.
+_BARE_HOOK = "blockedbyhook"
+_SPARK_POWER = "spark"
+
+
+def _hook_note(card: dict[str, Any],
+               powers: list[dict[str, Any]]) -> str:
+    """The extra clause for a refusal the feed would not explain. `""` mostly."""
+    if card["playable"] or _fold(card["unplayable_reason"]) != _BARE_HOOK:
+        return ""
+    price = card.get("printed_spark")
+    bank = next((_int(p.get("stacks")) for p in powers
+                 if _fold(p.get("name")) == _SPARK_POWER), None)
+    if isinstance(price, int) and price > 0 and bank is not None \
+            and bank < price:
+        return (f"This card is priced at {price} Spark and your bank is "
+                f"{bank}.")
+    on_you = ", ".join(
+        f"{p['name']} {p['stacks']}" if p.get("stacks") else p["name"]
+        for p in powers if p.get("name"))
+    if not on_you:
+        return ""
+    return ("The feed does not say which thing is stopping it. A hook is "
+            f"something already on the board, and what is on YOU right now "
+            f"is: {on_you}.")
+
+
+def _meter_max(player: dict[str, Any]) -> dict[str, int]:
+    """`{printed meter name: its maximum}` for every meter that declares one.
+
+    `EB-181`. `player.resources` is `{id: amount}` and carries no ceiling, so
+    every meter row on this page has had to say so. The bridge's
+    `resource_info` is the fuller row per id -- `amount`, `max`, `resets_to`
+    -- with `max` filled only where the RESOURCE ITSELF declares one, since a
+    ceiling is the mod's fact and never BaseLib's
+    (`vendor/STS2_MCP/gits/GitsResources.cs`).
+
+    A meter that answers `null` is left OUT of this map rather than entered as
+    0: a zero would print `Charge: 8/0`, and "this meter declares no maximum"
+    is the thing the row still has to be able to say.
+    """
+    info = player.get("resource_info")
+    if not isinstance(info, dict):
+        return {}
+    out: dict[str, int] = {}
+    for key, row in info.items():
+        if not isinstance(row, dict):
+            continue
+        top = row.get("max")
+        if isinstance(top, bool) or not isinstance(top, int) or top <= 0:
+            continue
+        out[_label(key)] = top
+    return out
+
+
+def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
+    """`qa_packet._powers` plus the `type` the wire has always carried.
+
+    `EB-179`. A status row on the wire is exactly `id`, `name`, `amount`,
+    `type`, `description`, `keywords` -- no duration and no expiry anywhere.
+    `type` is the one of those the page was dropping, and it is the game's
+    own word for whether a thing on the board is helping or hurting, so it
+    goes back on the line. The filter below MIRRORS `qa_packet._powers`'s
+    skip rule (a row with no printed name is not a power the page shows), so
+    the two lists stay index-aligned; they are one function's worth of logic
+    living either side of a module boundary, and a change to one is a change
+    to both.
+    """
+    out = qa_packet._powers(blob)
+    kinds = [_text(row.get("type"))
+             for row in (blob.get("status") or [])
+             if isinstance(row, dict)
+             and (_text(row.get("title")) or _label(row.get("name")))]
+    for power, kind in zip(out, kinds):
+        power["kind"] = "aura" if _is_aura(power["name"]) else kind
+    return out
+
+
+def _is_aura(name: str) -> bool:
+    """Is this printed power an elemental AURA? (`EB-294`)
+
+    THE WIRE SAYS `Buff` AND IT IS NOT LYING, WHICH IS THE WHOLE TRAP.
+    `AuraPower.Type` is `PowerType.Buff` on purpose and the reason is written
+    at the property: elemental application has to COEXIST with Artifact
+    ([USER] 2026-08-23), and `ArtifactPower` negates on
+    `GetTypeForAmount(amount) == PowerType.Debuff`, so a positive counter that
+    must not be eaten has to declare itself a buff. That is a rule about
+    Artifact, not a statement to a reader -- and the page printed it as one:
+    `Hydro Aura 2 (buff)` sat in the same block as `Vulnerable 1 (debuff)`,
+    and the r2 Opus seat read the aura it had just applied as something
+    helping the enemy.
+
+    Read off the PRINTED TITLE, which is the only handle this side of the line
+    has: `AuraPower.Localization` writes `("title", $"{Element} Aura")` for
+    every element, so every aura on the board prints a name ending in the word
+    Aura and nothing else does. An id would be the sturdier key, and an id may
+    not reach this module at all.
+    """
+    words = _fold(name).split()
+    return bool(words) and words[-1] == "aura"
+
+
+def _intent(blob: Any) -> dict[str, str]:
+    """`qa_packet._intent` plus the wire's own `type` (`EB-299`).
+
+    A telegraph on the wire is `type` (`Attack`, `Debuff`, ...), `label` (the
+    number the game draws ON the icon), `title` (the hover tip's heading --
+    `Aggressive`, `Strategic`) and `description` (its sentence). The page
+    printed title, label and description comma-joined and dropped `type`
+    entirely, which is `EB-179`'s power defect one field over.
+    """
+    out = qa_packet._intent(blob)
+    row = blob[0] if isinstance(blob, list) and blob else blob
+    out["type"] = _text(row.get("type")) if isinstance(row, dict) else ""
+    return out
+
+
+def _shop_items(state: dict[str, Any]) -> list[dict[str, Any]]:
+    return [i for i in _listing(state, "items", "shop.items")
+            if isinstance(i, dict)]
+
+def _card_title(entry: dict[str, Any]) -> str:
+    return _text(entry.get("name"))
+

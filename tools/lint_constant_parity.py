@@ -400,6 +400,30 @@ UNMIRRORED: dict[str, str] = {
         "far past anything a real flight produces on a 1920x1080 design "
         "resolution. It touches no card, no meter and no number the sim can "
         "see: tier0 draws nothing.",
+    "NonFiniteCardGuard.MaxTrackedNodes":
+        "`EB-292`. A LOG BOUND, not balance: how many nodes the guard's "
+        "rate limiter remembers before it forgets the lot. Every card play "
+        "builds a fresh trail node, so the limiter's keys are transient and "
+        "the map needs a bound of its own -- the file's whole subject is an "
+        "unbounded allocation, and a diagnostic that leaked would be the same "
+        "defect in a smaller font. Forgetting costs at most one extra log "
+        "line. The sim writes no godot.log and has nothing to limit.",
+    "NonFiniteCardGuard.ExtrapolationReportT":
+        "`EB-292`. A CURVE DOMAIN, not balance: how far past the end of its "
+        "own Bezier a card flight has to run before the clamp SAYS so in "
+        "godot.log. The clamp itself bites at t = 1, where the quadratic stops "
+        "interpolating and starts extrapolating as t^2; the last iteration of "
+        "`NCardFlyVfx.PlayAnim`'s loop overshoots a little by construction, so "
+        "the reporting threshold sits above the worst ordinary frame and below "
+        "a stall. It is a parameter of the base game's animation curve. The "
+        "sim animates nothing and has no counterpart.",
+    "NonFiniteCardGuard.MaxNodesScanned":
+        "`EB-292`. A WALK BUDGET, not balance: how many scene nodes the "
+        "clamp's report visits looking for the flight that owns the curve it "
+        "caught. The clamp is a prefix on a static helper and has no node, so "
+        "the card is found by matching the flight's own start and end; the "
+        "walk is bounded because it runs on a frame the engine is already "
+        "struggling with. The sim has no scene tree.",
     "MeterLedger.MaxRows":
         "`EB-216`. INSTRUMENT, not balance: how many per-play ledger rows the "
         "mod keeps before dropping the oldest. It touches no game number, no "
@@ -560,6 +584,22 @@ UNMIRRORED: dict[str, str] = {
         "presentation: how many pop effects may overlap before they are "
         "dropped. A frame-rate guard, not a rule -- the sim resolves every "
         "detonation regardless of what is drawn.",
+    # EB-38, the rest-site and merchant breathe. All four are the SHAPE of one
+    # loop -- two of them seconds, two of them the size of the move -- on a
+    # portrait the sim does not draw, at two rooms the sim does not render. A
+    # rest site's RULES (the heal, the enchant) are mirrored elsewhere and none
+    # of them is here; nothing in this file can change a number a run reads.
+    "StaticPortraitIdle.PeriodSeconds":
+        "presentation: one full breath, in seconds.",
+    "StaticPortraitIdle.HalfPeriodSeconds":
+        "presentation: the swell and the settle are half a breath each, in "
+        "seconds. Derived from PeriodSeconds by the pin, not by the compiler.",
+    "StaticPortraitIdle.ScaleYPeak":
+        "presentation: peak vertical scale of the portrait at the top of the "
+        "breath. A multiplier on drawn pixels, not on any quantity.",
+    "StaticPortraitIdle.RiseYPixels":
+        "presentation: how far the portrait lifts at the top of the breath, "
+        "in pixels, so the feet stay planted while the head moves.",
     # RibbonFullWidth and RibbonVisualSpan retired with D7 (salon UI sprint,
     # 2026-07-28): the ribbon no longer has a display span at all. A segment
     # is one TURN of upkeep at the current stage, which is a derived quantity

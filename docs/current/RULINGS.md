@@ -253,8 +253,11 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R241 | 2026-09-02 | Kokomi brief draft 6 approved for the Prototype build; picks 1 to 3 at their defaults | `c892ff7` |
 | R242 | 2026-09-02 | Klee round 4 ruled; the starter takes the canonical shape, 1 Spark at combat start, base Strike and Defend for all three characters | `372fc9f` |
 | R243 | 2026-09-02 | the 2026-09-02 sitting slate, ruled live on the Kokomi and Klee prototype builds | `62c928f` |
+| R244 | 2026-09-02 | the night's sitting ruled: Klee round seven at its defaults, the Hexerei readers with Alice's Introduction Magic in place of Alice's Letters | `489e42c` |
+| R245 | 2026-09-03 | the Furina card audit is ruled -- defaults on Full Ensemble and The Final Verdict, Singer of Many Waters on [USER]'s own shape | `3f294fd` |
+| R246 | 2026-09-03 | Kokomi round 4c is ruled at its defaults -- the Bake-Kurage deals Plan damage, and the kit's own defence scales in act 2 | `561a899` |
 
-242 rows over the R1..R243 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 131 from a commit message, 0 unresolved.
+245 rows over the R1..R246 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 134 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 

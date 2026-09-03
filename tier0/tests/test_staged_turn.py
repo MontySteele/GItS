@@ -706,16 +706,18 @@ def test_the_soak_cannot_reach_a_staged_turn():
     from understudy import soak
     assert not hasattr(soak, "staged_turn")
     assert not hasattr(soak, "qa_packet")
-    src = Path(soak.__file__).read_text(encoding="utf-8")
-    for node in ast.walk(ast.parse(src)):
-        if isinstance(node, ast.Import):
-            assert not any(a.name.endswith(("staged_turn", "qa_packet"))
-                           for a in node.names)
-        if isinstance(node, ast.ImportFrom):
-            assert not (node.module or "").endswith(("staged_turn",
-                                                     "qa_packet"))
-            assert not any(a.name in ("staged_turn", "qa_packet")
-                           for a in node.names)
+    # The FAMILY `EB-180` split the soak into, not the facade alone.
+    from tier0.tests.conftest import seam_files
+    for path in seam_files("soak"):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.Import):
+                assert not any(a.name.endswith(("staged_turn", "qa_packet"))
+                               for a in node.names), path
+            if isinstance(node, ast.ImportFrom):
+                assert not (node.module or "").endswith(("staged_turn",
+                                                         "qa_packet")), path
+                assert not any(a.name in ("staged_turn", "qa_packet")
+                               for a in node.names), path
 
 
 def test_the_form_questions_are_r213s_verbatim():
@@ -1758,7 +1760,10 @@ def test_the_stage_is_what_refuses_and_it_refuses_before_the_packet():
     """Position matters as much as the check: `stage_board` calls the
     preflight after the last staging step and before it hands the state
     back, so nothing downstream -- packet, reader, grade -- exists yet."""
-    src = (REPO / "understudy" / "staged_turn.py").read_text(encoding="utf-8")
+    # `EB-180` moved `stage_board` into `staged_turn_stage.py`; the read is
+    # of the whole seam family, so the claim follows the function.
+    from tier0.tests.conftest import seam_source
+    src = seam_source("staged_turn")
     body = src.split("def stage_board(")[1].split("\ndef ")[0]
     assert "wire_assumption_preflight(turn, policy.staged_state)" in body
     assert body.index("if not policy.ok") < body.index(

@@ -15,6 +15,7 @@ import json
 
 from pathlib import Path
 
+from tier0.tests.conftest import seam_source
 from understudy import bridge, instances, report, soak
 
 
@@ -40,14 +41,16 @@ def test_readiness_is_the_options_key_and_never_the_health_endpoint():
     """R97/5a, made structural. The HTTP server answers ~20 s before the main
     menu has buttons; a launcher that trusts `GET /` acts into an empty menu
     and then someone spends an evening diagnosing the game for it."""
-    src = (soak.Path(soak.__file__)).read_text(encoding="utf-8")
+    # `EB-180` moved `wait_for_menu` into `soak_session.py`, so this reads the
+    # whole seam family: the claim is about the launcher wherever it sits.
+    src = seam_source("soak")
     body = src.split("def wait_for_menu", 1)[1].split("\n    def ", 1)[0]
     assert '"options"' in body or "options" in body
     assert "health" not in body, "readiness must not consult GET /"
     # And the module must not call it at all outside its own docstring.
     code = "\n".join(line for line in src.splitlines()
                      if not line.strip().startswith("#"))
-    assert "bridge.health(" not in code
+    assert "bridge.health(" not in code and "_wire().health(" not in code
 
 
 # -------------------------------------------------------------- watchdog ---

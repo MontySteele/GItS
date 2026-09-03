@@ -507,6 +507,11 @@ GENERATOR_OWNED = {
     "ImageGen/images/ui/char_icon_outline.png":             "gen_char_icon_outlines.py",
     "ImageGen/images/furina/ui/char_icon_outline.png":      "gen_char_icon_outlines.py",
     "ImageGen/images/kokomi/ui/char_icon_outline.png":      "gen_char_icon_outlines.py",
+    # EB-161: the Mods screen's res://klee/mod_image.png. A composite of all
+    # three characters' select_portrait.png (a plan.tsv row on Klee's side,
+    # gen_furina_stills.py/gen_kokomi_stills.py on theirs), so no single
+    # plan.tsv row could source it even if one wanted to claim it.
+    "ImageGen/images/mod_image.png":                        "gen_mod_image.py",
 }
 
 

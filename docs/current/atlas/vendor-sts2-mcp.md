@@ -178,8 +178,8 @@ the per-play meter ledger) (`McpMod.HandleRequest`). Anything else is 404.
   to `Fast` on every non-editor boot, so a restarted process can never read
   `Instant` back. What it CAN read back is a laundered `Fast` over a user whose
   original was `Normal`, and the sidecar is what prevents that.
-  `understudy/soak.py:457-489` reads the sidecar before removing the
-  mod directory, so an unreverted change is named in the ledger rather than
+  `understudy/soak_session.py`'s `_read_speed_sidecar` reads it before
+  removing the mod directory (`EB-180` moved it out of `soak.py`), so an unreverted change is named in the ledger rather than
   deleted with the file that recorded it.
 - **Seeded embark returns an error and does NOT start the run** unless
   `charSelect.Lobby != null` (`McpMod.Actions.cs:1621-1627`) — the mechanism
