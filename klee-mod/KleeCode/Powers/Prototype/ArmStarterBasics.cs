@@ -1,13 +1,18 @@
+using System.Collections.Generic;
 using HarmonyLib;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Models.Characters;
 using MegaCrit.Sts2.Core.Models.Relics;
 
 namespace KleeMod.Powers;
 
 /// <summary>
-/// `EB-351`. THE THIRD SEAM: which pair of basics is this character's, when a
-/// base-game effect asks the CHARACTER instead of reading the deck.
+/// `EB-351`, extended by `EB-352`. THE THIRD SEAM: which pair of basics is this
+/// character's, when a base-game effect asks the CHARACTER instead of reading
+/// the deck. `EB-351` built it for Large Capsule, which asks and gets the wrong
+/// answer; `EB-352` added Fasten, which asks and gets a throw.
 ///
 /// WHAT WENT WRONG. A blind seat on `0.2.2301+proto` opened fight 1 of a Klee
 /// overhaul run holding **Duck and Cover**, with **Kaboom!** in the same
@@ -48,13 +53,54 @@ namespace KleeMod.Powers;
 /// defect needs Large Capsule in the run, which is an Ancient-rarity relic and
 /// therefore a Neow or Ancient-event offer.
 ///
-/// LARGE CAPSULE IS THE ONLY DOOR, and that is a sweep of the decompile rather
-/// than a hope: `CardPoolModel.AllCards` has exactly two consumers in the whole
-/// assembly -- `PreloadManager` (asset paths, grants nothing) and these two
-/// methods. Everything else that reaches into a character's pool -- the
-/// merchant, `CardFactory`, Discovery, Metamorphosis, Stoke, Jackpot, the
-/// Crystal Sphere, Dusty Tome -- goes through `GetUnlockedCards`, which IS
-/// `FilterThroughEpochs`, which the arm already owns.
+/// LARGE CAPSULE IS THE ONLY `AllCards` DOOR, and that is a sweep of the
+/// decompile rather than a hope: `CardPoolModel.AllCards` has exactly two
+/// consumers in the whole assembly -- `PreloadManager` (asset paths, grants
+/// nothing) and these two methods. Everything else that reaches into a
+/// character's pool -- the merchant, `CardFactory`, Discovery, Metamorphosis,
+/// Stoke, Jackpot, the Crystal Sphere, Dusty Tome -- goes through
+/// `GetUnlockedCards`, which IS `FilterThroughEpochs`, which the arm already
+/// owns.
+///
+/// `EB-352`: THE SECOND DOOR, AND OWNING `GetUnlockedCards` WAS NOT ENOUGH.
+/// `EB-351` closed on that last sentence, and it is true of every consumer that
+/// OFFERS from the pool -- they all take what the arm hands them. It is not
+/// true of the one consumer that does not offer but ASKS THE POOL A QUESTION:
+///
+///   protected override IEnumerable&lt;IHoverTip&gt; ExtraHoverTips  // Fasten
+///       =&gt; ... Owner.Character.CardPool
+///              .GetUnlockedCards(Owner.UnlockState, ...)
+///              .First(c =&gt; c.Tags.Contains(CardTag.Defend)) ...
+///
+/// Fasten is an Uncommon Power in `ColorlessCardPool` -- Defend-tagged cards
+/// gain extra Block (`FastenPower.ModifyBlockAdditive`) -- and it renders its
+/// second hover tip as a picture of the reader's OWN Defend, which is what that
+/// lookup is for. It reaches a modded seat the way any Colorless card does: the
+/// merchant's colorless slots, Toolbox, Orange Dough, a Colorless Potion.
+///
+/// Owning `FilterThroughEpochs` is exactly what breaks it: the arm's pool is
+/// the prototype rows and nothing else, not one of which carries
+/// `CardTag.Defend` (the base Defends live in the STARTER, and putting one in
+/// the offer pool would make it drawable as a reward, which is not the fix). So
+/// the `First()` finds nothing and throws -- and unlike Large Capsule's silent
+/// wrong answer this one is a hard `InvalidOperationException` the moment the
+/// card is SHOWN: a shop shelf, a reward screen, a hand. `KleeSelfCheck`'s R11
+/// cannot see it either, for the mirror of R11's `AllCards` blind spot -- R11
+/// reads the SHIPPED pool, where Duck and Cover satisfies the predicate.
+///
+/// THE SWEEP THAT SAYS THESE THREE ARE ALL OF THEM. Over the whole 0.111.0
+/// assembly, every unguarded `First`/`Single`/`Last` taking a `CardModel`
+/// predicate is one of exactly three call sites: `Fasten.ExtraHoverTips`,
+/// `LargeCapsule.GetStrikeForCharacter`, `LargeCapsule.GetDefendForCharacter`.
+/// Everything else keyed on `CardTag.Strike` / `CardTag.Defend` either reads
+/// the DECK rather than the pool (`Tezcatara`, `Amalgamator`, `NeowsTalisman`,
+/// `LeafyPoultice`, `NutritiousSoup`, `SoldiersStew`, `PerfectedStrike`) or
+/// asks a single card about itself (`StrikeDummy`, `FakeStrikeDummy`,
+/// `GhostSeed`, `Spiral`, `Goopy`, `HellraiserPower`, `FastenPower`), and both
+/// of those are safe by construction: an arm run's deck DOES hold four base
+/// Defends, and a per-card test cannot be empty. The list is a pin --
+/// `ArmStarterBasicsTests.The_swept_pool_lookups_are_the_three_this_seam_covers`
+/// -- so a fourth site after a Steam move is an addition somebody has to write.
 ///
 /// WHY A PATCH AND NOT AN `AllCards` OVERRIDE. `AllCards` is virtual, so the
 /// arm could have returned a list with the shipped basics removed or the base
@@ -73,12 +119,14 @@ namespace KleeMod.Powers;
 /// `TouchOfOrobas.GetUpgradedStarterRelic` (quoted in
 /// <c>Relics/UpgradedStarterRelics.cs</c>).
 ///
-/// FLAG OFF, NOTHING MOVES. With both arms off <see cref="StrikeFor"/> and
-/// <see cref="DefendFor"/> return null before they touch `ModelDb`, the prefix
-/// returns true, and the base game answers exactly as it did -- Kaboom! and Duck
-/// and Cover for Klee, her shipped basics, which is correct off the arm. A
-/// release build compiles none of this: the file is under `Powers/Prototype/**`,
-/// which `KleeCode.csproj` removes without `-p:PrototypeCards=true`.
+/// FLAG OFF, NOTHING MOVES. With both arms off <see cref="StrikeFor"/>,
+/// <see cref="DefendFor"/> and <see cref="DefendTipsFor"/> return null before
+/// they touch `ModelDb`, every prefix returns true, and the base game answers
+/// exactly as it did -- Kaboom! and Duck and Cover for Klee, her shipped
+/// basics, and Fasten's tip a picture of Duck and Cover, which is correct off
+/// the arm. A release build compiles none of this: the file is under
+/// `Powers/Prototype/**`, which `KleeCode.csproj` removes without
+/// `-p:PrototypeCards=true`.
 ///
 /// FURINA IS ABSENT ON PURPOSE. The reframe arm does not replace her starter,
 /// so her shipped `SoloistsSolicitation` / `StagePresence` are still the honest
@@ -129,6 +177,47 @@ internal static class ArmStarterBasics
 
         return null;
     }
+
+    /// <summary>
+    /// `EB-352`. Fasten's two hover tips, under an overhaul arm, or
+    /// <c>null</c> when no arm owns this character and the base game's own
+    /// getter stands.
+    ///
+    /// THE SAME ANSWER AS <see cref="DefendFor"/>, NOT A SECOND ONE. This
+    /// exists only to spell the tip PAIR, because the site being replaced is a
+    /// whole property getter rather than a one-card helper -- the Defend it
+    /// names still comes from the one seam, so the relic and the tip cannot
+    /// disagree about which Defend is hers.
+    ///
+    /// WHY THE PAIR IS REBUILT RATHER THAN REPAIRED. The throwing `First()` is
+    /// INLINE in `Fasten.ExtraHoverTips`; there is no inner method to answer,
+    /// so a prefix has to produce the whole list. It is a two-element list and
+    /// both elements are the base game's own factory calls in the base game's
+    /// own order -- <c>Static(Block)</c> then <c>FromCard(theDefend)</c> -- and
+    /// a pin reads the shipped getter's IL to say those two are still what it
+    /// builds (`ArmStarterBasicsTests`). If MegaCrit adds a third tip, that pin
+    /// bites rather than the arm quietly dropping it.
+    ///
+    /// TAKES THE CHARACTER, NOT THE CARD, so the flag-off pin can ask it the
+    /// same way it asks the other two -- with a character and no live run. The
+    /// card-shaped part (is it mutable, has it an owner) belongs to the patch,
+    /// because that is the base game's own guard and it is where the base
+    /// game's own fallback lives.
+    /// </summary>
+    internal static IEnumerable<IHoverTip>? DefendTipsFor(CharacterModel character)
+    {
+        var defend = DefendFor(character);
+        if (defend == null)
+        {
+            return null;
+        }
+
+        return new IHoverTip[]
+        {
+            HoverTipFactory.Static(StaticHoverTip.Block),
+            HoverTipFactory.FromCard(defend),
+        };
+    }
 }
 
 /// <summary>
@@ -166,6 +255,53 @@ internal static class LargeCapsule_ArmStarterDefend_Patch
     private static bool Prefix(CharacterModel character, ref CardModel __result)
     {
         var replacement = ArmStarterBasics.DefendFor(character);
+        if (replacement == null)
+        {
+            return true;
+        }
+
+        __result = replacement;
+        return false;
+    }
+}
+
+/// <summary>
+/// `EB-352`. Fasten's "a picture of your Defend" hover tip, under an overhaul
+/// arm, where asking the arm's pool for a `CardTag.Defend` card throws.
+///
+/// THIS ONE *IS* A SOFTLOCK-CLASS FAILURE, and that is the difference from the
+/// two patches above. Large Capsule's absence costs a prototype round -- the
+/// arm quietly plays two shipped cards. This one's absence throws
+/// `InvalidOperationException` out of a property getter that the card RENDERER
+/// calls, so the screen holding the card never finishes drawing: a shop shelf
+/// with Fasten on it, the reward screen that rolled it, or the hand it was
+/// drawn into. It is still not on `KleePatchBootstrap.SoftlockGuards`, because
+/// that list is read by an operator deciding whether to playtest a build at
+/// all, and this failure needs a Colorless card the run may never see -- but
+/// the boot report names the class either way, which is the signal that
+/// matters.
+///
+/// THE GUARD IS THE BASE GAME'S OWN, in the base game's order.
+/// `CardModel.Owner` calls `AssertMutable()` and THROWS on a canonical model,
+/// so `IsMutable` is tested FIRST and the `||` short-circuit that stops `Owner`
+/// being read is load-bearing, not style. When either test fails we return true
+/// and the base getter takes its own `cardModel == null` arm, which hands back
+/// `ModelDb.Card&lt;DefendIronclad&gt;()` -- the right answer for a card with no
+/// reader (the card library, a canonical model), and unchanged from the shipped
+/// game.
+/// </summary>
+[HarmonyPatch(typeof(Fasten), "ExtraHoverTips", MethodType.Getter)]
+internal static class Fasten_ArmDefendTip_Patch
+{
+    [HarmonyPrefix]
+    private static bool Prefix(Fasten __instance, ref IEnumerable<IHoverTip> __result)
+    {
+        if (!__instance.IsMutable || __instance.Owner == null)
+        {
+            return true;
+        }
+
+        var replacement = ArmStarterBasics.DefendTipsFor(__instance.Owner.Character);
         if (replacement == null)
         {
             return true;
