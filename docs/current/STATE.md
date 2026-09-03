@@ -156,9 +156,12 @@ are in [`workstreams.md`](workstreams.md).
   installed dev build, soaked, and **round one is read**
   and RULED (R251, `review/ruled/furina-reframe-round-1-2026-09-04.md`): one
   Sonnet seat cleared act 1 at 8 of 78, the reframe's rules read true, the
-  shipped Burst won the boss fight, and it RETIRES under the arm in round two
-  (`EB-365`), with `EB-364`, `EB-366`, `EB-367`. [USER]'s act-1 run is due
-  on the round-two build. No stamp moves, nothing measured.
+  shipped Burst won the boss fight. **Round two is BUILT**: the shipped Burst
+  retires under the arm alone — no draw, no feed, no kit card, behind
+  `FURINA_REFRAME_BURST` in both engines, the shared retirement still
+  `EB-199` / `EB-200`'s (`EB-365` closed) — with `EB-364`, `EB-366`, `EB-367`
+  and `EB-368`. [USER]'s act-1 run is due on the round-two build. No stamp
+  moves, nothing measured.
 - **Control run** — R250 pick 4: one base-game Ironclad run by the same
   Opus seats on the same lane and harness (`review/qa/control-ironclad-2026-09-04/`),
   ascension recorded. The kit clears (Kokomi 4d, 5; Klee 8) are read against

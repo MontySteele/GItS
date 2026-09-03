@@ -4441,8 +4441,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # the mod side and written out on this one, so its anchors are the
         # clauses AROUND them -- the same fold-out this table already does for
         # the Bomb's growth and the Spark's opening bank.
-        "Deploy": ["member joins the stage and performs at ",
-                   "full stage, the front member "],
+        # `EB-368` rewrote Deploy's sentence rather than extending it (the
+        # keyword-tip ceiling; see `test_the_deploy_row_says_what_makes_a_
+        # member_act_again` for the finding).
+        "Deploy": ["A member joins and performs at once; a full stage ",
+                   " the front member first. Afterwards only a ",
+                   " play performs a member."],
         "Evoke": ["The member performs and leaves. Its ",
                   " price pays "],
         "Drain": [" falls to nothing. What the card does ",
@@ -4512,9 +4516,72 @@ def test_the_companion_word_is_defined_where_a_card_prices_itself_on_it():
 def test_the_glossary_carries_no_markup_and_no_id():
     """It is rendered through the same blindness assertion as everything else,
     and the sentences are copied from C# that spells them with `[gold]` tags."""
-    for word, body in blindplay.ARM_KEYWORDS.items():
-        assert "[" not in body and "]" not in body, word
-        assert not qa_packet.leaks(body), word
+    for table in (blindplay.ARM_KEYWORDS, blindplay.GAME_KEYWORDS):
+        for word, body in table.items():
+            assert "[" not in body and "]" not in body, word
+            assert not qa_packet.leaks(body), word
+
+
+def test_the_deploy_row_says_what_makes_a_member_act_again():
+    """`EB-368`. THE ACT-2 SEAT PLAYED NO SALON CARD IN THREE FIGHTS.
+
+    Under the arm a member on stage does NOTHING on its own: what performs it
+    afterwards is a Companion card. The word said only "joins the stage and
+    performs at once", which prices a deploy as a one-shot -- and a one-shot at
+    that price is never worth the card.
+
+    Held in step with `ArmKeywordTips.ForDeploy` from this side, the discipline
+    every row in this table is under. The word was REWRITTEN rather than
+    extended -- three rules appended to the old two sentences ran 50 characters
+    over the keyword-tip ceiling -- so this asserts all three rules and not the
+    old wording.
+    """
+    page = blindplay.observe(keyword_hand_state([
+        "Deploy Mademoiselle Crabaletta."]))
+    assert "- **Deploy** — " in page
+    for clause in ("joins and performs at once",
+                   "a full stage Evokes the front member first",
+                   "only a Companion play performs a member"):
+        assert clause in page, clause
+        assert clause in blindplay.ARM_KEYWORDS["Deploy"], clause
+
+    src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+           / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+    # The tip's own [gold] spans split the sentence across concatenated
+    # literals, so the anchors are the runs that do not straddle a `+`.
+    for phrase in ("A member joins and performs at once; a full stage ",
+                   " the front member first. Afterwards only a ",
+                   " play performs a member."):
+        assert phrase in src, phrase
+
+
+def test_ringing_is_defined_the_first_time_the_screen_names_it():
+    """`EB-367`. A DEBUFF THE SEAT "never saw named or explained anywhere".
+
+    The act-1 boss's Beast Cry stamps Ringing onto every card the player owns
+    that carries no other affliction, and the rule is one card play for the
+    turn. The Furina round-one seat met it twice and had to infer it from the
+    reminder printed on every card in hand -- which says what it does and not
+    the two seams that make the choked turn playable.
+
+    `EB-359`'s shape: a keyword that names a STATUS gets the status's own rule,
+    not the card-side reminder that mentions it.
+
+    NO EARLIER WARNING IS AVAILABLE: Beast Cry's intent is a bare `DebuffIntent`
+    naming no power, so the first screen carrying the word is the one the
+    affliction lands on -- which is the turn the seat has to choose.
+    """
+    page = blindplay.observe(keyword_hand_state([
+        "Ringing — You can only play 1 card this turn."]))
+    assert "- **Ringing** — " in page
+    assert "you can play only 1 card this turn" in page
+    # The two seams, which the game's own reminder never states.
+    assert "already carry a different affliction are never stamped" in page
+    assert "potions, relics and end-of-turn triggers are not card plays" in page
+    # A screen that never names it defines nothing, the rule every row in the
+    # glossary is under.
+    assert "**Ringing**" not in blindplay.observe(
+        keyword_hand_state(["Gain 5 Block."]))
 
 
 # --------------------------------- EB-273: the Kokomi arm's meter on the wire
@@ -4734,11 +4801,42 @@ def test_the_reactions_are_defined_wherever_the_screen_shows_an_element():
     # numbers it exists for are both still here.
     assert "6 damage to ALL enemies and 1 Weak" in page
     assert "Shatters for 6 damage" in page
-    assert "Bosses cannot be Frozen" in page
+    # `EB-366`: the boss substitution is NOT on this page. The recorded combat
+    # is a `monster` room, and the clause is a rule about a boss room -- see
+    # the two tests below.
+    assert "Bosses cannot be Frozen" not in page
     # AN AURA ALONE IS ENOUGH: the combination is priced from the other side
     # just as often, and that screen carries no elemental card at all.
     assert "- **Melt** — " in blindplay.observe(
         elemental_hand_state(aura=True))
+
+
+def test_the_boss_substitution_prints_in_a_boss_room():
+    """`EB-366`. THE PREVIEW AND THE FREEZE ASKED DIFFERENT QUESTIONS.
+
+    The Furina reframe's round-one seat applied Cryo to a Hydro-wearing
+    Byrdonis -- an ELITE -- under a printed line reading "Bosses cannot be
+    Frozen: Hydro plus Cryo is consumed and applies 2 Vulnerable instead", and
+    Byrdonis froze: "its next action deals half damage". The rule was right and
+    the page was wrong. The substitution is `RoomType.Boss AND not a Minion`,
+    so the clause is a fact about a boss room and belongs on one.
+
+    Seen to FAIL: before the split it printed on every elemental screen in the
+    game.
+    """
+    elite = elemental_hand_state()
+    elite["state_type"] = "elite"
+    boss = elemental_hand_state()
+    boss["state_type"] = "boss"
+
+    assert "Bosses cannot be Frozen" not in blindplay.observe(elite)
+    assert "Shatters for 6 damage" in blindplay.observe(elite)
+
+    page = blindplay.observe(boss)
+    assert "Bosses cannot be Frozen" in page
+    # The half that decides WHICH body in front of you freezes, and the half
+    # the C# preview was missing when this row was filed.
+    assert "A Minion beside the boss still Freezes." in page
 
 
 def test_the_consumed_aura_rule_is_stated_plainly():
@@ -4808,7 +4906,7 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         "Superconduct": ["reacted enemy gains "],
         "Electro-Charged": [" HP at the start of its turn, 1 less each turn"],
         "Frozen": ["ts next action deals half damage, and the first Attack "
-                   "to hit it Shatters for ", "Bosses cannot be Frozen"],
+                   "to hit it Shatters for "],
     }
     assert set(anchors) | {"Elemental Reaction"} \
         == set(blindplay.REACTION_KEYWORDS)
@@ -4816,6 +4914,12 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         for phrase in phrases:
             assert phrase in src, (word, phrase)
             assert phrase in blindplay.REACTION_KEYWORDS[word], (word, phrase)
+    # `EB-366`: the boss substitution left the Frozen ROW and became a clause
+    # the room decides. It is still the C#'s own sentence and still held in
+    # step from this side -- only where it prints has moved.
+    assert "Bosses cannot be Frozen" in src
+    assert "Bosses cannot be Frozen" in blindplay.FROZEN_BOSS_CLAUSE
+    assert "Bosses cannot be Frozen" not in blindplay.REACTION_KEYWORDS["Frozen"]
     # The interpolated constants, read off the table the C# interpolates from.
     table = (REPO / "klee-mod" / "KleeCode" / "Elements"
              / "ReactionTable.cs").read_text(encoding="utf-8")

@@ -1454,6 +1454,12 @@ face and hits share one DamageVar; Tender ticks after each card is played,
 so the seat read a 5 composed before the turn's first tick and added
 Strength again. The turn reconciles at 31 (PR #347). Ceilings never come
 down.
+EB-365 RETIRED 2026-09-04 on its own acceptance (R251, the Furina reframe's
+round-one pick 1 at option (1)): the shipped Burst meter is retired UNDER THE
+FURINA ARM -- it does not draw, nothing feeds it and Let the People Rejoice is
+never granted, all behind FURINA_REFRAME_BURST / FurinaReframe.BurstEnabled.
+The SHARED retirement is still EB-199 and EB-200's, and nothing outside the
+arm's flag moved. Ceilings never come down.
 ```
 M45 RETIRED 2026-09-04 (R250): the six post-playtest calls were written
 against the shipped kits and the richness playtest; the Kokomi items retire

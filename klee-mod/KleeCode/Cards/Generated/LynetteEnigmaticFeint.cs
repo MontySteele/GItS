@@ -52,7 +52,7 @@ public sealed class LynetteEnigmaticFeint : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lynette — Enigmatic Feint"),
-        ("description", "[gold]Swirl[/gold] an enemy's aura. Gain {CalculatedBlock:diff()} [gold]Block[/gold]."),
+        ("description", "[gold]Swirl[/gold] an enemy's aura onto ALL enemies. Gain {CalculatedBlock:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

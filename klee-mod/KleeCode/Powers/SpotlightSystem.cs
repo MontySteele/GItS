@@ -272,6 +272,38 @@ public static class SpotlightSystem
         await Designate(
             choiceContext, creature, SpotlightMode.GuestCast, cardSource);
     }
+
+    /// <summary>
+    /// `EB-364`. THE REFUSAL <see cref="DesignateOneMode"/> WOULD MAKE, ASKED
+    /// ONE PHASE EARLIER -- and its ONLY statement, so the question the
+    /// playability gate asks and the answer the designation acts on can never
+    /// drift apart. It decides nothing; it only reports.
+    ///
+    /// WHAT THE SEAT SAW. Ethereal Spotlight prints "Costs 2 Encore" under the
+    /// arm, and the round-one seat played it at 0 Encore in fight 2 round 1: no
+    /// refusal, no Guest Cast, no line on the page, and it found out two turns
+    /// later that its Companions were never empowered. The card is a 0-ENERGY
+    /// token whose Encore price is charged INSIDE the op rather than declared
+    /// as a resource cost, so no gate ran for it at all -- <c>CanPlay</c> had
+    /// nothing to refuse on, and "unpaid is a no-op" (above) turned the whole
+    /// play into an Ethereal card exhausting for nothing.
+    ///
+    /// THE REDUNDANT CASE IS NOT A REFUSAL, deliberately. Re-aiming at the same
+    /// target bills nothing, so a seat already in Guest Cast can still play the
+    /// card at an empty buffer; what it must not do is pay nothing and get
+    /// nothing, which is the only state this gate names.
+    ///
+    /// NULL-TOLERANT AND READ-ONLY: it is called on every card in hand on every
+    /// state poll and on the compendium's ownerless copy, so no combat, no
+    /// owner and no resource table all answer <c>false</c> -- a card nobody
+    /// holds is refused by nothing.
+    /// </summary>
+    public static bool DesignateOneModeIsUnpayable(Creature? creature) =>
+        creature != null
+        && FurinaReframe.SpotlightLiveFor(creature)
+        && Mode(creature) != SpotlightMode.GuestCast
+        && FurinaResources.Encore(creature)
+            < FurinaReframeLaw.SpotlightDesignateEncoreCost;
 #endif
 
     /// <summary>

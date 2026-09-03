@@ -150,11 +150,48 @@ public static class SalonMemberTips
           + $"{SalonConstants.FocusPerFanfare} Fanfare you hold; a member "
           + "with no Encore to spend acts at three-quarters.";
 
+#if PROTOTYPE_CARDS
+        // `EB-368`. THE ARM'S THREE SALON RULES ARE PRINTED NOWHERE, and the
+        // act-2 seat played no Salon card across three fights because of it.
+        // Every sentence above is a SHIPPED rule the reframe replaces: members
+        // do not act on their own turn, a deploy performs on the spot, a
+        // deploy onto a full stage EVOKES the front rather than bowing the
+        // oldest out for its payoff, and a Companion play performs the front
+        // member -- the arm's whole engine, and none of it on any face.
+        //
+        // The branch is here rather than on the two deploy faces because this
+        // is the tip both the deploy card and the stage hover read (D1 §4), so
+        // the rules are stated once and cannot fork. The faces carry their own
+        // clause too; this is the paragraph behind the word.
+        if (FurinaReframe.ManualLiveFor(owner))
+        {
+            body =
+                $"Your Salon holds {slots} members. Members do NOT act on "
+              + "their own. A [gold]Companion[/gold] card you play performs "
+              + "the front member; a [gold]Deploy[/gold] performs the member "
+              + "it fields at once; deploying onto a full stage "
+              + "[gold]Evokes[/gold] the front member first. The leftmost "
+              + "member is the front. Member numbers gain +1 per "
+              + $"{SalonConstants.FocusPerFanfare} Fanfare you hold.";
+        }
+#endif
+
         if (owner == null) return body;
 
         var onStage = SalonMemberPower.Count(owner);
-        return onStage >= slots
-            ? $"{body} Your stage is FULL: the next deploy bows someone out."
-            : $"{body} You have {onStage} on stage.";
+        if (onStage < slots) return $"{body} You have {onStage} on stage.";
+        var full = "Your stage is FULL: the next deploy bows someone out.";
+#if PROTOTYPE_CARDS
+        // `EB-368`. The live half of the same sentence: under the arm a full
+        // stage is a REWARD (the free Evoke), not a cost, and telling a seat
+        // it is about to lose a member for a payoff it does not get is how the
+        // round-two seat learned to stop deploying.
+        if (FurinaReframe.ManualLiveFor(owner))
+        {
+            full = "Your stage is FULL: the next deploy [gold]Evokes[/gold] "
+                 + "the front member first.";
+        }
+#endif
+        return $"{body} {full}";
     }
 }

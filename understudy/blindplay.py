@@ -154,8 +154,9 @@ from understudy.blindplay_board import (   # noqa: E402,F401  (re-export)
     _relic_options, _rest_options, _reward_items, _screen_cards,
     _selected_bundle, UNEXPLAINED_OMISSION, upgrade_deck_floor)
 from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
-    _ARM_KEYWORD_RE, ARM_KEYWORDS, AURA_NOTE, _elements_on_screen,
-    _every_string, HAND_REPEAT_NOTE, keyword_notes, METER_CAPPED_NOTE,
+    _ARM_KEYWORD_RE, ARM_KEYWORDS, AURA_NOTE, BOSS_ROOM, _elements_on_screen,
+    _every_string, FROZEN_BOSS_CLAUSE, _GAME_KEYWORD_RE, GAME_KEYWORDS,
+    HAND_REPEAT_NOTE, keyword_notes, METER_CAPPED_NOTE,
     METER_NOTE, POWER_NOTE, PREVIEW_LOCKED, REACTION_KEYWORDS,
     SELECTION_NOTE, TRANSFORM_NOTE, TRANSFORM_UNREADABLE, _wire_keyword_rows)
 from understudy.blindplay_observe import (   # noqa: E402,F401  (re-export)

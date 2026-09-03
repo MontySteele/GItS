@@ -225,7 +225,15 @@ public static class GaugeBridge
             AnchorOffset = OverheadBurstAnchor,
             VisualSpan = FurinaResourceConstants.BurstMax,
             LabelMax = FurinaResourceConstants.BurstMax,
-            AppliesTo = FurinaResources.IsFurina,
+            // NOT a bare `IsFurina` any more (`EB-365`, R251), and it is
+            // `EB-281`'s and `EB-297`'s fact one character further over: under
+            // the Furina reframe arm the shipped Burst meter is retired -- no
+            // rule under the arm feeds it and no card under it spends it -- so
+            // a spec that still APPLIED would draw an overhead ribbon pinned at
+            // 0/70 for the whole run. The round-one seat read the un-retired
+            // meter live at `78/70`, over its own cap. The guard lives beside
+            // the resource, as Klee's and Kokomi's do.
+            AppliesTo = FurinaResources.BurstGaugeApplies,
             ReadValue = FurinaResources.Burst,
             ShouldFlash = (previous, current) =>
                 previous < FurinaResourceConstants.BurstMax

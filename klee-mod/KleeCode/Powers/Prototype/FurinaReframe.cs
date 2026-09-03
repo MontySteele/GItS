@@ -144,6 +144,29 @@ public static class FurinaReframe
     public static bool SpotlightEnabled { get; set; } = DefaultEnabled;
 
     /// <summary>
+    /// R251 (2026-09-04), <c>EB-365</c>: THE SHIPPED BURST METER RETIRES UNDER
+    /// THIS ARM, and only under this arm. Mirrors <c>FURINA_REFRAME_BURST</c>.
+    ///
+    /// The round-one seat's meter read <c>78/70</c>, over its own cap, and
+    /// <i>Let the People Rejoice</i> arrived off that overflow to take the boss
+    /// from 28 to 14 -- the clutch turn of the run, and the shipped kit's
+    /// rather than the reframe's. R220 B had sequenced the Burst fold last, so
+    /// the shipped meter still ran beside the reframe's own; the round-one
+    /// pick's new fact is that it will sit inside every Furina read until it
+    /// goes.
+    ///
+    /// ARM-ONLY, and that is the whole scope. The SHARED retirement
+    /// (<c>EB-199</c> / <c>EB-200</c>) still owns the shipped engines -- the
+    /// resource class, the <c>Burst Energy</c> keyword id, the constants, the
+    /// kit-grant machinery and every other character's meter are untouched
+    /// here. What this leg does is Kokomi's <c>EB-297</c> and <c>EB-327</c> one
+    /// character over: under the flag the meter does not DRAW, nothing FEEDS it
+    /// (<c>EB-266</c>'s reaction funnel included), and the kit card is never
+    /// GRANTED.
+    /// </summary>
+    public static bool BurstEnabled { get; set; } = DefaultEnabled;
+
+    /// <summary>
     /// Whose engine this is. Every leg is character-scoped, which is the sim's
     /// <c>is_furina</c> and its stated reason: the reframe is one character's
     /// redesign and a roster-wide branch would be a different (and much
@@ -168,6 +191,14 @@ public static class FurinaReframe
     /// <summary>Is the one-mode SPOTLIGHT leg live for this creature?</summary>
     public static bool SpotlightLiveFor(Creature? creature) =>
         Enabled && SpotlightEnabled && IsFurina(creature);
+
+    /// <summary>Is the shipped Burst meter RETIRED for this creature? The one
+    /// question the display guard, the income funnel and the kit grant all ask,
+    /// so "she has no Burst meter under the arm" is one decision rather than
+    /// three that can be retired by halves. Mirrors
+    /// <c>furina_reframe.burst_retired</c>.</summary>
+    public static bool BurstRetiredFor(Creature? creature) =>
+        Enabled && BurstEnabled && IsFurina(creature);
 
     /// <summary>
     /// How many times an Evoke applies the Focus term. ONE when the leg is

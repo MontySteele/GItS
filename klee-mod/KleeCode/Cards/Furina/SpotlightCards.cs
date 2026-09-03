@@ -13,7 +13,8 @@ using MegaCrit.Sts2.Core.Models;
 namespace KleeMod.Cards.Furina;
 
 /// <summary>The zero-cost Ethereal selector granted by Furina's starter relic.</summary>
-public sealed class EtherealSpotlight : CustomCardModel, ICharacterCard
+public sealed class EtherealSpotlight
+    : CustomCardModel, ICharacterCard, IUnplayableReasonCard
 {
     public string CharacterId => "furina";
 
@@ -54,6 +55,62 @@ public sealed class EtherealSpotlight : CustomCardModel, ICharacterCard
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         System.Array.Empty<DynamicVar>();
+
+    /// <summary>
+    /// `EB-364`. THE CARD REFUSES SHORT OF ITS OWN PRICE.
+    ///
+    /// This is a 0-ENERGY token whose Encore price is charged inside the op
+    /// rather than declared as a resource cost, so until now NO gate ran for it
+    /// at all: the round-one seat played it at 0 Encore, got no refusal, no
+    /// Guest Cast and no line on the page, and found out two turns later. The
+    /// price is real, so the gate is where every other priced card in this mod
+    /// puts one, and the predicate is <c>SpotlightSystem</c>'s own so the gate
+    /// and the payment cannot disagree.
+    ///
+    /// INERT WITH THE ARM OFF and absent from a release build: the shipped
+    /// selector charges no Encore, it opens a choose-a-card screen, and there
+    /// is nothing here to refuse.
+    /// </summary>
+    protected override bool IsPlayable
+    {
+        get
+        {
+#if PROTOTYPE_CARDS
+            if (SpotlightSystem.DesignateOneModeIsUnpayable(
+                    SparkCost.OwnerCreatureOf(this)))
+            {
+                return false;
+            }
+#endif
+            return base.IsPlayable;
+        }
+    }
+
+    /// <summary>
+    /// `EB-364`, and `EB-264`'s half of it: <c>CardModel.CanPlay</c> collapses
+    /// every mod-side refusal into <c>BlockedByCardLogic</c>, which names no
+    /// reason, so the refusal carries its own sentence for the blind page to
+    /// print beside the enum. Same shape as the Spark-priced cards' -- the bank
+    /// first, then the price -- because it is the same reader.
+    /// </summary>
+    public string? UnplayableReason
+    {
+        get
+        {
+#if PROTOTYPE_CARDS
+            var owner = SparkCost.OwnerCreatureOf(this);
+            if (SpotlightSystem.DesignateOneModeIsUnpayable(owner))
+            {
+                var bank = owner == null ? 0 : FurinaResources.Encore(owner);
+                var price = FurinaReframeLaw.SpotlightDesignateEncoreCost;
+                return bank <= 0
+                    ? $"you have no Encore, and this costs {price}"
+                    : $"you have {bank} Encore, and this costs {price}";
+            }
+#endif
+            return null;
+        }
+    }
 
     public EtherealSpotlight()
         : base(0, CardType.Skill, CardRarity.Token, TargetType.Self, autoAdd: false)

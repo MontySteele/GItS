@@ -8803,10 +8803,20 @@ def build_description(card: dict) -> str:
             parts.append(f"Apply [gold]{el}[/gold]{where}.")
 
         elif op == "swirl":
+            # `EB-367`. "ONTO ALL ENEMIES" IS THE HALF THE SINGLE-TARGET CLAUSE
+            # LEFT OUT, and it is the half that decides whether the card is
+            # worth playing. The Furina reframe's round-one seat swirled one
+            # Leaf Slime's Cryo aura and watched it land on a second slime it
+            # had not targeted -- filed as "a side effect the card's printed
+            # text doesn't fully warn about" (fight 1, round 2). The reaction's
+            # own preview row has said "consumed and copied onto ALL enemies"
+            # since it was written, and so does `ArmKeywordTips.ForSwirl`; the
+            # VERB on the face was the one surface that did not.
             tgt = eff.get("target", "enemy")
-            parts.append("[gold]Swirl[/gold] ALL enemies' auras."
-                         if tgt == "all_enemies"
-                         else "[gold]Swirl[/gold] an enemy's aura.")
+            parts.append(
+                "[gold]Swirl[/gold] ALL enemies' auras."
+                if tgt == "all_enemies"
+                else "[gold]Swirl[/gold] an enemy's aura onto ALL enemies.")
 
         elif op == "refresh_all_auras":
             parts.append("Refresh ALL elemental auras.")

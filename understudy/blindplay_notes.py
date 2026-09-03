@@ -276,8 +276,15 @@ ARM_KEYWORDS: dict[str, str] = {
     # numerals the C# interpolates from `FurinaReframeLaw` written out: this
     # page has no access to the mod's constants, and a seat reading it needs
     # the number rather than the name of the constant that holds it.
-    "Deploy": ("A Salon member joins the stage and performs at once. Onto a "
-               "full stage, the front member Evokes first."),
+    # `EB-368` REWROTE THIS ROW, in step with `ArmKeywordTips.ForDeploy` and
+    # for the reason the row gives: the act-2 seat played no Salon card in
+    # three fights, because "joins the stage and performs at once" prices a
+    # deploy as a one-shot and never says what makes a member act again. Three
+    # rules in two sentences, the Bomb's shape, because the tip ceiling binds
+    # on the C# side and the two copies must not fork.
+    "Deploy": ("A member joins and performs at once; a full stage Evokes the "
+               "front member first. Afterwards only a Companion play performs "
+               "a member."),
     "Evoke": ("The member performs and leaves. Its Fanfare bonus counts 3 "
               "times and it prints 5 Fanfare. The card's Encore price pays "
               "for it."),
@@ -334,6 +341,43 @@ _ARM_KEYWORD_RE = {
     # ("Companion card", "Companion cards"), and that is exactly the screen a
     # reader needs the definition on.
     "Companion": re.compile(r"\bCompanion cards?\b"),
+}
+
+
+# `EB-367`. THE BASE GAME'S OWN WORDS, WHEN ITS OWN TIP IS NOT WHAT THE WORD
+# DOES. Separate from `ARM_KEYWORDS` on purpose: those rows are held in step
+# with `ArmKeywordTips` in the C# and their pin asserts a one-to-one join, so a
+# word this mod did not invent and hangs no tip on has no place in that table.
+#
+# THE SHAPE IS `EB-359`'s -- a keyword that names a STATUS gets the status's own
+# rule printed, not the card-side reminder that mentions it. `Tainted`'s entry
+# is that row's example: the game's tip says "Gain 2 Tainted when played" and
+# never that Tainted is +2 damage taken, so two seats spent a card to find out.
+#
+# `Ringing` is the same gap one enemy over. Beast Cry stamps the affliction onto
+# every card the player owns that carries no other affliction, and the rule is
+# "playable only if you have not started a card play this turn" -- so the turn
+# after Beast Cry is ONE card play. The Furina round-one seat met it twice at
+# the act-1 boss, "a debuff I never saw named or explained anywhere before it
+# first appeared", and had to infer it from the reminder printed on every card
+# in hand. The two seams the reminder never mentions are what makes the choked
+# turn playable at all, and they are the reason this entry is worth its lines.
+#
+# NO EARLIER WARNING IS AVAILABLE ON THIS WIRE, and that is a fact about the
+# feed rather than a decision here: Beast Cry's intent is a bare `DebuffIntent`
+# (`MegaCrit.Sts2.Core.Models.Monsters.CeremonialBeast`), whose hover tip names
+# no power, so the first screen that carries the word is the one the affliction
+# lands on. The entry prints there, which is the turn the seat has to choose.
+GAME_KEYWORDS: dict[str, str] = {
+    "Ringing": ("An enemy debuff on YOU: you can play only 1 card this turn. "
+                "The first play locks every other Ringing card in hand. Cards "
+                "that already carry a different affliction are never stamped "
+                "and stay playable; potions, relics and end-of-turn triggers "
+                "are not card plays and are untouched."),
+}
+
+_GAME_KEYWORD_RE = {
+    "Ringing": re.compile(r"\bRinging\b"),
 }
 
 
@@ -409,11 +453,33 @@ REACTION_KEYWORDS: dict[str, str] = {
     "Electro-Charged": ("Hydro on an Electro aura, or Electro on a Hydro "
                         "aura. The reacted enemy loses 4 HP at the start of "
                         "its turn, 1 less each turn."),
+    # `EB-366` SPLIT THE BOSS CLAUSE OFF THIS ROW. See `FROZEN_BOSS_CLAUSE`.
     "Frozen": ("Hydro on a Cryo aura, or Cryo on a Hydro aura. Its next "
                "action deals half damage, and the first Attack to hit it "
-               "Shatters for 6 damage. Bosses cannot be Frozen: Hydro plus "
-               "Cryo is consumed and applies 2 Vulnerable instead."),
+               "Shatters for 6 damage."),
 }
+
+# `EB-366`. THE BOSS SUBSTITUTION, PRINTED IN A BOSS ROOM AND NOWHERE ELSE.
+#
+# WHAT THE SEAT SAW (Furina reframe round 1, the Elite fight, round 5): a Cryo
+# hit onto a Hydro aura on Byrdonis, an ELITE, under a printed line reading
+# "Bosses cannot be Frozen: Hydro plus Cryo is consumed and applies 2
+# Vulnerable instead" -- and Byrdonis froze. The rule was right and the page
+# was wrong: the substitution is `RoomType.Boss AND not a Minion`, so it has
+# nothing to say about an elite, and stating it unconditionally told a seat
+# that the freeze it was about to get could not happen.
+#
+# So the clause is appended by the ROOM, off the wire's own `state_type` --
+# "monster", "elite" or "boss" (`McpMod.StateBuilder`, from the encounter's own
+# `RoomType`) -- which is the same fact the mod's predicate reads. The minion
+# half rides with it, because in a boss room it is the half that decides which
+# body in front of you freezes.
+FROZEN_BOSS_CLAUSE = (" Bosses cannot be Frozen: Hydro plus Cryo is consumed "
+                      "and applies 2 Vulnerable instead. A Minion beside the "
+                      "boss still Freezes.")
+
+# The room the boss substitution applies in, off the wire's `state_type`.
+BOSS_ROOM = "boss"
 
 # The number the card's own Bomb tip prints, where a screen carries that tip.
 # `ArmKeywordTips.ForBomb` builds it as "Grows by <n> at the start of your
@@ -516,10 +582,12 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     word that reaches the page through a card's body, an enemy's badge, a
     power's text, a relic, a potion or a reward row is defined the same way.
 
-    THREE SOURCES, IN THIS ORDER (`EB-340`):
+    FOUR SOURCES, IN THIS ORDER (`EB-340`, extended by `EB-367`):
 
       the ARMS' words, matched on the text of the screen, unchanged since
         `EB-272` except that `Bomb` now carries its growth number;
+      the BASE GAME's words whose own tip is not what the word DOES
+        (`GAME_KEYWORDS`), matched the same way;
       the REACTIONS, on any screen showing an aura or an element-bearing card,
         because a reaction is a rule about a board rather than a word printed
         on it and the seat that cannot see it cannot price a combination;
@@ -527,6 +595,11 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
 
     A word already defined by an earlier source is not defined twice, and the
     arms' own copies win: they are the sentences held in step with the C#.
+
+    `EB-366`: the reaction rows are room-aware in exactly one place. Frozen's
+    boss substitution is a rule about a BOSS ROOM, so it prints in one and
+    nowhere else -- an elite that is about to freeze must not be read a line
+    saying it cannot.
     """
     hay = "\n".join(_every_string(obs))
     growth = _BOMB_GROWTH_RE.search(hay)
@@ -534,8 +607,14 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
              "text": ARM_KEYWORDS[word].format(
                  growth=int(growth.group(1)) if growth else BOMB_GROWTH)}
             for word, pattern in _ARM_KEYWORD_RE.items() if pattern.search(hay)]
+    rows += [{"name": word, "text": GAME_KEYWORDS[word]}
+             for word, pattern in _GAME_KEYWORD_RE.items()
+             if pattern.search(hay)]
     if _elements_on_screen(obs):
-        rows += [{"name": word, "text": text}
+        boss = str(obs.get("state_type") or "") == BOSS_ROOM
+        rows += [{"name": word,
+                  "text": text + (FROZEN_BOSS_CLAUSE
+                                  if boss and word == "Frozen" else "")}
                  for word, text in REACTION_KEYWORDS.items()]
     seen = {row["name"] for row in rows}
     for row in _wire_keyword_rows(obs):
