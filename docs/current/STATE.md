@@ -102,8 +102,8 @@ Slay the Spire 2 **v0.111.0**, commit `41cef1ea`, buildid `24724944`, appid
 v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
-`+proto` dev mark (R217 D). **Installed: `0.2.2263+proto`** (2026-09-03,
-main `8b877787`, all three arms on), the three prototype arms behind `-p:PrototypeCards=true`; the
+`+proto` dev mark (R217 D). **Installed: `0.2.2301+proto`** (2026-09-03,
+main `2c2a94de`, all three arms on, the round-8 build), the three prototype arms behind `-p:PrototypeCards=true`; the
 Furina arm needs `-p:FurinaReframe=true` too and ships OFF. **Last RELEASE
 package: `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
 
@@ -135,19 +135,18 @@ are in [`workstreams.md`](workstreams.md).
 
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
-- **Klee** — Prototype round 7b is read and ruled (R248,
-  `review/ruled/klee-overhaul-round-7b-2026-09-03.md`): four Opus seats
-  played three acts on the R243 numbers, the Fable card audit and the
-  stand-ins, and died two floors below Aeonglass. Round 8 builds a Bomb
-  carrying the target's modifiers only (`EB-343`), Grounded's Spark
-  (`EB-344`) and the Hexerei readers (`EB-326`); [USER] plays it.
-- **Kokomi** — Prototype round 4c is read and ruled (R246,
-  `review/ruled/kokomi-overhaul-round-4c-2026-09-02.md`): three Opus seats
-  died on floor 24 with the Plan layer answering act 2's damage and none of
-  its block. Round five builds `EB-334` (the Bake-Kurage deals Plan damage)
-  and `EB-335` (Tide Wall, Shell Guard); a second seat run on the fix build
-  comes first, then [USER]'s. The Kurage memory is base kit behind
-  `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
+- **Klee** — Prototype round 8 is installed: a Bomb carries the target's
+  modifiers only (`EB-343`), Grounded's held turn pays a Spark (`EB-344`),
+  the three Hexerei readers (`EB-326`, art owed) and the round-7b defaults
+  (`EB-336` to `EB-339`). Round 7b's read is ruled (R248,
+  `review/ruled/klee-overhaul-round-7b-2026-09-03.md`). The round-8 seats
+  play three acts on lane 2 before [USER] does.
+- **Kokomi** — Round 4d is read: three Opus seats cleared the spire on the
+  fix build, Aeonglass dead on round 6, and named the Plan layer's one
+  decision as a Sango draw (`review/active/kokomi-overhaul-round-4d-2026-09-03.md`,
+  one pick: the Plan cards' shape). Round five is installed (`EB-334`, Tide
+  Wall and Shell Guard) and its seats play lane 1 before [USER] does. The
+  Kurage memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
   2's five `proto_fr_` rows are built** (2026-09-02): the named deploy, two
