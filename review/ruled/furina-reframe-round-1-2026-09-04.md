@@ -1,4 +1,4 @@
-Status: OPEN (PR = [USER]; one pick in §6)
+Status: RULED R251 2026-09-04
 
 # Furina reframe round one: act 1 cleared at 8 HP, and the shipped Burst that won it
 
