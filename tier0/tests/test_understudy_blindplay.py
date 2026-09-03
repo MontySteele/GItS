@@ -4537,9 +4537,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-329`: the aim clause now defers to the face, because a Plan
         # that says ALL hits every enemy and this sentence said otherwise on
         # every battle screen of the run.
+        # `EB-380`: the aim clause split in two (a single-target Plan skips
+        # a Minion, an ALL Plan does not) and the modifier clause gained
+        # Strength, which does not reach a carry-out at all.
         "Plan": [", paid now; next turn: front ",
-                 "enemy, or ALL if it says so; never a Minion. ",
-                 "counts; your "],
+                 " counts; your ",
+                 " do not."],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
         # `EB-377` ADDED THESE TWO ROWS to the page, and their absence was the

@@ -200,6 +200,39 @@ public class ArmKeywordTipTests
     }
 
     [Fact]
+    public void The_plan_word_states_both_aims_and_all_three_modifiers()
+    {
+        // `EB-380`. "Never a Minion" was flat and the rule is not:
+        // `KokomiPlan.FrontTarget` skips a Minion for a SINGLE-TARGET Plan,
+        // and `Aim.AllEnemies` walks every living body, decoys included -- the
+        // r9 act-1 seat watched an `Exposed Flank+` Plan land on `Eye With
+        // Teeth` while this sentence said it could not. And the modifier
+        // clause named two of three: the carry-out is an UNPOWERED
+        // `ElementalHit`, so her Strength does not ride it either, and the
+        // same seat priced `Kurage's Oath+` at Plan 10 under Vajra expecting
+        // it would.
+        var body = Printed("ForPlan");
+        Assert.Contains("front non-", body);
+        Assert.Contains("Minion", body);
+        Assert.Contains("or ALL", body);
+        Assert.Contains("Enemy ", body);
+        Assert.Contains("Vulnerable", body);
+        Assert.Contains("Weak", body);
+        Assert.Contains("Strength", body);
+        Assert.DoesNotContain("never a Minion", body);
+
+        // The ceiling is the base game's own longest mechanic tip (CHANNELING,
+        // 134), and this word is read on every battle screen of every run.
+        // `Printed` concatenates every literal in the method, so the loc KEY
+        // comes off before the markup does.
+        var rendered = System.Text.RegularExpressions.Regex.Replace(
+            body.Replace(Tips.GetField("PlanKey")!.GetRawConstantValue()
+                             as string ?? string.Empty, string.Empty),
+            @"\[/?[a-z]+\]", string.Empty);
+        Assert.True(rendered.Length <= 135, rendered.Length.ToString());
+    }
+
+    [Fact]
     public void The_plan_element_rider_says_whose_hit_leaves_the_aura()
     {
         // `EB-378`. `KokomiPlan.ResolveAll` deals every damaging Plan clause as

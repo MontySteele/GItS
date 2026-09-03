@@ -309,10 +309,19 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # formations put a decoy on the leftmost slot on purpose, and the
             # sixth clause compressed "lands next turn on" to "next turn:" to
             # stay under the same 135-character ceiling.
+            #
+            # `EB-380` SPLIT THAT CLAUSE, because the rule is not flat: an ALL
+            # Plan walks every living body, decoys included, and the round-9
+            # act-1 seat watched one land on `Eye With Teeth` while this
+            # sentence said it could not. And `Strength` joined the modifier
+            # clause -- naming Vulnerable and Weak and stopping read as a
+            # complete list, and the carry-out is an UNPOWERED hit. 135
+            # characters rendered, at the ceiling: "the front enemy" and "or
+            # ALL if it says so" paid for both facts.
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front ",
-            "enemy, or ALL if it says so; never a Minion. ",
-            "[gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] does ",
-            "not.",
+            "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. ",
+            "Enemy [gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] ",
+            "and [gold]Strength[/gold] do not.",
             "heal N HP, never above the HP you entered ",
             # Furina, furina-reframe-2026-08-29.md sec.4.2 / sec.4.4 / sec.4.6,
             # staged as slice two. Three words the SHIPPED kit does not have:
@@ -708,3 +717,45 @@ def test_a_word_excused_by_a_card_tip_really_carries_that_tip(word):
                 for text in [path.read_text(encoding="utf-8")]
                 if span in text and f"{attach}(" in text]
     assert carriers, (word, attach)
+
+
+# ------------------ `EB-380`: the Plan tip states the rule it has ----------
+
+
+def test_the_plan_tip_matches_the_two_aims_the_resolution_has():
+    """`KokomiPlan.FrontTarget` skips a Minion; `Aim.AllEnemies` walks every
+    living body, decoys included. The tip said "never a Minion" flat, and the
+    r9 act-1 seat watched an `Exposed Flank+` Plan land on `Eye With Teeth`
+    (run 2, act 1, (c) 4).
+
+    Driven against the RESOLUTION rather than restated: both branches are read
+    out of `KokomiPlan.cs` here, so a tip that stops matching the code goes red
+    from this side too.
+    """
+    plan = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+            / "KokomiPlan.cs").read_text(encoding="utf-8")
+    assert "hittable.FirstOrDefault(IsNotMinion)" in plan
+    assert "if (aim == Aim.AllEnemies)" in plan
+    body = blindplay.ARM_KEYWORDS["Plan"]
+    assert "front non-Minion" in body
+    assert "or ALL, Minions too" in body
+    assert "never a Minion" not in body
+
+
+def test_the_plan_tip_names_strength_among_the_modifiers_that_do_not_reach():
+    """The carry-out is an UNPOWERED `ElementalHit` -- no Strength, no Weak,
+    no attack buff of hers -- while the TARGET's Vulnerable multiplies. The
+    clause named two of the three, which reads as a complete list, and the seat
+    priced `Kurage's Oath+` face 4 under Vajra at Plan 10 expecting Strength to
+    ride it (run 2, act 1, (c) 5)."""
+    plan = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+            / "KokomiPlan.cs").read_text(encoding="utf-8")
+    assert "UNPOWERED -- no Strength, no Weak" in plan
+    body = blindplay.ARM_KEYWORDS["Plan"]
+    assert "Enemy Vulnerable counts; your Weak and Strength do not." in body
+
+
+def test_the_plan_tip_stays_under_the_keyword_ceiling():
+    """135, the base game's own longest mechanic tip, and this word is read on
+    every battle screen of every run."""
+    assert len(blindplay.ARM_KEYWORDS["Plan"]) <= 135

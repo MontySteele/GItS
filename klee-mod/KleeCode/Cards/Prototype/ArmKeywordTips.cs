@@ -304,14 +304,40 @@ public static class ArmKeywordTips
     /// single-target Plan for a whole fight (round-5 packet sec.2). The
     /// sixth clause cost room, so "lands next turn on" compressed to "next
     /// turn:" -- nothing else in the first four clauses moved.
+    ///
+    /// `EB-380` FIXED THAT CLAUSE, WHICH WAS FLAT AND THE RULE IS NOT. "Never
+    /// a Minion" is true of a SINGLE-TARGET Plan only: <see cref="Aim"/>
+    /// <c>.AllEnemies</c> walks <c>HittableEnemies</c> and takes every living
+    /// body, decoys included, and the round-9 act-1 seat watched an
+    /// `Exposed Flank+` Plan land on `Eye With Teeth` while this line said it
+    /// could not. Both halves are now stated, in the order a reader needs
+    /// them: the aim, then the exception the word ALL makes.
+    ///
+    /// AND `STRENGTH` JOINED THE MODIFIER CLAUSE. The clause named Vulnerable
+    /// and Weak and stopped, which reads as a complete list, and the seat
+    /// priced `Kurage's Oath+` face 4 under Vajra at Plan 10 expecting her
+    /// Strength to ride it (r9 run 2, act 1, (c) 5). It does not: this class's
+    /// own header is why -- the carry-out goes through
+    /// <see cref="ElementalHit"/> UNPOWERED, so no Strength, no Weak and no
+    /// attack buff of hers reaches it. "Enemy" replaced the bare
+    /// `[gold]Vulnerable[/gold]` in the same breath, because the sentence is
+    /// about WHOSE modifiers are read and the old one left that to inference.
+    ///
+    /// 135 CHARACTERS RENDERED, at the ceiling and not over it: "the front
+    /// enemy" compressed to "front non-Minion" and "or ALL if it says so"
+    /// to "or ALL", which is what paid for the two new facts. The
+    /// all-Minions board is the one corner left unsaid -- `FrontTarget`
+    /// falls back to the leftmost body when every enemy is a Minion -- and it
+    /// is a board on which the compressed clause and the full one aim at the
+    /// same creature.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front "
-          + "enemy, or ALL if it says so; never a Minion. "
-          + "[gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] does "
-          + "not.");
+          + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. "
+          + "Enemy [gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] "
+          + "and [gold]Strength[/gold] do not.");
 
     /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the
