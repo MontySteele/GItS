@@ -93,7 +93,8 @@ when they are days.
 `S4-G*`, `CC-G*` and `SKIP-*` carry no arithmetic, so nothing about them can be
 derived: `OPEN_IRREGULAR` stays an explicit list of the ids that define rows,
 and `RETIRED_IRREGULAR` holds the ones whose rows have closed (`S4-G11`, ruled
-in all three parts by R231 on 2026-08-30). Both directions are gated — an id in
+in all three parts by R231 on 2026-08-30; `S4-G6` and `S4-G14`, closed by
+R250 on 2026-09-04 as overtaken by the Kokomi Plan overhaul). Both directions are gated — an id in
 neither list is unrecorded, an entry with no row is stale.
 
 ## The `R` and `D` series are not here
@@ -1454,3 +1455,8 @@ so the seat read a 5 composed before the turn's first tick and added
 Strength again. The turn reconciles at 31 (PR #347). Ceilings never come
 down.
 ```
+M45 RETIRED 2026-09-04 (R250): the six post-playtest calls were written
+against the shipped kits and the richness playtest; the Kokomi items retire
+with the Plan overhaul, Spotlight was answered by R228, and what survives of
+the Furina items returns through the reframe's round packets. S4-G6 and
+S4-G14 closed the same way in the same ruling. Ceilings never come down.

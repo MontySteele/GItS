@@ -1,4 +1,4 @@
-Status: OPEN (PR = [USER]; one pick in §6)
+Status: RULED R250 2026-09-04
 
 # Kokomi round five: three runs, two deaths at the first boss, and a clear
 

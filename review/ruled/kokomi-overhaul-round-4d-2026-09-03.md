@@ -1,4 +1,4 @@
-Status: OPEN (PR = [USER]; one pick in §6)
+Status: RULED R250 2026-09-04
 
 # Kokomi round four-d: three Opus seats, the spire cleared, and what the Plan layer is only good through
 

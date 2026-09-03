@@ -1,4 +1,4 @@
-Status: OPEN (PR = [USER]; one pick in §6)
+Status: RULED R250 2026-09-04
 
 # Klee round eight: two runs, the spire cleared, and what the Splash does to the kit's one decision
 

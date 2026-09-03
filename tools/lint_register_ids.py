@@ -170,7 +170,7 @@ RETIRED: dict[str, frozenset[int]] = {
         (256, 259), (267, 268), (271, 272), 276, 278, 288, 290,
         (294, 295), 298, (301, 315), 354,
     ),
-    "M": _spans((1, 12), (14, 25), (27, 44), (46, 68)),
+    "M": _spans((1, 12), (14, 25), (27, 68)),
 }
 
 # The irregular half of the same record. These ids carry no arithmetic, so
@@ -180,7 +180,7 @@ RETIRED: dict[str, frozenset[int]] = {
 # REFUSAL: `S4-G11` was answered in all three parts by R231 and left
 # OPEN_IRREGULAR with its row on 2026-08-30, so a row re-taking it is a re-mint
 # and should be told so, not told that somebody forgot to record a new id.
-RETIRED_IRREGULAR: frozenset[str] = frozenset({"S4-G11"})
+RETIRED_IRREGULAR: frozenset[str] = frozenset({"S4-G11", "S4-G6", "S4-G14"})
 
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
@@ -193,8 +193,7 @@ RETIRED_IRREGULAR: frozenset[str] = frozenset({"S4-G11"})
 # `chinju_ward`, and the EB-82 Grave conversion taking the Liyue / Nameless
 # Cairn labels. S4-G6 STAYS -- R231 answered only its MECHANISM.
 OPEN_IRREGULAR: frozenset[str] = frozenset({
-    "CC-G1", "CC-G2",
-    "S4-G6", "S4-G12", "S4-G14", "S4-G17",
+    "CC-G1", "CC-G2", "S4-G12", "S4-G17",
     "SKIP-10.9",
 })
 
