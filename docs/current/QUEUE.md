@@ -36,11 +36,14 @@
 
 ## 1. Kokomi — band, playtest, and levers
 
+**R250 (2026-09-04) closed `S4-G6` and `S4-G14` as OVERTAKEN:** both were
+written against the shipped Kokomi kit, which the Plan overhaul (R240, R241)
+retires; the prototype's own reads are its round packets, and a Balance-stage
+band and protocol are drafted fresh when the overhaul reaches Balance.
+
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `S4-G6` | **Ask:** declare Kokomi's HP stability band from design intent — never revisable against the playtest that grades it (D5). **Pick:** (1) Claude drafts it from written intent, countersigned before the confirmatory protocol — **RULED (R231)**; (2) at the table; (3) DARK. **Gate:** the exploratory run first, the confirmatory after (R175) | OPEN — mechanism ANSWERED (R231), the band still owed | user-queue §2; `DEC-D5` clauses 2–4; R156; R175; R212; R231 |
 | `M69` | **Ask:** rule on `X9` — `W9` FIRED on Limb A: repeatable readers are **58.91%** of completed-turn reads (**51.68%** without `EB-242`'s pilot reads), both over R188's 50%. Severity QUIET (`p50` 0). **Pick:** (1) R188 STANDS, no read budget; (2) re-read after `EB-242`, then rule — **default**; (3) open a dedupe/cap options packet. **Gate:** `EB-242` for (2) | OPEN — the graded read is in | R188; R233; `charge-reads-per-turn-registration-2026-08-13.md` §5.4, §9 |
-| `S4-G14` | **Ask:** run the Kokomi confirmatory protocol and rule on its written question list — an exploratory run cannot be graded, and this one fills the Answers block. **Eyes-on:** `docs/current/playtest/kokomi-playtest-protocol.md`, question by question. **Gate:** the sequence R175 fixed — post-wave exploratory run → `S4-G6`'s band declaration → this run; plus `EB-53`'s remnant | OPEN — table time | user-queue §2/§7; R115; R152; R175 |
 
 ## 2. Shop, pricing, and money
 
@@ -84,9 +87,12 @@ under R212(1), veto on the sheet.
 
 ## 5. Post-playtest design calls
 
-| ID | Decision needed | Status | Provenance |
-|---|---|---|---|
-| `M45` | **Ask:** ratify the pass's six open calls as ONE slate (R206). **Pick (adopt / defer, audit first):** (1) `salon_rotate` reader / timing; (2) `smoke_and_sparks` re-body / cut; (3) `Win10`/`Win11` on choices / state; (4) Spotlight: ANSWERED R228 = one mode, priced; (5) `depths_judgment` flat-14 / rescale; (6) Kokomi Block cluster accept / amend; (7) Charge lever: `S4-G13`. **Gate:** the playtest | OPEN — after the playtest | R206; review/ruled/richness-playtest-brief-2026-08-26.md |
+**R250 (2026-09-04) closed `M45` as OVERTAKEN:** its six calls were written
+against the shipped kits and the richness playtest; the Kokomi items retire
+with the overhaul, Spotlight was answered by R228, and anything of the Furina
+items that survives returns through the reframe's own round packets.
+
+**Nothing is open in this section.**
 
 ## 6. Prototype slices (R213) — held arms, re-authored kits, and the rules under them
 

@@ -171,14 +171,14 @@ def test_an_irregular_id_is_covered_by_the_explicit_set():
     mod = _module()
     q, b = mod.REGISTERS
     bad, _ = mod.findings(
-        {q: "| `S4-G6` | live |\n| `S4-G7` | re-taken |", b: ""},
-        ceilings={}, open_ids={}, open_irregular={"S4-G6"})
-    assert any(f.startswith("UNRECORDED ID:") and "S4-G7" in f
+        {q: "| `S4-G8` | live |\n| `S4-G9` | re-taken |", b: ""},
+        ceilings={}, open_ids={}, open_irregular={"S4-G8"})
+    assert any(f.startswith("UNRECORDED ID:") and "S4-G9" in f
                for f in bad), bad
-    stale, _ = mod.findings({q: "| `S4-G6` | live |", b: ""},
+    stale, _ = mod.findings({q: "| `S4-G8` | live |", b: ""},
                             ceilings={}, open_ids={},
-                            open_irregular={"S4-G6", "S4-G7"})
-    assert any(f.startswith("STALE MANIFEST ENTRY:") and "S4-G7" in f
+                            open_irregular={"S4-G8", "S4-G9"})
+    assert any(f.startswith("STALE MANIFEST ENTRY:") and "S4-G9" in f
                for f in stale), stale
 
 
@@ -322,7 +322,7 @@ def test_two_branches_each_minting_a_row_merge_with_no_conflict_in_the_lint(
     lint_before = (root / "tools" / "lint_register_ids.py").read_bytes()
 
     _branch(root, "a", "tools")                      # the next free EB
-    _branch(root, "b", "5", register="QUEUE",        # the next free M
+    _branch(root, "b", "3", register="QUEUE",        # the next free M; §3 holds a table
             decision="**CHOOSE** between (1) a and (2) b",
             status="OPEN -- gated on the test")
 

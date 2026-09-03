@@ -103,8 +103,10 @@ v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
 `+proto` dev mark (R217 D). **Installed: `0.2.2309+proto`** (2026-09-04,
-main `1177b74d`, all three arms on, the round-8 build with #344 to #347), the three prototype arms behind `-p:PrototypeCards=true`; the
-Furina arm needs `-p:FurinaReframe=true` too and ships OFF. **Last RELEASE
+main `1177b74d`, ALL FOUR arms on since R250: the round-8 build with #344 to
+#347 plus the Furina reframe), the prototype arms behind
+`-p:PrototypeCards=true` and the Furina arm behind `-p:FurinaReframe=true`
+too; every arm ships OFF in a release package. **Last RELEASE
 package: `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
 
 ## Systems
@@ -135,23 +137,29 @@ are in [`workstreams.md`](workstreams.md).
 
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
-- **Klee** — Round 8 is read: five Opus seats, two runs on the round-8
-  build (R248's rules, the Hexerei readers, the round-7b defaults); the
-  second run cleared the spire and named the Splash as the end of the kit's
-  one decision (`review/active/klee-overhaul-round-8-2026-09-04.md`, one
-  pick: what the Splash pays). [USER] plays on the next deploy.
-- **Kokomi** — Rounds 4d and 5 are read: round 4d cleared the spire on the
-  fix build (`review/active/kokomi-overhaul-round-4d-2026-09-03.md`, one pick:
-  the Plan cards' shape); round five died twice at the act-1 boss and then
-  cleared it with no fight lost
-  (`review/active/kokomi-overhaul-round-5-2026-09-04.md`, one pick: where a
-  single-target Plan lands). [USER] plays on the installed build. The Kurage
+- **Klee** — Round 8 is RULED (R250, `review/ruled/klee-overhaul-round-8-2026-09-04.md`):
+  the Splash pays the largest Bomb, not the sum, so hold-or-cash survives the
+  Power landing. Round 9 is building on it; the seats read it, then [USER]
+  plays. The round-8 clear is read against a control run (below).
+- **Kokomi** — Rounds 4d and 5 are RULED (R250,
+  `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
+  six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
+  when written if the engine can carry a second selection, else lands on the
+  front enemy that is not a Minion. Round 9 is building on both; the seats
+  read it, then [USER] plays. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
   2's five `proto_fr_` rows are built** (2026-09-02): the named deploy, two
   Evokes and the drain pair, on a new `drain_fanfare` op and the
-  `Deploy`/`Evoke`/`Drain` tips. Flag-off, no stamp moves, and NOT RUN.
+  `Deploy`/`Evoke`/`Drain` tips. R250 (2026-09-04) LIFTS the R220 B sequence: the arm is on in the
+  installed dev build, soaked, and the first blind seat round runs on it;
+  no stamp moves, nothing measured.
+- **Control run** — R250 pick 4: one base-game Ironclad run by the same
+  Opus seats on the same lane and harness (`review/qa/control-ironclad-2026-09-04/`),
+  ascension recorded. The kit clears (Kokomi 4d, 5; Klee 8) are read against
+  it: the arm pools are 33 (Klee) and 30 (Kokomi) rows against 79 and 76
+  shipped, so a clear on them is consistency as much as strength.
 - **Companion cards** — R234 ruled the slate whole, Mondstadt first, in
   parallel; `EB-249` / `EB-250` / `EB-251` are what it owes; Itto and Gorou's
   rate are noted there from the round-5 and act-1 reads.
@@ -161,8 +169,8 @@ are in [`workstreams.md`](workstreams.md).
 
 ## Open [USER] pile
 
-Every open row is in [`QUEUE.md`](QUEUE.md) and owned by [USER] — Kokomi's two,
-`M69`, the art eyes-on pile and `M45`'s five; the text-conventions
+Every open row is in [`QUEUE.md`](QUEUE.md) and owned by [USER] — `M69` and
+the art eyes-on pile (R250 closed `S4-G6`, `S4-G14` and `M45` as overtaken); the text-conventions
 proposal is ruled (R249, `review/ruled/text-conventions-shipped-2026-09-02.md`;
 builds `EB-345`, `EB-346`). The nine blessed mechanisms are in [`watch-register.md`](watch-register.md):
 `W9` has FIRED and is back with [USER] as `M69`, the other eight are dormant.
