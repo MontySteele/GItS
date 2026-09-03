@@ -6898,18 +6898,27 @@ def companion_overhaul_block_absorbed(state: CombatState, enemy: Enemy,
     # marks are separate keys and `block_before` is the number both read), and
     # the C# listener walks them in this order for the same reason.
     #
-    # THE NEW BLOCK IS NOT MARKED. The card marks what IT gave you; the 3 it
-    # pays is the barrier's payout, and marking that too would make one play a
-    # shield that thickens for the rest of the fight.
+    # `EB-353`. THE NEW BLOCK IS MARKED, and that is what makes the rider fire
+    # ONCE PER ABSORPTION. The card says "WHENEVER this Block absorbs damage",
+    # and a three-hit attack is three absorptions; with the payout unmarked the
+    # first hit spent the whole mark and the barrier paid exactly once, for any
+    # attack. The blind act-2 seat measured 9 absorbed on all three occasions
+    # it could (`klee round 8, opus-act2.md`, finding 4) and wrote "Thoma is a
+    # 9-Block card that prints 6 and implies more". Per absorption the same 7x3
+    # absorbs 6 + 3 + 3 = 12.
+    #
+    # NOT A SHIELD THAT THICKENS FOR THE FIGHT, which is what the old note here
+    # feared: the mark carries no Block of its own, it is clamped to
+    # `block_before` on the way in, and `inazuma_overhaul_turn_start` deletes a
+    # mark with no Block behind it -- so the barrier lives exactly one enemy
+    # turn per play. C# twin: `BlockMark.Absorb`, with the payout as its one
+    # argument (the paws pass 0 and keep the plain marked-first spend).
     mark = min(p.powers.get("mi_blazing_barrier", 0), block_before)
     if mark > 0:
         p.block += C.MI_BLAZING_BARRIER_BLOCK           # RAW (NC-11)
         state.emit("block", amount=C.MI_BLAZING_BARRIER_BLOCK)
-        left = mark - blocked
-        if left > 0:
-            p.powers["mi_blazing_barrier"] = left
-        else:
-            p.powers.pop("mi_blazing_barrier", None)
+        p.powers["mi_blazing_barrier"] = (max(mark - blocked, 0)
+                                          + C.MI_BLAZING_BARRIER_BLOCK)
 
 
 def companion_overhaul_reaction(state: CombatState, enemy: Enemy,

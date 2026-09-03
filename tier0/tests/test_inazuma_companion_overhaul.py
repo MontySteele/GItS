@@ -440,18 +440,55 @@ def test_the_barrier_thickens_when_its_own_block_is_eaten(overhaul):
     st.player.block -= 4
     effects.companion_overhaul_block_absorbed(st, st.enemies[0], 4, 6)
     assert st.player.block == 2 + C.MI_BLAZING_BARRIER_BLOCK
-    assert st.player.powers["mi_blazing_barrier"] == 2
+    # `EB-353`: 2 of the mark survive the absorption and the 3 just paid is
+    # marked too, because it is the same "this Block" the card names.
+    assert (st.player.powers["mi_blazing_barrier"]
+            == 2 + C.MI_BLAZING_BARRIER_BLOCK)
 
 
-def test_the_barrier_stops_once_its_mark_is_gone(overhaul):
+def test_the_barrier_pays_on_every_hit_of_a_multi_hit_attack(overhaul):
+    """`EB-353`, end to end through `combat._enemy_turn` -- the row's own
+    acceptance and the number the blind seat could not reconcile.
+
+    The card says "WHENEVER this Block absorbs damage", and a three-hit attack
+    is three absorptions. Against 7x3 the barrier absorbs 6, then 3, then 3 --
+    12 of the 21, leaving 9 -- where the old marked-first-and-never-replenished
+    spend paid once and absorbed 9 (`klee round 8, opus-act2.md`, finding 4:
+    "Thoma is a 9-Block card that prints 6 and implies more", measured at
+    exactly 9 on all three occasions the seat could measure it).
+    """
+    st = make_state(enemies=[make_enemy(hp=50,
+                                        intents=[{"kind": "attack",
+                                                  "amount": 7, "times": 3}])])
+    _play(st, "proto_mi_thoma_blazing_barrier")
+    assert st.player.block == 6
+    hp_before = st.player.hp
+
+    combat._enemy_turn(st, st.enemies[0])
+
+    # Three absorptions, three payouts: 6 + 3 + 3 = 12 of the 21 absorbed.
+    assert st.player.hp == hp_before - 9
+    # And the barrier is still standing on the 3 it last paid.
+    assert st.player.block == C.MI_BLAZING_BARRIER_BLOCK
+    assert (st.player.powers["mi_blazing_barrier"]
+            == C.MI_BLAZING_BARRIER_BLOCK)
+
+
+def test_the_barrier_leaves_when_the_block_it_marked_is_cleared(overhaul):
+    """`EB-353`'s other half, and the reason a marked payout is not a shield
+    that thickens for the rest of the fight: the mark carries no Block of its
+    own, so the turn tick that clears Block takes it with it."""
     st = make_state()
-    st.player.block = 6
+    st.player.block = 0
     st.player.powers["mi_blazing_barrier"] = 6
-    effects.companion_overhaul_block_absorbed(st, st.enemies[0], 6, 6)
+    effects.inazuma_overhaul_turn_start(st)
     assert "mi_blazing_barrier" not in st.player.powers
-    st.player.block = 9
-    effects.companion_overhaul_block_absorbed(st, st.enemies[0], 3, 9)
-    assert st.player.block == 9                       # nothing more
+    # And a hit that absorbs nothing never fires the rider.
+    st.player.block = 0
+    st.player.powers["mi_blazing_barrier"] = 6
+    effects.companion_overhaul_block_absorbed(st, st.enemies[0], 0, 0)
+    assert st.player.block == 0
+    assert st.player.powers["mi_blazing_barrier"] == 6
 
 
 def test_ooyoroi_answers_every_attack_and_only_attacks(overhaul):
