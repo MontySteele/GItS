@@ -455,6 +455,89 @@ public class FurinaReframeRoundTwoTests
         Assert.EndsWith(".smartDescription", LocKey(canonical));
     }
 
+    // ==================================================================
+    // 5. `EB-385` -- the Fanfare badge's generators
+    // ==================================================================
+
+    private static FanfareMeterPower Badge(Seat seat)
+    {
+        var badge = (FanfareMeterPower)RuntimeHelpers
+            .GetUninitializedObject(typeof(FanfareMeterPower));
+        Seat.Force(badge, "Id",
+            new MegaCrit.Sts2.Core.Models.ModelId("POWER", "KLEE_FANFARE_TEST"));
+        Seat.Force(badge, "Amount", 6);
+        Seat.Force(badge, "IsMutable", true);
+        Seat.Force(badge, "Owner", seat.Creature);
+        return badge;
+    }
+
+    private static string BadgeKey(FanfareMeterPower badge) =>
+        (string)typeof(FanfareMeterPower)
+            .GetProperty("SmartDescriptionLocKey", HeadlessGame.All)!
+            .GetValue(badge)!;
+
+    [Fact]
+    public void The_fanfare_badge_names_the_arms_mint_sites_and_no_others()
+    {
+        // The seat lost 1 HP and spent 2 Encore in one turn for 0 Fanfare,
+        // then watched Salon Debut pay 2. The badge was naming three
+        // generators the METER leg retires and missing the only one that mints.
+        using var _ = new Arm(meter: true);
+        var seat = Stage(0);
+        var badge = Badge(seat);
+
+        var key = BadgeKey(badge);
+        var face = badge.Localization!
+            .First(r => key.EndsWith(r.Item1)).Item2;
+
+        Assert.EndsWith(".smartDescriptionReframe", key);
+        Assert.DoesNotContain("losing HP", face);
+        Assert.DoesNotContain("absorbing", face);
+        Assert.DoesNotContain("Center Stage", face);
+        Assert.Contains("member performing", face);
+        Assert.Contains("Evoke", face);
+    }
+
+    [Fact]
+    public void The_two_amounts_on_the_badge_are_the_arms_own_law()
+    {
+        // `EB-89`'s rule one meter over: a retune of either mint must not be
+        // able to leave the badge quoting a retired number. These are the two
+        // constants the mint sites read and `lint_constant_parity` mirrors.
+        using var _ = new Arm(meter: true);
+        var seat = Stage(0);
+        var badge = Badge(seat);
+
+        var face = badge.Localization!
+            .First(r => r.Item1 == "smartDescriptionReframe").Item2;
+
+        Assert.Contains("[blue]" + FurinaReframeLaw.FanfarePerTrigger
+                        + "[/blue] when it stays", face);
+        Assert.Contains("[blue]" + FurinaReframeLaw.FanfarePerEvoke
+                        + "[/blue] on an", face);
+    }
+
+    [Fact]
+    public void The_shipped_fanfare_badge_is_untouched_with_the_leg_off()
+    {
+        using var _ = new Arm(master: false);
+        var seat = Stage(0);
+
+        Assert.EndsWith(".smartDescription", BadgeKey(Badge(seat)));
+    }
+
+    [Fact]
+    public void A_canonical_fanfare_badge_answers_without_throwing()
+    {
+        using var _ = new Arm(meter: true);
+        var canonical = (FanfareMeterPower)RuntimeHelpers
+            .GetUninitializedObject(typeof(FanfareMeterPower));
+        Seat.Force(canonical, "Id",
+            new MegaCrit.Sts2.Core.Models.ModelId("POWER", "KLEE_FANFARE_TEST"));
+
+        Assert.EndsWith(".smartDescription", BadgeKey(canonical));
+    }
+
     private static IDictionary<Creature, object?> CompanyCombat() =>
         (IDictionary<Creature, object?>)typeof(SalonMemberPower)
             .GetField("CompanyCombat", HeadlessGame.All)!

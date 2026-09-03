@@ -410,6 +410,20 @@ def salon_arm_rows() -> list[Row]:
     return rows
 
 
+def furina_arm_rows() -> list[Row]:
+    """`EB-385`. The Fanfare badge's ARM face, gated with the rest of the arm.
+
+    `FurinaResources.cs` is a SHIPPED file, so `--shipped` reads all of it and
+    the row below would otherwise be measured only by a report. What belongs
+    to the prototype gate is the one row the arm adds, which is the row whose
+    KEY says so -- filtered by key rather than by file, so a second arm face in
+    the same file joins the gate the day it lands and no shipped row is
+    counted twice.
+    """
+    rows = loc_rows([MOD / "Powers" / "FurinaResources.cs"], "power", "proto")
+    return [r for r in rows if "Reframe" in r.ident]
+
+
 def prompt_rows() -> list[Row]:
     path = MOD / "Powers" / "Prototype" / "KokomiPlan.cs"
     m = re.search(r"ReflectionPromptText =\s*((?:[^;])*);", read(path))
@@ -432,6 +446,7 @@ def prototype_rows() -> list[Row]:
             + loc_rows([MOD / "Relics" / "PoundingSurprise.cs",
                         MOD / "Relics" / "TamakushiCasket.cs"], "relic", "proto")
             + salon_arm_rows()
+            + furina_arm_rows()
             + prompt_rows())
 
 
