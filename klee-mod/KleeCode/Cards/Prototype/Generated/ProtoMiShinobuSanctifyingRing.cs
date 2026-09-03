@@ -51,7 +51,7 @@ public sealed class ProtoMiShinobuSanctifyingRing : CustomCardModel, ICompanionC
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Shinobu — Sanctifying Ring (proto)"),
+        ("title", "Shinobu — Sanctifying Ring"),
         ("description", "Lose 3 HP. For {PowerAmount:diff()} turns, at the end of your turn deal 5 [gold]Electro[/gold] damage to ALL enemies and gain 5 [gold]Block[/gold]."),
     };
 

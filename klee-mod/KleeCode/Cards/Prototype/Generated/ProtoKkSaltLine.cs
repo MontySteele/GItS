@@ -43,7 +43,7 @@ public sealed class ProtoKkSaltLine : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Salt Line (proto)"),
+        ("title", "Salt Line"),
         ("description", "Gain {Block:diff()} [gold]Block[/gold]."),
     };
 

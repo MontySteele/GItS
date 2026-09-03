@@ -44,7 +44,7 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlann
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Kurage's Oath (proto)"),
+        ("title", "Kurage's Oath"),
         ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies."),
     };
 

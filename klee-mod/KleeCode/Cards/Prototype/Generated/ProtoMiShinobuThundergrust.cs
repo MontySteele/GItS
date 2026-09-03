@@ -58,7 +58,7 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Shinobu — Thundergrust (proto)"),
+        ("title", "Shinobu — Thundergrust"),
         ("description", "Deal {CalculatedDamage:diff()} damage. If you are below half HP, deal 5 additional damage."),
     };
 

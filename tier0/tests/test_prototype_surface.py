@@ -958,3 +958,162 @@ def test_every_kokomi_row_declares_the_target_type_the_slice_states():
         assert expected in source, (
             f"{row['id']} should declare {expected}")
     assert checked >= 15, f"only {checked} Plan rows checked -- pin is stale"
+
+
+# =============================================================================
+# `EB-322`: NO PLAYER-FACING TITLE CARRIES THE SHADOW SUFFIX.
+#
+# A row that supersedes a shipped row keeps its name and declares the shadow
+# with " (proto)" so the sheet namespace stays legible. That is a SHEET device
+# -- the arm substitutes the shipped row out of the pool -- and the emitter
+# printed it on the card face anyway: the round-7 seats read
+# `Thoma - Blazing Barrier (proto)`, `Barbara - Let the Show Begin (proto)`
+# and `Sparks 'n' Splash (proto)` as the cards' names.
+# =============================================================================
+
+def test_the_two_engines_spell_the_shadow_suffix_once():
+    """The lint restates the suffix rather than importing it (it runs as a
+    bare script), so the two spellings are pinned against each other here --
+    the drift that would make the lint stop seeing a declaration while both
+    engines kept stripping one."""
+    import tools.lint_unique_names as lint
+
+    assert lint.SHADOW_SUFFIX == loader.PROTOTYPE_SHADOW_SUFFIX
+
+
+def test_display_name_strips_the_declaration_and_nothing_else():
+    assert loader.display_name("Undertow (proto)") == "Undertow"
+    assert loader.display_name("Undertow") == "Undertow"
+    # Not a prefix rule and not a substring rule: only a trailing declaration.
+    assert loader.display_name("(proto) Undertow") == "(proto) Undertow"
+    assert loader.display_name("Undertow (proto) II") == "Undertow (proto) II"
+
+
+def test_every_declared_shadow_names_a_row_that_really_ships():
+    """The suffix is a CLAIM -- "this rewrites the shipped row of that name" --
+    and a claim nothing checks is decoration. Read off the live surface and
+    the six shipped sheets, so a row that keeps the suffix after its shipped
+    twin is renamed or retired fails here."""
+    shipped: dict[str, list[str]] = {}
+    for sheet in loader.DOCS_CARD_SHEETS:
+        for row in yaml.safe_load(
+                (loader.DOCS_DIR / sheet).read_text(encoding="utf-8")) or []:
+            shipped.setdefault(row["name"], []).append(row["id"])
+
+    declared = 0
+    for row in yaml.safe_load(
+            loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []:
+        name = row["name"]
+        if not name.endswith(loader.PROTOTYPE_SHADOW_SUFFIX):
+            continue
+        declared += 1
+        bare = loader.display_name(name)
+        assert bare in shipped, (
+            f"{row['id']} declares a shadow of {bare!r}, which no shipped "
+            "row holds -- the suffix shadows nothing and the face prints "
+            "the bare name unchecked")
+    # Non-vacuous: the surface carries declared shadows today, and a sweep
+    # over none of them is the dead-gate class this repo has been bitten by.
+    assert declared >= 30, f"only {declared} declared shadows found"
+
+
+def test_the_sim_carries_the_bare_title_for_a_declared_shadow():
+    """The sim's half of "both engines print the same title", taken at the ONE
+    seam: a `Card` the engine hands to a report, a draft or a seat page has
+    the player's title on it, never the sheet's declaration."""
+    rows = {r["id"]: r["name"] for r in yaml.safe_load(
+        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []}
+    checked = 0
+    for card in loader.prototype_cards():
+        assert loader.PROTOTYPE_SHADOW_SUFFIX not in card.name, (
+            f"{card.id} reaches the engine as {card.name!r}")
+        if rows[card.id].endswith(loader.PROTOTYPE_SHADOW_SUFFIX):
+            checked += 1
+            assert card.name == loader.display_name(rows[card.id])
+    assert checked >= 30, f"only {checked} shadowed rows checked"
+
+
+def test_no_generated_prototype_face_prints_the_suffix():
+    """The mod's half, read off the COMMITTED C# rather than off the emitter:
+    the defect was "the row is right and the emitted card is not", and the
+    card face is what the seat read."""
+    import re
+
+    titles = {}
+    for path in sorted(_GENERATED.glob("*.cs")):
+        source = path.read_text(encoding="utf-8")
+        ident = re.search(r"Sheet entry: id=(\S+)", source)
+        title = re.search(r'\("title", "(.*)"\),', source)
+        if ident is None or title is None:
+            continue
+        titles[ident.group(1)] = title.group(1)
+
+    assert titles, "no generated prototype titles found -- the sweep is dead"
+    offenders = {cid: t for cid, t in titles.items()
+                 if loader.PROTOTYPE_SHADOW_SUFFIX in t}
+    assert not offenders, f"generated titles carrying the declaration: {offenders}"
+
+    # And the positive half: the shadowed rows are still THERE, printing the
+    # shipped row's title, which is what the arm is for.
+    rows = {r["id"]: r["name"] for r in yaml.safe_load(
+        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []}
+    checked = 0
+    for cid, title in titles.items():
+        if rows.get(cid, "").endswith(loader.PROTOTYPE_SHADOW_SUFFIX):
+            checked += 1
+            assert title == loader.display_name(rows[cid])
+    assert checked >= 30, f"only {checked} shadowed faces checked"
+
+
+def test_the_lint_reads_a_declaration_as_a_shadow_and_a_bare_name_as_a_clash(
+        tmp_path):
+    """`EB-322`'s lint half, both directions, against the REAL relic sources.
+
+    The relaxation has to be exactly as wide as the declaration: the shipped
+    row and its declared rewrite pass, and two rows holding one bare name
+    still fail -- which is the guarantee the suffix was standing in for."""
+    import subprocess
+    import sys
+
+    lint = str(REPO / "tools" / "lint_unique_names.py")
+
+    def run(body: str):
+        sheet = tmp_path / f"s{abs(hash(body))}.yaml"
+        sheet.write_text(body, encoding="utf-8")
+        return subprocess.run([sys.executable, lint, str(sheet)],
+                              capture_output=True, text=True)
+
+    shadow = run(
+        'cards:\n'
+        '- {id: undertow, name: "Undertow", cost: 1, type: skill,\n'
+        '   rarity: common}\n'
+        '- {id: proto_kk_undertow, name: "Undertow (proto)", cost: 1,\n'
+        '   type: skill, rarity: common}\n')
+    assert shadow.returncode == 0, shadow.stdout + shadow.stderr
+
+    clash = run(
+        'cards:\n'
+        '- {id: undertow, name: "Undertow", cost: 1, type: skill,\n'
+        '   rarity: common}\n'
+        '- {id: undertow_two, name: "Undertow", cost: 1, type: skill,\n'
+        '   rarity: common}\n')
+    assert clash.returncode == 1, clash.stdout + clash.stderr
+    assert "DUPLICATE NAME" in clash.stdout
+
+    twins = run(
+        'cards:\n'
+        '- {id: undertow, name: "Undertow", cost: 1, type: skill,\n'
+        '   rarity: common}\n'
+        '- {id: proto_a, name: "Undertow (proto)", cost: 1, type: skill,\n'
+        '   rarity: common}\n'
+        '- {id: proto_b, name: "Undertow (proto)", cost: 1, type: skill,\n'
+        '   rarity: common}\n')
+    assert twins.returncode == 1, twins.stdout + twins.stderr
+    assert "DUPLICATE SHADOW" in twins.stdout
+
+    orphan = run(
+        'cards:\n'
+        '- {id: proto_a, name: "Nothing Here (proto)", cost: 1, type: skill,\n'
+        '   rarity: common}\n')
+    assert orphan.returncode == 1, orphan.stdout + orphan.stderr
+    assert "SHADOW OF NOTHING" in orphan.stdout

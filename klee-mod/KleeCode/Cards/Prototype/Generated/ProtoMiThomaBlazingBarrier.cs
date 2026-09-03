@@ -48,7 +48,7 @@ public sealed class ProtoMiThomaBlazingBarrier : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Thoma — Blazing Barrier (proto)"),
+        ("title", "Thoma — Blazing Barrier"),
         ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Whenever this [gold]Block[/gold] absorbs damage, gain 3 [gold]Block[/gold]."),
     };
 

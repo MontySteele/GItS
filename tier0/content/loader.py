@@ -59,6 +59,46 @@ PROTOTYPE_SHEET = DOCS_DIR / "prototype-surface.yaml"
 # `git grep proto_ docs/` answers "did the last slice leave the surface?".
 PROTOTYPE_ID_PREFIX = "proto_"
 
+# THE SHADOW SUFFIX (`EB-322`), a SHEET device and never a title.
+#
+# A prototype row that supersedes a shipped row of the same name keeps that
+# name, so the sheet namespace would hold the name twice and
+# `tools/lint_unique_names.py` -- which holds one namespace over the card
+# sheets and the relics -- could not tell a declared rewrite from an accidental
+# collision. The row declares the shadow by ending its `name:` with this
+# suffix, and the lint reads it as the declaration it is.
+#
+# THE PLAYER MUST NEVER SEE IT. Under the arm the shipped row is substituted
+# OUT (`_pool_substitutions`), so on all but one row exactly one of the pair is
+# reachable in a build and there is nothing on screen for the suffix to
+# disambiguate; the round-7 seats read it off the card face as part of the
+# card's name (`Thoma - Blazing Barrier (proto)`, `Sparks 'n' Splash (proto)`),
+# which is the defect. Both engines print `display_name(row["name"])` instead:
+# the sim at the one seam in `prototype_cards` below, the mod at the one
+# `("title", ...)` site in `tools/gen_klee_cards.py` -- one function, imported
+# by both, so the two engines cannot print different titles.
+#
+# THE ONE ROW WHOSE TWIN IS NOT HIDDEN is `proto_ko_sparks_n_splash`: the
+# shipped card of that name is Klee's KIT Burst card, granted to hand by the
+# meter rather than offered from the pool, so the arm can put both in one run.
+# They then share a printed title, and the blind page numbers them the way it
+# numbers any repeated title (`EB-177`) -- stated here rather than solved by
+# keeping a suffix on the face, because a title is not the place to carry a
+# sheet's bookkeeping. `docs/notes/prototype-surface-provenance.md` records it.
+PROTOTYPE_SHADOW_SUFFIX = " (proto)"
+
+
+def display_name(name: str) -> str:
+    """The player-facing title for a sheet `name:` (`EB-322`).
+
+    Total on every name: a row that declares no shadow is its own title, which
+    is every row on every shipped sheet.
+    """
+    if name.endswith(PROTOTYPE_SHADOW_SUFFIX):
+        return name[:-len(PROTOTYPE_SHADOW_SUFFIX)]
+    return name
+
+
 # The real base-game pool (tools/extract_base_game_pool.py ->
 # tools/build_ironclad_sheet.py). game_ref/ is gitignored (.gitignore:28):
 # decompiled material is REFERENCE ONLY, so this is a regenerable LOCAL
@@ -477,9 +517,16 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
         # `Card` would be one the engine carries and nothing reads.
         # `replaces:` is KEPT, because the sim's stand-in hand-off is a rule
         # and reads it (`tier0.engine.companion_standins`).
-        card = Card.from_dict({k: v for k, v in d.items()
-                               if k not in ("authored_by", "description",
-                                            "art_of")})
+        row = {k: v for k, v in d.items()
+               if k not in ("authored_by", "description", "art_of")}
+        # `EB-322`: the sheet declares the shadow, the ENGINE carries the
+        # title. This is the sim's half of "both engines print the same
+        # title" and it is one line here rather than a strip at every
+        # display site, because a name that reaches a report or a seat page
+        # with the suffix still on it is the defect the row closes.
+        if isinstance(row.get("name"), str):
+            row["name"] = display_name(row["name"])
+        card = Card.from_dict(row)
         _validate_card_shape(card)
         cards.append(card)
     return cards

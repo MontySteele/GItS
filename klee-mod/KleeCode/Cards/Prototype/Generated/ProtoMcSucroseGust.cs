@@ -52,7 +52,7 @@ public sealed class ProtoMcSucroseGust : CustomCardModel, ICompanionCard, IHexer
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Sucrose — Wind Spirit Creation (proto)"),
+        ("title", "Sucrose — Wind Spirit Creation"),
         ("description", "[gold]Swirl[/gold] the enemy. Draw 1 card."),
     };
 
