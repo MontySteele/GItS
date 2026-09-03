@@ -327,7 +327,7 @@ public static class KleeMod
                     // reason Rally's prompt is: `Cards/Prototype/**` is
                     // Compile Remove'd from a release build, so
                     // `Cards.ArmKeywordTips` does not exist there and these
-                    // ten keys name nothing. Under the switch they are the
+                    // eleven keys name nothing. Under the switch they are the
                     // only source of the titles, exactly as the four rider
                     // rows above are -- the pck's card_keywords.json carries
                     // none of them, and a missing row renders as the raw key
@@ -347,6 +347,10 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.SetOffKey + ".title"] = "Set off",
                     [Cards.ArmKeywordTips.SparkKey + ".title"] = "Spark",
                     [Cards.ArmKeywordTips.MineKey + ".title"] = "Mine",
+                    // R244, Klee's fifth: the coven's one-word family mark.
+                    // Eighteen faces printed it and nothing defined it, because
+                    // until her three readers existed it had no rule to state.
+                    [Cards.ArmKeywordTips.HexereiKey + ".title"] = "Hexerei",
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",

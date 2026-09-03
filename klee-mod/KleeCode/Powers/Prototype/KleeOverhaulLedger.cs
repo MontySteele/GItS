@@ -12,6 +12,11 @@ namespace KleeMod.Powers;
 /// Grounded shifted by a turn) and three read the second (Sizzle, Perfect
 /// Timing, Catalytic Converter).
 ///
+/// A THIRD COUNTER JOINED THEM AT R244 and it is the same kind of fact one
+/// family over: <see cref="HexereiPlayedThisTurn"/>, which Coven Errand reads.
+/// It is here rather than on the card so that it and <c>WitchesCirclePower</c>
+/// cannot disagree about what a Hexerei card is.
+///
 /// TWO MORE LIVE HERE BECAUSE THEY ARE THE SAME KIND OF FACT, scoped to a PLAY
 /// rather than a turn:
 ///   * <see cref="DamageSetOffThisPlay"/> -- Big Badda Boom's "hit again for
@@ -92,6 +97,22 @@ public sealed class KleeOverhaulLedger
     /// whole read: "if none of your Bombs went off LAST turn".</summary>
     public int SetOffLastTurn { get; private set; }
 
+    /// <summary>
+    /// Counter three (R244): Hexerei cards played this turn. Coven Errand's
+    /// whole read -- "if you played a Hexerei card this turn, place it on ALL
+    /// enemies instead".
+    ///
+    /// IT LIVES HERE rather than on the card, for rule 7's two counters'
+    /// reason: it is written at the ONE site a Hexerei play is noticed
+    /// (<see cref="NoteHexereiPlayed"/>, called from the arm's standing
+    /// card-play listener), so the card and <c>WitchesCirclePower</c> beside
+    /// it cannot disagree about what a Hexerei card is. What COUNTS as one is
+    /// <c>CompanionHexerei.IsHexerei</c>'s answer and nobody else's, which is
+    /// what lets Alice's Introduction Magic widen the family for a turn without
+    /// either reader learning about her.
+    /// </summary>
+    public int HexereiPlayedThisTurn { get; private set; }
+
     /// <summary>Total DAMAGE the explosions since the current card play began
     /// actually dealt -- post-Strength, post-Weak, post-reaction,
     /// post-Vulnerable (`EB-270`), which is what Big Badda Boom's face
@@ -111,6 +132,10 @@ public sealed class KleeOverhaulLedger
         DamageSetOffThisPlay += damageDealt;
         if (reacted) ReactedThisTurn++;
     }
+
+    /// <summary>A Hexerei card was played (R244). The ONE write site, for
+    /// <see cref="NoteExplosion"/>'s reason.</summary>
+    public void NoteHexereiPlayed() => HexereiPlayedThisTurn++;
 
     /// <summary>A card play begins: the play-scoped size memory starts empty.
     /// Emitted at the top of the body of any card that reads it.</summary>
@@ -142,6 +167,7 @@ public sealed class KleeOverhaulLedger
         SetOffLastTurn = round == _round + 1 ? SetOffThisTurn : 0;
         SetOffThisTurn = 0;
         ReactedThisTurn = 0;
+        HexereiPlayedThisTurn = 0;
         DamageSetOffThisPlay = 0;
         _setOffMultiplier = 1;
         _round = round;

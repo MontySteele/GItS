@@ -1134,6 +1134,20 @@ CO_TENANCY_LEDGER = {
             "same this-turn expiry, one card over: the Block it pays is paid "
             "per REACTION during the turn (CompanionOverhaulReactions), never "
             "in this broadcast, so all that happens here is the removal",
+        ("Powers/Prototype/CompanionHexerei.cs", "IntroductionMagicPower"):
+            "QUARANTINED (R244, Klee's Hexerei readers). Alice's Introduction "
+            "Magic's this-turn window CLOSING, in the shape SinfulHexPower "
+            "below takes and for the same reason -- a card-play promise ends "
+            "where the arm's other this-turn promises do. THE ORDERING "
+            "QUESTION, answered: the override reads nothing and writes only "
+            "its own removal and the mark set that dies with it. What the "
+            "window PAYS happens per CARD PLAY during the turn "
+            "(AfterCardPlayed, on LadderOfAscentPower and WitchesCirclePower) "
+            "and never in this broadcast, so no co-tenant here can read the "
+            "marks either before or after they go. The sim drops the same "
+            "list at one sequential point (companion_hexerei.roll_hand_marks, "
+            "called first thing in klee_overhaul.turn_end), so there is no "
+            "order for it to disagree with",
         ("Powers/Prototype/CompanionHexerei.cs", "SinfulHexPower"):
             "QUARANTINED (the Hexerei family stand-ins, R236 sec.3). Fischl's "
             "this-turn watcher CLOSING, and Favonian Favor's expiry one row "

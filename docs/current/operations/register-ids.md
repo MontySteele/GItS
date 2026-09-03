@@ -1441,4 +1441,11 @@ what_the_tokoyo_returns, which shipped bytes whose rank-1 source was
 cleared nowhere in SOURCES.tsv. It closed without the fetch window the
 row asked for: 478b83a6, filling the uncovered companion rows, landed
 that clearance too. Ceilings never come down.
+EB-158 RETIRED 2026-09-03: PR #311 (eb158-pack-size) landed the three
+package-size fixes and the row was never marked; closed on its own
+acceptance. Ceilings never come down.
+EB-313 RETIRED 2026-09-03 on its own acceptance: PR #294 built the base
+Strike applying no element, and the round-7b seats' pages printed the
+Strike without an element tag beside Ka-pow!'s [Pyro] (opus-act1.md);
+the C# pin was in #294. Ceilings never come down.
 ```

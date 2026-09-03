@@ -107,11 +107,20 @@ public sealed class KleeOverhaulSweepHooks : AbstractModel
     /// Bombs are on a living enemy before the next card is played. Any card,
     /// any owner -- a companion card is played by the same player and reaches
     /// this hook exactly as her own cards do.
+    ///
+    /// AND, SINCE R244, THE ARM'S HEXEREI COUNT. Coven Errand reads "did you
+    /// play a Hexerei card this turn", which has to be answerable whether or
+    /// not any power is on the board -- so it cannot ride a power the way
+    /// Witches' Circle's payout does, and it lands on the arm's ONE standing
+    /// card-play listener rather than on a second <c>AbstractModel</c>
+    /// subscription registered for one counter. The rule itself is
+    /// <c>CompanionHexerei.NoteCardPlayed</c>; this is only the mouth.
     /// </summary>
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         if (!KleeOverhaul.Enabled) return;
+        CompanionHexerei.NoteCardPlayed(cardPlay);
         await ProtoBombPower.SweepJumps(
             choiceContext, cardPlay.Card?.CombatState);
     }

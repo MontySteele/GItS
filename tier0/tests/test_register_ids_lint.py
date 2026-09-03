@@ -389,18 +389,12 @@ def test_a_close_that_records_no_retirement_leaves_a_hole_the_lint_finds(
     text = page.read_text(encoding="utf-8")
     lines = text.split("\n")
     # Drop one EB row that is NOT the highest (the ceiling must not move).
-    #
-    # THE VICTIM IS A ROW, NOT A STRING. Rows CITE each other -- `EB-327`'s
-    # scope names `EB-266` in its own text -- so dropping every line
-    # CONTAINING the id can delete two rows, which asserts nothing about the
-    # rule under test and starts failing the day the register grows past a new
-    # median. The DEFINING line is the one the row starts with, which is
-    # exactly what `row_ids` reads.
     numbers = sorted(n for cid, _ in module.row_ids(text)
                      for s, n in [module.parse(cid)] if s == "EB")
     victim = numbers[len(numbers) // 2]
-    defining = f"| `EB-{victim}` |"
-    kept = [l for l in lines if not l.lstrip().startswith(defining)]
+    # The victim's OWN row only: another row may cite the victim in
+    # backticks, and dropping that line too would open a second hole.
+    kept = [l for l in lines if not l.startswith(f"| `EB-{victim}`")]
     assert len(kept) == len(lines) - 1, victim
     page.write_text("\n".join(kept), encoding="utf-8")
 

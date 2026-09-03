@@ -1239,3 +1239,165 @@ def test_the_ops_all_resolve_through_the_module(overhaul):
     for op in klee_overhaul.OVERHAUL_OPS:
         assert op in effects.OPS
         assert effects.OPS[op].__name__ != "_op_klee_overhaul_off"
+
+
+# ---------------------------------------------------------------------------
+# THE HEXEREI READERS -- R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`)
+# ---------------------------------------------------------------------------
+#
+# Three rows in Klee's own pool that read the coven's one-word family mark.
+# The C# twins are `klee-mod/KleeTests/Prototype/HexereiReaderTests.cs`, case
+# for case; where a case is structural there (the headless harness cannot play
+# a card) it is a real board here, which is the whole point of the twin.
+
+
+def witch(cid="proto_mc_witch", ctype="skill"):
+    """A Hexerei card by the PRINTED mark -- the sheet key, not an id list."""
+    card = probe([], cid=cid, ctype=ctype)
+    card.hexerei = True
+    return card
+
+
+def test_coven_errand_places_one_bomb_with_no_witch_played(overhaul):
+    """"Place a Bomb 5." The else arm, and the honest read of the card alone:
+    a Pop! that costs 1, which the ruled packet calls "a little under the
+    Common bar ... the price of the upside"."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    state.card_aim, state.card_aim_bound = a, True
+    effects.resolve_card(state, load("proto_ko_coven_errand"))
+    assert sizes(a) == [5]
+    assert sizes(b) == []
+
+
+def test_coven_errand_goes_wide_after_a_witch(overhaul):
+    """"If you played a Hexerei card this turn, place it on ALL enemies
+    instead." INSTEAD is the load-bearing word: the aimed enemy holds ONE
+    Bomb, not two, which is what makes the widening a target change rather
+    than a second placement."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    combat._finish_play(state, witch())
+    state.card_aim, state.card_aim_bound = a, True
+    effects.resolve_card(state, load("proto_ko_coven_errand"))
+    assert sizes(a) == [5]
+    assert sizes(b) == [5]
+
+
+def test_coven_errands_upgrade_moves_both_arms(overhaul):
+    """"Upgrade: Bomb 7." ONE printed number, so the wide arm and the aimed
+    arm cannot upgrade to different Bombs -- which is the reason the widening
+    is a field on the op rather than two `plant_bomb`s in a conditional."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    state.card_aim, state.card_aim_bound = a, True
+    effects.resolve_card(state, load("proto_ko_coven_errand+"))
+    assert sizes(a) == [7]
+
+    state = klee_state([a := make_enemy(hp=200, name="a"),
+                        b := make_enemy(hp=200, name="b")])
+    combat._finish_play(state, witch())
+    state.card_aim, state.card_aim_bound = a, True
+    effects.resolve_card(state, load("proto_ko_coven_errand+"))
+    assert sizes(a) == [7]
+    assert sizes(b) == [7]
+
+
+def test_the_hexerei_count_is_per_turn(overhaul):
+    """The window is the TURN, and the ledger rolls with it -- the same stamp
+    rule rule 7's two counters take."""
+    state = klee_state([make_enemy(hp=200)])
+    klee_overhaul.roll_to(state, 1)
+    combat._finish_play(state, witch())
+    assert klee_overhaul.played_hexerei_this_turn(state) is True
+    klee_overhaul.roll_to(state, 2)
+    assert klee_overhaul.played_hexerei_this_turn(state) is False
+
+
+def test_witches_circle_plants_per_witch_and_is_dead_alone(overhaul):
+    """"Whenever you play a Hexerei card, place a Bomb 3 on a random enemy."
+
+    DEAD ALONE IS THE CARD, not a defect: the ruled packet's pick 2 was taken
+    at its default, so a deck with no witch in it never sets this off. Both
+    halves are asserted, because the second is the one a future "fix" would
+    quietly remove."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    effects.resolve_card(state, load("proto_ko_witches_circle"))
+    assert state.player.powers[klee_overhaul.WITCHES_CIRCLE] == 3
+
+    # A plain card pays nothing.
+    combat._finish_play(state, probe([], cid="proto_ko_plain"))
+    assert sizes(enemy) == []
+    # A witch pays once, per play.
+    combat._finish_play(state, witch())
+    combat._finish_play(state, witch())
+    assert sizes(enemy) == [3, 3]
+
+
+def test_witches_circle_upgrades_the_bomb_it_plants(overhaul):
+    """"Upgrade: Bomb 5." The stack IS the size, Chained Reactions' grammar."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    effects.resolve_card(state, load("proto_ko_witches_circle+"))
+    combat._finish_play(state, witch())
+    assert sizes(enemy) == [5]
+
+
+def test_alices_introduction_magic_makes_the_hand_a_coven_for_one_turn(
+        overhaul):
+    """THE ROW'S OWN ACCEPTANCE: a card that is NOT Hexerei counts as one for
+    the rest of this turn, and does not next turn.
+
+    Both readers are watched through one board, because the point of the card
+    is that every reader sees the same widened family: Witches' Circle plants
+    for the marked card while the window is open and plants nothing for it
+    after the window shuts.
+    """
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    plain = probe([], cid="proto_ko_plain", ctype="skill")
+    state.player.hand = [plain]
+    effects.resolve_card(state, load("proto_ko_witches_circle"))
+    effects.resolve_card(state, load("proto_ko_alices_introduction_magic"))
+
+    from tier0.engine import companion_hexerei
+    assert plain.hexerei is False           # the PRINTED mark never moved
+    assert companion_hexerei.is_hexerei(state, plain) is True
+    combat._finish_play(state, plain)
+    assert sizes(enemy) == [3]
+
+    # ... AND NOT THE NEXT TURN. The window closes at the arm's turn end.
+    klee_overhaul.turn_end(state)
+    assert companion_hexerei.is_hexerei(state, plain) is False
+    combat._finish_play(state, plain)
+    assert sizes(enemy) == [3]
+
+
+def test_alices_window_covers_the_hand_it_saw_and_not_a_later_draw(overhaul):
+    """The ruling's first derived reading, and the reason the upgrade is
+    Retain: "the window is this turn, over the cards in hand when it is
+    played (a card drawn later this turn is not counted)"."""
+    state = klee_state([make_enemy(hp=200)])
+    held = probe([], cid="proto_ko_held", ctype="skill")
+    later = probe([], cid="proto_ko_later", ctype="skill")
+    state.player.hand = [held]
+    effects.resolve_card(state, load("proto_ko_alices_introduction_magic"))
+    state.player.hand.append(later)
+
+    from tier0.engine import companion_hexerei
+    assert companion_hexerei.is_hexerei(state, held) is True
+    assert companion_hexerei.is_hexerei(state, later) is False
+
+
+def test_alices_introduction_magic_is_itself_hexerei_and_upgrades_to_retain(
+        overhaul):
+    """The ruling's second derived reading ("it counts as Hexerei itself, so
+    it does not need a second witch to start a circle") and the upgrade the
+    packet names."""
+    card = load("proto_ko_alices_introduction_magic")
+    assert card.hexerei is True
+    assert card.retain is False
+    upgraded = load("proto_ko_alices_introduction_magic+")
+    assert upgraded.hexerei is True
+    assert upgraded.retain is True

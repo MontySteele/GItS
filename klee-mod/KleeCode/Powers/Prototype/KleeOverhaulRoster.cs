@@ -107,9 +107,15 @@ internal static class KleeOverhaulRoster
     /// LISTED BY TYPE, not filtered by id prefix. A prefix match would be a
     /// second, softer definition of "which rows are the slice" living next to
     /// the sheet's own, and it would fail silently the day a row is renamed.
-    /// These are the same 26 ids as <c>C.KLEE_OVERHAUL_POOL_IDS</c>, in the
+    /// These are the same ids as <c>C.KLEE_OVERHAUL_POOL_IDS</c>, in the
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
+    ///
+    /// THIRTY-ONE SINCE R244, and the three that arrived are a SECOND slice
+    /// rather than a redraft of this one: the ruled packet
+    /// `review/ruled/klee-hexerei-readers-2026-09-02.md` adds Klee's three
+    /// Hexerei readers, the cards in her own pool that pay for the coven's
+    /// one-word mark. They are listed in their own block at the end.
     ///
     /// TWENTY-EIGHT AT DRAFT 4, and only ONE row is absent now. Dig In had left
     /// the OFFER pool at draft 3 to be the starter's Spark sink; the canonical
@@ -174,5 +180,12 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoRunAway>(),
         ModelDb.Card<ProtoKoGrounded>(),
         ModelDb.Card<ProtoKoSorryJean>(),
+        // The Hexerei readers (3 -- R244, the ruled packet's sec.2). One per
+        // rarity, which is the ruling's own shape: a Common that reads the
+        // turn, an Uncommon Power that is DEAD ALONE by ruling, and a Rare
+        // that makes the hand a coven for one turn.
+        ModelDb.Card<ProtoKoCovenErrand>(),
+        ModelDb.Card<ProtoKoWitchesCircle>(),
+        ModelDb.Card<ProtoKoAlicesIntroductionMagic>(),
     };
 }
