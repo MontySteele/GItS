@@ -45,7 +45,7 @@ public sealed class BeforeSunAndMoon : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Before Sun and Moon"),
-        ("description", "Each [gold]Bake-Kurage[/gold] pulse reads your [gold]Charge[/gold] for {PowerAmount:diff()} more damage per point."),
+        ("description", "Each [gold]Bake-Kurage[/gold] pulse reads your [gold]Charge[/gold] for {PowerAmount:diff()} additional damage per point."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

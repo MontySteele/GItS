@@ -71,10 +71,12 @@ public class InterpolationPinTests
         // said doubled and the funnel granted base. Both now read the relic.
         var body = Loc(Bare<PearlOfInsightRelic>(), "description");
 
-        Assert.Contains($"gain {PearlOfInsightRelic.ChargePerExhaust} [gold]Charge[/gold]", body);
-        Assert.Contains($"and {PearlOfInsightRelic.BurstPerExhaust} Burst Energy", body);
-        Assert.Contains("gain 2 [gold]Charge[/gold]", body);
-        Assert.Contains("and 4 Burst Energy", body);
+        Assert.Contains(
+            $"gain [blue]{PearlOfInsightRelic.ChargePerExhaust}[/blue] [gold]Charge[/gold]", body);
+        Assert.Contains(
+            $"and [blue]{PearlOfInsightRelic.BurstPerExhaust}[/blue] [gold]Burst Energy[/gold]", body);
+        Assert.Contains("gain [blue]2[/blue] [gold]Charge[/gold]", body);
+        Assert.Contains("and [blue]4[/blue] [gold]Burst Energy[/gold]", body);
     }
 
     [Fact]
@@ -82,8 +84,10 @@ public class InterpolationPinTests
     {
         var body = Loc(Bare<PearlOfWisdomRelic>(), "description");
 
-        Assert.Contains($"gain {KokomiConstants.ChargePerExhaust} [gold]Charge[/gold]", body);
-        Assert.Contains($"and {KokomiConstants.BurstPerExhaust} Burst Energy", body);
+        Assert.Contains(
+            $"gain [blue]{KokomiConstants.ChargePerExhaust}[/blue] [gold]Charge[/gold]", body);
+        Assert.Contains(
+            $"and [blue]{KokomiConstants.BurstPerExhaust}[/blue] [gold]Burst Energy[/gold]", body);
     }
 
     [Fact]

@@ -48,7 +48,7 @@ public sealed class FullEnsemble : CustomCardModel, ICharacterCard, ISkillTagCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Full Ensemble"),
-        ("description", "Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Add 1 [gold]Surintendante Chevalmarin[/gold]. Add 1 [gold]Mademoiselle Crabaletta[/gold]. [gold]Burst[/gold] +5."),
+        ("description", "Add 1 [gold]Gentilhomme Usher[/gold], 1 [gold]Surintendante Chevalmarin[/gold], 1 [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

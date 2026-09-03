@@ -191,51 +191,63 @@ public static class KleeMod
                     ["KLEEMOD-ELEMENTAL_SKILL.title"] = "Elemental Skill",
                     ["KLEEMOD-ELEMENTAL_SKILL.description"] =
                         $"Playing this card grants {Powers.BurstConstants.PerSkillTag} Burst Energy.",
+                    // `EB-345` / R249. The shared tips took the text pass.
+                    // The Applies-X four said one rule in two long clauses
+                    // and named no keyword; the eight reaction previews all
+                    // opened with the same 60-character preamble about what
+                    // the CARD supplies, which is the one thing a player
+                    // reading the card already knows. Every tip now leads
+                    // with the pair that reacts and then says what happens,
+                    // keywords golded and numerals blue. No number, no
+                    // constant and no rule moved -- the interpolations are
+                    // the same interpolations.
                     ["KLEEMOD-APPLIES_PYRO.title"] = "Applies Pyro",
                     ["KLEEMOD-APPLIES_PYRO.description"] =
-                        $"If the target has no aura, this applies Pyro for {Elements.ReactionConstants.AuraDurationTurns} turns. A different aura is consumed to trigger a Reaction instead.",
+                        $"No aura: applies [gold]Pyro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
                     ["KLEEMOD-APPLIES_HYDRO.title"] = "Applies Hydro",
                     ["KLEEMOD-APPLIES_HYDRO.description"] =
-                        $"If the target has no aura, this applies Hydro for {Elements.ReactionConstants.AuraDurationTurns} turns. A different aura is consumed to trigger a Reaction instead.",
+                        $"No aura: applies [gold]Hydro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
                     ["KLEEMOD-APPLIES_ELECTRO.title"] = "Applies Electro",
                     ["KLEEMOD-APPLIES_ELECTRO.description"] =
-                        $"If the target has no aura, this applies Electro for {Elements.ReactionConstants.AuraDurationTurns} turns. A different aura is consumed to trigger a Reaction instead.",
+                        $"No aura: applies [gold]Electro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
                     ["KLEEMOD-APPLIES_CRYO.title"] = "Applies Cryo",
                     ["KLEEMOD-APPLIES_CRYO.description"] =
-                        $"If the target has no aura, this applies Cryo for {Elements.ReactionConstants.AuraDurationTurns} turns. A different aura is consumed to trigger a Reaction instead.",
+                        $"No aura: applies [gold]Cryo[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
                     ["KLEEMOD-BOMB.title"] = "Bomb",
+                    // R249 pick 2(a): the SHIPPED Bomb keeps "detonates"
+                    // until the overhaul replaces this kit.
                     ["KLEEMOD-BOMB.description"] =
-                        "Detonates at the start of your turn or early when its enemy takes unblocked Attack damage. The first attack that enemy makes while Bombed each combat deals 25% less damage.",
+                        "Detonates at the start of your turn, or early when its enemy takes unblocked Attack damage. That enemy's first attack deals 25% less.",
                     ["KLEEMOD-CONFISCATED.title"] = "Confiscated",
                     ["KLEEMOD-CONFISCATED.description"] =
                         "A 1-cost Status card that does nothing.",
                     ["KLEEMOD-VAPORIZE_PREVIEW.title"] = "Reaction preview: Vaporize",
                     ["KLEEMOD-VAPORIZE_PREVIEW.description"] =
-                        "This card supplies Pyro or Hydro while an enemy has the other aura. The triggering hit deals 1.5x damage and consumes the aura.",
+                        "[gold]Pyro[/gold] meets [gold]Hydro[/gold]: this hit deals 1.5x damage and consumes the aura.",
                     ["KLEEMOD-MELT_PREVIEW.title"] = "Reaction preview: Melt",
                     ["KLEEMOD-MELT_PREVIEW.description"] =
-                        "This card supplies Pyro or Cryo while an enemy has the other aura. The triggering hit deals 1.75x damage and consumes the aura.",
+                        "[gold]Pyro[/gold] meets [gold]Cryo[/gold]: this hit deals 1.75x damage and consumes the aura.",
                     ["KLEEMOD-OVERLOAD_PREVIEW.title"] = "Reaction preview: Overloaded",
                     ["KLEEMOD-OVERLOAD_PREVIEW.description"] =
-                        $"This card supplies Pyro or Electro while an enemy has the other aura. It deals {Elements.ReactionConstants.OverloadSplash} splash damage to all enemies and applies {Elements.ReactionConstants.OverloadWeak} Weak to the reacted enemy.",
+                        $"[gold]Pyro[/gold] meets [gold]Electro[/gold]: [blue]{Elements.ReactionConstants.OverloadSplash}[/blue] damage to ALL enemies and [blue]{Elements.ReactionConstants.OverloadWeak}[/blue] [gold]Weak[/gold] on the reacted enemy.",
                     ["KLEEMOD-SUPERCONDUCT_PREVIEW.title"] = "Reaction preview: Superconduct",
                     ["KLEEMOD-SUPERCONDUCT_PREVIEW.description"] =
-                        $"This card supplies Electro or Cryo while an enemy has the other aura. The reacted enemy gains {Elements.ReactionConstants.SuperconductVuln} Vulnerable.",
+                        $"[gold]Electro[/gold] meets [gold]Cryo[/gold]: the reacted enemy gains [blue]{Elements.ReactionConstants.SuperconductVuln}[/blue] [gold]Vulnerable[/gold].",
                     ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.title"] = "Reaction preview: Electro-Charged",
                     ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.description"] =
-                        $"This card supplies Hydro or Electro while an enemy has the other aura. The reacted enemy gains a {Elements.ReactionConstants.ElectroChargedDot}-damage decaying damage-over-time effect.",
+                        $"[gold]Hydro[/gold] meets [gold]Electro[/gold]: the reacted enemy loses [blue]{Elements.ReactionConstants.ElectroChargedDot}[/blue] HP at the start of its turn, 1 less each turn.",
                     ["KLEEMOD-FROZEN_PREVIEW.title"] = "Reaction preview: Frozen",
                     ["KLEEMOD-FROZEN_PREVIEW.description"] =
-                        $"This card supplies Hydro or Cryo while an enemy has the other aura. Its next action deals half damage; attacking it Shatters for {Elements.ReactionConstants.ShatterDamage} damage.",
+                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals half damage, and the first Attack to hit it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] damage.",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Frozen (Boss)",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
-                        $"Bosses cannot be Frozen. Hydro plus Cryo is consumed and applies {Elements.ReactionConstants.FrozenBossVuln} Vulnerable instead.",
+                        $"Bosses cannot be Frozen. [gold]Hydro[/gold] plus [gold]Cryo[/gold] is consumed and applies [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
                     ["KLEEMOD-SWIRL_PREVIEW.title"] = "Reaction preview: Swirl",
                     ["KLEEMOD-SWIRL_PREVIEW.description"] =
-                        "This card supplies Anemo to an existing aura. The aura is consumed and copied onto all enemies.",
+                        "[gold]Anemo[/gold] meets an aura: the aura is consumed and copied onto ALL enemies.",
                     ["KLEEMOD-CRYSTALLIZE_PREVIEW.title"] = "Reaction preview: Crystallize",
                     ["KLEEMOD-CRYSTALLIZE_PREVIEW.description"] =
-                        $"This card supplies Geo to an existing aura. The aura is consumed and you gain {Elements.ReactionConstants.CrystallizeBlock} Block.",
+                        $"[gold]Geo[/gold] meets an aura: the aura is consumed and you gain [blue]{Elements.ReactionConstants.CrystallizeBlock}[/blue] [gold]Block[/gold].",
 
                     // Legibility sprint L-C: titles for the re-homed rider
                     // tips (FurinaRiderTips). These are NOT card keywords --

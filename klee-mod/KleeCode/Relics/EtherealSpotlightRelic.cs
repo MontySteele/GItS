@@ -52,8 +52,8 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
     {
         ("title", "Ethereal Spotlight"),
         ("description",
-            "At the start of each turn, add an [gold]Ethereal Spotlight[/gold] "
-          + "to your hand. " + CompanionSlot.RewardSlotDescription),
+            "At the start of your turn, add an [gold]Ethereal Spotlight[/gold] "
+          + "to your [gold]Hand[/gold]."),
     };
 
     /// <summary>

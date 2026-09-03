@@ -282,22 +282,27 @@ REACTION_KEYWORDS: dict[str, str] = {
         f"element. On a bare enemy the hit applies its own element for "
         f"{AURA_DURATION_TURNS} turns instead, and a hit matching the aura "
         "refreshes it."),
-    "Melt": ("Pyro on a Cryo aura, or Cryo on a Pyro aura. The triggering hit "
-             "deals 1.75x damage and consumes the aura."),
-    "Vaporize": ("Pyro on a Hydro aura, or Hydro on a Pyro aura. The "
-                 "triggering hit deals 1.5x damage and consumes the aura."),
-    "Overloaded": ("Pyro on an Electro aura, or Electro on a Pyro aura. It "
-                   "deals 6 splash damage to all enemies and applies 1 Weak "
-                   "to the reacted enemy."),
+    # `EB-345` (R249) retuned the six preview rows in `KleeMod.cs` -- each one
+    # now leads with the pair that reacts instead of a 60-character preamble
+    # about what the CARD supplies, and Electro-Charged says what the dot
+    # actually does rather than naming its effect type. The clauses below
+    # follow, verbatim, which is the whole point of the pin.
+    "Melt": ("Pyro on a Cryo aura, or Cryo on a Pyro aura. This hit deals "
+             "1.75x damage and consumes the aura."),
+    "Vaporize": ("Pyro on a Hydro aura, or Hydro on a Pyro aura. This hit "
+                 "deals 1.5x damage and consumes the aura."),
+    "Overloaded": ("Pyro on an Electro aura, or Electro on a Pyro aura. "
+                   "6 damage to ALL enemies and 1 Weak on the reacted "
+                   "enemy."),
     "Superconduct": ("Electro on a Cryo aura, or Cryo on an Electro aura. The "
                      "reacted enemy gains 2 Vulnerable."),
     "Electro-Charged": ("Hydro on an Electro aura, or Electro on a Hydro "
-                        "aura. The reacted enemy gains a 4-damage decaying "
-                        "damage-over-time effect."),
+                        "aura. The reacted enemy loses 4 HP at the start of "
+                        "its turn, 1 less each turn."),
     "Frozen": ("Hydro on a Cryo aura, or Cryo on a Hydro aura. Its next "
-               "action deals half damage; attacking it Shatters for 6 damage. "
-               "Bosses cannot be Frozen: the pair is consumed and applies 2 "
-               "Vulnerable instead."),
+               "action deals half damage, and the first Attack to hit it "
+               "Shatters for 6 damage. Bosses cannot be Frozen: Hydro plus "
+               "Cryo is consumed and applies 2 Vulnerable instead."),
 }
 
 # The number the card's own Bomb tip prints, where a screen carries that tip.

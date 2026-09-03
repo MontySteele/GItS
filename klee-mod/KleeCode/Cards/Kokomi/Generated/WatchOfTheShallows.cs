@@ -46,7 +46,7 @@ public sealed class WatchOfTheShallows : CustomCardModel, ICharacterCard, INever
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watch of the Shallows"),
-        ("description", "The first time you would take unblocked attack damage each turn, prevent up to {PowerAmount:diff()} of it and [gold]Exhaust[/gold] a random card from your draw pile."),
+        ("description", "The first unblocked Attack damage each turn is reduced by up to {PowerAmount:diff()}, and a random card in your [gold]Draw Pile[/gold] is [gold]Exhausted[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -72,8 +72,11 @@ def test_the_generated_rows_carry_numbers_not_placeholders():
         assert "{" not in value and "}" not in value, (key, value)
     # And the interpolation really did resolve rather than the C# having gone
     # literal: the aura duration is in four rows and is a numeral in all four.
+    # `EB-345` golded the keyword and blued the numeral (R249); the assertion
+    # is still that a NUMBER reached the row, not that the markup did not move.
     pyro = table["KLEEMOD-APPLIES_PYRO.description"]
-    assert re.search(r"applies Pyro for \d+ turns", pyro), pyro
+    assert re.search(r"applies \[gold\]Pyro\[/gold\] for \[blue\]\d+\[/blue\] "
+                     r"turns", pyro), pyro
 
 
 def test_every_dll_row_with_a_literal_key_reaches_the_pck():

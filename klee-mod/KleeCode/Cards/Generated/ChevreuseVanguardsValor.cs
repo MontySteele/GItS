@@ -48,7 +48,7 @@ public sealed class ChevreuseVanguardsValor : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chevreuse — Vanguard's Valor"),
-        ("description", "Your next Attack deals {PowerAmount:diff()} more damage. If an [gold]Elemental Reaction[/gold] triggered this turn: your next Attack deals 3 more damage."),
+        ("description", "Your next Attack deals {PowerAmount:diff()} additional damage, plus 3 if an [gold]Elemental Reaction[/gold] triggered this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

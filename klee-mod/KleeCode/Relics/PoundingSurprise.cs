@@ -74,11 +74,11 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
             // keyword has to define the word for a player who has not read the
             // relic -- so the relic says which one of them it is.
             "Whenever a [gold]Bomb[/gold] goes off, gain [blue]"
-          + KleeOverhaulLaw.SparkPerExplosion + "[/blue] [gold]Spark[/gold]. "
+          + KleeOverhaulLaw.SparkPerExplosion + "[/blue] [gold]Spark[/gold]."
 #else
-            "Whenever a [gold]Bomb[/gold] detonates, gain 1 [gold]Spark[/gold]. "
+            "Whenever a [gold]Bomb[/gold] detonates, gain 1 [gold]Spark[/gold]."
 #endif
-          + CompanionSlot.RewardSlotDescription),
+            ),
     };
 
     /// <summary>

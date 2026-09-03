@@ -1753,24 +1753,26 @@ APPLY_POWERS = {
     # for exactly their semantics and a private copy would be a second
     # implementation of a rule the engine already owns.
     "metallicize": ("MetallicizePower", None,
-        "At the start of your turn, gain {X} Block."),
+        "At the start of your turn, gain {X} [gold]Block[/gold]."),
     # Cap 6 mirrors the sheet's `max_stacks: 6` -- a single-application ward,
     # not a stacking one. Vigil's upgrade moves amount AND cap together
     # (test_vigil_upgrade_moves_the_cap_with_the_amount pins that), so the
     # registry cap has to move with them or the upgrade is silently swallowed.
     "prevent_exhaust_ward": ("PreventExhaustWardPower", 6,
-        "The first time you would take unblocked attack damage each turn, "
-        "prevent up to {X} of it and [gold]Exhaust[/gold] a random card from "
-        "your draw pile."),
+        "The first unblocked Attack damage each turn is reduced by up to "
+        "{X}, and a random card in your [gold]Draw Pile[/gold] is "
+        "[gold]Exhausted[/gold]."),
     "kurage_ward": ("KurageWardPower", None,
-        "Each [gold]Bake-Kurage[/gold] pulse also grants {X} Block."),
+        "Each [gold]Bake-Kurage[/gold] pulse also grants {X} "
+        "[gold]Block[/gold]."),
     # R73/G2. No cap: the stacking is the ruling, not an oversight, and a cap
     # here would implement the ban [USER] considered and rejected.
     "kurage_amp": ("KurageAmpPower", None,
         "Each [gold]Bake-Kurage[/gold] pulse reads your [gold]Charge[/gold] "
-        "for {X} more damage per point."),
+        "for {X} additional damage per point."),
     "feel_no_pain": ("FeelNoPainPower", None,
-        "Whenever a card is [gold]Exhausted[/gold], gain {X} Block."),
+        "Whenever a card is [gold]Exhausted[/gold], gain {X} "
+        "[gold]Block[/gold]."),
     "dark_embrace": ("DarkEmbracePower", None,
         "Whenever a card is [gold]Exhausted[/gold], draw {X} card{XS}."),
     "weak": ("WeakPower", None,
@@ -1968,7 +1970,7 @@ APPLY_POWERS = {
     # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
-        "Your [gold]Shatters[/gold] deal {X} more damage."),
+        "Your [gold]Shatters[/gold] deal {X} additional damage."),
     # Fontaine 5-star Rares (R64, 2026-07-25). Amounts live on the cards, so
     # none of these adds a constant for the parity lint to drift on.
     "cannon_fire_support": ("CannonFireSupportPower", None,
@@ -1976,15 +1978,15 @@ APPLY_POWERS = {
         "[gold]Block[/gold]."),
     "night_vigil": ("NightVigilPower", None,
         "Your Attacks against enemies holding an elemental aura deal {X} "
-        "more damage."),
+        "additional damage."),
     "ancient_sea_authority": ("AncientSeaAuthorityPower", None,
-        "Elemental auras you apply last {X} extra turn(s)."),
+        "Elemental auras you apply last {X} extra turn{XS}."),
     "masque_red_death": ("MasqueRedDeathPower", None,
-        "At the start of each turn, gain {X} [gold]Strength[/gold]. Each turn "
-        "your [gold]Bond of Life[/gold] consumes the first 5 "
-        "[gold]Block[/gold] you gain."),
+        "At the start of your turn, gain {X} [gold]Strength[/gold]. Your "
+        "[gold]Bond of Life[/gold] eats the first 5 [gold]Block[/gold] you "
+        "gain each turn."),
     "fanfare_attack_per10": ("FanfareAttackPer10Power", None,
-        "Your Attacks deal {X} more damage per 10 [gold]Fanfare[/gold]."),
+        "Your Attacks deal {X} additional damage per 10 [gold]Fanfare[/gold]."),
     # B5 (2026-07-28): the face NAMES the member and says nothing else. The
     # member's act, its bow, and the cap rules moved to hover tips
     # (SalonMemberTips) -- eight cards were reprinting one paragraph that
@@ -1996,7 +1998,7 @@ APPLY_POWERS = {
     # A12 (2026-07-28): the stage's size stops being a constant.
     "salon_cap_up": ("SalonCapUpPower", None,
         "Your [gold]Salon[/gold] has room for {X} more "
-        "[gold]Salon Member(s)[/gold]."),
+        "[gold]Salon Member{XS}[/gold]."),
     # ALL max_stacks DROPPED across Furina's sheet (user ruling 2026-07-24).
     # Two rounds: the first dropped the four non-compounding powers; this one
     # drops the rest, matching base StS where Power dupes always stack. An A/B
@@ -2014,19 +2016,16 @@ APPLY_POWERS = {
     "spotlight_draw": ("SpotlightDrawPower", None,
         "The first [gold]Spotlighted[/gold] card each turn draws {X} card{XS}."),
     "spotlight_mult_bonus": ("SpotlightMultBonusPower", None,
-        "[gold]Spotlighted[/gold] Companion numbers are {X}% stronger "
-        "this combat."),
+        "[gold]Spotlighted[/gold] Companions are {X}% stronger this combat."),
     "spotlight_mult_bonus_turn": ("SpotlightMultBonusTurnPower", None,
-        "[gold]Spotlighted[/gold] Companion numbers are {X}% stronger "
-        "this turn."),
+        "[gold]Spotlighted[/gold] Companions are {X}% stronger this turn."),
     "spotlight_flat_damage": ("SpotlightFlatDamagePower", None,
         "[gold]Spotlighted[/gold] Companion damage gains {X}."),
     "spotlight_flat_damage_turn": ("SpotlightFlatDamageTurnPower", None,
         "[gold]Spotlighted[/gold] Companion damage gains {X} this turn."),
     "ovation_spend_boost": ("OvationSpendBoostPower", None,
-        "Whenever you spend [gold]Encore[/gold], [gold]Spotlighted[/gold] "
-        "Companion "
-        "numbers are {X}% stronger this turn."),
+        "[gold]Spotlighted[/gold] Companions are {X}% stronger on turns you "
+        "spend [gold]Encore[/gold]."),
     "spotlight_encore_first": ("SpotlightEncoreFirstPower", None,
         "The first [gold]Spotlighted[/gold] card each turn grants {X} "
         "[gold]Encore[/gold]."),
@@ -2036,10 +2035,11 @@ APPLY_POWERS = {
     # the trigger sites and their tier0 mirrors. No caps: the activity gate IS
     # the rate limit, so a stack ceiling would be a second, redundant one.
     "salon_deploy_block": ("SalonDeployBlockPower", None,
-        "Whenever you deploy a [gold]Salon Member[/gold], gain {X} Block."),
+        "Whenever you deploy a [gold]Salon Member[/gold], gain {X} "
+        "[gold]Block[/gold]."),
     "salon_bow_block": ("SalonBowBlockPower", None,
         "Whenever a [gold]Salon Member[/gold] takes its final bow, gain "
-        "{X} Block."),
+        "{X} [gold]Block[/gold]."),
     "salon_bow_encore": ("SalonBowEncorePower", None,
         "Whenever a [gold]Salon Member[/gold] takes its final bow, gain "
         "{X} [gold]Encore[/gold]."),
@@ -4081,8 +4081,22 @@ def rider_tip_args(card: dict) -> tuple[str, str]:
     return ", ".join(args), ", ".join(kokomi_args)
 
 
-def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int]]:
+def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int],
+                                            dict[int, list[int]]]:
     """B5: consecutive deploys of the SAME member render as one sentence.
+
+    `EB-345` / R249 widened it one step: a consecutive RUN of deploys of
+    DIFFERENT members is also one sentence, a list rather than three copies of
+    "Add 1 X." Grand Gala printed five sentences and 127 characters against a
+    four-sentence, 120-character ceiling purely by repeating the verb and the
+    prepositional phrase. The third return is that run: {first anchor ->
+    [every anchor in the run]}, and every anchor after the first is in `skip`
+    so the loop emits the run once, at its head.
+
+    The names in the list stay the FULL ones. They are the member cards' own
+    titles and the tip titles (`SalonMemberTips.DisplayName`, pinned in
+    `InterpolationPinTests`), and a card that named them differently from the
+    tooltip explaining them is the defect B5 fixed.
 
     Grand Gala deploys Crabaletta twice in a row, which read as "Add 1
     Mademoiselle Crabaletta. Add 1 Mademoiselle Crabaletta." -- the same
@@ -4111,9 +4125,12 @@ def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int]]:
                 and salon_calc_rider(card, eff) is None)
 
     anchor = None
+    runs: dict[int, list[int]] = {}
+    head = None
     for i, eff in enumerate(effects):
         if not plain_deploy(eff):
             anchor = None
+            head = None
             continue
         if (anchor is not None
                 and effects[anchor].get("member") == eff.get("member")):
@@ -4122,7 +4139,13 @@ def merged_deploy_text(card: dict) -> tuple[dict[int, int], set[int]]:
             continue
         anchor = i
         merged[i] = int(eff["amount"])
-    return merged, skip
+        if head is None:
+            head = i
+            runs[head] = [i]
+        else:
+            runs[head].append(i)
+            skip.add(i)
+    return merged, skip, runs
 
 
 def salon_member_tip_args(card: dict) -> str:
@@ -7792,7 +7815,7 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
             # Literal: POWER_UPGRADE_KEYS deltas bind to the first TOP-LEVEL
             # effect, so a branch rider never renders a var.
             bits.append(
-                f'your next Attack deals {int(e["amount"])} more damage')
+                f'your next Attack deals {int(e["amount"])} additional damage')
         elif op == "apply_power":
             # EB-125. The power's own template, lowercased into the branch
             # clause and stripped of its full stop, so "If your Exhaust pile
@@ -8215,7 +8238,7 @@ def build_description(card: dict) -> str:
     deltas = upgrade_plan(card)[0]
     parts = list(meter_price_clauses(card, deltas))
     salon_named = False          # B5: has a deploy already said "your Salon"?
-    deploy_amounts, deploy_skip = merged_deploy_text(card)
+    deploy_amounts, deploy_skip, deploy_runs = merged_deploy_text(card)
     add_anchor = added_effect_anchor(card)
     for eff_index, eff in enumerate(card["effects"]):
         if eff_index in deploy_skip:
@@ -8540,9 +8563,14 @@ def build_description(card: dict) -> str:
             parts.append(f"Gain {amount} [gold]Encore[/gold].")
 
         elif op == "spend_encore":
+            # `EB-345` / R249. The semicolon goes (rule 14 allows one only
+            # between the halves of an either/or) and the shortfall becomes a
+            # trailing clause on the spend it prices. The rule is unchanged
+            # and still printed -- `EB-119`'s whole point is that this clause
+            # is the difference between this op and the encore_cost gate.
             parts.append(
-                f"Spend {int(eff['amount'])} [gold]Encore[/gold]; "
-                "lose HP for any shortfall.")
+                f"Spend {int(eff['amount'])} [gold]Encore[/gold], or HP for "
+                "any shortfall.")
 
         elif op == "spend_charge":
             # The price is printed FIRST because it is a cost line, the
@@ -8614,6 +8642,27 @@ def build_description(card: dict) -> str:
 
         elif op == "apply_power":
             template = APPLY_POWERS[eff["power"]][2]
+            # `EB-345` / R249. A run of deploys is ONE sentence naming each
+            # member once. Only a run of two or more takes this path; a lone
+            # deploy renders through the template below exactly as it did.
+            run = deploy_runs.get(eff_index)
+            if run is not None and len(run) > 1:
+                names = [
+                    f'{deploy_amounts[i]} '
+                    f'[gold]{SALON_MEMBER_NAMES[card["effects"][i]["member"]]}'
+                    f'[/gold]'
+                    for i in run]
+                # Two are joined by "and"; three or more are a comma list.
+                # The members keep their FULL names (they are the member
+                # cards' own titles), and three of those plus Grand Gala's
+                # Encore and Burst riders leave no room for a conjunction
+                # under the 120-character ceiling.
+                listed = (" and ".join(names) if len(names) == 2
+                          else ", ".join(names))
+                where = "" if salon_named else " to your [gold]Salon[/gold]"
+                salon_named = True
+                parts.append(f"Add {listed}{where}.")
+                continue
             if "member" in eff:
                 # B5: name WHO. A11's random deploy says so instead -- it can
                 # field any of the three, and the tooltip lists all three.
@@ -8683,15 +8732,19 @@ def build_description(card: dict) -> str:
             amount = int(eff.get("amount", 1))
             rarity = eff["rarity"].capitalize()
             noun = "card" if amount == 1 else "cards"
+            # `EB-345` / R249. The upgrade's own sentence ("It costs 0 this
+            # turn." / "They cost 0 this turn.") was 21 and 22 rendered
+            # characters against a 20-character add-clause ceiling, and it
+            # needed number agreement with the count to say "It" or "They".
+            # As a trailing modifier on the sentence it modifies it is 16
+            # characters, needs no pronoun at either count, and keeps "this
+            # turn" -- which is the rule (`EnergyCost.SetThisTurn`), not
+            # decoration.
+            free = ("{IfUpgraded:show:, free this turn|}"
+                    if "generate_cost_override" in deltas else "")
             parts.append(
                 f"Add {amount} random {rarity} [gold]Companion[/gold] "
-                f"{noun} to your hand.")
-            if "generate_cost_override" in deltas:
-                # Number agreement with the generated count (SYS-9:
-                # an_invitation adds ONE guest and said "They").
-                pronoun = "It costs" if amount == 1 else "They cost"
-                parts.append(
-                    "{IfUpgraded:show:" + pronoun + " 0 this turn.|}")
+                f"{noun} to your hand{free}.")
 
         elif op == "cost_mod":
             n = -int(eff["delta"])
@@ -8766,7 +8819,7 @@ def build_description(card: dict) -> str:
         elif op == "buff_next_attack":
             n = ("{PowerAmount:diff()}" if eff is power_upgrade_effect(card)
                  else str(int(eff["amount"])))
-            parts.append(f"Your next Attack deals {n} more damage.")
+            parts.append(f"Your next Attack deals {n} additional damage.")
 
         elif op == "energy":
             n = int(eff["amount"])
@@ -8876,6 +8929,26 @@ def build_description(card: dict) -> str:
         elif op == "conditional":
             pred_txt = predicate_text(eff["if"])
             then = eff.get("then", [])
+            # `EB-345` / R249. THE SAME RIDER TWICE IS ONE SENTENCE. Chevreuse
+            # printed "Your next Attack deals 3 more damage. If an Elemental
+            # Reaction triggered this turn: your next Attack deals 3 more
+            # damage." -- 121 rendered characters saying one thing twice, in a
+            # shape rule 7 already has a shorter form for ("... trails as
+            # '... if ...'"). A single-armed conditional whose one effect
+            # REPEATS the effect immediately before it folds into that
+            # sentence as a trailing "plus N if ...". Both numbers stay
+            # printed and both stay literal (POWER_UPGRADE_KEYS binds to the
+            # first top-level effect, so a branch rider never renders a var).
+            if (not eff.get("else") and len(then) == 1
+                    and then[0].get("op") == "buff_next_attack"
+                    and eff_index > 0
+                    and card["effects"][eff_index - 1].get("op")
+                        == "buff_next_attack"
+                    and parts and parts[-1].endswith(" damage.")):
+                parts[-1] = (parts[-1][:-1]
+                             + f', plus {int(then[0]["amount"])} '
+                             + pred_txt[0].lower() + pred_txt[1:] + ".")
+                continue
             if any(e.get("op") == "repeat_this" for e in then):
                 parts.append(f"{pred_txt}: play this card again.")
             else:
@@ -8993,8 +9066,13 @@ def build_description(card: dict) -> str:
         # again"), swapped in on upgrade. Pipe-free payload, as the swap-parse
         # requires.
         n = added_repeat_upgrade(card)
-        again = ("Play this card again." if n == 1
-                 else f"Play this card {n} more times.")
+        # `EB-345` / R249. "Play this card again." was 21 rendered characters
+        # in a `{IfUpgraded:show:}` clause whose base-game ceiling is 20 (the
+        # longest the base prints is 18). "it" is the card, unambiguously --
+        # the clause sits on the card's own face -- and the sentence is the
+        # printed repeat-conditional's own words either way.
+        again = ("Play it again." if n == 1
+                 else f"Play it {n} more times.")
         parts.append("{IfUpgraded:show:" + again + "|}")
 
     # Sly. DEFECT FIX (v0.5 fill): the discard hook generated correctly from

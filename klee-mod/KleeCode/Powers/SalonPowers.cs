@@ -847,8 +847,8 @@ public sealed class SalonCapUpPower : PowerModel, ILocalizationProvider
     {
         ("title", "Casting Call"),
         ("description",
-            "Your [gold]Salon[/gold] has room for {Amount} more "
-          + "[gold]Salon Member(s)[/gold]."),
+            "Your [gold]Salon[/gold] has room for [blue]{Amount}[/blue] more "
+          + "[gold]{Amount:plural:Salon Member|Salon Members}[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

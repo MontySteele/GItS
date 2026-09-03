@@ -409,9 +409,11 @@ def test_deep_breaths_modes_are_the_ruled_pair():
     assert [m["effects"] for m in fx["modes"]] == [
         [{"op": "energy", "amount": 1}, {"op": "gain_encore", "amount": 2}],
         [{"op": "spend_encore", "amount": 3}, {"op": "draw", "amount": 3}]]
+    # `EB-345` (R249) gave the draw its noun: "Draw N cards." is the base
+    # game's own shape (`ACROBATICS`) and a bare count is never printed.
     assert [m["label"] for m in fx["modes"]] == [
         "Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold]",
-        "Spend 3 [gold]Encore[/gold]: draw 3"]
+        "Spend 3 [gold]Encore[/gold]: draw 3 cards"]
 
 
 def test_the_frame_is_mode_independent():

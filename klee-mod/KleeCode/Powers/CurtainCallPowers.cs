@@ -316,7 +316,7 @@ public sealed class SalonDeployBlockPower : PowerModel, ILocalizationProvider
         ("title", "Fortissimo Guard"),
         ("description",
             "Whenever you deploy a [gold]Salon Member[/gold], gain "
-          + "{Amount} Block."),
+          + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -337,7 +337,7 @@ public sealed class SalonBowBlockPower : PowerModel, ILocalizationProvider
         ("title", "Stagehands"),
         ("description",
             "Whenever a [gold]Salon Member[/gold] takes its final bow, gain "
-          + "{Amount} Block."),
+          + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

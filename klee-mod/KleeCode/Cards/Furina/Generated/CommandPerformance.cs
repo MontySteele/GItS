@@ -44,7 +44,7 @@ public sealed class CommandPerformance : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Command Performance"),
-        ("description", "Add 2 random Uncommon [gold]Companion[/gold] cards to your hand. {IfUpgraded:show:They cost 0 this turn.|}"),
+        ("description", "Add 2 random Uncommon [gold]Companion[/gold] cards to your hand{IfUpgraded:show:, free this turn|}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

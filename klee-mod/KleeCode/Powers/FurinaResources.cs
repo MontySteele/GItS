@@ -1397,7 +1397,8 @@ public sealed class FanfareAttackPer10Power : PowerModel, ILocalizationProvider
     {
         ("title", "Rising Ovation"),
         ("description",
-            "Your Attacks deal {Amount} more damage per 10 [gold]Fanfare[/gold]."),
+            "Your Attacks deal [blue]{Amount}[/blue] additional damage per 10 "
+          + "[gold]Fanfare[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -62,20 +62,25 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Bomb"),
+        // `EB-345` / R249. The badge keeps all three rules (pick 3(a)) and
+        // keeps the SHIPPED arm's verb (pick 2(a): the two Bombs are two
+        // rules and two words is honest, so "detonates" stays here until the
+        // overhaul replaces this kit). What moved is the shape: a plain card
+        // type, the live count as a sentence rather than a parenthesis, and
+        // one clause per rule. The smart face is the one string still over
+        // the power ceiling, carried as a named exception for that reason.
         ("description",
-            "Detonates at the start of your turn for its damage. "
-          + "Detonates early if this enemy takes unblocked [gold]Attack[/gold] damage. "
-          + "The first attack this enemy makes while Bombed each combat "
-          + "deals 25% less damage."),
+            "Detonates at the start of your turn for its damage, or early "
+          + "when this enemy takes unblocked Attack damage. "
+          + "Its first attack while Bombed each combat deals 25% less."),
         // The smart (in-combat, mutable-instance) tooltip carries the count;
         // the badge already shows the total. {Damage} is our DynamicVar,
         // {Amount} is the stack count the game adds to every smart tip.
         ("smartDescription",
-            "Detonates at the start of your turn for {Damage} total damage "
-          + "({Amount} Bomb{Amount:plural:|s}). "
-          + "Detonates early if this enemy takes unblocked [gold]Attack[/gold] damage. "
-          + "The first attack this enemy makes while Bombed each combat "
-          + "deals 25% less damage."),
+            "[blue]{Damage}[/blue] damage at the start of your turn, or early "
+          + "when this enemy takes unblocked Attack damage. "
+          + "Bombs here: [blue]{Amount}[/blue]. "
+          + "Its first attack while Bombed deals 25% less."),
     };
 
     // ARTIFACT COEXISTENCE ([USER] ruling 2026-08-23; LAW "Combat --

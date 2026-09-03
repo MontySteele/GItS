@@ -4454,7 +4454,10 @@ def test_the_reactions_are_defined_wherever_the_screen_shows_an_element():
     # The numbers, which are the whole reason a seat can price a combination.
     assert "1.75x damage and consumes the aura" in page
     assert "1.5x damage and consumes the aura" in page
-    assert "6 splash damage to all enemies and applies 1 Weak" in page
+    # `EB-345`: Overloaded's row dropped the word "splash" with the rest of
+    # the preamble -- "damage to ALL enemies" is what splash meant -- and the
+    # numbers it exists for are both still here.
+    assert "6 damage to ALL enemies and 1 Weak" in page
     assert "Shatters for 6 damage" in page
     assert "Bosses cannot be Frozen" in page
     # AN AURA ALONE IS ENOUGH: the combination is priced from the other side
@@ -4497,16 +4500,20 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
     """
     src = (REPO / "klee-mod" / "KleeCode" / "KleeMod.cs").read_text(
         encoding="utf-8")
+    # `EB-345` (R249) retuned all six rows and golded their keywords, so an
+    # anchor is now a TAG-FREE run: it is matched against the SOURCE, where
+    # `[gold]Weak[/gold]` stands between two words that used to be adjacent.
+    # It also drops the leading capital, because the glossary opens the clause
+    # as a sentence and the C# opens it after a colon.
     anchors = {
-        "Melt": ["The triggering hit deals 1.75x damage and consumes the aura"],
-        "Vaporize": ["The triggering hit deals 1.5x damage and consumes the "
-                     "aura"],
-        "Overloaded": ["splash damage to all enemies and applies ",
-                       " Weak to the reacted enemy"],
-        "Superconduct": [" Vulnerable"],
-        "Electro-Charged": ["-damage decaying damage-over-time effect"],
-        "Frozen": ["Its next action deals half damage; attacking it Shatters "
-                   "for ", "Bosses cannot be Frozen"],
+        "Melt": ["his hit deals 1.75x damage and consumes the aura"],
+        "Vaporize": ["his hit deals 1.5x damage and consumes the aura"],
+        "Overloaded": [" damage to ALL enemies and ",
+                       " on the reacted enemy"],
+        "Superconduct": ["reacted enemy gains "],
+        "Electro-Charged": [" HP at the start of its turn, 1 less each turn"],
+        "Frozen": ["ts next action deals half damage, and the first Attack "
+                   "to hit it Shatters for ", "Bosses cannot be Frozen"],
     }
     assert set(anchors) | {"Elemental Reaction"} \
         == set(blindplay.REACTION_KEYWORDS)

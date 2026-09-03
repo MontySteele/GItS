@@ -48,7 +48,7 @@ public sealed class NeuvilletteAncientSeaAuthority : CustomCardModel, ICompanion
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Neuvillette — Heir to the Ancient Sea's Authority"),
-        ("description", "Elemental auras you apply last 1 extra turn(s)."),
+        ("description", "Elemental auras you apply last 1 extra turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

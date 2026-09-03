@@ -41,7 +41,7 @@ public sealed class KuragesOath : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage's Oath"),
-        ("description", "Each [gold]Bake-Kurage[/gold] pulse also grants {PowerAmount:diff()} Block."),
+        ("description", "Each [gold]Bake-Kurage[/gold] pulse also grants {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

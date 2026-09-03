@@ -41,7 +41,7 @@ public sealed class MercyOfTheDeep : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mercy of the Currents"),
-        ("description", "Whenever a card is [gold]Exhausted[/gold], gain {PowerAmount:diff()} Block."),
+        ("description", "Whenever a card is [gold]Exhausted[/gold], gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

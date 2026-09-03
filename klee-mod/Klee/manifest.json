@@ -2,7 +2,7 @@
   "id": "klee",
   "name": "Teyvat Spire Roster",
   "author": "Monty",
-  "description": "Playable Genshin roster for Slay the Spire 2. Includes Klee, Furina, elemental reactions, and Companion cards.",
+  "description": "Playable Genshin roster for Slay the Spire 2. Includes Klee, Furina, elemental reactions, and Companion cards. Card rewards after a fight offer a fourth, Companion, choice.",
   "version": "0.2",
   "has_dll": true,
   "has_pck": true,
