@@ -169,14 +169,21 @@ public sealed class WitchesCirclePower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// Sparks 'n' Splash: "At the end of your turn, deal Pyro damage to a random
-/// enemy equal to the Bombs on it."
+/// enemy equal to its largest Bomb."
 ///
-/// [USER]'s OWN DESIGN, 2026-09-02: "I think auto-detonation on Sparks n'
-/// Splash completely bricks the growth build. How about instead 'a random
-/// enemy takes damage equal to the amount of Bomb on them'?" The row printed
-/// an automatic Set off before this -- first at the end of the turn, then at
-/// the start of it -- and either way the Rare that the growth deck most wants
-/// was the one card that cashed its pile without being asked.
+/// R250 (2026-09-04), replacing the SUM this row paid before: round 8's seats
+/// found that once the echo lands the sum makes banking always right and
+/// every Set off card "deletes my engine" -- the largest single charge keeps
+/// hold-or-cash a decision after the Power lands, since a Set off still
+/// cashes the WHOLE pile (<c>ProtoBombPower.SetOff</c>) and a reaction
+/// still multiplies whichever one hit is dealt.
+///
+/// Before that, [USER]'s OWN DESIGN, 2026-09-02: "I think auto-detonation on
+/// Sparks n' Splash completely bricks the growth build. How about instead 'a
+/// random enemy takes damage equal to the amount of Bomb on them'?" The row
+/// printed an automatic Set off before this -- first at the end of the turn,
+/// then at the start of it -- and either way the Rare that the growth deck
+/// most wants was the one card that cashed its pile without being asked.
 ///
 /// IT READS THE PILE AND DOES NOT SPEND IT, which is the whole card. Nothing
 /// is taken, so:
@@ -196,6 +203,15 @@ public sealed class WitchesCirclePower : PowerModel, ILocalizationProvider
 /// nothing is not a printed effect, so the roll is over the enemies that
 /// actually hold one of her charges, and a board with none does nothing at
 /// all.
+///
+/// EACH COPY IS ITS OWN HIT (<c>EB-358</c>, default applied): a second Sparks
+/// 'n' Splash used to badge <c>Amount</c> 2 (this power's own
+/// <see cref="StackType"/> is <c>Counter</c>, one stack per copy played) and
+/// pay the pile ONCE. The badge and the payout now read the same number: the
+/// loop below runs <see cref="PowerModel.Amount"/> times, one per stack, each
+/// iteration rolling its OWN random target -- so two copies can land on the
+/// same enemy twice or on two different ones -- and paying that target's
+/// largest Bomb, independently of every other iteration.
 /// </summary>
 public sealed class BombEchoPower : PowerModel, ILocalizationProvider
 {
@@ -204,7 +220,7 @@ public sealed class BombEchoPower : PowerModel, ILocalizationProvider
         ("title", "Sparks 'n' Splash"),
         ("description",
             "At the end of your turn, deal [gold]Pyro[/gold] damage to a "
-          + "random enemy equal to the [gold]Bombs[/gold] on it."),
+          + "random enemy equal to its largest [gold]Bomb[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -217,26 +233,31 @@ public sealed class BombEchoPower : PowerModel, ILocalizationProvider
         if (side != CombatSide.Player) return;
         if (Owner?.CombatState == null) return;
 
-        // An explicit walk rather than a `Where` lambda: the candidate rule is
-        // the card's own printed one ("a random enemy ... equal to the Bombs
-        // on it" -- so, an enemy that has some), and a closure would hide it
-        // from the IL pin that reads this method.
-        var candidates = new List<Creature>();
-        foreach (var enemy in Owner.CombatState.HittableEnemies)
+        for (var copy = 0; copy < Amount; copy++)
         {
-            if (enemy.IsDead) continue;
-            if (!ProtoBombPower.HoldsChargeFrom(enemy, Owner)) continue;
-            candidates.Add(enemy);
-        }
-        if (candidates.Count == 0) return;
-        var target = Owner.CombatState.RunState.Rng.CombatTargets
-            .NextItem(candidates);
-        if (target == null) return;
+            // An explicit walk rather than a `Where` lambda: the candidate
+            // rule is the card's own printed one ("a random enemy ... equal
+            // to its largest Bomb" -- so, an enemy that has some), and a
+            // closure would hide it from the IL pin that reads this method.
+            // Rolled FRESH per copy (EB-358): each hit is its own random
+            // enemy, not one roll shared by every stack.
+            var candidates = new List<Creature>();
+            foreach (var enemy in Owner.CombatState.HittableEnemies)
+            {
+                if (enemy.IsDead) continue;
+                if (!ProtoBombPower.HoldsChargeFrom(enemy, Owner)) continue;
+                candidates.Add(enemy);
+            }
+            if (candidates.Count == 0) break;
+            var target = Owner.CombatState.RunState.Rng.CombatTargets
+                .NextItem(candidates);
+            if (target == null) continue;
 
-        var size = ProtoBombPower.TotalPlacedBy(target, Owner);
-        if (size <= 0) return;
-        await ElementalHit.Deal(
-            choiceContext, target, Element.Pyro, size, Owner);
+            var size = ProtoBombPower.LargestPlacedBy(target, Owner);
+            if (size <= 0) continue;
+            await ElementalHit.Deal(
+                choiceContext, target, Element.Pyro, size, Owner);
+        }
     }
 }
 

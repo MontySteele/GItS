@@ -429,6 +429,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <summary>Total size on this pile: what a Set off will deal here.</summary>
     public int TotalSize => _charges.Sum(c => c.Size);
 
+    /// <summary>The single largest charge on this pile -- what Sparks 'n'
+    /// Splash's echo pays here (R250). `TotalSize`'s twin: the raw SUM every
+    /// other rule inside the arm is priced in (growth, jumps, Sorry Jean's
+    /// Block, a Set off) survives beside it untouched.</summary>
+    public int LargestSize => _charges.Count == 0 ? 0 : _charges.Max(c => c.Size);
+
     /// <summary>How many of this pile's charges are Mines -- the fuse mark.</summary>
     public int MineCount => _charges.Count(c => c.IsMine);
 
@@ -1332,6 +1338,35 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             if (pile.Applier == applier) total += pile.TotalSize;
         }
         return total;
+    }
+
+    /// <summary>
+    /// This placer's SINGLE LARGEST charge on <paramref name="enemy"/>, RAW --
+    /// what Sparks 'n' Splash's echo pays here since <c>R250</c>
+    /// (<c>klee-overhaul-round-8-2026-09-04.md</c> sec.6 pick 1 default (1)),
+    /// replacing <see cref="TotalPlacedBy"/> at that one call site. Round 8's
+    /// seats found the sum made banking always right and every Set off card
+    /// "deletes my engine"; the largest charge keeps hold-or-cash a decision
+    /// after the Power lands, and a Set off (<c>SetOff</c>) still cashes the
+    /// whole pile.
+    ///
+    /// <see cref="TotalPlacedBy"/> survives unchanged and unremoved: growth,
+    /// jumps and Sorry Jean's Block are still priced in the raw SUM, and a
+    /// Set off still pays every charge.
+    ///
+    /// R205-scoped like every other read here: another Klee's pile is not
+    /// hers to echo.
+    /// </summary>
+    public static int LargestPlacedBy(Creature? enemy, Creature? applier)
+    {
+        if (enemy == null || applier == null) return 0;
+        var largest = 0;
+        foreach (var pile in enemy.Powers.OfType<ProtoBombPower>())
+        {
+            if (pile.Applier != applier) continue;
+            if (pile.LargestSize > largest) largest = pile.LargestSize;
+        }
+        return largest;
     }
 
     /// <summary>
