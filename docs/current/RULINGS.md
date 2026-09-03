@@ -258,8 +258,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R246 | 2026-09-03 | Kokomi round 4c is ruled at its defaults -- the Bake-Kurage deals Plan damage, and the kit's own defence scales in act 2 | `561a899` |
 | R247 | 2026-09-03 | Chinju Ward stacks as independent instances, the game's own rule | `5a7ed52` |
 | R248 | 2026-09-03 | RULED: Klee round 7b picks, a Bomb carries the target's modifiers, Grounded grants a Spark | `ce6c135` |
+| R249 | 2026-09-03 | RULED: the shipped sheets' text pass, and the Companion-slot sentence leaves the relics | `c90aadb` |
 
-247 rows over the R1..R248 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 136 from a commit message, 0 unresolved.
+248 rows over the R1..R249 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 137 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
