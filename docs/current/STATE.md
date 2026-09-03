@@ -102,8 +102,8 @@ Slay the Spire 2 **v0.111.0**, commit `41cef1ea`, buildid `24724944`, appid
 v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
-`+proto` dev mark (R217 D). **Installed: `0.2.2256+proto`** (2026-09-03,
-main `1710dfb4`), the three prototype arms behind `-p:PrototypeCards=true`; the
+`+proto` dev mark (R217 D). **Installed: `0.2.2263+proto`** (2026-09-03,
+main `8b877787`, all three arms on), the three prototype arms behind `-p:PrototypeCards=true`; the
 Furina arm needs `-p:FurinaReframe=true` too and ships OFF. **Last RELEASE
 package: `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
 
