@@ -858,6 +858,12 @@ def test_the_option_id_and_the_display_name_fold_together():
     # Non-roster names still compare, and are never claimed as roster members.
     assert soak.character_matches("IRONCLAD", "Ironclad")
     assert soak.canonical_character("IRONCLAD") == "ironclad"
+    # The run reads back the display name, article and all (seen to FAIL on
+    # the first CONTROL embark, 2026-09-04: `character_mismatch` against
+    # 'The Ironclad').
+    assert soak.canonical_character("The Ironclad") == "ironclad"
+    assert soak.character_matches("IRONCLAD", "The Ironclad")
+    assert soak.character_matches("SILENT", "The Silent")
 
 
 def test_a_different_character_never_matches_and_neither_does_silence():
