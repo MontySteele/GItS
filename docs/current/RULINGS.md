@@ -257,8 +257,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R245 | 2026-09-03 | the Furina card audit is ruled -- defaults on Full Ensemble and The Final Verdict, Singer of Many Waters on [USER]'s own shape | `3f294fd` |
 | R246 | 2026-09-03 | Kokomi round 4c is ruled at its defaults -- the Bake-Kurage deals Plan damage, and the kit's own defence scales in act 2 | `561a899` |
 | R247 | 2026-09-03 | Chinju Ward stacks as independent instances, the game's own rule | `5a7ed52` |
+| R248 | 2026-09-03 | RULED: Klee round 7b picks, a Bomb carries the target's modifiers, Grounded grants a Spark | `ce6c135` |
 
-246 rows over the R1..R247 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 135 from a commit message, 0 unresolved.
+247 rows over the R1..R248 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 136 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
