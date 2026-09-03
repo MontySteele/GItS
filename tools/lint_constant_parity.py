@@ -408,6 +408,22 @@ UNMIRRORED: dict[str, str] = {
         "unbounded allocation, and a diagnostic that leaked would be the same "
         "defect in a smaller font. Forgetting costs at most one extra log "
         "line. The sim writes no godot.log and has nothing to limit.",
+    "NonFiniteCardGuard.ExtrapolationReportT":
+        "`EB-292`. A CURVE DOMAIN, not balance: how far past the end of its "
+        "own Bezier a card flight has to run before the clamp SAYS so in "
+        "godot.log. The clamp itself bites at t = 1, where the quadratic stops "
+        "interpolating and starts extrapolating as t^2; the last iteration of "
+        "`NCardFlyVfx.PlayAnim`'s loop overshoots a little by construction, so "
+        "the reporting threshold sits above the worst ordinary frame and below "
+        "a stall. It is a parameter of the base game's animation curve. The "
+        "sim animates nothing and has no counterpart.",
+    "NonFiniteCardGuard.MaxNodesScanned":
+        "`EB-292`. A WALK BUDGET, not balance: how many scene nodes the "
+        "clamp's report visits looking for the flight that owns the curve it "
+        "caught. The clamp is a prefix on a static helper and has no node, so "
+        "the card is found by matching the flight's own start and end; the "
+        "walk is bounded because it runs on a frame the engine is already "
+        "struggling with. The sim has no scene tree.",
     "MeterLedger.MaxRows":
         "`EB-216`. INSTRUMENT, not balance: how many per-play ledger rows the "
         "mod keeps before dropping the oldest. It touches no game number, no "

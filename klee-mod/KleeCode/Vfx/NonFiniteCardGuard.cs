@@ -4,6 +4,7 @@ using System.Text;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Nodes.Cards;
 using MegaCrit.Sts2.Core.Nodes.Vfx;
@@ -46,14 +47,26 @@ namespace KleeMod.Vfx;
 /// alternative -- substituting a number -- would draw a streak across the
 /// screen from wherever the engine thought the card was.
 ///
-/// THE SOURCE OF THE NON-FINITE NUMBER IS NOT NAMED HERE, and that is stated
-/// rather than hidden: three targeted reproductions on the seat's own seed,
-/// encounter, ascension, hand and pacing (at Instant and at normal animation
-/// speed) produced a byte-identical play sequence and NO non-finite line, so
-/// the trigger is environmental and was not reproduced. What the guard buys is
-/// that the next occurrence costs a log line instead of a session -- and the
-/// line carries the node chain and its transforms, which is the reading that
-/// was missing when this was first investigated.
+/// AND SINCE THE SECOND PASS THERE IS A FOURTH DOOR, which is a different kind
+/// of door: it stops the number being MADE rather than refusing it once it
+/// exists. `MathHelper.BezierCurve` is a quadratic with no clamp, and
+/// `NCardFlyVfx.PlayAnim`'s loop structurally evaluates it past t = 1, where
+/// it extrapolates as t^2 -- so one stalled frame is a position in the
+/// billions. The clamp holds t at 1, which is the endpoint `PlayAnim` assigns
+/// on its own next line; every other caller in the assembly asks for t inside
+/// [0, 1] and cannot feel it. See
+/// <see cref="MathHelper_BezierCurve_ExtrapolationGuard_Patch"/> for the whole
+/// argument, including what it costs.
+///
+/// THE TRIGGER IS STILL NOT REPRODUCED, and that is stated rather than hidden:
+/// three targeted reproductions on the seat's own seed, encounter, ascension,
+/// hand and pacing (at Instant and at normal animation speed) produced a
+/// byte-identical play sequence and NO non-finite line, so what stalls the
+/// frame is environmental and unproven. The MECHANISM is now read off the
+/// decompile; the frame that fires it is what the log line is for. What the
+/// guards buy is that the next occurrence costs a log line instead of a
+/// session -- and the line carries the node chain and its transforms, which is
+/// the reading that was missing when this was first investigated.
 ///
 /// SO THE LINE IS THE INSTRUMENT, and it is written to settle the row rather
 /// than to record that something happened. One line per catch, at most once a
@@ -303,8 +316,15 @@ internal static class NonFiniteCardGuard
     {
         try
         {
-            var delta = node != null && GodotObject.IsInstanceValid(node)
-                ? node.GetProcessDeltaTime().ToString("G6")
+            // The frame delta is per-node in Godot's API and identical for
+            // every node in the tree, so a catch that arrives with no node --
+            // the clamp door is a static helper and has none -- reads it off
+            // the tree's own root rather than going without the one number the
+            // row's hypothesis turns on.
+            var paced = node != null && GodotObject.IsInstanceValid(node)
+                ? node : TreeRoot();
+            var delta = paced != null
+                ? paced.GetProcessDeltaTime().ToString("G6")
                 : "(no node)";
             return $"timeScale={Engine.TimeScale:G6} maxFps={Engine.MaxFps} "
                  + $"fps={Engine.GetFramesPerSecond():G6} frameDelta={delta}";
@@ -312,6 +332,22 @@ internal static class NonFiniteCardGuard
         catch (Exception e)
         {
             return $"pacing unreadable: {e.GetType().Name}";
+        }
+    }
+
+    /// <summary>The scene tree's root window, or null if there is no tree --
+    /// which is the normal answer in a headless host.</summary>
+    private static Node? TreeRoot()
+    {
+        try
+        {
+            var root = (Engine.GetMainLoop() as SceneTree)?.Root;
+            return root != null && GodotObject.IsInstanceValid(root)
+                ? root : null;
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 
@@ -490,6 +526,127 @@ internal static class NonFiniteCardGuard
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// How far past its own curve a flight has to run before the clamp SAYS
+    /// so. The clamp itself bites at t = 1 -- past there the curve is
+    /// extrapolating and every caller in the game asks for t in [0, 1] -- but
+    /// the last iteration of `PlayAnim`'s loop always overshoots a little by
+    /// construction, so a reporter that printed at 1 would print once per card
+    /// play forever.
+    ///
+    /// FOUR IS WHERE THE OVERSHOOT STOPS BEING ARITHMETIC AND STARTS BEING A
+    /// STALL. One frame advances t by `_speed * delta / _duration`; with
+    /// `_speed` in [1.1, ~4] and `_duration` in [1, 1.75], reaching 4 needs a
+    /// frame of roughly two seconds of scaled time -- two thirds of a second
+    /// of wall clock at the seat's `Engine.TimeScale` of 3. Nothing healthy
+    /// produces that, and the row's whole question is what does.
+    /// </summary>
+    internal const float ExtrapolationReportT = 4f;
+
+    /// <summary>
+    /// The limiter bucket the clamp door reports in. It is not a node -- the
+    /// clamp is a prefix on a static helper -- so it takes a key no instance
+    /// id can collide with.
+    /// </summary>
+    private const ulong ExtrapolationKey = ulong.MaxValue;
+
+    /// <summary>
+    /// THE SOURCE DOOR'S REPORT. Where the trail guard says "something handed
+    /// me an impossible position", this says WHICH FLIGHT ran past its curve
+    /// and BY HOW MUCH -- t is read here rather than recovered, because the
+    /// clamp is standing inside the call that uses it.
+    ///
+    /// It prints the position the unclamped curve WOULD have produced, and its
+    /// magnitude, so the line can be held against the (-8.8e9, -4.9e8) the
+    /// first live catch recorded without needing that catch to happen again.
+    /// </summary>
+    internal static void ReportExtrapolation(Vector2 v0, Vector2 v1, Vector2 c0,
+                                             float t)
+    {
+        if (!MayReport(ExtrapolationKey, System.Environment.TickCount64)) return;
+        try
+        {
+            var would = Bezier(v0, v1, c0, t);
+            Log.Warn($"[{KleeMod.ModId}] EB-292: clamped a card flight that had "
+                   + $"run past the end of its own curve. t={t:G6} (clamped to "
+                   + $"1); the curve at that t is {would} "
+                   + $"|pos|={would.Length():G6}. "
+                   + $"curve=[start={v0} end={v1} control={c0}] | "
+                   + $"{FlightNamed(v0, v1)} | {Pacing(null)}");
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] EB-292: clamped a card flight at "
+                   + $"t={t:G6}; the rest of the reading was unreadable "
+                   + $"({e.GetType().Name}).");
+        }
+    }
+
+    /// <summary>
+    /// How many nodes the clamp's report walks looking for the flight that
+    /// owns a curve. Bounded because this runs while the engine is already
+    /// having a bad frame, and it is only ever reached once a second.
+    /// </summary>
+    private const int MaxNodesScanned = 4000;
+
+    /// <summary>
+    /// WHICH CARD IS ON THIS CURVE. The clamp sees four numbers and no node,
+    /// so the card is found the only way available: the live `NCardFlyVfx`
+    /// whose `_startPos` and `_endPos` ARE those numbers. They are copied from
+    /// the same fields the caller passed, so the match is exact rather than
+    /// approximate.
+    /// </summary>
+    private static string FlightNamed(Vector2 start, Vector2 end)
+    {
+        try
+        {
+            var root = TreeRoot();
+            if (root == null) return "flight=(no tree)";
+            var budget = MaxNodesScanned;
+            var fly = FindFlightByCurve(root, start, end, ref budget);
+            if (fly == null) return "flight=(unmatched)";
+
+            var card = AccessTools
+                .FieldRefAccess<NCardFlyVfx, NCard>("_card")?.Invoke(fly);
+            var duration = Field<NCardFlyVfx, float>(fly, "_duration");
+            var speed = Field<NCardFlyVfx, float>(fly, "_speed");
+            var accel = Field<NCardFlyVfx, float>(fly, "_accel");
+            var delta = (float)fly.GetProcessDeltaTime();
+            var step = duration is { } dur && speed is { } spd
+                ? OvershootPerFrame(spd, delta, dur) : float.NaN;
+
+            return $"card={(card == null || !GodotObject.IsInstanceValid(card)
+                            ? "(no card)" : NameOf(card))} "
+                 + $"flight=[path={PathOf(fly)} dur={duration?.ToString("G6") ?? "?"} "
+                 + $"speed={speed?.ToString("G6") ?? "?"} "
+                 + $"accel={accel?.ToString("G6") ?? "?"} tStep={step:G6}]";
+        }
+        catch (Exception e)
+        {
+            return $"flight unreadable: {e.GetType().Name}";
+        }
+    }
+
+    /// <summary>Depth-first, budgeted, and it stops at the first match: two
+    /// flights cannot share a start AND an end.</summary>
+    private static NCardFlyVfx? FindFlightByCurve(Node node, Vector2 start,
+                                                  Vector2 end, ref int budget)
+    {
+        if (budget-- <= 0 || !GodotObject.IsInstanceValid(node)) return null;
+        if (node is NCardFlyVfx fly
+            && Field<NCardFlyVfx, Vector2>(fly, "_startPos") == start
+            && Field<NCardFlyVfx, Vector2>(fly, "_endPos") == end)
+        {
+            return fly;
+        }
+        foreach (var child in node.GetChildren())
+        {
+            var found = FindFlightByCurve(child, start, end, ref budget);
+            if (found != null) return found;
+        }
+        return null;
     }
 
     /// <summary>
@@ -777,5 +934,82 @@ internal static class PileType_GetTargetPosition_NonFiniteGuard_Patch
         if (NonFiniteCardGuard.IsFinite(__result)) return;
         NonFiniteCardGuard.Report("card flight destination", node);
         __result = Vector2.Zero;
+    }
+}
+
+/// <summary>
+/// THE SOURCE, AND THIS IS THE DOOR THAT SHUTS IT. The three patches above
+/// refuse a position that has already gone wrong. This one stops it being
+/// produced.
+///
+/// WHAT THE DECOMPILE SAYS, and it is the row's hypothesis read back verbatim
+/// off 0.111.0's `sts2.dll`. `NCardFlyVfx.PlayAnim` is
+///
+///     float time = 0f;
+///     while (time / _duration &lt;= 1f) {
+///         await this.AwaitProcessFrame();
+///         float num = (float)GetProcessDeltaTime();
+///         time += _speed * num;
+///         _speed += _accel * num;
+///         ...
+///         _card.GlobalPosition =
+///             MathHelper.BezierCurve(_startPos, _endPos, c, time / _duration);
+///     }
+///
+/// The exit test is at the TOP and `time` advances INSIDE, so the last
+/// iteration always evaluates the curve at a t that has already passed 1 --
+/// by one frame's `_speed * delta / _duration`. `MathHelper.BezierCurve` is
+/// `(1-t)^2 v0 + 2(1-t)t c0 + t^2 v1` with NO clamp, so past t = 1 it stops
+/// interpolating and starts extrapolating, and |position| grows as t^2 against
+/// control-point offsets the same method sets as far out as 500 + 400 px.
+/// `GetProcessDeltaTime()` is TIME-SCALED, and the seat's session runs
+/// `Engine.TimeScale` at 3, so a stalled frame counts triple. t near 3,000 --
+/// one frame of about twenty minutes of scaled time -- lands at ~1e9, which is
+/// the order of the position the first live catch printed.
+/// `NCardFlyShuffleVfx.PlayAnim` is the same loop with the same defect.
+///
+/// WHY THE CLAMP IS SAFE, WHICH IS A CLAIM ABOUT EVERY CALLER AND NOT JUST
+/// THIS ONE. `MathHelper.BezierCurve` has six call sites in the assembly:
+/// `NTargetingArrow` (t = i/20, i &lt; 19), `NRemoteTargetingIndicator`
+/// (t = i/101, i &lt; 100), `NBolasVfx` (a tween from 0 to 1 with a Sine ease,
+/// which does not overshoot), and the two fly-vfx loops. Not one of them
+/// deliberately extrapolates: for four the clamp can never fire, and for the
+/// other two it substitutes `_endPos` -- the value `PlayAnim` itself assigns
+/// on the very next line, once the loop it just left has exited. So the clamp
+/// hands back the game's own next position, one frame early, and no card rule,
+/// number or timing moves.
+///
+/// WHAT IT COSTS, stated rather than buried: on the one frame per flight where
+/// BOTH the position's t and the look-ahead's `(time + 0.05f) / _duration`
+/// clamp to 1, their difference is the zero vector and the card's rotation
+/// lerps toward a right angle for that frame. By then `PlayAnim` has already
+/// driven `_card.Body` to 0.1 scale and fully black (both saturate at a third
+/// of the duration), so the frame in question is a black tenth-size card about
+/// to be freed.
+///
+/// AND IT IS NOT A REPLACEMENT FOR THE GUARDS ABOVE. A patched static helper
+/// small enough for the JIT to inline at a call site compiled before boot
+/// would not bite at all, and the enormous-but-finite position also has a
+/// second candidate origin (a transform inverted through a zero scale) that
+/// never passes through this method. The trail guard stays the backstop; this
+/// is the door that makes the backstop stop being reached.
+/// </summary>
+[HarmonyPatch(typeof(MathHelper), nameof(MathHelper.BezierCurve))]
+internal static class MathHelper_BezierCurve_ExtrapolationGuard_Patch
+{
+    [HarmonyPrefix]
+    public static void Prefix(Vector2 v0, Vector2 v1, Vector2 c0, ref float t)
+    {
+        // `!(t > 1f)` rather than `t <= 1f` so a NaN t falls through
+        // UNTOUCHED: clamping it would invent a position, and the guards above
+        // are what the resulting NaN is for.
+        if (!(t > 1f)) return;
+
+        if (t > NonFiniteCardGuard.ExtrapolationReportT)
+        {
+            NonFiniteCardGuard.ReportExtrapolation(v0, v1, c0, t);
+        }
+
+        t = 1f;
     }
 }

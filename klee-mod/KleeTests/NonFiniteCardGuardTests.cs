@@ -60,6 +60,30 @@ public class NonFiniteCardGuardTests
         (float)Il.Method("NonFiniteCardGuard", "OvershootPerFrame")
                  .Invoke(null, new object[] { speed, delta, duration })!;
 
+    /// <summary>The clamp's own threshold, read off the shipped constant so a
+    /// retune moves the assertions with it instead of past them.</summary>
+    private static float ReportThreshold =>
+        (float)Il.Method("NonFiniteCardGuard", "OvershootPerFrame")
+                 .DeclaringType!
+                 .GetField("ExtrapolationReportT", HeadlessGame.All)!
+                 .GetValue(null)!;
+
+    /// <summary>
+    /// The clamp prefix run over a t, answering with the t the base method
+    /// would then see. `ref` arguments come back through the argument array.
+    /// </summary>
+    private static float Clamped(float t)
+    {
+        var args = new object[]
+        {
+            new Vector2(100f, 900f), new Vector2(1500f, 300f),
+            new Vector2(800f, 1100f), t,
+        };
+        Il.Method("MathHelper_BezierCurve_ExtrapolationGuard_Patch", "Prefix")
+          .Invoke(null, args);
+        return (float)args[3]!;
+    }
+
     [Fact]
     public void An_ordinary_card_position_is_finite()
     {
@@ -295,5 +319,70 @@ public class NonFiniteCardGuardTests
         Assert.True(float.IsNaN(
             RecoverT(start, end, control,
                      new Vector2(float.PositiveInfinity, 0f))));
+    }
+
+    [Fact]
+    public void The_curve_is_never_evaluated_past_its_own_end()
+    {
+        // THE SOURCE, CLAMPED. `NCardFlyVfx.PlayAnim` tests `time / _duration
+        // <= 1` at the TOP of its loop and advances `time` inside, so its last
+        // iteration always evaluates an UNCLAMPED quadratic past t = 1, where
+        // the curve extrapolates as t^2. One stalled frame -- tripled by the
+        // seat's `Engine.TimeScale` -- is the whole 1e9 position.
+        Assert.Equal(1f, Clamped(1.02f));
+        Assert.Equal(1f, Clamped(2f));
+
+        // 2 is above the clamp and below the REPORT threshold on purpose: the
+        // reporter reads the engine, which this host has no way to build.
+        Assert.True(2f < ReportThreshold);
+    }
+
+    [Fact]
+    public void The_clamp_is_a_no_op_on_every_t_the_game_actually_asks_for()
+    {
+        // The claim the clamp rests on is about all six call sites, not just
+        // the flight: `NTargetingArrow` walks i/20 for i < 19,
+        // `NRemoteTargetingIndicator` walks i/101 for i < 100, and `NBolasVfx`
+        // tweens 0 to 1 on a Sine ease that cannot overshoot. Every one of
+        // those is inside the domain, so the clamp can never fire for them.
+        Assert.Equal(0f, Clamped(0f));
+        Assert.Equal(18f / 20f, Clamped(18f / 20f));
+        Assert.Equal(99f / 101f, Clamped(99f / 101f));
+        Assert.Equal(1f, Clamped(1f));
+
+        // A NaN t falls through UNTOUCHED. Clamping it would invent a position
+        // -- the thing this file refuses to do -- and the guards above are
+        // what the resulting NaN exists to meet.
+        Assert.True(float.IsNaN(Clamped(float.NaN)));
+
+        // So does a negative one: only the end the recorded defect came out of
+        // is closed, and no caller in the assembly passes t < 0.
+        Assert.Equal(-0.5f, Clamped(-0.5f));
+    }
+
+    [Fact]
+    public void The_report_threshold_sits_above_an_ordinary_frame()
+    {
+        // A reporter that printed at the clamp would print once per card play
+        // forever, because the overshoot is structural. The threshold has to
+        // clear the WORST ordinary frame -- 60 fps at the seat's TimeScale of
+        // 3, with `_speed` accelerated to about 4 against the shortest
+        // `_duration` the game rolls -- and still catch a stall.
+        Assert.True(OvershootPerFrame(4f, 0.05f, 1f) < ReportThreshold);
+        Assert.True(OvershootPerFrame(1.2f, 3600f, 1.5f) > ReportThreshold);
+    }
+
+    [Fact]
+    public void The_clamp_says_which_flight_it_caught()
+    {
+        // Structural pin. The clamp shuts the door the trail guard was
+        // watching, so if it reported nothing the row's acceptance -- the
+        // source NAMED -- would be closed by a fix that deleted its own
+        // evidence.
+        var calls = Il.Calls(
+            Il.Method("MathHelper_BezierCurve_ExtrapolationGuard_Patch",
+                      "Prefix"));
+
+        Assert.Contains("NonFiniteCardGuard.ReportExtrapolation", calls);
     }
 }
