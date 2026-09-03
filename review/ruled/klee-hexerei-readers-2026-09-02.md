@@ -1,6 +1,8 @@
-Status: RULED R244 2026-09-02 (picks 1, 2 and 4 at their defaults; pick 3 replaced by [USER]'s card)
+Status: RULED R244 2026-09-02
 
 # Klee's Hexerei readers: the three cards in her own pool that read the tag
+
+Picks 1, 2 and 4 at their defaults; pick 3 replaced by [USER]'s card.
 
 Written 2026-09-02, the night the coven Personals and both sets of stand-ins
 were built (PRs #314, #315 and the Hexerei stand-ins that follow). Paper only:

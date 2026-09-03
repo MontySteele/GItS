@@ -1,6 +1,8 @@
-Status: RULED R244 2026-09-02 (no picks; the two E defaults stand, and the three-act read is running on the fix build)
+Status: RULED R244 2026-09-02
 
 # Kokomi round four: what the local seat saw, and why the three-act read is not in it
+
+No picks; the two E defaults stand, and the three-act read is running on the fix build.
 
 Written 2026-09-02. The build carried R243's numbers (Treatise, Song of
 Pearls and the Banner once a turn, Sango Isshin at 8 or a quarter of Max HP

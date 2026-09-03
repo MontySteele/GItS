@@ -1,6 +1,8 @@
-Status: RULED R244 2026-09-02 (picks 1 to 3 at their defaults)
+Status: RULED R244 2026-09-02
 
 # Klee round seven: what the seats saw on the build with the coven and the stand-ins
+
+Picks 1 to 3 at their defaults.
 
 Written 2026-09-02, the night the build went in. The build carried R243's
 numbers (growth 4, Ka-pow! Retain, the base Strike applying nothing), the
