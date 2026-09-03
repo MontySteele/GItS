@@ -145,6 +145,43 @@ PREVIEW_LOCKED = ("your pick is already made and this screen is showing it "
 # second printing is. Neither invents anything: the screen really is showing
 # the pick back, which is what `PREVIEW_LOCKED` tells anyone who tries to
 # name a second card.
+# `EB-374`. THE SACRIFICE THAT NEVER REACHED THE PAGE, AND WHAT THIS PAGE CAN
+# HONESTLY SAY ABOUT IT.
+#
+# THE FINDING. The r9 act-2 seat took Pael's Wing and met two card rewards
+# afterwards; both printed `choose` and `skip` and nothing else, and the seat
+# could not tell whether `skip` WAS the sacrifice the relic had promised or
+# whether the sacrifice was somewhere it could not reach.
+#
+# WHAT THE FEED CARRIES, read off the vendored builder rather than guessed:
+# a card reward is its list of cards plus ONE boolean, whether an alternative
+# button exists on the screen at all. Not the button's words, not what it does,
+# and `skip` presses that button whatever it has become. So the page cannot say
+# that skip is the sacrifice, and it must not say that it is not.
+#
+# WHICH LEAVES THE HONEST LINE: name the relic the run is holding, say the
+# control is not on this page's feed, and send the reader to the one place the
+# words do exist -- the relic's own face, which this page prints. The register
+# is folded relic names, one row per relic that is known to REPLACE this
+# screen's alternative, because a page that printed the caveat on every reward
+# screen of every run would be teaching a doubt that is not there. Carrying the
+# control itself is a bridge change and belongs to `EB-310`'s family.
+# FOLDED KEYS, and the fold is `_fold`'s: an apostrophe is punctuation there,
+# so the relic the game prints as `Pael's Wing` is three words here. Written as
+# the folded spelling rather than the printed one so the register cannot be a
+# near-miss that silently matches nothing -- which is exactly what a hand-typed
+# `paels wing` would have been.
+REWARD_ALTERNATIVE_RELICS = {"pael s wing"}
+
+CARD_REWARD_ALTERNATIVE_NOTE = (
+    "*You are holding {relics}, which changes what the alternative to "
+    "choosing a card does on this screen. The game's data feed carries the "
+    "cards and whether an alternative button exists -- never what that button "
+    "says or does -- so `skip` here presses whatever the button has become, "
+    "and this page cannot tell you whether that is a plain skip or the "
+    "relic's own option. The relic's printed words are on your relic row in "
+    "the next fight.*")
+
 PICKED_MARK = "PICKED"
 PENDING_PICK_NOTE = ("*Already listed above. These rows are the pick this "
                      "screen is holding, printed a second time so you can "

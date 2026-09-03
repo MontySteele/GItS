@@ -22,10 +22,11 @@ from understudy.blindplay_board import (_bundle_cards, _combat,
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_options)
-from understudy.blindplay_notes import keyword_notes
+from understudy.blindplay_notes import (REWARD_ALTERNATIVE_RELICS,
+                                        keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
-                                       _fold, _int, _player, _potions, _screen,
-                                       _text)
+                                       _fold, _int, _player, _potions, _relics,
+                                       _screen, _text)
 from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
                                         SELECT_SCREENS, UNDRIVEN_SCREENS)
 
@@ -53,6 +54,17 @@ from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
 _DROP_FORMS = ('drop potion "<potion>"',
                "drop potion <number>   (the Nth potion on your belt, "
                "counting from 1)")
+
+
+def _alternative_relics(state: dict[str, Any]) -> list[str]:
+    """The held relics that rewrite a card reward's alternative. `EB-374`.
+
+    Matched on the PRINTED name folded, which is the only handle this page
+    has: a relic's id is on the wire and may not cross to a tester. Empty --
+    and so printed nowhere -- on every run that holds none of them.
+    """
+    return [_text(r.get("name")) for r in _relics(state)
+            if _fold(r.get("name")) in REWARD_ALTERNATIVE_RELICS]
 
 
 def _offer_drop(state: dict[str, Any], obs: dict[str, Any]) -> None:
@@ -131,6 +143,10 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["offers"] = _number_faces(
             [_card_face(c) for c in _screen_cards(state)], "title")
         obs["can_skip"] = blob.get("can_skip") is not False
+        # `EB-374`: the relics the run holds that rewrite what the alternative
+        # to choosing does here. Named, because the page can name them; the
+        # control itself is not on the feed and the note says so.
+        obs["alternative_relics"] = _alternative_relics(state)
         obs["commands"] = ['choose "<card title>"', "skip"]
     elif st in SELECT_SCREENS:
         blob = _blob(state, st)

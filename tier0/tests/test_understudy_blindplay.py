@@ -1035,6 +1035,65 @@ def test_an_icon_token_names_the_icon_and_not_the_art_set():
     assert "Gain [Energy][Energy]." in page
 
 
+# --------------- EB-374: the sacrifice this page can and cannot speak about --
+#
+# THE FINDING. The r9 act-2 seat took Pael's Wing and met two card rewards
+# afterwards; both printed `choose` and `skip` and nothing else, and it could
+# not tell whether `skip` WAS the sacrifice the relic had promised.
+#
+# WHAT THE FEED CARRIES, read off the vendored builder: `BuildCardRewardState`
+# emits the cards and ONE boolean -- whether an alternative button exists on
+# the screen -- and `ExecuteSkipCardReward` presses that button whatever it has
+# become. The button's words are on neither side of the wire, so the page
+# cannot say that skip is the sacrifice and must not say that it is not.
+# Carrying the control is a bridge change, `EB-310`'s family.
+
+
+def paels_wing_reward_state() -> dict:
+    """A card reward on a run holding the relic, relics as `BuildPlayerState`
+    sends them (`name` plus the game's own hover `description`)."""
+    state = json.loads(json.dumps(card_reward_state()))
+    state["player"] = {"hp": 40, "max_hp": 70, "relics": [
+        {"id": "PAELS_WING", "name": "Pael's Wing",
+         "description": "Whenever you skip a card reward, sacrifice it."}]}
+    return state
+
+
+def test_a_card_reward_says_which_relic_has_rewritten_its_alternative():
+    """Seen to FAIL: the screen printed `choose` and `skip` and said nothing
+    about either the relic or the control it could not reach."""
+    page = blindplay.observe(paels_wing_reward_state())
+    assert "**Pael's Wing**" in page
+    assert "changes what the alternative to choosing a card does" in page
+    # It says what the feed has and does not claim what the button is.
+    assert "never what that button says or does" in page
+    assert "cannot tell you whether that is a plain skip" in page
+    # And the verbs are unchanged: there is no `sacrifice` to offer.
+    assert "sacrifice`" not in page
+    assert blindplay.act(paels_wing_reward_state(), "skip")["post"] == {
+        "action": "skip_card_reward"}
+
+
+def test_the_wire_carries_no_sacrifice_control_to_offer():
+    """The reason this row is a page line and not a verb, asserted against the
+    vendored builder rather than against a memory of it."""
+    builder = (REPO / "vendor" / "STS2_MCP" / "McpMod.StateBuilder.cs"
+               ).read_text(encoding="utf-8")
+    head = builder.index("BuildCardRewardState(NCardRewardSelectionScreen")
+    body = builder[head:builder.index("private static", head + 10)]
+    assert 'state["can_skip"] = altButtons.Count > 0;' in body
+    assert set(re.findall(r'state\["(\w+)"\]', body)) == {"cards", "can_skip"}
+    assert "sacrifice" not in builder.casefold()
+
+
+def test_a_run_without_the_relic_reads_exactly_as_before():
+    """The register is one relic long on purpose: a caveat printed on every
+    reward screen of every run would teach a doubt that is not there."""
+    page = blindplay.observe(card_reward_state())
+    assert "alternative to choosing" not in page
+    assert "You may skip this." in page
+
+
 # ------------------- EB-375: the icon fold is on the door, not on one screen -
 #
 # THE DEFECT, AND WHY IT SURVIVED `EB-264`. The sprite pass ran on the finished

@@ -12,7 +12,9 @@ from typing import Any
 
 from understudy import qa_packet
 from understudy.blindplay_board import _pulse_phrase
-from understudy.blindplay_notes import (AURA_NOTE, CARRY_OUT_BOARD_NOTE,
+from understudy.blindplay_notes import (AURA_NOTE,
+                                        CARD_REWARD_ALTERNATIVE_NOTE,
+                                        CARRY_OUT_BOARD_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
                                         METER_CAPPED_NOTE, METER_NOTE,
@@ -526,6 +528,13 @@ def render(obs: dict[str, Any]) -> str:
                         "again; it does not leave the screen."]
         elif obs.get("can_skip"):
             out += ["", "You may skip this."]
+        # `EB-374`: and where a held relic has rewritten what that alternative
+        # IS, the caveat goes with it. Printed under the skip line because it
+        # is about the skip, and only on a run holding one of those relics.
+        if obs.get("alternative_relics"):
+            out += ["", CARD_REWARD_ALTERNATIVE_NOTE.format(
+                relics=" and ".join(f"**{r}**"
+                                    for r in obs["alternative_relics"]))]
     elif obs["screen"] == "bundle_select":
         out += [f"# {obs['prompt']}", ""]
         for i, offer in enumerate(obs["offers"]):
