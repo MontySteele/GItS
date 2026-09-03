@@ -10,6 +10,7 @@ python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
 .venv/Scripts/python tools/cut_combat_layers.py klee [--check]
 .venv/Scripts/python tools/gen_furina_stills.py    # and gen_kokomi_stills.py
 .venv/Scripts/python tools/gen_char_icon_outlines.py [--check]   # all three outline halos
+.venv/Scripts/python tools/gen_mod_image.py [--check]      # Mods-screen badge, EB-161
 ```
 
 `art/plan.tsv` is UTF-8 + CRLF — read with `encoding="utf-8", newline=""` and

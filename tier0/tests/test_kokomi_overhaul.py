@@ -341,7 +341,7 @@ def test_every_row_prints_its_own_face():
 
 
 def test_a_reaction_leaves_the_retired_burst_meter_at_zero(overhaul):
-    """`EB-318`. The brief retires the Burst gate, so under the arm NOTHING
+    """`EB-327`. The brief retires the Burst gate, so under the arm NOTHING
     fills the meter -- and reactions were the one income site neither engine
     had guarded. She is a catalyst, so the 2026-09-02 blind seat read
     `Kokomi Burst: 5/20` off the status line in round 4 and watched it climb

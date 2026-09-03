@@ -644,3 +644,26 @@ def test_a_real_dial_gap_still_reads_as_a_dial_gap():
     reason = extract._power_gap("NoSuchInventedPower")
     assert "is not on the SUPPORTED_POWERS dial" in reason
     assert "could not be imported" not in reason
+
+
+def test_an_out_of_repo_json_path_is_named_not_raised_on(tmp_path):
+    """`--json` outside the checkout must print, not raise.
+
+    The documented-safe regeneration writes to a scratch directory, diffs
+    against `game_ref/` and copies only what moved, so the path handed to
+    `--json` is normally OUTSIDE `REPO`. `relative_to` raises there, and it
+    was reached AFTER the write -- the extract landed on disk and the run
+    still ended in a traceback, which is exactly the shape that makes an
+    operator re-run a decompile they did not need.
+    """
+    outside = tmp_path / "scratch" / "regent.json"
+    assert str(outside).startswith(str(tmp_path))
+    assert extract.display_path(outside) == str(outside)
+
+
+def test_a_path_inside_the_repo_still_prints_relative():
+    """The other half: the ordinary case keeps the short name it had."""
+    inside = extract.OUT_DIR / "regent.json"
+    shown = extract.display_path(inside)
+    assert shown == str(Path("game_ref") / "regent.json")
+    assert not Path(shown).is_absolute()
