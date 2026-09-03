@@ -159,10 +159,20 @@ def test_every_overhaul_id_resolves_to_a_mondstadt_companion(overhaul):
 def test_the_pool_ids_and_the_sheet_agree(overhaul):
     """`C.MONDSTADT_OVERHAUL_POOL_IDS` is the arm's list and the sheet is
     where the rows live; a row on one and not the other is a row that either
-    cannot be offered or does not exist."""
+    cannot be offered or does not exist.
+
+    TWO LISTS SINCE R236, and the split is what a `proto_mc_` row can be. The
+    Mondstadt workshop's sec.3 rewrites the nation's UNIVERSALS and its sec.4
+    gives Klee four PERSONALS; both are that document's rows and both carry its
+    prefix, and the difference is `personal_pool`, which every offer site
+    already filters. A row on neither list is still the defect this asks
+    about."""
     on_sheet = {c.id for c in loader.prototype_cards()
                 if c.id.startswith("proto_mc_")}
-    assert on_sheet == set(C.MONDSTADT_OVERHAUL_POOL_IDS)
+    assert on_sheet == (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
+                        | set(C.COVEN_PERSONAL_POOL_IDS))
+    assert not (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
+                & set(C.COVEN_PERSONAL_POOL_IDS))
 
 
 def test_the_banner_roster_moves_with_the_pool(overhaul):
@@ -197,6 +207,9 @@ HEXEREI_ROWS = {
     "proto_mc_razor_claw_and_thunder",
     "proto_mc_razor_lightning_fang",
     "proto_mc_varka_sturm_und_drang",
+    # The coven Personal off the same sec.3 line as the shipped Prune row it
+    # supersedes: Prune is a tagged character in the workshop's own list.
+    "proto_mc_prune_hexhunter_chime",
 }
 
 
@@ -455,6 +468,11 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
                         "SoumetsuPower", "KyoukaPower", "TamotoPower",
                         "CrimsonOoyoroiPower", "WarBannerPower",
                         "AurousBlazePower",
+                        # KLEE'S COVEN (R236), last before the latch. Its sim
+                        # twin is `companion_coven.turn_end`, called from the
+                        # tail of `player_turn_end_triggers` for the same
+                        # reason: the throw draws from the rng.
+                        "YueguiPower",
                         "RevelationPower"], cs_order
 
 

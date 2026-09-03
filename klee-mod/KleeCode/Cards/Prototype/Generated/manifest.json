@@ -95,14 +95,18 @@
     "proto_mc_nicole_revelation",
     "proto_mc_noelle_breastplate",
     "proto_mc_noelle_sweeping_time",
+    "proto_mc_prune_hexhunter_chime",
+    "proto_mc_qiqi_herald_of_frost",
     "proto_mc_razor_claw_and_thunder",
     "proto_mc_razor_lightning_fang",
     "proto_mc_rosaria_ravaging_confession",
+    "proto_mc_sayu_silencers_secret",
     "proto_mc_sucrose_astable",
     "proto_mc_sucrose_catalyst_conversion",
     "proto_mc_sucrose_gust",
     "proto_mc_varka_sturm_und_drang",
     "proto_mc_venti_grand_ode",
+    "proto_mc_yaoyao_yuegui_throwing_mode",
     "proto_mi_ayaka_soumetsu",
     "proto_mi_ayato_kyouka",
     "proto_mi_chiori_hasode",
@@ -238,14 +242,18 @@
     "proto_mc_nicole_revelation": "klee",
     "proto_mc_noelle_breastplate": "klee",
     "proto_mc_noelle_sweeping_time": "klee",
+    "proto_mc_prune_hexhunter_chime": "klee",
+    "proto_mc_qiqi_herald_of_frost": "klee",
     "proto_mc_razor_claw_and_thunder": "klee",
     "proto_mc_razor_lightning_fang": "klee",
     "proto_mc_rosaria_ravaging_confession": "klee",
+    "proto_mc_sayu_silencers_secret": "klee",
     "proto_mc_sucrose_astable": "klee",
     "proto_mc_sucrose_catalyst_conversion": "klee",
     "proto_mc_sucrose_gust": "klee",
     "proto_mc_varka_sturm_und_drang": "klee",
     "proto_mc_venti_grand_ode": "klee",
+    "proto_mc_yaoyao_yuegui_throwing_mode": "klee",
     "proto_mi_ayaka_soumetsu": "klee",
     "proto_mi_ayato_kyouka": "klee",
     "proto_mi_chiori_hasode": "klee",
@@ -595,6 +603,12 @@
     "proto_mc_noelle_sweeping_time": {
       "cost": -1
     },
+    "proto_mc_prune_hexhunter_chime": {
+      "damage": 3
+    },
+    "proto_mc_qiqi_herald_of_frost": {
+      "power_amount": 1
+    },
     "proto_mc_razor_claw_and_thunder": {
       "damage": 3
     },
@@ -603,6 +617,9 @@
     },
     "proto_mc_rosaria_ravaging_confession": {
       "damage": 3
+    },
+    "proto_mc_sayu_silencers_secret": {
+      "block": 3
     },
     "proto_mc_sucrose_astable": {
       "remove": "exhaust"
@@ -615,6 +632,9 @@
     },
     "proto_mc_venti_grand_ode": {
       "damage": 3,
+      "power_amount": 1
+    },
+    "proto_mc_yaoyao_yuegui_throwing_mode": {
       "power_amount": 1
     },
     "proto_mi_ayaka_soumetsu": {

@@ -455,6 +455,15 @@ class Card:
     # sim cannot smith a card the mod prints as base-only.
     no_upgrade: Optional[str] = None
 
+    # PROTOTYPE SURFACE ONLY: borrow another row's illustration. One producer
+    # per out-path is `art_lint` L11, so a row that RE-AUTHORS a shipped card
+    # (Prune's coven Personal supersedes `prune_witch_hunt` under the companion
+    # arm) points at the existing portrait rather than minting a second
+    # plan.tsv row for the same picture. INERT HERE -- nothing in tier0 reads
+    # it; the field exists so the sheet loader accepts the row the codegen's
+    # `CustomPortrait` line reads it from.
+    art_of: Optional[str] = None
+
     @property
     def is_companion(self) -> bool:
         return self.role_c is not None or "companion" in self.tags
@@ -1063,6 +1072,12 @@ class CombatState:
     # engine resolves a reaction, inside the arm's flag branch, and cleared
     # with the reaction window at the top of the player turn.
     mi_swirls_this_turn: int = 0
+    # KLEE'S COVEN PERSONALS (QUARANTINED, C.COMPANION_OVERHAUL). The element
+    # the LAST Swirl this turn consumed, which is what Prune's Chime hands to
+    # the next Bomb set off. On the STATE beside the counter above, not on the
+    # Player, because the two are one turn-scoped fact about one board and are
+    # cleared on the same line. `tier0.engine.companion_coven`.
+    cvn_swirl_element: str = ""
     encore_spend_draws_this_turn: int = 0  # encore_spend_draw once-per-turn
     #                                        latch (Curtain Call, R85)
     # INSTRUMENT ONLY (EB-78 (2); resources.note_charge_read writes it and

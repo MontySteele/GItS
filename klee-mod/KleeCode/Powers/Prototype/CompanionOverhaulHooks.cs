@@ -149,8 +149,25 @@ public sealed class CompanionOverhaulLedger
     /// <summary>One Attack finished. The one write site.</summary>
     public void NoteAttack() => AttacksPlayedThisTurn++;
 
-    /// <summary>One Swirl resolved. The one write site.</summary>
-    public void NoteSwirl() => SwirlsThisTurn++;
+    /// <summary>
+    /// The element the LAST Swirl this turn consumed, or <c>Element.None</c>.
+    /// KLEE'S COVEN reads it: Prune's Hexhunter Chime hands "the swirled
+    /// element" to the next Bomb set off, and the Chime is armed AFTER the
+    /// Swirl its own card makes -- so the latch cannot live on the power the
+    /// way Varka's does (<see cref="SwirlChargePower"/>) and lives on the
+    /// turn-scoped ledger instead. Sim twin: `state.cvn_swirl_element`,
+    /// cleared on the same turn boundary as the count above.
+    /// </summary>
+    public Element LastSwirlElement { get; private set; } = Element.None;
+
+    /// <summary>One Swirl resolved, consuming <paramref name="element"/>. The
+    /// one write site for the count and the latch, so the two cannot disagree
+    /// about which Swirl was the last one.</summary>
+    public void NoteSwirl(Element element = Element.None)
+    {
+        SwirlsThisTurn++;
+        LastSwirlElement = element;
+    }
 
     /// <summary>A card play begins: the play-scoped total starts clean.
     /// `KokomiOverhaulLedger.BeginPlay`'s shape, and emitted the same way --
@@ -171,6 +188,8 @@ public sealed class CompanionOverhaulLedger
         if (round == _round) return;
         AttacksPlayedThisTurn = 0;
         SwirlsThisTurn = 0;
+        // The coven's latch is turn-scoped like the count it rides beside.
+        LastSwirlElement = Element.None;
         // Per PLAY rather than per turn, but zeroed here as well as at the top
         // of a play: a turn boundary is a play boundary too, and a total left
         // standing across one is a number nothing would ever clear.
@@ -294,7 +313,9 @@ public static class CompanionOverhaulReactions
         // Heizou's Heartstopper Strike prints "deals 4 more for each Swirl this
         // turn", and this is the one site the mod resolves a reaction, so the
         // count and Varka's latch below it read the same event.
-        CompanionOverhaulLedger.For(dealer).NoteSwirl();
+        // KLEE'S COVEN rides the same write: Prune's Chime needs the ELEMENT
+        // this Swirl consumed, and this is the one site the mod has it.
+        CompanionOverhaulLedger.For(dealer).NoteSwirl(consumedAura);
 
         // Varka, Sturm und Drang: "Whenever a Swirl happens, your next Attack
         // deals 6 more damage OF THE SWIRLED ELEMENT."

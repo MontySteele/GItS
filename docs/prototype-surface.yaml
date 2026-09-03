@@ -1115,6 +1115,43 @@
    description: "For 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_tamoto, amount: 3, target: self}]}
 
+# coven Personals, PR: coven-personals. R236 / the Mondstadt workshop sec.4
+# plus its sec.3 Prune Prune entry: Klee-only rows on the Personal channel.
+# Per-row reasoning: docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_mc_prune_hexhunter_chime, name: "Prune — Ring-A-Ding-Ding! Hexhunter Chime", character: klee,
+   authored_by: [claude], hexerei: true, art_of: prune_witch_hunt,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
+   cost: 1, type: attack, personal_pool: klee,
+   upgrade: {damage: +3},
+   description: "Deal 8 damage. [gold]Swirl[/gold]. The next [gold]Bomb[/gold] you set off this turn deals the swirled element instead of [gold]Pyro[/gold].",
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
+             {op: swirl, target: enemy},
+             {op: apply_power, power: cvn_hexhunter_chime, amount: 1, target: self}]}
+
+- {id: proto_mc_sayu_silencers_secret, name: "Sayu — Yoohoo Art: Silencer's Secret", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
+   cost: 0, type: skill, personal_pool: klee,
+   description: "[gold]Swirl[/gold] a random enemy. Gain 4 [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, draw 1 card.",
+   effects: [{op: swirl, target: random_enemy},
+             {op: block, amount: 4},
+             {op: conditional, if: bomb_went_off_this_turn,
+              then: [{op: draw, amount: 1}]}]}
+
+- {id: proto_mc_qiqi_herald_of_frost, name: "Qiqi — Herald of Frost", character: klee,
+   authored_by: [claude],
+   nation: liyue, star: 5, rarity: uncommon, role_c: applier, element: cryo,
+   cost: 1, type: skill, exhaust: true, personal_pool: klee,
+   description: "For 3 turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 3 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: cvn_herald_of_frost, amount: 3, target: self}]}
+
+- {id: proto_mc_yaoyao_yuegui_throwing_mode, name: "Yaoyao — Yuegui: Throwing Mode", character: klee,
+   authored_by: [claude],
+   nation: liyue, star: 4, rarity: uncommon, role_c: trigger,
+   cost: 1, type: skill, exhaust: true, personal_pool: klee,
+   description: "For 3 turns, at the end of your turn place a [gold]Bomb[/gold] 3 on a random enemy.",
+   effects: [{op: apply_power, power: cvn_yuegui, amount: 3, target: self}]}
 # Kokomi's Personal, PR: gorou-personal
 # THE INAZUMA WORKSHOP'S ONE PERSONAL (R236 sec.3 Gorou). Not a Universal and
 # not in `C.INAZUMA_OVERHAUL_POOL_IDS`; reasoning in docs/notes/.

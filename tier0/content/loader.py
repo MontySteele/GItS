@@ -1309,10 +1309,15 @@ def companion_roster_replacement() -> list[Card] | None:
     # and `tier05.rewards` filters `personal_pool in (None, character_id)` at
     # the offer site. They are added to the ROSTER anyway -- the roster is
     # what an offer surface may see, and a Personal that never entered it
-    # could not be offered to its own character either.
+    # could not be offered to its own character either. Kokomi's (R236,
+    # `INAZUMA_OVERHAUL_PERSONAL_IDS`) and Klee's coven (R236,
+    # `COVEN_PERSONAL_POOL_IDS`) ride the same list; Prune's shipped
+    # `prune_witch_hunt` is superseded by the KEPT half's nation filter
+    # above, which drops every Mondstadt row the lists do not name.
     added = [peek_card(cid) for cid in (C.MONDSTADT_OVERHAUL_POOL_IDS
                                         + C.INAZUMA_OVERHAUL_POOL_IDS
-                                        + C.INAZUMA_OVERHAUL_PERSONAL_IDS)]
+                                        + C.INAZUMA_OVERHAUL_PERSONAL_IDS
+                                        + C.COVEN_PERSONAL_POOL_IDS)]
     return sorted(kept + added, key=lambda c: c.id)
 
 

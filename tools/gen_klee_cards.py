@@ -1841,6 +1841,24 @@ APPLY_POWERS = {
     "mi_tamoto": ("TamotoPower", None,
         "At the end of your turn, deal 6 damage and apply [gold]Geo[/gold] to "
         "a random enemy, ignoring [gold]Block[/gold]. Lasts {X} more turn(s)."),
+    # KLEE'S COVEN PERSONALS (QUARANTINED, R213 B / R236), on the SAME flag
+    # pair as the two nation blocks above. Every class lives in
+    # klee-mod/KleeCode/Powers/Prototype/CompanionCoven.cs and is Compile
+    # Remove'd out of a release build, so the only rows that may name one are
+    # the four `proto_mc_` Personals. Two are shapes this arm already runs -- a
+    # start-of-turn payout and an end-of-turn volley -- and the third is the
+    # one place the companion arm reaches into the KLEE arm's rules. The {X}
+    # templates are here for form; every row carries its own `description:`
+    # (EB-215). Sim twin: tier0.engine.companion_coven, one function each.
+    "cvn_hexhunter_chime": ("HexhunterChimePower", None,
+        "The next [gold]Bomb[/gold] you set off this turn deals the swirled "
+        "element instead of [gold]Pyro[/gold]."),
+    "cvn_herald_of_frost": ("HeraldOfFrostPower", None,
+        "At the start of your turn, apply [gold]Cryo[/gold] twice to a random "
+        "enemy and gain 3 [gold]Block[/gold]. Lasts {X} more turn(s)."),
+    "cvn_yuegui": ("YueguiPower", None,
+        "At the end of your turn, place a [gold]Bomb[/gold] 3 on a random "
+        "enemy. Lasts {X} more turn(s)."),
     # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
     # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
     "shatter_bonus": ("ShatterBonusPower", None,
@@ -2329,6 +2347,9 @@ CARD_FIELDS = {
     # already-fetched image says so here instead of minting an `art/plan.tsv`
     # row and a second copy of the same picture. tier0 strips it at load
     # (`loader.prototype_cards`) because that engine has no art.
+    # One producer per out-path is `art_lint` L11, so a row that RE-AUTHORS a
+    # shipped card (Prune's coven Personal supersedes `prune_witch_hunt` under
+    # the companion arm) points at the existing portrait this way.
     "art_of",
     # Furina resource gates. BaseLib provides affordability and post-effect
     # Fanfare spend; FurinaResourceHooks moves Encore spend pre-effect.

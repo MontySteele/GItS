@@ -237,10 +237,25 @@ def roll_banner(rng: random.Random,
 
 def _banner_filtered(cards: list[Card],
                      banner: frozenset[str] | None) -> list[Card]:
-    """Drop off-banner 5-stars from an offer pool. 4-stars are never gated."""
+    """Drop off-banner 5-stars from an offer pool. 4-stars are never gated,
+    and neither is a PERSONAL.
+
+    THE PERSONAL CLAUSE IS A CONTRADICTION CLOSED, not a new rule. The banner
+    is rolled from `five_star_roster`, which excludes `personal_pool` cards by
+    name -- a Personal is a character's kit, not a draw somebody can be lucky
+    into -- so a five-star Personal can never be ON a banner and gating it by
+    one made it unofferable everywhere rather than rarely. The C# twin
+    (`CompanionBanner.Roll` / `IsOffered`) argued the same two halves and
+    reached the same split. NOTHING SHIPPED MOVES: `prune_witch_hunt` is the
+    only `personal_pool` companion in the index and it is a four-star, so this
+    clause is unreachable on any flag-off tree (pinned, not assumed, by
+    `test_companion_overhaul.py`). It is reachable under `C.COMPANION_OVERHAUL`,
+    where Klee's coven gives Qiqi -- a five-star character -- a Personal.
+    """
     if banner is None:
         return cards
-    return [c for c in cards if c.star != 5 or c.id in banner]
+    return [c for c in cards
+            if c.star != 5 or c.personal_pool is not None or c.id in banner]
 
 
 def _roll_rarity(rng: random.Random) -> str:

@@ -13,8 +13,8 @@ import copy
 from typing import Optional, Sequence
 
 from tier0 import constants as C
-from tier0.engine import (furina_reframe, klee_overhaul, kokomi_plan, powers,
-                          reactions, resources, statuses)
+from tier0.engine import (companion_coven, furina_reframe, klee_overhaul,
+                          kokomi_plan, powers, reactions, resources, statuses)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, KurageMemory,
                                 grant_sly_autoplay,
@@ -5824,6 +5824,11 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
         else:
             del enemy.powers["mc_melody_loop"]
     inazuma_overhaul_turn_start(state)
+    # ---- and KLEE'S COVEN PERSONALS, last (QUARANTINED, R236) --------------
+    # Qiqi's Herald applies Cryo, which can resolve a reaction, and Mona's omen
+    # above applies Vulnerable to ALL enemies -- so the two are not commutative
+    # and one sequence is written down. `tier0.engine.companion_coven`.
+    companion_coven.turn_start(state)
 
 
 def inazuma_overhaul_turn_start(state: CombatState) -> None:
@@ -6298,6 +6303,11 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
     # block rather than after the latch precisely so Nicole's question is
     # asked of the board the player really ended the turn holding.
     inazuma_overhaul_turn_end(state)
+    # ---- KLEE'S COVEN PERSONALS, still before the latch (R236) -------------
+    # Yaoyao's Yuegui draws a target from `state.rng`, so its position decides
+    # every later roll; it grants no Block, so it cannot change the answer
+    # Nicole's latch is about to record. `tier0.engine.companion_coven`.
+    companion_coven.turn_end(state)
     # Nicole's latch, LAST. Written unconditionally rather than only while she
     # is on the board: a card drafted mid-fight must not read a stale answer
     # from the turn before it existed, and the field is per-combat anyway.
@@ -6762,6 +6772,11 @@ def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
         if n:
             p.powers["mc_swirl_charge"] = p.powers.get("mc_swirl_charge", 0) + n
             p.mc_swirl_element = aura
+        # KLEE'S COVEN, third reader of the same event (QUARANTINED, R236).
+        # Prune's Chime latches unconditionally rather than asking whether it
+        # is up, because the Attack that arms it swirls BEFORE it arms --
+        # `companion_coven.note_swirl` argues it.
+        companion_coven.note_swirl(state, aura)
 
 
 def companion_overhaul_reaction_mult(state: CombatState) -> float:
