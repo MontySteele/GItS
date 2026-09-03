@@ -64,10 +64,18 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
 {
     // The typed company per owner. The counter power (Amount) mirrors the
     // queue length so every count read stays valid; this dictionary is the
-    // member-identity half the counter cannot carry. Entries are reset on
-    // the first deploy of a combat (queue outliving the power is harmless:
-    // a fresh combat's first Deploy clears a stale list).
+    // member-identity half the counter cannot carry. A list outliving its
+    // combat is dropped by <see cref="CompanyFor"/>, which asks the COMBAT
+    // and not the counter -- see the banner there.
     private static readonly Dictionary<Creature, List<SalonMember>> Company =
+        new();
+
+    /// <summary>
+    /// Which combat each live company list was built in. `EB-384`: this is the
+    /// question the stale-list check has to ask, and asking the counter
+    /// instead is what cost the round-two seat a member.
+    /// </summary>
+    private static readonly Dictionary<Creature, object?> CompanyCombat =
         new();
 
     public List<(string, string)>? Localization => new()
@@ -152,16 +160,55 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     public static IReadOnlyList<SalonMember> CompanyOf(Creature owner) =>
         CompanyFor(owner).ToList();
 
+    /// <summary>
+    /// This owner's live company, dropping a list left over from an earlier
+    /// combat.
+    ///
+    /// `EB-384`. THE STALENESS TEST IS THE COMBAT, NOT THE COUNTER, and the
+    /// difference cost the round-two seat a member on a card that prints one.
+    ///
+    /// It used to read "a nonempty list with a zero counter is garbage",
+    /// which is true BETWEEN combats and false for one window inside every
+    /// deploy: <see cref="Deploy"/> adds the entering member to this list and
+    /// applies the mirror counter AFTER the loop, so from the `company.Add`
+    /// to the `PowerCmd.Apply` the stage legitimately holds a member the
+    /// counter has never heard of. Nothing read the list inside that window
+    /// until the arm's deploy-performs clause put <see cref="PerformMember"/>
+    /// there -- and a member that can PAY its Encore reaches
+    /// `FurinaResources.SpendEncore`, which refreshes the stage visuals, which
+    /// read <see cref="CompanyOf"/>, which came back through here and wiped
+    /// the company it had just been handed.
+    ///
+    /// That is the seat's whole finding, and it explains BOTH of its halves.
+    /// Fight 1 the deploy went in at 0 Encore, so the member acted dry, no
+    /// spend ran, no refresh ran, and the member stayed -- dealing 1, the
+    /// three-quarters cut of a printed 2. Fight 2 it went in on a banked
+    /// Encore, paid, dealt the full 2, and vanished. The reaction the record
+    /// noticed was a coincidence of the same two turns.
+    ///
+    /// The combat identity answers the real question directly and cannot fire
+    /// mid-deploy, because a deploy does not change combats. It is the same
+    /// token <see cref="FurinaReframeLedger.For"/> and `ProtoBombPower` key
+    /// their per-combat tables on.
+    /// </summary>
     private static List<SalonMember> CompanyFor(Creature owner)
     {
+        var combat = (object?)owner.CombatState;
         if (!Company.TryGetValue(owner, out var list))
         {
             list = new List<SalonMember>();
             Company[owner] = list;
         }
-        // Stale list from a previous combat: the counter power died with
-        // that combat, so a nonempty list with a zero counter is garbage.
-        if (Count(owner) == 0 && list.Count > 0) list.Clear();
+        else if (CompanyCombat.TryGetValue(owner, out var built)
+                 && !ReferenceEquals(built, combat))
+        {
+            // A list built in a combat that is over. The Creature key can
+            // outlive one (PurgeCompany sweeps only the keys whose combat has
+            // already been torn down), so this is still the check that keeps a
+            // dead stage out of a live fight.
+            list.Clear();
+        }
+        CompanyCombat[owner] = combat;
         return list;
     }
 
@@ -182,6 +229,11 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                      .ToList())
         {
             Company.Remove(stale);
+            // `EB-384`: the sidecar leaves with the entry it describes. A
+            // combat token outliving its list is the same leak one dictionary
+            // over, and a stale token would answer the staleness question with
+            // a lie the next time this Creature turned up.
+            CompanyCombat.Remove(stale);
         }
     }
 

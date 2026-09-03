@@ -213,4 +213,124 @@ public class FurinaReframeRoundTwoTests
         Assert.Equal(0, FurinaResources.Encore(seat.Creature));
         Assert.True(FurinaResources.Fanfare(seat.Creature) > 0);
     }
+
+    // ==================================================================
+    // 3. `EB-384` -- the deploy that lost its member
+    // ==================================================================
+
+    [Fact]
+    public void A_stage_the_counter_has_not_caught_up_to_survives_a_read()
+    {
+        // THE DEPLOY WINDOW, reproduced without a deploy, which is what makes
+        // this a REAL pin rather than a structural one: `Deploy` adds the
+        // entering member to the company list and applies the mirror counter
+        // AFTER the loop, so for that window the stage legitimately holds a
+        // member the counter has never heard of. The old staleness test read
+        // "nonempty list, zero counter" as garbage from a previous combat and
+        // wiped it.
+        //
+        // MUTATION CHECK: put `if (Count(owner) == 0 && list.Count > 0)
+        // list.Clear();` back in `CompanyFor` and this fails.
+        var seat = Stage(0);
+        Company()[seat.Creature] = new List<SalonMember>
+        {
+            SalonMember.Chevalmarin,
+        };
+
+        Assert.Equal(0, SalonMemberPower.Count(seat.Creature));
+        Assert.Single(SalonMemberPower.CompanyOf(seat.Creature));
+    }
+
+    [Fact]
+    public void A_company_built_in_an_earlier_combat_is_still_dropped()
+    {
+        // The other half of the same edit, and the job the old test was
+        // actually there for. The Creature key can outlive a combat, so the
+        // list has to go when the combat it was built in does -- now asked of
+        // the combat itself, which is the question, rather than of a counter
+        // that happens to answer it most of the time.
+        var seat = Stage(0, SalonMember.Crabaletta);
+        SalonMemberPower.CompanyOf(seat.Creature);          // stamps this combat
+        CompanyCombat()[seat.Creature] = new object();      // ... a different one
+
+        Assert.Empty(SalonMemberPower.CompanyOf(seat.Creature));
+    }
+
+    [Fact]
+    public void The_staleness_test_no_longer_asks_the_counter()
+    {
+        // STRUCTURAL, and it is the regression itself rather than a
+        // consequence of it: the mirror counter is not the question, so
+        // `CompanyFor` must not read it.
+        var calls = Il.Calls(Il.Method("SalonMemberPower", "CompanyFor"));
+
+        Assert.DoesNotContain("SalonMemberPower.Count", calls);
+    }
+
+    [Theory]
+    [InlineData("SalonMemberPower", "Deploy", "SalonMemberPower.PerformMember")]
+    [InlineData("SalonMemberPower", "PerformMember", "FurinaResources.SpendEncore")]
+    [InlineData("FurinaResources", "SpendEncore", "SalonVisualsBridge.Refresh")]
+    [InlineData("SalonVisualsBridge", "RefreshDisplay", "SalonMemberPower.CompanyOf")]
+    public void The_path_that_wiped_the_stage_is_four_calls_long(
+        string type, string method, string call)
+    {
+        // STRUCTURAL, and it is the CAUSE written down: the arm's
+        // deploy-performs clause put a performance inside the window, a
+        // performance that can PAY reaches the Encore spend, the spend
+        // refreshes the stage art, and the art reads the company. Each link
+        // is shipped and correct on its own. Kept as a pin because the fix is
+        // one line in `CompanyFor` and nothing else on this path changed, so
+        // a reader asking "why was that line load-bearing" gets the chain.
+        Assert.Contains(call, Il.Calls(Il.Method(type, method)));
+    }
+
+    [Fact]
+    public void The_members_own_tip_stops_promising_a_turn_start_act()
+    {
+        // `EB-384`'s display half. The seat read 1 damage in one fight and 2
+        // in another off a card that prints neither, while the member tip
+        // beside it described the shipped upkeep the arm deletes.
+        using var _ = new Arm(manual: true);
+        var seat = Stage(0);
+
+        var tip = global::KleeMod.Cards.SalonMemberTips.BodyFor(
+            SalonMember.Chevalmarin, seat.Creature);
+
+        Assert.DoesNotContain("Each turn", tip);
+        Assert.Contains("Performs for " + SalonConstants.ChevalmarinTick, tip);
+        Assert.Contains("Evokes", tip);
+    }
+
+    [Fact]
+    public void The_members_own_tip_is_the_shipped_one_with_the_arm_off()
+    {
+        using var _ = new Arm(master: false);
+        var seat = Stage(0);
+
+        var tip = global::KleeMod.Cards.SalonMemberTips.BodyFor(
+            SalonMember.Chevalmarin, seat.Creature);
+
+        Assert.StartsWith("Each turn", tip);
+        Assert.Contains("Bows out", tip);
+    }
+
+    [Fact]
+    public void The_arms_salon_rules_keep_the_dry_clause()
+    {
+        // The three-quarters cut is what makes 1 and 2 the same member on two
+        // turns, and the arm's own rules paragraph had dropped it.
+        using var _ = new Arm(manual: true);
+        var seat = Stage(0, SalonMember.Chevalmarin);
+
+        var rules = global::KleeMod.Cards.SalonMemberTips.SalonRulesBody(seat.Creature);
+
+        Assert.Contains("three-quarters", rules);
+        Assert.DoesNotContain("bows the OLDEST member out", rules);
+    }
+
+    private static IDictionary<Creature, object?> CompanyCombat() =>
+        (IDictionary<Creature, object?>)typeof(SalonMemberPower)
+            .GetField("CompanyCombat", HeadlessGame.All)!
+            .GetValue(null)!;
 }
