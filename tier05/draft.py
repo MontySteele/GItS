@@ -851,6 +851,27 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         return _neutral_amount(fx, 0) * STATIC_FANFARE_CAP_VALUE
     if op == "crash_fanfare":
         return -_neutral_amount(fx, 0) * STATIC_CRASH_FANFARE_VALUE
+    if op == "drain_fanfare":
+        # THE FURINA REFRAME'S DRAIN (QUARANTINED, furina_reframe.FURINA_REFRAME).
+        # ZERO, and a DELIBERATE zero of a THIRD kind, different from both
+        # neighbours it sits between.
+        #
+        # `crash_fanfare` above is a COST with a printed number, so it prices as
+        # one. This op prints no number at all -- it takes whatever the meter
+        # holds -- and what the spend BUYS is the effect after it, which is an
+        # `amount_formula` the pricer already reads at its own base. Pricing the
+        # drain as well would charge the card for its cost and credit it for its
+        # payout twice over, on the same line.
+        #
+        # Nor is a negative honest here. The meter is not a bank the drafter can
+        # see: at offer time there is no combat, so "what would this take?" has
+        # no answer that is not a guess about how a run goes.
+        #
+        # Prototype surface only: no shipped row prints the op, no offerable
+        # pool holds one, so every drafted number in the world is byte-identical
+        # with and without this branch and DRAFTER_VERSION does not move. The
+        # same terms `block_half_damage` took.
+        return 0.0
     if op == "salon_bow":
         return _neutral_amount(fx) * STATIC_SALON_BOW_VALUE
     if op == "salon_perform":
