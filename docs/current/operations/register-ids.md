@@ -1448,4 +1448,9 @@ EB-313 RETIRED 2026-09-03 on its own acceptance: PR #294 built the base
 Strike applying no element, and the round-7b seats' pages printed the
 Strike without an element tag beside Ka-pow!'s [Pyro] (opus-act1.md);
 the C# pin was in #294. Ceilings never come down.
+EB-354 RETIRED 2026-09-04 as not a defect: Rapid Fire's base is 3 and its
+face and hits share one DamageVar; Tender ticks after each card is played,
+so the seat read a 5 composed before the turn's first tick and added
+Strength again. The turn reconciles at 31 (PR #347). Ceilings never come
+down.
 ```
