@@ -167,8 +167,9 @@ def test_the_blind_commands_reach_the_wire_only_through_the_client():
     without one line of that design-blind file changing (and it may not
     import `instances` or `soak` at all: `test_understudy_blindplay` pins
     that line, and a `--lane` flag there would have to cross it)."""
-    src = (Path(__file__).resolve().parents[2] / "understudy"
-           / "blindplay.py").read_text(encoding="utf-8")
+    # Every file `EB-180` split the blind module into, not the facade alone.
+    from tier0.tests.conftest import seam_source
+    src = seam_source("blindplay")
     assert "localhost" not in src
     assert "urllib" not in src
     assert "import instances" not in src and "import soak" not in src

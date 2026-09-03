@@ -81,6 +81,38 @@ command)` / `blindplay.Session(thread, wire=…).run()`, with
 `blindplay.ScriptedWire` and `blindplay.ScriptedThread` as the shipped doubles
 that run the whole loop without the game or codex (`blindplay.py`).
 
+### 2.1 Where the three big instruments live (`EB-180`)
+
+`soak.py`, `blindplay.py` and `staged_turn.py` each carried three or four
+concerns in one file, so every change paged the whole module. **Each is now a
+FACADE plus one module per concern, and the facade re-exports every name it
+used to declare** — `soak.RunDriver`, `blindplay.observe`,
+`staged_turn.parse` and the rest all still resolve off the module they always
+did, and `python -m understudy.<module>` is unchanged. Import from the facade;
+read the seam.
+
+| facade | seams, in dependency order |
+|---|---|
+| `soak.py` — the CLI, `soak()`, `run_scripted` | `soak_shape` (paths, dials, registers, `Defect`) · `soak_lane` (is the bridge staged, is a game up, whose lane) · `soak_session` (launch, teardown, the reversibility ledger) · `soak_telemetry` (one fight's numbers) · `soak_screens` (what a screen is, and the forced move on it) · `soak_navigate` (the route to the first fight, and who embarked) · `soak_driver` (one run, with a watchdog on every action) |
+| `blindplay.py` — the CLI, `build_thread` | `blindplay_shape` · `blindplay_read` (printed text, folded names, the blobs behind them) · `blindplay_faces` (one card, one option, one enemy, as printed) · `blindplay_board` (combat, the pet, the meters, the map) · `blindplay_notes` (the standing notes and the arm-keyword glossary) · `blindplay_observe` (`observation`) · `blindplay_render` · `blindplay_snapshot` (the grader's channel) · `blindplay_grammar` · `blindplay_session` · `blindplay_record` (the audit and `seal`) |
+| `staged_turn.py` — the CLI | `staged_turn_shape` · `staged_turn_model` (`Board`, `StagedTurn`) · `staged_turn_parse` · `staged_turn_stage` · `staged_turn_grade` · `staged_turn_closeness` · `staged_turn_ledger` · `staged_turn_execute` |
+
+**The wire and the swappable dials stay on the facade, and a seam reads them
+back at call time** (`soak_session._soak` / `_wire`, `blindplay_record._bp`,
+`staged_turn_parse._st`). `soak.bridge`, `soak.LOG_DIR`, `soak.LOCAL_PROPS`,
+`soak.SETTLE_S`, `soak.PID_EXIT_*`, `soak.game_dir`, `blindplay.LOCAL_PROPS`
+and `staged_turn.QA_DIR` are what a caller reaches in and swaps, so each has
+ONE home; a seam that bound its own copy at import would never see the swap.
+`RunDriver`'s route half is a mixin (`soak_navigate.Navigation`) rather than
+loose functions, because those five methods were written against `RunDriver`'s
+own `self`.
+
+**Every source-reading fence walks the FAMILY, not the facade** — the no-leak
+pin on `blindplay`, the four "the soak cannot reach X" pins, the stage-refuses
+pin. `tier0/tests/conftest.py` has `seam_files(base)` / `seam_source(base)`;
+use them for any new structural check, or the check will pass by reading a
+file the code has left.
+
 ## 3. Key invariants
 
 - **The seam: nothing in `tier0/`, `tier05/`, the drafter or any sheet is
@@ -97,13 +129,13 @@ that run the whole loop without the game or codex (`blindplay.py`).
   lowercase) — deliberately over-eager (`rng.py:38-51,63-72`). The understudy
   stream offset is 7e9, clear of tier05's 1e9/2e9/3e9 (`rng.py:24-31`).
 - **Readiness is the `options` key on a `menu` state, never `GET /`.** The HTTP
-  server answers ~20 s before the menu has buttons (`soak.py:224-250`;
+  server answers ~20 s before the menu has buttons (`soak_session.py`, `Session.wait_for_menu`;
   `bridge.py:12-14`).
 - **Every failure to reach the bridge is a `BridgeError`,** including
   `ConnectionResetError` — an `OSError`, not a `URLError` (`bridge.py:54-63`).
 - **The reversibility ledger is written BEFORE each change lands,** and
   teardown walks it in reverse with every step independently guarded
-  (`soak.py:100-133,271-294`). **The shared bridge is not one of those steps**
+  (`soak_session.py`, `Reversibility` and `Session.teardown`). **The shared bridge is not one of those steps**
   (`EB-310`): `mods\STS2_MCP` is read by the owner's own Steam launches, so an
   embark refreshes it when nothing holds the dll, records it *shared, left in
   place*, and no teardown removes it — `deploy_bridge.ps1 -Remove` is the only
@@ -112,14 +144,14 @@ that run the whole loop without the game or codex (`blindplay.py`).
   recomputes policy_v0 before POSTing, and each step of a planned sequence gets
   its own (`harness.py:255-303`). **Names are resolved before the POST, once,
   in `decide`** — one frame later `card_index: 2` is a different card
-  (`naming.py:14-17`; `policy_v1.py:1061-1065`; `soak.py:593,605`).
+  (`naming.py:14-17`; `policy_v1.py:1061-1065`; `soak_driver.py`, `RunDriver.post`).
 - **Log schema:** `soak-<stamp>-index.json`, `soak-<stamp>-run<NNN>.jsonl`
   (one JSON object per line, `record` discriminates: `run_begin`,
   `seed_read_back`, `decision`, `fight`, `defect`, `forced_default`,
   `game_over`, `run_end`), `reversibility-<stamp>.json` (`understudy/README.md`
-  "Telemetry schema"; `soak.py:511-517`). Adding keys is free; **renaming or
+  "Telemetry schema"; `soak_driver.py`, `RunDriver.emit`). Adding keys is free; **renaming or
   repurposing one is a shared-schema change** once Track B reads it
-  (`soak.py:367-371`; `naming.py:31-33`).
+  (`soak_telemetry.py`; `naming.py:31-33`).
 - **A blind seat's blindness is PROVEN FROM THE TRANSCRIPT, never assumed
   from the sandbox** (`seat.py`). `--sandbox read-only` stops writing, not
   reading, and the `--json` stdout stream does not show tool-call attempts at
@@ -144,7 +176,7 @@ that run the whole loop without the game or codex (`blindplay.py`).
   registered EB-1 hazard event all render as `TOOL-BLOCKED: <state_type>` and
   stop the driver. There is no first-button fallback in the file:
   `soak._mechanical_action` has one because a soak must keep moving
-  (`soak.py:1928`), and a blind tester must not.
+  (`soak_screens.py`), and a blind tester must not.
 - **The seat's identity fill has an exact limit:** `grader.id`,
   `grader.kind` and `grader.model` only — the three facts about the SEAT that
   a model cannot know. `turn_id`, `packet_sha256`, `designed_these_cards`,
@@ -177,13 +209,13 @@ that run the whole loop without the game or codex (`blindplay.py`).
   deck-management overlays were left unrevised (`policy_v1.py:1069-1076`).
 - **R97** (`:3339`) — 5a: readiness watches `options`, never the health
   endpoint. 5b: the leftover profile run may be abandoned freely, so the soak
-  abandons ANY resumable run rather than negotiating (`soak.py:751-758`). 5d:
+  abandons ANY resumable run rather than negotiating (`soak_navigate.py`, `_to_main_menu`). 5d:
   the five adapter defects stay **measurement history, not open defects** —
   any future adapter against this wire meets the same five.
 - **R87(1)** (`:2834,2852`) — the "pilot-limited floor" precedent Guardrail-7
   extends to bots.
 - **R70** (`:2209`) — "latest is not a version"; the vendored bridge is pinned
-  to commit `55e0648` (`vendor/STS2_MCP/PROVENANCE.md`; `soak.py:201`).
+  to commit `55e0648` (`vendor/STS2_MCP/PROVENANCE.md`; `soak_session.py`, `_deploy_bridge`).
 - **R68** (`:2122`) — single-source-of-truth discipline; Furina's plan→pilot
   mapping is read from tier05, not chosen here (`policy_v0.py:51-55`).
 - **D4** (`:2446`) — instrument-visibility law: a quantitative claim used as
@@ -239,7 +271,7 @@ that run the whole loop without the game or codex (`blindplay.py`).
 - **Two dials live in `policy_v1` and nowhere else** —
   `BLOCK_MATTERS_FRACTION`, `COMPANION_SHARE_FOR_GUEST_CAST`. Bot-policy dials,
   not balance constants; they must not migrate to `tier0/constants.py`, and are
-  logged per run (`policy_v1.py:70-90`; `soak.py:701-707`).
+  logged per run (`policy_v1.py:70-90`; `soak_driver.py`).
 - **`end_turn` IS ASYNCHRONOUS, and the frame it leaves behind looks playable**
   (`EB-175`). `ExecuteEndTurn` calls `PlayerCmd.EndTurn` and answers
   `ok Ending turn` at once; a GET 55 ms later still reads `state_type:
@@ -251,8 +283,9 @@ that run the whole loop without the game or codex (`blindplay.py`).
   `blindplay.settle` rides all three out on every LIVE read (the driver's and
   the CLI's) and on no saved one. Neither ends a turn on anybody's behalf.
 - **A stall is a small cycle, not only a frozen frame:** at most 2 distinct
-  fingerprints across 12 posted actions (`soak.py:79-87,569-587`). A mechanical
-  action that changes nothing is likewise not mechanical (`soak.py:926-949`).
+  fingerprints across 12 posted actions (`soak_shape.py`'s `NO_PROGRESS_*`;
+  `soak_driver.py`, `RunDriver._check`). A mechanical action that changes
+  nothing is likewise not mechanical (`soak_screens.py`).
 - **A dead wire is TWO failures, and `bridge_unreachable` is only one of them.**
   A process that is alive and spinning (EB-1) files `unresponsive_spin` instead,
   on a log-growth / message-pump probe (`hangwatch.py`); `bridge_unreachable` is
@@ -364,11 +397,11 @@ that run the whole loop without the game or codex (`blindplay.py`).
   writes both to the player's combat state and ignores the field.
 - **Ordering traps in the driver:** the character stays in `options` after
   being picked, so pick once then `confirm` or loop forever
-  (`soak.py:810-820`); a play the bridge rejected is not re-offered this turn
-  (`soak.py:614-620`; `policy_v1.py:118-127`); a defect run is not trusted to
-  leave clean state, so the game is relaunched (`soak.py:1156-1168`); two
-  harness-side defects of the same shape halt the soak
-  (`soak.py:1144-1155,1186-1187`).
+  (`soak_navigate.py`, `_embark`); a play the bridge rejected is not re-offered
+  this turn (`soak_driver.py`; `policy_v1.py:118-127`); a defect run is not
+  trusted to leave clean state, so the game is relaunched (`soak.py`,
+  `_needs_restart`); two harness-side defects of the same shape halt the soak
+  (`soak.py`, `_HARNESS_SIDE` and `soak()`).
 - **`understudy/logs/soak/` is gitignored** (per-machine output);
   `logs/phase0-SSRWEGLNRG.jsonl` is committed and is the whole surviving
   Phase-0 measurement — R97/5b says the live save it came from may be deleted.
@@ -384,5 +417,7 @@ that run the whole loop without the game or codex (`blindplay.py`).
 2. `understudy/adapter.py:1-50` — what crosses the wire faithfully and what does not.
 3. `understudy/policy_v0.py:1-35,459-481` — the delegation commitment and the dispatch.
 4. `understudy/policy_v1.py:1-130,1022-1079` — the seven revisions, the dials, the Memo, `decide`.
-5. `understudy/soak.py:1-100,463-600` — Guardrail-7, the ledger, the watchdog.
+5. `understudy/soak.py:1-96` — Guardrail-7 and the two seed arms; then
+   `soak_session.py` for the ledger and `soak_driver.py` for the watchdog
+   (`EB-180` split the file; §2.1 has the map).
 6. `tier0/DECISIONS.md` R93–R97 (`:3179-3371`) — the rulings, in one sitting.

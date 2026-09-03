@@ -174,5 +174,8 @@ def test_the_soak_has_no_grant_verb():
     assert not hasattr(soak, "give_card")
     # The source grep below is the strict form of the same claim; the parsed
     # conditional-expression that used to sit here read like a precedence bug.
-    src = (soak.Path(soak.__file__)).read_text(encoding="utf-8")
-    assert "give_card" not in src
+    # `EB-180` split the soak into a facade and six seams, so the grep is of
+    # the FAMILY -- a fence that kept reading the facade alone would pass on
+    # a grant that had simply moved next door.
+    from tier0.tests.conftest import seam_source
+    assert "give_card" not in seam_source("soak")

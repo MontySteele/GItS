@@ -30,6 +30,7 @@ from pathlib import Path
 import pytest
 
 from tier0 import constants as C
+from tier0.tests.conftest import seam_files
 from understudy import blindplay, embark, qa_packet, soak
 
 REPO = Path(__file__).resolve().parents[2]
@@ -288,11 +289,18 @@ def test_blindplay_cannot_reach_a_sheet_or_a_policy():
     recommendation beside the screen, which is precisely the leak this row
     forbids; `soak`, `scenario`, `adapter` and `naming` each reach a tier0
     sheet loader transitively, so they are refused by the same walk."""
-    named = _imported(Path(blindplay.__file__))
+    # `EB-180` split the module into a facade and ten seams; the walk is of
+    # EVERY one of them. A no-leak pin that read the facade alone after the
+    # code moved would be a pin on an empty file.
     banned = {"harness", "policy_v0", "policy_v1", "soak", "scenario",
               "adapter", "naming", "staged_turn", "replay", "embark"}
-    assert not [m for m in named
-                if m.split(".")[0] in ("tier0", "tier05")], named
+    for path in seam_files("blindplay"):
+        named = _imported(path)
+        assert not [m for m in named
+                    if m.split(".")[0] in ("tier0", "tier05")], (path, named)
+        assert not [m for m in named
+                    if m.rsplit(".", 1)[-1] in banned], (path, named)
+    named = _imported(Path(blindplay.__file__))
     assert not [m for m in named if m.rsplit(".", 1)[-1] in banned], named
 
 
@@ -300,8 +308,10 @@ def test_soak_never_imports_blindplay():
     """The other direction, and the same rule `scenario.py` lives under: an
     unattended soak may not reach a tool whose whole job is to hand a screen to
     a third party's model."""
-    named = _imported(Path(soak.__file__))
-    assert not [m for m in named if "blindplay" in m], named
+    # Every file `EB-180` split the soak into, not the facade alone.
+    for path in seam_files("soak"):
+        named = _imported(path)
+        assert not [m for m in named if "blindplay" in m], (path, named)
 
 
 def test_a_base_game_sprite_tag_renders_instead_of_refusing():
@@ -347,8 +357,9 @@ def test_blindplay_never_imports_the_operator_side_embark():
     innocuous name, so it is pinned in both directions -- named in `banned`
     above, and checked here from the other end."""
     assert embark.soak is soak, "embark is the side that owns the launch"
-    assert not [m for m in _imported(Path(blindplay.__file__))
-                if "embark" in m], "blindplay reached the operator side"
+    for path in seam_files("blindplay"):        # the family, since `EB-180`
+        assert not [m for m in _imported(path)
+                    if "embark" in m], f"{path} reached the operator side"
 
 
 def test_embark_expands_a_roster_id_to_a_select_screen_option():

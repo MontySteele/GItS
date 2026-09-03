@@ -1,5 +1,6 @@
 import os
 import random
+from pathlib import Path
 
 import pytest
 
@@ -33,6 +34,27 @@ for _leaked in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE",
                 "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES",
                 "GIT_COMMON_DIR", "GIT_NAMESPACE", "GIT_CEILING_DIRECTORIES"):
     os.environ.pop(_leaked, None)
+
+
+# --- THE SEAM FAMILY, FOR THE FENCES THAT READ SOURCE ----------------------
+# `EB-180` split `understudy/soak.py`, `blindplay.py` and `staged_turn.py`
+# into one module per concern. Half a dozen fences in this suite are written
+# as source reads -- "the soak cannot reach the seat", "blindplay cannot reach
+# a sheet" -- and each of them named ONE file. A fence that keeps naming the
+# facade after the code moved out of it is a fence that passes because it is
+# looking somewhere else, which is worse than no fence at all. So they ask for
+# the FAMILY: `<base>.py` and every `<base>_*.py` beside it.
+
+def seam_files(base):
+    """Every file `understudy/<base>.py` was split into, the facade first."""
+    root = Path(__file__).resolve().parents[2] / "understudy"
+    return ([root / f"{base}.py"]
+            + sorted(p for p in root.glob(f"{base}_*.py")))
+
+
+def seam_source(base):
+    """The whole family's source, concatenated. For the substring fences."""
+    return "\n".join(p.read_text(encoding="utf-8") for p in seam_files(base))
 
 
 def make_enemy(hp=50, name="dummy", intents=None, is_boss=False):
