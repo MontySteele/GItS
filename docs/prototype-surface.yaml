@@ -322,7 +322,7 @@
 - {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash (proto)", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the end of your turn, deal [gold]Pyro[/gold] damage to a random enemy equal to the [gold]Bombs[/gold] on it.",
+   description: "At the end of your turn, deal [gold]Pyro[/gold] damage to a random enemy equal to its largest [gold]Bomb[/gold].",
    effects: [{op: apply_power, power: ko_bomb_echo, amount: 1, target: self}]}
 
 # --- React, the one that goes off twice (packet sec.4) ---

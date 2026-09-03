@@ -201,6 +201,17 @@ def total_size(enemy: Enemy) -> int:
     return sum(c.size for c in enemy.ko_charges)
 
 
+def largest_size(enemy: Enemy) -> int:
+    """The single largest charge on this pile -- what Sparks 'n' Splash's
+    echo pays here (R250, `klee-overhaul-round-8-2026-09-04.md` sec.6 pick 1
+    default (1)). `total_size`'s twin: the raw SUM every other rule inside the
+    arm is priced in (growth, jumps, Sorry Jean's Block, a Set off) survives
+    beside it untouched -- only the echo's own payout moved off the sum.
+    `LargestPlacedBy`'s twin.
+    """
+    return max((c.size for c in enemy.ko_charges), default=0)
+
+
 def mine_count(enemy: Enemy) -> int:
     """How many of this pile's charges are Mines -- the fuse mark."""
     return sum(1 for c in enemy.ko_charges if c.is_mine)
@@ -691,8 +702,15 @@ def turn_end(state: CombatState) -> None:
     a different card on two boards. Nothing between here and the enemy's half
     reads the mark, so the order costs nothing and the guarantee is total.
 
-    "At the end of your turn, deal Pyro damage to a random enemy equal to the
-    Bombs on it." [USER]'s OWN DESIGN, 2026-09-02: "I think auto-detonation on
+    "At the end of your turn, deal Pyro damage to a random enemy equal to its
+    largest Bomb." R250 (2026-09-04), replacing the sum this row paid before:
+    the seats' round 8 found that once the echo lands the sum makes banking
+    always right and every Set off card "deletes my engine" -- the largest
+    single charge keeps hold-or-cash a decision after the Power lands, since a
+    Set off still cashes the WHOLE pile and a reaction still multiplies
+    whichever one hit is dealt.
+
+    Before that, [USER]'s OWN DESIGN, 2026-09-02: "I think auto-detonation on
     Sparks n' Splash completely bricks the growth build. How about instead 'a
     random enemy takes damage equal to the amount of Bomb on them'?" The row
     printed an automatic Set off before that, and the Rare the growth deck most
@@ -713,6 +731,13 @@ def turn_end(state: CombatState) -> None:
     A RANDOM BOMBED ENEMY, unlike the auto-detonation it replaces: an echo of
     nothing is not a printed effect, so the roll is over the enemies that
     actually hold a charge, and a board with none does nothing at all.
+
+    EACH COPY IS ITS OWN HIT (`EB-358`, default applied): a second Sparks 'n'
+    Splash used to badge 2 and pay the pile once. The Power's stack count is
+    how many copies are live, and the badge and the payout now read the same
+    number -- the loop below runs once per stack, each iteration rolling its
+    OWN random target (so two copies can hit the same enemy twice or two
+    different ones) and paying that target's largest Bomb, independently.
     """
     from tier0.engine import companion_hexerei      # late import: cycle
     from tier0.engine import effects                # late import: cycle
@@ -720,18 +745,20 @@ def turn_end(state: CombatState) -> None:
     if not live(state):
         return
     companion_hexerei.roll_hand_marks(state)
-    if not state.player.powers.get(BOMB_ECHO, 0):
+    copies = state.player.powers.get(BOMB_ECHO, 0)
+    if not copies:
         return
-    candidates = [e for e in state.living_enemies if e.ko_charges]
-    if not candidates:
-        return
-    target = state.rng.choice(candidates)
-    size = total_size(target)
-    if size <= 0:
-        return
-    state.emit("ko_bomb_echo", target=target.name, amount=size)
-    effects.deal_damage_to_enemy(state, target, size, element="pyro",
-                                 source=ECHO_SOURCE)
+    for _ in range(copies):
+        candidates = [e for e in state.living_enemies if e.ko_charges]
+        if not candidates:
+            break
+        target = state.rng.choice(candidates)
+        size = largest_size(target)
+        if size <= 0:
+            continue
+        state.emit("ko_bomb_echo", target=target.name, amount=size)
+        effects.deal_damage_to_enemy(state, target, size, element="pyro",
+                                     source=ECHO_SOURCE)
 
 
 # ---------------------------------------------------------------------------

@@ -585,27 +585,27 @@ public class KleeOverhaulRuleTests
     [Fact]
     public void The_echo_reads_this_klees_pile_and_leaves_every_charge_on_it()
     {
-        // [USER]: "I think auto-detonation on Sparks n' Splash completely
-        // bricks the growth build. How about instead 'a random enemy takes
-        // damage equal to the amount of Bomb on them'?" So the Rare READS the
-        // pile: 5 and 3 is an 8-point hit, and the pile is still 8 afterwards,
-        // 12 after the next morning's growth.
+        // R250 (2026-09-04): the echo pays the LARGEST charge, not the sum.
+        // 5 and 3 is a 5-point hit, and the pile is still [5, 3] afterwards,
+        // [9, 7] after the next morning's growth -- largest still 9.
         var klee = Seat.Klee();
         var other = Seat.Klee();
         var enemy = Seat.Klee(30).Creature;
         var pile = ProtoBombs.Place(enemy, klee.Creature,
             new ProtoBombs.Charge(5), new ProtoBombs.Charge(3));
 
-        Assert.Equal(8, ProtoBombPower.TotalPlacedBy(enemy, klee.Creature));
-        Assert.Equal(8, pile.TotalSize);
+        Assert.Equal(5, ProtoBombPower.LargestPlacedBy(enemy, klee.Creature));
+        Assert.Equal(8, pile.TotalSize);              // the SUM still prices growth/jumps
+        Assert.Equal(5, pile.LargestSize);
         Assert.Equal(2, pile.Charges.Count);
 
         pile.GrowBy(KleeOverhaulLaw.BombGrowth);
-        Assert.Equal(16, ProtoBombPower.TotalPlacedBy(enemy, klee.Creature));
+        Assert.Equal(5 + KleeOverhaulLaw.BombGrowth,
+                     ProtoBombPower.LargestPlacedBy(enemy, klee.Creature));
 
         // R205, like every other read in this file: another Klee's pile is
         // not hers to echo.
-        Assert.Equal(0, ProtoBombPower.TotalPlacedBy(enemy, other.Creature));
+        Assert.Equal(0, ProtoBombPower.LargestPlacedBy(enemy, other.Creature));
     }
 
     [Fact]
@@ -620,7 +620,7 @@ public class KleeOverhaulRuleTests
         var calls = Il.Calls(hook);
 
         Assert.Contains("ProtoBombPower.HoldsChargeFrom", calls);
-        Assert.Contains("ProtoBombPower.TotalPlacedBy", calls);
+        Assert.Contains("ProtoBombPower.LargestPlacedBy", calls);
         Assert.Contains("ElementalHit.Deal", calls);
 
         Assert.DoesNotContain("ProtoBombPower.SetOff", calls);
@@ -629,6 +629,26 @@ public class KleeOverhaulRuleTests
         Assert.DoesNotContain(calls,
                               c => c.StartsWith("KleeOverhaulLedger."));
         Assert.DoesNotContain("DamageCmd.Attack", calls);
+    }
+
+    [Fact]
+    public void A_second_copy_is_its_own_hit_not_a_doubled_constant()
+    {
+        // `EB-358`, default applied: a second Sparks 'n' Splash used to badge
+        // `Amount` 2 (this power's own `StackType` is `Counter`, one stack
+        // per copy played) and pay the pile ONCE. Now the end-of-turn hook
+        // loops `Amount` times -- ONE `ElementalHit.Deal` call SITE, run
+        // `Amount` times, not two unrolled call sites (which would double the
+        // damage at compile time regardless of how many copies are live, and
+        // could not roll two independent targets).
+        var hook = typeof(BombEchoPower)
+            .GetMethod("BeforeSideTurnEnd", HeadlessGame.All)!;
+        var calls = Il.Calls(hook);
+
+        Assert.Single(calls, c => c == "ElementalHit.Deal");
+        // The candidate roll is likewise ONE site, read fresh each pass of
+        // the loop -- not hoisted out and reused for every copy.
+        Assert.Single(calls, c => c.Contains("NextItem"));
     }
 
     // ---- helpers ---------------------------------------------------------

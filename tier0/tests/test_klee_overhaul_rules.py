@@ -1185,8 +1185,10 @@ def test_ammo_scavenging_draws_one_per_bomb_that_went_off_this_turn(overhaul):
 
 
 def test_sparks_n_splash_echoes_the_pile_without_spending_it(overhaul):
-    """`BombEchoPower`, [USER]'s own 2026-09-02 design: "at the end of your
-    turn, deal Pyro damage to a random enemy equal to the Bombs on it".
+    """`BombEchoPower`, R250 (2026-09-04): "at the end of your turn, deal
+    Pyro damage to a random enemy equal to its LARGEST Bomb" -- the largest
+    single charge, not the sum ([USER]'s own 2026-09-02 design predates R250,
+    which replaced the sum it paid at first).
 
     IT READS THE PILE AND DOES NOT SPEND IT, which is the whole card and the
     whole of why rule 7 survives it. The row printed an automatic Set off
@@ -1202,16 +1204,35 @@ def test_sparks_n_splash_echoes_the_pile_without_spending_it(overhaul):
     klee_overhaul.turn_end(state)
 
     assert sizes(enemy) == [4, 3], "the Bombs stay and keep growing"
-    assert enemy.hp == 193, "and the echo dealt their total once"
+    assert enemy.hp == 196, "the echo dealt the LARGEST charge (4), not 4+3"
     # NOTHING EXPLODED, so rule 4 mints nothing and neither of rule 7's
     # counters moves -- the ledger is not touched at all.
     assert state.player.sparks == 0
     assert (state.ko_set_off_this_turn, state.ko_reacted_this_turn) == (0, 0)
     assert counts(state)["ko_explosion"] == 0
-    # It pays AGAIN next turn, and bigger, because the pile grew.
+    # It pays AGAIN next turn, and bigger, because the pile grew: the largest
+    # charge is now 4 + growth.
     klee_overhaul.turn_start(state)
     klee_overhaul.turn_end(state)
-    assert enemy.hp == 193 - (7 + 2 * C.KLEE_OVERHAUL_BOMB_GROWTH)
+    assert enemy.hp == 196 - (4 + C.KLEE_OVERHAUL_BOMB_GROWTH)
+
+
+def test_sparks_n_splash_pays_per_copy_its_own_random_target(overhaul):
+    """`EB-358`, default applied: a second Sparks 'n' Splash badges 2 (the
+    power's stack count) and used to pay the pile ONCE. Now each copy is its
+    OWN end-of-turn hit, each paying its own random target's largest Bomb --
+    on a one-enemy board that means two hits landing on the same enemy."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.player.powers[klee_overhaul.BOMB_ECHO] = 2
+    klee_overhaul.place(state, enemy, 5)
+    klee_overhaul.place(state, enemy, 3)
+
+    klee_overhaul.turn_end(state)
+
+    assert sizes(enemy) == [5, 3], "still not spent, by either copy"
+    assert enemy.hp == 200 - 2 * 5, "two hits, each the largest Bomb (5)"
+    assert counts(state)["ko_bomb_echo"] == 2, "the badge's count is the hits"
 
 
 def test_the_echo_rolls_only_over_bombed_enemies(overhaul):
