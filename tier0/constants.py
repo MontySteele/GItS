@@ -524,6 +524,47 @@ COMPANION_OVERHAUL_NATIONS: tuple[str, ...] = (
     COMPANION_OVERHAUL_NATION, INAZUMA_OVERHAUL_NATION)
 
 # =============================================================================
+# KLEE'S COVEN PERSONALS -- SAME FLAG AGAIN, THIRD LIST (QUARANTINED, R236).
+#
+# The approved Mondstadt workshop's sec.4 (and its sec.3 Prune entry) gives
+# Klee four PERSONAL companions -- her coven. A Personal is not a Universal: it
+# is offered only to its own character, through the channel `prune_witch_hunt`
+# already rides (`Card.personal_pool`, filtered at every offer site), so these
+# four are NOT in either nation's pool list and neither pool list's count moves.
+#
+# WHAT MOVES WHEN THE FLAG IS ON, and it is the same two sites the two nation
+# blocks name:
+#   * loader.companion_roster_replacement -- these ids join the replacement
+#     roster beside the two nations' Universals, and the per-character filter
+#     at the offer site is what keeps them Klee's.
+#   * loader._card_prototype -- the `proto_mc_` ids resolve, the same door.
+# `prune_witch_hunt` needs no exclusion of its own: it is a MONDSTADT companion,
+# and the kept half of the replacement drops every row of a replaced nation. So
+# the Chime SUPERSEDES it by the rule that was already there, and with the flag
+# off the shipped row is byte-identical (`test_companion_overhaul.py`).
+#
+# THE NATIONS ARE THE CHARACTERS' OWN. Sayu is Inazuma and Qiqi and Yaoyao are
+# Liyue, which has no workshop and no shipped companion row; a Personal is
+# offered through the Personal channel rather than through a nation's pool, so
+# an off-region Personal is only ever weighted differently (the reward slot's
+# `_nation_weighted_choice`) or filtered out of the shop's HOME slot and
+# reachable in its any-region slot. That is today's behaviour, unchanged.
+COVEN_PERSONAL_POOL_IDS: tuple[str, ...] = (
+    "proto_mc_prune_hexhunter_chime",
+    "proto_mc_sayu_silencers_secret",
+    "proto_mc_qiqi_herald_of_frost",
+    "proto_mc_yaoyao_yuegui_throwing_mode",
+)
+
+# THE NUMBERS THE COVEN'S POWERS CARRY, on the same terms as the two blocks
+# above: a number the CARD prints stays on the card row, and only a number a
+# POWER carries lands here, because the C# mirrors are compared BY VALUE
+# (`tools/lint_constant_parity.py`). Every one is R236's printed text.
+CVN_HERALD_BLOCK = 3            # Qiqi: Block at the start of each turn
+CVN_HERALD_APPLICATIONS = 2     # Qiqi: "apply Cryo twice"
+CVN_YUEGUI_BOMB_SIZE = 3        # Yaoyao: the Bomb Yuegui throws
+
+# =============================================================================
 # THE KOKOMI OVERHAUL, SLICE ONE -- QUARANTINED (R213 B, BACKLOG EB-147).
 #
 # The ruled brief `review/active/kokomi-brief-2026-09-01.md` DRAFT 6 (ruled

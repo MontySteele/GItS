@@ -317,6 +317,12 @@ MIRRORED: dict[str, object] = {
     "CompanionOverhaulLaw.KyoukaFinale": C.MI_KYOUKA_FINALE,
     "CompanionOverhaulLaw.SurpriseDispatchDamage": C.MI_SURPRISE_DISPATCH_DMG,
     "CompanionOverhaulLaw.TamotoDamage": C.MI_TAMOTO_DMG,
+    # KLEE'S COVEN PERSONALS (QUARANTINED, R236), same flag and same terms:
+    # three numbers a POWER carries, mirrored by value because both engines
+    # play these four rows.
+    "CompanionCovenLaw.HeraldBlock": C.CVN_HERALD_BLOCK,
+    "CompanionCovenLaw.HeraldApplications": C.CVN_HERALD_APPLICATIONS,
+    "CompanionCovenLaw.YueguiBombSize": C.CVN_YUEGUI_BOMB_SIZE,
     # THE KOKOMI OVERHAUL (QUARANTINED, `C.KOKOMI_OVERHAUL`). Same terms again
     # and for the same reason: quarantined is not exempt. Draft 6 left the arm
     # with exactly ONE rule number -- Tamakushi Casket's Hydro strike, printed

@@ -841,6 +841,17 @@ CO_TENANCY_LEDGER = {
             "up. Two Melody Loops are on two different enemies by "
             "construction, because the card places the power on the body it "
             "targeted",
+        ("Powers/Prototype/CompanionCoven.cs", "HeraldOfFrostPower"):
+            "QUARANTINED (Klee's coven Personals, R236). Applies Cryo twice to "
+            "a random enemy, pays raw Block, then ticks its own duration. THE "
+            "ORDERING QUESTION, answered, and it is the reason the sim runs "
+            "this LAST of the broadcast's tenants: the Cryo can resolve a "
+            "REACTION, whose damage StellarisOmenPower's Vulnerable would "
+            "amplify, so the two are not commutative and one sequence is "
+            "written down (effects.player_turn_start_triggers, coven last). "
+            "It is also the only tenant here that draws from the rng, so no "
+            "co-tenant's roll can move under it, and two copies of this one "
+            "power are identical",
         ("Powers/Prototype/CompanionOverhaulInazuma.cs", "NaptimePower"):
             "QUARANTINED (the Inazuma companion overhaul). Draws its promised "
             "cards and removes itself. THE ORDERING QUESTION, answered: it "
@@ -1073,6 +1084,14 @@ CO_TENANCY_LEDGER = {
             "EXPIRY PassionOverloadPower above it is, one nation over -- it "
             "removes itself and does nothing else, and what it pays is paid "
             "on the Attack that spends it, a broadcast away",
+        ("Powers/Prototype/CompanionCoven.cs", "HexhunterChimePower"):
+            "QUARANTINED (Klee's coven Personals, R236). The same this-turn "
+            "EXPIRY again -- it removes itself and does nothing else. THE "
+            "ORDERING QUESTION, answered: what the power DOES happens at an "
+            "explosion (CompanionCovenBombs.ElementFor), which is a broadcast "
+            "away, so all that happens here is the removal. It is NOT in "
+            "CompanionOverhaulTurnEnd's walk for the reason "
+            "PassionOverloadPower is not: a removal has no position to defend",
     },
 }
 

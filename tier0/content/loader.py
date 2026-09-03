@@ -1298,8 +1298,15 @@ def companion_roster_replacement() -> list[Card] | None:
         return None
     kept = [c for c in _card_index().values()
             if c.is_companion and c.nation not in C.COMPANION_OVERHAUL_NATIONS]
+    # AND KLEE'S COVEN PERSONALS (R236), on the same list because a Personal
+    # is offered through the same three surfaces -- it is the `personal_pool`
+    # filter at each offer site, not a separate roster, that keeps them hers.
+    # They belong to no nation's pool, so neither nation count moves; Prune's
+    # shipped `prune_witch_hunt` is superseded by the KEPT half's nation
+    # filter above, which drops every Mondstadt row the lists do not name.
     added = [peek_card(cid) for cid in (C.MONDSTADT_OVERHAUL_POOL_IDS
-                                        + C.INAZUMA_OVERHAUL_POOL_IDS)]
+                                        + C.INAZUMA_OVERHAUL_POOL_IDS
+                                        + C.COVEN_PERSONAL_POOL_IDS)]
     return sorted(kept + added, key=lambda c: c.id)
 
 

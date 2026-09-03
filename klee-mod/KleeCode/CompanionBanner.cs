@@ -75,11 +75,23 @@ public static class CompanionBanner
     /// <summary>
     /// True if this card may be offered to this player. 4-stars and
     /// non-companions are never gated, mirroring _banner_filtered.
+    ///
+    /// AND NEITHER IS A PERSONAL, which closes a contradiction rather than
+    /// adding a rule. <see cref="Roll"/> below skips every
+    /// <c>PersonalPool</c> card by name ("Prune is not a draw") -- a Personal
+    /// is a character's kit, not something a banner can feature -- so gating
+    /// one BY the banner made a five-star Personal unofferable everywhere
+    /// instead of rarely. Nothing shipped moves: <c>prune_witch_hunt</c> is
+    /// the only personal-pool companion and it is a four-star, so the clause
+    /// is unreachable in a release build. It is reachable under the companion
+    /// arm, where Klee's coven gives Qiqi -- a five-star character -- a
+    /// Personal. Sim twin: <c>rewards._banner_filtered</c>, same clause.
     /// </summary>
     public static bool IsOffered(CardModel card, Player player)
     {
         if (card is not ICompanionCard comp) return true;
         if (comp.Star != 5) return true;
+        if (comp.PersonalPool is not null) return true;
         return Featured(player).Contains(card.Id.Entry);
     }
 

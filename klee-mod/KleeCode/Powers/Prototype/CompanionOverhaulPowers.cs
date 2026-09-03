@@ -659,6 +659,15 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
                     }
                 }
             }
+            // KLEE'S COVEN PERSONALS (R236), still before the latch. Yuegui
+            // draws a target from `Rng.CombatTargets`, so its position decides
+            // every later roll; it grants no Block, so it cannot change the
+            // answer Nicole's latch is about to record. Sim twin: the tail of
+            // `effects.player_turn_end_triggers` -> `companion_coven.turn_end`.
+            foreach (var yuegui in creature.Powers.OfType<YueguiPower>().ToList())
+            {
+                await yuegui.FireVolley(choiceContext);
+            }
             foreach (var rev in creature.Powers.OfType<RevelationPower>().ToList())
             {
                 rev.NoteEndOfTurn();

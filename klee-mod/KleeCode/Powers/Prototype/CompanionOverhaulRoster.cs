@@ -69,6 +69,13 @@ internal static class CompanionOverhaulRoster
             .Where(c => !Nations.Contains((c as ICompanionCard)?.Nation))
             .Concat(Universals())
             .Concat(InazumaUniversals())
+            // AND KLEE'S COVEN PERSONALS (R236). They are on this list for the
+            // reason the Universals are -- one roster, three offer surfaces --
+            // and it is the `PersonalPool` filter at each offer site
+            // (`CompanionPool.IsOfferable`) that keeps them Klee's, not a
+            // second roster. `CompanionCovenRoster` says why Prune's shipped
+            // row needs no exclusion of its own.
+            .Concat(CompanionCovenRoster.Personals())
             .ToList();
 
     /// <summary>
