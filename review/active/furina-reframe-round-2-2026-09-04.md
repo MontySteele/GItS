@@ -185,3 +185,47 @@ unread; round three reads it.
 The numbers in pick 1 (1) and (2) and pick 2 (3) are prototype numbers, D
 by the ladder; each pick is which surface moves, which is the reframe's own
 question.
+
+## 7. Round three, read after the fixes
+
+Two Opus seats played one more run on `0.2.2401+proto`, which carries #363's
+fixes in the C# (`review/qa/furina-reframe-round-3-2026-09-04/opus-act1.md`,
+`opus-act2.md`). One caveat first: the act-1 seat's page came from `main`,
+without #363's page half, so its two page findings (the Encore meter's "no
+rule for how it is spent", the Spotlight meters still listed) are the
+unfixed page and not a read of the fix; the act-2 seat had the fixed page.
+The picks in §6 were not applied; this run reads the fixes only.
+
+Act 1 cleared at 45 of 85 (189 actions), The Kin dead, an 18-card deck on
+Ethereal Spotlight, Silver Crucible and Tiny Mailbox. Act 2 (126 actions)
+cleared four fights and died on floor 25 to an Infested Prism the map
+offered as the only node, at 17 of 85 going in, the same floor and the same
+Elite that killed round one's act 2.
+
+What the fixes did: the Salon badge names the member and the deploy's
+performance shows on a buff line the moment it happens (`opus-act1.md`
+§(c) 4), which is `EB-383` and `EB-384` read true, and the seat's one
+complaint is that the card face still does not say it (`EB-398`, on the
+round-10 branch above this one). Encore fell by exactly 3 across two turn
+boundaries and held across two others, which is the absorption rule at
+work (`EB-382`); the seat could not see the rule because its page was the
+old one.
+
+What the round adds: the opening is solved and automatic by fight four,
+buy Encore, Ethereal Spotlight, the biggest Companion, four times
+identically (`opus-act1.md` §(b)); the Salon is the longest rules block on
+the screen and paid about 25 damage and 30 Block in seven fights; Fanfare
+peaked at 15 and the seat never acted on it, which is §6 pick 1's fact
+again; Casting Call was never worth playing and Duet+ was the best card in
+the deck (`opus-act2.md` §(d)); Freminet's Block half prints 6 and pays 9
+under Guest Cast while his damage prints its boost (`EB-388`, widened);
+Lightning Rose's Vulnerable never showed on a body across three castings
+(`EB-399`, above this branch); Tainted's circular gloss cost the seat its
+last Elite (`EB-359`); the Burst tooltip still reads 0 of 70 (`EB-369`).
+The elemental layer was, for the third round running, the part every seat
+called legible and the source of the best turns.
+
+Nothing in round three moves §6. Pick 1 has three rounds of Fanfare
+between 0 and 15 behind it; pick 2 now has the absorption printed on the
+meter for the round-four seat to read.
+
