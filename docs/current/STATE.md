@@ -102,8 +102,8 @@ Slay the Spire 2 **v0.111.0**, commit `41cef1ea`, buildid `24724944`, appid
 v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
-`+proto` dev mark (R217 D). **Installed: `0.2.2136+proto.dirty`** (2026-09-02,
-main `4da69fe5`), the three prototype arms behind `-p:PrototypeCards=true`; the
+`+proto` dev mark (R217 D). **Installed: `0.2.2256+proto`** (2026-09-03,
+main `1710dfb4`), the three prototype arms behind `-p:PrototypeCards=true`; the
 Furina arm needs `-p:FurinaReframe=true` too and ships OFF. **Last RELEASE
 package: `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
 
@@ -135,16 +135,17 @@ are in [`workstreams.md`](workstreams.md).
 
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
-- **Klee** — Prototype round 6 is installed: the R242 starter with R243's
-  numbers (growth 4, Ka-pow! Retain, the Sparks 'n' Splash echo, the base
-  Strike applying nothing) and the Plan/Bomb upgrade pass (EB-315). The
-  Fable card audit (PR #302)
-  is the next build; the seats then play three acts before [USER] does.
-- **Kokomi** — Prototype round 3 on draft 6, *the Plan* (brief R241), the
-  rules gate passed on [USER]'s act-1 run (R243). Installed with the same
-  build; the casket and morning legibility rows (`EB-316`, `EB-317`) and the
-  Fable card audit (PR #303) are next; the acts-2/3 depth is the Plan cards'
-  own design, no momentum rule. The Kurage memory is base kit behind
+- **Klee** — Prototype round 7b is read: four Opus seats played three acts
+  on the R243 numbers, the Fable card audit and the stand-ins, and died two
+  floors below Aeonglass (`review/active/klee-overhaul-round-7b-2026-09-03.md`,
+  two picks: whose modifiers a Bomb carries, block on a schedule). Round 8
+  builds the picks and the Hexerei readers (`EB-326`); [USER] plays it.
+- **Kokomi** — Prototype round 4c is read and ruled (R246,
+  `review/ruled/kokomi-overhaul-round-4c-2026-09-02.md`): three Opus seats
+  died on floor 24 with the Plan layer answering act 2's damage and none of
+  its block. Round five builds `EB-334` (the Bake-Kurage deals Plan damage)
+  and `EB-335` (Tide Wall, Shell Guard); a second seat run on the fix build
+  comes first, then [USER]'s. The Kurage memory is base kit behind
   `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF; no
