@@ -161,17 +161,25 @@ def test_the_pool_ids_and_the_sheet_agree(overhaul):
     where the rows live; a row on one and not the other is a row that either
     cannot be offered or does not exist.
 
-    THE STAND-INS ARE THE ONE EXCLUSION, and it is the seam's whole point: a
-    stand-in is handed to Klee IN PLACE of a Universal and is a member of no
-    pool, so it is on the sheet and deliberately not on this list. It is
-    subtracted by `C.COMPANION_STANDIN_IDS` rather than by its `replaces:` key,
-    so a stand-in that fell off that list would fail here instead of quietly
-    joining the offerable pool."""
+    THREE LISTS SINCE R236, and the split is what a `proto_mc_` row can be. The
+    Mondstadt workshop's sec.3 rewrites the nation's UNIVERSALS, its sec.4 gives
+    Klee four PERSONALS (`personal_pool`, filtered at every offer site), and its
+    sec.3 stand-ins are handed to Klee IN PLACE of a Universal and are a member
+    of no pool -- on the sheet and deliberately on neither pool list, subtracted
+    by `C.COMPANION_STANDIN_IDS` rather than by their `replaces:` key, so a
+    stand-in that fell off that list fails here instead of quietly joining the
+    offerable pool. A row on none of the three is still the defect this asks
+    about."""
     on_sheet = {c.id for c in loader.prototype_cards()
                 if c.id.startswith("proto_mc_")}
-    assert on_sheet - set(C.COMPANION_STANDIN_IDS) == set(
-        C.MONDSTADT_OVERHAUL_POOL_IDS)
     assert set(C.COMPANION_STANDIN_IDS) <= on_sheet
+    assert on_sheet - set(C.COMPANION_STANDIN_IDS) == (
+        set(C.MONDSTADT_OVERHAUL_POOL_IDS) | set(C.COVEN_PERSONAL_POOL_IDS))
+    assert not (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
+                & set(C.COVEN_PERSONAL_POOL_IDS))
+    assert not (set(C.COMPANION_STANDIN_IDS)
+                & (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
+                   | set(C.COVEN_PERSONAL_POOL_IDS)))
 
 
 def test_the_banner_roster_moves_with_the_pool(overhaul):
@@ -206,6 +214,9 @@ HEXEREI_ROWS = {
     "proto_mc_razor_claw_and_thunder",
     "proto_mc_razor_lightning_fang",
     "proto_mc_varka_sturm_und_drang",
+    # The coven Personal off the same sec.3 line as the shipped Prune row it
+    # supersedes: Prune is a tagged character in the workshop's own list.
+    "proto_mc_prune_hexhunter_chime",
 }
 
 
@@ -464,6 +475,11 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
                         "SoumetsuPower", "KyoukaPower", "TamotoPower",
                         "CrimsonOoyoroiPower", "WarBannerPower",
                         "AurousBlazePower",
+                        # KLEE'S COVEN (R236), last before the latch. Its sim
+                        # twin is `companion_coven.turn_end`, called from the
+                        # tail of `player_turn_end_triggers` for the same
+                        # reason: the throw draws from the rng.
+                        "YueguiPower",
                         "RevelationPower"], cs_order
 
 

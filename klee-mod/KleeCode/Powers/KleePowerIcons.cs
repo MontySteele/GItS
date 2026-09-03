@@ -157,6 +157,12 @@ internal static class KleePowerIcons
         ColdBloodedPower => KleePck.Path("klee/powers/frozen.png"),
         IGotYourBackPower => KleePck.Path("klee/powers/celestial_gift.png"),
         LionsFangPower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        // KLEE'S COVEN PERSONALS (R236), same arm and same terms again: each
+        // borrows the shipped icon of the power whose job it takes over, and
+        // the four rows' own illustrations are deferred to the Balance stage.
+        HexhunterChimePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        HeraldOfFrostPower => KleePck.Path("klee/powers/oz_summon.png"),
+        YueguiPower => KleePck.Path("klee/powers/oz_summon.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

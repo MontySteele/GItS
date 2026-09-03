@@ -13,8 +13,9 @@ import copy
 from typing import Optional, Sequence
 
 from tier0 import constants as C
-from tier0.engine import (companion_standins, furina_reframe, klee_overhaul,
-                          kokomi_plan, powers, reactions, resources, statuses)
+from tier0.engine import (companion_coven, companion_standins, furina_reframe,
+                          klee_overhaul, kokomi_plan, powers, reactions,
+                          resources, statuses)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, KurageMemory,
                                 grant_sly_autoplay,
@@ -5289,6 +5290,11 @@ OPS = {
     # a property of the code.
     "plan_twice": _op_kokomi_plan_only,
     "damage_per_companion_last_turn": _op_kokomi_plan_only,
+    # THREE now, and the third is Crystal Collapse's (R236). Same terms: it is
+    # registered so `loader.prototype_cards` can validate the row's `plan:`
+    # list through the body's own vocabulary check, and it refuses when it is
+    # reached from an `effects:` list.
+    "play_copy_of_companion": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,
@@ -5819,10 +5825,15 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
         else:
             del enemy.powers["mc_melody_loop"]
     inazuma_overhaul_turn_start(state)
-    # THE STAND-IN SEAM's one start-of-turn rule -- Jean's Lion's Fang, Fair
-    # Protector, which is Grounded's shape with a card on it. LAST, and
-    # commutative with everything above it: it grants the player Block and a
-    # draw and reads only the explosion counter, which nothing here writes.
+    # ---- and KLEE'S COVEN PERSONALS, last (QUARANTINED, R236) --------------
+    # Qiqi's Herald applies Cryo, which can resolve a reaction, and Mona's omen
+    # above applies Vulnerable to ALL enemies -- so the two are not commutative
+    # and one sequence is written down. `tier0.engine.companion_coven`.
+    companion_coven.turn_start(state)
+    # THE STAND-IN SEAM's one start-of-turn rule after it -- Jean's Lion's
+    # Fang, Fair Protector, Grounded's shape with a card on it. LAST, and
+    # commutative with everything above: it grants Block and a draw and reads
+    # only the explosion counter, which nothing here writes.
     companion_standins.turn_start(state)
 
 
@@ -6298,6 +6309,11 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
     # block rather than after the latch precisely so Nicole's question is
     # asked of the board the player really ended the turn holding.
     inazuma_overhaul_turn_end(state)
+    # ---- KLEE'S COVEN PERSONALS, still before the latch (R236) -------------
+    # Yaoyao's Yuegui draws a target from `state.rng`, so its position decides
+    # every later roll; it grants no Block, so it cannot change the answer
+    # Nicole's latch is about to record. `tier0.engine.companion_coven`.
+    companion_coven.turn_end(state)
     # Nicole's latch, LAST. Written unconditionally rather than only while she
     # is on the board: a card drafted mid-fight must not read a stale answer
     # from the turn before it existed, and the field is per-combat anyway.
@@ -6762,6 +6778,11 @@ def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
         if n:
             p.powers["mc_swirl_charge"] = p.powers.get("mc_swirl_charge", 0) + n
             p.mc_swirl_element = aura
+        # KLEE'S COVEN, third reader of the same event (QUARANTINED, R236).
+        # Prune's Chime latches unconditionally rather than asking whether it
+        # is up, because the Attack that arms it swirls BEFORE it arms --
+        # `companion_coven.note_swirl` argues it.
+        companion_coven.note_swirl(state, aura)
 
 
 def companion_overhaul_reaction_mult(state: CombatState) -> float:

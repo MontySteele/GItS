@@ -2896,6 +2896,90 @@ def test_the_two_rares_that_change_what_the_queue_means_are_printed():
     assert "Plans also happen NOW" in page
 
 
+# --------------------------------------------------------------------------
+# THE CARRY-OUT MOMENT (`EB-317`). Two Opus seats asked for one: the morning
+# drained and "the panel simply reads empty", so nothing on the page or the
+# screen said WHICH Plans had just happened or for how much. The mod now says
+# a line over the jellyfish's head per Plan carried out and puts the SAME
+# STRING on the wire; what is pinned here is that the page prints that string
+# rather than composing a second one of its own.
+# --------------------------------------------------------------------------
+
+
+CARRIED_OUT = dict(TWO_PLANS, pending=0, queue=[], carried_out=[
+    {"card": "Ambush", "number": 12, "line": "Bake-Kurage: Ambush, 12"},
+    {"card": "Stolen Chapter", "number": None,
+     "line": "Bake-Kurage: Stolen Chapter"},
+])
+
+
+def test_the_page_prints_the_carry_out_line_the_screen_showed():
+    """The row's own format, and the row's own example. The number is what the
+    clause PRODUCED, not what the sheet printed, so a Vaporized planned hit
+    says the number the enemy actually took."""
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(CARRIED_OUT)))
+    assert "carried these out at the start of this turn" in page
+    assert "- Bake-Kurage: Ambush, 12" in page
+    # A clause with no number is the card name alone -- never a dangling comma.
+    assert "- Bake-Kurage: Stolen Chapter" in page
+    # ORDER IS THE MORNING'S, front first, the same order the strip empties in.
+    assert (page.index("Bake-Kurage: Ambush")
+            < page.index("Bake-Kurage: Stolen Chapter"))
+
+
+def test_the_page_prints_the_mods_sentence_and_never_rebuilds_it():
+    """ONE COMPOSER, AND IT IS C#. `line` is what the speech bubble said; the
+    page is not entitled to a second opinion about the words, because a page
+    and a screen that word the same event differently is the whole failure the
+    field exists to prevent. A doctored `line` must reach the page verbatim."""
+    doctored = dict(CARRIED_OUT, carried_out=[
+        {"card": "Ambush", "number": 12, "line": "Bake-Kurage said this"}])
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(doctored)))
+    assert "- Bake-Kurage said this" in page
+    assert "Ambush, 12" not in page
+
+
+def test_a_wire_without_the_sentence_still_gets_the_ruled_format():
+    """The one fallback, for a bridge older than the field: the parts are
+    there, so the page prints the same format the mod would have."""
+    older = dict(CARRIED_OUT, carried_out=[
+        {"card": "Ambush", "number": 12}, {"card": "Stolen Chapter"}])
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(older)))
+    assert "- Bake-Kurage: Ambush, 12" in page
+    assert "- Bake-Kurage: Stolen Chapter" in page
+
+
+def test_a_turn_with_no_carry_out_prints_no_carry_out_block():
+    """The morning drain clears the record whether or not anything was due, so
+    an empty list is a fact about THIS turn and not a stale one about the last.
+    Nothing carried out is nothing to say."""
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(dict(TWO_PLANS, carried_out=[]))))
+    assert "carried these out" not in page
+    # And the section itself is unchanged for a board that never had the field.
+    assert "1. **Kurage's Oath (proto)**" in page
+
+
+def test_the_meter_ledger_stays_off_the_carry_out_block():
+    """`R101b`. The page line is the ON-SCREEN text, and the ledger's rows --
+    meter, before, after, price_paid -- are an instrument, not a surface a
+    player ever reads. None of its vocabulary may leak in with the lines."""
+    obs = blindplay.observation(plans_combat_state(CARRIED_OUT))
+    page = blindplay.render(obs)
+    block = [ln for ln in page.splitlines()
+             if ln.strip().startswith("- Bake-Kurage:")]
+    assert block, "the carry-out lines are gone"
+    for line in block:
+        for word in ("price_paid", "meter_ledger", "before=", "after="):
+            assert word not in line
+    # And the observation carries nothing but the three ruled fields per row.
+    for row in obs["combat"]["plans"]["carried_out"]:
+        assert set(row) == {"card", "number", "line"}
+
+
 def test_the_grammar_offers_the_jellyfish_only_where_there_is_one():
     with_pet = blindplay.observation(plans_combat_state(TWO_PLANS))
     assert any('on "Bake-Kurage"' in c for c in with_pet["commands"])

@@ -1670,4 +1670,157 @@ arm off (pinned by `tier0/tests/test_companion_standins.py`):
 
 THE DELETION RULE AT THE TOP OF THE SHEET BINDS THIS BLOCK: these rows leave
 when the arm is accepted or rejected.
+## before proto_mc_prune_hexhunter_chime
+
+```
+# KLEE'S COVEN PERSONALS (QUARANTINED, R213 B / R236). Four rows, and they are
+# the whole of the approved Mondstadt workshop's sec.4 plus the Prune entry in
+# its sec.3. Same arm and same flag pair as the two nation blocks above; what
+# is different is the CHANNEL. A Personal is not a Universal: `personal_pool:
+# klee` is filtered at every offer site in both engines (`rewards`, the shop's
+# `eligible`, `CompanionPool.IsOfferable`), so these four are offered to Klee
+# and to nobody else, they are on neither nation's pool list, and neither
+# nation's count moves. R234 P5 allows three to five Personals; these four are
+# the set.
+#
+# PRUNE SUPERSEDES HER OWN SHIPPED ROW, and it costs no second rule. The Chime
+# is `prune_witch_hunt` re-authored, and under the arm the shipped row is gone
+# because the replacement KEEPS only rows of a nation the arm does not replace
+# -- Prune is Mondstadt. So the supersession is the nation filter that was
+# already there, and with the flag off the shipped row is byte-identical. Her
+# illustration is REUSED rather than re-fetched: `art_of: prune_witch_hunt` is
+# read at the codegen's one `CustomPortrait` line, because `art_lint` L11 is
+# one producer per out-path and a second plan.tsv row for the same picture is
+# exactly the collision that rule names.
+#
+# THE NATIONS ARE THE CHARACTERS' OWN, and two of them are new here. Sayu is
+# Inazuma; Qiqi and Yaoyao are LIYUE, which has no workshop, no shipped
+# companion row and no card in either nation pool. Nothing breaks: `nation` is
+# free text that two things read, the reward slot's same-nation weighting and
+# the shop's HOME slot filter, so an off-region Personal is weighted lower in
+# the slot and reachable in the shop's any-region slot rather than its home
+# one. That is today's behaviour applied to a wider roster, not a new rule.
+#
+# ONE SHARED FILTER MOVED, and it closes a contradiction rather than adding a
+# rule. Qiqi is a FIVE-STAR character, so `star: 5`; the Featured Banner is
+# rolled from `five_star_roster`, which excludes Personals by name (a Personal
+# is a character's kit, not a draw), and `_banner_filtered` then gated every
+# five-star that was not ON a banner -- which made a five-star Personal
+# unofferable everywhere instead of rarely. Both engines argued both halves and
+# both reached the same split, so both now exempt a Personal from the gate
+# (`rewards._banner_filtered`, `CompanionBanner.IsOffered`). NOTHING SHIPPED
+# MOVES: `prune_witch_hunt` is the only personal-pool companion in the index
+# and it is a four-star, so the clause is unreachable on a release build --
+# pinned by `test_companion_coven.py` rather than assumed.
+#
+# WHAT EACH ROW SPENDS.
+#
+#   Prune, Hexhunter Chime    the ONE place the companion arm reaches into the
+#                             KLEE arm's rules: rule 5's Pyro becomes the
+#                             swirled element for ONE explosion. The latch is
+#                             on the turn-scoped ledger and not on the power,
+#                             and the card is why -- its printed order is
+#                             "Deal 8 damage. Swirl. The next Bomb ...", so the
+#                             Swirl it names resolves BEFORE the rider it arms
+#                             and a latch on the power would always be empty.
+#                             Varka's Sturm und Drang is the opposite case (a
+#                             Power already standing when the Swirl happens),
+#                             which is why the two latch differently.
+#   Sayu, Silencer's Secret   no power and no new op at all: `swirl`, `block`
+#                             and the `bomb_went_off_this_turn` predicate the
+#                             Klee arm already reads in both engines.
+#   Qiqi, Herald of Frost     a start-of-turn payout, the SignatureMixPower
+#                             shape. "Twice" is two applications at ONE body:
+#                             the printed words aim once and then say how many
+#                             times, and the second application is what lets
+#                             the card be its own reaction.
+#   Yaoyao, Yuegui            an end-of-turn volley that places a Bomb, so it
+#                             joins the ONE end-of-turn sequencer (it draws
+#                             from the rng) and takes the Klee arm's own gate
+#                             as well as this one. The clock ticks even where
+#                             the Bomb cannot land, which is what keeps the
+#                             power from becoming permanent on a board it could
+#                             not reach.
+#
+# THE NAME SAYU'S ROW DOES NOT USE. The ruled paper called this card "Yoohoo
+# Art: Fuuin Dash". That name is already spoken for: it belongs to her INAZUMA
+# Universal, `proto_mi_sayu_fuuin_dash`, and display names are unique by LAW
+# R69 (`tools/lint_display_names.py` over this sheet). So the Personal takes
+# her PASSIVE's name -- "Yoohoo Art: Silencer's Secret" -- which is the same
+# character's own words and leaves the Universal untouched.
+#
+# THREE NUMBERS AND NO MORE are in `tier0/constants.py` (`CVN_*`) with C#
+# mirrors in `CompanionCovenLaw`: a number a POWER carries lands there, a
+# number the CARD prints stays on the row. Prune DECLARES her upgrade
+# (`{damage: +3}`, the Prototype-stage rule's own delta) rather than deriving
+# one, because the derived default would also bump the Chime's marker stack --
+# a number the face does not print, and a second stack would arm the rider
+# twice.
+#
+# THE DELETION RULE AT THE TOP OF THE SHEET BINDS THIS BLOCK: these rows leave
+# when the arm is accepted or rejected.
+## `proto_mi_gorou_crystal_collapse` — Kokomi's Personal (R236, 2026-09-02)
+
+```
+GOROU — CRYSTAL COLLAPSE, and it is the Inazuma workshop's ONE Personal:
+"Plan: play a copy of the last other Companion card you played this turn."
+1 Energy, Skill, Uncommon, Geo, four-star, upgrade 1 -> 0.
+
+WHY IT IS NOT ONE OF THE TWENTY-FOUR. A Personal is a character's kit rather
+than a companion offer. It carries `personal_pool: kokomi`, so it enters the
+arm's ROSTER (a row that never did could not be offered to its own character
+either) through `C.INAZUMA_OVERHAUL_PERSONAL_IDS` /
+`CompanionOverhaulRoster.InazumaPersonals`, and the offer layer's own
+`personal_pool in (None, character_id)` filter -- Prune's door since the
+shipped Mondstadt sheet -- keeps it out of everybody else's slot. It is
+deliberately absent from `C.INAZUMA_OVERHAUL_POOL_IDS`, whose every id is
+asserted `personal_pool is None`.
+
+WHY `character: kokomi` ON AN INAZUMA COMPANION ROW. The row prints a `plan:`
+line, and `gen_klee_cards.card_level_reason` refuses one on any character but
+Kokomi: the emitted body calls her queue and the row declares a pet-accepting
+TargetType, so a Plan on anybody else's row would be a rule that character does
+not have wearing a schema key. The other twenty-four Inazuma rows are
+`character: klee` because they print nothing of hers.
+
+THE ONE NEW CLAUSE: `play_copy_of_companion` / `KokomiPlan.Kind.
+PlayCopyOfCompanion`. Two readings the printed text left open, both taken the
+same way in both engines:
+
+  * WHEN IS THE CARD CHOSEN? At WRITING time, not at carry-out. "This turn" is
+    a fact about the turn the Plan was written on and the Plan resolves on the
+    next one, so a read at the morning would find nothing on almost every
+    board. The captured card rides the entry (`PlanEntry.card` /
+    `Planned.Card`), which is the field `replay_exhausted` already uses.
+  * WHAT IS "OTHER"? The card writing the Plan is excluded by IDENTITY, so a
+    second copy of Crystal Collapse played earlier the same turn IS other. In
+    the mod the exclusion is free (the recorder is an `AfterCardPlayed`
+    listener and this runs in `OnPlay`); in the sim it is necessary
+    (`combat._finish_play` records the play before the body resolves). Both
+    engines assert it, so the two say so for the same reason.
+
+A COPY, NOT THE CARD. Moon's Reflection takes its chosen card OUT of the
+exhaust pile and plays that instance; this leaves the original where the first
+play sent it and plays a clone (`ICombatState.CloneCard` / `copy.deepcopy`, the
+same idiom Anger's self-clone uses), exhausted after so the deck is neither one
+card shorter nor one longer. The aim is `KokomiPlan.FrontEnemy`, the reader
+every planned hit already uses.
+
+THE EMPTY CASE IS WRITTEN DOWN, not refused: a turn with no other Companion in
+it queues a Plan that carries out as nothing. Refusing to queue would make the
+pending-Plans badge and the strip lie about the queue's depth, and the face
+says what it does with nothing. The strip says which card it holds --
+"Crystal Collapse: Gorou — Juuga: Forward Unto Victory", or "Crystal Collapse:
+nothing" -- through `KokomiPlan.Entry.Label`, the only Plan that overrides its
+strip line.
+
+NEREID'S ASCENSION DOUBLES IT like any other Plan, which is two copies; nothing
+about this clause is special to `ResolveAll`'s drain loop.
+
+ART: `art_of: proto_mi_gorou_juuga`, so the row borrows an illustration Gorou's
+Universals already staged rather than minting an `art/plan.tsv` row for a
+fourth picture of the same character.
+
+THE DELETION RULE AT THE TOP OF THE SHEET BINDS THIS ROW: it leaves when the
+arm is accepted or rejected.
 ```

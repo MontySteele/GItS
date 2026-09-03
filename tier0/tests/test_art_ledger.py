@@ -404,6 +404,32 @@ def test_build_excluded_working_file_is_not_stale(root):
     assert "$pckExclude" in recorded["ImageGen/images/ui/klee_cutout.png"]
 
 
+def test_pck_exclude_reads_the_array_spelling_too(root):
+    """`EB-158` grew `$pckExclude` past one entry, so it became a PS array.
+
+    A parser that only knew the scalar spelling would read that array as NO
+    exclusions at all -- and then report every file the build deliberately
+    leaves out as a STALE-OUTPUT defect, which is the loudest possible way to
+    be silently wrong. Both spellings are exercised: the scalar by the test
+    above, the array here.
+    """
+    _png(root, "ImageGen/images/ui/klee_cutout.png")
+    _png(root, "ImageGen/images/ui/klee_master_plate.png")
+    script = root / "tools" / "build_pck.ps1"
+    script.write_text(
+        script.read_text(encoding="utf-8").replace(
+            "$pckExclude = '*_cutout.png'",
+            "$pckExclude = @('*_cutout.png',\n"
+            "                'klee_master_plate.png')"),
+        encoding="utf-8")
+
+    led = art_ledger.Ledger(root)
+    assert checks(led, "STALE-OUTPUT") == []
+    recorded = dict(led.stale_outputs)
+    assert "$pckExclude" in recorded["ImageGen/images/ui/klee_cutout.png"]
+    assert "$pckExclude" in recorded["ImageGen/images/ui/klee_master_plate.png"]
+
+
 # ---------------------------------------------------------------------------
 # CHECK 3 -- an unintended fallback
 # ---------------------------------------------------------------------------
@@ -610,6 +636,53 @@ def test_report_renders_without_an_art_tree(tmp_path):
 # ---------------------------------------------------------------------------
 # Rot guards against the real repo (skipped where the file is absent)
 # ---------------------------------------------------------------------------
+
+def test_klee_source_masters_stay_out_of_the_pck():
+    """`EB-158`: 1.18 MB of a 9.14 MB pack was two source masters nothing
+    loads. They left through `$pckExclude`, not through the plan, because one
+    of them is still a real input -- see the next test."""
+    build = REPO / "tools" / "build_pck.ps1"
+    if not build.is_file():
+        pytest.skip("no build_pck.ps1 in this checkout")
+    globs = set(art_ledger.Ledger(REPO)._pck_exclude_globs())
+    assert globs >= {"*_cutout.png", "character_klee_full_wish.png",
+                     "klee_character_card.png"}
+
+
+def test_combat_layer_cut_sources_are_still_produced_by_the_plan():
+    """The cutter's INPUT is not a runtime reference, and that is the trap.
+
+    `character_klee_full_wish.png` is referenced by nothing in C#, no .tscn and
+    no .tres -- so an audit of runtime references calls it unreferenced and an
+    unreferenced master is a thing you delete. It is in fact the source
+    `tools/combat_layer_fences/klee.yaml` reads to cut the five combat layer
+    sprites that DO ship, so dropping its `art/plan.tsv` row would leave the
+    cutter with no input and the failure would surface a sprint later, in an
+    art tool nobody was touching. Every fence source must therefore still be
+    SOMETHING the repo produces: an `art/plan.tsv` out-path (Klee) or a file a
+    generator under tools/ writes (Furina's cached cutout).
+    """
+    fences = sorted((REPO / "tools" / "combat_layer_fences").glob("*.yaml"))
+    plan = REPO / "art" / "plan.tsv"
+    if not fences or not plan.is_file():
+        pytest.skip("fence configs or the Tier F plan ledger are absent")
+    with plan.open(encoding="utf-8", newline="") as f:
+        outs = {line.rstrip("\r\n").split("\t")[1]
+                for line in f
+                if line.strip() and not line.startswith("#")}
+    # Generators build their paths out of parts, so the basename is what can
+    # be matched -- which is enough to prove the file still has an author.
+    generated = "\n".join(p.read_text(encoding="utf-8", errors="replace")
+                          for p in (REPO / "tools").glob("*.py"))
+    for cfg in fences:
+        for line in cfg.read_text(encoding="utf-8").splitlines():
+            if not line.startswith("source:"):
+                continue
+            src = line.split(":", 1)[1].split("#")[0].strip()
+            assert src in outs or Path(src).name in generated, (
+                f"{cfg.name} cuts from {src}, which no art/plan.tsv row and "
+                f"no tools/ generator produces any more")
+
 
 def test_pck_source_map_rules_are_still_in_the_build_script():
     """The res:// -> ImageGen map is derived from build_pck.ps1's copy blocks.

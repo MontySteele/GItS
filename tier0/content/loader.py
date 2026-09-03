@@ -470,12 +470,13 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
                     f"{path.name}: {card_id!r}: `plan:` must be a non-empty "
                     "list of effects")
             _validate_effect_vocabulary(card_id, plan)
-        # THE STAND-IN SEAM: `art_of:` is stripped for `description:`'s reason
-        # and it is the same kind of fact -- whose ILLUSTRATION the row wears.
-        # tier 0 draws nothing, so an `art_of` on `Card` would be a field the
-        # engine carries and nothing reads; the codegen emits it into
-        # `RosterArt.CardPortrait` on the other side. `replaces:` is KEPT,
-        # because the sim's hand-off is a rule and reads it.
+        # `art_of:` is stripped for the reason `description:` is, and it is
+        # the same kind of fact: which row's ILLUSTRATION this row borrows.
+        # Only the mod loads an image (`RosterArt.CardPortrait` keys on the id
+        # the emitter prints), tier0 has no art and never will, so a field on
+        # `Card` would be one the engine carries and nothing reads.
+        # `replaces:` is KEPT, because the sim's stand-in hand-off is a rule
+        # and reads it (`tier0.engine.companion_standins`).
         card = Card.from_dict({k: v for k, v in d.items()
                                if k not in ("authored_by", "description",
                                             "art_of")})
@@ -1310,8 +1311,20 @@ def companion_roster_replacement() -> list[Card] | None:
         return None
     kept = [c for c in _card_index().values()
             if c.is_companion and c.nation not in C.COMPANION_OVERHAUL_NATIONS]
+    # AND THE PERSONALS, which are not Universals and are not in either
+    # nation's pool list: `personal_pool` is what makes a row one character's,
+    # and `tier05.rewards` filters `personal_pool in (None, character_id)` at
+    # the offer site. They are added to the ROSTER anyway -- the roster is
+    # what an offer surface may see, and a Personal that never entered it
+    # could not be offered to its own character either. Kokomi's (R236,
+    # `INAZUMA_OVERHAUL_PERSONAL_IDS`) and Klee's coven (R236,
+    # `COVEN_PERSONAL_POOL_IDS`) ride the same list; Prune's shipped
+    # `prune_witch_hunt` is superseded by the KEPT half's nation filter
+    # above, which drops every Mondstadt row the lists do not name.
     added = [peek_card(cid) for cid in (C.MONDSTADT_OVERHAUL_POOL_IDS
-                                        + C.INAZUMA_OVERHAUL_POOL_IDS)]
+                                        + C.INAZUMA_OVERHAUL_POOL_IDS
+                                        + C.INAZUMA_OVERHAUL_PERSONAL_IDS
+                                        + C.COVEN_PERSONAL_POOL_IDS)]
     return sorted(kept + added, key=lambda c: c.id)
 
 

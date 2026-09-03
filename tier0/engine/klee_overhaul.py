@@ -395,13 +395,19 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     hit, so the diff is exact. `reactions_this_card` would have been wrong --
     a Mine answering an enemy attack is not inside a card.
     """
+    from tier0.engine import companion_coven        # late import: cycle
     from tier0.engine import effects                # late import: cycle
 
     size = charge.size * multiplier
     before = state.reactions_this_turn
     state.emit("ko_explosion", target=enemy.name, size=size,
                mine=charge.is_mine, multiplier=multiplier)
-    dealt = effects.deal_damage_to_enemy(state, enemy, size, element="pyro",
+    # PYRO, UNLESS A COVEN PERSONAL SAYS OTHERWISE (QUARANTINED, R236). Prune's
+    # Hexhunter Chime is the one thing in either engine that can move rule 5's
+    # element, and it moves it for ONE explosion; `companion_coven.bomb_element`
+    # answers "pyro" on every other board and with the companion arm off.
+    element = companion_coven.bomb_element(state)
+    dealt = effects.deal_damage_to_enemy(state, enemy, size, element=element,
                                          source=EXPLOSION_SOURCE)
     reacted = state.reactions_this_turn > before
     # `dealt` is the number the hit LANDED for, straight off the funnel that

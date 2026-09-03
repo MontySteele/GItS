@@ -712,8 +712,14 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         // ledger and its face says "the damage the Bombs dealt", so the two
         // have to be one number -- `size` is the charge, not the damage, and
         // under Weak (or Strength, or Vulnerable) they are different.
+        // PYRO, UNLESS A COVEN PERSONAL SAYS OTHERWISE (R236). Prune's
+        // Hexhunter Chime is the one thing in either engine that moves rule 5's
+        // element, and it moves it for ONE explosion; the call answers Pyro on
+        // every other board and with the companion arm off. Sim twin:
+        // `companion_coven.bomb_element`, read at `klee_overhaul._explode`.
+        var element = await CompanionCovenBombs.ElementFor(choiceContext, applier);
         var dealt = await ElementalHit.Deal(
-            choiceContext, target, Element.Pyro, size, applier);
+            choiceContext, target, element, size, applier);
         var reacted = ReactionEffects.TotalResolved > reactionsBefore;
 
         ledger.NoteExplosion(reacted, dealt);

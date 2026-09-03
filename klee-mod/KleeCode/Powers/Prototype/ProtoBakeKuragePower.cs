@@ -5,6 +5,8 @@ using BaseLib.Abstracts;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
+using KleeMod.Cards;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
@@ -93,6 +95,33 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         if (Owner == null || player.Creature != Owner) return;
         if (!KokomiOverhaul.LiveFor(Owner)) return;
         await KokomiPlan.ResolveAll(choiceContext, Owner);
+    }
+
+    /// <summary>
+    /// CRYSTAL COLLAPSE'S MEMORY (R236): the last Companion card she played
+    /// this turn.
+    ///
+    /// HOSTED HERE FOR THE REASON THE RESOLUTION ABOVE IS. Rule 1 guarantees
+    /// this power is on her for every turn of every combat, so a per-turn fact
+    /// hung off it is recorded on every board; The General's Banner's own
+    /// <c>AfterCardPlayed</c> -- which writes the COUNT beside this -- is a
+    /// card she may never draw, and a memory that only exists while a Power is
+    /// out would read null on most boards and make the card's face a lie.
+    ///
+    /// IT RECORDS AND NOTHING ELSE. The "other" half of "the last other
+    /// Companion card" is applied where the memory is READ
+    /// (<c>KokomiPlan.Schedule</c>), so this hook holds a fact and not a
+    /// reading.
+    /// </summary>
+    public override Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (Owner == null) return Task.CompletedTask;
+        if (!KokomiOverhaul.LiveFor(Owner)) return Task.CompletedTask;
+        if (cardPlay.Card is not ICompanionCard) return Task.CompletedTask;
+        if (cardPlay.Card.Owner?.Creature != Owner) return Task.CompletedTask;
+        KokomiOverhaulLedger.For(Owner).NoteCompanionCard(cardPlay.Card);
+        return Task.CompletedTask;
     }
 }
 

@@ -44,10 +44,10 @@ three questions that were holding the tail:
 Sheets: `art/contact_sheet_r231_2026-08-30.html` for the R231 faces and
 `art/contact_sheet_art_pass_2026-08-30.html` for the pass before it (local —
 contact sheets are Tier F and gitignored). Kokomi bill: **0 MISSING**, was 15
-before the pass and 5 before `R231`. One debt survives and is not an art bill:
-`what_the_tokoyo_returns` ships bytes whose rank-1 source is cleared NOWHERE in
-`SOURCES.tsv`, which is `EB-163`'s one live `PROVENANCE-GAP` and needs the same
-fetch window `all_hands` does. **character-shell track DONE** — see §5a
+before the pass and 5 before `R231`. The one surviving debt is now paid too:
+`what_the_tokoyo_returns` shipped bytes whose rank-1 source was cleared NOWHERE
+in `SOURCES.tsv`, and `478b83a6` landed that clearance, so `art_ledger --strict`
+reports `PROVENANCE-GAP -- 0`. **character-shell track DONE** — see §5a
 **Canonical content:** `docs/kokomi-cards.yaml`, `docs/inazuma-companions.yaml`
 **Bill owner:** `tools/art_coverage.py` — if this doc and the tool disagree, the tool is right (the lesson of the Furina bill correction).
 

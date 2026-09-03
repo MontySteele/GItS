@@ -918,6 +918,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # same line as the reaction window it counts a subset of -- one turn
     # boundary for both, so the two can never disagree about which turn it is.
     state.mi_swirls_this_turn = 0
+    # Same line, same reason (QUARANTINED, R236): the element Prune's Chime
+    # hands to a Bomb is "the swirled element" of THIS turn, so it is cleared
+    # with the window that counts those Swirls.
+    state.cvn_swirl_element = ""
     state.spotlighted_cards_this_turn = 0        # Ovation / reserve cap
     state.spotlighted_paid_cards_this_turn = 0   # B2: Leading Role's window
     state.spotlight_moved_this_turn = False      # selector-payoff window

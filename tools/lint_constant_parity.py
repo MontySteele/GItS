@@ -317,6 +317,12 @@ MIRRORED: dict[str, object] = {
     "CompanionOverhaulLaw.KyoukaFinale": C.MI_KYOUKA_FINALE,
     "CompanionOverhaulLaw.SurpriseDispatchDamage": C.MI_SURPRISE_DISPATCH_DMG,
     "CompanionOverhaulLaw.TamotoDamage": C.MI_TAMOTO_DMG,
+    # KLEE'S COVEN PERSONALS (QUARANTINED, R236), same flag and same terms:
+    # three numbers a POWER carries, mirrored by value because both engines
+    # play these four rows.
+    "CompanionCovenLaw.HeraldBlock": C.CVN_HERALD_BLOCK,
+    "CompanionCovenLaw.HeraldApplications": C.CVN_HERALD_APPLICATIONS,
+    "CompanionCovenLaw.YueguiBombSize": C.CVN_YUEGUI_BOMB_SIZE,
     # THE KOKOMI OVERHAUL (QUARANTINED, `C.KOKOMI_OVERHAUL`). Same terms again
     # and for the same reason: quarantined is not exempt. Draft 6 left the arm
     # with exactly ONE rule number -- Tamakushi Casket's Hydro strike, printed
@@ -371,6 +377,20 @@ UNMIRRORED: dict[str, str] = {
     "RosterArt.PortraitHeight":
         "`EB-275`. The other half of the card-art window's authored size; see "
         "`RosterArt.PortraitWidth` for the whole of it.",
+    "RosterArt.CacheCapacity":
+        "`EB-158`. A MEMORY BOUND, not balance: how many decoded card "
+        "portraits the LRU in `KleeArt.cs` holds before it evicts the least "
+        "recently used one. Sized off what the UI can want AT ONCE -- a "
+        "browsed end-of-run deck alongside a hand, a shop row and a reward "
+        "screen -- and the only thing it can change is whether a re-shown "
+        "card costs one PNG decode. tier0 draws nothing, loads no textures "
+        "and has no counterpart.",
+    "RosterArt.PortraitBytes":
+        "`EB-158`. DERIVED, and read by no code: `PortraitWidth * "
+        "PortraitHeight * 4` is the decoded RGBA8 size of one portrait, "
+        "written down so the arithmetic behind `RosterArt.CacheCapacity` is "
+        "checkable instead of asserted in a comment. Both of its inputs are "
+        "UNMIRRORED directly above, for the same reason.",
     "NonFiniteCardGuard.MaxTrailTravelPx":
         "`EB-292`. A SCENE BOUND, not balance: how far a followed node may "
         "travel in one frame before the base game's card-trail gap-fill loop "
@@ -472,6 +492,23 @@ UNMIRRORED: dict[str, str] = {
         "runs off the band. Not a cap on the queue -- nothing limits how many "
         "Plans she may write -- and the overflow is printed as `+N`, so the "
         "sim has nothing to compare and no rule is hiding here.",
+    # The Bake-Kurage's beat (`EB-316`, `EB-317`). Both numbers are SCREEN
+    # TIME. They decide how long an animation and a speech bubble occupy the
+    # frame and nothing else: no hit is added, removed, resized or reordered by
+    # either, and every rule they sit between resolves in the same order for the
+    # same amounts with them set to zero. The sim has no frames, no animation
+    # and nobody to read a bubble, so there is nothing to compare by value.
+    "KurageBeat.ActSeconds":
+        "presentation: how long the jellyfish's attack animation holds before "
+        "the hit behind it lands, in seconds. It IS `EB-316`'s repair -- the "
+        "casket's strike used to arrive in the same frame as the card that "
+        "caused it, so the two damage numbers read as one -- and it moves no "
+        "number: the same damage lands either way. tier0 resolves a turn with "
+        "no frames in it.",
+    "KurageBeat.LineSeconds":
+        "presentation: how long the carry-out line stays on screen, in "
+        "seconds. Long enough to read, short enough that four Plans in one "
+        "morning do not stack their bubbles. The sim has no screen.",
     "KurageMemoryPileRing.RingWidth":
         "presentation: ring thickness on a full-size card in the pile viewer, "
         "thicker than the HUD's because the card is.",
