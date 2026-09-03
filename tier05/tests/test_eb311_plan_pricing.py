@@ -43,15 +43,33 @@ from tier05 import draft
 # ---------------------------------------------------------------------------
 
 #: sha256 over `[[card id, "%.10f" % _static_power(card)], ...]` for every
-#: committed row and every upgraded face, sorted by id. TAKEN AT `origin/main`
-#: `a63c2b0a`, BEFORE any of EB-311's edits, and unchanged after them. Rebuild
-#: it only alongside a `DRAFTER_VERSION` bump and the re-baseline that bump
-#: owes -- a diff here is a moved world, not a stale fixture.
-SHIPPED_PRICE_DIGEST = \
-    "5c40b256cd69e17cc5d4ac0f105a6b689cfdcab88583d3944e3e231488deca7b"
-#: 618 rows at the commit this landed on. Pinned beside the hash because a hash
-#: of a shrinking population also never changes.
-SHIPPED_PRICE_ROWS = 618
+#: committed row and every upgraded face, sorted by id. First taken at
+#: `origin/main` `a63c2b0a`, BEFORE any of EB-311's edits, and unchanged after
+#: them. Rebuild it only alongside a `DRAFTER_VERSION` bump and the re-baseline
+#: that bump owes, OR when the POPULATION moves and every surviving row's price
+#: is proved identical first -- a diff here is a moved world, not a stale
+#: fixture, and which kind of move it was has to be shown rather than assumed.
+#:
+#: RE-PINNED ONCE, at `EB-83` (2026-09-02, `RT12` -> `RT13`). The Wood Carvings
+#: conversion added `tengu_flurry` and `chinju_ward` to
+#: `tier0/content/cards/colorless_event.yaml`; neither takes an upgrade, so the
+#: population went 618 -> 620 exactly. NO EXISTING PRICE MOVED, and
+#: `test_the_eb83_rows_are_the_only_reason_the_digest_moved` below is that
+#: proof rather than this comment -- the digest over the pool MINUS those two
+#: ids still equals the pre-EB-83 hash, which is kept below for it to check.
+#: `DRAFTER_VERSION` therefore stayed at 18, on the same argument EB-311's own
+#: no-bump proof makes: content entering the pool is an `RT` fact, and what
+#: this hash guards is the drafter's arithmetic.
+SHIPPED_PRICE_DIGEST =     "c674c433cdc34d52510de771e006e84cf57127df28d38c8e24176347a4ed99c3"
+#: 620 rows since `EB-83`. Pinned beside the hash because a hash of a shrinking
+#: population also never changes.
+SHIPPED_PRICE_ROWS = 620
+
+#: The pre-`EB-83` pair, kept as what the re-pin is CHECKED against rather than
+#: as history. Retire them only when a bump re-derives the hash for a reason
+#: that is not a population change.
+PRE_EB83_PRICE_DIGEST =     "5c40b256cd69e17cc5d4ac0f105a6b689cfdcab88583d3944e3e231488deca7b"
+EB83_ROWS = ("chinju_ward", "tengu_flurry")
 
 
 def _shipped_rows() -> list[Card]:
@@ -97,6 +115,23 @@ def test_every_shipped_price_is_byte_identical():
     at": the same digits, card for card, on every committed row and both of its
     faces."""
     assert _digest(_shipped_rows()) == SHIPPED_PRICE_DIGEST
+
+
+def test_the_eb83_rows_are_the_only_reason_the_digest_moved():
+    """The re-pin's proof, and the reason the hash above could be rewritten
+    without a `DRAFTER_VERSION` bump.
+
+    A re-pinned fixture is worth exactly as much as the argument for re-pinning
+    it, and "two cards were added" is not an argument -- a sheet edit can move
+    a price on rows it never touched, through a shared price table or a rarity
+    term. So the claim is checked rather than asserted: strike the two `EB-83`
+    ids out of the population and the pre-EB-83 hash comes back, digit for
+    digit, across all 618 rows that existed before it.
+    """
+    rows = _shipped_rows()
+    survivors = [c for c in rows if c.id not in EB83_ROWS]
+    assert len(rows) - len(survivors) == len(EB83_ROWS)
+    assert _digest(survivors) == PRE_EB83_PRICE_DIGEST
 
 
 def test_the_digest_covers_the_whole_committed_pool():
