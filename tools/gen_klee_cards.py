@@ -9490,6 +9490,19 @@ def emit(
     # UI affordances derive from the same mechanics as play resolution.
     # A damage-bearing IElementalCard supplies its card element; apply-only
     # skills supply the element written on their effect; Swirl supplies Anemo.
+    #
+    # `EB-338`: AND THAT SPLIT IS THE FLAG. A row whose element rides its own
+    # damage (`elemental`) has a hit for a reaction to multiply. A row whose
+    # element comes from an `apply_aura` or a `swirl` does NOT: the reaction is
+    # triggered by the APPLICATION, and any damage the row also carries applies
+    # no element and so triggers nothing of its own. Barbara's stand-in is the
+    # second shape -- "Gain 6 Block. Apply Hydro" -- and its Vaporize preview
+    # promised 1.5x on a card with no damage on it at all.
+    #
+    # DERIVED HERE, NEVER REMEMBERED ON THE CARD, which is the `ArmKeywordTips`
+    # bargain one attach over: the sheet knows which op puts the element on the
+    # board and the C# tooltip cannot.
+    applies_without_hit = not elemental
     preview_element_cs = element_cs if elemental else None
     if preview_element_cs is None:
         elemental_effect = next((e for e in card.get("effects", [])
@@ -10034,10 +10047,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         confiscated_arg = (
             ", includesConfiscatedRules: true"
             if includes_confiscated_rules else "")
+        # `EB-338`, and it rides the PREVIEW rather than the card: a row with
+        # no reaction preview has nothing to correct, so the argument is only
+        # emitted where one is drawn.
+        no_hit_arg = (
+            ", appliesWithoutHit: true"
+            if applies_without_hit and preview_element_cs is not None else "")
         tips_expr = (
             "KleeCardTooltips.ForCard(base.ExtraHoverTips, this, "
             f"{trigger_arg}, includesBombRules: {bomb_arg}"
-            f"{confiscated_arg})")
+            f"{confiscated_arg}{no_hit_arg})")
     # Track L-C: the arithmetic the card text no longer carries. Wraps the
     # element/bomb tips when both apply, so one override yields both lists.
     rider_args, charge_rider_args = rider_tip_args(card)

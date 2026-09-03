@@ -727,6 +727,49 @@ def test_rule6_a_multi_hit_intent_finds_no_second_mine(overhaul):
     assert counts(state)["ko_explosion"] == 1
 
 
+def test_eb336_a_lethal_mine_costs_the_player_no_hp(overhaul):
+    """`EB-336`, on the seat's own board: a Chomper on 4 HP under a `Mine 4`,
+    swinging `8x2`, with the player holding Block.
+
+    THE MOD IS WHAT MOVED, NOT THIS. `combat._enemy_turn` has always taken the
+    `enemy.alive` test between the trap and the Block spend, so a lethal Mine
+    has always cost this engine's player nothing; the mod read `dealer.IsDead`
+    once at the top of a call the Mine fires from the middle of, so its first
+    hit landed for the full 8. Pinned on BOTH numbers -- HP and Block --
+    because HP is the acceptance the two engines share and Block is the one
+    thing they do not (`ProtoBombPower.Preempted` says so on the other side).
+    """
+    enemy = make_enemy(hp=4, name="attacker",
+                       intents=[{"kind": "attack", "amount": 8, "times": 2}])
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 4, is_mine=True)
+    state.player.block = 6
+    hp_before = state.player.hp
+
+    combat._enemy_turn(state, enemy)
+
+    assert not enemy.alive
+    assert state.player.hp == hp_before, "the hit landed after all"
+    assert state.player.block == 6, "the pre-empted hit spent Block"
+
+
+def test_eb336_a_mine_that_does_not_kill_leaves_the_hit_intact(overhaul):
+    """The other half of `EB-336`'s acceptance, and the half that must not
+    move: a Mine too small to kill answers the attack, and the attack still
+    lands for what it prints."""
+    enemy = make_enemy(hp=40, name="attacker",
+                       intents=[{"kind": "attack", "amount": 8}])
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 4, is_mine=True)
+    hp_before = state.player.hp
+
+    combat._enemy_turn(state, enemy)
+
+    assert enemy.alive
+    assert counts(state)["ko_explosion"] == 1, "the Mine did not answer"
+    assert state.player.hp == hp_before - 8
+
+
 # ---------------------------------------------------------------------------
 # THE PAYLOAD (Jumpy Dumpty)
 # ---------------------------------------------------------------------------

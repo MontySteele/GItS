@@ -948,6 +948,29 @@ CO_TENANCY_LEDGER = {
             "Charge meter, is minted a broadcast earlier (see "
             "ChargePerTurnPower under BeforeSideTurnStart), so the grant "
             "cannot see a half-paid bank",
+        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "BlazingBarrierPower"):
+            "QUARANTINED (the Inazuma companion overhaul). `EB-337`. Thoma's "
+            "Block MARK, dropping itself when the pool it marks is gone -- the "
+            "twin of the sim's inazuma_overhaul_turn_start clamp. THE "
+            "ORDERING QUESTION, answered, and it is the one row here whose "
+            "INPUT a co-tenant really does move: it reads the player's Block, "
+            "which SignatureMixPower, RevelationPower, CelestialGiftPower, "
+            "MetallicizePower and LionsFangPower all write in this same "
+            "broadcast. It is answered by NOT DEPENDING ON THE ANSWER rather "
+            "than by order: the number the face prints, the number the badge "
+            "draws and the number the rider pays on are all min(Amount, "
+            "Owner.Block) read at the moment they are read (BlockMarkVar), so "
+            "whichever way the listeners iterate, nothing on screen and "
+            "nothing paid can be wrong. All this override decides is whether "
+            "an ALREADY-SPENT mark leaves the strip this turn or next, and it "
+            "writes only its own removal",
+        ("Powers/Prototype/CompanionOverhaulHooks.cs", "IcyPawsPower"):
+            "QUARANTINED (the Mondstadt companion overhaul, second wave). "
+            "`EB-337`. Diona's Block mark, and it is BlazingBarrierPower's "
+            "construction to the line -- same mark, same live read, same "
+            "removal, same answer to the ordering question above. The two are "
+            "commutative with each other for the reason neither is ordered "
+            "against a Block grant: neither reads a number it keeps",
         ("Powers/KuragePowers.cs", "PreventExhaustWardPower"):
             "resets the Vigil once-per-turn latch; consumed only from "
             "damage hooks, never by a co-tenant",
@@ -1165,7 +1188,19 @@ CO_TENANCY_LEDGER = {
     },
 }
 
-_CLASS_DECL = re.compile(r"\bclass\s+(\w+)")
+# A DECLARATION, not the WORD. `\bclass\s+(\w+)` also matched PROSE:
+# `IcyPawsPower`'s own doc comment says "see that class for why the three
+# incoming readers share one listener", which minted a span named `for` opening
+# at the very brace `IcyPawsPower` opens at. Two spans of identical length, and
+# `min` keeps the first one it saw -- so the moment that class gained a
+# turn-broadcast override, the sweep reported its tenant as `for`. A real
+# declaration starts a line and carries only modifiers ahead of `class`, which
+# no comment line does.
+_CLASS_DECL = re.compile(
+    r"(?m)^[^\S\n]*"
+    r"(?:(?:public|internal|private|protected|static|sealed|abstract"
+    r"|partial|file|new|record|readonly|unsafe)\s+)*"
+    r"class\s+(\w+)")
 
 
 def _class_spans(source: str) -> list[tuple[str, int, int]]:
