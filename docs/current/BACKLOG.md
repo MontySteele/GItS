@@ -155,4 +155,4 @@
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-38` | **Scope:** Animation Track F3 plus the sprint-1 polish deferral — rest/merchant gentle idles for both characters; the in-combat layer is approved and frozen but no polish sprint has opened. **Next action:** open the polish sprint. **Gate:** capacity (deliberately NOT in the dormant class — this is real deferred production work). **Acceptance:** rest/merchant idles ship for both characters | eng-backlog §6; missed-requirements §4.5 |
+| `EB-38` | **BUILT 2026-09-02.** **Scope:** Animation Track F3 plus the sprint-1 polish deferral — the spine-less characters were a still picture at the rest site and the shop, beside a breathing base cast. **Built:** `Vfx/StaticPortraitIdle.cs` postfixes both `_Ready`s, adds a pivot above the factory-built `Sprite2D` and breathes it on a looped Tween (scale y 1.015, rise 2px, 1.2s halves, sine, staggered); a real rig is refused. **Next action:** [USER] eyes-on at the next deploy. **Gate:** none. **Acceptance:** 14 pins; all three breathing live | eng-backlog §6; missed-requirements §4.5 |
