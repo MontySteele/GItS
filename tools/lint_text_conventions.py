@@ -24,7 +24,7 @@ played or being built (the Furina reframe joined on 2026-09-02); the
 `proto_spark_*` rows and their power are the retired-in-place Sparks arm
 (`M48`), which carries no `description:` and prints the shipped grammar.
 The shipped sheets are `--shipped`: a REPORT, never a gate, because their
-rewrite is [USER]'s (`review/active/text-conventions-shipped-2026-09-02.md`).
+rewrite is [USER]'s (`review/ruled/text-conventions-shipped-2026-09-02.md`).
 
 THE EXCEPTION LIST is curated, with a reason per entry, and it has rot
 semantics: an entry whose string is now UNDER its ceiling fails, so the list

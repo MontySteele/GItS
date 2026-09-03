@@ -163,7 +163,7 @@ are in [`workstreams.md`](workstreams.md).
 ## Open [USER] pile
 
 Every open row is in [`QUEUE.md`](QUEUE.md) and owned by [USER] — Kokomi's two,
-`M69`, the art eyes-on pile and `M45`'s five; the text-conventions shipped
-proposal (`review/active/text-conventions-shipped-2026-09-02.md`) carries four
-more. The nine blessed mechanisms are in [`watch-register.md`](watch-register.md):
+`M69`, the art eyes-on pile and `M45`'s five; the text-conventions
+proposal is ruled (R249, `review/ruled/text-conventions-shipped-2026-09-02.md`;
+builds `EB-345`, `EB-346`). The nine blessed mechanisms are in [`watch-register.md`](watch-register.md):
 `W9` has FIRED and is back with [USER] as `M69`, the other eight are dormant.

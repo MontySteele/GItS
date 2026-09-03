@@ -8,7 +8,7 @@ base game's own English strings and measured on them. The corpus is the
 by their loc id. Lengths are RENDERED characters: BBCode tags stripped, every
 `{hole}` counted as one numeral, newlines as spaces. `tools/lint_text_conventions.py`
 enforces the ceilings and spellings on the prototype arms; the shipped sheets
-are proposed in `review/active/text-conventions-shipped-2026-09-02.md`.
+were proposed and ruled (R249) in `review/ruled/text-conventions-shipped-2026-09-02.md`.
 
 ## Ceilings, measured
 
