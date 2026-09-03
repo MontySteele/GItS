@@ -145,8 +145,10 @@ are in [`workstreams.md`](workstreams.md).
   own design, no momentum rule. The Kurage memory is base kit behind
   `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
-  sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF; no
-  card rows exist for it yet.
+  sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
+  2's five `proto_fr_` rows are built** (2026-09-02): the named deploy, two
+  Evokes and the drain pair, on a new `drain_fanfare` op and the
+  `Deploy`/`Evoke`/`Drain` tips. Flag-off, no stamp moves, and NOT RUN.
 - **Companion cards** — R234 ruled the slate whole, Mondstadt first, in
   parallel; `EB-249` / `EB-250` / `EB-251` are what it owes; Itto and Gorou's
   rate are noted there from the round-5 and act-1 reads.

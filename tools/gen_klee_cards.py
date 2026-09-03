@@ -281,6 +281,11 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # Fanfare rework (2026-07-28): the Hyperbeam settle
                   # (Track C.2) and the on-demand bow probe (Track D).
                   "crash_fanfare", "salon_bow",
+                  # QUARANTINED (R213 B): the Furina reframe's drain, slice
+                  # two. One call, no locals, no arguments -- the salon_bow
+                  # shape again; what it BUYS is the effect after it, through
+                  # the ordinary `amount_formula` grammar.
+                  "drain_fanfare",
                   # EB-118 §5.5 (staged): the queue verbs. Both are a
                   # single call into SalonMemberPower, the salon_bow
                   # shape, so they carry no locals and no new grammar.
@@ -517,6 +522,15 @@ ARM_KEYWORDS = (
     # a VERB by ten Universals; the eight reaction PREVIEWS are board-aware and
     # say nothing over an aura-less board.
     ArmKeyword("Swirl", ("Swirl", "Swirls"), "ArmKeywordTips.ForSwirl"),
+    # THE FURINA REFRAME'S THREE (R220 A; the packet's sec.4.2, sec.4.4 and
+    # sec.4.6, staged as slice two). Each names a rule the SHIPPED engine does
+    # not have, which is why all three are here and none is a shipped keyword:
+    # a shipped deploy adds a member and performs nobody, a shipped bow neither
+    # triples the Focus term nor mints, and nothing in the shipped kit spends
+    # the meter down to nothing.
+    ArmKeyword("Deploy", ("Deploy", "Deploys"), "ArmKeywordTips.ForDeploy"),
+    ArmKeyword("Evoke", ("Evoke", "Evokes"), "ArmKeywordTips.ForEvoke"),
+    ArmKeyword("Drain", ("Drain", "Drains"), "ArmKeywordTips.ForDrain"),
 )
 
 
@@ -2050,6 +2064,29 @@ SALON_MEMBER_CS = {
     "random": "null",
 }
 
+def salon_bow_aim(eff: dict) -> str:
+    """`SalonMemberPower.BowLeftmost`'s trailing `aim` argument, or "".
+
+    THE AIMED EVOKE (the slot-6 ruling, 2026-08-30). The verb's third parameter
+    DEFAULTS to null, which is the FRONT, so a row that names no member emits
+    NOTHING here and its call is byte-identical to what it was before the
+    ruling -- `take_your_bow` is the shipped row that proves it, and a
+    generated tree that moved for a feature no shipped card uses would be a
+    diff nobody could read. The sim spells the same sentinel as the string
+    "front"; C# spells it as a nullable enum, and
+    `FurinaReframe.EvokeTargetFront` is the name for it.
+
+    Read through `SALON_MEMBER_CS`, the ONE member table, so the deploy verb
+    and the Evoke verb cannot disagree about who Chevalmarin is. `random` is
+    refused by `blocked_reason`: it is a legal DEPLOY (the stage rolls) and a
+    meaningless aim (an Evoke that names nobody already means the front).
+    """
+    named = eff.get("member")
+    if named in (None, "front"):
+        return ""
+    return ", " + SALON_MEMBER_CS[named]
+
+
 # B5: the stage names the faces print. These MUST match
 # SalonMemberTips.DisplayName -- the card says "Add Gentilhomme Usher" and the
 # tooltip that explains him is titled the same thing, or the player cannot
@@ -2673,7 +2710,9 @@ def blocked_reason(
                 and exhausts_turn_calc_rider(card, effect) is None
                 and player_block_calc_rider(card, effect) is None
                 and companions_played_calc_rider(card, effect) is None
-                and swirls_turn_calc_rider(card, effect) is None):
+                and swirls_turn_calc_rider(card, effect) is None
+                and fanfare_drained_calc_rider(card, effect) is None
+                and fanfare_drained_block_rider(card, effect) is None):
             formula = effect["amount_formula"]
             return (f"amount_formula (reads {formula.get('count')}) -- needs a "
                     "CalculatedVar bound to that count, not a literal")
@@ -2867,6 +2906,15 @@ def blocked_reason(
                 return f"{op} field(s) {sorted(unknown)} not understood"
         if op in PLAN_ONLY_OPS:
             return f"{op} outside a `plan:` list"
+        if op == "drain_fanfare":
+            # QUARANTINED (R213 B). NO FIELDS AT ALL, and that is the rule
+            # rather than an omission: the op takes the whole held meter, so
+            # an `amount:` would be a number the card could not honour and a
+            # `target:` a creature it does not have. What the drain is WORTH
+            # is printed by the effect after it.
+            unknown = set(eff) - {"op"}
+            if unknown:
+                return f"drain_fanfare field(s) {sorted(unknown)} not understood"
         if op in {"salon_rotate", "salon_perform"}:
             # EB-118 §5.5. Same field discipline as the meter ops above,
             # with `amount` OPTIONAL: one rotation and one act are the
@@ -2878,6 +2926,20 @@ def blocked_reason(
             amount = eff.get("amount", 1)
             if not isinstance(amount, int) or amount <= 0:
                 return f"{op} amount must be a positive literal int"
+        if op == "salon_bow" and "member" in eff:
+            # THE AIMED EVOKE (the slot-6 ruling, 2026-08-30), an ARGUMENT on
+            # the shipped verb and not a second op -- the sim put it there for
+            # the reason `effects._op_salon_bow` writes out, and registering a
+            # `salon_evoke` would have moved the priced-op set. Checked the way
+            # `apply_power`'s deploy member is (A11): an unrecognised name is a
+            # NAMED blocker here rather than a KeyError mid-emit, because a typo
+            # that degraded quietly into "the front member" is the one failure
+            # an aimed Evoke could hide for a whole sprint.
+            if (eff["member"] not in SALON_MEMBER_CS
+                    or eff["member"] == "random"):
+                return (f"salon_bow member '{eff['member']}' is not one of "
+                        f"{sorted(set(SALON_MEMBER_CS) - {'random'})} -- an "
+                        "Evoke names a member or names none (the front)")
         if op in {"gain_encore", "spend_encore", "raise_fanfare_cap",
                   "gain_fanfare_floor", "crash_fanfare", "salon_bow",
                   # A Spark price the generator cannot read as a
@@ -2885,7 +2947,9 @@ def blocked_reason(
                   "spend_spark",
                   # R213 E1, same sentence one meter over.
                   "spend_charge"}:
-            unknown = set(eff) - {"op", "amount"}
+            allowed = {"op", "amount"} | ({"member"} if op == "salon_bow"
+                                          else set())
+            unknown = set(eff) - allowed
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
             if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
@@ -3573,6 +3637,86 @@ def exhausts_turn_calc_rider(card: dict,
             "KokomiResources.ExhaustsThisTurn(card.Owner)")
 
 
+def _drain_before(card: dict, eff: dict) -> bool:
+    """Does this card `drain_fanfare` BEFORE `eff` resolves?
+
+    Structural and identity-based, exactly like `_exhausts_before` below and
+    for the same reason: two effects on one row can be equal dicts, and the
+    question is about a POSITION in the emitted `OnPlay` body, which runs the
+    effects in sheet order. A row that reads `fanfare_drained` before it has
+    drained anything would print a number it cannot pay, so the rider refuses
+    to render rather than emitting a var that reads zero.
+    """
+    for other in card.get("effects") or []:
+        if other is eff:
+            return False
+        if other.get("op") == "drain_fanfare":
+            return True
+    return False
+
+
+#: The count both drain riders read, and the ONE C# expression they read it
+#: with. `FurinaDrain.Amount` answers "what did this play drain?" while a play
+#: is resolving and "what WOULD it drain?" before one starts -- which is what
+#: makes the hover preview and the resolved number the same number, the whole
+#: point of routing a computed amount through a CalculatedVar at all.
+FANFARE_DRAINED_CS = "static (card, _) => FurinaDrain.Amount(card)"
+
+
+def fanfare_drained_calc_rider(card: dict,
+                               eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: fanfare_drained}` on a DAMAGE op --
+    QUARANTINED (R213 B), the Furina reframe's Rare drain (§4.6, `F11` (1)).
+
+    Same CalculatedDamageVar triple as the six riders above it, and the same
+    idiom the base game's own MementoMori uses. What is different is the
+    COUNT, and it is the only count on this rail that is not a live board
+    read: `drain_fanfare` empties the meter, so by the time this hit resolves
+    `ReadableFanfare` is 0 and a meter-reading multiplier would pay nothing.
+    `FurinaDrain.Amount` is the per-play number instead, and it falls back to
+    the live meter when no play is in flight so the card in hand previews the
+    hit it is about to make.
+
+    Refused unless the card actually drains FIRST (`_drain_before`): a row
+    that read the count without the op would render a promise nothing fills.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict)             or formula.get("count") != "fanfare_drained":
+        return None
+    if not _drain_before(card, eff):
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            FANFARE_DRAINED_CS)
+
+
+def fanfare_drained_block_rider(card: dict,
+                                eff: dict) -> tuple[int, int, str] | None:
+    """The same count on a BLOCK op -- the survival twin (`F12` (1)).
+
+    THE FIRST `amount_formula` BLOCK RIDER, and the four damage-side riders
+    above say in as many words why there was none: "a block-side reader needs
+    `block_calc_rider`'s CalculationBase plumbing and has no card yet". This
+    is that card. The rail itself is unchanged -- `block_calc_rider` already
+    renders three `bonus_formula` shapes through `CalculatedBlockVar` -- so
+    what is added is a predicate reading the OTHER key, not a mechanism.
+
+    `base: 0` is legal here and is what the row prints: "Gain Block equal to
+    the Fanfare drained" is a pure slope with no printed floor, which the
+    damage side has no example of because a hit with base 0 is a blank card.
+    """
+    if eff.get("op") != "block":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict)             or formula.get("count") != "fanfare_drained":
+        return None
+    if not _drain_before(card, eff):
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            FANFARE_DRAINED_CS)
+
+
 def _exhausts_before(card: dict, eff: dict) -> bool:
     """Does this card Exhaust a card of its own BEFORE `eff` resolves?
 
@@ -4064,7 +4208,17 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     # so the card would have rendered and paid a flat 6 -- which is why
     # `blocked_reason` refused to emit it rather than ship a wrong number.
     charge = re.fullmatch(r"(\d+)_per_(\d+)_charge", formula)
-    if not m and not members and not companions and not charge:
+    # QUARANTINED (R213 B): the FIFTH shape on this rail, and the first that
+    # reads the OTHER key. `amount_formula: {base, per, count: fanfare_drained}`
+    # is the count grammar both engines already speak on a block op
+    # (`effects._op_block` resolves it); what was missing on this side was a
+    # predicate, which is the whole reason the four damage riders above each
+    # say "a block-side reader needs block_calc_rider's CalculationBase
+    # plumbing and has no card yet". Resolved here rather than in its own
+    # branch so it inherits every guard below -- one CalculationBase per card
+    # is the invariant this function exists to keep.
+    drained = fanfare_drained_block_rider(card, eff)
+    if not m and not members and not companions and not charge and drained is None:
         return None
     if salon_deploy_card(card):
         return None
@@ -4078,6 +4232,8 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     if any(spotlight_block_rider(card, e) is not None
            or salon_calc_rider(card, e) is not None for e in effects):
         return None
+    if drained is not None:
+        return drained
     if members:
         return int(eff["amount"]), int(members.group(1)), (
             f"static (card, _) => {SALON_MEMBER_COUNT_CS}")
@@ -4136,6 +4292,11 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     swirls_turn = swirls_turn_calc_rider(card, eff)
     if swirls_turn is not None:
         return swirls_turn
+    # QUARANTINED USE ONLY (R213 B), and the one count on this rail that is
+    # NOT a live board read -- see `fanfare_drained_calc_rider`.
+    drained = fanfare_drained_calc_rider(card, eff)
+    if drained is not None:
+        return drained
     charge = charge_calc_rider(card, eff)
     if charge is not None:
         base, per_n, div = charge
@@ -6283,9 +6444,23 @@ def build_body(
             # the same end of the FIFO queue a deploy into a full stage
             # displaces -- so this reuses the displacement path rather than
             # introducing a second notion of "which member".
+            #
+            # `aim` is the slot-6 ruling's AIMED EVOKE, and it is the shipped
+            # verb's optional third argument rather than a second call: the
+            # leg is off in a release world, where the argument is ignored and
+            # this pops the front exactly as it always has.
             lines.append(
                 "await SalonMemberPower.BowLeftmost("
-                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
+                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))}"
+                f"{salon_bow_aim(eff)});")
+
+        elif op == "drain_fanfare":
+            # QUARANTINED (R213 B): the Furina reframe's drain, slice two.
+            # ONE synchronous call, and everything the drain is worth is
+            # printed by the effect after it -- which reads the number this
+            # returns through `FurinaDrain.Amount`, not through the meter the
+            # call has just emptied.
+            lines.append("FurinaDrain.Drain(Owner.Creature);")
 
         elif op == "salon_rotate":
             # EB-118 §5.5. A reorder and nothing else: no tick, no Encore, no
@@ -7353,7 +7528,10 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
         elif op == "salon_bow":
             body.append(
                 "await SalonMemberPower.BowLeftmost("
-                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
+                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))}"
+                f"{salon_bow_aim(eff)});")
+        elif op == "drain_fanfare":
+            body.append("FurinaDrain.Drain(Owner.Creature);")
         elif op == "salon_rotate":
             body.append(
                 "SalonMemberPower.RotateLeftmost("
@@ -8208,6 +8386,13 @@ def build_description(card: dict) -> str:
                 "bow." if n == 1 else
                 f"The leftmost {n} members of your [gold]Salon[/gold] take "
                 "their bows.")
+
+        elif op == "drain_fanfare":
+            # QUARANTINED (R213 B). Every row that carries the op states its
+            # own face with `description:` -- what the drain BUYS is the next
+            # sentence, and only the row knows it -- so this is the fallback
+            # a rendered row would get and not the shipped wording of anything.
+            parts.append("[gold]Drain[/gold] your [gold]Fanfare[/gold].")
 
         elif op == "salon_rotate":
             # "Moves to the back" and not "rotates": the player is told what

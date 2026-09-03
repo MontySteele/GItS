@@ -36,6 +36,11 @@ public static class PrototypeRoster
     private static List<CardModel> BuildFurina() =>
         new()
         {
+            ModelDb.Card<ProtoFrCurtainCall>(),
+            ModelDb.Card<ProtoFrExitStageLeft>(),
+            ModelDb.Card<ProtoFrIntermission>(),
+            ModelDb.Card<ProtoFrLetThePeopleRejoice>(),
+            ModelDb.Card<ProtoFrSalonDebutNamed>(),
         };
 
     private static List<CardModel> BuildKlee() =>

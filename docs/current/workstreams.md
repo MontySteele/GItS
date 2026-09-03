@@ -470,6 +470,29 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     that slice 1 deferred: a dev build has to carry the rows before a board
     can be staged. The blind read still owns the half the arithmetic cannot
     answer: whether a player can SEE that the aim is worth the Encore.
+    **SLICE 2 IS BUILT (2026-09-02, `furina-slice-2`, §6.2's row list): the
+    five `proto_fr_` rows the reframe's rules finally have.** Salon Début
+    (§5's NAMED starter deploy), Curtain Call (`F16` (1), the cheap front
+    Evoke, 2 Encore), Exit Stage Left (`F5` (2)'s aimed Evoke at Chevalmarin,
+    1 Encore, printing the absent-member fallback the engine actually takes),
+    Let the People Rejoice (§4.6 / `F11` (1) as a proto twin — no `kit_card`,
+    no `requires`, a real cost) and Intermission (`F12` (1), the survival
+    drain, so draining is a plan and not a single card). **ONE NEW OP,
+    `drain_fanfare`:** the held meter goes to 0 and the amount is this play's
+    `fanfare_drained` count, which the effects after it read; the floor, the
+    cap, decay and the Focus term are untouched, and Focus never scales the
+    drained amount (§4.4's scaling invariant). It is priced at ZERO in the
+    drafter with the archive scope stated — no shipped row prints it and no
+    drafted number moves — so **no `DRAFTER_VERSION` bump is owed**, on the
+    same terms `block_half_damage` took. **Three keyword tips** (`Deploy`,
+    `Evoke`, `Drain`) join `ARM_KEYWORDS`, attached off the printed word
+    (`EB-272`) and defined in `ArmKeywordTips`, which a release build removes;
+    the reframe also joins `PROTOTYPE_DEFAULT_PREFIXES` as the fifth arm, so
+    each row's campfire does something without a number this build invented.
+    **FLAG-OFF, NO STAMP, NOT RUN** — no seat, no sim round, and under R215 B
+    no number in the slice is quotable. 20 C# pins
+    (`FurinaReframeSliceTwoTests`) and 23 sim pins
+    (`test_furina_reframe_slice2.py`).
   - **Companion cards — R234 RULED THE SLATE WHOLE, MONDSTADT FIRST**
     (`review/active/companion-cards-2026-08-30.md` §5). Nine picks plus `P5a`,
     all answered in one ruling except `P5a`, which R234 deliberately leaves

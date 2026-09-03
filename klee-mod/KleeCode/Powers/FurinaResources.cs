@@ -625,6 +625,46 @@ public static class FurinaResources
         return before - resource.Amount;
     }
 
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// QUARANTINED (R213 B): the FURINA REFRAME's drain, slice two. Mirrors
+    /// <c>effects._op_drain_fanfare</c>. The held meter goes to nothing and
+    /// the amount it held is returned, which is the number the card's next
+    /// effect is priced off.
+    ///
+    /// IT LIVES HERE AND NOT IN <c>Powers/Prototype/</c> FOR ONE REASON: the
+    /// module note above says every Fanfare mutation funnels through this
+    /// class, and that is what makes the A7 delta-Block trigger a rule with
+    /// ONE home rather than a list of call sites somebody maintains. A drain
+    /// is a mutation, so it comes through the funnel like the gain, the decay
+    /// and the settle above it -- and it is inside the quarantine switch, so a
+    /// release build has no drain to call. <see cref="FurinaDrain"/> owns
+    /// everything ABOUT the drain that is not the mutation: the per-play
+    /// record, the preview fallback and the ledger line.
+    ///
+    /// A DEBT CANNOT BE DRAINED. The Track C.2 settle may leave the meter
+    /// below zero; <see cref="ReadableFanfare"/> is the clamp every reader
+    /// goes through, so a negative meter drains 0 and is left exactly where it
+    /// was rather than paying a card for a hole.
+    ///
+    /// NEITHER THE FLOOR NOR THE CAP MOVES, which is the whole difference from
+    /// <see cref="DropFanfareToFloor"/> beside it: that card's price IS the
+    /// falling baseline, and this card's price is the meter itself.
+    /// </summary>
+    public static int DrainFanfare(Creature creature)
+    {
+        if (!IsFurina(creature)) return 0;
+        var resource = FanfareResourceFor(creature);
+        if (resource == null) return 0;
+        var before = resource.Amount;
+        var drained = Math.Max(0, before);
+        if (drained <= 0) return 0;
+        resource.Amount = before - drained;
+        NoteFanfareChanged(creature, before, resource.Amount);
+        return drained;
+    }
+#endif
+
     /// <summary>
     /// What a Fanfare READER sees: the meter, clamped at zero. Mirrors
     /// resources.readable. Every reader goes through here so the Track C.2
@@ -842,6 +882,14 @@ public sealed class FurinaResourceHooks : AbstractModel
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
         if (!cardPlay.IsFirstInSeries) return Task.CompletedTask;
+#if PROTOTYPE_CARDS
+        // QUARANTINED (R213 B): a fresh, EMPTY drain record per card play, so
+        // a row that reads `fanfare_drained` reads THIS play's number and a
+        // drain row redrawn later previews the live meter rather than what it
+        // took last time. Before the ownerless guard below because the call
+        // self-guards, exactly as `FurinaBurstResource.DrainOnPlay` does.
+        FurinaDrain.BeginPlay(cardPlay.Card?.Owner?.Creature);
+#endif
         // SIM ORDER (combat.py play_card), corrected EB-19/M8. The three
         // lines below used to run drain -> skill-tag -> cost under a comment
         // asserting that WAS the sim's order. It is the reverse of it. The

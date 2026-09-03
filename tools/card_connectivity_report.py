@@ -390,6 +390,12 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "gain_fanfare_floor": [_hook("private", "fanfare", "write")],
     "raise_fanfare_cap": [_hook("private", "fanfare", "write")],
     "crash_fanfare": [_hook("private", "fanfare", "use")],
+    # QUARANTINED (R213 B, the Furina reframe's drain slice). The same
+    # competing USE `crash_fanfare` above makes, and for the same
+    # reason: the meter is spent, so a second drain in one turn finds
+    # nothing. What follows it on the card reads the amount taken,
+    # which is a per-play number and not a state in this vocabulary.
+    "drain_fanfare": [_hook("private", "fanfare", "use")],
     "salon_bow": [_hook("private", "salon", "use")],
     # EB-118 5.5. Rotate is a pure REORDER: it consumes nothing, so it is a
     # write to the private board (which performer the FIFO end offers next)

@@ -68,6 +68,9 @@ public static class ArmKeywordTips
     public const string MendKey = "KLEEMOD-ARM_MEND";
     public const string PlanKey = "KLEEMOD-ARM_PLAN";
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
+    public const string DeployKey = "KLEEMOD-ARM_DEPLOY";
+    public const string EvokeKey = "KLEEMOD-ARM_EVOKE";
+    public const string DrainKey = "KLEEMOD-ARM_DRAIN";
 
     // ----------------------------------------------------------- Klee ------
     //
@@ -223,6 +226,70 @@ public static class ArmKeywordTips
         With(inherited, SwirlKey,
             "The enemy's aura is consumed and copied onto ALL enemies. No "
           + "aura, no effect.");
+
+    // ---------------------------------------------------- Furina ----------
+    //
+    // Her THREE, and the reframe packet is what makes it three: sec.4.2 gives
+    // the deploy its perform clause, sec.4.4 renames the bow and prices it,
+    // sec.4.6 adds the drain. Each names a rule the SHIPPED engine does not
+    // have, which is why all three live here rather than in
+    // <see cref="SalonMemberTips"/> beside the member table: a release build
+    // deploys without performing, bows without tripling or minting, and has
+    // no drain at all, so the shipped tips are RIGHT about the shipped rules
+    // and these would contradict them on every Furina face in the game.
+
+    /// <summary>
+    /// SEC.4.2, and the second sentence is the half a player cannot infer.
+    /// Deploying onto a full stage has always displaced the oldest member;
+    /// what the arm adds is that the displacement is an <i>Evoke</i> -- the
+    /// free one, the reward for filling the stage -- so the word the card
+    /// prints has to say where the other word comes from.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForDeploy(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, DeployKey,
+            "A [gold]Salon[/gold] member joins the stage and performs at "
+          + "once. Onto a full stage, the front member [gold]Evokes[/gold] "
+          + "first.");
+
+    /// <summary>
+    /// SEC.4.4, all three clauses, and the numerals are interpolated from
+    /// <see cref="FurinaReframeLaw"/> for `EB-89`'s reason: a retune of the
+    /// multiplier or the mint must not be able to leave this sentence quoting
+    /// a retired number.
+    ///
+    /// THE PRICE CLAUSE IS NOT DECORATION. `F7` (1) made the Evoke's cost the
+    /// card's own printed Encore, which is shipped machinery -- the gate and
+    /// the spend both run before the op resolves -- so the word means "this
+    /// card charges Encore" on every card that prints it, and a player who
+    /// met the word on a Rare should not have to discover that on the second
+    /// one.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForEvoke(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, EvokeKey,
+            "The member performs and leaves. Its [gold]Fanfare[/gold] bonus "
+          + "counts " + FurinaReframeLaw.EvokeFocusMult + " times and it "
+          + "prints " + FurinaReframeLaw.FanfarePerEvoke
+          + " [gold]Fanfare[/gold]. The card's [gold]Encore[/gold] price pays "
+          + "for it.");
+
+    /// <summary>
+    /// SEC.4.6. TWO SENTENCES BECAUSE IT IS TWO FACTS, and the second is the
+    /// one the meter cannot show: after the drain the bar reads 0 whether it
+    /// held twelve or nothing, so what the card pays out has to be tied to
+    /// what it TOOK in words as well as in code
+    /// (<see cref="KleeMod.Powers.FurinaDrain"/>).
+    ///
+    /// NO THRESHOLD IS MENTIONED because there is none: both drain rows are
+    /// playable at any value, including zero, which is the wasted play the
+    /// packet deliberately leaves available.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForDrain(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, DrainKey,
+            "Your [gold]Fanfare[/gold] falls to nothing. What the card does "
+          + "next is priced off the amount it took.");
 
     /// <summary>
     /// One tip, appended after whatever the card already carries.

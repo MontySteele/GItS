@@ -327,7 +327,7 @@ public static class KleeMod
                     // reason Rally's prompt is: `Cards/Prototype/**` is
                     // Compile Remove'd from a release build, so
                     // `Cards.ArmKeywordTips` does not exist there and these
-                    // seven keys name nothing. Under the switch they are the
+                    // ten keys name nothing. Under the switch they are the
                     // only source of the titles, exactly as the four rider
                     // rows above are -- the pck's card_keywords.json carries
                     // none of them, and a missing row renders as the raw key
@@ -350,6 +350,14 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
+                    // The Furina reframe's three (slice two). `Deploy`
+                    // is the one word here a shipped Furina card also
+                    // uses in prose, and it is the same correctness as
+                    // `Bomb` above: the shipped deploy performs nobody,
+                    // the arm's does, and no single face raises both.
+                    [Cards.ArmKeywordTips.DeployKey + ".title"] = "Deploy",
+                    [Cards.ArmKeywordTips.EvokeKey + ".title"] = "Evoke",
+                    [Cards.ArmKeywordTips.DrainKey + ".title"] = "Drain",
 #endif
                 };
             keywordTable.MergeWith(keywordFallback

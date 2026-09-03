@@ -28,7 +28,7 @@ configurations** (2026-09-02):
 
 ```sh
 dotnet test klee-mod/KleeTests                              # 262 tests
-dotnet test klee-mod/KleeTests -p:PrototypeCards=true       # 674 tests
+dotnet test klee-mod/KleeTests -p:PrototypeCards=true       # 725 tests
 ```
 
 `-p:KleeOverhaul=true` and its three siblings belong on a `dotnet build` or a

@@ -1938,3 +1938,94 @@ because the delta it derives is the power stack and never the printed draw.
 THE DELETION RULE AT THE TOP OF THE SHEET BINDS ALL FOUR: they leave when the
 slice is accepted or rejected.
 ```
+
+## before proto_fr_salon_debut_named
+
+```
+# =========================================================================
+# THE FURINA REFRAME, SLICE TWO -- the first cards the reframe's rules have
+# (R220 A; the countersigned packet is review/ruled/furina-reframe-2026-08-29.md,
+# its sec.6.2 row list, with sec.4.4 the Evoke, sec.4.6 the drain and sec.5 the
+# starter delta). Slice one built the RULES -- the manual stage, the Companion
+# trigger, the deploy that performs, the aimed Evoke and the meter that only
+# performance mints -- in both engines and behind FURINA_REFRAME, and it left
+# the surface with no row that speaks them. These five are that row list.
+#
+# THEY PRINT THREE WORDS THE SHIPPED KIT DOES NOT HAVE, and each carries its
+# rule in a hover tip the codegen attaches off the printed word (`EB-272`):
+# Deploy (a member joins AND performs), Evoke (it performs, leaves, counts its
+# Fanfare bonus three times and prints five), Drain (the meter falls to nothing
+# and the next clause is priced off what it took).
+#
+# FLAG-OFF AND UNRUN. Nothing here has been played, in the game or in a sim,
+# and no number below is quotable (R215 B): the two mint figures and the Focus
+# multiplier are slice one's prototype seeds, and the costs, the two Encore
+# prices and the Rare's base are this slice's.
+# =========================================================================
+```
+
+## proto_fr_salon_debut_named
+
+Face: "Deploy Mademoiselle Crabaletta." The Deploy keyword tip carries the
+perform clause: a deployed member performs at once; deployed onto a full stage,
+the front member Evokes first. Reframe sec.5's starter delta: a NAMED member, so
+which member is on the board is a decision and not a coin flip.
+
+The shipped `salon_debut` it is a delta OF deploys `member: random`, which is
+what makes the two a real A/B rather than a rename, and the row borrows that
+card's illustration under R179 (`art_of`, cosmetic, lint-proved).
+
+## proto_fr_curtain_call
+
+Face: "Evoke the front Salon member." Prints its Encore price. The Evoke tip:
+the member leaves the stage, its performance applies the Fanfare bonus three
+times, and it mints 5 Fanfare. sec.6.2 row 2, `F16` (1)'s cheap Evoke.
+
+The price is PRINTED as a sentence rather than left to the cost badge, which is
+this sheet's shipped convention -- every priced Furina row on
+`docs/furina-cards.yaml` opens "Spend N [gold]Encore[/gold]." -- and it is
+shipped machinery on both engines: the playability gate and the spend run
+before the op resolves, which is why `F7` (1) needed no port.
+
+## proto_fr_exit_stage_left
+
+Face: "Evoke Surintendante Chevalmarin." The aimed Evoke (`F5` (2)); her bow is
+the alternative effect (the all-enemy aura and the Encore refund). If she is
+not on stage the slice-1 fallback rule applies and the face must say what
+happens then -- print exactly what the engine does. sec.6.2 row 3.
+
+WHAT THE ENGINE DOES, printed: an aimed Evoke whose member is absent Evokes the
+FRONT and reports it (`furina_reframe.EVOKE_TARGET_ABSENT`,
+`FurinaReframeLedger.NoteEvokeTargetAbsent`) -- an aimed card that cannot find
+its member is an unaimed Evoke, never a wasted one. So the face reads "or the
+front member if she is not on stage" and the row's pin compares that sentence
+with the rule rather than with a second copy of itself.
+
+The aim is a `member:` ARGUMENT on the shipped `salon_bow` verb and not a new
+op, which is the slot-6 ruling's own shape on both sides: registering a
+`salon_evoke` would have grown the priced-op set, and that is a
+`DRAFTER_VERSION` bump bought for a synonym.
+
+## proto_fr_let_the_people_rejoice
+
+Face: "Drain your Fanfare. Deal 5 damage to ALL enemies, plus 1 per Fanfare
+drained." The Rare drain (sec.4.6, `F11` (1) as a proto twin: no `kit_card`, no
+`requires` gate, a real cost). Playable at any Fanfare value; it reads the HELD
+meter, never a threshold.
+
+Neither gate travels with it, and each for its own reason: `kit_card` makes a
+row inexpressible by name in the emitter ("hand-write it against the KitBurst
+machinery"), and a `requires: burst_energy_full` would put back the threshold
+the reframe took out. The shipped row keeps both and costs 0; this one costs 2.
+
+## proto_fr_intermission
+
+Face: "Drain your Fanfare. Gain Block equal to the Fanfare drained." `F12` (1):
+the survival drain beside the damage one, so draining is a plan and not a single
+card.
+
+It is the first `amount_formula` on a BLOCK op in either engine, which is the
+sentence four damage-side riders in `tools/gen_klee_cards.py` have carried for a
+sprint ("a block-side reader needs `block_calc_rider`'s CalculationBase plumbing
+and has no card yet"). The rail was already there; what this row added is a
+predicate reading the other key.

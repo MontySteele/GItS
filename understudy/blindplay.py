@@ -2194,8 +2194,11 @@ AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
 # fails the moment a sentence here falls behind it -- the same way
 # `CHARGE_SOURCE_LINE` is held in step from the other side.
 #
-# THE LIVE ARMS ONLY. Klee's overhaul (Bomb, Set off, Spark, Mine) and Kokomi's
-# (Plan, Mend). `Tide`, `Surge` and `Exert` left with the rules they named when
+# THE LIVE ARMS ONLY. Klee's overhaul (Bomb, Set off, Spark, Mine), Kokomi's
+# (Plan, Mend) and the Furina reframe's (Deploy, Evoke, Drain -- three words
+# whose rules exist only under FURINA_REFRAME, so a seat that meets one on a
+# prototype face has nowhere else to read it).
+# `Tide`, `Surge` and `Exert` left with the rules they named when
 # R240/R241 replaced the Tide with the Plan, and a page defining a dead word
 # would be teaching a tester a rule this build does not have.
 ARM_KEYWORDS: dict[str, str] = {
@@ -2214,6 +2217,18 @@ ARM_KEYWORDS: dict[str, str] = {
              "front enemy."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
+    # The Furina reframe's three (slice two, R220 A). The same sentences
+    # `ArmKeywordTips.ForDeploy` / `ForEvoke` / `ForDrain` print, with the two
+    # numerals the C# interpolates from `FurinaReframeLaw` written out: this
+    # page has no access to the mod's constants, and a seat reading it needs
+    # the number rather than the name of the constant that holds it.
+    "Deploy": ("A Salon member joins the stage and performs at once. Onto a "
+               "full stage, the front member Evokes first."),
+    "Evoke": ("The member performs and leaves. Its Fanfare bonus counts 3 "
+              "times and it prints 5 Fanfare. The card's Encore price pays "
+              "for it."),
+    "Drain": ("Your Fanfare falls to nothing. What the card does next is "
+              "priced off the amount it took."),
 }
 
 # One pattern per word, and they are CASE-SENSITIVE on purpose: the game
@@ -2227,6 +2242,9 @@ _ARM_KEYWORD_RE = {
     "Mine": re.compile(r"\bMines?\b"),
     "Plan": re.compile(r"\bPlans?\b"),
     "Mend": re.compile(r"\bMends?\b"),
+    "Deploy": re.compile(r"\bDeploys?\b"),
+    "Evoke": re.compile(r"\bEvokes?\b"),
+    "Drain": re.compile(r"\bDrains?\b"),
 }
 
 

@@ -2298,6 +2298,16 @@ STATIC_OP_PRICING: dict[str, str] = {
                                "measured dead dial (STATIC_ENERGY_VALUE)",
     "remove_debuff": "STATIC_DEBUFF_VALUE, one debuff off HER -- the mirror "
                      "of putting one onto an enemy, at the same rate",
+    # --- the Furina reframe (QUARANTINED, furina_reframe.FURINA_REFRAME) ---
+    "drain_fanfare": "ZERO: it SPENDS the meter, and what the spend buys is "
+                     "printed by the effect after it as an `amount_formula` "
+                     "the pricer already reads at its own base. Pricing the "
+                     "drain as well would charge the card for its cost and "
+                     "credit it for its payout twice over. Prototype surface "
+                     "only -- no shipped row prints it and no drafted number "
+                     "moves, so the priced-op set grows without a "
+                     "DRAFTER_VERSION bump (the same terms as "
+                     "`block_half_damage` below)",
     # --- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
     "block_half_damage": "ZERO: the amount is half of what the card's own "
                          "damage line LANDED, which no static pricer can see "
