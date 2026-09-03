@@ -233,13 +233,14 @@ from understudy.soak_lane import (         # noqa: E402,F401  (re-export)
 from understudy.soak_session import (      # noqa: E402,F401  (re-export)
     Reversibility, Session)
 from understudy.soak_telemetry import (    # noqa: E402,F401  (re-export)
-    ENCORE_UNSEEN, FightTelemetry, METER_UNSEEN, SALON_PRINTED_CAP,
-    _enemy_pool, _meters, _telegraphed)
+    ENCORE_UNSEEN, _ENCORE_RESOURCE_ID, _FANFARE_RESOURCE_ID, FightTelemetry,
+    _INTENT_LABEL, METER_UNSEEN, _METER_IDS, SALON_PRINTED_CAP,
+    _SALON_CAP_UP_ID, _enemy_pool, _meters, _telegraphed)
 from understudy.soak_screens import (      # noqa: E402,F401  (re-export)
     _escape, _first_of, _game_over_won, _hazard_event, _last_resort,
     _mechanical_action, _option_names, _trim_state)
 from understudy.soak_navigate import (     # noqa: E402,F401  (re-export)
-    Navigation, canonical_character, character_matches,
+    _CHARACTER_PREFIX, Navigation, canonical_character, character_matches,
     _selectable_characters)
 from understudy.soak_driver import RunDriver    # noqa: E402,F401 (re-export)
 
