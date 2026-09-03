@@ -288,7 +288,9 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForGrounded(
         IEnumerable<IHoverTip> inherited, CardModel? card = null) =>
         With(inherited, GroundedKey,
-            "A [gold]Power[/gold] that pays at the start of your turn, but "
+            // A card TYPE is a plain word, never golded
+            // (`docs/current/text-conventions.md`, and the lint bites).
+            "A Power that pays at the start of your turn, but "
           + "only if none of your [gold]Bombs[/gold] went off last turn. Its "
           + "card prints what it pays.");
 
