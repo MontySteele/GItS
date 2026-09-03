@@ -2639,12 +2639,19 @@ def test_a_remembered_shelf_never_crosses_from_one_shop_to_another():
 def test_a_spent_live_rest_site_offers_only_proceed():
     """`EB-263`'s acceptance, on the shape the wire actually sends: a spent
     rest site is `{"options": [], "can_proceed": true}`. The page used to
-    print no options while still advertising four verbs."""
+    print no options while still advertising four verbs.
+
+    `EB-371` ADDED THE ONE VERB THAT IS NOT THE ROOM'S. `drop potion` belongs
+    to the belt rather than to the screen -- the wire allows `discard_potion`
+    wherever a run is in progress -- so what this asserts is that the SPENT
+    ROOM offers nothing of its own, which is the rule the row is about.
+    """
     assert live("rest-spent")["rest_site"] == {"options": [],
                                                "can_proceed": True}
     page = blindplay.observe(live("rest-spent"))
     assert "nothing left to offer" in page
-    assert page.count("- `") == 1 and "- `proceed`" in page
+    verbs = [line for line in page.splitlines() if line.startswith("- `")]
+    assert [v for v in verbs if "drop potion" not in v] == ["- `proceed`"]
 
 
 def test_a_fresh_live_rest_site_offers_the_verbs_it_actually_has():
@@ -5277,11 +5284,17 @@ def test_a_potion_claimed_on_full_slots_says_the_slots_are_full():
 
 def test_a_free_slot_claims_a_potion_exactly_as_before():
     """The guard is narrow on purpose: a run with room reads and resolves the
-    way it always did."""
+    way it always did.
+
+    `EB-371` NARROWED WHAT THIS ASSERTS RATHER THAN WEAKENING IT. The belt is
+    printed on every screen that can drop from it now, so a page holding one
+    potion of three says so in its own count. What must stay absent is the
+    WARNING -- the sentence that refuses the claim -- and that is asserted.
+    """
     state = full_slots_rewards_state()
     state["player"]["potions"] = state["player"]["potions"][:1]
     page = blindplay.observe(state)
-    assert "slots are full" not in page
+    assert "Your potion slots are full" not in page
     assert blindplay.act(state, 'choose "Fire Potion"')["ok"]
 
 
@@ -5292,6 +5305,101 @@ def test_the_combat_page_says_how_many_potion_slots_there_are():
     state["player"]["potions"] = [{"name": "Fire Potion",
                                    "description": "Deal 20 damage."}]
     assert "- 1 of 3 slots are full." in blindplay.observe(state)
+
+
+# --------------------------- EB-371: the belt has a way off it, everywhere --
+#
+# THE ROW. At three of three the page REFUSES a potion reward -- "a potion
+# claimed now has nowhere to go" (`EB-341`) -- and outside a fight there was
+# nothing a seat could do to make room: `use potion` needs a combat for a
+# combat-only potion and nothing else touched the belt. The r9 act-1 seat met
+# Tiny Mailbox at a rest site, was handed two potions onto a full belt and lost
+# both, having been told only that it could not claim.
+#
+# THE WIRE HAD IT ALL ALONG. `discard_potion` is dispatched by
+# `McpMod.Actions.cs:65` and `ExecuteDiscardPotion` (`:325`) asks for a run in
+# progress and a potion in the slot -- no combat, no play phase and no
+# usability check, which is exactly what separates it from `use_potion`.
+
+
+def test_the_drop_verb_is_offered_on_a_rest_site_and_posts_the_wires_slot():
+    """The screen a seat was standing on when it lost two potions, and the
+    slot posted is the wire's own (`EB-269`'s lesson, one verb over).
+
+    Seen to FAIL: before this row `drop potion 2` was not a command at all.
+    """
+    state = live("rest-fresh")
+    page = blindplay.observe(state)
+    assert '- `drop potion "<potion>"`' in page
+    assert "- `drop potion <number>" in page
+    # The belt it counts against is printed on the same screen.
+    assert "## Potions" in page
+    assert "- 2 of 3 slots are full." in page
+    assert "- **Mazaleth's Gift** — Gain 1 Ritual." in page
+
+    res = blindplay.act(state, "drop potion 2")
+    assert res["ok"], res["refusal"]
+    assert res["post"] == {"action": "discard_potion", "slot": 1}
+    assert res["printed"] == {"potion": "Mazaleth's Gift"}
+    # And by name, which is the same row.
+    named = blindplay.act(state, 'drop potion "Blessing of the Forge"')
+    assert named["post"] == {"action": "discard_potion", "slot": 0}
+
+
+def test_the_drop_verb_reaches_the_reward_screen_that_refused_the_claim():
+    """The acceptance sentence: at three of three a seat drops one and claims
+    the offered one. Both halves against the one state."""
+    state = full_slots_rewards_state()
+    page = blindplay.observe(state)
+    assert "Your potion slots are full: 3 of 3" in page
+    assert '- `drop potion "<potion>"`' in page
+    # The refusal now names the way out instead of offering only a fight.
+    refusal = blindplay.act(state, 'choose "Fire Potion"')["refusal"]
+    assert "`drop potion 1`" in refusal
+
+    dropped = blindplay.act(state, 'drop potion "Flex Potion"')
+    assert dropped["ok"], dropped["refusal"]
+    assert dropped["post"] == {"action": "discard_potion", "slot": 2}
+    # With the slot free, the claim that was refused resolves.
+    state["player"]["potions"] = state["player"]["potions"][:2]
+    assert blindplay.act(state, 'choose "Fire Potion"')["ok"]
+
+
+def test_the_drop_verb_is_offered_in_a_fight_over_the_belt_already_printed():
+    """A combat screen prints the belt already, so only the verb is added --
+    and the ordinal counts the list the page has been printing since
+    `EB-341`."""
+    state = potion_belt_state(FIRE_IN_SLOT_ZERO + DEXTERITY_IN_SLOT_ONE)
+    page = blindplay.observe(state)
+    assert page.count("## Potions") == 1
+    assert "- `drop potion <number>" in page
+    assert blindplay.act(state, "drop potion 2")["printed"] == {
+        "potion": "Dexterity Potion"}
+
+
+def test_a_screen_with_no_belt_offers_no_drop():
+    """The verb is offered where it resolves and nowhere else: an empty belt
+    has nothing to aim it at, and a blocked screen is not being driven."""
+    state = json.loads(json.dumps(live("rest-fresh")))
+    state["player"]["potions"] = []
+    page = blindplay.observe(state)
+    assert "drop potion" not in page and "## Potions" not in page
+    assert not blindplay.act(state, "drop potion 1")["ok"]
+
+    over = {"state_type": "game_over", "game_over": {"result": "Defeat"},
+            "player": {"potions": [{"name": "Fire Potion", "slot": 0}]}}
+    assert "drop potion" not in blindplay.observe(over)
+
+
+def test_a_drop_that_names_nothing_is_refused_in_the_page_s_own_grammar():
+    """`drop` is not a verb and `drop potion` needs a handle. Both refusals
+    name the forms that resolve rather than a parser rule."""
+    state = live("rest-fresh")
+    bare = blindplay.act(state, "drop potion")
+    assert not bare["ok"] and "drop potion 2" in bare["refusal"]
+    assert not blindplay.act(state, 'drop "Mazaleth\'s Gift"')["ok"]
+    off = blindplay.act(state, "drop potion 9")
+    assert not off["ok"] and "no number 9 on your belt" in off["refusal"]
 
 
 # ----------------------------- EB-342: three page lines short of the state --

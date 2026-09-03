@@ -30,6 +30,46 @@ from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
                                         SELECT_SCREENS, UNDRIVEN_SCREENS)
 
 
+# `EB-371`. THE VERB, AND WHERE IT IS OFFERED.
+#
+# THE DEFECT. At three of three the page REFUSES a potion reward -- "a potion
+# claimed now has nowhere to go" (`_full_slots`, `EB-341`) -- and until this
+# row there was no way to make room outside a fight: `use potion` needs a
+# combat for a combat-only potion, and nothing else touched the belt. The r9
+# act-1 seat met Tiny Mailbox at a rest site, was handed two potions onto a
+# full belt and lost both, having been told only that it could not claim.
+#
+# THE WIRE HAS ALWAYS CARRIED IT. `discard_potion` (`McpMod.Actions.cs:65`,
+# `ExecuteDiscardPotion` at `:325`) asks for a run in progress and a slot with
+# a potion in it -- no combat, no play phase, no usability check, which is the
+# whole difference from `use_potion` one case above it. So the verb is offered
+# on EVERY screen this page drives rather than on a list of screens: the gate
+# is the page's own `blocked`, which is the same question the bridge asks.
+#
+# AND THE BELT IS PRINTED WHERE THE VERB IS. A combat screen already prints
+# `## Potions`; a rest site, a shop and a reward screen did not, so a seat on
+# one of them was being offered a verb over a list it could not see. Same
+# shape, same heading, one reader.
+_DROP_FORMS = ('drop potion "<potion>"',
+               "drop potion <number>   (the Nth potion on your belt, "
+               "counting from 1)")
+
+
+def _offer_drop(state: dict[str, Any], obs: dict[str, Any]) -> None:
+    """Offer `drop potion` -- and print the belt -- wherever it resolves."""
+    if obs["blocked"] or not obs["commands"]:
+        return
+    potions = _potions(state)
+    if not potions:
+        return
+    if obs["screen"] != "combat":
+        obs["belt"] = [{"title": _text(p.get("name")),
+                        "text": _text(p.get("description"))}
+                       for p in potions]
+        obs["belt_slots"] = _potion_slots(state)
+    obs["commands"] += list(_DROP_FORMS)
+
+
 def observation(state: dict[str, Any]) -> dict[str, Any]:
     """One screen, design-blind, field by field. Raises `PacketLeak` on a leak.
 
@@ -327,6 +367,11 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     else:
         obs["screen"] = "unknown"
         obs["blocked"] = "this tool has never seen this screen"
+
+    # `EB-371`: the belt, and the verb that empties a slot, on every screen
+    # the wire allows the action on. Before the sprite pass, so a potion face
+    # that names an icon file reads like every other face on the page.
+    _offer_drop(state, obs)
 
     # Sprite tags are rewritten HERE, at the boundary, rather than in each of
     # the dozen readers that could carry one: the wire prints them in card

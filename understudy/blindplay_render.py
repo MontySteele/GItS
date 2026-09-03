@@ -594,6 +594,20 @@ def render(obs: dict[str, Any]) -> str:
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
 
+    # `EB-371`: the belt, on a screen that is not a fight. A combat page has
+    # printed it under the same heading since `EB-341`; every other screen was
+    # offering `drop potion` over a list the reader could not see. Above the
+    # glossary and below the screen's own body, which is where the combat page
+    # already puts it.
+    if obs.get("belt"):
+        out += ["", "## Potions", ""]
+        if obs.get("belt_slots"):
+            out += [f"- {len(obs['belt'])} of {obs['belt_slots']} slots are "
+                    f"full.", ""]
+        for p in obs["belt"]:
+            out.append(f"- **{p['title']}** — {p['text']}" if p["text"]
+                       else f"- **{p['title']}**")
+
     # `EB-272`: one definition per arm keyword the screen printed, once, below
     # the board and above the grammar -- where a reader who has just met the
     # word looks next, and where it does not push the board off the top.
