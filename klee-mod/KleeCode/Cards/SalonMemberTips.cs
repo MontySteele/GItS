@@ -67,11 +67,15 @@ public static class SalonMemberTips
             }
             : (members ?? System.Array.Empty<SalonMember>()).Distinct().ToArray();
 
+        // `EB-384`: asked ONCE, and through the same accessor `SalonRulesBody`
+        // uses -- `card.Owner` throws on a canonical model (`EB-94`), and the
+        // two tips on one card must agree about whose stage they describe.
+        var owner = TipOwner.CreatureOf(card);
         foreach (var member in shown)
         {
             yield return new HoverTip(
                 new LocString(Table, KeyFor(member) + ".title"),
-                BodyFor(member));
+                BodyFor(member, owner));
         }
 
         if (shown.Length > 0)
@@ -105,7 +109,58 @@ public static class SalonMemberTips
     /// <summary>What this member does on stage and on the way out. Numbers
     /// come from SalonConstants, so a repricing cannot leave the tooltip
     /// telling the player a retired number.</summary>
-    public static string BodyFor(SalonMember member) => member switch
+    /// <param name="owner">Whose stage this tip is about. `EB-384`: the arm's
+    /// branch below is character-scoped like every other reframe seam, so the
+    /// owner is asked rather than the bare flag -- in co-op the other seat may
+    /// be Klee, and a Furina tip is not the place to invent a roster-wide
+    /// branch. `null` (no owner reachable, which is what a canonical
+    /// compendium copy gives) is the SHIPPED wording, the same way
+    /// <see cref="SalonRulesBody(Creature?)"/> falls back to the printed cap.
+    /// </param>
+    public static string BodyFor(SalonMember member, Creature? owner = null)
+    {
+#if PROTOTYPE_CARDS
+        // `EB-384`. THE MEMBER'S OWN TIP SAYS WHAT A PERFORMANCE PAYS, because
+        // under the arm a deploy card's damage is the entering member's and
+        // the card face prints none of it. The round-two seat watched
+        // Overflowing Hospitality -- a card whose face is one deploy line --
+        // take an enemy for 1 in one fight and 2 in another and called both
+        // unexplained. Both were this member: the printed 2, and the
+        // three-quarters cut of it on the turn the stage could not pay.
+        //
+        // "EACH TURN" IS THE CLAUSE THAT HAD TO GO. It is the shipped upkeep,
+        // which the MANUAL leg deletes, so every member tip on the screen was
+        // contradicting the Salon rules tip printed directly under it
+        // (`SalonRulesBody`, whose own arm branch is `EB-368`'s). Same defect
+        // as `EB-383`'s buff, one surface over.
+        if (FurinaReframe.ManualLiveFor(owner))
+        {
+            return member switch
+            {
+                SalonMember.Crabaletta =>
+                    $"Performs for {SalonConstants.CrabalettaTick} Hydro "
+                  + $"damage, paying {SalonConstants.TickEncoreCost} Encore. "
+                  + $"Evokes for {SalonConstants.CrabalettaBow} Hydro damage "
+                  + "and leaves the stage.",
+                SalonMember.Usher =>
+                    $"Performs for {SalonConstants.UsherTick} Block, paying "
+                  + $"{SalonConstants.TickEncoreCost} Encore. Evokes for "
+                  + $"{SalonConstants.UsherBow} Block and leaves the stage.",
+                _ =>
+                    $"Performs for {SalonConstants.ChevalmarinTick} Hydro "
+                  + $"damage, paying {SalonConstants.TickEncoreCost} Encore. "
+                  + "Evokes by applying Hydro to ALL enemies and granting "
+                  + $"{SalonConstants.ChevalmarinBowEncore} Encore.",
+            };
+        }
+#endif
+        return ShippedBodyFor(member);
+    }
+
+    /// <summary>The shipped upkeep's wording, unmoved and unreachable from the
+    /// arm's branch, so a release build's tip is the same expression it has
+    /// always been.</summary>
+    private static string ShippedBodyFor(SalonMember member) => member switch
     {
         SalonMember.Crabaletta =>
             $"Each turn, spends {SalonConstants.TickEncoreCost} Encore to deal "
@@ -172,7 +227,8 @@ public static class SalonMemberTips
               + "it fields at once; deploying onto a full stage "
               + "[gold]Evokes[/gold] the front member first. The leftmost "
               + "member is the front. Member numbers gain +1 per "
-              + $"{SalonConstants.FocusPerFanfare} Fanfare you hold.";
+              + $"{SalonConstants.FocusPerFanfare} Fanfare you hold, and a "
+              + "member with no Encore to spend performs at three-quarters.";
         }
 #endif
 

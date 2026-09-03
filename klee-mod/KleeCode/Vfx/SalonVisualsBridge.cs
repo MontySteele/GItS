@@ -522,7 +522,9 @@ public static class SalonVisualsBridge
 
         target.MouseFilter = Control.MouseFilterEnum.Stop;
         target.SetMeta(HoverTitleMeta, SalonMemberTips.KeyFor(who) + ".title");
-        target.SetMeta(HoverBodyMeta, SalonMemberTips.BodyFor(who));
+        // `EB-384`: the owner goes with the member, so the stage hover and the
+        // deploy card's tip read the same branch of the same copy.
+        target.SetMeta(HoverBodyMeta, SalonMemberTips.BodyFor(who, creature));
         target.SetMeta(HoverRulesMeta, SalonMemberTips.SalonRulesBody(creature));
 
         if (target.HasMeta(HoverWiredMeta))

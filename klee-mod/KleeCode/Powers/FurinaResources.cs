@@ -883,6 +883,11 @@ public static class FurinaResources
         if (!IsFurina(creature)) return;
         await SyncMeter<FanfareMeterPower>(
             choiceContext, creature, Fanfare(creature), cardSource);
+        // `EB-386`: the Spotlight badge follows its mode resource here too.
+        // Same moment and same argument as the meters above -- the resource is
+        // the rule, the power is the display, and a display that has stopped
+        // describing a live rule is what the round-two seat filed.
+        await SpotlightSystem.SyncModeDisplay(choiceContext, creature);
         // Salon stage sync (Track D): every meter-sync moment is also a
         // dry-state moment, and the stage reads composition + Encore here.
         // The member tooltip's live cap rides the same moment, which is what
@@ -1306,7 +1311,54 @@ public sealed class FanfareMeterPower : PowerModel, ILocalizationProvider
           + "[gold]Encore[/gold] — and by Center Stage plays. Cards read it; "
           + "nothing spends it. It fades by 20% at the start of each of your "
           + "turns, never below the baseline your cards have built."),
+#if PROTOTYPE_CARDS
+        // `EB-385`. THE ARM'S FACE, and the shipped one above it is a list of
+        // four generators the reframe retires. The round-two seat lost 1 HP
+        // and spent 2 Encore in the same turn for 0 Fanfare, then watched
+        // Salon Debut pay 2 -- so the badge named three things that mint
+        // nothing and missed the only thing that does.
+        //
+        // THE TWO AMOUNTS ARE INTERPOLATED from the arm's own law, `EB-89`'s
+        // rule applied one meter over: a retune of the trigger or the Evoke
+        // mint must not be able to leave this sentence quoting a retired
+        // number, and these are the same two constants `ArmKeywordTips.ForEvoke`
+        // prints and `lint_constant_parity` mirrors against the sim.
+        //
+        // NO SEMICOLON, unlike the shipped row: `lint_text_conventions` reads
+        // these literals out of the SOURCE with a regex that stops at one, so
+        // a semicolon makes a player-facing string invisible to its own
+        // ceiling. This face is 123 of 125.
+        ("smartDescriptionReframe",
+            "Only a member performing makes it: "
+          + $"[blue]{FurinaReframeLaw.FanfarePerTrigger}[/blue] when it stays "
+          + $"and [blue]{FurinaReframeLaw.FanfarePerEvoke}[/blue] on an "
+          + "[gold]Evoke[/gold]. It fades "
+          + $"{(int)(FurinaResourceConstants.FanfareDecayFraction * 100)}% a "
+          + "turn. Cards read it and none spends it."),
+#endif
     };
+
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// `EB-385`. Which face this badge prints. `IsMutable` first, for
+    /// `SalonMemberPower`'s reason: `HasSmartDescription` probes this key on a
+    /// canonical copy too, and `PowerModel.Owner`'s getter asserts mutability
+    /// (`EB-94`). A compendium copy therefore reads the shipped generators,
+    /// which is what a release build has.
+    /// </summary>
+    protected override string SmartDescriptionLocKey
+    {
+        get
+        {
+            if (IsMutable && Owner is { } owner
+                && FurinaReframe.MeterLiveFor(owner))
+            {
+                return Id.Entry + ".smartDescriptionReframe";
+            }
+            return base.SmartDescriptionLocKey;
+        }
+    }
+#endif
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;

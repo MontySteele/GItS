@@ -16,6 +16,7 @@ from understudy.blindplay_notes import (AURA_NOTE, CARRY_OUT_BOARD_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
                                         METER_CAPPED_NOTE, METER_NOTE,
+                                        METER_RULES,
                                         PENDING_PICK_NOTE, PICKED_MARK,
                                         POWER_NOTE, SELECTION_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE)
@@ -275,10 +276,17 @@ def render(obs: dict[str, Any]) -> str:
             # rows above it and the note narrows to the half still true; with
             # none it is exactly the row it always was.
             top = you.get("meter_max", {}).get(name)
+            # `EB-382`: where the MOD declares a spend rule the feed cannot
+            # carry, the row prints the rule instead of the sentence saying
+            # there is none. The ceiling half is unchanged either way, because
+            # a maximum and a spend rule are two different facts and this table
+            # answers only the second.
+            rule = METER_RULES.get(name)
             if top:
-                out.append(f"- {name}: {amount}/{top} — {METER_CAPPED_NOTE}")
+                out.append(f"- {name}: {amount}/{top} — "
+                           f"{rule or METER_CAPPED_NOTE}")
             else:
-                out.append(f"- {name}: {amount} — {METER_NOTE}")
+                out.append(f"- {name}: {amount} — {rule or METER_NOTE}")
         for pw in you["powers"]:
             out.append(_render_power(pw, "- "))
         out.append(f"- Piles: {c['piles']['draw']} in the draw pile, "
