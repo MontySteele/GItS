@@ -2724,6 +2724,38 @@ def test_the_enchant_picker_marks_the_pick_once_the_bridge_carries_it():
     assert page.index("## What you have picked") < page.rindex(picked)
 
 
+def test_the_pending_pick_is_marked_as_a_second_printing_of_a_row_above():
+    """`EB-329`. THE REMOVAL SCREEN LOOKED ONE CARD LONGER THAN THE DECK.
+
+    The round-5 act-1 seat counted sixteen rows over a fifteen-card deck and
+    read the extra as a real card -- "a bare `Strike` after `Undertow (2)`,
+    distinguishable only by the absence of a `(N)` index" -- and unpicked it
+    two fights later off pile arithmetic. The rows were both honest: the
+    second is the pending pick shown back, numbered on its own list and so
+    printed bare. Nothing said so.
+
+    Seen to FAIL without the mark: the two lists are the same format and the
+    heading alone did not carry it.
+    """
+    state = card_select_state()
+    state["card_select"]["preview_showing"] = True
+    state["card_select"]["preview_cards"] = [
+        dict(state["card_select"]["cards"][0])]
+    page = blindplay.observe(state)
+    assert "## What you have picked" in page
+    assert "Already listed above." in page
+    assert "counting both lists counts it twice" in page
+    # The row itself carries the word, at the end of its head where the cost
+    # and the type already sit.
+    picked = [ln for ln in page.splitlines()
+              if ln.startswith("- **Coral Guard**") and "PICKED" in ln]
+    assert len(picked) == 1, page
+    # And a screen with no pick is untouched: no mark, no note, no heading.
+    plain = blindplay.observe(card_select_state())
+    assert "PICKED" not in plain
+    assert "Already listed above." not in plain
+
+
 def test_an_asked_screen_with_nothing_picked_says_so():
     """"Nothing is picked" and "I could not find out" are different things to
     tell a tester who is about to spend a turn confirming, and only one of them
@@ -3032,9 +3064,184 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
     for line in block:
         for word in ("price_paid", "meter_ledger", "before=", "after="):
             assert word not in line
-    # And the observation carries nothing but the three ruled fields per row.
+    # And the observation carries nothing but the ruled fields per row --
+    # `EB-317`'s three, plus `EB-329`'s board reading and the door the Plan
+    # came through. All five are things a sighted player watched happen; not
+    # one of them is a ledger row.
     for row in obs["combat"]["plans"]["carried_out"]:
-        assert set(row) == {"card", "number", "line"}
+        assert set(row) == {"card", "number", "line",
+                            "on_play", "board_read", "moved"}
+        for moved in row["moved"]:
+            assert set(moved) == {"target", "combat_id", "amount", "dead"}
+
+
+# --------------------------------------------------------------------------
+# `EB-329`: THE MORNING LOG IS THE BOARD. Three seats across three acts read
+# the figure on a carry-out line as the damage and it is not: it is what the
+# Plan's FIRST clause produced. `Exposed Flank, 2` is two stacks of Vulnerable
+# on a beat that moved 3 HP; `Feint+, 19` agreed with the board only because a
+# damage clause's landed number is the damage. The mod now measures each
+# enemy's HP across the whole Plan and the page prints it under the line.
+# --------------------------------------------------------------------------
+
+
+def morning_of(*rows: dict) -> dict:
+    """A drained morning on the wire, with `EB-329`'s two new fields."""
+    return dict(TWO_PLANS, pending=0, queue=[], carried_out=list(rows))
+
+
+def two_body_state(plans: dict) -> dict:
+    """The recorded Kokomi board with a SECOND Nibbit beside the first.
+
+    Hand-built from the recorded one rather than invented: the copy keeps
+    every field the bridge sent and changes the two that identify a creature,
+    so the page numbers them `Nibbit (1)` and `Nibbit (2)` exactly as it does
+    on a real two-body board.
+    """
+    blindplay.forget_fight()
+    state = plans_combat_state(plans)
+    enemies = state["battle"]["enemies"]
+    twin = dict(enemies[0])
+    twin["combat_id"] = 2
+    twin["entity_id"] = "NIBBIT_1"
+    state["battle"] = dict(state["battle"], enemies=[enemies[0], twin])
+    return state
+
+
+def test_a_plan_on_a_vulnerable_target_prints_the_number_the_board_moved():
+    """The row's own example, and the sharpest form of the defect.
+
+    `Exposed Flank` applies 2 Vulnerable; the line's figure is that 2. What a
+    player watched was the Tamakushi Casket answering the debuff with a Hydro
+    strike, multiplied by the Vulnerable it had just applied -- 3 HP off the
+    body. Both numbers are now on the page, each saying what it is.
+
+    Seen to FAIL before the mod measured it: the page had the 2 and nothing
+    else, and the seat's arithmetic came out one point short every time.
+    """
+    blindplay.forget_fight()
+    page = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Exposed Flank", "number": 2,
+                    "line": "Bake-Kurage: Exposed Flank, 2",
+                    "on_play": False,
+                    "moved": [{"target": "Nibbit", "combat_id": "1",
+                               "amount": 3, "dead": False}]}))))
+    assert "- Bake-Kurage: Exposed Flank, 2" in page
+    assert "- Nibbit lost 3 HP" in page
+    # And the page says which number is which, once, under the block.
+    assert "what its first clause produced" in page
+
+
+def test_an_all_plan_prints_a_number_per_target():
+    """Kurage's Oath is `Deal 7 damage to ALL enemies`, and one line has room
+    for one figure -- `EB-317` said so and left the rest on a screen a blind
+    seat does not have. Per body, named the way this page names bodies."""
+    page = blindplay.render(blindplay.observation(two_body_state(
+        morning_of({"card": "Kurage's Oath", "number": 7,
+                    "line": "Bake-Kurage: Kurage's Oath, 7",
+                    "on_play": False,
+                    "moved": [{"target": "Nibbit", "combat_id": "1",
+                               "amount": 7, "dead": False},
+                              {"target": "Nibbit", "combat_id": "2",
+                               "amount": 10, "dead": True}]}))))
+    assert "- Nibbit (1) lost 7 HP" in page
+    assert "- Nibbit (2) lost 10 HP, and died" in page
+    # The names are THIS PAGE'S, so the receipt and the enemy list four lines
+    # down name the same body the same way.
+    assert "**Nibbit (2)**" in page
+
+
+def test_a_plan_that_moved_no_hp_says_so_and_an_older_wire_says_nothing():
+    """Two silences that are not the same silence. A Draw Plan really moved
+    no HP and saying so is what lets a morning reconcile; a bridge that
+    predates the measurement has not answered, and a page that printed
+    "nothing moved" for it would be inventing a board."""
+    blindplay.forget_fight()
+    measured = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Stolen Chapter", "number": None,
+                    "line": "Bake-Kurage: Stolen Chapter",
+                    "on_play": False, "moved": []}))))
+    assert "- no enemy lost HP" in measured
+    blindplay.forget_fight()
+    older = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Stolen Chapter", "number": None,
+                    "line": "Bake-Kurage: Stolen Chapter"}))))
+    assert "- Bake-Kurage: Stolen Chapter" in older
+    assert "no enemy lost HP" not in older
+    assert "what its first clause produced" not in older
+
+
+def test_an_on_play_firing_prints_under_its_own_heading():
+    """`EB-329`, the r4c seat's finding 4. With The Moon Overlooks the Waters
+    out, a War Council played mid-turn was reported on one screen both as
+    already carried out "at the start of this turn" and as still queued. Both
+    rows were true; the first sentence was not."""
+    blindplay.forget_fight()
+    page = blindplay.render(blindplay.observation(plans_combat_state(
+        dict(TWO_PLANS, pending=1, also_now=True,
+             queue=[{"name": "War Council", "clauses": 2}],
+             carried_out=[{"card": "War Council", "number": 5,
+                           "line": "Bake-Kurage: War Council, 5",
+                           "on_play": True,
+                           "moved": [{"target": "Nibbit", "combat_id": "1",
+                                      "amount": 7, "dead": False}]}]))))
+    assert "carried these out at the start of this turn" not in page
+    assert "the moment each was written, and not this morning" in page
+    assert "- Bake-Kurage: War Council, 5" in page
+    assert "- Nibbit lost 7 HP" in page
+    # The queue below still says the Plan is waiting for the morning, which
+    # is the OTHER true half the seat could not reconcile with the first.
+    assert "1. **War Council**" in page
+
+
+def test_a_morning_and_an_on_play_firing_are_two_blocks_in_turn_order():
+    """The morning happened at the top of the turn and the mid-turn firing
+    after it, so the page prints them in that order and heads them apart."""
+    blindplay.forget_fight()
+    page = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Ambush", "number": 12,
+                    "line": "Bake-Kurage: Ambush, 12", "on_play": False,
+                    "moved": [{"target": "Nibbit", "combat_id": "1",
+                               "amount": 12, "dead": False}]},
+                   {"card": "War Council", "number": 5,
+                    "line": "Bake-Kurage: War Council, 5", "on_play": True,
+                    "moved": [{"target": "Nibbit", "combat_id": "1",
+                               "amount": 7, "dead": False}]}))))
+    assert page.index("carried these out at the start of this turn") \
+        < page.index("the moment each was written")
+    assert page.index("Bake-Kurage: Ambush, 12") \
+        < page.index("Bake-Kurage: War Council, 5")
+
+
+def test_the_last_carry_out_of_a_finished_fight_reaches_the_reward_screen():
+    """`EB-329`. A PLAN WHOSE KILL ENDS THE FIGHT NEVER REACHES A BATTLE
+    SCREEN. The round-5 act-1 seat banked two exactly-lethal Plans and wrote
+    "the next screen was the reward screen": computed, never confirmed.
+
+    `KokomiPlan.Snapshot` reads static per-player records and touches no
+    combat, so the bridge emits `kokomi_plans` outside the combat block and
+    the receipt lands here. The QUEUE is deliberately not printed: a fight
+    that ended mid-turn can leave Plans pending, and "carried out at the start
+    of your next turn" is a promise about a fight that no longer exists.
+    """
+    state = rewards_state()
+    state["player"] = {"hp": 26, "max_hp": 80, "gold": 99,
+                       "kokomi_plans": morning_of(
+                           {"card": "Feint+", "number": 19,
+                            "line": "Bake-Kurage: Feint+, 19",
+                            "on_play": False,
+                            "moved": [{"target": "Terror Eel",
+                                       "combat_id": "1", "amount": 19,
+                                       "dead": True}]})}
+    page = blindplay.render(blindplay.observation(state))
+    assert "## The Bake-Kurage's last carry-out" in page
+    assert "never reaches a battle screen" in page
+    assert "- Bake-Kurage: Feint+, 19" in page
+    assert "- Terror Eel lost 19 HP, and died" in page
+    assert "carried out at the start of your next turn" not in page
+    # A reward screen from a build with no Plan rule is untouched.
+    assert "Bake-Kurage" not in blindplay.render(
+        blindplay.observation(rewards_state()))
 
 
 def test_the_grammar_offers_the_jellyfish_only_where_there_is_one():
@@ -4207,9 +4414,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
         # phrase that straddles a `+` is not a substring of the source.
-        "Plan": [", paid now; the ",
-                 "lands first thing next turn on the front enemy. Enemy ",
-                 " raises it; your "],
+        # `EB-329`: the aim clause now defers to the face, because a Plan
+        # that says ALL hits every enemy and this sentence said otherwise on
+        # every battle screen of the run.
+        "Plan": [", paid now; lands next turn on ",
+                 "the front enemy, or ALL if it says so. Enemy ",
+                 "counts; your "],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
         # The Furina reframe's three (slice two, 2026-09-02). The Evoke
@@ -4224,14 +4434,65 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Drain": [" falls to nothing. What the card does ",
                   "next is priced off the amount it took"],
     }
-    assert set(anchors) == set(blindplay.ARM_KEYWORDS)
+    # `EB-329`: `Companion` is the one row with NO tooltip to be held in step
+    # with, because the game hangs no tip on the word at all -- which is the
+    # finding. Its own source is pinned one test down.
+    assert set(anchors) | {"Companion"} == set(blindplay.ARM_KEYWORDS)
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
                 "PlanKey", "DeployKey", "EvokeKey", "DrainKey"):
         assert f"public const string {key}" in src
+    assert "CompanionKey" not in src
     for word, phrases in anchors.items():
         for phrase in phrases:
             assert phrase in src, (word, phrase)
             assert phrase in blindplay.ARM_KEYWORDS[word], (word, phrase)
+
+
+def test_the_companion_row_is_the_mods_own_sentence_about_the_slot():
+    """`EB-329`. TWO CARDS PRICE THEMSELVES ON A WORD NO SCREEN DEFINES.
+
+    `Chain of Command` counts the Companion cards you played last turn and
+    `The General's Banner` triggers on one; the round-5 act-1 seat met both,
+    one on a reward and one on a 76-gold shelf, and reported the term
+    undefined across seventeen floors. There is no `ArmKeywordTips` row to
+    copy, so the definition is built out of the two things the game DOES
+    print: the shape of a companion row's title, and the mod's own sentence
+    about the reward slot on the Mods screen. The second half is quoted
+    verbatim and pinned here, so a reworded manifest goes red rather than
+    leaving the page saying something the game no longer does.
+    """
+    manifest = json.loads((REPO / "klee-mod" / "Klee" / "manifest.json")
+                          .read_text(encoding="utf-8"))
+    body = blindplay.ARM_KEYWORDS["Companion"]
+    assert ("Card rewards after a fight offer a fourth, Companion, choice."
+            in manifest["description"])
+    assert ("Card rewards after a fight offer a fourth, Companion, choice."
+            in body)
+    # The title's shape, which is the tell a reader has mid-fight, checked
+    # against a real companion row rather than against prose.
+    sheet = (REPO / "docs" / "mondstadt-companions.yaml").read_text(
+        encoding="utf-8")
+    assert re.search(r'name:\s*"[^"]+ — [^"]+"', sheet)
+    assert "a character's name, a dash, then its own" in body
+    # The page's own ceiling: the arm rows mirror a 135-character tip, and a
+    # row with no tip to mirror keeps the same bound rather than sprawling.
+    assert len(body) <= 135, len(body)
+
+
+def test_the_companion_word_is_defined_where_a_card_prices_itself_on_it():
+    """The trigger is the PHRASE. A companion's own face never prints it --
+    every one of them is a Companion card and none says so -- and the two
+    cards that charge for it both spell it out."""
+    page = blindplay.observe(keyword_hand_state([
+        "Deal 4 damage for each Companion card you played last turn."]))
+    assert "- **Companion** — A card titled with a character's name" in page
+    assert "offer a fourth, Companion, choice" in page
+    # Plural too, and a face that merely names a companion defines nothing.
+    plural = blindplay.observe(keyword_hand_state([
+        "Whenever you play a Companion card, apply 1 Weak."]))
+    assert "- **Companion** —" in plural
+    bare = blindplay.observe(keyword_hand_state(["Gain 5 Block."]))
+    assert "**Companion**" not in bare
 
 
 def test_the_glossary_carries_no_markup_and_no_id():
@@ -4481,6 +4742,26 @@ def test_the_consumed_aura_rule_is_stated_plainly():
     assert "a card that hits once leaves the enemy bare" in entry
     assert "only a later hit of the same card applies its element" in entry
     assert f"for {blindplay.AURA_DURATION_TURNS} turns instead" in entry
+
+
+def test_a_consumed_aura_that_is_re_applied_in_the_same_beat_says_so():
+    """`EB-329`, off round 4c's finding 15. TWO KOKOMI SEATS FILED "the aura
+    is not consumed when its own text says it is" as a defect, and the rule
+    was firing the whole time: the reaction applies a debuff, the Tamakushi
+    Casket answers any debuff with 2 Hydro damage, and a Hydro hit refreshes a
+    Hydro aura to full. The consumed state exists for less than one screen
+    refresh, so the keyword's central sentence cannot be checked off the
+    board -- and a reader who checks it concludes the rule is broken.
+
+    The relic is NOT named: this row prints for a Klee who holds no Casket,
+    and what is general is the shape.
+    """
+    entry = blindplay.REACTION_KEYWORDS["Elemental Reaction"]
+    assert "RE-APPLIED" in entry
+    assert "no screen ever shows it gone" in entry
+    assert "Tamakushi" not in entry and "Casket" not in entry
+    assert "- **Elemental Reaction** — " in blindplay.observe(
+        elemental_hand_state())
 
 
 def test_a_screen_with_no_element_defines_no_reaction():

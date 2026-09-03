@@ -171,8 +171,33 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         combat["memory"] = memory
     plans = kokomi_plans(p)
     if plans is not None:
+        # `EB-329`: the mod names a moved enemy by its combat id, and THE
+        # PAGE OWNS THE NAMES -- `_enemy_names` numbers repeats and keeps the
+        # numbers for the fight, so `Toadpole (2)` has to mean the same body
+        # in the Bake-Kurage's receipt as in the enemy list four lines down.
+        name_moved_rows(plans, _enemies(state), combat["enemies"])
         combat["plans"] = plans
     return combat
+
+
+def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],
+                    printed: list[dict[str, Any]]) -> None:
+    """Resolve each moved row's combat id to the name this page uses.
+
+    `EB-329`. THE ID IS THE HANDLE AND THE NAME IS THE FALLBACK, the split
+    `KokomiPlan.MovedOn` documents from the other side. A body still on the
+    board gets the page's own numbered name; one that DIED to the Plan is off
+    the next board entirely and keeps the title the mod recorded, which is
+    the whole reason the mod sends a title at all.
+    """
+    by_id = {_text(raw.get("combat_id")): face["name"]
+             for raw, face in zip(wire, printed)
+             if _text(raw.get("combat_id"))}
+    for row in plans["carried_out"] + plans["fired_now"]:
+        for moved in row["moved"]:
+            named = by_id.get(moved["combat_id"])
+            if named:
+                moved["target"] = named
 
 
 def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
@@ -207,6 +232,15 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
         seat's page and a sighted player's screen cannot come to disagree about
         the words. `_carry_out_line` recomposes it only when an older build
         sends the parts without the sentence.
+
+        `EB-329` adds two per row. `moved` is WHAT THE BOARD DID -- each
+        enemy's HP loss across the whole Plan, measured by the mod rather than
+        read off a clause, so the Casket's answering strikes and a reaction's
+        damage are inside it. `on_play` is which door the Plan came through,
+        and it splits this list in two here: `carried_out` keeps the MORNING
+        and `fired_now` takes Change of Plans and The Moon Overlooks the
+        Waters, because "at the start of this turn" is a false sentence about
+        a Plan that fired as it was written.
     """
     raw = player.get("kokomi_plans")
     if not isinstance(raw, dict) or not raw:
@@ -216,9 +250,9 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"
-    carried_out = [_carried_out_row(row, pet_name)
-                   for row in (raw.get("carried_out") or [])
-                   if isinstance(row, dict)]
+    said = [_carried_out_row(row, pet_name)
+            for row in (raw.get("carried_out") or [])
+            if isinstance(row, dict)]
     return {
         "pet": bool(raw.get("pet")),
         "pet_name": pet_name,
@@ -227,7 +261,8 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
         "twice": bool(raw.get("twice")),
         "also_now": bool(raw.get("also_now")),
         "queue": queue,
-        "carried_out": carried_out,
+        "carried_out": [row for row in said if not row["on_play"]],
+        "fired_now": [row for row in said if row["on_play"]],
     }
 
 
@@ -239,6 +274,15 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
     there. The fallback exists for one case and is written for it: a build
     whose wire predates the field, where printing nothing would be worse than
     printing the same format the mod uses.
+
+    `board_read` IS THE THIRD STATE, and `EB-329` needs it because the other
+    two are not enough: "every enemy came through untouched" and "this bridge
+    predates the measurement" are different facts, and a page that printed
+    "nothing moved" for the second would be inventing a board. An ABSENT
+    `moved` key answers False and the row prints exactly what it printed
+    before this change; a present-and-empty one answers True and the row can
+    say the Plan moved no HP, which for a Draw or a Block Plan is the honest
+    and useful receipt.
     """
     number = row.get("number")
     number = None if number is None else _int(number)
@@ -247,7 +291,52 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
     if not line:
         line = (f"{pet_name}: {card}" if number is None
                 else f"{pet_name}: {card}, {number}")
-    return {"card": card, "number": number, "line": line}
+    raw_moved = row.get("moved")
+    return {"card": card, "number": number, "line": line,
+            "on_play": bool(row.get("on_play")),
+            "board_read": isinstance(raw_moved, list),
+            "moved": [_moved_row(m) for m in (raw_moved or [])
+                      if isinstance(m, dict) and _int(m.get("amount")) > 0]}
+
+
+def last_morning(state: dict[str, Any]) -> dict[str, Any] | None:
+    """The last carry-out of a fight that is already over (`EB-329`).
+
+    THE SAME SNAPSHOT, READ ON A SCREEN WITH NO COMBAT BEHIND IT. Everything
+    else in `kokomi_plans` is about a live board -- the pending queue, the
+    pet, Nereid's window -- and none of it means anything here, so this
+    returns the carry-out lines alone. The queue in particular is deliberately
+    dropped: a fight that ended mid-turn can leave Plans pending, and "carried
+    out at the start of your next turn" is a promise about a fight that no
+    longer exists.
+
+    `None` where there is nothing to say, which covers a build with no Plan
+    rule, a seat that is not Kokomi, a bridge that predates the out-of-combat
+    emission, and a fight whose last turn carried nothing out.
+    """
+    plans = kokomi_plans(_player(state))
+    if plans is None:
+        return None
+    said = plans["carried_out"] + plans["fired_now"]
+    if not said:
+        return None
+    return {"pet_name": plans["pet_name"], "carried_out": plans["carried_out"],
+            "fired_now": plans["fired_now"]}
+
+
+def _moved_row(row: dict[str, Any]) -> dict[str, Any]:
+    """One enemy's share of one Plan (`EB-329`), off `KokomiPlan.MovedRow`.
+
+    `target` is the mod's own read of the creature's title and is REPLACED by
+    `name_moved_rows` wherever the body is still on the board, so a reader is
+    handed the numbered name this page has been using all fight. Where the
+    game would not answer either, the row says so in words rather than
+    printing a bare number against nothing.
+    """
+    return {"target": _text(row.get("target")) or "an enemy",
+            "combat_id": _text(row.get("combat_id")),
+            "amount": _int(row.get("amount")),
+            "dead": bool(row.get("dead"))}
 
 
 def _pulse_phrase(memory: dict[str, Any]) -> str:

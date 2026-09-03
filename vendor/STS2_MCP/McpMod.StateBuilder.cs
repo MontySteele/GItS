@@ -1177,20 +1177,6 @@ public static partial class McpMod
                 state["kurage_memory"] = kurageMemory;
             }
 
-            // GItS LOCAL EDIT (`EB-216`, the Kokomi draft-6 half). The same
-            // gap one rule over: the arm's pending-Plans badge reaches the
-            // wire as a COUNT, and what the next morning WILL BE is the list
-            // behind it -- which Plans, in what order, and whether Nereid's
-            // Ascension has made each of them happen twice. The pet's entity
-            // id rides here too, because a Plan is played ON the jellyfish and
-            // a seat with no id to aim at cannot write one at all. Emitted
-            // only when this build HAS the rule. Implementation and its
-            // reflection contract: gits/GitsKokomiPlan.cs.
-            if (GitsKokomiPlanState(player) is { } kokomiPlans)
-            {
-                state["kokomi_plans"] = kokomiPlans;
-            }
-
             // Stars (The Regent's resource, conditionally shown)
             if (player.Character.ShouldAlwaysShowStarCounter || combatState.Stars > 0)
             {
@@ -1262,6 +1248,32 @@ public static partial class McpMod
         }
 
         state["gold"] = player.Gold;
+
+        // GItS LOCAL EDIT (`EB-216`, the Kokomi draft-6 half). The same gap
+        // one rule over from `kurage_memory`: the arm's pending-Plans badge
+        // reaches the wire as a COUNT, and what the next morning WILL BE is
+        // the list behind it -- which Plans, in what order, and whether
+        // Nereid's Ascension has made each of them happen twice. The pet's
+        // entity id rides here too, because a Plan is played ON the jellyfish
+        // and a seat with no id to aim at cannot write one at all. Emitted
+        // only when this build HAS the rule. Implementation and its
+        // reflection contract: gits/GitsKokomiPlan.cs.
+        //
+        // OUTSIDE THE COMBAT BLOCK SINCE `EB-329`, and that is the whole of
+        // the row's third ask. `KokomiPlan.Snapshot` reads static per-Player
+        // records and touches no `CombatState`, so it answers perfectly well
+        // once a fight is over -- and the one morning a seat can never see is
+        // the one whose kill ENDED the fight, because the next screen the
+        // game shows is the reward screen and the combat block does not run
+        // for it. The round-5 act-1 seat banked two Plans for an exactly
+        // lethal morning and reported "the next screen was the reward
+        // screen": the beat it had spent a turn setting up was the only beat
+        // of the run with no receipt. Emitting here costs a dictionary on
+        // non-combat screens and hands the page that receipt.
+        if (GitsKokomiPlanState(player) is { } kokomiPlans)
+        {
+            state["kokomi_plans"] = kokomiPlans;
+        }
 
         // Powers (status effects)
         state["status"] = BuildPowersState(creature);

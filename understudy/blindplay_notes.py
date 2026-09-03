@@ -127,6 +127,57 @@ PREVIEW_LOCKED = ("your pick is already made and this screen is showing it "
                   "`confirm` to take it, or `skip` to put it back and choose "
                   "again")
 
+# `EB-329`, the card-removal half, and the refusal above is what made it
+# legible in the end rather than the screen. The round-5 act-1 seat counted
+# SIXTEEN rows on a removal screen over a fifteen-card deck: "the extra being
+# a bare `Strike` after `Undertow (2)`, distinguishable only by the absence of
+# a `(N)` index". It read that as a fifth Strike-family card -- as the Fishing
+# Rod having ADDED an upgraded Strike rather than upgrading one in place --
+# and only unpicked it two fights later off pile arithmetic.
+#
+# The rows were never wrong. `obs["selected"]` is the pending pick printed a
+# SECOND time, under its own heading and numbered on its own, so the copy the
+# grid already listed as `Strike (1)` reprints bare. Two lists in one format,
+# one of them a subset of the other, and nothing on the page saying so.
+#
+# So the pick is MARKED on its own row (`PICKED`, the word `EB-294` already
+# gave a chosen bundle) and the heading carries one sentence saying what the
+# second printing is. Neither invents anything: the screen really is showing
+# the pick back, which is what `PREVIEW_LOCKED` tells anyone who tries to
+# name a second card.
+PICKED_MARK = "PICKED"
+PENDING_PICK_NOTE = ("*Already listed above. These rows are the pick this "
+                     "screen is holding, printed a second time so you can "
+                     "read its face -- each is one of the cards in the list "
+                     "above and not another copy of it, so counting both "
+                     "lists counts it twice.*")
+
+# `EB-329`, the morning log's own note. THE TWO NUMBERS UNDER A PLAN ARE NOT
+# THE SAME QUANTITY and three seats spent three acts finding that out the hard
+# way: the figure on the Plan's line is what its FIRST clause produced -- two
+# stacks of Vulnerable for `Exposed Flank, 2` -- while the board moved 3 that
+# beat, because the Tamakushi Casket answers a debuff with a Hydro strike and
+# the Vulnerable it had just applied multiplied it. `Feint+, 19` agreed with
+# the board only because a damage clause's landed number IS the damage. The
+# note says which is which, once, under the block that prints both.
+CARRY_OUT_BOARD_NOTE = (
+    "*Under each Plan is the HP each enemy lost while that Plan resolved -- "
+    "the whole beat, so anything the Plan set off is inside the number. The "
+    "figure on the Plan's own line is what its first clause produced, which "
+    "is a different quantity whenever that clause is not damage.*")
+
+# `EB-329`, the fight-ended half. The round-5 act-1 seat banked two Plans for
+# an exactly lethal morning and wrote: "the next screen was the reward screen
+# -- the two Plans killed it at the top of turn 3 as computed". Computed, and
+# never confirmed: a morning that ends the fight is the one morning no battle
+# screen is ever drawn for. The mod now records its line on the way out
+# (`KokomiPlan.ResolveEntry`'s finally) and the bridge sends the record on a
+# screen with no combat behind it, so the receipt has somewhere to land.
+LAST_MORNING_NOTE = (
+    "*The fight is over. This is the last thing the Bake-Kurage carried out "
+    "in it -- printed here because a Plan whose kill ends a fight never "
+    "reaches a battle screen.*")
+
 # `EB-299`. THE NOTE WAS WRONG IN BOTH DIRECTIONS AND THE r2 OPUS SEAT CAUGHT
 # BOTH. It said *"Two cards here print the same name"* over a hand holding
 # THREE Coral Guards, over a hand with two separate duplicate PAIRS, and over
@@ -209,9 +260,15 @@ ARM_KEYWORDS: dict[str, str] = {
     "Mine": ("A Bomb that also goes off when its enemy attacks you, before "
              "the hit lands. The enemy's debuffs move it, and the badge has "
              "the number."),
-    "Plan": ("On the Bake-Kurage, paid now; the Plan lands first thing next "
-             "turn on the front enemy. Enemy Vulnerable raises it; your Weak "
-             "does not."),
+    # `EB-329`. "OR ALL IF IT SAYS SO" IS THE HALF THE OLD SENTENCE GOT
+    # WRONG, and it was reprinted on every battle screen of every run: a
+    # starter, Kurage's Oath, deals its Plan to ALL enemies, and the round-5
+    # act-1 seat watched one Plan take two Toadpoles and then four Phantasmal
+    # Gardeners while this line said "the front enemy" and nothing else. The
+    # card face was right the whole time; the word now defers to it.
+    "Plan": ("On the Bake-Kurage, paid now; lands next turn on the front "
+             "enemy, or ALL if it says so. Enemy Vulnerable counts; your "
+             "Weak does not."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
     # The Furina reframe's three (slice two, R220 A). The same sentences
@@ -226,6 +283,27 @@ ARM_KEYWORDS: dict[str, str] = {
               "for it."),
     "Drain": ("Your Fanfare falls to nothing. What the card does next is "
               "priced off the amount it took."),
+    # `EB-329`. THE ONE WORD IN THIS TABLE THE GAME DEFINES NOWHERE, and that
+    # is the finding rather than an oversight here: two cards price themselves
+    # on it -- Chain of Command counts the Companion cards you played last
+    # turn, The General's Banner triggers on one -- and the round-5 act-1 seat
+    # met both, one on a reward and one on a shelf at 76 gold, across
+    # seventeen floors on which "no screen defines" the term. So this row has
+    # no `ArmKeywordTips` twin to be held in step with, and it is written
+    # instead out of the two things the game does print:
+    #
+    #   the TITLE. A companion row is "<Character> — <Card>"
+    #     (`docs/<nation>-companions.yaml`, and `KokomiPlan.Label` splits a
+    #     held card's name on that same dash), so the shape of the name IS
+    #     the tell, and it is the only one a reader has mid-fight.
+    #   the SLOT, in the mod's own sentence: `klee-mod/Klee/manifest.json`'s
+    #     description, printed on the Mods screen, says it in eleven words and
+    #     they are quoted verbatim. That is where a sighted player reads it
+    #     and where `docs/current/text-conventions.md` rule 11 put it (R249
+    #     pick 4) when the four starting relics stopped each printing it.
+    "Companion": ("A card titled with a character's name, a dash, then its "
+                  "own. Card rewards after a fight offer a fourth, "
+                  "Companion, choice."),
 }
 
 # One pattern per word, and they are CASE-SENSITIVE on purpose: the game
@@ -239,9 +317,23 @@ _ARM_KEYWORD_RE = {
     "Mine": re.compile(r"\bMines?\b"),
     "Plan": re.compile(r"\bPlans?\b"),
     "Mend": re.compile(r"\bMends?\b"),
-    "Deploy": re.compile(r"Deploys?"),
-    "Evoke": re.compile(r"Evokes?"),
-    "Drain": re.compile(r"Drains?"),
+    # THE THREE FURINA WORDS CARRIED A LITERAL BACKSPACE, not a word
+    # boundary: `\b` inside these three patterns was the CHARACTER 0x08 and
+    # not the escape, so `Deploy`, `Evoke` and `Drain` could never match any
+    # screen and the reframe's glossary rows were unreachable. Nothing shipped
+    # noticed because slice two is flag-off, and no pin exercised the three.
+    # Hygiene, fixed in passing with `EB-329`; the pattern is now the same
+    # shape as every row above it.
+    "Deploy": re.compile(r"\bDeploys?\b"),
+    "Evoke": re.compile(r"\bEvokes?\b"),
+    "Drain": re.compile(r"\bDrains?\b"),
+    # `EB-329`: THE PHRASE, not the bare word. "Companion" alone would fire on
+    # a companion's own card face -- every one of them IS a companion card and
+    # none of them prints the term -- and on any prose that happened to use
+    # it. The two cards that PRICE themselves on the word both spell it out
+    # ("Companion card", "Companion cards"), and that is exactly the screen a
+    # reader needs the definition on.
+    "Companion": re.compile(r"\bCompanion cards?\b"),
 }
 
 
@@ -264,6 +356,20 @@ _ARM_KEYWORD_RE = {
 # step from this side by `test_the_reaction_glossary_is_the_games_own_preview`,
 # the discipline `ARM_KEYWORDS` is already under.
 #
+# `EB-329` ADDED THE RE-APPLICATION CLAUSE, and it is the one sentence in this
+# table that is not about a reaction at all -- it is about why a reader cannot
+# SEE one. Two Kokomi seats filed "the aura is not consumed when its own text
+# says it is" as a defect; the r4c seat worked out what was really happening
+# (round 4c, finding 15) and it is the two shipped rules composing. Sara's
+# Electro reacts off a Hydro aura, the reaction applies a debuff, the
+# Tamakushi Casket answers "whenever you apply a debuff to an enemy" with 2
+# Hydro damage, and a Hydro hit refreshes a Hydro aura to its full duration.
+# So the consumed state exists for less than one screen refresh, and the
+# keyword's central sentence is unfalsifiable from the board. The relic is not
+# NAMED here, because this row is printed for a Klee who holds no Casket; what
+# is named is the shape, which any relic answering a debuff in the aura's own
+# element has.
+#
 # SIX, NOT FOUR. `EB-340` names the four the seat met; the mod's `Reaction`
 # enum pairs the game's four elements six ways, and the other two are reachable
 # by the same deck -- Charlotte supplies Cryo, Shinobu Electro, Barbara Hydro,
@@ -281,7 +387,11 @@ REACTION_KEYWORDS: dict[str, str] = {
         "enemy bare, and only a later hit of the same card applies its "
         f"element. On a bare enemy the hit applies its own element for "
         f"{AURA_DURATION_TURNS} turns instead, and a hit matching the aura "
-        "refreshes it."),
+        "refreshes it. THAT LAST RULE CAN HIDE THE FIRST: where a reaction's "
+        "own debuff sets off a relic that hits with the aura's own element, "
+        "the aura is consumed and RE-APPLIED inside the same beat, so no "
+        "screen ever shows it gone and the reaction looks as though it did "
+        "not happen. The reaction did happen -- its effect is on the body."),
     # `EB-345` (R249) retuned the six preview rows in `KleeMod.cs` -- each one
     # now leads with the pair that reacts instead of a 60-character preamble
     # about what the CARD supplies, and Electro-Charged says what the dot

@@ -44,6 +44,27 @@ public class KurageBeatTests
         return -1;
     }
 
+    /// <summary>
+    /// How many `finally` blocks an async method's body carries (`EB-329`).
+    ///
+    /// An async method compiles to a state machine and the real body is
+    /// `MoveNext`, so that is what is counted. The compiler's own machinery
+    /// wraps the whole thing in a CATCH -- it has to set the exception on the
+    /// task builder -- and never in a Finally, so a Finally clause here is
+    /// user-written. Local to this file rather than in `Il`, because it is
+    /// one row's question and not a harness the rest of the suite asks.
+    /// </summary>
+    private static int Finallys(MethodBase method)
+    {
+        var machine = method
+            .GetCustomAttribute<System.Runtime.CompilerServices
+                .AsyncStateMachineAttribute>()?.StateMachineType;
+        var body = (machine?.GetMethod("MoveNext", HeadlessGame.All) ?? method)
+            .GetMethodBody();
+        return body?.ExceptionHandlingClauses.Count(
+            c => c.Flags == ExceptionHandlingClauseOptions.Finally) ?? 0;
+    }
+
     // ---- THE LINE, real ---------------------------------------------------
 
     [Fact]
@@ -186,6 +207,115 @@ public class KurageBeatTests
         Assert.Equal(typeof(string), row.GetProperty("Line").PropertyType);
         // NULLABLE, because "no number" is a state the format has words for.
         Assert.Equal(typeof(int?), row.GetProperty("Number").PropertyType);
+    }
+
+    // ---- `EB-329`: THE MORNING LOG IS THE BOARD ---------------------------
+
+    [Fact]
+    public void The_board_is_read_before_the_clauses_and_again_after()
+    {
+        // STRUCTURAL PIN (Il), and the ORDER is the whole of it: a before-read
+        // taken after the clauses would subtract a board from itself and
+        // report that nothing happened, which is the state the row is open on
+        // by a different route. `Moved` runs on the way out.
+        var calls = Il.CallSequence(Il.Method("KokomiPlan", "ResolveEntry"));
+        var read = First(calls, "KokomiPlan.BoardHp");
+        var clause = First(calls, "KokomiPlan.ResolveOne");
+        var subtract = First(calls, "KokomiPlan.Moved");
+        Assert.True(read >= 0, "the board is never read");
+        Assert.True(clause >= 0, "the clauses are gone");
+        Assert.True(subtract >= 0, "nothing subtracts the two reads");
+        Assert.True(read < clause, "the BEFORE read must precede the clauses");
+        Assert.True(clause < subtract, "the AFTER read must follow them");
+    }
+
+    [Fact]
+    public void The_line_is_recorded_even_when_a_plan_ends_the_fight()
+    {
+        // STRUCTURAL, and it is the only shape a headless test can see: a
+        // combat that ends inside a clause UNWINDS `ResolveEntry`, so the
+        // announcement has to sit on the unwind path. A `finally` in the
+        // source is a Finally clause in the async state machine's MoveNext;
+        // the compiler's own machinery adds Catch clauses, never a Finally,
+        // so one being present is the user-written block.
+        //
+        // The round-5 act-1 seat banked an exactly lethal morning and got no
+        // receipt: "the next screen was the reward screen".
+        Assert.True(Finallys(Il.Method("KokomiPlan", "ResolveEntry")) >= 1,
+                    "no finally in ResolveEntry -- a fight-ending Plan would "
+                  + "unwind past its own announcement");
+        Assert.Contains("KokomiPlan.Announce",
+                        Il.Calls(Il.Method("KokomiPlan", "ResolveEntry")));
+    }
+
+    [Fact]
+    public void The_two_mid_turn_doors_go_through_the_on_play_one()
+    {
+        // Change of Plans and The Moon Overlooks the Waters resolve a Plan in
+        // the MIDDLE of a turn, and the morning drain does not. A bare `true`
+        // at two call sites is a fact no structural pin can read, so the flag
+        // has a named door and the split is in the call graph.
+        foreach (var door in new[] { "ResolveFront", "Schedule" })
+        {
+            Assert.Contains("KokomiPlan.ResolveNow",
+                            Il.Calls(Il.Method("KokomiPlan", door)));
+        }
+        var morning = Il.Calls(Il.Method("KokomiPlan", "ResolveAll"));
+        Assert.Contains("KokomiPlan.ResolveEntry", morning);
+        Assert.DoesNotContain("KokomiPlan.ResolveNow", morning);
+        // And the parameter it sets defaults to the morning's reading, so a
+        // fourth caller written tomorrow is not silently filed as on-play.
+        var flag = Il.Method("KokomiPlan", "ResolveEntry").GetParameters()
+                     .Single(p => p.Name == "onPlay");
+        Assert.Equal(typeof(bool), flag.ParameterType);
+        Assert.Equal(false, flag.DefaultValue);
+    }
+
+    [Fact]
+    public void The_wire_carries_the_board_reading_and_the_door()
+    {
+        // The key names ARE the contract with `understudy/blindplay.py`, on
+        // `CarriedOutRow`'s own argument: they live in NAMED methods so a
+        // headless pin can read the literals.
+        var keys = Il.Strings(Il.Method("KokomiPlan", "CarriedOutRow"));
+        Assert.Contains("moved", keys);
+        Assert.Contains("on_play", keys);
+        var moved = Il.Strings(Il.Method("KokomiPlan", "MovedRow"));
+        Assert.Contains("target", moved);
+        Assert.Contains("combat_id", moved);
+        Assert.Contains("amount", moved);
+        Assert.Contains("dead", moved);
+    }
+
+    [Fact]
+    public void One_moved_row_is_a_target_an_id_an_amount_and_a_death()
+    {
+        var row = Mod.GetTypes().Single(t => t.Name == "MovedOn");
+        Assert.Equal(typeof(string), row.GetProperty("Target").PropertyType);
+        Assert.Equal(typeof(string), row.GetProperty("CombatId").PropertyType);
+        Assert.Equal(typeof(int), row.GetProperty("Amount").PropertyType);
+        Assert.Equal(typeof(bool), row.GetProperty("Dead").PropertyType);
+        // And the carry-out row carries the list plus the door. The list is
+        // NULLABLE: null is "this beat could not be measured" and an empty
+        // list is "measured, and no enemy lost HP", which the page reads as
+        // two different things.
+        var said = Mod.GetTypes().Single(t => t.Name == "CarriedOutPlan");
+        Assert.Equal(typeof(bool), said.GetProperty("OnPlay").PropertyType);
+        Assert.Equal(
+            typeof(System.Collections.Generic.IReadOnlyList<>).MakeGenericType(row),
+            said.GetProperty("Moved").PropertyType);
+    }
+
+    [Fact]
+    public void An_unreadable_board_answers_null_rather_than_a_clean_sweep()
+    {
+        // REAL, and it is the arithmetic that matters most: `Moved` is handed
+        // the before-read and asks for the after-read itself, and a combat
+        // torn down between the two would otherwise subtract the whole board
+        // from nothing and report every enemy dead of the Plan. Headless
+        // there is no combat at all, which is exactly that case.
+        var moved = Il.Method("KokomiPlan", "Moved");
+        Assert.Null(moved.Invoke(null, new object[] { null, null }));
     }
 
     [Fact]

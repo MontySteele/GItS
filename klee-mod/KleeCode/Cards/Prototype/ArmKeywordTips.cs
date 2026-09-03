@@ -261,9 +261,25 @@ public static class ArmKeywordTips
     /// game's own longest tip (CHANNELING, 134) and THIS tip is read every
     /// turn, so the sentences were rewritten to carry all five clauses in 134
     /// characters instead. Nothing was dropped -- "on the Bake-Kurage" is
-    /// still where it is played, "paid now" is still the cost, "lands first
-    /// thing next turn" is still the delay, "on the front enemy" is still the
-    /// aim, and the second sentence is the new rule.
+    /// still where it is played, "paid now" is still the cost, "lands next
+    /// turn" is still the delay, "on the front enemy" is still the aim, and
+    /// the second sentence is the new rule.
+    ///
+    /// "OR ALL IF IT SAYS SO" IS `EB-329`, AND THE OLD CLAUSE WAS WRONG.
+    /// The aim clause said "on the front enemy" and stopped there, while
+    /// Kurage's Oath -- a starter -- reads "Deal 7 damage to ALL enemies" and
+    /// took two Toadpoles in fight 1 and four Phantasmal Gardeners at the
+    /// first elite of the round-5 act-1 run. This tip is reprinted on every
+    /// battle screen, so it was the most-read wrong sentence in the build.
+    /// The card face is and was correct; the word's definition now defers to
+    /// it, which is the same shape `docs/current/text-conventions.md` already
+    /// states ("a Plan hits the front enemy unless it says ALL").
+    ///
+    /// "COUNTS" REPLACES "RAISES IT" for room, and loses nothing: the clause
+    /// is about WHOSE modifiers are read, and the pair "enemy Vulnerable
+    /// counts; your Weak does not" says that in fewer characters than "raises
+    /// it". "First thing" left for the same reason and is the only thing that
+    /// did -- 144 characters with it, 132 without, against a ceiling of 135.
     ///
     /// "ON THE BAKE-KURAGE" IS STILL `EB-293`'s ANSWER, and it is still the
     /// load-bearing half: a player who has never read the brief has to be able
@@ -278,9 +294,9 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "On the [gold]Bake-Kurage[/gold], paid now; the [gold]Plan[/gold] "
-          + "lands first thing next turn on the front enemy. Enemy "
-          + "[gold]Vulnerable[/gold] raises it; your [gold]Weak[/gold] does "
+            "On the [gold]Bake-Kurage[/gold], paid now; lands next turn on "
+          + "the front enemy, or ALL if it says so. Enemy "
+          + "[gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] does "
           + "not.");
 
     /// <summary>
