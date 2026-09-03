@@ -304,13 +304,18 @@ public class KokomiOverhaulRuleTests
         // "ALSO happen now" taken at its word: the Plan happens now AND is
         // still queued. Reading it as "instead" would delete rule 2 rather than
         // break it.
+        //
+        // `EB-329` renamed the door, not the rule: this is a MID-TURN
+        // resolution, so it goes through `ResolveNow` -- `ResolveEntry` with
+        // the on-play flag set -- and the flag is what stops the blind page
+        // filing it under "carried out at the start of this turn".
         var schedule = typeof(KokomiPlan)
             .GetMethod("Schedule", HeadlessGame.All)!;
         var calls = Il.CallSequence(schedule).ToList();
         Assert.Contains("List`1.Add", calls);
-        Assert.Contains("KokomiPlan.ResolveEntry", calls);
+        Assert.Contains("KokomiPlan.ResolveNow", calls);
         Assert.True(calls.IndexOf("List`1.Add")
-                    < calls.IndexOf("KokomiPlan.ResolveEntry"));
+                    < calls.IndexOf("KokomiPlan.ResolveNow"));
     }
 
     [Fact]
@@ -508,11 +513,15 @@ public class KokomiOverhaulRuleTests
         // "Carries out" means one resolution moved forward, everywhere in the
         // arm. The entry LEAVES the queue before it resolves, which is also
         // what keeps the badge from showing a Plan that already happened.
+        //
+        // `EB-329`: through `ResolveNow`, the mid-turn door. Change of Plans'
+        // own face says "NOW", so a page heading it with the morning's
+        // sentence would be contradicting the card that caused it.
         var front = typeof(KokomiPlan)
             .GetMethod("ResolveFront", HeadlessGame.All)!;
         var calls = Il.CallSequence(front).ToList();
         Assert.True(calls.IndexOf("List`1.RemoveAt")
-                    < calls.IndexOf("KokomiPlan.ResolveEntry"));
+                    < calls.IndexOf("KokomiPlan.ResolveNow"));
     }
 
     [Fact]

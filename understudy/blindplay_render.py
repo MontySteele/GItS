@@ -12,8 +12,11 @@ from typing import Any
 
 from understudy import qa_packet
 from understudy.blindplay_board import _pulse_phrase
-from understudy.blindplay_notes import (AURA_NOTE, HAND_REPEAT_NOTE,
+from understudy.blindplay_notes import (AURA_NOTE, CARRY_OUT_BOARD_NOTE,
+                                        HAND_REPEAT_NOTE,
+                                        LAST_MORNING_NOTE,
                                         METER_CAPPED_NOTE, METER_NOTE,
+                                        PENDING_PICK_NOTE, PICKED_MARK,
                                         POWER_NOTE, SELECTION_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE)
 from understudy.blindplay_observe import observation
@@ -24,7 +27,11 @@ from understudy.blindplay_shape import (BlindPlayError, CHARGE_SOURCE_LINE,
 
 # ----------------------------------------------------------------- render --
 
-def _render_card(c: dict[str, Any], bullet: str = "-") -> list[str]:
+def _render_card(c: dict[str, Any], bullet: str = "-",
+                 mark: str = "") -> list[str]:
+    """One card face. `mark` is a state the SCREEN is in about this row and
+    not a fact about the card, so it goes at the END of the head, after the
+    cost and the type -- the shape `EB-294` gave a picked bundle."""
     head = f"{bullet} **{c['title']}**"
     if c["upgraded"]:
         head += " (upgraded)"
@@ -53,6 +60,8 @@ def _render_card(c: dict[str, Any], bullet: str = "-") -> list[str]:
                         c["kind"].lower() if c["kind"] else "") if b]
     if bits:
         head += f" — {', '.join(bits)}"
+    if mark:
+        head += f" — {mark}"
     out = [head, f"    {c['text'] or '(no printed text)'}"]
     note = qa_packet.cost_note(c)
     if note:
@@ -76,6 +85,69 @@ def _render_card(c: dict[str, Any], bullet: str = "-") -> list[str]:
         if c.get("unplayable_note"):
             out.append(f"    {c['unplayable_note']}")
     return out
+
+
+def _render_moved(said: dict[str, Any]) -> list[str]:
+    """What the board did under one carried-out Plan (`EB-329`).
+
+    ONE ENEMY PER LINE, the page's own `EB-198` contract: a morning against
+    four Gardeners is four facts and joining them into a sentence is how the
+    strip that preceded this section came to be unreadable. The verb is
+    "lost", not "took damage", because the number is an HP DIFFERENCE and a
+    Plan can move a bar through something that is not a hit.
+
+    A Plan that moved no HP says so where the mod measured it, and says
+    nothing where the mod could not -- `board_read` is the split, and it is
+    what keeps this honest against a bridge older than the field.
+    """
+    if not said["board_read"]:
+        return []
+    if not said["moved"]:
+        return ["    - no enemy lost HP"]
+    return [f"    - {m['target']} lost {m['amount']} HP"
+            + (", and died" if m["dead"] else "")
+            for m in said["moved"]]
+
+
+def _render_carry_out(pl: dict[str, Any]) -> list[str]:
+    """The morning, and then the Plans that fired as they were written.
+
+    `EB-329`. TWO HEADINGS, BECAUSE THEY ARE TWO MOMENTS. The r4c seat played
+    War Council with The Moon Overlooks the Waters out and was told on one
+    screen both that the jellyfish "carried these out at the start of this
+    turn" and that War Council was still planned; the first was simply not
+    true of that resolution. Change of Plans is the same door -- its own face
+    says "carries out your front Plan NOW" -- so both are filed together,
+    under a sentence that says WHEN.
+    """
+    out: list[str] = []
+    if pl["carried_out"]:
+        out.append(f"- The {pl['pet_name']} carried these out at the "
+                   "start of this turn, front first:")
+        for said in pl["carried_out"]:
+            out.append(f"  - {said['line']}")
+            out += _render_moved(said)
+    if pl["fired_now"]:
+        out.append(f"- The {pl['pet_name']} carried these out THIS TURN, the "
+                   "moment each was written, and not this morning:")
+        for said in pl["fired_now"]:
+            out.append(f"  - {said['line']}")
+            out += _render_moved(said)
+    return out
+
+
+def _board_note_wanted(pl: dict[str, Any]) -> bool:
+    """Is a board reading on this screen at all? (`EB-329`)
+
+    The note explains the two numbers under a Plan, so it is printed where
+    both are and nowhere else -- a bridge older than the measurement prints
+    the lines it always printed and no footnote about numbers it does not
+    carry. It goes at the END of the section rather than under the last Plan,
+    where the indent made it read as a fact about that one card.
+    """
+    return any(said["board_read"]
+               for said in pl["carried_out"] + pl["fired_now"])
+
 
 def _render_power(power: dict[str, Any], indent: str) -> str:
     """One power: printed name, the amount, buff or debuff, the printed text."""
@@ -249,11 +321,15 @@ def render(obs: dict[str, Any]) -> str:
             # printed verbatim, which is the whole point of the field. The
             # meter ledger is NOT here and must not be (`R101b`): this is what
             # a sighted player saw, not an instrument's rows.
-            if pl["carried_out"]:
-                out.append(f"- The {pl['pet_name']} carried these out at the "
-                           "start of this turn, front first:")
-                for said in pl["carried_out"]:
-                    out.append(f"  - {said['line']}")
+            #
+            # `EB-329` splits the block in THREE, in the order the turn had
+            # them: what the morning did, what fired mid-turn as it was
+            # written, and what is still waiting. And each Plan now carries
+            # what the BOARD did under it, which is the row's own headline --
+            # the line's own figure is its first clause's and a reader who
+            # took it for the damage got `Exposed Flank, 2` for a beat that
+            # moved 3.
+            out += _render_carry_out(pl)
             if not pl["queue"]:
                 out.append("- Nothing is planned. The morning is empty.")
             else:
@@ -267,6 +343,10 @@ def render(obs: dict[str, Any]) -> str:
                                "while Nereid's Ascension lasts.")
             if pl["also_now"]:
                 out.append("- Plans also happen NOW as you write them.")
+            # `EB-329`: which of the two numbers under a Plan is which, once,
+            # at the foot of the section rather than under the last card.
+            if _board_note_wanted(pl):
+                out += ["", CARRY_OUT_BOARD_NOTE]
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page
@@ -401,9 +481,13 @@ def render(obs: dict[str, Any]) -> str:
             out += _render_card(card)
         if obs["screen"] == "card_select":
             if obs.get("selected"):
-                out += ["", "## What you have picked", ""]
+                # `EB-329`: the note FIRST, because the misread it prevents is
+                # a count, and a reader who has already counted sixteen rows
+                # will not go back for a footnote.
+                out += ["", "## What you have picked", "",
+                        PENDING_PICK_NOTE, ""]
                 for card in obs["selected"]:
-                    out += _render_card(card)
+                    out += _render_card(card, mark=PICKED_MARK)
                 # `EB-314`: on a transform screen the cards above are the ones
                 # going IN, and what comes out is still unrolled.
                 if obs.get("undecided"):
@@ -497,6 +581,16 @@ def render(obs: dict[str, Any]) -> str:
                         f"potion claimed now has nowhere to go, and the game "
                         f"says nothing when one is dropped -- so this page "
                         f"will not claim it until a slot is free.*"]
+        # `EB-329`: the receipt for a morning that ended the fight, on the
+        # screen the fight ended into. Nothing is claimed about WHY the fight
+        # ended -- the note says the fight is over and that this is the last
+        # thing the jellyfish did in it, both of which the record supports.
+        if obs.get("last_morning"):
+            lm = obs["last_morning"]
+            out += ["", f"## The {lm['pet_name']}'s last carry-out", "",
+                    LAST_MORNING_NOTE, ""] + _render_carry_out(lm)
+            if _board_note_wanted(lm):
+                out += ["", CARRY_OUT_BOARD_NOTE]
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
 
