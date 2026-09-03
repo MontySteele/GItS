@@ -363,9 +363,13 @@ def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
                                 + consts["PyroTotal"] + clause + "."
                                 + (consts["BombsWithMines"] if mines
                                    else consts["Bombs"])
-                                + consts["GrowthSentence"]
                                 + (consts["MineClause"] if mines
-                                   else consts["NoSelfSentence"]))
+                                   else consts["NoSelfSentence"])
+                                # `EB-361`: rule 3 prints on every face, and
+                                # the growth sentence became a clause on
+                                # `Bombs` in the same edit -- four sentences is
+                                # the ceiling and the jump is a fifth fact.
+                                + consts["JumpSentence"])
                         rows.append(Row(
                             "power",
                             "ProtoBombPower.smartDescription"

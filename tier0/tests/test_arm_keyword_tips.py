@@ -273,11 +273,20 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # rather than extended ([USER], PR #340): four sentences carrying
             # four rules would have run 60 characters over the tip ceiling, and
             # the ceiling is the base game's own longest mechanic tip on the one
-            # word a seat reads every turn. All four rules are still here in two
-            # sentences, and the tip takes no length exception.
+            # word a seat reads every turn. All four rules are still here in
+            # two sentences, and the tip takes no length exception.
+            #
+            # `EB-361` MADE IT THREE SENTENCES AND A FIFTH RULE: rule 3, a Bomb
+            # whose enemy dies moves to a survivor at its size, which was
+            # printed nowhere until three round-10 seats met it as a stack they
+            # could not account for. The same 135 characters paid for it by
+            # dropping rule 2's "all at once" (the `Set off` clauses below
+            # state that rule in full) and by spelling the burden the way the
+            # static badge face already does ("It takes").
             "A charge on an enemy: grows ",
-            " a turn, goes off only when [gold]Set off[/gold], all at once. ",
-            "Its hit takes the enemy's debuffs, not yours.",
+            " a turn, goes off only when [gold]Set off[/gold]. ",
+            "It takes the enemy's debuffs, not yours. ",
+            "Kills move it to a survivor.",
             "on the target goes off first, one at a ",
             "time, each a Pyro hit for its size.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
