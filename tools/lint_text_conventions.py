@@ -376,6 +376,40 @@ def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
     return rows
 
 
+def salon_arm_rows() -> list[Row]:
+    """`EB-383`. The Salon buff's ARM faces, rebuilt from their own pieces.
+
+    Same shape and same reason as the Bomb badge's grid above: the badge
+    generates its rows in C# off one list, so a typed copy here would be a
+    second copy that agrees until one is edited. This composes the four faces
+    out of the constants `SalonMemberPower.ManualFace` composes them from, and
+    the member names out of `ManualFrontName`'s own switch, so a reworded rule
+    or a renamed member reaches its ceiling the day it lands.
+
+    THE SHIPPED PAIR IS NOT HERE, deliberately rather than by omission:
+    `SalonMemberPower`'s `description` and `smartDescription` are the RELEASE
+    face, they belong to the `--shipped` report, and nothing on this branch
+    touches them.
+    """
+    path = MOD / "Powers" / "SalonPowers.cs"
+    src = re.sub(r"^\s*///.*$", "", read(path), flags=re.M)
+    src = re.sub(r"^\s*//.*$", "", src, flags=re.M)
+    where = str(path.relative_to(REPO))
+    consts = _consts(src)
+    body = src[src.index("ManualFrontName"):]
+    body = body[:body.index("};")]
+    names = dict(re.findall(r"SalonMember\.(\w+) => \"([^\"]+)\"", body))
+    names["Chevalmarin"] = re.search(r"_ => \"([^\"]+)\"", body).group(1)
+    rows = [Row("power", "SalonMemberPower.smartDescriptionManualEmpty",
+                consts["ManualLead"] + consts["ManualEmptyTail"], where)]
+    for member, printed in sorted(names.items()):
+        rows.append(Row(
+            "power", f"SalonMemberPower.smartDescriptionManual{member}",
+            consts["ManualLead"] + consts["ManualNamedTail"] + printed + ".",
+            where))
+    return rows
+
+
 def prompt_rows() -> list[Row]:
     path = MOD / "Powers" / "Prototype" / "KokomiPlan.cs"
     m = re.search(r"ReflectionPromptText =\s*((?:[^;])*);", read(path))
@@ -397,6 +431,7 @@ def prototype_rows() -> list[Row]:
             + loc_rows(sorted((MOD / "Powers" / "Prototype").glob("*.cs")), "power", "proto")
             + loc_rows([MOD / "Relics" / "PoundingSurprise.cs",
                         MOD / "Relics" / "TamakushiCasket.cs"], "relic", "proto")
+            + salon_arm_rows()
             + prompt_rows())
 
 

@@ -87,6 +87,11 @@ public class FurinaReframeRoundTwoTests
 
         var power = (SalonMemberPower)RuntimeHelpers
             .GetUninitializedObject(typeof(SalonMemberPower));
+        // The registered id, seeded the way `Bombs.Place` seeds it and for
+        // the same reason: BaseLib assigns it at registration, which is
+        // model-table state a test has no business mutating, and
+        // `SmartDescriptionLocKey` is `Id.Entry` plus a suffix.
+        Seat.Force(power, "Id", BadgeId);
         Seat.Force(power, "Amount", members.Length);
         ((System.Collections.IList)seat.Creature.Powers).Add(power);
         Seat.Force(power, "IsMutable", true);
@@ -96,6 +101,10 @@ public class FurinaReframeRoundTwoTests
         FurinaResources.GainEncore(seat.Creature, encore);
         return seat;
     }
+
+    /// <summary>Stand-in for the badge's registered id. See `Stage`.</summary>
+    private static readonly MegaCrit.Sts2.Core.Models.ModelId BadgeId =
+        new("POWER", "KLEE_SALON_MEMBER_TEST");
 
     private static IDictionary<Creature, List<SalonMember>> Company() =>
         (IDictionary<Creature, List<SalonMember>>)typeof(SalonMemberPower)
@@ -327,6 +336,123 @@ public class FurinaReframeRoundTwoTests
 
         Assert.Contains("three-quarters", rules);
         Assert.DoesNotContain("bows the OLDEST member out", rules);
+    }
+
+    // ==================================================================
+    // 4. `EB-383` -- one rulebook on the screen, and a name on the buff
+    // ==================================================================
+
+    private static string LocKey(SalonMemberPower power) =>
+        (string)typeof(SalonMemberPower)
+            .GetProperty("SmartDescriptionLocKey", HeadlessGame.All)!
+            .GetValue(power)!;
+
+    private static string Row(SalonMemberPower power, string suffix) =>
+        power.Localization!.First(r => r.Item1.EndsWith(suffix)).Item2;
+
+    [Theory]
+    [InlineData(SalonMember.Crabaletta, "Crabaletta")]
+    [InlineData(SalonMember.Usher, "the Usher")]
+    [InlineData(SalonMember.Chevalmarin, "Chevalmarin")]
+    public void The_buff_names_the_member_it_is_about(
+        SalonMember front, string printed)
+    {
+        // The seat "worked out mine was Chevalmarin by subtracting
+        // Neuvillette's 7 from a 9-point HP drop", because the badge said
+        // `Salon Member 1` and then recited all three members' abilities.
+        using var _ = new Arm(manual: true);
+        var seat = Stage(0, front, SalonMember.Usher);
+
+        var key = LocKey(PowerOf(seat));
+        var face = Row(PowerOf(seat), key.Split('.').Last());
+
+        Assert.EndsWith("Manual" + front, key);
+        Assert.EndsWith(printed + ".", face);
+    }
+
+    [Fact]
+    public void The_buff_stops_printing_the_upkeep_the_arm_deleted()
+    {
+        // THE TWO RULEBOOKS, which is the row: this badge said "At the start
+        // of your turn, each Salon Member spends 1 Encore for its act" three
+        // lines above the Salon tip saying "Members do NOT act on their own",
+        // and behaviour matched the tip in all five fights.
+        using var _ = new Arm(manual: true);
+        var seat = Stage(0, SalonMember.Crabaletta);
+
+        var face = Row(PowerOf(seat), LocKey(PowerOf(seat)).Split('.').Last());
+
+        Assert.DoesNotContain("At the start of your turn", face);
+        Assert.Contains("performs at once", face);
+        Assert.Contains("Evokes", face);
+        Assert.Contains("Companion", face);
+    }
+
+    [Fact]
+    public void An_empty_stage_still_has_a_row_to_print()
+    {
+        // A key with no row behind it falls back to the shipped face, which
+        // would put the retired upkeep back on the screen -- so the row set
+        // and the selector are built off one list and this is the pin on the
+        // one member of it that is not a member.
+        using var _ = new Arm(manual: true);
+        var seat = Stage(0);
+
+        var key = LocKey(PowerOf(seat));
+
+        Assert.EndsWith("ManualEmpty", key);
+        Assert.Contains(PowerOf(seat).Localization!,
+            row => key.EndsWith(row.Item1));
+    }
+
+    [Fact]
+    public void Every_key_the_selector_can_compose_has_a_row()
+    {
+        // The whole join, not one arm of it: four fronts, four rows, and the
+        // rows come off the same list the selector reads.
+        using var _ = new Arm(manual: true);
+        var keys = new List<string>();
+        foreach (var front in new SalonMember?[]
+                 {
+                     null, SalonMember.Crabaletta, SalonMember.Usher,
+                     SalonMember.Chevalmarin,
+                 })
+        {
+            var seat = front is { } who ? Stage(0, who) : Stage(0);
+            keys.Add(LocKey(PowerOf(seat)).Split('.').Last());
+        }
+
+        var rows = PowerOf(Stage(0)).Localization!
+            .Select(r => r.Item1).ToList();
+        Assert.Equal(4, keys.Distinct().Count());
+        foreach (var key in keys) Assert.Contains(key, rows);
+    }
+
+    [Fact]
+    public void The_shipped_badge_is_untouched_with_the_arm_off()
+    {
+        // The acceptance condition for a release build: the same key and the
+        // same paragraph the badge has printed since the v2 rework.
+        using var _ = new Arm(master: false);
+        var seat = Stage(0, SalonMember.Crabaletta);
+
+        Assert.EndsWith(".smartDescription", LocKey(PowerOf(seat)));
+        Assert.Contains("At the start of your turn",
+            Row(PowerOf(seat), "smartDescription"));
+    }
+
+    [Fact]
+    public void A_canonical_badge_answers_the_selector_without_throwing()
+    {
+        // `HasSmartDescription` probes this key on the compendium's own copy,
+        // whose `Owner` getter asserts mutability (`EB-94`). It has no stage,
+        // so the shipped key is also the honest answer.
+        using var _ = new Arm(manual: true);
+        var canonical = (SalonMemberPower)RuntimeHelpers
+            .GetUninitializedObject(typeof(SalonMemberPower));
+        Seat.Force(canonical, "Id", BadgeId);
+
+        Assert.EndsWith(".smartDescription", LocKey(canonical));
     }
 
     private static IDictionary<Creature, object?> CompanyCombat() =>
