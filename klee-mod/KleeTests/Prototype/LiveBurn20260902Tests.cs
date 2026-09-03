@@ -179,6 +179,48 @@ public class LiveBurn20260902Tests
         Assert.False(KokomiResources.BurstGaugeApplies(Seat.Furina().Creature));
     }
 
+    // ---- EB-318: and nothing FILLS the meter the gauge stood down from -----
+
+    [Fact]
+    public void A_reaction_pays_no_burst_under_her_own_arm()
+    {
+        // The feed half of `EB-297`'s sentence, and the half that was still
+        // live: the blind seat read `Kokomi Burst: 5/20` off the status line
+        // in round 4 and watched it climb 5 -> 10 -> 15, one reaction at a
+        // time, with no card, relic or keyword in the slice naming the meter.
+        // Three of her four income sites were already off at their own seams;
+        // the reaction funnel (`ReactionEffects.Resolve`) was not.
+        //
+        // Pinned at `GainBurst` because that is where the guard went -- the
+        // funnel every source lands in, as Klee's `EB-266` guard sits in
+        // `BurstResource.Find`. The reaction call site itself is a live path
+        // (it needs a dealer, a target and a consumed aura) and is outside the
+        // headless boundary; what is reachable here is the decision it makes.
+        var kokomi = Seat.Kokomi().WithCombatState().Creature;
+        var was = KokomiOverhaul.Enabled;
+        try
+        {
+            KokomiOverhaul.Enabled = false;
+            KokomiResources.GainBurst(kokomi, KokomiConstants.BurstPerReaction);
+            Assert.Equal(KokomiConstants.BurstPerReaction,
+                         KokomiResources.GetBurst(kokomi));
+
+            KokomiOverhaul.Enabled = true;
+            KokomiResources.GainBurst(kokomi, KokomiConstants.BurstPerReaction);
+            Assert.Equal(KokomiConstants.BurstPerReaction,
+                         KokomiResources.GetBurst(kokomi));  // unmoved
+        }
+        finally
+        {
+            KokomiOverhaul.Enabled = was;
+        }
+
+        // The co-op clause: the guard is HERS, so a Klee or a Furina dealing
+        // the reaction is untouched by it (they have no Kokomi meter to move
+        // either way, which is what `FindBurst` already answers).
+        Assert.Equal(0, KokomiResources.GetBurst(Seat.Klee().Creature));
+    }
+
     // ---- EB-300 / EB-296: the restore fires on exactly the broken path ----
 
     [Fact]

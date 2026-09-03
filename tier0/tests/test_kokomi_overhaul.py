@@ -340,6 +340,38 @@ def test_every_row_prints_its_own_face():
         assert faces.get(cid), cid
 
 
+def test_a_reaction_leaves_the_retired_burst_meter_at_zero(overhaul):
+    """`EB-318`. The brief retires the Burst gate, so under the arm NOTHING
+    fills the meter -- and reactions were the one income site neither engine
+    had guarded. She is a catalyst, so the 2026-09-02 blind seat read
+    `Kokomi Burst: 5/20` off the status line in round 4 and watched it climb
+    5 -> 10 -> 15 with no rule anywhere naming it. Klee's `EB-266`, word for
+    word, and it is guarded in the same place: `resources.gain_burst` here,
+    `KokomiResources.GainBurst` in the mod.
+
+    The ceiling is asserted FIRST and on purpose: `kokomi.yaml` still declares
+    `burst_max: 20` under the arm, so this is a test that the GUARD holds and
+    not that the meter was deleted out from under it.
+    """
+    import random
+    from tier0.engine import reactions
+    from tier0.engine.state import CombatState
+    from tier0.tests.conftest import make_enemy
+
+    enemy = make_enemy(hp=60)
+    state = CombatState(player=loader.build_player("kokomi"),
+                        enemies=[enemy], rng=random.Random(0))
+    assert state.player.burst_max == 20, "the sheet still declares the meter"
+
+    reactions.resolve_hit(state, enemy, "pyro", 10)     # the aura
+    reactions.resolve_hit(state, enemy, "hydro", 10)    # Vaporize off it
+
+    assert [e for e in state.log if e["event"] == "reaction"], (
+        "no reaction fired, so this pin would pass on an unguarded engine")
+    assert state.player.burst_energy == 0
+    assert not [e for e in state.log if e["event"] == "burst_income"]
+
+
 # --- 4. THE TWO C# FACTS NO IL SCAN CAN SEE --------------------------------
 
 def test_a_planned_block_is_powered_and_a_planned_hit_is_hers():
