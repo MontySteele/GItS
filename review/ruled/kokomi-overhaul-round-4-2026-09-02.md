@@ -1,4 +1,4 @@
-Status: OPEN (round four, build 0.2.2188+proto: one local seat, one act, no sealed record; no A/B/C picks, two E defaults applied)
+Status: RULED R244 2026-09-02 (no picks; the two E defaults stand, and the three-act read is running on the fix build)
 
 # Kokomi round four: what the local seat saw, and why the three-act read is not in it
 

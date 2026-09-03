@@ -1,4 +1,4 @@
-Status: OPEN (round seven, build 0.2.2188+proto: two Opus seats, one run, six fights, dead on floor 9; three picks)
+Status: RULED R244 2026-09-02 (picks 1 to 3 at their defaults)
 
 # Klee round seven: what the seats saw on the build with the coven and the stand-ins
 
@@ -90,7 +90,7 @@ behind the build. None of this is a finding against the cards; it is the
 round's coverage, and it is why the next round is the one that reads the
 companion layer.
 
-## 4. Picks
+## 4. Picks, ruled R244 at their defaults ([USER]: "Otherwise agreed on the defaults")
 
 1. **Your run.** (1) *After the fix build (#317's emitter fix is on main;
    the deploy follows the Kokomi seat), so the run you play is the one with
