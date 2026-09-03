@@ -869,6 +869,28 @@
              {op: remove_debuff}],
    plan: [{op: block, amount: 10}]}
 
+# `EB-335`, R246 pick 2: the kit's own defence in act 2, and the `art_of:`
+# reuse both rows carry -- docs/notes/prototype-surface-provenance.md.
+- {id: proto_kk_tide_wall, name: "Tide Wall", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   art_of: proto_kk_coral_bulwark,
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 3 [gold]Block[/gold] for each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] carries out this morning.",
+   effects: [{op: block, amount: 4}],
+   plan: [{op: block_per_plan_this_morning, amount: 3}],
+   # R246: 4 and 3, upgrading to 6 and 4.
+   upgrade: {block: 2, plan_block: 1}}
+
+- {id: proto_kk_shell_guard, name: "Shell Guard", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   art_of: proto_kk_salt_line,
+   description: "Gain 5 [gold]Block[/gold]. Until your next turn, whenever the [gold]Tamakushi Casket[/gold] strikes, gain 3 [gold]Block[/gold].",
+   effects: [{op: block, amount: 5},
+             {op: apply_power, power: kk_shell_guard, amount: 3, target: self}],
+   # R246: 5 and 3, upgrading to 7 and 4.
+   upgrade: {block: 2, power_amount: 1}}
+
 - {id: proto_kk_the_clouds_like_waves, name: "The Clouds Like Waves Rippling", character: kokomi,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,

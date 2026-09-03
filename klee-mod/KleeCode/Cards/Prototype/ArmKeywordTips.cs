@@ -180,6 +180,16 @@ public static class ArmKeywordTips
     /// to find "play it on the jellyfish" from the card in their hand, which is
     /// the slice's own first acceptance sentence (sec.1).
     ///
+    /// THE FOURTH IS `EB-334`, and it is the sentence R246 pick 1 asks for in
+    /// as many words. Three seats derived the Plan's arithmetic from the board
+    /// and got three different answers, because the rule was stated nowhere:
+    /// one found that Plans keep their full number while she is Weak, one that
+    /// they pay x0.75 against a Strategic enemy, and one that Vulnerable did
+    /// not multiply a Plan at all
+    /// (`review/ruled/kokomi-overhaul-round-4c-2026-09-02.md` sec.2). The rule
+    /// is now the honest one -- the jellyfish deals it -- and this is where the
+    /// player reads it, beside the word it belongs to.
+    ///
     /// THE THIRD IS `EB-293`. "instead" presumes a normal play to do instead
     /// of, and a card with no now-line has none -- its target type is
     /// <c>KokomiTargets.PetOnly</c> and the jellyfish is the only legal drop.
@@ -194,7 +204,9 @@ public static class ArmKeywordTips
         With(inherited, PlanKey,
             "Play this on the [gold]Bake-Kurage[/gold]: it carries out the "
           + "[gold]Plan[/gold] line at the start of your next turn. Cost is "
-          + "paid now. Plans hit the front enemy.");
+          + "paid now. Plans hit the front enemy. The [gold]Bake-Kurage[/gold] "
+          + "deals it: the enemy's [gold]Vulnerable[/gold] raises it, your "
+          + "[gold]Weak[/gold] and attack buffs do not.");
 
     /// <summary>
     /// THE BOUND IS THE WHOLE POINT OF THIS ROW'S SECOND HALF. The Casket read

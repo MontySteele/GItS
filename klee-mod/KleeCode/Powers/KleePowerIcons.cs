@@ -88,6 +88,9 @@ internal static class KleePowerIcons
         GeneralsBannerPower => KleePck.Path("klee/powers/study_buddy.png"),
         NextCompanionDiscountPower =>
             KleePck.Path("klee/powers/friendly_visit.png"),
+        // `EB-335`. Shell Guard is a Block window, so it borrows the shipped
+        // Kokomi power that already means "the jellyfish is protecting you".
+        ShellGuardPower => KleePck.Path("kokomi/powers/kurages_oath.png"),
         // QUARANTINED (the Mondstadt companion overhaul). Every one of these
         // borrows the icon of the SHIPPED companion power whose job it takes
         // over, on the block above's argument verbatim: art is commissioned

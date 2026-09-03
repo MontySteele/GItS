@@ -60,7 +60,7 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlann
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PlanDamage", 7m)
+            new KokomiPlan.PlanDamageVar(7m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

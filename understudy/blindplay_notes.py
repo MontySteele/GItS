@@ -200,7 +200,8 @@ ARM_KEYWORDS: dict[str, str] = {
              "the number."),
     "Plan": ("Play this on the Bake-Kurage: it carries out the Plan line at "
              "the start of your next turn. Cost is paid now. Plans hit the "
-             "front enemy."),
+             "front enemy. The Bake-Kurage deals it: the enemy's Vulnerable "
+             "raises it, your Weak and attack buffs do not."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
     # The Furina reframe's three (slice two, R220 A). The same sentences

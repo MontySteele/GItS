@@ -32,6 +32,7 @@
     "proto_kk_salt_line",
     "proto_kk_sango_isshin",
     "proto_kk_sea_salt_prayer",
+    "proto_kk_shell_guard",
     "proto_kk_slack_water",
     "proto_kk_song_of_pearls",
     "proto_kk_stolen_chapter",
@@ -39,6 +40,7 @@
     "proto_kk_the_generals_banner",
     "proto_kk_the_moon_a_ship",
     "proto_kk_the_moon_overlooks_the_waters",
+    "proto_kk_tide_wall",
     "proto_kk_treatise",
     "proto_kk_undertow",
     "proto_kk_vanguard",
@@ -192,6 +194,7 @@
     "proto_kk_salt_line": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
     "proto_kk_sea_salt_prayer": "kokomi",
+    "proto_kk_shell_guard": "kokomi",
     "proto_kk_slack_water": "kokomi",
     "proto_kk_song_of_pearls": "kokomi",
     "proto_kk_stolen_chapter": "kokomi",
@@ -199,6 +202,7 @@
     "proto_kk_the_generals_banner": "kokomi",
     "proto_kk_the_moon_a_ship": "kokomi",
     "proto_kk_the_moon_overlooks_the_waters": "kokomi",
+    "proto_kk_tide_wall": "kokomi",
     "proto_kk_treatise": "kokomi",
     "proto_kk_undertow": "kokomi",
     "proto_kk_vanguard": "kokomi",
@@ -424,6 +428,10 @@
       "block": 3,
       "power_amount": 1
     },
+    "proto_kk_shell_guard": {
+      "block": 2,
+      "power_amount": 1
+    },
     "proto_kk_slack_water": {
       "damage": 3,
       "plan_power_amount": 1
@@ -447,6 +455,10 @@
     },
     "proto_kk_the_moon_overlooks_the_waters": {
       "cost": -1
+    },
+    "proto_kk_tide_wall": {
+      "block": 2,
+      "plan_block": 1
     },
     "proto_kk_treatise": {
       "innate": true

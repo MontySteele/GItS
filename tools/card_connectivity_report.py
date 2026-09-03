@@ -482,6 +482,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "play_copy_of_companion": [
         _hook("shared", "plays_this_turn", "read"),
         _hook("shared", "plays_this_turn", "write")],
+    # Tide Wall (`EB-335`) READS the morning's own depth off the jellyfish --
+    # the queue it is being drained from -- and pays Block, which this
+    # vocabulary carries as a private write nowhere; Block is the player's own
+    # pool and no other Block op declares a hook for it.
+    "block_per_plan_this_morning": [_hook("private", "kurage", "read")],
 }
 
 # Ops whose value arrives at a card the player PICKS, through the pilot's

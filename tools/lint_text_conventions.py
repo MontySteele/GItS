@@ -79,6 +79,13 @@ EXCEPTIONS = {
     "ProtoBombPower.smartDescriptionMinesWeak": (
         "the Mine face plus the one term a player cannot see in the total "
         "(EB-287)"),
+    "PlanKey": (
+        "the arm's ONE rule, and R246 pick 1 made it five clauses: where the "
+        "card is played, when the line happens, that the cost is paid now, "
+        "what a Plan aims at, and who deals its damage. Three seats derived "
+        "the last of those from the board and got three different answers "
+        "(EB-334), so it is the clause that had to be printed; the other four "
+        "were exactly at the ceiling before it"),
     "TamakushiCasket.description": (
         "a two-rule starting relic plus the shared 59-character "
         "Companion-slot sentence every starting relic in this mod appends; "

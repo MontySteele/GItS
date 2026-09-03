@@ -1323,6 +1323,16 @@ class CombatState:
     # that means "this turn"; the twin of
     # `KokomiOverhaulLedger.LastCompanionPlayedThisTurn`.
     kk_companions_this_turn: list["Card"] = field(default_factory=list)
+    # QUARANTINED (C.KOKOMI_OVERHAUL, `EB-335`): HOW MANY PLANS THIS MORNING'S
+    # DRAIN HELD -- Tide Wall's "for each Plan the Bake-Kurage carries out this
+    # morning". THE WHOLE MORNING'S DEPTH, written once at the top of
+    # `kokomi_plan.resolve_all` before the first clause runs, so a Tide Wall
+    # sitting first, second or last in the queue pays the same number; a count
+    # that grew as the drain went would make one card's Block depend on the
+    # order the player happened to write in. Cleared by `kokomi_plan.roll_turn`,
+    # which runs BEFORE the drain, so a morning with no Plans reads zero.
+    # `KokomiOverhaulLedger.PlansThisMorning`'s twin.
+    kk_plans_this_morning: int = 0
     # QUARANTINED (C.KLEE_OVERHAUL): RULE 7'S TWO COUNTERS AND THE TWO
     # MEMORIES, the twin of `KleeOverhaulLedger`. Per FIGHT and per SEAT for
     # the reason `kk_plan_queue` above is: tier 0 runs one seat, so the C#'s

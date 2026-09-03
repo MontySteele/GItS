@@ -742,7 +742,7 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "mend", "next_companion_discount", "remove_debuff",
     "carry_out_front_plan", "plan_from_exhaust", "damage_quarter_max_hp",
     "plan_twice", "damage_per_companion_last_turn",
-    "play_copy_of_companion"))
+    "play_copy_of_companion", "block_per_plan_this_morning"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -935,6 +935,14 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # will end up playing in a turn, and guessing more would price the
         # Commander plan's best case as its printed case.
         return _neutral_amount(fx, 0) * aoe
+    if op == "block_per_plan_this_morning":
+        # Tide Wall (`EB-335`). ONE PLAN is the same neutral single-unit
+        # estimate the line above takes, and for the same refusal: how many
+        # Plans a deck banks in a turn is a deck fact an offer screen cannot
+        # read, and guessing three would price the built deck's best morning as
+        # the card's printed one. At face value from there, which is what
+        # `block` is priced at inline.
+        return _neutral_amount(fx, 0)
     if op == "plan_twice":
         # Nereid's Ascension's window: "for N turns the jellyfish carries out
         # every Plan twice". The value is ONE EXTRA PLAN CARRIED OUT PER TURN
@@ -2302,6 +2310,10 @@ STATIC_OP_PRICING: dict[str, str] = {
     "damage_per_companion_last_turn": "its printed damage against ONE "
                                       "companion, the neutral single-unit "
                                       "estimate every live count here takes",
+    "block_per_plan_this_morning": "its printed Block for ONE Plan -- the same "
+                                   "neutral single-unit estimate, since Plan "
+                                   "density is a deck fact an offer screen "
+                                   "cannot read",
     "plan_twice": "STATIC_AUTOPLAY_VALUE per turn of the window: one extra "
                   "Plan carried out a turn, not one per Plan (density is a "
                   "deck fact an offer screen cannot read)",
