@@ -35,7 +35,7 @@ namespace KleeMod.Powers;
 ///     rules AND assert the flag-off wiring in one build.
 ///
 /// WHAT MOVES WHEN IT IS ON, exhaustively. Every seam is one <c>if</c> on this
-/// property and there are eight of them, in two groups.
+/// property and there are ten of them, in two groups.
 ///
 /// The four that REPLACE:
 ///   * <c>Kokomi.StartingDeck</c> -- the slice's ten cards
@@ -47,8 +47,8 @@ namespace KleeMod.Powers;
 ///   * <c>KokomiResourceHooks.BeforeCombatStart</c> -- the Bake-Kurage pet is
 ///     summoned, its marker power installed and her entry HP captured.
 ///
-/// The four that TURN OFF, all in <c>KokomiResourceHooks</c> and all because
-/// the brief retires the rules they are priced inside:
+/// The six that TURN OFF, all because the brief retires the rules they are
+/// priced inside. The first four are in <c>KokomiResourceHooks</c>:
 ///   * the Charge and Burst accrual on exhaust,
 ///   * the Kurage's memory (its entry rules, its fire and its install),
 ///   * the skill-tag Burst particle and the kit-Burst grant check,
@@ -59,7 +59,18 @@ namespace KleeMod.Powers;
 ///     off-switch that changes what a SHIPPED hook does rather than what an
 ///     arm rule does, and it is why it is named here.
 ///
-/// FLAG OFF IS BYTE-IDENTICAL. Every one of those eight is an early branch on
+/// The other two sit beside the RESOURCE, in <c>KokomiResources</c>, because
+/// each is an answer to "does she have a Burst meter at all" and that question
+/// should have one home rather than one per caller:
+///   * the Burst FEED -- <c>KokomiResources.GainBurst</c> (`EB-318`), the one
+///     funnel every income source lands in. Three of the four sources were
+///     already off at their own seams; REACTIONS were not, and a blind seat
+///     read the retired meter filling on the status line.
+///   * the Burst GAUGE -- <c>KokomiResources.BurstGaugeApplies</c>
+///     (`EB-297`), the predicate <c>GaugeBridge</c> selects on, so the
+///     overhead bar is not built at all.
+///
+/// FLAG OFF IS BYTE-IDENTICAL. Every one of those ten is an early branch on
 /// this property, so with it off her starter, her relic, her pool and her
 /// funnel are exactly what they were, and no card applies a power from this
 /// arm. That is the acceptance condition and it is pinned by

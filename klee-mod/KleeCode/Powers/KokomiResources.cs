@@ -481,10 +481,31 @@ public static class KokomiResources
     /// behind a gain and so the economy stays one place to instrument.
     /// Accrual is UNCAPPED past the max (the sim never clamps; the grant check
     /// is `>=` and casting resets to 0 -- overflow is lost at cast, not gain).
+    ///
+    /// `EB-318`. THE ARM NEITHER FEEDS NOR SHOWS BURST, and this is the FEED
+    /// half of the sentence <see cref="BurstGaugeApplies"/> makes the display
+    /// half of. Three of the four income sites were already guarded at their
+    /// own seams -- the exhaust funnel, the skill-tag particle and the kit
+    /// grant -- and the fourth, the reaction funnel in
+    /// <c>ReactionEffects.Resolve</c>, was missed. She is a catalyst, so every
+    /// Attack she plays applies Hydro: the 2026-09-02 blind seat watched
+    /// `Kokomi Burst: 5/20` arrive in round 4 and climb 5 -> 10 -> 15 with no
+    /// rule anywhere naming the meter. That is Klee's `EB-266` word for word,
+    /// so it is fixed where Klee's was -- at the FUNNEL, not at the reaction
+    /// call site, because the arm's answer is "she has no Burst meter" and not
+    /// "reactions in particular do not feed it". Sim twin: the same one line
+    /// in <c>resources.gain_burst</c>, beside the Klee arm's.
+    ///
+    /// <see cref="KokomiBurstResource.DrainOnPlay"/> is deliberately NOT
+    /// guarded: it is a refusal rather than an income, and with nothing
+    /// feeding the meter it is inert under the arm anyway.
     /// </summary>
     public static void GainBurst(Creature? creature, int amount)
     {
         if (amount <= 0) return;
+#if PROTOTYPE_CARDS
+        if (KokomiOverhaul.LiveFor(creature)) return;
+#endif
         var resource = FindBurst(creature);
         if (resource == null) return;
         resource.ModifyAmount(amount);
