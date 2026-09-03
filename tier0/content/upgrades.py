@@ -243,7 +243,12 @@ def _proto_power(effects: list[dict]) -> dict | None:
 #: prototype is two different cards.
 PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     "plan_damage": ("damage", "damage_per_companion_last_turn"),
-    "plan_block": ("block",),
+    # `EB-335`. Tide Wall's per-Plan scaler is a BLOCK clause wearing a count,
+    # exactly as `damage_per_companion_last_turn` is a damage clause wearing
+    # one, so it takes `plan_block`'s key rather than a sixth key of its own --
+    # one printed Block number per row is still the rule, and the flat `block`
+    # spelling wins where a row somehow prints both.
+    "plan_block": ("block", "block_per_plan_this_morning"),
     "plan_mend": ("mend",),
     "plan_power_amount": ("apply_power",),
     "plan_draw": ("draw",),
@@ -271,6 +276,13 @@ def _plan_default_delta(plan: list[dict]) -> dict:
     if any(fx.get("op") == "block" and isinstance(fx.get("amount"), int)
            for fx in plan):
         delta["plan_block"] = PROTOTYPE_BLOCK_DELTA
+    elif any(fx.get("op") == "block_per_plan_this_morning"
+             and isinstance(fx.get("amount"), int) for fx in plan):
+        # `EB-335`. PER PLAN, so the per-instance idiom (+1) rather than the
+        # flat Block delta -- the same distinction `plan_damage` makes one
+        # branch up between a printed hit and Chain of Command's per-Companion
+        # multiplier.
+        delta["plan_block"] = PROTOTYPE_MULTI_HIT_DAMAGE_DELTA
     if any(fx.get("op") == "mend" and isinstance(fx.get("amount"), int)
            for fx in plan):
         delta["plan_mend"] = PROTOTYPE_MEND_DELTA

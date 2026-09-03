@@ -178,14 +178,18 @@ def test_the_starter_is_the_canonical_ten():
         assert gone not in staged
 
 
-def test_the_pool_is_all_twenty_six_of_the_slices_rows():
+def test_the_pool_is_all_twenty_eight_of_the_slices_rows():
     """Slice draft 6 sec.4, whole. Pinned rather than described because it is
     the slice's own scope statement, and because -- unlike the Klee arm, which
-    dropped Vermillion Pact on its packet's own escape -- NOTHING drops here."""
+    dropped Vermillion Pact on its packet's own escape -- NOTHING drops here.
+
+    TWENTY-EIGHT since `EB-335` (R246 pick 2): the slice's 26 plus Tide Wall
+    and Shell Guard, the kit's own defence in act 2."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 26
-    assert len(set(ids)) == 26
+    assert len(ids) == 28
+    assert len(set(ids)) == 28
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
+    assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
 
 
 def test_the_arm_carries_exactly_two_rule_numbers():
@@ -260,12 +264,14 @@ def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
 
 
 def test_the_pool_keeps_the_packets_rarity_split(overhaul):
-    """13 Common, 8 Uncommon, 5 Rare -- the packet's sec.4 count. Pinned
-    because the rarity buckets ARE the offer odds: a row filed in the wrong
-    tier changes how often it is seen."""
+    """13 Common, 10 Uncommon, 5 Rare. The packet's sec.4 count was 13/8/5;
+    `EB-335`'s two defensive rows are both Uncommon (R246 pick 2), which is
+    where the round-four-c packet designed them. Pinned because the rarity
+    buckets ARE the offer odds: a row filed in the wrong tier changes how often
+    it is seen."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 13, "uncommon": 8, "rare": 5}
+        "common": 13, "uncommon": 10, "rare": 5}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):
@@ -374,18 +380,18 @@ def test_a_reaction_leaves_the_retired_burst_meter_at_zero(overhaul):
 
 # --- 4. THE TWO C# FACTS NO IL SCAN CAN SEE --------------------------------
 
-def test_a_planned_block_is_powered_and_a_planned_hit_is_hers():
-    """RULE 3, source-level, because a ValueProp is invisible to an IL scan.
+def test_a_planned_block_is_powered_and_a_planned_hit_is_the_jellyfishs():
+    """RULE 3 AND `EB-334`, source-level, because a ValueProp and a named
+    argument are both invisible to an IL scan.
 
-    "Your Strength and Dexterity count, since the plans are hers" is the whole
-    of it, and it takes two spellings no compiler can check for us:
-
-      * a planned Block is `ValueProp.Move` and NOT `Unpowered`. Draft 2's Plan
-        Block took the NC-11 power-sourced line (`Unpowered`, so neither Frail
-        nor Dexterity sees it); draft 6 states the opposite rule in the brief
-        itself, so the prop had to move with it.
-      * a planned hit names KOKOMI as the applier of the elemental hit, which
-        is what runs her Strength and her Weak through the shared pipeline.
+    THE TWO HALVES SPLIT AT R246 PICK 1, and that is what this pin now records.
+    "Your Strength and Dexterity count, since the plans are hers" still governs
+    a planned BLOCK: it is `ValueProp.Move` and NOT `Unpowered`, where draft 2
+    took the NC-11 power-sourced line that neither Frail nor Dexterity sees.
+    A planned HIT no longer takes it -- the Bake-Kurage deals a Plan
+    (`EB-334`), so the call is `powered: false` while the APPLIER stays her,
+    which is the pair that keeps her Weak off the number and keeps a
+    Plan-caused Freeze a debuff she applied.
 
     Source-level here for the same reason `test_starter_relic_upgrades.py` is:
     the logic is C#, the fact is an enum literal, and the absence is exactly
@@ -417,9 +423,16 @@ def test_a_planned_block_is_powered_and_a_planned_hit_is_hers():
     hit = re.search(r"private static async Task<int\?> Hit\(.*?\n    \}", src,
                     re.DOTALL)
     assert hit, "KokomiPlan.Hit is gone -- rule 3's damage half moved"
-    assert "Element.Hydro, amount, kokomi)" in hit.group(0), (
-        "a planned hit does not name her as the applier, so her Strength and "
-        "her Weak do not reach it")
+    code = chr(10).join(
+        line for line in hit.group(0).splitlines()
+        if not line.strip().startswith("//"))
+    assert "Element.Hydro, amount, kokomi," in code, (
+        "a planned hit does not name her as the APPLIER, so a Plan-caused "
+        "Freeze would stop being a debuff she applied and the Casket would "
+        "stop answering it")
+    assert "powered: false" in code, (
+        "a planned hit runs the dealer's mods, so her Weak shrinks it and her "
+        "attack buffs feed it -- the exact arithmetic `EB-334` reversed")
 
 
 def test_the_shipped_strength_refusal_is_off_under_the_arm():

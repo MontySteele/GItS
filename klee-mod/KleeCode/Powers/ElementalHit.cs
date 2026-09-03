@@ -44,12 +44,36 @@ internal static class ElementalHit
     /// that computes it -- rather than each surface re-deriving its own
     /// arithmetic and disagreeing under Weak. Every existing caller ignores the
     /// result and is behaviour-identical; nothing in the pipeline moved.
+    ///
+    /// <paramref name="powered"/> is QUARANTINED (the Kokomi overhaul) and has
+    /// exactly one caller: <c>KokomiPlan.Hit</c>, since <c>EB-334</c> ruled
+    /// (R246 pick 1) that the BAKE-KURAGE deals a Plan's damage. False skips
+    /// <see cref="SimDamagePipeline.DealerMods"/> -- the dealer's Strength and
+    /// Weak, and with them every flat attack buff the mirror carries -- and
+    /// changes nothing else: the aura still lands, the reaction still fires
+    /// and its amplifier is still read off the applier, and the target's
+    /// Vulnerable still multiplies through
+    /// <see cref="SimDamagePipeline.TargetMods"/>.
+    ///
+    /// WHY A FLAG AND NOT "PASS THE PET AS THE APPLIER", which is how the
+    /// Tamakushi Casket says the same thing one file over: the applier is also
+    /// who applies the AURA and who owns the REACTION's debuff, and a
+    /// Plan-caused Freeze has to stay a debuff SHE applied or the Casket would
+    /// stop answering it and The Clouds Like Waves Rippling would stop paying
+    /// for it. Draft 6 gives the jellyfish the arithmetic, not the authorship.
+    /// It is also the exact sim twin: `deal_damage_to_enemy(...,
+    /// powered=False)` keeps the applier and drops `modify_damage_dealt`, and
+    /// tier0 has no pet object to hand over. Defaulted true, so every shipped
+    /// caller is byte-identical.
     /// </summary>
     public static async Task<int> Deal(
         PlayerChoiceContext choiceContext, Creature target, Element element,
-        decimal baseDamage, Creature? applier, bool ignoreBlock = false)
+        decimal baseDamage, Creature? applier, bool ignoreBlock = false,
+        bool powered = true)
     {
-        var dealt = SimDamagePipeline.DealerMods(applier, baseDamage);
+        var dealt = powered
+            ? SimDamagePipeline.DealerMods(applier, baseDamage)
+            : baseDamage;
 
         var aura = AuraCmd.Find(target);
         if (aura == null)

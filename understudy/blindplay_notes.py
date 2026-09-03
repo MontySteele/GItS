@@ -198,9 +198,9 @@ ARM_KEYWORDS: dict[str, str] = {
     "Mine": ("A Bomb that also goes off when its enemy attacks you, before "
              "the hit lands. Weak shrinks it like any Bomb; the badge shows "
              "the number."),
-    "Plan": ("Play this on the Bake-Kurage: it carries out the Plan line at "
-             "the start of your next turn. Cost is paid now. Plans hit the "
-             "front enemy."),
+    "Plan": ("On the Bake-Kurage, paid now; the Plan lands first thing next "
+             "turn on the front enemy. Enemy Vulnerable raises it; your Weak "
+             "does not."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
     # The Furina reframe's three (slice two, R220 A). The same sentences

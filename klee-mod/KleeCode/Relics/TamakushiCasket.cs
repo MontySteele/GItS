@@ -191,6 +191,13 @@ public sealed class TamakushiCasket : CustomRelicModel
         await ElementalHit.Deal(
             choiceContext, target, Element.Hydro,
             KokomiOverhaulLaw.CasketStrike, dealer);
+        // `EB-335`. SHELL GUARD reads the STRIKE and not the debuff that caused
+        // it, which is what keeps it separable from The Clouds Like Waves
+        // Rippling (that card pays per debuff APPLIED). Hung here, at the one
+        // place the jellyfish strikes, so the card's own text -- "whenever the
+        // Tamakushi Casket strikes" -- has exactly one implementation. AFTER
+        // the hit, so a strike that ends the fight has already happened.
+        await ShellGuardPower.Pay(choiceContext, kokomi);
     }
 
     /// <summary>

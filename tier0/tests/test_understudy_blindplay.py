@@ -4084,8 +4084,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Mine": ["that also goes off when its enemy attacks",
                  "before the hit lands",
                  "the badge shows the number"],
-        "Plan": ["it carries out the ",
-                 "paid now. Plans hit the front enemy"],
+        # The anchors are clauses INSIDE one C# literal apiece, the same
+        # fold-out the Evoke row below makes around its interpolated numerals:
+        # the tip's [gold] spans split it across concatenated literals, so a
+        # phrase that straddles a `+` is not a substring of the source.
+        "Plan": [", paid now; the ",
+                 "lands first thing next turn on the front enemy. Enemy ",
+                 " raises it; your "],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
         # The Furina reframe's three (slice two, 2026-09-02). The Evoke
