@@ -139,8 +139,11 @@ are in [`workstreams.md`](workstreams.md).
   inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
 - **Klee** — Round 8 is RULED (R250, `review/ruled/klee-overhaul-round-8-2026-09-04.md`):
   the Splash pays the largest Bomb, not the sum, so hold-or-cash survives the
-  Power landing. Round 9 is building on it; the seats read it, then [USER]
-  plays. The round-8 clear is read against a control run (below).
+  Power landing. Round 9 is READ (`review/active/klee-overhaul-round-9-2026-09-04.md`):
+  one run died on act-2 floor 22 with no Block in hand, the pool's defence
+  shows one row in three rewards, one pick (how the pool answers it) and
+  `EB-370`-`EB-373`. [USER]'s act-1 run is due on `0.2.2309+proto`; the Splash
+  rule is still unread live. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
   six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
