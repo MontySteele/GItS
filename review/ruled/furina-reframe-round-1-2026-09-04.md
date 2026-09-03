@@ -110,3 +110,32 @@ off the seat's numbers, not a ledger.
 
 The retirement in (1) is a prototype-arm build, D by the ladder, and rides
 round two with `EB-364` to `EB-367`; the seats read it before you do.
+
+## 7. Act two, read after the ruling
+
+A second Sonnet seat played act 2 on the same run after R251 was recorded
+(`review/qa/furina-reframe-round-1-2026-09-04/opus-act2.md`): 88 actions,
+two fights won, then death on floor 25 to the Infested Prism, an Elite the
+map forced through a shop with no rest site in reach, at 16 of 78 going in.
+The death itself was the seat's own call, Slip Backstage ("Spend 5 Encore,
+or HP for any shortfall. Gain 10 Block.") played at 0 Encore because the
+only other line was to take the hit unblocked; the card did what it says.
+
+The finding that matters is (b): **the seat played no Salon card in three
+fights.** It read a deployed member as one that "does nothing until Encore
+is spent", which is the shipped model, and under that model a deploy is
+pure downside. The reframe's three rules, that a Companion play performs
+the front member, that a deploy performs at once, and that a deploy onto a
+full stage Evokes the front, are printed on no card and no tip, so a seat
+that never happens to deploy never learns them. `EB-368`, built in round
+two beside the retirement. The same seat held Ethereal Spotlight unplayed
+every turn of every fight at 0 Encore, the affordable half of `EB-364`.
+
+Two smaller reads, carried here because their rows are at the length gate:
+Tainted at 4, 4 and 6 stacks cost the seat no damage past the plain Block
+shortfall in three rounds (`EB-359`'s question, now with numbers); and the
+"Take your stolen card back" reward named no card (`EB-323`'s family).
+
+**Watch for round two:** with the shipped Burst gone, Encore and Fanfare are
+the whole economy. This seat held 0 Encore for nearly the entire act. If
+the round-two seat starves the same way, Encore income is round two's pick.
