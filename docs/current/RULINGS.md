@@ -259,8 +259,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R247 | 2026-09-03 | Chinju Ward stacks as independent instances, the game's own rule | `5a7ed52` |
 | R248 | 2026-09-03 | RULED: Klee round 7b picks, a Bomb carries the target's modifiers, Grounded grants a Spark | `ce6c135` |
 | R249 | 2026-09-03 | RULED: the shipped sheets' text pass, and the Companion-slot sentence leaves the relics | `c90aadb` |
+| R250 | 2026-09-03 | the 2026-09-04 morning slate -- three packet picks, a control run, Furina in motion, three overtaken rows closed | `193321b` |
 
-248 rows over the R1..R249 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 137 from a commit message, 0 unresolved.
+249 rows over the R1..R250 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 138 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
