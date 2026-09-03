@@ -1490,9 +1490,10 @@ def _op_block_at_turn_start(state: CombatState, fx: dict, card: Card) -> None:
     is a one-shot bank popped whole at the next turn start; this one pays the
     same delayed Block once per turn for a printed number of turns, which is
     the shape `powers` alone cannot hold -- an int stack is one number and this
-    power is two. The second number lives in `Player.timed_power_amounts`, the
-    sidecar `power_payloads` already established; `powers[BLOCK_AT_TURN_START]`
-    holds TURNS REMAINING, the engine's own stacks-are-turns grammar.
+    power is two. The pair lives in `Player.timed_power_amounts`, the sidecar
+    `power_payloads` established; `powers[BLOCK_AT_TURN_START]` holds TURNS
+    REMAINING, the engine's own stacks-are-turns grammar, and is the LONGEST
+    live instance's (see the stacking note below).
 
     THE AMOUNT IS SNAPSHOTTED AT PLAY TIME and never re-read. Spotlight and the
     salon replacement multiplier scale it here, exactly as they scale
@@ -1512,6 +1513,30 @@ def _op_block_at_turn_start(state: CombatState, fx: dict, card: Card) -> None:
     Garment refresh and `_op_summon_kurage` both take `max`). Written directly
     for the same reason `_op_summon_kurage` is, and emitting its own row the
     same way.
+
+    STACKING IS INDEPENDENT INSTANCES, RULED R247 ([USER], 2026-09-03: "For
+    wood carvings - agreed, 2 independent instances (5 for 2)"). A second
+    casting does not merge with a standing one at all: each application is its
+    own *(amount, turns)* pair, pays its own amount at every turn start it is
+    still alive for, and expires on its own clock. Two Chinju Wards played on
+    one turn are two 5-for-2 instances -- 10, then 10, then nothing -- and one
+    played on each of two turns pays 5, then 10, then 5.
+
+    That is `ToricToughnessPower`'s own rule and not a sim invention: the class
+    declares `PowerInstanceType.Instanced` and `PowerStackType.Counter`, so the
+    game holds one power object per play with the turns in its `Amount` and
+    the Block in its own `BlockVar`, and `SetBlock`'s docstring says why ("this
+    is necessary because Amount is used to track the number of turns left").
+    The shipped placeholder before R247 was additive-on-amount / `max`-on-turns,
+    which differed from this only when two instances had DIFFERENT durations --
+    it stretched the smaller amount over the longer clock.
+
+    THE COST OF THE RULING IS THE SIDECAR'S SHAPE: `powers` is `name -> int`
+    and instancing needs a list where there was one integer, so
+    `timed_power_amounts[name]` is now a LIST of `[amount, turns]` pairs.
+    `powers[name]` stays the single int every generic reader wants and is the
+    longest live instance's turns remaining -- non-zero exactly while the power
+    is live, and still turns rather than a count of anything else.
     """
     amount = _amount(state, fx["amount"])
     if state.salon_replacements_this_card:
@@ -1519,24 +1544,15 @@ def _op_block_at_turn_start(state: CombatState, fx: dict, card: Card) -> None:
     amount = _spotlight_scale(state, card, amount)
     turns = block_at_turn_start_turns(fx)
     p = state.player
-    # PLACEHOLDER -- sheet-pass sweep, user pick. Stacking two of these is
-    # ADDITIVE ON AMOUNT and MAX ON TURNS: the amounts sum into one payout and
-    # the longer duration wins, so a second casting can never shorten a
-    # standing one. No ratified rule for same-name (amount, turns) effects
-    # exists to inherit -- the engine's ratified duration rules are all
-    # single-field refreshes (`_op_summon_kurage`'s `max`, the aura refresh,
-    # `apply_power(never_reduces=)`), and each of them settles only the turns
-    # half. The amount half is genuinely unruled, and additive is the choice
-    # that makes two copies of a card worth two copies. NO CARD PRINTS THIS OP,
-    # so nothing depends on the choice today; it wants [USER]'s eye whenever
-    # the first carrier is printed.
-    p.timed_power_amounts[BLOCK_AT_TURN_START] = (
-        p.timed_power_amounts.get(BLOCK_AT_TURN_START, 0) + amount)
-    p.powers[BLOCK_AT_TURN_START] = max(p.powers.get(BLOCK_AT_TURN_START, 0),
-                                        turns)
-    state.emit(BLOCK_AT_TURN_START,
-               amount=p.timed_power_amounts[BLOCK_AT_TURN_START],
-               turns=p.powers[BLOCK_AT_TURN_START])
+    # R247: APPEND, never merge. The instance list is the power, and
+    # `powers[name]` is the derived summary rather than the storage -- deriving
+    # it here and at the payout from the same list is what stops the two
+    # answers drifting.
+    instances = p.timed_power_amounts.setdefault(BLOCK_AT_TURN_START, [])
+    instances.append([amount, turns])
+    p.powers[BLOCK_AT_TURN_START] = max(t for _, t in instances)
+    state.emit(BLOCK_AT_TURN_START, amount=amount, turns=turns,
+               instances=len(instances))
 
 
 def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
@@ -5627,28 +5643,43 @@ def player_turn_start_triggers(state: CombatState) -> None:
     # turn-start block reset, and splitting them across the function is how one
     # of them acquires a different set of hooks by accident.
     #
-    # PAY, THEN TICK, THEN EXPIRE. `powers[BLOCK_AT_TURN_START]` is turns
-    # remaining, so a power applied on turn N (during the player's own turn,
-    # after this function has already run for turn N) with `turns: 2` pays at
-    # the start of N+1 and N+2 and is gone before N+3 -- exactly "the start of
-    # your next 2 turns", and it never pays on the turn it was played.
+    # PAY, THEN TICK, THEN EXPIRE, PER INSTANCE. An instance applied on turn N
+    # (during the player's own turn, after this function has already run for
+    # turn N) with `turns: 2` pays at the start of N+1 and N+2 and is gone
+    # before N+3 -- exactly "the start of your next 2 turns", and it never pays
+    # on the turn it was played.
+    #
+    # R247 ([USER], 2026-09-03) made the instances INDEPENDENT, so the loop is
+    # over the list rather than over one summed amount: every live instance
+    # pays its own Block and ticks its own clock, and a short one expiring does
+    # not shorten or lengthen a long one standing beside it. `powers[name]` is
+    # re-derived from the survivors rather than decremented, because it is a
+    # summary of the list and not a second copy of the truth.
+    #
+    # ONE `block` ROW PER INSTANCE, not one summed row: the game pays each
+    # `ToricToughnessPower` through its own `CreatureCmd.GainBlock` in its own
+    # `AfterBlockCleared`, and a reader counting Block gains should see what
+    # the game does.
     #
     # THE PAYOUT IS RAW, sharing `block_next_turn`'s argument above verbatim
     # rather than restating it: neither block funnel may touch a gain the card
     # that banked it is no longer the source of. The two delayed-Block ops must
     # not drift, so they get one behaviour and it is written once.
-    n = p.powers.get(BLOCK_AT_TURN_START, 0)
-    if n:
-        amount = p.timed_power_amounts.get(BLOCK_AT_TURN_START, 0)
-        if amount:
-            p.block += amount
-            state.emit("block", amount=amount)
-        if n > 1:
-            p.powers[BLOCK_AT_TURN_START] = n - 1
+    instances = p.timed_power_amounts.get(BLOCK_AT_TURN_START) or []
+    if instances:
+        for amount, _turns in instances:
+            if amount:
+                p.block += amount
+                state.emit("block", amount=amount)
+        live = [[amount, turns - 1] for amount, turns in instances
+                if turns - 1 > 0]
+        if live:
+            p.timed_power_amounts[BLOCK_AT_TURN_START] = live
+            p.powers[BLOCK_AT_TURN_START] = max(t for _, t in live)
         else:
-            # BOTH entries leave together. The sidecar outliving the power is
-            # a stale amount waiting for the next application to add itself to.
-            del p.powers[BLOCK_AT_TURN_START]
+            # BOTH entries leave together. The sidecar outliving the power is a
+            # stale instance list waiting for the next application to append to.
+            p.powers.pop(BLOCK_AT_TURN_START, None)
             p.timed_power_amounts.pop(BLOCK_AT_TURN_START, None)
     # --- the two Ancient income powers (R127 / EB-30m) ------------------
     # PLACED ABOVE `salon_tick` DELIBERATELY, and above the whole income

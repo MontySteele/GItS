@@ -707,6 +707,17 @@ class Player(Fighter):
     # turns pay. So the tick, the expiry and every existing reader of `powers`
     # keep working unchanged, and only the payout consults the sidecar.
     #
+    # THE VALUE IS A LIST OF `[amount, turns remaining]` PAIRS, ONE PER
+    # APPLICATION -- R247 ([USER], 2026-09-03), which ruled that two castings
+    # of `block_at_turn_start` are two INDEPENDENT instances rather than one
+    # merged power. That is the shipped game's rule (`ToricToughnessPower` is
+    # `PowerInstanceType.Instanced`) and it is the whole reason this field is a
+    # list: `powers` is `name -> int`, and instancing needs a list where there
+    # was one integer. `powers[name]` is then the DERIVED summary -- the
+    # longest live instance's turns remaining, re-derived from this list at
+    # every write rather than decremented in parallel, so the two can never
+    # disagree about when the power is gone.
+    #
     # LIFETIME IS EXACTLY `powers`' LIFETIME -- default-empty on a freshly
     # built Player, and tier 0.5 builds one per fight (`tier05/model.py` ->
     # `loader.build_player_from_ids`), which is the whole of "survives nothing
@@ -715,7 +726,8 @@ class Player(Fighter):
     # pass its own power is not cleared on is a power with an amount of zero,
     # which pays silently rather than expiring loudly. The op that writes it
     # deletes BOTH entries at expiry, so nothing lingers even within a combat.
-    timed_power_amounts: dict[str, int] = field(default_factory=dict)
+    timed_power_amounts: dict[str, list[list[int]]] = field(
+        default_factory=dict)
     first_hp_loss_fired: bool = False        # on_first_hp_loss_draw, per combat
     # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL).
     # Nicole's Revelation asks whether you "had Block left at the end of your

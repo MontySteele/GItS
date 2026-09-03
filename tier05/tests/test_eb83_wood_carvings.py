@@ -285,7 +285,11 @@ def test_tengu_flurry_deals_its_three_hits_separately():
 def test_chinju_ward_pays_five_now_and_five_on_each_of_the_next_two_turns():
     """`ToricToughnessPower` holds TURNS in its stack and the Block in a
     sidecar, and pays at the turn-start seam: 5 immediately, then 5 at the
-    start of each of the next two turns, then nothing."""
+    start of each of the next two turns, then nothing.
+
+    ONE instance, because one card was played. R247 made the sidecar a LIST of
+    `[amount, turns]` pairs so that two cards are two independent powers; the
+    single-card reading below is unchanged by that, which is the point."""
     from tier0.engine import effects
     state = _fight_state(["chinju_ward"])
     card = loader.get_card("chinju_ward")
@@ -295,7 +299,7 @@ def test_chinju_ward_pays_five_now_and_five_on_each_of_the_next_two_turns():
     assert state.player.block == 5                    # the immediate half
     assert state.player.powers[effects.BLOCK_AT_TURN_START] == 2
     assert state.player.timed_power_amounts[
-        effects.BLOCK_AT_TURN_START] == 5
+        effects.BLOCK_AT_TURN_START] == [[5, 2]]
 
     paid = []
     for _ in range(3):

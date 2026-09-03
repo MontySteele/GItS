@@ -98,9 +98,12 @@
   solve: [block]
   role: glue
   # THE FIRST PRINTED CARRIER of `block_at_turn_start` (EB-83, built alone in
-  # the 2026-08-26 window on EB-82's admission rule). Its stacking placeholder
-  # -- additive on amount, `max` on turns -- is therefore live for the first
-  # time and is [USER]'s pick, raised in the PR that lands this row.
+  # the 2026-08-26 window on EB-82's admission rule). Printing it made the op's
+  # stacking rule reachable for the first time, and R247 ruled it ([USER],
+  # 2026-09-03): two of these are two INDEPENDENT instances -- 5 for 2 apiece,
+  # so a pair played together pays 10, then 10, then nothing -- which is the
+  # shipped game's own rule (`ToricToughnessPower` is
+  # `PowerInstanceType.Instanced`).
   effects:
     - {op: block, amount: 5}
     - {op: block_at_turn_start, amount: 5, turns: 2}

@@ -307,16 +307,29 @@ the two consequences of no longer being inert.
   checked at LOAD by `loader._validate_effect_vocabulary`: a duration
   resolved against combat state is printed text that means something
   different every time it is played.
-- **Stacking is still a PLACEHOLDER, and it is now REACHABLE** — additive on
-  amount, `max` on turns, so a second casting can never shorten a standing
-  one. No ratified rule for same-name *(amount, turns)* effects exists to
-  inherit; the engine's ratified duration rules are all single-field
-  refreshes and settle only the turns half. **This was "[USER]'s pick
-  whenever the first carrier is printed" and the carrier is printed:** two
-  `chinju_ward` in one deck, both played on the same turn, pay 10 for two
-  turns rather than 5 for four (`EB-83` raised it as a numbered pick in its
-  own PR and it is [USER]'s to rule). Nothing was decided in the conversion
-  window — the shipped default stands until it is ruled.
+- **Stacking is INDEPENDENT INSTANCES, ruled R247** ([USER], 2026-09-03: *"For
+  wood carvings - agreed, 2 independent instances (5 for 2)"*). A second
+  casting does not merge with a standing one in any way: each application is
+  its own *(amount, turns)* pair, pays its own amount at every turn start it
+  is alive for, and expires on its own clock. **Two `chinju_ward` on one turn
+  pay 10, then 10, then nothing; one on each of two turns pays 5, then 10,
+  then 5.** This is `ToricToughnessPower`'s own rule rather than a sim choice
+  — the class declares `PowerInstanceType.Instanced` with
+  `PowerStackType.Counter`, so the game holds one power object per play with
+  the turns in `Amount` and the Block in its own `BlockVar`, and `SetBlock`'s
+  docstring says why. The rule this replaced was a marked PLACEHOLDER
+  (additive amount, `max` turns) that shipped inert on 2026-08-26 and became
+  reachable the moment `chinju_ward` was printed; the two differ only when
+  two instances carry DIFFERENT durations, where the placeholder stretched
+  the smaller amount over the longer clock.
+- **What the ruling cost, structurally:** `powers` is `name -> int` and
+  instancing needs a list where there was one integer, so
+  `Player.timed_power_amounts[name]` holds a **list of `[amount, turns]`
+  pairs**, one per application. `powers[name]` stays the single int every
+  generic reader wants — the longest live instance's turns remaining,
+  re-derived from that list at each write rather than decremented beside it,
+  so the summary and the storage cannot disagree about when the power is
+  gone. Both entries still leave together at expiry.
 - **Nimble does not ride it**, for `block_next_turn`'s reason verbatim (EB-85
   divergence 4): the Block arrives from a POWER, so there is no `cardSource`
   for the enchantment hook to read. `enchantments._BLOCK_OPS` is an allowlist,
