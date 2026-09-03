@@ -31,7 +31,7 @@ FLAG OFF EVERY FUNCTION HERE IS A NO-OP, checked at the top of each rather than
 assumed by its callers, which is what makes the byte-identity pin
 (`tier0/tests/test_companion_standins.py`) a property of this module.
 
-THE FOUR CARETAKERS' RULES also live here, for the reason the seam does: they
+THE FIVE CARETAKERS' RULES also live here, for the reason the seam does: they
 are the only rules that read a stand-in, and a new file is what keeps a
 quarantined arm's whole behaviour greppable in one place.
 
@@ -47,11 +47,14 @@ quarantined arm's whole behaviour greppable in one place.
   * Lion's Fang, Fair Protector (Jean) -- a POWER, Grounded's shape with a
     card on it: at the start of your turn, if none of your Bombs went off last
     turn, gain its stacks in Block and draw one.
+  * Front Row Seat (Barbara, R252) -- REPEATING, and every Bomb. "Whenever a
+    Bomb goes off this turn, gain 3 Block": Noelle's card with the Mines-only
+    clause taken off, so a Mine pays both.
 
 "THIS TURN" IS THE ROUND, including the enemy's half, and that is not a
 liberty: Klee's Mines go off when an ENEMY attacks, so a window that closed at
 the end of the player's own turn would leave "whenever a Mine goes off this
-turn" unable to fire at all. Both watchers are therefore cleared where the
+turn" unable to fire at all. Every watcher is therefore cleared where the
 explosion counters roll -- the start of the player's NEXT turn.
 """
 
@@ -75,9 +78,13 @@ I_GOT_YOUR_BACK = "mc_i_got_your_back"
 COLD_BLOODED = "mc_cold_blooded"
 #: Jean's power. Stacks are the Block, Grounded's own grammar.
 LIONS_FANG = "mc_lions_fang"
+#: Barbara's repeating watcher (R252). Stacks are the Block paid per BOMB --
+#: Noelle's grammar with her Mines-only clause taken off, which is the one line
+#: that separates the two.
+FRONT_ROW_SEAT = "mc_front_row_seat"
 
-#: The two watchers, cleared together at the turn roll.
-_WATCHERS = (SHAKEN_NOT_PURRED, I_GOT_YOUR_BACK)
+#: The three watchers, cleared together at the turn roll.
+_WATCHERS = (SHAKEN_NOT_PURRED, I_GOT_YOUR_BACK, FRONT_ROW_SEAT)
 
 
 # --- the sheet contract ------------------------------------------------------
@@ -209,6 +216,14 @@ def note_explosion(state: "CombatState", is_mine: bool) -> None:
             p.block += n
             state.emit("block", amount=n)
             state.emit("mc_i_got_your_back", amount=n)
+    # Barbara -- REPEATING, and EVERY Bomb (R252). Noelle's shape without her
+    # Mines clause, which is the whole difference between the two cards: a
+    # Mine is a Bomb, so Noelle's window is a subset of this one.
+    n = p.powers.get(FRONT_ROW_SEAT, 0)
+    if n:
+        p.block += n
+        state.emit("block", amount=n)
+        state.emit("mc_front_row_seat", amount=n)
 
 
 def on_played(state: "CombatState", card: "Card") -> None:

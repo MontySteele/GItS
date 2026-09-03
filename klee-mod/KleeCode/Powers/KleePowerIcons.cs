@@ -60,6 +60,13 @@ internal static class KleePowerIcons
         BombReactionSparkPower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         GroundedPower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        // R252's DEFENCE-SHELF POWER, on the block above's terms verbatim: it
+        // borrows Grounded's icon, because Grounded is the power whose job it
+        // takes over one trigger along -- both pay Block off the arm's own
+        // explosion ledger, one for the turn nothing went off and one for the
+        // turn something did. Its own illustration stays owed until the slice
+        // is accepted.
+        SafetyLessonPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         // R244's TWO COVEN READERS, on the block above's terms verbatim: the
         // Circle borrows the icon of the arm power whose job it takes over
         // (Chained Reactions -- a Bomb per trigger, one trigger over), and the
@@ -170,6 +177,12 @@ internal static class KleePowerIcons
         ColdBloodedPower => KleePck.Path("klee/powers/frozen.png"),
         IGotYourBackPower => KleePck.Path("klee/powers/celestial_gift.png"),
         LionsFangPower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        // R252's fifth caretaker. Let the Show Begin♪ prints no power, so this
+        // one takes the second half of the block's rule: the icon of the power
+        // whose job the stand-in takes over, which is Noelle's I Got Your Back
+        // -- the same repeating this-turn Block watcher with the Mines-only
+        // clause taken off.
+        FrontRowSeatPower => KleePck.Path("klee/powers/celestial_gift.png"),
         // THE SAME SLICE'S HEXEREI FAMILY (R236 sec.3), the same borrow: each
         // of the four wears its Universal's illustration, so the badge takes
         // the icon that Universal's own power already uses (Albedo's Isotoma,

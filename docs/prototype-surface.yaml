@@ -436,7 +436,7 @@
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
    description: "Gain 3 [gold]Block[/gold]. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 6 additional [gold]Block[/gold].",
-   upgrade: {block: +2, conditional_block: +2},
+   upgrade: {conditional_block: +2},
    effects: [{op: block, amount: 3},
              {op: conditional, if: bomb_reacted_this_turn,
               then: [{op: block, amount: 6}]}]}

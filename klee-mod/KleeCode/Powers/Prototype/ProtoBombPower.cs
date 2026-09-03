@@ -1472,6 +1472,51 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         await CreatureCmd.GainBlock(applier, size, ValueProp.Unpowered, null);
     }
 
+    /// <summary>
+    /// Careful Now (<c>R252</c>): gain Block equal to your largest Bomb, up to
+    /// <paramref name="cap"/>. Returns the Block granted.
+    ///
+    /// IT READS THE PILE AND SPENDS NOTHING, which is the whole of what
+    /// separates it from <see cref="RemoveLargestForBlockAndGain"/> above.
+    /// Sorry, Jean... is an emergency exit that costs the Bomb; this is the
+    /// cook's own posture -- the bigger the charge she is standing over, the
+    /// more carefully she stands -- and afterwards every Bomb is still there
+    /// and still growing.
+    ///
+    /// THE LARGEST SINGLE CHARGE, BOARD-WIDE, and both halves are the printed
+    /// face's ("your largest Bomb"). Per enemy it is
+    /// <see cref="LargestPlacedBy"/>, the Splash's own reader since R250;
+    /// across the board it is the largest of those, which is the same walk
+    /// Sorry, Jean... makes one charge at a time. The card takes no target, so
+    /// "the enemy" could only ever have meant the board.
+    ///
+    /// THE CAP IS THE ROW'S, never a law constant: it is a printed number the
+    /// upgrade moves (<c>upgrade: {cap: +3}</c>), and it is what keeps the row
+    /// from turning Grounded's cook turn into a stall.
+    ///
+    /// UNPOWERED (<c>ValueProp.Unpowered</c>), like every other rule-sourced
+    /// Block on this arm: no Dexterity feeds it and no Frail bites it, because
+    /// it is a RULE's Block and not a card's printed Block. Sim twin:
+    /// <c>klee_overhaul.block_for_largest_bomb</c>.
+    /// </summary>
+    public static async Task<int> BlockForLargestBomb(
+        PlayerChoiceContext choiceContext, Creature applier, int cap)
+    {
+        if (applier.CombatState == null || cap <= 0) return 0;
+
+        var largest = 0;
+        foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
+        {
+            if (enemy.IsDead) continue;
+            var here = LargestPlacedBy(enemy, applier);
+            if (here > largest) largest = here;
+        }
+        var amount = largest < cap ? largest : cap;
+        if (amount <= 0) return 0;
+        await CreatureCmd.GainBlock(applier, amount, ValueProp.Unpowered, null);
+        return amount;
+    }
+
     /// <summary>Big Badda Boom's second clause reads this: the damage this
     /// play's explosions have already dealt. Kept on the ledger, not here,
     /// because the card asks about the PLAY and a pile is gone by the time it

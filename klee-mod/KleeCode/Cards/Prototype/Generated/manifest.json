@@ -51,12 +51,15 @@
     "proto_ko_bang_bang",
     "proto_ko_big_badda_boom",
     "proto_ko_careful_arrangement",
+    "proto_ko_careful_now",
     "proto_ko_catalytic_converter",
     "proto_ko_chain_fuse",
     "proto_ko_chained_reactions",
     "proto_ko_coven_errand",
     "proto_ko_dig_in",
+    "proto_ko_dodoco_cover",
     "proto_ko_explosives_workshop",
+    "proto_ko_fire_safety",
     "proto_ko_fish_flavored_bait",
     "proto_ko_flame_dance",
     "proto_ko_fwoosh",
@@ -71,6 +74,7 @@
     "proto_ko_quick_fuse",
     "proto_ko_rapid_fire",
     "proto_ko_run_away",
+    "proto_ko_safety_lesson",
     "proto_ko_sizzle",
     "proto_ko_sorry_jean",
     "proto_ko_sparks_n_splash",
@@ -83,6 +87,7 @@
     "proto_mc_albedo_tectonic_tide",
     "proto_mc_amber_explosive_puppet",
     "proto_mc_amber_fiery_rain",
+    "proto_mc_barbara_front_row_seat",
     "proto_mc_barbara_melody_loop",
     "proto_mc_barbara_show_begin",
     "proto_mc_bennett_fantastic_voyage",
@@ -216,12 +221,15 @@
     "proto_ko_bang_bang": "klee",
     "proto_ko_big_badda_boom": "klee",
     "proto_ko_careful_arrangement": "klee",
+    "proto_ko_careful_now": "klee",
     "proto_ko_catalytic_converter": "klee",
     "proto_ko_chain_fuse": "klee",
     "proto_ko_chained_reactions": "klee",
     "proto_ko_coven_errand": "klee",
     "proto_ko_dig_in": "klee",
+    "proto_ko_dodoco_cover": "klee",
     "proto_ko_explosives_workshop": "klee",
+    "proto_ko_fire_safety": "klee",
     "proto_ko_fish_flavored_bait": "klee",
     "proto_ko_flame_dance": "klee",
     "proto_ko_fwoosh": "klee",
@@ -236,6 +244,7 @@
     "proto_ko_quick_fuse": "klee",
     "proto_ko_rapid_fire": "klee",
     "proto_ko_run_away": "klee",
+    "proto_ko_safety_lesson": "klee",
     "proto_ko_sizzle": "klee",
     "proto_ko_sorry_jean": "klee",
     "proto_ko_sparks_n_splash": "klee",
@@ -248,6 +257,7 @@
     "proto_mc_albedo_tectonic_tide": "klee",
     "proto_mc_amber_explosive_puppet": "klee",
     "proto_mc_amber_fiery_rain": "klee",
+    "proto_mc_barbara_front_row_seat": "klee",
     "proto_mc_barbara_melody_loop": "klee",
     "proto_mc_barbara_show_begin": "klee",
     "proto_mc_bennett_fantastic_voyage": "klee",
@@ -497,6 +507,9 @@
     "proto_ko_careful_arrangement": {
       "grow": 3
     },
+    "proto_ko_careful_now": {
+      "cap": 3
+    },
     "proto_ko_catalytic_converter": {
       "power_amount": 1
     },
@@ -512,8 +525,15 @@
     "proto_ko_dig_in": {
       "block": 3
     },
+    "proto_ko_dodoco_cover": {
+      "bomb_size": 2,
+      "block": 2
+    },
     "proto_ko_explosives_workshop": {
       "power_amount": 1
+    },
+    "proto_ko_fire_safety": {
+      "conditional_block": 2
     },
     "proto_ko_fish_flavored_bait": {
       "damage": 3,
@@ -559,6 +579,9 @@
     "proto_ko_run_away": {
       "block": 3
     },
+    "proto_ko_safety_lesson": {
+      "power_amount": 1
+    },
     "proto_ko_sizzle": {
       "damage": 3
     },
@@ -600,6 +623,10 @@
     },
     "proto_mc_amber_fiery_rain": {
       "damage": 1
+    },
+    "proto_mc_barbara_front_row_seat": {
+      "block": 2,
+      "power_amount": 1
     },
     "proto_mc_barbara_melody_loop": {
       "block": 3,

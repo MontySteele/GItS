@@ -25,7 +25,7 @@ namespace KleeMod.Powers;
 /// 6; the approved Mondstadt workshop sec.1; R236 sec.3). Everything below
 /// follows from that one sentence:
 ///
-///   * it never enters ANY pool on its own. The four types are absent from
+///   * it never enters ANY pool on its own. None of the types is in
 ///     <see cref="CompanionOverhaulRoster"/>, which is the ONE door
 ///     <see cref="CompanionPool.All"/> opens, so the reward slot, the shop and
 ///     the Featured Banner are all structurally unable to see one;
@@ -59,7 +59,8 @@ public static class CompanionStandIns
 {
     /// <summary>
     /// The pairs, Universal -> stand-in, in the sheet's own order. Klee's four
-    /// caretakers (R236 sec.3): Diona, Noelle, Kaeya, Jean.
+    /// caretakers (R236 sec.3) -- Diona, Noelle, Kaeya, Jean -- and the fifth
+    /// the defence shelf added (R252): Barbara.
     ///
     /// CACHED LAZILY for <see cref="CompanionOverhaulRoster"/>'s reason, which
     /// is the EB-194 lesson: <c>ModelDb.Card&lt;T&gt;()</c> throws until the
@@ -79,6 +80,10 @@ public static class CompanionStandIns
              ModelDb.Card<ProtoMcKaeyaColdBloodedStrike>()),
             (ModelDb.Card<ProtoMcJeanDandelionBreeze>(),
              ModelDb.Card<ProtoMcJeanLionsFang>()),
+            // R252's fifth, on the same terms as the four above: Barbara's
+            // Front Row Seat stands in for Let the Show Begin♪.
+            (ModelDb.Card<ProtoMcBarbaraShowBegin>(),
+             ModelDb.Card<ProtoMcBarbaraFrontRowSeat>()),
         };
 
     /// <summary>Test seam: forget the cache. The mod never calls it.</summary>
@@ -141,7 +146,7 @@ public static class CompanionStandIns
         return picked;
     }
 
-    // ---- the four caretakers' rules -------------------------------------
+    // ---- the caretakers' rules -----------------------------------------
 
     /// <summary>
     /// One explosion landed: pay whichever this-turn watcher is armed.
@@ -166,6 +171,12 @@ public static class CompanionStandIns
                     break;
                 case IGotYourBackPower back when isMine:
                     await back.Pay();
+                    break;
+                // R252. Noelle's arm without her `when isMine`, which is the
+                // one line between the two cards: a Mine is a Bomb, so
+                // Barbara's window contains Noelle's.
+                case FrontRowSeatPower seat:
+                    await seat.Pay();
                     break;
             }
         }
@@ -321,6 +332,48 @@ public sealed class IGotYourBackPower : PowerModel, ILocalizationProvider
         ("title", "I Got Your Back"),
         ("description",
             "Whenever one of your [gold]Mines[/gold] goes off this turn, gain "
+          + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal async Task Pay()
+    {
+        if (Owner == null || Amount <= 0) return;
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null,
+                                    fast: true);
+    }
+
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (Owner == null || player.Creature != Owner) return;
+        await PowerCmd.Remove(this);
+    }
+}
+
+/// <summary>
+/// Barbara, Front Row Seat (<c>R252</c>): "Gain 5 Block. Apply Hydro twice.
+/// Whenever a Bomb goes off this turn, gain 3 Block."
+///
+/// REPEATING, AND EVERY BOMB. <see cref="IGotYourBackPower"/> with the
+/// Mines-only clause taken off, which is the one line between the two cards --
+/// a Mine is a Bomb, so Noelle's window is contained in this one.
+///
+/// HYDRO TWICE is round 8's Diona finding read onto the other element: one
+/// application on a board Klee is already cooking is eaten by her own Pyro
+/// before the companion's own turn comes round, so the applier row that is
+/// worth drafting applies twice.
+/// </summary>
+public sealed class FrontRowSeatPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Front Row Seat"),
+        ("description",
+            "Whenever one of your [gold]Bombs[/gold] goes off this turn, gain "
           + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 

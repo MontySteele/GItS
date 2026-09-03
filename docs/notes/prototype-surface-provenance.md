@@ -2228,3 +2228,14 @@ to the Bomb state and none is a plain Block:
 
 Numbers are Prototype numbers, D by the ladder; the seats read them on
 round 10 before [USER] does.
+
+ONE UPGRADE KEY WAS RESPELLED WHEN THE ROWS WERE BUILT, and only the key.
+Fire Safety was drafted `{block: +2, conditional_block: +2}` and ships
+`{conditional_block: +2}`, because `conditional_block` bumps EVERY printed
+Block on a row and not only the branch one (`upgrades.apply_upgrade`, and
+`docs/klee-upgrades.yaml`'s `hold_the_line` says so in its own comment:
+"5->8 top level AND 6->9 in the branch"). The drafted pair would have moved
+the top-level 3 twice, to 7, which is not what a row stating two `+2`s says.
+The one key moves both printed numbers by exactly 2 -- 3 to 5, 6 to 8 -- which
+is the drafted intent, and both engines now do it. Nothing else on any of the
+five rows moved: no name, no cost, no number and no face.
