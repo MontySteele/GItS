@@ -1760,7 +1760,10 @@ def test_the_stage_is_what_refuses_and_it_refuses_before_the_packet():
     """Position matters as much as the check: `stage_board` calls the
     preflight after the last staging step and before it hands the state
     back, so nothing downstream -- packet, reader, grade -- exists yet."""
-    src = (REPO / "understudy" / "staged_turn.py").read_text(encoding="utf-8")
+    # `EB-180` moved `stage_board` into `staged_turn_stage.py`; the read is
+    # of the whole seam family, so the claim follows the function.
+    from tier0.tests.conftest import seam_source
+    src = seam_source("staged_turn")
     body = src.split("def stage_board(")[1].split("\ndef ")[0]
     assert "wire_assumption_preflight(turn, policy.staged_state)" in body
     assert body.index("if not policy.ok") < body.index(

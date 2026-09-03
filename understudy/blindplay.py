@@ -109,17 +109,17 @@ LOCAL_PROPS = Path(__file__).resolve().parents[1] / "klee-mod" / "local.props"
 # still resolves off `understudy.blindplay`. Nothing below is new:
 # each name is the definition that used to stand in this file.
 #
-#   blindplay_shape    The blind module's fixed shapes: paths, screen registers
-#   blindplay_read     Small reads: printed text, folded names, and the blobs b
-#   blindplay_faces    One card, one option, one enemy, as the game prints it.
-#   blindplay_board    The board behind the screen: combat, the pet, the meters
-#   blindplay_notes    The standing notes a page prints, and the arm-keyword gl
-#   blindplay_observe  One screen, design-blind, field by field.
-#   blindplay_render   The observation as the page the tester is handed. Same c
-#   blindplay_snapshot One turn of the board, off the wire, for the grader and 
-#   blindplay_grammar  One line of player language, resolved against the screen
-#   blindplay_session  One blind run: one screen at a time, one command at a ti
-#   blindplay_record   What a finished session leaves behind: the audit and the
+#   blindplay_shape    paths, screen registers, the two refusals
+#   blindplay_read     printed text, folded names, the blobs behind them
+#   blindplay_faces    one card, one option, one enemy, as printed
+#   blindplay_board    combat, the pet, the meters, the map
+#   blindplay_notes    the standing notes, and the arm-keyword glossary
+#   blindplay_observe  `observation` -- the no-leak guarantee, once
+#   blindplay_render   the observation as the page a tester is handed
+#   blindplay_snapshot the wire snapshot, which is the grader's channel
+#   blindplay_grammar  one line of player language, resolved
+#   blindplay_session  one blind run, one command at a time
+#   blindplay_record   the audit, and the two halves `seal` writes
 #
 # `LOCAL_PROPS` STAYS HERE, with the four lines that explain it: it
 # is the path a caller reaches in and swaps, so it has one home and
