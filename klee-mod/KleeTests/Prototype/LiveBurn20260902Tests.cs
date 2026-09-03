@@ -127,15 +127,21 @@ public class LiveBurn20260902Tests
         // not.
         //
         // `EB-343` (R248) changed WHICH modifier that sentence names, not that
-        // it names one: Klee's Weak no longer reaches a Bomb, so the tip says
-        // the enemy's own debuffs do -- and still sends the reader to the badge
-        // for the live number, which is the half the seat actually needed.
+        // it names one: Klee's Weak no longer reaches a Bomb, so the tip names
+        // what does -- and still sends the reader to the badge for the live
+        // number, which is the half the seat actually needed.
+        //
+        // `EB-373` NARROWED IT TO WHAT THE CODE FOLDS. A Mine is a Bomb, and
+        // `FoldedMods` reads the target's Vulnerable and its damage cap and
+        // nothing else, so "the enemy's debuffs move it" was promising a Slow
+        // or a Flutter would. Same words as the Bomb tip, so a reader cannot
+        // hold the two against each other.
         var body = string.Concat(Il.Strings(
             typeof(ArmKeywordTips)
                 .GetMethod("ForMine", HeadlessGame.All)!));
 
-        Assert.Contains("The enemy's debuffs move it, and the ", body);
-        Assert.Contains("badge has the number.", body);
+        Assert.Contains("Read the badge: only their ", body);
+        Assert.Contains("[gold]Vulnerable[/gold] and a cap move it.", body);
         Assert.DoesNotContain("[gold]Weak[/gold]", body);
 
         // AND IT IS MEASURED NOW. The sentence used to carry a semicolon, and
@@ -165,7 +171,9 @@ public class LiveBurn20260902Tests
             typeof(ArmKeywordTips)
                 .GetMethod("ForBomb", HeadlessGame.All)!));
 
-        Assert.Contains("Its hit takes the enemy's debuffs, not yours.", body);
+        // `EB-373`: the same clause, narrowed to the two terms the fold reads.
+        Assert.Contains("Not an Attack: only their [gold]Vulnerable[/gold] "
+                      + "and a cap move it.", body);
     }
 
     // ---- EB-293: the Plan keyword covers the plan-only case ---------------

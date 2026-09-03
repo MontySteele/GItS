@@ -275,9 +275,19 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # the ceiling is the base game's own longest mechanic tip on the one
             # word a seat reads every turn. All four rules are still here in two
             # sentences, and the tip takes no length exception.
+            # `EB-373` REWROTE THE LAST CLAUSE. The fold is `FoldedMods` and
+            # it reads two things off the target -- Vulnerable and whichever
+            # power sets the lowest damage cap -- so "takes the enemy's
+            # debuffs" was a promise the code does not keep. The r9 seat
+            # priced two fights off it: a Slow 50 enemy took 48 from a pile
+            # printing 46, and a Flutter 5 enemy took a 27 Bomb whole while a
+            # printed 8 Attack landed 4. Both debuffs say "from Attacks", and
+            # a Bomb's hit is not an Attack -- which is what the clause leads
+            # with now, inside the same 135-character ceiling.
             "A charge on an enemy: grows ",
             " a turn, goes off only when [gold]Set off[/gold], all at once. ",
-            "Its hit takes the enemy's debuffs, not yours.",
+            "Not an Attack: only their [gold]Vulnerable[/gold] and a cap ",
+            "move it.",
             "on the target goes off first, one at a ",
             "time, each a Pyro hit for its size.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
@@ -286,6 +296,9 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "Gone after combat.",
             "that also goes off when its enemy attacks ",
             "you, before the hit lands.",
+            # `EB-373`: a Mine IS a Bomb, so the same two terms move it and
+            # the two tips say so in the same words.
+            "Read the badge: only their ",
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.

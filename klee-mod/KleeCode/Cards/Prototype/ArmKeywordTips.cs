@@ -94,11 +94,11 @@ public static class ArmKeywordTips
     ///
     /// THE LAST CLAUSE IS `EB-343` (R248), and it is the one thing a player
     /// cannot get from the badge: the badge shows the number, this says whose
-    /// number it is. A Bomb is the ENEMY'S burden, their debuffs moving it
-    /// while Klee's Strength and Weak do not, which is the opposite of what
-    /// every other damage source in her deck does. A rule that runs backwards
-    /// to the rest of the game cannot be inferred from a total that did not
-    /// change, so it is printed where the word is met.
+    /// number it is. A Bomb is the ENEMY'S burden -- what the target is wearing
+    /// moves it and Klee's own Strength and Weak do not, which is the opposite
+    /// of what every other damage source in her deck does. A rule that runs
+    /// backwards to the rest of the game cannot be inferred from a total that
+    /// did not change, so it is printed where the word is met.
     ///
     /// IT IS TWO SENTENCES AND IT FITS, which is the point of the rewrite
     /// ([USER], PR #340, the same call as the Plan tip in #335). The four rules
@@ -109,18 +109,33 @@ public static class ArmKeywordTips
     /// here, and the growth rate is still interpolated so a repricing cannot
     /// leave the sentence lying (`EB-89`).
     ///
-    /// "not yours" RATHER THAN NAMING STRENGTH AND WEAK, and it costs nothing
-    /// true: the enemy's debuffs are what DOES move the number, so what is left
-    /// to say about the player's own modifiers is that none of them count. The
-    /// static badge face beside it (`ProtoBombPower`'s `description`) names the
-    /// two by name for the reader who wants them.
+    /// `EB-373` REWROTE THE LAST CLAUSE, WHICH WAS TOO GENEROUS BY HALF.
+    /// "Takes the enemy's debuffs" is not what the code does: the fold is
+    /// <c>FoldedMods</c> in <see cref="KleeMod.Powers.ProtoBombPower"/> and it
+    /// reads exactly two things off the target -- its <c>VulnerablePower</c>,
+    /// and whichever power sets the lowest damage cap. Every other debuff the
+    /// enemy is wearing is left out, and the r9 seat priced two fights off the
+    /// sentence as it stood: a Slow 50 enemy took 48 from a pile printing 46
+    /// (act 1), and a Flutter 5 enemy took the full 27 from a 27 Bomb while a
+    /// printed 8 Attack landed 4 (act 2). Both of those debuffs say "from
+    /// Attacks" on their own faces, and the reason they miss a Bomb is the rule
+    /// this clause now leads with: a Bomb's hit is not an Attack.
+    ///
+    /// "ONLY" IS THE LOAD-BEARING WORD, and it is also what makes the sentence
+    /// fit. Naming the two terms that DO apply and nothing else says, in one
+    /// clause, that no Attack-conditional debuff of the enemy's and no modifier
+    /// of Klee's reaches the number -- which is three claims in the room two
+    /// used to take. The static badge face beside it (`ProtoBombPower`'s
+    /// `description`) spells both halves out for the reader who wants them, the
+    /// same split <c>MineClause</c> already has.
     /// </summary>
     public static IEnumerable<IHoverTip> ForBomb(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
             "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
           + " a turn, goes off only when [gold]Set off[/gold], all at once. "
-          + "Its hit takes the enemy's debuffs, not yours.");
+          + "Not an Attack: only their [gold]Vulnerable[/gold] and a cap "
+          + "move it.");
 
     /// <summary>Rule 2, and the one [USER] named ("Set Off has no tooltip
     /// text"). The ORDER clause is the load-bearing half: the explosions land
@@ -200,12 +215,20 @@ public static class ArmKeywordTips
     /// in the same change; this sentence is a comma now and the tip is 134 of
     /// 135.
     /// </summary>
+    /// `EB-373` NARROWED THE SECOND SENTENCE HERE TOO, because a Mine IS a
+    /// Bomb and the fold that moves one moves the other: `FoldedMods` reads
+    /// the target's Vulnerable and its damage cap and nothing else. "The
+    /// enemy's debuffs move it" promised a Slow or a Flutter would, and the
+    /// number on the badge said otherwise in two of the r9 fights. Same rule,
+    /// same words as the Bomb tip, so the two cannot be read against each
+    /// other.
+    /// </summary>
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
-          + "you, before the hit lands. The enemy's debuffs move it, and the "
-          + "badge has the number.");
+          + "you, before the hit lands. Read the badge: only their "
+          + "[gold]Vulnerable[/gold] and a cap move it.");
 
     /// <summary>
     /// KLEE'S FIFTH, R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`

@@ -287,16 +287,27 @@ ARM_KEYWORDS: dict[str, str] = {
     # +{growth} PER BOMB (Bomb 5 + Bomb 8 -> 21, not 17) and no wording said
     # so. In game the badge carries that fact ("Each grows at the start of
     # your turn"); the seat page has no badge, so the glossary says it.
+    # `EB-373` REWROTE THE SECOND SENTENCE, and the old one promised more
+    # than the code does. The C# folds exactly two things off the target --
+    # its Vulnerable, and whichever power sets the lowest damage cap -- so
+    # "the enemy's debuffs" was a rule the r9 seat priced two fights off and
+    # lost both reads: a Slow 50 enemy took 48 from a pile printing 46, and a
+    # Flutter 5 enemy took a 27 Bomb whole while a printed 8 Attack landed 4.
+    # Both debuffs say "from Attacks", and a Bomb's hit is not an Attack.
+    # Held in step with `ArmKeywordTips.ForBomb`, which says it in the same
+    # words.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
-             "only when Set off, all at once. Its hit takes the enemy's "
-             "debuffs, not yours."),
+             "only when Set off, all at once. Not an Attack: only their "
+             "Vulnerable and a cap move it."),
     "Set off": ("Every Bomb on the target goes off first, one at a time, "
                 "each a Pyro hit for its size."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
+    # `EB-373`: a Mine IS a Bomb, so the same fold moves it and the same
+    # sentence has to say so. The badge is still where the live number is.
     "Mine": ("A Bomb that also goes off when its enemy attacks you, before "
-             "the hit lands. The enemy's debuffs move it, and the badge has "
-             "the number."),
+             "the hit lands. Read the badge: only their Vulnerable and a cap "
+             "move it."),
     # `EB-329`. "OR ALL IF IT SAYS SO" IS THE HALF THE OLD SENTENCE GOT
     # WRONG, and it was reprinted on every battle screen of every run: a
     # starter, Kurage's Oath, deals its Plan to ALL enemies, and the round-5

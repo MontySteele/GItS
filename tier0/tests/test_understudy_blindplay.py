@@ -4652,14 +4652,18 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # [USER] held it to the 135-character tip ceiling (PR #340), so
         # rule 7 is now "goes off only when" and the stacking rule is
         # "all at once".
+        # `EB-373` REWROTE THE LAST CLAUSE. "Takes the enemy's debuffs"
+        # promised more than the fold does -- Vulnerable and a damage cap,
+        # nothing else -- and the r9 seat priced two fights off it.
         "Bomb": ["A charge on an enemy", "goes off only when",
-                 "all at once", "takes the enemy's debuffs, not yours"],
+                 "all at once", "Not an Attack: only their ",
+                 " and a cap "],
         "Set off": ["on the target goes off first, one at a",
                     "each a Pyro hit for its size"],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
         "Mine": ["that also goes off when its enemy attacks",
                  "before the hit lands",
-                 "badge has the number"],
+                 "Read the badge: only their "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
@@ -5237,10 +5241,11 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     `EB-343` (R248) REWROTE THE TIP THIS SCRAPES, and both of this test's
     claims survive it. [USER] held the in-game word to its 135-character
     ceiling, so the tip reads "A charge on an enemy: grows 4 a turn, goes off
-    only when Set off, all at once. Its hit takes the enemy's debuffs, not
-    yours." The glossary keeps "each" on top of it, because the fact that
-    growth is PER BOMB lives on the badge in game and the seat page has no
-    badge.
+    only when Set off, all at once", and `EB-373` rewrote what follows it
+    ("Not an Attack: only their Vulnerable and a cap move it") because the
+    older clause promised debuffs the fold does not read. The glossary keeps
+    "each" on top of the first sentence, because the fact that growth is PER
+    BOMB lives on the badge in game and the seat page has no badge.
     """
     page = blindplay.observe(keyword_hand_state(["Set off. Place a Bomb 4."]))
     assert (f"- **Bomb** — A charge on an enemy: each grows "

@@ -163,8 +163,14 @@ public class ArmKeywordTipTests
         Assert.Contains("A charge on an enemy: grows ", printed);
         Assert.Contains(" a turn, goes off only when [gold]Set off[/gold], "
                       + "all at once.", printed);
-        Assert.Contains("Its hit takes the enemy's debuffs, not yours.",
-                        printed);
+        // `EB-373` REWROTE THE FOURTH RULE'S CLAUSE. The fold is `FoldedMods`
+        // and it reads two things off the target -- Vulnerable, and whichever
+        // power sets the lowest damage cap -- so "takes the enemy's debuffs"
+        // promised a Slow or a Flutter would move a Bomb, and the r9 seat
+        // priced two fights on it. The reason those miss is what the clause
+        // leads with now: a Bomb's hit is not an Attack.
+        Assert.Contains("Not an Attack: only their [gold]Vulnerable[/gold] "
+                      + "and a cap move it.", printed);
 
         // `EB-89`, read the only way it can be read: the growth rate is NOT a
         // literal anywhere in this method -- the two halves of the sentence are
