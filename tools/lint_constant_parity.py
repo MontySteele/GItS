@@ -371,6 +371,20 @@ UNMIRRORED: dict[str, str] = {
     "RosterArt.PortraitHeight":
         "`EB-275`. The other half of the card-art window's authored size; see "
         "`RosterArt.PortraitWidth` for the whole of it.",
+    "RosterArt.CacheCapacity":
+        "`EB-158`. A MEMORY BOUND, not balance: how many decoded card "
+        "portraits the LRU in `KleeArt.cs` holds before it evicts the least "
+        "recently used one. Sized off what the UI can want AT ONCE -- a "
+        "browsed end-of-run deck alongside a hand, a shop row and a reward "
+        "screen -- and the only thing it can change is whether a re-shown "
+        "card costs one PNG decode. tier0 draws nothing, loads no textures "
+        "and has no counterpart.",
+    "RosterArt.PortraitBytes":
+        "`EB-158`. DERIVED, and read by no code: `PortraitWidth * "
+        "PortraitHeight * 4` is the decoded RGBA8 size of one portrait, "
+        "written down so the arithmetic behind `RosterArt.CacheCapacity` is "
+        "checkable instead of asserted in a comment. Both of its inputs are "
+        "UNMIRRORED directly above, for the same reason.",
     "NonFiniteCardGuard.MaxTrailTravelPx":
         "`EB-292`. A SCENE BOUND, not balance: how far a followed node may "
         "travel in one frame before the base game's card-trail gap-fill loop "
