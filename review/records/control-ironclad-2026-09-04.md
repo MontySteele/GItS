@@ -25,7 +25,8 @@ Same seat family, same two allowed commands, same brief, same pages.
 
 | run | character | pool | ascension | result |
 |---|---|---|---|---|
-| control | base Ironclad | the base pool | 0 | died on the act-1 boss, floor 17 |
+| control, run 1 | base Ironclad | the base pool | 0 | died on the act-1 boss, floor 17 |
+| control, run 2 | base Ironclad | the base pool | 0 | died on the act-1 boss, floor 17 |
 | Klee round 8, run 1 | Klee arm | 33 rows | 0 | died act 2, floor 7 |
 | Klee round 8, run 2 | Klee arm | 33 rows | 0 | cleared the spire |
 | Kokomi round 4d | Kokomi arm | 30 rows | 2 | cleared the spire |
@@ -65,11 +66,41 @@ drawing 4, is the base game's ten-card hand limit and is not rowed.
 
 ## 4. Defaults applied (D and E), disclosed
 
-- **E:** one run is the direction; a second control runs at the next free
-  lane window, after the round-9 and Furina round-2 deploys, since the lanes
-  are the queue. Its ascension is whatever the Ironclad profile carries (0);
-  the harness cannot set it, and matching Kokomi's 2 would need a
-  preferred-ascension change on lane 0, which is [USER]'s save.
+- **E:** the second control ran the same afternoon (§5); a third is not
+  queued, two runs on one floor being the direction R250 pick 4 asked for.
+  Its ascension is whatever the Ironclad profile carries (0); the harness
+  cannot set it, and matching Kokomi's 2 would need a preferred-ascension
+  change on lane 0, which is [USER]'s save.
 - **E:** no row minted; the record is committed beside this read.
 - **E:** the pool-widening question (R250 §2, "variety versus balance")
   stays sequenced after the round-9 reads, as [USER] set it.
+
+## 5. Run 2, the same afternoon
+
+Claude Opus, lane 2, base Ironclad, **Ascension 0**, seed `TBLVAK65LCAD`,
+213 actions, no refusal (`review/qa/control-ironclad-2026-09-04/opus-run2-act1.md`).
+Hefty Tablet at Neow, the Injury removed at the shop, two Elites won at 35
+and 16 of 80, two rests, then the Waterfall Giant killed on round 7 and its
+Death Blow for 30 against 16 HP and 13 Block at the end of round 8. Floor
+17 again, the same boss, the same mechanic, one round later than run 1. The
+seat read the clock from round 2 and said the fight scales against a deck
+that blocks: every round spent blocking grows the blow that follows the
+kill.
+
+Two runs on one floor is the direction the record asked for. The harness
+with a base character loses in act 1 both times; the same harness with the
+arm pools cleared three of seven kit runs and, since this record was
+written, lost Klee round 9 on act-2 floor 22
+(`review/active/klee-overhaul-round-9-2026-09-04.md`). The reading in §2
+stands unchanged: the clears are the kits', and a pool of thirty rows is
+the first thing to widen before any number moves.
+
+What the seat called well-designed was the base game's: Skittish 6 and
+Hardened Shell 20 each inverted the deck's plan for one fight, which is the
+same praise the Klee seat gave Hard To Kill. What it could not read is
+rowed or the base game's: relics claimed with no text and an Ancient's
+sword offered unnamed (`EB-323`, `EB-350`), enemies renumbered after a kill
+(`EB-319`'s family), the dead boss at `999999999` (`EB-332`), an intent
+that says Debuff and not which (`EB-323`). One new: the reward screen and a
+relic face printed `[ironclad_energy_icon.png]` where combat printed
+`[Energy]`, an asset name reaching the page (`EB-375`).
