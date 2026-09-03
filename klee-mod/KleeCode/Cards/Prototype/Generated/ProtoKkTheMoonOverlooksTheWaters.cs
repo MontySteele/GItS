@@ -45,7 +45,7 @@ public sealed class ProtoKkTheMoonOverlooksTheWaters : CustomCardModel, ICharact
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Moon Overlooks the Waters"),
-        ("description", "[gold]Plans[/gold] also happen when played."),
+        ("description", "[gold]Plans[/gold] also happen now, as you write them."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

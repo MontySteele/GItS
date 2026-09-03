@@ -18,6 +18,7 @@ from understudy.blindplay_notes import (AURA_NOTE, CARRY_OUT_BOARD_NOTE,
                                         METER_CAPPED_NOTE, METER_NOTE,
                                         METER_RULES,
                                         PENDING_PICK_NOTE, PICKED_MARK,
+                                        PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE)
 from understudy.blindplay_observe import observation
@@ -321,6 +322,11 @@ def render(obs: dict[str, Any]) -> str:
                            "whole fight. Enemies cannot touch it. Play a card "
                            "on it to write its **Plan** line instead of "
                            "playing the card now.")
+                # `EB-378`: whose element the carry-out is, said where the
+                # carry-out happens. Under the pet's own line, because it is a
+                # fact about the jellyfish's hit rather than about any one
+                # Plan in the queue below.
+                out.append(PLAN_HYDRO_NOTE)
             # `EB-317`. WHAT ALREADY HAPPENED, BEFORE WHAT IS STILL WAITING,
             # because that is the order the turn had: the morning's Plans were
             # carried out at the top of this turn and the queue below is what

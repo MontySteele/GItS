@@ -4463,9 +4463,17 @@ def test_an_arm_keyword_prints_one_definition_per_screen():
 
 def test_a_keyword_no_face_on_the_screen_prints_is_never_defined():
     """A glossary that defined every word the arms own would teach a reader
-    rules this board does not have."""
+    rules this board does not have.
+
+    PER WORD, NOT PER SECTION, since `EB-377`. The fixture's own `Pearl of
+    Wisdom` reads "Whenever a card is Exhausted ... Card rewards after a fight
+    offer a fourth Companion choice", so this screen genuinely names two words
+    and correctly defines both -- the rule this asserts is that the words it
+    does NOT name stay undefined.
+    """
     page = blindplay.observe(keyword_hand_state(["Gain 5 Block."]))
-    assert "## Words on this screen" not in page
+    for absent in ("Set off", "Bomb", "Plan", "Mend", "Spark", "Mine"):
+        assert f"- **{absent}** " not in page, absent
 
 
 def test_a_dead_arms_keyword_is_not_in_the_table():
@@ -4474,8 +4482,9 @@ def test_a_dead_arms_keyword_is_not_in_the_table():
     a page teaching a retired rule."""
     for dead in ("Tide", "Surge", "Exert"):
         assert dead not in blindplay.ARM_KEYWORDS
+        assert dead not in blindplay.BASE_KEYWORDS
     page = blindplay.observe(keyword_hand_state(["Exert 3. Gain 5 Block."]))
-    assert "## Words on this screen" not in page
+    assert "- **Exert** " not in page
 
 
 def test_the_word_is_found_wherever_the_screen_prints_it():
@@ -4497,7 +4506,8 @@ def test_a_lowercase_word_in_prose_is_not_a_keyword():
     word out of ordinary English."""
     page = blindplay.observe(keyword_hand_state(
         ["Take what is mine and make a plan."]))
-    assert "## Words on this screen" not in page
+    assert "- **Mine** " not in page
+    assert "- **Plan** " not in page
 
 
 def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
@@ -4527,11 +4537,23 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-329`: the aim clause now defers to the face, because a Plan
         # that says ALL hits every enemy and this sentence said otherwise on
         # every battle screen of the run.
+        # `EB-380`: the aim clause split in two (a single-target Plan skips
+        # a Minion, an ALL Plan does not) and the modifier clause gained
+        # Strength, which does not reach a carry-out at all.
         "Plan": [", paid now; next turn: front ",
-                 "enemy, or ALL if it says so; never a Minion. ",
-                 "counts; your "],
+                 " counts; your ",
+                 " do not."],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
+        # `EB-377` ADDED THESE TWO ROWS to the page, and their absence was the
+        # same defect the row is about: both have had an `ArmKeywordTips` twin
+        # since R244 and neither had a page row, so the mod defined them on a
+        # hover and the blind page defined them nowhere.
+        "Hexerei": [" card from the witches' circle. It does ",
+                    "nothing by itself; Klee is one too, and her own cards "
+                    "pay when "],
+        "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
+                  "No ", "aura, no effect."],
         # The Furina reframe's three (slice two, 2026-09-02). The Evoke
         # sentence's two numerals are interpolated from `FurinaReframeLaw` on
         # the mod side and written out on this one, so its anchors are the
@@ -4553,7 +4575,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     # finding. Its own source is pinned one test down.
     assert set(anchors) | {"Companion"} == set(blindplay.ARM_KEYWORDS)
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
-                "PlanKey", "DeployKey", "EvokeKey", "DrainKey"):
+                "PlanKey", "DeployKey", "EvokeKey", "DrainKey", "HexereiKey",
+                "SwirlKey"):
         assert f"public const string {key}" in src
     assert "CompanionKey" not in src
     for word, phrases in anchors.items():
@@ -4594,25 +4617,29 @@ def test_the_companion_row_is_the_mods_own_sentence_about_the_slot():
 
 
 def test_the_companion_word_is_defined_where_a_card_prices_itself_on_it():
-    """The trigger is the PHRASE. A companion's own face never prints it --
-    every one of them is a Companion card and none says so -- and the two
-    cards that charge for it both spell it out."""
-    page = blindplay.observe(keyword_hand_state([
-        "Deal 4 damage for each Companion card you played last turn."]))
-    assert "- **Companion** — A card titled with a character's name" in page
-    assert "offer a fourth, Companion, choice" in page
-    # Plural too, and a face that merely names a companion defines nothing.
-    plural = blindplay.observe(keyword_hand_state([
-        "Whenever you play a Companion card, apply 1 Weak."]))
-    assert "- **Companion** —" in plural
-    bare = blindplay.observe(keyword_hand_state(["Gain 5 Block."]))
-    assert "**Companion**" not in bare
+    """The trigger is the WORD, since `EB-377`.
+
+    `EB-329` matched the phrase `Companion card` because the two cards that
+    charge for the word both spelled it out. They no longer do -- `Chain of
+    Command` reads "for each [gold]Companion[/gold] you played this turn" and
+    `The General's Banner` the same -- so the phrase fired on neither and the
+    term was undefined again on exactly the screens the row was filed for.
+    Both spellings are asserted here, which is what keeps the widening from
+    quietly dropping the old one.
+    """
+    for face in ("Deal 4 damage for each Companion card you played last turn.",
+                 "Deal 3 damage for each Companion you played this turn.",
+                 "Whenever you play a Companion card, apply 1 Weak."):
+        page = blindplay.observe(keyword_hand_state([face]))
+        assert "- **Companion** — A card titled with a character's name"             in page, face
+        assert "offer a fourth, Companion, choice" in page, face
 
 
 def test_the_glossary_carries_no_markup_and_no_id():
     """It is rendered through the same blindness assertion as everything else,
     and the sentences are copied from C# that spells them with `[gold]` tags."""
-    for table in (blindplay.ARM_KEYWORDS, blindplay.GAME_KEYWORDS):
+    for table in (blindplay.ARM_KEYWORDS, blindplay.GAME_KEYWORDS,
+                  blindplay.BASE_KEYWORDS):
         for word, body in table.items():
             assert "[" not in body and "]" not in body, word
             assert not qa_packet.leaks(body), word
@@ -5475,3 +5502,275 @@ def test_the_no_upgrade_register_is_read_by_id_and_only_its_ids_cross():
     assert not qa_packet.leaks(blindplay.NO_UPGRADE_DEFINED)
     assert not qa_packet.leaks(blindplay.ALREADY_UPGRADED)
     assert not qa_packet.leaks(blindplay.UNEXPLAINED_OMISSION)
+
+
+# ------------------------- `EB-377`: the base game's words on a face ---------
+
+
+def test_a_base_keyword_a_face_names_is_defined_on_the_page():
+    """THE ROW, BY NAME. `Vulnerable` was defined on no screen of the round-9
+    run while `Weak`, `Frail`, `Slow` and `Minion` were -- because those four
+    arrived as POWERS on a body, carrying the game's own tip, and a card that
+    APPLIES one carries nothing. `Exposed Flank+` was bought "on a genre
+    assumption" for that reason (r9 run 2, act 1, (c) 6).
+
+    SEEN TO FAIL: before this row the same page had no `Vulnerable` line.
+    """
+    page = blindplay.observe(keyword_hand_state(
+        ["Apply 1 Vulnerable. Plan: Apply 2 Vulnerable to ALL enemies."]))
+    glossary = page.split("## Words on this screen")[1]
+    assert "- **Vulnerable** — The wearer takes 50% more damage" in glossary
+    assert "falls off at the end of each of its turns" in glossary
+    # And the Plan tip is still there: two words, two definitions.
+    assert "- **Plan** — " in glossary
+
+
+def test_the_wires_own_sentence_wins_over_the_page_copy():
+    """The base rows are a RESTATEMENT and go last, so a screen where the game
+    itself defines the word reads the game's sentence and not this one. That
+    is the whole reason `Weak` looked fine while `Vulnerable` did not."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "WEAK", "name": "Weak", "amount": 2, "type": "Debuff",
+         "description": "Deals less damage.", "keywords": [
+             {"name": "Weak", "description": "THE GAME'S OWN SENTENCE."}]}]
+    page = blindplay.observe(state)
+    assert "- **Weak** — THE GAME'S OWN SENTENCE." in page
+    assert "- **Weak** — The wearer deals" not in page
+
+
+def test_the_base_keyword_glossary_quotes_the_engines_own_rates():
+    """`blindplay_shape`'s three percentages are held in step with
+    `tier0.constants` from this side -- the module may not import `tier0` at
+    all -- the same discipline `CHARGE_SOURCE_LINE` is under."""
+    assert blindplay.VULNERABLE_TAKEN_PCT == round(
+        (C.VULNERABLE_TAKEN_MULT - 1) * 100)
+    assert blindplay.WEAK_DEALT_PCT == round((1 - C.WEAK_DEALT_MULT) * 100)
+    assert blindplay.FRAIL_BLOCK_PCT == round((1 - C.FRAIL_BLOCK_MULT) * 100)
+    for word, pct in (("Vulnerable", blindplay.VULNERABLE_TAKEN_PCT),
+                      ("Weak", blindplay.WEAK_DEALT_PCT),
+                      ("Frail", blindplay.FRAIL_BLOCK_PCT)):
+        assert f"{pct}%" in blindplay.BASE_KEYWORDS[word], word
+
+
+def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
+    """The five words with a C# twin are held in step with `BaseKeywordTips`
+    from this side, exactly as the arm rows are with `ArmKeywordTips`. The
+    four without one (`Sharp`, `Nimble`, `Swift`, `Bond of Life`, `Exhaust`)
+    have no face-side tip to mirror -- an enchantment is a card STATE and the
+    Bond is a docket hover -- which is why they are page-only."""
+    src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+           / "BaseKeywordTips.cs").read_text(encoding="utf-8")
+    anchors = {
+        "Vulnerable": ["The wearer takes 50% more damage from every hit. "
+                       "One stack falls ", "off at the end of each of its "
+                       "turns."],
+        "Weak": ["The wearer deals 25% less damage. One stack falls off at "
+                 "the end ", "of each of its turns."],
+        # The two rows whose clause straddles a `[gold]` span are anchored
+        # WITH the markup and folded out on the page side, the same way the
+        # arm table's interpolated numerals are.
+        "Frail": [" less [gold]Block[/gold]. One stack falls ",
+                  "off at the end of each of its turns."],
+        "Strength": [" hit the wearer ", "lands. It does not decay."],
+        "Dexterity": [" the wearer gains. It ", "does not decay."],
+    }
+    page_only = {"Sharp", "Nimble", "Swift", "Bond of Life", "Exhaust"}
+    assert set(anchors) | page_only == set(blindplay.BASE_KEYWORDS)
+    for word, phrases in anchors.items():
+        for phrase in phrases:
+            assert phrase in src, (word, phrase)
+            assert phrase.replace("[gold]", "").replace("[/gold]", "")                 in blindplay.BASE_KEYWORDS[word], (word, phrase)
+    for word in page_only:
+        # No `For<Word>` method and no key: the C# has nothing to hold these
+        # in step with, which is the fact the split records.
+        assert f"For{word.replace(' ', '')}(" not in src, word
+        assert f"{word.replace(' ', '').upper()}Key" not in src, word
+
+
+def test_the_enchantment_rows_are_the_ruled_conversion():
+    """`Sharp`, `Nimble` and `Swift` are the three the ruled event conversion
+    names (`dossiers/content/event-conversion-gallery.md`), and they are the
+    words `EB-355` found undefined at the enchant branch. The page states the
+    rule the sim runs: a flat damage rider, a flat Block rider, and a
+    first-play draw."""
+    assert "Attack" in blindplay.BASE_KEYWORDS["Sharp"]
+    assert "more damage" in blindplay.BASE_KEYWORDS["Sharp"]
+    assert "Skill" in blindplay.BASE_KEYWORDS["Nimble"]
+    assert "Block" in blindplay.BASE_KEYWORDS["Nimble"]
+    assert "Power" in blindplay.BASE_KEYWORDS["Swift"]
+    assert "first time you play it" in blindplay.BASE_KEYWORDS["Swift"]
+    page = blindplay.observe(keyword_hand_state(
+        ["Choose an Attack to Enchant with Sharp 2."]))
+    assert "- **Sharp** — An enchantment on an Attack" in page
+
+
+# ------------------ `EB-378`: whose element the carry-out is ---------------
+
+
+def test_the_kurage_panel_says_the_planned_hit_is_hydro():
+    """`KokomiPlan.ResolveAll` deals every damaging Plan clause as
+    `ElementalHit.Deal(..., Element.Hydro, ...)` and the sim's twin the same,
+    so a SKILL's Plan leaves a Hydro aura. The round-9 act-1 seat watched one
+    appear "from a card whose face says nothing about an element".
+
+    SEEN TO FAIL: the panel said nothing about the element of its own hit.
+    """
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(TWO_PLANS)))
+    assert "## The Bake-Kurage" in page
+    assert blindplay.PLAN_HYDRO_NOTE.lstrip("- ") in page
+    # Under the pet's own line: a fact about the jellyfish, not about any one
+    # Plan in the queue below it.
+    body = page.split("## The Bake-Kurage")[1]
+    assert body.index("Enemies cannot touch it") < body.index("Hydro hit")
+    assert body.index("Hydro hit") < body.index("Kurage's Oath")
+
+
+def test_the_panel_note_says_which_plans_leave_no_aura():
+    """The half a reader prices a reaction with: a Plan that blocks, draws or
+    applies a debuff is not a hit and leaves nothing clinging."""
+    assert "blocks, draws or applies a debuff leaves no aura" \
+        in blindplay.PLAN_HYDRO_NOTE
+
+
+# ------------------- `EB-381`: the body must not lag the board -------------
+
+
+class _PollWire:
+    """A wire whose `get_state` walks a script, one frame per call.
+
+    `ScriptedWire` advances on a POST, which is exactly wrong here: the whole
+    question is what a bare re-READ answers while the game's action queue is
+    still draining.
+    """
+
+    def __init__(self, frames):
+        self.frames = list(frames)
+        self.reads = 0
+
+    def get_state(self):
+        self.reads += 1
+        return self.frames[min(self.reads - 1, len(self.frames) - 1)]
+
+
+def _enemy_status(state, rows):
+    """One recorded combat state with the enemy wearing `rows`."""
+    out = json.loads(json.dumps(state))
+    out["battle"]["enemies"][0]["status"] = rows
+    return out
+
+
+PYRO_AURA = [{"id": "AURA_PYRO", "name": "Pyro Aura", "amount": 2,
+              "type": "Buff", "description": "A Pyro aura clings to it.",
+              "keywords": []}]
+
+
+def test_an_aura_applied_on_the_last_action_prints_on_the_next_observe():
+    """`EB-381`. THE ROW, BY NAME.
+
+    The r9 act-3 seat sequenced `Amber - Fiery Rain` (Pyro) into two Hydro
+    Sangos on purpose, read "no aura at all" off the enemy's status block, and
+    wrote the Vaporize off -- then `Sango Isshin+` hit for 31 on a printed 20,
+    which is the Vaporize. "The screen showed no aura for two consecutive
+    observes; the body had one."
+
+    The cause is not two sources: HP and the status list come off one creature
+    dict. It is one source read too early -- `ExecutePlayCard` hands the play
+    to the action queue and answers at once, so the damage action's HP is
+    written and the `PowerCmd.Apply` behind it is not.
+
+    SEEN TO FAIL: `settle(mid)` returns `mid` unchanged -- the screen is a real
+    screen, the turn is still the player's, and `transient` has nothing to say.
+    """
+    mid = _enemy_status(combat_state(), [])          # HP moved, aura pending
+    landed = _enemy_status(combat_state(), PYRO_AURA)
+    wire = _PollWire([landed, landed])
+
+    assert blindplay.transient(mid) == ""            # the old wait says nothing
+    assert "Pyro Aura" not in blindplay.observe(mid)
+
+    settled = blindplay.settle_board(mid, wire, delay=0)
+    page = blindplay.observe(settled)
+    assert "Pyro Aura 2 (aura)" in page
+    assert blindplay.AURA_NOTE in page
+
+
+def test_a_planned_debuff_that_lands_late_prints_when_it_lands():
+    """The row's other half: a planned `Exposed Flank+` fired the Casket on
+    three bodies and none printed Vulnerable for two actions."""
+    mid = _enemy_status(combat_state(), [])
+    landed = _enemy_status(combat_state(), [
+        {"id": "VULNERABLE", "name": "Vulnerable", "amount": 2,
+         "type": "Debuff", "description": "Takes more damage.",
+         "keywords": []}])
+    settled = blindplay.settle_board(mid, _PollWire([landed, landed]), delay=0)
+    assert "Vulnerable 2 (debuff)" in blindplay.observe(settled)
+
+
+def test_a_board_at_rest_costs_one_read_and_no_wait(monkeypatch):
+    """The common case is every screen of every fight, so it must not sleep.
+    The poll compares back to back and waits only when two reads disagree."""
+    from understudy import blindplay_read
+    slept: list[float] = []
+    monkeypatch.setattr(blindplay_read.time, "sleep", slept.append)
+    rest = _enemy_status(combat_state(), PYRO_AURA)
+    wire = _PollWire([rest, rest, rest])
+    assert blindplay.settle_board(rest, wire, delay=9.0) == rest
+    assert wire.reads == 1
+    assert slept == []
+
+
+def test_a_board_that_never_settles_is_handed_back_bounded(monkeypatch):
+    """`settle`'s rule: the bound does not raise. A board still moving after
+    `BOARD_SETTLE_TRIES` reads has an animation ticking on it, and a page one
+    frame stale is a better answer than a page that never comes."""
+    from understudy import blindplay_read
+    monkeypatch.setattr(blindplay_read.time, "sleep", lambda _s: None)
+    frames = [_enemy_status(combat_state(), [
+        {"id": "TICK", "name": "Tick", "amount": n, "type": "Buff",
+         "description": "", "keywords": []}]) for n in range(1, 40)]
+    wire = _PollWire(frames[1:])
+    assert blindplay.settle_board(frames[0], wire, delay=0) is not None
+    assert wire.reads == blindplay.BOARD_SETTLE_TRIES
+
+
+def test_the_signature_is_the_bodies_and_nothing_else():
+    """A hand that changed, a pile that emptied and a round that ticked are
+    not the board: settling on them would wait out every draw."""
+    base = combat_state()
+    moved = json.loads(json.dumps(base))
+    moved["player"]["hand"] = []
+    moved["player"]["draw_pile_count"] = 0
+    moved["battle"]["round"] = 99
+    assert blindplay.board_signature(base) == blindplay.board_signature(moved)
+
+    hurt = json.loads(json.dumps(base))
+    hurt["battle"]["enemies"][0]["hp"] = 1
+    assert blindplay.board_signature(base) != blindplay.board_signature(hurt)
+
+
+def test_a_fight_that_ends_mid_poll_is_handed_back_as_it_is():
+    """The fight ending IS the answer to the question, so the poll stops on
+    it rather than waiting out a board that no longer exists."""
+    mid = _enemy_status(combat_state(), [])
+    rewards = {"state_type": "rewards", "rewards": []}
+    out = blindplay.settle_board(mid, _PollWire([rewards]), delay=0)
+    assert out["state_type"] == "rewards"
+
+
+def test_a_screen_with_no_bodies_on_it_is_never_polled():
+    """Off a battle screen there is nothing to settle and the extra read would
+    buy nothing."""
+    screen = map_state()
+    wire = _PollWire([screen])
+    assert blindplay.settle_board(screen, wire, delay=0) is screen
+    assert wire.reads == 0
+
+
+def test_the_session_settles_the_screen_and_then_the_board():
+    """The order is load-bearing: there is no board to settle on a frame that
+    has no screen."""
+    src = inspect.getsource(blindplay.Session._settle)
+    assert src.index("settle(state") < src.index("settle_board(")
