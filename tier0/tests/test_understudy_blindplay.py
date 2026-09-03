@@ -5633,3 +5633,144 @@ def test_the_panel_note_says_which_plans_leave_no_aura():
     applies a debuff is not a hit and leaves nothing clinging."""
     assert "blocks, draws or applies a debuff leaves no aura" \
         in blindplay.PLAN_HYDRO_NOTE
+
+
+# ------------------- `EB-381`: the body must not lag the board -------------
+
+
+class _PollWire:
+    """A wire whose `get_state` walks a script, one frame per call.
+
+    `ScriptedWire` advances on a POST, which is exactly wrong here: the whole
+    question is what a bare re-READ answers while the game's action queue is
+    still draining.
+    """
+
+    def __init__(self, frames):
+        self.frames = list(frames)
+        self.reads = 0
+
+    def get_state(self):
+        self.reads += 1
+        return self.frames[min(self.reads - 1, len(self.frames) - 1)]
+
+
+def _enemy_status(state, rows):
+    """One recorded combat state with the enemy wearing `rows`."""
+    out = json.loads(json.dumps(state))
+    out["battle"]["enemies"][0]["status"] = rows
+    return out
+
+
+PYRO_AURA = [{"id": "AURA_PYRO", "name": "Pyro Aura", "amount": 2,
+              "type": "Buff", "description": "A Pyro aura clings to it.",
+              "keywords": []}]
+
+
+def test_an_aura_applied_on_the_last_action_prints_on_the_next_observe():
+    """`EB-381`. THE ROW, BY NAME.
+
+    The r9 act-3 seat sequenced `Amber - Fiery Rain` (Pyro) into two Hydro
+    Sangos on purpose, read "no aura at all" off the enemy's status block, and
+    wrote the Vaporize off -- then `Sango Isshin+` hit for 31 on a printed 20,
+    which is the Vaporize. "The screen showed no aura for two consecutive
+    observes; the body had one."
+
+    The cause is not two sources: HP and the status list come off one creature
+    dict. It is one source read too early -- `ExecutePlayCard` hands the play
+    to the action queue and answers at once, so the damage action's HP is
+    written and the `PowerCmd.Apply` behind it is not.
+
+    SEEN TO FAIL: `settle(mid)` returns `mid` unchanged -- the screen is a real
+    screen, the turn is still the player's, and `transient` has nothing to say.
+    """
+    mid = _enemy_status(combat_state(), [])          # HP moved, aura pending
+    landed = _enemy_status(combat_state(), PYRO_AURA)
+    wire = _PollWire([landed, landed])
+
+    assert blindplay.transient(mid) == ""            # the old wait says nothing
+    assert "Pyro Aura" not in blindplay.observe(mid)
+
+    settled = blindplay.settle_board(mid, wire, delay=0)
+    page = blindplay.observe(settled)
+    assert "Pyro Aura 2 (aura)" in page
+    assert blindplay.AURA_NOTE in page
+
+
+def test_a_planned_debuff_that_lands_late_prints_when_it_lands():
+    """The row's other half: a planned `Exposed Flank+` fired the Casket on
+    three bodies and none printed Vulnerable for two actions."""
+    mid = _enemy_status(combat_state(), [])
+    landed = _enemy_status(combat_state(), [
+        {"id": "VULNERABLE", "name": "Vulnerable", "amount": 2,
+         "type": "Debuff", "description": "Takes more damage.",
+         "keywords": []}])
+    settled = blindplay.settle_board(mid, _PollWire([landed, landed]), delay=0)
+    assert "Vulnerable 2 (debuff)" in blindplay.observe(settled)
+
+
+def test_a_board_at_rest_costs_one_read_and_no_wait(monkeypatch):
+    """The common case is every screen of every fight, so it must not sleep.
+    The poll compares back to back and waits only when two reads disagree."""
+    from understudy import blindplay_read
+    slept: list[float] = []
+    monkeypatch.setattr(blindplay_read.time, "sleep", slept.append)
+    rest = _enemy_status(combat_state(), PYRO_AURA)
+    wire = _PollWire([rest, rest, rest])
+    assert blindplay.settle_board(rest, wire, delay=9.0) == rest
+    assert wire.reads == 1
+    assert slept == []
+
+
+def test_a_board_that_never_settles_is_handed_back_bounded(monkeypatch):
+    """`settle`'s rule: the bound does not raise. A board still moving after
+    `BOARD_SETTLE_TRIES` reads has an animation ticking on it, and a page one
+    frame stale is a better answer than a page that never comes."""
+    from understudy import blindplay_read
+    monkeypatch.setattr(blindplay_read.time, "sleep", lambda _s: None)
+    frames = [_enemy_status(combat_state(), [
+        {"id": "TICK", "name": "Tick", "amount": n, "type": "Buff",
+         "description": "", "keywords": []}]) for n in range(1, 40)]
+    wire = _PollWire(frames[1:])
+    assert blindplay.settle_board(frames[0], wire, delay=0) is not None
+    assert wire.reads == blindplay.BOARD_SETTLE_TRIES
+
+
+def test_the_signature_is_the_bodies_and_nothing_else():
+    """A hand that changed, a pile that emptied and a round that ticked are
+    not the board: settling on them would wait out every draw."""
+    base = combat_state()
+    moved = json.loads(json.dumps(base))
+    moved["player"]["hand"] = []
+    moved["player"]["draw_pile_count"] = 0
+    moved["battle"]["round"] = 99
+    assert blindplay.board_signature(base) == blindplay.board_signature(moved)
+
+    hurt = json.loads(json.dumps(base))
+    hurt["battle"]["enemies"][0]["hp"] = 1
+    assert blindplay.board_signature(base) != blindplay.board_signature(hurt)
+
+
+def test_a_fight_that_ends_mid_poll_is_handed_back_as_it_is():
+    """The fight ending IS the answer to the question, so the poll stops on
+    it rather than waiting out a board that no longer exists."""
+    mid = _enemy_status(combat_state(), [])
+    rewards = {"state_type": "rewards", "rewards": []}
+    out = blindplay.settle_board(mid, _PollWire([rewards]), delay=0)
+    assert out["state_type"] == "rewards"
+
+
+def test_a_screen_with_no_bodies_on_it_is_never_polled():
+    """Off a battle screen there is nothing to settle and the extra read would
+    buy nothing."""
+    screen = map_state()
+    wire = _PollWire([screen])
+    assert blindplay.settle_board(screen, wire, delay=0) is screen
+    assert wire.reads == 0
+
+
+def test_the_session_settles_the_screen_and_then_the_board():
+    """The order is load-bearing: there is no board to settle on a frame that
+    has no screen."""
+    src = inspect.getsource(blindplay.Session._settle)
+    assert src.index("settle(state") < src.index("settle_board(")

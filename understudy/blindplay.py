@@ -126,7 +126,8 @@ LOCAL_PROPS = Path(__file__).resolve().parents[1] / "klee-mod" / "local.props"
 # `blindplay_record` reads it back off this module at call time.
 
 from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
-    BlindPlayError, CHARGE_SOURCE_LINE, COMBAT_SCREENS, FIGHT_OVERLAYS,
+    BlindPlayError, BOARD_SETTLE_TRIES, CHARGE_SOURCE_LINE, COMBAT_SCREENS,
+    FIGHT_OVERLAYS,
     HAZARD_EVENT_TITLES, HAZARD_EVENTS, _is_rate_limited,
     AURA_DURATION_TURNS, BOMB_GROWTH, FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
     WEAK_DEALT_PCT,
@@ -137,6 +138,7 @@ from understudy.blindplay_read import (   # noqa: E402,F401  (re-export)
     _blob, _chest_opening, _combat_torn_down, _despritify, _enemies,
     _entity_id, _fold, _hand, _icon_name, _ICON_SUBJECTS, _int, _label,
     _listing, _number_names, _player, _potions, _relics, _screen, settle,
+    board_signature, settle_board,
     _SPRITE_TAG, _text, transient)
 from understudy.blindplay_faces import (   # noqa: E402,F401  (re-export)
     _BARE_HOOK, _card_face, _card_title, _dedupe_text, _element,

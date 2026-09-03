@@ -120,6 +120,14 @@ UNDRIVEN_SCREENS = {
 SETTLE_TRIES = 60
 SETTLE_DELAY_S = 0.5
 
+# `EB-381`. How many times `settle_board` will re-ask a board that is still
+# moving. SHORTER THAN `SETTLE_TRIES` on purpose: `settle` is waiting for a
+# screen the game is definitely about to hand over, and this is waiting for an
+# action queue to drain -- a board still changing after six reads is a board
+# with an animation ticking on it, and thirty seconds of polling per
+# observation would buy a blind seat nothing but a timeout.
+BOARD_SETTLE_TRIES = 6
+
 # EB-1. A REGISTER, NOT A HEURISTIC, and a deliberate SECOND COPY of
 # `soak.HAZARD_EVENTS`. Importing soak here would pull `policy_v1` and through
 # it every tier0 sheet loader into the design-blind module, which is the one
