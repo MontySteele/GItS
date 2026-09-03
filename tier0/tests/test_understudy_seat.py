@@ -70,15 +70,21 @@ def test_the_soak_cannot_reach_the_seat():
     same reason as `test_understudy_scenario`'s scenario pin."""
     from understudy import soak
 
+    # `EB-180` split the soak into a facade and six seams; the walk is of the
+    # FAMILY, or the fence would be reading a file the code has left.
+    from tier0.tests.conftest import seam_files, seam_source
+
     assert not hasattr(soak, "seat")
-    src = Path(soak.__file__).read_text(encoding="utf-8")
-    for node in ast.walk(ast.parse(src)):
-        if isinstance(node, ast.Import):
-            assert all("seat" not in a.name.split(".") for a in node.names)
-        if isinstance(node, ast.ImportFrom):
-            assert "seat" not in (node.module or "").split(".")
-            assert all(a.name != "seat" for a in node.names)
-    assert "codex" not in src
+    for path in seam_files("soak"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                assert all("seat" not in a.name.split(".")
+                           for a in node.names), path
+            if isinstance(node, ast.ImportFrom):
+                assert "seat" not in (node.module or "").split("."), path
+                assert all(a.name != "seat" for a in node.names), path
+    assert "codex" not in seam_source("soak")
 
 
 def test_the_session_directory_is_gitignored():

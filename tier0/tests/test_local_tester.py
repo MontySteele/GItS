@@ -35,6 +35,7 @@ import pytest
 
 from unittest import mock
 
+from tier0.tests.conftest import seam_source
 from understudy import (authorship, bridge, frames, hangwatch, instances,
                         local_model, local_seat, local_tester, misreads,
                         packet_section, resource_order, soak)
@@ -1683,9 +1684,11 @@ def test_a_crossed_read_back_is_its_own_defect_and_not_seed_not_honoured():
     the game ignored a seed, and the game had not. The two failures need
     different answers -- one is a game defect, the other is this harness
     reading the wrong game's save -- so they get different kinds."""
-    src = (REPO / "understudy" / "soak.py").read_text(encoding="utf-8")
+    # `EB-180` moved the read-back into `soak_navigate.py`, which reads the
+    # wire off `soak` at call time -- hence `_wire()` where `bridge` stood.
+    src = seam_source("soak")
     assert "seed_read_back_crossed" in src
-    at_catch = src.index("except bridge.LaneCrossed as crossed:")
+    at_catch = src.index("except _wire().LaneCrossed as crossed:")
     at_crossed = src.index("seed_read_back_crossed")
     assert at_catch < at_crossed
 

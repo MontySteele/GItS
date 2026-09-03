@@ -30,6 +30,7 @@ from pathlib import Path
 import pytest
 
 from tier0 import constants as C
+from tier0.tests.conftest import seam_files
 from understudy import blindplay, embark, qa_packet, soak
 
 REPO = Path(__file__).resolve().parents[2]
@@ -300,8 +301,10 @@ def test_soak_never_imports_blindplay():
     """The other direction, and the same rule `scenario.py` lives under: an
     unattended soak may not reach a tool whose whole job is to hand a screen to
     a third party's model."""
-    named = _imported(Path(soak.__file__))
-    assert not [m for m in named if "blindplay" in m], named
+    # Every file `EB-180` split the soak into, not the facade alone.
+    for path in seam_files("soak"):
+        named = _imported(path)
+        assert not [m for m in named if "blindplay" in m], (path, named)
 
 
 def test_a_base_game_sprite_tag_renders_instead_of_refusing():

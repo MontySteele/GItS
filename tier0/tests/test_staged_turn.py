@@ -706,16 +706,18 @@ def test_the_soak_cannot_reach_a_staged_turn():
     from understudy import soak
     assert not hasattr(soak, "staged_turn")
     assert not hasattr(soak, "qa_packet")
-    src = Path(soak.__file__).read_text(encoding="utf-8")
-    for node in ast.walk(ast.parse(src)):
-        if isinstance(node, ast.Import):
-            assert not any(a.name.endswith(("staged_turn", "qa_packet"))
-                           for a in node.names)
-        if isinstance(node, ast.ImportFrom):
-            assert not (node.module or "").endswith(("staged_turn",
-                                                     "qa_packet"))
-            assert not any(a.name in ("staged_turn", "qa_packet")
-                           for a in node.names)
+    # The FAMILY `EB-180` split the soak into, not the facade alone.
+    from tier0.tests.conftest import seam_files
+    for path in seam_files("soak"):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.Import):
+                assert not any(a.name.endswith(("staged_turn", "qa_packet"))
+                               for a in node.names), path
+            if isinstance(node, ast.ImportFrom):
+                assert not (node.module or "").endswith(("staged_turn",
+                                                         "qa_packet")), path
+                assert not any(a.name in ("staged_turn", "qa_packet")
+                               for a in node.names), path
 
 
 def test_the_form_questions_are_r213s_verbatim():

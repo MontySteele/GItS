@@ -597,19 +597,25 @@ def test_the_soak_cannot_reach_a_scenario():
     from understudy import soak
     assert not hasattr(soak, "scenario")
 
-    src = Path(soak.__file__).read_text(encoding="utf-8")
+    # `EB-180` split the soak into a facade and six seams; the fence is on the
+    # FAMILY, because an import that moved next door is still an import.
+    from tier0.tests.conftest import seam_files, seam_source
+
     # The IMPORT is the claim, checked structurally rather than by substring:
     # `soak.py` names `scenario.py` in the comment that explains why
     # `run_scripted` was factored out, and a bare grep would read that
     # explanation as the violation it is explaining.
-    for node in ast.walk(ast.parse(src)):
-        if isinstance(node, ast.Import):
-            assert all("scenario" not in a.name for a in node.names)
-        if isinstance(node, ast.ImportFrom):
-            assert "scenario" not in (node.module or "")
-            assert all(a.name != "scenario" for a in node.names)
+    for path in seam_files("soak"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                assert all("scenario" not in a.name for a in node.names), path
+            if isinstance(node, ast.ImportFrom):
+                assert "scenario" not in (node.module or ""), path
+                assert all(a.name != "scenario" for a in node.names), path
     # And the two doors themselves are unreachable from here, by the same
     # substring rule `test_understudy_give_card` applies to the grant verb.
+    src = seam_source("soak")
     assert "debug_state" not in src
     assert "give_card" not in src
 
