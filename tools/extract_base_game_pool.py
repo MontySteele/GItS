@@ -208,6 +208,21 @@ CALC_READ = re.compile(r"\b(CardTag|PileType|CardType)\.(\w+)|\bOfType<(\w+)>")
 CALC_IS = re.compile(r"\bis ([A-Z]\w+)\b")
 
 
+def display_path(path: Path) -> str:
+    """Name a written file for the terminal without assuming it is in REPO.
+
+    `--json` takes an arbitrary path, and the SAFE way to re-extract -- write
+    to a scratch directory, diff against `game_ref/`, copy only what moved --
+    always hands it one OUTSIDE the checkout. A bare `relative_to(REPO)`
+    raised there, AFTER the file had been written, so the regeneration this
+    tool exists for ended in a traceback with its output already on disk.
+    """
+    try:
+        return str(path.relative_to(REPO))
+    except ValueError:
+        return str(path)
+
+
 def game_dll() -> Path:
     """Read GameDir from local.props so machine paths live in one place."""
     if not LOCAL_PROPS.exists():
@@ -1864,11 +1879,10 @@ def run_one(root: Path, character: str, json_out: Path | None,
 
     summarize(cards, character)
 
-    OUT_DIR.mkdir(exist_ok=True)
     out = json_out or OUT_DIR / f"{character.lower()}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(cards, indent=1), encoding="utf-8")
-    print(f"\n  wrote {out.relative_to(REPO)}  "
+    print(f"\n  wrote {display_path(out)}  "
           f"(gitignored -- reference only, do not commit)")
 
     if emit:
