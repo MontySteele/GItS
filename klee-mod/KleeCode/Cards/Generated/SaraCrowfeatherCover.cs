@@ -48,7 +48,7 @@ public sealed class SaraCrowfeatherCover : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kujou Sara — Crowfeather Cover"),
-        ("description", "Your next Attack deals {PowerAmount:diff()} more damage."),
+        ("description", "Your next Attack deals {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

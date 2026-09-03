@@ -636,7 +636,7 @@ public sealed class SpotlightMultBonusPower
     {
         ("title", "Top Billing"),
         ("description",
-            "[gold]Spotlighted[/gold] Companion numbers are {Amount}% "
+            "[gold]Spotlighted[/gold] Companions are [blue]{Amount}[/blue]% "
           + "stronger this combat."),
     };
 }
@@ -648,7 +648,7 @@ public sealed class SpotlightMultBonusTurnPower
     {
         ("title", "Limelight"),
         ("description",
-            "[gold]Spotlighted[/gold] Companion numbers are {Amount}% "
+            "[gold]Spotlighted[/gold] Companions are [blue]{Amount}[/blue]% "
           + "stronger this turn."),
     };
 
@@ -703,8 +703,8 @@ public sealed class OvationSpendBoostPower
     {
         ("title", "Standing Ovation"),
         ("description",
-            "Whenever you spend Encore, [gold]Spotlighted[/gold] Companion "
-          + "numbers are {Amount}% stronger this turn."),
+            "[gold]Spotlighted[/gold] Companions are [blue]{Amount}[/blue]% "
+          + "stronger on turns you spend [gold]Encore[/gold]."),
     };
 }
 

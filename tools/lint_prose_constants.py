@@ -130,12 +130,12 @@ ALLOWED: dict[tuple[str, str, str], str] = {
         "nothing.' -- that 1 is the Status card's ENERGY cost, not the "
         "Salon's Encore tick price. `cost` joins them and nothing else does. "
         "Repricing the salon tick must not touch this string.",
-    ("klee-mod/KleeCode/Powers/SparkKitPowers.cs",
-     "SalonConstants.TickEncoreCost", "1"):
-        "True Spark Knight reads 'for your Attacks to cost 0 (minimum 1)'. "
-        "The 1 is the floor on a card's energy cost -- a rule of the base "
-        "game's cost arithmetic, with no constant behind it -- and again it "
-        "is the word `cost` doing the joining.",
+    # DROPPED by `EB-345` (R249), and by the lint reporting it stale, which is
+    # the whole point of it reporting stale entries. The entry excused True
+    # Spark Knight's "for your Attacks to cost 0 (minimum 1)": the shipped
+    # text pass took the parenthesis out (rule 14) and the floor now reads
+    # "never fewer than 1", which puts four words between `cost` and the
+    # numeral and leaves no affinity to excuse.
     # 2026-09-02, the text-conventions pass. Both joins are the bare word the
     # base game uses for a card type: the page un-golded `Attack` on the
     # prototype faces (card types are plain words, `RAGE_POWER`), and the

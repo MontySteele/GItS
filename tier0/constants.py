@@ -3334,7 +3334,7 @@ CONSTANTS_VERSION = 21
 # `tools/lint_sheet_comment_blocks.py` now caps what may grow back. The rows
 # were checked byte-for-byte before and after, so no row, number or field
 # moved and `CONSTANTS_VERSION` does not bump.
-SHEET_DIGEST = "a273ca5b36fac24f6304b4382adda26b1405eee2db54f5c0ad44e326d4b516ff"
+SHEET_DIGEST = "cabfe8c876a239e1b36a0af97871974e31db729d5d38c22f464f59898ca4534c"
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

@@ -58,7 +58,7 @@ public sealed class ClorindeImpaleTheNight : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Clorinde — Impale the Night"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Your Attacks against enemies holding an elemental aura deal 6 more damage."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Your Attacks against enemies holding an elemental aura deal 6 additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

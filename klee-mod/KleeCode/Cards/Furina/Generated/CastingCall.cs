@@ -41,7 +41,7 @@ public sealed class CastingCall : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Casting Call"),
-        ("description", "Your [gold]Salon[/gold] has room for {PowerAmount:diff()} more [gold]Salon Member(s)[/gold]."),
+        ("description", "Your [gold]Salon[/gold] has room for {PowerAmount:diff()} more [gold]Salon Member{PowerAmount:plural:|s}[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

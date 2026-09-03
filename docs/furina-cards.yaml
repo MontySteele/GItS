@@ -149,7 +149,7 @@
    effects: [{op: choose_one, modes: [
               {label: "Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold]",
                effects: [{op: energy, amount: 1}, {op: gain_encore, amount: 2}]},
-              {label: "Spend 3 [gold]Encore[/gold]: draw 3",
+              {label: "Spend 3 [gold]Encore[/gold]: draw 3 cards",
                effects: [{op: spend_encore, amount: 3}, {op: draw, amount: 3}]}]}]}
 - {id: torrential_turn, name: "Torrential Turn", register: salon, cost: 2, type: attack, rarity: uncommon, solve: [frontload, utility], tempo_band: {fight: [mid], run: [late]}, archetypes: [salon, generic], role: payoff,
    effects: [{op: damage, amount: 10, target: enemy, bonus_vs_aura: 3}, {op: refresh_all_auras}]}

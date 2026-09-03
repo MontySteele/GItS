@@ -145,7 +145,7 @@ public sealed class NightVigilPower : PowerModel, ILocalizationProvider
         ("title", "Night Vigil"),
         ("description",
             "Your Attacks against enemies holding an elemental aura deal "
-          + "{Amount} more damage."),
+          + "[blue]{Amount}[/blue] additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -180,8 +180,8 @@ public sealed class AncientSeaAuthorityPower : PowerModel, ILocalizationProvider
     {
         ("title", "Heir to the Ancient Sea's Authority"),
         ("description",
-            "Elemental auras you apply last {Amount} extra "
-          + "turn{Amount:plural:|s}."),
+            "Elemental auras you apply last [blue]{Amount}[/blue] extra "
+          + "{Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -226,10 +226,10 @@ public sealed class MasqueRedDeathPower : PowerModel, ILocalizationProvider
     {
         ("title", "Masque of the Red Death"),
         ("description",
-            "At the start of each turn, gain {Amount} [gold]Strength[/gold]. "
-          + "Each turn your [gold]Bond of Life[/gold] consumes the first "
-          + $"{CompanionConstants.MasqueBondBlock} [gold]Block[/gold] you "
-          + "gain."),
+            "At the start of your turn, gain [blue]{Amount}[/blue] "
+          + "[gold]Strength[/gold]. Your [gold]Bond of Life[/gold] eats the "
+          + $"first [blue]{CompanionConstants.MasqueBondBlock}[/blue] "
+          + "[gold]Block[/gold] you gain each turn."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -51,7 +51,9 @@ public sealed class BombDamageUpPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Bomb Damage"),
-        ("description", "Your [gold]Bombs[/gold] detonate for {Amount} more damage."),
+        ("description",
+            "Your [gold]Bombs[/gold] detonate for [blue]{Amount}[/blue] "
+          + "additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -93,7 +95,8 @@ public sealed class ExplosivesWorkshopPower : PowerModel, ILocalizationProvider
         ("title", "Explosives Workshop"),
         ("description",
             "The first time each turn you discard or Exhaust a card, your "
-          + "[gold]Bombs[/gold] deal {Amount} more damage this combat."),
+          + "[gold]Bombs[/gold] deal [blue]{Amount}[/blue] additional damage "
+          + "this combat."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -157,11 +160,12 @@ public sealed class DetonationSplashPower
             // EB-89: the grant and the per-turn cap are interpolated.
             // {Amount} is a DynamicVar token, so its braces are doubled
             // to survive interpolation.
-            $"When a [gold]Bomb[/gold] detonates: deal {{Amount}} damage to "
-          + "ALL enemies, ignoring Block, and gain "
-          + $"{DemolitionConstants.SplashBurst} [gold]Burst Energy[/gold]. "
-          + $"Up to {DemolitionConstants.SplashProcCapPerTurn} times per "
-          + "turn."),
+            $"Whenever a [gold]Bomb[/gold] detonates, deal {{Amount}} damage to "
+          + "ALL enemies, ignoring [gold]Block[/gold], and gain "
+          + $"[blue]{DemolitionConstants.SplashBurst}[/blue] "
+          + "[gold]Burst Energy[/gold]. Up to "
+          + $"[blue]{DemolitionConstants.SplashProcCapPerTurn}[/blue] times "
+          + "per turn."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -217,8 +221,8 @@ public sealed class DetonationVulnPower
     {
         ("title", "Explosive Frags"),
         ("description",
-            "When a [gold]Bomb[/gold] detonates, apply {Amount} "
-          + "[gold]Vulnerable[/gold] to that enemy."),
+            "Whenever a [gold]Bomb[/gold] detonates, apply "
+          + "[blue]{Amount}[/blue] [gold]Vulnerable[/gold] to that enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;

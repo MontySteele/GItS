@@ -92,8 +92,7 @@ public sealed class TamakushiCasket : CustomRelicModel
             "Start each combat with the [gold]Bake-Kurage[/gold]. Whenever "
           + "you apply a debuff to an enemy, it deals [blue]"
           + KokomiOverhaulLaw.CasketStrike + "[/blue] [gold]Hydro[/gold] damage "
-          + "to that enemy. "
-          + CompanionSlot.RewardSlotDescription),
+          + "to that enemy."),
     };
 
     /// <summary>

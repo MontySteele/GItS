@@ -41,7 +41,7 @@ public sealed class Breathless : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Breathless"),
-        ("description", "Spend 4 [gold]Encore[/gold]; lose HP for any shortfall. Deal {Damage:diff()} damage."),
+        ("description", "Spend 4 [gold]Encore[/gold], or HP for any shortfall. Deal {Damage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

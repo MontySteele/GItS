@@ -41,7 +41,7 @@ public sealed class PearlCurrent : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pearl Current"),
-        ("description", "At the start of your turn, gain {PowerAmount:diff()} Block."),
+        ("description", "At the start of your turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

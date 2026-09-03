@@ -34,23 +34,23 @@ namespace KleeMod;
 /// </summary>
 public static class CompanionSlot
 {
-    /// <summary>
-    /// The one sentence every relic hosting this slot appends to its
-    /// description. It lives here, next to the mechanic, because the two
-    /// hosts had already drifted: Furina's relic described the slot and
-    /// Klee's did not, so a Klee player had no in-game text explaining
-    /// where companions come from at all.
-    ///
-    /// Wording is load-bearing. "a fourth choice" -- not "an extra reward"
-    /// -- because TryModifyCardRewardOptions appends to the card reward's
-    /// OWN option list: the companion COMPETES with the three cards, it is
-    /// not taken alongside them (the correction of record in
-    /// PoundingSurprise). "after a fight" is the CardCreationSource.Encounter
-    /// gate, which the enum's own doc defines as the post-fight reward --
-    /// shops and events get no companion.
-    /// </summary>
-    public const string RewardSlotDescription =
-        "Card rewards after a fight offer a fourth [gold]Companion[/gold] choice.";
+    // THE SLOT IS A FACT ABOUT THE MOD, NOT ABOUT A RELIC (`EB-346`, R249
+    // pick 4). Every starting relic in the roster hosts this slot, so every
+    // starting relic used to append one shared sentence describing it -- 59
+    // characters of identical text on four relics, which is what pushed three
+    // of them over the relic ceiling and bought the fourth a lint exception.
+    // [USER], 2026-09-02: "it's universal to all of the modded characters, so
+    // I would consider it a fact about the mod, not the relic." The sentence
+    // is stated ONCE now, in klee-mod/Klee/manifest.json's `description` (the
+    // Mods screen), and no relic prints it.
+    //
+    // The wording that moved there is load-bearing and moved intact: "a
+    // fourth choice" -- not "an extra reward" -- because
+    // TryModifyCardRewardOptions appends to the card reward's OWN option
+    // list, so the companion COMPETES with the three cards rather than being
+    // taken alongside them; and "after a fight" is the
+    // CardCreationSource.Encounter gate, which the enum's own doc defines as
+    // the post-fight reward -- shops and events get no companion.
 
     // tier0 constants.RARITY_ODDS: common 0.60 / uncommon 0.35 / rare 0.05.
     private const float CommonOdds = 0.60f;
