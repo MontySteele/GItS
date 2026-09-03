@@ -566,6 +566,55 @@ def test_an_embark_on_lane_zero_is_the_embark_that_always_ran(tmp_path,
     assert "lane_guardrail" not in blob and "run_of_record" not in blob
 
 
+def test_an_embark_on_a_base_character_asks_the_wire_for_the_unprefixed_id(
+        tmp_path, monkeypatch):
+    """A CONTROL round embarks a base-game class on lane 1 beside the mod
+    rounds. `character_requested` is what reaches `soak._embark`'s option
+    comparison, so it must be the select screen's own unprefixed spelling
+    (`IRONCLAD`), never `KLEEMOD-IRONCLAD` -- an option no screen offers."""
+    _embark_stubs(tmp_path, monkeypatch)
+    lane1 = instances.lane("lane1", game_dir=tmp_path / "game")
+
+    blob = embark.embark("IRONCLAD", instance=lane1, install_bridge=False)
+
+    assert blob["character_requested"] == "IRONCLAD"
+
+
+class _SpyDriverAscended(_SpyDriver):
+    """`_SpyDriver`, with a run that reads back a nonzero ascension -- the
+    shape the bridge actually sends (`McpMod.StateBuilder.cs:610`,
+    `McpMod.MultiplayerState.cs:243`, both `run.ascension`)."""
+
+    def _verify_character(self, state):
+        return {"state_type": "map", "run": {"floor": 3, "ascension": 4}}
+
+
+def test_the_sidecar_carries_the_runs_ascension(tmp_path, monkeypatch):
+    """A CONTROL round is only comparable to a mod round played at the same
+    ascension, so the read-back value belongs beside `run_seed` in the run's
+    own manifest -- the file `--teardown` reads and the one place the record
+    says what the run actually was."""
+    _embark_stubs(tmp_path, monkeypatch)
+    monkeypatch.setattr(soak, "RunDriver", _SpyDriverAscended)
+
+    blob = embark.embark("IRONCLAD")
+
+    assert blob["ascension"] == 4
+    on_disk = json.loads(
+        (tmp_path / f"embark-{blob['stamp']}.json").read_text(encoding="utf-8"))
+    assert on_disk["ascension"] == 4
+
+
+def test_the_sidecar_defaults_ascension_to_zero_when_the_wire_omits_it(
+        tmp_path, monkeypatch):
+    """`_SpyDriver` (every other embark test here) never sets `ascension` --
+    the read is defensive against a screen that has not settled yet, the
+    same way `floor` already is, and must not raise on a missing key."""
+    _embark_stubs(tmp_path, monkeypatch)
+    blob = embark.embark("klee")
+    assert blob["ascension"] == 0
+
+
 def _sidecar(dir_: Path, stamp: str, lane: str, ledger: Path) -> None:
     blob = {"stamp": stamp, "ledger": str(ledger), "hold": False,
             "instance": lane, "character_requested": "KLEEMOD-KLEE"}

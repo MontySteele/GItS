@@ -19,6 +19,7 @@ nothing torn down. What comes next is a person running
     python -m understudy.embark --character kokomi --hold      # attach, no launch
     python -m understudy.embark --character klee --arm proto_spark_priced_draw
     python -m understudy.embark --character klee --lane 1      # a SECOND game
+    python -m understudy.embark --character IRONCLAD --lane 1  # base-game CONTROL
     python -m understudy.embark --teardown                     # put it all back
     python -m understudy.embark --teardown --lane 1            # lane 1's only
 
@@ -131,20 +132,44 @@ class EmbarkError(RuntimeError):
     """The game, the bridge or the ledger is not in a state this can work on."""
 
 
+#: The base game's five playable classes, spelled the way the character-select
+#: screen's own option id spells them (`cm.Id.Entry` in
+#: `vendor/STS2_MCP/McpMod.StateBuilder.cs::AddCharacterSelectMenuState` --
+#: uppercase, no prefix, unlike a custom model's id, which BaseLib prefixes
+#: `KLEE -> KLEEMOD-KLEE`). Confirmed against this repo's own naming for the
+#: same five: `game_ref/char_real_ironclad.yaml`'s `name: IRONCLAD (real
+#: pool)`, `char_real_silent.yaml`'s `name: SILENT (real pool)`, and
+#: `defect_char_facts.yaml`'s `id: real_defect` / `name: DEFECT (real pool)`
+#: all use the bare uppercase class name, never a `THE_`-prefixed or
+#: otherwise decorated spelling -- and `test_the_option_id_and_the_display_
+#: name_fold_together` (tier0/tests/test_understudy_soak.py) already asserts
+#: `canonical_character("IRONCLAD") == "ironclad"` on that same form.
+BASE_CHARACTERS = ("IRONCLAD", "SILENT", "DEFECT", "NECROBINDER", "REGENT")
+
+
 def option_id(name: str) -> str:
-    """A roster id or a select-screen option id, folded onto the option id.
+    """A roster id, a base-character id, or a select-screen option id --
+    folded onto the option id `soak._embark` compares against.
 
     `soak._embark` compares against the character-select screen's own option
     strings, so `--character kokomi` would match nothing and embark on whatever
     was highlighted -- which is EB-117, and it cost a run. Accepting the short
     name and expanding it here is the cheap half of that lesson.
+
+    A BASE CHARACTER IS NEVER PREFIXED. `KLEEMOD-` is BaseLib's prefix for
+    THIS mod's own custom models; Ironclad, Silent, Defect, Necrobinder and
+    Regent are the game's own classes and the select screen offers them
+    unprefixed (`BASE_CHARACTERS` above). Prefixing one would ask the wire
+    for `KLEEMOD-IRONCLAD`, which is not an option on any screen, and the
+    control round this exists for could never embark at all.
     """
     raw = str(name or "").strip()
     if not raw:
         raise EmbarkError("no character given")
-    if raw.upper().startswith("KLEEMOD-"):
-        return raw.upper()
-    return f"KLEEMOD-{raw.upper()}"
+    up = raw.upper()
+    if up.startswith("KLEEMOD-") or up in BASE_CHARACTERS:
+        return up
+    return f"KLEEMOD-{up}"
 
 
 # --------------------------------------------------------- prototype arms --
@@ -359,6 +384,13 @@ def embark(character: str, *, hold: bool = False,
         "run_seed": seed,
         "screen": str(state.get("state_type") or "unknown"),
         "floor": int(((state.get("run") or {}).get("floor")) or 0),
+        # The bridge's own run state, read back the same way `floor` is
+        # (`McpMod.MultiplayerState.cs:243` / `McpMod.StateBuilder.cs:610`
+        # both write `run.ascension = runState.AscensionLevel`). A CONTROL
+        # round is only comparable to a mod round at the same ascension, so
+        # this belongs beside `run_seed` in the run's own manifest rather
+        # than left to be re-derived from a screenshot.
+        "ascension": int(((state.get("run") or {}).get("ascension")) or 0),
         "run_log": str(driver.log),
     })
 
@@ -488,8 +520,10 @@ def main(argv: list[str] | None = None) -> int:
     report.console_safe()
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--character", default="kokomi",
-                    help="a roster id (kokomi) or the select-screen option id "
-                         "(KLEEMOD-KOKOMI)")
+                    help="a roster id (kokomi), the select-screen option id "
+                         "(KLEEMOD-KOKOMI), or a base-game class for a "
+                         "CONTROL round (IRONCLAD, SILENT, DEFECT, "
+                         "NECROBINDER, REGENT -- never KLEEMOD-prefixed)")
     ap.add_argument("--hold", action="store_true",
                     help="attach to a game somebody else launched: no bridge "
                          "deploy, no launch, no speed change, and nothing "
@@ -551,7 +585,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"character: {blob.get('character_actual') or '(unread)'}")
     print(f"run seed:  {blob.get('run_seed') or '(unread)'}   "
           f"(read back off the wire, R95)")
-    print(f"screen:    {blob.get('screen')}  floor {blob.get('floor')}")
+    print(f"screen:    {blob.get('screen')}  floor {blob.get('floor')}  "
+          f"ascension {blob.get('ascension')}")
     granted = blob.get("arms_granted") or []
     if granted:
         print(f"arms granted: "
