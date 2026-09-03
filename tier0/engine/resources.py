@@ -546,12 +546,28 @@ def gain_burst(state: CombatState, n: int, source: str) -> None:
     own funnel, so "the arm neither feeds nor shows Burst" is ONE decision
     instead of ten that can be retired by halves.
 
+    QUARANTINED (C.KOKOMI_OVERHAUL), `EB-318`: THE SAME DEFECT ONE CHARACTER
+    OVER, FOUND THE SAME WAY. The Kokomi overhaul's brief retires the Burst
+    gate outright -- no card, relic or keyword in the slice names the meter --
+    and the mod had already turned off the three income sites it knew about
+    (the exhaust funnel, the skill-tag particle, the kit grant). REACTIONS
+    were the one that was missed, and she is a catalyst, so the 2026-09-02
+    blind seat watched `Kokomi Burst: 5/20` appear in round 4 and climb
+    5 -> 10 -> 15 with no rule anywhere to explain it -- word for word Klee's
+    `EB-266`. The guard goes beside Klee's, at this funnel, rather than at the
+    reaction call site: the arm's answer is "she has no Burst meter", not
+    "reactions in particular do not feed it". The mod's twin is the same one
+    line inside `KokomiResources.GainBurst`.
+
     R14: diagnostic. Nothing reads these events to make a decision.
     """
     if n <= 0:
         return
     from tier0.engine import klee_overhaul         # late import (cycle)
     if klee_overhaul.live(state):
+        return
+    from tier0.engine import kokomi_plan           # late import (cycle)
+    if kokomi_plan.live(state):
         return
     p = state.player
     p.burst_energy += n
