@@ -73,6 +73,12 @@ public static class ArmKeywordTips
     public const string EvokeKey = "KLEEMOD-ARM_EVOKE";
     public const string DrainKey = "KLEEMOD-ARM_DRAIN";
 
+    // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
+    // RIDER on the rows whose element arrives with the jellyfish rather than
+    // with the play. It lives in this class because it is a sentence about the
+    // Plan, which is this class's word and this quarantine's rule.
+    public const string PlanElementKey = "KLEEMOD-ARM_PLAN_ELEMENT";
+
     // ----------------------------------------------------------- Klee ------
     //
     // The four sentences are the ruled brief's sec.3 rules 1, 2, 4 and 6, as
@@ -314,14 +320,71 @@ public static class ArmKeywordTips
     /// single-target Plan for a whole fight (round-5 packet sec.2). The
     /// sixth clause cost room, so "lands next turn on" compressed to "next
     /// turn:" -- nothing else in the first four clauses moved.
+    ///
+    /// `EB-380` FIXED THAT CLAUSE, WHICH WAS FLAT AND THE RULE IS NOT. "Never
+    /// a Minion" is true of a SINGLE-TARGET Plan only: <see cref="Aim"/>
+    /// <c>.AllEnemies</c> walks <c>HittableEnemies</c> and takes every living
+    /// body, decoys included, and the round-9 act-1 seat watched an
+    /// `Exposed Flank+` Plan land on `Eye With Teeth` while this line said it
+    /// could not. Both halves are now stated, in the order a reader needs
+    /// them: the aim, then the exception the word ALL makes.
+    ///
+    /// AND `STRENGTH` JOINED THE MODIFIER CLAUSE. The clause named Vulnerable
+    /// and Weak and stopped, which reads as a complete list, and the seat
+    /// priced `Kurage's Oath+` face 4 under Vajra at Plan 10 expecting her
+    /// Strength to ride it (r9 run 2, act 1, (c) 5). It does not: this class's
+    /// own header is why -- the carry-out goes through
+    /// <see cref="ElementalHit"/> UNPOWERED, so no Strength, no Weak and no
+    /// attack buff of hers reaches it. "Enemy" replaced the bare
+    /// `[gold]Vulnerable[/gold]` in the same breath, because the sentence is
+    /// about WHOSE modifiers are read and the old one left that to inference.
+    ///
+    /// 135 CHARACTERS RENDERED, at the ceiling and not over it: "the front
+    /// enemy" compressed to "front non-Minion" and "or ALL if it says so"
+    /// to "or ALL", which is what paid for the two new facts. The
+    /// all-Minions board is the one corner left unsaid -- `FrontTarget`
+    /// falls back to the leftmost body when every enemy is a Minion -- and it
+    /// is a board on which the compressed clause and the full one aim at the
+    /// same creature.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front "
-          + "enemy, or ALL if it says so; never a Minion. "
-          + "[gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] does "
-          + "not.");
+          + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. "
+          + "Enemy [gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] "
+          + "and [gold]Strength[/gold] do not.");
+
+    /// <summary>
+    /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the
+    /// jellyfish's and not the card's.
+    ///
+    /// <see cref="KokomiPlan.ResolveAll"/> deals every damaging Plan clause as
+    /// <c>ElementalHit.Deal(..., Element.Hydro, ...)</c> whatever the card's
+    /// type, so `Kurage's Oath` -- a SKILL -- leaves a Hydro aura on every
+    /// enemy it takes, and the sim's twin does the same
+    /// (<c>tier0/engine/kokomi_plan</c>, <c>element="hydro"</c>). The round-9
+    /// act-1 seat watched that aura appear "from a card whose face says nothing
+    /// about an element", and priced no reaction off it.
+    ///
+    /// THE CARD NOW DECLARES THE ELEMENT (the gem and the reaction rule, from
+    /// <c>gen_klee_cards.aura_elements_for</c>) AND THIS SAYS WHEN. Both halves
+    /// are needed and neither is enough: a gem alone would tell a player the
+    /// card's own hit applies Hydro, which it does not -- <see
+    /// cref="CatalystCadence.PrintedElement"/> answers <c>Element.None</c> for
+    /// a Skill and this row deliberately did not change that.
+    ///
+    /// ATTACHED ONLY WHERE THE TWO DISAGREE. A row whose own damage already
+    /// carries the element (every Attack of hers) needs no such sentence, so
+    /// `gen_klee_cards.emit` raises this one only where the Plan is the sole
+    /// source.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForPlanElement(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, PlanElementKey,
+            "Its own hit applies no aura; the [gold]Bake-Kurage[/gold] carries "
+          + "out the [gold]Plan[/gold] as a [gold]Hydro[/gold] hit, which "
+          + "does.");
 
     /// <summary>
     /// THE BOUND IS THE WHOLE POINT OF THIS ROW'S SECOND HALF. The Casket read

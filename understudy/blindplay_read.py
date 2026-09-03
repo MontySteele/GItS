@@ -13,8 +13,8 @@ import time
 from typing import Any
 
 from understudy import bridge, qa_packet
-from understudy.blindplay_shape import (COMBAT_SCREENS, SETTLE_DELAY_S,
-                                        SETTLE_TRIES)
+from understudy.blindplay_shape import (BOARD_SETTLE_TRIES, COMBAT_SCREENS,
+                                        SETTLE_DELAY_S, SETTLE_TRIES)
 
 
 # ------------------------------------------------------------ small reads --
@@ -273,6 +273,83 @@ def settle(state: dict[str, Any], wire: Any = bridge,
             return state
         time.sleep(delay)
         state = wire.get_state()
+    return state
+
+
+def board_signature(state: dict[str, Any]) -> tuple:
+    """The board as a comparable value: every HP, Block and status on it.
+
+    `EB-381`. The player and every enemy, read off the SAME blobs the page
+    prints them from (`blindplay_board._combat` takes `hp` and `status` out of
+    one creature dict apiece), so a signature that has stopped moving is a
+    board the page can describe without contradicting itself. Nothing else is
+    in it -- not the hand, not the piles, not the round -- because the question
+    is only whether the bodies have finished changing.
+    """
+    def creature(blob: Any) -> tuple:
+        if not isinstance(blob, dict):
+            return ()
+        return (_int(blob.get("hp")), _int(blob.get("block")),
+                tuple(sorted(
+                    (str(row.get("id") or row.get("name") or ""),
+                     _int(row.get("amount", row.get("stacks"))))
+                    for row in (blob.get("status") or [])
+                    if isinstance(row, dict))))
+
+    player = _player(state)
+    pets = [p for p in (player.get("pets") or []) if isinstance(p, dict)]
+    return (creature(player),
+            tuple(creature(e) for e in _enemies(state)),
+            tuple(creature(p) for p in pets))
+
+
+def settle_board(state: dict[str, Any], wire: Any = bridge,
+                 tries: int = BOARD_SETTLE_TRIES,
+                 delay: float = SETTLE_DELAY_S) -> dict[str, Any]:
+    """Poll while the BODIES are still moving; hand back a board at rest.
+
+    `EB-381`. THE BODY LAGGED THE BOARD. The r9 act-3 seat sequenced
+    `Amber - Fiery Rain` (Pyro) into two Hydro Sangos on purpose, read "no aura
+    at all" off the enemy's status block across TWO observes, wrote the
+    Vaporize off -- and then `Sango Isshin+` hit for 31 on a printed 20, which
+    is the Vaporize. "The screen showed no aura for two consecutive observes;
+    the body had one." The same act, one fight over, a planned `Exposed Flank+`
+    fired the Casket on three bodies and none printed Vulnerable for two
+    actions.
+
+    IT IS NOT TWO SOURCES. HP and the status list come off ONE creature dict
+    (`blindplay_board._combat`), so the page cannot mix a fresh bar with a
+    stale badge. What it can do -- and did -- is read the one dict too early:
+    `ExecutePlayCard` hands the play to
+    `RunManager.ActionQueueSynchronizer.RequestEnqueue` and answers at once
+    (`vendor/STS2_MCP/McpMod.Actions.cs`), so a `get_state` taken a few
+    milliseconds later sees the damage action's HP already written and the
+    `PowerCmd.Apply` behind it still queued. `transient` cannot see that: the
+    turn is still the player's, `is_play_phase` is true, and the screen is a
+    real screen. The only fact available is that the board is still changing.
+
+    SO THE PREDICATE IS THE BOARD ITSELF, and the first read costs nothing: the
+    poll compares back to back and sleeps only when two reads disagree. The
+    bound is short (`BOARD_SETTLE_TRIES`) and does not raise, `settle`'s rule
+    -- a board that never stops moving is a board with an animation on it, and
+    a page one frame stale is a better answer than a page that never comes.
+
+    COMBAT ONLY. Off a battle screen there are no bodies to settle and the
+    extra read would buy nothing; a state that LEAVES combat mid-poll is handed
+    back as it is, because the fight ending is the answer to the question.
+    """
+    if _screen(state) not in COMBAT_SCREENS:
+        return state
+    signature = board_signature(state)
+    for _ in range(tries):
+        nxt = wire.get_state()
+        if _screen(nxt) not in COMBAT_SCREENS:
+            return nxt
+        moved = board_signature(nxt)
+        if moved == signature:
+            return nxt
+        state, signature = nxt, moved
+        time.sleep(delay)
     return state
 
 def _player(state: dict[str, Any]) -> dict[str, Any]:

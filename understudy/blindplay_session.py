@@ -18,7 +18,7 @@ from typing import Any
 from understudy import authorship, bridge, qa_packet, seat
 from understudy.blindplay_grammar import act
 from understudy.blindplay_observe import observation
-from understudy.blindplay_read import _int, settle, _text
+from understudy.blindplay_read import _int, settle, settle_board, _text
 from understudy.blindplay_render import render, sha256, still_in_fight
 from understudy.blindplay_shape import (BlindPlayError, _is_rate_limited,
                                         LOG_ROOT, PLAY_GUARDRAIL, PROMPT_PATH,
@@ -458,9 +458,20 @@ class Session:
         `EB-175` added the third shape -- a combat screen the game has not
         handed back yet -- to `transient()`, which is where all three now
         live so the CLI's own live reads ride out the same moments.
+
+        `EB-381` ADDED A SECOND WAIT AFTER IT, and it is a different question.
+        `transient` asks whether this is a SCREEN; `settle_board` asks whether
+        the BODIES on it have finished changing. A card play is handed to the
+        game's action queue and answered at once, so a read taken a few
+        milliseconds later can carry the damage action's HP and not the
+        `PowerCmd.Apply` behind it -- which is how the r9 act-3 seat read "no
+        aura at all" off a body that had one, twice, and wrote off a Vaporize
+        that then happened. The order is load-bearing: settle the screen first,
+        because there is no board to settle on a frame that has none.
         """
-        return settle(state, self.wire, self.settle_tries,
-                      self.settle_delay_s)
+        state = settle(state, self.wire, self.settle_tries,
+                       self.settle_delay_s)
+        return settle_board(state, self.wire, delay=self.settle_delay_s)
 
     def _ask_record(self, questions: str) -> str:
         reply = self.thread.send(f"{questions}\n\n{RECORD_DISCLAIMER}\n",

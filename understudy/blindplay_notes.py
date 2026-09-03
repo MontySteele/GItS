@@ -15,7 +15,9 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from understudy.blindplay_shape import AURA_DURATION_TURNS, BOMB_GROWTH
+from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
+                                        FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
+                                        WEAK_DEALT_PCT)
 
 
 
@@ -243,6 +245,25 @@ HAND_REPEAT_NOTE = ("*More than one card in this hand prints the same name. "
 # `Vulnerable 1 (debuff)` and the r2 Opus seat read "the aura I put on them to
 # set up a Reaction" as something helping the enemy. The tag is `(aura)` on
 # the line, and this says once per screen what that third tag means.
+# `EB-378`. WHOSE ELEMENT THE CARRY-OUT IS, on the panel that carries it out.
+#
+# `KokomiPlan.ResolveAll` deals every damaging Plan clause as
+# `ElementalHit.Deal(..., Element.Hydro, ...)` -- and the sim's twin the same
+# (`kokomi_plan`, `element="hydro"`) -- whatever the card's own type. So a
+# SKILL's Plan leaves a Hydro aura, and the round-9 act-1 seat watched one
+# appear "from a card whose face says nothing about an element" (run 2, act 1,
+# finding 2). The card faces now declare it, and this is the same fact said
+# where the hit actually happens: the jellyfish's own panel, which is the one
+# section a reader is looking at when the morning resolves.
+#
+# ONE SENTENCE AND NO NUMBERS. The aura's duration and the reaction rule are
+# the `Applies Hydro` keyword's and the reaction glossary's, both already on
+# any screen showing an element; what is missing here is only whose hit it is.
+PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
+                   "hit: it leaves a Hydro aura, or reacts with the aura "
+                   "already there. A Plan that blocks, draws or applies a "
+                   "debuff leaves no aura.")
+
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
              "`(debuff)`, because it is neither: it is the element left "
              "clinging to a body, and it is what an Elemental Reaction needs "
@@ -313,11 +334,30 @@ ARM_KEYWORDS: dict[str, str] = {
     # `R250` (round-5 sec.6 pick 1) ADDED "NEVER A MINION": The Kin's
     # Followers and Queen's Torch Head Amalgam put a decoy on the leftmost
     # slot on purpose, and every single-target Plan landed on it.
-    "Plan": ("On the Bake-Kurage, paid now; next turn: front enemy, or ALL "
-             "if it says so; never a Minion. Vulnerable counts; your Weak "
-             "does not."),
+    # `EB-380` FIXED THAT CLAUSE AND ADDED STRENGTH TO THE OTHER ONE. "Never a
+    # Minion" is true of a SINGLE-TARGET Plan only -- an ALL Plan walks every
+    # living body, decoys included, and the round-9 act-1 seat watched an
+    # `Exposed Flank+` Plan land on `Eye With Teeth` while this line said it
+    # could not. And the modifier clause named Vulnerable and Weak and stopped,
+    # which reads as a complete list: the same seat priced `Kurage's Oath+`
+    # face 4 under Vajra at Plan 10 expecting her Strength to ride it. It does
+    # not -- the carry-out goes through `ElementalHit` UNPOWERED -- so the
+    # clause names all three and says whose each one is.
+    "Plan": ("On the Bake-Kurage, paid now; next turn: front non-Minion, or "
+             "ALL, Minions too. Enemy Vulnerable counts; your Weak and "
+             "Strength do not."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
+    # `EB-377` ADDED THESE TWO, and their absence was the same defect one row
+    # over rather than a decision: both have had an `ArmKeywordTips` twin since
+    # R244, and neither had a page row -- so the mod defined them on a hover
+    # and the blind page defined them nowhere. `Hexerei` rides eighteen faces
+    # and `Swirl` is printed as a VERB by ten Universals.
+    "Hexerei": ("A Companion card from the witches' circle. It does nothing "
+                "by itself; Klee is one too, and her own cards pay when you "
+                "play one."),
+    "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
+              "aura, no effect."),
     # The Furina reframe's three (slice two, R220 A). The same sentences
     # `ArmKeywordTips.ForDeploy` / `ForEvoke` / `ForDrain` print, with the two
     # numerals the C# interpolates from `FurinaReframeLaw` written out: this
@@ -371,6 +411,11 @@ _ARM_KEYWORD_RE = {
     "Mine": re.compile(r"\bMines?\b"),
     "Plan": re.compile(r"\bPlans?\b"),
     "Mend": re.compile(r"\bMends?\b"),
+    # `EB-377`'s two. `Hexerei` takes no plural -- the word is a family name
+    # and every face that prints it prints "a Hexerei card" -- and `Swirl` is
+    # printed as a verb, so it conjugates the way `Mend` does.
+    "Hexerei": re.compile(r"\bHexerei\b"),
+    "Swirl": re.compile(r"\bSwirls?\b"),
     # THE THREE FURINA WORDS CARRIED A LITERAL BACKSPACE, not a word
     # boundary: `\b` inside these three patterns was the CHARACTER 0x08 and
     # not the escape, so `Deploy`, `Evoke` and `Drain` could never match any
@@ -381,13 +426,20 @@ _ARM_KEYWORD_RE = {
     "Deploy": re.compile(r"\bDeploys?\b"),
     "Evoke": re.compile(r"\bEvokes?\b"),
     "Drain": re.compile(r"\bDrains?\b"),
-    # `EB-329`: THE PHRASE, not the bare word. "Companion" alone would fire on
-    # a companion's own card face -- every one of them IS a companion card and
-    # none of them prints the term -- and on any prose that happened to use
-    # it. The two cards that PRICE themselves on the word both spell it out
-    # ("Companion card", "Companion cards"), and that is exactly the screen a
-    # reader needs the definition on.
-    "Companion": re.compile(r"\bCompanion cards?\b"),
+    # `EB-329` MATCHED THE PHRASE `Companion cards?` AND THE FACES HAVE SINCE
+    # MOVED. That row's reasoning was that the two cards which PRICE themselves
+    # on the word both spell it out; `Chain of Command` now reads "for each
+    # [gold]Companion[/gold] you played this turn" and `The General's Banner`
+    # the same way, so the phrase pattern fired on neither and the word was
+    # undefined again on exactly the screens the row was filed for. `EB-377`
+    # widens it to the bare word.
+    #
+    # THE ORIGINAL WORRY DOES NOT BITE HERE. It was that "Companion" alone
+    # would fire on a companion's own face -- but no companion face prints the
+    # term (their tell is the dashed title), and the haystack is the
+    # OBSERVATION's printed values rather than this page's own prose, so the
+    # section headings and standing notes cannot raise it either.
+    "Companion": re.compile(r"\bCompanions?\b"),
 }
 
 
@@ -425,6 +477,103 @@ GAME_KEYWORDS: dict[str, str] = {
 
 _GAME_KEYWORD_RE = {
     "Ringing": re.compile(r"\bRinging\b"),
+}
+
+
+# `EB-377`. THE BASE GAME'S WORDS A PRINTED FACE NAMES, WHEN NOTHING ON THE
+# BOARD IS WEARING THEM YET.
+#
+# THE GAP, AND WHY IT LOOKED LIKE FOUR WORDS WERE FINE. `Weak`, `Frail`, `Slow`
+# and `Minion` reached the r9 page correctly defined and `Vulnerable` did not,
+# which reads as an oversight in a table and is not: those four arrived as
+# POWERS on a body, and `_wire_keyword_rows` lifts the game's own tip off a
+# status row. A word a CARD names has no such row until something is wearing
+# it -- so the one screen where the definition decides a purchase is exactly
+# the screen that has none. The r9 run-2 seat bought `Exposed Flank+` "on a
+# genre assumption" (act 1, (c) 6) because the only surface that ever defines
+# Vulnerable is an enemy already carrying it.
+#
+# LAST OF THE FOUR SOURCES, AND THAT ORDER IS THE POINT. These are the base
+# game's rules, not this mod's, so the game's own sentence wins wherever the
+# wire carries one: `keyword_notes` adds these only for a word no earlier
+# source defined. A screen with a Weak-bearing enemy on it still reads the
+# game's Weak; a screen holding only a card that APPLIES Weak reads this.
+#
+# WHERE THE NUMBERS COME FROM. The three duration debuffs quote
+# `blindplay_shape`'s percentages, which are pinned to `tier0.constants` from
+# the test side -- this module may not import `tier0` at all
+# (`test_blindplay_cannot_reach_a_sheet_or_a_policy`). The two enchantments are
+# `docs/current/dossiers/content/event-conversion-gallery.md`'s ruled
+# conversion (`enchant_damage`, `enchant_block`, and Swift's first-play draw),
+# which is the same rule `tier0.engine` runs.
+#
+# WHAT IS DELIBERATELY ABSENT. `Goopy` was reported undefined beside these and
+# has no rule anywhere in this repo -- no constant, no op, no dossier line --
+# so a sentence for it would be invented rather than read, which is the one
+# thing this table may never do. It reaches the page the way `Slow` does, off
+# the wire, the moment a body wears it. `Minion` is left to the wire for the
+# same reason it was never missing: the word only ever appears on a body that
+# is one.
+BASE_KEYWORDS: dict[str, str] = {
+    "Vulnerable": (
+        f"The wearer takes {VULNERABLE_TAKEN_PCT}% more damage from every "
+        f"hit. One stack falls off at the end of each of its turns."),
+    "Weak": (
+        f"The wearer deals {WEAK_DEALT_PCT}% less damage. One stack falls "
+        f"off at the end of each of its turns."),
+    "Frail": (
+        f"The wearer gains {FRAIL_BLOCK_PCT}% less Block. One stack falls "
+        f"off at the end of each of its turns."),
+    # The two undecaying stat powers. Named on four prototype faces and on the
+    # Plan's own tip, which says Strength does NOT reach a Plan -- a sentence
+    # that cannot be read by somebody who does not know what Strength is.
+    "Strength": ("Adds its amount to every Attack hit the wearer lands. It "
+                 "does not decay."),
+    "Dexterity": ("Adds its amount to every Block the wearer gains. It does "
+                  "not decay."),
+    # The three enchantments (`EB-355` is the same gap at the enchant screen).
+    # A card wears one for the rest of the run and the page prints it in the
+    # card's own `enchantment` field (`EB-181`), which is a badge and not a
+    # sentence.
+    "Sharp": ("An enchantment on an Attack: it deals that much more damage, "
+              "for the rest of the run."),
+    "Nimble": ("An enchantment on a Skill: every Block it gives you is that "
+               "much bigger, for the rest of the run."),
+    "Swift": ("An enchantment on a Power: the first time you play it in a "
+              "fight, draw that many cards."),
+    # The one word here this mod invented and then defined nowhere a card can
+    # be read: the Masque of the Red Death's debt. The rule is
+    # `TurnEndAttribution`'s own docket sentence, which only ever renders at
+    # the end of a turn the power has already taken the Block on.
+    "Bond of Life": ("A debt on you: the first Block you gain each turn pays "
+                     "it down instead of reaching your bar. Only Arlecchino "
+                     "- Masque of the Red Death makes one."),
+    # THE VERB, WHICH IS THE HALF THE GAME DOES NOT DEFINE. `Exhaust` on a card
+    # that exhausts ITSELF is a declared keyword and the game hangs its own tip
+    # on it; `Pearl Barrage` reads "Exhaust 1 card from your hand ... per card
+    # Exhausted this turn", where the word is an instruction about OTHER cards,
+    # declares nothing and hovers nothing.
+    "Exhaust": ("The card leaves the fight the moment it is spent -- it is not "
+                "discarded and cannot be drawn again this combat. It is back "
+                "in the deck for the next fight."),
+}
+
+# Case-sensitive, `_ARM_KEYWORD_RE`'s rule and for its reason. Written out
+# rather than derived from the table's keys, because two of the rows conjugate
+# and the rest must NOT: a face says "2 Vulnerable", never "2 Vulnerables", and
+# `Sharp`, `Swift` and `Strength` are ordinary English words whose plural would
+# fire on prose.
+_BASE_KEYWORD_RE = {
+    "Vulnerable": re.compile(r"\bVulnerable\b"),
+    "Weak": re.compile(r"\bWeak\b"),
+    "Frail": re.compile(r"\bFrail\b"),
+    "Strength": re.compile(r"\bStrength\b"),
+    "Dexterity": re.compile(r"\bDexterity\b"),
+    "Sharp": re.compile(r"\bSharp\b"),
+    "Nimble": re.compile(r"\bNimble\b"),
+    "Swift": re.compile(r"\bSwift\b"),
+    "Bond of Life": re.compile(r"\bBond of Life\b"),
+    "Exhaust": re.compile(r"\bExhaust(s|ed)?\b"),
 }
 
 
@@ -629,7 +778,7 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     word that reaches the page through a card's body, an enemy's badge, a
     power's text, a relic, a potion or a reward row is defined the same way.
 
-    FOUR SOURCES, IN THIS ORDER (`EB-340`, extended by `EB-367`):
+    FIVE SOURCES, IN THIS ORDER (`EB-340`, extended by `EB-367` and `EB-377`):
 
       the ARMS' words, matched on the text of the screen, unchanged since
         `EB-272` except that `Bomb` now carries its growth number;
@@ -638,7 +787,10 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
       the REACTIONS, on any screen showing an aura or an element-bearing card,
         because a reaction is a rule about a board rather than a word printed
         on it and the seat that cannot see it cannot price a combination;
-      the WIRE's own tips off a POWER row, which reach the page nowhere else.
+      the WIRE's own tips off a POWER row, which reach the page nowhere else;
+      the BASE GAME's status and enchantment words (`BASE_KEYWORDS`), LAST,
+        because the four rows above carry the game's own sentences and this
+        one carries a restatement -- so it fills a hole and never overwrites.
 
     A word already defined by an earlier source is not defined twice, and the
     arms' own copies win: they are the sentences held in step with the C#.
@@ -669,4 +821,9 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
             continue
         seen.add(row["name"])
         rows.append(row)
+    # `EB-377`, last: a base word the screen NAMES and nothing above defined.
+    for word, pattern in _BASE_KEYWORD_RE.items():
+        if word not in seen and pattern.search(hay):
+            seen.add(word)
+            rows.append({"name": word, "text": BASE_KEYWORDS[word]})
     return rows

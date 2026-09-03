@@ -54,6 +54,18 @@ BOMB_GROWTH = 4
 # as the line above: pinned from the other side, never imported.
 AURA_DURATION_TURNS = 2
 
+# `EB-377`. THE THREE BASE-GAME DURATION DEBUFFS, AS PERCENTAGES.
+#
+# Spelled here for `CHARGE_SOURCE_LINE`'s reason and held in step from the
+# other side by `test_the_base_keyword_glossary_quotes_the_engines_own_rates`,
+# which reads `C.VULNERABLE_TAKEN_MULT`, `C.WEAK_DEALT_MULT` and
+# `C.FRAIL_BLOCK_MULT`. They are STRUCTURAL rates rather than balance dials --
+# the base game's own numbers -- but a sim that ever restates one must not be
+# able to leave this page teaching the retired figure.
+VULNERABLE_TAKEN_PCT = 50
+WEAK_DEALT_PCT = 25
+FRAIL_BLOCK_PCT = 25
+
 REPO = Path(__file__).resolve().parents[1]
 LOG_ROOT = Path(__file__).resolve().parent / "logs" / "blindplay"
 RECORD_ROOT = REPO / "review" / "qa" / "blindplay"
@@ -107,6 +119,14 @@ UNDRIVEN_SCREENS = {
 # learned this on the same wire and these are its numbers.
 SETTLE_TRIES = 60
 SETTLE_DELAY_S = 0.5
+
+# `EB-381`. How many times `settle_board` will re-ask a board that is still
+# moving. SHORTER THAN `SETTLE_TRIES` on purpose: `settle` is waiting for a
+# screen the game is definitely about to hand over, and this is waiting for an
+# action queue to drain -- a board still changing after six reads is a board
+# with an animation ticking on it, and thirty seconds of polling per
+# observation would buy a blind seat nothing but a timeout.
+BOARD_SETTLE_TRIES = 6
 
 # EB-1. A REGISTER, NOT A HEURISTIC, and a deliberate SECOND COPY of
 # `soak.HAZARD_EVENTS`. Importing soak here would pull `policy_v1` and through
