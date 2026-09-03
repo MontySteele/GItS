@@ -4676,6 +4676,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                  "counts; your "],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
+        # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
+        # Strike is written against by name, met by a seat holding neither.
+        "Grounded": ["that pays at the start of your turn, but ",
+                     "went off last turn. Its ",
+                     "card prints what it pays."],
         # The Furina reframe's three (slice two, 2026-09-02). The Evoke
         # sentence's two numerals are interpolated from `FurinaReframeLaw` on
         # the mod side and written out on this one, so its anchors are the
@@ -4697,13 +4702,53 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     # finding. Its own source is pinned one test down.
     assert set(anchors) | {"Companion"} == set(blindplay.ARM_KEYWORDS)
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
-                "PlanKey", "DeployKey", "EvokeKey", "DrainKey"):
+                "PlanKey", "DeployKey", "EvokeKey", "DrainKey",
+                "GroundedKey"):
         assert f"public const string {key}" in src
     assert "CompanionKey" not in src
     for word, phrases in anchors.items():
         for phrase in phrases:
             assert phrase in src, (word, phrase)
             assert phrase in blindplay.ARM_KEYWORDS[word], (word, phrase)
+
+
+def test_the_grounded_word_is_defined_wherever_a_face_names_it():
+    """`EB-372`. THE SEAT READ IT AS NOISE IN BOTH ACTS.
+
+    `Grounded` is a Power card of Klee's and Kaeya's Cold-Blooded Strike is
+    written against it by name. A seat that drafted Kaeya and never drafted
+    Grounded had the word on a card face with nothing on the screen saying what
+    it is (r9 act 1 sec.(c) 3, act 2 sec.(c) 2).
+
+    Seen to FAIL: the glossary had no row for the word, so a screen printing it
+    defined every other arm word on it and not that one.
+    """
+    page = blindplay.observe(keyword_hand_state(
+        ["Deal 8 damage. Apply Cryo. This turn, Grounded counts nothing as "
+         "having gone off."]))
+    assert "- **Grounded** — A Power that pays at the start of your turn"         in page
+    assert "none of your Bombs went off last turn" in page
+
+    # WHETHER OR NOT THE DECK HOLDS IT, which is the state the seat was in:
+    # the trigger is the printed word and nothing else. The buff the card
+    # leaves behind carries it the same way, on a screen with no card naming
+    # it at all.
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["player"]["status"] = [
+        {"id": "KLEEMOD-COLD_BLOODED", "name": "Cold-Blooded", "amount": 1,
+         "type": "Buff", "keywords": [],
+         "description": "This turn, Grounded counts nothing as having gone "
+                        "off."}]
+    assert "- **Grounded** — " in blindplay.observe(state)
+
+
+def test_a_lowercase_grounded_in_prose_is_not_the_keyword():
+    """The case rule every row in this table is under: the game capitalises a
+    keyword wherever it prints one."""
+    page = blindplay.observe(keyword_hand_state(
+        ["The enemy is grounded and cannot fly."]))
+    assert "## Words on this screen" not in page
 
 
 def test_the_companion_row_is_the_mods_own_sentence_about_the_slot():

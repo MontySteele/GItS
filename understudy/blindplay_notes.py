@@ -322,6 +322,16 @@ ARM_KEYWORDS: dict[str, str] = {
              "does not."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
+    # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
+    # is a Power card of Klee's, and Kaeya's Cold-Blooded Strike is written
+    # against it by name ("This turn, Grounded counts nothing as having gone
+    # off"), as is the Cold-Blooded buff that card leaves behind. The r9 seat
+    # met the word in both acts, held neither the Power nor a screen that
+    # defined it, and read it as noise. Held in step with
+    # `ArmKeywordTips.ForGrounded`.
+    "Grounded": ("A Power that pays at the start of your turn, but only if "
+                 "none of your Bombs went off last turn. Its card prints what "
+                 "it pays."),
     # The Furina reframe's three (slice two, R220 A). The same sentences
     # `ArmKeywordTips.ForDeploy` / `ForEvoke` / `ForDrain` print, with the two
     # numerals the C# interpolates from `FurinaReframeLaw` written out: this
@@ -375,6 +385,11 @@ _ARM_KEYWORD_RE = {
     "Mine": re.compile(r"\bMines?\b"),
     "Plan": re.compile(r"\bPlans?\b"),
     "Mend": re.compile(r"\bMends?\b"),
+    # `EB-372`. NO PLURAL: the word names one Power. It fires on Kaeya's face,
+    # on the Cold-Blooded buff it leaves behind, and on the Power card itself
+    # wherever one is printed -- which is every screen a reader can meet the
+    # word on, whether or not the deck holds it.
+    "Grounded": re.compile(r"\bGrounded\b"),
     # THE THREE FURINA WORDS CARRIED A LITERAL BACKSPACE, not a word
     # boundary: `\b` inside these three patterns was the CHARACTER 0x08 and
     # not the escape, so `Deploy`, `Evoke` and `Drain` could never match any

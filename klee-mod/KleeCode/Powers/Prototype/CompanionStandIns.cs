@@ -11,6 +11,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -364,8 +365,20 @@ public sealed class ColdBloodedPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Cold-Blooded"),
-        ("description", "This turn, Grounded counts nothing as having gone off."),
+        ("description",
+            "This turn, [gold]Grounded[/gold] counts nothing as having gone "
+          + "off."),
     };
+
+    /// <summary>
+    /// `EB-372`: the word travels with THIS face too. The card is gone by the
+    /// time this buff is read -- it is the only thing on screen naming Grounded
+    /// for the rest of the turn -- so the definition rides the buff exactly as
+    /// the card's own attach rides the card, and a player who never drafted the
+    /// Power can still find out what the sentence is about.
+    /// </summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForGrounded(base.ExtraHoverTips);
 
     public override PowerType Type => PowerType.Buff;
 

@@ -113,6 +113,68 @@ def test_the_shipped_bomb_keeps_its_own_definition_and_the_arm_stands_down():
         "ArmKeywordTips.ForSpark"]
 
 
+# ------------------------------------------- EB-372: Grounded travels too --
+#
+# THE FINDING. `Grounded` is a Power card of Klee's, and Kaeya's Cold-Blooded
+# Strike is written against it by name -- "This turn, Grounded counts nothing
+# as having gone off" -- as is the Cold-Blooded buff that card leaves behind.
+# A seat that drafted Kaeya and never drafted Grounded met the word on a card
+# face with nothing on the screen saying what it is, and read it as noise in
+# both acts (r9 act 1 sec.(c) 3, act 2 sec.(c) 2).
+#
+# THE FIX IS THE TABLE, which is what makes it travel: the attach is derived
+# from the printed face, so the definition rides every face that prints the
+# word whether or not the run holds the Power.
+
+
+def test_the_grounded_word_owes_its_definition_wherever_it_is_printed():
+    assert gen.arm_keyword_tip_calls(
+        "This turn, [gold]Grounded[/gold] counts nothing as having gone "
+        "off.") == ["ArmKeywordTips.ForGrounded"]
+    # The bare word in prose is not the keyword, the rule every row here is
+    # under: the span has to be golded.
+    assert gen.arm_keyword_tip_calls("This turn, Grounded counts nothing.")         == []
+
+
+def test_kaeyas_face_carries_the_grounded_tip_in_the_shipped_generation():
+    """The card the seat was actually holding, read off the emitted C# rather
+    than off the rule that emits it.
+
+    Seen to FAIL: the row's face printed the word bare, so the derived attach
+    had nothing to fire on and the card carried no definition.
+    """
+    card = (PROTOTYPE_DIR / "ProtoMcKaeyaColdBloodedStrike.cs").read_text(
+        encoding="utf-8")
+    assert "[gold]Grounded[/gold] counts nothing as having gone off." in card
+    assert "ArmKeywordTips.ForGrounded(" in card
+
+
+def test_the_buff_kaeyas_card_leaves_behind_carries_it_too():
+    """The card is gone by the time the buff is read, and the buff is the only
+    thing on screen naming the word for the rest of that turn."""
+    power = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+             / "CompanionStandIns.cs").read_text(encoding="utf-8")
+    head = power.index("class ColdBloodedPower")
+    body = power[head:power.index("class LionsFangPower")]
+    # The face's literal is split across two lines by the concatenation, so
+    # the clause is asserted the way the source spells it.
+    assert "This turn, [gold]Grounded[/gold] counts nothing as having gone "         in body
+    assert "ArmKeywordTips.ForGrounded(base.ExtraHoverTips)" in body
+
+
+def test_the_grounded_tip_states_the_condition_and_defers_on_the_payout():
+    """The CONDITION is the whole rule a Kaeya reader needs. What Grounded
+    pays is the Power card's own printed line and moves with its upgrade, so
+    the tip must not quote a number a second card would contradict."""
+    tips = TIPS_CS.read_text(encoding="utf-8")
+    assert "that pays at the start of your turn, but " in tips
+    assert "only if none of your [gold]Bombs[/gold] went off last turn. Its "         in tips
+    assert "card prints what it pays." in tips
+    sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
+        encoding="utf-8")
+    assert "gain 6 [gold]Block[/gold] and 1 [gold]Spark[/gold]" in sheet
+
+
 def test_the_attach_is_scoped_to_the_quarantined_surface():
     """A shipped profile must never carry the arm's contradicting sentence."""
     assert gen.KLEE_PROFILE.arm_keyword_tips is False

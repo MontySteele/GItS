@@ -66,6 +66,7 @@ public static class ArmKeywordTips
     public const string SparkKey = "KLEEMOD-ARM_SPARK";
     public const string MineKey = "KLEEMOD-ARM_MINE";
     public const string HexereiKey = "KLEEMOD-ARM_HEXEREI";
+    public const string GroundedKey = "KLEEMOD-ARM_GROUNDED";
     public const string MendKey = "KLEEMOD-ARM_MEND";
     public const string PlanKey = "KLEEMOD-ARM_PLAN";
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
@@ -214,7 +215,7 @@ public static class ArmKeywordTips
     /// measured against the tip ceiling in either wording. The regex is fixed
     /// in the same change; this sentence is a comma now and the tip is 134 of
     /// 135.
-    /// </summary>
+    ///
     /// `EB-373` NARROWED THE SECOND SENTENCE HERE TOO, because a Mine IS a
     /// Bomb and the fold that moves one moves the other: `FoldedMods` reads
     /// the target's Vulnerable and its damage cap and nothing else. "The
@@ -254,6 +255,42 @@ public static class ArmKeywordTips
             "A [gold]Companion[/gold] card from the witches' circle. It does "
           + "nothing by itself; Klee is one too, and her own cards pay when "
           + "you play one.");
+
+    /// <summary>
+    /// KLEE'S SIXTH, `EB-372`, AND IT IS A WORD THE KIT NAMES ON A FACE THE
+    /// PLAYER MAY NEVER HAVE OWNED.
+    ///
+    /// THE GAP. `Grounded` is a Power of Klee's, and Kaeya's Cold-Blooded
+    /// Strike is written against it -- "This turn, Grounded counts nothing as
+    /// having gone off" -- as is the buff that card leaves behind
+    /// (<see cref="KleeMod.Powers.ColdBloodedPower"/>). A player who drafted
+    /// Kaeya without ever drafting Grounded meets the word on a card face with
+    /// nothing anywhere on the screen saying what it is, and the r9 seat read
+    /// it as noise in both acts (act 1 sec.(c) 3, act 2 sec.(c) 2).
+    ///
+    /// IT TRAVELS WITH THE WORD AND NOT WITH THE DECK. The attach is derived
+    /// from the printed face (`gen_klee_cards.arm_keyword_tip_calls`), so
+    /// Kaeya carries the definition because Kaeya prints the word -- whether or
+    /// not the run holds Grounded, which is the state the seat was actually in.
+    ///
+    /// WHAT IT SAYS AND WHAT IT LEAVES TO THE CARD. The CONDITION is the whole
+    /// rule and it is what a Kaeya reader needs: nothing of yours went off last
+    /// turn. What Grounded pays for that is the Power card's own printed line
+    /// and moves with its upgrade, so the tip defers to it rather than quoting
+    /// a number that a second card would contradict.
+    /// </summary>
+    /// ONE METHOD WITH AN OPTIONAL CARD, and not an overload: a POWER raises
+    /// this tip too -- the buff Kaeya's card leaves behind prints the word for
+    /// the rest of the turn, after the card itself has gone -- and every other
+    /// attach here ignores its `card` argument anyway. A second entry point
+    /// would be a second thing for `ArmKeywordTipTests`' structural pin to
+    /// count, and it is the pin that proves every tip goes through `With`.
+    public static IEnumerable<IHoverTip> ForGrounded(
+        IEnumerable<IHoverTip> inherited, CardModel? card = null) =>
+        With(inherited, GroundedKey,
+            "A [gold]Power[/gold] that pays at the start of your turn, but "
+          + "only if none of your [gold]Bombs[/gold] went off last turn. Its "
+          + "card prints what it pays.");
 
     // ---------------------------------------------------------- Kokomi -----
     //

@@ -214,15 +214,19 @@ public class ArmKeywordTipTests
         // cannot arrive with a different shape by accident.
         var attaches = Attaches().ToList();
 
-        // ELEVEN. Draft 6 cut Tide, Surge, Exert and the Garment as
+        // TWELVE. Draft 6 cut Tide, Surge, Exert and the Garment as
         // keywords and their four `For*` methods left with the rules they
         // defined, taking the table from eleven to seven; the Furina reframe's
         // slice two put Deploy, Evoke and Drain on it (2026-09-02), and R244
         // put `Hexerei` on it -- the coven's family mark, which eighteen faces
-        // printed while nothing defined it. The number is the TABLE's length
-        // (`gen_klee_cards.ARM_KEYWORDS`), which is what the python half of
-        // this pin walks.
-        Assert.Equal(11, attaches.Count);
+        // printed while nothing defined it. `EB-372` put `Grounded` on it --
+        // a Power of Klee's that Kaeya's Cold-Blooded Strike is written
+        // against by name, met by a seat that had never drafted it. The number
+        // is the TABLE's length (`gen_klee_cards.ARM_KEYWORDS`), which is what
+        // the python half of this pin walks, so `ForGrounded` takes an
+        // OPTIONAL card rather than adding a second entry point for the power
+        // that raises it.
+        Assert.Equal(12, attaches.Count);
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
                                          System.StringComparison.Ordinal)));
