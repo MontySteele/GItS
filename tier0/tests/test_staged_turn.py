@@ -1378,6 +1378,54 @@ def test_the_cost_slot_prints_the_spark_price():
     assert qa_packet.cost_label({"cost": "2", "printed_spark": 1})         == "2 and 1 Spark"
 
 
+def test_eb339_a_spark_priced_face_says_what_a_discount_does_not_cover():
+    """`EB-339`. A cost-to-zero effect covers Energy, and the face says so.
+
+    THE SEAT'S OWN CARD. `Vexing Puzzlebox` prints "It's free to play this
+    turn"; the card it handed over arrived as `Powder Charge -- cost 1 Spark`
+    with no note at all, and the seat had to derive "free apparently means free
+    of ENERGY" from a card that silently did not work
+    (`klee round 7b, opus-act2.md`, section (c)).
+
+    AND `_discounted` WAS RIGHT TO SAY NO. A Spark price is an `op:
+    spend_spark`, not a cost, so `printed_cost` is 0 on every Spark row and a
+    cost-to-zero effect moves 0 to 0. So the sentence is tied to the ENERGY
+    SLOT reading zero -- which is exactly when something can claim the card is
+    free -- rather than to a discount the wire never mentions.
+    """
+    note = qa_packet.cost_note(
+        {"cost": "0", "printed_cost": 0, "printed_spark": 1})
+    assert "Its 1 Spark is a price, not an Energy cost" in note
+    assert "covers Energy only" in note
+    assert "still spent" in note
+    # Plural is the card's, exactly as the cost slot's own is.
+    assert "Its 2 Sparks is a price" in qa_packet.cost_note(
+        {"cost": "0", "printed_cost": 0, "printed_spark": 2})
+    # A card with no Spark price gains not one word, in either direction.
+    assert qa_packet.cost_note({"cost": "0", "printed_cost": 0}) == ""
+    assert "Spark" not in qa_packet.cost_note(
+        {"cost": "0", "printed_cost": 1})
+    # Both halves on one line where both apply, the Energy slot first.
+    both = qa_packet.cost_note(
+        {"cost": "0", "printed_cost": 1, "printed_spark": 1})
+    assert both.startswith("The cost printed on this card is 1")
+    assert "Its 1 Spark is a price" in both
+
+
+def test_eb339_the_rendered_page_carries_the_spark_discount_sentence():
+    """End to end on the page an agent is handed, which is where the seat read
+    the card and found nothing."""
+    state = banked_state(0)
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-PROTO_KO_POWDER_CHARGE", "name": "Powder Charge",
+         "type": "Skill", "cost": "0", "can_play": True, "is_upgraded": False,
+         "description": "Place a Bomb 6."},
+    ]
+    page = qa_packet.render(qa_packet.build(state, "t", repo=REPO))
+    assert "- Cost: 1 Spark" in page
+    assert "covers Energy only" in page
+
+
 def test_the_rendered_page_shows_a_spark_priced_card_at_its_price():
     """End to end on the page an agent is handed: a Spark row is drawn at 0
     energy, and before this it read as free."""

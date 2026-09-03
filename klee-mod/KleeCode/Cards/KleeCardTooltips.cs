@@ -133,12 +133,18 @@ public static class KleeCardTooltips
         return null;
     }
 
+    /// <summary>
+    /// <paramref name="appliesWithoutHit"/> is `EB-338`. See
+    /// <see cref="NoHitBody"/> for what it changes and
+    /// <c>gen_klee_cards.emit</c> for how it is derived (never remembered).
+    /// </summary>
     public static IEnumerable<IHoverTip> ForCard(
         IEnumerable<IHoverTip> inherited,
         CardModel card,
         Element trigger = Element.None,
         bool includesBombRules = false,
-        bool includesConfiscatedRules = false)
+        bool includesConfiscatedRules = false,
+        bool appliesWithoutHit = false)
     {
         foreach (var tip in inherited) yield return tip;
 
@@ -167,10 +173,83 @@ public static class KleeCardTooltips
                 && enemy.CombatState?.Encounter?.RoomType == RoomType.Boss
                     ? KleeKeywords.FrozenBossPreview
                     : KleeKeywords.ReactionPreview(reaction);
-            if (keyword != MegaCrit.Sts2.Core.Entities.Cards.CardKeyword.None)
+            if (keyword == MegaCrit.Sts2.Core.Entities.Cards.CardKeyword.None)
             {
-                yield return HoverTipFactory.FromKeyword(keyword);
+                continue;
             }
+
+            // `EB-338`. The keyword's own TITLE ROW, so a reader still finds
+            // the reaction by name, with the body the card can actually keep.
+            var substitute = appliesWithoutHit ? NoHitBody(reaction) : null;
+            yield return substitute == null
+                ? HoverTipFactory.FromKeyword(keyword)
+                : new HoverTip(
+                    new LocString(Table, NoHitTitleKey(reaction) + ".title"),
+                    substitute);
         }
     }
+
+    /// <summary>
+    /// `EB-338`. The two preview keywords a no-hit card substitutes the BODY
+    /// of, named by their loc key.
+    ///
+    /// THE KEY RATHER THAN THE KEYWORD, and the reason is the boundary: the
+    /// game's own `CardKeyword.GetTitle()` lives on an INTERNAL extension
+    /// class, so a mod cannot ask a keyword for its title row. These are the
+    /// keys `KleeMod.InjectLocStrings` registers, one const apiece so the two
+    /// spellings cannot drift -- pinned against the compiled registration by
+    /// `ReactionPreviewNoHitTests`, the same `Il.Strings` read
+    /// `KeywordTitleRowTests` uses for every other title row.
+    /// </summary>
+    public const string VaporizePreviewKey = "KLEEMOD-VAPORIZE_PREVIEW";
+
+    /// <summary>Melt's half of <see cref="VaporizePreviewKey"/>.</summary>
+    public const string MeltPreviewKey = "KLEEMOD-MELT_PREVIEW";
+
+    private static string NoHitTitleKey(Reaction reaction) =>
+        reaction == Reaction.Vaporize ? VaporizePreviewKey : MeltPreviewKey;
+
+    /// <summary>
+    /// `EB-338`. THE PREVIEW ON A CARD WITH NO HIT.
+    ///
+    /// WHAT THE SEAT SAW (`klee round 7b, opus-act2b.md`,
+    /// finding 4). Barbara's stand-in -- "Gain 6 Block. Apply Hydro", and not a
+    /// point of damage on it -- carried *"Reaction preview: Vaporize -- The
+    /// triggering hit deals 1.5x damage and consumes the aura"* over a Pyro
+    /// aura. The reaction fired and the aura went; the enemy stayed on 23/41.
+    /// A line advertising a damage bonus delivered a pure loss, and nothing
+    /// told the seat apart from the previews on Ka-pow! and Charlotte, which
+    /// are worth having.
+    ///
+    /// THE RULE DOES NOT MOVE, only the words: an APPLICATION reacts, which is
+    /// what the Applies-X keyword has always said, and consuming the aura is
+    /// the reaction happening rather than a bug. So the preview says the one
+    /// thing it was not saying.
+    ///
+    /// THE SHAPE IS THE BOSS SUBSTITUTION'S, which the same seat called
+    /// excellent on the same card: *"Bosses cannot be Frozen. Hydro plus Cryo
+    /// is consumed and applies 2 Vulnerable instead."* It names the case, names
+    /// what is still consumed, and names what is paid instead.
+    ///
+    /// ONLY THE TWO MULTIPLIERS ARE SUBSTITUTED, because only they promise a
+    /// number that a card with no hit cannot pay. Overload's splash,
+    /// Superconduct's Vulnerable, Electro-Charged's dot, Frozen, Swirl and
+    /// Crystallize all land in full off an application, so their rows are
+    /// already true and are left exactly as they are.
+    ///
+    /// THE MULTIPLIERS STAY LITERALS, the same decision the loc rows in
+    /// `KleeMod.cs` write down: they are floats, and interpolating a float
+    /// renders it under the host's culture, so a comma locale would print
+    /// "1,5x".
+    /// </summary>
+    public static string? NoHitBody(Reaction reaction) => reaction switch
+    {
+        Reaction.Vaporize =>
+            "This card deals no damage. Pyro plus Hydro is still consumed, "
+          + "and there is no hit here for the 1.5x to multiply.",
+        Reaction.Melt =>
+            "This card deals no damage. Pyro plus Cryo is still consumed, "
+          + "and there is no hit here for the 1.75x to multiply.",
+        _ => null,
+    };
 }
