@@ -157,6 +157,17 @@ internal static class KleePowerIcons
         ColdBloodedPower => KleePck.Path("klee/powers/frozen.png"),
         IGotYourBackPower => KleePck.Path("klee/powers/celestial_gift.png"),
         LionsFangPower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        // THE SAME SLICE'S HEXEREI FAMILY (R236 sec.3), the same borrow: each
+        // of the four wears its Universal's illustration, so the badge takes
+        // the icon that Universal's own power already uses (Albedo's Isotoma,
+        // Nicole's Revelation-as-a-Hexerei-payoff) -- or, where the Universal
+        // it replaces printed no power at all (Fischl's Nightrider, Sucrose's
+        // Wind Spirit Creation), the icon of the arm power whose job the
+        // stand-in takes over.
+        TectonicTidePower => KleePck.Path("klee/powers/solar_isotoma.png"),
+        SinfulHexPower => KleePck.Path("klee/powers/oz_summon.png"),
+        MollisFavoniusPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        LadderOfAscentPower => KleePck.Path("klee/powers/witchs_flame.png"),
         // KLEE'S COVEN PERSONALS (R236), same arm and same terms again: each
         // borrows the shipped icon of the power whose job it takes over, and
         // the four rows' own illustrations are deferred to the Balance stage.

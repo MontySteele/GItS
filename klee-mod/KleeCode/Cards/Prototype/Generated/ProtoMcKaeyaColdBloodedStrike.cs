@@ -44,7 +44,7 @@ public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalC
 
     public Element CompanionElement => Element.Cryo;
 
-    public string? PersonalPool => "['klee']";
+    public string? PersonalPool => "klee";
 
     public string? Nation => "mondstadt";
 

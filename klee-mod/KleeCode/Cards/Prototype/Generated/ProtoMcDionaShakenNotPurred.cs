@@ -41,7 +41,7 @@ public sealed class ProtoMcDionaShakenNotPurred : CustomCardModel, ICompanionCar
 
     public Element CompanionElement => Element.Cryo;
 
-    public string? PersonalPool => "['klee']";
+    public string? PersonalPool => "klee";
 
     public string? Nation => "mondstadt";
 
