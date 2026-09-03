@@ -310,9 +310,15 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # staged as slice two. Three words the SHIPPED kit does not have:
             # its deploy performs nobody, its bow neither triples the Fanfare
             # bonus nor mints, and it has no drain at all.
-            "A [gold]Salon[/gold] member joins the stage and performs at ",
-            "once. Onto a full stage, the front member [gold]Evokes[/gold] ",
-            "first.",
+            #
+            # `EB-368` REWROTE Deploy's sentence rather than extending it: the
+            # act-2 seat played no Salon card in three fights because the word
+            # never said what makes a member act AFTER the deploy, and three
+            # rules appended to the old two sentences ran 50 characters over
+            # the keyword-tip ceiling. Same call R248 made for the Bomb.
+            "A member joins and performs at once; a full stage ",
+            "[gold]Evokes[/gold] the front member first. Afterwards only a ",
+            "[gold]Companion[/gold] play performs a member.",
             "The member performs and leaves. Its [gold]Fanfare[/gold] bonus ",
             " [gold]Fanfare[/gold]. The card's [gold]Encore[/gold] price pays ",
             "for it.",

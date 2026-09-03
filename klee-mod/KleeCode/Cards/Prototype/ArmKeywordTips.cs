@@ -355,13 +355,27 @@ public static class ArmKeywordTips
     /// what the arm adds is that the displacement is an <i>Evoke</i> -- the
     /// free one, the reward for filling the stage -- so the word the card
     /// prints has to say where the other word comes from.
+    ///
+    /// `EB-368` ADDED THE THIRD SENTENCE. The act-2 seat played no Salon card
+    /// across three fights, and the reason is the rule this word did not
+    /// carry: a member on stage does NOTHING on its own, and what makes it act
+    /// afterwards is a Companion card. A player who reads only "joins the
+    /// stage and performs at once" prices a deploy as a one-shot, and a
+    /// one-shot at that price is never worth the card.
+    ///
+    /// THE WORD WAS REWRITTEN RATHER THAN EXTENDED, the Bomb's precedent
+    /// (`EB-343`, R248): three rules appended to the old two sentences ran 50
+    /// characters over the tip ceiling, and the ceiling is the base game's own
+    /// longest mechanic tip. All three are here in two sentences, and the tip
+    /// takes no length exception. "[gold]Salon[/gold]" goes with them: this tip
+    /// only ever renders beside the member tips, which name the stage.
     /// </summary>
     public static IEnumerable<IHoverTip> ForDeploy(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, DeployKey,
-            "A [gold]Salon[/gold] member joins the stage and performs at "
-          + "once. Onto a full stage, the front member [gold]Evokes[/gold] "
-          + "first.");
+            "A member joins and performs at once; a full stage "
+          + "[gold]Evokes[/gold] the front member first. Afterwards only a "
+          + "[gold]Companion[/gold] play performs a member.");
 
     /// <summary>
     /// SEC.4.4, all three clauses, and the numerals are interpolated from

@@ -56,7 +56,7 @@ public sealed class PruneWitchHunt : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Prune — Little Witch's Hunt"),
-        ("description", "[gold]Swirl[/gold] an enemy's aura. If it did not trigger an [gold]Elemental Reaction[/gold]: gain 5 [gold]Block[/gold]."),
+        ("description", "[gold]Swirl[/gold] an enemy's aura onto ALL enemies. If it did not trigger an [gold]Elemental Reaction[/gold]: gain 5 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

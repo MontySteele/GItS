@@ -348,6 +348,32 @@ public static class FurinaResources
 #endif
     }
 
+    /// <summary>
+    /// `EB-365` (R251). SHOULD THE OVERHEAD BURST GAUGE EXIST FOR THIS
+    /// CREATURE?
+    ///
+    /// Kokomi's <see cref="KokomiResources.BurstGaugeApplies"/> one character
+    /// over, for the identical reason and by the identical shape: under the
+    /// Furina arm her shipped Burst meter is retired, nothing feeds it, and a
+    /// spec that still APPLIED would draw an overhead ribbon pinned at 0/70 for
+    /// the whole run. The guard lives HERE, beside the resource, rather than as
+    /// a character test written out in <c>GaugeBridge</c> -- that is where
+    /// Klee's and Kokomi's went, and it keeps "who has this meter" one question
+    /// with one answer instead of two that can drift.
+    ///
+    /// FALSE-FREE IN A RELEASE BUILD BY CONSTRUCTION: the arm's switch lives
+    /// under <c>Powers/Prototype/</c>, which is <c>Compile Remove</c>d, so
+    /// without the quarantine property there is nothing to ask and the gauge
+    /// applies to every Furina exactly as it ships.
+    /// </summary>
+    public static bool BurstGaugeApplies(Creature creature)
+    {
+#if PROTOTYPE_CARDS
+        if (FurinaReframe.BurstRetiredFor(creature)) return false;
+#endif
+        return IsFurina(creature);
+    }
+
     private static EncoreResource? EncoreResourceFor(Creature creature)
     {
         var combatState = creature.Player?.PlayerCombatState;
@@ -685,9 +711,30 @@ public static class FurinaResources
         Vfx.SalonVisualsBridge.Refresh(creature);
     }
 
+    /// <summary>
+    /// The single Burst gain funnel: the skill-tag particle, the Salon tick,
+    /// the Encore-spend particle and the reaction credit all land here.
+    ///
+    /// `EB-365` (R251). THE ARM NEITHER FEEDS NOR SHOWS BURST, and this is the
+    /// FEED half of the sentence <see cref="BurstGaugeApplies"/> makes the
+    /// display half of. It is Klee's `EB-266` and Kokomi's `EB-327` word for
+    /// word, so it is fixed where both of theirs were -- at the FUNNEL, not at
+    /// the four call sites, because the arm's answer is "she has no Burst
+    /// meter" and not "reactions in particular do not feed it". With nothing
+    /// feeding it the meter never reaches its max, so
+    /// <see cref="FurinaKitGrant"/> has nothing to grant; the guard is written
+    /// there as well anyway, because a grant is a rule and not a consequence.
+    ///
+    /// <see cref="FurinaBurstResource.DrainOnPlay"/> is deliberately NOT
+    /// guarded, exactly as Kokomi's is not: it is a refusal rather than an
+    /// income, and with nothing feeding the meter it is inert under the arm.
+    /// </summary>
     public static void GainBurst(Creature creature, int amount)
     {
         if (amount <= 0 || !IsFurina(creature)) return;
+#if PROTOTYPE_CARDS
+        if (FurinaReframe.BurstRetiredFor(creature)) return;
+#endif
         BurstResourceFor(creature)?.ModifyAmount(amount);
     }
 
@@ -1297,6 +1344,15 @@ public static class FurinaKitGrant
         PlayerChoiceContext choiceContext, Player? owner)
     {
         if (owner?.Character is not IFurinaCharacter) return;
+#if PROTOTYPE_CARDS
+        // `EB-365` (R251). THE ARM NEVER GRANTS THE KIT CARD. Nothing feeds
+        // the meter under the flag, so this branch is unreachable in play --
+        // and it is written anyway, because "Let the People Rejoice is not part
+        // of the reframe" is a rule of the arm rather than a consequence of one
+        // guard sitting upstream. Kokomi's kit grant carries the same guard for
+        // the same reason.
+        if (FurinaReframe.BurstRetiredFor(owner.Creature)) return;
+#endif
         var playerCombatState = owner.PlayerCombatState;
         var combatState = owner.Creature.CombatState;
         if (playerCombatState == null || combatState == null) return;

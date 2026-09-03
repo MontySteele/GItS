@@ -52,7 +52,7 @@ public sealed class SucroseGust : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Wind Spirit Creation"),
-        ("description", "[gold]Swirl[/gold] an enemy's aura. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "[gold]Swirl[/gold] an enemy's aura onto ALL enemies. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

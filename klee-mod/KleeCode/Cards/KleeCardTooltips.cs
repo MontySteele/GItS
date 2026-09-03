@@ -5,7 +5,6 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Rooms;
 
 namespace KleeMod.Cards;
 
@@ -169,8 +168,18 @@ public static class KleeCardTooltips
             var reaction = ReactionTable.Lookup(aura.Element, trigger);
             if (reaction == Reaction.None || !seen.Add(reaction)) continue;
 
+            // `EB-366`. THE PREVIEW READS THE FREEZE'S OWN PREDICATE, and it
+            // used to read HALF of it. The substitution is per-CREATURE inside
+            // a boss room -- `boss room AND not a Minion` -- and this line
+            // asked only the room, so a MINION standing beside a boss previewed
+            // "Bosses cannot be Frozen ... 2 Vulnerable instead" and then froze,
+            // which is exactly what the freeze branch does for it. Two
+            // statements of one rule is one statement too many, so the reader
+            // is now `ReactionEffects.FrozenBossVulnWillApply` -- the read-only
+            // twin that the damage pipeline already asks one phase early -- and
+            // there is no second copy left to drift.
             var keyword = reaction == Reaction.Frozen
-                && enemy.CombatState?.Encounter?.RoomType == RoomType.Boss
+                && ReactionEffects.FrozenBossVulnWillApply(enemy)
                     ? KleeKeywords.FrozenBossPreview
                     : KleeKeywords.ReactionPreview(reaction);
             if (keyword == MegaCrit.Sts2.Core.Entities.Cards.CardKeyword.None)

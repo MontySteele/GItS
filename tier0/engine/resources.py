@@ -559,6 +559,17 @@ def gain_burst(state: CombatState, n: int, source: str) -> None:
     "reactions in particular do not feed it". The mod's twin is the same one
     line inside `KokomiResources.GainBurst`.
 
+    QUARANTINED (`FURINA_REFRAME_BURST`), `EB-365` / R251: THE THIRD ARM, AND
+    THE FIRST ONE RULED RATHER THAN FOUND. The Furina reframe's first blind
+    round read the shipped meter at `78/70` -- over its own cap -- and *Let the
+    People Rejoice* arrived off that overflow to win the boss fight, so the
+    round's clutch turn was the shipped kit's and not the reframe's. R251 (1)
+    retires the meter under the arm now instead of waiting on the shared fold
+    (`EB-199`, `EB-200`), which still owns the shipped engines. The guard goes
+    beside the other two, at this funnel, for their reason: the arm's answer is
+    "she has no Burst meter". The mod's twin is the same one line inside
+    `FurinaResources.GainBurst`.
+
     R14: diagnostic. Nothing reads these events to make a decision.
     """
     if n <= 0:
@@ -568,6 +579,8 @@ def gain_burst(state: CombatState, n: int, source: str) -> None:
         return
     from tier0.engine import kokomi_plan           # late import (cycle)
     if kokomi_plan.live(state):
+        return
+    if furina_reframe.burst_retired(state.player):
         return
     p = state.player
     p.burst_energy += n

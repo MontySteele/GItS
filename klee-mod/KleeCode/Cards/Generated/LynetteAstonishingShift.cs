@@ -52,7 +52,7 @@ public sealed class LynetteAstonishingShift : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lynette — Magic Trick: Astonishing Shift"),
-        ("description", "[gold]Swirl[/gold] an enemy's aura. Deal {CalculatedDamage:diff()} damage to ALL enemies."),
+        ("description", "[gold]Swirl[/gold] an enemy's aura onto ALL enemies. Deal {CalculatedDamage:diff()} damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

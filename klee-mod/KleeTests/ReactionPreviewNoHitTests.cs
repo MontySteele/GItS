@@ -98,6 +98,46 @@ public class ReactionPreviewNoHitTests
         Assert.Contains(KleeCardTooltips.MeltPreviewKey + ".title", registered);
     }
 
+    // ==================================================================
+    // `EB-366`. THE FROZEN PREVIEW AND THE FREEZE ASKED DIFFERENT QUESTIONS.
+    // ==================================================================
+
+    [Fact]
+    public void The_frozen_preview_reads_the_freezes_own_predicate()
+    {
+        // WHAT THE SEAT SAW (Furina reframe round 1, the Elite fight, round 5):
+        // Freminet's Cryo onto a Hydro aura previewed *"Bosses cannot be
+        // Frozen ... applies 2 Vulnerable instead"* on Byrdonis -- and Byrdonis
+        // froze.
+        //
+        // The substitution is per-CREATURE inside a boss room: `RoomType.Boss`
+        // AND no `MinionPower`, which is the only per-creature "secondary
+        // enemy" fact the assembly carries (NC-7). The preview asked only the
+        // room half, so a MINION beside a boss previewed the fallback and then
+        // froze -- exactly as the freeze branch says it should.
+        //
+        // STRUCTURAL, and it has to be: the predicate reads
+        // `Creature.CombatState.Encounter.RoomType`, and building an encounter
+        // is outside the headless boundary (README). What is pinned is that
+        // there is now ONE statement of the rule rather than two -- the preview
+        // calls the freeze's own read-only twin and no longer reads a RoomType
+        // of its own to compare.
+        var calls = Il.Calls(Il.Method("KleeCardTooltips", "ForCard"));
+
+        Assert.Contains("ReactionEffects.FrozenBossVulnWillApply", calls);
+        Assert.DoesNotContain("EncounterModel.get_RoomType", calls);
+    }
+
+    [Fact]
+    public void The_freeze_branch_still_owns_the_only_copy_of_the_rule()
+    {
+        // The other half of the same claim: the predicate the preview now reads
+        // is the one the RESOLUTION acts on, so the two cannot drift.
+        var resolve = Il.Calls(Il.Method("ReactionEffects", "Resolve"));
+
+        Assert.Contains("ReactionEffects.FrozenBossVulnWillApply", resolve);
+    }
+
     private static IReadOnlyCollection<string> Registered()
         => Il.Strings(typeof(global::KleeMod.KleeMod)
                           .GetMethod("InjectLocStrings", HeadlessGame.All)!);

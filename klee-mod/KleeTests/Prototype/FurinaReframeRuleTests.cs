@@ -72,15 +72,21 @@ public class FurinaReframeRuleTests
         private readonly bool _evoke = FurinaReframe.EvokeEnabled;
         private readonly bool _meter = FurinaReframe.MeterEnabled;
         private readonly bool _spotlight = FurinaReframe.SpotlightEnabled;
+        // R251's leg (`EB-365`). Saved and restored like the other five even
+        // though no test in THIS file sets it: a fixture that restores five of
+        // six flags is a fixture that arms the next file.
+        private readonly bool _burst = FurinaReframe.BurstEnabled;
 
         internal Arm(bool manual = false, bool evoke = false, bool meter = false,
-                     bool spotlight = false, bool master = true)
+                     bool spotlight = false, bool burst = false,
+                     bool master = true)
         {
             FurinaReframe.Enabled = master;
             FurinaReframe.ManualEnabled = manual;
             FurinaReframe.EvokeEnabled = evoke;
             FurinaReframe.MeterEnabled = meter;
             FurinaReframe.SpotlightEnabled = spotlight;
+            FurinaReframe.BurstEnabled = burst;
         }
 
         public void Dispose()
@@ -90,6 +96,7 @@ public class FurinaReframeRuleTests
             FurinaReframe.EvokeEnabled = _evoke;
             FurinaReframe.MeterEnabled = _meter;
             FurinaReframe.SpotlightEnabled = _spotlight;
+            FurinaReframe.BurstEnabled = _burst;
         }
     }
 
@@ -194,6 +201,9 @@ public class FurinaReframeRuleTests
         Assert.Equal(FurinaReframe.DefaultEnabled, FurinaReframe.EvokeEnabled);
         Assert.Equal(FurinaReframe.DefaultEnabled, FurinaReframe.MeterEnabled);
         Assert.Equal(FurinaReframe.DefaultEnabled, FurinaReframe.SpotlightEnabled);
+        // R251's leg (`EB-365`) joins the roll call rather than taking a
+        // quarantine test of its own.
+        Assert.Equal(FurinaReframe.DefaultEnabled, FurinaReframe.BurstEnabled);
     }
 
     [Fact]
@@ -203,13 +213,14 @@ public class FurinaReframeRuleTests
         // one flip returns the shipped engine no matter what else is set. The
         // sim's `test_the_master_flag_gates_every_leg`, verbatim.
         using var _ = new Arm(manual: true, evoke: true, meter: true,
-                              spotlight: true, master: false);
+                              spotlight: true, burst: true, master: false);
         var furina = Seat.Furina().Creature;
 
         Assert.False(FurinaReframe.ManualLiveFor(furina));
         Assert.False(FurinaReframe.EvokeLiveFor(furina));
         Assert.False(FurinaReframe.MeterLiveFor(furina));
         Assert.False(FurinaReframe.SpotlightLiveFor(furina));
+        Assert.False(FurinaReframe.BurstRetiredFor(furina));
     }
 
     [Fact]
@@ -220,7 +231,7 @@ public class FurinaReframeRuleTests
         // co-op the other seat may be Klee, whose turn-start this must not
         // suppress.
         using var _ = new Arm(manual: true, evoke: true, meter: true,
-                              spotlight: true);
+                              spotlight: true, burst: true);
         var furina = Seat.Furina().Creature;
         var klee = Seat.Klee().Creature;
         var kokomi = Seat.Kokomi().Creature;
@@ -229,6 +240,7 @@ public class FurinaReframeRuleTests
         Assert.True(FurinaReframe.EvokeLiveFor(furina));
         Assert.True(FurinaReframe.MeterLiveFor(furina));
         Assert.True(FurinaReframe.SpotlightLiveFor(furina));
+        Assert.True(FurinaReframe.BurstRetiredFor(furina));
 
         foreach (var other in new[] { klee, kokomi })
         {
@@ -236,6 +248,9 @@ public class FurinaReframeRuleTests
             Assert.False(FurinaReframe.EvokeLiveFor(other));
             Assert.False(FurinaReframe.MeterLiveFor(other));
             Assert.False(FurinaReframe.SpotlightLiveFor(other));
+            // Klee and Kokomi each own a Burst meter, and neither is this
+            // arm's to retire -- in co-op the other seat may be one of them.
+            Assert.False(FurinaReframe.BurstRetiredFor(other));
         }
 
         // A null creature is a real state on the ownerless-play paths these

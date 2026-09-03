@@ -106,13 +106,18 @@ def test_every_flag_ships_off():
     assert FR.FURINA_REFRAME_EVOKE is False
     assert FR.FURINA_REFRAME_METER is False
     assert FR.FURINA_REFRAME_SPOTLIGHT is False
+    # R251's leg (`EB-365`) joins the roll call rather than taking a quarantine
+    # test of its own: the acceptance condition is one sentence about the whole
+    # module, and it is asserted in one place.
+    assert FR.FURINA_REFRAME_BURST is False
 
 
 def test_the_master_flag_gates_every_leg(monkeypatch):
-    """A leg flag alone does nothing: the master is AND-ed into all four, so
+    """A leg flag alone does nothing: the master is AND-ed into all five, so
     one flip returns the shipped engine no matter what else is set."""
     for leg in ("FURINA_REFRAME_MANUAL", "FURINA_REFRAME_EVOKE",
-                "FURINA_REFRAME_METER", "FURINA_REFRAME_SPOTLIGHT"):
+                "FURINA_REFRAME_METER", "FURINA_REFRAME_SPOTLIGHT",
+                "FURINA_REFRAME_BURST"):
         monkeypatch.setattr(FR, leg, True)
     p = furina_state().player
 
@@ -120,6 +125,7 @@ def test_the_master_flag_gates_every_leg(monkeypatch):
     assert not FR.evoke_active(p)
     assert not FR.meter_active(p)
     assert not FR.spotlight_active(p)
+    assert not FR.burst_retired(p)
 
 
 def test_the_reframe_is_scoped_to_furina(monkeypatch):

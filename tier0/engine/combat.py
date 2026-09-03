@@ -113,9 +113,18 @@ def grant_charged_kit(state: CombatState) -> None:
 
     Respects MAX_HAND_SIZE: a full hand defers the grant to the next check
     rather than dropping it -- the meter stays full, so it cannot be lost.
+
+    QUARANTINED (`FURINA_REFRAME_BURST`), `EB-365` / R251: THE ARM NEVER GRANTS
+    THE KIT CARD. Nothing feeds the meter under the flag
+    (`resources.gain_burst`), so this branch is unreachable in play -- and it is
+    written anyway, because "Let the People Rejoice is not part of the reframe"
+    is a rule of the arm rather than a consequence of one guard sitting
+    upstream. The mod's twin is the same guard in `FurinaKitGrant.GrantIfCharged`.
     """
     p = state.player
     if not p.burst_max or p.burst_energy < p.burst_max:
+        return
+    if furina_reframe.burst_retired(p):
         return
     for kit in p.kit_cards:
         if any(c.id == kit.id for c in p.hand):

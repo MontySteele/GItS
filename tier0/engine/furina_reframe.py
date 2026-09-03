@@ -78,6 +78,13 @@ FURINA_REFRAME_EVOKE = False      # the Evoke verb, its Focus multiplier and
 FURINA_REFRAME_METER = False      # Fanfare minted by performance, and only by
                                   # performance.
 FURINA_REFRAME_SPOTLIGHT = False  # R228 (1): one mode, priced.
+FURINA_REFRAME_BURST = False      # R251 / `EB-365`: the SHIPPED Burst meter
+                                  # retires under this arm -- it neither draws
+                                  # nor fills, and `let_the_people_rejoice` is
+                                  # never granted. ARM-ONLY: the shared
+                                  # retirement (`EB-199`, `EB-200`) still owns
+                                  # the shipped engines, and nothing outside
+                                  # this flag moves.
 
 # ----------------------------------------------------------------------
 # THE PROTOTYPE SEEDS. Not ruled numbers -- §4.1 says the small/large pair are
@@ -128,6 +135,29 @@ def meter_active(player) -> bool:
 
 def spotlight_active(player) -> bool:
     return FURINA_REFRAME and FURINA_REFRAME_SPOTLIGHT and is_furina(player)
+
+
+def burst_retired(player) -> bool:
+    """`EB-365` (R251). IS THE SHIPPED BURST METER RETIRED FOR THIS PLAYER?
+
+    The round-one seat's meter read `78/70`, over its own cap, and *Let the
+    People Rejoice* arrived off that overflow to take the boss from 28 to 14 --
+    the run's clutch turn, and the shipped kit's rather than the reframe's.
+    R220 B had sequenced the Burst fold last; the pick's new fact is that the
+    shipped meter will sit inside every Furina read until it goes.
+
+    ONE QUESTION, asked by the income funnel (`resources.gain_burst`) and by
+    the kit grant (`combat.grant_charged_kit`), so "she has no Burst meter
+    under the arm" is one decision rather than two that can be retired by
+    halves. Klee's `EB-266` and Kokomi's `EB-327` are the same sentence one
+    character over, and their guards sit at the same funnel.
+
+    ARM-ONLY. The shared retirement (`EB-199`, `EB-200`) still owns the shipped
+    engines: `burst_max`, the ops, the `requires` gate and every other
+    character's meter are untouched here. The mod's twin is
+    `FurinaReframe.BurstRetiredFor`.
+    """
+    return FURINA_REFRAME and FURINA_REFRAME_BURST and is_furina(player)
 
 
 def evoke_focus_mult(player) -> int:
