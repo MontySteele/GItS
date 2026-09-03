@@ -102,8 +102,8 @@ Slay the Spire 2 **v0.111.0**, commit `41cef1ea`, buildid `24724944`, appid
 v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
-`+proto` dev mark (R217 D). **Installed: `0.2.2301+proto`** (2026-09-03,
-main `2c2a94de`, all three arms on, the round-8 build), the three prototype arms behind `-p:PrototypeCards=true`; the
+`+proto` dev mark (R217 D). **Installed: `0.2.2309+proto`** (2026-09-04,
+main `1177b74d`, all three arms on, the round-8 build with #344 to #347), the three prototype arms behind `-p:PrototypeCards=true`; the
 Furina arm needs `-p:FurinaReframe=true` too and ships OFF. **Last RELEASE
 package: `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
 
@@ -140,12 +140,13 @@ are in [`workstreams.md`](workstreams.md).
   second run cleared the spire and named the Splash as the end of the kit's
   one decision (`review/active/klee-overhaul-round-8-2026-09-04.md`, one
   pick: what the Splash pays). [USER] plays on the next deploy.
-- **Kokomi** — Round 4d is read: three Opus seats cleared the spire on the
-  fix build, Aeonglass dead on round 6, and named the Plan layer's one
-  decision as a Sango draw (`review/active/kokomi-overhaul-round-4d-2026-09-03.md`,
-  one pick: the Plan cards' shape). Round five is installed (`EB-334`, Tide
-  Wall and Shell Guard) and its seats play lane 1 before [USER] does. The
-  Kurage memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
+- **Kokomi** — Rounds 4d and 5 are read: round 4d cleared the spire on the
+  fix build (`review/active/kokomi-overhaul-round-4d-2026-09-03.md`, one pick:
+  the Plan cards' shape); round five died twice at the act-1 boss and then
+  cleared it with no fight lost
+  (`review/active/kokomi-overhaul-round-5-2026-09-04.md`, one pick: where a
+  single-target Plan lands). [USER] plays on the installed build. The Kurage
+  memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
   2's five `proto_fr_` rows are built** (2026-09-02): the named deploy, two
