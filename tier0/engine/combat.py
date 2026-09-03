@@ -1350,6 +1350,20 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             if not enemy.alive:
                 # A trap killed the attacker before its hit landed. Same exit
                 # the FlameBarrier case takes at the foot of this loop.
+                #
+                # `EB-336`, AND THIS BREAK IS THE RULE. The blind seat's
+                # Chomper died on its own Mine 4 and its first hit landed
+                # anyway (`opus-act2b`, finding 3) -- in the MOD, where
+                # `CreatureCmd.Damage` reads `dealer.IsDead` once at the top of
+                # a call the Mine fires from the middle of. Here the test is
+                # taken between the trap and the Block spend, so a lethal Mine
+                # costs the player no Block and no HP; the mod reaches the same
+                # acceptance one hook later
+                # (`KleeOverhaulSweepHooks.ModifyHpLostBeforeOsty`), by which
+                # point Block has been spent. Both engines say "a Mine whose
+                # explosion kills the attacker costs Klee no HP"; they differ
+                # on Block, and that is written down on both sides rather than
+                # left to be discovered.
                 break
             block_before = state.player.block
             blocked = min(state.player.block, dmg)

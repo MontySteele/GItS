@@ -49,7 +49,7 @@ public sealed class ProtoMcSucroseAstable : CustomCardModel, ICompanionCard, IHe
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
+        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_astable");
 

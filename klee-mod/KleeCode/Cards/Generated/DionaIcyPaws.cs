@@ -48,7 +48,7 @@ public sealed class DionaIcyPaws : CustomCardModel, ICompanionCard
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false, appliesWithoutHit: true);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("diona_icy_paws");
 

@@ -41,7 +41,7 @@ public sealed class SharedBilling : CustomCardModel, ICharacterCard
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("shared_billing");
 
