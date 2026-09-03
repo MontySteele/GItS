@@ -1212,3 +1212,46 @@
    effects: [],
    plan: [{op: play_copy_of_companion}],
    upgrade: {cost: -1}}
+
+# stand-ins (Hexerei family), PR: hexerei-standins
+# The FAMILY half of the seam, Hexerei-tagged like the Universal each replaces.
+# R236 sec.3; reasoning in docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_mc_albedo_tectonic_tide, name: "Albedo — Tectonic Tide", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
+   cost: 1, type: power,
+   personal_pool: [klee],
+   replaces: proto_mc_albedo_solar_isotoma, art_of: proto_mc_albedo_solar_isotoma,
+   description: "Whenever an [gold]Elemental Reaction[/gold] happens, deal 4 damage to that enemy.",
+   effects: [{op: apply_power, power: mc_tectonic_tide, amount: 4, target: self}]}
+
+- {id: proto_mc_fischl_sinful_hex, name: "Fischl — Undone Be Thy Sinful Hex", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: common, role_c: trigger, element: electro,
+   cost: 1, type: attack,
+   personal_pool: [klee],
+   replaces: proto_mc_fischl_nightrider, art_of: proto_mc_fischl_nightrider,
+   description: "Deal 7 damage. Whenever an [gold]Electro[/gold] [gold]Elemental Reaction[/gold] happens this turn, deal 5 [gold]Electro[/gold] damage to a random enemy.",
+   effects: [{op: damage, amount: 7, target: enemy, applies_element: true},
+             {op: apply_power, power: mc_sinful_hex, amount: 5, target: self}]}
+
+- {id: proto_mc_sucrose_mollis_favonius, name: "Sucrose — Mollis Favonius", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
+   cost: 0, type: skill,
+   personal_pool: [klee],
+   replaces: proto_mc_sucrose_gust, art_of: proto_mc_sucrose_gust,
+   description: "[gold]Swirl[/gold]. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal 4 additional damage.",
+   effects: [{op: swirl, target: enemy},
+             {op: draw, amount: 1},
+             {op: apply_power, power: mc_mollis_favonius, amount: 4, target: self}]}
+
+- {id: proto_mc_nicole_ladder_of_ascent, name: "Nicole — Ladder of Divine Ascent", character: klee,
+   authored_by: [claude], hexerei: true,
+   nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
+   cost: 2, type: power,
+   personal_pool: [klee],
+   replaces: proto_mc_nicole_revelation, art_of: proto_mc_nicole_revelation,
+   description: "Whenever you play a [gold]Hexerei[/gold] card, deal 6 damage of that card's element to a random enemy.",
+   effects: [{op: apply_power, power: mc_ladder_of_ascent, amount: 6, target: self}]}

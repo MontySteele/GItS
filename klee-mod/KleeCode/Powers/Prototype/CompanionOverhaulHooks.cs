@@ -307,6 +307,15 @@ public static class CompanionOverhaulReactions
                 dealer, favor.Amount, ValueProp.Unpowered, null, fast: true);
         }
 
+        // KLEE'S HEXEREI FAMILY, the third, fourth and fifth readers of this
+        // event (QUARANTINED, R236 sec.3): Albedo's Tectonic Tide on ANY
+        // reaction, Sucrose's Mollis Favonius on a DAMAGING one, Fischl's
+        // Sinful Hex on an ELECTRO one -- which is derived from the reaction
+        // and the consumed aura rather than passed, so nothing here widened
+        // for the slice. `KleeMod.Powers.CompanionHexerei` argues all three.
+        await CompanionHexerei.OnReaction(
+            choiceContext, reaction, target, dealer, consumedAura);
+
         if (reaction != Reaction.Swirl) return;
 
         // THE INAZUMA ARM'S Swirl WINDOW, counted here and nowhere else:

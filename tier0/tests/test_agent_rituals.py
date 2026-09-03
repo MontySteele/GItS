@@ -194,12 +194,14 @@ def test_register_io_finds_a_table_by_prefix_and_refuses_an_ambiguous_one():
 # --- agent_worktree.py -----------------------------------------------------
 
 def test_agent_worktree_dry_run_creates_nothing():
-    # `--allow-live-lane` is not incidental. The tool REFUSES a worktree while
-    # a seat is playing on this checkout and is right to, but that turns this
-    # assertion into a question about whether somebody happens to be mid-round
-    # -- it went red under two blind seats on 2026-09-02 and would have been
-    # green an hour later, which is a flake rather than a finding. A dry run
-    # creates nothing by definition, so the flag costs the test nothing.
+    # `--allow-live-lane` because the claim under test is about the DRY RUN and
+    # the live-lane refusal is about the MACHINE: this checkout's seat lanes
+    # come and go while other work runs, so without the switch the test passes
+    # or fails on whether a game happens to be up -- and it failed for exactly
+    # that reason in the pre-push gate on 2026-09-02, blocking every push from
+    # a checkout with a seat in it. The switch weakens nothing here: a dry run
+    # creates no worktree, so there is no second checkout to own the profile,
+    # and the refusal keeps its own coverage below.
     res = _run(["tools/agent_worktree.py", "pytest-should-not-exist",
                 "--task", "build", "--dry-run", "--allow-live-lane"])
     assert res.returncode == 0, res.stdout + res.stderr
