@@ -883,6 +883,11 @@ public static class FurinaResources
         if (!IsFurina(creature)) return;
         await SyncMeter<FanfareMeterPower>(
             choiceContext, creature, Fanfare(creature), cardSource);
+        // `EB-386`: the Spotlight badge follows its mode resource here too.
+        // Same moment and same argument as the meters above -- the resource is
+        // the rule, the power is the display, and a display that has stopped
+        // describing a live rule is what the round-two seat filed.
+        await SpotlightSystem.SyncModeDisplay(choiceContext, creature);
         // Salon stage sync (Track D): every meter-sync moment is also a
         // dry-state moment, and the stage reads composition + Encore here.
         // The member tooltip's live cap rides the same moment, which is what

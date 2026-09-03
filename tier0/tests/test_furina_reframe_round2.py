@@ -38,7 +38,7 @@ from tier0.content import loader
 from tier0.engine import effects, furina_reframe, resources
 from tier0.engine.state import CombatState
 from tier0.tests.conftest import make_enemy
-from understudy import blindplay
+from understudy import blindplay, blindplay_board
 
 FR = furina_reframe
 
@@ -154,12 +154,20 @@ def test_the_shipped_engine_still_prints_that_receipt():
 
 def _meter_row(name, amount, top=None):
     """One combat page, rendered down to its meter row for `name`."""
+    page = _page({name: amount}, top)
+    return next(line for line in page.splitlines()
+                if line.startswith(f"- {name}: "))
+
+
+def _page(meters, top=None):
+    """The rendered combat page for a set of already-labelled meters."""
+    name = next(iter(meters), "")
     obs = {
         "screen": "combat", "state_type": "battle", "blocked": "",
         "combat": {
             "round": 1,
             "you": {"hp": 53, "max_hp": 78, "block": 0, "energy": 3,
-                    "max_energy": 3, "meters": {name: amount},
+                    "max_energy": 3, "meters": meters,
                     "meter_max": {name: top} if top else {},
                     "powers": [], "potions": [], "potion_slots": 3,
                     "relics": []},
@@ -168,9 +176,7 @@ def _meter_row(name, amount, top=None):
         },
         "commands": ["end turn"], "guardrail": "-", "items": [],
     }
-    page = blindplay.render(obs)
-    return next(line for line in page.splitlines()
-                if line.startswith(f"- {name}: "))
+    return blindplay.render(obs)
 
 
 def test_the_encore_row_prints_its_spend_rule_instead_of_the_gap():
@@ -200,3 +206,67 @@ def test_the_encore_meter_rule_is_the_mods_own_sentence():
 
     assert "absorbs incoming damage before HP" in printed
     assert "absorbs incoming damage before HP" in blindplay.METER_RULES["Encore"]
+
+
+# ======================================================================
+# `EB-386` -- the three meters that meant nothing on the page
+# ======================================================================
+
+SPOTLIGHT_CS = (REPO / "klee-mod" / "KleeCode" / "Powers" / "SpotlightSystem.cs")
+
+
+def _combat_page(resources):
+    """One combat page, with the board's meters read off a wire-shaped
+    `player.resources` blob -- which is where the hide has to bite."""
+    meters = blindplay_board._combat(
+        {"state_type": "battle",
+         "player": {"hp": 53, "max_hp": 78, "block": 0, "energy": 3,
+                    "max_energy": 3, "resources": resources, "status": [],
+                    "hand": [], "relics": [], "potions": []},
+         "battle": {"round": 3, "enemies": []}})["you"]["meters"]
+    return _page(meters)
+
+
+def test_the_three_spotlight_meters_do_not_reach_the_page():
+    """"appeared and disappeared in the status list all run and I never worked
+    out what any of them meant" -- and could not have. They are the mod's own
+    bookkeeping: the mode is printed by the two named buffs it selects between,
+    and the two counters back card conditions the cards print themselves."""
+    page = _combat_page({"KLEEMOD_SPOTLIGHT_MODE": 2,
+                         "KLEEMOD_SPOTLIGHT_MOVED": 1,
+                         "KLEEMOD_SPOTLIGHT_PLAYS": 2})
+
+    assert "Spotlight Mode" not in page
+    assert "Spotlight Moved" not in page
+    assert "Spotlight Plays" not in page
+
+
+def test_a_real_meter_beside_them_still_reaches_the_page():
+    """The mutation guard: the hide is a named list, not a Spotlight-shaped
+    hole that would take a future meter with it."""
+    page = _combat_page({"KLEEMOD_SPOTLIGHT_MODE": 2, "KLEEMOD_ENCORE": 4})
+
+    assert "- Encore: 4" in page
+    assert "Spotlight Mode" not in page
+
+
+def test_the_hidden_ids_are_the_ids_the_mod_registers():
+    """Held in step from this side: a rename in `SpotlightSystem.cs` must not
+    quietly put three undefined rows back on the board."""
+    src = SPOTLIGHT_CS.read_text(encoding="utf-8")
+    registered = set(re.findall(r'base\("(KLEEMOD_SPOTLIGHT_[A-Z_]+)"\)', src))
+
+    assert blindplay_board.INTERNAL_METERS <= registered
+
+
+def test_both_spotlight_modes_print_a_duration():
+    """The feed carries no duration field, so a power that does not say when it
+    ends reaches a reader as a buff with no end. Both modes say it now, which
+    is what makes hiding the mode NUMBER safe: the named buff is the surface."""
+    src = SPOTLIGHT_CS.read_text(encoding="utf-8")
+
+    for power in ("CenterStagePower", "GuestCastPower"):
+        body = src[src.index(f"class {power}"):]
+        body = body[:body.index("public override PowerType")]
+        printed = "".join(re.findall(r'"((?:[^"\\]|\\.)*)"', body))
+        assert "Lasts until the [gold]Spotlight[/gold] moves" in printed

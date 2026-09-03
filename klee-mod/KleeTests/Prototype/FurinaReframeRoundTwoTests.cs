@@ -538,6 +538,68 @@ public class FurinaReframeRoundTwoTests
         Assert.EndsWith(".smartDescription", BadgeKey(canonical));
     }
 
+    // ==================================================================
+    // 6. `EB-386` -- Guest Cast's duration, and its badge telling the truth
+    // ==================================================================
+
+    [Fact]
+    public void Guest_cast_prints_when_it_ends()
+    {
+        // The feed carries no duration field at all -- a status row is id,
+        // name, amount, type and text -- so a power that does not say when it
+        // ends reaches a reader as a buff with no end. The seat spent a run
+        // that way: "`Guest Cast` has no printed duration."
+        var power = (GuestCastPower)RuntimeHelpers
+            .GetUninitializedObject(typeof(GuestCastPower));
+        var face = power.Localization!
+            .First(r => r.Item1 == "description").Item2;
+
+        Assert.Contains("Lasts until the [gold]Spotlight[/gold] moves", face);
+    }
+
+    [Fact]
+    public void Center_stage_prints_when_it_ends_too()
+    {
+        // The same sentence on the mode beside it, because a duration printed
+        // on one of a pair reads as a difference between them.
+        var power = (CenterStagePower)RuntimeHelpers
+            .GetUninitializedObject(typeof(CenterStagePower));
+        var face = power.Localization!
+            .First(r => r.Item1 == "description").Item2;
+
+        Assert.Contains("Lasts until the [gold]Spotlight[/gold] moves", face);
+    }
+
+    [Fact]
+    public void The_guest_cast_badge_comes_back_when_the_mode_still_holds()
+    {
+        // The seat watched this badge leave the status list "while
+        // `Spotlight Mode: 2` stayed and Companion cards kept showing boosted
+        // numbers". The MODE is the rule and the badge is the display, so a
+        // badge missing under a live mode is a display that has stopped
+        // describing it. STRUCTURAL for the apply itself, which needs a
+        // combat; REAL for the decision, which is the whole of the defect.
+        var calls = Il.Calls(Il.Method("SpotlightSystem", "SyncModeDisplay"));
+
+        Assert.Contains("SpotlightSystem.Mode", calls);
+        Assert.Contains("PowerCmd.Apply", calls);
+        Assert.DoesNotContain("PowerCmd.Remove", calls);
+        Assert.Contains("SpotlightSystem.SyncModeDisplay",
+            Il.Calls(Il.Method("FurinaResources", "SyncMeters")));
+    }
+
+    [Fact]
+    public void The_badge_sync_grants_no_rule_and_claims_no_other_seat()
+    {
+        // It cannot grant an effect, because nothing reads these powers: every
+        // Spotlight predicate reads the mode RESOURCE. What it can do wrong is
+        // fire for the Klee at the other side of a co-op table, so the
+        // identity gate is asked first, the way every Furina hook asks it.
+        var calls = Il.Calls(Il.Method("SpotlightSystem", "SyncModeDisplay"));
+
+        Assert.Contains("FurinaResources.IsFurina", calls);
+    }
+
     private static IDictionary<Creature, object?> CompanyCombat() =>
         (IDictionary<Creature, object?>)typeof(SalonMemberPower)
             .GetField("CompanyCombat", HeadlessGame.All)!

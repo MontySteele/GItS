@@ -26,6 +26,39 @@ from understudy.blindplay_shape import SELECT_SCREENS
 # in the order they are checked, each in the page's own plain words. The
 # register that answers the second is `qa_packet.no_upgrade_index`, and only
 # its ID SET crosses -- its rows' prose names ruling numbers.
+# `EB-386`. THE MOD'S OWN BOOKKEEPING, KEPT OFF THE BOARD.
+#
+# The round-two seat: "The three meters `Spotlight Mode`, `Spotlight Moved` and
+# `Spotlight Plays` appeared and disappeared in the status list all run and I
+# never worked out what any of them meant." Nor could it: the wire reports
+# every resource the mod REGISTERED, and these three are internal state, not a
+# currency anybody holds, spends or plans around.
+#
+# WHY HIDDEN AND NOT DEFINED, which was the row's choice. Each of the three
+# already has a surface that states its rule in words:
+#
+#   `Spotlight Mode` is an enum ordinal, and the two BUFFS it selects between
+#     -- Center Stage and Guest Cast -- are named rows in the status list with
+#     their own text and, since `EB-386`, their own duration. A number that
+#     duplicates a named buff, in a spelling only the source can read, is a
+#     second surface for one fact and the worse of the two. The mod-side half
+#     of the row makes that buff follow the mode, so the named surface cannot
+#     go missing while the number stays.
+#   `Spotlight Moved` and `Spotlight Plays` are per-turn counters that back
+#     card CONDITIONS, and every card that reads one prints its own condition
+#     on its face. The counter is the implementation of a sentence the reader
+#     already has.
+#
+# So defining them would put three glossary rows on the page to explain three
+# rows that should not be on the page. Keyed by the WIRE id rather than the
+# printed name, because that is what the mod declares and what a rename here
+# would silently stop matching.
+INTERNAL_METERS = frozenset({
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+})
+
 ALREADY_UPGRADED = "already upgraded; an upgraded copy cannot be upgraded again"
 NO_UPGRADE_DEFINED = "this build defines no upgrade for it"
 UNEXPLAINED_OMISSION = ("on the screen's list nowhere, and nothing on the feed "
@@ -113,8 +146,11 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             # every meter the mod REGISTERED, so a board with no Spotlight on
             # it would otherwise print "Spotlight Mode: 0" and teach the tester
             # something this screen does not show.
+            # `EB-386`: and NOT the mod's own bookkeeping. See
+            # `INTERNAL_METERS`.
             "meters": ({_label(k): _int(v) for k, v in resources.items()
-                        if _int(v)} if isinstance(resources, dict) else {}),
+                        if _int(v) and k not in INTERNAL_METERS}
+                       if isinstance(resources, dict) else {}),
             # `EB-181`: the CEILING beside the amount, per meter, where the
             # meter declares one. `{printed name: max}`, and a meter that
             # declares none is simply absent from this map -- so the row for
