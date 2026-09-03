@@ -191,7 +191,7 @@ RETIRED_IRREGULAR: frozenset[str] = frozenset({"S4-G11", "S4-G6", "S4-G14"})
 # S4-G11 left this manifest 2026-08-30 with its row, ruled in all three parts
 # by R231: Backstroke KEPT, Tengu Flurry KEPT with `chinowa_ward` renamed
 # `chinju_ward`, and the EB-82 Grave conversion taking the Liyue / Nameless
-# Cairn labels. S4-G6 STAYS -- R231 answered only its MECHANISM.
+# Cairn labels. S4-G6 and S4-G14 followed under R250 (2026-09-04), overtaken.
 OPEN_IRREGULAR: frozenset[str] = frozenset({
     "CC-G1", "CC-G2", "S4-G12", "S4-G17",
     "SKIP-10.9",
@@ -613,17 +613,17 @@ def self_test() -> list[str]:
         bad.append(f"self-test: rule 6 (a manifest entry that outlived its "
                    f"row) did not fire: {stale}")
 
-    irregular = _run({Q: "| `S4-G6` | live |\n| `S4-G7` | re-taken |", B: ""},
-                     ceilings={}, open_ids={}, open_irregular={"S4-G6"})
-    if not any(f.startswith("UNRECORDED ID:") and "S4-G7" in f
+    irregular = _run({Q: "| `S4-G8` | live |\n| `S4-G9` | re-taken |", B: ""},
+                     ceilings={}, open_ids={}, open_irregular={"S4-G8"})
+    if not any(f.startswith("UNRECORDED ID:") and "S4-G9" in f
                for f in irregular):
         bad.append(f"self-test: an unrecorded irregular id was accepted: "
                    f"{irregular}")
 
-    irregular_stale = _run({Q: "| `S4-G6` | live |", B: ""},
+    irregular_stale = _run({Q: "| `S4-G8` | live |", B: ""},
                            ceilings={}, open_ids={},
-                           open_irregular={"S4-G6", "S4-G7"})
-    if not any(f.startswith("STALE MANIFEST ENTRY:") and "S4-G7" in f
+                           open_irregular={"S4-G8", "S4-G9"})
+    if not any(f.startswith("STALE MANIFEST ENTRY:") and "S4-G9" in f
                for f in irregular_stale):
         bad.append(f"self-test: a stale irregular entry was accepted: "
                    f"{irregular_stale}")
@@ -636,7 +636,7 @@ def self_test() -> list[str]:
                    f"{foreign}")
 
     fitting = _run({Q: "| `M10` | a |",
-                    B: "| `EB-1` | b |\n| `S4-G6` | c |"})
+                    B: "| `EB-1` | b |\n| `S4-G8` | c |"})
     if fitting:
         bad.append(f"self-test: a manifest that exactly fits its registers "
                    f"produced findings: {fitting}")
