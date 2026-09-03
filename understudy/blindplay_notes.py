@@ -195,8 +195,12 @@ AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
 # otherwise. It is the ONE row with a hole in it, and the hole is a number the
 # card face already prints.
 ARM_KEYWORDS: dict[str, str] = {
-    "Bomb": ("A charge on an enemy: grows {growth} a turn, goes off only "
-             "when Set off, all at once. Its hit takes the enemy's "
+    # "EACH" IS `EB-340`'s, and it stays: the act-1 seat found growth is
+    # +{growth} PER BOMB (Bomb 5 + Bomb 8 -> 21, not 17) and no wording said
+    # so. In game the badge carries that fact ("Each grows at the start of
+    # your turn"); the seat page has no badge, so the glossary says it.
+    "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
+             "only when Set off, all at once. Its hit takes the enemy's "
              "debuffs, not yours."),
     "Set off": ("Every Bomb on the target goes off first, one at a time, "
                 "each a Pyro hit for its size."),

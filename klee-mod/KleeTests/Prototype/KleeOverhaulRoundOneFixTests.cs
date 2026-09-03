@@ -315,10 +315,16 @@ public class KleeOverhaulRoundOneFixTests
         // And the default is the OTHER way, so every source that is not a Bomb
         // -- the echo, the Burst volley, the companion arms, Oz -- still
         // carries her Strength without saying anything.
-        var applyDealerMods = Il.Method("ElementalHit", "Deal").GetParameters()
-            .Single(p => p.Name == "applyDealerMods");
-        Assert.True(applyDealerMods.HasDefaultValue);
-        Assert.Equal(true, applyDealerMods.DefaultValue);
+        //
+        // `powered` IS THE KOKOMI ARM'S FLAG AND THIS ARM JOINED IT rather
+        // than adding a second parameter meaning the same thing: `EB-334`
+        // gives the Bake-Kurage a Plan's damage, `EB-343` takes Klee out of a
+        // Bomb, and both are the same edit to the same pipeline stage. The
+        // door above is what keeps THIS caller readable to a pin.
+        var powered = Il.Method("ElementalHit", "Deal").GetParameters()
+            .Single(p => p.Name == "powered");
+        Assert.True(powered.HasDefaultValue);
+        Assert.Equal(true, powered.DefaultValue);
     }
 
     [Fact]

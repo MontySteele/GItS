@@ -4591,17 +4591,25 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     5 + Bomb 8 -> 21, not 17), which neither wording says."
 
     Seen to FAIL: the old sentence carried neither the number nor "each".
+
+    `EB-343` (R248) REWROTE THE TIP THIS SCRAPES, and both of this test's
+    claims survive it. [USER] held the in-game word to its 135-character
+    ceiling, so the tip reads "A charge on an enemy: grows 4 a turn, goes off
+    only when Set off, all at once. Its hit takes the enemy's debuffs, not
+    yours." The glossary keeps "each" on top of it, because the fact that
+    growth is PER BOMB lives on the badge in game and the seat page has no
+    badge.
     """
     page = blindplay.observe(keyword_hand_state(["Set off. Place a Bomb 4."]))
-    assert (f"- **Bomb** — A charge on an enemy. Each Bomb grows by "
-            f"{blindplay.BOMB_GROWTH} at the start of your turn.") in page
+    assert (f"- **Bomb** — A charge on an enemy: each grows "
+            f"{blindplay.BOMB_GROWTH} a turn,") in page
     # LIVE FIRST: where the screen's own tip carries the number, that number is
     # what the glossary prints -- the fallback is for a screen that prints the
     # WORD with no tip on it, which is an enemy's badge and a reward row.
     live_tip = blindplay.observe(elemental_hand_state(
-        bomb_tip="A charge on an enemy. Grows by 9 at the start of your turn. "
-                 "Never goes off by itself."))
-    assert "Each Bomb grows by 9 at the start of your turn" in live_tip
+        bomb_tip="A charge on an enemy: grows 9 a turn, goes off only when "
+                 "Set off, all at once."))
+    assert "each grows 9 a turn" in live_tip
 
 
 def test_the_bomb_growth_fallback_is_the_mods_own_constant():
