@@ -1573,3 +1573,69 @@ written down here because it is the arm's most visible side effect.
 THE DELETION RULE AT THE TOP OF THE SHEET BINDS THIS BLOCK: these rows leave
 when the arm is accepted or rejected.
 ```
+
+## `proto_mi_gorou_crystal_collapse` — Kokomi's Personal (R236, 2026-09-02)
+
+```
+GOROU — CRYSTAL COLLAPSE, and it is the Inazuma workshop's ONE Personal:
+"Plan: play a copy of the last other Companion card you played this turn."
+1 Energy, Skill, Uncommon, Geo, four-star, upgrade 1 -> 0.
+
+WHY IT IS NOT ONE OF THE TWENTY-FOUR. A Personal is a character's kit rather
+than a companion offer. It carries `personal_pool: kokomi`, so it enters the
+arm's ROSTER (a row that never did could not be offered to its own character
+either) through `C.INAZUMA_OVERHAUL_PERSONAL_IDS` /
+`CompanionOverhaulRoster.InazumaPersonals`, and the offer layer's own
+`personal_pool in (None, character_id)` filter -- Prune's door since the
+shipped Mondstadt sheet -- keeps it out of everybody else's slot. It is
+deliberately absent from `C.INAZUMA_OVERHAUL_POOL_IDS`, whose every id is
+asserted `personal_pool is None`.
+
+WHY `character: kokomi` ON AN INAZUMA COMPANION ROW. The row prints a `plan:`
+line, and `gen_klee_cards.card_level_reason` refuses one on any character but
+Kokomi: the emitted body calls her queue and the row declares a pet-accepting
+TargetType, so a Plan on anybody else's row would be a rule that character does
+not have wearing a schema key. The other twenty-four Inazuma rows are
+`character: klee` because they print nothing of hers.
+
+THE ONE NEW CLAUSE: `play_copy_of_companion` / `KokomiPlan.Kind.
+PlayCopyOfCompanion`. Two readings the printed text left open, both taken the
+same way in both engines:
+
+  * WHEN IS THE CARD CHOSEN? At WRITING time, not at carry-out. "This turn" is
+    a fact about the turn the Plan was written on and the Plan resolves on the
+    next one, so a read at the morning would find nothing on almost every
+    board. The captured card rides the entry (`PlanEntry.card` /
+    `Planned.Card`), which is the field `replay_exhausted` already uses.
+  * WHAT IS "OTHER"? The card writing the Plan is excluded by IDENTITY, so a
+    second copy of Crystal Collapse played earlier the same turn IS other. In
+    the mod the exclusion is free (the recorder is an `AfterCardPlayed`
+    listener and this runs in `OnPlay`); in the sim it is necessary
+    (`combat._finish_play` records the play before the body resolves). Both
+    engines assert it, so the two say so for the same reason.
+
+A COPY, NOT THE CARD. Moon's Reflection takes its chosen card OUT of the
+exhaust pile and plays that instance; this leaves the original where the first
+play sent it and plays a clone (`ICombatState.CloneCard` / `copy.deepcopy`, the
+same idiom Anger's self-clone uses), exhausted after so the deck is neither one
+card shorter nor one longer. The aim is `KokomiPlan.FrontEnemy`, the reader
+every planned hit already uses.
+
+THE EMPTY CASE IS WRITTEN DOWN, not refused: a turn with no other Companion in
+it queues a Plan that carries out as nothing. Refusing to queue would make the
+pending-Plans badge and the strip lie about the queue's depth, and the face
+says what it does with nothing. The strip says which card it holds --
+"Crystal Collapse: Gorou — Juuga: Forward Unto Victory", or "Crystal Collapse:
+nothing" -- through `KokomiPlan.Entry.Label`, the only Plan that overrides its
+strip line.
+
+NEREID'S ASCENSION DOUBLES IT like any other Plan, which is two copies; nothing
+about this clause is special to `ResolveAll`'s drain loop.
+
+ART: `art_of: proto_mi_gorou_juuga`, so the row borrows an illustration Gorou's
+Universals already staged rather than minting an `art/plan.tsv` row for a
+fourth picture of the same character.
+
+THE DELETION RULE AT THE TOP OF THE SHEET BINDS THIS ROW: it leaves when the
+arm is accepted or rejected.
+```

@@ -54,6 +54,16 @@ from tier0.engine.state import Card, CombatState, Enemy, PlanEntry
 PLAN_KINDS = frozenset((
     "draw", "energy", "block", "mend", "damage", "damage_quarter_max_hp",
     "damage_per_companion_last_turn", "apply_power", "plan_twice",
+    "play_copy_of_companion",
+))
+
+#: The clauses that carry NO `amount`. Both are whole rules rather than
+#: numbers: Sango Isshin's quarter of Max HP is derived at carry-out, and
+#: Crystal Collapse's copy is a CARD rather than a size. Named once because
+#: `plan_shape_reason` asks it twice and `gen_klee_cards.plan_reason` asks the
+#: same question from the other side.
+PLAN_AMOUNTLESS_OPS = frozenset((
+    "damage_quarter_max_hp", "play_copy_of_companion",
 ))
 
 #: The two debuffs a Plan may apply. `KokomiPlan.PLAN_APPLY_POWERS`' twin.
@@ -75,13 +85,21 @@ PLAN_AIMED_OPS = frozenset((
 #: `effects.OPS` still registers them -- the loader validates a `plan:` list
 #: through the same vocabulary check the body takes -- and the registered
 #: handler refuses, which is what makes "plan-only" true rather than intended.
-PLAN_ONLY_OPS = frozenset(("plan_twice", "damage_per_companion_last_turn"))
+PLAN_ONLY_OPS = frozenset(("plan_twice", "damage_per_companion_last_turn",
+                           "play_copy_of_companion"))
 
 #: The one clause the SHEET cannot spell, minted by Moon's Reflection when the
 #: card it reaches has no Plan line of its own. It never appears in a `plan:`
 #: list (`plan_shape_reason` refuses it there), so it is kept out of
 #: `PLAN_KINDS` and handled beside them.
 REPLAY_EXHAUSTED = "replay_exhausted"
+
+#: Crystal Collapse's clause (R236, the Inazuma workshop's one Personal). The
+#: SHEET spells it, unlike `replay_exhausted` above, because the card prints
+#: it: "Plan: play a copy of the last other Companion card you played this
+#: turn." What it holds is decided when the Plan is WRITTEN and carried out at
+#: the morning, which is the whole shape of the card -- see `schedule`.
+PLAY_COPY_OF_COMPANION = "play_copy_of_companion"
 
 #: Sango Isshin's divisor. An inline literal on BOTH sides -- the C# writes
 #: `(int)kokomi.MaxHp / 4` in `KokomiRules.QuarterOfMaxHp` and holds no named
@@ -158,7 +176,7 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
             return (f"plan clause {op!r} is not one of the planned clauses "
                     f"{sorted(PLAN_KINDS)}")
         allowed = {"op"}
-        if op != "damage_quarter_max_hp":
+        if op not in PLAN_AMOUNTLESS_OPS:
             allowed.add("amount")
         if op in PLAN_AIMED_OPS:
             allowed.add("target")
@@ -168,7 +186,7 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
         if unknown:
             return (f"plan clause {op} field(s) {sorted(unknown)} "
                     "not understood")
-        if op != "damage_quarter_max_hp":
+        if op not in PLAN_AMOUNTLESS_OPS:
             amount = eff.get("amount")
             # A LITERAL POSITIVE INT, the `spend_spark_amount` /
             # `block_at_turn_start_turns` precedent: a Plan's amount is read a
@@ -284,6 +302,47 @@ def _intends_to_attack(enemy: Enemy) -> bool:
 # WRITING A PLAN
 # ---------------------------------------------------------------------------
 
+def last_other_companion(state: CombatState,
+                         card: Card) -> Optional[Card]:
+    """"The last other Companion card you played this turn" -- Crystal
+    Collapse's whole reading, and the ONE place it is decided.
+
+    BY IDENTITY, not by id, and it has to be here rather than "the last entry
+    of the list": `combat._finish_play` records a play BEFORE the card's body
+    resolves, so by the time this card's Plan is written the card ITSELF is
+    already the last thing on the list. "Other" is the word the face prints
+    and this is where it is honoured; a second copy of Crystal Collapse played
+    earlier in the same turn IS other, which is why the test is identity.
+
+    THE C# NEEDS NO SUCH GUARD and keeps one anyway: there `AfterCardPlayed`
+    fires after `OnPlay`, so the ledger's last-Companion is still the previous
+    card when the Plan is written -- the same answer by a different route, and
+    the identity test is what makes the two engines say so for the same
+    reason rather than by accident.
+    """
+    for played in reversed(state.kk_companions_this_turn):
+        if played is not card:
+            return played
+    return None
+
+
+def plan_label(card: Card, held: Optional[Card]) -> str:
+    """What the strip prints for a Plan that HOLDS a card.
+
+    `KokomiPlan.Entry.Label`'s twin. An ordinary Plan's strip line is the
+    writing card's name; this one has to say WHICH card it caught, because the
+    same face means a different thing every time it is written and a player who
+    cannot see the answer cannot plan around it.
+
+    THE SHORT NAME IS THE HALF AFTER THE EM DASH. A companion row is named
+    "<Character> — <Card>", so the strip prints "Crystal Collapse: ..." rather
+    than repeating Gorou twice in one line. The HELD card keeps its whole name,
+    which is what the player will see resolve.
+    """
+    short = card.name.split("—")[-1].strip() or card.name
+    return f"{short}: {held.name if held is not None else 'nothing'}"
+
+
 def schedule(state: CombatState, card: Card,
              clauses: Optional[Sequence[dict]] = None,
              replay: Optional[Card] = None) -> None:
@@ -305,10 +364,26 @@ def schedule(state: CombatState, card: Card,
     body = list(clauses if clauses is not None else card.plan)
     if not body:
         return
-    entry = PlanEntry(card_id=card.id, clauses=body, card=replay)
+    # CRYSTAL COLLAPSE CAPTURES AT WRITING TIME, and that is the card. "The
+    # last other Companion card you played THIS TURN" is a fact about the turn
+    # the Plan was written on, and the Plan resolves on the next one -- so
+    # asking at carry-out would read a turn the face never named and, on the
+    # usual morning, find nothing at all. The captured card rides `entry.card`,
+    # the one field a Plan already uses to hold an object (`replay_exhausted`),
+    # and an EMPTY capture is written down rather than refused: the face says
+    # what it does with nothing, and a Plan that silently declined to queue
+    # would make the strip lie about the queue's depth.
+    held = replay
+    label: Optional[str] = None
+    if replay is None and any(c.get("op") == PLAY_COPY_OF_COMPANION
+                              for c in body):
+        held = last_other_companion(state, card)
+        label = plan_label(card, held)
+    entry = PlanEntry(card_id=card.id, clauses=body, card=held, label=label)
     state.kk_plan_queue.append(entry)
     state.emit("plan_written", card=card.id, clauses=len(body),
-               queued=len(state.kk_plan_queue))
+               queued=len(state.kk_plan_queue),
+               holds=None if held is None else held.id)
     if state.player.powers.get(PLANS_ALSO_NOW, 0):
         _resolve_entry(state, entry, why="also_now")
 
@@ -517,6 +592,8 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         wear_plan_twice(state, amount)
     elif op == REPLAY_EXHAUSTED:
         _replay(state, entry.card)
+    elif op == PLAY_COPY_OF_COMPANION:
+        _play_copy(state, entry.card)
     else:                                   # unreachable: shape-checked at load
         raise ValueError(f"unknown plan clause {op!r}")
 
@@ -606,6 +683,40 @@ def _replay(state: CombatState, card: Optional[Card]) -> None:
     effects._free_play(state, card, force_exhaust=False)
 
 
+def _play_copy(state: CombatState, card: Optional[Card]) -> None:
+    """Crystal Collapse's morning: play a free COPY of the card it caught.
+
+    A COPY, WHICH IS THE DIFFERENCE FROM `_replay` ABOVE. Moon's Reflection
+    takes the chosen card OUT of the exhaust pile and plays that instance;
+    this one leaves the original wherever it went (its discard pile, usually,
+    where the deck can draw it again) and plays a clone. `copy.deepcopy` is the
+    engine's own clone idiom -- Anger's `add_card: self` uses it at the one
+    other site a card is duplicated mid-combat -- so the copy inherits the
+    original's upgrade state, which is what "a copy of the card you played"
+    says.
+
+    EXHAUSTED AFTER, and it is `force_exhaust` rather than a keyword written
+    onto the clone, so the copy leaves combat however its own printed keywords
+    would have routed it and then goes to the exhaust pile regardless. A copy
+    that returned to the discard pile would be a second permanent card in the
+    deck for one Energy.
+
+    A PLAN THAT CAUGHT NOTHING IS A PRINTED NO-OP, the shape a blocked Kurage
+    memory and an empty `resolve_front` already have: the face says what it
+    does when there was no other Companion, so this is the rule and not a
+    failure.
+    """
+    import copy as _copy
+
+    from tier0.engine import effects                # late import: cycle
+
+    if card is None:
+        state.emit("plan_copy_empty")
+        return
+    state.emit("plan_copy", card=card.id)
+    effects._free_play(state, _copy.deepcopy(card), force_exhaust=True)
+
+
 def wear_plan_twice(state: CombatState, turns: int) -> None:
     """Nereid's Ascension: "for 2 turns, the jellyfish carries out every Plan
     twice."
@@ -652,6 +763,10 @@ def roll_turn(state: CombatState) -> None:
     state.companion_plays_last_turn = state.companion_plays_this_turn
     state.kk_once_per_turn.clear()
     state.kk_plan_carried_out_this_turn = False
+    # Crystal Collapse's "this turn". It is CLEARED rather than handed over:
+    # the capture happens while the Plan is written, so what survives the
+    # boundary is the captured card on the entry and never the list.
+    state.kk_companions_this_turn.clear()
 
 
 def tick_windows(state: CombatState) -> None:
@@ -697,6 +812,12 @@ def note_companion_played(state: CombatState, card: Card) -> None:
     """
     if not live(state) or not card.is_companion:
         return
+    # CRYSTAL COLLAPSE'S MEMORY, recorded FIRST and unconditionally: this hook
+    # is the arm's one definition of "she played a Companion card", and the
+    # Banner's own `if not n` below is a fact about the Banner rather than
+    # about the play. A recorder behind that return would remember nothing on
+    # every board where the power is not out.
+    state.kk_companions_this_turn.append(card)
     n = state.player.powers.get(GENERALS_BANNER, 0)
     if not n:
         return

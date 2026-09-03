@@ -194,6 +194,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkVanguard>(),
             ModelDb.Card<ProtoKkWarCouncil>(),
             ModelDb.Card<ProtoKuragesOathMemory>(),
+            ModelDb.Card<ProtoMiGorouCrystalCollapse>(),
             ModelDb.Card<ProtoMusterSubsidyFunnel>(),
             ModelDb.Card<ProtoPearlBarrageTurn>(),
         };

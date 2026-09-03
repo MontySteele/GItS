@@ -86,6 +86,12 @@ public static class KokomiPlan
         ApplyVulnerable,
         PlanTwice,
         ReplayExhausted,
+        // R236, Gorou's Crystal Collapse (the Inazuma workshop's one
+        // Personal): "Plan: play a copy of the last other Companion card you
+        // played this turn." The card it holds is captured when the Plan is
+        // WRITTEN -- see <see cref="Schedule"/> -- and a copy of it is played
+        // for free at the morning.
+        PlayCopyOfCompanion,
     }
 
     /// <summary>
@@ -109,9 +115,12 @@ public static class KokomiPlan
     }
 
     /// <summary>
-    /// One scheduled clause. <paramref name="Card"/> is only ever set for
-    /// <see cref="Kind.ReplayExhausted"/> -- Moon's Reflection's chosen card --
-    /// and is the one place a Plan holds an object rather than a number.
+    /// One scheduled clause. <paramref name="Card"/> is set for
+    /// <see cref="Kind.ReplayExhausted"/> (Moon's Reflection's chosen card)
+    /// and for <see cref="Kind.PlayCopyOfCompanion"/> (Crystal Collapse's
+    /// captured Companion), and is the one place a Plan holds an object rather
+    /// than a number. Both are filled in when the Plan is written, never read
+    /// off the board at carry-out.
     /// </summary>
     public readonly record struct Planned(
         Kind Kind, int Amount, Aim Aim, CardModel? Card = null);
@@ -122,10 +131,18 @@ public static class KokomiPlan
     /// on the jellyfish -- and for nothing else; the clauses are the whole of
     /// what will happen.
     /// </summary>
-    public sealed record Entry(CardModel? Source, IReadOnlyList<Planned> Clauses)
+    public sealed record Entry(CardModel? Source, IReadOnlyList<Planned> Clauses,
+                              string? Label = null)
     {
-        /// <summary>What the strip prints for this Plan.</summary>
-        public string Title => Source?.Title.ToString() ?? "Plan";
+        /// <summary>What the strip prints for this Plan.
+        ///
+        /// <paramref name="Label"/> WINS WHERE ONE IS SET, and only a Plan
+        /// that HOLDS a card sets one (R236): Crystal Collapse's face means a
+        /// different thing every time it is written, so the strip has to say
+        /// which card it caught -- "Crystal Collapse: Gorou &#8212; Juuga",
+        /// or "Crystal Collapse: nothing" for a turn with no other Companion
+        /// in it. Every other Plan is its own card's name, unchanged.</summary>
+        public string Title => Label ?? Source?.Title.ToString() ?? "Plan";
     }
 
     private static object? _combat;
@@ -184,7 +201,36 @@ public static class KokomiPlan
             queue = new List<Entry>();
             _queues[player] = queue;
         }
-        var entry = new Entry(source, clauses.ToList());
+        // R236, CRYSTAL COLLAPSE CAPTURES AT WRITING TIME. "The last other
+        // Companion card you played THIS TURN" is a fact about the turn the
+        // Plan was written on, and the Plan resolves on the next one -- so
+        // asking at carry-out would read a turn the face never named and, on
+        // the usual morning, find nothing at all.
+        //
+        // "OTHER" IS FREE HERE and is asserted anyway. This runs inside
+        // `OnPlay`, and the ledger's own recorder is an `AfterCardPlayed`
+        // listener, so the card writing the Plan has not been recorded yet;
+        // the identity test below says so out loud rather than resting on
+        // listener order, and it is the same guard the sim needs for real
+        // (there the play is recorded BEFORE the body resolves).
+        var body = clauses.ToList();
+        string? label = null;
+        CardModel? held = null;
+        if (body.Any(c => c.Kind == Kind.PlayCopyOfCompanion))
+        {
+            held = KokomiOverhaulLedger.For(kokomi)
+                                       .LastCompanionPlayedThisTurn;
+            if (held == source) held = null;
+            for (var i = 0; i < body.Count; i++)
+            {
+                if (body[i].Kind == Kind.PlayCopyOfCompanion)
+                {
+                    body[i] = body[i] with { Card = held };
+                }
+            }
+            label = Label(source, held);
+        }
+        var entry = new Entry(source, body, label);
         int before = queue.Count;
         queue.Add(entry);
         await Sync(choiceContext, kokomi,
@@ -227,6 +273,25 @@ public static class KokomiPlan
             ? planned.PlanClauses
             : new[] { new Planned(Kind.ReplayExhausted, 1, Aim.Self, pick) };
         await Schedule(choiceContext, owner.Creature, pick, clauses);
+    }
+
+    /// <summary>
+    /// What the strip prints for a Plan that HOLDS a card (R236).
+    ///
+    /// THE SHORT NAME IS THE HALF AFTER THE EM DASH. A companion row is named
+    /// "&lt;Character&gt; &#8212; &lt;Card&gt;", so the line reads "Crystal
+    /// Collapse: ..." rather than repeating Gorou twice inside one strip
+    /// entry. The HELD card keeps its whole name, because that is the card the
+    /// player will watch resolve. <c>kokomi_plan.plan_label</c> is the twin.
+    /// </summary>
+    private static string Label(CardModel? source, CardModel? held)
+    {
+        var name = source?.Title.ToString() ?? "Plan";
+        var cut = name.LastIndexOf('—');
+        var shortName = cut >= 0 ? name.Substring(cut + 1).Trim() : name;
+        if (shortName.Length == 0) shortName = name;
+        var what = held?.Title.ToString() ?? "nothing";
+        return $"{shortName}: {what}";
     }
 
     /// <summary>Keyed on the VERB, the way Rally's search screen was: one
@@ -420,6 +485,10 @@ public static class KokomiPlan
             case Kind.ReplayExhausted:
                 await Replay(choiceContext, player, plan.Card);
                 break;
+
+            case Kind.PlayCopyOfCompanion:
+                await PlayCopy(choiceContext, kokomi, plan.Card);
+                break;
         }
     }
 
@@ -498,6 +567,44 @@ public static class KokomiPlan
         if (card == null) return;
         await CardPileCmd.Add(card, PileType.Hand, CardPilePosition.Top);
         await CardCmd.AutoPlay(choiceContext, card, null);
+    }
+
+    /// <summary>
+    /// Crystal Collapse's morning (R236): play a free COPY of the Companion
+    /// card it caught.
+    ///
+    /// A COPY, WHICH IS THE DIFFERENCE FROM <see cref="Replay"/> ABOVE. Moon's
+    /// Reflection takes the chosen card OUT of the exhaust pile and plays that
+    /// instance; this leaves the original wherever the first play sent it and
+    /// plays a clone, so the deck is not quietly one card shorter for having
+    /// used the Plan. <c>ICombatState.CloneCard</c> is the mod's own clone
+    /// door and is what <c>KurageMemory.Fire</c> uses one file over, so the
+    /// copy carries the original's upgrade state -- which is what "a copy of
+    /// the card you played" says.
+    ///
+    /// EXHAUSTED AFTER, through the game's own pile rule rather than a special
+    /// case: <c>ExhaustOnNextPlay</c> is the flag <c>CardCmd.AutoPlay</c>'s
+    /// routing already reads, so the copy leaves play into the exhaust pile
+    /// whatever its printed keywords say. A copy that landed in the discard
+    /// pile would be a second permanent card in the deck for one Energy.
+    ///
+    /// THE AIM IS THE PLAN'S OWN, <see cref="FrontEnemy"/>, which is the
+    /// reader every planned hit already uses -- so a copied Attack lands where
+    /// a planned one would and the arm has one answer to "where does a Plan
+    /// point".
+    ///
+    /// A PLAN THAT CAUGHT NOTHING IS A PRINTED NO-OP, the shape
+    /// <see cref="ResolveFront"/>'s empty queue already has: the face says
+    /// what it does when there was no other Companion.
+    /// </summary>
+    private static async Task PlayCopy(
+        PlayerChoiceContext choiceContext, Creature kokomi, CardModel? card)
+    {
+        if (card == null) return;
+        if (kokomi.CombatState is not { } combat) return;
+        var copy = combat.CloneCard(card);
+        copy.ExhaustOnNextPlay = true;
+        await CardCmd.AutoPlay(choiceContext, copy, FrontEnemy(kokomi));
     }
 
     /// <summary>
