@@ -1724,7 +1724,7 @@ APPLY_POWERS = {
         "Once per turn, when the jellyfish carries out a [gold]Plan[/gold], "
         "gain {X} Block."),
     "kk_plans_also_now": ("PlansAlsoNowPower", None,
-        "[gold]Plans[/gold] also happen now."),
+        "[gold]Plans[/gold] also happen now, as you write them."),
     "kk_clouds_like_waves": ("CloudsLikeWavesPower", None,
         "Whenever you apply a debuff to an enemy, gain {X} Block."),
     "kk_generals_banner": ("GeneralsBannerPower", None,

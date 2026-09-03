@@ -869,7 +869,7 @@
 - {id: proto_kk_the_moon_overlooks_the_waters, name: "The Moon Overlooks the Waters", character: kokomi,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "[gold]Plans[/gold] also happen when played.",
+   description: "[gold]Plans[/gold] also happen now, as you write them.",
    effects: [{op: apply_power, power: kk_plans_also_now, amount: 1, target: self}]}
 
 # --- the Priestess: Block through the jellyfish, Mend at Rare (packet sec.4) ---
