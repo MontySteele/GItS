@@ -27,11 +27,15 @@ plus six, against 17 incoming.
 
 **The stand-ins never appeared, and that is a defect, not a draft.** The seat
 was handed "Diona — Icy Paws (proto)" as Klee. The ruled structure says Klee
-is handed "Diona — Shaken, Not Purred" in its place. Every companion the seat
-saw came through the relic's fourth reward slot, which the seam built in
-#315 does not route through its hand-off. So this round tested none of the
-caretaker rows it was built to test, and your own run would not either.
-`EB-320`; the diagnosis and fix are in flight and land before your run.
+is handed "Diona — Shaken, Not Purred" in its place. The cause is found: the
+stand-in rows spell their owner as a one-item list, `personal_pool: [klee]`,
+and the C# emitter printed that list's Python spelling, `"['klee']"`, as the
+owner, which matches no character, so the hand-off answered "no" at both of
+its mouths while the sim, which normalises the spelling, swapped correctly
+the whole time. Two engines disagreeing with every test green, because the
+C# rule had no headless pin. PR #317 fixed the emitter the same night; the
+pin and the live look are `EB-320`. So this round tested none of the
+caretaker rows it was built to test, and your run waits for the fix build.
 
 **The reaction layer works the moment a foreign aura exists, and nothing of
 Klee's can make one.** Seat one wrote that six of her cards print reaction
@@ -88,10 +92,9 @@ companion layer.
 
 ## 4. Picks
 
-1. **Your run.** (1) *After the fix build: the seam hand-off on every offer
-   surface (`EB-320`), the "(proto)" titles (`EB-322`) and the badge's
-   reaction figure (`EB-321`), so the run you play is the one with the
-   stand-ins in it* [default]. (2) On 0.2.2188+proto now, knowing the
+1. **Your run.** (1) *After the fix build (#317's emitter fix is on main;
+   the deploy follows the Kokomi seat), so the run you play is the one with
+   the stand-ins in it* [default]. (2) On 0.2.2188+proto now, knowing the
    caretakers cannot appear.
 2. **The reaction layer's self-service.** (1) *Stays companion-fed as
    ruled; the fix build's seats read the coven and stand-in offer rate in
