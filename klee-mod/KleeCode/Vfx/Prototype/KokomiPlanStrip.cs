@@ -226,7 +226,14 @@ internal static class KokomiPlanStrip
     /// </summary>
     private static void Paint(Control root, Player player)
     {
-        var pending = KokomiPlan.Pending(player);
+        // `SHOWING`, NOT `PENDING` (`EB-317`). The two are the same list at
+        // every moment but one: during the morning drain the real queue is
+        // empty -- it is cleared in a single move, so a Plan written
+        // mid-resolution waits for the next turn -- while the column keeps
+        // drawing the Plans not carried out YET, and shortens by one as each
+        // is. The seat report this row is made of was "the panel simply reads
+        // empty"; this is the half of the repair the HUD owns.
+        var pending = KokomiPlan.Showing(player);
         var count = root.GetNodeOrNull<Label>("Count");
 
         for (var i = 0; i < MaxDrawn; i++)

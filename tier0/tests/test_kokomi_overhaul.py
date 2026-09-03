@@ -365,7 +365,11 @@ def test_a_planned_block_is_powered_and_a_planned_hit_is_hers():
     src = (root / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "KokomiPlan.cs").read_text(encoding="utf-8")
 
-    block = re.search(r"case Kind\.Block:.*?break;", src, re.DOTALL)
+    # ANCHORED ON THE NEXT CASE LABEL, not on a `break;`. `EB-317` gave
+    # `ResolveOne` a return value -- the number the clause produced, for the
+    # carry-out line the jellyfish says -- so every arm RETURNS now. Neither
+    # fact this pin is about, the prop or the applier, moved with it.
+    block = re.search(r"case Kind\.Block:.*?case Kind\.Mend:", src, re.DOTALL)
     assert block, "the planned Block clause is gone -- rule 3 moved under this pin"
     # CODE ONLY: the clause's own comment names the prop it does NOT take, and
     # that sentence is the record of the change rather than a second rule.
@@ -378,7 +382,7 @@ def test_a_planned_block_is_powered_and_a_planned_hit_is_hers():
         "NOT see -- rule 3 is 'your Strength and Dexterity count, since the "
         "plans are hers'")
 
-    hit = re.search(r"private static async Task Hit\(.*?\n    \}", src,
+    hit = re.search(r"private static async Task<int\?> Hit\(.*?\n    \}", src,
                     re.DOTALL)
     assert hit, "KokomiPlan.Hit is gone -- rule 3's damage half moved"
     assert "Element.Hydro, amount, kokomi)" in hit.group(0), (
