@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
 
@@ -122,5 +123,37 @@ public sealed class KleeOverhaulSweepHooks : AbstractModel
         CompanionHexerei.NoteCardPlayed(cardPlay);
         await ProtoBombPower.SweepJumps(
             choiceContext, cardPlay.Card?.CombatState);
+    }
+
+    /// <summary>
+    /// `EB-336`. THE HIT A LETHAL MINE ALREADY ANSWERED COSTS NO HP.
+    ///
+    /// <c>ModifyHpLostBeforeOsty</c> is the FIRST hook after
+    /// <c>Hook.BeforeDamageReceived</c> that can move the number
+    /// (<c>CreatureCmd.Damage</c>: modify -> before-received -> block -> THIS
+    /// -> osty -> <c>LoseHpInternal</c>), so it is where the Mine's
+    /// pre-emption is spent. <see cref="ProtoBombPower.Preempted"/> carries the
+    /// whole argument for why the kill alone was not enough and for what Block
+    /// still does.
+    ///
+    /// IT IS HERE AND NOT ON THE PILE because the pile is GONE by then: the
+    /// kill runs inline and <c>RemoveAllPowersAfterDeath</c> strips the
+    /// corpse's powers before control returns, so the dead enemy's own power is
+    /// not in <c>IterateHookListeners</c> any more. This model is, for the same
+    /// reason <see cref="AfterDeath"/> is here.
+    ///
+    /// PURE, and it has to be: the engine calls modifier hooks to answer
+    /// PREVIEWS as well as real hits (the Vigil's note in
+    /// <c>KuragePowers.cs</c>), so this reads three references and one flag and
+    /// writes nothing. A preview asks about a LIVE attacker, so the predicate
+    /// is false and no preview moves.
+    /// </summary>
+    public override decimal ModifyHpLostBeforeOsty(
+        Creature target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource)
+    {
+        if (!KleeOverhaul.Enabled || amount <= 0m) return amount;
+        if (!props.IsPoweredAttack()) return amount;
+        return ProtoBombPower.Preempted.Covers(target, dealer) ? 0m : amount;
     }
 }

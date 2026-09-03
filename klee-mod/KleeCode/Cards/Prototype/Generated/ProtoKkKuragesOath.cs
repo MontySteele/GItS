@@ -44,7 +44,7 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlann
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Kurage's Oath (proto)"),
+        ("title", "Kurage's Oath"),
         ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies."),
     };
 
@@ -60,7 +60,7 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlann
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PlanDamage", 7m)
+            new KokomiPlan.PlanDamageVar(7m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

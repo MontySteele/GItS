@@ -15,6 +15,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from understudy.blindplay_shape import AURA_DURATION_TURNS, BOMB_GROWTH
+
 
 
 
@@ -187,20 +189,29 @@ AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
 # (Plan, Mend). `Tide`, `Surge` and `Exert` left with the rules they named when
 # R240/R241 replaced the Tide with the Plan, and a page defining a dead word
 # would be teaching a tester a rule this build does not have.
+#
+# `EB-340`: the `Bomb` row carries `{growth}`, filled by `keyword_notes` from
+# the screen's own tip where the screen has one and from `BOMB_GROWTH`
+# otherwise. It is the ONE row with a hole in it, and the hole is a number the
+# card face already prints.
 ARM_KEYWORDS: dict[str, str] = {
-    "Bomb": ("A charge on an enemy. Grows at the start of your turn. Never "
-             "goes off by itself. Bombs on one enemy go off together when "
-             "Set off."),
+    # "EACH" IS `EB-340`'s, and it stays: the act-1 seat found growth is
+    # +{growth} PER BOMB (Bomb 5 + Bomb 8 -> 21, not 17) and no wording said
+    # so. In game the badge carries that fact ("Each grows at the start of
+    # your turn"); the seat page has no badge, so the glossary says it.
+    "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
+             "only when Set off, all at once. Its hit takes the enemy's "
+             "debuffs, not yours."),
     "Set off": ("Every Bomb on the target goes off first, one at a time, "
                 "each a Pyro hit for its size."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
     "Mine": ("A Bomb that also goes off when its enemy attacks you, before "
-             "the hit lands. Weak shrinks it like any Bomb; the badge shows "
+             "the hit lands. The enemy's debuffs move it, and the badge has "
              "the number."),
-    "Plan": ("Play this on the Bake-Kurage: it carries out the Plan line at "
-             "the start of your next turn. Cost is paid now. Plans hit the "
-             "front enemy."),
+    "Plan": ("On the Bake-Kurage, paid now; the Plan lands first thing next "
+             "turn on the front enemy. Enemy Vulnerable raises it; your Weak "
+             "does not."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
     # The Furina reframe's three (slice two, R220 A). The same sentences
@@ -234,6 +245,74 @@ _ARM_KEYWORD_RE = {
 }
 
 
+# `EB-340`. THE FOUR-ELEMENT REACTIONS, DEFINED ON A SCREEN THAT HAS ONE.
+#
+# THE GAP. A Reaction reached the page only as a `*Reaction preview: Melt*` row
+# under a card that HAPPENED to be in hand, HAPPENED to supply the right
+# element and only while the aura was already on the board. Everywhere else the
+# rule was unstated: the r7b act-3 seat watched `Shinobu`'s 5 Electro deal 13
+# into a Pyro aura, could not price it, and got the formula two rounds later
+# "unprompted on `Ka-pow!`" -- 5 x 1.5 + 6 splash, exact. "The rule existed the
+# whole time; whether I was allowed to see it depended on my draw."
+#
+# WHERE THE SENTENCES COME FROM. `KleeMod.cs`'s `keywordFallback`, which is the
+# one place the game's own preview text is composed (and is byte-identical to
+# `pck-src/klee/localization/eng/card_keywords.json`, the shipped copy). Each
+# body below keeps that text's load-bearing clause VERBATIM -- the multiplier,
+# the splash, the Shatter -- and replaces only the "This card supplies X or Y"
+# lead-in, which is a sentence about a card and there is no card here. Held in
+# step from this side by `test_the_reaction_glossary_is_the_games_own_preview`,
+# the discipline `ARM_KEYWORDS` is already under.
+#
+# SIX, NOT FOUR. `EB-340` names the four the seat met; the mod's `Reaction`
+# enum pairs the game's four elements six ways, and the other two are reachable
+# by the same deck -- Charlotte supplies Cryo, Shinobu Electro, Barbara Hydro,
+# so Superconduct and Electro-Charged are one companion draft away. A glossary
+# that defined four of six would hide the two a seat is least likely to have
+# seen. `Swirl` and `Crystallize` are Anemo and Geo, which NO card in this
+# build supplies (`_ELEMENT_KEYWORD` reads four elements), so they stay out
+# under the same rule that keeps `Tide` and `Exert` out: a page defining them
+# would be teaching a rule this board does not have.
+REACTION_KEYWORDS: dict[str, str] = {
+    "Elemental Reaction": (
+        "A hit of a different element than the aura an enemy is already "
+        "wearing. The aura is CONSUMED to trigger the reaction, so the hit "
+        "leaves no aura of its own behind: a card that hits once leaves the "
+        "enemy bare, and only a later hit of the same card applies its "
+        f"element. On a bare enemy the hit applies its own element for "
+        f"{AURA_DURATION_TURNS} turns instead, and a hit matching the aura "
+        "refreshes it."),
+    "Melt": ("Pyro on a Cryo aura, or Cryo on a Pyro aura. The triggering hit "
+             "deals 1.75x damage and consumes the aura."),
+    "Vaporize": ("Pyro on a Hydro aura, or Hydro on a Pyro aura. The "
+                 "triggering hit deals 1.5x damage and consumes the aura."),
+    "Overloaded": ("Pyro on an Electro aura, or Electro on a Pyro aura. It "
+                   "deals 6 splash damage to all enemies and applies 1 Weak "
+                   "to the reacted enemy."),
+    "Superconduct": ("Electro on a Cryo aura, or Cryo on an Electro aura. The "
+                     "reacted enemy gains 2 Vulnerable."),
+    "Electro-Charged": ("Hydro on an Electro aura, or Electro on a Hydro "
+                        "aura. The reacted enemy gains a 4-damage decaying "
+                        "damage-over-time effect."),
+    "Frozen": ("Hydro on a Cryo aura, or Cryo on a Hydro aura. Its next "
+               "action deals half damage; attacking it Shatters for 6 damage. "
+               "Bosses cannot be Frozen: the pair is consumed and applies 2 "
+               "Vulnerable instead."),
+}
+
+# The number the card's own Bomb tip prints, where a screen carries that tip.
+# `ArmKeywordTips.ForBomb` builds it as "Grows by <n> at the start of your
+# turn", so this is an exact read of the game's own sentence and never a guess
+# at what a stray numeral near the word Bomb might have meant.
+# `EB-340` reads the rate off the SCREEN's own Bomb tip so the page quotes
+# what this build prints rather than what tier0 believes. `EB-343` (R248)
+# rewrote that tip to fit its ceiling, so the pattern follows it: anchored
+# on the tip's own opening, because a bare "grows N a turn" is a phrase a
+# card face could reach one day and a wrong match here is silent.
+_BOMB_GROWTH_RE = re.compile(
+    r"charge on an enemy: grows (\d+) a turn\b")
+
+
 def _every_string(blob: Any):
     """Every string anywhere in a finished observation, values only."""
     if isinstance(blob, str):
@@ -246,15 +325,107 @@ def _every_string(blob: Any):
             yield from _every_string(value)
 
 
+def _elements_on_screen(obs: dict[str, Any]) -> bool:
+    """Does this screen show an aura, or a card that bears an element?
+
+    `EB-340`'s trigger, and it is deliberately the WIDER of the two halves: a
+    reaction has to be readable while the combination is still being BUILT, so
+    a Cryo card in hand against a bare board asks the question as much as a
+    Pyro aura already on a body does. Read off the two fields the page itself
+    computes -- `element` (`_element`, the card's own indicator keyword) and
+    a power tagged `aura` (`_is_aura`) -- so a screen kind added tomorrow gets
+    the rule for free, exactly as `keyword_notes` does.
+    """
+    def walk(blob: Any) -> bool:
+        if isinstance(blob, dict):
+            if str(blob.get("element") or "").strip():
+                return True
+            if str(blob.get("kind") or "").strip().lower() == "aura":
+                return True
+            return any(walk(v) for v in blob.values())
+        if isinstance(blob, list):
+            return any(walk(v) for v in blob)
+        return False
+    return walk(obs)
+
+
+def _wire_keyword_rows(blob: Any) -> list[dict[str, str]]:
+    """Every keyword tip the WIRE hung on a power, name and body.
+
+    `EB-340`. THE ENEMY ANNOUNCED A WORD THE SCREEN WOULD NOT DEFINE. The r7b
+    act-3 seat met `Galvanic 6 (buff) -- Powers are afflicted with Galvanized`
+    on the one turn whose decision is "do I install my engine", and the
+    glossary under it defined `Bomb`, `Set off` and `Spark` and not
+    `Galvanized`. Two rounds later the SAME word arrived correctly defined --
+    under a card, because a card's keywords are printed beneath its face and a
+    power's were read off the wire and dropped.
+
+    They are on the feed: `BuildPowersState` emits `keywords` per status row
+    (`BuildHoverTips` of every tip that is not the power's own), which is the
+    same shape a card face carries. So a word an enemy's buff line prints is
+    read into the glossary the way a card's is -- the game's own tip text,
+    never a sentence invented here, and nothing at all where the feed carries
+    none.
+
+    POWERS ONLY, and that is the whole scope: a CARD's keywords are already
+    printed under the card that declares them (`_render_card`), and lifting
+    those into the glossary as well would print every one of them twice.
+    """
+    out: list[dict[str, str]] = []
+    if isinstance(blob, dict):
+        for key, value in blob.items():
+            if key == "powers" and isinstance(value, list):
+                for power in value:
+                    if not isinstance(power, dict):
+                        continue
+                    for k in power.get("keywords") or []:
+                        if isinstance(k, dict) \
+                                and str(k.get("name") or "").strip() \
+                                and str(k.get("text") or "").strip():
+                            out.append({"name": str(k["name"]).strip(),
+                                        "text": str(k["text"]).strip()})
+            else:
+                out += _wire_keyword_rows(value)
+    elif isinstance(blob, list):
+        for value in blob:
+            out += _wire_keyword_rows(value)
+    return out
+
+
 def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
-    """The arm keywords this screen prints, each with one definition.
+    """The words this screen prints, each with one definition.
 
     ONCE PER SCREEN and in the arms' own order, however many faces printed the
     word -- a definition repeated under every card in a hand is a page a reader
     stops reading. It is computed over the WHOLE finished observation, so a
     word that reaches the page through a card's body, an enemy's badge, a
     power's text, a relic, a potion or a reward row is defined the same way.
+
+    THREE SOURCES, IN THIS ORDER (`EB-340`):
+
+      the ARMS' words, matched on the text of the screen, unchanged since
+        `EB-272` except that `Bomb` now carries its growth number;
+      the REACTIONS, on any screen showing an aura or an element-bearing card,
+        because a reaction is a rule about a board rather than a word printed
+        on it and the seat that cannot see it cannot price a combination;
+      the WIRE's own tips off a POWER row, which reach the page nowhere else.
+
+    A word already defined by an earlier source is not defined twice, and the
+    arms' own copies win: they are the sentences held in step with the C#.
     """
     hay = "\n".join(_every_string(obs))
-    return [{"name": word, "text": ARM_KEYWORDS[word]}
+    growth = _BOMB_GROWTH_RE.search(hay)
+    rows = [{"name": word,
+             "text": ARM_KEYWORDS[word].format(
+                 growth=int(growth.group(1)) if growth else BOMB_GROWTH)}
             for word, pattern in _ARM_KEYWORD_RE.items() if pattern.search(hay)]
+    if _elements_on_screen(obs):
+        rows += [{"name": word, "text": text}
+                 for word, text in REACTION_KEYWORDS.items()]
+    seen = {row["name"] for row in rows}
+    for row in _wire_keyword_rows(obs):
+        if row["name"] in seen:
+            continue
+        seen.add(row["name"])
+        rows.append(row)
+    return rows

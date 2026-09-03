@@ -38,6 +38,32 @@ Three guarantees:
    other -- otherwise reserving "Dodoco Tales" would fail the very relic
    that legitimately holds it.
 
+4. DECLARED SHADOWS (`EB-322`). A prototype row that REWRITES a shipped row
+   keeps the shipped row's printed name, and the arm hides the shipped one:
+   it is substituted out of the pool, so one of the pair is reachable in a
+   build. The row declares that by ending its `name:` with " (proto)", and
+   this lint reads the suffix as the declaration rather than as a second
+   name. What the suffix is NOT is a title:
+   `tier0.content.loader.display_name` strips it in both engines, so the
+   player sees the bare name -- which is why the lint has to know the rule.
+   Without it a " (proto)" name would look unique here while printing the
+   shipped row's exact title on the card face.
+
+   The relaxation is narrow, and each half is a refusal:
+
+     * a shadow coexists with AT MOST ONE live row of the bare name -- it
+       shadows that row, and nothing else;
+     * two shadows of one bare name still collide, because only one of them
+       can be the rewrite;
+     * two LIVE rows of one bare name still collide, exactly as before -- the
+       suffix buys a rewrite a name, never a duplicate;
+     * a shadow of a name no live row holds is a finding: it shadows nothing,
+       so the suffix is only a suffix, and it would print a bare title this
+       lint never checked.
+
+   The reserved list (3) reads the BARE name, since that is the name the
+   player would see.
+
 Usage: lint_unique_names.py <sheet.yaml> [<sheet.yaml> ...]
        (relic sources are found automatically under klee-mod/KleeCode)
 Exit 0 = clean, 1 = collision(s) found (printed to stdout).
@@ -50,6 +76,14 @@ import yaml
 
 REPO = Path(__file__).resolve().parents[1]
 RELIC_DIRS = (REPO / "klee-mod" / "KleeCode" / "Relics",)
+
+#: `EB-322`. The shadow declaration, and the ONE place its spelling lives on
+#: this side. `tier0.content.loader.PROTOTYPE_SHADOW_SUFFIX` is the same string
+#: on the engines' side and `tier0/tests/test_prototype_surface.py` pins the
+#: two against each other -- restated here rather than imported so this lint
+#: keeps running as a bare script with no `PYTHONPATH`, which is how
+#: `tools/run_lints.py` and the atlas both invoke it.
+SHADOW_SUFFIX = " (proto)"
 
 #: `("title", "Some Name"),` inside a Localization initializer. Deliberately
 #: matched on the literal rather than parsed: these files are hand-written C#
@@ -96,31 +130,55 @@ def main(argv):
         print("usage: lint_unique_names.py <sheet.yaml> [...]")
         return 2
 
-    # name -> list of (kind, source, id)
+    # BARE name -> list of (kind, source, id, is_shadow). Keyed on the name
+    # the PLAYER sees (`EB-322`), so a declared shadow and the row it shadows
+    # meet here rather than passing each other as two unrelated strings.
     seen = {}
     for sheet in sheets:
         for c in load_cards(sheet):
             name = c.get("name")
             if not name:
                 continue
-            seen.setdefault(name, []).append(
-                ("card", Path(sheet).name, c.get("id", "?")))
+            shadow = name.endswith(SHADOW_SUFFIX)
+            bare = name[:-len(SHADOW_SUFFIX)] if shadow else name
+            seen.setdefault(bare, []).append(
+                ("card", Path(sheet).name, c.get("id", "?"), shadow))
     n_relics = 0
     for name, source in load_relic_names():
         n_relics += 1
-        seen.setdefault(name, []).append(("relic", source, "-"))
+        # A relic title is already the printed title; there is no shadow
+        # channel on that side and a relic that spelled one would be printing
+        # the suffix.
+        seen.setdefault(name, []).append(("relic", source, "-", False))
 
     failed = False
 
-    # 1 + 2. duplicates within and across kinds.
+    # 1 + 2 + 4. duplicates within and across kinds, shadows excepted.
     for name, uses in sorted(seen.items()):
-        if len(uses) > 1:
+        live = [u for u in uses if not u[3]]
+        shadows = [u for u in uses if u[3]]
+        if len(live) > 1:
             failed = True
-            locs = ", ".join(f"{k} {s}:{i}" for k, s, i in uses)
-            kinds = {k for k, _, _ in uses}
+            locs = ", ".join(f"{k} {s}:{i}" for k, s, i, _ in live)
+            kinds = {k for k, _, _, _ in live}
             label = ("DUPLICATE NAME" if len(kinds) == 1
                      else "CROSS-KIND NAME COLLISION")
-            print(f"{label}: {name!r} used by {len(uses)} objects -> {locs}")
+            print(f"{label}: {name!r} used by {len(live)} objects -> {locs}")
+        if len(shadows) > 1:
+            # Only one row can be THE rewrite of a shipped row; two both
+            # claiming it print one title between them.
+            failed = True
+            locs = ", ".join(f"{k} {s}:{i}" for k, s, i, _ in shadows)
+            print(f"DUPLICATE SHADOW: {len(shadows)} rows declare "
+                  f"{name + SHADOW_SUFFIX!r} -> {locs}")
+        if shadows and not live:
+            # The suffix says "this rewrites the row of that name"; with no
+            # such row it says nothing, and the title it prints -- the bare
+            # name -- was never in this lint's namespace at all.
+            failed = True
+            locs = ", ".join(f"{k} {s}:{i}" for k, s, i, _ in shadows)
+            print(f"SHADOW OF NOTHING: {name + SHADOW_SUFFIX!r} shadows "
+                  f"{name!r}, which no row holds -> {locs}")
 
     # 3. reserved (external) names
     reserved_path = REPO / "docs" / "reserved-card-names.txt"
@@ -146,7 +204,7 @@ def main(argv):
             for kind in ("card", "relic"):
                 if f"{kind}-owned" in src:
                     owner = kind
-            offenders = [(k, s, i) for k, s, i in uses if k != owner]
+            offenders = [(k, s, i) for k, s, i, _ in uses if k != owner]
             if not offenders:
                 continue
             failed = True
@@ -155,7 +213,7 @@ def main(argv):
                   f"-- used by {locs}")
 
     if not failed:
-        n_cards = sum(1 for uses in seen.values() for k, _, _ in uses
+        n_cards = sum(1 for uses in seen.values() for k, _, _, _ in uses
                       if k == "card")
         print(f"OK: {n_cards} card + {n_relics} relic names unique across "
               f"{len(sheets)} sheet(s)"

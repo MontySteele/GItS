@@ -294,3 +294,74 @@ public sealed class NextCompanionDiscountPower : PowerModel, ILocalizationProvid
         await PowerCmd.Remove(this);
     }
 }
+
+/// <summary>
+/// SHELL GUARD's window (`EB-335`, R246 pick 2): "Until your next turn,
+/// whenever the Tamakushi Casket strikes, gain 3 Block."
+///
+/// WHY THE ROW EXISTS. Round four-c died on act 2's treadmill with a block
+/// ceiling of one <c>Defend+</c> and one base card, against a Slumbering
+/// Beetle whose intent grew 2 a round; the Plan layer answered every damage
+/// question act 2 asked and had no defensive line at all
+/// (`review/ruled/kokomi-overhaul-round-4c-2026-09-02.md` sec.2). This card
+/// turns the kit's best engine into its block engine for one turn: the seats
+/// watched the Casket strike five and six times a turn off Slack Water, War
+/// Council and Rosaria, and every one of those strikes now pays.
+///
+/// THE AMOUNT IS BLOCK PER STRIKE, NOT A DURATION, which is the one thing this
+/// power does NOT share with <c>PlanTwicePower</c> beside it. The window is
+/// closed by <c>ProtoBakeKuragePower.AfterPlayerTurnStart</c> rather than by a
+/// tick, and the placement is the rule: "until your next turn" is read to
+/// INCLUDE that turn's morning, because R246 pick 2 says "the morning's Plans
+/// that apply Weak strike it too, so the Block is there before the enemy
+/// swings". A tick at her turn END would have closed the window before the
+/// enemy ever swung; a clear on the turn-start ledger roll would have closed it
+/// one line before the morning the packet names.
+///
+/// IT HOOKS NOTHING. <see cref="TamakushiCasket.Strike"/> asks for it at the
+/// one moment the question can be asked -- the strike itself -- which is what
+/// keeps this card and The Clouds Like Waves Rippling separable: the Clouds pay
+/// per debuff APPLIED, this pays per Casket STRIKE, and a run that has traded
+/// the relic away pays nothing here.
+///
+/// THE BLOCK IS POWERED (<c>ValueProp.Move</c>) for the reason every other
+/// Block in this arm is -- rule 3, and <see cref="SongOfPearlsPower"/>'s
+/// header.
+/// </summary>
+public sealed class ShellGuardPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Shell Guard"),
+        ("description",
+            "Until your next turn, whenever the [gold]Tamakushi Casket[/gold] "
+          + "strikes, gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>The strike's payout, on the power that carries the number.
+    /// Called by <see cref="TamakushiCasket.Strike"/> after the hit has gone
+    /// out, so a strike that ends the fight has already happened.</summary>
+    public static async Task Pay(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        var guard = kokomi?.Powers.OfType<ShellGuardPower>().FirstOrDefault();
+        if (guard == null || guard.Amount <= 0) return;
+        await CreatureCmd.GainBlock(kokomi!, guard.Amount, ValueProp.Move, null);
+    }
+
+    /// <summary>The window closes -- "until your next turn". Called from
+    /// <c>ProtoBakeKuragePower.AfterPlayerTurnStart</c>, one line after the
+    /// morning, and unconditionally: <c>KokomiPlan.ResolveAll</c> returns early
+    /// on an empty queue and a window that only closed on mornings with Plans
+    /// in them would outlive its printed text.</summary>
+    public static async Task Close(Creature? kokomi)
+    {
+        var guard = kokomi?.Powers.OfType<ShellGuardPower>().FirstOrDefault();
+        if (guard == null) return;
+        await PowerCmd.Remove(guard);
+    }
+}

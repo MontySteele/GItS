@@ -54,7 +54,7 @@ from tier0.engine.state import Card, CombatState, Enemy, PlanEntry
 PLAN_KINDS = frozenset((
     "draw", "energy", "block", "mend", "damage", "damage_quarter_max_hp",
     "damage_per_companion_last_turn", "apply_power", "plan_twice",
-    "play_copy_of_companion",
+    "play_copy_of_companion", "block_per_plan_this_morning",
 ))
 
 #: The clauses that carry NO `amount`. Both are whole rules rather than
@@ -86,7 +86,14 @@ PLAN_AIMED_OPS = frozenset((
 #: through the same vocabulary check the body takes -- and the registered
 #: handler refuses, which is what makes "plan-only" true rather than intended.
 PLAN_ONLY_OPS = frozenset(("plan_twice", "damage_per_companion_last_turn",
-                           "play_copy_of_companion"))
+                           "play_copy_of_companion",
+                           "block_per_plan_this_morning"))
+
+#: Tide Wall's clause (`EB-335`, R246 pick 2): "Gain N Block for each Plan the
+#: Bake-Kurage carries out this morning." PLAN-ONLY by construction -- the
+#: count it multiplies is a fact about a morning, and a now-line spelling would
+#: read a number that is zero every time it is asked.
+BLOCK_PER_PLAN = "block_per_plan_this_morning"
 
 #: The one clause the SHEET cannot spell, minted by Moon's Reflection when the
 #: card it reaches has no Plan line of its own. It never appears in a `plan:`
@@ -123,6 +130,11 @@ PLAN_TWICE = "kk_plan_twice"
 #: Rally's grant. ONE STACK, ALWAYS -- the card says "costs 1 less", not
 #: "per Rally" -- and it is consumed by the next Companion play.
 NEXT_COMPANION_DISCOUNT = "kk_next_companion_discount"
+#: Shell Guard's window (`EB-335`). THE AMOUNT IS THE BLOCK PER STRIKE, not a
+#: number of turns: "until your next turn, whenever the Tamakushi Casket
+#: strikes, gain 3 Block". `close_shell_guard` is the one place it ends, and
+#: its header says which end of the turn that is and why.
+SHELL_GUARD = "kk_shell_guard"
 
 #: What counts as a debuff ON AN ENEMY in this engine, for the Casket and for
 #: Undertow's `target_has_debuff`.
@@ -450,6 +462,14 @@ def resolve_all(state: CombatState) -> None:
         return
     due = list(state.kk_plan_queue)
     state.kk_plan_queue.clear()
+    # `EB-335`. THE MORNING'S DEPTH, recorded on the same line the queue is
+    # drained on and BEFORE the first clause runs -- Tide Wall's "for each Plan
+    # the Bake-Kurage carries out this morning". Written here rather than
+    # counted up inside the loop so the answer does not depend on where in the
+    # queue the Tide Wall sits: on a three-Plan morning it is three whether it
+    # was written first or last. `KokomiPlan.ResolveAll` records the same
+    # number on the ledger, in the same place.
+    state.kk_plans_this_morning = len(due)
     state.emit("plan_resolve_all", plans=len(due))
     for entry in due:
         for _ in range(carry_out_times(state)):
@@ -573,6 +593,30 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         gained = powers.modify_block_gained(p, amount)
         p.block += gained
         state.emit("block", amount=gained)
+    elif op == BLOCK_PER_PLAN:
+        # TIDE WALL (`EB-335`, R246 pick 2): "Gain N Block for each Plan the
+        # Bake-Kurage carries out this morning." The count is the morning's
+        # whole depth, taken at the drain (`resolve_all`), so this card's Block
+        # does not depend on where in the queue it was written -- and it lands
+        # with the rest of the morning, which is what makes it guard the turn a
+        # Defend would have guarded, one turn later and bigger for the wait.
+        #
+        # POWERED, the same funnel the printed `block` clause above takes:
+        # rule 3 says her Dexterity counts and Frail bites, and two Block
+        # clauses of one morning scaling differently is exactly what
+        # `SongOfPearlsPower`'s header refuses.
+        #
+        # A MORNING THAT HELD NOTHING PAYS NOTHING, and it is a printed no-op
+        # rather than a failure: `Change of Plans` can carry this Plan out on a
+        # turn whose own morning was empty, and zero times three is the honest
+        # answer to "for each Plan carried out this morning".
+        gained = powers.modify_block_gained(
+            p, amount * state.kk_plans_this_morning)
+        if gained:
+            p.block += gained
+            state.emit("block", amount=gained)
+        state.emit("plan_tide_wall", amount=gained,
+                   plans=state.kk_plans_this_morning)
     elif op == "mend":
         effects.mend(state, amount)
     elif op == "damage":
@@ -610,23 +654,37 @@ def quarter_of_max_hp(state: CombatState) -> int:
 
 
 def _hit(state: CombatState, aim: Optional[str], amount: int) -> None:
-    """A Plan's damage, and it is HYDRO with KOKOMI as the dealer.
+    """A Plan's damage, and it is HYDRO, dealt BY THE BAKE-KURAGE.
 
-    Rule 3 settles both halves in one sentence: "Your Strength and Dexterity
-    count, and planned damage from an Attack applies Hydro the way her Attacks
-    do." `deal_damage_to_enemy` is this engine's funnel for exactly that -- the
-    dealer's Strength and Weak, then the aura and its reaction, then the
-    target's Vulnerable and Block -- so a planned hit and a played one differ
-    in nothing but when they land.
+    `EB-334`, RULED R246 pick 1 AT ITS DEFAULT: "the Bake-Kurage deals it. The
+    enemy's debuffs apply, Kokomi's own Weak and her attack buffs do not."
+    Round four-c found the arithmetic exactly the wrong way round -- a
+    Strategic enemy's Weak cut two banked Plans to x0.75 the next morning (12
+    to 9, 5 to 3) while the enemy's own Vulnerable multiplied nothing, so "her
+    debuffs apply to the Kurage's hits and the enemy's do not"
+    (`review/ruled/kokomi-overhaul-round-4c-2026-09-02.md` sec.2, sec.6).
+
+    `powered=False` IS THAT SENTENCE IN THIS ENGINE, and it is the flag the
+    Casket's strike already carries for the same reason: it drops the DEALER's
+    Strength and Weak (`powers.modify_damage_dealt`, which is also where every
+    flat attack buff in this engine lands) and NOTHING else -- the aura still
+    lands, the reaction still fires, the target's Vulnerable still multiplies
+    and its Block still absorbs. A pet carries no Strength, so a planned hit is
+    its printed number against the enemy's current state.
+
+    THE APPLIER IS STILL HER, which is a reading and is the C#'s: rule 3's
+    "the plans are hers" is what makes a Plan-caused Freeze a debuff SHE
+    applied, so the Tamakushi Casket answers it and The Clouds Like Waves pays
+    for it. Draft 6 gives the jellyfish the arithmetic, not the authorship.
 
     `source="plan"` AND NOT `"attack"`, which is a reading and is the C#'s:
     `KokomiPlan.Hit` goes out through `ElementalHit.Deal`, the funnel this mod
     uses for every NON-Attack hit, not through `DamageCmd.Attack`. In tier0
     `source == "attack"` is the name for a hit from an Attack CARD and it is
     what gates Shatter, on-hit bomb detonation and Skittish; a planned clause
-    is not a card being played, so it takes none of those. Everything rule 3
-    names -- Strength, Weak, the aura, the reaction, Vulnerable, Block -- is
-    outside that gate and applies.
+    is not a card being played, so it takes none of those. Everything that is
+    still the jellyfish's business -- the aura, the reaction, Vulnerable,
+    Block -- is outside that gate and applies.
 
     THE TARGET LIST IS SNAPSHOTTED before the first hit, so an enemy the volley
     kills does not change who is in it (`QuarterMaxHpAll`'s `.ToList()`).
@@ -639,7 +697,7 @@ def _hit(state: CombatState, aim: Optional[str], amount: int) -> None:
         if not enemy.alive:
             continue
         effects.deal_damage_to_enemy(state, enemy, amount, element="hydro",
-                                     source="plan")
+                                     source="plan", powered=False)
 
 
 def _debuff(state: CombatState, aim: Optional[str], power: str,
@@ -753,16 +811,25 @@ def roll_turn(state: CombatState) -> None:
     card body, a power and a relic must never see three different turns. With
     the flag off nothing reads the result.
 
-    THE ARM'S ONE TURN BOUNDARY, and it carries three things rather than one
-    since 2026-09-02: the Companion handover, the once-per-turn latches
-    (Treatise, Song of Pearls and The General's Banner) and Sango Isshin's
-    "did a Plan happen this morning". One line for all three, so no two of them
-    can come to disagree about when a turn began -- `KokomiOverhaulLedger.RollTo`
-    clears the same three.
+    THE ARM'S ONE TURN BOUNDARY, and it carries four things rather than one:
+    the Companion handover, the once-per-turn latches (Treatise, Song of Pearls
+    and The General's Banner), Sango Isshin's "did a Plan happen this morning"
+    and, since `EB-335`, Tide Wall's morning depth. One line for all of them,
+    so no two can come to disagree about when a turn began --
+    `KokomiOverhaulLedger.RollTo` clears the same set.
+
+    SHELL GUARD'S WINDOW IS NOT ON THIS LINE, deliberately: it has to survive
+    the morning it is read in, so it is closed one step later
+    (`close_shell_guard`, whose header carries the argument).
     """
     state.companion_plays_last_turn = state.companion_plays_this_turn
     state.kk_once_per_turn.clear()
     state.kk_plan_carried_out_this_turn = False
+    # `EB-335`. Tide Wall's morning count, cleared HERE and written a few lines
+    # later by `resolve_all` -- which runs after this in `combat._player_turn`,
+    # so a morning that drains nothing reads an honest zero rather than
+    # yesterday's depth.
+    state.kk_plans_this_morning = 0
     # Crystal Collapse's "this turn". It is CLEARED rather than handed over:
     # the capture happens while the Plan is written, so what survives the
     # boundary is the captured card on the entry and never the list.
@@ -925,6 +992,54 @@ def casket_strike(state: CombatState, target: Enemy) -> None:
     effects.deal_damage_to_enemy(
         state, target, C.KOKOMI_OVERHAUL_CASKET_STRIKE, element="hydro",
         source="casket", powered=False)
+    _pay_shell_guard(state)
+
+
+def _pay_shell_guard(state: CombatState) -> None:
+    """SHELL GUARD (`EB-335`, R246 pick 2): "Until your next turn, whenever the
+    Tamakushi Casket strikes, gain N Block."
+
+    HUNG OFF THE STRIKE ITSELF and not off the debuff that caused it, which is
+    the difference between this card and The Clouds Like Waves Rippling one row
+    over: the Clouds pay per APPLICATION, this pays per STRIKE. They are the
+    same count today, because the relic answers every application it is awake
+    for -- but the relic is what the card names, so a run without the Casket
+    pays nothing here and the two cards stay separable.
+
+    AFTER THE HIT, so a strike that ends the fight has already happened. The
+    Block is POWERED for the reason every other Block in this arm is (rule 3,
+    `SongOfPearlsPower`'s header).
+    """
+    n = state.player.powers.get(SHELL_GUARD, 0)
+    if not n:
+        return
+    gained = powers.modify_block_gained(state.player, n)
+    state.player.block += gained
+    state.emit("block", amount=gained)
+    state.emit("plan_shell_guard", amount=gained)
+
+
+def close_shell_guard(state: CombatState) -> None:
+    """Shell Guard's window closes -- "until your next turn".
+
+    THE END OF HER TURN-START RESOLUTION, and that is a reading with the
+    packet's own sentence behind it: R246 pick 2 says "the morning's Plans that
+    apply Weak strike it too, so the Block is there before the enemy swings"
+    (`review/ruled/kokomi-overhaul-round-4c-2026-09-02.md` sec.6). The morning
+    is the first thing that happens on her next turn, so a window closed by
+    `roll_turn` -- which runs BEFORE the drain -- would make that sentence
+    false. It is closed here instead, one line after the Plans are carried out,
+    which is why `combat._player_turn` calls it there rather than beside the
+    other per-turn clears.
+
+    CALLED UNCONDITIONALLY inside the arm's turn-start block, because
+    `resolve_all` returns early on an empty queue and a window that only closed
+    on mornings with Plans in them would outlive its printed text.
+    """
+    if not live(state):
+        return
+    if state.player.powers.pop(SHELL_GUARD, 0):
+        state.emit("plan_shell_guard_closed")
 
 
 # ---------------------------------------------------------------------------

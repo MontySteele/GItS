@@ -55,7 +55,7 @@ public sealed class ProtoMcBennettFantasticVoyage : CustomCardModel, ICompanionC
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Bennett — Fantastic Voyage (proto)"),
+        ("title", "Bennett — Fantastic Voyage"),
         ("description", "If you are above 70% HP, gain 3 [gold]Strength[/gold]. Otherwise, gain 10 [gold]Block[/gold]."),
     };
 

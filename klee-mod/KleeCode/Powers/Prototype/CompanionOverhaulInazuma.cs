@@ -395,6 +395,19 @@ public sealed class SanctifyingRingPower : PowerModel, ILocalizationProvider
 ///
 /// THE NEW BLOCK IS NOT MARKED. The card marks what IT gave you; marking the 3
 /// as well would make one play a shield that thickens for the rest of the fight.
+///
+/// `EB-337`. THE LINE USED TO LIE, AND THIS IS THE ROW THE SEAT FILED IT ON.
+/// The blind seat carried "Blazing Barrier 6 -- 6 Block left" through two
+/// rounds with `Block` at 0 and took a 15 in full
+/// (`klee round 7b, opus-act2.md`, section (c)): the mark
+/// is a mark on the Block pool, the pool is cleared at the turn tick, and the
+/// printed number was the raw stack. The printed number and the badge are now
+/// <see cref="BlockMark.Left"/> -- read LIVE, so they are what
+/// <see cref="Thicken"/> was always going to pay on -- and a mark with nothing
+/// behind it leaves at the start of the turn, which is what the sim's
+/// `inazuma_overhaul_turn_start` has always done. <see cref="BlockMark"/>
+/// carries the whole argument; Diona's paws are the same construction and took
+/// the same fix.
 /// </summary>
 public sealed class BlazingBarrierPower : PowerModel, ILocalizationProvider
 {
@@ -402,7 +415,7 @@ public sealed class BlazingBarrierPower : PowerModel, ILocalizationProvider
     {
         ("title", "Blazing Barrier"),
         ("description",
-            "[blue]{Amount}[/blue] [gold]Block[/gold] left. When it absorbs "
+            "[blue]{Left}[/blue] [gold]Block[/gold] left. When it absorbs "
           + $"damage, gain [blue]{CompanionOverhaulLaw.BlazingBarrierBlock}[/blue] "
           + "[gold]Block[/gold]."),
     };
@@ -410,6 +423,23 @@ public sealed class BlazingBarrierPower : PowerModel, ILocalizationProvider
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new DynamicVar[] { new BlockMarkVar() };
+
+    /// <summary>`EB-337`: the badge is the number the face prints.</summary>
+    public override int DisplayAmount => BlockMark.Left(this);
+
+    /// <summary>`EB-337`, the housekeeping half, and the twin of the sim's
+    /// `inazuma_overhaul_turn_start` clamp. This file's own header already
+    /// promised the behaviour ("One clamps its own Block mark"); the hook was
+    /// missing.</summary>
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player.Creature != Owner) return;
+        await BlockMark.ClearIfSpent(this);
+    }
 
     /// <summary>The hit is about to be absorbed. Same arithmetic as the paws,
     /// off the same standing Block, so a board carrying both spends both marks

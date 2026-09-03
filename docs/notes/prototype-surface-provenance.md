@@ -1040,11 +1040,16 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 # `KleeOverhaulPowers.VermillionPactNotBuilt`. A row for an unbuilt rule would
 # be a face that lies.
 #
-# ONE DISPLAY NAME IS SUFFIXED. "Sparks 'n' Splash (proto)": the shipped card of
-# that name is Klee's KIT Burst card, which is granted by the meter and is
-# therefore still reachable in the same run as this Power. Every other name here
-# is the packet's own, because the shipped card that shares it cannot be reached
-# while the flag is on.
+# ONE ROW DECLARES A SHADOW. `proto_ko_sparks_n_splash` keeps the shipped name
+# "Sparks 'n' Splash", and it is the one row on this sheet whose shipped twin
+# is NOT hidden by the arm: that card is Klee's KIT Burst card, granted to hand
+# by the meter rather than offered from the pool, so both are reachable in one
+# run. The sheet declares the shadow with a " (proto)" suffix and the PLAYER
+# never sees it (`EB-322`): the printed title is the bare name in both engines,
+# and where the meter does put the kit card in the same hand the page numbers
+# the two the way it numbers any repeated title (`EB-177`). Every other name
+# here is the packet's own, because the shipped card that shares it cannot be
+# reached while the flag is on.
 ```
 
 ## Klee's Hexerei readers — `proto_ko_` (R244, 2026-09-02)
@@ -1167,12 +1172,14 @@ shipped new art would be paying for a card that may be deleted next week.
 # (the shipped companion sheet's convention), Block and the named keywords are
 # golded, and Exhaust is the keyword rail's.
 #
-# TEN DISPLAY NAMES CARRY A "(proto)" SUFFIX. Those ten rewrite a SHIPPED row
-# whose display name they keep, and `tools/lint_unique_names.py` holds one
+# TEN NAMES DECLARE A SHADOW WITH A "(proto)" SUFFIX. Those ten rewrite a
+# SHIPPED row whose name they keep, and `tools/lint_unique_names.py` holds one
 # namespace across all six sheets -- so the suffix is what lets the rewritten
 # Frostgnaw and the shipped one coexist while the arm is being graded. It is
-# the same device `proto_ko_sparks_n_splash` already uses. The other eleven
-# names are new and carry no suffix.
+# the same device `proto_ko_sparks_n_splash` already uses, and it is a SHEET
+# KEY AND NOT A TITLE: `EB-322` prints the bare name on the card face in both
+# engines, so no player-facing title carries it. The other eleven names are
+# new and carry no suffix.
 #
 # THIRTEEN OF THE WORKSHOP'S THIRTY-FOUR UNIVERSALS LANDED IN A SECOND WAVE,
 # each because its printed text wanted an engine hook that existed in NEITHER
@@ -1365,13 +1372,14 @@ shipped new art would be paying for a card that may be deleted next week.
 
 ## The Kokomi overhaul, slice one, draft 6 — `proto_kk_` (2026-09-02)
 
-Twenty-eight rows: the two cards of her own that the ten-card starter carries,
-and all twenty-six pool rows of
+Thirty rows: the two cards of her own that the ten-card starter carries, the
+twenty-six pool rows of
 `review/active/kokomi-overhaul-slice-1-2026-09-01.md` **draft 6**, written
 against the ruled brief `kokomi-brief-2026-09-01.md` draft 6 (direction ruled
 R240, brief approved R241). Under `C.KOKOMI_OVERHAUL` /
 `-p:KokomiOverhaul=true` these ARE her starter and her whole reward pool; with
-the flag off they are unreachable, like every other row on this surface.
+the flag off they are unreachable, like every other row on this surface. The
+last two arrived after round four-c and are `EB-335`'s, below.
 
 **The other eight starter slots are the BASE GAME's Strike and Defend** (R242,
 ruled in the same breath as Klee's draft-4 starter: "where a character's basics
@@ -1437,17 +1445,72 @@ printed text with this repo's rendering conventions applied -- Plan and Mend
 golded, Exhaust on the keyword rail. No number moves and no clause is added or
 dropped.
 
-EIGHT DISPLAY NAMES CARRY A "(proto)" SUFFIX, and they are: Kurage's Oath,
+EIGHT NAMES DECLARE A SHADOW WITH A "(proto)" SUFFIX, and they are: Kurage's Oath,
 Slack Water, Song of Pearls, Nereid's Ascension, Sango Isshin, Stolen Chapter,
 Undertow and Salt Line -- eight names already owned by a SHIPPED Kokomi row.
 (Water's Edge and Coral Guard were two more until R242 replaced them with the
 base game's own basics and deleted their rows.) `tools/lint_unique_names.py` holds one namespace across
 all six sheets plus the relics, so the suffix is what lets the rewritten card
-and the shipped one coexist while the arm is being graded. The other twenty
+and the shipped one coexist while the arm is being graded. It is a SHEET KEY
+AND NOT A TITLE: `EB-322` prints the bare name on the card face in both
+engines, so no player-facing title carries it. The other twenty
 names are free, including the two Rares that took constellation names (The
 Moon Overlooks the Waters, The Moon, A Ship O'er the Seas) and The Clouds Like
 Waves Rippling, which is distinct from the shipped Kokomi row of a similar
 shape only by its last word -- the lint reads exact names and both stand.
+
+TWO ROWS ARRIVED AFTER THE SLICE: `proto_kk_tide_wall` and
+`proto_kk_shell_guard` (`EB-335`), designed in
+`review/ruled/kokomi-overhaul-round-4c-2026-09-02.md` sec.6 and ruled R246 pick
+2 at its default. Round four-c is why: three chained Opus seats took the kit
+through act 1 and five rooms of act 2 and died on a treadmill, because the
+deck's block ceiling never moved off one `Defend+` and one base card while a
+Slumbering Beetle's intent grew a printed 2 a round. "The Plan layer answers
+act 2's damage questions well, Hard To Kill and standing Block included; it has
+no defensive line at all" (that packet's sec.2). Both rows answer it off
+machinery the deck already builds rather than off a bigger Defend: Tide Wall
+scales on the MORNING's Plan count, which is the deck the seats actually built
+(three Plans a turn), and Shell Guard scales on the Tamakushi Casket's strikes,
+which the seats watched fire five and six times a turn. Numbers 4/3 and 5/3,
+upgrading to 6/4 and 7/4, all four ruled in the packet and prototype numbers by
+the ladder.
+
+ONE NEW PLAN-ONLY CLAUSE CAME WITH THEM, `block_per_plan_this_morning`, and it
+is a Block clause wearing a count exactly as `damage_per_companion_last_turn`
+is a damage clause wearing one -- so it takes `plan_block`'s upgrade key rather
+than a sixth key of its own. The count is the WHOLE morning's depth, taken once
+when the queue is drained, so a Tide Wall written first, second or last in the
+queue pays the same number; a count that grew as the drain went would make one
+card's Block depend on the order the player happened to write in. Shell Guard
+needed no new clause at all: it is an ordinary `apply_power` onto a window
+(`kk_shell_guard` / `ShellGuardPower`) that the Casket's strike asks for, so
+the card and The Clouds Like Waves Rippling stay separable -- the Clouds pay
+per debuff APPLIED and this pays per Casket STRIKE.
+
+"UNTIL YOUR NEXT TURN" INCLUDES THAT TURN'S MORNING, which is a reading and the
+packet's own sentence is behind it: "the morning's Plans that apply Weak strike
+it too, so the Block is there before the enemy swings". So the window is closed
+one line AFTER the Plans are carried out rather than on the arm's turn-start
+roll, in both engines (`kokomi_plan.close_shell_guard`,
+`ProtoBakeKuragePower.AfterPlayerTurnStart`).
+
+NEITHER ROW IS OWED ART. Both carry `art_of:` -- Tide Wall wears Coral
+Bulwark's illustration and Shell Guard wears Salt Line's, the two nearest
+defensive rows already fetched -- on the rule the stand-ins use one section up:
+art is commissioned when a slice is ACCEPTED, and `tools/art_coverage.py` bills
+the literals the codegen emits, so no new image is owed.
+
+WHO DEALS A PLAN'S DAMAGE CHANGED IN THE SAME BUILD (`EB-334`, R246 pick 1).
+The slice's sec.5 gave a planned hit HER Strength and HER Weak; round four-c
+watched a Strategic enemy's Weak shrink two banked Plans to x0.75 the next
+morning while the enemy's own Vulnerable raised none, which is the wrong way
+round if the Bake-Kurage is the one hitting. A planned hit is now UNPOWERED --
+no Strength, no Weak, no attack buff of hers -- while the APPLIER stays her, so
+the aura, the reaction and any debuff a reaction applies are all still hers and
+the Casket still answers them. The card face follows: a Plan's damage var is
+`KokomiPlan.PlanDamageVar`, which previews the one live term that is left (the
+target's Vulnerable) against the front enemy, so the printed Plan line is the
+number the morning will deal.
 
 THE RELIC. Tamakushi Casket replaces BOTH Tamanooya's Casket (a misspelling
 and a retired rule: the pulse) and the Pearl of Wisdom (whose printed body IS
@@ -1493,12 +1556,14 @@ waves kept -- "a card that cannot be printed as written is left OUT rather than
 replaced by a simpler card", the rule that left Vermillion Pact off the Klee
 surface -- bit on nothing here.
 
-FIFTEEN DISPLAY NAMES CARRY A "(proto)" SUFFIX, and they are the fifteen
+FIFTEEN NAMES DECLARE A SHADOW WITH A "(proto)" SUFFIX, and they are the fifteen
 rewrites of shipped Inazuma rows, whose printed names they keep.
 `tools/lint_unique_names.py` holds one namespace across all six sheets plus
 this surface, so the suffix is what lets the rewritten Thundergrust and the
 shipped one coexist while the arm is graded. It is the same device the ten
-`proto_mc_` rewrites and the eleven `proto_kk_` rows already use. Gorou's
+`proto_mc_` rewrites and the eleven `proto_kk_` rows already use, and it is a
+SHEET KEY AND NOT A TITLE: `EB-322` prints the bare name on the card face in
+both engines, so no player-facing title carries it. Gorou's
 Uncommon is NOT suffixed: the workshop renames it "Juuga: Forward Unto Victory"
 where the shipped row is "Forward Unto Victory", so the two names differ
 already. The other eight new characters' names are new.

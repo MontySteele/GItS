@@ -51,7 +51,7 @@ public sealed class ProtoMiThomaCrimsonOoyoroi : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Thoma — Crimson Ooyoroi (proto)"),
+        ("title", "Thoma — Crimson Ooyoroi"),
         ("description", "For {PowerAmount:diff()} turns, whenever you play an Attack, deal 5 [gold]Pyro[/gold] damage to a random enemy and gain 3 [gold]Block[/gold]."),
     };
 

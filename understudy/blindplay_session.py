@@ -620,7 +620,12 @@ class Session:
                     self._ledger_seen = max(self._ledger_seen,
                                             _int(row.get("index")))
             self.actions += 1
-            feedback = _result_line(result)
+            # `EB-341`: the decision first, in the screen's own words, and
+            # then the game's answer. A screen that says nothing about what
+            # arrived leaves the tester with the row it took; a screen that
+            # does say leaves it with both, in that order.
+            feedback = " ".join(x for x in (taken_line(res),
+                                            _result_line(result)) if x)
             self.transcript.write(kind="result", action=action,
                                   summary=feedback)
 
@@ -682,3 +687,54 @@ def _result_line(result: Any) -> str:
     if leaks:
         return "(the game answered with something this tool will not repeat)"
     return text
+
+
+# What each verb's answer opens with. A word per verb rather than one flat
+# "Took", because "Bought" and "Went to" are what a player would say and this
+# line is read in a stream of them.
+_TAKEN_VERB = {"buy": "Bought", "go": "Went to"}
+# The keys a resolution files its printed decision under, best first. One
+# resolution ever carries one of them.
+_TAKEN_KEYS = ("option", "card", "bundle", "item", "node")
+
+
+def taken_line(res: dict[str, Any]) -> str:
+    """What the tester just took, in the names the screen used (`EB-341`).
+
+    THE DEFECT. A choice's outcome was legible only on some LATER screen. The
+    r7b act-3 seat learned that The Round Tea Party's random relic was `Bag of
+    Marbles`, and what `Forgotten Soul` does, "from the relic list of a later
+    combat screen"; the act-2b seat could not say which of two identically
+    titled options it had taken; and eleven one-way choices across four seats
+    "name a thing and never say what it does". The wire's own answer to a POST
+    is one short sentence and often says nothing at all.
+
+    What the page DOES have is the row it just resolved -- the name it matched
+    and the body printed under it -- and that body is where a screen says what
+    it grants (`Obtain Royal Poison. Heal to full HP.`). So the line after a
+    choice is the row that was taken, in the screen's own words, ahead of
+    whatever the game answers. It reports a DECISION and never an outcome: the
+    game's own answer follows it, and is the only thing that says what landed.
+
+    Scrubbed like `_result_line`, and for the same reason -- it is assembled
+    from wire text and it goes to a third party's model.
+    """
+    printed = res.get("printed") or {}
+    if not isinstance(printed, dict):
+        return ""
+    name = next((_text(printed.get(k)) for k in _TAKEN_KEYS
+                 if _text(printed.get(k))), "")
+    if not name:
+        return ""
+    line = f"{_TAKEN_VERB.get(str(res.get('verb') or ''), 'Took')}: {name}"
+    kind = _text(printed.get("kind"))
+    if kind:
+        line += f" ({kind})"
+    price = printed.get("price")
+    if isinstance(price, int):
+        line += f", for {price} gold"
+    body = _text(printed.get("text"))
+    if body:
+        line += f" — {body}"
+    line = line.rstrip(".") + "."
+    return "" if qa_packet.leaks(line) else line

@@ -60,7 +60,7 @@ public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard, IPlannedCar
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PlanDamage", 12m)
+            new KokomiPlan.PlanDamageVar(12m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

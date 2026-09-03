@@ -79,12 +79,16 @@ public class LiveBurn20260902Tests
         var pile = ProtoBombs.Place(enemy, klee.Creature,
             new ProtoBombs.Charge(5));
 
-        foreach (var key in new[] { "smartDescription", "smartDescriptionWeak",
-                                    "smartDescriptionMines",
-                                    "smartDescriptionMinesWeak" })
+        // EVERY smart row, whatever the grid's shape: `EB-343` widened the
+        // modifier axis, and the claim here is about all of them at once, so
+        // the rows are read off the power rather than listed.
+        var smart = pile.Localization!
+            .Where(r => r.Item1.StartsWith("smartDescription")).ToList();
+        Assert.True(smart.Count >= 4);
+        foreach (var (_, face) in smart)
         {
-            Assert.Contains("{Count}", Row(pile, key));
-            Assert.DoesNotContain("{Amount}", Row(pile, key));
+            Assert.Contains("{Count}", face);
+            Assert.DoesNotContain("{Amount}", face);
         }
     }
 
@@ -114,19 +118,54 @@ public class LiveBurn20260902Tests
     // ---- EB-291: the Mine's number is not a fixed number ------------------
 
     [Fact]
-    public void The_mine_tip_says_that_weak_shrinks_it()
+    public void The_mine_tip_says_its_number_is_not_the_printed_one()
     {
         // The r4 Opus seat left a Gremlin Merc at 3 HP under a "Mine 3" as a
         // free kill; the Mine dealt 2 and the enemy survived and hit him. The
         // Bomb badge had learned to name Weak at `EB-287`; the Mine, which
         // fires on the ENEMY's turn with no badge in front of the player, had
         // not.
+        //
+        // `EB-343` (R248) changed WHICH modifier that sentence names, not that
+        // it names one: Klee's Weak no longer reaches a Bomb, so the tip says
+        // the enemy's own debuffs do -- and still sends the reader to the badge
+        // for the live number, which is the half the seat actually needed.
         var body = string.Concat(Il.Strings(
             typeof(ArmKeywordTips)
                 .GetMethod("ForMine", HeadlessGame.All)!));
 
-        Assert.Contains("[gold]Weak[/gold]", body);
-        Assert.Contains("shrinks it like any Bomb", body);
+        Assert.Contains("The enemy's debuffs move it, and the ", body);
+        Assert.Contains("badge has the number.", body);
+        Assert.DoesNotContain("[gold]Weak[/gold]", body);
+
+        // AND IT IS MEASURED NOW. The sentence used to carry a semicolon, and
+        // `tools/lint_text_conventions.py` reads these bodies out of the
+        // source with a regex that stopped at one -- so this whole tip sat
+        // outside the census in both of its wordings and was never held to the
+        // tip ceiling. The regex is fixed in the same change; the assertion
+        // here is the prose half of it.
+        Assert.DoesNotContain(";", body);
+    }
+
+    [Fact]
+    public void The_bomb_tip_says_whose_burden_a_bomb_is()
+    {
+        // `EB-343`'s card-side half. The badge shows the NUMBER; only the
+        // keyword tip can say whose number it is, and this is the one rule in
+        // the deck that runs opposite to every other damage source she has --
+        // so it is printed where the word is met rather than inferred from a
+        // total that did not move.
+        //
+        // AND IT FITS THE CEILING ([USER], PR #340): the clause is one half of
+        // one sentence, and the two sentences together are 124 of the 135 that
+        // the base game's longest mechanic tip measures. The rewrite is why
+        // this word takes no named exception in
+        // `tools/lint_text_conventions.py` while the badge's modified faces do.
+        var body = string.Concat(Il.Strings(
+            typeof(ArmKeywordTips)
+                .GetMethod("ForBomb", HeadlessGame.All)!));
+
+        Assert.Contains("Its hit takes the enemy's debuffs, not yours.", body);
     }
 
     // ---- EB-293: the Plan keyword covers the plan-only case ---------------
@@ -146,7 +185,13 @@ public class LiveBurn20260902Tests
                 .GetMethod("ForPlan", HeadlessGame.All)!));
 
         Assert.DoesNotContain("instead", body);
-        Assert.Contains("Play this on the [gold]Bake-Kurage[/gold]", body);
+        // THE WORDING WAS COMPRESSED BY `EB-334` and the anchor moved with it:
+        // the fifth clause (who deals a Plan's damage) had to fit under the
+        // same 135-character tip ceiling, so "Play this on the Bake-Kurage:"
+        // became "On the Bake-Kurage,". What this pin is about is unchanged --
+        // the tip still says WHERE a Plan card goes, which is the whole of
+        // `EB-293`.
+        Assert.Contains("On the [gold]Bake-Kurage[/gold]", body);
     }
 
     // ---- EB-297: no Burst gauge for a Kokomi who has no Burst -------------

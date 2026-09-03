@@ -48,7 +48,7 @@ public sealed class ProtoMcDahliaFavonianFavor : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Dahlia — Favonian Favor (proto)"),
+        ("title", "Dahlia — Favonian Favor"),
         ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Whenever an [gold]Elemental Reaction[/gold] happens this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 

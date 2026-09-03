@@ -27,6 +27,12 @@ namespace KleeMod.Tests.Prototype;
 /// <c>PredictedSetOffDamage</c> for the two the player reads before the play,
 /// and <c>ElementalHit.Deal</c>'s own return value for the one read after it.
 ///
+/// `EB-343` (R248) MOVED WHICH MODIFIERS ARE IN THE NUMBER -- a Bomb carries
+/// the target's only -- and left this file's claim untouched: whatever is in
+/// it, the badge, the tooltip and the bonus line print the SAME number. The
+/// boards below were re-aimed from Klee's Weak onto the enemy's Vulnerable for
+/// that reason and no other.
+///
 /// WHAT IS REAL HERE. The pile, its charges, the badge and the face are the
 /// real power's, and Weak/Strength/Vulnerable are the game's own powers on a
 /// real Creature. What is NOT reachable is an explosion: <c>Explode</c> needs
@@ -57,36 +63,40 @@ public class KleeOverhaulOneNumberTests
     // ---- the seat's own board --------------------------------------------
 
     [Fact]
-    public void The_badge_and_the_face_agree_on_the_weakened_board()
+    public void The_badge_and_the_face_agree_on_the_modified_board()
     {
-        // The r3 Codex seat's board, exactly: two Bombs, Weak 1, "Bomb 17"
-        // over "deals 12". The badge is the one that moved.
+        // The r3 Codex seat's board, in the shape R248 left it: two Bombs,
+        // "Bomb 17" over "deals 17" until the ENEMY is debuffed, then both move
+        // together. The seat's own board used Klee's Weak, which `EB-343` took
+        // out of a Bomb entirely -- what EB-270 pinned is that the two surfaces
+        // are ONE number, and that is what is pinned here.
         var klee = Seat.Klee();
-        var enemy = Seat.Klee(30).Creature;
-        var pile = ProtoBombs.Place(enemy, klee.Creature,
+        var enemy = Seat.Klee(30);
+        var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
             new ProtoBombs.Charge(8), new ProtoBombs.Charge(9));
 
         Assert.Equal(17, pile.DisplayAmount);
         Assert.Equal(17, pile.PredictedSetOffDamage());
 
-        klee.WithPower<WeakPower>(1);
+        enemy.WithPower<VulnerablePower>(1);
 
-        Assert.Equal(12, pile.PredictedSetOffDamage());
-        Assert.Equal(12, pile.DisplayAmount);
-        Assert.Equal("12", PrintedSize(pile));
-        // ... and the face still says WHY it is 12, which is EB-287's half and
-        // is not undone by this: one number, and the modifier named.
-        Assert.EndsWith(".smartDescriptionWeak", LocKey(pile));
-        Assert.Contains("after [gold]Weak[/gold]",
-                        Row(pile, "smartDescriptionWeak"));
+        Assert.Equal(25, pile.PredictedSetOffDamage());   // 12 + 13, per charge
+        Assert.Equal(25, pile.DisplayAmount);
+        Assert.Equal("25", PrintedSize(pile));
+        // ... and the face still says WHY it is 25, which is EB-287's half
+        // widened by R248: one number, and every modifier in it named.
+        Assert.EndsWith(".smartDescriptionVulnerable", LocKey(pile));
+        Assert.Contains("after [gold]Vulnerable[/gold]",
+                        Row(pile, "smartDescriptionVulnerable"));
     }
 
     [Fact]
-    public void The_badge_follows_strength_the_same_way_the_face_does()
+    public void The_badge_does_not_follow_klees_own_strength_or_weak()
     {
-        // The other direction, and the one EB-265 was raised on: Strength is
-        // added PER CHARGE by the explosion loop, so the badge has to be the
-        // pipeline's number rather than the sum of the charges.
+        // `EB-343`, and it is the reverse of what this file pinned before: the
+        // badge sits on the ENEMY and reads as incoming damage, so pricing it
+        // through Klee's swing stats made it unreadable -- [USER]'s three Bombs
+        // of printed 6, 4 and 4 read `Bomb -1` under Tender's minus 5 Strength.
         var klee = Seat.Klee();
         var enemy = Seat.Klee(30).Creature;
         var pile = ProtoBombs.Place(enemy, klee.Creature,
@@ -96,17 +106,21 @@ public class KleeOverhaulOneNumberTests
 
         klee.WithPower<StrengthPower>(2);
 
-        Assert.Equal(14, pile.DisplayAmount);
+        Assert.Equal(10, pile.DisplayAmount);
         Assert.Equal(pile.PredictedSetOffDamage(), pile.DisplayAmount);
-        Assert.Equal("14", PrintedSize(pile));
+        Assert.Equal("10", PrintedSize(pile));
+        // The face says so too: nothing of hers is folded in, so nothing of
+        // hers is named.
+        Assert.EndsWith(".smartDescription", LocKey(pile));
     }
 
     [Fact]
     public void Vulnerable_on_the_holder_moves_the_badge_too()
     {
-        // The target-side term. It is in `SimDamagePipeline.Resolve` and so it
-        // was already in the face; the point of the pin is that the badge is
-        // now the SAME call and cannot be left behind by a third modifier.
+        // The target-side term, and since `EB-343` the ONLY kind there is. It
+        // is in `SimDamagePipeline.ResolveOnTarget` and so it is in the face;
+        // the point of the pin is that the badge is the SAME call and cannot be
+        // left behind by a second modifier.
         var klee = Seat.Klee();
         var enemy = Seat.Klee(30);
         var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
@@ -138,14 +152,14 @@ public class KleeOverhaulOneNumberTests
         // and Sorry Jean's Block all read the charge, not the damage. What
         // changed is that no PLAYER-facing surface reads it any more.
         var klee = Seat.Klee();
-        var enemy = Seat.Klee(30).Creature;
-        var pile = ProtoBombs.Place(enemy, klee.Creature,
+        var enemy = Seat.Klee(30);
+        var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
             new ProtoBombs.Charge(8), new ProtoBombs.Charge(9));
 
-        klee.WithPower<WeakPower>(1);
+        enemy.WithPower<VulnerablePower>(1);
 
         Assert.Equal(17, pile.TotalSize);
-        Assert.Equal(12, pile.DisplayAmount);
+        Assert.Equal(25, pile.DisplayAmount);
     }
 
     // ---- the third surface: the bonus line -------------------------------
@@ -154,7 +168,7 @@ public class KleeOverhaulOneNumberTests
     public void The_ledger_banks_damage_and_big_badda_boom_reads_it()
     {
         // The play memory is arithmetic and is reachable; what it is FED is
-        // the structural half below. 12 is what the seat's Weak'd pair deals.
+        // the structural half below.
         KleeOverhaulLedger.ResetAll();
         var ledger = new KleeOverhaulLedger();
         ledger.RollTo(1);
@@ -170,14 +184,17 @@ public class KleeOverhaulOneNumberTests
     public void The_explosion_feeds_the_ledger_the_number_the_hit_returned()
     {
         // STRUCTURAL (Il): an explosion needs a live CombatState, so what is
-        // asserted is that `Explode` takes `ElementalHit.Deal`'s RESULT --
-        // which is only possible because `Deal` returns one -- and hands it to
-        // `NoteExplosion`. Before EB-270 the funnel returned `Task` and the
-        // ledger was fed `size`, and no value test could have seen the
-        // difference on an unmodified board.
-        var deal = (MethodInfo)Il.Method("ElementalHit", "Deal");
-        Assert.Equal(typeof(System.Threading.Tasks.Task<int>),
-                     deal.ReturnType);
+        // asserted is that `Explode` takes the funnel's RESULT -- which is only
+        // possible because it returns one -- and hands it to `NoteExplosion`.
+        // Before EB-270 the funnel returned `Task` and the ledger was fed
+        // `size`, and no value test could have seen the difference on an
+        // unmodified board. `EB-343` renamed the door the Bomb goes through
+        // (`DealWithoutDealerMods`) and both return the same `Task<int>`.
+        foreach (var name in new[] { "Deal", "DealWithoutDealerMods" })
+        {
+            Assert.Equal(typeof(System.Threading.Tasks.Task<int>),
+                         ((MethodInfo)Il.Method("ElementalHit", name)).ReturnType);
+        }
 
         var explode = typeof(ProtoBombPower)
             .GetMethod("Explode", HeadlessGame.All)!;

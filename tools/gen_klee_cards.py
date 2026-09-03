@@ -97,6 +97,12 @@ from tier0.constants import BURST_PER_SKILL_TAG                 # noqa: E402
 # clause by clause, and a second table here could bind one of them to a
 # different clause -- which is a smithed prototype that is two different cards.
 from tier0.content.upgrades import PLAN_DELTA_OPS               # noqa: E402
+# EB-322. The player-facing title for a sheet `name:`. Imported for the reason
+# the two above are: a prototype row that shadows a shipped row of the same
+# name declares that with a ` (proto)` suffix, the suffix is a SHEET device,
+# and a second copy of the rule here is what would let the mod print a title
+# the sim does not -- which is exactly what the row forbids.
+from tier0.content.loader import display_name                   # noqa: E402
 
 SHEET = REPO / "docs" / "klee-cards.yaml"
 # Mirrors tier0/content/upgrades.py UPGRADE_SHEETS, in the same order.
@@ -357,6 +363,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # nowhere else, which `plan_reason` and `blocked_reason`
                   # enforce by name. Each is one `KokomiPlan.Kind`.
                   "plan_twice", "damage_per_companion_last_turn",
+                  # `EB-335`: Tide Wall's per-Plan Block scaler, plan-only for
+                  # a reason of its own -- the count it multiplies is a fact
+                  # about a MORNING.
+                  "block_per_plan_this_morning",
                   # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, R213 B) --
                   # ONE verb, on the same terms as the two blocks above. Gorou's
                   # Inuzaka All-Round Defense prints "Gain Block equal to half
@@ -1432,6 +1442,7 @@ PLAN_CLAUSE_KINDS = {
     "damage_per_companion_last_turn": "DamagePerCompanionLastTurn",
     "plan_twice": "PlanTwice",
     "play_copy_of_companion": "PlayCopyOfCompanion",
+    "block_per_plan_this_morning": "BlockPerPlanThisMorning",
     "apply_power": None,
 }
 
@@ -1457,7 +1468,7 @@ PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
 #: Legal inside a `plan:` list and NOWHERE else -- a top-level spelling would
 #: be a different, unpriced card, and `KokomiPlan` is the only caller of both.
 PLAN_ONLY_OPS = {"plan_twice", "damage_per_companion_last_turn",
-                 "play_copy_of_companion"}
+                 "play_copy_of_companion", "block_per_plan_this_morning"}
 
 
 def plan_reason(card: dict) -> str | None:
@@ -1719,6 +1730,13 @@ APPLY_POWERS = {
     "kk_generals_banner": ("GeneralsBannerPower", None,
         "Once per turn, when you play a [gold]Companion[/gold] card, the front "
         "enemy gains {X} Weak."),
+    # `EB-335`, R246 pick 2. THE AMOUNT IS BLOCK PER STRIKE and not a duration:
+    # the window is "until your next turn" and is closed by
+    # `ProtoBakeKuragePower.AfterPlayerTurnStart`, one line after the morning
+    # the packet says strikes inside it.
+    "kk_shell_guard": ("ShellGuardPower", None,
+        "Until your next turn, whenever the [gold]Tamakushi Casket[/gold] "
+        "strikes, gain {X} [gold]Block[/gold]."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
@@ -4622,14 +4640,29 @@ def build_vars(card: dict) -> list[str]:
         out.append(f"new CardsVar({added_draw_upgrade(card)})")
     # EB-315. The PLAN line's upgradeable clauses, in the order the row wrote
     # them and AFTER the now-line's vars, which is the order the face prints
-    # the two halves in. A plain `DynamicVar` and never an attack var: a
-    # planned hit is dealt by the jellyfish at the start of the next turn, so
-    # resolving the printed number against the player's live attack modifiers
-    # at print time would show a number nobody will get (the same argument
+    # the two halves in. NEVER AN ATTACK VAR: a planned hit is dealt by the
+    # jellyfish at the start of the next turn, so the game's own attack preview
+    # -- which resolves the player's Strength, Weak and attack buffs at print
+    # time -- would show a number nobody will get (the same argument
     # `plant_bomb` above makes about a banked Bomb).
-    for index, (_key, var) in sorted(plan_var_effects(card).items()):
-        amount = int((card.get("plan") or [])[index]["amount"])
-        out.append(f'new DynamicVar("{var}", {amount}m)')
+    #
+    # `EB-334`. A PLANNED HIT IS THE ONE PLAN CLAUSE WHOSE PRINTED NUMBER IS
+    # STILL LIVE, and R246 pick 1 is what made it one: the Bake-Kurage deals a
+    # Plan, so her Weak and her buffs no longer touch it, but the TARGET's
+    # Vulnerable still multiplies it. `KokomiPlan.PlanDamageVar` is that one
+    # term and nothing else, resolved against the front enemy at preview time
+    # -- so the Plan line prints what the morning will deal against the board
+    # as it stands, which is the row's own acceptance sentence. Only the flat
+    # `damage` clause takes it: `damage_per_companion_last_turn` prints a
+    # PER-COMPANION rate rather than a hit, and multiplying a rate by the
+    # target's Vulnerable would print a number the card never deals.
+    plan_line = card.get("plan") or []
+    for index, (key, var) in sorted(plan_var_effects(card).items()):
+        amount = int(plan_line[index]["amount"])
+        if key == "plan_damage" and plan_line[index].get("op") == "damage":
+            out.append(f'new KokomiPlan.PlanDamageVar({amount}m)')
+        else:
+            out.append(f'new DynamicVar("{var}", {amount}m)')
     if added_encore_salon(card) is not None:
         base, deploys = added_encore_salon(card)
         # Same trio as salon_calc_var_decls, for the upgrade-appended encore
@@ -4653,10 +4686,15 @@ def build_vars(card: dict) -> list[str]:
     # softlock on whatever run happens to roll the card. Fail the GENERATOR
     # instead. Typed vars carry their class-derived name (DamageVar ->
     # "Damage"), named vars declare theirs.
+    #
+    # THE TYPE MAY BE QUALIFIED (`EB-334`): `KokomiPlan.PlanDamageVar` lives
+    # inside the arm's own class, so the pattern skips any dotted prefix and
+    # reads the class name -- and the class is named for the var it carries,
+    # which is what keeps that derivation honest.
     names = [
         (m.group(1)
          if (m := re.search(r'(?:DynamicVar|CalculatedVar)\("(\w+)"', decl))
-         else re.match(r"new (\w+?)Var\(", decl).group(1))
+         else re.match(r"new (?:\w+\.)*(\w+?)Var\(", decl).group(1))
         for decl in out
     ]
     dupes = sorted({n for n in names if names.count(n) > 1})
@@ -9645,6 +9683,19 @@ def emit(
     # UI affordances derive from the same mechanics as play resolution.
     # A damage-bearing IElementalCard supplies its card element; apply-only
     # skills supply the element written on their effect; Swirl supplies Anemo.
+    #
+    # `EB-338`: AND THAT SPLIT IS THE FLAG. A row whose element rides its own
+    # damage (`elemental`) has a hit for a reaction to multiply. A row whose
+    # element comes from an `apply_aura` or a `swirl` does NOT: the reaction is
+    # triggered by the APPLICATION, and any damage the row also carries applies
+    # no element and so triggers nothing of its own. Barbara's stand-in is the
+    # second shape -- "Gain 6 Block. Apply Hydro" -- and its Vaporize preview
+    # promised 1.5x on a card with no damage on it at all.
+    #
+    # DERIVED HERE, NEVER REMEMBERED ON THE CARD, which is the `ArmKeywordTips`
+    # bargain one attach over: the sheet knows which op puts the element on the
+    # board and the C# tooltip cannot.
+    applies_without_hit = not elemental
     preview_element_cs = element_cs if elemental else None
     if preview_element_cs is None:
         elemental_effect = next((e for e in card.get("effects", [])
@@ -10189,10 +10240,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         confiscated_arg = (
             ", includesConfiscatedRules: true"
             if includes_confiscated_rules else "")
+        # `EB-338`, and it rides the PREVIEW rather than the card: a row with
+        # no reaction preview has nothing to correct, so the argument is only
+        # emitted where one is drawn.
+        no_hit_arg = (
+            ", appliesWithoutHit: true"
+            if applies_without_hit and preview_element_cs is not None else "")
         tips_expr = (
             "KleeCardTooltips.ForCard(base.ExtraHoverTips, this, "
             f"{trigger_arg}, includesBombRules: {bomb_arg}"
-            f"{confiscated_arg})")
+            f"{confiscated_arg}{no_hit_arg})")
     # Track L-C: the arithmetic the card text no longer carries. Wraps the
     # element/bomb tips when both apply, so one override yields both lists.
     rider_args, charge_rider_args = rider_tip_args(card)
@@ -10531,6 +10588,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # plain interpolation.
     art_id = card.get("art_of") or card["id"]
 
+    # EB-322. THE TITLE IS THE DISPLAY NAME, not the sheet's `name:`. A
+    # prototype row that shadows a shipped row of the same name declares the
+    # shadow with a ` (proto)` suffix so the sheet namespace stays legible to
+    # `tools/lint_unique_names.py`; the player never sees it, because under
+    # the arm the shipped row is substituted out and there is nothing left to
+    # disambiguate. Three seats read the suffix off the card face as part of
+    # the card's name. Resolved here rather than inline for the reason
+    # `art_id` above is.
+    title_cs = cs_escape(display_name(card["name"]))
+
     return f'''// <auto-generated>
 {source_header.rstrip()}
 //     DO NOT EDIT. Edits are lost on the next regen -- change the sheet instead.
@@ -10568,7 +10635,7 @@ public sealed class {cls} : {interfaces}
 
     public override List<(string, string)>? Localization => new()
     {{
-        ("title", "{card["name"].replace('"', chr(92) + chr(34))}"),
+        ("title", "{title_cs}"),
         ("description", "{desc}"),
     }};{tags_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 

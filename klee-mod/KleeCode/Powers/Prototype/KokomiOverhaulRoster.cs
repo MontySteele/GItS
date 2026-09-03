@@ -38,7 +38,8 @@ namespace KleeMod.Powers;
 /// screen that could still offer the shipped 76 would be offering cards written
 /// against rules the run is no longer playing -- an Exhaust that pays Charge, a
 /// Muster that transforms, a Burst that gates. Slice one's own scope statement
-/// is that the 26 rows are her only reward pool for the prototype run.
+/// is that the 26 rows are her only reward pool for the prototype run; R246
+/// pick 2 added the two defensive rows `EB-335` builds, making it 28.
 ///
 /// THE OVERHAUL WINS WHERE IT MEETS THE KURAGE'S MEMORY. A dev build compiles
 /// this arm AND that one, and both want her starter. They are alternatives, not
@@ -102,13 +103,13 @@ internal static class KokomiOverhaulRoster
     };
 
     /// <summary>
-    /// Kokomi's WHOLE offerable pool under the arm: the slice's 26 rows and
+    /// Kokomi's WHOLE offerable pool under the arm: the slice's 28 rows and
     /// nothing else.
     ///
     /// LISTED BY TYPE, not filtered by id prefix. A prefix match would be a
     /// second, softer definition of "which rows are the slice" living next to
     /// the sheet's own, and it would fail silently the day a row is renamed.
-    /// These are the same 26 ids as <c>C.KOKOMI_OVERHAUL_POOL_IDS</c>, in the
+    /// These are the same 28 ids as <c>C.KOKOMI_OVERHAUL_POOL_IDS</c>, in the
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
@@ -123,7 +124,7 @@ internal static class KokomiOverhaulRoster
     internal static IEnumerable<CardModel> OfferablePool() =>
         Slice().Concat(RosterAncientCards.Kokomi);
 
-    /// <summary>The slice's own 26 rows, without the Ancient tail
+    /// <summary>The slice's own 28 rows, without the Ancient tail
     /// <see cref="OfferablePool"/> adds.</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
@@ -137,11 +138,14 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkWarCouncil>(),
         ModelDb.Card<ProtoKkNereidsAscension>(),
         ModelDb.Card<ProtoKkTheMoonOverlooksTheWaters>(),
-        // The Priestess -- Block through the jellyfish, Mend at Rare (7)
+        // The Priestess -- Block through the jellyfish, Mend at Rare (9)
         ModelDb.Card<ProtoKkSeaSaltPrayer>(),
         ModelDb.Card<ProtoKkDeepCurrent>(),
         ModelDb.Card<ProtoKkCoralBulwark>(),
         ModelDb.Card<ProtoKkCleansingWave>(),
+        // `EB-335`, R246 pick 2: the kit's own defence in act 2.
+        ModelDb.Card<ProtoKkTideWall>(),
+        ModelDb.Card<ProtoKkShellGuard>(),
         ModelDb.Card<ProtoKkTheCloudsLikeWaves>(),
         ModelDb.Card<ProtoKkTheMoonAShip>(),
         ModelDb.Card<ProtoKkSangoIsshin>(),

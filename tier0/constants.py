@@ -219,6 +219,13 @@ KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
 # the mod grants it from the arm's own turn-1 site and the relic's face is
 # unchanged. C# twin `KleeOverhaulLaw.OpeningSpark`.
 KLEE_OVERHAUL_OPENING_SPARK = 1
+# GROUNDED'S SPARK (`EB-344`, ruled R248). The held turn pays a Spark as well as
+# the Block: "At the start of your turn, if none of your Bombs went off last
+# turn, gain 6 Block and 1 Spark." The Block is the CARD's number and moves on
+# upgrade (`power_amount: +2`); the Spark is the KIT's and does not, which is
+# why it is named here beside rule 4's other two rates rather than riding the
+# power's amount. C# twin `KleeOverhaulLaw.GroundedSpark`.
+KLEE_OVERHAUL_GROUNDED_SPARK = 1
 
 # THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, in the
 # printed order.
@@ -719,9 +726,11 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
     "proto_kk_slack_water",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). Twenty-six rows: 13 Common,
-# 8 Uncommon, 5 Rare, in the packet's own order -- the Tactician, the
-# Priestess, the Commander, then the currencies and the one replay.
+# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). Twenty-eight rows since
+# `EB-335`: 13 Common, 10 Uncommon, 5 Rare, in the packet's own order -- the
+# Tactician, the Priestess, the Commander, then the currencies and the one
+# replay. The two newest are R246 pick 2's defensive pair, filed with the
+# Priestess because that is the plan they answer for.
 # `_pool_substitutions` cannot express this (it is a one-for-one map and this
 # is "her pool is these and nothing else"), so `loader.pool_replacement` is its
 # sibling seam, read at the same single door.
@@ -736,11 +745,13 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_war_council",
     "proto_kk_nereids_ascension",
     "proto_kk_the_moon_overlooks_the_waters",
-    # The Priestess -- Block through the jellyfish, Mend at Rare (7)
+    # The Priestess -- Block through the jellyfish, Mend at Rare (9)
     "proto_kk_sea_salt_prayer",
     "proto_kk_deep_current",
     "proto_kk_coral_bulwark",
     "proto_kk_cleansing_wave",
+    "proto_kk_tide_wall",
+    "proto_kk_shell_guard",
     "proto_kk_the_clouds_like_waves",
     "proto_kk_the_moon_a_ship",
     "proto_kk_sango_isshin",

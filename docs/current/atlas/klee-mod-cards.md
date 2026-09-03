@@ -144,6 +144,11 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
   (`tools/lint_text_encoding.py:1-14`); display names are unique across cards
   AND relics plus the reserved list (`tools/lint_unique_names.py:1-42`,
   `docs/reserved-card-names.txt:1-20`).
+- **A sheet `name:` is not always the printed title** (`EB-322`): a prototype
+  row that rewrites a shipped row declares the shadow with a ` (proto)`
+  suffix, `tier0.content.loader.display_name` strips it, and both engines
+  print what that returns — the emitter at its one `("title", …)` site, the
+  sim at `loader.prototype_cards`.
 
 ## 4. Rulings that shaped it
 

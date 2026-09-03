@@ -1014,6 +1014,13 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # but a reaction the hit causes can move the board under the loop.
     if C.KOKOMI_OVERHAUL:
         kokomi_plan.resolve_all(state)
+        # `EB-335`. SHELL GUARD'S WINDOW CLOSES AFTER THE MORNING, not on the
+        # `roll_turn` line above: R246 pick 2 says the morning's Plans strike
+        # the Casket inside the window, so the card's Block arrives before the
+        # enemy's next swing. `kokomi_plan.close_shell_guard`'s header carries
+        # the whole argument; it is called unconditionally because the drain
+        # above returns early on an empty queue.
+        kokomi_plan.close_shell_guard(state)
         _settle_phases(state)
         _revive_player_if_needed(state)
         if not p.alive or state.over:
@@ -1343,6 +1350,20 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             if not enemy.alive:
                 # A trap killed the attacker before its hit landed. Same exit
                 # the FlameBarrier case takes at the foot of this loop.
+                #
+                # `EB-336`, AND THIS BREAK IS THE RULE. The blind seat's
+                # Chomper died on its own Mine 4 and its first hit landed
+                # anyway (`opus-act2b`, finding 3) -- in the MOD, where
+                # `CreatureCmd.Damage` reads `dealer.IsDead` once at the top of
+                # a call the Mine fires from the middle of. Here the test is
+                # taken between the trap and the Block spend, so a lethal Mine
+                # costs the player no Block and no HP; the mod reaches the same
+                # acceptance one hook later
+                # (`KleeOverhaulSweepHooks.ModifyHpLostBeforeOsty`), by which
+                # point Block has been spent. Both engines say "a Mine whose
+                # explosion kills the attacker costs Klee no HP"; they differ
+                # on Block, and that is written down on both sides rather than
+                # left to be discovered.
                 break
             block_before = state.player.block
             blocked = min(state.player.block, dmg)

@@ -252,13 +252,26 @@ public class InazumaCompanionOverhaulTests
     {
         // STRUCTURAL: `ignoreBlock` is one optional flag on ElementalHit.Deal,
         // defaulted false, so every other caller in the mod is byte-identical.
+        // A SECOND OPTIONAL FLAG JOINED IT (`EB-334`, `powered`), which is why
+        // the arity is seven and both defaults are asserted by NAME rather
+        // than by position -- a third quarantined flag must not be able to
+        // move this pin's subject out from under it.
         var volley = Il.Method("TamotoPower", "FireVolley");
         Assert.Contains(Il.Calls(volley), c => c.Contains("ElementalHit.Deal"));
 
+        // SEVEN, and `EB-343` is why that is still seven: the overhaul
+        // Bomb wanted the same pipeline edit `powered` already made
+        // and JOINED that flag rather than adding a second one, so a
+        // count here is a real guard against a third. Every read is by
+        // NAME; only the count is positional.
         var deal = Il.Method("ElementalHit", "Deal");
-        Assert.Equal(6, deal.GetParameters().Length);
-        Assert.True(deal.GetParameters()[5].HasDefaultValue);
-        Assert.Equal(false, deal.GetParameters()[5].DefaultValue);
+        Assert.Equal(7, deal.GetParameters().Length);
+        var ignore = deal.GetParameters().Single(p => p.Name == "ignoreBlock");
+        Assert.True(ignore.HasDefaultValue);
+        Assert.Equal(false, ignore.DefaultValue);
+        var powered = deal.GetParameters().Single(p => p.Name == "powered");
+        Assert.True(powered.HasDefaultValue);
+        Assert.Equal(true, powered.DefaultValue);
     }
 
     // ---- THE POWERS -----------------------------------------------------

@@ -267,9 +267,17 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # Klee, klee-overhaul-slice-1-2026-09-01.md sec.2 rules 1/2/4/6,
             # in the shape docs/current/text-conventions.md sets (one clause
             # per sentence, under the keyword-tip ceiling).
-            "A charge on an enemy. Grows by ",
-            " at the start of your turn. Never goes off by itself. Bombs on ",
-            "one enemy go off together when [gold]Set off[/gold].",
+            #
+            # `EB-343` (R248) gave the Bomb a FOURTH rule -- a Bomb takes the
+            # enemy's debuffs and none of Klee's -- and the word was REWRITTEN
+            # rather than extended ([USER], PR #340): four sentences carrying
+            # four rules would have run 60 characters over the tip ceiling, and
+            # the ceiling is the base game's own longest mechanic tip on the one
+            # word a seat reads every turn. All four rules are still here in two
+            # sentences, and the tip takes no length exception.
+            "A charge on an enemy: grows ",
+            " a turn, goes off only when [gold]Set off[/gold], all at once. ",
+            "Its hit takes the enemy's debuffs, not yours.",
             "on the target goes off first, one at a ",
             "time, each a Pyro hit for its size.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
@@ -281,9 +289,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.
-            "Play this on the [gold]Bake-Kurage[/gold]: it carries out the ",
-            "[gold]Plan[/gold] line at the start of your next turn. Cost is ",
-            "paid now. Plans hit the front enemy.",
+            "On the [gold]Bake-Kurage[/gold], paid now; the [gold]Plan[/gold] ",
+            "lands first thing next turn on the front enemy. Enemy ",
+            "[gold]Vulnerable[/gold] raises it; your [gold]Weak[/gold] does ",
+            "not.",
             "heal N HP, never above the HP you entered ",
             # Furina, furina-reframe-2026-08-29.md sec.4.2 / sec.4.4 / sec.4.6,
             # staged as slice two. Three words the SHIPPED kit does not have:

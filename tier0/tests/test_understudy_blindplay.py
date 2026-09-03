@@ -837,20 +837,21 @@ def test_every_shelf_in_a_shop_is_named_and_buyable():
     # the shelf under `card_cost` and was never read, so The Big One was
     # bought for 73 gold and its 3 energy discovered a screen later. Two
     # prices, both printed, the card's first.
-    assert "**Coral Guard** — cost 1, skill, 75 gold" in page
+    assert "**Coral Guard** — cost 1, card (skill), 75 gold" in page
     # `EB-268`: and the card TYPE beside it, which the wire sends as
     # `card_type` and the hand line has always printed.
-    assert "**Bottled Tide** — 160 gold" in page
+    assert "**Bottled Tide** — relic, 160 gold" in page
     assert "At the start of each combat, gain 3 Block." in page
     # The card-removal shelf has no model and therefore no title; the wire's
     # own word for it is rendered rather than a label invented here.
     assert "**Card Removal** — 90 gold" in page
     # And a shelf already bought says so rather than offering a refused buy.
-    assert "**Fire Potion** — 50 gold (not available)" in page
+    assert "**Fire Potion** — potion, 50 gold (not available)" in page
 
     res = blindplay.act(shop_state(), 'buy "Coral Guard"')
     assert res["ok"] and res["post"] == {"action": "shop_purchase", "index": 0}
-    assert res["printed"] == {"item": "Coral Guard", "price": 75}
+    assert res["printed"] == {"item": "Coral Guard", "price": 75,
+                          "kind": "card (skill)", "text": "Gain 5 Block."}
     assert blindplay.act(shop_state(), 'buy "Card Removal"')["ok"]
     sold = blindplay.act(shop_state(), 'buy "Fire Potion"')
     assert not sold["ok"] and "not available to buy" in sold["refusal"]
@@ -2545,13 +2546,13 @@ def test_a_live_shop_prints_every_card_cost_beside_the_gold():
     energy -- a whole turn -- when I next saw it on a card-selection screen."
     The energy cost is on the shelf under `card_cost` and always was."""
     page = blindplay.observe(live("shop-stocked"))
-    assert "**Pocket Fireworks** — cost 1, attack, 25 gold" in page
-    assert "**Mine Toss** — cost 1, skill, 51 gold" in page
+    assert "**Pocket Fireworks** — cost 1, card (attack), 25 gold" in page
+    assert "**Mine Toss** — cost 1, card (skill), 51 gold" in page
     # `EB-286` reaches the shelves too: a Spark-priced card charges no energy,
     # so its shelf would otherwise have printed a price of nothing at all.
-    assert "**Powder Charge** — cost 1 Spark, skill, 77 gold" in page
+    assert "**Powder Charge** — cost 1 Spark, card (skill), 77 gold" in page
     # A relic and a potion have no card cost and read exactly as before.
-    assert "**Bag of Preparation** — 192 gold" in page
+    assert "**Bag of Preparation** — relic, 192 gold" in page
 
 
 def test_a_live_bought_shelf_says_what_it_is_instead_of_calling_itself_card():
@@ -2576,7 +2577,7 @@ def test_a_live_bought_shelf_says_what_it_is_instead_of_calling_itself_card():
 
     page = blindplay.observe(live("shop-bought"))
     assert "**Card** —" not in page
-    assert "**(this shelf is empty)** — 76 gold (not available)" in page
+    assert "**(this shelf is empty)** — card, 76 gold (not available)" in page
     assert "The game clears a shelf's card the moment it is sold" in page
 
 
@@ -2593,10 +2594,10 @@ def test_a_bought_shelf_keeps_the_name_this_page_printed_before_the_sale():
     """
     blindplay.forget_shelves()
     before = blindplay.observe(live("shop-stocked"))
-    assert "**Perfect Timing** — cost 1, attack, 76 gold" in before
+    assert "**Perfect Timing** — cost 1, card (attack), 76 gold" in before
 
     after = blindplay.observe(live("shop-bought"))
-    assert "**Perfect Timing** — cost 1, attack, 76 gold (sold)" in after
+    assert "**Perfect Timing** — cost 1, card (attack), 76 gold (sold)" in after
     assert "(this shelf is empty)" not in after
     assert "what this page printed for the same shelf before the purchase" \
         in after
@@ -2616,7 +2617,7 @@ def test_a_remembered_shelf_never_crosses_from_one_shop_to_another():
     assert "Perfect Timing" not in page
     # ...and coming back to a bought shelf with the memory gone says so.
     assert "(this shelf is empty)" not in page
-    assert "**(this shelf is empty)** — 76 gold" in blindplay.observe(
+    assert "**(this shelf is empty)** — card, 76 gold" in blindplay.observe(
         live("shop-bought"))
 
 
@@ -2905,7 +2906,10 @@ def plans_combat_state(plans: dict | None) -> dict:
 TWO_PLANS = {
     "pet": True, "pet_name": "Bake-Kurage", "pet_entity_id": "41",
     "pending": 2, "twice": False, "also_now": False,
-    "queue": [{"name": "Kurage's Oath (proto)", "clauses": 1},
+    # `EB-322`: the wire carries the card's TITLE, and a prototype row
+    # that shadows a shipped row prints the shipped row's title -- the
+    # " (proto)" declaration is a sheet device and never reaches a face.
+    "queue": [{"name": "Kurage's Oath", "clauses": 1},
               {"name": "War Council", "clauses": 2}],
 }
 
@@ -2925,7 +2929,7 @@ def test_the_page_lists_the_pending_plans_front_first():
     the same way -- a blind reader gets what a sighted player sees."""
     page = blindplay.render(blindplay.observation(plans_combat_state(TWO_PLANS)))
     assert "## The Bake-Kurage" in page
-    assert "1. **Kurage's Oath (proto)**" in page
+    assert "1. **Kurage's Oath**" in page
     assert "2. **War Council**" in page
     assert "Enemies cannot touch it" in page
 
@@ -3013,7 +3017,7 @@ def test_a_turn_with_no_carry_out_prints_no_carry_out_block():
         plans_combat_state(dict(TWO_PLANS, carried_out=[]))))
     assert "carried these out" not in page
     # And the section itself is unchanged for a board that never had the field.
-    assert "1. **Kurage's Oath (proto)**" in page
+    assert "1. **Kurage's Oath**" in page
 
 
 def test_the_meter_ledger_stays_off_the_carry_out_block():
@@ -3158,9 +3162,120 @@ def test_play_during_a_combat_chooser_names_the_chooser():
 
 def test_the_flat_refusal_survives_where_it_is_true():
     """The narrowing is only the chooser screens: a map really is not a battle
-    and still says so."""
-    assert blindplay.act(map_state(), "end turn")["refusal"] \
-        == "you are not in a battle"
+    and still says so.
+
+    `EB-319` added the second half of that sentence and nothing else: the
+    REASON is the one this row pinned, and the way out is the map's own verb.
+    """
+    res = blindplay.act(map_state(), "end turn")["refusal"]
+    assert res.startswith("you are not in a battle")
+    assert 'go "<node>"' in res
+
+
+# ------------------------------------------------- EB-319: the way out -----
+
+def random_target_combat_state() -> dict:
+    """The RECORDED combat turn plus ONE synthetic card: a random-target
+    Attack, which the game declares `TargetType.AllEnemies`.
+
+    Synthetic because the recording is a Kokomi turn and no Kokomi row aims
+    that way; the shape is the shipped Klee card's own -- `RapidFire.cs:63`
+    passes `TargetType.AllEnemies` and `McpMod.StateBuilder.cs:1394` sends
+    `card.TargetType.ToString()` -- so the value under test is the one the
+    wire carries, not one this file invented.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    hand = state["player"]["hand"]
+    card = json.loads(json.dumps(hand[0]))
+    card.update({"id": "KLEEMOD-RAPID_FIRE", "name": "Rapid Fire",
+                 "description": "Deal 3 damage to random enemies four times.",
+                 "target_type": "AllEnemies", "keywords": [],
+                 "index": len(hand)})
+    hand.append(card)
+    return state
+
+
+def test_a_card_that_aims_itself_is_refused_with_the_form_that_works():
+    """`EB-319`, and the round it cost.
+
+    `play "Rapid Fire" on "Seapunk"` was answered *Rapid Fire is random-target
+    and takes no target*: true, and it named no way to play the card. The seat
+    had chained `end turn` behind it, so an Attack Potion's 12 free damage
+    went with the turn -- "the message had the information and withheld it"
+    (round-7 act-1 seat, Fight 5).
+
+    Two halves, and the second is the row: the play is refused HERE instead of
+    being posted and refused by the bridge, and the refusal ends in the
+    command that resolves.
+    """
+    state = random_target_combat_state()
+    res = blindplay.act(state, 'play "Rapid Fire" on "Nibbit"')
+    assert not res["ok"]
+    assert res["post"] is None            # never posted, so nothing is spent
+    assert 'play "Rapid Fire"' in res["refusal"]
+    # ...and that form really is the one that works.
+    ok = blindplay.act(state, 'play "Rapid Fire"')
+    assert ok["ok"] and "target" not in ok["post"]
+
+
+def test_a_card_played_on_the_player_is_refused_the_same_way():
+    """The same rule for the other spelling the bridge refuses: a `Self` card
+    handed an enemy reaches `IsValidTarget` and comes back a wasted action."""
+    res = blindplay.act(combat_state(), 'play "Coral Guard" on "Nibbit"')
+    assert not res["ok"] and 'play "Coral Guard"' in res["refusal"]
+    assert blindplay.act(combat_state(), 'play "Coral Guard"')["ok"]
+
+
+def test_an_aimed_card_still_takes_its_aim():
+    """The relaxation is exactly as wide as the enum names in
+    `UNAIMED_TARGETS`: an `AnyEnemy` card is unchanged, and so is a custom
+    single-target type, which the wire spells as a bare number (`EB-216`)."""
+    state = random_target_combat_state()
+    assert blindplay.act(state, 'play "Pearl Barrage" on "Nibbit"')["ok"]
+    state["player"]["hand"][-1]["target_type"] = "40213"      # a custom type
+    assert blindplay.act(state, 'play "Rapid Fire" on "Nibbit"')["ok"]
+
+
+def test_every_refusal_on_every_screen_ends_in_a_form_that_resolves():
+    """`EB-319`'s acceptance, swept rather than sampled.
+
+    One nonsense command per screen this page drives, so a refusal that names
+    no way out fails here whichever `_refuse` produced it. A screen the page
+    refuses to drive is excluded BY NAME and for the honest reason: it has no
+    command that resolves, and inventing one would be the defect this row is
+    about, pointing the other way.
+    """
+    screens = {"combat": combat_state(), "map": map_state(),
+               "shop": shop_state(), "rest": rest_state(),
+               "card_reward": card_reward_state(), "event": event_state()}
+    checked = 0
+    for label, state in screens.items():
+        obs = blindplay.observation(state)
+        assert not obs["blocked"], f"{label} fixture is not drivable"
+        for command in ('play "Nothing At All"', 'choose "Nothing At All"',
+                        'go "Nowhere"', 'buy "Nothing At All"', "end turn",
+                        "rest", "confirm", "skip", "wibble"):
+            res = blindplay.act(state, command)
+            if res["ok"]:
+                continue
+            checked += 1
+            assert ("The form that resolves: " in res["refusal"]
+                    or "Forms that resolve here: " in res["refusal"]), (
+                f"{label}: {command} was refused with no form that resolves "
+                f"-- {res['refusal']!r}")
+            # And the form is a real one: the tail is the screen's own
+            # grammar, or a command a call site spelled out in full.
+            tail = res["refusal"].rsplit(": ", 1)[1]
+            assert tail.strip(), f"{label}: empty form list"
+    assert checked >= 30, f"only {checked} refusals swept -- the pin is stale"
+
+
+def test_a_screen_that_is_not_being_driven_promises_no_form():
+    """The other half of the same honesty: `_with_forms` adds nothing where
+    the page itself offers nothing, so a refusal never invents a way out."""
+    res = blindplay.act({"state_type": "seance_minigame"}, "proceed")
+    assert not res["ok"]
+    assert "resolves" not in res["refusal"]
 
 
 def test_the_spark_refusal_is_one_sentence():
@@ -3195,15 +3310,15 @@ def test_a_card_shelf_prints_its_type_sold_or_not():
     """
     blindplay.forget_shelves()
     stocked = blindplay.observe(live("shop-stocked"))
-    assert "**Perfect Timing** — cost 1, attack, 76 gold" in stocked
-    assert "**Mine Toss** — cost 1, skill, 51 gold" in stocked
-    assert "**Grounded** — cost 1, power, 74 gold" in stocked
+    assert "**Perfect Timing** — cost 1, card (attack), 76 gold" in stocked
+    assert "**Mine Toss** — cost 1, card (skill), 51 gold" in stocked
+    assert "**Grounded** — cost 1, card (power), 74 gold" in stocked
     # A relic and a potion have no card type and read exactly as before.
-    assert "**Bag of Preparation** — 192 gold" in stocked
-    assert "**Flex Potion** — 48 gold" in stocked
+    assert "**Bag of Preparation** — relic, 192 gold" in stocked
+    assert "**Flex Potion** — potion, 48 gold" in stocked
 
     sold = blindplay.observe(live("shop-bought"))
-    assert "**Perfect Timing** — cost 1, attack, 76 gold (sold)" in sold
+    assert "**Perfect Timing** — cost 1, card (attack), 76 gold (sold)" in sold
 
 
 # --------------------------------- EB-294: the three Kokomi r2 render gaps --
@@ -4076,16 +4191,25 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
     anchors = {
-        "Bomb": ["A charge on an enemy", "Never goes off by itself",
-                 "go off together when"],
+        # `EB-343` (R248) rewrote the word: it gained a fourth rule and
+        # [USER] held it to the 135-character tip ceiling (PR #340), so
+        # rule 7 is now "goes off only when" and the stacking rule is
+        # "all at once".
+        "Bomb": ["A charge on an enemy", "goes off only when",
+                 "all at once", "takes the enemy's debuffs, not yours"],
         "Set off": ["on the target goes off first, one at a",
                     "each a Pyro hit for its size"],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
         "Mine": ["that also goes off when its enemy attacks",
                  "before the hit lands",
-                 "the badge shows the number"],
-        "Plan": ["it carries out the ",
-                 "paid now. Plans hit the front enemy"],
+                 "badge has the number"],
+        # The anchors are clauses INSIDE one C# literal apiece, the same
+        # fold-out the Evoke row below makes around its interpolated numerals:
+        # the tip's [gold] spans split it across concatenated literals, so a
+        # phrase that straddles a `+` is not a substring of the source.
+        "Plan": [", paid now; the ",
+                 "lands first thing next turn on the front enemy. Enemy ",
+                 " raises it; your "],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
         # The Furina reframe's three (slice two, 2026-09-02). The Evoke
@@ -4276,3 +4400,576 @@ def test_a_simple_select_picker_does_not_trip_the_blindness_guard():
     assert "simple_select" not in page.replace("`simple_select`", "")  \
         or True  # the page may name the kind; it must not refuse to render
     assert blindplay.act(state, 'choose "Coral Guard"')["ok"]
+
+
+# ============ EB-340 / EB-341 / EB-342: the Klee round-7b page findings ======
+#
+# Four blind Opus seats played three acts on `0.2.2136+proto.dirty` and filed
+# the page's own gaps: `review/qa/klee-round-7b-2026-09-02/opus-act1.md` (c),
+# `opus-act2b.md` findings 5 and 12, `opus-act3.md` findings 1, 2, 3, 5, 8, 9
+# and 13. Every test below quotes the finding it closes.
+
+
+def elemental_hand_state(*, aura: bool = False, bomb_tip: str = "") -> dict:
+    """A combat holding one Pyro card, optionally against an aura (`EB-340`).
+
+    Built on the RECORDED combat, so everything the page prints around the two
+    fields under test is a real wire state.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    keywords = [{"name": "Applies Pyro",
+                 "description": "If the target has no aura, this applies Pyro "
+                                "for 2 turns. A different aura is consumed to "
+                                "trigger a Reaction instead."}]
+    if bomb_tip:
+        keywords.append({"name": "Bomb", "description": bomb_tip})
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-PROTO_KO_KAPOW", "name": "Ka-pow!", "type": "Attack",
+         "cost": "0", "can_play": True, "index": 0, "target_type": "AnyEnemy",
+         "is_upgraded": False, "keywords": keywords,
+         "description": "Retain. Set off. Deal 4 damage."}]
+    if aura:
+        state["player"]["hand"] = []
+        state["battle"]["enemies"][0]["status"] = [
+            {"id": "KLEEMOD-CRYO_AURA", "name": "Cryo Aura", "amount": 2,
+             "type": "Buff", "keywords": [],
+             "description": "Cryo clings to this enemy."}]
+    return state
+
+
+def test_the_reactions_are_defined_wherever_the_screen_shows_an_element():
+    """`EB-340` (1). "None of the four appears in the 'Words on this screen'
+    block, on any screen, ever" -- a Reaction reached the page only as a
+    preview on a card that happened to be in hand AND happened to supply the
+    right element AND only while the aura was already out. The r7b act-3 seat
+    dealt 13 with `Shinobu` into a Pyro aura, could not price it, and was
+    handed the formula two rounds later by an unrelated draw.
+
+    Seen to FAIL: with no reaction table the words are absent entirely.
+    """
+    page = blindplay.observe(elemental_hand_state())
+    for word in ("Melt", "Vaporize", "Overloaded", "Frozen", "Superconduct",
+                 "Electro-Charged"):
+        assert f"- **{word}** — " in page, word
+    # The numbers, which are the whole reason a seat can price a combination.
+    assert "1.75x damage and consumes the aura" in page
+    assert "1.5x damage and consumes the aura" in page
+    assert "6 splash damage to all enemies and applies 1 Weak" in page
+    assert "Shatters for 6 damage" in page
+    assert "Bosses cannot be Frozen" in page
+    # AN AURA ALONE IS ENOUGH: the combination is priced from the other side
+    # just as often, and that screen carries no elemental card at all.
+    assert "- **Melt** — " in blindplay.observe(
+        elemental_hand_state(aura=True))
+
+
+def test_the_consumed_aura_rule_is_stated_plainly():
+    """`EB-340` (1), the half that decides whether a line can be built at all.
+
+    "A reaction eats the aura and cancels your element; only a card with a
+    SECOND hit gets to leave its own aura behind. The word carrying that is
+    'instead', and nothing else on any screen says it." The seat built a
+    62-damage Melt line, played it, and watched it evaporate.
+    """
+    page = blindplay.observe(elemental_hand_state())
+    entry = blindplay.REACTION_KEYWORDS["Elemental Reaction"]
+    assert "- **Elemental Reaction** — " in page
+    assert "CONSUMED" in entry
+    assert "a card that hits once leaves the enemy bare" in entry
+    assert "only a later hit of the same card applies its element" in entry
+    assert f"for {blindplay.AURA_DURATION_TURNS} turns instead" in entry
+
+
+def test_a_screen_with_no_element_defines_no_reaction():
+    """The same rule that keeps `Tide` and `Exert` out of the glossary: a page
+    defining a reaction on a board that cannot produce one is teaching a rule
+    this screen does not have."""
+    page = blindplay.observe(keyword_hand_state(["Gain 5 Block."]))
+    assert "**Melt**" not in page and "**Elemental Reaction**" not in page
+
+
+def test_the_reaction_glossary_is_the_games_own_preview_text():
+    """The bodies are `KleeMod.cs`'s own `keywordFallback` rows -- the one
+    place the game's preview text is composed, and byte-identical to the pck's
+    `card_keywords.json` -- with only the per-card lead-in replaced. Held in
+    step FROM THIS SIDE, the discipline `ARM_KEYWORDS` is already under: a
+    sentence retuned in the C# and not here goes red on the clause it dropped.
+    """
+    src = (REPO / "klee-mod" / "KleeCode" / "KleeMod.cs").read_text(
+        encoding="utf-8")
+    anchors = {
+        "Melt": ["The triggering hit deals 1.75x damage and consumes the aura"],
+        "Vaporize": ["The triggering hit deals 1.5x damage and consumes the "
+                     "aura"],
+        "Overloaded": ["splash damage to all enemies and applies ",
+                       " Weak to the reacted enemy"],
+        "Superconduct": [" Vulnerable"],
+        "Electro-Charged": ["-damage decaying damage-over-time effect"],
+        "Frozen": ["Its next action deals half damage; attacking it Shatters "
+                   "for ", "Bosses cannot be Frozen"],
+    }
+    assert set(anchors) | {"Elemental Reaction"} \
+        == set(blindplay.REACTION_KEYWORDS)
+    for word, phrases in anchors.items():
+        for phrase in phrases:
+            assert phrase in src, (word, phrase)
+            assert phrase in blindplay.REACTION_KEYWORDS[word], (word, phrase)
+    # The interpolated constants, read off the table the C# interpolates from.
+    table = (REPO / "klee-mod" / "KleeCode" / "Elements"
+             / "ReactionTable.cs").read_text(encoding="utf-8")
+    for constant, number in (("OverloadSplash", 6), ("OverloadWeak", 1),
+                             ("SuperconductVuln", 2), ("ElectroChargedDot", 4),
+                             ("ShatterDamage", 6), ("FrozenBossVuln", 2),
+                             ("AuraDurationTurns",
+                              blindplay.AURA_DURATION_TURNS)):
+        assert re.search(rf"{constant}\s*=\s*{number}\b", table), constant
+    for word, body in blindplay.REACTION_KEYWORDS.items():
+        assert "[" not in body and "]" not in body, word
+        assert not qa_packet.leaks(body), word
+
+
+def galvanic_state() -> dict:
+    """An enemy buff that names a keyword and carries its tip (`EB-340`).
+
+    `BuildPowersState` emits `keywords` per status row -- every hover tip that
+    is not the power's own -- and this page read the row's name, amount, type
+    and description and dropped that list on the floor.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "KLEEMOD-GALVANIC", "name": "Galvanic", "amount": 6,
+         "type": "Buff", "description": "Powers are afflicted with Galvanized.",
+         "keywords": [{"name": "Galvanized",
+                       "description": "Take 6 damage when this card is "
+                                      "played."}]}]
+    return state
+
+
+def test_a_word_an_enemy_buff_announces_is_defined_on_that_screen():
+    """`EB-340` (2). "The 'Words on this screen' block on that same screen
+    defines Bomb, Set off and Spark. Not Galvanized. So on the one turn where
+    the decision is 'do I install my engine', the price of installing it is a
+    word the screen will not define." The same word arrived correctly defined
+    a round later -- under a CARD, because a card's keywords are printed and a
+    power's were dropped.
+
+    Seen to FAIL: without the carry-through the word is nowhere on the page.
+    """
+    page = blindplay.observe(galvanic_state())
+    assert "Galvanic 6 (buff) — Powers are afflicted with Galvanized." \
+        in page
+    assert "- **Galvanized** — Take 6 damage when this card is played." \
+        in page
+
+
+def test_a_power_tip_the_wire_does_not_send_invents_nothing():
+    """The other half of the same rule. A page that wrote its own sentence for
+    a word the feed did not define would be a page inventing rules."""
+    state = galvanic_state()
+    state["battle"]["enemies"][0]["status"][0]["keywords"] = []
+    page = blindplay.observe(state)
+    assert "Powers are afflicted with Galvanized." in page
+    assert "**Galvanized**" not in page
+
+
+def test_a_card_keyword_is_not_repeated_in_the_glossary():
+    """A card's own tips are printed under the card that declares them, so
+    lifting them into the glossary as well would print every one twice."""
+    page = blindplay.observe(elemental_hand_state())
+    assert page.count("- **Applies Pyro** — ") == 0
+    assert page.count("*Applies Pyro* — ") == 1
+
+
+def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
+    """`EB-340` (3), and act 1 (c) filed both halves in one bullet.
+
+    "Card-embedded text: 'Grows by 4 at the start of your turn.' The 'Words on
+    this screen' glossary directly below: 'Grows at the start of your turn.'
+    The number is missing from the glossary copy, on every screen, and the
+    number is the entire mechanic. Worse, growth is actually +4 PER BOMB (Bomb
+    5 + Bomb 8 -> 21, not 17), which neither wording says."
+
+    Seen to FAIL: the old sentence carried neither the number nor "each".
+
+    `EB-343` (R248) REWROTE THE TIP THIS SCRAPES, and both of this test's
+    claims survive it. [USER] held the in-game word to its 135-character
+    ceiling, so the tip reads "A charge on an enemy: grows 4 a turn, goes off
+    only when Set off, all at once. Its hit takes the enemy's debuffs, not
+    yours." The glossary keeps "each" on top of it, because the fact that
+    growth is PER BOMB lives on the badge in game and the seat page has no
+    badge.
+    """
+    page = blindplay.observe(keyword_hand_state(["Set off. Place a Bomb 4."]))
+    assert (f"- **Bomb** — A charge on an enemy: each grows "
+            f"{blindplay.BOMB_GROWTH} a turn,") in page
+    # LIVE FIRST: where the screen's own tip carries the number, that number is
+    # what the glossary prints -- the fallback is for a screen that prints the
+    # WORD with no tip on it, which is an enemy's badge and a reward row.
+    live_tip = blindplay.observe(elemental_hand_state(
+        bomb_tip="A charge on an enemy: grows 9 a turn, goes off only when "
+                 "Set off, all at once."))
+    assert "each grows 9 a turn" in live_tip
+
+
+def test_the_bomb_growth_fallback_is_the_mods_own_constant():
+    """`BOMB_GROWTH` is held in step from THIS side, the way
+    `CHARGE_SOURCE_LINE` and `KURAGE_COST_PER_ENERGY` are: this module may not
+    import `tier0` at all, so a retune of the C# constant goes red here."""
+    src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+           / "KleeOverhaul.cs").read_text(encoding="utf-8")
+    assert re.search(rf"BombGrowth\s*=\s*{blindplay.BOMB_GROWTH}\b", src)
+
+
+# ------------------------------------- EB-341: event, shop and reward pages --
+
+def twin_option_event_state() -> dict:
+    """The Future of Potions, as the r7b act-2b seat met it (`EB-341`).
+
+    Three options, two of them character-for-character identical and losing a
+    different potion each.
+    """
+    return {"state_type": "event",
+            "player": {"hp": 40, "max_hp": 70},
+            "event": {"event_id": "FUTURE_OF_POTIONS",
+                      "event_name": "The Future of Potions",
+                      "in_dialogue": False, "body": "A machine hums.",
+                      "options": [
+                          {"index": 0, "title": "Insert Common Potion",
+                           "description": "Lose Flex Potion. Obtain an "
+                                          "Upgraded Common Attack."},
+                          {"index": 1, "title": "Insert Common Potion",
+                           "description": "Lose Dexterity Potion. Obtain an "
+                                          "Upgraded Common Skill."},
+                          {"index": 2, "title": "Insert Rare Potion",
+                           "description": "Lose Beetle Juice. Obtain an "
+                                          "Upgraded Rare Power."}]}}
+
+
+def test_two_options_with_one_title_are_numbered_and_taken_by_number():
+    """`EB-341` (1). "The only grammar offered is `choose "<option>"`. I sent
+    `choose "Insert Common Potion"`, it was ACCEPTED WITH AN EMPTY REFUSAL,
+    and no screen ever said which of the two it had taken."
+
+    Seen to FAIL: `_match` collapsed the two identical names onto one choice
+    and fell through to `hits[0]`, silently.
+    """
+    state = twin_option_event_state()
+    page = blindplay.observe(state)
+    assert "- 1. **Insert Common Potion**" in page
+    assert "- 2. **Insert Common Potion**" in page
+    assert "- 3. **Insert Rare Potion**" in page
+    assert "choose <number>" in page
+
+    ambiguous = blindplay.act(state, 'choose "Insert Common Potion"')
+    assert not ambiguous["ok"]
+    assert "more than one row" in ambiguous["refusal"]
+    assert "`choose <number>`" in ambiguous["refusal"]
+
+    second = blindplay.act(state, "choose 2")
+    assert second["ok"], second["refusal"]
+    assert second["post"] == {"action": "choose_event_option", "index": 1}
+    assert "Dexterity Potion" in second["printed"]["text"]
+    # A title that is unique on the screen still resolves by name.
+    assert blindplay.act(state, 'choose "Insert Rare Potion"')["ok"]
+
+
+def test_an_ordinal_off_the_end_is_refused_with_the_rows_that_exist():
+    """A number the screen does not have is a refusal that names the list,
+    never a clamp onto the nearest row."""
+    res = blindplay.act(twin_option_event_state(), "choose 9")
+    assert not res["ok"]
+    assert "no row 9" in res["refusal"] and "it has 3" in res["refusal"]
+
+
+def test_a_screen_with_no_collisions_prints_no_ordinals():
+    """The number is a disambiguator and not decoration -- an event whose
+    options all print different names reads exactly as it always did."""
+    page = blindplay.observe(event_state())
+    assert "- **Offer a card**" in page and "- 1. **Offer a card**" not in page
+    assert blindplay.act(event_state(), "choose 2")["post"] == {
+        "action": "choose_event_option", "index": 1}
+
+
+def test_the_line_after_a_choice_names_the_row_and_what_it_said():
+    """`EB-341` (2). Both events of the r7b act-3 session "declined to name
+    what they gave me": the seat learned the Tea Party's random relic was `Bag
+    of Marbles`, and what `Forgotten Soul` does, off the relic list of a later
+    combat screen.
+
+    Seen to FAIL: the only line after a command was the wire's own answer,
+    which for an event choice is a status word and nothing else.
+    """
+    res = blindplay.act(twin_option_event_state(), "choose 1")
+    line = blindplay.taken_line(res)
+    assert line.startswith("Took: Insert Common Potion — ")
+    assert "Lose Flex Potion. Obtain an Upgraded Common Attack." in line
+    # A purchase says what category the shelf was, at the moment of buying.
+    blindplay.forget_shelves()
+    bought = blindplay.taken_line(blindplay.act(shop_state(),
+                                                'buy "Coral Guard"'))
+    assert bought.startswith("Bought: Coral Guard (card (skill)), for 75 gold")
+    # And a resolution with no printed name -- `end turn` -- says nothing.
+    assert blindplay.taken_line(
+        blindplay.act(combat_state(), "end turn")) == ""
+
+
+def test_every_shop_line_carries_its_category():
+    """`EB-341` (3). "`Fysh Oil` printed as a bare name, a price and an effect,
+    in the identical format used by `Vambrace`, `Stone Calendar` and `Royal
+    Stamp` one line above. I bought it as a permanent Strength relic. It is a
+    potion. The only disclosure is the SOLD-OUT line."
+
+    Seen to FAIL: `kind` was read off `card_type`, which a relic and a potion
+    shelf do not carry, so both printed with no category at all.
+    """
+    blindplay.forget_shelves()
+    page = blindplay.observe(live("shop-stocked"))
+    assert "**Flex Potion** — potion, 48 gold" in page
+    assert "**Bag of Preparation** — relic, 192 gold" in page
+    assert "**Perfect Timing** — cost 1, card (attack), 76 gold" in page
+    # The removal shelf's category IS its printed name; it is not said twice.
+    assert "card removal" not in page
+
+
+def full_slots_rewards_state() -> dict:
+    """A potion reward against three full slots (`EB-341`).
+
+    `BuildPlayerState` sends `potions` (the FILLED slots) and
+    `max_potion_slots` beside it, and this page printed neither number.
+    """
+    return {"state_type": "rewards",
+            "player": {"hp": 40, "max_hp": 70, "max_potion_slots": 3,
+                       "potions": [{"name": "Strength Potion",
+                                    "description": "Gain 2 Strength."},
+                                   {"name": "Fruit Juice",
+                                    "description": "Gain 5 Max HP."},
+                                   {"name": "Flex Potion",
+                                    "description": "Gain 2 Strength."}]},
+            "rewards": {"can_proceed": True, "items": [
+                {"index": 0, "type": "gold", "description": "12 Gold"},
+                {"index": 1, "type": "potion", "potion_id": "FIRE_POTION",
+                 "potion_name": "Fire Potion", "description": "Fire Potion",
+                 "potion_description": "Deal 20 damage to one enemy."}]}}
+
+
+def test_a_potion_claimed_on_full_slots_says_the_slots_are_full():
+    """`EB-341` (4). "I claimed `Fire Potion` off fight 19's reward screen and
+    the tool answered `ok Claiming reward: potion (Fire Potion)`. The next
+    combat listed three potions and `Fire Potion` was not among them. Three
+    slots, four potions, and NO LINE on either screen saying the claim had
+    failed or that a slot was full."
+
+    Seen to FAIL: the claim resolved `ok` and the page printed no count.
+    """
+    state = full_slots_rewards_state()
+    page = blindplay.observe(state)
+    assert "Your potion slots are full: 3 of 3" in page
+
+    res = blindplay.act(state, 'choose "Fire Potion"')
+    assert not res["ok"]
+    assert "potion slots are full: 3 of 3" in res["refusal"]
+    # Everything else on the screen still claims.
+    assert blindplay.act(state, 'choose "12 Gold"')["ok"]
+
+
+def test_a_free_slot_claims_a_potion_exactly_as_before():
+    """The guard is narrow on purpose: a run with room reads and resolves the
+    way it always did."""
+    state = full_slots_rewards_state()
+    state["player"]["potions"] = state["player"]["potions"][:1]
+    page = blindplay.observe(state)
+    assert "slots are full" not in page
+    assert blindplay.act(state, 'choose "Fire Potion"')["ok"]
+
+
+def test_the_combat_page_says_how_many_potion_slots_there_are():
+    """The same two numbers, on the screen a potion is spent from -- a tester
+    who cannot see the denominator cannot know a fourth has nowhere to go."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["potions"] = [{"name": "Fire Potion",
+                                   "description": "Deal 20 damage."}]
+    assert "- 1 of 3 slots are full." in blindplay.observe(state)
+
+
+# ----------------------------- EB-342: three page lines short of the state --
+
+def compound_intent_state() -> dict:
+    """Mecha Knight's move, as the wire sends it (`EB-342`).
+
+    `BuildEnemyState` walks `moveState.Intents` and sends a LIST; the page took
+    `blob[0]` and dropped the rest.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["enemies"][0]["intents"] = [
+        {"type": "Attack", "label": "8", "title": "Aggressive",
+         "description": "This enemy intends to Attack for 8 damage."},
+        {"type": "StatusCard", "label": "4", "title": "Strategic",
+         "description": "This enemy intends to add 4 Burn to your hand."}]
+    return state
+
+
+def test_a_compound_intent_prints_every_component():
+    """`EB-342` (1). "Intent: Aggressive (Attack) -- the number on its icon is
+    8 -- This enemy intends to Attack for 8 damage." Round 3 opened with FOUR
+    `Burn`s in hand, 8 more HP a turn, at 18/56, in the fight that ended the
+    run. "The bridge has a status-card intent type, so the vocabulary existed
+    and was not used."
+
+    Seen to FAIL: only the first row of the list reached the page.
+    """
+    page = blindplay.observe(compound_intent_state())
+    assert ("Intent: Aggressive (Attack) — the number on its icon is 8 "
+            "— This enemy intends to Attack for 8 damage.") in page
+    assert ("and also: Strategic (StatusCard) — the number on its icon "
+            "is 4 — This enemy intends to add 4 Burn to your hand.") \
+        in page
+
+
+def test_a_single_component_intent_reads_exactly_as_it_always_did():
+    """One row, one line, no continuation -- the recorded combat is the pin."""
+    page = blindplay.observe(combat_state())
+    assert ("Intent: Aggressive (Attack) — the number on its icon is 12 "
+            "— This enemy intends to Attack for 12 damage.") in page
+    assert "and also:" not in page
+
+
+def discounted_hand_state() -> dict:
+    """The r7b fight-15 hand: one permanent upgrade, one one-turn discount.
+
+    `The Big One+` prints 3 on its shipped face and 2 here; `Flame Dance`
+    prints 1 and is showing 0 under a `Vexing Puzzlebox`.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-PROTO_KO_THE_BIG_ONE", "name": "The Big One",
+         "type": "Attack", "cost": "2", "can_play": True, "index": 0,
+         "target_type": "AnyEnemy", "is_upgraded": True, "keywords": [],
+         "description": "Set off for quadruple damage."},
+        {"id": "KLEEMOD-PROTO_KO_FLAME_DANCE", "name": "Flame Dance",
+         "type": "Skill", "cost": "0", "can_play": True, "index": 1,
+         "target_type": "Self", "is_upgraded": False, "keywords": [],
+         "description": "Set off each enemy whose aura is not Pyro."}]
+    return state
+
+
+def test_the_cost_line_says_whether_it_is_the_upgrade_or_the_turn():
+    """`EB-342` (2). "Identical phrasing for a property of the card and a
+    property of this turn. The `(upgraded)` tag is the only distinguisher, and
+    it sits in the title rather than beside the cost line that is actually
+    being explained."
+
+    Seen to FAIL: both cards printed the same sentence, word for word.
+    """
+    page = blindplay.observe(discounted_hand_state())
+    assert ("The cost printed on this card is 3; it is showing 2 here, "
+            "because this copy is upgraded — that is permanent.") in page
+    assert ("The cost printed on this card is 1; it is showing 0 here. This "
+            "copy is not upgraded, so the cut is this turn's board and not "
+            "the card") in page
+
+
+def upgrade_run_states() -> tuple[dict, dict]:
+    """A fight and the Smith two rooms later, on one run (`EB-342`).
+
+    The Smith screen is the RECORDED one (`upgrade-fresh`, captured off a live
+    Klee run); the fight is built to hold that screen's grid plus three cards
+    it leaves out -- one already upgraded, one in the build's no-upgrade
+    register, and one the page can say nothing about.
+    """
+    smith = live("upgrade-fresh")
+    smith = smith.get("state", smith)
+    grid = [c["name"] for c in smith["card_select"]["cards"]]
+    fight = {
+        "state_type": "monster",
+        "run": {"act": 1, "floor": 10},
+        "battle": {"round": 1, "enemies": [
+            {"name": "Slug", "hp": 5, "max_hp": 5, "block": 0, "status": [],
+             "intents": [{"type": "Attack", "label": "3",
+                          "title": "Aggressive",
+                          "description": "This enemy intends to Attack for 3 "
+                                         "damage."}]}]},
+        "player": {
+            "character": smith["player"]["character"],
+            "hp": 30, "max_hp": 62, "block": 0, "energy": 3, "max_energy": 3,
+            "status": [], "relics": [], "potions": [], "max_potion_slots": 3,
+            "hand": [{"id": f"KLEEMOD-GRID_{i}", "name": name, "type": "Skill",
+                      "cost": "1", "can_play": True, "index": i,
+                      "description": "Gain 5 Block."}
+                     for i, name in enumerate(grid)],
+            "draw_pile": [
+                {"id": "KLEEMOD-PROTO_POWDER_CHARGE_SPARK",
+                 "name": "Powder Charge", "type": "Skill", "cost": "0",
+                 "description": "Place a Bomb 6."},
+                {"id": "KLEEMOD-PROTO_KO_KAPOW", "name": "Ka-pow!",
+                 "type": "Attack", "cost": "0", "is_upgraded": True,
+                 "description": "Retain. Set off. Deal 6 damage."},
+                {"id": "KLEEMOD-PROTO_KO_SIZZLE", "name": "Sizzle",
+                 "type": "Attack", "cost": "1",
+                 "description": "Deal 6 damage."}],
+            "discard_pile": [], "exhaust_pile": [],
+            "draw_pile_count": 3, "discard_pile_count": 0,
+            "exhaust_pile_count": 0}}
+    return fight, smith
+
+
+def test_the_smith_says_why_a_card_is_not_on_its_list():
+    """`EB-342` (3). "The upgrade screen listed 25 cards against a deck of
+    35-36... `Powder Charge`, `Shinobu -- Sanctifying Ring (proto)` are not
+    upgraded and are not listed, and no line explains the absence. On a screen
+    that is otherwise the most scrupulous in the bridge, a silent omission is
+    conspicuous."
+
+    The deck is not on this screen's feed at all, so the answer comes off the
+    deck this page printed for itself in the last fight -- and it says so.
+
+    Seen to FAIL: the page printed the grid and nothing else.
+    """
+    blindplay.forget_deck()
+    fight, smith = upgrade_run_states()
+    assert "Not on this list" not in blindplay.observe(smith)  # nothing known
+
+    blindplay.observe(fight)
+    page = blindplay.observe(smith)
+    assert "## Not on this list, and why" in page
+    assert ("- **Powder Charge** — " + blindplay.NO_UPGRADE_DEFINED) \
+        in page
+    assert ("- **Ka-pow!** — " + blindplay.ALREADY_UPGRADED) in page
+    assert ("- **Sizzle** — " + blindplay.UNEXPLAINED_OMISSION) in page
+    # Nothing the grid IS offering is listed as missing.
+    assert "**Chain Fuse** — " not in page.split("Not on this list")[1]
+    # And the staleness is named rather than papered over.
+    assert "your deck as it stood in the last fight (floor 10)" in page
+    blindplay.forget_deck()
+
+
+def test_a_remembered_deck_never_answers_another_runs_smith():
+    """The memory's own guard, on `_SHELF_MEMORY`'s pattern: a deck read for
+    one character may not describe another's screen, and a run only ever
+    climbs, so a floor below the one the deck was read on is a new run."""
+    blindplay.forget_deck()
+    fight, smith = upgrade_run_states()
+    blindplay.observe(fight)
+
+    other = json.loads(json.dumps(smith))
+    other["player"]["character"] = "Kokomi"
+    assert "Not on this list" not in blindplay.observe(other)
+
+    earlier = json.loads(json.dumps(smith))
+    earlier["run"] = {"act": 1, "floor": 2}
+    assert "Not on this list" not in blindplay.observe(earlier)
+    blindplay.forget_deck()
+
+
+def test_the_no_upgrade_register_is_read_by_id_and_only_its_ids_cross():
+    """`UPGRADE_DEBT`'s VALUES are register prose naming ruling and row
+    numbers, which is exactly what may not reach a blind page. Only the key set
+    is read, and the page writes its own plain sentence."""
+    index = qa_packet.no_upgrade_index()
+    assert "PROTO_POWDER_CHARGE_SPARK" in index
+    assert "PROTO_SHINOBU_SANCTIFYING_RING_EITHER" in index
+    for entry in index:
+        assert entry == entry.upper()
+    assert not qa_packet.leaks(blindplay.NO_UPGRADE_DEFINED)
+    assert not qa_packet.leaks(blindplay.ALREADY_UPGRADED)
+    assert not qa_packet.leaks(blindplay.UNEXPLAINED_OMISSION)

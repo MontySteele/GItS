@@ -73,7 +73,8 @@ assumptions:
      which is what the `no_power` read after the drain is asserting."
   - "Energy is written to 5 first, so nothing in this file can be refused for
      EnergyCostTooHigh wearing the answer the scenario is looking for. Both
-     Plan cards cost 1 and Coral Guard costs 1."
+     Plan cards cost 1 and Coral Bulwark costs 1 (its now-line is 6 Block; R242
+     deleted the Coral Guard row this file first granted)."
   - "`non-finite` is the substring both engine errors carry (`Offset is
      non-finite`, and Godot's `is_finite` condition prints `!std::isfinite`) --
      the first is the one that appears first in the recorded session, and it is
@@ -98,16 +99,16 @@ steps:
   - clear_hand: {}
   - give: {card: KLEEMOD-PROTO_KK_KURAGES_OATH, pile: hand, upgraded: false}
   - give: {card: KLEEMOD-PROTO_KK_BATTLE_PLAN, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-PROTO_KK_CORAL_GUARD, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_KK_CORAL_BULWARK, pile: hand, upgraded: false}
   - set_energy: {amount: 5}
 
   # ---- the board opened clean, so a later hit is this file's own ----------
   - expect:
       log_lacks: {text: "non-finite"}
-      can_play: {card: "Kurage's Oath (proto)", value: true}
+      can_play: {card: "Kurage's Oath", value: true}
 
   # ---- ONE Plan card on the jellyfish. THIS is the step that broke. -------
-  - play: {card: "Kurage's Oath (proto)", target: "Bake-Kurage"}
+  - play: {card: "Kurage's Oath", target: "Bake-Kurage"}
   - wait: 2
   - expect:
       power: {who: player, name: "Plan", stacks: 1}
@@ -130,8 +131,8 @@ steps:
 
   # ---- and the game still answers a card play, which is what hung --------
   - set_block: {who: player, amount: 0}
-  - give: {card: KLEEMOD-PROTO_KK_CORAL_GUARD, pile: hand, upgraded: false}
-  - play: {card: "Coral Guard (proto)"}
+  - give: {card: KLEEMOD-PROTO_KK_CORAL_BULWARK, pile: hand, upgraded: false}
+  - play: {card: "Coral Bulwark"}
   - expect:
-      player_block: {amount: 5}
+      player_block: {amount: 6}
       log_lacks: {text: "non-finite"}

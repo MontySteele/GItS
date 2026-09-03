@@ -50,7 +50,7 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Undertow (proto)"),
+        ("title", "Undertow"),
         ("description", "Deal {IfUpgraded:show:10|7} damage. If the enemy has a debuff, deal {IfUpgraded:show:13|10} instead."),
     };
 
