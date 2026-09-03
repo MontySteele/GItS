@@ -1,4 +1,4 @@
-Status: RECORD (R250 pick 4; no pick returns)
+Status: RECORD
 
 # The control: one base Ironclad through the same seats and harness
 
