@@ -20,6 +20,7 @@ never the wire.
 
 from __future__ import annotations
 
+import argparse
 import ast
 import inspect
 import json
@@ -3256,6 +3257,101 @@ def test_the_last_carry_out_of_a_finished_fight_reaches_the_reward_screen():
     # A reward screen from a build with no Plan rule is untouched.
     assert "Bake-Kurage" not in blindplay.render(
         blindplay.observation(rewards_state()))
+
+
+def test_a_dead_enemy_s_leaked_locstring_key_humanises_instead_of_leaking():
+    """`EB-370`, found live in the Kokomi round-9 seat's morning-log reprint.
+
+    A body still on the board gets the page's own numbered name
+    (`name_moved_rows`); one that DIED to the Plan is off the wire's enemy
+    list entirely and keeps whatever the mod sent for `target` -- which, for
+    a dead Sludge Spinner, was the mod's `.ToString()` on an unresolved
+    LocString rather than its resolved text:
+    `LocString table monsters entry SLUDGE_SPINNER.name`. That is not a
+    name a player would recognise and it must never reach the page as
+    written.
+    """
+    state = rewards_state()
+    state["player"] = {"hp": 40, "max_hp": 80, "gold": 99,
+                       "kokomi_plans": morning_of(
+                           {"card": "Kurage's Oath", "number": 7,
+                            "line": "Bake-Kurage: Kurage's Oath, 7",
+                            "on_play": False,
+                            "moved": [{"target": "LocString table monsters "
+                                                 "entry SLUDGE_SPINNER.name",
+                                       "combat_id": "9", "amount": 7,
+                                       "dead": True}]})}
+    page = blindplay.render(blindplay.observation(state))
+    assert "- Sludge Spinner lost 7 HP, and died" in page
+    assert "LocString" not in page
+    assert "monsters" not in page
+    assert "entry" not in page
+
+
+def test_a_relic_s_leaked_owner_variant_key_humanises_to_its_base_name():
+    """`EB-370`'s other half. A base-game relic borrowed into a modded
+    character's pool (`FurinaRelicPool`, `KokomiRelicPool` both borrow
+    `SilentRelicPool`) can print its per-character title VARIANT key when no
+    such variant was ever registered -- `relics.SEA_GLASS.KLEEMOD-FURINA.
+    title` reached a live Kokomi seat's Ancient-node relic offer and BRICKED
+    the run, because `qa_packet`'s mod-id-prefix guard correctly refuses a
+    `KLEEMOD-` id on a relic face. The owner segment is dropped -- it names
+    which modded character's pool happened to read the shared relic object,
+    not the relic -- and the base id humanises the same way any other
+    id-shaped wire string does."""
+    assert qa_packet._text(
+        "relics.SEA_GLASS.KLEEMOD-FURINA.title") == "Sea Glass"
+    # And the guard, which is otherwise unchanged, no longer has anything to
+    # refuse: a relic row built from the leaking wire value passes straight
+    # through `assert_blind`.
+    player = {"relics": [{"id": "SEA_GLASS",
+                          "name": "relics.SEA_GLASS.KLEEMOD-FURINA.title",
+                          "description": "A curious little shard.",
+                          "counter": None}]}
+    row = qa_packet._relics(player)
+    assert row == [{"name": "Sea Glass", "text": "A curious little shard."}]
+    qa_packet.assert_blind(row)
+
+
+def test_a_string_that_is_not_a_locstring_key_is_left_alone():
+    """The narrowness is the point, same as the sprite-tag fold above it:
+    ordinary prose, a version stamp and a real dotted id-looking sentence
+    fragment must all survive `_text` unchanged, or the fold would be
+    inventing names rather than reading them."""
+    assert qa_packet._text("Deal 6 damage.") == "Deal 6 damage."
+    assert qa_packet._text("Sea Glass") == "Sea Glass"
+    assert qa_packet._text("0.2.1357") == "0.2.1357"
+    # A design-vocabulary id is still refused -- this fold only unpacks the
+    # two LocString shapes above, and does not become a second leak scrubber.
+    with pytest.raises(qa_packet.PacketLeak):
+        qa_packet.assert_blind({"name": "pearl_barrage"})
+
+
+def test_act_refuses_a_packet_leak_the_way_observe_does(tmp_path, capsys):
+    """`EB-370`. `blindplay_grammar.act` reads through `observation()`
+    before it resolves anything, so a `PacketLeak` on the read path it
+    shares with `observe` used to reach `cmd_act` as an unhandled Python
+    traceback -- found live at a Kokomi seat's Ancient node, where `observe`
+    printed a clean one-line `REFUSED: ...` and the very next `act` call on
+    the same board died with a stack trace instead. `cmd_act` now catches
+    the same exception and prints the same line `cmd_observe` does.
+    """
+    state = {"state_type": "event",
+             "event": {"event_id": "NEOW", "event_name": "Neow",
+                       "options": [
+                           {"index": 0, "title": "Booming Conch",
+                            "description": "gain [pearl_barrage]"}]}}
+    raw = tmp_path / "leaking_state.json"
+    raw.write_text(json.dumps(state), encoding="utf-8")
+    args = argparse.Namespace(raw_file=str(raw), command="proceed",
+                              dry_run=True)
+
+    with pytest.raises(qa_packet.PacketLeak):
+        blindplay.observe(state)
+
+    code = blindplay.cmd_act(args)
+    assert code == 1
+    assert capsys.readouterr().err.startswith("REFUSED: ")
 
 
 def test_the_grammar_offers_the_jellyfish_only_where_there_is_one():
