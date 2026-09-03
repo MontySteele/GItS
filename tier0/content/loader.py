@@ -637,6 +637,18 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
             if not _effects.is_known_predicate(name):
                 raise ValueError(
                     f"card {card_id!r}: unknown predicate {name!r}")
+        if op == "plant_bomb" and fx.get("wide_if") is not None:
+            # R244 (Coven Errand). `wide_if:` is the SECOND door into the
+            # predicate vocabulary and takes the same load-time check the
+            # `if:` key takes, for this function's whole stated reason: a
+            # typo'd predicate would otherwise raise `unknown predicate` the
+            # first time the card RESOLVED -- in front of a player rather than
+            # in a test. One vocabulary, two doors, one check.
+            wide = fx["wide_if"]
+            if not _effects.is_known_predicate(wide):
+                raise ValueError(
+                    f"card {card_id!r}: unknown predicate {wide!r} on "
+                    "plant_bomb `wide_if:`")
         _validate_count_vocabulary(card_id, fx)
         if op == "gain_encore" and isinstance(fx.get("amount"), int) \
                 and fx["amount"] <= 0:

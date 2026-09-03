@@ -267,7 +267,15 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # nothing else" -- so `loader.pool_replacement` is its sibling seam, read at the
 # same single door.
 #
-# TWENTY-EIGHT OF THE PACKET'S TWENTY-NINE, and the count moved at DRAFT 4
+# THIRTY-ONE SINCE R244, and the three that arrived are a SECOND slice rather
+# than a redraft of this one: the ruled packet
+# `review/ruled/klee-hexerei-readers-2026-09-02.md` adds Klee's three Hexerei
+# readers, the cards in her own pool that pay for the coven's one-word mark.
+# They are listed in their own block at the end of the tuple, so the packet
+# each row belongs to is readable off the file.
+#
+# TWENTY-EIGHT OF THE PACKET'S TWENTY-NINE before that, and the count moved at
+# DRAFT 4
 # (R242). Draft 3 had taken `proto_ko_dig_in` out of the offer pool and into the
 # starter; the canonical starter has no room for it, so it comes BACK as the
 # Spark sink it was, and `proto_ko_pop` joins it as a Common for the same
@@ -319,6 +327,13 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_run_away",
     "proto_ko_grounded",
     "proto_ko_sorry_jean",
+    # THE HEXEREI READERS (3 -- R244, the ruled packet's sec.2). One per
+    # rarity, which is the ruling's own shape: a Common that reads the turn, an
+    # Uncommon Power that is DEAD ALONE by ruling (pick 2 at its default), and
+    # a Rare that makes the hand a coven for one turn.
+    "proto_ko_coven_errand",
+    "proto_ko_witches_circle",
+    "proto_ko_alices_introduction_magic",
 )
 
 # =============================================================================

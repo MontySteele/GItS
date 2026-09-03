@@ -1078,6 +1078,11 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     ///
     /// <c>target != Applier</c> is the co-op clause and it falls out of R205:
     /// this pile belongs to one Klee, and it is her attack to answer.
+    ///
+    /// <c>EB-336</c>: A LETHAL MINE PRE-EMPTS ITS OWN HIT. See
+    /// <see cref="Preempted"/> for the whole of why the kill alone was not
+    /// enough, and <c>KleeOverhaulSweepHooks.ModifyHpLostBeforeOsty</c> for
+    /// where the pre-emption is spent.
     /// </summary>
     public override async Task BeforeDamageReceived(
         PlayerChoiceContext choiceContext, Creature target, decimal amount,
@@ -1105,7 +1110,87 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             await Explode(choiceContext, enemy, mines[i], Applier,
                           cardSource: null, multiplier);
         }
+        // `EB-336`. The attacker died to its own Mines, so the hit that
+        // triggered them is owed nothing. NOTED HERE and not acted on here:
+        // this hook cannot change `modifiedAmount`, which the caller already
+        // holds (`CreatureCmd.Damage`).
+        if (enemy.IsDead) Preempted.Note(target, enemy);
         await SweepJumps(choiceContext, Applier.CombatState);
+    }
+
+    // ---- EB-336: the hit a lethal Mine pre-empts -------------------------
+
+    /// <summary>
+    /// THE ONE HIT A LETHAL MINE HAS ALREADY ANSWERED.
+    ///
+    /// WHAT THE SEAT SAW (`klee round 7b, opus-act2b.md`,
+    /// finding 3). A Chomper on 4 HP under a `Mine 4` swung `8x2`. The Mine
+    /// fired, killed it, and the SECOND hit never landed -- and the FIRST one
+    /// did, for its full 8. The tip promises "before the hit lands", and what
+    /// that promises a player is that the enemy dies before hurting them.
+    ///
+    /// WHY THE KILL IS NOT ENOUGH BY ITSELF. `CreatureCmd.Damage` reads
+    /// `dealer.IsDead` ONCE, at the top of the whole call, and
+    /// `AttackCommand.Execute` reads `Attacker.IsDead` once per hit BEFORE it
+    /// issues that call. So a dealer that dies DURING a hit -- which is
+    /// exactly what a Mine does, from inside `Hook.BeforeDamageReceived` --
+    /// is caught for every LATER hit and never for the one in flight. That is
+    /// the whole defect, and it is why the second hit of the `8x2` was already
+    /// correct.
+    ///
+    /// WHERE IT IS SPENT, AND WHY NOT HERE. The hook has `amount` by value and
+    /// the caller keeps its own `modifiedAmount`; the first hook after this one
+    /// that can move the number is `Hook.ModifyHpLost(..., BeforeOsty)`, one
+    /// line further down `CreatureCmd.Damage`. So the pre-emption is NOTED
+    /// here and READ there, purely, by <c>KleeOverhaulSweepHooks</c> -- which
+    /// has to be the reader, because by then this pile is gone: the kill runs
+    /// inline and `RemoveAllPowersAfterDeath` strips the corpse's powers before
+    /// control returns, so the dead enemy's own power is no longer a hook
+    /// listener. That is the same fact `SweepJumps` is built on.
+    ///
+    /// BLOCK IS STILL SPENT, said plainly rather than hidden: `DamageBlockInternal`
+    /// runs between the two hooks and there is nothing between them to stop it.
+    /// The rule the row asks for, and the one both engines now keep, is that a
+    /// Mine whose explosion kills the attacker costs Klee no HP. The sim reaches
+    /// the stronger form for free -- `combat._enemy_turn` breaks out of the hit
+    /// loop before Block -- and that difference is Block, never HP.
+    ///
+    /// NO LATCH TO CLEAR, for the same reason rule 6 needs none: the predicate
+    /// requires the dealer to be DEAD, and a dead dealer never deals again --
+    /// `CreatureCmd.Damage` returns early for one. The note is dropped with the
+    /// rest of the arm's per-combat state when <see cref="Register.Rebase"/>
+    /// sees a new combat.
+    /// </summary>
+    public static class Preempted
+    {
+        private static Creature? _victim;
+        private static Creature? _attacker;
+
+        /// <summary>PUBLIC, like the pure mutators above and for the same
+        /// reason: KleeTests is a separate assembly and this rule's whole
+        /// arithmetic is three references, so the alternative was an
+        /// <c>InternalsVisibleTo</c> nothing else in this mod needs.</summary>
+        public static void Note(Creature victim, Creature attacker)
+        {
+            _victim = victim;
+            _attacker = attacker;
+        }
+
+        public static void Clear()
+        {
+            _victim = null;
+            _attacker = null;
+        }
+
+        /// <summary>Is THIS hit -- this victim, this dealer -- the one a Mine
+        /// already answered? PURE: a modifier hook may not mutate (the Vigil's
+        /// note in <c>KuragePowers.cs</c>), and this reads three references and
+        /// one flag.</summary>
+        public static bool Covers(Creature? victim, Creature? dealer) =>
+            _victim != null && _attacker != null
+            && ReferenceEquals(_victim, victim)
+            && ReferenceEquals(_attacker, dealer)
+            && dealer.IsDead;
     }
 
     // ---- placement, and the card verbs -----------------------------------
@@ -1409,6 +1494,9 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             if (ReferenceEquals(_combat, combatState)) return;
             _combat = combatState;
             _piles.Clear();
+            // `EB-336`: the pre-empted hit is per-combat state too, and this is
+            // the one place the arm already notices a new combat.
+            Preempted.Clear();
         }
 
         /// <summary>Charges taken off a pile whose enemy is gone.</summary>

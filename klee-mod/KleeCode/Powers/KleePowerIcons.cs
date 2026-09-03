@@ -60,6 +60,16 @@ internal static class KleePowerIcons
         BombReactionSparkPower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         GroundedPower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        // R244's TWO COVEN READERS, on the block above's terms verbatim: the
+        // Circle borrows the icon of the arm power whose job it takes over
+        // (Chained Reactions -- a Bomb per trigger, one trigger over), and the
+        // Introduction Magic borrows the Hexerei family's own badge, because
+        // what it does is turn a hand into witches. The three rows' own
+        // illustrations stay owed until the slice is accepted.
+        WitchesCirclePower =>
+            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
+        IntroductionMagicPower =>
+            KleePck.Path("klee/powers/witchs_flame.png"),
         // QUARANTINED (the Kokomi overhaul, draft 6). Every one of these
         // borrows the icon of the SHIPPED Kokomi power whose job it takes over,
         // on the block above's argument verbatim: art is commissioned when a

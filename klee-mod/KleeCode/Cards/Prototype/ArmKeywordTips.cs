@@ -65,6 +65,7 @@ public static class ArmKeywordTips
     public const string SetOffKey = "KLEEMOD-ARM_SET_OFF";
     public const string SparkKey = "KLEEMOD-ARM_SPARK";
     public const string MineKey = "KLEEMOD-ARM_MINE";
+    public const string HexereiKey = "KLEEMOD-ARM_HEXEREI";
     public const string MendKey = "KLEEMOD-ARM_MEND";
     public const string PlanKey = "KLEEMOD-ARM_PLAN";
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
@@ -205,6 +206,31 @@ public static class ArmKeywordTips
             "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
           + "you, before the hit lands. The enemy's debuffs move it, and the "
           + "badge has the number.");
+
+    /// <summary>
+    /// KLEE'S FIFTH, R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`
+    /// sec.4, which asks for this tip by name).
+    ///
+    /// THE WORD WAS ALREADY ON EIGHTEEN FACES AND EXPLAINED NOWHERE. `Hexerei`
+    /// is a one-word family mark carried by thirteen Mondstadt Universals,
+    /// Prune's Personal and the four family stand-ins, and it does nothing by
+    /// itself -- so until the readers existed there was nothing to read and
+    /// nothing to say. Now three cards in Klee's own pool pay for it, and a
+    /// player who meets the word on a reward screen has to be able to find out
+    /// which cards are in the family.
+    ///
+    /// THE SECOND SENTENCE IS THE HALF A PLAYER CANNOT INFER, and it is the
+    /// brief's sec.7.4 refinement: Klee is herself Hexerei, so a circle is her
+    /// plus one witch rather than two cards. Without it, a player holding
+    /// Witches' Circle and one Universal would have no way to know the card
+    /// was live.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForHexerei(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, HexereiKey,
+            "A [gold]Companion[/gold] card from the witches' circle. It does "
+          + "nothing by itself; Klee is one too, and her own cards pay when "
+          + "you play one.");
 
     // ---------------------------------------------------------- Kokomi -----
     //

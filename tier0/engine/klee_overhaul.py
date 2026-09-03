@@ -65,12 +65,15 @@ from tier0.engine.state import Card, CombatState, Enemy, KleeCharge
 # THE VOCABULARY
 # ---------------------------------------------------------------------------
 
-#: The arm's eight verbs. Registered in `effects.OPS`, priced in
+#: The arm's nine verbs. Registered in `effects.OPS`, priced in
 #: `draft.STATIC_OP_PRICING`, and resolved by this module and nothing else.
+#: `hexerei_mark_hand` is R244's (Alice's Introduction Magic) and is the only
+#: one that touches no Bomb -- it widens the Hexerei family for one turn, which
+#: is a Klee rule because the cards that READ the family are hers.
 OVERHAUL_OPS = frozenset((
     "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
     "remove_bomb_for_block", "damage_set_off_total", "multiply_set_off",
-    "draw_per_set_off"))
+    "draw_per_set_off", "hexerei_mark_hand"))
 
 #: The player-side powers this arm reads, named here rather than spelled at
 #: each site so the sheet's `power:` values and the readers cannot drift. Every
@@ -82,6 +85,12 @@ CHAINED_REACTIONS = "ko_chained_reactions"    # re-Bomb per explosion
 BOMB_ECHO = "ko_bomb_echo"                    # Sparks 'n' Splash's echo
 BOMB_REACTION_SPARK = "ko_bomb_reaction_spark"   # Catalytic Converter
 GROUNDED = "ko_grounded"                      # Block for the quiet turn
+#: R244's Uncommon Power, the coven's second reader: "Whenever you play a
+#: Hexerei card, place a Bomb N on a random enemy." Stacks are the Bomb SIZE,
+#: Chained Reactions' grammar one trigger over -- and the ruling says in as
+#: many words that it is DEAD ALONE, drafted only by a deck that already holds
+#: witches (pick 2, taken at its default). That is the card, not a defect.
+WITCHES_CIRCLE = "ko_witches_circle"
 
 #: Pounding Surprise, in this engine's spelling. THE RELIC IS RULE 4 (the brief
 #: sec.8), and tier 0 already carries the relic as a hook name on the player --
@@ -269,7 +278,7 @@ def roll_to(state: CombatState, round_: int) -> None:
     quietly assumed the increment would be a different function wearing the
     same name.
 
-    Called unconditionally, the way `kokomi_plan.roll_turn` is: it is four
+    Called unconditionally, the way `kokomi_plan.roll_turn` is: it is five
     integer moves and reads no flag, and with the arm off nothing reads the
     result.
     """
@@ -279,6 +288,7 @@ def roll_to(state: CombatState, round_: int) -> None:
                                   if round_ == state.ko_round + 1 else 0)
     state.ko_set_off_this_turn = 0
     state.ko_reacted_this_turn = 0
+    state.ko_hexerei_this_turn = 0
     state.ko_damage_set_off_this_play = 0
     state.ko_set_off_multiplier = 1
     state.ko_round = round_
@@ -672,8 +682,14 @@ def turn_start_late(state: CombatState) -> None:
 
 
 def turn_end(state: CombatState) -> None:
-    """The end of Klee's turn: Sparks 'n' Splash's ECHO. `BombEchoPower
-    .BeforeSideTurnEnd`'s twin.
+    """The end of Klee's turn: the Hexerei window closes, then Sparks 'n'
+    Splash's ECHO. `BombEchoPower.BeforeSideTurnEnd`'s twin.
+
+    THE WINDOW CLOSES FIRST AND UNCONDITIONALLY (R244), ahead of every early
+    return below it: Alice's Introduction Magic promises "this turn", and a
+    promise that expired only on a board that happened to hold an echo would be
+    a different card on two boards. Nothing between here and the enemy's half
+    reads the mark, so the order costs nothing and the guarantee is total.
 
     "At the end of your turn, deal Pyro damage to a random enemy equal to the
     Bombs on it." [USER]'s OWN DESIGN, 2026-09-02: "I think auto-detonation on
@@ -698,10 +714,12 @@ def turn_end(state: CombatState) -> None:
     nothing is not a printed effect, so the roll is over the enemies that
     actually hold a charge, and a board with none does nothing at all.
     """
+    from tier0.engine import companion_hexerei      # late import: cycle
     from tier0.engine import effects                # late import: cycle
 
     if not live(state):
         return
+    companion_hexerei.roll_hand_marks(state)
     if not state.player.powers.get(BOMB_ECHO, 0):
         return
     candidates = [e for e in state.living_enemies if e.ko_charges]
@@ -714,6 +732,76 @@ def turn_end(state: CombatState) -> None:
     state.emit("ko_bomb_echo", target=target.name, amount=size)
     effects.deal_damage_to_enemy(state, target, size, element="pyro",
                                  source=ECHO_SOURCE)
+
+
+# ---------------------------------------------------------------------------
+# THE HEXEREI READERS -- R244
+# ---------------------------------------------------------------------------
+#
+# `review/ruled/klee-hexerei-readers-2026-09-02.md`: Hexerei is one word on a
+# companion row with no effect of its own, and the payoff lives in Klee's own
+# pool. Three rows read it -- Coven Errand (a predicate on the pile it places),
+# Witches' Circle (the power below) and Alice's Introduction Magic (which
+# widens the family for a turn). The MARK itself, and the one answer to "is
+# this play a Hexerei card", stay in `companion_hexerei`: the mark is shared
+# with the companion arm's Nicole stand-in and a second definition of the
+# family is precisely what the sheet field exists to prevent.
+
+
+def played_hexerei_this_turn(state: CombatState) -> bool:
+    """Coven Errand's read: has a Hexerei card been played this turn?
+
+    `KleeOverhaulLedger.HexereiPlayedThisTurn`'s twin, off the arm's own
+    per-turn ledger rather than off a scan of what was played -- the same
+    argument rule 7's two counters make. The counter is written at the ONE
+    site a Hexerei play is noticed (`note_hexerei_played`), so the card and
+    the Power beside it cannot disagree about what a witch is.
+    """
+    return state.ko_hexerei_this_turn > 0
+
+
+def note_hexerei_played(state: CombatState, card: Card) -> None:
+    """A HEXEREI CARD WAS PLAYED. Count it, then pay Witches' Circle.
+
+    Called from `companion_hexerei.note_card_played`, which is the one mouth
+    both arms' readers speak through -- the packet's sec.4 ("a Hexerei-play
+    trigger, which the Nicole stand-in already needs, so it lands once").
+    `AfterCardPlayed` is the mod's site for both.
+
+    THE COUNT IS WRITTEN BEFORE THE PAYOUT, and it is why Coven Errand played
+    AFTER a witch goes wide: the ledger is the card's own memory of the turn,
+    not of the play. It is REPLAY-COUNTED like the payout, for the reason
+    `combat._finish_play` counts Rage per play index -- a replayed card is a
+    card played again.
+
+    A RANDOM ENEMY, and a plain Bomb rather than a Mine: this PLACES, it does
+    not detonate (rule 7). Through the same `place` every other source uses, so
+    the new charge can be set off and can jump.
+    """
+    if not live(state):
+        return
+    state.ko_hexerei_this_turn += 1
+    n = state.player.powers.get(WITCHES_CIRCLE, 0)
+    if not n:
+        return
+    living = list(state.living_enemies)
+    if not living:
+        return
+    dest = state.rng.choice(living)
+    state.emit("ko_witches_circle", target=dest.name, size=n)
+    place(state, dest, n)
+
+
+def mark_hand_hexerei(state: CombatState) -> int:
+    """Alice's Introduction Magic, resolved. Returns how many cards were
+    marked. The rule itself is `companion_hexerei.mark_hand`; this is the arm's
+    gate in front of it, so an op that is Klee's cannot fire on another seat.
+    """
+    if not live(state):
+        return 0
+    from tier0.engine import companion_hexerei      # late import: cycle
+
+    return companion_hexerei.mark_hand(state)
 
 
 # ---------------------------------------------------------------------------

@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -364,6 +365,93 @@ public static class CompanionOverhaulReactions
 // ---------------------------------------------------------------------------
 
 /// <summary>
+/// `EB-337`. THE TWO BLOCK MARKS PRINT WHAT IS ACTUALLY LEFT.
+///
+/// WHAT THE SEAT SAW (`klee round 7b, opus-act2.md`,
+/// section (c)). Thoma's Blazing Barrier sat on the status strip reading
+/// "Blazing Barrier 6 -- 6 Block left" while `Block` read 0, and the Bowlbug's
+/// 15 went through in full. Nothing was miscounted: the mark is a mark on the
+/// Block pool, the pool had been CLEARED at the turn tick, and the mark's
+/// printed number was the raw stack -- one Block pool printed twice, once
+/// honestly and once from a stack nothing had lowered.
+///
+/// THE SIM ALREADY DID THIS AND THE MOD DID NOT. `effects.
+/// companion_overhaul_turn_start` clamps `mc_icy_paws` to `p.block` and deletes
+/// it at zero, and `inazuma_overhaul_turn_start` does the same for
+/// `mi_blazing_barrier`; the C# file's own header even claims the behaviour
+/// ("One clamps its own Block mark"). Neither power had the hook.
+///
+/// TWO HALVES, and the first one is the fix. The PRINTED number is read LIVE
+/// through <see cref="BlockMarkVar"/>, so it can never be a stale copy of a
+/// pool that has moved -- exactly what <see cref="IcyPawsPower.Bite"/> and
+/// <c>BlazingBarrierPower.Thicken</c> have always computed for themselves
+/// (`min(Amount, Owner.Block)`), now said out loud. The second is housekeeping
+/// and mirrors the sim exactly: at the start of the player's turn a mark with
+/// no Block behind it is REMOVED, so a spent barrier leaves the strip instead
+/// of sitting there reading 0.
+///
+/// WHY LIVE AND NOT ONLY THE CLAMP. The clamp shares
+/// <c>AfterPlayerTurnStart</c> with two powers that GRANT Block
+/// (<see cref="SignatureMixPower"/>, <see cref="RevelationPower"/>) and the
+/// game guarantees no order between listeners, so a clamp alone would print a
+/// number that depended on iteration order. A live read is right in every
+/// order, and it is what the rider was always going to pay on.
+/// </summary>
+internal static class BlockMark
+{
+    /// <summary>How much of this mark is still backed by standing Block.
+    ///
+    /// A CANONICAL (compendium) copy has no owner and <c>Owner</c>'s getter
+    /// asserts mutability, so it answers the raw stack -- which is what the
+    /// face printed before this row and is 0 on a compendium entry either way.
+    /// </summary>
+    internal static int Left(PowerModel power) =>
+        !power.IsMutable
+            ? power.Amount
+            : System.Math.Min(power.Amount, power.Owner.Block);
+
+    /// <summary>The start-of-turn housekeeping, shared by both marks: a mark
+    /// with nothing behind it is gone. Written as a CLAMP rather than as a
+    /// clear beside the block reset so it stays correct under Barricade, which
+    /// suppresses the reset -- the sim's own words for the same line.</summary>
+    internal static async Task ClearIfSpent(PowerModel power)
+    {
+        if (!power.IsMutable) return;
+        if (Left(power) > 0) return;
+        await PowerCmd.Remove(power);
+    }
+}
+
+/// <summary>
+/// `EB-337`. <c>{Left}</c>, READ LIVE -- the live half of <see cref="BlockMark"/>.
+///
+/// A plain <see cref="DynamicVar"/> is a stored number written when something
+/// remembers to write it, and the Block pool moves without either mark being
+/// told: the turn tick clears it and any hit spends it. So the var asks the
+/// power at FORMAT time instead, the same construction and for the same reason
+/// as <c>ProtoBombPower.SetOffDamageVar</c> -- the game hands the var itself to
+/// SmartFormat and formats it through <c>ToString()</c>, converting through
+/// <c>IConvertible</c> only for the numeric formatters, so both are overridden
+/// and both answer the same number.
+/// </summary>
+internal sealed class BlockMarkVar : DynamicVar
+{
+    internal const string Token = "Left";
+
+    internal BlockMarkVar() : base(Token, 0m)
+    {
+    }
+
+    private int Live =>
+        _owner is PowerModel power ? BlockMark.Left(power) : (int)BaseValue;
+
+    protected override decimal GetBaseValueForIConvertible() => Live;
+
+    public override string ToString() =>
+        Live.ToString(System.Globalization.CultureInfo.InvariantCulture);
+}
+
+/// <summary>
 /// Diona, Icy Paws: "Gain 6 Block. When this Block absorbs damage, apply Cryo
 /// to the attacker."
 ///
@@ -378,6 +466,10 @@ public static class CompanionOverhaulReactions
 /// FIRED BY <see cref="CompanionOverhaulIncomingHit"/>, not by a broadcast of
 /// its own -- see that class for why the three incoming readers share one
 /// listener.
+///
+/// `EB-337`: the printed number and the badge are <see cref="BlockMark.Left"/>,
+/// not the raw stack. See <see cref="BlockMark"/> for the whole argument; the
+/// defect was found on Thoma's twin and both marks are the one construction.
 /// </summary>
 public sealed class IcyPawsPower : PowerModel, ILocalizationProvider
 {
@@ -385,13 +477,32 @@ public sealed class IcyPawsPower : PowerModel, ILocalizationProvider
     {
         ("title", "Icy Paws"),
         ("description",
-            "[blue]{Amount}[/blue] [gold]Block[/gold] left. When it absorbs "
+            "[blue]{Left}[/blue] [gold]Block[/gold] left. When it absorbs "
           + "damage, apply [gold]Cryo[/gold] to the attacker."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new DynamicVar[] { new BlockMarkVar() };
+
+    /// <summary>The badge is the same number the face prints (`EB-337`), for
+    /// <c>EB-270</c>'s reason one power over: two numbers on one mark is one
+    /// number too many, and the survivor is the one the rider pays on.</summary>
+    public override int DisplayAmount => BlockMark.Left(this);
+
+    /// <summary>`EB-337`, the housekeeping half. The sim's
+    /// `companion_overhaul_turn_start` deletes a mark with no Block behind it
+    /// and this is the same moment: <c>AfterPlayerTurnStart</c> runs after the
+    /// block clear (`KleeOverhaulOpening`'s own note establishes it).</summary>
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player.Creature != Owner) return;
+        await BlockMark.ClearIfSpent(this);
+    }
 
     /// <summary>The hit is about to be absorbed. Returns nothing: the caller
     /// owns the order, and this owns the arithmetic.</summary>

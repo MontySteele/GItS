@@ -208,13 +208,15 @@ public class ArmKeywordTipTests
         // cannot arrive with a different shape by accident.
         var attaches = Attaches().ToList();
 
-        // TEN. Draft 6 cut Tide, Surge, Exert and the Garment as keywords and
-        // their four `For*` methods left with the rules they defined, taking
-        // the table from eleven to seven; the Furina reframe's slice two put
-        // Deploy, Evoke and Drain on it (2026-09-02). The number is the
-        // TABLE's length (`gen_klee_cards.ARM_KEYWORDS`), which is what the
-        // python half of this pin walks.
-        Assert.Equal(10, attaches.Count);
+        // ELEVEN. Draft 6 cut Tide, Surge, Exert and the Garment as
+        // keywords and their four `For*` methods left with the rules they
+        // defined, taking the table from eleven to seven; the Furina reframe's
+        // slice two put Deploy, Evoke and Drain on it (2026-09-02), and R244
+        // put `Hexerei` on it -- the coven's family mark, which eighteen faces
+        // printed while nothing defined it. The number is the TABLE's length
+        // (`gen_klee_cards.ARM_KEYWORDS`), which is what the python half of
+        // this pin walks.
+        Assert.Equal(11, attaches.Count);
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
                                          System.StringComparison.Ordinal)));
