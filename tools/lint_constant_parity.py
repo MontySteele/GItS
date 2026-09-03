@@ -560,6 +560,22 @@ UNMIRRORED: dict[str, str] = {
         "presentation: how many pop effects may overlap before they are "
         "dropped. A frame-rate guard, not a rule -- the sim resolves every "
         "detonation regardless of what is drawn.",
+    # EB-38, the rest-site and merchant breathe. All four are the SHAPE of one
+    # loop -- two of them seconds, two of them the size of the move -- on a
+    # portrait the sim does not draw, at two rooms the sim does not render. A
+    # rest site's RULES (the heal, the enchant) are mirrored elsewhere and none
+    # of them is here; nothing in this file can change a number a run reads.
+    "StaticPortraitIdle.PeriodSeconds":
+        "presentation: one full breath, in seconds.",
+    "StaticPortraitIdle.HalfPeriodSeconds":
+        "presentation: the swell and the settle are half a breath each, in "
+        "seconds. Derived from PeriodSeconds by the pin, not by the compiler.",
+    "StaticPortraitIdle.ScaleYPeak":
+        "presentation: peak vertical scale of the portrait at the top of the "
+        "breath. A multiplier on drawn pixels, not on any quantity.",
+    "StaticPortraitIdle.RiseYPixels":
+        "presentation: how far the portrait lifts at the top of the breath, "
+        "in pixels, so the feet stay planted while the head moves.",
     # RibbonFullWidth and RibbonVisualSpan retired with D7 (salon UI sprint,
     # 2026-07-28): the ribbon no longer has a display span at all. A segment
     # is one TURN of upkeep at the current stage, which is a derived quantity
