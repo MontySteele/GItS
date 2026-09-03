@@ -10,7 +10,8 @@ Written 2026-09-04. Opus seats played two runs on lane 1 of the round-9 build
 rule for a single-target Plan, `EB-362`'s Chain of Command fix, the fixes
 from #344 to #347, all arms on). Run one cleared act 1 and was stopped one
 move into act 2 by a page-leak guard, since fixed (`EB-370`, #357). Run two
-cleared act 1 at 42 of 80 and act 2 at 24 of 80, and @@ACT3@@. The records
+cleared act 1 at 42 of 80 and act 2 at 24 of 80, and died on act-3 floor
+39, in the third fight, ten floors short of Aeonglass. The records
 are `review/qa/kokomi-round-9-2026-09-04/opus-act1.md`, `opus-act2.md`
 (the blocked seat), `opus-run2-act1.md`, `opus-run2-act2.md` and
 `opus-run2-act3.md`; every claim below names one of them. This is the read
@@ -28,7 +29,11 @@ best turns were element order inside a turn (`opus-act1.md` §(a)). Run two
 Bygone Effigy at 25 of 80, The Kin at 42; act 2 through the Entomancer and
 the Knowledge Demon at 379 HP on a Moon, Nereid's Ascension and Sango Isshin
 line that paid 62, 78 and a 49-damage double Vaporize on three boss turns
-(`opus-run2-act2.md`, the boss). @@ACT3PARA@@ The seats' verdict across
+(`opus-run2-act2.md`, the boss). Act 3 (84 actions) opened at 69 of 81
+on a four-branch run with no rest site, lost 45 HP to the first fight and
+6 Max HP to Paper Cuts, and died to the Fabricator's summons at 6 of 77;
+the seat's own cause is a misread of The Moon's face two fights earlier
+(`opus-run2-act3.md` §(c) 1). The seats' verdict across
 both runs is the same sentence: the Plan decision is real on nearly every
 turn, and the dead turns are all hands of basics.
 
@@ -89,8 +94,28 @@ happen when played", the C# says "now", and the Bake-Kurage panel says "NOW
 as you write them". Run one declined the card twice because it could not
 parse the face; run two took it, read "played" as face-up, and burned a
 Coral Bulwark+ and a Sango Isshin on one turn (`opus-act1.md` §(c) 10;
-`opus-run2-act1.md` §(c) 1). `EB-376`, default applied: the sheet takes the
-panel's sentence.
+`opus-run2-act1.md` §(c) 1). Act 3 says the misread killed the run: Read
+the Field played from hand for 5 Block where the seat expected 15, at 23
+HP against 28, and everything after it was a spiral (`opus-run2-act3.md`
+§(c) 1). `EB-376`, default applied: the sheet takes the panel's sentence.
+
+**By act 3 the seat had stopped trusting the numbers.** Six times the
+screen said one thing and the board did another, and the seat began
+choosing cards by their worst case (`opus-run2-act3.md` §(c)): the Moon's
+face; Ayato's 12 landing two turns late on the buff's expiry; a Strike
+printing 11 and dealing 11 with Strength and Kyouka both live; Amber's Pyro
+aura never printed and the next Hydro Vaporizing for 31 on a printed 20;
+three planned Vulnerables absent from the bodies for two actions; and a
+killing blow that the printed numbers say leaves 1 HP. Each is a row below
+or cited; together they are the round's finding, because a kit whose whole
+decision is priced off printed numbers cannot survive a page that prints
+the wrong ones.
+
+**Nereid's Ascension never earned its two energy.** Its doubling reaches
+the morning carry-out and not the Moon's immediate copy, so it wants spare
+energy, queued Plans and a turn to spare, which is the board where the deck
+is already winning (`opus-run2-act3.md` §(b)). Held at its numbers; the
+tempo rows in pick 1 are what would give it a turn.
 
 ## 3. What the screens got wrong
 
@@ -111,10 +136,17 @@ main.
 - **Sango Isshin and the Kurage's own hit apply Hydro with no tag** where
   Slack Water, Undertow and Feint print `[Hydro]` (`opus-run2-act1.md` §(c)
   2). `EB-378`.
-- **Ayato's "Then deal 12 Hydro damage" never visibly landed** on the turn
-  it was played, and the face's "Then" reads as immediate where the hit
-  comes when the two turns end (`opus-run2-act2.md` §(c) 3). `EB-379`: the
-  face says after, and the log says when.
+- **Ayato's "Then deal 12 Hydro damage" lands two turns late**, on the
+  buff's expiry, as an unexplained HP drop; the face's "Then" reads as
+  immediate (`opus-run2-act2.md` §(c) 3; `opus-run2-act3.md` §(c) 2).
+  `EB-379`: the face says after, and the log says when.
+- **The body lags the board.** Amber's Pyro aura was never printed and the
+  next Hydro card Vaporized off it; three planned Vulnerables were absent
+  for two actions (`opus-run2-act3.md` §(c) 4, 5). `EB-381`.
+- **The fake merchant prints as an empty shop**, with the gold total, a
+  blank shelf and `buy` as a legal verb, and no event text; the seat carried
+  279 gold to its death (`opus-run2-act3.md` §(c)). That is `EB-360`'s
+  empty shop, now diagnosed: an Unknown node's fake merchant.
 - **Faces fold modifiers without saying so**, in both directions: the Plan
   line folds Vulnerable and the now line does not; Strength shows on
   Predator+ and Strike and not on Undertow; two totals came in one low
@@ -133,7 +165,9 @@ Strike (`ProtoKkSlackWater.cs`, `CanonicalTags`); Hard To Kill's cap sitting
 invisibly on Predator+'s 21, the same cap Klee's badge prints and a card
 face cannot; potion damage outside Vulnerable and Slow; Skittish not firing
 on Thoma's rider; whether an enemy's Block persists; boss statuses that do
-not say where they act; two events with no skip.
+not say where they act; two events with no skip; the killing blow at 6 HP
+against a printed 8 under Weak with 1 Block, which the records cannot
+explain and the packet does not guess at (`opus-run2-act3.md` §(c) 6).
 
 ## 4. What the round did not test
 
@@ -141,7 +175,9 @@ No seat named Tide Wall, Chain of Command, Battle Plan, Change of Plans,
 Treatise, Salt Line or The General's Banner, so `EB-362`'s Chain of Command
 fix is built and unread live and the kit's own Block wall is still
 undrafted after four rounds. Run one's act 2 was the leak, not a read.
-@@ACT3TEST@@
+Act 3 reached its third fight only: no Elite, no rest site, no shop that
+was a shop, and Aeonglass unseen, so the R250 rules are read across two
+acts and a third of one.
 
 ## 5. Defaults applied (D and E), disclosed
 
@@ -151,7 +187,7 @@ undrafted after four rounds. Run one's act 2 was the leak, not a read.
 - **D:** `EB-376`, the Moon's sheet face takes the panel's sentence.
 - **D:** `EB-380`, the Plan tip's two clauses.
 - **D:** Vanguard's now-mode stays at 0; watched on round 10.
-- **E:** rows `EB-376` to `EB-380` minted on this branch; four seat records and the blocked seat's record committed beside
+- **E:** rows `EB-376` to `EB-381` minted on this branch; five seat records and the blocked seat's record committed beside
   the packet.
 - **E:** the round-9 rows for both kits build together on one branch after
   the pool picks, so the seats read one build.
