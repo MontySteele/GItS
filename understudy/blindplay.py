@@ -218,8 +218,18 @@ def cmd_observe(args) -> int:
 
 
 def cmd_act(args) -> int:
+    # `EB-370`: `act` reads through `observation()` before it resolves
+    # anything (`blindplay_grammar.act`), so a `PacketLeak` on the read path
+    # it shares with `observe` used to reach here uncaught -- a seat that
+    # typed `act` on a leaking board saw a Python traceback where `observe`
+    # on the same board printed a clean one-line refusal. Same catch, same
+    # line, same exit code.
     state = _load_state(args)
-    res = act(state, args.command)
+    try:
+        res = act(state, args.command)
+    except qa_packet.PacketLeak as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 1
     print(json.dumps(res, indent=1, default=str))
     if not res["ok"]:
         return 1

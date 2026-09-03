@@ -675,8 +675,58 @@ def _int(value: Any, default: int = 0) -> int:
         return default
 
 
+# `EB-370`. A base-game LocString with no entry for the key it was asked for
+# does not raise -- it prints the key itself, and two different call
+# conventions on the mod/bridge side give it two different shapes. Neither
+# names anything a player would recognise, and both read as a leak because
+# they carry an internal table name (`monsters`, `relics`) or a mod-prefixed
+# id (`KLEEMOD-FURINA`) -- found live, Kokomi round 9
+# (`review/qa/kokomi-round-9-2026-09-04`): a dead monster's name in the
+# morning-log reprint of a carried-out Plan (a `.ToString()` on the
+# unresolved LocString, `KleeMod.Powers.KokomiPlan.EnemyName`), and a
+# base-game relic's OFFERED title at an Ancient node (a `.GetFormattedText()`
+# that found no registered per-character title variant for a relic that is
+# only ever BORROWED, never owned, by a modded character's pool). The second
+# one BRICKED the run: the leak guard was RIGHT to refuse a mod id on a relic
+# face, so the fix belongs here, upstream of the guard, not in the guard.
+#
+#   LocString table monsters entry SLUDGE_SPINNER.name   (`.ToString()`)
+#   relics.SEA_GLASS.KLEEMOD-FURINA.title                 (`.GetFormattedText()`)
+#
+# Both are unpacked to the one thing inside them a player would recognise --
+# the game object's own id, humanised exactly as `label()` humanises any
+# other id-shaped wire string. A per-character owner segment
+# (`KLEEMOD-FURINA`) is dropped rather than shown: it names which modded
+# character's pool happened to read the shared object first, not the object,
+# so dropping it IS "the fallback to the base entry, no character variant"
+# this repo's norms ask for. A string that does not match either shape --
+# which is every string this module has ever printed before this row -- is
+# untouched.
+_LOCSTRING_TOSTRING = re.compile(r"^LocString table \S+ entry (?P<rest>\S+)$")
+_LOCSTRING_KEY = re.compile(r"^[a-z][a-z_]*\.(?P<rest>[A-Z][A-Za-z0-9_.\-]*)$")
+
+
+def _delocify(text: str) -> str:
+    """`text`, with an unresolved base-game LocString's raw key humanised.
+
+    Never a raw key: a shape this does not recognise passes through
+    unchanged, and a shape it does recognise but cannot find an entry
+    segment in (no dot, or nothing left after the trailing field) also
+    passes through unchanged -- neither is invented text.
+    """
+    m = _LOCSTRING_TOSTRING.match(text) or _LOCSTRING_KEY.match(text)
+    if not m:
+        return text
+    segments = m.group("rest").split(".")
+    field = segments[-1] if len(segments) > 1 else None
+    body = segments[:-1] if field else segments
+    entry = next((s for s in body if not s.upper().startswith("KLEEMOD")), None)
+    entry = entry or (body[0] if body else None)
+    return label(entry) if entry else text
+
+
 def _text(value: Any) -> str:
-    return " ".join(str(value or "").split())
+    return _delocify(" ".join(str(value or "").split()))
 
 
 def label(raw: Any) -> str:

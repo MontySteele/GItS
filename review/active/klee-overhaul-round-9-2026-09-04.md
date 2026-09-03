@@ -68,7 +68,7 @@ the enemy's Vulnerable and a damage cap and nothing else
 because Hard To Kill and Aeonglass's Block still bite while a Flutter does
 not. But the tip says "its hit takes the enemy's debuffs, not yours", and Slow
 is the enemy's debuff, so the seat found the truth by arithmetic twice and
-said plainly that it guessed. `EB-372`, default applied: the tip and the face
+said plainly that it guessed. `EB-373`, default applied: the tip and the face
 say "not an Attack".
 
 **Alice's Recipe lost every comparison.** Held in five hands across three
@@ -100,19 +100,19 @@ Each is a row in `BACKLOG.md` on this packet's branch, or cited to one on
 main.
 
 - **The Bomb tip's "takes the enemy's debuffs"** against Slow and Flutter
-  (`EB-372`, above).
+  (`EB-373`, above).
 - **Grounded is named and never defined.** Kaeya's Cold-Blooded Strike prints
   "This turn, Grounded counts nothing as having gone off" and its buff
   reprints it; a seat who never owned Grounded read it in two acts as noise
   on the screen it reads every turn (`opus-act1.md` §(c) 3; `opus-act2.md`
-  §(c) 2). `EB-371`: the Grounded tip on every face that names it.
+  §(c) 2). `EB-372`: the Grounded tip on every face that names it.
 - **Pael's Wing never offered its sacrifice.** Two reward screens printed
   `choose` and `skip` only, and the seat could not tell whether skip was the
   sacrifice (`opus-act2.md`, Pael). The wire carries no sacrifice option.
-  `EB-373`.
+  `EB-374`.
 - **No way to drop a potion outside combat.** Tiny Mailbox's two potions at
   the pre-boss rest were refused at a full belt, and the page has no drop
-  verb though the wire has one (`opus-act1.md`, Identity). `EB-370`.
+  verb though the wire has one (`opus-act1.md`, Identity). `EB-371`.
 - **The Infested Automaton never named the Power it gave.** One of the
   seat's twenty-four cards was unplannable for the whole act
   (`opus-act2.md`, the event). `EB-323`'s family, already on main; the packet
@@ -143,10 +143,10 @@ held by Kokomi's round and then by a page-leak fix.
   has changed since R248, the seats have read it across three runs (round 8's
   two and this one), and the pool work in pick 1 is card design inside the
   brief, not a rule change, so it does not move your turn.
-- **D:** `EB-372`, the Bomb tip and face say the hit is not an Attack.
-- **D:** `EB-371`, the Grounded tip travels with any face naming it.
+- **D:** `EB-373`, the Bomb tip and face say the hit is not an Attack.
+- **D:** `EB-372`, the Grounded tip travels with any face naming it.
 - **D:** Alice's Recipe stays at 2 energy until the Splash pair is read.
-- **E:** rows `EB-370` to `EB-373` minted on this branch; two seat records
+- **E:** rows `EB-371` to `EB-374` minted on this branch; two seat records
   committed beside the packet.
 - **E:** the second round-9 run is not re-run; round 10 carries the pool
   rows from pick 1 and is the next seat read.
