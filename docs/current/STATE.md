@@ -155,11 +155,13 @@ are in [`workstreams.md`](workstreams.md).
   `Deploy`/`Evoke`/`Drain` tips. R250 (2026-09-04) LIFTS the R220 B sequence: the arm is on in the
   installed dev build, soaked, and the first blind seat round runs on it;
   no stamp moves, nothing measured.
-- **Control run** — R250 pick 4: one base-game Ironclad run by the same
-  Opus seats on the same lane and harness (`review/qa/control-ironclad-2026-09-04/`),
-  ascension recorded. The kit clears (Kokomi 4d, 5; Klee 8) are read against
-  it: the arm pools are 33 (Klee) and 30 (Kokomi) rows against 79 and 76
-  shipped, so a clear on them is consistency as much as strength.
+- **Control run** — R250 pick 4, RUN 2026-09-04
+  (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
+  playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
+  the arm pools (33 Klee / 30 Kokomi rows against 79 / 76 shipped) cleared
+  three of seven kit runs. The clears are the kits'; a clear on a 30-row pool
+  is consistency as much as strength. A second control runs at the next free
+  lane window.
 - **Companion cards** — R234 ruled the slate whole, Mondstadt first, in
   parallel; `EB-249` / `EB-250` / `EB-251` are what it owes; Itto and Gorou's
   rate are noted there from the round-5 and act-1 reads.
