@@ -94,7 +94,7 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void The_four_wiring_seams_read_the_flag_and_nothing_else()
+    public void The_five_wiring_seams_read_the_flag_and_nothing_else()
     {
         // FLAG OFF IS BYTE-IDENTICAL, pinned where it is decided rather than
         // asserted in prose. Each seam is one `if` on the same property, so
@@ -119,6 +119,15 @@ public class KokomiOverhaulRuleTests
         var open = typeof(KokomiResourceHooks)
             .GetMethod("BeforeCombatStart", HeadlessGame.All)!;
         Assert.Contains("KokomiRules.InstallAll", Il.Calls(open));
+
+        // THE FIFTH, ADDED BY `EB-351`: which pair of basics is hers when a
+        // base-game effect asks the CHARACTER rather than reading the deck.
+        // Large Capsule reads `CardPool.AllCards`, which the pool seam is never
+        // applied to, so it would hand an arm run her two SHIPPED basics.
+        // `ArmStarterBasicsTests` holds the rest of it.
+        var basics = Il.Calls(Il.Method("ArmStarterBasics", "StrikeFor"));
+        Assert.Contains("KokomiOverhaul.get_Enabled", basics);
+        Assert.Contains("KokomiOverhaulRoster.StarterStrike", basics);
     }
 
     [Fact]

@@ -350,6 +350,16 @@ internal static class KleeSelfCheck
         // option handler, hanging the room (playtest 2026-07-23: Furina's
         // first relic -- her generated basics carried no CanonicalTags).
         // Mirror that predicate exactly: rarity AND tag together.
+        //
+        // AND `AllCards` IS WHY THIS RULE COULD NOT CATCH `EB-351`. The
+        // predicate reads the pool's whole declared membership, which no
+        // overhaul arm touches (removing a card from it takes its
+        // CardModel.Pool with it) -- so under the Klee arm this rule passes on
+        // the SHIPPED Kaboom!/Duck and Cover, and Large Capsule then hands
+        // those two shipped cards to a run whose starter and pool had both been
+        // replaced. A pass here means "nothing throws", never "the right card
+        // is handed over"; the second question is Powers/Prototype's
+        // ArmStarterBasics, which is the seam that answers it.
         foreach (var tag in new[] { CardTag.Strike, CardTag.Defend })
         {
             if (!pool.Any(c => c.Rarity == CardRarity.Basic && c.Tags.Contains(tag)))

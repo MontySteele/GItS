@@ -7,11 +7,15 @@ using MegaCrit.Sts2.Core.Models.Cards;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// THE TWO WIRING SEAMS, and there are exactly two: what Klee OPENS with and
-/// what she can be OFFERED. Sim twins: <c>tier0.content.loader._starter_ids</c>
-/// and <c>tier0.content.loader.pool_replacement</c>, which exist for the same
+/// THE THREE WIRING SEAMS, and there are exactly three: what Klee OPENS with,
+/// what she can be OFFERED, and WHICH PAIR OF BASICS IS HERS when a base-game
+/// effect asks the CHARACTER for "your Strike and your Defend"
+/// (<see cref="ArmStarterBasics"/>, the seam `EB-351` had to add). Sim twins
+/// for the first two: <c>tier0.content.loader._starter_ids</c> and
+/// <c>tier0.content.loader.pool_replacement</c>, which exist for the same
 /// reason -- both readers of a starter and all five offer surfaces go through
-/// one door each, so the two engines cannot disagree about what a run is.
+/// one door each, so the two engines cannot disagree about what a run is. The
+/// third has no sim twin: tier 0.5 models no relic that grants a basic.
 ///
 /// WHY THE STARTER IS A REPLACEMENT AND NOT A SUBSTITUTION. The Sparks arm swaps
 /// two of the ten slots and leaves eight standing, because its rule is a price
@@ -99,6 +103,28 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoJumpyDumpty>(),
         ModelDb.Card<ProtoKoKapow>(),
     };
+
+    /// <summary>
+    /// THE PAIR ABOVE, NAMED ONCE MORE FOR THE THIRD SEAM (`EB-351`).
+    ///
+    /// The base game lets a relic ask the CHARACTER for "your Strike" rather
+    /// than reading the deck it is adding to, and under this arm the honest
+    /// answer is the pair the starter opens with. <see cref="ArmStarterBasics"/>
+    /// is the one place that answer is given and this is the one place it is
+    /// stated, so the relic and the starter cannot drift apart.
+    ///
+    /// NOT FACTORED OUT OF <see cref="StartingDeck"/>, deliberately. That list
+    /// is the ruled artifact (R242 pick 3 prints all ten in order) and its pin
+    /// reads the ten <c>ModelDb.Card</c> calls straight off the compiled
+    /// method; routing them through a helper would leave the pin reading the
+    /// helper's name instead of the card's. The correspondence is held by a
+    /// pin that reads BOTH bodies rather than by the compiler --
+    /// `ArmStarterBasicsTests.The_relic_pair_is_the_pair_the_starter_opens_with`.
+    /// </summary>
+    internal static CardModel StarterStrike() => ModelDb.Card<StrikeIronclad>();
+
+    /// <summary>The Defend half of <see cref="StarterStrike"/>'s pair.</summary>
+    internal static CardModel StarterDefend() => ModelDb.Card<DefendIronclad>();
 
     /// <summary>
     /// Klee's WHOLE offerable pool under the arm: the slice's pool rows and
