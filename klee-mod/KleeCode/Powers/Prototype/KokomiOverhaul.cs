@@ -35,15 +35,20 @@ namespace KleeMod.Powers;
 ///     rules AND assert the flag-off wiring in one build.
 ///
 /// WHAT MOVES WHEN IT IS ON, exhaustively. Every seam is one <c>if</c> on this
-/// property and there are ten of them, in two groups.
+/// property and there are eleven of them, in two groups.
 ///
-/// The four that REPLACE:
+/// The five that REPLACE:
 ///   * <c>Kokomi.StartingDeck</c> -- the slice's ten cards
 ///     (<see cref="KokomiOverhaulRoster.StartingDeck"/>).
 ///   * <c>Kokomi.StartingRelics</c> -- Tamakushi Casket instead of the Pearl
 ///     of Wisdom, because the Pearl IS the exhaust funnel this arm retires.
 ///   * <c>KokomiCardPool.FilterThroughEpochs</c> -- her whole offerable pool is
 ///     the slice's 26 rows (<see cref="KokomiOverhaulRoster.OfferablePool"/>).
+///   * <see cref="ArmStarterBasics"/> -- which pair of basics is HERS when a
+///     base-game effect asks the character rather than reading her deck.
+///     `EB-351` added it: Large Capsule reads `CardPool.AllCards`, which the
+///     pool seam above never touches, so it was handing an arm run her two
+///     SHIPPED basics.
 ///   * <c>KokomiResourceHooks.BeforeCombatStart</c> -- the Bake-Kurage pet is
 ///     summoned, its marker power installed and her entry HP captured.
 ///
