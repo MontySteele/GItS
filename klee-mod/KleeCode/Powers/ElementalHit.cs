@@ -45,24 +45,47 @@ internal static class ElementalHit
     /// arithmetic and disagreeing under Weak. Every existing caller ignores the
     /// result and is behaviour-identical; nothing in the pipeline moved.
     ///
-    /// <paramref name="applyDealerMods"/> is QUARANTINED (the Klee overhaul) and
-    /// has exactly one caller: <c>ProtoBombPower.Explode</c>. `EB-343` / R248
-    /// ruled that a Bomb carries the TARGET's modifiers only -- the placer's
-    /// Strength and Weak never enter it, at placement or at set-off -- so the
-    /// explosion asks for the pipeline WITHOUT
-    /// <see cref="SimDamagePipeline.DealerMods"/>. Everything else about the hit
-    /// is unchanged: the aura still lands, the reaction still fires and
-    /// amplifies, and the target's Vulnerable and cap still apply. Defaulted
-    /// true, so every other caller -- the Burst volley, the echo, the companion
-    /// arms, Oz -- is byte-identical. Sim twin: `deal_damage_to_enemy(...,
-    /// powered=False)`, which the sheet's other quarantined arm already used.
+    /// <paramref name="powered"/> is QUARANTINED and, since `EB-343`,
+    /// has TWO callers -- one per Klee-and-Kokomi prototype arm, asking
+    /// the same thing for two different reasons. False skips
+    /// <see cref="SimDamagePipeline.DealerMods"/> -- the dealer's Strength
+    /// and Weak, and with them every flat attack buff the mirror carries --
+    /// and changes nothing else: the aura still lands, the reaction still
+    /// fires and its amplifier is still read off the applier, and the
+    /// target's Vulnerable still multiplies through
+    /// <see cref="SimDamagePipeline.TargetMods"/>. Defaulted true, so every
+    /// shipped caller is byte-identical.
+    ///
+    ///   * <c>KokomiPlan.Hit</c>, since <c>EB-334</c> ruled (R246 pick 1)
+    ///     that the BAKE-KURAGE deals a Plan's damage.
+    ///   * <see cref="DealWithoutDealerMods"/>, the overhaul Bomb's own
+    ///     door, since <c>EB-343</c> ruled (R248) that a Bomb carries the
+    ///     TARGET's modifiers only -- the placer's Strength and Weak never
+    ///     enter it, at placement or at set-off.
+    ///
+    /// ONE FLAG AND NOT TWO, which is worth saying because the two arms
+    /// reached it a day apart and each could have spelled its own: what
+    /// they want is the same edit to the same pipeline stage, and a second
+    /// parameter meaning the same thing is a second thing to keep in step
+    /// with `deal_damage_to_enemy(..., powered=False)` on the sim side.
+    ///
+    /// WHY A FLAG AND NOT "PASS THE PET AS THE APPLIER", which is how the
+    /// Tamakushi Casket says the same thing one file over: the applier is
+    /// also who applies the AURA and who owns the REACTION's debuff, and a
+    /// Plan-caused Freeze has to stay a debuff SHE applied or the Casket
+    /// would stop answering it and The Clouds Like Waves Rippling would
+    /// stop paying for it. Draft 6 gives the jellyfish the arithmetic, not
+    /// the authorship. It is also the exact sim twin:
+    /// `deal_damage_to_enemy(..., powered=False)` keeps the applier and
+    /// drops `modify_damage_dealt`, and tier0 has no pet object to hand
+    /// over.
     /// </summary>
     public static async Task<int> Deal(
         PlayerChoiceContext choiceContext, Creature target, Element element,
         decimal baseDamage, Creature? applier, bool ignoreBlock = false,
-        bool applyDealerMods = true)
+        bool powered = true)
     {
-        var dealt = applyDealerMods
+        var dealt = powered
             ? SimDamagePipeline.DealerMods(applier, baseDamage)
             : baseDamage;
 
@@ -115,12 +138,16 @@ internal static class ElementalHit
     ///
     /// ONE CALLER, <c>ProtoBombPower.Explode</c>. Everything else in the mod
     /// goes through <see cref="Deal"/> and keeps the dealer's terms.
-    /// </summary>
+    ///
+    /// THE KOKOMI ARM PASSES <c>powered: false</c> DIRECTLY and does not need a
+    /// door, which is not an inconsistency: a Plan's hit is reachable from the
+    /// headless suite through <c>KokomiPlan</c>'s own pins, and this one is
+    /// not. The door buys a structural pin where no value pin can exist.
     public static Task<int> DealWithoutDealerMods(
         PlayerChoiceContext choiceContext, Creature target, Element element,
         decimal baseDamage, Creature? applier) =>
         Deal(choiceContext, target, element, baseDamage, applier,
-             ignoreBlock: false, applyDealerMods: false);
+             ignoreBlock: false, powered: false);
 
     /// <summary>
     /// Damage-less element application: tier0 resolve_hit(enemy, element, 0)

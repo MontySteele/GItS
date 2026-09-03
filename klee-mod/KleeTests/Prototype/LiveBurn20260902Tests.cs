@@ -185,7 +185,13 @@ public class LiveBurn20260902Tests
                 .GetMethod("ForPlan", HeadlessGame.All)!));
 
         Assert.DoesNotContain("instead", body);
-        Assert.Contains("Play this on the [gold]Bake-Kurage[/gold]", body);
+        // THE WORDING WAS COMPRESSED BY `EB-334` and the anchor moved with it:
+        // the fifth clause (who deals a Plan's damage) had to fit under the
+        // same 135-character tip ceiling, so "Play this on the Bake-Kurage:"
+        // became "On the Bake-Kurage,". What this pin is about is unchanged --
+        // the tip still says WHERE a Plan card goes, which is the whole of
+        // `EB-293`.
+        Assert.Contains("On the [gold]Bake-Kurage[/gold]", body);
     }
 
     // ---- EB-297: no Burst gauge for a Kokomi who has no Burst -------------

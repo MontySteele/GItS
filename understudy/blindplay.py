@@ -128,6 +128,7 @@ LOCAL_PROPS = Path(__file__).resolve().parents[1] / "klee-mod" / "local.props"
 from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
     BlindPlayError, CHARGE_SOURCE_LINE, COMBAT_SCREENS, FIGHT_OVERLAYS,
     HAZARD_EVENT_TITLES, HAZARD_EVENTS, _is_rate_limited,
+    AURA_DURATION_TURNS, BOMB_GROWTH,
     KURAGE_COST_PER_ENERGY, LOG_ROOT, PLAY_GUARDRAIL, PROMPT_PATH,
     _RATE_LIMIT_MARKERS, RECORD_ROOT, REPO, SeatBudgetExhausted,
     SELECT_SCREENS, SETTLE_DELAY_S, SETTLE_TRIES, UNDRIVEN_SCREENS)
@@ -139,38 +140,44 @@ from understudy.blindplay_read import (   # noqa: E402,F401  (re-export)
 from understudy.blindplay_faces import (   # noqa: E402,F401  (re-export)
     _BARE_HOOK, _card_face, _card_title, _dedupe_text, _element,
     _ELEMENT_KEYWORD, EMPTY_SHELF, _enchantment, _enemy_key, _enemy_names,
-    _FIGHT_MEMORY, forget_fight, forget_shelves, _hazard, _hook_note, _intent,
-    _is_aura, _meter_max, _named_option, _number_faces, _OPTION_KIND_KEYS,
-    _OPTION_NAME_KEYS, _OPTION_TEXT_KEYS, _powers, relic_faces, _reward_option,
-    _SHELF_MEMORY, _shop_fingerprint, _shop_items, _shop_options, _SPARK_POWER)
+    _DECK_MEMORY, _FIGHT_MEMORY, forget_deck, forget_fight, forget_shelves,
+    _hazard, _hook_note, _intent, _intents, _is_aura, _meter_max,
+    _named_option, _number_faces, _OPTION_KIND_KEYS, _OPTION_NAME_KEYS,
+    _OPTION_TEXT_KEYS, _powers, relic_faces, remember_deck, remembered_deck,
+    _reward_option, _SHELF_MEMORY, _shelf_kind, _shop_fingerprint,
+    _shop_items, _shop_options, _SPARK_POWER)
 from understudy.blindplay_board import (   # noqa: E402,F401  (re-export)
-    _bundle_cards, _carried_out_row, _combat, _event_options, kokomi_plans,
-    kurage_memory, _map_ahead, _map_boss, _map_nodes, _map_options,
-    _preview_cards, _proceed_option, _pulse_phrase, _relic_options,
-    _rest_options, _reward_items, _screen_cards, _selected_bundle)
+    ALREADY_UPGRADED, _bundle_cards, _carried_out_row, _combat,
+    _event_options, kokomi_plans, kurage_memory, _map_ahead, _map_boss,
+    _map_nodes, _map_options, NO_UPGRADE_DEFINED, _omitted_from_upgrade,
+    _potion_slots, _preview_cards, _proceed_option, _pulse_phrase,
+    _relic_options, _rest_options, _reward_items, _screen_cards,
+    _selected_bundle, UNEXPLAINED_OMISSION, upgrade_deck_floor)
 from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
-    _ARM_KEYWORD_RE, ARM_KEYWORDS, AURA_NOTE, _every_string, HAND_REPEAT_NOTE,
-    keyword_notes, METER_CAPPED_NOTE, METER_NOTE, POWER_NOTE, PREVIEW_LOCKED,
-    SELECTION_NOTE, TRANSFORM_NOTE, TRANSFORM_UNREADABLE)
+    _ARM_KEYWORD_RE, ARM_KEYWORDS, AURA_NOTE, _elements_on_screen,
+    _every_string, HAND_REPEAT_NOTE, keyword_notes, METER_CAPPED_NOTE,
+    METER_NOTE, POWER_NOTE, PREVIEW_LOCKED, REACTION_KEYWORDS,
+    SELECTION_NOTE, TRANSFORM_NOTE, TRANSFORM_UNREADABLE, _wire_keyword_rows)
 from understudy.blindplay_observe import (   # noqa: E402,F401  (re-export)
     observation)
 from understudy.blindplay_render import (   # noqa: E402,F401  (re-export)
-    observe, render, _render_card, _render_intent, _render_options,
-    _render_power, sha256, still_in_fight)
+    _colliding, observe, render, _render_card, _render_intent,
+    _render_intents, _render_options, _render_power, sha256, still_in_fight)
 from understudy.blindplay_snapshot import (   # noqa: E402,F401  (re-export)
     ledger_rows, _snapshot_hand, _snapshot_meters, SNAPSHOT_VERBS,
     wire_snapshot)
 from understudy.blindplay_grammar import (   # noqa: E402,F401  (re-export)
-    act, AIMED_TARGETS, _buy, _card_face_key, _choose, Command, _confirm, _go,
-    _index_choice, _is_upgraded, _match, _match_bundle, _not_in_battle,
-    _numbered_titles, parse_command, _pet_target, _play, _proceed, _QUALIFIER,
-    _QUOTED, _refuse, Resolution, _resolve_enemy, _rest_keyword, SELF_TARGETS,
-    _skip, _split_qualifier, _STALE_NUMBER, _use_potion, VERBS)
+    act, AIMED_TARGETS, _buy, _card_face_key, _choose, Command, _confirm,
+    _full_slots, _go, _index_choice, _is_upgraded, _match, _match_bundle,
+    _not_in_battle, _numbered_titles, ORDINAL_ADVICE, parse_command,
+    _pet_target, _play, _proceed, _QUALIFIER, _QUOTED, _refuse, Resolution,
+    _resolve_enemy, _rest_keyword, SELF_TARGETS, _skip, _split_qualifier,
+    _STALE_NUMBER, _use_potion, VERBS)
 from understudy.blindplay_session import (   # noqa: E402,F401  (re-export)
     AUTHOR_FAMILY, Budget, check_independent, CodexThread, command_schema,
     FIGHT_QUESTIONS, forecast_block, MODEL_FAMILIES, model_family,
     RECORD_DISCLAIMER, record_schema, _result_line, RUN_QUESTIONS,
-    ScriptedThread, ScriptedWire, Session, Transcript)
+    ScriptedThread, ScriptedWire, Session, taken_line, Transcript)
 from understudy.blindplay_record import (   # noqa: E402,F401  (re-export)
     AUDIT_EXTRA, audit_markdown, build_version, _game_dir, game_version,
     granted_arms, _json_field, leak_audit, meter_plays, notes_markdown,
@@ -220,7 +227,11 @@ def cmd_act(args) -> int:
     post = dict(res["post"] or {})
     action = post.pop("action")
     result = bridge.post(action, **post)
-    print(_result_line(result))
+    # `EB-341`: the row that was taken, then the game's answer -- the same two
+    # lines, in the same order, the session hands its seat.
+    for line in (taken_line(res), _result_line(result)):
+        if line:
+            print(line)
     return 0
 
 

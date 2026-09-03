@@ -289,9 +289,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.
-            "Play this on the [gold]Bake-Kurage[/gold]: it carries out the ",
-            "[gold]Plan[/gold] line at the start of your next turn. Cost is ",
-            "paid now. Plans hit the front enemy.",
+            "On the [gold]Bake-Kurage[/gold], paid now; the [gold]Plan[/gold] ",
+            "lands first thing next turn on the front enemy. Enemy ",
+            "[gold]Vulnerable[/gold] raises it; your [gold]Weak[/gold] does ",
+            "not.",
             "heal N HP, never above the HP you entered ",
             # Furina, furina-reframe-2026-08-29.md sec.4.2 / sec.4.4 / sec.4.6,
             # staged as slice two. Three words the SHIPPED kit does not have:

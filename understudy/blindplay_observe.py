@@ -13,16 +13,19 @@ from typing import Any
 from understudy import qa_packet
 from understudy.blindplay_board import (_bundle_cards, _combat,
                                         _event_options, _map_ahead, _map_boss,
-                                        _map_options, _preview_cards,
+                                        _map_options, _omitted_from_upgrade,
+                                        _potion_slots, _preview_cards,
                                         _proceed_option, _relic_options,
                                         _rest_options, _reward_items,
-                                        _screen_cards, _selected_bundle)
+                                        _screen_cards, _selected_bundle,
+                                        upgrade_deck_floor)
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_options)
 from understudy.blindplay_notes import keyword_notes
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
-                                       _fold, _int, _player, _screen, _text)
+                                       _fold, _int, _player, _potions, _screen,
+                                       _text)
 from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
                                         SELECT_SCREENS, UNDRIVEN_SCREENS)
 
@@ -116,6 +119,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # other four, and a pick that is already made may not be re-taken.
         obs["select_kind"] = _text(blob.get("screen_type"))
         obs["preview_showing"] = bool(blob.get("preview_showing"))
+        # `EB-342`. THE SMITH'S SILENT OMISSIONS. The grid holds the cards the
+        # game will upgrade and nothing says what happened to the rest; the
+        # deck is not on this screen's feed, so the answer comes off the deck
+        # this page printed for itself in the last fight. Empty -- and so
+        # printed nowhere -- until a fight has been seen.
+        if obs["select_kind"] == "upgrade":
+            obs["omitted"] = _omitted_from_upgrade(state)
+            obs["deck_floor"] = upgrade_deck_floor(state)
         picked = [_card_face(c) for c in _preview_cards(state, st)]
         # How many results the transform screen has NOT chosen yet, and
         # whether its preview came through in a shape this page can read at
@@ -256,6 +267,17 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["items"] = _number_faces(
             [_dedupe_text(_reward_option(r)) for r in _reward_items(state)],
             "name")
+        # `EB-341`. A CLAIMED POTION VANISHED WITH NO MESSAGE. The r7b act-3
+        # seat claimed `Fire Potion` off a reward screen, the tool answered
+        # `ok Claiming reward: potion (Fire Potion)`, and the next combat
+        # listed three potions without it: three slots, four potions, and no
+        # line on either screen saying the claim had failed. Both numbers are
+        # on the feed and neither was printed.
+        obs["potions_held"] = len(_potions(state))
+        obs["potion_slots"] = _potion_slots(state)
+        obs["potion_offered"] = any(
+            _fold(r.get("type")) == "potion"
+            for r in _reward_items(state) if isinstance(r, dict))
         # `EB-294`. THE VERB WAS A CONSTANT HERE TOO. Once both rewards were
         # taken the page printed `- (nothing here to take)` and still offered
         # `choose "<reward>"` under "What you can say", which is the same
@@ -302,6 +324,19 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     # alike, and a rule applied in one reader is a rule that will be missing
     # from the next one somebody adds.
     obs = _despritify(obs)
+
+    # `EB-341`. THE SECOND HANDLE, OFFERED WHEREVER IT WORKS. A `choose` that
+    # resolves against a printed list also resolves against a row's PLACE in
+    # that list, which is the one handle a screen cannot print twice -- and the
+    # screen that needed it printed two options titled `Insert Common Potion`
+    # and gave the tester no way to say which. Added here, once, keyed on the
+    # verb already offered, so a screen kind added tomorrow gets it for free
+    # and a screen with no chooser is untouched.
+    if any(c.startswith('choose "') for c in obs["commands"]):
+        obs["commands"].insert(
+            1 + [c.startswith('choose "') for c in obs["commands"]].index(True),
+            "choose <number>   (the Nth row of the list above, counting "
+            "from 1)")
 
     # `EB-272`: computed over the FINISHED structure, at the same boundary and
     # for the same reason the sprite tags are rewritten there -- every screen

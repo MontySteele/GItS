@@ -30,6 +30,9 @@ namespace KleeMod.Powers;
 ///     Song of Pearls and The General's Banner, capped at one payout a turn
 ///     each by [USER]'s live 2026-09-02 verdict.
 ///   * <see cref="PlanCarriedOutThisTurn"/> -- Sango Isshin's condition.
+///   * <see cref="PlansThisMorning"/> -- Tide Wall's multiplier (`EB-335`):
+///     how many Plans this morning's drain held, written once by
+///     <c>KokomiPlan.ResolveAll</c> before the first clause runs.
 ///
 /// PER PLAYER, keyed the way <c>KleeOverhaulLedger</c> is keyed and for the
 /// same reason (R205): in co-op the other seat's turn is not hers.
@@ -119,6 +122,19 @@ public sealed class KokomiOverhaulLedger
     /// </summary>
     public bool PlanCarriedOutThisTurn { get; private set; }
 
+    /// <summary>
+    /// HOW MANY PLANS THIS MORNING'S DRAIN HELD (`EB-335`) -- Tide Wall's "for
+    /// each Plan the Bake-Kurage carries out this morning".
+    ///
+    /// THE WHOLE MORNING'S DEPTH, taken once at the top of the drain rather
+    /// than counted up as it goes, so a Tide Wall written first, second or last
+    /// in the queue pays the same number; a count that grew would make one
+    /// card's Block depend on the order the player happened to write in. Zero
+    /// on a turn whose morning drained nothing, which is what the card's own
+    /// printed no-op says.
+    /// </summary>
+    public int PlansThisMorning { get; private set; }
+
     private int _round = -1;
 
     /// <summary>
@@ -180,6 +196,10 @@ public sealed class KokomiOverhaulLedger
     /// else, so a second Plan in the same turn changes nothing.</summary>
     public void NotePlanCarriedOut() => PlanCarriedOutThisTurn = true;
 
+    /// <summary>The morning opens with <paramref name="plans"/> Plans due.
+    /// Written by <c>KokomiPlan.ResolveAll</c> and by nothing else.</summary>
+    public void NoteMorning(int plans) => PlansThisMorning = plans;
+
     /// <summary>The claim itself, on the ledger a caller already holds. Public
     /// to the pins for the reason <see cref="RollTo"/> is: a turn boundary can
     /// then be exercised without a combat, which is what the headless suite
@@ -204,6 +224,11 @@ public sealed class KokomiOverhaulLedger
         CompanionsPlayedThisTurn = 0;
         _claimed.Clear();
         PlanCarriedOutThisTurn = false;
+        // `EB-335`. Cleared rather than handed over, and cleared HERE rather
+        // than at the drain: `For` rolls on read, so the first ask of a new
+        // round zeroes this before `ResolveAll` writes the new morning's depth
+        // -- which is what makes a morning with no Plans read an honest zero.
+        PlansThisMorning = 0;
         // CLEARED rather than handed over, unlike the count above: Crystal
         // Collapse captures while the Plan is WRITTEN, so what survives the
         // boundary is the card on the entry and never this slot.

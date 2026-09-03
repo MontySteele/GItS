@@ -252,18 +252,26 @@ public class InazumaCompanionOverhaulTests
     {
         // STRUCTURAL: `ignoreBlock` is one optional flag on ElementalHit.Deal,
         // defaulted false, so every other caller in the mod is byte-identical.
+        // A SECOND OPTIONAL FLAG JOINED IT (`EB-334`, `powered`), which is why
+        // the arity is seven and both defaults are asserted by NAME rather
+        // than by position -- a third quarantined flag must not be able to
+        // move this pin's subject out from under it.
         var volley = Il.Method("TamotoPower", "FireVolley");
         Assert.Contains(Il.Calls(volley), c => c.Contains("ElementalHit.Deal"));
 
-        // BY NAME and not by position: `EB-343` gave the funnel a second
-        // defaulted flag (`applyDealerMods`, the overhaul Bomb's), and a
-        // positional read would have failed on a change that has nothing to do
-        // with this card. What matters here is that `ignoreBlock` exists, is
-        // optional, and is OFF unless a caller asks for it.
-        var ignoreBlock = Il.Method("ElementalHit", "Deal").GetParameters()
-            .Single(p => p.Name == "ignoreBlock");
-        Assert.True(ignoreBlock.HasDefaultValue);
-        Assert.Equal(false, ignoreBlock.DefaultValue);
+        // SEVEN, and `EB-343` is why that is still seven: the overhaul
+        // Bomb wanted the same pipeline edit `powered` already made
+        // and JOINED that flag rather than adding a second one, so a
+        // count here is a real guard against a third. Every read is by
+        // NAME; only the count is positional.
+        var deal = Il.Method("ElementalHit", "Deal");
+        Assert.Equal(7, deal.GetParameters().Length);
+        var ignore = deal.GetParameters().Single(p => p.Name == "ignoreBlock");
+        Assert.True(ignore.HasDefaultValue);
+        Assert.Equal(false, ignore.DefaultValue);
+        var powered = deal.GetParameters().Single(p => p.Name == "powered");
+        Assert.True(powered.HasDefaultValue);
+        Assert.Equal(true, powered.DefaultValue);
     }
 
     // ---- THE POWERS -----------------------------------------------------

@@ -417,6 +417,49 @@ def printed_spark_index(repo: Path | None = None) -> dict[str, int]:
     return dict(_printed_spark_index_cached(root))
 
 
+# `EB-342`. THE CARDS THIS BUILD DEFINES NO UPGRADE FOR.
+#
+# `tools/gen_prototype_cards.UPGRADE_DEBT` is the register of them, and since
+# `EB-315` emptied the overhaul half it is the Spark arm's alone -- which is
+# exactly where the r7b act-3 seat's two silently-omitted cards live
+# (`proto_powder_charge_spark`, `proto_shinobu_sanctifying_ring_*`).
+#
+# ONLY THE IDS CROSS. Each row's VALUE is register prose that names ruling and
+# row numbers, which is precisely what may not reach a blind page; the page
+# writes its own plain sentence and reads nothing from here but the key set.
+# Parsed with a regex rather than imported for `printed_cost_index`'s reason
+# one function up: the module that owns it reaches a sheet loader, and this
+# index is read from a page that may not.
+_UPGRADE_DEBT_BLOCK = re.compile(
+    r"^UPGRADE_DEBT[^{]*\{(.*?)^\}", re.M | re.S)
+_UPGRADE_DEBT_KEY = re.compile(r'^\s*"([a-z0-9_]+)"\s*:', re.M)
+
+
+@lru_cache(maxsize=4)
+def _no_upgrade_index_cached(repo: Path) -> tuple[str, ...]:
+    src = repo / "tools" / "gen_prototype_cards.py"
+    try:
+        text = src.read_text(encoding="utf-8")
+    except OSError:
+        return ()
+    block = _UPGRADE_DEBT_BLOCK.search(text)
+    if block is None:
+        return ()
+    return tuple(sorted(card_key(k)
+                        for k in _UPGRADE_DEBT_KEY.findall(block.group(1))))
+
+
+def no_upgrade_index(repo: Path | None = None) -> frozenset[str]:
+    """`{card id}` for every row this build defines no upgrade for (`EB-342`).
+
+    Keyed the way `printed_cost_index` is -- `card_key`'s spelling of the
+    wire's own id -- so a face on a screen looks up by the same handle. An
+    empty set on a checkout with no `tools/` tree is silence, never a guess.
+    """
+    root = repo if repo is not None else Path(__file__).resolve().parents[1]
+    return frozenset(_no_upgrade_index_cached(root))
+
+
 # `EB-264`. THE WIRE'S UNPLAYABLE REASON IS AN ENUM NAME, AND A PLAYER CANNOT
 # READ IT. `unplayable_reason` on a hand entry is `UnplayableReason.ToString()`
 # (`McpMod.StateBuilder.cs:1324`), so the page printed
@@ -558,18 +601,38 @@ def cost_note(card: dict[str, Any]) -> str:
     `""` when the card is neither discounted nor Spark-priced. Where both
     apply they are ONE line in the order the price is read: what the Energy
     slot is doing, then what the Spark slot is not.
+
+    `EB-342`. THE FIRST HALF DID DUTY FOR TWO DIFFERENT FACTS. On a single r7b
+    fight-15 screen `The Big One+` read *"The cost printed on this card is 3;
+    it is showing 2 here"* -- a PERMANENT Smith upgrade -- and `Flame Dance`
+    read *"The cost printed on this card is 1; it is showing 0 here"* -- a
+    one-turn `Vexing Puzzlebox` discount that evaporates at end of turn.
+    Identical phrasing for a property of the CARD and a property of THIS TURN,
+    with the `(upgraded)` tag the only distinguisher and sitting in the title
+    rather than beside the cost line being explained.
+
+    The number the discount is measured against is the cost on the SHIPPED
+    FACE (`printed_cost_index`, read off the card's own C# sheet row), so an
+    upgraded copy showing less than its base is showing the upgrade and an
+    un-upgraded one showing less is showing something on the board. That is
+    the whole distinction, and it is read off `upgraded`, which the wire
+    carries per card -- nothing here guesses at a duration the feed does not
+    send, so the board half says where to look rather than how long it lasts.
     """
     parts: list[str] = []
     if _discounted(card):
+        opening = (f"The cost printed on this card is {card['printed_cost']}; "
+                   f"it is showing {_text(card['cost'])} here")
         parts.append(
-            f"The cost printed on this card is {card['printed_cost']}; it is "
-            f"showing {_text(card['cost'])} here.")
+            f"{opening}, because this copy is upgraded — that is permanent."
+            if card.get("upgraded") else
+            f"{opening}. This copy is not upgraded, so the cut is this turn's "
+            f"board and not the card: it is what this card costs now, not "
+            f"what it costs.")
     spark = spark_discount_note(card)
     if spark:
         parts.append(spark)
     return " ".join(parts)
-
-
 def spark_note(powers: list[dict[str, Any]],
                hand: list[dict[str, Any]]) -> str:
     """The once-per-page Spark line (EB-186). `""` when nothing is discounted.

@@ -75,7 +75,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # condition on one ([USER]: "this requires absolutely 0 setup or combo").
     # SIXTEEN with R236's Gorou Personal, the first Plan line on a COMPANION
     # row -- the shape check is the row's owner's, not the row's kind's.
-    assert len(planned) == 16
+    # SEVENTEEN with `EB-335`'s Tide Wall (R246 pick 2), the first Plan line
+    # whose clause multiplies the morning it is carried out in.
+    assert len(planned) == 17
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -217,18 +219,220 @@ def test_damage_to_every_enemy(overhaul):
     assert (a.hp, b.hp) == (35, 35)
 
 
-def test_a_planned_hit_is_hers_and_applies_hydro(overhaul):
-    """RULE 3's other half: "your Strength and Dexterity count, and planned
-    damage from an Attack applies Hydro the way her Attacks do." The C# gets
-    both from one call -- `ElementalHit.Deal(..., kokomi)` -- and this engine
-    gets both from `deal_damage_to_enemy(..., element="hydro")`, whose dealer
-    is always the player."""
+def test_a_planned_hit_is_the_jellyfishs_and_applies_hydro(overhaul):
+    """`EB-334`, R246 pick 1. THE BAKE-KURAGE DEALS IT, so the printed number
+    goes out unchanged by anything of hers, and the Hydro still lands -- which
+    is the half of rule 3 the ruling left alone.
+
+    Round four-c is the defect: her Weak cut two banked Plans at the morning
+    (12 to 9, 5 to 3) and no screen said so, while the enemy's own Vulnerable
+    raised nothing. The three pins below are the three modifiers the row names,
+    one apiece."""
     enemy = make_enemy(hp=40)
     st = kokomi_state(enemies=[enemy])
     st.player.powers["strength"] = 3
     carry_out(st, [{"op": "damage", "amount": 9, "target": "front_enemy"}])
-    assert enemy.hp == 40 - 12
+    assert enemy.hp == 40 - 9
     assert enemy.aura == "hydro"
+
+
+def test_her_weak_does_not_shrink_a_planned_hit(overhaul):
+    """`EB-334` PIN 1: Weak ON KOKOMI, no effect. The seat's own arithmetic --
+    "Plan: Deal 12 damage" paying 9 the next morning, exactly x0.75."""
+    enemy = make_enemy(hp=40)
+    st = kokomi_state(enemies=[enemy])
+    st.player.powers["weak"] = 2
+    carry_out(st, [{"op": "damage", "amount": 12, "target": "front_enemy"}])
+    assert enemy.hp == 40 - 12
+
+
+def test_enemy_vulnerable_multiplies_a_planned_hit(overhaul):
+    """`EB-334` PIN 2: Vulnerable ON THE ENEMY, x1.5. The half that paid
+    nothing before -- "27 landed where x1.5 would have been 40"."""
+    enemy = make_enemy(hp=60)
+    enemy.powers["vulnerable"] = 2
+    st = kokomi_state(enemies=[enemy])
+    carry_out(st, [{"op": "damage", "amount": 12, "target": "front_enemy"}])
+    assert enemy.hp == 60 - 18
+
+
+def test_an_attack_buff_on_kokomi_does_not_reach_a_planned_hit(overhaul):
+    """`EB-334` PIN 3: an attack buff on HER, no effect. Strength is this
+    engine's whole vocabulary for one -- `powers.modify_damage_dealt` is where
+    every flat attack bonus lands, and Fantastic Voyage is the C# name for the
+    same term -- so pinning Strength pins the class."""
+    enemy = make_enemy(hp=40)
+    st = kokomi_state(enemies=[enemy])
+    st.player.powers["strength"] = 5
+    carry_out(st, [{"op": "damage", "amount": 7, "target": "front_enemy"}])
+    assert enemy.hp == 40 - 7
+
+
+def test_a_plan_caused_debuff_is_still_hers(overhaul):
+    """`EB-334`, the half the flag deliberately does NOT move: the applier
+    stays her, so the Tamakushi Casket answers a debuff a Plan applies. If the
+    fix had swapped the applier to the pet this would read 40."""
+    enemy = make_enemy(hp=40)
+    st = kokomi_state(enemies=[enemy])
+    st.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
+    carry_out(st, [{"op": "apply_power", "power": "weak", "amount": 1,
+                    "target": "front_enemy"}])
+    assert enemy.powers.get("weak") == 1
+    assert enemy.hp == 40 - C.KOKOMI_OVERHAUL_CASKET_STRIKE
+
+
+# --- `EB-335`: the kit's own defence in act 2 (R246 pick 2) ---------------
+
+def test_tide_wall_blocks_per_plan_of_the_whole_morning(overhaul):
+    """TIDE WALL. "Gain 3 Block for each Plan the Bake-Kurage carries out this
+    morning" -- the packet's own example is a three-Plan morning paying 9."""
+    st = kokomi_state()
+    for i in range(2):
+        kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 1}],
+                                           cid=f"proto_kk_f{i}"))
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}]))
+    st.player.draw_pile = [plan_card([], cid=f"proto_kk_d{i}")
+                           for i in range(5)]
+    kokomi_plan.resolve_all(st)
+    assert st.kk_plans_this_morning == 3
+    assert st.player.block == 9
+
+
+def test_tide_wall_does_not_care_where_in_the_queue_it_sits(overhaul):
+    """THE ORDER CANNOT MOVE THE NUMBER, which is why the count is taken once
+    at the drain rather than grown as the drain goes: a card whose Block
+    depended on the order the player happened to write in would be unplayable
+    to plan around."""
+    blocks = []
+    for slot in (0, 1, 2):
+        st = kokomi_state()
+        st.player.draw_pile = [plan_card([], cid=f"proto_kk_d{i}")
+                               for i in range(6)]
+        for i in range(3):
+            clauses = ([{"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}]
+                       if i == slot else [{"op": "draw", "amount": 1}])
+            kokomi_plan.schedule(st, plan_card(clauses, cid=f"proto_kk_f{i}"))
+        kokomi_plan.resolve_all(st)
+        blocks.append(st.player.block)
+    assert blocks == [9, 9, 9]
+
+
+def test_tide_wall_pays_nothing_on_a_morning_that_drained_nothing(overhaul):
+    """A PRINTED NO-OP AND NOT A FAILURE: Change of Plans can carry this Plan
+    out on a turn whose own morning was empty, and zero times three is the
+    honest answer to "for each Plan carried out this morning"."""
+    st = kokomi_state()
+    kokomi_plan.roll_turn(st)                 # a fresh turn, nothing drained
+    assert st.kk_plans_this_morning == 0
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}]))
+    kokomi_plan.resolve_front(st)
+    assert st.player.block == 0
+
+
+def test_tide_walls_block_is_powered(overhaul):
+    """Rule 3, the half R246 pick 1 left alone: her Dexterity counts and Frail
+    bites, exactly as they do on the flat planned `block` clause."""
+    st = kokomi_state()
+    st.player.powers["dexterity"] = 2
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}]))
+    kokomi_plan.resolve_all(st)
+    assert st.player.block == 5           # 3 x 1 plan, then +2 Dexterity
+
+
+def test_tide_wall_is_plan_only(overhaul):
+    """The count it multiplies is a fact about a MORNING, so a now-line
+    spelling would read a number that is zero every time it is asked. The
+    engine refuses it from a body by name rather than resolving it quietly."""
+    st = kokomi_state()
+    card = Card(id="proto_kk_probe", name="probe", cost=1, type="skill",
+                effects=[{"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}])
+    with pytest.raises(NotImplementedError, match="PLAN-ONLY"):
+        effects.resolve_card(st, card)
+
+
+def test_shell_guard_blocks_on_every_casket_strike(overhaul):
+    """SHELL GUARD. "Until your next turn, whenever the Tamakushi Casket
+    strikes, gain 3 Block." The seats watched the Casket strike five and six
+    times a turn off the deck's own status lines."""
+    enemy = make_enemy(hp=60)
+    st = kokomi_state(enemies=[enemy])
+    st.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
+    st.player.powers[kokomi_plan.SHELL_GUARD] = 3
+    for _ in range(3):
+        powers.apply_power(st, enemy, "weak", 1, applier=st.player)
+    assert st.player.block == 9
+
+
+def test_shell_guard_pays_nothing_without_the_casket(overhaul):
+    """The card names the RELIC, which is what keeps it separable from The
+    Clouds Like Waves Rippling one row over: that card pays per debuff
+    APPLIED, this pays per Casket STRIKE."""
+    enemy = make_enemy(hp=60)
+    st = kokomi_state(enemies=[enemy])
+    st.player.powers[kokomi_plan.SHELL_GUARD] = 3
+    powers.apply_power(st, enemy, "weak", 1, applier=st.player)
+    assert st.player.block == 0
+
+
+def test_shell_guards_window_covers_the_morning_and_then_closes(overhaul):
+    """"UNTIL YOUR NEXT TURN" INCLUDES THAT TURN'S MORNING, R246 pick 2's own
+    sentence: "the morning's Plans that apply Weak strike it too, so the Block
+    is there before the enemy swings". So the window is closed one step AFTER
+    the drain, and everything after that is outside it."""
+    enemy = make_enemy(hp=60)
+    st = kokomi_state(enemies=[enemy])
+    st.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
+    st.player.powers[kokomi_plan.SHELL_GUARD] = 3
+
+    # The morning's own Weak Plan strikes the Casket inside the window.
+    kokomi_plan.roll_turn(st)
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": "apply_power", "power": "weak", "amount": 1,
+          "target": "front_enemy"}]))
+    kokomi_plan.resolve_all(st)
+    assert st.player.block == 3
+
+    # And then it is gone: a debuff applied later in the same turn pays
+    # nothing.
+    kokomi_plan.close_shell_guard(st)
+    assert kokomi_plan.SHELL_GUARD not in st.player.powers
+    powers.apply_power(st, enemy, "vulnerable", 1, applier=st.player)
+    assert st.player.block == 3
+
+
+def test_the_shell_guard_window_closes_on_a_morning_with_no_plans(overhaul):
+    """The close is UNCONDITIONAL inside the arm's turn-start block, because
+    `resolve_all` returns early on an empty queue -- a window that only closed
+    on mornings with Plans in them would outlive its printed text."""
+    st = kokomi_state()
+    st.player.powers[kokomi_plan.SHELL_GUARD] = 3
+    kokomi_plan.resolve_all(st)               # nothing due
+    kokomi_plan.close_shell_guard(st)
+    assert kokomi_plan.SHELL_GUARD not in st.player.powers
+
+
+def test_both_defensive_rows_load_and_smith(overhaul):
+    """The two rows themselves, off the sheet: R246's 4/3 and 5/3, upgrading
+    to 6/4 and 7/4."""
+    from tier0.content import upgrades
+
+    wall = loader.get_card("proto_kk_tide_wall")
+    assert wall.rarity == "uncommon" and wall.cost == 1
+    assert wall.effects == [{"op": "block", "amount": 4}]
+    assert wall.plan == [{"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}]
+    up = upgrades.apply_upgrade(wall)
+    assert up.effects[0]["amount"] == 6
+    assert up.plan[0]["amount"] == 4
+
+    guard = loader.get_card("proto_kk_shell_guard")
+    assert guard.rarity == "uncommon" and guard.cost == 1
+    assert guard.plan == []
+    assert [e["amount"] for e in guard.effects] == [5, 3]
+    up = upgrades.apply_upgrade(guard)
+    assert [e["amount"] for e in up.effects] == [7, 4]
 
 
 def test_damage_quarter_max_hp_rounds_down(overhaul):

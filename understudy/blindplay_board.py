@@ -12,19 +12,98 @@ from typing import Any
 
 from understudy import qa_packet
 from understudy.blindplay_faces import (_card_face, _card_title, _enemy_names,
-                                        _hook_note, _intent, _meter_max,
+                                        _hook_note, _intents, _meter_max,
                                         _named_option, _number_faces, _powers,
-                                        relic_faces)
+                                        relic_faces, remember_deck,
+                                        remembered_deck)
 from understudy.blindplay_read import (_blob, _enemies, _fold, _hand, _int,
                                        _label, _listing, _player, _potions,
                                        _screen, _text)
 from understudy.blindplay_shape import SELECT_SCREENS
 
 
+# `EB-342`. The three things a card can be missing from the Smith's grid for,
+# in the order they are checked, each in the page's own plain words. The
+# register that answers the second is `qa_packet.no_upgrade_index`, and only
+# its ID SET crosses -- its rows' prose names ruling numbers.
+ALREADY_UPGRADED = "already upgraded; an upgraded copy cannot be upgraded again"
+NO_UPGRADE_DEFINED = "this build defines no upgrade for it"
+UNEXPLAINED_OMISSION = ("on the screen's list nowhere, and nothing on the feed "
+                        "says why")
+
+
+def upgrade_deck_floor(state: dict[str, Any]) -> int:
+    """The floor the deck behind `_omitted_from_upgrade` was read on. `0` if none."""
+    return _int((remembered_deck(state) or {}).get("floor"))
+
+
+def _omitted_from_upgrade(state: dict[str, Any]) -> list[dict[str, str]]:
+    """Deck cards the upgrade grid does not offer, each with its reason.
+
+    `EB-342`. The r7b act-3 Smith listed 25 cards against a deck of 35 or 36
+    and explained none of the fifteen it left out.
+
+    THE DECK COMES FROM THE LAST FIGHT, because it comes from nowhere else:
+    `BuildPlayerState` sends the four piles and a selection screen is not a
+    combat (`blindplay_faces.remember_deck`). So this is as stale as that
+    fight, the render says so beside it, and a card drafted since is simply
+    absent from both sides of the subtraction -- which is a card this page
+    never claims anything about, rather than one it names wrongly.
+
+    MATCHED ON THE PRINTED FACE, `(folded title, upgraded)`, one grid card
+    consumed per deck card: three `Strike` in the deck and three on the grid
+    leave nothing over, and three in the deck against two on the grid leave
+    exactly one. The id is used for the REASON and never for the match, since
+    a remembered pile entry and a grid entry are the same card model and the
+    title is what the reader is looking at.
+    """
+    held = remembered_deck(state)
+    if not held:
+        return []
+    deck = held["cards"]
+    grid: list[tuple[str, bool]] = []
+    for entry in _screen_cards(state):
+        if isinstance(entry, dict):
+            grid.append((_fold(_text(entry.get("name"))),
+                         bool(entry.get("is_upgraded")
+                              or entry.get("upgraded"))))
+    debt = qa_packet.no_upgrade_index()
+    out: list[dict[str, str]] = []
+    for card in deck:
+        face = (_fold(card["title"]), bool(card["upgraded"]))
+        if face in grid:
+            grid.remove(face)
+            continue
+        if card["upgraded"]:
+            reason = ALREADY_UPGRADED
+        elif card["key"] in debt:
+            reason = NO_UPGRADE_DEFINED
+        else:
+            reason = UNEXPLAINED_OMISSION
+        out.append({"title": card["title"], "reason": reason})
+    return out
+
+
+def _potion_slots(state: dict[str, Any]) -> int:
+    """How many potion slots this run has (`EB-341`). `0` where none is sent.
+
+    `BuildPlayerState` sends `max_potion_slots` beside the potion list, and
+    the list holds only the FILLED slots -- a null slot is skipped. So the two
+    numbers together are "2 of 3", and neither on its own is. A feed that
+    sends no maximum answers 0, and every caller treats that as "this page
+    cannot say", never as "no slots".
+    """
+    return _int(_player(state).get("max_potion_slots"), 0)
+
+
 def _combat(state: dict[str, Any]) -> dict[str, Any]:
     p = _player(state)
     resources = p.get("resources")
     battle = _blob(state, "battle")
+    # `EB-342`: the four piles ARE the deck while a fight is up, and the
+    # Smith's screen two rooms later has no deck on its own feed. Remembered
+    # here, on the one screen that carries it, and read back there.
+    remember_deck(state)
     combat = {
         "you": {
             "hp": _int(p.get("hp")), "max_hp": _int(p.get("max_hp")),
@@ -45,6 +124,11 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             "potions": [{"title": _text(x.get("name")),
                          "text": _text(x.get("description"))}
                         for x in _potions(state)],
+            # `EB-341`: how many slots there are, which the wire has always
+            # carried (`max_potion_slots`, `BuildPlayerState`) and the page
+            # never printed. A tester who cannot see three-of-three cannot
+            # know a fourth potion has nowhere to go.
+            "potion_slots": _potion_slots(state),
             # `EB-238`. ON THE COMBAT PAGE, not only where a relic is offered.
             # The HUD carries the relic row through every screen of the run;
             # the page did not, and `KLEESPARK-BT1` paid for it.
@@ -65,7 +149,10 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
                      "hp": _int(e.get("hp")),
                      "max_hp": _int(e.get("max_hp", e.get("hp"))),
                      "block": _int(e.get("block")),
-                     "intent": _intent(e.get("intents") or e.get("intent")),
+                     # `EB-342`: EVERY component of the telegraph, not the
+                     # first. A move that attacks and also puts four Burns in
+                     # hand is two intents on the wire and was one line here.
+                     "intents": _intents(e.get("intents") or e.get("intent")),
                      "powers": _powers(e)}
                     for e, name in zip(_enemies(state),
                                        _enemy_names(_enemies(state)))],
