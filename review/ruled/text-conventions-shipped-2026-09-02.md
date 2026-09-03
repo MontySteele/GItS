@@ -1,4 +1,4 @@
-Status: OPEN (the shipped sheets' text against text-conventions.md; PR = [USER])
+Status: RULED R249 2026-09-03
 
 # The shipped sheets' text against text-conventions.md
 
@@ -113,3 +113,22 @@ it cannot meet the ceiling the row says so.
    "Combat rewards offer a fourth [gold]Companion[/gold] card." (48), which
    brings rows 8, 16 and 18 under the ceiling and row 4 to 141. (b) Keep it
    and carry the four relics as exceptions.
+
+## The picks, ruled R249 (2026-09-03)
+
+[USER], verbatim: "On the test conventions: 1) Default b is fine, 2) default
+a) is fine, 3) default is fine, 4) Let's just remove this text; it's universal
+to all of the modded characters, so I would consider it a fact about the mod,
+not the relic."
+
+1. RULED (b): the Furina sheet, the shipped companion rows, the shared keyword
+   tips (rows 5, 7, 9, 17, 21 and the lowercase pair) and the shipped powers
+   and relics take the pass now; the shipped Klee and Kokomi rows only if
+   their overhauls are rejected. Build row `EB-345`.
+2. RULED (a): "detonates" stays on the shipped Klee kit until the overhaul
+   replaces it.
+3. RULED (a): the three rules stay on the badge, carried as a lint exception.
+4. RULED, neither option: the Companion-slot sentence leaves every starting
+   relic. It is a fact about the mod, so it is stated once at mod level, in
+   the mod's description on the Mods screen, the derived home ([USER]
+   vetoes). Build row `EB-346`.

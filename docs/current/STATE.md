@@ -102,9 +102,11 @@ Slay the Spire 2 **v0.111.0**, commit `41cef1ea`, buildid `24724944`, appid
 v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
-`+proto` dev mark (R217 D). **Installed: `0.2.2263+proto`** (2026-09-03,
-main `8b877787`, all three arms on), the three prototype arms behind `-p:PrototypeCards=true`; the
-Furina arm needs `-p:FurinaReframe=true` too and ships OFF. **Last RELEASE
+`+proto` dev mark (R217 D). **Installed: `0.2.2309+proto`** (2026-09-04,
+main `1177b74d`, ALL FOUR arms on since R250: the round-8 build with #344 to
+#347 plus the Furina reframe), the prototype arms behind
+`-p:PrototypeCards=true` and the Furina arm behind `-p:FurinaReframe=true`
+too; every arm ships OFF in a release package. **Last RELEASE
 package: `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
 
 ## Systems
@@ -135,24 +137,29 @@ are in [`workstreams.md`](workstreams.md).
 
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
-- **Klee** — Prototype round 7b is read and ruled (R248,
-  `review/ruled/klee-overhaul-round-7b-2026-09-03.md`): four Opus seats
-  played three acts on the R243 numbers, the Fable card audit and the
-  stand-ins, and died two floors below Aeonglass. Round 8 builds a Bomb
-  carrying the target's modifiers only (`EB-343`), Grounded's Spark
-  (`EB-344`) and the Hexerei readers (`EB-326`); [USER] plays it.
-- **Kokomi** — Prototype round 4c is read and ruled (R246,
-  `review/ruled/kokomi-overhaul-round-4c-2026-09-02.md`): three Opus seats
-  died on floor 24 with the Plan layer answering act 2's damage and none of
-  its block. Round five builds `EB-334` (the Bake-Kurage deals Plan damage)
-  and `EB-335` (Tide Wall, Shell Guard); a second seat run on the fix build
-  comes first, then [USER]'s. The Kurage memory is base kit behind
-  `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
+- **Klee** — Round 8 is RULED (R250, `review/ruled/klee-overhaul-round-8-2026-09-04.md`):
+  the Splash pays the largest Bomb, not the sum, so hold-or-cash survives the
+  Power landing. Round 9 is building on it; the seats read it, then [USER]
+  plays. The round-8 clear is read against a control run (below).
+- **Kokomi** — Rounds 4d and 5 are RULED (R250,
+  `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
+  six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
+  when written if the engine can carry a second selection, else lands on the
+  front enemy that is not a Minion. Round 9 is building on both; the seats
+  read it, then [USER] plays. The Kurage
+  memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
   2's five `proto_fr_` rows are built** (2026-09-02): the named deploy, two
   Evokes and the drain pair, on a new `drain_fanfare` op and the
-  `Deploy`/`Evoke`/`Drain` tips. Flag-off, no stamp moves, and NOT RUN.
+  `Deploy`/`Evoke`/`Drain` tips. R250 (2026-09-04) LIFTS the R220 B sequence: the arm is on in the
+  installed dev build, soaked, and the first blind seat round runs on it;
+  no stamp moves, nothing measured.
+- **Control run** — R250 pick 4: one base-game Ironclad run by the same
+  Opus seats on the same lane and harness (`review/qa/control-ironclad-2026-09-04/`),
+  ascension recorded. The kit clears (Kokomi 4d, 5; Klee 8) are read against
+  it: the arm pools are 33 (Klee) and 30 (Kokomi) rows against 79 and 76
+  shipped, so a clear on them is consistency as much as strength.
 - **Companion cards** — R234 ruled the slate whole, Mondstadt first, in
   parallel; `EB-249` / `EB-250` / `EB-251` are what it owes; Itto and Gorou's
   rate are noted there from the round-5 and act-1 reads.
@@ -162,8 +169,8 @@ are in [`workstreams.md`](workstreams.md).
 
 ## Open [USER] pile
 
-Every open row is in [`QUEUE.md`](QUEUE.md) and owned by [USER] — Kokomi's two,
-`M69`, the art eyes-on pile and `M45`'s five; the text-conventions shipped
-proposal (`review/active/text-conventions-shipped-2026-09-02.md`) carries four
-more. The nine blessed mechanisms are in [`watch-register.md`](watch-register.md):
+Every open row is in [`QUEUE.md`](QUEUE.md) and owned by [USER] — `M69` and
+the art eyes-on pile (R250 closed `S4-G6`, `S4-G14` and `M45` as overtaken); the text-conventions
+proposal is ruled (R249, `review/ruled/text-conventions-shipped-2026-09-02.md`;
+builds `EB-345`, `EB-346`). The nine blessed mechanisms are in [`watch-register.md`](watch-register.md):
 `W9` has FIRED and is back with [USER] as `M69`, the other eight are dormant.

@@ -15,6 +15,7 @@ things stay where they were, by the same ruling: the shipped **Klee and Kokomi
 card rows** are not rewritten — the overhauls being played replace them, so the
 report skips them by id off those two sheets — and the shipped Klee kit keeps
 **"detonates"** until the overhaul replaces it, two Bombs being two rules.
+The ruling is R249 (`review/ruled/text-conventions-shipped-2026-09-02.md`).
 
 ## Ceilings, measured
 
