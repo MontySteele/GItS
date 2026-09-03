@@ -153,12 +153,18 @@ public class ArmKeywordTipTests
         // other one if the two were ever merged.
         var printed = Printed("ForBomb");
 
-        // `EB-343` merged the word's first two sentences: it gained a fourth
-        // rule and the four-sentence ceiling had no room for one, so "A charge
-        // on an enemy." and "Grows by N at the start of your turn." became one.
-        Assert.Contains("A charge on an enemy that grows by ", printed);
-        Assert.Contains(" at the start of your turn. Never goes off by "
-                      + "itself.", printed);
+        // `EB-343` rewrote the word rather than adding to it. It gained a
+        // fourth rule and the four sentences it had would have put it 60
+        // characters over a ceiling that is the base game's own longest
+        // mechanic tip, on the one word a seat reads every turn ([USER], PR
+        // #340). All four rules survive the compression, which is what these
+        // read back: rule 1's rate, rule 7 ("only when"), rule 2's "all at
+        // once", and R248's burden.
+        Assert.Contains("A charge on an enemy: grows ", printed);
+        Assert.Contains(" a turn, goes off only when [gold]Set off[/gold], "
+                      + "all at once.", printed);
+        Assert.Contains("Its hit takes the enemy's debuffs, not yours.",
+                        printed);
 
         // `EB-89`, read the only way it can be read: the growth rate is NOT a
         // literal anywhere in this method -- the two halves of the sentence are

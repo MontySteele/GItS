@@ -4076,14 +4076,18 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
     anchors = {
-        "Bomb": ["A charge on an enemy", "Never goes off by itself",
-                 "go off together when"],
+        # `EB-343` (R248) rewrote the word: it gained a fourth rule and
+        # [USER] held it to the 135-character tip ceiling (PR #340), so
+        # rule 7 is now "goes off only when" and the stacking rule is
+        # "all at once".
+        "Bomb": ["A charge on an enemy", "goes off only when",
+                 "all at once", "takes the enemy's debuffs, not yours"],
         "Set off": ["on the target goes off first, one at a",
                     "each a Pyro hit for its size"],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
         "Mine": ["that also goes off when its enemy attacks",
                  "before the hit lands",
-                 "the badge shows the number"],
+                 "badge has the number"],
         "Plan": ["it carries out the ",
                  "paid now. Plans hit the front enemy"],
         "Mend": [": heal N HP, never above the HP you entered",

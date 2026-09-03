@@ -269,15 +269,15 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # per sentence, under the keyword-tip ceiling).
             #
             # `EB-343` (R248) gave the Bomb a FOURTH rule -- a Bomb takes the
-            # enemy's debuffs and none of Klee's -- and the four-sentence
-            # ceiling had no room for a fifth, so rule 1's two sentences became
-            # one clause. Nothing was dropped, and the LENGTH ceiling it broke
-            # is carried by name in `tools/lint_text_conventions.py`.
-            "A charge on an enemy that grows by ",
-            " at the start of your turn. Never goes off by itself. Bombs on ",
-            "one enemy go off together when [gold]Set off[/gold]. It takes ",
-            "the enemy's debuffs, not your [gold]Strength[/gold] or ",
-            "[gold]Weak[/gold].",
+            # enemy's debuffs and none of Klee's -- and the word was REWRITTEN
+            # rather than extended ([USER], PR #340): four sentences carrying
+            # four rules would have run 60 characters over the tip ceiling, and
+            # the ceiling is the base game's own longest mechanic tip on the one
+            # word a seat reads every turn. All four rules are still here in two
+            # sentences, and the tip takes no length exception.
+            "A charge on an enemy: grows ",
+            " a turn, goes off only when [gold]Set off[/gold], all at once. ",
+            "Its hit takes the enemy's debuffs, not yours.",
             "on the target goes off first, one at a ",
             "time, each a Pyro hit for its size.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",

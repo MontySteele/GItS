@@ -255,11 +255,19 @@ public class KleeOverhaulRoundFourTests
     [Fact]
     public void The_bomb_keyword_tip_says_a_second_bomb_joins_the_first()
     {
+        // `EB-287`'s claim, in the words `EB-343` left it. The r3 Opus seat
+        // called the stacking "the single most important interaction in the
+        // deck and I only found it by gambling a card on it", so the word has
+        // to print it. R248 added a fourth rule to the same tip and [USER]
+        // held it to the 135-character ceiling (PR #340), so "Bombs on one
+        // enemy go off together when Set off" is now "goes off only when Set
+        // off, all at once" -- three characters shorter and carrying rule 7's
+        // "only" as well.
         var printed = string.Concat(Il.Strings(
             typeof(ArmKeywordTips).GetMethod("ForBomb", HeadlessGame.All)!));
 
-        Assert.Contains("Bombs on one enemy go off together when "
-                        + "[gold]Set off[/gold].", printed);
+        Assert.Contains("goes off only when [gold]Set off[/gold], all at "
+                        + "once.", printed);
     }
 
     [Fact]

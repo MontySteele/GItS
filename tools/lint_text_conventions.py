@@ -73,12 +73,6 @@ EXCEPTIONS = {
         "the Bomb badge's static face carries rules 1, 2 and 6 in one "
         "paragraph because a canonical copy has no live pile to quote; the "
         "in-combat smart faces without a Mine meet the ceiling"),
-    "BombKey": (
-        "R248 gave the word a fourth rule (a Bomb takes the ENEMY's debuffs "
-        "and none of Klee's, EB-343), which runs backwards to every other "
-        "damage source in her deck and so cannot be inferred; the first two "
-        "sentences were merged to stay inside the four-sentence rule and the "
-        "three older rules are each load-bearing"),
     "TamakushiCasket.description": (
         "a two-rule starting relic plus the shared 59-character "
         "Companion-slot sentence every starting relic in this mod appends; "
@@ -226,7 +220,16 @@ def tip_rows() -> list[Row]:
     src = re.sub(r"^\s*//.*$", "", read(path), flags=re.M)
     where = str(path.relative_to(REPO))
     rows: list[Row] = []
-    for name, body in re.findall(r"With\(inherited, (\w+Key),\s*((?:[^;]|\n)*?)\);", src):
+    # NON-GREEDY TO THE CALL'S OWN `);`, and not "any character except a
+    # semicolon". The older pattern could not cross a semicolon INSIDE a
+    # literal, so a tip whose prose used one was not matched at all and
+    # never reached its ceiling: `MineKey` sat outside this census in both
+    # of its wordings until `EB-343` went looking. A missing row is silent
+    # here, exactly like the missing hover tip `EB-272` was filed on, so
+    # the pattern now stops at the statement rather than at a character
+    # the prose is allowed to contain.
+    for name, body in re.findall(
+            r"With\(inherited, (\w+Key),\s*(.*?)\);", src, re.S):
         if "SparkBody()" in body:
             continue
         rows.append(Row("tip", name, csharp_text(body), where))

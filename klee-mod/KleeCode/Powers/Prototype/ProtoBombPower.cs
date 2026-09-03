@@ -154,9 +154,11 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     // measuring rule: `tools/lint_text_conventions.py` counts a bare
     // identifier in a concatenation as ONE numeral, so a named constant would
     // hide 65 characters of player-facing text from its own ceiling. The Bomb
-    // keyword tip carries the same sentence in its own words
-    // (`ArmKeywordTips.ForBomb`), which is the arrangement `MineClause`
-    // already has across the two surfaces.
+    // keyword tip states the same rule in ITS own words and shorter -- "Its
+    // hit takes the enemy's debuffs, not yours" (`ArmKeywordTips.ForBomb`),
+    // written to fit the tip ceiling -- while this face, read on the enemy
+    // where the modifiers actually are, names Strength and Weak outright. Same
+    // rule, two surfaces, the arrangement `MineClause` already has.
 
     /// <summary>
     /// The face the wire prints (<c>PowerModel.HoverTips</c> uses the SMART

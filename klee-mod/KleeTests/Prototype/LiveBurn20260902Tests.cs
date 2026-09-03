@@ -134,9 +134,17 @@ public class LiveBurn20260902Tests
             typeof(ArmKeywordTips)
                 .GetMethod("ForMine", HeadlessGame.All)!));
 
-        Assert.Contains("The enemy's own debuffs move it like any Bomb", body);
-        Assert.Contains("the badge shows the number", body);
+        Assert.Contains("The enemy's debuffs move it, and the ", body);
+        Assert.Contains("badge has the number.", body);
         Assert.DoesNotContain("[gold]Weak[/gold]", body);
+
+        // AND IT IS MEASURED NOW. The sentence used to carry a semicolon, and
+        // `tools/lint_text_conventions.py` reads these bodies out of the
+        // source with a regex that stopped at one -- so this whole tip sat
+        // outside the census in both of its wordings and was never held to the
+        // tip ceiling. The regex is fixed in the same change; the assertion
+        // here is the prose half of it.
+        Assert.DoesNotContain(";", body);
     }
 
     [Fact]
@@ -147,12 +155,17 @@ public class LiveBurn20260902Tests
         // the deck that runs opposite to every other damage source she has --
         // so it is printed where the word is met rather than inferred from a
         // total that did not move.
+        //
+        // AND IT FITS THE CEILING ([USER], PR #340): the clause is one half of
+        // one sentence, and the two sentences together are 124 of the 135 that
+        // the base game's longest mechanic tip measures. The rewrite is why
+        // this word takes no named exception in
+        // `tools/lint_text_conventions.py` while the badge's modified faces do.
         var body = string.Concat(Il.Strings(
             typeof(ArmKeywordTips)
                 .GetMethod("ForBomb", HeadlessGame.All)!));
 
-        Assert.Contains("It takes the enemy's debuffs, not your "
-                        + "[gold]Strength[/gold] or [gold]Weak[/gold].", body);
+        Assert.Contains("Its hit takes the enemy's debuffs, not yours.", body);
     }
 
     // ---- EB-293: the Plan keyword covers the plan-only case ---------------
