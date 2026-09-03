@@ -865,6 +865,75 @@ def test_the_payload_travels_with_the_charge_that_carries_it(overhaul):
     assert taken[0].is_mine is False
 
 
+def test_the_payload_pays_from_inside_a_stacked_pile(overhaul):
+    """`EB-395`, and the C# twin is
+    `The_payload_survives_being_stacked_with_a_plain_bomb`.
+
+    THE BOARD IS THE ROUND-10 SEAT'S FIGHT 3 (`opus-run4-act1.md`): Jumpy
+    Dumpty planted, a Pop! Bomb stacked onto the same enemy, two of Klee's
+    turns of growth, then one Set off on an aggregate the badge printed as
+    `Bomb 25 / Bombs here: 2`. The seat came out of that detonation with no
+    Mine badge anywhere, where every SINGLE-Bomb Set off in the same run had
+    placed one, and could not tell from any printed face whether the rider had
+    failed or fired and been eaten.
+
+    WHAT THIS ENGINE ANSWERS, which is the half the row asks to be pinned
+    first: the rider is not lost in the stack. A charge is a charge -- `place`
+    stores the payload on the one that carries it, `grow_pile` moves `size`
+    and touches nothing else, `take_all` hands the list back in placement
+    order, and `_explode` reads the payload off each charge as it goes off. So
+    the carrier pays from inside a pile of two exactly as it pays alone, on
+    every enemy, and the Mine it leaves is a Mine on the pile the badge
+    counts.
+    """
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 8, payload_mine_all=3)   # Jumpy Dumpty
+    klee_overhaul.place(state, a, 5)                       # Pop!
+    klee_overhaul.turn_start(state)
+    klee_overhaul.turn_start(state)
+    growth = 2 * klee_overhaul.growth_for(state)
+    assert sizes(a) == [8 + growth, 5 + growth]
+    assert klee_overhaul.mine_count(a) + klee_overhaul.mine_count(b) == 0
+
+    exploded = klee_overhaul.set_off(state, a)
+
+    assert exploded == 2
+    # THE RIDER PAID, on every enemy and at its printed size -- growth is the
+    # carrier's, never the payload's.
+    assert sizes(a) == [3] and sizes(b) == [3]
+    # AND THE BADGE PRINTS IT: `mine_count` is the number the mod's
+    # `{Mines}` var is written from (`SyncDisplay`), so a pile the page can
+    # count is a pile the badge says "including 1 Mine" about.
+    assert klee_overhaul.mine_count(a) == 1
+    assert klee_overhaul.mine_count(b) == 1
+
+
+def test_a_merge_carries_every_payload_it_moved(overhaul):
+    """`A_merge_carries_every_payload_it_moved`, `EB-395`'s other suspect.
+
+    Careful Arrangement moves every Bomb onto one enemy AS ONE Bomb, and a
+    merge is a MOVE: the merged charge is a Mine if any part of it was and it
+    carries the summed payload, so a card whose face only says it moves Bombs
+    cannot delete a rider. Read here as the rider PAYING after the merge,
+    rather than as the field surviving it.
+    """
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 8, payload_mine_all=3)   # Jumpy Dumpty
+    klee_overhaul.place(state, b, 5)                       # Pop!, elsewhere
+
+    klee_overhaul.merge_all_to(state, b, growth=5)
+
+    assert sizes(a) == [] and sizes(b) == [8 + 5 + 5]
+    assert b.ko_charges[0].payload_mine_all == 3
+
+    klee_overhaul.set_off(state, b)
+
+    assert klee_overhaul.mine_count(a) == 1
+    assert klee_overhaul.mine_count(b) == 1
+
+
 # ---------------------------------------------------------------------------
 # RULE 7 -- the two per-turn counters and the two memories
 # ---------------------------------------------------------------------------
