@@ -58,7 +58,7 @@ public sealed class ProtoMiSaraTenguStormcall : CustomCardModel, IElementalCard,
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Kujou Sara — Tengu Stormcall (proto)"),
+        ("title", "Kujou Sara — Tengu Stormcall"),
         ("description", "Deal {CalculatedDamage:diff()} damage. Next turn, your Attacks deal 5 additional damage."),
     };
 

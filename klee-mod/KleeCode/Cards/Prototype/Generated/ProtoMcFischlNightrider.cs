@@ -58,7 +58,7 @@ public sealed class ProtoMcFischlNightrider : CustomCardModel, IElementalCard, I
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Fischl — Nightrider (proto)"),
+        ("title", "Fischl — Nightrider"),
         ("description", "Deal {CalculatedDamage:diff()} damage. If Oz is out, he deals 5 [gold]Electro[/gold] damage to a random enemy."),
     };
 

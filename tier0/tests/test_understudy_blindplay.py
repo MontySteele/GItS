@@ -2906,7 +2906,10 @@ def plans_combat_state(plans: dict | None) -> dict:
 TWO_PLANS = {
     "pet": True, "pet_name": "Bake-Kurage", "pet_entity_id": "41",
     "pending": 2, "twice": False, "also_now": False,
-    "queue": [{"name": "Kurage's Oath (proto)", "clauses": 1},
+    # `EB-322`: the wire carries the card's TITLE, and a prototype row
+    # that shadows a shipped row prints the shipped row's title -- the
+    # " (proto)" declaration is a sheet device and never reaches a face.
+    "queue": [{"name": "Kurage's Oath", "clauses": 1},
               {"name": "War Council", "clauses": 2}],
 }
 
@@ -2926,7 +2929,7 @@ def test_the_page_lists_the_pending_plans_front_first():
     the same way -- a blind reader gets what a sighted player sees."""
     page = blindplay.render(blindplay.observation(plans_combat_state(TWO_PLANS)))
     assert "## The Bake-Kurage" in page
-    assert "1. **Kurage's Oath (proto)**" in page
+    assert "1. **Kurage's Oath**" in page
     assert "2. **War Council**" in page
     assert "Enemies cannot touch it" in page
 
@@ -3014,7 +3017,7 @@ def test_a_turn_with_no_carry_out_prints_no_carry_out_block():
         plans_combat_state(dict(TWO_PLANS, carried_out=[]))))
     assert "carried these out" not in page
     # And the section itself is unchanged for a board that never had the field.
-    assert "1. **Kurage's Oath (proto)**" in page
+    assert "1. **Kurage's Oath**" in page
 
 
 def test_the_meter_ledger_stays_off_the_carry_out_block():
@@ -3159,9 +3162,120 @@ def test_play_during_a_combat_chooser_names_the_chooser():
 
 def test_the_flat_refusal_survives_where_it_is_true():
     """The narrowing is only the chooser screens: a map really is not a battle
-    and still says so."""
-    assert blindplay.act(map_state(), "end turn")["refusal"] \
-        == "you are not in a battle"
+    and still says so.
+
+    `EB-319` added the second half of that sentence and nothing else: the
+    REASON is the one this row pinned, and the way out is the map's own verb.
+    """
+    res = blindplay.act(map_state(), "end turn")["refusal"]
+    assert res.startswith("you are not in a battle")
+    assert 'go "<node>"' in res
+
+
+# ------------------------------------------------- EB-319: the way out -----
+
+def random_target_combat_state() -> dict:
+    """The RECORDED combat turn plus ONE synthetic card: a random-target
+    Attack, which the game declares `TargetType.AllEnemies`.
+
+    Synthetic because the recording is a Kokomi turn and no Kokomi row aims
+    that way; the shape is the shipped Klee card's own -- `RapidFire.cs:63`
+    passes `TargetType.AllEnemies` and `McpMod.StateBuilder.cs:1394` sends
+    `card.TargetType.ToString()` -- so the value under test is the one the
+    wire carries, not one this file invented.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    hand = state["player"]["hand"]
+    card = json.loads(json.dumps(hand[0]))
+    card.update({"id": "KLEEMOD-RAPID_FIRE", "name": "Rapid Fire",
+                 "description": "Deal 3 damage to random enemies four times.",
+                 "target_type": "AllEnemies", "keywords": [],
+                 "index": len(hand)})
+    hand.append(card)
+    return state
+
+
+def test_a_card_that_aims_itself_is_refused_with_the_form_that_works():
+    """`EB-319`, and the round it cost.
+
+    `play "Rapid Fire" on "Seapunk"` was answered *Rapid Fire is random-target
+    and takes no target*: true, and it named no way to play the card. The seat
+    had chained `end turn` behind it, so an Attack Potion's 12 free damage
+    went with the turn -- "the message had the information and withheld it"
+    (round-7 act-1 seat, Fight 5).
+
+    Two halves, and the second is the row: the play is refused HERE instead of
+    being posted and refused by the bridge, and the refusal ends in the
+    command that resolves.
+    """
+    state = random_target_combat_state()
+    res = blindplay.act(state, 'play "Rapid Fire" on "Nibbit"')
+    assert not res["ok"]
+    assert res["post"] is None            # never posted, so nothing is spent
+    assert 'play "Rapid Fire"' in res["refusal"]
+    # ...and that form really is the one that works.
+    ok = blindplay.act(state, 'play "Rapid Fire"')
+    assert ok["ok"] and "target" not in ok["post"]
+
+
+def test_a_card_played_on_the_player_is_refused_the_same_way():
+    """The same rule for the other spelling the bridge refuses: a `Self` card
+    handed an enemy reaches `IsValidTarget` and comes back a wasted action."""
+    res = blindplay.act(combat_state(), 'play "Coral Guard" on "Nibbit"')
+    assert not res["ok"] and 'play "Coral Guard"' in res["refusal"]
+    assert blindplay.act(combat_state(), 'play "Coral Guard"')["ok"]
+
+
+def test_an_aimed_card_still_takes_its_aim():
+    """The relaxation is exactly as wide as the enum names in
+    `UNAIMED_TARGETS`: an `AnyEnemy` card is unchanged, and so is a custom
+    single-target type, which the wire spells as a bare number (`EB-216`)."""
+    state = random_target_combat_state()
+    assert blindplay.act(state, 'play "Pearl Barrage" on "Nibbit"')["ok"]
+    state["player"]["hand"][-1]["target_type"] = "40213"      # a custom type
+    assert blindplay.act(state, 'play "Rapid Fire" on "Nibbit"')["ok"]
+
+
+def test_every_refusal_on_every_screen_ends_in_a_form_that_resolves():
+    """`EB-319`'s acceptance, swept rather than sampled.
+
+    One nonsense command per screen this page drives, so a refusal that names
+    no way out fails here whichever `_refuse` produced it. A screen the page
+    refuses to drive is excluded BY NAME and for the honest reason: it has no
+    command that resolves, and inventing one would be the defect this row is
+    about, pointing the other way.
+    """
+    screens = {"combat": combat_state(), "map": map_state(),
+               "shop": shop_state(), "rest": rest_state(),
+               "card_reward": card_reward_state(), "event": event_state()}
+    checked = 0
+    for label, state in screens.items():
+        obs = blindplay.observation(state)
+        assert not obs["blocked"], f"{label} fixture is not drivable"
+        for command in ('play "Nothing At All"', 'choose "Nothing At All"',
+                        'go "Nowhere"', 'buy "Nothing At All"', "end turn",
+                        "rest", "confirm", "skip", "wibble"):
+            res = blindplay.act(state, command)
+            if res["ok"]:
+                continue
+            checked += 1
+            assert ("The form that resolves: " in res["refusal"]
+                    or "Forms that resolve here: " in res["refusal"]), (
+                f"{label}: {command} was refused with no form that resolves "
+                f"-- {res['refusal']!r}")
+            # And the form is a real one: the tail is the screen's own
+            # grammar, or a command a call site spelled out in full.
+            tail = res["refusal"].rsplit(": ", 1)[1]
+            assert tail.strip(), f"{label}: empty form list"
+    assert checked >= 30, f"only {checked} refusals swept -- the pin is stale"
+
+
+def test_a_screen_that_is_not_being_driven_promises_no_form():
+    """The other half of the same honesty: `_with_forms` adds nothing where
+    the page itself offers nothing, so a refusal never invents a way out."""
+    res = blindplay.act({"state_type": "seance_minigame"}, "proceed")
+    assert not res["ok"]
+    assert "resolves" not in res["refusal"]
 
 
 def test_the_spark_refusal_is_one_sentence():

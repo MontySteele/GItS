@@ -44,7 +44,7 @@ public sealed class ProtoKkSongOfPearls : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Song of Pearls (proto)"),
+        ("title", "Song of Pearls"),
         ("description", "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 

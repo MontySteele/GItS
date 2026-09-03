@@ -58,7 +58,7 @@ public sealed class ProtoMcKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Kaeya — Frostgnaw (proto)"),
+        ("title", "Kaeya — Frostgnaw"),
         ("description", "Deal {CalculatedDamage:diff()} damage. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 

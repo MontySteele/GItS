@@ -47,7 +47,7 @@ public sealed class ProtoKkNereidsAscension : CustomCardModel, ICharacterCard, I
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Nereid's Ascension (proto)"),
+        ("title", "Nereid's Ascension"),
         ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: for 2 turns, the [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] twice."),
     };
 

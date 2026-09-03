@@ -1040,11 +1040,16 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 # `KleeOverhaulPowers.VermillionPactNotBuilt`. A row for an unbuilt rule would
 # be a face that lies.
 #
-# ONE DISPLAY NAME IS SUFFIXED. "Sparks 'n' Splash (proto)": the shipped card of
-# that name is Klee's KIT Burst card, which is granted by the meter and is
-# therefore still reachable in the same run as this Power. Every other name here
-# is the packet's own, because the shipped card that shares it cannot be reached
-# while the flag is on.
+# ONE ROW DECLARES A SHADOW. `proto_ko_sparks_n_splash` keeps the shipped name
+# "Sparks 'n' Splash", and it is the one row on this sheet whose shipped twin
+# is NOT hidden by the arm: that card is Klee's KIT Burst card, granted to hand
+# by the meter rather than offered from the pool, so both are reachable in one
+# run. The sheet declares the shadow with a " (proto)" suffix and the PLAYER
+# never sees it (`EB-322`): the printed title is the bare name in both engines,
+# and where the meter does put the kit card in the same hand the page numbers
+# the two the way it numbers any repeated title (`EB-177`). Every other name
+# here is the packet's own, because the shipped card that shares it cannot be
+# reached while the flag is on.
 ```
 
 ## Klee's Hexerei readers — `proto_ko_` (R244, 2026-09-02)
@@ -1167,12 +1172,14 @@ shipped new art would be paying for a card that may be deleted next week.
 # (the shipped companion sheet's convention), Block and the named keywords are
 # golded, and Exhaust is the keyword rail's.
 #
-# TEN DISPLAY NAMES CARRY A "(proto)" SUFFIX. Those ten rewrite a SHIPPED row
-# whose display name they keep, and `tools/lint_unique_names.py` holds one
+# TEN NAMES DECLARE A SHADOW WITH A "(proto)" SUFFIX. Those ten rewrite a
+# SHIPPED row whose name they keep, and `tools/lint_unique_names.py` holds one
 # namespace across all six sheets -- so the suffix is what lets the rewritten
 # Frostgnaw and the shipped one coexist while the arm is being graded. It is
-# the same device `proto_ko_sparks_n_splash` already uses. The other eleven
-# names are new and carry no suffix.
+# the same device `proto_ko_sparks_n_splash` already uses, and it is a SHEET
+# KEY AND NOT A TITLE: `EB-322` prints the bare name on the card face in both
+# engines, so no player-facing title carries it. The other eleven names are
+# new and carry no suffix.
 #
 # THIRTEEN OF THE WORKSHOP'S THIRTY-FOUR UNIVERSALS LANDED IN A SECOND WAVE,
 # each because its printed text wanted an engine hook that existed in NEITHER
@@ -1438,13 +1445,15 @@ printed text with this repo's rendering conventions applied -- Plan and Mend
 golded, Exhaust on the keyword rail. No number moves and no clause is added or
 dropped.
 
-EIGHT DISPLAY NAMES CARRY A "(proto)" SUFFIX, and they are: Kurage's Oath,
+EIGHT NAMES DECLARE A SHADOW WITH A "(proto)" SUFFIX, and they are: Kurage's Oath,
 Slack Water, Song of Pearls, Nereid's Ascension, Sango Isshin, Stolen Chapter,
 Undertow and Salt Line -- eight names already owned by a SHIPPED Kokomi row.
 (Water's Edge and Coral Guard were two more until R242 replaced them with the
 base game's own basics and deleted their rows.) `tools/lint_unique_names.py` holds one namespace across
 all six sheets plus the relics, so the suffix is what lets the rewritten card
-and the shipped one coexist while the arm is being graded. The other twenty
+and the shipped one coexist while the arm is being graded. It is a SHEET KEY
+AND NOT A TITLE: `EB-322` prints the bare name on the card face in both
+engines, so no player-facing title carries it. The other twenty
 names are free, including the two Rares that took constellation names (The
 Moon Overlooks the Waters, The Moon, A Ship O'er the Seas) and The Clouds Like
 Waves Rippling, which is distinct from the shipped Kokomi row of a similar
@@ -1547,12 +1556,14 @@ waves kept -- "a card that cannot be printed as written is left OUT rather than
 replaced by a simpler card", the rule that left Vermillion Pact off the Klee
 surface -- bit on nothing here.
 
-FIFTEEN DISPLAY NAMES CARRY A "(proto)" SUFFIX, and they are the fifteen
+FIFTEEN NAMES DECLARE A SHADOW WITH A "(proto)" SUFFIX, and they are the fifteen
 rewrites of shipped Inazuma rows, whose printed names they keep.
 `tools/lint_unique_names.py` holds one namespace across all six sheets plus
 this surface, so the suffix is what lets the rewritten Thundergrust and the
 shipped one coexist while the arm is graded. It is the same device the ten
-`proto_mc_` rewrites and the eleven `proto_kk_` rows already use. Gorou's
+`proto_mc_` rewrites and the eleven `proto_kk_` rows already use, and it is a
+SHEET KEY AND NOT A TITLE: `EB-322` prints the bare name on the card face in
+both engines, so no player-facing title carries it. Gorou's
 Uncommon is NOT suffixed: the workshop renames it "Juuga: Forward Unto Victory"
 where the shipped row is "Forward Unto Victory", so the two names differ
 already. The other eight new characters' names are new.

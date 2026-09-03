@@ -115,20 +115,65 @@ class Resolution:
     `post` is the wire body and is the ONLY place an id lives; `printed` is the
     same decision in the names the screen used, and is what may be echoed back
     to the tester.
+
+    `forms` is `EB-319`: the command(s) that WOULD have resolved, in the
+    tester's own grammar. It is not part of `as_dict` -- `act` folds it into
+    the refusal sentence, so every reader of a refusal gets the way out
+    without having to know a second key exists.
     """
     ok: bool
     verb: str = ""
     post: dict[str, Any] | None = None
     printed: dict[str, Any] = field(default_factory=dict)
     refusal: str = ""
+    forms: tuple[str, ...] = ()
 
     def as_dict(self) -> dict[str, Any]:
         return {"ok": self.ok, "verb": self.verb, "post": self.post,
                 "printed": self.printed, "refusal": self.refusal}
 
 
-def _refuse(why: str) -> Resolution:
-    return Resolution(ok=False, refusal=why)
+def _refuse(why: str, *forms: str) -> Resolution:
+    """A refusal, and the form(s) that resolve where this one did not.
+
+    `EB-319`. `play "Rapid Fire" on "Seapunk"` came back *Rapid Fire is
+    random-target and takes no target* -- true, complete about the mistake and
+    silent about the repair. The seat was mid-chain, the turn ended, and an
+    Attack Potion's 12 free damage went with it: "the message had the
+    information and withheld it" (round-7 act-1 seat, Fight 5). The ambiguity
+    refusal had listed the numbered names that would work since `EB-177`, so
+    the page was already keeping the promise on one refusal in twenty.
+
+    Every refusal keeps it now. A site that knows the exact command names it
+    here; a site that does not falls back in `act` to the screen's own
+    "What you can say" list, which is the same list the page prints and is
+    therefore never a form the tester has not already been offered.
+    """
+    return Resolution(ok=False, refusal=why, forms=forms)
+
+
+def _with_forms(res: Resolution, obs: dict[str, Any]) -> Resolution:
+    """Fold `EB-319`'s way out into the refusal sentence.
+
+    The screen's `commands` are the fallback and not a second-best one: they
+    are the grammar the render prints under *What you can say*, so a refusal
+    that ends in them can never send a tester somewhere the page did not. A
+    screen that is not being driven has none, and then the refusal stands
+    alone -- there is no form that resolves, and inventing one would be worse
+    than the silence this row closes.
+    """
+    if res.ok:
+        return res
+    forms = list(res.forms) or [str(c) for c in obs.get("commands") or []]
+    if not forms:
+        return res
+    lead = ("The form that resolves: " if len(forms) == 1
+            else "Forms that resolve here: ")
+    why = res.refusal.rstrip()
+    if why and not why.endswith((".", "!", "?", ":")):
+        why += "."
+    res.refusal = f"{why} {lead}{'; '.join(forms)}".strip()
+    return res
 
 
 # `EB-173`: the qualifier the refusal advertises, and the resolver now honours.
@@ -354,6 +399,17 @@ def _card_face_key(entry: dict[str, Any]) -> str:
 AIMED_TARGETS = frozenset({"anyenemy", "enemy", "singleenemy", "targetenemy"})
 SELF_TARGETS = frozenset({"self", "anyally", "anyplayer"})
 
+# `EB-319`. The spellings that take NO enemy of the tester's choosing: the
+# game aims these itself, or aims them at nobody. `Rapid Fire` -- "Deal 3
+# damage to a random enemy 4 times" -- is `AllEnemies` here, which is why
+# `play "Rapid Fire" on "Fossil Stalker"` used to be POSTED and then refused
+# by the bridge's own `IsValidTarget` (`McpMod.Actions.cs:205-210`), a round
+# trip whose answer named the card, named the enemy and named no way to play
+# it. The set is CLOSED and holds the game's own enum names only: a custom
+# single-target type renders as a bare number on the wire (`EB-216`), matches
+# nothing here, and keeps the fall-through that lets a Plan card be aimed.
+UNAIMED_TARGETS = frozenset({"none", "allenemies"}) | SELF_TARGETS
+
 
 def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     """`(entity id, refusal)` for an enemy named the way the screen names it."""
@@ -403,6 +459,20 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
     if idx < 0:
         return _refuse(why)
     entry = hand[idx]
+    # `EB-319`, and it is refused HERE rather than by the game. The card aims
+    # itself; naming an enemy is the tester's only mistake, and the command
+    # that works is the same one without the `on` clause. Posting it would
+    # spend the action and come back `Card 'Rapid Fire' cannot be played on
+    # 'Fossil Stalker'`, which is what happened.
+    aim = str(entry.get("target_type") or "").lower()
+    if (cmd.target and aim in UNAIMED_TARGETS
+            and not entry.get("can_target_pet")):
+        return _refuse(
+            f"{titles[idx]!r} "
+            + ("is played on you, not on an enemy" if aim in SELF_TARGETS
+               else "does its own aiming")
+            + f', so it takes no `on "{cmd.target}"`',
+            f'play "{titles[idx]}"')
     if entry.get("can_play") is False:
         # `EB-264`: the same translation the page uses, so a refusal and the
         # card's own line cannot disagree about why.
@@ -764,14 +834,16 @@ def _not_in_battle(obs: dict[str, Any]) -> str:
     An overlay this page renders as a chooser therefore names itself, quotes
     its own prompt and lists its own verbs; every other screen keeps the old
     sentence, because there it is true.
+
+    `EB-319`: the verbs are no longer listed HERE. Every refusal ends in the
+    forms that resolve now (`_with_forms`), and this sentence listing them a
+    second time is the same list twice.
     """
     if obs["screen"] not in ("card_select", "bundle_select", "card_reward"):
         return "you are not in a battle"
     prompt = str(obs.get("prompt") or "").strip()
-    verbs = ", ".join(f"`{c}`" for c in obs["commands"])
     return ("a card chooser is open and has to be answered first"
-            + (f' — "{prompt}"' if prompt else "")
-            + (f". What you can say here: {verbs}" if verbs else ""))
+            + (f' — "{prompt}"' if prompt else ""))
 
 
 def act(state: dict[str, Any], command: str) -> dict[str, Any]:
@@ -780,17 +852,29 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
     Returns the `Resolution` as a dict. It does NOT post -- the caller posts,
     so that the state a command was resolved against and the state it is sent
     to are provably the same frame.
+
+    `EB-319`: every refusal that leaves here ends in the form(s) that resolve.
+    This is the ONE funnel -- each `_refuse` above may name its own exact
+    command and most do not need to, because the screen's own grammar is the
+    honest fallback and it is applied here rather than at forty call sites.
     """
     try:
         cmd = parse_command(command)
     except BlindPlayError as exc:
-        return _refuse(str(exc)).as_dict()
+        # A command that did not parse was typed against SOME screen, and that
+        # screen's own grammar is exactly what the typist needed. `observation`
+        # raises on a leak here for the same reason it does one line below: a
+        # leak must never reach a tester, typo or no typo.
+        return _with_forms(_refuse(str(exc)), observation(state)).as_dict()
 
     st = _screen(state)
     obs = observation(state)
     if obs["blocked"]:
-        return _refuse(f"this screen is not being driven: {obs['blocked']}"
-                       ).as_dict()
+        # No forms, deliberately: a screen that is not being driven has no
+        # command that resolves, and `_with_forms` leaves the sentence alone.
+        return _with_forms(
+            _refuse(f"this screen is not being driven: {obs['blocked']}"),
+            obs).as_dict()
 
     if cmd.verb == "play":
         res = (_play(state, cmd) if st in COMBAT_SCREENS
@@ -828,7 +912,7 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
     else:                                                # pragma: no cover
         res = _refuse(f"{cmd.verb!r} is not wired to anything")
     res.verb = res.verb or cmd.verb
-    return res.as_dict()
+    return _with_forms(res, obs).as_dict()
 
 
 def _confirm(state: dict[str, Any]) -> Resolution:
