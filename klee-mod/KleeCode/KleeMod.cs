@@ -374,6 +374,20 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.DeployKey + ".title"] = "Deploy",
                     [Cards.ArmKeywordTips.EvokeKey + ".title"] = "Evoke",
                     [Cards.ArmKeywordTips.DrainKey + ".title"] = "Drain",
+                    // `EB-377`. The BASE game's five, restated on the face
+                    // that names one. Same switch and same bargain as the
+                    // eleven rows above -- titles here, bodies in
+                    // `BaseKeywordTips` -- and the same non-collision: each
+                    // title is the base game's own word, because it is the
+                    // base game's own rule said where the card is.
+                    [Cards.BaseKeywordTips.VulnerableKey + ".title"] =
+                        "Vulnerable",
+                    [Cards.BaseKeywordTips.WeakKey + ".title"] = "Weak",
+                    [Cards.BaseKeywordTips.FrailKey + ".title"] = "Frail",
+                    [Cards.BaseKeywordTips.StrengthKey + ".title"] =
+                        "Strength",
+                    [Cards.BaseKeywordTips.DexterityKey + ".title"] =
+                        "Dexterity",
 #endif
                 };
             keywordTable.MergeWith(keywordFallback

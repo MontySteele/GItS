@@ -54,6 +54,18 @@ BOMB_GROWTH = 4
 # as the line above: pinned from the other side, never imported.
 AURA_DURATION_TURNS = 2
 
+# `EB-377`. THE THREE BASE-GAME DURATION DEBUFFS, AS PERCENTAGES.
+#
+# Spelled here for `CHARGE_SOURCE_LINE`'s reason and held in step from the
+# other side by `test_the_base_keyword_glossary_quotes_the_engines_own_rates`,
+# which reads `C.VULNERABLE_TAKEN_MULT`, `C.WEAK_DEALT_MULT` and
+# `C.FRAIL_BLOCK_MULT`. They are STRUCTURAL rates rather than balance dials --
+# the base game's own numbers -- but a sim that ever restates one must not be
+# able to leave this page teaching the retired figure.
+VULNERABLE_TAKEN_PCT = 50
+WEAK_DEALT_PCT = 25
+FRAIL_BLOCK_PCT = 25
+
 REPO = Path(__file__).resolve().parents[1]
 LOG_ROOT = Path(__file__).resolve().parent / "logs" / "blindplay"
 RECORD_ROOT = REPO / "review" / "qa" / "blindplay"

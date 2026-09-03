@@ -44,7 +44,7 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
+        BaseKeywordTips.ForWeak(ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_slack_water");
 

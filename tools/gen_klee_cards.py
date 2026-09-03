@@ -555,6 +555,38 @@ ARM_KEYWORDS = (
 )
 
 
+# --- `EB-377`: the BASE GAME'S KEYWORDS A QUARANTINED FACE NAMES -------------
+#
+# THE DEFECT, and it is the mirror image of the one above. `EB-272` gave every
+# word the arms INVENTED a definition; the words the arms merely USE still had
+# none on the face that names them. The round-9 seat found `Weak`, `Frail`,
+# `Slow` and `Minion` defined and `Vulnerable` defined nowhere -- because those
+# four reached the page as POWERS on a body, carrying the game's own tip, and a
+# card that APPLIES one carries nothing at all. `CardModel.HoverTips` walks the
+# card's declared `Keywords` and never its printed text, and a generated row
+# declares no status keyword, so `[gold]Vulnerable[/gold]` in a body hovers
+# nothing. `Exposed Flank+` was bought on a genre assumption for that reason.
+#
+# SAME ATTACH RULE, SAME QUARANTINE, SEPARATE TABLE. The rule is the printed
+# golded span, exactly as above; the scope is `arm_keyword_tips`, so only the
+# prototype surface attaches these. The table is separate because the two say
+# different things about their own authority: an `ARM_KEYWORDS` row is a rule
+# this mod owns and may retune, and a row here is the base game's rule restated
+# where the card is -- which is also why these attach LAST, outside the arm
+# words, and why nothing here is ever excluded by a shipped-keyword collision.
+#
+# NO PLURALS. None of these words is ever printed as one ("2 Vulnerable", never
+# "2 Vulnerables"), so the token list is the bare word.
+BASE_KEYWORDS = (
+    ArmKeyword("Vulnerable", ("Vulnerable",),
+               "BaseKeywordTips.ForVulnerable"),
+    ArmKeyword("Weak", ("Weak",), "BaseKeywordTips.ForWeak"),
+    ArmKeyword("Frail", ("Frail",), "BaseKeywordTips.ForFrail"),
+    ArmKeyword("Strength", ("Strength",), "BaseKeywordTips.ForStrength"),
+    ArmKeyword("Dexterity", ("Dexterity",), "BaseKeywordTips.ForDexterity"),
+)
+
+
 def golded_tokens(description: str) -> list[str]:
     """Every `[gold]...[/gold]` span in a built face, holes blanked."""
     return [_SMART_HOLE.sub("", span).strip()
@@ -669,6 +701,20 @@ def arm_keyword_tip_calls(description: str,
     return [keyword.attach
             for keyword in printed
             if not (keyword.word == "Bomb" and includes_bomb_rules)]
+
+
+def base_keyword_tip_calls(description: str) -> list[str]:
+    """The base-game tip calls this face owes, in table order (`EB-377`).
+
+    The same one rule as `arm_keyword_tip_calls` -- the printed, golded word --
+    with no exclusions, because there is nothing to exclude: these words carry
+    the base game's rules, so no second definition of one can contradict the
+    first. A face that raises `Weak` from a shipped keyword AND from here would
+    print one sentence twice, and no generated row declares a status keyword.
+    """
+    printed = set(golded_tokens(description))
+    return [keyword.attach for keyword in BASE_KEYWORDS
+            if printed.intersection(keyword.tokens)]
 
 
 # --- companion batch (2026-07-21) --------------------------------------------
@@ -10392,6 +10438,12 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc, includes_bomb_rules,
                                             spark_priced):
+            tips_expr = (
+                f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
+        # `EB-377`, and it is last of the last for the reason the block above
+        # is last at all: an arm's invented word is the one the reader has
+        # never met, and a base-game word restated is read after it.
+        for attach in base_keyword_tip_calls(desc):
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
     if tips_expr:

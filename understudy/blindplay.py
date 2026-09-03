@@ -128,7 +128,8 @@ LOCAL_PROPS = Path(__file__).resolve().parents[1] / "klee-mod" / "local.props"
 from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
     BlindPlayError, CHARGE_SOURCE_LINE, COMBAT_SCREENS, FIGHT_OVERLAYS,
     HAZARD_EVENT_TITLES, HAZARD_EVENTS, _is_rate_limited,
-    AURA_DURATION_TURNS, BOMB_GROWTH,
+    AURA_DURATION_TURNS, BOMB_GROWTH, FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
+    WEAK_DEALT_PCT,
     KURAGE_COST_PER_ENERGY, LOG_ROOT, PLAY_GUARDRAIL, PROMPT_PATH,
     _RATE_LIMIT_MARKERS, RECORD_ROOT, REPO, SeatBudgetExhausted,
     SELECT_SCREENS, SETTLE_DELAY_S, SETTLE_TRIES, UNDRIVEN_SCREENS)
@@ -154,7 +155,8 @@ from understudy.blindplay_board import (   # noqa: E402,F401  (re-export)
     _relic_options, _rest_options, _reward_items, _screen_cards,
     _selected_bundle, UNEXPLAINED_OMISSION, upgrade_deck_floor)
 from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
-    _ARM_KEYWORD_RE, ARM_KEYWORDS, AURA_NOTE, BOSS_ROOM, _elements_on_screen,
+    _ARM_KEYWORD_RE, ARM_KEYWORDS, AURA_NOTE, _BASE_KEYWORD_RE, BASE_KEYWORDS,
+    BOSS_ROOM, _elements_on_screen,
     _every_string, FROZEN_BOSS_CLAUSE, _GAME_KEYWORD_RE, GAME_KEYWORDS,
     HAND_REPEAT_NOTE, keyword_notes, METER_CAPPED_NOTE,
     METER_NOTE, POWER_NOTE, PREVIEW_LOCKED, REACTION_KEYWORDS,
