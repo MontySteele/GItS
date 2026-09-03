@@ -19,7 +19,8 @@ counts as one numeral, a `{hole}` as one numeral, a `[tag]` as nothing --
 the same rendering `text-conventions.md` measured the base game with.
 
 SCOPE, and why the older Sparks arm is outside it. Rows `proto_ko_*`,
-`proto_kk_*`, `proto_mc_*`, `proto_mi_*` are the arms being played; the
+`proto_kk_*`, `proto_mc_*`, `proto_mi_*`, `proto_fr_*` are the arms being
+played or being built (the Furina reframe joined on 2026-09-02); the
 `proto_spark_*` rows and their power are the retired-in-place Sparks arm
 (`M48`), which carries no `description:` and prints the shipped grammar.
 The shipped sheets are `--shipped`: a REPORT, never a gate, because their
@@ -60,7 +61,7 @@ CEILING = {
 ADD_CLAUSE_CEILING = 20   # the longest base {IfUpgraded:show:...} clause, 18
 MAX_SENTENCES = 4         # the base's longest card is four sentences
 
-IN_SCOPE = re.compile(r"^proto_(ko|kk|mc|mi)_")
+IN_SCOPE = re.compile(r"^proto_(ko|kk|mc|mi|fr)_")
 
 # --- the exceptions: id -> reason. Rot semantics, see the module doc. ----
 EXCEPTIONS = {

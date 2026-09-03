@@ -216,7 +216,7 @@ _VAR_FEEDS = {"CalculationBase": {"CalculatedDamage", "CalculatedBlock"}}
 _DEBT_SPARK_ARM = (
     "outside the Prototype-stage rule by declaration: `EB-218`'s Spark-arm "
     "migration twins and the Spark surface predate `EB-283`, whose prefixes "
-    "(`upgrades.PROTOTYPE_DEFAULT_PREFIXES`) are the four overhaul arms. "
+    "(`upgrades.PROTOTYPE_DEFAULT_PREFIXES`) are the five overhaul arms. "
     "Their upgrades are the SHIPPED rows' and are a Balance-stage ruling, not "
     "a default this generator may invent")
 

@@ -285,6 +285,18 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "[gold]Plan[/gold] line at the start of your next turn. Cost is ",
             "paid now. Plans hit the front enemy.",
             "heal N HP, never above the HP you entered ",
+            # Furina, furina-reframe-2026-08-29.md sec.4.2 / sec.4.4 / sec.4.6,
+            # staged as slice two. Three words the SHIPPED kit does not have:
+            # its deploy performs nobody, its bow neither triples the Fanfare
+            # bonus nor mints, and it has no drain at all.
+            "A [gold]Salon[/gold] member joins the stage and performs at ",
+            "once. Onto a full stage, the front member [gold]Evokes[/gold] ",
+            "first.",
+            "The member performs and leaves. Its [gold]Fanfare[/gold] bonus ",
+            " [gold]Fanfare[/gold]. The card's [gold]Encore[/gold] price pays ",
+            "for it.",
+            "Your [gold]Fanfare[/gold] falls to nothing. What the card does ",
+            "next is priced off the amount it took.",
     ):
         assert clause in tips, clause
 
@@ -308,6 +320,11 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert "KleeOverhaulLaw.BombGrowth" in tips
     assert "KleeOverhaulLaw.SparkPerExplosion" in tips
+    # The Furina reframe's Evoke sentence carries TWO numbers -- the Focus
+    # multiplier and the mint -- and both are prototype SEEDS (R215 B), which
+    # makes a retune likelier here than anywhere else on this list.
+    assert "FurinaReframeLaw.EvokeFocusMult" in tips
+    assert "FurinaReframeLaw.FanfarePerEvoke" in tips
     # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
     # structural and the Mend rule's bound is her entry HP, not a constant.
     # The arm's one number lives on the relic, whose face interpolates it

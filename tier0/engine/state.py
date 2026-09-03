@@ -1159,6 +1159,11 @@ class CombatState:
     # refpowers reads the count to divide a per-gain allowance.
     block_gained_this_card: int = 0
     discards_this_card: int = 0           # CalculatedGamble's draw-back count
+    # QUARANTINED (R213 B). What the Furina reframe's `drain_fanfare`
+    # took from THIS card play, read back by the effects after it
+    # through `amount_formula: {count: fanfare_drained}`. Per-card and
+    # not a meter read: the meter is 0 by the time they resolve.
+    fanfare_drained_this_card: int = 0
     last_drawn_type: str = ""             # EscapePlan's drawn-card branch
     salon_replacements_this_card: int = 0 # overflow count for current card
     cards_exhausted_this_turn: int = 0     # EvilEye / ForgottenRitual

@@ -4088,10 +4088,21 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                  "paid now. Plans hit the front enemy"],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
+        # The Furina reframe's three (slice two, 2026-09-02). The Evoke
+        # sentence's two numerals are interpolated from `FurinaReframeLaw` on
+        # the mod side and written out on this one, so its anchors are the
+        # clauses AROUND them -- the same fold-out this table already does for
+        # the Bomb's growth and the Spark's opening bank.
+        "Deploy": ["member joins the stage and performs at ",
+                   "full stage, the front member "],
+        "Evoke": ["The member performs and leaves. Its ",
+                  " price pays "],
+        "Drain": [" falls to nothing. What the card does ",
+                  "next is priced off the amount it took"],
     }
     assert set(anchors) == set(blindplay.ARM_KEYWORDS)
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
-                "PlanKey"):
+                "PlanKey", "DeployKey", "EvokeKey", "DrainKey"):
         assert f"public const string {key}" in src
     for word, phrases in anchors.items():
         for phrase in phrases:

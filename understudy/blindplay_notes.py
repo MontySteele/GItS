@@ -203,6 +203,18 @@ ARM_KEYWORDS: dict[str, str] = {
              "front enemy."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
+    # The Furina reframe's three (slice two, R220 A). The same sentences
+    # `ArmKeywordTips.ForDeploy` / `ForEvoke` / `ForDrain` print, with the two
+    # numerals the C# interpolates from `FurinaReframeLaw` written out: this
+    # page has no access to the mod's constants, and a seat reading it needs
+    # the number rather than the name of the constant that holds it.
+    "Deploy": ("A Salon member joins the stage and performs at once. Onto a "
+               "full stage, the front member Evokes first."),
+    "Evoke": ("The member performs and leaves. Its Fanfare bonus counts 3 "
+              "times and it prints 5 Fanfare. The card's Encore price pays "
+              "for it."),
+    "Drain": ("Your Fanfare falls to nothing. What the card does next is "
+              "priced off the amount it took."),
 }
 
 # One pattern per word, and they are CASE-SENSITIVE on purpose: the game
@@ -216,6 +228,9 @@ _ARM_KEYWORD_RE = {
     "Mine": re.compile(r"\bMines?\b"),
     "Plan": re.compile(r"\bPlans?\b"),
     "Mend": re.compile(r"\bMends?\b"),
+    "Deploy": re.compile(r"Deploys?"),
+    "Evoke": re.compile(r"Evokes?"),
+    "Drain": re.compile(r"Drains?"),
 }
 
 

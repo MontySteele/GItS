@@ -348,7 +348,9 @@ def test_no_upgrade_is_prototype_surface_only():
 #: rule and its rows carry the SHIPPED cards' upgrades, which are a
 #: Balance-stage ruling -- they are excused by name in
 #: `gen_prototype_cards.UPGRADE_DEBT` and are not this test's business.
-ARM_PREFIXES = ("proto_ko_", "proto_kk_", "proto_mc_", "proto_mi_")
+ARM_PREFIXES = ("proto_ko_", "proto_kk_", "proto_mc_", "proto_mi_",
+                # The Furina reframe joined the rule's reach on 2026-09-02.
+                "proto_fr_")
 
 
 def test_every_arm_row_on_the_live_surface_can_be_smithed():

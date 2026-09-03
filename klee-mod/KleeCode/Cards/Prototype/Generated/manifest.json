@@ -6,6 +6,11 @@
     "reachable_by": "understudy give_card / scenario `give:` step"
   },
   "generated": [
+    "proto_fr_curtain_call",
+    "proto_fr_exit_stage_left",
+    "proto_fr_intermission",
+    "proto_fr_let_the_people_rejoice",
+    "proto_fr_salon_debut_named",
     "proto_hold_the_line_spark",
     "proto_itto_superlative_superstrength_either",
     "proto_itto_superlative_superstrength_priced",
@@ -161,6 +166,11 @@
     "proto_true_spark_knight"
   ],
   "owners": {
+    "proto_fr_curtain_call": "furina",
+    "proto_fr_exit_stage_left": "furina",
+    "proto_fr_intermission": "furina",
+    "proto_fr_let_the_people_rejoice": "furina",
+    "proto_fr_salon_debut_named": "furina",
     "proto_hold_the_line_spark": "klee",
     "proto_itto_superlative_superstrength_either": "klee",
     "proto_itto_superlative_superstrength_priced": "klee",
@@ -338,6 +348,24 @@
     ]
   },
   "upgrades": {
+    "proto_fr_curtain_call": {
+      "encore_cost": -1
+    },
+    "proto_fr_exit_stage_left": {
+      "encore_cost": -1
+    },
+    "proto_fr_intermission": {
+      "retain": true
+    },
+    "proto_fr_let_the_people_rejoice": {
+      "cost": -1
+    },
+    "proto_fr_salon_debut_named": {
+      "add": {
+        "op": "gain_encore",
+        "amount": 2
+      }
+    },
     "proto_kk_ambush": {
       "plan_damage": 3
     },

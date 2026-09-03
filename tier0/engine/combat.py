@@ -767,6 +767,10 @@ _FREE_PLAY_CONTEXT = (
     # auto-play that discards or gains block in the middle of an outer card
     # would otherwise leave its numbers behind for the outer card to read.
     "block_gained_this_card", "discards_this_card", "last_drawn_type",
+    # QUARANTINED (R213 B). The Furina reframe's per-play drain total,
+    # saved for its neighbours' reason: a free play that drained inside
+    # an outer card would otherwise hand the outer card its number.
+    "fanfare_drained_this_card",
     # QUARANTINED (C.COMPANION_OVERHAUL). Gorou's per-play damage total, saved
     # for the reason its three neighbours are: an auto-play that dealt damage
     # inside an outer card would otherwise hand the outer card its number.

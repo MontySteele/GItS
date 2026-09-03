@@ -124,6 +124,26 @@ public sealed class FurinaReframeLedger
     /// <summary>Who the last missed aim named.</summary>
     public SalonMember? LastAbsentAim { get; private set; }
 
+    // ---- THE DRAIN (slice two) ---------------------------------------
+
+    /// <summary>Drains, mirroring the sim's <c>fanfare_drained</c> event, and
+    /// it is here for this ledger's stated reason: the fact leaves NO trace in
+    /// the state afterwards. A meter at 0 because nothing was earned and a
+    /// meter at 0 because twelve were just spent are the same board a moment
+    /// later, and the whole question the two drain rows ask is which of those
+    /// a turn produced.</summary>
+    public int Drains { get; private set; }
+
+    /// <summary>What the last drain took. Zero is a real answer and the
+    /// interesting one: a drain of nothing is the wasted play both rows are
+    /// deliberately allowed to be (no <c>requires</c> gate, packet 4.6).
+    /// </summary>
+    public int LastDrained { get; private set; }
+
+    /// <summary>Every point taken this combat, which is the drain arm's own
+    /// throughput and the number a grading round reads.</summary>
+    public int TotalDrained { get; private set; }
+
     // ---- SPOTLIGHT ---------------------------------------------------
 
     /// <summary>Designations that could not be paid for, mirroring
@@ -164,6 +184,13 @@ public sealed class FurinaReframeLedger
     {
         EvokeTargetAbsences++;
         LastAbsentAim = named;
+    }
+
+    public void NoteDrain(int drained)
+    {
+        Drains++;
+        LastDrained = drained;
+        TotalDrained += drained;
     }
 
     public void NoteDesignationUnpaid() => DesignationsUnpaid++;

@@ -350,6 +350,17 @@ def _runtime_count(state: CombatState, token: str,
     if token == "swirls_this_turn":
         # Heizou's Heartstopper Strike: "4 more for each Swirl this turn".
         return state.mi_swirls_this_turn
+    if token == "fanfare_drained":
+        # QUARANTINED USE ONLY (R213 B): the FURINA REFRAME's two drain rows
+        # (packet §4.6, `F11` (1) and `F12` (1)). What `drain_fanfare` took
+        # FROM THIS PLAY, read by the effects that follow it on the card.
+        #
+        # A PER-CARD NUMBER AND NOT A METER READ, which is the whole reason it
+        # is a count at all: by the time the damage or the Block resolves the
+        # meter is 0, so an effect that read `p.fanfare` here would pay out
+        # nothing every time. Written by `_op_drain_fanfare`, cleared per card
+        # play beside `discards_this_card` and its neighbours.
+        return state.fanfare_drained_this_card
     if token == "hand_size":
         return len(p.hand)
     if token == "discards_this_card":
@@ -2277,6 +2288,53 @@ def _op_crash_fanfare(state: CombatState, fx: dict, card: Card) -> None:
     resources.drop_fanfare_to_floor(state, fx["amount"], f"card:{card.id}")
 
 
+def _op_drain_fanfare(state: CombatState, fx: dict, card: Card) -> None:
+    """QUARANTINED (R213 B): the FURINA REFRAME's drain, slice two.
+
+    THE WHOLE OP. The held meter goes to 0 and the amount it held is recorded
+    as this play's `fanfare_drained`, which the effects after it on the same
+    card read through the ordinary `amount_formula: {count: fanfare_drained}`
+    grammar. Two rows print it -- the Rare all-enemy hit (§4.6, `F11` (1)) and
+    the survival twin beside it (`F12` (1)) -- and the pair is the point: with
+    one card draining, draining is a button; with two, it is a plan.
+
+    A SEPARATE OP AND NOT A RIDER, for `crash_fanfare`'s reason one line up:
+    the sheet then reads in the order the card resolves -- the meter empties,
+    THEN the number that empties it is spent -- and the ordering is a visible
+    line on the row rather than an implementation detail inside a damage op.
+
+    WHAT IT DOES NOT TOUCH, each deliberately:
+
+      * THE FLOOR. `crash_fanfare` is the op that moves it, and moving it is
+        that card's whole price; a drain is a SPEND of what has been earned,
+        so the baseline the meter rests on is left exactly where it was.
+      * THE CAP. Same argument from the other end, and `crash_fanfare`'s own
+        note gives it: a falling ceiling would make the card quietly worse the
+        second time it is played in one combat, which is a different card.
+      * THE FOCUS TERM. The reframe's scaling invariant (packet §4.4) is that
+        Focus multiplies PERFORMANCE numerics and nothing else, so the drained
+        amount is the meter's own number and no rider reaches it. `salon_bow`
+        is where the Focus term lives and it is not on this card.
+      * DECAY. Untouched: an emptied meter decays from 0 like any other.
+
+    Playable at any value, including 0 -- it reads the HELD meter and never a
+    threshold, which is why neither row carries a `requires` gate. A drain of
+    nothing is a wasted card and the player can see that coming from the
+    meter, exactly as an empty stage is visible to `salon_bow`.
+    """
+    p = state.player
+    if not p.fanfare_cap:                       # not a Fanfare character
+        state.fanfare_drained_this_card = 0
+        return
+    before = p.fanfare
+    drained = resources.readable(p)             # a debt cannot be drained
+    p.fanfare -= drained
+    state.fanfare_drained_this_card = drained
+    resources.note_fanfare_change(state, before)
+    state.emit("fanfare_drained", amount=drained, source=f"card:{card.id}",
+               floor=p.fanfare_floor, total=p.fanfare)
+
+
 def _op_salon_bow(state: CombatState, fx: dict, card: Card) -> None:
     """The on-demand bow (Track D, the D6 probe, 2026-07-28).
 
@@ -3354,6 +3412,10 @@ RUNTIME_COUNT_NAMES = frozenset({
     # played (EB-135, the defect this registry exists for).
     "companions_played_this_combat",
     "swirls_this_turn",
+    # QUARANTINED USE ONLY (R213 B) -- the FURINA REFRAME's drain slice. Same
+    # reason as the two above: the loader validates every count token at LOAD
+    # off this set.
+    "fanfare_drained",
 })
 
 # The one prefix family, exactly as `PREDICATE_PREFIXES` carries its own.
@@ -5238,6 +5300,8 @@ OPS = {
     "gain_fanfare_floor": _op_gain_fanfare_floor,
     "raise_fanfare_cap": _op_raise_fanfare_cap,
     "crash_fanfare": _op_crash_fanfare,
+    # QUARANTINED (R213 B): the Furina reframe's drain, slice two.
+    "drain_fanfare": _op_drain_fanfare,
     "salon_bow": _op_salon_bow,
     "salon_rotate": _op_salon_rotate,
     "salon_perform": _op_salon_perform,
@@ -5394,6 +5458,9 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # the card after an Attack must bank nothing from it.
     state.mi_damage_dealt_this_card = 0
     state.discards_this_card = 0
+    # QUARANTINED (R213 B), on the same line and for the same scoping reason:
+    # the card after a drain must not read the drain's number.
+    state.fanfare_drained_this_card = 0
     state.last_drawn_type = ""
     state.salon_replacements_this_card = 0
     state.detonations_at_card_start = state.detonations_total

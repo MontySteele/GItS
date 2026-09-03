@@ -1255,3 +1255,49 @@
    replaces: proto_mc_nicole_revelation, art_of: proto_mc_nicole_revelation,
    description: "Whenever you play a [gold]Hexerei[/gold] card, deal 6 damage of that card's element to a random enemy.",
    effects: [{op: apply_power, power: mc_ladder_of_ascent, amount: 6, target: self}]}
+
+# THE FURINA REFRAME, SLICE TWO (R220 A; the countersigned packet's sec.6.2
+# row list). Five rows, flag-off and UNRUN. Why each exists, and the three
+# words they print: docs/notes/prototype-surface-provenance.md.
+- {id: proto_fr_salon_debut_named, name: "Salon Début", character: furina,
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: basic,
+   art_of: salon_debut,
+   upgrade: {add: {op: gain_encore, amount: 2}},
+   description: "[gold]Deploy[/gold] Mademoiselle Crabaletta.",
+   effects: [{op: apply_power, power: salon_member, amount: 1, target: self,
+              member: crabaletta}]}
+
+- {id: proto_fr_curtain_call, name: "Curtain Call", character: furina,
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: common, encore_cost: 2,
+   art_of: take_your_bow,
+   upgrade: {encore_cost: -1},
+   description: "[gold]Evoke[/gold] the front [gold]Salon[/gold] member.",
+   effects: [{op: salon_bow, amount: 1}]}
+
+- {id: proto_fr_exit_stage_left, name: "Exit Stage Left", character: furina,
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon, encore_cost: 1,
+   art_of: surintendante_chevalmarin,
+   upgrade: {encore_cost: -1},
+   description: "[gold]Evoke[/gold] Surintendante Chevalmarin, or the front member if she is not on stage.",
+   effects: [{op: salon_bow, amount: 1, member: chevalmarin}]}
+
+- {id: proto_fr_let_the_people_rejoice, name: "Let the People Rejoice", character: furina,
+   authored_by: [claude],
+   register: archon, cost: 2, type: attack, rarity: rare,
+   art_of: let_the_people_rejoice,
+   description: "[gold]Drain[/gold] your [gold]Fanfare[/gold]. Deal {CalculatedDamage:diff()} damage to ALL enemies, plus {ExtraDamage:diff()} per [gold]Fanfare[/gold] drained.",
+   effects: [{op: drain_fanfare},
+             {op: damage, amount_formula: {base: 5, per: 1, count: fanfare_drained},
+              target: all_enemies}]}
+
+- {id: proto_fr_intermission, name: "Intermission", character: furina,
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: rare,
+   art_of: stage_presence,
+   upgrade: {retain: true},
+   description: "[gold]Drain[/gold] your [gold]Fanfare[/gold]. Gain [gold]Block[/gold] equal to the [gold]Fanfare[/gold] drained.",
+   effects: [{op: drain_fanfare},
+             {op: block, amount_formula: {base: 0, per: 1, count: fanfare_drained}}]}

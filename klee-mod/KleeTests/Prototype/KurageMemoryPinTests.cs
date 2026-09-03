@@ -413,24 +413,40 @@ public class KurageMemoryPinTests : System.IDisposable
     [Fact]
     public void The_prototype_roster_survives_a_touch_with_an_empty_model_db()
     {
-        // `EB-194` LOCK (b), the bite-check: ask the roster for a character
-        // while ModelDb holds no prototype models -- exactly the state boot was
-        // in -- and it must not throw, and must not poison itself for the ask
-        // that follows. Before the laziness fix the eager static dictionary
-        // resolved EVERY character's rows in the type initializer, so this threw
-        // TypeInitializationException on the first line and again on the second.
+        // `EB-194` LOCK (b), the bite-check: touch the roster while ModelDb
+        // holds no prototype models -- exactly the state boot was in -- and the
+        // damage must be CONFINED to the character that made the touch, with
+        // the type still usable afterwards. Before the laziness fix the eager
+        // static dictionary resolved EVERY character's rows in the type
+        // initializer, so one premature touch threw
+        // TypeInitializationException, cached it, and permanently disabled the
+        // whole prototype surface for every character for the life of the
+        // process.
+        //
+        // WHAT THIS ASSERTS CHANGED ON 2026-09-02, and the reason is worth
+        // writing down: this used to ask for "furina" and assert NO throw,
+        // which held only because Furina had no rows on the surface -- an
+        // empty `Build` resolves no models. The reframe's slice two gave her
+        // five, so all three characters now resolve models here and the
+        // ordinary `ModelDb.Card<T>()` lookup failure is what a premature
+        // touch gets. That failure was never the bug; the POISONED TYPE was,
+        // and that is what the three asks below pin.
         //
         // This is a HEADLESS test: nothing here builds a card, so ModelDb is
         // empty by construction and no game bring-up is needed.
         var furina = Record.Exception(() => PrototypeCards.For("furina"));
-        Assert.Null(furina);
+        Assert.IsNotType<TypeInitializationException>(furina);
 
         // The type is still usable after the touch above -- a poisoned type
-        // would rethrow its cached TypeInitializationException here.
+        // rethrows its CACHED TypeInitializationException here, whatever the
+        // first ask failed with.
         var again = Record.Exception(() => PrototypeCards.For("furina"));
-        Assert.Null(again);
+        Assert.IsNotType<TypeInitializationException>(again);
+        Assert.Equal(furina?.GetType(), again?.GetType());
 
-        // An unknown character is empty, not a throw.
+        // ... and a character that needs no model at all still answers, which
+        // is the confinement half: one character's premature touch does not
+        // take the surface down for the others.
         Assert.Empty(PrototypeCards.For("nobody"));
     }
 

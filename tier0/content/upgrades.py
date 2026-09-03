@@ -94,8 +94,16 @@ SUFFIX = "+"
 # AND COST ONLY -- never the row's `description`, which the sim strips at load
 # (loader, EB-215) and therefore cannot see. That is the whole reason the rule
 # is written in terms of ops rather than of printed text.
+#
+# FIVE ARMS, NOT FOUR (2026-09-02). `proto_fr_` is the Furina reframe, which is
+# an arm on exactly the terms the other four are -- its own compile property,
+# its own switch class, its own slice packet whose sec.1 says no number in it
+# is a claim -- so the argument above applies to it unchanged. It is listed
+# rather than left out because the alternative is five rows whose campfire
+# hands the card back, which is `EB-277` verbatim, and inventing five
+# per-row deltas here would be a Balance-stage ruling written by a build.
 PROTOTYPE_DEFAULT_PREFIXES = ("proto_ko_", "proto_kk_", "proto_mc_",
-                              "proto_mi_")
+                              "proto_mi_", "proto_fr_")
 
 #: The rule, as the `EB-283` row states it, named rather than buried in the
 #: walk below.
