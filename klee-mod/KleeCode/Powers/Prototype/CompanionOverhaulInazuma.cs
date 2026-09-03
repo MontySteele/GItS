@@ -393,8 +393,23 @@ public sealed class SanctifyingRingPower : PowerModel, ILocalizationProvider
 /// question a single pool cannot answer (R212's one-way rule). The only
 /// difference is the payout -- Block instead of an aura on the attacker.
 ///
-/// THE NEW BLOCK IS NOT MARKED. The card marks what IT gave you; marking the 3
-/// as well would make one play a shield that thickens for the rest of the fight.
+/// `EB-353`. THE BLOCK THE RIDER PAYS IS MARKED TOO, and that is what makes
+/// the rider fire ONCE PER ABSORPTION rather than once per barrier. The card
+/// says "WHENEVER this Block absorbs damage", and a three-hit attack is three
+/// absorptions; with the payout unmarked the mark was spent whole by the first
+/// hit and the barrier paid exactly once, for any attack, forever. The blind
+/// act-2 seat measured it three times and got the same 9 every time -- 18
+/// incoming / 9 taken, 9 incoming / 0 taken, 21 incoming / 12 taken -- and
+/// wrote "Thoma is a 9-Block card that prints 6 and implies more"
+/// (`klee round 8, opus-act2.md`, finding 4). Per absorption the same 7x3
+/// absorbs 6 + 3 + 3 = 12.
+///
+/// IT IS NOT A SHIELD THAT THICKENS FOR THE FIGHT, which is what the old note
+/// here feared. The mark carries no Block of its own: it is bounded by the
+/// pool through <see cref="BlockMark.Left"/>, and the pool is cleared at the
+/// player's turn start, where <see cref="BlockMark.ClearIfSpent"/> removes a
+/// mark with nothing behind it. So the barrier lives exactly one enemy turn
+/// per play, which is the card's own price.
 ///
 /// `EB-337`. THE LINE USED TO LIE, AND THIS IS THE ROW THE SEAT FILED IT ON.
 /// The blind seat carried "Blazing Barrier 6 -- 6 Block left" through two
@@ -414,10 +429,23 @@ public sealed class BlazingBarrierPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Blazing Barrier"),
+        // THE STATIC (compendium) ROW CARRIES NO VAR TOKEN -- `EB-353`.
+        // `PowerModel.HoverTips` takes the smart branch only when
+        // `HasSmartDescription && IsMutable`, and `DynamicVars.AddTo` is
+        // called on THAT branch alone; the static branch binds the game's own
+        // three dumb variables and nothing else. So `{Left}` written here was
+        // never bound, and the seat read the placeholder itself off the buff
+        // list: "Blazing Barrier 6 (buff) -- {Left} Block left."
+        // (`klee round 8, opus-act2.md`). The same split, for the same
+        // reason, as `SalonPowers`' `{Slots}`.
         ("description",
+            "Marks your [gold]Block[/gold]. When it absorbs damage, gain "
+          + $"[blue]{CompanionOverhaulLaw.BlazingBarrierBlock}[/blue] "
+          + "[gold]Block[/gold], marked too."),
+        ("smartDescription",
             "[blue]{Left}[/blue] [gold]Block[/gold] left. When it absorbs "
           + $"damage, gain [blue]{CompanionOverhaulLaw.BlazingBarrierBlock}[/blue] "
-          + "[gold]Block[/gold]."),
+          + "[gold]Block[/gold], marked too."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -443,28 +471,25 @@ public sealed class BlazingBarrierPower : PowerModel, ILocalizationProvider
 
     /// <summary>The hit is about to be absorbed. Same arithmetic as the paws,
     /// off the same standing Block, so a board carrying both spends both marks
-    /// against the same absorption.</summary>
+    /// against the same absorption -- and `EB-353` means the paws' arithmetic
+    /// is now literally the same call, with the barrier's payout as its one
+    /// argument. <see cref="BlockMark.Absorb"/> owns it; this owns the
+    /// commands, which is the split the paws' own note already made.</summary>
     internal async Task Thicken(PlayerChoiceContext choiceContext,
                                 decimal amount)
     {
-        var standing = (int)Owner.Block;
-        var mark = System.Math.Min((int)Amount, standing);
-        var absorbed = (int)System.Math.Min(standing, amount);
-        if (mark <= 0 || absorbed <= 0) return;
+        var left = BlockMark.Absorb(
+            (int)Amount, (int)Owner.Block, (int)amount,
+            CompanionOverhaulLaw.BlazingBarrierBlock);
+        if (left == null) return;
         await CreatureCmd.GainBlock(
             Owner, CompanionOverhaulLaw.BlazingBarrierBlock,
             ValueProp.Unpowered, null, fast: true);
-        var left = mark - absorbed;
-        if (left > 0)
-        {
-            await PowerCmd.ModifyAmount(
-                choiceContext, this, left - (int)Amount,
-                applier: Owner, cardSource: null, silent: true);
-        }
-        else
-        {
-            await PowerCmd.Remove(this);
-        }
+        // Never zero: the payout is marked, so the mark always survives its
+        // own absorption and leaves at the turn tick instead of here.
+        await PowerCmd.ModifyAmount(
+            choiceContext, this, left.Value - (int)Amount,
+            applier: Owner, cardSource: null, silent: true);
     }
 }
 
