@@ -8,14 +8,16 @@ using MegaCrit.Sts2.Core.Models.Relics;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// THE THREE WIRING SEAMS, and there are exactly three: what Kokomi OPENS
-/// with, what she OPENS HOLDING, and what she can be OFFERED. Sim twins:
-/// <c>tier0.content.loader._starter_ids</c> and
+/// THE FOUR WIRING SEAMS, and there are exactly four: what Kokomi OPENS
+/// with, what she OPENS HOLDING, what she can be OFFERED, and WHICH PAIR OF
+/// BASICS IS HERS when a base-game effect asks the CHARACTER for "your Strike
+/// and your Defend" (<see cref="ArmStarterBasics"/>, the seam `EB-351` had to
+/// add). Sim twins: <c>tier0.content.loader._starter_ids</c> and
 /// <c>tier0.content.loader.pool_replacement</c>, which exist for the same
 /// reason -- both readers of a starter and all five offer surfaces go through
 /// one door each, so the two engines cannot disagree about what a run is. (The
-/// relic has no sim twin, because tier 0.5 gives no character a starting relic
-/// it did not draft.)
+/// relic seams have no sim twin, because tier 0.5 gives no character a starting
+/// relic it did not draft and models nothing that grants a basic.)
 ///
 /// WHY THE STARTER IS A REPLACEMENT AND NOT A SUBSTITUTION. The Kurage's-memory
 /// arm swaps one of the twelve slots and leaves eleven standing, because its
@@ -101,6 +103,18 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkKuragesOath>(),
         ModelDb.Card<ProtoKkSlackWater>(),
     };
+
+    /// <summary>
+    /// THE PAIR ABOVE, NAMED ONCE MORE FOR THE FOURTH SEAM (`EB-351`). Klee's
+    /// twin, <c>KleeOverhaulRoster.StarterStrike</c>, carries the argument for
+    /// why the pair is stated a second time instead of being factored out of
+    /// <see cref="StartingDeck"/>; the seam itself is
+    /// <see cref="ArmStarterBasics"/>.
+    /// </summary>
+    internal static CardModel StarterStrike() => ModelDb.Card<StrikeSilent>();
+
+    /// <summary>The Defend half of <see cref="StarterStrike"/>'s pair.</summary>
+    internal static CardModel StarterDefend() => ModelDb.Card<DefendSilent>();
 
     /// <summary>
     /// Kokomi's WHOLE offerable pool under the arm: the slice's 28 rows and

@@ -62,10 +62,10 @@ public class KleeOverhaulRuleTests
     }
 
     [Fact]
-    public void The_two_wiring_seams_read_the_flag_and_nothing_else()
+    public void The_three_wiring_seams_read_the_flag_and_nothing_else()
     {
         // FLAG OFF IS BYTE-IDENTICAL, pinned where it is decided rather than
-        // asserted in prose. Both seams are one `if` on the same property, so
+        // asserted in prose. Each seam is one `if` on the same property, so
         // with the arm off `Klee.StartingDeck` falls through to the template
         // the Sparks arm owns and `KleeCardPool.FilterThroughEpochs` falls
         // through to the shipped off-pool filter.
@@ -78,6 +78,15 @@ public class KleeOverhaulRuleTests
             .GetMethod("FilterThroughEpochs", HeadlessGame.All)!;
         Assert.Contains("KleeOverhaul.get_Enabled", Il.Calls(filter));
         Assert.Contains("KleeOverhaulRoster.OfferablePool", Il.Calls(filter));
+
+        // THE THIRD, ADDED BY `EB-351`: which pair of basics is hers when a
+        // base-game effect asks the CHARACTER rather than reading the deck.
+        // Large Capsule reads `CardPool.AllCards`, which the second seam is
+        // never applied to, so it was handing an arm run her two SHIPPED
+        // basics. `ArmStarterBasicsTests` holds the rest of it.
+        var basics = Il.Calls(Il.Method("ArmStarterBasics", "StrikeFor"));
+        Assert.Contains("KleeOverhaul.get_Enabled", basics);
+        Assert.Contains("KleeOverhaulRoster.StarterStrike", basics);
     }
 
     [Fact]

@@ -169,7 +169,42 @@ public static class KokomiPlan
     /// disagree about words; there is one, and it is C#.
     /// </summary>
     public readonly record struct CarriedOutPlan(
-        string Card, int? Number, string Line);
+        string Card, int? Number, string Line,
+        IReadOnlyList<MovedOn>? Moved, bool OnPlay);
+
+    /// <summary>
+    /// HOW MUCH THE BOARD ACTUALLY MOVED, on one creature, during one Plan
+    /// (`EB-329`).
+    ///
+    /// <see cref="CarriedOutPlan.Number"/> IS NOT THIS NUMBER AND WAS NEVER
+    /// MEANT TO BE. It is what the Plan's FIRST clause produced -- the right
+    /// thing for the bubble over the jellyfish, which has room for one word
+    /// and one figure -- and three seats read it as the board. On a Plan that
+    /// applies a debuff the two are simply different quantities: round-5's
+    /// `Exposed Flank, 2` is TWO STACKS OF VULNERABLE, and the HP that moved
+    /// on that beat was the Tamakushi Casket's answering strike, 2 raw and 3
+    /// against the Vulnerable it had just applied. `Feint+, 19` agreed with
+    /// the board only because a damage clause's own landed number happens to
+    /// be the damage.
+    ///
+    /// SO THIS IS MEASURED, NOT COMPUTED. The HP of every enemy is read
+    /// before the Plan's clauses run and again after, and the difference is
+    /// what a player watched happen -- which folds in the Casket's procs, an
+    /// aura's reaction, the target's Vulnerable and anything a future card
+    /// adds to the same beat, without this file knowing about any of them.
+    /// `EB-317`'s own header said the missing numbers were "still on screen
+    /// over its own enemy, drawn by the engine"; a blind page has no screen,
+    /// so it gets the subtraction instead.
+    ///
+    /// <paramref name="CombatId"/> IS THE HANDLE AND <paramref name="Target"/>
+    /// IS THE FALLBACK. The page numbers repeated enemies itself and keeps
+    /// those numbers for the fight (`blindplay_faces._enemy_names`), so it
+    /// resolves the id to the name a reader has been using; a body that DIED
+    /// on this beat is off the board the next screen sends and keeps the name
+    /// recorded here.
+    /// </summary>
+    public readonly record struct MovedOn(
+        string Target, string CombatId, int Amount, bool Dead);
 
     private static object? _combat;
     private static readonly Dictionary<Player, List<Entry>> _queues = new();
@@ -311,7 +346,11 @@ public static class KokomiPlan
 
         if (kokomi.Powers.OfType<PlansAlsoNowPower>().Any())
         {
-            await ResolveEntry(choiceContext, kokomi, entry);
+            // `EB-329`: ON PLAY, and it is filed as such. This resolution
+            // happens in the middle of the turn that wrote it, so a page that
+            // heads it "carried out at the start of this turn" is stating the
+            // one thing about it a reader cannot check any other way.
+            await ResolveNow(choiceContext, kokomi, entry);
         }
     }
 
@@ -495,8 +534,26 @@ public static class KokomiPlan
         int before = queue.Count;
         queue.RemoveAt(0);
         await Sync(choiceContext, kokomi, "rule:carried_out_now", before);
-        await ResolveEntry(choiceContext, kokomi, front);
+        // `EB-329`: Change of Plans is one of the two mid-turn doors, and its
+        // card says so in as many words -- "carries out your front Plan NOW".
+        await ResolveNow(choiceContext, kokomi, front);
     }
+
+    /// <summary>
+    /// A PLAN CARRIED OUT IN THE MIDDLE OF A TURN (`EB-329`).
+    ///
+    /// A NAMED METHOD FOR A SINGLE ARGUMENT, and the reason is that the
+    /// argument is the whole distinction: the two mid-turn doors -- Change of
+    /// Plans and The Moon Overlooks the Waters -- are the ones the page must
+    /// not file under "at the start of this turn", and a bare `true` at two
+    /// call sites is a fact no structural pin can see. Every caller of THIS
+    /// is on-play by construction and <see cref="ResolveAll"/> calls
+    /// <see cref="ResolveEntry"/> straight, so the split is readable from the
+    /// call graph.
+    /// </summary>
+    private static Task ResolveNow(
+        PlayerChoiceContext choiceContext, Creature kokomi, Entry entry) =>
+        ResolveEntry(choiceContext, kokomi, entry, onPlay: true);
 
     /// <summary>
     /// ONE PLAN CARRIED OUT, which is the unit Treatise and Song of Pearls are
@@ -504,15 +561,38 @@ public static class KokomiPlan
     /// ENTRY, and the notify at the bottom is the only place that fires -- so
     /// The Moon Overlooks the Waters' extra resolution pays them too, which is
     /// what "also happen now" says.
+    ///
+    /// <paramref name="onPlay"/> IS WHICH OF THE THREE DOORS THIS CAME
+    /// THROUGH (`EB-329`). The morning queue is one of them and the other two
+    /// -- Change of Plans, The Moon Overlooks the Waters -- happen in the
+    /// middle of a turn, so filing all three under "carried these out at the
+    /// start of this turn" is a false sentence about WHEN. The round-4c seat
+    /// read a War Council that fired on play and was told, on the same
+    /// screen, both that it had already resolved this morning and that it was
+    /// still queued; both were true and neither was legible. The flag rides
+    /// the record so the page can head the two apart.
+    ///
+    /// THE ARGUMENT FOR A PARAMETER RATHER THAN A READ: whether the Moon is
+    /// out is not the question. `ResolveFront` fires one Plan early with no
+    /// Moon anywhere, and a Moon that is out does not make the MORNING's
+    /// Plans on-play. The caller is the only thing that knows, so the caller
+    /// says.
     /// </summary>
     private static async Task ResolveEntry(
-        PlayerChoiceContext choiceContext, Creature kokomi, Entry entry)
+        PlayerChoiceContext choiceContext, Creature kokomi, Entry entry,
+        bool onPlay = false)
     {
         // `EB-317`, the first half of the beat: THE JELLYFISH ACTS BEFORE THE
         // PLAN LANDS. Awaited, so the clause's damage number arrives after the
         // lunge rather than inside it -- the same argument the casket's strike
         // makes one file over.
         await Vfx.KurageBeat.Act(BakeKuragePet.Of(kokomi));
+
+        // `EB-329`: THE BOARD BEFORE. Read here rather than inside the clause
+        // loop because the unit the page prints is ONE PLAN -- War Council is
+        // a hit and a Weak and the Casket's answer to the Weak, and a reader
+        // asking "what did War Council do" wants the whole beat.
+        var before = BoardHp(kokomi);
 
         // THE NUMBER ON THE LINE IS THE FIRST ONE THE PLAN PRODUCED, and
         // "first" is a reading of a card face: War Council prints "Deal 4
@@ -522,13 +602,28 @@ public static class KokomiPlan
         // all (Moon's Reflection's replay, Nereid's window) says its name and
         // no number, which is what the row asks for.
         int? number = null;
-        foreach (var clause in entry.Clauses)
+        try
         {
-            var produced = await ResolveOne(choiceContext, kokomi, clause);
-            number ??= produced;
+            foreach (var clause in entry.Clauses)
+            {
+                var produced = await ResolveOne(choiceContext, kokomi, clause);
+                number ??= produced;
+            }
         }
-
-        Announce(kokomi, entry.Title, number);
+        finally
+        {
+            // `EB-329`, THE OTHER HALF OF THE ROW: A LINE EVEN WHEN THE PLAN'S
+            // KILL ENDS THE FIGHT. The round-5 act-1 seat banked two Plans for
+            // an exactly-lethal morning, and "the next screen was the reward
+            // screen" -- the beat it had spent a turn setting up was the one
+            // beat of the run it never got a receipt for. A combat that ends
+            // inside a clause unwinds this method, so the announcement is on
+            // the unwind path and not after it. Every number the board already
+            // moved is still measured; the clauses that never ran moved
+            // nothing, which is the honest reading.
+            Announce(kokomi, entry.Title, number, Moved(before, kokomi),
+                     onPlay);
+        }
 
         // SANGO ISSHIN's condition, written HERE because this is the one place
         // a Plan is carried out: the morning queue, Change of Plans' early
@@ -559,7 +654,8 @@ public static class KokomiPlan
     /// meter ledger stays off the page, so what a seat is shown here is the
     /// on-screen line and nothing else.
     /// </summary>
-    private static void Announce(Creature kokomi, string card, int? number)
+    private static void Announce(Creature kokomi, string card, int? number,
+                                 IReadOnlyList<MovedOn>? moved, bool onPlay)
     {
         var line = Vfx.KurageBeat.Line(card, number);
         Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi, line);
@@ -571,7 +667,94 @@ public static class KokomiPlan
             said = new List<CarriedOutPlan>();
             _carriedOut[player] = said;
         }
-        said.Add(new CarriedOutPlan(card, number, line));
+        said.Add(new CarriedOutPlan(card, number, line, moved, onPlay));
+    }
+
+    /// <summary>
+    /// EVERY ENEMY'S HP RIGHT NOW, by combat id, with the name to fall back on
+    /// (`EB-329`).
+    ///
+    /// NULL MEANS "COULD NOT ASK", AND EMPTY MEANS "NO ENEMIES", and the two
+    /// are as different here as an absent wire key is from an empty one. A
+    /// combat torn down between the two reads would otherwise subtract the
+    /// whole board from itself and report every enemy dead of the Plan --
+    /// a fabricated receipt, and the worst outcome this row could have.
+    ///
+    /// `HittableEnemies` AND NOT `Enemies`, and the dead are kept rather than
+    /// filtered: a body that dies inside the Plan has to be in the BEFORE map
+    /// or its death is a hit nothing recorded, and one already dead when the
+    /// Plan starts simply moves zero and drops out of the difference on its
+    /// own. Nothing here throws -- a state read never does.
+    /// </summary>
+    private static Dictionary<string, (string Name, int Hp)>? BoardHp(
+        Creature? kokomi)
+    {
+        var combat = kokomi?.CombatState;
+        if (combat == null) return null;
+        var board = new Dictionary<string, (string, int)>();
+        foreach (var enemy in combat.HittableEnemies.ToList())
+        {
+            if (enemy == null) continue;
+            var id = enemy.CombatId.ToString();
+            if (string.IsNullOrEmpty(id)) continue;
+            board[id!] = (EnemyName(enemy), (int)enemy.CurrentHp);
+        }
+        return board;
+    }
+
+    /// <summary>
+    /// THE SUBTRACTION: what each enemy lost between the two reads, or NULL
+    /// where either read could not be taken.
+    ///
+    /// ONLY THE ROWS THAT MOVED. An enemy the Plan never touched is not a
+    /// fact about the Plan, and a morning of four Plans against four
+    /// Gardeners would otherwise print sixteen rows to say twelve times that
+    /// nothing happened. An empty LIST is therefore a real answer -- the Plan
+    /// drew cards, or gave Block, and moved no enemy's HP -- which is exactly
+    /// what a morning has to say for its arithmetic to close.
+    ///
+    /// A NEGATIVE DELTA IS DROPPED rather than printed as a heal. Nothing in
+    /// the arm heals an enemy today; if something does, "the board moved -3"
+    /// is a sentence this row has not been ruled on and inventing one here
+    /// would be worse than the silence the seat already reported.
+    ///
+    /// AND DEATH IS A FIELD. The page cannot infer it -- an enemy at 0 is off
+    /// the next board entirely, so "not in the enemy list" is as true of a
+    /// creature that died to this Plan as of one that died three turns ago.
+    /// </summary>
+    private static IReadOnlyList<MovedOn>? Moved(
+        Dictionary<string, (string Name, int Hp)>? before, Creature? kokomi)
+    {
+        var after = BoardHp(kokomi);
+        if (before == null || after == null) return null;
+        var rows = new List<MovedOn>();
+        foreach (var pair in before)
+        {
+            var was = pair.Value.Hp;
+            // A creature MISSING from the after-read has left the board, and
+            // the honest reading of that is "it took everything it had left".
+            var now = after.TryGetValue(pair.Key, out var seen) ? seen.Hp : 0;
+            var lost = was - now;
+            if (lost <= 0) continue;
+            rows.Add(new MovedOn(pair.Value.Name, pair.Key, lost, now <= 0));
+        }
+        return rows;
+    }
+
+    /// <summary>The enemy's printed title, or an empty string where the game
+    /// will not answer. A state read must never throw
+    /// (<c>Diagnostics.PlayTelemetry.NameOf</c> takes the same posture), and
+    /// the page has the combat id to name the creature with anyway.</summary>
+    private static string EnemyName(Creature enemy)
+    {
+        try
+        {
+            return enemy.Monster?.Title.ToString() ?? "";
+        }
+        catch (System.Exception)
+        {
+            return "";
+        }
     }
 
     /// <summary>
@@ -822,15 +1005,29 @@ public static class KokomiPlan
         await CardCmd.AutoPlay(choiceContext, copy, FrontEnemy(kokomi));
     }
 
-    /// One carried-out Plan on the wire (`EB-317`).
+    /// One carried-out Plan on the wire (`EB-317`, widened by `EB-329`).
     ///
     /// A NAMED METHOD RATHER THAN A LAMBDA INSIDE <see cref="Snapshot"/>, and
-    /// the reason is the pin: these three key names are the contract with
+    /// the reason is the pin: these key names are the contract with
     /// `understudy/blindplay.py`, and the only way a headless test can read
     /// them is <c>Il.Strings</c> over the method that holds them. A lambda
     /// compiles into a display class whose name a pin cannot ask for, so the
     /// literals would sit somewhere no test could see -- which is how a
     /// renamed key becomes a silent hole on a seat's page.
+    ///
+    /// `moved` AND `on_play` ARE `EB-329`'s TWO. The first is the board's own
+    /// answer -- what each enemy lost across this Plan, measured rather than
+    /// read off a clause -- and the second is which door the Plan came
+    /// through, so the page can head a mid-turn firing apart from the
+    /// morning's.
+    ///
+    /// `moved` KEEPS THE SNAPSHOT'S THREE-STATE DISCIPLINE, one level down.
+    /// NULL is "this beat could not be measured" (a combat torn down between
+    /// the two reads); an EMPTY LIST is "measured, and no enemy lost HP",
+    /// which is the true and useful receipt for a Draw or a Block Plan. The
+    /// page reads exactly that split -- `blindplay._carried_out_row`'s
+    /// `board_read` -- and prints nothing at all for the first, because a
+    /// page that said "nothing moved" there would be inventing a board.
     /// </summary>
     private static object? CarriedOutRow(CarriedOutPlan said) =>
         new Dictionary<string, object?>
@@ -838,6 +1035,22 @@ public static class KokomiPlan
             ["card"] = said.Card,
             ["number"] = said.Number,
             ["line"] = said.Line,
+            ["on_play"] = said.OnPlay,
+            ["moved"] = said.Moved?.Select(MovedRow).ToList(),
+        };
+
+    /// One enemy's share of one Plan, on the wire (`EB-329`).
+    ///
+    /// A NAMED METHOD FOR <see cref="CarriedOutRow"/>'s OWN REASON: these
+    /// four keys are read by `understudy/blindplay._moved_row` and a pin has
+    /// to be able to see the literals.
+    private static object? MovedRow(MovedOn moved) =>
+        new Dictionary<string, object?>
+        {
+            ["target"] = moved.Target,
+            ["combat_id"] = moved.CombatId,
+            ["amount"] = moved.Amount,
+            ["dead"] = moved.Dead,
         };
 
     /// <summary>

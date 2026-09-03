@@ -29,9 +29,11 @@ namespace KleeMod.Powers;
 /// (<c>SparkPower.BaseRuleActive</c>) is a <c>const</c> because that arm has
 /// exactly one shape per build. This one does not: it must COEXIST with the
 /// Sparks arm, which also rewrites Klee's starter, and a dev build compiles
-/// both. So the arm is a runtime read at the two wiring seams
-/// (<c>Klee.StartingDeck</c> and <c>KleeCardPool.FilterThroughEpochs</c>), and
-/// it wins where they overlap -- see <see cref="KleeOverhaulRoster"/>.
+/// both. So the arm is a runtime read at the three wiring seams
+/// (<c>Klee.StartingDeck</c>, <c>KleeCardPool.FilterThroughEpochs</c> and
+/// <see cref="ArmStarterBasics"/>, which `EB-351` added when a relic that asks
+/// the CHARACTER for its basics turned out to read neither of the first two),
+/// and it wins where they overlap -- see <see cref="KleeOverhaulRoster"/>.
 ///
 /// FLAG OFF IS BYTE-IDENTICAL. Nothing reads a proto overhaul row, no card
 /// places a <see cref="ProtoBombPower"/>, and the shipped <c>BombPower</c> is

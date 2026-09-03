@@ -18,7 +18,7 @@ from understudy.blindplay_board import (_bundle_cards, _combat,
                                         _proceed_option, _relic_options,
                                         _rest_options, _reward_items,
                                         _screen_cards, _selected_bundle,
-                                        upgrade_deck_floor)
+                                        last_morning, upgrade_deck_floor)
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_options)
@@ -286,6 +286,16 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         if any(i["enabled"] for i in obs["items"]):
             obs["commands"].append('choose "<reward>"')
         obs["commands"].append("proceed")
+        # `EB-329`. THE ONE MORNING NO BATTLE SCREEN IS EVER DRAWN FOR. A
+        # Plan whose kill ends the fight resolves and the game goes straight
+        # here, so the round-5 act-1 seat -- which banked an exactly lethal
+        # morning and wrote "the next screen was the reward screen" -- never
+        # saw the only beat it had spent a whole turn setting up.
+        # `KokomiPlan.Snapshot` reads static per-player records and touches no
+        # combat, so the bridge now sends them on this screen too and the
+        # receipt lands here. `None` -- and so printed nowhere -- on every
+        # reward screen of a build without the rule.
+        obs["last_morning"] = last_morning(state)
     elif st in ("treasure", "relic_select"):
         obs["screen"] = st
         obs["items"] = [_named_option(r) for r in _relic_options(state)]

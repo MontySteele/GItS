@@ -41,8 +41,10 @@
        under Powers/Prototype/** and Cards/Prototype/**, which the block below
        removes from a release build, so this property compiles nothing new
        and cannot reach a release build even if somebody passes it alone. All
-       it moves is KleeOverhaul.Enabled's default, which the two wiring seams
-       (Klee.StartingDeck and KleeCardPool.FilterThroughEpochs) read at
+       it moves is KleeOverhaul.Enabled's default, which the three wiring seams
+       (Klee.StartingDeck, KleeCardPool.FilterThroughEpochs and
+       ArmStarterBasics, the answer a base-game relic gets when it asks the
+       CHARACTER for its Strike and Defend, EB-351) read at
        runtime. The rules engine compiles either way on purpose: the headless
        pins must exercise the rules AND assert the flag-off wiring in ONE
        build, exactly as KleeTests.csproj already argues for PROTOTYPE_CARDS.
@@ -91,9 +93,11 @@
        Cards/Prototype/**, which the block below removes from a release build,
        so this property compiles nothing new and cannot reach a release build
        even if somebody passes it alone. All it moves is
-       KokomiOverhaul.Enabled's default, which the four wiring seams read at
+       KokomiOverhaul.Enabled's default, which the five wiring seams read at
        runtime (Kokomi.StartingDeck, Kokomi.StartingRelics,
-       KokomiCardPool.FilterThroughEpochs and the shipped Kokomi funnel's
+       KokomiCardPool.FilterThroughEpochs, ArmStarterBasics (the answer a
+       base-game relic gets when it asks the CHARACTER for its Strike and
+       Defend, EB-351) and the shipped Kokomi funnel's
        three off-switches). The rules engine compiles either way on purpose:
        the headless pins must exercise the rules AND assert the flag-off
        wiring in ONE build, exactly as KleeTests.csproj already argues for

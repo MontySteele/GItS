@@ -289,9 +289,16 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.
-            "On the [gold]Bake-Kurage[/gold], paid now; the [gold]Plan[/gold] ",
-            "lands first thing next turn on the front enemy. Enemy ",
-            "[gold]Vulnerable[/gold] raises it; your [gold]Weak[/gold] does ",
+            #
+            # `EB-329` REWROTE THE AIM CLAUSE. "On the front enemy" was the
+            # whole of it and it was false for every Plan that says ALL --
+            # including the starter Kurage's Oath -- so the clause now defers
+            # to the face, which was right all along. "First thing" and
+            # "raises it" paid for the room: 144 characters with them, 132
+            # without, against a ceiling of 135 and no exception taken.
+            "On the [gold]Bake-Kurage[/gold], paid now; lands next turn on ",
+            "the front enemy, or ALL if it says so. Enemy ",
+            "[gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] does ",
             "not.",
             "heal N HP, never above the HP you entered ",
             # Furina, furina-reframe-2026-08-29.md sec.4.2 / sec.4.4 / sec.4.6,
