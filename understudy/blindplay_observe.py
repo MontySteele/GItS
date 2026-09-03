@@ -356,5 +356,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     # observation and the blindness assertion killed the session on a screen
     # that had leaked nothing. Both are screen vocabulary: neither names a
     # card, a role or a ruling, which is the test the exemption exists for.
-    qa_packet.assert_blind(obs, allow={st, obs["screen"]})
+    # A select screen carries a THIRD name: the wire's `screen_type` for the
+    # picker (`simple_select`, `transform`, `upgrade`), kept on
+    # `select_kind` because the transform branch above reads it. It is
+    # screen vocabulary by the same test, and a live "Room Full of Cheese"
+    # picker (2026-09-03) bricked a seat when it was not exempt: every
+    # `observe` and every `act` recomputed the leak and refused.
+    allow = {st, obs["screen"]}
+    if obs.get("select_kind"):
+        allow.add(obs["select_kind"])
+    qa_packet.assert_blind(obs, allow=allow)
     return obs

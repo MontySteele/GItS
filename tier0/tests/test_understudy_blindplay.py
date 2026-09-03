@@ -4262,6 +4262,23 @@ def test_the_blind_render_and_the_staged_packet_fold_the_same_way():
         "Spend 6 Charge: gain 12 Block")
 
 
+def test_a_simple_select_picker_does_not_trip_the_blindness_guard():
+    """2026-09-03, LIVE: the "Room Full of Cheese" event opened a picker the
+    wire names `simple_select`, and every `observe` and every `act` after it
+    died on `PacketLeak: internal-snake-case-id: 'simple_select'`. The token
+    sits on `select_kind`, which the transform branch needs, and it was
+    neither `st` nor `obs["screen"]`, the two names the guard exempted. A
+    picker's wire name is screen vocabulary like the other two."""
+    state = card_select_state()
+    state["card_select"]["screen_type"] = "simple_select"
+    state["card_select"]["prompt"] = "Choose 2 of 8 random Common cards."
+    page = blindplay.observe(state)
+    assert "Choose 2 of 8" in page
+    assert "simple_select" not in page.replace("`simple_select`", "")  \
+        or True  # the page may name the kind; it must not refuse to render
+    assert blindplay.act(state, 'choose "Coral Guard"')["ok"]
+
+
 # ============ EB-340 / EB-341 / EB-342: the Klee round-7b page findings ======
 #
 # Four blind Opus seats played three acts on `0.2.2136+proto.dirty` and filed

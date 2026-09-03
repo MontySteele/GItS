@@ -43,6 +43,7 @@
     "proto_kk_undertow",
     "proto_kk_vanguard",
     "proto_kk_war_council",
+    "proto_ko_alices_introduction_magic",
     "proto_ko_alices_recipe",
     "proto_ko_ammo_scavenging",
     "proto_ko_bang_bang",
@@ -51,6 +52,7 @@
     "proto_ko_catalytic_converter",
     "proto_ko_chain_fuse",
     "proto_ko_chained_reactions",
+    "proto_ko_coven_errand",
     "proto_ko_dig_in",
     "proto_ko_explosives_workshop",
     "proto_ko_fish_flavored_bait",
@@ -73,6 +75,7 @@
     "proto_ko_sugar_rush",
     "proto_ko_the_big_one",
     "proto_ko_tinder_toss",
+    "proto_ko_witches_circle",
     "proto_kurages_oath_memory",
     "proto_mc_albedo_solar_isotoma",
     "proto_mc_albedo_tectonic_tide",
@@ -203,6 +206,7 @@
     "proto_kk_undertow": "kokomi",
     "proto_kk_vanguard": "kokomi",
     "proto_kk_war_council": "kokomi",
+    "proto_ko_alices_introduction_magic": "klee",
     "proto_ko_alices_recipe": "klee",
     "proto_ko_ammo_scavenging": "klee",
     "proto_ko_bang_bang": "klee",
@@ -211,6 +215,7 @@
     "proto_ko_catalytic_converter": "klee",
     "proto_ko_chain_fuse": "klee",
     "proto_ko_chained_reactions": "klee",
+    "proto_ko_coven_errand": "klee",
     "proto_ko_dig_in": "klee",
     "proto_ko_explosives_workshop": "klee",
     "proto_ko_fish_flavored_bait": "klee",
@@ -233,6 +238,7 @@
     "proto_ko_sugar_rush": "klee",
     "proto_ko_the_big_one": "klee",
     "proto_ko_tinder_toss": "klee",
+    "proto_ko_witches_circle": "klee",
     "proto_kurages_oath_memory": "kokomi",
     "proto_mc_albedo_solar_isotoma": "klee",
     "proto_mc_albedo_tectonic_tide": "klee",
@@ -460,6 +466,9 @@
     "proto_kk_war_council": {
       "plan_damage": 3
     },
+    "proto_ko_alices_introduction_magic": {
+      "retain": true
+    },
     "proto_ko_alices_recipe": {
       "cost": -1
     },
@@ -484,6 +493,9 @@
     },
     "proto_ko_chained_reactions": {
       "power_amount": 1
+    },
+    "proto_ko_coven_errand": {
+      "bomb_size": 2
     },
     "proto_ko_dig_in": {
       "block": 3
@@ -552,6 +564,9 @@
     },
     "proto_ko_tinder_toss": {
       "damage": 2
+    },
+    "proto_ko_witches_circle": {
+      "power_amount": 2
     },
     "proto_kurages_oath_memory": {
       "kurage_ward": 2

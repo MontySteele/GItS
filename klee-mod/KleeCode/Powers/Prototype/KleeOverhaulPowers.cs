@@ -5,6 +5,7 @@ using BaseLib.Abstracts;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
@@ -104,6 +105,65 @@ public sealed class ChainedReactionsPower
 
         await ProtoBombPower.Place(choiceContext, dest, Amount, isMine: false,
                                    payloadMineAll: 0, applier, cardSource: null);
+    }
+}
+
+/// <summary>
+/// Witches' Circle (R244): "Whenever you play a Hexerei card, place a Bomb 3
+/// on a random enemy."
+///
+/// CHAINED REACTIONS' SHAPE WITH A RARER TRIGGER, which is why the ruled packet
+/// files it one rarity down. The stack is the Bomb SIZE, so a second copy is a
+/// second Bomb per witch, and the printed number is the row's -- which is what
+/// lets its declared <c>power_amount</c> delta move it.
+///
+/// DEAD ALONE, AND THAT IS THE CARD. The packet's pick 2 was taken at its
+/// default: a deck with no Hexerei card in it never sets this off, and it is
+/// drafted only by a deck that already holds witches. Klee is herself Hexerei
+/// (the brief's sec.7.4), so "two witches make a circle" is her plus any one
+/// Hexerei card -- and Alice's Introduction Magic can make a whole hand one.
+///
+/// IT HOOKS ITSELF, like <see cref="LadderOfAscentPower"/> and unlike this
+/// arm's explosion listeners: <c>AfterCardPlayed</c> reaches a power the card
+/// just applied, and asking the mark's one reader
+/// (<c>CompanionHexerei.IsHexerei</c>) is what lets the this-turn window widen
+/// the family without this power learning about it.
+///
+/// THE BOMB IS PLACED THROUGH THE SAME <c>Place</c> every other source uses, so
+/// it registers, can be set off and can jump -- and, being a plain Bomb rather
+/// than a Mine, it cannot answer an attack by itself. Nothing fires by itself
+/// (rule 7): this places, it does not detonate. Sim twin:
+/// <c>klee_overhaul.note_hexerei_played</c>.
+/// </summary>
+public sealed class WitchesCirclePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Witches' Circle"),
+        ("description",
+            "Whenever you play a [gold]Hexerei[/gold] card, place a "
+          + "[gold]Bomb[/gold] [blue]{Amount}[/blue] on a random enemy."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (!KleeOverhaul.Enabled || Owner == null) return;
+        if (cardPlay.Card?.Owner?.Creature != Owner) return;   // co-op: yours
+        if (!CompanionHexerei.IsHexerei(cardPlay.Card)) return;
+        var combat = Owner.CombatState;
+        if (combat == null) return;
+
+        var candidates = combat.HittableEnemies.Where(e => !e.IsDead).ToList();
+        if (candidates.Count == 0) return;
+        var dest = combat.RunState.Rng.CombatTargets.NextItem(candidates);
+        if (dest == null) return;
+
+        await ProtoBombPower.Place(choiceContext, dest, Amount, isMine: false,
+                                   payloadMineAll: 0, Owner, cardSource: null);
     }
 }
 
