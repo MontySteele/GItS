@@ -74,9 +74,12 @@ public class KleeOverhaulRoundFourTests
                         + "Pyro damage.", face);
         // `EB-289`: `{Count}`, not `{Amount}` -- see the test below and
         // `ProtoBombPower.Bombs` for why the stack amount could not be it.
-        Assert.Contains(" Bombs here: [blue]{Count}[/blue].", face);
-        Assert.EndsWith(" Each grows at the start of your turn. None goes "
-                        + "off by itself.", face);
+        Assert.Contains(" Bombs here: [blue]{Count}[/blue], ", face);
+        // `EB-361`: rule 1's growth is a CLAUSE on that count now, and rule 3
+        // ends the face -- four sentences is the ceiling and the jump was the
+        // fifth fact three round-10 seats needed and could not read anywhere.
+        Assert.EndsWith(" growing each turn. None goes off by itself."
+                        + " A kill moves them to a survivor.", face);
     }
 
     [Fact]
@@ -255,19 +258,25 @@ public class KleeOverhaulRoundFourTests
     [Fact]
     public void The_bomb_keyword_tip_says_a_second_bomb_joins_the_first()
     {
-        // `EB-287`'s claim, in the words `EB-343` left it. The r3 Opus seat
+        // `EB-287`'s claim, on the tip that carries it now. The r3 Opus seat
         // called the stacking "the single most important interaction in the
-        // deck and I only found it by gambling a card on it", so the word has
-        // to print it. R248 added a fourth rule to the same tip and [USER]
-        // held it to the 135-character ceiling (PR #340), so "Bombs on one
-        // enemy go off together when Set off" is now "goes off only when Set
-        // off, all at once" -- three characters shorter and carrying rule 7's
-        // "only" as well.
-        var printed = string.Concat(Il.Strings(
+        // deck and I only found it by gambling a card on it", so the arm has
+        // to print it. R248 added a fourth rule to the Bomb tip and [USER]
+        // held it to the 135-character ceiling (PR #340), which compressed
+        // "Bombs on one enemy go off together when Set off" to "all at once";
+        // `EB-361` added rule 3's jump to the same 135 characters, and the
+        // clause that paid for it was that one. It is not lost -- `ForSetOff`
+        // states the rule in full and always has ("Every Bomb on the target
+        // goes off first, one at a time"), and the badge counts the pile
+        // ("Bombs here: N"), so the claim is pinned where it is printed.
+        var bomb = string.Concat(Il.Strings(
             typeof(ArmKeywordTips).GetMethod("ForBomb", HeadlessGame.All)!));
+        var setOff = string.Concat(Il.Strings(
+            typeof(ArmKeywordTips).GetMethod("ForSetOff", HeadlessGame.All)!));
 
-        Assert.Contains("goes off only when [gold]Set off[/gold], all at "
-                        + "once.", printed);
+        Assert.DoesNotContain("all at once", bomb);
+        Assert.Contains("Every [gold]Bomb[/gold] on the target goes off "
+                        + "first, one at a time", setOff);
     }
 
     [Fact]

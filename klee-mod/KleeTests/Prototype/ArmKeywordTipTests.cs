@@ -158,13 +158,16 @@ public class ArmKeywordTipTests
         // characters over a ceiling that is the base game's own longest
         // mechanic tip, on the one word a seat reads every turn ([USER], PR
         // #340). All four rules survive the compression, which is what these
-        // read back: rule 1's rate, rule 7 ("only when"), rule 2's "all at
-        // once", and R248's burden.
+        // read back: rule 1's rate, rule 7 ("only when"), R248's burden and,
+        // since `EB-361`, rule 3's jump -- a Bomb whose enemy dies moves to a
+        // survivor, which three round-10 seats met with no wording anywhere.
+        // Rule 2's "all at once" is what those 33 characters cost, and the
+        // `Set off` tip two tests up states it in full.
         Assert.Contains("A charge on an enemy: grows ", printed);
-        Assert.Contains(" a turn, goes off only when [gold]Set off[/gold], "
-                      + "all at once.", printed);
-        Assert.Contains("Its hit takes the enemy's debuffs, not yours.",
+        Assert.Contains(" a turn, goes off only when [gold]Set off[/gold]. ",
                         printed);
+        Assert.Contains("It takes the enemy's debuffs, not yours.", printed);
+        Assert.Contains("Kills move it to a survivor.", printed);
 
         // `EB-89`, read the only way it can be read: the growth rate is NOT a
         // literal anywhere in this method -- the two halves of the sentence are

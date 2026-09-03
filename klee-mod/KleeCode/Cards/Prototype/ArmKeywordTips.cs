@@ -100,14 +100,29 @@ public static class ArmKeywordTips
     /// to the rest of the game cannot be inferred from a total that did not
     /// change, so it is printed where the word is met.
     ///
-    /// IT IS TWO SENTENCES AND IT FITS, which is the point of the rewrite
+    /// IT IS THREE SENTENCES AND IT FITS, which is the point of the rewrite
     /// ([USER], PR #340, the same call as the Plan tip in #335). The four rules
     /// used to be four sentences and 195 characters, over a ceiling that is the
     /// base game's own longest mechanic tip -- and a seat reads this word every
     /// turn. The compression is in the grammar, not in the content: rule 1's
-    /// rate, rule 7, rule 2's "all at once" and R248's burden are all still
-    /// here, and the growth rate is still interpolated so a repricing cannot
-    /// leave the sentence lying (`EB-89`).
+    /// rate, rule 7 and R248's burden are all still here, and the growth rate
+    /// is still interpolated so a repricing cannot leave the sentence lying
+    /// (`EB-89`).
+    ///
+    /// THE LAST SENTENCE IS RULE 3, AND IT IS `EB-361`. A Bomb whose enemy dies
+    /// moves to a survivor at its size, and that rule was on no card, no badge
+    /// and no tip: three round-10 seats met it as a surprise, one of them
+    /// reading a `Bomb 36 / Bombs here: 3` on a Wriggler it had planted 11 on
+    /// and filing it as something the screen contradicted. It is stated as the
+    /// jump code does it (`ProtoBombPower.JumpCharges`): every charge moves,
+    /// Mines included, to a random LIVING enemy, so the word is "a survivor"
+    /// rather than "the next enemy".
+    ///
+    /// WHAT ITS 33 CHARACTERS COST, said plainly because the ceiling is the
+    /// reason: rule 2's "all at once" is gone from this tip and lives on the
+    /// `Set off` tip, which states it in full ("Every Bomb on the target goes
+    /// off first, one at a time"), and "Its hit takes" became "It takes", the
+    /// spelling the static badge face already uses.
     ///
     /// "not yours" RATHER THAN NAMING STRENGTH AND WEAK, and it costs nothing
     /// true: the enemy's debuffs are what DOES move the number, so what is left
@@ -119,8 +134,9 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
             "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
-          + " a turn, goes off only when [gold]Set off[/gold], all at once. "
-          + "Its hit takes the enemy's debuffs, not yours.");
+          + " a turn, goes off only when [gold]Set off[/gold]. "
+          + "It takes the enemy's debuffs, not yours. "
+          + "Kills move it to a survivor.");
 
     /// <summary>Rule 2, and the one [USER] named ("Set Off has no tooltip
     /// text"). The ORDER clause is the load-bearing half: the explosions land

@@ -286,11 +286,17 @@ AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
 ARM_KEYWORDS: dict[str, str] = {
     # "EACH" IS `EB-340`'s, and it stays: the act-1 seat found growth is
     # +{growth} PER BOMB (Bomb 5 + Bomb 8 -> 21, not 17) and no wording said
-    # so. In game the badge carries that fact ("Each grows at the start of
-    # your turn"); the seat page has no badge, so the glossary says it.
+    # so. In game the badge carries that fact ("Bombs here: N, growing each
+    # turn"); the seat page has no badge, so the glossary says it per Bomb.
+    # `EB-361` ADDED THE LAST SENTENCE, in step with `ArmKeywordTips.ForBomb`:
+    # a Bomb whose enemy dies moves to a survivor at its size, and three
+    # round-10 seats met that rule for the first time as a stack they could
+    # not account for ("Bomb 36 / Bombs here: 3" on an enemy they had planted
+    # 11 on). Rule 2's "all at once" left the same sentence to pay for it and
+    # lives on the `Set off` row below, which states it in full.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
-             "only when Set off, all at once. Its hit takes the enemy's "
-             "debuffs, not yours."),
+             "only when Set off. It takes the enemy's debuffs, not yours. "
+             "Kills move it to a survivor."),
     "Set off": ("Every Bomb on the target goes off first, one at a time, "
                 "each a Pyro hit for its size."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
@@ -523,7 +529,7 @@ FROZEN_BOSS_CLAUSE = (" Bosses cannot be Frozen: Hydro plus Cryo is consumed "
 BOSS_ROOM = "boss"
 
 # The number the card's own Bomb tip prints, where a screen carries that tip.
-# `ArmKeywordTips.ForBomb` builds it as "Grows by <n> at the start of your
+# `ArmKeywordTips.ForBomb` builds it as "A charge on an enemy: grows <n> a
 # turn", so this is an exact read of the game's own sentence and never a guess
 # at what a stray numeral near the word Bomb might have meant.
 # `EB-340` reads the rate off the SCREEN's own Bomb tip so the page quotes

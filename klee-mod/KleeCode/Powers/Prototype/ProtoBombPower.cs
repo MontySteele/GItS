@@ -173,11 +173,19 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// through"). So the count is a sentence, the Mine clause appears only
     /// when there is a Mine to talk about, and each modifier term says its own
     /// name.
+    ///
+    /// EB-361: FOUR SENTENCES IS THE CEILING AND RULE 3 IS THE FIFTH FACT, so
+    /// the growth sentence is a clause on the count rather than a sentence of
+    /// its own. Rule 3 -- a Bomb whose enemy dies moves to a survivor -- was on
+    /// no card, badge or tip, and three round-10 seats met it as a surprise:
+    /// one read `Bomb 36 / Bombs here: 3` on an enemy it had planted 11 on and
+    /// filed it as the screen contradicting itself. The badge is where a player
+    /// meets the survivor's stack, so it is where the rule is printed.
     /// </summary>
     private static string Face(bool mines, FoldedMods mods) =>
         "[gold]Set off[/gold] here deals " + PyroTotal + mods.Clause + "."
-      + (mines ? BombsWithMines : Bombs) + GrowthSentence
-      + (mines ? MineClause : NoSelfSentence);
+      + (mines ? BombsWithMines : Bombs)
+      + (mines ? MineClause : NoSelfSentence) + JumpSentence;
 
     /// <summary>The total, with no full stop: a modifier clause may follow it.
     ///
@@ -234,14 +242,25 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// this face now comes from the list the explosions consume, and the stack
     /// amount is left to be what the engine uses it for.
     /// </summary>
-    private const string Bombs = " Bombs here: [blue]{Count}[/blue].";
+    /// `EB-361` FOLDED RULE 1'S GROWTH INTO THIS SENTENCE, and the reason is
+    /// the sentence ceiling rather than taste: rule 3's jump is a fifth fact on
+    /// a face that may print four sentences, so the growth clause rides the
+    /// count it is about. "growing each turn" is the phrasing the Bomb keyword
+    /// tip already uses for the same rule ("grows {BombGrowth} a turn"), which
+    /// is also where the RATE is printed -- the badge has never carried it.
+    private const string Bombs =
+        " Bombs here: [blue]{Count}[/blue], growing each turn.";
 
     private const string BombsWithMines =
         " Bombs here: [blue]{Count}[/blue], including [blue]{Mines}[/blue] "
-      + "[gold]Mine{Mines:plural:|s}[/gold].";
+      + "[gold]Mine{Mines:plural:|s}[/gold], growing each turn.";
 
-    private const string GrowthSentence =
-        " Each grows at the start of your turn.";
+    /// <summary>Rule 3, `EB-361`. A Bomb whose enemy dies moves to a random
+    /// LIVING enemy at its size -- see <see cref="JumpCharges"/>, which is what
+    /// this sentence describes: every charge travels, Mines included, so the
+    /// word is "a survivor" and not "the next enemy". Printed on both branches,
+    /// because a Mine jumps exactly as a plain Bomb does.</summary>
+    private const string JumpSentence = " A kill moves them to a survivor.";
 
     /// <summary>Rule 7 on a pile with no Mine in it. A pile holding a Mine
     /// prints <see cref="MineClause"/> INSTEAD, because "none goes off by

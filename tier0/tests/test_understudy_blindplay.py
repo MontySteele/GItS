@@ -4510,10 +4510,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     anchors = {
         # `EB-343` (R248) rewrote the word: it gained a fourth rule and
         # [USER] held it to the 135-character tip ceiling (PR #340), so
-        # rule 7 is now "goes off only when" and the stacking rule is
-        # "all at once".
+        # rule 7 is now "goes off only when".
+        # `EB-361` added rule 3 -- a Bomb whose enemy dies moves to a
+        # survivor -- and the same ceiling paid for it by dropping rule 2's
+        # "all at once", which the `Set off` row below states in full.
         "Bomb": ["A charge on an enemy", "goes off only when",
-                 "all at once", "takes the enemy's debuffs, not yours"],
+                 "takes the enemy's debuffs, not yours",
+                 "Kills move it to a survivor"],
         "Set off": ["on the target goes off first, one at a",
                     "each a Pyro hit for its size"],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
@@ -5094,13 +5097,13 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
 
     Seen to FAIL: the old sentence carried neither the number nor "each".
 
-    `EB-343` (R248) REWROTE THE TIP THIS SCRAPES, and both of this test's
-    claims survive it. [USER] held the in-game word to its 135-character
-    ceiling, so the tip reads "A charge on an enemy: grows 4 a turn, goes off
-    only when Set off, all at once. Its hit takes the enemy's debuffs, not
-    yours." The glossary keeps "each" on top of it, because the fact that
-    growth is PER BOMB lives on the badge in game and the seat page has no
-    badge.
+    `EB-343` (R248) REWROTE THE TIP THIS SCRAPES and `EB-361` rewrote it
+    again, and both of this test's claims survive both. [USER] held the in-game
+    word to its 135-character ceiling, so the tip reads "A charge on an enemy:
+    grows 4 a turn, goes off only when Set off. It takes the enemy's debuffs,
+    not yours. Kills move it to a survivor." The glossary keeps "each" on top
+    of it, because the fact that growth is PER BOMB lives on the badge in game
+    and the seat page has no badge.
     """
     page = blindplay.observe(keyword_hand_state(["Set off. Place a Bomb 4."]))
     assert (f"- **Bomb** — A charge on an enemy: each grows "
@@ -5110,7 +5113,7 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     # WORD with no tip on it, which is an enemy's badge and a reward row.
     live_tip = blindplay.observe(elemental_hand_state(
         bomb_tip="A charge on an enemy: grows 9 a turn, goes off only when "
-                 "Set off, all at once."))
+                 "Set off."))
     assert "each grows 9 a turn" in live_tip
 
 
