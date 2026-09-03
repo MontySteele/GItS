@@ -72,6 +72,11 @@ def canonical_character(name: str) -> str:
     if key.startswith(_CHARACTER_PREFIX):
         key = key[len(_CHARACTER_PREFIX):]
     key = " ".join(key.replace("-", " ").replace("_", " ").split())
+    # The base game's display names carry an article the option id does not:
+    # the select screen offers `IRONCLAD`, the run reads back `The Ironclad`.
+    # Both are the one character, and the CONTROL round asks by the id.
+    if key.startswith("the "):
+        key = key[4:]
     if not key:
         return ""
     from tier0 import roster
