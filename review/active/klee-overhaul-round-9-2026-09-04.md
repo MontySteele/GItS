@@ -6,7 +6,7 @@ One pick in §6, with a marked default. Everything else is a default, applied
 and disclosed in §5.
 
 Written 2026-09-04. Two Opus seats played one run on lane 2 of the round-9
-build (`0.2.2309+proto`: R250's Splash paying the largest Bomb, `EB-358`'s
+build (`0.2.2309+proto`, Ascension 1: R250's Splash paying the largest Bomb, `EB-358`'s
 stacking answer, the fixes from #344 to #347, all arms on). The run cleared
 act 1 at 12 of 69 HP and died on act-2 floor 22, in the third hallway fight,
 before any Elite, shop, rest site or the boss. The records are
