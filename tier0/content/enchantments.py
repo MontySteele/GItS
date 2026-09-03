@@ -53,6 +53,14 @@ ENGINE_EXTENSIONS = {
     "enchant_first_play_effects": "Sown / Swift -- effects, first play only",
     "enchant_top_of_draw": "Perfect Fit -- a SHUFFLE placement, not a play",
     "enchant_played_this_combat": "the per-instance first-play gate itself",
+    # EB-83, and the one field that landed BEFORE its enchantment rather than
+    # with it: the per-draw hook was built alone in the 2026-08-26 window on
+    # EB-82's admission rule (an engine surface is never invented inline inside
+    # a conversion), sat inert while Wood Carvings was blocked, and is armed by
+    # the Slither row below. `cost_set_this_combat` is the absolute cost that
+    # hook WRITES and is deliberately not listed: it is combat state on the
+    # instance (`EnergyCost.SetThisCombat`), never a rider the CATALOG sets.
+    "on_draw_randomise_cost": "Slither -- the per-draw cost randomiser",
 }
 
 
@@ -149,6 +157,36 @@ def _exhausts(c) -> bool:
     return bool(c.exhaust)
 
 
+def _fixed_cost(c) -> bool:
+    """Slither's target: a card whose cost is a NUMBER (EB-83).
+
+    The game's `Models.Enchantments.Slither.CanEnchant` (sts2.dll v0.111.0)
+    is
+
+        if (base.CanEnchant(card) && !card.Keywords.Contains(
+                CardKeyword.Unplayable)) {
+            return !card.EnergyCost.CostsX;
+        }
+        return false;
+
+    -- two clauses on top of base CanEnchant, and only one of them is a fact
+    tier0 can state. `CostsX` is `cost: X` on a sheet row, and the enchantment
+    is refused there because a randomised cost and an X cost are the same
+    field: writing one erases the other, so the game refuses rather than
+    deciding which wins. Two shipped rows are X-cost (`controlled_demolition`,
+    `fish_blasting`) and both are therefore illegal targets.
+
+    The Unplayable clause has NO tier0 twin and needs none: the base game's
+    own `CanEnchant` already refuses an Unplayable card sitting in the Deck
+    pile, Slither's repeat of it only widens the refusal to the piles a deck
+    event can never reach, and no card in any sheet here carries the keyword
+    (`CardKeyword.Unplayable` appears nowhere in klee-mod). The nearest thing
+    the sim has is `type == "status"`, which `eligible` already refuses for
+    every enchantment.
+    """
+    return str(c.cost) != "X"
+
+
 def _anything(c) -> bool:
     return True
 
@@ -242,42 +280,67 @@ CATALOG: dict[str, Enchantment] = {
         # shuffle, so this is not an Innate (EB-85 divergence 5). The one
         # reading site is state.shuffle_discard_into_draw.
         lambda x: {"enchant_top_of_draw": True}),
+
+    "slither": Enchantment(
+        "slither", "Slither",
+        "Randomizes this card's cost when drawn.",
+        _fixed_cost,
+        # THE TEXT IS THE DECOMPILE'S, not the wiki's, and that is deliberate:
+        # Slither is absent from slaythespire.wiki.gg's Enchantments page
+        # altogether, which is why the gallery entry (dossiers/content/
+        # event-conversion-gallery.md) said this row's citation would have to
+        # come from the binary. `Models.Enchantments.Slither`, sts2.dll
+        # v0.111.0, read 2026-09-02:
+        #
+        #     public override Task AfterCardDrawn(..., CardModel card, bool
+        #                                         fromHandDraw) {
+        #         if (card != base.Card) return Task.CompletedTask;
+        #         if (base.Card.Pile.Type != PileType.Hand)
+        #             return Task.CompletedTask;
+        #         base.Card.EnergyCost.SetThisCombat(NextEnergyCost());
+        #         ...
+        #     private int NextEnergyCost() => ...
+        #         base.Card.Owner.RunState.Rng.CombatEnergyCosts.NextInt(4);
+        #
+        # THE RIDER IS THE ROLL'S EXCLUSIVE BOUND, 4 -- i.e. 0..3 inclusive,
+        # which is `NextInt(4)` verbatim -- and it IGNORES the event amount,
+        # exactly as Sown's 1 Energy does: Wood Carvings grants it with
+        # `CardCmd.Enchant<Slither>(cardModel, 1m)`, but nothing in the class
+        # reads that amount, so a number in the deck-list id would be a
+        # number nothing spends. The hook that consumes this field is
+        # `refpowers.randomise_cost_on_draw`, which carries the game's
+        # in-hand gate and the per-instance identity check with it.
+        lambda x: {"on_draw_randomise_cost": 4}),
 }
 
 # Enchantments the seven events name that this module deliberately does NOT
 # hold, with the engine surface each one would need. House rule: a gap is
 # named, never approximated.
 #
-#   Slither (Wood Carvings) -- "randomises this card's cost when drawn".
-#       The ENGINE half is no longer the blocker: EB-83 built the per-draw
-#       card hook (`Card.on_draw_randomise_cost` / `cost_set_this_combat`,
-#       read in `refpowers.randomise_cost_on_draw`) as unused machinery, and
-#       a CATALOG row for Slither would now be expressible. It stays out
-#       anyway, on this module's own rule: the row exists to serve a granting
-#       event, and Wood Carvings is not converted yet. Its colorless blocker
-#       is RULED -- R184 chose reskin, so Peck and Toric Toughness are
-#       replaced by equivalent-function companion/Teyvat content and LAW's
-#       colorless clause holds. THE ENGINE IS NO LONGER SHORT EITHER: the
-#       Peck half was always expressible (1-cost Attack, 2 damage x3), and
-#       the TORIC TOUGHNESS half -- "Block at the start of your next 2
-#       turns", which `block_next_turn`'s one-shot bank could not say -- now
-#       has `block_at_turn_start`, the duration-scoped repeating Block power
-#       (EB-83, 2026-08-26; atlas tier0-engine §7), also built as unused
-#       machinery. What remains is [USER]'s, not engineering's: the RT window
-#       for the conversion and the S4-G11-pattern name eye-read. Until it
-#       converts no event grants Slither, so this row stays.
-#       An enchantment nobody grants is a name with no caller.
+# THE TABLE IS EMPTY as of EB-83 (2026-09-02), and empty is a RESULT rather
+# than a table nobody filled in. It held exactly one row for the whole of its
+# life -- Slither, the Wood Carvings enchantment -- and that row left because
+# the event converted, which is the only exit this dict has ever had: the
+# module's rule is that a CATALOG row serves a granting event, so an
+# unexpressed name is one an unconverted event would grant. Every enchantment
+# the seven events name is now in CATALOG above.
 #
-#       When it does land it needs a companion row in the parity lint:
-#       tools/lint_enchant_parity.GAME_RULES has no `slither` entry and would
-#       report UNMAPPED, and the card fact its CanEnchant reads is NOT on the
-#       wiki's Enchantments page (Slither is absent from that list) -- the
-#       citation has to come from the decompile.
-UNEXPRESSED = {
-    "slither": ("randomises cost on DRAW -- the engine hook exists (EB-83); "
-                "no event grants it, because the Wood Carvings reskin is "
-                "blocked on Toric Toughness's 2-turn Block power (R184)"),
-}
+# Slither's history, kept because it is the shape of the next gap rather than
+# a fact about this one: the ENGINE half stopped being the blocker on
+# 2026-08-26, when EB-83 built the per-draw card hook
+# (`Card.on_draw_randomise_cost` / `cost_set_this_combat`, read in
+# `refpowers.randomise_cost_on_draw`) as unused machinery. The row still
+# stayed out for six days after that, on this module's own rule, because
+# Wood Carvings was still blocked -- on R184's colorless call, then on the
+# R231 name eye-read, then on the `RT` window. An enchantment nobody grants is
+# a name with no caller, and the engine being ready is not the same fact.
+#
+# A ROW ADDED HERE IN FUTURE owes what Slither's owed and paid: the enchantment
+# the event names, the engine surface it would need, and -- the part that is
+# easy to forget -- a companion row in `tools/lint_enchant_parity.GAME_RULES`
+# on the day it moves into CATALOG, because a CATALOG name with no rule there
+# reports UNMAPPED and a rule there with no CATALOG name reports STALE.
+UNEXPRESSED: dict[str, str] = {}
 
 
 # ---------------------------------------------------------------------------
@@ -343,9 +406,19 @@ def apply(card, name: str, amount: int | None) -> None:
 
     List-valued rider fields APPEND (a card could in principle already carry
     an `enchant_effects` row from the creation-time `enchant:` block);
-    `enchant_damage_mult` multiplies; everything else is a set-or-add by the
-    field's own kind. Deliberately dumb: the whole mechanic is the CATALOG
-    row, and nothing downstream ever asks a card which enchantment it holds.
+    `enchant_damage_mult` multiplies; a field whose current value is `None`
+    is SET, because `None` is this engine's spelling of "this card does not
+    have one of these at all" and there is nothing to add to; everything else
+    is a set-or-add by the field's own kind. Deliberately dumb: the whole
+    mechanic is the CATALOG row, and nothing downstream ever asks a card which
+    enchantment it holds.
+
+    The `None` branch arrived with EB-83's Slither, whose rider writes
+    `on_draw_randomise_cost` -- an ABSOLUTE roll bound (`NextInt(4)`), not a
+    delta. Adding it to a default of `None` raised; adding it to a default of
+    0 would have been worse, because summing two bounds is not what a second
+    bound would mean. Nothing can reach the add branch on such a field anyway:
+    a card holds exactly one enchantment and `decorate` refuses a second.
     """
     for field, value in CATALOG[name].rider(amount).items():
         current = getattr(card, field)
@@ -355,6 +428,8 @@ def apply(card, name: str, amount: int | None) -> None:
             setattr(card, field, value)
         elif field == "enchant_damage_mult":
             card.enchant_damage_mult = current * value
+        elif current is None:
+            setattr(card, field, value)
         else:
             setattr(card, field, current + value)
 

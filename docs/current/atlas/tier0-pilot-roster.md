@@ -56,16 +56,20 @@ In-process (the four doors everything else uses):
   `tier05/runner.py:62` — the R68 single source of truth for plan→pilot; do not
   index `roster.Character.plans` directly.
 
-Live inventory today: 300 cards, 5 character sheets (3 roster + 2 reference),
+Live inventory today: 321 cards, 5 character sheets (3 roster + 2 reference),
 6 encounters, 15 pilot weight sets.
 
 Recipe (recount with `loader._card_index()`, then subtract the side sheet):
-234 personal rows (`docs/klee-cards.yaml` 76, `docs/furina-cards.yaml` 82,
-`docs/kokomi-cards.yaml` 76) + 51 companion rows (17 / 19 / 15) + 29 shared and
+239 personal rows (`docs/klee-cards.yaml` 79, `docs/furina-cards.yaml` 84,
+`docs/kokomi-cards.yaml` 76) + 51 companion rows (17 / 19 / 15) + 31 shared and
 reference rows under `tier0/content/cards/` (curses 10, ironclad_package 6,
-silent 6, ironclad_starter 3, colorless_event 2, tokens 2) = 314. The loader
-index reads **317** — the extra 3 are `ancients.yaml`, acquisition-only.
+silent 6, ironclad_starter 3, colorless_event 4, tokens 2) = 321. The loader
+index reads **324** — the extra 3 are `ancients.yaml`, acquisition-only.
 Kokomi's 62 -> 76 is `EB-69` (R198, 2026-08-23), the ruled 14-card pool fill.
+`colorless_event` went 2 -> 4 at `EB-83` (2026-09-02): Wood Carvings' two
+reskin cards, reachable through that event and through nothing else. The
+personal and headline counts were recounted in the same pass and had drifted on
+their own — this recipe is meant to be re-derived, not trusted.
 
 ## 3. Key invariants
 

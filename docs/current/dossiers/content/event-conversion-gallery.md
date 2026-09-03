@@ -1480,47 +1480,85 @@ Below Merusea Village a pale root of Elynas breaks through the seabed stone, and
 ---
 
 ## - [ ] Wood Carvings
-*Acts: act1 · not in tier05 pool · base text: `docs/sts2-events-harvest.txt`*
+*Acts: act1 · shipped in tier05 pool · base text: `docs/sts2-events-harvest.txt`*
 
-> **FLAG — all three options are now EXPRESSIBLE; the event still does not ship (RE-MEASURED 2026-08-26, EB-83).** The [USER] call is SETTLED: R184 chose **reskin**, so *Peck* and *Toric Toughness* are replaced by equivalent-function Teyvat content and design principles §4.7 holds unamended — no base-game colorless card ships. The engine op that held Torus up is BUILT, so no option is short of a grammar any more. What keeps the event whole in the skip list is now three things, none of them a missing card verb: the one remaining [USER] gate (the `RT` window that stamps content batches in — the `S4-G11` name eye-read is DISCHARGED by R231, 2026-08-30), and the two engineering gaps recorded at the foot of this entry — the event layer's missing `transform_starter_into:` key and the `slither` row `lint_enchant_parity.GAME_RULES` still wants. Both of those remain OPEN and unbuilt as of 2026-08-26.
+> **CONVERTED 2026-09-02 (`EB-83`), and the FLAG is discharged.** All three
+> options ship, exact, in `tier05/content/events.yaml`'s act-1 pool, at
+> `RUNTEMPLATE` **13**. This was the last unconverted event of the `EB-68`
+> sweep, and it took three separate blockers being cleared by three separate
+> pieces of work — none of them this conversion's:
 >
-> - **Bird** (transform a starter into *Peck*) — **BUILDABLE.** Published numbers, re-harvested 2026-08-13 from `slaythespire.wiki.gg` (the same authority as `docs/sts2-events-harvest.txt`, which carries option text only and no card text): 1 cost, colorless **Attack**, rarity Event, *deal 2 damage 3 times* (upgraded: 4 times, and per `tier0/content/cards/colorless_event.yaml`'s standing rule an event card ships with no upgrade path). Expressible today as `{op: damage, amount: 2, times: 3, target: enemy}` — the same shape `exterminate` already ships.
-> - **Torus** (transform a starter into *Toric Toughness*) — **THE ENGINE OP IS BUILT (2026-08-26); what is left is [USER]'s, not engineering's.** Published: 2 cost, **Skill**, rarity Event, *gain 5 Block and 5 Toric Toughness — gain that much Block at the start of your next 2 turns* (upgraded 7; the amount is snapshotted at play time, so a later No Block does not shrink the delayed halves). tier0 had only `block_next_turn`, a **one-shot bank** `pop`ped whole at the next turn start, and `powers` is a `name -> int` map, so the second delayed turn could not be expressed at all. `block_at_turn_start` is now that missing power — `{op: block_at_turn_start, amount: 5, turns: 2}`, amount snapshotted and Spotlight-scaled at play, `turns` a literal positive int, ticked and expired at the same turn-start seam its one-shot sibling pays at (`engine/effects.py::_op_block_at_turn_start`; atlas `tier0-engine.md` §7). It was built **first and alone, with no carrier**, because inventing the power inline is exactly what the event-relic admission rule forbids (cf. `EB-82`); stacking is a marked PLACEHOLDER (additive amount, max turns) that wants [USER]'s eye when the first carrier is printed, and the upgraded 5→7 still needs an upgrade-delta key, which is a shared schema with the C# emitter and lands with it.
-> - **Snake** (enchant with *Slither*) — **ENGINE HALF DISCHARGED, vocabulary half still parked.** The on-draw hook exists (`Card.on_draw_randomise_cost` / `cost_set_this_combat`, read in `refpowers.randomise_cost_on_draw`), so a `CATALOG` row for Slither would now be expressible. It stays out on this module's own rule — a row serves a granting event, and there is no granting event until Wood Carvings itself converts. One further gap when it does land: `tools/lint_enchant_parity.py` `GAME_RULES` needs a Slither row naming the decompiled `CanEnchant`, and Slither is absent from the wiki's Enchantments page, so that citation has to come from the decompile, not the wiki.
+> - **Bird** (transform a starter into *Peck*) — ships as **`tengu_flurry`**.
+>   1 cost, Attack, rarity Event, 2 damage × 3, off `Models.Cards.Peck` in
+>   `sts2.dll` v0.111.0 rather than off the wiki (the wiki carries option text
+>   only, and no card text). Its blocker was never engineering: R184 chose
+>   RESKIN over amending design principles §4.7, so a base-game colorless card
+>   never had to ship, and R231 named it.
+> - **Torus** (transform a starter into *Toric Toughness*) — ships as
+>   **`chinju_ward`**. 2 cost, Skill, rarity Event, 5 Block now and 5 at the
+>   start of each of the next 2 turns (`Models.Cards.ToricToughness`:
+>   `Turns 2m`, `BlockVar(5m)`, and `ToricToughnessPower` holding the turns in
+>   its stack and the Block in a sidecar). It is the **first printed carrier**
+>   of `block_at_turn_start`, the two-number delayed-Block power built alone
+>   and inert on 2026-08-26 precisely so that this conversion would not have to
+>   invent it (`EB-82`'s admission rule). Two things it still does not carry,
+>   both stated rather than papered over: the published 5→7 upgrade, which
+>   needs an upgrade-delta key that is shared schema with the C# emitter and
+>   lands atomically with every consumer or not at all (R20/R92); and a ruled
+>   STACKING rule for two of them, which `EB-83` took to [USER] as a numbered
+>   pick with the shipped placeholder standing until it is answered.
+> - **Snake** (enchant with *Slither*) — ships as `enchant: {name: slither}`.
+>   The `CATALOG` row exists now for the reason the module gives: a row serves
+>   a granting event, and this is the granting event. Its rider is the roll's
+>   exclusive bound, 4 — `Rng.CombatEnergyCosts.NextInt(4)`, i.e. 0..3 — and
+>   its eligibility is `!card.EnergyCost.CostsX`, which the parity lint's
+>   `GAME_RULES` now carries as `fixed_cost` with that citation. Both had to
+>   come from the decompile: Slither is absent from the wiki's Enchantments
+>   page entirely.
 >
-> **Also missing on the event layer** (cheap, but not built here because the event cannot ship): a `transform_starter_into: <card id>` effect key. `transform: N` is remove-N/add-N-random-of-same-rarity and `remove:` is worst-first over the whole deck, so neither expresses "choose 1 **starter** card to transform into this **named** card".
+> **The event layer gained one key**, `transform_starter_into: <card id>` --
+> "choose 1 STARTER card to transform into this NAMED card", which neither
+> `transform: N` (remove-N / add-N-random-of-the-same-rarity) nor `remove:`
+> (worst-first over the whole deck) could say.
 >
-> **Replacement names RULED (R231, 2026-08-30) at the `S4-G11` eye-read**, still not shipped because the event is not (R184): *Peck* → **"Tengu Flurry"** (`tengu_flurry`), KEPT — *Tengu* is established in Teyvat through Kujou Sara. *Toric Toughness* → **"Chinju Ward"** (`chinju_ward`), RENAMED from *Chinowa Ward*: the ward anchors to Chinju Forest, this entry's own setting, rather than to an unexplained real-world ritual term. Variant 1's option label moved with it (*[Chinju Ring]*). Neither card is in a sheet — a card whose only door is an unshippable event would be dead content, and this is stamped-world content that batches in an `RT` window regardless.
+> **One named divergence, and it is narrower than the game rather than more
+> generous.** `WoodCarvings.IsAllowed` refuses to offer the whole event unless
+> every player's deck holds a removable Basic; the sim locks the two transform
+> BRANCHES instead and still offers Snake. The event layer models no
+> event-level availability rule for any of the 36 pool events that declare one,
+> so this follows the house treatment rather than growing a second gate for one
+> event; it costs at most one Unknown room, on a deck that has removed every
+> starter.
 
 ### 1. Votive Carvings of Chinju Forest — Inazuma / Grand Narukami Shrine — literal (literal)
 
 A weathered offering-stall stands at the foot of the Chinju Forest steps, its keeper gone down to Inazuma City for the festival. Three votive carvings wait on the shelf, cut from fallen sacred wood and still faintly warm to the touch. A notice pinned above them, in a shrine maiden's careful hand, reads: take one, and let it take something of yours in return.
 
-[Tengu Crow] Choose 1 starter card to Transform into Peck.
+[Tengu Crow] Choose 1 starter card to Transform into Tengu Flurry.
 
 [Orobashi's Coil] Enchant 1 card with Slither. (Locked if no cards can be enchanted with Slither)
 
-[Chinju Ring] Choose 1 starter card to Transform into Toric Toughness.
+[Chinju Ring] Choose 1 starter card to Transform into Chinju Ward.
 
 ### 2. Totem Stumps of the Whispering Woods — Mondstadt / hilichurl camp, logged by the Adventurers' Guild — literal (literal)
 
 Three stumps ring a half-abandoned hilichurl camp at the edge of the Whispering Woods, each hacked into a shape by someone with far more patience than tools. A Samachurl squats by the coals and does not reach for its staff; it only points at the totems in turn and grunts — "Mosi mita. Celi. Unu." The Guild's notice board calls this place harmless. It does not say the trade is free.
 
-[Crow Totem] Choose 1 starter card to Transform into Peck.
+[Crow Totem] Choose 1 starter card to Transform into Tengu Flurry.
 
 [Vine Totem] Enchant 1 card with Slither. (Locked if no cards can be enchanted with Slither)
 
-[Ring Totem] Choose 1 starter card to Transform into Toric Toughness.
+[Ring Totem] Choose 1 starter card to Transform into Chinju Ward.
 
 ### 3. The Curio Shelf of Merusea Village — Fontaine / Melusines of Merusea Village — loose (loose)
 
 Merusea Village glows soft beneath the Fontemer, and a Melusine curio-keeper has arranged three treasures on a shelf of pressed coral — things the current carried in, which she scrubbed and polished until they shone. She will part with any of them, but only in trade for a habit you have outgrown. "Old things become new things," she says, entirely serious. "That is simply how the sea does it."
 
-[Seagull Charm] Choose 1 starter card to Transform into Peck.
+[Seagull Charm] Choose 1 starter card to Transform into Tengu Flurry.
 
 [Eel Ribbon] Enchant 1 card with Slither. (Locked if no cards can be enchanted with Slither)
 
-[Bubble-Coral Ring] Choose 1 starter card to Transform into Toric Toughness.
+[Bubble-Coral Ring] Choose 1 starter card to Transform into Chinju Ward.
 
 ---
 
@@ -1704,7 +1742,7 @@ Every NOT-APPLIED temptation recorded by the drafters, collected verbatim. Inven
 - **Whispering Hollow** — Let a Dendro or Hydro character (Kokomi, Furina) reduce the 9 HP embrace cost as a lore-resonance bonus; base has no character-conditional branch.
 - **Wood Carvings** — The Snake option's lock reads as a dead shelf slot; a flavored 'already claimed' greyed-out line would explain it in-world without changing the condition.
 - **Wood Carvings** — 'Starter card' is deck-vocabulary; a Klee/Furina/Kokomi-specific starter callout would land better but ties the event to one character.
-- **Wood Carvings** — Peck / Slither / Toric Toughness kept verbatim; Teyvat-flavored renames would need a mod-wide card-name pass first.
+- **Wood Carvings** — the two colorless CARDS are renamed and shipped: *Peck* → *Tengu Flurry*, *Toric Toughness* → *Chinju Ward* (R184 ruled the reskin, R231 named them, `EB-83` shipped them). No mod-wide card-name pass was needed after all, because design principles §4.7 forbade shipping the base-game rows in any case and the rename was the cheaper half of obeying it. *Slither* keeps its name: it is an enchantment, not a card, and §4.7 does not reach it.
 - **Zen Weaver** — Mora costs of 50/125/250 are nonsensically small in lore terms; a themed rescale (e.g. x100) would break parity with base numbers.
 - **Zen Weaver** — The Sumeru variant tempts a Dendro/Akasha gate instead of Gold; the lock must stay purely gold-based.
 - **Zen Weaver** — 'Enlightenment' is a natural fit for a Sumeru-flavored rename ('Akasha Insight'); left as-is so the base card name stays unambiguous.
@@ -1756,5 +1794,5 @@ Every NOT-APPLIED temptation recorded by the drafters, collected verbatim. Inven
 - **Welcome to Wongo's**: The load-bearing oddity is Wongo Points: a profile-level, cross-run meta-currency with a purely cosmetic 2000-point payoff, which no in-world Teyvat ledger can plausibly track across separate, unrelated expeditions — every variant papers this over with a "filed under your name, outlives the journey" conceit rather than solving it. The inverted curve (100 Gold pays 32 points, 300 Gold pays 16, 200 Gold pays 8) also has no honest fiction behind it, so the merchant/quartermaster voices simply decline to explain it, which reads as intentional in a huckster register and slightly odd in the sincerer Melusine and resistance ones.
 - **Wellspring**: Almost no resistance: a wellspring is a real Teyvat fixture in every nation, "Bottle" maps to any flask-filling, and the Guilty curse lands naturally on Fontaine's judicial register and on wartime survivor's guilt. The only mild stretch is that Guilty is a moral penalty attached to a purely beneficial card-removal, so each variant has to invent a reason the water charges you.
 - **Whispering Hollow**: Very little resistance — a whispering hollow tree has near-exact Teyvat analogues (Vanarana's Aranara trees, Elynas' roots), and Gold/Potions/HP/Transform all map to Mora, potions, HP, and card-reforging without strain. The only mild friction is tonal: 50 Mora reads as a trivial sum in Teyvat lore, so the "Exchange Gold" cost feels less like a real sacrifice than it does in base — flavor only, numbers untouched.
-- **Wood Carvings**: Very little resistance — a shelf of three carvings maps cleanly onto votive objects, curios, or totems anywhere in Teyvat. The only friction is vocabulary: "Transform into Peck," "Enchant with Slither," and the locked-if-ineligible condition are STS2 system terms with no in-world equivalent, so the outcome lines stay bare mechanics under the flavored labels rather than reading as Teyvat prose.
+- **Wood Carvings**: Very little resistance — a shelf of three carvings maps cleanly onto votive objects, curios, or totems anywhere in Teyvat. The friction was vocabulary, and R184/R231 removed two thirds of it: the transform outcomes now name *Tengu Flurry* and *Chinju Ward*, which are Teyvat words. What is left is "Enchant with Slither" and the locked-if-ineligible condition, STS2 system terms with no in-world equivalent, so those outcome lines stay bare mechanics under the flavored labels.
 - **Zen Weaver**: Very little resistance: the event is a pure pay-Gold deck-thinning shop with a gold-gated lock, and Teyvat has abundant analogues (Mora-priced services, Liyue-style acupuncture, Akasha memory-pruning). The only real friction is that Genshin has no canonical spiders, so "Arachnid" must become a many-needled silk/thread motif, and 50 Mora reads absurdly cheap against Teyvat's in-lore economy — but the numbers are kept exactly as harvested.

@@ -1812,7 +1812,33 @@ WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
 #      (the tier0 engine half of EB-104) -- see the C10 entry below; the two
 #      fields move once each, together, at the end of the window.
 #      No v11 run-layer number carries across.
-RUNTEMPLATE_VERSION = 12
+# v13 (EB-83, 2026-09-02): the Wood Carvings conversion -- EB-68's LAST
+#      unconverted event. ONE change, and it is the same shape v9's single
+#      act-2 addition and v11's single act-3 addition were: the event joins
+#      the ACT-1 pool (12 own -> 13 own; 16 -> 17 reachable, with the four
+#      all-acts events), so act-1 event odds move for EVERY character and no
+#      v12 act-1 event number carries across.
+#      What it puts INTO a run that v12 could not: two colorless event cards
+#      reachable by no other door (`tengu_flurry`, `chinju_ward` -- the R184
+#      reskins of Peck and Toric Toughness, named at R231), a NINTH
+#      enchantment in the vocabulary (`slither`, which randomises a card's
+#      cost on draw and is the first enchantment to touch cost at all), and
+#      the first PRINTED carrier of `block_at_turn_start`, the delayed-Block
+#      power built inert in the 2026-08-26 window. All three engine surfaces
+#      predate this bump and none was invented inside the conversion (EB-82's
+#      admission rule); what moved is the CONTENT that reaches them.
+#      The event layer gained one key, `transform_starter_into` -- a named
+#      transform of a basic-rarity card, which neither `transform:` (random,
+#      same rarity) nor `remove:` (worst-first, whole deck) could say.
+#      No drafter or pilot code moved: enchantments are still post-draft only
+#      and the two new cards are `rarity: event`, so no reward, shop, Neow or
+#      Ancient roll can reach them. DRAFTER_VERSION and draft.POLICY_VERSION
+#      are therefore both untouched and the payoff-reach D14 pin stands.
+#      CONSTANTS_VERSION did not move either -- no tier0 engine rule changed;
+#      `enchantments.apply` learned to SET a `None`-valued rider field rather
+#      than add to it, which is a defect fix on a field no shipped card
+#      carried before this window.
+RUNTEMPLATE_VERSION = 13
 # DEAD as of v6; kept as the name of the world every pre-§11 measurement was
 # taken in, and still used by tests that pin a node sequence deliberately.
 RUN_NODE_TEMPLATE = "NNNRETN$ERB"

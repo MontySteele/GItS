@@ -8,14 +8,20 @@ one-shot bank popped whole at the next turn start, and `powers` is a
 `name -> int` map, so a power carrying *(amount, turns remaining)* had nowhere
 to put its second number.
 
-It is built FIRST AND ALONE, on the EB-82 admission rule: an engine surface is
-never invented inline inside a conversion. The two replacement cards and the
-Wood Carvings conversion are [USER]-gated (the RT window; the S4-G11 name
-eye-read was discharged by R231), so this lands with NO CARRIER at all.
+It was built FIRST AND ALONE, on the EB-82 admission rule: an engine surface
+is never invented inline inside a conversion. For six days it had NO CARRIER
+at all, and the first tests below pinned that carrier-lessness -- the
+stamp-free claim, and therefore the claim that no measured number had moved.
 
-The first tests below pin that carrier-lessness -- which is the stamp-free
-claim, and therefore the claim that no measured number moved. The rest drive
-the op by hand, which is the only way the machinery runs at all today.
+IT HAS EXACTLY ONE CARRIER NOW. Wood Carvings converted on 2026-09-02 at
+RUNTEMPLATE 13, and `chinju_ward` -- the R184 reskin of Toric Toughness, named
+at R231 -- prints `{amount: 5, turns: 2}`. So those first tests now pin
+EXACTLY ONE rather than none, which is the same guard doing the same job: an
+op that quietly acquires a second carrier is an op whose PLACEHOLDER stacking
+rule (still unruled, still [USER]'s) started deciding real numbers without
+anybody choosing it. The rest of the file drives the op by hand, unchanged --
+the op itself did not move when its carrier arrived, which is the whole point
+of building it alone.
 """
 
 from pathlib import Path
@@ -47,20 +53,51 @@ def play(state, fx, **kw):
     return c
 
 
-# --- what reaches the op: nothing -----------------------------------------
+# --- what reaches the op: exactly one card (EB-83, RT13) -------------------
 
-def test_no_loaded_card_prints_the_op_anywhere_in_its_tree():
-    """The stamp-free claim, at the loader. Walked as a TREE, not a flat list:
-    a `conditional`'s `then:` and a `choose_one`'s mode body are as printed as
-    anything at the top level, and a flat read is exactly how an op hides."""
+# The one row allowed to print it, and the one sheet allowed to hold that row.
+# Named rather than counted, because "one carrier" and "the RIGHT carrier" are
+# different claims and only the second one is worth having.
+CARRIER = "chinju_ward"
+CARRIER_SHEET = "tier0/content/cards/colorless_event.yaml"
+# The event that hands the carrier out. Its own file mentions the op in prose
+# (the conversion's account of which blocker cleared when) and never as an
+# effect row -- events have no effect trees, so the text sweep below allows the
+# path and the structural sweep above cannot be fooled by it.
+CARRIER_EVENT_SHEET = "tier05/content/events.yaml"
+
+
+def test_exactly_one_loaded_card_prints_the_op_and_it_is_the_named_one():
+    """Walked as a TREE, not a flat list: a `conditional`'s `then:` and a
+    `choose_one`'s mode body are as printed as anything at the top level, and
+    a flat read is exactly how an op hides.
+
+    This asserted ZERO until 2026-09-02 and asserts ONE now. What it is really
+    holding is unchanged: the op's stacking rule is a PLACEHOLDER that no
+    ruling has confirmed, and stacking is only reachable when two carriers can
+    sit in one deck. A second printed row makes that live, and it should not
+    become live because somebody added a card without noticing.
+    """
+    printed = set()
     for cid, c in loader._card_index().items():
         for field in (c.effects, c.sly, c.enchant_effects,
                       c.enchant_first_play_effects):
-            assert all(fx.get("op") != OP
-                       for fx in effect_walk.iter_effects(field)), cid
+            if any(fx.get("op") == OP
+                   for fx in effect_walk.iter_effects(field)):
+                printed.add(cid)
+    assert printed == {CARRIER}, printed
 
 
-def test_no_committed_sheet_mentions_the_op_at_all():
+def test_the_carrier_prints_the_decompiled_numbers_and_nothing_else_does():
+    """`Models.Cards.ToricToughness`: `Turns 2m`, `BlockVar(5m, Move)`, and an
+    `OnPlay` that gains the Block and then applies the power for `Turns`."""
+    fx = [f for f in loader.peek_card(CARRIER).effects if f["op"] == OP]
+    assert fx == [{"op": OP, "amount": 5, "turns": 2}]
+    # ...beside its immediate half, which is an ordinary printed Block row.
+    assert {"op": "block", "amount": 5} in loader.peek_card(CARRIER).effects
+
+
+def test_no_other_committed_sheet_mentions_the_op_at_all():
     """The same claim one level below the loader, as raw text, so it also
     covers the sheets the card index does not build: every `*-upgrades.yaml`
     delta key, the tier 0.5 relic / potion / event content, and any sheet a
@@ -68,14 +105,25 @@ def test_no_committed_sheet_mentions_the_op_at_all():
 
     Text rather than structure ON PURPOSE. The question is not "does a card
     resolve this op" -- it is "did any number that a measured world is made of
-    move", and for that the honest test is that the string does not occur.
+    move", and for that the honest test is that the string does not occur
+    anywhere but the two files that are supposed to say it.
+
+    TWO ALLOWED PATHS, and they are allowed for different reasons: the sheet
+    that prints the carrier, and the event file that hands the carrier out and
+    explains in a comment why it took three years of blockers to get there.
+    The second is prose only -- an `events.yaml` option has no effect tree at
+    all -- so the structural sweep above is what actually guards it.
     """
+    allowed = {REPO / CARRIER_SHEET, REPO / CARRIER_EVENT_SHEET}
     roots = [REPO / "docs", REPO / "tier05" / "content", REPO / "tier0" /
              "content"]
     scanned = 0
     for root in roots:
         for path in sorted(root.rglob("*.yaml")):
             scanned += 1
+            if path in allowed:
+                assert OP in path.read_text(encoding="utf-8"), path
+                continue
             assert OP not in path.read_text(encoding="utf-8"), path
     assert scanned > 10, "the sheet sweep found almost nothing; it has rotted"
 

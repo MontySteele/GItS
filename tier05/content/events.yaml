@@ -29,6 +29,14 @@
 #   downgrade_random: N   un-upgrade N random upgraded cards
 #   duplicate_deck: true  append a copy of the whole deck (resolves FIRST)
 #   transform: N       remove N cards, add N random of the same rarity
+#   transform_starter_into: <id>   choose ONE STARTER card (rarity basic) and
+#                      transform it into the NAMED card, IN PLACE. Distinct
+#                      from `transform:` in both halves: the victim comes from
+#                      the starters only, and the replacement is named rather
+#                      than rolled. LOCKED when no starter is left
+#                      (tier05/events.py::_starter_targets, which also records
+#                      how that lock is narrower than the game's event-level
+#                      one). EB-83, Wood Carvings
 #   curse: <id>        add a curse to the deck
 #   relic: N           grant N random relics from the run's relic pool
 #                      (`true` means 1)
@@ -176,6 +184,45 @@ act1:
       - {label: "Reach into the Flesh", remove: 2, curse: curse_spore_mind}
       - {label: "Offer Tribute", gold: [-149, -99], relic: true,
          requires_gold: 149}
+
+  - id: wood_carvings
+    name: "Wood Carvings"
+    # EB-68's LAST unconverted event, converted 2026-09-02 under EB-83. It was
+    # in the skip list below for eleven months of repo time on three separate
+    # blockers, and every one of them had to be cleared by somebody else
+    # first:
+    #
+    #   Bird and Torus name two BASE-GAME colorless cards (Peck, Toric
+    #     Toughness). Design principles §4.7 forbids shipping those, and R184
+    #     ([USER], 2026-08-12) ruled RESKIN rather than amending §4.7 -- so
+    #     they arrive as `tengu_flurry` and `chinju_ward`, function-for-
+    #     function and number-for-number, named at the R231 eye-read
+    #     (2026-08-30). Both rows and their decompiled citations are in
+    #     tier0/content/cards/colorless_event.yaml.
+    #   Torus additionally needed an ENGINE op nothing had: "gain that much
+    #     Block at the start of your next 2 turns" is two numbers, and
+    #     `block_next_turn` is a one-shot bank. `block_at_turn_start` was
+    #     built FIRST AND ALONE for it on EB-82's admission rule (2026-08-26)
+    #     and has been inert since; `chinju_ward` is its first printed
+    #     carrier.
+    #   Snake grants SLITHER, which randomises a card's cost on draw. That
+    #     hook was built alone in the same window and stayed out of the
+    #     enchantment CATALOG on that module's own rule -- a row serves a
+    #     granting event, and this is the granting event.
+    #
+    # THE OPTIONS ARE THE HARVEST'S, verbatim (docs/sts2-events-harvest.txt
+    # line 430), and the labels are the base game's rather than the gallery's
+    # Teyvat reskins -- the gallery is a flavor artifact for [USER]'s eye and
+    # every other row in this file carries the harvest's own label.
+    #
+    # NO OPTION IS APPROXIMATED. Snake's lock is the wiki's own parenthetical
+    # ("Locked if no cards can be enchanted with Slither") and falls out of
+    # `_enchant_targets` for free; the two transform branches carry the same
+    # lock shape on their own rule.
+    options:
+      - {label: "Bird", transform_starter_into: tengu_flurry}
+      - {label: "Snake", enchant: {name: slither}}
+      - {label: "Torus", transform_starter_into: chinju_ward}
 
 # --- act 2: the Hive ------------------------------------------------------
 # Brain Leech and Room Full of Cheese also land here via `also_acts`, so the
@@ -443,10 +490,11 @@ all:
 #     Five of the seven enchant events converted this pass and are in the
 #     pools above: Sapphire Seed (act 1), Field of Man-Sized Holes,
 #     Stone of All Time, Symbiote (act 2 / act 2+3), Self-Help Book (all).
-#     The vocabulary is tier0/content/enchantments.CATALOG -- eight named
+#     The vocabulary is tier0/content/enchantments.CATALOG -- NINE named
 #     enchantments, exactly the ones these events grant, no registry and no
 #     enchantment economy. Two events did NOT convert in that pass, and
-#     neither was blocked on Enchant. One of the two has since converted:
+#     neither was blocked on Enchant. BOTH HAVE SINCE CONVERTED, so all seven
+#     enchant events are in the pools above and this paragraph is history:
 #   Grave of the Forgotten   CONVERTED (EB-82, act 3 above). It was blocked
 #       on a RELIC and not on the enchant op: its Accept branch hands out
 #       Forgotten Soul -- "whenever you Exhaust a card, deal 1 damage to a
@@ -454,14 +502,17 @@ all:
 #       tier05/content/relics.yaml) forbids inventing the hook inline. So
 #       `damage_per_exhaust` was built first, on its own, as unused
 #       machinery; this conversion arms it and adds no engine surface.
-#   Wood Carvings            THREE options, all three blocked, and none of
-#       them by the enchant op alone. Bird and Torus transform a starter into
-#       Peck and Toric Toughness -- named base-game colorless cards that do
-#       not exist in any of our pools. Snake enchants with Slither, which
-#       randomises a card's cost ON DRAW: `state.draw` has no per-card
-#       callback and cost is read at play time, so Slither is new machinery
-#       rather than a rider (named in enchantments.UNEXPRESSED). Shipping two
-#       of three options is not a conversion, so it stays here whole.
+#   Wood Carvings            CONVERTED (EB-83, act 1 above), and it was the
+#       LAST unconverted event of EB-68's sweep. Three options, all three
+#       blocked, none of them by the enchant op alone -- Bird and Torus named
+#       base-game colorless cards (R184 ruled RESKIN; R231 named them), Torus
+#       wanted a two-number delayed-Block power the engine could not say
+#       (`block_at_turn_start`, built alone at EB-82's admission rule), and
+#       Snake wanted the on-draw cost randomiser Slither rides (built alone in
+#       the same window). Its entry above records which blocker cleared when.
+#       The pattern is the one this list was written to make visible: every
+#       one of the three was an engine surface built FIRST, with no carrier,
+#       and the conversion arms them rather than inventing them.
 # Quest cards are not modeled:        The Legends Were True, The Lantern Key,
 #     War Historian Repy, Byrdonis Nest's Take-the-Egg branch (the event
 #     ships one-option)

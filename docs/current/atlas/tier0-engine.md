@@ -263,14 +263,20 @@ trip over is assuming it is dead code.
   (`:2138`). Deliberately **no** "Status exhausted" reward grammar — the
   context reports rarity and C11 keeps Kokomi's pool free of junk.
 
-## 7. `block_at_turn_start` — merged, and INERT (EB-83)
+## 7. `block_at_turn_start` — merged, and CARRIED since `RT13` (EB-83)
 
 Built FIRST AND ALONE on the `EB-82` admission rule — an engine surface is
-never invented inline inside a conversion — so it lands with **no carrier at
-all**: no card on any sheet prints it, and no live `RT/D/P/C` integer moved.
-The two replacement cards (*Tengu Flurry*, *Chinju Ward* — names ruled at
-R231, 2026-08-30) and the Wood Carvings conversion are still [USER]-gated on
-the `RT` window.
+never invented inline inside a conversion — so it landed on 2026-08-26 with
+**no carrier at all**: no card on any sheet printed it and no live `RT/D/P/C`
+integer moved. **It has one now.** `chinju_ward` — the R184 reskin of *Toric
+Toughness*, named at R231 — prints `{amount: 5, turns: 2}` beside a printed
+`block: 5`, and it reaches a deck through exactly one door, the Wood Carvings
+conversion that landed at `RT13` (2026-09-02). Its sibling *Tengu Flurry*
+prints nothing from this section.
+
+The op did not change when its carrier arrived, and that is the point of
+building it alone: what follows is the same description it shipped with, plus
+the two consequences of no longer being inert.
 
 - **What it is.** `{op: block_at_turn_start, amount: <int|count>, turns: <int>}`
   — "gain `amount` Block at the start of each of your next `turns` turns"
@@ -301,11 +307,16 @@ the `RT` window.
   checked at LOAD by `loader._validate_effect_vocabulary`: a duration
   resolved against combat state is printed text that means something
   different every time it is played.
-- **Stacking is a PLACEHOLDER** — additive on amount, `max` on turns, so a
-  second casting can never shorten a standing one. No ratified rule for
-  same-name *(amount, turns)* effects exists to inherit; the engine's
-  ratified duration rules are all single-field refreshes and settle only the
-  turns half. **[USER]'s pick whenever the first carrier is printed.**
+- **Stacking is still a PLACEHOLDER, and it is now REACHABLE** — additive on
+  amount, `max` on turns, so a second casting can never shorten a standing
+  one. No ratified rule for same-name *(amount, turns)* effects exists to
+  inherit; the engine's ratified duration rules are all single-field
+  refreshes and settle only the turns half. **This was "[USER]'s pick
+  whenever the first carrier is printed" and the carrier is printed:** two
+  `chinju_ward` in one deck, both played on the same turn, pay 10 for two
+  turns rather than 5 for four (`EB-83` raised it as a numbered pick in its
+  own PR and it is [USER]'s to rule). Nothing was decided in the conversion
+  window — the shipped default stands until it is ruled.
 - **Nimble does not ride it**, for `block_next_turn`'s reason verbatim (EB-85
   divergence 4): the Block arrives from a POWER, so there is no `cardSource`
   for the enchantment hook to read. `enchantments._BLOCK_OPS` is an allowlist,
@@ -315,12 +326,15 @@ the `RT` window.
   as its one-shot sibling — the vocabulary asks what state an op moves, not
   how often), and `draft.STATIC_OP_PRICING` / `_op_price` (the delayed-Block
   share, once per printed turn; PROPOSED, and unreachable).
-- **Named still-owed, for whoever prints the first carrier:** there is no
+- **Still owed, and the first carrier did not pay it either:** there is no
   `block_at_turn_start` upgrade-delta key in `content/upgrades.py`, so an
-  upgraded row (Toric Toughness' published 5→7) cannot yet spell its bump.
-  Deliberately not added here — the delta keys are a shared schema with
+  upgraded row (Toric Toughness' published 5→7) cannot spell its bump. Still
+  deliberately not added — the delta keys are a shared schema with
   `tools/gen_klee_cards.py`'s C# emitter, and a shared-schema change lands
-  atomically with every consumer (R20/R92) or not at all.
+  atomically with every consumer (R20/R92) or not at all. `chinju_ward`
+  therefore ships with **no upgrade path**, which is the standing rule for
+  every row in `colorless_event.yaml` anyway and is a penalty rather than a
+  buff — the safe direction.
 
 ## 8. Reading order
 

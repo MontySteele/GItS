@@ -63,6 +63,11 @@ OPTION_KEYS = frozenset({
     "card_reward", "card_screens", "pick_cards", "add_card", "random_card",
     "remove", "remove_random", "upgrade", "upgrade_random", "downgrade_random",
     "duplicate_deck", "transform", "curse", "upgraded",
+    # EB-83, Wood Carvings: "Choose 1 STARTER card to Transform into <a named
+    # card>". Neither neighbour says it -- `transform: N` is remove-N /
+    # add-N-random-of-the-same-rarity, and `remove:` is worst-first over the
+    # whole deck -- so it is its own key. See `_starter_targets`.
+    "transform_starter_into",
     # The Dusty Tome (R127 / EB-30m): add THIS character's Ancient, upgraded.
     # A key rather than an `add_card` id because the card is per-character and
     # the option cannot name one; `roster.ANCIENTS` is the lookup. Carrying it
@@ -296,6 +301,45 @@ def _filtered_pool(st: EventState, spec: dict) -> list:
 
 ENCHANT_HP = UPGRADE_HP    # see _enchant_targets' docstring for why
 
+# The rarity a STARTER card carries. `transform_starter_into`'s whole
+# selection rule, and the game's own: `CardRarity.Basic`, tested twice in
+# `Models.Events.WoodCarvings` -- once per transform branch's card filter and
+# once in `IsAllowed`. One name rather than a bare literal at four sites,
+# because the two engines have to agree about which cards this key can eat.
+STARTER_RARITY = "basic"
+
+
+def _starter_targets(st: EventState) -> list[int]:
+    """Deck INDICES a `transform_starter_into` option may consume (EB-83).
+
+    The rule is the decompiled one and nothing more. Both transform branches
+    of `Models.Events.WoodCarvings` open a card selector filtered
+
+        (CardModel c) => c != null && c.IsTransformable
+                         && c.Rarity == CardRarity.Basic
+
+    so the candidate set is the STARTER cards still in the deck, whatever the
+    run has done to it since. `IsTransformable` is `!Keywords.Contains(Eternal)`
+    (or the card is not in the deck pile at all) and has no tier0 twin: no
+    sheet here prints Eternal, no starter in any of the three printed decks
+    could carry it, and inventing a keyword to model the absence of one would
+    be a surface with no caller. Basic rarity is therefore the whole gate.
+
+    EMPTY IS A REAL ANSWER, the same way `_enchant_targets`' is: `available`
+    drops the option. That is a NARROWER lock than the game's, and the
+    difference is worth naming -- `WoodCarvings.IsAllowed` refuses to offer
+    the WHOLE EVENT unless every player's deck holds a removable Basic, so in
+    game a starterless deck never meets the carvings at all, while here it
+    meets them and sees only the Snake branch. The event layer models no
+    event-level availability rule (`pool_for`'s Ancient gate is a CHARACTER
+    gate, not a deck one) and 36 of the pool's events declare an `IsAllowed`
+    the sim already ignores, so this follows the house treatment rather than
+    growing a second gating mechanism for one event. It costs the run at most
+    one Unknown room, and only on a deck that has removed every starter.
+    """
+    return [i for i, cid in enumerate(st.deck_ids)
+            if loader.peek_card(cid).rarity == STARTER_RARITY]
+
 
 def _enchant_targets(opt: dict, st: EventState) -> list[int]:
     """Deck INDICES this option's enchantment may legally land on.
@@ -357,6 +401,11 @@ def _adds_of(opt: dict, st: EventState) -> int:
         legal = sum(1 for cid in st.deck_ids
                     if loader.peek_card(cid).rarity not in _NEVER_TRANSFORMED)
         n += min(opt["transform"], legal)
+    if opt.get("transform_starter_into") and _starter_targets(st):
+        # One card leaves and one arrives, exactly as `transform:` above --
+        # the Book counts the ARRIVAL, and the game does too (a transform is
+        # an add on the C# side as well).
+        n += 1
     n += 1 if opt.get("curse") else 0
     n += 1 if opt.get("add_card") else 0
     n += 1 if opt.get("add_ancient") else 0
@@ -476,6 +525,20 @@ def option_value(opt: dict, st: EventState, _depth: int = 0,
     if opt.get("enchant"):
         v += ENCHANT_HP
     v += 2.0 * opt.get("transform", 0)       # a coin flip on a card, not a gain
+    if opt.get("transform_starter_into"):
+        # A NAMED transform is not the coin flip its neighbour is: the card
+        # that arrives is known, so it rides `add_card`'s flat CARD_HP, and
+        # the same limitation that comment names applies here too -- the
+        # valuation cannot tell Tengu Flurry from Chinju Ward, and `_fit`
+        # breaks that tie with the drafter's opinion exactly as it does for
+        # Bugslayer's two colorless cards.
+        #
+        # AND NO REMOVE_HP TERM, deliberately. `remove:` is worth 6 HP because
+        # the deck gets SMALLER; this does not shrink it, it overwrites one
+        # slot. Crediting both halves would price a free option at 14 HP --
+        # nearly a relic -- on the strength of a term the option does not
+        # earn.
+        v += CARD_HP
     v += CURSE_HP if opt.get("curse") else 0.0
     v += RELIC_HP * int(opt.get("relic") or 0)      # `relic: true` -> 1
     v += RELIC_HP if opt.get("relic_id") else 0.0
@@ -519,6 +582,11 @@ def available(event: dict, st: EventState) -> list[dict]:
         # locks these too ("only available if you have a valid card").
         if opt.get("random_card") and not _filtered_pool(st, opt["random_card"]):
             continue
+        # EB-83: no starter left, nothing to transform. Same lock shape as the
+        # two above, and `_starter_targets` says where it is narrower than the
+        # game's (which refuses the whole event, not the branch).
+        if opt.get("transform_starter_into") and not _starter_targets(st):
+            continue
         # A lethal option stays legal in the real game; ours refuses, because
         # nothing in the run model can survive it (no Lizard Tail) and a
         # policy that suicides is noise, not agency.
@@ -534,8 +602,15 @@ def _fit(opt: dict, st: EventState) -> float:
     """Drafter's opinion of a NAMED card an option adds. Used only to break
     ties between options the HP valuation cannot separate (Bugslayer offers
     two colorless cards, so both score a flat CARD_HP). Not a second currency:
-    it never outranks `option_value`."""
-    cid = opt.get("add_card")
+    it never outranks `option_value`.
+
+    `transform_starter_into` reads here for the same reason `add_card` does,
+    and Wood Carvings is the second event that needs it: its Bird and Torus
+    branches name one card each, both score a flat CARD_HP, and without this
+    the choice between an Attack and a Block card would fall to declaration
+    order on every deck of every character.
+    """
+    cid = opt.get("add_card") or opt.get("transform_starter_into")
     if not cid:
         return 0.0
     deck = [loader.peek_card(c) for c in st.deck_ids]
@@ -654,6 +729,29 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
             if same:
                 st.deck_ids.append(same[rng.randrange(len(same))].id)
                 st.note_add()
+    if opt.get("transform_starter_into"):
+        # EB-83, Wood Carvings: one STARTER becomes one NAMED card.
+        #
+        # IN PLACE, not remove-then-append, because that is what a transform
+        # is -- the slot is overwritten and the deck does not get shorter.
+        # It still ticks `note_add`, exactly as the `transform:` branch above
+        # does: a card entered the master deck, and Book of Five Rings counts
+        # arrivals (EB-111).
+        #
+        # THE VICTIM IS THE DRAFTER'S WORST LEGAL STARTER -- the mirror image
+        # of the enchant branch's best-legal-target and the same reuse of the
+        # one valuation, so transform policy cannot disagree with removal
+        # policy about which Strike is the bad one. Ties break to the earliest
+        # deck slot, which is `choose`'s declaration-order rule.
+        idxs = _starter_targets(st)
+        if idxs:
+            cards = [loader.peek_card(cid) for cid in st.deck_ids]
+            worst = min(idxs, key=lambda i: (
+                draft.score_offer(cards[i], cards, st.archetype), i))
+            entry["transformed"] = [st.deck_ids[worst],
+                                    opt["transform_starter_into"]]
+            st.deck_ids[worst] = opt["transform_starter_into"]
+            st.note_add()
     if opt.get("curse"):
         st.deck_ids.append(opt["curse"])
         st.note_add()
