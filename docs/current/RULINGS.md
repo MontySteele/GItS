@@ -229,28 +229,25 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R217 | 2026-08-28 | (2026-08-28): the seat decides -- independent-model authority, GPT's D1-D9 as the design charter, +proto ratified, the automation minted in order | `00ba07a` |
 | R218 | 2026-08-28 | (2026-08-28): the pin moves to v0.111.0 -- M46 takes the port, and a Steam update must never again be able to stop the build | `6b22fb0` |
 | R219 | 2026-08-29 | (2026-08-29): Sparks become a price and Bake-Kurage becomes the kit -- two characters re-authored, EB-186 was never a defect, and the HP floor moves | `0017306` |
-| R220 | 2026-08-29 | (2026-08-29): the Salon becomes an orb board and the shared Burst meter is retired roster-wide -- one slate, six lettered answers | `f1a296f` |
-| R221 | 2026-08-29 | A -- SEAT-CONTROL RETIREMENT. The fresh-Opus control form on every packet is a CALIBRATION ARM for the local seat's first live rounds, not a standing chair. | `af137bb` |
-| R222 | 2026-08-29 | A -- P1'S DECISION-FIRE IS NOT A TRIGGER. The MISS stands as published and is not re-graded (R101b); | `13a0537` |
-| R223 | 2026-08-29 | - THE PASS MARK IS PER CATEGORY AND THERE IS NO TOTAL. | `170821e` |
-| R224 | 2026-08-29 | (2026-08-30): the sitting slate lands whole -- eleven QUEUE rows closed, Klee's R2 picks answered, Furina and the Burst retirement countersigned prospective | `ed41d9a` |
-| R225 | 2026-08-30 | the open-items slate — generator question first on a representative deck, Bag of Tricks admitted at mode-head price, one prototype switch with a scope lint… | `e302cda` |
-| R226 | 2026-08-30 | the Kokomi Charge law signed as amended (prospective), Klee's generator survival matches Regent, Furina's Spotlight gets an options packet when Klee is close | `425912a` |
-| R227 | 2026-08-30 | landed: M67 (1), Regent stands, three registrations countersigned, Furina paper work starts | `29c7f16` |
-| R228 | 2026-08-30 | landed: sink set 4 + 6 as fold baseline, M68 (1) one-mode priced Spotlight, EB-235 minted | `071f280` |
-| R229 | 2026-08-30 | landed: Bag of Tricks refund accepted as a test condition, arm AT RISK under a pre-registered return | `b3c33d0` |
-| R230 | 2026-08-30 | landed: Bag of Tricks' refund accepted as a deliberate BRIDGE mechanic, option (3) qualified | `9e5560c` |
-| R231 | 2026-08-30 | landed: the sitting slate whole -- slot 6 ruled to a third design, four QUEUE rows closed, two narrowed | `65b2451` |
-| R232 | 2026-08-30 | landed: the costs battery asks the ledger's question now, and the mark stays at 4/6 | `3f5887a` |
-| R233 | 2026-08-30 | landed: the countersign batch, three revised slates signed as one | `0fb6417` |
-| R234 | 2026-08-30 | landed: the companion-cards slate ruled whole, and the program runs parallel | `630234b` |
-| R235 | 2026-08-31 | landed: Klee's two Personal Companion faces signed on all six defaults | `3ec41b7` |
-| R236 | 2026-09-01 | the Mondstadt and Inazuma companion workshops, ruled and moved to review/ruled | `cd532fd` |
-| R237 | 2026-09-01 | [USER]'s Klee run rules round one; starter draft 3, six rows EB-279 to EB-284 | `c49685f` |
-| R238 | 2026-09-02 | Kokomi's rework direction accepted; the brief's draft 3 and the slice rewritten on the Memory | `8c3f30a` |
-| R239 | 2026-09-02 | Kokomi draft 4; the Tide stays, the jellyfish spends nothing by itself, Surge plays the top of the exhaust pile, Tactics is once-only | `a42eda6` |
-| R240 | 2026-09-02 | Kokomi's chassis is the Plan; the exhaust replay and Mend step down to payoff cards | `e33bb94` |
-| R241 | 2026-09-02 | Kokomi brief draft 6 approved for the Prototype build; picks 1 to 3 at their defaults | `c892ff7` |
+| R220 | 2026-09-02 | A countersigned the reframe and built slice 1 IN THE SIM (tier0/engine/furina_reframe.py, five module flags, all False); | `ea11f35` |
+| R221 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R222 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R223 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R224 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R225 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R226 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R227 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R228 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R229 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R230 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R231 | 2026-09-02 | All three were cleared by other work -- R184 ruled RESKIN and R231 named the replacements; | `e1d8e33` |
+| R232 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R233 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R234 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R236 | 2026-09-02 | Klee's coven Personals: Prune, Sayu, Qiqi, Yaoyao in both engines (R236) | `1182ff5` |
+| R237 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R240 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
+| R241 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
 | R242 | 2026-09-02 | Klee round 4 ruled; the starter takes the canonical shape, 1 Spark at combat start, base Strike and Defend for all three characters | `372fc9f` |
 | R243 | 2026-09-02 | the 2026-09-02 sitting slate, ruled live on the Kokomi and Klee prototype builds | `62c928f` |
 | R244 | 2026-09-02 | the night's sitting ruled: Klee round seven at its defaults, the Hexerei readers with Alice's Introduction Magic in place of Alice's Letters | `489e42c` |
@@ -260,10 +257,11 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R248 | 2026-09-03 | RULED: Klee round 7b picks, a Bomb carries the target's modifiers, Grounded grants a Spark | `ce6c135` |
 | R249 | 2026-09-03 | RULED: the shipped sheets' text pass, and the Companion-slot sentence leaves the relics | `c90aadb` |
 | R250 | 2026-09-03 | the 2026-09-04 morning slate -- three packet picks, a control run, Furina in motion, three overtaken rows closed | `193321b` |
+| R251 | 2026-09-03 | the Furina round-one pick -- the shipped Burst retires under the Furina arm now | `c1c369d` |
 
-249 rows over the R1..R250 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 138 from a commit message, 0 unresolved.
+247 rows over the R1..R251 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 120 from a commit message, 16 unresolved.
 
-1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
+4 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28, R235, R238-R239.
 
 Ledger retrieval point: `3907837` (tag `pre-simplification-2026-08-06`); ledger paths `tier0/DECISIONS.md`, `tier0/DECISIONS-archive-R39-R99.md`, `klee-mod/DECISIONS.md`.
 
