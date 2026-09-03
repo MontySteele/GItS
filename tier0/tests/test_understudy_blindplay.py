@@ -372,6 +372,20 @@ def test_embark_expands_a_roster_id_to_a_select_screen_option():
         embark.option_id("")
 
 
+def test_embark_never_prefixes_a_base_game_character():
+    """A CONTROL round plays a base-game class (Ironclad, Silent, Defect,
+    Necrobinder, Regent) on the same funnel a mod round uses. The select
+    screen offers those unprefixed -- `KLEEMOD-` is BaseLib's prefix for
+    THIS mod's own custom models -- so `option_id` must pass them through
+    exactly, in any case, rather than asking the wire for a
+    `KLEEMOD-IRONCLAD` option that does not exist on any screen."""
+    for base in embark.BASE_CHARACTERS:
+        assert embark.option_id(base) == base
+        assert embark.option_id(base.lower()) == base
+    # A roster id (a mod character) still gets the mod's own prefix.
+    assert embark.option_id("klee") == "KLEEMOD-KLEE"
+
+
 def test_a_hold_embark_has_nothing_to_tear_down(tmp_path, monkeypatch):
     """FOUND LIVE. A `--hold` attaches to a game somebody else launched and
     records no ledger rows -- so it must not be picked as "the latest embark"
