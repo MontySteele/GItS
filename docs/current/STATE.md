@@ -135,12 +135,11 @@ are in [`workstreams.md`](workstreams.md).
 
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
-- **Klee** — Prototype round 8 is installed: a Bomb carries the target's
-  modifiers only (`EB-343`), Grounded's held turn pays a Spark (`EB-344`),
-  the three Hexerei readers (`EB-326`, art owed) and the round-7b defaults
-  (`EB-336` to `EB-339`). Round 7b's read is ruled (R248,
-  `review/ruled/klee-overhaul-round-7b-2026-09-03.md`). The round-8 seats
-  play three acts on lane 2 before [USER] does.
+- **Klee** — Round 8 is read: five Opus seats, two runs on the round-8
+  build (R248's rules, the Hexerei readers, the round-7b defaults); the
+  second run cleared the spire and named the Splash as the end of the kit's
+  one decision (`review/active/klee-overhaul-round-8-2026-09-04.md`, one
+  pick: what the Splash pays). [USER] plays on the next deploy.
 - **Kokomi** — Round 4d is read: three Opus seats cleared the spire on the
   fix build, Aeonglass dead on round 6, and named the Plan layer's one
   decision as a Sango draw (`review/active/kokomi-overhaul-round-4d-2026-09-03.md`,
