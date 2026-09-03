@@ -2199,3 +2199,32 @@ sentence four damage-side riders in `tools/gen_klee_cards.py` have carried for a
 sprint ("a block-side reader needs `block_calc_rider`'s CalculationBase plumbing
 and has no card yet"). The rail was already there; what this row added is a
 predicate reading the other key.
+
+## before proto_ko_dodoco_cover
+
+The defence shelf, R252 (2026-09-04), Klee round 9 pick 1 taken at its
+default. The round-9 run died on act-2 floor 22 with no Block in hand; the
+arm carried four defensive rows in thirty-three and offered none in ten
+rewards (`review/ruled/klee-overhaul-round-9-2026-09-04.md` §2). The brief's
+weakness stands (§6: she cannot block on demand), so every row here is keyed
+to the Bomb state and none is a plain Block:
+
+- **Dodoco Cover** (Common): a placer with a Block half, for the opening
+  hand with no placer, which reduced every Set off card to a vanilla attack
+  (round 9 act 2, fight 1 and fight 3). Cook's turn, paid a little safety.
+- **Careful Now** (Uncommon, Retain): Block equal to the largest Bomb, capped.
+  The bigger the bomb she is cooking, the more carefully she stands; the cap
+  keeps it from making Grounded a stall. The `block_largest_bomb` op reads
+  `klee_overhaul.largest_size`, the Splash's own reader since R250.
+- **Fire Safety** (Common, 0): Run Away!'s shape on the React loop, paid
+  when a Bomb reacted this turn (`bomb_reacted_this_turn`).
+- **Safety Lesson** (Uncommon Power): Spray's Grounded, Block per Bomb going
+  off. It pays nothing under the Splash, which does not Set off, so the
+  Splash keeps its R250 cost.
+- **Barbara — Front Row Seat** (stand-in for Let the Show Begin♪): the
+  fourth grown-up, Hydro applied twice so Klee's own Pyro does not eat it
+  (round 8's Diona finding), Block per Bomb this turn. Same shape as Diona's
+  Shaken, Not Purred on the other element.
+
+Numbers are Prototype numbers, D by the ladder; the seats read them on
+round 10 before [USER] does.
