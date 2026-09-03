@@ -31,6 +31,29 @@ CHARGE_SOURCE_LINE = "Gain 1 Charge when a card of yours Exhausts"
 # move on a retune or none do.
 KURAGE_COST_PER_ENERGY = 3
 
+# `EB-340`. RULE 1'S GROWTH NUMBER, and the two-line reason it is spelled here.
+#
+# THE GLOSSARY DROPPED IT. The Bomb card's own keyword tip reads "Grows by 4 at
+# the start of your turn" (`ArmKeywordTips.ForBomb`, which interpolates
+# `KleeOverhaul.BombGrowth`); the page's copy of that sentence said only "Grows
+# at the start of your turn", on every screen, and the r7b act-1 seat filed the
+# two sentences disagreeing on one screen -- "the number is the entire
+# mechanic". It also read "Grows" as the PILE growing and measured otherwise
+# (`Bomb 5` + `Bomb 8` -> 21, not 17), so the page says "each Bomb".
+#
+# LIVE FIRST, THIS SECOND. `keyword_notes` reads the number off the screen's
+# own Bomb tip where the screen carries one; this is the fallback for a screen
+# that prints the WORD with no tip on it -- an enemy's badge, a reward row -- and
+# is held in step from the other side by
+# `test_the_bomb_glossary_carries_the_growth_number`, which reads the C#
+# constant, the same discipline `CHARGE_SOURCE_LINE` is under.
+BOMB_GROWTH = 4
+
+# `EB-340`. How long an aura clings, as `ReactionConstants.AuraDurationTurns`
+# sets it and the four `Applies <element>` tips interpolate it. Same discipline
+# as the line above: pinned from the other side, never imported.
+AURA_DURATION_TURNS = 2
+
 REPO = Path(__file__).resolve().parents[1]
 LOG_ROOT = Path(__file__).resolve().parent / "logs" / "blindplay"
 RECORD_ROOT = REPO / "review" / "qa" / "blindplay"
