@@ -512,6 +512,20 @@ UNMIRRORED: dict[str, str] = {
     "KurageMemoryPileRing.RingWidth":
         "presentation: ring thickness on a full-size card in the pile viewer, "
         "thicker than the HUD's because the card is.",
+    # EB-248's price band. The SENTENCE it prints is `KurageMemory.PriceText`'s
+    # and its multiplier is the law constant, interpolated -- pinned in
+    # KleeTests and in tier0/tests/test_kurage_base_kit.py. These three are
+    # where the band sits on the card and how big its type is, and the sim has
+    # no card to sit on.
+    "KurageMemoryPileRing.PriceFontSize":
+        "presentation: font size of the price line on a card in the pile "
+        "view.",
+    "KurageMemoryPileRing.PriceHeight":
+        "presentation: the price band's height, in the card's own "
+        "coordinates.",
+    "KurageMemoryPileRing.PriceInset":
+        "presentation: how far the price band sits above the bottom edge of "
+        "the card face, in pixels.",
     # EB-214's header. The SENTENCE is what R224 ruled and it is pinned in
     # KleeTests and in tier0/tests/test_kurage_base_kit.py; where it sits and
     # how big it is are presentation, and the sim has no screen to compare

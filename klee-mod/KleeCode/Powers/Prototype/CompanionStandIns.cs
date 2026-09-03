@@ -47,8 +47,15 @@ namespace KleeMod.Powers;
 /// same map from the sheet's <c>replaces:</c> key, and
 /// <c>tier0/tests/test_companion_standins.py</c> pins the two against each
 /// other by id.
+///
+/// PUBLIC rather than internal, for the reason <c>ProtoBombPower.Charges</c>
+/// gives: KleeTests is a separate assembly, the decision <see cref="HandOffTo"/>
+/// takes is the whole of this seam, and the alternative was an
+/// <c>InternalsVisibleTo</c> nothing else in this mod needs or an IL-shape
+/// assertion standing in for the decision itself -- which is exactly the
+/// substitution that let the defect below ship.
 /// </summary>
-internal static class CompanionStandIns
+public static class CompanionStandIns
 {
     /// <summary>
     /// The pairs, Universal -> stand-in, in the sheet's own order. Klee's four
@@ -94,9 +101,35 @@ internal static class CompanionStandIns
     internal static CardModel HandOff(CardModel picked, Player player)
     {
         if (!CompanionOverhaul.Enabled) return picked;
-        var characterId = CompanionPool.CharacterId(player);
+        return HandOffTo(picked, CompanionPool.CharacterId(player), Pairs());
+    }
+
+    /// <summary>
+    /// THE DECISION, with the pair table handed in instead of resolved, and
+    /// the only reason it is a second method is that the PINS could not reach
+    /// the first: <see cref="Pairs"/> goes through <c>ModelDb</c> and
+    /// <see cref="HandOff"/> takes a <c>Player</c>, both outside the headless
+    /// boundary (KleeTests/README), so the seam's own rule had no C# pin at all
+    /// -- which is how it shipped broken. `CompanionStandInHandOffTests` calls
+    /// THIS with two cards it constructed itself.
+    ///
+    /// THE COMPARISON IS THE WHOLE RULE, and it is a STRING one: the stand-in's
+    /// <c>PersonalPool</c> must BE the character id
+    /// <see cref="CompanionPool.CharacterId"/> returns. It was not. The codegen
+    /// emitted a Python list repr (<c>"['klee']"</c>) for a row that spells
+    /// `personal_pool:` as a one-member list, so this loop matched the pair,
+    /// failed the second test and handed Klee the Universal at both mouths --
+    /// silently, and in the engine the player plays, while the sim swapped
+    /// correctly the whole time (`tools/gen_klee_cards.personal_pool_id` is the
+    /// fix and `tier0.engine.state.Card.from_dict` the twin it was missing).
+    /// </summary>
+    public static CardModel HandOffTo(
+        CardModel picked, string? characterId,
+        IReadOnlyList<(CardModel Universal, CardModel StandIn)> pairs)
+    {
+        if (!CompanionOverhaul.Enabled) return picked;
         if (characterId == null) return picked;
-        foreach (var (universal, standIn) in Pairs())
+        foreach (var (universal, standIn) in pairs)
         {
             if (!ReferenceEquals(universal, picked)) continue;
             if ((standIn as ICompanionCard)?.PersonalPool != characterId)

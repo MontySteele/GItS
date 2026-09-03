@@ -1824,3 +1824,117 @@ fourth picture of the same character.
 THE DELETION RULE AT THE TOP OF THE SHEET BINDS THIS ROW: it leaves when the
 arm is accepted or rejected.
 ```
+
+## The companion stand-ins — the Hexerei family (2026-09-02)
+
+```
+FOUR MORE STAND-INS ON THE SEAM ABOVE, and every key on the row is that seam's
+unchanged: `personal_pool: [klee]` (the LIST form, which `Card.from_dict`
+normalises to the string), `replaces:` the Universal, `art_of:` the same id.
+Nothing new was added to the contract for this slice.
+
+WHAT MAKES THEM A FAMILY RATHER THAN CARETAKERS. The four caretakers read the
+Klee overhaul's explosion ledger, which is what a caretaker is for. These four
+read the REACTION, because Hexerei is the reaction family (the approved
+Mondstadt workshop sec.1; R236 sec.3), and each replaces a HEXEREI Universal
+and carries the mark itself. Same rarity, same cost, same nation as the row it
+stands in for -- a face swap, never a tier move, so the offer odds do not move
+for these four either.
+
+  proto_mc_albedo_tectonic_tide       for Solar Isotoma        Rare, 1, Power
+  proto_mc_fischl_sinful_hex          for Nightrider           Common, 1, Attack
+  proto_mc_sucrose_mollis_favonius    for Wind Spirit Creation Uncommon, 0, Skill
+  proto_mc_nicole_ladder_of_ascent    for Revelation           Rare, 2, Power
+
+THE MARK IS MECHANICAL NOW, and this slice is what made it so. The workshop's
+sec.1 pick 2 said "Hexerei is one word on a Universal. It does nothing by
+itself. Klee's own readers and any future Hexerei character's carry the
+payoff", and `hexerei: true` was carried inert on thirteen rows with a test
+(`test_the_hexerei_mark_is_inert`) whose own docstring said the reader that
+moved it would be the change that moved the test. Nicole's Ladder of Divine
+Ascent is that reader. So:
+
+  sim   `Card.hexerei`, read in `tier0.engine.companion_hexerei` and nowhere
+        else. The old gate is now a LIST of allowed readers
+        (`HEXEREI_READERS`), which keeps a second one a deliberate diff.
+  mod   a MARKER INTERFACE, `IHexereiCard`, emitted by the codegen onto any row
+        carrying the key. By type rather than by a bool or a list of ids, for
+        `CompanionStandIns`' reason: the compiler owns the correspondence, so a
+        row deleted from the surface takes its class with it and the arm stops
+        building. The interface is declared in Powers/Prototype, which a
+        release build removes, and every row carrying the mark is a `proto_`
+        row compiled under the same switch -- so a shipped card cannot
+        implement it.
+
+FIVE READERS NOW RIDE THE ONE REACTION SITE, and none of them widened it. The
+arm's rule is that "a reaction happened" has ONE definition per engine --
+`reactions._react` in the sim, `ReactionEffects.Resolve` in the mod -- and the
+two existing readers (Dahlia's Favonian Favor, Varka's Sturm und Drang) hang
+off it. Three of these four join them there: Albedo's on ANY reaction,
+Sucrose's on one that DEALS DAMAGE, Fischl's on an ELECTRO one.
+
+  AN ELECTRO REACTION IS DERIVED, NOT PASSED. The site hands over the
+  reaction's NAME and the CONSUMED AURA, and that pair names both elements:
+  Overload, Superconduct and Electro-Charged are the three reactions Electro
+  can be the TRIGGER of, and every other way Electro takes part is as the aura
+  that was standing. Anemo and Geo never stick as an aura, so the derivation is
+  total -- which is why no hook signature moved for this slice.
+
+  FISCHL'S VOLLEY DEALS ELECTRO AND CAN THEREFORE REACT AGAIN. Two things could
+  have gone wrong and neither does. THE LOG: the sim emits its own `reaction`
+  event AFTER this call and `settle_amp_delta` rewrites the first one since the
+  mark that carries a nonzero `amp_delta` -- but Electro is in no amplifier
+  pair, so every reaction the volley can cause carries 0 and is skipped. THE
+  DEPTH: each chained firing spends one standing aura and creates none, and a
+  volley that instead APPLIES Electro to a bare enemy causes no reaction, so
+  the chain is bounded by the enemies on the board.
+
+SUCROSE'S ADDITIVE IS DELIVERED AT THE REACTION SITE, and that is the one
+implementation call in the slice worth writing down. Her card and Durin's WHITE
+form speak about one quantity -- the damage a reaction deals of its own -- so
+they must reach the same reactions: the two amplifiers' contribution and the
+Overload splash, which is `companion_overhaul_reaction_mult`'s own written
+boundary. It is NOT folded into the amplifier arithmetic, because the mod's
+amplifier is a MULTIPLIER (`AuraPower.ModifyDamageMultiplicative` returns a
+factor, with no damage to add a constant to) and the mod's additive phase runs
+BEFORE the amplifier, so the same 4 would be scaled there and unscaled in the
+sim. THE ORDER, since the two stack: MULTIPLY FIRST, ADD AFTER -- White scales
+the reaction's own contribution inside the pipeline, the flat 4 lands
+afterwards, so White never scales the 4 and the 4 never enters an amplifier.
+Both engines, same sentence. Once per reaction on the reacted enemy, including
+Overload: "the reaction deals 4 additional damage" is one promise about one
+reaction, not one per body the splash touched.
+
+TWO WINDOWS CLOSE AT THE TURN END, NOT THE TURN START, which is where the
+CARETAKERS' two close. Fischl's and Sucrose's are reaction promises, and only
+the player makes reactions happen, so nothing is owed during the enemy's half;
+the caretakers' watchers have to survive it because a Mine goes off when an
+ENEMY attacks. So these two sit with Dahlia's and Bennett's in
+`companion_overhaul_turn_end` / `AfterSideTurnEnd`, and both hold a row in the
+co-tenancy ledger (`tier0/tests/test_reaction_phase_parity.py`).
+
+NICOLE PAYS FOR HER OWN CARD, once. Her stand-in carries the mark like the
+Universal it replaces, and the card-played site runs AFTER the body in both
+engines -- the same contract Diona's stand-in already leans on -- so the power
+the card just applied is standing when the site fires. That is a consequence of
+the engines' contract rather than a special case, and it is identical in both.
+
+TWO FACES ARE THE WORKSHOP'S SENTENCE WITH THIS REPO'S RENDERING APPLIED. The
+reaction is spelled "[gold]Elemental Reaction[/gold]" (the shipped spelling,
+which `tools/lint_text_conventions.py` enforces) and a bonus is "N additional
+damage" rather than "N more damage" (the base game's own ratio, 36 to 2).
+Fischl's ruled text also printed "Apply Electro", which the row does NOT: her
+row is an Attack with `applies_element: true`, so the element rides the
+AppliesX keyword chip -- the shipped companion sheet's convention, stated in
+the Mondstadt block header -- and printing it too would put the face over the
+120-character ceiling for a clause the chip already shows.
+
+EVERY ROW'S UPGRADE IS DERIVED. `tier0.content.upgrades.prototype_default_delta`
+finds a printed number on all four (a power stack on each, plus Fischl's
+damage), so none of them states an `upgrade:` block; the Universal Sucrose
+replaces carries a `no_upgrade:` reason and her stand-in does not need one,
+because the delta it derives is the power stack and never the printed draw.
+
+THE DELETION RULE AT THE TOP OF THE SHEET BINDS ALL FOUR: they leave when the
+slice is accepted or rejected.
+```

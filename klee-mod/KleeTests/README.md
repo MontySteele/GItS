@@ -136,9 +136,19 @@ those types do not exist, so a pin against them could not compile either.
 
 | `LiveBurn20260902Tests.cs` | 7 | THE 2026-09-02 LIVE BURN -- six defects found by PLAYING. `EB-289`: the Bomb badge's count is the live charge list and not the power's stack, which the three pure takes cannot lower, plus the structural read that one Bomb is one explosion is one Spark. `EB-291` and `EB-293`: the Mine tip names Weak and the Plan tip covers a plan-only card, both read off the compiled `ldstr` set. `EB-297`: the Burst gauge predicate, both ways round and never for another character. `EB-300`: the navigation restore fires on a custom target type and on nothing else, against a real registration in the library's own table. What is NOT here is named in the file: the controller walk, the drawn gauge and `EB-292`'s source are all live checks. |
 
-**With the flag: 563 tests, all green** (measured 2026-09-02,
+| `CompanionStandInHandOffTests.cs` | 10 | `EB-320`: THE COMPANION STAND-IN HAND-OFF, which shipped with no C# pin at all and was caught by a blind seat being handed the Universal. REAL for the decision and for BOTH SIDES of the string comparison that failed: the seam's `HandOffTo` takes the pair table as a parameter, so four pairs of SHIPPED generated rows are constructed here and swapped, refused for another character, refused for a base-game seat and refused with the arm off; and the id is a real `Seat.Klee()` Player through `CompanionPool.CharacterId`, asserted equal to the `PersonalPool` each stand-in prints. Class-wide beside it, the regression itself: no personal-pool row on the prototype surface spells its pool as a Python list (`"['klee']"` matched no character and swapped nothing), and every one of them is an id some seat actually answers. Structural where `ModelDb` is needed: that the game's own mouth decides through the pinned method, and that the shipped pair table names the same eight classes. |
+
+**With the flag: 703 tests** (measured 2026-09-02,
 `dotnet test -p:PrototypeCards=true`). With all four arm switches on, the
 three `The_arm_ships_off` pins fail BY CONSTRUCTION and nothing else does.
+
+ONE RED STANDS AT THAT MEASUREMENT, written down rather than left invisible:
+`KokomiOverhaulRuleTests.Rule2_the_eleven_planned_clauses_are_the_slices_eleven`
+pins ELEVEN plan clause kinds and R236's Crystal Collapse shipped a twelfth
+(`PlayCopyOfCompanion`), which `CrystalCollapseTests` pins from the other side.
+It is a Kokomi-slice row and nothing here moved it. It went unseen because
+**this project is not in CI** ("Not a deploy gate yet", above) — the same
+reason `EB-320`'s defect reached a seat.
 
 ## Co-op coverage
 

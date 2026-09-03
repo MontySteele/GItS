@@ -14,9 +14,10 @@ import random
 from typing import Callable
 
 from tier0 import constants as C
-from tier0.engine import (companion_standins, effects, furina_reframe,
-                          klee_overhaul, kokomi_plan, potions, powers,
-                          reactions, refpowers, relics, resources)
+from tier0.engine import (companion_hexerei, companion_standins, effects,
+                          furina_reframe, klee_overhaul, kokomi_plan,
+                          potions, powers, reactions, refpowers, relics,
+                          resources)
 from tier0.engine.state import (Card, CombatState, Enemy, Player,
                                 remove_instance, sync_fanfare_cap_to_max_hp)
 
@@ -675,6 +676,10 @@ def _finish_play(state: CombatState, card: Card,
         # played AFTER the Bomb pays at once instead of arming a watcher for a
         # turn that has already spent its explosion.
         companion_standins.on_played(state, card)
+        # THE HEXEREI FAMILY, same broadcast: Nicole's Ladder of Divine
+        # Ascent pays on every Hexerei card played, and reads the mark
+        # off the card. `tier0.engine.companion_hexerei`.
+        companion_hexerei.note_card_played(state, card)
         if replay_index == 0 and card.is_companion:
             # FURINA REFRAME (§4.3, `F3` (1) / `F4` (1)): a Companion play
             # makes the FRONT Salon member perform, then rotates it to the

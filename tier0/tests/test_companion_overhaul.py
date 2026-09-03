@@ -217,6 +217,13 @@ HEXEREI_ROWS = {
     # The coven Personal off the same sec.3 line as the shipped Prune row it
     # supersedes: Prune is a tagged character in the workshop's own list.
     "proto_mc_prune_hexhunter_chime",
+    # THE FAMILY STAND-INS (R236 sec.3), each tagged like the Universal it is
+    # handed out in place of -- which is what lets Nicole's own stand-in pay
+    # for the other three.
+    "proto_mc_albedo_tectonic_tide",
+    "proto_mc_fischl_sinful_hex",
+    "proto_mc_nicole_ladder_of_ascent",
+    "proto_mc_sucrose_mollis_favonius",
 }
 
 
@@ -226,12 +233,23 @@ def test_the_hexerei_mark_is_on_exactly_the_rows_the_workshop_names():
     assert marked == HEXEREI_ROWS
 
 
-def test_the_hexerei_mark_is_inert():
-    """Pick 2's words: "It does nothing by itself." Nothing outside the
-    dataclass declaration and the codegen's inert whitelist reads the field,
-    so this is the gate that keeps it a mark rather than a mechanic. When a
-    Klee reader is authored it is that change's job to move this test, and
-    the failure is what makes the change deliberate."""
+#: THE FILES ALLOWED TO NAME THE FAMILY MARK, and the list is the whole point.
+#:
+#: Pick 2's words were "It does nothing by itself", and this test was the gate
+#: that kept it so: the field's own declaration, and nothing else. R236 sec.3
+#: MOVED IT, which is exactly what the gate was built to force -- Nicole's
+#: family stand-in, "whenever you play a Hexerei card", is the Klee reader pick
+#: 2 said would carry the payoff. So the mark is mechanical now and the gate is
+#: a list of ONE reader rather than of none. A second reader is still a
+#: deliberate change: adding a file here means somebody answered "does this
+#: row's FAMILY really decide a rule?" out loud, in a diff.
+HEXEREI_READERS = [
+    "tier0/engine/companion_hexerei.py",     # Nicole's Ladder of Divine Ascent
+    "tier0/engine/state.py",                 # the field's own declaration
+]
+
+
+def test_only_the_declared_readers_name_the_hexerei_mark():
     readers = []
     for path in sorted((REPO / "tier0").rglob("*.py")):
         if "tests" in path.parts:
@@ -240,9 +258,8 @@ def test_the_hexerei_mark_is_inert():
         for hit in re.finditer(r"\.hexerei\b|\bhexerei\s*[:=]", text):
             line = text[:hit.start()].count("\n") + 1
             readers.append(f"{path.relative_to(REPO).as_posix()}:{line}")
-    # The one legal mention is the field's own declaration on Card.
-    decl = "tier0/engine/state.py"
-    assert [r.split(":")[0] for r in readers] == [decl], readers
+    assert sorted({r.split(":")[0] for r in readers}) == HEXEREI_READERS, \
+        readers
 
 
 # ---------------------------------------------------------------------------

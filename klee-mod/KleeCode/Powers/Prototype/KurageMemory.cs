@@ -1235,12 +1235,44 @@ public static class KurageMemory
     }
 
     /// <summary>
+    /// `EB-248`. ONE MEMORY'S PRICE AND THE COST THE RULE MULTIPLIED, in the
+    /// one form every queue surface prints -- the strip below, the pile view
+    /// (<c>Vfx/Prototype/KurageMemoryCard.cs</c>) and, mirrored, the blind
+    /// page's queue block in <c>understudy/blindplay.py</c>.
+    ///
+    /// THE SECOND HALF IS THE WHOLE POINT. The rule prices off the EFFECTIVE
+    /// face (<see cref="FaceCost"/>), a Muster recruit's discount included, so
+    /// a card whose printed face reads two enrols at three and the player has
+    /// no route from the one number to the other. `KURAGECAD-W1`'s tester
+    /// named that gap unprompted. Printing the cost the rule read closes it
+    /// without printing the rule: the price is checkable against the face by
+    /// arithmetic, and nobody has to know how Muster is implemented.
+    ///
+    /// A FREE MEMORY CARRIES NO DERIVATION. A price is
+    /// <c>max(0, cost) x CostPerEnergy</c>, so a zero price means a zero cost;
+    /// a derivation there would restate the answer rather than explain it, and
+    /// §14.2's ruled reading -- a 0-cost memory reads as free, because it is --
+    /// is the one this surface keeps.
+    ///
+    /// THE RATE INTERPOLATES, never typed: a retune of
+    /// <see cref="KurageMemoryLaw.CostPerEnergy"/> moves the sentence with the
+    /// rule, which is `lint_prose_constants`' rule applied one surface out.
+    /// </summary>
+    public static string PriceText(int cost, int price) =>
+        price == 0
+            ? "free"
+            : $"{price} Charge, cost {cost} x {KurageMemoryLaw.CostPerEnergy}";
+
+    /// <summary>
     /// The whole strip as the lines the gauge label draws: the reading, then
     /// the queue in order, front first, each with its own price and the body it
     /// will hit. §11.5: under v2 every memory cost the same and the strip only
     /// had to draw ONE number; under v3 it must draw a price per card, and the
     /// block is a STATE it has to show rather than a number that happens to be
     /// too small.
+    ///
+    /// `EB-248`: each price arrives with the cost it was multiplied from,
+    /// through <see cref="PriceText"/>, so the queue is derivable from itself.
     /// </summary>
     public static string StripText(Player? player)
     {
@@ -1253,7 +1285,7 @@ public static class KurageMemory
         {
             var e = queue[i];
             var aim = e.Target is { IsAlive: true } t ? t.Name : "random";
-            var price = e.Price == 0 ? "free" : $"{e.Price} Charge";
+            var price = PriceText(e.Cost, e.Price);
             var mark = i == 0 && bank < e.Price ? "  (blocked)" : string.Empty;
             lines.Add($"{i + 1}. {e.Name} — {price} — {aim}{mark}");
         }

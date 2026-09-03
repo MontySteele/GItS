@@ -41,7 +41,7 @@ public sealed class ProtoMcNoelleIGotYourBack : CustomCardModel, ICompanionCard
 
     public Element CompanionElement => Element.Geo;
 
-    public string? PersonalPool => "['klee']";
+    public string? PersonalPool => "klee";
 
     public string? Nation => "mondstadt";
 

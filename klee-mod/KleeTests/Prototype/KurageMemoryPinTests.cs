@@ -179,6 +179,37 @@ public class KurageMemoryPinTests : System.IDisposable
     }
 
     [Fact]
+    public void A_price_prints_the_cost_it_was_multiplied_from()
+    {
+        // EB-248. The rule prices off the EFFECTIVE face, so a Muster recruit
+        // printing 2 enrols at 3 and the card and the queue disagree on their
+        // faces with nothing joining them. `KURAGECAD-W1`'s tester named that
+        // unprompted. The queue's own line now carries the cost the rule read,
+        // which is the whole repair: legibility, not arithmetic -- the price
+        // itself is unchanged and pinned by the tests above.
+        var recruit = MutableProbe();
+        recruit.EnergyCost.AddThisCombat(-1, reduceOnly: false);
+        var kokomi = Seat.Kokomi();
+        KurageMemory.NoteMusterRecruit(kokomi.Player, recruit, 1);
+
+        Assert.Equal("3 Charge, cost 1 x 3",
+                     KurageMemory.PriceText(KurageMemory.FaceCost(recruit),
+                                            KurageMemory.Price(recruit)!.Value));
+        KurageMemory.ResetForCombat();
+
+        // The rate is interpolated rather than typed, so a retune moves the
+        // sentence with the rule.
+        Assert.Equal(
+            $"6 Charge, cost 2 x {KurageMemory.KurageMemoryLaw.CostPerEnergy}",
+            KurageMemory.PriceText(2, 6));
+
+        // A FREE memory reads as free and carries no derivation: a zero price
+        // is a zero cost, and "cost 0 x 3" would restate the answer rather
+        // than explain it (sec.14.2: it reads as free, because it is).
+        Assert.Equal("free", KurageMemory.PriceText(0, 0));
+    }
+
+    [Fact]
     public void An_x_cost_face_has_no_price_and_is_refused()
     {
         // Refused at the door rather than priced off a turn that is over.
