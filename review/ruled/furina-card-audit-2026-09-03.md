@@ -1,8 +1,8 @@
-Status: OPEN (3 picks, the rest applied as defaults for the fold)
+Status: RULED R245 2026-09-03
 
 # Furina card audit: the shipped sheet, read by design against the reframe
 
-Three picks. Twelve rows change, seventy-two stand. No sheet number moves
+Ruled R245 (§4): picks 1 and 2 at their defaults, Singer of Many Waters on your own shape. Twelve rows change, seventy-two stand. No sheet number moves
 in this packet: Furina's sheet is at Balance and a sheet edit is a stamp
 event, so every change below is the fold's worksheet (R220 B, Furina last),
 ruled now so the fold has its answers.
@@ -41,9 +41,9 @@ last three are your picks (§4).
 | Undercurrent (C, 2) | 2 damage to ALL; upgrade twice | the same at cost 1 | Cleave is 8 to all for 1. Two energy for 2 and Hydro on every enemy is the aura setup priced as an attack; Rain of Roses does the aura job at 1. |
 | Stagehands (U power, 1) | "final bow" in the text | "Evoke" | Wording only; the bow is the Evoke now. Lint proves it cosmetic (R179). |
 | Stage Presence (basic, 1) | Gain 6 Block | noted for F16 | Klee's and Kokomi's Defend is 5 and R244 said the basics are meant to be bad. F16's starter delta already rewrites this starter; the number rides it. |
-| Full Ensemble (U, 2) | deploys all three members | pick 1 | On a full stage it is three free Evokes and three performances for 2 energy. |
-| The Final Verdict (R, 2) | damage equal to Fanfare, then the meter crashes and its floor drops 30 | pick 2 | It is a drain, and slice 2 builds the two the packet ruled. A third drain makes draining the default (§4.6). |
-| Singer of Many Waters (R, 1, Exhaust) | heal 6 | pick 3 | The base game removed healing outside Ironclad, and a Rare that heals 6 once is neither on genre nor Rare. |
+| Full Ensemble (U, 2) | deploys all three members | fills the empty seats only (R245) | On a full stage it is three free Evokes and three performances for 2 energy. |
+| The Final Verdict (R, 2) | damage equal to Fanfare, then the meter crashes and its floor drops 30 | retired (R245) | It is a drain, and slice 2 builds the two the packet ruled. A third drain makes draining the default (§4.6). |
+| Singer of Many Waters (R, 1, Exhaust) | heal 6 | "Heal 1 for 6 turns", Exhaust (R245) | The base game removed healing outside Ironclad, and a Rare that heals 6 once is neither on genre nor Rare. |
 
 ## 2. Rows read and left alone
 
@@ -128,38 +128,26 @@ sheet is "press button, delete act one".
 fourth member (F1) and its cards; none of these 84 rows deploys a member
 that does not exist, and the audit does not invent one.
 
-## 4. Picks
+## 4. Picks, ruled R245 (2026-09-03)
 
-**1. Full Ensemble on a full stage.** Three deploys onto three occupied
-seats is three free Evokes plus three performances, for 2 energy, on an
-uncommon, and the upgrade makes it 1.
+[USER], verbatim: "On Furina, I'm fine with the defaults, but let's reauthor
+Singer of Many Waters as "Heal 1 for 6 turns". Strictly speaking it breaks
+the "no heals" rule, but Furina is canonically a healer and thus can have it
+as a Rare + Exhaust. At that going rate, you usually don't get the full
+amount unless you deliberately stall. Otherwise approved."
 
-  1. **It fills the empty seats only (default).** "Deploy every member not
-     on stage." The setup card, worth its 2 on an empty stage and nothing
-     on a full one; Grand Gala keeps the overflow Evoke as the Rare's
-     payoff, with Exhaust. Upgrade stays cost 1.
-  2. As written, three free Evokes for 2, the reward for filling the stage
-     taken to its limit. Fun once; then it is the only card you cast.
-  3. As written at cost 3, upgrade 2.
+1. **Full Ensemble.** RULED at the default: "Deploy every member not on
+   stage." The setup card; Grand Gala keeps the overflow Evoke as the Rare's
+   payoff. Upgrade stays cost 1.
+2. **The Final Verdict.** RULED at the default: retired at the fold. Two
+   drains, as F12 (1) ruled; its art goes to the crop pool.
+3. **Singer of Many Waters.** RULED on your own shape, not on any of the
+   three options: "Exhaust. For 6 turns, at the start of your turn heal 1
+   HP." Rare, cost 1. The base game keeps healing to Ironclad; Furina is
+   canonically the healer, and the rate is the price: six turns is longer
+   than most fights, so the full 6 is paid only to a player who stalls for
+   it. Upgrade, derived: eight turns, not 2 a turn, because doubling the
+   rate is what the stall shape exists to refuse.
 
-**2. The Final Verdict beside the slice-2 drains.** It reads the whole
-meter and crashes it, which is a drain by another name; slice 2 builds Let
-the People Rejoice (drain for damage to all) and Intermission (drain for
-Block), the two F12 (1) ruled.
-
-  1. **Retire it (default).** Two drains, as ruled; its art goes to the
-     crop pool. The archon register keeps eleven Rares.
-  2. Keep it as the single-target drain and let Let the People Rejoice be
-     the all-enemy one, three drains, against §4.6's own warning.
-  3. Re-author it as a reader with no crash: "Deal damage equal to half
-     your Fanfare" at 1, beside High Tide.
-
-**3. Singer of Many Waters.** A Rare that heals 6 once, in a game that
-removed healing from every class but one.
-
-  1. Retire it.
-  2. **Re-author on a power the mod already has (default):** "At the start
-     of your turn, gain 2 Encore", Power, Rare, cost 1, upgrade 3. Encore
-     per turn is the engine's version of Metallicize and it feeds both the
-     hold and the aim.
-  3. Keep the heal, at Uncommon and cost 0.
+The six D defaults in §1 stand as applied. All nine land at the fold with
+the sheet's re-authoring (R220 B), none before.
