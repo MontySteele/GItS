@@ -73,6 +73,11 @@ def _emitted(class_name):
     return (GENERATED / f"{class_name}.cs").read_text(encoding="utf-8")
 
 
+def _manifest():
+    import json
+    return json.loads((GENERATED / "manifest.json").read_text(encoding="utf-8"))
+
+
 def _face(source):
     return re.search(r'\("description", "((?:[^"\\]|\\.)*)"\)',
                      source).group(1)
@@ -330,28 +335,38 @@ def test_the_op_is_registered_and_takes_no_fields():
 # 3. THE UPGRADES -- the Prototype-stage rule, extended to a fifth arm
 # ======================================================================
 
-def test_every_row_takes_the_prototype_stage_upgrade_rule():
-    """`EB-283` / `EB-315`. The reframe joined `PROTOTYPE_DEFAULT_PREFIXES` on
-    2026-09-02 for the reason that list exists at all: the alternative is five
-    rows whose campfire hands the card back unchanged, which is `EB-277`
-    verbatim, and five per-row deltas invented by a build would be a
-    Balance-stage ruling nobody made.
+def test_four_rows_carry_the_designers_upgrade_and_the_rare_takes_the_rule():
+    """`EB-283` / `EB-315`, and BOTH channels are live on this slice.
 
-    The rule's own clauses decide which delta each row gets, and this asserts
-    the OUTCOME rather than re-deriving it: the Rare costs 2 and prints no
-    literal number the rule can move, so it takes the cost clause; the other
-    four are 1-cost rows with no movable number and take the added draw.
+    An AUTHORED `upgrade:` block always wins -- that is how a ruled delta
+    replaces the Prototype-stage default without the rule having to be removed
+    -- and four of these five rows carry one: an Encore rider on the starter, a
+    price cut on each Evoke, and Retain on the survival drain. The Rare
+    declares nothing and takes the rule's own last-resort clause, which reads
+    its cost because a formula-scaled hit has no literal to bump.
+
+    The reframe is IN `PROTOTYPE_DEFAULT_PREFIXES` all the same, and that is
+    not redundant: the list is what makes a row declaring nothing get a
+    campfire that does something, and the Rare is the row proving it.
     """
     assert "proto_fr_" in upgrades.PROTOTYPE_DEFAULT_PREFIXES
     rows = _sheet_rows()
+    manifest = _manifest()["upgrades"]
 
+    assert rows["proto_fr_salon_debut_named"]["upgrade"] == {
+        "add": {"op": "gain_encore", "amount": 2}}
+    assert rows["proto_fr_curtain_call"]["upgrade"] == {"encore_cost": -1}
+    assert rows["proto_fr_exit_stage_left"]["upgrade"] == {"encore_cost": -1}
+    assert rows["proto_fr_intermission"]["upgrade"] == {"retain": True}
+    assert "upgrade" not in rows["proto_fr_let_the_people_rejoice"]
+
+    # The manifest is what the emitted C# was actually built from, so the
+    # authored blocks and the derived one are read there rather than off the
+    # sheet a second time.
     for row_id in ROWS:
-        row = rows[row_id]
-        delta = upgrades.prototype_default_delta(
-            row_id, row.get("cost"), row.get("effects", []),
-            bool(row.get("exhaust")), row.get("plan") or [])
-        assert delta, row_id
-
+        assert manifest.get(row_id), row_id
+    assert manifest["proto_fr_let_the_people_rejoice"] == {
+        "cost": upgrades.PROTOTYPE_COST_DELTA}
     assert upgrades.prototype_default_delta(
         "proto_fr_let_the_people_rejoice", 2,
         rows["proto_fr_let_the_people_rejoice"]["effects"]) == {
@@ -360,16 +375,91 @@ def test_every_row_takes_the_prototype_stage_upgrade_rule():
 
 def test_the_upgrade_is_visible_on_every_face():
     """The gate's own question, asked of the committed tree: an upgrade a
-    player cannot SEE is a campfire choice nobody can grade. Four rows say so
-    in an `{IfUpgraded:show:...}` clause and the Rare says it in the cost pip,
-    which is exactly the two shapes `gen_prototype_cards` accepts."""
+    player cannot SEE is a campfire choice nobody can grade. The slice uses
+    three of the four shapes `gen_prototype_cards` accepts -- an
+    `{IfUpgraded:show:...}` clause, the keyword rail and the cost pip -- and
+    every row uses exactly one."""
     for cls in ("ProtoFrSalonDebutNamed", "ProtoFrCurtainCall",
-                "ProtoFrExitStageLeft", "ProtoFrIntermission"):
+                "ProtoFrExitStageLeft"):
         assert "{IfUpgraded:show:" in _face(_emitted(cls)), cls
+
+    # Retain shows on the KEYWORD RAIL under the art, not in the sentence.
+    keeper = _emitted("ProtoFrIntermission")
+    assert "AddKeyword(CardKeyword.Retain)" in keeper
+    assert "{IfUpgraded:show:" not in _face(keeper)
 
     rare = _emitted("ProtoFrLetThePeopleRejoice")
     assert "EnergyCost.UpgradeBy(-1)" in rare
     assert "{IfUpgraded:show:" not in _face(rare)
+
+
+def test_the_encore_price_upgrades_on_the_face_and_at_the_gate():
+    """THE DEFECT THIS SLICE HIT, and it is `EB-288`/`EB-291`'s class arriving
+    through the one field that was meant to be free text.
+
+    A prototype row states its own face (`EB-215`), so the two Evokes wrote
+    "Spend 2 [gold]Encore[/gold]." as a LITERAL. `upgrade: {encore_cost: -1}`
+    then emitted a real `UpgradeCostBy(-1)` -- the gate and the badge charge the
+    moved number -- while the face went on printing the old one, and the
+    emitter's own visibility gate refused the row for exactly that reason
+    ("OnUpgrade moves no var and the face prints no upgradable number").
+
+    The price is the EMITTER'S sentence now, on both face paths, built by the
+    one `meter_price_clauses`. So a row's `description:` says what the card
+    DOES and never what it costs, and the printed price and the charged price
+    are one number.
+    """
+    rows = _sheet_rows()
+    for row_id in ("proto_fr_curtain_call", "proto_fr_exit_stage_left"):
+        assert "Spend" not in rows[row_id]["description"], row_id
+        assert "Encore" not in rows[row_id]["description"], row_id
+
+    # 2 -> 1: the base game's own swap, the shape `dress_rehearsal` ships.
+    curtain = _face(_emitted("ProtoFrCurtainCall"))
+    assert curtain.startswith("Spend {IfUpgraded:show:1|2} [gold]Encore[/gold].")
+
+    # 1 -> 0: THE WHOLE SENTENCE GOES on the `+` card, and the separator goes
+    # with it. "Spend 0 [gold]Encore[/gold]." is not a smaller price, it is a
+    # line claiming a cost the card does not have -- and the rendered path's
+    # own first clause already skips a row priced at 0.
+    exit_face = _face(_emitted("ProtoFrExitStageLeft"))
+    assert exit_face.startswith(
+        "{IfUpgraded:show:|Spend 1 [gold]Encore[/gold]. }[gold]Evoke[/gold]")
+    assert "Spend 0" not in exit_face
+
+    # The gate moves with the face: one emitted call, on the resource the
+    # playability check refuses on and the badge reads.
+    for cls in ("ProtoFrCurtainCall", "ProtoFrExitStageLeft"):
+        assert ("CustomResources<EncoreResource>.Cost(this)!.UpgradeCostBy(-1);"
+                ) in _emitted(cls), cls
+
+
+def test_the_price_sentence_has_one_builder_for_both_face_paths():
+    """The rendered path and the authored path cannot disagree about what a
+    price looks like or about whether it upgrades, because there is one
+    function. Driven directly, which is the only way to see the third shape
+    without a row that has it."""
+    import sys
+    sys.path.insert(0, str(REPO / "tools"))
+    import gen_klee_cards as gen                             # noqa: E402
+
+    assert gen.meter_price_clauses({"encore_cost": 2}, {}) == [
+        "Spend 2 [gold]Encore[/gold]."]
+    assert gen.meter_price_clauses({"encore_cost": 2}, {"encore_cost": -1}) == [
+        "Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]."]
+    assert gen.meter_price_clauses({"encore_cost": 1}, {"encore_cost": -1}) == [
+        "{IfUpgraded:show:|Spend 1 [gold]Encore[/gold].}"]
+    # An over-large delta is a sheet defect, not a refund.
+    assert gen.meter_price_clauses({"encore_cost": 1}, {"encore_cost": -4}) == [
+        "{IfUpgraded:show:|Spend 1 [gold]Encore[/gold].}"]
+    # A row with no price prints no sentence, upgraded or not.
+    assert gen.meter_price_clauses({}, {"encore_cost": -1}) == []
+
+    # And the vanishing clause takes the following space INSIDE the hole, so
+    # the `+` face does not open with a blank.
+    assert gen._face_from_parts(
+        ["{IfUpgraded:show:|Spend 1 [gold]Encore[/gold].}", "Evoke."]) == (
+            "{IfUpgraded:show:|Spend 1 [gold]Encore[/gold]. }Evoke.")
 
 
 # ======================================================================
@@ -463,9 +553,12 @@ def test_the_faces_print_what_the_rows_do():
     assert faces["ProtoFrSalonDebutNamed"].startswith(
         "[gold]Deploy[/gold] Mademoiselle Crabaletta.")
     # The Encore price is PRINTED, which is this sheet's shipped convention
-    # (`Spend N [gold]Encore[/gold].` on every priced Furina row).
-    assert faces["ProtoFrCurtainCall"].startswith("Spend 2 [gold]Encore[/gold].")
-    assert faces["ProtoFrExitStageLeft"].startswith("Spend 1 [gold]Encore[/gold].")
+    # (`Spend N [gold]Encore[/gold].` on every priced Furina row), and it is
+    # the EMITTER's sentence rather than the row's -- the upgraded halves are
+    # `test_the_encore_price_upgrades_on_the_face_and_at_the_gate`.
+    assert ("Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]."
+            in faces["ProtoFrCurtainCall"])
+    assert "Spend 1 [gold]Encore[/gold]." in faces["ProtoFrExitStageLeft"]
     # THE FALLBACK IS PRINTED, and it has to be: the engine does not waste an
     # aimed Evoke whose member is absent, it Evokes the front and says so
     # (`furina_reframe.EVOKE_TARGET_ABSENT`). A face that stopped at the name

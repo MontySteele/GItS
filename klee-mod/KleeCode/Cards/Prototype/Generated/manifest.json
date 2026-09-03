@@ -349,30 +349,21 @@
   },
   "upgrades": {
     "proto_fr_curtain_call": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "encore_cost": -1
     },
     "proto_fr_exit_stage_left": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "encore_cost": -1
     },
     "proto_fr_intermission": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "retain": true
     },
     "proto_fr_let_the_people_rejoice": {
       "cost": -1
     },
     "proto_fr_salon_debut_named": {
       "add": {
-        "op": "draw",
-        "amount": 1
+        "op": "gain_encore",
+        "amount": 2
       }
     },
     "proto_kk_ambush": {

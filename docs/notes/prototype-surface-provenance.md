@@ -1987,6 +1987,16 @@ this sheet's shipped convention -- every priced Furina row on
 shipped machinery on both engines: the playability gate and the spend run
 before the op resolves, which is why `F7` (1) needed no port.
 
+THE SENTENCE IS THE CODEGEN'S AND NOT THE ROW'S, which is what the designer's
+`upgrade: {encore_cost: -1}` forced. The row used to write "Spend 2
+[gold]Encore[/gold]." into its own `description:`, and a literal cannot move:
+the delta emitted a real `UpgradeCostBy(-1)`, the gate and the badge charged
+the moved number, and the face went on printing the old one -- so the emitter's
+own visibility gate refused the row by name. `meter_price_clauses` is now the
+ONE builder both face paths call, the base card prints "Spend 2 Encore" and the
+`+` card "Spend 1 Encore", and a row's `description:` states what the card DOES
+and never what it costs.
+
 ## proto_fr_exit_stage_left
 
 Face: "Evoke Surintendante Chevalmarin." The aimed Evoke (`F5` (2)); her bow is
@@ -2005,6 +2015,12 @@ The aim is a `member:` ARGUMENT on the shipped `salon_bow` verb and not a new
 op, which is the slot-6 ruling's own shape on both sides: registering a
 `salon_evoke` would have grown the priced-op set, and that is a
 `DRAFTER_VERSION` bump bought for a synonym.
+
+ITS UPGRADE TAKES THE PRICE TO NOTHING, which is the one shape a printed price
+had no wording for. "Spend 0 [gold]Encore[/gold]." is not a smaller price, it
+is a line claiming a cost the card does not have -- and the rendered path's own
+first clause already skips a row priced at 0. So the `+` card drops the whole
+sentence, separator included, and the base card is unchanged.
 
 ## proto_fr_let_the_people_rejoice
 

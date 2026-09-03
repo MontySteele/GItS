@@ -471,6 +471,56 @@ public class FurinaReframeSliceTwoTests
     }
 
     [Fact]
+    public void An_upgraded_evoke_charges_the_price_its_upgraded_face_prints()
+    {
+        // THE OTHER HALF OF THE PRICE, and the reason the face had to learn to
+        // upgrade at all: `upgrade: {encore_cost: -1}` emits a real
+        // `UpgradeCostBy(-1)`, so the GATE and the BADGE charge the moved
+        // number the moment the smith is used. A face that went on printing the
+        // canonical price would be a printed number that is not the number the
+        // card charges -- `EB-288`/`EB-291`'s defect class, one field over.
+        //
+        // `GetResolved` is what both this read and `CustomResourceCost
+        // .ResourceCheck` go through, which is what makes this the gate's own
+        // number rather than a second copy of it.
+        var curtain = new ProtoFrCurtainCall();
+        Seat.Set(curtain, "IsMutable", true);
+        BaseLib.Abstracts.CustomResources<EncoreResource>.Cost(curtain)!
+            .UpgradeCostBy(-1);
+        Assert.Equal(1, MeterCost.Priced(curtain)!.Value.Amount);
+
+        // Exit Stage Left+ charges NOTHING, which is why its `+` face drops the
+        // sentence instead of printing "Spend 0". `Priced` returns null at 0 --
+        // the card has no meter price at all -- and that is the same answer the
+        // three unpriced rows above give.
+        var exit = new ProtoFrExitStageLeft();
+        Seat.Set(exit, "IsMutable", true);
+        BaseLib.Abstracts.CustomResources<EncoreResource>.Cost(exit)!
+            .UpgradeCostBy(-1);
+        Assert.Null(MeterCost.Priced(exit));
+    }
+
+    [Fact]
+    public void An_upgraded_evoke_is_affordable_where_its_base_was_not()
+    {
+        // The refusal below, moved by one: a seat holding 1 Encore cannot play
+        // Curtain Call and can play Curtain Call+. That is the whole of what
+        // the upgrade buys, asserted on the bank rather than on the sentence.
+        var seat = Furina();
+        FurinaResources.GainEncore(seat.Creature, 1);
+        var card = Held<ProtoFrCurtainCall>(seat);
+
+        var basePrice = MeterCost.Priced(new ProtoFrCurtainCall())!.Value;
+        Assert.False(MeterCost.Affordable(card, basePrice));
+
+        var upgraded = new ProtoFrCurtainCall();
+        Seat.Set(upgraded, "IsMutable", true);
+        BaseLib.Abstracts.CustomResources<EncoreResource>.Cost(upgraded)!
+            .UpgradeCostBy(-1);
+        Assert.True(MeterCost.Affordable(card, MeterCost.Priced(upgraded)!.Value));
+    }
+
+    [Fact]
     public void An_evoke_is_refused_below_its_price_and_allowed_at_it()
     {
         // THE REFUSAL, on the seat's real buffer. One below the price is not

@@ -45,13 +45,13 @@ public sealed class ProtoFrCurtainCall : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Curtain Call"),
-        ("description", "Spend 2 [gold]Encore[/gold]. [gold]Evoke[/gold] the front [gold]Salon[/gold] member. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]. [gold]Evoke[/gold] the front [gold]Salon[/gold] member."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,14 +65,10 @@ public sealed class ProtoFrCurtainCall : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await SalonMemberPower.BowLeftmost(choiceContext, Owner.Creature, 1);
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        CustomResources<EncoreResource>.Cost(this)!.UpgradeCostBy(-1);
     }
 }

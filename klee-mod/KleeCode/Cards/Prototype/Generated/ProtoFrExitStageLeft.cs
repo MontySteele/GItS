@@ -45,13 +45,13 @@ public sealed class ProtoFrExitStageLeft : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Exit Stage Left"),
-        ("description", "Spend 1 [gold]Encore[/gold]. [gold]Evoke[/gold] Surintendante Chevalmarin, or the front member if she is not on stage. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "{IfUpgraded:show:|Spend 1 [gold]Encore[/gold]. }[gold]Evoke[/gold] Surintendante Chevalmarin, or the front member if she is not on stage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,14 +65,10 @@ public sealed class ProtoFrExitStageLeft : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await SalonMemberPower.BowLeftmost(choiceContext, Owner.Creature, 1, SalonMember.Chevalmarin);
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        CustomResources<EncoreResource>.Cost(this)!.UpgradeCostBy(-1);
     }
 }

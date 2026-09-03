@@ -7906,6 +7906,85 @@ CARD_COUNT_FACE_VARS = frozenset({"Cards", "PlanCards"})
 LIVE_MODIFIED_FACE_KEYS = frozenset({"damage", "block"})
 
 
+#: A clause whose UPGRADED branch is empty -- the whole sentence disappears on
+#: the `+` card. Matched so `_face_from_parts` can move the separator INSIDE
+#: the hole; see that function.
+_VANISHING_CLAUSE = re.compile(r"^\{IfUpgraded:show:\|(?P<base>.*)\}$", re.S)
+
+
+def _face_from_parts(parts: list[str]) -> str:
+    """A face from its sentences: one space between them, and no stray space
+    where a sentence VANISHES.
+
+    `" ".join` is right for every clause that always prints. It is wrong for
+    one that may not: `{IfUpgraded:show:|Spend 1 [gold]Encore[/gold].}` renders
+    as NOTHING on the upgraded card, and the join's space renders anyway -- so
+    the `+` face would open with a leading blank. The separator therefore moves
+    INSIDE the hole's base branch, where it disappears with the sentence it
+    belongs to, and the joiner skips its own space after such a clause.
+
+    One implementation for both face paths (rendered and authored), which is
+    the same reason `meter_price_clauses` below is one builder for both.
+    """
+    out = ""
+    for part in parts:
+        if not part:
+            continue
+        vanishing = _VANISHING_CLAUSE.match(part)
+        if vanishing:
+            out += "{IfUpgraded:show:|" + vanishing.group("base") + " }"
+        else:
+            out += part + " "
+    return out.rstrip()
+
+
+def meter_price_clauses(card: dict, deltas: dict) -> list[str]:
+    """`Spend N [gold]Encore[/gold].` -- one clause per meter price the card
+    PRINTS, in the shipped order, upgrade included.
+
+    ONE BUILDER FOR BOTH FACE PATHS (`EB-283`, the authored half). The rendered
+    path has printed this sentence since Curtain Call; the AUTHORED path
+    (`description:`, prototype surface only) had no notion of a price at all,
+    so a row that wanted one wrote the literal into its own text -- and a
+    literal cannot move. `upgrade: {encore_cost: -1}` then emitted a real
+    `UpgradeCostBy(-1)`, the gate and the badge charged the moved number, and
+    the face went on printing the old one. Both paths call this, so they cannot
+    disagree about what a price looks like or about whether it upgrades.
+
+    THE UPGRADED SENTENCE, three shapes and each is the honest one:
+
+      * no delta -> the flat number, as it always was;
+      * a delta that leaves a price -> `{IfUpgraded:show:U|N}`, the base game's
+        own swap and the shape `dress_rehearsal` already ships;
+      * a delta that takes the price to ZERO -> the WHOLE SENTENCE goes, on the
+        `+` card only. "Spend 0 [gold]Encore[/gold]." is not a smaller price,
+        it is a line claiming a cost the card does not have, and the rendered
+        path's own first clause already skips a row whose price is 0 (`if not
+        base_cost: continue`). This is that rule reached one turn later.
+
+    A negative resolved price is clamped to 0 the way it always was: an
+    over-large delta is a sheet defect, not a refund.
+    """
+    out: list[str] = []
+    for field, label in (("encore_cost", "Encore"),
+                         ("fanfare_cost", "Fanfare")):
+        base_cost = int(card.get(field, 0))
+        if not base_cost:
+            continue
+        delta = int(deltas.get(field, 0))
+        upgraded = max(0, base_cost + delta)
+        if not delta:
+            out.append(f"Spend {base_cost} [gold]{label}[/gold].")
+        elif upgraded:
+            out.append(
+                f"Spend {{IfUpgraded:show:{upgraded}|{base_cost}}} "
+                f"[gold]{label}[/gold].")
+        else:
+            out.append(
+                f"{{IfUpgraded:show:|Spend {base_cost} [gold]{label}[/gold].}}")
+    return out
+
+
 def _authored_face_with_tokens(card: dict) -> str:
     """A row's own face with a `{Var:diff()}` token wherever this card's
     upgrade moves a number the face PRINTS.
@@ -8002,21 +8081,24 @@ def build_description(card: dict) -> str:
         # after the base body (`_upgrade_add_lines`) -- and no row on the
         # surface carries `add_before`, which is the only delta that would
         # want another position.
-        face = " ".join(
-            [_authored_face_with_tokens(card)] + _upgrade_add_text(card))
+        #
+        # THE METER PRICE IS THE EMITTER'S SENTENCE ON THIS PATH TOO, and it
+        # is the same sentence: `meter_price_clauses` is the ONE builder both
+        # halves of this function call. A row that wrote "Spend 2
+        # [gold]Encore[/gold]." into its own `description:` printed a LITERAL,
+        # so an `upgrade: {encore_cost: -1}` moved the resource cost and left
+        # the face saying 2 -- a printed number that is not the number the
+        # card charges, which is `EB-288`/`EB-291`'s defect class arriving
+        # through the one field that was supposed to be free text. So the
+        # price comes off the row and is prepended here, exactly where the
+        # rendered path puts it, and a prototype row's `description:` states
+        # what the card DOES and never what it costs.
+        face = _face_from_parts(
+            meter_price_clauses(card, upgrade_plan(card)[0])
+            + [_authored_face_with_tokens(card)] + _upgrade_add_text(card))
         return _face_riders(card, face)
-    parts = []
     deltas = upgrade_plan(card)[0]
-    for field, label in (("encore_cost", "Encore"),
-                         ("fanfare_cost", "Fanfare")):
-        base_cost = int(card.get(field, 0))
-        if not base_cost:
-            continue
-        delta = int(deltas.get(field, 0))
-        rendered = (
-            f"{{IfUpgraded:show:{max(0, base_cost + delta)}|{base_cost}}}"
-            if delta else str(base_cost))
-        parts.append(f"Spend {rendered} [gold]{label}[/gold].")
+    parts = list(meter_price_clauses(card, deltas))
     salon_named = False          # B5: has a deploy already said "your Salon"?
     deploy_amounts, deploy_skip = merged_deploy_text(card)
     add_anchor = added_effect_anchor(card)
@@ -8859,7 +8941,7 @@ def build_description(card: dict) -> str:
         if sly_text:
             parts.append(f"[gold]Sly[/gold]: {sly_text}")
 
-    return _face_riders(card, " ".join(parts))
+    return _face_riders(card, _face_from_parts(parts))
 
 
 # `Exhaust.` as the face's OWN first or last sentence, which is the only place

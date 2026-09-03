@@ -45,13 +45,15 @@ public sealed class ProtoFrSalonDebutNamed : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Salon Début"),
-        ("description", "[gold]Deploy[/gold] Mademoiselle Crabaletta. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "[gold]Deploy[/gold] Mademoiselle Crabaletta. {IfUpgraded:show:Gain {Encore:diff()} [gold]Encore[/gold].|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+            new CalculationBaseVar(2m),
+            new CalculationExtraVar(1m),
+            new CalculatedVar("Encore").WithMultiplier(static (card, _) => SalonMemberPower.ReplacementDelta(card, 1, SalonConstants.ReplacementNumericMultiplier))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,15 +66,16 @@ public sealed class ProtoFrSalonDebutNamed : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var salonReplacements = 0;
+        var salonScaledEncore = ((CalculatedVar)DynamicVars["Encore"]).Calculate(null);
         salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Crabaletta);
         if (IsUpgraded)
         {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+            FurinaResources.GainEncore(Owner.Creature, (int)salonScaledEncore);
         }
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        // add: gain_encore -- expressed at play time as an IsUpgraded-gated effect appended after the base effects.
     }
 }

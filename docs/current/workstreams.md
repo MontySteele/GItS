@@ -488,10 +488,21 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `Evoke`, `Drain`) join `ARM_KEYWORDS`, attached off the printed word
     (`EB-272`) and defined in `ArmKeywordTips`, which a release build removes;
     the reframe also joins `PROTOTYPE_DEFAULT_PREFIXES` as the fifth arm, so
-    each row's campfire does something without a number this build invented.
+    a row that declares nothing still gets a campfire that does something.
+    **THE UPGRADES ARE THE DESIGNER'S**, and four rows carry an authored
+    `upgrade:` block that replaces the derived draw: Salon Début gains 2
+    Encore, both Evokes cut their Encore price by 1, Intermission gains Retain;
+    only the Rare takes the rule, whose last clause reads its cost because a
+    formula-scaled hit has no literal to bump. **The Encore price became an
+    upgradable var on a prototype face** to carry the two price cuts — a row
+    that wrote "Spend 2 Encore." into its own `description:` printed a LITERAL
+    the smith could not move, so the price is the codegen's sentence on BOTH
+    face paths now (`gen_klee_cards.meter_price_clauses`, one builder), a row's
+    `description:` says what the card DOES and never what it costs, and Exit
+    Stage Left+ at 0 Encore drops the sentence rather than printing "Spend 0".
     **FLAG-OFF, NO STAMP, NOT RUN** — no seat, no sim round, and under R215 B
-    no number in the slice is quotable. 20 C# pins
-    (`FurinaReframeSliceTwoTests`) and 23 sim pins
+    no number in the slice is quotable. 22 C# pins
+    (`FurinaReframeSliceTwoTests`) and 25 sim pins
     (`test_furina_reframe_slice2.py`).
   - **Companion cards — R234 RULED THE SLATE WHOLE, MONDSTADT FIRST**
     (`review/active/companion-cards-2026-08-30.md` §5). Nine picks plus `P5a`,

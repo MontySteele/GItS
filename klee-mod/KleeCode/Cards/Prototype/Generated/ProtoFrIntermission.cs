@@ -45,7 +45,7 @@ public sealed class ProtoFrIntermission : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Intermission"),
-        ("description", "[gold]Drain[/gold] your [gold]Fanfare[/gold]. Gain [gold]Block[/gold] equal to the [gold]Fanfare[/gold] drained. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "[gold]Drain[/gold] your [gold]Fanfare[/gold]. Gain [gold]Block[/gold] equal to the [gold]Fanfare[/gold] drained."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -53,8 +53,7 @@ public sealed class ProtoFrIntermission : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(0m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaDrain.Amount(card)),
-            new CardsVar(1)
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaDrain.Amount(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -68,14 +67,10 @@ public sealed class ProtoFrIntermission : CustomCardModel, ICharacterCard
     {
         FurinaDrain.Drain(Owner.Creature);
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        AddKeyword(CardKeyword.Retain);
     }
 }
