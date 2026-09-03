@@ -175,38 +175,48 @@ public static class ArmKeywordTips
     // Exert and Garment left with the rules they named.
 
     /// <summary>
-    /// RULE 2, and it is the whole kit in three sentences. The SECOND is the
+    /// RULE 2, THE WHOLE KIT, IN TWO SENTENCES AND UNDER THE CEILING. Five
+    /// clauses have to fit: where the card is played, that its cost is paid
+    /// now, when the line happens, what it aims at, and who deals its damage.
+    ///
+    /// THE FIFTH CLAUSE IS `EB-334`, and R246 pick 1 asks for it in as many
+    /// words. Three seats derived the Plan's arithmetic from the board and got
+    /// three different answers, because the rule was stated nowhere: one found
+    /// that Plans keep their full number while she is Weak, one that they pay
+    /// x0.75 against a Strategic enemy, and one that Vulnerable did not
+    /// multiply a Plan at all
+    /// (`review/ruled/kokomi-overhaul-round-4c-2026-09-02.md` sec.2). The rule
+    /// is now the honest one -- the Bake-Kurage deals it -- and this is where
+    /// the player reads it, beside the word it belongs to.
+    ///
+    /// THE PROSE IS COMPRESSED RATHER THAN EXEMPTED. The four older clauses
+    /// used the whole 135-character tip ceiling on their own, so the fifth
+    /// briefly took a named exception in `tools/lint_text_conventions.py`.
+    /// That was the wrong trade and it was reverted: the ceiling is the base
+    /// game's own longest tip (CHANNELING, 134) and THIS tip is read every
+    /// turn, so the sentences were rewritten to carry all five clauses in 134
+    /// characters instead. Nothing was dropped -- "on the Bake-Kurage" is
+    /// still where it is played, "paid now" is still the cost, "lands first
+    /// thing next turn" is still the delay, "on the front enemy" is still the
+    /// aim, and the second sentence is the new rule.
+    ///
+    /// "ON THE BAKE-KURAGE" IS STILL `EB-293`'s ANSWER, and it is still the
     /// load-bearing half: a player who has never read the brief has to be able
     /// to find "play it on the jellyfish" from the card in their hand, which is
-    /// the slice's own first acceptance sentence (sec.1).
-    ///
-    /// THE FOURTH IS `EB-334`, and it is the sentence R246 pick 1 asks for in
-    /// as many words. Three seats derived the Plan's arithmetic from the board
-    /// and got three different answers, because the rule was stated nowhere:
-    /// one found that Plans keep their full number while she is Weak, one that
-    /// they pay x0.75 against a Strategic enemy, and one that Vulnerable did
-    /// not multiply a Plan at all
-    /// (`review/ruled/kokomi-overhaul-round-4c-2026-09-02.md` sec.2). The rule
-    /// is now the honest one -- the jellyfish deals it -- and this is where the
-    /// player reads it, beside the word it belongs to.
-    ///
-    /// THE THIRD IS `EB-293`. "instead" presumes a normal play to do instead
-    /// of, and a card with no now-line has none -- its target type is
-    /// <c>KokomiTargets.PetOnly</c> and the jellyfish is the only legal drop.
-    /// The r2 Opus seat could not tell: "Plan-only cards never say what happens
-    /// if you play them normally... I never risked finding out." The row's own
-    /// face now leads with "Play on the Bake-Kurage." (the codegen's
-    /// <c>_plan_only_line</c>) and the word's definition says why some rows
-    /// carry that line and others do not.
+    /// the slice's own first acceptance sentence (sec.1). The r2 Opus seat
+    /// could not tell -- "Plan-only cards never say what happens if you play
+    /// them normally... I never risked finding out" -- so a Plan-only row's own
+    /// face also leads with "Play on the Bake-Kurage." (the codegen's
+    /// <c>_plan_only_line</c>), and this definition is why some rows carry that
+    /// line and others do not.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "Play this on the [gold]Bake-Kurage[/gold]: it carries out the "
-          + "[gold]Plan[/gold] line at the start of your next turn. Cost is "
-          + "paid now. Plans hit the front enemy. The [gold]Bake-Kurage[/gold] "
-          + "deals it: the enemy's [gold]Vulnerable[/gold] raises it, your "
-          + "[gold]Weak[/gold] and attack buffs do not.");
+            "On the [gold]Bake-Kurage[/gold], paid now; the [gold]Plan[/gold] "
+          + "lands first thing next turn on the front enemy. Enemy "
+          + "[gold]Vulnerable[/gold] raises it; your [gold]Weak[/gold] does "
+          + "not.");
 
     /// <summary>
     /// THE BOUND IS THE WHOLE POINT OF THIS ROW'S SECOND HALF. The Casket read
