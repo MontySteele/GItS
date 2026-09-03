@@ -1349,6 +1349,25 @@ class CombatState:
     # post-reaction, post-Vulnerable (`EB-270`) -- never the charge sizes.
     ko_damage_set_off_this_play: int = 0
     ko_set_off_multiplier: int = 1          # The Big One arms N, a Set off spends it
+    # QUARANTINED (`C.KLEE_OVERHAUL`, R244). Coven Errand's read: how many
+    # Hexerei cards have been played this turn. A COUNTER on the arm's ledger
+    # rather than a scan of the play log, for rule 7's two counters' reason --
+    # it is written at the ONE site a Hexerei play is noticed
+    # (`klee_overhaul.note_hexerei_played`), so the card and the Power beside
+    # it cannot disagree about what a witch is. Rolled by `roll_to`, the twin
+    # of `KleeOverhaulLedger.HexereiPlayedThisTurn`.
+    ko_hexerei_this_turn: int = 0
+    # QUARANTINED (`C.KLEE_OVERHAUL`, R244). Alice's Introduction Magic: "All
+    # cards in your hand count as Hexerei cards this turn." The window is over
+    # the cards that WERE in hand when it resolved, so the mark is on the card
+    # INSTANCES and not on their ids -- a second copy of the same card drawn
+    # later this turn is not counted, which is the ruling's own derived
+    # reading. Held here rather than as a `Card` field for the reason the
+    # window is a turn: the list is dropped whole at the arm's turn end
+    # (`companion_hexerei.roll_hand_marks`), so no stamp can outlive the turn
+    # that wrote it on a card sitting in the discard pile. Empty on every tree
+    # with the arm off; the twin is `IntroductionMagicPower.Marked`.
+    ko_hexerei_marked: list["Card"] = field(default_factory=list)
     # Blocking Notes' slope (rework Track C.3, 2026-07-28). A per-TURN count
     # where companions_played above is a per-COMBAT list, so the two cannot be
     # derived from each other and both have to exist.
