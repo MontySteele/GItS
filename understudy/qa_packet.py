@@ -510,12 +510,64 @@ def cost_label(card: dict[str, Any]) -> str:
     return sparks if shown in ("0", "-") else f"{shown} and {sparks}"
 
 
-def cost_note(card: dict[str, Any]) -> str:
-    """The one sentence a discounted card carries. `""` when it is not one."""
-    if not _discounted(card):
+def _spark_price(card: dict[str, Any]) -> int:
+    price = card.get("printed_spark")
+    return price if isinstance(price, int) and price > 0 else 0
+
+
+def spark_discount_note(card: dict[str, Any]) -> str:
+    """`EB-339`. WHAT A COST-TO-ZERO EFFECT DOES NOT COVER.
+
+    WHAT THE SEAT SAW (`klee round 7b, opus-act2.md`,
+    section (c), last bullet). `Vexing Puzzlebox` prints "It's free to play
+    this turn"; the card it handed over arrived as `Powder Charge -- cost 1
+    Spark`, with none of the "the cost printed on this card is X; it is showing
+    Y here" line the energy cards get. The seat wrote the rule out for
+    themselves -- "free apparently means free of ENERGY" -- which is a rule a
+    page should not make a player derive from a card that silently did not
+    work.
+
+    AND THE REASON IS STRUCTURAL, not a display slip. A Spark price is an
+    EFFECT (`op: spend_spark` at the head of the row), not a cost, so
+    `printed_cost` is 0 on every Spark-priced row in the pool
+    (`proto_ko_powder_charge`, `proto_ko_dig_in`, and the rest). A cost-to-zero
+    effect moves the ENERGY cost from 0 to 0, `_discounted` is correctly False,
+    and there was nothing on the wire for either page to notice.
+
+    SO IT IS SAID WHENEVER THE ENERGY SLOT READS ZERO, which is exactly when a
+    relic, a potion or a power can claim the card is free -- and not only while
+    a discount happens to be running, because nothing on the wire says one is.
+    The sentence is true either way, so a page carrying it cannot mislead; the
+    page withholding it already did.
+    """
+    price = _spark_price(card)
+    if not price:
         return ""
-    return (f"The cost printed on this card is {card['printed_cost']}; it is "
+    shown = _text(card.get("cost"))
+    if shown not in ("", "-", "0"):
+        return ""
+    sparks = f"{price} Spark" if price == 1 else f"{price} Sparks"
+    return (f"Its {sparks} is a price, not an Energy cost: an effect that "
+            f"makes a card free to play, or cuts its cost to 0, covers Energy "
+            f"only, and the {sparks} is still spent.")
+
+
+def cost_note(card: dict[str, Any]) -> str:
+    """The one sentence a discounted card carries, and `EB-339`'s beside it.
+
+    `""` when the card is neither discounted nor Spark-priced. Where both
+    apply they are ONE line in the order the price is read: what the Energy
+    slot is doing, then what the Spark slot is not.
+    """
+    parts: list[str] = []
+    if _discounted(card):
+        parts.append(
+            f"The cost printed on this card is {card['printed_cost']}; it is "
             f"showing {_text(card['cost'])} here.")
+    spark = spark_discount_note(card)
+    if spark:
+        parts.append(spark)
+    return " ".join(parts)
 
 
 def spark_note(powers: list[dict[str, Any]],
