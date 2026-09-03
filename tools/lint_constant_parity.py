@@ -400,6 +400,14 @@ UNMIRRORED: dict[str, str] = {
         "far past anything a real flight produces on a 1920x1080 design "
         "resolution. It touches no card, no meter and no number the sim can "
         "see: tier0 draws nothing.",
+    "NonFiniteCardGuard.MaxTrackedNodes":
+        "`EB-292`. A LOG BOUND, not balance: how many nodes the guard's "
+        "rate limiter remembers before it forgets the lot. Every card play "
+        "builds a fresh trail node, so the limiter's keys are transient and "
+        "the map needs a bound of its own -- the file's whole subject is an "
+        "unbounded allocation, and a diagnostic that leaked would be the same "
+        "defect in a smaller font. Forgetting costs at most one extra log "
+        "line. The sim writes no godot.log and has nothing to limit.",
     "MeterLedger.MaxRows":
         "`EB-216`. INSTRUMENT, not balance: how many per-play ledger rows the "
         "mod keeps before dropping the oldest. It touches no game number, no "

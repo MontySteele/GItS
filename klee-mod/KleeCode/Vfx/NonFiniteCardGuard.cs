@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Godot;
 using HarmonyLib;
@@ -54,6 +55,18 @@ namespace KleeMod.Vfx;
 /// line carries the node chain and its transforms, which is the reading that
 /// was missing when this was first investigated.
 ///
+/// SO THE LINE IS THE INSTRUMENT, and it is written to settle the row rather
+/// than to record that something happened. One line per catch, at most once a
+/// second per node, carrying: the node's PATH in the scene, the card's id and
+/// printed title, the engine's pacing (`Engine.TimeScale`, the frame delta,
+/// fps), the position and its MAGNITUDE, and the flying card's own curve --
+/// its start, end, arc and duration, the t one frame at this pacing advances
+/// (`tStep`), and the t the observed position actually sits at (`tNow`),
+/// recovered by inverting the quadratic. Those last two are the row's
+/// hypothesis stated as two numbers: a `tNow` in the hundreds beside a `tStep`
+/// to match confirms it and names the frame; a `tNow` near 1 at an ordinary
+/// 16 ms delta refutes it, and the source is something else.
+///
 /// SHIPPED, NOT QUARANTINED. The failing code is the base game's and is reached
 /// by every character on every card play; scoping the guard to one prototype
 /// arm would leave the hang in place everywhere else. On finite input every
@@ -62,14 +75,75 @@ namespace KleeMod.Vfx;
 internal static class NonFiniteCardGuard
 {
     /// <summary>
-    /// One report per process. The condition prints every frame while it lasts
-    /// -- 286 engine errors in the recorded session -- so a reporter without a
-    /// latch would be the same denial of service in a different file.
+    /// ONE REPORT PER NODE PER SECOND. The condition prints every frame while
+    /// it lasts -- 286 engine errors in the recorded session -- so a reporter
+    /// without a limit would be the same denial of service in a different
+    /// file.
+    ///
+    /// WHY THIS REPLACED A ONCE-PER-PROCESS LATCH, which is what the first
+    /// pass shipped. The latch bought silence at the price of the reading: the
+    /// FIRST catch printed and every later one was dropped -- including a catch
+    /// on a different node, a different card, or a different door. The row's
+    /// open question is WHICH of those the source is, so an instrument that can
+    /// only ever answer once is the wrong one. Per node per second keeps the
+    /// flood bounded -- a trail node lives about as long as one card flight, so
+    /// the worst case is a line or two per flight -- and still lets a second,
+    /// different source name itself.
     /// </summary>
-    private static bool _reported;
+    internal const long ReportIntervalMsec = 1000;
 
-    /// <summary>Test seam: forget the latch. The mod never calls it.</summary>
-    internal static void ResetForTests() => _reported = false;
+    /// <summary>
+    /// When each node last printed. Every card play builds a fresh trail, so
+    /// these keys are transient and the map needs a bound of its own; see
+    /// <see cref="MayReport"/>.
+    /// </summary>
+    private static readonly Dictionary<ulong, long> LastReportMsec = new();
+
+    /// <summary>
+    /// How many nodes the limiter remembers. Small on purpose: the map exists
+    /// to stop a per-frame flood from ONE node, and forgetting a node costs at
+    /// most one extra line.
+    /// </summary>
+    private const int MaxTrackedNodes = 64;
+
+    /// <summary>Test seam: forget the limiter. The mod never calls it.</summary>
+    internal static void ResetForTests()
+    {
+        lock (LastReportMsec)
+        {
+            LastReportMsec.Clear();
+        }
+    }
+
+    /// <summary>
+    /// May this node's catch be printed at <paramref name="nowMsec"/>?
+    ///
+    /// The clock is a parameter rather than a read inside, so the limiter is a
+    /// pure function of (node, time) and can be asserted headlessly. It is why
+    /// the callers read <c>Environment.TickCount64</c> and not Godot's
+    /// <c>Time.GetTicksMsec</c>: the second needs an engine this test host has
+    /// no way to build.
+    /// </summary>
+    internal static bool MayReport(ulong nodeKey, long nowMsec)
+    {
+        lock (LastReportMsec)
+        {
+            if (LastReportMsec.TryGetValue(nodeKey, out var last)
+                && nowMsec >= last
+                && nowMsec - last < ReportIntervalMsec)
+            {
+                return false;
+            }
+
+            if (LastReportMsec.Count >= MaxTrackedNodes)
+            {
+                LastReportMsec.Clear();
+            }
+
+            LastReportMsec[nodeKey] = nowMsec;
+            return true;
+        }
+    }
 
     /// <summary>
     /// Is this a number the scene can be given? The whole predicate, in one
@@ -108,14 +182,15 @@ internal static class NonFiniteCardGuard
     }
 
     /// <summary>
-    /// Say what was caught, once, with the node chain that produced it.
+    /// Say what was caught, with the node chain that produced it, at most once
+    /// a second per node.
     ///
     /// EVERY READ IS GUARDED. This runs on a scene that is already in a state
     /// the engine calls impossible, and a reporter that threw would replace a
     /// drawn-wrong frame with a lost run.
     /// </summary>
-    internal static void ReportOnce(string what, Node? node) =>
-        ReportOnce(what, node, detail: null);
+    internal static void Report(string what, Node? node) =>
+        Report(what, node, detail: null);
 
     /// <summary>
     /// THE SOURCE HUNT'S INSTRUMENT (`EB-292`, second pass). The first live
@@ -156,16 +231,67 @@ internal static class NonFiniteCardGuard
     /// distance says how far it did. A catch whose delta is an ordinary 16 ms
     /// at TimeScale 1 falsifies this outright, which is the point of logging
     /// it.
+    ///
+    /// AND THE THIRD PASS ADDS THE TWO THE SECOND STILL COULD NOT SAY. The
+    /// flight's OWN dials -- <c>_startPos</c>, <c>_endPos</c>, <c>_arcDir</c>,
+    /// <c>_duration</c>, <c>_speed</c> -- are instance fields on the
+    /// <c>NCardFlyVfx</c> that is a SIBLING of the trail's own vfx (see
+    /// <see cref="FlightOf"/>), so both halves of the hypothesis become
+    /// arithmetic instead of inference: <c>tStep</c> is how far one frame at
+    /// this delta advances t (<c>_speed * delta / _duration</c>), and
+    /// <c>tNow</c> is the t the observed position actually sits at, recovered
+    /// by inverting the quadratic (<see cref="RecoverBezierT"/>). `time`
+    /// itself is a LOCAL of an async method and lives in a state machine no
+    /// handle here reaches, which is why it is recovered rather than read.
     /// </summary>
-    internal static void ReportOnce(string what, Node? node, string? detail)
+    internal static void Report(string what, Node? node, string? detail)
     {
-        if (_reported) return;
-        _reported = true;
+        // `Environment` is spelled out: Godot has a type of that name too, and
+        // this file has both namespaces open.
+        if (!MayReport(KeyOf(node), System.Environment.TickCount64)) return;
         Log.Warn($"[{KleeMod.ModId}] EB-292: refused a non-finite {what}; "
                + $"the card trail would have allocated without bound. "
-               + $"Node chain: {Chain(node)}"
+               + $"Path: {PathOf(node)} | Node chain: {Chain(node)}"
                + (string.IsNullOrEmpty(detail) ? "" : $" | {detail}")
                + $" | {Pacing(node)}");
+    }
+
+    /// <summary>
+    /// The limiter's key. A freed or missing node all shares bucket zero,
+    /// which is the conservative direction: it rate-limits together rather
+    /// than not at all.
+    /// </summary>
+    private static ulong KeyOf(Node? node)
+    {
+        try
+        {
+            return node != null && GodotObject.IsInstanceValid(node)
+                ? node.GetInstanceId() : 0UL;
+        }
+        catch (Exception)
+        {
+            return 0UL;
+        }
+    }
+
+    /// <summary>
+    /// The node's path in the scene tree -- the reading that says WHERE in the
+    /// scene the catch happened, which the name chain alone does not (two
+    /// trails on two cards render identical chains).
+    /// </summary>
+    private static string PathOf(Node? node)
+    {
+        try
+        {
+            if (node == null) return "(no node)";
+            if (!GodotObject.IsInstanceValid(node)) return "(freed)";
+            return node.IsInsideTree()
+                ? node.GetPath().ToString() : "(not in tree)";
+        }
+        catch (Exception e)
+        {
+            return $"(unreadable: {e.GetType().Name})";
+        }
     }
 
     /// <summary>
@@ -219,16 +345,260 @@ internal static class NonFiniteCardGuard
             {
                 null => "(no card)",
                 NCard n when GodotObject.IsInstanceValid(n) =>
-                    (n.Model?.Id.ToString() ?? "(no model)")
-                  + $" gpos={n.GlobalPosition} size={n.Size}",
+                    $"{NameOf(n)} gpos={n.GlobalPosition} "
+                  + $"|gpos|={n.GlobalPosition.Length():G6} size={n.Size}",
                 _ => Describe(card),
             };
-            return $"followed={followed} card={cardName}";
+            return $"followed={followed} card={cardName} "
+                 + FlightOf(vfx, card);
         }
         catch (Exception e)
         {
             return $"followed unreadable: {e.GetType().Name}";
         }
+    }
+
+    /// <summary>
+    /// The card's id AND its printed title. The id alone is what the first two
+    /// passes logged, and on the prototype surface an id is a
+    /// `KLEEMOD-PROTO_KK_...` token that has to be looked up before it names a
+    /// card anyone recognises. `Title` is a localisation lookup on a virtual
+    /// member, so it is read inside the guard like everything else here.
+    /// </summary>
+    private static string NameOf(NCard card)
+    {
+        try
+        {
+            var model = card.Model;
+            if (model == null) return "(no model)";
+            string? title = null;
+            try
+            {
+                title = model.Title;
+            }
+            catch (Exception)
+            {
+                // A model whose locale entry is missing still has an id, and
+                // the id is the half the register row is written against.
+            }
+            return string.IsNullOrEmpty(title)
+                ? model.Id.ToString()
+                : $"{model.Id} \"{title}\"";
+        }
+        catch (Exception e)
+        {
+            return $"(card unreadable: {e.GetType().Name})";
+        }
+    }
+
+    /// <summary>
+    /// THE FLIGHT'S OWN DIALS, which is the reading that decides the row.
+    ///
+    /// HOW IT IS REACHED. `NCardFlyVfx._Ready` builds the trail vfx and adds it
+    /// to its OWN parent (<c>GetParent().AddChildSafely(_vfx)</c>), so the
+    /// flight and the trail are SIBLINGS and the flight holds the trail in
+    /// <c>_vfx</c> and the card in <c>_card</c>. Matching on either is enough,
+    /// and both are tried: a scene that reparented one of them still matches on
+    /// the card.
+    ///
+    /// WHAT IT PRINTS AND WHY EACH ONE IS THERE. <c>start</c>/<c>end</c>/
+    /// <c>arc</c> reconstruct the exact curve `PlayAnim` is evaluating;
+    /// <c>dur</c>/<c>speed</c> with the frame delta give <c>tStep</c>, how far
+    /// ONE frame at this pacing advances t; and <c>tNow</c> is the t the card's
+    /// observed position actually sits at, recovered by inverting the
+    /// quadratic. A tNow near 1 with a small tStep REFUTES the row's
+    /// hypothesis; a tNow in the hundreds with a tStep to match confirms it and
+    /// names the frame that did it.
+    /// </summary>
+    internal static string FlightOf(NCardTrailVfx? vfx, Control? card)
+    {
+        try
+        {
+            var fly = FindFlight(vfx, card);
+            if (fly == null) return "flight=(unmatched)";
+
+            var start = Field<NCardFlyVfx, Vector2>(fly, "_startPos");
+            var end = Field<NCardFlyVfx, Vector2>(fly, "_endPos");
+            var arc = Field<NCardFlyVfx, float>(fly, "_arcDir");
+            var duration = Field<NCardFlyVfx, float>(fly, "_duration");
+            var speed = Field<NCardFlyVfx, float>(fly, "_speed");
+            var accel = Field<NCardFlyVfx, float>(fly, "_accel");
+            if (start is not { } v0 || end is not { } v1 || arc is not { } a
+                || duration is not { } dur || speed is not { } spd)
+            {
+                return "flight=(fields unreadable)";
+            }
+
+            var control = FlightControlPoint(v0, v1, a);
+            var live = card != null && GodotObject.IsInstanceValid(card);
+            var delta = live ? (float)card!.GetProcessDeltaTime() : float.NaN;
+            var at = live ? card!.GlobalPosition : Vector2.Zero;
+
+            return $"flight=[start={v0} end={v1} control={control} arc={a:G6} "
+                 + $"dur={dur:G6} speed={spd:G6} accel={accel?.ToString("G6") ?? "?"} "
+                 + $"tStep={OvershootPerFrame(spd, delta, dur):G6} "
+                 + $"tNow={RecoverBezierT(v0, v1, control, at):G6}]";
+        }
+        catch (Exception e)
+        {
+            return $"flight unreadable: {e.GetType().Name}";
+        }
+    }
+
+    /// <summary>
+    /// The sibling <c>NCardFlyVfx</c> driving this trail, by the trail vfx it
+    /// owns or by the card both follow.
+    /// </summary>
+    private static NCardFlyVfx? FindFlight(NCardTrailVfx? vfx, Control? card)
+    {
+        if (vfx == null || !GodotObject.IsInstanceValid(vfx)) return null;
+        var container = vfx.GetParent();
+        if (container == null || !GodotObject.IsInstanceValid(container))
+        {
+            return null;
+        }
+        foreach (var child in container.GetChildren())
+        {
+            if (child is not NCardFlyVfx fly
+                || !GodotObject.IsInstanceValid(fly))
+            {
+                continue;
+            }
+            var owned = AccessTools
+                .FieldRefAccess<NCardFlyVfx, NCardTrailVfx?>("_vfx")?.Invoke(fly);
+            if (ReferenceEquals(owned, vfx)) return fly;
+            var flown = AccessTools
+                .FieldRefAccess<NCardFlyVfx, NCard>("_card")?.Invoke(fly);
+            if (card != null && ReferenceEquals(flown, card)) return fly;
+        }
+        return null;
+    }
+
+    /// <summary>One field of one engine type, or null if it no longer
+    /// resolves. Every reflective read in this file goes through a shape like
+    /// this so a rename degrades to a named miss.</summary>
+    private static TField? Field<TObject, TField>(TObject instance, string name)
+        where TObject : class
+        where TField : struct
+    {
+        try
+        {
+            var reader = AccessTools.FieldRefAccess<TObject, TField>(name);
+            return reader == null ? null : reader.Invoke(instance);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// The curve's control point, spelled exactly as `NCardFlyVfx.PlayAnim`
+    /// spells it: the midpoint of the flight, pushed off the line by the arc.
+    /// Pure, so the recovery below can be checked against a curve this repo
+    /// builds itself.
+    /// </summary>
+    internal static Vector2 FlightControlPoint(Vector2 start, Vector2 end,
+                                               float arcDir)
+    {
+        var control = start + (end - start) * 0.5f;
+        control.Y -= arcDir;
+        return control;
+    }
+
+    /// <summary>
+    /// How far ONE frame advances the flight's curve parameter:
+    /// <c>time += _speed * GetProcessDeltaTime()</c> over <c>_duration</c>.
+    /// This is the row's hypothesis reduced to one number -- a value near 0.02
+    /// is an ordinary 16 ms frame and a value in the hundreds is the stall the
+    /// row is looking for.
+    /// </summary>
+    internal static float OvershootPerFrame(float speed, float frameDelta,
+                                            float duration)
+        => duration == 0f ? float.NaN : speed * frameDelta / duration;
+
+    /// <summary>
+    /// WHICH t PRODUCED THIS POSITION. `time` is a local of an async method and
+    /// lives in a compiler-generated state machine nothing here holds, so the
+    /// only way to read the flight's t is to invert the curve it drew.
+    ///
+    /// THE ARITHMETIC. A quadratic Bezier is
+    /// <c>B(t) = (1-t)^2 v0 + 2(1-t)t c0 + t^2 v1</c>, which regroups per axis
+    /// into <c>C t^2 + B t + A</c> with <c>A = v0</c>, <c>B = 2(c0 - v0)</c>,
+    /// <c>C = v0 - 2 c0 + v1</c>. Solving on the axis with the larger |C| keeps
+    /// the conditioning sane; both roots are then scored by re-evaluating the
+    /// curve, because a quadratic reaches most positions twice and only one of
+    /// the two also matches the OTHER axis.
+    ///
+    /// RETURNS NaN WHEN THE POSITION IS NOT ON THIS CURVE, and that is itself a
+    /// reading rather than a failure: it says the card's position did not come
+    /// from this flight, which refutes the row's hypothesis for that catch. The
+    /// answer is checked before it is returned -- solving one axis alone would
+    /// always produce SOME t, including for a position the other axis rules
+    /// out -- so the recovered t is a t the curve verifiably reaches.
+    /// </summary>
+    internal static float RecoverBezierT(Vector2 v0, Vector2 v1, Vector2 c0,
+                                         Vector2 position)
+    {
+        if (!IsFinite(v0) || !IsFinite(v1) || !IsFinite(c0)
+            || !IsFinite(position))
+        {
+            return float.NaN;
+        }
+
+        var c = v0 - 2f * c0 + v1;
+        var b = 2f * (c0 - v0);
+        var useX = Math.Abs(c.X) >= Math.Abs(c.Y);
+        var quadratic = useX ? c.X : c.Y;
+        var linear = useX ? b.X : b.Y;
+        var constant = (useX ? v0.X : v0.Y) - (useX ? position.X : position.Y);
+
+        if (Math.Abs(quadratic) < 1e-6f)
+        {
+            // A degenerate curve -- control point exactly on the midpoint --
+            // is a straight line, and t is then one division.
+            return Math.Abs(linear) < 1e-9f
+                ? float.NaN
+                : Verified(v0, v1, c0, -constant / linear, position);
+        }
+
+        var discriminant = linear * linear - 4f * quadratic * constant;
+        if (discriminant < 0f) return float.NaN;
+
+        var root = MathF.Sqrt(discriminant);
+        var first = (-linear + root) / (2f * quadratic);
+        var second = (-linear - root) / (2f * quadratic);
+        var firstError = Bezier(v0, v1, c0, first).DistanceSquaredTo(position);
+        var secondError = Bezier(v0, v1, c0, second).DistanceSquaredTo(position);
+        return Verified(v0, v1, c0,
+                        firstError <= secondError ? first : second, position);
+    }
+
+    /// <summary>
+    /// The recovered t, or NaN if the curve at that t does not land on the
+    /// position it was recovered from. The tolerance is RELATIVE because the
+    /// magnitudes this instrument exists for are around 1e9, where a `float`
+    /// has about 64 px of resolution and an absolute epsilon would reject
+    /// every real answer.
+    /// </summary>
+    private static float Verified(Vector2 v0, Vector2 v1, Vector2 c0, float t,
+                                  Vector2 position)
+    {
+        if (!float.IsFinite(t)) return float.NaN;
+        var error = Bezier(v0, v1, c0, t).DistanceTo(position);
+        var tolerance = 1e-2f * (1f + position.Length());
+        return float.IsFinite(error) && error <= tolerance ? t : float.NaN;
+    }
+
+    /// <summary>
+    /// `MathHelper.BezierCurve`'s arithmetic, re-spelled here rather than
+    /// called, so the recovery above can be asserted in a host with no game
+    /// assembly loaded.
+    /// </summary>
+    internal static Vector2 Bezier(Vector2 v0, Vector2 v1, Vector2 c0, float t)
+    {
+        var inverse = 1f - t;
+        return inverse * inverse * v0 + 2f * inverse * t * c0 + t * t * v1;
     }
 
     /// <summary>The node and its ancestors, each with the transform numbers
@@ -329,16 +699,18 @@ internal static class NCardTrail_CreatePoint_NonFiniteGuard_Patch
             {
                 return true;
             }
-            NonFiniteCardGuard.ReportOnce(
+            NonFiniteCardGuard.Report(
                 "card-trail travel", __instance,
-                $"from={from} to={pointPos} travel={from.DistanceTo(pointPos):G6} "
+                $"from={from} to={pointPos} |to|={pointPos.Length():G6} "
+              + $"travel={from.DistanceTo(pointPos):G6} "
               + $"cap={NonFiniteCardGuard.MaxTrailTravelPx:G6} | "
               + NonFiniteCardGuard.FollowedBy(__instance));
             return false;
         }
-        NonFiniteCardGuard.ReportOnce(
+        NonFiniteCardGuard.Report(
             "card-trail point", __instance,
-            $"point={pointPos} | " + NonFiniteCardGuard.FollowedBy(__instance));
+            $"point={pointPos} |point|={pointPos.Length():G6} | "
+          + NonFiniteCardGuard.FollowedBy(__instance));
         return false;
     }
 }
@@ -377,7 +749,7 @@ internal static class NCard_UpdateTypePlaque_NonFiniteGuard_Patch
         {
             return true;
         }
-        NonFiniteCardGuard.ReportOnce("card type-plaque size", __instance);
+        NonFiniteCardGuard.Report("card type-plaque size", __instance);
         return false;
     }
 }
@@ -403,7 +775,7 @@ internal static class PileType_GetTargetPosition_NonFiniteGuard_Patch
     public static void Postfix(NCard? node, ref Vector2 __result)
     {
         if (NonFiniteCardGuard.IsFinite(__result)) return;
-        NonFiniteCardGuard.ReportOnce("card flight destination", node);
+        NonFiniteCardGuard.Report("card flight destination", node);
         __result = Vector2.Zero;
     }
 }

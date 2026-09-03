@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using KleeMod.Tests.Harness;
 using Xunit;
@@ -32,6 +33,32 @@ public class NonFiniteCardGuardTests
     private static bool IsDrawable(Vector2 from, Vector2 to) =>
         (bool)Il.Method("NonFiniteCardGuard", "IsDrawableTravel")
                 .Invoke(null, new object[] { from, to })!;
+
+    private static bool MayReport(ulong node, long nowMsec) =>
+        (bool)Il.Method("NonFiniteCardGuard", "MayReport")
+                .Invoke(null, new object[] { node, nowMsec })!;
+
+    private static void ForgetReports() =>
+        Il.Method("NonFiniteCardGuard", "ResetForTests").Invoke(null, null);
+
+    private static Vector2 Bezier(Vector2 v0, Vector2 v1, Vector2 c0, float t) =>
+        (Vector2)Il.Method("NonFiniteCardGuard", "Bezier")
+                   .Invoke(null, new object[] { v0, v1, c0, t })!;
+
+    private static float RecoverT(Vector2 v0, Vector2 v1, Vector2 c0,
+                                  Vector2 position) =>
+        (float)Il.Method("NonFiniteCardGuard", "RecoverBezierT")
+                 .Invoke(null, new object[] { v0, v1, c0, position })!;
+
+    private static Vector2 ControlPoint(Vector2 start, Vector2 end,
+                                        float arcDir) =>
+        (Vector2)Il.Method("NonFiniteCardGuard", "FlightControlPoint")
+                   .Invoke(null, new object[] { start, end, arcDir })!;
+
+    private static float OvershootPerFrame(float speed, float delta,
+                                           float duration) =>
+        (float)Il.Method("NonFiniteCardGuard", "OvershootPerFrame")
+                 .Invoke(null, new object[] { speed, delta, duration })!;
 
     [Fact]
     public void An_ordinary_card_position_is_finite()
@@ -113,7 +140,7 @@ public class NonFiniteCardGuardTests
             Il.Method("NCardTrail_CreatePoint_NonFiniteGuard_Patch", "Prefix"));
 
         Assert.Contains("NonFiniteCardGuard.IsFinite", calls);
-        Assert.Contains("NonFiniteCardGuard.ReportOnce", calls);
+        Assert.Contains("NonFiniteCardGuard.Report", calls);
     }
 
     [Fact]
@@ -140,6 +167,133 @@ public class NonFiniteCardGuardTests
                       "Postfix"));
 
         Assert.Contains("NonFiniteCardGuard.IsFinite", calls);
-        Assert.Contains("NonFiniteCardGuard.ReportOnce", calls);
+        Assert.Contains("NonFiniteCardGuard.Report", calls);
+    }
+
+    [Fact]
+    public void The_reporter_prints_once_a_second_per_node()
+    {
+        // THE RATE LIMIT, and why it is per NODE. The recorded session printed
+        // the condition every frame; the first pass answered that with a
+        // once-per-process latch, which also silenced every LATER catch --
+        // including one on a different node, which is exactly the reading the
+        // open row wants. A second bucket must not be closed by the first.
+        ForgetReports();
+
+        Assert.True(MayReport(node: 7UL, nowMsec: 0L));
+        Assert.False(MayReport(node: 7UL, nowMsec: 1L));
+        Assert.False(MayReport(node: 7UL, nowMsec: 999L));
+        Assert.True(MayReport(node: 7UL, nowMsec: 1000L));
+
+        // A different node is a different bucket, at the same instant.
+        Assert.True(MayReport(node: 8UL, nowMsec: 1000L));
+        Assert.False(MayReport(node: 8UL, nowMsec: 1500L));
+    }
+
+    [Fact]
+    public void The_limiter_forgets_rather_than_growing_without_a_bound()
+    {
+        // Every card play builds a FRESH trail node, so the map's keys are
+        // transient: a limiter that only ever inserted would be a slow leak in
+        // the file whose whole subject is an unbounded allocation.
+        ForgetReports();
+        for (var node = 0UL; node < 200UL; node++)
+        {
+            Assert.True(MayReport(node, nowMsec: 0L));
+        }
+
+        // The cost of forgetting is one extra line, never a missed catch.
+        Assert.True(MayReport(node: 0UL, nowMsec: 10L));
+    }
+
+    [Fact]
+    public void One_frames_overshoot_is_the_flights_own_arithmetic()
+    {
+        // `PlayAnim` advances `time += _speed * GetProcessDeltaTime()` and
+        // evaluates the curve at `time / _duration`, so ONE frame moves t by
+        // this much. The two numbers below are the row's whole question: an
+        // ordinary frame is a fiftieth of the curve, and a stalled one is
+        // hundreds of curves.
+        Assert.Equal(0.0128f, OvershootPerFrame(1.2f, 0.016f, 1.5f), 4);
+
+        // 20 minutes of stalled frame at TimeScale 3, which is the shape the
+        // recorded 1e9 magnitude needs.
+        Assert.True(OvershootPerFrame(1.2f, 3600f, 1.5f) > 2800f);
+
+        // A duration of zero cannot happen (`_duration` is drawn from
+        // [1, 1.75]) and must not divide anyway.
+        Assert.True(float.IsNaN(OvershootPerFrame(1.2f, 0.016f, 0f)));
+    }
+
+    [Fact]
+    public void The_control_point_is_the_flights_own()
+    {
+        // `PlayAnim` spells it `c = _startPos + (_endPos - _startPos) * 0.5f;
+        // c.Y -= _arcDir;`. If this drifts, every recovered t below is a
+        // number about a curve the game never drew.
+        var control = ControlPoint(new Vector2(100f, 900f),
+                                   new Vector2(1500f, 300f),
+                                   arcDir: -500f);
+
+        Assert.Equal(800f, control.X, 3);
+        Assert.Equal(1100f, control.Y, 3);
+    }
+
+    [Fact]
+    public void The_curves_t_is_recovered_from_the_position_it_produced()
+    {
+        // THE HYPOTHESIS'S OWN NUMBER. `time` is a local of an async method
+        // and unreachable from the trail, so the log recovers t by inverting
+        // the quadratic. Round-tripping it is what makes the recovered number
+        // evidence: mid-flight, at the endpoint, one frame past it, and out at
+        // the magnitude the live catch recorded.
+        var start = new Vector2(100f, 900f);
+        var end = new Vector2(1500f, 300f);
+        var control = ControlPoint(start, end, arcDir: -500f);
+
+        foreach (var t in new[] { 0.25f, 0.75f, 1f, 1.02f, 8f, 2900f })
+        {
+            var position = Bezier(start, end, control, t);
+            var recovered = RecoverT(start, end, control, position);
+            Assert.True(Math.Abs(recovered - t) <= 1e-3f * Math.Abs(t) + 1e-3f,
+                        $"t={t} recovered as {recovered}");
+        }
+    }
+
+    [Fact]
+    public void The_recovered_t_reaches_the_magnitude_the_live_catch_recorded()
+    {
+        // The row's arithmetic, end to end: a t in the thousands puts the card
+        // at ~1e9 px, which is the order of the position the first live catch
+        // printed (-8.8e9, -4.9e8). If this ever stops holding, the hypothesis
+        // in the row's own text is wrong about the mechanism and not just the
+        // trigger.
+        var start = new Vector2(960f, 540f);
+        var end = new Vector2(1500f, 200f);
+        var control = ControlPoint(start, end, arcDir: 900f);
+
+        var position = Bezier(start, end, control, 2900f);
+
+        Assert.True(position.Length() > 1e8f, $"|pos|={position.Length()}");
+        Assert.Equal(2900f, RecoverT(start, end, control, position), 0);
+    }
+
+    [Fact]
+    public void A_position_that_is_not_on_the_curve_recovers_no_t()
+    {
+        // Solving ONE axis always yields some t, so the answer is checked
+        // against the curve before it is returned. Without that, a card moved
+        // by something OTHER than its flight would still be reported with a
+        // confident t, and the log would confirm the hypothesis it exists to
+        // test.
+        var start = new Vector2(100f, 900f);
+        var end = new Vector2(1500f, 300f);
+        var control = ControlPoint(start, end, arcDir: -500f);
+
+        Assert.True(float.IsNaN(
+            RecoverT(start, end, control, new Vector2(800f, -40_000f))));
+        Assert.True(float.IsNaN(
+            RecoverT(start, end, control,
+                     new Vector2(float.PositiveInfinity, 0f))));
     }
 }
