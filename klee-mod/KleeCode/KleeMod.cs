@@ -365,6 +365,11 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.HexereiKey + ".title"] = "Hexerei",
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
+                    // `EB-378`. The rider, not a keyword: the rows whose Hydro
+                    // arrives with the jellyfish's carry-out rather than with
+                    // the play.
+                    [Cards.ArmKeywordTips.PlanElementKey + ".title"] =
+                        "Hydro on the carry-out",
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
                     // The Furina reframe's three (slice two). `Deploy`
                     // is the one word here a shipped Furina card also

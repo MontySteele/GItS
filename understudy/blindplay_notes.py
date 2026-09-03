@@ -207,6 +207,25 @@ HAND_REPEAT_NOTE = ("*More than one card in this hand prints the same name. "
 # `Vulnerable 1 (debuff)` and the r2 Opus seat read "the aura I put on them to
 # set up a Reaction" as something helping the enemy. The tag is `(aura)` on
 # the line, and this says once per screen what that third tag means.
+# `EB-378`. WHOSE ELEMENT THE CARRY-OUT IS, on the panel that carries it out.
+#
+# `KokomiPlan.ResolveAll` deals every damaging Plan clause as
+# `ElementalHit.Deal(..., Element.Hydro, ...)` -- and the sim's twin the same
+# (`kokomi_plan`, `element="hydro"`) -- whatever the card's own type. So a
+# SKILL's Plan leaves a Hydro aura, and the round-9 act-1 seat watched one
+# appear "from a card whose face says nothing about an element" (run 2, act 1,
+# finding 2). The card faces now declare it, and this is the same fact said
+# where the hit actually happens: the jellyfish's own panel, which is the one
+# section a reader is looking at when the morning resolves.
+#
+# ONE SENTENCE AND NO NUMBERS. The aura's duration and the reaction rule are
+# the `Applies Hydro` keyword's and the reaction glossary's, both already on
+# any screen showing an element; what is missing here is only whose hit it is.
+PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
+                   "hit: it leaves a Hydro aura, or reacts with the aura "
+                   "already there. A Plan that blocks, draws or applies a "
+                   "debuff leaves no aura.")
+
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
              "`(debuff)`, because it is neither: it is the element left "
              "clinging to a body, and it is what an Elemental Reaction needs "

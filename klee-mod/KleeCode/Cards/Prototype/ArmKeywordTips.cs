@@ -73,6 +73,12 @@ public static class ArmKeywordTips
     public const string EvokeKey = "KLEEMOD-ARM_EVOKE";
     public const string DrainKey = "KLEEMOD-ARM_DRAIN";
 
+    // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
+    // RIDER on the rows whose element arrives with the jellyfish rather than
+    // with the play. It lives in this class because it is a sentence about the
+    // Plan, which is this class's word and this quarantine's rule.
+    public const string PlanElementKey = "KLEEMOD-ARM_PLAN_ELEMENT";
+
     // ----------------------------------------------------------- Klee ------
     //
     // The four sentences are the ruled brief's sec.3 rules 1, 2, 4 and 6, as
@@ -306,6 +312,37 @@ public static class ArmKeywordTips
           + "enemy, or ALL if it says so; never a Minion. "
           + "[gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] does "
           + "not.");
+
+    /// <summary>
+    /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the
+    /// jellyfish's and not the card's.
+    ///
+    /// <see cref="KokomiPlan.ResolveAll"/> deals every damaging Plan clause as
+    /// <c>ElementalHit.Deal(..., Element.Hydro, ...)</c> whatever the card's
+    /// type, so `Kurage's Oath` -- a SKILL -- leaves a Hydro aura on every
+    /// enemy it takes, and the sim's twin does the same
+    /// (<c>tier0/engine/kokomi_plan</c>, <c>element="hydro"</c>). The round-9
+    /// act-1 seat watched that aura appear "from a card whose face says nothing
+    /// about an element", and priced no reaction off it.
+    ///
+    /// THE CARD NOW DECLARES THE ELEMENT (the gem and the reaction rule, from
+    /// <c>gen_klee_cards.aura_elements_for</c>) AND THIS SAYS WHEN. Both halves
+    /// are needed and neither is enough: a gem alone would tell a player the
+    /// card's own hit applies Hydro, which it does not -- <see
+    /// cref="CatalystCadence.PrintedElement"/> answers <c>Element.None</c> for
+    /// a Skill and this row deliberately did not change that.
+    ///
+    /// ATTACHED ONLY WHERE THE TWO DISAGREE. A row whose own damage already
+    /// carries the element (every Attack of hers) needs no such sentence, so
+    /// `gen_klee_cards.emit` raises this one only where the Plan is the sole
+    /// source.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForPlanElement(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, PlanElementKey,
+            "Its own hit applies no aura; the [gold]Bake-Kurage[/gold] carries "
+          + "out the [gold]Plan[/gold] as a [gold]Hydro[/gold] hit, which "
+          + "does.");
 
     /// <summary>
     /// THE BOUND IS THE WHOLE POINT OF THIS ROW'S SECOND HALF. The Casket read

@@ -5601,3 +5601,32 @@ def test_the_enchantment_rows_are_the_ruled_conversion():
     page = blindplay.observe(keyword_hand_state(
         ["Choose an Attack to Enchant with Sharp 2."]))
     assert "- **Sharp** — An enchantment on an Attack" in page
+
+
+# ------------------ `EB-378`: whose element the carry-out is ---------------
+
+
+def test_the_kurage_panel_says_the_planned_hit_is_hydro():
+    """`KokomiPlan.ResolveAll` deals every damaging Plan clause as
+    `ElementalHit.Deal(..., Element.Hydro, ...)` and the sim's twin the same,
+    so a SKILL's Plan leaves a Hydro aura. The round-9 act-1 seat watched one
+    appear "from a card whose face says nothing about an element".
+
+    SEEN TO FAIL: the panel said nothing about the element of its own hit.
+    """
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(TWO_PLANS)))
+    assert "## The Bake-Kurage" in page
+    assert blindplay.PLAN_HYDRO_NOTE.lstrip("- ") in page
+    # Under the pet's own line: a fact about the jellyfish, not about any one
+    # Plan in the queue below it.
+    body = page.split("## The Bake-Kurage")[1]
+    assert body.index("Enemies cannot touch it") < body.index("Hydro hit")
+    assert body.index("Hydro hit") < body.index("Kurage's Oath")
+
+
+def test_the_panel_note_says_which_plans_leave_no_aura():
+    """The half a reader prices a reaction with: a Plan that blocks, draws or
+    applies a debuff is not a hit and leaves nothing clinging."""
+    assert "blocks, draws or applies a debuff leaves no aura" \
+        in blindplay.PLAN_HYDRO_NOTE

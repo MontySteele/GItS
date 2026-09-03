@@ -191,11 +191,27 @@ public class ArmKeywordTipTests
             .Select(f => (string)f.GetRawConstantValue()!)
             .ToList();
 
+        // One key per attach, the rider included (`EB-378`).
         Assert.Equal(Attaches().Count(), keys.Count);
         Assert.Equal(keys.Count, keys.Distinct().Count());
         Assert.All(keys, k => Assert.StartsWith("KLEEMOD-ARM_", k));
         Assert.DoesNotContain("KLEEMOD-BOMB", keys);
         Assert.DoesNotContain("KLEEMOD-SWIRL_PREVIEW", keys);
+    }
+
+    [Fact]
+    public void The_plan_element_rider_says_whose_hit_leaves_the_aura()
+    {
+        // `EB-378`. `KokomiPlan.ResolveAll` deals every damaging Plan clause as
+        // `ElementalHit.Deal(..., Element.Hydro, ...)` whatever the card's
+        // type, so a SKILL's Plan leaves a Hydro aura -- and the r9 act-1 seat
+        // watched one appear from "a card whose face says nothing about an
+        // element". The card now declares the element; this says WHEN, which
+        // is the half a gem cannot carry.
+        var body = Printed("ForPlanElement");
+        Assert.Contains("Its own hit applies no aura", body);
+        Assert.Contains("Bake-Kurage", body);
+        Assert.Contains("Hydro", body);
     }
 
     [Fact]
@@ -208,15 +224,21 @@ public class ArmKeywordTipTests
         // cannot arrive with a different shape by accident.
         var attaches = Attaches().ToList();
 
-        // ELEVEN. Draft 6 cut Tide, Surge, Exert and the Garment as
-        // keywords and their four `For*` methods left with the rules they
-        // defined, taking the table from eleven to seven; the Furina reframe's
-        // slice two put Deploy, Evoke and Drain on it (2026-09-02), and R244
-        // put `Hexerei` on it -- the coven's family mark, which eighteen faces
-        // printed while nothing defined it. The number is the TABLE's length
-        // (`gen_klee_cards.ARM_KEYWORDS`), which is what the python half of
-        // this pin walks.
-        Assert.Equal(11, attaches.Count);
+        // TWELVE: ELEVEN KEYWORDS AND ONE RIDER. Draft 6 cut Tide, Surge,
+        // Exert and the Garment as keywords and their four `For*` methods left
+        // with the rules they defined, taking the table from eleven to seven;
+        // the Furina reframe's slice two put Deploy, Evoke and Drain on it
+        // (2026-09-02), and R244 put `Hexerei` on it -- the coven's family
+        // mark, which eighteen faces printed while nothing defined it. Eleven
+        // is the TABLE's length (`gen_klee_cards.ARM_KEYWORDS`), which is what
+        // the python half of this pin walks.
+        //
+        // THE TWELFTH IS `EB-378`'s `ForPlanElement`, which titles no keyword:
+        // it is a sentence about a CARD whose Hydro arrives with the
+        // jellyfish's carry-out rather than with the play. It goes through the
+        // same `With`, which is what this pin is actually for.
+        Assert.Equal(12, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
                                          System.StringComparison.Ordinal)));

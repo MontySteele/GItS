@@ -169,10 +169,17 @@ class CharacterProfile:
             return card.get("type") == "attack"
         if self.cadence == "skill_grade":
             tags = set(card.get("tags", []))
+            # `EB-378`: BRANCHES INCLUDED, because the SIM decides per EFFECT
+            # at resolution (`effects._element_for` asks `fx["op"] == "damage"`
+            # of whatever op is resolving) while this asks the card once. A row
+            # whose only damage sat inside a `conditional` was elemental in the
+            # sim and carried no `IElementalCard` in the mod, so the branch
+            # applied an aura in one engine and none in the other. Same walk
+            # the aim and Bomb scans were moved onto (`EB-142`, L4).
             has_damage = any(
                 effect.get("op") == "damage"
                 and effect.get("target") != "self"
-                for effect in card.get("effects", [])
+                for effect in _effects_everywhere(card)
             )
             return has_damage and (
                 card.get("type") == "skill"
@@ -644,6 +651,32 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
     its printed `apply_aura` adds. `ElementBadge.ElementOf` draws the first, so
     a companion that hits with its own element and applies a second aura wears
     the element its damage carries.
+
+    `EB-378` CLOSED TWO HOLES IN THE SCAN, both of them silent.
+
+      A BRANCH. The `apply_aura` walk read the TOP LEVEL only, so a row whose
+      only aura op sits inside a `conditional` declared no element, drew no
+      gem and raised no reaction rule -- while applying the aura on resolution.
+      It now reads `_effects_everywhere`, the shared walk the aim and Bomb
+      scans were already moved onto (`EB-142`, L4), for the same reason: a
+      branch-gated aura is still an aura on the face.
+
+      A PLAN. `KokomiPlan.ResolveAll` deals EVERY damaging Plan clause as
+      `ElementalHit.Deal(..., Element.Hydro, ...)` -- the element is the
+      jellyfish's carry-out, not the card's type -- and the sim's twin does the
+      same (`kokomi_plan`, `element="hydro"`). So `Kurage's Oath`, a SKILL,
+      leaves a Hydro aura on every enemy it takes, and its face declared
+      nothing at all: the round-9 act-1 seat watched the aura appear "from a
+      card whose face says nothing about an element", in a kit whose whole
+      reaction layer keys off which element is clinging to a body.
+
+    THE PLAN HALF ADDS THE KEYWORD AND NOT `elemental`, and that split is the
+    whole of its safety. `elemental` decides `IElementalCard`, which is what
+    `CatalystCadence.PrintedElement` reads to element the card's OWN hit -- so
+    setting it would make Kurage's Oath's now-line apply Hydro, which is a
+    rules change and not this row's business. What is added is the face
+    DECLARATION: the gem, the reaction rule, and (from `emit`) one sentence
+    saying the aura rides the carry-out rather than the play.
     """
     elements: list[str] = []
     if elemental:
@@ -652,11 +685,39 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
         )
         if source_element in AURA_KEYWORD_BY_ELEMENT:
             elements.append(source_element)
-    for effect in card.get("effects", []):
+    if plan_applies_element(card, profile):
+        elements.append(profile.native_element)
+    for effect in _effects_everywhere(card):
         if (effect.get("op") == "apply_aura"
                 and effect.get("element") in AURA_KEYWORD_BY_ELEMENT):
             elements.append(effect["element"])
     return list(dict.fromkeys(elements))
+
+
+#: The Plan clauses that HIT, and so leave the carry-out's Hydro aura. The twin
+#: of `KokomiPlan.Kind.Damage` / `DamageQuarterMaxHp` /
+#: `DamagePerCompanionLastTurn`, which are the three cases of `ResolveAll` that
+#: reach `ElementalHit.Deal`. A closed set for `PLAN_CLAUSE_KINDS`' reason: a
+#: clause that starts hitting must come here deliberately.
+PLAN_DAMAGE_OPS = frozenset({
+    "damage", "damage_quarter_max_hp", "damage_per_companion_last_turn"})
+
+
+def plan_applies_element(card: dict, profile: "CharacterProfile") -> bool:
+    """Does the jellyfish's carry-out of this card's Plan leave an aura?
+
+    `EB-378`. The carry-out's element is the CHARACTER's, exactly as the
+    cadence is -- `KokomiPlan` hardcodes `Element.Hydro` and the sim hardcodes
+    `element="hydro"` -- so the question is asked of the profile rather than of
+    the card, and a profile whose native element leaves no aura in this engine
+    answers no.
+    """
+    if profile.cadence != "catalyst_attack":
+        return False
+    if profile.native_element not in AURA_KEYWORD_BY_ELEMENT:
+        return False
+    return any(clause.get("op") in PLAN_DAMAGE_OPS
+               for clause in card.get("plan") or [])
 
 
 def arm_keywords_printed(description: str) -> list[ArmKeyword]:
@@ -10434,6 +10495,15 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # word is the thing a player reads second. The rule and the exclusion are
     # `arm_keyword_tip_calls`'; nothing about them is decided here.
     if profile.arm_keyword_tips:
+        # `EB-378`, and it goes UNDER the keyword definitions for the reason
+        # they go under the live arithmetic: this is a fact about THIS card's
+        # element, so it is read before the definition of the word `Plan`.
+        # ONLY where the two sources disagree -- an Attack of hers already
+        # carries the element on its own hit and needs no sentence at all.
+        if plan_applies_element(card, profile) and not elemental:
+            tips_expr = (
+                "ArmKeywordTips.ForPlanElement("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc, includes_bomb_rules,

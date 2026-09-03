@@ -248,12 +248,20 @@ def test_every_table_row_has_a_method_and_a_registered_title_row(keyword):
         encoding="utf-8"), keyword.word
 
 
+# `EB-378` put ONE key in this file that titles no keyword: the Plan-element
+# rider, which is a sentence about a card rather than a definition of a word.
+# It is named here so the count below stays a real pin instead of a number
+# somebody bumps.
+NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT"}
+
+
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
     """`Bomb` and `Swirl` are the same WORD under two different rules, so the
     keys must differ or the loc merge would let one arm overwrite the other."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     keys = set(re.findall(r'"(KLEEMOD-[A-Z0-9_]+)"', tips))
-    assert len(keys) == len(gen.ARM_KEYWORDS)
+    assert len(keys - NON_KEYWORD_KEYS) == len(gen.ARM_KEYWORDS)
+    assert NON_KEYWORD_KEYS <= keys
     assert all(k.startswith("KLEEMOD-ARM_") for k in keys)
     assert "KLEEMOD-BOMB" not in keys
     assert "KLEEMOD-SWIRL_PREVIEW" not in keys
