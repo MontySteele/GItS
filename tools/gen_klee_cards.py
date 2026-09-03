@@ -2049,8 +2049,8 @@ APPLY_POWERS = {
         "to ALL enemies; when it ends, 16 more. Lasts {X} more turn(s)."),
     "mi_kyouka": ("KyoukaPower", None,
         "Your [gold]Attacks[/gold] apply [gold]Hydro[/gold] and deal 4 more "
-        "damage; when it ends, deal 12 damage and apply [gold]Hydro[/gold] to "
-        "a random enemy. Lasts {X} more turn(s)."),
+        "damage; when it ends, deal 12 [gold]Hydro[/gold] damage to a random "
+        "enemy. Lasts {X} more turn(s)."),
     "mi_surprise_dispatch": ("SurpriseDispatchPower", None,
         "At the start of your next turn, deal 10 damage to a random enemy."),
     "mi_tamoto": ("TamotoPower", None,

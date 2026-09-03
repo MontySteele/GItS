@@ -747,3 +747,49 @@ def test_the_entry_ceiling_is_captured_at_the_top_of_the_fight():
     assert effects.companion_overhaul_entry_hp(st) == 50
     st.player.hp = 20
     assert effects.companion_overhaul_entry_hp(st) == 50
+
+
+# ------------------ `EB-379`: the face says WHEN the finale lands ----------
+
+
+def _proto_face(card_id: str) -> str:
+    """One prototype row's printed description, off the sheet."""
+    import yaml
+    rows = yaml.safe_load(
+        (REPO / "docs" / "prototype-surface.yaml").read_text(
+            encoding="utf-8"))
+    row = next(r for r in rows if r["id"] == card_id)
+    return row["description"]
+
+
+def test_the_two_delayed_finales_say_when_they_land(overhaul):
+    """`EB-379`. "Then deal 12 Hydro damage to a random enemy" reads as the
+    second half of THIS play; the op fires when the window ends, two turns
+    later. The round-9 act-3 seat met it as an unexplained HP drop and could
+    not attribute it -- `test_kyouka_rides_your_attacks_then_pops` above is the
+    rule, and it takes two turn ends.
+
+    Ayaka's Soumetsu carries the identical sentence one row over and is fixed
+    with it: the same word, the same two turn ends, the same misreading
+    available.
+    """
+    for card_id, finale in (("proto_mi_ayato_kyouka", "12"),
+                            ("proto_mi_ayaka_soumetsu", "16")):
+        face = _proto_face(card_id)
+        assert "Then deal" not in face, card_id
+        assert f"After 2 turns, deal {finale}" in face, card_id
+
+
+def test_the_badge_says_when_it_ends_rather_than_then(overhaul):
+    """The badge is the page's only slot for the forecast -- it reaches a blind
+    reader through the player's power list with its own turns-remaining count,
+    and there is no event log on the page for an untargeted end-of-turn hit to
+    be named in. So it has to carry the WHEN too, and it must not carry a
+    second wording of it (`docs/current/text-conventions.md`).
+    """
+    src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+           / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
+    kyouka = src.split("class KyoukaPower")[1].split("class ")[0]
+    assert "When it ends, deal" in kyouka
+    assert "Then deal" not in kyouka
+    assert "{Amount:plural:turn|turns}" in kyouka

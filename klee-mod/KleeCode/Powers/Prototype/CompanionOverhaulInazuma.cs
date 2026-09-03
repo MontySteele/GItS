@@ -757,7 +757,8 @@ public sealed class AurousBlazePower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// Kamisato Ayaka, Soumetsu: "For 2 turns, at the end of your turn deal 8 Cryo
-/// damage to ALL enemies. Then deal 16 Cryo damage to ALL enemies."
+/// damage to ALL enemies. After 2 turns, deal 16 Cryo damage to ALL
+/// enemies."
 ///
 /// FIRE, TICK, AND FIRE AGAIN AT ZERO -- both on the same turn when the clock
 /// runs out, because "then" is what happens after the two turns and the second
@@ -824,7 +825,7 @@ public sealed class KyoukaPower : PowerModel, ILocalizationProvider
         ("description",
             "Your Attacks apply [gold]Hydro[/gold] and deal "
           + $"[blue]{CompanionOverhaulLaw.KyoukaDamage}[/blue] additional damage. "
-          + $"Then deal [blue]{CompanionOverhaulLaw.KyoukaFinale}[/blue] "
+          + $"When it ends, deal [blue]{CompanionOverhaulLaw.KyoukaFinale}[/blue] "
           + "[gold]Hydro[/gold] damage to a random enemy. "
           + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
