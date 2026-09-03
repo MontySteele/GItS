@@ -149,6 +149,14 @@ internal static class KleePowerIcons
         SurpriseDispatchPower =>
             KleePck.Path("klee/powers/detonation_splash.png"),
         TamotoPower => KleePck.Path("klee/powers/shattering_pressure.png"),
+        // THE SAME ARM'S STAND-IN SLICE, on the same terms once more, and the
+        // borrow is easier to argue here than anywhere above: a stand-in wears
+        // the Universal's own illustration (its row's `art_of:`), so its badge
+        // borrows the icon that Universal's power already uses.
+        ShakenNotPurredPower => KleePck.Path("klee/powers/frozen.png"),
+        ColdBloodedPower => KleePck.Path("klee/powers/frozen.png"),
+        IGotYourBackPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        LionsFangPower => KleePck.Path("klee/powers/spark_per_turn.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

@@ -79,6 +79,7 @@
     "proto_mc_dahlia_favonian_favor",
     "proto_mc_dahlia_sacramental_shower",
     "proto_mc_diona_icy_paws",
+    "proto_mc_diona_shaken_not_purred",
     "proto_mc_diona_signature_mix",
     "proto_mc_durin_binary_form",
     "proto_mc_eula_glacial_illumination",
@@ -86,6 +87,8 @@
     "proto_mc_fischl_oz",
     "proto_mc_jean_dandelion_breeze",
     "proto_mc_jean_gale_blade",
+    "proto_mc_jean_lions_fang",
+    "proto_mc_kaeya_cold_blooded_strike",
     "proto_mc_kaeya_frostgnaw",
     "proto_mc_kaeya_glacial_waltz",
     "proto_mc_lisa_lightning_rose",
@@ -94,6 +97,7 @@
     "proto_mc_mona_stellaris_phantasm",
     "proto_mc_nicole_revelation",
     "proto_mc_noelle_breastplate",
+    "proto_mc_noelle_i_got_your_back",
     "proto_mc_noelle_sweeping_time",
     "proto_mc_razor_claw_and_thunder",
     "proto_mc_razor_lightning_fang",
@@ -221,6 +225,7 @@
     "proto_mc_dahlia_favonian_favor": "klee",
     "proto_mc_dahlia_sacramental_shower": "klee",
     "proto_mc_diona_icy_paws": "klee",
+    "proto_mc_diona_shaken_not_purred": "klee",
     "proto_mc_diona_signature_mix": "klee",
     "proto_mc_durin_binary_form": "klee",
     "proto_mc_eula_glacial_illumination": "klee",
@@ -228,6 +233,8 @@
     "proto_mc_fischl_oz": "klee",
     "proto_mc_jean_dandelion_breeze": "klee",
     "proto_mc_jean_gale_blade": "klee",
+    "proto_mc_jean_lions_fang": "klee",
+    "proto_mc_kaeya_cold_blooded_strike": "klee",
     "proto_mc_kaeya_frostgnaw": "klee",
     "proto_mc_kaeya_glacial_waltz": "klee",
     "proto_mc_lisa_lightning_rose": "klee",
@@ -236,6 +243,7 @@
     "proto_mc_mona_stellaris_phantasm": "klee",
     "proto_mc_nicole_revelation": "klee",
     "proto_mc_noelle_breastplate": "klee",
+    "proto_mc_noelle_i_got_your_back": "klee",
     "proto_mc_noelle_sweeping_time": "klee",
     "proto_mc_razor_claw_and_thunder": "klee",
     "proto_mc_razor_lightning_fang": "klee",
@@ -544,6 +552,10 @@
       "block": 3,
       "power_amount": 1
     },
+    "proto_mc_diona_shaken_not_purred": {
+      "block": 3,
+      "power_amount": 1
+    },
     "proto_mc_diona_signature_mix": {
       "power_amount": 1
     },
@@ -568,6 +580,12 @@
     "proto_mc_jean_gale_blade": {
       "damage": 3
     },
+    "proto_mc_jean_lions_fang": {
+      "power_amount": 1
+    },
+    "proto_mc_kaeya_cold_blooded_strike": {
+      "damage": 3
+    },
     "proto_mc_kaeya_frostgnaw": {
       "damage": 3,
       "block": 3
@@ -589,6 +607,10 @@
     },
     "proto_mc_noelle_breastplate": {
       "block": 3
+    },
+    "proto_mc_noelle_i_got_your_back": {
+      "block": 3,
+      "power_amount": 1
     },
     "proto_mc_noelle_sweeping_time": {
       "cost": -1

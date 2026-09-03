@@ -13,8 +13,8 @@ import copy
 from typing import Optional, Sequence
 
 from tier0 import constants as C
-from tier0.engine import (furina_reframe, klee_overhaul, kokomi_plan, powers,
-                          reactions, resources, statuses)
+from tier0.engine import (companion_standins, furina_reframe, klee_overhaul,
+                          kokomi_plan, powers, reactions, resources, statuses)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, KurageMemory,
                                 grant_sly_autoplay,
@@ -5819,6 +5819,11 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
         else:
             del enemy.powers["mc_melody_loop"]
     inazuma_overhaul_turn_start(state)
+    # THE STAND-IN SEAM's one start-of-turn rule -- Jean's Lion's Fang, Fair
+    # Protector, which is Grounded's shape with a card on it. LAST, and
+    # commutative with everything above it: it grants the player Block and a
+    # draw and reads only the explosion counter, which nothing here writes.
+    companion_standins.turn_start(state)
 
 
 def inazuma_overhaul_turn_start(state: CombatState) -> None:

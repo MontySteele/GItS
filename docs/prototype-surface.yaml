@@ -698,6 +698,54 @@
    effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
              {op: apply_power, power: mc_starfrost_discount, amount: 1, target: self}]}
 
+# stand-ins (caretakers), PR: stand-in seam
+# A Klee-only card handed to Klee in place of the Universal `replaces:` names;
+# `art_of:` is whose art it wears. In NO pool -- docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_mc_diona_shaken_not_purred, name: "Diona — Shaken, Not Purred", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
+   cost: 1, type: skill,
+   personal_pool: [klee],
+   replaces: proto_mc_diona_icy_paws, art_of: proto_mc_diona_icy_paws,
+   description: "Gain 6 [gold]Block[/gold]. Apply [gold]Cryo[/gold] twice. If a [gold]Bomb[/gold] goes off this turn, gain 5 [gold]Block[/gold].",
+   effects: [{op: block, amount: 6},
+             {op: apply_aura, element: cryo, target: enemy},
+             {op: apply_aura, element: cryo, target: enemy},
+             {op: apply_power, power: mc_shaken_not_purred, amount: 5, target: self}]}
+
+- {id: proto_mc_noelle_i_got_your_back, name: "Noelle — I Got Your Back", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: geo,
+   cost: 1, type: skill,
+   personal_pool: [klee],
+   replaces: proto_mc_noelle_breastplate, art_of: proto_mc_noelle_breastplate,
+   description: "Gain 6 [gold]Block[/gold]. Whenever a [gold]Mine[/gold] goes off this turn, gain 4 [gold]Block[/gold].",
+   effects: [{op: block, amount: 6},
+             {op: apply_power, power: mc_i_got_your_back, amount: 4, target: self}]}
+
+# The marker's stack is a FLAG, so this row states its own upgrade rather than
+# letting the Prototype-stage rule move an amount nothing reads.
+- {id: proto_mc_kaeya_cold_blooded_strike, name: "Kaeya — Cold-Blooded Strike", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
+   cost: 1, type: attack,
+   personal_pool: [klee],
+   replaces: proto_mc_kaeya_frostgnaw, art_of: proto_mc_kaeya_frostgnaw,
+   description: "Deal 8 damage. Apply [gold]Cryo[/gold]. This turn, Grounded counts nothing as having gone off.",
+   upgrade: {damage: 3},
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
+             {op: apply_power, power: mc_cold_blooded, amount: 1, target: self}]}
+
+- {id: proto_mc_jean_lions_fang, name: "Jean — Lion's Fang, Fair Protector", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 5, rarity: rare, role_c: buffer, element: anemo,
+   cost: 2, type: power,
+   personal_pool: [klee],
+   replaces: proto_mc_jean_dandelion_breeze, art_of: proto_mc_jean_dandelion_breeze,
+   description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 8 [gold]Block[/gold] and draw 1 card.",
+   effects: [{op: apply_power, power: mc_lions_fang, amount: 8, target: self}]}
+
 # THE KOKOMI OVERHAUL, SLICE ONE, DRAFT 6 (the Plan). Under
 # `C.KOKOMI_OVERHAUL` these ARE her starter and her whole pool. The `plan:`
 # key, the targets and every row: docs/notes/prototype-surface-provenance.md.

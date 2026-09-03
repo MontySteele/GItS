@@ -248,7 +248,14 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
         // Read BEFORE the roll would be wrong and read after it is the point:
         // `For` rolls the ledger to this round, so `SetOffLastTurn` is exactly
         // the count that stood when the player last passed.
-        if (KleeOverhaulLedger.For(Owner).SetOffLastTurn > 0) return;
+        // KAEYA'S COVER STORY, and the only line the companion stand-in seam
+        // adds to this arm: Cold-Blooded Strike prints "This turn, Grounded
+        // counts nothing as having gone off" and it names GROUNDED -- so the
+        // blind is read HERE rather than written into the counter above, which
+        // Jean's stand-in also reads. False on every build with the companion
+        // arm off.
+        if (KleeOverhaulLedger.For(Owner).SetOffLastTurn > 0
+            && !CompanionStandIns.GroundedBlind(Owner)) return;
         await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null);
     }
 }

@@ -36,6 +36,7 @@ from typing import Callable, Optional
 
 from tier0 import constants as C
 from tier0.content import loader, upgrades
+from tier0.engine import companion_standins
 from tier0.engine.state import Card
 from tier05 import rewards
 
@@ -195,7 +196,15 @@ def companion_shop_offer(
             continue                      # slot omitted -- see the docstring
         pick = rng.choice(cards)
         taken.append(pick)
-        offers.append((loader.get_card(pick.id), C.SHOP_COMPANION_PRICE[rarity]))
+        # THE STAND-IN HAND-OFF (QUARANTINED, `C.COMPANION_OVERHAUL`), the same
+        # one line the reward slot carries and in the same place: on the PICKED
+        # id, after the eligibility list, the rarity roll and the draw. `taken`
+        # keeps the UNIVERSAL, so slot 2 cannot re-offer the row slot 1 already
+        # stocked under its stand-in's name, and the price is the Universal's
+        # rarity price -- a stand-in is a face swap, never a tier move.
+        offers.append((loader.get_card(
+            companion_standins.hand_off(pick.id, character)),
+            C.SHOP_COMPANION_PRICE[rarity]))
     return offers
 
 

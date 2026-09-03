@@ -1601,6 +1601,25 @@ APPLY_POWERS = {
     "ko_grounded": ("GroundedPower", None,
         "At the start of your turn, if none of your [gold]Bombs[/gold] went "
         "off last turn, gain {X} Block."),
+    # THE COMPANION STAND-INS' FOUR (QUARANTINED, R213 B). Every class below
+    # lives in klee-mod/KleeCode/Powers/Prototype/CompanionStandIns.cs and is
+    # compiled only under `-p:PrototypeCards=true`, so the only rows that may
+    # name one are `proto_mc_` stand-ins on the prototype surface. They are
+    # HERE, beside Klee's own, rather than in the companion block below,
+    # because all four read the Klee overhaul's explosion ledger -- which is
+    # what a caretaker stand-in is for. The {X} templates are for form; every
+    # row carries its own `description:` (EB-215).
+    "mc_shaken_not_purred": ("ShakenNotPurredPower", None,
+        "The next time one of your [gold]Bombs[/gold] goes off this turn, "
+        "gain {X} Block."),
+    "mc_i_got_your_back": ("IGotYourBackPower", None,
+        "Whenever one of your [gold]Mines[/gold] goes off this turn, gain {X} "
+        "Block."),
+    "mc_cold_blooded": ("ColdBloodedPower", None,
+        "This turn, Grounded counts nothing as having gone off."),
+    "mc_lions_fang": ("LionsFangPower", None,
+        "At the start of your turn, if none of your [gold]Bombs[/gold] went "
+        "off last turn, gain {X} Block and draw 1 card."),
     # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out
     # of a release build, so the only rows that may name one are `proto_` rows
@@ -2355,6 +2374,22 @@ CARD_FIELDS = {
     # answer than one that is simply carried. The reader that makes it
     # mechanical is a later change, and it is that change's job to move this.
     "hexerei",
+    # THE COMPANION STAND-IN SEAM (QUARANTINED), and the two halves differ.
+    #
+    # `replaces` is INERT here, like `register` and `hexerei` above: which
+    # Universal a row stands in for is an OFFER rule, carried out at each
+    # engine's hand-off (`KleeMod.Powers.CompanionStandIns`,
+    # `tier0.engine.companion_standins`), and there is nothing on the card
+    # itself to emit. Whitelisted rather than left unknown, because this list
+    # is deliberately total and an unknown field BLOCKS the row.
+    #
+    # `art_of` IS read, by exactly one line: the `CustomPortrait` getter names
+    # this id instead of the row's own, so a stand-in wears the Universal's
+    # illustration. Nothing else moves -- deploy stages ONE flat
+    # `images/cards` dir keyed by id, so the file is already there, and
+    # `tools/art_coverage.py` derives the art bill from the very literals this
+    # emits, so a stand-in adds no debt, needs no plan.tsv row and no new image.
+    "replaces", "art_of",
 }
 
 
@@ -9774,6 +9809,15 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "unexpressible deltas block the upgrade path.\n"
         )
     )
+    # THE PORTRAIT'S ID, and it is the row's own on every row but a stand-in.
+    # `art_of:` (the companion stand-in seam, QUARANTINED) says "wear THAT
+    # row's illustration": a stand-in is a Klee-only card handed out in place
+    # of a named Universal, and it is meant to look like the card it replaces.
+    # One line, and no other consequence -- deploy stages one flat
+    # `images/cards` dir keyed by id, so the file is already staged, and
+    # `tools/art_coverage.py` bills exactly the literals emitted here, so the
+    # art debt does not move and no new image is owed.
+    art_id = card.get("art_of") or card["id"]
     extra_usings = ""
     if profile is not KLEE_PROFILE:
         extra_usings = "\nusing KleeMod;\nusing KleeMod.Cards;"
@@ -10008,7 +10052,7 @@ namespace {profile.namespace};
 
 public sealed class {cls} : {interfaces}
 {{{gains_block_member}{element_member}{keywords_member}{tooltip_member}
-    public override Texture2D? CustomPortrait => {profile.art_loader}.CardPortrait("{card["id"]}");
+    public override Texture2D? CustomPortrait => {profile.art_loader}.CardPortrait("{art_id}");
 
     public override List<(string, string)>? Localization => new()
     {{

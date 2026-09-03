@@ -17,6 +17,7 @@ from tier0 import constants as C
 from tier0.content import enchantments
 from tier0.content import local_reference
 from tier0.content import upgrades
+from tier0.engine import companion_standins
 from tier0.engine import state as state_mod
 from tier0.engine.state import Card, Enemy, Player, sly_riders
 
@@ -373,6 +374,10 @@ def _validate_card_shape(c: Card) -> None:
     _validate_recall_shape(c)
     _validate_plan_shape(c)
     _validate_no_upgrade_shape(c)
+    # THE STAND-IN SEAM's own two-line schema rule (`replaces:` is prototype
+    # surface only, and it needs a `personal_pool:`), stated where the arm's
+    # rules are rather than as a fourth `_validate_*` in this file.
+    companion_standins.validate_row(c)
 
 
 def prototype_cards(sheet: Path | None = None) -> list[Card]:
@@ -465,8 +470,15 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
                     f"{path.name}: {card_id!r}: `plan:` must be a non-empty "
                     "list of effects")
             _validate_effect_vocabulary(card_id, plan)
+        # THE STAND-IN SEAM: `art_of:` is stripped for `description:`'s reason
+        # and it is the same kind of fact -- whose ILLUSTRATION the row wears.
+        # tier 0 draws nothing, so an `art_of` on `Card` would be a field the
+        # engine carries and nothing reads; the codegen emits it into
+        # `RosterArt.CardPortrait` on the other side. `replaces:` is KEPT,
+        # because the sim's hand-off is a rule and reads it.
         card = Card.from_dict({k: v for k, v in d.items()
-                               if k not in ("authored_by", "description")})
+                               if k not in ("authored_by", "description",
+                                            "art_of")})
         _validate_card_shape(card)
         cards.append(card)
     return cards
@@ -1519,6 +1531,10 @@ def reset_caches() -> None:
     upgrades._upgrade_index.cache_clear()
     upgrades._shipped_upgrade_index.cache_clear()
     upgrades._prototype_upgrade_index.cache_clear()
+    # The stand-in map is derived from the surface (`replaces:` +
+    # `personal_pool:`), so it is a memoized view of the content tree like the
+    # rest and belongs behind the same one door.
+    companion_standins._replacements.cache_clear()
 
 
 def pilot_weights(pilot_id: str) -> dict:

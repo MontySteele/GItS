@@ -159,10 +159,19 @@ def test_every_overhaul_id_resolves_to_a_mondstadt_companion(overhaul):
 def test_the_pool_ids_and_the_sheet_agree(overhaul):
     """`C.MONDSTADT_OVERHAUL_POOL_IDS` is the arm's list and the sheet is
     where the rows live; a row on one and not the other is a row that either
-    cannot be offered or does not exist."""
+    cannot be offered or does not exist.
+
+    THE STAND-INS ARE THE ONE EXCLUSION, and it is the seam's whole point: a
+    stand-in is handed to Klee IN PLACE of a Universal and is a member of no
+    pool, so it is on the sheet and deliberately not on this list. It is
+    subtracted by `C.COMPANION_STANDIN_IDS` rather than by its `replaces:` key,
+    so a stand-in that fell off that list would fail here instead of quietly
+    joining the offerable pool."""
     on_sheet = {c.id for c in loader.prototype_cards()
                 if c.id.startswith("proto_mc_")}
-    assert on_sheet == set(C.MONDSTADT_OVERHAUL_POOL_IDS)
+    assert on_sheet - set(C.COMPANION_STANDIN_IDS) == set(
+        C.MONDSTADT_OVERHAUL_POOL_IDS)
+    assert set(C.COMPANION_STANDIN_IDS) <= on_sheet
 
 
 def test_the_banner_roster_moves_with_the_pool(overhaul):

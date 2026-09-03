@@ -183,6 +183,15 @@ class Card:
     star: Optional[int] = None
     role_c: Optional[str] = None          # applier | buffer | trigger
     personal_pool: Optional[str] = None
+    # QUARANTINED (`C.COMPANION_OVERHAUL`) -- THE STAND-IN SEAM'S ONE CARD
+    # FIELD. The `proto_mc_` Universal this row is handed out IN PLACE OF, for
+    # a character named by `personal_pool`. Read at exactly one door,
+    # `tier0.engine.companion_standins.hand_off`, which every companion offer
+    # surface calls after its pick; nothing else in the engine reads it, and no
+    # shipped sheet may carry it (`companion_standins.validate_row`, run from
+    # `_validate_card_shape`). The row's `art_of:` is NOT here: tier 0 renders
+    # no card, so it is stripped at load beside `description:`.
+    replaces: Optional[str] = None
     requires: Optional[str] = None        # e.g. burst_energy_full
     nation: Optional[str] = None          # set by the loader from the sheet name
     # THE HEXEREI FAMILY MARK -- ONE WORD, NO EFFECT (the approved Mondstadt
@@ -497,6 +506,33 @@ class Card:
         unknown = set(d) - known
         if unknown:
             raise ValueError(f"card {d.get('id')!r}: unknown fields {sorted(unknown)}")
+        # `personal_pool` NORMALISES HERE, at the one door every sheet row
+        # passes through, and that is the whole of the list spelling's cost.
+        # The stand-in seam's contract (docs/prototype-surface.yaml, the
+        # stand-in block) lets a row write `personal_pool: [klee]` so a FAMILY
+        # of characters can be named where one is named today. Six readers
+        # spread across `loader`, `tier05.rewards`, `tier05.shop`,
+        # `engine.effects` and `content.upgrades` compare the field to a single
+        # character id; normalising a one-member list to that string is what
+        # keeps every one of them byte-identical rather than teaching six
+        # call sites a second shape.
+        #
+        # A LONGER LIST IS REFUSED BY NAME rather than accepted and silently
+        # matched by none of those readers -- an offer filter that answers
+        # "nobody" is a card that quietly leaves the game. The day a stand-in
+        # serves two characters, those six comparisons move to one predicate
+        # and this branch becomes the tuple it already describes.
+        pool = d.get("personal_pool")
+        if isinstance(pool, list):
+            if len(pool) != 1 or not isinstance(pool[0], str):
+                raise ValueError(
+                    f"card {d.get('id')!r}: `personal_pool:` as a list may "
+                    "name exactly ONE character id today "
+                    f"(got {pool!r}); every reader of the field compares it "
+                    "to a single character, so a longer list would match "
+                    "nobody. Move those readers to a membership predicate "
+                    "first.")
+            d = dict(d, personal_pool=pool[0])
         return cls(**d)
 
     def __deepcopy__(self, memo):
@@ -1251,6 +1287,15 @@ class CombatState:
     ko_set_off_this_turn: int = 0        # Run Away!, Ammo Scavenging
     ko_reacted_this_turn: int = 0        # Sizzle, Perfect Timing
     ko_set_off_last_turn: int = 0        # Grounded, and only Grounded
+    # QUARANTINED (`C.COMPANION_OVERHAUL`). Kaeya's stand-in, Cold-Blooded
+    # Strike: "This turn, Grounded counts nothing as having gone off." A
+    # SECOND field rather than a write to `ko_set_off_last_turn`, because the
+    # card names Grounded and the counter is read by more than Grounded --
+    # zeroing it would silently pay Jean's stand-in too. Armed as a marker
+    # power when the card resolves, converted to this flag by
+    # `companion_standins.roll_turn` at the ONE place the counter rolls, and
+    # read by `klee_overhaul.turn_start_late`. False on every flag-off tree.
+    mc_grounded_blind: bool = False
     # Big Badda Boom's "the damage the Bombs dealt": what the explosions since
     # this play began actually LANDED for, post-Strength, post-Weak,
     # post-reaction, post-Vulnerable (`EB-270`) -- never the charge sizes.
