@@ -148,14 +148,46 @@ public sealed class TamakushiCasket : CustomRelicModel
         });
     }
 
+    /// <summary>
+    /// The relic's own name, for the line the jellyfish says when it strikes.
+    ///
+    /// A SECOND SPELLING OF THE TITLE ABOVE, and deliberately not a shared
+    /// constant: `tools/lint_unique_names.py` reads relic names out of the
+    /// literal inside the <c>("title", "...")</c> tuple and nowhere else (R69
+    /// put relic names in the same namespace as card names), so the tuple
+    /// keeps its literal rather than an interpolation the lint cannot read.
+    /// `KurageBeatTests` pins the two together, so a rename that edits one is
+    /// a red test rather than a bubble naming a relic nobody carries.
+    /// </summary>
+    internal const string SourceName = "Tamakushi Casket";
+
     /// <summary>The jellyfish's hit, in one place so a pin and the relic read
     /// the same arithmetic. The pet is the dealer; with no pet on the board she
-    /// is, which is the honest degradation rather than a silent no-op.</summary>
+    /// is, which is the honest degradation rather than a silent no-op.
+    ///
+    /// `EB-316`: THE HIT NOW HAS A BEAT IN FRONT OF IT. The arithmetic below is
+    /// untouched and always was correct -- what was wrong is that it landed in
+    /// the same frame as the card that caused it, so <c>CreatureCmd.Damage</c>'s
+    /// damage number arrived on top of the card's own and the pair read as ONE
+    /// bigger hit. [USER] "had to remind myself why"; the round-3 seat saw "no
+    /// line, no announcement". So the jellyfish LUNGES first (its scene's
+    /// attack state, through the shared animation router) and SAYS the relic's
+    /// name, and only then does the strike go out -- which puts its number on
+    /// its own frame, beside a bubble naming what caused it.
+    /// <c>KleeMod.Vfx.KurageBeat</c> holds the three engine commands.
+    ///
+    /// THE ANNOUNCEMENT IS ON THE PET, NOT THE ENEMY, and that is a reading:
+    /// the row asks for the SOURCE to be named, and the source is the
+    /// jellyfish acting off the relic. A label on the enemy would name the
+    /// creature that was hit.</summary>
     public static async Task Strike(
         PlayerChoiceContext choiceContext, Creature kokomi, Creature target)
     {
         if (target.IsDead) return;
-        var dealer = BakeKuragePet.Of(kokomi) ?? kokomi;
+        var pet = BakeKuragePet.Of(kokomi);
+        var dealer = pet ?? kokomi;
+        await Vfx.KurageBeat.Act(pet);
+        Vfx.KurageBeat.Say(dealer, Vfx.KurageBeat.Line(SourceName, null));
         await ElementalHit.Deal(
             choiceContext, target, Element.Hydro,
             KokomiOverhaulLaw.CasketStrike, dealer);

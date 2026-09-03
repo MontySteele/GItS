@@ -1282,6 +1282,14 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
         turn also happens immediately.
       queue -- ordered, front first: the card's name and how many clauses its
         Plan line carries.
+      carried_out -- `EB-317`: what the jellyfish has already done THIS TURN,
+        in the order it did it. Each row carries `card`, the `number` its
+        clause produced (null when it produced none) and `line`, THE STRING THE
+        SPEECH BUBBLE SAID over the pet's head. The page prints `line`
+        verbatim: the mod builds the sentence once (`Vfx.KurageBeat.Line`) so a
+        seat's page and a sighted player's screen cannot come to disagree about
+        the words. `_carry_out_line` recomposes it only when an older build
+        sends the parts without the sentence.
     """
     raw = player.get("kokomi_plans")
     if not isinstance(raw, dict) or not raw:
@@ -1290,15 +1298,39 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               "clauses": _int(row.get("clauses"))}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
+    pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"
+    carried_out = [_carried_out_row(row, pet_name)
+                   for row in (raw.get("carried_out") or [])
+                   if isinstance(row, dict)]
     return {
         "pet": bool(raw.get("pet")),
-        "pet_name": _text(raw.get("pet_name")) or "Bake-Kurage",
+        "pet_name": pet_name,
         "pet_entity_id": None if pet_id is None else _text(pet_id),
         "pending": _int(raw.get("pending")),
         "twice": bool(raw.get("twice")),
         "also_now": bool(raw.get("also_now")),
         "queue": queue,
+        "carried_out": carried_out,
     }
+
+
+def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
+    """One carried-out Plan, as the screen said it (`EB-317`).
+
+    THE MOD'S SENTENCE WINS. `line` is what the bubble carried, so it is
+    printed as sent and never reassembled from `card` and `number` when it is
+    there. The fallback exists for one case and is written for it: a build
+    whose wire predates the field, where printing nothing would be worse than
+    printing the same format the mod uses.
+    """
+    number = row.get("number")
+    number = None if number is None else _int(number)
+    card = _text(row.get("card"))
+    line = _text(row.get("line"))
+    if not line:
+        line = (f"{pet_name}: {card}" if number is None
+                else f"{pet_name}: {card}, {number}")
+    return {"card": card, "number": number, "line": line}
 
 
 def _pulse_phrase(memory: dict[str, Any]) -> str:
@@ -2339,6 +2371,19 @@ def render(obs: dict[str, Any]) -> str:
                            "whole fight. Enemies cannot touch it. Play a card "
                            "on it to write its **Plan** line instead of "
                            "playing the card now.")
+            # `EB-317`. WHAT ALREADY HAPPENED, BEFORE WHAT IS STILL WAITING,
+            # because that is the order the turn had: the morning's Plans were
+            # carried out at the top of this turn and the queue below is what
+            # the player has written since. Each line is the mod's own string
+            # -- the words the speech bubble put over the jellyfish's head --
+            # printed verbatim, which is the whole point of the field. The
+            # meter ledger is NOT here and must not be (`R101b`): this is what
+            # a sighted player saw, not an instrument's rows.
+            if pl["carried_out"]:
+                out.append(f"- The {pl['pet_name']} carried these out at the "
+                           "start of this turn, front first:")
+                for said in pl["carried_out"]:
+                    out.append(f"  - {said['line']}")
             if not pl["queue"]:
                 out.append("- Nothing is planned. The morning is empty.")
             else:

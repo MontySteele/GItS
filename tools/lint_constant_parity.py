@@ -486,6 +486,23 @@ UNMIRRORED: dict[str, str] = {
         "runs off the band. Not a cap on the queue -- nothing limits how many "
         "Plans she may write -- and the overflow is printed as `+N`, so the "
         "sim has nothing to compare and no rule is hiding here.",
+    # The Bake-Kurage's beat (`EB-316`, `EB-317`). Both numbers are SCREEN
+    # TIME. They decide how long an animation and a speech bubble occupy the
+    # frame and nothing else: no hit is added, removed, resized or reordered by
+    # either, and every rule they sit between resolves in the same order for the
+    # same amounts with them set to zero. The sim has no frames, no animation
+    # and nobody to read a bubble, so there is nothing to compare by value.
+    "KurageBeat.ActSeconds":
+        "presentation: how long the jellyfish's attack animation holds before "
+        "the hit behind it lands, in seconds. It IS `EB-316`'s repair -- the "
+        "casket's strike used to arrive in the same frame as the card that "
+        "caused it, so the two damage numbers read as one -- and it moves no "
+        "number: the same damage lands either way. tier0 resolves a turn with "
+        "no frames in it.",
+    "KurageBeat.LineSeconds":
+        "presentation: how long the carry-out line stays on screen, in "
+        "seconds. Long enough to read, short enough that four Plans in one "
+        "morning do not stack their bubbles. The sim has no screen.",
     "KurageMemoryPileRing.RingWidth":
         "presentation: ring thickness on a full-size card in the pile viewer, "
         "thicker than the HUD's because the card is.",
