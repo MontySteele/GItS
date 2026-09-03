@@ -170,8 +170,8 @@ are in [`workstreams.md`](workstreams.md).
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
   the arm pools (33 Klee / 30 Kokomi rows against 79 / 76 shipped) cleared
   three of seven kit runs. The clears are the kits'; a clear on a 30-row pool
-  is consistency as much as strength. A second control runs at the next free
-  lane window.
+  is consistency as much as strength. The second control (same afternoon,
+  §5) died on the same floor to the same Death Blow; no third is queued.
 - **Companion cards** — R234 ruled the slate whole, Mondstadt first, in
   parallel; `EB-249` / `EB-250` / `EB-251` are what it owes; Itto and Gorou's
   rate are noted there from the round-5 and act-1 reads.
