@@ -482,7 +482,7 @@ public static class KokomiResources
     /// Accrual is UNCAPPED past the max (the sim never clamps; the grant check
     /// is `>=` and casting resets to 0 -- overflow is lost at cast, not gain).
     ///
-    /// `EB-318`. THE ARM NEITHER FEEDS NOR SHOWS BURST, and this is the FEED
+    /// `EB-327`. THE ARM NEITHER FEEDS NOR SHOWS BURST, and this is the FEED
     /// half of the sentence <see cref="BurstGaugeApplies"/> makes the display
     /// half of. Three of the four income sites were already guarded at their
     /// own seams -- the exhaust funnel, the skill-tag particle and the kit
