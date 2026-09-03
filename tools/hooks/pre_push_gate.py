@@ -46,6 +46,20 @@ the calibration bands -- **a band that was not run is not a band**.
     name: a push from a tree this gate cannot test is exactly what must not
     slip through.
 
+THE THIRD LEG: THE C# SUITE (2026-09-02). `klee-mod/KleeTests` was in no gate
+at all -- optional in `tools/gates.py`, absent from CI, absent from here -- and
+two pins sat red on main for days with every gate green. It cannot join CI: the
+project references `sts2.dll`, `0Harmony.dll`, `GodotSharp.dll` and the
+Workshop `BaseLib.dll`, four binaries that live in a Steam install and are not
+ours to publish, so a runner structurally cannot hold this check. Local is the
+only place it can run, and a push is the last moment before the rest of the
+house sees the tree. So this gate runs it, through `tools/gates.py --only
+dotnet-test` rather than a second `dotnet` command line -- ONE implementation,
+two callers, and the property (`-p:PrototypeCards=true`) is decided in one
+place. A machine with no dotnet or no `local.props` gets a SKIP with the
+reason, never a silent pass, and its pushes are not blocked by a check it
+cannot run.
+
 INSTALLATION. `python tools/hooks/install.py` writes the `.git/hooks/pre-push`
 shim (into the COMMON git dir, so every sibling worktree is covered by the one
 install). `tools/hooks/push_gate.py` is now a PreToolUse shim that does the
@@ -76,6 +90,8 @@ FAST_LANE = ["-m", "pytest", "tier0/tests", "tier05/tests", "-q",
              "-m", "not battery"]
 PARALLEL = ["-n", "auto", "--dist", "loadscope"]
 LINTS = ["tools/run_lints.py", "--lane", "ci"]
+#: The mod's C# suite, via the gate wrapper so the flags live in one file.
+KLEETESTS = ["tools/gates.py", "--only", "dotnet-test", "--oneline"]
 
 # What a directory must hold before this gate can honestly claim to have
 # tested it. Both, not either: `run_lints.py` alone would let a docs-only
@@ -217,8 +233,19 @@ def decide(stdin_text: str, target: Path, execute: bool = True) -> int:
              f"\n{_tail(output)}")
         return BLOCK
 
+    remaining = max(120.0, BUDGET_SECONDS - (time.perf_counter() - started))
+    code, output, cs_seconds = _run(KLEETESTS, remaining, target)
+    cs_line = _tail(output, 1) or "(no output)"
+    if code != 0:
+        note(f"PUSH BLOCKED by tools/hooks/pre_push_gate.py: the C# suite "
+             f"klee-mod/KleeTests is RED in {target} ({cs_seconds:.1f}s, exit "
+             f"{code}). No GitHub runner can catch this one -- see the module "
+             f"docstring.\n{_tail(output)}")
+        return BLOCK
+
     note(f"pre_push_gate: GREEN in {time.perf_counter() - started:.1f}s -- "
-         f"gated {target} with the fast lane ({arm}) + run_lints --lane ci. "
+         f"gated {target} with the fast lane ({arm}) + run_lints --lane ci + "
+         f"the C# suite ({cs_seconds:.1f}s: {cs_line}). "
          f"NOT run: the 82 `battery` items (the calibration bands) and the "
          f"local lint lane. Before a merge, run the full suite.")
     return ALLOW

@@ -20,6 +20,20 @@ reading it is a deliberate second step rather than the default.
     python tools/gates.py --oneline          # a single verdict line
     python tools/gates.py --only pytest      # one gate by name
 
+THE ONE GATE THAT CANNOT BE CI's (2026-09-02). `dotnet-test` -- the mod's C#
+suite, `klee-mod/KleeTests` under `-p:PrototypeCards=true` -- runs in BOTH
+lanes and is not behind `--dotnet` any more. It was optional here, absent from
+`.github/workflows/repo.yml` and absent from the pre-push hook, so it was in no
+gate at all: two pins sat red on main for days and nothing said so. It cannot
+become a CI job, and that is a fact about the assemblies rather than a
+preference -- the project references `sts2.dll`, `0Harmony.dll`,
+`GodotSharp.dll` and the Workshop `BaseLib.dll`, four binaries that live in a
+Steam install, are gitignored, and are not ours to publish. So the gate is
+LOCAL, it runs on every `gates.py` and in the `pre-push` hook, and it SAYS
+`local-only` in its own line so a reader never mistakes a green CI run for
+having covered it. On a machine with no game (or no dotnet) it reports a SKIP
+with the reason -- a skip is a skip, never a pass.
+
 WHAT --fast IS AND IS NOT. `--fast` is the inner loop: `-m "not battery"`,
 which drops the 82 calibration-band items. `operations/test.md` is explicit
 that the fast lane is NEVER the gate before a push -- "a band that was not run
@@ -53,6 +67,10 @@ DOTNET = re.compile(r"(?:Passed!|Failed!).*?"
                     r"Failed:\s*(\d+),\s*Passed:\s*(\d+),\s*Skipped:\s*(\d+)",
                     re.DOTALL)
 DOTNET_BUILD = re.compile(r"(\d+) Warning\(s\)\s+(\d+) Error\(s\)")
+#: Said on the `dotnet-test` line every run, green or red. The C# suite is the
+#: one gate a GitHub runner structurally cannot hold (see the module docstring),
+#: so a green CI badge is never evidence about it.
+LOCAL_ONLY = "local-only: no game dlls on a runner"
 
 
 @dataclass
@@ -108,8 +126,11 @@ def gates(args) -> list[Gate]:
              optional="codegen"),
         Gate("dotnet-build", ["dotnet", "build", "klee-mod/KleeCode",
                               "-v", "minimal", "--nologo"], optional="dotnet"),
+        # NOT optional, and `-p:PrototypeCards=true` because the 300-odd
+        # Prototype/ pins are `Compile Remove`d without it -- the arm every
+        # live workstream is building against would otherwise be ungated.
         Gate("dotnet-test", ["dotnet", "test", "klee-mod/KleeTests",
-                             "--nologo", "-v", "q"], optional="dotnet"),
+                             "-p:PrototypeCards=true", "--nologo", "-v", "q"]),
     ]
     picked = []
     for gate in out:
@@ -144,9 +165,9 @@ def summarise(gate: Gate, text: str, code: int) -> tuple[str, list[str]]:
             failed, passed, skipped = m.groups()
             names = re.findall(r"^\s*(?:Failed|X)\s+([\w.]+)", text,
                                re.MULTILINE)
-            return (f"{passed} passed, {failed} failed, {skipped} skipped",
-                    names)
-        return ("ok" if code == 0 else "FAILED"), []
+            return (f"{passed} passed, {failed} failed, {skipped} skipped "
+                    f"[{LOCAL_ONLY}]", names)
+        return ("ok" if code == 0 else "FAILED") + f" [{LOCAL_ONLY}]", []
     if gate.name == "dotnet-build":
         m = DOTNET_BUILD.search(text)
         if m:
@@ -155,10 +176,46 @@ def summarise(gate: Gate, text: str, code: int) -> tuple[str, list[str]]:
     return ("ok" if code == 0 else f"exit {code}"), []
 
 
+def local_props() -> Path | None:
+    """The `local.props` MSBuild will import, or `None` if there is none.
+
+    Mirrors `klee-mod/Directory.Build.props` exactly, in its order: the
+    worktree's own copy wins, then `$GitsLocalProps`, then the machine-level
+    `%LOCALAPPDATA%/gits/local.props` (backslashes on Windows). That file is what names `GameDir` and
+    `BaseLibDll`, so its absence means this machine cannot resolve the game
+    assemblies and the C# gate has nothing to run against.
+    """
+    here = REPO / "klee-mod" / "local.props"
+    if here.exists():
+        return here
+    override = os.environ.get("GitsLocalProps")
+    if override and Path(override).exists():
+        return Path(override)
+    appdata = os.environ.get("LOCALAPPDATA")
+    if appdata:
+        machine = Path(appdata) / "gits" / "local.props"
+        if machine.exists():
+            return machine
+    return None
+
+
+def dotnet_unavailable() -> str:
+    """Why a `dotnet` gate cannot run here, or `""` when it can."""
+    if not shutil.which("dotnet"):
+        return "no dotnet on PATH"
+    if os.environ.get("UsePinnedAssemblies", "").lower() == "true":
+        return ""
+    if local_props() is None:
+        return ("no local.props -- this machine has no game assemblies "
+                "(copy klee-mod/local.props.example to %LOCALAPPDATA%/gits/)")
+    return ""
+
+
 def run(gate: Gate, log: Path) -> Result:
-    if gate.argv[0] == "dotnet" and not shutil.which("dotnet"):
-        return Result(gate, 0, 0.0, "skipped -- no dotnet on PATH",
-                      skipped=True)
+    if gate.argv[0] == "dotnet":
+        why = dotnet_unavailable()
+        if why:
+            return Result(gate, 0, 0.0, f"skipped -- {why}", skipped=True)
     env = dict(os.environ)
     # EB-93: a child whose stdout is a pipe on a cp1252 host dies on a shipped
     # card title. `run_lints` sets this for its own children for the same
