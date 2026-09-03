@@ -36,6 +36,7 @@ namespace KleeMod.Tests.Prototype;
 /// are labelled STRUCTURAL wherever they are. The arithmetic those hooks
 /// perform is asserted for real in the sim twin, against the same constants.
 /// </summary>
+[Collection(CompanionOverhaulArm.Name)]
 public class CompanionOverhaulTests
 {
     private const BindingFlags All = HeadlessGame.All;
@@ -234,6 +235,21 @@ public class CompanionOverhaulTests
                         // reward slot may offer one, so the roster does not
                         // list them and this sweep does not ask about them.
                         && !typeof(ModalOptionCard).IsAssignableFrom(t))
+            // NOR IS A PERSONAL-POOL ROW A UNIVERSAL, and the sweep could not
+            // tell the difference until `EB-320` -- which is how it came to be
+            // failing here for every stand-in and every Klee-personal
+            // companion the surface has grown (the four R236 caretakers, the
+            // four Hexerei, and Prune, Qiqi, Sayu and Yaoyao before them).
+            // `CompanionOverhaulRoster` is the OFFER list, and a card carrying
+            // a PersonalPool is deliberately not on it: a stand-in is reached
+            // at the hand-off and nowhere else (`CompanionStandIns`), and a
+            // personal companion is offered through its own character's route.
+            // So "the roster forgot a row" is a question about Universals, and
+            // this is where the two are separated. What the personal rows are
+            // swept for instead is the value of that very key:
+            // `CompanionStandInHandOffTests`.
+            .Where(t => (Activator.CreateInstance(t) as ICompanionCard)
+                            ?.PersonalPool == null)
             .ToList();
         Assert.Equal(
             Universals.OrderBy(t => t.Name).Select(t => t.Name).ToList(),
