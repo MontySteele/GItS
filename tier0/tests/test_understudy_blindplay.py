@@ -1035,6 +1035,80 @@ def test_an_icon_token_names_the_icon_and_not_the_art_set():
     assert "Gain [Energy][Energy]." in page
 
 
+# ------------------- EB-375: the icon fold is on the door, not on one screen -
+#
+# THE DEFECT, AND WHY IT SURVIVED `EB-264`. The sprite pass ran on the finished
+# OBSERVATION, so every screen was clean -- and the two lines a COMMAND answers
+# with are not part of an observation. `taken_line` prints the row a choice
+# took and `_result_line` the game's own answer, both assembled from `_text`
+# and neither passing through that boundary. The control run's second seat read
+# `The next Attack you play costs 0 [ironclad_energy_icon.png]` off the reward
+# it had just claimed and the file name twice off Venerable Tea Set, while the
+# same cards printed `[Energy]` in combat one screen later.
+#
+# So the rule moved onto `_text` itself, the one door every printed value comes
+# through, and the corpus sweep below is the lint the row asks for.
+
+_BRACKETED_FILE = re.compile(
+    r"\[[A-Za-z0-9_]+\.(?:png|jpg|jpeg|svg|webp)\]", re.I)
+
+
+def test_the_line_after_a_claim_prints_the_icon_and_not_the_file():
+    """Seen to FAIL: both lines carried the raw file name, which is what the
+    control run reported off a reward screen and a relic face."""
+    took = blindplay.taken_line(
+        {"ok": True, "verb": "choose",
+         "printed": {"card": "Unrelenting",
+                     "text": "The next Attack you play costs "
+                             "0 [ironclad_energy_icon.png]"}})
+    assert "Took: Unrelenting — The next Attack you play costs 0 [Energy]." \
+        == took
+    answer = blindplay._result_line(
+        {"status": "ok", "message": "Venerable Tea Set: gain "
+                                    "[ironclad_energy_icon.png]"})
+    assert answer == "ok Venerable Tea Set: gain [Energy]"
+
+
+def test_a_relic_face_folds_the_icon_wherever_it_is_printed():
+    """The relic row is on the combat page and in the claim line, and the two
+    must not disagree about a word the player is looking at."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["relics"] = [
+        {"id": "VENERABLE_TEA_SET", "name": "Venerable Tea Set",
+         "description": "At the start of your turn, gain "
+                        "[ironclad_energy_icon.png][ironclad_energy_icon.png]."
+         }]
+    page = blindplay.observe(state)
+    assert "gain [Energy][Energy]." in page
+    assert not _BRACKETED_FILE.search(page)
+
+
+def test_no_printed_face_in_the_page_corpus_carries_a_bracketed_file_name():
+    """THE LINT THE ROW ASKS FOR, over the corpus of real wire envelopes.
+
+    `review/qa/blindplay/eb263-live-shapes/` is nine screens captured off a
+    live run, six of which carry a sprite tag in a card, relic or potion face.
+    Every one is rendered and every string of every observation is swept -- not
+    only the markdown -- so a face that reaches the page through a field the
+    render does not print yet is still held to the rule.
+    """
+    swept = 0
+    for path in sorted(LIVE.glob("*.json")):
+        state = json.loads(path.read_text(encoding="utf-8"))
+        obs = blindplay.observation(state)
+        for value in blindplay._every_string(obs):
+            assert not _BRACKETED_FILE.search(value), (path.name, value)
+        page = blindplay.render(obs)
+        assert not _BRACKETED_FILE.search(page), path.name
+        swept += 1
+    assert swept == 9
+    # The corpus is only worth its lines if it CONTAINS the thing being
+    # excluded: six of the nine envelopes carry a raw tag on the wire.
+    raw = [p.name for p in sorted(LIVE.glob("*.json"))
+           if _BRACKETED_FILE.search(p.read_text(encoding="utf-8"))]
+    assert len(raw) >= 6, raw
+
+
 # -------------------------------------------------------------- session ----
 
 def fight_states() -> list[dict]:
