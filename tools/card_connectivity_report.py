@@ -380,6 +380,14 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "draw_per_set_off": [_hook("private", "bombs", "read"),
                          _hook("shared", "draw_pile", "use"),
                          _hook("shared", "hand_contents", "write")],
+    # R244's Alice's Introduction Magic. It moves no meter and no pile: it
+    # READS the hand and WRITES what those cards ARE -- "all cards in your hand
+    # count as Hexerei cards this turn" is a change of card identity, which is
+    # a shared state this vocabulary already has a name for. Filing it under
+    # `bombs` because a witch may later plant one would classify the payoff
+    # rather than the op.
+    "hexerei_mark_hand": [_hook("shared", "hand_contents", "read"),
+                          _hook("shared", "card_identity", "write")],
     "gain_spark": [_hook("private", "sparks", "write")],
     # A competing use for the bank, mirroring spend_encore: the Sparks paid
     # here are Sparks the threshold cash-out no longer reaches (packet 4.5).

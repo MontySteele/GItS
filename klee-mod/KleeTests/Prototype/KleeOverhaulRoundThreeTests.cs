@@ -55,8 +55,12 @@ public class KleeOverhaulRoundThreeTests
         // canonical starter has room for neither, so both are back and the
         // disjointness still has to hold -- which the draft-4 starter pin in
         // `BaseBasicsTests` asserts from the other end.
+        // THIRTY-ONE SINCE R244: the ruled packet
+        // `review/ruled/klee-hexerei-readers-2026-09-02.md` adds Klee's three
+        // Hexerei readers as a SECOND slice, which is why the count moved
+        // without anything in draft 4 being redrafted.
         var slice = Cards("KleeOverhaulRoster", "Slice");
-        Assert.Equal(28, slice.Count);
+        Assert.Equal(31, slice.Count);
         Assert.Contains(slice, c => c.Contains("ProtoKoDigIn"));
         Assert.Contains(slice, c => c.Contains("ProtoKoPop"));
         // OFFERABLE means not Basic: a Basic row cannot be rolled.
