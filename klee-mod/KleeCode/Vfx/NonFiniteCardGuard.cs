@@ -519,8 +519,14 @@ internal static class NonFiniteCardGuard
     {
         try
         {
-            var reader = AccessTools.FieldRefAccess<TObject, TField>(name);
-            return reader == null ? null : reader.Invoke(instance);
+            // Returned rather than assigned to a local on purpose:
+            // `FieldRefAccess` THROWS on a dead name, and the bootstrap
+            // contract's lint reads an assignment as the field-initializer
+            // shape that turns that throw into a
+            // TypeInitializationException. The catch below is what makes this
+            // site legitimate, and the spelling is what makes that visible.
+            return AccessTools.FieldRefAccess<TObject, TField>(name)
+                              .Invoke(instance);
         }
         catch (Exception)
         {
