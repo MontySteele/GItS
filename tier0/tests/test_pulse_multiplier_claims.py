@@ -52,11 +52,6 @@ LIVE_CLAIMS: dict[str, list[str]] = {
         # A1b: the restored WATCH block's worked example.
         "WORKED EXAMPLE, at the LANDED x{v}",
     ],
-    "docs/current/playtest/kokomi-playtest-protocol.md": [
-        # The standing-flag list -- what playtest three is told to watch.
-        "`KuragePulsePerCharge = {v}`",
-        "reads the bank at ×{v}",
-    ],
 }
 
 # Worked-example rows in the constants comment: "bank 10, x3  pulse 4 + 30 = 34".

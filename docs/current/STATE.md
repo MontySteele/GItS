@@ -255,7 +255,9 @@ are in [`workstreams.md`](workstreams.md).
 Every open row is in [`QUEUE.md`](QUEUE.md) and owned by [USER] — `M69` and
 the art eyes-on pile (R250 closed `S4-G6`, `S4-G14` and `M45` as overtaken); the text-conventions
 proposal is ruled (R249, `review/ruled/text-conventions-shipped-2026-09-02.md`;
-builds `EB-345`, `EB-346`). The nine blessed mechanisms are in [`watch-register.md`](watch-register.md):
-`W9` fired, was re-read and ruled R255 (R188 stands, no budget); all nine are dormant.
-The rulings deprecation audit [USER] asked for at R255 is
-`review/active/rulings-deprecation-audit-2026-09-04.md` (four picks, defaults marked).
+builds `EB-345`, `EB-346`). The six blessed mechanisms are in [`watch-register.md`](watch-register.md), all
+dormant; `W6`, `W8` and `W9` were struck by R256 with the shipped Kokomi's
+Charge and Burst. R256 (2026-09-04) ruled the rulings deprecation audit at all
+four defaults (`review/ruled/rulings-deprecation-audit-2026-09-04.md`): R56
+struck, R58 scoped to Balance sheets, and each overhaul's Balance landing
+strikes its own LAW lines (its §3).

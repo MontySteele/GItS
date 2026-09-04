@@ -202,8 +202,6 @@ brief, with no amendment ceremony.
   true-heals (potions and relic-scale trickles exempt). A rider otherwise banned
   is legal only conjunctively — dropping one half is not a "simplification."
   (principles Guardrail 6; R8; R79/B4)
-- **No card starts the game with AoE;** AoE must be drafted, never in any
-  starter. (R56)
 - **Ancient carve-out (R127, 2026-08-07):** an Ancient-rarity card — Dusty
   Tome's single acquisition door, one visible Ancient per roster character —
   may grant per-turn accrual that its owner's resource laws otherwise ban
@@ -219,7 +217,10 @@ brief, with no amendment ceremony.
 - **Threshold predicates pay a flat printed bonus once, not proportional reads;**
   charge/meter bars are Uncommon+; thresholds encode base-plus-bonus so the
   always-live half moves on upgrade and the bar cannot drift down (lowering a
-  threshold is forbidden). (R58, invoking R1)
+  threshold is forbidden). **Scope (R256):** the threshold clause binds
+  Balance sheets. A bar on a prototype row is a number the seats test, taken
+  as a D default and disclosed; the one-way door closes when the row is
+  re-authored onto the shipped sheet. (R58, invoking R1; R256)
 - **A meter-reading damage card is tagged `scaling`, and also `frontload` only if
   it deals damage at meter zero.** `sustain` = healing/prevention of your own HP
   only; zero sustain is a legal identity and `sustain` is never linted. (R91 2c,

@@ -113,8 +113,8 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   (R199), which is also the Phase-3 authorization and its four guardrails.
 - **Kokomi playtest** — EXPLORATORY run played 2026-08-26 on `0.2-1159`
   (raw notes `review/records/kokomi-playtest-notes-2026-08-26.md`);
-  the confirmatory protocol run is unrun
-  (`docs/current/playtest/kokomi-playtest-protocol.md`).
+  the confirmatory protocol was struck by R256 (2026-09-04) with the shipped
+  kit it graded; the Plan overhaul's reads are its round packets.
 - **Design course-correction — R213 (2026-08-26), authority amended R217
   (2026-08-28), pin moved R218 (2026-08-28).** Status only: the words are
   the three commits; the running narrative is the slice packet.

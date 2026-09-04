@@ -1,4 +1,4 @@
-Status: OPEN (the section 4 slate awaits countersign, then the run; BACKLOG EB-183)
+Status: RULED R256 2026-09-04
 
 # EB-183 — Muster's Charge subsidy, asked at the funnel
 
@@ -250,3 +250,9 @@ blind grading, replay of every graded line, and the pair read.
 - **Not owed:** any shipped change. No sheet row, no constant, no stamp and no
   version moved; both builds are clean and the flag-off byte identity is pinned
   by test on both sides.
+
+## Ruled
+
+R256 (2026-09-04), the rulings deprecation audit pick 1: overtaken. The Plan
+kit has neither Muster nor Charge; the slate was never countersigned or run;
+EB-183 retired.

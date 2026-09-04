@@ -1512,3 +1512,4 @@ EB-320 RETIRED 2026-09-04: #317 fixed the emitter and CompanionStandInHandOffTes
 EB-322 RETIRED 2026-09-04: one loader.display_name, imported by both engines, strips the " (proto)" suffix at the emitter's single title site and at prototype_cards.
 EB-319 RETIRED 2026-09-04: _refuse carries the forms that resolve and act folds them into every refusal, falling back to the screen's own grammar.
 M69 RETIRED 2026-09-04 under R255, pick 1 on the X9 re-read (review/records/x9read-reread-2026-09-04.md: W9 fires at 51.76%, QUIET): R188 stands, no Charge read budget; [USER] also called R188 a legacy artifact of the old build, which the rulings deprecation audit takes up.
+EB-183 RETIRED 2026-09-04 under R256 (pick 1): R213 E1's second reading, Muster's Charge subsidy at the funnel, is overtaken; the Plan kit (R240) has neither Muster nor Charge. The built subsidy: waived op stays flag-off; the EB183-MF slate was never countersigned or run.

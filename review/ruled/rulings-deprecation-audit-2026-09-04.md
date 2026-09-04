@@ -1,4 +1,4 @@
-Status: OPEN (picks 1 to 4 are [USER]'s; nothing in LAW, EXPERIMENTS or the watch register is edited until they are ruled)
+Status: RULED R256 2026-09-04
 
 # Rulings deprecation audit: what the overhauls left behind
 
@@ -147,3 +147,11 @@ pointers of §2.**
    **Default.**
 2. Now, for the Burst lines only, since all three Bursts are retired on
    paper.
+
+## 7. Ruled
+
+R256, 2026-09-04: all four picks at their defaults. [USER]'s words are in the
+ruling commit. Executed in the same commit: W6, W8, W9 struck; the four
+active pointers and the Kokomi playtest protocol left HEAD; EB-183 retired;
+R56 struck from LAW; R58 scoped to Balance sheets; the stage-gate page carries
+§3 for each landing.
