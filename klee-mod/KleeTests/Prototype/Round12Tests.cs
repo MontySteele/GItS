@@ -5,6 +5,7 @@ using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -238,5 +239,43 @@ public class Round12Tests
         Assert.Contains("Klee's own", string.Concat(Il.Strings(
             typeof(ArmKeywordTips)
                 .GetMethod("ForCovenSpark", HeadlessGame.All)!)));
+    }
+
+    // ---- EB-425: a deploy deals damage and takes no target ---------------
+
+    [Fact]
+    public void The_salon_rules_say_the_member_picks_its_own_enemy()
+    {
+        // THE REFUSAL WAS THE FIRST PLACE THE SEAT LEARNED IT. r5 run 1: "the
+        // first thing I tried was `play 'Salon Debut' on 'Corpse Slug (1)'`
+        // and it was refused... a card that deals damage but takes no target
+        // is not something the face warns you about. The Salon picked slug 2
+        // on its own. I never got to choose a member's target all round."
+        //
+        // It is a rule about every PERFORMANCE -- `PerformMember` draws the
+        // body from `Rng.CombatTargets` and is the only implementation of a
+        // member acting -- so it is on the paragraph every Salon card carries
+        // rather than on one card's face.
+        var body = string.Concat(Il.Strings(typeof(SalonMemberTips)
+            .GetMethod("SalonRulesBody",
+                       HeadlessGame.All,
+                       new[] { typeof(Creature) })!));
+
+        Assert.Contains("A performing member picks its own enemy.", body);
+    }
+
+    [Fact]
+    public void The_deploy_word_could_not_have_carried_it()
+    {
+        // Said rather than assumed: the keyword is at its ceiling with
+        // `EB-368`'s three rules, which is why the clause went to the
+        // paragraph behind the word.
+        var deploy = string.Concat(Il.Strings(typeof(ArmKeywordTips)
+            .GetMethod("ForDeploy", HeadlessGame.All)!));
+        var rendered = deploy.Replace("KLEEMOD-ARM_DEPLOY", string.Empty)
+            .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
+
+        Assert.True(rendered.Length > 130, rendered.Length.ToString());
+        Assert.DoesNotContain("picks its own", deploy);
     }
 }
