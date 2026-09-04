@@ -171,8 +171,12 @@ are in [`workstreams.md`](workstreams.md).
   `0.2.2446+proto`, floors 6 and 11, both budget-out, neither drew Tide
   Chart; the Plan's Shrink line read true again, the jellyfish stood empty
   on most turns, one pick (starter Plan density), `EB-402`-`EB-403`,
-  `EB-408`-`EB-411`; RULED R254, starter density stands. [USER]'s act-1 run is
-  due on `0.2.2446+proto`. The Kurage
+  `EB-408`-`EB-411`; RULED R254, starter density stands. **Round 11 is READ**
+  (`review/active/kokomi-overhaul-round-11-2026-09-04.md`): two seats on
+  `0.2.2476+proto`, floors 10 and 10, both budget-out; the six round-10
+  fixes read true, the Plan read as the kit's decision and as autopilot in
+  one run, `EB-426`-`EB-428`, `EB-433`; no pick. [USER]'s act-1 run is due
+  on `0.2.2476+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
