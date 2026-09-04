@@ -1460,4 +1460,17 @@
    description: "Deal {IfUpgraded:show:17|14} damage. If you have at least 10 [gold]Fanfare[/gold], deal 14 more.",
    effects: [{op: damage, amount: 14, target: enemy},
              {op: conditional, if: fanfare_at_least_10, then: [{op: damage, amount: 14, target: enemy}]}]}
+# --- the starter's reader (R254, round 4 pick 1): one of Furina's two kit
+# starters reads Fanfare under the arm. Same copy-and-swap shape as the four
+# riders above, at the STARTER seam rather than the offer one. ---
+
+- {id: proto_fr_aria_of_recompense, name: "Aria of Recompense (reframe)", character: furina,
+   authored_by: [claude],
+   replaces: aria_of_recompense,
+   cost: 1, type: skill, rarity: basic,
+   art_of: aria_of_recompense,
+   upgrade: {encore: +3, innate: true},
+   description: "Gain {IfUpgraded:show:8|5} [gold]Encore[/gold]. If you have at least 6 [gold]Fanfare[/gold], gain {IfUpgraded:show:8|5} more.",
+   effects: [{op: gain_encore, amount: 5},
+             {op: conditional, if: fanfare_at_least_6, then: [{op: gain_encore, amount: 5}]}]}
 

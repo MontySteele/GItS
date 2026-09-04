@@ -66,7 +66,18 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
         ModelDb.Card<StagePresence>(),
         ModelDb.Card<StagePresence>(),
         ModelDb.Card<RegalBearing>(),
+#if PROTOTYPE_CARDS
+        // QUARANTINED, THE FURINA REFRAME'S ONE STARTER SEAM (R254, round 4
+        // pick 1). With the arm on this slot is the reframe copy of Aria of
+        // Recompense -- the same 5 Encore, plus 5 more at 6 Fanfare -- and
+        // with it off it is the shipped card, byte for byte. The sheet does
+        // not move; only this slot does, and only under the flag. The
+        // reasoning, the two lifted numbers and the sim twin
+        // (`loader._starter_ids`) are on FurinaReframeRoster.StarterAria.
+        Powers.FurinaReframeRoster.StarterAria(),
+#else
         ModelDb.Card<AriaOfRecompense>(),
+#endif
         ModelDb.Card<SalonDebut>(),
         ModelDb.Card<AnInvitation>(),
     };

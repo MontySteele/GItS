@@ -425,4 +425,35 @@ public static class FurinaReframeRoster
                                             or ProtoFrUniversalRevelry
                                             or ProtoFrFloodOfEmotion));
     }
+
+    /// <summary>
+    /// THE ARM'S ONE STARTER SEAM (R254, round 4 pick 1, 2026-09-04). Slot 8
+    /// of <c>Furina.StartingDeck</c>: with the arm on it is the reframe copy
+    /// of <i>Aria of Recompense</i>, and otherwise the shipped card, byte for
+    /// byte. Sim twin: <c>furina_reframe.STARTER_SUBS</c>, read by
+    /// <c>tier0.content.loader._starter_ids</c> -- the ONE seam both the
+    /// tier-0 battery and the tier-0.5 run go through.
+    ///
+    /// [USER], ruling the round-4 packet's sec.6: "maybe a reader in the
+    /// starter deck? I still want to leave it at just 2 'good' cards, but they
+    /// can be stronger." Her two kit starters stay two, and ONE of them reads
+    /// Fanfare: "Gain 5 Encore. If you have at least 6 Fanfare, gain 5 more."
+    /// Both numbers are LIFTED rather than picked -- the 5 is Aria's own
+    /// printed Encore, the 6 is the bar the four rider copies above already
+    /// carry -- and the loop it closes is the arm's own: a stage that performs
+    /// mints Fanfare, Fanfare pays Encore, Encore pays performances.
+    ///
+    /// ONE CARD FOR ONE CARD, which is <see cref="KurageMemory.StarterSlotEleven"/>'s
+    /// shape one character over and what keeps this a substitution rather than
+    /// a starter rework: the deck is still ten.
+    ///
+    /// THE PRINTED SHEET DOES NOT MOVE. <c>docs/furina-cards.yaml</c> still
+    /// says <c>aria_of_recompense</c> and its generated card is untouched;
+    /// only this slot moves, and only under the flag. A starter card's text is
+    /// a RULE, so [USER] plays the first build that carries it.
+    /// </summary>
+    public static CardModel StarterAria() =>
+        FurinaReframe.Enabled
+            ? ModelDb.Card<ProtoFrAriaOfRecompense>()
+            : ModelDb.Card<FurinaGen.AriaOfRecompense>();
 }

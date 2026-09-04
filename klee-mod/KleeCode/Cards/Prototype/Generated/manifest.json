@@ -6,6 +6,7 @@
     "reachable_by": "understudy give_card / scenario `give:` step"
   },
   "generated": [
+    "proto_fr_aria_of_recompense",
     "proto_fr_curtain_call",
     "proto_fr_dramatic_entrance",
     "proto_fr_exit_stage_left",
@@ -180,6 +181,7 @@
     "proto_true_spark_knight"
   ],
   "owners": {
+    "proto_fr_aria_of_recompense": "furina",
     "proto_fr_curtain_call": "furina",
     "proto_fr_dramatic_entrance": "furina",
     "proto_fr_exit_stage_left": "furina",
@@ -376,6 +378,10 @@
     ]
   },
   "upgrades": {
+    "proto_fr_aria_of_recompense": {
+      "encore": 3,
+      "innate": true
+    },
     "proto_fr_curtain_call": {
       "encore_cost": -1
     },

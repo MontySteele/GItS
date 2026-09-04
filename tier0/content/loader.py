@@ -940,7 +940,8 @@ def _card_prototype(card_id: str) -> Card:
                 else _prototype_index()[base_id])
         card = upgrades.apply_upgrade(base)
     elif ((C.SPARK_ALT_COST_ENABLED or C.KLEE_OVERHAUL
-           or C.COMPANION_OVERHAUL or C.KOKOMI_OVERHAUL)
+           or C.COMPANION_OVERHAUL or C.KOKOMI_OVERHAUL
+           or furina_reframe.FURINA_REFRAME)
             and plain.startswith(PROTOTYPE_ID_PREFIX)):
         # THE ONE DOOR THE SPARK ARM OPENS INTO THE QUARANTINE, and it is
         # exactly as wide as it has to be. `_starter_ids` substitutes two
@@ -970,6 +971,17 @@ def _card_prototype(card_id: str) -> Card:
         # AND THE KOKOMI OVERHAUL, fourth arm, same door, no wider again:
         # `_starter_ids` returns ten `proto_kk_` id STRINGS and
         # `pool_replacement` returns twenty-eight more.
+        #
+        # AND THE FURINA REFRAME, fifth arm (R254), for the reason the first
+        # clause gives and one more of its own. Her starter reader is a
+        # `proto_fr_` id STRING in the printed ten, so it needs this door like
+        # every other dealt prototype -- and this door READS THE FLAG AT CALL
+        # TIME while `_substituted_card_index` is memoized, so a test (or a
+        # sim arm) that flips the flag over a warm cache resolves the row
+        # instead of raising a `KeyError` on the first draw. The substitution
+        # table still carries the row, because `upgrades._prototype_deltas`
+        # derives campfire reachability from it; this branch is simply reached
+        # first.
         card = _prototype_index()[plain]
     else:
         index = _card_index()
@@ -1168,6 +1180,26 @@ def _starter_ids(spec: dict) -> list[str]:
                     f"klee: Spark starter substitution cannot replace missing "
                     f"card {drop!r}")
             ids[ids.index(drop)] = add      # ONE copy: `.index` is the first
+
+    # FURINA, THE REFRAME'S STARTER READER (R254, round 4 pick 1, 2026-09-04),
+    # ONE substitution. [USER]: "maybe a reader in the starter deck? I still
+    # want to leave it at just 2 'good' cards, but they can be stronger." Her
+    # two kit starters stay two; one of them -- Aria of Recompense -- reads the
+    # arm's Fanfare bar under the arm and is the printed card otherwise. The
+    # map, the numbers and the reason are on `furina_reframe.STARTER_SUBS`; the
+    # flag is that module's rather than `constants.py`'s, for the reason its own
+    # header gives. The deck size is unchanged at ten, which is what keeps this
+    # a substitution rather than a starter rework, and the raise is the Kurage
+    # branch's raise one arm over: a swap with nothing to replace is a silent
+    # no-op nobody would notice until a smoke ran.
+    if (character == furina_reframe.CHARACTER
+            and furina_reframe.FURINA_REFRAME):
+        for drop, add in furina_reframe.STARTER_SUBS.items():
+            if drop not in ids:
+                raise ValueError(
+                    f"furina reframe: {drop!r} is not in the printed starter, "
+                    f"so the {add!r} substitution has nothing to replace")
+            ids[ids.index(drop)] = add      # ONE copy: `.index` is the first
     return ids
 
 
@@ -1265,6 +1297,31 @@ def declared_pool_substitutions() -> dict[str, str]:
     subs: dict[str, str] = dict(C.SPARK_ALT_POOL_SUBS)
     subs[C.KURAGE_MEMORY_POOL_DROP] = C.KURAGE_MEMORY_POOL_ADD
     subs.update(furina_reframe.POOL_SUBS)
+    return subs
+
+
+def declared_starter_substitutions() -> dict[str, str]:
+    """Every arm's `{shipped id: prototype id}` STARTER map, FLAGS IGNORED.
+
+    The twin of `declared_pool_substitutions` above at the other door, and it
+    exists for the same caller and the same reason. `validate_row` has to
+    accept a `replaces:` row that carries no `personal_pool:`, and until R254
+    every such row was a POOL substitution -- so the pool map alone was the
+    whole answer. The Furina reframe's starter reader
+    (`furina_reframe.STARTER_SUBS`) is the first row swapped in at the printed
+    starter and never offered, and asking the pool map about it would be asking
+    the wrong door: its rarity is `basic`, so `rewards.character_pool` cannot
+    offer it whatever any map says.
+
+    TWO FUNCTIONS RATHER THAN ONE UNION, because the two answer different
+    questions and a caller that wants "is this offerable" must not be handed a
+    starter id. Derived from the same maps `_starter_ids` reads, so an arm
+    cannot declare a substitution here that the run does not make, or the
+    reverse.
+    """
+    subs: dict[str, str] = dict(C.SPARK_ALT_STARTER_SUBS)
+    subs[C.KURAGE_MEMORY_STARTER_DROP] = C.KURAGE_MEMORY_STARTER_ADD
+    subs.update(furina_reframe.STARTER_SUBS)
     return subs
 
 
@@ -1445,10 +1502,27 @@ def _substituted_card_index() -> dict[str, Card]:
     every substituted row, and the substituted Kurage's Oath's ruled upgraded
     value existed only as prose on the row. A row that declares no `upgrade:`
     is still base-only, and is still skipped honestly.
+
+    BOTH DOORS, NOT JUST THE OFFER ONE (R254). A run reaches a prototype row
+    by being OFFERED one or by being DEALT one, and until R254 the Furina arm
+    only did the first -- so this table was built from `_pool_substitutions`
+    alone. Her starter reader (`furina_reframe.STARTER_SUBS`) is dealt and
+    never offered, and a deck is a list of id STRINGS that `build_player` and
+    the run layer both resolve back through `_card_prototype`; a starter id
+    with no entry here is a `KeyError` on the first draw. The starter half is
+    DERIVED from `_starter_ids` rather than re-listed, so the arm that moves a
+    starter and the table that resolves it cannot drift apart -- and the three
+    older arms' starter rows land here too, which changes nothing for them
+    (each already resolves through `_card_prototype`'s own flagged door, and
+    `upgrades._prototype_deltas` already names them reachable).
     """
     targets = {proto
                for spec in _character_index().values()
                for proto in _pool_substitutions(spec).values()}
+    targets |= {cid
+                for spec in _character_index().values()
+                for cid in _starter_ids(spec)
+                if cid.startswith(PROTOTYPE_ID_PREFIX)}
     if not targets:
         return {}
     index = {c.id: c for c in prototype_cards() if c.id in targets}
@@ -1458,7 +1532,7 @@ def _substituted_card_index() -> dict[str, Card]:
         # accepted or rejected. A substitution left pointing at a deleted row
         # must say so here, not as a KeyError on someone's reward screen.
         raise ValueError(
-            f"pool substitution names {missing}, which is not on "
+            f"a live substitution names {missing}, which is not on "
             f"{PROTOTYPE_SHEET.name}; a substituted row cannot have left the "
             "surface while the flag still points at it")
     return index

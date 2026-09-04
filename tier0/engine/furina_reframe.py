@@ -129,14 +129,53 @@ SPOTLIGHT_DESIGNATE_ENCORE_COST = 2
 #
 # THE MAP MIRRORS THE SHEET'S OWN `replaces:` KEY, and
 # `tier0/tests/test_furina_reframe_pool.py` compares the two in both
-# directions, so a fifth copy on the surface that nobody named here is a red
-# test rather than a row that is never offered.
+# directions -- against this map UNIONED WITH `STARTER_SUBS` below, since a
+# `replaces:` row is one seam's or the other's -- so a copy on the surface that
+# nobody named in either is a red test rather than a row nothing ever deals.
 # ----------------------------------------------------------------------
 POOL_SUBS: dict[str, str] = {
     "florid_cadenza": "proto_fr_florid_cadenza",        # 12 -> 6,  uncommon
     "dramatic_entrance": "proto_fr_dramatic_entrance",  # 12 -> 6,  uncommon
     "universal_revelry": "proto_fr_universal_revelry",  # 15 -> 8,  rare
     "flood_of_emotion": "proto_fr_flood_of_emotion",    # 20 -> 10, rare
+}
+
+
+# ----------------------------------------------------------------------
+# THE STARTER SEAM (R254, round 4 pick 1, 2026-09-04). `{shipped id: prototype
+# id}`, read by `loader._starter_ids` under `FURINA_REFRAME` and nowhere else
+# -- the Kurage's slot-eleven shape, ONE CARD FOR ONE CARD, so the printed ten
+# stays ten and this is a substitution rather than a starter rework.
+#
+# WHY, and it is [USER]'s ruling rather than a number picked here (R254,
+# `review/ruled/furina-reframe-round-4-2026-09-04.md` sec.6): "maybe a reader
+# in the starter deck? I still want to leave it at just 2 'good' cards, but
+# they can be stronger." So the starter keeps its two kit cards -- Salon Début
+# and Aria of Recompense -- and ONE of them reads Fanfare. The reader goes on
+# Aria, the card the seats had already weighed on three axes. Both numbers are
+# LIFTED and neither is new: the 5 is Aria's own printed Encore, the 6 is the
+# rider copies' bar in `POOL_SUBS` above. The loop it closes is the arm's own
+# (a stage that performs mints Fanfare, Fanfare pays Encore, Encore pays
+# performances) and the shipped Encore decay is its brake.
+#
+# THE SHIPPED SHEET STANDS, for `POOL_SUBS`'s reason verbatim: Balance-stage
+# content does not move for a prototype arm (R213 B), so the arm carries a copy
+# and swaps it in at the one seam. WITH THE FLAG OFF this map is unread and the
+# printed Aria is dealt -- the acceptance condition, pinned by
+# `tier0/tests/test_furina_reframe_starter.py` rather than intended.
+#
+# A STARTER MAP AND NOT A POOL ONE, kept apart because they are read at
+# different doors and one of them cannot express this pair: a `basic` row is
+# unofferable by construction, so naming Aria in `POOL_SUBS` would declare a
+# swap `rewards.character_pool` can never make. `loader.declared_starter_
+# substitutions` is the flag-blind union the sheet's `replaces:` key is checked
+# against here, exactly as `declared_pool_substitutions` is for the other.
+#
+# THE ALTERNATIVE READER IS HELD, not withdrawn: Salon Début performing its
+# member again at 6 Fanfare is the packet's own re-ask if Aria's does not read.
+# ----------------------------------------------------------------------
+STARTER_SUBS: dict[str, str] = {
+    "aria_of_recompense": "proto_fr_aria_of_recompense",   # 5 Encore, 10 at 6
 }
 
 

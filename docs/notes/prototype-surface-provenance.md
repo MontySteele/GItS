@@ -2287,3 +2287,40 @@ number is the power's own constant, `CompanionOverhaulLaw.WarBannerDexterity`
 upgraded banner grants 3 and hands 2 back. That asymmetry is the shipped rule
 as written and is disclosed here rather than changed; the base Dexterity gloss
 stays the base rule and the exception is printed where the exception is made.
+
+## before proto_fr_aria_of_recompense
+
+The starter's reader, R254 (2026-09-04), Furina reframe round 4 pick 1. The
+packet is `review/ruled/furina-reframe-round-4-2026-09-04.md`; its sec.6 is
+the ruling, and it answers neither of the two options as written. [USER]:
+"maybe a reader in the starter deck? I still want to leave it at just 2
+'good' cards, but they can be stronger." So her starter keeps its two kit
+cards -- Salon Début and Aria of Recompense -- and ONE of them reads Fanfare.
+
+The reader goes on Aria, the card the seats had already weighed on three
+axes. Under the arm it prints "Gain 5 Encore. If you have at least 6
+Fanfare, gain 5 more." Both numbers are lifted and neither is new: the 5 is
+Aria's own printed Encore and the 6 is the bar the four rider copies above
+already carry. The loop it closes is the reframe's own -- a stage that
+performs mints Fanfare, Fanfare pays Encore, Encore pays performances -- and
+the 20% Encore decay is its brake.
+
+Arm-only copy by the same seam as the riders, so the shipped sheet stands
+(R213 B). The difference is which door: the riders are swapped in where a
+run is OFFERED a card (`loader._pool_substitutions`,
+`FurinaReframeRoster.SwapOfferedRiders`) and this one where a run is DEALT
+one (`furina_reframe.STARTER_SUBS` read by `loader._starter_ids`;
+`FurinaReframeRoster.StarterAria` called from `Furina.StartingDeck`). One
+card for one card, so the printed ten is still ten, and with the arm off the
+shipped Aria is dealt. The R130 veto on the SHIPPED starter's payoff
+([USER], 2026-08-07) is untouched: it rules a Balance-stage sheet, and this
+moves a prototype arm.
+
+A STARTER CARD'S TEXT IS A RULE, so this one goes back to [USER]: he plays
+the first build that carries it, per the norm on when [USER] plays. The
+alternative reader is HELD rather than withdrawn -- Salon Début performing
+its member again at 6 Fanfare is the packet's own re-ask if Aria's does not
+read.
+
+Numbers are Prototype numbers, D by the ladder, and nothing measured on them
+is quotable.
