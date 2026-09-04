@@ -8811,6 +8811,40 @@ def build_description(card: dict) -> str:
                            else formula.partition("_per_")[0])
                     parts.append(
                         f"+{per} damage per [gold]Bomb[/gold] detonated this combat.")
+                elif encore_calc_rider(card, eff) is not None:
+                    # `EB-429`. ENCORE IS THE ONE FOLDED SOURCE THAT IS ALSO A
+                    # PRICE, and "already including [gold]Encore[/gold]" left
+                    # a reader three readings of it. The r5 run-2 seat skipped
+                    # the card rather than guess: "I could not parse that
+                    # sentence and still cannot. Encore is defined as an
+                    # absorb pool that cards pay to resolve; 'already
+                    # including Encore' does not tell me whether the card
+                    # spends Encore, is priced as though it had spent Encore,
+                    # or deals more damage when I hold Encore." Six fights
+                    # later: "I still cannot tell you what that sentence
+                    # means."
+                    #
+                    # SO THE FACE SAYS WHAT THE RIDER DOES. It is the third
+                    # reading, and both halves come off the code:
+                    # `encore_calc_rider` reads `N_per_M_encore` off the row,
+                    # and its own docstring is the second half -- "the bank is
+                    # READ, never spent -- consulting it costs nothing".
+                    # Naming the rate says the number already carries it in
+                    # the same breath as saying where it came from, which is
+                    # what `_already_including` was for and what the bare
+                    # resource name could not do here.
+                    #
+                    # THE NUMERALS ARE THE ROW'S (`EB-89`'s discipline), so a
+                    # repricing of the slope cannot leave this sentence
+                    # quoting a retired rate. Encore only: `Fanfare`, `Salon`,
+                    # `Charge` and `Companions` are counters a player never
+                    # spends on a card, so none of them carries the
+                    # ambiguity this one does.
+                    _, per, div = encore_calc_rider(card, eff)
+                    parts[dmg_idx] = (
+                        parts[dmg_idx].removesuffix(".")
+                        + f", counting {per} for every {div} "
+                          "[gold]Encore[/gold] you hold and spending none.")
                 elif rehomed:
                     # Name the RESOURCE the formula actually reads. This said
                     # "Fanfare" unconditionally, which put another character's

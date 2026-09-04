@@ -41,7 +41,7 @@ public sealed class PoisedRiposte : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Poised Riposte"),
-        ("description", "Deal {CalculatedDamage:diff()} damage, already including [gold]Encore[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, counting 1 for every 3 [gold]Encore[/gold] you hold and spending none."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
