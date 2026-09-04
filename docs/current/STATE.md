@@ -102,9 +102,12 @@ Slay the Spire 2 **v0.111.0**, commit `41cef1ea`, buildid `24724944`, appid
 v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
-`+proto` dev mark (R217 D). **Installed: `0.2.2446+proto`** (2026-09-04,
-main `f1c6c9ec`, ALL FOUR arms on since R250: the round-9 and round-10
-builds, #360 to #370, and R253's nine audited rows), the prototype arms behind
+`+proto` dev mark (R217 D). **Installed: `0.2.2564+proto`** (2026-09-04,
+the #373 stack at `fb7b12d8` on main `f1c6c9ec`, ALL FOUR arms on since R250:
+the round-9 to round-13 builds, R253's nine audited rows, R254's starter
+reader, Countdown, Stoke the Fuse, Aria's bar at 3, and the four fixers'
+27 face, tip, page and bridge rows including the bridge's action cap
+`EB-456`), the prototype arms behind
 `-p:PrototypeCards=true` and the Furina arm behind `-p:FurinaReframe=true`
 too; every arm ships OFF in a release package. **Last RELEASE
 package: `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
@@ -146,7 +149,25 @@ are in [`workstreams.md`](workstreams.md).
   (`review/ruled/klee-overhaul-round-10-2026-09-04.md`): six runs on
   `0.2.2401+proto`, six act-1 clears, none past act 2; Dodoco Cover played
   every fight, Careful Now split the seats along cook-or-cash, Front Row
-  Seat unseen; no pick, `EB-390`-`EB-400`. [USER]'s act-1 run is due on
+  Seat unseen; no pick, `EB-390`-`EB-400`. **Round 11 is READ**
+  (`review/active/klee-overhaul-round-11-2026-09-04.md`): two seats on
+  `0.2.2476+proto` with Countdown in the pool (undrawn), floors 5 and 10,
+  both budget-out; the loan against the clock priced on the nose, a Spark
+  gain nothing prints (`EB-418`), random Set off and one-charge reaction
+  rules unprinted (`EB-431`, `EB-432`); no pick. **Round 12 is READ**
+  (`review/active/klee-overhaul-round-12-2026-09-04.md`): two seats on
+  `0.2.2501+proto`, floors 10 and 8, ordering read as the puzzle, the Mine
+  tip read as mitigation (`EB-436`), Block and Skittish learned by experiment
+  (`EB-443`), Countdown undrawn in five runs; no pick. **Round 13 is READ**
+  (`review/active/klee-overhaul-round-13-2026-09-04.md`): one seat on
+  `0.2.2547+proto`, floor 14 at a declared budget overrun, eight of eight
+  fights, "don't use your big spell" read as the kit's best decision, the
+  Bomb queue and the enemy-turn Melt invisible (`EB-450`), events unnamed
+  (`EB-448`); no pick. **Round 14 is READ**
+  (`review/active/klee-overhaul-round-14-2026-09-04.md`): one seat on
+  `0.2.2564+proto`, floor 8 at the bridge's cap, six of six fights, the
+  Spark economy read as the kit's engine, an invisible Mine (`EB-457`), the
+  enemy block printed twice (`EB-458`); no pick. [USER]'s act-1 run is due on
   `0.2.2401+proto`. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
@@ -162,11 +183,32 @@ are in [`workstreams.md`](workstreams.md).
   Ripple, on a new `plans_held` count in both engines, the pool 30 rows;
   Held Tide and Tidal Rhythm were withdrawn on the charter audit and are
   not on the surface. **Round 10 is READ**
-  (`review/active/kokomi-overhaul-round-10-2026-09-04.md`): two seats on
+  (`review/ruled/kokomi-overhaul-round-10-2026-09-04.md`): two seats on
   `0.2.2446+proto`, floors 6 and 11, both budget-out, neither drew Tide
   Chart; the Plan's Shrink line read true again, the jellyfish stood empty
   on most turns, one pick (starter Plan density), `EB-402`-`EB-403`,
-  `EB-408`-`EB-411`. [USER]'s act-1 run is due on `0.2.2446+proto`. The Kurage
+  `EB-408`-`EB-411`; RULED R254, starter density stands. **Round 11 is READ**
+  (`review/active/kokomi-overhaul-round-11-2026-09-04.md`): two seats on
+  `0.2.2476+proto`, floors 10 and 10, both budget-out; the six round-10
+  fixes read true, the Plan read as the kit's decision and as autopilot in
+  one run, `EB-426`-`EB-428`, `EB-433`; no pick. **Round 12 is READ**
+  (`review/active/kokomi-overhaul-round-12-2026-09-04.md`): one seat on
+  `0.2.2501+proto`, floor 11; a carry-out into Block prints nothing, an
+  Attack face not Weak-folded, the Plan tip's aim sentence unread
+  (`EB-440`-`EB-442`); no pick. **Round 13 is READ**
+  (`review/active/kokomi-overhaul-round-13-2026-09-04.md`): one seat on
+  `0.2.2547+proto`, the act-1 boss reached at a declared budget overrun,
+  eight of eight fights, War Council read as four different correct calls,
+  a targeted potion vanishing untargeted (`EB-452`), the carry-out panel
+  omitting a Plan (`EB-453`), Change of Plans dead until it says why
+  (`EB-455`), the bridge to count actions (`EB-456`); Tide Chart undrawn a
+  seventh time; no pick. **Round 14 is READ**
+  (`review/active/kokomi-overhaul-round-14-2026-09-04.md`): one seat on
+  `0.2.2564+proto`, floor 12 at the cap with the elite dying, Arcane
+  Scroll gave no card (`EB-459`), dual-intent attack numbers never land
+  (`EB-461`), Kurage's Oath's tag contradicts its rider (`EB-462`); Tide
+  Chart undrawn an eighth time; no pick. [USER]'s act-1 run is due on
+  `0.2.2501+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
@@ -190,11 +232,31 @@ are in [`workstreams.md`](workstreams.md).
   same rarity by `loader._pool_substitutions` and
   `FurinaReframeRoster.SwapOfferedRiders`, so the shipped sheet stands and an
   arm-off run is offered the shipped card. **Round 4 is READ**
-  (`review/active/furina-reframe-round-4-2026-09-04.md`): two seats on
+  (`review/ruled/furina-reframe-round-4-2026-09-04.md`): two seats on
   `0.2.2446+proto`, floors 4 and 8, both budget-out, no rider copy drawn,
   Fanfare decorative below the bars; four real decisions named, one pick
-  (a reader in every deck), `EB-404`-`EB-407`, `EB-412`-`EB-414`. [USER]'s
-  act-1 run is due on `0.2.2446+proto`. No stamp moves, nothing measured.
+  (a reader in every deck), `EB-404`-`EB-407`, `EB-412`-`EB-414`; RULED R254:
+  Aria of Recompense reads Fanfare under the arm (5 more Encore at 3 since
+  round 6, from 6), the
+  starter stays two kit cards, **BUILT** as `proto_fr_aria_of_recompense`.
+  **Round 5 is READ**
+  (`review/active/furina-reframe-round-5-2026-09-04.md`): two seats on
+  `0.2.2476+proto`, floors 10 and 10, both budget-out; the turn one with no
+  Encore in every fight, the reader carried at Fanfare 3 and its line never
+  paid, nine rows (`EB-419`-`EB-425`, `EB-429`, `EB-430`); one pick, the
+  Encore opening. **Rounds 6 and 7 are READ**
+  (`review/active/furina-reframe-round-6-2026-09-04.md`, `-round-7-`): one
+  seat each on `0.2.2501+proto` and `0.2.2547+proto`, floors 11 and 10, the
+  reader's bar moved to 3 (round 6 default), a member's roll spent the paid
+  performance on a reviving Minion (`EB-451`, skips Minions as R250's shape),
+  the retired Burst's tip still taught at a reward (`EB-449`); the Encore
+  opening read the same a third time. **Round 8 is READ**
+  (`review/active/furina-reframe-round-8-2026-09-04.md`): one seat on
+  `0.2.2564+proto`, floor 10 at the cap, six of six fights with the elite,
+  Guest Cast skipping Chiori's hit (`EB-463`), a Replay performing no member
+  (`EB-464`), five faces feeding a Burst no screen shows (`EB-449`), the
+  Encore opening read the same a fourth time. [USER]'s act-1 run is due on
+  that build. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
@@ -215,5 +277,9 @@ are in [`workstreams.md`](workstreams.md).
 Every open row is in [`QUEUE.md`](QUEUE.md) and owned by [USER] — `M69` and
 the art eyes-on pile (R250 closed `S4-G6`, `S4-G14` and `M45` as overtaken); the text-conventions
 proposal is ruled (R249, `review/ruled/text-conventions-shipped-2026-09-02.md`;
-builds `EB-345`, `EB-346`). The nine blessed mechanisms are in [`watch-register.md`](watch-register.md):
-`W9` has FIRED and is back with [USER] as `M69`, the other eight are dormant.
+builds `EB-345`, `EB-346`). The six blessed mechanisms are in [`watch-register.md`](watch-register.md), all
+dormant; `W6`, `W8` and `W9` were struck by R256 with the shipped Kokomi's
+Charge and Burst. R256 (2026-09-04) ruled the rulings deprecation audit at all
+four defaults (`review/ruled/rulings-deprecation-audit-2026-09-04.md`): R56
+struck, R58 scoped to Balance sheets, and each overhaul's Balance landing
+strikes its own LAW lines (its §3).

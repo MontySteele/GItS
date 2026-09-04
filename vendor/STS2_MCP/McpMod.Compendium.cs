@@ -602,11 +602,28 @@ public static partial class McpMod
         var saveDirectory = GetSaveDirectoryFromProgressPath(snapshot.ProgressPath);
         if (saveDirectory != null)
         {
+            // GItS LOCAL EDIT (EB-435). ONCE THIS PROCESS'S OWN SAVE DIRECTORY
+            // IS KNOWN, IT IS THE ONLY ANSWER THERE IS. `saveDirectory` is
+            // derived from the profile's own progress path, so an absent
+            // `current_run.save` under it means THIS game has not written one
+            // yet -- which is exactly the `limitation` this method's caller
+            // reports, and a true sentence.
+            //
+            // Falling through to the enumeration below turned "not yet" into
+            // "here is a stranger's run": the abandon that starts every
+            // harness run deletes `current_run.save`, the new run does not
+            // write one until the post-embark preloads finish, and asked in
+            // that window the loop walked past this lane's tree into the
+            // machine's own `%APPDATA%` and returned a save from a different
+            // day. Two lone-lane Klee soaks (2026-09-04) filed
+            // `seed_read_back_crossed` on the strength of it, with no second
+            // lane anywhere on the machine.
             var currentRunPath = Path.Combine(saveDirectory, "current_run.save");
-            if (File.Exists(currentRunPath))
-                return currentRunPath;
+            return File.Exists(currentRunPath) ? currentRunPath : null;
         }
 
+        // Only when this process's own directory could not be resolved AT ALL
+        // is a search across the known save roots better than nothing.
         foreach (var saveRoot in EnumerateSaveRoots())
         {
             var absolutePath = Path.Combine(saveRoot, snapshot.ProfileRoot, "saves", "current_run.save");

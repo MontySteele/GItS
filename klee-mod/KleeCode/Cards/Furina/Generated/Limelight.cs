@@ -44,7 +44,7 @@ public sealed class Limelight : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Limelight"),
-        ("description", "Spend 1 [gold]Encore[/gold], or HP for any shortfall. [gold]Spotlighted[/gold] Companions are 25% stronger this turn. Gain 1 [gold]Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Spend 1 [gold]Encore[/gold], or HP for any shortfall. [gold]Spotlighted[/gold] Companion cards gain 25% this turn. Gain 1 [gold]Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

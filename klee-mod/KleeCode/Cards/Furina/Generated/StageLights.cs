@@ -41,7 +41,7 @@ public sealed class StageLights : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stage Lights"),
-        ("description", "[gold]Spotlighted[/gold] Companion damage gains {PowerAmount:diff()} this turn. Apply 1 [gold]Weak[/gold] to ALL enemies. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "[gold]Spotlighted[/gold] Companion card damage gains {PowerAmount:diff()} this turn. Apply 1 [gold]Weak[/gold] to ALL enemies. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

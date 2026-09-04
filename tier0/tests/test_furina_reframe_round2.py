@@ -190,10 +190,43 @@ def test_the_encore_row_prints_its_spend_rule_instead_of_the_gap():
 
 def test_a_meter_with_no_declared_rule_keeps_the_honest_gap():
     """The table is not a glossary: a meter it says nothing about still says
-    what is missing and whose it is to carry."""
-    row = _meter_row("Fanfare", 6)
+    what is missing and whose it is to carry.
+
+    `EB-437` MOVED THE EXAMPLE. `Fanfare` used to stand here and now has a row
+    of its own, so the denominator is a meter the mod declares no spend rule
+    for -- which is what this test has always been about."""
+    row = _meter_row("Burst Energy", 6)
 
     assert "no rule for how it is spent" in row
+
+
+def test_the_fanfare_row_prints_the_rule_its_own_badge_states():
+    """`EB-437`. TWO READOUTS ON ONE SCREEN, DISAGREEING.
+
+    `FanfareMeterPower`'s arm face ends "Cards read it and none spends it";
+    this block, with no row for the word, printed `METER_NOTE` -- "no maximum,
+    and no rule for how it is spent". The r6 act-1 seat read both and filed the
+    pair: "the two Fanfare readouts on the same screen say different things
+    about whether a rule exists for spending it."
+
+    Each sentence was true of its own source and the pair was not: the mod
+    states the rule, so the page prints it rather than saying there is none."""
+    row = _meter_row("Fanfare", 6)
+
+    assert "no rule for how it is spent" not in row
+    assert "cards read it and none spends it" in row
+
+
+def test_the_fanfare_meter_rule_is_the_mods_own_sentence():
+    """Held in step from this side, the Encore row's discipline: the page's
+    clause is `FanfareMeterPower`'s own, off the arm face."""
+    src = FURINA_CS.read_text(encoding="utf-8")
+    body = src[src.index("class FanfareMeterPower"):]
+    printed = " ".join(re.findall(r'"((?:[^"\\]|\\.)*)"', body))
+
+    assert "Cards read it and none spends it" in printed
+    assert ("cards read it and none spends it"
+            == blindplay.METER_RULES["Fanfare"])
 
 
 def test_the_encore_meter_rule_is_the_mods_own_sentence():
@@ -239,6 +272,24 @@ def test_the_three_spotlight_meters_do_not_reach_the_page():
     assert "Spotlight Mode" not in page
     assert "Spotlight Moved" not in page
     assert "Spotlight Plays" not in page
+
+
+def test_the_spend_boost_accumulator_does_not_reach_the_page():
+    """`EB-422`, the fourth of the same kind, found the same way three rounds
+    later: "Spotlight Spend Boost: 30" sat in the status bar all fight with no
+    gloss and no card naming it (round 5, run 1, fight 4).
+
+    It is bookkeeping, not a currency. `SpotlightSystem.OnEncoreSpent` is its
+    only writer and adds `OvationSpendBoostPower`'s amount on each Encore
+    spend; `ClearSpendBoost` zeroes it at turn end. The rule is already on the
+    page under the name a card prints -- "Standing Ovation", whose own text
+    says what it multiplies and when -- and the running total is a quantity
+    that sentence never promises, which is what the seat reported: "Standing
+    Ovation says 10%; the meter said 30"."""
+    page = _combat_page({"KLEEMOD_SPOTLIGHT_SPEND_BOOST": 30})
+
+    assert "Spend Boost" not in page
+    assert "30" not in page
 
 
 def test_a_real_meter_beside_them_still_reaches_the_page():
@@ -320,6 +371,8 @@ def test_the_relics_arm_face_says_the_copy_it_hands_back_is_dead():
     arm = relic[relic.index("#if PROTOTYPE_CARDS && FURINA_REFRAME"):
                 relic.index("#else")]
     shipped = relic[relic.index("#else"):relic.index("#endif")]
-    assert "It does nothing once your Companions " in arm
-    assert "are lit." in arm
+    # `EB-437`: "Companions" is the noun the r6 seat read as the Salon
+    # members, and the Spotlight reaches CARDS.
+    assert "It does nothing once your " in arm
+    assert "[gold]Companion[/gold] cards are lit." in arm
     assert "does nothing" not in shipped

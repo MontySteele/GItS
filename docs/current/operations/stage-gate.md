@@ -21,4 +21,7 @@ survive play, or a rule is rewritten and the brief edited by a sentence.
 character's real sheet under a `CONSTANTS_VERSION` bump and deleted from the
 prototype surface in the same commit; `EXPERIMENTS.md` binds in full from here
 (pre-registration, blind grading, stamps, bands, and the twelve-arm
-re-baseline where one is owed). **Exit:** the re-baseline publishes.
+re-baseline where one is owed). The landing's slate also strikes the `LAW.md`
+lines the rulings deprecation audit lists for that kit
+(`review/ruled/rulings-deprecation-audit-2026-09-04.md` §3, R256 pick 4).
+**Exit:** the re-baseline publishes.

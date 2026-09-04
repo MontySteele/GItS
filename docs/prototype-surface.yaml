@@ -285,7 +285,7 @@
 - {id: proto_ko_tinder_toss, name: "Tinder Toss", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "[gold]Set off[/gold] and deal 4 damage to a random enemy twice.",
+   description: "[gold]Set off[/gold] a random enemy and deal 4 damage to it, twice.",
    upgrade: {damage: +2},
    effects: [{op: spend_spark, amount: 1},
              {op: set_off, target: random_enemy, damage: 4, times: 2}]}
@@ -310,7 +310,7 @@
 - {id: proto_ko_rapid_fire, name: "Rapid Fire", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal 3 damage to a random enemy 4 times. [gold]Set off[/gold] each enemy hit.",
+   description: "[gold]Set off[/gold] a random enemy and deal 3 damage to it, 4 times.",
    effects: [{op: set_off, target: random_enemy, damage: 3, times: 4}]}
 
 - {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
@@ -471,6 +471,30 @@
    description: "All cards in your hand count as [gold]Hexerei[/gold] cards this turn.",
    effects: [{op: hexerei_mark_hand}]}
 
+# the pool pass, round 10 (2026-09-04): the arm's one energy-priced plain
+# detonator, beside Sizzle's reaction-keyed one. Why it exists:
+# docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_ko_countdown, name: "Countdown", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "[gold]Set off[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   upgrade: {draw: 1},
+   effects: [{op: set_off, target: enemy},
+             {op: draw, amount: 1}]}
+
+# the pool pass, round 11 (2026-09-04): the arm's Spark SINK, and the first
+# X price on any sheet -- `spend_spark: all`, gated at one Spark. Why it
+# exists: docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_ko_stoke_the_fuse, name: "Stoke the Fuse", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Spend all your [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] grows by 3 per [gold]Spark[/gold] spent.",
+   upgrade: {grow: +1},
+   effects: [{op: spend_spark, amount: all},
+             {op: grow_largest_bomb, per_spark: 3}]}
+
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and
 # which 13 of the workshop's 34 are absent: docs/notes/prototype-surface-provenance.md.
@@ -541,7 +565,7 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
-   description: "Deal 7 damage. If Oz is out, he deals 5 [gold]Electro[/gold] damage to a random enemy.",
+   description: "Deal 7 damage. If [gold]Oz[/gold] is out, he deals 5 [gold]Electro[/gold] damage to a random enemy.",
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true},
              {op: conditional, if: self_has_power_mc_oz,
               then: [{op: damage, amount: 5, target: random_enemy, applies_element: true}]}]}
@@ -550,7 +574,7 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: power,
-   description: "At the end of your turn, Oz deals 5 [gold]Electro[/gold] damage to a random enemy.",
+   description: "At the end of your turn, [gold]Oz[/gold] deals 5 [gold]Electro[/gold] damage to a random enemy.",
    effects: [{op: apply_power, power: mc_oz, amount: 1, target: self}]}
 
 - {id: proto_mc_sucrose_gust, name: "Sucrose — Wind Spirit Creation (proto)", character: klee,
@@ -1038,12 +1062,11 @@
 - {id: proto_kk_undertow, name: "Undertow (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {IfUpgraded:show:10|7} damage. If the enemy has a debuff, deal {IfUpgraded:show:13|10} instead.",
-   effects: [{op: conditional, if: target_has_debuff,
-              then: [{op: damage, amount: 10, target: enemy}],
-              else: [{op: damage, amount: 7, target: enemy}]}],
+   # `EB-441`: one damage op with a rider, not two literal branches.
+   description: "Deal {CalculatedDamage:diff()} damage, already including {ExtraDamage:diff()} if the enemy has a debuff.",
+   effects: [{op: damage, amount: 7, target: enemy, bonus_vs_debuff: 3}],
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
-   upgrade: {conditional_damage: 3}}
+   upgrade: {damage: +3}}
 
 - {id: proto_kk_salt_line, name: "Salt Line (proto)", character: kokomi,
    authored_by: [claude],
@@ -1351,7 +1374,7 @@
    cost: 1, type: attack,
    personal_pool: [klee],
    replaces: proto_mc_fischl_nightrider, art_of: proto_mc_fischl_nightrider,
-   description: "Deal 7 damage. Whenever an [gold]Electro[/gold] [gold]Elemental Reaction[/gold] happens this turn, deal 5 [gold]Electro[/gold] damage to a random enemy.",
+   description: "Deal 7 damage. This turn, each [gold]Electro[/gold] [gold]Elemental Reaction[/gold] deals 5 [gold]Electro[/gold] damage to a random enemy.",
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true},
              {op: apply_power, power: mc_sinful_hex, amount: 5, target: self}]}
 
@@ -1380,6 +1403,7 @@
 # words they print: docs/notes/prototype-surface-provenance.md.
 - {id: proto_fr_salon_debut_named, name: "Salon Début", character: furina,
    authored_by: [claude],
+   replaces: salon_debut,
    register: salon, cost: 1, type: skill, rarity: basic,
    art_of: salon_debut,
    upgrade: {add: {op: gain_encore, amount: 2}},
@@ -1424,7 +1448,7 @@
 # default applied 2026-09-04): arm-only copies at the arm's Fanfare scale,
 # swapped in at the same rarity by the pool seam. The shipped sheet stands. ---
 
-- {id: proto_fr_florid_cadenza, name: "Florid Cadenza (reframe)", character: furina,
+- {id: proto_fr_florid_cadenza, name: "Florid Cadenza (proto)", character: furina,
    authored_by: [claude],
    replaces: florid_cadenza,
    cost: 0, type: skill, rarity: uncommon,
@@ -1433,7 +1457,7 @@
    effects: [{op: draw, amount: 1},
              {op: conditional, if: fanfare_at_least_6, then: [{op: draw, amount: 2}]}]}
 
-- {id: proto_fr_dramatic_entrance, name: "Dramatic Entrance (reframe)", character: furina,
+- {id: proto_fr_dramatic_entrance, name: "Dramatic Entrance (proto)", character: furina,
    authored_by: [claude],
    replaces: dramatic_entrance,
    cost: 1, type: attack, rarity: uncommon,
@@ -1443,7 +1467,7 @@
              {op: conditional, if: fanfare_at_least_6,
               then: [{op: damage, amount: 7, target: all_enemies}]}]}
 
-- {id: proto_fr_universal_revelry, name: "Universal Revelry (reframe)", character: furina,
+- {id: proto_fr_universal_revelry, name: "Universal Revelry (proto)", character: furina,
    authored_by: [claude],
    replaces: universal_revelry,
    cost: 2, type: attack, rarity: rare,
@@ -1452,7 +1476,7 @@
    effects: [{op: damage, amount: 9, target: all_enemies, bonus_formula: 1_per_2_fanfare},
              {op: conditional, if: fanfare_at_least_8, then: [{op: damage, amount: 6, target: all_enemies}]}]}
 
-- {id: proto_fr_flood_of_emotion, name: "Flood of Emotion (reframe)", character: furina,
+- {id: proto_fr_flood_of_emotion, name: "Flood of Emotion (proto)", character: furina,
    authored_by: [claude],
    replaces: flood_of_emotion,
    cost: 1, type: skill, rarity: rare,
@@ -1460,4 +1484,17 @@
    description: "Deal {IfUpgraded:show:17|14} damage. If you have at least 10 [gold]Fanfare[/gold], deal 14 more.",
    effects: [{op: damage, amount: 14, target: enemy},
              {op: conditional, if: fanfare_at_least_10, then: [{op: damage, amount: 14, target: enemy}]}]}
+# --- the starter's reader (R254, round 4 pick 1): one of Furina's two kit
+# starters reads Fanfare under the arm. Same copy-and-swap shape as the four
+# riders above, at the STARTER seam rather than the offer one. ---
+
+- {id: proto_fr_aria_of_recompense, name: "Aria of Recompense (proto)", character: furina,
+   authored_by: [claude],
+   replaces: aria_of_recompense,
+   cost: 1, type: skill, rarity: basic,
+   art_of: aria_of_recompense,
+   upgrade: {encore: +3, innate: true},
+   description: "Gain {IfUpgraded:show:8|5} [gold]Encore[/gold]. If you have at least 3 [gold]Fanfare[/gold], gain {IfUpgraded:show:8|5} more.",
+   effects: [{op: gain_encore, amount: 5},
+             {op: conditional, if: fanfare_at_least_3, then: [{op: gain_encore, amount: 5}]}]}
 

@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
@@ -419,6 +420,48 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         return paid ? amt : (int)(amt * SalonConstants.DryDamageMultiplier);
     }
 
+    /// <summary>
+    /// THE BODIES A MEMBER'S ROLL MAY PICK -- every hittable enemy, SKIPPING A
+    /// MINION while a non-Minion stands (`EB-451`).
+    ///
+    /// THE DEFECT. Furina r7 fight 7: the run's ONE paid performance -- every
+    /// other member in every other fight had performed dry -- rolled the 6-HP
+    /// Eye with Teeth, whose own status line says it revives at full. The rule
+    /// was printed and the outcome still handed the Encore economy's payoff to
+    /// the roll at the moment it was worth most.
+    ///
+    /// THE SAME SHAPE AS THE PLAN'S AIM, deliberately, and R250 is why: it
+    /// ruled that a Plan aims a non-Minion unless it is aimed, over the same
+    /// evidence (a decoy absorbing the one hit that mattered), and a member's
+    /// roll is the same question with a different roller.
+    /// <see cref="Prototype.KokomiPlan.FrontEnemy"/> is the twin, down to the
+    /// fallback: when the board is Minions ALONE the whole list comes back,
+    /// because a performance that lands on nothing is worse than one that
+    /// lands on the decoy.
+    ///
+    /// <c>MinionPower</c> IS THE MARK, the base game's own "secondary enemy"
+    /// flag, so this reads it rather than inventing a second one -- the Kin's
+    /// Followers and Queen's Torch Head Amalgam already carry it.
+    ///
+    /// NOT ARM-SCOPED. <see cref="PerformMember"/> and <see cref="Bow"/> are
+    /// the shipped kit's roll as well as the reframe's, and a rule that says
+    /// "the roll does not throw your payoff at a decoy" is not a fork of the
+    /// reframe's engine. Sim twin: <c>effects.salon_aim_pool</c>.
+    /// </summary>
+    public static List<Creature>? AimPool(IEnumerable<Creature>? hittable)
+    {
+        var all = hittable?.ToList();
+        if (all == null || all.Count == 0) return all;
+        var standing = all.Where(IsNotMinion).ToList();
+        return standing.Count > 0 ? standing : all;
+    }
+
+    /// <summary>Named rather than inline so the Minion read is one call a
+    /// structural pin can see directly -- `KokomiPlan.IsNotMinion`'s reason,
+    /// and the same predicate.</summary>
+    private static bool IsNotMinion(Creature enemy) =>
+        !enemy.Powers.OfType<MinionPower>().Any();
+
     /// <param name="evoked">The Furina reframe's EVOKE (packet §4.4), and it
     /// changes exactly two things: the Focus term is applied
     /// <c>FurinaReframeLaw.EvokeFocusMult</c> times instead of once
@@ -443,7 +486,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         {
             case SalonMember.Crabaletta:
             {
-                var targets = owner.CombatState?.HittableEnemies.ToList();
+                var targets = AimPool(owner.CombatState?.HittableEnemies);
                 if (targets == null || targets.Count == 0) break;
                 var target = owner.Player?.RunState.Rng.CombatTargets
                     .NextItem(targets);
@@ -755,7 +798,10 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     {
         if (owner.IsDead) return false;
         var combat = owner.CombatState;
-        var targets = combat?.HittableEnemies.ToList();
+        // `EB-451`: the roll's pool, not the raw board. `AimPool` never empties
+        // a board that had a body on it, so this is still the "can the stage
+        // act at all" test it has always been.
+        var targets = AimPool(combat?.HittableEnemies);
         if (targets == null || targets.Count == 0) return false;
 
         var paid = FurinaResources.Encore(owner)
@@ -964,6 +1010,63 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         }
         RotateLeftmost(owner, 1);
         FurinaReframeLedger.For(owner).NoteCompanionTrigger(member);
+    }
+
+    /// <summary>
+    /// `EB-420`. A Companion REPLAY -- the second and later resolutions of one
+    /// play, which <see cref="CompanionPlayTrigger"/>'s `IsFirstInSeries` gate
+    /// deliberately does not answer.
+    ///
+    /// IT PERFORMS NOBODY, AND THAT IS THE RULE. LAW:145 (countersigned R224)
+    /// lets a kit engine respond to a Companion play only where it "bounds the
+    /// amount generated per Companion play"; `KleeCompanionSpark` states the
+    /// consequence for the two cards that replay -- "a replay is one card
+    /// being resolved twice, and a per-play bound a replay can double is not a
+    /// bound". Duet and Study Buddy are those two cards.
+    ///
+    /// SO THIS METHOD CHANGES NOTHING AND ONLY RECORDS. The Furina round-5
+    /// seat played Duet into Freminet, got the doubled hit and two Crabaletta
+    /// performs where it counted three due, and found nothing on any screen
+    /// naming the second play: "I ended the turn unable to say whether Duet
+    /// had fired at all." The face says the rule now
+    /// (<c>ReplayNextCompanionPower</c>'s arm sentence) and the page says it
+    /// happened. Sim twin: <c>furina_reframe.companion_replay_no_trigger</c>.
+    ///
+    /// The same two guards as the trigger, in the same order and for the same
+    /// reasons: the arm's MANUAL leg owns this rule, and the Companion test
+    /// belongs to the rule rather than to a caller.
+    /// </summary>
+    public static void NoteCompanionReplay(Creature owner, CardModel? card)
+    {
+        if (!FurinaReframe.ManualLiveFor(owner)) return;
+        if (card is not Cards.ICompanionCard) return;
+        FurinaReframeLedger.For(owner).NoteReplayWithoutTrigger(
+            PrintedTitle(card));
+    }
+
+    /// <summary>
+    /// A card's printed title for a LEDGER row, and the id when it has none.
+    ///
+    /// `PlayTelemetry`'s `card.Title ?? card.Id.Entry` for the same question,
+    /// plus the guard that idiom leaves to its caller: `CardModel.Title`
+    /// resolves through `LocString.GetFormattedText`, which throws on a model
+    /// whose loc table has not been built -- and this is reached from
+    /// `AfterCardPlayed`, inside `CombatManager`'s async continuation, where a
+    /// throw reaches the player as a black screen rather than an error
+    /// (`KleeElementalHooks.BeforeCardPlayed` guards its own hook for exactly
+    /// that reason). A record of what happened must never be able to end the
+    /// run it is recording, so the id is the fallback for both cases.
+    /// </summary>
+    private static string PrintedTitle(CardModel card)
+    {
+        try
+        {
+            return card.Title ?? card.Id.Entry;
+        }
+        catch (System.Exception)
+        {
+            return card.Id.Entry;
+        }
     }
 #endif
 

@@ -38,14 +38,15 @@ from tier05 import draft, rewards
 
 SEED = 7
 
-#: Every op the arm has: slice one's eight, plus R244's `hexerei_mark_hand`
-#: and R252's `block_largest_bomb`. Registered in `effects.OPS` so the loader's
+#: Every op the arm has: slice one's eight, plus R244's `hexerei_mark_hand`,
+#: R252's `block_largest_bomb` and the round-11 pool pass's
+#: `grow_largest_bomb`. Registered in `effects.OPS` so the loader's
 #: vocabulary check accepts a row, priced in `draft.STATIC_OP_PRICING` so
 #: `lint_op_parity` stays green, and resolved only with the flag on and Klee in
 #: the seat.
 OVERHAUL_OPS = ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                 "remove_bomb_for_block", "block_largest_bomb",
-                "damage_set_off_total",
+                "grow_largest_bomb", "damage_set_off_total",
                 "multiply_set_off", "draw_per_set_off", "hexerei_mark_hand")
 
 
@@ -208,10 +209,26 @@ def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
     scope statement is what the names below hold -- each keyed to the Bomb
     state, and neither a plain Block, which is why `proto_ko_dig_in` beside
     them is still the arm's only unconditional Block and is still a Spark sink.
+
+    THIRTY-FOUR SINCE THE ROUND-10 POOL PASS (2026-09-04), and the one that
+    arrived is `proto_ko_countdown`: the arm's only detonator priced in ENERGY
+    that asks nothing else of the board. Three round-10 seats held Spark-priced
+    detonators at 0 Spark with a fat Bomb on the enemy and no energy-priced
+    detonator drawn; Ka-pow! is the starter's, one card in ten. The Spark sink
+    drafted beside it (Explosive Spark) was WITHDRAWN on the card audit's C3
+    clause and is on no surface, so its absence is pinned here for the reason
+    Fire Safety's is.
+
+    THIRTY-FIVE SINCE THE ROUND-11 POOL PASS (2026-09-04), and the one that
+    arrived is `proto_ko_stoke_the_fuse`: the Spark SINK, written a second
+    time and answering the C3 clause that withdrew the first. Explosive
+    Spark's value followed the banked Sparks; this row's follows the Bomb
+    decision -- the bank buys growth on a charge the player chose to keep
+    cooking, and buys nothing at all with no Bomb on the board.
     """
     ids = C.KLEE_OVERHAUL_POOL_IDS
-    assert len(ids) == 33
-    assert len(set(ids)) == 33
+    assert len(ids) == 35
+    assert len(set(ids)) == 35
     assert "proto_ko_vermillion_pact" not in ids
     assert {"proto_ko_dig_in", "proto_ko_pop"} <= set(ids)
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
@@ -227,6 +244,14 @@ def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
     assert {"proto_ko_dodoco_cover", "proto_ko_careful_now"} <= set(ids)
     assert "proto_ko_fire_safety" not in ids
     assert "proto_ko_safety_lesson" not in ids
+    # The round-10 pool pass's one, and only one: the Spark sink written with
+    # it was withdrawn on the audit's C3 clause and is on no surface.
+    assert "proto_ko_countdown" in ids
+    assert "proto_ko_explosive_spark" not in ids
+    # The round-11 pool pass's one: the Spark SINK, written a second time and
+    # this time keyed to the Bomb rather than to the bank -- the C3 clause
+    # that withdrew Explosive Spark is what the row above it is answering.
+    assert "proto_ko_stoke_the_fuse" in ids
 
 
 def test_the_numbers_are_the_briefs_placeholders():
@@ -318,7 +343,7 @@ def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
 
 
 def test_the_pool_keeps_the_packets_rarity_split(overhaul):
-    """15 Common, 12 Uncommon, 6 Rare -- the slice packet's sec.4 count with
+    """16 Common, 12 Uncommon, 6 Rare -- the slice packet's sec.4 count with
     Vermillion Pact removed and, since DRAFT 4 (R242), Pop! and Dig In back as
     Commons, plus ONE OF EACH from R244's Hexerei readers and ONE OF EACH from
     what is left of R252's defence shelf (it drafted two Commons and two
@@ -327,10 +352,16 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     a row filed in the wrong tier changes how often it is seen, both returning
     rows had to stop being `rarity: basic` to be offerable at all, and the R244
     packet files its three one per tier on purpose (a Common that reads the
-    turn, an Uncommon Power that is dead alone, a Rare enabler)."""
+    turn, an Uncommon Power that is dead alone, a Rare enabler). The
+    round-10 pool pass adds ONE Common (`proto_ko_countdown`): a detonator a
+    seat has to be OFFERED often is a Common or it is not the answer to the
+    finding it was written for. The round-11 pool pass adds ONE Uncommon
+    (`proto_ko_stoke_the_fuse`) and NOT a Common, for the other half of the
+    same argument: a sink that pays only into a Bomb already cooking is a card
+    a deck is built around rather than one every hand needs to be holding."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 15, "uncommon": 12, "rare": 6}
+        "common": 16, "uncommon": 13, "rare": 6}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):

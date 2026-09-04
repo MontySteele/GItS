@@ -6,6 +6,7 @@
     "reachable_by": "understudy give_card / scenario `give:` step"
   },
   "generated": [
+    "proto_fr_aria_of_recompense",
     "proto_fr_curtain_call",
     "proto_fr_dramatic_entrance",
     "proto_fr_exit_stage_left",
@@ -61,6 +62,7 @@
     "proto_ko_catalytic_converter",
     "proto_ko_chain_fuse",
     "proto_ko_chained_reactions",
+    "proto_ko_countdown",
     "proto_ko_coven_errand",
     "proto_ko_dig_in",
     "proto_ko_dodoco_cover",
@@ -82,6 +84,7 @@
     "proto_ko_sizzle",
     "proto_ko_sorry_jean",
     "proto_ko_sparks_n_splash",
+    "proto_ko_stoke_the_fuse",
     "proto_ko_sugar_rush",
     "proto_ko_the_big_one",
     "proto_ko_tinder_toss",
@@ -180,6 +183,7 @@
     "proto_true_spark_knight"
   ],
   "owners": {
+    "proto_fr_aria_of_recompense": "furina",
     "proto_fr_curtain_call": "furina",
     "proto_fr_dramatic_entrance": "furina",
     "proto_fr_exit_stage_left": "furina",
@@ -235,6 +239,7 @@
     "proto_ko_catalytic_converter": "klee",
     "proto_ko_chain_fuse": "klee",
     "proto_ko_chained_reactions": "klee",
+    "proto_ko_countdown": "klee",
     "proto_ko_coven_errand": "klee",
     "proto_ko_dig_in": "klee",
     "proto_ko_dodoco_cover": "klee",
@@ -256,6 +261,7 @@
     "proto_ko_sizzle": "klee",
     "proto_ko_sorry_jean": "klee",
     "proto_ko_sparks_n_splash": "klee",
+    "proto_ko_stoke_the_fuse": "klee",
     "proto_ko_sugar_rush": "klee",
     "proto_ko_the_big_one": "klee",
     "proto_ko_tinder_toss": "klee",
@@ -376,6 +382,10 @@
     ]
   },
   "upgrades": {
+    "proto_fr_aria_of_recompense": {
+      "encore": 3,
+      "innate": true
+    },
     "proto_fr_curtain_call": {
       "encore_cost": -1
     },
@@ -509,7 +519,7 @@
       "innate": true
     },
     "proto_kk_undertow": {
-      "conditional_damage": 3
+      "damage": 3
     },
     "proto_kk_vanguard": {
       "plan_power_amount": 1
@@ -547,6 +557,9 @@
     },
     "proto_ko_chained_reactions": {
       "power_amount": 1
+    },
+    "proto_ko_countdown": {
+      "draw": 1
     },
     "proto_ko_coven_errand": {
       "bomb_size": 2
@@ -613,6 +626,9 @@
     },
     "proto_ko_sparks_n_splash": {
       "cost": -1
+    },
+    "proto_ko_stoke_the_fuse": {
+      "grow": 1
     },
     "proto_ko_sugar_rush": {
       "energy": 1

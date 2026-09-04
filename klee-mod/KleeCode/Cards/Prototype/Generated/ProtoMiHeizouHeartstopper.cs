@@ -48,6 +48,9 @@ public sealed class ProtoMiHeizouHeartstopper : CustomCardModel, IElementalCard,
 
     public string? Nation => "inazuma";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesAnemo };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
 

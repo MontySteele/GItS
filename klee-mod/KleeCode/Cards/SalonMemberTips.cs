@@ -218,6 +218,33 @@ public static class SalonMemberTips
         // is the tip both the deploy card and the stage hover read (D1 §4), so
         // the rules are stated once and cannot fork. The faces carry their own
         // clause too; this is the paragraph behind the word.
+        //
+        // `EB-425` ADDED THE AIM. A deploy card DEALS DAMAGE and TAKES NO
+        // TARGET, and the first place the r5 seat learned that was a refusal:
+        // "the first thing I tried was `play "Salon Debut" on "Corpse Slug
+        // (1)"` and it was refused... the card's own reminder text says the
+        // member `Performs for 6 Hydro damage`, and a card that deals damage
+        // but takes no target is not something the face warns you about. The
+        // Salon picked slug 2 on its own. I never got to choose a member's
+        // target all round." The rule is `SalonPowers.PerformMember`'s, which
+        // draws the body from `Rng.CombatTargets` over `HittableEnemies` and
+        // is the only implementation of a member acting -- so the sentence is
+        // about every performance and not about one card, which is why it is
+        // here and not on Salon Debut's face. In the `Deploy` tip's words: a
+        // member performs, and the enemy it performs on is its own choice.
+        //
+        // THE `Deploy` KEYWORD TIP COULD NOT TAKE IT. That word is 132 of its
+        // 135-character ceiling carrying `EB-368`'s three rules, and this
+        // clause is 39; the paragraph behind the word has the room, is printed
+        // on the same card, and is where the other four rules already live.
+        //
+        // `EB-451` PUT THE LIMIT ON THE AIM. "Its own choice" was true and
+        // still cost the r7 seat the run's one PAID performance: the roll took
+        // the 6-HP Eye with Teeth, which revives at full, while the body that
+        // mattered stood beside it. The roll now skips a Minion while a
+        // non-Minion stands (`SalonMemberPower.AimPool`, R250's shape one roller
+        // over), and the sentence that describes the aim is the sentence that
+        // says so.
         if (FurinaReframe.ManualLiveFor(owner))
         {
             body =
@@ -226,7 +253,9 @@ public static class SalonMemberTips
               + "the front member; a [gold]Deploy[/gold] performs the member "
               + "it fields at once; deploying onto a full stage "
               + "[gold]Evokes[/gold] the front member first. The leftmost "
-              + "member is the front. Member numbers gain +1 per "
+              + "member is the front. A performing member picks its own "
+              + "enemy, never a [gold]Minion[/gold] while another enemy "
+              + "stands. Member numbers gain +1 per "
               + $"{SalonConstants.FocusPerFanfare} Fanfare you hold, and a "
               + "member with no Encore to spend performs at three-quarters.";
         }

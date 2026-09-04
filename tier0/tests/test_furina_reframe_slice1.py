@@ -254,6 +254,51 @@ def test_a_non_companion_play_never_triggers_the_stage(manual):
     assert _events(st, "salon_trigger") == []
 
 
+def test_a_doubled_companion_performs_once_and_says_so(manual):
+    """`EB-420`. Duet plays the next Companion card an extra time; the trigger
+    is gated on `replay_index == 0`, so the extra play performs nobody -- and
+    that gate is LAW:145's per-Companion-play bound rather than an accident of
+    the call site ("a per-play bound a replay can double is not a bound",
+    `KleeCompanionSpark`).
+
+    THE RULE WAS ALREADY THIS AND LEFT NO TRACE. The round-5 seat played Duet
+    into Freminet, counted three Companion plays' worth of triggers, got two,
+    and found no line on any screen naming the second play. So the replay is
+    emitted under its own name, the way the whiff is."""
+    st = _staged(["usher", "crabaletta"], encore=9)
+    st.replay_next_companion = 1
+
+    combat._finish_play(st, _companion())
+
+    # One play, two resolutions, ONE performance -- and the stage turned once.
+    assert len(_events(st, "salon_trigger")) == 1
+    assert st.player.salon == ["crabaletta", "usher"]
+    # ...and the resolution that performed nobody has a line of its own.
+    assert len(_events(st, "salon_replay_no_trigger")) == 1
+
+
+def test_a_doubled_non_companion_says_nothing(manual):
+    """The event is the Companion half of the kit, exactly as the trigger is:
+    a replayed card of hers was never going to perform anybody."""
+    st = _staged(["usher"], encore=9)
+    st.replay_next_companion = 1
+
+    combat._finish_play(st, _card(id="not_a_companion"))
+
+    assert _events(st, "salon_replay_no_trigger") == []
+
+
+def test_a_doubled_companion_says_nothing_with_the_flag_off():
+    """The OFF half: with no reframe there is no Companion trigger to miss, so
+    there is nothing for the line to be about."""
+    st = _staged(["usher"], encore=9)
+    st.replay_next_companion = 1
+
+    combat._finish_play(st, _companion())
+
+    assert _events(st, "salon_replay_no_trigger") == []
+
+
 def test_the_trigger_performs_through_the_one_shared_act(manual):
     """The same hard requirement EB-118 pinned for the card verbs: no second
     Salon-resolution implementation. If the hook grew its own copy of the act,

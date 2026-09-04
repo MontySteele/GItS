@@ -1078,7 +1078,8 @@ def detonate_bombs(state: CombatState, enemy: Enemy, bonus: int = 0) -> None:
         deal_damage_to_enemy(state, enemy, dmg, element=bomb.element,
                              source="bomb")
         if "spark_on_detonation" in p.relic_hooks:
-            gain_sparks(state, 1)
+            gain_sparks(state, 1,
+                        source="relic:pounding_surprise/detonation")
         splash = p.powers.get("detonation_splash", 0)     # Blazing Delight
         if splash and C.DETONATION_SPLASH_PROC_CAP is not None:
             procs = getattr(state, "splash_procs_this_turn", 0)
@@ -1110,8 +1111,30 @@ def detonate_bombs(state: CombatState, enemy: Enemy, bonus: int = 0) -> None:
             powers.apply_power(state, enemy, "vulnerable", vuln)
 
 
-def gain_sparks(state: CombatState, n: int) -> None:
+def gain_sparks(state: CombatState, n: int, source: str) -> None:
+    """Every Spark that lands, and the NAME of what made it (`EB-418`).
+
+    `source` IS REQUIRED, and it is required because the r11 Opus seat could
+    not name one: "My Spark went 1 to 2 with no bomb going off... This is the
+    one number in the kit I could not read off the screen." The grant was
+    `klee_personal_companion_spark`, which is a real kit rule and was printed
+    nowhere; the mod prints it now, and this argument is the pin that stops the
+    NEXT unnamed income arriving. The C# twin is `SparkPower.Gain`'s own
+    `source` parameter, which has carried exactly these strings into
+    `MeterLedger` since `EB-216` -- the two vocabularies are the same
+    vocabulary, so a ledger row read off the wire and an event read off a sim
+    fight name the same rule.
+    """
+    before = state.player.sparks
     state.player.sparks += n
+    # THE LEDGER IS BESIDE THE EVENT AND NOT INSIDE IT. The `gain_spark` event
+    # sits inside two fixed-seed log digests taken before their arms existed,
+    # and a diagnostic that moved one of those would be answering a question
+    # about instrumentation with a measurement about the game. `CombatState
+    # .spark_ledger` says why at greater length; the mod draws the same line
+    # (`SparkPower.Gain` -> `Diagnostics.MeterLedger`).
+    state.spark_ledger.append({"source": source, "amount": n,
+                               "before": before, "total": state.player.sparks})
     state.emit("gain_spark", amount=n, total=state.player.sparks)
 
 
@@ -1163,7 +1186,20 @@ def klee_personal_companion_spark(state: CombatState, card: Card) -> None:
     if n <= 0:
         return
     state.emit("klee_companion_spark", card=card.id, amount=n)
-    gain_sparks(state, n)
+    gain_sparks(state, n, source="companion:personal/play")
+
+
+#: The one non-literal a Spark price may be spelled with: X, "spend all your
+#: Sparks". The round-11 pool pass's Stoke the Fuse is the first and only row
+#: that prints it, and it is a WORD rather than a number because the amount is
+#: not a number the card prints -- the face says "all your Sparks" and the
+#: gate says "at least one" (`spend_spark_price` below).
+SPEND_ALL = "all"
+
+
+def spend_spark_is_all(fx: dict) -> bool:
+    """Is this Spark price the X price -- "spend all your Sparks"?"""
+    return fx.get("amount") == SPEND_ALL
 
 
 def spend_spark_amount(fx: dict) -> int:
@@ -1173,7 +1209,10 @@ def spend_spark_amount(fx: dict) -> int:
     number off the printed effect with no state in hand, and a price the
     playability gate cannot read is a price that fires without being shown.
     Raises rather than approximating -- the loader's vocabulary check reports
-    an unknown op, and this reports an unpriceable one.
+    an unknown op, and this reports an unpriceable one. `SPEND_ALL` raises
+    here too, and deliberately: an X price has no literal, so every reader
+    that wants a number goes through `spend_spark_price` and says which
+    number it wanted.
     """
     amount = fx.get("amount")
     if not isinstance(amount, int) or isinstance(amount, bool) or amount <= 0:
@@ -1181,6 +1220,24 @@ def spend_spark_amount(fx: dict) -> int:
             f"spend_spark amount must be a positive literal int, got "
             f"{amount!r}")
     return amount
+
+
+def spend_spark_price(fx: dict) -> int:
+    """What the PLAYABILITY GATE charges for this Spark price.
+
+    The literal for a printed price, and 1 for the X price: "spend all your
+    Sparks" is unplayable at an empty bank and playable at any bank that holds
+    one, which is exactly a price of 1 read through `combat.card_playable`'s
+    existing `sparks < price` clause. The mod says the same thing the same way
+    -- an X row's `PrintedSparkPrice` is 1 -- so the number shown and the
+    number gated on cannot drift apart across the two engines.
+
+    It is NOT what the card pays: the payment is `_op_spend_spark`'s, which
+    empties the bank. Two readers, two questions, and the split is the point.
+    """
+    if spend_spark_is_all(fx):
+        return 1
+    return spend_spark_amount(fx)
 
 
 def spend_sparks(state: CombatState, n: int) -> bool:
@@ -1383,6 +1440,14 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
                 hit += fx["bonus_vs_bombed"]
             if fx.get("bonus_vs_aura") and enemy.aura:
                 hit += fx["bonus_vs_aura"]
+            # `EB-441`. The aura rider's twin, on the enemy's DEBUFFS. Same
+            # per-target shape and the same classification the
+            # `target_has_debuff` predicate uses -- `kokomi_plan.has_debuff`,
+            # this engine's stand-in for the game's `PowerType.Debuff` -- so a
+            # branch rewritten as a rider asks exactly the question it asked
+            # as a branch.
+            if fx.get("bonus_vs_debuff") and kokomi_plan.has_debuff(enemy):
+                hit += fx["bonus_vs_debuff"]
             # Clorinde, Night Vigil: the same per-target aura rider, sourced
             # from a POWER instead of the card. Read before the hit resolves,
             # because resolve_hit consumes the aura it is keyed on -- the
@@ -1715,7 +1780,8 @@ def _salon_bow(state: CombatState, member: str, evoked: bool = False) -> None:
     mult = furina_reframe.evoke_focus_mult(p) if evoked else 1
     dmg = spec.get("damage", 0)
     if dmg and state.living_enemies:
-        enemy = state.rng.choice(state.living_enemies)
+        # `EB-451`: the roll's pool, not the raw board.
+        enemy = state.rng.choice(salon_aim_pool(state.living_enemies))
         deal_damage_to_enemy(state, enemy,
                              _salon_amount(state, dmg, focus_mult=mult),
                              element="hydro", source="salon_final_bow")
@@ -2149,7 +2215,7 @@ def _op_grant_sly_this_turn(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_gain_spark(state: CombatState, fx: dict, card: Card) -> None:
-    gain_sparks(state, fx.get("amount", 1))
+    gain_sparks(state, fx.get("amount", 1), source=f"card:{card.id}/gain_spark")
 
 
 def _op_spend_spark(state: CombatState, fx: dict, card: Card) -> None:
@@ -2162,7 +2228,17 @@ def _op_spend_spark(state: CombatState, fx: dict, card: Card) -> None:
     is spent. `spend_sparks` refuses a short bank as well -- the gate cannot
     see a spend nested in a conditional branch, and an unpayable price must
     fail loudly wherever it is reached rather than half-paying.
+
+    THE X PRICE (`amount: all`) EMPTIES THE BANK, whatever it holds. It is
+    still all-or-nothing by construction -- the amount asked for IS the bank
+    -- and the gate in front of it is a price of 1 (`spend_spark_price`), so
+    a card that would spend nothing is not playable in the first place. The
+    bank it reads is the LIVE one and not `sparks_at_play`, because this is
+    the payment; the payout beside it reads the pre-spend number.
     """
+    if spend_spark_is_all(fx):
+        spend_sparks(state, state.player.sparks)
+        return
     spend_sparks(state, spend_spark_amount(fx))
 
 
@@ -3098,7 +3174,7 @@ def _op_discard_for_sparks(state: CombatState, fx: dict, card: Card) -> None:
         discarded += 1
     gain = min(fx.get("sparks", discarded), discarded)
     if gain:
-        gain_sparks(state, gain)
+        gain_sparks(state, gain, source=f"card:{card.id}/discard_for_sparks")
 
 
 def _op_scry_discard(state: CombatState, fx: dict, card: Card) -> None:
@@ -3507,11 +3583,13 @@ def is_known_count(token: str) -> bool:
 # MoltenFist are the two users, both in the reference Ironclad pool.
 POWER_FORMULA_OPS = frozenset({"apply_power"})
 
-# The one op that reads `amount: "all"` ITSELF, before `_amount` ever sees it:
-# `_op_exhaust_from` resolves it as the eligible pool size (Stoke's whole-hand
-# shape; ic_fiend_fire and ic_second_wind print it). Anywhere else "all" is a
-# typo that would reach `_amount` and raise.
-AMOUNT_ALL_OPS = frozenset({"exhaust_from"})
+# The ops that read `amount: "all"` THEMSELVES, before `_amount` ever sees it.
+# `_op_exhaust_from` resolves it as the eligible pool size (the whole-hand
+# shape; ic_fiend_fire and ic_second_wind print it), and `_op_spend_spark`
+# resolves it as the whole bank -- the X price, "spend all your Sparks", which
+# the round-11 pool pass's Stoke the Fuse is the first and only row to print.
+# Anywhere else "all" is a typo that would reach `_amount` and raise.
+AMOUNT_ALL_OPS = frozenset({"exhaust_from", "spend_spark"})
 
 
 def is_known_amount(val) -> bool:
@@ -5239,6 +5317,21 @@ def _op_block_largest_bomb(state: CombatState, fx: dict, card: Card) -> None:
     klee_overhaul.block_for_largest_bomb(state, int(fx["cap"]))
 
 
+def _op_grow_largest_bomb(state: CombatState, fx: dict, card: Card) -> None:
+    """Stoke the Fuse (the round-11 pool pass): the largest Bomb grows by
+    `per_spark` for every Spark this card spent.
+
+    ONE call into the arm, so the number of Sparks read and the growth applied
+    are one arithmetic -- `block_largest_bomb`'s shape above, and the same
+    reason. The Sparks are read there, off `state.sparks_at_play`, because
+    this op is legal only behind an all-in `spend_spark` price and the bank at
+    play IS what such a card spent.
+    """
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.grow_largest_per_spark(state, int(fx["per_spark"]))
+
+
 def _op_damage_set_off_total(state: CombatState, fx: dict,
                              card: Card) -> None:
     """Big Badda Boom's second clause: "Then deal damage equal to what the
@@ -5457,6 +5550,12 @@ OPS = {
     # because it reads the same pile, and distinct from it because it spends
     # nothing -- see `_op_block_largest_bomb`.
     "block_largest_bomb": _op_block_largest_bomb,
+    # The round-11 pool pass's verb (Stoke the Fuse), and the arm's one
+    # SPARK-SHAPED payout: it reads the bank the card just spent and pours it
+    # into a single charge. Beside `grow_bombs` because it grows, and distinct
+    # from it because it grows ONE Bomb by a number no row prints whole --
+    # see `_op_grow_largest_bomb`.
+    "grow_largest_bomb": _op_grow_largest_bomb,
     "damage_set_off_total": _op_damage_set_off_total,
     "multiply_set_off": _op_multiply_set_off,
     "draw_per_set_off": _op_draw_per_set_off,
@@ -5936,7 +6035,7 @@ def player_turn_start_triggers(state: CombatState) -> None:
         powers.apply_power(state, p, "strength", n, applier=p)
     n = p.powers.get("spark_per_turn", 0)               # Endless Fireworks
     if n:
-        gain_sparks(state, n)
+        gain_sparks(state, n, source="power:endless_fireworks/turn_start")
     n = p.powers.get("bomb_and_spark_per_turn", 0)      # Playtime Forever
     for _ in range(n):
         if state.living_enemies:
@@ -5945,7 +6044,7 @@ def player_turn_start_triggers(state: CombatState) -> None:
                                     turn_placed=state.turn))
             state.emit("bomb_placed", target=enemy.name,
                        damage=C.PLAYTIME_BOMB_DAMAGE)
-        gain_sparks(state, 1)
+        gain_sparks(state, 1, source="power:playtime_forever/turn_start")
     companion_overhaul_turn_start(state)
 
 
@@ -6146,6 +6245,26 @@ def salon_tick_amount(state: CombatState, member: str, paid: bool,
     return amt if paid else int(amt * C.SALON_DRY_DAMAGE_MULT)
 
 
+def salon_aim_pool(living: list) -> list:
+    """The bodies a member's roll may pick (`EB-451`).
+
+    Every living enemy, SKIPPING A MINION while a non-Minion stands. Furina r7
+    fight 7 spent the run's one PAID performance -- every other member in every
+    other fight performed dry -- on the 6-HP Eye with Teeth, which revives at
+    full, while the body that mattered stood beside it.
+
+    R250'S SHAPE, ONE ROLLER OVER. It ruled that a Plan aims a non-Minion
+    unless it is aimed, over the same evidence, and `kokomi_plan.front_enemy`
+    reads `is_minion` for it. This reads the same flag, and falls back to the
+    whole list on an all-Minion board for the same reason: a performance that
+    lands on nothing is worse than one that lands on the decoy.
+
+    Twin: `SalonPowers.AimPool`, which both the tick and the bow roll over.
+    """
+    standing = [e for e in living if not e.is_minion]
+    return standing or living
+
+
 def salon_member_act(state: CombatState, member: str) -> bool:
     """ONE member's slot passive, with the full standard bill: the Encore
     upkeep, the dry three-quarters when it goes unpaid, the Focus/Grand-Salon
@@ -6175,7 +6294,8 @@ def salon_member_act(state: CombatState, member: str) -> bool:
         resources.spend_encore(state, C.SALON_TICK_ENCORE_COST,
                                "salon_upkeep")
     if spec.get("damage", 0):
-        enemy = state.rng.choice(state.living_enemies)
+        # `EB-451`: the roll's pool, not the raw board.
+        enemy = state.rng.choice(salon_aim_pool(state.living_enemies))
         deal_damage_to_enemy(state, enemy,
                              salon_tick_amount(state, member, paid),
                              element="hydro", source="salon")

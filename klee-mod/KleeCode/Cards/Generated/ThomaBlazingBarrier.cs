@@ -48,7 +48,7 @@ public sealed class ThomaBlazingBarrier : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thoma — Blazing Barrier"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. At the start of your next turn, gain 2 [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. At the start of your next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -56,7 +56,8 @@ public sealed class ThomaBlazingBarrier : CustomCardModel, ICompanionCard
         {
             new CalculationBaseVar(5m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new SpotlightSystem.DeferredBlockVar(2m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in

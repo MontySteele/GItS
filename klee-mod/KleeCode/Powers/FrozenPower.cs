@@ -110,6 +110,18 @@ public sealed class FrozenPower : PowerModel, ILocalizationProvider
             choiceContext, target, shatter,
             ValueProp.Unblockable | ValueProp.Unpowered,
             dealer: null, cardSource: null, cardPlay: null);
+
+        // `EB-423`. "and removes Frozen" has to survive the rest of THIS
+        // broadcast. `AuraPower.AfterDamageReceived` may still be ahead of us
+        // in the same one, and a Hydro aura meeting this Cryo hit resolves a
+        // Frozen reaction that puts the freeze straight back -- which is what
+        // the round-5 seat read off the board: "the shatter demonstrably
+        // happened (the 6 is in the HP total) and the board still read Frozen
+        // 1". The sim cannot reach that state; it reacts first and zeroes
+        // `enemy.frozen` after. The full argument, and why the mark is set
+        // HERE rather than before the damage above, is at
+        // `ReactionEffects.MarkShattered`.
+        ReactionEffects.MarkShattered(target);
     }
 
     /// <summary>

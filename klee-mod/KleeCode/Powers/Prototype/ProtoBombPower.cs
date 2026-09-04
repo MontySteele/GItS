@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
@@ -99,6 +100,13 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             var rows = new List<(string, string)>
             {
                 ("title", "Bomb"),
+                // `EB-417`. THE BADGE'S OTHER NAME, and it is a row rather
+                // than a conditional inside the one above for
+                // <see cref="SmartDescriptionLocKey"/>'s reason: loc is
+                // registered once at boot and the pile changes every turn, so
+                // the LIVE choice is a key (<see cref="Title"/>) and both
+                // spellings have to exist before it can be made.
+                (MineTitleKey, "Mine"),
                 // FOUR SENTENCES, which is the ceiling, so `EB-343`'s clause
                 // is paid for by merging the first two rather than added to
                 // them. NO SEMICOLON, and that is not a style note:
@@ -147,9 +155,17 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// twice and called it the most confusing thing on the screen
     /// (`klee-overhaul-r1-codex-b`, fights 4 and 5).
     /// </summary>
+    /// <summary>`EB-436` PUT THE HIT IN THE SENTENCE. The clause said WHEN
+    /// and nothing about the attack, and the r12 act-1 seat read mitigation
+    /// into it: three Mines left armed against an elite, five went off,
+    /// "every hit landed in full, 36 to 18 HP". The only thing a Mine does to
+    /// the attack is stop it happening, by killing the attacker -- `EB-336`'s
+    /// rule, <see cref="Preempted"/> -- so the badge says that and stops.
+    /// Same sentence, same two surfaces the clause has had since
+    /// <c>EB-260</c>.</summary>
     private const string MineClause =
-        " A [gold]Mine[/gold] also goes off when this enemy attacks you, "
-      + "before the hit lands.";
+        " A [gold]Mine[/gold] also goes off before this enemy's hit, which "
+      + "lands in full unless the Mine kills.";
 
     // `EB-343`'s sentence is written INTO the static description above rather
     // than pulled out as a constant beside `MineClause`, and the reason is the
@@ -259,11 +275,44 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// count it is about. "growing each turn" is the phrasing the Bomb keyword
     /// tip already uses for the same rule ("grows {BombGrowth} a turn"), which
     /// is also where the RATE is printed -- the badge has never carried it.
+    /// `EB-450` REPLACED THE COUNT WITH THE LIST, and the count is still in
+    /// it: `Bombs here: 5, 8, 20, 12` says four as plainly as `4` did and adds
+    /// the one fact the badge withheld.
+    ///
+    /// THE DEFECT. The badge printed a SUM and a count -- `Bomb 45 (4 bombs)`
+    /// -- while `EB-432`'s Set off tip says the charges go off oldest first
+    /// and the FIRST one takes the aura. So on a bombed body wearing Cryo,
+    /// which charge Melts was a fact the player had to remember placing rather
+    /// than read, and the r13 seat carried it in its head for a whole fight.
+    /// Two surfaces, one rule, and only one of them could name the charge.
+    ///
+    /// OLDEST FIRST IS THE ORDER `SetOff` WALKS -- `_charges` is placement
+    /// order and every taker walks it front to back -- so the list is printed
+    /// in the list's own order and no second definition of "oldest" exists.
+    ///
+    /// `{Count}` STAYS A VAR (`EB-289` is why it is not `{Amount}`) and leaves
+    /// this text: `5 / 8 / 20 / 12` says four as plainly as `4` did, and
+    /// printing both would put two number groups in one sentence for no fact.
+    ///
+    /// THE WORDS "OLDEST FIRST" ARE NOT HERE AND THAT IS THE CEILING, said out
+    /// loud rather than left to be discovered. This face is 125 of its
+    /// 125-character power ceiling (`tools/lint_text_conventions.py`, and it
+    /// bites), so the clause has no room without rewriting `PyroTotal`,
+    /// `NoSelfSentence` or `JumpSentence` -- three ruled sentences, to restate
+    /// a rule the reader already has: `EB-432` put "oldest first" on the
+    /// `Set off` tip, which is printed on the card that will spend this pile.
+    /// The tip says the ORDER and the badge now shows the QUEUE, which is the
+    /// pairing the r13 seat was doing in its head.
+    ///
+    /// SLASHES AND NOT COMMAS inside the list, for one reason: the sentence
+    /// around it is comma-separated, and `Bombs here: 5, 8, 20, 12, growing
+    /// each turn` hides where the pile stops. It costs nothing at the ceiling
+    /// -- the lint renders a hole as one character however it is filled.
     private const string Bombs =
-        " Bombs here: [blue]{Count}[/blue], growing each turn.";
+        " Bombs here: [blue]{Charges}[/blue], growing each turn.";
 
     private const string BombsWithMines =
-        " Bombs here: [blue]{Count}[/blue], including [blue]{Mines}[/blue] "
+        " Bombs here: [blue]{Charges}[/blue], including [blue]{Mines}[/blue] "
       + "[gold]Mine{Mines:plural:|s}[/gold], growing each turn.";
 
     /// <summary>Rule 3, `EB-361`. A Bomb whose enemy dies moves to a random
@@ -292,6 +341,53 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     protected override string SmartDescriptionLocKey =>
         Id.Entry + "." + SmartKey(MineCount > 0, LiveMods);
+
+    /// <summary>The loc suffix <see cref="Title"/> selects when the pile is all
+    /// Mines. `title` is the base game's own suffix and BaseLib registers every
+    /// pair this model returns under `{Id.Entry}.{key}`, so a second name costs
+    /// a row and nothing else.</summary>
+    private const string MineTitleKey = "titleMine";
+
+    /// <summary>The table a power's loc lives in, and the one
+    /// <c>KleeSelfCheck</c> R8 walks.</summary>
+    private const string PowersTable = "powers";
+
+    /// <summary>
+    /// `EB-417`. A MINE READS AS A MINE.
+    ///
+    /// THE DEFECT. The badge titled every pile `Bomb`, so a lone Mine under an
+    /// enemy read `Bomb 4` and the one property the whole Mine trick turns on
+    /// -- that it goes off BEFORE the enemy's hit lands -- was three lines down
+    /// in the body text. The r11 Opus seat found the rule on Jumpy Dumpty's
+    /// face instead and said so: "the enemy badge calls a Mine `Bomb 4` in the
+    /// title and only discloses it is a Mine in the body text... Since the
+    /// whole Mine trick is timing, the badge should lead with it."
+    ///
+    /// ALL OF THEM OR NONE, which is the honest test and not a cautious one. A
+    /// pile is one badge and one number; naming it `Mine` while a plain Bomb
+    /// sits in it would print a timing rule over a charge that does not have
+    /// one. A MIXED pile keeps `Bomb` and discloses its Mines where it always
+    /// has -- <see cref="BombsWithMines"/>'s "including {Mines} Mines", the
+    /// fuse mark -- and rule 6's sentence rides beside it either way, because
+    /// <see cref="SmartDescriptionLocKey"/> switches on <c>MineCount > 0</c>
+    /// and not on this.
+    ///
+    /// A CANONICAL COPY HAS NO CHARGES and therefore no Mines, so the
+    /// compendium entry is titled `Bomb` exactly as it was: the guard is
+    /// <c>MineCount > 0</c>, not <c>MineCount == _charges.Count</c> alone,
+    /// which an empty pile satisfies vacuously.
+    /// </summary>
+    public override LocString Title =>
+        TitledAsMine
+            ? new LocString(PowersTable, Id.Entry + "." + MineTitleKey)
+            : base.Title;
+
+    /// <summary>Is this pile a Mine and nothing but? The decision
+    /// <see cref="Title"/> makes, exposed for the pins the way the pure reads
+    /// below are: a <c>LocString</c> cannot be resolved outside a booted game
+    /// (KleeTests README, "The headless boundary"), so the branch has to be
+    /// readable without formatting one.</summary>
+    public bool TitledAsMine => MineCount > 0 && MineCount == _charges.Count;
 
     /// <summary>
     /// WHICH OF THE TARGET'S MODIFIERS THE PRINTED TOTAL HAS FOLDED IN, right
@@ -523,7 +619,51 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             // `EB-289`: the live charge count. See `Bombs` above for why the
             // stack amount could not be it.
             new DynamicVar("Count", 0m),
+            // `EB-450`: the charges themselves, oldest first.
+            new ChargeListVar(),
         };
+
+    /// <summary>
+    /// <c>{Charges}</c>, the pile's sizes in the order they will go off
+    /// (`EB-450`).
+    ///
+    /// A <see cref="SetOffDamageVar"/> SUBCLASSED THE SAME WAY AND FOR THE
+    /// SAME REASON: the game hands the var itself to SmartFormat
+    /// (<c>LocString.Add(DynamicVar)</c>) and formats it through
+    /// <c>ToString()</c>, so a var can answer with something that is not one
+    /// number -- and this one has to, because the whole finding is that ONE
+    /// number was all the badge could say. Read LIVE off <c>_charges</c>, like
+    /// every other figure on this face.
+    ///
+    /// <c>GetBaseValueForIConvertible</c> answers the COUNT, which is what a
+    /// numeric formatter would have to be given if anybody ever wrote
+    /// <c>{Charges:plural:|s}</c>; nothing does today, and answering the sum
+    /// there would be a second name for <c>{Size}</c>.
+    /// </summary>
+    private sealed class ChargeListVar : DynamicVar
+    {
+        public ChargeListVar() : base("Charges", 0m)
+        {
+        }
+
+        private ProtoBombPower? Pile => _owner as ProtoBombPower;
+
+        protected override decimal GetBaseValueForIConvertible() =>
+            Pile?._charges.Count ?? BaseValue;
+
+        public override string ToString()
+        {
+            var pile = Pile;
+            if (pile == null || pile._charges.Count == 0)
+            {
+                return "0";
+            }
+
+            return string.Join(" / ", pile._charges.Select(
+                c => c.Size.ToString(
+                    System.Globalization.CultureInfo.InvariantCulture)));
+        }
+    }
 
     /// <summary>
     /// <c>{Size}</c>, READ LIVE. <c>EB-265</c>.
@@ -639,6 +779,35 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             _charges[i] = _charges[i] with { Size = _charges[i].Size + amount };
         }
         SyncDisplay();
+    }
+
+    /// <summary>
+    /// Grow the single largest charge ON THIS PILE by <paramref name="amount"/>,
+    /// and report which index took it (-1 if the pile is empty). PURE.
+    ///
+    /// <see cref="GrowBy"/>'s one-charge twin, and the board-wide walk in
+    /// <see cref="GrowLargestPerSpark"/> is what turns "largest here" into
+    /// "largest anywhere". THE FIRST largest wins a tie, in place order, which
+    /// is the tie-break <see cref="RemoveLargestForBlock"/> already takes: a
+    /// card whose payout lands on a coin flip is one the player cannot plan
+    /// around. Sim twin: <c>klee_overhaul.grow_largest_per_spark</c>'s inner
+    /// walk.
+    /// </summary>
+    public int GrowLargestChargeBy(int amount)
+    {
+        if (_charges.Count == 0) return -1;
+        var best = 0;
+        for (var i = 1; i < _charges.Count; i++)
+        {
+            if (_charges[i].Size > _charges[best].Size) best = i;
+        }
+        if (amount == 0) return best;
+        _charges[best] = _charges[best] with
+        {
+            Size = _charges[best].Size + amount,
+        };
+        SyncDisplay();
+        return best;
     }
 
     /// <summary>Add one charge. PURE -- the APPLY that creates the pile is the
@@ -1544,6 +1713,57 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         var amount = largest < cap ? largest : cap;
         if (amount <= 0) return 0;
         await CreatureCmd.GainBlock(applier, amount, ValueProp.Unpowered, null);
+        return amount;
+    }
+
+    /// <summary>
+    /// Stoke the Fuse (the round-11 pool pass): the SINGLE largest Bomb on the
+    /// board grows by <paramref name="perSpark"/> for every Spark this card
+    /// spent. Returns the growth applied, 0 if nothing grew.
+    ///
+    /// <paramref name="sparksSpent"/> IS HANDED IN, not read here, and that is
+    /// the whole ordering rule. <c>SparkPower.Spend</c> debits the bank where
+    /// it is called, so the generated body captures
+    /// <c>SparkPower.SparksAtPlay</c> BEFORE the price is paid and passes the
+    /// number down -- reading the bank after the spend would read zero. The
+    /// sim answers the same question off <c>state.sparks_at_play</c>, the
+    /// documented twin of that accessor, and the op is legal only behind an
+    /// all-in Spark price so the two readings are the same number.
+    ///
+    /// THE LARGEST SINGLE CHARGE, BOARD-WIDE -- <see cref="BlockForLargestBomb"/>'s
+    /// walk one rule over, with <see cref="GrowLargestChargeBy"/>'s tie-break
+    /// inside each pile. ONE CHARGE AND NOT THE PILE is the row's decision:
+    /// <see cref="GrowOn"/> spreads growth across an enemy's charges, and this
+    /// pours the bank into the one she is already cooking.
+    ///
+    /// IT SETS NOTHING OFF. Sim twin:
+    /// <c>klee_overhaul.grow_largest_per_spark</c>.
+    /// </summary>
+    public static int GrowLargestPerSpark(
+        Creature applier, int perSpark, int sparksSpent)
+    {
+        if (applier.CombatState == null) return 0;
+        if (perSpark <= 0 || sparksSpent <= 0) return 0;
+
+        ProtoBombPower? bestPile = null;
+        var bestSize = 0;
+        foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
+        {
+            if (enemy.IsDead) continue;
+            foreach (var pile in enemy.Powers.OfType<ProtoBombPower>())
+            {
+                if (pile.Applier != applier) continue;
+                if (pile.LargestSize > bestSize)
+                {
+                    bestPile = pile;
+                    bestSize = pile.LargestSize;
+                }
+            }
+        }
+        if (bestPile == null) return 0;
+
+        var amount = perSpark * sparksSpent;
+        bestPile.GrowLargestChargeBy(amount);
         return amount;
     }
 

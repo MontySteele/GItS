@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from understudy import qa_packet
-from understudy.blindplay_board import (_bundle_cards, _combat,
+from understudy.blindplay_board import (_bundle_cards, _combat, _event_option,
                                         _event_options, _map_nodes,
                                         _map_options, _proceed_option,
                                         _relic_options, _rest_options,
@@ -467,6 +467,39 @@ def _aims_at_an_enemy(entry: dict[str, Any]) -> bool:
     return entry.get("can_target_enemy") is True
 
 
+def _potion_aims_at_an_enemy(entry: dict[str, Any]) -> bool:
+    """Does this potion need an enemy of the tester's choosing? `EB-452`.
+
+    THE DEFECT, in one line: on the Kokomi round-13 boss, turn 5,
+    `use potion "Weak Potion"` with no `on` clause was accepted, the potion
+    was spent, no Weak landed on any of the three bodies, no intent moved,
+    and no refusal was printed anywhere.
+
+    WHY IT WAS ACCEPTED. This function's card twin (`_aims_at_an_enemy`)
+    falls THROUGH to "aims itself" on a spelling it does not know, because
+    the arm mints custom card target types that legitimately play bare -- a
+    Plan on the pet, a now-line on the player. A POTION has neither form:
+    `ExecuteUsePotion`'s switch resolves `AnyEnemy` from the tester's own
+    `target`, resolves the three self spellings to the player whatever is
+    sent, and answers every other spelling with `default: target = null`
+    (`McpMod.Actions.cs:286-306`) -- then enqueues the use anyway. So a
+    spelling this page does not know is the one case where the game spends
+    the potion on nobody and says `ok`, which is exactly what the seat saw.
+
+    So the fall-through is the OTHER WAY here, and it is the conservative
+    direction: only a potion the game itself aims -- `AllEnemies`, `None`,
+    the three self spellings -- is used bare, and everything else is asked
+    for an enemy. A potion refused for want of a target costs one refusal
+    with the working forms in it; a potion drunk into the void costs the
+    potion. An ABSENT `target_type` is a feed that has not said, and reads as
+    unaimed, the same way the card twin reads it.
+    """
+    aim = str(entry.get("target_type") or "").strip().lower()
+    if aim in AIMED_TARGETS:
+        return True
+    return bool(aim) and aim not in UNAIMED_TARGETS
+
+
 def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     """`(entity id, refusal)` for an enemy named the way the screen names it."""
     enemies = _enemies(state)
@@ -593,7 +626,10 @@ def _use_potion(state: dict[str, Any], cmd: Command) -> Resolution:
     bare word; a `Self` / `AnyAlly` / `AnyPlayer` potion is resolved to the
     player by the bridge whatever is sent, so nothing is sent -- and a tester
     who aimed one anyway is told it went on them rather than being refused for
-    a mistake with no consequence.
+    a mistake with no consequence. `EB-452` widened the first half from the
+    `AnyEnemy` spelling to every spelling the game does not aim itself, for
+    the reason in `_potion_aims_at_an_enemy`: on the others the bridge passes
+    a null target, spends the potion and answers `ok`.
     """
     potions = _potions(state)
     if not potions:
@@ -610,10 +646,15 @@ def _use_potion(state: dict[str, Any], cmd: Command) -> Resolution:
     if aim in SELF_TARGETS:
         printed["target"] = "yourself"
         return Resolution(True, "use potion", post, printed)
-    if aim in AIMED_TARGETS or cmd.target:
+    if _potion_aims_at_an_enemy(entry) or cmd.target:
         eid, why = _resolve_enemy(state, cmd.target)
         if not eid:
-            return _refuse(why)
+            # `EB-452`, and it is `_play`'s own repair one verb over: a potion
+            # that has to be aimed and was not is refused with the `on` form
+            # listed back per living enemy, so the working command is in the
+            # refusal rather than a screen away.
+            return _refuse(why, *(f'use potion "{printed["potion"]}" on "{n}"'
+                                  for n in _living_enemy_names(state)))
         post["target"] = eid
         printed["target"] = next(
             (n for e, n in zip(_enemies(state),
@@ -733,8 +774,11 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
                           {"action": "select_bundle", "index": idx},
                           {"bundle": _named_option(entries[idx])["name"]})
     if st == "event":
+        # `EB-448`: the page's own namer, so the line after the command names
+        # the card or relic the option hands over rather than only the
+        # sentence promising one.
         return _index_choice(state, cmd, _event_options(state),
-                             "choose_event_option")
+                             "choose_event_option", namer=_event_option)
     if st == "rest_site":
         return _index_choice(state, cmd, _rest_options(state),
                              "choose_rest_option")
@@ -848,6 +892,11 @@ def _index_choice(state: dict[str, Any], cmd: Command, entries: list[Any],
     printed = {"option": names[idx]}
     if options[idx].get("text"):
         printed["text"] = options[idx]["text"]
+    # `EB-448`: and the faces of whatever the row names, so the result line
+    # says WHAT was given rather than only that something was. Present only
+    # where the namer supplies them, which today is the event screen alone.
+    if options[idx].get("names"):
+        printed["names"] = options[idx]["names"]
     return Resolution(True, "choose",
                       {"action": action,
                        "index": posted if isinstance(posted, int) else idx},

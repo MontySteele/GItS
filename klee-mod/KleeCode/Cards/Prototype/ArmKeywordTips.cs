@@ -67,6 +67,7 @@ public static class ArmKeywordTips
     public const string MineKey = "KLEEMOD-ARM_MINE";
     public const string HexereiKey = "KLEEMOD-ARM_HEXEREI";
     public const string GroundedKey = "KLEEMOD-ARM_GROUNDED";
+    public const string OzKey = "KLEEMOD-ARM_OZ";
     public const string MendKey = "KLEEMOD-ARM_MEND";
     public const string PlanKey = "KLEEMOD-ARM_PLAN";
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
@@ -80,6 +81,14 @@ public static class ArmKeywordTips
     // with the play. It lives in this class because it is a sentence about the
     // Plan, which is this class's word and this quarantine's rule.
     public const string PlanElementKey = "KLEEMOD-ARM_PLAN_ELEMENT";
+
+    // `EB-418`. THE SECOND KEY HERE THAT TITLES NO KEYWORD, and it names the
+    // one Spark income no screen in the game stated: `KleeCompanionSpark`
+    // ("Little Hexenzirkul"), the kit rule LAW:145 obliges Klee's own KIT to
+    // declare because a Companion card may not print a signature resource on
+    // its own face. It sits beside `PlanElementKey` for that key's reason --
+    // it is a sentence about the CARD in hand, printed where that card is met.
+    public const string CovenSparkKey = "KLEEMOD-ARM_COVEN_SPARK";
 
     // ----------------------------------------------------------- Klee ------
     //
@@ -160,15 +169,70 @@ public static class ArmKeywordTips
           + "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. "
           + "Kills move it on.");
 
-    /// <summary>Rule 2, and the one [USER] named ("Set Off has no tooltip
-    /// text"). The ORDER clause is the load-bearing half: the explosions land
-    /// BEFORE the rest of the card, which is what makes a cooked pile worth
-    /// more than the Attack printed beside it.</summary>
+    /// <summary>
+    /// Rule 2, and the one [USER] named ("Set Off has no tooltip text"). The
+    /// ORDER clause is the load-bearing half: the explosions land BEFORE the
+    /// rest of the card, which is what makes a cooked pile worth more than the
+    /// Attack printed beside it.
+    ///
+    /// `EB-432` NAMED THE OTHER ORDER, the one INSIDE the pile.
+    /// <see cref="KleeMod.Powers.ProtoBombPower.SetOff"/> walks the taken
+    /// charges in the order
+    /// <see cref="KleeMod.Powers.ProtoBombPower.AddCharge"/> appended them --
+    /// the list's own comment is "Charges in placement order" -- and the FIRST
+    /// one through the funnel is the one that meets the enemy's aura, because
+    /// every reaction consumes it (<c>ReactionEffects</c>, `consumedAura`).
+    /// The r11 run-2 seat priced its best turn of the run off that rule and
+    /// could only get it by arithmetic: "22 = 8 (the Bomb 5, Melted to 8.75 to
+    /// 8) + 8 + 6. Bombs go off in placement order, and the first one is the
+    /// one that eats the Melt -- a rule nothing printed, that I could only
+    /// infer from the arithmetic."
+    ///
+    /// "OLDEST FIRST" REPLACES "ONE AT A TIME" AND LOSES NOTHING. An order
+    /// that names a first and a rest is one at a time by construction, and the
+    /// separateness the old phrase carried -- three charges, three hits, three
+    /// Sparks -- is what "each a Pyro hit" says. `EB-287`'s claim that a pile
+    /// goes off TOGETHER is still here and is now the subject of the sentence:
+    /// "the target's Bombs", all of them.
+    ///
+    /// "THE FIRST TAKES THE AURA" AND NOT "ONLY THE FIRST REACTS", which would
+    /// be false on a board this build really has: a Swirl re-applies the aura
+    /// it consumed to every living enemy, the target included
+    /// (<c>ReactionEffects</c>, the `Swirl` arm), so a charge behind a Swirl
+    /// meets a fresh aura and reacts again. What is true on every board is the
+    /// sentence the player is deciding on: the aura in front of them is spent
+    /// on the OLDEST charge.
+    ///
+    /// `EB-443` ADDED THE TWO FACTS THE OLD NEGATIVE LEFT TO INFERENCE. "Not
+    /// an Attack" is on the Bomb tip and it answers a question a player did
+    /// not ask: the r12 run-2 seat ran the experiment and drew the wrong
+    /// conclusion from it -- "Set off ignores enemy Block, and no card says
+    /// so. Two 11-point bombs both landed at full value into Skittish 6...
+    /// 'not an Attack' plainly did not stop it from HITTING (Skittish did not
+    /// fire), and a rule this load-bearing against a whole class of enemy
+    /// should not be an inference from a negative." Both halves are read off
+    /// the one call the explosion makes:
+    /// <see cref="ElementalHit.DealWithoutDealerMods"/> passes
+    /// <c>ignoreBlock: false</c>, so Block absorbs it like anything else, and
+    /// it reaches <c>CreatureCmd.Damage</c> as <c>ValueProp.Unpowered</c> with
+    /// <c>dealer: null</c>, so nothing an enemy keys on being hit by an Attack
+    /// can fire. The seat was right about the Block it saw and wrong about the
+    /// rule: there was no Block, because Skittish never fired.
+    ///
+    /// "FOR ITS SIZE" IS WHAT PAID FOR THEM, and it is the trade the Mine tip
+    /// already makes for the same reason. A keyword tip is read in HAND, where
+    /// there is no pile to quote, so an arithmetic claim here is one this
+    /// surface cannot get right; the number a Set off will deal is on the
+    /// badge, live, and that is `EB-343`'s own split between the two. "Each a
+    /// Pyro hit" keeps what the tip can say -- separate hits, so separate
+    /// reactions and separate Sparks. 132 of 135 rendered, no exception taken.
+    /// </summary>
     public static IEnumerable<IHoverTip> ForSetOff(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SetOffKey,
-            "Every [gold]Bomb[/gold] on the target goes off first, one at a "
-          + "time, each a Pyro hit for its size.");
+            "The target's [gold]Bombs[/gold] go off first, oldest first, each "
+          + "a Pyro hit. [gold]Block[/gold] stops them, no Attack trigger "
+          + "fires, the first takes the aura.");
 
     /// <summary>Rule 4. The gain rate is read from
     /// <see cref="KleeOverhaulLaw.SparkPerExplosion"/>, which is also
@@ -246,11 +310,27 @@ public static class ArmKeywordTips
     /// same words as the Bomb tip, so the two cannot be read against each
     /// other.
     /// </summary>
+    /// `EB-436` SAID WHAT THE OLD SENTENCE LEFT OUT, and the old sentence was
+    /// true the whole time: "goes off when its enemy attacks you, before the
+    /// hit lands" says WHEN and says nothing at all about the hit. The r12
+    /// act-1 seat read mitigation into it and played a turn on that read --
+    /// three Mines left armed against an elite, five went off, "every hit
+    /// landed in full, 36 to 18 HP". A Mine blunts nothing: the only thing a
+    /// Mine can do to the attack is stop it happening, by killing the
+    /// attacker, and that is `EB-336`'s rule (`Preempted`) -- a Mine whose
+    /// explosion kills the attacker costs Klee no HP, and nothing short of a
+    /// kill costs the attacker anything.
+    ///
+    /// "READ THE BADGE:" IS WHAT PAID FOR IT. The clause it introduced is
+    /// still here word for word and still names both terms, so `EB-343`'s
+    /// rule survives whole; what went is the pointer, which a player standing
+    /// in front of the badge does not need and a player in hand cannot use.
+    /// 133 of 135 rendered, no exception taken.
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
-            "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
-          + "you, before the hit lands. Read the badge: only their "
+            "A [gold]Bomb[/gold] that also goes off before its enemy's hit, "
+          + "which lands in full unless the Mine kills. Only their "
           + "[gold]Vulnerable[/gold] and a cap move it.");
 
     /// <summary>
@@ -271,12 +351,68 @@ public static class ArmKeywordTips
     /// Witches' Circle and one Universal would have no way to know the card
     /// was live.
     /// </summary>
+    /// `EB-392` REWROTE IT, because "from the witches' circle" was doing
+    /// silent work and the r12 run-2 seat said so: "I could not tell from any
+    /// card face whether MY Companion qualified. I found out by counting bombs
+    /// on an enemy badge." Then it met a second word on the same screen and
+    /// had three: "there is apparently a distinction between `Companion`,
+    /// `Hexerei`, and `Klee's own Companion`, and none of the three cards
+    /// involved prints which one it is."
+    ///
+    /// THE FIRST SENTENCE IS ANSWERABLE NOW, and it was not before: every
+    /// Hexerei Companion prints the word on its own face
+    /// (`gen_klee_cards._hexerei_tag`), so "a Companion card that prints the
+    /// word" is a test a player can run on the card in their hand. "And Klee
+    /// herself" is the brief's sec.7.4 refinement, unchanged.
+    ///
+    /// THE SECOND SENTENCE IS THE THIRD WORD, and it is stated as the OVERLAP
+    /// it really is rather than as an exclusion. Five rows carry both marks
+    /// and thirteen carry only one, so "a different set" would be a lie in
+    /// both directions; "some are Klee's own, some are not" is what the sheet
+    /// says. `Klee's own` is the exact phrase the Spark rider uses
+    /// (<see cref="ForCovenSpark"/>), so the two words meet under one
+    /// spelling.
+    ///
+    /// "IT DOES NOTHING BY ITSELF" LEFT and is not missed: it was true of a
+    /// word with no readers, and three cards in Klee's pool have paid for it
+    /// since R244. The last sentence says that instead.
     public static IEnumerable<IHoverTip> ForHexerei(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, HexereiKey,
-            "A [gold]Companion[/gold] card from the witches' circle. It does "
-          + "nothing by itself; Klee is one too, and her own cards pay when "
-          + "you play one.");
+            "A [gold]Companion[/gold] card that prints the word, and Klee "
+          + "herself. Some are Klee's own, some are not. Cards of hers pay "
+          + "when you play one.");
+
+    /// <summary>
+    /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.
+    ///
+    /// THE GAP. <i>Fischl -- Nightrider</i> prints "If Oz is out, he deals 5
+    /// Electro damage to a random enemy" and nothing on the screen says what
+    /// puts Oz out. The r7 seat played the card five times and never learned
+    /// it: the word reads as an undefined keyword, and the thing it actually
+    /// names is a DIFFERENT companion card -- the Power <i>Fischl -- Oz, at
+    /// Your Side</i> -- which that run never held and may never be offered.
+    ///
+    /// SO THE TIP NAMES THE POWER, which is the one fact the reader is missing
+    /// and cannot derive. `Grounded`'s shape exactly (`EB-372`): a word one
+    /// card is written against, defined on the face that prints it rather than
+    /// on the card that grants it, because the attach travels with the WORD
+    /// (`gen_klee_cards.arm_keyword_tip_calls`) and not with the deck.
+    ///
+    /// WHAT IT LEAVES TO THE CARDS. How much Oz deals and for how long are the
+    /// two faces' own printed numbers, and both move on an upgrade, so the tip
+    /// says what Oz IS and which card puts him out and stops there, the way
+    /// `ForGrounded` defers its payout to the Power card's own line.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForOz(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, OzKey,
+            // A card TITLE is a plain word, never golded
+            // (`docs/current/text-conventions.md`, and the lint bites), and
+            // the title is quoted WITHOUT its `Fischl --` prefix because the
+            // conventions ban a dash of any kind in player text.
+            "Fischl's raven, out while you hold the Power Oz, at Your Side. "
+          + "He hits at the end of your turn while he is out.");
 
     /// <summary>
     /// KLEE'S SIXTH, `EB-372`, AND IT IS A WORD THE KIT NAMES ON A FACE THE
@@ -315,6 +451,45 @@ public static class ArmKeywordTips
             "A Power that pays at the start of your turn, but "
           + "only if none of your [gold]Bombs[/gold] went off last turn. Its "
           + "card prints what it pays.");
+
+    /// <summary>
+    /// `EB-418`, AND IT IS THE ONE NUMBER IN THE KIT A SEAT COULD NOT READ OFF
+    /// THE SCREEN.
+    ///
+    /// THE GAP. <see cref="KleeMod.Powers.KleeCompanionSpark"/> -- "Little
+    /// Hexenzirkul" -- mints a Spark on every play of one of Klee's OWN
+    /// Personal Companions, and it is printed nowhere: LAW:145 forbids the
+    /// Companion card from carrying the grant on its face ("Companion cards may
+    /// not themselves grant signature resources"), so the rule moved WHOLE into
+    /// her kit at `EB-219` and the sentence did not move with it. The
+    /// companions packet says so in as many words -- "the kit already pays a
+    /// rider neither card prints" -- and the r11 Opus seat met the consequence
+    /// as the only unreadable number in five fights: "My Spark went 1 to 2 with
+    /// no bomb going off... This is the one number in the kit I could not read
+    /// off the screen."
+    ///
+    /// WHERE IT HAPPENS IS THE CARD, so that is where it prints. The Spark
+    /// keyword tip is full -- four sentences and 130 of its 135 characters
+    /// since R242 put the opening bank in it -- and in any case it is met on a
+    /// Spark-priced Attack rather than on the Companion that pays. A rider on
+    /// the Companion's own face is read at the moment the energy is committed,
+    /// which is the moment the seat's read was wrong.
+    ///
+    /// THE THREE LIMBS ARE THE POWER'S OWN, interpolated from the constants the
+    /// grant reads (`EB-89`) so a repricing cannot leave this sentence lying.
+    /// The CAP is deliberately not printed: it is the sum of the three limbs
+    /// (<see cref="KleeMod.Powers.KleeCompanionSpark.MaxPerPlay"/>), so a
+    /// fourth clause would state a bound no reachable play can meet.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForCovenSpark(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, CovenSparkKey,
+            "Playing one of Klee's own [gold]Companions[/gold] makes [blue]"
+          + KleeCompanionSpark.Base + "[/blue] [gold]Spark[/gold], [blue]"
+          + KleeCompanionSpark.ReactionBonus + "[/blue] more if it triggered "
+          + "an [gold]Elemental Reaction[/gold] and [blue]"
+          + KleeCompanionSpark.UpgradedBonus
+          + "[/blue] more if it is upgraded.");
 
     // ---------------------------------------------------------- Kokomi -----
     //

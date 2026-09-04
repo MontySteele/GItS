@@ -52,14 +52,14 @@ public sealed class ProtoMcRazorClawAndThunder : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false);
+        ArmKeywordTips.ForHexerei(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_razor_claw_and_thunder");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Razor — Claw and Thunder"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. If this is the third Attack you played this turn, gain 1 [gold]Energy[/gold]."),
+        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage. If this is the third Attack you played this turn, gain 1 [gold]Energy[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

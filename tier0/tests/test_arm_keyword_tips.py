@@ -185,6 +185,99 @@ def test_the_attach_is_scoped_to_the_quarantined_surface():
         assert proto._profile_for(character).arm_keyword_tips is True
 
 
+def test_every_klee_personal_companion_carries_the_kits_spark_rider():
+    """`EB-418`, the committed tree. Every row on the quarantined sheet that is
+    a Personal Companion of KLEE'S carries `ForCovenSpark`, and no other row
+    does.
+
+    THE DENOMINATOR IS THE POINT. The trigger is keyed on the POOL and not on
+    one card (`effects.klee_personal_companion_spark`, `KleeCompanionSpark`),
+    which is how it reached Diona and the coven stand-ins with nobody deciding
+    it should -- so the sentence has to reach the same set by the same read, or
+    the next Personal added to the sheet is the r11 seat's finding again.
+
+    GOROU IS THE NEGATIVE CASE, and he is a real one: he is a Personal
+    Companion of KOKOMI'S on this same sheet, he walks the engines' identical
+    branch, and Sparks are Klee's resource with no surface of Kokomi's to read
+    them off. The sentence is scoped to the kit that declared it.
+    """
+    owed, carried = set(), set()
+    for row in proto._rows():
+        if not gen.is_companion(row):
+            continue
+        cls = gen.pascal(row["id"])
+        if (row.get("character") == "klee"
+                and gen.personal_pool_id(row) == "klee"):
+            owed.add(cls)
+        path = PROTOTYPE_DIR / f"{cls}.cs"
+        if path.exists() and "ForCovenSpark" in path.read_text(encoding="utf-8"):
+            carried.add(cls)
+
+    assert owed, "no Klee Personal Companion on the sheet is not a read"
+    assert owed == carried
+    assert "ProtoMiGorouCrystalCollapse" in {
+        gen.pascal(r["id"]) for r in proto._rows()
+        if gen.is_companion(r) and r.get("character") == "kokomi"}
+    assert "ProtoMiGorouCrystalCollapse" not in carried
+
+
+def test_every_hexerei_companion_prints_the_family_tag():
+    """`EB-392`, the committed tree. Every Companion row the sheet marks
+    `hexerei` prints the word on its own face, and no row that is not marked
+    does.
+
+    THE DEFECT. `hexerei: true` emitted `IHexereiCard` and nothing a player
+    could see, so the family was readable only from the three cards that ASK
+    about it -- and those ask about a set whose members never said they were
+    in it. The r12 run-2 seat held Witches' Circle for four fights: "I owned no
+    Hexerei card and the reminder text does not say which of my cards are
+    Hexerei", and found the answer "only by counting bombs on the enemy badge,
+    because Fischl's own face never prints the word Hexerei".
+
+    THE DENOMINATOR IS THE POINT, exactly as it is for the Spark rider above:
+    the tag is DERIVED from the sheet key (`gen._hexerei_tag`), so a row that
+    joins the family carries the mark because it joined. The negative case is
+    every unmarked Companion on the same sheet.
+
+    THE READERS ARE NOT MEMBERS. Coven Errand and Witches' Circle are Klee's
+    own cards and carry no `hexerei` key; Alice's Introduction Magic carries
+    it and already prints the word in its body, which is why the tag is
+    skipped where the face has said it.
+    """
+    marked, printed = set(), set()
+    for row in proto._rows():
+        if not gen.is_companion(row):
+            continue
+        cls = gen.pascal(row["id"])
+        if row.get("hexerei"):
+            marked.add(cls)
+        path = PROTOTYPE_DIR / f"{cls}.cs"
+        if not path.exists():
+            continue
+        if any("[gold]Hexerei[/gold]" in face
+               for face in _descriptions(path.read_text(encoding="utf-8"))):
+            printed.add(cls)
+
+    assert marked, "no Hexerei Companion on the sheet is not a read"
+    assert marked == printed
+    # ... and the definition rides the printed word, which is `EB-272`'s
+    # attach rule doing the work rather than a second list to maintain.
+    for cls in sorted(marked):
+        assert "ForHexerei" in (PROTOTYPE_DIR / f"{cls}.cs").read_text(
+            encoding="utf-8"), cls
+
+
+def test_the_hexerei_readers_are_not_tagged_as_members():
+    """Klee's own three read the word; none of them is a Companion, so none of
+    them takes the tag. Named rather than derived, because the point is that
+    the tag's guard is `is_companion` and these are the rows it excludes."""
+    for cls in ("ProtoKoCovenErrand", "ProtoKoWitchesCircle"):
+        face, = _descriptions(
+            (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8"))[:1]
+        assert "[gold]Hexerei[/gold]" in face
+        assert not face.startswith("[gold]Hexerei[/gold]. "), cls
+
+
 def test_no_shipped_generated_card_reaches_the_arm_tips():
     offenders = [p.relative_to(REPO).as_posix()
                  for directory in SHIPPED_DIRS
@@ -312,9 +405,11 @@ def test_every_table_row_has_a_method_and_a_registered_title_row(keyword):
 
 # `EB-378` put ONE key in this file that titles no keyword: the Plan-element
 # rider, which is a sentence about a card rather than a definition of a word.
-# It is named here so the count below stays a real pin instead of a number
-# somebody bumps.
-NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT"}
+# `EB-418` put the second, the Spark Klee's KIT mints on a play of one of her
+# own Personal Companions -- a rule LAW:145 keeps off the Companion's face, so
+# no word on any card can carry it. They are named here so the count below
+# stays a real pin instead of a number somebody bumps.
+NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -360,17 +455,29 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             " a turn, goes off only when [gold]Set off[/gold]. ",
             "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. ",
             "Kills move it on.",
-            "on the target goes off first, one at a ",
-            "time, each a Pyro hit for its size.",
+            # `EB-432` named the order INSIDE the pile: `SetOff` walks the
+            # charges in placement order and the first one meets the aura,
+            # because a reaction consumes it. "Oldest first" carries "one at a
+            # time" -- an order that names a first and a rest is one at a time
+            # -- and `EB-287`'s "together" claim is now the subject.
+            # `EB-443` added Block and the Attack trigger, and "for its
+            # size" paid for them: a tip is read in hand where there is no
+            # pile to quote, so the live number stays on the badge.
+            "The target's [gold]Bombs[/gold] go off first, oldest first, each ",
+            "a Pyro hit. [gold]Block[/gold] stops them, no Attack trigger ",
+            "fires, the first takes the aura.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
             "Start each combat with ",
             ". Pounding Surprise grants more. ",
             "Gone after combat.",
-            "that also goes off when its enemy attacks ",
-            "you, before the hit lands.",
+            # `EB-436`: the clause said WHEN and nothing about the attack,
+            # and a seat read mitigation into it. A Mine blunts nothing; the
+            # only thing it can do to the hit is stop it happening.
+            "that also goes off before its enemy's hit, ",
+            "which lands in full unless the Mine kills.",
             # `EB-373`: a Mine IS a Bomb, so the same two terms move it and
             # the two tips say so in the same words.
-            "Read the badge: only their ",
+            "Only their ",
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.
@@ -484,6 +591,18 @@ EXERT_TIP = {
 }
 
 
+#: `EB-418`. The rider the kit's Spark rule rides, in the shape the bridge
+#: sends it: `KleeMod.cs` titles the key and `ArmKeywordTips.ForCovenSpark`
+#: builds the body, so a seat reading a Companion in hand reads the income
+#: before it commits the energy.
+COVEN_SPARK_TIP = {
+    "name": "Sparks from your Companion",
+    "description": ("Playing one of Klee's own Companions makes 1 Spark, 1 "
+                    "more if it triggered an Elemental Reaction and 1 more if "
+                    "it is upgraded."),
+}
+
+
 def _hand_with(tips: list[dict]) -> dict:
     """The recorded combat wire, with one hand card carrying arm keywords.
 
@@ -519,6 +638,14 @@ def test_the_blind_page_prints_the_exert_definition_under_the_card():
     from losing HP because the page carried no line for it."""
     page = blindplay.observe(_hand_with([EXERT_TIP]))
     assert "*Exert* — " + EXERT_TIP["description"] in page
+
+
+def test_the_blind_page_prints_the_kits_companion_spark_under_the_card():
+    """`EB-418`'s page twin. The r11 seat read every screen this page draws and
+    could not name the Spark it watched arrive; the rider now travels with the
+    Companion, and the page carries a card's keyword rows verbatim."""
+    page = blindplay.observe(_hand_with([COVEN_SPARK_TIP]))
+    assert "*Sparks from your Companion* — " + COVEN_SPARK_TIP["description"]         in page
 
 
 def test_a_card_with_no_keyword_row_prints_no_keyword_line():

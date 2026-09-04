@@ -425,4 +425,66 @@ public static class FurinaReframeRoster
                                             or ProtoFrUniversalRevelry
                                             or ProtoFrFloodOfEmotion));
     }
+
+    /// <summary>
+    /// THE ARM'S ONE STARTER SEAM (R254, round 4 pick 1, 2026-09-04). Slot 8
+    /// of <c>Furina.StartingDeck</c>: with the arm on it is the reframe copy
+    /// of <i>Aria of Recompense</i>, and otherwise the shipped card, byte for
+    /// byte. Sim twin: <c>furina_reframe.STARTER_SUBS</c>, read by
+    /// <c>tier0.content.loader._starter_ids</c> -- the ONE seam both the
+    /// tier-0 battery and the tier-0.5 run go through.
+    ///
+    /// [USER], ruling the round-4 packet's sec.6: "maybe a reader in the
+    /// starter deck? I still want to leave it at just 2 'good' cards, but they
+    /// can be stronger." Her two kit starters stay two, and ONE of them reads
+    /// Fanfare: "Gain 5 Encore. If you have at least 3 Fanfare, gain 5 more."
+    /// Both numbers are LIFTED rather than picked -- the 5 is Aria's own
+    /// printed Encore, the 3 is the Fanfare the seat records show on an Aria
+    /// turn -- and the loop it closes is the arm's own: a stage that performs
+    /// mints Fanfare, Fanfare pays Encore, Encore pays performances.
+    ///
+    /// THE BAR MOVED 6 -> 3 (round 6 sec.4, 2026-09-04, a D default). It was
+    /// built at the rider copies' 6 and three seat runs never once paid the
+    /// second line, because Aria is played BEFORE the stage performs. The four
+    /// OFFERED rider copies above keep their own bars, which are read later in
+    /// the turn.
+    ///
+    /// ONE CARD FOR ONE CARD, which is <see cref="KurageMemory.StarterSlotEleven"/>'s
+    /// shape one character over and what keeps this a substitution rather than
+    /// a starter rework: the deck is still ten.
+    ///
+    /// THE PRINTED SHEET DOES NOT MOVE. <c>docs/furina-cards.yaml</c> still
+    /// says <c>aria_of_recompense</c> and its generated card is untouched;
+    /// only this slot moves, and only under the flag. A starter card's text is
+    /// a RULE, so [USER] plays the first build that carries it.
+    /// </summary>
+    public static CardModel StarterAria() =>
+        FurinaReframe.Enabled
+            ? ModelDb.Card<ProtoFrAriaOfRecompense>()
+            : ModelDb.Card<FurinaGen.AriaOfRecompense>();
+
+    /// <summary>
+    /// THE ARM'S OTHER STARTER SLOT (<c>EB-416</c>). Slot 9 of
+    /// <c>Furina.StartingDeck</c>: with the arm on it is the NAMED <i>Salon
+    /// Début</i>, otherwise the shipped card, byte for byte. Sim twin: the
+    /// second pair in <c>furina_reframe.STARTER_SUBS</c>.
+    ///
+    /// A WIRING DEFECT CLOSED, NOT A NEW DECISION. The reframe packet's sec.5
+    /// ruled that the starter deploy NAMES its member, and slice 2 built the
+    /// row that says so -- <c>proto_fr_salon_debut_named</c>, "Deploy
+    /// Mademoiselle Crabaletta". The row was generated, pooled and pinned, and
+    /// it was wired into NO starter in either engine, so the arm went on
+    /// dealing the shipped card and its RANDOM member. That matters most
+    /// exactly here: under <see cref="FurinaReframe.ManualEnabled"/> the front
+    /// member is the one a Companion play makes perform, so a random deploy
+    /// decides for the player which member their first trigger fires. The
+    /// R254 Aria build found the gap while opening this seam.
+    ///
+    /// ONE CARD FOR ONE CARD, like the slot above it: the deck is still ten
+    /// and <c>docs/furina-cards.yaml</c> does not move.
+    /// </summary>
+    public static CardModel StarterSalonDebut() =>
+        FurinaReframe.Enabled
+            ? ModelDb.Card<ProtoFrSalonDebutNamed>()
+            : ModelDb.Card<FurinaGen.SalonDebut>();
 }

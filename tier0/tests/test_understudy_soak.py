@@ -370,6 +370,13 @@ class _FakeBridge:
     def current_seed(self):
         return "FAKESEED01"
 
+    # EB-435: the driver reads the seed through the WAITING read-back. An
+    # in-memory fake has no window to wait out, so it answers at once -- but
+    # it has to ANSWER, because the driver calls this name and not the one
+    # above.
+    def seed_read_back(self, wait=0.0, poll=0.0):
+        return self.current_seed()
+
     # A fake that does not answer an endpoint the driver reads is not a fake of
     # this bridge. EB-15 made the driver read the seed report BEFORE the POST
     # as well as after, so both halves of the guard live here.

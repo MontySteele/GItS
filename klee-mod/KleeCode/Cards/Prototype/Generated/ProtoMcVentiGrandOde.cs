@@ -49,17 +49,17 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
     public string? Nation => "mondstadt";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { CardKeyword.Exhaust };
+        new[] { CardKeyword.Exhaust, KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_venti_grand_ode");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Venti — Wind's Grand Ode"),
-        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. For {PowerAmount:diff()} turns, at the end of your turn [gold]Swirl[/gold] ALL enemies."),
+        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage to ALL enemies. For {PowerAmount:diff()} turns, at the end of your turn [gold]Swirl[/gold] ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -41,7 +41,7 @@ public sealed class StarOfTheShow : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Star of the Show"),
-        ("description", "[gold]Spotlighted[/gold] Companion damage gains {PowerAmount:diff()}."),
+        ("description", "[gold]Spotlighted[/gold] Companion card damage gains {PowerAmount:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

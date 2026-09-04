@@ -126,8 +126,10 @@ LOCAL_PROPS = Path(__file__).resolve().parents[1] / "klee-mod" / "local.props"
 # `blindplay_record` reads it back off this module at call time.
 
 from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
-    BlindPlayError, BOARD_SETTLE_TRIES, CHARGE_SOURCE_LINE, COMBAT_SCREENS,
-    FIGHT_OVERLAYS,
+    BlindPlayError, BOARD_SETTLE_TRIES, budget_cap, budget_path, budget_spent,
+    BUDGET_REACHED, CHARGE_SOURCE_LINE, COMBAT_SCREENS,
+    count_action, FIGHT_OVERLAYS, forget_budget, LANE_ENV, lane_tag,
+    MAX_ACTIONS_ENV, read_budget, set_budget,
     HAZARD_EVENT_TITLES, HAZARD_EVENTS, _is_rate_limited,
     AURA_DURATION_TURNS, BOMB_GROWTH, FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
     WEAK_DEALT_PCT,
@@ -150,8 +152,9 @@ from understudy.blindplay_faces import (   # noqa: E402,F401  (re-export)
     _reward_option, _SHELF_MEMORY, _shelf_kind, _shop_fingerprint,
     _shop_items, _shop_options, _SPARK_POWER)
 from understudy.blindplay_board import (   # noqa: E402,F401  (re-export)
-    ALREADY_UPGRADED, _bundle_cards, _carried_out_row, _combat,
-    _event_options, kokomi_plans, kurage_memory, _map_ahead, _map_boss,
+    ALREADY_UPGRADED, _bundle_cards, _carried_out_row, _combat, deck_titles,
+    _event_option, _event_options, kokomi_plans, kurage_memory, _map_ahead,
+    _map_boss, _option_faces,
     _map_nodes, _map_options, NO_UPGRADE_DEFINED, _omitted_from_upgrade,
     _potion_slots, _preview_cards, _proceed_option, _pulse_phrase,
     _relic_options, _rest_options, _reward_items, _screen_cards,
@@ -161,7 +164,8 @@ from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
     BOSS_ROOM, _elements_on_screen,
     _every_string, FROZEN_BOSS_CLAUSE, _GAME_KEYWORD_RE, GAME_KEYWORDS,
     HAND_REPEAT_NOTE, keyword_notes, METER_CAPPED_NOTE,
-    METER_NOTE, METER_RULES, PLAN_HYDRO_NOTE, POWER_NOTE, PREVIEW_LOCKED,
+    METER_NOTE, METER_RULES, PLAN_AIM_NOTE, PLAN_HYDRO_NOTE, POWER_NOTE,
+    PREVIEW_LOCKED,
     REACTION_KEYWORDS,
     SELECTION_NOTE, TRANSFORM_NOTE, TRANSFORM_UNREADABLE, _wire_keyword_rows)
 from understudy.blindplay_observe import (   # noqa: E402,F401  (re-export)
@@ -176,6 +180,7 @@ from understudy.blindplay_grammar import (   # noqa: E402,F401  (re-export)
     act, AIMED_TARGETS, _buy, _card_face_key, _choose, Command, _confirm,
     _full_slots, _go, _index_choice, _is_upgraded, _match, _match_bundle,
     _not_in_battle, _numbered_titles, ORDINAL_ADVICE, parse_command,
+    _potion_aims_at_an_enemy,
     _pet_target, _play, _proceed, _QUALIFIER, _QUOTED, _refuse, Resolution,
     _resolve_enemy, _rest_keyword, SELF_TARGETS, _skip, _split_qualifier,
     _STALE_NUMBER, _use_potion, VERBS)
@@ -222,7 +227,23 @@ def cmd_observe(args) -> int:
     return 0
 
 
+def budget_refusal(count: int, cap: int) -> str:
+    """The one line a seat past its action budget is given (`EB-456`)."""
+    return (f"{BUDGET_REACHED}: this lane's {cap} actions are spent "
+            f"({count} taken). The round stops here; nothing was posted.")
+
+
 def cmd_act(args) -> int:
+    # `EB-456`. THE CAP IS THE BRIDGE'S, NOT THE SEAT'S ARITHMETIC. Two of
+    # three round-13 seats were told to stop at 120 and stopped at 155-165.
+    # Charged only on an act that is actually POSTED: a refusal, a `--dry-run`
+    # and a `--raw-file` resolution all cost the run nothing, so none of them
+    # costs the budget anything either.
+    live = not (args.raw_file or args.dry_run)
+    count, cap = budget_spent()
+    if live and cap and count >= cap:
+        print(budget_refusal(count, cap), file=sys.stderr)
+        return 2
     # `EB-370`: `act` reads through `observation()` before it resolves
     # anything (`blindplay_grammar.act`), so a `PacketLeak` on the read path
     # it shares with `observe` used to reach here uncaught -- a seat that
@@ -238,7 +259,7 @@ def cmd_act(args) -> int:
     print(json.dumps(res, indent=1, default=str))
     if not res["ok"]:
         return 1
-    if args.raw_file or args.dry_run:
+    if not live:
         return 0
     post = dict(res["post"] or {})
     action = post.pop("action")
@@ -248,6 +269,11 @@ def cmd_act(args) -> int:
     for line in (taken_line(res), _result_line(result)):
         if line:
             print(line)
+    # `EB-456`: charged AFTER the post, so an act the wire never saw is not
+    # billed for. The line is printed only on a lane that has a cap, so a
+    # round run without one reads exactly as it always did.
+    if cap:
+        print(f"actions: {count_action()} of {cap}")
     return 0
 
 

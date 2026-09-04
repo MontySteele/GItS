@@ -129,14 +129,71 @@ SPOTLIGHT_DESIGNATE_ENCORE_COST = 2
 #
 # THE MAP MIRRORS THE SHEET'S OWN `replaces:` KEY, and
 # `tier0/tests/test_furina_reframe_pool.py` compares the two in both
-# directions, so a fifth copy on the surface that nobody named here is a red
-# test rather than a row that is never offered.
+# directions -- against this map UNIONED WITH `STARTER_SUBS` below, since a
+# `replaces:` row is one seam's or the other's -- so a copy on the surface that
+# nobody named in either is a red test rather than a row nothing ever deals.
 # ----------------------------------------------------------------------
 POOL_SUBS: dict[str, str] = {
     "florid_cadenza": "proto_fr_florid_cadenza",        # 12 -> 6,  uncommon
     "dramatic_entrance": "proto_fr_dramatic_entrance",  # 12 -> 6,  uncommon
     "universal_revelry": "proto_fr_universal_revelry",  # 15 -> 8,  rare
     "flood_of_emotion": "proto_fr_flood_of_emotion",    # 20 -> 10, rare
+}
+
+
+# ----------------------------------------------------------------------
+# THE STARTER SEAM (R254, round 4 pick 1, 2026-09-04). `{shipped id: prototype
+# id}`, read by `loader._starter_ids` under `FURINA_REFRAME` and nowhere else
+# -- the Kurage's slot-eleven shape, ONE CARD FOR ONE CARD, so the printed ten
+# stays ten and this is a substitution rather than a starter rework.
+#
+# WHY, and it is [USER]'s ruling rather than a number picked here (R254,
+# `review/ruled/furina-reframe-round-4-2026-09-04.md` sec.6): "maybe a reader
+# in the starter deck? I still want to leave it at just 2 'good' cards, but
+# they can be stronger." So the starter keeps its two kit cards -- Salon Début
+# and Aria of Recompense -- and ONE of them reads Fanfare. The reader goes on
+# Aria, the card the seats had already weighed on three axes. Both numbers are
+# LIFTED and neither is new: the 5 is Aria's own printed Encore, the 3 is the
+# Fanfare the seat records show on an Aria turn. The loop it closes is the
+# arm's own (a stage that performs mints Fanfare, Fanfare pays Encore, Encore
+# pays performances) and the shipped Encore decay is its brake.
+#
+# THE BAR MOVED 6 -> 3 (round 6 sec.4, 2026-09-04, a D default). It was built
+# at the rider copies' bar in `POOL_SUBS` above and three seat runs never once
+# paid the second line: Aria is played BEFORE the stage performs, so the meter
+# it reads is the one an Aria turn actually has. The OFFERED rider copies keep
+# their own bars, which are read later in the turn.
+#
+# THE SHIPPED SHEET STANDS, for `POOL_SUBS`'s reason verbatim: Balance-stage
+# content does not move for a prototype arm (R213 B), so the arm carries a copy
+# and swaps it in at the one seam. WITH THE FLAG OFF this map is unread and the
+# printed Aria is dealt -- the acceptance condition, pinned by
+# `tier0/tests/test_furina_reframe_starter.py` rather than intended.
+#
+# A STARTER MAP AND NOT A POOL ONE, kept apart because they are read at
+# different doors and one of them cannot express this pair: a `basic` row is
+# unofferable by construction, so naming Aria in `POOL_SUBS` would declare a
+# swap `rewards.character_pool` can never make. `loader.declared_starter_
+# substitutions` is the flag-blind union the sheet's `replaces:` key is checked
+# against here, exactly as `declared_pool_substitutions` is for the other.
+#
+# THE ALTERNATIVE READER IS HELD, not withdrawn: Salon Début performing its
+# member again at 6 Fanfare is the packet's own re-ask if Aria's does not read.
+#
+# THE SECOND PAIR IS `EB-416`, and it is a wiring defect rather than a new
+# decision. The reframe packet's sec.5 ruled the starter deploy NAMES its
+# member -- the shipped Salon Début deploys a RANDOM one, which under the
+# manual arm decides for the player which member their first Companion play
+# will make perform -- and slice 2 built the row for it
+# (`proto_fr_salon_debut_named`, "Deploy Mademoiselle Crabaletta"). It had a
+# generated class and pins and was wired into NO starter in either engine, so
+# the arm went on dealing the random Début; the R254 Aria build found it while
+# opening this very seam. The row is unchanged: what is new is that something
+# now hands it out.
+# ----------------------------------------------------------------------
+STARTER_SUBS: dict[str, str] = {
+    "aria_of_recompense": "proto_fr_aria_of_recompense",   # 5 Encore, 10 at 3
+    "salon_debut": "proto_fr_salon_debut_named",           # names Crabaletta
 }
 
 
@@ -310,3 +367,26 @@ def companion_play_trigger(state, card) -> None:
     p.salon.append(p.salon.pop(0))
     state.emit("salon_trigger", card=card.id, member=member,
                company=list(p.salon))
+
+
+def companion_replay_no_trigger(state, card) -> None:
+    """A Companion REPLAY, which performs nobody -- said out loud (`EB-420`).
+
+    THE RULE IS THE ONE ABOVE, unchanged: `combat._finish_play` gates the
+    trigger on `replay_index == 0`, and that is LAW:145's per-Companion-play
+    bound rather than an accident of the call site -- "a replay is one card
+    being resolved twice, and a per-play bound a replay can double is not a
+    bound" (`KleeCompanionSpark`, the same clause one kit over).
+
+    THE FACT LEAVES NO TRACE, which is why it gets an event, the same argument
+    the whiff above is emitted under: two performs off two plays and two
+    performs off one Duet-doubled play are the same board a moment later. The
+    round-5 seat played Duet into Freminet, counted three Companion plays'
+    worth of triggers, got two, and found no line naming the second play at
+    all. C# twin: `SalonMemberPower.NoteCompanionReplay`, at the same gate.
+
+    NOTHING HAPPENS HERE. It emits and returns; no rule reads the event back.
+    """
+    if not manual_active(state.player) or not card.is_companion:
+        return
+    state.emit("salon_replay_no_trigger", card=card.id)

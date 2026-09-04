@@ -1,10 +1,14 @@
 using System;
 using System.Collections;
 using System.Linq;
+using KleeMod.Cards;
+using KleeMod.Cards.Furina.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using KleeMod.Vfx;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -191,5 +195,98 @@ public class FurinaReframeBurstTests
         // sitting upstream. STRUCTURAL: the grant itself needs a live combat.
         Assert.Contains("FurinaReframe.BurstRetiredFor",
                         Il.Calls(Il.Method("FurinaKitGrant", "GrantIfCharged")));
+    }
+
+    // ==================================================================
+    // 4. `EB-449` -- THE TIP THAT WENT ON TEACHING THE RETIRED METER
+    // ==================================================================
+    //
+    // The r7 seat met all three of the paragraph's rules -- what the meter is,
+    // that a Burst card enters the hand the moment it fills, and that "energy
+    // past full is lost at the cast" -- on High Tide at a floor-9 reward, with
+    // no Burst meter on any screen. Every other Furina surface has been guarded
+    // since R251; this keyword tip had not.
+    //
+    // COUNTED, NOT READ. `IHoverTip`'s members are the game's and its body is
+    // resolved at render time, so the assertion is how many tips the attach
+    // point yields -- which is exactly what the guard changes. The paragraph's
+    // own words are checked through `BurstBody`, the private builder, the way
+    // `CanonicalHoverTipTests` reads `SalonRulesBody`.
+    //
+    // OWNED FOR THE ARM, CANONICAL FOR THE SHIPPED HALF, and the split is the
+    // headless boundary rather than a preference: `BurstBody` on an OWNED card
+    // reaches `CardModel.CombatState`, which walks the piles a live combat
+    // builds. The guard returns before that, so the arm half can hold a card
+    // with an owner on it; the shipped half reads a compendium copy, whose
+    // meter is null and whose `CombatState` is therefore never asked.
+
+    /// <summary>An owned copy of a card, which is what an owner-scoped tip
+    /// branch needs: `TipOwner.CreatureOf` answers null on a canonical model
+    /// (`CanonicalHoverTipTests`), and null is not this arm's Furina.</summary>
+    private static T Owned<T>(Seat seat) where T : CardModel, new()
+    {
+        var card = new T();
+        Seat.Set(card, "IsMutable", true);
+        card.Owner = seat.Player;
+        return card;
+    }
+
+    private static int BurstTipCount(CardModel card) =>
+        KleeCardTooltips.ForBurst(
+            System.Array.Empty<IHoverTip>(), card).Count();
+
+    [Fact]
+    public void High_tide_attaches_no_burst_tip_under_the_arm()
+    {
+        using var _ = new Arm();
+        var seat = Seat.Furina().WithCombatState();
+
+        Assert.Equal(0, BurstTipCount(Owned<HighTide>(seat)));
+    }
+
+    [Fact]
+    public void High_tides_shipped_face_is_unchanged()
+    {
+        // The mutation guard, and the half that matters most: yielding nothing
+        // unconditionally would delete a roster-wide keyword and pass the test
+        // above. The PARAGRAPH is read rather than the tip count, because
+        // building a `HoverTip` resolves its title through `LocManager` and a
+        // registered table is outside the headless boundary -- which is why
+        // only the zero-tip half above can be counted at all.
+        using var _ = new Arm(master: false);
+
+        var body = (string)typeof(KleeCardTooltips)
+            .GetMethod("BurstBody", HeadlessGame.All)!
+            .Invoke(null, new object[] { new HighTide() })!;
+
+        Assert.Contains("energy past full is lost", body);
+        Assert.Contains("Burst Energy", body);
+    }
+
+    [Fact]
+    public void A_compendium_copy_is_not_a_furina_under_the_arm()
+    {
+        // Owner-scoped like every other reframe seam. A card with no owner is
+        // not "a Furina under the arm", it is a card nobody is holding, and the
+        // shipped wording is what `SalonMemberTips.BodyFor` gives that reader
+        // too -- so the guard must answer False for it, and for the other seat.
+        using var _ = new Arm();
+
+        Assert.False(FurinaReframe.BurstRetiredFor(null));
+        Assert.False(FurinaReframe.BurstRetiredFor(Seat.Kokomi().Creature));
+        Assert.True(FurinaReframe.BurstRetiredFor(Seat.Furina().Creature));
+    }
+
+    [Fact]
+    public void The_guard_is_the_owner_read_and_not_the_bare_flag()
+    {
+        // STRUCTURAL, and the reason is the co-op board: in co-op the other
+        // seat may be Kokomi, whose Burst meter this flag has no business
+        // touching, and a bare `FurinaReframe.Enabled` here would take her
+        // keyword away with Furina's.
+        var calls = Il.Calls(Il.Method("KleeCardTooltips", "ForBurst"));
+
+        Assert.Contains("TipOwner.CreatureOf", calls);
+        Assert.Contains("FurinaReframe.BurstRetiredFor", calls);
     }
 }

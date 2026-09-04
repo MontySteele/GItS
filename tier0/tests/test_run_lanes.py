@@ -525,7 +525,9 @@ def _embark_stubs(tmp_path, monkeypatch):
     monkeypatch.setattr(soak, "LOG_DIR", tmp_path)
     monkeypatch.setattr(soak, "Session", _SpySession)
     monkeypatch.setattr(soak, "RunDriver", _SpyDriver)
-    monkeypatch.setattr(bridge, "current_seed", lambda: "SEEDSEED")
+    # EB-435: the embark reads its seed through the WAITING read-back now, so
+    # that is the seam a stub has to stand in for.
+    monkeypatch.setattr(bridge, "seed_read_back", lambda: "SEEDSEED")
 
 
 def test_an_embark_on_lane_one_launches_the_second_game(tmp_path, monkeypatch):

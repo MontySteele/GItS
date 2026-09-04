@@ -75,10 +75,13 @@ measured on it is comparable to any other run; that sentence is
 comment.
 
 THE SEED IS READ BACK, NEVER ASSUMED (R95). The embark path passes no seed on
-the read-back arm, the game rolls one, and `bridge.current_seed()` is asked
+the read-back arm, the game rolls one, and `bridge.seed_read_back()` is asked
 after the run exists. That string is what the sealed record carries, and it is
 also the one string the leak audit greps every observation for -- a tester who
-can see the seed is not blind.
+can see the seed is not blind. The read WAITS (`EB-435`): the abandon on the
+way in deleted the profile's `current_run.save` and the new run writes its own
+several seconds later, and a read taken inside that window is answered about
+another user tree's file entirely.
 
 REVERSIBILITY ACROSS TWO PROCESSES. `soak.Session` reverts what it recorded
 using entries it holds in memory, which is right for a soak that owns its whole
@@ -102,6 +105,10 @@ from typing import Any
 import yaml
 
 from understudy import authorship, bridge, instances, report, soak
+# `EB-456`: the LANE'S action budget, and this is the one direction the blind
+# wall runs in. `blindplay` may never import this file; this file may read the
+# blind module's bottom seam, which imports nothing from this package at all.
+from understudy import blindplay_shape
 
 LOG_DIR = Path(__file__).resolve().parent / "logs"
 
@@ -318,6 +325,8 @@ def embark(character: str, *, hold: bool = False,
            chosen_seed: str | None = None,
            arms: list[str] | None = None,
            instance: Any = None,
+           lane: object = None,
+           max_actions: int = 0,
            install_bridge: bool = True) -> dict[str, Any]:
     """Launch (or attach), embark, read the seed back, and LEAVE IT RUNNING.
 
@@ -332,6 +341,13 @@ def embark(character: str, *, hold: bool = False,
     the session's own rule -- an install with a game up on it is left alone,
     one with nothing holding it is refreshed, and neither is ever removed
     (`EB-310`) -- can see the machine rather than guess at it.
+
+    `max_actions` is `EB-456`: the coordinator's cap on how many acts this
+    lane's seat may post. It is written to the lane's own budget -- and the
+    count zeroed, because an embark is a new run -- BEFORE the launch, so a
+    launch that fails half way still leaves the cap the operator asked for
+    rather than the previous round's spent count. `0` clears the budget, which
+    is every round before this row.
     """
     who = option_id(character)
     wanted = list(arms or [])
@@ -339,6 +355,7 @@ def embark(character: str, *, hold: bool = False,
     # the machine and the request, not about the run, and finding it out after
     # the game is up costs a launch and a teardown for nothing.
     build, build_source = check_arms(wanted) if wanted else ("", "")
+    budget = blindplay_shape.set_budget(max_actions, lane)
 
     stamp = time.strftime("%Y%m%d-%H%M%S")
     soak.LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -350,6 +367,11 @@ def embark(character: str, *, hold: bool = False,
         "character_requested": who,
         "hold": hold,
         "arms_requested": wanted,
+        # `EB-456`. The cap, in the run's own manifest: a round is only
+        # comparable to another inside it, and a caveat that lives in the
+        # coordinator's shell history is a caveat the reader does not have.
+        "max_actions": budget["cap"],
+        "max_actions_store": str(blindplay_shape.budget_path(lane)),
         # WHICH GAME THIS RUN IS ON. A sidecar with no lane on it is a run
         # nobody can attribute once two of them can be open at once; the
         # label, the port and the user tree are all three facts a reader needs
@@ -376,7 +398,15 @@ def embark(character: str, *, hold: bool = False,
         state = driver._verify_character(state)
     except soak.Defect as d:
         raise EmbarkError(f"{d.kind}: {d.detail}") from None
-    seed = bridge.current_seed() or ""
+    # EB-435: WAITED FOR. The abandon on the way in deleted the profile's
+    # `current_run.save` and the new run writes its own several seconds later;
+    # read inside that window, the mod's resolution leaves this lane's tree and
+    # answers about another one. A crossing that survives the wait is a real
+    # one and becomes an embark error rather than a bare traceback.
+    try:
+        seed = bridge.seed_read_back() or ""
+    except bridge.LaneCrossed as crossed:
+        raise EmbarkError(f"seed_read_back_crossed: {crossed}") from None
 
     sidecar.update({
         "character_actual": driver.character_actual,
@@ -549,6 +579,14 @@ def main(argv: list[str] | None = None) -> int:
                          "deploy_bridge.ps1 -Remove")
     ap.add_argument("--stamp", default="",
                     help="which embark to tear down; the newest by default")
+    ap.add_argument("--max-actions", type=int, default=0, metavar="N",
+                    help="EB-456: cap how many actions this lane's seat may "
+                         "post. `blindplay act` counts every accepted act "
+                         "against it and refuses past it with `budget "
+                         "reached`, so the count is the bridge's rather than "
+                         "the seat's own arithmetic -- two of three round-13 "
+                         "seats overran a counted 120 by a third. 0 (the "
+                         "default) is no budget, exactly as before")
     ap.add_argument("--lane", default=0, metavar="N",
                     help="which game instance to open the run in. 0 (the "
                          "default) is the machine's own %%APPDATA%% and port "
@@ -575,7 +613,8 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         instance, install_bridge = soak.lane_setup(args.lane)
         blob = embark(args.character, hold=args.hold, chosen_seed=args.seed,
-                      arms=args.arms, instance=instance,
+                      arms=args.arms, instance=instance, lane=args.lane,
+                      max_actions=args.max_actions,
                       install_bridge=install_bridge)
     except (EmbarkError, ValueError) as exc:
         print(f"embark error: {exc}", file=sys.stderr)
@@ -593,6 +632,10 @@ def main(argv: list[str] | None = None) -> int:
               f"{', '.join(g['card_id'] for g in granted)}  into the deck "
               f"on {blob.get('arms_build_version')}")
         print(f"  {bridge.GRANT_GUARDRAIL}")
+    if blob.get("max_actions"):
+        print(f"budget:    {blob['max_actions']} actions on this lane; "
+              f"`blindplay act` refuses past it "
+              f"({blindplay_shape.BUDGET_REACHED})")
     print(f"sidecar:   {sidecar_path(blob['stamp'])}")
     label = sidecar_lane(blob)
     lane_arg = ""

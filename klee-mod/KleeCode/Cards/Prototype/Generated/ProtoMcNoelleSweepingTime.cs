@@ -48,6 +48,9 @@ public sealed class ProtoMcNoelleSweepingTime : CustomCardModel, IElementalCard,
 
     public string? Nation => "mondstadt";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesGeo };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo, includesBombRules: false);
 

@@ -345,6 +345,12 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # nothing, which is the one line separating it from
                   # `remove_bomb_for_block` above.
                   "block_largest_bomb",
+                  # The round-11 pool pass's verb (Stoke the Fuse). It writes
+                  # the pile -- `ProtoBombPower.GrowLargestPerSpark`, off the
+                  # same `LargestPlacedBy` read `block_largest_bomb` above
+                  # takes -- and it is the one arm verb whose number is a
+                  # RATE: the Sparks the cost line just spent multiply it.
+                  "grow_largest_bomb",
                   # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
                   # same terms and the same quarantine as the block above: the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
@@ -551,6 +557,13 @@ ARM_KEYWORDS = (
     # on the screen saying what it is, and the r9 seat read it as noise in
     # both acts. NO PLURAL: the word names one Power.
     ArmKeyword("Grounded", ("Grounded",), "ArmKeywordTips.ForGrounded"),
+    # Klee's SEVENTH, `EB-446`. `Oz` is a name one companion card is written
+    # against and a DIFFERENT one grants: Fischl -- Nightrider prints "If Oz is
+    # out" and cannot put him out, and the r7 seat played it five times without
+    # learning what does. `Grounded`'s shape exactly -- the attach travels with
+    # the word, so the card that names him carries the definition whether or not
+    # the run ever holds the Power. NO PLURAL: there is one raven.
+    ArmKeyword("Oz", ("Oz",), "ArmKeywordTips.ForOz"),
     # Kokomi's TWO (kokomi-overhaul-slice-1-2026-09-01.md draft 6 sec.2:
     # "Keywords with tooltips: Plan, Mend"). Draft 6 cut Tide, Surge, Exert
     # and Garment as keywords, so their four rows left this table with the
@@ -650,6 +663,35 @@ AURA_KEYWORD_BY_ELEMENT = {
     "cryo": "KleeKeywords.AppliesCryo",
 }
 
+# `EB-454`. THE TWO THAT TRIGGER AND LEAVE NOTHING, and the paragraph above is
+# why they were absent and why they are here now.
+#
+# THE FIND (Kokomi r13 (c) 8). `Jean -- Gale Blade` "read as untyped until a
+# Reaction preview named Anemo mid-fight", on a page where every Hydro, Electro,
+# Cryo and Pyro card prints its element beside the title. The old reasoning was
+# sound about the GEM -- Anemo and Geo leave no aura, so there is no aura icon
+# to draw and `ElementBadge.IconPathFor` still answers null for both -- and it
+# proved too much: it took the WORD away with the picture, and the word is what
+# a reader uses to work out which pair can react.
+#
+# SO THE KEYWORD IS THE TAG AND THE GEM IS NOT. These two ride
+# `AutoKeywordPosition.None` exactly as the four do, print no line, hover their
+# own tip, and reach the blind page as `Applies Anemo` / `Applies Geo` --
+# `blindplay_faces._ELEMENT_KEYWORD`, whose map covers all six. They are NOT in
+# `AURA_KEYWORD_BY_ELEMENT` and must not be: that map answers "does this element
+# leave an aura", which is what `plan_applies_element` and the gem's own
+# declaration test ask, and both answers are still no.
+TRIGGER_KEYWORD_BY_ELEMENT = {
+    "anemo": "KleeKeywords.AppliesAnemo",
+    "geo": "KleeKeywords.AppliesGeo",
+}
+
+#: Every element a face can DECLARE, aura-leaving or not. The emission map.
+ELEMENT_KEYWORD_BY_ELEMENT = {
+    **AURA_KEYWORD_BY_ELEMENT,
+    **TRIGGER_KEYWORD_BY_ELEMENT,
+}
+
 
 def aura_elements_for(card: dict, profile: "CharacterProfile",
                       elemental: bool) -> list[str]:
@@ -720,6 +762,31 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
 #: clause that starts hitting must come here deliberately.
 PLAN_DAMAGE_OPS = frozenset({
     "damage", "damage_quarter_max_hp", "damage_per_companion_last_turn"})
+
+
+def element_tag_elements_for(card: dict, profile: "CharacterProfile",
+                             elemental: bool) -> list[str]:
+    """Every element this card's face DECLARES, in face order (`EB-454`).
+
+    <see cref="aura_elements_for"/> plus the card's OWN element when that
+    element only triggers -- Anemo and Geo, which leave no aura and therefore
+    never appear in an `apply_aura` effect or in a carry-out. Its own element
+    LEADS, the order `ElementBadge.ElementOf` reads and the order the page's
+    `_element` takes its first match in, so a Swirl companion that also lays
+    somebody else's aura is tagged with the one its damage carries.
+
+    TWO FUNCTIONS RATHER THAN A WIDER ONE, because two different questions are
+    being asked and only one of them moved: "does this leave an aura" still has
+    exactly four answers (the gem, `plan_applies_element`), and "what does this
+    face say it is" now has six.
+    """
+    elements = aura_elements_for(card, profile, elemental)
+    if not elemental:
+        return elements
+    own = card["element"] if is_companion(card) else profile.native_element
+    if own in TRIGGER_KEYWORD_BY_ELEMENT and own not in elements:
+        elements.insert(0, own)
+    return elements
 
 
 def plan_applies_element(card: dict, profile: "CharacterProfile") -> bool:
@@ -827,6 +894,22 @@ def is_companion(card: dict) -> bool:
     return "star" in card
 
 
+def personal_pool_id(card: dict) -> str | None:
+    """The ONE character id a Personal Companion row names, or None (`EB-418`).
+
+    `personal_pool:` accepts a bare string and a one-member list for the same
+    value -- the sim normalises at load (`Card.from_dict`) and the emitter
+    normalises again where it writes `PersonalPool`. A third reader needs the
+    same step or it compares `"['klee']"` to `"klee"` and silently answers no.
+    A longer list is not normalised here: the emitter REFUSES one, and this
+    read must not be the place a refused row quietly becomes a yes.
+    """
+    personal = card.get("personal_pool")
+    if isinstance(personal, list):
+        personal = personal[0] if len(personal) == 1 else None
+    return personal or None
+
+
 # A cost op is not a thing the card DOES; it is what the card charges. Both
 # have their own IsPlayable gate already (EB-118 §4.5, R213 E1).
 _COST_OPS = ("spend_spark", "spend_charge")
@@ -884,6 +967,35 @@ def card_is_set_off_only(card: dict) -> bool:
                    for later in rest[index + 1:]):
             return False
     return True
+
+
+def card_is_carry_out_only(card: dict) -> bool:
+    """Does this row do NOTHING while the jellyfish holds no Plan? (`EB-455`.)
+
+    True when every top-level effect that is not a cost is a
+    `carry_out_front_plan`. Such a card pays its energy, exhausts itself and
+    resolves to nothing -- `card_is_set_off_only`'s shape one mechanic over,
+    and the same argument: a card that looks playable and cannot do anything
+    is a play the reader has to LOSE to learn about.
+
+    THE FIND (Kokomi r13 (b)). Change of Plans "was dead in hand three fights
+    before it was good once and its face never says it needs a written Plan; a
+    first reader plays it into an empty jellyfish". When it did fire it was
+    excellent -- 2 energy for 21 damage and Weak on three, on the boss's second
+    turn -- so this is legibility and not balance: nothing the card DOES moves.
+
+    DERIVED FROM THE ROW, never a per-card flag, for the reason
+    `card_is_set_off_only` gives: a future row with this shape cannot be given
+    the gate by somebody remembering to. A `carry_out_front_plan` sitting
+    BESIDE another effect is NOT covered -- a card that also draws still does
+    something on an empty jellyfish, and refusing it would be a rules change.
+    Twin: `kokomi_plan.carry_out_only`.
+    """
+    rest = [eff for eff in card.get("effects", [])
+            if eff.get("op") not in _COST_OPS]
+    if not rest:
+        return False
+    return all(eff.get("op") == "carry_out_front_plan" for eff in rest)
 
 
 ELEMENT_CS = {"pyro": "Element.Pyro", "hydro": "Element.Hydro",
@@ -1536,7 +1648,14 @@ SET_OFF_FIELDS = {"op", "target", "times", "damage", "aura"}
 PLANT_BOMB_FIELDS = {"op", "target", "size", "mine", "payload_mine_all",
                      "wide_if"}
 GROW_BOMBS_FIELDS = {"op", "target", "amount"}
+#: Stoke the Fuse. NO `target`: "your largest Bomb" is board-wide, the same
+#: scope `block_largest_bomb` reads, so the row aims at nobody.
+GROW_LARGEST_BOMB_FIELDS = {"op", "per_spark"}
 MERGE_BOMBS_FIELDS = {"op", "target", "growth"}
+#: The one non-literal a `spend_spark` price may be spelled with: X, "spend
+#: all your Sparks". tier0's twin is `effects.SPEND_ALL`, and the two engines
+#: charge the same gate price for it (1) through their own readers.
+SPEND_ALL = "all"
 SET_OFF_TARGETS = {"enemy", "random_enemy", "all_enemies"}
 PLANT_BOMB_TARGETS = {"enemy", "random_enemy", "all_enemies"}
 MOVE_BOMBS_FIELDS = {"op", "target", "bonus"}
@@ -2147,15 +2266,22 @@ APPLY_POWERS = {
     "spotlight_draw": ("SpotlightDrawPower", None,
         "The first [gold]Spotlighted[/gold] card each turn draws {X} card{XS}."),
     "spotlight_mult_bonus": ("SpotlightMultBonusPower", None,
-        "[gold]Spotlighted[/gold] Companions are {X}% stronger this combat."),
+        # `EB-437`: `Companions` is what the seat read as the Salon members,
+        # and the reach is CARDS -- `OutwardMultiplier` refuses anything that
+        # is not an `ICompanionCard`. "Gain {X}%" replaces "are {X}% stronger"
+        # in the same breath and is the truer word as well as the shorter one:
+        # the amount is added to Guest Cast's multiplier
+        # (`GuestCastBaseMultiplier + points / 100`), so it moves 50% to 75%
+        # rather than multiplying what is there by 1.25.
+        "[gold]Spotlighted[/gold] Companion cards gain {X}% this combat."),
     "spotlight_mult_bonus_turn": ("SpotlightMultBonusTurnPower", None,
-        "[gold]Spotlighted[/gold] Companions are {X}% stronger this turn."),
+        "[gold]Spotlighted[/gold] Companion cards gain {X}% this turn."),
     "spotlight_flat_damage": ("SpotlightFlatDamagePower", None,
-        "[gold]Spotlighted[/gold] Companion damage gains {X}."),
+        "[gold]Spotlighted[/gold] Companion card damage gains {X}."),
     "spotlight_flat_damage_turn": ("SpotlightFlatDamageTurnPower", None,
-        "[gold]Spotlighted[/gold] Companion damage gains {X} this turn."),
+        "[gold]Spotlighted[/gold] Companion card damage gains {X} this turn."),
     "ovation_spend_boost": ("OvationSpendBoostPower", None,
-        "[gold]Spotlighted[/gold] Companions are {X}% stronger on turns you "
+        "[gold]Spotlighted[/gold] Companion cards gain {X}% on turns you "
         "spend [gold]Encore[/gold]."),
     "spotlight_encore_first": ("SpotlightEncoreFirstPower", None,
         "The first [gold]Spotlighted[/gold] card each turn grants {X} "
@@ -2981,6 +3107,17 @@ def blocked_reason(
                     return (
                         "bonus_vs_aura requires enemy damage and "
                         "a literal int")
+            if "bonus_vs_debuff" in eff:
+                # `EB-441`. AIMED ONLY, and narrower than the aura rider on
+                # purpose: `debuff_calc_rider` renders this through
+                # `CalculatedDamageVar`, whose multiplier is resolved ONCE
+                # against the hovered or aimed creature. An all-enemies form
+                # would collapse a per-enemy decision into one flat value,
+                # which is the reason `aura_calc_rider` refuses AoE.
+                if eff.get("target") != "enemy" or not isinstance(
+                        eff["bonus_vs_debuff"], int):
+                    return ("bonus_vs_debuff requires aimed enemy damage "
+                            "and a literal int")
             # `times` is checked by _times_reason at the top of this loop
             # (EB-132) -- it is not a damage-only field.
         if op == "place_bomb":
@@ -3077,6 +3214,32 @@ def blocked_reason(
                 return f"{op} field(s) {sorted(unknown)} not understood"
             if not isinstance(eff.get("cap"), int) or eff["cap"] <= 0:
                 return "block_largest_bomb cap must be a positive literal int"
+        if op == "grow_largest_bomb":
+            # The round-11 pool pass (Stoke the Fuse). ONE field, and it is a
+            # RATE: the growth is `per_spark` times the Sparks the cost line
+            # spent, so the row prints the rate and the bank supplies the rest.
+            unknown = set(eff) - GROW_LARGEST_BOMB_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            rate = eff.get("per_spark")
+            if not isinstance(rate, int) or isinstance(rate, bool) or rate <= 0:
+                return ("grow_largest_bomb per_spark must be a positive "
+                        "literal int")
+            # THE ORDERING RULE, AND IT IS LOAD-BEARING IN BOTH ENGINES. The
+            # Sparks this op multiplies by are the ones the card SPENT, read
+            # as the bank at play (`SparkPower.SparksAtPlay`,
+            # `state.sparks_at_play`) -- which is the number spent only when
+            # the price is the X price and only when it is paid FIRST. The
+            # emitted body captures the bank into a local ahead of
+            # `SparkPower.Spend`, so a row without that price ahead of this op
+            # would not compile; blocking it here says so in words instead.
+            head = card["effects"][0] if card["effects"] else {}
+            if (head.get("op") != "spend_spark"
+                    or head.get("amount") != SPEND_ALL):
+                return ("grow_largest_bomb needs a `spend_spark: all` price as "
+                        "the row's FIRST effect -- the growth is per Spark "
+                        "SPENT, and only an all-in price makes the bank at "
+                        "play that number")
         if op == "multiply_set_off":
             # The Big One's number IS the card's (R243, [USER]: "move The Big
             # One to 4x with no flat number"), so the row carries it and the
@@ -3160,13 +3323,24 @@ def blocked_reason(
                 return (f"salon_bow member '{eff['member']}' is not one of "
                         f"{sorted(set(SALON_MEMBER_CS) - {'random'})} -- an "
                         "Evoke names a member or names none (the front)")
-        if op in {"gain_encore", "spend_encore", "raise_fanfare_cap",
-                  "gain_fanfare_floor", "crash_fanfare", "salon_bow",
-                  # A Spark price the generator cannot read as a
-                  # literal is a price the IsPlayable gate cannot show.
-                  "spend_spark",
-                  # R213 E1, same sentence one meter over.
-                  "spend_charge"}:
+        if op == "spend_spark" and eff.get("amount") == SPEND_ALL:
+            # THE X PRICE (the round-11 pool pass, Stoke the Fuse): "spend all
+            # your Sparks". The one non-literal a Spark price may be spelled
+            # with, and it does not weaken the sentence below it -- the gate
+            # can still show a number, because what it charges is ONE (an
+            # empty bank cannot pay, any bank that holds a Spark can). The
+            # emitted `PrintedSparkPrice` is that 1, and tier0 reads the same
+            # number through `effects.spend_spark_price`.
+            unknown = set(eff) - {"op", "amount"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+        elif op in {"gain_encore", "spend_encore", "raise_fanfare_cap",
+                    "gain_fanfare_floor", "crash_fanfare", "salon_bow",
+                    # A Spark price the generator cannot read as a
+                    # literal is a price the IsPlayable gate cannot show.
+                    "spend_spark",
+                    # R213 E1, same sentence one meter over.
+                    "spend_charge"}:
             allowed = {"op", "amount"} | ({"member"} if op == "salon_bow"
                                           else set())
             unknown = set(eff) - allowed
@@ -4560,6 +4734,40 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
         f"FurinaResources.ReadableFanfare(card.Owner.Creature) / {int(m.group(2))}")
 
 
+def debuff_calc_rider(card: dict, eff: dict) -> tuple[int, int] | None:
+    """`EB-441`: a single-target `bonus_vs_debuff` rider, rendered through
+    `CalculatedDamageVar`. Returns (base, bonus) or None.
+
+    THE DEFECT IT CLOSES. Undertow was a `conditional` whose two branch
+    numbers were LITERALS in the face, so nothing folded them: the r12 act-1
+    seat read "`Strike -- Deal 4 damage.` (6 adjusted to 4 -- correct)" and
+    "`Undertow -- Deal 7 damage...`" on one screen, played Undertow into a
+    Weak 1 turn and watched it deal 5. "Strike's face is Weak-adjusted;
+    Undertow's face is not. I chose the turn's plays off a number that was 2
+    too high."
+
+    A RIDER RATHER THAN A FOLD OF OUR OWN, and that is the point: the engine
+    already folds a `CalculatedDamageVar` exactly the way it folds Strike's
+    `DamageVar` -- every term, not the two a hand-written mirror would name --
+    and `Calculate(target)` at resolution is the same call. Face and hit are
+    one number by construction rather than by agreement.
+
+    THE BRANCH BECOMES A BONUS AND THE ARITHMETIC DOES NOT MOVE: 7, or 7+3 on
+    a debuffed enemy, is what "deal 7, or 10 instead" said. ONE hit either
+    way, which matters -- two would be two aura applications and two reaction
+    rolls.
+
+    AIMED ONLY, `aura_calc_rider`'s rule and its reason: the multiplier is
+    resolved once against the hovered creature, so an all-enemies form would
+    print one number for a board that would take several.
+    """
+    if eff.get("op") != "damage" or eff.get("target") != "enemy":
+        return None
+    if "bonus_vs_debuff" not in eff:
+        return None
+    return int(eff["amount"]), int(eff["bonus_vs_debuff"])
+
+
 def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     """Unified view of every damage rider that renders through a
     CalculatedDamageVar: (base, extra, multiplier-lambda source). The four
@@ -4626,6 +4834,14 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     if members is not None:
         base, per_n, _ = members
         return base, per_n, f"static (card, _) => {SALON_MEMBER_COUNT_CS}"
+    debuff = debuff_calc_rider(card, eff)
+    if debuff is not None:
+        base, bonus = debuff
+        # Guard the null for `aura_calc_rider`'s reason: preview calls
+        # `Calculate(null)` whenever nothing is hovered.
+        return base, bonus, (
+            "static (_, target) => "
+            "target != null && KokomiOverhaulKit.HasDebuff(target) ? 1 : 0")
     aura = aura_calc_rider(card, eff)
     if aura is not None:
         base, bonus = aura
@@ -4749,10 +4965,9 @@ def build_vars(card: dict) -> list[str]:
                 if payload_mine_upgrade(card) and eff.get("payload_mine_all"):
                     out.append('new DynamicVar("PayloadMine", '
                                f'{int(eff["payload_mine_all"])}m)')
-        elif op in ("grow_bombs", "merge_bombs") and grow_upgrade(card) \
+        elif op in GROW_FIELD and grow_upgrade(card) \
                 and eff is grow_var_effect(card):
-            literal = eff["amount"] if op == "grow_bombs" else eff["growth"]
-            out.append(f'new DynamicVar("Grow", {int(literal)}m)')
+            out.append(f'new DynamicVar("Grow", {grow_literal(eff)}m)')
         elif op == "block_largest_bomb" and cap_upgrade(card) \
                 and eff is cap_var_effect(card):
             # R252. The Sparks idiom again: a var ONLY when the upgrade has to
@@ -4801,9 +5016,21 @@ def build_vars(card: dict) -> list[str]:
                 f'new DynamicVar("KurageTurns", {int(eff.get("amount", 1))}m)')
         elif op == "energy" and energy_upgrade(card):
             out.append(f'new DynamicVar("Energy", {int(eff["amount"])}m)')
-        elif op == "block_next_turn" and block_next_turn_upgrade(card):
+        elif op == "block_next_turn" and (block_next_turn_upgrade(card)
+                                          or spotlight_folds(card)):
+            # `EB-438`. A SECOND VAR RULE ON THE SAME OP, and the two reasons
+            # are different: an upgradeable amount needs a var so the NEW
+            # number renders, and a SPOTLIGHT-folded amount needs one so the
+            # printed number is the delivered one. The second was the defect:
+            # Charlotte, First-Person Shutter printed `gain 4 Block` on a
+            # clause the play applied `PrintedBlock` to, and delivered 6.
+            # `DeferredBlockVar` is the second number's own var -- see its
+            # summary for why `CalculatedBlockVar` could not be, and why the
+            # fold is a PREVIEW here and stays in the play.
             out.append(
-                f'new DynamicVar("BlockNextTurn", {int(eff["amount"])}m)')
+                f'new SpotlightSystem.DeferredBlockVar({int(eff["amount"])}m)'
+                if spotlight_folds(card)
+                else f'new DynamicVar("BlockNextTurn", {int(eff["amount"])}m)')
         elif op == "exhaust_from" and exhaust_upgrade(card):
             out.append(
                 f'new DynamicVar("Exhausts", {int(eff.get("amount", 1))}m)')
@@ -5956,6 +6183,19 @@ def _stmt_spend_spark(card: dict, eff: dict) -> str:
     # MECHANICAL_OPS. The return value is deliberately dropped: with the gate
     # in front of it a top-level spend cannot be short, and a card that wants
     # to BRANCH on the payment is a different mechanic than a cost line.
+    #
+    # THE X PRICE ("spend all your Sparks") IS TWO STATEMENTS, and the local is
+    # the reason. `SparkPower.Spend` debits the bank where it is called, so the
+    # number of Sparks SPENT has to be captured before the call -- and it is
+    # captured rather than recomputed because the payout beside it
+    # (`grow_largest_bomb`) is priced per Spark spent and would otherwise read
+    # an emptied bank. tier0 answers the same question off `sparks_at_play`,
+    # `SparksAtPlay`'s documented twin, and `blocked_reason` refuses the payout
+    # on any row that does not open with this price.
+    if eff.get("amount") == SPEND_ALL:
+        return ("var sparksSpent = SparkPower.SparksAtPlay(Owner.Creature);\n"
+                "        await SparkPower.Spend(choiceContext, "
+                "Owner.Creature, sparksSpent, this);")
     return ("await SparkPower.Spend(choiceContext, Owner.Creature, "
             f"{int(eff['amount'])}, this);")
 
@@ -6015,6 +6255,25 @@ def energy_upgrade(card: dict) -> int:
 def block_next_turn_upgrade(card: dict) -> int:
     """Ruled deferred-block delta: `block_next_turn: +N` (Sayu's daruma)."""
     return int(upgrade_plan(card)[0].get("block_next_turn", 0))
+
+
+def spotlight_folds(card: dict) -> bool:
+    """`EB-438`: does the Spotlight move this card's printed numbers?
+
+    THE SAME TEST THE EMITTER ALREADY MAKES, hoisted so the FACE can ask it
+    too. `emit` computes `spotlight_capable` and wraps every amount it emits in
+    `SpotlightSystem.PrintedBlock` / `PrintedDamage`; the description builder
+    had no way to ask, so a clause whose play was wrapped could still print a
+    literal. That is exactly what Charlotte's second clause did.
+
+    A COMPANION, OR ONE OF FURINA'S OWN. The wrap is identity on her own cards
+    -- `PrintedBlock`'s bonus path needs Guest Cast, which lights Companions
+    only -- so the var it produces there previews its own base and costs
+    nothing; the test is kept identical to the emitter's rather than narrowed,
+    because two spellings of one question is how the first clause and the
+    second came to disagree.
+    """
+    return is_companion(card) or card.get("character") == "furina"
 
 
 def exhaust_upgrade(card: dict) -> int:
@@ -6101,19 +6360,34 @@ def payload_mine_expr(card: dict, eff: dict) -> str:
 
 def grow_var_effect(card: dict) -> dict | None:
     """The ONE effect a `grow` delta binds to: the first top-level printed
-    grow amount, whichever of the two ops prints it. tier0's applier bumps the
-    first `amount`/`growth` in the same order, so the two engines cannot land
-    the delta on different effects."""
+    grow amount, whichever of the three ops prints it. tier0's applier bumps
+    the first `amount`/`growth`/`per_spark` in the same order, so the two
+    engines cannot land the delta on different effects.
+
+    `grow_largest_bomb`'s number is a RATE ("grows by 3 per Spark spent") and
+    takes the same key anyway, for tier0 `_proto_grow`'s stated reason: the key
+    names the one grow number a face prints, and no row carries two of these
+    ops."""
     return next((fx for fx in card.get("effects", [])
                  if (fx.get("op") == "grow_bombs" and "amount" in fx)
-                 or (fx.get("op") == "merge_bombs" and "growth" in fx)), None)
+                 or (fx.get("op") == "merge_bombs" and "growth" in fx)
+                 or (fx.get("op") == "grow_largest_bomb"
+                     and "per_spark" in fx)), None)
+
+
+#: Which field each of the three grow ops prints its number in.
+GROW_FIELD = {"grow_bombs": "amount", "merge_bombs": "growth",
+              "grow_largest_bomb": "per_spark"}
+
+
+def grow_literal(eff: dict) -> int:
+    """The printed grow number on whichever of the three ops carries it."""
+    return int(eff.get(GROW_FIELD[eff["op"]], 0))
 
 
 def grow_expr(card: dict, eff: dict) -> str:
     active = grow_upgrade(card) and eff is grow_var_effect(card)
-    literal = (eff["amount"] if eff["op"] == "grow_bombs"
-               else eff.get("growth", 0))
-    return _var_or_literal(active, "Grow", literal)
+    return _var_or_literal(active, "Grow", grow_literal(eff))
 
 
 def mend_expr(card: dict, eff: dict) -> str:
@@ -7092,6 +7366,15 @@ def build_body(
             lines.append(
                 "ProtoBombPower.GrowOn(cardPlay.Target, "
                 f'Owner.Creature, {grow_expr(card, eff)});')
+
+        elif op == "grow_largest_bomb":
+            # The round-11 pool pass (Stoke the Fuse). ONE call, so the Sparks
+            # read and the growth applied are one arithmetic; `sparksSpent` is
+            # the local `_stmt_spend_spark` declares for the X price ahead of
+            # it, which `blocked_reason` requires this row to carry.
+            lines.append(
+                "ProtoBombPower.GrowLargestPerSpark(Owner.Creature, "
+                f"{grow_expr(card, eff)}, sparksSpent);")
 
         elif op == "merge_bombs":
             _target_guard(lines, ctx)
@@ -8263,9 +8546,8 @@ def _authored_face_numbers(card: dict):
             if payload:
                 yield ("payload_mine", "PayloadMine", payload) if owns \
                     else (None, None, payload)
-        elif op in ("grow_bombs", "merge_bombs"):
-            literal = (eff.get("amount") if op == "grow_bombs"
-                       else eff.get("growth"))
+        elif op in GROW_FIELD:
+            literal = eff.get(GROW_FIELD[op])
             if isinstance(literal, int):
                 owns = eff is grow_var_effect(card)
                 yield ("grow", "Grow", literal) if owns \
@@ -8616,7 +8898,7 @@ def build_description(card: dict) -> str:
                     parts[-1], [f"[gold]{stat}[/gold]"])
 
         elif op == "block_next_turn":
-            if block_next_turn_upgrade(card):
+            if block_next_turn_upgrade(card) or spotlight_folds(card):
                 # The next-turn half moves with the upgrade, so the face must
                 # show the NEW number (SYS-1: tideline_watch printed 8 while
                 # the sim banked 12).
@@ -8795,6 +9077,40 @@ def build_description(card: dict) -> str:
                            else formula.partition("_per_")[0])
                     parts.append(
                         f"+{per} damage per [gold]Bomb[/gold] detonated this combat.")
+                elif encore_calc_rider(card, eff) is not None:
+                    # `EB-429`. ENCORE IS THE ONE FOLDED SOURCE THAT IS ALSO A
+                    # PRICE, and "already including [gold]Encore[/gold]" left
+                    # a reader three readings of it. The r5 run-2 seat skipped
+                    # the card rather than guess: "I could not parse that
+                    # sentence and still cannot. Encore is defined as an
+                    # absorb pool that cards pay to resolve; 'already
+                    # including Encore' does not tell me whether the card
+                    # spends Encore, is priced as though it had spent Encore,
+                    # or deals more damage when I hold Encore." Six fights
+                    # later: "I still cannot tell you what that sentence
+                    # means."
+                    #
+                    # SO THE FACE SAYS WHAT THE RIDER DOES. It is the third
+                    # reading, and both halves come off the code:
+                    # `encore_calc_rider` reads `N_per_M_encore` off the row,
+                    # and its own docstring is the second half -- "the bank is
+                    # READ, never spent -- consulting it costs nothing".
+                    # Naming the rate says the number already carries it in
+                    # the same breath as saying where it came from, which is
+                    # what `_already_including` was for and what the bare
+                    # resource name could not do here.
+                    #
+                    # THE NUMERALS ARE THE ROW'S (`EB-89`'s discipline), so a
+                    # repricing of the slope cannot leave this sentence
+                    # quoting a retired rate. Encore only: `Fanfare`, `Salon`,
+                    # `Charge` and `Companions` are counters a player never
+                    # spends on a card, so none of them carries the
+                    # ambiguity this one does.
+                    _, per, div = encore_calc_rider(card, eff)
+                    parts[dmg_idx] = (
+                        parts[dmg_idx].removesuffix(".")
+                        + f", counting {per} for every {div} "
+                          "[gold]Encore[/gold] you hold and spending none.")
                 elif rehomed:
                     # Name the RESOURCE the formula actually reads. This said
                     # "Fanfare" unconditionally, which put another character's
@@ -8849,11 +9165,20 @@ def build_description(card: dict) -> str:
             # reads what the card charges before what it buys. The card is
             # unplayable below it (the IsPlayable gate), so this sentence
             # describes a gate, never a partial spend.
-            n = int(eff["amount"])
-            parts.append(
-                "Spend 1 [gold]Spark[/gold]." if n == 1
-                else f"Spend {n} [gold]Sparks[/gold]."
-            )
+            #
+            # THE X PRICE says "all your Sparks" rather than a number, because
+            # there is no number to print: the gate charges one and the payment
+            # takes whatever the bank holds. Stoke the Fuse states its own face
+            # (`description:`), so this arm is the shape any future rendered
+            # row would take rather than one in use today.
+            if eff.get("amount") == SPEND_ALL:
+                parts.append("Spend all your [gold]Sparks[/gold].")
+            else:
+                n = int(eff["amount"])
+                parts.append(
+                    "Spend 1 [gold]Spark[/gold]." if n == 1
+                    else f"Spend {n} [gold]Sparks[/gold]."
+                )
 
         elif op == "burst_energy":
             if burst_upgrade(card):
@@ -9497,8 +9822,47 @@ def _face_riders(card: dict, text: str) -> str:
     defect the next rendered row inherits.
 
     `EB-293`. Both are live defects from [USER]'s own play of the arm.
+    `EB-392` made it three for the same reason.
     """
-    return _plan_only_line(card, _dedupe_printed_exhaust(card, text))
+    return _hexerei_tag(
+        card, _plan_only_line(card, _dedupe_printed_exhaust(card, text)))
+
+
+def _hexerei_tag(card: dict, text: str) -> str:
+    """`EB-392`: a Hexerei COMPANION says so on its own face.
+
+    THE WORD WAS ON EIGHTEEN ROWS AND PRINTED ON FOUR. `hexerei: true` emitted
+    `IHexereiCard` and nothing a player could see, so the family mark was
+    readable only from the cards that ASK about it -- and those ask about a set
+    whose members never identified themselves. The r12 run-2 seat held Witches'
+    Circle for four fights and called it dead: "Witches' Circle was
+    unplayable-in-practice: I owned no Hexerei card and the reminder text does
+    not say which of my cards are Hexerei." It learned the answer by counting
+    Bombs on an enemy badge, and then learned there were THREE words:
+    "there is apparently a distinction between `Companion`, `Hexerei`, and
+    `Klee's own Companion`, and none of the three cards involved prints which
+    one it is."
+
+    DERIVED FROM THE ROW, never remembered. The tag is the sheet's own
+    `hexerei` key, so a row that joins the family carries the mark because it
+    joined -- and the keyword tip comes with it for free, because
+    `arm_keyword_tip_calls` reads the golded tokens out of THIS text
+    (`EB-272`'s attach rule). One field, one printed word, one definition.
+
+    COMPANIONS ONLY, which is the row's own scope. The three READERS are Klee's
+    own cards: Coven Errand and Witches' Circle carry no `hexerei` key at all,
+    and Alice's Introduction Magic carries it while printing the word in its
+    body already -- so the guard below skips a face that has said it, and a
+    reader is never mistaken for a member.
+
+    IT LEADS, like `_plan_only_line`. What a card IS is read before what it
+    does, and a trailing tag reads as a clause of the last effect sentence.
+    """
+    if not (is_companion(card) and card.get("hexerei")):
+        return text
+    if "[gold]Hexerei[/gold]" in text:
+        return text
+    return ("[gold]Hexerei[/gold]. " + text).strip()
 
 
 def _dedupe_printed_exhaust(card: dict, text: str) -> str:
@@ -9647,6 +10011,9 @@ def build_upgrade(card: dict) -> list[str]:
                "discard": "discard",
                # EB-283, the prototype arms' own printed numbers.
                "grow_bombs": "grow", "merge_bombs": "grow",
+               # The round-11 pool pass. A RATE, on the one key that names a
+               # printed grow number -- see `grow_var_effect`.
+               "grow_largest_bomb": "grow",
                "mend": "mend",
                # R252, Careful Now's ceiling.
                "block_largest_bomb": "cap",
@@ -9654,6 +10021,7 @@ def build_upgrade(card: dict) -> list[str]:
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
                "grow_bombs": 'DynamicVars["Grow"]',
                "merge_bombs": 'DynamicVars["Grow"]',
+               "grow_largest_bomb": 'DynamicVars["Grow"]',
                "mend": 'DynamicVars["Mend"]',
                "block_largest_bomb": 'DynamicVars["BombCap"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
@@ -9715,7 +10083,7 @@ def build_upgrade(card: dict) -> list[str]:
             # EB-280: only the Set off that OWNS the Damage var takes the
             # delta -- the same one-owner rule the `damage` arm above obeys.
             key = "damage" if eff is set_off_damage_var_effect(card) else None
-        elif op in ("grow_bombs", "merge_bombs"):
+        elif op in GROW_FIELD:
             key = "grow" if eff is grow_var_effect(card) else None
         else:
             key = key_for.get(op)
@@ -10054,7 +10422,7 @@ def emit(
                 if elemental_effect["op"] == "apply_aura"
                 else "Element.Anemo")
 
-    aura_elements = aura_elements_for(card, profile, elemental)
+    aura_elements = element_tag_elements_for(card, profile, elemental)
     # L4: the Bomb rules text is a question about the WHOLE effect tree, not
     # about the top level. `sparkly_explosion` places its two Bombs inside the
     # kill-conditional's `then:`, so the flat scan this replaced shipped the
@@ -10252,7 +10620,7 @@ def emit(
     # EB-261 / EB-264. A card refused by its OWN gate carries the sentence the
     # page prints, because `CardModel.CanPlay` collapses every mod-side refusal
     # into `BlockedByCardLogic` and has no slot for what the reason was.
-    if card_is_set_off_only(card):
+    if card_is_set_off_only(card) or card_is_carry_out_only(card):
         interfaces += ", IUnplayableReasonCard"
 
     # EB-184: a modal card DECLARES what each of its modes does about aiming,
@@ -10569,7 +10937,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         keywords.append("CardKeyword.Sly")
     if "skill_tag" in card.get("tags", []):
         keywords.append("KleeKeywords.ElementalSkill")
-    keywords.extend(AURA_KEYWORD_BY_ELEMENT[e] for e in aura_elements)
+    keywords.extend(ELEMENT_KEYWORD_BY_ELEMENT[e] for e in aura_elements)
     keywords_member = ""
     if keywords:
         keywords_member = (
@@ -10697,6 +11065,29 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "ArmKeywordTips.ForPlanElement("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # `EB-418`, and it goes here for `EB-378`'s reason one line up: a rider
+        # is a fact about THIS card and is read before the definition of a
+        # word. DERIVED FROM THE ROW rather than declared per card, and from
+        # the two fields the engines ask -- `is_companion` (the sheet's `star`)
+        # and whether the OWNING character is in the row's `personal_pool`.
+        # That pair is exactly `KleeCompanionSpark.IsOwnPersonalCompanion` and
+        # `effects.klee_personal_companion_spark`'s two early returns, so a
+        # Personal Companion added to this sheet tomorrow carries the sentence
+        # the day its row exists -- which is how the rule reached Diona and the
+        # coven stand-ins unannounced in the first place.
+        #
+        # KLEE'S, AND SAID SO RATHER THAN LEFT TO THE POOL. The engines' test
+        # is "the player's own Personal Companion" with no character in it, so
+        # Kokomi playing Gorou walks the same branch -- but Sparks are Klee's
+        # resource, she is the only character with a Spark surface to read, and
+        # a sentence about Klee's coven on an Inazuma row of Kokomi's would
+        # print a rule its reader cannot use. The tip is scoped to the kit that
+        # declared it (LAW:145's own words); the wider branch is not this row's.
+        if (is_companion(card) and profile.character_id == "klee"
+                and personal_pool_id(card) == "klee"):
+            tips_expr = (
+                "ArmKeywordTips.ForCovenSpark("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc, includes_bomb_rules,
@@ -10783,7 +11174,14 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # `spark_cost` check. TOP-LEVEL spends only, the sim's rule -- a price
     # inside a conditional branch cannot be shown before the play, and
     # SparkPower.Spend refuses it there instead.
-    spark_price = sum(int(eff["amount"]) for eff in card["effects"]
+    # THE X PRICE COUNTS AS ONE. "Spend all your Sparks" prints no literal,
+    # and what the GATE charges for it is one: unplayable at an empty bank,
+    # playable at any bank holding a Spark. tier0 reads the same number the
+    # same way (`effects.spend_spark_price`), so the price shown here and the
+    # price the sim gates on cannot drift.
+    spark_price = sum(1 if eff.get("amount") == SPEND_ALL
+                      else int(eff["amount"])
+                      for eff in card["effects"]
                       if eff.get("op") == "spend_spark")
     # EB-261, THE OTHER HALF OF THE SAME GATE. A card whose whole body is a
     # damage-less `set_off` does NOTHING on a board with no Bomb on it -- it
@@ -10828,6 +11226,27 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "            ? null\n"
         '            : "no enemy is holding a Bomb";'
         if bomb_gated else "")
+    # `EB-455`, the same pair one mechanic over: a card whose whole body is a
+    # carry-out does NOTHING while the jellyfish holds no Plan. The r13 seat
+    # met Change of Plans three times as a dead card before it was good once,
+    # off a face that never says it needs one.
+    plan_gated = card_is_carry_out_only(card)
+    plan_gate_expr = (
+        "KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0")
+    plan_gate_member = (
+        "\n\n    // `EB-455`, the carry-out gate: a card whose whole body is\n"
+        "    // a carry-out is unplayable while the Bake-Kurage holds no\n"
+        "    // Plan, rather than paying its energy and exhausting itself\n"
+        "    // for nothing.\n"
+        "    protected override bool IsPlayable =>\n"
+        f"        {plan_gate_expr};"
+        if plan_gated and not spark_price else "")
+    plan_reason_member = (
+        "\n\n    public string? UnplayableReason =>\n"
+        f"        {plan_gate_expr}\n"
+        "            ? null\n"
+        '            : "no Plan is written";'
+        if plan_gated else "")
     # R213 E1, QUARANTINED: the same cost line one meter over, and the mirror
     # of tier0 combat.charge_cost. TOP-LEVEL spends only, the sim's rule --
     # a price at the head of a `choose_one` MODE is that mode's cost line and
@@ -10923,7 +11342,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>\n"
             f"        new[] {{ {flags_cs} }};")
     if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member,
-                             bomb_gate_member)) > 1:
+                             bomb_gate_member, plan_gate_member)) > 1:
         raise ValueError(
             f"{card['id']}: two resource cost lines on one card -- only one "
             "IsPlayable override can be emitted")
@@ -10931,6 +11350,10 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         raise ValueError(
             f"{card['id']}: the Set-off gate (EB-261) and a Charge or modal "
             "cost line cannot share one IsPlayable override")
+    if plan_gated and (charge_price or modal_gate_member or bomb_gated):
+        raise ValueError(
+            f"{card['id']}: the carry-out gate (EB-455) and another gate "
+            "cannot share one IsPlayable override")
     resource_cost_setup = []
     if int(card.get("encore_cost", 0)) > 0:
         resource_cost_setup.append(
@@ -11000,7 +11423,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", "{desc}"),
-    }};{tags_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
+    }};{tags_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

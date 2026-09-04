@@ -2267,8 +2267,11 @@ and 20. These four rows are arm-only copies at the arm's scale (12 to 6, 15
 to 8, 20 to 10), swapped in for the shipped ids at the same rarity by the
 pool seam (`loader._pool_substitutions`, the Kurage's Oath shape), so
 nothing on the shipped sheet moves and a run with the arm off is offered
-the shipped card. The `(reframe)` suffix keeps the names unique for the
-lint; the face the player sees is the card's own name.
+the shipped card. The rows declare the shadow with ` (proto)`, the one suffix
+`loader.display_name` strips in both engines, so the face the player
+sees is the card's own name (`EB-419`: they spelled it ` (reframe)`
+at first, which nothing stripped, and the arm's starter reached the
+round-5 seat printing the tag).
 
 
 ## proto_mi_gorou_war_banner
@@ -2287,3 +2290,172 @@ number is the power's own constant, `CompanionOverhaulLaw.WarBannerDexterity`
 upgraded banner grants 3 and hands 2 back. That asymmetry is the shipped rule
 as written and is disclosed here rather than changed; the base Dexterity gloss
 stays the base rule and the exception is printed where the exception is made.
+
+## before proto_fr_aria_of_recompense
+
+The starter's reader, R254 (2026-09-04), Furina reframe round 4 pick 1. The
+packet is `review/ruled/furina-reframe-round-4-2026-09-04.md`; its sec.6 is
+the ruling, and it answers neither of the two options as written. [USER]:
+"maybe a reader in the starter deck? I still want to leave it at just 2
+'good' cards, but they can be stronger." So her starter keeps its two kit
+cards -- Salon Début and Aria of Recompense -- and ONE of them reads Fanfare.
+
+The reader goes on Aria, the card the seats had already weighed on three
+axes. Under the arm it prints "Gain 5 Encore. If you have at least 6
+Fanfare, gain 5 more." Both numbers are lifted and neither is new: the 5 is
+Aria's own printed Encore and the 6 is the bar the four rider copies above
+already carry. The loop it closes is the reframe's own -- a stage that
+performs mints Fanfare, Fanfare pays Encore, Encore pays performances -- and
+the 20% Encore decay is its brake.
+
+Arm-only copy by the same seam as the riders, so the shipped sheet stands
+(R213 B). The difference is which door: the riders are swapped in where a
+run is OFFERED a card (`loader._pool_substitutions`,
+`FurinaReframeRoster.SwapOfferedRiders`) and this one where a run is DEALT
+one (`furina_reframe.STARTER_SUBS` read by `loader._starter_ids`;
+`FurinaReframeRoster.StarterAria` called from `Furina.StartingDeck`). One
+card for one card, so the printed ten is still ten, and with the arm off the
+shipped Aria is dealt. The R130 veto on the SHIPPED starter's payoff
+([USER], 2026-08-07) is untouched: it rules a Balance-stage sheet, and this
+moves a prototype arm.
+
+A STARTER CARD'S TEXT IS A RULE, so this one goes back to [USER]: he plays
+the first build that carries it, per the norm on when [USER] plays. The
+alternative reader is HELD rather than withdrawn -- Salon Début performing
+its member again at 6 Fanfare is the packet's own re-ask if Aria's does not
+read.
+
+THE BAR MOVED 6 -> 3 (the Furina reframe's round 6, sec.4, 2026-09-04 -- a D
+default taken at its stated value and disclosed in that round's record, which
+is where the three runs are read). It was built at the riders' 6 and three seat runs played Aria with the second
+line never paying once: Aria is a STARTER, played at the top of a turn and
+before the stage performs, so the meter it reads is not the one the offered
+riders read later in the same turn -- 3 is the Fanfare the records show on an
+Aria turn. So the row's condition is `fanfare_at_least_3` and it pays 5 at
+Fanfare 2 and 10 at Fanfare 3. The 5 is untouched, the upgrade is untouched,
+and the four OFFERED rider copies keep their own bars (6, 6, 8 and 10) --
+those are read at a different point in the turn, and nothing in this move
+says anything about them.
+
+Numbers are Prototype numbers, D by the ladder, and nothing measured on them
+is quotable.
+
+## before proto_ko_countdown
+
+The pool pass, Klee round 10 (2026-09-04). Three seats ended turns holding
+Spark-priced detonators at 0 Spark with a fat Bomb sitting on the enemy and no
+energy-priced detonator drawn. The arm's unconditional cash button is Ka-pow!
+and Ka-pow! is the STARTER's -- one card in ten -- so a hand that has already
+spent its Sparks has nothing that sets the pile off, and the Bomb the whole
+turn was spent cooking grows for another round instead of paying.
+
+Countdown is the pool's energy-priced plain detonator at Common, beside
+Sizzle's reaction-keyed one: 1 energy, Set off, draw a card, no Spark price and
+no condition on either clause. The draw is what keeps it off `EB-261`'s
+playability gate -- `set_off_only` covers a row whose whole body is the Set off,
+and a second clause that pays on any board is exactly the difference between a
+card that eats a turn and a cantrip -- so it is playable, and pays, with nothing
+on the enemy. Its one printed number is the draw, so that is what the smith
+moves (`{Cards:diff()}`, the shape Stolen Chapter takes for the same reason).
+
+A SPARK SINK WAS WRITTEN WITH IT AND IS WITHDRAWN: Explosive Spark, the row
+that would have turned leftover energy back into Sparks. It is on no surface,
+in no roster and in no engine, struck on the audit's C3 clause. The finding is
+"she cannot cash a Bomb without Sparks", and a second way to make Sparks
+answers a different sentence -- it makes the Spark-priced detonators easier to
+fire rather than giving the hand one that never needed a Spark. One row, and it
+is the one the finding names.
+
+Numbers are Prototype numbers, D by the ladder; the seats read them on the next
+round before [USER] does.
+
+## before proto_ko_stoke_the_fuse
+
+The pool pass, Klee rounds 11 and 12 (2026-09-04). The seats ended fights
+holding four to nine Sparks they never spent. The bank fills from every
+explosion (rule 4) and almost everything that empties it is a detonator, so a
+turn that banks a Bomb banks Sparks with it and the meter climbs at the exact
+moment the player has decided not to cash anything. Round 10 answered the
+other end of that deadlock -- Countdown, the energy-priced detonator a hand at
+0 Spark can always fire -- and left this end open in as many words: the Spark
+surplus is "left for the next round to say again with Countdown in the pool".
+It said it again.
+
+A SINK WAS ALREADY WRITTEN ONCE AND WITHDRAWN, and the withdrawal is what
+shapes this row. Explosive Spark (Uncommon Attack, 0 energy, X Sparks: 3
+damage per Spark spent) was read on the C3 clause -- the card's value has to
+turn on a choice the player makes, not on a number rising while you watch --
+and its value followed the BANK. Spend nine, deal twenty-seven; the card is
+worth what the meter happens to hold and the meter fills by itself. Stoke the
+Fuse spends the same bank and its value follows the BOMB: the growth lands on
+one charge, the charge is one the player chose to keep cooking rather than
+cash, and on a board with no Bomb on it the row spends the whole bank and buys
+nothing. That is the losing line C1 asks every card to keep, and it is printed
+on the face rather than hidden in a rule -- "your largest Bomb", and if there
+is no largest Bomb there is nothing to grow.
+
+THE RATE IS QUICK FUSE'S. Three per Spark is lifted off the pool's existing
+Spark-priced grow (Quick Fuse: one Spark, "each Bomb on the enemy grows by 3",
+then a Set off), so a Spark buys the same growth here that it already buys
+there and the sink is priced against a row the seats have played rather than
+against nothing. What the two differ on is where the growth lands and what
+follows it: Quick Fuse spreads three across an enemy's charges and cashes the
+pile immediately, and this puts the whole bank on ONE charge and sets nothing
+off. The upgrade moves the rate to 4, the sheet's per-unit grammar, and the
+face reads it through the `Grow` var the two grow rows already use
+(`{Grow:diff()}`) rather than an `IfUpgraded` swap -- a top-level effect owns
+the var, and this is one.
+
+THE FIRST X PRICE ON ANY SHEET, and it splits a Spark cost line in two for the
+first time. `spend_spark: all` prints no literal, so what the GATE charges and
+what the card PAYS stop being the same number: the gate charges ONE (an empty
+bank cannot pay, any bank holding a Spark can) and the payment takes whatever
+the bank holds. Both engines say it that way -- `effects.spend_spark_price`
+and the emitted `PrintedSparkPrice => 1` -- and the consequence is reported
+rather than hidden: the Spark cost badge and the QA packet's cost slot both
+read that gate price, so they show "1 Spark" on a card whose face says "Spend
+all your Sparks". The face carries the truth and the badge carries the bar to
+play it.
+
+WHAT "PER SPARK SPENT" READS, since nothing on the card can print it: the bank
+as it stood when the card was played, before its own spend. That is R39's own
+reading, `state.sparks_at_play` and `SparkPower.SparksAtPlay`, which are twins
+of each other and which equal the amount spent only because the price is
+all-in. The codegen refuses `grow_largest_bomb` on any row that does not open
+with `spend_spark: all`, so the equality cannot be broken by a later row
+quietly.
+
+ONE RESPELLING, FOUND BY A LINT. The ruled face read "3 per Spark spent" with
+the second Spark unmarked; `lint_keyword_meters` requires the keyword's gold
+markup wherever a face prints the word, so it ships as "3 per [gold]Spark[/gold]
+spent". Same words, same reading, one markup pair.
+
+Numbers are Prototype numbers, D by the ladder; the seats read them on the next
+round before [USER] does.
+
+## `proto_kk_undertow` -- one damage op with a rider (`EB-441`)
+
+The row was a `conditional` whose two branch numbers were LITERALS in the face,
+and the codegen's own note says why nothing could fold them: a branch amount
+"owns no var to print a `:diff()` of". So the card carried no `DynamicVar` at
+all, and the engine -- which is what turns Strike's printed 6 into the 4 it
+prints under Weak -- had nothing to fold. The round-12 act-1 seat read both
+faces on one screen, played Undertow into a Weak 1 turn and watched it deal 5:
+"Strike's face is Weak-adjusted; Undertow's face is not. I chose the turn's
+plays off a number that was 2 too high."
+
+It is one `damage` op with `bonus_vs_debuff: 3` now, rendered through
+`CalculatedDamageVar` by the same `calc_rider` machinery `bonus_vs_aura` has
+used since the Legibility sprint. The engine folds that var exactly as it folds
+Strike's `DamageVar`, and `Calculate(target)` at resolution is the same call, so
+the face and the hit are one number by construction rather than by agreement --
+and the multiplier reads the HOVERED enemy, so the face answers per body the
+question the branch could only ask in the abstract.
+
+THE ARITHMETIC DOES NOT MOVE. 7, or 7+3 on a debuffed enemy, is what "deal 7, or
+10 instead" said, and the upgrade's +3 lands on the base exactly as the
+`conditional_damage: 3` delta did. It is ONE hit either way, which is the part
+worth naming: two would be two aura applications and two reaction rolls.
+`KokomiOverhaulKit.HasDebuff` and `kokomi_plan.has_debuff` are the twins the
+`target_has_debuff` predicate already used, so the rider asks the question the
+branch asked.

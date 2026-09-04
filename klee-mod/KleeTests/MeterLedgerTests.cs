@@ -56,12 +56,12 @@ public class MeterLedgerTests
         MeterLedger.ResetFight();
         MeterLedger.OpenPlay(MeterLedger.Spark, "C", "C", turn: 1, before: 0);
         MeterLedger.Note(MeterLedger.Spark, "card:C", 2, 0);
-        MeterLedger.Note(MeterLedger.Spark, "companion:prune/play", 1, 2);
+        MeterLedger.Note(MeterLedger.Spark, "companion:personal/play", 1, 2);
         MeterLedger.Note(MeterLedger.Spark, "card:C", 1, 3);
 
         var gains = Gains(Row(1));
         Assert.Equal(3, gains["card:C"]);
-        Assert.Equal(1, gains["companion:prune/play"]);
+        Assert.Equal(1, gains["companion:personal/play"]);
         Assert.Equal(4, Row(1)["after"]);
     }
 

@@ -50,7 +50,7 @@ public sealed class ProtoFrFloodOfEmotion : CustomCardModel, IElementalCard, ICh
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Flood of Emotion (reframe)"),
+        ("title", "Flood of Emotion"),
         ("description", "Deal {IfUpgraded:show:17|14} damage. If you have at least 10 [gold]Fanfare[/gold], deal {Damage:diff()} more."),
     };
 

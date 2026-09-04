@@ -87,7 +87,10 @@ public class LiveBurn20260902Tests
         Assert.True(smart.Count >= 4);
         foreach (var (_, face) in smart)
         {
-            Assert.Contains("{Count}", face);
+            // `EB-450` swapped `{Count}` for `{Charges}`. Both are read off
+            // `_charges` in `SyncDisplay` and neither is the stack, which is
+            // the whole of this claim; the list also carries the order.
+            Assert.Contains("{Charges}", face);
             Assert.DoesNotContain("{Amount}", face);
         }
     }
@@ -140,7 +143,9 @@ public class LiveBurn20260902Tests
             typeof(ArmKeywordTips)
                 .GetMethod("ForMine", HeadlessGame.All)!));
 
-        Assert.Contains("Read the badge: only their ", body);
+        // `EB-436` spent "Read the badge:" on the hit clause; the terms it
+        // introduced are still named, which is what R248 asked for.
+        Assert.Contains("Only their ", body);
         Assert.Contains("[gold]Vulnerable[/gold] and a cap move it.", body);
         Assert.DoesNotContain("[gold]Weak[/gold]", body);
 

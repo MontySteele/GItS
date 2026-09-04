@@ -493,14 +493,16 @@ def _notify_explosion(state: CombatState, enemy: Enemy, size: int,
     # is: the honest test for "this player runs the Spark economy" is the
     # starter's own hook, which the mod's upgrade keeps rather than removes.
     if SPARK_RELIC_HOOK in p.relic_hooks:
-        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION))
+        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION),
+                            source="relic:pounding_surprise/explosion")
 
     # Catalytic Converter: EXTRA, on top of the explosion's own Spark, and only
     # when the explosion REACTED.
     n = p.powers.get(BOMB_REACTION_SPARK, 0)
     if n and reacted:
         state.emit("ko_catalytic_converter", amount=n)
-        effects.gain_sparks(state, n)
+        effects.gain_sparks(
+            state, n, source="power:catalytic_converter/bomb_reaction")
 
     # Chained Reactions: "Whenever one of your Bombs goes off, place a Bomb N
     # on a random enemy." Through the same `place` every other source uses, so
@@ -661,7 +663,8 @@ def turn_start_late(state: CombatState) -> None:
     if state.turn == 1 and C.KLEE_OVERHAUL_OPENING_SPARK > 0:
         state.emit("ko_opening_spark",
                    amount=int(C.KLEE_OVERHAUL_OPENING_SPARK))
-        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_OPENING_SPARK))
+        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_OPENING_SPARK),
+                            source="kit:opening_spark")
 
     # GROUNDED: "if none of your Bombs went off LAST turn, gain N Block and 1
     # Spark." Last turn and not this one is the whole design -- the decision it
@@ -692,7 +695,8 @@ def turn_start_late(state: CombatState) -> None:
         state.emit("block", amount=n)
         state.emit("ko_grounded", amount=n,
                    spark=int(C.KLEE_OVERHAUL_GROUNDED_SPARK))
-        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_GROUNDED_SPARK))
+        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_GROUNDED_SPARK),
+                            source="power:grounded/held_turn")
 
 
 def turn_end(state: CombatState) -> None:
@@ -939,6 +943,58 @@ def block_for_largest_bomb(state: CombatState, cap: int) -> int:
     state.emit("block", amount=amount)
     state.emit("ko_block_largest_bomb", amount=amount, largest=largest,
                cap=cap)
+    return amount
+
+
+def grow_largest_per_spark(state: CombatState, per_spark: int) -> int:
+    """Stoke the Fuse (the round-11 pool pass): the SINGLE largest Bomb on the
+    board grows by `per_spark` for every Spark the card spent. Returns the
+    growth applied, 0 if nothing grew. `GrowLargestPerSpark`'s twin.
+
+    WHAT "PER SPARK SPENT" READS. The row's price is `spend_spark: all`, so
+    the Sparks spent are exactly the bank as it stood when the card was played
+    -- `state.sparks_at_play`, R39's own reader ("effects that READ the spark
+    bank see it as it was when the card was played, before this card's own
+    spend"). The mod reads that number through `SparkPower.SparksAtPlay`,
+    which is this field's documented twin. The op is legal ONLY behind an
+    all-in Spark price (`gen_klee_cards.blocked_reason` refuses it anywhere
+    else), and that is what keeps "the bank at play" and "what this card
+    spent" the same number in both engines.
+
+    THE LARGEST SINGLE CHARGE, BOARD-WIDE, and both halves are the printed
+    face's ("your largest Bomb") -- `block_for_largest_bomb`'s walk one rule
+    over, with `remove_largest_for_block`'s tie-break: the FIRST largest
+    found, living enemies in order and each pile in place order. A tie broken
+    by a coin flip is a card the player cannot plan around.
+
+    ONE CHARGE, NOT THE PILE, and that is the row's whole decision. `grow_pile`
+    (Chain Fuse, Quick Fuse) grows every charge on an enemy; this pours the
+    bank into the one she is already cooking.
+
+    IT SETS NOTHING OFF. The Sparks buy a bigger Bomb and the cash-out is still
+    a separate card -- which is what keeps the hold-or-cash decision the arm is
+    built on in the player's hands rather than in this row's body.
+    """
+    if not live(state):
+        return 0
+    per_spark = int(per_spark)
+    spent = int(state.sparks_at_play)
+    if per_spark <= 0 or spent <= 0:
+        return 0
+    best_enemy: Optional[Enemy] = None
+    best_index = -1
+    best_size = 0
+    for enemy in list(state.living_enemies):
+        for index, charge in enumerate(enemy.ko_charges):
+            if charge.size > best_size:
+                best_enemy, best_index, best_size = enemy, index, charge.size
+    if best_enemy is None:
+        return 0
+    amount = per_spark * spent
+    charge = best_enemy.ko_charges[best_index]
+    charge.size += amount
+    state.emit("ko_grow_largest", amount=amount, per_spark=per_spark,
+               sparks=spent, target=best_enemy.name, size=charge.size)
     return amount
 
 

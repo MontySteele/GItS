@@ -510,3 +510,69 @@ def test_the_plan_only_clauses_refuse_from_a_body_with_the_flag_on(overhaul):
                     effects=[{"op": op}])
         with pytest.raises(NotImplementedError, match="PLAN-ONLY"):
             effects.OPS[op](state, {"op": op, "amount": 1}, card)
+
+
+# ======================================================================
+# `EB-441` -- Undertow's two numbers, folded through the one live door
+# ======================================================================
+
+def test_undertow_is_one_hit_with_a_rider_and_not_two_branches(overhaul):
+    """THE FIND. Undertow was a `conditional` whose two branch numbers were
+    LITERALS in the face, so nothing folded them. The r12 act-1 seat read them
+    beside a folded Strike on one screen -- "`Strike -- Deal 4 damage.` (6
+    adjusted to 4 -- correct)" and "`Undertow -- Deal 7 damage...`" -- played
+    Undertow into a Weak 1 turn and watched it deal 5: "Strike's face is
+    Weak-adjusted; Undertow's face is not. I chose the turn's plays off a
+    number that was 2 too high."
+
+    THE ARITHMETIC DOES NOT MOVE, which is the whole claim of the rewrite: 7,
+    or 7+3 on a debuffed enemy, is what "deal 7, or 10 instead" said. ONE hit
+    either way, which matters -- two would be two aura applications and two
+    reaction rolls -- and this is the assertion that says so.
+    """
+    from tier0.tests.conftest import make_state
+
+    card = next(c for c in loader.prototype_cards()
+                if c.id == "proto_kk_undertow")
+    assert [e["op"] for e in card.effects] == ["damage"]
+    assert card.effects[0]["bonus_vs_debuff"] == 3
+
+    # Aimed at the default target both ways, which is how `target_has_debuff`
+    # read "the enemy" when this was a branch (R210's bound aim).
+    state = make_state()
+    state.player = loader.build_player("kokomi")
+    enemy = state.enemies[0]
+    hp = enemy.hp
+    effects.resolve_card(state, card)
+    assert hp - enemy.hp == 7
+
+    state = make_state()
+    state.player = loader.build_player("kokomi")
+    enemy = state.enemies[0]
+    enemy.powers["poison"] = 3
+    hp = enemy.hp
+    effects.resolve_card(state, card)
+    assert hp - enemy.hp == 10
+
+
+def test_undertows_face_prints_one_folded_number(overhaul):
+    """The C# half, and the reason it is a rider and not a fold of our own:
+    `CalculatedDamageVar` is the engine's own var, folded exactly the way
+    Strike's `DamageVar` is folded, and `Calculate(target)` at resolution is
+    the same call -- so the face and the hit are one number by construction.
+    The multiplier reads the HOVERED enemy, so the face answers per body the
+    question the branch used to ask in the abstract."""
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parents[2]
+    src = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+           / "Generated" / "ProtoKkUndertow.cs").read_text(encoding="utf-8")
+
+    assert ("Deal {CalculatedDamage:diff()} damage, already including "
+            "{ExtraDamage:diff()} if the enemy has a debuff." in src)
+    assert "IfUpgraded:show:10|7" not in src
+    assert "KokomiOverhaulKit.HasDebuff(target) ? 1 : 0" in src
+    # ONE hit, the sim's shape: the branch is gone from the play as well as
+    # from the face.
+    assert src.count("DamageCmd.Attack") == 1
+    assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in src

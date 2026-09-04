@@ -1253,6 +1253,81 @@ def test_ammo_scavenging_draws_one_per_bomb_that_went_off_this_turn(overhaul):
     assert len(state.player.hand) == hand_before + 3
 
 
+# ---------------------------------------------------------------------------
+# THE POOL PASS -- the energy-priced plain detonator (round 10, 2026-09-04)
+# ---------------------------------------------------------------------------
+
+def test_countdown_sets_off_the_whole_pile_and_then_draws(overhaul):
+    """`ProtoKoCountdown`. The arm's one detonator priced in ENERGY: three
+    round-10 seats held Spark-priced detonators at 0 Spark with a fat Bomb
+    sitting on the enemy and nothing in hand that could cash it.
+
+    THE ORDER IS THE CARD. The Set off is first, so the card the draw finds is
+    drawn into a board the explosion has already resolved -- the C# twin pins
+    the same order off the compiled `OnPlay`
+    (`klee-mod/KleeTests/Prototype/PoolPassTests.cs`)."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    state.player.energy = 3
+    state.player.draw_pile = [probe([], cid=f"filler{i}", ctype="skill")
+                              for i in range(5)]
+    for size in (3, 4, 5):
+        klee_overhaul.place(state, enemy, size)
+
+    card = load("proto_ko_countdown")
+    assert [fx["op"] for fx in card.effects] == ["set_off", "draw"]
+    assert combat.spark_cost(card) == 0
+    assert combat.card_cost(state, card) == 1
+
+    hand_before = len(state.player.hand)
+    effects.resolve_card(state, card)
+
+    assert sizes(enemy) == [], "every Bomb on the target went off"
+    assert enemy.hp < 400
+    assert len(state.player.hand) == hand_before + 1
+
+
+def test_countdown_upgraded_draws_two(overhaul):
+    """The row's only printed number is its draw, so that is what the smith
+    moves (`upgrade: {draw: 1}`, the `Cards` var on the C# side)."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    state.player.draw_pile = [probe([], cid=f"filler{i}", ctype="skill")
+                              for i in range(5)]
+    klee_overhaul.place(state, enemy, 5)
+
+    card = load("proto_ko_countdown+")
+    assert card.effects[1] == {"op": "draw", "amount": 2}
+
+    hand_before = len(state.player.hand)
+    effects.resolve_card(state, card)
+
+    assert sizes(enemy) == []
+    assert len(state.player.hand) == hand_before + 2
+
+
+def test_countdown_still_draws_on_a_bomb_less_board(overhaul):
+    """`EB-261`'s gate does NOT cover this row and must not: the draw is a
+    second clause that pays whatever the board holds, so Countdown is a
+    playable cantrip with no Bomb out rather than a dead card."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.player.energy = 3
+    state.player.sparks = 0
+    state.player.draw_pile = [probe([], cid=f"filler{i}", ctype="skill")
+                              for i in range(5)]
+
+    card = load("proto_ko_countdown")
+    assert klee_overhaul.set_off_only(card) is False
+    assert combat.card_playable(state, card) is True
+
+    hand_before = len(state.player.hand)
+    effects.resolve_card(state, card)
+
+    assert len(state.player.hand) == hand_before + 1
+    assert enemy.hp == 200
+
+
 def test_sparks_n_splash_echoes_the_pile_without_spending_it(overhaul):
     """`BombEchoPower`, R250 (2026-09-04): "at the end of your turn, deal
     Pyro damage to a random enemy equal to its LARGEST Bomb" -- the largest
@@ -1692,5 +1767,123 @@ def test_careful_now_retains_and_keeps_retaining_upgraded(overhaul):
     with."""
     assert load("proto_ko_careful_now").retain is True
     assert load("proto_ko_careful_now+").retain is True
+
+
+# ---------------------------------------------------------------------------
+# THE POOL PASS, ROUND 11 -- Stoke the Fuse, the Spark sink
+# ---------------------------------------------------------------------------
+
+def stoke(state, enemies, sparks, cid="proto_ko_stoke_the_fuse"):
+    """Play Stoke the Fuse at a bank of `sparks`, through `play_card`.
+
+    THROUGH `play_card` AND NOT `resolve_card`, which every other row in this
+    file may use: the growth is priced per Spark SPENT and reads
+    `state.sparks_at_play`, a field only a real play sets. A test that
+    resolved the body directly would be measuring a card nobody played.
+    """
+    card = load(cid)
+    state.player.sparks = sparks
+    state.player.energy = 3
+    state.player.hand.append(card)
+    combat.play_card(state, card)
+    return card
+
+
+def test_stoke_the_fuse_is_unplayable_at_zero_sparks(overhaul):
+    """THE X PRICE'S GATE. "Spend all your Sparks" charges ONE at the
+    playability seam -- an empty bank cannot pay, any bank holding a Spark
+    can -- which is `PrintedSparkPrice => 1` in the mod and
+    `effects.spend_spark_price` here. Without it the card would be playable
+    at 0 and resolve to nothing, which is exactly the silent no-play the
+    Spark cost line exists to refuse."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 6)
+    card = load("proto_ko_stoke_the_fuse")
+
+    assert combat.spark_cost(card) == 1
+    assert combat.card_cost(state, card) == 0
+
+    state.player.sparks = 0
+    assert combat.card_playable(state, card) is False
+    state.player.sparks = 1
+    assert combat.card_playable(state, card) is True
+
+
+def test_stoke_the_fuse_spends_the_whole_bank_and_grows_per_spark(overhaul):
+    """Three Sparks grow the Bomb by 9 (3 per Spark) and leave the bank at 0.
+
+    The bank is EMPTIED, not decremented by a printed price: the row's price
+    is X, so what it pays is whatever it holds -- and what it pays is what the
+    growth is measured in."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 6)
+
+    stoke(state, [enemy], 3)
+
+    assert sizes(enemy) == [6 + 9]
+    assert state.player.sparks == 0
+    assert state.player.energy == 3        # a 0-energy row
+
+
+def test_stoke_the_fuse_upgraded_pays_four_per_spark(overhaul):
+    """`upgrade: {grow: +1}` -- the rate is the row's one printed number and
+    the only thing the smith moves, so three Sparks buy 12 instead of 9."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 6)
+
+    stoke(state, [enemy], 3, cid="proto_ko_stoke_the_fuse+")
+
+    assert sizes(enemy) == [6 + 12]
+    assert state.player.sparks == 0
+
+
+def test_stoke_the_fuse_grows_the_largest_of_two_bombs(overhaul):
+    """"Your largest Bomb", board-wide and ONE charge -- `block_largest_bomb`'s
+    scope with `grow_bombs`'s effect, and neither one's spread: the other
+    charges are exactly where they were."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 4)
+    klee_overhaul.place(state, a, 9)
+    klee_overhaul.place(state, b, 7)
+
+    stoke(state, [a, b], 2)
+
+    assert sizes(a) == [4, 9 + 6]          # the 9 took all of it
+    assert sizes(b) == [7]
+
+
+def test_stoke_the_fuse_sets_nothing_off(overhaul):
+    """IT IS NOT A DETONATOR. The Sparks buy a bigger Bomb and the cash-out is
+    still a separate card, which is what keeps hold-or-cash in the player's
+    hands. The enemy takes no damage and the pile is still standing."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 6)
+
+    stoke(state, [enemy], 4)
+
+    assert enemy.hp == 200
+    assert sizes(enemy) == [6 + 12]
+    assert counts(state)["ko_bomb_exploded"] == 0
+
+
+def test_stoke_the_fuse_on_a_bomb_less_board_still_spends(overhaul):
+    """A REAL COST, REPORTED. Nothing on the board is a legal place to play
+    this -- the row is not `set_off_only` and takes no Bomb gate (it is a
+    grow, not a Set off) -- so the bank goes and nothing grows. That is the
+    row's losing line, and it is the one the charter asks every card to
+    keep."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+
+    stoke(state, [enemy], 3)
+
+    assert state.player.sparks == 0
+    assert sizes(enemy) == []
+    assert klee_overhaul.set_off_only(load("proto_ko_stoke_the_fuse")) is False
 
 

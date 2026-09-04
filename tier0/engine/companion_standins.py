@@ -104,20 +104,28 @@ def validate_row(card: "Card") -> None:
     IT CANNOT BE ANONYMOUS -- UNLESS IT IS THE OTHER SHAPE. `replaces:`
     without `personal_pool:` names no character to hand the card to, so it is
     not a stand-in: it is a row that replaces another FOR EVERYBODY playing the
-    arm, which is a POOL SUBSTITUTION (`loader._pool_substitutions`, the
-    Kurage's Oath seam). That shape is legal, and this is the only place the
-    two are told apart, so it is CHECKED rather than assumed: the row must be
-    named in `loader.declared_pool_substitutions()`, the flag-blind union of
-    the arms' own maps. A `replaces:` that names neither a character to hand
-    the card to nor a declared swap is a row no surface can ever reach, and
-    still raises.
+    arm, which is a SUBSTITUTION -- at the offer door
+    (`loader._pool_substitutions`, the Kurage's Oath seam) or at the printed
+    starter (`loader._starter_ids`, the Kurage's slot eleven). That shape is
+    legal, and this is the only place the two meanings are told apart, so it is
+    CHECKED rather than assumed: the row must be named in
+    `loader.declared_pool_substitutions()` or
+    `loader.declared_starter_substitutions()`, the flag-blind unions of the
+    arms' own maps. A `replaces:` that names neither a character to hand the
+    card to nor a declared swap is a row no surface can ever reach, and still
+    raises.
 
     The Furina reframe's four riders (2026-09-04) are the first users of the
-    second shape. The Mondstadt stand-ins are the first shape and nothing about
-    them moves -- `_replacements` has always filtered on `personal_pool`.
+    second shape at the offer door; her starter reader
+    (`proto_fr_aria_of_recompense`, R254) is the first at the starter, and it
+    is why the check reads two maps rather than one: that row is `basic`, so
+    the POOL map could never legally name it. The Mondstadt stand-ins are the
+    first shape and nothing about them moves -- `_replacements` has always
+    filtered on `personal_pool`.
     """
     from tier0.content.loader import (PROTOTYPE_ID_PREFIX,
-                                      declared_pool_substitutions)
+                                      declared_pool_substitutions,
+                                      declared_starter_substitutions)
 
     if card.replaces is None:
         return
@@ -127,14 +135,16 @@ def validate_row(card: "Card") -> None:
             f"shipped row may not stand in for another card (ids on that "
             f"surface carry {PROTOTYPE_ID_PREFIX!r})")
     if not card.personal_pool:
-        if declared_pool_substitutions().get(card.replaces) == card.id:
+        if (declared_pool_substitutions().get(card.replaces) == card.id
+                or declared_starter_substitutions().get(card.replaces)
+                == card.id):
             return
         raise ValueError(
             f"card {card.id!r}: `replaces:` needs a `personal_pool:` -- a "
             "stand-in is handed to ONE character in place of a Universal -- "
-            "or an arm's pool-substitution map has to name it. A row that "
-            "replaces another for everybody and is in no arm's map can never "
-            "be offered at all")
+            "or an arm's pool- or starter-substitution map has to name it. A "
+            "row that replaces another for everybody and is in no arm's map "
+            "can never be dealt or offered at all")
 
 
 @lru_cache(maxsize=1)

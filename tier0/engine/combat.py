@@ -265,6 +265,13 @@ def card_playable(state: CombatState, card: Card) -> bool:
     # `klee_overhaul.set_off_only` -- never a per-card flag.
     if klee_overhaul.refuses_for_no_bomb(state, card):
         return False
+    # QUARANTINED (C.KOKOMI_OVERHAUL). `EB-455`, the clause above one mechanic
+    # over: a card whose whole body is a carry-out pays its energy, exhausts
+    # itself and does NOTHING while the jellyfish holds no Plan. The r13 seat
+    # met Change of Plans three times as a dead card off a face that never says
+    # it needs one. DERIVED FROM THE ROW -- `kokomi_plan.carry_out_only`.
+    if kokomi_plan.refuses_for_no_plan(state, card):
+        return False
     # No Fanfare playability gate: Fanfare is read, never spent (F-A4).
     return card_cost(state, card) <= state.player.energy
 
@@ -302,11 +309,17 @@ def spark_cost(card: Card) -> int:
     player cannot be shown before choosing to play the card, so it is not
     part of the cost line -- effects.spend_sparks refuses it at resolve time
     instead, which is the loud half of the same rule.
+
+    `spend_spark_price` AND NOT `spend_spark_amount`: an X price ("spend all
+    your Sparks") prints no literal, and what the GATE charges for it is 1 --
+    unplayable at an empty bank, playable at any bank holding a Spark, which
+    is the mod's `PrintedSparkPrice => 1` on the same row. What the card PAYS
+    is a different question and `effects._op_spend_spark` answers it.
     """
     total = 0
     for fx in card.effects:
         if fx.get("op") == "spend_spark":
-            total += effects.spend_spark_amount(fx)
+            total += effects.spend_spark_price(fx)
     return total
 
 
@@ -708,6 +721,14 @@ def _finish_play(state: CombatState, card: Card,
             # read `reactions_this_card`, which does not exist until a
             # resolution has run. C# does the same at KleeElementalHooks.
             effects.klee_personal_companion_spark(state, card)
+        elif card.is_companion:
+            # `EB-420`. THE OTHER SIDE OF THAT GATE, said out loud. The bound
+            # is deliberate and the replay leaves no trace: Duet doubled a
+            # Companion's hit, the Salon performed once, and nothing named the
+            # second play. Emitted here rather than inside the trigger because
+            # this is the branch that does not call it. C# twin:
+            # `SalonMemberPower.NoteCompanionReplay`, at the same gate.
+            furina_reframe.companion_replay_no_trigger(state, card)
     # THE AUTOMATIC POWER FLOOR GRANT USED TO LIVE HERE. Deleted by the
     # Fanfare rework (2026-07-28, Track B, RULED): playing any Power silently
     # raised floor, cap and current by 5 (rares 8), printed on no card and

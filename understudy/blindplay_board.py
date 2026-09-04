@@ -15,7 +15,7 @@ from understudy.blindplay_faces import (_card_face, _card_title, _enemy_names,
                                         _hook_note, _intents, _meter_max,
                                         _named_option, _number_faces, _powers,
                                         relic_faces, remember_deck,
-                                        remembered_deck)
+                                        remembered_deck, remembered_enemy_name)
 from understudy.blindplay_read import (_blob, _enemies, _fold, _hand, _int,
                                        _label, _listing, _player, _potions,
                                        _screen, _text)
@@ -48,8 +48,21 @@ from understudy.blindplay_shape import SELECT_SCREENS
 #     card CONDITIONS, and every card that reads one prints its own condition
 #     on its face. The counter is the implementation of a sentence the reader
 #     already has.
+#   `Spotlight Spend Boost` (`EB-422`) is the FOURTH of the same kind, found
+#     the same way: "a row reading `Spotlight Spend Boost: 30` sat in the
+#     status bar all fight with no gloss and no card naming it" (Furina round
+#     5, run 1, fight 4). It is this turn's accumulator, and its only writer
+#     is `SpotlightSystem.OnEncoreSpent`, which adds the amount of
+#     `OvationSpendBoostPower` to it on each Encore spend and zeroes it at
+#     turn end. That power is a NAMED status row -- "Standing Ovation --
+#     Spotlighted Companions are 10% stronger on turns you spend Encore" --
+#     printed by the card the player played, so the rule is already on the
+#     page in its own words; 30 is three spends' worth of one 10, which is a
+#     running total the sentence does not promise and the feed cannot
+#     explain. The seat read the two side by side and reported exactly that:
+#     "Standing Ovation says 10%; the meter said 30."
 #
-# So defining them would put three glossary rows on the page to explain three
+# So defining them would put four glossary rows on the page to explain four
 # rows that should not be on the page. Keyed by the WIRE id rather than the
 # printed name, because that is what the mod declares and what a rename here
 # would silently stop matching.
@@ -57,6 +70,7 @@ INTERNAL_METERS = frozenset({
     "KLEEMOD_SPOTLIGHT_MODE",
     "KLEEMOD_SPOTLIGHT_MOVED",
     "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST",
 })
 
 ALREADY_UPGRADED = "already upgraded; an upgraded copy cannot be upgraded again"
@@ -115,6 +129,43 @@ def _omitted_from_upgrade(state: dict[str, Any]) -> list[dict[str, str]]:
             reason = UNEXPLAINED_OMISSION
         out.append({"title": card["title"], "reason": reason})
     return out
+
+
+def deck_titles(state: dict[str, Any]) -> list[dict[str, Any]]:
+    """The run's deck, as PRINTED TITLES with their upgrade marks (`EB-447`).
+
+    THE DEFECT. No screen outside a fight printed the deck at all: the Furina
+    r7 seat "reconstructed, not read" its deck out of remembered hands, and
+    the Kokomi r11 and r13 seats first met a `Slimed` at a Smith screen, rooms
+    after the event that added it. The wire carries the four piles on a COMBAT
+    state and on nothing else (`BuildPlayerState`), so a map screen has no
+    deck on its own feed -- and the map is the one screen a run passes through
+    between every pair of rooms.
+
+    So it is read off the lane's own store, the same one the Smith's omissions
+    are subtracted against (`blindplay_faces.remember_deck`), with the same
+    two guards and the same staleness: as of the last fight, and a card
+    drafted since is not in it. The render says so beside the list.
+
+    COUNTED, NOT LISTED TWICE. A deck holds five `Strike` and a page that
+    printed five rows would bury the one card that matters under them. The
+    upgrade mark rides in the title, in the grammar's own vocabulary
+    (`"<title> (upgraded)"`, `_split_qualifier`) -- except where the game has
+    already printed its own `+`, which is a mark the fold keeps and this must
+    not double.
+    """
+    held = remembered_deck(state)
+    if not held:
+        return []
+    counts: dict[str, int] = {}
+    for card in held["cards"]:
+        title = _text(card.get("title"))
+        if not title:
+            continue
+        if card.get("upgraded") and not title.rstrip().endswith("+"):
+            title += " (upgraded)"
+        counts[title] = counts.get(title, 0) + 1
+    return [{"title": t, "count": n} for t, n in sorted(counts.items())]
 
 
 def _potion_slots(state: dict[str, Any]) -> int:
@@ -253,6 +304,15 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
         `amount` is the number it dealt or blocked and `paid` is whether it
         could afford its Encore, which is the difference between the printed
         number and three-quarters of it.
+
+      replayed -- `EB-420`. This turn's Companion cards that were played an
+        EXTRA time, by printed title, one entry per extra play. The extra play
+        makes nobody perform -- the trigger is once per Companion card played,
+        LAW:145's bound -- so these are the plays that are missing from
+        `performed`, and a reader given only that list would count the stage's
+        acts and reach the wrong rule. The round-5 seat did exactly that: "two
+        Crabaletta lines ... for three Companion-card plays' worth of
+        triggers", and "no line anywhere on the screen said Duet".
     """
     raw = player.get("furina_salon")
     if not isinstance(raw, dict) or not raw:
@@ -266,7 +326,10 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
          "amount": _int(row.get("amount")),
          "paid": bool(row.get("paid"))}
         for row in (raw.get("performed") or []) if isinstance(row, dict)]
-    return {"performed": performed}
+    replayed = [name for name in
+                (_text(entry) for entry in (raw.get("replayed") or []))
+                if name]
+    return {"performed": performed, "replayed": replayed}
 
 
 def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],
@@ -278,14 +341,24 @@ def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],
     numbered name; one the performance KILLED is off the next board entirely
     and keeps the title the mod recorded, which is why the mod sends a title
     at all.
+
+    `EB-424`, AND IT IS `EB-427` ONE ARM OVER. The mod's title is the game's
+    printed name and carries no copy number, so the r5 seat read
+    *"Crabaletta hit Corpse Slug (2)"* on turn 1 and *"Crabaletta hit Corpse
+    Slug"* on turn 2 -- "in a two-of-a-kind fight I could not tell which body
+    it hit" -- for the one reason that the second body was no longer on the
+    board. The fight's own memory names it, so a performance on a duplicate
+    always says which copy.
     """
     by_id = {_text(raw.get("combat_id")): face["name"]
              for raw, face in zip(wire, printed)
              if _text(raw.get("combat_id"))}
     for row in salon["performed"]:
-        named = by_id.get(row["combat_id"])
-        if named:
-            row["target"] = named
+        if not row["combat_id"]:
+            continue
+        row["target"] = (by_id.get(row["combat_id"])
+                         or remembered_enemy_name(row["combat_id"],
+                                                  row["target"]))
 
 
 def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],
@@ -297,15 +370,22 @@ def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],
     board gets the page's own numbered name; one that DIED to the Plan is off
     the next board entirely and keeps the title the mod recorded, which is
     the whole reason the mod sends a title at all.
+
+    `EB-427` PUT THE FIGHT'S MEMORY BETWEEN THE TWO. The mod's title carries no
+    copy number, so a morning against three Inklets that killed one printed
+    `Inklet`, `Inklet (1)` and `Inklet (2)` -- three bodies, two handles and one
+    bare word -- and the r11 seat read the mix as the numbering having shifted.
+    `remembered_enemy_name` hands back the name this page used while that body
+    stood, so the receipt and the enemy list under it never disagree.
     """
     by_id = {_text(raw.get("combat_id")): face["name"]
              for raw, face in zip(wire, printed)
              if _text(raw.get("combat_id"))}
     for row in plans["carried_out"] + plans["fired_now"]:
         for moved in row["moved"]:
-            named = by_id.get(moved["combat_id"])
-            if named:
-                moved["target"] = named
+            moved["target"] = (by_id.get(moved["combat_id"])
+                               or remembered_enemy_name(moved["combat_id"],
+                                                        moved["target"]))
 
 
 def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
@@ -399,12 +479,46 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
     if not line:
         line = (f"{pet_name}: {card}" if number is None
                 else f"{pet_name}: {card}, {number}")
+    # `EB-426`: WHAT THE NUMBER IS, and what its clause asked for. Both are
+    # `KokomiPlan.NumberKind` / `AskedFor`'s, and both are ABSENT on a bridge
+    # older than the field -- which prints exactly the line it always printed,
+    # `board_read`'s discipline again.
+    asked = row.get("asked")
     raw_moved = row.get("moved")
     return {"card": card, "number": number, "line": line,
+            "kind": _text(row.get("kind")),
+            "asked": None if asked is None else _int(asked),
             "on_play": bool(row.get("on_play")),
             "board_read": isinstance(raw_moved, list),
+            # `EB-453`: what ELSE landed inside this Plan's window, by name,
+            # and whether the Plan ran at all. Both are ABSENT on a bridge
+            # older than the fields -- `board_read`'s discipline again, so
+            # such a page prints exactly the lines it always printed.
+            "riders": [_rider_row(r) for r in (row.get("riders") or [])
+                       if isinstance(r, dict) and _int(r.get("amount")) > 0],
+            "unfinished": bool(row.get("unfinished")),
+            # `EB-440`: A ROW IS A BODY THIS PLAN MOVED SOMETHING ON, and
+            # Block is something. The filter existed to drop the mod's
+            # zero-delta rows, and a beat that spent itself entirely on a
+            # Defend intent produces exactly such a row with the Block beside
+            # it -- which is the receipt the r12 seat did not get.
             "moved": [_moved_row(m) for m in (raw_moved or [])
-                      if isinstance(m, dict) and _int(m.get("amount")) > 0]}
+                      if isinstance(m, dict)
+                      and (_int(m.get("amount")) > 0
+                           or _int(m.get("absorbed")) > 0)]}
+
+
+def _rider_row(row: dict[str, Any]) -> dict[str, Any]:
+    """One named rider inside one Plan (`EB-453`), off `KokomiPlan.RiderRow`.
+
+    The Plan's own `number` is what its FIRST clause produced and `moved` is
+    what the BOARD did, and the two differ by whatever else landed in the same
+    beat -- the Tamakushi Casket answering a Weak the same Plan applied, which
+    is the 2 the r13 seat could not account for. The mod names it because the
+    mod is the only thing that can: the measurement is a subtraction and a
+    subtraction has no sources.
+    """
+    return {"source": _text(row.get("source")), "amount": _int(row.get("amount"))}
 
 
 def last_morning(state: dict[str, Any]) -> dict[str, Any] | None:
@@ -440,11 +554,19 @@ def _moved_row(row: dict[str, Any]) -> dict[str, Any]:
     handed the numbered name this page has been using all fight. Where the
     game would not answer either, the row says so in words rather than
     printing a bare number against nothing.
+
+    `EB-440` ADDED `absorbed`, AND THE ABSENT / ZERO SPLIT IS THE ONE
+    `board_read` MAKES ONE LEVEL UP. A bridge older than the measurement sends
+    no key at all and this page must not print a Block figure for it; a bridge
+    that sends 0 measured the Block and found none. So an absent key answers
+    `None` and a present one answers its number.
     """
+    absorbed = row.get("absorbed")
     return {"target": _text(row.get("target")) or "an enemy",
             "combat_id": _text(row.get("combat_id")),
             "amount": _int(row.get("amount")),
-            "dead": bool(row.get("dead"))}
+            "dead": bool(row.get("dead")),
+            "absorbed": None if absorbed is None else _int(absorbed)}
 
 
 def _pulse_phrase(memory: dict[str, Any]) -> str:
@@ -727,6 +849,79 @@ def _rest_options(state: dict[str, Any]) -> list[Any]:
 
 def _event_options(state: dict[str, Any]) -> list[Any]:
     return _listing(state, "event.options", "options")
+
+
+# The keys an option carries a NAMED THING'S face under, beside the option's
+# own title and body. `BuildEventState` merges a granted relic in as
+# `relic_name` / `relic_description` (`McpMod.StateBuilder.cs:1617-1621`), on
+# the same category-prefixed convention `BuildShopState` uses for its shelves.
+_OPTION_FACE_KEYS = (("card_name", "card_description"),
+                     ("relic_name", "relic_description"),
+                     ("potion_name", "potion_description"))
+
+
+def _option_faces(entry: Any, skip: str = "") -> list[dict[str, str]]:
+    """Everything an option NAMES, each with the text the game printed for it.
+
+    `EB-448`. THE OUTCOME WAS NEVER ON THE PAGE. Klee r13's Trash Heap "gave a
+    card" and the seat identified it as `Caltrops` two fights later off a
+    hand; Endless Conveyor's upgrade turned up as `Strike+` in a removal list
+    a room later; and an option that adds a card the screen NAMES -- Byrdonis
+    Egg, Neow's Dowsing -- printed the sentence and never the card. So the
+    seat shopped, drafted and routed against a deck it could not read.
+
+    TWO CHANNELS, AND BOTH WERE ALREADY ON THE FEED. An option that hands over
+    a modelled thing merges its face in under a CATEGORY-PREFIXED key, which
+    `_named_option` drops the moment the option also has a `title` of its own
+    (`_OPTION_NAME_KEYS` stops at the first hit). And `opt.HoverTips` reaches
+    the wire as `keywords`, where `BuildHoverTips` flattens a `CardHoverTip`
+    into the card's own printed title and description
+    (`McpMod.Helpers.cs:260-264`) -- the same shape a keyword definition
+    arrives in, and the page read neither.
+
+    IT DOES NOT CLAIM WHICH KIND EACH ONE IS, and that is deliberate: the wire
+    flattens a card tip and a keyword tip into one `{name, description}` pair,
+    so a page that sorted them would be guessing at the difference. What it
+    says is true either way -- these are the things this option names, in the
+    game's own words -- and a card among them is printed with the title the
+    game gave it, `+` and all.
+
+    WHAT IS STILL NOT HERE, and the row's scope says so: a RANDOM grant. Trash
+    Heap does not choose its card until the click, and the event room carries
+    no card on its feed afterwards, so nothing on this side can name it.
+    """
+    if not isinstance(entry, dict):
+        return []
+    out: list[dict[str, str]] = []
+    seen = {_fold(skip)} if skip else set()
+    for name_key, text_key in _OPTION_FACE_KEYS:
+        name = _text(entry.get(name_key))
+        if name and _fold(name) not in seen:
+            seen.add(_fold(name))
+            out.append({"name": name, "text": _text(entry.get(text_key))})
+    for tip in entry.get("keywords") or []:
+        if not isinstance(tip, dict):
+            continue
+        name = _text(tip.get("name"))
+        if name and _fold(name) not in seen:
+            seen.add(_fold(name))
+            out.append({"name": name,
+                        "text": _text(tip.get("description"))})
+    return out
+
+
+def _event_option(entry: Any) -> dict[str, Any]:
+    """One event option, plus what it names and whether it has been taken.
+
+    `EB-448`. The namer the event screen renders with AND resolves `choose`
+    with -- one function, for `_index_choice`'s own rule: a screen whose page
+    names its rows one way and whose grammar names them another is two
+    screens.
+    """
+    option = _named_option(entry)
+    option["names"] = _option_faces(entry, skip=option["name"])
+    option["taken"] = bool(isinstance(entry, dict) and entry.get("was_chosen"))
+    return option
 
 
 def _proceed_option(state: dict[str, Any]) -> int:

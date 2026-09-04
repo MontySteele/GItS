@@ -74,6 +74,31 @@ public static class KleeKeywords
     [KeywordProperties(AutoKeywordPosition.None)]
     public static CardKeyword AppliesCryo;
 
+    // `EB-454`. THE TWO THAT TRIGGER AND LEAVE NOTHING, and the block above is
+    // both why they were absent and why they are here.
+    //
+    // THE FIND (Kokomi r13 (c) 8). `Jean -- Gale Blade` "read as untyped until
+    // a Reaction preview named Anemo mid-fight", on a screen where every Hydro,
+    // Electro, Cryo and Pyro card carries its element. The old reasoning was
+    // right about the GEM -- Anemo and Geo leave no aura (LAW, combat: "they
+    // only trigger"), so there is no aura icon to paint and
+    // <see cref="Vfx.ElementBadge.IconPathFor"/> still answers null for both --
+    // and it proved too much: it took the WORD away with the picture, and the
+    // word is what a reader uses to work out which pair can react.
+    //
+    // A KEYWORD IS NOT A GEM. These ride `AutoKeywordPosition.None` like the
+    // four above, print no line, hover their own tip, and reach the blind page
+    // as `Applies Anemo` / `Applies Geo` -- which is the tag the find is about.
+    // <see cref="AuraApplication"/> still answers `None` for both, so the gem
+    // stays off with no second condition anywhere.
+    [CustomEnum("applies_anemo")]
+    [KeywordProperties(AutoKeywordPosition.None)]
+    public static CardKeyword AppliesAnemo;
+
+    [CustomEnum("applies_geo")]
+    [KeywordProperties(AutoKeywordPosition.None)]
+    public static CardKeyword AppliesGeo;
+
     // Referenced-term tips. Auto=None keeps these out of rules text; cards
     // opt into them through ExtraHoverTips, including combat-aware reaction
     // previews that only appear while the matching aura is on the board.

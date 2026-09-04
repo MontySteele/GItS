@@ -267,14 +267,30 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # nothing else" -- so `loader.pool_replacement` is its sibling seam, read at the
 # same single door.
 #
-# THIRTY-FIVE SINCE R252, and the four that arrived are the DEFENCE SHELF, a
-# third slice on the same terms as the second: Klee round 9's pick 1, taken at
-# its default (`review/ruled/klee-overhaul-round-9-2026-09-04.md`). The round-9
-# run died on act-2 floor 22 with no Block in hand, and the arm offered none of
-# its four defensive rows in ten rewards. Every new row is keyed to the Bomb
-# state and none is a plain Block, so the brief's sec.6 weakness ("she cannot
-# block on demand") is answered rather than repealed. They are listed in their
-# own block, like R244's below them.
+# THIRTY-FIVE SINCE THE ROUND-11 POOL PASS (2026-09-04), and the one that
+# arrived is `proto_ko_stoke_the_fuse`: the arm's Spark SINK, the other half
+# of the deadlock round 10 answered with Countdown. The round-11 and round-12
+# seats ended fights holding 4 to 9 unspent Sparks, and the row is where the
+# bank goes -- all of it, into the one Bomb she is already cooking, at 3 per
+# Spark. Its own block at the end of the tuple, like the slices below it.
+#
+# THIRTY-FOUR BEFORE THAT (round 10), and the one that
+# arrived is `proto_ko_countdown`: the arm's only detonator that is priced in
+# ENERGY and asks nothing else of the board. Three round-10 seats held
+# Spark-priced detonators at 0 Spark with a fat Bomb sitting on the enemy and
+# no energy-priced detonator in hand -- Ka-pow! is one card in ten and it is
+# the starter's, not the pool's. Its own block at the end of the tuple, like
+# the two slices below it.
+#
+# THIRTY-THREE BEFORE THAT (R252), and the two that arrived are the DEFENCE
+# SHELF, a third slice on the same terms as the second: Klee round 9's pick 1,
+# taken at its default (`review/ruled/klee-overhaul-round-9-2026-09-04.md`).
+# The round-9 run died on act-2 floor 22 with no Block in hand, and the arm
+# offered none of its four defensive rows in ten rewards. Every new row is
+# keyed to the Bomb state and none is a plain Block, so the brief's sec.6
+# weakness ("she cannot block on demand") is answered rather than repealed.
+# The pick drafted four; the R253 charter audit withdrew two, so the shelf
+# ships as two. They are listed in their own block, like R244's below them.
 #
 # THIRTY-ONE BEFORE THAT (R244), and the three that arrived were a SECOND slice
 # rather than a redraft of the first: the ruled packet
@@ -301,7 +317,7 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # shared code every character's reactions would have to be re-checked against.
 # The reasoning is recorded in `VermillionPactNotBuilt`, and the row is off the
 # surface rather than staged as a card whose face would lie. The pool is
-# therefore 16 Common, 13 Uncommon, 6 Rare.
+# therefore 16 Common, 12 Uncommon, 6 Rare.
 KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Cook (8)
     "proto_ko_fish_flavored_bait",
@@ -350,6 +366,15 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_coven_errand",
     "proto_ko_witches_circle",
     "proto_ko_alices_introduction_magic",
+    # THE POOL PASS (1 -- round 10, 2026-09-04). The energy-priced plain
+    # detonator: 1 energy, Set off, draw a card, no Spark and no condition.
+    # It is the row three seats wanted and could not be offered.
+    "proto_ko_countdown",
+    # THE POOL PASS (1 -- round 11, 2026-09-04). The Spark sink: 0 energy, X
+    # Sparks, and the whole bank goes into the largest Bomb at 3 apiece. Round
+    # 10 gave the hand a detonator it could always fire; this gives the bank
+    # somewhere to go, and it pays only if a Bomb is already cooking.
+    "proto_ko_stoke_the_fuse",
 )
 
 # =============================================================================

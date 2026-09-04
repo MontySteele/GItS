@@ -220,6 +220,17 @@ public sealed class KleeElementalHooks : AbstractModel
         PlayerChoiceContext choiceContext, Creature target, decimal amount,
         ValueProp props, Creature? dealer, CardModel? cardSource)
     {
+        // `EB-423`. THE DAMAGE-EVENT BOUNDARY for the Shatter mark, and it is
+        // FIRST, above every guard below: this hook is the one thing that runs
+        // for EVERY hit -- powered or not, on a monster or a player -- in the
+        // broadcast BEFORE any power's `AfterDamageReceived`, which is exactly
+        // the lifetime the mark needs. Unconditional, so the nested Unpowered
+        // hit the Shatter itself deals clears it too (the mark is set after
+        // that hit lands, at `FrozenPower`), and so no mark can outlive the
+        // one broadcast it is about. The whole argument is at
+        // `ReactionEffects.MarkShattered`.
+        ReactionEffects.ClearShatterMark();
+
         // Same predicate the rest of the stack uses: unpowered damage (bombs,
         // reaction splash, HP costs) is never element-tagged.
         if (!props.IsPoweredAttack()) return;

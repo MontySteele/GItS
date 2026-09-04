@@ -21,6 +21,7 @@ from understudy.blindplay_notes import (AURA_NOTE,
                                         METER_DEFINED_NOTE, METER_NOTE,
                                         METER_RULES,
                                         PENDING_PICK_NOTE, PICKED_MARK,
+                                        PLAN_AIM_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE)
@@ -109,9 +110,30 @@ def _render_moved(said: dict[str, Any]) -> list[str]:
         return []
     if not said["moved"]:
         return ["    - no enemy lost HP"]
-    return [f"    - {m['target']} lost {m['amount']} HP"
-            + (", and died" if m["dead"] else "")
-            for m in said["moved"]]
+    return [f"    - {_moved_line(m)}" for m in said["moved"]]
+
+
+def _moved_line(m: dict[str, Any]) -> str:
+    """One body's share of one Plan, HP and Block (`EB-329`, `EB-440`).
+
+    THE SILENCE THE r12 SEAT READ AS SUCCESS. `Kurage's Oath+` carried out into
+    a Defend intent, HP went 35 to 35, the aura landed, and the receipt was
+    "no enemy lost HP" -- true, and indistinguishable on the page from a Plan
+    that did nothing at all. The Block the beat ate is now the line's own
+    clause, so a morning spent on a shield reads as one.
+
+    ABSENT IS NOT ZERO, `board_read`'s discipline one level down: a bridge that
+    predates the measurement sends no `absorbed` key and prints exactly the
+    line it always printed.
+    """
+    absorbed = m.get("absorbed") or 0
+    if not m["amount"] and absorbed:
+        return (f"{m['target']} lost no HP -- {absorbed} absorbed by Block"
+                + (", and died" if m["dead"] else ""))
+    line = f"{m['target']} lost {m['amount']} HP"
+    if absorbed:
+        line += f", and {absorbed} more absorbed by Block"
+    return line + (", and died" if m["dead"] else "")
 
 
 def _render_carry_out(pl: dict[str, Any]) -> list[str]:
@@ -129,16 +151,88 @@ def _render_carry_out(pl: dict[str, Any]) -> list[str]:
     if pl["carried_out"]:
         out.append(f"- The {pl['pet_name']} carried these out at the "
                    "start of this turn, front first:")
-        for said in pl["carried_out"]:
-            out.append(f"  - {said['line']}")
-            out += _render_moved(said)
+        out += _carry_out_rows(pl["carried_out"])
     if pl["fired_now"]:
         out.append(f"- The {pl['pet_name']} carried these out THIS TURN, the "
                    "moment each was written, and not this morning:")
-        for said in pl["fired_now"]:
-            out.append(f"  - {said['line']}")
-            out += _render_moved(said)
+        out += _carry_out_rows(pl["fired_now"])
     return out
+
+
+def _carry_out_rows(rows: list[dict[str, Any]]) -> list[str]:
+    """One heading's worth of Plans, in the order the jellyfish took them.
+
+    `EB-453` PUT THE UNRUN PLANS IN THE SAME LIST. A kill inside the first
+    Plan of a morning unwinds the drain, so the rest never happen -- and the
+    r13 seat, who had written two, was shown one and nothing about the other.
+    They ride the same list because they were in the same queue and the ORDER
+    is the fact: what the jellyfish did, and then where it stopped.
+    """
+    out: list[str] = []
+    for said in rows:
+        if said["unfinished"]:
+            out.append(f"  - {said['card']} — still planned when the fight "
+                       "ended, so it never happened.")
+            continue
+        out.append(
+            f"  - {said['line']}{_kind_clause(said)}{_rider_clause(said)}")
+        out += _render_moved(said)
+    return out
+
+
+def _rider_clause(said: dict[str, Any]) -> str:
+    """What ELSE landed inside this Plan's beat, by name (`EB-453`).
+
+    THE TWO NUMBERS THAT WOULD NOT ADD UP. The line's own figure is what the
+    Plan's first clause produced and the lines under it are what the BOARD
+    lost, measured across the whole beat -- so `War Council, 7 (the 7 is
+    damage)` sat above `lost 9 HP` and the missing 2 was the Tamakushi Casket
+    answering the Weak that same Plan had just applied. The page could not name
+    it, because a subtraction has no sources; the mod names it at the line that
+    deals it (`KokomiPlan.NoteRider`) and this prints the name.
+
+    ABSENT IS NOT EMPTY, this section's standing rule: a bridge with no
+    `riders` key sends none, and the row reads exactly as it always did.
+    """
+    riders = said.get("riders") or []
+    if not riders:
+        return ""
+    named = ", ".join(f"{r['source']} {r['amount']}" for r in riders)
+    return f" Inside the same beat: {named}."
+
+
+def _kind_clause(said: dict[str, Any]) -> str:
+    """What the figure on a carry-out line IS (`EB-426`).
+
+    `Bake-Kurage: Cleansing Wave, 7` put a bare 7 in the slot every other line
+    uses for damage and then said "no enemy lost HP". The 7 was BLOCK, cut from
+    the clause's 10 by Frail, and the r11 seat derived both halves off the
+    board. Neither is in the mod's sentence -- it is one string with one figure
+    -- so the kind and the amount the clause asked for ride beside it and the
+    page says them.
+
+    THE MOD'S SENTENCE IS UNTOUCHED. It is printed as sent, and this is a
+    clause AFTER it: one composer for the on-screen words, which is the whole
+    argument for the `line` field, and the page adding what the wire now
+    carries.
+
+    EVERY KIND AND NOT ONLY BLOCK. "A bare number in the slot every other line
+    uses for damage" is a complaint about a slot with no label, and labelling
+    one kind would leave the slot exactly as ambiguous for the next reader --
+    `Exposed Flank, 2` is two stacks of Vulnerable.
+
+    THE ASKED-FOR HALF IS PRINTED ONLY WHERE IT DIFFERS, and it is not always
+    smaller: a hit into Vulnerable lands above what its clause asked for. Which
+    power moved it is not on the wire (`CreatureCmd.GainBlock` reports a landed
+    amount and no attribution), so the page states the two numbers and leaves
+    the screen's own status rows to name what sits between them.
+    """
+    if said["number"] is None or not said["kind"]:
+        return ""
+    clause = f" — the {said['number']} is {said['kind']}"
+    if said["asked"] is not None and said["asked"] != said["number"]:
+        clause += f"; the clause asked for {said['asked']}"
+    return clause + "."
 
 
 def _board_note_wanted(pl: dict[str, Any]) -> bool:
@@ -272,9 +366,24 @@ def _render_options(items: list[dict[str, Any]], bullet: str = "-") -> list[str]
             # unchanged `not available` everywhere else, which covers a shelf
             # that was never stocked and a row priced out of reach.
             line += f" ({o.get('unavailable') or 'not available'})"
+        # `EB-448`: the mark the event screen never had. `was_chosen` is on
+        # the feed and says this row is the one this room has already
+        # resolved, which is what makes the outcome below readable as an
+        # outcome rather than as an offer.
+        if o.get("taken"):
+            line += " — TAKEN"
         out.append(line)
         if o.get("text"):
             out.append(f"    {o['text']}")
+        # `EB-448`: what this row NAMES, each in the game's own words. An
+        # option that hands over a card or a relic carries its face on the
+        # feed and the page dropped it, so a granted `Byrdonis Egg` was a
+        # sentence and never a card.
+        for named in o.get("names") or []:
+            row = f"    · **{named['name']}**"
+            if named.get("text"):
+                row += f" — {named['text']}"
+            out.append(row)
         if o.get("note"):
             out.append(f"    *{o['note']}*")
     return out
@@ -357,10 +466,12 @@ def render(obs: dict[str, Any]) -> str:
                            "whole fight. Enemies cannot touch it. Play a card "
                            "on it to write its **Plan** line instead of "
                            "playing the card now.")
-                # `EB-378`: whose element the carry-out is, said where the
-                # carry-out happens. Under the pet's own line, because it is a
-                # fact about the jellyfish's hit rather than about any one
-                # Plan in the queue below.
+                # `EB-442`: WHERE a Plan lands, then `EB-378`'s whose hit
+                # it is -- both under the pet's own line, because both are
+                # facts about the jellyfish's carry-out rather than about any
+                # one Plan in the queue below. The aim rule leads: a reader
+                # asking what a Plan will do asks which body first.
+                out.append(PLAN_AIM_NOTE)
                 out.append(PLAN_HYDRO_NOTE)
             # `EB-317`. WHAT ALREADY HAPPENED, BEFORE WHAT IS STILL WAITING,
             # because that is the order the turn had: the morning's Plans were
@@ -396,7 +507,8 @@ def render(obs: dict[str, Any]) -> str:
             # at the foot of the section rather than under the last card.
             if _board_note_wanted(pl):
                 out += ["", CARRY_OUT_BOARD_NOTE]
-        if c.get("salon") and c["salon"]["performed"]:
+        if c.get("salon") and (c["salon"]["performed"]
+                               or c["salon"]["replayed"]):
             # `EB-405`. WHAT THE STAGE DID THIS TURN, one act per line --
             # `EB-198`'s contract, the same one the carry-out block is under.
             #
@@ -410,6 +522,16 @@ def render(obs: dict[str, Any]) -> str:
             # aura" rather than claiming Hydro that is not there.
             out += ["", "## What your Salon did this turn", ""]
             out += [_render_performance(row) for row in c["salon"]["performed"]]
+            # `EB-420`. THE PLAY THAT IS MISSING FROM THE LIST ABOVE, named.
+            # A Companion card played an extra time makes nobody perform --
+            # the trigger is once per Companion card played -- so the acts
+            # above are one short of the plays, and a reader counting them
+            # infers the wrong rule. The round-5 seat did: "two Crabaletta
+            # lines ... for three Companion-card plays' worth of triggers",
+            # and "no line anywhere on the screen said Duet".
+            out += [f"- **{name}** was played an extra time, and an extra "
+                    "play makes nobody perform."
+                    for name in c["salon"]["replayed"]]
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page
@@ -538,6 +660,26 @@ def render(obs: dict[str, Any]) -> str:
                     + ", ".join(f["kinds"]) for f in obs["ahead"]]
         if obs.get("boss"):
             out += ["", f"At the top of this act: **{obs['boss']}**"]
+        # `EB-447`: what you are routing WITH. The gold is this screen's own
+        # feed; the deck is the lane's store and carries its staleness with
+        # it, in the same words the Smith's omission list uses.
+        if obs.get("gold") is not None:
+            out += ["", f"You have {obs['gold']} gold."]
+        if obs.get("deck"):
+            out += ["", "## Your deck", ""]
+            out += [f"- **{c['title']}**"
+                    + (f" × {c['count']}" if c["count"] > 1 else "")
+                    for c in obs["deck"]]
+            floor = obs.get("deck_floor")
+            out += ["", "*This page has no deck on this screen's data feed: "
+                        "the list above is your deck as it stood in the last "
+                        "fight"
+                    + (f" (floor {floor})" if floor else "")
+                    + ". Anything you have picked up since is not in it.*"]
+        else:
+            out += ["", "*This page cannot say what is in your deck yet: the "
+                        "deck is on a fight's data feed and no fight of this "
+                        "run has been read.*"]
     elif obs["screen"] in ("card_reward", "card_select"):
         out += [f"# {obs['prompt']}", ""]
         for card in obs["offers"]:

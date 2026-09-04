@@ -187,9 +187,18 @@ public sealed class TamakushiCasket : CustomRelicModel
         var dealer = pet ?? kokomi;
         await Vfx.KurageBeat.Act(pet);
         Vfx.KurageBeat.Say(dealer, Vfx.KurageBeat.Line(SourceName, null));
-        await ElementalHit.Deal(
+        var dealt = await ElementalHit.Deal(
             choiceContext, target, Element.Hydro,
             KokomiOverhaulLaw.CasketStrike, dealer);
+        // `EB-453`. THE STRIKE NAMES ITSELF TO THE PLAN IT LANDED INSIDE.
+        // `KokomiPlan.MovedOn` is MEASURED across the whole beat, so a Plan
+        // that applies a debuff shows this hit inside its total and could not
+        // say where it came from: the r13 seat read `War Council, 7 (the 7 is
+        // damage)` beside a body that had lost 9. The DELIVERED number is
+        // reported rather than the printed one, because Vulnerable moves it
+        // and the page is trying to account for a total. Outside a Plan the
+        // call does nothing, which is why it is unconditional.
+        KokomiPlan.NoteRider(SourceName, dealt);
         // `EB-335`. SHELL GUARD reads the STRIKE and not the debuff that caused
         // it, which is what keeps it separable from The Clouds Like Waves
         // Rippling (that card pays per debuff APPLIED). Hung here, at the one

@@ -448,3 +448,144 @@ The reply:
 1. FOLLOWS — C6.
 2. FOLLOWS — C6.
 ```
+
+## 5. Addendum, 2026-09-04: a third misquote, and the Klee pool pass
+
+**The calibration list in call 2 (§4.2) misquoted Dig In.** It gave "Uncommon,
+0 energy, costs 2 Spark: Gain 5 Block; 6 more if the enemy intends to attack".
+The sheet prints Dig In as a Common Skill, 0 energy, 1 Spark: "Gain 8 Block."
+The row was on the list for calibration only; no verdict in §1 names it, and
+the three reviewed defence rows were ruled on C4 and C6 against their own
+lines, Defend, and later the sheet's rows. The verdicts stand. The lesson in
+§2 is repeated because the misquote was found after it was written: every
+reference row in a charter prompt is pasted from the YAML, and the census
+that pastes it is run, not remembered.
+
+**The Klee pool pass, first two rows, same door.** Klee round 10 left the Spark
+deadlock as the pool pass's first question (three seats holding Spark-priced
+detonators at 0 Spark, others holding 4 to 7 Sparks with nothing to spend
+them on). Two rows were written and read by GPT through the doctrine role
+before any tester, this time with the pool census pasted from the sheet:
+
+| Row | Verdict | Clause |
+|---|---|---|
+| Explosive Spark (Uncommon Attack, 0 energy, X Sparks: 3 damage per Spark spent) | **REQUIRES_MODIFICATION**, withdrawn | C3: its value follows the banked Sparks, not a Bomb decision |
+| Countdown (Common Skill, 1 energy: Set off. Draw 1 card.) | **FOLLOWS** | C1 to C6: 1 energy to Set off and draw, beside Sizzle's 1-energy Set off and 6 damage; the losing line stays |
+
+Countdown is built; the sink is not, and the Spark surplus the seats reported
+is left for the next round to say again with Countdown in the pool. The
+prompt and reply:
+
+```
+# Doctrine read: two Klee pool rows against the kit charter
+
+Each numbered card below is ONE ARM. For each, FOLLOWS or
+REQUIRES_MODIFICATION, the clause (C1 to C6) you ruled against, and the line
+of the card with its arithmetic in one sentence, naming the pool row you
+compared it to. Read adversarially; the author is a different model family
+and the owner wants the row that should not reach a tester named.
+
+## The charter
+
+- **C1 (owner).** "A successful design phase should not end with 'all agents
+  always win.'" A row that removes a losing line the kit is meant to keep,
+  instead of pricing it, is out.
+- **C2 (LAW D3).** A benefit carries a binding price; there is a real turn on
+  which the card is worse than a plain card of its cost.
+- **C3 (LAW D2).** The card's value turns on a choice the player makes (bank
+  or cash a Bomb), not on a number rising while you watch.
+- **C4 (Klee brief §6).** She cannot block on demand; every defence past the
+  base game's Defend is conditional on the decision just made.
+- **C5 (Klee brief §3 rule 7).** Nothing fires by itself: no automatic free
+  attack, no "at N Sparks".
+- **C6 (not strictly better).** Not a strictly better version of a shipped
+  pool row below, or of a base-game non-basic card at the same or lower
+  rarity and cost (Whirlwind is X-cost Uncommon: 5 to ALL per energy;
+  Skewer X-cost: 7 per energy to one; Sword Boomerang; Cleave).
+
+## The engine, Klee
+
+Her Attacks apply Pyro. A **Bomb** is a charge on an enemy that grows by 4
+at the start of each of her turns and goes off only when a card says **Set
+off** (every Bomb on that enemy, one at a time, each its own Pyro hit; not
+an Attack). A **Mine** also goes off when its enemy attacks her. **Spark**:
+she starts each combat with 1, gains 1 per Bomb going off, and cards that
+print a Spark price spend Sparks instead of energy; no cap, lost at the end
+of combat. Energy 3, HP 62. Starter: 4 Strike, 4 Defend, Ka-pow! (basic, 0
+energy, Retain: "Set off. Deal 4 damage."), Jumpy Dumpty (basic, 1: "Place a
+Bomb 8. When it goes off, place a Mine 3 on ALL enemies.").
+
+The round-10 finding these rows answer: three seats sat in a deadlock,
+holding Spark-priced detonators at 0 Spark with a fat Bomb on the enemy and
+no energy-priced detonator drawn (Ka-pow! is one card in ten); other seats
+ended fights holding 4 to 7 Sparks with nothing to spend them on.
+
+Pool rows quoted from the sheet (rarity, energy cost, Spark cost if any):
+
+- Fwoosh! (Common Attack, 0 energy, 1 Spark): Set off. Deal 6 damage.
+- Tinder Toss (Common Attack, 0 energy, 1 Spark): Set off and deal 4 damage
+  to a random enemy twice.
+- Quick Fuse (Common Skill, 0 energy, 1 Spark): Each Bomb on the enemy grows
+  by 3. Set off.
+- Bang Bang! (Uncommon Attack, 0 energy, 2 Spark): Set off. Deal 8 damage.
+  Place a Bomb 4.
+- Sugar Rush (Rare Skill, 0 energy, 2 Spark): Gain 2 Energy. Draw 1 card.
+  Exhaust.
+- Dig In (Common Skill, 0 energy, 1 Spark): Gain 8 Block.
+- Powder Charge (Uncommon Skill, 0 energy, 1 Spark): Place a Bomb 6.
+- Sizzle (Common Attack, 1 energy): Set off. Deal 6 damage. If a Bomb
+  triggered an Elemental Reaction this turn, deal 6 additional damage.
+- Perfect Timing (Uncommon Attack, 1): Set off. Deal 8 damage. If a Bomb
+  triggered an Elemental Reaction this turn, play this again.
+- Flame Dance (Uncommon Attack, 1): Set off each enemy whose aura is not
+  Pyro. Deal 5 damage to ALL enemies.
+- Big Badda Boom (Uncommon Attack, 2): Set off. Deal 12 damage. Then deal
+  damage equal to what the Bombs dealt.
+- Rapid Fire (Uncommon Attack, 2): Deal 3 damage to a random enemy 4 times.
+  Set off each enemy hit.
+- The Big One (Rare Attack, 3): Set off for quadruple damage.
+- Pocket Fireworks (Common Attack, 1): Deal 9 damage.
+- Ammo Scavenging (Common Skill, 1): Place a Bomb 4. Draw 1 card for each of
+  your Bombs that went off this turn.
+- Pop (Common Skill, 0 energy): Place a Bomb 5.
+- Catalytic Converter (Uncommon Power, 1): Whenever one of your Bombs
+  triggers an Elemental Reaction, gain 1 additional Spark.
+- Grounded (Uncommon Power, 1): At the start of your turn, if none of your
+  Bombs went off last turn, gain 6 Block and 1 Spark.
+
+## The arms
+
+1. **Explosive Spark** — Uncommon Attack, 0 energy, costs all your Sparks
+   (X). Spend all your Sparks. Deal 3 damage per Spark spent. Upgrade: 4 per
+   Spark. (Does not Set off. At 0 Sparks it does nothing and is not
+   playable.)
+2. **Countdown** — Common Skill, 1 energy. Set off. Draw 1 card. Upgrade:
+   draw 2.
+
+Two verdicts, each with its clause and its line. Under 200 words.
+```
+
+```
+1. REQUIRES_MODIFICATION — C3. At 1 Spark, Explosive Spark deals 3 damage versus Fwoosh!’s 6 damage plus Set off, but its value scales only with banked Sparks rather than a Bomb decision.
+
+2. FOLLOWS — C1–C6. Countdown costs 1 energy to Set off and draw 1, versus Sizzle’s same 1-energy Set off plus 6 damage, preserving a real losing line.
+```
+
+### 5.1 The pool pass, row 2 (same day, later)
+
+Rounds 11 and 12 ended fights with 4 to 9 Sparks unspent, the surplus the
+withdrawn sink was written for. A second sink was written whose value
+follows the Bomb decision rather than the bank, at Quick Fuse's own rate,
+and read through the same door:
+
+| Row | Verdict | Clause |
+|---|---|---|
+| Stoke the Fuse (Uncommon Skill, 0 energy, X Sparks: your largest Bomb grows by 3 per Spark spent; no Set off) | **FOLLOWS** | C1 to C6: +3 for 1 Spark, Quick Fuse's rate, without its Set off |
+
+The prompt was the row-1 prompt with the earlier verdicts stated and the
+single arm below; the reply verbatim:
+
+```
+FOLLOWS — C1–C6; “Your largest Bomb grows by 3 per Spark spent” yields +3 for 1 Spark, matching Quick Fuse’s pool-row rate while lacking its Set off.
+```
+

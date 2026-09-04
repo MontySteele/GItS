@@ -46,14 +46,14 @@ public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCa
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_gust");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Mollis Favonius"),
-        ("description", "[gold]Swirl[/gold]. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal {PowerAmount:diff()} additional damage."),
+        ("description", "[gold]Hexerei[/gold]. [gold]Swirl[/gold]. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

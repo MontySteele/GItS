@@ -63,6 +63,9 @@ class _FakeBridge:
     def current_seed(self):                     # pragma: no cover - guard
         raise AssertionError("the run must not reach the seed read-back")
 
+    def seed_read_back(self, **kw):             # pragma: no cover - guard
+        raise AssertionError("the run must not reach the seed read-back")
+
 
 @pytest.fixture()
 def parked_run(tmp_path, monkeypatch):

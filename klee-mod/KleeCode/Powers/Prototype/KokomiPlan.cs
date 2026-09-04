@@ -168,9 +168,45 @@ public static class KokomiPlan
     /// composers in two languages is exactly how a page and a screen come to
     /// disagree about words; there is one, and it is C#.
     /// </summary>
+    /// <paramref name="Kind"/> AND <paramref name="Asked"/> ARE `EB-426`, AND
+    /// THEY SAY WHAT THE FIGURE IS. `Bake-Kurage: Cleansing Wave, 7` puts a
+    /// bare 7 in the slot every other line uses for damage and then reports
+    /// "no enemy lost HP"; the 7 was BLOCK, cut from the clause's 10 by Frail,
+    /// and the r11 seat had to derive both halves. Neither is derivable from
+    /// the wire: the line is one string and <paramref name="Number"/> is one
+    /// integer, so the clause's own kind and the amount it asked for ride
+    /// beside them. Both are the FIRST numbered clause's, which is the clause
+    /// <paramref name="Number"/> already belongs to.
+    ///
+    /// WHICH MODIFIER MOVED IT IS NOT HERE, and that is a limit rather than an
+    /// omission: <c>CreatureCmd.GainBlock</c> reports a landed amount and no
+    /// attribution, so the honest pair is what was asked and what landed. The
+    /// screen's own status rows name the power that sits between them.
     public readonly record struct CarriedOutPlan(
         string Card, int? Number, string Line,
-        IReadOnlyList<MovedOn>? Moved, bool OnPlay);
+        IReadOnlyList<MovedOn>? Moved, bool OnPlay,
+        string? Kind = null, int? Asked = null,
+        IReadOnlyList<Rider>? Riders = null, bool Unfinished = false);
+
+    /// <summary>
+    /// SOMETHING ELSE THAT LANDED INSIDE ONE PLAN'S WINDOW, by name and by
+    /// the number it delivered (`EB-453`).
+    ///
+    /// THE GAP. <see cref="MovedOn"/> is MEASURED -- HP before the clauses and
+    /// HP after -- which is what makes it honest and also what makes it
+    /// anonymous: the r13 seat read `War Council, 7 (the 7 is damage)` beside
+    /// a body that had lost 9, and the missing 2 was the Tamakushi Casket
+    /// answering the Weak the same Plan had just applied. Both numbers were
+    /// right and the page could not say why they differed.
+    ///
+    /// SO THE RIDER NAMES ITSELF. Nothing is re-derived and nothing is
+    /// subtracted: a source that lands inside the window says what it is and
+    /// what it dealt, at the one line that already knows both
+    /// (<c>TamakushiCasket.Strike</c>), and the page prints the delivered
+    /// total with that name beside it. A future rider that says nothing here
+    /// leaves the page exactly as it was.
+    /// </summary>
+    public readonly record struct Rider(string Source, int Amount);
 
     /// <summary>
     /// HOW MUCH THE BOARD ACTUALLY MOVED, on one creature, during one Plan
@@ -202,12 +238,50 @@ public static class KokomiPlan
     /// resolves the id to the name a reader has been using; a body that DIED
     /// on this beat is off the board the next screen sends and keeps the name
     /// recorded here.
+    ///
+    /// <paramref name="Absorbed"/> IS `EB-440`, AND IT IS THE OTHER HALF OF
+    /// THE SUBTRACTION. HP is not the only bar a Plan moves: the r12 seat
+    /// carried `Kurage's Oath+` out into a Defend intent, watched HP go 35 to
+    /// 35, saw the aura land, and read the beat as having worked. Every row
+    /// above measures HP, so the receipt for that beat was the empty list --
+    /// "no enemy lost HP" -- which is true and reads as "nothing happened".
+    /// The enemy's BLOCK is read at the same two moments as its HP, so a
+    /// morning that spent itself on Block says so with the number it spent.
     /// </summary>
     public readonly record struct MovedOn(
-        string Target, string CombatId, int Amount, bool Dead);
+        string Target, string CombatId, int Amount, bool Dead, int Absorbed);
 
     private static object? _combat;
     private static readonly Dictionary<Player, List<Entry>> _queues = new();
+
+    /// <summary>
+    /// The riders landing inside the Plan being resolved RIGHT NOW, or null
+    /// between Plans (`EB-453`).
+    ///
+    /// ONE LIST AND NOT A DICTIONARY PER SEAT, deliberately: a Plan resolves
+    /// inside one synchronous beat of one seat's turn, which is the same
+    /// window `before` is measured across, and a rider that arrives while no
+    /// Plan is running belongs to no Plan and is dropped. `ResolveEntry` saves
+    /// and restores the previous value around its own, because a clause can
+    /// play a card that resolves a second Plan (Moon's Reflection's replay),
+    /// and the inner Plan's riders are the inner Plan's.
+    /// </summary>
+    private static List<Rider>? _riders;
+
+    /// <summary>
+    /// "I landed inside this Plan, I am called X, and I delivered N."
+    ///
+    /// Called by the rider itself rather than inferred here: this file knows
+    /// what the BOARD did (<see cref="MovedOn"/>) and cannot know what caused
+    /// any part of it, which is exactly the gap `EB-453` is. Safe to call at
+    /// any time -- outside a Plan it does nothing, which is what makes it a
+    /// call a rider can make unconditionally.
+    /// </summary>
+    public static void NoteRider(string source, int amount)
+    {
+        if (_riders == null || amount <= 0) return;
+        _riders.Add(new Rider(source, amount));
+    }
 
     /// <summary>
     /// WHAT THE STRIP SHOWS WHILE A MORNING IS RUNNING, and it exists only so
@@ -513,6 +587,14 @@ public static class KokomiPlan
         }
         finally
         {
+            // `EB-453`: WHAT THE FIGHT CUT OFF, recorded before the display
+            // list that holds it is torn down. On the ordinary path this loop
+            // is empty -- every Plan that resolved has already removed its own
+            // thumbnail -- so a normal morning's page is unchanged.
+            if (_showing.TryGetValue(player, out var left))
+            {
+                foreach (var entry in left) NoteUnfinished(kokomi, entry);
+            }
             // A throw inside a Plan must not leave the strip drawing a morning
             // that is over; the display list is torn down on every path.
             _showing.Remove(player);
@@ -623,12 +705,31 @@ public static class KokomiPlan
         // all (Moon's Reflection's replay, Nereid's window) says its name and
         // no number, which is what the row asks for.
         int? number = null;
+        // `EB-426`: the first numbered clause's KIND and the amount it asked
+        // for, taken beside the number they belong to. `asked` is read BEFORE
+        // the clause runs, because two of the three scaled kinds read a ledger
+        // the clause itself moves.
+        string? kind = null;
+        int? asked = null;
+        // `EB-453`: the window a rider can name itself in, opened here beside
+        // `before` because it closes where `before` is read back. The outer
+        // value is saved rather than assumed null: a clause may play a card
+        // that resolves a second Plan, and that Plan's riders are its own.
+        var outerRiders = _riders;
+        var riders = new List<Rider>();
+        _riders = riders;
         try
         {
             foreach (var clause in entry.Clauses)
             {
+                var wanted = AskedFor(kokomi, clause);
                 var produced = await ResolveOne(choiceContext, kokomi, clause);
-                number ??= produced;
+                if (number == null && produced != null)
+                {
+                    number = produced;
+                    kind = NumberKind(clause.Kind);
+                    asked = wanted;
+                }
             }
         }
         finally
@@ -642,8 +743,9 @@ public static class KokomiPlan
             // the unwind path and not after it. Every number the board already
             // moved is still measured; the clauses that never ran moved
             // nothing, which is the honest reading.
+            _riders = outerRiders;
             Announce(kokomi, entry.Title, number, Moved(before, kokomi),
-                     onPlay);
+                     onPlay, kind, asked, riders);
         }
 
         // SANGO ISSHIN's condition, written HERE because this is the one place
@@ -676,11 +778,40 @@ public static class KokomiPlan
     /// on-screen line and nothing else.
     /// </summary>
     private static void Announce(Creature kokomi, string card, int? number,
-                                 IReadOnlyList<MovedOn>? moved, bool onPlay)
+                                 IReadOnlyList<MovedOn>? moved, bool onPlay,
+                                 string? kind = null, int? asked = null,
+                                 IReadOnlyList<Rider>? riders = null)
     {
         var line = Vfx.KurageBeat.Line(card, number);
         Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi, line);
+        Record(kokomi, new CarriedOutPlan(card, number, line, moved, onPlay,
+                                          kind, asked, riders));
+    }
 
+    /// <summary>
+    /// A PLAN THAT NEVER HAPPENED, filed in the order it would have (`EB-453`).
+    ///
+    /// THE GAP. `ResolveAll` drains the queue in one move and then resolves
+    /// the entries one at a time; a kill inside the FIRST one unwinds the loop
+    /// and the rest never run. The r13 seat wrote two Plans, was shown one,
+    /// and had nothing on the page to say what became of the other -- the
+    /// queue is already empty by then and `_showing` is torn down on the way
+    /// out, so no surface carried it at all.
+    ///
+    /// NO BUBBLE, because nothing was said: this is a page row and not a beat.
+    /// `Number` is null and `Moved` is null for the same reason -- the board
+    /// was not measured across a Plan that did not run, and an empty list here
+    /// would read as "measured, and nothing moved".
+    /// </summary>
+    private static void NoteUnfinished(Creature kokomi, Entry entry) =>
+        Record(kokomi, new CarriedOutPlan(
+            entry.Title, null, Vfx.KurageBeat.Line(entry.Title, null),
+            null, false, null, null, null, Unfinished: true));
+
+    /// <summary>The one writer of the turn's carry-out list, so a beat and a
+    /// Plan the fight cut off arrive in one order and by one door.</summary>
+    private static void Record(Creature kokomi, CarriedOutPlan row)
+    {
         var player = kokomi.Player;
         if (player == null) return;
         if (!_carriedOut.TryGetValue(player, out var said))
@@ -688,7 +819,7 @@ public static class KokomiPlan
             said = new List<CarriedOutPlan>();
             _carriedOut[player] = said;
         }
-        said.Add(new CarriedOutPlan(card, number, line, moved, onPlay));
+        said.Add(row);
     }
 
     /// <summary>
@@ -707,18 +838,22 @@ public static class KokomiPlan
     /// Plan starts simply moves zero and drops out of the difference on its
     /// own. Nothing here throws -- a state read never does.
     /// </summary>
-    private static Dictionary<string, (string Name, int Hp)>? BoardHp(
-        Creature? kokomi)
+    private static Dictionary<string, (string Name, int Hp, int Block)>?
+        BoardHp(Creature? kokomi)
     {
         var combat = kokomi?.CombatState;
         if (combat == null) return null;
-        var board = new Dictionary<string, (string, int)>();
+        var board = new Dictionary<string, (string, int, int)>();
         foreach (var enemy in combat.HittableEnemies.ToList())
         {
             if (enemy == null) continue;
             var id = enemy.CombatId.ToString();
             if (string.IsNullOrEmpty(id)) continue;
-            board[id!] = (EnemyName(enemy), (int)enemy.CurrentHp);
+            // `EB-440`: BLOCK BESIDE HP, read at the same moment and by the
+            // same rule. A Plan that spent itself on a Defend intent moved a
+            // bar; which bar is the reader's question and not this method's.
+            board[id!] = (EnemyName(enemy), (int)enemy.CurrentHp,
+                          (int)enemy.Block);
         }
         return board;
     }
@@ -744,7 +879,8 @@ public static class KokomiPlan
     /// creature that died to this Plan as of one that died three turns ago.
     /// </summary>
     private static IReadOnlyList<MovedOn>? Moved(
-        Dictionary<string, (string Name, int Hp)>? before, Creature? kokomi)
+        Dictionary<string, (string Name, int Hp, int Block)>? before,
+        Creature? kokomi)
     {
         var after = BoardHp(kokomi);
         if (before == null || after == null) return null;
@@ -754,10 +890,21 @@ public static class KokomiPlan
             var was = pair.Value.Hp;
             // A creature MISSING from the after-read has left the board, and
             // the honest reading of that is "it took everything it had left".
-            var now = after.TryGetValue(pair.Key, out var seen) ? seen.Hp : 0;
+            var standing = after.TryGetValue(pair.Key, out var seen);
+            var now = standing ? seen.Hp : 0;
             var lost = was - now;
-            if (lost <= 0) continue;
-            rows.Add(new MovedOn(pair.Value.Name, pair.Key, lost, now <= 0));
+            // `EB-440`: THE BLOCK THE BEAT ATE. A body off the board has no
+            // Block left either, and Block a Plan somehow GAVE an enemy is not
+            // a thing this row has been ruled on -- the negative delta drops,
+            // exactly as a negative HP delta does one line up.
+            var absorbed = pair.Value.Block - (standing ? seen.Block : 0);
+            if (absorbed < 0) absorbed = 0;
+            // A row is now "this Plan moved something on this body", and Block
+            // is something: the empty list still means the morning moved no
+            // bar at all, which is what a Draw Plan's receipt has to say.
+            if (lost <= 0 && absorbed <= 0) continue;
+            rows.Add(new MovedOn(pair.Value.Name, pair.Key,
+                                 lost > 0 ? lost : 0, now <= 0, absorbed));
         }
         return rows;
     }
@@ -883,6 +1030,65 @@ public static class KokomiPlan
         }
         return null;
     }
+
+    /// <summary>
+    /// WHAT THE NUMBER ON A CARRY-OUT LINE IS, in the word the page prints
+    /// (`EB-426`).
+    ///
+    /// A NAMED METHOD RATHER THAN A MAP, for <see cref="CarriedOutRow"/>'s
+    /// reason: these strings are the contract with `understudy/blindplay`, and
+    /// `Il.Strings` over a named method is what a headless pin can read.
+    ///
+    /// NULL WHERE THE CLAUSE PRODUCES NO NUMBER, which is the same set
+    /// <see cref="ResolveOne"/> returns null for -- Nereid's window is turns
+    /// and not a board figure, and a replay or a copy prints its own numbers
+    /// as it resolves. Those lines carry a card name and nothing else, so
+    /// there is no figure to label.
+    ///
+    /// THE THREE DAMAGE KINDS ARE ONE WORD, because they are one quantity: a
+    /// flat hit, a quarter of her Max HP and a per-Companion count all land as
+    /// damage, and a reader asking what the figure is is not asking how it was
+    /// derived.
+    /// </summary>
+    private static string? NumberKind(Kind kind) => kind switch
+    {
+        Kind.Draw => "cards drawn",
+        Kind.Energy => "Energy",
+        Kind.Block or Kind.BlockPerPlanThisMorning => "Block",
+        Kind.Mend => "HP healed",
+        Kind.Damage or Kind.DamageQuarterMaxHp
+            or Kind.DamagePerCompanionLastTurn => "damage",
+        Kind.ApplyWeak => "Weak",
+        Kind.ApplyVulnerable => "Vulnerable",
+        _ => null,
+    };
+
+    /// <summary>
+    /// WHAT THE CLAUSE ASKED FOR, before the board had its say (`EB-426`).
+    ///
+    /// The other half of the seat's derivation: `Cleansing Wave, 7` is a Plan
+    /// that asked for 10 and was cut by Frail, and the page can only say so
+    /// where it is told the 10. For most kinds that is the clause's own
+    /// <c>Amount</c>; the three scaled ones compute it exactly as
+    /// <see cref="ResolveOne"/> does, which is why this is a method beside it
+    /// rather than a second reading of the same rule somewhere else.
+    ///
+    /// CALLED BEFORE THE CLAUSE RUNS. Two of the three read a ledger the
+    /// clause itself moves -- Tide Wall counts the morning's Plans, Chain of
+    /// Command last turn's Companions -- so asking afterwards would answer a
+    /// different question.
+    /// </summary>
+    private static int? AskedFor(Creature kokomi, Planned plan) => plan.Kind
+        switch
+    {
+        Kind.BlockPerPlanThisMorning =>
+            plan.Amount * KokomiOverhaulLedger.For(kokomi).PlansThisMorning,
+        Kind.DamagePerCompanionLastTurn =>
+            plan.Amount * KokomiOverhaulLedger.For(kokomi)
+                              .CompanionsPlayedLastTurn,
+        Kind.DamageQuarterMaxHp => KokomiRules.QuarterOfMaxHp(kokomi),
+        _ => plan.Amount,
+    };
 
     /// <summary>
     /// The front enemy: leftmost alive, SKIPPING A MINION (`R250`, round-5
@@ -1081,13 +1287,30 @@ public static class KokomiPlan
             ["line"] = said.Line,
             ["on_play"] = said.OnPlay,
             ["moved"] = said.Moved?.Select(MovedRow).ToList(),
+            // `EB-426`: what the number IS, and what its clause asked for.
+            ["kind"] = said.Kind,
+            ["asked"] = said.Asked,
+            // `EB-453`: what else landed inside this Plan's window, and
+            // whether the Plan happened at all.
+            ["riders"] = said.Riders?.Select(RiderRow).ToList(),
+            ["unfinished"] = said.Unfinished,
+        };
+
+    /// One named rider inside one Plan's window (`EB-453`). A named method for
+    /// <see cref="CarriedOutRow"/>'s own reason: these two keys are read by
+    /// `understudy/blindplay._rider_row` and a pin has to see the literals.
+    private static object? RiderRow(Rider rider) =>
+        new Dictionary<string, object?>
+        {
+            ["source"] = rider.Source,
+            ["amount"] = rider.Amount,
         };
 
     /// One enemy's share of one Plan, on the wire (`EB-329`).
     ///
     /// A NAMED METHOD FOR <see cref="CarriedOutRow"/>'s OWN REASON: these
-    /// four keys are read by `understudy/blindplay._moved_row` and a pin has
-    /// to be able to see the literals.
+    /// five keys are read by `understudy/blindplay._moved_row` and a pin has
+    /// to be able to see the literals. `absorbed` is `EB-440`'s.
     private static object? MovedRow(MovedOn moved) =>
         new Dictionary<string, object?>
         {
@@ -1095,6 +1318,7 @@ public static class KokomiPlan
             ["combat_id"] = moved.CombatId,
             ["amount"] = moved.Amount,
             ["dead"] = moved.Dead,
+            ["absorbed"] = moved.Absorbed,
         };
 
     /// <summary>

@@ -49,7 +49,7 @@ public sealed class ProtoMcYaoyaoYueguiThrowingMode : CustomCardModel, ICompanio
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_yaoyao_yuegui_throwing_mode");
 

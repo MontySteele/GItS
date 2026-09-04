@@ -46,16 +46,23 @@ def by_rarity(character="furina"):
 
 
 def test_the_map_is_the_sheets_own_replaces_key():
-    """DERIVED IN NEITHER DIRECTION, COMPARED IN BOTH. The map is a literal in
+    """DERIVED IN NEITHER DIRECTION, COMPARED IN BOTH. The maps are literals in
     `furina_reframe` (the flag lives there rather than in `constants.py`, for
     the reason that module's header gives) and the rows carry `replaces:`; a
-    fifth copy on the surface that nobody named here would otherwise be a row
-    that is never offered, which is exactly the defect
-    `lint_arm_pool_parity` was written for one arm over."""
+    copy on the surface that nobody named in either would otherwise be a row
+    that is never offered AND never dealt, which is exactly the defect
+    `lint_arm_pool_parity` was written for one arm over.
+
+    BOTH SEAMS AT ONCE, because the sheet key does not say which door a row
+    goes through: `replaces:` means only "this arm swaps me in", and R254's
+    starter reader is the first row that swaps in at the printed starter
+    rather than at the offer. The two maps are asserted DISJOINT, so the union
+    cannot quietly cover a shipped id claimed by both."""
     on_sheet = {c.replaces: c.id for c in loader.prototype_cards()
                 if c.replaces is not None and not c.personal_pool
                 and c.character == "furina"}
-    assert on_sheet == fr.POOL_SUBS
+    assert not set(fr.POOL_SUBS) & set(fr.STARTER_SUBS)
+    assert on_sheet == {**fr.POOL_SUBS, **fr.STARTER_SUBS}
 
 
 def test_the_arm_off_offers_the_shipped_rows_and_no_prototype():

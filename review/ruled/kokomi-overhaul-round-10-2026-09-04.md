@@ -1,4 +1,4 @@
-Status: OPEN (pick 1 in §5; the defaults in §4 are applied)
+Status: RULED R254 2026-09-04
 
 # Kokomi round ten: the first build after the audit, and the jellyfish that stood empty
 
@@ -130,3 +130,8 @@ Default is 1 because the shelf built for this question has not been read
 yet; 2 is the smallest change that answers the seats and the one this
 author would take if the next Kokomi round says the same thing with Tide
 Chart in the deck.
+
+## 6. Ruled (R254, 2026-09-04)
+
+[USER]: "Starter density stands." Option 1; the re-ask trigger in §5
+stands with it.

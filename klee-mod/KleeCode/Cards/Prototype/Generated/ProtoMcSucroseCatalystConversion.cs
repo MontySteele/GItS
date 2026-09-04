@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -47,12 +48,15 @@ public sealed class ProtoMcSucroseCatalystConversion : CustomCardModel, ICompani
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Exhaust };
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForHexerei(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_catalyst_conversion");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Catalyst Conversion"),
-        ("description", "Gain 1 [gold]Energy[/gold]. Draw 1 card."),
+        ("description", "[gold]Hexerei[/gold]. Gain 1 [gold]Energy[/gold]. Draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

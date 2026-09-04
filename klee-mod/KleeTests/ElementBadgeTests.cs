@@ -136,7 +136,13 @@ public class ElementBadgeTests
         // would notice.
         var fields = AppliesFields();
 
-        Assert.Equal(4, fields.Length);
+        // `EB-454` MADE IT SIX. Anemo and Geo leave no aura and still get no
+        // gem (`IconPathFor` answers null for both, and `AuraApplication` still
+        // answers `None`), but they carry the WORD now: a face that names no
+        // element reads as untyped, and the r13 seat read `Jean -- Gale Blade`
+        // that way until a reaction preview named Anemo mid-fight. The claim
+        // this test makes is about the POSITION, and it is unchanged.
+        Assert.Equal(6, fields.Length);
         Assert.All(fields, f => Assert.Equal(
             AutoKeywordPosition.None,
             f.GetCustomAttribute<KeywordPropertiesAttribute>()!.Position));
@@ -213,7 +219,9 @@ public class ElementBadgeTests
         //     (the reason `KleePowerIcons` names its powers one by one), and
         //   * Anemo and Geo declare NONE, because they leave no aura (LAW,
         //     combat: "Anemo/Geo leave no aura -- they only trigger") and so
-        //     have no keyword, no tip and nothing to indicate.
+        //     have no aura icon to paint. `EB-454` gave both a KEYWORD, which
+        //     is the word and the tip; the gem is still the four that leave
+        //     something on a body.
         //
         // The FILES are the art pipeline's business (`art/plan.tsv` rows
         // `power_aura_*`); no pck is present in this host, so what is provable

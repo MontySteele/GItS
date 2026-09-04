@@ -36,6 +36,7 @@ public static class PrototypeRoster
     private static List<CardModel> BuildFurina() =>
         new()
         {
+            ModelDb.Card<ProtoFrAriaOfRecompense>(),
             ModelDb.Card<ProtoFrCurtainCall>(),
             ModelDb.Card<ProtoFrDramaticEntrance>(),
             ModelDb.Card<ProtoFrExitStageLeft>(),
@@ -64,6 +65,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKoCatalyticConverter>(),
             ModelDb.Card<ProtoKoChainFuse>(),
             ModelDb.Card<ProtoKoChainedReactions>(),
+            ModelDb.Card<ProtoKoCountdown>(),
             ModelDb.Card<ProtoKoCovenErrand>(),
             ModelDb.Card<ProtoKoDigIn>(),
             ModelDb.Card<ProtoKoDodocoCover>(),
@@ -85,6 +87,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKoSizzle>(),
             ModelDb.Card<ProtoKoSorryJean>(),
             ModelDb.Card<ProtoKoSparksNSplash>(),
+            ModelDb.Card<ProtoKoStokeTheFuse>(),
             ModelDb.Card<ProtoKoSugarRush>(),
             ModelDb.Card<ProtoKoTheBigOne>(),
             ModelDb.Card<ProtoKoTinderToss>(),

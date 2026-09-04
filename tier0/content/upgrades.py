@@ -162,12 +162,19 @@ def _proto_hit(effects: list[dict]) -> dict | None:
 
 def _proto_grow(effects: list[dict]) -> dict | None:
     """The one effect a prototype `grow` delta binds to: the first printed
-    grow amount, whichever of the two overhaul ops prints it."""
+    grow amount, whichever of the three overhaul ops prints it.
+
+    `grow_largest_bomb`'s number is a RATE ("grows by 3 per Spark spent") and
+    it takes the same key anyway, because the key names what the smith moves
+    and what the face prints -- one printed grow number per row, and no row
+    carries two of these ops."""
     return next((fx for fx in effects
                  if (fx.get("op") == "grow_bombs"
                      and isinstance(fx.get("amount"), int))
                  or (fx.get("op") == "merge_bombs"
-                     and isinstance(fx.get("growth"), int))), None)
+                     and isinstance(fx.get("growth"), int))
+                 or (fx.get("op") == "grow_largest_bomb"
+                     and isinstance(fx.get("per_spark"), int))), None)
 
 
 def _proto_power(effects: list[dict]) -> dict | None:
@@ -757,15 +764,22 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                 (fx for fx in top if fx.get("op") == "block_largest_bomb"),
                 "cap", val)
         elif key == "grow":
-            # One key, two ops: `grow_bombs.amount` and `merge_bombs.growth`
-            # are both "how much the Bombs grow", and a row carries at most
-            # one of them.
+            # One key, three ops: `grow_bombs.amount`, `merge_bombs.growth`
+            # and `grow_largest_bomb.per_spark` are all "how much the Bombs
+            # grow", and a row carries at most one of them. The third is a
+            # RATE rather than a flat amount and still takes this key, for
+            # `_proto_grow`'s stated reason -- the key names the one grow
+            # number the face prints.
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "grow_bombs"), "amount", val)
             if not ok:
                 ok = _bump_first((fx for fx in top
                                   if fx.get("op") == "merge_bombs"),
                                  "growth", val)
+            if not ok:
+                ok = _bump_first((fx for fx in top
+                                  if fx.get("op") == "grow_largest_bomb"),
+                                 "per_spark", val)
         elif key == "mend":
             ok = _bump_first((fx for fx in top if fx.get("op") == "mend"),
                              "amount", val)

@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -44,12 +45,15 @@ public sealed class ProtoMcAlbedoTectonicTide : CustomCardModel, ICompanionCard,
 
     public string? Nation => "mondstadt";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_albedo_solar_isotoma");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Albedo — Tectonic Tide"),
-        ("description", "Whenever an [gold]Elemental Reaction[/gold] happens, deal {PowerAmount:diff()} damage to that enemy."),
+        ("description", "[gold]Hexerei[/gold]. Whenever an [gold]Elemental Reaction[/gold] happens, deal {PowerAmount:diff()} damage to that enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

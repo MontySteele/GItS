@@ -119,6 +119,11 @@ public static class KleeCompanionSpark
         if (amount <= 0) return;
 
         await SparkPower.Gain(choiceContext, creature, amount, cardPlay.Card,
-            source: "companion:prune/play");
+            // `EB-418`. THE NAME IS THE RULE'S AND NOT PRUNE'S. The grant
+            // moved off her face at `EB-219` and the trigger is keyed on the
+            // POOL, so every coven Personal walks this line -- the r11 seat's
+            // unnamed Spark was Diona's. A ledger row saying "prune" over a
+            // Diona play is the same unreadable number one surface in.
+            source: "companion:personal/play");
     }
 }

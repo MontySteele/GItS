@@ -52,14 +52,14 @@ public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, IC
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false);
+        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_fischl_nightrider");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fischl — Undone Be Thy Sinful Hex"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Whenever an [gold]Electro[/gold] [gold]Elemental Reaction[/gold] happens this turn, deal {PowerAmount:diff()} [gold]Electro[/gold] damage to a random enemy."),
+        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage. This turn, each [gold]Electro[/gold] [gold]Elemental Reaction[/gold] deals {PowerAmount:diff()} [gold]Electro[/gold] damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
