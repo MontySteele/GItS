@@ -30,7 +30,7 @@ namespace KleeMod.Tests.Prototype;
 ///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL. The DECISION is real: the seam's
 /// second method takes the pair table as a parameter, so this file hands it
-/// four pairs it constructed itself -- shipped generated rows, not stand-in
+/// pairs it constructed itself -- shipped generated rows, not stand-in
 /// doubles -- and the swap, the refusal for another character and the refusal
 /// with the arm off are direct assertions against the shipped comparison. The
 /// character id is real too: <c>Seat.Klee()</c> is a real <c>Player</c> and
@@ -38,7 +38,7 @@ namespace KleeMod.Tests.Prototype;
 /// SIDES of the comparison that failed are computed here rather than assumed.
 /// STRUCTURAL are the two things a <c>ModelDb</c>-free process cannot run: that
 /// the game's own mouth routes through the pinned method, and that the shipped
-/// pair table names the same eight classes this file pairs up.
+/// pair table names the same classes this file pairs up.
 ///
 /// Sim twin: <c>tier0/tests/test_companion_standins.py</c>, which pins the two
 /// tables against each other by id.
@@ -51,7 +51,7 @@ public class CompanionStandInHandOffTests : IDisposable
     public void Dispose() => CompanionOverhaul.Enabled = _armWas;
 
     /// <summary>
-    /// The four pairs, Universal -> stand-in, CONSTRUCTED HERE. These are the
+    /// The pairs, Universal -> stand-in, CONSTRUCTED HERE. These are the
     /// shipped generated classes, so the <c>PersonalPool</c> under test is the
     /// emitted one and not a value this file made up -- which is the whole
     /// point: a hand-written double would have carried <c>"klee"</c> and passed
@@ -64,6 +64,10 @@ public class CompanionStandInHandOffTests : IDisposable
             (new ProtoMcNoelleBreastplate(), new ProtoMcNoelleIGotYourBack()),
             (new ProtoMcKaeyaFrostgnaw(), new ProtoMcKaeyaColdBloodedStrike()),
             (new ProtoMcJeanDandelionBreeze(), new ProtoMcJeanLionsFang()),
+            // R252's fifth caretaker, named here for the reason the four above
+            // are: every pin in this file is a sweep over this table, so a new
+            // stand-in joins the seam's whole coverage by being listed once.
+            (new ProtoMcBarbaraShowBegin(), new ProtoMcBarbaraFrontRowSeat()),
         };
 
     // ---- THE DECISION, real ---------------------------------------------
@@ -116,7 +120,7 @@ public class CompanionStandInHandOffTests : IDisposable
     public void With_the_arm_off_even_klee_is_handed_the_universal()
     {
         // The acceptance condition: a flag-off build is byte-identical at this
-        // seam, and the four stand-ins are unreachable rather than merely
+        // seam, and every stand-in is unreachable rather than merely
         // unlikely.
         CompanionOverhaul.Enabled = false;
         var table = Table();
@@ -217,12 +221,12 @@ public class CompanionStandInHandOffTests : IDisposable
     }
 
     [Fact]
-    public void The_shipped_pair_table_names_the_eight_classes_pinned_here()
+    public void The_shipped_pair_table_names_the_classes_pinned_here()
     {
         // STRUCTURAL: `Pairs` resolves every row through `ModelDb.Card<T>()`,
         // which throws until the game's boot builds the models, so the table
-        // cannot be CALLED here -- but the eight type arguments are in its IL.
-        // Without this, the four pairs above could drift into a fiction of
+        // cannot be CALLED here -- but every type argument is in its IL.
+        // Without this, the pairs above could drift into a fiction of
         // this file's own while the mod paired something else.
         var pairs = typeof(CompanionStandIns).GetMethod("Pairs", HeadlessGame.All)
             ?? throw new InvalidOperationException(

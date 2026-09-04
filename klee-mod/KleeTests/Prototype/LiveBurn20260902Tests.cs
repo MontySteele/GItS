@@ -163,17 +163,22 @@ public class LiveBurn20260902Tests
         // total that did not move.
         //
         // AND IT FITS THE CEILING ([USER], PR #340): the clause is one half of
-        // one sentence, and the two sentences together are 124 of the 135 that
-        // the base game's longest mechanic tip measures. The rewrite is why
-        // this word takes no named exception in
+        // one sentence, and the three sentences together are 135 of the 135
+        // that the base game's longest mechanic tip measures. The rewrite is
+        // why this word takes no named exception in
         // `tools/lint_text_conventions.py` while the badge's modified faces do.
+        //
+        // "Its hit takes" BECAME "It takes" AT `EB-361`, which is the spelling
+        // the static badge face already used ("It takes the enemy's debuffs,
+        // not your Strength or Weak") -- five of the characters rule 3's
+        // sentence needed, taken from a word the rule does not need.
         var body = string.Concat(Il.Strings(
             typeof(ArmKeywordTips)
                 .GetMethod("ForBomb", HeadlessGame.All)!));
 
         // `EB-373`: the same clause, narrowed to the two terms the fold reads.
-        Assert.Contains("Not an Attack: only their [gold]Vulnerable[/gold] "
-                      + "and a cap move it.", body);
+        Assert.Contains("Not an Attack: only [gold]Vulnerable[/gold] and a cap "
+                      + "move it.", body);
     }
 
     // ---- EB-293: the Plan keyword covers the plan-only case ---------------

@@ -158,19 +158,24 @@ public class ArmKeywordTipTests
         // characters over a ceiling that is the base game's own longest
         // mechanic tip, on the one word a seat reads every turn ([USER], PR
         // #340). All four rules survive the compression, which is what these
-        // read back: rule 1's rate, rule 7 ("only when"), rule 2's "all at
-        // once", and R248's burden.
+        // read back: rule 1's rate, rule 7 ("only when"), R248's burden and,
+        // since `EB-361`, rule 3's jump -- a Bomb whose enemy dies moves to a
+        // survivor, which three round-10 seats met with no wording anywhere.
+        // Rule 2's "all at once" is what those 33 characters cost, and the
+        // `Set off` tip two tests up states it in full.
         Assert.Contains("A charge on an enemy: grows ", printed);
-        Assert.Contains(" a turn, goes off only when [gold]Set off[/gold], "
-                      + "all at once.", printed);
+        Assert.Contains(" a turn, goes off only when [gold]Set off[/gold]. ",
+                        printed);
         // `EB-373` REWROTE THE FOURTH RULE'S CLAUSE. The fold is `FoldedMods`
         // and it reads two things off the target -- Vulnerable, and whichever
         // power sets the lowest damage cap -- so "takes the enemy's debuffs"
         // promised a Slow or a Flutter would move a Bomb, and the r9 seat
         // priced two fights on it. The reason those miss is what the clause
-        // leads with now: a Bomb's hit is not an Attack.
-        Assert.Contains("Not an Attack: only their [gold]Vulnerable[/gold] "
-                      + "and a cap move it.", printed);
+        // leads with now: a Bomb's hit is not an Attack. `EB-361`'s jump rule
+        // shares the 135 characters with it: "their" and "to a survivor" paid.
+        Assert.Contains("Not an Attack: only [gold]Vulnerable[/gold] and a cap "
+                      + "move it.", printed);
+        Assert.Contains("Kills move it on.", printed);
 
         // `EB-89`, read the only way it can be read: the growth rate is NOT a
         // literal anywhere in this method -- the two halves of the sentence are

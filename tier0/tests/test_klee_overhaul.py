@@ -38,12 +38,14 @@ from tier05 import draft, rewards
 
 SEED = 7
 
-#: Every op the arm has: slice one's eight, plus R244's `hexerei_mark_hand`.
-#: Registered in `effects.OPS` so the loader's vocabulary check accepts a row,
-#: priced in `draft.STATIC_OP_PRICING` so `lint_op_parity` stays green, and
-#: resolved only with the flag on and Klee in the seat.
+#: Every op the arm has: slice one's eight, plus R244's `hexerei_mark_hand`
+#: and R252's `block_largest_bomb`. Registered in `effects.OPS` so the loader's
+#: vocabulary check accepts a row, priced in `draft.STATIC_OP_PRICING` so
+#: `lint_op_parity` stays green, and resolved only with the flag on and Klee in
+#: the seat.
 OVERHAUL_OPS = ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
-                "remove_bomb_for_block", "damage_set_off_total",
+                "remove_bomb_for_block", "block_largest_bomb",
+                "damage_set_off_total",
                 "multiply_set_off", "draw_per_set_off", "hexerei_mark_hand")
 
 
@@ -198,10 +200,17 @@ def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
     They are pinned by name for the same reason the absence above is -- the
     ruled packet's scope statement is "three, no more", and a fourth arriving
     without a ruling is what this count catches.
+
+    THIRTY-FIVE SINCE R252, a THIRD slice on the same terms: the defence shelf
+    (`review/ruled/klee-overhaul-round-9-2026-09-04.md`, pick 1 taken at its
+    default). Four rows, and the packet's own scope statement is what the
+    names below hold -- every one keyed to the Bomb state, and none of them a
+    plain Block, which is why `proto_ko_dig_in` beside them is still the arm's
+    only unconditional Block and is still a Spark sink.
     """
     ids = C.KLEE_OVERHAUL_POOL_IDS
-    assert len(ids) == 31
-    assert len(set(ids)) == 31
+    assert len(ids) == 35
+    assert len(set(ids)) == 35
     assert "proto_ko_vermillion_pact" not in ids
     assert {"proto_ko_dig_in", "proto_ko_pop"} <= set(ids)
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
@@ -211,6 +220,9 @@ def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
     assert {"proto_ko_coven_errand", "proto_ko_witches_circle",
             "proto_ko_alices_introduction_magic"} <= set(ids)
     assert "proto_ko_hex_and_wick" not in ids
+    # R252's four, and only four.
+    assert {"proto_ko_dodoco_cover", "proto_ko_careful_now",
+            "proto_ko_fire_safety", "proto_ko_safety_lesson"} <= set(ids)
 
 
 def test_the_numbers_are_the_briefs_placeholders():
@@ -302,17 +314,20 @@ def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
 
 
 def test_the_pool_keeps_the_packets_rarity_split(overhaul):
-    """14 Common, 11 Uncommon, 6 Rare -- the slice packet's sec.4 count with
+    """16 Common, 13 Uncommon, 6 Rare -- the slice packet's sec.4 count with
     Vermillion Pact removed and, since DRAFT 4 (R242), Pop! and Dig In back as
-    Commons, plus ONE OF EACH from R244's Hexerei readers. Pinned because the
-    rarity buckets ARE the offer odds: a row filed in the wrong tier changes
-    how often it is seen, both returning rows had to stop being
-    `rarity: basic` to be offerable at all, and the ruled packet files its
-    three one per tier on purpose (a Common that reads the turn, an Uncommon
-    Power that is dead alone, a Rare enabler)."""
+    Commons, plus ONE OF EACH from R244's Hexerei readers and R252's defence
+    shelf two and two. Pinned because the rarity buckets ARE the offer odds: a
+    row filed in the wrong tier changes how often it is seen, both returning
+    rows had to stop being `rarity: basic` to be offerable at all, the R244
+    packet files its three one per tier on purpose (a Common that reads the
+    turn, an Uncommon Power that is dead alone, a Rare enabler), and R252's
+    split is its own answer to what the round-9 read asked -- the two rows a
+    STARTING HAND needs are Common, and the two that ask for a deck around
+    them are Uncommon."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 14, "uncommon": 11, "rare": 6}
+        "common": 16, "uncommon": 13, "rare": 6}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):

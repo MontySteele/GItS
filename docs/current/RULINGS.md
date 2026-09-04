@@ -261,8 +261,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R249 | 2026-09-03 | RULED: the shipped sheets' text pass, and the Companion-slot sentence leaves the relics | `c90aadb` |
 | R250 | 2026-09-03 | the 2026-09-04 morning slate -- three packet picks, a control run, Furina in motion, three overtaken rows closed | `193321b` |
 | R251 | 2026-09-03 | the Furina round-one pick -- the shipped Burst retires under the Furina arm now | `c1c369d` |
+| R252 | 2026-09-03 | Klee round 9 pick 1 at its default; the defence shelf, five rows on the surface | `bc8ca25` |
 
-250 rows over the R1..R251 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 139 from a commit message, 0 unresolved.
+251 rows over the R1..R252 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 140 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 

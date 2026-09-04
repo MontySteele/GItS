@@ -343,21 +343,23 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # rather than extended ([USER], PR #340): four sentences carrying
             # four rules would have run 60 characters over the tip ceiling, and
             # the ceiling is the base game's own longest mechanic tip on the one
-            # word a seat reads every turn. All four rules are still here in two
-            # sentences, and the tip takes no length exception.
+            # word a seat reads every turn. All four rules are still here in
+            # two sentences, and the tip takes no length exception.
+            #
             # `EB-373` REWROTE THE LAST CLAUSE. The fold is `FoldedMods` and
             # it reads two things off the target -- Vulnerable and whichever
             # power sets the lowest damage cap -- so "takes the enemy's
-            # debuffs" was a promise the code does not keep. The r9 seat
-            # priced two fights off it: a Slow 50 enemy took 48 from a pile
-            # printing 46, and a Flutter 5 enemy took a 27 Bomb whole while a
-            # printed 8 Attack landed 4. Both debuffs say "from Attacks", and
-            # a Bomb's hit is not an Attack -- which is what the clause leads
-            # with now, inside the same 135-character ceiling.
+            # debuffs" was a promise the code does not keep; a Bomb's hit is
+            # not an Attack, which is what the clause leads with now.
+            # `EB-361` ADDED A FIFTH RULE in the same 135 characters: a Bomb
+            # whose enemy dies moves to a survivor at its size, which three
+            # round-10 seats met as a stack they could not account for. Rule
+            # 2's "all at once" (the `Set off` clauses state it in full),
+            # "their" and "to a survivor" paid for it: 133 rendered.
             "A charge on an enemy: grows ",
-            " a turn, goes off only when [gold]Set off[/gold], all at once. ",
-            "Not an Attack: only their [gold]Vulnerable[/gold] and a cap ",
-            "move it.",
+            " a turn, goes off only when [gold]Set off[/gold]. ",
+            "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. ",
+            "Kills move it on.",
             "on the target goes off first, one at a ",
             "time, each a Pyro hit for its size.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",

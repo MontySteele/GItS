@@ -413,6 +413,54 @@
    upgrade: {retain: true},
    effects: [{op: remove_bomb_for_block}]}
 
+# --- the defence shelf (R252, Klee r9 pick 1): five rows, every one keyed to
+# the Bomb state, none a plain Block. Per-row reasoning:
+# docs/notes/prototype-surface-provenance.md. ---
+
+- {id: proto_ko_dodoco_cover, name: "Dodoco Cover", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Place a [gold]Bomb[/gold] 4. Gain 5 [gold]Block[/gold].",
+   upgrade: {bomb_size: +2, block: +2},
+   effects: [{op: plant_bomb, target: enemy, size: 4},
+             {op: block, amount: 5}]}
+
+- {id: proto_ko_careful_now, name: "Careful Now", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, retain: true,
+   description: "Gain [gold]Block[/gold] equal to your largest [gold]Bomb[/gold] when played, up to 10.",
+   upgrade: {cap: +3},
+   effects: [{op: block_largest_bomb, cap: 10}]}
+
+- {id: proto_ko_fire_safety, name: "Fire Safety", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "Gain 3 [gold]Block[/gold]. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 6 additional [gold]Block[/gold].",
+   upgrade: {conditional_block: +2},
+   effects: [{op: block, amount: 3},
+             {op: conditional, if: bomb_reacted_this_turn,
+              then: [{op: block, amount: 6}]}]}
+
+- {id: proto_ko_safety_lesson, name: "Safety Lesson", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever one of your [gold]Bombs[/gold] goes off, gain 2 [gold]Block[/gold].",
+   upgrade: {power_amount: +1},
+   effects: [{op: apply_power, power: ko_safety_lesson, amount: 2, target: self}]}
+
+- {id: proto_mc_barbara_front_row_seat, name: "Barbara — Front Row Seat", character: klee,
+   authored_by: [claude],
+   nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
+   cost: 1, type: skill,
+   personal_pool: [klee],
+   replaces: proto_mc_barbara_show_begin, art_of: proto_mc_barbara_show_begin,
+   description: "Gain 5 [gold]Block[/gold]. Apply [gold]Hydro[/gold] twice. Whenever a [gold]Bomb[/gold] goes off this turn, gain 3 [gold]Block[/gold].",
+   upgrade: {block: +2, power_amount: +1},
+   effects: [{op: block, amount: 5},
+             {op: apply_aura, element: hydro, target: enemy},
+             {op: apply_aura, element: hydro, target: enemy},
+             {op: apply_power, power: mc_front_row_seat, amount: 3, target: self}]}
+
 # the coven readers, PR: eb326-hexerei-readers. R244 sec.2: Klee's three
 # Hexerei readers, in her OWN pool.
 # Per-row reasoning: docs/notes/prototype-surface-provenance.md.

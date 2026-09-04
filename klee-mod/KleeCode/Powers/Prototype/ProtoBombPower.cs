@@ -184,11 +184,19 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// through"). So the count is a sentence, the Mine clause appears only
     /// when there is a Mine to talk about, and each modifier term says its own
     /// name.
+    ///
+    /// EB-361: FOUR SENTENCES IS THE CEILING AND RULE 3 IS THE FIFTH FACT, so
+    /// the growth sentence is a clause on the count rather than a sentence of
+    /// its own. Rule 3 -- a Bomb whose enemy dies moves to a survivor -- was on
+    /// no card, badge or tip, and three round-10 seats met it as a surprise:
+    /// one read `Bomb 36 / Bombs here: 3` on an enemy it had planted 11 on and
+    /// filed it as the screen contradicting itself. The badge is where a player
+    /// meets the survivor's stack, so it is where the rule is printed.
     /// </summary>
     private static string Face(bool mines, FoldedMods mods) =>
         "[gold]Set off[/gold] here deals " + PyroTotal + mods.Clause + "."
-      + (mines ? BombsWithMines : Bombs) + GrowthSentence
-      + (mines ? MineClause : NoSelfSentence);
+      + (mines ? BombsWithMines : Bombs)
+      + (mines ? MineClause : NoSelfSentence) + JumpSentence;
 
     /// <summary>The total, with no full stop: a modifier clause may follow it.
     ///
@@ -245,14 +253,25 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// this face now comes from the list the explosions consume, and the stack
     /// amount is left to be what the engine uses it for.
     /// </summary>
-    private const string Bombs = " Bombs here: [blue]{Count}[/blue].";
+    /// `EB-361` FOLDED RULE 1'S GROWTH INTO THIS SENTENCE, and the reason is
+    /// the sentence ceiling rather than taste: rule 3's jump is a fifth fact on
+    /// a face that may print four sentences, so the growth clause rides the
+    /// count it is about. "growing each turn" is the phrasing the Bomb keyword
+    /// tip already uses for the same rule ("grows {BombGrowth} a turn"), which
+    /// is also where the RATE is printed -- the badge has never carried it.
+    private const string Bombs =
+        " Bombs here: [blue]{Count}[/blue], growing each turn.";
 
     private const string BombsWithMines =
         " Bombs here: [blue]{Count}[/blue], including [blue]{Mines}[/blue] "
-      + "[gold]Mine{Mines:plural:|s}[/gold].";
+      + "[gold]Mine{Mines:plural:|s}[/gold], growing each turn.";
 
-    private const string GrowthSentence =
-        " Each grows at the start of your turn.";
+    /// <summary>Rule 3, `EB-361`. A Bomb whose enemy dies moves to a random
+    /// LIVING enemy at its size -- see <see cref="JumpCharges"/>, which is what
+    /// this sentence describes: every charge travels, Mines included, so the
+    /// word is "a survivor" and not "the next enemy". Printed on both branches,
+    /// because a Mine jumps exactly as a plain Bomb does.</summary>
+    private const string JumpSentence = " A kill moves them to a survivor.";
 
     /// <summary>Rule 7 on a pile with no Mine in it. A pile holding a Mine
     /// prints <see cref="MineClause"/> INSTEAD, because "none goes off by
@@ -1481,6 +1500,51 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         var size = await RemoveLargestForBlock(choiceContext, applier);
         if (size <= 0) return;
         await CreatureCmd.GainBlock(applier, size, ValueProp.Unpowered, null);
+    }
+
+    /// <summary>
+    /// Careful Now (<c>R252</c>): gain Block equal to your largest Bomb, up to
+    /// <paramref name="cap"/>. Returns the Block granted.
+    ///
+    /// IT READS THE PILE AND SPENDS NOTHING, which is the whole of what
+    /// separates it from <see cref="RemoveLargestForBlockAndGain"/> above.
+    /// Sorry, Jean... is an emergency exit that costs the Bomb; this is the
+    /// cook's own posture -- the bigger the charge she is standing over, the
+    /// more carefully she stands -- and afterwards every Bomb is still there
+    /// and still growing.
+    ///
+    /// THE LARGEST SINGLE CHARGE, BOARD-WIDE, and both halves are the printed
+    /// face's ("your largest Bomb"). Per enemy it is
+    /// <see cref="LargestPlacedBy"/>, the Splash's own reader since R250;
+    /// across the board it is the largest of those, which is the same walk
+    /// Sorry, Jean... makes one charge at a time. The card takes no target, so
+    /// "the enemy" could only ever have meant the board.
+    ///
+    /// THE CAP IS THE ROW'S, never a law constant: it is a printed number the
+    /// upgrade moves (<c>upgrade: {cap: +3}</c>), and it is what keeps the row
+    /// from turning Grounded's cook turn into a stall.
+    ///
+    /// UNPOWERED (<c>ValueProp.Unpowered</c>), like every other rule-sourced
+    /// Block on this arm: no Dexterity feeds it and no Frail bites it, because
+    /// it is a RULE's Block and not a card's printed Block. Sim twin:
+    /// <c>klee_overhaul.block_for_largest_bomb</c>.
+    /// </summary>
+    public static async Task<int> BlockForLargestBomb(
+        PlayerChoiceContext choiceContext, Creature applier, int cap)
+    {
+        if (applier.CombatState == null || cap <= 0) return 0;
+
+        var largest = 0;
+        foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
+        {
+            if (enemy.IsDead) continue;
+            var here = LargestPlacedBy(enemy, applier);
+            if (here > largest) largest = here;
+        }
+        var amount = largest < cap ? largest : cap;
+        if (amount <= 0) return 0;
+        await CreatureCmd.GainBlock(applier, amount, ValueProp.Unpowered, null);
+        return amount;
     }
 
     /// <summary>Big Badda Boom's second clause reads this: the damage this

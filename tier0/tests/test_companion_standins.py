@@ -209,7 +209,7 @@ def test_hand_off_is_the_identity_with_the_flag_off():
         assert standins.hand_off(cid, "klee") == cid
 
 
-# --- 4. the four caretakers' rules -------------------------------------------
+# --- 4. the caretakers' rules -----------------------------------------------
 
 def _klee_state():
     state = make_state(enemies=[make_enemy(hp=200)])
@@ -259,14 +259,44 @@ def test_noelle_pays_per_mine_and_not_per_bomb(arms):
     assert state.player.block == before + 8                 # twice, repeating
 
 
-def test_both_watchers_close_at_the_turn_boundary(arms):
+def test_barbara_pays_per_bomb_and_not_only_per_mine(arms):
+    """R252's fifth caretaker. Noelle's card one clause over: `Whenever` is
+    still forward-looking and still pays per explosion, but the Mines-only
+    test is gone -- a Mine is a Bomb, so Noelle's window sits inside this
+    one."""
+    state = _klee_state()
+    state.player.powers[standins.FRONT_ROW_SEAT] = 3
+    enemy = state.enemies[0]
+    klee_overhaul.place(state, enemy, 5)                    # a plain Bomb
+    before = state.player.block
+    klee_overhaul.set_off(state, enemy)
+    assert state.player.block == before + 3                 # Noelle pays none
+    klee_overhaul.place(state, enemy, 5, is_mine=True)
+    klee_overhaul.place(state, enemy, 5, is_mine=True)
+    klee_overhaul.set_off(state, enemy)
+    assert state.player.block == before + 9                 # and per Mine too
+
+
+def test_barbara_applies_hydro_twice(arms):
+    """Round 8's Diona finding read onto the other element: one application on
+    a board Klee is already cooking is eaten by her own Pyro before the
+    companion's turn comes round, so the applier row worth drafting applies
+    twice. The row's own effects are what both engines read."""
+    row = loader.peek_card("proto_mc_barbara_front_row_seat")
+    auras = [fx for fx in row.effects if fx.get("op") == "apply_aura"]
+    assert [fx["element"] for fx in auras] == ["hydro", "hydro"]
+
+
+def test_every_watcher_closes_at_the_turn_boundary(arms):
     state = _klee_state()
     state.player.powers[standins.SHAKEN_NOT_PURRED] = 5
     state.player.powers[standins.I_GOT_YOUR_BACK] = 4
+    state.player.powers[standins.FRONT_ROW_SEAT] = 3
     state.turn = 2
     standins.roll_turn(state)
     assert standins.SHAKEN_NOT_PURRED not in state.player.powers
     assert standins.I_GOT_YOUR_BACK not in state.player.powers
+    assert standins.FRONT_ROW_SEAT not in state.player.powers
 
 
 def test_kaeya_blinds_grounded_for_exactly_one_turn(arms):

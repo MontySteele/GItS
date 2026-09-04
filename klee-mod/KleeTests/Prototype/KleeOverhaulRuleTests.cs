@@ -404,6 +404,66 @@ public class KleeOverhaulRuleTests
         Assert.False(taken[0].IsMine);      // the CARRIER is a plain Bomb
     }
 
+    [Fact]
+    public void The_payload_survives_being_stacked_with_a_plain_bomb()
+    {
+        // `EB-395`. The round-10 seat planted Jumpy Dumpty, stacked a Pop!
+        // Bomb on the same enemy, let both grow for two turns and set the
+        // aggregate off at `Bomb 25 / Bombs here: 2` -- and reported no Mine
+        // afterwards, where every single-Bomb Set off in the same run placed
+        // one. Either the rider was lost in the stack or nothing printed that
+        // it had fired.
+        //
+        // THIS IS THE FIRST HALF, and it is the half a headless pin can hold:
+        // the charge list is a list, not a total, so a second charge beside
+        // the carrier changes nothing about the carrier -- and NEITHER DOES
+        // GROWTH, which is where a `new ProtoCharge(size + amount, isMine)`
+        // would have dropped the payload field on the floor. `GrowBy` uses a
+        // `with` expression, and this reads that back rather than trusting it.
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(30).Creature;
+        var pile = ProtoBombs.Place(enemy, klee.Creature,
+            new ProtoBombs.Charge(8, PayloadMineAll: 3),   // Jumpy Dumpty
+            new ProtoBombs.Charge(5));                     // Pop!
+
+        pile.GrowBy(KleeOverhaulLaw.BombGrowth);
+        pile.GrowBy(KleeOverhaulLaw.BombGrowth);
+        var taken = pile.TakeAll()!;
+
+        Assert.Equal(2, taken.Count);
+        Assert.Equal(8 + 2 * KleeOverhaulLaw.BombGrowth, taken[0].Size);
+        Assert.Equal(3, taken[0].PayloadMineAll);
+        Assert.Equal(0, taken[1].PayloadMineAll);
+        // AND THE SECOND HALF, structurally: `SetOff` explodes the charges it
+        // took ONE AT A TIME (`Explode` per charge, pinned above), and
+        // `Explode` places the payload on every enemy -- so the carrier pays
+        // whether it is alone on the pile or second in a stack of four. The
+        // sim twin runs the whole board:
+        // `test_the_payload_pays_from_inside_a_stacked_pile`.
+        Assert.Contains("ProtoBombPower.Explode", Il.Calls(Method("SetOff")));
+        Assert.Contains("ProtoBombPower.Place", Il.Calls(Method("Explode")));
+    }
+
+    [Fact]
+    public void A_merge_carries_every_payload_it_moved()
+    {
+        // `EB-395`'s other named suspect: Careful Arrangement moves every Bomb
+        // onto one enemy AS ONE Bomb, and a merge is a MOVE, so it loses
+        // nothing -- the merged charge is a Mine if any part of it was, and it
+        // carries the summed payload. Read off `MergeAllTo`'s own loop, which
+        // is the only place in the arm that folds charges together.
+        var il = Il.Calls(Method("MergeAllTo"));
+
+        Assert.Contains("ProtoBombPower.Place", il);
+        Assert.Contains("ProtoBombPower.TakeAll", il);
+        // The three fields the fold must READ, off the compiled method that
+        // folds them. A getter missing here is a rider deleted by a card whose
+        // face says it only moves Bombs.
+        Assert.Contains(il, c => c.Contains("get_PayloadMineAll"));
+        Assert.Contains(il, c => c.Contains("get_IsMine"));
+        Assert.Contains(il, c => c.Contains("get_Size"));
+    }
+
     // ---- RULE 7: the two per-turn counters -------------------------------
 
     [Fact]

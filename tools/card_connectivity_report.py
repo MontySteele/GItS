@@ -375,6 +375,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "merge_bombs": [_hook("private", "bombs", "use")],
     "remove_bomb_for_block": [_hook("private", "bombs", "use"),
                               _hook("shared", "block_held", "write")],
+    # R252 (Careful Now). A READ of the pile and not a use: the charge stays
+    # where it is and keeps growing, which is the one line that separates this
+    # row from Sorry, Jean... above it.
+    "block_largest_bomb": [_hook("private", "bombs", "read"),
+                           _hook("shared", "block_held", "write")],
     "damage_set_off_total": [_hook("private", "bombs", "read")],
     "multiply_set_off": [_hook("private", "bombs", "read")],
     "draw_per_set_off": [_hook("private", "bombs", "read"),

@@ -344,20 +344,22 @@ AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
 ARM_KEYWORDS: dict[str, str] = {
     # "EACH" IS `EB-340`'s, and it stays: the act-1 seat found growth is
     # +{growth} PER BOMB (Bomb 5 + Bomb 8 -> 21, not 17) and no wording said
-    # so. In game the badge carries that fact ("Each grows at the start of
-    # your turn"); the seat page has no badge, so the glossary says it.
-    # `EB-373` REWROTE THE SECOND SENTENCE, and the old one promised more
-    # than the code does. The C# folds exactly two things off the target --
-    # its Vulnerable, and whichever power sets the lowest damage cap -- so
-    # "the enemy's debuffs" was a rule the r9 seat priced two fights off and
-    # lost both reads: a Slow 50 enemy took 48 from a pile printing 46, and a
-    # Flutter 5 enemy took a 27 Bomb whole while a printed 8 Attack landed 4.
-    # Both debuffs say "from Attacks", and a Bomb's hit is not an Attack.
-    # Held in step with `ArmKeywordTips.ForBomb`, which says it in the same
-    # words.
+    # so. In game the badge carries that fact ("Bombs here: N, growing each
+    # turn"); the seat page has no badge, so the glossary says it per Bomb.
+    # `EB-373` REWROTE THE SECOND SENTENCE: the C# folds exactly two things
+    # off the target -- its Vulnerable, and whichever power sets the lowest
+    # damage cap -- so "the enemy's debuffs" was a rule the r9 seat priced
+    # two fights off and lost both reads (a Slow 50 enemy took 48 from a pile
+    # printing 46; a Flutter 5 enemy took a 27 Bomb whole). Both debuffs say
+    # "from Attacks", and a Bomb's hit is not an Attack.
+    # `EB-361` ADDED THE LAST SENTENCE, in step with `ArmKeywordTips.ForBomb`:
+    # a Bomb whose enemy dies moves to a survivor at its size, and three
+    # round-10 seats met that rule for the first time as a stack they could
+    # not account for. The page says it in the tip's own words, "Kills move
+    # it on", because the glossary is pinned to the C# text word for word.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
-             "only when Set off, all at once. Not an Attack: only their "
-             "Vulnerable and a cap move it."),
+             "only when Set off. Not an Attack: only Vulnerable and a cap "
+             "move it. Kills move it on."),
     "Set off": ("Every Bomb on the target goes off first, one at a time, "
                 "each a Pyro hit for its size."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
@@ -735,7 +737,7 @@ FROZEN_BOSS_CLAUSE = (" Bosses cannot be Frozen: Hydro plus Cryo is consumed "
 BOSS_ROOM = "boss"
 
 # The number the card's own Bomb tip prints, where a screen carries that tip.
-# `ArmKeywordTips.ForBomb` builds it as "Grows by <n> at the start of your
+# `ArmKeywordTips.ForBomb` builds it as "A charge on an enemy: grows <n> a
 # turn", so this is an exact read of the game's own sentence and never a guess
 # at what a stray numeral near the word Bomb might have meant.
 # `EB-340` reads the rate off the SCREEN's own Bomb tip so the page quotes

@@ -267,8 +267,17 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # nothing else" -- so `loader.pool_replacement` is its sibling seam, read at the
 # same single door.
 #
-# THIRTY-ONE SINCE R244, and the three that arrived are a SECOND slice rather
-# than a redraft of this one: the ruled packet
+# THIRTY-FIVE SINCE R252, and the four that arrived are the DEFENCE SHELF, a
+# third slice on the same terms as the second: Klee round 9's pick 1, taken at
+# its default (`review/ruled/klee-overhaul-round-9-2026-09-04.md`). The round-9
+# run died on act-2 floor 22 with no Block in hand, and the arm offered none of
+# its four defensive rows in ten rewards. Every new row is keyed to the Bomb
+# state and none is a plain Block, so the brief's sec.6 weakness ("she cannot
+# block on demand") is answered rather than repealed. They are listed in their
+# own block, like R244's below them.
+#
+# THIRTY-ONE BEFORE THAT (R244), and the three that arrived were a SECOND slice
+# rather than a redraft of the first: the ruled packet
 # `review/ruled/klee-hexerei-readers-2026-09-02.md` adds Klee's three Hexerei
 # readers, the cards in her own pool that pay for the coven's one-word mark.
 # They are listed in their own block at the end of the tuple, so the packet
@@ -292,7 +301,7 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # shared code every character's reactions would have to be re-checked against.
 # The reasoning is recorded in `VermillionPactNotBuilt`, and the row is off the
 # surface rather than staged as a card whose face would lie. The pool is
-# therefore 13 Common, 10 Uncommon, 5 Rare.
+# therefore 16 Common, 13 Uncommon, 6 Rare.
 KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Cook (8)
     "proto_ko_fish_flavored_bait",
@@ -327,6 +336,16 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_run_away",
     "proto_ko_grounded",
     "proto_ko_sorry_jean",
+    # THE DEFENCE SHELF (4 -- R252, Klee round 9 pick 1 at its default). Two
+    # Commons and two Uncommons, and the split is the pick's own: the two rows
+    # a starting hand needs (a placer with a Block half, and Run Away!'s shape
+    # on the React loop) are Common, and the two that ask for a deck around
+    # them (the capped read of the pile, the Block-per-explosion Power) are
+    # Uncommon.
+    "proto_ko_dodoco_cover",
+    "proto_ko_careful_now",
+    "proto_ko_fire_safety",
+    "proto_ko_safety_lesson",
     # THE HEXEREI READERS (3 -- R244, the ruled packet's sec.2). One per
     # rarity, which is the ruling's own shape: a Common that reads the turn, an
     # Uncommon Power that is DEAD ALONE by ruling (pick 2 at its default), and
@@ -472,6 +491,12 @@ COMPANION_OVERHAUL_NATION = "mondstadt"
 # REACHABLE, and so smithable at a campfire. `companion_standins.standin_ids()`
 # is the derivation it is pinned against.
 COMPANION_STANDIN_IDS: tuple[str, ...] = (
+    # R252's fifth caretaker, on the same terms as the four below it: Barbara's
+    # Front Row Seat replaces Let the Show Begin♪, applies Hydro TWICE so
+    # Klee's own Pyro does not eat it (round 8's Diona finding), and pays Block
+    # per Bomb this turn. Filed in the caretakers' block because it reads the
+    # Klee arm's explosion bus, which is what a caretaker stand-in is for.
+    "proto_mc_barbara_front_row_seat",      # for proto_mc_barbara_show_begin
     "proto_mc_diona_shaken_not_purred",     # for proto_mc_diona_icy_paws
     "proto_mc_jean_lions_fang",             # for proto_mc_jean_dandelion_breeze
     "proto_mc_kaeya_cold_blooded_strike",   # for proto_mc_kaeya_frostgnaw
