@@ -46,14 +46,14 @@ public sealed class ProtoMcFischlOz : CustomCardModel, ICompanionCard, IHexereiC
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForOz(ArmKeywordTips.ForHexerei(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_fischl_oz");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fischl — Oz, at Your Side"),
-        ("description", "[gold]Hexerei[/gold]. At the end of your turn, Oz deals 5 [gold]Electro[/gold] damage to a random enemy. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "[gold]Hexerei[/gold]. At the end of your turn, [gold]Oz[/gold] deals 5 [gold]Electro[/gold] damage to a random enemy. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

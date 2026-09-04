@@ -62,6 +62,33 @@ public static class KleeCardTooltips
         IEnumerable<IHoverTip> inherited, CardModel card)
     {
         foreach (var tip in inherited) yield return tip;
+#if PROTOTYPE_CARDS
+        // `EB-449`. A RETIRED METER EXPLAINS NOTHING.
+        //
+        // R251 retired Furina's Burst under the reframe, and this paragraph
+        // went on describing it: what the meter is, that a Burst card enters
+        // the hand the moment it fills, and that "energy past full is lost at
+        // the cast". The r7 seat met all three on High Tide at a floor-9
+        // reward with no Burst meter anywhere on the screen -- three rules
+        // about a resource the arm does not have, printed on the one surface
+        // a reader consults before drafting.
+        //
+        // `FurinaReframe.BurstRetiredFor` IS THE GATE, the same one
+        // `FurinaResources` asks before granting, spending or displaying the
+        // meter (three call sites, all in that file). Asking it here makes
+        // "she has no Burst meter under the arm" one decision rather than
+        // four, and keeps this branch owner-scoped like every other reframe
+        // seam: in co-op the other seat may be Klee, whose meter is live, and
+        // whose card must keep the paragraph.
+        //
+        // NOT THE `Elemental Skill` KEYWORD, which is loc registered once at
+        // boot and cannot be owner-branched. Its own retirement is
+        // `EB-200`'s, which rides `EB-199`; this is the tip the seat read.
+        if (FurinaReframe.BurstRetiredFor(TipOwner.CreatureOf(card)))
+        {
+            yield break;
+        }
+#endif
         yield return new HoverTip(
             new LocString(Table, BurstKey + ".title"), BurstBody(card));
     }

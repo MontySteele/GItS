@@ -275,11 +275,44 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// count it is about. "growing each turn" is the phrasing the Bomb keyword
     /// tip already uses for the same rule ("grows {BombGrowth} a turn"), which
     /// is also where the RATE is printed -- the badge has never carried it.
+    /// `EB-450` REPLACED THE COUNT WITH THE LIST, and the count is still in
+    /// it: `Bombs here: 5, 8, 20, 12` says four as plainly as `4` did and adds
+    /// the one fact the badge withheld.
+    ///
+    /// THE DEFECT. The badge printed a SUM and a count -- `Bomb 45 (4 bombs)`
+    /// -- while `EB-432`'s Set off tip says the charges go off oldest first
+    /// and the FIRST one takes the aura. So on a bombed body wearing Cryo,
+    /// which charge Melts was a fact the player had to remember placing rather
+    /// than read, and the r13 seat carried it in its head for a whole fight.
+    /// Two surfaces, one rule, and only one of them could name the charge.
+    ///
+    /// OLDEST FIRST IS THE ORDER `SetOff` WALKS -- `_charges` is placement
+    /// order and every taker walks it front to back -- so the list is printed
+    /// in the list's own order and no second definition of "oldest" exists.
+    ///
+    /// `{Count}` STAYS A VAR (`EB-289` is why it is not `{Amount}`) and leaves
+    /// this text: `5 / 8 / 20 / 12` says four as plainly as `4` did, and
+    /// printing both would put two number groups in one sentence for no fact.
+    ///
+    /// THE WORDS "OLDEST FIRST" ARE NOT HERE AND THAT IS THE CEILING, said out
+    /// loud rather than left to be discovered. This face is 125 of its
+    /// 125-character power ceiling (`tools/lint_text_conventions.py`, and it
+    /// bites), so the clause has no room without rewriting `PyroTotal`,
+    /// `NoSelfSentence` or `JumpSentence` -- three ruled sentences, to restate
+    /// a rule the reader already has: `EB-432` put "oldest first" on the
+    /// `Set off` tip, which is printed on the card that will spend this pile.
+    /// The tip says the ORDER and the badge now shows the QUEUE, which is the
+    /// pairing the r13 seat was doing in its head.
+    ///
+    /// SLASHES AND NOT COMMAS inside the list, for one reason: the sentence
+    /// around it is comma-separated, and `Bombs here: 5, 8, 20, 12, growing
+    /// each turn` hides where the pile stops. It costs nothing at the ceiling
+    /// -- the lint renders a hole as one character however it is filled.
     private const string Bombs =
-        " Bombs here: [blue]{Count}[/blue], growing each turn.";
+        " Bombs here: [blue]{Charges}[/blue], growing each turn.";
 
     private const string BombsWithMines =
-        " Bombs here: [blue]{Count}[/blue], including [blue]{Mines}[/blue] "
+        " Bombs here: [blue]{Charges}[/blue], including [blue]{Mines}[/blue] "
       + "[gold]Mine{Mines:plural:|s}[/gold], growing each turn.";
 
     /// <summary>Rule 3, `EB-361`. A Bomb whose enemy dies moves to a random
@@ -586,7 +619,51 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             // `EB-289`: the live charge count. See `Bombs` above for why the
             // stack amount could not be it.
             new DynamicVar("Count", 0m),
+            // `EB-450`: the charges themselves, oldest first.
+            new ChargeListVar(),
         };
+
+    /// <summary>
+    /// <c>{Charges}</c>, the pile's sizes in the order they will go off
+    /// (`EB-450`).
+    ///
+    /// A <see cref="SetOffDamageVar"/> SUBCLASSED THE SAME WAY AND FOR THE
+    /// SAME REASON: the game hands the var itself to SmartFormat
+    /// (<c>LocString.Add(DynamicVar)</c>) and formats it through
+    /// <c>ToString()</c>, so a var can answer with something that is not one
+    /// number -- and this one has to, because the whole finding is that ONE
+    /// number was all the badge could say. Read LIVE off <c>_charges</c>, like
+    /// every other figure on this face.
+    ///
+    /// <c>GetBaseValueForIConvertible</c> answers the COUNT, which is what a
+    /// numeric formatter would have to be given if anybody ever wrote
+    /// <c>{Charges:plural:|s}</c>; nothing does today, and answering the sum
+    /// there would be a second name for <c>{Size}</c>.
+    /// </summary>
+    private sealed class ChargeListVar : DynamicVar
+    {
+        public ChargeListVar() : base("Charges", 0m)
+        {
+        }
+
+        private ProtoBombPower? Pile => _owner as ProtoBombPower;
+
+        protected override decimal GetBaseValueForIConvertible() =>
+            Pile?._charges.Count ?? BaseValue;
+
+        public override string ToString()
+        {
+            var pile = Pile;
+            if (pile == null || pile._charges.Count == 0)
+            {
+                return "0";
+            }
+
+            return string.Join(" / ", pile._charges.Select(
+                c => c.Size.ToString(
+                    System.Globalization.CultureInfo.InvariantCulture)));
+        }
+    }
 
     /// <summary>
     /// <c>{Size}</c>, READ LIVE. <c>EB-265</c>.

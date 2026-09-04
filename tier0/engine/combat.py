@@ -265,6 +265,13 @@ def card_playable(state: CombatState, card: Card) -> bool:
     # `klee_overhaul.set_off_only` -- never a per-card flag.
     if klee_overhaul.refuses_for_no_bomb(state, card):
         return False
+    # QUARANTINED (C.KOKOMI_OVERHAUL). `EB-455`, the clause above one mechanic
+    # over: a card whose whole body is a carry-out pays its energy, exhausts
+    # itself and does NOTHING while the jellyfish holds no Plan. The r13 seat
+    # met Change of Plans three times as a dead card off a face that never says
+    # it needs one. DERIVED FROM THE ROW -- `kokomi_plan.carry_out_only`.
+    if kokomi_plan.refuses_for_no_plan(state, card):
+        return False
     # No Fanfare playability gate: Fanfare is read, never spent (F-A4).
     return card_cost(state, card) <= state.player.energy
 

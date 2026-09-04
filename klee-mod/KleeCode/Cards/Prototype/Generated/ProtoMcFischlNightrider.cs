@@ -52,14 +52,14 @@ public sealed class ProtoMcFischlNightrider : CustomCardModel, IElementalCard, I
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false), this);
+        ArmKeywordTips.ForOz(ArmKeywordTips.ForHexerei(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_fischl_nightrider");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fischl — Nightrider"),
-        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage. If Oz is out, he deals 5 [gold]Electro[/gold] damage to a random enemy."),
+        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage. If [gold]Oz[/gold] is out, he deals 5 [gold]Electro[/gold] damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

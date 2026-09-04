@@ -268,6 +268,35 @@ def _aimed(state: CombatState, aim: Optional[str]) -> list[Enemy]:
     return []
 
 
+def carry_out_only(card: Card) -> bool:
+    """Does this row do NOTHING while the jellyfish holds no Plan? (`EB-455`.)
+
+    `gen_klee_cards.card_is_carry_out_only`'s twin, clause for clause: true
+    when every top-level effect that is not a cost is a `carry_out_front_plan`.
+    Such a card pays its energy, exhausts itself and resolves to nothing --
+    `klee_overhaul.set_off_only`'s shape one mechanic over, and its argument.
+
+    A carry-out sitting BESIDE another effect is not covered: a card that also
+    draws still does something on an empty jellyfish.
+    """
+    rest = [fx for fx in card.effects
+            if fx.get("op") not in ("spend_spark", "spend_charge")]
+    if not rest:
+        return False
+    return all(fx.get("op") == "carry_out_front_plan" for fx in rest)
+
+
+def refuses_for_no_plan(state: CombatState, card: Card) -> bool:
+    """`card_playable`'s Plan clause: a carry-out-only card is unplayable while
+    the Bake-Kurage holds no Plan (`EB-455`).
+
+    The mod refuses it at `CardModel.IsPlayable` and prints the reason through
+    `IUnplayableReasonCard` ("no Plan is written"); this is that refusal at
+    this engine's twin seam, exactly as `klee_overhaul.refuses_for_no_bomb` is.
+    """
+    return live(state) and carry_out_only(card) and not state.kk_plan_queue
+
+
 def plan_aimed_at_pet(state: CombatState, card: Card) -> bool:
     """WAS THIS PLAY AIMED AT THE JELLYFISH? -- and this engine's whole answer
     to "the pet as a target the pilot can choose".

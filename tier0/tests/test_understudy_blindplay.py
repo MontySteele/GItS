@@ -521,6 +521,31 @@ def test_the_element_a_card_applies_is_a_tag_on_its_line():
             assert "[" not in ln.split("**Coral Guard**", 1)[1]
 
 
+def test_anemo_and_geo_carry_the_tag_too():
+    """`EB-454`. The two that TRIGGER and leave no aura printed no tag at all,
+    on a page where every other element prints one: the Kokomi r13 seat read
+    `Jean -- Gale Blade` as untyped "until a Reaction preview named Anemo
+    mid-fight" ((c) 8).
+
+    THE GEM IS STILL FOUR and the WORD is now six, which is the split the fix
+    is: `ElementBadge.IconPathFor` answers null for both because there is no
+    aura icon to paint, while `KleeKeywords.AppliesAnemo` / `AppliesGeo` are
+    declared, hover their own tip and cross this wire as a keyword row.
+    """
+    state = combat_state()
+    state["player"]["hand"][1]["keywords"] = [
+        {"name": "Applies Anemo",
+         "description": "Another aura: consumed, and a reaction triggers."}]
+    state["player"]["hand"][2]["keywords"] = [
+        {"name": "Applies Geo",
+         "description": "Another aura: consumed, and a reaction triggers."}]
+
+    faces = blindplay.observation(state)["combat"]["hand"]
+
+    assert [f["element"] for f in faces] == ["Hydro", "Anemo", "Geo", "",
+                                             "Hydro"]
+
+
 def test_the_element_tag_is_never_read_off_a_reaction_word():
     """`Applies Electro-Charged` is a REACTION a companion prints, not an
     element, and the six elements are not the seven words that follow the verb.
@@ -3274,6 +3299,67 @@ def test_a_turn_with_no_carry_out_prints_no_carry_out_block():
     assert "1. **Kurage's Oath**" in page
 
 
+# `EB-453`. THE PANEL OMITTED A PLAN AND MIS-STATED A NUMBER.
+#
+# Kokomi r13 fight 6: two Plans written, ONE printed, and `War Council, 7 (the
+# 7 is damage)` sat above a body that had lost 9. Both halves are one shape --
+# the page could only print what the wire carried, and the wire carried neither
+# the Plan the fight cut off nor the name of the thing that dealt the other 2.
+
+#: The r13 board: a Plan that ran with the Casket answering inside its beat,
+#: and a second Plan the kill cut off before it happened.
+CARRIED_OUT_R13 = dict(TWO_PLANS, pending=0, queue=[], carried_out=[
+    {"card": "War Council", "number": 7, "line": "Bake-Kurage: War Council, 7",
+     "kind": "damage", "asked": 7, "on_play": False,
+     "moved": [{"target": "Cubex", "combat_id": "1", "amount": 9,
+                "dead": False, "absorbed": 0}],
+     "riders": [{"source": "Tamakushi Casket", "amount": 2}],
+     "unfinished": False},
+    {"card": "Kurage's Oath", "number": None,
+     "line": "Bake-Kurage: Kurage's Oath", "on_play": False,
+     "unfinished": True},
+])
+
+
+def test_the_panel_lists_the_plan_the_fight_cut_off():
+    """A kill inside the first Plan of a morning unwinds the drain, so the rest
+    never happen -- and nothing on the page said so. The row rides the same
+    list because it was in the same queue, and the ORDER is the fact."""
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(CARRIED_OUT_R13)))
+
+    assert "Bake-Kurage: War Council, 7" in page
+    assert ("Kurage's Oath — still planned when the fight ended, so it never "
+            "happened.") in page
+    assert (page.index("War Council") < page.index("Kurage's Oath"))
+    # A Plan that never ran was never MEASURED either, so it claims no board.
+    assert "no enemy lost HP" not in page
+
+
+def test_the_delivered_number_names_what_else_was_in_it():
+    """The 7 and the 9. The line's figure is what the Plan's first clause
+    produced; the line under it is what the board LOST, measured across the
+    whole beat -- and the difference was the Tamakushi Casket answering the
+    Weak that same Plan had just applied. A subtraction has no sources, so the
+    mod names the rider and the page prints the name."""
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(CARRIED_OUT_R13)))
+
+    assert "the 7 is damage" in page
+    assert "Inside the same beat: Tamakushi Casket 2." in page
+    assert "lost 9 HP" in page
+
+
+def test_a_bridge_with_no_riders_prints_what_it_always_printed():
+    """ABSENT IS NOT EMPTY, this section's standing rule: a build older than
+    the field sends no `riders` key, and the row reads exactly as it did."""
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(CARRIED_OUT_MEASURED)))
+
+    assert "Inside the same beat" not in page
+    assert "still planned when the fight ended" not in page
+
+
 def test_the_meter_ledger_stays_off_the_carry_out_block():
     """`R101b`. The page line is the ON-SCREEN text, and the ledger's rows --
     meter, before, after, price_paid -- are an instrument, not a surface a
@@ -3292,8 +3378,14 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
     # clause asked for. All seven are things a sighted player watched happen;
     # not one of them is a ledger row.
     for row in obs["combat"]["plans"]["carried_out"]:
+        # `EB-453` added the last two: the named riders inside the beat, so
+        # the line's figure and the board's can be reconciled, and whether
+        # the Plan ran at all. Both are things a sighted player watched
+        # happen -- a relic striking, and a Plan the fight cut off -- and
+        # neither is a ledger row.
         assert set(row) == {"card", "number", "line", "kind", "asked",
-                            "on_play", "board_read", "moved"}
+                            "on_play", "board_read", "moved",
+                            "riders", "unfinished"}
         for moved in row["moved"]:
             assert set(moved) == {"target", "combat_id", "amount", "dead",
                                   "absorbed"}
@@ -5404,6 +5496,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Grounded": ["that pays at the start of your turn, but ",
                      "went off last turn. Its ",
                      "card prints what it pays."],
+        # `EB-446`, Klee's seventh: a name Fischl -- Nightrider is written
+        # against and a DIFFERENT companion card grants, so the face that
+        # prints it carries the definition.
+        "Oz": ["Fischl's raven, out while you hold the Power Oz, at Your "
+               "Side. ",
+               "He hits at the end of your turn while he is out."],
         # The Furina reframe's three (slice two, 2026-09-02). The Evoke
         # sentence's two numerals are interpolated from `FurinaReframeLaw` on
         # the mod side and written out on this one, so its anchors are the

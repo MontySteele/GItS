@@ -557,6 +557,13 @@ ARM_KEYWORDS = (
     # on the screen saying what it is, and the r9 seat read it as noise in
     # both acts. NO PLURAL: the word names one Power.
     ArmKeyword("Grounded", ("Grounded",), "ArmKeywordTips.ForGrounded"),
+    # Klee's SEVENTH, `EB-446`. `Oz` is a name one companion card is written
+    # against and a DIFFERENT one grants: Fischl -- Nightrider prints "If Oz is
+    # out" and cannot put him out, and the r7 seat played it five times without
+    # learning what does. `Grounded`'s shape exactly -- the attach travels with
+    # the word, so the card that names him carries the definition whether or not
+    # the run ever holds the Power. NO PLURAL: there is one raven.
+    ArmKeyword("Oz", ("Oz",), "ArmKeywordTips.ForOz"),
     # Kokomi's TWO (kokomi-overhaul-slice-1-2026-09-01.md draft 6 sec.2:
     # "Keywords with tooltips: Plan, Mend"). Draft 6 cut Tide, Surge, Exert
     # and Garment as keywords, so their four rows left this table with the
@@ -656,6 +663,35 @@ AURA_KEYWORD_BY_ELEMENT = {
     "cryo": "KleeKeywords.AppliesCryo",
 }
 
+# `EB-454`. THE TWO THAT TRIGGER AND LEAVE NOTHING, and the paragraph above is
+# why they were absent and why they are here now.
+#
+# THE FIND (Kokomi r13 (c) 8). `Jean -- Gale Blade` "read as untyped until a
+# Reaction preview named Anemo mid-fight", on a page where every Hydro, Electro,
+# Cryo and Pyro card prints its element beside the title. The old reasoning was
+# sound about the GEM -- Anemo and Geo leave no aura, so there is no aura icon
+# to draw and `ElementBadge.IconPathFor` still answers null for both -- and it
+# proved too much: it took the WORD away with the picture, and the word is what
+# a reader uses to work out which pair can react.
+#
+# SO THE KEYWORD IS THE TAG AND THE GEM IS NOT. These two ride
+# `AutoKeywordPosition.None` exactly as the four do, print no line, hover their
+# own tip, and reach the blind page as `Applies Anemo` / `Applies Geo` --
+# `blindplay_faces._ELEMENT_KEYWORD`, whose map covers all six. They are NOT in
+# `AURA_KEYWORD_BY_ELEMENT` and must not be: that map answers "does this element
+# leave an aura", which is what `plan_applies_element` and the gem's own
+# declaration test ask, and both answers are still no.
+TRIGGER_KEYWORD_BY_ELEMENT = {
+    "anemo": "KleeKeywords.AppliesAnemo",
+    "geo": "KleeKeywords.AppliesGeo",
+}
+
+#: Every element a face can DECLARE, aura-leaving or not. The emission map.
+ELEMENT_KEYWORD_BY_ELEMENT = {
+    **AURA_KEYWORD_BY_ELEMENT,
+    **TRIGGER_KEYWORD_BY_ELEMENT,
+}
+
 
 def aura_elements_for(card: dict, profile: "CharacterProfile",
                       elemental: bool) -> list[str]:
@@ -726,6 +762,31 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
 #: clause that starts hitting must come here deliberately.
 PLAN_DAMAGE_OPS = frozenset({
     "damage", "damage_quarter_max_hp", "damage_per_companion_last_turn"})
+
+
+def element_tag_elements_for(card: dict, profile: "CharacterProfile",
+                             elemental: bool) -> list[str]:
+    """Every element this card's face DECLARES, in face order (`EB-454`).
+
+    <see cref="aura_elements_for"/> plus the card's OWN element when that
+    element only triggers -- Anemo and Geo, which leave no aura and therefore
+    never appear in an `apply_aura` effect or in a carry-out. Its own element
+    LEADS, the order `ElementBadge.ElementOf` reads and the order the page's
+    `_element` takes its first match in, so a Swirl companion that also lays
+    somebody else's aura is tagged with the one its damage carries.
+
+    TWO FUNCTIONS RATHER THAN A WIDER ONE, because two different questions are
+    being asked and only one of them moved: "does this leave an aura" still has
+    exactly four answers (the gem, `plan_applies_element`), and "what does this
+    face say it is" now has six.
+    """
+    elements = aura_elements_for(card, profile, elemental)
+    if not elemental:
+        return elements
+    own = card["element"] if is_companion(card) else profile.native_element
+    if own in TRIGGER_KEYWORD_BY_ELEMENT and own not in elements:
+        elements.insert(0, own)
+    return elements
 
 
 def plan_applies_element(card: dict, profile: "CharacterProfile") -> bool:
@@ -906,6 +967,35 @@ def card_is_set_off_only(card: dict) -> bool:
                    for later in rest[index + 1:]):
             return False
     return True
+
+
+def card_is_carry_out_only(card: dict) -> bool:
+    """Does this row do NOTHING while the jellyfish holds no Plan? (`EB-455`.)
+
+    True when every top-level effect that is not a cost is a
+    `carry_out_front_plan`. Such a card pays its energy, exhausts itself and
+    resolves to nothing -- `card_is_set_off_only`'s shape one mechanic over,
+    and the same argument: a card that looks playable and cannot do anything
+    is a play the reader has to LOSE to learn about.
+
+    THE FIND (Kokomi r13 (b)). Change of Plans "was dead in hand three fights
+    before it was good once and its face never says it needs a written Plan; a
+    first reader plays it into an empty jellyfish". When it did fire it was
+    excellent -- 2 energy for 21 damage and Weak on three, on the boss's second
+    turn -- so this is legibility and not balance: nothing the card DOES moves.
+
+    DERIVED FROM THE ROW, never a per-card flag, for the reason
+    `card_is_set_off_only` gives: a future row with this shape cannot be given
+    the gate by somebody remembering to. A `carry_out_front_plan` sitting
+    BESIDE another effect is NOT covered -- a card that also draws still does
+    something on an empty jellyfish, and refusing it would be a rules change.
+    Twin: `kokomi_plan.carry_out_only`.
+    """
+    rest = [eff for eff in card.get("effects", [])
+            if eff.get("op") not in _COST_OPS]
+    if not rest:
+        return False
+    return all(eff.get("op") == "carry_out_front_plan" for eff in rest)
 
 
 ELEMENT_CS = {"pyro": "Element.Pyro", "hydro": "Element.Hydro",
@@ -10332,7 +10422,7 @@ def emit(
                 if elemental_effect["op"] == "apply_aura"
                 else "Element.Anemo")
 
-    aura_elements = aura_elements_for(card, profile, elemental)
+    aura_elements = element_tag_elements_for(card, profile, elemental)
     # L4: the Bomb rules text is a question about the WHOLE effect tree, not
     # about the top level. `sparkly_explosion` places its two Bombs inside the
     # kill-conditional's `then:`, so the flat scan this replaced shipped the
@@ -10530,7 +10620,7 @@ def emit(
     # EB-261 / EB-264. A card refused by its OWN gate carries the sentence the
     # page prints, because `CardModel.CanPlay` collapses every mod-side refusal
     # into `BlockedByCardLogic` and has no slot for what the reason was.
-    if card_is_set_off_only(card):
+    if card_is_set_off_only(card) or card_is_carry_out_only(card):
         interfaces += ", IUnplayableReasonCard"
 
     # EB-184: a modal card DECLARES what each of its modes does about aiming,
@@ -10847,7 +10937,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         keywords.append("CardKeyword.Sly")
     if "skill_tag" in card.get("tags", []):
         keywords.append("KleeKeywords.ElementalSkill")
-    keywords.extend(AURA_KEYWORD_BY_ELEMENT[e] for e in aura_elements)
+    keywords.extend(ELEMENT_KEYWORD_BY_ELEMENT[e] for e in aura_elements)
     keywords_member = ""
     if keywords:
         keywords_member = (
@@ -11136,6 +11226,27 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "            ? null\n"
         '            : "no enemy is holding a Bomb";'
         if bomb_gated else "")
+    # `EB-455`, the same pair one mechanic over: a card whose whole body is a
+    # carry-out does NOTHING while the jellyfish holds no Plan. The r13 seat
+    # met Change of Plans three times as a dead card before it was good once,
+    # off a face that never says it needs one.
+    plan_gated = card_is_carry_out_only(card)
+    plan_gate_expr = (
+        "KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0")
+    plan_gate_member = (
+        "\n\n    // `EB-455`, the carry-out gate: a card whose whole body is\n"
+        "    // a carry-out is unplayable while the Bake-Kurage holds no\n"
+        "    // Plan, rather than paying its energy and exhausting itself\n"
+        "    // for nothing.\n"
+        "    protected override bool IsPlayable =>\n"
+        f"        {plan_gate_expr};"
+        if plan_gated and not spark_price else "")
+    plan_reason_member = (
+        "\n\n    public string? UnplayableReason =>\n"
+        f"        {plan_gate_expr}\n"
+        "            ? null\n"
+        '            : "no Plan is written";'
+        if plan_gated else "")
     # R213 E1, QUARANTINED: the same cost line one meter over, and the mirror
     # of tier0 combat.charge_cost. TOP-LEVEL spends only, the sim's rule --
     # a price at the head of a `choose_one` MODE is that mode's cost line and
@@ -11231,7 +11342,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>\n"
             f"        new[] {{ {flags_cs} }};")
     if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member,
-                             bomb_gate_member)) > 1:
+                             bomb_gate_member, plan_gate_member)) > 1:
         raise ValueError(
             f"{card['id']}: two resource cost lines on one card -- only one "
             "IsPlayable override can be emitted")
@@ -11239,6 +11350,10 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         raise ValueError(
             f"{card['id']}: the Set-off gate (EB-261) and a Charge or modal "
             "cost line cannot share one IsPlayable override")
+    if plan_gated and (charge_price or modal_gate_member or bomb_gated):
+        raise ValueError(
+            f"{card['id']}: the carry-out gate (EB-455) and another gate "
+            "cannot share one IsPlayable override")
     resource_cost_setup = []
     if int(card.get("encore_cost", 0)) > 0:
         resource_cost_setup.append(
@@ -11308,7 +11423,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", "{desc}"),
-    }};{tags_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
+    }};{tags_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

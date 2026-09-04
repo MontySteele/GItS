@@ -151,16 +151,54 @@ def _render_carry_out(pl: dict[str, Any]) -> list[str]:
     if pl["carried_out"]:
         out.append(f"- The {pl['pet_name']} carried these out at the "
                    "start of this turn, front first:")
-        for said in pl["carried_out"]:
-            out.append(f"  - {said['line']}{_kind_clause(said)}")
-            out += _render_moved(said)
+        out += _carry_out_rows(pl["carried_out"])
     if pl["fired_now"]:
         out.append(f"- The {pl['pet_name']} carried these out THIS TURN, the "
                    "moment each was written, and not this morning:")
-        for said in pl["fired_now"]:
-            out.append(f"  - {said['line']}{_kind_clause(said)}")
-            out += _render_moved(said)
+        out += _carry_out_rows(pl["fired_now"])
     return out
+
+
+def _carry_out_rows(rows: list[dict[str, Any]]) -> list[str]:
+    """One heading's worth of Plans, in the order the jellyfish took them.
+
+    `EB-453` PUT THE UNRUN PLANS IN THE SAME LIST. A kill inside the first
+    Plan of a morning unwinds the drain, so the rest never happen -- and the
+    r13 seat, who had written two, was shown one and nothing about the other.
+    They ride the same list because they were in the same queue and the ORDER
+    is the fact: what the jellyfish did, and then where it stopped.
+    """
+    out: list[str] = []
+    for said in rows:
+        if said["unfinished"]:
+            out.append(f"  - {said['card']} — still planned when the fight "
+                       "ended, so it never happened.")
+            continue
+        out.append(
+            f"  - {said['line']}{_kind_clause(said)}{_rider_clause(said)}")
+        out += _render_moved(said)
+    return out
+
+
+def _rider_clause(said: dict[str, Any]) -> str:
+    """What ELSE landed inside this Plan's beat, by name (`EB-453`).
+
+    THE TWO NUMBERS THAT WOULD NOT ADD UP. The line's own figure is what the
+    Plan's first clause produced and the lines under it are what the BOARD
+    lost, measured across the whole beat -- so `War Council, 7 (the 7 is
+    damage)` sat above `lost 9 HP` and the missing 2 was the Tamakushi Casket
+    answering the Weak that same Plan had just applied. The page could not name
+    it, because a subtraction has no sources; the mod names it at the line that
+    deals it (`KokomiPlan.NoteRider`) and this prints the name.
+
+    ABSENT IS NOT EMPTY, this section's standing rule: a bridge with no
+    `riders` key sends none, and the row reads exactly as it always did.
+    """
+    riders = said.get("riders") or []
+    if not riders:
+        return ""
+    named = ", ".join(f"{r['source']} {r['amount']}" for r in riders)
+    return f" Inside the same beat: {named}."
 
 
 def _kind_clause(said: dict[str, Any]) -> str:

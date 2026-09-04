@@ -490,6 +490,13 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
             "asked": None if asked is None else _int(asked),
             "on_play": bool(row.get("on_play")),
             "board_read": isinstance(raw_moved, list),
+            # `EB-453`: what ELSE landed inside this Plan's window, by name,
+            # and whether the Plan ran at all. Both are ABSENT on a bridge
+            # older than the fields -- `board_read`'s discipline again, so
+            # such a page prints exactly the lines it always printed.
+            "riders": [_rider_row(r) for r in (row.get("riders") or [])
+                       if isinstance(r, dict) and _int(r.get("amount")) > 0],
+            "unfinished": bool(row.get("unfinished")),
             # `EB-440`: A ROW IS A BODY THIS PLAN MOVED SOMETHING ON, and
             # Block is something. The filter existed to drop the mod's
             # zero-delta rows, and a beat that spent itself entirely on a
@@ -499,6 +506,19 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
                       if isinstance(m, dict)
                       and (_int(m.get("amount")) > 0
                            or _int(m.get("absorbed")) > 0)]}
+
+
+def _rider_row(row: dict[str, Any]) -> dict[str, Any]:
+    """One named rider inside one Plan (`EB-453`), off `KokomiPlan.RiderRow`.
+
+    The Plan's own `number` is what its FIRST clause produced and `moved` is
+    what the BOARD did, and the two differ by whatever else landed in the same
+    beat -- the Tamakushi Casket answering a Weak the same Plan applied, which
+    is the 2 the r13 seat could not account for. The mod names it because the
+    mod is the only thing that can: the measurement is a subtraction and a
+    subtraction has no sources.
+    """
+    return {"source": _text(row.get("source")), "amount": _int(row.get("amount"))}
 
 
 def last_morning(state: dict[str, Any]) -> dict[str, Any] | None:

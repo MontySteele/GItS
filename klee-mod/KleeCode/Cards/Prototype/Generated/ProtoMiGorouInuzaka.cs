@@ -48,6 +48,9 @@ public sealed class ProtoMiGorouInuzaka : CustomCardModel, IElementalCard, IComp
 
     public string? Nation => "inazuma";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesGeo };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo, includesBombRules: false);
 

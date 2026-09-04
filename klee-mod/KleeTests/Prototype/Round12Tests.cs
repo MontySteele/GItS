@@ -261,7 +261,12 @@ public class Round12Tests
                        HeadlessGame.All,
                        new[] { typeof(Creature) })!));
 
-        Assert.Contains("A performing member picks its own enemy.", body);
+        // `EB-451` extended the sentence rather than replacing it: the aim is
+        // still the member's own, and the clause after the comma is the limit
+        // r7 paid for. The pin follows the sentence it is about.
+        Assert.Contains("A performing member picks its own enemy, never a "
+                      + "[gold]Minion[/gold] while another enemy stands.",
+                        body);
     }
 
     [Fact]

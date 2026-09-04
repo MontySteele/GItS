@@ -136,8 +136,12 @@ def test_every_prototype_row_that_applies_an_element_carries_its_gem():
                             for e in gen.companion_damage_effects(card))
         else:
             elemental = profile.damage_applies_element(card)
-        expected = [gen.AURA_KEYWORD_BY_ELEMENT[e]
-                    for e in gen.aura_elements_for(card, profile, elemental)]
+        # `EB-454`: the six-element map and the six-element derivation. The
+        # four-element pair is still what the GEM is declared from, one test
+        # down; this join is about the keyword, which Anemo and Geo now carry.
+        expected = [gen.ELEMENT_KEYWORD_BY_ELEMENT[e]
+                    for e in gen.element_tag_elements_for(
+                        card, profile, elemental)]
 
         path = proto.OUT_DIR / f"{gen.pascal(card['id'])}.cs"
         if not path.is_file():
@@ -198,8 +202,15 @@ def test_no_applies_keyword_auto_prints_a_line_any_more():
     fields = dict(_APPLIES_FIELD.findall(
         KEYWORDS_CS.read_text(encoding="utf-8")))
 
+    # `EB-454` MADE IT SIX. Anemo and Geo leave no aura and get no gem --
+    # `IconPathFor` answers null for both, one test down -- but they DO carry
+    # the word, because a face that names no element reads as untyped and the
+    # r13 seat read `Jean -- Gale Blade` that way for a whole fight. The
+    # POSITION claim is what this test is for and it is unchanged: all six are
+    # `None` and none of them prints a line.
     assert set(fields) == {"applies_pyro", "applies_hydro",
-                           "applies_electro", "applies_cryo"}
+                           "applies_electro", "applies_cryo",
+                           "applies_anemo", "applies_geo"}
     assert set(fields.values()) == {"None"}
 
 

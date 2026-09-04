@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard
+public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard, IUnplayableReasonCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
@@ -50,6 +50,18 @@ public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard
         ("title", "Change of Plans"),
         ("description", "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now."),
     };
+
+    // `EB-455`, the carry-out gate: a card whose whole body is
+    // a carry-out is unplayable while the Bake-Kurage holds no
+    // Plan, rather than paying its energy and exhausting itself
+    // for nothing.
+    protected override bool IsPlayable =>
+        KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0;
+
+    public string? UnplayableReason =>
+        KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0
+            ? null
+            : "no Plan is written";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

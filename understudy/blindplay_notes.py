@@ -483,6 +483,14 @@ ARM_KEYWORDS: dict[str, str] = {
     "Grounded": ("A Power that pays at the start of your turn, but only if "
                  "none of your Bombs went off last turn. Its card prints what "
                  "it pays."),
+    # `EB-446`. THE NAME ONE CARD IS WRITTEN AGAINST AND ANOTHER GRANTS.
+    # `Fischl -- Nightrider` prints "If Oz is out, he deals 5 Electro damage"
+    # and cannot put him out: the Power that does is a DIFFERENT companion
+    # card the r7 run never held. The seat played Nightrider five times and
+    # never learned what the word meant. Held in step with
+    # `ArmKeywordTips.ForOz`.
+    "Oz": ("Fischl's raven, out while you hold the Power Oz, at Your Side. "
+           "He hits at the end of your turn while he is out."),
     # The Furina reframe's three (slice two, R220 A). The same sentences
     # `ArmKeywordTips.ForDeploy` / `ForEvoke` / `ForDrain` print, with the two
     # numerals the C# interpolates from `FurinaReframeLaw` written out: this
@@ -583,6 +591,11 @@ _ARM_KEYWORD_RE = {
     # wherever one is printed -- which is every screen a reader can meet the
     # word on, whether or not the deck holds it.
     "Grounded": re.compile(r"\bGrounded\b"),
+    # `EB-446`. NO PLURAL: there is one raven. It fires on Nightrider's face,
+    # which names him and cannot grant him, and on the Power card that does --
+    # every screen a reader can meet the word on, whether or not the run holds
+    # the Power, which is the state the r7 seat was in for five plays.
+    "Oz": re.compile(r"\bOz\b"),
     # THE THREE FURINA WORDS CARRIED A LITERAL BACKSPACE, not a word
     # boundary: `\b` inside these three patterns was the CHARACTER 0x08 and
     # not the escape, so `Deploy`, `Evoke` and `Drain` could never match any

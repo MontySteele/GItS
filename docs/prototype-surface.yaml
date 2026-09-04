@@ -565,7 +565,7 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
-   description: "Deal 7 damage. If Oz is out, he deals 5 [gold]Electro[/gold] damage to a random enemy.",
+   description: "Deal 7 damage. If [gold]Oz[/gold] is out, he deals 5 [gold]Electro[/gold] damage to a random enemy.",
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true},
              {op: conditional, if: self_has_power_mc_oz,
               then: [{op: damage, amount: 5, target: random_enemy, applies_element: true}]}]}
@@ -574,7 +574,7 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: power,
-   description: "At the end of your turn, Oz deals 5 [gold]Electro[/gold] damage to a random enemy.",
+   description: "At the end of your turn, [gold]Oz[/gold] deals 5 [gold]Electro[/gold] damage to a random enemy.",
    effects: [{op: apply_power, power: mc_oz, amount: 1, target: self}]}
 
 - {id: proto_mc_sucrose_gust, name: "Sucrose — Wind Spirit Creation (proto)", character: klee,
