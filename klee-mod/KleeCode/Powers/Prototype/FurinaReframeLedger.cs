@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 
 namespace KleeMod.Powers;
 
@@ -196,4 +198,91 @@ public sealed class FurinaReframeLedger
     public void NoteDesignationUnpaid() => DesignationsUnpaid++;
 
     public void NoteDesignationRedundant() => DesignationsRedundant++;
+
+    // ---- `EB-405`: WHO PERFORMED, ON WHOM, AND WHAT IT LEFT -----------
+    //
+    // WHAT THE SEAT SAW (Furina round 4, run 1, (c) 4). A member's line on
+    // the page named no target: "Crabaletta chose its own enemy and left a
+    // Hydro aura on a body the seat had not picked", in a kit whose readable
+    // decision is which element lands on which aura. There was nothing for
+    // the page to print -- no Salon block reached the wire at all, and the
+    // only Salon row a seat ever saw was the counter power's static rulebook
+    // sentence, which by construction can never name a body.
+    //
+    // THE TARGET IS PICKED HERE AND NOWHERE ELSE. `PerformMember` and `Bow`
+    // draw it from `Rng.CombatTargets` over `HittableEnemies` and then throw
+    // the reference away: `ElementalHit.Deal` returns the damage and not the
+    // creature, so the fact left no trace in any state a poll could read.
+    //
+    // A LIST AND NOT A COUNTER, which is the one exception to this class's
+    // "NO TURN ROLL" note above and is why it is stated here: every field
+    // above answers "how many times this combat", and this answers "what
+    // happened on the turn I am looking at", which is a different question
+    // with a different boundary. It is cleared at the start of each player
+    // turn, in `SalonMemberPower.AfterPlayerTurnStart`, which is the one
+    // place that boundary exists. Still not a source of truth: nothing
+    // branches on it and no rule reads it back.
+    //
+    // THE SHAPE IS `KokomiPlan.CarriedOutPlan`'s, deliberately -- the page
+    // already knows how to name a body from a `combat_id` and fall back to
+    // the title for one that died (`blindplay_board.name_moved_rows`), so a
+    // second shape would be a second naming rule.
+
+    /// <summary>One member's act: who, on whom, with what, and what the body
+    /// is wearing afterwards.</summary>
+    public readonly record struct Performed(
+        string Member, string? Target, string? CombatId, string? Element,
+        string? Aura, int Amount, bool Paid, bool Evoked);
+
+    private readonly List<Performed> _performances = new();
+
+    /// <summary>This turn's performances, in the order they happened.</summary>
+    public IReadOnlyList<Performed> Performances => _performances;
+
+    public void NotePerformance(Performed performed) =>
+        _performances.Add(performed);
+
+    /// <summary>The turn boundary, and the only one this class has.</summary>
+    public void ClearPerformances() => _performances.Clear();
+
+    /// <summary>
+    /// `EB-405`. THE WIRE'S VIEW of this turn's performances.
+    ///
+    /// A PLAIN DICTIONARY OF PRIMITIVES, and the shape is
+    /// <c>KokomiPlan.Snapshot</c>'s for the reason that one is: the bridge
+    /// (<c>vendor/STS2_MCP/gits/GitsFurinaSalon.cs</c>) reaches it by
+    /// REFLECTION, because this whole file is Compile Remove'd from a release
+    /// build and a compile-time reference would make the bridge refuse to load
+    /// without it. The field names here ARE the contract, and
+    /// <c>understudy/blindplay_board.furina_salon</c> reads them.
+    ///
+    /// THREE STATES, NOT TWO, the same split every other GItS block on this
+    /// wire makes: an ABSENT key is "no reframe in this build", an EMPTY map
+    /// is "the rule is here and this seat is not playing it", and a populated
+    /// map is her stage. So this returns an empty map rather than null for a
+    /// Klee, and the reader is entitled to tell those apart.
+    /// </summary>
+    public static Dictionary<string, object?> Snapshot(Player? player)
+    {
+        var snapshot = new Dictionary<string, object?>();
+        var creature = player?.Creature;
+        if (creature == null || !FurinaReframe.ManualLiveFor(creature))
+        {
+            return snapshot;
+        }
+        snapshot["performed"] = For(creature).Performances
+            .Select(row => (object?)new Dictionary<string, object?>
+            {
+                ["member"] = row.Member,
+                ["target"] = row.Target,
+                ["combat_id"] = row.CombatId,
+                ["element"] = row.Element,
+                ["aura"] = row.Aura,
+                ["amount"] = row.Amount,
+                ["paid"] = row.Paid,
+                ["evoked"] = row.Evoked,
+            })
+            .ToList();
+        return snapshot;
+    }
 }

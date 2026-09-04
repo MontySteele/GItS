@@ -139,4 +139,44 @@ public static partial class McpMod
             return false;
         }
     }
+
+    /// <summary>
+    /// GItS LOCAL ADDITION (`EB-402`). The other half of the same question:
+    /// can this card be aimed at an ENEMY?
+    ///
+    /// WHY IT IS NEEDED. A custom single-target type has no enum name, so
+    /// `target_type` reaches the wire as a bare NUMBER (`EB-216`) and the
+    /// three the Plan uses -- `Pet`, `PetOrSelf`, `PetOrEnemy` -- cannot be
+    /// told apart there. `PetOrSelf` played with no target is CORRECT (the
+    /// now-line lands on the player); `PetOrEnemy` played with no target
+    /// reaches <c>PlayCardAction(card, null)</c> and the card throws on its
+    /// own null check -- `ok` on the wire and nothing on the board. That is
+    /// the defect: on the Kokomi round-10 seat a bare `play "Slack Water"`
+    /// dealt no damage, applied no Weak, and was answered `ok`.
+    ///
+    /// THE CARD IS ASKED, exactly as above: `IsValidTarget` is the game's own
+    /// gate and the base library prefixes it for every custom type, so this
+    /// separates the three without the bridge knowing any of their values.
+    ///
+    /// FALSE OUT OF COMBAT and false with no living enemy, so the field is
+    /// only ever consulted where the question has an answer.
+    /// </summary>
+    private static bool GitsCanTargetEnemy(CardModel card)
+    {
+        try
+        {
+            var enemies = card.Owner?.Creature?.CombatState?.Enemies;
+            if (enemies == null) return false;
+            foreach (var enemy in enemies)
+            {
+                if (enemy.IsAlive && card.IsValidTarget(enemy)) return true;
+            }
+            return false;
+        }
+        catch
+        {
+            // A state read must never throw. Same posture as the pet half.
+            return false;
+        }
+    }
 }

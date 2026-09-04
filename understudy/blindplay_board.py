@@ -213,7 +213,79 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # in the Bake-Kurage's receipt as in the enemy list four lines down.
         name_moved_rows(plans, _enemies(state), combat["enemies"])
         combat["plans"] = plans
+    salon = furina_salon(p)
+    if salon is not None:
+        # `EB-405`, and it is `EB-329`'s rule one arm over: the mod names the
+        # body it hit by combat id and THE PAGE OWNS THE NAMES, so `Slug (2)`
+        # in a performance line means the same body as `Slug (2)` in the enemy
+        # list under it.
+        name_performances(salon, _enemies(state), combat["enemies"])
+        combat["salon"] = salon
     return combat
+
+
+def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
+    """This turn's Salon performances, as the observed board sees them.
+
+    `EB-405`. THE DEFECT, in the seat's own words: "Crabaletta chose its own
+    enemy and left a Hydro aura on a body the seat had not picked" (Furina
+    round 4, run 1, (c) 4), in a kit whose readable decision is which element
+    lands on which aura. Nothing about that reached the page, because nothing
+    about it reached the wire: the only Salon row on a screen was the counter
+    power's static rulebook sentence, which carries the company COUNT and
+    cannot carry a body.
+
+    THE ABSENT / EMPTY SPLIT IS `kokomi_plans`', and for the same reason: an
+    ABSENT key is "no reframe in this build", an EMPTY map is "the rule is here
+    and this seat is not playing it", and a populated map is her stage. `None`
+    here keeps the section off the page in both of the first two cases.
+
+    Emitted by `vendor/STS2_MCP/gits/GitsFurinaSalon.cs`, which lifts it by
+    reflection from `KleeMod.Powers.FurinaReframeLedger.Snapshot`. Every field
+    below is that method's, and the two together are the contract:
+
+      performed -- this turn's acts, in the order they happened. `member` is
+        the stage name the faces use; `target` and `combat_id` are the body the
+        member PICKED, both null for the Usher, who blocks and aims at nobody;
+        `element` is what the member supplied and `aura` is what the body is
+        wearing AFTERWARDS, which are not the same fact -- a hit into a
+        different aura consumes it into a reaction and leaves the body bare;
+        `amount` is the number it dealt or blocked and `paid` is whether it
+        could afford its Encore, which is the difference between the printed
+        number and three-quarters of it.
+    """
+    raw = player.get("furina_salon")
+    if not isinstance(raw, dict) or not raw:
+        return None
+    performed = [
+        {"member": _text(row.get("member")),
+         "target": _text(row.get("target")),
+         "combat_id": _text(row.get("combat_id")),
+         "element": _text(row.get("element")),
+         "aura": _text(row.get("aura")),
+         "amount": _int(row.get("amount")),
+         "paid": bool(row.get("paid"))}
+        for row in (raw.get("performed") or []) if isinstance(row, dict)]
+    return {"performed": performed}
+
+
+def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],
+                      printed: list[dict[str, Any]]) -> None:
+    """Resolve each performance's combat id to the name this page uses.
+
+    `EB-405`, and it is `name_moved_rows` verbatim: THE ID IS THE HANDLE AND
+    THE NAME IS THE FALLBACK. A body still on the board gets the page's own
+    numbered name; one the performance KILLED is off the next board entirely
+    and keeps the title the mod recorded, which is why the mod sends a title
+    at all.
+    """
+    by_id = {_text(raw.get("combat_id")): face["name"]
+             for raw, face in zip(wire, printed)
+             if _text(raw.get("combat_id"))}
+    for row in salon["performed"]:
+        named = by_id.get(row["combat_id"])
+        if named:
+            row["target"] = named
 
 
 def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],

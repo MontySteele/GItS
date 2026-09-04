@@ -51,9 +51,27 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ethereal Spotlight"),
+#if PROTOTYPE_CARDS && FURINA_REFRAME
+        // `EB-406`. THE COPY THIS RELIC KEEPS HANDING BACK IS DEAD ONCE THE
+        // SPOTLIGHT IS OUT, and under the arm that is permanent for the fight:
+        // R228 (1) retires Center Stage, so Guest Cast is the only target and
+        // there is no second aim to re-take. The card refuses itself now
+        // (`SpotlightSystem.DesignateOneModeIsRedundant`), and this is the
+        // sentence a reader gets BEFORE spending a turn finding out.
+        //
+        // ARM-ONLY, and chosen by the COMPILE constant for the reason the
+        // card's own face is (`SpotlightCards.cs`): a Localization is read
+        // once at registration. On a release build the selector has two modes
+        // and a second play RE-AIMS, so the sentence would be false there.
+        ("description",
+            "At the start of your turn, add an [gold]Ethereal Spotlight[/gold] "
+          + "to your [gold]Hand[/gold]. It does nothing once your Companions "
+          + "are lit."),
+#else
         ("description",
             "At the start of your turn, add an [gold]Ethereal Spotlight[/gold] "
           + "to your [gold]Hand[/gold]."),
+#endif
     };
 
     /// <summary>

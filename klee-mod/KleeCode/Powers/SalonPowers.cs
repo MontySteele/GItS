@@ -202,6 +202,22 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
             ? ManualNamedTail + ManualFrontName(who) + "."
             : ManualEmptyTail);
 
+    /// <summary>`EB-405`. The enemy's printed title, or an empty string where
+    /// the game will not answer -- `KokomiPlan.EnemyName`'s posture, verbatim
+    /// and for its reason: a state read must never throw, and the page has the
+    /// combat id to name the creature with anyway.</summary>
+    private static string EnemyName(Creature enemy)
+    {
+        try
+        {
+            return enemy.Monster?.Title.ToString() ?? "";
+        }
+        catch (Exception)
+        {
+            return "";
+        }
+    }
+
     /// <summary>The stage NAME each face uses, not the full card title:
     /// "Mademoiselle Crabaletta" and its two siblings run the face past its
     /// ceiling, and the shipped description has printed the short form since
@@ -752,6 +768,13 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         // The SAME expression D1's role chip renders -- see TickValue.
         var amount = TickValue(owner, member, paid);
 
+        // `EB-405`. The two facts the page had no way to print are decided
+        // inside this switch and thrown away by it: WHICH body the member
+        // picked, and WHAT that body is wearing afterwards. They are carried
+        // out of the branches in these locals and filed once below, so there
+        // is one recording site for the one implementation of a member acting.
+        Creature? picked = null;
+        Elements.Element? left = null;
         switch (member)
         {
             case SalonMember.Crabaletta:
@@ -763,6 +786,13 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 await ElementalHit.Deal(
                     choiceContext, target, Elements.Element.Hydro,
                     amount, owner);
+                picked = target;
+                // THE AURA IS READ AFTER THE HIT, not assumed from the element
+                // supplied: `ElementalHit.Deal` applies Hydro to a bare body,
+                // REFRESHES a Hydro one, and on any other element CONSUMES the
+                // aura into a reaction and leaves the body bare. All three are
+                // "what it left", and only the board knows which happened.
+                left = AuraCmd.Find(target)?.Element;
                 break;
             }
             case SalonMember.Usher:
@@ -770,6 +800,16 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                     owner, amount, ValueProp.Unpowered, null, fast: true);
                 break;
         }
+#if PROTOTYPE_CARDS
+        FurinaReframeLedger.For(owner).NotePerformance(
+            new FurinaReframeLedger.Performed(
+                ManualFrontName(member),
+                picked == null ? null : EnemyName(picked),
+                picked?.CombatId.ToString(),
+                picked == null ? null : Elements.Element.Hydro.ToString(),
+                left?.ToString(),
+                amount, paid, Evoked: false));
+#endif
         FurinaResources.GainBurst(
             owner, FurinaResourceConstants.BurstPerSalonTick);
 #if PROTOTYPE_CARDS
@@ -932,6 +972,12 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     {
         if (player.Creature != Owner) return;
 #if PROTOTYPE_CARDS
+        // `EB-405`. THE TURN BOUNDARY, and the only one the ledger has. The
+        // performance list answers "what happened on the turn I am looking
+        // at", so it is emptied here -- before the suppression branch below
+        // returns, because that branch is the arm's turn start and the list
+        // has to be cleared on exactly the turns the page is read on.
+        FurinaReframeLedger.For(Owner).ClearPerformances();
         if (FurinaReframe.ManualLiveFor(Owner))
         {
             // THE SINGLE BIGGEST CHANGE IN THE REFRAME (§4.2 / §2.2): members

@@ -332,10 +332,11 @@ public static class SpotlightSystem
     /// nothing to refuse on, and "unpaid is a no-op" (above) turned the whole
     /// play into an Ethereal card exhausting for nothing.
     ///
-    /// THE REDUNDANT CASE IS NOT A REFUSAL, deliberately. Re-aiming at the same
-    /// target bills nothing, so a seat already in Guest Cast can still play the
-    /// card at an empty buffer; what it must not do is pay nothing and get
-    /// nothing, which is the only state this gate names.
+    /// THE REDUNDANT CASE IS NOT THIS GATE'S, and since `EB-406` it is not a
+    /// free play either -- it is <see cref="DesignateOneModeIsRedundant"/>
+    /// below. This one names the PRICE and nothing else, which is why it steps
+    /// aside where the mode is already Guest Cast: there is no price to fail
+    /// to meet there.
     ///
     /// NULL-TOLERANT AND READ-ONLY: it is called on every card in hand on every
     /// state poll and on the compendium's ownerless copy, so no combat, no
@@ -348,6 +349,41 @@ public static class SpotlightSystem
         && Mode(creature) != SpotlightMode.GuestCast
         && FurinaResources.Encore(creature)
             < FurinaReframeLaw.SpotlightDesignateEncoreCost;
+
+    /// <summary>
+    /// `EB-406`. THE SECOND COPY, AND IT WAS THE HOLE THE PRICE GATE LEFT.
+    ///
+    /// WHAT THE SEAT SAW (Furina round 4, run 1, fight 1). Ethereal Spotlight
+    /// at 0 Encore was refused one turn -- "CANNOT BE PLAYED: you have no
+    /// Encore, and this costs 2" -- and ACCEPTED the next at the same 0
+    /// Encore, Exhausting with no effect: no Encore moved and Guest Cast
+    /// stayed 1. The card is `Ethereal` and `Exhaust`, and the starter relic
+    /// puts a fresh copy in hand every turn, so this is a dead card handed
+    /// back every turn for the rest of the fight.
+    ///
+    /// THE PATH. The price gate above steps aside once the mode IS Guest Cast,
+    /// on the reading that re-aiming at the same target bills nothing and so
+    /// may be allowed at an empty buffer. Under the arm there is no other
+    /// target -- R228 (1) retires Center Stage, and
+    /// <see cref="CenterStageActive"/> returns false unconditionally -- so
+    /// "re-aim" is not a thing the card can do: the only second play is the
+    /// redundant one, and <see cref="DesignateOneMode"/> answers it with
+    /// `NoteDesignationRedundant()` and a bare `return`. Bill nothing and do
+    /// nothing is exactly the state the gate above says a play must never
+    /// reach; it just could not see this way in.
+    ///
+    /// SO IT IS A REFUSAL, and the card carries the sentence
+    /// (`IUnplayableReasonCard`), because the reason is not the price and must
+    /// not be reported as one. The op's early-out stays where it is: a gate
+    /// and a payment that disagree is the defect `EB-364` closed, and this
+    /// keeps them agreeing from both ends.
+    ///
+    /// NULL-TOLERANT AND READ-ONLY, for the reason its neighbour is.
+    /// </summary>
+    public static bool DesignateOneModeIsRedundant(Creature? creature) =>
+        creature != null
+        && FurinaReframe.SpotlightLiveFor(creature)
+        && Mode(creature) == SpotlightMode.GuestCast;
 #endif
 
     /// <summary>

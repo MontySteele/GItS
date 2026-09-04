@@ -571,6 +571,13 @@ ARM_KEYWORDS = (
     ArmKeyword("Deploy", ("Deploy", "Deploys"), "ArmKeywordTips.ForDeploy"),
     ArmKeyword("Evoke", ("Evoke", "Evokes"), "ArmKeywordTips.ForEvoke"),
     ArmKeyword("Drain", ("Drain", "Drains"), "ArmKeywordTips.ForDrain"),
+    # `EB-407`. THE ARM'S FOURTH, and the one word here the arm did not invent
+    # -- Encore is shipped machinery. It is in this table anyway because the
+    # surface that states its rule is a BADGE (`EncoreMeterPower`), which only
+    # renders once the meter is on the board, and the word is printed on the
+    # Neow screen and on opening-hand faces before that. NO PLURAL: the meter
+    # is never printed as one.
+    ArmKeyword("Encore", ("Encore",), "ArmKeywordTips.ForEncore"),
 )
 
 

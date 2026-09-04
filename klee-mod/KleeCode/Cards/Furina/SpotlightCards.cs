@@ -76,8 +76,12 @@ public sealed class EtherealSpotlight
         get
         {
 #if PROTOTYPE_CARDS
-            if (SpotlightSystem.DesignateOneModeIsUnpayable(
-                    SparkCost.OwnerCreatureOf(this)))
+            // `EB-406`: the REDUNDANT copy first. It is refused whatever the
+            // buffer holds, so it must never fall through to the price test
+            // and be reported as a shortfall it is not.
+            var creature = SparkCost.OwnerCreatureOf(this);
+            if (SpotlightSystem.DesignateOneModeIsRedundant(creature)
+                || SpotlightSystem.DesignateOneModeIsUnpayable(creature))
             {
                 return false;
             }
@@ -99,6 +103,15 @@ public sealed class EtherealSpotlight
         {
 #if PROTOTYPE_CARDS
             var owner = SparkCost.OwnerCreatureOf(this);
+            // `EB-406`. The redundant copy's own sentence, in the card's own
+            // words -- its face says "Spotlight every Companion card", and
+            // they already are. It is FIRST because it is true whatever the
+            // buffer holds, and reporting it as a price shortfall would send
+            // the reader to bank Encore it does not need.
+            if (SpotlightSystem.DesignateOneModeIsRedundant(owner))
+            {
+                return "the Spotlight is already on your Companion cards";
+            }
             if (SpotlightSystem.DesignateOneModeIsUnpayable(owner))
             {
                 var bank = owner == null ? 0 : FurinaResources.Encore(owner);

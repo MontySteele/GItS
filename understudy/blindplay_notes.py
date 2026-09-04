@@ -62,6 +62,12 @@ METER_NOTE = ("the game's data feed carries this meter's amount only: no "
 METER_CAPPED_NOTE = ("the game's data feed carries this meter's amount and "
                      "its maximum, and no rule for how it is spent")
 
+# `EB-407`. The third case: the glossary on this same screen already defines
+# the word, so the meter line points at it rather than printing the rule twice.
+# One definition per screen is `keyword_notes`' own rule, and the meters block
+# was the one place two sources could both fire on one word.
+METER_DEFINED_NOTE = "defined under *Words on this screen*"
+
 # `EB-382`. WHERE A METER'S SPEND RULE EXISTS, THE ROW SAYS IT.
 #
 # The Furina round-two seat ended a turn holding four banked Encore and opened
@@ -431,6 +437,20 @@ ARM_KEYWORDS: dict[str, str] = {
               "for it."),
     "Drain": ("Your Fanfare falls to nothing. What the card does next is "
               "priced off the amount it took."),
+    # `EB-407`. THE WORD PRINTED BEFORE THE PLAYER HOLDS ANY. Encore is named
+    # on the Neow screen and on opening-hand faces, and the only surface that
+    # stated its rule was the METER LINE -- which needs the meter to be on the
+    # board. The Furina round-4 seat made the run's first decision without the
+    # word (run 1, (c) 5). The sentence is `ArmKeywordTips.ForEncore`'s, and
+    # the ORDER clause is the half nothing printed: the buffer
+    # (`FurinaResources.AbsorbDamage`), a card's price
+    # (`FurinaResourceHooks.BeforeCardPlayed`, before resolution) and a
+    # member's 1 (`SalonPowers.PerformMember`, or 3/4 when it cannot pay) all
+    # draw on ONE amount with no reservation and no priority, so a hit that
+    # lands first leaves the member dry.
+    "Encore": ("After Block it absorbs damage before HP. One pool, as each "
+               "lands: a card pays to resolve, a member spends 1 to perform "
+               "or acts at 3/4."),
     # `EB-329`. THE ONE WORD IN THIS TABLE THE GAME DEFINES NOWHERE, and that
     # is the finding rather than an oversight here: two cards price themselves
     # on it -- Chain of Command counts the Companion cards you played last
@@ -485,6 +505,11 @@ _ARM_KEYWORD_RE = {
     "Deploy": re.compile(r"\bDeploys?\b"),
     "Evoke": re.compile(r"\bEvokes?\b"),
     "Drain": re.compile(r"\bDrains?\b"),
+    # `EB-407`. NO PLURAL: the meter is never printed as one. And the pattern
+    # is written with an editor rather than a shell heredoc, which is how the
+    # three rows above once acquired a literal 0x08 in place of a word
+    # boundary and matched nothing at all.
+    "Encore": re.compile(r"\bEncore\b"),
     # `EB-329` MATCHED THE PHRASE `Companion cards?` AND THE FACES HAVE SINCE
     # MOVED. That row's reasoning was that the two cards which PRICE themselves
     # on the word both spell it out; `Chain of Command` now reads "for each
@@ -761,6 +786,51 @@ def _every_string(blob: Any):
             yield from _every_string(value)
 
 
+# `EB-404`. THE KEYS THAT HOLD A NAME RATHER THAN A RULE.
+#
+# THE DEFECT. The page glossed `Deploy` -- "A member joins and performs at
+# once" -- on a screen holding `Freminet - Pers, Deploy!`, whose printed body
+# is "Deal 6 damage". The word was in the card's TITLE. The Furina round-4 seat
+# played it six times waiting for a member to join, and read the card as broken
+# (run 1, (c) 2).
+#
+# A TITLE IS NOT A RULE. A card is named by its flavour and ruled by its body:
+# `Freminet - Pers, Deploy!` names a character's move and deploys nothing,
+# `Spark Strike` may charge no Sparks, and a body that really carries the rule
+# prints the word where the rule is. So the glossary's haystack is every
+# printed string on the screen EXCEPT the ones that name a thing -- card and
+# option titles, creature names, relic and potion names, map labels.
+#
+# `title` AND NOT `name`, AND THE DIFFERENCE IS THE RULE. In a finished
+# observation `title` is the key that holds a CARD's or a potion's printed name
+# -- `_card_face`, `blindplay_faces.py:137` -- and holds nothing else. A power
+# row's `name` is the game's own BADGE, which is a printed rule in force and
+# not flavour: `Bomb 6` on an enemy means there is a Bomb on the board, and
+# `test_the_word_is_found_wherever_the_screen_prints_it` pins that it defines
+# the word. So the badge stays in and the card title comes out.
+#
+# THE OTHER SOURCES ARE UNAFFECTED and that is the boundary. `_wire_keyword_rows`
+# reads tips the game itself hung on a power, `_elements_on_screen` reads two
+# computed fields, and the LEAK GUARD (`_every_string`, above) must keep
+# sweeping titles -- a sprite tag in a card's NAME is exactly what it is for.
+# Only the word-match haystack narrows.
+_TITLE_KEYS = frozenset({"title"})
+
+
+def _body_strings(blob: Any):
+    """Every printed string of an observation that is a RULE, not a title."""
+    if isinstance(blob, str):
+        yield blob
+    elif isinstance(blob, dict):
+        for key, value in blob.items():
+            if key in _TITLE_KEYS:
+                continue
+            yield from _body_strings(value)
+    elif isinstance(blob, list):
+        for value in blob:
+            yield from _body_strings(value)
+
+
 def _elements_on_screen(obs: dict[str, Any]) -> bool:
     """Does this screen show an aura, or a card that bears an element?
 
@@ -833,9 +903,11 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
 
     ONCE PER SCREEN and in the arms' own order, however many faces printed the
     word -- a definition repeated under every card in a hand is a page a reader
-    stops reading. It is computed over the WHOLE finished observation, so a
-    word that reaches the page through a card's body, an enemy's badge, a
-    power's text, a relic, a potion or a reward row is defined the same way.
+    stops reading. It is computed over the whole finished observation MINUS its
+    titles (`EB-404`), so a word that reaches the page through a card's body,
+    an enemy's badge, a power's text, a relic's or a potion's rule or a reward
+    row is defined the same way, and a word that is only somebody's NAME
+    defines nothing.
 
     FIVE SOURCES, IN THIS ORDER (`EB-340`, extended by `EB-367` and `EB-377`):
 
@@ -859,7 +931,13 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     nowhere else -- an elite that is about to freeze must not be read a line
     saying it cannot.
     """
-    hay = "\n".join(_every_string(obs))
+    # `EB-404`: BODIES AND PRINTED RULES, NEVER TITLES -- see `_body_strings`.
+    # `EB-407`: AND THE METER NAMES, which are dict KEYS and so reach no value
+    # walk, while the page prints every one of them as a row of its own. The
+    # word this row was filed for is a meter's name, and a screen that prints
+    # `Encore: 4` prints the word.
+    meters = ((obs.get("combat") or {}).get("you") or {}).get("meters") or {}
+    hay = "\n".join(list(_body_strings(obs)) + list(meters))
     growth = _BOMB_GROWTH_RE.search(hay)
     rows = [{"name": word,
              "text": ARM_KEYWORDS[word].format(

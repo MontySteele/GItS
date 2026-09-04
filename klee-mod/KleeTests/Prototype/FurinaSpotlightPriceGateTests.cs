@@ -144,16 +144,72 @@ public class FurinaSpotlightPriceGateTests
     // ==================================================================
 
     [Fact]
-    public void Re_aiming_at_the_same_target_is_free_and_stays_playable()
+    public void A_second_copy_while_the_spotlight_holds_is_refused()
     {
-        // Re-aiming bills nothing, so it cannot be refused for being unpayable:
-        // the only state this gate names is "would pay, and cannot".
+        // `EB-406`. THIS TEST USED TO ASSERT THE OPPOSITE, and the reading it
+        // rested on does not survive the arm. "Re-aiming at the same target
+        // bills nothing, so it cannot be refused for being unpayable" is true
+        // of the price gate and was read as "so the play is fine" -- but R228
+        // (1) retires Center Stage, so Guest Cast is the ONLY target and there
+        // is no re-aim to make. `DesignateOneMode` answers the second copy
+        // with `NoteDesignationRedundant()` and a bare return, and the card is
+        // `Ethereal` + `Exhaust` with a relic putting a fresh one in hand
+        // every turn.
+        //
+        // The Furina round-4 seat played exactly that: refused one turn at 0
+        // Encore ("you have no Encore, and this costs 2"), accepted the next
+        // at the same 0 Encore, Exhausting with no effect -- no Encore moved,
+        // Guest Cast stayed 1.
         using var _ = new Arm();
         var seat = Seat.Furina().WithCombatState();
         CustomResources<SpotlightModeResource>
             .Get(seat.Player.PlayerCombatState).Amount =
                 (int)SpotlightMode.GuestCast;
 
+        Assert.False(Playable(Card(seat)));
+        // ...and the reason is the redundancy, NOT the price, whatever the
+        // buffer holds: banking Encore is not the way out of this one.
+        Assert.Equal("the Spotlight is already on your Companion cards",
+                     KleeUnplayableReason.For(Card(seat)));
+        FurinaResources.GainEncore(
+            seat.Creature, FurinaReframeLaw.SpotlightDesignateEncoreCost);
+        Assert.False(Playable(Card(seat)));
+        Assert.Equal("the Spotlight is already on your Companion cards",
+                     KleeUnplayableReason.For(Card(seat)));
+    }
+
+    [Fact]
+    public void The_first_copy_is_still_playable_at_the_price()
+    {
+        // The other direction, so the refusal above cannot pass by refusing
+        // the card outright: with no Spotlight out and the price banked, the
+        // selector plays.
+        using var _ = new Arm();
+        var seat = Seat.Furina().WithCombatState();
+        FurinaResources.GainEncore(
+            seat.Creature, FurinaReframeLaw.SpotlightDesignateEncoreCost);
+
+        Assert.NotEqual((int)SpotlightMode.GuestCast,
+                        CustomResources<SpotlightModeResource>
+                            .Get(seat.Player.PlayerCombatState).Amount);
+        Assert.True(Playable(Card(seat)));
+        Assert.Null(KleeUnplayableReason.For(Card(seat)));
+    }
+
+    [Fact]
+    public void With_the_arm_off_a_second_copy_is_not_refused()
+    {
+        // The quarantine. Off the arm the selector has two modes and a second
+        // play RE-AIMS, so nothing here may refuse it -- and the relic's face
+        // does not carry the arm's sentence either.
+        using var _ = new Arm(master: false, spotlight: false);
+        var seat = Seat.Furina().WithCombatState();
+        CustomResources<SpotlightModeResource>
+            .Get(seat.Player.PlayerCombatState).Amount =
+                (int)SpotlightMode.GuestCast;
+
+        Assert.False(SpotlightSystem.DesignateOneModeIsRedundant(
+            seat.Creature));
         Assert.True(Playable(Card(seat)));
         Assert.Null(KleeUnplayableReason.For(Card(seat)));
     }
@@ -167,6 +223,7 @@ public class FurinaSpotlightPriceGateTests
         using var _ = new Arm();
 
         Assert.False(SpotlightSystem.DesignateOneModeIsUnpayable(null));
+        Assert.False(SpotlightSystem.DesignateOneModeIsRedundant(null));
         Assert.True(Playable(new EtherealSpotlight()));
     }
 }
