@@ -1380,6 +1380,7 @@
 # words they print: docs/notes/prototype-surface-provenance.md.
 - {id: proto_fr_salon_debut_named, name: "Salon Début", character: furina,
    authored_by: [claude],
+   replaces: salon_debut,
    register: salon, cost: 1, type: skill, rarity: basic,
    art_of: salon_debut,
    upgrade: {add: {op: gain_encore, amount: 2}},

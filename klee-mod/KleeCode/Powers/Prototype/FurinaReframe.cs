@@ -456,4 +456,29 @@ public static class FurinaReframeRoster
         FurinaReframe.Enabled
             ? ModelDb.Card<ProtoFrAriaOfRecompense>()
             : ModelDb.Card<FurinaGen.AriaOfRecompense>();
+
+    /// <summary>
+    /// THE ARM'S OTHER STARTER SLOT (<c>EB-416</c>). Slot 9 of
+    /// <c>Furina.StartingDeck</c>: with the arm on it is the NAMED <i>Salon
+    /// Début</i>, otherwise the shipped card, byte for byte. Sim twin: the
+    /// second pair in <c>furina_reframe.STARTER_SUBS</c>.
+    ///
+    /// A WIRING DEFECT CLOSED, NOT A NEW DECISION. The reframe packet's sec.5
+    /// ruled that the starter deploy NAMES its member, and slice 2 built the
+    /// row that says so -- <c>proto_fr_salon_debut_named</c>, "Deploy
+    /// Mademoiselle Crabaletta". The row was generated, pooled and pinned, and
+    /// it was wired into NO starter in either engine, so the arm went on
+    /// dealing the shipped card and its RANDOM member. That matters most
+    /// exactly here: under <see cref="FurinaReframe.ManualEnabled"/> the front
+    /// member is the one a Companion play makes perform, so a random deploy
+    /// decides for the player which member their first trigger fires. The
+    /// R254 Aria build found the gap while opening this seam.
+    ///
+    /// ONE CARD FOR ONE CARD, like the slot above it: the deck is still ten
+    /// and <c>docs/furina-cards.yaml</c> does not move.
+    /// </summary>
+    public static CardModel StarterSalonDebut() =>
+        FurinaReframe.Enabled
+            ? ModelDb.Card<ProtoFrSalonDebutNamed>()
+            : ModelDb.Card<FurinaGen.SalonDebut>();
 }

@@ -173,9 +173,21 @@ POOL_SUBS: dict[str, str] = {
 #
 # THE ALTERNATIVE READER IS HELD, not withdrawn: Salon Début performing its
 # member again at 6 Fanfare is the packet's own re-ask if Aria's does not read.
+#
+# THE SECOND PAIR IS `EB-416`, and it is a wiring defect rather than a new
+# decision. The reframe packet's sec.5 ruled the starter deploy NAMES its
+# member -- the shipped Salon Début deploys a RANDOM one, which under the
+# manual arm decides for the player which member their first Companion play
+# will make perform -- and slice 2 built the row for it
+# (`proto_fr_salon_debut_named`, "Deploy Mademoiselle Crabaletta"). It had a
+# generated class and pins and was wired into NO starter in either engine, so
+# the arm went on dealing the random Début; the R254 Aria build found it while
+# opening this very seam. The row is unchanged: what is new is that something
+# now hands it out.
 # ----------------------------------------------------------------------
 STARTER_SUBS: dict[str, str] = {
     "aria_of_recompense": "proto_fr_aria_of_recompense",   # 5 Encore, 10 at 6
+    "salon_debut": "proto_fr_salon_debut_named",           # names Crabaletta
 }
 
 

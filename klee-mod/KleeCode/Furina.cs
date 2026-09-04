@@ -67,18 +67,27 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
         ModelDb.Card<StagePresence>(),
         ModelDb.Card<RegalBearing>(),
 #if PROTOTYPE_CARDS
-        // QUARANTINED, THE FURINA REFRAME'S ONE STARTER SEAM (R254, round 4
-        // pick 1). With the arm on this slot is the reframe copy of Aria of
-        // Recompense -- the same 5 Encore, plus 5 more at 6 Fanfare -- and
-        // with it off it is the shipped card, byte for byte. The sheet does
-        // not move; only this slot does, and only under the flag. The
-        // reasoning, the two lifted numbers and the sim twin
-        // (`loader._starter_ids`) are on FurinaReframeRoster.StarterAria.
+        // QUARANTINED, THE FURINA REFRAME'S TWO STARTER SLOTS -- her two kit
+        // cards, and no others. With the arm on this slot is the reframe copy
+        // of Aria of Recompense (R254, round 4 pick 1) -- the same 5 Encore,
+        // plus 5 more at 6 Fanfare -- and with it off it is the shipped card,
+        // byte for byte. The sheet does not move; only these slots do, and
+        // only under the flag. The reasoning, the two lifted numbers and the
+        // sim twin (`loader._starter_ids`) are on
+        // FurinaReframeRoster.StarterAria.
         Powers.FurinaReframeRoster.StarterAria(),
 #else
         ModelDb.Card<AriaOfRecompense>(),
 #endif
+#if PROTOTYPE_CARDS
+        // And the other kit card, `EB-416`: under the arm the deploy NAMES its
+        // member (packet sec.5) instead of rolling one, which matters because
+        // the front member is the one a Companion play makes perform. See
+        // FurinaReframeRoster.StarterSalonDebut.
+        Powers.FurinaReframeRoster.StarterSalonDebut(),
+#else
         ModelDb.Card<SalonDebut>(),
+#endif
         ModelDb.Card<AnInvitation>(),
     };
 
