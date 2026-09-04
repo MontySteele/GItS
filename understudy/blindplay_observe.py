@@ -22,12 +22,64 @@ from understudy.blindplay_board import (_bundle_cards, _combat,
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_options)
-from understudy.blindplay_notes import keyword_notes
+from understudy.blindplay_notes import (REWARD_ALTERNATIVE_RELICS,
+                                        keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
-                                       _fold, _int, _player, _potions, _screen,
-                                       _text)
+                                       _fold, _int, _player, _potions, _relics,
+                                       _screen, _text)
 from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
                                         SELECT_SCREENS, UNDRIVEN_SCREENS)
+
+
+# `EB-371`. THE VERB, AND WHERE IT IS OFFERED.
+#
+# THE DEFECT. At three of three the page REFUSES a potion reward -- "a potion
+# claimed now has nowhere to go" (`_full_slots`, `EB-341`) -- and until this
+# row there was no way to make room outside a fight: `use potion` needs a
+# combat for a combat-only potion, and nothing else touched the belt. The r9
+# act-1 seat met Tiny Mailbox at a rest site, was handed two potions onto a
+# full belt and lost both, having been told only that it could not claim.
+#
+# THE WIRE HAS ALWAYS CARRIED IT. `discard_potion` (`McpMod.Actions.cs:65`,
+# `ExecuteDiscardPotion` at `:325`) asks for a run in progress and a slot with
+# a potion in it -- no combat, no play phase, no usability check, which is the
+# whole difference from `use_potion` one case above it. So the verb is offered
+# on EVERY screen this page drives rather than on a list of screens: the gate
+# is the page's own `blocked`, which is the same question the bridge asks.
+#
+# AND THE BELT IS PRINTED WHERE THE VERB IS. A combat screen already prints
+# `## Potions`; a rest site, a shop and a reward screen did not, so a seat on
+# one of them was being offered a verb over a list it could not see. Same
+# shape, same heading, one reader.
+_DROP_FORMS = ('drop potion "<potion>"',
+               "drop potion <number>   (the Nth potion on your belt, "
+               "counting from 1)")
+
+
+def _alternative_relics(state: dict[str, Any]) -> list[str]:
+    """The held relics that rewrite a card reward's alternative. `EB-374`.
+
+    Matched on the PRINTED name folded, which is the only handle this page
+    has: a relic's id is on the wire and may not cross to a tester. Empty --
+    and so printed nowhere -- on every run that holds none of them.
+    """
+    return [_text(r.get("name")) for r in _relics(state)
+            if _fold(r.get("name")) in REWARD_ALTERNATIVE_RELICS]
+
+
+def _offer_drop(state: dict[str, Any], obs: dict[str, Any]) -> None:
+    """Offer `drop potion` -- and print the belt -- wherever it resolves."""
+    if obs["blocked"] or not obs["commands"]:
+        return
+    potions = _potions(state)
+    if not potions:
+        return
+    if obs["screen"] != "combat":
+        obs["belt"] = [{"title": _text(p.get("name")),
+                        "text": _text(p.get("description"))}
+                       for p in potions]
+        obs["belt_slots"] = _potion_slots(state)
+    obs["commands"] += list(_DROP_FORMS)
 
 
 def observation(state: dict[str, Any]) -> dict[str, Any]:
@@ -91,6 +143,10 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["offers"] = _number_faces(
             [_card_face(c) for c in _screen_cards(state)], "title")
         obs["can_skip"] = blob.get("can_skip") is not False
+        # `EB-374`: the relics the run holds that rewrite what the alternative
+        # to choosing does here. Named, because the page can name them; the
+        # control itself is not on the feed and the note says so.
+        obs["alternative_relics"] = _alternative_relics(state)
         obs["commands"] = ['choose "<card title>"', "skip"]
     elif st in SELECT_SCREENS:
         blob = _blob(state, st)
@@ -327,6 +383,11 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     else:
         obs["screen"] = "unknown"
         obs["blocked"] = "this tool has never seen this screen"
+
+    # `EB-371`: the belt, and the verb that empties a slot, on every screen
+    # the wire allows the action on. Before the sprite pass, so a potion face
+    # that names an icon file reads like every other face on the page.
+    _offer_drop(state, obs)
 
     # Sprite tags are rewritten HERE, at the boundary, rather than in each of
     # the dozen readers that could carry one: the wire prints them in card

@@ -108,9 +108,11 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
                 ("description",
                     "A charge on this enemy that grows at the start of your "
                   + "turn. Every [gold]Bomb[/gold] here goes off as Pyro "
-                  + "damage when [gold]Set off[/gold], never by itself. It "
-                  + "takes the enemy's debuffs, not your [gold]Strength[/gold] "
-                  + "or [gold]Weak[/gold]." + MineClause),
+                  + "damage when [gold]Set off[/gold], never by itself. The "
+                  + "hit is not an Attack, so only this enemy's "
+                  + "[gold]Vulnerable[/gold] and a damage cap move it, never a "
+                  + "debuff that answers Attacks and never anything of yours."
+                  + MineClause),
             };
             // EB-260, EB-287 and `EB-343`. ROWS, not one row with conditionals
             // in it, for the reason <see cref="SmartDescriptionLocKey"/> gives:
@@ -153,11 +155,20 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     // than pulled out as a constant beside `MineClause`, and the reason is the
     // measuring rule: `tools/lint_text_conventions.py` counts a bare
     // identifier in a concatenation as ONE numeral, so a named constant would
-    // hide 65 characters of player-facing text from its own ceiling. The Bomb
-    // keyword tip states the same rule in ITS own words and shorter -- "Its
-    // hit takes the enemy's debuffs, not yours" (`ArmKeywordTips.ForBomb`),
-    // written to fit the tip ceiling -- while this face, read on the enemy
-    // where the modifiers actually are, names Strength and Weak outright. Same
+    // hide 65 characters of player-facing text from its own ceiling.
+    //
+    // `EB-373` REWROTE THAT SENTENCE ON BOTH SURFACES, because it was not the
+    // rule this file implements. `FoldedMods` reads exactly two things off the
+    // target -- its `VulnerablePower`, and whichever power returns the lowest
+    // `ModifyDamageCap` -- and "the enemy's debuffs" claimed the rest. The r9
+    // seat lost two reads to it: a Slow 50 enemy took 48 from a pile printing
+    // 46, and a Flutter 5 enemy took a 27 Bomb whole while a printed 8 Attack
+    // landed 4. Both of those say "from Attacks" on their own faces, and the
+    // reason they miss is the one both surfaces now lead with -- the hit is not
+    // an Attack. The keyword tip says it in its own shorter words ("Not an
+    // Attack: only their Vulnerable and a cap move it",
+    // `ArmKeywordTips.ForBomb`), while this face, read on the enemy where the
+    // modifiers actually are, names the cap and both exclusions outright. Same
     // rule, two surfaces, the arrangement `MineClause` already has.
 
     /// <summary>

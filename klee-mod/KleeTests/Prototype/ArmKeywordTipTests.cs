@@ -166,8 +166,16 @@ public class ArmKeywordTipTests
         Assert.Contains("A charge on an enemy: grows ", printed);
         Assert.Contains(" a turn, goes off only when [gold]Set off[/gold]. ",
                         printed);
-        Assert.Contains("It takes the enemy's debuffs, not yours.", printed);
-        Assert.Contains("Kills move it to a survivor.", printed);
+        // `EB-373` REWROTE THE FOURTH RULE'S CLAUSE. The fold is `FoldedMods`
+        // and it reads two things off the target -- Vulnerable, and whichever
+        // power sets the lowest damage cap -- so "takes the enemy's debuffs"
+        // promised a Slow or a Flutter would move a Bomb, and the r9 seat
+        // priced two fights on it. The reason those miss is what the clause
+        // leads with now: a Bomb's hit is not an Attack. `EB-361`'s jump rule
+        // shares the 135 characters with it: "their" and "to a survivor" paid.
+        Assert.Contains("Not an Attack: only [gold]Vulnerable[/gold] and a cap "
+                      + "move it.", printed);
+        Assert.Contains("Kills move it on.", printed);
 
         // `EB-89`, read the only way it can be read: the growth rate is NOT a
         // literal anywhere in this method -- the two halves of the sentence are
@@ -260,20 +268,24 @@ public class ArmKeywordTipTests
         // cannot arrive with a different shape by accident.
         var attaches = Attaches().ToList();
 
-        // TWELVE: ELEVEN KEYWORDS AND ONE RIDER. Draft 6 cut Tide, Surge,
-        // Exert and the Garment as keywords and their four `For*` methods left
-        // with the rules they defined, taking the table from eleven to seven;
-        // the Furina reframe's slice two put Deploy, Evoke and Drain on it
-        // (2026-09-02), and R244 put `Hexerei` on it -- the coven's family
-        // mark, which eighteen faces printed while nothing defined it. Eleven
+        // THIRTEEN: TWELVE KEYWORDS AND ONE RIDER. Draft 6 cut Tide, Surge, Exert and the Garment as
+        // keywords and their four `For*` methods left with the rules they
+        // defined, taking the table from eleven to seven; the Furina reframe's
+        // slice two put Deploy, Evoke and Drain on it (2026-09-02), and R244
+        // put `Hexerei` on it -- the coven's family mark, which eighteen faces
+        // printed while nothing defined it. `EB-372` put `Grounded` on it --
+        // a Power of Klee's that Kaeya's Cold-Blooded Strike is written
+        // against by name, met by a seat that had never drafted it. The number
         // is the TABLE's length (`gen_klee_cards.ARM_KEYWORDS`), which is what
-        // the python half of this pin walks.
+        // the python half of this pin walks, so `ForGrounded` takes an
+        // OPTIONAL card rather than adding a second entry point for the power
+        // that raises it.
         //
-        // THE TWELFTH IS `EB-378`'s `ForPlanElement`, which titles no keyword:
+        // THE THIRTEENTH IS `EB-378`'s `ForPlanElement`, which titles no keyword:
         // it is a sentence about a CARD whose Hydro arrives with the
         // jellyfish's carry-out rather than with the play. It goes through the
         // same `With`, which is what this pin is actually for.
-        Assert.Equal(12, attaches.Count);
+        Assert.Equal(13, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
