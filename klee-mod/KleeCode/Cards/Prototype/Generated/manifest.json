@@ -61,6 +61,7 @@
     "proto_ko_catalytic_converter",
     "proto_ko_chain_fuse",
     "proto_ko_chained_reactions",
+    "proto_ko_countdown",
     "proto_ko_coven_errand",
     "proto_ko_dig_in",
     "proto_ko_dodoco_cover",
@@ -235,6 +236,7 @@
     "proto_ko_catalytic_converter": "klee",
     "proto_ko_chain_fuse": "klee",
     "proto_ko_chained_reactions": "klee",
+    "proto_ko_countdown": "klee",
     "proto_ko_coven_errand": "klee",
     "proto_ko_dig_in": "klee",
     "proto_ko_dodoco_cover": "klee",
@@ -547,6 +549,9 @@
     },
     "proto_ko_chained_reactions": {
       "power_amount": 1
+    },
+    "proto_ko_countdown": {
+      "draw": 1
     },
     "proto_ko_coven_errand": {
       "bomb_size": 2

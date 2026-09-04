@@ -471,6 +471,18 @@
    description: "All cards in your hand count as [gold]Hexerei[/gold] cards this turn.",
    effects: [{op: hexerei_mark_hand}]}
 
+# the pool pass, round 10 (2026-09-04): the arm's one energy-priced plain
+# detonator, beside Sizzle's reaction-keyed one. Why it exists:
+# docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_ko_countdown, name: "Countdown", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "[gold]Set off[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   upgrade: {draw: 1},
+   effects: [{op: set_off, target: enemy},
+             {op: draw, amount: 1}]}
+
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and
 # which 13 of the workshop's 34 are absent: docs/notes/prototype-surface-provenance.md.

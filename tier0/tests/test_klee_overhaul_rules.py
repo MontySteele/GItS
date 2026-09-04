@@ -1253,6 +1253,81 @@ def test_ammo_scavenging_draws_one_per_bomb_that_went_off_this_turn(overhaul):
     assert len(state.player.hand) == hand_before + 3
 
 
+# ---------------------------------------------------------------------------
+# THE POOL PASS -- the energy-priced plain detonator (round 10, 2026-09-04)
+# ---------------------------------------------------------------------------
+
+def test_countdown_sets_off_the_whole_pile_and_then_draws(overhaul):
+    """`ProtoKoCountdown`. The arm's one detonator priced in ENERGY: three
+    round-10 seats held Spark-priced detonators at 0 Spark with a fat Bomb
+    sitting on the enemy and nothing in hand that could cash it.
+
+    THE ORDER IS THE CARD. The Set off is first, so the card the draw finds is
+    drawn into a board the explosion has already resolved -- the C# twin pins
+    the same order off the compiled `OnPlay`
+    (`klee-mod/KleeTests/Prototype/PoolPassTests.cs`)."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    state.player.energy = 3
+    state.player.draw_pile = [probe([], cid=f"filler{i}", ctype="skill")
+                              for i in range(5)]
+    for size in (3, 4, 5):
+        klee_overhaul.place(state, enemy, size)
+
+    card = load("proto_ko_countdown")
+    assert [fx["op"] for fx in card.effects] == ["set_off", "draw"]
+    assert combat.spark_cost(card) == 0
+    assert combat.card_cost(state, card) == 1
+
+    hand_before = len(state.player.hand)
+    effects.resolve_card(state, card)
+
+    assert sizes(enemy) == [], "every Bomb on the target went off"
+    assert enemy.hp < 400
+    assert len(state.player.hand) == hand_before + 1
+
+
+def test_countdown_upgraded_draws_two(overhaul):
+    """The row's only printed number is its draw, so that is what the smith
+    moves (`upgrade: {draw: 1}`, the `Cards` var on the C# side)."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    state.player.draw_pile = [probe([], cid=f"filler{i}", ctype="skill")
+                              for i in range(5)]
+    klee_overhaul.place(state, enemy, 5)
+
+    card = load("proto_ko_countdown+")
+    assert card.effects[1] == {"op": "draw", "amount": 2}
+
+    hand_before = len(state.player.hand)
+    effects.resolve_card(state, card)
+
+    assert sizes(enemy) == []
+    assert len(state.player.hand) == hand_before + 2
+
+
+def test_countdown_still_draws_on_a_bomb_less_board(overhaul):
+    """`EB-261`'s gate does NOT cover this row and must not: the draw is a
+    second clause that pays whatever the board holds, so Countdown is a
+    playable cantrip with no Bomb out rather than a dead card."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.player.energy = 3
+    state.player.sparks = 0
+    state.player.draw_pile = [probe([], cid=f"filler{i}", ctype="skill")
+                              for i in range(5)]
+
+    card = load("proto_ko_countdown")
+    assert klee_overhaul.set_off_only(card) is False
+    assert combat.card_playable(state, card) is True
+
+    hand_before = len(state.player.hand)
+    effects.resolve_card(state, card)
+
+    assert len(state.player.hand) == hand_before + 1
+    assert enemy.hp == 200
+
+
 def test_sparks_n_splash_echoes_the_pile_without_spending_it(overhaul):
     """`BombEchoPower`, R250 (2026-09-04): "at the end of your turn, deal
     Pyro damage to a random enemy equal to its LARGEST Bomb" -- the largest

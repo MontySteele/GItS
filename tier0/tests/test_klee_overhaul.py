@@ -208,10 +208,19 @@ def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
     scope statement is what the names below hold -- each keyed to the Bomb
     state, and neither a plain Block, which is why `proto_ko_dig_in` beside
     them is still the arm's only unconditional Block and is still a Spark sink.
+
+    THIRTY-FOUR SINCE THE ROUND-10 POOL PASS (2026-09-04), and the one that
+    arrived is `proto_ko_countdown`: the arm's only detonator priced in ENERGY
+    that asks nothing else of the board. Three round-10 seats held Spark-priced
+    detonators at 0 Spark with a fat Bomb on the enemy and no energy-priced
+    detonator drawn; Ka-pow! is the starter's, one card in ten. The Spark sink
+    drafted beside it (Explosive Spark) was WITHDRAWN on the card audit's C3
+    clause and is on no surface, so its absence is pinned here for the reason
+    Fire Safety's is.
     """
     ids = C.KLEE_OVERHAUL_POOL_IDS
-    assert len(ids) == 33
-    assert len(set(ids)) == 33
+    assert len(ids) == 34
+    assert len(set(ids)) == 34
     assert "proto_ko_vermillion_pact" not in ids
     assert {"proto_ko_dig_in", "proto_ko_pop"} <= set(ids)
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
@@ -227,6 +236,10 @@ def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
     assert {"proto_ko_dodoco_cover", "proto_ko_careful_now"} <= set(ids)
     assert "proto_ko_fire_safety" not in ids
     assert "proto_ko_safety_lesson" not in ids
+    # The round-10 pool pass's one, and only one: the Spark sink written with
+    # it was withdrawn on the audit's C3 clause and is on no surface.
+    assert "proto_ko_countdown" in ids
+    assert "proto_ko_explosive_spark" not in ids
 
 
 def test_the_numbers_are_the_briefs_placeholders():
@@ -318,7 +331,7 @@ def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
 
 
 def test_the_pool_keeps_the_packets_rarity_split(overhaul):
-    """15 Common, 12 Uncommon, 6 Rare -- the slice packet's sec.4 count with
+    """16 Common, 12 Uncommon, 6 Rare -- the slice packet's sec.4 count with
     Vermillion Pact removed and, since DRAFT 4 (R242), Pop! and Dig In back as
     Commons, plus ONE OF EACH from R244's Hexerei readers and ONE OF EACH from
     what is left of R252's defence shelf (it drafted two Commons and two
@@ -327,10 +340,13 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     a row filed in the wrong tier changes how often it is seen, both returning
     rows had to stop being `rarity: basic` to be offerable at all, and the R244
     packet files its three one per tier on purpose (a Common that reads the
-    turn, an Uncommon Power that is dead alone, a Rare enabler)."""
+    turn, an Uncommon Power that is dead alone, a Rare enabler). The
+    round-10 pool pass adds ONE Common (`proto_ko_countdown`): a detonator a
+    seat has to be OFFERED often is a Common or it is not the answer to the
+    finding it was written for."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 15, "uncommon": 12, "rare": 6}
+        "common": 16, "uncommon": 12, "rare": 6}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):
