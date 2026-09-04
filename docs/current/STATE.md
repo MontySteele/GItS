@@ -137,13 +137,19 @@ are in [`workstreams.md`](workstreams.md).
 
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
-- **Klee** — Round 8 is RULED (R250, `review/ruled/klee-overhaul-round-8-2026-09-04.md`):
-  the Splash pays the largest Bomb, not the sum, so hold-or-cash survives the
-  Power landing. Round 9 is READ (`review/active/klee-overhaul-round-9-2026-09-04.md`):
-  one run died on act-2 floor 22 with no Block in hand, the pool's defence
-  shows one row in three rewards, one pick (how the pool answers it) and
-  `EB-371`-`EB-374`. [USER]'s act-1 run is due on `0.2.2309+proto`; the Splash
-  rule is still unread live. The round-8 clear is read against a control run (below).
+- **Klee** — Rounds 8 and 9 are RULED (R250 / R252,
+  `review/ruled/klee-overhaul-round-8-2026-09-04.md`,
+  `review/ruled/klee-overhaul-round-9-2026-09-04.md`): the Splash pays the
+  largest Bomb, not the sum, so hold-or-cash survives the Power landing; and
+  round 9's pick 1 stands at its default, one run having died on act-2 floor
+  22 with no Block in hand while the pool's defence showed one row in three
+  rewards (`EB-371`-`EB-374`). **Round 10 is BUILT** — the DEFENCE SHELF, five
+  rows keyed to the Bomb state and none of them a plain Block (Dodoco Cover,
+  Careful Now, Fire Safety, Safety Lesson, Barbara's Front Row Seat), on a new
+  `block_largest_bomb` op, a `ko_safety_lesson` power and an
+  `mc_front_row_seat` stand-in, in both engines. [USER]'s act-1 run is due on
+  `0.2.2309+proto`; the Splash rule is still unread live. The round-8 clear is
+  read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
   six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
@@ -171,7 +177,8 @@ are in [`workstreams.md`](workstreams.md).
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
-  the arm pools (33 Klee / 30 Kokomi rows against 79 / 76 shipped) cleared
+  the arm pools (33 Klee — 37 since R252's defence shelf — / 30 Kokomi rows
+  against 79 / 76 shipped) cleared
   three of seven kit runs. The clears are the kits'; a clear on a 30-row pool
   is consistency as much as strength. The second control (same afternoon,
   §5) died on the same floor to the same Death Blow; no third is queued.

@@ -137,8 +137,25 @@ internal static class KleeOverhaulRoster
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
-    /// THIRTY-ONE SINCE R244, and the three that arrived are a SECOND slice
-    /// rather than a redraft of this one: the ruled packet
+    /// THIRTY-FIVE SINCE R252, and the four that arrived are the DEFENCE
+    /// SHELF, a THIRD slice on the same terms as the second: Klee round 9's
+    /// pick 1, taken at its default
+    /// (`review/ruled/klee-overhaul-round-9-2026-09-04.md`). Every new row is
+    /// keyed to the Bomb state and none is a plain Block. They are listed in
+    /// their own block, in the sim's order.
+    ///
+    /// AND THE PIN THAT NOW HOLDS THIS LIST TO THE SHEET. R252 shipped the four
+    /// rows -- sim ops, powers, codegen, tests, all green -- and did not add
+    /// them HERE, so they compiled into `PrototypeRoster` (which is why nothing
+    /// went red: `lint_pool_membership` only asks that a class be in SOME pool)
+    /// and were never OFFERED. A live seat played eight fights on the deployed
+    /// build and saw none of them. `tools/lint_arm_pool_parity.py` is the gate
+    /// that would have caught it: every non-`basic` row on the sheet with this
+    /// arm's id prefix must be named in this method, and the ids this method
+    /// names must equal `C.KLEE_OVERHAUL_POOL_IDS` exactly, in order.
+    ///
+    /// THIRTY-ONE BEFORE THAT (R244), and the three that arrived are a SECOND
+    /// slice rather than a redraft of this one: the ruled packet
     /// `review/ruled/klee-hexerei-readers-2026-09-02.md` adds Klee's three
     /// Hexerei readers, the cards in her own pool that pay for the coven's
     /// one-word mark. They are listed in their own block at the end.
@@ -206,6 +223,17 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoRunAway>(),
         ModelDb.Card<ProtoKoGrounded>(),
         ModelDb.Card<ProtoKoSorryJean>(),
+        // THE DEFENCE SHELF (4 -- R252, Klee round 9 pick 1 at its default).
+        // Two Commons and two Uncommons, and the split is the pick's own: the
+        // two rows a starting hand needs (a placer with a Block half, and Run
+        // Away!'s shape on the React loop) are Common, and the two that ask
+        // for a deck around them (the capped read of the pile, the
+        // Block-per-explosion Power) are Uncommon. In `C.KLEE_OVERHAUL_
+        // POOL_IDS`'s order, which is the sheet's.
+        ModelDb.Card<ProtoKoDodocoCover>(),
+        ModelDb.Card<ProtoKoCarefulNow>(),
+        ModelDb.Card<ProtoKoFireSafety>(),
+        ModelDb.Card<ProtoKoSafetyLesson>(),
         // The Hexerei readers (3 -- R244, the ruled packet's sec.2). One per
         // rarity, which is the ruling's own shape: a Common that reads the
         // turn, an Uncommon Power that is DEAD ALONE by ruling, and a Rare

@@ -899,6 +899,16 @@ CO_TENANCY_LEDGER = {
             "the same reason as ShakenNotPurredPower above -- it differs only "
             "in what pays it (Mines, and per Mine), which happens on an "
             "explosion and never in this broadcast",
+        ("Powers/Prototype/CompanionStandIns.cs", "FrontRowSeatPower"):
+            "QUARANTINED (the companion stand-in seam). R252's fifth "
+            "caretaker, Barbara's repeating watcher closing -- the same "
+            "removal at the same boundary and for the same reason as "
+            "IGotYourBackPower above, from which it differs in one clause "
+            "only: it pays on EVERY Bomb rather than on Mines alone. What "
+            "pays it happens on an explosion, during a card play or an enemy "
+            "attack, and never in this broadcast; the sim closes the same "
+            "window at the same sequential point "
+            "(companion_standins.roll_turn, whose _WATCHERS tuple it joined)",
         ("Powers/Prototype/CompanionStandIns.cs", "ColdBloodedPower"):
             "QUARANTINED (the companion stand-in seam). Kaeya's marker being "
             "SPENT, and it is the one row of the four with a co-tenant that "

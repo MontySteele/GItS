@@ -328,7 +328,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
                   # and is Compile Remove'd out of a release build, so the only
                   # rows that may print these are `proto_` rows on the
-                  # prototype surface, compiled under the same switch). Nine
+                  # prototype surface, compiled under the same switch). Ten
                   # verbs, every one with a verified call site on
                   # `ProtoBombPower`, `KleeOverhaulLedger` or
                   # `CompanionHexerei`; the whitelist stays honest.
@@ -339,6 +339,12 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # arm verb that touches no Bomb: it widens the family mark
                   # for a turn, and the cards that READ the mark are Klee's.
                   "hexerei_mark_hand",
+                  # R252's defence-shelf verb (Careful Now). It READS the pile
+                  # -- `ProtoBombPower.BlockForLargestBomb`, off the same
+                  # `LargestPlacedBy` the Splash reads since R250 -- and spends
+                  # nothing, which is the one line separating it from
+                  # `remove_bomb_for_block` above.
+                  "block_largest_bomb",
                   # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
                   # same terms and the same quarantine as the block above: the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
@@ -1767,6 +1773,12 @@ APPLY_POWERS = {
     "ko_grounded": ("GroundedPower", None,
         "At the start of your turn, if none of your [gold]Bombs[/gold] went "
         "off last turn, gain {X} Block."),
+    # R252's defence-shelf Power (Safety Lesson). Grounded's grammar one
+    # trigger over, on the EXPLOSION bus -- so a three-Bomb Set off pays three
+    # times, and Sparks 'n' Splash's echo pays nothing at all, because the echo
+    # is not a Set off (R250).
+    "ko_safety_lesson": ("SafetyLessonPower", None,
+        "Whenever one of your [gold]Bombs[/gold] goes off, gain {X} Block."),
     # R244's coven reader. Chained Reactions' grammar one trigger over, and
     # DEAD ALONE by the ruling's own pick 2 -- a deck with no witch in it never
     # sets this off, which is what makes it the bridge card rather than a
@@ -1787,6 +1799,11 @@ APPLY_POWERS = {
         "gain {X} Block."),
     "mc_i_got_your_back": ("IGotYourBackPower", None,
         "Whenever one of your [gold]Mines[/gold] goes off this turn, gain {X} "
+        "Block."),
+    # R252's fifth caretaker (Barbara, Front Row Seat). Noelle's power with her
+    # Mines-only clause taken off, which is the one line between the two.
+    "mc_front_row_seat": ("FrontRowSeatPower", None,
+        "Whenever one of your [gold]Bombs[/gold] goes off this turn, gain {X} "
         "Block."),
     "mc_cold_blooded": ("ColdBloodedPower", None,
         "This turn, Grounded counts nothing as having gone off."),
@@ -2450,7 +2467,14 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                       # Mend -- and a proto row with none of the shipped
                       # keys had no campfire path at all, which is EB-277 read
                       # from the other side.
-                      | {"bomb_size", "payload_mine", "grow", "mend"}
+                      | {"bomb_size", "payload_mine", "grow", "mend",
+                         # R252, and the same argument one row on: Careful Now
+                         # prints a CEILING and no payout ("Block equal to
+                         # your largest Bomb, up to 10"), so the cap is the
+                         # only number an upgrade can move. Not `block`,
+                         # because the two are different promises -- what the
+                         # card gains, and what it will not gain past.
+                         "cap"}
                       # EB-315, the PLAN line's own numbers. A Plan is the
                       # second half of a printed face, so its clauses upgrade
                       # like any other printed number -- through a per-clause
@@ -3035,6 +3059,16 @@ def blocked_reason(
             unknown = set(eff) - {"op"}
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
+        if op == "block_largest_bomb":
+            # R252 (Careful Now). ONE field, and it is the CAP: the payout is
+            # read off the board and the ceiling is the only number the face
+            # prints, so a row that carried an `amount` would be printing a
+            # promise the rule does not make.
+            unknown = set(eff) - {"op", "cap"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            if not isinstance(eff.get("cap"), int) or eff["cap"] <= 0:
+                return "block_largest_bomb cap must be a positive literal int"
         if op == "multiply_set_off":
             # The Big One's number IS the card's (R243, [USER]: "move The Big
             # One to 4x with no flat number"), so the row carries it and the
@@ -4678,6 +4712,13 @@ def build_vars(card: dict) -> list[str]:
                 and eff is grow_var_effect(card):
             literal = eff["amount"] if op == "grow_bombs" else eff["growth"]
             out.append(f'new DynamicVar("Grow", {int(literal)}m)')
+        elif op == "block_largest_bomb" and cap_upgrade(card) \
+                and eff is cap_var_effect(card):
+            # R252. The Sparks idiom again: a var ONLY when the upgrade has to
+            # render. A PLAIN DynamicVar and never a BlockVar -- the cap is a
+            # ceiling on a payout, not the payout, so no Dexterity may reach
+            # it at print time (`EB-230`'s reading, one op over).
+            out.append(f'new DynamicVar("BombCap", {int(eff["cap"])}m)')
         elif op == "mend" and mend_upgrade(card):
             out.append(f'new DynamicVar("Mend", {int(eff["amount"])}m)')
         elif op == "draw":
@@ -5005,6 +5046,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                             and int(e.get("payload_mine_all", 0)) > 0
                             for e in effects),
         "grow": grow_var_effect(card) is not None,
+        # R252. Binds to the op that PRINTS the ceiling, the same one-owner
+        # rule every key above it keeps.
+        "cap": any(e["op"] == "block_largest_bomb" for e in effects),
         "mend": any(e["op"] == "mend" for e in effects),
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
         "cost": str(card.get("cost")) != "X",
@@ -5954,6 +5998,20 @@ def grow_upgrade(card: dict) -> int:
 def mend_upgrade(card: dict) -> int:
     """`mend: +N` -- Kokomi's printed Mend."""
     return int(upgrade_plan(card)[0].get("mend", 0))
+
+
+def cap_upgrade(card: dict) -> int:
+    """`cap: +N` -- Careful Now's printed ceiling (R252). The card's only
+    number: its payout is read off the board, so the cap is what the face
+    prints and what the smith moves."""
+    return int(upgrade_plan(card)[0].get("cap", 0))
+
+
+def cap_var_effect(card: dict) -> dict | None:
+    """The ONE `block_largest_bomb` a `cap` delta binds to: the first
+    top-level one, mirroring tier0's `_bump_first`."""
+    return next((fx for fx in card.get("effects", [])
+                 if fx.get("op") == "block_largest_bomb"), None)
 
 
 def _var_or_literal(active: int, var: str, literal) -> str:
@@ -6986,6 +7044,17 @@ def build_body(
             lines.append(
                 "await ProtoBombPower.RemoveLargestForBlockAndGain("
                 "choiceContext, Owner.Creature);")
+
+        elif op == "block_largest_bomb":
+            # R252 (Careful Now). ONE call, so the number read and the number
+            # gained are one number; the CAP is the row's, through the var when
+            # the upgrade must render it and as a literal otherwise.
+            cap = _var_or_literal(
+                cap_upgrade(card) and eff is cap_var_effect(card),
+                "BombCap", eff["cap"])
+            lines.append(
+                "await ProtoBombPower.BlockForLargestBomb("
+                f"choiceContext, Owner.Creature, {cap});")
 
         elif op == "damage_set_off_total":
             _target_guard(lines, ctx)
@@ -8138,6 +8207,12 @@ def _authored_face_numbers(card: dict):
                 owns = eff is grow_var_effect(card)
                 yield ("grow", "Grow", literal) if owns \
                     else (None, None, literal)
+        elif op == "block_largest_bomb" and isinstance(eff.get("cap"), int):
+            # R252. The card's ONE printed number is its ceiling, so the token
+            # goes on the cap -- "up to {BombCap:diff()}".
+            owns = eff is cap_var_effect(card)
+            yield ("cap", "BombCap", int(eff["cap"])) if owns \
+                else (None, None, int(eff["cap"]))
         elif op in POWER_UPGRADE_OPS and isinstance(eff.get("amount"), int):
             owns = eff is power_upgrade_effect(card)
             yield ("power_amount", "PowerAmount", eff["amount"]) if owns \
@@ -8156,6 +8231,27 @@ def _authored_face_numbers(card: dict):
                 else (None, None, eff["amount"])
         elif op == "draw" and isinstance(eff.get("amount"), int):
             yield None, None, eff["amount"]
+        elif op == "conditional":
+            # `EB-140`'s BRANCH numbers, on the AUTHORED face. A branch amount
+            # is a literal by construction, so a `conditional_*` delta says
+            # "this number is N higher when upgraded" with the base game's own
+            # `{IfUpgraded:show:up|base}` swap rather than with a var -- which
+            # is exactly what the rendered path has printed since `EB-140`
+            # (`_branch_amount_text`) and what the play emits beside it
+            # (`_branch_amount`'s `IsUpgraded` read). A row that states its own
+            # face had no such clause at all, so its `+` card gained one number
+            # and printed another: the `EB-288` / `EB-291` defect class, found
+            # here by R252's Fire Safety, the first authored row to carry the
+            # key. The swap TEXT is `_branch_amount_text`'s, so the two face
+            # paths cannot disagree about what an upgraded branch looks like.
+            for arm in ("then", "else"):
+                for inner in eff.get(arm) or []:
+                    key = next((k for k, match in _CONDITIONAL_DELTA_OPS.items()
+                                if match(inner)), None)
+                    if key is None:
+                        continue
+                    yield key, _branch_amount_text(card, inner, key), \
+                        int(inner["amount"])
     # EB-315. THE PLAN LINE'S NUMBERS, AFTER THE NOW-LINE'S, because that is
     # the order a Plan row's own face prints them in ("Deal 6 damage. Plan:
     # Deal 10 damage.") and the walk below places its cursor by that order. A
@@ -8268,6 +8364,33 @@ def meter_price_clauses(card: dict, deltas: dict) -> list[str]:
     return out
 
 
+def _search_outside_placeholder(pattern, text: str, start: int):
+    """The first match of `pattern` at or after `start` that is NOT inside a
+    SmartFormat `{...}` placeholder, or None.
+
+    A DIGIT INSIDE A PLACEHOLDER IS NOT A PRINTED LITERAL -- it is part of a
+    token the row already wrote, and swapping it produces a nested
+    `{IfUpgraded:show:{IfUpgraded:show:13|10}|...}` that SmartFormat cannot
+    read. Undertow is the row that shows it: its `description:` hand-writes
+    BOTH branch swaps (`EB-140` predates the authored branch clause below), so
+    the numbers the walk is looking for are already spoken for. This is the
+    same rule the cursor already keeps for a token this pass inserted, read one
+    step earlier: a number the face does not print as a number is left alone.
+
+    Depth by counting, which is exact here because a face never nests
+    placeholders -- and the whole job of this function is to keep it that way.
+    """
+    at = start
+    while True:
+        match = pattern.search(text, at)
+        if match is None:
+            return None
+        head = text[:match.start()]
+        if head.count("{") == head.count("}"):
+            return match
+        at = match.end()
+
+
 def _authored_face_with_tokens(card: dict) -> str:
     """A row's own face with a `{Var:diff()}` token wherever this card's
     upgrade moves a number the face PRINTS.
@@ -8309,11 +8432,15 @@ def _authored_face_with_tokens(card: dict) -> str:
         plural = var in CARD_COUNT_FACE_VARS
         pattern = (rf"(?<!\d){literal}(?!\d)(?P<noun>\s+cards?\b)?" if plural
                    else rf"(?<!\d){literal}(?!\d)")
-        match = re.compile(pattern).search(text, cursor)
+        match = _search_outside_placeholder(re.compile(pattern), text, cursor)
         if match is None:
             continue
         if var and (key in deltas or key in LIVE_MODIFIED_FACE_KEYS):
-            token = f"{{{var}:diff()}}"
+            # `EB-140`'s branch clauses hand their WHOLE token over (the
+            # `{IfUpgraded:show:up|base}` swap `_branch_amount_text` builds),
+            # because a branch amount owns no var to print a `:diff()` of.
+            token = (var if key in _CONDITIONAL_DELTA_OPS
+                     else f"{{{var}:diff()}}")
             if plural and match.group("noun"):
                 token += f" card{{{var}:plural:|s}}"
             text = text[:match.start()] + token + text[match.end():]
@@ -9458,11 +9585,14 @@ def build_upgrade(card: dict) -> list[str]:
                # EB-283, the prototype arms' own printed numbers.
                "grow_bombs": "grow", "merge_bombs": "grow",
                "mend": "mend",
+               # R252, Careful Now's ceiling.
+               "block_largest_bomb": "cap",
                "exhaust_from": "exhaust"}
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
                "grow_bombs": 'DynamicVars["Grow"]',
                "merge_bombs": 'DynamicVars["Grow"]',
                "mend": 'DynamicVars["Mend"]',
+               "block_largest_bomb": 'DynamicVars["BombCap"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
                "buff_next_attack": 'DynamicVars["PowerAmount"]',
                "heal": 'DynamicVars["Heal"]',

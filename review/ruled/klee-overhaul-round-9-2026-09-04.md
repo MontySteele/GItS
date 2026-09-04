@@ -1,4 +1,4 @@
-Status: OPEN (pick 1 in §6; the defaults in §5 are applied)
+Status: RULED R252 2026-09-04
 
 # Klee round nine: one run, dead on floor 22, and where the pool is thin
 

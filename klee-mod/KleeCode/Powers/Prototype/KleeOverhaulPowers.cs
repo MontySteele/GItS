@@ -360,6 +360,56 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
+/// Safety Lesson (<c>R252</c>): "Whenever one of your Bombs goes off, gain 2
+/// Block." The defence shelf's Power, and Grounded's grammar one trigger over
+/// -- Grounded pays for the turn she DIDN'T set anything off, this pays for
+/// the turn she did.
+///
+/// ON THE EXPLOSION BUS, which is what "whenever" has to mean under rule 2: a
+/// Set off on a three-Bomb pile is three explosions, so it is three payouts,
+/// exactly as rule 4's Spark and Chained Reactions are. A Mine answering an
+/// enemy attack pays too, because a Mine going off is a Bomb going off -- and
+/// that is the half that makes this a defensive card rather than a second
+/// reward for attacking.
+///
+/// IT PAYS NOTHING UNDER SPARKS 'N' SPLASH, and the site is why rather than a
+/// special case: the echo reads the pile and spends no charge, so it never
+/// reaches <c>ProtoBombPower.Explode</c> and never reaches this bus (see
+/// <see cref="BombEchoPower"/>: "no explosion bus, no per-turn counters move.
+/// This is not a Set off"). The R250 Splash therefore keeps the cost R250
+/// priced it at, and a growth deck cannot turn a Power that never asks for a
+/// decision into free Block every turn.
+///
+/// UNPOWERED (<c>ValueProp.Unpowered</c>), <see cref="GroundedPower"/>'s own
+/// argument: it is a POWER's Block, not a card's printed Block, so no
+/// Dexterity feeds it and no Frail bites it. Sim twin:
+/// <c>klee_overhaul._notify_explosion</c>'s <c>SAFETY_LESSON</c> arm.
+/// </summary>
+public sealed class SafetyLessonPower
+    : PowerModel, ILocalizationProvider, IProtoExplosionListener
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Safety Lesson"),
+        ("description",
+            "Whenever one of your [gold]Bombs[/gold] goes off, gain "
+          + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public async Task OnBombExploded(
+        PlayerChoiceContext choiceContext, Creature applier, Creature target,
+        int size, bool reacted)
+    {
+        if (applier != Owner || Amount <= 0) return;   // co-op: your bombs only
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null,
+                                    fast: true);
+    }
+}
+
+/// <summary>
 /// Vermillion Pact: "When a Bomb reacts, the Attack that set it off reacts
 /// too." NOT BUILT IN SLICE ONE, and the slice packet's sec.5 names this row as
 /// the one that may drop out: "Vermillion Pact is the one item on this list

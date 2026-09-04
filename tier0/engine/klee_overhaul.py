@@ -65,15 +65,18 @@ from tier0.engine.state import Card, CombatState, Enemy, KleeCharge
 # THE VOCABULARY
 # ---------------------------------------------------------------------------
 
-#: The arm's nine verbs. Registered in `effects.OPS`, priced in
+#: The arm's ten verbs. Registered in `effects.OPS`, priced in
 #: `draft.STATIC_OP_PRICING`, and resolved by this module and nothing else.
 #: `hexerei_mark_hand` is R244's (Alice's Introduction Magic) and is the only
 #: one that touches no Bomb -- it widens the Hexerei family for one turn, which
 #: is a Klee rule because the cards that READ the family are hers.
+#: `block_largest_bomb` is R252's (Careful Now, the defence shelf): it READS the
+#: pile and spends nothing, which is what separates it from
+#: `remove_bomb_for_block` beside it.
 OVERHAUL_OPS = frozenset((
     "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
-    "remove_bomb_for_block", "damage_set_off_total", "multiply_set_off",
-    "draw_per_set_off", "hexerei_mark_hand"))
+    "remove_bomb_for_block", "block_largest_bomb", "damage_set_off_total",
+    "multiply_set_off", "draw_per_set_off", "hexerei_mark_hand"))
 
 #: The player-side powers this arm reads, named here rather than spelled at
 #: each site so the sheet's `power:` values and the readers cannot drift. Every
@@ -85,6 +88,12 @@ CHAINED_REACTIONS = "ko_chained_reactions"    # re-Bomb per explosion
 BOMB_ECHO = "ko_bomb_echo"                    # Sparks 'n' Splash's echo
 BOMB_REACTION_SPARK = "ko_bomb_reaction_spark"   # Catalytic Converter
 GROUNDED = "ko_grounded"                      # Block for the quiet turn
+#: R252's Uncommon Power, the defence shelf's Grounded-shaped half: "Whenever
+#: one of your Bombs goes off, gain N Block." Stacks are the BLOCK. It rides
+#: the EXPLOSION bus (`_notify_explosion`) and so pays nothing under Sparks 'n'
+#: Splash, whose echo is not a Set off and mints no explosion -- which is what
+#: keeps the R250 Splash costing what it costs.
+SAFETY_LESSON = "ko_safety_lesson"
 #: R244's Uncommon Power, the coven's second reader: "Whenever you play a
 #: Hexerei card, place a Bomb N on a random enemy." Stacks are the Bomb SIZE,
 #: Chained Reactions' grammar one trigger over -- and the ruling says in as
@@ -499,6 +508,26 @@ def _notify_explosion(state: CombatState, enemy: Enemy, size: int,
         state.emit("ko_catalytic_converter", amount=n)
         effects.gain_sparks(state, n)
 
+    # SAFETY LESSON (R252): "Whenever one of your Bombs goes off, gain N
+    # Block." Grounded's grammar one trigger over, and on the BUS rather than
+    # at a card, so a three-Bomb Set off pays three times exactly as rule 4's
+    # Spark does -- and a Mine answering an enemy attack pays too, because that
+    # is a Bomb going off.
+    #
+    # THE SPLASH PAYS NOTHING, and that is the point of the site rather than an
+    # accident of it: Sparks 'n' Splash's echo reads the pile and spends no
+    # charge, so it reaches neither `_explode` nor this bus (see `turn_end`),
+    # and the R250 echo keeps the cost R250 priced it at.
+    #
+    # UNPOWERED, the argument every power-sourced Block on this arm makes: no
+    # Dexterity feeds it and no Frail bites it, because it is a POWER's Block
+    # and not a card's printed Block (Grounded's `ValueProp.Unpowered`).
+    n = p.powers.get(SAFETY_LESSON, 0)
+    if n:
+        p.block += n
+        state.emit("block", amount=n)
+        state.emit("ko_safety_lesson", amount=n)
+
     # Chained Reactions: "Whenever one of your Bombs goes off, place a Bomb N
     # on a random enemy." Through the same `place` every other source uses, so
     # it can be set off and it can jump -- and, being a plain Bomb rather than
@@ -897,6 +926,46 @@ def remove_largest_for_block(state: CombatState) -> int:
     state.emit("block", amount=removed.size)
     state.emit("ko_bomb_removed", target=best_enemy.name, size=removed.size)
     return removed.size
+
+
+def block_for_largest_bomb(state: CombatState, cap: int) -> int:
+    """Careful Now (R252): gain Block equal to your largest Bomb, up to `cap`.
+    Returns the Block granted. `BlockForLargestBomb`'s twin.
+
+    IT READS THE PILE AND SPENDS NOTHING, which is the whole of what separates
+    it from `remove_largest_for_block` above -- Sorry, Jean... is an emergency
+    exit that costs the Bomb, and this one is the cook's own posture: the
+    bigger the charge she is standing over, the more carefully she stands. The
+    Bombs are all still there afterwards and still growing.
+
+    THE LARGEST SINGLE CHARGE, BOARD-WIDE, and both halves are the printed
+    face's ("your largest Bomb"). Per enemy it is `largest_size`, the Splash's
+    own reader since R250 and the `LargestPlacedBy` twin; across the board it
+    is the max of those, which is the same walk Sorry, Jean... makes one line
+    at a time. A card with no `target:` aims at nobody, so "the enemy" could
+    only ever have meant the board.
+
+    THE CAP IS THE ROW'S, never a constant: it is a printed number the upgrade
+    moves (`upgrade: {cap: +3}`), and it is what keeps the row from turning
+    Grounded's cook turn into a stall. A cap of 0 or less is a sheet defect
+    rather than an uncapped card, so it grants nothing.
+
+    UNPOWERED, like every other power- or rule-sourced Block on this arm.
+    """
+    if not live(state):
+        return 0
+    cap = int(cap)
+    if cap <= 0:
+        return 0
+    largest = max((largest_size(e) for e in state.living_enemies), default=0)
+    amount = min(largest, cap)
+    if amount <= 0:
+        return 0
+    state.player.block += amount
+    state.emit("block", amount=amount)
+    state.emit("ko_block_largest_bomb", amount=amount, largest=largest,
+               cap=cap)
+    return amount
 
 
 def draw_per_set_off(state: CombatState) -> None:

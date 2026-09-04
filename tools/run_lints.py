@@ -201,6 +201,16 @@ REGISTRY: tuple[Lint, ...] = (
     # and bites on the fourteenth; the flagged arms are walked too, because
     # the second contaminator is one flag away.
     _ci("starter-pool-overlap", "tools/lint_starter_pool_overlap.py"),
+    # Round 10, 2026-09-04. The THIRD question about the same two lists, and
+    # the one neither of the two above asks: is the arm's OFFER roster in the
+    # MOD the same set as the sheet and as the sim's mirror? R252 shipped four
+    # rows to the sheet, the sim, the powers and the codegen and not to
+    # `KleeOverhaulRoster.Slice()` -- pool-membership stayed green (the classes
+    # were pooled, which is a crash gate), the sim stayed green (its list was
+    # right), and a live seat played eight fights without being offered one of
+    # them. The only pin `Slice` had was a COUNT, which goes red only if
+    # somebody remembers to raise it.
+    _ci("arm-pool-parity",      "tools/lint_arm_pool_parity.py"),
     _ci("role-tempo-artifacts", "tools/suggest_role_tempo_tags.py", "--check"),
     _ci("role-tempo-coverage",  "tools/lint_role_tempo_coverage.py", "--gate"),
     _ci("roster-registry",      "tools/lint_roster_registry.py"),

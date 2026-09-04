@@ -5200,6 +5200,19 @@ def _op_remove_bomb_for_block(state: CombatState, fx: dict,
     klee_overhaul.remove_largest_for_block(state)
 
 
+def _op_block_largest_bomb(state: CombatState, fx: dict, card: Card) -> None:
+    """Careful Now (R252): gain Block equal to your largest Bomb, capped.
+
+    The cap is the ROW's printed number (`cap:`) and the whole rule is ONE call
+    into the arm, so the number read and the number gained cannot drift -- the
+    same shape `remove_bomb_for_block` above takes for the same reason. Unlike
+    that one it SPENDS NOTHING: the pile is read and left where it is.
+    """
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.block_for_largest_bomb(state, int(fx["cap"]))
+
+
 def _op_damage_set_off_total(state: CombatState, fx: dict,
                              card: Card) -> None:
     """Big Badda Boom's second clause: "Then deal damage equal to what the
@@ -5414,6 +5427,10 @@ OPS = {
     "grow_bombs": _op_grow_bombs,
     "merge_bombs": _op_merge_bombs,
     "remove_bomb_for_block": _op_remove_bomb_for_block,
+    # R252's verb, the defence shelf's own (Careful Now). Beside Sorry, Jean...
+    # because it reads the same pile, and distinct from it because it spends
+    # nothing -- see `_op_block_largest_bomb`.
+    "block_largest_bomb": _op_block_largest_bomb,
     "damage_set_off_total": _op_damage_set_off_total,
     "multiply_set_off": _op_multiply_set_off,
     "draw_per_set_off": _op_draw_per_set_off,

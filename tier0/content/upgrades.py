@@ -744,6 +744,18 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "payload_mine":
             ok = _bump_first((fx for fx in top if fx.get("op") == "plant_bomb"),
                              "payload_mine_all", val)
+        elif key == "cap":
+            # R252 (Careful Now). The CEILING on a payout the card reads off
+            # the board rather than printing -- "Block equal to your largest
+            # Bomb when played, up to 10" -- so the only number the row
+            # prints is the cap, and the only number an upgrade can move is
+            # the cap. A key of its own rather than `block`, because the
+            # two are different promises:
+            # `block` is what the card gains, `cap` is what it will not gain
+            # past, and a row could one day print both.
+            ok = _bump_first(
+                (fx for fx in top if fx.get("op") == "block_largest_bomb"),
+                "cap", val)
         elif key == "grow":
             # One key, two ops: `grow_bombs.amount` and `merge_bombs.growth`
             # are both "how much the Bombs grow", and a row carries at most

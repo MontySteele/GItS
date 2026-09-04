@@ -1598,3 +1598,191 @@ def test_alices_introduction_magic_is_itself_hexerei_and_upgrades_to_retain(
     upgraded = load("proto_ko_alices_introduction_magic+")
     assert upgraded.hexerei is True
     assert upgraded.retain is True
+
+
+# ---------------------------------------------------------------------------
+# THE DEFENCE SHELF -- R252
+# (`review/ruled/klee-overhaul-round-9-2026-09-04.md`, pick 1 at its default)
+# ---------------------------------------------------------------------------
+#
+# Four rows in Klee's own pool plus one companion stand-in (Barbara's, pinned
+# with the rest of the seam in `test_companion_standins.py`). The round-9 run
+# died on act-2 floor 22 with no Block in hand, and the brief's own weakness
+# stands -- so every row here is keyed to the Bomb state and none is a plain
+# Block. The C# twins are `klee-mod/KleeTests/Prototype/DefenceShelfTests.cs`,
+# case for case.
+
+
+def test_dodoco_cover_places_and_blocks_on_one_card(overhaul):
+    """The opening hand's answer to "no placer": a Bomb 4 AND 5 Block, so a
+    turn that draws no Cook card is still a turn that cooked something."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.card_aim, state.card_aim_bound = enemy, True
+
+    effects.resolve_card(state, load("proto_ko_dodoco_cover"))
+
+    assert sizes(enemy) == [4]
+    assert state.player.block == 5
+
+
+def test_dodoco_covers_upgrade_moves_both_printed_numbers(overhaul):
+    """`{bomb_size: +2, block: +2}`: the row prints two numbers and the smith
+    moves both, which is what keeps the `+` card from being a copy."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.card_aim, state.card_aim_bound = enemy, True
+
+    effects.resolve_card(state, load("proto_ko_dodoco_cover+"))
+
+    assert sizes(enemy) == [6]
+    assert state.player.block == 7
+
+
+def test_careful_now_blocks_for_the_largest_bomb_and_spends_nothing(overhaul):
+    """Careful Now: "Gain Block equal to your largest Bomb when played, up to 10."
+
+    THE LARGEST SINGLE CHARGE, BOARD-WIDE (`klee_overhaul.largest_size`, the
+    Splash's own reader since R250) -- not the sum, and not one enemy's.
+
+    AND IT SPENDS NOTHING, which is the one line separating it from Sorry,
+    Jean... above: every charge is exactly where it was afterwards, still
+    growing.
+    """
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 3)
+    klee_overhaul.place(state, a, 4)
+    klee_overhaul.place(state, b, 7)
+
+    effects.resolve_card(state, load("proto_ko_careful_now"))
+
+    assert state.player.block == 7          # the largest ONE, not 3+4 or 14
+    assert sizes(a) == [3, 4] and sizes(b) == [7]
+
+
+def test_careful_now_is_capped_and_the_upgrade_raises_the_cap(overhaul):
+    """The cap is the row's printed number and the ONLY thing its upgrade
+    moves -- which is what keeps the row from turning Grounded's cook turn
+    into a stall."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 40)
+
+    effects.resolve_card(state, load("proto_ko_careful_now"))
+    assert state.player.block == 10
+
+    state.player.block = 0
+    effects.resolve_card(state, load("proto_ko_careful_now+"))
+    assert state.player.block == 13
+
+
+def test_careful_now_on_a_bomb_less_board_is_a_printed_no_op(overhaul):
+    """No Bomb, no Block -- `remove_bomb_for_block`'s own answer one row over.
+    A Retain card that banked its cap on an empty board would be exactly the
+    flat Block this shelf is written not to be."""
+    state = klee_state([make_enemy()])
+    effects.resolve_card(state, load("proto_ko_careful_now"))
+    assert state.player.block == 0
+
+
+def test_careful_now_retains_and_keeps_retaining_upgraded(overhaul):
+    """Retain is on the BASE card (the row's own `retain: true`) and the
+    upgrade is the cap, so the `+` card keeps the keyword it was printed
+    with."""
+    assert load("proto_ko_careful_now").retain is True
+    assert load("proto_ko_careful_now+").retain is True
+
+
+def test_fire_safety_pays_its_rider_only_when_a_bomb_reacted(overhaul):
+    """Run Away!'s shape on the React loop: `bomb_reacted_this_turn`, the
+    counter Perfect Timing and Sizzle already read, and NOT the engine's
+    every-reaction counter."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+
+    effects.resolve_card(state, load("proto_ko_fire_safety"))
+    assert state.player.block == 3          # nothing reacted: the 3 alone
+
+    state.player.block = 0
+    enemy.aura = "hydro"          # the explosion Vaporizes off it
+    klee_overhaul.place(state, enemy, 6)
+    klee_overhaul.set_off(state, enemy)
+    assert state.ko_reacted_this_turn > 0
+
+    effects.resolve_card(state, load("proto_ko_fire_safety"))
+    assert state.player.block == 9          # 3 + the 6 the rider pays
+
+
+def test_fire_safetys_upgrade_moves_both_halves_of_its_face(overhaul):
+    """`{conditional_block: +2}` bumps EVERY printed Block on the row -- the
+    top-level one through its var and the branch one through the emitted
+    `IsUpgraded` read (`EB-140`). Both engines move the same two numbers, and
+    the authored face prints both."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+
+    effects.resolve_card(state, load("proto_ko_fire_safety+"))
+    assert state.player.block == 5
+
+    state.player.block = 0
+    enemy.aura = "hydro"          # the explosion Vaporizes off it
+    klee_overhaul.place(state, enemy, 6)
+    klee_overhaul.set_off(state, enemy)
+    effects.resolve_card(state, load("proto_ko_fire_safety+"))
+    assert state.player.block == 13         # 5 + 8
+
+
+def test_safety_lesson_pays_once_per_explosion(overhaul):
+    """"Whenever one of your Bombs goes off, gain 2 Block." Grounded's grammar
+    one trigger over, and ON THE EXPLOSION BUS -- so a three-Bomb Set off is
+    three payouts, exactly as rule 4's Spark is."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    effects.resolve_card(state, load("proto_ko_safety_lesson"))
+    assert state.player.powers[klee_overhaul.SAFETY_LESSON] == 2
+
+    for size in (3, 4, 5):
+        klee_overhaul.place(state, enemy, size)
+    klee_overhaul.set_off(state, enemy)
+
+    assert state.player.block == 6          # three explosions, 2 apiece
+
+
+def test_safety_lesson_pays_for_a_mine_answering_an_attack(overhaul):
+    """A Mine going off is a Bomb going off (rule 6), and that is the half
+    that makes this a DEFENSIVE card rather than a second reward for
+    attacking."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    state.player.powers[klee_overhaul.SAFETY_LESSON] = 2
+    klee_overhaul.place(state, enemy, 5, is_mine=True)
+
+    klee_overhaul.mines_answer_attack(state, enemy)
+
+    assert state.player.block == 2
+
+
+def test_safety_lesson_pays_nothing_under_the_splash(overhaul):
+    """R250's Splash is NOT a Set off: it reads the pile, spends no charge and
+    mints no explosion, so it never reaches the bus this power listens on --
+    which is what keeps the echo costing what R250 priced it at."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    state.player.powers[klee_overhaul.SAFETY_LESSON] = 2
+    state.player.powers[klee_overhaul.BOMB_ECHO] = 1
+    klee_overhaul.place(state, enemy, 9)
+
+    klee_overhaul.turn_end(state)
+
+    assert counts(state)["ko_bomb_echo"] == 1        # the echo DID land
+    assert state.player.block == 0                   # and paid nothing here
+    assert sizes(enemy) == [9]
+
+
+def test_safety_lessons_upgrade_moves_the_block_it_pays(overhaul):
+    """`{power_amount: +1}`: the stacks ARE the Block, so the smith moves the
+    one number the face prints."""
+    state = klee_state([make_enemy(hp=400)])
+    effects.resolve_card(state, load("proto_ko_safety_lesson+"))
+    assert state.player.powers[klee_overhaul.SAFETY_LESSON] == 3
