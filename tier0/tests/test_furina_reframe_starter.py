@@ -6,9 +6,16 @@ R254, ROUND 4 PICK 1 (2026-09-04) put a Fanfare reader on the first of them.
 "maybe a reader in the starter deck? I still want to leave it at just 2 'good'
 cards, but they can be stronger." So her two kit starters stay two and ONE of
 them reads Fanfare -- Aria of Recompense, under the arm only: "Gain 5 Encore.
-If you have at least 6 Fanfare, gain 5 more." Both numbers are lifted rather
-than picked (the 5 is Aria's own printed Encore, the 6 the bar the four rider
-copies already carry), so nothing here is a number this engine decided.
+If you have at least 3 Fanfare, gain 5 more."
+
+THE BAR IS 3, NOT THE RIDERS' 6 (round 6 sec.4, 2026-09-04, a D default). It
+was built at 6 -- the bar the four rider copies carry -- and three seat runs
+played the card at Fanfare 3 with the 6 line never paying once, because Aria
+is played BEFORE the stage performs and 3 is the Fanfare the records show on
+an Aria turn. The 5 is still Aria's own printed Encore and the 3 is still read
+off the runs rather than picked, so nothing here is a number this engine
+decided; the four OFFERED rider copies keep their own bars (6/6/8/10), which
+are read at a different point in the turn.
 
 `EB-416` WIRED THE SECOND. The reframe packet's sec.5 ruled that the starter
 deploy NAMES its member, and slice 2 built the row -- `proto_fr_salon_debut_
@@ -165,26 +172,28 @@ def test_both_kit_cards_are_swapped_and_no_basic_besides(reframe):
 
 
 # --------------------------------------------------------------------------
-# (2) WHAT ARIA'S COPY PAYS. The bar is 6; 5 is one under it.
+# (2) WHAT ARIA'S COPY PAYS. The bar is 3; 2 is one under it.
 # --------------------------------------------------------------------------
 
 def test_the_copy_pays_five_below_the_bar(reframe):
-    st = _state(fanfare=5)
+    st = _state(fanfare=2)
     _play(st, COPY)
     assert st.player.encore == 5
 
 
 def test_the_copy_pays_ten_at_the_bar(reframe):
-    st = _state(fanfare=6)
+    st = _state(fanfare=3)
     _play(st, COPY)
     assert st.player.encore == 10
 
 
-def test_the_bar_is_the_riders_own_and_the_reader_is_the_only_new_clause(
+def test_the_bar_is_the_starters_own_and_the_reader_is_the_only_new_clause(
         reframe):
     """The copy is the shipped row plus ONE conditional, and the condition is
-    the bar the four rider copies already print. Derived from both sheets so a
-    silent edit to either side is a red test rather than a face that drifts."""
+    the bar the seat runs put an Aria turn at -- 3, and NOT the 6 the four
+    OFFERED rider copies print, which keep their own bars. Derived from both
+    sheets so a silent edit to either side is a red test rather than a face
+    that drifts."""
     shipped = loader.get_card(SHIPPED)
     copy = loader.peek_card(COPY)
     assert copy.rarity == shipped.rarity == "basic"
@@ -193,7 +202,7 @@ def test_the_bar_is_the_riders_own_and_the_reader_is_the_only_new_clause(
     assert copy.effects[0] == shipped.effects[0]
     rider = copy.effects[1]
     assert rider["op"] == "conditional"
-    assert rider["if"] == "fanfare_at_least_6"
+    assert rider["if"] == "fanfare_at_least_3"
     assert rider["then"] == [shipped.effects[0]]
     assert len(copy.effects) == 2
 

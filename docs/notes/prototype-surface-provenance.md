@@ -2325,6 +2325,18 @@ alternative reader is HELD rather than withdrawn -- Salon Début performing
 its member again at 6 Fanfare is the packet's own re-ask if Aria's does not
 read.
 
+THE BAR MOVED 6 -> 3 (the Furina reframe's round 6, sec.4, 2026-09-04 -- a D
+default taken at its stated value and disclosed in that round's record, which
+is where the three runs are read). It was built at the riders' 6 and three seat runs played Aria with the second
+line never paying once: Aria is a STARTER, played at the top of a turn and
+before the stage performs, so the meter it reads is not the one the offered
+riders read later in the same turn -- 3 is the Fanfare the records show on an
+Aria turn. So the row's condition is `fanfare_at_least_3` and it pays 5 at
+Fanfare 2 and 10 at Fanfare 3. The 5 is untouched, the upgrade is untouched,
+and the four OFFERED rider copies keep their own bars (6, 6, 8 and 10) --
+those are read at a different point in the turn, and nothing in this move
+says anything about them.
+
 Numbers are Prototype numbers, D by the ladder, and nothing measured on them
 is quotable.
 
