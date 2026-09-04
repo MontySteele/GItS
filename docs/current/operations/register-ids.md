@@ -1496,3 +1496,10 @@ EB-297 RETIRED 2026-09-04: GaugeBridge's kokomi_burst spec now selects on Kokomi
 EB-327 RETIRED 2026-09-04: Klee's EB-266 guard moved one character over, into KokomiResources.GainBurst and resources.gain_burst.
 EB-381 RETIRED 2026-09-04: settle_board polls until the bodies stop moving, bounded at 6, so HP and the status list come off one creature dict after settle.
 EB-377 RETIRED 2026-09-04: BaseKeywordTips attaches five base words and the page's BASE_KEYWORDS adds four more, read last so the wire wins.
+EB-386 RETIRED 2026-09-04: both modes print "Lasts until the Spotlight moves" and the badge now follows its mode via SyncModeDisplay.
+EB-368 RETIRED 2026-09-04: the Salon rules tip, read by both deploy cards and the stage hover, states all three rules under the arm.
+EB-367 RETIRED 2026-09-04: a GAME_KEYWORDS table carries Ringing with its rule, and the codegen's Swirl clause now reads "onto ALL enemies" on six shipped faces.
+EB-180 RETIRED 2026-09-04: soak.py, blindplay.py and staged_turn.py are each a facade plus one module per concern, re-exporting every name with entry points and output unchanged.
+EB-262 RETIRED 2026-09-04: a shelf's card_cost and Spark price print beside the gold, and the shop is remembered by its shelf fingerprint so a bought row keeps its face, marked sold.
+EB-299 RETIRED 2026-09-04: the footnote says the number is a place in a list that re-counts, and the telegraph names its type and whose the number is.
+EB-277 RETIRED 2026-09-04: the Prototype-stage rule gives every reachable row a real delta, under EB-283's codegen gate refusing an identical + face.
