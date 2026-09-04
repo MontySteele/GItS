@@ -27,12 +27,13 @@ import json
 import re
 import time
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
 from tier0 import constants as C
 from tier0.tests.conftest import seam_files
-from understudy import blindplay, embark, qa_packet, soak
+from understudy import blindplay, blindplay_shape, embark, qa_packet, soak
 
 REPO = Path(__file__).resolve().parents[2]
 RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
@@ -3815,6 +3816,159 @@ def test_act_refuses_a_packet_leak_the_way_observe_does(tmp_path, capsys):
     code = blindplay.cmd_act(args)
     assert code == 1
     assert capsys.readouterr().err.startswith("REFUSED: ")
+
+
+# ---------------- EB-456: the action budget the seat cannot overrun --------
+
+
+class _CountingWire:
+    """A wire that answers one map screen and records every POST."""
+
+    def __init__(self, state):
+        self.state = state
+        self.posts = []
+
+    def get_state(self):
+        return json.loads(json.dumps(self.state))
+
+    def post(self, action, **kw):
+        self.posts.append((action, kw))
+        return {"status": "ok", "message": f"Doing {action}"}
+
+
+@pytest.fixture
+def lane_budget(tmp_path, monkeypatch):
+    """A lane whose budget store is this test's own directory."""
+    monkeypatch.setattr(blindplay_shape, "_BUDGET_STORE_DIR", tmp_path)
+    monkeypatch.delenv(blindplay.LANE_ENV, raising=False)
+    monkeypatch.delenv(blindplay.MAX_ACTIONS_ENV, raising=False)
+    return tmp_path
+
+
+def test_the_121st_act_is_refused_once_the_lane_has_a_budget(lane_budget,
+                                                             capsys):
+    """`EB-456`. THE COUNT RULE HAD NO MECHANISM. Two of three round-13 seats
+    were told to stop at 120 actions and stopped at 155-160 (Klee) and 165
+    (Kokomi). A lane above zero is disposable, so the cost was a caveat rather
+    than a loss -- but the rounds are not comparable past the cap, which is
+    the only thing the cap is for.
+
+    The count is the bridge's now: the coordinator writes the cap at embark,
+    `act` charges every act it actually posts, and the act after the last one
+    is refused before anything is resolved or sent.
+
+    Seen to FAIL: with no budget in the file the 121st act posts like the 120
+    before it.
+    """
+    wire = _CountingWire(map_state())
+    args = argparse.Namespace(raw_file="", command='go "Monster (path 1)"',
+                              dry_run=False)
+
+    blindplay.set_budget(120)
+    assert blindplay.budget_spent() == (0, 120)
+
+    with mock.patch.object(blindplay, "bridge", wire):
+        for n in range(120):
+            assert blindplay.cmd_act(args) == 0, f"act {n + 1}"
+        assert blindplay.budget_spent() == (120, 120)
+        capsys.readouterr()
+
+        # The 121st. Refused before the wire is read at all, so the post count
+        # does not move and the reason is the row's own word.
+        assert blindplay.cmd_act(args) == 2
+    err = capsys.readouterr().err
+    assert err.startswith(blindplay.BUDGET_REACHED)
+    assert "120" in err
+    assert len(wire.posts) == 120
+    assert blindplay.budget_spent() == (120, 120)
+
+
+def test_only_an_act_the_wire_actually_saw_is_charged(lane_budget, tmp_path,
+                                                      capsys):
+    """A refusal, a `--dry-run` and a `--raw-file` resolution all cost the run
+    nothing, so none of them costs the budget anything. Charged after the
+    POST, never before it."""
+    wire = _CountingWire(map_state())
+    blindplay.set_budget(3)
+
+    raw = tmp_path / "map.json"
+    raw.write_text(json.dumps(map_state()), encoding="utf-8")
+    blindplay.cmd_act(argparse.Namespace(raw_file=str(raw), dry_run=False,
+                                         command='go "Monster (path 1)"'))
+    with mock.patch.object(blindplay, "bridge", wire):
+        blindplay.cmd_act(argparse.Namespace(raw_file="", dry_run=True,
+                                             command='go "Monster (path 1)"'))
+        # A command the grammar refuses never reaches the wire either.
+        assert blindplay.cmd_act(
+            argparse.Namespace(raw_file="", dry_run=False,
+                               command='go "Nowhere"')) == 1
+    assert blindplay.budget_spent() == (0, 3)
+    capsys.readouterr()
+
+
+def test_a_lane_with_no_budget_acts_exactly_as_it_always_did(lane_budget,
+                                                             capsys):
+    """`0` is no budget, which is every round before this row: nothing is
+    counted, nothing is refused, and the extra line is not printed."""
+    wire = _CountingWire(map_state())
+    blindplay.set_budget(0)
+    args = argparse.Namespace(raw_file="", command='go "Monster (path 1)"',
+                              dry_run=False)
+    with mock.patch.object(blindplay, "bridge", wire):
+        for _ in range(5):
+            assert blindplay.cmd_act(args) == 0
+    assert "actions:" not in capsys.readouterr().out
+    assert blindplay.budget_spent() == (0, 0)
+
+
+def test_the_environment_overrides_the_recorded_cap(lane_budget, monkeypatch):
+    """`GITS_MAX_ACTIONS` is the operator's own door onto a lane they did not
+    embark; an unreadable value is no budget rather than a crash."""
+    blindplay.set_budget(120)
+    monkeypatch.setenv(blindplay.MAX_ACTIONS_ENV, "40")
+    assert blindplay.budget_cap() == 40
+    monkeypatch.setenv(blindplay.MAX_ACTIONS_ENV, "not a number")
+    assert blindplay.budget_cap() == 0
+
+
+def test_two_lanes_keep_two_budgets(lane_budget):
+    """The deck store's rule, and for the same reason: two seats play side by
+    side, and one lane's spent budget must not end the other's run. The tag is
+    normalised, because the coordinator writes it from `--lane 1` and the seat
+    reads it from `GITS_LANE=lane1`."""
+    blindplay.set_budget(120, 0)
+    blindplay.set_budget(40, 1)
+    blindplay.count_action(1)
+    assert blindplay.budget_spent(0) == (0, 120)
+    assert blindplay.budget_spent(1) == (1, 40)
+    assert blindplay.lane_tag("lane1") == blindplay.lane_tag(1) == "1"
+    assert blindplay.lane_tag("") == blindplay.lane_tag(None) == "0"
+
+
+def test_the_lane_variable_is_spelled_the_same_on_both_sides_of_the_wall():
+    """`blindplay_shape` may not import `instances`, so `GITS_LANE` is spelled
+    there. Held in step from this side, the way `CHARGE_SOURCE_LINE` is held
+    against `tier0.constants`."""
+    from understudy import instances
+    assert blindplay_shape.LANE_ENV == instances.LANE_ENV
+
+
+def test_embark_records_the_cap_in_the_lanes_own_budget(lane_budget,
+                                                        monkeypatch):
+    """The coordinator's write, and the reset that goes with it: an embark is
+    a new run, so the previous round's spent count may not survive it."""
+    blindplay.set_budget(120)
+    for _ in range(7):
+        blindplay.count_action()
+    assert blindplay.budget_spent() == (7, 120)
+
+    # `embark()` writes the budget BEFORE it launches anything, so the write
+    # is reachable without a game: the launch below is what raises.
+    monkeypatch.setattr(embark.soak, "Session",
+                        mock.Mock(side_effect=RuntimeError("no game here")))
+    with pytest.raises(RuntimeError):
+        embark.embark("kokomi", lane=0, max_actions=90)
+    assert blindplay.budget_spent() == (0, 90)
 
 
 def test_the_grammar_offers_the_jellyfish_only_where_there_is_one():

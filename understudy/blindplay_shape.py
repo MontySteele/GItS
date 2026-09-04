@@ -8,6 +8,9 @@ seam stack: it imports nothing from this package.
 """
 from __future__ import annotations
 
+import json
+import os
+import re
 from pathlib import Path
 
 
@@ -70,6 +73,124 @@ REPO = Path(__file__).resolve().parents[1]
 LOG_ROOT = Path(__file__).resolve().parent / "logs" / "blindplay"
 RECORD_ROOT = REPO / "review" / "qa" / "blindplay"
 PROMPT_PATH = Path(__file__).resolve().parent / "blindplay_prompt.md"
+
+
+# ------------------------------------------- EB-456: the action budget ----
+#
+# THE DEFECT. Two of the three round-13 seats were told to stop at 120 actions
+# and stopped at 155-160 (Klee) and 165 (Kokomi). The brief's rule was a
+# sentence addressed to the player, and a player counting its own actions is a
+# player doing arithmetic instead of reading the board. A lane above zero is
+# disposable, so nothing was lost but comparability -- and comparability is
+# the whole reason the cap exists.
+#
+# SO THE COUNT IS THE BRIDGE'S. `blindplay act` is one PROCESS PER CALL (the
+# same fact that puts the deck memory on disk, `blindplay_faces._deck_store`),
+# so the count lives in a file beside it; the coordinator writes the cap at
+# embark and the seat cannot see either number unless it asks. `GITS_MAX_ACTIONS`
+# overrides the recorded cap for an operator driving a lane by hand.
+#
+# PER LANE, for the deck store's reason: two seats play side by side and one
+# lane's spent budget must not close the other's run. The tag is NORMALISED
+# here -- `1`, `lane1` and `GITS_LANE=lane1` are one lane -- because the
+# coordinator writes it from `--lane 1` and the seat reads it from the
+# environment, and those two spellings have to meet.
+MAX_ACTIONS_ENV = "GITS_MAX_ACTIONS"
+BUDGET_REACHED = "budget reached"
+_BUDGET_STORE_DIR = Path(__file__).resolve().parent / "logs"
+
+# `instances.LANE_ENV`'s value, SPELLED rather than imported: `instances`
+# reaches a game-directory resolver, and this module's whole job is to import
+# nothing from this package. The test side holds the two in step, the way
+# `CHARGE_SOURCE_LINE` is held against `tier0.constants`.
+LANE_ENV = "GITS_LANE"
+
+
+def lane_tag(lane: object = None) -> str:
+    """`1` / `"1"` / `"lane1"` -> `"1"`; unset, empty or unreadable -> `"0"`.
+
+    Read raw and scrubbed to a filename rather than resolved through
+    `instances`. NORMALISED because the two doors spell it differently: the
+    coordinator writes the cap from `--lane 1` and the seat reads its count
+    from `GITS_LANE`, which is documented both as `1` and as `lane1`.
+    """
+    raw = os.environ.get(LANE_ENV, "") if lane is None else str(lane)
+    raw = re.sub(r"[^A-Za-z0-9]", "", raw).lower()
+    if raw.startswith("lane"):
+        raw = raw[4:]
+    return raw or "0"
+
+
+def budget_path(lane: object = None) -> Path:
+    return _BUDGET_STORE_DIR / f"_blindplay-budget-lane{lane_tag(lane)}.json"
+
+
+def read_budget(lane: object = None) -> dict[str, int]:
+    """`{"cap": n, "count": n}` for this lane. Zeroes where nothing is set."""
+    try:
+        blob = json.loads(budget_path(lane).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        blob = {}
+    if not isinstance(blob, dict):
+        blob = {}
+    def _num(key: str) -> int:
+        try:
+            return max(0, int(blob.get(key) or 0))
+        except (TypeError, ValueError):
+            return 0
+    return {"cap": _num("cap"), "count": _num("count")}
+
+
+def _write_budget(row: dict[str, int], lane: object = None) -> None:
+    try:
+        _BUDGET_STORE_DIR.mkdir(parents=True, exist_ok=True)
+        budget_path(lane).write_text(json.dumps(row), encoding="utf-8")
+    except OSError:
+        pass                       # a read-only tree simply keeps no count
+
+
+def set_budget(cap: int, lane: object = None) -> dict[str, int]:
+    """Record this lane's cap and ZERO its count. The coordinator's write.
+
+    Zeroing is the point: a cap is set at embark, and an embark is a new run.
+    A cap of 0 clears the budget entirely, which is the unlimited lane every
+    round before this row ran on.
+    """
+    row = {"cap": max(0, int(cap or 0)), "count": 0}
+    _write_budget(row, lane)
+    return row
+
+
+def budget_cap(lane: object = None) -> int:
+    """The cap in force: `GITS_MAX_ACTIONS` first, then the lane's own."""
+    env = os.environ.get(MAX_ACTIONS_ENV, "").strip()
+    if env:
+        try:
+            return max(0, int(env))
+        except ValueError:
+            return 0
+    return read_budget(lane)["cap"]
+
+
+def budget_spent(lane: object = None) -> tuple[int, int]:
+    """`(actions taken, cap)` for this lane. A cap of `0` is no budget."""
+    return read_budget(lane)["count"], budget_cap(lane)
+
+
+def count_action(lane: object = None) -> int:
+    """Charge one accepted act to this lane and return the new count."""
+    row = read_budget(lane)
+    row["count"] += 1
+    _write_budget(row, lane)
+    return row["count"]
+
+
+def forget_budget(lane: object = None) -> None:
+    """Drop this lane's budget. The operator's reset, and the tests'."""
+    try:
+        budget_path(lane).unlink()
+    except OSError:
+        pass
 
 # The disclaimer that rides on every observation, the transcript and the sealed
 # record -- same reasoning as `qa_packet.PACKET_GUARDRAIL`: a caveat that lives

@@ -126,8 +126,10 @@ LOCAL_PROPS = Path(__file__).resolve().parents[1] / "klee-mod" / "local.props"
 # `blindplay_record` reads it back off this module at call time.
 
 from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
-    BlindPlayError, BOARD_SETTLE_TRIES, CHARGE_SOURCE_LINE, COMBAT_SCREENS,
-    FIGHT_OVERLAYS,
+    BlindPlayError, BOARD_SETTLE_TRIES, budget_cap, budget_path, budget_spent,
+    BUDGET_REACHED, CHARGE_SOURCE_LINE, COMBAT_SCREENS,
+    count_action, FIGHT_OVERLAYS, forget_budget, LANE_ENV, lane_tag,
+    MAX_ACTIONS_ENV, read_budget, set_budget,
     HAZARD_EVENT_TITLES, HAZARD_EVENTS, _is_rate_limited,
     AURA_DURATION_TURNS, BOMB_GROWTH, FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
     WEAK_DEALT_PCT,
@@ -224,7 +226,23 @@ def cmd_observe(args) -> int:
     return 0
 
 
+def budget_refusal(count: int, cap: int) -> str:
+    """The one line a seat past its action budget is given (`EB-456`)."""
+    return (f"{BUDGET_REACHED}: this lane's {cap} actions are spent "
+            f"({count} taken). The round stops here; nothing was posted.")
+
+
 def cmd_act(args) -> int:
+    # `EB-456`. THE CAP IS THE BRIDGE'S, NOT THE SEAT'S ARITHMETIC. Two of
+    # three round-13 seats were told to stop at 120 and stopped at 155-165.
+    # Charged only on an act that is actually POSTED: a refusal, a `--dry-run`
+    # and a `--raw-file` resolution all cost the run nothing, so none of them
+    # costs the budget anything either.
+    live = not (args.raw_file or args.dry_run)
+    count, cap = budget_spent()
+    if live and cap and count >= cap:
+        print(budget_refusal(count, cap), file=sys.stderr)
+        return 2
     # `EB-370`: `act` reads through `observation()` before it resolves
     # anything (`blindplay_grammar.act`), so a `PacketLeak` on the read path
     # it shares with `observe` used to reach here uncaught -- a seat that
@@ -240,7 +258,7 @@ def cmd_act(args) -> int:
     print(json.dumps(res, indent=1, default=str))
     if not res["ok"]:
         return 1
-    if args.raw_file or args.dry_run:
+    if not live:
         return 0
     post = dict(res["post"] or {})
     action = post.pop("action")
@@ -250,6 +268,11 @@ def cmd_act(args) -> int:
     for line in (taken_line(res), _result_line(result)):
         if line:
             print(line)
+    # `EB-456`: charged AFTER the post, so an act the wire never saw is not
+    # billed for. The line is printed only on a lane that has a cap, so a
+    # round run without one reads exactly as it always did.
+    if cap:
+        print(f"actions: {count_action()} of {cap}")
     return 0
 
 

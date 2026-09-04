@@ -62,7 +62,9 @@ say so in the record and stop; do not go looking for another way through.
 
 - **Actions:** stop at the cap the coordinator gives you (`--max-actions`,
   120 accepted `act` calls for an act on any of the three kits, since round
-  11: 70 reached floor 6 and 120 reached floor 10 or 11).
+  11: 70 reached floor 6 and 120 reached floor 10 or 11). Since `EB-456` the
+  bridge counts your accepted acts itself and refuses past the cap with
+  `budget reached`, so your own count is a courtesy and not the mechanism.
 - **Wall clock:** stop at `--max-wall-s` (typically 5400 s).
 - **Refusals:** three consecutive refused commands is a stop. A refusal is a
   finding — write down what you asked for and what it said.
