@@ -9513,8 +9513,47 @@ def _face_riders(card: dict, text: str) -> str:
     defect the next rendered row inherits.
 
     `EB-293`. Both are live defects from [USER]'s own play of the arm.
+    `EB-392` made it three for the same reason.
     """
-    return _plan_only_line(card, _dedupe_printed_exhaust(card, text))
+    return _hexerei_tag(
+        card, _plan_only_line(card, _dedupe_printed_exhaust(card, text)))
+
+
+def _hexerei_tag(card: dict, text: str) -> str:
+    """`EB-392`: a Hexerei COMPANION says so on its own face.
+
+    THE WORD WAS ON EIGHTEEN ROWS AND PRINTED ON FOUR. `hexerei: true` emitted
+    `IHexereiCard` and nothing a player could see, so the family mark was
+    readable only from the cards that ASK about it -- and those ask about a set
+    whose members never identified themselves. The r12 run-2 seat held Witches'
+    Circle for four fights and called it dead: "Witches' Circle was
+    unplayable-in-practice: I owned no Hexerei card and the reminder text does
+    not say which of my cards are Hexerei." It learned the answer by counting
+    Bombs on an enemy badge, and then learned there were THREE words:
+    "there is apparently a distinction between `Companion`, `Hexerei`, and
+    `Klee's own Companion`, and none of the three cards involved prints which
+    one it is."
+
+    DERIVED FROM THE ROW, never remembered. The tag is the sheet's own
+    `hexerei` key, so a row that joins the family carries the mark because it
+    joined -- and the keyword tip comes with it for free, because
+    `arm_keyword_tip_calls` reads the golded tokens out of THIS text
+    (`EB-272`'s attach rule). One field, one printed word, one definition.
+
+    COMPANIONS ONLY, which is the row's own scope. The three READERS are Klee's
+    own cards: Coven Errand and Witches' Circle carry no `hexerei` key at all,
+    and Alice's Introduction Magic carries it while printing the word in its
+    body already -- so the guard below skips a face that has said it, and a
+    reader is never mistaken for a member.
+
+    IT LEADS, like `_plan_only_line`. What a card IS is read before what it
+    does, and a trailing tag reads as a clause of the last effect sentence.
+    """
+    if not (is_companion(card) and card.get("hexerei")):
+        return text
+    if "[gold]Hexerei[/gold]" in text:
+        return text
+    return ("[gold]Hexerei[/gold]. " + text).strip()
 
 
 def _dedupe_printed_exhaust(card: dict, text: str) -> str:

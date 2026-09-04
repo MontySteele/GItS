@@ -221,6 +221,63 @@ def test_every_klee_personal_companion_carries_the_kits_spark_rider():
     assert "ProtoMiGorouCrystalCollapse" not in carried
 
 
+def test_every_hexerei_companion_prints_the_family_tag():
+    """`EB-392`, the committed tree. Every Companion row the sheet marks
+    `hexerei` prints the word on its own face, and no row that is not marked
+    does.
+
+    THE DEFECT. `hexerei: true` emitted `IHexereiCard` and nothing a player
+    could see, so the family was readable only from the three cards that ASK
+    about it -- and those ask about a set whose members never said they were
+    in it. The r12 run-2 seat held Witches' Circle for four fights: "I owned no
+    Hexerei card and the reminder text does not say which of my cards are
+    Hexerei", and found the answer "only by counting bombs on the enemy badge,
+    because Fischl's own face never prints the word Hexerei".
+
+    THE DENOMINATOR IS THE POINT, exactly as it is for the Spark rider above:
+    the tag is DERIVED from the sheet key (`gen._hexerei_tag`), so a row that
+    joins the family carries the mark because it joined. The negative case is
+    every unmarked Companion on the same sheet.
+
+    THE READERS ARE NOT MEMBERS. Coven Errand and Witches' Circle are Klee's
+    own cards and carry no `hexerei` key; Alice's Introduction Magic carries
+    it and already prints the word in its body, which is why the tag is
+    skipped where the face has said it.
+    """
+    marked, printed = set(), set()
+    for row in proto._rows():
+        if not gen.is_companion(row):
+            continue
+        cls = gen.pascal(row["id"])
+        if row.get("hexerei"):
+            marked.add(cls)
+        path = PROTOTYPE_DIR / f"{cls}.cs"
+        if not path.exists():
+            continue
+        if any("[gold]Hexerei[/gold]" in face
+               for face in _descriptions(path.read_text(encoding="utf-8"))):
+            printed.add(cls)
+
+    assert marked, "no Hexerei Companion on the sheet is not a read"
+    assert marked == printed
+    # ... and the definition rides the printed word, which is `EB-272`'s
+    # attach rule doing the work rather than a second list to maintain.
+    for cls in sorted(marked):
+        assert "ForHexerei" in (PROTOTYPE_DIR / f"{cls}.cs").read_text(
+            encoding="utf-8"), cls
+
+
+def test_the_hexerei_readers_are_not_tagged_as_members():
+    """Klee's own three read the word; none of them is a Companion, so none of
+    them takes the tag. Named rather than derived, because the point is that
+    the tag's guard is `is_companion` and these are the rows it excludes."""
+    for cls in ("ProtoKoCovenErrand", "ProtoKoWitchesCircle"):
+        face, = _descriptions(
+            (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8"))[:1]
+        assert "[gold]Hexerei[/gold]" in face
+        assert not face.startswith("[gold]Hexerei[/gold]. "), cls
+
+
 def test_no_shipped_generated_card_reaches_the_arm_tips():
     offenders = [p.relative_to(REPO).as_posix()
                  for directory in SHIPPED_DIRS

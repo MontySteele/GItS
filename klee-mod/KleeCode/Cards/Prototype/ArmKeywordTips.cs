@@ -350,12 +350,37 @@ public static class ArmKeywordTips
     /// Witches' Circle and one Universal would have no way to know the card
     /// was live.
     /// </summary>
+    /// `EB-392` REWROTE IT, because "from the witches' circle" was doing
+    /// silent work and the r12 run-2 seat said so: "I could not tell from any
+    /// card face whether MY Companion qualified. I found out by counting bombs
+    /// on an enemy badge." Then it met a second word on the same screen and
+    /// had three: "there is apparently a distinction between `Companion`,
+    /// `Hexerei`, and `Klee's own Companion`, and none of the three cards
+    /// involved prints which one it is."
+    ///
+    /// THE FIRST SENTENCE IS ANSWERABLE NOW, and it was not before: every
+    /// Hexerei Companion prints the word on its own face
+    /// (`gen_klee_cards._hexerei_tag`), so "a Companion card that prints the
+    /// word" is a test a player can run on the card in their hand. "And Klee
+    /// herself" is the brief's sec.7.4 refinement, unchanged.
+    ///
+    /// THE SECOND SENTENCE IS THE THIRD WORD, and it is stated as the OVERLAP
+    /// it really is rather than as an exclusion. Five rows carry both marks
+    /// and thirteen carry only one, so "a different set" would be a lie in
+    /// both directions; "some are Klee's own, some are not" is what the sheet
+    /// says. `Klee's own` is the exact phrase the Spark rider uses
+    /// (<see cref="ForCovenSpark"/>), so the two words meet under one
+    /// spelling.
+    ///
+    /// "IT DOES NOTHING BY ITSELF" LEFT and is not missed: it was true of a
+    /// word with no readers, and three cards in Klee's pool have paid for it
+    /// since R244. The last sentence says that instead.
     public static IEnumerable<IHoverTip> ForHexerei(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, HexereiKey,
-            "A [gold]Companion[/gold] card from the witches' circle. It does "
-          + "nothing by itself; Klee is one too, and her own cards pay when "
-          + "you play one.");
+            "A [gold]Companion[/gold] card that prints the word, and Klee "
+          + "herself. Some are Klee's own, some are not. Cards of hers pay "
+          + "when you play one.");
 
     /// <summary>
     /// KLEE'S SIXTH, `EB-372`, AND IT IS A WORD THE KIT NAMES ON A FACE THE

@@ -204,4 +204,39 @@ public class Round12Tests
                 rows.First(r => r.Item1 == key).Item2);
         }
     }
+
+    // ---- EB-392: three words on one screen -------------------------------
+
+    private static string HexereiTip() =>
+        string.Concat(Il.Strings(typeof(ArmKeywordTips)
+            .GetMethod("ForHexerei", HeadlessGame.All)!));
+
+    [Fact]
+    public void The_hexerei_tip_gives_a_test_a_player_can_run()
+    {
+        // "From the witches' circle" was doing silent work: the r12 run-2
+        // seat "could not tell from any card face whether MY Companion
+        // qualified" and found out by counting Bombs on an enemy badge. Every
+        // member prints the word now, so the definition can point at it.
+        Assert.Contains("card that prints the word", HexereiTip());
+        Assert.DoesNotContain("witches' circle", HexereiTip());
+    }
+
+    [Fact]
+    public void The_hexerei_tip_names_the_other_word_on_the_screen()
+    {
+        // The seat met three: "there is apparently a distinction between
+        // `Companion`, `Hexerei`, and `Klee's own Companion`, and none of the
+        // three cards involved prints which one it is." `Klee's own` is the
+        // Spark rider's exact phrase, so the two meet under one spelling --
+        // and the relation is stated as the OVERLAP it is, five rows carrying
+        // both marks and thirteen carrying one.
+        Assert.Contains("Some are Klee's own, some are not", HexereiTip());
+        // ONE SPELLING FOR THE OTHER WORD: the Spark rider says "Klee's own"
+        // too, so a player who has met that rider recognises the set this
+        // sentence is pointing at rather than meeting a fourth phrase.
+        Assert.Contains("Klee's own", string.Concat(Il.Strings(
+            typeof(ArmKeywordTips)
+                .GetMethod("ForCovenSpark", HeadlessGame.All)!)));
+    }
 }

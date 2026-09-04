@@ -422,9 +422,15 @@ ARM_KEYWORDS: dict[str, str] = {
     # R244, and neither had a page row -- so the mod defined them on a hover
     # and the blind page defined them nowhere. `Hexerei` rides eighteen faces
     # and `Swirl` is printed as a VERB by ten Universals.
-    "Hexerei": ("A Companion card from the witches' circle. It does nothing "
-                "by itself; Klee is one too, and her own cards pay when you "
-                "play one."),
+    # `EB-392`: "from the witches' circle" was doing silent work -- the r12
+    # run-2 seat "could not tell from any card face whether MY Companion
+    # qualified" and then met a third word on the same screen. Every Hexerei
+    # Companion prints the tag now, so the first sentence is a test a player
+    # can run; the second names the overlap with "Klee's own", which is the
+    # Spark rider's phrase.
+    "Hexerei": ("A Companion card that prints the word, and Klee herself. "
+                "Some are Klee's own, some are not. Cards of hers pay when "
+                "you play one."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`

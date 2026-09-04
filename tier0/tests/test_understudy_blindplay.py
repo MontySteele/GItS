@@ -4696,9 +4696,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # same defect the row is about: both have had an `ArmKeywordTips` twin
         # since R244 and neither had a page row, so the mod defined them on a
         # hover and the blind page defined them nowhere.
-        "Hexerei": [" card from the witches' circle. It does ",
-                    "nothing by itself; Klee is one too, and her own cards "
-                    "pay when "],
+        # `EB-392` rewrote the word once every member could print it.
+        "Hexerei": [" card that prints the word, and Klee ",
+                    "herself. Some are Klee's own, some are not. Cards of hers pay ",
+                    "when you play one."],
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
                   "No ", "aura, no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded

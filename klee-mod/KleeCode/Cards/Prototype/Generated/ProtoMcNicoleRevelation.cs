@@ -46,14 +46,14 @@ public sealed class ProtoMcNicoleRevelation : CustomCardModel, ICompanionCard, I
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForStrength(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForStrength(ArmKeywordTips.ForHexerei(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_nicole_revelation");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Nicole — Revelation, Uncreated Light"),
-        ("description", "At the start of your turn, gain 5 [gold]Block[/gold], and 2 [gold]Strength[/gold] if you ended last turn with [gold]Block[/gold]."),
+        ("description", "[gold]Hexerei[/gold]. At the start of your turn, gain 5 [gold]Block[/gold], and 2 [gold]Strength[/gold] if you ended last turn with [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
