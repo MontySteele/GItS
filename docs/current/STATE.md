@@ -176,8 +176,12 @@ are in [`workstreams.md`](workstreams.md).
   (`review/active/kokomi-overhaul-round-11-2026-09-04.md`): two seats on
   `0.2.2476+proto`, floors 10 and 10, both budget-out; the six round-10
   fixes read true, the Plan read as the kit's decision and as autopilot in
-  one run, `EB-426`-`EB-428`, `EB-433`; no pick. [USER]'s act-1 run is due
-  on `0.2.2476+proto`. The Kurage
+  one run, `EB-426`-`EB-428`, `EB-433`; no pick. **Round 12 is READ**
+  (`review/active/kokomi-overhaul-round-12-2026-09-04.md`): one seat on
+  `0.2.2501+proto`, floor 11; a carry-out into Block prints nothing, an
+  Attack face not Weak-folded, the Plan tip's aim sentence unread
+  (`EB-440`-`EB-442`); no pick. [USER]'s act-1 run is due on
+  `0.2.2501+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
