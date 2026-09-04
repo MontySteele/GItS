@@ -430,6 +430,43 @@ SELF_TARGETS = frozenset({"self", "anyally", "anyplayer"})
 UNAIMED_TARGETS = frozenset({"none", "allenemies"}) | SELF_TARGETS
 
 
+def _aims_at_an_enemy(entry: dict[str, Any]) -> bool:
+    """Does this hand card need an enemy of the tester's choosing? `EB-402`.
+
+    THE DEFECT, in one line: `play "Slack Water"` with no `on` clause was
+    answered `ok` and did nothing -- no damage, no Weak -- on the Kokomi
+    round-10 seat, while an `AllEnemies` card played bare resolved.
+
+    WHY. Six of the arm's cards are `KokomiTargets.PetOrEnemy`, a CUSTOM target
+    type minted at `ModelDb.Init`, so `card.TargetType.ToString()` renders a
+    bare NUMBER on the wire (`EB-216`) and matches nothing in `AIMED_TARGETS`.
+    The bridge's `ExecutePlayCard` only demands a target for
+    `TargetType.AnyEnemy` (`McpMod.Actions.cs:152`), so the play was posted
+    with a NULL target, reached `PlayCardAction(card, null)`, and the card's
+    own `ArgumentNullException.ThrowIfNull(cardPlay.Target)` ended it inside
+    the action queue -- after the wire had already answered `ok`.
+
+    AND WHY THE NUMBER ALONE IS NOT ENOUGH. The other two custom spellings
+    render as bare numbers too, and for BOTH of them a bare play is correct:
+    `PetOrSelf` (ten cards, e.g. Tide Wall) falls through to its now-line on
+    the player, and `PetOnly` (two) schedules its Plan with no target read. So
+    the question is asked of the CARD rather than of the spelling, through the
+    bridge's `can_target_enemy` (`EB-402`, the twin of `EB-216`'s
+    `can_target_pet`): both are `CardModel.IsValidTarget`, which is the game's
+    own gate and is prefixed by BaseLib for every custom type.
+
+    An ABSENT `can_target_enemy` is a build that predates the field, and it
+    reads as the behaviour that build has: the named spellings decide and a
+    custom one falls through, exactly as before.
+    """
+    aim = str(entry.get("target_type") or "").lower()
+    if aim in AIMED_TARGETS:
+        return True
+    if not aim or aim in UNAIMED_TARGETS:
+        return False
+    return entry.get("can_target_enemy") is True
+
+
 def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     """`(entity id, refusal)` for an enemy named the way the screen names it."""
     enemies = _enemies(state)
@@ -453,6 +490,14 @@ def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     if idx < 0:
         return "", why
     return _entity_id(enemies[living[idx]]), ""
+
+
+def _living_enemy_names(state: dict[str, Any]) -> list[str]:
+    """The printed names of the living enemies, numbered as the render numbers
+    them (`EB-402`, and the numbering is `_resolve_enemy`'s own)."""
+    enemies = _enemies(state)
+    names = _enemy_names(enemies)
+    return [names[i] for i, e in enumerate(enemies) if _int(e.get("hp")) > 0]
 
 
 def _pet_target(state: dict[str, Any], name: str) -> str | None:
@@ -509,11 +554,15 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
         post["target"] = pet
         printed["target"] = (_combat(state)["plans"]["pet_name"])
         return Resolution(True, "play", post, printed)
-    needs_target = str(entry.get("target_type") or "").lower() in AIMED_TARGETS
+    needs_target = _aims_at_an_enemy(entry)
     if cmd.target or needs_target:
         eid, why = _resolve_enemy(state, cmd.target)
         if not eid:
-            return _refuse(why)
+            # `EB-402`. A card that has to be aimed and was not is refused with
+            # the `on` form listed back per living enemy, so the way out is in
+            # the refusal rather than one screen away.
+            return _refuse(why, *(f'play "{titles[idx]}" on "{n}"'
+                                  for n in _living_enemy_names(state)))
         post["target"] = eid
         printed["target"] = next(
             (n for e, n in zip(_enemies(state),

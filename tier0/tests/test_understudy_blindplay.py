@@ -6067,3 +6067,133 @@ def test_the_session_settles_the_screen_and_then_the_board():
     has no screen."""
     src = inspect.getsource(blindplay.Session._settle)
     assert src.index("settle(state") < src.index("settle_board(")
+
+
+# ------------------------------- EB-402: a bare play of an aimed card -------
+
+def plan_card_state(target_type: str = "40213", **fields) -> dict:
+    """The RECORDED combat turn plus ONE synthetic Kokomi Plan card.
+
+    Synthetic because the recording predates the arm; the shape is the shipped
+    row's own -- `ProtoKkSlackWater.cs:78` passes `KokomiTargets.PetOrEnemy`, a
+    `[CustomEnum]` value minted at `ModelDb.Init`, and
+    `McpMod.StateBuilder.cs` sends `card.TargetType.ToString()`, which for a
+    custom type has no enum name and renders a bare NUMBER (`EB-216`). So the
+    `target_type` under test is the one the wire carries.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    hand = state["player"]["hand"]
+    card = json.loads(json.dumps(hand[0]))
+    card.update({"id": "KLEEMOD-PROTO_KK_SLACK_WATER",
+                 "name": "Slack Water (proto)",
+                 "description": "Deal 4 damage. Apply 1 Weak. "
+                                "Plan: Apply 1 Weak to ALL enemies.",
+                 "target_type": target_type, "keywords": [],
+                 "index": len(hand)})
+    card.update(fields)
+    hand.append(card)
+    return state
+
+
+def two_enemy(state: dict) -> dict:
+    """The same board with a second living body on it."""
+    enemies = state["battle"]["enemies"]
+    second = json.loads(json.dumps(enemies[0]))
+    second.update({"name": "Slug", "entity_id": "999", "combat_id": 999})
+    enemies.append(second)
+    return state
+
+
+def test_a_bare_play_of_a_custom_aimed_card_resolves_to_the_sole_enemy():
+    """`EB-402`, and it is the row.
+
+    Kokomi round 10, run 1, fight 1, turn 2: `play "Slack Water"` with no `on`
+    clause was answered `ok` with an empty refusal and did NOTHING -- no
+    damage, no Weak -- while an `AllEnemies` card played bare resolved. The
+    play was posted with a NULL target (the bridge only demands one for
+    `TargetType.AnyEnemy`), reached `PlayCardAction(card, null)`, and the
+    card's own `ArgumentNullException.ThrowIfNull(cardPlay.Target)` ended it
+    inside the action queue, after the wire had answered `ok`.
+
+    A play must never come back `ok` for a no-op. With one enemy on the board
+    the bare form resolves to it.
+    """
+    state = plan_card_state(can_target_enemy=True)
+    res = blindplay.act(state, 'play "Slack Water (proto)"')
+    assert res["ok"], res["refusal"]
+    assert res["post"]["target"], "posted with no target -- the EB-402 no-op"
+    assert res["printed"]["target"] == "Nibbit"
+
+
+def test_a_bare_play_of_a_custom_aimed_card_is_refused_with_the_on_forms():
+    """The other half: with two bodies up there is no sole enemy to resolve
+    to, so the play is REFUSED -- never posted -- and the refusal carries the
+    `on` form per living enemy."""
+    state = two_enemy(plan_card_state(can_target_enemy=True))
+    res = blindplay.act(state, 'play "Slack Water (proto)"')
+    assert not res["ok"]
+    assert res["post"] is None            # never posted, so nothing is spent
+    assert 'play "Slack Water (proto)" on "Nibbit"' in res["refusal"]
+    assert 'play "Slack Water (proto)" on "Slug"' in res["refusal"]
+    # ...and one of those forms really is the one that works.
+    assert blindplay.act(state,
+                         'play "Slack Water (proto)" on "Slug"')["ok"]
+
+
+def test_the_other_two_custom_spellings_still_play_bare():
+    """A pin per spelling, and this is the reason the fix asks the CARD rather
+    than the number.
+
+    All three of the arm's custom types render as the same bare number, and
+    for two of them a bare play is CORRECT: `KokomiTargets.PetOrSelf` (ten
+    rows -- `ProtoKkTideWall.cs:76` falls through to `GainBlock` on the owner
+    when the play was not on the pet) and `KokomiTargets.PetOnly` (two --
+    `ProtoKkNereidsAscension.cs` schedules its Plan and reads no target). The
+    bridge answers `can_target_enemy: false` for both, so both keep the bare
+    form, with no target posted.
+    """
+    for spelling in ("PetOrSelf", "PetOnly"):
+        state = plan_card_state(can_target_enemy=False)
+        state["player"]["hand"][-1]["name"] = f"Tide Wall ({spelling})"
+        res = blindplay.act(state, f'play "Tide Wall ({spelling})"')
+        assert res["ok"], (spelling, res["refusal"])
+        assert "target" not in res["post"], spelling
+
+
+def test_a_build_that_does_not_answer_the_question_is_unchanged():
+    """The absent-key contract, the bridge's own: a build predating
+    `can_target_enemy` says nothing, and a custom spelling on it falls through
+    exactly as it did before this row."""
+    state = plan_card_state()                     # no can_target_enemy at all
+    res = blindplay.act(state, 'play "Slack Water (proto)"')
+    assert res["ok"] and "target" not in res["post"]
+
+
+def test_every_aimed_spelling_the_wire_uses_demands_a_target():
+    """The spelling census, swept: the four named enemy spellings all aim, the
+    self and all-enemies spellings do not, and the custom number defers to the
+    card."""
+    from understudy.blindplay_grammar import _aims_at_an_enemy
+    for spelling in ("AnyEnemy", "Enemy", "SingleEnemy", "TargetEnemy"):
+        assert _aims_at_an_enemy({"target_type": spelling}), spelling
+    for spelling in ("Self", "AnyAlly", "AnyPlayer", "AllEnemies", "None", ""):
+        assert not _aims_at_an_enemy({"target_type": spelling}), spelling
+    assert _aims_at_an_enemy({"target_type": "40213",
+                              "can_target_enemy": True})
+    assert not _aims_at_an_enemy({"target_type": "40213",
+                                  "can_target_enemy": False})
+
+
+def test_the_bridge_answers_the_enemy_half_the_way_it_answers_the_pet_half():
+    """The C# twin. `can_target_enemy` is `can_target_pet`'s mirror and is
+    computed the same way -- by asking the card, through the game's own
+    `IsValidTarget` -- because a table of custom enum values is exactly what
+    the bridge cannot have."""
+    builder = (REPO / "vendor" / "STS2_MCP"
+               / "McpMod.StateBuilder.cs").read_text(encoding="utf-8")
+    assert '["can_target_enemy"] = GitsCanTargetEnemy(card)' in builder
+    plan = (REPO / "vendor" / "STS2_MCP" / "gits"
+            / "GitsKokomiPlan.cs").read_text(encoding="utf-8")
+    body = plan.split("GitsCanTargetEnemy(CardModel card)")[1]
+    assert "card.IsValidTarget(enemy)" in body
+    assert "enemy.IsAlive" in body

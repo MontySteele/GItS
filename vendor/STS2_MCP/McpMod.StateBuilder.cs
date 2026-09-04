@@ -1413,6 +1413,12 @@ public static partial class McpMod
         // `IsValidTarget` is the game's own gate and BaseLib prefixes it for
         // every custom type, so a `true` here means the drag would land.
         state["can_target_pet"] = GitsCanTargetPet(card);
+        // GItS LOCAL EDIT (`EB-402`). The same question about the other side of
+        // the board, and it is what tells `PetOrEnemy` from `PetOrSelf` and
+        // `Pet` -- all three of which render as the same bare number above. A
+        // bare play of a `PetOrEnemy` card posts a NULL target, the card throws
+        // on its own null check, and the wire answers `ok` for a no-op.
+        state["can_target_enemy"] = GitsCanTargetEnemy(card);
         state["can_play"] = unplayableReason == UnplayableReason.None;
         state["unplayable_reason"] = unplayableReason != UnplayableReason.None ? unplayableReason.ToString() : null;
 
