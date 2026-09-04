@@ -52,14 +52,14 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
+        ArmKeywordTips.ForHexerei(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_durin_binary_form");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Durin — Binary Form"),
-        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies, then choose one for the combat. [gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage."),
+        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage to ALL enemies, then choose one for the combat. [gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.

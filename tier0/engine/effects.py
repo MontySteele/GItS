@@ -1440,6 +1440,14 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
                 hit += fx["bonus_vs_bombed"]
             if fx.get("bonus_vs_aura") and enemy.aura:
                 hit += fx["bonus_vs_aura"]
+            # `EB-441`. The aura rider's twin, on the enemy's DEBUFFS. Same
+            # per-target shape and the same classification the
+            # `target_has_debuff` predicate uses -- `kokomi_plan.has_debuff`,
+            # this engine's stand-in for the game's `PowerType.Debuff` -- so a
+            # branch rewritten as a rider asks exactly the question it asked
+            # as a branch.
+            if fx.get("bonus_vs_debuff") and kokomi_plan.has_debuff(enemy):
+                hit += fx["bonus_vs_debuff"]
             # Clorinde, Night Vigil: the same per-target aura rider, sourced
             # from a POWER instead of the card. Read before the hit resolves,
             # because resolve_hit consumes the aura it is keyed on -- the

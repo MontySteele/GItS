@@ -140,8 +140,12 @@ public class ArmKeywordTipTests
         // explosions resolve BEFORE the rest of the card.
         var printed = Printed("ForSetOff");
 
-        Assert.Contains("one at a time", printed);
-        Assert.Contains("goes off first", printed);
+        // `EB-432` traded "one at a time" for the order it leaves out: an
+        // order that names a first and a rest IS one at a time, and the pile
+        // resolves in placement order with the aura going to the oldest.
+        Assert.Contains("oldest first", printed);
+        Assert.Contains("go off first", printed);
+        Assert.Contains("the first takes the aura", printed);
     }
 
     [Fact]

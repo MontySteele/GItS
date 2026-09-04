@@ -46,14 +46,14 @@ public sealed class ProtoMcVarkaSturmUndDrang : CustomCardModel, ICompanionCard,
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_varka_sturm_und_drang");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Varka — Sturm und Drang"),
-        ("description", "Whenever a [gold]Swirl[/gold] happens, your next Attack deals {PowerAmount:diff()} additional damage of the swirled element."),
+        ("description", "[gold]Hexerei[/gold]. Whenever a [gold]Swirl[/gold] happens, your next Attack deals {PowerAmount:diff()} additional damage of the swirled element."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -41,7 +41,7 @@ public sealed class StandingOvation : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Standing Ovation"),
-        ("description", "[gold]Spotlighted[/gold] Companions are 10% stronger on turns you spend [gold]Encore[/gold]. The first [gold]Spotlighted[/gold] card each turn grants 1 [gold]Encore[/gold]."),
+        ("description", "[gold]Spotlighted[/gold] Companion cards gain 10% on turns you spend [gold]Encore[/gold]. The first [gold]Spotlighted[/gold] card each turn grants 1 [gold]Encore[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

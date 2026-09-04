@@ -11,6 +11,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Powers;
@@ -429,6 +430,62 @@ public static class SpotlightSystem
         return GuestCastBaseMultiplier + percentagePoints / 100m;
     }
 
+    /// <summary>
+    /// `EB-438`. A DEFERRED BLOCK CLAUSE, PRINTED AS IT WILL BE DELIVERED.
+    ///
+    /// THE DEFECT. Charlotte, First-Person Shutter is two Block clauses -- one
+    /// now, one at the start of the next turn -- and only the first was a var.
+    /// The second was a LITERAL in the face while the play applied
+    /// <see cref="PrintedBlock"/> to it, so under Guest Cast the card printed
+    /// `Gain 4 Block. At the start of your next turn, gain 4 Block.` and
+    /// delivered 6 and 6. The Furina round-6 seat priced a turn off it and
+    /// filed the shape rather than the number: "The Spotlight rewrites the
+    /// FIRST number of a two-clause card but not the second, so the card
+    /// under-reports itself. Compare Ring of Bursting Grenades, which rewrites
+    /// cleanly -- the behaviour is inconsistent between cards."
+    ///
+    /// WHY NOT `CalculatedBlockVar`, which the first clause uses: that var
+    /// takes its base from the single `CalculationBase` var, so a card with
+    /// two Block numbers cannot have two of them -- the second would compute
+    /// off the first's base. This is the second number's own var, and it folds
+    /// through the SAME call the play makes.
+    ///
+    /// `UpdateCardPreview` IS THE SEAM THE GAME ALREADY OWNS
+    /// (<c>KokomiPlan.PlanDamageVar</c>'s idiom): the engine calls it on every
+    /// var of a card in hand whenever it refreshes a face, and
+    /// <c>PreviewValue</c> is the number <c>{Var:diff()}</c> prints.
+    /// <c>IntValue</c> is untouched and stays <c>BaseValue</c>, which is what
+    /// the emitted play reads before wrapping it in <see cref="PrintedBlock"/>
+    /// -- so the fold is applied exactly once, in the play, and previewed
+    /// here.
+    ///
+    /// OFF THE HAND IT PRINTS ITS BASE. A compendium or reward copy has no
+    /// owner and `runGlobalHooks` is false, so every such read falls through
+    /// exactly as a plain var would.
+    /// </summary>
+    public sealed class DeferredBlockVar : DynamicVar
+    {
+        public const string Token = "BlockNextTurn";
+
+        public DeferredBlockVar(decimal amount) : base(Token, amount)
+        {
+        }
+
+        public override void UpdateCardPreview(
+            CardModel card, CardPreviewMode previewMode, Creature? target,
+            bool runGlobalHooks)
+        {
+            PreviewValue = BaseValue;
+            if (!runGlobalHooks) return;
+            // A canonical (compendium) copy has no owner and the getter
+            // ASSERTS rather than returning null, which is why this guard is
+            // the shape `PlanDamageVar` uses.
+            if (!card.IsMutable) return;
+            if (card.Owner?.Creature == null) return;
+            PreviewValue = PrintedBlock(card, BaseValue);
+        }
+    }
+
     public static decimal PrintedDamage(CardModel card, decimal amount)
     {
         var scaled = Math.Truncate(amount * OutwardMultiplier(card));
@@ -681,10 +738,29 @@ public sealed class GuestCastPower : PowerModel, ILocalizationProvider
         // Same `SmartDescriptionLocKey` mechanism, same no-semicolon rule as
         // that face: `lint_text_conventions` reads these literals out of the
         // source and its regex stops at one.
+        //
+        // `EB-437` ADDED THE THIRD SENTENCE, and it is three words long
+        // because the confusion it answers is one word. The r6 act-1 seat
+        // deployed under this buff and watched the member perform dry:
+        // "`Guest Cast 1` was active and claims Companions are '50%
+        // stronger', yet the log printed `Crabaletta hit Corpse Slug for 4
+        // Hydro` -- 6 x 0.75, with no 1.5x anywhere. Reading the Spotlight
+        // card again, it says 'Spotlight every Companion card', and a Salon
+        // member is not a card; but the relic that hands you the card says
+        // 'It does nothing once your Companions are lit', and the salon
+        // members are the things the game calls Companions everywhere else. I
+        // could not tell from the screens whether that was a bug or my
+        // misreading, and that is the point."
+        //
+        // It is not a bug: `OutwardMultiplier` refuses anything that is not an
+        // `ICompanionCard`, and a member is a POWER. The buff is the surface
+        // that is on screen at the moment the question arises, so it answers
+        // it here rather than leaving the reader to notice that "card" is
+        // doing the work in the sentence above.
         ("smartDescriptionReframe",
             "Companion cards are Spotlighted: 50% stronger printed damage and "
-          + "[gold]Block[/gold]. Lasts until the [gold]Spotlight[/gold] "
-          + "moves."),
+          + "[gold]Block[/gold]. No member is one. Lasts until the "
+          + "[gold]Spotlight[/gold] moves."),
 #endif
     };
 
@@ -818,8 +894,8 @@ public sealed class SpotlightMultBonusPower
     {
         ("title", "Top Billing"),
         ("description",
-            "[gold]Spotlighted[/gold] Companions are [blue]{Amount}[/blue]% "
-          + "stronger this combat."),
+            "[gold]Spotlighted[/gold] Companion cards gain [blue]{Amount}[/blue]%"
+          + " this combat."),
     };
 }
 
@@ -830,8 +906,8 @@ public sealed class SpotlightMultBonusTurnPower
     {
         ("title", "Limelight"),
         ("description",
-            "[gold]Spotlighted[/gold] Companions are [blue]{Amount}[/blue]% "
-          + "stronger this turn."),
+            "[gold]Spotlighted[/gold] Companion cards gain [blue]{Amount}[/blue]%"
+          + " this turn."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -852,7 +928,7 @@ public sealed class SpotlightFlatDamagePower
     {
         ("title", "Star of the Show"),
         ("description",
-            "[gold]Spotlighted[/gold] Companion damage gains {Amount}."),
+            "[gold]Spotlighted[/gold] Companion card damage gains {Amount}."),
     };
 }
 
@@ -863,7 +939,7 @@ public sealed class SpotlightFlatDamageTurnPower
     {
         ("title", "Stage Lights"),
         ("description",
-            "[gold]Spotlighted[/gold] Companion damage gains {Amount} "
+            "[gold]Spotlighted[/gold] Companion card damage gains {Amount} "
           + "this turn."),
     };
 
@@ -885,8 +961,8 @@ public sealed class OvationSpendBoostPower
     {
         ("title", "Standing Ovation"),
         ("description",
-            "[gold]Spotlighted[/gold] Companions are [blue]{Amount}[/blue]% "
-          + "stronger on turns you spend [gold]Encore[/gold]."),
+            "[gold]Spotlighted[/gold] Companion cards gain [blue]{Amount}[/blue]%"
+          + " on turns you spend [gold]Encore[/gold]."),
     };
 }
 

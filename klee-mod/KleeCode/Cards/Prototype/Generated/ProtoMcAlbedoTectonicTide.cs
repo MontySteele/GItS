@@ -46,14 +46,14 @@ public sealed class ProtoMcAlbedoTectonicTide : CustomCardModel, ICompanionCard,
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_albedo_solar_isotoma");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Albedo — Tectonic Tide"),
-        ("description", "Whenever an [gold]Elemental Reaction[/gold] happens, deal {PowerAmount:diff()} damage to that enemy."),
+        ("description", "[gold]Hexerei[/gold]. Whenever an [gold]Elemental Reaction[/gold] happens, deal {PowerAmount:diff()} damage to that enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

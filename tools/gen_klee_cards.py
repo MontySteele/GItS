@@ -2176,15 +2176,22 @@ APPLY_POWERS = {
     "spotlight_draw": ("SpotlightDrawPower", None,
         "The first [gold]Spotlighted[/gold] card each turn draws {X} card{XS}."),
     "spotlight_mult_bonus": ("SpotlightMultBonusPower", None,
-        "[gold]Spotlighted[/gold] Companions are {X}% stronger this combat."),
+        # `EB-437`: `Companions` is what the seat read as the Salon members,
+        # and the reach is CARDS -- `OutwardMultiplier` refuses anything that
+        # is not an `ICompanionCard`. "Gain {X}%" replaces "are {X}% stronger"
+        # in the same breath and is the truer word as well as the shorter one:
+        # the amount is added to Guest Cast's multiplier
+        # (`GuestCastBaseMultiplier + points / 100`), so it moves 50% to 75%
+        # rather than multiplying what is there by 1.25.
+        "[gold]Spotlighted[/gold] Companion cards gain {X}% this combat."),
     "spotlight_mult_bonus_turn": ("SpotlightMultBonusTurnPower", None,
-        "[gold]Spotlighted[/gold] Companions are {X}% stronger this turn."),
+        "[gold]Spotlighted[/gold] Companion cards gain {X}% this turn."),
     "spotlight_flat_damage": ("SpotlightFlatDamagePower", None,
-        "[gold]Spotlighted[/gold] Companion damage gains {X}."),
+        "[gold]Spotlighted[/gold] Companion card damage gains {X}."),
     "spotlight_flat_damage_turn": ("SpotlightFlatDamageTurnPower", None,
-        "[gold]Spotlighted[/gold] Companion damage gains {X} this turn."),
+        "[gold]Spotlighted[/gold] Companion card damage gains {X} this turn."),
     "ovation_spend_boost": ("OvationSpendBoostPower", None,
-        "[gold]Spotlighted[/gold] Companions are {X}% stronger on turns you "
+        "[gold]Spotlighted[/gold] Companion cards gain {X}% on turns you "
         "spend [gold]Encore[/gold]."),
     "spotlight_encore_first": ("SpotlightEncoreFirstPower", None,
         "The first [gold]Spotlighted[/gold] card each turn grants {X} "
@@ -3010,6 +3017,17 @@ def blocked_reason(
                     return (
                         "bonus_vs_aura requires enemy damage and "
                         "a literal int")
+            if "bonus_vs_debuff" in eff:
+                # `EB-441`. AIMED ONLY, and narrower than the aura rider on
+                # purpose: `debuff_calc_rider` renders this through
+                # `CalculatedDamageVar`, whose multiplier is resolved ONCE
+                # against the hovered or aimed creature. An all-enemies form
+                # would collapse a per-enemy decision into one flat value,
+                # which is the reason `aura_calc_rider` refuses AoE.
+                if eff.get("target") != "enemy" or not isinstance(
+                        eff["bonus_vs_debuff"], int):
+                    return ("bonus_vs_debuff requires aimed enemy damage "
+                            "and a literal int")
             # `times` is checked by _times_reason at the top of this loop
             # (EB-132) -- it is not a damage-only field.
         if op == "place_bomb":
@@ -4626,6 +4644,40 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
         f"FurinaResources.ReadableFanfare(card.Owner.Creature) / {int(m.group(2))}")
 
 
+def debuff_calc_rider(card: dict, eff: dict) -> tuple[int, int] | None:
+    """`EB-441`: a single-target `bonus_vs_debuff` rider, rendered through
+    `CalculatedDamageVar`. Returns (base, bonus) or None.
+
+    THE DEFECT IT CLOSES. Undertow was a `conditional` whose two branch
+    numbers were LITERALS in the face, so nothing folded them: the r12 act-1
+    seat read "`Strike -- Deal 4 damage.` (6 adjusted to 4 -- correct)" and
+    "`Undertow -- Deal 7 damage...`" on one screen, played Undertow into a
+    Weak 1 turn and watched it deal 5. "Strike's face is Weak-adjusted;
+    Undertow's face is not. I chose the turn's plays off a number that was 2
+    too high."
+
+    A RIDER RATHER THAN A FOLD OF OUR OWN, and that is the point: the engine
+    already folds a `CalculatedDamageVar` exactly the way it folds Strike's
+    `DamageVar` -- every term, not the two a hand-written mirror would name --
+    and `Calculate(target)` at resolution is the same call. Face and hit are
+    one number by construction rather than by agreement.
+
+    THE BRANCH BECOMES A BONUS AND THE ARITHMETIC DOES NOT MOVE: 7, or 7+3 on
+    a debuffed enemy, is what "deal 7, or 10 instead" said. ONE hit either
+    way, which matters -- two would be two aura applications and two reaction
+    rolls.
+
+    AIMED ONLY, `aura_calc_rider`'s rule and its reason: the multiplier is
+    resolved once against the hovered creature, so an all-enemies form would
+    print one number for a board that would take several.
+    """
+    if eff.get("op") != "damage" or eff.get("target") != "enemy":
+        return None
+    if "bonus_vs_debuff" not in eff:
+        return None
+    return int(eff["amount"]), int(eff["bonus_vs_debuff"])
+
+
 def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     """Unified view of every damage rider that renders through a
     CalculatedDamageVar: (base, extra, multiplier-lambda source). The four
@@ -4692,6 +4744,14 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     if members is not None:
         base, per_n, _ = members
         return base, per_n, f"static (card, _) => {SALON_MEMBER_COUNT_CS}"
+    debuff = debuff_calc_rider(card, eff)
+    if debuff is not None:
+        base, bonus = debuff
+        # Guard the null for `aura_calc_rider`'s reason: preview calls
+        # `Calculate(null)` whenever nothing is hovered.
+        return base, bonus, (
+            "static (_, target) => "
+            "target != null && KokomiOverhaulKit.HasDebuff(target) ? 1 : 0")
     aura = aura_calc_rider(card, eff)
     if aura is not None:
         base, bonus = aura
@@ -4866,9 +4926,21 @@ def build_vars(card: dict) -> list[str]:
                 f'new DynamicVar("KurageTurns", {int(eff.get("amount", 1))}m)')
         elif op == "energy" and energy_upgrade(card):
             out.append(f'new DynamicVar("Energy", {int(eff["amount"])}m)')
-        elif op == "block_next_turn" and block_next_turn_upgrade(card):
+        elif op == "block_next_turn" and (block_next_turn_upgrade(card)
+                                          or spotlight_folds(card)):
+            # `EB-438`. A SECOND VAR RULE ON THE SAME OP, and the two reasons
+            # are different: an upgradeable amount needs a var so the NEW
+            # number renders, and a SPOTLIGHT-folded amount needs one so the
+            # printed number is the delivered one. The second was the defect:
+            # Charlotte, First-Person Shutter printed `gain 4 Block` on a
+            # clause the play applied `PrintedBlock` to, and delivered 6.
+            # `DeferredBlockVar` is the second number's own var -- see its
+            # summary for why `CalculatedBlockVar` could not be, and why the
+            # fold is a PREVIEW here and stays in the play.
             out.append(
-                f'new DynamicVar("BlockNextTurn", {int(eff["amount"])}m)')
+                f'new SpotlightSystem.DeferredBlockVar({int(eff["amount"])}m)'
+                if spotlight_folds(card)
+                else f'new DynamicVar("BlockNextTurn", {int(eff["amount"])}m)')
         elif op == "exhaust_from" and exhaust_upgrade(card):
             out.append(
                 f'new DynamicVar("Exhausts", {int(eff.get("amount", 1))}m)')
@@ -6093,6 +6165,25 @@ def energy_upgrade(card: dict) -> int:
 def block_next_turn_upgrade(card: dict) -> int:
     """Ruled deferred-block delta: `block_next_turn: +N` (Sayu's daruma)."""
     return int(upgrade_plan(card)[0].get("block_next_turn", 0))
+
+
+def spotlight_folds(card: dict) -> bool:
+    """`EB-438`: does the Spotlight move this card's printed numbers?
+
+    THE SAME TEST THE EMITTER ALREADY MAKES, hoisted so the FACE can ask it
+    too. `emit` computes `spotlight_capable` and wraps every amount it emits in
+    `SpotlightSystem.PrintedBlock` / `PrintedDamage`; the description builder
+    had no way to ask, so a clause whose play was wrapped could still print a
+    literal. That is exactly what Charlotte's second clause did.
+
+    A COMPANION, OR ONE OF FURINA'S OWN. The wrap is identity on her own cards
+    -- `PrintedBlock`'s bonus path needs Guest Cast, which lights Companions
+    only -- so the var it produces there previews its own base and costs
+    nothing; the test is kept identical to the emitter's rather than narrowed,
+    because two spellings of one question is how the first clause and the
+    second came to disagree.
+    """
+    return is_companion(card) or card.get("character") == "furina"
 
 
 def exhaust_upgrade(card: dict) -> int:
@@ -8717,7 +8808,7 @@ def build_description(card: dict) -> str:
                     parts[-1], [f"[gold]{stat}[/gold]"])
 
         elif op == "block_next_turn":
-            if block_next_turn_upgrade(card):
+            if block_next_turn_upgrade(card) or spotlight_folds(card):
                 # The next-turn half moves with the upgrade, so the face must
                 # show the NEW number (SYS-1: tideline_watch printed 8 while
                 # the sim banked 12).
@@ -8896,6 +8987,40 @@ def build_description(card: dict) -> str:
                            else formula.partition("_per_")[0])
                     parts.append(
                         f"+{per} damage per [gold]Bomb[/gold] detonated this combat.")
+                elif encore_calc_rider(card, eff) is not None:
+                    # `EB-429`. ENCORE IS THE ONE FOLDED SOURCE THAT IS ALSO A
+                    # PRICE, and "already including [gold]Encore[/gold]" left
+                    # a reader three readings of it. The r5 run-2 seat skipped
+                    # the card rather than guess: "I could not parse that
+                    # sentence and still cannot. Encore is defined as an
+                    # absorb pool that cards pay to resolve; 'already
+                    # including Encore' does not tell me whether the card
+                    # spends Encore, is priced as though it had spent Encore,
+                    # or deals more damage when I hold Encore." Six fights
+                    # later: "I still cannot tell you what that sentence
+                    # means."
+                    #
+                    # SO THE FACE SAYS WHAT THE RIDER DOES. It is the third
+                    # reading, and both halves come off the code:
+                    # `encore_calc_rider` reads `N_per_M_encore` off the row,
+                    # and its own docstring is the second half -- "the bank is
+                    # READ, never spent -- consulting it costs nothing".
+                    # Naming the rate says the number already carries it in
+                    # the same breath as saying where it came from, which is
+                    # what `_already_including` was for and what the bare
+                    # resource name could not do here.
+                    #
+                    # THE NUMERALS ARE THE ROW'S (`EB-89`'s discipline), so a
+                    # repricing of the slope cannot leave this sentence
+                    # quoting a retired rate. Encore only: `Fanfare`, `Salon`,
+                    # `Charge` and `Companions` are counters a player never
+                    # spends on a card, so none of them carries the
+                    # ambiguity this one does.
+                    _, per, div = encore_calc_rider(card, eff)
+                    parts[dmg_idx] = (
+                        parts[dmg_idx].removesuffix(".")
+                        + f", counting {per} for every {div} "
+                          "[gold]Encore[/gold] you hold and spending none.")
                 elif rehomed:
                     # Name the RESOURCE the formula actually reads. This said
                     # "Fanfare" unconditionally, which put another character's
@@ -9607,8 +9732,47 @@ def _face_riders(card: dict, text: str) -> str:
     defect the next rendered row inherits.
 
     `EB-293`. Both are live defects from [USER]'s own play of the arm.
+    `EB-392` made it three for the same reason.
     """
-    return _plan_only_line(card, _dedupe_printed_exhaust(card, text))
+    return _hexerei_tag(
+        card, _plan_only_line(card, _dedupe_printed_exhaust(card, text)))
+
+
+def _hexerei_tag(card: dict, text: str) -> str:
+    """`EB-392`: a Hexerei COMPANION says so on its own face.
+
+    THE WORD WAS ON EIGHTEEN ROWS AND PRINTED ON FOUR. `hexerei: true` emitted
+    `IHexereiCard` and nothing a player could see, so the family mark was
+    readable only from the cards that ASK about it -- and those ask about a set
+    whose members never identified themselves. The r12 run-2 seat held Witches'
+    Circle for four fights and called it dead: "Witches' Circle was
+    unplayable-in-practice: I owned no Hexerei card and the reminder text does
+    not say which of my cards are Hexerei." It learned the answer by counting
+    Bombs on an enemy badge, and then learned there were THREE words:
+    "there is apparently a distinction between `Companion`, `Hexerei`, and
+    `Klee's own Companion`, and none of the three cards involved prints which
+    one it is."
+
+    DERIVED FROM THE ROW, never remembered. The tag is the sheet's own
+    `hexerei` key, so a row that joins the family carries the mark because it
+    joined -- and the keyword tip comes with it for free, because
+    `arm_keyword_tip_calls` reads the golded tokens out of THIS text
+    (`EB-272`'s attach rule). One field, one printed word, one definition.
+
+    COMPANIONS ONLY, which is the row's own scope. The three READERS are Klee's
+    own cards: Coven Errand and Witches' Circle carry no `hexerei` key at all,
+    and Alice's Introduction Magic carries it while printing the word in its
+    body already -- so the guard below skips a face that has said it, and a
+    reader is never mistaken for a member.
+
+    IT LEADS, like `_plan_only_line`. What a card IS is read before what it
+    does, and a trailing tag reads as a clause of the last effect sentence.
+    """
+    if not (is_companion(card) and card.get("hexerei")):
+        return text
+    if "[gold]Hexerei[/gold]" in text:
+        return text
+    return ("[gold]Hexerei[/gold]. " + text).strip()
 
 
 def _dedupe_printed_exhaust(card: dict, text: str) -> str:

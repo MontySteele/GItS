@@ -1253,6 +1253,17 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 rider = fx.get("bonus_per_target_power")
                 if isinstance(rider, dict):
                     amt += rider.get("per", 0)  # one matching stack
+                # `EB-441`. HALF THE BONUS, which is the number this row
+                # already carried: Undertow was a `conditional` priced at the
+                # MEAN of its two branches, and base + bonus/2 is that mean
+                # written the way the rider writes it. Half is also the share
+                # this table gives every live predicate of Klee's
+                # (`"conditional"`, one line down the reasons map), and for
+                # the same reason -- a board-state bonus is real and is not
+                # always on.
+                debuff_bonus = fx.get("bonus_vs_debuff")
+                if isinstance(debuff_bonus, (int, float)):
+                    amt += debuff_bonus / 2
                 if isinstance(amt, (int, float)):
                     times = (fx.get("times", 1)
                              if isinstance(fx.get("times", 1), int) else 1)

@@ -155,9 +155,17 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// twice and called it the most confusing thing on the screen
     /// (`klee-overhaul-r1-codex-b`, fights 4 and 5).
     /// </summary>
+    /// <summary>`EB-436` PUT THE HIT IN THE SENTENCE. The clause said WHEN
+    /// and nothing about the attack, and the r12 act-1 seat read mitigation
+    /// into it: three Mines left armed against an elite, five went off,
+    /// "every hit landed in full, 36 to 18 HP". The only thing a Mine does to
+    /// the attack is stop it happening, by killing the attacker -- `EB-336`'s
+    /// rule, <see cref="Preempted"/> -- so the badge says that and stops.
+    /// Same sentence, same two surfaces the clause has had since
+    /// <c>EB-260</c>.</summary>
     private const string MineClause =
-        " A [gold]Mine[/gold] also goes off when this enemy attacks you, "
-      + "before the hit lands.";
+        " A [gold]Mine[/gold] also goes off before this enemy's hit, which "
+      + "lands in full unless the Mine kills.";
 
     // `EB-343`'s sentence is written INTO the static description above rather
     // than pulled out as a constant beside `MineClause`, and the reason is the

@@ -2432,3 +2432,30 @@ spent". Same words, same reading, one markup pair.
 
 Numbers are Prototype numbers, D by the ladder; the seats read them on the next
 round before [USER] does.
+
+## `proto_kk_undertow` -- one damage op with a rider (`EB-441`)
+
+The row was a `conditional` whose two branch numbers were LITERALS in the face,
+and the codegen's own note says why nothing could fold them: a branch amount
+"owns no var to print a `:diff()` of". So the card carried no `DynamicVar` at
+all, and the engine -- which is what turns Strike's printed 6 into the 4 it
+prints under Weak -- had nothing to fold. The round-12 act-1 seat read both
+faces on one screen, played Undertow into a Weak 1 turn and watched it deal 5:
+"Strike's face is Weak-adjusted; Undertow's face is not. I chose the turn's
+plays off a number that was 2 too high."
+
+It is one `damage` op with `bonus_vs_debuff: 3` now, rendered through
+`CalculatedDamageVar` by the same `calc_rider` machinery `bonus_vs_aura` has
+used since the Legibility sprint. The engine folds that var exactly as it folds
+Strike's `DamageVar`, and `Calculate(target)` at resolution is the same call, so
+the face and the hit are one number by construction rather than by agreement --
+and the multiplier reads the HOVERED enemy, so the face answers per body the
+question the branch could only ask in the abstract.
+
+THE ARITHMETIC DOES NOT MOVE. 7, or 7+3 on a debuffed enemy, is what "deal 7, or
+10 instead" said, and the upgrade's +3 lands on the base exactly as the
+`conditional_damage: 3` delta did. It is ONE hit either way, which is the part
+worth naming: two would be two aura applications and two reaction rolls.
+`KokomiOverhaulKit.HasDebuff` and `kokomi_plan.has_debuff` are the twins the
+`target_has_debuff` predicate already used, so the rider asks the question the
+branch asked.

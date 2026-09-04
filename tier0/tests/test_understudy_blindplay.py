@@ -4921,7 +4921,7 @@ def test_an_arm_keyword_prints_one_definition_per_screen():
     assert "## Words on this screen" in page
     assert page.count("- **Set off** ") == 1
     assert page.count("- **Bomb** ") == 1
-    assert "goes off first" in page
+    assert "go off first" in page
 
 
 def test_a_keyword_no_face_on_the_screen_prints_is_never_defined():
@@ -4992,12 +4992,14 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Bomb": ["A charge on an enemy", "goes off only when",
                  "Not an Attack: only ", " and a cap ",
                  "Kills move it on"],
-        "Set off": ["on the target goes off first, one at a",
-                    "each a Pyro hit for its size"],
+        # `EB-432`: the pile's own order, and which charge meets the aura.
+        "Set off": ["go off first, oldest first, each ",
+                    "a Pyro hit. ", " stops them, no Attack trigger ",
+                    "fires, the first takes the aura."],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
-        "Mine": ["that also goes off when its enemy attacks",
-                 "before the hit lands",
-                 "Read the badge: only their "],
+        # `EB-436`: the hit is in the sentence now.
+        "Mine": ["that also goes off before its enemy's hit, ",
+                 "which lands in full unless the Mine kills. Only their "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
@@ -5017,9 +5019,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # same defect the row is about: both have had an `ArmKeywordTips` twin
         # since R244 and neither had a page row, so the mod defined them on a
         # hover and the blind page defined them nowhere.
-        "Hexerei": [" card from the witches' circle. It does ",
-                    "nothing by itself; Klee is one too, and her own cards "
-                    "pay when "],
+        # `EB-392` rewrote the word once every member could print it.
+        "Hexerei": [" card that prints the word, and Klee ",
+                    "herself. Some are Klee's own, some are not. Cards of hers pay ",
+                    "when you play one."],
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
                   "No ", "aura, no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
@@ -6786,8 +6789,11 @@ def test_the_encore_meter_line_does_not_repeat_the_gloss():
     assert "- Encore: 4 — defined under *Words on this screen*" in page
     assert "- **Encore** — After Block it absorbs damage before HP." in page
     assert page.count("absorbs damage before HP") == 1
-    assert ("- Fanfare: 6 — the game's data feed carries this meter's "
-            "amount only") in page
+    # `EB-437`: Fanfare has a row of its own now, and it is the second half of
+    # the same discipline -- the meter line carries the MOD's spend rule
+    # rather than the generic gap, because the mod declares one.
+    assert "- Fanfare: 6 — cards read it and none spends it" in page
+    assert "no rule for how it is spent" not in page
 
 
 # ---------------- EB-405: a Salon performance names its target -------------
@@ -7051,13 +7057,15 @@ def test_the_target_and_the_aura_are_recorded_where_they_are_decided():
 #: `ProtoBombPower.Title` selected. The body is the arm's own, quoted, so the
 #: page half of this pin cannot pass on a sentence the game does not print.
 _MINE_FACE = ("Set off here deals 4 Pyro damage. Bombs here: 1, including 1 "
-              "Mine, growing each turn. A Mine also goes off when this enemy "
-              "attacks you, before the hit lands. A kill moves them to a "
+              "Mine, growing each turn. A Mine also goes off before this "
+              "enemy's hit, which lands in full unless the Mine kills. A "
+              "kill moves them to a "
               "survivor.")
 
 _MIXED_FACE = ("Set off here deals 12 Pyro damage. Bombs here: 2, including 1 "
-               "Mine, growing each turn. A Mine also goes off when this enemy "
-               "attacks you, before the hit lands. A kill moves them to a "
+               "Mine, growing each turn. A Mine also goes off before this "
+               "enemy's hit, which lands in full unless the Mine kills. A "
+               "kill moves them to a "
                "survivor.")
 
 
@@ -7083,7 +7091,7 @@ def test_a_pile_that_is_all_mines_reads_as_a_mine_on_the_page():
 
     assert badge.strip().startswith("Mine 4")
     assert "Bomb 4" not in badge
-    assert "before the hit lands" in badge
+    assert "goes off before this enemy's hit" in badge
 
 
 def test_a_pile_holding_one_plain_bomb_is_still_a_bomb_on_the_page():
@@ -7097,7 +7105,7 @@ def test_a_pile_holding_one_plain_bomb_is_still_a_bomb_on_the_page():
     assert badge.strip().startswith("Bomb 12")
     assert "Mine 12" not in badge
     assert "including 1 Mine" in badge
-    assert "before the hit lands" in badge
+    assert "goes off before this enemy's hit" in badge
 
 
 def test_the_badge_owns_both_names_and_chooses_between_them_live():
@@ -7117,4 +7125,4 @@ def test_the_badge_owns_both_names_and_chooses_between_them_live():
     # Rule 6's sentence rides the face and is NOT what the title switches on:
     # a mixed pile keeps `Bomb` and still prints the timing clause.
     assert "MineClause" in power
-    assert "before the hit lands" in power
+    assert "goes off before this enemy's hit" in power

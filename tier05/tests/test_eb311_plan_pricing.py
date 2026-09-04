@@ -363,12 +363,18 @@ def test_a_row_whose_character_is_unknown_refuses_rather_than_guesses():
 def test_undertow_is_priced_at_the_mean_of_its_branches():
     """The record's own proof that the zeros were the instrument: damage that
     RISES against a debuff, above Strike on either branch, priced 0.00 because
-    `target_has_debuff` had no entry anywhere."""
+    `target_has_debuff` had no entry anywhere.
+
+    `EB-441` REWROTE THE ROW AND NOT THE PRICE. The two branches are one damage
+    op with a `bonus_vs_debuff` rider now -- so the face can be folded by the
+    engine, which a branch literal could not be -- and the number this table
+    reaches is unchanged: base + bonus/2 IS the mean of the branches, half
+    being the share the table already gives a live predicate."""
     card = _proto("proto_kk_undertow")
-    branch = card.effects[0]
-    assert branch["if"] == "target_has_debuff"
-    hi = branch["then"][0]["amount"]
-    lo = branch["else"][0]["amount"]
+    hit = card.effects[0]
+    assert hit["op"] == "damage"
+    lo = hit["amount"]
+    hi = lo + hit["bonus_vs_debuff"]
     assert draft._static_power(card) == (hi + lo) / 2 / card.cost
 
 

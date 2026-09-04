@@ -974,15 +974,43 @@ public sealed class SacramentalShowerPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Sacramental Shower"),
+        // THE STATIC (compendium) ROW CARRIES NO VAR TOKEN -- `EB-353`'s
+        // finding, one class over: `PowerModel.HoverTips` calls
+        // `DynamicVars.AddTo` on the SMART branch alone, so a token written
+        // here would reach the screen as a placeholder.
         ("description",
             "The next time an enemy attacks you, deal "
           + $"[blue]{CompanionOverhaulLaw.ShowerDamage}[/blue] [gold]Hydro[/gold] "
+          + "damage to it first."),
+        // `EB-438`. THE STORED NUMBER, FOLDED THE WAY THE CARD FACES ARE.
+        //
+        // The r6 act-1 seat read this badge and lost the arithmetic on it:
+        // "the buff line printed `Sacramental Shower 1 -- The next time an
+        // enemy attacks you, deal 9 Hydro damage to it first`, and when it
+        // fired the ship went 38 to 32, i.e. 6. I was carrying Weak 2. Card
+        // text on this kit folds Weak into the printed number reliably and
+        // well; the STORED-BUFF text does not. If you are going to fold
+        // modifiers into printed numbers -- and you should, it's very good --
+        // the buff readouts have to do it too, or the one place that doesn't
+        // becomes the place you get killed."
+        //
+        // The fold is not a new arithmetic: <see cref="Spring"/> deals through
+        // `ElementalHit.Deal` with `powered: true`, whose first step is
+        // `SimDamagePipeline.DealerMods` -- Strength, then Weak's three
+        // quarters. <see cref="ShowerVar"/> asks that same call at FORMAT
+        // time, so the badge and the hit cannot drift.
+        ("smartDescription",
+            "The next time an enemy attacks you, deal "
+          + $"[blue]{{{ShowerVar.Token}}}[/blue] [gold]Hydro[/gold] "
           + "damage to it first."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new DynamicVar[] { new ShowerVar() };
 
     internal async Task Spring(PlayerChoiceContext choiceContext,
                                Creature attacker)
@@ -1004,6 +1032,43 @@ public sealed class SacramentalShowerPower : PowerModel, ILocalizationProvider
             choiceContext, this, -1, applier: Owner, cardSource: null,
             silent: true);
     }
+}
+
+/// <summary>
+/// `EB-438`. <c>{Shower}</c>, READ LIVE.
+///
+/// A plain <see cref="DynamicVar"/> is a stored number written when something
+/// remembers to write it, and the terms that move this one belong to KOKOMI
+/// and move between the placing and the springing: the Shower is placed on one
+/// turn and answers an attack on the next, with a Weak applied in between.
+/// So the var asks the pipeline at FORMAT time, the construction
+/// <see cref="BlockMarkVar"/> and <c>ProtoBombPower.SetOffDamageVar</c> both
+/// use -- the game hands the var itself to SmartFormat and formats it through
+/// <c>ToString()</c>, converting through <c>IConvertible</c> only for the
+/// numeric formatters, so both are overridden and both answer one number.
+///
+/// THE DEALER'S TERMS AND NOT THE TARGET'S, because the target is not known
+/// until the attack lands: `Spring` hits whichever enemy attacked. What a
+/// badge can promise is the half that is already decided, which is exactly
+/// the half the seat was reading Weak off.
+/// </summary>
+internal sealed class ShowerVar : DynamicVar
+{
+    internal const string Token = "Shower";
+
+    internal ShowerVar() : base(Token, CompanionOverhaulLaw.ShowerDamage)
+    {
+    }
+
+    private int Live =>
+        _owner is PowerModel { Owner: not null } power
+            ? (int)SimDamagePipeline.DealerMods(power.Owner, BaseValue)
+            : (int)BaseValue;
+
+    protected override decimal GetBaseValueForIConvertible() => Live;
+
+    public override string ToString() =>
+        Live.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }
 
 /// <summary>

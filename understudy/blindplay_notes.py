@@ -95,15 +95,29 @@ METER_DEFINED_NOTE = "defined under *Words on this screen*"
 # `test_the_encore_meter_rule_is_the_mods_own_sentence`, the discipline
 # `ARM_KEYWORDS` and `REACTION_KEYWORDS` are already under.
 #
-# THE FANFARE CLAUSE IS DELIBERATELY ABSENT. `EncoreMeterPower`'s second
-# sentence says losing Encore creates Fanfare, and the reframe's METER leg
-# retires exactly that, so a page printing it would be teaching a rule this
-# build does not have -- the reason `Tide` and `Exert` are out of
-# `ARM_KEYWORDS`, one meter over.
+# ENCORE'S FANFARE CLAUSE IS DELIBERATELY ABSENT from the Encore row.
+# `EncoreMeterPower`'s second sentence says losing Encore creates Fanfare, and
+# the reframe's METER leg retires exactly that, so a page printing it would be
+# teaching a rule this build does not have -- the reason `Tide` and `Exert` are
+# out of `ARM_KEYWORDS`, one meter over.
+#
+# `EB-437` ADDED FANFARE'S OWN ROW, because the two readouts on one screen
+# disagreed about whether a spend rule exists at all. `FanfareMeterPower`'s arm
+# face ends "Cards read it and none spends it"; this block, with no row for the
+# word, printed `METER_NOTE` -- "no maximum, and no rule for how it is spent".
+# The r6 act-1 seat read both and filed the pair: "the two Fanfare readouts on
+# the same screen say different things about whether a rule exists for spending
+# it", inside a finding whose headline was "Fanfare does nothing I could
+# observe". Both sentences were true of their own source and the pair was not:
+# the mod states the rule, so the row prints it and the generic note stands
+# down. Held in step with the C# by
+# `test_the_fanfare_meter_rule_is_the_mods_own_sentence`, the same discipline
+# the Encore row is under.
 METER_RULES: dict[str, str] = {
     "Encore": ("a buffer and not a bank: after Block it absorbs incoming "
                "damage before HP. Cards spend it, and a Salon member spends "
                "1 each time it performs"),
+    "Fanfare": "cards read it and none spends it",
 }
 
 # `EB-263`. THE ENCHANT PICKER MARKS NOTHING, and the r3 Opus seat found out
@@ -392,14 +406,33 @@ ARM_KEYWORDS: dict[str, str] = {
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
              "only when Set off. Not an Attack: only Vulnerable and a cap "
              "move it. Kills move it on."),
-    "Set off": ("Every Bomb on the target goes off first, one at a time, "
-                "each a Pyro hit for its size."),
+    # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
+    # walks the charges in placement order and the first one through the
+    # funnel meets the aura, because every reaction consumes it -- the r11
+    # run-2 seat got that rule only by arithmetic ("Bombs go off in placement
+    # order, and the first one is the one that eats the Melt"). "Oldest first"
+    # is "one at a time" plus the order, in the same room.
+    # `EB-443`: the two facts the Bomb tip's "not an Attack" left to
+    # inference. The explosion passes `ignoreBlock: false`, so Block absorbs
+    # it, and it lands as `Unpowered` with no dealer, so nothing keyed on
+    # being hit by an Attack fires -- the r12 run-2 seat read a full-value hit
+    # into Skittish 6 as "Set off ignores enemy Block" when what happened is
+    # that Skittish never fired. "For its size" paid for them: the live number
+    # is the badge's, which is the split `EB-343` already made.
+    "Set off": ("The target's Bombs go off first, oldest first, each a Pyro "
+                "hit. Block stops them, no Attack trigger fires, the first "
+                "takes the aura."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
     # `EB-373`: a Mine IS a Bomb, so the same fold moves it and the same
     # sentence has to say so. The badge is still where the live number is.
-    "Mine": ("A Bomb that also goes off when its enemy attacks you, before "
-             "the hit lands. Read the badge: only their Vulnerable and a cap "
+    # `EB-436`: the old sentence said WHEN and nothing about the attack, and
+    # the r12 act-1 seat read mitigation into it -- three Mines armed against
+    # an elite, five went off, "every hit landed in full, 36 to 18 HP". The
+    # only thing a Mine does to the hit is stop it happening, by killing the
+    # attacker (`EB-336`). "Read the badge:" paid for the clause.
+    "Mine": ("A Bomb that also goes off before its enemy's hit, which lands "
+             "in full unless the Mine kills. Only their Vulnerable and a cap "
              "move it."),
     # `EB-329`. "OR ALL IF IT SAYS SO" IS THE HALF THE OLD SENTENCE GOT
     # WRONG, and it was reprinted on every battle screen of every run: a
@@ -429,9 +462,15 @@ ARM_KEYWORDS: dict[str, str] = {
     # R244, and neither had a page row -- so the mod defined them on a hover
     # and the blind page defined them nowhere. `Hexerei` rides eighteen faces
     # and `Swirl` is printed as a VERB by ten Universals.
-    "Hexerei": ("A Companion card from the witches' circle. It does nothing "
-                "by itself; Klee is one too, and her own cards pay when you "
-                "play one."),
+    # `EB-392`: "from the witches' circle" was doing silent work -- the r12
+    # run-2 seat "could not tell from any card face whether MY Companion
+    # qualified" and then met a third word on the same screen. Every Hexerei
+    # Companion prints the tag now, so the first sentence is a test a player
+    # can run; the second names the overlap with "Klee's own", which is the
+    # Spark rider's phrase.
+    "Hexerei": ("A Companion card that prints the word, and Klee herself. "
+                "Some are Klee's own, some are not. Cards of hers pay when "
+                "you play one."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`

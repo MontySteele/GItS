@@ -162,3 +162,48 @@ def test_poised_riposte_reads_the_buffer_and_never_spends_it():
     effects.resolve_card(st, loader.get_card("poised_riposte"))
     assert hp - e.hp == 6 + 9 // 3               # 6 printed + 1 per 3 held
     assert p.encore == 9                         # READ, never consumed
+
+
+def test_poised_riposte_prints_what_the_rider_does():
+    """`EB-429`. THE SEAT SKIPPED THE CARD RATHER THAN GUESS.
+
+    "Deal 6 damage, already including Encore" left three readings, and the r5
+    run-2 seat named all three and could not choose between them: "Encore is
+    defined as an absorb pool that cards pay to resolve; 'already including
+    Encore' does not tell me whether the card spends Encore, is priced as
+    though it had spent Encore, or deals more damage when I hold Encore. I
+    skipped a card because I could not read it." Six fights later it still
+    could not: "after six fights I still cannot tell you what that sentence
+    means."
+
+    THE FACE IS THE RIDER NOW, and both halves are the code's own. The rate is
+    the row's `1_per_3_encore`, read by `gen.encore_calc_rider`; "spending
+    none" is that function's own docstring, "the bank is READ, never spent --
+    consulting it costs nothing", which the test above proves at the sim.
+
+    ENCORE ONLY. Fanfare, Salon, Charge and Companions are counters no card
+    spends, so none of them carries this ambiguity and none of their faces
+    moved.
+    """
+    import sys
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parents[2]
+    sys.path.insert(0, str(repo / "tools"))
+    import gen_klee_cards as gen                              # noqa: E402
+
+    face = (repo / "klee-mod" / "KleeCode" / "Cards" / "Furina" / "Generated"
+            / "PoisedRiposte.cs").read_text(encoding="utf-8")
+    assert ("Deal {CalculatedDamage:diff()} damage, counting 1 for every 3 "
+            "[gold]Encore[/gold] you hold and spending none." in face)
+    assert "already including" not in face
+
+    # The numerals are the ROW's, so a repricing cannot leave the sentence
+    # quoting a retired rate (`EB-89`'s discipline): the rate the face prints
+    # is the rate the rider reads off the sheet.
+    import yaml                                               # noqa: E402
+    sheet = yaml.safe_load(
+        (repo / "docs" / "furina-cards.yaml").read_text(encoding="utf-8"))
+    row = next(r for r in sheet if r["id"] == "poised_riposte")
+    eff, = [e for e in row["effects"] if e["op"] == "damage"]
+    assert gen.encore_calc_rider(row, eff) == (6, 1, 3)

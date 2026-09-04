@@ -168,15 +168,70 @@ public static class ArmKeywordTips
           + "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. "
           + "Kills move it on.");
 
-    /// <summary>Rule 2, and the one [USER] named ("Set Off has no tooltip
-    /// text"). The ORDER clause is the load-bearing half: the explosions land
-    /// BEFORE the rest of the card, which is what makes a cooked pile worth
-    /// more than the Attack printed beside it.</summary>
+    /// <summary>
+    /// Rule 2, and the one [USER] named ("Set Off has no tooltip text"). The
+    /// ORDER clause is the load-bearing half: the explosions land BEFORE the
+    /// rest of the card, which is what makes a cooked pile worth more than the
+    /// Attack printed beside it.
+    ///
+    /// `EB-432` NAMED THE OTHER ORDER, the one INSIDE the pile.
+    /// <see cref="KleeMod.Powers.ProtoBombPower.SetOff"/> walks the taken
+    /// charges in the order
+    /// <see cref="KleeMod.Powers.ProtoBombPower.AddCharge"/> appended them --
+    /// the list's own comment is "Charges in placement order" -- and the FIRST
+    /// one through the funnel is the one that meets the enemy's aura, because
+    /// every reaction consumes it (<c>ReactionEffects</c>, `consumedAura`).
+    /// The r11 run-2 seat priced its best turn of the run off that rule and
+    /// could only get it by arithmetic: "22 = 8 (the Bomb 5, Melted to 8.75 to
+    /// 8) + 8 + 6. Bombs go off in placement order, and the first one is the
+    /// one that eats the Melt -- a rule nothing printed, that I could only
+    /// infer from the arithmetic."
+    ///
+    /// "OLDEST FIRST" REPLACES "ONE AT A TIME" AND LOSES NOTHING. An order
+    /// that names a first and a rest is one at a time by construction, and the
+    /// separateness the old phrase carried -- three charges, three hits, three
+    /// Sparks -- is what "each a Pyro hit" says. `EB-287`'s claim that a pile
+    /// goes off TOGETHER is still here and is now the subject of the sentence:
+    /// "the target's Bombs", all of them.
+    ///
+    /// "THE FIRST TAKES THE AURA" AND NOT "ONLY THE FIRST REACTS", which would
+    /// be false on a board this build really has: a Swirl re-applies the aura
+    /// it consumed to every living enemy, the target included
+    /// (<c>ReactionEffects</c>, the `Swirl` arm), so a charge behind a Swirl
+    /// meets a fresh aura and reacts again. What is true on every board is the
+    /// sentence the player is deciding on: the aura in front of them is spent
+    /// on the OLDEST charge.
+    ///
+    /// `EB-443` ADDED THE TWO FACTS THE OLD NEGATIVE LEFT TO INFERENCE. "Not
+    /// an Attack" is on the Bomb tip and it answers a question a player did
+    /// not ask: the r12 run-2 seat ran the experiment and drew the wrong
+    /// conclusion from it -- "Set off ignores enemy Block, and no card says
+    /// so. Two 11-point bombs both landed at full value into Skittish 6...
+    /// 'not an Attack' plainly did not stop it from HITTING (Skittish did not
+    /// fire), and a rule this load-bearing against a whole class of enemy
+    /// should not be an inference from a negative." Both halves are read off
+    /// the one call the explosion makes:
+    /// <see cref="ElementalHit.DealWithoutDealerMods"/> passes
+    /// <c>ignoreBlock: false</c>, so Block absorbs it like anything else, and
+    /// it reaches <c>CreatureCmd.Damage</c> as <c>ValueProp.Unpowered</c> with
+    /// <c>dealer: null</c>, so nothing an enemy keys on being hit by an Attack
+    /// can fire. The seat was right about the Block it saw and wrong about the
+    /// rule: there was no Block, because Skittish never fired.
+    ///
+    /// "FOR ITS SIZE" IS WHAT PAID FOR THEM, and it is the trade the Mine tip
+    /// already makes for the same reason. A keyword tip is read in HAND, where
+    /// there is no pile to quote, so an arithmetic claim here is one this
+    /// surface cannot get right; the number a Set off will deal is on the
+    /// badge, live, and that is `EB-343`'s own split between the two. "Each a
+    /// Pyro hit" keeps what the tip can say -- separate hits, so separate
+    /// reactions and separate Sparks. 132 of 135 rendered, no exception taken.
+    /// </summary>
     public static IEnumerable<IHoverTip> ForSetOff(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SetOffKey,
-            "Every [gold]Bomb[/gold] on the target goes off first, one at a "
-          + "time, each a Pyro hit for its size.");
+            "The target's [gold]Bombs[/gold] go off first, oldest first, each "
+          + "a Pyro hit. [gold]Block[/gold] stops them, no Attack trigger "
+          + "fires, the first takes the aura.");
 
     /// <summary>Rule 4. The gain rate is read from
     /// <see cref="KleeOverhaulLaw.SparkPerExplosion"/>, which is also
@@ -254,11 +309,27 @@ public static class ArmKeywordTips
     /// same words as the Bomb tip, so the two cannot be read against each
     /// other.
     /// </summary>
+    /// `EB-436` SAID WHAT THE OLD SENTENCE LEFT OUT, and the old sentence was
+    /// true the whole time: "goes off when its enemy attacks you, before the
+    /// hit lands" says WHEN and says nothing at all about the hit. The r12
+    /// act-1 seat read mitigation into it and played a turn on that read --
+    /// three Mines left armed against an elite, five went off, "every hit
+    /// landed in full, 36 to 18 HP". A Mine blunts nothing: the only thing a
+    /// Mine can do to the attack is stop it happening, by killing the
+    /// attacker, and that is `EB-336`'s rule (`Preempted`) -- a Mine whose
+    /// explosion kills the attacker costs Klee no HP, and nothing short of a
+    /// kill costs the attacker anything.
+    ///
+    /// "READ THE BADGE:" IS WHAT PAID FOR IT. The clause it introduced is
+    /// still here word for word and still names both terms, so `EB-343`'s
+    /// rule survives whole; what went is the pointer, which a player standing
+    /// in front of the badge does not need and a player in hand cannot use.
+    /// 133 of 135 rendered, no exception taken.
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
-            "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
-          + "you, before the hit lands. Read the badge: only their "
+            "A [gold]Bomb[/gold] that also goes off before its enemy's hit, "
+          + "which lands in full unless the Mine kills. Only their "
           + "[gold]Vulnerable[/gold] and a cap move it.");
 
     /// <summary>
@@ -279,12 +350,37 @@ public static class ArmKeywordTips
     /// Witches' Circle and one Universal would have no way to know the card
     /// was live.
     /// </summary>
+    /// `EB-392` REWROTE IT, because "from the witches' circle" was doing
+    /// silent work and the r12 run-2 seat said so: "I could not tell from any
+    /// card face whether MY Companion qualified. I found out by counting bombs
+    /// on an enemy badge." Then it met a second word on the same screen and
+    /// had three: "there is apparently a distinction between `Companion`,
+    /// `Hexerei`, and `Klee's own Companion`, and none of the three cards
+    /// involved prints which one it is."
+    ///
+    /// THE FIRST SENTENCE IS ANSWERABLE NOW, and it was not before: every
+    /// Hexerei Companion prints the word on its own face
+    /// (`gen_klee_cards._hexerei_tag`), so "a Companion card that prints the
+    /// word" is a test a player can run on the card in their hand. "And Klee
+    /// herself" is the brief's sec.7.4 refinement, unchanged.
+    ///
+    /// THE SECOND SENTENCE IS THE THIRD WORD, and it is stated as the OVERLAP
+    /// it really is rather than as an exclusion. Five rows carry both marks
+    /// and thirteen carry only one, so "a different set" would be a lie in
+    /// both directions; "some are Klee's own, some are not" is what the sheet
+    /// says. `Klee's own` is the exact phrase the Spark rider uses
+    /// (<see cref="ForCovenSpark"/>), so the two words meet under one
+    /// spelling.
+    ///
+    /// "IT DOES NOTHING BY ITSELF" LEFT and is not missed: it was true of a
+    /// word with no readers, and three cards in Klee's pool have paid for it
+    /// since R244. The last sentence says that instead.
     public static IEnumerable<IHoverTip> ForHexerei(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, HexereiKey,
-            "A [gold]Companion[/gold] card from the witches' circle. It does "
-          + "nothing by itself; Klee is one too, and her own cards pay when "
-          + "you play one.");
+            "A [gold]Companion[/gold] card that prints the word, and Klee "
+          + "herself. Some are Klee's own, some are not. Cards of hers pay "
+          + "when you play one.");
 
     /// <summary>
     /// KLEE'S SIXTH, `EB-372`, AND IT IS A WORD THE KIT NAMES ON A FACE THE
