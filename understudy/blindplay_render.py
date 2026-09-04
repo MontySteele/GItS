@@ -607,6 +607,26 @@ def render(obs: dict[str, Any]) -> str:
                     + ", ".join(f["kinds"]) for f in obs["ahead"]]
         if obs.get("boss"):
             out += ["", f"At the top of this act: **{obs['boss']}**"]
+        # `EB-447`: what you are routing WITH. The gold is this screen's own
+        # feed; the deck is the lane's store and carries its staleness with
+        # it, in the same words the Smith's omission list uses.
+        if obs.get("gold") is not None:
+            out += ["", f"You have {obs['gold']} gold."]
+        if obs.get("deck"):
+            out += ["", "## Your deck", ""]
+            out += [f"- **{c['title']}**"
+                    + (f" × {c['count']}" if c["count"] > 1 else "")
+                    for c in obs["deck"]]
+            floor = obs.get("deck_floor")
+            out += ["", "*This page has no deck on this screen's data feed: "
+                        "the list above is your deck as it stood in the last "
+                        "fight"
+                    + (f" (floor {floor})" if floor else "")
+                    + ". Anything you have picked up since is not in it.*"]
+        else:
+            out += ["", "*This page cannot say what is in your deck yet: the "
+                        "deck is on a fight's data feed and no fight of this "
+                        "run has been read.*"]
     elif obs["screen"] in ("card_reward", "card_select"):
         out += [f"# {obs['prompt']}", ""]
         for card in obs["offers"]:

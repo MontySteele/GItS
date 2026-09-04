@@ -131,6 +131,43 @@ def _omitted_from_upgrade(state: dict[str, Any]) -> list[dict[str, str]]:
     return out
 
 
+def deck_titles(state: dict[str, Any]) -> list[dict[str, Any]]:
+    """The run's deck, as PRINTED TITLES with their upgrade marks (`EB-447`).
+
+    THE DEFECT. No screen outside a fight printed the deck at all: the Furina
+    r7 seat "reconstructed, not read" its deck out of remembered hands, and
+    the Kokomi r11 and r13 seats first met a `Slimed` at a Smith screen, rooms
+    after the event that added it. The wire carries the four piles on a COMBAT
+    state and on nothing else (`BuildPlayerState`), so a map screen has no
+    deck on its own feed -- and the map is the one screen a run passes through
+    between every pair of rooms.
+
+    So it is read off the lane's own store, the same one the Smith's omissions
+    are subtracted against (`blindplay_faces.remember_deck`), with the same
+    two guards and the same staleness: as of the last fight, and a card
+    drafted since is not in it. The render says so beside the list.
+
+    COUNTED, NOT LISTED TWICE. A deck holds five `Strike` and a page that
+    printed five rows would bury the one card that matters under them. The
+    upgrade mark rides in the title, in the grammar's own vocabulary
+    (`"<title> (upgraded)"`, `_split_qualifier`) -- except where the game has
+    already printed its own `+`, which is a mark the fold keeps and this must
+    not double.
+    """
+    held = remembered_deck(state)
+    if not held:
+        return []
+    counts: dict[str, int] = {}
+    for card in held["cards"]:
+        title = _text(card.get("title"))
+        if not title:
+            continue
+        if card.get("upgraded") and not title.rstrip().endswith("+"):
+            title += " (upgraded)"
+        counts[title] = counts.get(title, 0) + 1
+    return [{"title": t, "count": n} for t, n in sorted(counts.items())]
+
+
 def _potion_slots(state: dict[str, Any]) -> int:
     """How many potion slots this run has (`EB-341`). `0` where none is sent.
 

@@ -11,7 +11,7 @@ from __future__ import annotations
 from typing import Any
 
 from understudy import qa_packet
-from understudy.blindplay_board import (_bundle_cards, _combat,
+from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         _event_options, _map_ahead, _map_boss,
                                         _map_options, _omitted_from_upgrade,
                                         _potion_slots, _preview_cards,
@@ -135,6 +135,18 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # `EB-298`: the floors ahead and the boss, both already on the feed.
         obs["ahead"] = _map_ahead(state)
         obs["boss"] = _map_boss(state)
+        # `EB-447`: the two facts a run is planned on, on the one screen every
+        # room is entered from. The gold is on the map's own feed
+        # (`BuildPlayerState` sends it outside combat too) and was printed on
+        # the shop screen alone; the deck is on no screen's feed out of a
+        # fight and comes off the lane's own store.
+        # A feed that sends no gold at all gets no line, rather than a `0`
+        # this page cannot stand behind -- the same rule `_potion_slots` and
+        # `_map_boss` are read under.
+        if _player(state).get("gold") is not None:
+            obs["gold"] = _int(_player(state).get("gold"))
+        obs["deck"] = deck_titles(state)
+        obs["deck_floor"] = upgrade_deck_floor(state)
         obs["commands"] = ['go "<node>"']
     elif st == "card_reward":
         blob = _blob(state, "card_reward")

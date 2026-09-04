@@ -4266,6 +4266,49 @@ def test_the_floors_ahead_are_read_from_the_direction_of_travel():
     assert "- 3 floors ahead: Boss" in page
 
 
+def test_the_map_prints_the_gold_and_the_deck():
+    """`EB-447`. THE TWO FACTS A ROUTE IS CHOSEN ON, AND NEITHER WAS PRINTED.
+
+    The Furina r7 seat got its gold by arithmetic over reward lines and
+    "reconstructed, not read" its deck out of remembered hands; the Kokomi r11
+    and r13 seats met a `Slimed` for the first time at a Smith screen. The
+    gold is on the map's own feed and was printed on the shop screen alone;
+    the deck is on a fight's feed only, so it comes off the same lane store
+    the Smith's omission list is subtracted against -- with the same
+    staleness, said in the same words.
+
+    Seen to FAIL: the map page printed the nodes, the floors ahead and the
+    boss, and no gold and no deck.
+    """
+    blindplay.forget_deck()
+    fight, smith = upgrade_run_states()
+    here = json.loads(json.dumps(map_state()))
+    here["run"] = {"act": 1, "floor": 11}
+    here["player"]["character"] = smith["player"]["character"]
+
+    # Before any fight: the gold is already readable, the deck is not, and the
+    # page says which of the two it cannot answer instead of printing nothing.
+    page = blindplay.observe(here)
+    assert "You have 99 gold." in page
+    assert "## Your deck" not in page
+    assert "no fight of this run has been read" in page
+
+    blindplay.observe(fight)                       # the deck is read here
+    page = blindplay.observe(here)
+    assert "You have 99 gold." in page
+    assert "## Your deck" in page
+    # A title the run holds one of, and the upgrade mark on the copy that
+    # carries it -- the grammar's own `(upgraded)` spelling.
+    assert "- **Powder Charge**" in page
+    assert "- **Ka-pow! (upgraded)**" in page
+    # Repeats are counted rather than listed, and the staleness travels with
+    # the list.
+    assert "- **Duck and Cover** × 3" in page
+    assert "- **Ka-pow!** × 2" in page
+    assert "your deck as it stood in the last fight (floor 10)" in page
+    blindplay.forget_deck()
+
+
 # ------------ EB-299: two lines whose grammar the reader could not read -----
 
 def test_the_duplicate_name_note_does_not_say_two():

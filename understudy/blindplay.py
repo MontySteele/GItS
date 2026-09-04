@@ -150,7 +150,7 @@ from understudy.blindplay_faces import (   # noqa: E402,F401  (re-export)
     _reward_option, _SHELF_MEMORY, _shelf_kind, _shop_fingerprint,
     _shop_items, _shop_options, _SPARK_POWER)
 from understudy.blindplay_board import (   # noqa: E402,F401  (re-export)
-    ALREADY_UPGRADED, _bundle_cards, _carried_out_row, _combat,
+    ALREADY_UPGRADED, _bundle_cards, _carried_out_row, _combat, deck_titles,
     _event_options, kokomi_plans, kurage_memory, _map_ahead, _map_boss,
     _map_nodes, _map_options, NO_UPGRADE_DEFINED, _omitted_from_upgrade,
     _potion_slots, _preview_cards, _proceed_option, _pulse_phrase,
