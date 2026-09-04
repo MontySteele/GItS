@@ -49,7 +49,7 @@ public sealed class ProtoMcPruneHexhunterChime : CustomCardModel, IElementalCard
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForBomb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("prune_witch_hunt");
 

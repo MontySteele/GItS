@@ -827,6 +827,22 @@ def is_companion(card: dict) -> bool:
     return "star" in card
 
 
+def personal_pool_id(card: dict) -> str | None:
+    """The ONE character id a Personal Companion row names, or None (`EB-418`).
+
+    `personal_pool:` accepts a bare string and a one-member list for the same
+    value -- the sim normalises at load (`Card.from_dict`) and the emitter
+    normalises again where it writes `PersonalPool`. A third reader needs the
+    same step or it compares `"['klee']"` to `"klee"` and silently answers no.
+    A longer list is not normalised here: the emitter REFUSES one, and this
+    read must not be the place a refused row quietly becomes a yes.
+    """
+    personal = card.get("personal_pool")
+    if isinstance(personal, list):
+        personal = personal[0] if len(personal) == 1 else None
+    return personal or None
+
+
 # A cost op is not a thing the card DOES; it is what the card charges. Both
 # have their own IsPlayable gate already (EB-118 §4.5, R213 E1).
 _COST_OPS = ("spend_spark", "spend_charge")
@@ -10696,6 +10712,29 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         if plan_applies_element(card, profile) and not elemental:
             tips_expr = (
                 "ArmKeywordTips.ForPlanElement("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # `EB-418`, and it goes here for `EB-378`'s reason one line up: a rider
+        # is a fact about THIS card and is read before the definition of a
+        # word. DERIVED FROM THE ROW rather than declared per card, and from
+        # the two fields the engines ask -- `is_companion` (the sheet's `star`)
+        # and whether the OWNING character is in the row's `personal_pool`.
+        # That pair is exactly `KleeCompanionSpark.IsOwnPersonalCompanion` and
+        # `effects.klee_personal_companion_spark`'s two early returns, so a
+        # Personal Companion added to this sheet tomorrow carries the sentence
+        # the day its row exists -- which is how the rule reached Diona and the
+        # coven stand-ins unannounced in the first place.
+        #
+        # KLEE'S, AND SAID SO RATHER THAN LEFT TO THE POOL. The engines' test
+        # is "the player's own Personal Companion" with no character in it, so
+        # Kokomi playing Gorou walks the same branch -- but Sparks are Klee's
+        # resource, she is the only character with a Spark surface to read, and
+        # a sentence about Klee's coven on an Inazuma row of Kokomi's would
+        # print a rule its reader cannot use. The tip is scoped to the kit that
+        # declared it (LAW:145's own words); the wider branch is not this row's.
+        if (is_companion(card) and profile.character_id == "klee"
+                and personal_pool_id(card) == "klee"):
+            tips_expr = (
+                "ArmKeywordTips.ForCovenSpark("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])

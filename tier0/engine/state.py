@@ -1137,6 +1137,19 @@ class CombatState:
     # this dict to decide whether a read may happen.
     charge_reads_this_turn: dict[str, int] = field(default_factory=dict)
                                           # (Chevreuse; reset per turn)
+    # INSTRUMENT ONLY (`EB-418`), and the sim twin of the mod's `MeterLedger`:
+    # one row per Spark that lands, naming the rule that made it, for the whole
+    # fight. `effects.gain_sparks` is the only writer and nothing reads it back
+    # to decide anything.
+    #
+    # A LEDGER AND NOT A FIELD ON THE EVENT, which is not a style choice: the
+    # `gain_spark` event is inside two fixed-seed LOG DIGESTS
+    # (`test_spark_alt_cost` and `test_klee_overhaul`, both taken before their
+    # arms were written), and a diagnostic added to the event stream would move
+    # a measurement that is meant to say only whether the OFF arm still matches
+    # every Klee number on record. The C# side draws exactly this line for the
+    # same reason -- the ledger is beside the game, not in it.
+    spark_ledger: list[dict] = field(default_factory=list)
     kills_this_card: int = 0              # killed_target
     # Kills that the base game's Fatal gate would honor (Enemy
     # .counts_for_fatal). Separate from kills_this_card so the existing

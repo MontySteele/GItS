@@ -185,6 +185,42 @@ def test_the_attach_is_scoped_to_the_quarantined_surface():
         assert proto._profile_for(character).arm_keyword_tips is True
 
 
+def test_every_klee_personal_companion_carries_the_kits_spark_rider():
+    """`EB-418`, the committed tree. Every row on the quarantined sheet that is
+    a Personal Companion of KLEE'S carries `ForCovenSpark`, and no other row
+    does.
+
+    THE DENOMINATOR IS THE POINT. The trigger is keyed on the POOL and not on
+    one card (`effects.klee_personal_companion_spark`, `KleeCompanionSpark`),
+    which is how it reached Diona and the coven stand-ins with nobody deciding
+    it should -- so the sentence has to reach the same set by the same read, or
+    the next Personal added to the sheet is the r11 seat's finding again.
+
+    GOROU IS THE NEGATIVE CASE, and he is a real one: he is a Personal
+    Companion of KOKOMI'S on this same sheet, he walks the engines' identical
+    branch, and Sparks are Klee's resource with no surface of Kokomi's to read
+    them off. The sentence is scoped to the kit that declared it.
+    """
+    owed, carried = set(), set()
+    for row in proto._rows():
+        if not gen.is_companion(row):
+            continue
+        cls = gen.pascal(row["id"])
+        if (row.get("character") == "klee"
+                and gen.personal_pool_id(row) == "klee"):
+            owed.add(cls)
+        path = PROTOTYPE_DIR / f"{cls}.cs"
+        if path.exists() and "ForCovenSpark" in path.read_text(encoding="utf-8"):
+            carried.add(cls)
+
+    assert owed, "no Klee Personal Companion on the sheet is not a read"
+    assert owed == carried
+    assert "ProtoMiGorouCrystalCollapse" in {
+        gen.pascal(r["id"]) for r in proto._rows()
+        if gen.is_companion(r) and r.get("character") == "kokomi"}
+    assert "ProtoMiGorouCrystalCollapse" not in carried
+
+
 def test_no_shipped_generated_card_reaches_the_arm_tips():
     offenders = [p.relative_to(REPO).as_posix()
                  for directory in SHIPPED_DIRS
@@ -312,9 +348,11 @@ def test_every_table_row_has_a_method_and_a_registered_title_row(keyword):
 
 # `EB-378` put ONE key in this file that titles no keyword: the Plan-element
 # rider, which is a sentence about a card rather than a definition of a word.
-# It is named here so the count below stays a real pin instead of a number
-# somebody bumps.
-NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT"}
+# `EB-418` put the second, the Spark Klee's KIT mints on a play of one of her
+# own Personal Companions -- a rule LAW:145 keeps off the Companion's face, so
+# no word on any card can carry it. They are named here so the count below
+# stays a real pin instead of a number somebody bumps.
+NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -484,6 +522,18 @@ EXERT_TIP = {
 }
 
 
+#: `EB-418`. The rider the kit's Spark rule rides, in the shape the bridge
+#: sends it: `KleeMod.cs` titles the key and `ArmKeywordTips.ForCovenSpark`
+#: builds the body, so a seat reading a Companion in hand reads the income
+#: before it commits the energy.
+COVEN_SPARK_TIP = {
+    "name": "Sparks from your Companion",
+    "description": ("Playing one of Klee's own Companions makes 1 Spark, 1 "
+                    "more if it triggered an Elemental Reaction and 1 more if "
+                    "it is upgraded."),
+}
+
+
 def _hand_with(tips: list[dict]) -> dict:
     """The recorded combat wire, with one hand card carrying arm keywords.
 
@@ -519,6 +569,14 @@ def test_the_blind_page_prints_the_exert_definition_under_the_card():
     from losing HP because the page carried no line for it."""
     page = blindplay.observe(_hand_with([EXERT_TIP]))
     assert "*Exert* — " + EXERT_TIP["description"] in page
+
+
+def test_the_blind_page_prints_the_kits_companion_spark_under_the_card():
+    """`EB-418`'s page twin. The r11 seat read every screen this page draws and
+    could not name the Spark it watched arrive; the rider now travels with the
+    Companion, and the page carries a card's keyword rows verbatim."""
+    page = blindplay.observe(_hand_with([COVEN_SPARK_TIP]))
+    assert "*Sparks from your Companion* — " + COVEN_SPARK_TIP["description"]         in page
 
 
 def test_a_card_with_no_keyword_row_prints_no_keyword_line():
