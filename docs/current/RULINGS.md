@@ -197,7 +197,7 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R185 | 2026-08-12 | Q-C aims ruled — packet §7.2 table adopted as written | `02cd295` |
 | R186 | 2026-08-13 | payoff-reach predictions commit — step (2) executed, Q-C closes | `825d302` |
 | R187 | 2026-08-13 | M24, countersigned 2026-08-13. [USER] verbatim: "Ah, yes, the batch recommendations are approved." | `9f316dd` |
-| R188 | 2026-08-13 | M25, countersigned 2026-08-13. [USER] verbatim: "Ah, yes, the batch recommendations are approved." | `7b031c3` |
+| R188 | 2026-09-04 | M69 closed at pick 1 -- R188 stands, no Charge read budget; the rulings deprecation audit is opened | `7d8b267` |
 | R189 | 2026-08-13 | M17, countersigned 2026-08-13. [USER] verbatim: "Ah, yes, the batch recommendations are approved." | `1cc7491` |
 | R190 | 2026-08-13 | part one / EB-74, countersigned 2026-08-13. [USER] verbatim: "Ah, yes, the batch recommendations are approved." | `5e31b16` |
 | R191 | 2026-08-23 | (was M33) -- the mode-valuation chooser gets its OWN activation window, not the bomb-placement + exhaust-chooser bump. | `e9c3316` |
@@ -264,8 +264,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R252 | 2026-09-03 | Klee round 9 pick 1 at its default; the defence shelf, five rows on the surface | `bc8ca25` |
 | R253 | 2026-09-03 | the card audit; nine new rows approved by GPT, four withdrawn; Kokomi round 9 and Furina round 2 ruled | `9bf8657` |
 | R254 | 2026-09-04 | Kokomi starter density stands; Furina's starter reader goes on Aria of Recompense; Klee owes [USER] nothing but the act-1 run | `54042ef` |
+| R255 | 2026-09-04 | M69 closed at pick 1 -- R188 stands, no Charge read budget; the rulings deprecation audit is opened | `7d8b267` |
 
-253 rows over the R1..R254 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 142 from a commit message, 0 unresolved.
+254 rows over the R1..R255 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 143 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
