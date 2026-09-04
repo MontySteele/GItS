@@ -103,8 +103,8 @@ v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
 `+proto` dev mark (R217 D). **Installed: `0.2.2446+proto`** (2026-09-04,
-main `fb0e0169`, ALL FOUR arms on since R250: the round-9 builds, #344 to
-#347 and R251's Burst retirement under the Furina arm), the prototype arms behind
+main `f1c6c9ec`, ALL FOUR arms on since R250: the round-9 and round-10
+builds, #360 to #370, and R253's nine audited rows), the prototype arms behind
 `-p:PrototypeCards=true` and the Furina arm behind `-p:FurinaReframe=true`
 too; every arm ships OFF in a release package. **Last RELEASE
 package: `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
@@ -143,7 +143,7 @@ are in [`workstreams.md`](workstreams.md).
   conditional rows (Dodoco Cover, Careful Now, Barbara — Front Row Seat);
   Fire Safety and Safety Lesson were withdrawn on the charter audit
   (R253, `review/records/card-audit-2026-09-04.md`). Round 10 is READ
-  (`review/active/klee-overhaul-round-10-2026-09-04.md`): six runs on
+  (`review/ruled/klee-overhaul-round-10-2026-09-04.md`): six runs on
   `0.2.2401+proto`, six act-1 clears, none past act 2; Dodoco Cover played
   every fight, Careful Now split the seats along cook-or-cash, Front Row
   Seat unseen; no pick, `EB-390`-`EB-400`. [USER]'s act-1 run is due on

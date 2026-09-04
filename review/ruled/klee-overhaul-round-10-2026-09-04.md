@@ -1,4 +1,4 @@
-Status: OPEN (no pick; the defaults in §5 are applied)
+Status: RULED R253 2026-09-04
 
 # Klee round ten: the defence shelf read, and the two pre-roster runs beside it
 
