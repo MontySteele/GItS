@@ -1476,3 +1476,13 @@ EB-383 RETIRED 2026-09-04: four smart-description rows on the badge, one per fro
 EB-382 RETIRED 2026-09-04 as not a defect: the spend is the shipped post-Block absorption, silenced by the meter leg, pinned at all three amounts in both engines.
 EB-366 RETIRED 2026-09-04: the card preview reads ReactionEffects.FrozenBossVulnWillApply, and the blind page prints the boss clause in a boss room only.
 EB-364 RETIRED 2026-09-04: SpotlightSystem.DesignateOneModeIsUnpayable asks the refusal one phase early, since the price is charged inside the op.
+EB-260 RETIRED 2026-09-04: ProtoBombPower states two smart rows and picks between them off the live MineCount.
+EB-261 RETIRED 2026-09-04: the generator derives the gate from the row and emits the sentence "no enemy is holding a Bomb" on IUnplayableReasonCard.
+EB-265 RETIRED 2026-09-04: {Size} became a DynamicVar subclass computing at format time, so Strength gained later moves the face.
+EB-266 RETIRED 2026-09-04: the guard sits at KleeBurstResource.Find, the one funnel every gain, read, drain and gauge refresh passes through.
+EB-270 RETIRED 2026-09-04: badge, hit and ledger now share one number -- the badge is PredictedSetOffDamage(), the ledger banks damage.
+EB-279 RETIRED 2026-09-04: KleeOverhaulSweepHooks is a standing listener sweeping on AfterDeath and after every card play, alongside the three old sweeps.
+EB-280 RETIRED 2026-09-04: a set_off carrying damage now owns the same DamageVar an op: damage owns, and the row's face renders {Damage:diff()}.
+EB-281 RETIRED 2026-09-04: Vfx/Prototype/SparkGauge.cs draws a bar-less klee_spark gauge at the overhead slot and hides the status-strip badge.
+EB-282 RETIRED 2026-09-04: the blind page prints the Spark price in its cost slot first, and the restated sentence came off all seven surface rows.
+EB-283 RETIRED 2026-09-04: upgrades.prototype_default_delta is one implementation both engines read, gated by upgrade_face_findings refusing a row whose + face prints identically to its base.
