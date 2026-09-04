@@ -262,7 +262,7 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R250 | 2026-09-03 | the 2026-09-04 morning slate -- three packet picks, a control run, Furina in motion, three overtaken rows closed | `193321b` |
 | R251 | 2026-09-03 | the Furina round-one pick -- the shipped Burst retires under the Furina arm now | `c1c369d` |
 | R252 | 2026-09-03 | Klee round 9 pick 1 at its default; the defence shelf, five rows on the surface | `bc8ca25` |
-| R253 | 2026-09-03 | the card audit; nine new rows approved by GPT, four withdrawn; Kokomi round 9 and Furina round 2 ruled | `fa9c37e` |
+| R253 | 2026-09-03 | the card audit; nine new rows approved by GPT, four withdrawn; Kokomi round 9 and Furina round 2 ruled | `9bf8657` |
 
 252 rows over the R1..R253 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 141 from a commit message, 0 unresolved.
 
