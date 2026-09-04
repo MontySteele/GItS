@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
@@ -99,6 +100,13 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             var rows = new List<(string, string)>
             {
                 ("title", "Bomb"),
+                // `EB-417`. THE BADGE'S OTHER NAME, and it is a row rather
+                // than a conditional inside the one above for
+                // <see cref="SmartDescriptionLocKey"/>'s reason: loc is
+                // registered once at boot and the pile changes every turn, so
+                // the LIVE choice is a key (<see cref="Title"/>) and both
+                // spellings have to exist before it can be made.
+                (MineTitleKey, "Mine"),
                 // FOUR SENTENCES, which is the ceiling, so `EB-343`'s clause
                 // is paid for by merging the first two rather than added to
                 // them. NO SEMICOLON, and that is not a style note:
@@ -292,6 +300,53 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     protected override string SmartDescriptionLocKey =>
         Id.Entry + "." + SmartKey(MineCount > 0, LiveMods);
+
+    /// <summary>The loc suffix <see cref="Title"/> selects when the pile is all
+    /// Mines. `title` is the base game's own suffix and BaseLib registers every
+    /// pair this model returns under `{Id.Entry}.{key}`, so a second name costs
+    /// a row and nothing else.</summary>
+    private const string MineTitleKey = "titleMine";
+
+    /// <summary>The table a power's loc lives in, and the one
+    /// <c>KleeSelfCheck</c> R8 walks.</summary>
+    private const string PowersTable = "powers";
+
+    /// <summary>
+    /// `EB-417`. A MINE READS AS A MINE.
+    ///
+    /// THE DEFECT. The badge titled every pile `Bomb`, so a lone Mine under an
+    /// enemy read `Bomb 4` and the one property the whole Mine trick turns on
+    /// -- that it goes off BEFORE the enemy's hit lands -- was three lines down
+    /// in the body text. The r11 Opus seat found the rule on Jumpy Dumpty's
+    /// face instead and said so: "the enemy badge calls a Mine `Bomb 4` in the
+    /// title and only discloses it is a Mine in the body text... Since the
+    /// whole Mine trick is timing, the badge should lead with it."
+    ///
+    /// ALL OF THEM OR NONE, which is the honest test and not a cautious one. A
+    /// pile is one badge and one number; naming it `Mine` while a plain Bomb
+    /// sits in it would print a timing rule over a charge that does not have
+    /// one. A MIXED pile keeps `Bomb` and discloses its Mines where it always
+    /// has -- <see cref="BombsWithMines"/>'s "including {Mines} Mines", the
+    /// fuse mark -- and rule 6's sentence rides beside it either way, because
+    /// <see cref="SmartDescriptionLocKey"/> switches on <c>MineCount > 0</c>
+    /// and not on this.
+    ///
+    /// A CANONICAL COPY HAS NO CHARGES and therefore no Mines, so the
+    /// compendium entry is titled `Bomb` exactly as it was: the guard is
+    /// <c>MineCount > 0</c>, not <c>MineCount == _charges.Count</c> alone,
+    /// which an empty pile satisfies vacuously.
+    /// </summary>
+    public override LocString Title =>
+        TitledAsMine
+            ? new LocString(PowersTable, Id.Entry + "." + MineTitleKey)
+            : base.Title;
+
+    /// <summary>Is this pile a Mine and nothing but? The decision
+    /// <see cref="Title"/> makes, exposed for the pins the way the pure reads
+    /// below are: a <c>LocString</c> cannot be resolved outside a booted game
+    /// (KleeTests README, "The headless boundary"), so the branch has to be
+    /// readable without formatting one.</summary>
+    public bool TitledAsMine => MineCount > 0 && MineCount == _charges.Count;
 
     /// <summary>
     /// WHICH OF THE TARGET'S MODIFIERS THE PRINTED TOTAL HAS FOLDED IN, right

@@ -6504,3 +6504,79 @@ def test_the_target_and_the_aura_are_recorded_where_they_are_decided():
     # ...and the turn boundary is the one place it exists.
     turn = salon[salon.index("public override async Task AfterPlayerTurnStart"):]
     assert "ClearPerformances()" in turn[:900]
+
+
+# ------------------------------------- EB-417: a Mine reads as a Mine -------
+
+#: The badge the r11 Opus seat read, in the shape the wire sends it: the mod's
+#: `smartDescriptionMines` face under whichever `title` row
+#: `ProtoBombPower.Title` selected. The body is the arm's own, quoted, so the
+#: page half of this pin cannot pass on a sentence the game does not print.
+_MINE_FACE = ("Set off here deals 4 Pyro damage. Bombs here: 1, including 1 "
+              "Mine, growing each turn. A Mine also goes off when this enemy "
+              "attacks you, before the hit lands. A kill moves them to a "
+              "survivor.")
+
+_MIXED_FACE = ("Set off here deals 12 Pyro damage. Bombs here: 2, including 1 "
+               "Mine, growing each turn. A Mine also goes off when this enemy "
+               "attacks you, before the hit lands. A kill moves them to a "
+               "survivor.")
+
+
+def _bomb_badge_state(title: str, amount: int, description: str) -> dict:
+    state = json.loads(json.dumps(spark_priced_state()))
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "KLEEMOD-PROTO_BOMB_POWER", "title": title, "amount": amount,
+         "type": "Debuff", "description": description}]
+    return state
+
+
+def test_a_pile_that_is_all_mines_reads_as_a_mine_on_the_page():
+    """`EB-417`. The seat's screen, fixed at the source.
+
+    "the enemy badge calls a Mine `Bomb 4` in the title and only discloses it
+    is a Mine in the body text... Since the whole Mine trick is timing, the
+    badge should lead with it." The page carries the badge's own title, so the
+    fix is `ProtoBombPower.Title` and this is the twin: the seat reads `Mine 4`
+    and the timing clause under it, on the one screen where a Mine is met.
+    """
+    page = blindplay.observe(_bomb_badge_state("Mine", 4, _MINE_FACE))
+    badge, = [ln for ln in page.splitlines() if "Set off here deals" in ln]
+
+    assert badge.strip().startswith("Mine 4")
+    assert "Bomb 4" not in badge
+    assert "before the hit lands" in badge
+
+
+def test_a_pile_holding_one_plain_bomb_is_still_a_bomb_on_the_page():
+    """The denominator, and the rule `Title` actually implements: all of them
+    or none. A mixed pile is one badge over two kinds of charge, so it keeps
+    `Bomb` and discloses its Mines where it always has -- the fuse mark in the
+    count -- with rule 6's clause beside it either way."""
+    page = blindplay.observe(_bomb_badge_state("Bomb", 12, _MIXED_FACE))
+    badge, = [ln for ln in page.splitlines() if "Set off here deals" in ln]
+
+    assert badge.strip().startswith("Bomb 12")
+    assert "Mine 12" not in badge
+    assert "including 1 Mine" in badge
+    assert "before the hit lands" in badge
+
+
+def test_the_badge_owns_both_names_and_chooses_between_them_live():
+    """The mod half. Loc is registered once at boot and a pile changes every
+    turn, so the live choice has to be a KEY -- the same bargain
+    `SmartDescriptionLocKey` already makes for the face."""
+    power = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+             / "ProtoBombPower.cs").read_text(encoding="utf-8")
+    assert '("title", "Bomb")' in power
+    assert '(MineTitleKey, "Mine")' in power
+    body = power[power.index("public override LocString Title"):]
+    body = body[:body.index(";", body.index("base.Title"))]
+    assert "TitledAsMine" in body
+    assert "MineTitleKey" in body
+    assert ("public bool TitledAsMine => MineCount > 0 "
+            "&& MineCount == _charges.Count;") in power
+    # Rule 6's sentence rides the face and is NOT what the title switches on:
+    # a mixed pile keeps `Bomb` and still prints the timing clause.
+    assert "MineClause" in power
+    assert "before the hit lands" in power
