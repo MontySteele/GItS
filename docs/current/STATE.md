@@ -102,7 +102,7 @@ Slay the Spire 2 **v0.111.0**, commit `41cef1ea`, buildid `24724944`, appid
 v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
-`+proto` dev mark (R217 D). **Installed: `0.2.2371+proto`** (2026-09-04,
+`+proto` dev mark (R217 D). **Installed: `0.2.2446+proto`** (2026-09-04,
 main `fb0e0169`, ALL FOUR arms on since R250: the round-9 builds, #344 to
 #347 and R251's Burst retirement under the Furina arm), the prototype arms behind
 `-p:PrototypeCards=true` and the Furina arm behind `-p:FurinaReframe=true`
@@ -161,7 +161,12 @@ are in [`workstreams.md`](workstreams.md).
   `review/ruled/kokomi-overhaul-round-9-2026-09-04.md`): Tide Chart and
   Ripple, on a new `plans_held` count in both engines, the pool 30 rows;
   Held Tide and Tidal Rhythm were withdrawn on the charter audit and are
-  not on the surface. [USER]'s act-1 run is due on `0.2.2309+proto`. The Kurage
+  not on the surface. **Round 10 is READ**
+  (`review/active/kokomi-overhaul-round-10-2026-09-04.md`): two seats on
+  `0.2.2446+proto`, floors 6 and 11, both budget-out, neither drew Tide
+  Chart; the Plan's Shrink line read true again, the jellyfish stood empty
+  on most turns, one pick (starter Plan density), `EB-402`-`EB-403`,
+  `EB-408`-`EB-411`. [USER]'s act-1 run is due on `0.2.2446+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
@@ -184,8 +189,12 @@ are in [`workstreams.md`](workstreams.md).
   scale (12/12/15/20 down to 6/6/8/10), swapped in for the shipped ids at the
   same rarity by `loader._pool_substitutions` and
   `FurinaReframeRoster.SwapOfferedRiders`, so the shipped sheet stands and an
-  arm-off run is offered the shipped card. [USER]'s act-1 run is due on the
-  round-two build. No stamp moves, nothing measured.
+  arm-off run is offered the shipped card. **Round 4 is READ**
+  (`review/active/furina-reframe-round-4-2026-09-04.md`): two seats on
+  `0.2.2446+proto`, floors 4 and 8, both budget-out, no rider copy drawn,
+  Fanfare decorative below the bars; four real decisions named, one pick
+  (a reader in every deck), `EB-404`-`EB-407`, `EB-412`-`EB-414`. [USER]'s
+  act-1 run is due on `0.2.2446+proto`. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
