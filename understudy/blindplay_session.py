@@ -748,4 +748,16 @@ def taken_line(res: dict[str, Any]) -> str:
     if body:
         line += f" — {body}"
     line = line.rstrip(".") + "."
+    # `EB-448`. WHAT THE ROW HANDED OVER, BY NAME. The sentence above is the
+    # screen's promise ("Add a card to your deck"); these are the faces the
+    # feed carried beside it and the page used to drop, so Klee r13's granted
+    # egg was a sentence and the card itself turned up two fights later.
+    # Appended rather than folded in, because the promise and the thing are
+    # two different claims and only the second one is a card now owned.
+    for named in printed.get("names") or []:
+        if not isinstance(named, dict) or not _text(named.get("name")):
+            continue
+        line += f" It names **{_text(named['name'])}**"
+        body = _text(named.get("text"))
+        line += f": {body.rstrip('.')}." if body else "."
     return "" if qa_packet.leaks(line) else line

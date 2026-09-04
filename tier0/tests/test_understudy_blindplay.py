@@ -3971,6 +3971,122 @@ def test_embark_records_the_cap_in_the_lanes_own_budget(lane_budget,
     assert blindplay.budget_spent() == (0, 90)
 
 
+# ------------- EB-448: an event outcome that never named what it gave -----
+
+
+def granting_event_state() -> dict:
+    """SYNTHETIC, BUILT FROM THE BRIDGE'S OWN BUILDER (`EB-448`).
+
+    `BuildEventState` (`vendor/STS2_MCP/McpMod.StateBuilder.cs:1600-1627`)
+    sends each option's `title`, `description`, `is_locked`, `is_proceed` and
+    `was_chosen`, merges a granted RELIC in as `relic_name` /
+    `relic_description`, and closes with `keywords` = `BuildHoverTips(
+    opt.HoverTips)` -- where a `CardHoverTip` is flattened into the card's own
+    printed title and description (`McpMod.Helpers.cs:260-264`), the game's
+    `+` and all. This fixture is that shape: an option that adds a named card,
+    one that upgrades a named card, one that hands over a relic, and one whose
+    grant the feed does not name at all.
+    """
+    return {"state_type": "event",
+            "run": {"act": 1, "floor": 6},
+            "player": {"hp": 44, "max_hp": 62, "gold": 120},
+            "event": {"event_id": "BYRDONIS_NEST",
+                      "event_name": "Byrdonis Nest",
+                      "in_dialogue": False,
+                      "body": "An unattended egg sits in the reeds.",
+                      "options": [
+                          {"index": 0, "title": "Send It Up to Sangonomiya",
+                           "description": "Add a card to your deck.",
+                           "keywords": [
+                               {"name": "Bathysmal Egg",
+                                "description": "Unplayable. Exhaust at the "
+                                               "end of your turn."}]},
+                          {"index": 1, "title": "Feed It to the Conveyor",
+                           "description": "Upgrade a card in your deck.",
+                           "was_chosen": True,
+                           "keywords": [
+                               {"name": "Strike+",
+                                "description": "Deal 9 damage."}]},
+                          {"index": 2, "title": "Pocket the Shell",
+                           "description": "Obtain a relic.",
+                           "relic_name": "Bottled Tide",
+                           "relic_description": "At the start of each combat, "
+                                                "gain 3 Block."},
+                          {"index": 3, "title": "Eat It",
+                           "description": "Gain 6 Max HP."}]}}
+
+
+def test_an_event_option_prints_the_face_of_the_card_it_names():
+    """`EB-448`. THE OUTCOME WAS A SENTENCE AND NEVER A CARD.
+
+    Klee r13: Trash Heap "gave a card" and the seat identified it as
+    `Caltrops` two fights later off a hand; Endless Conveyor's upgrade turned
+    up as `Strike+` in a removal list a room later; and an option adding a
+    card the screen NAMES -- Byrdonis Egg, Neow's Dowsing -- printed the
+    promise and never the face. So the seat shopped partly blind to its deck.
+
+    Both channels were already on the feed and the page read neither: the
+    category-prefixed face `_named_option` drops the moment a row has a title
+    of its own, and `keywords`, which carries a card hover tip flattened into
+    the card's printed title and text.
+
+    Seen to FAIL: the page prints the four option titles and their bodies, and
+    the words `Bathysmal Egg`, `Strike+` and `Bottled Tide` appear nowhere.
+    """
+    page = blindplay.observe(granting_event_state())
+    # The card an option ADDS, by title, with the text the game printed.
+    assert ("    · **Bathysmal Egg** — Unplayable. Exhaust at the end of your "
+            "turn.") in page
+    # The card an option UPGRADES, with the game's own upgrade mark on it.
+    assert "    · **Strike+** — Deal 9 damage." in page
+    # And the relic face `_named_option` used to drop behind the option title.
+    assert "    · **Bottled Tide** — At the start of each combat" in page
+    # An option whose grant the feed does not name claims nothing.
+    assert "**Eat It**" in page
+    assert page.split("**Eat It**")[1].strip().startswith("Gain 6 Max HP.")
+
+
+def test_the_event_screen_marks_the_option_the_room_already_took():
+    """`was_chosen` is on the feed and nothing read it, so an outcome and an
+    offer printed identically -- which is what makes the faces above readable
+    as a result rather than a promise."""
+    page = blindplay.observe(granting_event_state())
+    assert "**Feed It to the Conveyor** — TAKEN" in page
+    assert "**Eat It** — TAKEN" not in page
+
+
+def test_the_result_line_after_an_event_choice_names_what_it_gave():
+    """The other half of the row: the line the seat is handed after `choose`.
+    The screen's promise first, then the thing itself -- two claims, and only
+    the second is a card now owned."""
+    state = granting_event_state()
+    res = blindplay.act(state, 'choose "Send It Up to Sangonomiya"')
+    assert res["ok"], res["refusal"]
+    assert res["post"] == {"action": "choose_event_option", "index": 0}
+    line = blindplay.taken_line(res)
+    assert line.startswith("Took: Send It Up to Sangonomiya — Add a card to "
+                           "your deck.")
+    assert ("It names **Bathysmal Egg**: Unplayable. Exhaust at the end of "
+            "your turn.") in line
+
+    upgraded = blindplay.act(state, 'choose "Feed It to the Conveyor"')
+    assert "It names **Strike+**: Deal 9 damage." in blindplay.taken_line(
+        upgraded)
+
+
+def test_a_random_grant_is_still_not_named_and_the_page_does_not_pretend():
+    """The row's own limit, stated as a test. Trash Heap does not choose its
+    card until the click and the event room carries no card afterwards, so an
+    option with no face on its feed gets no face on the page -- rather than a
+    guess, which is the one thing this module may never print."""
+    state = granting_event_state()
+    state["event"]["options"] = [
+        {"index": 0, "title": "Rummage", "description": "Obtain a card."}]
+    page = blindplay.observe(state)
+    assert "**Rummage**" in page
+    assert "·" not in page.split("**Rummage**")[1]
+
+
 def test_the_grammar_offers_the_jellyfish_only_where_there_is_one():
     with_pet = blindplay.observation(plans_combat_state(TWO_PLANS))
     assert any('on "Bake-Kurage"' in c for c in with_pet["commands"])

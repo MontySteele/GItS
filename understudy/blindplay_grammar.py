@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from understudy import qa_packet
-from understudy.blindplay_board import (_bundle_cards, _combat,
+from understudy.blindplay_board import (_bundle_cards, _combat, _event_option,
                                         _event_options, _map_nodes,
                                         _map_options, _proceed_option,
                                         _relic_options, _rest_options,
@@ -774,8 +774,11 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
                           {"action": "select_bundle", "index": idx},
                           {"bundle": _named_option(entries[idx])["name"]})
     if st == "event":
+        # `EB-448`: the page's own namer, so the line after the command names
+        # the card or relic the option hands over rather than only the
+        # sentence promising one.
         return _index_choice(state, cmd, _event_options(state),
-                             "choose_event_option")
+                             "choose_event_option", namer=_event_option)
     if st == "rest_site":
         return _index_choice(state, cmd, _rest_options(state),
                              "choose_rest_option")
@@ -889,6 +892,11 @@ def _index_choice(state: dict[str, Any], cmd: Command, entries: list[Any],
     printed = {"option": names[idx]}
     if options[idx].get("text"):
         printed["text"] = options[idx]["text"]
+    # `EB-448`: and the faces of whatever the row names, so the result line
+    # says WHAT was given rather than only that something was. Present only
+    # where the namer supplies them, which today is the event screen alone.
+    if options[idx].get("names"):
+        printed["names"] = options[idx]["names"]
     return Resolution(True, "choose",
                       {"action": action,
                        "index": posted if isinstance(posted, int) else idx},

@@ -831,6 +831,79 @@ def _event_options(state: dict[str, Any]) -> list[Any]:
     return _listing(state, "event.options", "options")
 
 
+# The keys an option carries a NAMED THING'S face under, beside the option's
+# own title and body. `BuildEventState` merges a granted relic in as
+# `relic_name` / `relic_description` (`McpMod.StateBuilder.cs:1617-1621`), on
+# the same category-prefixed convention `BuildShopState` uses for its shelves.
+_OPTION_FACE_KEYS = (("card_name", "card_description"),
+                     ("relic_name", "relic_description"),
+                     ("potion_name", "potion_description"))
+
+
+def _option_faces(entry: Any, skip: str = "") -> list[dict[str, str]]:
+    """Everything an option NAMES, each with the text the game printed for it.
+
+    `EB-448`. THE OUTCOME WAS NEVER ON THE PAGE. Klee r13's Trash Heap "gave a
+    card" and the seat identified it as `Caltrops` two fights later off a
+    hand; Endless Conveyor's upgrade turned up as `Strike+` in a removal list
+    a room later; and an option that adds a card the screen NAMES -- Byrdonis
+    Egg, Neow's Dowsing -- printed the sentence and never the card. So the
+    seat shopped, drafted and routed against a deck it could not read.
+
+    TWO CHANNELS, AND BOTH WERE ALREADY ON THE FEED. An option that hands over
+    a modelled thing merges its face in under a CATEGORY-PREFIXED key, which
+    `_named_option` drops the moment the option also has a `title` of its own
+    (`_OPTION_NAME_KEYS` stops at the first hit). And `opt.HoverTips` reaches
+    the wire as `keywords`, where `BuildHoverTips` flattens a `CardHoverTip`
+    into the card's own printed title and description
+    (`McpMod.Helpers.cs:260-264`) -- the same shape a keyword definition
+    arrives in, and the page read neither.
+
+    IT DOES NOT CLAIM WHICH KIND EACH ONE IS, and that is deliberate: the wire
+    flattens a card tip and a keyword tip into one `{name, description}` pair,
+    so a page that sorted them would be guessing at the difference. What it
+    says is true either way -- these are the things this option names, in the
+    game's own words -- and a card among them is printed with the title the
+    game gave it, `+` and all.
+
+    WHAT IS STILL NOT HERE, and the row's scope says so: a RANDOM grant. Trash
+    Heap does not choose its card until the click, and the event room carries
+    no card on its feed afterwards, so nothing on this side can name it.
+    """
+    if not isinstance(entry, dict):
+        return []
+    out: list[dict[str, str]] = []
+    seen = {_fold(skip)} if skip else set()
+    for name_key, text_key in _OPTION_FACE_KEYS:
+        name = _text(entry.get(name_key))
+        if name and _fold(name) not in seen:
+            seen.add(_fold(name))
+            out.append({"name": name, "text": _text(entry.get(text_key))})
+    for tip in entry.get("keywords") or []:
+        if not isinstance(tip, dict):
+            continue
+        name = _text(tip.get("name"))
+        if name and _fold(name) not in seen:
+            seen.add(_fold(name))
+            out.append({"name": name,
+                        "text": _text(tip.get("description"))})
+    return out
+
+
+def _event_option(entry: Any) -> dict[str, Any]:
+    """One event option, plus what it names and whether it has been taken.
+
+    `EB-448`. The namer the event screen renders with AND resolves `choose`
+    with -- one function, for `_index_choice`'s own rule: a screen whose page
+    names its rows one way and whose grammar names them another is two
+    screens.
+    """
+    option = _named_option(entry)
+    option["names"] = _option_faces(entry, skip=option["name"])
+    option["taken"] = bool(isinstance(entry, dict) and entry.get("was_chosen"))
+    return option
+
+
 def _proceed_option(state: dict[str, Any]) -> int:
     """The list position of the event option that IS *Proceed*, or `-1`.
 

@@ -328,9 +328,24 @@ def _render_options(items: list[dict[str, Any]], bullet: str = "-") -> list[str]
             # unchanged `not available` everywhere else, which covers a shelf
             # that was never stocked and a row priced out of reach.
             line += f" ({o.get('unavailable') or 'not available'})"
+        # `EB-448`: the mark the event screen never had. `was_chosen` is on
+        # the feed and says this row is the one this room has already
+        # resolved, which is what makes the outcome below readable as an
+        # outcome rather than as an offer.
+        if o.get("taken"):
+            line += " — TAKEN"
         out.append(line)
         if o.get("text"):
             out.append(f"    {o['text']}")
+        # `EB-448`: what this row NAMES, each in the game's own words. An
+        # option that hands over a card or a relic carries its face on the
+        # feed and the page dropped it, so a granted `Byrdonis Egg` was a
+        # sentence and never a card.
+        for named in o.get("names") or []:
+            row = f"    · **{named['name']}**"
+            if named.get("text"):
+                row += f" — {named['text']}"
+            out.append(row)
         if o.get("note"):
             out.append(f"    *{o['note']}*")
     return out

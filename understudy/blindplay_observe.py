@@ -12,7 +12,8 @@ from typing import Any
 
 from understudy import qa_packet
 from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
-                                        _event_options, _map_ahead, _map_boss,
+                                        _event_option, _event_options,
+                                        _map_ahead, _map_boss,
                                         _map_options, _omitted_from_upgrade,
                                         _potion_slots, _preview_cards,
                                         _proceed_option, _relic_options,
@@ -312,7 +313,11 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["text"] = _text(ev.get("body") or ev.get("text")
                             or ev.get("description"))
         obs["in_dialogue"] = bool(ev.get("in_dialogue"))
-        obs["options"] = [_named_option(o) for o in _event_options(state)]
+        # `EB-448`: through the event screen's OWN namer, so each option
+        # carries the faces of the things it names and the mark saying it has
+        # already been taken -- and so `choose` resolves against the same rows
+        # the page printed.
+        obs["options"] = [_event_option(o) for o in _event_options(state)]
         # `EB-259`, the other half. An event room has NO proceed button --
         # `ExecuteProceed` walks rewards, rest, both merchants and the
         # treasure room and stops (`McpMod.Actions.cs:600-663`) -- so a bare
