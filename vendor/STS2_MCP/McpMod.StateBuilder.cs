@@ -1275,6 +1275,15 @@ public static partial class McpMod
             state["kokomi_plans"] = kokomiPlans;
         }
 
+        // GItS LOCAL EDIT (`EB-405`). The same receipt one arm over: a Salon
+        // member picks its own body and leaves an element on it, and neither
+        // fact survives the switch that decides them. Emitted beside the Plan
+        // queue and on the same absent/empty/populated contract.
+        if (GitsFurinaSalonState(player) is { } furinaSalon)
+        {
+            state["furina_salon"] = furinaSalon;
+        }
+
         // Powers (status effects)
         state["status"] = BuildPowersState(creature);
 

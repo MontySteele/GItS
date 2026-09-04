@@ -6367,3 +6367,140 @@ def test_the_encore_meter_line_does_not_repeat_the_gloss():
     assert page.count("absorbs damage before HP") == 1
     assert ("- Fanfare: 6 — the game's data feed carries this meter's "
             "amount only") in page
+
+
+# ---------------- EB-405: a Salon performance names its target -------------
+
+def salon_state(performed: list[dict]) -> dict:
+    """A combat whose wire carries this turn's Salon performances.
+
+    SYNTHETIC, BUILT FROM THE MOD'S OWN SNAPSHOT SHAPE: every key below is
+    written by `FurinaReframeLedger.Snapshot` and lifted onto the wire by
+    `vendor/STS2_MCP/gits/GitsFurinaSalon.cs`, and the two are held in step by
+    `test_the_salon_block_is_the_mods_own_snapshot_shape`.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["furina_salon"] = {"performed": performed}
+    return state
+
+
+def test_a_salon_performance_names_the_body_it_picked_and_the_aura():
+    """`EB-405`, and it is the row.
+
+    "Crabaletta chose its own enemy and left a Hydro aura on a body the seat
+    had not picked" (Furina round 4, run 1, (c) 4), in a kit whose readable
+    decision is which element lands on which aura -- and the page named
+    neither. It could not: no Salon block reached the wire at all, and the only
+    Salon row on a screen was the counter power's static rulebook sentence,
+    which carries the company count and by construction cannot carry a body.
+    """
+    page = blindplay.observe(salon_state([
+        {"member": "Crabaletta", "target": "Nibbit", "combat_id": "1",
+         "element": "Hydro", "aura": "Hydro", "amount": 6, "paid": True,
+         "evoked": False}]))
+    assert "## What your Salon did this turn" in page
+    assert ("- **Crabaletta** hit Nibbit for 6 Hydro, and it is wearing a "
+            "Hydro aura.") in page
+
+
+def test_the_aura_printed_is_the_one_the_body_is_wearing_afterwards():
+    """The half that is easy to get wrong by assuming. `ElementalHit.Deal`
+    applies the element to a bare body, REFRESHES a matching aura, and on any
+    other element CONSUMES the aura into a reaction and leaves the body bare.
+    The mod reads the aura AFTER the hit, so a reaction says so rather than
+    the page claiming a Hydro aura that is not there."""
+    page = blindplay.observe(salon_state([
+        {"member": "Chevalmarin", "target": "Nibbit", "combat_id": "1",
+         "element": "Hydro", "aura": "", "amount": 2, "paid": True,
+         "evoked": False}]))
+    assert "- **Chevalmarin** hit Nibbit for 2 Hydro, and left no aura on it."\
+        in page
+
+
+def test_a_member_that_aims_at_nobody_says_what_it_did_instead():
+    """The Usher gains Block and touches no body, so there is no target to
+    name and no aura to report -- and a sentence about what it left on a body
+    would be about no body."""
+    page = blindplay.observe(salon_state([
+        {"member": "the Usher", "target": "", "combat_id": "",
+         "element": "", "aura": "", "amount": 3, "paid": True,
+         "evoked": False}]))
+    assert "- **the Usher** gave you 3 Block." in page
+    section = page.split("## What your Salon did this turn")[1]
+    section = section.split("\n\n")[1]
+    assert "aura" not in section, section
+
+
+def test_a_dry_performance_says_why_its_number_is_small():
+    """`SalonConstants.DryDamageMultiplier` is the difference between the
+    printed number and three-quarters of it, and a reader watching a member
+    act small with an empty buffer is owed the reason."""
+    page = blindplay.observe(salon_state([
+        {"member": "Crabaletta", "target": "Nibbit", "combat_id": "1",
+         "element": "Hydro", "aura": "Hydro", "amount": 4, "paid": False,
+         "evoked": False}]))
+    assert "(dry: it could not pay its Encore, so it acted at " in page
+
+
+def test_the_page_owns_the_name_a_performance_prints():
+    """`EB-329`'s rule one arm over: the mod names the body by combat id and
+    THE PAGE OWNS THE NAMES, so a numbered repeat means the same body in the
+    performance line as in the enemy list under it."""
+    state = salon_state([
+        {"member": "Crabaletta", "target": "Nibbit", "combat_id": "1",
+         "element": "Hydro", "aura": "Hydro", "amount": 6, "paid": True,
+         "evoked": False}])
+    wire = state["battle"]["enemies"][0]
+    wire["name"] = "Slug"
+    second = json.loads(json.dumps(wire))
+    second.update({"entity_id": "999", "combat_id": "999"})
+    state["battle"]["enemies"].append(second)
+    page = blindplay.observe(state)
+    assert "- **Crabaletta** hit Slug (1) for 6 Hydro" in page
+
+
+def test_a_build_with_no_reframe_prints_no_salon_section():
+    """The absent / empty split, `kokomi_plans`' own: an ABSENT key is "no
+    reframe in this build" and an EMPTY map is "the rule is here and this seat
+    is not playing it". Neither may put an empty stage in front of a Klee."""
+    assert "What your Salon did" not in blindplay.observe(combat_state())
+    absent = json.loads(json.dumps(combat_state()))
+    absent["player"]["furina_salon"] = {}
+    assert "What your Salon did" not in blindplay.observe(absent)
+    assert "What your Salon did" not in blindplay.observe(salon_state([]))
+
+
+def test_the_salon_block_is_the_mods_own_snapshot_shape():
+    """Held in step from this side, the discipline every other GItS wire block
+    is under: a field renamed in `FurinaReframeLedger.Snapshot` and not here
+    would leave the section silently empty on a live board."""
+    ledger = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+              / "FurinaReframeLedger.cs").read_text(encoding="utf-8")
+    snapshot = ledger[ledger.index("public static Dictionary<string, object?>"
+                                   " Snapshot"):]
+    for field in ("member", "target", "combat_id", "element", "aura",
+                  "amount", "paid", "evoked"):
+        assert f'["{field}"]' in snapshot, field
+    assert 'snapshot["performed"]' in snapshot
+    bridge = (REPO / "vendor" / "STS2_MCP" / "gits"
+              / "GitsFurinaSalon.cs").read_text(encoding="utf-8")
+    assert '"KleeMod.Powers.FurinaReframeLedger"' in bridge
+    builder = (REPO / "vendor" / "STS2_MCP"
+               / "McpMod.StateBuilder.cs").read_text(encoding="utf-8")
+    assert 'state["furina_salon"] = furinaSalon;' in builder
+
+
+def test_the_target_and_the_aura_are_recorded_where_they_are_decided():
+    """The mod half. `PerformMember` is the ONE implementation of a member
+    acting, it draws the body from `Rng.CombatTargets`, and `ElementalHit.Deal`
+    returns the damage and not the creature -- so both facts had to be caught
+    inside that switch or they were gone."""
+    salon = (REPO / "klee-mod" / "KleeCode" / "Powers"
+             / "SalonPowers.cs").read_text(encoding="utf-8")
+    body = salon[salon.index("public static async Task<bool> PerformMember"):]
+    body = body[:body.index("return true;")]
+    assert "AuraCmd.Find(target)?.Element" in body
+    assert "FurinaReframeLedger.For(owner).NotePerformance(" in body
+    # ...and the turn boundary is the one place it exists.
+    turn = salon[salon.index("public override async Task AfterPlayerTurnStart"):]
+    assert "ClearPerformances()" in turn[:900]

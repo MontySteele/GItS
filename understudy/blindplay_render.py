@@ -154,6 +154,31 @@ def _board_note_wanted(pl: dict[str, Any]) -> bool:
                for said in pl["carried_out"] + pl["fired_now"])
 
 
+def _render_performance(row: dict[str, Any]) -> str:
+    """One Salon member's act (`EB-405`): who, on whom, for how much, and what
+    the body is wearing afterwards.
+
+    THREE FACTS AND NOT FOUR. The `paid` half is on the line because it is the
+    difference between the printed number and three-quarters of it
+    (`SalonConstants.DryDamageMultiplier`), and a reader watching a member act
+    small with an empty buffer is owed the reason. The aura clause is printed
+    only for a member that AIMED: the Usher gains Block and touches nobody, so
+    a sentence about what it left on a body would be about no body.
+    """
+    line = f"- **{row['member']}**"
+    if row["target"]:
+        line += (f" hit {row['target']} for {row['amount']}"
+                 + (f" {row['element']}" if row["element"] else ""))
+        line += (f", and it is wearing a {row['aura']} aura" if row["aura"]
+                 else ", and left no aura on it")
+    else:
+        line += f" gave you {row['amount']} Block"
+    if not row["paid"]:
+        line += " (dry: it could not pay its Encore, so it acted at "
+        line += "three-quarters)"
+    return line + "."
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
     """One power: printed name, the amount, buff or debuff, the printed text."""
     line = f"{indent}{power['name']} {power['stacks']}"
@@ -371,6 +396,20 @@ def render(obs: dict[str, Any]) -> str:
             # at the foot of the section rather than under the last card.
             if _board_note_wanted(pl):
                 out += ["", CARRY_OUT_BOARD_NOTE]
+        if c.get("salon") and c["salon"]["performed"]:
+            # `EB-405`. WHAT THE STAGE DID THIS TURN, one act per line --
+            # `EB-198`'s contract, the same one the carry-out block is under.
+            #
+            # THE TARGET AND THE AURA ARE THE POINT. "Crabaletta chose its own
+            # enemy and left a Hydro aura on a body the seat had not picked"
+            # (Furina round 4, run 1, (c) 4) is a complaint about a decision
+            # the reader could not see, in a kit whose readable decision is
+            # which element lands on which aura. The member names its body, and
+            # the line ends with what that body is WEARING -- read after the
+            # hit, so a reaction that consumed the aura says "and left no
+            # aura" rather than claiming Hydro that is not there.
+            out += ["", "## What your Salon did this turn", ""]
+            out += [_render_performance(row) for row in c["salon"]["performed"]]
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page
