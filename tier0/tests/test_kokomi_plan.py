@@ -1435,3 +1435,71 @@ def test_the_memory_is_cleared_at_the_turn_boundary(overhaul):
     assert st.kk_companions_this_turn
     kokomi_plan.roll_turn(st)
     assert st.kk_companions_this_turn == []
+
+
+# ---------------------------------------------------------------------------
+# THE PLAYABILITY GATE -- `EB-455`
+# ---------------------------------------------------------------------------
+
+def test_change_of_plans_is_unplayable_while_no_plan_is_written(overhaul):
+    """`EB-455`, the mod's `IsPlayable` gate at this engine's twin seam.
+
+    THE FIND (Kokomi r13 (b)). Change of Plans "was dead in hand three fights
+    before it was good once and its face never says it needs a written Plan; a
+    first reader plays it into an empty jellyfish". It is `EB-261`'s Set-off
+    gate one mechanic over: the card pays its energy, exhausts itself and
+    resolves to nothing.
+    """
+    from tier0.engine import combat
+
+    st = kokomi_state(enemies=[make_enemy(hp=40)])
+    st.player.energy = 3
+    card = loader.get_card("proto_kk_change_of_plans")
+    assert kokomi_plan.carry_out_only(card) is True
+
+    assert combat.card_playable(st, card) is False
+    kokomi_plan.schedule(st, plan_card(ATTACKER))
+    assert combat.card_playable(st, card) is True
+
+
+def test_the_gate_is_inert_with_the_flag_off():
+    """`live()` first, this file's rule: nothing the arm invents may reach a
+    release build's playability read."""
+    from tier0.engine import combat
+
+    st = kokomi_state(enemies=[make_enemy(hp=40)])
+    st.player.energy = 3
+    card = Card(id="proto_kk_probe", name="probe", cost=1, type="skill",
+                effects=[{"op": "carry_out_front_plan"}])
+
+    assert kokomi_plan.refuses_for_no_plan(st, card) is False
+
+
+def test_a_carry_out_beside_another_effect_is_never_gated(overhaul):
+    """The clause is deliberately narrow, `set_off_only`'s rule: a card that
+    also draws still does something on an empty jellyfish, and refusing it
+    would be a rules change rather than a legibility fix."""
+    from tier0.engine import combat
+
+    st = kokomi_state(enemies=[make_enemy(hp=40)])
+    st.player.energy = 3
+    card = Card(id="proto_kk_probe", name="probe", cost=1, type="skill",
+                effects=[{"op": "carry_out_front_plan"},
+                         {"op": "draw", "amount": 1}])
+
+    assert kokomi_plan.carry_out_only(card) is False
+    assert combat.card_playable(st, card) is True
+
+
+def test_every_kokomi_row_agrees_with_the_emitters_own_gate(overhaul):
+    """The two implementations of `card_is_carry_out_only` are checked against
+    each other over the whole surface -- `test_klee_overhaul_rules`' pin on the
+    Set-off pair, which is the only way "the same list" stays true."""
+    from tools import gen_klee_cards
+
+    for card in loader.prototype_cards():
+        if not card.id.startswith("proto_kk_"):
+            continue
+        row = {"effects": card.effects}
+        assert kokomi_plan.carry_out_only(card) == \
+            gen_klee_cards.card_is_carry_out_only(row), card.id

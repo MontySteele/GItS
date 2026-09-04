@@ -969,6 +969,35 @@ def card_is_set_off_only(card: dict) -> bool:
     return True
 
 
+def card_is_carry_out_only(card: dict) -> bool:
+    """Does this row do NOTHING while the jellyfish holds no Plan? (`EB-455`.)
+
+    True when every top-level effect that is not a cost is a
+    `carry_out_front_plan`. Such a card pays its energy, exhausts itself and
+    resolves to nothing -- `card_is_set_off_only`'s shape one mechanic over,
+    and the same argument: a card that looks playable and cannot do anything
+    is a play the reader has to LOSE to learn about.
+
+    THE FIND (Kokomi r13 (b)). Change of Plans "was dead in hand three fights
+    before it was good once and its face never says it needs a written Plan; a
+    first reader plays it into an empty jellyfish". When it did fire it was
+    excellent -- 2 energy for 21 damage and Weak on three, on the boss's second
+    turn -- so this is legibility and not balance: nothing the card DOES moves.
+
+    DERIVED FROM THE ROW, never a per-card flag, for the reason
+    `card_is_set_off_only` gives: a future row with this shape cannot be given
+    the gate by somebody remembering to. A `carry_out_front_plan` sitting
+    BESIDE another effect is NOT covered -- a card that also draws still does
+    something on an empty jellyfish, and refusing it would be a rules change.
+    Twin: `kokomi_plan.carry_out_only`.
+    """
+    rest = [eff for eff in card.get("effects", [])
+            if eff.get("op") not in _COST_OPS]
+    if not rest:
+        return False
+    return all(eff.get("op") == "carry_out_front_plan" for eff in rest)
+
+
 ELEMENT_CS = {"pyro": "Element.Pyro", "hydro": "Element.Hydro",
               "electro": "Element.Electro", "cryo": "Element.Cryo",
               "anemo": "Element.Anemo", "geo": "Element.Geo"}
@@ -10591,7 +10620,7 @@ def emit(
     # EB-261 / EB-264. A card refused by its OWN gate carries the sentence the
     # page prints, because `CardModel.CanPlay` collapses every mod-side refusal
     # into `BlockedByCardLogic` and has no slot for what the reason was.
-    if card_is_set_off_only(card):
+    if card_is_set_off_only(card) or card_is_carry_out_only(card):
         interfaces += ", IUnplayableReasonCard"
 
     # EB-184: a modal card DECLARES what each of its modes does about aiming,
@@ -11197,6 +11226,27 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "            ? null\n"
         '            : "no enemy is holding a Bomb";'
         if bomb_gated else "")
+    # `EB-455`, the same pair one mechanic over: a card whose whole body is a
+    # carry-out does NOTHING while the jellyfish holds no Plan. The r13 seat
+    # met Change of Plans three times as a dead card before it was good once,
+    # off a face that never says it needs one.
+    plan_gated = card_is_carry_out_only(card)
+    plan_gate_expr = (
+        "KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0")
+    plan_gate_member = (
+        "\n\n    // `EB-455`, the carry-out gate: a card whose whole body is\n"
+        "    // a carry-out is unplayable while the Bake-Kurage holds no\n"
+        "    // Plan, rather than paying its energy and exhausting itself\n"
+        "    // for nothing.\n"
+        "    protected override bool IsPlayable =>\n"
+        f"        {plan_gate_expr};"
+        if plan_gated and not spark_price else "")
+    plan_reason_member = (
+        "\n\n    public string? UnplayableReason =>\n"
+        f"        {plan_gate_expr}\n"
+        "            ? null\n"
+        '            : "no Plan is written";'
+        if plan_gated else "")
     # R213 E1, QUARANTINED: the same cost line one meter over, and the mirror
     # of tier0 combat.charge_cost. TOP-LEVEL spends only, the sim's rule --
     # a price at the head of a `choose_one` MODE is that mode's cost line and
@@ -11292,7 +11342,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>\n"
             f"        new[] {{ {flags_cs} }};")
     if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member,
-                             bomb_gate_member)) > 1:
+                             bomb_gate_member, plan_gate_member)) > 1:
         raise ValueError(
             f"{card['id']}: two resource cost lines on one card -- only one "
             "IsPlayable override can be emitted")
@@ -11300,6 +11350,10 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         raise ValueError(
             f"{card['id']}: the Set-off gate (EB-261) and a Charge or modal "
             "cost line cannot share one IsPlayable override")
+    if plan_gated and (charge_price or modal_gate_member or bomb_gated):
+        raise ValueError(
+            f"{card['id']}: the carry-out gate (EB-455) and another gate "
+            "cannot share one IsPlayable override")
     resource_cost_setup = []
     if int(card.get("encore_cost", 0)) > 0:
         resource_cost_setup.append(
@@ -11369,7 +11423,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", "{desc}"),
-    }};{tags_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
+    }};{tags_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
