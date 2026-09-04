@@ -250,8 +250,13 @@ are in [`workstreams.md`](workstreams.md).
   reader's bar moved to 3 (round 6 default), a member's roll spent the paid
   performance on a reviving Minion (`EB-451`, skips Minions as R250's shape),
   the retired Burst's tip still taught at a reward (`EB-449`); the Encore
-  opening read the same a third time. [USER]'s act-1 run is due on that
-  build. No stamp moves, nothing measured.
+  opening read the same a third time. **Round 8 is READ**
+  (`review/active/furina-reframe-round-8-2026-09-04.md`): one seat on
+  `0.2.2564+proto`, floor 10 at the cap, six of six fights with the elite,
+  Guest Cast skipping Chiori's hit (`EB-463`), a Replay performing no member
+  (`EB-464`), five faces feeding a Burst no screen shows (`EB-449`), the
+  Encore opening read the same a fourth time. [USER]'s act-1 run is due on
+  that build. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
