@@ -1503,3 +1503,5 @@ EB-180 RETIRED 2026-09-04: soak.py, blindplay.py and staged_turn.py are each a f
 EB-262 RETIRED 2026-09-04: a shelf's card_cost and Spark price print beside the gold, and the shop is remembered by its shelf fingerprint so a bought row keeps its face, marked sold.
 EB-299 RETIRED 2026-09-04: the footnote says the number is a place in a list that re-counts, and the telegraph names its type and whose the number is.
 EB-277 RETIRED 2026-09-04: the Prototype-stage rule gives every reachable row a real delta, under EB-283's codegen gate refusing an identical + face.
+EB-41 RETIRED 2026-09-04 on [USER]'s rulings: Encore and Fanfare telemetry stay separate, no shared base (question 1, "I think they should be separate"); the exp_* move takes its default, no module moves and all 21 records stay re-runnable (question 2).
+EB-128 RETIRED 2026-09-04 on [USER]'s ruling ("they are truly lost and need to be recreated"): the reconstructed defect/necrobinder/regent *_char_facts.yaml, re-decompiled from the live DLL 2026-08-24, stand as the originals, and tools.backup_game_ref reports the vault holds all five, 29 files unchanged.
