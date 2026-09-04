@@ -1035,6 +1035,139 @@ def test_an_icon_token_names_the_icon_and_not_the_art_set():
     assert "Gain [Energy][Energy]." in page
 
 
+# --------------- EB-374: the sacrifice this page can and cannot speak about --
+#
+# THE FINDING. The r9 act-2 seat took Pael's Wing and met two card rewards
+# afterwards; both printed `choose` and `skip` and nothing else, and it could
+# not tell whether `skip` WAS the sacrifice the relic had promised.
+#
+# WHAT THE FEED CARRIES, read off the vendored builder: `BuildCardRewardState`
+# emits the cards and ONE boolean -- whether an alternative button exists on
+# the screen -- and `ExecuteSkipCardReward` presses that button whatever it has
+# become. The button's words are on neither side of the wire, so the page
+# cannot say that skip is the sacrifice and must not say that it is not.
+# Carrying the control is a bridge change, `EB-310`'s family.
+
+
+def paels_wing_reward_state() -> dict:
+    """A card reward on a run holding the relic, relics as `BuildPlayerState`
+    sends them (`name` plus the game's own hover `description`)."""
+    state = json.loads(json.dumps(card_reward_state()))
+    state["player"] = {"hp": 40, "max_hp": 70, "relics": [
+        {"id": "PAELS_WING", "name": "Pael's Wing",
+         "description": "Whenever you skip a card reward, sacrifice it."}]}
+    return state
+
+
+def test_a_card_reward_says_which_relic_has_rewritten_its_alternative():
+    """Seen to FAIL: the screen printed `choose` and `skip` and said nothing
+    about either the relic or the control it could not reach."""
+    page = blindplay.observe(paels_wing_reward_state())
+    assert "**Pael's Wing**" in page
+    assert "changes what the alternative to choosing a card does" in page
+    # It says what the feed has and does not claim what the button is.
+    assert "never what that button says or does" in page
+    assert "cannot tell you whether that is a plain skip" in page
+    # And the verbs are unchanged: there is no `sacrifice` to offer.
+    assert "sacrifice`" not in page
+    assert blindplay.act(paels_wing_reward_state(), "skip")["post"] == {
+        "action": "skip_card_reward"}
+
+
+def test_the_wire_carries_no_sacrifice_control_to_offer():
+    """The reason this row is a page line and not a verb, asserted against the
+    vendored builder rather than against a memory of it."""
+    builder = (REPO / "vendor" / "STS2_MCP" / "McpMod.StateBuilder.cs"
+               ).read_text(encoding="utf-8")
+    head = builder.index("BuildCardRewardState(NCardRewardSelectionScreen")
+    body = builder[head:builder.index("private static", head + 10)]
+    assert 'state["can_skip"] = altButtons.Count > 0;' in body
+    assert set(re.findall(r'state\["(\w+)"\]', body)) == {"cards", "can_skip"}
+    assert "sacrifice" not in builder.casefold()
+
+
+def test_a_run_without_the_relic_reads_exactly_as_before():
+    """The register is one relic long on purpose: a caveat printed on every
+    reward screen of every run would teach a doubt that is not there."""
+    page = blindplay.observe(card_reward_state())
+    assert "alternative to choosing" not in page
+    assert "You may skip this." in page
+
+
+# ------------------- EB-375: the icon fold is on the door, not on one screen -
+#
+# THE DEFECT, AND WHY IT SURVIVED `EB-264`. The sprite pass ran on the finished
+# OBSERVATION, so every screen was clean -- and the two lines a COMMAND answers
+# with are not part of an observation. `taken_line` prints the row a choice
+# took and `_result_line` the game's own answer, both assembled from `_text`
+# and neither passing through that boundary. The control run's second seat read
+# `The next Attack you play costs 0 [ironclad_energy_icon.png]` off the reward
+# it had just claimed and the file name twice off Venerable Tea Set, while the
+# same cards printed `[Energy]` in combat one screen later.
+#
+# So the rule moved onto `_text` itself, the one door every printed value comes
+# through, and the corpus sweep below is the lint the row asks for.
+
+_BRACKETED_FILE = re.compile(
+    r"\[[A-Za-z0-9_]+\.(?:png|jpg|jpeg|svg|webp)\]", re.I)
+
+
+def test_the_line_after_a_claim_prints_the_icon_and_not_the_file():
+    """Seen to FAIL: both lines carried the raw file name, which is what the
+    control run reported off a reward screen and a relic face."""
+    took = blindplay.taken_line(
+        {"ok": True, "verb": "choose",
+         "printed": {"card": "Unrelenting",
+                     "text": "The next Attack you play costs "
+                             "0 [ironclad_energy_icon.png]"}})
+    assert "Took: Unrelenting — The next Attack you play costs 0 [Energy]." \
+        == took
+    answer = blindplay._result_line(
+        {"status": "ok", "message": "Venerable Tea Set: gain "
+                                    "[ironclad_energy_icon.png]"})
+    assert answer == "ok Venerable Tea Set: gain [Energy]"
+
+
+def test_a_relic_face_folds_the_icon_wherever_it_is_printed():
+    """The relic row is on the combat page and in the claim line, and the two
+    must not disagree about a word the player is looking at."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["relics"] = [
+        {"id": "VENERABLE_TEA_SET", "name": "Venerable Tea Set",
+         "description": "At the start of your turn, gain "
+                        "[ironclad_energy_icon.png][ironclad_energy_icon.png]."
+         }]
+    page = blindplay.observe(state)
+    assert "gain [Energy][Energy]." in page
+    assert not _BRACKETED_FILE.search(page)
+
+
+def test_no_printed_face_in_the_page_corpus_carries_a_bracketed_file_name():
+    """THE LINT THE ROW ASKS FOR, over the corpus of real wire envelopes.
+
+    `review/qa/blindplay/eb263-live-shapes/` is nine screens captured off a
+    live run, six of which carry a sprite tag in a card, relic or potion face.
+    Every one is rendered and every string of every observation is swept -- not
+    only the markdown -- so a face that reaches the page through a field the
+    render does not print yet is still held to the rule.
+    """
+    swept = 0
+    for path in sorted(LIVE.glob("*.json")):
+        state = json.loads(path.read_text(encoding="utf-8"))
+        obs = blindplay.observation(state)
+        for value in blindplay._every_string(obs):
+            assert not _BRACKETED_FILE.search(value), (path.name, value)
+        page = blindplay.render(obs)
+        assert not _BRACKETED_FILE.search(page), path.name
+        swept += 1
+    assert swept == 9
+    # The corpus is only worth its lines if it CONTAINS the thing being
+    # excluded: six of the nine envelopes carry a raw tag on the wire.
+    raw = [p.name for p in sorted(LIVE.glob("*.json"))
+           if _BRACKETED_FILE.search(p.read_text(encoding="utf-8"))]
+    assert len(raw) >= 6, raw
+
+
 # -------------------------------------------------------------- session ----
 
 def fight_states() -> list[dict]:
@@ -2639,12 +2772,19 @@ def test_a_remembered_shelf_never_crosses_from_one_shop_to_another():
 def test_a_spent_live_rest_site_offers_only_proceed():
     """`EB-263`'s acceptance, on the shape the wire actually sends: a spent
     rest site is `{"options": [], "can_proceed": true}`. The page used to
-    print no options while still advertising four verbs."""
+    print no options while still advertising four verbs.
+
+    `EB-371` ADDED THE ONE VERB THAT IS NOT THE ROOM'S. `drop potion` belongs
+    to the belt rather than to the screen -- the wire allows `discard_potion`
+    wherever a run is in progress -- so what this asserts is that the SPENT
+    ROOM offers nothing of its own, which is the rule the row is about.
+    """
     assert live("rest-spent")["rest_site"] == {"options": [],
                                                "can_proceed": True}
     page = blindplay.observe(live("rest-spent"))
     assert "nothing left to offer" in page
-    assert page.count("- `") == 1 and "- `proceed`" in page
+    verbs = [line for line in page.splitlines() if line.startswith("- `")]
+    assert [v for v in verbs if "drop potion" not in v] == ["- `proceed`"]
 
 
 def test_a_fresh_live_rest_site_offers_the_verbs_it_actually_has():
@@ -4522,14 +4662,18 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # [USER] held it to the 135-character tip ceiling (PR #340), so
         # rule 7 is now "goes off only when" and the stacking rule is
         # "all at once".
+        # `EB-373` REWROTE THE LAST CLAUSE. "Takes the enemy's debuffs"
+        # promised more than the fold does -- Vulnerable and a damage cap,
+        # nothing else -- and the r9 seat priced two fights off it.
         "Bomb": ["A charge on an enemy", "goes off only when",
-                 "all at once", "takes the enemy's debuffs, not yours"],
+                 "all at once", "Not an Attack: only their ",
+                 " and a cap "],
         "Set off": ["on the target goes off first, one at a",
                     "each a Pyro hit for its size"],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
         "Mine": ["that also goes off when its enemy attacks",
                  "before the hit lands",
-                 "badge has the number"],
+                 "Read the badge: only their "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
@@ -4554,6 +4698,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                     "pay when "],
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
                   "No ", "aura, no effect."],
+        # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
+        # Strike is written against by name, met by a seat holding neither.
+        "Grounded": ["that pays at the start of your turn, but ",
+                     "went off last turn. Its ",
+                     "card prints what it pays."],
         # The Furina reframe's three (slice two, 2026-09-02). The Evoke
         # sentence's two numerals are interpolated from `FurinaReframeLaw` on
         # the mod side and written out on this one, so its anchors are the
@@ -4576,13 +4725,54 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     assert set(anchors) | {"Companion"} == set(blindplay.ARM_KEYWORDS)
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
                 "PlanKey", "DeployKey", "EvokeKey", "DrainKey", "HexereiKey",
-                "SwirlKey"):
+                "SwirlKey", "GroundedKey"):
         assert f"public const string {key}" in src
     assert "CompanionKey" not in src
     for word, phrases in anchors.items():
         for phrase in phrases:
             assert phrase in src, (word, phrase)
             assert phrase in blindplay.ARM_KEYWORDS[word], (word, phrase)
+
+
+def test_the_grounded_word_is_defined_wherever_a_face_names_it():
+    """`EB-372`. THE SEAT READ IT AS NOISE IN BOTH ACTS.
+
+    `Grounded` is a Power card of Klee's and Kaeya's Cold-Blooded Strike is
+    written against it by name. A seat that drafted Kaeya and never drafted
+    Grounded had the word on a card face with nothing on the screen saying what
+    it is (r9 act 1 sec.(c) 3, act 2 sec.(c) 2).
+
+    Seen to FAIL: the glossary had no row for the word, so a screen printing it
+    defined every other arm word on it and not that one.
+    """
+    page = blindplay.observe(keyword_hand_state(
+        ["Deal 8 damage. Apply Cryo. This turn, Grounded counts nothing as "
+         "having gone off."]))
+    assert "- **Grounded** — A Power that pays at the start of your turn"         in page
+    assert "none of your Bombs went off last turn" in page
+
+    # WHETHER OR NOT THE DECK HOLDS IT, which is the state the seat was in:
+    # the trigger is the printed word and nothing else. The buff the card
+    # leaves behind carries it the same way, on a screen with no card naming
+    # it at all.
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["player"]["status"] = [
+        {"id": "KLEEMOD-COLD_BLOODED", "name": "Cold-Blooded", "amount": 1,
+         "type": "Buff", "keywords": [],
+         "description": "This turn, Grounded counts nothing as having gone "
+                        "off."}]
+    assert "- **Grounded** — " in blindplay.observe(state)
+
+
+def test_a_lowercase_grounded_in_prose_is_not_the_keyword():
+    """The case rule every row in this table is under: the game capitalises a
+    keyword wherever it prints one."""
+    page = blindplay.observe(keyword_hand_state(
+        ["The enemy is grounded and cannot fly."]))
+    # The fixture's own faces define other words (`EB-377` put Companion and
+    # the base words on the page), so the pin is the ROW, not the section.
+    assert "**Grounded**" not in page
 
 
 def test_the_companion_row_is_the_mods_own_sentence_about_the_slot():
@@ -5124,10 +5314,11 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     `EB-343` (R248) REWROTE THE TIP THIS SCRAPES, and both of this test's
     claims survive it. [USER] held the in-game word to its 135-character
     ceiling, so the tip reads "A charge on an enemy: grows 4 a turn, goes off
-    only when Set off, all at once. Its hit takes the enemy's debuffs, not
-    yours." The glossary keeps "each" on top of it, because the fact that
-    growth is PER BOMB lives on the badge in game and the seat page has no
-    badge.
+    only when Set off, all at once", and `EB-373` rewrote what follows it
+    ("Not an Attack: only their Vulnerable and a cap move it") because the
+    older clause promised debuffs the fold does not read. The glossary keeps
+    "each" on top of the first sentence, because the fact that growth is PER
+    BOMB lives on the badge in game and the seat page has no badge.
     """
     page = blindplay.observe(keyword_hand_state(["Set off. Place a Bomb 4."]))
     assert (f"- **Bomb** — A charge on an enemy: each grows "
@@ -5304,11 +5495,17 @@ def test_a_potion_claimed_on_full_slots_says_the_slots_are_full():
 
 def test_a_free_slot_claims_a_potion_exactly_as_before():
     """The guard is narrow on purpose: a run with room reads and resolves the
-    way it always did."""
+    way it always did.
+
+    `EB-371` NARROWED WHAT THIS ASSERTS RATHER THAN WEAKENING IT. The belt is
+    printed on every screen that can drop from it now, so a page holding one
+    potion of three says so in its own count. What must stay absent is the
+    WARNING -- the sentence that refuses the claim -- and that is asserted.
+    """
     state = full_slots_rewards_state()
     state["player"]["potions"] = state["player"]["potions"][:1]
     page = blindplay.observe(state)
-    assert "slots are full" not in page
+    assert "Your potion slots are full" not in page
     assert blindplay.act(state, 'choose "Fire Potion"')["ok"]
 
 
@@ -5319,6 +5516,101 @@ def test_the_combat_page_says_how_many_potion_slots_there_are():
     state["player"]["potions"] = [{"name": "Fire Potion",
                                    "description": "Deal 20 damage."}]
     assert "- 1 of 3 slots are full." in blindplay.observe(state)
+
+
+# --------------------------- EB-371: the belt has a way off it, everywhere --
+#
+# THE ROW. At three of three the page REFUSES a potion reward -- "a potion
+# claimed now has nowhere to go" (`EB-341`) -- and outside a fight there was
+# nothing a seat could do to make room: `use potion` needs a combat for a
+# combat-only potion and nothing else touched the belt. The r9 act-1 seat met
+# Tiny Mailbox at a rest site, was handed two potions onto a full belt and lost
+# both, having been told only that it could not claim.
+#
+# THE WIRE HAD IT ALL ALONG. `discard_potion` is dispatched by
+# `McpMod.Actions.cs:65` and `ExecuteDiscardPotion` (`:325`) asks for a run in
+# progress and a potion in the slot -- no combat, no play phase and no
+# usability check, which is exactly what separates it from `use_potion`.
+
+
+def test_the_drop_verb_is_offered_on_a_rest_site_and_posts_the_wires_slot():
+    """The screen a seat was standing on when it lost two potions, and the
+    slot posted is the wire's own (`EB-269`'s lesson, one verb over).
+
+    Seen to FAIL: before this row `drop potion 2` was not a command at all.
+    """
+    state = live("rest-fresh")
+    page = blindplay.observe(state)
+    assert '- `drop potion "<potion>"`' in page
+    assert "- `drop potion <number>" in page
+    # The belt it counts against is printed on the same screen.
+    assert "## Potions" in page
+    assert "- 2 of 3 slots are full." in page
+    assert "- **Mazaleth's Gift** — Gain 1 Ritual." in page
+
+    res = blindplay.act(state, "drop potion 2")
+    assert res["ok"], res["refusal"]
+    assert res["post"] == {"action": "discard_potion", "slot": 1}
+    assert res["printed"] == {"potion": "Mazaleth's Gift"}
+    # And by name, which is the same row.
+    named = blindplay.act(state, 'drop potion "Blessing of the Forge"')
+    assert named["post"] == {"action": "discard_potion", "slot": 0}
+
+
+def test_the_drop_verb_reaches_the_reward_screen_that_refused_the_claim():
+    """The acceptance sentence: at three of three a seat drops one and claims
+    the offered one. Both halves against the one state."""
+    state = full_slots_rewards_state()
+    page = blindplay.observe(state)
+    assert "Your potion slots are full: 3 of 3" in page
+    assert '- `drop potion "<potion>"`' in page
+    # The refusal now names the way out instead of offering only a fight.
+    refusal = blindplay.act(state, 'choose "Fire Potion"')["refusal"]
+    assert "`drop potion 1`" in refusal
+
+    dropped = blindplay.act(state, 'drop potion "Flex Potion"')
+    assert dropped["ok"], dropped["refusal"]
+    assert dropped["post"] == {"action": "discard_potion", "slot": 2}
+    # With the slot free, the claim that was refused resolves.
+    state["player"]["potions"] = state["player"]["potions"][:2]
+    assert blindplay.act(state, 'choose "Fire Potion"')["ok"]
+
+
+def test_the_drop_verb_is_offered_in_a_fight_over_the_belt_already_printed():
+    """A combat screen prints the belt already, so only the verb is added --
+    and the ordinal counts the list the page has been printing since
+    `EB-341`."""
+    state = potion_belt_state(FIRE_IN_SLOT_ZERO + DEXTERITY_IN_SLOT_ONE)
+    page = blindplay.observe(state)
+    assert page.count("## Potions") == 1
+    assert "- `drop potion <number>" in page
+    assert blindplay.act(state, "drop potion 2")["printed"] == {
+        "potion": "Dexterity Potion"}
+
+
+def test_a_screen_with_no_belt_offers_no_drop():
+    """The verb is offered where it resolves and nowhere else: an empty belt
+    has nothing to aim it at, and a blocked screen is not being driven."""
+    state = json.loads(json.dumps(live("rest-fresh")))
+    state["player"]["potions"] = []
+    page = blindplay.observe(state)
+    assert "drop potion" not in page and "## Potions" not in page
+    assert not blindplay.act(state, "drop potion 1")["ok"]
+
+    over = {"state_type": "game_over", "game_over": {"result": "Defeat"},
+            "player": {"potions": [{"name": "Fire Potion", "slot": 0}]}}
+    assert "drop potion" not in blindplay.observe(over)
+
+
+def test_a_drop_that_names_nothing_is_refused_in_the_page_s_own_grammar():
+    """`drop` is not a verb and `drop potion` needs a handle. Both refusals
+    name the forms that resolve rather than a parser rule."""
+    state = live("rest-fresh")
+    bare = blindplay.act(state, "drop potion")
+    assert not bare["ok"] and "drop potion 2" in bare["refusal"]
+    assert not blindplay.act(state, 'drop "Mazaleth\'s Gift"')["ok"]
+    off = blindplay.act(state, "drop potion 9")
+    assert not off["ok"] and "no number 9 on your belt" in off["refusal"]
 
 
 # ----------------------------- EB-342: three page lines short of the state --

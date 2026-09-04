@@ -363,6 +363,10 @@ public static class KleeMod
                     // Eighteen faces printed it and nothing defined it, because
                     // until her three readers existed it had no rule to state.
                     [Cards.ArmKeywordTips.HexereiKey + ".title"] = "Hexerei",
+                    // `EB-372`, Klee's sixth: a Power of hers that Kaeya's
+                    // Cold-Blooded Strike is written against, so the word
+                    // reaches a player who may never have drafted it.
+                    [Cards.ArmKeywordTips.GroundedKey + ".title"] = "Grounded",
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
                     // `EB-378`. The rider, not a keyword: the rows whose Hydro

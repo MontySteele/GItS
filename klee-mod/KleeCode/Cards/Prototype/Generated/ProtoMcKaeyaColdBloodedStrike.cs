@@ -52,14 +52,14 @@ public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalC
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false);
+        ArmKeywordTips.ForGrounded(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_kaeya_frostgnaw");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaeya — Cold-Blooded Strike"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Apply [gold]Cryo[/gold]. This turn, Grounded counts nothing as having gone off."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Apply [gold]Cryo[/gold]. This turn, [gold]Grounded[/gold] counts nothing as having gone off."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

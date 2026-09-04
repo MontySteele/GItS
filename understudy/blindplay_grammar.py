@@ -33,7 +33,8 @@ from understudy.blindplay_shape import (BlindPlayError, COMBAT_SCREENS,
 _QUOTED = re.compile(r'"([^"]*)"|“([^”]*)”')
 
 VERBS = ("play", "end turn", "choose", "skip", "go", "buy", "rest",
-         "upgrade", "remove", "use potion", "confirm", "proceed")
+         "upgrade", "remove", "use potion", "drop potion", "confirm",
+         "proceed")
 
 
 @dataclass
@@ -71,6 +72,11 @@ def parse_command(text: str) -> Command:
     head = head.rstrip(".")
     if head.startswith("use potion") or head.startswith("use the potion"):
         verb = "use potion"
+    # `EB-371`. Two words, like `use potion`, and read before the bare-first-
+    # word rule for the same reason: `drop` alone is not a verb here, and a
+    # tester who types `drop "Fire Potion"` is told so by the VERBS list.
+    elif head.startswith("drop potion") or head.startswith("drop the potion"):
+        verb = "drop potion"
     elif head.startswith("end turn"):
         verb = "end turn"
     else:
@@ -103,6 +109,19 @@ def parse_command(text: str) -> Command:
         ordinal = int(m.group(1))
         if ordinal < 1:
             raise BlindPlayError("the rows on a screen are counted from 1")
+    # `EB-371`: the same second handle on the belt, and the row asks for it by
+    # name (`drop potion <n>`). A potion is the one list on this page a screen
+    # can print twice over -- two Fire Potions in two slots -- so the ordinal
+    # is not a convenience here either.
+    if verb == "drop potion" and not names:
+        m = re.fullmatch(r"drop (?:the )?potion\s+#?(\d+)", head)
+        if m is None:
+            raise BlindPlayError(
+                "`drop potion` needs a name in quotes, or the number of a "
+                "potion on your belt (`drop potion 2`)")
+        ordinal = int(m.group(1))
+        if ordinal < 1:
+            raise BlindPlayError("the potions on your belt are counted from 1")
     return Command(verb=verb, names=names, raw=raw, ordinal=ordinal)
 
 
@@ -554,6 +573,49 @@ def _use_potion(state: dict[str, Any], cmd: Command) -> Resolution:
     return Resolution(True, "use potion", post, printed)
 
 
+def _drop_potion(state: dict[str, Any], cmd: Command) -> Resolution:
+    """`drop potion "<title>"` or `drop potion <n>`, off the belt. `EB-371`.
+
+    THE ROW, IN ONE SENTENCE: at three of three a potion reward is refused
+    ("a potion claimed now has nowhere to go", `_full_slots`) and until this
+    verb existed there was nothing a seat outside a fight could do about it.
+    The r9 act-1 seat lost both of Tiny Mailbox's rest-site potions that way.
+
+    THE SLOT IS THE WIRE'S OWN NUMBER, `_use_potion`'s hard-won lesson
+    (`EB-269`): `BuildPlayerState` skips empty slots while numbering the ones
+    it walks past, so the list position stops agreeing with the slot the
+    moment a potion is spent out of an earlier one, and `ExecuteDiscardPotion`
+    refuses an empty slot by number. The list position is the fallback for a
+    feed that sends none, exactly as it is one function up.
+
+    NO SCREEN TEST HERE. `ExecuteDiscardPotion` (`McpMod.Actions.cs:325`)
+    wants a run in progress and a potion in the slot -- no combat, no play
+    phase, no usability check -- so the only question this page can honestly
+    ask is whether the screen is being driven at all, and `act` has already
+    asked it.
+    """
+    potions = _potions(state)
+    if not potions:
+        return _refuse("you are not carrying any potions")
+    if cmd.ordinal:
+        if cmd.ordinal > len(potions):
+            return _refuse(
+                f"you are carrying {len(potions)} potion(s), so there is no "
+                f"number {cmd.ordinal} on your belt")
+        idx = cmd.ordinal - 1
+    else:
+        idx, why = _match(potions, cmd.name,
+                          key=lambda p: _text(p.get("name")))
+        if idx < 0:
+            return _refuse(why)
+    entry = potions[idx]
+    slot = entry.get("slot")
+    post = {"action": "discard_potion",
+            "slot": slot if isinstance(slot, int) else idx}
+    return Resolution(True, "drop potion", post,
+                      {"potion": _text(entry.get("name"))})
+
+
 def _card_taken(entries: list[dict[str, Any]], idx: int) -> dict[str, Any]:
     """The card a `choose` took, printed (`EB-341`).
 
@@ -675,10 +737,14 @@ def _full_slots(state: dict[str, Any], res: Resolution) -> Resolution | None:
     held = len(_potions(state))
     if not slots or held < slots:
         return None
+    # `EB-371`: the refusal names the way out. It used to say "use one first"
+    # on a screen where a combat-only potion cannot be used, which left a seat
+    # at three of three with nothing to do but leave the reward behind.
     return _refuse(
         f"your potion slots are full: {held} of {slots}, and this reward is a "
-        f"potion. Use one first, or leave this on the screen -- claiming it "
-        f"now is how a potion disappears with the game saying nothing.")
+        f"potion. Drop one first (`drop potion 1`, or by name), use one if "
+        f"you are in a fight, or leave this on the screen -- claiming it now "
+        f"is how a potion disappears with the game saying nothing.")
 
 
 # `EB-341`: what an ambiguous option refusal tells the tester to do instead.
@@ -881,6 +947,11 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
                else _refuse(_not_in_battle(obs)))
     elif cmd.verb == "use potion":
         res = _use_potion(state, cmd)
+    elif cmd.verb == "drop potion":
+        # `EB-371`: no screen list, deliberately. The wire's own gate on
+        # `discard_potion` is "a run is in progress", which is the question
+        # `obs["blocked"]` above has already answered for this page.
+        res = _drop_potion(state, cmd)
     elif cmd.verb == "end turn":
         res = (Resolution(True, "end turn", {"action": "end_turn"}, {})
                if st in COMBAT_SCREENS else _refuse(_not_in_battle(obs)))
