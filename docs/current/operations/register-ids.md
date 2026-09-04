@@ -1466,3 +1466,48 @@ against the shipped kits and the richness playtest; the Kokomi items retire
 with the Plan overhaul, Spotlight was answered by R228, and what survives of
 the Furina items returns through the reframe's round packets. S4-G6 and
 S4-G14 closed the same way in the same ruling. Ceilings never come down.
+EB-380 RETIRED 2026-09-04: both surfaces now read "front non-Minion, or ALL, Minions too; Enemy Vulnerable counts, your Weak and Strength do not".
+EB-379 RETIRED 2026-09-04: the face reads "After 2 turns, deal 12" and the badge says "When it ends" beside its own turns-remaining count.
+EB-378 RETIRED 2026-09-04: the aura scan now walks branches and the Plan, so KokomiPlan deals every damaging clause as Element.Hydro and four rows gain the gem.
+EB-376 RETIRED 2026-09-04: the panel's sentence now carries on all four surfaces -- sheet, regenerated card, PlansAlsoNowPower, codegen template.
+EB-385 RETIRED 2026-09-04: a smartDescriptionReframe row on FanfareMeterPower names the Fanfare tip's two mint sites and nothing else.
+EB-384 RETIRED 2026-09-04: the deploy-performs clause pays a performance whose Encore spend refreshes the art, so staleness reads off the combat now.
+EB-383 RETIRED 2026-09-04: four smart-description rows on the badge, one per front plus the empty one, each naming the front member and all three rules.
+EB-382 RETIRED 2026-09-04 as not a defect: the spend is the shipped post-Block absorption, silenced by the meter leg, pinned at all three amounts in both engines.
+EB-366 RETIRED 2026-09-04: the card preview reads ReactionEffects.FrozenBossVulnWillApply, and the blind page prints the boss clause in a boss room only.
+EB-364 RETIRED 2026-09-04: SpotlightSystem.DesignateOneModeIsUnpayable asks the refusal one phase early, since the price is charged inside the op.
+EB-260 RETIRED 2026-09-04: ProtoBombPower states two smart rows and picks between them off the live MineCount.
+EB-261 RETIRED 2026-09-04: the generator derives the gate from the row and emits the sentence "no enemy is holding a Bomb" on IUnplayableReasonCard.
+EB-265 RETIRED 2026-09-04: {Size} became a DynamicVar subclass computing at format time, so Strength gained later moves the face.
+EB-266 RETIRED 2026-09-04: the guard sits at KleeBurstResource.Find, the one funnel every gain, read, drain and gauge refresh passes through.
+EB-270 RETIRED 2026-09-04: badge, hit and ledger now share one number -- the badge is PredictedSetOffDamage(), the ledger banks damage.
+EB-279 RETIRED 2026-09-04: KleeOverhaulSweepHooks is a standing listener sweeping on AfterDeath and after every card play, alongside the three old sweeps.
+EB-280 RETIRED 2026-09-04: a set_off carrying damage now owns the same DamageVar an op: damage owns, and the row's face renders {Damage:diff()}.
+EB-281 RETIRED 2026-09-04: Vfx/Prototype/SparkGauge.cs draws a bar-less klee_spark gauge at the overhead slot and hides the status-strip badge.
+EB-282 RETIRED 2026-09-04: the blind page prints the Spark price in its cost slot first, and the restated sentence came off all seven surface rows.
+EB-283 RETIRED 2026-09-04: upgrades.prototype_default_delta is one implementation both engines read, gated by upgrade_face_findings refusing a row whose + face prints identically to its base.
+EB-284 RETIRED 2026-09-04: both arm pools now concat their character's Ancient ledger, and lint_ancient_coverage.py gates the arm pools too.
+EB-285 RETIRED 2026-09-04: the {Damage:diff()} token now mirrors build_vars, and lint_generated_structure L1 covers the prototype surface, which it never had.
+EB-286 RETIRED 2026-09-04: _card_face carries printed_spark and the hand, reward and shop rows print the whole Spark price through qa_packet.cost_label.
+EB-289 RETIRED 2026-09-04: the face reads a new {Count} var synced off the charge list, replacing the stale {Amount} stack.
+EB-291 RETIRED 2026-09-04: Pounding Surprise leads "Sparks come from this:", the Mine tip says it is the same Pyro hit for its own size, and Big Badda Boom's bonus reads "hit again for the damage the Bombs dealt".
+EB-293 RETIRED 2026-09-04: the codegen strips a printed "Exhaust." line, a plan-only row prints "Play on the Bake-Kurage.", and the Casket reads "a Hydro hit for 2".
+EB-297 RETIRED 2026-09-04: GaugeBridge's kokomi_burst spec now selects on KokomiResources.BurstGaugeApplies instead of a bare IsKokomi, so the arm draws no overhead bar.
+EB-327 RETIRED 2026-09-04: Klee's EB-266 guard moved one character over, into KokomiResources.GainBurst and resources.gain_burst.
+EB-381 RETIRED 2026-09-04: settle_board polls until the bodies stop moving, bounded at 6, so HP and the status list come off one creature dict after settle.
+EB-377 RETIRED 2026-09-04: BaseKeywordTips attaches five base words and the page's BASE_KEYWORDS adds four more, read last so the wire wins.
+EB-386 RETIRED 2026-09-04: both modes print "Lasts until the Spotlight moves" and the badge now follows its mode via SyncModeDisplay.
+EB-368 RETIRED 2026-09-04: the Salon rules tip, read by both deploy cards and the stage hover, states all three rules under the arm.
+EB-367 RETIRED 2026-09-04: a GAME_KEYWORDS table carries Ringing with its rule, and the codegen's Swirl clause now reads "onto ALL enemies" on six shipped faces.
+EB-180 RETIRED 2026-09-04: soak.py, blindplay.py and staged_turn.py are each a facade plus one module per concern, re-exporting every name with entry points and output unchanged.
+EB-262 RETIRED 2026-09-04: a shelf's card_cost and Spark price print beside the gold, and the shop is remembered by its shelf fingerprint so a bought row keeps its face, marked sold.
+EB-299 RETIRED 2026-09-04: the footnote says the number is a place in a list that re-counts, and the telegraph names its type and whose the number is.
+EB-277 RETIRED 2026-09-04: the Prototype-stage rule gives every reachable row a real delta, under EB-283's codegen gate refusing an identical + face.
+EB-41 RETIRED 2026-09-04 on [USER]'s rulings: Encore and Fanfare telemetry stay separate, no shared base (question 1, "I think they should be separate"); the exp_* move takes its default, no module moves and all 21 records stay re-runnable (question 2).
+EB-128 RETIRED 2026-09-04 on [USER]'s ruling ("they are truly lost and need to be recreated"): the reconstructed defect/necrobinder/regent *_char_facts.yaml, re-decompiled from the live DLL 2026-08-24, stand as the originals, and tools.backup_game_ref reports the vault holds all five, 29 files unchanged.
+EB-362 RETIRED 2026-09-04: the CompanionsPlayedThisTurn write moved to the always-on marker power, so it no longer depends on drawing The General's Banner.
+EB-358 RETIRED 2026-09-04: each Sparks 'n' Splash copy is now its own end-of-turn hit, the loop running once per stack, and the badge's count reads as the hit count, both engines.
+EB-343 RETIRED 2026-09-04: set-off now drops the placer's Strength and Weak and applies only the target's Vulnerable and per-hit cap, with the badge and tooltip naming every modifier folded in.
+EB-320 RETIRED 2026-09-04: #317 fixed the emitter and CompanionStandInHandOffTests.cs pins HandOffTo yes for a Klee reward, no for anyone else, no with the arm off.
+EB-322 RETIRED 2026-09-04: one loader.display_name, imported by both engines, strips the " (proto)" suffix at the emitter's single title site and at prototype_cards.
+EB-319 RETIRED 2026-09-04: _refuse carries the forms that resolve and act folds them into every refusal, falling back to the screen's own grammar.
