@@ -336,16 +336,13 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_run_away",
     "proto_ko_grounded",
     "proto_ko_sorry_jean",
-    # THE DEFENCE SHELF (4 -- R252, Klee round 9 pick 1 at its default). Two
-    # Commons and two Uncommons, and the split is the pick's own: the two rows
-    # a starting hand needs (a placer with a Block half, and Run Away!'s shape
-    # on the React loop) are Common, and the two that ask for a deck around
-    # them (the capped read of the pile, the Block-per-explosion Power) are
-    # Uncommon.
+    # THE DEFENCE SHELF (2 -- R252, Klee round 9 pick 1 at its default). The
+    # pick drafted four; the R253 charter audit withdrew two of them (Fire
+    # Safety and Safety Lesson) and they are on no surface. What is left is
+    # the placer with a Block half a starting hand needs, and the capped read
+    # of the pile that asks for a deck around it.
     "proto_ko_dodoco_cover",
     "proto_ko_careful_now",
-    "proto_ko_fire_safety",
-    "proto_ko_safety_lesson",
     # THE HEXEREI READERS (3 -- R244, the ruled packet's sec.2). One per
     # rarity, which is the ruling's own shape: a Common that reads the turn, an
     # Uncommon Power that is DEAD ALONE by ruling (pick 2 at its default), and

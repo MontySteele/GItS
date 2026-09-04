@@ -139,9 +139,10 @@ are in [`workstreams.md`](workstreams.md).
   inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
 - **Klee** — Rounds 8 and 9 are RULED (R250, R252;
   `review/ruled/klee-overhaul-round-8-2026-09-04.md`, `...round-9-2026-09-04.md`):
-  the Splash pays the largest Bomb, and the pool's defence shelf is five
-  conditional rows (Dodoco Cover, Careful Now, Fire Safety, Safety Lesson,
-  Barbara — Front Row Seat). Round 10 is READ
+  the Splash pays the largest Bomb, and the pool's defence shelf is three
+  conditional rows (Dodoco Cover, Careful Now, Barbara — Front Row Seat);
+  Fire Safety and Safety Lesson were withdrawn on the charter audit,
+  whose ruling record lands with this stack. Round 10 is READ
   (`review/active/klee-overhaul-round-10-2026-09-04.md`): six runs on
   `0.2.2401+proto`, six act-1 clears, none past act 2; Dodoco Cover played
   every fight, Careful Now split the seats along cook-or-cash, Front Row

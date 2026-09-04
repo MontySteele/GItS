@@ -432,22 +432,6 @@
    upgrade: {cap: +3},
    effects: [{op: block_largest_bomb, cap: 10}]}
 
-- {id: proto_ko_fire_safety, name: "Fire Safety", character: klee,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   description: "Gain 3 [gold]Block[/gold]. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 6 additional [gold]Block[/gold].",
-   upgrade: {conditional_block: +2},
-   effects: [{op: block, amount: 3},
-             {op: conditional, if: bomb_reacted_this_turn,
-              then: [{op: block, amount: 6}]}]}
-
-- {id: proto_ko_safety_lesson, name: "Safety Lesson", character: klee,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   description: "Whenever one of your [gold]Bombs[/gold] goes off, gain 2 [gold]Block[/gold].",
-   upgrade: {power_amount: +1},
-   effects: [{op: apply_power, power: ko_safety_lesson, amount: 2, target: self}]}
-
 - {id: proto_mc_barbara_front_row_seat, name: "Barbara — Front Row Seat", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,

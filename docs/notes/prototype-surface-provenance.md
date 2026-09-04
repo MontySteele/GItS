@@ -2216,11 +2216,6 @@ to the Bomb state and none is a plain Block:
   The bigger the bomb she is cooking, the more carefully she stands; the cap
   keeps it from making Grounded a stall. The `block_largest_bomb` op reads
   `klee_overhaul.largest_size`, the Splash's own reader since R250.
-- **Fire Safety** (Common, 0): Run Away!'s shape on the React loop, paid
-  when a Bomb reacted this turn (`bomb_reacted_this_turn`).
-- **Safety Lesson** (Uncommon Power): Spray's Grounded, Block per Bomb going
-  off. It pays nothing under the Splash, which does not Set off, so the
-  Splash keeps its R250 cost.
 - **Barbara — Front Row Seat** (stand-in for Let the Show Begin♪): the
   fourth grown-up, Hydro applied twice so Klee's own Pyro does not eat it
   (round 8's Diona finding), Block per Bomb this turn. Same shape as Diona's
@@ -2229,16 +2224,13 @@ to the Bomb state and none is a plain Block:
 Numbers are Prototype numbers, D by the ladder; the seats read them on
 round 10 before [USER] does.
 
-ONE UPGRADE KEY WAS RESPELLED WHEN THE ROWS WERE BUILT, and only the key.
-Fire Safety was drafted `{block: +2, conditional_block: +2}` and ships
-`{conditional_block: +2}`, because `conditional_block` bumps EVERY printed
-Block on a row and not only the branch one (`upgrades.apply_upgrade`, and
-`docs/klee-upgrades.yaml`'s `hold_the_line` says so in its own comment:
-"5->8 top level AND 6->9 in the branch"). The drafted pair would have moved
-the top-level 3 twice, to 7, which is not what a row stating two `+2`s says.
-The one key moves both printed numbers by exactly 2 -- 3 to 5, 6 to 8 -- which
-is the drafted intent, and both engines now do it. Nothing else on any of the
-five rows moved: no name, no cost, no number and no face.
+TWO OF THE FIVE ARE WITHDRAWN on the R253 charter audit and are on no
+surface, in no roster and in no engine: Fire Safety (Common, 0 -- Run Away!'s
+shape on the React loop) and Safety Lesson (Uncommon Power -- Spray's
+Grounded, Block per Bomb going off). The shelf ships as three. The
+`bomb_reacted_this_turn` condition STAYS, because Perfect Timing and Sizzle
+read it too; the `ko_safety_lesson` power was Safety Lesson's alone and is
+deleted with it.
 
 ## before proto_kk_tide_chart
 

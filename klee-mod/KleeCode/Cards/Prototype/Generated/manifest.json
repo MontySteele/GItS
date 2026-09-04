@@ -65,7 +65,6 @@
     "proto_ko_dig_in",
     "proto_ko_dodoco_cover",
     "proto_ko_explosives_workshop",
-    "proto_ko_fire_safety",
     "proto_ko_fish_flavored_bait",
     "proto_ko_flame_dance",
     "proto_ko_fwoosh",
@@ -80,7 +79,6 @@
     "proto_ko_quick_fuse",
     "proto_ko_rapid_fire",
     "proto_ko_run_away",
-    "proto_ko_safety_lesson",
     "proto_ko_sizzle",
     "proto_ko_sorry_jean",
     "proto_ko_sparks_n_splash",
@@ -241,7 +239,6 @@
     "proto_ko_dig_in": "klee",
     "proto_ko_dodoco_cover": "klee",
     "proto_ko_explosives_workshop": "klee",
-    "proto_ko_fire_safety": "klee",
     "proto_ko_fish_flavored_bait": "klee",
     "proto_ko_flame_dance": "klee",
     "proto_ko_fwoosh": "klee",
@@ -256,7 +253,6 @@
     "proto_ko_quick_fuse": "klee",
     "proto_ko_rapid_fire": "klee",
     "proto_ko_run_away": "klee",
-    "proto_ko_safety_lesson": "klee",
     "proto_ko_sizzle": "klee",
     "proto_ko_sorry_jean": "klee",
     "proto_ko_sparks_n_splash": "klee",
@@ -565,9 +561,6 @@
     "proto_ko_explosives_workshop": {
       "power_amount": 1
     },
-    "proto_ko_fire_safety": {
-      "conditional_block": 2
-    },
     "proto_ko_fish_flavored_bait": {
       "damage": 3,
       "bomb_size": 2
@@ -611,9 +604,6 @@
     },
     "proto_ko_run_away": {
       "block": 3
-    },
-    "proto_ko_safety_lesson": {
-      "power_amount": 1
     },
     "proto_ko_sizzle": {
       "damage": 3

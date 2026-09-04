@@ -66,7 +66,6 @@ internal static class KleePowerIcons
         // explosion ledger, one for the turn nothing went off and one for the
         // turn something did. Its own illustration stays owed until the slice
         // is accepted.
-        SafetyLessonPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         // R244's TWO COVEN READERS, on the block above's terms verbatim: the
         // Circle borrows the icon of the arm power whose job it takes over
         // (Chained Reactions -- a Bomb per trigger, one trigger over), and the

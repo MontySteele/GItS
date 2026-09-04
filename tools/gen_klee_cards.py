@@ -1779,12 +1779,6 @@ APPLY_POWERS = {
     "ko_grounded": ("GroundedPower", None,
         "At the start of your turn, if none of your [gold]Bombs[/gold] went "
         "off last turn, gain {X} Block."),
-    # R252's defence-shelf Power (Safety Lesson). Grounded's grammar one
-    # trigger over, on the EXPLOSION bus -- so a three-Bomb Set off pays three
-    # times, and Sparks 'n' Splash's echo pays nothing at all, because the echo
-    # is not a Set off (R250).
-    "ko_safety_lesson": ("SafetyLessonPower", None,
-        "Whenever one of your [gold]Bombs[/gold] goes off, gain {X} Block."),
     # R244's coven reader. Chained Reactions' grammar one trigger over, and
     # DEAD ALONE by the ruling's own pick 2 -- a deck with no witch in it never
     # sets this off, which is what makes it the bridge card rather than a
