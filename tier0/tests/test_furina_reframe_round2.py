@@ -241,6 +241,24 @@ def test_the_three_spotlight_meters_do_not_reach_the_page():
     assert "Spotlight Plays" not in page
 
 
+def test_the_spend_boost_accumulator_does_not_reach_the_page():
+    """`EB-422`, the fourth of the same kind, found the same way three rounds
+    later: "Spotlight Spend Boost: 30" sat in the status bar all fight with no
+    gloss and no card naming it (round 5, run 1, fight 4).
+
+    It is bookkeeping, not a currency. `SpotlightSystem.OnEncoreSpent` is its
+    only writer and adds `OvationSpendBoostPower`'s amount on each Encore
+    spend; `ClearSpendBoost` zeroes it at turn end. The rule is already on the
+    page under the name a card prints -- "Standing Ovation", whose own text
+    says what it multiplies and when -- and the running total is a quantity
+    that sentence never promises, which is what the seat reported: "Standing
+    Ovation says 10%; the meter said 30"."""
+    page = _combat_page({"KLEEMOD_SPOTLIGHT_SPEND_BOOST": 30})
+
+    assert "Spend Boost" not in page
+    assert "30" not in page
+
+
 def test_a_real_meter_beside_them_still_reaches_the_page():
     """The mutation guard: the hide is a named list, not a Spotlight-shaped
     hole that would take a future meter with it."""

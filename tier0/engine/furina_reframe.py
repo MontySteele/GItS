@@ -361,3 +361,26 @@ def companion_play_trigger(state, card) -> None:
     p.salon.append(p.salon.pop(0))
     state.emit("salon_trigger", card=card.id, member=member,
                company=list(p.salon))
+
+
+def companion_replay_no_trigger(state, card) -> None:
+    """A Companion REPLAY, which performs nobody -- said out loud (`EB-420`).
+
+    THE RULE IS THE ONE ABOVE, unchanged: `combat._finish_play` gates the
+    trigger on `replay_index == 0`, and that is LAW:145's per-Companion-play
+    bound rather than an accident of the call site -- "a replay is one card
+    being resolved twice, and a per-play bound a replay can double is not a
+    bound" (`KleeCompanionSpark`, the same clause one kit over).
+
+    THE FACT LEAVES NO TRACE, which is why it gets an event, the same argument
+    the whiff above is emitted under: two performs off two plays and two
+    performs off one Duet-doubled play are the same board a moment later. The
+    round-5 seat played Duet into Freminet, counted three Companion plays'
+    worth of triggers, got two, and found no line naming the second play at
+    all. C# twin: `SalonMemberPower.NoteCompanionReplay`, at the same gate.
+
+    NOTHING HAPPENS HERE. It emits and returns; no rule reads the event back.
+    """
+    if not manual_active(state.player) or not card.is_companion:
+        return
+    state.emit("salon_replay_no_trigger", card=card.id)

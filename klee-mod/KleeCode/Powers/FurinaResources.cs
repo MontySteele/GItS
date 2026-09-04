@@ -1041,6 +1041,18 @@ public sealed class FurinaResourceHooks : AbstractModel
             await SalonMemberPower.CompanionPlayTrigger(
                 choiceContext, owner, cardPlay.Card);
         }
+        else
+        {
+            // `EB-420`. THE OTHER SIDE OF THE SAME GATE, said out loud. The
+            // bound above is deliberate (LAW:145, and `KleeCompanionSpark`
+            // spells out why a replay must not double it), and it left no
+            // trace: Duet doubled Freminet's hit, the Salon performed once,
+            // and no line on any screen named the second play. Recorded at
+            // the gate rather than inside `CompanionPlayTrigger`, because
+            // this is the branch that does NOT call it, and the Companion and
+            // arm tests live in that method for the reason its doc gives.
+            SalonMemberPower.NoteCompanionReplay(owner, cardPlay.Card);
+        }
 #endif
         // A7: the play's Encore spend, Center Stage credit and floor grant all
         // moved the meter from BeforeCardPlayed, which has no context of its

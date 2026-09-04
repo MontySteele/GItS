@@ -2267,8 +2267,11 @@ and 20. These four rows are arm-only copies at the arm's scale (12 to 6, 15
 to 8, 20 to 10), swapped in for the shipped ids at the same rarity by the
 pool seam (`loader._pool_substitutions`, the Kurage's Oath shape), so
 nothing on the shipped sheet moves and a run with the arm off is offered
-the shipped card. The `(reframe)` suffix keeps the names unique for the
-lint; the face the player sees is the card's own name.
+the shipped card. The rows declare the shadow with ` (proto)`, the one suffix
+`loader.display_name` strips in both engines, so the face the player
+sees is the card's own name (`EB-419`: they spelled it ` (reframe)`
+at first, which nothing stripped, and the arm's starter reached the
+round-5 seat printing the tag).
 
 
 ## proto_mi_gorou_war_banner

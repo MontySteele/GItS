@@ -965,6 +965,63 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         RotateLeftmost(owner, 1);
         FurinaReframeLedger.For(owner).NoteCompanionTrigger(member);
     }
+
+    /// <summary>
+    /// `EB-420`. A Companion REPLAY -- the second and later resolutions of one
+    /// play, which <see cref="CompanionPlayTrigger"/>'s `IsFirstInSeries` gate
+    /// deliberately does not answer.
+    ///
+    /// IT PERFORMS NOBODY, AND THAT IS THE RULE. LAW:145 (countersigned R224)
+    /// lets a kit engine respond to a Companion play only where it "bounds the
+    /// amount generated per Companion play"; `KleeCompanionSpark` states the
+    /// consequence for the two cards that replay -- "a replay is one card
+    /// being resolved twice, and a per-play bound a replay can double is not a
+    /// bound". Duet and Study Buddy are those two cards.
+    ///
+    /// SO THIS METHOD CHANGES NOTHING AND ONLY RECORDS. The Furina round-5
+    /// seat played Duet into Freminet, got the doubled hit and two Crabaletta
+    /// performs where it counted three due, and found nothing on any screen
+    /// naming the second play: "I ended the turn unable to say whether Duet
+    /// had fired at all." The face says the rule now
+    /// (<c>ReplayNextCompanionPower</c>'s arm sentence) and the page says it
+    /// happened. Sim twin: <c>furina_reframe.companion_replay_no_trigger</c>.
+    ///
+    /// The same two guards as the trigger, in the same order and for the same
+    /// reasons: the arm's MANUAL leg owns this rule, and the Companion test
+    /// belongs to the rule rather than to a caller.
+    /// </summary>
+    public static void NoteCompanionReplay(Creature owner, CardModel? card)
+    {
+        if (!FurinaReframe.ManualLiveFor(owner)) return;
+        if (card is not Cards.ICompanionCard) return;
+        FurinaReframeLedger.For(owner).NoteReplayWithoutTrigger(
+            PrintedTitle(card));
+    }
+
+    /// <summary>
+    /// A card's printed title for a LEDGER row, and the id when it has none.
+    ///
+    /// `PlayTelemetry`'s `card.Title ?? card.Id.Entry` for the same question,
+    /// plus the guard that idiom leaves to its caller: `CardModel.Title`
+    /// resolves through `LocString.GetFormattedText`, which throws on a model
+    /// whose loc table has not been built -- and this is reached from
+    /// `AfterCardPlayed`, inside `CombatManager`'s async continuation, where a
+    /// throw reaches the player as a black screen rather than an error
+    /// (`KleeElementalHooks.BeforeCardPlayed` guards its own hook for exactly
+    /// that reason). A record of what happened must never be able to end the
+    /// run it is recording, so the id is the fallback for both cases.
+    /// </summary>
+    private static string PrintedTitle(CardModel card)
+    {
+        try
+        {
+            return card.Title ?? card.Id.Entry;
+        }
+        catch (System.Exception)
+        {
+            return card.Id.Entry;
+        }
+    }
 #endif
 
     public override async Task AfterPlayerTurnStart(

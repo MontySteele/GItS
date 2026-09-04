@@ -281,6 +281,56 @@ internal static class ReactionEffects
             (_resolvedByPlayer.TryGetValue(player, out var n) ? n : 0) + 1;
     }
 
+    // ---- `EB-423`: A HIT THAT SHATTERS LEAVES NO FREEZE ----------------
+    //
+    // THE DIVERGENCE, in the seat's words (Furina round 5, run 1, fight 4):
+    // "the shatter's own text says 'The first Attack to hit it Shatters for 6
+    // unblockable damage and removes Frozen' -- the shatter demonstrably
+    // happened (the 6 is in the HP total) and the board still read Frozen 1".
+    //
+    // BOTH RULES FIRED ON ONE HIT, IN THE WRONG ORDER. A Cryo Attack landed on
+    // a body that was Frozen AND wearing a Hydro aura (Crabaletta refreshed it
+    // between the two plays of a doubled Companion), and the two rules live in
+    // two powers inside ONE `AfterDamageReceived` broadcast: `FrozenPower`
+    // Shattered and removed itself, and then `AuraPower` consumed the Hydro
+    // and resolved a Frozen reaction that put a fresh stack back on.
+    //
+    // THE SIM CANNOT REACH THAT STATE, and it is the reference. Its order is
+    // reaction FIRST and Shatter after: `effects.resolve_hit` snapshots
+    // `was_frozen` before the hit, `reactions._react` does `enemy.frozen += 1`,
+    // and the Shatter block below it does `enemy.frozen = 0` -- so a re-freeze
+    // on the shattering hit is cleared by the Shatter it arrived beside. One
+    // rule, one board, two answers is the defect; the sentence is right in
+    // both engines and this engine's board was not.
+    //
+    // SO THE MARK, narrow by construction: the Frozen branch below skips its
+    // apply when THIS hit already Shattered THIS creature. It is set after the
+    // Shatter's own damage lands -- that nested hit opens its own
+    // `BeforeDamageReceived` broadcast, which clears the mark -- and cleared
+    // at the top of every damage event by `KleeElementalHooks`, so it lives
+    // exactly as long as the one broadcast it is about and can never swallow a
+    // later freeze. THE OTHER HOOK ORDER NEEDS NOTHING: when `AuraPower` runs
+    // first the apply lands on the power that is still standing and
+    // `PowerCmd.Remove` takes every stack with it, which is already the sim's
+    // answer.
+    private static Creature? _shatteredThisHit;
+
+    /// <summary>`EB-423`. This hit Shattered <paramref name="target"/>, so a
+    /// Frozen reaction resolving later in the same broadcast must not put the
+    /// freeze back. Called by <see cref="FrozenPower"/> and nowhere else.
+    /// </summary>
+    public static void MarkShattered(Creature target) =>
+        _shatteredThisHit = target;
+
+    /// <summary>The damage-event boundary, called from
+    /// <c>KleeElementalHooks.BeforeDamageReceived</c> -- the one hook that runs
+    /// for every hit, in the broadcast before any power's
+    /// `AfterDamageReceived`.</summary>
+    public static void ClearShatterMark() => _shatteredThisHit = null;
+
+    private static bool ShatteredThisHit(Creature target) =>
+        ReferenceEquals(_shatteredThisHit, target);
+
     public static async Task Resolve(
         PlayerChoiceContext choiceContext,
         Reaction reaction,
@@ -416,12 +466,17 @@ internal static class ReactionEffects
                         ReactionConstants.FrozenBossVuln,
                         applier: dealer, cardSource: cardSource);
                 }
-                else
+                else if (!ShatteredThisHit(target))
                 {
                     await PowerCmd.Apply<FrozenPower>(
                         choiceContext, target, 1,
                         applier: dealer, cardSource: cardSource);
                 }
+                // `EB-423`. The aura is CONSUMED either way, above, and the
+                // reaction still counted -- what the mark suppresses is only
+                // the freeze this hit's own Shatter has already removed. The
+                // sim reaches the same board by the opposite route: it applies
+                // the stack and the Shatter block zeroes it a few lines later.
                 break;
 
             // Completed with the companions batch (2026-07-21): the roster's

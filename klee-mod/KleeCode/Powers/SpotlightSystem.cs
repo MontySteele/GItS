@@ -658,7 +658,57 @@ public sealed class GuestCastPower : PowerModel, ILocalizationProvider
             "Companion cards are Spotlighted: 50% stronger printed damage and "
           + "[gold]Block[/gold], no Fanfare. Lasts until the "
           + "[gold]Spotlight[/gold] moves."),
+#if PROTOTYPE_CARDS
+        // `EB-421`. THE ARM'S FACE, and it is the shipped sentence with one
+        // clause removed and nothing added.
+        //
+        // "no Fanfare" is true of the SHIPPED kit, where the Fanfare a
+        // Spotlight makes is Center Stage's -- her own cards, by the card-class
+        // test in `NoteSpotlightedPlay` -- so a Companion play mints none. The
+        // arm retires that leg outright (`ReframeRetiresTheShippedMintLegs`)
+        // and mints by PERFORMANCE instead, and a Companion play is exactly
+        // what makes the front member perform
+        // (`SalonMemberPower.CompanionPlayTrigger`). So under the arm the
+        // clause is not merely stale, it is backwards: a Guest Cast play is
+        // the commonest way to make Fanfare. The round-5 seat watched the
+        // meter go 3 to 5 on the beat this sentence forbade.
+        //
+        // NOTHING IS PUT IN ITS PLACE. The rate and the two sites are the
+        // Fanfare badge's sentence (`FanfareMeterPower`'s own arm face,
+        // `EB-385`), and a mode buff restating a meter's rule is the second
+        // surface `EB-386` already refused for the mode number.
+        //
+        // Same `SmartDescriptionLocKey` mechanism, same no-semicolon rule as
+        // that face: `lint_text_conventions` reads these literals out of the
+        // source and its regex stops at one.
+        ("smartDescriptionReframe",
+            "Companion cards are Spotlighted: 50% stronger printed damage and "
+          + "[gold]Block[/gold]. Lasts until the [gold]Spotlight[/gold] "
+          + "moves."),
+#endif
     };
+
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// `EB-421`. Which face this badge prints, the `FanfareMeterPower` shape
+    /// one power over. `IsMutable` first for its reason: `HasSmartDescription`
+    /// probes this key on a canonical copy, whose `Owner` getter asserts
+    /// mutability (`EB-94`), so a compendium copy reads the shipped sentence --
+    /// which is what a release build has anyway.
+    /// </summary>
+    protected override string SmartDescriptionLocKey
+    {
+        get
+        {
+            if (IsMutable && Owner is { } owner
+                && FurinaReframe.MeterLiveFor(owner))
+            {
+                return Id.Entry + ".smartDescriptionReframe";
+            }
+            return base.SmartDescriptionLocKey;
+        }
+    }
+#endif
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Single;

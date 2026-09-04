@@ -242,8 +242,43 @@ public sealed class FurinaReframeLedger
     public void NotePerformance(Performed performed) =>
         _performances.Add(performed);
 
+    // ---- `EB-420`: THE REPLAY THAT PERFORMED NOBODY -------------------
+    //
+    // The same kind of fact as the whiff above, found the same way. Duet plays
+    // the next Companion card an extra time; the Salon trigger is gated on
+    // `IsFirstInSeries`, so the extra play performs nobody -- LAW:145's
+    // per-Companion-play bound, stated at Klee's twin `KleeCompanionSpark`
+    // ("a per-play bound a replay can double is not a bound").
+    //
+    // AND THE FACT LEAVES NO TRACE. Two Crabaletta lines for what the seat
+    // counted as three Companion-card plays' worth of triggers is the same
+    // board as two performs off two plays, and "I ended the turn unable to say
+    // whether Duet had fired at all" is what a rule with no surface reads
+    // like. So the replay is recorded under its own name, beside the
+    // performances it is absent from, and the page prints it in that block.
+    // Mirrors the sim's `salon_replay_no_trigger`, emitted from
+    // `combat._finish_play` on the other side of the same gate.
+    //
+    // BY PRINTED TITLE, because that is what the reader is looking at, and per
+    // TURN, cleared with the performances: it answers "what happened on the
+    // turn I am looking at", which is the performance list's own question.
+
+    private readonly List<string> _replaysWithoutTrigger = new();
+
+    /// <summary>This turn's Companion replays that performed nobody, in the
+    /// order they happened, by printed title.</summary>
+    public IReadOnlyList<string> ReplaysWithoutTrigger =>
+        _replaysWithoutTrigger;
+
+    public void NoteReplayWithoutTrigger(string card) =>
+        _replaysWithoutTrigger.Add(card);
+
     /// <summary>The turn boundary, and the only one this class has.</summary>
-    public void ClearPerformances() => _performances.Clear();
+    public void ClearPerformances()
+    {
+        _performances.Clear();
+        _replaysWithoutTrigger.Clear();
+    }
 
     /// <summary>
     /// `EB-405`. THE WIRE'S VIEW of this turn's performances.
@@ -282,6 +317,13 @@ public sealed class FurinaReframeLedger
                 ["paid"] = row.Paid,
                 ["evoked"] = row.Evoked,
             })
+            .ToList();
+        // `EB-420`. Beside the performances and never inside them: a replay
+        // that performed nobody is not a performance, and a reader must be
+        // able to tell "the stage acted twice" from "you played the card
+        // twice and the stage acted once".
+        snapshot["replayed"] = For(creature).ReplaysWithoutTrigger
+            .Select(card => (object?)card)
             .ToList();
         return snapshot;
     }
