@@ -446,8 +446,15 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
     return {"card": card, "number": number, "line": line,
             "on_play": bool(row.get("on_play")),
             "board_read": isinstance(raw_moved, list),
+            # `EB-440`: A ROW IS A BODY THIS PLAN MOVED SOMETHING ON, and
+            # Block is something. The filter existed to drop the mod's
+            # zero-delta rows, and a beat that spent itself entirely on a
+            # Defend intent produces exactly such a row with the Block beside
+            # it -- which is the receipt the r12 seat did not get.
             "moved": [_moved_row(m) for m in (raw_moved or [])
-                      if isinstance(m, dict) and _int(m.get("amount")) > 0]}
+                      if isinstance(m, dict)
+                      and (_int(m.get("amount")) > 0
+                           or _int(m.get("absorbed")) > 0)]}
 
 
 def last_morning(state: dict[str, Any]) -> dict[str, Any] | None:
@@ -483,11 +490,19 @@ def _moved_row(row: dict[str, Any]) -> dict[str, Any]:
     handed the numbered name this page has been using all fight. Where the
     game would not answer either, the row says so in words rather than
     printing a bare number against nothing.
+
+    `EB-440` ADDED `absorbed`, AND THE ABSENT / ZERO SPLIT IS THE ONE
+    `board_read` MAKES ONE LEVEL UP. A bridge older than the measurement sends
+    no key at all and this page must not print a Block figure for it; a bridge
+    that sends 0 measured the Block and found none. So an absent key answers
+    `None` and a present one answers its number.
     """
+    absorbed = row.get("absorbed")
     return {"target": _text(row.get("target")) or "an enemy",
             "combat_id": _text(row.get("combat_id")),
             "amount": _int(row.get("amount")),
-            "dead": bool(row.get("dead"))}
+            "dead": bool(row.get("dead")),
+            "absorbed": None if absorbed is None else _int(absorbed)}
 
 
 def _pulse_phrase(memory: dict[str, Any]) -> str:

@@ -3174,6 +3174,14 @@ CARRIED_OUT = dict(TWO_PLANS, pending=0, queue=[], carried_out=[
      "line": "Bake-Kurage: Stolen Chapter"},
 ])
 
+#: `CARRIED_OUT` with `EB-329`'s board reading on the first row, so the key-set
+#: pin below actually walks a `moved` row rather than an empty list.
+CARRIED_OUT_MEASURED = dict(
+    CARRIED_OUT,
+    carried_out=[dict(CARRIED_OUT["carried_out"][0], on_play=False,
+                      moved=[{"target": "Nibbit", "combat_id": "1",
+                              "amount": 12, "dead": False, "absorbed": 3}]),
+                 CARRIED_OUT["carried_out"][1]])
 
 
 def test_the_page_prints_the_carry_out_line_the_screen_showed():
@@ -3268,7 +3276,7 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
     """`R101b`. The page line is the ON-SCREEN text, and the ledger's rows --
     meter, before, after, price_paid -- are an instrument, not a surface a
     player ever reads. None of its vocabulary may leak in with the lines."""
-    obs = blindplay.observation(plans_combat_state(CARRIED_OUT))
+    obs = blindplay.observation(plans_combat_state(CARRIED_OUT_MEASURED))
     page = blindplay.render(obs)
     block = [ln for ln in page.splitlines()
              if ln.strip().startswith("- Bake-Kurage:")]
@@ -3284,7 +3292,8 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
         assert set(row) == {"card", "number", "line",
                             "on_play", "board_read", "moved"}
         for moved in row["moved"]:
-            assert set(moved) == {"target", "combat_id", "amount", "dead"}
+            assert set(moved) == {"target", "combat_id", "amount", "dead",
+                                  "absorbed"}
 
 
 # --------------------------------------------------------------------------
@@ -3477,6 +3486,72 @@ def test_a_plan_that_moved_no_hp_says_so_and_an_older_wire_says_nothing():
     assert "- Bake-Kurage: Stolen Chapter" in older
     assert "no enemy lost HP" not in older
     assert "what its first clause produced" not in older
+
+
+def test_a_carry_out_eaten_by_block_says_so_with_the_amount():
+    """`EB-440`, and it is the row's own beat. `Kurage's Oath+` carried out
+    into a Defend intent: HP 35 to 35, the aura landed, and the receipt was
+    "no enemy lost HP" -- true, and identical on the page to a Plan that did
+    nothing at all, so the seat read the morning as having worked.
+
+    Seen to FAIL: the row was filtered out entirely (`amount > 0`) and the
+    block printed the empty-morning line.
+    """
+    page = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Kurage's Oath", "number": 7,
+                    "line": "Bake-Kurage: Kurage's Oath, 7",
+                    "on_play": False,
+                    "moved": [{"target": "Nibbit", "combat_id": "1",
+                               "amount": 0, "dead": False,
+                               "absorbed": 7}]}))))
+    assert "- Nibbit lost no HP -- 7 absorbed by Block" in page
+    assert "no enemy lost HP" not in page
+
+
+def test_a_carry_out_that_ate_block_and_then_HP_prints_both():
+    """The half-shield case, which is the one a reader has to reconcile: the
+    number on the Plan's line is 10, the body lost 4, and the other 6 went
+    into Block. Both figures are the beat's, and neither on its own closes the
+    arithmetic."""
+    page = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Ambush", "number": 10,
+                    "line": "Bake-Kurage: Ambush, 10", "on_play": False,
+                    "moved": [{"target": "Nibbit", "combat_id": "1",
+                               "amount": 4, "dead": False,
+                               "absorbed": 6}]}))))
+    assert "- Nibbit lost 4 HP, and 6 more absorbed by Block" in page
+
+
+def test_a_bridge_that_predates_the_block_reading_prints_what_it_always_did():
+    """ABSENT IS NOT ZERO, `board_read`'s own discipline one level down. A
+    wire with no `absorbed` key has not answered, and a page that printed
+    "0 absorbed by Block" for it would be inventing a board."""
+    page = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Ambush", "number": 12,
+                    "line": "Bake-Kurage: Ambush, 12", "on_play": False,
+                    "moved": [{"target": "Nibbit", "combat_id": "1",
+                               "amount": 12, "dead": False}]}))))
+    assert "- Nibbit lost 12 HP" in page
+    assert "absorbed by Block" not in page
+
+
+def test_the_block_reading_is_the_mods_own_subtraction():
+    """Held in step with `KokomiPlan` from this side, the discipline every
+    other GItS wire block is under: the key is emitted by `MovedRow`, and the
+    Block it carries is read at the same two moments as the HP -- so a rename
+    or a dropped read goes red here rather than silently emptying the clause
+    on a live board."""
+    plan = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+            / "KokomiPlan.cs").read_text(encoding="utf-8")
+    assert '["absorbed"] = moved.Absorbed,' in plan
+    board = plan[plan.index(
+        "private static Dictionary<string, (string Name, int Hp, int Block)>?"):]
+    board = board[:board.index("/// <summary>")]
+    assert "(int)enemy.Block" in board and "(int)enemy.CurrentHp" in board
+    moved = plan[plan.index("private static IReadOnlyList<MovedOn>? Moved("):]
+    moved = moved[:moved.index("/// <summary>")]
+    assert "if (absorbed < 0) absorbed = 0;" in moved
+    assert "if (lost <= 0 && absorbed <= 0) continue;" in moved
 
 
 def test_an_on_play_firing_prints_under_its_own_heading():

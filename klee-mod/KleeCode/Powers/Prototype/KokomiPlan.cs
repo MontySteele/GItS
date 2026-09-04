@@ -202,9 +202,18 @@ public static class KokomiPlan
     /// resolves the id to the name a reader has been using; a body that DIED
     /// on this beat is off the board the next screen sends and keeps the name
     /// recorded here.
+    ///
+    /// <paramref name="Absorbed"/> IS `EB-440`, AND IT IS THE OTHER HALF OF
+    /// THE SUBTRACTION. HP is not the only bar a Plan moves: the r12 seat
+    /// carried `Kurage's Oath+` out into a Defend intent, watched HP go 35 to
+    /// 35, saw the aura land, and read the beat as having worked. Every row
+    /// above measures HP, so the receipt for that beat was the empty list --
+    /// "no enemy lost HP" -- which is true and reads as "nothing happened".
+    /// The enemy's BLOCK is read at the same two moments as its HP, so a
+    /// morning that spent itself on Block says so with the number it spent.
     /// </summary>
     public readonly record struct MovedOn(
-        string Target, string CombatId, int Amount, bool Dead);
+        string Target, string CombatId, int Amount, bool Dead, int Absorbed);
 
     private static object? _combat;
     private static readonly Dictionary<Player, List<Entry>> _queues = new();
@@ -707,18 +716,22 @@ public static class KokomiPlan
     /// Plan starts simply moves zero and drops out of the difference on its
     /// own. Nothing here throws -- a state read never does.
     /// </summary>
-    private static Dictionary<string, (string Name, int Hp)>? BoardHp(
-        Creature? kokomi)
+    private static Dictionary<string, (string Name, int Hp, int Block)>?
+        BoardHp(Creature? kokomi)
     {
         var combat = kokomi?.CombatState;
         if (combat == null) return null;
-        var board = new Dictionary<string, (string, int)>();
+        var board = new Dictionary<string, (string, int, int)>();
         foreach (var enemy in combat.HittableEnemies.ToList())
         {
             if (enemy == null) continue;
             var id = enemy.CombatId.ToString();
             if (string.IsNullOrEmpty(id)) continue;
-            board[id!] = (EnemyName(enemy), (int)enemy.CurrentHp);
+            // `EB-440`: BLOCK BESIDE HP, read at the same moment and by the
+            // same rule. A Plan that spent itself on a Defend intent moved a
+            // bar; which bar is the reader's question and not this method's.
+            board[id!] = (EnemyName(enemy), (int)enemy.CurrentHp,
+                          (int)enemy.Block);
         }
         return board;
     }
@@ -744,7 +757,8 @@ public static class KokomiPlan
     /// creature that died to this Plan as of one that died three turns ago.
     /// </summary>
     private static IReadOnlyList<MovedOn>? Moved(
-        Dictionary<string, (string Name, int Hp)>? before, Creature? kokomi)
+        Dictionary<string, (string Name, int Hp, int Block)>? before,
+        Creature? kokomi)
     {
         var after = BoardHp(kokomi);
         if (before == null || after == null) return null;
@@ -754,10 +768,21 @@ public static class KokomiPlan
             var was = pair.Value.Hp;
             // A creature MISSING from the after-read has left the board, and
             // the honest reading of that is "it took everything it had left".
-            var now = after.TryGetValue(pair.Key, out var seen) ? seen.Hp : 0;
+            var standing = after.TryGetValue(pair.Key, out var seen);
+            var now = standing ? seen.Hp : 0;
             var lost = was - now;
-            if (lost <= 0) continue;
-            rows.Add(new MovedOn(pair.Value.Name, pair.Key, lost, now <= 0));
+            // `EB-440`: THE BLOCK THE BEAT ATE. A body off the board has no
+            // Block left either, and Block a Plan somehow GAVE an enemy is not
+            // a thing this row has been ruled on -- the negative delta drops,
+            // exactly as a negative HP delta does one line up.
+            var absorbed = pair.Value.Block - (standing ? seen.Block : 0);
+            if (absorbed < 0) absorbed = 0;
+            // A row is now "this Plan moved something on this body", and Block
+            // is something: the empty list still means the morning moved no
+            // bar at all, which is what a Draw Plan's receipt has to say.
+            if (lost <= 0 && absorbed <= 0) continue;
+            rows.Add(new MovedOn(pair.Value.Name, pair.Key,
+                                 lost > 0 ? lost : 0, now <= 0, absorbed));
         }
         return rows;
     }
@@ -1086,8 +1111,8 @@ public static class KokomiPlan
     /// One enemy's share of one Plan, on the wire (`EB-329`).
     ///
     /// A NAMED METHOD FOR <see cref="CarriedOutRow"/>'s OWN REASON: these
-    /// four keys are read by `understudy/blindplay._moved_row` and a pin has
-    /// to be able to see the literals.
+    /// five keys are read by `understudy/blindplay._moved_row` and a pin has
+    /// to be able to see the literals. `absorbed` is `EB-440`'s.
     private static object? MovedRow(MovedOn moved) =>
         new Dictionary<string, object?>
         {
@@ -1095,6 +1120,7 @@ public static class KokomiPlan
             ["combat_id"] = moved.CombatId,
             ["amount"] = moved.Amount,
             ["dead"] = moved.Dead,
+            ["absorbed"] = moved.Absorbed,
         };
 
     /// <summary>

@@ -110,9 +110,30 @@ def _render_moved(said: dict[str, Any]) -> list[str]:
         return []
     if not said["moved"]:
         return ["    - no enemy lost HP"]
-    return [f"    - {m['target']} lost {m['amount']} HP"
-            + (", and died" if m["dead"] else "")
-            for m in said["moved"]]
+    return [f"    - {_moved_line(m)}" for m in said["moved"]]
+
+
+def _moved_line(m: dict[str, Any]) -> str:
+    """One body's share of one Plan, HP and Block (`EB-329`, `EB-440`).
+
+    THE SILENCE THE r12 SEAT READ AS SUCCESS. `Kurage's Oath+` carried out into
+    a Defend intent, HP went 35 to 35, the aura landed, and the receipt was
+    "no enemy lost HP" -- true, and indistinguishable on the page from a Plan
+    that did nothing at all. The Block the beat ate is now the line's own
+    clause, so a morning spent on a shield reads as one.
+
+    ABSENT IS NOT ZERO, `board_read`'s discipline one level down: a bridge that
+    predates the measurement sends no `absorbed` key and prints exactly the
+    line it always printed.
+    """
+    absorbed = m.get("absorbed") or 0
+    if not m["amount"] and absorbed:
+        return (f"{m['target']} lost no HP -- {absorbed} absorbed by Block"
+                + (", and died" if m["dead"] else ""))
+    line = f"{m['target']} lost {m['amount']} HP"
+    if absorbed:
+        line += f", and {absorbed} more absorbed by Block"
+    return line + (", and died" if m["dead"] else "")
 
 
 def _render_carry_out(pl: dict[str, Any]) -> list[str]:
