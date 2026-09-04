@@ -270,3 +270,56 @@ def test_both_spotlight_modes_print_a_duration():
         body = body[:body.index("public override PowerType")]
         printed = "".join(re.findall(r'"((?:[^"\\]|\\.)*)"', body))
         assert "Lasts until the [gold]Spotlight[/gold] moves" in printed
+
+
+# ==================================================================
+# `EB-406` -- the second Ethereal Spotlight, and the face that says so
+# ==================================================================
+
+SPOTLIGHT_CARDS_CS = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina"
+                      / "SpotlightCards.cs")
+SPOTLIGHT_RELIC_CS = (REPO / "klee-mod" / "KleeCode" / "Relics"
+                      / "EtherealSpotlightRelic.cs")
+
+
+def test_the_redundant_spotlight_is_refused_and_not_priced():
+    """`EB-406`. At 0 Encore the card was refused one turn and accepted the
+    next at the same 0 Encore, Exhausting with no effect (Furina round 4, run
+    1, fight 1).
+
+    The price gate stepped aside once the mode WAS Guest Cast -- correctly, it
+    names a price and there is none to fail -- and under the arm that is the
+    only second play there is, because R228 (1) retires Center Stage. So the
+    card now refuses the redundant copy on its own predicate, and the reason it
+    gives is the redundancy rather than the price: banking Encore is not the
+    way out of this one. The C# behaviour is pinned in
+    `KleeTests/Prototype/FurinaSpotlightPriceGateTests.cs`; this holds the two
+    sentences in step from the sim side.
+    """
+    system = SPOTLIGHT_CS.read_text(encoding="utf-8")
+    body = system[system.index("DesignateOneModeIsRedundant(Creature? creature)"):]
+    body = body[:body.index(";") + 1]
+    assert "FurinaReframe.SpotlightLiveFor(creature)" in body
+    assert "Mode(creature) == SpotlightMode.GuestCast" in body
+
+    card = SPOTLIGHT_CARDS_CS.read_text(encoding="utf-8")
+    assert "the Spotlight is already on your Companion cards" in card
+    # ...and it is asked BEFORE the price, so a redundant copy at an empty
+    # buffer is never reported as a shortfall.
+    assert (card.index("DesignateOneModeIsRedundant(owner)")
+            < card.index("DesignateOneModeIsUnpayable(owner)"))
+
+
+def test_the_relics_arm_face_says_the_copy_it_hands_back_is_dead():
+    """The other half of the row: the starter relic puts a fresh copy in hand
+    every turn, and once the Spotlight is out every one of them is a dead
+    Exhaust. The relic's face says so, and ONLY under the arm -- off it the
+    selector has two modes and a second play re-aims, where the sentence would
+    be false."""
+    relic = SPOTLIGHT_RELIC_CS.read_text(encoding="utf-8")
+    arm = relic[relic.index("#if PROTOTYPE_CARDS && FURINA_REFRAME"):
+                relic.index("#else")]
+    shipped = relic[relic.index("#else"):relic.index("#endif")]
+    assert "It does nothing once your Companions " in arm
+    assert "are lit." in arm
+    assert "does nothing" not in shipped
