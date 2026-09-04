@@ -49,7 +49,7 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
     public string? Nation => "mondstadt";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { CardKeyword.Exhaust };
+        new[] { CardKeyword.Exhaust, KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this);

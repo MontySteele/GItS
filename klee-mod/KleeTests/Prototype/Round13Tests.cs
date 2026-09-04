@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using KleeMod.Cards;
 using KleeMod.Cards.Prototype;
 using KleeMod.Cards.Prototype.Generated;
+using KleeMod.Elements;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -60,6 +63,81 @@ public class Round13Tests
         Assert.Contains("ArmKeywordTips.ForOz",
                         Il.Calls(Il.Method("ProtoMcFischlOz",
                                            "get_ExtraHoverTips")));
+    }
+
+    // ==================================================================
+    // `EB-454` -- the two elements that printed no tag
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r13 (c) 8). <i>Jean -- Gale Blade</i> "read as untyped
+    // until a Reaction preview named Anemo mid-fight", on a screen where every
+    // Hydro, Electro, Cryo and Pyro card carries its element. Anemo and Geo
+    // leave no aura, so they got no gem and, until now, no keyword either --
+    // and the keyword is the tag, not the gem.
+
+    /// <summary>The `KleeKeywords` field a card's `CanonicalKeywords` LOADS.
+    /// `ElementBadgeTests.KeywordFieldOf`'s scan, and its reason: BaseLib fills
+    /// these fields at `ModelDb.Init`, so in this host every one of them reads
+    /// `None` and comparing VALUES would pass for any element at all. A static
+    /// field read is `ldsfld`, which `Il.Calls` cannot see, so the byte scan is
+    /// the reachable form.</summary>
+    private static string[] KeywordFieldsOf(System.Type card)
+    {
+        var body = card.GetProperty("CanonicalKeywords", HeadlessGame.All)!
+            .GetGetMethod()!.GetMethodBody()!.GetILAsByteArray()!;
+        var found = new List<string>();
+        for (var i = 0; i < body.Length - 4; i++)
+        {
+            if (body[i] != 0x7E) continue;              // ldsfld
+            try
+            {
+                var field = card.Module.ResolveField(
+                    System.BitConverter.ToInt32(body, i + 1));
+                if (field?.DeclaringType?.Name == "KleeKeywords")
+                {
+                    found.Add(field.Name);
+                }
+            }
+            catch
+            {
+                // Not a field token. Expected while byte-scanning.
+            }
+        }
+
+        return found.ToArray();
+    }
+
+    [Fact]
+    public void Gale_blade_declares_the_element_its_damage_carries()
+    {
+        Assert.Contains("AppliesAnemo",
+                        KeywordFieldsOf(typeof(ProtoMcJeanGaleBlade)));
+    }
+
+    [Fact]
+    public void A_geo_face_declares_its_element_too()
+    {
+        // Both of the two, because "the tag map covers all six" is the claim
+        // and Geo is the half no seat happened to report.
+        Assert.Contains("AppliesGeo",
+                        KeywordFieldsOf(typeof(ProtoMiGorouInuzaka)));
+    }
+
+    [Fact]
+    public void The_two_that_leave_no_aura_still_draw_no_gem()
+    {
+        // THE SPLIT IS THE FIX, and it is why this is a separate assertion
+        // rather than one wider map: the gem is the AURA's own icon -- the
+        // badge a player will see on the enemy -- and there is none to paint
+        // for an element that leaves nothing. `ElementBadge.IconPathFor` is
+        // internal, so it is reached the way `ElementBadgeTests` reaches it.
+        var badge = typeof(global::KleeMod.KleeMod).Assembly
+            .GetTypes().Single(t => t.Name == "ElementBadge");
+        var iconPathFor = badge.GetMethod("IconPathFor", HeadlessGame.All)!;
+
+        Assert.Null(iconPathFor.Invoke(null, new object[] { Element.Anemo }));
+        Assert.Null(iconPathFor.Invoke(null, new object[] { Element.Geo }));
+        Assert.NotNull(iconPathFor.Invoke(null, new object[] { Element.Pyro }));
     }
 
     [Fact]

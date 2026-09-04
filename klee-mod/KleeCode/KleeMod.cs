@@ -213,6 +213,15 @@ public static class KleeMod
                     ["KLEEMOD-APPLIES_CRYO.title"] = "Applies Cryo",
                     ["KLEEMOD-APPLIES_CRYO.description"] =
                         $"No aura: applies [gold]Cryo[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
+                    // `EB-454`. The two that TRIGGER: a reaction happens and
+                    // no aura is left, so the sentence is the four above with
+                    // the duration clause replaced by the reason there is none.
+                    ["KLEEMOD-APPLIES_ANEMO.title"] = "Applies Anemo",
+                    ["KLEEMOD-APPLIES_ANEMO.description"] =
+                        "Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. No aura: nothing happens. [gold]Anemo[/gold] never stays on a body.",
+                    ["KLEEMOD-APPLIES_GEO.title"] = "Applies Geo",
+                    ["KLEEMOD-APPLIES_GEO.description"] =
+                        "Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. No aura: nothing happens. [gold]Geo[/gold] never stays on a body.",
                     ["KLEEMOD-BOMB.title"] = "Bomb",
                     // R249 pick 2(a): the SHIPPED Bomb keeps "detonates"
                     // until the overhaul replaces this kit.

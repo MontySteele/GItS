@@ -663,6 +663,35 @@ AURA_KEYWORD_BY_ELEMENT = {
     "cryo": "KleeKeywords.AppliesCryo",
 }
 
+# `EB-454`. THE TWO THAT TRIGGER AND LEAVE NOTHING, and the paragraph above is
+# why they were absent and why they are here now.
+#
+# THE FIND (Kokomi r13 (c) 8). `Jean -- Gale Blade` "read as untyped until a
+# Reaction preview named Anemo mid-fight", on a page where every Hydro, Electro,
+# Cryo and Pyro card prints its element beside the title. The old reasoning was
+# sound about the GEM -- Anemo and Geo leave no aura, so there is no aura icon
+# to draw and `ElementBadge.IconPathFor` still answers null for both -- and it
+# proved too much: it took the WORD away with the picture, and the word is what
+# a reader uses to work out which pair can react.
+#
+# SO THE KEYWORD IS THE TAG AND THE GEM IS NOT. These two ride
+# `AutoKeywordPosition.None` exactly as the four do, print no line, hover their
+# own tip, and reach the blind page as `Applies Anemo` / `Applies Geo` --
+# `blindplay_faces._ELEMENT_KEYWORD`, whose map covers all six. They are NOT in
+# `AURA_KEYWORD_BY_ELEMENT` and must not be: that map answers "does this element
+# leave an aura", which is what `plan_applies_element` and the gem's own
+# declaration test ask, and both answers are still no.
+TRIGGER_KEYWORD_BY_ELEMENT = {
+    "anemo": "KleeKeywords.AppliesAnemo",
+    "geo": "KleeKeywords.AppliesGeo",
+}
+
+#: Every element a face can DECLARE, aura-leaving or not. The emission map.
+ELEMENT_KEYWORD_BY_ELEMENT = {
+    **AURA_KEYWORD_BY_ELEMENT,
+    **TRIGGER_KEYWORD_BY_ELEMENT,
+}
+
 
 def aura_elements_for(card: dict, profile: "CharacterProfile",
                       elemental: bool) -> list[str]:
@@ -733,6 +762,31 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
 #: clause that starts hitting must come here deliberately.
 PLAN_DAMAGE_OPS = frozenset({
     "damage", "damage_quarter_max_hp", "damage_per_companion_last_turn"})
+
+
+def element_tag_elements_for(card: dict, profile: "CharacterProfile",
+                             elemental: bool) -> list[str]:
+    """Every element this card's face DECLARES, in face order (`EB-454`).
+
+    <see cref="aura_elements_for"/> plus the card's OWN element when that
+    element only triggers -- Anemo and Geo, which leave no aura and therefore
+    never appear in an `apply_aura` effect or in a carry-out. Its own element
+    LEADS, the order `ElementBadge.ElementOf` reads and the order the page's
+    `_element` takes its first match in, so a Swirl companion that also lays
+    somebody else's aura is tagged with the one its damage carries.
+
+    TWO FUNCTIONS RATHER THAN A WIDER ONE, because two different questions are
+    being asked and only one of them moved: "does this leave an aura" still has
+    exactly four answers (the gem, `plan_applies_element`), and "what does this
+    face say it is" now has six.
+    """
+    elements = aura_elements_for(card, profile, elemental)
+    if not elemental:
+        return elements
+    own = card["element"] if is_companion(card) else profile.native_element
+    if own in TRIGGER_KEYWORD_BY_ELEMENT and own not in elements:
+        elements.insert(0, own)
+    return elements
 
 
 def plan_applies_element(card: dict, profile: "CharacterProfile") -> bool:
@@ -10339,7 +10393,7 @@ def emit(
                 if elemental_effect["op"] == "apply_aura"
                 else "Element.Anemo")
 
-    aura_elements = aura_elements_for(card, profile, elemental)
+    aura_elements = element_tag_elements_for(card, profile, elemental)
     # L4: the Bomb rules text is a question about the WHOLE effect tree, not
     # about the top level. `sparkly_explosion` places its two Bombs inside the
     # kill-conditional's `then:`, so the flat scan this replaced shipped the
@@ -10854,7 +10908,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         keywords.append("CardKeyword.Sly")
     if "skill_tag" in card.get("tags", []):
         keywords.append("KleeKeywords.ElementalSkill")
-    keywords.extend(AURA_KEYWORD_BY_ELEMENT[e] for e in aura_elements)
+    keywords.extend(ELEMENT_KEYWORD_BY_ELEMENT[e] for e in aura_elements)
     keywords_member = ""
     if keywords:
         keywords_member = (

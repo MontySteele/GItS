@@ -520,6 +520,31 @@ def test_the_element_a_card_applies_is_a_tag_on_its_line():
             assert "[" not in ln.split("**Coral Guard**", 1)[1]
 
 
+def test_anemo_and_geo_carry_the_tag_too():
+    """`EB-454`. The two that TRIGGER and leave no aura printed no tag at all,
+    on a page where every other element prints one: the Kokomi r13 seat read
+    `Jean -- Gale Blade` as untyped "until a Reaction preview named Anemo
+    mid-fight" ((c) 8).
+
+    THE GEM IS STILL FOUR and the WORD is now six, which is the split the fix
+    is: `ElementBadge.IconPathFor` answers null for both because there is no
+    aura icon to paint, while `KleeKeywords.AppliesAnemo` / `AppliesGeo` are
+    declared, hover their own tip and cross this wire as a keyword row.
+    """
+    state = combat_state()
+    state["player"]["hand"][1]["keywords"] = [
+        {"name": "Applies Anemo",
+         "description": "Another aura: consumed, and a reaction triggers."}]
+    state["player"]["hand"][2]["keywords"] = [
+        {"name": "Applies Geo",
+         "description": "Another aura: consumed, and a reaction triggers."}]
+
+    faces = blindplay.observation(state)["combat"]["hand"]
+
+    assert [f["element"] for f in faces] == ["Hydro", "Anemo", "Geo", "",
+                                             "Hydro"]
+
+
 def test_the_element_tag_is_never_read_off_a_reaction_word():
     """`Applies Electro-Charged` is a REACTION a companion prints, not an
     element, and the six elements are not the seven words that follow the verb.

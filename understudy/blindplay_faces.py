@@ -102,11 +102,19 @@ def _hazard(state: dict[str, Any]) -> tuple[str, str] | None:
 #
 # ANCHORED AND ONE WORD WIDE: `Applies Electro-Charged`, a Kokomi companion's
 # printed reaction, is not an element and must not become one.
-_ELEMENT_KEYWORD = re.compile(r"^Applies (Pyro|Hydro|Electro|Cryo)$")
+#
+# `EB-454` PUT ANEMO AND GEO IN THE MAP. They leave no aura, so they get no gem
+# and had no `Applies` keyword either -- and the r13 seat read `Jean -- Gale
+# Blade` as untyped "until a Reaction preview named Anemo mid-fight", on a page
+# where every other element prints beside the title. The gem is still four
+# (`ElementBadge.IconPathFor` answers null for both); the WORD is six, because
+# the word is what a reader pairs against an aura.
+_ELEMENT_KEYWORD = re.compile(
+    r"^Applies (Pyro|Hydro|Electro|Cryo|Anemo|Geo)$")
 
 
 def _element(keywords: list[dict[str, str]]) -> str:
-    """The element this face applies (`Pyro`), or `""`.
+    """The element this face applies or triggers with (`Pyro`), or `""`.
 
     First match wins, in the order the game listed them -- the badge's own rule
     (`ElementBadge.ElementOf` takes the card's own element, which is the first

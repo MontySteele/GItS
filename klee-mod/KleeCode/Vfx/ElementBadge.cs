@@ -74,9 +74,16 @@ namespace KleeMod.Vfx;
 /// board and a colour-blind player lose first.
 ///
 /// ANEMO AND GEO GET NO GEM, and that is not an omission: they leave no aura
-/// (LAW, combat sec.: "Anemo/Geo leave no aura -- they only trigger"), so they
-/// have no `Applies` keyword, and they never printed a sentence either. The
+/// (LAW, combat sec.: "Anemo/Geo leave no aura -- they only trigger"), so there
+/// is no aura icon to draw and they never printed a sentence either. The
 /// indicator says exactly what the sentence said, no more.
+///
+/// `EB-454` GAVE THEM THE KEYWORD ANYWAY, and the split is the point: the two
+/// now carry `KleeKeywords.AppliesAnemo` / `AppliesGeo` -- so they hover a tip
+/// and print `[Anemo]` on the blind page -- while <see cref="AuraElements"/>
+/// and <see cref="IconPathFor"/> stay four, so nothing here paints anything
+/// new. The word is not the picture: the r13 seat read `Jean -- Gale Blade` as
+/// untyped for a whole fight, which is a complaint about the word.
 /// </summary>
 internal static class ElementBadge
 {
