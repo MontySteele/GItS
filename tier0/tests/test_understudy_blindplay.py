@@ -4674,9 +4674,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                     "a Pyro hit. ", " stops them, no Attack trigger ",
                     "fires, the first takes the aura."],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
-        "Mine": ["that also goes off when its enemy attacks",
-                 "before the hit lands",
-                 "Read the badge: only their "],
+        # `EB-436`: the hit is in the sentence now.
+        "Mine": ["that also goes off before its enemy's hit, ",
+                 "which lands in full unless the Mine kills. Only their "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
@@ -6552,13 +6552,15 @@ def test_the_target_and_the_aura_are_recorded_where_they_are_decided():
 #: `ProtoBombPower.Title` selected. The body is the arm's own, quoted, so the
 #: page half of this pin cannot pass on a sentence the game does not print.
 _MINE_FACE = ("Set off here deals 4 Pyro damage. Bombs here: 1, including 1 "
-              "Mine, growing each turn. A Mine also goes off when this enemy "
-              "attacks you, before the hit lands. A kill moves them to a "
+              "Mine, growing each turn. A Mine also goes off before this "
+              "enemy's hit, which lands in full unless the Mine kills. A "
+              "kill moves them to a "
               "survivor.")
 
 _MIXED_FACE = ("Set off here deals 12 Pyro damage. Bombs here: 2, including 1 "
-               "Mine, growing each turn. A Mine also goes off when this enemy "
-               "attacks you, before the hit lands. A kill moves them to a "
+               "Mine, growing each turn. A Mine also goes off before this "
+               "enemy's hit, which lands in full unless the Mine kills. A "
+               "kill moves them to a "
                "survivor.")
 
 
@@ -6584,7 +6586,7 @@ def test_a_pile_that_is_all_mines_reads_as_a_mine_on_the_page():
 
     assert badge.strip().startswith("Mine 4")
     assert "Bomb 4" not in badge
-    assert "before the hit lands" in badge
+    assert "goes off before this enemy's hit" in badge
 
 
 def test_a_pile_holding_one_plain_bomb_is_still_a_bomb_on_the_page():
@@ -6598,7 +6600,7 @@ def test_a_pile_holding_one_plain_bomb_is_still_a_bomb_on_the_page():
     assert badge.strip().startswith("Bomb 12")
     assert "Mine 12" not in badge
     assert "including 1 Mine" in badge
-    assert "before the hit lands" in badge
+    assert "goes off before this enemy's hit" in badge
 
 
 def test_the_badge_owns_both_names_and_chooses_between_them_live():
@@ -6618,4 +6620,4 @@ def test_the_badge_owns_both_names_and_chooses_between_them_live():
     # Rule 6's sentence rides the face and is NOT what the title switches on:
     # a mixed pile keeps `Bomb` and still prints the timing clause.
     assert "MineClause" in power
-    assert "before the hit lands" in power
+    assert "goes off before this enemy's hit" in power

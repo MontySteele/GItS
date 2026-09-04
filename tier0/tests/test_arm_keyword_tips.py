@@ -413,11 +413,14 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "Start each combat with ",
             ". Pounding Surprise grants more. ",
             "Gone after combat.",
-            "that also goes off when its enemy attacks ",
-            "you, before the hit lands.",
+            # `EB-436`: the clause said WHEN and nothing about the attack,
+            # and a seat read mitigation into it. A Mine blunts nothing; the
+            # only thing it can do to the hit is stop it happening.
+            "that also goes off before its enemy's hit, ",
+            "which lands in full unless the Mine kills.",
             # `EB-373`: a Mine IS a Bomb, so the same two terms move it and
             # the two tips say so in the same words.
-            "Read the badge: only their ",
+            "Only their ",
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.

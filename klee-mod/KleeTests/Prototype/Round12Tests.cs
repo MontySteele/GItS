@@ -157,4 +157,51 @@ public class Round12Tests
         Assert.DoesNotContain("for its size", SetOffTip());
         Assert.Contains("each a Pyro hit.", SetOffTip());
     }
+
+    // ---- EB-436: a Mine does not blunt the hit ---------------------------
+
+    private static string MineTip() =>
+        string.Concat(Il.Strings(typeof(ArmKeywordTips)
+            .GetMethod("ForMine", HeadlessGame.All)!));
+
+    [Fact]
+    public void The_mine_tip_says_the_hit_still_lands()
+    {
+        // THE OLD SENTENCE WAS TRUE AND SAID NOTHING ABOUT THE HIT. "Goes off
+        // when its enemy attacks you, before the hit lands" reads as
+        // mitigation, and the r12 act-1 seat played a turn on that read:
+        // three Mines left armed against an elite, five went off, "every hit
+        // landed in full, 36 to 18 HP".
+        Assert.Contains("which lands in full unless the Mine kills", MineTip());
+        Assert.DoesNotContain("before the hit lands", MineTip());
+    }
+
+    [Fact]
+    public void The_mine_tip_still_names_both_folded_terms()
+    {
+        // "Read the badge:" is what paid for the new clause; the clause it
+        // introduced is untouched, so R248's rule survives whole.
+        Assert.Contains("Only their ", MineTip());
+        Assert.Contains("[gold]Vulnerable[/gold] and a cap move it.", MineTip());
+        Assert.DoesNotContain("Read the badge", MineTip());
+    }
+
+    [Fact]
+    public void The_badge_carries_the_same_sentence()
+    {
+        // ONE CLAUSE, TWO SURFACES -- the arrangement `MineClause` has had
+        // since `EB-260`, and the reason that row was filed: the tooltip
+        // carried rule 6 and the smart face did not.
+        var pile = ProtoBombs.Place(Seat.Klee(30).Creature,
+                                    Seat.Klee().Creature,
+                                    new ProtoBombs.Charge(4, IsMine: true));
+        var rows = pile.Localization!;
+        foreach (var key in new[] { "description", "smartDescriptionMines" })
+        {
+            Assert.Contains(
+                "goes off before this enemy's hit, which lands in full "
+              + "unless the Mine kills.",
+                rows.First(r => r.Item1 == key).Item2);
+        }
+    }
 }

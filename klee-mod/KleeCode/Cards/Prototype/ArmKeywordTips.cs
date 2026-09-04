@@ -309,11 +309,27 @@ public static class ArmKeywordTips
     /// same words as the Bomb tip, so the two cannot be read against each
     /// other.
     /// </summary>
+    /// `EB-436` SAID WHAT THE OLD SENTENCE LEFT OUT, and the old sentence was
+    /// true the whole time: "goes off when its enemy attacks you, before the
+    /// hit lands" says WHEN and says nothing at all about the hit. The r12
+    /// act-1 seat read mitigation into it and played a turn on that read --
+    /// three Mines left armed against an elite, five went off, "every hit
+    /// landed in full, 36 to 18 HP". A Mine blunts nothing: the only thing a
+    /// Mine can do to the attack is stop it happening, by killing the
+    /// attacker, and that is `EB-336`'s rule (`Preempted`) -- a Mine whose
+    /// explosion kills the attacker costs Klee no HP, and nothing short of a
+    /// kill costs the attacker anything.
+    ///
+    /// "READ THE BADGE:" IS WHAT PAID FOR IT. The clause it introduced is
+    /// still here word for word and still names both terms, so `EB-343`'s
+    /// rule survives whole; what went is the pointer, which a player standing
+    /// in front of the badge does not need and a player in hand cannot use.
+    /// 133 of 135 rendered, no exception taken.
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
-            "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
-          + "you, before the hit lands. Read the badge: only their "
+            "A [gold]Bomb[/gold] that also goes off before its enemy's hit, "
+          + "which lands in full unless the Mine kills. Only their "
           + "[gold]Vulnerable[/gold] and a cap move it.");
 
     /// <summary>

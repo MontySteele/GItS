@@ -78,7 +78,7 @@ public class Round11Tests
         // clause beside it: the title switch is not what carries the timing.
         var face = Row(pile, "smartDescriptionMines");
         Assert.Contains("including [blue]{Mines}[/blue]", face);
-        Assert.Contains("before the hit lands", face);
+        Assert.Contains("goes off before this enemy's hit", face);
     }
 
     [Fact]

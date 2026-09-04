@@ -386,8 +386,13 @@ ARM_KEYWORDS: dict[str, str] = {
               "after combat."),
     # `EB-373`: a Mine IS a Bomb, so the same fold moves it and the same
     # sentence has to say so. The badge is still where the live number is.
-    "Mine": ("A Bomb that also goes off when its enemy attacks you, before "
-             "the hit lands. Read the badge: only their Vulnerable and a cap "
+    # `EB-436`: the old sentence said WHEN and nothing about the attack, and
+    # the r12 act-1 seat read mitigation into it -- three Mines armed against
+    # an elite, five went off, "every hit landed in full, 36 to 18 HP". The
+    # only thing a Mine does to the hit is stop it happening, by killing the
+    # attacker (`EB-336`). "Read the badge:" paid for the clause.
+    "Mine": ("A Bomb that also goes off before its enemy's hit, which lands "
+             "in full unless the Mine kills. Only their Vulnerable and a cap "
              "move it."),
     # `EB-329`. "OR ALL IF IT SAYS SO" IS THE HALF THE OLD SENTENCE GOT
     # WRONG, and it was reprinted on every battle screen of every run: a

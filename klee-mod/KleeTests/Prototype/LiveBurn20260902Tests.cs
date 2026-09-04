@@ -140,7 +140,9 @@ public class LiveBurn20260902Tests
             typeof(ArmKeywordTips)
                 .GetMethod("ForMine", HeadlessGame.All)!));
 
-        Assert.Contains("Read the badge: only their ", body);
+        // `EB-436` spent "Read the badge:" on the hit clause; the terms it
+        // introduced are still named, which is what R248 asked for.
+        Assert.Contains("Only their ", body);
         Assert.Contains("[gold]Vulnerable[/gold] and a cap move it.", body);
         Assert.DoesNotContain("[gold]Weak[/gold]", body);
 
