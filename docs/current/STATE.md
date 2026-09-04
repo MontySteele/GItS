@@ -190,7 +190,14 @@ are in [`workstreams.md`](workstreams.md).
   (`review/active/kokomi-overhaul-round-12-2026-09-04.md`): one seat on
   `0.2.2501+proto`, floor 11; a carry-out into Block prints nothing, an
   Attack face not Weak-folded, the Plan tip's aim sentence unread
-  (`EB-440`-`EB-442`); no pick. [USER]'s act-1 run is due on
+  (`EB-440`-`EB-442`); no pick. **Round 13 is READ**
+  (`review/active/kokomi-overhaul-round-13-2026-09-04.md`): one seat on
+  `0.2.2547+proto`, the act-1 boss reached at a declared budget overrun,
+  eight of eight fights, War Council read as four different correct calls,
+  a targeted potion vanishing untargeted (`EB-452`), the carry-out panel
+  omitting a Plan (`EB-453`), Change of Plans dead until it says why
+  (`EB-455`), the bridge to count actions (`EB-456`); Tide Chart undrawn a
+  seventh time; no pick. [USER]'s act-1 run is due on
   `0.2.2501+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the

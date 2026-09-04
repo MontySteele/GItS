@@ -3,7 +3,8 @@ Status: OPEN (no pick; the defaults in §4 are applied)
 # Klee round thirteen: don't use your big spell, and the queue nobody can see
 
 Written 2026-09-04. One blind Opus seat played the Bomb kit on
-`0.2.2547+proto`, the build with Stoke the Fuse in the pool (35 rows), the
+`0.2.2547+proto`, the build with Stoke the Fuse in the pool (35 rows on
+`docs/prototype-surface.yaml`), the
 Mine tip saying the hit lands in full (`EB-436`), the Set off tip's walk
 (`EB-432`, `EB-443`), and the Hexerei mark on every face (`EB-392`).
 Record: `review/qa/klee-round-13-2026-09-04/opus-act1.md`. Prototype stage,
@@ -80,8 +81,9 @@ Countdown; Stoke the Fuse; the boss (two floors short); act 2. Fights 7 and
 
 - **`EB-448`, `EB-450` minted.**
 - **The seat brief's count rule gets a mechanism** (E): the seat is told to
-  count and this one did not; the next round's coordinator notes ask for the
-  count to be appended to the scratch file after every act, and a lane
-  above zero stays disposable so the overrun cost nothing but the caveat.
+  count and this one did not, nor did the Kokomi seat of the same round;
+  the bridge counts accepted acts and refuses past the cap from the next
+  round (`EB-456`). A lane above zero stays disposable, so the overrun cost
+  nothing but the caveat.
 - **Countdown's sixth non-draw** is recorded, not acted on: it has been
   offered once. The pool pass keeps its row.
