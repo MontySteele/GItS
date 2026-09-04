@@ -1486,3 +1486,13 @@ EB-280 RETIRED 2026-09-04: a set_off carrying damage now owns the same DamageVar
 EB-281 RETIRED 2026-09-04: Vfx/Prototype/SparkGauge.cs draws a bar-less klee_spark gauge at the overhead slot and hides the status-strip badge.
 EB-282 RETIRED 2026-09-04: the blind page prints the Spark price in its cost slot first, and the restated sentence came off all seven surface rows.
 EB-283 RETIRED 2026-09-04: upgrades.prototype_default_delta is one implementation both engines read, gated by upgrade_face_findings refusing a row whose + face prints identically to its base.
+EB-284 RETIRED 2026-09-04: both arm pools now concat their character's Ancient ledger, and lint_ancient_coverage.py gates the arm pools too.
+EB-285 RETIRED 2026-09-04: the {Damage:diff()} token now mirrors build_vars, and lint_generated_structure L1 covers the prototype surface, which it never had.
+EB-286 RETIRED 2026-09-04: _card_face carries printed_spark and the hand, reward and shop rows print the whole Spark price through qa_packet.cost_label.
+EB-289 RETIRED 2026-09-04: the face reads a new {Count} var synced off the charge list, replacing the stale {Amount} stack.
+EB-291 RETIRED 2026-09-04: Pounding Surprise leads "Sparks come from this:", the Mine tip says it is the same Pyro hit for its own size, and Big Badda Boom's bonus reads "hit again for the damage the Bombs dealt".
+EB-293 RETIRED 2026-09-04: the codegen strips a printed "Exhaust." line, a plan-only row prints "Play on the Bake-Kurage.", and the Casket reads "a Hydro hit for 2".
+EB-297 RETIRED 2026-09-04: GaugeBridge's kokomi_burst spec now selects on KokomiResources.BurstGaugeApplies instead of a bare IsKokomi, so the arm draws no overhead bar.
+EB-327 RETIRED 2026-09-04: Klee's EB-266 guard moved one character over, into KokomiResources.GainBurst and resources.gain_burst.
+EB-381 RETIRED 2026-09-04: settle_board polls until the bodies stop moving, bounded at 6, so HP and the status list come off one creature dict after settle.
+EB-377 RETIRED 2026-09-04: BaseKeywordTips attaches five base words and the page's BASE_KEYWORDS adds four more, read last so the wire wins.
