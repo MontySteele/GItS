@@ -302,11 +302,17 @@ def spark_cost(card: Card) -> int:
     player cannot be shown before choosing to play the card, so it is not
     part of the cost line -- effects.spend_sparks refuses it at resolve time
     instead, which is the loud half of the same rule.
+
+    `spend_spark_price` AND NOT `spend_spark_amount`: an X price ("spend all
+    your Sparks") prints no literal, and what the GATE charges for it is 1 --
+    unplayable at an empty bank, playable at any bank holding a Spark, which
+    is the mod's `PrintedSparkPrice => 1` on the same row. What the card PAYS
+    is a different question and `effects._op_spend_spark` answers it.
     """
     total = 0
     for fx in card.effects:
         if fx.get("op") == "spend_spark":
-            total += effects.spend_spark_amount(fx)
+            total += effects.spend_spark_price(fx)
     return total
 
 

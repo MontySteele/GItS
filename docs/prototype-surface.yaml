@@ -483,6 +483,18 @@
    effects: [{op: set_off, target: enemy},
              {op: draw, amount: 1}]}
 
+# the pool pass, round 11 (2026-09-04): the arm's Spark SINK, and the first
+# X price on any sheet -- `spend_spark: all`, gated at one Spark. Why it
+# exists: docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_ko_stoke_the_fuse, name: "Stoke the Fuse", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Spend all your [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] grows by 3 per [gold]Spark[/gold] spent.",
+   upgrade: {grow: +1},
+   effects: [{op: spend_spark, amount: all},
+             {op: grow_largest_bomb, per_spark: 3}]}
+
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and
 # which 13 of the workshop's 34 are absent: docs/notes/prototype-surface-provenance.md.

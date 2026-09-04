@@ -267,7 +267,14 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # nothing else" -- so `loader.pool_replacement` is its sibling seam, read at the
 # same single door.
 #
-# THIRTY-FOUR SINCE THE ROUND-10 POOL PASS (2026-09-04), and the one that
+# THIRTY-FIVE SINCE THE ROUND-11 POOL PASS (2026-09-04), and the one that
+# arrived is `proto_ko_stoke_the_fuse`: the arm's Spark SINK, the other half
+# of the deadlock round 10 answered with Countdown. The round-11 and round-12
+# seats ended fights holding 4 to 9 unspent Sparks, and the row is where the
+# bank goes -- all of it, into the one Bomb she is already cooking, at 3 per
+# Spark. Its own block at the end of the tuple, like the slices below it.
+#
+# THIRTY-FOUR BEFORE THAT (round 10), and the one that
 # arrived is `proto_ko_countdown`: the arm's only detonator that is priced in
 # ENERGY and asks nothing else of the board. Three round-10 seats held
 # Spark-priced detonators at 0 Spark with a fat Bomb sitting on the enemy and
@@ -363,6 +370,11 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # detonator: 1 energy, Set off, draw a card, no Spark and no condition.
     # It is the row three seats wanted and could not be offered.
     "proto_ko_countdown",
+    # THE POOL PASS (1 -- round 11, 2026-09-04). The Spark sink: 0 energy, X
+    # Sparks, and the whole bank goes into the largest Bomb at 3 apiece. Round
+    # 10 gave the hand a detonator it could always fire; this gives the bank
+    # somewhere to go, and it pays only if a Bomb is already cooking.
+    "proto_ko_stoke_the_fuse",
 )
 
 # =============================================================================

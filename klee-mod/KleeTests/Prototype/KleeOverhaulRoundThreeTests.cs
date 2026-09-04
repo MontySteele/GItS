@@ -70,8 +70,11 @@ public class KleeOverhaulRoundThreeTests
         // beside it.
         // THIRTY-FOUR SINCE THE ROUND-10 POOL PASS (2026-09-04): one row,
         // `ProtoKoCountdown`, the arm's only detonator priced in energy.
+        // THIRTY-FIVE SINCE THE ROUND-11 POOL PASS (2026-09-04): one row,
+        // `ProtoKoStokeTheFuse`, the arm's Spark sink -- the other half of the
+        // same finding, and the first X price on any sheet.
         var slice = Cards("KleeOverhaulRoster", "Slice");
-        Assert.Equal(34, slice.Count);
+        Assert.Equal(35, slice.Count);
         Assert.Contains(slice, c => c.Contains("ProtoKoDigIn"));
         Assert.Contains(slice, c => c.Contains("ProtoKoPop"));
         // OFFERABLE means not Basic: a Basic row cannot be rolled.
