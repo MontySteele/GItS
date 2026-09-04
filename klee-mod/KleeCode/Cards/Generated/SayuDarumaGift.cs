@@ -57,7 +57,7 @@ public sealed class SayuDarumaGift : CustomCardModel, ICompanionCard
             new CalculationBaseVar(4m),
             new CalculationExtraVar(1m),
             new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
-            new DynamicVar("BlockNextTurn", 4m)
+            new SpotlightSystem.DeferredBlockVar(4m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in

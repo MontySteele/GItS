@@ -11,6 +11,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Powers;
@@ -427,6 +428,62 @@ public static class SpotlightSystem
             + PowerAmount<SpotlightMultBonusTurnPower>(owner)
             + (Resource<SpotlightSpendBoostResource>(owner)?.Amount ?? 0);
         return GuestCastBaseMultiplier + percentagePoints / 100m;
+    }
+
+    /// <summary>
+    /// `EB-438`. A DEFERRED BLOCK CLAUSE, PRINTED AS IT WILL BE DELIVERED.
+    ///
+    /// THE DEFECT. Charlotte, First-Person Shutter is two Block clauses -- one
+    /// now, one at the start of the next turn -- and only the first was a var.
+    /// The second was a LITERAL in the face while the play applied
+    /// <see cref="PrintedBlock"/> to it, so under Guest Cast the card printed
+    /// `Gain 4 Block. At the start of your next turn, gain 4 Block.` and
+    /// delivered 6 and 6. The Furina round-6 seat priced a turn off it and
+    /// filed the shape rather than the number: "The Spotlight rewrites the
+    /// FIRST number of a two-clause card but not the second, so the card
+    /// under-reports itself. Compare Ring of Bursting Grenades, which rewrites
+    /// cleanly -- the behaviour is inconsistent between cards."
+    ///
+    /// WHY NOT `CalculatedBlockVar`, which the first clause uses: that var
+    /// takes its base from the single `CalculationBase` var, so a card with
+    /// two Block numbers cannot have two of them -- the second would compute
+    /// off the first's base. This is the second number's own var, and it folds
+    /// through the SAME call the play makes.
+    ///
+    /// `UpdateCardPreview` IS THE SEAM THE GAME ALREADY OWNS
+    /// (<c>KokomiPlan.PlanDamageVar</c>'s idiom): the engine calls it on every
+    /// var of a card in hand whenever it refreshes a face, and
+    /// <c>PreviewValue</c> is the number <c>{Var:diff()}</c> prints.
+    /// <c>IntValue</c> is untouched and stays <c>BaseValue</c>, which is what
+    /// the emitted play reads before wrapping it in <see cref="PrintedBlock"/>
+    /// -- so the fold is applied exactly once, in the play, and previewed
+    /// here.
+    ///
+    /// OFF THE HAND IT PRINTS ITS BASE. A compendium or reward copy has no
+    /// owner and `runGlobalHooks` is false, so every such read falls through
+    /// exactly as a plain var would.
+    /// </summary>
+    public sealed class DeferredBlockVar : DynamicVar
+    {
+        public const string Token = "BlockNextTurn";
+
+        public DeferredBlockVar(decimal amount) : base(Token, amount)
+        {
+        }
+
+        public override void UpdateCardPreview(
+            CardModel card, CardPreviewMode previewMode, Creature? target,
+            bool runGlobalHooks)
+        {
+            PreviewValue = BaseValue;
+            if (!runGlobalHooks) return;
+            // A canonical (compendium) copy has no owner and the getter
+            // ASSERTS rather than returning null, which is why this guard is
+            // the shape `PlanDamageVar` uses.
+            if (!card.IsMutable) return;
+            if (card.Owner?.Creature == null) return;
+            PreviewValue = PrintedBlock(card, BaseValue);
+        }
     }
 
     public static decimal PrintedDamage(CardModel card, decimal amount)

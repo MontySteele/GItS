@@ -4824,9 +4824,21 @@ def build_vars(card: dict) -> list[str]:
                 f'new DynamicVar("KurageTurns", {int(eff.get("amount", 1))}m)')
         elif op == "energy" and energy_upgrade(card):
             out.append(f'new DynamicVar("Energy", {int(eff["amount"])}m)')
-        elif op == "block_next_turn" and block_next_turn_upgrade(card):
+        elif op == "block_next_turn" and (block_next_turn_upgrade(card)
+                                          or spotlight_folds(card)):
+            # `EB-438`. A SECOND VAR RULE ON THE SAME OP, and the two reasons
+            # are different: an upgradeable amount needs a var so the NEW
+            # number renders, and a SPOTLIGHT-folded amount needs one so the
+            # printed number is the delivered one. The second was the defect:
+            # Charlotte, First-Person Shutter printed `gain 4 Block` on a
+            # clause the play applied `PrintedBlock` to, and delivered 6.
+            # `DeferredBlockVar` is the second number's own var -- see its
+            # summary for why `CalculatedBlockVar` could not be, and why the
+            # fold is a PREVIEW here and stays in the play.
             out.append(
-                f'new DynamicVar("BlockNextTurn", {int(eff["amount"])}m)')
+                f'new SpotlightSystem.DeferredBlockVar({int(eff["amount"])}m)'
+                if spotlight_folds(card)
+                else f'new DynamicVar("BlockNextTurn", {int(eff["amount"])}m)')
         elif op == "exhaust_from" and exhaust_upgrade(card):
             out.append(
                 f'new DynamicVar("Exhausts", {int(eff.get("amount", 1))}m)')
@@ -6038,6 +6050,25 @@ def energy_upgrade(card: dict) -> int:
 def block_next_turn_upgrade(card: dict) -> int:
     """Ruled deferred-block delta: `block_next_turn: +N` (Sayu's daruma)."""
     return int(upgrade_plan(card)[0].get("block_next_turn", 0))
+
+
+def spotlight_folds(card: dict) -> bool:
+    """`EB-438`: does the Spotlight move this card's printed numbers?
+
+    THE SAME TEST THE EMITTER ALREADY MAKES, hoisted so the FACE can ask it
+    too. `emit` computes `spotlight_capable` and wraps every amount it emits in
+    `SpotlightSystem.PrintedBlock` / `PrintedDamage`; the description builder
+    had no way to ask, so a clause whose play was wrapped could still print a
+    literal. That is exactly what Charlotte's second clause did.
+
+    A COMPANION, OR ONE OF FURINA'S OWN. The wrap is identity on her own cards
+    -- `PrintedBlock`'s bonus path needs Guest Cast, which lights Companions
+    only -- so the var it produces there previews its own base and costs
+    nothing; the test is kept identical to the emitter's rather than narrowed,
+    because two spellings of one question is how the first clause and the
+    second came to disagree.
+    """
+    return is_companion(card) or card.get("character") == "furina"
 
 
 def exhaust_upgrade(card: dict) -> int:
@@ -8639,7 +8670,7 @@ def build_description(card: dict) -> str:
                     parts[-1], [f"[gold]{stat}[/gold]"])
 
         elif op == "block_next_turn":
-            if block_next_turn_upgrade(card):
+            if block_next_turn_upgrade(card) or spotlight_folds(card):
                 # The next-turn half moves with the upgrade, so the face must
                 # show the NEW number (SYS-1: tideline_watch printed 8 while
                 # the sim banked 12).

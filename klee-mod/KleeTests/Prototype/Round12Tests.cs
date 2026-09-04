@@ -334,6 +334,67 @@ public class Round12Tests
         }
     }
 
+    // ---- EB-438: a printed number is the delivered number ---------------
+
+    [Fact]
+    public void A_deferred_block_clause_prints_through_the_fold()
+    {
+        // THE FIND. Charlotte, First-Person Shutter is two Block clauses and
+        // only the first was a var: under Guest Cast the card printed "Gain 4
+        // Block. At the start of your next turn, gain 4 Block." and delivered
+        // 6 and 6. The r6 seat filed the SHAPE rather than the number: "The
+        // Spotlight rewrites the FIRST number of a two-clause card but not the
+        // second, so the card under-reports itself."
+        var src = Printed("Cards/Generated/CharlotteEnduringFrosthelm.cs");
+
+        Assert.Contains(
+            "At the start of your next turn, gain {BlockNextTurn:diff()} "
+          + "[gold]Block[/gold].", src);
+        Assert.Contains("new SpotlightSystem.DeferredBlockVar(4m)", src);
+        // The PLAY is unchanged: the fold is applied once, there, and the var
+        // above previews it.
+        Assert.Contains("(int)SpotlightSystem.PrintedBlock(this, 4)", src);
+    }
+
+    [Fact]
+    public void Every_deferred_block_clause_on_a_spotlit_card_carries_the_var()
+    {
+        // The denominator, and the reason the rule is derived rather than
+        // applied by hand: the emitter already wrapped every one of these
+        // plays in `PrintedBlock`, so the face had to ask the same question.
+        foreach (var cls in new[] { "CharlotteEnduringFrosthelm",
+                                    "SayuDarumaGift",
+                                    "ThomaBlazingBarrier" })
+        {
+            var src = Printed("Cards/Generated/" + cls + ".cs");
+            Assert.Contains("SpotlightSystem.DeferredBlockVar", src);
+            Assert.Contains("gain {BlockNextTurn:diff()} [gold]Block[/gold]",
+                            src);
+        }
+    }
+
+    [Fact]
+    public void The_stored_shower_prints_the_number_it_will_deal()
+    {
+        // "The buff line printed `Sacramental Shower 1 -- ... deal 9 Hydro
+        // damage to it first`, and when it fired the ship went 38 to 32, i.e.
+        // 6. I was carrying Weak 2... the stored-buff text does not [fold]."
+        //
+        // `Spring` deals through `ElementalHit.Deal` with `powered: true`,
+        // whose first step is `SimDamagePipeline.DealerMods`, so the badge
+        // asks that same call.
+        var src = Printed("Powers/Prototype/CompanionOverhaulHooks.cs");
+
+        Assert.Contains("(\"smartDescription\",", src);
+        Assert.Contains("SimDamagePipeline.DealerMods(power.Owner, BaseValue)",
+                        src);
+        // The static compendium row keeps its literal: `PowerModel.HoverTips`
+        // binds vars on the SMART branch alone, and a token on the other one
+        // reaches the screen as a placeholder (`EB-353`).
+        Assert.Contains(
+            "$\"[blue]{CompanionOverhaulLaw.ShowerDamage}[/blue]", src);
+    }
+
     [Fact]
     public void The_guest_cast_badge_says_a_member_is_not_one()
     {
