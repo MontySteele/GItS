@@ -4,8 +4,8 @@ Status: OPEN (no pick; the defaults in §5 are applied)
 
 No pick. Everything is a default, applied and disclosed in §5.
 
-Written 2026-09-04, evening. Four Opus runs on the round-10 build, two of
-them before the five defence rows were in the arm's offer roster and two
+Written 2026-09-04, evening. Six Opus runs on the round-10 build, two of
+them before the five defence rows were in the arm's offer roster and four
 after. The first build (`0.2.2399+proto`) compiled R252's rows and never
 offered them: the roster that hands the reward screen its cards lists the
 arm's rows by name and the build's author had added them to the sheet, the
@@ -13,12 +13,15 @@ sim and the generated master list and not there. Two runs read it before a
 seat that was never offered a new row exposed it; the roster now has the
 rows and a lint (`tools/lint_arm_pool_parity.py`) that reads the sheet
 against the roster and the sim's mirror, so it cannot recur. The corrected
-build (`0.2.2401+proto`) carried runs three and four. All four runs sit at
+build (`0.2.2401+proto`) carried runs three to six. All six runs sit at
 Ascension 1 with every arm on and the round-9 legibility rows (#362) built.
 The records are `review/qa/klee-round-10-2026-09-04/opus-act1.md`,
 `opus-act2.md`, `opus-run2-act1.md`, `opus-run2-act2.md` (the pre-roster
 pair) and `opus-run3-act1.md`, `opus-run3-act2.md`, `opus-run4-act1.md`,
-`opus-run4-act2.md`; every claim below names one of them.
+`opus-run4-act2.md`, `opus-run5-act1.md`, `opus-run5-act2.md`,
+`opus-run6-act1.md` and `opus-run6-act2.md`; every claim below names one of
+them. This branch also carries R252 and the rows' build (#361), so the
+ruling, the rows and their read land together.
 
 ## 1. The runs in one paragraph
 
@@ -31,8 +34,13 @@ the deck and was stopped in act 2 at 53 of 77 by a screen the page cannot
 drive, the Crystal Sphere's minigame (`opus-run3-act2.md`, `EB-396`); run four cleared act 1 at 15 of 62 with Careful
 Now and Dodoco Cover, a Bomb 66 into Big Badda Boom on the Fogmog, and
 died on act-2 floor 31 to an Infested Prism the map offered as the only
-node at 9 of 62, after two Elites (`opus-run4-act2.md`). Four act-1 clears from four runs, where round 9's one run
-cleared act 1 at 12 of 69.
+node at 9 of 62, after two Elites (`opus-run4-act2.md`). Run five cleared
+act 1 at 39 of 83 on Dodoco Cover and Run Away! and died on act-2 floor 31
+to the Entomancer, a Big Badda Boom into Thorns having cost it the margin
+(`opus-run5-act2.md`); run six cleared act 1 at 36 of 62 and reached The
+Insatiable, dying on floor 33 to the boss's Sandpit timer at 30 of 72 with
+the boss at 78 (`opus-run6-act2.md`). Six act-1 clears from six runs, where
+round 9's one run cleared act 1 at 12 of 69; no run cleared act 2.
 
 ## 2. What the round found
 
@@ -60,15 +68,22 @@ the spray is the shelf doing what R252 asked.
 
 **Run Away! read as designed.** Taken over Coven Errand for its 0 cost, dead
 on non-attack turns, worth 7 on the turn after a cash (`opus-run3-act1.md`,
-fight 7 reward and §(b)). Fire Safety, Safety Lesson and Barbara — Front Row
-Seat were offered to no seat in four runs and two acts; the shelf's React
-and Spray halves are unread, and the stand-in waits on the companion slot
-rolling Barbara. Run four's act 2 added the shelf's other cost: Careful
+fight 7 reward and §(b)); run five leaned on it (`opus-run5-act1.md`).
+**Safety Lesson was offered once and declined**, its 2 Block per Bomb read
+as less than a Defend at the one or two detonations a turn that seat was
+seeing (`opus-run5-act1.md`, fight 4 reward); one read, held. **Fire Safety
+read as a dead pick in a mono-Pyro deck** (`opus-run6-act1.md` §(b)), which
+is the React loop's own condition: every reaction-keyed card in the arm
+needs an off-element companion, and a deck without one reads a glossary it
+cannot use. The row stands; the pool pass that follows should weigh how
+many rows key off a reaction the kit cannot make alone. **Barbara — Front
+Row Seat** was offered to no seat in six runs; the stand-in waits on the
+companion slot rolling Barbara. Run four's act 2 added the shelf's other cost: Careful
 Now's number is unreadable from a badge that prints only the stack's sum
 (`opus-run4-act2.md` §(c)), which is `EB-343`'s aggregate line and `EB-394`'s
 face between them.
 
-**The Spark loop can close, and one seat sat inside it twice.** Sparks come
+**The Spark loop can close, and three seats sat inside it.** Sparks come
 from Bombs going off, two Set off cards are Spark-priced, and a seat holding
 Fwoosh! and Bang Bang! at 0 Spark with a fat Bomb on the enemy had no
 detonator, once under Vulnerable against a 31 (`opus-run3-act1.md` §(c)).
@@ -76,10 +91,14 @@ Ka-pow! is the starter's answer, 0 energy and no Spark, and the seat that
 held it never closed the loop; the seat that did had bought two Spark-priced
 detonators and drew neither. The pre-roster run one died the same way from
 the other side, a Bomb 28 and no detonator of any price (`opus-act2.md`
-§(c)). That is the deck's shape, not a rule: with four placers and three
-detonators in twenty-two cards, the hand that has one and not the other is
-the common hand. Noted for the next pool pass; nothing moves on one seat's
-read of a purchase it made.
+§(c)). Run six held three Dig Ins on 1 Spark and called it a deadlock
+(`opus-run6-act2.md`); run five ended fights holding 4 to 7 Sparks with
+nothing to spend them on until Fwoosh! and Dig In arrived, and asked
+whether a Spark sink belongs in the starter (`opus-run5-act1.md`). That is
+the deck's shape, not a rule: with four placers and three detonators in
+twenty-two cards, the hand that has one and not the other is the common
+hand, and Spark sits on both sides of it. Noted for the next pool pass as
+its first question; nothing moves on this round.
 
 **Hard To Kill and Slippery keep inverting the deck, and the badge keeps
 up.** "Capped by Hard To Kill" on the badge made bomb count beat bomb size
@@ -141,9 +160,9 @@ that two seats read as a handover mismatch.
 
 ## 4. What the round did not test
 
-Act 3 was reached by no run: run three was stopped by the Crystal Sphere
-and run four died on floor 31, so the shelf is read across act 1 twice and
-act 2 once and a half. No seat filled a hand with the shelf: the most any deck held
+Act 3 was reached by no run: run three was stopped by the Crystal Sphere,
+runs four and five died on floor 31 and run six on the act-2 boss, so the
+shelf is read across four act 1s and three and a half act 2s. No seat filled a hand with the shelf: the most any deck held
 was three of the five rows. The pre-roster pair read no shelf row at all.
 Sparks 'n' Splash was drafted by run one (`opus-act1.md`) and R250's
 largest-Bomb rule was read for the first time: the seat held the Splash and
@@ -159,7 +178,10 @@ kept detonating, which is the rule's purpose. Act 3 is unplayed on the shelf bui
   the rows already there; the seats read them on round 11.
 - **E:** the pre-roster runs are kept as records and read for the round-9
   legibility rows only; nothing about the shelf is claimed from them.
-- **E:** rows `EB-390` to `EB-397` minted on this branch; eight seat records
-  committed beside the packet.
+- **E:** rows `EB-390` to `EB-400` minted on this branch (`EB-398` and
+  `EB-399` are Furina round 3's, minted here as the top of the stack);
+  twelve seat records committed beside the packet.
+- **E:** this branch carries #361 (R252, the rows and their build), so the
+  ruling and its read merge as one.
 - **E:** the Crystal Sphere's page verb (`EB-396`) builds with this round's
   rows: the wire already carries the screen's proceed action.
