@@ -259,6 +259,59 @@ public class ArmKeywordTipTests
     }
 
     [Fact]
+    public void The_coven_rider_names_all_three_limbs_of_the_kits_spark()
+    {
+        // `EB-418`. The r11 seat's one unreadable number: Spark 1 to 2 with no
+        // Bomb going off, because `KleeCompanionSpark` mints on any play of one
+        // of Klee's own Personal Companions and LAW:145 keeps that grant off
+        // the Companion's own face. All three limbs print -- a sentence saying
+        // only "makes a Spark" would leave a reacted upgraded play as
+        // unreadable as the plain one was.
+        var body = Printed("ForCovenSpark");
+        Assert.Contains("Klee's own", body);
+        Assert.Contains("Companions", body);
+        Assert.Contains("Spark", body);
+        Assert.Contains("more if it triggered", body);
+        Assert.Contains("Elemental Reaction", body);
+        Assert.Contains("more if it is upgraded", body);
+
+        // THE NUMERALS ARE THE POWER'S AND ARE NOT TYPED HERE (`EB-89`): each
+        // limb is an `int` folded into the concat at runtime, so the literals
+        // above carry no digit at all and a repricing moves the sentence with
+        // the grant.
+        Assert.Equal(1, KleeCompanionSpark.Base);
+        Assert.Equal(1, KleeCompanionSpark.ReactionBonus);
+        Assert.Equal(1, KleeCompanionSpark.UpgradedBonus);
+        // The cap is the sum of the three limbs, so no reachable play can meet
+        // a fourth clause and none is printed.
+        Assert.Equal(KleeCompanionSpark.Base + KleeCompanionSpark.ReactionBonus
+                     + KleeCompanionSpark.UpgradedBonus,
+                     KleeCompanionSpark.MaxPerPlay);
+    }
+
+    [Fact]
+    public void The_kits_spark_is_minted_where_the_rider_says_it_is()
+    {
+        // `EB-418`, the other half: the sentence is only true while the grant
+        // is where it says. `Settle` is the mint and `Arm` decides whether it
+        // fires, both keyed on `IsOwnPersonalCompanion` -- the row's own
+        // `PersonalPool` against the player's character, which is the same pair
+        // `gen_klee_cards` reads to decide which faces carry the sentence.
+        var settle = typeof(KleeCompanionSpark)
+            .GetMethod("Settle", HeadlessGame.All)!;
+        Assert.Contains(Il.Calls(settle),
+                        c => c.EndsWith("SparkPower.Gain",
+                                        System.StringComparison.Ordinal));
+        Assert.Contains("companion:personal/play", Il.Strings(settle));
+
+        var arm = typeof(KleeCompanionSpark).GetMethod("Arm", HeadlessGame.All)!;
+        Assert.Contains(
+            Il.Calls(arm),
+            c => c.EndsWith("KleeCompanionSpark.IsOwnPersonalCompanion",
+                            System.StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Every_keyword_goes_through_the_one_attach_point()
     {
         // Structural pin. `With` yields the INHERITED list first and its own
@@ -291,8 +344,15 @@ public class ArmKeywordTipTests
         // only statement of itself is `EncoreMeterPower`'s badge, which renders
         // once the meter is on the board -- and the word is printed on the Neow
         // screen and on opening-hand faces before that.
-        Assert.Equal(14, attaches.Count);
+        //
+        // THE FIFTEENTH IS `EB-418`'s `ForCovenSpark`, the second entry here
+        // that titles no keyword: the Spark Klee's KIT mints on a play of one
+        // of her own Personal Companions, which LAW:145 keeps off the
+        // Companion's face and which therefore had no surface at all until the
+        // r11 seat reported it as the one number it could not read.
+        Assert.Equal(15, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
+        Assert.Contains(attaches, m => m.Name == "ForCovenSpark");
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
                                          System.StringComparison.Ordinal)));

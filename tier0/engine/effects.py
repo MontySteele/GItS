@@ -1078,7 +1078,8 @@ def detonate_bombs(state: CombatState, enemy: Enemy, bonus: int = 0) -> None:
         deal_damage_to_enemy(state, enemy, dmg, element=bomb.element,
                              source="bomb")
         if "spark_on_detonation" in p.relic_hooks:
-            gain_sparks(state, 1)
+            gain_sparks(state, 1,
+                        source="relic:pounding_surprise/detonation")
         splash = p.powers.get("detonation_splash", 0)     # Blazing Delight
         if splash and C.DETONATION_SPLASH_PROC_CAP is not None:
             procs = getattr(state, "splash_procs_this_turn", 0)
@@ -1110,8 +1111,30 @@ def detonate_bombs(state: CombatState, enemy: Enemy, bonus: int = 0) -> None:
             powers.apply_power(state, enemy, "vulnerable", vuln)
 
 
-def gain_sparks(state: CombatState, n: int) -> None:
+def gain_sparks(state: CombatState, n: int, source: str) -> None:
+    """Every Spark that lands, and the NAME of what made it (`EB-418`).
+
+    `source` IS REQUIRED, and it is required because the r11 Opus seat could
+    not name one: "My Spark went 1 to 2 with no bomb going off... This is the
+    one number in the kit I could not read off the screen." The grant was
+    `klee_personal_companion_spark`, which is a real kit rule and was printed
+    nowhere; the mod prints it now, and this argument is the pin that stops the
+    NEXT unnamed income arriving. The C# twin is `SparkPower.Gain`'s own
+    `source` parameter, which has carried exactly these strings into
+    `MeterLedger` since `EB-216` -- the two vocabularies are the same
+    vocabulary, so a ledger row read off the wire and an event read off a sim
+    fight name the same rule.
+    """
+    before = state.player.sparks
     state.player.sparks += n
+    # THE LEDGER IS BESIDE THE EVENT AND NOT INSIDE IT. The `gain_spark` event
+    # sits inside two fixed-seed log digests taken before their arms existed,
+    # and a diagnostic that moved one of those would be answering a question
+    # about instrumentation with a measurement about the game. `CombatState
+    # .spark_ledger` says why at greater length; the mod draws the same line
+    # (`SparkPower.Gain` -> `Diagnostics.MeterLedger`).
+    state.spark_ledger.append({"source": source, "amount": n,
+                               "before": before, "total": state.player.sparks})
     state.emit("gain_spark", amount=n, total=state.player.sparks)
 
 
@@ -1163,7 +1186,7 @@ def klee_personal_companion_spark(state: CombatState, card: Card) -> None:
     if n <= 0:
         return
     state.emit("klee_companion_spark", card=card.id, amount=n)
-    gain_sparks(state, n)
+    gain_sparks(state, n, source="companion:personal/play")
 
 
 def spend_spark_amount(fx: dict) -> int:
@@ -2149,7 +2172,7 @@ def _op_grant_sly_this_turn(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_gain_spark(state: CombatState, fx: dict, card: Card) -> None:
-    gain_sparks(state, fx.get("amount", 1))
+    gain_sparks(state, fx.get("amount", 1), source=f"card:{card.id}/gain_spark")
 
 
 def _op_spend_spark(state: CombatState, fx: dict, card: Card) -> None:
@@ -3098,7 +3121,7 @@ def _op_discard_for_sparks(state: CombatState, fx: dict, card: Card) -> None:
         discarded += 1
     gain = min(fx.get("sparks", discarded), discarded)
     if gain:
-        gain_sparks(state, gain)
+        gain_sparks(state, gain, source=f"card:{card.id}/discard_for_sparks")
 
 
 def _op_scry_discard(state: CombatState, fx: dict, card: Card) -> None:
@@ -5936,7 +5959,7 @@ def player_turn_start_triggers(state: CombatState) -> None:
         powers.apply_power(state, p, "strength", n, applier=p)
     n = p.powers.get("spark_per_turn", 0)               # Endless Fireworks
     if n:
-        gain_sparks(state, n)
+        gain_sparks(state, n, source="power:endless_fireworks/turn_start")
     n = p.powers.get("bomb_and_spark_per_turn", 0)      # Playtime Forever
     for _ in range(n):
         if state.living_enemies:
@@ -5945,7 +5968,7 @@ def player_turn_start_triggers(state: CombatState) -> None:
                                     turn_placed=state.turn))
             state.emit("bomb_placed", target=enemy.name,
                        damage=C.PLAYTIME_BOMB_DAMAGE)
-        gain_sparks(state, 1)
+        gain_sparks(state, 1, source="power:playtime_forever/turn_start")
     companion_overhaul_turn_start(state)
 
 

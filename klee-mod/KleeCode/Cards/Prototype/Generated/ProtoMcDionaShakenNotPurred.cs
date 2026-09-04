@@ -49,7 +49,7 @@ public sealed class ProtoMcDionaShakenNotPurred : CustomCardModel, ICompanionCar
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false, appliesWithoutHit: true), this);
+        ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false, appliesWithoutHit: true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_diona_icy_paws");
 

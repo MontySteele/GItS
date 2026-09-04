@@ -175,7 +175,8 @@ def apply_combat_start(state: CombatState) -> None:
             if (amt > 0 and "spark_on_detonation" in p.relic_hooks
                     and not klee_overhaul.live(state)):
                 from tier0.engine import effects   # late import (cycle)
-                effects.gain_sparks(state, amt)
+                effects.gain_sparks(
+                    state, amt, source="relic:explosive_frags/combat_start")
     # conditional_power is evaluated at combat start too (Red Skull may already
     # be active if the fight opens below the HP threshold).
     reevaluate_conditionals(state)

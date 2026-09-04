@@ -81,6 +81,14 @@ public static class ArmKeywordTips
     // Plan, which is this class's word and this quarantine's rule.
     public const string PlanElementKey = "KLEEMOD-ARM_PLAN_ELEMENT";
 
+    // `EB-418`. THE SECOND KEY HERE THAT TITLES NO KEYWORD, and it names the
+    // one Spark income no screen in the game stated: `KleeCompanionSpark`
+    // ("Little Hexenzirkul"), the kit rule LAW:145 obliges Klee's own KIT to
+    // declare because a Companion card may not print a signature resource on
+    // its own face. It sits beside `PlanElementKey` for that key's reason --
+    // it is a sentence about the CARD in hand, printed where that card is met.
+    public const string CovenSparkKey = "KLEEMOD-ARM_COVEN_SPARK";
+
     // ----------------------------------------------------------- Klee ------
     //
     // The four sentences are the ruled brief's sec.3 rules 1, 2, 4 and 6, as
@@ -315,6 +323,45 @@ public static class ArmKeywordTips
             "A Power that pays at the start of your turn, but "
           + "only if none of your [gold]Bombs[/gold] went off last turn. Its "
           + "card prints what it pays.");
+
+    /// <summary>
+    /// `EB-418`, AND IT IS THE ONE NUMBER IN THE KIT A SEAT COULD NOT READ OFF
+    /// THE SCREEN.
+    ///
+    /// THE GAP. <see cref="KleeMod.Powers.KleeCompanionSpark"/> -- "Little
+    /// Hexenzirkul" -- mints a Spark on every play of one of Klee's OWN
+    /// Personal Companions, and it is printed nowhere: LAW:145 forbids the
+    /// Companion card from carrying the grant on its face ("Companion cards may
+    /// not themselves grant signature resources"), so the rule moved WHOLE into
+    /// her kit at `EB-219` and the sentence did not move with it. The
+    /// companions packet says so in as many words -- "the kit already pays a
+    /// rider neither card prints" -- and the r11 Opus seat met the consequence
+    /// as the only unreadable number in five fights: "My Spark went 1 to 2 with
+    /// no bomb going off... This is the one number in the kit I could not read
+    /// off the screen."
+    ///
+    /// WHERE IT HAPPENS IS THE CARD, so that is where it prints. The Spark
+    /// keyword tip is full -- four sentences and 130 of its 135 characters
+    /// since R242 put the opening bank in it -- and in any case it is met on a
+    /// Spark-priced Attack rather than on the Companion that pays. A rider on
+    /// the Companion's own face is read at the moment the energy is committed,
+    /// which is the moment the seat's read was wrong.
+    ///
+    /// THE THREE LIMBS ARE THE POWER'S OWN, interpolated from the constants the
+    /// grant reads (`EB-89`) so a repricing cannot leave this sentence lying.
+    /// The CAP is deliberately not printed: it is the sum of the three limbs
+    /// (<see cref="KleeMod.Powers.KleeCompanionSpark.MaxPerPlay"/>), so a
+    /// fourth clause would state a bound no reachable play can meet.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForCovenSpark(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, CovenSparkKey,
+            "Playing one of Klee's own [gold]Companions[/gold] makes [blue]"
+          + KleeCompanionSpark.Base + "[/blue] [gold]Spark[/gold], [blue]"
+          + KleeCompanionSpark.ReactionBonus + "[/blue] more if it triggered "
+          + "an [gold]Elemental Reaction[/gold] and [blue]"
+          + KleeCompanionSpark.UpgradedBonus
+          + "[/blue] more if it is upgraded.");
 
     // ---------------------------------------------------------- Kokomi -----
     //

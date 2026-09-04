@@ -493,14 +493,16 @@ def _notify_explosion(state: CombatState, enemy: Enemy, size: int,
     # is: the honest test for "this player runs the Spark economy" is the
     # starter's own hook, which the mod's upgrade keeps rather than removes.
     if SPARK_RELIC_HOOK in p.relic_hooks:
-        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION))
+        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION),
+                            source="relic:pounding_surprise/explosion")
 
     # Catalytic Converter: EXTRA, on top of the explosion's own Spark, and only
     # when the explosion REACTED.
     n = p.powers.get(BOMB_REACTION_SPARK, 0)
     if n and reacted:
         state.emit("ko_catalytic_converter", amount=n)
-        effects.gain_sparks(state, n)
+        effects.gain_sparks(
+            state, n, source="power:catalytic_converter/bomb_reaction")
 
     # Chained Reactions: "Whenever one of your Bombs goes off, place a Bomb N
     # on a random enemy." Through the same `place` every other source uses, so
@@ -661,7 +663,8 @@ def turn_start_late(state: CombatState) -> None:
     if state.turn == 1 and C.KLEE_OVERHAUL_OPENING_SPARK > 0:
         state.emit("ko_opening_spark",
                    amount=int(C.KLEE_OVERHAUL_OPENING_SPARK))
-        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_OPENING_SPARK))
+        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_OPENING_SPARK),
+                            source="kit:opening_spark")
 
     # GROUNDED: "if none of your Bombs went off LAST turn, gain N Block and 1
     # Spark." Last turn and not this one is the whole design -- the decision it
@@ -692,7 +695,8 @@ def turn_start_late(state: CombatState) -> None:
         state.emit("block", amount=n)
         state.emit("ko_grounded", amount=n,
                    spark=int(C.KLEE_OVERHAUL_GROUNDED_SPARK))
-        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_GROUNDED_SPARK))
+        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_GROUNDED_SPARK),
+                            source="power:grounded/held_turn")
 
 
 def turn_end(state: CombatState) -> None:

@@ -367,6 +367,12 @@ public static class KleeMod
                     // Cold-Blooded Strike is written against, so the word
                     // reaches a player who may never have drafted it.
                     [Cards.ArmKeywordTips.GroundedKey + ".title"] = "Grounded",
+                    // `EB-418`. The second rider, not a keyword: the Spark her
+                    // KIT mints on a play of one of her own Companions, which
+                    // LAW:145 keeps off the Companion's own face and which
+                    // therefore had no surface at all.
+                    [Cards.ArmKeywordTips.CovenSparkKey + ".title"] =
+                        "Sparks from your Companion",
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
                     // `EB-378`. The rider, not a keyword: the rows whose Hydro

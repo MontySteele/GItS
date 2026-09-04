@@ -46,7 +46,7 @@ public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_jean_dandelion_breeze");
 
