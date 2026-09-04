@@ -277,10 +277,70 @@ def current_seed() -> str | None:
 
     Recorded, never fed to a policy stream -- see understudy/rng.py. Raises
     `LaneCrossed` rather than answering with another lane's seed (`EB-210`).
+
+    ONE READ, TAKEN NOW. A caller that has just embarked wants
+    `seed_read_back` below instead: there is a window in which this answers
+    about the wrong file, and `EB-435` is what it cost.
     """
     run = current_run()
     _refuse_foreign_save(run)
     return run.get("seed")
+
+
+#: How long `seed_read_back` waits for the game to write its OWN
+#: `current_run.save`. Generous rather than tight: the window measured on
+#: 2026-09-04 was the several seconds of asset preloading that follow an
+#: embark, and waiting too long costs a slow refusal while waiting too little
+#: costs a run recorded against somebody else's seed.
+SEED_READ_BACK_WAIT_S = 30.0
+
+
+def seed_read_back(wait: float = SEED_READ_BACK_WAIT_S,
+                   poll: float = 0.5) -> str | None:
+    """The seed of THIS lane's run, waited for rather than snatched (`EB-435`).
+
+    THE READ-BACK RACES THE GAME'S OWN SAVE, AND ON A LONE LANE IT LOST. The
+    compendium's `current_run` block is built by opening `current_run.save`
+    OFF DISK, and the harness's own route to the main menu abandons the
+    profile's leftover run on the way -- `NMainMenu.AbandonRun` ->
+    `RunSaveManager.DeleteCurrentRun`, which DELETES that file. The new run
+    does not write its first one until several seconds later, after the
+    `Common` and character asset preloads. Asked inside that window the mod
+    finds no file in this process's tree, walks on to the next save root it
+    knows -- the machine's own `%APPDATA%` -- and answers with a run from
+    months ago. `_refuse_foreign_save` caught it, correctly, and two lone-lane
+    Klee soaks died at `seed_read_back_crossed` (2026-09-04) with nothing
+    whatever wrong with them.
+
+    So the window is waited out here rather than read as a verdict: poll until
+    the block resolves to a file inside THIS lane's tree AND names a seed, and
+    only then answer. What is refused at the deadline is what was actually
+    seen -- the crossing, if one was still standing, and otherwise the plain
+    (unrefused) fact that this lane has no seed to read.
+
+    `wait=0` is a single read and exactly `current_seed`'s behaviour, which is
+    what every caller not reading back a just-started run should keep.
+    """
+    deadline = time.time() + max(0.0, float(wait))
+    crossed: LaneCrossed | None = None
+    while True:
+        run = current_run()
+        try:
+            _refuse_foreign_save(run)
+        except LaneCrossed as exc:
+            crossed = exc
+        else:
+            seed = run.get("seed")
+            if seed:
+                return seed
+            # In-tree and seedless is not a crossing: forget any earlier one
+            # rather than raising it over a state that has since resolved.
+            crossed = None
+        if time.time() >= deadline:
+            if crossed is not None:
+                raise crossed
+            return run.get("seed")
+        time.sleep(max(0.0, float(poll)))
 
 
 def set_speed(enabled: bool, time_scale: float | None = None) -> dict:

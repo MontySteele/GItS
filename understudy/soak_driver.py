@@ -463,8 +463,14 @@ class RunDriver(Navigation):
             # defect of its own now, with its own name, because the two need
             # different answers: one is the game refusing a seed, the other is
             # this harness reading the wrong game's save.
+            # EB-435: AND IT IS WAITED FOR, NOT SNATCHED. `_to_main_menu`
+            # abandons the profile's leftover run on the way in, which DELETES
+            # its `current_run.save`; the new run does not write one until the
+            # post-embark preloads are done. Asked inside that window the
+            # resolution leaves this lane's tree and the refusal above fires on
+            # a run with nothing wrong with it -- twice, on a lone lane.
             try:
-                self.seed = _wire().current_seed()
+                self.seed = _wire().seed_read_back()
             except _wire().LaneCrossed as crossed:
                 raise Defect("seed_read_back_crossed", str(crossed),
                              self._last_state or {}) from crossed

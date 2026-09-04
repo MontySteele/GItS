@@ -1694,6 +1694,159 @@ def test_a_crossed_read_back_is_its_own_defect_and_not_seed_not_honoured():
 
 
 # ======================================================================
+# EB-435 -- THE CROSSED READ ON A LONE LANE, AND THE WINDOW UNDER IT
+# ======================================================================
+#
+# Nothing about EB-210 was wrong; what was missing is that the crossing has a
+# TRANSIENT cause as well as a structural one. `_to_main_menu` abandons the
+# profile's leftover run on the way in, `NMainMenu.AbandonRun` ->
+# `RunSaveManager.DeleteCurrentRun` DELETES `current_run.save`, and the new run
+# does not write its own until the post-embark preloads finish several seconds
+# later. Read inside that window the mod found no file in this process's tree
+# and walked on to the next save root it knows -- the machine's own `%APPDATA%`
+# -- returning a save from a different day. Two lone-lane Klee soaks
+# (2026-09-04, no second game anywhere on the machine) filed
+# `seed_read_back_crossed` on it, and the mechanism was then reproduced
+# deterministically: with a live lane-1 run up, deleting the lane's own
+# `current_run.save` moved the block's `save_path` from the lane's tree to the
+# Roaming one between two reads a second apart.
+#
+# Two halves, and both are pinned below: the mod stops searching once it knows
+# this process's own save directory, and the harness WAITS the window out
+# instead of reading it as a verdict.
+
+
+def test_the_read_back_waits_out_the_window_before_the_first_save_write(
+        tmp_path, monkeypatch):
+    """The window is a state, not a verdict.
+
+    The first reads answer with the foreign path the deleted file leaves
+    behind; the next answers with this lane's own. The waiting read-back must
+    return the lane's OWN seed and never raise -- the live failure, scripted.
+    """
+    lane1 = instances.Instance(game_dir=tmp_path / "g", port=1,
+                               appdata=tmp_path / "lane1", label="lane1")
+    foreign = {"is_in_progress": True, "seed": "OLDRUNSEED1",
+               "save_path": str(tmp_path / "roaming" / "saves"
+                                / "current_run.save")}
+    mine = {"is_in_progress": True, "seed": "MYOWNSEED22",
+            "save_path": str(tmp_path / "lane1" / "saves"
+                             / "current_run.save")}
+    answers = [foreign, foreign, mine]
+    monkeypatch.setattr(bridge, "current_run",
+                        lambda: answers.pop(0) if answers else mine)
+    try:
+        bridge.use(lane1)
+        assert bridge.seed_read_back(wait=5.0, poll=0.0) == "MYOWNSEED22"
+    finally:
+        bridge.use_default()
+
+
+def test_a_lane_with_no_seed_yet_is_waited_for_and_not_stamped_empty(
+        tmp_path, monkeypatch):
+    """The other shape the window takes: `limitation`, no `save_path`, no
+    seed. Nothing to refuse -- and nothing to record either, so the read-back
+    keeps asking rather than stamping an empty seed on the run."""
+    lane1 = instances.Instance(game_dir=tmp_path / "g", port=1,
+                               appdata=tmp_path / "lane1", label="lane1")
+    late = {"is_in_progress": True, "seed": "ARRIVEDLATE",
+            "save_path": str(tmp_path / "lane1" / "saves"
+                             / "current_run.save")}
+    answers = [{"is_in_progress": True,
+                "limitation": "current_run.save was not found yet."}, late]
+    monkeypatch.setattr(bridge, "current_run",
+                        lambda: answers.pop(0) if answers else late)
+    try:
+        bridge.use(lane1)
+        assert bridge.seed_read_back(wait=5.0, poll=0.0) == "ARRIVEDLATE"
+    finally:
+        bridge.use_default()
+
+
+def test_a_crossing_that_outlasts_the_wait_is_still_refused(tmp_path):
+    """WAITING IS NOT WAVING THROUGH. A read still answering out of another
+    tree when the deadline passes raises exactly as it did before: EB-210's
+    lock is the thing being made patient, not the thing being removed.
+    Through the real server, because the refusal is what a driver files on."""
+    srv, port = _lane_bridge({
+        "is_in_progress": True, "seed": "R7W86HG7WHUD",
+        "save_path": str(tmp_path / "roaming" / "SlayTheSpire2" / "steam"
+                         / "1" / "modded" / "profile1" / "saves"
+                         / "current_run.save")})
+    try:
+        bridge.use(instances.Instance(game_dir=tmp_path / "game", port=port,
+                                      appdata=tmp_path / "lane1",
+                                      label="lane1"))
+        started = time.time()
+        with pytest.raises(bridge.LaneCrossed) as caught:
+            bridge.seed_read_back(wait=0.4, poll=0.1)
+        assert time.time() - started < 20.0      # bounded, never a hang
+        assert "current_run.save" in str(caught.value)
+    finally:
+        bridge.use_default()
+        srv.shutdown()
+
+
+def test_the_read_back_with_no_wait_is_exactly_the_one_shot_read(
+        tmp_path, monkeypatch):
+    """`wait=0` is ONE read and today's behaviour, which is the compatibility
+    claim every caller that is not reading back a just-started run rests on."""
+    lane1 = instances.Instance(game_dir=tmp_path / "g", port=1,
+                               appdata=tmp_path / "lane1", label="lane1")
+    reads = []
+    foreign = {"is_in_progress": True, "seed": "OLDRUNSEED1",
+               "save_path": str(tmp_path / "roaming" / "current_run.save")}
+
+    def one_read():
+        reads.append(1)
+        return foreign
+
+    monkeypatch.setattr(bridge, "current_run", one_read)
+    try:
+        bridge.use(lane1)
+        with pytest.raises(bridge.LaneCrossed):
+            bridge.seed_read_back(wait=0.0)
+        assert len(reads) == 1
+    finally:
+        bridge.use_default()
+
+
+def test_the_two_read_backs_that_follow_an_embark_are_the_waiting_one():
+    """WHICH CALLERS WAIT, read off the source.
+
+    The soak driver and the operator-side embark are the two that read a seed
+    back on a run that started seconds ago; every other caller attaches to a
+    run whose save was written long before it looked. Naming them here is what
+    stops the next edit quietly putting the one-shot read back.
+    """
+    driver = seam_source("soak")
+    assert "_wire().seed_read_back()" in driver
+    assert "_wire().current_seed()" not in driver
+    src = (REPO / "understudy" / "embark.py").read_text(encoding="utf-8")
+    assert "bridge.seed_read_back()" in src
+    assert "bridge.current_seed()" not in src
+
+
+def test_the_mod_stops_at_this_process_own_save_directory():
+    """THE OTHER HALF IS IN C#, and this is that contract read off the source.
+
+    Once `GetSaveDirectoryFromProgressPath` has answered, that directory is
+    THIS process's -- so an absent `current_run.save` under it means this game
+    has not written one yet, which is the `limitation` its caller already
+    reports. Walking on into the save-root enumeration is what turned "not
+    yet" into another tree's run, so the resolved branch must RETURN rather
+    than fall through to it.
+    """
+    src = (REPO / "vendor" / "STS2_MCP"
+           / "McpMod.Compendium.cs").read_text(encoding="utf-8")
+    body = src[src.index("private static string? ResolveCurrentRunPath("):]
+    body = body[:body.index("\n    }\n")]
+    assert "return File.Exists(currentRunPath) ? currentRunPath : null;" in body, (
+        "ResolveCurrentRunPath must stop at this process's own save directory "
+        "instead of enumerating every save root on the machine (EB-435)")
+
+
+# ======================================================================
 # EB-209 -- IN THE SHADOW CHAIR THE STOPPING RULE READ SHADOW GRADES
 # ======================================================================
 

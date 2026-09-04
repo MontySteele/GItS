@@ -75,10 +75,13 @@ measured on it is comparable to any other run; that sentence is
 comment.
 
 THE SEED IS READ BACK, NEVER ASSUMED (R95). The embark path passes no seed on
-the read-back arm, the game rolls one, and `bridge.current_seed()` is asked
+the read-back arm, the game rolls one, and `bridge.seed_read_back()` is asked
 after the run exists. That string is what the sealed record carries, and it is
 also the one string the leak audit greps every observation for -- a tester who
-can see the seed is not blind.
+can see the seed is not blind. The read WAITS (`EB-435`): the abandon on the
+way in deleted the profile's `current_run.save` and the new run writes its own
+several seconds later, and a read taken inside that window is answered about
+another user tree's file entirely.
 
 REVERSIBILITY ACROSS TWO PROCESSES. `soak.Session` reverts what it recorded
 using entries it holds in memory, which is right for a soak that owns its whole
@@ -376,7 +379,15 @@ def embark(character: str, *, hold: bool = False,
         state = driver._verify_character(state)
     except soak.Defect as d:
         raise EmbarkError(f"{d.kind}: {d.detail}") from None
-    seed = bridge.current_seed() or ""
+    # EB-435: WAITED FOR. The abandon on the way in deleted the profile's
+    # `current_run.save` and the new run writes its own several seconds later;
+    # read inside that window, the mod's resolution leaves this lane's tree and
+    # answers about another one. A crossing that survives the wait is a real
+    # one and becomes an embark error rather than a bare traceback.
+    try:
+        seed = bridge.seed_read_back() or ""
+    except bridge.LaneCrossed as crossed:
+        raise EmbarkError(f"seed_read_back_crossed: {crossed}") from None
 
     sidecar.update({
         "character_actual": driver.character_actual,
