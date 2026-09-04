@@ -157,7 +157,12 @@ are in [`workstreams.md`](workstreams.md).
   (`review/active/klee-overhaul-round-12-2026-09-04.md`): two seats on
   `0.2.2501+proto`, floors 10 and 8, ordering read as the puzzle, the Mine
   tip read as mitigation (`EB-436`), Block and Skittish learned by experiment
-  (`EB-443`), Countdown undrawn in five runs; no pick. [USER]'s act-1 run is due on
+  (`EB-443`), Countdown undrawn in five runs; no pick. **Round 13 is READ**
+  (`review/active/klee-overhaul-round-13-2026-09-04.md`): one seat on
+  `0.2.2547+proto`, floor 14 at a declared budget overrun, eight of eight
+  fights, "don't use your big spell" read as the kit's best decision, the
+  Bomb queue and the enemy-turn Melt invisible (`EB-450`), events unnamed
+  (`EB-448`); no pick. [USER]'s act-1 run is due on
   `0.2.2401+proto`. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
@@ -222,7 +227,14 @@ are in [`workstreams.md`](workstreams.md).
   `0.2.2476+proto`, floors 10 and 10, both budget-out; the turn one with no
   Encore in every fight, the reader carried at Fanfare 3 and its line never
   paid, nine rows (`EB-419`-`EB-425`, `EB-429`, `EB-430`); one pick, the
-  Encore opening. [USER]'s act-1 run is due on that build. No stamp moves, nothing measured.
+  Encore opening. **Rounds 6 and 7 are READ**
+  (`review/active/furina-reframe-round-6-2026-09-04.md`, `-round-7-`): one
+  seat each on `0.2.2501+proto` and `0.2.2547+proto`, floors 11 and 10, the
+  reader's bar moved to 3 (round 6 default), a member's roll spent the paid
+  performance on a reviving Minion (`EB-451`, skips Minions as R250's shape),
+  the retired Burst's tip still taught at a reward (`EB-449`); the Encore
+  opening read the same a third time. [USER]'s act-1 run is due on that
+  build. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
