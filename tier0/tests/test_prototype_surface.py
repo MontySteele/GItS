@@ -1117,3 +1117,55 @@ def test_the_lint_reads_a_declaration_as_a_shadow_and_a_bare_name_as_a_clash(
         '   rarity: common}\n')
     assert orphan.returncode == 1, orphan.stdout + orphan.stderr
     assert "SHADOW OF NOTHING" in orphan.stdout
+
+
+# --------------------- EB-403: the banner face and the Dexterity gloss ------
+
+def _war_banner_row() -> dict:
+    return next(r for r in yaml.safe_load(
+        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
+        if r["id"] == "proto_mi_gorou_war_banner")
+
+
+def test_the_war_banner_face_says_the_banner_takes_the_dexterity_back():
+    """`EB-403`, and the twin, C# side.
+
+    The face printed "Gain 2 Dexterity for 2 turns" on a screen whose Dexterity
+    gloss says "It does not decay" (Kokomi round 10, run 1, (c) 1). Both are
+    true: the row grants real `DexterityPower`, and the `mi_war_banner` power
+    it applies beside it is a clock that hands 2 of it back when it runs out
+    (`WarBannerPower.Tick`). Nothing printed said so.
+
+    The clause is now on the card face and on the power's own tip, and the two
+    say the same thing.
+    """
+    row = _war_banner_row()
+    assert "takes 2 back" in row["description"]
+    emitted = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+               / "Generated" / "ProtoMiGorouWarBanner.cs").read_text(
+                   encoding="utf-8")
+    assert "for 2 turns, then the banner takes 2 back." in emitted
+    power = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+             / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
+    banner = power.split("class WarBannerPower")[1].split("class ")[0]
+    assert '{Amount:plural:turn|turns}, then "' in banner
+    assert '+ "[/blue] back."' in banner
+    # ...and the number it hands back is the POWER's constant, not the card's
+    # upgradeable amount: an upgraded banner grants 3 and gives 2 back.
+    assert "CompanionOverhaulLaw.WarBannerDexterity" in banner
+    assert row["upgrade"] is None if "upgrade" in row else True
+
+
+def test_the_base_dexterity_gloss_is_still_the_base_rule():
+    """The other half of the row, and the half it would have been easy to get
+    wrong: Dexterity really does not decay, so the fix is a clause on the
+    exception and NOT an edit to the base word's definition. Both copies of
+    that definition -- the page's and the mod's hover tip -- are unchanged.
+    """
+    from understudy import blindplay_notes
+    assert blindplay_notes.BASE_KEYWORDS["Dexterity"] == (
+        "Adds its amount to every Block the wearer gains. It does not decay.")
+    tips = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+            / "BaseKeywordTips.cs").read_text(encoding="utf-8")
+    dexterity = tips.split("ForDexterity")[1].split("</summary>")[0]
+    assert "It " in dexterity and "does not decay." in dexterity

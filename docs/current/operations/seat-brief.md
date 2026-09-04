@@ -61,7 +61,8 @@ say so in the record and stop; do not go looking for another way through.
 ### Your budget
 
 - **Actions:** stop at the cap the coordinator gives you (`--max-actions`,
-  typically 40–70 accepted `act` calls).
+  typically 40–70 accepted `act` calls; a Kokomi or Furina seat is given 120,
+  because a Plan or a Salon turn is more commands than a Klee turn).
 - **Wall clock:** stop at `--max-wall-s` (typically 5400 s).
 - **Refusals:** three consecutive refused commands is a stop. A refusal is a
   finding — write down what you asked for and what it said.
@@ -76,7 +77,8 @@ tidier place, and do not start a second session.
 One markdown file at the path the coordinator gives you, with these sections in
 this order:
 
-1. **`## Identity`** — model and seat, lane, run seed, character, act and the
+1. **`## Identity`** — model and seat, lane, run seed, character, the ascension
+   the run opened at, act and the
    boss if the map named one; actions accepted; termination reason (which
    budget, or why not); HP trajectory; gold; potions held; the deck and relics
    at the end. Then your Neow pick and, in one sentence each, why.

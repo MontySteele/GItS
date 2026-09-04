@@ -38,7 +38,7 @@ public sealed class ProtoFrExitStageLeft : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEvoke(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForEncore(ArmKeywordTips.ForEvoke(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("surintendante_chevalmarin");
 

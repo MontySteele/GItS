@@ -38,7 +38,7 @@ public sealed class ProtoFrSalonDebutNamed : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForDeploy(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Crabaletta }), this);
+        ArmKeywordTips.ForEncore(ArmKeywordTips.ForDeploy(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Crabaletta }), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("salon_debut");
 

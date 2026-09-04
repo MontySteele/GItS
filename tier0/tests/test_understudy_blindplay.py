@@ -4719,6 +4719,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                   " price pays "],
         "Drain": [" falls to nothing. What the card does ",
                   "next is priced off the amount it took"],
+        # `EB-407`. The arm's fourth Furina word and the one it did not
+        # invent. The clauses straddle the `[gold]Block[/gold]` span, so the
+        # anchors are the two literals either side of it.
+        "Encore": ["it absorbs damage before HP. One pool, ",
+                   "as each lands: a card pays to resolve, a member spends 1 ",
+                   "perform or acts at 3/4."],
     }
     # `EB-329`: `Companion` is the one row with NO tooltip to be held in step
     # with, because the game hangs no tip on the word at all -- which is the
@@ -6067,3 +6073,434 @@ def test_the_session_settles_the_screen_and_then_the_board():
     has no screen."""
     src = inspect.getsource(blindplay.Session._settle)
     assert src.index("settle(state") < src.index("settle_board(")
+
+
+# ------------------------------- EB-402: a bare play of an aimed card -------
+
+def plan_card_state(target_type: str = "40213", **fields) -> dict:
+    """The RECORDED combat turn plus ONE synthetic Kokomi Plan card.
+
+    Synthetic because the recording predates the arm; the shape is the shipped
+    row's own -- `ProtoKkSlackWater.cs:78` passes `KokomiTargets.PetOrEnemy`, a
+    `[CustomEnum]` value minted at `ModelDb.Init`, and
+    `McpMod.StateBuilder.cs` sends `card.TargetType.ToString()`, which for a
+    custom type has no enum name and renders a bare NUMBER (`EB-216`). So the
+    `target_type` under test is the one the wire carries.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    hand = state["player"]["hand"]
+    card = json.loads(json.dumps(hand[0]))
+    card.update({"id": "KLEEMOD-PROTO_KK_SLACK_WATER",
+                 "name": "Slack Water (proto)",
+                 "description": "Deal 4 damage. Apply 1 Weak. "
+                                "Plan: Apply 1 Weak to ALL enemies.",
+                 "target_type": target_type, "keywords": [],
+                 "index": len(hand)})
+    card.update(fields)
+    hand.append(card)
+    return state
+
+
+def two_enemy(state: dict) -> dict:
+    """The same board with a second living body on it."""
+    enemies = state["battle"]["enemies"]
+    second = json.loads(json.dumps(enemies[0]))
+    second.update({"name": "Slug", "entity_id": "999", "combat_id": 999})
+    enemies.append(second)
+    return state
+
+
+def test_a_bare_play_of_a_custom_aimed_card_resolves_to_the_sole_enemy():
+    """`EB-402`, and it is the row.
+
+    Kokomi round 10, run 1, fight 1, turn 2: `play "Slack Water"` with no `on`
+    clause was answered `ok` with an empty refusal and did NOTHING -- no
+    damage, no Weak -- while an `AllEnemies` card played bare resolved. The
+    play was posted with a NULL target (the bridge only demands one for
+    `TargetType.AnyEnemy`), reached `PlayCardAction(card, null)`, and the
+    card's own `ArgumentNullException.ThrowIfNull(cardPlay.Target)` ended it
+    inside the action queue, after the wire had answered `ok`.
+
+    A play must never come back `ok` for a no-op. With one enemy on the board
+    the bare form resolves to it.
+    """
+    state = plan_card_state(can_target_enemy=True)
+    res = blindplay.act(state, 'play "Slack Water (proto)"')
+    assert res["ok"], res["refusal"]
+    assert res["post"]["target"], "posted with no target -- the EB-402 no-op"
+    assert res["printed"]["target"] == "Nibbit"
+
+
+def test_a_bare_play_of_a_custom_aimed_card_is_refused_with_the_on_forms():
+    """The other half: with two bodies up there is no sole enemy to resolve
+    to, so the play is REFUSED -- never posted -- and the refusal carries the
+    `on` form per living enemy."""
+    state = two_enemy(plan_card_state(can_target_enemy=True))
+    res = blindplay.act(state, 'play "Slack Water (proto)"')
+    assert not res["ok"]
+    assert res["post"] is None            # never posted, so nothing is spent
+    assert 'play "Slack Water (proto)" on "Nibbit"' in res["refusal"]
+    assert 'play "Slack Water (proto)" on "Slug"' in res["refusal"]
+    # ...and one of those forms really is the one that works.
+    assert blindplay.act(state,
+                         'play "Slack Water (proto)" on "Slug"')["ok"]
+
+
+def test_the_other_two_custom_spellings_still_play_bare():
+    """A pin per spelling, and this is the reason the fix asks the CARD rather
+    than the number.
+
+    All three of the arm's custom types render as the same bare number, and
+    for two of them a bare play is CORRECT: `KokomiTargets.PetOrSelf` (ten
+    rows -- `ProtoKkTideWall.cs:76` falls through to `GainBlock` on the owner
+    when the play was not on the pet) and `KokomiTargets.PetOnly` (two --
+    `ProtoKkNereidsAscension.cs` schedules its Plan and reads no target). The
+    bridge answers `can_target_enemy: false` for both, so both keep the bare
+    form, with no target posted.
+    """
+    for spelling in ("PetOrSelf", "PetOnly"):
+        state = plan_card_state(can_target_enemy=False)
+        state["player"]["hand"][-1]["name"] = f"Tide Wall ({spelling})"
+        res = blindplay.act(state, f'play "Tide Wall ({spelling})"')
+        assert res["ok"], (spelling, res["refusal"])
+        assert "target" not in res["post"], spelling
+
+
+def test_a_build_that_does_not_answer_the_question_is_unchanged():
+    """The absent-key contract, the bridge's own: a build predating
+    `can_target_enemy` says nothing, and a custom spelling on it falls through
+    exactly as it did before this row."""
+    state = plan_card_state()                     # no can_target_enemy at all
+    res = blindplay.act(state, 'play "Slack Water (proto)"')
+    assert res["ok"] and "target" not in res["post"]
+
+
+def test_every_aimed_spelling_the_wire_uses_demands_a_target():
+    """The spelling census, swept: the four named enemy spellings all aim, the
+    self and all-enemies spellings do not, and the custom number defers to the
+    card."""
+    from understudy.blindplay_grammar import _aims_at_an_enemy
+    for spelling in ("AnyEnemy", "Enemy", "SingleEnemy", "TargetEnemy"):
+        assert _aims_at_an_enemy({"target_type": spelling}), spelling
+    for spelling in ("Self", "AnyAlly", "AnyPlayer", "AllEnemies", "None", ""):
+        assert not _aims_at_an_enemy({"target_type": spelling}), spelling
+    assert _aims_at_an_enemy({"target_type": "40213",
+                              "can_target_enemy": True})
+    assert not _aims_at_an_enemy({"target_type": "40213",
+                                  "can_target_enemy": False})
+
+
+def test_the_bridge_answers_the_enemy_half_the_way_it_answers_the_pet_half():
+    """The C# twin. `can_target_enemy` is `can_target_pet`'s mirror and is
+    computed the same way -- by asking the card, through the game's own
+    `IsValidTarget` -- because a table of custom enum values is exactly what
+    the bridge cannot have."""
+    builder = (REPO / "vendor" / "STS2_MCP"
+               / "McpMod.StateBuilder.cs").read_text(encoding="utf-8")
+    assert '["can_target_enemy"] = GitsCanTargetEnemy(card)' in builder
+    plan = (REPO / "vendor" / "STS2_MCP" / "gits"
+            / "GitsKokomiPlan.cs").read_text(encoding="utf-8")
+    body = plan.split("GitsCanTargetEnemy(CardModel card)")[1]
+    assert "card.IsValidTarget(enemy)" in body
+    assert "enemy.IsAlive" in body
+
+
+# ------------- EB-403: the banner face and the base Dexterity gloss ---------
+
+def test_the_banner_face_and_the_dexterity_gloss_agree_on_one_page():
+    """`EB-403`, the page half of the twin.
+
+    Kokomi round 10, run 1, (c) 1: the face printed "Gain 2 Dexterity for 2
+    turns" and the same screen's Dexterity gloss said "It does not decay".
+    Both sentences were true -- the row grants real `DexterityPower`, and the
+    `mi_war_banner` clock beside it hands 2 of it back when it runs out -- and
+    together they read as a contradiction, because nothing printed named the
+    take-back.
+
+    The base gloss is the base RULE and does not move. The face carries the
+    exception now, so the two can be read on one screen.
+    """
+    import yaml
+    row = next(r for r in yaml.safe_load(
+        (REPO / "docs" / "prototype-surface.yaml").read_text(encoding="utf-8"))
+        if r["id"] == "proto_mi_gorou_war_banner")
+    state = combat_state()
+    card = state["player"]["hand"][0]
+    card["name"] = "Gorou - General's War Banner (proto)"
+    card["description"] = row["description"]
+    page = blindplay.render(blindplay.observation(state))
+    assert "then the banner takes 2 back" in page
+    assert "does not decay" in page          # the base rule, still printed
+
+
+# --------------------- EB-404: a keyword in a TITLE defines nothing --------
+
+def titled_hand_state(title: str, body: str) -> dict:
+    """A combat whose hand holds one card with the given printed title and
+    body, and nothing else."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-PROTO_FR_ROW", "name": title, "type": "Attack",
+         "cost": "1", "can_play": True, "index": 0, "target_type": "AnyEnemy",
+         "is_upgraded": False, "keywords": [], "description": body}]
+    return state
+
+
+def test_a_keyword_in_a_card_title_raises_no_glossary_row():
+    """`EB-404`, and it is the row.
+
+    The page glossed `Deploy` -- "A member joins and performs at once" -- on a
+    screen holding `Freminet - Pers, Deploy!`, whose printed body is "Deal 6
+    damage". The word was in the TITLE. The Furina round-4 seat played the card
+    six times waiting for a member to join and read it as broken (run 1, (c) 2).
+
+    A title is flavour; a body is the rule. The card's own printed name is
+    still on the page, unchanged -- only the glossary stops reading it.
+    """
+    page = blindplay.observe(
+        titled_hand_state("Freminet - Pers, Deploy!", "Deal 6 damage."))
+    assert "Freminet - Pers, Deploy!" in page      # the face is untouched
+    assert "- **Deploy** " not in page
+
+
+def test_the_same_word_in_the_body_still_raises_it():
+    """The other direction, so the fix cannot pass by defining nothing: the
+    identical card whose BODY carries the word is glossed exactly as before."""
+    page = blindplay.observe(
+        titled_hand_state("Freminet - Pers, Deploy!",
+                          "Deploy Freminet. Deal 6 damage."))
+    assert "- **Deploy** " in page
+
+
+def test_no_class_of_keyword_row_is_raised_by_a_title_alone():
+    """Swept rather than sampled, over all four word tables the glossary
+    draws on -- the arms', the base game's re-statements, `GAME_KEYWORDS` and
+    the base status words. A title carrying any of them defines none of them.
+    """
+    from understudy import blindplay_notes as N
+    words = (list(N.ARM_KEYWORDS) + list(N.GAME_KEYWORDS)
+             + list(N.BASE_KEYWORDS))
+    assert len(words) >= 20
+    # Against the SAME board with a neutral title, so a word the recorded
+    # fixture already defines off a relic's body is not read as a finding: the
+    # claim is that the TITLE adds nothing, not that the board is empty.
+    base = blindplay.observation(
+        titled_hand_state("Someone - Pers, Move!", "Deal 6 damage."))
+    plain = {row["name"] for row in base["keywords"]}
+    for word in words:
+        obs = blindplay.observation(
+            titled_hand_state(f"Someone - Pers, {word}!", "Deal 6 damage."))
+        assert {row["name"] for row in obs["keywords"]} == plain, word
+
+
+def test_an_enemy_badge_is_a_printed_rule_and_still_defines_its_word():
+    """The boundary the fix must not cross. A POWER's name is the game's own
+    badge -- `Bomb 6` on a body means there IS a Bomb on the board -- so it is
+    a printed rule and not a title, and it keeps defining the word.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "KLEEMOD-PROTO_BOMB", "name": "Bomb", "amount": 6,
+         "type": "Buff", "description": "", "keywords": []}]
+    assert "- **Bomb** " in blindplay.observe(state)
+
+
+# ------------------ EB-407: Encore, defined on its first printed screen ----
+
+def test_encore_is_defined_on_the_screen_that_first_prints_it():
+    """`EB-407`, and it is the row.
+
+    Encore is named on the Neow screen and on opening-hand faces, and until
+    this row the only surface that stated its rule was the METER line -- which
+    needs the meter to be on the board. So the Furina round-4 seat made the
+    run's first decision without the word (run 1, (c) 5).
+
+    The word now carries its definition wherever it is printed, from Neow on.
+    """
+    state = {"state_type": "event",
+             "event": {"event_id": "NEOW", "event_name": "Neow",
+                       "in_dialogue": False,
+                       "body": "Neow offers a blessing.",
+                       "options": [
+                           {"index": 0, "title": "Start each fight with 3 "
+                                                 "Encore."},
+                           {"index": 1, "title": "Leave"}]}}
+    page = blindplay.observe(state)
+    assert "- **Encore** — " in page
+    assert "absorbs damage before HP" in page
+
+
+def test_the_encore_gloss_states_the_order_a_hit_and_a_performance_take_it():
+    """The half nothing printed. Three sites draw on one amount and none of
+    them reserves any: `FurinaResources.AbsorbDamage` takes what is there
+    after Block, `FurinaResourceHooks.BeforeCardPlayed` spends a card's price
+    before the card resolves, and `SalonPowers.PerformMember` pays 1 if it can
+    and performs at `DryDamageMultiplier` if it cannot. So the pool is one
+    pool and the order is the order things land -- which is why a hit can
+    leave a member performing dry.
+    """
+    text = blindplay.ARM_KEYWORDS["Encore"]
+    assert "One pool, as each lands" in text
+    assert "a card pays to resolve" in text
+    assert "a member spends 1 to perform or acts at 3/4" in text
+    salon = (REPO / "klee-mod" / "KleeCode" / "Powers"
+             / "SalonPowers.cs").read_text(encoding="utf-8")
+    assert "TickEncoreCost = 1;" in salon
+    assert "DryDamageMultiplier = 0.75m;" in salon
+    furina = (REPO / "klee-mod" / "KleeCode" / "Powers"
+              / "FurinaResources.cs").read_text(encoding="utf-8")
+    absorb = furina.split("public static decimal AbsorbDamage")[1][:600]
+    assert "Math.Min(resource.Amount" in absorb
+
+
+def test_the_encore_meter_line_does_not_repeat_the_gloss():
+    """One definition per screen is `keyword_notes`' own rule, and the meters
+    block was the one place two sources could both fire on one word. Where the
+    glossary carries it, the meter line points at it; where a meter has no
+    glossary row, the line is exactly what it always was."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["resources"] = {"KLEEMOD_ENCORE": 4, "KLEEMOD_FANFARE": 6}
+    page = blindplay.observe(state)
+    assert "- Encore: 4 — defined under *Words on this screen*" in page
+    assert "- **Encore** — After Block it absorbs damage before HP." in page
+    assert page.count("absorbs damage before HP") == 1
+    assert ("- Fanfare: 6 — the game's data feed carries this meter's "
+            "amount only") in page
+
+
+# ---------------- EB-405: a Salon performance names its target -------------
+
+def salon_state(performed: list[dict]) -> dict:
+    """A combat whose wire carries this turn's Salon performances.
+
+    SYNTHETIC, BUILT FROM THE MOD'S OWN SNAPSHOT SHAPE: every key below is
+    written by `FurinaReframeLedger.Snapshot` and lifted onto the wire by
+    `vendor/STS2_MCP/gits/GitsFurinaSalon.cs`, and the two are held in step by
+    `test_the_salon_block_is_the_mods_own_snapshot_shape`.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["furina_salon"] = {"performed": performed}
+    return state
+
+
+def test_a_salon_performance_names_the_body_it_picked_and_the_aura():
+    """`EB-405`, and it is the row.
+
+    "Crabaletta chose its own enemy and left a Hydro aura on a body the seat
+    had not picked" (Furina round 4, run 1, (c) 4), in a kit whose readable
+    decision is which element lands on which aura -- and the page named
+    neither. It could not: no Salon block reached the wire at all, and the only
+    Salon row on a screen was the counter power's static rulebook sentence,
+    which carries the company count and by construction cannot carry a body.
+    """
+    page = blindplay.observe(salon_state([
+        {"member": "Crabaletta", "target": "Nibbit", "combat_id": "1",
+         "element": "Hydro", "aura": "Hydro", "amount": 6, "paid": True,
+         "evoked": False}]))
+    assert "## What your Salon did this turn" in page
+    assert ("- **Crabaletta** hit Nibbit for 6 Hydro, and it is wearing a "
+            "Hydro aura.") in page
+
+
+def test_the_aura_printed_is_the_one_the_body_is_wearing_afterwards():
+    """The half that is easy to get wrong by assuming. `ElementalHit.Deal`
+    applies the element to a bare body, REFRESHES a matching aura, and on any
+    other element CONSUMES the aura into a reaction and leaves the body bare.
+    The mod reads the aura AFTER the hit, so a reaction says so rather than
+    the page claiming a Hydro aura that is not there."""
+    page = blindplay.observe(salon_state([
+        {"member": "Chevalmarin", "target": "Nibbit", "combat_id": "1",
+         "element": "Hydro", "aura": "", "amount": 2, "paid": True,
+         "evoked": False}]))
+    assert "- **Chevalmarin** hit Nibbit for 2 Hydro, and left no aura on it."\
+        in page
+
+
+def test_a_member_that_aims_at_nobody_says_what_it_did_instead():
+    """The Usher gains Block and touches no body, so there is no target to
+    name and no aura to report -- and a sentence about what it left on a body
+    would be about no body."""
+    page = blindplay.observe(salon_state([
+        {"member": "the Usher", "target": "", "combat_id": "",
+         "element": "", "aura": "", "amount": 3, "paid": True,
+         "evoked": False}]))
+    assert "- **the Usher** gave you 3 Block." in page
+    section = page.split("## What your Salon did this turn")[1]
+    section = section.split("\n\n")[1]
+    assert "aura" not in section, section
+
+
+def test_a_dry_performance_says_why_its_number_is_small():
+    """`SalonConstants.DryDamageMultiplier` is the difference between the
+    printed number and three-quarters of it, and a reader watching a member
+    act small with an empty buffer is owed the reason."""
+    page = blindplay.observe(salon_state([
+        {"member": "Crabaletta", "target": "Nibbit", "combat_id": "1",
+         "element": "Hydro", "aura": "Hydro", "amount": 4, "paid": False,
+         "evoked": False}]))
+    assert "(dry: it could not pay its Encore, so it acted at " in page
+
+
+def test_the_page_owns_the_name_a_performance_prints():
+    """`EB-329`'s rule one arm over: the mod names the body by combat id and
+    THE PAGE OWNS THE NAMES, so a numbered repeat means the same body in the
+    performance line as in the enemy list under it."""
+    state = salon_state([
+        {"member": "Crabaletta", "target": "Nibbit", "combat_id": "1",
+         "element": "Hydro", "aura": "Hydro", "amount": 6, "paid": True,
+         "evoked": False}])
+    wire = state["battle"]["enemies"][0]
+    wire["name"] = "Slug"
+    second = json.loads(json.dumps(wire))
+    second.update({"entity_id": "999", "combat_id": "999"})
+    state["battle"]["enemies"].append(second)
+    page = blindplay.observe(state)
+    assert "- **Crabaletta** hit Slug (1) for 6 Hydro" in page
+
+
+def test_a_build_with_no_reframe_prints_no_salon_section():
+    """The absent / empty split, `kokomi_plans`' own: an ABSENT key is "no
+    reframe in this build" and an EMPTY map is "the rule is here and this seat
+    is not playing it". Neither may put an empty stage in front of a Klee."""
+    assert "What your Salon did" not in blindplay.observe(combat_state())
+    absent = json.loads(json.dumps(combat_state()))
+    absent["player"]["furina_salon"] = {}
+    assert "What your Salon did" not in blindplay.observe(absent)
+    assert "What your Salon did" not in blindplay.observe(salon_state([]))
+
+
+def test_the_salon_block_is_the_mods_own_snapshot_shape():
+    """Held in step from this side, the discipline every other GItS wire block
+    is under: a field renamed in `FurinaReframeLedger.Snapshot` and not here
+    would leave the section silently empty on a live board."""
+    ledger = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+              / "FurinaReframeLedger.cs").read_text(encoding="utf-8")
+    snapshot = ledger[ledger.index("public static Dictionary<string, object?>"
+                                   " Snapshot"):]
+    for field in ("member", "target", "combat_id", "element", "aura",
+                  "amount", "paid", "evoked"):
+        assert f'["{field}"]' in snapshot, field
+    assert 'snapshot["performed"]' in snapshot
+    bridge = (REPO / "vendor" / "STS2_MCP" / "gits"
+              / "GitsFurinaSalon.cs").read_text(encoding="utf-8")
+    assert '"KleeMod.Powers.FurinaReframeLedger"' in bridge
+    builder = (REPO / "vendor" / "STS2_MCP"
+               / "McpMod.StateBuilder.cs").read_text(encoding="utf-8")
+    assert 'state["furina_salon"] = furinaSalon;' in builder
+
+
+def test_the_target_and_the_aura_are_recorded_where_they_are_decided():
+    """The mod half. `PerformMember` is the ONE implementation of a member
+    acting, it draws the body from `Rng.CombatTargets`, and `ElementalHit.Deal`
+    returns the damage and not the creature -- so both facts had to be caught
+    inside that switch or they were gone."""
+    salon = (REPO / "klee-mod" / "KleeCode" / "Powers"
+             / "SalonPowers.cs").read_text(encoding="utf-8")
+    body = salon[salon.index("public static async Task<bool> PerformMember"):]
+    body = body[:body.index("return true;")]
+    assert "AuraCmd.Find(target)?.Element" in body
+    assert "FurinaReframeLedger.For(owner).NotePerformance(" in body
+    # ...and the turn boundary is the one place it exists.
+    turn = salon[salon.index("public override async Task AfterPlayerTurnStart"):]
+    assert "ClearPerformances()" in turn[:900]

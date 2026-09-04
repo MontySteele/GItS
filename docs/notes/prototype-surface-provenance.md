@@ -2270,3 +2270,20 @@ nothing on the shipped sheet moves and a run with the arm off is offered
 the shipped card. The `(reframe)` suffix keeps the names unique for the
 lint; the face the player sees is the card's own name.
 
+
+## proto_mi_gorou_war_banner
+
+`EB-403` (Kokomi round 10, run 1, (c) 1). The face printed "Gain 2 Dexterity
+for 2 turns" on a screen whose Dexterity gloss says "It does not decay". Both
+sentences are true and they read as a contradiction: what the row grants is
+real `DexterityPower`, and the second effect it applies -- `mi_war_banner`,
+`WarBannerPower` in `Powers/Prototype/CompanionOverhaulInazuma.cs` -- is a
+clock that takes 2 Dexterity back when it runs out, at the end of the turn its
+`Amount` reaches 1 (`CompanionOverhaulTurnEnd`, `AfterSideTurnEnd`).
+
+The take-back clause is now on both faces, in that power's own words. The
+number is the power's own constant, `CompanionOverhaulLaw.WarBannerDexterity`
+= 2, and NOT the card's `PowerAmount`, which the upgrade moves to 3 -- so an
+upgraded banner grants 3 and hands 2 back. That asymmetry is the shipped rule
+as written and is disclosed here rather than changed; the base Dexterity gloss
+stays the base rule and the exception is printed where the exception is made.

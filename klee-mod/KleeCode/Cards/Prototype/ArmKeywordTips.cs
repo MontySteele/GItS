@@ -73,6 +73,7 @@ public static class ArmKeywordTips
     public const string DeployKey = "KLEEMOD-ARM_DEPLOY";
     public const string EvokeKey = "KLEEMOD-ARM_EVOKE";
     public const string DrainKey = "KLEEMOD-ARM_DRAIN";
+    public const string EncoreKey = "KLEEMOD-ARM_ENCORE";
 
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
@@ -555,6 +556,36 @@ public static class ArmKeywordTips
         With(inherited, DrainKey,
             "Your [gold]Fanfare[/gold] falls to nothing. What the card does "
           + "next is priced off the amount it took.");
+
+    /// <summary>
+    /// `EB-407`. THE WORD IS PRINTED BEFORE THE PLAYER HOLDS ANY. Encore is
+    /// named on the Neow screen and on opening-hand faces, and the shipped
+    /// surface that states its rule is `EncoreMeterPower`'s badge -- which
+    /// only ever renders once the meter is on the board. The Furina round-4
+    /// seat made the run's first decision without the word (run 1, (c) 5).
+    ///
+    /// THREE FACTS, EACH READ OFF ITS OWN SITE, no fourth invented:
+    ///   * the buffer, <see cref="KleeMod.Powers.FurinaResources.AbsorbDamage"/>
+    ///     -- damage remaining after Block consumes Encore before HP;
+    ///   * a card's price, <c>FurinaResourceHooks.BeforeCardPlayed</c> --
+    ///     spent immediately after the energy debit and BEFORE resolution;
+    ///   * a member's 1, <see cref="KleeMod.Powers.SalonMemberPower"/>'s
+    ///     <c>PerformMember</c> -- it pays <c>TickEncoreCost</c> if it can and
+    ///     performs at <c>DryDamageMultiplier</c> (3/4) if it cannot.
+    ///
+    /// AND THE ORDER, WHICH IS THE HALF NOTHING PRINTED. All three draw on one
+    /// amount, in the order the events reach it: there is no reservation and
+    /// no priority anywhere in those three sites, so a hit that lands first
+    /// leaves a member performing dry, and a member that performs first leaves
+    /// less buffer for the hit. "One pool, as each lands" is that, in the
+    /// space the 135-character tip ceiling leaves.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForEncore(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, EncoreKey,
+            "After [gold]Block[/gold] it absorbs damage before HP. One pool, "
+          + "as each lands: a card pays to resolve, a member spends 1 to "
+          + "perform or acts at 3/4.");
 
     /// <summary>
     /// One tip, appended after whatever the card already carries.
