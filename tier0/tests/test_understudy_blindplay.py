@@ -4719,6 +4719,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                   " price pays "],
         "Drain": [" falls to nothing. What the card does ",
                   "next is priced off the amount it took"],
+        # `EB-407`. The arm's fourth Furina word and the one it did not
+        # invent. The clauses straddle the `[gold]Block[/gold]` span, so the
+        # anchors are the two literals either side of it.
+        "Encore": ["it absorbs damage before HP. One pool, ",
+                   "as each lands: a card pays to resolve, a member spends 1 ",
+                   "perform or acts at 3/4."],
     }
     # `EB-329`: `Companion` is the one row with NO tooltip to be held in step
     # with, because the game hangs no tip on the word at all -- which is the
@@ -6298,3 +6304,66 @@ def test_an_enemy_badge_is_a_printed_rule_and_still_defines_its_word():
         {"id": "KLEEMOD-PROTO_BOMB", "name": "Bomb", "amount": 6,
          "type": "Buff", "description": "", "keywords": []}]
     assert "- **Bomb** " in blindplay.observe(state)
+
+
+# ------------------ EB-407: Encore, defined on its first printed screen ----
+
+def test_encore_is_defined_on_the_screen_that_first_prints_it():
+    """`EB-407`, and it is the row.
+
+    Encore is named on the Neow screen and on opening-hand faces, and until
+    this row the only surface that stated its rule was the METER line -- which
+    needs the meter to be on the board. So the Furina round-4 seat made the
+    run's first decision without the word (run 1, (c) 5).
+
+    The word now carries its definition wherever it is printed, from Neow on.
+    """
+    state = {"state_type": "event",
+             "event": {"event_id": "NEOW", "event_name": "Neow",
+                       "in_dialogue": False,
+                       "body": "Neow offers a blessing.",
+                       "options": [
+                           {"index": 0, "title": "Start each fight with 3 "
+                                                 "Encore."},
+                           {"index": 1, "title": "Leave"}]}}
+    page = blindplay.observe(state)
+    assert "- **Encore** — " in page
+    assert "absorbs damage before HP" in page
+
+
+def test_the_encore_gloss_states_the_order_a_hit_and_a_performance_take_it():
+    """The half nothing printed. Three sites draw on one amount and none of
+    them reserves any: `FurinaResources.AbsorbDamage` takes what is there
+    after Block, `FurinaResourceHooks.BeforeCardPlayed` spends a card's price
+    before the card resolves, and `SalonPowers.PerformMember` pays 1 if it can
+    and performs at `DryDamageMultiplier` if it cannot. So the pool is one
+    pool and the order is the order things land -- which is why a hit can
+    leave a member performing dry.
+    """
+    text = blindplay.ARM_KEYWORDS["Encore"]
+    assert "One pool, as each lands" in text
+    assert "a card pays to resolve" in text
+    assert "a member spends 1 to perform or acts at 3/4" in text
+    salon = (REPO / "klee-mod" / "KleeCode" / "Powers"
+             / "SalonPowers.cs").read_text(encoding="utf-8")
+    assert "TickEncoreCost = 1;" in salon
+    assert "DryDamageMultiplier = 0.75m;" in salon
+    furina = (REPO / "klee-mod" / "KleeCode" / "Powers"
+              / "FurinaResources.cs").read_text(encoding="utf-8")
+    absorb = furina.split("public static decimal AbsorbDamage")[1][:600]
+    assert "Math.Min(resource.Amount" in absorb
+
+
+def test_the_encore_meter_line_does_not_repeat_the_gloss():
+    """One definition per screen is `keyword_notes`' own rule, and the meters
+    block was the one place two sources could both fire on one word. Where the
+    glossary carries it, the meter line points at it; where a meter has no
+    glossary row, the line is exactly what it always was."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["resources"] = {"KLEEMOD_ENCORE": 4, "KLEEMOD_FANFARE": 6}
+    page = blindplay.observe(state)
+    assert "- Encore: 4 — defined under *Words on this screen*" in page
+    assert "- **Encore** — After Block it absorbs damage before HP." in page
+    assert page.count("absorbs damage before HP") == 1
+    assert ("- Fanfare: 6 — the game's data feed carries this meter's "
+            "amount only") in page

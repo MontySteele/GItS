@@ -383,6 +383,14 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.DeployKey + ".title"] = "Deploy",
                     [Cards.ArmKeywordTips.EvokeKey + ".title"] = "Evoke",
                     [Cards.ArmKeywordTips.DrainKey + ".title"] = "Drain",
+                    // `EB-407`. The one word in this block the arm did not
+                    // invent: Encore is shipped machinery, and its only
+                    // statement of itself is `EncoreMeterPower`'s badge, which
+                    // renders once the meter is on the board -- while the word
+                    // is printed on the Neow screen and on opening-hand faces
+                    // before that. No collision: the shipped meter power
+                    // titles itself and hangs no keyword tip.
+                    [Cards.ArmKeywordTips.EncoreKey + ".title"] = "Encore",
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in

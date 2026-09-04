@@ -62,6 +62,12 @@ METER_NOTE = ("the game's data feed carries this meter's amount only: no "
 METER_CAPPED_NOTE = ("the game's data feed carries this meter's amount and "
                      "its maximum, and no rule for how it is spent")
 
+# `EB-407`. The third case: the glossary on this same screen already defines
+# the word, so the meter line points at it rather than printing the rule twice.
+# One definition per screen is `keyword_notes`' own rule, and the meters block
+# was the one place two sources could both fire on one word.
+METER_DEFINED_NOTE = "defined under *Words on this screen*"
+
 # `EB-382`. WHERE A METER'S SPEND RULE EXISTS, THE ROW SAYS IT.
 #
 # The Furina round-two seat ended a turn holding four banked Encore and opened
@@ -431,6 +437,20 @@ ARM_KEYWORDS: dict[str, str] = {
               "for it."),
     "Drain": ("Your Fanfare falls to nothing. What the card does next is "
               "priced off the amount it took."),
+    # `EB-407`. THE WORD PRINTED BEFORE THE PLAYER HOLDS ANY. Encore is named
+    # on the Neow screen and on opening-hand faces, and the only surface that
+    # stated its rule was the METER LINE -- which needs the meter to be on the
+    # board. The Furina round-4 seat made the run's first decision without the
+    # word (run 1, (c) 5). The sentence is `ArmKeywordTips.ForEncore`'s, and
+    # the ORDER clause is the half nothing printed: the buffer
+    # (`FurinaResources.AbsorbDamage`), a card's price
+    # (`FurinaResourceHooks.BeforeCardPlayed`, before resolution) and a
+    # member's 1 (`SalonPowers.PerformMember`, or 3/4 when it cannot pay) all
+    # draw on ONE amount with no reservation and no priority, so a hit that
+    # lands first leaves the member dry.
+    "Encore": ("After Block it absorbs damage before HP. One pool, as each "
+               "lands: a card pays to resolve, a member spends 1 to perform "
+               "or acts at 3/4."),
     # `EB-329`. THE ONE WORD IN THIS TABLE THE GAME DEFINES NOWHERE, and that
     # is the finding rather than an oversight here: two cards price themselves
     # on it -- Chain of Command counts the Companion cards you played last
@@ -485,6 +505,11 @@ _ARM_KEYWORD_RE = {
     "Deploy": re.compile(r"\bDeploys?\b"),
     "Evoke": re.compile(r"\bEvokes?\b"),
     "Drain": re.compile(r"\bDrains?\b"),
+    # `EB-407`. NO PLURAL: the meter is never printed as one. And the pattern
+    # is written with an editor rather than a shell heredoc, which is how the
+    # three rows above once acquired a literal 0x08 in place of a word
+    # boundary and matched nothing at all.
+    "Encore": re.compile(r"\bEncore\b"),
     # `EB-329` MATCHED THE PHRASE `Companion cards?` AND THE FACES HAVE SINCE
     # MOVED. That row's reasoning was that the two cards which PRICE themselves
     # on the word both spell it out; `Chain of Command` now reads "for each
@@ -907,7 +932,12 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     saying it cannot.
     """
     # `EB-404`: BODIES AND PRINTED RULES, NEVER TITLES -- see `_body_strings`.
-    hay = "\n".join(_body_strings(obs))
+    # `EB-407`: AND THE METER NAMES, which are dict KEYS and so reach no value
+    # walk, while the page prints every one of them as a row of its own. The
+    # word this row was filed for is a meter's name, and a screen that prints
+    # `Encore: 4` prints the word.
+    meters = ((obs.get("combat") or {}).get("you") or {}).get("meters") or {}
+    hay = "\n".join(list(_body_strings(obs)) + list(meters))
     growth = _BOMB_GROWTH_RE.search(hay)
     rows = [{"name": word,
              "text": ARM_KEYWORDS[word].format(

@@ -17,7 +17,8 @@ from understudy.blindplay_notes import (AURA_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
-                                        METER_CAPPED_NOTE, METER_NOTE,
+                                        METER_CAPPED_NOTE,
+                                        METER_DEFINED_NOTE, METER_NOTE,
                                         METER_RULES,
                                         PENDING_PICK_NOTE, PICKED_MARK,
                                         PLAN_HYDRO_NOTE,
@@ -274,6 +275,7 @@ def render(obs: dict[str, Any]) -> str:
                 f"- HP {you['hp']}/{you['max_hp']}",
                 f"- Block {you['block']}",
                 f"- Energy {you['energy']}/{you['max_energy']}"]
+        defined = {row["name"] for row in (obs.get("keywords") or [])}
         for name, amount in sorted(you["meters"].items()):
             # `EB-181`: with a ceiling the row reads like the HP and Energy
             # rows above it and the note narrows to the half still true; with
@@ -285,6 +287,12 @@ def render(obs: dict[str, Any]) -> str:
             # a maximum and a spend rule are two different facts and this table
             # answers only the second.
             rule = METER_RULES.get(name)
+            # `EB-407`: and where the GLOSSARY defines the same word on this
+            # screen, the meter line points at it instead of printing a second
+            # copy. One definition per screen is `keyword_notes`' own rule and
+            # the meters block was the one place two sources could both fire.
+            if name in defined:
+                rule = METER_DEFINED_NOTE
             if top:
                 out.append(f"- {name}: {amount}/{top} — "
                            f"{rule or METER_CAPPED_NOTE}")

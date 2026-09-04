@@ -268,7 +268,7 @@ public class ArmKeywordTipTests
         // cannot arrive with a different shape by accident.
         var attaches = Attaches().ToList();
 
-        // THIRTEEN: TWELVE KEYWORDS AND ONE RIDER. Draft 6 cut Tide, Surge, Exert and the Garment as
+        // FOURTEEN: THIRTEEN KEYWORDS AND ONE RIDER. Draft 6 cut Tide, Surge, Exert and the Garment as
         // keywords and their four `For*` methods left with the rules they
         // defined, taking the table from eleven to seven; the Furina reframe's
         // slice two put Deploy, Evoke and Drain on it (2026-09-02), and R244
@@ -285,7 +285,13 @@ public class ArmKeywordTipTests
         // it is a sentence about a CARD whose Hydro arrives with the
         // jellyfish's carry-out rather than with the play. It goes through the
         // same `With`, which is what this pin is actually for.
-        Assert.Equal(13, attaches.Count);
+        //
+        // THE FOURTEENTH IS `EB-407`'s `ForEncore`, and it is the one word on
+        // this table the arm did not invent. Encore is shipped machinery whose
+        // only statement of itself is `EncoreMeterPower`'s badge, which renders
+        // once the meter is on the board -- and the word is printed on the Neow
+        // screen and on opening-hand faces before that.
+        Assert.Equal(14, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
