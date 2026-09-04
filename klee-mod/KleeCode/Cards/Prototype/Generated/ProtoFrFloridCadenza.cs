@@ -40,7 +40,7 @@ public sealed class ProtoFrFloridCadenza : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Florid Cadenza (reframe)"),
+        ("title", "Florid Cadenza"),
         ("description", "Draw 1 card. {IfUpgraded:show:Draw 2 more.|If you have at least 6 [gold]Fanfare[/gold], draw 2 more.}"),
     };
 

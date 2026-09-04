@@ -40,7 +40,7 @@ public sealed class ProtoFrDramaticEntrance : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Dramatic Entrance (reframe)"),
+        ("title", "Dramatic Entrance"),
         ("description", "Deal {IfUpgraded:show:10|7} damage. If you have at least 6 [gold]Fanfare[/gold], deal {Damage:diff()} damage to ALL enemies."),
     };
 

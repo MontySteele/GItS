@@ -1065,6 +1065,42 @@ def test_no_generated_prototype_face_prints_the_suffix():
     assert checked >= 30, f"only {checked} shadowed faces checked"
 
 
+def test_the_sheet_declares_a_shadow_only_with_the_suffix_both_engines_strip():
+    """`EB-419`. The five Furina reframe copies declared their shadow with a
+    SECOND spelling, ` (reframe)`, which `display_name` does not strip and no
+    lint reads -- so the arm's starter printed "Aria of Recompense (reframe)"
+    to the round-5 seat, and four offer rows carried the same tag.
+
+    The rule is one spelling, not two: a row that ends its `name:` in
+    parentheses is either declaring the ONE shadow both engines strip, or it
+    is printing those parentheses on the card face. There is no third case,
+    and this is the check that says so -- over the sheet, the sim's `Card`s
+    and the committed C# alike, because that is the whole path the tag
+    travelled."""
+    import re
+
+    rows = yaml.safe_load(
+        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
+    trailing = re.compile(r"\s\([^()]*\)$")
+    for row in rows:
+        name = row["name"]
+        if name.endswith(loader.PROTOTYPE_SHADOW_SUFFIX):
+            continue
+        assert not trailing.search(name), (
+            f"{row['id']}: {name!r} ends in a parenthesised tag that is not "
+            f"{loader.PROTOTYPE_SHADOW_SUFFIX!r}, so nothing strips it and "
+            "the card face prints it")
+
+    # The two faces the seat actually read, checked as faces rather than as
+    # sheet rows: the engine's `Card` and the committed C# title.
+    for card in loader.prototype_cards():
+        assert "(reframe)" not in card.name, card.id
+    for path in sorted(_GENERATED.glob("*.cs")):
+        title = re.search(r'\("title", "(.*)"\),',
+                          path.read_text(encoding="utf-8"))
+        assert title is None or "(reframe)" not in title.group(1), path.name
+
+
 def test_the_lint_reads_a_declaration_as_a_shadow_and_a_bare_name_as_a_clash(
         tmp_path):
     """`EB-322`'s lint half, both directions, against the REAL relic sources.

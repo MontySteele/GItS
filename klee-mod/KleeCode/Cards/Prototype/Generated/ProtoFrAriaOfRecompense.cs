@@ -44,7 +44,7 @@ public sealed class ProtoFrAriaOfRecompense : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Aria of Recompense (reframe)"),
+        ("title", "Aria of Recompense"),
         ("description", "Gain {IfUpgraded:show:8|5} [gold]Encore[/gold]. If you have at least 6 [gold]Fanfare[/gold], gain {IfUpgraded:show:8|5} more."),
     };
 

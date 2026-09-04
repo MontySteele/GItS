@@ -44,7 +44,7 @@ public sealed class ProtoFrUniversalRevelry : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Universal Revelry (reframe)"),
+        ("title", "Universal Revelry"),
         ("description", "Deal {IfUpgraded:show:12|9} damage to ALL enemies, plus 1 per 2 [gold]Fanfare[/gold]. If you have at least 8 [gold]Fanfare[/gold], deal 6 more to ALL enemies."),
     };
 
