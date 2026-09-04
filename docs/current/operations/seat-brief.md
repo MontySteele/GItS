@@ -61,8 +61,8 @@ say so in the record and stop; do not go looking for another way through.
 ### Your budget
 
 - **Actions:** stop at the cap the coordinator gives you (`--max-actions`,
-  typically 40–70 accepted `act` calls; a Kokomi or Furina seat is given 120,
-  because a Plan or a Salon turn is more commands than a Klee turn).
+  120 accepted `act` calls for an act on any of the three kits, since round
+  11: 70 reached floor 6 and 120 reached floor 10 or 11).
 - **Wall clock:** stop at `--max-wall-s` (typically 5400 s).
 - **Refusals:** three consecutive refused commands is a stop. A refusal is a
   finding — write down what you asked for and what it said.
