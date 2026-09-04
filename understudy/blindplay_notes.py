@@ -61,6 +61,44 @@ METER_NOTE = ("the game's data feed carries this meter's amount only: no "
 # and nothing on this wire says what fills or empties a meter.
 METER_CAPPED_NOTE = ("the game's data feed carries this meter's amount and "
                      "its maximum, and no rule for how it is spent")
+
+# `EB-382`. WHERE A METER'S SPEND RULE EXISTS, THE ROW SAYS IT.
+#
+# The Furina round-two seat ended a turn holding four banked Encore and opened
+# the next one with none, three times across three fights, and read it as a
+# confiscation: "Encore evaporates at the start of my next turn". It does not.
+# Encore is a damage buffer -- after Block it absorbs incoming damage before HP
+# -- and every one of those boundaries had an enemy hit in it. Fight 1's
+# arithmetic settles it: a `2x4` intent, HP 57 -> 53 and Encore 4 -> 0, which
+# is eight damage split four and four. The one turn the seat kept its Encore is
+# the turn its own record calls "Took 0 damage".
+#
+# THE RULE WAS WRITTEN AND REACHED NOBODY. `EncoreMeterPower` states it in the
+# mod in one sentence -- but that badge was RETIRED as a display in the
+# 2026-07-24 diet, its ambient home being the Salon stage ribbon, which is art
+# and reaches no page. So `METER_NOTE` said, correctly, that the feed carries
+# no spend rule, and a seat was asked to budget a resource the screen would not
+# explain.
+#
+# WHAT THIS TABLE IS, AND IS NOT. It is not a glossary of meters: a row here is
+# a spend rule the MOD declares and the FEED cannot carry, keyed by the name the
+# page prints (`qa_packet.label` of the wire id). A meter with no row keeps
+# `METER_NOTE` unchanged, still saying what is missing and whose it is to carry.
+# The wording is held in step with the C# by
+# `test_the_encore_meter_rule_is_the_mods_own_sentence`, the discipline
+# `ARM_KEYWORDS` and `REACTION_KEYWORDS` are already under.
+#
+# THE FANFARE CLAUSE IS DELIBERATELY ABSENT. `EncoreMeterPower`'s second
+# sentence says losing Encore creates Fanfare, and the reframe's METER leg
+# retires exactly that, so a page printing it would be teaching a rule this
+# build does not have -- the reason `Tide` and `Exert` are out of
+# `ARM_KEYWORDS`, one meter over.
+METER_RULES: dict[str, str] = {
+    "Encore": ("a buffer and not a bank: after Block it absorbs incoming "
+               "damage before HP. Cards spend it, and a Salon member spends "
+               "1 each time it performs"),
+}
+
 # `EB-263`. THE ENCHANT PICKER MARKS NOTHING, and the r3 Opus seat found out
 # the hard way: after `choose "Flame Dance"` "the whole list reprinted
 # byte-identically; the only change anywhere on the screen was the footer

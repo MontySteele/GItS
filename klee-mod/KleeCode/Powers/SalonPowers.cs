@@ -64,13 +64,58 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
 {
     // The typed company per owner. The counter power (Amount) mirrors the
     // queue length so every count read stays valid; this dictionary is the
-    // member-identity half the counter cannot carry. Entries are reset on
-    // the first deploy of a combat (queue outliving the power is harmless:
-    // a fresh combat's first Deploy clears a stale list).
+    // member-identity half the counter cannot carry. A list outliving its
+    // combat is dropped by <see cref="CompanyFor"/>, which asks the COMBAT
+    // and not the counter -- see the banner there.
     private static readonly Dictionary<Creature, List<SalonMember>> Company =
         new();
 
-    public List<(string, string)>? Localization => new()
+    /// <summary>
+    /// Which combat each live company list was built in. `EB-384`: this is the
+    /// question the stale-list check has to ask, and asking the counter
+    /// instead is what cost the round-two seat a member.
+    /// </summary>
+    private static readonly Dictionary<Creature, object?> CompanyCombat =
+        new();
+
+    public List<(string, string)>? Localization
+    {
+        get
+        {
+            var rows = ShippedLocalization();
+#if PROTOTYPE_CARDS
+            // `EB-383`. THE ARM'S OWN ROWS, one per member the stage can hold
+            // in front, plus the empty one. ROWS AND A KEY, not conditionals
+            // inside one row, for `ProtoBombPower.SmartDescriptionLocKey`'s
+            // reason: a headless pin can read a row and cannot run
+            // `LocManager`, and the row a live power picks is decided by
+            // <see cref="SmartDescriptionLocKey"/> below.
+            //
+            // WHY THE FRONT MEMBER IS THE ONE NAMED. Every rule the arm has is
+            // about it -- a Companion play performs the front member, an
+            // overflow deploy Evokes the front member -- so naming it is the
+            // same sentence as stating the rule, which is what makes all three
+            // rules AND an identity fit under the 125-character power ceiling
+            // (`docs/current/text-conventions.md`). The stage's own hover and
+            // every deploy card carry the rest (`SalonMemberTips`).
+            //
+            // GENERATED RATHER THAN TYPED, and every piece of the face is a
+            // named constant, both for `ProtoBombPower`'s reasons: the row set
+            // and the selector come off one list so a key the selector can
+            // compose always has a row behind it, and
+            // `tools/lint_text_conventions.py` rebuilds these four faces from
+            // these same names -- it reads SOURCE and can no more run
+            // `LocManager` than a headless pin can.
+            foreach (var front in ManualFronts)
+            {
+                rows.Add((ManualKey(front), ManualFace(front)));
+            }
+#endif
+            return rows;
+        }
+    }
+
+    private static List<(string, string)> ShippedLocalization() => new()
     {
         ("title", "Salon Member"),
         // Numbers come from SalonConstants (SalonMemberTips.BodyFor's rule,
@@ -113,6 +158,92 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
           + $"{SalonConstants.ChevalmarinBowEncore} Encore."),
     };
 
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// `EB-383`. THE BUFF'S ARM FACE, and the defect it closes is that there
+    /// were TWO RULEBOOKS ON ONE SCREEN. The round-two seat read this badge
+    /// saying "At the start of your turn, each Salon Member spends 1 Encore
+    /// for its act" three lines above the Salon tip saying "Members do NOT act
+    /// on their own", and recorded that behaviour matched the tip and never
+    /// the badge across five fights. The shipped rows above are the SHIPPED
+    /// rule and stay exactly as they are for a release build.
+    ///
+    /// THREE RULES AND A NAME. The seat's other half was that the buff read
+    /// `Salon Member 1` and then recited all three members' abilities, so it
+    /// "worked out mine was Chevalmarin by subtracting Neuvillette's 7 from a
+    /// 9-point HP drop". What the member DOES is on its own hover tip
+    /// (`SalonMemberTips.BodyFor`, `EB-384`); what this row owes is which one
+    /// is there, and it lands as the object of the rule that acts on it.
+    /// </summary>
+    /// <summary>The three rules, which every face carries whole and which is
+    /// what makes this ONE rulebook rather than a second one.</summary>
+    private const string ManualLead =
+        "A joining member performs at once. A full stage [gold]Evokes[/gold] "
+      + "the front member. A [gold]Companion[/gold] card ";
+
+    /// <summary>An empty stage: the rule with no object to hang on.</summary>
+    private const string ManualEmptyTail = "performs the front one.";
+
+    /// <summary>A stage with somebody in front: the rule and the name, one
+    /// clause, which is how three rules and an identity fit under the
+    /// 125-character power ceiling.</summary>
+    private const string ManualNamedTail = "you play performs ";
+
+    /// <summary>Every front this stage can have, the empty one included. The
+    /// row set and the selector are built off the same list.</summary>
+    private static readonly SalonMember?[] ManualFronts =
+    {
+        null, SalonMember.Crabaletta, SalonMember.Usher,
+        SalonMember.Chevalmarin,
+    };
+
+    private static string ManualFace(SalonMember? front) =>
+        ManualLead + (front is { } who
+            ? ManualNamedTail + ManualFrontName(who) + "."
+            : ManualEmptyTail);
+
+    /// <summary>The stage NAME each face uses, not the full card title:
+    /// "Mademoiselle Crabaletta" and its two siblings run the face past its
+    /// ceiling, and the shipped description has printed the short form since
+    /// the v2 rework. Kept beside the faces as the one place the spelling is
+    /// declared, and pinned against them.</summary>
+    internal static string ManualFrontName(SalonMember front) => front switch
+    {
+        SalonMember.Crabaletta => "Crabaletta",
+        SalonMember.Usher => "the Usher",
+        _ => "Chevalmarin",
+    };
+
+    /// <summary>The row key each arm face is filed under, and the ONE place
+    /// the front is spelled into a key -- <see cref="Localization"/> writes
+    /// the rows with it and <see cref="SmartDescriptionLocKey"/> reads one
+    /// back, so a row and its selector cannot drift apart.</summary>
+    private static string ManualKey(SalonMember? front) =>
+        "smartDescriptionManual" + (front?.ToString() ?? "Empty");
+
+    /// <summary>
+    /// `EB-383`. Which face this badge prints right now.
+    ///
+    /// `IsMutable` FIRST, and it is not defensive tidiness: `HasSmartDescription`
+    /// probes this key on a CANONICAL power too, and `PowerModel.Owner`'s
+    /// getter asserts mutability (`EB-94`). A compendium copy therefore takes
+    /// the shipped key, which is also the honest answer -- it has no stage.
+    /// The guard and its reason are `ProtoBombPower.LiveMods`'.
+    /// </summary>
+    protected override string SmartDescriptionLocKey
+    {
+        get
+        {
+            if (IsMutable && Owner is { } owner
+                && FurinaReframe.ManualLiveFor(owner))
+            {
+                return Id.Entry + "." + ManualKey(LeftmostMember(owner));
+            }
+            return base.SmartDescriptionLocKey;
+        }
+    }
+#endif
+
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
@@ -152,16 +283,55 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     public static IReadOnlyList<SalonMember> CompanyOf(Creature owner) =>
         CompanyFor(owner).ToList();
 
+    /// <summary>
+    /// This owner's live company, dropping a list left over from an earlier
+    /// combat.
+    ///
+    /// `EB-384`. THE STALENESS TEST IS THE COMBAT, NOT THE COUNTER, and the
+    /// difference cost the round-two seat a member on a card that prints one.
+    ///
+    /// It used to read "a nonempty list with a zero counter is garbage",
+    /// which is true BETWEEN combats and false for one window inside every
+    /// deploy: <see cref="Deploy"/> adds the entering member to this list and
+    /// applies the mirror counter AFTER the loop, so from the `company.Add`
+    /// to the `PowerCmd.Apply` the stage legitimately holds a member the
+    /// counter has never heard of. Nothing read the list inside that window
+    /// until the arm's deploy-performs clause put <see cref="PerformMember"/>
+    /// there -- and a member that can PAY its Encore reaches
+    /// `FurinaResources.SpendEncore`, which refreshes the stage visuals, which
+    /// read <see cref="CompanyOf"/>, which came back through here and wiped
+    /// the company it had just been handed.
+    ///
+    /// That is the seat's whole finding, and it explains BOTH of its halves.
+    /// Fight 1 the deploy went in at 0 Encore, so the member acted dry, no
+    /// spend ran, no refresh ran, and the member stayed -- dealing 1, the
+    /// three-quarters cut of a printed 2. Fight 2 it went in on a banked
+    /// Encore, paid, dealt the full 2, and vanished. The reaction the record
+    /// noticed was a coincidence of the same two turns.
+    ///
+    /// The combat identity answers the real question directly and cannot fire
+    /// mid-deploy, because a deploy does not change combats. It is the same
+    /// token <see cref="FurinaReframeLedger.For"/> and `ProtoBombPower` key
+    /// their per-combat tables on.
+    /// </summary>
     private static List<SalonMember> CompanyFor(Creature owner)
     {
+        var combat = (object?)owner.CombatState;
         if (!Company.TryGetValue(owner, out var list))
         {
             list = new List<SalonMember>();
             Company[owner] = list;
         }
-        // Stale list from a previous combat: the counter power died with
-        // that combat, so a nonempty list with a zero counter is garbage.
-        if (Count(owner) == 0 && list.Count > 0) list.Clear();
+        else if (CompanyCombat.TryGetValue(owner, out var built)
+                 && !ReferenceEquals(built, combat))
+        {
+            // A list built in a combat that is over. The Creature key can
+            // outlive one (PurgeCompany sweeps only the keys whose combat has
+            // already been torn down), so this is still the check that keeps a
+            // dead stage out of a live fight.
+            list.Clear();
+        }
+        CompanyCombat[owner] = combat;
         return list;
     }
 
@@ -182,6 +352,11 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                      .ToList())
         {
             Company.Remove(stale);
+            // `EB-384`: the sidecar leaves with the entry it describes. A
+            // combat token outliving its list is the same leak one dictionary
+            // over, and a stale token would answer the staleness question with
+            // a lie the next time this Creature turned up.
+            CompanyCombat.Remove(stale);
         }
     }
 

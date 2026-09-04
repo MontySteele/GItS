@@ -214,6 +214,50 @@ public static class SpotlightSystem
         }
     }
 
+    /// <summary>
+    /// `EB-386`. THE BADGE FOLLOWS THE MODE, because the MODE is the rule and
+    /// the badge is only a display.
+    ///
+    /// Everything that reads the Spotlight reads the RESOURCE
+    /// (<see cref="Mode"/>, through <c>CenterStageActive</c> and
+    /// <c>GuestCastActive</c>); the two powers exist so a player can see which
+    /// one is in force. The round-two seat watched Guest Cast leave the status
+    /// list in fight 4 "while `Spotlight Mode: 2` stayed and Companion cards
+    /// kept showing boosted numbers" -- a display that had stopped describing a
+    /// rule that was still running, which is the worst thing a display can do
+    /// and is invisible to every rule test in the suite.
+    ///
+    /// WHAT REMOVED IT IS NOT KNOWN, and this does not need to know: whatever
+    /// takes the badge off leaves the resource alone, so the effect never
+    /// stopped and putting the badge back is telling the truth rather than
+    /// re-granting anything. Nothing here can grant an effect, because nothing
+    /// reads these powers.
+    ///
+    /// RIDES <c>FurinaResources.SyncMeters</c>, the funnel every meter display
+    /// already refreshes on -- after each card play, at turn start and at turn
+    /// end -- so a badge can be missing for at most one beat.
+    /// </summary>
+    public static async Task SyncModeDisplay(
+        PlayerChoiceContext choiceContext, Creature creature)
+    {
+        if (!FurinaResources.IsFurina(creature)) return;
+        switch (Mode(creature))
+        {
+            case SpotlightMode.CenterStage
+                when !creature.Powers.OfType<CenterStagePower>().Any():
+                await PowerCmd.Apply<CenterStagePower>(
+                    choiceContext, creature, 1,
+                    applier: creature, cardSource: null);
+                break;
+            case SpotlightMode.GuestCast
+                when !creature.Powers.OfType<GuestCastPower>().Any():
+                await PowerCmd.Apply<GuestCastPower>(
+                    choiceContext, creature, 1,
+                    applier: creature, cardSource: null);
+                break;
+        }
+    }
+
 #if PROTOTYPE_CARDS
     /// <summary>
     /// THE ONE-MODE, PRICED SELECTOR -- R228 option (1), and the whole of the
@@ -539,11 +583,23 @@ public sealed class CenterStagePower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Center Stage"),
+        // `EB-386`. THE DURATION, which neither mode printed and which the
+        // wire cannot supply: a status row on the feed is id, name, amount,
+        // type and text, with no duration field at all, so "unless a power's
+        // own text says when it ends, this page cannot say either"
+        // (`blindplay_notes.POWER_NOTE`). This one ends when the Spotlight is
+        // aimed somewhere else and not before, which is the fact the
+        // round-two seat spent a run without.
+        //
+        // ONE SENTENCE FOR BOTH MODES, and it is true under the arm as well:
+        // `DesignateOneMode` never moves the Spotlight off Guest Cast, so
+        // "until it moves" is a duration that simply never elapses there.
         ("description",
             // EB-89: the rate is interpolated, not printed.
-            "Furina is Spotlighted. Playing her cards generates "
-          + $"{SpotlightSystem.FanfarePerCenterStagePlay} Fanfare; their "
-          + "printed numbers are unchanged."),
+            "Furina is Spotlighted: her cards make "
+          + $"{SpotlightSystem.FanfarePerCenterStagePlay} Fanfare and their "
+          + "printed numbers are unchanged. Lasts until the "
+          + "[gold]Spotlight[/gold] moves."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -555,9 +611,17 @@ public sealed class GuestCastPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Guest Cast"),
+        // `EB-386`. The duration, and see `CenterStagePower` for why it is
+        // one sentence for both modes. The seat watched this buff leave the
+        // status list mid-fight "while Companion cards kept showing boosted
+        // numbers", which is the OTHER half of the row: the badge is a
+        // display and the MODE resource is the rule, so
+        // `SpotlightSystem.SyncModeDisplay` now puts the badge back whenever
+        // the two disagree.
         ("description",
-            "Companion cards are Spotlighted. Their printed damage and Block "
-          + "are 50% stronger; their plays generate no Fanfare."),
+            "Companion cards are Spotlighted: 50% stronger printed damage and "
+          + "[gold]Block[/gold], no Fanfare. Lasts until the "
+          + "[gold]Spotlight[/gold] moves."),
     };
 
     public override PowerType Type => PowerType.Buff;
