@@ -101,12 +101,23 @@ def validate_row(card: "Card") -> None:
     shipped row claiming to replace another would be a second, permanent pool
     rule wearing a schema key, and R213 B's deletion rule could never reach it.
 
-    IT CANNOT BE ANONYMOUS. `replaces:` without `personal_pool:` names no
-    character to hand the card to, so it would be a row that replaces a
-    Universal for everybody -- which is a pool REPLACEMENT, not a stand-in, and
-    the arm already has one of those (`MONDSTADT_OVERHAUL_POOL_IDS`).
+    IT CANNOT BE ANONYMOUS -- UNLESS IT IS THE OTHER SHAPE. `replaces:`
+    without `personal_pool:` names no character to hand the card to, so it is
+    not a stand-in: it is a row that replaces another FOR EVERYBODY playing the
+    arm, which is a POOL SUBSTITUTION (`loader._pool_substitutions`, the
+    Kurage's Oath seam). That shape is legal, and this is the only place the
+    two are told apart, so it is CHECKED rather than assumed: the row must be
+    named in `loader.declared_pool_substitutions()`, the flag-blind union of
+    the arms' own maps. A `replaces:` that names neither a character to hand
+    the card to nor a declared swap is a row no surface can ever reach, and
+    still raises.
+
+    The Furina reframe's four riders (2026-09-04) are the first users of the
+    second shape. The Mondstadt stand-ins are the first shape and nothing about
+    them moves -- `_replacements` has always filtered on `personal_pool`.
     """
-    from tier0.content.loader import PROTOTYPE_ID_PREFIX
+    from tier0.content.loader import (PROTOTYPE_ID_PREFIX,
+                                      declared_pool_substitutions)
 
     if card.replaces is None:
         return
@@ -116,11 +127,14 @@ def validate_row(card: "Card") -> None:
             f"shipped row may not stand in for another card (ids on that "
             f"surface carry {PROTOTYPE_ID_PREFIX!r})")
     if not card.personal_pool:
+        if declared_pool_substitutions().get(card.replaces) == card.id:
+            return
         raise ValueError(
             f"card {card.id!r}: `replaces:` needs a `personal_pool:` -- a "
-            "stand-in is handed to ONE character in place of a Universal, and "
-            "a row that replaces a Universal for everybody is a pool "
-            "replacement rather than a stand-in")
+            "stand-in is handed to ONE character in place of a Universal -- "
+            "or an arm's pool-substitution map has to name it. A row that "
+            "replaces another for everybody and is in no arm's map can never "
+            "be offered at all")
 
 
 @lru_cache(maxsize=1)

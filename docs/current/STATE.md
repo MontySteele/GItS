@@ -155,11 +155,16 @@ are in [`workstreams.md`](workstreams.md).
   (`review/active/kokomi-overhaul-round-9-2026-09-04.md`): both rules read
   true, run 2 cleared acts 1 and 2 and died on act-3 floor 39 after a misread
   of The Moon's face; the pool's empty shelf is tempo (no energy, no Retain),
-  one pick, `EB-376`-`EB-381`. [USER]'s act-1 run is due on `0.2.2309+proto`. The Kurage
+  one pick, `EB-376`-`EB-381`. **Round 10 is BUILT** — the TEMPO SHELF, round 9
+  pick 1 at its default: Held Tide, Tide Chart and Ripple, on a new
+  `plans_held` count in both engines, the pool now 31 rows (the shelf's fourth,
+  Tidal Rhythm, is held by [USER] pending an adversarial audit and is not on
+  the surface). [USER]'s act-1 run is due on `0.2.2309+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
-  2's five `proto_fr_` rows are built** (2026-09-02): the named deploy, two
+  2's five `proto_fr_` rows are built** (2026-09-02; nine with round 4's
+  riders): the named deploy, two
   Evokes and the drain pair, on a new `drain_fanfare` op and the
   `Deploy`/`Evoke`/`Drain` tips. R250 (2026-09-04) LIFTS the R220 B sequence: the arm is on in the
   installed dev build, soaked, and **round one is read**
@@ -169,8 +174,13 @@ are in [`workstreams.md`](workstreams.md).
   retires under the arm alone — no draw, no feed, no kit card, behind
   `FURINA_REFRAME_BURST` in both engines, the shared retirement still
   `EB-199` / `EB-200`'s (`EB-365` closed) — with `EB-364`, `EB-366`, `EB-367`
-  and `EB-368`. [USER]'s act-1 run is due on the round-two build. No stamp
-  moves, nothing measured.
+  and `EB-368`. **Round 4 is BUILT** — round 2 pick 1 at its default: four
+  arm-only `proto_fr_` copies of the shipped Fanfare riders at the arm's own
+  scale (12/12/15/20 down to 6/6/8/10), swapped in for the shipped ids at the
+  same rarity by `loader._pool_substitutions` and
+  `FurinaReframeRoster.SwapOfferedRiders`, so the shipped sheet stands and an
+  arm-off run is offered the shipped card. [USER]'s act-1 run is due on the
+  round-two build. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where

@@ -2240,7 +2240,7 @@ The one key moves both printed numbers by exactly 2 -- 3 to 5, 6 to 8 -- which
 is the drafted intent, and both engines now do it. Nothing else on any of the
 five rows moved: no name, no cost, no number and no face.
 
-## before proto_kk_held_tide
+## before proto_kk_tide_chart
 
 The tempo shelf, Kokomi round 9 pick 1 taken at its default (2026-09-04,
 disclosed to [USER] with the pick and unanswered before the build; the
@@ -2249,14 +2249,17 @@ had thirty rows at a flat cost, no energy gain, two draw cards and nothing
 that Retains, and the seats' dead turns were all dilution with no way to
 hold or hurry a Plan. Every row here is keyed to the Bake-Kurage:
 
-- **Held Tide** (Uncommon, Retain): Sango Isshin's condition at Common
-  scale with Retain, so the payoff can wait for the morning it wants.
-- **Tidal Rhythm** (Uncommon Power): an Energy back when the Kurage carries
-  out, once a turn, so a written turn is not a lost turn.
 - **Tide Chart** (Common, 0): draw per Plan the Kurage holds, the draw that
   reads the memory; blank with nothing written, which is the price.
 - **Ripple** (Common, 0): a cheap Plan whose now-line is worth playing (2
   Block for 0) and whose Plan pays tempo (1 Energy and 4 Block).
+
+TWO OF THE DRAFTED FOUR ARE WITHDRAWN on the R253 charter audit and are not
+on the surface: Held Tide (Uncommon, Retain -- Sango Isshin's condition at
+Common scale) on the owner's "not all agents always win" clause, because
+Retain guarantees the payoff line; and Tidal Rhythm (Uncommon Power, an
+Energy back once a turn when the Kurage carries out) as free repeatable
+Energy. Both were ruled REQUIRES_MODIFICATION; the shelf ships as two.
 
 Numbers are Prototype numbers, D by the ladder; the seats read them on
 Kokomi round 10 before [USER] does.

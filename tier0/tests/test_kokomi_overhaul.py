@@ -178,18 +178,24 @@ def test_the_starter_is_the_canonical_ten():
         assert gone not in staged
 
 
-def test_the_pool_is_all_twenty_eight_of_the_slices_rows():
+def test_the_pool_is_all_thirty_of_the_slices_rows():
     """Slice draft 6 sec.4, whole. Pinned rather than described because it is
     the slice's own scope statement, and because -- unlike the Klee arm, which
     dropped Vermillion Pact on its packet's own escape -- NOTHING drops here.
 
     TWENTY-EIGHT since `EB-335` (R246 pick 2): the slice's 26 plus Tide Wall
-    and Shell Guard, the kit's own defence in act 2."""
+    and Shell Guard, the kit's own defence in act 2. THIRTY since round 9
+    pick 1's tempo shelf (2026-09-04), the two rows that let a Plan be held or
+    hurried -- Held Tide and Tidal Rhythm, the drafted other two, were
+    withdrawn on the R253 charter audit and are not on the surface."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 28
-    assert len(set(ids)) == 28
+    assert len(ids) == 30
+    assert len(set(ids)) == 30
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
+    assert {"proto_kk_tide_chart", "proto_kk_ripple"} <= set(ids)
+    assert "proto_kk_held_tide" not in ids
+    assert "proto_kk_tidal_rhythm" not in ids
 
 
 def test_the_arm_carries_exactly_two_rule_numbers():
@@ -264,14 +270,14 @@ def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
 
 
 def test_the_pool_keeps_the_packets_rarity_split(overhaul):
-    """13 Common, 10 Uncommon, 5 Rare. The packet's sec.4 count was 13/8/5;
+    """15 Common, 10 Uncommon, 5 Rare. The packet's sec.4 count was 13/8/5;
     `EB-335`'s two defensive rows are both Uncommon (R246 pick 2), which is
-    where the round-four-c packet designed them. Pinned because the rarity
-    buckets ARE the offer odds: a row filed in the wrong tier changes how often
-    it is seen."""
+    where the round-four-c packet designed them, and the tempo shelf adds two
+    Commons (Tide Chart, Ripple). Pinned because the rarity buckets ARE the
+    offer odds: a row filed in the wrong tier changes how often it is seen."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 13, "uncommon": 10, "rare": 5}
+        "common": 15, "uncommon": 10, "rare": 5}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

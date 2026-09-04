@@ -1087,24 +1087,8 @@
    upgrade: {cost: -1}}
 
 # --- the tempo shelf (Kokomi round 9 pick 1, default applied 2026-09-04):
-# four rows keyed to the Bake-Kurage that let a Plan be held or hurried.
+# two rows keyed to the Bake-Kurage that let a Plan be held or hurried.
 # Per-row reasoning: docs/notes/prototype-surface-provenance.md. ---
-
-- {id: proto_kk_held_tide, name: "Held Tide", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: uncommon, retain: true,
-   description: "Retain. Deal 6 damage. If the [gold]Bake-Kurage[/gold] carried out a [gold]Plan[/gold] this turn, deal 12 instead.",
-   upgrade: {conditional_damage: 4},
-   effects: [{op: conditional, if: plan_carried_out_this_turn,
-              then: [{op: damage, amount: 12, target: enemy}],
-              else: [{op: damage, amount: 6, target: enemy}]}]}
-
-- {id: proto_kk_tidal_rhythm, name: "Tidal Rhythm", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   description: "Once per turn, when the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain 1 [gold]Energy[/gold].",
-   upgrade: {innate: true},
-   effects: [{op: apply_power, power: kk_tidal_rhythm, amount: 1, target: self}]}
 
 - {id: proto_kk_tide_chart, name: "Tide Chart", character: kokomi,
    authored_by: [claude],
@@ -1116,7 +1100,7 @@
 - {id: proto_kk_ripple, name: "Ripple", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Gain 2 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and 4 [gold]Block[/gold].",
+   description: "Gain 2 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and {IfUpgraded:show:7|4} [gold]Block[/gold].",
    upgrade: {plan_block: 3},
    effects: [{op: block, amount: 2}],
    plan: [{op: energy, amount: 1},
@@ -1451,14 +1435,14 @@
              {op: block, amount_formula: {base: 0, per: 1, count: fanfare_drained}}]}
 # --- the shipped Fanfare riders under the Furina arm (round 2 pick 1,
 # default applied 2026-09-04): arm-only copies at the arm's Fanfare scale,
-# swapped in for the shipped ids at the same rarity by the pool seam. Nothing
-# on the shipped sheet moves. ---
+# swapped in at the same rarity by the pool seam. The shipped sheet stands. ---
 
 - {id: proto_fr_florid_cadenza, name: "Florid Cadenza (reframe)", character: furina,
    authored_by: [claude],
    replaces: florid_cadenza,
    cost: 0, type: skill, rarity: uncommon,
-   description: "Draw 1 card. If you have at least 6 [gold]Fanfare[/gold], draw 2 more.",
+   upgrade: {condition: unconditional},
+   description: "Draw 1 card. {IfUpgraded:show:Draw 2 more.|If you have at least 6 [gold]Fanfare[/gold], draw 2 more.}",
    effects: [{op: draw, amount: 1},
              {op: conditional, if: fanfare_at_least_6, then: [{op: draw, amount: 2}]}]}
 
@@ -1466,7 +1450,8 @@
    authored_by: [claude],
    replaces: dramatic_entrance,
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 7 damage. If you have at least 6 [gold]Fanfare[/gold], deal 7 damage to ALL enemies.",
+   upgrade: {damage: +3},
+   description: "Deal {IfUpgraded:show:10|7} damage. If you have at least 6 [gold]Fanfare[/gold], deal 7 damage to ALL enemies.",
    effects: [{op: damage, amount: 7, target: enemy},
              {op: conditional, if: fanfare_at_least_6,
               then: [{op: damage, amount: 7, target: all_enemies}]}]}
@@ -1475,7 +1460,8 @@
    authored_by: [claude],
    replaces: universal_revelry,
    cost: 2, type: attack, rarity: rare,
-   description: "Deal 9 damage to ALL enemies, plus 1 per 2 [gold]Fanfare[/gold]. If you have at least 8 [gold]Fanfare[/gold], deal 6 more to ALL enemies.",
+   upgrade: {damage: +3},
+   description: "Deal {IfUpgraded:show:12|9} damage to ALL enemies, plus 1 per 2 [gold]Fanfare[/gold]. If you have at least 8 [gold]Fanfare[/gold], deal 6 more to ALL enemies.",
    effects: [{op: damage, amount: 9, target: all_enemies, bonus_formula: 1_per_2_fanfare},
              {op: conditional, if: fanfare_at_least_8, then: [{op: damage, amount: 6, target: all_enemies}]}]}
 
@@ -1483,7 +1469,8 @@
    authored_by: [claude],
    replaces: flood_of_emotion,
    cost: 1, type: skill, rarity: rare,
-   description: "Deal 14 damage. If you have at least 10 [gold]Fanfare[/gold], deal 14 more.",
+   upgrade: {damage: +3},
+   description: "Deal {IfUpgraded:show:17|14} damage. If you have at least 10 [gold]Fanfare[/gold], deal 14 more.",
    effects: [{op: damage, amount: 14, target: enemy},
              {op: conditional, if: fanfare_at_least_10, then: [{op: damage, amount: 14, target: enemy}]}]}
 

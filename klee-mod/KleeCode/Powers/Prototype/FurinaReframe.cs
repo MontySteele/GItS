@@ -1,5 +1,14 @@
 using System.Collections.Generic;
+using System.Linq;
+// ALIASED, not imported: the base game ships its own
+// `MegaCrit.Sts2.Core.Models.Cards.DramaticEntrance`, so a plain import of
+// Furina's generated namespace makes the name ambiguous. The alias says
+// which one this seam means at every use.
+using FurinaGen = KleeMod.Cards.Furina.Generated;
+using KleeMod.Cards.Prototype.Generated;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Cards;
 
 namespace KleeMod.Powers;
 
@@ -361,4 +370,59 @@ public static class FurinaReframeLaw
     /// rather than assumed away. Mirrors
     /// <c>furina_reframe.SPOTLIGHT_DESIGNATE_ENCORE_COST</c>.</summary>
     public const int SpotlightDesignateEncoreCost = 2;
+}
+
+/// <summary>
+/// THE ARM'S ONE POOL SEAM (Furina reframe round 2 pick 1, taken at its
+/// default 2026-09-04). Sim twin: <c>furina_reframe.POOL_SUBS</c>, read by
+/// <c>tier0.content.loader._pool_substitutions</c> at the one door
+/// <c>tier05.rewards.character_pool</c> already reads.
+///
+/// WHY IT EXISTS. The arm mints Fanfare by performance ALONE -- 2 per trigger
+/// and 5 per Evoke -- and across three rounds the meter ranged 0 to 15, while
+/// four shipped rows gate on it at 12, 12, 15 and 20. Two of them essentially
+/// cannot pay under the arm, and a card whose printed condition the run cannot
+/// reach is a dead row rather than a hard one.
+///
+/// A SWAP AND NOT A SHEET EDIT, which is the same argument
+/// <see cref="KurageMemory.SwapOfferedOath"/> makes one character over. The
+/// shipped sheet is Balance-stage content and does not move for a prototype
+/// arm (R213 B), so the copies are prototype rows carrying the arm's own
+/// thresholds (6, 6, 8, 10) and the arm swaps them in HERE, at the offer.
+/// Same rarity in and out -- two Uncommons and two Rares -- so the offer odds
+/// do not move.
+///
+/// ONE SEAM, for <c>SwapOfferedOath</c>'s reason verbatim:
+/// <c>FilterThroughEpochs</c> feeds <c>GetUnlockedCards</c>, which is the SOLE
+/// path into reward rolls, the shop and card transforms. Nothing else
+/// generates from a pool, so "every offer surface" is a property of the code
+/// and not a list this method has to keep in step with.
+///
+/// THE SHIPPED ROWS STAY IN THE POOL for <c>CardModel.Pool</c> legality -- a
+/// poolless card throws "You monster!" the moment it is drawn, and a player
+/// who already holds one must still be able to draw it. They are only
+/// unofferable, which is the same in/out split the kit Burst uses.
+///
+/// WITH THE ARM OFF THIS IS THE IDENTITY FUNCTION, checked at the top rather
+/// than assumed by its caller -- the same shape every other reader on this
+/// switch takes, and what makes the flag-off pin a property of this method.
+/// </summary>
+public static class FurinaReframeRoster
+{
+    /// <summary>The four shipped riders, out; the four arm copies, in.</summary>
+    public static IEnumerable<CardModel> SwapOfferedRiders(
+        IEnumerable<CardModel> offered)
+    {
+        if (!FurinaReframe.Enabled) return offered;
+        return offered
+            .Where(card => card is not FurinaGen.FloridCadenza
+                        && card is not FurinaGen.DramaticEntrance
+                        && card is not FurinaGen.UniversalRevelry
+                        && card is not FurinaGen.FloodOfEmotion)
+            .Concat(PrototypeCards.For("furina")
+                        .Where(card => card is ProtoFrFloridCadenza
+                                            or ProtoFrDramaticEntrance
+                                            or ProtoFrUniversalRevelry
+                                            or ProtoFrFloodOfEmotion));
+    }
 }

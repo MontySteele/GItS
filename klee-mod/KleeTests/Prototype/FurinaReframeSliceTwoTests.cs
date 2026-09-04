@@ -4,6 +4,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
+// ALIASED, not imported: the base game ships its own
+// `MegaCrit.Sts2.Core.Models.Cards.DramaticEntrance`, so the plain name is
+// ambiguous once this file names Furina's rider rows.
+using FurinaGen = KleeMod.Cards.Furina.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -589,5 +593,73 @@ public class FurinaReframeSliceTwoTests
         Assert.DoesNotContain("prints 5 ", tip);
         Assert.Equal(3, FurinaReframeLaw.EvokeFocusMult);
         Assert.Equal(5, FurinaReframeLaw.FanfarePerEvoke);
+    }
+
+    // ---- the pool seam (round 2 pick 1, default applied 2026-09-04) -------
+
+    [Fact]
+    public void The_arm_swaps_the_four_riders_and_the_shipped_pool_stands()
+    {
+        // STRUCTURAL, read off the compiled method, for this harness's usual
+        // reason: `ModelDb.Card<T>()` throws until the game's pool build has
+        // run, so what is pinned is the WIRING -- that the swap drops the four
+        // shipped rider types and concats the four arm copies out of
+        // `PrototypeCards.For`, and that `FurinaCardPool` is what calls it.
+        var swap = Il.Method("FurinaReframeRoster", "SwapOfferedRiders");
+        var calls = Il.Calls(swap);
+        Assert.Contains("PrototypeCards.For", calls);
+        Assert.Contains("FurinaReframe.get_Enabled", calls);
+        Assert.Contains("FurinaReframeRoster.SwapOfferedRiders",
+            Il.Calls(Il.Method("FurinaCardPool", "FilterThroughEpochs")));
+    }
+
+    [Fact]
+    public void The_swapped_rows_are_the_arms_thresholds_at_the_same_rarity()
+    {
+        // A SUBSTITUTION IS A FACE SWAP: a prototype filed in another tier
+        // would move the odds the row is offered at, which is a balance change
+        // smuggled in as a quarantine. The sim raises on one
+        // (`rewards.character_pool`); this is the same claim in the mod, read
+        // off constructed models, which need no combat.
+        Assert.Equal(new FurinaGen.FloridCadenza().Rarity,
+            new ProtoFrFloridCadenza().Rarity);
+        Assert.Equal(new FurinaGen.DramaticEntrance().Rarity,
+            new ProtoFrDramaticEntrance().Rarity);
+        Assert.Equal(new FurinaGen.UniversalRevelry().Rarity,
+            new ProtoFrUniversalRevelry().Rarity);
+        Assert.Equal(new FurinaGen.FloodOfEmotion().Rarity,
+            new ProtoFrFloodOfEmotion().Rarity);
+    }
+
+    [Fact]
+    public void The_copies_read_the_arms_bars_and_the_shipped_rows_do_not()
+    {
+        // The whole reason the seam exists: the arm mints Fanfare by
+        // performance alone -- 2 per trigger, 5 per Evoke -- and the shipped
+        // riders ask 12, 12, 15 and 20 of a meter three rounds saw range 0 to
+        // 15. Read off each row's own FACE, which is the number the player is
+        // asked to reach and the one thing a swap must actually move.
+        Assert.Equal(new[] { "12", "12", "15", "20" }, new[]
+        {
+            Bar("FloridCadenza"), Bar("DramaticEntrance"),
+            Bar("UniversalRevelry"), Bar("FloodOfEmotion"),
+        });
+        Assert.Equal(new[] { "6", "6", "8", "10" }, new[]
+        {
+            Bar("ProtoFrFloridCadenza"), Bar("ProtoFrDramaticEntrance"),
+            Bar("ProtoFrUniversalRevelry"), Bar("ProtoFrFloodOfEmotion"),
+        });
+    }
+
+    /// <summary>The Fanfare threshold a row prints: the number after "at
+    /// least" in its emitted description.</summary>
+    private static string Bar(string type)
+    {
+        var face = string.Join(" ", Il.Strings(
+            Il.Method(type, "get_Localization")));
+        var hit = System.Text.RegularExpressions.Regex.Match(
+            face, @"at least (\d+) \[gold\]Fanfare");
+        Assert.True(hit.Success, $"{type} prints no Fanfare bar: {face}");
+        return hit.Groups[1].Value;
     }
 }

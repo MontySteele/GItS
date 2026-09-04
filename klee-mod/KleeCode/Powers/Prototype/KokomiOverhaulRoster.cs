@@ -41,7 +41,8 @@ namespace KleeMod.Powers;
 /// against rules the run is no longer playing -- an Exhaust that pays Charge, a
 /// Muster that transforms, a Burst that gates. Slice one's own scope statement
 /// is that the 26 rows are her only reward pool for the prototype run; R246
-/// pick 2 added the two defensive rows `EB-335` builds, making it 28.
+/// pick 2 added the two defensive rows `EB-335` builds, making it 28, and
+/// round 9 pick 1's tempo shelf added two more, making it 30.
 ///
 /// THE OVERHAUL WINS WHERE IT MEETS THE KURAGE'S MEMORY. A dev build compiles
 /// this arm AND that one, and both want her starter. They are alternatives, not
@@ -117,13 +118,13 @@ internal static class KokomiOverhaulRoster
     internal static CardModel StarterDefend() => ModelDb.Card<DefendSilent>();
 
     /// <summary>
-    /// Kokomi's WHOLE offerable pool under the arm: the slice's 28 rows and
+    /// Kokomi's WHOLE offerable pool under the arm: the slice's 30 rows and
     /// nothing else.
     ///
     /// LISTED BY TYPE, not filtered by id prefix. A prefix match would be a
     /// second, softer definition of "which rows are the slice" living next to
     /// the sheet's own, and it would fail silently the day a row is renamed.
-    /// These are the same 28 ids as <c>C.KOKOMI_OVERHAUL_POOL_IDS</c>, in the
+    /// These are the same 30 ids as <c>C.KOKOMI_OVERHAUL_POOL_IDS</c>, in the
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
@@ -138,7 +139,7 @@ internal static class KokomiOverhaulRoster
     internal static IEnumerable<CardModel> OfferablePool() =>
         Slice().Concat(RosterAncientCards.Kokomi);
 
-    /// <summary>The slice's own 28 rows, without the Ancient tail
+    /// <summary>The slice's own 30 rows, without the Ancient tail
     /// <see cref="OfferablePool"/> adds.</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
@@ -175,6 +176,16 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkSaltLine>(),
         ModelDb.Card<ProtoKkBattlePlan>(),
         ModelDb.Card<ProtoKkMoonsReflection>(),
+        // THE TEMPO SHELF (round 9 pick 1 at its default, 2026-09-04): the
+        // two rows that let a Plan be held or hurried. Held Tide and Tidal
+        // Rhythm, the drafted other two, were withdrawn on the R253 charter
+        // audit and are not built. LAST, in the sheet's
+        // own order, because `tools/lint_arm_pool_parity.py` compares this
+        // list to the sheet and to `C.KOKOMI_OVERHAUL_POOL_IDS` BY ORDER --
+        // the gate that exists because R252's defence shelf shipped
+        // unofferable when a `Slice()` was forgotten.
+        ModelDb.Card<ProtoKkTideChart>(),
+        ModelDb.Card<ProtoKkRipple>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the

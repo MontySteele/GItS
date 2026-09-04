@@ -2900,6 +2900,7 @@ def blocked_reason(
                 and player_block_calc_rider(card, effect) is None
                 and companions_played_calc_rider(card, effect) is None
                 and kokomi_companions_this_turn_calc_rider(card, effect) is None
+                and plans_held_draw_rider(card, effect) is None
                 and swirls_turn_calc_rider(card, effect) is None
                 and fanfare_drained_calc_rider(card, effect) is None
                 and fanfare_drained_block_rider(card, effect) is None):
@@ -3804,6 +3805,39 @@ def kokomi_companions_this_turn_calc_rider(
     return (int(formula.get("base", 0)), int(formula.get("per", 1)),
             "static (card, _) => KokomiOverhaulLedger.For("
             "card.Owner.Creature).CompanionsPlayedThisTurn")
+
+
+def plans_held_draw_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: plans_held}` on a DRAW -- Tide
+    Chart (the tempo shelf, round 9 pick 1), "draw 1 card for each Plan the
+    Bake-Kurage holds".
+
+    THE FIRST `amount_formula` DRAW RIDER, and it takes neither of the two
+    rails beside it. The damage riders render a `CalculatedDamageVar` triple
+    and the block rider a `CalculatedBlockVar`; a DRAW has no such var --
+    `CardsVar` holds a literal and nothing calculates it -- so this one is
+    resolved INLINE in the emitted body, as `base + per * <the count>`. That
+    is not a shortcut past the "one value path" rule: the rule exists so the
+    face, the hover preview and the resolved effect cannot drift, and a draw
+    has no printed number that a preview could show drifting. Tide Chart's
+    face is its own authored sentence (`EB-215`), which states the rule rather
+    than a number.
+
+    THE COUNT IS THE QUEUE. `KokomiPlan.PlansHeld` is the length of the
+    written-and-not-yet-carried-out list, the same object the morning drains,
+    which is what the sim's `plans_held` reads for the same reason.
+
+    Refused off the arm's own count, so no shipped row can reach this.
+    """
+    if eff.get("op") != "draw":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict):
+        return None
+    if formula.get("count") != "plans_held":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "KokomiPlan.PlansHeld(Owner.Creature)")
 
 
 def swirls_turn_calc_rider(card: dict,
@@ -4727,6 +4761,13 @@ def build_vars(card: dict) -> list[str]:
             out.append(f'new DynamicVar("BombCap", {int(eff["cap"])}m)')
         elif op == "mend" and mend_upgrade(card):
             out.append(f'new DynamicVar("Mend", {int(eff["amount"])}m)')
+        elif op == "draw" and plans_held_draw_rider(card, eff) is not None:
+            # Tide Chart. NO VAR: the number is computed inline from the
+            # queue (see `plans_held_draw_rider`), and declaring a `CardsVar`
+            # that nothing reads would leave "Cards" claimed -- which is
+            # exactly the collision `upgrade_plan` refuses an `add: draw`
+            # over, and this row rules one.
+            pass
         elif op == "draw":
             out.append(f'new CardsVar({int(eff["amount"])})')
         elif op == "discard" and plain_discard_upgrade(card):
@@ -5232,7 +5273,15 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                     "gain_encore, block or chosen discard effect, or a "
                     "repeat_this, is expressible)")
             if added_op == "draw" and any(
-                    e.get("op") == "draw" for e in everywhere):
+                    e.get("op") == "draw"
+                    # A FORMULA-DRIVEN DRAW CLAIMS NO `Cards` VAR (Tide Chart,
+                    # the tempo shelf), so there is nothing for the appended
+                    # one to collide WITH -- the var emitter skips it and the
+                    # count is resolved inline. The rule above is named for
+                    # the collision and not for the op, so this is the rule
+                    # applied rather than an exception carved out of it.
+                    and plans_held_draw_rider(card, e) is None
+                    for e in everywhere):
                 return {}, "delta 'add: draw' on a card with an existing draw (Cards var collision)"
             if added_op != "repeat_this" and any(
                     e.get("op") == "conditional" and any(
@@ -6584,6 +6633,13 @@ def build_body(
             )
 
         elif op == "draw":
+            plans_rider = plans_held_draw_rider(card, eff)
+            if plans_rider is not None:
+                base, per, count_cs = plans_rider
+                lines.append(
+                    "await CardPileCmd.Draw(choiceContext, "
+                    f"{base} + {per} * {count_cs}, Owner);")
+                continue
             amount = (str(int(eff["amount"])) if _is_sly_branch(card)
                       else "DynamicVars.Cards.BaseValue")
             if salon_calc_rider(card, eff) is not None:

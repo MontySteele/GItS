@@ -751,11 +751,13 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
     "proto_kk_slack_water",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). Twenty-eight rows since
-# `EB-335`: 13 Common, 10 Uncommon, 5 Rare, in the packet's own order -- the
-# Tactician, the Priestess, the Commander, then the currencies and the one
-# replay. The two newest are R246 pick 2's defensive pair, filed with the
-# Priestess because that is the plan they answer for.
+# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). THIRTY rows since the tempo
+# shelf: 15 Common, 10 Uncommon, 5 Rare, in the packet's own order -- the
+# Tactician, the Priestess, the Commander, then the currencies, the one replay,
+# and the tempo shelf. `EB-335` filed R246 pick 2's defensive pair with the
+# Priestess because that is the plan they answer for; round 9 pick 1's rows are
+# last, in the sheet's order. THE SHELF IS TWO AND NOT FOUR: Held Tide and
+# Tidal Rhythm were withdrawn on the R253 charter audit and are not built.
 # `_pool_substitutions` cannot express this (it is a one-for-one map and this
 # is "her pool is these and nothing else"), so `loader.pool_replacement` is its
 # sibling seam, read at the same single door.
@@ -792,6 +794,14 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_salt_line",
     "proto_kk_battle_plan",
     "proto_kk_moons_reflection",
+    # THE TEMPO SHELF (round 9 pick 1 at its default, 2026-09-04). Two rows
+    # keyed to the Bake-Kurage that let a Plan be held or hurried -- the arm's
+    # empty shelf, which round 9 read as thirty rows at a flat cost with no
+    # energy gain and nothing that Retains. LAST, in the sheet's own order,
+    # because `tools/lint_arm_pool_parity.py` compares this tuple to
+    # `KokomiOverhaulRoster.Slice()` and to the sheet BY ORDER.
+    "proto_kk_tide_chart",
+    "proto_kk_ripple",
 )
 
 # THE ONE INSTRUMENT DIAL THIS ARM ADDS, AND IT IS NOT A BALANCE NUMBER

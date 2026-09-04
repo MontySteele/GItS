@@ -7,10 +7,14 @@
   },
   "generated": [
     "proto_fr_curtain_call",
+    "proto_fr_dramatic_entrance",
     "proto_fr_exit_stage_left",
+    "proto_fr_flood_of_emotion",
+    "proto_fr_florid_cadenza",
     "proto_fr_intermission",
     "proto_fr_let_the_people_rejoice",
     "proto_fr_salon_debut_named",
+    "proto_fr_universal_revelry",
     "proto_hold_the_line_spark",
     "proto_itto_superlative_superstrength_either",
     "proto_itto_superlative_superstrength_priced",
@@ -29,6 +33,7 @@
     "proto_kk_nereids_ascension",
     "proto_kk_rally",
     "proto_kk_read_the_field",
+    "proto_kk_ripple",
     "proto_kk_salt_line",
     "proto_kk_sango_isshin",
     "proto_kk_sea_salt_prayer",
@@ -40,6 +45,7 @@
     "proto_kk_the_generals_banner",
     "proto_kk_the_moon_a_ship",
     "proto_kk_the_moon_overlooks_the_waters",
+    "proto_kk_tide_chart",
     "proto_kk_tide_wall",
     "proto_kk_treatise",
     "proto_kk_undertow",
@@ -177,10 +183,14 @@
   ],
   "owners": {
     "proto_fr_curtain_call": "furina",
+    "proto_fr_dramatic_entrance": "furina",
     "proto_fr_exit_stage_left": "furina",
+    "proto_fr_flood_of_emotion": "furina",
+    "proto_fr_florid_cadenza": "furina",
     "proto_fr_intermission": "furina",
     "proto_fr_let_the_people_rejoice": "furina",
     "proto_fr_salon_debut_named": "furina",
+    "proto_fr_universal_revelry": "furina",
     "proto_hold_the_line_spark": "klee",
     "proto_itto_superlative_superstrength_either": "klee",
     "proto_itto_superlative_superstrength_priced": "klee",
@@ -199,6 +209,7 @@
     "proto_kk_nereids_ascension": "kokomi",
     "proto_kk_rally": "kokomi",
     "proto_kk_read_the_field": "kokomi",
+    "proto_kk_ripple": "kokomi",
     "proto_kk_salt_line": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
     "proto_kk_sea_salt_prayer": "kokomi",
@@ -210,6 +221,7 @@
     "proto_kk_the_generals_banner": "kokomi",
     "proto_kk_the_moon_a_ship": "kokomi",
     "proto_kk_the_moon_overlooks_the_waters": "kokomi",
+    "proto_kk_tide_chart": "kokomi",
     "proto_kk_tide_wall": "kokomi",
     "proto_kk_treatise": "kokomi",
     "proto_kk_undertow": "kokomi",
@@ -371,8 +383,17 @@
     "proto_fr_curtain_call": {
       "encore_cost": -1
     },
+    "proto_fr_dramatic_entrance": {
+      "damage": 3
+    },
     "proto_fr_exit_stage_left": {
       "encore_cost": -1
+    },
+    "proto_fr_flood_of_emotion": {
+      "damage": 3
+    },
+    "proto_fr_florid_cadenza": {
+      "condition": "unconditional"
     },
     "proto_fr_intermission": {
       "retain": true
@@ -385,6 +406,9 @@
         "op": "gain_encore",
         "amount": 2
       }
+    },
+    "proto_fr_universal_revelry": {
+      "damage": 3
     },
     "proto_kk_ambush": {
       "plan_damage": 3
@@ -434,6 +458,9 @@
       "block": 3,
       "plan_block": 3
     },
+    "proto_kk_ripple": {
+      "plan_block": 3
+    },
     "proto_kk_salt_line": {
       "block": 3
     },
@@ -471,6 +498,12 @@
     },
     "proto_kk_the_moon_overlooks_the_waters": {
       "cost": -1
+    },
+    "proto_kk_tide_chart": {
+      "add": {
+        "op": "draw",
+        "amount": 1
+      }
     },
     "proto_kk_tide_wall": {
       "block": 2,

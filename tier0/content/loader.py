@@ -18,6 +18,7 @@ from tier0.content import enchantments
 from tier0.content import local_reference
 from tier0.content import upgrades
 from tier0.engine import companion_standins
+from tier0.engine import furina_reframe
 from tier0.engine import state as state_mod
 from tier0.engine.state import Card, Enemy, Player, sly_riders
 
@@ -1234,7 +1235,37 @@ def _pool_substitutions(spec: dict) -> dict[str, str]:
         return {C.KURAGE_MEMORY_POOL_DROP: C.KURAGE_MEMORY_POOL_ADD}
     if character == "klee" and C.SPARK_ALT_COST_ENABLED:
         return dict(C.SPARK_ALT_POOL_SUBS)
+    if (character == furina_reframe.CHARACTER
+            and furina_reframe.FURINA_REFRAME):
+        # THE THIRD ARM (round 2 pick 1 at its default, 2026-09-04), and it is
+        # the Kurage's Oath case exactly: four shipped rows print a Fanfare bar
+        # this arm's meter cannot reach, so under the arm the shipped id leaves
+        # the pool and the prototype takes its slot at the same rarity. The
+        # flag is the module's, not `constants.py`'s, for the reason
+        # `furina_reframe`'s own header gives -- a reframe flag is quarantined
+        # machinery and must not reach the constant census.
+        return dict(furina_reframe.POOL_SUBS)
     return {}
+
+
+def declared_pool_substitutions() -> dict[str, str]:
+    """Every arm's `{shipped id: prototype id}` map, FLAGS IGNORED.
+
+    `_pool_substitutions` answers "what does this run swap"; this answers "what
+    id is a pool substitution at all", which is a schema question and therefore
+    flag-blind. Its one caller is `companion_standins.validate_row`, which has
+    to tell the surface's TWO meanings of `replaces:` apart: a stand-in (handed
+    to one character in place of a Universal, and carrying a `personal_pool:`)
+    from a pool substitution (swapped in at the offer door for everybody
+    playing the arm, and carrying none).
+
+    Derived from the same three maps the branch above reads, so an arm cannot
+    have a substitution here that the run does not make, or the reverse.
+    """
+    subs: dict[str, str] = dict(C.SPARK_ALT_POOL_SUBS)
+    subs[C.KURAGE_MEMORY_POOL_DROP] = C.KURAGE_MEMORY_POOL_ADD
+    subs.update(furina_reframe.POOL_SUBS)
+    return subs
 
 
 def pool_substitutions(character_id: str) -> dict[str, str]:

@@ -37,10 +37,14 @@ public static class PrototypeRoster
         new()
         {
             ModelDb.Card<ProtoFrCurtainCall>(),
+            ModelDb.Card<ProtoFrDramaticEntrance>(),
             ModelDb.Card<ProtoFrExitStageLeft>(),
+            ModelDb.Card<ProtoFrFloodOfEmotion>(),
+            ModelDb.Card<ProtoFrFloridCadenza>(),
             ModelDb.Card<ProtoFrIntermission>(),
             ModelDb.Card<ProtoFrLetThePeopleRejoice>(),
             ModelDb.Card<ProtoFrSalonDebutNamed>(),
+            ModelDb.Card<ProtoFrUniversalRevelry>(),
         };
 
     private static List<CardModel> BuildKlee() =>
@@ -204,6 +208,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkNereidsAscension>(),
             ModelDb.Card<ProtoKkRally>(),
             ModelDb.Card<ProtoKkReadTheField>(),
+            ModelDb.Card<ProtoKkRipple>(),
             ModelDb.Card<ProtoKkSaltLine>(),
             ModelDb.Card<ProtoKkSangoIsshin>(),
             ModelDb.Card<ProtoKkSeaSaltPrayer>(),
@@ -215,6 +220,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkTheGeneralsBanner>(),
             ModelDb.Card<ProtoKkTheMoonAShip>(),
             ModelDb.Card<ProtoKkTheMoonOverlooksTheWaters>(),
+            ModelDb.Card<ProtoKkTideChart>(),
             ModelDb.Card<ProtoKkTideWall>(),
             ModelDb.Card<ProtoKkTreatise>(),
             ModelDb.Card<ProtoKkUndertow>(),
