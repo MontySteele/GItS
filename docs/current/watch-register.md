@@ -49,9 +49,10 @@
   and Limb B does not fire. The severity indicator is QUIET — `p50` 0 reads per
   turn, and the pulse floor the slate was drafted against does not exist at this
   cell (`KURAGE_ALWAYS_ON` is read only under the quarantined `KURAGE_MEMORY`).
-  **`X9` is back with [USER] as QUEUE `M69`**, a numbered pick and nothing else:
-  the read nerfs, caps, dedupes and budgets nothing (packet §9; `EB-78` closed
-  on it).
+  Re-read 2026-09-04 after `EB-242` (`x9read-reread-2026-09-04.md`): Limb A
+  51.76%, still QUIET. **Ruled R255 (M69 pick 1): R188 stands, no read budget;
+  the trigger is discharged** and the instrument stays inert. Nothing was
+  nerfed, capped, deduped or budgeted (packet §9; `EB-78` closed on it).
 
 (Migrated from the retired watch-items docket, frozen at tag
 `pre-simplification-2026-08-06`; `W5` added 2026-08-10, `W6`–`W8` at `EB-69`

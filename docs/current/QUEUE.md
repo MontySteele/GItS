@@ -43,7 +43,6 @@ band and protocol are drafted fresh when the overhaul reaches Balance.
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `M69` | **Ask:** rule on `X9` — `W9` FIRED on Limb A: repeatable readers are **58.91%** of completed-turn reads (**51.68%** without `EB-242`'s pilot reads), both over R188's 50%. Severity QUIET (`p50` 0). **Pick:** (1) R188 STANDS, no read budget; (2) re-read after `EB-242`, then rule — **default**; (3) open a dedupe/cap options packet. **Gate:** `EB-242` for (2) | OPEN — the graded read is in | R188; R233; `charge-reads-per-turn-registration-2026-08-13.md` §5.4, §9 |
 
 ## 2. Shop, pricing, and money
 

@@ -171,7 +171,7 @@ RETIRED: dict[str, frozenset[int]] = {
         (301, 315), (319, 320), 322, 327, 343, 354, 358, 362, (364, 368),
         (376, 386),
     ),
-    "M": _spans((1, 12), (14, 25), (27, 68)),
+    "M": _spans((1, 12), (14, 25), (27, 69)),
 }
 
 # The irregular half of the same record. These ids carry no arithmetic, so

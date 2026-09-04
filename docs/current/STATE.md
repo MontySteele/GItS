@@ -243,4 +243,4 @@ Every open row is in [`QUEUE.md`](QUEUE.md) and owned by [USER] — `M69` and
 the art eyes-on pile (R250 closed `S4-G6`, `S4-G14` and `M45` as overtaken); the text-conventions
 proposal is ruled (R249, `review/ruled/text-conventions-shipped-2026-09-02.md`;
 builds `EB-345`, `EB-346`). The nine blessed mechanisms are in [`watch-register.md`](watch-register.md):
-`W9` has FIRED and is back with [USER] as `M69`, the other eight are dormant.
+`W9` fired, was re-read and ruled R255 (R188 stands, no budget); all nine are dormant.

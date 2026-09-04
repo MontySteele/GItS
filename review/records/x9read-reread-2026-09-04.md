@@ -61,3 +61,8 @@ the arm no longer runs.
    being replaced.
 3. **Re-read once more when the Plan arm reaches Balance**, against the
    arm's own reads, and rule then. Keeps M69 open with a stated trigger.
+
+## 5. Ruled
+
+R255, 2026-09-04: pick 1. R188 stands, no read budget; M69 closed. [USER]'s
+words are in the ruling commit.
