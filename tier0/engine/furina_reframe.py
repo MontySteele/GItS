@@ -111,6 +111,36 @@ SPOTLIGHT_DESIGNATE_ENCORE_COST = 2
 
 
 # ----------------------------------------------------------------------
+# THE POOL SEAM (round 2 pick 1 at its default, 2026-09-04). `{shipped id:
+# prototype id}`, read by `loader._pool_substitutions` under `FURINA_REFRAME`
+# and nowhere else -- the Kurage's Oath shape, one for one and at the SAME
+# rarity, so the offer odds do not move (`rewards.character_pool` refuses a
+# substitution that would change a card's tier).
+#
+# WHY THESE FOUR AND WHY A SWAP RATHER THAN A SHEET EDIT. The arm mints Fanfare
+# by performance only, 2 per trigger and 5 per Evoke, and across three rounds
+# the meter ranged 0 to 15 -- while the four shipped riders that GATE on it ask
+# 12, 12, 15 and 20. Two of them can essentially never pay under the arm. The
+# shipped sheet is Balance-stage content and does not move for a prototype arm
+# (R213 B), so the copies are prototype rows and the arm swaps them in at the
+# one offer door. WITH THE FLAG OFF this map is unread, `_pool_substitutions`
+# returns `{}` for Furina exactly as before, and no surface can see a
+# `proto_fr_` id -- which is the acceptance condition, pinned by test.
+#
+# THE MAP MIRRORS THE SHEET'S OWN `replaces:` KEY, and
+# `tier0/tests/test_furina_reframe_pool.py` compares the two in both
+# directions, so a fifth copy on the surface that nobody named here is a red
+# test rather than a row that is never offered.
+# ----------------------------------------------------------------------
+POOL_SUBS: dict[str, str] = {
+    "florid_cadenza": "proto_fr_florid_cadenza",        # 12 -> 6,  uncommon
+    "dramatic_entrance": "proto_fr_dramatic_entrance",  # 12 -> 6,  uncommon
+    "universal_revelry": "proto_fr_universal_revelry",  # 15 -> 8,  rare
+    "flood_of_emotion": "proto_fr_flood_of_emotion",    # 20 -> 10, rare
+}
+
+
+# ----------------------------------------------------------------------
 # The readers. Functions rather than module constants at the call sites, so a
 # test can flip a flag with `monkeypatch.setattr` and every branch sees it.
 # ----------------------------------------------------------------------

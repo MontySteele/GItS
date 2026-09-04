@@ -147,66 +147,6 @@ public class DefenceShelfTests
         Assert.Contains(play, c => c.EndsWith("get_IntValue"));
     }
 
-    // ---- Safety Lesson ---------------------------------------------------
-
-    [Fact]
-    public void Safety_lesson_listens_on_the_explosion_bus()
-    {
-        // "Whenever one of your Bombs goes off" has to mean the EXPLOSION and
-        // not the card, under rule 2: one Set off on a three-Bomb pile is
-        // three explosions, so it is three payouts -- exactly as rule 4's
-        // Spark and Chained Reactions are. The interface is what puts it on
-        // that bus, and `NotifyExplosionListeners` is what walks it.
-        Assert.True(typeof(IProtoExplosionListener)
-                        .IsAssignableFrom(typeof(SafetyLessonPower)));
-        Assert.Contains(Il.Calls(Il.Method("ProtoBombPower",
-                                           "NotifyExplosionListeners")),
-                        c => c.Contains("OnBombExploded"));
-    }
-
-    [Fact]
-    public void Safety_lesson_pays_unpowered_block_and_only_for_its_own_bombs()
-    {
-        // STRUCTURAL (the payout is a command). Two facts: the Block is
-        // UNPOWERED, `GroundedPower`'s own argument -- it is a POWER's Block,
-        // so no Dexterity feeds it and no Frail bites it -- and the hook is
-        // R205-scoped, so a co-op partner's Bomb pays nobody here.
-        var pay = Il.Calls(Il.Method("SafetyLessonPower", "OnBombExploded"));
-
-        Assert.Contains(pay, c => c.StartsWith("CreatureCmd.GainBlock"));
-        Assert.DoesNotContain(pay, c => c.StartsWith("PowerCmd.Remove"));
-        Assert.Contains(pay, c => c.Contains("get_Owner"));
-    }
-
-    [Fact]
-    public void Safety_lesson_cannot_be_paid_by_the_splash()
-    {
-        // THE ROW'S LOAD-BEARING NEGATIVE, and R250's cost kept. Sparks 'n'
-        // Splash reads the pile and spends no charge, so it is not a Set off:
-        // it never calls `Explode` and never reaches the bus this power sits
-        // on. A growth deck therefore cannot turn a Power that asks for no
-        // decision into free Block every turn. Sim twin:
-        // `test_safety_lesson_pays_nothing_under_the_splash`.
-        var echo = Il.Calls(Il.Method("BombEchoPower", "BeforeSideTurnEnd"));
-
-        Assert.Contains("ProtoBombPower.LargestPlacedBy", echo);
-        Assert.DoesNotContain(echo, c => c.Contains("Explode"));
-        Assert.DoesNotContain(echo, c => c.Contains("NotifyExplosionListeners"));
-        Assert.DoesNotContain(echo, c => c.Contains("OnBombExploded"));
-    }
-
-    [Fact]
-    public void Safety_lessons_badge_prints_the_block_it_pays()
-    {
-        // The stacks ARE the Block, so the badge's `{Amount}` is the number
-        // the rider grants and the row's `power_amount` delta moves it.
-        var row = Row<SafetyLessonPower>("description");
-
-        Assert.Contains("{Amount}", row);
-        Assert.Contains("[gold]Block[/gold]", row);
-        Assert.Contains("goes off", row);
-    }
-
     // ---- Barbara, Front Row Seat ----------------------------------------
 
     [Fact]
@@ -267,34 +207,18 @@ public class DefenceShelfTests
     [Fact]
     public void No_row_on_the_shelf_is_a_plain_block()
     {
-        // THE PACKET'S SCOPE STATEMENT, made mechanical: every one of the four
-        // Klee rows names the Bomb state on its own face, so none of them is
-        // the unconditional Block the arm deliberately does not have (Dig In
-        // is that, and it is a Spark sink priced for it).
+        // THE PACKET'S SCOPE STATEMENT, made mechanical: every Klee row on the
+        // shelf names the Bomb state on its own face, so none of them is the
+        // unconditional Block the arm deliberately does not have (Dig In is
+        // that, and it is a Spark sink priced for it). TWO since the R253
+        // charter audit withdrew Fire Safety and Safety Lesson.
         foreach (var card in new CardModel[]
                  {
                      new ProtoKoDodocoCover(), new ProtoKoCarefulNow(),
-                     new ProtoKoFireSafety(), new ProtoKoSafetyLesson(),
                  })
         {
             Assert.Contains("Bomb", Face(card));
         }
-    }
-
-    [Fact]
-    public void Fire_safety_reads_the_bombs_reaction_and_upgrades_both_halves()
-    {
-        // Run Away!'s shape on the React loop: the ledger's own
-        // `ReactedThisTurn`, which counts a BOMB's reaction and not the
-        // engine's every-reaction counter. `EB-140`'s branch delta moves the
-        // rider, and the face prints the swap beside it -- the half an
-        // authored face had no clause for until this row.
-        var card = new ProtoKoFireSafety();
-        var play = Il.Calls(Il.Method("ProtoKoFireSafety", "OnPlay"));
-
-        Assert.Contains("KleeOverhaulLedger.get_ReactedThisTurn", play);
-        Assert.Contains("{Block:diff()}", Face(card));
-        Assert.Contains("{IfUpgraded:show:8|6}", Face(card));
     }
 
     [Fact]

@@ -2,6 +2,13 @@ Status: OPEN (no pick; the defaults in §5 are applied)
 
 # Klee round ten: the defence shelf read, and the two pre-roster runs beside it
 
+**Read after the fact (R253, 2026-09-04):** the shelf these six runs were
+offered had five rows. The charter audit of the same day
+(`review/records/card-audit-2026-09-04.md`) withdrew Fire Safety and Safety
+Lesson, so the shelf on the surface is Dodoco Cover, Careful Now and
+Barbara — Front Row Seat. Nothing below is rewritten; where a run played one
+of the two withdrawn rows the record says so and stands as a record.
+
 No pick. Everything is a default, applied and disclosed in §5.
 
 Written 2026-09-04, evening. Six Opus runs on the round-10 build, two of

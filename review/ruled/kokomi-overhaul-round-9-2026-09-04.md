@@ -1,4 +1,4 @@
-Status: OPEN (pick 1 in §6; the defaults in §5 are applied)
+Status: RULED R253 2026-09-04
 
 # Kokomi round nine: two runs on R250's rules, and the shelf the pool leaves empty
 

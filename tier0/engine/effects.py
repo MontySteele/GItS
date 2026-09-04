@@ -357,6 +357,18 @@ def _runtime_count(state: CombatState, token: str,
         # handover (`kokomi_plan.roll_turn`), so this reads the one count
         # rather than minting a second.
         return state.companion_plays_this_turn
+    if token == "plans_held":
+        # QUARANTINED USE ONLY (Kokomi round 9 pick 1, the tempo shelf) --
+        # Tide Chart, "draw 1 card for each Plan the Bake-Kurage holds".
+        #
+        # THE QUEUE ITSELF, and it has to be: "holds" means WRITTEN and not yet
+        # carried out, which is `kk_plan_queue` and nothing else.
+        # `kk_plans_this_morning` is the depth of the morning just drained --
+        # the number Tide Wall reads -- so a card played after the drain would
+        # find yesterday's plans there and pay for cards the jellyfish no
+        # longer holds. The C# twin is `KokomiPlan.PlansHeld`, the length of
+        # the same queue read at the same moment.
+        return len(state.kk_plan_queue)
     if token == "swirls_this_turn":
         # Heizou's Heartstopper Strike: "4 more for each Swirl this turn".
         return state.mi_swirls_this_turn
@@ -1596,6 +1608,14 @@ def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
         # pass-4 grammar widening did exactly that and broke every fight
         # that played the card (caught by the R84 roster re-run).
         n = sum(1 for e in state.living_enemies if e.aura)
+    elif isinstance(fx.get("amount_formula"), dict):
+        # Tide Chart: `{base: 0, per: 1, count: plans_held}`. THE SAME
+        # `_calc_amount` GRAMMAR `damage` and `block` already carry, and it is
+        # widened here rather than approximated on the row: a draw priced off a
+        # live count has no other spelling (`amount:` takes a bare count token
+        # and cannot carry a base or a per), and the two grammars were separate
+        # only by accident of which op needed a live number first.
+        n = _calc_amount(state, fx["amount_formula"], card)
     else:
         n = _amount(state, fx.get("amount"))
     if state.salon_replacements_this_card:
@@ -3443,6 +3463,12 @@ RUNTIME_COUNT_NAMES = frozenset({
     # QUARANTINED USE ONLY (R250) -- the Kokomi overhaul's Chain of Command,
     # the now-line twin of the Plan clause's `damage_per_companion_last_turn`.
     "companions_played_this_turn",
+    # QUARANTINED USE ONLY -- the Kokomi overhaul's tempo shelf, Tide Chart's
+    # "for each Plan the Bake-Kurage holds". Registered here as well as
+    # resolved in `_runtime_count` for this registry's own reason: the loader
+    # validates every count token at LOAD off this set, so a token only the
+    # resolver knows is a card that raises the first time it is played.
+    "plans_held",
     # QUARANTINED USE ONLY (R213 B) -- the FURINA REFRAME's drain slice. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.

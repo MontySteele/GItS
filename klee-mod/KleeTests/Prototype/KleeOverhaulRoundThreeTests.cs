@@ -59,15 +59,17 @@ public class KleeOverhaulRoundThreeTests
         // `review/ruled/klee-hexerei-readers-2026-09-02.md` adds Klee's three
         // Hexerei readers as a SECOND slice, which is why the count moved
         // without anything in draft 4 being redrafted.
-        // THIRTY-FIVE SINCE R252, the defence shelf's four -- and the number
-        // moved LATE, because R252 shipped those rows to the sheet, the sim,
-        // the codegen and the powers and not to `Slice`. A count is the wrong
-        // shape of pin for that: it goes red only if somebody remembers to
-        // raise it, which is the same act they forgot. The gate that names the
-        // missing row is `tools/lint_arm_pool_parity.py`; this stays as the
-        // shape assertion beside it.
+        // THIRTY-THREE SINCE R252, whose defence shelf drafted four rows and
+        // kept two: the charter audit withdrew Fire Safety and Safety Lesson,
+        // and they are on no surface. The count moved LATE the first time,
+        // because R252 shipped those rows to the sheet, the sim, the codegen
+        // and the powers and not to `Slice`. A count is the wrong shape of pin
+        // for that: it goes red only if somebody remembers to raise it, which
+        // is the same act they forgot. The gate that names the missing row is
+        // `tools/lint_arm_pool_parity.py`; this stays as the shape assertion
+        // beside it.
         var slice = Cards("KleeOverhaulRoster", "Slice");
-        Assert.Equal(35, slice.Count);
+        Assert.Equal(33, slice.Count);
         Assert.Contains(slice, c => c.Contains("ProtoKoDigIn"));
         Assert.Contains(slice, c => c.Contains("ProtoKoPop"));
         // OFFERABLE means not Basic: a Basic row cannot be rolled.

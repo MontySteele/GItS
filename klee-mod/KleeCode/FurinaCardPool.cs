@@ -31,8 +31,28 @@ public sealed class FurinaCardPool : CardPoolModel
     protected override IEnumerable<CardModel> FilterThroughEpochs(
         UnlockState unlockState, IEnumerable<CardModel> cards)
     {
-        return base.FilterThroughEpochs(unlockState, cards)
+        var offered = base.FilterThroughEpochs(unlockState, cards)
             .Where(card => !FurinaOffPoolCards.Ids.Contains(card.Id));
+#if PROTOTYPE_CARDS
+        // QUARANTINED, THE FURINA REFRAME'S ONE POOL SEAM (round 2 pick 1 at
+        // its default, 2026-09-04). Sim twin
+        // `tier0.content.loader._pool_substitutions`, read at the one door
+        // `tier05.rewards.character_pool` already reads.
+        //
+        // THE SAME PLACE KOKOMI'S OATH SWAP SITS, and for the same reason:
+        // this method feeds GetUnlockedCards, which is the SOLE path into
+        // reward rolls, the shop and card transforms, so a substitution made
+        // here reaches every surface that can offer her a card and no list of
+        // surfaces has to be kept in step. Four shipped rows gate on a Fanfare
+        // bar (12, 12, 15 and 20) that this arm's performance-only meter does
+        // not reach; the arm's copies read 6, 6, 8 and 10 at the same
+        // rarities, so the offer odds are untouched.
+        //
+        // With `FurinaReframe.Enabled` off this returns `offered` unchanged,
+        // which the method checks itself rather than leaving to this call.
+        offered = Powers.FurinaReframeRoster.SwapOfferedRiders(offered);
+#endif
+        return offered;
     }
 
     // RosterAncientCards.Furina: visible (Dusty Tome draws from

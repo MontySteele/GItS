@@ -2216,11 +2216,6 @@ to the Bomb state and none is a plain Block:
   The bigger the bomb she is cooking, the more carefully she stands; the cap
   keeps it from making Grounded a stall. The `block_largest_bomb` op reads
   `klee_overhaul.largest_size`, the Splash's own reader since R250.
-- **Fire Safety** (Common, 0): Run Away!'s shape on the React loop, paid
-  when a Bomb reacted this turn (`bomb_reacted_this_turn`).
-- **Safety Lesson** (Uncommon Power): Spray's Grounded, Block per Bomb going
-  off. It pays nothing under the Splash, which does not Set off, so the
-  Splash keeps its R250 cost.
 - **Barbara — Front Row Seat** (stand-in for Let the Show Begin♪): the
   fourth grown-up, Hydro applied twice so Klee's own Pyro does not eat it
   (round 8's Diona finding), Block per Bomb this turn. Same shape as Diona's
@@ -2229,13 +2224,49 @@ to the Bomb state and none is a plain Block:
 Numbers are Prototype numbers, D by the ladder; the seats read them on
 round 10 before [USER] does.
 
-ONE UPGRADE KEY WAS RESPELLED WHEN THE ROWS WERE BUILT, and only the key.
-Fire Safety was drafted `{block: +2, conditional_block: +2}` and ships
-`{conditional_block: +2}`, because `conditional_block` bumps EVERY printed
-Block on a row and not only the branch one (`upgrades.apply_upgrade`, and
-`docs/klee-upgrades.yaml`'s `hold_the_line` says so in its own comment:
-"5->8 top level AND 6->9 in the branch"). The drafted pair would have moved
-the top-level 3 twice, to 7, which is not what a row stating two `+2`s says.
-The one key moves both printed numbers by exactly 2 -- 3 to 5, 6 to 8 -- which
-is the drafted intent, and both engines now do it. Nothing else on any of the
-five rows moved: no name, no cost, no number and no face.
+TWO OF THE FIVE ARE WITHDRAWN on the R253 charter audit and are on no
+surface, in no roster and in no engine: Fire Safety (Common, 0 -- Run Away!'s
+shape on the React loop) and Safety Lesson (Uncommon Power -- Spray's
+Grounded, Block per Bomb going off). The shelf ships as three. The
+`bomb_reacted_this_turn` condition STAYS, because Perfect Timing and Sizzle
+read it too; the `ko_safety_lesson` power was Safety Lesson's alone and is
+deleted with it.
+
+## before proto_kk_tide_chart
+
+The tempo shelf, Kokomi round 9 pick 1 taken at its default (2026-09-04,
+disclosed to [USER] with the pick and unanswered before the build; the
+packet is `review/ruled/kokomi-overhaul-round-9-2026-09-04.md`). The arm
+had thirty rows at a flat cost, no energy gain, two draw cards and nothing
+that Retains, and the seats' dead turns were all dilution with no way to
+hold or hurry a Plan. Every row here is keyed to the Bake-Kurage:
+
+- **Tide Chart** (Common, 0): draw per Plan the Kurage holds, the draw that
+  reads the memory; blank with nothing written, which is the price.
+- **Ripple** (Common, 0): a cheap Plan whose now-line is worth playing (2
+  Block for 0) and whose Plan pays tempo (1 Energy and 4 Block).
+
+TWO OF THE DRAFTED FOUR ARE WITHDRAWN on the R253 charter audit and are not
+on the surface: Held Tide (Uncommon, Retain -- Sango Isshin's condition at
+Common scale) on the owner's "not all agents always win" clause, because
+Retain guarantees the payoff line; and Tidal Rhythm (Uncommon Power, an
+Energy back once a turn when the Kurage carries out) as free repeatable
+Energy. Both were ruled REQUIRES_MODIFICATION; the shelf ships as two.
+
+Numbers are Prototype numbers, D by the ladder; the seats read them on
+Kokomi round 10 before [USER] does.
+
+## before proto_fr_florid_cadenza
+
+The shipped Fanfare riders under the Furina arm, round 2 pick 1 taken at
+its default (2026-09-04, disclosed and unanswered before the build; the
+packet is `review/ruled/furina-reframe-round-2-2026-09-04.md`). The arm
+mints Fanfare by performance only, 2 per trigger and 5 per Evoke, and in
+three rounds Fanfare ranged 0 to 15 while the shipped riders asked 12, 15
+and 20. These four rows are arm-only copies at the arm's scale (12 to 6, 15
+to 8, 20 to 10), swapped in for the shipped ids at the same rarity by the
+pool seam (`loader._pool_substitutions`, the Kurage's Oath shape), so
+nothing on the shipped sheet moves and a run with the arm off is offered
+the shipped card. The `(reframe)` suffix keeps the names unique for the
+lint; the face the player sees is the card's own name.
+

@@ -1,4 +1,4 @@
-Status: OPEN (picks 1 and 2 in §6; the defaults in §5 are applied)
+Status: RULED R253 2026-09-04
 
 # Furina round two: the reframe on its own engine, and the two economies that read wrong
 

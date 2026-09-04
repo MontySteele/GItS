@@ -88,12 +88,6 @@ CHAINED_REACTIONS = "ko_chained_reactions"    # re-Bomb per explosion
 BOMB_ECHO = "ko_bomb_echo"                    # Sparks 'n' Splash's echo
 BOMB_REACTION_SPARK = "ko_bomb_reaction_spark"   # Catalytic Converter
 GROUNDED = "ko_grounded"                      # Block for the quiet turn
-#: R252's Uncommon Power, the defence shelf's Grounded-shaped half: "Whenever
-#: one of your Bombs goes off, gain N Block." Stacks are the BLOCK. It rides
-#: the EXPLOSION bus (`_notify_explosion`) and so pays nothing under Sparks 'n'
-#: Splash, whose echo is not a Set off and mints no explosion -- which is what
-#: keeps the R250 Splash costing what it costs.
-SAFETY_LESSON = "ko_safety_lesson"
 #: R244's Uncommon Power, the coven's second reader: "Whenever you play a
 #: Hexerei card, place a Bomb N on a random enemy." Stacks are the Bomb SIZE,
 #: Chained Reactions' grammar one trigger over -- and the ruling says in as
@@ -507,26 +501,6 @@ def _notify_explosion(state: CombatState, enemy: Enemy, size: int,
     if n and reacted:
         state.emit("ko_catalytic_converter", amount=n)
         effects.gain_sparks(state, n)
-
-    # SAFETY LESSON (R252): "Whenever one of your Bombs goes off, gain N
-    # Block." Grounded's grammar one trigger over, and on the BUS rather than
-    # at a card, so a three-Bomb Set off pays three times exactly as rule 4's
-    # Spark does -- and a Mine answering an enemy attack pays too, because that
-    # is a Bomb going off.
-    #
-    # THE SPLASH PAYS NOTHING, and that is the point of the site rather than an
-    # accident of it: Sparks 'n' Splash's echo reads the pile and spends no
-    # charge, so it reaches neither `_explode` nor this bus (see `turn_end`),
-    # and the R250 echo keeps the cost R250 priced it at.
-    #
-    # UNPOWERED, the argument every power-sourced Block on this arm makes: no
-    # Dexterity feeds it and no Frail bites it, because it is a POWER's Block
-    # and not a card's printed Block (Grounded's `ValueProp.Unpowered`).
-    n = p.powers.get(SAFETY_LESSON, 0)
-    if n:
-        p.block += n
-        state.emit("block", amount=n)
-        state.emit("ko_safety_lesson", amount=n)
 
     # Chained Reactions: "Whenever one of your Bombs goes off, place a Bomb N
     # on a random enemy." Through the same `place` every other source uses, so

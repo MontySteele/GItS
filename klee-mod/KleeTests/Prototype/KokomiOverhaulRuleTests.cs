@@ -754,7 +754,7 @@ public class KokomiOverhaulRuleTests
     // ---- the roster ------------------------------------------------------
 
     [Fact]
-    public void The_starter_is_ten_cards_and_the_pool_is_twenty_eight()
+    public void The_starter_is_ten_cards_and_the_pool_is_thirty()
     {
         // Read off the IL rather than by building the models, which needs
         // ModelDb: `ModelDb.Card<T>()` throws until the game's pool build has
@@ -765,10 +765,46 @@ public class KokomiOverhaulRuleTests
 
         // EB-284 split the pool in two: `Slice` is the packet's rows and
         // `OfferablePool` is that plus the Ancient tail below. TWENTY-EIGHT
-        // since `EB-335` (R246 pick 2) added Tide Wall and Shell Guard.
+        // since `EB-335` (R246 pick 2) added Tide Wall and Shell Guard;
+        // THIRTY since round 9 pick 1's tempo shelf (2026-09-04) added Tide
+        // Chart and Ripple. Its other two drafted rows, Held Tide and Tidal
+        // Rhythm, were withdrawn on the R253 charter audit and are not built.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(28, Il.CallSequence(slice)
+        Assert.Equal(30, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
+    }
+
+    [Fact]
+    public void Plans_held_is_the_pending_queue_and_not_the_morning()
+    {
+        // Tide Chart's count (the tempo shelf, round 9 pick 1). "Holds" is
+        // WRITTEN AND NOT YET CARRIED OUT, so it reads `Pending`; the
+        // ledger's `PlansThisMorning` -- the number Tide Wall reads -- keeps
+        // the drained morning's depth, so a Tide Chart played after the drain
+        // would pay for Plans the jellyfish no longer holds. Sim twin:
+        // `effects._runtime_count`'s `plans_held`, `len(state.kk_plan_queue)`.
+        var calls = Il.Calls(Il.Method("KokomiPlan", "PlansHeld"));
+        Assert.Contains("KokomiPlan.Pending", calls);
+        Assert.DoesNotContain("KokomiOverhaulLedger.get_PlansThisMorning",
+            calls);
+
+        // And the generated row reads THAT and no second definition.
+        Assert.Contains("KokomiPlan.PlansHeld",
+            Il.Calls(Il.Method("ProtoKkTideChart", "OnPlay")));
+    }
+
+    [Fact]
+    public void The_tempo_shelf_is_two_rows_and_builds_no_power()
+    {
+        // Round 9 pick 1 drafted four; the R253 charter audit withdrew Held
+        // Tide and Tidal Rhythm, so neither has a card class and the Power
+        // has no type at all. Asserted rather than assumed -- a withdrawn row
+        // that quietly kept its machinery would be the same defect
+        // `lint_arm_pool_parity` catches from the offer side.
+        var klee = typeof(global::KleeMod.Powers.FurinaResources).Assembly;
+        Assert.DoesNotContain(klee.GetTypes(),
+            t => t.Name is "TidalRhythmPower" or "ProtoKkTidalRhythm"
+                        or "ProtoKkHeldTide");
     }
 
     [Fact]

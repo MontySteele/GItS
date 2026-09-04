@@ -223,6 +223,18 @@ text, a number, a mode — adds its family to that list. `seat grade` and
 family from the blind seat, and this generalises it from who is running to what
 the row records about who wrote it.
 
+**A charter prompt quotes the sheet or it quotes nothing.** The card audit of
+2026-09-04 (`review/records/card-audit-2026-09-04.md`, R253) took four calls
+where two would have done: the first pass compared a Common to Defend, which
+is a basic and no reference (every class's Common block card beats it), and
+the corrected second pass typed two pool rows from memory, one of which does
+not exist. A verdict resting on a false row is discarded and the pass is
+re-run with the YAML's own words, never re-worded to get the answer; the
+reference rows in a charter prompt are pasted from the sheet, and the clause
+names a non-basic card at the same rarity and cost. The doctrine role is the
+role for this read (a proposal against a charter, before a tester sees it);
+the pair role refuses it, correctly, as out of its protocol.
+
 ### Local model as grader (experiment)
 
 A model served on this machine in the grader's chair, so the funnel can keep

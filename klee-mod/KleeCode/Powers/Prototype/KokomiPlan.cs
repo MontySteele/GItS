@@ -258,6 +258,27 @@ public static class KokomiPlan
             : (IReadOnlyList<Entry>)System.Array.Empty<Entry>();
 
     /// <summary>
+    /// HOW MANY PLANS THE JELLYFISH HOLDS RIGHT NOW -- Tide Chart's count
+    /// (the tempo shelf, round 9 pick 1): "draw 1 card for each Plan the
+    /// Bake-Kurage holds".
+    ///
+    /// THE PENDING QUEUE, NOT THE MORNING. "Holds" is what has been WRITTEN
+    /// and not yet carried out, which is <see cref="Pending"/>. The morning's
+    /// own depth is <c>KokomiOverhaulLedger.PlansThisMorning</c> -- the number
+    /// Tide Wall reads -- and it keeps yesterday's value until the next drain,
+    /// so a Tide Chart played after the drain would pay for Plans the
+    /// jellyfish no longer holds. Sim twin: `effects._runtime_count`'s
+    /// `plans_held`, `len(state.kk_plan_queue)` read at the same moment and
+    /// for the same reason.
+    ///
+    /// A CREATURE OVERLOAD because the generated card has a creature at the
+    /// call site, and co-op means the seat matters: this is THIS Kokomi's
+    /// queue and never the other seat's.
+    /// </summary>
+    public static int PlansHeld(Creature? kokomi) =>
+        Pending(kokomi?.Player).Count;
+
+    /// <summary>
     /// WHAT TO DRAW ON THE JELLYFISH RIGHT NOW: the morning's remaining Plans
     /// while one is running, and the pending queue every other moment.
     ///

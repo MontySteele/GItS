@@ -77,7 +77,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # row -- the shape check is the row's owner's, not the row's kind's.
     # SEVENTEEN with `EB-335`'s Tide Wall (R246 pick 2), the first Plan line
     # whose clause multiplies the morning it is carried out in.
-    assert len(planned) == 17
+    # EIGHTEEN with the tempo shelf's Ripple (round 9 pick 1, 2026-09-04),
+    # whose Plan line is the arm's first to pay Energy.
+    assert len(planned) == 18
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -787,6 +789,62 @@ def test_the_bus_pays_the_also_now_resolution_too(overhaul):
     kokomi_plan.roll_turn(st)
     carry_out(st, [{"op": "energy", "amount": 1}])
     assert st.player.block == 6                 # a new turn, a new payout
+
+
+# --- 7b. THE TEMPO SHELF (round 9 pick 1, default applied 2026-09-04) ------
+#
+# TWO ROWS AND NOT FOUR: Held Tide and Tidal Rhythm were withdrawn on the R253
+# charter audit and are not on the surface, so `kk_tidal_rhythm` is not a power
+# this engine knows and nothing on the shelf Retains.
+
+def test_plans_held_is_the_queue_and_not_the_morning(overhaul):
+    """Tide Chart's count. "Holds" is WRITTEN AND NOT YET CARRIED OUT, so it
+    is `kk_plan_queue` -- `kk_plans_this_morning` keeps the drained morning's
+    depth and would pay for Plans the jellyfish no longer holds. The C# twin
+    `KokomiPlan.PlansHeld` reads `Pending` for the same reason."""
+    st = kokomi_state()
+    assert effects._runtime_count(st, "plans_held") == 0
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_a"))
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_b"))
+    assert effects._runtime_count(st, "plans_held") == 2
+    kokomi_plan.resolve_all(st)
+    assert st.kk_plans_this_morning == 2        # the morning, still two
+    assert effects._runtime_count(st, "plans_held") == 0     # held, none
+
+
+def test_tide_chart_draws_one_per_plan_held(overhaul):
+    """The row itself, through the ordinary op chain: `{base: 0, per: 1,
+    count: plans_held}` on a `draw`. Blank with nothing written, which is the
+    price the row is designed around."""
+    st = kokomi_state()
+    st.player.draw_pile = [plan_card([], cid=f"proto_kk_f{i}")
+                           for i in range(6)]
+    card = loader._card_prototype("proto_kk_tide_chart")
+    effects.resolve_card(st, card)
+    assert st.player.hand == []                 # nothing written, nothing drawn
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_a"))
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_b"))
+    effects.resolve_card(st, card)
+    assert len(st.player.hand) == 2
+
+
+def test_ripple_pays_block_now_and_energy_and_block_on_the_plan(overhaul):
+    """A cheap Plan whose now-line is worth playing (2 Block for 0) and whose
+    Plan pays tempo (1 Energy and 4 Block)."""
+    card = loader._card_prototype("proto_kk_ripple")
+    st = kokomi_state()
+    st.player.energy = 0
+    effects.resolve_card(st, card)
+    assert st.player.block == 2
+    st.player.block = 0
+    kokomi_plan.schedule(st, card)
+    kokomi_plan.resolve_all(st)
+    assert st.player.energy == 1
+    assert st.player.block == 4
 
 
 # --- 8. THE TAMAKUSHI CASKET ----------------------------------------------
