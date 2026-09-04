@@ -6555,6 +6555,51 @@ def test_the_page_owns_the_name_a_performance_prints():
     assert "- **Crabaletta** hit Slug (1) for 6 Hydro" in page
 
 
+def two_slug_salon_state(performed: list[dict], dead: str = "") -> dict:
+    """The r5 fight-1 board: two bodies of one name, one optionally off the
+    feed. `Corpse Slug (2)` died on turn 1 and the turn-2 log still had to say
+    which body Crabaletta hit."""
+    state = salon_state(performed)
+    wire = state["battle"]["enemies"][0]
+    wire.update({"name": "Corpse Slug", "combat_id": "1"})
+    second = json.loads(json.dumps(wire))
+    second.update({"entity_id": "999", "combat_id": "2"})
+    state["battle"]["enemies"] = [b for b in (wire, second)
+                                  if b["combat_id"] != dead]
+    return state
+
+
+def test_a_performance_on_a_body_that_has_died_still_names_the_copy():
+    """`EB-424`. The r5 seat read *"Crabaletta hit Corpse Slug (2)"* on turn 1
+    and *"Crabaletta hit Corpse Slug"* on turn 2, and wrote "in a two-of-a-kind
+    fight I could not tell which body it hit". The only difference between the
+    two lines is that the second body was off the board by the time the screen
+    was drawn, so the line fell back to the mod's title -- the game's printed
+    name, which carries no copy number and never can.
+
+    Seen to FAIL before the fight's memory was asked: the assertion below is
+    the seat's turn-2 line, and it printed bare."""
+    blindplay.forget_fight()
+    blindplay.observe(two_slug_salon_state([]))
+    page = blindplay.observe(two_slug_salon_state(
+        [{"member": "Crabaletta", "target": "Corpse Slug", "combat_id": "2",
+          "element": "Hydro", "aura": "Hydro", "amount": 4, "paid": False,
+          "evoked": False}], dead="2"))
+    assert "- **Crabaletta** hit Corpse Slug (2) for 4 Hydro" in page
+
+
+def test_a_performance_on_a_body_this_fight_never_saw_keeps_the_mods_title():
+    """The fallback, unchanged. An id no board of this fight carried is named
+    by the title the mod recorded and never by a number borrowed from some
+    other body."""
+    blindplay.forget_fight()
+    page = blindplay.observe(salon_state(
+        [{"member": "Crabaletta", "target": "Sentry", "combat_id": "77",
+          "element": "Hydro", "aura": "", "amount": 6, "paid": True,
+          "evoked": False}]))
+    assert "- **Crabaletta** hit Sentry for 6 Hydro" in page
+
+
 def test_a_replayed_companion_is_named_beside_the_performances():
     """`EB-420`. Duet plays the next Companion card an extra time and the
     extra play performs nobody -- LAW:145's per-Companion-play bound, which

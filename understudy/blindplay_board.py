@@ -304,14 +304,24 @@ def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],
     numbered name; one the performance KILLED is off the next board entirely
     and keeps the title the mod recorded, which is why the mod sends a title
     at all.
+
+    `EB-424`, AND IT IS `EB-427` ONE ARM OVER. The mod's title is the game's
+    printed name and carries no copy number, so the r5 seat read
+    *"Crabaletta hit Corpse Slug (2)"* on turn 1 and *"Crabaletta hit Corpse
+    Slug"* on turn 2 -- "in a two-of-a-kind fight I could not tell which body
+    it hit" -- for the one reason that the second body was no longer on the
+    board. The fight's own memory names it, so a performance on a duplicate
+    always says which copy.
     """
     by_id = {_text(raw.get("combat_id")): face["name"]
              for raw, face in zip(wire, printed)
              if _text(raw.get("combat_id"))}
     for row in salon["performed"]:
-        named = by_id.get(row["combat_id"])
-        if named:
-            row["target"] = named
+        if not row["combat_id"]:
+            continue
+        row["target"] = (by_id.get(row["combat_id"])
+                         or remembered_enemy_name(row["combat_id"],
+                                                  row["target"]))
 
 
 def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],
