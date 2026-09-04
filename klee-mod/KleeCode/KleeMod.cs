@@ -367,6 +367,9 @@ public static class KleeMod
                     // Cold-Blooded Strike is written against, so the word
                     // reaches a player who may never have drafted it.
                     [Cards.ArmKeywordTips.GroundedKey + ".title"] = "Grounded",
+                    // `EB-446`, Klee's seventh: the raven ANOTHER companion
+                    // card puts out, named on a face that cannot grant him.
+                    [Cards.ArmKeywordTips.OzKey + ".title"] = "Oz",
                     // `EB-418`. The second rider, not a keyword: the Spark her
                     // KIT mints on a play of one of her own Companions, which
                     // LAW:145 keeps off the Companion's own face and which

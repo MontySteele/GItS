@@ -557,6 +557,13 @@ ARM_KEYWORDS = (
     # on the screen saying what it is, and the r9 seat read it as noise in
     # both acts. NO PLURAL: the word names one Power.
     ArmKeyword("Grounded", ("Grounded",), "ArmKeywordTips.ForGrounded"),
+    # Klee's SEVENTH, `EB-446`. `Oz` is a name one companion card is written
+    # against and a DIFFERENT one grants: Fischl -- Nightrider prints "If Oz is
+    # out" and cannot put him out, and the r7 seat played it five times without
+    # learning what does. `Grounded`'s shape exactly -- the attach travels with
+    # the word, so the card that names him carries the definition whether or not
+    # the run ever holds the Power. NO PLURAL: there is one raven.
+    ArmKeyword("Oz", ("Oz",), "ArmKeywordTips.ForOz"),
     # Kokomi's TWO (kokomi-overhaul-slice-1-2026-09-01.md draft 6 sec.2:
     # "Keywords with tooltips: Plan, Mend"). Draft 6 cut Tide, Surge, Exert
     # and Garment as keywords, so their four rows left this table with the

@@ -5030,6 +5030,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Grounded": ["that pays at the start of your turn, but ",
                      "went off last turn. Its ",
                      "card prints what it pays."],
+        # `EB-446`, Klee's seventh: a name Fischl -- Nightrider is written
+        # against and a DIFFERENT companion card grants, so the face that
+        # prints it carries the definition.
+        "Oz": ["Fischl's raven, out while you hold the Power Oz, at Your "
+               "Side. ",
+               "He hits at the end of your turn while he is out."],
         # The Furina reframe's three (slice two, 2026-09-02). The Evoke
         # sentence's two numerals are interpolated from `FurinaReframeLaw` on
         # the mod side and written out on this one, so its anchors are the

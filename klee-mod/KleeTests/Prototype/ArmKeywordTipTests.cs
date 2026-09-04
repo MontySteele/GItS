@@ -325,7 +325,7 @@ public class ArmKeywordTipTests
         // cannot arrive with a different shape by accident.
         var attaches = Attaches().ToList();
 
-        // FOURTEEN: THIRTEEN KEYWORDS AND ONE RIDER. Draft 6 cut Tide, Surge, Exert and the Garment as
+        // SIXTEEN: FOURTEEN KEYWORDS AND TWO RIDERS. Draft 6 cut Tide, Surge, Exert and the Garment as
         // keywords and their four `For*` methods left with the rules they
         // defined, taking the table from eleven to seven; the Furina reframe's
         // slice two put Deploy, Evoke and Drain on it (2026-09-02), and R244
@@ -354,7 +354,12 @@ public class ArmKeywordTipTests
         // of her own Personal Companions, which LAW:145 keeps off the
         // Companion's face and which therefore had no surface at all until the
         // r11 seat reported it as the one number it could not read.
-        Assert.Equal(15, attaches.Count);
+        //
+        // THE SIXTEENTH IS `EB-446`'s `ForOz`, `ForGrounded`'s shape: a name
+        // one companion card is written against and a DIFFERENT one grants, so
+        // the face that prints it carries the definition. The r7 seat played
+        // Fischl -- Nightrider five times without learning what puts Oz out.
+        Assert.Equal(16, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.Contains(attaches, m => m.Name == "ForCovenSpark");
         Assert.All(attaches, m => Assert.Contains(

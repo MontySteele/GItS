@@ -67,6 +67,7 @@ public static class ArmKeywordTips
     public const string MineKey = "KLEEMOD-ARM_MINE";
     public const string HexereiKey = "KLEEMOD-ARM_HEXEREI";
     public const string GroundedKey = "KLEEMOD-ARM_GROUNDED";
+    public const string OzKey = "KLEEMOD-ARM_OZ";
     public const string MendKey = "KLEEMOD-ARM_MEND";
     public const string PlanKey = "KLEEMOD-ARM_PLAN";
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
@@ -381,6 +382,37 @@ public static class ArmKeywordTips
             "A [gold]Companion[/gold] card that prints the word, and Klee "
           + "herself. Some are Klee's own, some are not. Cards of hers pay "
           + "when you play one.");
+
+    /// <summary>
+    /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.
+    ///
+    /// THE GAP. <i>Fischl -- Nightrider</i> prints "If Oz is out, he deals 5
+    /// Electro damage to a random enemy" and nothing on the screen says what
+    /// puts Oz out. The r7 seat played the card five times and never learned
+    /// it: the word reads as an undefined keyword, and the thing it actually
+    /// names is a DIFFERENT companion card -- the Power <i>Fischl -- Oz, at
+    /// Your Side</i> -- which that run never held and may never be offered.
+    ///
+    /// SO THE TIP NAMES THE POWER, which is the one fact the reader is missing
+    /// and cannot derive. `Grounded`'s shape exactly (`EB-372`): a word one
+    /// card is written against, defined on the face that prints it rather than
+    /// on the card that grants it, because the attach travels with the WORD
+    /// (`gen_klee_cards.arm_keyword_tip_calls`) and not with the deck.
+    ///
+    /// WHAT IT LEAVES TO THE CARDS. How much Oz deals and for how long are the
+    /// two faces' own printed numbers, and both move on an upgrade, so the tip
+    /// says what Oz IS and which card puts him out and stops there, the way
+    /// `ForGrounded` defers its payout to the Power card's own line.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForOz(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, OzKey,
+            // A card TITLE is a plain word, never golded
+            // (`docs/current/text-conventions.md`, and the lint bites), and
+            // the title is quoted WITHOUT its `Fischl --` prefix because the
+            // conventions ban a dash of any kind in player text.
+            "Fischl's raven, out while you hold the Power Oz, at Your Side. "
+          + "He hits at the end of your turn while he is out.");
 
     /// <summary>
     /// KLEE'S SIXTH, `EB-372`, AND IT IS A WORD THE KIT NAMES ON A FACE THE
