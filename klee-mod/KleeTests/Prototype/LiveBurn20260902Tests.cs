@@ -87,7 +87,10 @@ public class LiveBurn20260902Tests
         Assert.True(smart.Count >= 4);
         foreach (var (_, face) in smart)
         {
-            Assert.Contains("{Count}", face);
+            // `EB-450` swapped `{Count}` for `{Charges}`. Both are read off
+            // `_charges` in `SyncDisplay` and neither is the stack, which is
+            // the whole of this claim; the list also carries the order.
+            Assert.Contains("{Charges}", face);
             Assert.DoesNotContain("{Amount}", face);
         }
     }

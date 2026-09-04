@@ -142,6 +142,83 @@ public class Round13Tests
     }
 
     // ==================================================================
+    // `EB-450` -- the queue the badge printed as a sum
+    // ==================================================================
+    //
+    // THE FIND (Klee r13 (c) 1). The badge printed `Bomb 45 (4 bombs)` -- a
+    // sum and a count -- while `EB-432`'s Set off tip says the charges go off
+    // oldest first and the FIRST one takes the aura. So on a bombed body
+    // wearing Cryo, WHICH charge Melts was a fact the seat had to remember
+    // placing rather than read, for a whole fight.
+
+    [Fact]
+    public void The_badge_lists_three_charges_in_the_order_they_will_fire()
+    {
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(60).Creature;
+        var pile = ProtoBombs.Place(enemy, klee.Creature,
+            new ProtoBombs.Charge(5));
+        // Through the power's own door, so the display syncs the way it does
+        // in a fight -- `LiveBurn20260902Tests`' reason for the same call.
+        pile.AddCharge(new ProtoBombPower.ProtoCharge(8, false, 0));
+        pile.AddCharge(new ProtoBombPower.ProtoCharge(20, false, 0));
+
+        // PLACEMENT ORDER, which is the order `SetOff` walks and therefore the
+        // order the aura clause is about. Slash-separated: the sentence around
+        // the hole is comma-separated, and a comma list inside it would hide
+        // where the pile stops.
+        Assert.Equal("5 / 8 / 20",
+                     pile.DynamicVars["Charges"].ToString());
+    }
+
+    [Fact]
+    public void The_list_follows_the_pile_and_not_the_stack()
+    {
+        // `EB-289`'s defect, one var over: the takes are PURE (they run inside
+        // a damage hook where no command may), so the stack amount cannot go
+        // down and a face reading it would keep printing a charge that has
+        // already gone off.
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(60).Creature;
+        var pile = ProtoBombs.Place(enemy, klee.Creature,
+            new ProtoBombs.Charge(4, IsMine: true));
+        pile.AddCharge(new ProtoBombPower.ProtoCharge(8, false, 0));
+
+        Assert.Equal("4 / 8", pile.DynamicVars["Charges"].ToString());
+
+        pile.TakeMines();
+
+        Assert.Equal("8", pile.DynamicVars["Charges"].ToString());
+
+        // An emptied pile prints `0` rather than an empty slot: the badge is
+        // torn down with the last charge, and a face caught mid-teardown must
+        // not render "Bombs here: ,".
+        pile.TakeAll();
+        Assert.Equal("0", pile.DynamicVars["Charges"].ToString());
+    }
+
+    [Fact]
+    public void The_face_prints_the_list_where_it_printed_the_count()
+    {
+        // The two live faces, read as rows: a headless pin can read a row and
+        // cannot run `LocManager` (KleeTests README).
+        var pile = ProtoBombs.Place(Seat.Klee(60).Creature,
+                                    Seat.Klee().Creature,
+                                    new ProtoBombs.Charge(5));
+        var rows = pile.Localization!;
+
+        var plain = rows.First(
+            r => r.Item1 == "smartDescription").Item2;
+        var mined = rows.First(
+            r => r.Item1 == "smartDescriptionMines").Item2;
+
+        Assert.Contains("Bombs here: [blue]{Charges}[/blue]", plain);
+        Assert.Contains("Bombs here: [blue]{Charges}[/blue]", mined);
+        Assert.DoesNotContain("{Count}", plain);
+        Assert.DoesNotContain("{Count}", mined);
+    }
+
+    // ==================================================================
     // `EB-455` -- the card that was dead in hand and never said why
     // ==================================================================
     //
