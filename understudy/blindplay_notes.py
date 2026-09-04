@@ -366,8 +366,14 @@ ARM_KEYWORDS: dict[str, str] = {
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
              "only when Set off. Not an Attack: only Vulnerable and a cap "
              "move it. Kills move it on."),
-    "Set off": ("Every Bomb on the target goes off first, one at a time, "
-                "each a Pyro hit for its size."),
+    # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
+    # walks the charges in placement order and the first one through the
+    # funnel meets the aura, because every reaction consumes it -- the r11
+    # run-2 seat got that rule only by arithmetic ("Bombs go off in placement
+    # order, and the first one is the one that eats the Melt"). "Oldest first"
+    # is "one at a time" plus the order, in the same room.
+    "Set off": ("The target's Bombs go off first, oldest first, each a Pyro "
+                "hit for its size. The first takes the aura."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
     # `EB-373`: a Mine IS a Bomb, so the same fold moves it and the same

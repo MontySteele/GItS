@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -78,5 +79,48 @@ public class Round12Tests
             Assert.StartsWith("[gold]Set off[/gold] a random enemy and deal ",
                               face);
         }
+    }
+
+    // ---- EB-432: the order inside the pile -------------------------------
+
+    /// <summary>The `Set off` tip's body, joined out of the method's own
+    /// string literals -- `ArmKeywordTipTests`' idiom, and the headless
+    /// boundary's reason: a `LocString` cannot be resolved without a booted
+    /// game.</summary>
+    private static string SetOffTip() =>
+        string.Concat(Il.Strings(typeof(ArmKeywordTips)
+            .GetMethod("ForSetOff", HeadlessGame.All)!));
+
+    [Fact]
+    public void The_set_off_tip_states_the_placement_order()
+    {
+        // `SetOff` walks the charges `AddCharge` appended, in the order it
+        // appended them ("Charges in placement order"). The r11 run-2 seat
+        // could get that only by arithmetic: "Bombs go off in placement
+        // order, and the first one is the one that eats the Melt -- a rule
+        // nothing printed."
+        Assert.Contains("oldest first", SetOffTip());
+    }
+
+    [Fact]
+    public void The_set_off_tip_says_which_charge_meets_the_aura()
+    {
+        // Every reaction consumes the aura, so the charge that meets it is
+        // the one the walk reaches first. Stated as the aura and not as "only
+        // the first reacts", which a Swirl makes false: that reaction
+        // re-applies what it consumed to every living enemy, the target
+        // included.
+        Assert.Contains("The first takes the aura", SetOffTip());
+        Assert.DoesNotContain("only the first reacts", SetOffTip());
+    }
+
+    [Fact]
+    public void The_pile_is_still_the_subject_of_the_sentence()
+    {
+        // `EB-287`'s claim -- a pile goes off TOGETHER -- was carried by this
+        // tip's old "Every Bomb on the target". It is carried by the new
+        // subject instead, and the round-four pin reads it there.
+        Assert.Contains("The target's [gold]Bombs[/gold] go off first",
+                        SetOffTip());
     }
 }

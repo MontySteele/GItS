@@ -4598,7 +4598,7 @@ def test_an_arm_keyword_prints_one_definition_per_screen():
     assert "## Words on this screen" in page
     assert page.count("- **Set off** ") == 1
     assert page.count("- **Bomb** ") == 1
-    assert "goes off first" in page
+    assert "go off first" in page
 
 
 def test_a_keyword_no_face_on_the_screen_prints_is_never_defined():
@@ -4669,8 +4669,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Bomb": ["A charge on an enemy", "goes off only when",
                  "Not an Attack: only ", " and a cap ",
                  "Kills move it on"],
-        "Set off": ["on the target goes off first, one at a",
-                    "each a Pyro hit for its size"],
+        # `EB-432`: the pile's own order, and which charge meets the aura.
+        "Set off": ["go off first, oldest first, each ",
+                    "a Pyro hit for its size. The first takes the aura."],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
         "Mine": ["that also goes off when its enemy attacks",
                  "before the hit lands",

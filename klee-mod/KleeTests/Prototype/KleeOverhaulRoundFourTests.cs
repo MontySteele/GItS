@@ -275,8 +275,11 @@ public class KleeOverhaulRoundFourTests
             typeof(ArmKeywordTips).GetMethod("ForSetOff", HeadlessGame.All)!));
 
         Assert.DoesNotContain("all at once", bomb);
-        Assert.Contains("Every [gold]Bomb[/gold] on the target goes off "
-                        + "first, one at a time", setOff);
+        // `EB-432` rewrote that sentence and kept the claim: the SUBJECT is
+        // now "the target's Bombs", all of them, and the order they go off in
+        // is printed beside it.
+        Assert.Contains("The target's [gold]Bombs[/gold] go off first, "
+                        + "oldest first", setOff);
     }
 
     [Fact]

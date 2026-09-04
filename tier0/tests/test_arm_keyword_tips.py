@@ -398,8 +398,13 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             " a turn, goes off only when [gold]Set off[/gold]. ",
             "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. ",
             "Kills move it on.",
-            "on the target goes off first, one at a ",
-            "time, each a Pyro hit for its size.",
+            # `EB-432` named the order INSIDE the pile: `SetOff` walks the
+            # charges in placement order and the first one meets the aura,
+            # because a reaction consumes it. "Oldest first" carries "one at a
+            # time" -- an order that names a first and a rest is one at a time
+            # -- and `EB-287`'s "together" claim is now the subject.
+            "The target's [gold]Bombs[/gold] go off first, oldest first, each ",
+            "a Pyro hit for its size. The first takes the aura.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
             "Start each combat with ",
             ". Pounding Surprise grants more. ",

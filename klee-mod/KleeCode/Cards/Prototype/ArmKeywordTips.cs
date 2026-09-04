@@ -168,15 +168,45 @@ public static class ArmKeywordTips
           + "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. "
           + "Kills move it on.");
 
-    /// <summary>Rule 2, and the one [USER] named ("Set Off has no tooltip
-    /// text"). The ORDER clause is the load-bearing half: the explosions land
-    /// BEFORE the rest of the card, which is what makes a cooked pile worth
-    /// more than the Attack printed beside it.</summary>
+    /// <summary>
+    /// Rule 2, and the one [USER] named ("Set Off has no tooltip text"). The
+    /// ORDER clause is the load-bearing half: the explosions land BEFORE the
+    /// rest of the card, which is what makes a cooked pile worth more than the
+    /// Attack printed beside it.
+    ///
+    /// `EB-432` NAMED THE OTHER ORDER, the one INSIDE the pile.
+    /// <see cref="KleeMod.Powers.ProtoBombPower.SetOff"/> walks the taken
+    /// charges in the order
+    /// <see cref="KleeMod.Powers.ProtoBombPower.AddCharge"/> appended them --
+    /// the list's own comment is "Charges in placement order" -- and the FIRST
+    /// one through the funnel is the one that meets the enemy's aura, because
+    /// every reaction consumes it (<c>ReactionEffects</c>, `consumedAura`).
+    /// The r11 run-2 seat priced its best turn of the run off that rule and
+    /// could only get it by arithmetic: "22 = 8 (the Bomb 5, Melted to 8.75 to
+    /// 8) + 8 + 6. Bombs go off in placement order, and the first one is the
+    /// one that eats the Melt -- a rule nothing printed, that I could only
+    /// infer from the arithmetic."
+    ///
+    /// "OLDEST FIRST" REPLACES "ONE AT A TIME" AND LOSES NOTHING. An order
+    /// that names a first and a rest is one at a time by construction, and the
+    /// separateness the old phrase carried -- three charges, three hits, three
+    /// Sparks -- is what "each a Pyro hit" says. `EB-287`'s claim that a pile
+    /// goes off TOGETHER is still here and is now the subject of the sentence:
+    /// "the target's Bombs", all of them.
+    ///
+    /// "THE FIRST TAKES THE AURA" AND NOT "ONLY THE FIRST REACTS", which would
+    /// be false on a board this build really has: a Swirl re-applies the aura
+    /// it consumed to every living enemy, the target included
+    /// (<c>ReactionEffects</c>, the `Swirl` arm), so a charge behind a Swirl
+    /// meets a fresh aura and reacts again. What is true on every board is the
+    /// sentence the player is deciding on: the aura in front of them is spent
+    /// on the OLDEST charge.
+    /// </summary>
     public static IEnumerable<IHoverTip> ForSetOff(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SetOffKey,
-            "Every [gold]Bomb[/gold] on the target goes off first, one at a "
-          + "time, each a Pyro hit for its size.");
+            "The target's [gold]Bombs[/gold] go off first, oldest first, each "
+          + "a Pyro hit for its size. The first takes the aura.");
 
     /// <summary>Rule 4. The gain rate is read from
     /// <see cref="KleeOverhaulLaw.SparkPerExplosion"/>, which is also
