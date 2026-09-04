@@ -2239,3 +2239,39 @@ the top-level 3 twice, to 7, which is not what a row stating two `+2`s says.
 The one key moves both printed numbers by exactly 2 -- 3 to 5, 6 to 8 -- which
 is the drafted intent, and both engines now do it. Nothing else on any of the
 five rows moved: no name, no cost, no number and no face.
+
+## before proto_kk_held_tide
+
+The tempo shelf, Kokomi round 9 pick 1 taken at its default (2026-09-04,
+disclosed to [USER] with the pick and unanswered before the build; the
+packet is `review/active/kokomi-overhaul-round-9-2026-09-04.md`). The arm
+had thirty rows at a flat cost, no energy gain, two draw cards and nothing
+that Retains, and the seats' dead turns were all dilution with no way to
+hold or hurry a Plan. Every row here is keyed to the Bake-Kurage:
+
+- **Held Tide** (Uncommon, Retain): Sango Isshin's condition at Common
+  scale with Retain, so the payoff can wait for the morning it wants.
+- **Tidal Rhythm** (Uncommon Power): an Energy back when the Kurage carries
+  out, once a turn, so a written turn is not a lost turn.
+- **Tide Chart** (Common, 0): draw per Plan the Kurage holds, the draw that
+  reads the memory; blank with nothing written, which is the price.
+- **Ripple** (Common, 0): a cheap Plan whose now-line is worth playing (2
+  Block for 0) and whose Plan pays tempo (1 Energy and 4 Block).
+
+Numbers are Prototype numbers, D by the ladder; the seats read them on
+Kokomi round 10 before [USER] does.
+
+## before proto_fr_florid_cadenza
+
+The shipped Fanfare riders under the Furina arm, round 2 pick 1 taken at
+its default (2026-09-04, disclosed and unanswered before the build; the
+packet is `review/active/furina-reframe-round-2-2026-09-04.md`). The arm
+mints Fanfare by performance only, 2 per trigger and 5 per Evoke, and in
+three rounds Fanfare ranged 0 to 15 while the shipped riders asked 12, 15
+and 20. These four rows are arm-only copies at the arm's scale (12 to 6, 15
+to 8, 20 to 10), swapped in for the shipped ids at the same rarity by the
+pool seam (`loader._pool_substitutions`, the Kurage's Oath shape), so
+nothing on the shipped sheet moves and a run with the arm off is offered
+the shipped card. The `(reframe)` suffix keeps the names unique for the
+lint; the face the player sees is the card's own name.
+
