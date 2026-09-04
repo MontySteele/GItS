@@ -131,8 +131,8 @@ from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
     count_action, FIGHT_OVERLAYS, forget_budget, LANE_ENV, lane_tag,
     MAX_ACTIONS_ENV, read_budget, set_budget,
     HAZARD_EVENT_TITLES, HAZARD_EVENTS, _is_rate_limited,
-    AURA_DURATION_TURNS, BOMB_GROWTH, FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
-    WEAK_DEALT_PCT,
+    AURA_DURATION_TURNS, BOMB_GROWTH, CRYSTALLIZE_BLOCK, FRAIL_BLOCK_PCT,
+    VULNERABLE_TAKEN_PCT, WEAK_DEALT_PCT,
     KURAGE_COST_PER_ENERGY, LOG_ROOT, PLAY_GUARDRAIL, PROMPT_PATH,
     _RATE_LIMIT_MARKERS, RECORD_ROOT, REPO, SeatBudgetExhausted,
     SELECT_SCREENS, SETTLE_DELAY_S, SETTLE_TRIES, UNDRIVEN_SCREENS)
@@ -166,7 +166,7 @@ from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
     HAND_REPEAT_NOTE, keyword_notes, METER_CAPPED_NOTE,
     METER_NOTE, METER_RULES, PLAN_AIM_NOTE, PLAN_HYDRO_NOTE, POWER_NOTE,
     PREVIEW_LOCKED,
-    REACTION_KEYWORDS,
+    REACTION_KEYWORDS, SPREAD_REACTIONS,
     SELECTION_NOTE, TRANSFORM_NOTE, TRANSFORM_UNREADABLE, _wire_keyword_rows)
 from understudy.blindplay_observe import (   # noqa: E402,F401  (re-export)
     observation)

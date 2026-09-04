@@ -6062,6 +6062,60 @@ def test_a_second_element_brings_back_its_pair_and_only_its_pair():
     assert "NO REACTION IS REACHABLE" not in page
 
 
+def test_an_anemo_card_over_a_standing_aura_reaches_swirl():
+    """`EB-465`, THE SENTENCE THAT CONTRADICTED A PREVIEW ON ITS OWN SCREEN.
+
+    The Furina r8 seat held an Anemo card with a live Swirl preview and was
+    told in capitals that NO REACTION IS REACHABLE HERE. Anemo and Geo pair
+    with nothing, so the four-element pair test could never see them; they
+    react with ANY aura already standing, which is a fact this page has.
+
+    Seen to FAIL: the capitals printed on this exact board, and no Swirl row
+    printed with them.
+    """
+    page = blindplay.observe(
+        elemental_hand_state(aura=True, elements=("Anemo",)))
+    assert "NO REACTION IS REACHABLE" not in page
+    assert "- **Swirl** — " in page
+    # ONCE. Ten Universals print the word as a verb and carry an arm row of
+    # their own, and one screen must not define it twice.
+    assert page.count("- **Swirl** ") == 1
+    assert "- **Elemental Reaction** — " in page
+    # Geo is the same rule one element over, and its row carries the Block the
+    # mod's own preview interpolates.
+    geo = blindplay.observe(
+        elemental_hand_state(aura=True, elements=("Geo",)))
+    assert "NO REACTION IS REACHABLE" not in geo
+    assert (f"- **Crystallize** — Geo on any aura. The aura is consumed and "
+            f"you gain {blindplay.CRYSTALLIZE_BLOCK} Block.") in geo
+
+
+def test_a_trigger_element_with_no_aura_out_is_told_which_half_is_missing():
+    """The other side of `EB-465`, and the reason the clause was rewritten
+    rather than deleted: a Swirl with nothing to spread does nothing, so the
+    sentence still fires -- and it now names the half that is absent instead of
+    calling an Anemo card "no element at all"."""
+    page = blindplay.observe(elemental_hand_state(elements=("Anemo",)))
+    assert ("NO REACTION IS REACHABLE HERE: this screen supplies no element "
+            "at all; Anemo reacts with any aura already standing, and no "
+            "enemy is wearing one.") in page
+    assert "- **Swirl** — " not in page
+    # And beside the pair half, because the two are different shopping lists.
+    both = blindplay.observe(elemental_hand_state(elements=("Pyro", "Anemo")))
+    assert "NO REACTION IS REACHABLE HERE: Pyro is the only element" in both
+    assert "Anemo reacts with any aura already standing" in both
+
+
+def test_the_crystallize_block_is_the_mods_own_constant():
+    """`CRYSTALLIZE_BLOCK` is held in step from THIS side, the way
+    `BOMB_GROWTH` and `AURA_DURATION_TURNS` are: this module may not import
+    `tier0`, so a retune of the C# constant goes red here (`EB-465`)."""
+    table = (REPO / "klee-mod" / "KleeCode" / "Elements"
+             / "ReactionTable.cs").read_text(encoding="utf-8")
+    assert re.search(
+        rf"CrystallizeBlock\s*=\s*{blindplay.CRYSTALLIZE_BLOCK}\b", table)
+
+
 def test_the_belt_supplies_an_element_through_its_printed_rule():
     """The row names three sources, and a potion is the one with no `element`
     field to read: the game writes `Applies X` into the printed body instead,
@@ -6123,6 +6177,10 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         "Electro-Charged": [" HP at the start of its turn, 1 less each turn"],
         "Frozen": ["ts next action deals half damage, and the first Attack "
                    "to hit it Shatters for "],
+        # `EB-465`'s two trigger elements, held in step off the same
+        # `keywordFallback` table the six above come from.
+        "Swirl": ["aura is consumed and copied onto ALL enemies"],
+        "Crystallize": ["he aura is consumed and you gain "],
     }
     assert set(anchors) | {"Elemental Reaction"} \
         == set(blindplay.REACTION_KEYWORDS)
