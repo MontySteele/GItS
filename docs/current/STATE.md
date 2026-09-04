@@ -205,7 +205,8 @@ are in [`workstreams.md`](workstreams.md).
   `0.2.2446+proto`, floors 4 and 8, both budget-out, no rider copy drawn,
   Fanfare decorative below the bars; four real decisions named, one pick
   (a reader in every deck), `EB-404`-`EB-407`, `EB-412`-`EB-414`; RULED R254:
-  Aria of Recompense reads Fanfare under the arm (5 more Encore at 6), the
+  Aria of Recompense reads Fanfare under the arm (5 more Encore at 3 since
+  round 6, from 6), the
   starter stays two kit cards, **BUILT** as `proto_fr_aria_of_recompense`.
   **Round 5 is READ**
   (`review/active/furina-reframe-round-5-2026-09-04.md`): two seats on
