@@ -4942,9 +4942,20 @@ def test_the_companion_row_is_the_mods_own_sentence_about_the_slot():
         encoding="utf-8")
     assert re.search(r'name:\s*"[^"]+ — [^"]+"', sheet)
     assert "a character's name, a dash, then its own" in body
-    # The page's own ceiling: the arm rows mirror a 135-character tip, and a
-    # row with no tip to mirror keeps the same bound rather than sprawling.
-    assert len(body) <= 135, len(body)
+    # `EB-430` PUT A SECOND ARM'S TRIGGER ON THIS ROW, and it is the reason
+    # the bound moved. The word rides both kits, and the glossary is the ONE
+    # surface that fires wherever a Companion card is read -- in hand, on a
+    # reward, on a shelf -- which is where the r5 run-2 seat needed the rule
+    # and did not have it. So the row now carries three facts rather than
+    # two, and the ceiling it keeps is PER SENTENCE: no sentence here runs
+    # longer than the 135-character tip the arm rows mirror, which is what
+    # stops a row with no tip of its own from sprawling.
+    for sentence in re.split(r"(?<=\.)\s+", body):
+        assert len(sentence) <= 135, (len(sentence), sentence)
+    # And the Salon half NAMES the stage it is about: Klee's Companions carry
+    # their own rider (Spark, on `KleeCompanionSpark`'s tip), so a flat
+    # sentence here would teach her a rule her board does not have.
+    assert "On Furina's stage" in body
 
 
 def test_the_companion_word_is_defined_where_a_card_prices_itself_on_it():
@@ -6671,6 +6682,41 @@ def test_a_replay_with_no_performance_still_gets_its_line():
 
     assert "## What your Salon did this turn" in page
     assert "was played an extra time" in page
+
+
+def test_the_companion_perform_clauses_are_the_perform_codes_own():
+    """`EB-430`, held in step with `SalonPowers` from this side.
+
+    THE ROW WAS FILED ON AN INFERENCE AND `EB-439` OVERTURNED IT. The r5 run-2
+    seat wrote "a Companion card's perform lands on the Companion card's
+    target" and priced its plays on that; the r6 seat watched one perform split
+    across two Toadpoles. The code is the arbiter, so the sentence is read off
+    it and pinned here -- a retarget in the mod goes red rather than leaving the
+    page teaching a rule the board stopped having.
+    """
+    salon = (REPO / "klee-mod" / "KleeCode" / "Powers"
+             / "SalonPowers.cs").read_text(encoding="utf-8")
+    body = blindplay.ARM_KEYWORDS["Companion"]
+
+    # THE TARGET. `PerformMember` rolls it; the card's target reaches it
+    # nowhere -- the method takes an owner and a member and no creature.
+    perform = salon[salon.index(
+        "public static async Task<bool> PerformMember"):]
+    perform = perform[:perform.index("/// <summary>")]
+    assert "Rng.CombatTargets" in perform and "NextItem(targets)" in perform
+    assert "HittableEnemies" in perform
+    assert "picks its own enemy at random, never the card's target." in body
+
+    # THE EMPTY STAGE, and the rotate that follows a real one.
+    trigger = salon[salon.index(
+        "public static async Task CompanionPlayTrigger"):]
+    trigger = trigger[:trigger.index("/// <summary>")]
+    assert "if (company.Count == 0)" in trigger
+    assert "NoteTriggerWhiffed()" in trigger
+    assert "var member = company[0];" in trigger
+    assert "RotateLeftmost(owner, 1);" in trigger
+    assert ("performs the front member, then sends it to the back; an empty "
+            "stage performs nobody.") in body
 
 
 def test_a_build_with_no_reframe_prints_no_salon_section():

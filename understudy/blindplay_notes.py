@@ -494,9 +494,32 @@ ARM_KEYWORDS: dict[str, str] = {
     #     they are quoted verbatim. That is where a sighted player reads it
     #     and where `docs/current/text-conventions.md` rule 11 put it (R249
     #     pick 4) when the four starting relics stopped each printing it.
+    #
+    # `EB-430` ADDED THE THIRD AND FOURTH SENTENCES, and `EB-439` decided what
+    # they say. The r5 run-2 seat priced two Companion rewards blind, skipped
+    # them, and worked the trigger out three fights later: "a Companion card is
+    # a free extra member perform stapled to whatever else it does". It then
+    # inferred the aim -- "a Companion card's perform lands on the Companion
+    # card's target" -- and the r6 seat watched a perform split across two
+    # Toadpoles and prove that wrong. THE CODE IS THE ARBITER and it is not
+    # ambiguous: `SalonPowers.PerformMember` picks with
+    # `RunState.Rng.CombatTargets.NextItem(HittableEnemies)`, so the card's own
+    # target reaches it nowhere; `CompanionPlayTrigger` performs `company[0]`
+    # and then `RotateLeftmost`, and returns on `company.Count == 0` with a
+    # whiff the ledger records.
+    #
+    # "ON FURINA'S STAGE" IS NOT DECORATION. The word rides Klee's Companions
+    # too, whose own rider is Spark and lives on its own tip
+    # (`ArmKeywordTips` / `KleeCompanionSpark`), so a row that stated the
+    # perform flatly would be teaching a Klee a rule her board does not have.
+    # The qualifier is what lets the two clauses ride the ONE row a reader
+    # meets on a reward screen, which is where the seat needed them.
     "Companion": ("A card titled with a character's name, a dash, then its "
                   "own. Card rewards after a fight offer a fourth, "
-                  "Companion, choice."),
+                  "Companion, choice. On Furina's stage playing one performs "
+                  "the front member, then sends it to the back; an empty "
+                  "stage performs nobody. The member picks its own enemy at "
+                  "random, never the card's target."),
 }
 
 # One pattern per word, and they are CASE-SENSITIVE on purpose: the game
