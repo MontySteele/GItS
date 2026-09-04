@@ -1,4 +1,4 @@
-Status: RULED R253 2026-09-04 (pick 1 at its default AS AUDITED: Tide Chart and Ripple built, Held Tide and Tidal Rhythm withdrawn; `review/records/card-audit-2026-09-04.md`)
+Status: RULED R253 2026-09-04
 
 # Kokomi round nine: two runs on R250's rules, and the shelf the pool leaves empty
 
