@@ -1106,7 +1106,10 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: geo,
    cost: 1, type: skill,
-   description: "Gain 2 [gold]Dexterity[/gold] for 2 turns.",
+   # `EB-403`: the take-back clause is `WarBannerPower`'s own, and 2 is its
+   # constant (`CompanionOverhaulLaw.WarBannerDexterity`), not the card's
+   # upgradeable amount. Provenance: docs/notes/prototype-surface-provenance.md.
+   description: "Gain 2 [gold]Dexterity[/gold] for 2 turns, then the banner takes 2 back.",
    effects: [{op: apply_power, power: dexterity, amount: 2, target: self},
              {op: apply_power, power: mi_war_banner, amount: 2, target: self}]}
 

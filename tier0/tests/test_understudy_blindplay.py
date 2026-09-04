@@ -6197,3 +6197,31 @@ def test_the_bridge_answers_the_enemy_half_the_way_it_answers_the_pet_half():
     body = plan.split("GitsCanTargetEnemy(CardModel card)")[1]
     assert "card.IsValidTarget(enemy)" in body
     assert "enemy.IsAlive" in body
+
+
+# ------------- EB-403: the banner face and the base Dexterity gloss ---------
+
+def test_the_banner_face_and_the_dexterity_gloss_agree_on_one_page():
+    """`EB-403`, the page half of the twin.
+
+    Kokomi round 10, run 1, (c) 1: the face printed "Gain 2 Dexterity for 2
+    turns" and the same screen's Dexterity gloss said "It does not decay".
+    Both sentences were true -- the row grants real `DexterityPower`, and the
+    `mi_war_banner` clock beside it hands 2 of it back when it runs out -- and
+    together they read as a contradiction, because nothing printed named the
+    take-back.
+
+    The base gloss is the base RULE and does not move. The face carries the
+    exception now, so the two can be read on one screen.
+    """
+    import yaml
+    row = next(r for r in yaml.safe_load(
+        (REPO / "docs" / "prototype-surface.yaml").read_text(encoding="utf-8"))
+        if r["id"] == "proto_mi_gorou_war_banner")
+    state = combat_state()
+    card = state["player"]["hand"][0]
+    card["name"] = "Gorou - General's War Banner (proto)"
+    card["description"] = row["description"]
+    page = blindplay.render(blindplay.observation(state))
+    assert "then the banner takes 2 back" in page
+    assert "does not decay" in page          # the base rule, still printed

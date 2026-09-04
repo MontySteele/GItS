@@ -152,10 +152,18 @@ public sealed class WarBannerPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "General's War Banner"),
+        // `EB-403`. THE LAST CLAUSE IS THE ONE BOTH FACES WERE MISSING. What
+        // this grants is real `DexterityPower`, whose own gloss says it does
+        // not decay -- true, and the reason the card face and that gloss read
+        // as a contradiction on one screen. `Tick` below is this sentence's
+        // authority, and the number is this power's own constant rather than
+        // the card's (upgradeable) applied amount.
         ("description",
             "You have [blue]" + CompanionOverhaulLaw.WarBannerDexterity
           + "[/blue] more [gold]Dexterity[/gold]. "
-          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}, then "
+          + "takes [blue]" + CompanionOverhaulLaw.WarBannerDexterity
+          + "[/blue] back."),
     };
 
     public override PowerType Type => PowerType.Buff;
