@@ -201,12 +201,37 @@ public static class ArmKeywordTips
     /// meets a fresh aura and reacts again. What is true on every board is the
     /// sentence the player is deciding on: the aura in front of them is spent
     /// on the OLDEST charge.
+    ///
+    /// `EB-443` ADDED THE TWO FACTS THE OLD NEGATIVE LEFT TO INFERENCE. "Not
+    /// an Attack" is on the Bomb tip and it answers a question a player did
+    /// not ask: the r12 run-2 seat ran the experiment and drew the wrong
+    /// conclusion from it -- "Set off ignores enemy Block, and no card says
+    /// so. Two 11-point bombs both landed at full value into Skittish 6...
+    /// 'not an Attack' plainly did not stop it from HITTING (Skittish did not
+    /// fire), and a rule this load-bearing against a whole class of enemy
+    /// should not be an inference from a negative." Both halves are read off
+    /// the one call the explosion makes:
+    /// <see cref="ElementalHit.DealWithoutDealerMods"/> passes
+    /// <c>ignoreBlock: false</c>, so Block absorbs it like anything else, and
+    /// it reaches <c>CreatureCmd.Damage</c> as <c>ValueProp.Unpowered</c> with
+    /// <c>dealer: null</c>, so nothing an enemy keys on being hit by an Attack
+    /// can fire. The seat was right about the Block it saw and wrong about the
+    /// rule: there was no Block, because Skittish never fired.
+    ///
+    /// "FOR ITS SIZE" IS WHAT PAID FOR THEM, and it is the trade the Mine tip
+    /// already makes for the same reason. A keyword tip is read in HAND, where
+    /// there is no pile to quote, so an arithmetic claim here is one this
+    /// surface cannot get right; the number a Set off will deal is on the
+    /// badge, live, and that is `EB-343`'s own split between the two. "Each a
+    /// Pyro hit" keeps what the tip can say -- separate hits, so separate
+    /// reactions and separate Sparks. 132 of 135 rendered, no exception taken.
     /// </summary>
     public static IEnumerable<IHoverTip> ForSetOff(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SetOffKey,
             "The target's [gold]Bombs[/gold] go off first, oldest first, each "
-          + "a Pyro hit for its size. The first takes the aura.");
+          + "a Pyro hit. [gold]Block[/gold] stops them, no Attack trigger "
+          + "fires, the first takes the aura.");
 
     /// <summary>Rule 4. The gain rate is read from
     /// <see cref="KleeOverhaulLaw.SparkPerExplosion"/>, which is also

@@ -110,7 +110,7 @@ public class Round12Tests
         // the first reacts", which a Swirl makes false: that reaction
         // re-applies what it consumed to every living enemy, the target
         // included.
-        Assert.Contains("The first takes the aura", SetOffTip());
+        Assert.Contains("the first takes the aura", SetOffTip());
         Assert.DoesNotContain("only the first reacts", SetOffTip());
     }
 
@@ -122,5 +122,39 @@ public class Round12Tests
         // subject instead, and the round-four pin reads it there.
         Assert.Contains("The target's [gold]Bombs[/gold] go off first",
                         SetOffTip());
+    }
+
+    // ---- EB-443: what Block and a when-hit Attack effect do to a Bomb -----
+
+    [Fact]
+    public void The_set_off_tip_says_block_absorbs_the_hit()
+    {
+        // `ElementalHit.DealWithoutDealerMods` passes `ignoreBlock: false`,
+        // so the explosion pays Block like anything else. The r12 run-2 seat
+        // concluded the opposite from a true observation: "Set off ignores
+        // enemy Block... Two 11-point bombs both landed at full value into
+        // Skittish 6." There was no Block, because Skittish never fired.
+        Assert.Contains("[gold]Block[/gold] stops them", SetOffTip());
+    }
+
+    [Fact]
+    public void The_set_off_tip_says_no_attack_trigger_fires()
+    {
+        // The hit reaches `CreatureCmd.Damage` as `ValueProp.Unpowered` with
+        // `dealer: null`, so nothing an enemy keys on being hit by an Attack
+        // can answer it. "Not an Attack" on the Bomb tip left that to
+        // inference and the seat's inference went the other way.
+        Assert.Contains("no Attack trigger ", SetOffTip());
+        Assert.Contains("fires", SetOffTip());
+    }
+
+    [Fact]
+    public void The_size_clause_is_what_paid_for_them()
+    {
+        // A keyword tip is read in HAND, where there is no pile to quote, so
+        // the arithmetic stays on the badge -- `EB-343`'s own split between
+        // the two surfaces, and the trade the Mine tip already makes.
+        Assert.DoesNotContain("for its size", SetOffTip());
+        Assert.Contains("each a Pyro hit.", SetOffTip());
     }
 }

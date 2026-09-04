@@ -4671,7 +4671,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                  "Kills move it on"],
         # `EB-432`: the pile's own order, and which charge meets the aura.
         "Set off": ["go off first, oldest first, each ",
-                    "a Pyro hit for its size. The first takes the aura."],
+                    "a Pyro hit. ", " stops them, no Attack trigger ",
+                    "fires, the first takes the aura."],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
         "Mine": ["that also goes off when its enemy attacks",
                  "before the hit lands",

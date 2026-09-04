@@ -403,8 +403,12 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # because a reaction consumes it. "Oldest first" carries "one at a
             # time" -- an order that names a first and a rest is one at a time
             # -- and `EB-287`'s "together" claim is now the subject.
+            # `EB-443` added Block and the Attack trigger, and "for its
+            # size" paid for them: a tip is read in hand where there is no
+            # pile to quote, so the live number stays on the badge.
             "The target's [gold]Bombs[/gold] go off first, oldest first, each ",
-            "a Pyro hit for its size. The first takes the aura.",
+            "a Pyro hit. [gold]Block[/gold] stops them, no Attack trigger ",
+            "fires, the first takes the aura.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
             "Start each combat with ",
             ". Pounding Surprise grants more. ",

@@ -372,8 +372,16 @@ ARM_KEYWORDS: dict[str, str] = {
     # run-2 seat got that rule only by arithmetic ("Bombs go off in placement
     # order, and the first one is the one that eats the Melt"). "Oldest first"
     # is "one at a time" plus the order, in the same room.
+    # `EB-443`: the two facts the Bomb tip's "not an Attack" left to
+    # inference. The explosion passes `ignoreBlock: false`, so Block absorbs
+    # it, and it lands as `Unpowered` with no dealer, so nothing keyed on
+    # being hit by an Attack fires -- the r12 run-2 seat read a full-value hit
+    # into Skittish 6 as "Set off ignores enemy Block" when what happened is
+    # that Skittish never fired. "For its size" paid for them: the live number
+    # is the badge's, which is the split `EB-343` already made.
     "Set off": ("The target's Bombs go off first, oldest first, each a Pyro "
-                "hit for its size. The first takes the aura."),
+                "hit. Block stops them, no Attack trigger fires, the first "
+                "takes the aura."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
     # `EB-373`: a Mine IS a Bomb, so the same fold moves it and the same
