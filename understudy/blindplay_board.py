@@ -48,8 +48,21 @@ from understudy.blindplay_shape import SELECT_SCREENS
 #     card CONDITIONS, and every card that reads one prints its own condition
 #     on its face. The counter is the implementation of a sentence the reader
 #     already has.
+#   `Spotlight Spend Boost` (`EB-422`) is the FOURTH of the same kind, found
+#     the same way: "a row reading `Spotlight Spend Boost: 30` sat in the
+#     status bar all fight with no gloss and no card naming it" (Furina round
+#     5, run 1, fight 4). It is this turn's accumulator, and its only writer
+#     is `SpotlightSystem.OnEncoreSpent`, which adds the amount of
+#     `OvationSpendBoostPower` to it on each Encore spend and zeroes it at
+#     turn end. That power is a NAMED status row -- "Standing Ovation --
+#     Spotlighted Companions are 10% stronger on turns you spend Encore" --
+#     printed by the card the player played, so the rule is already on the
+#     page in its own words; 30 is three spends' worth of one 10, which is a
+#     running total the sentence does not promise and the feed cannot
+#     explain. The seat read the two side by side and reported exactly that:
+#     "Standing Ovation says 10%; the meter said 30."
 #
-# So defining them would put three glossary rows on the page to explain three
+# So defining them would put four glossary rows on the page to explain four
 # rows that should not be on the page. Keyed by the WIRE id rather than the
 # printed name, because that is what the mod declares and what a rename here
 # would silently stop matching.
@@ -57,6 +70,7 @@ INTERNAL_METERS = frozenset({
     "KLEEMOD_SPOTLIGHT_MODE",
     "KLEEMOD_SPOTLIGHT_MOVED",
     "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST",
 })
 
 ALREADY_UPGRADED = "already upgraded; an upgraded copy cannot be upgraded again"
