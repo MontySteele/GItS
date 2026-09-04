@@ -15,7 +15,7 @@ from understudy.blindplay_faces import (_card_face, _card_title, _enemy_names,
                                         _hook_note, _intents, _meter_max,
                                         _named_option, _number_faces, _powers,
                                         relic_faces, remember_deck,
-                                        remembered_deck)
+                                        remembered_deck, remembered_enemy_name)
 from understudy.blindplay_read import (_blob, _enemies, _fold, _hand, _int,
                                        _label, _listing, _player, _potions,
                                        _screen, _text)
@@ -304,14 +304,24 @@ def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],
     numbered name; one the performance KILLED is off the next board entirely
     and keeps the title the mod recorded, which is why the mod sends a title
     at all.
+
+    `EB-424`, AND IT IS `EB-427` ONE ARM OVER. The mod's title is the game's
+    printed name and carries no copy number, so the r5 seat read
+    *"Crabaletta hit Corpse Slug (2)"* on turn 1 and *"Crabaletta hit Corpse
+    Slug"* on turn 2 -- "in a two-of-a-kind fight I could not tell which body
+    it hit" -- for the one reason that the second body was no longer on the
+    board. The fight's own memory names it, so a performance on a duplicate
+    always says which copy.
     """
     by_id = {_text(raw.get("combat_id")): face["name"]
              for raw, face in zip(wire, printed)
              if _text(raw.get("combat_id"))}
     for row in salon["performed"]:
-        named = by_id.get(row["combat_id"])
-        if named:
-            row["target"] = named
+        if not row["combat_id"]:
+            continue
+        row["target"] = (by_id.get(row["combat_id"])
+                         or remembered_enemy_name(row["combat_id"],
+                                                  row["target"]))
 
 
 def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],
@@ -323,15 +333,22 @@ def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],
     board gets the page's own numbered name; one that DIED to the Plan is off
     the next board entirely and keeps the title the mod recorded, which is
     the whole reason the mod sends a title at all.
+
+    `EB-427` PUT THE FIGHT'S MEMORY BETWEEN THE TWO. The mod's title carries no
+    copy number, so a morning against three Inklets that killed one printed
+    `Inklet`, `Inklet (1)` and `Inklet (2)` -- three bodies, two handles and one
+    bare word -- and the r11 seat read the mix as the numbering having shifted.
+    `remembered_enemy_name` hands back the name this page used while that body
+    stood, so the receipt and the enemy list under it never disagree.
     """
     by_id = {_text(raw.get("combat_id")): face["name"]
              for raw, face in zip(wire, printed)
              if _text(raw.get("combat_id"))}
     for row in plans["carried_out"] + plans["fired_now"]:
         for moved in row["moved"]:
-            named = by_id.get(moved["combat_id"])
-            if named:
-                moved["target"] = named
+            moved["target"] = (by_id.get(moved["combat_id"])
+                               or remembered_enemy_name(moved["combat_id"],
+                                                        moved["target"]))
 
 
 def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
@@ -425,12 +442,26 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
     if not line:
         line = (f"{pet_name}: {card}" if number is None
                 else f"{pet_name}: {card}, {number}")
+    # `EB-426`: WHAT THE NUMBER IS, and what its clause asked for. Both are
+    # `KokomiPlan.NumberKind` / `AskedFor`'s, and both are ABSENT on a bridge
+    # older than the field -- which prints exactly the line it always printed,
+    # `board_read`'s discipline again.
+    asked = row.get("asked")
     raw_moved = row.get("moved")
     return {"card": card, "number": number, "line": line,
+            "kind": _text(row.get("kind")),
+            "asked": None if asked is None else _int(asked),
             "on_play": bool(row.get("on_play")),
             "board_read": isinstance(raw_moved, list),
+            # `EB-440`: A ROW IS A BODY THIS PLAN MOVED SOMETHING ON, and
+            # Block is something. The filter existed to drop the mod's
+            # zero-delta rows, and a beat that spent itself entirely on a
+            # Defend intent produces exactly such a row with the Block beside
+            # it -- which is the receipt the r12 seat did not get.
             "moved": [_moved_row(m) for m in (raw_moved or [])
-                      if isinstance(m, dict) and _int(m.get("amount")) > 0]}
+                      if isinstance(m, dict)
+                      and (_int(m.get("amount")) > 0
+                           or _int(m.get("absorbed")) > 0)]}
 
 
 def last_morning(state: dict[str, Any]) -> dict[str, Any] | None:
@@ -466,11 +497,19 @@ def _moved_row(row: dict[str, Any]) -> dict[str, Any]:
     handed the numbered name this page has been using all fight. Where the
     game would not answer either, the row says so in words rather than
     printing a bare number against nothing.
+
+    `EB-440` ADDED `absorbed`, AND THE ABSENT / ZERO SPLIT IS THE ONE
+    `board_read` MAKES ONE LEVEL UP. A bridge older than the measurement sends
+    no key at all and this page must not print a Block figure for it; a bridge
+    that sends 0 measured the Block and found none. So an absent key answers
+    `None` and a present one answers its number.
     """
+    absorbed = row.get("absorbed")
     return {"target": _text(row.get("target")) or "an enemy",
             "combat_id": _text(row.get("combat_id")),
             "amount": _int(row.get("amount")),
-            "dead": bool(row.get("dead"))}
+            "dead": bool(row.get("dead")),
+            "absorbed": None if absorbed is None else _int(absorbed)}
 
 
 def _pulse_phrase(memory: dict[str, Any]) -> str:

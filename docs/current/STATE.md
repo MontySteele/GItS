@@ -152,7 +152,11 @@ are in [`workstreams.md`](workstreams.md).
   `0.2.2476+proto` with Countdown in the pool (undrawn), floors 5 and 10,
   both budget-out; the loan against the clock priced on the nose, a Spark
   gain nothing prints (`EB-418`), random Set off and one-charge reaction
-  rules unprinted (`EB-431`, `EB-432`); no pick. [USER]'s act-1 run is due on
+  rules unprinted (`EB-431`, `EB-432`); no pick. **Round 12 is READ**
+  (`review/active/klee-overhaul-round-12-2026-09-04.md`): two seats on
+  `0.2.2501+proto`, floors 10 and 8, ordering read as the puzzle, the Mine
+  tip read as mitigation (`EB-436`), Block and Skittish learned by experiment
+  (`EB-443`), Countdown undrawn in five runs; no pick. [USER]'s act-1 run is due on
   `0.2.2401+proto`. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):

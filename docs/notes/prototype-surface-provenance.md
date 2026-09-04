@@ -2369,6 +2369,70 @@ is the one the finding names.
 Numbers are Prototype numbers, D by the ladder; the seats read them on the next
 round before [USER] does.
 
+## before proto_ko_stoke_the_fuse
+
+The pool pass, Klee rounds 11 and 12 (2026-09-04). The seats ended fights
+holding four to nine Sparks they never spent. The bank fills from every
+explosion (rule 4) and almost everything that empties it is a detonator, so a
+turn that banks a Bomb banks Sparks with it and the meter climbs at the exact
+moment the player has decided not to cash anything. Round 10 answered the
+other end of that deadlock -- Countdown, the energy-priced detonator a hand at
+0 Spark can always fire -- and left this end open in as many words: the Spark
+surplus is "left for the next round to say again with Countdown in the pool".
+It said it again.
+
+A SINK WAS ALREADY WRITTEN ONCE AND WITHDRAWN, and the withdrawal is what
+shapes this row. Explosive Spark (Uncommon Attack, 0 energy, X Sparks: 3
+damage per Spark spent) was read on the C3 clause -- the card's value has to
+turn on a choice the player makes, not on a number rising while you watch --
+and its value followed the BANK. Spend nine, deal twenty-seven; the card is
+worth what the meter happens to hold and the meter fills by itself. Stoke the
+Fuse spends the same bank and its value follows the BOMB: the growth lands on
+one charge, the charge is one the player chose to keep cooking rather than
+cash, and on a board with no Bomb on it the row spends the whole bank and buys
+nothing. That is the losing line C1 asks every card to keep, and it is printed
+on the face rather than hidden in a rule -- "your largest Bomb", and if there
+is no largest Bomb there is nothing to grow.
+
+THE RATE IS QUICK FUSE'S. Three per Spark is lifted off the pool's existing
+Spark-priced grow (Quick Fuse: one Spark, "each Bomb on the enemy grows by 3",
+then a Set off), so a Spark buys the same growth here that it already buys
+there and the sink is priced against a row the seats have played rather than
+against nothing. What the two differ on is where the growth lands and what
+follows it: Quick Fuse spreads three across an enemy's charges and cashes the
+pile immediately, and this puts the whole bank on ONE charge and sets nothing
+off. The upgrade moves the rate to 4, the sheet's per-unit grammar, and the
+face reads it through the `Grow` var the two grow rows already use
+(`{Grow:diff()}`) rather than an `IfUpgraded` swap -- a top-level effect owns
+the var, and this is one.
+
+THE FIRST X PRICE ON ANY SHEET, and it splits a Spark cost line in two for the
+first time. `spend_spark: all` prints no literal, so what the GATE charges and
+what the card PAYS stop being the same number: the gate charges ONE (an empty
+bank cannot pay, any bank holding a Spark can) and the payment takes whatever
+the bank holds. Both engines say it that way -- `effects.spend_spark_price`
+and the emitted `PrintedSparkPrice => 1` -- and the consequence is reported
+rather than hidden: the Spark cost badge and the QA packet's cost slot both
+read that gate price, so they show "1 Spark" on a card whose face says "Spend
+all your Sparks". The face carries the truth and the badge carries the bar to
+play it.
+
+WHAT "PER SPARK SPENT" READS, since nothing on the card can print it: the bank
+as it stood when the card was played, before its own spend. That is R39's own
+reading, `state.sparks_at_play` and `SparkPower.SparksAtPlay`, which are twins
+of each other and which equal the amount spent only because the price is
+all-in. The codegen refuses `grow_largest_bomb` on any row that does not open
+with `spend_spark: all`, so the equality cannot be broken by a later row
+quietly.
+
+ONE RESPELLING, FOUND BY A LINT. The ruled face read "3 per Spark spent" with
+the second Spark unmarked; `lint_keyword_meters` requires the keyword's gold
+markup wherever a face prints the word, so it ships as "3 per [gold]Spark[/gold]
+spent". Same words, same reading, one markup pair.
+
+Numbers are Prototype numbers, D by the ladder; the seats read them on the next
+round before [USER] does.
+
 ## `proto_kk_undertow` -- one damage op with a rider (`EB-441`)
 
 The row was a `conditional` whose two branch numbers were LITERALS in the face,

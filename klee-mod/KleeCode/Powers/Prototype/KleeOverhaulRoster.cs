@@ -137,10 +137,16 @@ internal static class KleeOverhaulRoster
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
-    /// THIRTY-FOUR SINCE THE ROUND-10 POOL PASS (2026-09-04), and the one
-    /// that arrived is <c>ProtoKoCountdown</c>: the arm's only detonator
-    /// priced in ENERGY that asks nothing else of the board. Its own block at
-    /// the end, in the sim's order.
+    /// THIRTY-FIVE SINCE THE ROUND-11 POOL PASS (2026-09-04), and the one
+    /// that arrived is <c>ProtoKoStokeTheFuse</c>: the arm's Spark SINK, the
+    /// other half of the deadlock round 10 answered with Countdown. The
+    /// round-11 and round-12 seats ended fights holding 4 to 9 unspent
+    /// Sparks; this is where the bank goes. Its own block at the end, in the
+    /// sim's order.
+    ///
+    /// THIRTY-FOUR BEFORE THAT (round 10), and the one that arrived is
+    /// <c>ProtoKoCountdown</c>: the arm's only detonator priced in ENERGY
+    /// that asks nothing else of the board. Its own block, in the sim's order.
     ///
     /// THIRTY-THREE BEFORE THAT (R252), and the two that arrived are the
     /// DEFENCE SHELF, a THIRD slice on the same terms as the second: Klee
@@ -250,5 +256,11 @@ internal static class KleeOverhaulRoster
         // Spark with a fat Bomb on the enemy and nothing in hand that could
         // cash it; Ka-pow! is the starter's one card in ten.
         ModelDb.Card<ProtoKoCountdown>(),
+        // THE POOL PASS (1 -- round 11, 2026-09-04). The Spark sink: 0
+        // energy, X Sparks, and the whole bank goes into the largest Bomb at
+        // 3 apiece. Round 10 gave the hand a detonator it could always fire;
+        // this gives the bank somewhere to go, and it pays only if a Bomb is
+        // already cooking.
+        ModelDb.Card<ProtoKoStokeTheFuse>(),
     };
 }

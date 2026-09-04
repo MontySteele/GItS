@@ -1511,7 +1511,3 @@ EB-343 RETIRED 2026-09-04: set-off now drops the placer's Strength and Weak and 
 EB-320 RETIRED 2026-09-04: #317 fixed the emitter and CompanionStandInHandOffTests.cs pins HandOffTo yes for a Klee reward, no for anyone else, no with the arm off.
 EB-322 RETIRED 2026-09-04: one loader.display_name, imported by both engines, strips the " (proto)" suffix at the emitter's single title site and at prototype_cards.
 EB-319 RETIRED 2026-09-04: _refuse carries the forms that resolve and act folds them into every refusal, falling back to the screen's own grammar.
-
-EB-444 RETIRED 2026-09-04: minted from Klee r12 run 2 for the Hexerei tag on
-Companion faces and found to be EB-392's own scope; the evidence moved into
-EB-392 and the number is consumed.

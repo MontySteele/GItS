@@ -345,6 +345,12 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # nothing, which is the one line separating it from
                   # `remove_bomb_for_block` above.
                   "block_largest_bomb",
+                  # The round-11 pool pass's verb (Stoke the Fuse). It writes
+                  # the pile -- `ProtoBombPower.GrowLargestPerSpark`, off the
+                  # same `LargestPlacedBy` read `block_largest_bomb` above
+                  # takes -- and it is the one arm verb whose number is a
+                  # RATE: the Sparks the cost line just spent multiply it.
+                  "grow_largest_bomb",
                   # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
                   # same terms and the same quarantine as the block above: the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
@@ -1552,7 +1558,14 @@ SET_OFF_FIELDS = {"op", "target", "times", "damage", "aura"}
 PLANT_BOMB_FIELDS = {"op", "target", "size", "mine", "payload_mine_all",
                      "wide_if"}
 GROW_BOMBS_FIELDS = {"op", "target", "amount"}
+#: Stoke the Fuse. NO `target`: "your largest Bomb" is board-wide, the same
+#: scope `block_largest_bomb` reads, so the row aims at nobody.
+GROW_LARGEST_BOMB_FIELDS = {"op", "per_spark"}
 MERGE_BOMBS_FIELDS = {"op", "target", "growth"}
+#: The one non-literal a `spend_spark` price may be spelled with: X, "spend
+#: all your Sparks". tier0's twin is `effects.SPEND_ALL`, and the two engines
+#: charge the same gate price for it (1) through their own readers.
+SPEND_ALL = "all"
 SET_OFF_TARGETS = {"enemy", "random_enemy", "all_enemies"}
 PLANT_BOMB_TARGETS = {"enemy", "random_enemy", "all_enemies"}
 MOVE_BOMBS_FIELDS = {"op", "target", "bonus"}
@@ -3111,6 +3124,32 @@ def blocked_reason(
                 return f"{op} field(s) {sorted(unknown)} not understood"
             if not isinstance(eff.get("cap"), int) or eff["cap"] <= 0:
                 return "block_largest_bomb cap must be a positive literal int"
+        if op == "grow_largest_bomb":
+            # The round-11 pool pass (Stoke the Fuse). ONE field, and it is a
+            # RATE: the growth is `per_spark` times the Sparks the cost line
+            # spent, so the row prints the rate and the bank supplies the rest.
+            unknown = set(eff) - GROW_LARGEST_BOMB_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            rate = eff.get("per_spark")
+            if not isinstance(rate, int) or isinstance(rate, bool) or rate <= 0:
+                return ("grow_largest_bomb per_spark must be a positive "
+                        "literal int")
+            # THE ORDERING RULE, AND IT IS LOAD-BEARING IN BOTH ENGINES. The
+            # Sparks this op multiplies by are the ones the card SPENT, read
+            # as the bank at play (`SparkPower.SparksAtPlay`,
+            # `state.sparks_at_play`) -- which is the number spent only when
+            # the price is the X price and only when it is paid FIRST. The
+            # emitted body captures the bank into a local ahead of
+            # `SparkPower.Spend`, so a row without that price ahead of this op
+            # would not compile; blocking it here says so in words instead.
+            head = card["effects"][0] if card["effects"] else {}
+            if (head.get("op") != "spend_spark"
+                    or head.get("amount") != SPEND_ALL):
+                return ("grow_largest_bomb needs a `spend_spark: all` price as "
+                        "the row's FIRST effect -- the growth is per Spark "
+                        "SPENT, and only an all-in price makes the bank at "
+                        "play that number")
         if op == "multiply_set_off":
             # The Big One's number IS the card's (R243, [USER]: "move The Big
             # One to 4x with no flat number"), so the row carries it and the
@@ -3194,13 +3233,24 @@ def blocked_reason(
                 return (f"salon_bow member '{eff['member']}' is not one of "
                         f"{sorted(set(SALON_MEMBER_CS) - {'random'})} -- an "
                         "Evoke names a member or names none (the front)")
-        if op in {"gain_encore", "spend_encore", "raise_fanfare_cap",
-                  "gain_fanfare_floor", "crash_fanfare", "salon_bow",
-                  # A Spark price the generator cannot read as a
-                  # literal is a price the IsPlayable gate cannot show.
-                  "spend_spark",
-                  # R213 E1, same sentence one meter over.
-                  "spend_charge"}:
+        if op == "spend_spark" and eff.get("amount") == SPEND_ALL:
+            # THE X PRICE (the round-11 pool pass, Stoke the Fuse): "spend all
+            # your Sparks". The one non-literal a Spark price may be spelled
+            # with, and it does not weaken the sentence below it -- the gate
+            # can still show a number, because what it charges is ONE (an
+            # empty bank cannot pay, any bank that holds a Spark can). The
+            # emitted `PrintedSparkPrice` is that 1, and tier0 reads the same
+            # number through `effects.spend_spark_price`.
+            unknown = set(eff) - {"op", "amount"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+        elif op in {"gain_encore", "spend_encore", "raise_fanfare_cap",
+                    "gain_fanfare_floor", "crash_fanfare", "salon_bow",
+                    # A Spark price the generator cannot read as a
+                    # literal is a price the IsPlayable gate cannot show.
+                    "spend_spark",
+                    # R213 E1, same sentence one meter over.
+                    "spend_charge"}:
             allowed = {"op", "amount"} | ({"member"} if op == "salon_bow"
                                           else set())
             unknown = set(eff) - allowed
@@ -4825,10 +4875,9 @@ def build_vars(card: dict) -> list[str]:
                 if payload_mine_upgrade(card) and eff.get("payload_mine_all"):
                     out.append('new DynamicVar("PayloadMine", '
                                f'{int(eff["payload_mine_all"])}m)')
-        elif op in ("grow_bombs", "merge_bombs") and grow_upgrade(card) \
+        elif op in GROW_FIELD and grow_upgrade(card) \
                 and eff is grow_var_effect(card):
-            literal = eff["amount"] if op == "grow_bombs" else eff["growth"]
-            out.append(f'new DynamicVar("Grow", {int(literal)}m)')
+            out.append(f'new DynamicVar("Grow", {grow_literal(eff)}m)')
         elif op == "block_largest_bomb" and cap_upgrade(card) \
                 and eff is cap_var_effect(card):
             # R252. The Sparks idiom again: a var ONLY when the upgrade has to
@@ -6044,6 +6093,19 @@ def _stmt_spend_spark(card: dict, eff: dict) -> str:
     # MECHANICAL_OPS. The return value is deliberately dropped: with the gate
     # in front of it a top-level spend cannot be short, and a card that wants
     # to BRANCH on the payment is a different mechanic than a cost line.
+    #
+    # THE X PRICE ("spend all your Sparks") IS TWO STATEMENTS, and the local is
+    # the reason. `SparkPower.Spend` debits the bank where it is called, so the
+    # number of Sparks SPENT has to be captured before the call -- and it is
+    # captured rather than recomputed because the payout beside it
+    # (`grow_largest_bomb`) is priced per Spark spent and would otherwise read
+    # an emptied bank. tier0 answers the same question off `sparks_at_play`,
+    # `SparksAtPlay`'s documented twin, and `blocked_reason` refuses the payout
+    # on any row that does not open with this price.
+    if eff.get("amount") == SPEND_ALL:
+        return ("var sparksSpent = SparkPower.SparksAtPlay(Owner.Creature);\n"
+                "        await SparkPower.Spend(choiceContext, "
+                "Owner.Creature, sparksSpent, this);")
     return ("await SparkPower.Spend(choiceContext, Owner.Creature, "
             f"{int(eff['amount'])}, this);")
 
@@ -6208,19 +6270,34 @@ def payload_mine_expr(card: dict, eff: dict) -> str:
 
 def grow_var_effect(card: dict) -> dict | None:
     """The ONE effect a `grow` delta binds to: the first top-level printed
-    grow amount, whichever of the two ops prints it. tier0's applier bumps the
-    first `amount`/`growth` in the same order, so the two engines cannot land
-    the delta on different effects."""
+    grow amount, whichever of the three ops prints it. tier0's applier bumps
+    the first `amount`/`growth`/`per_spark` in the same order, so the two
+    engines cannot land the delta on different effects.
+
+    `grow_largest_bomb`'s number is a RATE ("grows by 3 per Spark spent") and
+    takes the same key anyway, for tier0 `_proto_grow`'s stated reason: the key
+    names the one grow number a face prints, and no row carries two of these
+    ops."""
     return next((fx for fx in card.get("effects", [])
                  if (fx.get("op") == "grow_bombs" and "amount" in fx)
-                 or (fx.get("op") == "merge_bombs" and "growth" in fx)), None)
+                 or (fx.get("op") == "merge_bombs" and "growth" in fx)
+                 or (fx.get("op") == "grow_largest_bomb"
+                     and "per_spark" in fx)), None)
+
+
+#: Which field each of the three grow ops prints its number in.
+GROW_FIELD = {"grow_bombs": "amount", "merge_bombs": "growth",
+              "grow_largest_bomb": "per_spark"}
+
+
+def grow_literal(eff: dict) -> int:
+    """The printed grow number on whichever of the three ops carries it."""
+    return int(eff.get(GROW_FIELD[eff["op"]], 0))
 
 
 def grow_expr(card: dict, eff: dict) -> str:
     active = grow_upgrade(card) and eff is grow_var_effect(card)
-    literal = (eff["amount"] if eff["op"] == "grow_bombs"
-               else eff.get("growth", 0))
-    return _var_or_literal(active, "Grow", literal)
+    return _var_or_literal(active, "Grow", grow_literal(eff))
 
 
 def mend_expr(card: dict, eff: dict) -> str:
@@ -7199,6 +7276,15 @@ def build_body(
             lines.append(
                 "ProtoBombPower.GrowOn(cardPlay.Target, "
                 f'Owner.Creature, {grow_expr(card, eff)});')
+
+        elif op == "grow_largest_bomb":
+            # The round-11 pool pass (Stoke the Fuse). ONE call, so the Sparks
+            # read and the growth applied are one arithmetic; `sparksSpent` is
+            # the local `_stmt_spend_spark` declares for the X price ahead of
+            # it, which `blocked_reason` requires this row to carry.
+            lines.append(
+                "ProtoBombPower.GrowLargestPerSpark(Owner.Creature, "
+                f"{grow_expr(card, eff)}, sparksSpent);")
 
         elif op == "merge_bombs":
             _target_guard(lines, ctx)
@@ -8370,9 +8456,8 @@ def _authored_face_numbers(card: dict):
             if payload:
                 yield ("payload_mine", "PayloadMine", payload) if owns \
                     else (None, None, payload)
-        elif op in ("grow_bombs", "merge_bombs"):
-            literal = (eff.get("amount") if op == "grow_bombs"
-                       else eff.get("growth"))
+        elif op in GROW_FIELD:
+            literal = eff.get(GROW_FIELD[op])
             if isinstance(literal, int):
                 owns = eff is grow_var_effect(card)
                 yield ("grow", "Grow", literal) if owns \
@@ -8990,11 +9075,20 @@ def build_description(card: dict) -> str:
             # reads what the card charges before what it buys. The card is
             # unplayable below it (the IsPlayable gate), so this sentence
             # describes a gate, never a partial spend.
-            n = int(eff["amount"])
-            parts.append(
-                "Spend 1 [gold]Spark[/gold]." if n == 1
-                else f"Spend {n} [gold]Sparks[/gold]."
-            )
+            #
+            # THE X PRICE says "all your Sparks" rather than a number, because
+            # there is no number to print: the gate charges one and the payment
+            # takes whatever the bank holds. Stoke the Fuse states its own face
+            # (`description:`), so this arm is the shape any future rendered
+            # row would take rather than one in use today.
+            if eff.get("amount") == SPEND_ALL:
+                parts.append("Spend all your [gold]Sparks[/gold].")
+            else:
+                n = int(eff["amount"])
+                parts.append(
+                    "Spend 1 [gold]Spark[/gold]." if n == 1
+                    else f"Spend {n} [gold]Sparks[/gold]."
+                )
 
         elif op == "burst_energy":
             if burst_upgrade(card):
@@ -9827,6 +9921,9 @@ def build_upgrade(card: dict) -> list[str]:
                "discard": "discard",
                # EB-283, the prototype arms' own printed numbers.
                "grow_bombs": "grow", "merge_bombs": "grow",
+               # The round-11 pool pass. A RATE, on the one key that names a
+               # printed grow number -- see `grow_var_effect`.
+               "grow_largest_bomb": "grow",
                "mend": "mend",
                # R252, Careful Now's ceiling.
                "block_largest_bomb": "cap",
@@ -9834,6 +9931,7 @@ def build_upgrade(card: dict) -> list[str]:
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
                "grow_bombs": 'DynamicVars["Grow"]',
                "merge_bombs": 'DynamicVars["Grow"]',
+               "grow_largest_bomb": 'DynamicVars["Grow"]',
                "mend": 'DynamicVars["Mend"]',
                "block_largest_bomb": 'DynamicVars["BombCap"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
@@ -9895,7 +9993,7 @@ def build_upgrade(card: dict) -> list[str]:
             # EB-280: only the Set off that OWNS the Damage var takes the
             # delta -- the same one-owner rule the `damage` arm above obeys.
             key = "damage" if eff is set_off_damage_var_effect(card) else None
-        elif op in ("grow_bombs", "merge_bombs"):
+        elif op in GROW_FIELD:
             key = "grow" if eff is grow_var_effect(card) else None
         else:
             key = key_for.get(op)
@@ -10986,7 +11084,14 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # `spark_cost` check. TOP-LEVEL spends only, the sim's rule -- a price
     # inside a conditional branch cannot be shown before the play, and
     # SparkPower.Spend refuses it there instead.
-    spark_price = sum(int(eff["amount"]) for eff in card["effects"]
+    # THE X PRICE COUNTS AS ONE. "Spend all your Sparks" prints no literal,
+    # and what the GATE charges for it is one: unplayable at an empty bank,
+    # playable at any bank holding a Spark. tier0 reads the same number the
+    # same way (`effects.spend_spark_price`), so the price shown here and the
+    # price the sim gates on cannot drift.
+    spark_price = sum(1 if eff.get("amount") == SPEND_ALL
+                      else int(eff["amount"])
+                      for eff in card["effects"]
                       if eff.get("op") == "spend_spark")
     # EB-261, THE OTHER HALF OF THE SAME GATE. A card whose whole body is a
     # damage-less `set_off` does NOTHING on a board with no Bomb on it -- it

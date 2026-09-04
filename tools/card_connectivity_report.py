@@ -380,6 +380,12 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # row from Sorry, Jean... above it.
     "block_largest_bomb": [_hook("private", "bombs", "read"),
                            _hook("shared", "block_held", "write")],
+    # The round-11 pool pass (Stoke the Fuse). The one arm verb that USES the
+    # Spark bank without being a price: the bank the cost line just emptied is
+    # what the growth is measured in, so this writes the pile and reads the
+    # meter -- which is the connection the row exists to make.
+    "grow_largest_bomb": [_hook("private", "sparks", "read"),
+                          _hook("private", "bombs", "write")],
     "damage_set_off_total": [_hook("private", "bombs", "read")],
     "multiply_set_off": [_hook("private", "bombs", "read")],
     "draw_per_set_off": [_hook("private", "bombs", "read"),

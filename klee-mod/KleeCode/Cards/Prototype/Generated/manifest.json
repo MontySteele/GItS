@@ -84,6 +84,7 @@
     "proto_ko_sizzle",
     "proto_ko_sorry_jean",
     "proto_ko_sparks_n_splash",
+    "proto_ko_stoke_the_fuse",
     "proto_ko_sugar_rush",
     "proto_ko_the_big_one",
     "proto_ko_tinder_toss",
@@ -260,6 +261,7 @@
     "proto_ko_sizzle": "klee",
     "proto_ko_sorry_jean": "klee",
     "proto_ko_sparks_n_splash": "klee",
+    "proto_ko_stoke_the_fuse": "klee",
     "proto_ko_sugar_rush": "klee",
     "proto_ko_the_big_one": "klee",
     "proto_ko_tinder_toss": "klee",
@@ -624,6 +626,9 @@
     },
     "proto_ko_sparks_n_splash": {
       "cost": -1
+    },
+    "proto_ko_stoke_the_fuse": {
+      "grow": 1
     },
     "proto_ko_sugar_rush": {
       "energy": 1

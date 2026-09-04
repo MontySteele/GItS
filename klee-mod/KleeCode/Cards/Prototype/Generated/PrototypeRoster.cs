@@ -87,6 +87,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKoSizzle>(),
             ModelDb.Card<ProtoKoSorryJean>(),
             ModelDb.Card<ProtoKoSparksNSplash>(),
+            ModelDb.Card<ProtoKoStokeTheFuse>(),
             ModelDb.Card<ProtoKoSugarRush>(),
             ModelDb.Card<ProtoKoTheBigOne>(),
             ModelDb.Card<ProtoKoTinderToss>(),

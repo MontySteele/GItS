@@ -571,3 +571,21 @@ Two verdicts, each with its clause and its line. Under 200 words.
 2. FOLLOWS — C1–C6. Countdown costs 1 energy to Set off and draw 1, versus Sizzle’s same 1-energy Set off plus 6 damage, preserving a real losing line.
 ```
 
+### 5.1 The pool pass, row 2 (same day, later)
+
+Rounds 11 and 12 ended fights with 4 to 9 Sparks unspent, the surplus the
+withdrawn sink was written for. A second sink was written whose value
+follows the Bomb decision rather than the bank, at Quick Fuse's own rate,
+and read through the same door:
+
+| Row | Verdict | Clause |
+|---|---|---|
+| Stoke the Fuse (Uncommon Skill, 0 energy, X Sparks: your largest Bomb grows by 3 per Spark spent; no Set off) | **FOLLOWS** | C1 to C6: +3 for 1 Spark, Quick Fuse's rate, without its Set off |
+
+The prompt was the row-1 prompt with the earlier verdicts stated and the
+single arm below; the reply verbatim:
+
+```
+FOLLOWS — C1–C6; “Your largest Bomb grows by 3 per Spark spent” yields +3 for 1 Spark, matching Quick Fuse’s pool-row rate while lacking its Set off.
+```
+

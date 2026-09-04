@@ -21,6 +21,7 @@ from understudy.blindplay_notes import (AURA_NOTE,
                                         METER_DEFINED_NOTE, METER_NOTE,
                                         METER_RULES,
                                         PENDING_PICK_NOTE, PICKED_MARK,
+                                        PLAN_AIM_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE)
@@ -109,9 +110,30 @@ def _render_moved(said: dict[str, Any]) -> list[str]:
         return []
     if not said["moved"]:
         return ["    - no enemy lost HP"]
-    return [f"    - {m['target']} lost {m['amount']} HP"
-            + (", and died" if m["dead"] else "")
-            for m in said["moved"]]
+    return [f"    - {_moved_line(m)}" for m in said["moved"]]
+
+
+def _moved_line(m: dict[str, Any]) -> str:
+    """One body's share of one Plan, HP and Block (`EB-329`, `EB-440`).
+
+    THE SILENCE THE r12 SEAT READ AS SUCCESS. `Kurage's Oath+` carried out into
+    a Defend intent, HP went 35 to 35, the aura landed, and the receipt was
+    "no enemy lost HP" -- true, and indistinguishable on the page from a Plan
+    that did nothing at all. The Block the beat ate is now the line's own
+    clause, so a morning spent on a shield reads as one.
+
+    ABSENT IS NOT ZERO, `board_read`'s discipline one level down: a bridge that
+    predates the measurement sends no `absorbed` key and prints exactly the
+    line it always printed.
+    """
+    absorbed = m.get("absorbed") or 0
+    if not m["amount"] and absorbed:
+        return (f"{m['target']} lost no HP -- {absorbed} absorbed by Block"
+                + (", and died" if m["dead"] else ""))
+    line = f"{m['target']} lost {m['amount']} HP"
+    if absorbed:
+        line += f", and {absorbed} more absorbed by Block"
+    return line + (", and died" if m["dead"] else "")
 
 
 def _render_carry_out(pl: dict[str, Any]) -> list[str]:
@@ -130,15 +152,49 @@ def _render_carry_out(pl: dict[str, Any]) -> list[str]:
         out.append(f"- The {pl['pet_name']} carried these out at the "
                    "start of this turn, front first:")
         for said in pl["carried_out"]:
-            out.append(f"  - {said['line']}")
+            out.append(f"  - {said['line']}{_kind_clause(said)}")
             out += _render_moved(said)
     if pl["fired_now"]:
         out.append(f"- The {pl['pet_name']} carried these out THIS TURN, the "
                    "moment each was written, and not this morning:")
         for said in pl["fired_now"]:
-            out.append(f"  - {said['line']}")
+            out.append(f"  - {said['line']}{_kind_clause(said)}")
             out += _render_moved(said)
     return out
+
+
+def _kind_clause(said: dict[str, Any]) -> str:
+    """What the figure on a carry-out line IS (`EB-426`).
+
+    `Bake-Kurage: Cleansing Wave, 7` put a bare 7 in the slot every other line
+    uses for damage and then said "no enemy lost HP". The 7 was BLOCK, cut from
+    the clause's 10 by Frail, and the r11 seat derived both halves off the
+    board. Neither is in the mod's sentence -- it is one string with one figure
+    -- so the kind and the amount the clause asked for ride beside it and the
+    page says them.
+
+    THE MOD'S SENTENCE IS UNTOUCHED. It is printed as sent, and this is a
+    clause AFTER it: one composer for the on-screen words, which is the whole
+    argument for the `line` field, and the page adding what the wire now
+    carries.
+
+    EVERY KIND AND NOT ONLY BLOCK. "A bare number in the slot every other line
+    uses for damage" is a complaint about a slot with no label, and labelling
+    one kind would leave the slot exactly as ambiguous for the next reader --
+    `Exposed Flank, 2` is two stacks of Vulnerable.
+
+    THE ASKED-FOR HALF IS PRINTED ONLY WHERE IT DIFFERS, and it is not always
+    smaller: a hit into Vulnerable lands above what its clause asked for. Which
+    power moved it is not on the wire (`CreatureCmd.GainBlock` reports a landed
+    amount and no attribution), so the page states the two numbers and leaves
+    the screen's own status rows to name what sits between them.
+    """
+    if said["number"] is None or not said["kind"]:
+        return ""
+    clause = f" — the {said['number']} is {said['kind']}"
+    if said["asked"] is not None and said["asked"] != said["number"]:
+        clause += f"; the clause asked for {said['asked']}"
+    return clause + "."
 
 
 def _board_note_wanted(pl: dict[str, Any]) -> bool:
@@ -357,10 +413,12 @@ def render(obs: dict[str, Any]) -> str:
                            "whole fight. Enemies cannot touch it. Play a card "
                            "on it to write its **Plan** line instead of "
                            "playing the card now.")
-                # `EB-378`: whose element the carry-out is, said where the
-                # carry-out happens. Under the pet's own line, because it is a
-                # fact about the jellyfish's hit rather than about any one
-                # Plan in the queue below.
+                # `EB-442`: WHERE a Plan lands, then `EB-378`'s whose hit
+                # it is -- both under the pet's own line, because both are
+                # facts about the jellyfish's carry-out rather than about any
+                # one Plan in the queue below. The aim rule leads: a reader
+                # asking what a Plan will do asks which body first.
+                out.append(PLAN_AIM_NOTE)
                 out.append(PLAN_HYDRO_NOTE)
             # `EB-317`. WHAT ALREADY HAPPENED, BEFORE WHAT IS STILL WAITING,
             # because that is the order the turn had: the morning's Plans were
