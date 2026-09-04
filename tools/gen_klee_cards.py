@@ -3004,6 +3004,17 @@ def blocked_reason(
                     return (
                         "bonus_vs_aura requires enemy damage and "
                         "a literal int")
+            if "bonus_vs_debuff" in eff:
+                # `EB-441`. AIMED ONLY, and narrower than the aura rider on
+                # purpose: `debuff_calc_rider` renders this through
+                # `CalculatedDamageVar`, whose multiplier is resolved ONCE
+                # against the hovered or aimed creature. An all-enemies form
+                # would collapse a per-enemy decision into one flat value,
+                # which is the reason `aura_calc_rider` refuses AoE.
+                if eff.get("target") != "enemy" or not isinstance(
+                        eff["bonus_vs_debuff"], int):
+                    return ("bonus_vs_debuff requires aimed enemy damage "
+                            "and a literal int")
             # `times` is checked by _times_reason at the top of this loop
             # (EB-132) -- it is not a damage-only field.
         if op == "place_bomb":
@@ -4583,6 +4594,40 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
         f"FurinaResources.ReadableFanfare(card.Owner.Creature) / {int(m.group(2))}")
 
 
+def debuff_calc_rider(card: dict, eff: dict) -> tuple[int, int] | None:
+    """`EB-441`: a single-target `bonus_vs_debuff` rider, rendered through
+    `CalculatedDamageVar`. Returns (base, bonus) or None.
+
+    THE DEFECT IT CLOSES. Undertow was a `conditional` whose two branch
+    numbers were LITERALS in the face, so nothing folded them: the r12 act-1
+    seat read "`Strike -- Deal 4 damage.` (6 adjusted to 4 -- correct)" and
+    "`Undertow -- Deal 7 damage...`" on one screen, played Undertow into a
+    Weak 1 turn and watched it deal 5. "Strike's face is Weak-adjusted;
+    Undertow's face is not. I chose the turn's plays off a number that was 2
+    too high."
+
+    A RIDER RATHER THAN A FOLD OF OUR OWN, and that is the point: the engine
+    already folds a `CalculatedDamageVar` exactly the way it folds Strike's
+    `DamageVar` -- every term, not the two a hand-written mirror would name --
+    and `Calculate(target)` at resolution is the same call. Face and hit are
+    one number by construction rather than by agreement.
+
+    THE BRANCH BECOMES A BONUS AND THE ARITHMETIC DOES NOT MOVE: 7, or 7+3 on
+    a debuffed enemy, is what "deal 7, or 10 instead" said. ONE hit either
+    way, which matters -- two would be two aura applications and two reaction
+    rolls.
+
+    AIMED ONLY, `aura_calc_rider`'s rule and its reason: the multiplier is
+    resolved once against the hovered creature, so an all-enemies form would
+    print one number for a board that would take several.
+    """
+    if eff.get("op") != "damage" or eff.get("target") != "enemy":
+        return None
+    if "bonus_vs_debuff" not in eff:
+        return None
+    return int(eff["amount"]), int(eff["bonus_vs_debuff"])
+
+
 def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     """Unified view of every damage rider that renders through a
     CalculatedDamageVar: (base, extra, multiplier-lambda source). The four
@@ -4649,6 +4694,14 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     if members is not None:
         base, per_n, _ = members
         return base, per_n, f"static (card, _) => {SALON_MEMBER_COUNT_CS}"
+    debuff = debuff_calc_rider(card, eff)
+    if debuff is not None:
+        base, bonus = debuff
+        # Guard the null for `aura_calc_rider`'s reason: preview calls
+        # `Calculate(null)` whenever nothing is hovered.
+        return base, bonus, (
+            "static (_, target) => "
+            "target != null && KokomiOverhaulKit.HasDebuff(target) ? 1 : 0")
     aura = aura_calc_rider(card, eff)
     if aura is not None:
         base, bonus = aura

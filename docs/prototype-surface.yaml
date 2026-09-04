@@ -1050,12 +1050,17 @@
 - {id: proto_kk_undertow, name: "Undertow (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {IfUpgraded:show:10|7} damage. If the enemy has a debuff, deal {IfUpgraded:show:13|10} instead.",
-   effects: [{op: conditional, if: target_has_debuff,
-              then: [{op: damage, amount: 10, target: enemy}],
-              else: [{op: damage, amount: 7, target: enemy}]}],
+   # `EB-441`: the two branch numbers were literals in the face and nothing
+   # folded them, so a Weak 1 turn printed 7 and dealt 5 beside a Strike that
+   # printed its adjusted 4. One damage op with a rider prints ONE number
+   # through `CalculatedDamageVar`, which the engine folds exactly as it folds
+   # Strike's -- and previews per hovered enemy, so the face answers the
+   # question the branch was asking. Same two numbers: 7, or 7+3 on a debuffed
+   # enemy.
+   description: "Deal {CalculatedDamage:diff()} damage, already including {ExtraDamage:diff()} if the enemy has a debuff.",
+   effects: [{op: damage, amount: 7, target: enemy, bonus_vs_debuff: 3}],
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
-   upgrade: {conditional_damage: 3}}
+   upgrade: {damage: +3}}
 
 - {id: proto_kk_salt_line, name: "Salt Line (proto)", character: kokomi,
    authored_by: [claude],

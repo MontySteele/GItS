@@ -517,7 +517,7 @@
       "innate": true
     },
     "proto_kk_undertow": {
-      "conditional_damage": 3
+      "damage": 3
     },
     "proto_kk_vanguard": {
       "plan_power_amount": 1

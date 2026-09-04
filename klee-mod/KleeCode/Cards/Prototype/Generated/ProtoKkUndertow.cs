@@ -51,13 +51,15 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undertow"),
-        ("description", "Deal {IfUpgraded:show:10|7} damage. If the enemy has a debuff, deal {IfUpgraded:show:13|10} instead."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, already including {ExtraDamage:diff()} if the enemy has a debuff."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CalculationBaseVar(7m),
+            new ExtraDamageVar(3m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => target != null && KokomiOverhaulKit.HasDebuff(target) ? 1 : 0)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -69,27 +71,16 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiOverhaulKit.HasDebuff(cardPlay.Target))
-        {
-            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack((IsUpgraded ? 13m : 10m))
-                .FromCard(this, cardPlay)
-                .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
-                .Execute(choiceContext);
-        }
-        else
-        {
-            await DamageCmd.Attack((IsUpgraded ? 10m : 7m))
-                .FromCard(this, cardPlay)
-                .Targeting(cardPlay.Target)
-                .WithHitFx("vfx/vfx_attack_slash")
-                .Execute(choiceContext);
-        }
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()
     {
-        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the text swaps via {IfUpgraded:show:...|...}.
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }
