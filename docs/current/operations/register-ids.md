@@ -1505,3 +1505,9 @@ EB-299 RETIRED 2026-09-04: the footnote says the number is a place in a list tha
 EB-277 RETIRED 2026-09-04: the Prototype-stage rule gives every reachable row a real delta, under EB-283's codegen gate refusing an identical + face.
 EB-41 RETIRED 2026-09-04 on [USER]'s rulings: Encore and Fanfare telemetry stay separate, no shared base (question 1, "I think they should be separate"); the exp_* move takes its default, no module moves and all 21 records stay re-runnable (question 2).
 EB-128 RETIRED 2026-09-04 on [USER]'s ruling ("they are truly lost and need to be recreated"): the reconstructed defect/necrobinder/regent *_char_facts.yaml, re-decompiled from the live DLL 2026-08-24, stand as the originals, and tools.backup_game_ref reports the vault holds all five, 29 files unchanged.
+EB-362 RETIRED 2026-09-04: the CompanionsPlayedThisTurn write moved to the always-on marker power, so it no longer depends on drawing The General's Banner.
+EB-358 RETIRED 2026-09-04: each Sparks 'n' Splash copy is now its own end-of-turn hit, the loop running once per stack, and the badge's count reads as the hit count, both engines.
+EB-343 RETIRED 2026-09-04: set-off now drops the placer's Strength and Weak and applies only the target's Vulnerable and per-hit cap, with the badge and tooltip naming every modifier folded in.
+EB-320 RETIRED 2026-09-04: #317 fixed the emitter and CompanionStandInHandOffTests.cs pins HandOffTo yes for a Klee reward, no for anyone else, no with the arm off.
+EB-322 RETIRED 2026-09-04: one loader.display_name, imported by both engines, strips the " (proto)" suffix at the emitter's single title site and at prototype_cards.
+EB-319 RETIRED 2026-09-04: _refuse carries the forms that resolve and act folds them into every refusal, falling back to the screen's own grammar.
