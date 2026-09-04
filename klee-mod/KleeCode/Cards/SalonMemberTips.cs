@@ -237,6 +237,14 @@ public static class SalonMemberTips
         // 135-character ceiling carrying `EB-368`'s three rules, and this
         // clause is 39; the paragraph behind the word has the room, is printed
         // on the same card, and is where the other four rules already live.
+        //
+        // `EB-451` PUT THE LIMIT ON THE AIM. "Its own choice" was true and
+        // still cost the r7 seat the run's one PAID performance: the roll took
+        // the 6-HP Eye with Teeth, which revives at full, while the body that
+        // mattered stood beside it. The roll now skips a Minion while a
+        // non-Minion stands (`SalonMemberPower.AimPool`, R250's shape one roller
+        // over), and the sentence that describes the aim is the sentence that
+        // says so.
         if (FurinaReframe.ManualLiveFor(owner))
         {
             body =
@@ -246,7 +254,8 @@ public static class SalonMemberTips
               + "it fields at once; deploying onto a full stage "
               + "[gold]Evokes[/gold] the front member first. The leftmost "
               + "member is the front. A performing member picks its own "
-              + "enemy. Member numbers gain +1 per "
+              + "enemy, never a [gold]Minion[/gold] while another enemy "
+              + "stands. Member numbers gain +1 per "
               + $"{SalonConstants.FocusPerFanfare} Fanfare you hold, and a "
               + "member with no Encore to spend performs at three-quarters.";
         }

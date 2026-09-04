@@ -1780,7 +1780,8 @@ def _salon_bow(state: CombatState, member: str, evoked: bool = False) -> None:
     mult = furina_reframe.evoke_focus_mult(p) if evoked else 1
     dmg = spec.get("damage", 0)
     if dmg and state.living_enemies:
-        enemy = state.rng.choice(state.living_enemies)
+        # `EB-451`: the roll's pool, not the raw board.
+        enemy = state.rng.choice(salon_aim_pool(state.living_enemies))
         deal_damage_to_enemy(state, enemy,
                              _salon_amount(state, dmg, focus_mult=mult),
                              element="hydro", source="salon_final_bow")
@@ -6244,6 +6245,26 @@ def salon_tick_amount(state: CombatState, member: str, paid: bool,
     return amt if paid else int(amt * C.SALON_DRY_DAMAGE_MULT)
 
 
+def salon_aim_pool(living: list) -> list:
+    """The bodies a member's roll may pick (`EB-451`).
+
+    Every living enemy, SKIPPING A MINION while a non-Minion stands. Furina r7
+    fight 7 spent the run's one PAID performance -- every other member in every
+    other fight performed dry -- on the 6-HP Eye with Teeth, which revives at
+    full, while the body that mattered stood beside it.
+
+    R250'S SHAPE, ONE ROLLER OVER. It ruled that a Plan aims a non-Minion
+    unless it is aimed, over the same evidence, and `kokomi_plan.front_enemy`
+    reads `is_minion` for it. This reads the same flag, and falls back to the
+    whole list on an all-Minion board for the same reason: a performance that
+    lands on nothing is worse than one that lands on the decoy.
+
+    Twin: `SalonPowers.AimPool`, which both the tick and the bow roll over.
+    """
+    standing = [e for e in living if not e.is_minion]
+    return standing or living
+
+
 def salon_member_act(state: CombatState, member: str) -> bool:
     """ONE member's slot passive, with the full standard bill: the Encore
     upkeep, the dry three-quarters when it goes unpaid, the Focus/Grand-Salon
@@ -6273,7 +6294,8 @@ def salon_member_act(state: CombatState, member: str) -> bool:
         resources.spend_encore(state, C.SALON_TICK_ENCORE_COST,
                                "salon_upkeep")
     if spec.get("damage", 0):
-        enemy = state.rng.choice(state.living_enemies)
+        # `EB-451`: the roll's pool, not the raw board.
+        enemy = state.rng.choice(salon_aim_pool(state.living_enemies))
         deal_damage_to_enemy(state, enemy,
                              salon_tick_amount(state, member, paid),
                              element="hydro", source="salon")
