@@ -196,8 +196,8 @@ are in [`workstreams.md`](workstreams.md).
   Fanfare decorative below the bars; four real decisions named, one pick
   (a reader in every deck), `EB-404`-`EB-407`, `EB-412`-`EB-414`; RULED R254:
   Aria of Recompense reads Fanfare under the arm (5 more Encore at 6), the
-  starter stays two kit cards, build in flight. [USER]'s act-1 run is due on
-  that build. No stamp moves, nothing measured.
+  starter stays two kit cards, **BUILT** as `proto_fr_aria_of_recompense`.
+  [USER]'s act-1 run is due on that build. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
