@@ -168,6 +168,38 @@ def test_shatter_on_attack_hit(state):
     assert any(ev["event"] == "shatter" for ev in state.log)
 
 
+def test_a_hit_that_shatters_and_refreezes_leaves_no_freeze(state):
+    """`EB-423`. The board a round-5 Furina seat read: "the shatter
+    demonstrably happened (the 6 is in the HP total) and the board still read
+    Frozen 1 afterwards."
+
+    ONE HIT, BOTH RULES. A Cryo Attack lands on a body that is already Frozen
+    AND wearing a fresh Hydro aura -- which is an ordinary board in that kit,
+    a Salon member having re-applied Hydro between two plays. The hit Shatters
+    the standing freeze and its own reaction makes a new one, and the printed
+    sentence says the Frozen is gone.
+
+    THIS ENGINE'S ORDER IS WHAT MAKES THAT TRUE, and it is not an accident of
+    the call site: `resolve_hit` reacts first (`enemy.frozen += 1`) and the
+    Shatter block below it zeroes the whole field. The mod reached the
+    opposite board because its two rules are two powers in one broadcast, and
+    `ReactionEffects.MarkShattered` is the half that fixes it there. Pinned
+    here so the reference cannot drift out from under it."""
+    from tier0.engine.effects import deal_damage_to_enemy
+    e = state.enemies[0]
+    hit(state, e, "hydro", 0)
+    deal_damage_to_enemy(state, e, 5, element="cryo", source="attack")
+    assert e.frozen == 1
+    hit(state, e, "hydro", 0)               # the aura is back on the body
+    hp_before = e.hp
+
+    deal_damage_to_enemy(state, e, 5, element="cryo", source="attack")
+
+    # The Shatter landed -- and left nothing behind, which is what it prints.
+    assert e.hp == hp_before - 5 - C.SHATTER_DAMAGE
+    assert e.frozen == 0
+
+
 def test_frozen_boss_becomes_vulnerable():
     # Round-3 ruling (decision-2 contingency triggered): bosses consume
     # Frozen for Vulnerable 2 instead of a skipped intent.
