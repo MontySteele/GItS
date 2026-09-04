@@ -658,7 +658,17 @@ def _number_faces(faces: list[dict[str, Any]], field: str
 # a remembered id for a DIFFERENT creature. A board that is a subset of the
 # roster is the same fight with bodies gone; a board that adds an id beside
 # remembered ones is a summon, and the newcomer takes the next free number.
-_FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {}, "numbered": set()}
+#
+# `EB-427` ADDED `names`, AND IT IS THE HALF EVERY RECEIPT NEEDED. The
+# numbering above already held across a death -- the kokomi r11 seat's three
+# Inklets keep 1, 2 and 3 through the one the morning killed -- but every line
+# that names a body the board no longer carries fell back to the mod's bare
+# title, so one morning printed `Inklet`, `Inklet (1)` and `Inklet (2)` for
+# three bodies and the seat read that as the numbers having shifted under it.
+# The fight remembers each id's PRINTED name, so a body that has left the board
+# is still called what it was called while it stood.
+_FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {},
+                                 "numbered": set(), "names": {}}
 
 
 def forget_fight() -> None:
@@ -666,6 +676,30 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["roster"] = {}
     _FIGHT_MEMORY["ordinals"] = {}
     _FIGHT_MEMORY["numbered"] = set()
+    _FIGHT_MEMORY["names"] = {}
+
+
+def remembered_enemy_name(combat_id: Any, title: str) -> str:
+    """What this fight has been calling the body with that combat id (`EB-427`).
+
+    THE CALLER'S OWN TITLE STAYS THE FALLBACK, for the two cases it was always
+    right for: an id this fight never saw, and a wire that carries no id at
+    all. What changes is the case in between -- a body that WAS on the board
+    and is not any more, which is exactly the body a carry-out or a performance
+    is most likely to be about, because a Plan that killed something is a Plan
+    a reader wants to read.
+
+    THE EXPRESSION IS `_enemy_names`' OWN, deliberately: a name is numbered
+    here on the same two conditions it is numbered there, so a body cannot be
+    called one thing in the enemy list and another in the receipt above it.
+    """
+    key = f"c{combat_id}"
+    name = _FIGHT_MEMORY["names"].get(key)
+    if not name:
+        return title
+    if _fold(name) in _FIGHT_MEMORY["numbered"] and key in _FIGHT_MEMORY["ordinals"]:
+        return f"{name} ({_FIGHT_MEMORY['ordinals'][key]})"
+    return name
 
 
 def _enemy_key(entry: dict[str, Any]) -> str:
@@ -720,10 +754,13 @@ def _enemy_names(enemies: list[dict[str, Any]]) -> list[str]:
     ordinals: dict[str, int] = _FIGHT_MEMORY["ordinals"]
     numbered: set[str] = _FIGHT_MEMORY["numbered"]
 
-    for key, (fold, hp) in zip(keys, ident):
+    for key, name, (fold, hp) in zip(keys, names, ident):
         if key in roster or not fold:
             continue
         roster[key] = (fold, hp)
+        # `EB-427`: the printed name beside the ordinal, so a line about a body
+        # that has since left the board can be given the same handle.
+        _FIGHT_MEMORY["names"][key] = name
         seen = sum(1 for f, _ in roster.values() if f == fold)
         ordinals[key] = seen
         if seen > 1:

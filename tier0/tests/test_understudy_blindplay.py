@@ -3306,6 +3306,102 @@ def test_an_all_plan_prints_a_number_per_target():
     assert "**Nibbit (2)**" in page
 
 
+# --------------------------------------------------------------------------
+# `EB-427`: A COPY KEEPS ITS NUMBER FOR THE FIGHT, RECEIPTS INCLUDED.
+#
+# The kokomi r11 seat met three Inklets, watched one die to a morning, and read
+# the receipt for that morning as `Inklet`, `Inklet (1)` and `Inklet (2)` -- so
+# it concluded "`Inklet (1)` was a different Inklet than it had been the turn
+# before ... the list re-counts", and nearly aimed at the wrong body. The list
+# does not re-count: `_enemy_names` has held the numbers by combat id since
+# `EB-271`. What re-counted was the READING, because the one row naming a body
+# the board no longer carried fell back to the mod's bare title. Both halves
+# are pinned here, on a fight with a death.
+# --------------------------------------------------------------------------
+
+
+def three_body_state(plans: dict, dead: str = "") -> dict:
+    """`two_body_state` with THREE copies, and one id optionally off the feed.
+
+    The r11 board, in its own shape: three bodies of one name, distinct combat
+    ids, and a death that the feed answers by dropping the body entirely rather
+    than sending a corpse -- which is the case `EB-271`'s corpse test could not
+    reach and the case a morning's receipt is always about.
+    """
+    state = plans_combat_state(plans)
+    enemies = state["battle"]["enemies"]
+    bodies = [dict(enemies[0], name="Inklet", combat_id=n,
+                   entity_id=f"INKLET_{n}") for n in (1, 2, 3)]
+    state["battle"] = dict(state["battle"],
+                           enemies=[b for b in bodies
+                                    if str(b["combat_id"]) != dead])
+    return state
+
+
+def test_a_copy_keeps_its_number_when_the_dead_body_leaves_the_feed():
+    """The first board numbers three copies; the next board is two of them and
+    the numbers do not move. GREEN BEFORE THIS ROW and pinned by it: the seat
+    reported the opposite, so the standing behaviour is now stated rather than
+    inferred -- `EB-271`'s own test keeps a corpse in the list, and this is the
+    feed that drops the body instead."""
+    blindplay.forget_fight()
+    empty = morning_of()
+    first = blindplay.render(blindplay.observation(three_body_state(empty)))
+    for n in (1, 2, 3):
+        assert f"({n})" in first
+    after = blindplay.render(blindplay.observation(
+        three_body_state(empty, dead="1")))
+    # The survivors keep 2 and 3, and no line naming an Inklet says `(1)`.
+    named = [ln for ln in after.splitlines() if "Inklet" in ln]
+    assert any("Inklet (2)" in ln for ln in named)
+    assert any("Inklet (3)" in ln for ln in named)
+    assert not any("Inklet (1)" in ln for ln in named)
+    # And the grammar offers the same handles the page just printed, which is
+    # the half `EB-271` closed: a page and a grammar that disagree about which
+    # body `(1)` names is the silent mistarget, not a cosmetic one.
+    state = three_body_state(empty, dead="1")
+    refusal = blindplay.act(state, 'play "Pearl Barrage" on "Inklet"')["refusal"]
+    assert "Inklet (2)" in refusal and "Inklet (3)" in refusal
+    assert "Inklet (1)" not in refusal
+    assert blindplay.act(state, 'play "Pearl Barrage" on "Inklet (3)"')["ok"]
+
+
+def test_a_morning_names_the_copy_it_killed():
+    """The r11 receipt, repaired. The mod records a bare title for the body it
+    killed because that body is off the next board; the fight remembers what
+    the page called it, so all three rows carry a copy number and the reader is
+    never handed a bare name beside two numbered ones."""
+    blindplay.forget_fight()
+    blindplay.observation(three_body_state(morning_of()))
+    page = blindplay.render(blindplay.observation(three_body_state(
+        morning_of({"card": "Exposed Flank", "number": 2,
+                    "line": "Bake-Kurage: Exposed Flank, 2",
+                    "on_play": False,
+                    "moved": [{"target": "Inklet", "combat_id": "1",
+                               "amount": 13, "dead": True},
+                              {"target": "Inklet", "combat_id": "2",
+                               "amount": 3, "dead": False},
+                              {"target": "Inklet", "combat_id": "3",
+                               "amount": 1, "dead": False}]}),
+        dead="1")))
+    assert "- Inklet (1) lost 13 HP, and died" in page
+    assert "- Inklet (2) lost 3 HP" in page
+    assert "- Inklet (3) lost 1 HP" in page
+
+
+def test_an_unremembered_body_still_falls_back_to_the_mods_title():
+    """The fallback is unchanged where it was always right: an id this fight
+    never saw is named by the title the mod recorded, and never by a number
+    borrowed from some other body."""
+    blindplay.forget_fight()
+    page = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Ambush", "number": 12,
+                    "line": "Bake-Kurage: Ambush, 12", "on_play": False,
+                    "moved": [{"target": "Sentry", "combat_id": "77",
+                               "amount": 12, "dead": True}]}))))
+    assert "- Sentry lost 12 HP, and died" in page
+
+
 def test_a_plan_that_moved_no_hp_says_so_and_an_older_wire_says_nothing():
     """Two silences that are not the same silence. A Draw Plan really moved
     no HP and saying so is what lets a morning reconcile; a bridge that

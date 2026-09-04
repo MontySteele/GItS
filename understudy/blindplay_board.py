@@ -15,7 +15,7 @@ from understudy.blindplay_faces import (_card_face, _card_title, _enemy_names,
                                         _hook_note, _intents, _meter_max,
                                         _named_option, _number_faces, _powers,
                                         relic_faces, remember_deck,
-                                        remembered_deck)
+                                        remembered_deck, remembered_enemy_name)
 from understudy.blindplay_read import (_blob, _enemies, _fold, _hand, _int,
                                        _label, _listing, _player, _potions,
                                        _screen, _text)
@@ -323,15 +323,22 @@ def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],
     board gets the page's own numbered name; one that DIED to the Plan is off
     the next board entirely and keeps the title the mod recorded, which is
     the whole reason the mod sends a title at all.
+
+    `EB-427` PUT THE FIGHT'S MEMORY BETWEEN THE TWO. The mod's title carries no
+    copy number, so a morning against three Inklets that killed one printed
+    `Inklet`, `Inklet (1)` and `Inklet (2)` -- three bodies, two handles and one
+    bare word -- and the r11 seat read the mix as the numbering having shifted.
+    `remembered_enemy_name` hands back the name this page used while that body
+    stood, so the receipt and the enemy list under it never disagree.
     """
     by_id = {_text(raw.get("combat_id")): face["name"]
              for raw, face in zip(wire, printed)
              if _text(raw.get("combat_id"))}
     for row in plans["carried_out"] + plans["fired_now"]:
         for moved in row["moved"]:
-            named = by_id.get(moved["combat_id"])
-            if named:
-                moved["target"] = named
+            moved["target"] = (by_id.get(moved["combat_id"])
+                               or remembered_enemy_name(moved["combat_id"],
+                                                        moved["target"]))
 
 
 def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
