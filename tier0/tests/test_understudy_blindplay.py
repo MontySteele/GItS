@@ -3298,6 +3298,67 @@ def test_a_turn_with_no_carry_out_prints_no_carry_out_block():
     assert "1. **Kurage's Oath**" in page
 
 
+# `EB-453`. THE PANEL OMITTED A PLAN AND MIS-STATED A NUMBER.
+#
+# Kokomi r13 fight 6: two Plans written, ONE printed, and `War Council, 7 (the
+# 7 is damage)` sat above a body that had lost 9. Both halves are one shape --
+# the page could only print what the wire carried, and the wire carried neither
+# the Plan the fight cut off nor the name of the thing that dealt the other 2.
+
+#: The r13 board: a Plan that ran with the Casket answering inside its beat,
+#: and a second Plan the kill cut off before it happened.
+CARRIED_OUT_R13 = dict(TWO_PLANS, pending=0, queue=[], carried_out=[
+    {"card": "War Council", "number": 7, "line": "Bake-Kurage: War Council, 7",
+     "kind": "damage", "asked": 7, "on_play": False,
+     "moved": [{"target": "Cubex", "combat_id": "1", "amount": 9,
+                "dead": False, "absorbed": 0}],
+     "riders": [{"source": "Tamakushi Casket", "amount": 2}],
+     "unfinished": False},
+    {"card": "Kurage's Oath", "number": None,
+     "line": "Bake-Kurage: Kurage's Oath", "on_play": False,
+     "unfinished": True},
+])
+
+
+def test_the_panel_lists_the_plan_the_fight_cut_off():
+    """A kill inside the first Plan of a morning unwinds the drain, so the rest
+    never happen -- and nothing on the page said so. The row rides the same
+    list because it was in the same queue, and the ORDER is the fact."""
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(CARRIED_OUT_R13)))
+
+    assert "Bake-Kurage: War Council, 7" in page
+    assert ("Kurage's Oath — still planned when the fight ended, so it never "
+            "happened.") in page
+    assert (page.index("War Council") < page.index("Kurage's Oath"))
+    # A Plan that never ran was never MEASURED either, so it claims no board.
+    assert "no enemy lost HP" not in page
+
+
+def test_the_delivered_number_names_what_else_was_in_it():
+    """The 7 and the 9. The line's figure is what the Plan's first clause
+    produced; the line under it is what the board LOST, measured across the
+    whole beat -- and the difference was the Tamakushi Casket answering the
+    Weak that same Plan had just applied. A subtraction has no sources, so the
+    mod names the rider and the page prints the name."""
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(CARRIED_OUT_R13)))
+
+    assert "the 7 is damage" in page
+    assert "Inside the same beat: Tamakushi Casket 2." in page
+    assert "lost 9 HP" in page
+
+
+def test_a_bridge_with_no_riders_prints_what_it_always_printed():
+    """ABSENT IS NOT EMPTY, this section's standing rule: a build older than
+    the field sends no `riders` key, and the row reads exactly as it did."""
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(CARRIED_OUT_MEASURED)))
+
+    assert "Inside the same beat" not in page
+    assert "still planned when the fight ended" not in page
+
+
 def test_the_meter_ledger_stays_off_the_carry_out_block():
     """`R101b`. The page line is the ON-SCREEN text, and the ledger's rows --
     meter, before, after, price_paid -- are an instrument, not a surface a
@@ -3316,8 +3377,14 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
     # clause asked for. All seven are things a sighted player watched happen;
     # not one of them is a ledger row.
     for row in obs["combat"]["plans"]["carried_out"]:
+        # `EB-453` added the last two: the named riders inside the beat, so
+        # the line's figure and the board's can be reconciled, and whether
+        # the Plan ran at all. Both are things a sighted player watched
+        # happen -- a relic striking, and a Plan the fight cut off -- and
+        # neither is a ledger row.
         assert set(row) == {"card", "number", "line", "kind", "asked",
-                            "on_play", "board_read", "moved"}
+                            "on_play", "board_read", "moved",
+                            "riders", "unfinished"}
         for moved in row["moved"]:
             assert set(moved) == {"target", "combat_id", "amount", "dead",
                                   "absorbed"}

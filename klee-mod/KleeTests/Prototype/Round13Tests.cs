@@ -219,6 +219,80 @@ public class Round13Tests
     }
 
     // ==================================================================
+    // `EB-453` -- the panel that omitted a Plan and mis-stated a number
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r13 (c) 5). Two Plans written, ONE printed, and
+    // `War Council, 7 (the 7 is damage)` above a body that had lost 9. Both
+    // halves are one shape: the page could only print what the wire carried,
+    // and the wire carried neither the Plan the fight cut off nor the name of
+    // the thing that dealt the other 2.
+
+    [Fact]
+    public void A_rider_names_itself_to_the_plan_it_landed_inside()
+    {
+        // `MovedOn` is a SUBTRACTION and a subtraction has no sources, so the
+        // rider is the only thing that can say what it was. The Casket's own
+        // strike reports the DELIVERED number, because Vulnerable moves it and
+        // the page is trying to account for a total.
+        var strike = Il.Method("TamakushiCasket", "Strike");
+        var calls = Il.Calls(strike);
+
+        Assert.Contains("ElementalHit.Deal", calls);
+        Assert.Contains("KokomiPlan.NoteRider", calls);
+    }
+
+    [Fact]
+    public void A_rider_outside_a_plan_is_dropped_rather_than_misfiled()
+    {
+        // The call is unconditional at the strike, so "am I inside a Plan"
+        // has to be answered here -- and a strike on the enemy's turn belongs
+        // to no Plan at all.
+        KokomiPlan.ResetAll();
+
+        KokomiPlan.NoteRider("Tamakushi Casket", 2);
+
+        // Nothing to assert on but the absence of a throw and of a row: the
+        // collector is null between Plans, which is the whole guard.
+        Assert.Empty(KokomiPlan.CarriedOut(Seat.Kokomi().Player));
+    }
+
+    [Fact]
+    public void The_wire_carries_the_riders_and_the_unfinished_mark()
+    {
+        // The field names ARE the contract (`KokomiPlan.Snapshot`'s header),
+        // and `understudy/blindplay_board._carried_out_row` reads these two.
+        var row = Il.Method("KokomiPlan", "CarriedOutRow");
+        var rider = Il.Method("KokomiPlan", "RiderRow");
+
+        Assert.Contains("riders", Il.Strings(row));
+        Assert.Contains("unfinished", Il.Strings(row));
+        Assert.Contains("source", Il.Strings(rider));
+        Assert.Contains("amount", Il.Strings(rider));
+    }
+
+    [Fact]
+    public void The_plans_a_kill_cut_off_are_recorded_before_the_strip_goes()
+    {
+        // The order is the whole of it: `_showing` holds exactly the Plans
+        // that never ran (each resolved Plan removes its own thumbnail), and
+        // the old code tore it down on every path. A row read after the
+        // teardown would find nothing to name.
+        var calls = Il.Calls(Il.Method("KokomiPlan", "ResolveAll"));
+        var noteIndex = calls.ToList()
+            .FindIndex(c => c.EndsWith("KokomiPlan.NoteUnfinished",
+                                       System.StringComparison.Ordinal));
+
+        Assert.True(noteIndex >= 0, "the unfinished Plans are never recorded");
+        Assert.Contains("KokomiPlan.Record",
+                        Il.Calls(Il.Method("KokomiPlan", "NoteUnfinished")));
+        // One writer for both kinds of row, so a beat and a Plan the fight cut
+        // off arrive in one order and by one door.
+        Assert.Contains("KokomiPlan.Record",
+                        Il.Calls(Il.Method("KokomiPlan", "Announce")));
+    }
+
+    // ==================================================================
     // `EB-455` -- the card that was dead in hand and never said why
     // ==================================================================
     //
