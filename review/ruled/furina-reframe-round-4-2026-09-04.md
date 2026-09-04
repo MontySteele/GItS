@@ -1,4 +1,4 @@
-Status: OPEN (pick 1 in §5; the defaults in §4 are applied)
+Status: RULED R254 2026-09-04
 
 # Furina round four: the riders at the arm's scale, read by two seats who never reached them
 
@@ -122,3 +122,20 @@ crossed once and did not feel.
 Default is 1 because the readers exist and were not drawn; 3 is the
 smallest change if the next round says the same thing with a copy in the
 deck.
+
+## 6. Ruled (R254, 2026-09-04)
+
+[USER]: "maybe a reader in the starter deck? I still want to leave it at
+just 2 'good' cards, but they can be stronger." So neither 2 nor 3 as
+written: the starter keeps its two kit cards (Salon Début, Aria of
+Recompense) and one of them reads Fanfare. The reader goes on Aria, the
+card the seats already weighed on three axes: under the arm it reads
+"Gain 5 Encore. If you have at least 6 Fanfare, gain 5 more." Both
+numbers are lifted, 5 from its own face and 6 from the rider copies' bar;
+the loop it closes is the reframe's own (a stage that performs mints
+Fanfare, Fanfare pays Encore, Encore pays performances), and the 20%
+decay is its brake. Arm-only copy by the same seam as the riders; the
+shipped sheet stands. A starter card's text is a rule, so [USER] plays
+the first build. The alternative reader, Salon Début performing its
+member again at 6 Fanfare, is held as the re-ask if Aria's does not
+read.

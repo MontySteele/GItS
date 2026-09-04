@@ -162,11 +162,12 @@ are in [`workstreams.md`](workstreams.md).
   Ripple, on a new `plans_held` count in both engines, the pool 30 rows;
   Held Tide and Tidal Rhythm were withdrawn on the charter audit and are
   not on the surface. **Round 10 is READ**
-  (`review/active/kokomi-overhaul-round-10-2026-09-04.md`): two seats on
+  (`review/ruled/kokomi-overhaul-round-10-2026-09-04.md`): two seats on
   `0.2.2446+proto`, floors 6 and 11, both budget-out, neither drew Tide
   Chart; the Plan's Shrink line read true again, the jellyfish stood empty
   on most turns, one pick (starter Plan density), `EB-402`-`EB-403`,
-  `EB-408`-`EB-411`. [USER]'s act-1 run is due on `0.2.2446+proto`. The Kurage
+  `EB-408`-`EB-411`; RULED R254, starter density stands. [USER]'s act-1 run is
+  due on `0.2.2446+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
@@ -190,11 +191,13 @@ are in [`workstreams.md`](workstreams.md).
   same rarity by `loader._pool_substitutions` and
   `FurinaReframeRoster.SwapOfferedRiders`, so the shipped sheet stands and an
   arm-off run is offered the shipped card. **Round 4 is READ**
-  (`review/active/furina-reframe-round-4-2026-09-04.md`): two seats on
+  (`review/ruled/furina-reframe-round-4-2026-09-04.md`): two seats on
   `0.2.2446+proto`, floors 4 and 8, both budget-out, no rider copy drawn,
   Fanfare decorative below the bars; four real decisions named, one pick
-  (a reader in every deck), `EB-404`-`EB-407`, `EB-412`-`EB-414`. [USER]'s
-  act-1 run is due on `0.2.2446+proto`. No stamp moves, nothing measured.
+  (a reader in every deck), `EB-404`-`EB-407`, `EB-412`-`EB-414`; RULED R254:
+  Aria of Recompense reads Fanfare under the arm (5 more Encore at 6), the
+  starter stays two kit cards, build in flight. [USER]'s act-1 run is due on
+  that build. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
