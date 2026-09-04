@@ -6225,3 +6225,76 @@ def test_the_banner_face_and_the_dexterity_gloss_agree_on_one_page():
     page = blindplay.render(blindplay.observation(state))
     assert "then the banner takes 2 back" in page
     assert "does not decay" in page          # the base rule, still printed
+
+
+# --------------------- EB-404: a keyword in a TITLE defines nothing --------
+
+def titled_hand_state(title: str, body: str) -> dict:
+    """A combat whose hand holds one card with the given printed title and
+    body, and nothing else."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-PROTO_FR_ROW", "name": title, "type": "Attack",
+         "cost": "1", "can_play": True, "index": 0, "target_type": "AnyEnemy",
+         "is_upgraded": False, "keywords": [], "description": body}]
+    return state
+
+
+def test_a_keyword_in_a_card_title_raises_no_glossary_row():
+    """`EB-404`, and it is the row.
+
+    The page glossed `Deploy` -- "A member joins and performs at once" -- on a
+    screen holding `Freminet - Pers, Deploy!`, whose printed body is "Deal 6
+    damage". The word was in the TITLE. The Furina round-4 seat played the card
+    six times waiting for a member to join and read it as broken (run 1, (c) 2).
+
+    A title is flavour; a body is the rule. The card's own printed name is
+    still on the page, unchanged -- only the glossary stops reading it.
+    """
+    page = blindplay.observe(
+        titled_hand_state("Freminet - Pers, Deploy!", "Deal 6 damage."))
+    assert "Freminet - Pers, Deploy!" in page      # the face is untouched
+    assert "- **Deploy** " not in page
+
+
+def test_the_same_word_in_the_body_still_raises_it():
+    """The other direction, so the fix cannot pass by defining nothing: the
+    identical card whose BODY carries the word is glossed exactly as before."""
+    page = blindplay.observe(
+        titled_hand_state("Freminet - Pers, Deploy!",
+                          "Deploy Freminet. Deal 6 damage."))
+    assert "- **Deploy** " in page
+
+
+def test_no_class_of_keyword_row_is_raised_by_a_title_alone():
+    """Swept rather than sampled, over all four word tables the glossary
+    draws on -- the arms', the base game's re-statements, `GAME_KEYWORDS` and
+    the base status words. A title carrying any of them defines none of them.
+    """
+    from understudy import blindplay_notes as N
+    words = (list(N.ARM_KEYWORDS) + list(N.GAME_KEYWORDS)
+             + list(N.BASE_KEYWORDS))
+    assert len(words) >= 20
+    # Against the SAME board with a neutral title, so a word the recorded
+    # fixture already defines off a relic's body is not read as a finding: the
+    # claim is that the TITLE adds nothing, not that the board is empty.
+    base = blindplay.observation(
+        titled_hand_state("Someone - Pers, Move!", "Deal 6 damage."))
+    plain = {row["name"] for row in base["keywords"]}
+    for word in words:
+        obs = blindplay.observation(
+            titled_hand_state(f"Someone - Pers, {word}!", "Deal 6 damage."))
+        assert {row["name"] for row in obs["keywords"]} == plain, word
+
+
+def test_an_enemy_badge_is_a_printed_rule_and_still_defines_its_word():
+    """The boundary the fix must not cross. A POWER's name is the game's own
+    badge -- `Bomb 6` on a body means there IS a Bomb on the board -- so it is
+    a printed rule and not a title, and it keeps defining the word.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "KLEEMOD-PROTO_BOMB", "name": "Bomb", "amount": 6,
+         "type": "Buff", "description": "", "keywords": []}]
+    assert "- **Bomb** " in blindplay.observe(state)
