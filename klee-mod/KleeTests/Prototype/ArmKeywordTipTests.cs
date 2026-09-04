@@ -145,7 +145,7 @@ public class ArmKeywordTipTests
         // resolves in placement order with the aura going to the oldest.
         Assert.Contains("oldest first", printed);
         Assert.Contains("go off first", printed);
-        Assert.Contains("The first takes the aura", printed);
+        Assert.Contains("the first takes the aura", printed);
     }
 
     [Fact]

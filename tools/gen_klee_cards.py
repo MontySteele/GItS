@@ -2163,15 +2163,22 @@ APPLY_POWERS = {
     "spotlight_draw": ("SpotlightDrawPower", None,
         "The first [gold]Spotlighted[/gold] card each turn draws {X} card{XS}."),
     "spotlight_mult_bonus": ("SpotlightMultBonusPower", None,
-        "[gold]Spotlighted[/gold] Companions are {X}% stronger this combat."),
+        # `EB-437`: `Companions` is what the seat read as the Salon members,
+        # and the reach is CARDS -- `OutwardMultiplier` refuses anything that
+        # is not an `ICompanionCard`. "Gain {X}%" replaces "are {X}% stronger"
+        # in the same breath and is the truer word as well as the shorter one:
+        # the amount is added to Guest Cast's multiplier
+        # (`GuestCastBaseMultiplier + points / 100`), so it moves 50% to 75%
+        # rather than multiplying what is there by 1.25.
+        "[gold]Spotlighted[/gold] Companion cards gain {X}% this combat."),
     "spotlight_mult_bonus_turn": ("SpotlightMultBonusTurnPower", None,
-        "[gold]Spotlighted[/gold] Companions are {X}% stronger this turn."),
+        "[gold]Spotlighted[/gold] Companion cards gain {X}% this turn."),
     "spotlight_flat_damage": ("SpotlightFlatDamagePower", None,
-        "[gold]Spotlighted[/gold] Companion damage gains {X}."),
+        "[gold]Spotlighted[/gold] Companion card damage gains {X}."),
     "spotlight_flat_damage_turn": ("SpotlightFlatDamageTurnPower", None,
-        "[gold]Spotlighted[/gold] Companion damage gains {X} this turn."),
+        "[gold]Spotlighted[/gold] Companion card damage gains {X} this turn."),
     "ovation_spend_boost": ("OvationSpendBoostPower", None,
-        "[gold]Spotlighted[/gold] Companions are {X}% stronger on turns you "
+        "[gold]Spotlighted[/gold] Companion cards gain {X}% on turns you "
         "spend [gold]Encore[/gold]."),
     "spotlight_encore_first": ("SpotlightEncoreFirstPower", None,
         "The first [gold]Spotlighted[/gold] card each turn grants {X} "

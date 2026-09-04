@@ -6368,8 +6368,11 @@ def test_the_encore_meter_line_does_not_repeat_the_gloss():
     assert "- Encore: 4 — defined under *Words on this screen*" in page
     assert "- **Encore** — After Block it absorbs damage before HP." in page
     assert page.count("absorbs damage before HP") == 1
-    assert ("- Fanfare: 6 — the game's data feed carries this meter's "
-            "amount only") in page
+    # `EB-437`: Fanfare has a row of its own now, and it is the second half of
+    # the same discipline -- the meter line carries the MOD's spend rule
+    # rather than the generic gap, because the mod declares one.
+    assert "- Fanfare: 6 — cards read it and none spends it" in page
+    assert "no rule for how it is spent" not in page
 
 
 # ---------------- EB-405: a Salon performance names its target -------------

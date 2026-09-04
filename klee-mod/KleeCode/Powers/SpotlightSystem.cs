@@ -681,10 +681,29 @@ public sealed class GuestCastPower : PowerModel, ILocalizationProvider
         // Same `SmartDescriptionLocKey` mechanism, same no-semicolon rule as
         // that face: `lint_text_conventions` reads these literals out of the
         // source and its regex stops at one.
+        //
+        // `EB-437` ADDED THE THIRD SENTENCE, and it is three words long
+        // because the confusion it answers is one word. The r6 act-1 seat
+        // deployed under this buff and watched the member perform dry:
+        // "`Guest Cast 1` was active and claims Companions are '50%
+        // stronger', yet the log printed `Crabaletta hit Corpse Slug for 4
+        // Hydro` -- 6 x 0.75, with no 1.5x anywhere. Reading the Spotlight
+        // card again, it says 'Spotlight every Companion card', and a Salon
+        // member is not a card; but the relic that hands you the card says
+        // 'It does nothing once your Companions are lit', and the salon
+        // members are the things the game calls Companions everywhere else. I
+        // could not tell from the screens whether that was a bug or my
+        // misreading, and that is the point."
+        //
+        // It is not a bug: `OutwardMultiplier` refuses anything that is not an
+        // `ICompanionCard`, and a member is a POWER. The buff is the surface
+        // that is on screen at the moment the question arises, so it answers
+        // it here rather than leaving the reader to notice that "card" is
+        // doing the work in the sentence above.
         ("smartDescriptionReframe",
             "Companion cards are Spotlighted: 50% stronger printed damage and "
-          + "[gold]Block[/gold]. Lasts until the [gold]Spotlight[/gold] "
-          + "moves."),
+          + "[gold]Block[/gold]. No member is one. Lasts until the "
+          + "[gold]Spotlight[/gold] moves."),
 #endif
     };
 
@@ -818,8 +837,8 @@ public sealed class SpotlightMultBonusPower
     {
         ("title", "Top Billing"),
         ("description",
-            "[gold]Spotlighted[/gold] Companions are [blue]{Amount}[/blue]% "
-          + "stronger this combat."),
+            "[gold]Spotlighted[/gold] Companion cards gain [blue]{Amount}[/blue]%"
+          + " this combat."),
     };
 }
 
@@ -830,8 +849,8 @@ public sealed class SpotlightMultBonusTurnPower
     {
         ("title", "Limelight"),
         ("description",
-            "[gold]Spotlighted[/gold] Companions are [blue]{Amount}[/blue]% "
-          + "stronger this turn."),
+            "[gold]Spotlighted[/gold] Companion cards gain [blue]{Amount}[/blue]%"
+          + " this turn."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -852,7 +871,7 @@ public sealed class SpotlightFlatDamagePower
     {
         ("title", "Star of the Show"),
         ("description",
-            "[gold]Spotlighted[/gold] Companion damage gains {Amount}."),
+            "[gold]Spotlighted[/gold] Companion card damage gains {Amount}."),
     };
 }
 
@@ -863,7 +882,7 @@ public sealed class SpotlightFlatDamageTurnPower
     {
         ("title", "Stage Lights"),
         ("description",
-            "[gold]Spotlighted[/gold] Companion damage gains {Amount} "
+            "[gold]Spotlighted[/gold] Companion card damage gains {Amount} "
           + "this turn."),
     };
 
@@ -885,8 +904,8 @@ public sealed class OvationSpendBoostPower
     {
         ("title", "Standing Ovation"),
         ("description",
-            "[gold]Spotlighted[/gold] Companions are [blue]{Amount}[/blue]% "
-          + "stronger on turns you spend [gold]Encore[/gold]."),
+            "[gold]Spotlighted[/gold] Companion cards gain [blue]{Amount}[/blue]%"
+          + " on turns you spend [gold]Encore[/gold]."),
     };
 }
 

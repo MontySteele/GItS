@@ -65,8 +65,8 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
         // and a second play RE-AIMS, so the sentence would be false there.
         ("description",
             "At the start of your turn, add an [gold]Ethereal Spotlight[/gold] "
-          + "to your [gold]Hand[/gold]. It does nothing once your Companions "
-          + "are lit."),
+          + "to your [gold]Hand[/gold]. It does nothing once your "
+          + "[gold]Companion[/gold] cards are lit."),
 #else
         ("description",
             "At the start of your turn, add an [gold]Ethereal Spotlight[/gold] "

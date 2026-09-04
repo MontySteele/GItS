@@ -94,15 +94,29 @@ METER_DEFINED_NOTE = "defined under *Words on this screen*"
 # `test_the_encore_meter_rule_is_the_mods_own_sentence`, the discipline
 # `ARM_KEYWORDS` and `REACTION_KEYWORDS` are already under.
 #
-# THE FANFARE CLAUSE IS DELIBERATELY ABSENT. `EncoreMeterPower`'s second
-# sentence says losing Encore creates Fanfare, and the reframe's METER leg
-# retires exactly that, so a page printing it would be teaching a rule this
-# build does not have -- the reason `Tide` and `Exert` are out of
-# `ARM_KEYWORDS`, one meter over.
+# ENCORE'S FANFARE CLAUSE IS DELIBERATELY ABSENT from the Encore row.
+# `EncoreMeterPower`'s second sentence says losing Encore creates Fanfare, and
+# the reframe's METER leg retires exactly that, so a page printing it would be
+# teaching a rule this build does not have -- the reason `Tide` and `Exert` are
+# out of `ARM_KEYWORDS`, one meter over.
+#
+# `EB-437` ADDED FANFARE'S OWN ROW, because the two readouts on one screen
+# disagreed about whether a spend rule exists at all. `FanfareMeterPower`'s arm
+# face ends "Cards read it and none spends it"; this block, with no row for the
+# word, printed `METER_NOTE` -- "no maximum, and no rule for how it is spent".
+# The r6 act-1 seat read both and filed the pair: "the two Fanfare readouts on
+# the same screen say different things about whether a rule exists for spending
+# it", inside a finding whose headline was "Fanfare does nothing I could
+# observe". Both sentences were true of their own source and the pair was not:
+# the mod states the rule, so the row prints it and the generic note stands
+# down. Held in step with the C# by
+# `test_the_fanfare_meter_rule_is_the_mods_own_sentence`, the same discipline
+# the Encore row is under.
 METER_RULES: dict[str, str] = {
     "Encore": ("a buffer and not a bank: after Block it absorbs incoming "
                "damage before HP. Cards spend it, and a Salon member spends "
                "1 each time it performs"),
+    "Fanfare": "cards read it and none spends it",
 }
 
 # `EB-263`. THE ENCHANT PICKER MARKS NOTHING, and the r3 Opus seat found out

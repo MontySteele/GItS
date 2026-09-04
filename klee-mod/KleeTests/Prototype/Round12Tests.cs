@@ -278,4 +278,69 @@ public class Round12Tests
         Assert.True(rendered.Length > 130, rendered.Length.ToString());
         Assert.DoesNotContain("picks its own", deploy);
     }
+
+    // ---- EB-437: two nouns that read as one ------------------------------
+
+    /// <summary>A mod source file, read whole. Walked up from the test binary
+    /// rather than copied at build time, which is `KurageMemoryPinTests`'
+    /// idiom and its reason: a stale copy beside the dll is exactly the drift
+    /// a text pin exists to catch.</summary>
+    private static string Printed(string relativePath)
+    {
+        var relative = System.IO.Path.Combine("klee-mod", "KleeCode",
+            relativePath.Replace('/', System.IO.Path.DirectorySeparatorChar));
+        var dir = new System.IO.DirectoryInfo(System.AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = System.IO.Path.Combine(dir.FullName, relative);
+            if (System.IO.File.Exists(candidate))
+            {
+                // COMMENTS STRIPPED, which `lint_text_conventions` does for
+                // the same reason: a comment quoting the seat's own words is
+                // not a surface a player reads, and this pin is about what
+                // ships.
+                return System.Text.RegularExpressions.Regex.Replace(
+                    System.IO.File.ReadAllText(candidate),
+                    @"^\s*//.*$", string.Empty,
+                    System.Text.RegularExpressions.RegexOptions.Multiline);
+            }
+            dir = dir.Parent;
+        }
+
+        throw new System.IO.FileNotFoundException(
+            "no " + relative + " above " + System.AppContext.BaseDirectory);
+    }
+
+    [Fact]
+    public void No_surface_states_the_spotlights_reach_as_bare_Companions()
+    {
+        // THE FIND. The r6 act-1 seat deployed under Guest Cast and watched
+        // the member perform dry: "`Guest Cast 1` was active and claims
+        // Companions are '50% stronger', yet the log printed `Crabaletta hit
+        // Corpse Slug for 4 Hydro` -- 6 x 0.75, with no 1.5x anywhere...
+        // the relic that hands you the card says 'It does nothing once your
+        // Companions are lit', and the salon members are the things the game
+        // calls Companions everywhere else."
+        //
+        // `OutwardMultiplier` refuses anything that is not an
+        // `ICompanionCard`, so the reach is CARDS and every surface says so.
+        foreach (var file in new[] { "Powers/SpotlightSystem.cs",
+                                     "Relics/EtherealSpotlightRelic.cs",
+                                     "Cards/Furina/SpotlightCards.cs" })
+        {
+            var src = Printed(file);
+            Assert.DoesNotContain("[gold]Spotlighted[/gold] Companions", src);
+            Assert.DoesNotContain("your Companions are lit", src);
+        }
+    }
+
+    [Fact]
+    public void The_guest_cast_badge_says_a_member_is_not_one()
+    {
+        // The buff is the surface on screen at the moment the question
+        // arises, so it answers it rather than leaving "card" to do the work
+        // silently in the sentence above.
+        Assert.Contains("No member is one.",
+                        Printed("Powers/SpotlightSystem.cs"));
+    }
 }
