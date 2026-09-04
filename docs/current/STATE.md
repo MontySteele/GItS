@@ -163,7 +163,11 @@ are in [`workstreams.md`](workstreams.md).
   `0.2.2547+proto`, floor 14 at a declared budget overrun, eight of eight
   fights, "don't use your big spell" read as the kit's best decision, the
   Bomb queue and the enemy-turn Melt invisible (`EB-450`), events unnamed
-  (`EB-448`); no pick. [USER]'s act-1 run is due on
+  (`EB-448`); no pick. **Round 14 is READ**
+  (`review/active/klee-overhaul-round-14-2026-09-04.md`): one seat on
+  `0.2.2564+proto`, floor 8 at the bridge's cap, six of six fights, the
+  Spark economy read as the kit's engine, an invisible Mine (`EB-457`), the
+  enemy block printed twice (`EB-458`); no pick. [USER]'s act-1 run is due on
   `0.2.2401+proto`. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
@@ -198,7 +202,12 @@ are in [`workstreams.md`](workstreams.md).
   a targeted potion vanishing untargeted (`EB-452`), the carry-out panel
   omitting a Plan (`EB-453`), Change of Plans dead until it says why
   (`EB-455`), the bridge to count actions (`EB-456`); Tide Chart undrawn a
-  seventh time; no pick. [USER]'s act-1 run is due on
+  seventh time; no pick. **Round 14 is READ**
+  (`review/active/kokomi-overhaul-round-14-2026-09-04.md`): one seat on
+  `0.2.2564+proto`, floor 12 at the cap with the elite dying, Arcane
+  Scroll gave no card (`EB-459`), dual-intent attack numbers never land
+  (`EB-461`), Kurage's Oath's tag contradicts its rider (`EB-462`); Tide
+  Chart undrawn an eighth time; no pick. [USER]'s act-1 run is due on
   `0.2.2501+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
