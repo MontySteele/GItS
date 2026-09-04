@@ -667,8 +667,19 @@ def _number_faces(faces: list[dict[str, Any]], field: str
 # three bodies and the seat read that as the numbers having shifted under it.
 # The fight remembers each id's PRINTED name, so a body that has left the board
 # is still called what it was called while it stood.
+#
+# `EB-428` ADDED `elements`, and it rides here because it decays on the same
+# boundary. The reaction glossary prints a row only where the screen can supply
+# both of its elements, and a screen is one turn: a Cryo card played on turn 1
+# is not in the hand on turn 2, and a glossary that dropped Melt for it would
+# be `EB-340`'s own defect back again -- "whether I was allowed to see it
+# depended on my draw". So an element this FIGHT has been shown to reach stays
+# reachable for the fight. It is the nearest honest reading of the row's "the
+# deck faces": the deck memory (`remember_deck`) keeps titles alone and cannot
+# answer what a card applies.
 _FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {},
-                                 "numbered": set(), "names": {}}
+                                 "numbered": set(), "names": {},
+                                 "elements": set()}
 
 
 def forget_fight() -> None:
@@ -677,6 +688,20 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["ordinals"] = {}
     _FIGHT_MEMORY["numbered"] = set()
     _FIGHT_MEMORY["names"] = {}
+    _FIGHT_MEMORY["elements"] = set()
+
+
+def remember_elements(found: set[str]) -> set[str]:
+    """Every element this fight has been shown to reach (`EB-428`).
+
+    UNION AND NEVER SUBTRACT, for the reason in `_FIGHT_MEMORY`'s header: the
+    question a reaction row answers is whether the DECK can build the pair, and
+    a card that is in the discard this turn is in the hand two turns from now.
+    Dropped with the rest of the fight's memory, so a Cryo drafted for one run
+    is not still colouring the glossary of the next.
+    """
+    _FIGHT_MEMORY["elements"] |= set(found)
+    return set(_FIGHT_MEMORY["elements"])
 
 
 def remembered_enemy_name(combat_id: Any, title: str) -> str:

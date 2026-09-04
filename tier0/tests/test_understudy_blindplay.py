@@ -41,6 +41,24 @@ RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
 
 # ------------------------------------------------------------- fixtures ----
 
+
+@pytest.fixture(autouse=True)
+def _fresh_fight():
+    """`EB-428`. THE FIGHT'S MEMORY IS PROCESS STATE, so it leaks between tests.
+
+    It always did -- `_FIGHT_MEMORY` has held enemy ordinals since `EB-271` and
+    the tests that cared called `forget_fight` by hand. `EB-428` put the
+    elements this fight has been shown into the same memory, which is the
+    right lifetime for them and the wrong one for a test file: a Cryo card in
+    one test's hand made another test's glossary reach Melt. So every test
+    starts on a fresh fight, and a test that wants the memory to carry still
+    gets it, because it carries WITHIN a test.
+    """
+    blindplay.forget_fight()
+    yield
+    blindplay.forget_fight()
+
+
 def combat_state() -> dict:
     """RECORDED. A real staged Kokomi turn as the bridge returned it."""
     blob = json.loads(RECORDED_COMBAT.read_text(encoding="utf-8"))
@@ -3157,6 +3175,7 @@ CARRIED_OUT = dict(TWO_PLANS, pending=0, queue=[], carried_out=[
 ])
 
 
+
 def test_the_page_prints_the_carry_out_line_the_screen_showed():
     """The row's own format, and the row's own example. The number is what the
     clause PRODUCED, not what the sheet printed, so a Vaporized planned hit
@@ -5217,26 +5236,41 @@ def test_a_simple_select_picker_does_not_trip_the_blindness_guard():
 # and 13. Every test below quotes the finding it closes.
 
 
-def elemental_hand_state(*, aura: bool = False, bomb_tip: str = "") -> dict:
-    """A combat holding one Pyro card, optionally against an aura (`EB-340`).
+ALL_ELEMENTS = ("Pyro", "Hydro", "Electro", "Cryo")
 
-    Built on the RECORDED combat, so everything the page prints around the two
+
+def elemental_hand_state(*, aura: bool = False, bomb_tip: str = "",
+                         elements: tuple[str, ...] = ("Pyro",)) -> dict:
+    """A combat holding one card per named element, optionally against an aura.
+
+    `EB-340` built this on ONE Pyro card. `EB-428` made the ELEMENTS IN REACH
+    decide which reaction rows print at all, so a test about a row's words has
+    to hand the fixture a board that can fire it -- which is the row, from the
+    test side: nine rows on a screen that could reach none of them is what four
+    seats read past.
+
+    Built on the RECORDED combat, so everything the page prints around the
     fields under test is a real wire state.
     """
     state = json.loads(json.dumps(combat_state()))
-    keywords = [{"name": "Applies Pyro",
-                 "description": "If the target has no aura, this applies Pyro "
-                                "for 2 turns. A different aura is consumed to "
-                                "trigger a Reaction instead."}]
-    if bomb_tip:
-        keywords.append({"name": "Bomb", "description": bomb_tip})
-    state["player"]["hand"] = [
-        {"id": "KLEEMOD-PROTO_KO_KAPOW", "name": "Ka-pow!", "type": "Attack",
-         "cost": "0", "can_play": True, "index": 0, "target_type": "AnyEnemy",
-         "is_upgraded": False, "keywords": keywords,
-         "description": "Retain. Set off. Deal 4 damage."}]
+    hand = []
+    for index, element in enumerate(elements):
+        keywords = [{"name": f"Applies {element}",
+                     "description": f"If the target has no aura, this applies "
+                                    f"{element} for 2 turns. A different aura "
+                                    f"is consumed to trigger a Reaction "
+                                    f"instead."}]
+        if bomb_tip and index == 0:
+            keywords.append({"name": "Bomb", "description": bomb_tip})
+        hand.append(
+            {"id": f"KLEEMOD-PROTO_KO_KAPOW{index or ''}",
+             "name": "Ka-pow!" if index == 0 else f"{element} Strike",
+             "type": "Attack", "cost": "0", "can_play": True, "index": index,
+             "target_type": "AnyEnemy", "is_upgraded": False,
+             "keywords": keywords,
+             "description": "Retain. Set off. Deal 4 damage."})
+    state["player"]["hand"] = hand
     if aura:
-        state["player"]["hand"] = []
         state["battle"]["enemies"][0]["status"] = [
             {"id": "KLEEMOD-CRYO_AURA", "name": "Cryo Aura", "amount": 2,
              "type": "Buff", "keywords": [],
@@ -5254,7 +5288,7 @@ def test_the_reactions_are_defined_wherever_the_screen_shows_an_element():
 
     Seen to FAIL: with no reaction table the words are absent entirely.
     """
-    page = blindplay.observe(elemental_hand_state())
+    page = blindplay.observe(elemental_hand_state(elements=ALL_ELEMENTS))
     for word in ("Melt", "Vaporize", "Overloaded", "Frozen", "Superconduct",
                  "Electro-Charged"):
         assert f"- **{word}** — " in page, word
@@ -5270,10 +5304,14 @@ def test_the_reactions_are_defined_wherever_the_screen_shows_an_element():
     # is a `monster` room, and the clause is a rule about a boss room -- see
     # the two tests below.
     assert "Bosses cannot be Frozen" not in page
-    # AN AURA ALONE IS ENOUGH: the combination is priced from the other side
-    # just as often, and that screen carries no elemental card at all.
-    assert "- **Melt** — " in blindplay.observe(
-        elemental_hand_state(aura=True))
+    # AN AURA IS ONE HALF OF A PAIR, and `EB-428` is why that is now the
+    # sentence: the combination is priced from the board's side just as often,
+    # so a Cryo aura standing under a Pyro card reaches Melt -- and reaches
+    # nothing else, because those are the only two elements on the screen.
+    blindplay.forget_fight()          # a different fight, not turn two of this
+    both = blindplay.observe(elemental_hand_state(aura=True))
+    assert "- **Melt** — " in both
+    assert "- **Vaporize** — " not in both
 
 
 def test_the_boss_substitution_prints_in_a_boss_room():
@@ -5289,9 +5327,11 @@ def test_the_boss_substitution_prints_in_a_boss_room():
     Seen to FAIL: before the split it printed on every elemental screen in the
     game.
     """
-    elite = elemental_hand_state()
+    # Frozen is Hydro on Cryo, so the board has to reach both for the row to
+    # print at all (`EB-428`).
+    elite = elemental_hand_state(elements=("Hydro", "Cryo"))
     elite["state_type"] = "elite"
-    boss = elemental_hand_state()
+    boss = elemental_hand_state(elements=("Hydro", "Cryo"))
     boss["state_type"] = "boss"
 
     assert "Bosses cannot be Frozen" not in blindplay.observe(elite)
@@ -5339,6 +5379,72 @@ def test_a_consumed_aura_that_is_re_applied_in_the_same_beat_says_so():
     assert "Tamakushi" not in entry and "Casket" not in entry
     assert "- **Elemental Reaction** — " in blindplay.observe(
         elemental_hand_state())
+
+
+def test_a_mono_element_deck_is_told_no_reaction_is_reachable():
+    """`EB-428`, THE STATE FOUR SEATS READ PAST.
+
+    "The glossary is about 40% of the screen text and 0% of the gameplay until
+    a Cryo card happens to show up in a reward" (Kokomi r11; Klee r10 and r11
+    and Kokomi r10 filed the same). A deck owning one element cannot react --
+    its own element meeting its own aura refreshes it -- so the six rows were
+    unreachable rules taking the space the reachable words needed.
+
+    Seen to FAIL: all six printed on this exact board.
+    """
+    page = blindplay.observe(elemental_hand_state())
+    for word in ("Melt", "Vaporize", "Overloaded", "Frozen", "Superconduct",
+                 "Electro-Charged"):
+        assert f"- **{word}** — " not in page, word
+    # The umbrella row stays, because it is the AURA rule and this is the deck
+    # that needs it most -- and it carries the one line saying why the six are
+    # gone, naming the element it has so a reader knows what to draft.
+    assert "- **Elemental Reaction** — " in page
+    assert "NO REACTION IS REACHABLE HERE: Pyro is the only element" in page
+    assert "Pyro meeting a Pyro aura refreshes it rather than reacting" in page
+    assert "defined again on the first screen that reaches a second" in page
+
+
+def test_a_second_element_brings_back_its_pair_and_only_its_pair():
+    """The other state the row asks to be pinned. Two elements in reach are one
+    pair, so exactly one row returns -- and the "no reaction" clause goes with
+    the rest, because the sentence is now false."""
+    page = blindplay.observe(elemental_hand_state(elements=("Pyro", "Cryo")))
+    assert "- **Melt** — " in page
+    for word in ("Vaporize", "Overloaded", "Frozen", "Superconduct",
+                 "Electro-Charged"):
+        assert f"- **{word}** — " not in page, word
+    assert "NO REACTION IS REACHABLE" not in page
+
+
+def test_the_belt_supplies_an_element_through_its_printed_rule():
+    """The row names three sources, and a potion is the one with no `element`
+    field to read: the game writes `Applies X` into the printed body instead,
+    which is the same phrase a card's keyword uses and is matched as such."""
+    blindplay.forget_fight()
+    belt = elemental_hand_state()
+    belt["player"]["potions"] = [
+        {"name": "Cryo Flask", "description": "Applies Cryo to one enemy."}]
+    assert "- **Melt** — " in blindplay.observe(belt)
+
+
+def test_an_element_this_fight_has_shown_stays_reachable_after_it_is_played():
+    """`EB-340`'s defect must not come back through this door. "Whether I was
+    allowed to see it depended on my draw" is exactly what a per-screen read
+    would produce -- the Cryo card is in hand on turn 1 and in the discard on
+    turn 2, and Melt would blink out of the glossary with it.
+
+    A screen is one turn; a deck is a fight. The union is dropped with the rest
+    of the fight's memory, which is pinned below."""
+    blindplay.forget_fight()
+    assert "- **Melt** — " in blindplay.observe(
+        elemental_hand_state(elements=("Pyro", "Cryo")))
+    # Turn 2: the Cryo card is gone from the hand and Melt is still defined.
+    assert "- **Melt** — " in blindplay.observe(elemental_hand_state())
+    # A new fight starts over, so a Cryo drafted for one run does not colour
+    # the glossary of the next.
+    blindplay.forget_fight()
+    assert "- **Melt** — " not in blindplay.observe(elemental_hand_state())
 
 
 def test_a_screen_with_no_element_defines_no_reaction():

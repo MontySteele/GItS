@@ -15,6 +15,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from understudy.blindplay_faces import remember_elements
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
                                         WEAK_DEALT_PCT)
@@ -787,6 +788,50 @@ REACTION_KEYWORDS: dict[str, str] = {
                "Shatters for 6 damage."),
 }
 
+# `EB-428`. THE SIX ROWS FILLED 40% OF A SCREEN THAT COULD FIRE NONE OF THEM.
+#
+# FOUR SEATS, ONE SENTENCE. "The glossary is about 40% of the screen text and
+# 0% of the gameplay until a Cryo card happens to show up in a reward" (Kokomi
+# r11; Klee r10 and r11 and Kokomi r10 said the same). A deck that owns ONE
+# element cannot react at all -- an element meeting its own aura refreshes it,
+# which the umbrella row says -- so nine rows of table were being read past on
+# every battle screen of four runs, and the words a reader did need were below
+# them.
+#
+# THE PAIR IS THE GATE, and it is a fact this page already has: each of the six
+# names its two elements in its own first clause, and the three sources a
+# second element can come from are all on the screen -- the FACES this page
+# prints (hand, the remembered deck, a reward, a shelf, the belt), the AURAS on
+# the board, and any printed `Applies X` text. So a row prints when both of its
+# elements are in reach and not otherwise.
+#
+# THE UMBRELLA ROW ALWAYS PRINTS, because it is not a reaction: it is the aura
+# rule, and a mono-element deck needs it MORE than a mixed one -- "a hit
+# matching the aura refreshes it" is the sentence that explains why its Hydro
+# never does anything. When no pair is reachable it carries one extra clause
+# saying so, which is the row's "otherwise one line".
+#
+# ANY TWO DISTINCT ELEMENTS ARE A REACTION -- the four pair six ways and all
+# six are here -- so "no pair reachable" is exactly "fewer than two elements in
+# reach", and the clause can say which one without a search.
+REACTION_ELEMENTS: dict[str, frozenset[str]] = {
+    "Melt": frozenset({"Pyro", "Cryo"}),
+    "Vaporize": frozenset({"Pyro", "Hydro"}),
+    "Overloaded": frozenset({"Pyro", "Electro"}),
+    "Superconduct": frozenset({"Electro", "Cryo"}),
+    "Electro-Charged": frozenset({"Hydro", "Electro"}),
+    "Frozen": frozenset({"Hydro", "Cryo"}),
+}
+
+_ELEMENTS = ("Pyro", "Hydro", "Electro", "Cryo")
+#: The game's own phrase for a card that supplies an element, matched in any
+#: printed body -- a potion's rule and a relic's read the same way a card's
+#: keyword does, and the belt is one of the three sources the row names.
+_APPLIES_RE = re.compile(r"\bApplies (Pyro|Hydro|Electro|Cryo)\b")
+#: `AuraPower.Localization` writes `("title", $"{Element} Aura")`, which is
+#: the same handle `_is_aura` reads and the only one this side of the line has.
+_AURA_NAME_RE = re.compile(r"^(Pyro|Hydro|Electro|Cryo) Aura$")
+
 # `EB-366`. THE BOSS SUBSTITUTION, PRINTED IN A BOSS ROOM AND NOWHERE ELSE.
 #
 # WHAT THE SEAT SAW (Furina reframe round 1, the Elite fight, round 5): a Cryo
@@ -903,6 +948,66 @@ def _elements_on_screen(obs: dict[str, Any]) -> bool:
     return walk(obs)
 
 
+def _reachable_elements(obs: dict[str, Any]) -> set[str]:
+    """The elements this screen can supply, from the three sources `EB-428`
+    names: the FACES it prints, the AURAS on the board, and any printed
+    `Applies X`.
+
+    THE FACES ARE EVERY FACE, which is what makes the belt and the remembered
+    deck free: `element` is computed by `_card_face` for anything the page
+    prints as a card, so a hand, a reward row, a shop shelf and `EB-342`'s
+    remembered deck all answer the same way. A potion or a relic that carries
+    no `element` field still answers through its printed rule, because
+    `Applies Pyro` is the game's own phrase and it is written out in the body.
+
+    THE AURA IS READ OFF THE BADGE, `_is_aura`'s handle: an aura on any body,
+    yours or theirs, is one half of a pair already standing on the board.
+    """
+    found: set[str] = set()
+
+    def walk(blob: Any) -> None:
+        if isinstance(blob, dict):
+            element = str(blob.get("element") or "").strip()
+            if element in _ELEMENTS:
+                found.add(element)
+            aura = _AURA_NAME_RE.match(str(blob.get("name") or "").strip())
+            if aura and str(blob.get("kind") or "").strip().lower() == "aura":
+                found.add(aura.group(1))
+            for value in blob.values():
+                walk(value)
+        elif isinstance(blob, list):
+            for value in blob:
+                walk(value)
+        elif isinstance(blob, str):
+            found.update(_APPLIES_RE.findall(blob))
+
+    walk(obs)
+    # AND EVERY ELEMENT THIS FIGHT HAS ALREADY SHOWN. A screen is one turn and
+    # a deck is a fight; see `_FIGHT_MEMORY`'s header for why the union is the
+    # honest reading rather than the generous one.
+    return remember_elements(found)
+
+
+def _no_reaction_clause(reach: set[str]) -> str:
+    """`EB-428`'s "otherwise one line", and it says WHY rather than only that.
+
+    A reader told "no reaction is reachable" and nothing else cannot act on
+    it. The clause names the element it has, which turns the six missing rows
+    into a shopping list: one card of any other element brings a reaction back,
+    and the umbrella sentence above already says what an element meeting its
+    own aura does instead.
+    """
+    tail = (" Each of the six is defined again on the first screen that "
+            "reaches a second element.")
+    if len(reach) == 1:
+        only = next(iter(reach))
+        return (f" NO REACTION IS REACHABLE HERE: {only} is the only element "
+                f"this screen can supply, and {only} meeting a {only} aura "
+                f"refreshes it rather than reacting.{tail}")
+    return (" NO REACTION IS REACHABLE HERE: this screen supplies no element "
+            "at all." + tail)
+
+
 def _wire_keyword_rows(blob: Any) -> list[dict[str, str]]:
     """Every keyword tip the WIRE hung on a power, name and body.
 
@@ -995,11 +1100,22 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
              for word, pattern in _GAME_KEYWORD_RE.items()
              if pattern.search(hay)]
     if _elements_on_screen(obs):
+        # `EB-428`: the umbrella row always, the six only where the screen can
+        # supply both of a pair. The umbrella is not a reaction -- it is the
+        # aura rule, and a mono-element deck needs it most -- so when nothing
+        # is reachable it carries the one line saying so instead.
         boss = str(obs.get("state_type") or "") == BOSS_ROOM
+        reach = _reachable_elements(obs)
+        live = [word for word in REACTION_KEYWORDS
+                if word in REACTION_ELEMENTS
+                and REACTION_ELEMENTS[word] <= reach]
+        rows.append({"name": "Elemental Reaction",
+                     "text": REACTION_KEYWORDS["Elemental Reaction"]
+                     + ("" if live else _no_reaction_clause(reach))})
         rows += [{"name": word,
-                  "text": text + (FROZEN_BOSS_CLAUSE
-                                  if boss and word == "Frozen" else "")}
-                 for word, text in REACTION_KEYWORDS.items()]
+                  "text": REACTION_KEYWORDS[word]
+                  + (FROZEN_BOSS_CLAUSE if boss and word == "Frozen" else "")}
+                 for word in live]
     seen = {row["name"] for row in rows}
     for row in _wire_keyword_rows(obs):
         if row["name"] in seen:
