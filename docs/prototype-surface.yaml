@@ -285,7 +285,7 @@
 - {id: proto_ko_tinder_toss, name: "Tinder Toss", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "[gold]Set off[/gold] and deal 4 damage to a random enemy twice.",
+   description: "[gold]Set off[/gold] a random enemy and deal 4 damage to it, twice.",
    upgrade: {damage: +2},
    effects: [{op: spend_spark, amount: 1},
              {op: set_off, target: random_enemy, damage: 4, times: 2}]}
@@ -310,7 +310,7 @@
 - {id: proto_ko_rapid_fire, name: "Rapid Fire", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal 3 damage to a random enemy 4 times. [gold]Set off[/gold] each enemy hit.",
+   description: "[gold]Set off[/gold] a random enemy and deal 3 damage to it, 4 times.",
    effects: [{op: set_off, target: random_enemy, damage: 3, times: 4}]}
 
 - {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
