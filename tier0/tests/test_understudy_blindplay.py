@@ -4568,6 +4568,67 @@ def test_an_enemy_potion_on_a_crowded_board_asks_which():
     assert "Nibbit" in res["refusal"] and "Corpse Slug" in res["refusal"]
 
 
+WEAK_IN_SLOT_ZERO = [
+    {"id": "WEAK_POTION", "name": "Weak Potion",
+     "description": "Apply 3 Weak.", "slot": 0, "can_use_in_combat": True,
+     # The spelling that reproduces `EB-452`: not `AnyEnemy`, so it fell past
+     # `AIMED_TARGETS`, and not one of the three the bridge aims itself, so
+     # `ExecuteUsePotion` passed a null target and enqueued the use anyway.
+     "target_type": "AnyCreature", "keywords": []}]
+
+
+def test_a_targeted_potion_with_no_target_is_refused_with_the_working_forms():
+    """`EB-452`. THE POTION WAS DRUNK INTO THE VOID AND THE PAGE SAID `ok`.
+
+    Kokomi round 13, the act boss, turn 5: `use potion "Weak Potion"` on a
+    board of three was accepted, the potion was spent, no Weak landed on any
+    body, no intent moved, and nothing anywhere printed a refusal.
+
+    The fall-through is the other way for a potion than for a card
+    (`_potion_aims_at_an_enemy`): only the spellings the game aims itself are
+    drunk bare. Everything else is asked for an enemy, and the refusal carries
+    the command that works.
+
+    Seen to FAIL: the untargeted use resolves, `ok` is True, and the post
+    carries no target at all.
+    """
+    state = potion_belt_state(WEAK_IN_SLOT_ZERO)
+    state["battle"]["enemies"].append(
+        {"entity_id": "SLUG_1", "name": "Corpse Slug", "hp": 12, "max_hp": 12,
+         "block": 0, "intents": [], "status": []})
+
+    res = blindplay.act(state, 'use potion "Weak Potion"')
+    assert not res["ok"]
+    assert "Nibbit" in res["refusal"] and "Corpse Slug" in res["refusal"]
+    assert 'use potion "Weak Potion" on "Nibbit"' in res["refusal"]
+    assert 'use potion "Weak Potion" on "Corpse Slug"' in res["refusal"]
+
+    # Named, it resolves exactly as `play` does: the entity id on the post and
+    # the printed name on the receipt.
+    res = blindplay.act(state, 'use potion "Weak Potion" on "Corpse Slug"')
+    assert res["ok"], res["refusal"]
+    assert res["post"] == {"action": "use_potion", "slot": 0,
+                           "target": "SLUG_1"}
+    assert res["printed"] == {"potion": "Weak Potion",
+                              "target": "Corpse Slug"}
+
+
+def test_a_potion_the_game_aims_itself_is_still_drunk_bare():
+    """The boundary the row must not cross. `AllEnemies` and `None` are the
+    two spellings `ExecuteUsePotion` deliberately resolves to a null target,
+    and a feed that sends no `target_type` has not said anything -- all three
+    keep being used with no `on` clause and no refusal."""
+    for aim in ("AllEnemies", "None", ""):
+        belt = [dict(WEAK_IN_SLOT_ZERO[0], target_type=aim)]
+        state = potion_belt_state(belt)
+        state["battle"]["enemies"].append(
+            {"entity_id": "SLUG_1", "name": "Corpse Slug", "hp": 12,
+             "max_hp": 12, "block": 0, "intents": [], "status": []})
+        res = blindplay.act(state, 'use potion "Weak Potion"')
+        assert res["ok"], f"{aim}: {res['refusal']}"
+        assert "target" not in res["post"]
+
+
 def test_a_bridge_refusal_reaches_the_page_as_words():
     """`EB-269`, the half that made the defect invisible. `Error()` writes the
     reason under `error`, never `message` (`McpMod.Helpers.cs:158-161`), and

@@ -177,6 +177,7 @@ from understudy.blindplay_grammar import (   # noqa: E402,F401  (re-export)
     act, AIMED_TARGETS, _buy, _card_face_key, _choose, Command, _confirm,
     _full_slots, _go, _index_choice, _is_upgraded, _match, _match_bundle,
     _not_in_battle, _numbered_titles, ORDINAL_ADVICE, parse_command,
+    _potion_aims_at_an_enemy,
     _pet_target, _play, _proceed, _QUALIFIER, _QUOTED, _refuse, Resolution,
     _resolve_enemy, _rest_keyword, SELF_TARGETS, _skip, _split_qualifier,
     _STALE_NUMBER, _use_potion, VERBS)
