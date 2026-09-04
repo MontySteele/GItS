@@ -146,7 +146,12 @@ are in [`workstreams.md`](workstreams.md).
   (`review/ruled/klee-overhaul-round-10-2026-09-04.md`): six runs on
   `0.2.2401+proto`, six act-1 clears, none past act 2; Dodoco Cover played
   every fight, Careful Now split the seats along cook-or-cash, Front Row
-  Seat unseen; no pick, `EB-390`-`EB-400`. [USER]'s act-1 run is due on
+  Seat unseen; no pick, `EB-390`-`EB-400`. **Round 11 is READ**
+  (`review/active/klee-overhaul-round-11-2026-09-04.md`): two seats on
+  `0.2.2476+proto` with Countdown in the pool (undrawn), floors 5 and 10,
+  both budget-out; the loan against the clock priced on the nose, a Spark
+  gain nothing prints (`EB-418`), random Set off and one-charge reaction
+  rules unprinted (`EB-431`, `EB-432`); no pick. [USER]'s act-1 run is due on
   `0.2.2401+proto`. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
@@ -197,7 +202,12 @@ are in [`workstreams.md`](workstreams.md).
   (a reader in every deck), `EB-404`-`EB-407`, `EB-412`-`EB-414`; RULED R254:
   Aria of Recompense reads Fanfare under the arm (5 more Encore at 6), the
   starter stays two kit cards, **BUILT** as `proto_fr_aria_of_recompense`.
-  [USER]'s act-1 run is due on that build. No stamp moves, nothing measured.
+  **Round 5 is READ**
+  (`review/active/furina-reframe-round-5-2026-09-04.md`): two seats on
+  `0.2.2476+proto`, floors 10 and 10, both budget-out; the turn one with no
+  Encore in every fight, the reader carried at Fanfare 3 and its line never
+  paid, nine rows (`EB-419`-`EB-425`, `EB-429`, `EB-430`); one pick, the
+  Encore opening. [USER]'s act-1 run is due on that build. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
