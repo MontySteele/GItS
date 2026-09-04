@@ -73,5 +73,9 @@ reading.
 
 - **`EB-459` to `EB-462` minted; `EB-357` widened; `EB-410`, `EB-447`,
   `EB-448` cited.**
+- **Kurage's Oath's now-line applies Hydro** (D): the face's tag is what
+  two seats read, and a one-card exception in a rider is the kind of rule
+  nobody finds; `EB-462` builds it and [USER] plays the next build of the
+  starter either way.
 - **Starter density STANDS** (R254), not re-asked; Nereid's Ascension is
   recorded for the pool pass.

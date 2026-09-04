@@ -74,4 +74,7 @@ against Minions. One run. Nothing here is a strength reading.
 - **`EB-463`, `EB-464`, `EB-465` minted; `EB-449` widened; `EB-437`,
   `EB-447` cited** (the map's deck list showed combat-deck copies of
   Ethereal Spotlight, the disclosed limit of `EB-447`).
+- **A replayed Companion card performs the front member** (D): the
+  Companion tip already says a played Companion card performs, and the
+  seat's 20 was the printed promise; `EB-464` builds it.
 - **The cap held** (`EB-456`): 120 of 120, stop read as the stop.
