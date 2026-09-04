@@ -1354,10 +1354,17 @@ def test_the_printed_spark_index_reads_the_shipped_face():
         "draft 3 made Ka-pow! pay energy; a stale Spark price would print a "
         "cost the card does not charge")
 
+    # `spend_spark_price` AND NOT the raw `amount`: the X price ("spend all
+    # your Sparks", the round-11 pool pass's Stoke the Fuse) prints no literal,
+    # and what the badge and the gate BOTH show for it is 1. This is the reader
+    # `combat.spark_cost` and the emitted `PrintedSparkPrice` already share, so
+    # the page, the sim's gate and the mod's gate cannot disagree about it.
+    from tier0.engine import effects as fx_mod
+
     disagree = []
     for card in loader.prototype_cards():
         priced = [f for f in card.effects if f.get("op") == "spend_spark"]
-        want = int(priced[0]["amount"]) if priced else None
+        want = fx_mod.spend_spark_price(priced[0]) if priced else None
         got = index.get(card.id.upper())
         if want != got:
             disagree.append((card.id, got, want))

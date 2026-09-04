@@ -1769,3 +1769,121 @@ def test_careful_now_retains_and_keeps_retaining_upgraded(overhaul):
     assert load("proto_ko_careful_now+").retain is True
 
 
+# ---------------------------------------------------------------------------
+# THE POOL PASS, ROUND 11 -- Stoke the Fuse, the Spark sink
+# ---------------------------------------------------------------------------
+
+def stoke(state, enemies, sparks, cid="proto_ko_stoke_the_fuse"):
+    """Play Stoke the Fuse at a bank of `sparks`, through `play_card`.
+
+    THROUGH `play_card` AND NOT `resolve_card`, which every other row in this
+    file may use: the growth is priced per Spark SPENT and reads
+    `state.sparks_at_play`, a field only a real play sets. A test that
+    resolved the body directly would be measuring a card nobody played.
+    """
+    card = load(cid)
+    state.player.sparks = sparks
+    state.player.energy = 3
+    state.player.hand.append(card)
+    combat.play_card(state, card)
+    return card
+
+
+def test_stoke_the_fuse_is_unplayable_at_zero_sparks(overhaul):
+    """THE X PRICE'S GATE. "Spend all your Sparks" charges ONE at the
+    playability seam -- an empty bank cannot pay, any bank holding a Spark
+    can -- which is `PrintedSparkPrice => 1` in the mod and
+    `effects.spend_spark_price` here. Without it the card would be playable
+    at 0 and resolve to nothing, which is exactly the silent no-play the
+    Spark cost line exists to refuse."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 6)
+    card = load("proto_ko_stoke_the_fuse")
+
+    assert combat.spark_cost(card) == 1
+    assert combat.card_cost(state, card) == 0
+
+    state.player.sparks = 0
+    assert combat.card_playable(state, card) is False
+    state.player.sparks = 1
+    assert combat.card_playable(state, card) is True
+
+
+def test_stoke_the_fuse_spends_the_whole_bank_and_grows_per_spark(overhaul):
+    """Three Sparks grow the Bomb by 9 (3 per Spark) and leave the bank at 0.
+
+    The bank is EMPTIED, not decremented by a printed price: the row's price
+    is X, so what it pays is whatever it holds -- and what it pays is what the
+    growth is measured in."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 6)
+
+    stoke(state, [enemy], 3)
+
+    assert sizes(enemy) == [6 + 9]
+    assert state.player.sparks == 0
+    assert state.player.energy == 3        # a 0-energy row
+
+
+def test_stoke_the_fuse_upgraded_pays_four_per_spark(overhaul):
+    """`upgrade: {grow: +1}` -- the rate is the row's one printed number and
+    the only thing the smith moves, so three Sparks buy 12 instead of 9."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 6)
+
+    stoke(state, [enemy], 3, cid="proto_ko_stoke_the_fuse+")
+
+    assert sizes(enemy) == [6 + 12]
+    assert state.player.sparks == 0
+
+
+def test_stoke_the_fuse_grows_the_largest_of_two_bombs(overhaul):
+    """"Your largest Bomb", board-wide and ONE charge -- `block_largest_bomb`'s
+    scope with `grow_bombs`'s effect, and neither one's spread: the other
+    charges are exactly where they were."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 4)
+    klee_overhaul.place(state, a, 9)
+    klee_overhaul.place(state, b, 7)
+
+    stoke(state, [a, b], 2)
+
+    assert sizes(a) == [4, 9 + 6]          # the 9 took all of it
+    assert sizes(b) == [7]
+
+
+def test_stoke_the_fuse_sets_nothing_off(overhaul):
+    """IT IS NOT A DETONATOR. The Sparks buy a bigger Bomb and the cash-out is
+    still a separate card, which is what keeps hold-or-cash in the player's
+    hands. The enemy takes no damage and the pile is still standing."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 6)
+
+    stoke(state, [enemy], 4)
+
+    assert enemy.hp == 200
+    assert sizes(enemy) == [6 + 12]
+    assert counts(state)["ko_bomb_exploded"] == 0
+
+
+def test_stoke_the_fuse_on_a_bomb_less_board_still_spends(overhaul):
+    """A REAL COST, REPORTED. Nothing on the board is a legal place to play
+    this -- the row is not `set_off_only` and takes no Bomb gate (it is a
+    grow, not a Set off) -- so the bank goes and nothing grows. That is the
+    row's losing line, and it is the one the charter asks every card to
+    keep."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+
+    stoke(state, [enemy], 3)
+
+    assert state.player.sparks == 0
+    assert sizes(enemy) == []
+    assert klee_overhaul.set_off_only(load("proto_ko_stoke_the_fuse")) is False
+
+

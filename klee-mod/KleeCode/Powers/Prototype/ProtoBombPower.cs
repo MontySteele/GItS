@@ -696,6 +696,35 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         SyncDisplay();
     }
 
+    /// <summary>
+    /// Grow the single largest charge ON THIS PILE by <paramref name="amount"/>,
+    /// and report which index took it (-1 if the pile is empty). PURE.
+    ///
+    /// <see cref="GrowBy"/>'s one-charge twin, and the board-wide walk in
+    /// <see cref="GrowLargestPerSpark"/> is what turns "largest here" into
+    /// "largest anywhere". THE FIRST largest wins a tie, in place order, which
+    /// is the tie-break <see cref="RemoveLargestForBlock"/> already takes: a
+    /// card whose payout lands on a coin flip is one the player cannot plan
+    /// around. Sim twin: <c>klee_overhaul.grow_largest_per_spark</c>'s inner
+    /// walk.
+    /// </summary>
+    public int GrowLargestChargeBy(int amount)
+    {
+        if (_charges.Count == 0) return -1;
+        var best = 0;
+        for (var i = 1; i < _charges.Count; i++)
+        {
+            if (_charges[i].Size > _charges[best].Size) best = i;
+        }
+        if (amount == 0) return best;
+        _charges[best] = _charges[best] with
+        {
+            Size = _charges[best].Size + amount,
+        };
+        SyncDisplay();
+        return best;
+    }
+
     /// <summary>Add one charge. PURE -- the APPLY that creates the pile is the
     /// caller's.</summary>
     public void AddCharge(ProtoCharge charge)
@@ -1599,6 +1628,57 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         var amount = largest < cap ? largest : cap;
         if (amount <= 0) return 0;
         await CreatureCmd.GainBlock(applier, amount, ValueProp.Unpowered, null);
+        return amount;
+    }
+
+    /// <summary>
+    /// Stoke the Fuse (the round-11 pool pass): the SINGLE largest Bomb on the
+    /// board grows by <paramref name="perSpark"/> for every Spark this card
+    /// spent. Returns the growth applied, 0 if nothing grew.
+    ///
+    /// <paramref name="sparksSpent"/> IS HANDED IN, not read here, and that is
+    /// the whole ordering rule. <c>SparkPower.Spend</c> debits the bank where
+    /// it is called, so the generated body captures
+    /// <c>SparkPower.SparksAtPlay</c> BEFORE the price is paid and passes the
+    /// number down -- reading the bank after the spend would read zero. The
+    /// sim answers the same question off <c>state.sparks_at_play</c>, the
+    /// documented twin of that accessor, and the op is legal only behind an
+    /// all-in Spark price so the two readings are the same number.
+    ///
+    /// THE LARGEST SINGLE CHARGE, BOARD-WIDE -- <see cref="BlockForLargestBomb"/>'s
+    /// walk one rule over, with <see cref="GrowLargestChargeBy"/>'s tie-break
+    /// inside each pile. ONE CHARGE AND NOT THE PILE is the row's decision:
+    /// <see cref="GrowOn"/> spreads growth across an enemy's charges, and this
+    /// pours the bank into the one she is already cooking.
+    ///
+    /// IT SETS NOTHING OFF. Sim twin:
+    /// <c>klee_overhaul.grow_largest_per_spark</c>.
+    /// </summary>
+    public static int GrowLargestPerSpark(
+        Creature applier, int perSpark, int sparksSpent)
+    {
+        if (applier.CombatState == null) return 0;
+        if (perSpark <= 0 || sparksSpent <= 0) return 0;
+
+        ProtoBombPower? bestPile = null;
+        var bestSize = 0;
+        foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
+        {
+            if (enemy.IsDead) continue;
+            foreach (var pile in enemy.Powers.OfType<ProtoBombPower>())
+            {
+                if (pile.Applier != applier) continue;
+                if (pile.LargestSize > bestSize)
+                {
+                    bestPile = pile;
+                    bestSize = pile.LargestSize;
+                }
+            }
+        }
+        if (bestPile == null) return 0;
+
+        var amount = perSpark * sparksSpent;
+        bestPile.GrowLargestChargeBy(amount);
         return amount;
     }
 
