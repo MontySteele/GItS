@@ -1466,3 +1466,13 @@ against the shipped kits and the richness playtest; the Kokomi items retire
 with the Plan overhaul, Spotlight was answered by R228, and what survives of
 the Furina items returns through the reframe's round packets. S4-G6 and
 S4-G14 closed the same way in the same ruling. Ceilings never come down.
+EB-380 RETIRED 2026-09-04: both surfaces now read "front non-Minion, or ALL, Minions too; Enemy Vulnerable counts, your Weak and Strength do not".
+EB-379 RETIRED 2026-09-04: the face reads "After 2 turns, deal 12" and the badge says "When it ends" beside its own turns-remaining count.
+EB-378 RETIRED 2026-09-04: the aura scan now walks branches and the Plan, so KokomiPlan deals every damaging clause as Element.Hydro and four rows gain the gem.
+EB-376 RETIRED 2026-09-04: the panel's sentence now carries on all four surfaces -- sheet, regenerated card, PlansAlsoNowPower, codegen template.
+EB-385 RETIRED 2026-09-04: a smartDescriptionReframe row on FanfareMeterPower names the Fanfare tip's two mint sites and nothing else.
+EB-384 RETIRED 2026-09-04: the deploy-performs clause pays a performance whose Encore spend refreshes the art, so staleness reads off the combat now.
+EB-383 RETIRED 2026-09-04: four smart-description rows on the badge, one per front plus the empty one, each naming the front member and all three rules.
+EB-382 RETIRED 2026-09-04 as not a defect: the spend is the shipped post-Block absorption, silenced by the meter leg, pinned at all three amounts in both engines.
+EB-366 RETIRED 2026-09-04: the card preview reads ReactionEffects.FrozenBossVulnWillApply, and the blind page prints the boss clause in a boss room only.
+EB-364 RETIRED 2026-09-04: SpotlightSystem.DesignateOneModeIsUnpayable asks the refusal one phase early, since the price is charged inside the op.
