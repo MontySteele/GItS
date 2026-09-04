@@ -658,7 +658,28 @@ def _number_faces(faces: list[dict[str, Any]], field: str
 # a remembered id for a DIFFERENT creature. A board that is a subset of the
 # roster is the same fight with bodies gone; a board that adds an id beside
 # remembered ones is a summon, and the newcomer takes the next free number.
-_FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {}, "numbered": set()}
+#
+# `EB-427` ADDED `names`, AND IT IS THE HALF EVERY RECEIPT NEEDED. The
+# numbering above already held across a death -- the kokomi r11 seat's three
+# Inklets keep 1, 2 and 3 through the one the morning killed -- but every line
+# that names a body the board no longer carries fell back to the mod's bare
+# title, so one morning printed `Inklet`, `Inklet (1)` and `Inklet (2)` for
+# three bodies and the seat read that as the numbers having shifted under it.
+# The fight remembers each id's PRINTED name, so a body that has left the board
+# is still called what it was called while it stood.
+#
+# `EB-428` ADDED `elements`, and it rides here because it decays on the same
+# boundary. The reaction glossary prints a row only where the screen can supply
+# both of its elements, and a screen is one turn: a Cryo card played on turn 1
+# is not in the hand on turn 2, and a glossary that dropped Melt for it would
+# be `EB-340`'s own defect back again -- "whether I was allowed to see it
+# depended on my draw". So an element this FIGHT has been shown to reach stays
+# reachable for the fight. It is the nearest honest reading of the row's "the
+# deck faces": the deck memory (`remember_deck`) keeps titles alone and cannot
+# answer what a card applies.
+_FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {},
+                                 "numbered": set(), "names": {},
+                                 "elements": set()}
 
 
 def forget_fight() -> None:
@@ -666,6 +687,44 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["roster"] = {}
     _FIGHT_MEMORY["ordinals"] = {}
     _FIGHT_MEMORY["numbered"] = set()
+    _FIGHT_MEMORY["names"] = {}
+    _FIGHT_MEMORY["elements"] = set()
+
+
+def remember_elements(found: set[str]) -> set[str]:
+    """Every element this fight has been shown to reach (`EB-428`).
+
+    UNION AND NEVER SUBTRACT, for the reason in `_FIGHT_MEMORY`'s header: the
+    question a reaction row answers is whether the DECK can build the pair, and
+    a card that is in the discard this turn is in the hand two turns from now.
+    Dropped with the rest of the fight's memory, so a Cryo drafted for one run
+    is not still colouring the glossary of the next.
+    """
+    _FIGHT_MEMORY["elements"] |= set(found)
+    return set(_FIGHT_MEMORY["elements"])
+
+
+def remembered_enemy_name(combat_id: Any, title: str) -> str:
+    """What this fight has been calling the body with that combat id (`EB-427`).
+
+    THE CALLER'S OWN TITLE STAYS THE FALLBACK, for the two cases it was always
+    right for: an id this fight never saw, and a wire that carries no id at
+    all. What changes is the case in between -- a body that WAS on the board
+    and is not any more, which is exactly the body a carry-out or a performance
+    is most likely to be about, because a Plan that killed something is a Plan
+    a reader wants to read.
+
+    THE EXPRESSION IS `_enemy_names`' OWN, deliberately: a name is numbered
+    here on the same two conditions it is numbered there, so a body cannot be
+    called one thing in the enemy list and another in the receipt above it.
+    """
+    key = f"c{combat_id}"
+    name = _FIGHT_MEMORY["names"].get(key)
+    if not name:
+        return title
+    if _fold(name) in _FIGHT_MEMORY["numbered"] and key in _FIGHT_MEMORY["ordinals"]:
+        return f"{name} ({_FIGHT_MEMORY['ordinals'][key]})"
+    return name
 
 
 def _enemy_key(entry: dict[str, Any]) -> str:
@@ -720,10 +779,13 @@ def _enemy_names(enemies: list[dict[str, Any]]) -> list[str]:
     ordinals: dict[str, int] = _FIGHT_MEMORY["ordinals"]
     numbered: set[str] = _FIGHT_MEMORY["numbered"]
 
-    for key, (fold, hp) in zip(keys, ident):
+    for key, name, (fold, hp) in zip(keys, names, ident):
         if key in roster or not fold:
             continue
         roster[key] = (fold, hp)
+        # `EB-427`: the printed name beside the ordinal, so a line about a body
+        # that has since left the board can be given the same handle.
+        _FIGHT_MEMORY["names"][key] = name
         seen = sum(1 for f, _ in roster.values() if f == fold)
         ordinals[key] = seen
         if seen > 1:
