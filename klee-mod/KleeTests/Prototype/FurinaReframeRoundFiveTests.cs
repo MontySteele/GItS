@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -59,7 +61,7 @@ public class FurinaReframeRoundFiveTests
     /// real one at registration, and `SmartDescriptionLocKey` is `Id.Entry`
     /// plus a suffix. Same seeding as `FurinaReframeRoundTwoTests.Stage`.
     /// </summary>
-    private static readonly MegaCrit.Sts2.Core.Models.ModelId GuestCastId =
+    private static readonly ModelId GuestCastId =
         new("POWER", "KLEE_GUEST_CAST_TEST");
 
     private static GuestCastPower Badge(Seat seat)
@@ -129,6 +131,173 @@ public class FurinaReframeRoundFiveTests
 
         Assert.EndsWith(".smartDescription", BadgeKey(badge));
         Assert.Contains("no Fanfare", FaceFor(badge));
+    }
+
+    // ==================================================================
+    // 2. `EB-420` -- Duet's extra play, printed and logged
+    // ==================================================================
+
+    private static readonly ModelId ReplayId =
+        new("POWER", "KLEE_REPLAY_NEXT_TEST");
+
+    private static ReplayNextCompanionPower Replay(Seat seat)
+    {
+        var badge = (ReplayNextCompanionPower)RuntimeHelpers
+            .GetUninitializedObject(typeof(ReplayNextCompanionPower));
+        Seat.Force(badge, "Id", ReplayId);
+        Seat.Force(badge, "IsMutable", true);
+        Seat.Force(badge, "Owner", seat.Creature);
+        return badge;
+    }
+
+    private static string ReplayKey(ReplayNextCompanionPower badge) =>
+        (string)typeof(ReplayNextCompanionPower)
+            .GetProperty("SmartDescriptionLocKey", HeadlessGame.All)!
+            .GetValue(badge)!;
+
+    private static string ReplayFace(ReplayNextCompanionPower badge)
+    {
+        var key = ReplayKey(badge);
+        var rows = badge.Localization!;
+        return rows.FirstOrDefault(r => r.Item1 != "description"
+                                        && key.EndsWith(r.Item1)).Item2
+               ?? rows.First(r => r.Item1 == "description").Item2;
+    }
+
+    /// <summary>A Companion card, uninitialised with a forced id -- the same
+    /// shape `FurinaReframeRuleTests.Companion` uses, plus the id, because the
+    /// ledger records the printed title and falls back to the entry.</summary>
+    private static CardModel Companion()
+    {
+        var card = (CardModel)
+            RuntimeHelpers.GetUninitializedObject(
+                typeof(global::KleeMod.Cards.Generated.BarbaraMelody));
+        Seat.Force(card, "Id",
+            new ModelId("CARD", "BARBARA_TEST"));
+        return card;
+    }
+
+    private static CardModel NotACompanion()
+    {
+        var card = (CardModel)
+            RuntimeHelpers.GetUninitializedObject(
+                typeof(global::KleeMod.Cards.Furina.EtherealSpotlight));
+        Seat.Force(card, "Id",
+            new ModelId("CARD", "SPOTLIGHT_TEST"));
+        return card;
+    }
+
+    [Fact]
+    public void The_arms_replay_face_says_the_salon_still_performs_once()
+    {
+        // The rule was already this and was printed nowhere: the trigger is
+        // gated on `IsFirstInSeries` (LAW:145's per-Companion-play bound), and
+        // the seat "ended the turn unable to say whether Duet had fired".
+        using var _ = new Arm(manual: true);
+        var badge = Replay(Seat.Furina());
+
+        Assert.EndsWith(".smartDescriptionReframe", ReplayKey(badge));
+        Assert.Contains("performs on the first play only", ReplayFace(badge));
+    }
+
+    [Fact]
+    public void The_shipped_replay_face_is_untouched_off_the_arm()
+    {
+        // Off the arm nothing performs off a Companion play at all, so the
+        // clause would name a trigger that does not exist. Klee holds this
+        // same power (Study Buddy) and reads the shipped sentence for the same
+        // reason -- `ManualLiveFor` is Furina's.
+        using var _ = new Arm(master: false);
+        var badge = Replay(Seat.Furina());
+
+        Assert.EndsWith(".smartDescription", ReplayKey(badge));
+        Assert.DoesNotContain("first play only", ReplayFace(badge));
+    }
+
+    [Fact]
+    public void Klee_holding_study_buddy_reads_the_shipped_face_under_the_arm()
+    {
+        using var _ = new Arm(manual: true);
+        var badge = Replay(Seat.Klee());
+
+        Assert.EndsWith(".smartDescription", ReplayKey(badge));
+    }
+
+    [Fact]
+    public void A_companion_replay_is_recorded_under_the_arm()
+    {
+        // The log half. `NoteCompanionReplay` is what the seam calls on the
+        // side of the gate that does NOT trigger, so the page can name the
+        // play that performed nobody.
+        using var _ = new Arm(manual: true);
+        FurinaReframeLedger.ResetAll();
+        var seat = Seat.Furina();
+
+        SalonMemberPower.NoteCompanionReplay(seat.Creature, Companion());
+
+        Assert.Single(FurinaReframeLedger.For(seat.Creature)
+                          .ReplaysWithoutTrigger);
+    }
+
+    [Fact]
+    public void A_replay_of_a_non_companion_is_not_recorded()
+    {
+        // The trigger is the Companion half of the kit; her own cards Evoke.
+        using var _ = new Arm(manual: true);
+        FurinaReframeLedger.ResetAll();
+        var seat = Seat.Furina();
+
+        SalonMemberPower.NoteCompanionReplay(seat.Creature, NotACompanion());
+
+        Assert.Empty(FurinaReframeLedger.For(seat.Creature)
+                         .ReplaysWithoutTrigger);
+    }
+
+    [Fact]
+    public void Nothing_is_recorded_with_the_manual_leg_off()
+    {
+        using var _ = new Arm(master: false);
+        FurinaReframeLedger.ResetAll();
+        var seat = Seat.Furina();
+
+        SalonMemberPower.NoteCompanionReplay(seat.Creature, Companion());
+
+        Assert.Empty(FurinaReframeLedger.For(seat.Creature)
+                         .ReplaysWithoutTrigger);
+    }
+
+    [Fact]
+    public void The_turn_boundary_clears_the_replays_with_the_performances()
+    {
+        // One list's question, so one boundary: "what happened on the turn I
+        // am looking at".
+        using var _ = new Arm(manual: true);
+        FurinaReframeLedger.ResetAll();
+        var seat = Seat.Furina();
+        var ledger = FurinaReframeLedger.For(seat.Creature);
+
+        SalonMemberPower.NoteCompanionReplay(seat.Creature, Companion());
+        ledger.ClearPerformances();
+
+        Assert.Empty(ledger.ReplaysWithoutTrigger);
+    }
+
+    [Fact]
+    public void The_wire_carries_the_replays_beside_the_performances()
+    {
+        // Beside and never inside: a replay that performed nobody is not a
+        // performance, and the reader has to be able to tell the two apart.
+        using var _ = new Arm(manual: true);
+        FurinaReframeLedger.ResetAll();
+        var seat = Seat.Furina();
+
+        SalonMemberPower.NoteCompanionReplay(seat.Creature, Companion());
+        var snapshot = FurinaReframeLedger.Snapshot(seat.Player);
+
+        Assert.True(snapshot.ContainsKey("performed"));
+        var replayed = Assert.IsType<List<object?>>(
+            snapshot["replayed"]);
+        Assert.Single(replayed);
     }
 
     [Fact]

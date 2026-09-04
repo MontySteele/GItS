@@ -708,6 +708,14 @@ def _finish_play(state: CombatState, card: Card,
             # read `reactions_this_card`, which does not exist until a
             # resolution has run. C# does the same at KleeElementalHooks.
             effects.klee_personal_companion_spark(state, card)
+        elif card.is_companion:
+            # `EB-420`. THE OTHER SIDE OF THAT GATE, said out loud. The bound
+            # is deliberate and the replay leaves no trace: Duet doubled a
+            # Companion's hit, the Salon performed once, and nothing named the
+            # second play. Emitted here rather than inside the trigger because
+            # this is the branch that does not call it. C# twin:
+            # `SalonMemberPower.NoteCompanionReplay`, at the same gate.
+            furina_reframe.companion_replay_no_trigger(state, card)
     # THE AUTOMATIC POWER FLOOR GRANT USED TO LIVE HERE. Deleted by the
     # Fanfare rework (2026-07-28, Track B, RULED): playing any Power silently
     # raised floor, cap and current by 5 (rares 8), printed on no card and

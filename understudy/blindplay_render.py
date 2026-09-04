@@ -396,7 +396,8 @@ def render(obs: dict[str, Any]) -> str:
             # at the foot of the section rather than under the last card.
             if _board_note_wanted(pl):
                 out += ["", CARRY_OUT_BOARD_NOTE]
-        if c.get("salon") and c["salon"]["performed"]:
+        if c.get("salon") and (c["salon"]["performed"]
+                               or c["salon"]["replayed"]):
             # `EB-405`. WHAT THE STAGE DID THIS TURN, one act per line --
             # `EB-198`'s contract, the same one the carry-out block is under.
             #
@@ -410,6 +411,16 @@ def render(obs: dict[str, Any]) -> str:
             # aura" rather than claiming Hydro that is not there.
             out += ["", "## What your Salon did this turn", ""]
             out += [_render_performance(row) for row in c["salon"]["performed"]]
+            # `EB-420`. THE PLAY THAT IS MISSING FROM THE LIST ABOVE, named.
+            # A Companion card played an extra time makes nobody perform --
+            # the trigger is once per Companion card played -- so the acts
+            # above are one short of the plays, and a reader counting them
+            # infers the wrong rule. The round-5 seat did: "two Crabaletta
+            # lines ... for three Companion-card plays' worth of triggers",
+            # and "no line anywhere on the screen said Duet".
+            out += [f"- **{name}** was played an extra time, and an extra "
+                    "play makes nobody perform."
+                    for name in c["salon"]["replayed"]]
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page

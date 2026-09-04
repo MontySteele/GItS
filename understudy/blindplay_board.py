@@ -267,6 +267,15 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
         `amount` is the number it dealt or blocked and `paid` is whether it
         could afford its Encore, which is the difference between the printed
         number and three-quarters of it.
+
+      replayed -- `EB-420`. This turn's Companion cards that were played an
+        EXTRA time, by printed title, one entry per extra play. The extra play
+        makes nobody perform -- the trigger is once per Companion card played,
+        LAW:145's bound -- so these are the plays that are missing from
+        `performed`, and a reader given only that list would count the stage's
+        acts and reach the wrong rule. The round-5 seat did exactly that: "two
+        Crabaletta lines ... for three Companion-card plays' worth of
+        triggers", and "no line anywhere on the screen said Duet".
     """
     raw = player.get("furina_salon")
     if not isinstance(raw, dict) or not raw:
@@ -280,7 +289,10 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
          "amount": _int(row.get("amount")),
          "paid": bool(row.get("paid"))}
         for row in (raw.get("performed") or []) if isinstance(row, dict)]
-    return {"performed": performed}
+    replayed = [name for name in
+                (_text(entry) for entry in (raw.get("replayed") or []))
+                if name]
+    return {"performed": performed, "replayed": replayed}
 
 
 def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],

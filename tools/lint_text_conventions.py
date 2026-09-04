@@ -414,17 +414,26 @@ def salon_arm_rows() -> list[Row]:
     return rows
 
 
-def furina_arm_rows() -> list[Row]:
-    """`EB-385`. The Fanfare badge's ARM face, gated with the rest of the arm.
+#: The SHIPPED power files the arm adds a face to. `EB-421` and `EB-420` put
+#: the second and third here -- Guest Cast's mode buff and the replay buff Duet
+#: applies -- and they are LISTED rather than globbed because "which shipped
+#: power carries an arm face" is a fact worth naming in one place.
+FURINA_ARM_FACE_FILES = ("FurinaResources.cs", "SpotlightSystem.cs",
+                         "CompanionPowers.cs")
 
-    `FurinaResources.cs` is a SHIPPED file, so `--shipped` reads all of it and
-    the row below would otherwise be measured only by a report. What belongs
-    to the prototype gate is the one row the arm adds, which is the row whose
-    KEY says so -- filtered by key rather than by file, so a second arm face in
-    the same file joins the gate the day it lands and no shipped row is
-    counted twice.
+
+def furina_arm_rows() -> list[Row]:
+    """`EB-385`. The arm's faces on SHIPPED powers, gated with the rest of the
+    arm.
+
+    Those files are SHIPPED, so `--shipped` reads all of them and the arm rows
+    would otherwise be measured only by a report. What belongs to the prototype
+    gate is the rows the ARM adds, which are the rows whose KEY says so --
+    filtered by key rather than by file, so a second arm face in one of these
+    files joins the gate the day it lands and no shipped row is counted twice.
     """
-    rows = loc_rows([MOD / "Powers" / "FurinaResources.cs"], "power", "proto")
+    rows = loc_rows([MOD / "Powers" / name for name in FURINA_ARM_FACE_FILES],
+                    "power", "proto")
     return [r for r in rows if "Reframe" in r.ident]
 
 
