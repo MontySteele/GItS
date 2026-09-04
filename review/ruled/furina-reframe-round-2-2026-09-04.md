@@ -1,4 +1,4 @@
-Status: OPEN (picks 1 and 2 in §6; the defaults in §5 are applied)
+Status: RULED R253 2026-09-04 (picks 1 and 2 at their defaults; the four rider copies passed the charter audit, `review/records/card-audit-2026-09-04.md`)
 
 # Furina round two: the reframe on its own engine, and the two economies that read wrong
 

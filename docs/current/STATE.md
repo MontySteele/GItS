@@ -137,12 +137,12 @@ are in [`workstreams.md`](workstreams.md).
 
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
   inside; R220 B sequences it Kokomi → Klee → Furina, Burst retirement last.
-- **Klee** — Rounds 8 and 9 are RULED (R250, R252;
+- **Klee** — Rounds 8 and 9 are RULED (R250, R252, narrowed by R253;
   `review/ruled/klee-overhaul-round-8-2026-09-04.md`, `...round-9-2026-09-04.md`):
   the Splash pays the largest Bomb, and the pool's defence shelf is three
   conditional rows (Dodoco Cover, Careful Now, Barbara — Front Row Seat);
-  Fire Safety and Safety Lesson were withdrawn on the charter audit,
-  whose ruling record lands with this stack. Round 10 is READ
+  Fire Safety and Safety Lesson were withdrawn on the charter audit
+  (R253, `review/records/card-audit-2026-09-04.md`). Round 10 is READ
   (`review/active/klee-overhaul-round-10-2026-09-04.md`): six runs on
   `0.2.2401+proto`, six act-1 clears, none past act 2; Dodoco Cover played
   every fight, Careful Now split the seats along cook-or-cash, Front Row
@@ -153,14 +153,15 @@ are in [`workstreams.md`](workstreams.md).
   six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
   when written if the engine can carry a second selection, else lands on the
   front enemy that is not a Minion. Round 9 is READ
-  (`review/active/kokomi-overhaul-round-9-2026-09-04.md`): both rules read
+  (`review/ruled/kokomi-overhaul-round-9-2026-09-04.md`): both rules read
   true, run 2 cleared acts 1 and 2 and died on act-3 floor 39 after a misread
   of The Moon's face; the pool's empty shelf is tempo (no energy, no Retain),
   one pick, `EB-376`-`EB-381`. **Round 10 is BUILT** — the TEMPO SHELF, round 9
-  pick 1 at its default: Held Tide, Tide Chart and Ripple, on a new
-  `plans_held` count in both engines, the pool now 31 rows (the shelf's fourth,
-  Tidal Rhythm, is held by [USER] pending an adversarial audit and is not on
-  the surface). [USER]'s act-1 run is due on `0.2.2309+proto`. The Kurage
+  pick 1 at its default AS AUDITED (R253,
+  `review/ruled/kokomi-overhaul-round-9-2026-09-04.md`): Tide Chart and
+  Ripple, on a new `plans_held` count in both engines, the pool 30 rows;
+  Held Tide and Tidal Rhythm were withdrawn on the charter audit and are
+  not on the surface. [USER]'s act-1 run is due on `0.2.2309+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
@@ -175,7 +176,10 @@ are in [`workstreams.md`](workstreams.md).
   retires under the arm alone — no draw, no feed, no kit card, behind
   `FURINA_REFRAME_BURST` in both engines, the shared retirement still
   `EB-199` / `EB-200`'s (`EB-365` closed) — with `EB-364`, `EB-366`, `EB-367`
-  and `EB-368`. **Round 4 is BUILT** — round 2 pick 1 at its default: four
+  and `EB-368`. Round 2 is RULED (R253,
+  `review/ruled/furina-reframe-round-2-2026-09-04.md`): the riders re-priced
+  arm-only and Encore absorption kept and printed. **Round 4 is BUILT** — round 2 pick 1 at its default, the four copies
+  passed the charter audit: four
   arm-only `proto_fr_` copies of the shipped Fanfare riders at the arm's own
   scale (12/12/15/20 down to 6/6/8/10), swapped in for the shipped ids at the
   same rarity by `loader._pool_substitutions` and
@@ -185,7 +189,7 @@ are in [`workstreams.md`](workstreams.md).
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
-  the arm pools (33 Klee — 37 since R252's defence shelf — / 30 Kokomi rows
+  the arm pools (33 Klee / 30 Kokomi rows
   against 79 / 76 shipped) cleared
   three of seven kit runs. The clears are the kits'; a clear on a 30-row pool
   is consistency as much as strength. The second control (same afternoon,

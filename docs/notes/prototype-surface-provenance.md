@@ -2236,7 +2236,7 @@ deleted with it.
 
 The tempo shelf, Kokomi round 9 pick 1 taken at its default (2026-09-04,
 disclosed to [USER] with the pick and unanswered before the build; the
-packet is `review/active/kokomi-overhaul-round-9-2026-09-04.md`). The arm
+packet is `review/ruled/kokomi-overhaul-round-9-2026-09-04.md`). The arm
 had thirty rows at a flat cost, no energy gain, two draw cards and nothing
 that Retains, and the seats' dead turns were all dilution with no way to
 hold or hurry a Plan. Every row here is keyed to the Bake-Kurage:
@@ -2260,7 +2260,7 @@ Kokomi round 10 before [USER] does.
 
 The shipped Fanfare riders under the Furina arm, round 2 pick 1 taken at
 its default (2026-09-04, disclosed and unanswered before the build; the
-packet is `review/active/furina-reframe-round-2-2026-09-04.md`). The arm
+packet is `review/ruled/furina-reframe-round-2-2026-09-04.md`). The arm
 mints Fanfare by performance only, 2 per trigger and 5 per Evoke, and in
 three rounds Fanfare ranged 0 to 15 while the shipped riders asked 12, 15
 and 20. These four rows are arm-only copies at the arm's scale (12 to 6, 15
