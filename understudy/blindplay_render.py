@@ -152,15 +152,49 @@ def _render_carry_out(pl: dict[str, Any]) -> list[str]:
         out.append(f"- The {pl['pet_name']} carried these out at the "
                    "start of this turn, front first:")
         for said in pl["carried_out"]:
-            out.append(f"  - {said['line']}")
+            out.append(f"  - {said['line']}{_kind_clause(said)}")
             out += _render_moved(said)
     if pl["fired_now"]:
         out.append(f"- The {pl['pet_name']} carried these out THIS TURN, the "
                    "moment each was written, and not this morning:")
         for said in pl["fired_now"]:
-            out.append(f"  - {said['line']}")
+            out.append(f"  - {said['line']}{_kind_clause(said)}")
             out += _render_moved(said)
     return out
+
+
+def _kind_clause(said: dict[str, Any]) -> str:
+    """What the figure on a carry-out line IS (`EB-426`).
+
+    `Bake-Kurage: Cleansing Wave, 7` put a bare 7 in the slot every other line
+    uses for damage and then said "no enemy lost HP". The 7 was BLOCK, cut from
+    the clause's 10 by Frail, and the r11 seat derived both halves off the
+    board. Neither is in the mod's sentence -- it is one string with one figure
+    -- so the kind and the amount the clause asked for ride beside it and the
+    page says them.
+
+    THE MOD'S SENTENCE IS UNTOUCHED. It is printed as sent, and this is a
+    clause AFTER it: one composer for the on-screen words, which is the whole
+    argument for the `line` field, and the page adding what the wire now
+    carries.
+
+    EVERY KIND AND NOT ONLY BLOCK. "A bare number in the slot every other line
+    uses for damage" is a complaint about a slot with no label, and labelling
+    one kind would leave the slot exactly as ambiguous for the next reader --
+    `Exposed Flank, 2` is two stacks of Vulnerable.
+
+    THE ASKED-FOR HALF IS PRINTED ONLY WHERE IT DIFFERS, and it is not always
+    smaller: a hit into Vulnerable lands above what its clause asked for. Which
+    power moved it is not on the wire (`CreatureCmd.GainBlock` reports a landed
+    amount and no attribution), so the page states the two numbers and leaves
+    the screen's own status rows to name what sits between them.
+    """
+    if said["number"] is None or not said["kind"]:
+        return ""
+    clause = f" — the {said['number']} is {said['kind']}"
+    if said["asked"] is not None and said["asked"] != said["number"]:
+        clause += f"; the clause asked for {said['asked']}"
+    return clause + "."
 
 
 def _board_note_wanted(pl: dict[str, Any]) -> bool:

@@ -442,8 +442,15 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
     if not line:
         line = (f"{pet_name}: {card}" if number is None
                 else f"{pet_name}: {card}, {number}")
+    # `EB-426`: WHAT THE NUMBER IS, and what its clause asked for. Both are
+    # `KokomiPlan.NumberKind` / `AskedFor`'s, and both are ABSENT on a bridge
+    # older than the field -- which prints exactly the line it always printed,
+    # `board_read`'s discipline again.
+    asked = row.get("asked")
     raw_moved = row.get("moved")
     return {"card": card, "number": number, "line": line,
+            "kind": _text(row.get("kind")),
+            "asked": None if asked is None else _int(asked),
             "on_play": bool(row.get("on_play")),
             "board_read": isinstance(raw_moved, list),
             # `EB-440`: A ROW IS A BODY THIS PLAN MOVED SOMETHING ON, and

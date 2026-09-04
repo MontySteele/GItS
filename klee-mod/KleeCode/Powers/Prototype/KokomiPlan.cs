@@ -168,9 +168,24 @@ public static class KokomiPlan
     /// composers in two languages is exactly how a page and a screen come to
     /// disagree about words; there is one, and it is C#.
     /// </summary>
+    /// <paramref name="Kind"/> AND <paramref name="Asked"/> ARE `EB-426`, AND
+    /// THEY SAY WHAT THE FIGURE IS. `Bake-Kurage: Cleansing Wave, 7` puts a
+    /// bare 7 in the slot every other line uses for damage and then reports
+    /// "no enemy lost HP"; the 7 was BLOCK, cut from the clause's 10 by Frail,
+    /// and the r11 seat had to derive both halves. Neither is derivable from
+    /// the wire: the line is one string and <paramref name="Number"/> is one
+    /// integer, so the clause's own kind and the amount it asked for ride
+    /// beside them. Both are the FIRST numbered clause's, which is the clause
+    /// <paramref name="Number"/> already belongs to.
+    ///
+    /// WHICH MODIFIER MOVED IT IS NOT HERE, and that is a limit rather than an
+    /// omission: <c>CreatureCmd.GainBlock</c> reports a landed amount and no
+    /// attribution, so the honest pair is what was asked and what landed. The
+    /// screen's own status rows name the power that sits between them.
     public readonly record struct CarriedOutPlan(
         string Card, int? Number, string Line,
-        IReadOnlyList<MovedOn>? Moved, bool OnPlay);
+        IReadOnlyList<MovedOn>? Moved, bool OnPlay,
+        string? Kind = null, int? Asked = null);
 
     /// <summary>
     /// HOW MUCH THE BOARD ACTUALLY MOVED, on one creature, during one Plan
@@ -632,12 +647,24 @@ public static class KokomiPlan
         // all (Moon's Reflection's replay, Nereid's window) says its name and
         // no number, which is what the row asks for.
         int? number = null;
+        // `EB-426`: the first numbered clause's KIND and the amount it asked
+        // for, taken beside the number they belong to. `asked` is read BEFORE
+        // the clause runs, because two of the three scaled kinds read a ledger
+        // the clause itself moves.
+        string? kind = null;
+        int? asked = null;
         try
         {
             foreach (var clause in entry.Clauses)
             {
+                var wanted = AskedFor(kokomi, clause);
                 var produced = await ResolveOne(choiceContext, kokomi, clause);
-                number ??= produced;
+                if (number == null && produced != null)
+                {
+                    number = produced;
+                    kind = NumberKind(clause.Kind);
+                    asked = wanted;
+                }
             }
         }
         finally
@@ -652,7 +679,7 @@ public static class KokomiPlan
             // moved is still measured; the clauses that never ran moved
             // nothing, which is the honest reading.
             Announce(kokomi, entry.Title, number, Moved(before, kokomi),
-                     onPlay);
+                     onPlay, kind, asked);
         }
 
         // SANGO ISSHIN's condition, written HERE because this is the one place
@@ -685,7 +712,8 @@ public static class KokomiPlan
     /// on-screen line and nothing else.
     /// </summary>
     private static void Announce(Creature kokomi, string card, int? number,
-                                 IReadOnlyList<MovedOn>? moved, bool onPlay)
+                                 IReadOnlyList<MovedOn>? moved, bool onPlay,
+                                 string? kind = null, int? asked = null)
     {
         var line = Vfx.KurageBeat.Line(card, number);
         Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi, line);
@@ -697,7 +725,8 @@ public static class KokomiPlan
             said = new List<CarriedOutPlan>();
             _carriedOut[player] = said;
         }
-        said.Add(new CarriedOutPlan(card, number, line, moved, onPlay));
+        said.Add(new CarriedOutPlan(card, number, line, moved, onPlay,
+                                    kind, asked));
     }
 
     /// <summary>
@@ -910,6 +939,65 @@ public static class KokomiPlan
     }
 
     /// <summary>
+    /// WHAT THE NUMBER ON A CARRY-OUT LINE IS, in the word the page prints
+    /// (`EB-426`).
+    ///
+    /// A NAMED METHOD RATHER THAN A MAP, for <see cref="CarriedOutRow"/>'s
+    /// reason: these strings are the contract with `understudy/blindplay`, and
+    /// `Il.Strings` over a named method is what a headless pin can read.
+    ///
+    /// NULL WHERE THE CLAUSE PRODUCES NO NUMBER, which is the same set
+    /// <see cref="ResolveOne"/> returns null for -- Nereid's window is turns
+    /// and not a board figure, and a replay or a copy prints its own numbers
+    /// as it resolves. Those lines carry a card name and nothing else, so
+    /// there is no figure to label.
+    ///
+    /// THE THREE DAMAGE KINDS ARE ONE WORD, because they are one quantity: a
+    /// flat hit, a quarter of her Max HP and a per-Companion count all land as
+    /// damage, and a reader asking what the figure is is not asking how it was
+    /// derived.
+    /// </summary>
+    private static string? NumberKind(Kind kind) => kind switch
+    {
+        Kind.Draw => "cards drawn",
+        Kind.Energy => "Energy",
+        Kind.Block or Kind.BlockPerPlanThisMorning => "Block",
+        Kind.Mend => "HP healed",
+        Kind.Damage or Kind.DamageQuarterMaxHp
+            or Kind.DamagePerCompanionLastTurn => "damage",
+        Kind.ApplyWeak => "Weak",
+        Kind.ApplyVulnerable => "Vulnerable",
+        _ => null,
+    };
+
+    /// <summary>
+    /// WHAT THE CLAUSE ASKED FOR, before the board had its say (`EB-426`).
+    ///
+    /// The other half of the seat's derivation: `Cleansing Wave, 7` is a Plan
+    /// that asked for 10 and was cut by Frail, and the page can only say so
+    /// where it is told the 10. For most kinds that is the clause's own
+    /// <c>Amount</c>; the three scaled ones compute it exactly as
+    /// <see cref="ResolveOne"/> does, which is why this is a method beside it
+    /// rather than a second reading of the same rule somewhere else.
+    ///
+    /// CALLED BEFORE THE CLAUSE RUNS. Two of the three read a ledger the
+    /// clause itself moves -- Tide Wall counts the morning's Plans, Chain of
+    /// Command last turn's Companions -- so asking afterwards would answer a
+    /// different question.
+    /// </summary>
+    private static int? AskedFor(Creature kokomi, Planned plan) => plan.Kind
+        switch
+    {
+        Kind.BlockPerPlanThisMorning =>
+            plan.Amount * KokomiOverhaulLedger.For(kokomi).PlansThisMorning,
+        Kind.DamagePerCompanionLastTurn =>
+            plan.Amount * KokomiOverhaulLedger.For(kokomi)
+                              .CompanionsPlayedLastTurn,
+        Kind.DamageQuarterMaxHp => KokomiRules.QuarterOfMaxHp(kokomi),
+        _ => plan.Amount,
+    };
+
+    /// <summary>
     /// The front enemy: leftmost alive, SKIPPING A MINION (`R250`, round-5
     /// sec.6 pick 1 at its default). <c>CombatState.Enemies</c> is board order
     /// (it is sorted by encounter slot), so "leftmost" is the first hittable
@@ -1106,6 +1194,9 @@ public static class KokomiPlan
             ["line"] = said.Line,
             ["on_play"] = said.OnPlay,
             ["moved"] = said.Moved?.Select(MovedRow).ToList(),
+            // `EB-426`: what the number IS, and what its clause asked for.
+            ["kind"] = said.Kind,
+            ["asked"] = said.Asked,
         };
 
     /// One enemy's share of one Plan, on the wire (`EB-329`).

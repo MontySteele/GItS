@@ -3179,6 +3179,7 @@ CARRIED_OUT = dict(TWO_PLANS, pending=0, queue=[], carried_out=[
 CARRIED_OUT_MEASURED = dict(
     CARRIED_OUT,
     carried_out=[dict(CARRIED_OUT["carried_out"][0], on_play=False,
+                      kind="damage", asked=12,
                       moved=[{"target": "Nibbit", "combat_id": "1",
                               "amount": 12, "dead": False, "absorbed": 3}]),
                  CARRIED_OUT["carried_out"][1]])
@@ -3286,10 +3287,11 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
             assert word not in line
     # And the observation carries nothing but the ruled fields per row --
     # `EB-317`'s three, plus `EB-329`'s board reading and the door the Plan
-    # came through. All five are things a sighted player watched happen; not
-    # one of them is a ledger row.
+    # came through, plus `EB-426`'s two: what the number IS and what its
+    # clause asked for. All seven are things a sighted player watched happen;
+    # not one of them is a ledger row.
     for row in obs["combat"]["plans"]["carried_out"]:
-        assert set(row) == {"card", "number", "line",
+        assert set(row) == {"card", "number", "line", "kind", "asked",
                             "on_play", "board_read", "moved"}
         for moved in row["moved"]:
             assert set(moved) == {"target", "combat_id", "amount", "dead",
@@ -3486,6 +3488,99 @@ def test_a_plan_that_moved_no_hp_says_so_and_an_older_wire_says_nothing():
     assert "- Bake-Kurage: Stolen Chapter" in older
     assert "no enemy lost HP" not in older
     assert "what its first clause produced" not in older
+
+
+def test_a_block_carry_out_says_it_is_block_and_what_it_asked_for():
+    """`EB-426`, and it is the row's own line. `Bake-Kurage: Cleansing Wave, 7`
+    put a bare 7 in the slot every other line uses for damage and followed it
+    with "no enemy lost HP": the 7 was BLOCK, cut from the clause's 10 by
+    Frail, and the r11 seat derived both halves off the board.
+
+    Seen to FAIL: the wire carried one string and one integer, and the page had
+    nothing to label the integer with.
+    """
+    page = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Cleansing Wave", "number": 7,
+                    "line": "Bake-Kurage: Cleansing Wave, 7",
+                    "kind": "Block", "asked": 10,
+                    "on_play": False, "moved": []}))))
+    assert ("- Bake-Kurage: Cleansing Wave, 7 — the 7 is Block; the clause "
+            "asked for 10.") in page
+    # The mod's own sentence is printed as sent and the clause comes after it.
+    assert "Bake-Kurage: Cleansing Wave, 7 —" in page
+
+
+def test_a_number_the_board_did_not_move_says_only_what_it_is():
+    """The asked-for half is printed only where it differs, and the label is
+    printed on every kind: "a bare number in the slot every other line uses for
+    damage" is a complaint about an unlabelled slot, and labelling Block alone
+    would leave it exactly as ambiguous for `Exposed Flank, 2`."""
+    page = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Exposed Flank", "number": 2,
+                    "line": "Bake-Kurage: Exposed Flank, 2",
+                    "kind": "Vulnerable", "asked": 2,
+                    "on_play": False, "moved": []}))))
+    assert "- Bake-Kurage: Exposed Flank, 2 — the 2 is Vulnerable." in page
+    assert "asked for" not in page
+
+
+def test_a_hit_that_landed_above_its_clause_says_both_numbers():
+    """The difference is not always a cut. A planned hit into Vulnerable lands
+    ABOVE what its clause asked for -- 12 x 1.5 -- which is the same two
+    numbers the other way round, and the page states both rather than naming a
+    modifier the wire cannot attribute."""
+    page = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Ambush", "number": 18,
+                    "line": "Bake-Kurage: Ambush, 18",
+                    "kind": "damage", "asked": 12,
+                    "on_play": False, "moved": []}))))
+    assert ("- Bake-Kurage: Ambush, 18 — the 18 is damage; the clause asked "
+            "for 12.") in page
+
+
+def test_a_line_with_no_number_and_an_older_wire_stay_unlabelled():
+    """Two silences. A Plan whose clauses produced no figure has nothing to
+    label -- Nereid's window is turns, a replay prints its own numbers -- and a
+    bridge older than the field has not answered, so both print exactly the
+    line they always printed."""
+    silent = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Stolen Chapter", "number": None,
+                    "line": "Bake-Kurage: Stolen Chapter",
+                    "kind": None, "asked": None,
+                    "on_play": False, "moved": []}))))
+    assert "- Bake-Kurage: Stolen Chapter" in silent
+    assert "is cards drawn" not in silent
+    older = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Ambush", "number": 12,
+                    "line": "Bake-Kurage: Ambush, 12",
+                    "on_play": False, "moved": []}))))
+    assert "- Bake-Kurage: Ambush, 12" in older
+    assert "is damage" not in older
+
+
+def test_the_number_kind_words_are_the_mods_own():
+    """Held in step with `KokomiPlan` from this side: the strings the page
+    prints are `NumberKind`'s, and the amount beside them is `AskedFor`'s,
+    computed the way `ResolveOne` computes each scaled clause and read BEFORE
+    the clause runs -- two of the three read a ledger the clause itself moves.
+    """
+    plan = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+            / "KokomiPlan.cs").read_text(encoding="utf-8")
+    assert '["kind"] = said.Kind,' in plan and '["asked"] = said.Asked,' in plan
+    kinds = plan[plan.index("private static string? NumberKind(Kind kind)"):]
+    kinds = kinds[:kinds.index("/// <summary>")]
+    for word in ('"cards drawn"', '"Energy"', '"Block"', '"HP healed"',
+                 '"damage"', '"Weak"', '"Vulnerable"'):
+        assert word in kinds, word
+    asked = plan[plan.index("private static int? AskedFor("):]
+    asked = asked[:asked.index("/// <summary>")]
+    assert "PlansThisMorning" in asked
+    assert "CompanionsPlayedLastTurn" in asked
+    assert "KokomiRules.QuarterOfMaxHp(kokomi)" in asked
+    # Read before the clause resolves, which is the whole reason it is a
+    # separate call rather than a read inside `Announce`.
+    entry = plan[plan.index("var wanted = AskedFor(kokomi, clause);"):]
+    assert entry.index("await ResolveOne(") < entry.index("kind = NumberKind(")
 
 
 def test_a_carry_out_eaten_by_block_says_so_with_the_amount():
