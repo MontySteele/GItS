@@ -3196,6 +3196,44 @@ def test_a_wire_without_the_sentence_still_gets_the_ruled_format():
     assert "- Bake-Kurage: Stolen Chapter" in page
 
 
+def test_the_panel_says_where_a_plan_lands_in_two_sentences():
+    """`EB-442`. The `Plan` keyword says the aim rule in 135 rendered
+    characters at the tip ceiling, and the r12 seat read it about fifteen
+    times without getting the rule out of it while "the Bake-Kurage panel and
+    the Reaction preview read clearly". The panel has no ceiling.
+
+    Every clause is `KokomiPlan`'s own: `FrontEnemy` takes the leftmost
+    hittable non-Minion and falls back to the leftmost Minion on a board of
+    Minions alone, and `Aimed` walks every living body for `Aim.AllEnemies`.
+    """
+    page = blindplay.render(blindplay.observation(plans_combat_state(TWO_PLANS)))
+    assert ("- A Plan with one target hits the front enemy and never a Minion "
+            "-- unless every enemy is a Minion, when it takes the front one "
+            "anyway. A Plan whose card says ALL hits every living enemy, "
+            "Minions included.") in page
+    # The aim rule leads and the element follows it: a reader asking what a
+    # Plan will do asks which body before it asks which element.
+    lines = page.splitlines()
+    assert lines.index(blindplay.PLAN_AIM_NOTE) + 1 ==         lines.index(blindplay.PLAN_HYDRO_NOTE)
+
+
+def test_the_plan_keywords_aim_clause_stays_the_pointer():
+    """The row keeps the tip's clause: the panel is where the rule is stated
+    and the keyword is where a reader meets the word, so the two must not
+    diverge and the keyword must not be emptied into the panel."""
+    plan = blindplay.ARM_KEYWORDS["Plan"]
+    assert "front non-Minion, or ALL, Minions too" in plan
+    assert "Enemy Vulnerable counts; your Weak and Strength do not." in plan
+
+
+def test_a_board_with_no_jellyfish_is_told_no_aim_rule():
+    """The note is a fact about the jellyfish's carry-out, so it prints under
+    the pet's own line and nowhere else -- a Klee at this table must not be
+    read a rule about where her Plans land."""
+    page = blindplay.render(blindplay.observation(plans_combat_state(None)))
+    assert "hits the front enemy and never a Minion" not in page
+
+
 def test_a_turn_with_no_carry_out_prints_no_carry_out_block():
     """The morning drain clears the record whether or not anything was due, so
     an empty list is a fact about THIS turn and not a stale one about the last.

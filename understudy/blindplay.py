@@ -161,7 +161,8 @@ from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
     BOSS_ROOM, _elements_on_screen,
     _every_string, FROZEN_BOSS_CLAUSE, _GAME_KEYWORD_RE, GAME_KEYWORDS,
     HAND_REPEAT_NOTE, keyword_notes, METER_CAPPED_NOTE,
-    METER_NOTE, METER_RULES, PLAN_HYDRO_NOTE, POWER_NOTE, PREVIEW_LOCKED,
+    METER_NOTE, METER_RULES, PLAN_AIM_NOTE, PLAN_HYDRO_NOTE, POWER_NOTE,
+    PREVIEW_LOCKED,
     REACTION_KEYWORDS,
     SELECTION_NOTE, TRANSFORM_NOTE, TRANSFORM_UNREADABLE, _wire_keyword_rows)
 from understudy.blindplay_observe import (   # noqa: E402,F401  (re-export)

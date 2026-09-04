@@ -21,6 +21,7 @@ from understudy.blindplay_notes import (AURA_NOTE,
                                         METER_DEFINED_NOTE, METER_NOTE,
                                         METER_RULES,
                                         PENDING_PICK_NOTE, PICKED_MARK,
+                                        PLAN_AIM_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE)
@@ -357,10 +358,12 @@ def render(obs: dict[str, Any]) -> str:
                            "whole fight. Enemies cannot touch it. Play a card "
                            "on it to write its **Plan** line instead of "
                            "playing the card now.")
-                # `EB-378`: whose element the carry-out is, said where the
-                # carry-out happens. Under the pet's own line, because it is a
-                # fact about the jellyfish's hit rather than about any one
-                # Plan in the queue below.
+                # `EB-442`: WHERE a Plan lands, then `EB-378`'s whose hit
+                # it is -- both under the pet's own line, because both are
+                # facts about the jellyfish's carry-out rather than about any
+                # one Plan in the queue below. The aim rule leads: a reader
+                # asking what a Plan will do asks which body first.
+                out.append(PLAN_AIM_NOTE)
                 out.append(PLAN_HYDRO_NOTE)
             # `EB-317`. WHAT ALREADY HAPPENED, BEFORE WHAT IS STILL WAITING,
             # because that is the order the turn had: the morning's Plans were

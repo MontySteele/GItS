@@ -302,6 +302,31 @@ HAND_REPEAT_NOTE = ("*More than one card in this hand prints the same name. "
 # ONE SENTENCE AND NO NUMBERS. The aura's duration and the reaction rule are
 # the `Applies Hydro` keyword's and the reaction glossary's, both already on
 # any screen showing an element; what is missing here is only whose hit it is.
+# `EB-442`. THE AIM RULE, SAID WHERE THERE IS ROOM TO SAY IT.
+#
+# The `Plan` keyword carries the rule in 135 rendered characters -- "next
+# turn: front non-Minion, or ALL, Minions too" -- which is AT the tip ceiling
+# (`ArmKeywordTips.ForPlan`'s header does the arithmetic) and is all the room
+# the mod has. The r12 seat read that clause about fifteen times and never got
+# the rule out of it, while "the Bake-Kurage panel and the Reaction preview
+# read clearly". The panel has no ceiling, so the compression is unnecessary
+# here and the tip's clause stays exactly as it is, as the pointer.
+#
+# THE CORNER THE TIP HAD TO DROP IS HERE. `KokomiPlan.FrontEnemy` takes the
+# leftmost hittable body that is not a Minion and FALLS BACK to the leftmost
+# Minion when the board is Minions alone -- "a Plan that lands on nothing is
+# worse than one that lands on the decoy". The tip's own header names that as
+# the one corner it left unsaid; there is room for it here.
+#
+# TWO SENTENCES AND NOTHING ELSE. The modifier clause -- enemy Vulnerable
+# counts, her Weak and Strength do not -- is the keyword's and stays there.
+# This note is about WHERE a Plan lands, and a panel that restated the whole
+# keyword would be the wall the seat was already reading past.
+PLAN_AIM_NOTE = ("- A Plan with one target hits the front enemy and never a "
+                 "Minion -- unless every enemy is a Minion, when it takes the "
+                 "front one anyway. A Plan whose card says ALL hits every "
+                 "living enemy, Minions included.")
+
 PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
                    "hit: it leaves a Hydro aura, or reacts with the aura "
                    "already there. A Plan that blocks, draws or applies a "
