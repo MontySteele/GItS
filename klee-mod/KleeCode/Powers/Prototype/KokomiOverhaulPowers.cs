@@ -115,8 +115,8 @@ public sealed class SongOfPearlsPower
 }
 
 /// <summary>
-/// The Moon Overlooks the Waters (Rare): "Plans also happen now." Rule 2's
-/// delay is gone.
+/// The Moon Overlooks the Waters (Rare): "Plans also happen now, as you write
+/// them." Rule 2's delay is gone.
 ///
 /// It stores nothing and hooks nothing. <see cref="KokomiPlan.Schedule"/> asks
 /// for it at the one moment the question can be asked -- as a Plan is written
@@ -128,7 +128,7 @@ public sealed class PlansAlsoNowPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "The Moon Overlooks the Waters"),
-        ("description", "[gold]Plans[/gold] also happen when played."),
+        ("description", "[gold]Plans[/gold] also happen now, as you write them."),
     };
 
     public override PowerType Type => PowerType.Buff;

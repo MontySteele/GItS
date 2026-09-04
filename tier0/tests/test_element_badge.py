@@ -224,3 +224,122 @@ def test_every_aura_element_declares_a_gem_of_its_own():
     # The four the keywords name, and only those.
     assert {e.capitalize() for e in gen.AURA_KEYWORD_BY_ELEMENT} == set(
         declared)
+
+
+# ------------------------ `EB-378`: the two holes in the scan ---------------
+#
+# THE FINDING. "Kurage's Oath and Sango Isshin apply a Hydro aura but do not
+# print `[Hydro]`. Slack Water, Undertow and Feint all carry a visible
+# `[Hydro]` tag with the *Applies Hydro* gloss... In a kit whose whole reaction
+# system keys off which element is clinging to a body, an untagged aura source
+# is a real hole." (Kokomi r9 run 2, act 1, finding 2.)
+
+
+def test_a_branch_gated_aura_still_declares_its_element():
+    """The scan read the TOP LEVEL only, so a row whose `apply_aura` sat inside
+    a `conditional` declared nothing while applying the aura on resolution --
+    `EB-142`'s shape, one scan over.
+
+    SEEN TO FAIL: with the old top-level walk this row returned `[]`.
+    """
+    branched = {"id": "x", "type": "skill",
+                "effects": [{"op": "conditional", "if": "x",
+                             "then": [{"op": "apply_aura", "element": "cryo",
+                                       "target": "enemy"}],
+                             "else": [{"op": "block", "amount": 5}]}]}
+    assert gen.aura_elements_for(branched, gen.KLEE_PROFILE, False) == ["cryo"]
+
+
+def test_a_damaging_plan_declares_the_carry_outs_element():
+    """`KokomiPlan.ResolveAll` deals every damaging Plan clause as
+    `ElementalHit.Deal(..., Element.Hydro, ...)`, whatever the card's type, and
+    the sim's twin does the same. So a SKILL with a damaging Plan leaves a
+    Hydro aura and its face must say so."""
+    oath = {"id": "x", "type": "skill",
+            "effects": [{"op": "damage", "amount": 3, "target": "all_enemies"}],
+            "plan": [{"op": "damage", "amount": 7, "target": "all_enemies"}]}
+    assert gen.plan_applies_element(oath, gen.KOKOMI_PROFILE) is True
+    assert gen.aura_elements_for(oath, gen.KOKOMI_PROFILE, False) == ["hydro"]
+    # All three hitting clauses, and only those.
+    for op in sorted(gen.PLAN_DAMAGE_OPS):
+        row = {"id": "x", "type": "skill", "effects": [],
+               "plan": [{"op": op, "amount": 4, "target": "enemy"}]}
+        assert gen.plan_applies_element(row, gen.KOKOMI_PROFILE), op
+    for op in ("block", "draw", "mend", "apply_power"):
+        row = {"id": "x", "type": "skill", "effects": [],
+               "plan": [{"op": op, "amount": 4, "target": "self"}]}
+        assert not gen.plan_applies_element(row, gen.KOKOMI_PROFILE), op
+
+
+def test_the_plan_half_never_elements_the_cards_own_hit():
+    """The split that keeps this a DISPLAY fix. `elemental` is what puts
+    `IElementalCard` on the row, which is what
+    `CatalystCadence.PrintedElement` reads to element the card's own play --
+    so a Skill with a damaging Plan gains the face declaration and its now-line
+    still applies nothing, which is what it did before this row."""
+    oath = {"id": "x", "type": "skill",
+            "effects": [{"op": "damage", "amount": 3, "target": "all_enemies"}],
+            "plan": [{"op": "damage", "amount": 7, "target": "all_enemies"}]}
+    assert gen.KOKOMI_PROFILE.damage_applies_element(oath) is False
+    text = (proto.OUT_DIR / "ProtoKkKuragesOath.cs").read_text(
+        encoding="utf-8")
+    assert "IElementalCard" not in text
+    assert "KleeKeywords.AppliesHydro" in text
+    # And the sentence that says when, so the gem cannot be read as "this
+    # card's own hit applies Hydro".
+    assert "ArmKeywordTips.ForPlanElement(" in text
+
+
+def test_a_plan_is_not_a_furina_rule():
+    """Scoped to the catalyst profiles. Furina is Skill-grade and has no
+    jellyfish, so the question is asked of the profile and answered no."""
+    row = {"id": "x", "type": "skill", "effects": [],
+           "plan": [{"op": "damage", "amount": 7, "target": "enemy"}]}
+    assert gen.plan_applies_element(row, gen.FURINA_PROFILE) is False
+
+
+def test_the_rows_the_finding_names_carry_the_gem():
+    """`Kurage's Oath` and `Sango Isshin` by name, beside the three the seat
+    read as correct."""
+    for stem in ("ProtoKkKuragesOath", "ProtoKkSangoIsshin",
+                 "ProtoKkSlackWater", "ProtoKkUndertow", "ProtoKkFeint"):
+        text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
+        assert "KleeKeywords.AppliesHydro" in text, stem
+
+
+def test_only_the_plan_only_rows_carry_the_when_sentence():
+    """An Attack of hers already elements its own hit, so it owes no
+    explanation; the sentence rides exactly the rows where the Plan is the
+    only source."""
+    carriers = {p.stem for p in proto.OUT_DIR.glob("*.cs")
+                if "ArmKeywordTips.ForPlanElement(" in p.read_text(
+                    encoding="utf-8")}
+    assert carriers, "no row carries the sentence"
+    for stem in carriers:
+        text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
+        assert "IElementalCard" not in text, stem
+        assert "KleeKeywords.AppliesHydro" in text, stem
+    assert "ProtoKkSangoIsshin" not in carriers
+
+
+def test_a_skill_grade_row_whose_damage_is_branch_gated_is_elemental():
+    """THE PARITY HALF OF `EB-378`. The sim decides per EFFECT at resolution
+    (`effects._element_for` asks `fx["op"] == "damage"` of whatever op is
+    resolving); this generator asks the CARD once, off a scan that read the top
+    level only. `Take It From the Top` -- Block 5, then 10 damage inside
+    `spotlight_moved_this_turn` -- was elemental in the sim and carried no
+    `IElementalCard` in the mod, so the branch applied a Hydro aura in one
+    engine and nothing in the other.
+
+    SEEN TO FAIL: with the old top-level walk this returns False.
+    """
+    row = {"id": "x", "type": "skill",
+           "effects": [{"op": "block", "amount": 5},
+                       {"op": "conditional", "if": "y",
+                        "then": [{"op": "damage", "amount": 10,
+                                  "target": "enemy"}]}]}
+    assert gen.FURINA_PROFILE.damage_applies_element(row) is True
+    text = (gen.FURINA_PROFILE.out_dir / "TakeItFromTheTop.cs").read_text(
+        encoding="utf-8")
+    assert "IElementalCard" in text
+    assert "KleeKeywords.AppliesHydro" in text

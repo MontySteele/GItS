@@ -169,10 +169,17 @@ class CharacterProfile:
             return card.get("type") == "attack"
         if self.cadence == "skill_grade":
             tags = set(card.get("tags", []))
+            # `EB-378`: BRANCHES INCLUDED, because the SIM decides per EFFECT
+            # at resolution (`effects._element_for` asks `fx["op"] == "damage"`
+            # of whatever op is resolving) while this asks the card once. A row
+            # whose only damage sat inside a `conditional` was elemental in the
+            # sim and carried no `IElementalCard` in the mod, so the branch
+            # applied an aura in one engine and none in the other. Same walk
+            # the aim and Bomb scans were moved onto (`EB-142`, L4).
             has_damage = any(
                 effect.get("op") == "damage"
                 and effect.get("target") != "self"
-                for effect in card.get("effects", [])
+                for effect in _effects_everywhere(card)
             )
             return has_damage and (
                 card.get("type") == "skill"
@@ -561,6 +568,38 @@ ARM_KEYWORDS = (
 )
 
 
+# --- `EB-377`: the BASE GAME'S KEYWORDS A QUARANTINED FACE NAMES -------------
+#
+# THE DEFECT, and it is the mirror image of the one above. `EB-272` gave every
+# word the arms INVENTED a definition; the words the arms merely USE still had
+# none on the face that names them. The round-9 seat found `Weak`, `Frail`,
+# `Slow` and `Minion` defined and `Vulnerable` defined nowhere -- because those
+# four reached the page as POWERS on a body, carrying the game's own tip, and a
+# card that APPLIES one carries nothing at all. `CardModel.HoverTips` walks the
+# card's declared `Keywords` and never its printed text, and a generated row
+# declares no status keyword, so `[gold]Vulnerable[/gold]` in a body hovers
+# nothing. `Exposed Flank+` was bought on a genre assumption for that reason.
+#
+# SAME ATTACH RULE, SAME QUARANTINE, SEPARATE TABLE. The rule is the printed
+# golded span, exactly as above; the scope is `arm_keyword_tips`, so only the
+# prototype surface attaches these. The table is separate because the two say
+# different things about their own authority: an `ARM_KEYWORDS` row is a rule
+# this mod owns and may retune, and a row here is the base game's rule restated
+# where the card is -- which is also why these attach LAST, outside the arm
+# words, and why nothing here is ever excluded by a shipped-keyword collision.
+#
+# NO PLURALS. None of these words is ever printed as one ("2 Vulnerable", never
+# "2 Vulnerables"), so the token list is the bare word.
+BASE_KEYWORDS = (
+    ArmKeyword("Vulnerable", ("Vulnerable",),
+               "BaseKeywordTips.ForVulnerable"),
+    ArmKeyword("Weak", ("Weak",), "BaseKeywordTips.ForWeak"),
+    ArmKeyword("Frail", ("Frail",), "BaseKeywordTips.ForFrail"),
+    ArmKeyword("Strength", ("Strength",), "BaseKeywordTips.ForStrength"),
+    ArmKeyword("Dexterity", ("Dexterity",), "BaseKeywordTips.ForDexterity"),
+)
+
+
 def golded_tokens(description: str) -> list[str]:
     """Every `[gold]...[/gold]` span in a built face, holes blanked."""
     return [_SMART_HOLE.sub("", span).strip()
@@ -618,6 +657,32 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
     its printed `apply_aura` adds. `ElementBadge.ElementOf` draws the first, so
     a companion that hits with its own element and applies a second aura wears
     the element its damage carries.
+
+    `EB-378` CLOSED TWO HOLES IN THE SCAN, both of them silent.
+
+      A BRANCH. The `apply_aura` walk read the TOP LEVEL only, so a row whose
+      only aura op sits inside a `conditional` declared no element, drew no
+      gem and raised no reaction rule -- while applying the aura on resolution.
+      It now reads `_effects_everywhere`, the shared walk the aim and Bomb
+      scans were already moved onto (`EB-142`, L4), for the same reason: a
+      branch-gated aura is still an aura on the face.
+
+      A PLAN. `KokomiPlan.ResolveAll` deals EVERY damaging Plan clause as
+      `ElementalHit.Deal(..., Element.Hydro, ...)` -- the element is the
+      jellyfish's carry-out, not the card's type -- and the sim's twin does the
+      same (`kokomi_plan`, `element="hydro"`). So `Kurage's Oath`, a SKILL,
+      leaves a Hydro aura on every enemy it takes, and its face declared
+      nothing at all: the round-9 act-1 seat watched the aura appear "from a
+      card whose face says nothing about an element", in a kit whose whole
+      reaction layer keys off which element is clinging to a body.
+
+    THE PLAN HALF ADDS THE KEYWORD AND NOT `elemental`, and that split is the
+    whole of its safety. `elemental` decides `IElementalCard`, which is what
+    `CatalystCadence.PrintedElement` reads to element the card's OWN hit -- so
+    setting it would make Kurage's Oath's now-line apply Hydro, which is a
+    rules change and not this row's business. What is added is the face
+    DECLARATION: the gem, the reaction rule, and (from `emit`) one sentence
+    saying the aura rides the carry-out rather than the play.
     """
     elements: list[str] = []
     if elemental:
@@ -626,11 +691,39 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
         )
         if source_element in AURA_KEYWORD_BY_ELEMENT:
             elements.append(source_element)
-    for effect in card.get("effects", []):
+    if plan_applies_element(card, profile):
+        elements.append(profile.native_element)
+    for effect in _effects_everywhere(card):
         if (effect.get("op") == "apply_aura"
                 and effect.get("element") in AURA_KEYWORD_BY_ELEMENT):
             elements.append(effect["element"])
     return list(dict.fromkeys(elements))
+
+
+#: The Plan clauses that HIT, and so leave the carry-out's Hydro aura. The twin
+#: of `KokomiPlan.Kind.Damage` / `DamageQuarterMaxHp` /
+#: `DamagePerCompanionLastTurn`, which are the three cases of `ResolveAll` that
+#: reach `ElementalHit.Deal`. A closed set for `PLAN_CLAUSE_KINDS`' reason: a
+#: clause that starts hitting must come here deliberately.
+PLAN_DAMAGE_OPS = frozenset({
+    "damage", "damage_quarter_max_hp", "damage_per_companion_last_turn"})
+
+
+def plan_applies_element(card: dict, profile: "CharacterProfile") -> bool:
+    """Does the jellyfish's carry-out of this card's Plan leave an aura?
+
+    `EB-378`. The carry-out's element is the CHARACTER's, exactly as the
+    cadence is -- `KokomiPlan` hardcodes `Element.Hydro` and the sim hardcodes
+    `element="hydro"` -- so the question is asked of the profile rather than of
+    the card, and a profile whose native element leaves no aura in this engine
+    answers no.
+    """
+    if profile.cadence != "catalyst_attack":
+        return False
+    if profile.native_element not in AURA_KEYWORD_BY_ELEMENT:
+        return False
+    return any(clause.get("op") in PLAN_DAMAGE_OPS
+               for clause in card.get("plan") or [])
 
 
 def arm_keywords_printed(description: str) -> list[ArmKeyword]:
@@ -675,6 +768,20 @@ def arm_keyword_tip_calls(description: str,
     return [keyword.attach
             for keyword in printed
             if not (keyword.word == "Bomb" and includes_bomb_rules)]
+
+
+def base_keyword_tip_calls(description: str) -> list[str]:
+    """The base-game tip calls this face owes, in table order (`EB-377`).
+
+    The same one rule as `arm_keyword_tip_calls` -- the printed, golded word --
+    with no exclusions, because there is nothing to exclude: these words carry
+    the base game's rules, so no second definition of one can contradict the
+    first. A face that raises `Weak` from a shipped keyword AND from here would
+    print one sentence twice, and no generated row declares a status keyword.
+    """
+    printed = set(golded_tokens(description))
+    return [keyword.attach for keyword in BASE_KEYWORDS
+            if printed.intersection(keyword.tokens)]
 
 
 # --- companion batch (2026-07-21) --------------------------------------------
@@ -1730,7 +1837,7 @@ APPLY_POWERS = {
         "Once per turn, when the jellyfish carries out a [gold]Plan[/gold], "
         "gain {X} Block."),
     "kk_plans_also_now": ("PlansAlsoNowPower", None,
-        "[gold]Plans[/gold] also happen now."),
+        "[gold]Plans[/gold] also happen now, as you write them."),
     "kk_clouds_like_waves": ("CloudsLikeWavesPower", None,
         "Whenever you apply a debuff to an enemy, gain {X} Block."),
     "kk_generals_banner": ("GeneralsBannerPower", None,
@@ -1948,8 +2055,8 @@ APPLY_POWERS = {
         "to ALL enemies; when it ends, 16 more. Lasts {X} more turn(s)."),
     "mi_kyouka": ("KyoukaPower", None,
         "Your [gold]Attacks[/gold] apply [gold]Hydro[/gold] and deal 4 more "
-        "damage; when it ends, deal 12 damage and apply [gold]Hydro[/gold] to "
-        "a random enemy. Lasts {X} more turn(s)."),
+        "damage; when it ends, deal 12 [gold]Hydro[/gold] damage to a random "
+        "enemy. Lasts {X} more turn(s)."),
     "mi_surprise_dispatch": ("SurpriseDispatchPower", None,
         "At the start of your next turn, deal 10 damage to a random enemy."),
     "mi_tamoto": ("TamotoPower", None,
@@ -10394,10 +10501,25 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # word is the thing a player reads second. The rule and the exclusion are
     # `arm_keyword_tip_calls`'; nothing about them is decided here.
     if profile.arm_keyword_tips:
+        # `EB-378`, and it goes UNDER the keyword definitions for the reason
+        # they go under the live arithmetic: this is a fact about THIS card's
+        # element, so it is read before the definition of the word `Plan`.
+        # ONLY where the two sources disagree -- an Attack of hers already
+        # carries the element on its own hit and needs no sentence at all.
+        if plan_applies_element(card, profile) and not elemental:
+            tips_expr = (
+                "ArmKeywordTips.ForPlanElement("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc, includes_bomb_rules,
                                             spark_priced):
+            tips_expr = (
+                f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
+        # `EB-377`, and it is last of the last for the reason the block above
+        # is last at all: an arm's invented word is the one the reader has
+        # never met, and a base-game word restated is read after it.
+        for attach in base_keyword_tip_calls(desc):
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
     if tips_expr:

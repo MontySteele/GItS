@@ -148,8 +148,11 @@ are in [`workstreams.md`](workstreams.md).
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
   six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
   when written if the engine can carry a second selection, else lands on the
-  front enemy that is not a Minion. Round 9 is building on both; the seats
-  read it, then [USER] plays. The Kurage
+  front enemy that is not a Minion. Round 9 is READ
+  (`review/active/kokomi-overhaul-round-9-2026-09-04.md`): both rules read
+  true, run 2 cleared acts 1 and 2 and died on act-3 floor 39 after a misread
+  of The Moon's face; the pool's empty shelf is tempo (no energy, no Retain),
+  one pick, `EB-376`-`EB-381`. [USER]'s act-1 run is due on `0.2.2309+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice

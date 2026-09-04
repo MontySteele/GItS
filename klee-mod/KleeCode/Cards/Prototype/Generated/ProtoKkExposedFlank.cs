@@ -38,7 +38,7 @@ public sealed class ProtoKkExposedFlank : CustomCardModel, ICharacterCard, IPlan
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_exposed_flank");
 
