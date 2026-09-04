@@ -1483,7 +1483,7 @@
    cost: 1, type: skill, rarity: basic,
    art_of: aria_of_recompense,
    upgrade: {encore: +3, innate: true},
-   description: "Gain {IfUpgraded:show:8|5} [gold]Encore[/gold]. If you have at least 6 [gold]Fanfare[/gold], gain {IfUpgraded:show:8|5} more.",
+   description: "Gain {IfUpgraded:show:8|5} [gold]Encore[/gold]. If you have at least 3 [gold]Fanfare[/gold], gain {IfUpgraded:show:8|5} more.",
    effects: [{op: gain_encore, amount: 5},
-             {op: conditional, if: fanfare_at_least_6, then: [{op: gain_encore, amount: 5}]}]}
+             {op: conditional, if: fanfare_at_least_3, then: [{op: gain_encore, amount: 5}]}]}
 

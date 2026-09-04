@@ -153,10 +153,16 @@ POOL_SUBS: dict[str, str] = {
 # they can be stronger." So the starter keeps its two kit cards -- Salon Début
 # and Aria of Recompense -- and ONE of them reads Fanfare. The reader goes on
 # Aria, the card the seats had already weighed on three axes. Both numbers are
-# LIFTED and neither is new: the 5 is Aria's own printed Encore, the 6 is the
-# rider copies' bar in `POOL_SUBS` above. The loop it closes is the arm's own
-# (a stage that performs mints Fanfare, Fanfare pays Encore, Encore pays
-# performances) and the shipped Encore decay is its brake.
+# LIFTED and neither is new: the 5 is Aria's own printed Encore, the 3 is the
+# Fanfare the seat records show on an Aria turn. The loop it closes is the
+# arm's own (a stage that performs mints Fanfare, Fanfare pays Encore, Encore
+# pays performances) and the shipped Encore decay is its brake.
+#
+# THE BAR MOVED 6 -> 3 (round 6 sec.4, 2026-09-04, a D default). It was built
+# at the rider copies' bar in `POOL_SUBS` above and three seat runs never once
+# paid the second line: Aria is played BEFORE the stage performs, so the meter
+# it reads is the one an Aria turn actually has. The OFFERED rider copies keep
+# their own bars, which are read later in the turn.
 #
 # THE SHIPPED SHEET STANDS, for `POOL_SUBS`'s reason verbatim: Balance-stage
 # content does not move for a prototype arm (R213 B), so the arm carries a copy
@@ -186,7 +192,7 @@ POOL_SUBS: dict[str, str] = {
 # now hands it out.
 # ----------------------------------------------------------------------
 STARTER_SUBS: dict[str, str] = {
-    "aria_of_recompense": "proto_fr_aria_of_recompense",   # 5 Encore, 10 at 6
+    "aria_of_recompense": "proto_fr_aria_of_recompense",   # 5 Encore, 10 at 3
     "salon_debut": "proto_fr_salon_debut_named",           # names Crabaletta
 }
 

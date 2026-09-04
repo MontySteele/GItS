@@ -437,11 +437,17 @@ public static class FurinaReframeRoster
     /// [USER], ruling the round-4 packet's sec.6: "maybe a reader in the
     /// starter deck? I still want to leave it at just 2 'good' cards, but they
     /// can be stronger." Her two kit starters stay two, and ONE of them reads
-    /// Fanfare: "Gain 5 Encore. If you have at least 6 Fanfare, gain 5 more."
+    /// Fanfare: "Gain 5 Encore. If you have at least 3 Fanfare, gain 5 more."
     /// Both numbers are LIFTED rather than picked -- the 5 is Aria's own
-    /// printed Encore, the 6 is the bar the four rider copies above already
-    /// carry -- and the loop it closes is the arm's own: a stage that performs
+    /// printed Encore, the 3 is the Fanfare the seat records show on an Aria
+    /// turn -- and the loop it closes is the arm's own: a stage that performs
     /// mints Fanfare, Fanfare pays Encore, Encore pays performances.
+    ///
+    /// THE BAR MOVED 6 -> 3 (round 6 sec.4, 2026-09-04, a D default). It was
+    /// built at the rider copies' 6 and three seat runs never once paid the
+    /// second line, because Aria is played BEFORE the stage performs. The four
+    /// OFFERED rider copies above keep their own bars, which are read later in
+    /// the turn.
     ///
     /// ONE CARD FOR ONE CARD, which is <see cref="KurageMemory.StarterSlotEleven"/>'s
     /// shape one character over and what keeps this a substitution rather than

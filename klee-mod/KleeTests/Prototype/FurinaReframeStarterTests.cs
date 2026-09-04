@@ -20,10 +20,16 @@ namespace KleeMod.Tests.Prototype;
 /// sec.6: "maybe a reader in the starter deck? I still want to leave it at
 /// just 2 'good' cards, but they can be stronger." So her two kit starters
 /// stay two and ONE of them reads Fanfare -- <i>Aria of Recompense</i>, under
-/// the arm only: "Gain 5 Encore. If you have at least 6 Fanfare, gain 5 more."
-/// Both numbers are lifted rather than picked (the 5 is Aria's own printed
-/// Encore, the 6 the bar the four rider copies already carry), so no number
-/// here was decided on this side of the wire.
+/// the arm only: "Gain 5 Encore. If you have at least 3 Fanfare, gain 5 more."
+///
+/// THE BAR IS 3, NOT THE RIDERS' 6 (round 6 sec.4, 2026-09-04, a D default).
+/// It was built at 6 -- the bar the four rider copies carry -- and three seat
+/// runs played the card at Fanfare 3 with the 6 line never paying once,
+/// because Aria is played BEFORE the stage performs and 3 is the Fanfare the
+/// records show on an Aria turn. Both numbers are still lifted rather than
+/// picked (the 5 is Aria's own printed Encore, the 3 is read off those runs),
+/// so no number here was decided on this side of the wire; the four OFFERED
+/// rider copies keep their own bars (6/6/8/10).
 ///
 /// <c>EB-416</c> WIRED THE SECOND. The packet's sec.5 ruled that the starter
 /// deploy NAMES its member, and slice 2 built the row that says so --
@@ -129,12 +135,12 @@ public class FurinaReframeStarterTests
     }
 
     // ==================================================================
-    // 2. WHAT THE COPY PAYS. The bar is 6; 5 is one under it.
+    // 2. WHAT THE COPY PAYS. The bar is 3; 2 is one under it.
     // ==================================================================
 
     [Theory]
-    [InlineData(5, 5)]     // one under the bar: the shipped line alone
-    [InlineData(6, 10)]    // at the bar: the shipped line and the reader
+    [InlineData(2, 5)]     // one under the bar: the shipped line alone
+    [InlineData(3, 10)]    // at the bar: the shipped line and the reader
     public void The_copy_pays_the_reader_only_at_the_bar(int fanfare, int paid)
     {
         // REAL: the row's own `OnPlay`, on a seat whose meter is set to the

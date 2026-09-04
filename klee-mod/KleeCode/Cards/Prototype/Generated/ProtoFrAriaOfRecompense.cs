@@ -45,7 +45,7 @@ public sealed class ProtoFrAriaOfRecompense : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Aria of Recompense"),
-        ("description", "Gain {IfUpgraded:show:8|5} [gold]Encore[/gold]. If you have at least 6 [gold]Fanfare[/gold], gain {IfUpgraded:show:8|5} more."),
+        ("description", "Gain {IfUpgraded:show:8|5} [gold]Encore[/gold]. If you have at least 3 [gold]Fanfare[/gold], gain {IfUpgraded:show:8|5} more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -64,7 +64,7 @@ public sealed class ProtoFrAriaOfRecompense : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 8 : 5));
-        if (FurinaResources.ReadableFanfare(Owner.Creature) >= 6)
+        if (FurinaResources.ReadableFanfare(Owner.Creature) >= 3)
         {
             FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 8 : 5));
         }
