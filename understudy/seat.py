@@ -171,10 +171,20 @@ LOG_ROOT = Path(__file__).resolve().parent / "logs" / "seat"
 # funnel's first guard forbids.
 TIMEOUT_S = 600
 
-# The CLI's own default on 2026-08-28, read back out of a smoke's rollout.
 # `-m` is passed ALWAYS and never left implicit, so the ledger's grader id
 # names a model rather than "whatever codex defaulted to that month".
-DEFAULT_MODEL = "gpt-5.6-sol"
+# 2026-09-04 ([USER]): GPT 6 Astra at its light setting replaces 5.6 Sol as
+# the reviewer and playtester -- the same verdict quality for far fewer
+# tokens. Smoked on codex-cli 0.153.4: the model id answers at
+# `model_reasoning_effort="low"`; "light" is not an effort the CLI accepts,
+# and 0.150.x refuses the model outright ("requires a newer version").
+DEFAULT_MODEL = "gpt-6-astra"
+DEFAULT_REASONING = "low"
+
+
+def reasoning_flags(effort: str = DEFAULT_REASONING) -> list[str]:
+    """The effort setting, passed the way the CLI takes an override."""
+    return ["-c", f'model_reasoning_effort="{effort}"']
 
 # ------------------------------------------------------------ the guard ----
 
@@ -935,11 +945,12 @@ def grade_argv(codex: str, session: Path, scratch: Path, *,
         "--output-schema", str(session / "form-schema.json"),
         "-o", str(session / "form-raw.json"),
         "-m", model,                       # always explicit; see DEFAULT_MODEL
+        *reasoning_flags(),
         "-",                               # prompt on stdin
     ]
 
 
-def review_argv(codex: str, out: Path, *, model: str = "") -> list[str]:
+def review_argv(codex: str, out: Path, *, model: str = DEFAULT_MODEL) -> list[str]:
     """The REPO-VISIBLE seat. No `--json`, no schema, no scratch root, and
     `--ephemeral` is fine here because there is no blindness to prove."""
     argv = [
@@ -952,7 +963,7 @@ def review_argv(codex: str, out: Path, *, model: str = "") -> list[str]:
         "-o", str(out),
     ]
     if model:
-        argv += ["-m", model]
+        argv += ["-m", model, *reasoning_flags()]
     argv.append("-")
     return argv
 
