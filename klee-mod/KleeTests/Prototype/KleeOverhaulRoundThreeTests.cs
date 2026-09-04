@@ -68,8 +68,10 @@ public class KleeOverhaulRoundThreeTests
         // is the same act they forgot. The gate that names the missing row is
         // `tools/lint_arm_pool_parity.py`; this stays as the shape assertion
         // beside it.
+        // THIRTY-FOUR SINCE THE ROUND-10 POOL PASS (2026-09-04): one row,
+        // `ProtoKoCountdown`, the arm's only detonator priced in energy.
         var slice = Cards("KleeOverhaulRoster", "Slice");
-        Assert.Equal(33, slice.Count);
+        Assert.Equal(34, slice.Count);
         Assert.Contains(slice, c => c.Contains("ProtoKoDigIn"));
         Assert.Contains(slice, c => c.Contains("ProtoKoPop"));
         // OFFERABLE means not Basic: a Basic row cannot be rolled.

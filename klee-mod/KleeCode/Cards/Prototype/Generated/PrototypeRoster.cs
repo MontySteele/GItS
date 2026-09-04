@@ -65,6 +65,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKoCatalyticConverter>(),
             ModelDb.Card<ProtoKoChainFuse>(),
             ModelDb.Card<ProtoKoChainedReactions>(),
+            ModelDb.Card<ProtoKoCountdown>(),
             ModelDb.Card<ProtoKoCovenErrand>(),
             ModelDb.Card<ProtoKoDigIn>(),
             ModelDb.Card<ProtoKoDodocoCover>(),

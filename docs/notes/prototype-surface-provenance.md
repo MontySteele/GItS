@@ -2324,3 +2324,32 @@ read.
 
 Numbers are Prototype numbers, D by the ladder, and nothing measured on them
 is quotable.
+
+## before proto_ko_countdown
+
+The pool pass, Klee round 10 (2026-09-04). Three seats ended turns holding
+Spark-priced detonators at 0 Spark with a fat Bomb sitting on the enemy and no
+energy-priced detonator drawn. The arm's unconditional cash button is Ka-pow!
+and Ka-pow! is the STARTER's -- one card in ten -- so a hand that has already
+spent its Sparks has nothing that sets the pile off, and the Bomb the whole
+turn was spent cooking grows for another round instead of paying.
+
+Countdown is the pool's energy-priced plain detonator at Common, beside
+Sizzle's reaction-keyed one: 1 energy, Set off, draw a card, no Spark price and
+no condition on either clause. The draw is what keeps it off `EB-261`'s
+playability gate -- `set_off_only` covers a row whose whole body is the Set off,
+and a second clause that pays on any board is exactly the difference between a
+card that eats a turn and a cantrip -- so it is playable, and pays, with nothing
+on the enemy. Its one printed number is the draw, so that is what the smith
+moves (`{Cards:diff()}`, the shape Stolen Chapter takes for the same reason).
+
+A SPARK SINK WAS WRITTEN WITH IT AND IS WITHDRAWN: Explosive Spark, the row
+that would have turned leftover energy back into Sparks. It is on no surface,
+in no roster and in no engine, struck on the audit's C3 clause. The finding is
+"she cannot cash a Bomb without Sparks", and a second way to make Sparks
+answers a different sentence -- it makes the Spark-priced detonators easier to
+fire rather than giving the hand one that never needed a Spark. One row, and it
+is the one the finding names.
+
+Numbers are Prototype numbers, D by the ladder; the seats read them on the next
+round before [USER] does.

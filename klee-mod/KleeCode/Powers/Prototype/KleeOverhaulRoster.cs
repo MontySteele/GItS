@@ -137,12 +137,18 @@ internal static class KleeOverhaulRoster
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
-    /// THIRTY-FIVE SINCE R252, and the four that arrived are the DEFENCE
-    /// SHELF, a THIRD slice on the same terms as the second: Klee round 9's
-    /// pick 1, taken at its default
+    /// THIRTY-FOUR SINCE THE ROUND-10 POOL PASS (2026-09-04), and the one
+    /// that arrived is <c>ProtoKoCountdown</c>: the arm's only detonator
+    /// priced in ENERGY that asks nothing else of the board. Its own block at
+    /// the end, in the sim's order.
+    ///
+    /// THIRTY-THREE BEFORE THAT (R252), and the two that arrived are the
+    /// DEFENCE SHELF, a THIRD slice on the same terms as the second: Klee
+    /// round 9's pick 1, taken at its default
     /// (`review/ruled/klee-overhaul-round-9-2026-09-04.md`). Every new row is
-    /// keyed to the Bomb state and none is a plain Block. They are listed in
-    /// their own block, in the sim's order.
+    /// keyed to the Bomb state and none is a plain Block. The pick drafted
+    /// four and the R253 charter audit withdrew two, so the shelf ships as
+    /// two. They are listed in their own block, in the sim's order.
     ///
     /// AND THE PIN THAT NOW HOLDS THIS LIST TO THE SHEET. R252 shipped the four
     /// rows -- sim ops, powers, codegen, tests, all green -- and did not add
@@ -238,5 +244,11 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoCovenErrand>(),
         ModelDb.Card<ProtoKoWitchesCircle>(),
         ModelDb.Card<ProtoKoAlicesIntroductionMagic>(),
+        // THE POOL PASS (1 -- round 10, 2026-09-04). The energy-priced plain
+        // detonator: 1 energy, Set off, draw a card, no Spark and no
+        // condition. Three round-10 seats held Spark-priced detonators at 0
+        // Spark with a fat Bomb on the enemy and nothing in hand that could
+        // cash it; Ka-pow! is the starter's one card in ten.
+        ModelDb.Card<ProtoKoCountdown>(),
     };
 }
