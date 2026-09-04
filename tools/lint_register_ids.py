@@ -645,7 +645,7 @@ def self_test() -> list[str]:
     # --- and the DERIVED half: the ceiling follows the rows, RETIRED holds --
     # A mint above every live row and every retired number is the ordinary
     # act this redesign exists to make conflict-free. It must produce nothing.
-    two = {"EB": frozenset({1, 2, 444})}
+    two = {"EB": frozenset({1, 2})}
     minted, _ = findings({Q: "", B: "| `EB-4` | fresh |\n| `EB-3` | older |"},
                          open_irregular=set(), retired=two)
     if minted:
