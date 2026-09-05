@@ -268,6 +268,7 @@ MIRRORED: dict[str, object] = {
     # is the one turn rule 4's per-explosion rate mints nothing.
     "KleeOverhaulLaw.OpeningSpark": C.KLEE_OVERHAUL_OPENING_SPARK,
     "KleeOverhaulLaw.GroundedSpark": C.KLEE_OVERHAUL_GROUNDED_SPARK,
+    "KleeOverhaulLaw.SparkSeedFloors": C.KLEE_OVERHAUL_SPARK_SEED_FLOORS,
     # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, `C.COMPANION_OVERHAUL`).
     # Same terms as the four above and for the same reason: quarantined is not
     # exempt. Every number here is the approved workshop's own printed text

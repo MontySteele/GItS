@@ -226,6 +226,14 @@ KLEE_OVERHAUL_OPENING_SPARK = 1
 # why it is named here beside rule 4's other two rates rather than riding the
 # power's amount. C# twin `KleeOverhaulLaw.GroundedSpark`.
 KLEE_OVERHAUL_GROUNDED_SPARK = 1
+# THE SPARK SEED (`EB-577`, D default off the Klee r21 packet sec.5). Sparks
+# read as inert until a sink is drafted, six rounds running (r17-r21): r21 lane
+# 2 ended fights holding 3, 4 and 5 Sparks with Dig In the deck's only reader.
+# So the ARM's first card rewards guarantee a Spark-priced row -- floors 1 to 3,
+# which is the first two card rewards of a run. NOT A SHEET CHANGE: no card's
+# rarity, price or text moves, only which cards a reward screen may show while
+# the deck has no reader at all. C# twin `KleeOverhaulLaw.SparkSeedFloors`.
+KLEE_OVERHAUL_SPARK_SEED_FLOORS = 3
 
 # THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, in the
 # printed order.
