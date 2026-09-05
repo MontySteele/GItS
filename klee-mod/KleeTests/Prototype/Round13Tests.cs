@@ -214,8 +214,17 @@ public class Round13Tests
 
         Assert.Contains("Bombs here: [blue]{Charges}[/blue]", plain);
         Assert.Contains("Bombs here: [blue]{Charges}[/blue]", mined);
-        Assert.DoesNotContain("{Count}", plain);
-        Assert.DoesNotContain("{Count}", mined);
+        // `EB-514`: the count is not in THIS sentence -- the list still says
+        // it more plainly here -- and it is in the HEADLINE, where the seat
+        // reads the number it plans against. Two number groups in one
+        // sentence is what this pin was written against; two sentences each
+        // saying their own thing is what it now reads.
+        Assert.DoesNotContain("Bombs here: [blue]{Charges}[/blue], "
+                              + "[blue]{Count}[/blue]", plain);
+        Assert.Contains("Pyro damage, in [blue]{Count}[/blue] "
+                        + "hit{Count:plural:|s}", plain);
+        Assert.Contains("Pyro damage, in [blue]{Count}[/blue] "
+                        + "hit{Count:plural:|s}", mined);
     }
 
     // ==================================================================
