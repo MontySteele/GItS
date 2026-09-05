@@ -6829,6 +6829,73 @@ def test_the_hexerei_line_names_the_payment_the_kit_declares():
     assert len(row) <= 135
 
 
+def _shattering_pressure_reward_state() -> dict:
+    """The r19 lane-2 offer, as the seat met it (`EB-537`).
+
+    A CARD REWARD and not a fight: the decision the screen is asking for is
+    whether to take the card, the run had never printed a Shatter, and no
+    element is on the screen at all -- which is the board the census cannot
+    answer for and the word can.
+    """
+    return {"state_type": "card_reward",
+            "player": {"character": "Klee", "hp": 40, "max_hp": 70},
+            "card_reward": {"cards": [
+                {"name": "Freminet - Shattering Pressure", "cost": "1",
+                 "type": "Power",
+                 "description": "Your Shatters deal 4 additional damage."}]}}
+
+
+def test_a_keyword_on_an_offered_face_is_defined_even_when_unreachable():
+    """`EB-537`. THE CARD THE SEAT COULD NOT PRICE.
+
+    Klee r19 lane 2: "*Freminet -- Shattering Pressure* ('Your Shatters deal 4
+    additional damage') was offered to me and I could not have played it:
+    nothing in the run ever printed a Shatter, and the word is not in the
+    glossary on that screen."
+
+    `EB-428`'s census answers "can this DECK build the pair", which is the
+    right question for a row the page raises on its OWN initiative -- six
+    reactions listed at a mono-element deck is the noise it was filed on. It is
+    the wrong question for a word the screen is already showing the reader: an
+    offered card whose one mechanic is undefined cannot be priced at all.
+
+    Seen to FAIL: `Shatter` was in no table, so no screen ever defined it.
+    """
+    page = blindplay.observe(_shattering_pressure_reward_state())
+
+    assert "- **Shatter** — The first Attack to hit a Frozen enemy" in page
+    assert "ends the freeze" in page
+
+
+def test_the_shatter_row_is_the_mods_own_number():
+    """Held in step from THIS side, the way `BOMB_GROWTH` is: this module may
+    not import `tier0`, and the sim and the mod share the constant."""
+    src = (REPO / "tier0" / "constants.py").read_text(encoding="utf-8")
+    assert re.search(
+        rf"SHATTER_DAMAGE\s*=\s*{blindplay_notes.SHATTER_DAMAGE}\b", src)
+    assert (f"deals {blindplay_notes.SHATTER_DAMAGE} additional damage"
+            in blindplay_notes.GAME_KEYWORDS["Shatter"])
+
+
+def test_a_reaction_the_screen_names_is_defined_though_it_is_unreachable():
+    """The general rule the row asks for, one word over: the page defines what
+    it PRINTS. A screen naming Vaporize on a deck that holds one element still
+    owes the reader the sentence, because the word is already in front of
+    them."""
+    state = {"state_type": "card_reward",
+             "player": {"character": "Klee", "hp": 40, "max_hp": 70},
+             "card_reward": {"cards": [
+                 {"name": "Probe", "cost": "1", "type": "Skill",
+                  "description": "Deal 6 damage. Vaporize deals 4 more."}]}}
+
+    page = blindplay.observe(state)
+
+    assert "- **Vaporize** —" in page
+    # And nothing invented beside it: a word the screen does NOT print is still
+    # the census's business and stays off the page.
+    assert "- **Superconduct** —" not in page
+
+
 def test_the_bomb_growth_fallback_is_the_mods_own_constant():
     """`BOMB_GROWTH` is held in step from THIS side, the way
     `CHARGE_SOURCE_LINE` and `KURAGE_COST_PER_ENERGY` are: this module may not
