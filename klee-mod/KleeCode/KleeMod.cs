@@ -358,6 +358,11 @@ public static class KleeMod
                     // "card_keywords.KLEEMOD-MUSTER.title" as the keyword name
                     // on a live shop screen (0.2-634, EB-53 capture session).
                     [Cards.KokomiRiderTips.MusterKey + ".title"] = "Muster",
+                    // `EB-484`: both numbers of a `bonus_vs_debuff` fold, on
+                    // a screen with no enemy to resolve it. Same bargain and
+                    // the same raw-key hazard as every row here.
+                    [Cards.KokomiRiderTips.DebuffRiderKey + ".title"] =
+                        "Against a debuffed enemy",
                     // QUARANTINED (R213 E1): the Charge KEYWORD's title. The
                     // BODY is built live in KokomiRiderTips, because it
                     // quotes CHARGE_PER_EXHAUST and reads the current bank --

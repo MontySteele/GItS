@@ -416,6 +416,92 @@ public class Round16Tests
         }
     }
 
+    // ==================================================================
+    // `EB-484` -- a folded number read on a screen with no enemy on it
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r16 (c) 7). On a SHOP shelf `Undertow` printed "Deal 7
+    // damage, already including 3 if the enemy has a debuff" and "I could not
+    // determine whether that card deals 4 or 7."
+    //
+    // BOTH READINGS ARE AVAILABLE AND ONLY ONE IS TRUE. The number is
+    // `CalculationBase + ExtraDamage * (debuff ? 1 : 0)` -- 7 with nothing
+    // aimed at, 10 on a debuffed enemy -- so "already including 3" is the
+    // clause `EB-441` needed for the HOVERED case, where the 10 does include
+    // the 3, and it reads as 4 + 3 on every other screen.
+    //
+    // THE FACE CANNOT ANSWER IT, which is why this row lands on the tip and
+    // not on the description: see the pin below.
+
+    [Fact]
+    public void A_card_cannot_print_one_face_in_a_shop_and_another_in_a_fight()
+    {
+        // THE ROW ASKED FOR A CONTEXT-DEPENDENT FACE, and the engine does not
+        // have one. A `Localization` is read ONCE at registration, and neither
+        // description getter on the shipped `CardModel` is virtual -- so a
+        // card has exactly one face and a mod cannot branch it. Checked
+        // against the real `sts2.dll` rather than asserted, because the whole
+        // decision to put this on a tip rests on it.
+        var card = typeof(CardModel);
+        Assert.False(card.GetProperty("Description", All)!.GetMethod!.IsVirtual);
+        foreach (var name in new[] { "GetDescriptionForPile",
+                                     "GetDescriptionForUpgradePreview" })
+        {
+            foreach (var m in card.GetMethods(All).Where(m => m.Name == name))
+            {
+                Assert.False(m.IsVirtual, name);
+            }
+        }
+    }
+
+    [Fact]
+    public void The_debuff_rider_tip_prints_both_numbers_on_every_screen()
+    {
+        // The pair, and which one the face is showing. Interpolated from the
+        // generator's own `debuff_calc_rider` -- the same pair that emits the
+        // vars -- so a repricing cannot leave this quoting a retired number.
+        var undertow = Source(
+            "Cards/Prototype/Generated/ProtoKkUndertow.cs");
+        Assert.Contains(
+            "KokomiRiderTips.ForDebuffRider(", undertow);
+        Assert.Contains(", this, 7, 3)", undertow);
+        Assert.Contains("new CalculationBaseVar(7m)", undertow);
+        Assert.Contains("new ExtraDamageVar(3m)", undertow);
+
+        var body = Printed(typeof(KokomiRiderTips), "ForDebuffRider");
+        // The interpolated numerals are holes in the compiled literals, so
+        // what is read back is the prose around them.
+        Assert.Contains("against an undebuffed enemy", body);
+        Assert.Contains("against a debuffed one", body);
+        Assert.Contains("The face shows whichever applies to the enemy you "
+                      + "are aiming at.", body);
+        // 122 of 135 with both numbers in: 7 and 10, one digit and two.
+        Assert.True(
+            (body.Length + "7".Length + "10".Length) <= 135,
+            body.Length.ToString());
+    }
+
+    [Fact]
+    public void The_debuff_tip_does_not_go_quiet_off_the_board()
+    {
+        // UNLIKE EVERY OTHER TIP IN THAT FILE, which reads a live meter and
+        // stands down out of combat rather than printing a misleading zero.
+        // These two numbers are the SHEET's, so a shop shelf is exactly the
+        // screen that must have them -- and it is the screen the row was
+        // filed from.
+        var il = Il.Strings(typeof(KokomiRiderTips)
+            .GetMethod("ForDebuffRider", All)!).ToList();
+        Assert.Contains(il, s => s.Contains("undebuffed"));
+        Assert.DoesNotContain(Il.Calls(typeof(KokomiRiderTips)
+                .GetMethod("ForDebuffRider", All)!),
+            c => c.Contains("CreatureOf"));
+
+        Assert.Equal("KLEEMOD-DEBUFF_RIDER", KokomiRiderTips.DebuffRiderKey);
+        Assert.Contains(
+            "[Cards.KokomiRiderTips.DebuffRiderKey + \".title\"]",
+            Source("KleeMod.cs"));
+    }
+
     /// <summary>One ratified sheet, read whole, off the same walk.</summary>
     private static string Sheet(string name) =>
         Read(System.IO.Path.Combine("docs", name));

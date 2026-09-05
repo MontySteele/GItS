@@ -11167,6 +11167,26 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "KokomiRiderTips.ForChargeRider("
             f"{tips_expr or 'base.ExtraHoverTips'}, this, "
             f"{charge_rider_args})")
+    # `EB-484`. BOTH NUMBERS OF A `bonus_vs_debuff` FOLD, on a screen with no
+    # enemy to resolve it.
+    #
+    # The fold is `EB-441` working: the face prints what the hovered enemy will
+    # take. On a SHOP shelf there is no hovered enemy, so `Undertow` printed
+    # "Deal 7 damage, already including 3 if the enemy has a debuff" and the
+    # r16 seat "could not determine whether that card deals 4 or 7" ((c) 7).
+    # The face cannot answer it -- a card's `Localization` is read once at
+    # registration and neither description getter is virtual -- so the pair
+    # goes on the tip, whose numbers are handed down from the SAME rider that
+    # emits the vars rather than re-derived.
+    for _eff in card.get("effects", []):
+        _debuff = debuff_calc_rider(card, _eff)
+        if _debuff is not None:
+            _base, _bonus = _debuff
+            tips_expr = (
+                "KokomiRiderTips.ForDebuffRider("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this, "
+                f"{_base}, {_bonus})")
+            break
     # B5: a deploy card carries the tip for every member it can field, plus
     # the cap rules its face no longer prints. Attached from the EFFECT, not
     # from a card list, so a new deploy card cannot ship naming a member that
