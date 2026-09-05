@@ -759,6 +759,76 @@ public class Round19Tests
             new DuckAndCover(), seat.Creature));
     }
 
+    // ==================================================================
+    // `EB-546` -- the Vaporize that did not multiply
+    // ==================================================================
+    //
+    // THE FIND (Furina r13 lane 1). "The salon log read: `Crabaletta hit
+    // Sludge Spinner for 6 Hydro, and left no aura on it.` The enemy was
+    // wearing Pyro Aura 2, and Crabaletta was at full strength (Encore paid)
+    // ... so 9. The HP bar moved 24 to 18. Six." And in fight 2 the same card
+    // into the same aura while DRY hit for 6 off a 4.5 base, which IS 1.5x.
+    //
+    // WHAT IS PINNED HERE is every term of that arithmetic that a headless
+    // test can reach, plus the wiring that composes them -- the row's
+    // reproduction half is `tier0/tests/test_eb546_a_performance_amplifies.py`,
+    // where a paid performance into Pyro lands 9 and a dry one lands 6. The
+    // live 6 is NOT reproduced by either engine's code and the row stays open
+    // on it.
+
+    [Fact]
+    public void The_amplifier_is_one_and_a_half_and_does_not_ask_who_paid()
+    {
+        // THE TERM ITSELF. It is a property of the REACTION, so nothing about
+        // the Encore buffer can reach it -- which is why "paid" and "dry"
+        // cannot differ in whether they multiply, only in what they multiply.
+        Assert.Equal(ReactionConstants.VaporizeMult,
+                     ReactionTable.AmplifierMultiplier(Reaction.Vaporize));
+        Assert.Equal(ReactionConstants.VaporizeMult,
+                     ReactionTable.AmplifierMultiplier(Reaction.Vaporize, null));
+        Assert.Equal(1.5m, ReactionConstants.VaporizeMult);
+    }
+
+    [Fact]
+    public void The_dry_cut_is_a_size_and_the_amplifier_is_a_separate_term()
+    {
+        // The two numbers the seat's readings turn on, off the one expression
+        // the badge and the hit share: a paid Crabaletta is her printed tick
+        // and a dry one is three-quarters of it, TRUNCATED -- 6 and 4, which
+        // is what makes 9 and 6 the two amplified answers.
+        var seat = Seat.Furina().WithCombatState();
+
+        var paid = SalonMemberPower.TickValue(
+            seat.Creature, SalonMember.Crabaletta, paid: true);
+        var dry = SalonMemberPower.TickValue(
+            seat.Creature, SalonMember.Crabaletta, paid: false);
+
+        Assert.Equal(SalonConstants.CrabalettaTick, paid);
+        Assert.Equal((int)(paid * SalonConstants.DryDamageMultiplier), dry);
+        Assert.Equal(6, paid);
+        Assert.Equal(4, dry);
+    }
+
+    [Fact]
+    public void A_performance_goes_through_the_funnel_that_multiplies()
+    {
+        // STRUCTURAL, and it is the whole of what a headless test can say
+        // about the live reading: there is ONE implementation of a member
+        // acting, it asks `ElementalHit.Deal`, and `Deal` multiplies by the
+        // amplifier and then reads the target's terms -- in that order, with
+        // no branch between them that the Encore buffer can reach.
+        Assert.Contains("ElementalHit.Deal",
+                        Il.Calls(Il.Method("SalonMemberPower", "PerformMember")));
+
+        var deal = Il.CallSequence(Il.Method("ElementalHit", "Deal")).ToList();
+        var amp = deal.FindIndex(c => c.Contains("AmplifierMultiplier"));
+        var mods = deal.FindIndex(c => c.Contains("TargetMods"));
+        var hit = deal.FindIndex(c => c.Contains("CreatureCmd.Damage"));
+
+        Assert.True(amp >= 0 && mods > amp && hit > mods,
+                    "amplifier, then the target's terms, then the hit");
+    }
+
     /// <summary>The loc key a pile's badge is resolving right now.
     /// <c>KleeOverhaulRoundOneFixTests.LocKey</c>, verbatim.</summary>
     private static string LocKey(ProtoBombPower pile) =>
