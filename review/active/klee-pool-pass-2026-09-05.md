@@ -66,6 +66,7 @@ Growth is 4 per turn (`KLEE_OVERHAUL_BOMB_GROWTH`).
    (Uncommon, 1: merge and +5): a second pile the size of the first, once.
    Playing it on a 12 or waiting for a 16 is the cook's call, and the
    copy grows on its own schedule (rule 9, each Bomb grows separately).
+   Built under `EB-491`, which is the register row this whole §2 waits on.
 3. **Fish Blasting** — Common Attack, 1 energy. *Deal 5 damage to ALL
    enemies. Shuffle a Confiscated into your draw pile.* The lore card,
    kept as the brief says (§2, "AoE with a cost card"). Cook's plain

@@ -369,6 +369,13 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # takes -- and it is the one arm verb whose number is a
                   # RATE: the Sparks the cost line just spent multiply it.
                   "grow_largest_bomb",
+                  # THE POOL PASS's three (`EB-491`), on the same terms as the
+                  # block above and each with its own verified call site on
+                  # `ProtoBombPower`: `PlaceCopyOfLargest` (All of My
+                  # Treasures!), `GrowOffAura` (Kindling) and `SplitLargest`
+                  # (Split Charge).
+                  "plant_bomb_copy_largest", "grow_bombs_off_aura",
+                  "split_largest_bomb",
                   # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
                   # same terms and the same quarantine as the block above: the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
@@ -1735,6 +1742,19 @@ GROW_BOMBS_FIELDS = {"op", "target", "amount"}
 #: scope `block_largest_bomb` reads, so the row aims at nobody.
 GROW_LARGEST_BOMB_FIELDS = {"op", "per_spark"}
 MERGE_BOMBS_FIELDS = {"op", "target", "growth"}
+#: THE POOL PASS's three (`EB-491`), same discipline.
+#: All of My Treasures! aims (the copy lands where the player says) and carries
+#: no number: the size is the board's own largest charge, which is what "equal
+#: to" means and why no figure could be printed for it.
+PLANT_BOMB_COPY_LARGEST_FIELDS = {"op", "target"}
+#: Kindling's two numbers, both printed: `amount` per Bomb on a non-Pyro aura,
+#: `floor` on the largest Bomb when there is none. NO `target`: the row reads
+#: the whole board, so it aims at nobody.
+GROW_BOMBS_OFF_AURA_FIELDS = {"op", "amount", "floor"}
+#: Split Charge's one number, and it is 0 on the base card: the halves are the
+#: Bomb's own, and `growth` is what the upgrade buys on top of each. NO
+#: `target` -- "your largest Bomb" is board-wide and the halves land at random.
+SPLIT_LARGEST_BOMB_FIELDS = {"op", "growth"}
 #: The one non-literal a `spend_spark` price may be spelled with: X, "spend
 #: all your Sparks". tier0's twin is `effects.SPEND_ALL`, and the two engines
 #: charge the same gate price for it (1) through their own readers.
@@ -1999,6 +2019,16 @@ APPLY_POWERS = {
     "ko_witches_circle": ("WitchesCirclePower", None,
         "Whenever you play a [gold]Hexerei[/gold] card, place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
+    # THE POOL PASS's Rare (`EB-491`), the brief's sec.5.3 rule-breaker and the
+    # one row slice one deferred: the aura an explosion CONSUMES is handed back
+    # before the Attack behind it lands, so the Attack reacts too. NO {X} in
+    # the template, because the rule is a fact about the board and not a number
+    # -- a second copy adds no second aura, exactly as Alice's Recipe's stack
+    # count is a copy count and nothing else.
+    "ko_vermillion_pact": ("VermillionPactPower", None,
+        "Whenever one of your [gold]Bombs[/gold] triggers an "
+        "[gold]Elemental Reaction[/gold], the Attack that set it off "
+        "triggers one too."),
     # THE COMPANION STAND-INS' FOUR (QUARANTINED, R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype/CompanionStandIns.cs and is
     # compiled only under `-p:PrototypeCards=true`, so the only rows that may
@@ -2639,6 +2669,17 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # face states the rule in words and prints no figure a
                        # var could keep honest.
                        "tide_draw",
+                       # `EB-491`, the pool pass's three. `grow_floor` is
+                       # Kindling's second printed number and `split_grow` is
+                       # Split Charge's upgrade-only clause: both are emitted
+                       # as `tide_draw`'s play-time `IsUpgraded` read, because
+                       # each face states its own `{IfUpgraded:show:...}` swap
+                       # and a var would render one number twice. `spark_price`
+                       # is Fireworks Show's, and the face prints NOTHING for
+                       # it at all -- a Spark price sits in the cost slot, so
+                       # the moved number reaches the player through the badge
+                       # and the gate, which both read `PrintedSparkPrice`.
+                       "grow_floor", "split_grow", "spark_price",
                        "encore",
                        "encore_cost", "fanfare_cost", "fanfare_cap",
                        "fanfare_floor", "heal",
@@ -2762,6 +2803,12 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # these would otherwise emit `TargetType.Self` and throw on
               # every play.
               "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+              # The pool pass's one aimed verb (`EB-491`, All of My
+              # Treasures!): it READS the board for the size and PLACES on the
+              # enemy the player picked, so it dereferences `cardPlay.Target`
+              # like every verb beside it. `grow_bombs_off_aura` and
+              # `split_largest_bomb` aim at nobody and are deliberately absent.
+              "plant_bomb_copy_largest",
               # The Kokomi overhaul's one aimed verb, here for the same
               # reason: it dereferences `cardPlay.Target`, so a card whose
               # ONLY aimed op is this one must declare an enemy TargetType or
@@ -2833,6 +2880,18 @@ CARD_FIELDS = {
     # without this entry the first card ruled Ethereal from print would BLOCK
     # with "card field(s) ['ethereal'] not understood".
     "ethereal",
+    # `EB-491` (Long Fuse), and the A9 / Track-C.1 story a fourth time -- with
+    # the difference that this keyword rail did not exist yet. The card's
+    # ENERGY COST RISES by this much for every turn it stays in hand, which is
+    # the base game's own `CardEnergyCost.AddUntilPlayed` modifier (it
+    # accumulates, it survives the turn boundary, it is cleared when the card
+    # is played and it is combat-scoped). A PROPERTY OF THE CARD and not an
+    # effect, because nothing is resolved when the card is played: it is what
+    # the card costs while it waits. The emitted class declares
+    # `IRisingHandCostCard` and the arm's one standing listener rolls the hand
+    # at end of turn. Sim twin: `Card.rising_cost`, rolled by
+    # `klee_overhaul.roll_rising_costs`.
+    "rising_cost",
     # Companion identity/reward metadata.
     "star", "element", "role_c", "personal_pool", "nation", "character",
     "guest_star",
@@ -2921,6 +2980,26 @@ def card_level_reason(
     if card.get("plan") is not None and profile.character_id != "kokomi":
         return (f"`plan:` on a {profile.character_id} row -- the Plan is the "
                 "Kokomi overhaul's rule and only her rows may print it")
+    # `EB-491`. THE RISING HAND COST IS QUARANTINED, AND IT ONLY MEANS
+    # ANYTHING ON A CARD THAT STAYS. `KleeOverhaulRisingCost` is Compile
+    # Remove'd out of a release build, so a shipped row naming it would emit an
+    # interface that does not exist there; and a card without Retain is
+    # discarded at the end of the turn it was drawn, so its fuse could never
+    # burn -- the row would print a rule that cannot fire, which is the
+    # face-that-lies defect one field over.
+    rising = card.get("rising_cost")
+    if rising is not None:
+        if not isinstance(rising, int) or isinstance(rising, bool) \
+                or rising <= 0:
+            return "rising_cost must be a positive literal int"
+        if not str(card["id"]).startswith("proto_"):
+            return ("`rising_cost:` is the KLEE_OVERHAUL arm's rule "
+                    "(KleeOverhaulRisingCost, Compile Remove'd out of a "
+                    "release build) -- prototype rows only")
+        if not card.get("retain"):
+            return ("`rising_cost:` needs `retain: true` -- a card discarded "
+                    "at end of turn can never stay in your hand, so the fuse "
+                    "would print a rule that cannot fire")
     return plan_reason(card)
 
 
@@ -3359,6 +3438,41 @@ def blocked_reason(
                         "not understood")
             if eff.get("target") not in {"enemy", "all_enemies"}:
                 return f"damage_set_off_total target '{eff.get('target')}'"
+        # THE POOL PASS's three (`EB-491`), same UNPARSEABLE discipline.
+        if op == "plant_bomb_copy_largest":
+            # All of My Treasures!: the size is the board's largest charge, so
+            # the row carries NO number -- a `size` here would be a second
+            # reading of "equal to your largest Bomb".
+            unknown = set(eff) - PLANT_BOMB_COPY_LARGEST_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            if eff.get("target") != "enemy":
+                return f"plant_bomb_copy_largest target '{eff.get('target')}'"
+        if op == "grow_bombs_off_aura":
+            # Kindling: TWO printed numbers, and both are required. The floor is
+            # what keeps the row from being dead in a mono-Pyro deck, so a row
+            # that left it out would be a different card, not a shorter one.
+            unknown = set(eff) - GROW_BOMBS_OFF_AURA_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            for key in ("amount", "floor"):
+                value = eff.get(key)
+                if not isinstance(value, int) or isinstance(value, bool) \
+                        or value <= 0:
+                    return (f"grow_bombs_off_aura {key} must be a positive "
+                            "literal int")
+        if op == "split_largest_bomb":
+            # Split Charge: `growth` is what each half gains, 0 on the base
+            # card and bought by the upgrade. A literal >= 0 rather than
+            # optional, so the row states the base reading rather than leaving
+            # the emitter to assume one.
+            unknown = set(eff) - SPLIT_LARGEST_BOMB_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            growth = eff.get("growth")
+            if not isinstance(growth, int) or isinstance(growth, bool) \
+                    or growth < 0:
+                return "split_largest_bomb growth must be a literal int >= 0"
         # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL).
         # Same UNPARSEABLE discipline as the Klee arm's eight above: a field
         # the emitter does not understand encodes a mechanic, and every number
@@ -3774,7 +3888,13 @@ def blocked_reason(
             if unknown:
                 return f"add_card field(s) {sorted(unknown)} not understood"
             zone = eff.get("zone") or eff.get("to", "discard")
-            if zone not in ("hand", "discard"):
+            # `draw` is the pool pass's third zone (`EB-491`, Fish Blasting):
+            # the token is SHUFFLED into the draw pile rather than laid on the
+            # discard, so what it costs the deck is a draw at an unknown moment
+            # rather than a card after the next reshuffle. `CardPilePosition`
+            # is the base game's own vocabulary for the difference and the sim
+            # answers it with an insert at a random index -- see the emitter.
+            if zone not in ("hand", "discard", "draw"):
                 return f"add_card zone '{zone}'"
             if "pool" in eff:
                 members = _pool_members(eff["pool"], profile)
@@ -5491,6 +5611,24 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                             and int(e.get("payload_mine_all", 0)) > 0
                             for e in effects),
         "grow": grow_var_effect(card) is not None,
+        # `EB-491`. Kindling's SECOND printed number, and Split Charge's
+        # upgrade-only one. Each binds to the op that prints it, the one-owner
+        # rule every key here keeps, and each is emitted as a play-time
+        # `IsUpgraded` read rather than a var -- the face already carries its
+        # own `{IfUpgraded:show:...}` swap, so a var would render the number
+        # twice.
+        "grow_floor": any(e["op"] == "grow_bombs_off_aura"
+                          and isinstance(e.get("floor"), int)
+                          for e in effects),
+        "split_grow": any(e["op"] == "split_largest_bomb" for e in effects),
+        # `EB-491` (Fireworks Show): the upgrade cuts the SPARK PRICE. The face
+        # never prints a Spark price (`docs/current/text-conventions.md`, the
+        # Spark row: it sits in the cost slot), so there is nothing to render
+        # and the moved number reaches the player through the badge and the
+        # gate -- both of which read `PrintedSparkPrice`.
+        "spark_price": any(e["op"] == "spend_spark"
+                           and isinstance(e.get("amount"), int)
+                           for e in effects),
         # R252. Binds to the op that PRINTS the ceiling, the same one-owner
         # rule every key above it keeps.
         "cap": any(e["op"] == "block_largest_bomb" for e in effects),
@@ -6369,8 +6507,35 @@ def _stmt_spend_spark(card: dict, eff: dict) -> str:
         return ("var sparksSpent = SparkPower.SparksAtPlay(Owner.Creature);\n"
                 "        await SparkPower.Spend(choiceContext, "
                 "Owner.Creature, sparksSpent, this);")
+    # `EB-491` (Fireworks Show): a `spark_price` delta moves what the card
+    # CHARGES, so the payment and the declared price are ONE expression --
+    # `spark_price_expr` is the builder both call, for the reason the X price
+    # already gives one line up (a badge showing one number while the spend
+    # takes another is the `EB-288` defect class, one resource over).
     return ("await SparkPower.Spend(choiceContext, Owner.Creature, "
-            f"{int(eff['amount'])}, this);")
+            f"{spark_price_expr(card, eff)}, this);")
+
+
+def spark_price_expr(card: dict, eff: dict) -> str:
+    """One literal `spend_spark` price, with its `spark_price` delta folded in
+    as a play-time `IsUpgraded` read (`EB-491`).
+
+    `_tide_draw_flat_expr`'s shape, and this face prints NOTHING for the
+    number: a Spark price sits in the cost slot and the body does not restate
+    it (`docs/current/text-conventions.md`, the Spark row), so the moved price
+    reaches the player through the cost BADGE and the playability gate -- both
+    of which read `PrintedSparkPrice`, which is emitted from this same
+    expression. tier0 bumps the op's own `amount` and `combat.spark_price`
+    gates on it, so the two engines charge the same number.
+
+    CLAMPED AT 0 like every other price in this file: an over-large delta is a
+    sheet defect, not a refund.
+    """
+    base = int(eff["amount"])
+    delta = int(upgrade_plan(card)[0].get("spark_price", 0))
+    if not delta:
+        return str(base)
+    return f"(IsUpgraded ? {max(0, base + delta)} : {base})"
 
 
 def _stmt_spend_spark_guarded(card: dict, eff: dict) -> str:
@@ -6432,6 +6597,36 @@ def _tide_draw_flat_expr(card: dict, eff: dict) -> str:
     """
     base = int(eff.get("amount", 0))
     delta = int(upgrade_plan(card)[0].get("tide_draw", 0))
+    return f"(IsUpgraded ? {base + delta} : {base})" if delta else str(base)
+
+
+def _grow_floor_expr(card: dict, eff: dict) -> str:
+    """Kindling's FLOOR, with its `grow_floor` delta folded in as a play-time
+    `IsUpgraded` read (`EB-491`).
+
+    `_tide_draw_flat_expr`'s shape one op over, and for the same reason: the
+    row's own `description:` already prints this number with the base game's
+    `{IfUpgraded:show:up|base}` swap, so there is no rendered figure for a
+    DynamicVar to keep honest and a second one would be two spellings of one
+    number. The row's OTHER number -- the per-Bomb growth -- does own a var
+    (`grow`), because that one is rendered from the sheet's literal.
+    """
+    base = int(eff.get("floor", 0))
+    delta = int(upgrade_plan(card)[0].get("grow_floor", 0))
+    return f"(IsUpgraded ? {base + delta} : {base})" if delta else str(base)
+
+
+def _split_growth_expr(card: dict, eff: dict) -> str:
+    """Split Charge's per-half growth, with its `split_grow` delta folded in as
+    a play-time `IsUpgraded` read (`EB-491`).
+
+    `_grow_floor_expr`'s shape, and the base is 0: the upgrade BUYS a clause
+    the base card does not have, so the face prints it inside its own
+    `{IfUpgraded:show:...}` hole and nothing renders on the base card. A `grow`
+    var here would declare a DynamicVar whose value the base face never shows.
+    """
+    base = int(eff.get("growth", 0))
+    delta = int(upgrade_plan(card)[0].get("split_grow", 0))
     return f"(IsUpgraded ? {base + delta} : {base})" if delta else str(base)
 
 
@@ -6555,17 +6750,23 @@ def grow_var_effect(card: dict) -> dict | None:
     `grow_largest_bomb`'s number is a RATE ("grows by 3 per Spark spent") and
     takes the same key anyway, for tier0 `_proto_grow`'s stated reason: the key
     names the one grow number a face prints, and no row carries two of these
-    ops."""
+    ops. `grow_bombs_off_aura` is the FOURTH (`EB-491`, Kindling) and it takes
+    the key for its per-Bomb `amount` only -- its floor is a second printed
+    number and rides `grow_floor`, which is a play-time read rather than a
+    var."""
     return next((fx for fx in card.get("effects", [])
                  if (fx.get("op") == "grow_bombs" and "amount" in fx)
                  or (fx.get("op") == "merge_bombs" and "growth" in fx)
                  or (fx.get("op") == "grow_largest_bomb"
-                     and "per_spark" in fx)), None)
+                     and "per_spark" in fx)
+                 or (fx.get("op") == "grow_bombs_off_aura"
+                     and "amount" in fx)), None)
 
 
-#: Which field each of the three grow ops prints its number in.
+#: Which field each of the four grow ops prints its number in.
 GROW_FIELD = {"grow_bombs": "amount", "merge_bombs": "growth",
-              "grow_largest_bomb": "per_spark"}
+              "grow_largest_bomb": "per_spark",
+              "grow_bombs_off_aura": "amount"}
 
 
 def grow_literal(eff: dict) -> int:
@@ -7613,6 +7814,40 @@ def build_body(
                 "await ProtoBombPower.DrawPerSetOff("
                 "choiceContext, Owner);")
 
+        elif op == "plant_bomb_copy_largest":
+            # THE POOL PASS (All of My Treasures!, `EB-491`). ONE call, and it
+            # carries no number: the size is read off the board inside
+            # `ProtoBombPower`, so the card cannot express a second reading of
+            # "your largest Bomb".
+            _target_guard(lines, ctx)
+            lines.append(
+                "await ProtoBombPower.PlaceCopyOfLargest("
+                "choiceContext, cardPlay.Target, Owner.Creature, this);")
+
+        elif op == "grow_bombs_off_aura":
+            # THE POOL PASS (Kindling, `EB-491`). ONE call with BOTH printed
+            # numbers, so the aura clause and its floor cannot be reached by
+            # two different paths: the rule that decides which of them applies
+            # is the power's.
+            #
+            # THE FLOOR IS A PLAY-TIME `IsUpgraded` LITERAL and not a var --
+            # `tide_draw`'s shape (`EB-478`), because the face already prints
+            # its own `{IfUpgraded:show:...}` swap for it and a second var
+            # rendering the same number twice is how the two drift.
+            lines.append(
+                "ProtoBombPower.GrowOffAura(Owner.Creature, "
+                f"{grow_expr(card, eff)}, {_grow_floor_expr(card, eff)});")
+
+        elif op == "split_largest_bomb":
+            # THE POOL PASS (Split Charge, `EB-491`). ONE call; the halving is
+            # the power's arithmetic and `growth` is what the upgrade adds to
+            # each half, read at play time off `IsUpgraded` for the reason the
+            # floor above is -- the base card prints no figure for it.
+            lines.append(
+                "await ProtoBombPower.SplitLargest("
+                "choiceContext, Owner.Creature, this, "
+                f"{_split_growth_expr(card, eff)});")
+
         elif op == "hexerei_mark_hand":
             # R244 (Alice's Introduction Magic). ONE awaited call into
             # `CompanionHexerei`, which is where the family mark lives -- the
@@ -8173,7 +8408,15 @@ def build_body(
 
         elif op == "add_card":
             zone = eff.get("zone") or eff.get("to", "discard")
-            pile = "PileType.Hand" if zone == "hand" else "PileType.Discard"
+            pile = {"hand": "PileType.Hand",
+                    "draw": "PileType.Draw"}.get(zone, "PileType.Discard")
+            # `EB-491` (Fish Blasting), the draw-pile zone: SHUFFLED IN, which
+            # is `CardPilePosition.Random` and not the parameter's default
+            # (bottom). A token laid on the bottom of the draw pile is a token
+            # the player knows the moment of, and the whole cost of the Status
+            # is that they do not. Sim twin: `effects._add_token`'s random
+            # index. Every other zone keeps the default it always had.
+            position = ", CardPilePosition.Random" if zone == "draw" else ""
             n = int(eff.get("amount", 1))
             if "pool" in eff:
                 # Pool resolved from the sheet at generation time; picks are
@@ -8204,7 +8447,7 @@ def build_body(
                     "                if (canonical == null) break;\n"
                     "                var token = CombatState!.CreateCard(canonical, Owner);\n"
                     f"{cost_line}"
-                    f"                await CardPileCmd.AddGeneratedCardToCombat(token, {pile}, Owner);\n"
+                    f"                await CardPileCmd.AddGeneratedCardToCombat(token, {pile}, Owner{position});\n"
                     "            }\n"
                     "        }"
                 )
@@ -8213,7 +8456,7 @@ def build_body(
                 cls = ADD_CARD_CLASSES[cid]
                 token_lines = (
                     f"            var token = CombatState!.CreateCard<{cls}>(Owner);\n"
-                    f"            await CardPileCmd.AddGeneratedCardToCombat(token, {pile}, Owner);\n"
+                    f"            await CardPileCmd.AddGeneratedCardToCombat(token, {pile}, Owner{position});\n"
                 )
                 body = token_lines if n == 1 else (
                     f"            for (var i = 0; i < {n}; i++)\n"
@@ -9794,9 +10037,10 @@ def build_description(card: dict) -> str:
 
         elif op == "add_card":
             n = eff.get("amount", 1)
-            zone_txt = ("your hand"
-                        if (eff.get("zone") or eff.get("to", "discard")) == "hand"
-                        else "your discard pile")
+            zone_txt = {"hand": "your hand",
+                        "draw": "your draw pile"}.get(
+                            eff.get("zone") or eff.get("to", "discard"),
+                            "your discard pile")
             if "pool" in eff:
                 archetype, _, rarity = eff["pool"].rpartition("_")
                 rarity = rarity.rstrip("s").capitalize()
@@ -10233,6 +10477,10 @@ def build_upgrade(card: dict) -> list[str]:
                # The round-11 pool pass. A RATE, on the one key that names a
                # printed grow number -- see `grow_var_effect`.
                "grow_largest_bomb": "grow",
+               # `EB-491` (Kindling). Its per-Bomb `amount` takes the same key
+               # for the same reason; its FLOOR is a play-time IsUpgraded read
+               # (`grow_floor`) and never reaches this table.
+               "grow_bombs_off_aura": "grow",
                "mend": "mend",
                # R252, Careful Now's ceiling.
                "block_largest_bomb": "cap",
@@ -10241,6 +10489,7 @@ def build_upgrade(card: dict) -> list[str]:
                "grow_bombs": 'DynamicVars["Grow"]',
                "merge_bombs": 'DynamicVars["Grow"]',
                "grow_largest_bomb": 'DynamicVars["Grow"]',
+               "grow_bombs_off_aura": 'DynamicVars["Grow"]',
                "mend": 'DynamicVars["Mend"]',
                "block_largest_bomb": 'DynamicVars["BombCap"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
@@ -10435,6 +10684,28 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(
             "// tier0 twin: upgrades.apply key 'tide_draw', which bumps the "
             "same op's `amount`.")
+    for flat, where in (
+            ("grow_floor",
+             "ProtoBombPower.GrowOffAura's floor argument; tier0 twin: "
+             "upgrades.apply key 'grow_floor', which bumps the same op's "
+             "`floor`"),
+            ("split_grow",
+             "ProtoBombPower.SplitLargest's growth argument; tier0 twin: "
+             "upgrades.apply key 'split_grow', which bumps the same op's "
+             "`growth`"),
+            ("spark_price",
+             "PrintedSparkPrice and the SparkPower.Spend beside it; tier0 "
+             "twin: upgrades.apply key 'spark_price', which bumps the "
+             "`spend_spark` amount both engines gate on")):
+        if flat not in deltas:
+            continue
+        # `EB-491`. `tide_draw`'s shape: the number is read at PLAY time off
+        # `IsUpgraded`, because the face either states the swap itself or
+        # prints no figure at all, so there is no rendered number a DynamicVar
+        # would be keeping honest.
+        done.add(flat)
+        lines.append(f"// {flat}: read at play time off IsUpgraded, at")
+        lines.append(f"// {where}.")
     if "bombs" in deltas:
         done.add("bombs")
         lines.append(f'DynamicVars["Bombs"].UpgradeValueBy({int(deltas["bombs"])}m);')
@@ -10847,6 +11118,15 @@ def emit(
     # the number is already on the card where `MeterCost` reads it.
     if any(eff.get("op") == "spend_charge" for eff in card["effects"]):
         interfaces += ", IMeterPricedCard"
+
+    # `EB-491` (Long Fuse), and the same rule a third time, on a cost that is
+    # not a meter: a row printing `rising_cost:` declares the number on
+    # `IRisingHandCostCard`, and the arm's one standing turn-end listener reads
+    # it back rather than carrying a literal per card. It is on the CARD
+    # because the fuse is the card's: two Long Fuses in one hand burn
+    # separately, and a card that is not in hand is not burning at all.
+    if int(card.get("rising_cost", 0)):
+        interfaces += ", IRisingHandCostCard"
 
     # EB-261 / EB-264. A card refused by its OWN gate carries the sentence the
     # page prints, because `CardModel.CanPlay` collapses every mod-side refusal
@@ -11485,6 +11765,18 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                       else int(eff["amount"])
                       for eff in card["effects"]
                       if eff.get("op") == "spend_spark")
+    # `EB-491` (Fireworks Show): an upgrade may CUT the price, and the declared
+    # price is what the gate and the badge both read -- so it is emitted from
+    # the same builder the payment is (`spark_price_expr`) rather than as the
+    # flat sum above. Only the single-price shape moves: a row that printed two
+    # literal prices would need the sum of two swaps, and none does.
+    price_effs = [eff for eff in card["effects"]
+                  if eff.get("op") == "spend_spark"]
+    spark_price_cs = str(spark_price)
+    if (len(price_effs) == 1
+            and price_effs[0].get("amount") != SPEND_ALL
+            and upgrade_plan(card)[0].get("spark_price")):
+        spark_price_cs = spark_price_expr(card, price_effs[0])
     # EB-261, THE OTHER HALF OF THE SAME GATE. A card whose whole body is a
     # damage-less `set_off` does NOTHING on a board with no Bomb on it -- it
     # pays its price and resolves to nothing, which is the play the cost line
@@ -11507,7 +11799,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "    // that already prints a price is unaffected by the strict Rare\n"
         "    // Power, which is why PriceOf returns this number unchanged\n"
         "    // here (tier0 twin: combat.spark_price, sub-pick (a)).\n"
-        f"    public int PrintedSparkPrice => {spark_price};\n\n"
+        f"    public int PrintedSparkPrice => {spark_price_cs};\n\n"
         "    protected override bool IsPlayable =>\n"
         "        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this))"
         f"{bomb_clause};"
@@ -11581,6 +11873,25 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # unplayable, exactly as a card below a top-level price is -- the two
     # gates above, one nesting level down. Sim twin: `combat.modal_refusal`
     # reached through `card_playable`.
+    # `EB-491` (Long Fuse): the row's own fuse length, declared where the arm's
+    # turn-end listener reads it. A PROPERTY and not a var, because the face
+    # states the rule in words ("Costs 1 more each turn it stays in your hand")
+    # and the number the player watches move is the COST BADGE's, which the
+    # base game's own `AddUntilPlayed` modifier already keeps.
+    rising = int(card.get("rising_cost", 0))
+    rising_cost_member = (
+        "\n\n    // `EB-491`, the rising hand cost: this card"
+        " costs this much more\n"
+        "    // for every turn it stays in hand, applied by\n"
+        "    // `KleeOverhaulRisingCost.RollHand` through the base"
+        " game's own\n"
+        "    // `CardEnergyCost.AddUntilPlayed` -- which accumulates,"
+        " survives the\n"
+        "    // turn boundary, clears when the card is played and is"
+        " combat-scoped.\n"
+        f"    public int HandCostRise => {rising};"
+        if rising else "")
+
     prices = mode_prices(card)
     modal_gate_member = ""
     modal_prices_member = ""
@@ -11725,7 +12036,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", "{desc}"),
-    }};{tags_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
+    }};{tags_member}{rising_cost_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

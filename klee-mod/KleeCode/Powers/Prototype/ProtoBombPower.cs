@@ -1146,6 +1146,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         // every other board and with the companion arm off. Sim twin:
         // `companion_coven.bomb_element`, read at `klee_overhaul._explode`.
         var element = await CompanionCovenBombs.ElementFor(choiceContext, applier);
+        // THE VERMILLION PACT'S ONE READ, taken BEFORE the funnel runs because
+        // the funnel is what consumes it: the aura this explosion is about to
+        // eat is the aura the Pact hands back. Null on an aura-less enemy and
+        // on every board with no Pact, and the whole of what the Rare knows.
+        var auraBefore = VermillionPactPower.AuraToRestore(applier, cardSource,
+                                                           target);
         // `EB-343` / R248: THIS DOOR IS THE WHOLE OF "a Bomb carries the
         // target's modifiers only". The charge enters the funnel at its printed
         // size -- Klee's Strength and Weak are hers and never travelled to a
@@ -1158,6 +1164,15 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         var reacted = ReactionEffects.TotalResolved > reactionsBefore;
 
         ledger.NoteExplosion(reacted, dealt);
+        // THE VERMILLION PACT (the pool pass, `EB-491`). The Rare's whole rule
+        // is that the aura the explosion CONSUMED is still standing when the
+        // Attack behind it lands, so the Attack reacts too -- re-applied HERE,
+        // between the explosion and `DealCardDamage`, which is the ordering the
+        // face states. It fires only on a reaction the card's own Set off
+        // caused and only for an ATTACK: a Mine answering an intent and a
+        // Skill's Set off carry no hit behind them for the aura to feed.
+        await VermillionPactPower.Restore(choiceContext, applier, target,
+                                          auraBefore, reacted);
         // THE COMPANION STAND-INS' two this-turn watchers (QUARANTINED,
         // COMPANION_OVERHAUL): Diona's Bomb and Noelle's Mine. Here rather than
         // on `NotifyExplosionListeners` below, because that bus carries no Mine
@@ -1781,6 +1796,168 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         var amount = perSpark * sparksSpent;
         bestPile.GrowLargestChargeBy(amount);
         return amount;
+    }
+
+    /// <summary>
+    /// THE POOL PASS's one shared read (`EB-491`): the SINGLE largest charge
+    /// this Klee holds anywhere on the living board, as the pile that carries
+    /// it and its index inside that pile.
+    ///
+    /// The walk <see cref="RemoveLargestForBlock"/> makes one charge at a time
+    /// and <see cref="GrowLargestPerSpark"/> makes one pile at a time, named
+    /// once so All of My Treasures!, Split Charge and Kindling's floor cannot
+    /// disagree about which Bomb "your largest Bomb" is. THE TIE-BREAK IS THE
+    /// FIRST ONE FOUND -- living enemies in order, each pile in place order --
+    /// which is Sorry, Jean...'s rule and the only one a player can plan
+    /// around. Sim twin: <c>klee_overhaul.largest_charge</c>.
+    /// </summary>
+    private static (ProtoBombPower? Pile, int Index, int Size) LargestCharge(
+        Creature applier)
+    {
+        if (applier.CombatState == null) return (null, -1, 0);
+
+        ProtoBombPower? best = null;
+        var bestIndex = -1;
+        var bestSize = 0;
+        foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
+        {
+            if (enemy.IsDead) continue;
+            foreach (var pile in enemy.Powers.OfType<ProtoBombPower>())
+            {
+                if (pile.Applier != applier) continue;
+                for (var i = 0; i < pile._charges.Count; i++)
+                {
+                    if (pile._charges[i].Size <= bestSize) continue;
+                    best = pile;
+                    bestIndex = i;
+                    bestSize = pile._charges[i].Size;
+                }
+            }
+        }
+        return (best, bestIndex, bestSize);
+    }
+
+    /// <summary>
+    /// All of My Treasures! (the pool pass, `EB-491`): "Place a Bomb on the
+    /// enemy equal to your largest Bomb." A COPY and not a move -- the pile it
+    /// was measured against is untouched and still growing, which is what makes
+    /// the card a cook decision (play it on a 12, or wait for a 16) rather than
+    /// a second Careful Arrangement.
+    ///
+    /// THE COPY IS A PLAIN BOMB. A Mine's defence is not doubled by a card that
+    /// prints "Bomb", and the copy carries no payload: Jumpy Dumpty's Mines are
+    /// the charge's own promise, not its size.
+    ///
+    /// IT GROWS ON ITS OWN SCHEDULE from here (rule 9, each Bomb grows
+    /// separately), which is the whole of what "equal to" means -- equal WHEN
+    /// PLACED. Nothing happens on a board with no Bomb on it. Sim twin:
+    /// <c>klee_overhaul.place_copy_of_largest</c>.
+    /// </summary>
+    public static async Task PlaceCopyOfLargest(
+        PlayerChoiceContext choiceContext, Creature? target, Creature applier,
+        CardModel? cardSource)
+    {
+        if (target == null) return;
+        var size = LargestCharge(applier).Size;
+        if (size <= 0) return;
+        await Place(choiceContext, target, size, isMine: false,
+                    payloadMineAll: 0, applier, cardSource);
+    }
+
+    /// <summary>
+    /// Kindling (the pool pass, `EB-491`): "Each Bomb on an enemy whose aura is
+    /// not Pyro grows by <paramref name="amount"/>. If there is none, your
+    /// largest Bomb grows by <paramref name="floor"/>."
+    ///
+    /// THE FLOOR IS WHAT MAKES IT A REACT ROW WITH A LOSING LINE RATHER THAN A
+    /// DEAD CARD. Catalytic Converter is dead in a mono-Pyro deck by its own
+    /// printed admission (R244 pick 2's shape); this one still buys 2 growth
+    /// when no applier went first, and buys 4 per Bomb on every foreign aura
+    /// when one did.
+    ///
+    /// "AURA IS NOT PYRO" IS THE ENEMY'S CARRIED AURA and no aura does not
+    /// count -- <see cref="SetOffAll"/>'s <c>nonPyroAuraOnly</c> filter, read
+    /// the same way for the same reason (Flame Dance and this row must not
+    /// disagree about which enemies are "off-element"). The board is read as it
+    /// stands; nothing here consumes an aura, so no order matters inside it.
+    ///
+    /// AN ENEMY WITH THE AURA AND NO BOMB IS NOT A MATCH: the face counts
+    /// BOMBS, not enemies, so a board of aura'd but Bomb-less enemies takes the
+    /// floor. Sim twin: <c>klee_overhaul.grow_bombs_off_aura</c>.
+    /// </summary>
+    public static void GrowOffAura(Creature applier, int amount, int floor)
+    {
+        if (applier.CombatState == null) return;
+
+        var grew = false;
+        foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
+        {
+            if (enemy.IsDead) continue;
+            var aura = AuraCmd.Find(enemy);
+            if (aura == null || aura.Element == Element.Pyro) continue;
+            if (!HoldsChargeFrom(enemy, applier)) continue;
+            GrowOn(enemy, applier, amount);
+            grew = true;
+        }
+        if (grew || floor <= 0) return;
+
+        var pile = LargestCharge(applier).Pile;
+        // The board's largest charge is by construction its own pile's largest,
+        // and both walks break a tie the same way (first found, place order) --
+        // so this is `LargestCharge`'s index, reached through the pure mutation
+        // that already owns it.
+        pile?.GrowLargestChargeBy(floor);
+    }
+
+    /// <summary>
+    /// Split Charge (the pool pass, `EB-491`): "Split your largest Bomb into
+    /// two halves on random enemies." Careful Arrangement's opposite, and the
+    /// arm's one bridge from Cook to Spray -- a pile cooked on one body becomes
+    /// two fuses wherever they land.
+    ///
+    /// THE HALVES ARE <c>n/2</c> AND <c>n - n/2</c>, so an odd Bomb loses
+    /// nothing and the bigger half is the second one; each then grows by
+    /// <paramref name="growth"/>, which is 0 until the upgrade buys it.
+    ///
+    /// EACH HALF ROLLS ITS OWN DESTINATION, independently, which is
+    /// <see cref="JumpCharges"/>'s rule and means both halves can land on one
+    /// enemy -- on a single-enemy board they always do, which is the row's
+    /// printed losing line (two piles growing 4 apiece where one grew 4, into
+    /// Block, for a card and an energy).
+    ///
+    /// A MINE'S HALVES ARE PLAIN BOMBS. The Mine is one fuse and splitting it
+    /// does not make two; the defence is spent, which is the price of the
+    /// bridge.
+    ///
+    /// A LARGEST BOMB OF 1 DOES NOTHING: there is no split of 1 that leaves two
+    /// Bombs, and halving it to 0 and 1 would silently delete a charge. Sim
+    /// twin: <c>klee_overhaul.split_largest</c>.
+    /// </summary>
+    public static async Task SplitLargest(
+        PlayerChoiceContext choiceContext, Creature applier,
+        CardModel? cardSource, int growth)
+    {
+        var combat = applier.CombatState;
+        if (combat == null) return;
+
+        var (pile, index, size) = LargestCharge(applier);
+        if (pile == null || size <= 1) return;
+        if (pile.TakeAt(index) is not { } removed) return;
+        if (pile.TotalSize == 0 && pile.Charges.Count == 0)
+        {
+            await PowerCmd.Remove(pile);
+        }
+
+        var halves = new[] { removed.Size / 2, removed.Size - removed.Size / 2 };
+        foreach (var half in halves)
+        {
+            var candidates = combat.HittableEnemies.Where(e => !e.IsDead).ToList();
+            if (candidates.Count == 0) return;
+            var dest = combat.RunState.Rng.CombatTargets.NextItem(candidates);
+            if (dest == null) return;
+            await Place(choiceContext, dest, half + growth, isMine: false,
+                        payloadMineAll: 0, applier, cardSource);
+        }
     }
 
     /// <summary>Big Badda Boom's second clause reads this: the damage this

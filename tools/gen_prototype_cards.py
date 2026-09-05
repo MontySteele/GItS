@@ -205,6 +205,11 @@ _ON_UPGRADE = re.compile(
 _DESCRIPTION = re.compile(r'\("description", (".*?")\),\n', re.S)
 _VAR_MOVED = re.compile(r'DynamicVars(?:\.(\w+)|\["(\w+)"\])\s*\.\s*Upgrade')
 _VAR_PRINTED = re.compile(r"\{(\w+):diff\(\)\}")
+#: `EB-491`. The SPARK cost badge as an upgrade channel: a declared price that
+#: reads `IsUpgraded` is a number the player watches move in the cost slot,
+#: even though the face prints no figure for it.
+_SPARK_PRICE_UPGRADED = re.compile(
+    r"public int PrintedSparkPrice =>\s*\(IsUpgraded\s*\?")
 
 #: A var that FEEDS a printed one. The base game's `Calculated*Var` is a
 #: TRIPLE -- `CalculationBase` holds the number an upgrade moves and
@@ -279,14 +284,21 @@ def _upgrade_face_finding(delta: dict | None, source: str) -> str | None:
     expressible, a var moved) was true of `EB-277`'s own two cards while they
     printed identical text.
 
-    Four ways an upgrade shows, and any one is enough:
+    Five ways an upgrade shows, and any one is enough:
 
       * an `{IfUpgraded:show:...}` clause in the face -- an APPENDED effect,
         or a cost the face states in words;
       * `RemoveKeyword` / `AddKeyword` -- the keyword rail under the art;
       * `EnergyCost.Upgrade*` -- the cost pip in the corner;
       * a `DynamicVars` move whose var the face prints as `{Var:diff()}`,
-        directly or through `_VAR_FEEDS`.
+        directly or through `_VAR_FEEDS`;
+      * `EB-491`: a `PrintedSparkPrice` that reads `IsUpgraded` -- the SPARK
+        cost badge, which is the fifth printed surface an upgrade can move and
+        the one a Spark-priced card's price has always lived on. The face
+        deliberately prints no figure for it (`docs/current/text-conventions.md`,
+        the Spark row: the price sits in the cost slot and the body does not
+        restate it), so the four channels above could not see the change and
+        the gate would call a real, visible upgrade invisible.
     """
     if not delta:
         return ("no upgrade at all -- the smith would hand back a copy of the "
@@ -296,6 +308,8 @@ def _upgrade_face_finding(delta: dict | None, source: str) -> str | None:
     face = " ".join(_DESCRIPTION.findall(source))
 
     if "{IfUpgraded:" in face:
+        return None
+    if "PrintedSparkPrice" in source and _SPARK_PRICE_UPGRADED.search(source):
         return None
     if ("RemoveKeyword(" in body or "AddKeyword(" in body
             or "EnergyCost.Upgrade" in body):

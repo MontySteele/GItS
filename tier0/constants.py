@@ -267,8 +267,14 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # nothing else" -- so `loader.pool_replacement` is its sibling seam, read at the
 # same single door.
 #
-# THIRTY-FIVE SINCE THE ROUND-11 POOL PASS (2026-09-04), and the one that
-# arrived is `proto_ko_stoke_the_fuse`: the arm's Spark SINK, the other half
+# FORTY-FIVE SINCE THE POOL PASS (2026-09-05, `EB-491`), and the TEN that
+# arrived are the readings of rounds 13 to 16 made into cards: three for Cook,
+# three for Spray, three for React and one bridge between Cook and Spray. Their
+# own block at the end of the tuple, like the slices below it. The pool is 8
+# Rares, which is the brief's count.
+#
+# THIRTY-FIVE BEFORE THAT (the round-11 pool pass, 2026-09-04), and the one
+# that arrived is `proto_ko_stoke_the_fuse`: the arm's Spark SINK, the other half
 # of the deadlock round 10 answered with Countdown. The round-11 and round-12
 # seats ended fights holding 4 to 9 unspent Sparks, and the row is where the
 # bank goes -- all of it, into the one Bomb she is already cooking, at 3 per
@@ -375,6 +381,19 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # 10 gave the hand a detonator it could always fire; this gives the bank
     # somewhere to go, and it pays only if a Bomb is already cooking.
     "proto_ko_stoke_the_fuse",
+    # THE POOL PASS (2026-09-05, `EB-491`). Rounds 13 to 16, in the order the
+    # packet reads them: Cook, Spray, React, bridge. Why each exists:
+    # review/active/klee-pool-pass-2026-09-05.md sec.2.
+    "proto_ko_long_fuse",
+    "proto_ko_all_of_my_treasures",
+    "proto_ko_fish_blasting",
+    "proto_ko_pocket_match",
+    "proto_ko_bombs_away",
+    "proto_ko_fireworks_show",
+    "proto_ko_kindling",
+    "proto_ko_flash_point",
+    "proto_ko_vermillion_pact",
+    "proto_ko_split_charge",
 )
 
 # =============================================================================

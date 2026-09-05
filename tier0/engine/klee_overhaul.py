@@ -73,10 +73,17 @@ from tier0.engine.state import Card, CombatState, Enemy, KleeCharge
 #: `block_largest_bomb` is R252's (Careful Now, the defence shelf): it READS the
 #: pile and spends nothing, which is what separates it from
 #: `remove_bomb_for_block` beside it.
+#: THE POOL PASS's three (`EB-491`) join them: `plant_bomb_copy_largest` (All
+#: of My Treasures!), `grow_bombs_off_aura` (Kindling) and `split_largest_bomb`
+#: (Split Charge). `grow_largest_bomb` (Stoke the Fuse) is here too and was
+#: not: it went live in both engines with the round-11 pass and never reached
+#: this tuple, so the parity test that walks it never asked about it.
 OVERHAUL_OPS = frozenset((
     "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
-    "remove_bomb_for_block", "block_largest_bomb", "damage_set_off_total",
-    "multiply_set_off", "draw_per_set_off", "hexerei_mark_hand"))
+    "remove_bomb_for_block", "block_largest_bomb", "grow_largest_bomb",
+    "damage_set_off_total",
+    "multiply_set_off", "draw_per_set_off", "hexerei_mark_hand",
+    "plant_bomb_copy_largest", "grow_bombs_off_aura", "split_largest_bomb"))
 
 #: The player-side powers this arm reads, named here rather than spelled at
 #: each site so the sheet's `power:` values and the readers cannot drift. Every
@@ -94,6 +101,12 @@ GROUNDED = "ko_grounded"                      # Block for the quiet turn
 #: many words that it is DEAD ALONE, drafted only by a deck that already holds
 #: witches (pick 2, taken at its default). That is the card, not a defect.
 WITCHES_CIRCLE = "ko_witches_circle"
+#: THE POOL PASS's Rare (`EB-491`), the brief's sec.5.3 rule-breaker: the aura
+#: an explosion CONSUMED is handed back before the Attack behind it lands, so
+#: the Attack reacts too. Read at exactly two places inside `_explode` and
+#: nowhere else. Stacks are a copy count and nothing more -- the rule is a fact
+#: about the board, not a number.
+VERMILLION_PACT = "ko_vermillion_pact"
 
 #: Pounding Surprise, in this engine's spelling. THE RELIC IS RULE 4 (the brief
 #: sec.8), and tier 0 already carries the relic as a hook name on the player --
@@ -366,7 +379,8 @@ def peek_multiplier(state: CombatState) -> int:
 # RULE 2 -- SET OFF
 # ---------------------------------------------------------------------------
 
-def set_off(state: CombatState, enemy: Optional[Enemy]) -> int:
+def set_off(state: CombatState, enemy: Optional[Enemy],
+            card: Optional[Card] = None) -> int:
     """RULE 2. Every Bomb on `enemy` goes off, ONE AT A TIME, each a Pyro hit
     for its own size. Returns how many charges went off. `SetOff`'s twin.
 
@@ -382,6 +396,13 @@ def set_off(state: CombatState, enemy: Optional[Enemy]) -> int:
     the charge resolves, so a Set off aimed at an enemy that is already dead --
     which R210's bind makes reachable, the aim being one creature for the whole
     play, dead or alive -- moves every charge instead of spending it on a body.
+
+    `card` IS THE CARD THAT SAID "Set off", and it is carried for exactly one
+    reader: the Vermillion Pact (`EB-491`) hands a consumed aura back only when
+    an ATTACK's own Set off caused the reaction, because only an Attack has a
+    hit behind the explosion for the aura to feed. A Mine answering an intent
+    passes None, and every Skill passes a Skill. The C# reads the same fact off
+    `cardSource` at `ProtoBombPower.Explode`.
     """
     if enemy is None or not live(state):
         return 0
@@ -396,7 +417,7 @@ def set_off(state: CombatState, enemy: Optional[Enemy]) -> int:
         if not enemy.alive:
             jump_charges(state, enemy, taken[index:])
             break
-        _explode(state, enemy, charge, multiplier)
+        _explode(state, enemy, charge, multiplier, card)
         exploded += 1
         if state.over or not state.player.alive:
             break
@@ -404,8 +425,56 @@ def set_off(state: CombatState, enemy: Optional[Enemy]) -> int:
     return exploded
 
 
+def _pact_aura_to_restore(state: CombatState, enemy: Enemy,
+                          card: Optional[Card]) -> Optional[str]:
+    """The aura this explosion is ABOUT TO CONSUME, or None. The Vermillion
+    Pact's read (`EB-491`), `VermillionPactPower.AuraToRestore`'s twin.
+
+    READ BEFORE THE HIT, because the hit is what eats it: after
+    `deal_damage_to_enemy` has run there is nothing left to ask, which is the
+    same fact the `reacted` diff exists for.
+
+    ATTACKS ONLY, AND ONLY THE CARD'S OWN SET OFF. `card is None` is a Mine
+    answering an enemy intent, and a Skill's Set off (Quick Fuse, Countdown,
+    Fireworks Show) carries no hit behind the explosion for the aura to feed.
+    "The Attack that Set it off" is exactly this scope.
+    """
+    if card is None or card.type != "attack":
+        return None
+    if not state.player.powers.get(VERMILLION_PACT, 0):
+        return None
+    return enemy.aura
+
+
+def _pact_restore(state: CombatState, enemy: Enemy, aura: Optional[str],
+                  reacted: bool) -> None:
+    """Hand the consumed aura back, if the explosion really did react with it.
+    `VermillionPactPower.Restore`'s twin.
+
+    `reacted` IS THE WHOLE GATE and not a convenience: an explosion into a Pyro
+    aura refreshes rather than reacts and consumes nothing, so nothing is owed
+    -- and re-applying there would be the Pact silently topping up an aura it
+    never spent.
+
+    IT REFUSES A BOARD THAT ALREADY HOLDS ONE (one aura per enemy is the
+    invariant both engines keep) and a corpse: a dead enemy takes no hit behind
+    the explosion, so there is no second reaction for the aura to make.
+
+    THE PRICE OF THIS ROAD, stated rather than hidden: the aura really is back,
+    so a THIRD hit in the same play sees it too and the next charge on a
+    multi-Bomb pile reacts as well. That is what the Rare buys, and it is what
+    its face says -- the aura the Bomb ate is still there.
+    """
+    from tier0.engine import reactions             # late import: cycle
+
+    if not reacted or not aura or not enemy.alive or enemy.aura:
+        return
+    state.emit("ko_vermillion_pact", target=enemy.name, element=aura)
+    reactions.apply_aura(state, enemy, aura, source="ko_vermillion_pact")
+
+
 def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
-             multiplier: int) -> None:
+             multiplier: int, card: Optional[Card] = None) -> None:
     """ONE explosion, which is the unit every other rule is priced in: one Pyro
     hit for the charge's size, one Spark, one payload, one entry in both of
     rule 7's counters. `Explode`'s twin.
@@ -448,10 +517,22 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     # element, and it moves it for ONE explosion; `companion_coven.bomb_element`
     # answers "pyro" on every other board and with the companion arm off.
     element = companion_coven.bomb_element(state)
+    # THE VERMILLION PACT'S ONE READ (`EB-491`), taken BEFORE the funnel runs
+    # because the funnel is what consumes it: the aura this explosion is about
+    # to eat is the aura the Pact hands back. None on an aura-less enemy, on
+    # every board with no Pact, on a Mine (no card) and on a Skill's Set off
+    # (no hit behind it for the aura to feed). C# twin:
+    # `VermillionPactPower.AuraToRestore`.
+    pact_aura = _pact_aura_to_restore(state, enemy, card)
     dealt = effects.deal_damage_to_enemy(state, enemy, size, element=element,
                                          source=EXPLOSION_SOURCE,
                                          powered=False)
     reacted = state.reactions_this_turn > before
+    # THE PACT, PAID. Before the card's own hit, which is the ordering the face
+    # states -- `_op_set_off` resolves every explosion first and lands the
+    # printed damage after, so an aura handed back here is standing when that
+    # hit arrives. C# twin: `VermillionPactPower.Restore`.
+    _pact_restore(state, enemy, pact_aura, reacted)
     # `dealt` is the number the hit LANDED for, straight off the funnel that
     # computed it (`EB-270`): Big Badda Boom's face says "the damage the Bombs
     # dealt", and under the target's Vulnerable that is not `size`.
@@ -752,6 +833,12 @@ def turn_end(state: CombatState) -> None:
     if not live(state):
         return
     companion_hexerei.roll_hand_marks(state)
+    # THE RISING HAND COST (`EB-491`, Long Fuse), on the same line and ahead of
+    # every early return below it for the same reason the window is: "it stayed
+    # in your hand" is true of the turn just played whether or not the board
+    # happens to hold an echo. C# twin:
+    # `KleeOverhaulSweepHooks.BeforeSideTurnEnd`.
+    roll_rising_costs(state)
     copies = state.player.powers.get(BOMB_ECHO, 0)
     if not copies:
         return
@@ -996,6 +1083,174 @@ def grow_largest_per_spark(state: CombatState, per_spark: int) -> int:
     state.emit("ko_grow_largest", amount=amount, per_spark=per_spark,
                sparks=spent, target=best_enemy.name, size=charge.size)
     return amount
+
+
+# ---------------------------------------------------------------------------
+# THE POOL PASS'S THREE VERBS -- `EB-491`
+# ---------------------------------------------------------------------------
+
+
+def largest_charge(state: CombatState) -> tuple[Optional[Enemy], int, int]:
+    """THE POOL PASS's one shared read: the SINGLE largest charge on the living
+    board, as `(enemy, index, size)`. `ProtoBombPower.LargestCharge`'s twin.
+
+    The walk `remove_largest_for_block` and `grow_largest_per_spark` each make
+    inline, named once so All of My Treasures!, Split Charge and Kindling's
+    floor cannot disagree about which Bomb "your largest Bomb" is. THE
+    TIE-BREAK IS THE FIRST ONE FOUND -- living enemies in order, each pile in
+    place order -- which is Sorry, Jean...'s rule and the only one a player can
+    plan around.
+    """
+    best_enemy: Optional[Enemy] = None
+    best_index = -1
+    best_size = 0
+    for enemy in list(state.living_enemies):
+        for index, charge in enumerate(enemy.ko_charges):
+            if charge.size > best_size:
+                best_enemy, best_index, best_size = enemy, index, charge.size
+    return best_enemy, best_index, best_size
+
+
+def place_copy_of_largest(state: CombatState,
+                          enemy: Optional[Enemy]) -> int:
+    """All of My Treasures!: "Place a Bomb on the enemy equal to your largest
+    Bomb." Returns the size placed, 0 if there was nothing to copy.
+    `ProtoBombPower.PlaceCopyOfLargest`'s twin.
+
+    A COPY AND NOT A MOVE -- the pile it was measured against is untouched and
+    still growing, which is what makes the card a cook decision (play it on a
+    12, or wait for a 16) rather than a second Careful Arrangement.
+
+    THE COPY IS A PLAIN BOMB and carries no payload: a Mine's defence is not
+    doubled by a card that prints "Bomb", and Jumpy Dumpty's Mines are the
+    charge's own promise rather than its size.
+
+    "EQUAL TO" MEANS EQUAL WHEN PLACED. From here it grows on its own schedule
+    like any other charge (rule 9, each Bomb grows separately).
+    """
+    if enemy is None or not live(state):
+        return 0
+    size = largest_charge(state)[2]
+    if size <= 0:
+        return 0
+    state.emit("ko_bomb_copied", target=enemy.name, size=size)
+    place(state, enemy, size)
+    return size
+
+
+def grow_bombs_off_aura(state: CombatState, amount: int, floor: int) -> int:
+    """Kindling: "Each Bomb on an enemy whose aura is not Pyro grows by
+    `amount`. If there is none, your largest Bomb grows by `floor`." Returns
+    the total growth applied. `ProtoBombPower.GrowOffAura`'s twin.
+
+    THE FLOOR IS WHAT MAKES IT A REACT ROW WITH A LOSING LINE RATHER THAN A
+    DEAD CARD. It still buys `floor` growth when no applier went first, and
+    `amount` per Bomb on every foreign aura when one did.
+
+    "AURA IS NOT PYRO" IS THE ENEMY'S CARRIED AURA, and NO AURA DOES NOT COUNT
+    -- `_op_set_off`'s `non_pyro` filter (Flame Dance), read the same way for
+    the same reason: the two rows must not disagree about which enemies are
+    off-element.
+
+    AN ENEMY WITH THE AURA AND NO BOMB IS NOT A MATCH. The face counts BOMBS,
+    so a board of aura'd but Bomb-less enemies takes the floor.
+    """
+    if not live(state):
+        return 0
+    amount, floor = int(amount), int(floor)
+    grown = 0
+    for enemy in list(state.living_enemies):
+        if enemy.aura is None or enemy.aura == "pyro":
+            continue
+        if not enemy.ko_charges:
+            continue
+        grow_pile(enemy, amount)
+        grown += amount * len(enemy.ko_charges)
+        state.emit("ko_kindling", target=enemy.name, amount=amount,
+                   aura=enemy.aura, charges=len(enemy.ko_charges))
+    if grown or floor <= 0:
+        return grown
+    enemy, index, _ = largest_charge(state)
+    if enemy is None:
+        return 0
+    enemy.ko_charges[index].size += floor
+    state.emit("ko_kindling_floor", target=enemy.name, amount=floor,
+               size=enemy.ko_charges[index].size)
+    return floor
+
+
+def split_largest(state: CombatState, growth: int) -> int:
+    """Split Charge: "Split your largest Bomb into two halves on random
+    enemies." Returns the size that was split, 0 if nothing was.
+    `ProtoBombPower.SplitLargest`'s twin.
+
+    Careful Arrangement's opposite, and the arm's one bridge from Cook to
+    Spray: a pile cooked on one body becomes two fuses wherever they land.
+
+    THE HALVES ARE `n // 2` AND `n - n // 2`, so an odd Bomb loses nothing and
+    the bigger half is the second one; each then grows by `growth`, which is 0
+    until the upgrade buys it.
+
+    EACH HALF ROLLS ITS OWN DESTINATION, independently -- `jump_charges`'s rule
+    -- so both can land on one enemy, and on a single-enemy board they always
+    do. That is the row's printed losing line.
+
+    A MINE'S HALVES ARE PLAIN BOMBS: the Mine is one fuse and splitting it does
+    not make two, which is the price of the bridge.
+
+    A LARGEST BOMB OF 1 DOES NOTHING. There is no split of 1 that leaves two
+    Bombs, and halving it to 0 and 1 would silently delete a charge.
+    """
+    if not live(state):
+        return 0
+    enemy, index, size = largest_charge(state)
+    if enemy is None or size <= 1:
+        return 0
+    enemy.ko_charges.pop(index)
+    growth = int(growth)
+    halves = (size // 2, size - size // 2)
+    state.emit("ko_bomb_split", frm=enemy.name, size=size, halves=list(halves),
+               growth=growth)
+    for half in halves:
+        living = list(state.living_enemies)
+        if not living:
+            return size
+        dest = state.rng.choice(living)
+        place(state, dest, half + growth)
+    return size
+
+
+# ---------------------------------------------------------------------------
+# THE RISING HAND COST -- `EB-491`
+# ---------------------------------------------------------------------------
+
+
+def roll_rising_costs(state: CombatState) -> None:
+    """Long Fuse's second rule: "Costs 1 more each turn it stays in your hand."
+    `KleeOverhaulRisingCost.RollHand`'s twin.
+
+    THE SITE IS THE END OF KLEE'S TURN, before the hand flush, which is the one
+    moment "it stayed in your hand" becomes true for the turn just played.
+
+    IT RIDES `Card.rising_cost_risen`, which `combat.card_cost` adds and
+    `combat._finish_play` clears -- the base game's own `AddUntilPlayed`
+    modifier, in this engine's spelling: it accumulates, it survives the turn
+    boundary, it is cleared when the card is played, and `run_fight` zeroes it
+    at fight start so it is combat-scoped. NEVER DOWNWARD, which is the printed
+    rule.
+
+    A CARD-LEVEL FIELD AND NOT A POWER, because the fuse is the card's: two
+    Long Fuses in one hand burn separately, and a card that is not in hand is
+    not burning at all.
+    """
+    if not live(state):
+        return
+    for card in list(state.player.hand):
+        if card.rising_cost <= 0:
+            continue
+        card.rising_cost_risen += card.rising_cost
+        state.emit("ko_fuse_burned", card=card.id,
+                   amount=card.rising_cost, total=card.rising_cost_risen)
 
 
 def draw_per_set_off(state: CombatState) -> None:
