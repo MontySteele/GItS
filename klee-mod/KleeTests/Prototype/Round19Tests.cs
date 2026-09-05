@@ -623,6 +623,53 @@ public class Round19Tests
         Assert.Equal(ValueProp.Move, damage.Props);
     }
 
+    // ==================================================================
+    // `EB-542` -- raw LocString keys in the carry-out log
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r19 lane 1). `Bake-Kurage: Flank: LocString table
+    // monsters entry CORPSE_SLUG.name, LocString table monsters entry
+    // CORPSE_SLUG.name, 8 -- the 8 is damage.` It recurred on floor 5 with
+    // `CALCIFIED_CULTIST` and `DAMP_CULTIST`, and the seat noted the scope
+    // exactly: "Only Flank's 'each enemy that intends to attack' line does
+    // this -- Kurage's Oath, Pincer and Feigned Retreat all printed clean."
+    //
+    // THAT SCOPE IS THE DIAGNOSIS. A `LocString`'s `ToString` is its DEBUG
+    // form; every other row this class emits carries a `CombatId` and the page
+    // renames it out of its own fight memory, so an unresolved title never
+    // survived to the screen. `AimedLabel` bakes its names into a string with
+    // no id on it, which is the one place it could.
+
+    [Fact]
+    public void The_carry_out_line_names_enemies_through_the_bridges_own_lookup()
+    {
+        // STRUCTURAL, and it is the whole fix: `GetFormattedText` is what
+        // `McpMod.SafeGetText` calls to name every body in the enemy list, so
+        // the log and the list resolve one way. Read off the compiled method
+        // because a live `Monster` needs a combat this harness cannot build.
+        var calls = Il.Calls(Il.Method("KokomiPlan", "EnemyName"));
+
+        Assert.Contains(calls, c => c.Contains("GetFormattedText"));
+        Assert.DoesNotContain(calls, c => c.EndsWith("LocString.ToString",
+                                                     StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void The_label_that_bakes_names_in_is_the_only_one_without_an_id()
+    {
+        // WHY THE DEFECT WAS FLANK-SHAPED, pinned so a new row that bakes a
+        // name into a line inherits the reason rather than the bug: the two
+        // row types that carry names also carry the handle the page renames
+        // them by, and `AimedLabel` carries neither.
+        Assert.Contains("KokomiPlan.EnemyName",
+                        Il.Calls(Il.Method("KokomiPlan", "AimedLabel")));
+
+        var moved = typeof(KokomiPlan).GetNestedType("MovedOn", All)!;
+        var rider = typeof(KokomiPlan).GetNestedType("Rider", All)!;
+        Assert.NotNull(moved.GetProperty("CombatId"));
+        Assert.NotNull(rider.GetProperty("CombatId"));
+    }
+
     /// <summary>The loc key a pile's badge is resolving right now.
     /// <c>KleeOverhaulRoundOneFixTests.LocKey</c>, verbatim.</summary>
     private static string LocKey(ProtoBombPower pile) =>
