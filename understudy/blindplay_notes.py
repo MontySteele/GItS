@@ -1189,6 +1189,39 @@ _REACTION_WORD_RE: dict[str, "re.Pattern[str]"] = {
     for word in REACTION_KEYWORDS if word != "Elemental Reaction"
 }
 
+# `EB-547`. A SALON MEMBER IS AN ELEMENT SOURCE, and the census could not see
+# one.
+#
+# THE FIND (Furina r13 lane 2). "NO REACTION IS REACHABLE HERE: Pyro is the only
+# element this screen can supply" printed on a screen with `Salon Debut` -- a
+# card whose whole body is "Deploy Mademoiselle Crabaletta" -- in the hand. The
+# seat: "it was wrong in the most direct way available; the Hydro that broke the
+# claim was a card in the hand printed underneath it", and it broke the claim
+# two plays later.
+#
+# WHY THE THREE SOURCES MISSED IT. `EB-428`'s census reads a card's own
+# `element` indicator, an aura on a body, and the printed phrase `Applies X`. A
+# deploy card has none of the three: the element is the MEMBER's, and the member
+# supplies it on arrival because a deploy performs.
+#
+# MATCHED ON THE MEMBER'S NAME, which is the one handle every surface carries --
+# the deploy card's face names her, the member tip is titled with her, and the
+# stage line (`furina_salon.company`) is a list of exactly these names. The
+# Usher is absent on purpose and it is not an omission: he performs BLOCK and
+# supplies no element at all, so a screen holding only his deploy really can
+# reach nothing.
+SALON_MEMBER_ELEMENTS: dict[str, str] = {
+    "Crabaletta": "Hydro",
+    "Chevalmarin": "Hydro",
+}
+
+#: The surname alone, word-bounded and case-sensitive, `_ARM_KEYWORD_RE`'s
+#: discipline: the game capitalises a member's name wherever it prints one, and
+#: the full stage name and the short one both end in it.
+_SALON_MEMBER_RE = {
+    name: re.compile(rf"\b{name}\b") for name in SALON_MEMBER_ELEMENTS
+}
+
 _ELEMENTS = ("Pyro", "Hydro", "Electro", "Cryo")
 #: The trigger elements, in reach on the same three sources as the four above:
 #: `EB-454` put both words in `_ELEMENT_KEYWORD`, so a face carries them.
@@ -1350,6 +1383,13 @@ def _reachable_elements(obs: dict[str, Any]) -> set[str]:
                 walk(value)
         elif isinstance(blob, str):
             found.update(_APPLIES_RE.findall(blob))
+            # `EB-547`: and a Salon member named anywhere on the screen -- on a
+            # deploy card's face, on her own tip, or on the stage line -- is
+            # the element she performs with, because a deploy performs the
+            # member it fields at once.
+            for name, pattern in _SALON_MEMBER_RE.items():
+                if pattern.search(blob):
+                    found.add(SALON_MEMBER_ELEMENTS[name])
 
     walk(obs)
     # AND EVERY ELEMENT THIS FIGHT HAS ALREADY SHOWN. A screen is one turn and

@@ -6424,6 +6424,75 @@ def test_a_second_element_brings_back_its_pair_and_only_its_pair():
     assert "NO REACTION IS REACHABLE" not in page
 
 
+def _salon_debut_hand_state() -> dict:
+    """The r13 lane-2 screen (`EB-547`): a Pyro deck, and `Salon Debut` -- a
+    card whose whole body is "Deploy Mademoiselle Crabaletta" -- in hand.
+
+    THE DEPLOY CARD CARRIES NO ELEMENT OF ITS OWN, which is the point: it has
+    no `element` indicator and no printed `Applies X`, because the Hydro is the
+    MEMBER's and she supplies it on arrival.
+    """
+    state = elemental_hand_state()
+    state["player"]["hand"].append(
+        {"id": "KLEEMOD-SALON_DEBUT", "name": "Salon Debut", "type": "Skill",
+         "cost": "1", "can_play": True, "index": 1, "target_type": "Self",
+         "is_upgraded": False, "keywords": [],
+         "description": "Deploy Mademoiselle Crabaletta."})
+    return state
+
+
+def test_a_deploy_cards_member_is_an_element_the_screen_can_supply():
+    """`EB-547`. THE CLAIM THE SEAT BROKE TWO PLAYS LATER.
+
+    "NO REACTION IS REACHABLE HERE: Pyro is the only element this screen can
+    supply" printed with a Hydro member's deploy card in hand (Furina r13 lane
+    2): "it was wrong in the most direct way available -- the Hydro that broke
+    the claim was a card in the hand printed underneath it."
+
+    `EB-428`'s census reads a card's own element indicator, an aura on a body
+    and the printed phrase `Applies X`. A deploy card has none of the three.
+
+    Seen to FAIL: the screen said Pyro was the only element it could supply.
+    """
+    page = blindplay.observe(_salon_debut_hand_state())
+
+    assert "NO REACTION IS REACHABLE" not in page
+    assert "- **Vaporize** — " in page
+    # And only its pair: Hydro and Pyro make one reaction, not six.
+    for word in ("Melt", "Overloaded", "Superconduct", "Electro-Charged"):
+        assert f"- **{word}** — " not in page, word
+
+
+def test_the_stage_itself_counts_as_well_as_a_deploy_in_hand():
+    """The other half of the row: a member already STANDING supplies her
+    element too, because a Companion play performs her. The stage line is a
+    list of these same names, which is why the census matches on the name."""
+    blindplay.forget_fight()
+    state = elemental_hand_state()
+    state["player"]["furina_salon"] = {
+        "performed": [], "replayed": [],
+        "company": ["Mademoiselle Crabaletta"]}
+
+    page = blindplay.observe(state)
+
+    assert "NO REACTION IS REACHABLE" not in page
+    assert "- **Vaporize** — " in page
+
+
+def test_the_usher_supplies_no_element_and_the_claim_stands():
+    """The member deliberately absent from the table, and it is not an
+    omission: the Usher performs BLOCK, so a screen whose only member is his
+    really can reach nothing and the sentence is true."""
+    blindplay.forget_fight()
+    state = elemental_hand_state()
+    state["player"]["furina_salon"] = {
+        "performed": [], "replayed": [], "company": ["Gentilhomme Usher"]}
+
+    page = blindplay.observe(state)
+
+    assert "NO REACTION IS REACHABLE HERE: Pyro is the only element" in page
+
+
 def test_the_superconduct_row_says_its_vulnerable_lands_before_the_hit():
     """`EB-472`. A 4-POINT SWING THE SEAT HAD TO FIND IN THE HP NUMBERS.
 
