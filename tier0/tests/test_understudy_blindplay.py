@@ -4264,6 +4264,55 @@ def test_naming_no_target_still_plays_the_card_now():
     assert res["post"]["target"] == "NIBBIT_0"
 
 
+def _planning_hand(state: dict) -> dict:
+    """`EB-480`. The recorded turn with the wire's `can_target_pet` on it.
+
+    The capture predates the field (`EB-216` added it), so every hand entry
+    answers `None` there -- which is the case the refusal below deliberately
+    leaves alone. This fixture is the SAME hand with the field filled the way
+    a current bridge fills it: the Plan card answers true, the rest false.
+    """
+    out = json.loads(json.dumps(state))
+    for card in out["player"]["hand"]:
+        card["can_target_pet"] = (
+            card["name"] == "All Streams Flow to the Sea")
+    return out
+
+
+def test_a_card_that_cannot_be_planned_is_refused_on_the_jellyfish():
+    """`EB-480` (Kokomi r16 (c) 1). `play "Strike" on "Bake-Kurage"` returned
+    ok with an empty refusal, burned an action and changed nothing: energy,
+    discard and hand as before, "Nothing is planned."."""
+    state = _planning_hand(plans_combat_state(TWO_PLANS))
+    res = blindplay.act(state, 'play "Pearl Barrage" on "Bake-Kurage"')
+
+    assert not res["ok"]
+    assert "cannot be planned on Bake-Kurage" in res["refusal"]
+    # `EB-402`'s repair: the way out is IN the refusal. The one Plan card in
+    # this hand is offered by name, and so is the bare form.
+    assert ('play "All Streams Flow to the Sea" on "Bake-Kurage"'
+            in res["refusal"])
+    assert 'play "Pearl Barrage"' in res["refusal"]
+
+    # And the Plan card itself is still accepted, on the same board.
+    ok = blindplay.act(state, 'play "All Streams Flow to the Sea" '
+                              'on "Bake-Kurage"')
+    assert ok["ok"], ok
+    assert ok["post"]["target"] == "41"
+
+
+def test_a_feed_with_no_pet_target_field_plays_the_card_as_it_always_did():
+    """`EB-480`'s conservative half, `_aims_at_an_enemy`'s own rule: an ABSENT
+    `can_target_pet` is a bridge that predates the field, and it reads as the
+    behaviour that build has rather than as a refusal."""
+    state = plans_combat_state(TWO_PLANS)
+    assert all(c.get("can_target_pet") is None
+               for c in state["player"]["hand"])
+    res = blindplay.act(state, 'play "Pearl Barrage" on "Bake-Kurage"')
+    assert res["ok"], res
+    assert res["post"]["target"] == "41"
+
+
 # ==== The blind-render burn, rounds four (Klee) and two (Kokomi), 2026-09-02 =
 #
 # Five rows, all of them read off seat records rather than off this file:
