@@ -1074,13 +1074,6 @@ CO_TENANCY_LEDGER = {
             "test_the_sequencer_walks_the_table",
     },
     "AfterSideTurnEnd": {
-        ("Powers/Prototype/KokomiPlan.cs", "PlanTwicePower"):
-            "QUARANTINED (the Kokomi overhaul, draft 6). Nereid's Ascension's "
-            "window, ticking itself down on the player side -- the same shape "
-            "and the same broadcast as the shipped CeremonialGarmentPower "
-            "below. Touches nothing but its own Amount, and the thing it "
-            "modifies (how many times a Plan is carried out) is read at the "
-            "START of her next turn, strictly after every tenant here",
         ("Powers/Prototype/KokomiOverhaulPowers.cs",
          "NextCompanionDiscountPower"):
             "QUARANTINED (the Kokomi overhaul, draft 6). Rally's grant, "

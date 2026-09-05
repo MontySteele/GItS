@@ -81,9 +81,10 @@ one.
 The morning three Plans land at once. The pool pays for it twice over:
 cards that trigger whenever the jellyfish carries out a Plan (draw one,
 gain Block, hit the front enemy), and her Burst, **Nereid's Ascension**
-(Rare, 2, Exhaust): Plan: for two turns the jellyfish carries out every
-Plan twice. That is the Ceremonial Garment as one card, and the one Rare
-that breaks rule 3's "once, in order."
+(Rare Power, 2): the jellyfish carries out every Plan twice. That is the
+Ceremonial Garment as one card, and the one Rare that breaks rule 3's
+"once, in order." (Pool pass one, 2026-09-05: it was a two-turn Exhaust
+Plan and spent the morning it doubled; as a Power it never does.)
 
 ## 6. Later: the pool, in one line per loop
 

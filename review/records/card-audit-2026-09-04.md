@@ -789,3 +789,514 @@ Ten verdicts, each with its clause and its line. Under 400 words.
 
 10. **FOLLOWS — C2.** Split Charge preserves the initial total across two halves and increases subsequent combined growth from 4 to 8, but random placement sacrifices targeting and supplies none of Careful Arrangement’s immediate +5.
 ```
+
+
+## 5.4 The Kokomi pool pass, six rows in four reads (2026-09-05, morning)
+
+The pass packet (`review/active/kokomi-pool-pass-2026-09-05.md`) put six
+rows through the doctrine role on GPT 6 Astra at low effort with the pool
+census pasted from the sheet by a script (32 rows). Read one passed Flank,
+Well Laid and Feigned Retreat and ruled Riptide, Pincer and the redesigned
+Nereid's Ascension REQUIRES_MODIFICATION on C6 with no comparison line.
+Reads two and three asked for the comparison; the second also asked for
+"the smallest modification", which the seat's protocol forbids, and both
+came back as bare verdicts. The comparisons were derived by the author off
+shipped cards (Riptide against Kurage's Oath, Pincer against Feint, the
+new Nereid's against the printed row it replaces), the three rows were
+re-priced (Riptide to 2 energy at 9 and 13; Pincer to 3 per hit; the old
+Nereid's row struck from the census as replaced, with The Moon Overlooks
+the Waters named as the standing Rare Power), and read four passed all
+three. **Outcome:** six FOLLOWS; the pass builds under `EB-492`. Lesson:
+a C6 verdict is asked for its comparison row in the first prompt and
+never for a modification. The four prompts and replies, verbatim:
+
+### Read 1
+
+```
+# Doctrine read: six Kokomi pool-pass rows against the kit charter
+
+You are the adversarial reviewer for a Slay the Spire 2 character mod. The
+owner's rule: a new or redesigned card ships to a tester only if you rule it
+FOLLOWS. Each numbered card below is ONE ARM. For each, FOLLOWS or
+REQUIRES_MODIFICATION, the clause ids you weighed, and one sentence with the
+card's arithmetic naming the pool row you compared it to; for a
+REQUIRES_MODIFICATION, the smallest change that would make it FOLLOWS. Read
+adversarially; the author is a different model family and the owner wants
+the row that should not reach a tester named. One precedent you may cite:
+the brief names Nereid's Ascension as the one Rare that breaks the kit's
+rule 3 ("carried out once, in order"), so its doubling is not a C5 failure
+by itself. You have no repo access; every card text below is pasted
+verbatim from the sheet.
+
+## Clauses
+
+- **C1 (the owner's "not all agents always win").** A row that removes a
+  losing line the kit is meant to keep, instead of pricing it, is out.
+- **C2 (binding prices).** Every cost printed must bind at the moment it is
+  paid; a card whose cost is routinely free is out.
+- **C3 (player-controlled leverage).** The card's value must follow a
+  decision the player makes (write the Plan or play it now; aim it), not a
+  state that arrives by itself.
+- **C4 (the kit's own constraint).** Kokomi's defence is Block and
+  prevention only; nothing heals below Rare.
+- **C5 (nothing fires by itself).** No card triggers without a play or a
+  Plan the player wrote.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a shipped POOL row (listed below) or of a base-game non-basic card at
+  the same or lower rarity and cost. Strike and Defend are basics and are
+  not reference points. Base-game Commons for reference: Cleave (1: 8 to
+  ALL), Twin Strike (1: 5 twice), Pommel Strike (1: 9, draw 1), Iron Wave
+  (1: 5 Block and 5 damage), Sword Boomerang (1: 3 to a random enemy three
+  times), Thunderclap (1: 4 to ALL and Vulnerable).
+
+## The engine, Kokomi (the Plan kit)
+
+A **Bake-Kurage** (jellyfish) is on her field every fight. Some cards
+print two halves: a now-line and a **Plan** line. Playing the card onto the
+Bake-Kurage *writes the Plan*: it does nothing now, and at the start of her
+next turn, before she draws, the Bake-Kurage *carries out* every Plan it
+holds, in the order written, as its own Hydro hits. A planned
+single-target line is aimed at an enemy when it is written (R250). Carry-outs
+take the target's Vulnerable; her Weak does not fold in. The energy is paid
+the turn before. Starter: 4 Strike, 4 Defend, Kurage's Oath, Slack Water;
+3 energy; HP 80. Relic: Tamakushi Casket, 2 Hydro damage to an enemy
+whenever she applies a debuff to it. "This morning" means the carry-outs
+at the start of the current turn.
+
+The readings these rows answer, rounds 10 to 16: seats draft the Attacks
+they are offered and the pool's Attacks mostly carry no Plan line, so the
+jellyfish stands empty on most turns; Nereid's Ascension as printed "reads
+like the kit's payoff and behaves like a tax" (two energy, Exhaust, and a
+Plan slot for two turns of doubling in a deck with two Plan cards).
+
+## The pool, every row pasted from the sheet (rarity, type, price)
+
+- Kurage's Oath (Basic Skill, 1 energy): Deal 3 damage to ALL enemies. Plan: Deal 7 damage to ALL enemies.
+- Slack Water (Basic Attack, 1 energy): Deal 4 damage. Apply 1 Weak. Plan: Apply 1 Weak to ALL enemies.
+- Feint (Common Attack, 1 energy): Deal 6 damage. Plan: Deal 10 damage.
+- Ambush (Common Skill, 1 energy): Deal 5 damage. Plan: Deal 12 damage.
+- Read the Field (Common Skill, 1 energy): Gain 5 Block. Plan: Gain 10 Block.
+- Exposed Flank (Common Skill, 1 energy): Apply 1 Vulnerable. Plan: Apply 2 Vulnerable to ALL enemies.
+- Treatise (Uncommon Power, 1 energy): Once per turn, when the Bake-Kurage carries out a Plan, draw 1 card.
+- Song of Pearls (Uncommon Power, 1 energy): Once per turn, when the Bake-Kurage carries out a Plan, gain 3 Block.
+- War Council (Uncommon Skill, 1 energy): Apply 1 Weak to ALL enemies. Plan: Deal 5 damage and apply 1 Weak to ALL enemies.
+- Nereid's Ascension (Rare Skill, 2 energy, Exhaust): Exhaust. Plan: for 2 turns, the Bake-Kurage carries out every Plan twice.
+- The Moon Overlooks the Waters (Rare Power, 2 energy): Plans also happen now, as you write them.
+- Sea-Salt Prayer (Common Skill, 1 energy): Gain 4 Block. Apply 1 Weak.
+- Deep Current (Common Attack, 1 energy): Deal 6 damage to ALL enemies.
+- Coral Bulwark (Common Skill, 1 energy): Gain 6 Block. Plan: Gain 8 Block and apply 1 Weak.
+- Cleansing Wave (Uncommon Skill, 1 energy): Gain 5 Block. Remove one of your debuffs. Plan: Gain 10 Block.
+- Tide Wall (Uncommon Skill, 1 energy): Gain 4 Block. Plan: Gain 3 Block for each Plan the Bake-Kurage carries out this morning.
+- Shell Guard (Uncommon Skill, 1 energy): Gain 5 Block. Until your next turn, whenever the Tamakushi Casket strikes, gain 3 Block.
+- The Clouds Like Waves Rippling (Rare Power, 2 energy): Whenever you apply a debuff to an enemy, gain 2 Block.
+- The Moon, A Ship O'er the Seas (Rare Skill, 2 energy, Exhaust): Exhaust. Mend 3. Plan: Mend 6.
+- Sango Isshin (Rare Attack, 2 energy): Deal 8 damage. If the Bake-Kurage carried out a Plan this turn, deal a quarter of your Max HP to ALL enemies instead.
+- Rally (Common Skill, 1 energy): Apply 1 Weak. The next Companion card you play this turn costs 1 less.
+- Vanguard (Common Skill, 0 energy, Exhaust): Exhaust. Apply 1 Vulnerable. Plan: Apply 1 Vulnerable and 1 Weak.
+- The General's Banner (Uncommon Power, 1 energy): Once per turn, when you play a Companion card, apply 1 Weak to the front enemy.
+- Chain of Command (Uncommon Skill, 1 energy): Deal 3 damage for each Companion you played this turn. Plan: Deal 6 damage for each Companion you played last turn.
+- Stolen Chapter (Common Skill, 1 energy): Draw 1 card. Plan: Draw 4 cards.
+- Change of Plans (Common Skill, 1 energy, Exhaust): Exhaust. The Bake-Kurage carries out your first Plan now.
+- Undertow (Common Attack, 1 energy): Deal 4 damage, already including 3 if the enemy has a debuff.
+- Salt Line (Common Skill, 1 energy, Exhaust): Exhaust. Gain 8 Block.
+- Battle Plan (Uncommon Skill, 1 energy): Draw 1 card. Plan: Gain 1 Energy and draw 2 cards.
+- Moon's Reflection (Uncommon Skill, 1 energy, Exhaust): Exhaust. Choose a card in your Exhaust Pile. Next turn, the Bake-Kurage carries out its Plan line, or plays it if it has none.
+- Tide Chart (Common Skill, 0 energy): Next turn, after the Bake-Kurage carries out its Plans, draw 1 card for each.
+- Ripple (Common Skill, 0 energy): Gain 2 Block. Plan: Gain 1 Energy and 4 Block.
+
+## The arms
+
+1. **Riptide** — Common Attack, 1 energy. Deal 5 damage to ALL enemies.
+   Plan: Deal 9 damage to ALL enemies. Upgrade: 7 and 12.
+2. **Pincer** — Common Attack, 1 energy. Deal 4 damage twice. Plan: Deal 4
+   damage three times. Upgrade: 5 per hit.
+3. **Flank** — Uncommon Attack, 1 energy. Deal 8 damage. Plan: Deal 8 damage
+   to each enemy that intends to attack. (The set of enemies is fixed when
+   the Plan is written, from the intents shown then.) Upgrade: 11.
+4. **Well Laid** — Common Attack, 0 energy. Deal 2 damage. Deals 3 more for
+   each Plan the Bake-Kurage carried out this morning. Upgrade: 3 and 4.
+5. **Feigned Retreat** — Common Skill, 1 energy. Gain 4 Block. Plan: Gain 4
+   Block and deal 6 damage. Upgrade: 6 Block; 6 Block and 8 damage.
+6. **Nereid's Ascension, redesigned** — Rare Power, 2 energy. The
+   Bake-Kurage carries out every Plan twice. Upgrade: costs 1. (Replaces the
+   pool row of the same name above: no longer Exhaust, no longer a Plan, no
+   longer two turns.)
+
+Six verdicts, each with its clauses and its line. Under 300 words.
+```
+
+```
+1. **REQUIRES_MODIFICATION — C6 (not strictly better).**
+2. **REQUIRES_MODIFICATION — C6 (not strictly better).**
+3. **FOLLOWS — C1–C6.**
+4. **FOLLOWS — C1–C6.**
+5. **FOLLOWS — C1–C6.**
+6. **REQUIRES_MODIFICATION — C6 (not strictly better).**
+```
+
+### Read 2 (the ask for a modification, refused by protocol)
+
+```
+# Doctrine read: six Kokomi pool-pass rows against the kit charter
+
+You are the adversarial reviewer for a Slay the Spire 2 character mod. The
+owner's rule: a new or redesigned card ships to a tester only if you rule it
+FOLLOWS. Each numbered card below is ONE ARM. For each, FOLLOWS or
+REQUIRES_MODIFICATION, the clause ids you weighed, and one sentence with the
+card's arithmetic naming the pool row you compared it to; for a
+REQUIRES_MODIFICATION, the smallest change that would make it FOLLOWS. Read
+adversarially; the author is a different model family and the owner wants
+the row that should not reach a tester named. One precedent you may cite:
+the brief names Nereid's Ascension as the one Rare that breaks the kit's
+rule 3 ("carried out once, in order"), so its doubling is not a C5 failure
+by itself. You have no repo access; every card text below is pasted
+verbatim from the sheet.
+
+## Clauses
+
+- **C1 (the owner's "not all agents always win").** A row that removes a
+  losing line the kit is meant to keep, instead of pricing it, is out.
+- **C2 (binding prices).** Every cost printed must bind at the moment it is
+  paid; a card whose cost is routinely free is out.
+- **C3 (player-controlled leverage).** The card's value must follow a
+  decision the player makes (write the Plan or play it now; aim it), not a
+  state that arrives by itself.
+- **C4 (the kit's own constraint).** Kokomi's defence is Block and
+  prevention only; nothing heals below Rare.
+- **C5 (nothing fires by itself).** No card triggers without a play or a
+  Plan the player wrote.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a shipped POOL row (listed below) or of a base-game non-basic card at
+  the same or lower rarity and cost. Strike and Defend are basics and are
+  not reference points. Base-game Commons for reference: Cleave (1: 8 to
+  ALL), Twin Strike (1: 5 twice), Pommel Strike (1: 9, draw 1), Iron Wave
+  (1: 5 Block and 5 damage), Sword Boomerang (1: 3 to a random enemy three
+  times), Thunderclap (1: 4 to ALL and Vulnerable).
+
+## The engine, Kokomi (the Plan kit)
+
+A **Bake-Kurage** (jellyfish) is on her field every fight. Some cards
+print two halves: a now-line and a **Plan** line. Playing the card onto the
+Bake-Kurage *writes the Plan*: it does nothing now, and at the start of her
+next turn, before she draws, the Bake-Kurage *carries out* every Plan it
+holds, in the order written, as its own Hydro hits. A planned
+single-target line is aimed at an enemy when it is written (R250). Carry-outs
+take the target's Vulnerable; her Weak does not fold in. The energy is paid
+the turn before. Starter: 4 Strike, 4 Defend, Kurage's Oath, Slack Water;
+3 energy; HP 80. Relic: Tamakushi Casket, 2 Hydro damage to an enemy
+whenever she applies a debuff to it. "This morning" means the carry-outs
+at the start of the current turn.
+
+The readings these rows answer, rounds 10 to 16: seats draft the Attacks
+they are offered and the pool's Attacks mostly carry no Plan line, so the
+jellyfish stands empty on most turns; Nereid's Ascension as printed "reads
+like the kit's payoff and behaves like a tax" (two energy, Exhaust, and a
+Plan slot for two turns of doubling in a deck with two Plan cards).
+
+## The pool, every row pasted from the sheet (rarity, type, price)
+
+- Kurage's Oath (Basic Skill, 1 energy): Deal 3 damage to ALL enemies. Plan: Deal 7 damage to ALL enemies.
+- Slack Water (Basic Attack, 1 energy): Deal 4 damage. Apply 1 Weak. Plan: Apply 1 Weak to ALL enemies.
+- Feint (Common Attack, 1 energy): Deal 6 damage. Plan: Deal 10 damage.
+- Ambush (Common Skill, 1 energy): Deal 5 damage. Plan: Deal 12 damage.
+- Read the Field (Common Skill, 1 energy): Gain 5 Block. Plan: Gain 10 Block.
+- Exposed Flank (Common Skill, 1 energy): Apply 1 Vulnerable. Plan: Apply 2 Vulnerable to ALL enemies.
+- Treatise (Uncommon Power, 1 energy): Once per turn, when the Bake-Kurage carries out a Plan, draw 1 card.
+- Song of Pearls (Uncommon Power, 1 energy): Once per turn, when the Bake-Kurage carries out a Plan, gain 3 Block.
+- War Council (Uncommon Skill, 1 energy): Apply 1 Weak to ALL enemies. Plan: Deal 5 damage and apply 1 Weak to ALL enemies.
+- Nereid's Ascension (Rare Skill, 2 energy, Exhaust): Exhaust. Plan: for 2 turns, the Bake-Kurage carries out every Plan twice.
+- The Moon Overlooks the Waters (Rare Power, 2 energy): Plans also happen now, as you write them.
+- Sea-Salt Prayer (Common Skill, 1 energy): Gain 4 Block. Apply 1 Weak.
+- Deep Current (Common Attack, 1 energy): Deal 6 damage to ALL enemies.
+- Coral Bulwark (Common Skill, 1 energy): Gain 6 Block. Plan: Gain 8 Block and apply 1 Weak.
+- Cleansing Wave (Uncommon Skill, 1 energy): Gain 5 Block. Remove one of your debuffs. Plan: Gain 10 Block.
+- Tide Wall (Uncommon Skill, 1 energy): Gain 4 Block. Plan: Gain 3 Block for each Plan the Bake-Kurage carries out this morning.
+- Shell Guard (Uncommon Skill, 1 energy): Gain 5 Block. Until your next turn, whenever the Tamakushi Casket strikes, gain 3 Block.
+- The Clouds Like Waves Rippling (Rare Power, 2 energy): Whenever you apply a debuff to an enemy, gain 2 Block.
+- The Moon, A Ship O'er the Seas (Rare Skill, 2 energy, Exhaust): Exhaust. Mend 3. Plan: Mend 6.
+- Sango Isshin (Rare Attack, 2 energy): Deal 8 damage. If the Bake-Kurage carried out a Plan this turn, deal a quarter of your Max HP to ALL enemies instead.
+- Rally (Common Skill, 1 energy): Apply 1 Weak. The next Companion card you play this turn costs 1 less.
+- Vanguard (Common Skill, 0 energy, Exhaust): Exhaust. Apply 1 Vulnerable. Plan: Apply 1 Vulnerable and 1 Weak.
+- The General's Banner (Uncommon Power, 1 energy): Once per turn, when you play a Companion card, apply 1 Weak to the front enemy.
+- Chain of Command (Uncommon Skill, 1 energy): Deal 3 damage for each Companion you played this turn. Plan: Deal 6 damage for each Companion you played last turn.
+- Stolen Chapter (Common Skill, 1 energy): Draw 1 card. Plan: Draw 4 cards.
+- Change of Plans (Common Skill, 1 energy, Exhaust): Exhaust. The Bake-Kurage carries out your first Plan now.
+- Undertow (Common Attack, 1 energy): Deal 4 damage, already including 3 if the enemy has a debuff.
+- Salt Line (Common Skill, 1 energy, Exhaust): Exhaust. Gain 8 Block.
+- Battle Plan (Uncommon Skill, 1 energy): Draw 1 card. Plan: Gain 1 Energy and draw 2 cards.
+- Moon's Reflection (Uncommon Skill, 1 energy, Exhaust): Exhaust. Choose a card in your Exhaust Pile. Next turn, the Bake-Kurage carries out its Plan line, or plays it if it has none.
+- Tide Chart (Common Skill, 0 energy): Next turn, after the Bake-Kurage carries out its Plans, draw 1 card for each.
+- Ripple (Common Skill, 0 energy): Gain 2 Block. Plan: Gain 1 Energy and 4 Block.
+
+## Your verdicts on the first read, and what is missing
+
+You ruled Riptide, Pincer and the redesigned Nereid's Ascension
+REQUIRES_MODIFICATION on C6 and gave no line. The owner records the row you
+compared each to, its arithmetic, and the smallest modification; a verdict
+without them cannot be acted on. For EACH of the three arms below, write
+exactly three lines: (a) the pool row or base-game card it is strictly
+better than, with both cards' numbers; (b) whether "strictly better" holds
+on every line (now-line, Plan line, cost, rarity, drawback) or only some;
+(c) the smallest modification that makes it FOLLOWS.
+
+## The arms
+
+1. **Riptide** — Common Attack, 1 energy. Deal 5 damage to ALL enemies.
+   Plan: Deal 9 damage to ALL enemies. Upgrade: 7 and 12.
+2. **Pincer** — Common Attack, 1 energy. Deal 4 damage twice. Plan: Deal 4
+   damage three times. Upgrade: 5 per hit.
+6. **Nereid's Ascension, redesigned** — Rare Power, 2 energy. The
+   Bake-Kurage carries out every Plan twice. Upgrade: costs 1. (Replaces the
+   pool row of the same name above: no longer Exhaust, no longer a Plan, no
+   longer two turns.)
+
+Nine lines total. No other text.
+```
+
+```
+1. REQUIRES_MODIFICATION — C6 (not strictly better).
+2. REQUIRES_MODIFICATION — C6 (not strictly better).
+6. REQUIRES_MODIFICATION — C6 (not strictly better).
+```
+
+### Read 3 (the ask for the comparison only, still bare)
+
+```
+# Doctrine read: six Kokomi pool-pass rows against the kit charter
+
+You are the adversarial reviewer for a Slay the Spire 2 character mod. The
+owner's rule: a new or redesigned card ships to a tester only if you rule it
+FOLLOWS. Each numbered card below is ONE ARM. For each, FOLLOWS or
+REQUIRES_MODIFICATION, the clause ids you weighed, and one sentence with the
+card's arithmetic naming the pool row you compared it to; for a
+REQUIRES_MODIFICATION, the smallest change that would make it FOLLOWS. Read
+adversarially; the author is a different model family and the owner wants
+the row that should not reach a tester named. One precedent you may cite:
+the brief names Nereid's Ascension as the one Rare that breaks the kit's
+rule 3 ("carried out once, in order"), so its doubling is not a C5 failure
+by itself. You have no repo access; every card text below is pasted
+verbatim from the sheet.
+
+## Clauses
+
+- **C1 (the owner's "not all agents always win").** A row that removes a
+  losing line the kit is meant to keep, instead of pricing it, is out.
+- **C2 (binding prices).** Every cost printed must bind at the moment it is
+  paid; a card whose cost is routinely free is out.
+- **C3 (player-controlled leverage).** The card's value must follow a
+  decision the player makes (write the Plan or play it now; aim it), not a
+  state that arrives by itself.
+- **C4 (the kit's own constraint).** Kokomi's defence is Block and
+  prevention only; nothing heals below Rare.
+- **C5 (nothing fires by itself).** No card triggers without a play or a
+  Plan the player wrote.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a shipped POOL row (listed below) or of a base-game non-basic card at
+  the same or lower rarity and cost. Strike and Defend are basics and are
+  not reference points. Base-game Commons for reference: Cleave (1: 8 to
+  ALL), Twin Strike (1: 5 twice), Pommel Strike (1: 9, draw 1), Iron Wave
+  (1: 5 Block and 5 damage), Sword Boomerang (1: 3 to a random enemy three
+  times), Thunderclap (1: 4 to ALL and Vulnerable).
+
+## The engine, Kokomi (the Plan kit)
+
+A **Bake-Kurage** (jellyfish) is on her field every fight. Some cards
+print two halves: a now-line and a **Plan** line. Playing the card onto the
+Bake-Kurage *writes the Plan*: it does nothing now, and at the start of her
+next turn, before she draws, the Bake-Kurage *carries out* every Plan it
+holds, in the order written, as its own Hydro hits. A planned
+single-target line is aimed at an enemy when it is written (R250). Carry-outs
+take the target's Vulnerable; her Weak does not fold in. The energy is paid
+the turn before. Starter: 4 Strike, 4 Defend, Kurage's Oath, Slack Water;
+3 energy; HP 80. Relic: Tamakushi Casket, 2 Hydro damage to an enemy
+whenever she applies a debuff to it. "This morning" means the carry-outs
+at the start of the current turn.
+
+The readings these rows answer, rounds 10 to 16: seats draft the Attacks
+they are offered and the pool's Attacks mostly carry no Plan line, so the
+jellyfish stands empty on most turns; Nereid's Ascension as printed "reads
+like the kit's payoff and behaves like a tax" (two energy, Exhaust, and a
+Plan slot for two turns of doubling in a deck with two Plan cards).
+
+## The pool, every row pasted from the sheet (rarity, type, price)
+
+- Kurage's Oath (Basic Skill, 1 energy): Deal 3 damage to ALL enemies. Plan: Deal 7 damage to ALL enemies.
+- Slack Water (Basic Attack, 1 energy): Deal 4 damage. Apply 1 Weak. Plan: Apply 1 Weak to ALL enemies.
+- Feint (Common Attack, 1 energy): Deal 6 damage. Plan: Deal 10 damage.
+- Ambush (Common Skill, 1 energy): Deal 5 damage. Plan: Deal 12 damage.
+- Read the Field (Common Skill, 1 energy): Gain 5 Block. Plan: Gain 10 Block.
+- Exposed Flank (Common Skill, 1 energy): Apply 1 Vulnerable. Plan: Apply 2 Vulnerable to ALL enemies.
+- Treatise (Uncommon Power, 1 energy): Once per turn, when the Bake-Kurage carries out a Plan, draw 1 card.
+- Song of Pearls (Uncommon Power, 1 energy): Once per turn, when the Bake-Kurage carries out a Plan, gain 3 Block.
+- War Council (Uncommon Skill, 1 energy): Apply 1 Weak to ALL enemies. Plan: Deal 5 damage and apply 1 Weak to ALL enemies.
+- Nereid's Ascension (Rare Skill, 2 energy, Exhaust): Exhaust. Plan: for 2 turns, the Bake-Kurage carries out every Plan twice.
+- The Moon Overlooks the Waters (Rare Power, 2 energy): Plans also happen now, as you write them.
+- Sea-Salt Prayer (Common Skill, 1 energy): Gain 4 Block. Apply 1 Weak.
+- Deep Current (Common Attack, 1 energy): Deal 6 damage to ALL enemies.
+- Coral Bulwark (Common Skill, 1 energy): Gain 6 Block. Plan: Gain 8 Block and apply 1 Weak.
+- Cleansing Wave (Uncommon Skill, 1 energy): Gain 5 Block. Remove one of your debuffs. Plan: Gain 10 Block.
+- Tide Wall (Uncommon Skill, 1 energy): Gain 4 Block. Plan: Gain 3 Block for each Plan the Bake-Kurage carries out this morning.
+- Shell Guard (Uncommon Skill, 1 energy): Gain 5 Block. Until your next turn, whenever the Tamakushi Casket strikes, gain 3 Block.
+- The Clouds Like Waves Rippling (Rare Power, 2 energy): Whenever you apply a debuff to an enemy, gain 2 Block.
+- The Moon, A Ship O'er the Seas (Rare Skill, 2 energy, Exhaust): Exhaust. Mend 3. Plan: Mend 6.
+- Sango Isshin (Rare Attack, 2 energy): Deal 8 damage. If the Bake-Kurage carried out a Plan this turn, deal a quarter of your Max HP to ALL enemies instead.
+- Rally (Common Skill, 1 energy): Apply 1 Weak. The next Companion card you play this turn costs 1 less.
+- Vanguard (Common Skill, 0 energy, Exhaust): Exhaust. Apply 1 Vulnerable. Plan: Apply 1 Vulnerable and 1 Weak.
+- The General's Banner (Uncommon Power, 1 energy): Once per turn, when you play a Companion card, apply 1 Weak to the front enemy.
+- Chain of Command (Uncommon Skill, 1 energy): Deal 3 damage for each Companion you played this turn. Plan: Deal 6 damage for each Companion you played last turn.
+- Stolen Chapter (Common Skill, 1 energy): Draw 1 card. Plan: Draw 4 cards.
+- Change of Plans (Common Skill, 1 energy, Exhaust): Exhaust. The Bake-Kurage carries out your first Plan now.
+- Undertow (Common Attack, 1 energy): Deal 4 damage, already including 3 if the enemy has a debuff.
+- Salt Line (Common Skill, 1 energy, Exhaust): Exhaust. Gain 8 Block.
+- Battle Plan (Uncommon Skill, 1 energy): Draw 1 card. Plan: Gain 1 Energy and draw 2 cards.
+- Moon's Reflection (Uncommon Skill, 1 energy, Exhaust): Exhaust. Choose a card in your Exhaust Pile. Next turn, the Bake-Kurage carries out its Plan line, or plays it if it has none.
+- Tide Chart (Common Skill, 0 energy): Next turn, after the Bake-Kurage carries out its Plans, draw 1 card for each.
+- Ripple (Common Skill, 0 energy): Gain 2 Block. Plan: Gain 1 Energy and 4 Block.
+
+## What the owner needs from this read
+
+You ruled Riptide, Pincer and the redesigned Nereid's Ascension
+REQUIRES_MODIFICATION on C6 (not strictly better). A C6 verdict is a
+comparison, and the comparison is part of the reading, not a remedy: for
+EACH of the three arms, restate the verdict and the clause, then name the
+pool row or base-game card the arm is a strictly better version of, quoting
+both cards' printed numbers on every line you compared (now-line, Plan line,
+cost, rarity, drawback). Do not propose any change; the owner derives the
+fix by lifting a value off a shipped card.
+
+## The arms
+
+1. **Riptide** — Common Attack, 1 energy. Deal 5 damage to ALL enemies.
+   Plan: Deal 9 damage to ALL enemies. Upgrade: 7 and 12.
+2. **Pincer** — Common Attack, 1 energy. Deal 4 damage twice. Plan: Deal 4
+   damage three times. Upgrade: 5 per hit.
+6. **Nereid's Ascension, redesigned** — Rare Power, 2 energy. The
+   Bake-Kurage carries out every Plan twice. Upgrade: costs 1. (Replaces the
+   pool row of the same name above: no longer Exhaust, no longer a Plan, no
+   longer two turns.)
+
+Three verdicts, each with its clause and the comparison it rests on.
+```
+
+```
+1. Riptide — REQUIRES_MODIFICATION; C6 (not strictly better).
+2. Pincer — REQUIRES_MODIFICATION; C6 (not strictly better).
+6. Nereid’s Ascension, redesigned — REQUIRES_MODIFICATION; C6 (not strictly better).
+```
+
+### Read 4 (the three rows re-priced)
+
+```
+# Doctrine read: three re-priced Kokomi pool-pass rows against the kit charter
+
+You are the adversarial reviewer for a Slay the Spire 2 character mod. The
+owner's rule: a new or redesigned card ships to a tester only if you rule it
+FOLLOWS. Each numbered card below is ONE ARM. For each, FOLLOWS or
+REQUIRES_MODIFICATION, the clause you ruled against, and the line of the
+card with its arithmetic in one sentence, naming the pool row you compared
+it to. Read
+adversarially; the author is a different model family and the owner wants
+the row that should not reach a tester named. One precedent you may cite:
+the brief names Nereid's Ascension as the one Rare that breaks the kit's
+rule 3 ("carried out once, in order"), so its doubling is not a C5 failure
+by itself. You have no repo access; every card text below is pasted
+verbatim from the sheet.
+
+## Clauses
+
+- **C1 (the owner's "not all agents always win").** A row that removes a
+  losing line the kit is meant to keep, instead of pricing it, is out.
+- **C2 (binding prices).** Every cost printed must bind at the moment it is
+  paid; a card whose cost is routinely free is out.
+- **C3 (player-controlled leverage).** The card's value must follow a
+  decision the player makes (write the Plan or play it now; aim it), not a
+  state that arrives by itself.
+- **C4 (the kit's own constraint).** Kokomi's defence is Block and
+  prevention only; nothing heals below Rare.
+- **C5 (nothing fires by itself).** No card triggers without a play or a
+  Plan the player wrote.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a shipped POOL row (listed below) or of a base-game non-basic card at
+  the same or lower rarity and cost. Strike and Defend are basics and are
+  not reference points. Base-game Commons for reference: Cleave (1: 8 to
+  ALL), Twin Strike (1: 5 twice), Pommel Strike (1: 9, draw 1), Iron Wave
+  (1: 5 Block and 5 damage), Sword Boomerang (1: 3 to a random enemy three
+  times), Thunderclap (1: 4 to ALL and Vulnerable).
+
+## The engine, Kokomi (the Plan kit)
+
+A **Bake-Kurage** (jellyfish) is on her field every fight. Some cards
+print two halves: a now-line and a **Plan** line. Playing the card onto the
+Bake-Kurage *writes the Plan*: it does nothing now, and at the start of her
+next turn, before she draws, the Bake-Kurage *carries out* every Plan it
+holds, in the order written, as its own Hydro hits. A planned
+single-target line is aimed at an enemy when it is written (R250). Carry-outs
+take the target's Vulnerable; her Weak does not fold in. The energy is paid
+the turn before. Starter: 4 Strike, 4 Defend, Kurage's Oath, Slack Water;
+3 energy; HP 80. Relic: Tamakushi Casket, 2 Hydro damage to an enemy
+whenever she applies a debuff to it. "This morning" means the carry-outs
+at the start of the current turn.
+
+The readings these rows answer, rounds 10 to 16: seats draft the Attacks
+they are offered and the pool's Attacks mostly carry no Plan line, so the
+jellyfish stands empty on most turns; Nereid's Ascension as printed "reads
+like the kit's payoff and behaves like a tax" (two energy, Exhaust, and a
+Plan slot for two turns of doubling in a deck with two Plan cards).
+
+## The pool, every row pasted from the sheet (rarity, type, price)
+
+- Kurage's Oath (Basic Skill, 1 energy): Deal 3 damage to ALL enemies. Plan: Deal 7 damage to ALL enemies.
+- Slack Water (Basic Attack, 1 energy): Deal 4 damage. Apply 1 Weak. Plan: Apply 1 Weak to ALL enemies.
+- Feint (Common Attack, 1 energy): Deal 6 damage. Plan: Deal 10 damage.
+- Ambush (Common Skill, 1 energy): Deal 5 damage. Plan: Deal 12 damage.
+- Read the Field (Common Skill, 1 energy): Gain 5 Block. Plan: Gain 10 Block.
+- Exposed Flank (Common Skill, 1 energy): Apply 1 Vulnerable. Plan: Apply 2 Vulnerable to ALL enemies.
+- Treatise (Uncommon Power, 1 energy): Once per turn, when the Bake-Kurage carries out a Plan, draw 1 card.
+- Song of Pearls (Uncommon Power, 1 energy): Once per turn, when the Bake-Kurage carries out a Plan, gain 3 Block.
+- War Council (Uncommon Skill, 1 energy): Apply 1 Weak to ALL enemies. Plan: Deal 5 damage and apply 1 Weak to ALL enemies.
+- The Moon Overlooks the Waters (Rare Power, 2 energy): Plans also happen now, as you write them.
+- Sea-Salt Prayer (Common Skill, 1 energy): Gain 4 Block. Apply 1 Weak.
+- Deep Current (Common Attack, 1 energy): Deal 6 damage to ALL enemies.
+- Coral Bulwark (Common Skill, 1 energy): Gain 6 Block. Plan: Gain 8 Block and apply 1 Weak.
+- Cleansing Wave (Uncommon Skill, 1 energy): Gain 5 Block. Remove one of your debuffs. Plan: Gain 10 Block.
+- Tide Wall (Uncommon Skill, 1 energy): Gain 4 Block. Plan: Gain 3 Block for each Plan the Bake-Kurage carries out this morning.
+- Shell Guard (Uncommon Skill, 1 energy): Gain 5 Block. Until your next turn, whenever the Tamakushi Casket strikes, gain 3 Block.
+- The Clouds Like Waves Rippling (Rare Power, 2 energy): Whenever you apply a debuff to an enemy, gain 2 Block.
+- The Moon, A Ship O'er the Seas (Rare Skill, 2 energy, Exhaust): Exhaust. Mend 3. Plan: Mend 6.
+- Sango Isshin (Rare Attack, 2 energy): Deal 8 damage. If the Bake-Kurage carried out a Plan this turn, deal a quarter of your Max HP to ALL enemies instead.
+- Rally (Common Skill, 1 energy): Apply 1 Weak. The next Companion card you play this turn costs 1 less.
+- Vanguard (Common Skill, 0 energy, Exhaust): Exhaust. Apply 1 Vulnerable. Plan: Apply 1 Vulnerable and 1 Weak.
+- The General's Banner (Uncommon Power, 1 energy): Once per turn, when you play a Companion card, apply 1 Weak to the front enemy.
+- Chain of Command (Uncommon Skill, 1 energy): Deal 3 damage for each Companion you played this turn. Plan: Deal 6 damage for each Companion you played last turn.
+- Stolen Chapter (Common Skill, 1 energy): Draw 1 card. Plan: Draw 4 cards.
+- Change of Plans (Common Skill, 1 energy, Exhaust): Exhaust. The Bake-Kurage carries out your first Plan now.
+- Undertow (Common Attack, 1 energy): Deal 4 damage, already including 3 if the enemy has a debuff.
+- Salt Line (Common Skill, 1 energy, Exhaust): Exhaust. Gain 8 Block.
+- Battle Plan (Uncommon Skill, 1 energy): Draw 1 card. Plan: Gain 1 Energy and draw 2 cards.
+- Moon's Reflection (Uncommon Skill, 1 energy, Exhaust): Exhaust. Choose a card in your Exhaust Pile. Next turn, the Bake-Kurage carries out its Plan line, or plays it if it has none.
+- Tide Chart (Common Skill, 0 energy): Next turn, after the Bake-Kurage carries out its Plans, draw 1 card for each.
+- Ripple (Common Skill, 0 energy): Gain 2 Block. Plan: Gain 1 Energy and 4 Block.
+
+Note on the census: the printed Nereid's Ascension (Rare Skill, 2, Exhaust:
+"Plan: for 2 turns, the Bake-Kurage carries out every Plan twice") is the
+row arm 3 REPLACES; it leaves the sheet in the same commit and is not a C6
+reference. The nearest standing Rare Power is The Moon Overlooks the Waters
+(2: "Plans also happen now, as you write them").
+
+## The arms
+
+1. **Riptide** — Common Attack, 2 energy. Deal 9 damage to ALL enemies.
+   Plan: Deal 13 damage to ALL enemies. Upgrade: 12 and 17.
+2. **Pincer** — Common Attack, 1 energy. Deal 3 damage twice. Plan: Deal 3
+   damage three times. Upgrade: 4 per hit.
+3. **Nereid's Ascension, redesigned** — Rare Power, 2 energy. The
+   Bake-Kurage carries out every Plan twice. Upgrade: costs 1.
+
+Three verdicts, each with its clause and its line. Under 150 words.
+```
+
+```
+1. FOLLOWS — C6 (not strictly better).
+2. FOLLOWS — C6 (not strictly better).
+3. FOLLOWS — C5 (nothing fires by itself); C6 (not strictly better).
+```

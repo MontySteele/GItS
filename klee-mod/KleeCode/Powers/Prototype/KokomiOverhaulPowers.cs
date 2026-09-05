@@ -311,7 +311,7 @@ public sealed class NextCompanionDiscountPower : PowerModel, ILocalizationProvid
 /// Council and Rosaria, and every one of those strikes now pays.
 ///
 /// THE AMOUNT IS BLOCK PER STRIKE, NOT A DURATION, which is the one thing this
-/// power does NOT share with <c>PlanTwicePower</c> beside it. The window is
+/// power does NOT share with the other windowed powers in this mod. The window is
 /// closed by <c>ProtoBakeKuragePower.AfterPlayerTurnStart</c> rather than by a
 /// tick, and the placement is the rule: "until your next turn" is read to
 /// INCLUDE that turn's morning, because R246 pick 2 says "the morning's Plans
@@ -366,4 +366,46 @@ public sealed class ShellGuardPower : PowerModel, ILocalizationProvider
         if (guard == null) return;
         await PowerCmd.Remove(guard);
     }
+}
+
+
+/// <summary>
+/// NEREID'S ASCENSION (Rare Power, 2): "The Bake-Kurage carries out every Plan
+/// twice." `EB-492`.
+///
+/// A POWER, AND THAT IS THE WHOLE REDESIGN. The row it replaces was a Plan --
+/// "Exhaust. Plan: for 2 turns, the Bake-Kurage carries out every Plan twice"
+/// -- so the card that was meant to be the kit's payoff spent the morning it
+/// was meant to pay: two energy, an Exhaust and a Plan slot, in a deck the r14
+/// seat measured at two Plan cards to double
+/// (`review/active/kokomi-pool-pass-2026-09-05.md` sec.1). As a Power it never
+/// takes a morning, it lasts the fight instead of two turns, and its price is
+/// two energy on a turn that writes no Plan.
+///
+/// IT STORES NOTHING AND HOOKS NOTHING, exactly as
+/// <see cref="PlansAlsoNowPower"/> does and for the same reason:
+/// <c>KokomiPlan.CarryOutTimes</c> asks for it at the one moment the question
+/// can be asked -- inside the drain loop, before each entry -- and a hook would
+/// have to reconstruct which Plans were still owed. The stack is a marker, so a
+/// second copy doubles nothing further; "every Plan twice" is what the face
+/// says, and twice is twice.
+///
+/// THE BRIEF'S RULE 3 IS THE ONE THIS BREAKS. "Every Plan is carried out once,
+/// in order" is the arm's law and this Rare is the card the brief allows to
+/// break it (brief sec.5); it breaks the ONCE and leaves the ORDER alone --
+/// each Plan is carried out twice before the next one starts.
+/// </summary>
+public sealed class NereidsAscensionPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Nereid's Ascension"),
+        ("description",
+            "The [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] "
+          + "twice."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
 }

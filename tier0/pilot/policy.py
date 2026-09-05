@@ -230,15 +230,6 @@ def predicate_is_declared_blind(name: str) -> bool:
                 and name.startswith(BLIND_PREDICATE_PREFIXES)))
 
 
-#: Planned clauses whose `amount` is NOT a magnitude, so the delay discount
-#: must not touch it. `plan_twice`'s amount is the LENGTH OF NEREID'S WINDOW IN
-#: TURNS (`kokomi_plan.wear_plan_twice` tops a standing window up to it), and
-#: three-quarters of a turn is not a thing. A closed set rather than a
-#: check-what-looks-numeric, because a duration wearing an `amount:` key is
-#: exactly the kind of thing a blanket scale gets silently wrong.
-_PLAN_DURATION_OPS = frozenset(("plan_twice",))
-
-
 def _plan_discounted(fx: dict) -> dict:
     """One planned clause, at `C.PLAN_DELAY_DISCOUNT` of its printed face.
 
@@ -256,14 +247,21 @@ def _plan_discounted(fx: dict) -> dict:
     scaling it in place would make the forecast rewrite the card it forecast.
 
     A clause with no numeric `amount` -- the Max-HP fraction, the exhaust
-    replay -- passes through untouched, and so does a duration
-    (`_PLAN_DURATION_OPS`). Neither is priced by any term today; the discount
-    declines to invent a price for them on the way past.
+    replay -- passes through untouched. Neither is priced by any term today;
+    the discount declines to invent a price for them on the way past.
+
+    `times` IS NOT DISCOUNTED (`EB-492`). It is a COUNT OF HITS and not a
+    magnitude: Pincer's planned line is three hits of a discounted 3, which is
+    what every term downstream already reads (`_expected_damage` multiplies
+    `amount` by `times`), and scaling both would take the delay twice.
+
+    THE DURATION CARVE-OUT IS GONE with the clause that needed it: `plan_twice`
+    was the one planned amount that meant TURNS, and Nereid's Ascension is a
+    Power now, so every remaining numeric `amount` in a `plan:` list is a
+    magnitude.
     """
     amount = fx.get("amount")
-    if (fx.get("op") in _PLAN_DURATION_OPS
-            or isinstance(amount, bool)
-            or not isinstance(amount, (int, float))):
+    if isinstance(amount, bool) or not isinstance(amount, (int, float)):
         return fx
     return {**fx, "amount": amount * C.PLAN_DELAY_DISCOUNT}
 

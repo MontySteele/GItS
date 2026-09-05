@@ -244,9 +244,10 @@ def _proto_power(effects: list[dict]) -> dict | None:
 #   * `energy` gets NO default in either place. +1 Energy is a whole turn's
 #     tempo and the arm is priced against it; that is a ruling, and the one row
 #     that prints it (Battle Plan) reaches a campfire through its draw clause.
-#   * `damage_quarter_max_hp` and `plan_twice` print no literal the rule may
-#     move (the first has no amount at all, the second is a duration). Both
-#     rows that carry them cost 2 and take the cost clause instead.
+#   * `damage_quarter_max_hp` prints no literal the rule may move -- it has no
+#     amount at all -- so the one row that carries it costs 2 and takes the
+#     cost clause instead. (`plan_twice` stood beside it as a duration until
+#     `EB-492` retired the clause with Nereid's Ascension's redesign.)
 #
 #: Which `plan:` op each `plan_*` key binds to, in order, in the ONE place both
 #: appliers read it. Mirrors `apply_upgrade`'s branches below and
@@ -388,9 +389,9 @@ def prototype_default_delta(card_id: str, cost, effects: list[dict],
     # Such a row keeps no default upgrade rather than a generated-wrong one.
     # `EB-315` is why reaching here is now RARE rather than the Plan-only norm:
     # a Plan line's own numbers are read above, so a row only falls this far
-    # when NEITHER line prints one -- `damage_quarter_max_hp` and `plan_twice`
-    # are the two clauses that can do it, and both rows carrying them cost 2
-    # and take the cost clause first. A row that falls all the way through says
+    # when NEITHER line prints one -- `damage_quarter_max_hp` is the clause
+    # that can do it, and the row carrying it costs 2 and takes the cost clause
+    # first. A row that falls all the way through says
     # so on the row, with `no_upgrade:` and a reason, and the surface's gate
     # (`tier0/tests/test_prototype_surface.py`) is what makes that mandatory.
     if exhaust:

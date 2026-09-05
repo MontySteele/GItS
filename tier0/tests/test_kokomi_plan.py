@@ -100,7 +100,10 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # whose clause multiplies the morning it is carried out in.
     # EIGHTEEN with the tempo shelf's Ripple (round 9 pick 1, 2026-09-04),
     # whose Plan line is the arm's first to pay Energy.
-    assert len(planned) == 18
+    # TWENTY-ONE after the pool pass (`EB-492`): Riptide, Pincer, Flank and
+    # Feigned Retreat printed one, and Nereid's Ascension GAVE one up -- it is
+    # a Power now, so the Rare that doubles Plans is no longer a Plan.
+    assert len(planned) == 21
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -608,45 +611,64 @@ def test_applying_weak_and_vulnerable(overhaul):
 
 # --- 4. NEREID'S ASCENSION -------------------------------------------------
 
-def test_plan_twice_doubles_every_plan_but_not_its_own(overhaul):
-    """THE READING the C# records at `ResolveAll`: `CarryOutTimes` is asked
-    INSIDE the drain loop, before each entry, so the Rare's own clause -- which
-    is what installs the doubling -- does not double itself, and every Plan
-    written after it in the same morning is doubled."""
+def test_the_ascension_doubles_every_plan_in_the_morning(overhaul):
+    """THE READING the C# records at `ResolveAll`: `carry_out_times` is asked
+    INSIDE the drain loop, before each entry. Since `EB-492` the Rare is a
+    POWER -- it is played, not planned -- so every Plan the morning holds is
+    carried out twice."""
     enemy = make_enemy(hp=90)
     st = kokomi_state(enemies=[enemy])
-    kokomi_plan.schedule(st, plan_card([{"op": "plan_twice", "amount": 2}]))
+    powers.apply_power(st, st.player, kokomi_plan.NEREIDS_ASCENSION, 1)
     kokomi_plan.schedule(st, plan_card([{"op": "damage", "amount": 5,
                                          "target": "front_enemy"}]))
     kokomi_plan.resolve_all(st)
-    # The Ascension resolved ONCE (a second resolution would only re-wear the
-    # same window), and the hit behind it resolved TWICE.
-    assert st.player.powers[kokomi_plan.PLAN_TWICE] == 2
     assert enemy.hp == 90 - 10
 
 
-def test_a_second_ascension_extends_the_window_and_never_doubles_it(overhaul):
-    """`PlanTwicePower.Wear` tops the window UP to `turns` and returns early
-    when it is already there -- "the same construction every other windowed
-    power in this mod takes". `apply_power` is additive, so the top-up is a
-    DELTA and not the printed amount."""
-    st = kokomi_state()
-    kokomi_plan.wear_plan_twice(st, 2)
-    kokomi_plan.wear_plan_twice(st, 2)
-    assert st.player.powers[kokomi_plan.PLAN_TWICE] == 2
-    kokomi_plan.wear_plan_twice(st, 3)
-    assert st.player.powers[kokomi_plan.PLAN_TWICE] == 3
-    kokomi_plan.wear_plan_twice(st, 1)
-    assert st.player.powers[kokomi_plan.PLAN_TWICE] == 3
+def test_without_the_ascension_a_plan_is_carried_out_once(overhaul):
+    """The other half of the same read, so the doubling is the power's and not
+    the loop's."""
+    enemy = make_enemy(hp=90)
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.schedule(st, plan_card([{"op": "damage", "amount": 5,
+                                         "target": "front_enemy"}]))
+    kokomi_plan.resolve_all(st)
+    assert enemy.hp == 90 - 5
 
 
-def test_the_window_ticks_at_the_end_of_her_turn(overhaul):
+def test_a_second_ascension_doubles_and_never_triples(overhaul):
+    """`EB-492`. The stack is a MARKER: `carry_out_times` reads whether the
+    power is worn and never its amount, so a second copy of the Rare is a dead
+    card rather than a third carry-out. `NereidsAscensionPower` says the same
+    in its header."""
+    enemy = make_enemy(hp=90)
+    st = kokomi_state(enemies=[enemy])
+    powers.apply_power(st, st.player, kokomi_plan.NEREIDS_ASCENSION, 1)
+    powers.apply_power(st, st.player, kokomi_plan.NEREIDS_ASCENSION, 1)
+    assert st.player.powers[kokomi_plan.NEREIDS_ASCENSION] == 2
+    assert kokomi_plan.carry_out_times(st) == 2
+    kokomi_plan.schedule(st, plan_card([{"op": "damage", "amount": 5,
+                                         "target": "front_enemy"}]))
+    kokomi_plan.resolve_all(st)
+    assert enemy.hp == 90 - 10
+
+
+def test_the_ascension_lasts_the_fight(overhaul):
+    """`EB-492`. It was a two-turn window installed by a Plan; it is a Power
+    now, so nothing ticks it down and the turn boundary leaves it alone."""
     st = kokomi_state()
-    kokomi_plan.wear_plan_twice(st, 2)
-    kokomi_plan.tick_windows(st)
-    assert st.player.powers[kokomi_plan.PLAN_TWICE] == 1
-    kokomi_plan.tick_windows(st)
-    assert kokomi_plan.PLAN_TWICE not in st.player.powers
+    powers.apply_power(st, st.player, kokomi_plan.NEREIDS_ASCENSION, 1)
+    kokomi_plan.roll_turn(st)
+    assert kokomi_plan.carry_out_times(st) == 2
+
+
+def test_the_retired_plan_twice_clause_is_refused_at_load(overhaul):
+    """`EB-492` RETIRED the clause rather than leaving it standing with no row
+    to spell it: a `plan:` list that says `plan_twice` is a load failure on
+    both sides, which is what "a clause outside this table is never an
+    approximation" means."""
+    assert "plan_twice" not in kokomi_plan.PLAN_KINDS
+    assert kokomi_plan.plan_shape_reason([{"op": "plan_twice", "amount": 2}])
 
 
 # --- 5. THE QUEUE ITSELF ---------------------------------------------------
@@ -715,11 +737,11 @@ def test_change_of_plans_carries_out_the_front_and_removes_it(overhaul):
 
 def test_change_of_plans_is_not_doubled_by_nereid(overhaul):
     """`CarryOutTimes` is read inside `ResolveAll`'s drain loop and nowhere
-    else, so the Rare's window pays the MORNING and not this card. Taken from
-    the C#'s shape literally rather than argued here."""
+    else, so the Rare pays the MORNING and not this card. Taken from the C#'s
+    shape literally rather than argued here."""
     st = kokomi_state()
     st.player.energy = 0
-    kokomi_plan.wear_plan_twice(st, 2)
+    powers.apply_power(st, st.player, kokomi_plan.NEREIDS_ASCENSION, 1)
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
     kokomi_plan.resolve_front(st)
     assert st.player.energy == 1
@@ -1304,8 +1326,8 @@ def test_every_row_in_her_pool_resolves(overhaul):
 
 
 def test_a_plan_only_clause_refuses_from_a_body(overhaul):
-    """`plan_twice` and `damage_per_companion_last_turn` are legal inside a
-    `plan:` list and nowhere else. They stay in `effects.OPS` because the
+    """`damage_per_companion_last_turn` and its two siblings are legal inside
+    a `plan:` list and nowhere else. They stay in `effects.OPS` because the
     loader validates a `plan:` list through the same vocabulary check the body
     takes; reaching one from a BODY is a defect, and it says so."""
     st = kokomi_state()
@@ -1504,7 +1526,7 @@ def test_the_morning_plays_a_free_copy_and_keeps_the_original(overhaul):
 
 
 def test_the_copy_is_doubled_by_nereids_ascension(overhaul):
-    """Nereid's window carries out every Plan twice, and this Plan is not
+    """Nereid's Ascension carries out every Plan twice, and this Plan is not
     special: two carry-outs, two copies, two hits."""
     enemy = make_enemy(hp=40)
     st = kokomi_state(enemies=[enemy])
@@ -1512,7 +1534,7 @@ def test_the_copy_is_doubled_by_nereids_ascension(overhaul):
     card = crystal_collapse()
     play_companions(st, [caught, card])
     kokomi_plan.schedule(st, card)
-    powers.apply_power(st, st.player, kokomi_plan.PLAN_TWICE, 2)
+    powers.apply_power(st, st.player, kokomi_plan.NEREIDS_ASCENSION, 1)
     kokomi_plan.resolve_all(st)
     assert enemy.hp == 28
     assert counts(st)["plan_copy"] == 2
@@ -1608,3 +1630,181 @@ def test_every_kokomi_row_agrees_with_the_emitters_own_gate(overhaul):
         row = {"effects": card.effects}
         assert kokomi_plan.carry_out_only(card) == \
             gen_klee_cards.card_is_carry_out_only(row), card.id
+
+
+# --- THE POOL PASS (`EB-492`) ----------------------------------------------
+#
+# One section per new piece of engine: the multi-hit Plan clause (Pincer), the
+# intent-keyed set aim (Flank), and the morning count on a now-line (Well
+# Laid). Nereid's Ascension's redesign is pinned in section 4 above, beside
+# the reading it changed. Every number here is a PROTOTYPE number and none of
+# it is quotable (R215 B).
+
+
+def test_a_planned_times_clause_is_that_many_whole_hits(overhaul):
+    """Pincer. THREE HITS OF 3, not one hit of 9, and the difference is the
+    number of damage EVENTS rather than the total: each pass goes out through
+    `deal_damage_to_enemy` on its own, so each reacts on its own and each is
+    one strike for anything hung off a hit. `KokomiPlan.Hit` loops the same
+    way."""
+    enemy = make_enemy(hp=40)
+    st = kokomi_state(enemies=[enemy])
+    carry_out(st, [{"op": "damage", "amount": 3, "target": "front_enemy",
+                    "times": 3}])
+    assert enemy.hp == 40 - 9
+    assert counts(st)["damage"] == 3
+
+
+def test_a_times_clause_re_reads_its_aim_between_hits(overhaul):
+    """The front enemy killed by the first pass hands the next one to the
+    enemy behind it -- "leftmost alive" read three times rather than a second
+    rule."""
+    first, second = make_enemy(hp=3), make_enemy(hp=40)
+    st = kokomi_state(enemies=[first, second])
+    carry_out(st, [{"op": "damage", "amount": 3, "target": "front_enemy",
+                    "times": 3}])
+    assert first.hp == 0
+    assert second.hp == 40 - 6
+
+
+def test_times_is_refused_outside_the_flat_hit(overhaul):
+    """`PLAN_TIMES_OPS` is the flat hit and nothing else: the scaled damage
+    kinds already derive their size from a count, and a debuff applied twice
+    in one beat is two stacks rather than two applications."""
+    assert kokomi_plan.plan_shape_reason(
+        [{"op": "damage", "amount": 3, "target": "front_enemy", "times": 2}]
+    ) is None
+    assert kokomi_plan.plan_shape_reason(
+        [{"op": "apply_power", "power": "weak", "amount": 1,
+          "target": "front_enemy", "times": 2}])
+    # A literal of 2 or more, for `amount`'s reason: the count is read a turn
+    # after it was written.
+    assert kokomi_plan.plan_shape_reason(
+        [{"op": "damage", "amount": 3, "target": "front_enemy", "times": 1}])
+
+
+def test_the_intent_set_is_fixed_when_the_plan_is_written(overhaul):
+    """Flank. The enemies caught are the ones telegraphing an attack AT
+    WRITING TIME -- an enemy whose intent changes overnight is still hit, and
+    one that was Defending when the Plan was written is not."""
+    swinger = make_enemy(hp=40, intents=ATTACKER)
+    guard = make_enemy(hp=40, intents=BLOCKER)
+    st = kokomi_state(enemies=[swinger, guard])
+    card = plan_card([{"op": "damage", "amount": 8,
+                       "target": "enemies_intending_attack"}])
+    kokomi_plan.schedule(st, card)
+    # The board changes its mind between the writing and the morning.
+    swinger.intents = BLOCKER
+    guard.intents = ATTACKER
+    kokomi_plan.resolve_all(st)
+    assert swinger.hp == 40 - 8
+    assert guard.hp == 40
+
+
+def test_the_intent_set_skips_a_body_that_died(overhaul):
+    """"Each carry-out hit lands on those enemies that are still alive." A
+    corpse is not a target, which is the rule every other aim already keeps."""
+    dying = make_enemy(hp=40, intents=ATTACKER)
+    other = make_enemy(hp=40, intents=ATTACKER)
+    st = kokomi_state(enemies=[dying, other])
+    card = plan_card([{"op": "damage", "amount": 8,
+                       "target": "enemies_intending_attack"}])
+    kokomi_plan.schedule(st, card)
+    dying.hp = 0
+    kokomi_plan.resolve_all(st)
+    assert other.hp == 40 - 8
+
+
+def test_an_empty_intent_set_is_a_plan_that_carries_out_nothing(overhaul):
+    """The Plan is WRITTEN -- the queue's depth is honest and the strip says
+    so -- and it hits no one. The label is what says so."""
+    guard = make_enemy(hp=40, intents=BLOCKER)
+    st = kokomi_state(enemies=[guard])
+    card = plan_card([{"op": "damage", "amount": 8,
+                       "target": "enemies_intending_attack"}])
+    kokomi_plan.schedule(st, card)
+    assert len(st.kk_plan_queue) == 1
+    assert st.kk_plan_queue[0].label.endswith(": nothing")
+    kokomi_plan.resolve_all(st)
+    assert guard.hp == 40
+
+
+def test_the_aimed_label_names_the_bodies_it_caught(overhaul):
+    """`KokomiPlan.AimedLabel`'s twin: a Plan whose targets were decided when
+    it was written has to say which bodies it caught, for `plan_label`'s
+    reason one aim over."""
+    swinger = make_enemy(hp=40, intents=ATTACKER)
+    swinger.name = "Cultist"
+    st = kokomi_state(enemies=[swinger, make_enemy(hp=40, intents=BLOCKER)])
+    card = plan_card([{"op": "damage", "amount": 8,
+                       "target": "enemies_intending_attack"}])
+    kokomi_plan.schedule(st, card)
+    assert st.kk_plan_queue[0].label == "probe: Cultist"
+
+
+def test_a_sleeping_enemy_intends_nothing(overhaul):
+    """The arm's one intent read, and it is the shipped predicate's two
+    clauses: an attack intent AND `sleep_turns == 0`."""
+    sleeper = make_enemy(hp=40, intents=ATTACKER)
+    sleeper.sleep_turns = 2
+    st = kokomi_state(enemies=[sleeper])
+    card = plan_card([{"op": "damage", "amount": 8,
+                       "target": "enemies_intending_attack"}])
+    kokomi_plan.schedule(st, card)
+    kokomi_plan.resolve_all(st)
+    assert sleeper.hp == 40
+
+
+def test_the_captured_set_never_touches_the_printed_card(overhaul):
+    """The capture is written onto a COPY of the clause. `card.plan` is the
+    SHEET's list, shared by every instance of the row, and writing this turn's
+    board into it would put a corpse on a printed card."""
+    st = kokomi_state(enemies=[make_enemy(hp=40, intents=ATTACKER)])
+    card = plan_card([{"op": "damage", "amount": 8,
+                       "target": "enemies_intending_attack"}])
+    kokomi_plan.schedule(st, card)
+    assert "targets" not in card.plan[0]
+    assert st.kk_plan_queue[0].clauses[0]["targets"]
+
+
+def well_laid():
+    """Well Laid's own now-line, off a probe row rather than the sheet: the
+    sheet's numbers are a `D` default and this file pins the ENGINE."""
+    return Card(id="proto_kk_probe_well_laid", name="probe", cost=0,
+                type="attack",
+                effects=[{"op": "damage", "target": "enemy",
+                          "amount_formula": {
+                              "base": 2, "per": 3,
+                              "count": "plans_carried_out_this_morning"}}])
+
+
+def test_well_laids_count_is_the_morning_tide_wall_reads(overhaul):
+    """`plans_carried_out_this_morning` is `kk_plans_this_morning`, written
+    once at the drain -- the same number Tide Wall's planned Block multiplies,
+    so the morning a now-line sees and the morning a Plan clause sees are one
+    fact."""
+    enemy = make_enemy(hp=60)
+    st = kokomi_state(enemies=[enemy])
+    for i in range(3):
+        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                           cid=f"proto_kk_p{i}"))
+    kokomi_plan.resolve_all(st)
+    assert effects._runtime_count(
+        st, "plans_carried_out_this_morning") == 3
+    # And the now-line prices off it: 2 + 3 x 3.
+    effects.resolve_card(st, well_laid())
+    assert enemy.hp == 60 - 11
+
+
+def test_a_morning_that_drained_nothing_reads_an_honest_zero(overhaul):
+    """`roll_turn` clears the count, so Well Laid on a quiet morning is a
+    worse Strike rather than yesterday's payout."""
+    enemy = make_enemy(hp=60)
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
+    kokomi_plan.resolve_all(st)
+    kokomi_plan.roll_turn(st)
+    assert effects._runtime_count(
+        st, "plans_carried_out_this_morning") == 0
+    effects.resolve_card(st, well_laid())
+    assert enemy.hp == 60 - 2

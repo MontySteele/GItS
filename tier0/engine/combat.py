@@ -1284,11 +1284,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # `NextCompanionDiscountPower.AfterSideTurnEnd`, the same removal on the
     # same side turn end.
     state.player.powers.pop(kokomi_plan.NEXT_COMPANION_DISCOUNT, None)
-    # NEREID'S ASCENSION'S WINDOW ticks HERE, at the end of her turn -- the
-    # placement IS the rule, and it is `PlanTwicePower.AfterSideTurnEnd`'s: a
-    # window installed by a Plan at the top of turn N+1 ticks at the end of
-    # N+1, so "for 2 turns" is N+1 and N+2.
-    kokomi_plan.tick_windows(state)
     # INSTRUMENT ONLY (pair of `turn_open`): the block standing when the player
     # hands the turn over, which is the quantity a demand curve is read against.
     # A turn that ended by killing the last enemy or by the player dying never
