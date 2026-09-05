@@ -39,6 +39,20 @@ nothing. `EB-577` (the first two rewards each carry a Spark-priced row,
 built) put sinks in the seats' hands and did not change the reading.
 Seven rounds now read the bank as inert or circular.
 
+**A fourth reading, from the other edge (added the same morning).** An
+assembled lane on the fixer-S build
+(`review/qa/klee-round-23-2026-09-06/opus-arm-act1.md`, Ascension 1) was
+given six Spark-priced kit cards and no other detonator: "the Spark loop
+deadlocks; Sparks need detonations, detonations need Spark cards, nothing
+printed warns of it, and that ended the run rather than damage" (the
+act-1 elite, a Bomb 12 live with Fireworks Show the only detonator in hand
+and priced out, 0 Sparks, 0 Block). The same lane: Energy and Sparks idled
+on different turns, and the deck had no unconditional Block because its
+Block cards read the Bomb. That is the pick's option 4 (the opening Spark)
+and option 3 (an Energy-priced detonator in the starter) seen from the
+failure state, and it moves my recommendation: 3 over 1, without waiting
+for the run, because the deadlock is the starter's and not the draft's.
+
 ## 2. Why this is your pick and not a row
 
 The starter is R242's ("basics are supposed to be bad") and R261's (Innate
@@ -75,7 +89,7 @@ proposes nothing on its own.
    seats read as noise gets one Spark worse.
 
 Options 2 and 3 answer the detonator; option 4 answers the loop; option 1
-answers neither and costs nothing. My recommendation is 1 until your own
-run, then 3 if the dead-Bomb turn reads as the starter's fault to you
-too: it keeps both kit cards where R261 put them and adds a card that is
-bad on purpose.
+answers neither and costs nothing. My recommendation is 3: it keeps both kit cards where R261 put them and
+adds a card that is bad on purpose, and the deadlock the assembled lane
+hit is the starter's own (a Bomb, one priced-out detonator, no Energy
+exit). Option 1 remains the default until you rule.
