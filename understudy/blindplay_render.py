@@ -314,6 +314,47 @@ def _render_performance(row: dict[str, Any]) -> str:
     return line + "."
 
 
+def _render_evoke(row: dict[str, Any]) -> str:
+    """One Evoke (`EB-564`): who bowed, what the bow did, and what it minted.
+
+    THE DEFECT, in the r14 lane-1 seat's words: "The Salon log printed the two
+    performances and never printed the Evoke. I only knew it had happened by
+    reading the auras." It fired twice in one elite -- the kit's biggest single
+    beat -- and the whole evidence was Encore jumping by three and every body
+    coming out wearing Hydro.
+
+    IT IS ITS OWN SENTENCE AND NOT A PERFORMANCE LINE. A bow does things a
+    performance never does: Chevalmarin's touches EVERY enemy and names no
+    body, and every Evoke leaves the member. So the line says the member left,
+    then what the bow did, then what it paid -- and the clauses that do not
+    apply to this member are simply absent, `_render_performance`'s own rule
+    about the Usher and the aura.
+    """
+    line = f"- **{row['member']}** took its final bow — an EVOKE, so it left "
+    line += "the stage"
+    did: list[str] = []
+    if row["aura_all"]:
+        did.append("left Hydro on every enemy")
+    if row["target"]:
+        did.append(f"hit {row['target']} for {row['damage']} Hydro")
+    if row["block"]:
+        did.append(f"gave you {row['block']} Block")
+    if row["encore"]:
+        did.append(f"granted {row['encore']} Encore")
+    if row["fanfare"]:
+        # THE FOCUS MULTIPLIER IS ON THE LINE because it is the whole
+        # difference between an Evoke and a performance the reader can see
+        # from the numbers -- the Fanfare is larger BECAUSE the bow cost a
+        # member, and the Focus term counted `focus_mult` times.
+        mult = (f", its Focus counting {row['focus_mult']} times"
+                if row["focus_mult"] > 1 else "")
+        did.append(f"minted {row['fanfare']} Fanfare{mult}")
+    if did:
+        line += ". It " + ", ".join(did[:-1] + [f"and {did[-1]}"]
+                                    if len(did) > 1 else did)
+    return line + "."
+
+
 #: A per-turn ALLOWANCE stated in a power's own sentence (`EB-467`). The
 #: shipped shape is Hardened Shell's "cannot lose more than 20 HP each turn";
 #: the alternatives are the same sentence's other spellings of "each turn",
@@ -676,7 +717,8 @@ def render(obs: dict[str, Any]) -> str:
                               "performs this one, and then sends it to the "
                               "back" if i == 0 else ""))
         if c.get("salon") and (c["salon"]["performed"]
-                               or c["salon"]["replayed"]):
+                               or c["salon"]["replayed"]
+                               or c["salon"].get("evoked")):
             # `EB-405`. WHAT THE STAGE DID THIS TURN, one act per line --
             # `EB-198`'s contract, the same one the carry-out block is under.
             #
@@ -703,6 +745,11 @@ def render(obs: dict[str, Any]) -> str:
             out += [f"- **{name}** was played an extra time, and the extra "
                     "play performed as well."
                     for name in c["salon"]["replayed"]]
+            # `EB-564`. LAST IN THE BLOCK, because that is where the bow
+            # happens: an Evoke is forced out BY a deploy onto a full stage or
+            # taken by the Evoke card, and either way it follows the acts
+            # above in the turn it belongs to.
+            out += [_render_evoke(row) for row in c["salon"].get("evoked", [])]
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page

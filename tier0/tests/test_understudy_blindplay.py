@@ -8624,7 +8624,8 @@ def test_the_encore_meter_line_does_not_repeat_the_gloss():
 
 # ---------------- EB-405: a Salon performance names its target -------------
 
-def salon_state(performed: list[dict]) -> dict:
+def salon_state(performed: list[dict], evoked: list[dict] | None = None
+                ) -> dict:
     """A combat whose wire carries this turn's Salon performances.
 
     SYNTHETIC, BUILT FROM THE MOD'S OWN SNAPSHOT SHAPE: every key below is
@@ -8633,8 +8634,91 @@ def salon_state(performed: list[dict]) -> dict:
     `test_the_salon_block_is_the_mods_own_snapshot_shape`.
     """
     state = json.loads(json.dumps(combat_state()))
-    state["player"]["furina_salon"] = {"performed": performed}
+    salon: dict = {"performed": performed}
+    # `EB-564`: ABSENT AND NOT EMPTY when a case is not about the Evoke, which
+    # is the wire's own three-state rule -- an older bridge sends no key.
+    if evoked is not None:
+        salon["evoked"] = evoked
+    state["player"]["furina_salon"] = salon
     return state
+
+
+def evoke_row(**kw) -> dict:
+    """One Evoke on the wire, in `FurinaReframeLedger.Evoked`'s field order.
+
+    THE DEFAULT IS CHEVALMARIN'S, which is the bow the r14 seat met twice:
+    Hydro on every enemy, a flat 3 Encore, no body named and no damage.
+    """
+    row = {"member": "Chevalmarin", "focus_mult": 3, "fanfare": 5,
+           "encore": 3, "aura_all": True, "target": "", "combat_id": "",
+           "damage": 0, "block": 0}
+    row.update(kw)
+    return row
+
+
+def test_an_evoke_prints_its_own_line():
+    """`EB-564`, and it is the row.
+
+    "The Salon log printed the two performances and never printed the Evoke.
+    I only knew it had happened by reading the auras" (Furina r14 lane 1, (c)
+    2). It fired twice in one elite -- the kit's biggest single beat -- and
+    the whole evidence was Encore jumping by three and every body coming out
+    wearing Hydro.
+
+    THE PERFORMANCE LIST COULD NOT HAVE CARRIED IT. An Evoke is a BOW, and a
+    bow never passes through `PerformMember`, the one site that files a
+    performance row. Chevalmarin's bow also does two things no performance row
+    can say: it touches EVERY enemy, so there is no body to name, and it
+    grants a flat Encore no `amount` field is about.
+    """
+    page = blindplay.observe(salon_state(
+        [{"member": "Crabaletta", "target": "Nibbit", "combat_id": "1",
+          "element": "Hydro", "aura": "Hydro", "amount": 6, "paid": True,
+          "evoked": False}],
+        evoked=[evoke_row()]))
+    assert "## What your Salon did this turn" in page
+    # The ordinary performance is still its own line, above.
+    assert "- **Crabaletta** hit Nibbit for 6 Hydro" in page
+    assert ("- **Chevalmarin** took its final bow \u2014 an EVOKE, so it left "
+            "the stage. It left Hydro on every enemy, granted 3 Encore, and "
+            "minted 5 Fanfare, its Focus counting 3 times.") in page
+
+
+def test_an_evoke_that_hits_names_the_body_and_the_number_that_landed():
+    """Crabaletta's bow picks a body the way its performance does, so the line
+    names it -- and the figure is what LANDED, `EB-511`'s rule at the bow."""
+    page = blindplay.observe(salon_state(
+        [], evoked=[evoke_row(member="Crabaletta", aura_all=False,
+                              target="Nibbit", combat_id="1", damage=18,
+                              encore=0)]))
+    assert ("- **Crabaletta** took its final bow \u2014 an EVOKE, so it left "
+            "the stage. It hit Nibbit for 18 Hydro, and minted 5 Fanfare, its "
+            "Focus counting 3 times.") in page
+
+
+def test_an_evoke_that_aims_at_nobody_says_what_it_did_instead():
+    """The Usher's bow blocks and touches no body, `_render_performance`'s own
+    rule one act over: the clauses that are not about this member are absent
+    rather than printed empty."""
+    page = blindplay.observe(salon_state(
+        [], evoked=[evoke_row(member="the Usher", aura_all=False, block=11,
+                              encore=0)]))
+    assert ("- **the Usher** took its final bow \u2014 an EVOKE, so it left "
+            "the stage. It gave you 11 Block, and minted 5 Fanfare, its Focus "
+            "counting 3 times.") in page
+    section = page.split("## What your Salon did this turn")[1]
+    assert "Hydro" not in section.split("\n\n")[1]
+
+
+def test_a_wire_without_the_evoke_key_prints_no_evoke_line():
+    """ABSENT IS NOT EMPTY. A bridge or a klee.dll older than `EB-564` sends
+    no `evoked` key, and the block prints exactly what it printed before."""
+    page = blindplay.observe(salon_state(
+        [{"member": "the Usher", "target": "", "combat_id": "",
+          "element": "", "aura": "", "amount": 3, "paid": True,
+          "evoked": False}]))
+    assert "- **the Usher** gave you 3 Block." in page
+    assert "final bow" not in page
 
 
 def test_a_salon_performance_names_the_body_it_picked_and_the_aura():
@@ -8855,6 +8939,11 @@ def test_the_salon_block_is_the_mods_own_snapshot_shape():
     assert 'snapshot["replayed"]' in snapshot
     # `EB-506`: and the third, the stage in slot order.
     assert 'snapshot["company"]' in snapshot
+    # `EB-564`: and the fourth, this turn's Evokes with their own fields.
+    assert 'snapshot["evoked"]' in snapshot
+    for field in ("focus_mult", "fanfare", "encore", "aura_all", "damage",
+                  "block"):
+        assert f'["{field}"]' in snapshot, field
     bridge = (REPO / "vendor" / "STS2_MCP" / "gits"
               / "GitsFurinaSalon.cs").read_text(encoding="utf-8")
     assert '"KleeMod.Powers.FurinaReframeLedger"' in bridge
@@ -8877,6 +8966,14 @@ def test_the_target_and_the_aura_are_recorded_where_they_are_decided():
     # ...and the turn boundary is the one place it exists.
     turn = salon[salon.index("public override async Task AfterPlayerTurnStart"):]
     assert "ClearPerformances()" in turn[:900]
+    # `EB-564`: the BOW's half, recorded in the one implementation of a member
+    # bowing and for the same reason -- `Bow` picks Crabaletta's body from
+    # `Rng.CombatTargets` and throws the reference away, and Chevalmarin's
+    # Encore grant is a local nothing polls back.
+    bow = salon[salon.index("private static async Task Bow("):]
+    bow = bow[:bow.index("\n    }")]
+    assert "FurinaReframeLedger.For(owner).NoteEvoked(" in bow
+    assert "bowEncoreGranted = SalonConstants.ChevalmarinBowEncore;" in bow
 
 
 # ------------------------------------- EB-417: a Mine reads as a Mine -------

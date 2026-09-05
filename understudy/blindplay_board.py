@@ -359,6 +359,16 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
         it is printed at all -- "two Crabaletta lines ... for three
         Companion-card plays' worth of triggers", and "no line anywhere on the
         screen said Duet".
+
+      evoked -- `EB-564`. This turn's EVOKES, in order. An Evoke is a BOW and
+        a bow is not a performance, so it is in neither list above and the r14
+        seat that met two of them knew only from the auras: "the Salon log
+        printed the two performances and never printed the Evoke". `member` is
+        the stage name; `fanfare` is what the Evoke minted and `focus_mult`
+        how many times its Focus term counted; `encore` is Chevalmarin's flat
+        grant; `aura_all` is that member's whole-board Hydro, which has no
+        target to name; `target`/`combat_id`/`damage` are Crabaletta's hit and
+        `block` is the Usher's.
     """
     raw = player.get("furina_salon")
     if not isinstance(raw, dict) or not raw:
@@ -375,6 +385,20 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
     replayed = [name for name in
                 (_text(entry) for entry in (raw.get("replayed") or []))
                 if name]
+    # `EB-564`. ABSENT IS NOT EMPTY, this block's standing rule: a bridge or a
+    # klee.dll older than the field sends no `evoked` key and the page prints
+    # no Evoke line, exactly as before.
+    evoked = [
+        {"member": _text(row.get("member")),
+         "focus_mult": _int(row.get("focus_mult")),
+         "fanfare": _int(row.get("fanfare")),
+         "encore": _int(row.get("encore")),
+         "aura_all": bool(row.get("aura_all")),
+         "target": _text(row.get("target")),
+         "combat_id": _text(row.get("combat_id")),
+         "damage": _int(row.get("damage")),
+         "block": _int(row.get("block"))}
+        for row in (raw.get("evoked") or []) if isinstance(row, dict)]
     # `EB-506`: the stage itself, front first. ABSENT IS NOT EMPTY, this
     # block's standing rule: a bridge or a klee.dll older than the field sends
     # no `company` key and the page prints no stage line, exactly as before.
@@ -382,7 +406,7 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
                (_text(entry) for entry in (raw.get("company") or []))
                if name]
     return {"performed": performed, "replayed": replayed,
-            "company": company}
+            "evoked": evoked, "company": company}
 
 
 def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],
@@ -406,7 +430,11 @@ def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],
     by_id = {_text(raw.get("combat_id")): face["name"]
              for raw, face in zip(wire, printed)
              if _text(raw.get("combat_id"))}
-    for row in salon["performed"]:
+    # `EB-564`: THE EVOKE'S OWN BODY TAKES THE SAME NAMING. Crabaletta's bow
+    # picks a target the way its performance does, and a bow of that size is
+    # the most likely act in the fight to have KILLED what it hit -- which is
+    # exactly the case the title fallback exists for.
+    for row in salon["performed"] + salon.get("evoked", []):
         if not row["combat_id"]:
             continue
         row["target"] = (by_id.get(row["combat_id"])
