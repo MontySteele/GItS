@@ -1441,3 +1441,28 @@ Four verdicts, each with its clause and its line. Under 200 words.
 - **Rolling Tide — FOLLOWS.** Clauses: C3, C5, C8.
 - **Guest List — FOLLOWS.** Clauses: C1, C6.
 ```
+
+
+### 5.5a Correction (2026-09-05, GPT review item 2): Second Course's price
+
+The prompt in 5.5 priced Second Course as "two performances (12 random
+Hydro) for an energy and three Encore". That arithmetic came from a resolve
+that never paid the printed price. In play the printed 3 is spent at the
+cost line and the shipped Salon rule then charges 1 Encore per performance
+or performs dry at three quarters (`SALON_TICK_ENCORE_COST`,
+`SALON_DRY_DAMAGE_MULT`), so the card's full value costs five Encore: 8
+damage at 3, 10 at 4, 12 at 5, the pool empty afterwards in every case,
+which is the reproduction GPT reported and
+`test_second_course_at_the_affordability_boundary` now pins. The verdict
+(FOLLOWS on C2, C5, C8) is kept with this caveat: the corrected price binds
+harder than the one the reviewer read, so no clause it weighed loosens; the
+row is not re-read. The face is unchanged and the pass packet's section 2
+carries the corrected arithmetic.
+
+### 5.5b Process (2026-09-05, GPT review item 1)
+
+`REVIEW_PROTOCOL` (`understudy/seat.py`) now requires each verdict to carry
+the comparison or counterexample it rests on and calls a bare verdict
+INCOMPLETE; the remedy ban is unchanged. The three bare Kokomi verdicts in
+5.4 were the seat obeying the old text. The comparisons written into the
+Kokomi pass packet are the author's derivations and are labelled so there.

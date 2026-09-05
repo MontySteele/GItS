@@ -51,13 +51,17 @@ are Hydro; a planned single-target line is aimed when written (R250).
 
 1. **Riptide** — Common Attack, 2. *Deal 9 damage to ALL enemies. Plan:
    Deal 13 damage to ALL enemies.* Upgrade: 12 and 17. The heavy AoE.
-   First written at 1 energy (5 and 9) and ruled a strictly better
-   Kurage's Oath (basic, 1: 3 and 7); re-priced at 2, where Deep Current
+   First written at 1 energy (5 and 9) and ruled REQUIRES_MODIFICATION on
+   C6 with no comparison named; the comparison this packet's author
+   derived, not the reviewer's, is Kurage's Oath (basic, 1: 3 and 7),
+   which that version dominated on both lines; re-priced at 2, where Deep Current
    (1: 6 to ALL) is the cheaper now-line and the Plan premium is the
    brief's usual four.
 2. **Pincer** — Common Attack, 1. *Deal 3 damage twice. Plan: Deal 3
    damage three times.* Upgrade: 4 per hit. First written at 4s (8 and
-   12) and ruled a strictly better Feint (1: 6, Plan 10); re-priced at
+   12) and ruled REQUIRES_MODIFICATION on C6 with no comparison named;
+   the author's derived comparison is Feint (1: 6, Plan 10), which that
+   version dominated on both lines; re-priced at
    3s: 6 now in two hits, 9 planned in three, worse into Block, better
    under Vulnerable, three Casket-sized hits the morning after.
 3. **Flank** — Uncommon Attack, 1. *Deal 8 damage. Plan: Deal 8 damage to
@@ -89,10 +93,15 @@ are Hydro; a planned single-target line is aimed when written (R250).
    (rule 3), for the whole fight instead of two mornings, and no longer a
    Plan itself, so it never spends the morning it doubles. Its price is
    two energy on a turn that writes no Plan, and every turn after that it
-   pays only what the deck plans. The reviewer's first read held it
-   against the printed row it replaces; the second read, with that row
-   off the census and The Moon Overlooks the Waters (Rare Power, 2:
-   Plans also happen now) as the standing reference, is FOLLOWS. The
+   pays only what the deck plans. The reviewer's first read ruled it
+   REQUIRES_MODIFICATION on C6 with no comparison named; the author's
+   reading of that verdict was that it was held against the printed row
+   it replaces, which was still on the census. The fourth read, with that
+   row struck as replaced and The Moon Overlooks the Waters (Rare Power,
+   2: Plans also happen now) named as the standing reference, is FOLLOWS
+   on C5 and C6. Which comparison the first verdict rested on is not
+   recorded, because the seat's protocol at the time did not ask for it
+   (amended 2026-09-05, `understudy/seat.py`). The
    brief's §5 sentence is edited to match in this packet's commit.
 
 Pool after the pass: 37 rows; Common Attacks with a Plan line 3 (from 1),

@@ -362,6 +362,39 @@ def test_the_extra_performance_is_crabalettas_even_off_a_full_stage(arm):
     assert _tick_members(st) == ["crabaletta", "crabaletta"]
 
 
+@pytest.mark.parametrize("encore, expected_hits", [
+    (3, "dry dry"), (4, "paid dry"), (5, "paid paid"),
+])
+def test_second_course_at_the_affordability_boundary(arm, encore,
+                                                     expected_hits):
+    """GPT review, 2026-09-05, item 2. The printed price is 3 Encore, and the
+    SHIPPED Salon rule then charges `SALON_TICK_ENCORE_COST` per performance
+    or performs dry at `SALON_DRY_DAMAGE_MULT` -- the member tip says so, the
+    packet's first arithmetic did not. So the card's full-value price is
+    FIVE Encore: at exactly 3 both performances are dry, at 4 the first is
+    paid and the second dry, at 5 both are paid, and the Encore pool is
+    empty afterwards in every case. The reproduction GPT reported (8 / 10 /
+    12 at zero Fanfare against an empty stage) is what this pins."""
+    st = _staged([], encore=encore)
+    st.player.energy = 3
+    hp = st.enemies[0].hp
+    printed = C.SALON_MEMBERS["crabaletta"]["tick"]["damage"]
+    paid, dry = printed, int(printed * C.SALON_DRY_DAMAGE_MULT)
+    card = loader.get_card("proto_fr_second_course")
+    st.player.hand.append(card)
+    assert combat.card_playable(st, card)
+
+    # Through `play_card`, not `resolve_card`: the printed 3 is spent at the
+    # cost line (combat.py, `encore_cost`), and a resolve-only test never
+    # pays it -- which is how the packet's first arithmetic was written.
+    combat.play_card(st, card)
+
+    expected = sum(paid if h == "paid" else dry for h in expected_hits.split())
+    assert st.enemies[0].hp == hp - expected
+    assert _tick_members(st) == ["crabaletta", "crabaletta"]
+    assert st.player.encore == 0, "the printed 3 and the per-performance drain"
+
+
 # ======================================================================
 # 4. ROLLING TIDE -- the kit's own perform verb
 # ======================================================================

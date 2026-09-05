@@ -88,10 +88,16 @@ this order:
    turn: what you played, in what order, and **the alternative you rejected and
    why**. That last clause is the instrument — a turn with no rejected
    alternative is a turn that presented no decision, and saying so is the
-   finding. Quote the printed text you were reading whenever it decided
-   something, and say plainly where the screen and the outcome disagreed.
+   finding. **Judge the decisions across the fight and the draft, not turn by
+   turn:** an obvious lethal that a plan set up two turns earlier is that
+   plan paying off, not a dead turn, and a fight whose only decision was
+   the draft pick that shaped it still had one. Say which it was. Quote the
+   printed text you were reading whenever it decided something, and say
+   plainly where the screen and the outcome disagreed.
 3. **`## The kit, after N fights`** — five lettered answers:
-   - **(a)** Which decisions felt like real choices, and what they traded off.
+   - **(a)** Which decisions felt like real choices, and what they traded off,
+     naming where each was made: on the turn, earlier in the fight, or at
+     the draft.
    - **(b)** What felt automatic, and what never seemed worth playing.
    - **(c)** What you could not understand, or that seemed to contradict its
      own printed text.
