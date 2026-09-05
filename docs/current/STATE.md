@@ -170,7 +170,11 @@ are in [`workstreams.md`](workstreams.md).
   Stoke the Fuse granted then Grounded and Sparks 'n' Splash; Stoke played
   five times with a real ordering rule, Countdown quiet, Sparks 'n' Splash
   never played in four fights of its own kit, the intent hedge and the map's deck list wrong
-  (`EB-461`, `EB-447` reopened); no pick. [USER]'s act-1 run is due on
+  (`EB-461`, `EB-447` reopened); no pick. **Round 16 is READ**
+  (`review/active/klee-overhaul-round-16-2026-09-04.md`): one seat on
+  `0.2.2614+proto`, floor 11, five of five with the Gardener elite; the
+  ordering decisions read as real and good, Skittish silently unfired by a
+  Bomb (`EB-490`), the last turn of every fight automatic; no pick. [USER]'s act-1 run is due on
   `0.2.2401+proto`. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
