@@ -591,7 +591,20 @@ def resolve_all(state: CombatState) -> None:
     # queue the Tide Wall sits: on a three-Plan morning it is three whether it
     # was written first or last. `KokomiPlan.ResolveAll` records the same
     # number on the ledger, in the same place.
-    state.kk_plans_this_morning = len(due)
+    # `EB-501`, R-less D default (Kokomi r17): the depth is CARRY-OUTS and not
+    # entries. All three readers say "carried out this morning" on their own
+    # faces -- Tide Wall, Well Laid, Tide Chart -- and under Nereid's
+    # Ascension a one-Plan morning carries out twice, so a morning of one
+    # written Plan pays for two. The seat wrote two Plans under the Ascension
+    # and Well Laid paid +3.
+    #
+    # READ ONCE, AT THE DRAIN, which is the same discipline the paragraph
+    # above states and for the same reason: the answer must not depend on
+    # where in the queue the reader sits. The one state it cannot see is an
+    # Ascension that ARRIVES mid-morning off a Plan of its own; the loop below
+    # would then double the later entries and this number would not know. That
+    # is the price of order-independence and it is deliberate.
+    state.kk_plans_this_morning = len(due) * carry_out_times(state)
     state.emit("plan_resolve_all", plans=len(due))
     for entry in due:
         for _ in range(carry_out_times(state)):

@@ -51,7 +51,7 @@ public sealed class ProtoKkWellLaid : CustomCardModel, IElementalCard, ICharacte
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Well Laid"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Deals {ExtraDamage:diff()} more for each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] carried out this morning."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, already including {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this morning."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

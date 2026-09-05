@@ -861,11 +861,22 @@ BASE_KEYWORDS: dict[str, str] = {
     # row said "every hit", and `Kurage's Oath` -- printed `cost 1, skill` --
     # took the 1.5x (Kokomi r16 (c) 2). `VulnerablePower` is the TARGET's own
     # power and gates on `IsPoweredAttack()` exactly as `WeakPower` does, so
-    # "Attacks" means attack HITS on both sides of the exchange. Same sentence
-    # as `BaseKeywordTips.ForVulnerable`, pinned to it.
+    # a card's hit is amplified whatever its `type:`.
+    #
+    # `EB-497` NARROWED IT to "every CARD hit", because "every hit" was one
+    # case too wide: Explosive Ampoule dealt 10, not 15, into a Vulnerable
+    # Sewer Clam (Klee r17 lane 1). `potions.fire_potion` goes through
+    # `refpowers.unpowered_damage`, which never reaches `modify_damage_taken`,
+    # and the shipped C# power's `IsPoweredAttack()` gate says the same thing
+    # -- so a potion's damage is flat and this row says so.
+    #
+    # THE ENEMY'S OWN STATUS LINE now carries the same rule: `EB-481` reopened
+    # for it and `KleeMod.InjectLocStrings` merges an arm row into the game's
+    # `powers` table. Same sentence as `BaseKeywordTips.ForVulnerable`, pinned
+    # to it.
     "Vulnerable": (
-        f"The wearer takes {VULNERABLE_TAKEN_PCT}% more damage from every "
-        f"hit it takes, a Skill's damage too. One stack falls off at the end "
+        f"Every card hit it takes deals {VULNERABLE_TAKEN_PCT}% more, a "
+        f"Skill's too. A potion's does not. One stack falls off at the end "
         f"of each of its turns."),
     # `EB-469`. THE GAME'S OWN STATUS LINE SAYS "Attacks deal 25% less damage
     # for 1 turn", and the Kokomi r15 seat read "Attacks" as the CARD TYPE --

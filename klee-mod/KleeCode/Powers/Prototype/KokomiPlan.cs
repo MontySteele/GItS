@@ -682,7 +682,22 @@ public static class KokomiPlan
         // than counted up inside the loop, so the answer does not depend on
         // where in the queue the Tide Wall sits. `kokomi_plan.resolve_all`
         // records the same number in the same place.
-        KokomiOverhaulLedger.For(kokomi).NoteMorning(due.Count);
+        //
+        // `EB-501`. THE DEPTH IS CARRY-OUTS AND NOT ENTRIES. All three readers
+        // say "carried out this morning" on their own faces -- Tide Wall, Well
+        // Laid and Tide Chart -- and under Nereid's Ascension a one-Plan
+        // morning is carried out twice. The r17 seat wrote its Plans under the
+        // Ascension and Well Laid paid the written count.
+        //
+        // STILL READ ONCE, AT THE DRAIN, for the reason above: the answer must
+        // not depend on where in the queue the reader sits. The one state it
+        // cannot see is an Ascension that ARRIVES mid-morning off a Plan of its
+        // own, which the loop below would honour and this number would not.
+        // That is the price of order-independence and it is deliberate.
+        // `kokomi_plan.resolve_all` multiplies by the same term in the same
+        // place.
+        KokomiOverhaulLedger.For(kokomi).NoteMorning(
+            due.Count * CarryOutTimes(kokomi));
         // The display list is handed over BEFORE the sync, because `Sync`
         // refreshes the strip and the strip reads `Showing`: the badge goes
         // away in the same beat the column stays up, which is the true
@@ -743,6 +758,13 @@ public static class KokomiPlan
     /// this file holds what is owed, and which card owed it is the card's own
     /// business. Sim twin: `kokomi_plan.promise_tide_chart`.
     /// </summary>
+    /// <summary>The card's printed title, said once (`EB-503`): the morning's
+    /// draw line names the card that promised it, and the page's own naming
+    /// rule is "by printed title" (`FurinaReframeLedger`'s replay list makes
+    /// the same choice). Sim twin: the `tide_chart_paid` row's own name.
+    /// </summary>
+    private const string TideChartTitle = "Tide Chart";
+
     public static void PromiseDraw(Creature? kokomi, int flat, int per)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
@@ -810,6 +832,31 @@ public static class KokomiPlan
         _tideCharts.Remove(player);
         if (cards <= 0) return;
         await CardPileCmd.Draw(choiceContext, cards, player);
+        // `EB-503`. THE ONE PLAN CARD THE BAKE-KURAGE BLOCK NEVER REPORTED ON.
+        // The r17 seat had two carry-outs pending, watched one extra card
+        // arrive, and found "no line anywhere" -- the draw happens inside the
+        // morning, after the jellyfish has finished speaking, and nothing said
+        // it was the Tide Chart's.
+        //
+        // A ROW AND NOT A BEAT, which is `NoteUnfinished`'s split and taken
+        // for a second reason here: `KurageBeat.Say` builds an
+        // `NSpeechBubbleVfx`, which needs a live scene tree, and this method
+        // is one of the few on this class the headless suite can reach
+        // (`KokomiOverhaulRuleTests` calls it directly). It still goes through
+        // `Record`, the one writer, so the draw files into the same list every
+        // carry-out lands in and the page needs to learn nothing --
+        // `KurageBeat.Line` gives it the ruled format ("Bake-Kurage: Tide
+        // Chart, 3") and `Kind.Draw`'s word the rest ("3 cards drawn").
+        //
+        // AFTER THE DRAW, not before, because the number the seat is owed is
+        // what arrived: this is the one site that knows both that a promise
+        // existed and what it came to.
+        //
+        // `onPlay: false` -- a morning event, so it files with the morning's
+        // carry-outs and not with the on-play doors.
+        Record(kokomi, new CarriedOutPlan(
+            TideChartTitle, cards, Vfx.KurageBeat.Line(TideChartTitle, cards),
+            null, false, NumberKind(Kind.Draw), cards, null));
     }
 
     /// <summary>

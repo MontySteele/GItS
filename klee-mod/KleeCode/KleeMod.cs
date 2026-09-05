@@ -466,6 +466,54 @@ public static class KleeMod
                 .Where(pair => !keywordTable.HasEntry(pair.Key))
                 .ToDictionary(pair => pair.Key, pair => pair.Value));
 
+#if PROTOTYPE_CARDS
+            // `EB-481`, THE HALF THIS MOD DOES NOT OWN A KEYWORD FOR.
+            //
+            // The row was closed once on the tips and reopened on 2026-09-05,
+            // because a tip is not where a player meets Vulnerable: the seat
+            // met it on the ENEMY, whose status line is the base game's own
+            // `VULNERABLE_POWER` row and reads "more damage from Attacks"
+            // while `BaseKeywordTips.ForVulnerable` and the sim's glossary
+            // read the engine's rule. Two texts disagreeing about whether a
+            // Skill is safe is a player sequencing badly (Kokomi r16/r17),
+            // and the box was the one telling the truth.
+            //
+            // A ROW AND NOT A PATCH, because a description is a table lookup:
+            // the base game's own `powers` table is the only printer of that
+            // line, so the only way to correct it is to carry a row. The keys
+            // are the shipped ones, read off `SlayTheSpire2.pck` v0.111.0 --
+            // "Vulnerable creatures take [blue]50%[/blue] more damage from
+            // Attacks." and "Receive [blue]{DamageIncrease:percentMore()}%
+            // [/blue] more damage from Attacks for [blue]{Amount}[/blue]
+            // {Amount:plural:turn|turns}." -- so this is those two sentences
+            // with one word moved, holes and BBCode untouched.
+            //
+            // THE ONE WORD IS "CARDS", and `EB-497` is why it is not "hits":
+            // `VulnerablePower.ModifyDamageMultiplicative` gates on
+            // `ValueProp.IsPoweredAttack()`, which every damage clause the
+            // generator emits carries and a POTION's damage does not (a
+            // Vulnerable Sewer Clam took 10 off Explosive Ampoule, not 15 --
+            // Klee r17 lane 1). The sim says the same thing structurally:
+            // `potions.fire_potion` goes through `refpowers.unpowered_damage`,
+            // which never reaches `modify_damage_taken`.
+            //
+            // UNDER THE QUARANTINE, like the five keyword bodies above and for
+            // the same reason: a release build does not police the base game's
+            // English (`KleeSelfCheck` says so in as many words), and the
+            // glossary these words have to agree with is itself arm-only.
+            LocManager.Instance.GetTable("powers").MergeWith(
+                new Dictionary<string, string>
+                {
+                    ["VULNERABLE_POWER.description"] =
+                        "Vulnerable creatures take [blue]50%[/blue] more "
+                      + "damage from cards, a potion's aside.",
+                    ["VULNERABLE_POWER.smartDescription"] =
+                        "Receive [blue]{DamageIncrease:percentMore()}%[/blue] "
+                      + "more damage from cards for [blue]{Amount}[/blue] "
+                      + "{Amount:plural:turn|turns}.",
+                });
+#endif
+
             // Klee's character strings moved onto the model itself
             // (Klee.Localization) when she became a CustomCharacterModel:
             // BaseLib prefixed her id to KLEEMOD-KLEE, so the hardcoded

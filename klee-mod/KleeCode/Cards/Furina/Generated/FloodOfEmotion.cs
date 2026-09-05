@@ -41,7 +41,7 @@ public sealed class FloodOfEmotion : CustomCardModel, IElementalCard, ICharacter
     public string CharacterId => "furina";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
+        FurinaBurstRider.Keywords(new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro });
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForBurst(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
@@ -51,7 +51,7 @@ public sealed class FloodOfEmotion : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Flood of Emotion"),
-        ("description", "Deal {Damage:diff()} damage. If you have at least 20 [gold]Fanfare[/gold]: deal 14 damage. [gold]Burst[/gold] +5."),
+        ("description", FurinaBurstRider.Face("Deal {Damage:diff()} damage. If you have at least 20 [gold]Fanfare[/gold]: deal 14 damage.", "Deal {Damage:diff()} damage. If you have at least 20 [gold]Fanfare[/gold]: deal 14 damage. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

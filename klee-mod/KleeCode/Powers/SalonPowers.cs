@@ -821,6 +821,23 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         // is one recording site for the one implementation of a member acting.
         Creature? picked = null;
         Elements.Element? left = null;
+        // `EB-511`. THE NUMBER THAT LANDED, not the number the tick was worth
+        // before the pipeline touched it. Seeded with the tick so the Usher's
+        // Block branch -- which has no pipeline -- files what it always filed.
+        //
+        // THE DEFECT. Furina r11 fight 3 turn 2 and fight 4 turn 6: the page's
+        // Salon block reported a member's act at `TickValue`, which is read
+        // BEFORE `ElementalHit.Deal` runs the dealer's Weak, the reaction
+        // amplifier and the target's Vulnerable. Under a Weak stack a
+        // Crabaletta logged at 6 landed for 4, and a Vaporizing one logged at
+        // 4 landed for 6 -- so a seat reconciling the fight's HP against the
+        // block concluded that a reaction amplifier had been dropped by the
+        // CARD it had just played (Chevreuse printed 7, previewed Vaporize
+        // 1.5x, and was blamed for the 8 the arithmetic left over). Nothing
+        // was dropped: `Deal` composes Spotlight x Weak x Vaporize exactly,
+        // and the log was the only thing lying. `Deal` has RETURNED the
+        // truncated landed amount since `EB-270`, for this exact reason.
+        var landed = amount;
         switch (member)
         {
             case SalonMember.Crabaletta:
@@ -829,7 +846,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 var target = combat!.RunState.Rng.CombatTargets
                     .NextItem(targets);
                 if (target == null) break;
-                await ElementalHit.Deal(
+                landed = await ElementalHit.Deal(
                     choiceContext, target, Elements.Element.Hydro,
                     amount, owner);
                 picked = target;
@@ -854,7 +871,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 picked?.CombatId.ToString(),
                 picked == null ? null : Elements.Element.Hydro.ToString(),
                 left?.ToString(),
-                amount, paid, Evoked: false));
+                landed, paid, Evoked: false));
 #endif
         FurinaResources.GainBurst(
             owner, FurinaResourceConstants.BurstPerSalonTick);

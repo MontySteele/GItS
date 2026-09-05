@@ -38,7 +38,7 @@ public sealed class OverflowingHospitality : CustomCardModel, ICharacterCard, IS
     public string CharacterId => "furina";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
+        FurinaBurstRider.Keywords(new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro });
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this, members: new[] { SalonMember.Chevalmarin }), this);
@@ -48,7 +48,7 @@ public sealed class OverflowingHospitality : CustomCardModel, ICharacterCard, IS
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Overflowing Hospitality"),
-        ("description", "Add 1 [gold]Surintendante Chevalmarin[/gold] to your [gold]Salon[/gold]. Apply [gold]Hydro[/gold] to a random enemy. Gain {Encore:diff()} [gold]Encore[/gold]. [gold]Burst[/gold] +5."),
+        ("description", FurinaBurstRider.Face("Add 1 [gold]Surintendante Chevalmarin[/gold] to your [gold]Salon[/gold]. Apply [gold]Hydro[/gold] to a random enemy. Gain {Encore:diff()} [gold]Encore[/gold].", "Add 1 [gold]Surintendante Chevalmarin[/gold] to your [gold]Salon[/gold]. Apply [gold]Hydro[/gold] to a random enemy. Gain {Encore:diff()} [gold]Encore[/gold]. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
