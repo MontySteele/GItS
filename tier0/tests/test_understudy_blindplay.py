@@ -8883,6 +8883,35 @@ def test_an_evoke_that_aims_at_nobody_says_what_it_did_instead():
     assert "Hydro" not in section.split("\n\n")[1]
 
 
+def test_the_evoke_line_prints_before_the_arriving_member_performs():
+    """`EB-582`, and it is the row.
+
+    THE FIND (Furina r15 lane 1 (c) 2). The Salon log printed the Evoke AFTER
+    the joining member's performance, while the `Deploy` word printed on the
+    same card says "a full stage [gold]Evokes[/gold] the front member first".
+    `EB-564` put the bow last on the reading that "an Evoke follows the acts
+    above"; it does not -- a deploy onto a full stage bows the front member
+    out and THEN the arrival performs, in both engines
+    (`effects._deploy_salon_members`, `SalonMemberPower.Deploy`).
+
+    THE BLOCK ORDERS BY CLASS AND NOT BY CLOCK, which is the boundary this
+    fixture states as well: the wire carries two lists and no per-act
+    sequence, so the one turn it cannot order is a Companion play followed by
+    a full-stage deploy. Every Evoke that has a performance beside it at all
+    came from a deploy, which is the case this row is about.
+    """
+    page = blindplay.observe(salon_state(
+        [{"member": "the Usher", "target": "", "combat_id": "",
+          "element": "", "aura": "", "amount": 7, "paid": True,
+          "evoked": False}],
+        evoked=[evoke_row(member="Crabaletta", aura_all=False,
+                          target="Nibbit", combat_id="1", damage=18,
+                          encore=0)]))
+
+    section = page.split("## What your Salon did this turn")[1]
+    assert section.index("took its final bow") < section.index("**the Usher**")
+
+
 # ------------- EB-567: the Spotlight window, before the refusal -----------
 
 def spotlight_turn_one_state(round_no: int = 1, hand_title: str =

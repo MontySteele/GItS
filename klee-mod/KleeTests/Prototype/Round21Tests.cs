@@ -248,6 +248,57 @@ public class Round21Tests
             c => c.StartsWith("DamageCmd.", StringComparison.Ordinal));
     }
 
+    // ==================================================================
+    // `EB-580` -- a card's enchantment folds into its Plan line
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r21 lane 2 (c) 3). A Sharp 2 raised Riptide's now-line
+    // from 9 to 11 and left its Plan line printing 13, so the pair read as a
+    // fact about the card: the Plan premium had shrunk and the now-line was
+    // the better half. It "silently reversed the right play on my best card".
+    // Ruled at the r21 packet's D default -- a card's own enchantment applies
+    // to BOTH its lines, since both are the card's.
+    //
+    // STRUCTURAL, for this file's standing reason: an `EnchantmentModel` is a
+    // live model on a live card and the headless suite has neither, so what a
+    // pin reads is that ONE method asks the base game's two calls and that
+    // both the number WRITTEN and the number PRINTED go through it. The
+    // arithmetic itself is pinned for real in tier0
+    // (`test_eb580_an_enchantment_folds_into_the_plan_line.py`).
+
+    [Fact]
+    public void The_fold_asks_the_base_game_s_own_two_terms()
+    {
+        var folded = Il.Calls(Il.Method("KokomiPlan", "Enchanted"));
+
+        Assert.Contains("EnchantmentModel.EnchantDamageAdditive", folded);
+        Assert.Contains("EnchantmentModel.EnchantDamageMultiplicative", folded);
+        // `ValueProp.Move` and not the planned hit's `Unpowered`, which is the
+        // one argument in that method: measured on the shipped assembly,
+        // `Corrupted` answers x1.5 to `Move` and x1 to `Unpowered`, so the
+        // hit's own prop would have dropped every multiplier.
+        var source = Source("Powers/Prototype/KokomiPlan.cs")
+            .Replace("\r\n", "\n");
+        Assert.Contains(
+            "        var folded = amount\n"
+          + "                   + enchantment.EnchantDamageAdditive("
+          + "amount, ValueProp.Move);",
+            source);
+    }
+
+    [Fact]
+    public void The_number_written_and_the_number_printed_take_the_same_fold()
+    {
+        // ONE CALL, TWO READERS -- `EB-265`'s rule, and the whole of why the
+        // r21 find was legible as a defect at all: a face that folds and a
+        // queue that does not is two numbers for one line.
+        Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "Schedule")),
+                        c => c == "KokomiPlan.Enchanted");
+        Assert.Contains(
+            Il.Calls(Il.Method("PlanDamageVar", "UpdateCardPreview")),
+            c => c == "KokomiPlan.Enchanted");
+    }
+
     // ------------------------------------------------------------ helpers --
 
     /// <summary>The body of a method matched by <paramref name="signature"/>,
