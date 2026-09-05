@@ -78,8 +78,13 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # under the one it prints now. Absent on every other screen, and absent
     # here for a row this page cannot render without guessing -- see
     # `qa_packet.upgraded_face` for both bounds.
+    # `EB-529`: and where it cannot be rendered, the REASON, because "no
+    # `Upgraded:` line" and "no upgrade" are the same silence to a reader
+    # deciding what to spend a Smith on.
     if c.get("upgraded_face"):
         out.append(f"    Upgraded: {c['upgraded_face']}")
+    elif c.get("upgraded_note"):
+        out.append(f"    Upgraded: not shown -- {c['upgraded_note']}.")
     note = qa_packet.cost_note(c)
     if note:
         out.append(f"    {note}")

@@ -7561,6 +7561,98 @@ def test_the_upgraded_face_moves_the_number_the_delta_names():
         "KLEEMOD-LYNETTE_BOX_TRICK", "Draw 2 cards.") == "Draw 3 cards."
 
 
+# --- `EB-529`: THE FOUR SMITH ROWS THAT SHOWED NOTHING AND SAID NOTHING ------
+#
+# THE FIND (Furina r12 lane 2). "The upgrade screen showed no upgrade at all
+# for `Aria of Recompense`, `Salon Debut`, `An Invitation` and `Fischl -- Oz`,
+# with no line saying why, while every other card printed an `Upgraded:`
+# preview."
+#
+# THE FOUR NAMED, AND THREE OF THEM ARE ONE SHAPE. `{IfUpgraded:show:A|B}`
+# prints arm B as the card stands and arm A once it is upgraded, and where
+# NEITHER arm holds a brace that is a swap this page can make exactly. The
+# fourth -- Salon Debut's `{IfUpgraded:show:Gain {Encore:diff()} Encore.|}` --
+# carries a hole inside an arm, which is two sentences rather than one sentence
+# with a number in it, and gets a REASON instead.
+
+#: The four, with the face each printed on the seat's own Smith screen.
+_R12_SMITH = (
+    ("KLEEMOD-PROTO_FR_ARIA_OF_RECOMPENSE",
+     "Gain 5 Encore. If you have at least 3 Fanfare, gain 5 more."),
+    ("KLEEMOD-PROTO_FR_SALON_DEBUT_NAMED", "Deploy Mademoiselle Crabaletta."),
+    ("KLEEMOD-AN_INVITATION",
+     "Add 1 random Common Companion card to your hand."),
+    ("KLEEMOD-PROTO_MC_FISCHL_OZ",
+     "Hexerei. At the end of your turn, Oz deals 5 Electro damage to a "
+     "random enemy."),
+)
+
+
+def test_every_one_of_the_four_now_prints_a_face_or_a_reason():
+    """The row's acceptance: every Smith row prints its upgraded face or says
+    why not. Silence is the one answer none of them may give."""
+    for card_id, printed in _R12_SMITH:
+        built, why = qa_packet.upgrade_preview(card_id, printed)
+        assert bool(built) != bool(why), card_id
+
+
+def test_the_two_arm_swap_writes_the_upgraded_arm():
+    """Three of the four, and no arithmetic in any of them: the pattern reads
+    the UNUPGRADED arm off the printed face and the render writes the other."""
+    assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
+        "Gain 8 Encore. If you have at least 3 Fanfare, gain 8 more.")
+    assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
+        "Add 1 random Common Companion card to your hand, free this turn.")
+    # AN EMPTY UNUPGRADED ARM TAKES THE SPACE IN FRONT OF IT WITH IT: the game
+    # prints the trimmed sentence, and the upgraded face needs the space back.
+    assert qa_packet.upgraded_face(*_R12_SMITH[3]) == (
+        "Hexerei. At the end of your turn, Oz deals 5 Electro damage to a "
+        "random enemy. Draw 1 card.")
+
+
+def test_the_one_that_cannot_be_rendered_says_which_kind_of_upgrade_it_is():
+    """Salon Debut's arm carries a hole of its own, so the upgrade is a second
+    sentence rather than a number in the first. The reason is a fact about the
+    CARD, which is what a reader deciding where to spend a Smith can act on."""
+    built, why = qa_packet.upgrade_preview(*_R12_SMITH[1])
+
+    assert built == ""
+    assert why == qa_packet.NO_PREVIEW_REWRITES
+    assert not qa_packet.leaks(why)
+
+
+def test_the_other_three_reasons_are_each_a_fact_about_the_card():
+    """A card this page has no written face for, one whose upgrade moves a
+    value the face does not print, and one whose printed text no longer
+    matches the sentence it was generated from."""
+    assert qa_packet.upgrade_preview("KLEEMOD-NOT_A_CARD", "Deal 6.")[1] == \
+        qa_packet.NO_PREVIEW_TEMPLATE
+    assert qa_packet.upgrade_preview(
+        "KLEEMOD-PROTO_KO_CHAIN_FUSE",
+        "Each Bomb on target enemy grows by 3.")[1] == \
+        qa_packet.NO_PREVIEW_UNMATCHED
+    for text in (qa_packet.NO_PREVIEW_TEMPLATE, qa_packet.NO_PREVIEW_NO_NUMBER,
+                 qa_packet.NO_PREVIEW_UNMATCHED):
+        assert not qa_packet.leaks(text)
+
+
+def test_the_reason_prints_on_the_smith_under_the_face_it_is_about():
+    """And it prints where the missing line was, so the two rows read as two
+    different facts rather than as one silence."""
+    smith = live("upgrade-fresh")
+    smith = json.loads(json.dumps(smith.get("state", smith)))
+    smith["card_select"]["cards"].append(
+        {"id": "KLEEMOD-PROTO_FR_SALON_DEBUT_NAMED", "name": "Salon Début",
+         "cost": "1", "type": "Skill",
+         "description": "Deploy Mademoiselle Crabaletta."})
+    page = blindplay.observe(smith)
+
+    assert ("    Upgraded: not shown -- its upgrade rewrites the sentence "
+            "rather than moving a number in it.") in page
+    # The rows that CAN be rendered are untouched by the new line.
+    assert "    Upgraded: Gain 11 Block." in page
+
+
 # ------------------------- `EB-377`: the base game's words on a face ---------
 
 

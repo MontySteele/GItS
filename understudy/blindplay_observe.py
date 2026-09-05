@@ -249,11 +249,21 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             # `base + extra * multiplier`, so the delta and the printed
             # movement agree only where every multiplier is at rest, which a
             # Smith is and a hand is not (`qa_packet.upgraded_face`).
+            #
+            # `EB-529`. AND WHY, WHERE THERE IS NO FACE TO PRINT. "The upgrade
+            # screen showed no upgrade at all for Aria of Recompense, Salon
+            # Debut, An Invitation and Fischl -- Oz, with no line saying why,
+            # while every other card printed an `Upgraded:` preview" (Furina
+            # r12 lane 2). Three of the four were a two-arm swap this page can
+            # now make; the fourth is an upgrade that rewrites its sentence,
+            # and it says so rather than looking like the other three.
             for face, raw in zip(obs["offers"], _screen_cards(state)):
                 if face.get("upgraded"):
                     continue
-                face["upgraded_face"] = qa_packet.upgraded_face(
+                built, why = qa_packet.upgrade_preview(
                     raw.get("id"), face.get("text") or "")
+                face["upgraded_face"] = built
+                face["upgraded_note"] = why
         picked = [_card_face(c) for c in _preview_cards(state, st)]
         # How many results the transform screen has NOT chosen yet, and
         # whether its preview came through in a shape this page can read at
