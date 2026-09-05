@@ -584,6 +584,39 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
     # than one enemy, so say which") would be about the wrong board.
     pet = _pet_target(state, cmd.target)
     if pet is not None:
+        # `EB-480`. A CARD THAT CANNOT BE PLANNED IS REFUSED HERE, not posted.
+        #
+        # THE FIND (Kokomi r16 (c) 1). `play "Strike" on "Bake-Kurage"` came
+        # back `ok` with an empty refusal, burned one of the run's 120 actions
+        # and changed nothing -- energy, hand and discard as before, "Nothing
+        # is planned." The post is accepted by the bridge, reaches
+        # `PlayCardAction(card, pet)`, and the card's own now-line runs against
+        # a target it does not read, which for a `Strike` is a no-op.
+        #
+        # `can_target_pet` IS THE FACT, and it is the game's own answer:
+        # `CardModel.IsValidTarget` for the pet, asked per hand card by the
+        # bridge (`McpMod.StateBuilder.BuildCardState`, `EB-216`). A `false`
+        # here means the drag would not land, which is exactly what the tester
+        # just tried to do in words.
+        #
+        # ONLY AN EXPLICIT `false` REFUSES, `_aims_at_an_enemy`'s rule for its
+        # own twin: an ABSENT field is a bridge that predates it, and on such a
+        # feed this reads as the behaviour that build has -- the play goes
+        # through, exactly as before.
+        #
+        # THE REFUSAL LISTS THE PLAN CARDS IN HAND, which is `EB-402`'s repair
+        # one clause over: the way out is in the refusal rather than a screen
+        # away, and where the hand holds none the bare form is the only one
+        # offered because it is the only one that works.
+        if entry.get("can_target_pet") is False:
+            pet_name = _text(_combat(state)["plans"].get("pet_name"))
+            plannable = [t for e, t in zip(hand, titles)
+                         if e.get("can_target_pet") is True]
+            return _refuse(
+                f"{titles[idx]!r} cannot be planned on {pet_name}, so aiming "
+                "it there would spend the action and do nothing",
+                *(f'play "{t}" on "{pet_name}"' for t in plannable),
+                f'play "{titles[idx]}"')
         post["target"] = pet
         printed["target"] = (_combat(state)["plans"]["pet_name"])
         return Resolution(True, "play", post, printed)

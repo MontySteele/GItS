@@ -374,5 +374,8 @@ def test_the_relics_arm_face_says_the_copy_it_hands_back_is_dead():
     # `EB-437`: "Companions" is the noun the r6 seat read as the Salon
     # members, and the Spotlight reaches CARDS.
     assert "It does nothing once your " in arm
-    assert "[gold]Companion[/gold] cards are lit." in arm
+    # `EB-485` PUT THE DURATION ON THE END OF THAT CLAUSE: the lighting is a
+    # power and dies with the fight, and the r10 seat priced the Spotlight as
+    # a one-time purchase off this very sentence.
+    assert "[gold]Companion[/gold] cards are lit for this combat." in arm
     assert "does nothing" not in shipped

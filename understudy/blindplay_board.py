@@ -73,6 +73,39 @@ INTERNAL_METERS = frozenset({
     "KLEEMOD_SPOTLIGHT_SPEND_BOOST",
 })
 
+# `EB-487`. THE METERS A ZERO IS INFORMATION ABOUT, and whose board they are.
+#
+# THE FIND (Furina r10 (c) 3). The header drops a meter row at 0 -- the rule
+# right above, and a good one: the wire reports every resource the mod
+# REGISTERED, so a Kokomi board would otherwise print `Spotlight Mode: 0`. But
+# under the arm Encore and Fanfare are the two numbers every turn is priced
+# against, and a row that VANISHES at zero is not the message a row saying
+# zero is. The r10 seat inferred a load-bearing number from a missing line
+# twice, and read Fanfare as arriving only once a member had performed -- it
+# had been at 0 and unprinted all along.
+#
+# ASKED OF THE ARM, NEVER OF THE BOARD, which is why this is a table and not
+# a set: a resource is registered whether or not the run holds the character
+# who spends it (`vendor/STS2_MCP/gits/GitsResources.cs` walks BaseLib's
+# registry and knows nothing about who is playing), so presence on the wire
+# cannot tell a Furina board from a Kokomi one. `player.character` is the
+# wire's own answer -- matched on the printed Title, case-folded, exactly the
+# way `blindplay_notes._STAGE_CHARACTER` matches it one module over.
+#
+# KEYED BY THE PRINTED NAME, unlike `INTERNAL_METERS` above: these rows are
+# the ones the render prints and the glossary defines, so they are named the
+# way the page names them. Every other meter keeps the non-zero rule whole.
+ZERO_METERS: dict[str, frozenset[str]] = {
+    "furina": frozenset({"Encore", "Fanfare"}),
+}
+
+
+def _zero_meters(player: dict[str, Any]) -> frozenset[str]:
+    """The meter names this board prints at 0. Empty for every other arm."""
+    return ZERO_METERS.get(_fold(_text(player.get("character"))),
+                           frozenset())
+
+
 ALREADY_UPGRADED = "already upgraded; an upgraded copy cannot be upgraded again"
 NO_UPGRADE_DEFINED = "this build defines no upgrade for it"
 UNEXPLAINED_OMISSION = ("on the screen's list nowhere, and nothing on the feed "
@@ -199,8 +232,12 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             # something this screen does not show.
             # `EB-386`: and NOT the mod's own bookkeeping. See
             # `INTERNAL_METERS`.
+            # `EB-487`: except the arm's own two, which print their zero. See
+            # `ZERO_METERS` for why the ARM is asked and not the board.
             "meters": ({_label(k): _int(v) for k, v in resources.items()
-                        if _int(v) and k not in INTERNAL_METERS}
+                        if k not in INTERNAL_METERS
+                        and (_int(v)
+                             or _label(k) in _zero_meters(p))}
                        if isinstance(resources, dict) else {}),
             # `EB-181`: the CEILING beside the amount, per meter, where the
             # meter declares one. `{printed name: max}`, and a meter that

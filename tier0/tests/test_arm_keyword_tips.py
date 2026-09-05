@@ -463,8 +463,12 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # `EB-443` added Block and the Attack trigger, and "for its
             # size" paid for them: a tip is read in hand where there is no
             # pile to quote, so the live number stays on the badge.
+            # `EB-490` RENAMED THE CLASS AND NOT THE CLAIM, in the same
+            # fourteen characters: "Attack trigger" reads as something on the
+            # player's own side of the board, and the r16 seat read it that
+            # way beside a Block clause pointing the other direction.
             "The target's [gold]Bombs[/gold] go off first, oldest first, each ",
-            "a Pyro hit. [gold]Block[/gold] stops them, no Attack trigger ",
+            "a Pyro hit. [gold]Block[/gold] stops them, no when-hit power ",
             "fires, the first takes the aura.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
             "Start each combat with ",

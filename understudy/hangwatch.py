@@ -82,6 +82,48 @@ DEFAULT_LOG_RELATIVE = ("SlayTheSpire2", "logs", "godot.log")
 # `soak` so the string has one home.
 DEFECT_KIND = "unresponsive_spin"
 
+# `EB-489`. THE FOURTH SHAPE, and the one the r10 Furina lane died of.
+#
+# WHAT THE LANE SAW. After `go "Unknown (path 1)"` from a Treasure floor, nine
+# consecutive `observe` calls raised `TimeoutError: timed out` against
+# `/api/v1/singleplayer` -- while `/` went on answering. The lane stayed that
+# way until it was torn down; 22 of 120 actions were lost.
+#
+# THAT PAIR IS THE WHOLE DIAGNOSIS, and it is structural rather than a guess.
+# The two endpoints do NOT run in the same place:
+#
+#   `/`                       is answered on the ThreadPool worker that took
+#                             the request (`McpMod.HandleRequest`), touching
+#                             nothing of the game;
+#   `/api/v1/singleplayer`    hops to the game thread --
+#                             `RunOnMainThread(() => BuildGameState())` and
+#                             then `stateTask.GetAwaiter().GetResult()`
+#                             (`McpMod.HandleGetState`).
+#
+# That queue is drained by `ProcessMainThreadQueue`, connected to the
+# `SceneTree.ProcessFrame` signal at `Initialize`. So the moment the game
+# thread stops reaching a process frame -- a room transition that never
+# completes, a scene load that blocks, an awaited modal -- the queued build
+# never runs, `GetResult()` waits with NO TIMEOUT AND NO CANCELLATION, and the
+# state endpoint is dead for the rest of the process's life while the root
+# endpoint keeps saying `status: ok`. Each attempt after that leaks another
+# ThreadPool worker parked on the same queue, which is why nine tries did not
+# recover and could not.
+#
+# HOW IT IS TOLD FROM `unresponsive_spin`. It is not told from it by the root
+# endpoint -- EB-1's spin answers `/` too, for the same reason. It is told from
+# it by the ABSENCE of EB-1's two signals: a spin floods `godot.log` at ~1.3
+# MB/s and stops pumping window messages, and this shape does neither. So the
+# order in `classify` is: EB-1's signature first, and a root that still answers
+# with neither of those signals is this.
+#
+# NOT FIXED HERE. The repair is on the bridge side of the wire -- a bounded
+# wait on that hop, answering 503 with the queue depth instead of blocking a
+# worker forever -- and that is a `vendor/STS2_MCP` change that cannot be
+# proved without a build and a lane. Named, so the next lane files it as this
+# rather than as "the bridge stopped answering".
+STATE_STALL_KIND = "state_thread_stall"
+
 
 def default_log_path(env: dict[str, str] | None = None) -> Path | None:
     """`%APPDATA%\\SlayTheSpire2\\logs\\godot.log`, or whatever overrides it.
@@ -178,6 +220,12 @@ class Probe:
     log_bytes_end: int | None = None
     elapsed_s: float = 0.0
     responding: tuple = ()
+    #: `EB-489`. Whether the bridge's ROOT endpoint answered during the window,
+    #: `None` where nobody asked. It is the half of the pair that separates a
+    #: game-thread stall from a wire that is simply gone -- see
+    #: `STATE_STALL_KIND` for why the two endpoints answer from different
+    #: threads and what that makes readable.
+    root_answers: bool | None = None
 
     @property
     def log_bytes_per_s(self) -> float | None:
@@ -201,6 +249,7 @@ class Probe:
             "flood_threshold_bytes_per_s": FLOOD_BYTES_PER_S,
             "elapsed_s": round(self.elapsed_s, 2),
             "responding_samples": list(self.responding),
+            "root_answers": self.root_answers,
         }
 
 
@@ -209,13 +258,20 @@ def sample(log_path: Path | None, image_name: str,
            interval: float = PROBE_INTERVAL_S,
            sizer=file_size, responder=windows_responding,
            sleep=time.sleep, clock=time.monotonic,
-           pid: int | None = None) -> Probe:
+           pid: int | None = None, rooter=None) -> Probe:
     """Watch the log and the message pump for `samples` ticks.
 
     Every OS call is a parameter. That is not ceremony: the whole value of this
     module is a judgment that must be right the first time it fires, at 3am,
     unattended, and a judgment that can only be exercised by hanging a real
     game is a judgment nobody exercises.
+
+    `rooter` (`EB-489`) is the one WIRE call, and it is optional for the same
+    reason every other call is injected: a caller that cannot ask leaves
+    `root_answers` at `None`, which removes the signal rather than faking it.
+    `understudy.bridge.health` is the live one -- it requests `BASE + "/"`,
+    which is the endpoint that went on answering while the lane's state reads
+    timed out.
     """
     samples = max(2, int(samples))
     start_bytes = sizer(log_path)
@@ -231,10 +287,18 @@ def sample(log_path: Path | None, image_name: str,
         sleep(interval)
         responding.append(ask())
     end_bytes = sizer(log_path)
+    root: bool | None = None
+    if rooter is not None:
+        try:
+            rooter()
+            root = True
+        except Exception:                                    # noqa: BLE001
+            root = False
     return Probe(
         log_path=None if log_path is None else str(log_path),
         log_bytes_start=start_bytes, log_bytes_end=end_bytes,
-        elapsed_s=clock() - t0, responding=tuple(responding))
+        elapsed_s=clock() - t0, responding=tuple(responding),
+        root_answers=root)
 
 
 # --------------------------------------------------------- the verdict ----
@@ -283,6 +347,26 @@ def classify(probe: Probe, *, alive: bool, wire_dead: bool,
             f"window")
 
     if not signals:
+        # `EB-489`. THE ROOT ENDPOINT SPLITS THIS BRANCH IN TWO. It is asked
+        # only AFTER EB-1's signature has failed to fire, because a spin
+        # answers `/` as readily as a stall does -- the root handler never
+        # leaves the ThreadPool worker. What separates them is that a spin
+        # floods the log and stops the message pump and this does neither.
+        if probe.root_answers is True:
+            return Verdict(
+                False,
+                "the state endpoint is dead, the process is alive and "
+                "responding, and the bridge's ROOT endpoint still answers. "
+                "The two are served from different threads: `/` replies on "
+                "the ThreadPool worker, and `/api/v1/singleplayer` hops to "
+                "the game thread (`RunOnMainThread(BuildGameState)` then a "
+                "`GetResult()` with no timeout) whose queue is drained from "
+                "`SceneTree.ProcessFrame`. So the game thread has stopped "
+                f"reaching a process frame; this is `{STATE_STALL_KIND}`, and "
+                "every further read parks another worker on the same queue. "
+                "Recovery is a teardown -- there is no unblocking it from "
+                "this side",
+                (f"root endpoint answers, {STATE_STALL_KIND}",), evidence)
         return Verdict(
             False,
             "the wire is dead and the process is alive, but neither the log "
