@@ -432,7 +432,12 @@ def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],
              for raw, face in zip(wire, printed)
              if _text(raw.get("combat_id"))}
     for row in plans["carried_out"] + plans["fired_now"]:
-        for moved in row["moved"]:
+        # `EB-518`: the riders take the same names as the moved rows, out of
+        # the same lookup, because the page is asking a reader to add the two
+        # lists together body by body.
+        for moved in row["moved"] + row["riders"]:
+            if not moved["combat_id"]:
+                continue
             moved["target"] = (by_id.get(moved["combat_id"])
                                or remembered_enemy_name(moved["combat_id"],
                                                         moved["target"]))
@@ -567,8 +572,25 @@ def _rider_row(row: dict[str, Any]) -> dict[str, Any]:
     is the 2 the r13 seat could not account for. The mod names it because the
     mod is the only thing that can: the measurement is a subtraction and a
     subtraction has no sources.
+
+    `EB-518` ADDS THE BODY. Three entries reading `Tamakushi Casket 2` divide
+    among three enemies in more than one way, and the r18 seat divided them the
+    even way: it predicted 5 + 2 on each of three bodies, read 1 / 9 / 7 off
+    the board, and concluded a FOURTH strike had gone unlisted. Two of the
+    three had landed on ONE body -- the Plan's own Hydro hit froze it before
+    the hit landed, because `ElementalHit.Deal` resolves the reaction first, so
+    the relic answered the Frozen as well as the Weak the same Plan applied.
+    With the target named, each body's riders add to its own `moved` line and
+    the arithmetic closes.
+
+    `combat_id` IS THE HANDLE AND `target` IS THE FALLBACK, `_moved_row`'s own
+    split: `name_rider_rows` puts the numbered name this page has been using
+    on the row wherever the body can still be found.
     """
-    return {"source": _text(row.get("source")), "amount": _int(row.get("amount"))}
+    return {"source": _text(row.get("source")),
+            "amount": _int(row.get("amount")),
+            "target": _text(row.get("target")),
+            "combat_id": _text(row.get("combat_id"))}
 
 
 def last_morning(state: dict[str, Any]) -> dict[str, Any] | None:

@@ -79,7 +79,7 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
         {
             new CalculationBaseVar(10m),
             new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

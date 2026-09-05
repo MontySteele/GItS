@@ -55,7 +55,7 @@ public sealed class SucroseAstable : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Astable Anemohypostasis"),
-        ("description", "[gold]Swirl[/gold] an enemy's aura onto ALL enemies. Gain {BurstEnergy:diff()} [gold]Burst Energy[/gold]."),
+        ("description", FurinaBurstRider.Face("[gold]Swirl[/gold] an enemy's aura onto ALL enemies.", "[gold]Swirl[/gold] an enemy's aura onto ALL enemies. Gain {BurstEnergy:diff()} [gold]Burst Energy[/gold].")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -407,6 +407,19 @@ def _card_face_key(entry: dict[str, Any]) -> str:
     return f"{c['title']}|{c['cost']}|{c['upgraded']}|{c['text']}"
 
 
+def _prints_all_enemies(entry: dict[str, Any]) -> bool:
+    """Does this card's PRINTED face say `ALL enemies`? (`EB-527`.)
+
+    THE WORD IS THE BASE GAME'S OWN AND IT IS SPELLED ONE WAY: 47 uses, 0
+    lowercase (`docs/current/text-conventions.md` rule 4), so the test is the
+    literal rather than a pattern. It is asked ONLY to explain a refusal --
+    the target type is read off the WIRE and decides everything, exactly as
+    `EB-499` decided the other direction -- so a face that says something this
+    misses simply gets the sentence it always got.
+    """
+    return "ALL enemies" in _text(_card_face(entry).get("text"))
+
+
 # The wire's `target_type` spellings, split by what the BRIDGE does with each.
 #
 # `EB-269`. `ExecuteUsePotion` (`vendor/STS2_MCP/McpMod.Actions.cs:287-306`) is
@@ -545,6 +558,34 @@ def _living_enemy_names(state: dict[str, Any]) -> list[str]:
     return [names[i] for i, e in enumerate(enemies) if _int(e.get("hp")) > 0]
 
 
+# `EB-519`: A LETTER IS A BODY ON THE OTHER SIDE, AND NEVER THE PET.
+#
+# THE DEFECT (Kokomi r18, both lanes). `EB-496` minted the per-fight letter and
+# `_resolve_enemy` matches it EXACTLY, for the reason written there: a bare `A`
+# is a unique SUBSTRING of half the names on any board. The pet's own lookup
+# was left on `_match` and so kept the substring rule -- and the jellyfish is
+# called `Bake-Kurage`, which folds to `bakekurage` and therefore CONTAINS
+# `a`, `b`, `e`, `g`, `k`, `r` and `u`. Seven of the first letters a fight
+# hands out are the pet, and the pet block sits ABOVE the enemy block, so
+# `on "A"` was refused as a Plan the card could not carry ("cannot be planned
+# on Bake-Kurage") and `on "B"` was silently ACCEPTED as one -- writing a Plan
+# the seat never asked for out of a card it had aimed at the second body.
+#
+# THE SHAPE OF THE HANDLE IS THE TEST, not the board's current letters: one
+# letter, or `E27` and up, is `_handle_for`'s whole output and is not a name
+# anything in this game prints. Declining it here sends it one block down to
+# `_resolve_enemy`, which either resolves it exactly or refuses it with the
+# living bodies listed -- both of which are about the right side of the board.
+# The pet KEEPS ITS NAME: `Bake-Kurage`, and every unique substring of it that
+# is not a bare handle, still reach the jellyfish exactly as before.
+_ENEMY_HANDLE = re.compile(r"^(?:[a-z]|e[0-9]+)$")
+
+
+def _is_enemy_handle(name: str) -> bool:
+    """Is this word one of `EB-496`'s per-fight letters rather than a name?"""
+    return bool(_ENEMY_HANDLE.match(_fold(name)))
+
+
 def _pet_target(state: dict[str, Any], name: str) -> str | None:
     """`EB-216`. The jellyfish's entity id when the tester named IT, else None.
 
@@ -552,9 +593,13 @@ def _pet_target(state: dict[str, Any], name: str) -> str | None:
     the choice the slice exists to test (its sec.1), so a card that could go
     either way and was aimed at nothing is played NOW. Only the tester's own
     word sends it to the jellyfish.
+
+    `EB-519`: and never by a LETTER, for the reason written above this function.
     """
     plans = _combat(state).get("plans") if state else None
     if not plans or not plans.get("pet_entity_id") or not name:
+        return None
+    if _is_enemy_handle(name):
         return None
     idx, _ = _match([{"n": plans["pet_name"]}], name, key=lambda e: e["n"])
     return plans["pet_entity_id"] if idx == 0 else None
@@ -668,6 +713,27 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
             # `EB-402`. A card that has to be aimed and was not is refused with
             # the `on` form listed back per living enemy, so the way out is in
             # the refusal rather than one screen away.
+            #
+            # `EB-527`. AND WHERE THE FACE SAYS OTHERWISE, THE REFUSAL SAYS SO.
+            # Two faces printing "ALL enemies" took opposite forms on one
+            # screen (Furina r12 lane 2): `Lynette -- Magic Trick` was refused
+            # BARE with "there is more than one enemy, so say which", and the
+            # very next turn `Chevreuse -- Ring of Bursting Grenades` was
+            # refused WITH `on` -- "two cards, both printing ALL enemies, with
+            # opposite targeting rules and nothing on either face to tell them
+            # apart", which cost the seat an elite turn.
+            #
+            # THE WIRE IS RIGHT AND THE FACE IS INCOMPLETE. Magic Trick's Swirl
+            # half needs a body, so the game aims the card at one; the ALL in
+            # its damage clause is true of what the hit does and not of how it
+            # is played. `EB-499` gave the other direction its own sentence
+            # ("does its own aiming, so it takes no `on`"); this is that
+            # sentence's twin, so both refusals name the form that works AND
+            # say why the face did not predict it.
+            if not cmd.target and _prints_all_enemies(entry):
+                why = (f"{titles[idx]!r} prints \"ALL enemies\" and is still "
+                       "aimed at one body, so say which: "
+                       + ", ".join(_living_enemy_names(state)))
             return _refuse(why, *(f'play "{titles[idx]}" on "{n}"'
                                   for n in _living_enemy_names(state)))
         post["target"] = eid

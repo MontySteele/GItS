@@ -1,6 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 
@@ -403,8 +406,14 @@ public static class ArmKeywordTips
     /// "IT DOES NOTHING BY ITSELF" LEFT and is not missed: it was true of a
     /// word with no readers, and three cards in Klee's pool have paid for it
     /// since R244. The last sentence says that instead.
+    ///
+    /// `EB-504`, REOPENED 2026-09-05: THE RULE IS KLEE'S AND THE WORD IS
+    /// EVERYONE'S. See <see cref="KleesRuleBelongsHere"/>. The page glossary
+    /// was gated on the r17 finding and this tip was the second source, so
+    /// Razor's own face still printed the whole sentence on a Kokomi run.
     public static IEnumerable<IHoverTip> ForHexerei(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
+        !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, HexereiKey,
             "A [gold]Companion[/gold] card that prints the word, and Klee "
           + "herself. Some are Klee's own, some are not. Cards of hers pay "
@@ -431,8 +440,12 @@ public static class ArmKeywordTips
     /// says what Oz IS and which card puts him out and stops there, the way
     /// `ForGrounded` defers its payout to the Power card's own line.
     /// </summary>
+    /// `EB-504`, the second of the two words whose rule is Klee's: the Power
+    /// that fields Oz is hers, and Fischl's face is drafted by every
+    /// character. See <see cref="KleesRuleBelongsHere"/>.
     public static IEnumerable<IHoverTip> ForOz(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
+        !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, OzKey,
             // A card TITLE is a plain word, never golded
             // (`docs/current/text-conventions.md`, and the lint bites), and
@@ -838,5 +851,69 @@ public static class ArmKeywordTips
     {
         foreach (var tip in inherited) yield return tip;
         yield return new HoverTip(new LocString(Table, key + ".title"), body);
+    }
+
+    /// <summary>
+    /// `EB-504`. IS THERE A KLEE IN THIS RUN FOR KLEE'S RULE TO BE ABOUT?
+    ///
+    /// THE ROW WAS CLOSED ONCE ON THE PAGE GLOSSARY AND REOPENED ON THE CARD.
+    /// `Hexerei` rides eighteen companion faces the whole roster can draft and
+    /// its rule is Klee's Spark rider; `Oz` is named by Fischl's face, which
+    /// every character meets, and the Power that fields him is hers. So the
+    /// WORD reaches every run and the RULE reaches one.
+    /// `blindplay_notes._ARM_KEYWORD_CHARACTER` gated the page's own glossary
+    /// on the r17 finding, and the r18 lane-2 seat then met the same sentence
+    /// on Razor's own card: "two Companion cards in a Kokomi run printed
+    /// 'Hexerei -- ... Cards of hers pay when you play one.' I could not tell
+    /// what is paid, by whom, or whether it applies to me at all, so I refused
+    /// both cards partly on that." The card's tip is a second printer.
+    ///
+    /// THE OWNER FIRST, BECAUSE IT IS THE ONE THAT IS ALWAYS RIGHT. A card in
+    /// a hand or a deck belongs to a seat and that seat has a character; only
+    /// where there is no owner -- a shelf, a reward, a compendium page -- does
+    /// this fall back to the run's player list, which is the same question one
+    /// scope out and the one that answers in co-op.
+    ///
+    /// SILENCE IS NOT EVIDENCE, and it is the page's own direction here
+    /// (`absent is not zero`): where NOTHING says who is playing, the rule
+    /// prints. A missing tooltip on a Klee run would be the worse failure of
+    /// the two, and it is the one this returns true to avoid.
+    /// </summary>
+    public static bool KleesRuleBelongsHere(CardModel card)
+    {
+        var inRun = KleeAmongTheRunsPlayers();
+        Player? owner = null;
+        try
+        {
+            // A canonical (compendium) copy asserts on `Owner` rather than
+            // answering null -- `KokomiPlan.PlanDamageVar`'s guard, verbatim.
+            if (card.IsMutable) owner = card.Owner;
+        }
+        catch (System.Exception)
+        {
+            owner = null;
+        }
+        if (owner != null)
+        {
+            return owner.Character is IKleeCharacter || (inRun ?? false);
+        }
+        return inRun ?? true;
+    }
+
+    /// <summary>Is any seat in this run playing Klee, or does nothing answer?
+    /// A state read must never throw (<c>PlayTelemetry.NameOf</c> takes the
+    /// same posture), and outside a run there is nothing to read.</summary>
+    private static bool? KleeAmongTheRunsPlayers()
+    {
+        try
+        {
+            var players = RunManager.Instance?.DebugOnlyGetState()?.Players;
+            if (players == null) return null;
+            return players.Any(p => p?.Character is IKleeCharacter);
+        }
+        catch (System.Exception)
+        {
+            return null;
+        }
     }
 }

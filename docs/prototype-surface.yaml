@@ -1656,10 +1656,10 @@
    register: salon, cost: 1, type: attack, rarity: common,
    art_of: house_call,
    upgrade: {damage: +3},
-   description: "Deal 6 damage. [gold]Deploy[/gold] Gentilhomme Usher.",
+   description: "Deal 6 damage. [gold]Deploy[/gold] Surintendante Chevalmarin.",
    effects: [{op: damage, amount: 6, target: enemy},
              {op: apply_power, power: salon_member, amount: 1, target: self,
-              member: usher}]}
+              member: chevalmarin}]}
 
 - {id: proto_fr_second_course, name: "Second Course", character: furina,
    authored_by: [claude],
@@ -1675,7 +1675,7 @@
 - {id: proto_fr_rolling_tide, name: "Rolling Tide", character: furina,
    authored_by: [claude],
    replaces: undercurrent,
-   register: salon, cost: 2, type: attack, rarity: common,
+   register: salon, cost: 1, type: attack, rarity: common,
    art_of: undercurrent,
    upgrade: {damage: +1},
    description: "Deal 2 damage to ALL enemies twice. The front [gold]Salon[/gold] member performs.",

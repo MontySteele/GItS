@@ -189,7 +189,8 @@ from understudy.blindplay_grammar import (   # noqa: E402,F401  (re-export)
 from understudy.blindplay_session import (   # noqa: E402,F401  (re-export)
     AUTHOR_FAMILY, Budget, check_independent, CodexThread, command_schema,
     FIGHT_QUESTIONS, forecast_block, MODEL_FAMILIES, model_family,
-    RECORD_DISCLAIMER, record_schema, _result_line, RUN_QUESTIONS,
+    post_when_the_room_is_open, RECORD_DISCLAIMER, record_schema,
+    _result_line, ROOM_NOT_OPEN, RUN_QUESTIONS,
     ScriptedThread, ScriptedWire, Session, taken_line, Transcript)
 from understudy.blindplay_record import (   # noqa: E402,F401  (re-export)
     AUDIT_EXTRA, audit_markdown, build_version, _game_dir, game_version,

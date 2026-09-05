@@ -67,7 +67,7 @@ public sealed class ProtoMiHeizouHeartstopper : CustomCardModel, IElementalCard,
         {
             new CalculationBaseVar(6m),
             new ExtraDamageVar(4m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => CompanionOverhaulLedger.For(card.Owner.Creature).SwirlsThisTurn),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => CompanionOverhaulLedger.For(card.Owner.Creature).SwirlsThisTurn),
             new CardsVar(1)
         };
 

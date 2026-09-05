@@ -53,7 +53,7 @@ public sealed class ProtoFrUniversalRevelry : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(9m),
             new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.ReadableFanfare(card.Owner.Creature) / 2)
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.ReadableFanfare(card.Owner.Creature) / 2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

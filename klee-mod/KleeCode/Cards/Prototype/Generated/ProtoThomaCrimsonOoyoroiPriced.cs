@@ -67,7 +67,7 @@ public sealed class ProtoThomaCrimsonOoyoroiPriced : CustomCardModel, IElemental
         {
             new CalculationBaseVar(8m),
             new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
             new SpotlightSystem.SpotlitBlockVar(3m)
         };
 

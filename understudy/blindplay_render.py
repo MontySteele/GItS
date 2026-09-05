@@ -78,8 +78,13 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # under the one it prints now. Absent on every other screen, and absent
     # here for a row this page cannot render without guessing -- see
     # `qa_packet.upgraded_face` for both bounds.
+    # `EB-529`: and where it cannot be rendered, the REASON, because "no
+    # `Upgraded:` line" and "no upgrade" are the same silence to a reader
+    # deciding what to spend a Smith on.
     if c.get("upgraded_face"):
         out.append(f"    Upgraded: {c['upgraded_face']}")
+    elif c.get("upgraded_note"):
+        out.append(f"    Upgraded: not shown -- {c['upgraded_note']}.")
     note = qa_packet.cost_note(c)
     if note:
         out.append(f"    {note}")
@@ -202,13 +207,28 @@ def _rider_clause(said: dict[str, Any]) -> str:
     it, because a subtraction has no sources; the mod names it at the line that
     deals it (`KokomiPlan.NoteRider`) and this prints the name.
 
-    ABSENT IS NOT EMPTY, this section's standing rule: a bridge with no
-    `riders` key sends none, and the row reads exactly as it always did.
+    AND ON WHICH BODY (`EB-518`). Naming the source was not enough to make the
+    beat add up, because a beat can strike ONE body twice: the r18 seat read
+    "Tamakushi Casket 2, Tamakushi Casket 2, Tamakushi Casket 2" over bodies
+    that had lost 1, 9 and 7, divided the three entries evenly, made every body
+    5 + 2, and concluded a FOURTH strike had gone unlisted. It had not -- two
+    of the three landed on the same body, because the Plan's own Hydro hit
+    froze it before the hit landed and the relic answered the Frozen as well as
+    the Weak. With the body named, each `lost N HP` line under this one is the
+    Plan's own number plus its own riders, and the subtraction the seat had to
+    do by hand is on the page.
+
+    ABSENT IS NOT EMPTY, this section's standing rule, and it is why the target
+    is a suffix rather than part of the format: a bridge with no `riders` key
+    sends none and the row reads as it always did, and one that sends riders
+    without the `EB-518` fields prints the source and the number alone.
     """
     riders = said.get("riders") or []
     if not riders:
         return ""
-    named = ", ".join(f"{r['source']} {r['amount']}" for r in riders)
+    named = ", ".join(f"{r['source']} {r['amount']}"
+                      + (f" on {r['target']}" if r.get("target") else "")
+                      for r in riders)
     return f" Inside the same beat: {named}."
 
 
@@ -323,12 +343,50 @@ def _turn_allowance(power: dict[str, Any]) -> int | None:
     return cap if 0 <= stacks <= cap else None
 
 
+# `EB-525`. THE STEP THE SENTENCE DOES NOT SAY IT LEAVES OUT.
+#
+# THE FIND (Furina r12 lane 1, the elite). The Bygone Effigy wears "Slow N --
+# Whenever you play a card, this enemy receives 10% more damage from Attacks
+# this turn", and the seat played three cheap cards and then two attacks: "I
+# predicted 27 damage and got 25. By the arithmetic, Soloist's+ resolved at
+# Slow 30 (not 40) and Chevreuse at 40 (not 50) -- i.e. a card's own Slow
+# increment does not apply to itself. The printed text does not say that."
+#
+# THE STACK ARRIVES AFTER THE CARD RESOLVES, which is the game's own trigger
+# order and is invisible in a sentence written in the present tense: "whenever
+# you play a card" is true of the card in your hand, and the number it hits
+# with is the one that was on the board before it. Every Slow turn the seat's
+# arithmetic was off by one step, and it read the difference as its own error
+# twice before deriving the rule.
+#
+# A CLAUSE ON THE PAGE AND NOT A NEW SENTENCE, `_turn_allowance`'s shape one
+# power over (`EB-467`): the wire sends a power as `name`, `amount`, `type` and
+# `description`, so what the page can add is a clause about the sentence the
+# game printed -- and it is added only where that sentence is the one the rule
+# is about, so a future power wearing a similar name gets the line it always
+# had.
+_SLOW_TRIGGER = "whenever you play a card"
+_SLOW_CLAUSE = " It counts the cards played BEFORE this one."
+
+
+def _slow_clause(power: dict[str, Any]) -> str:
+    """`EB-525`: the step Slow's own sentence leaves out, or ''."""
+    if str(power.get("name") or "").strip().casefold() != "slow":
+        return ""
+    text = str(power.get("text") or "")
+    return _SLOW_CLAUSE if _SLOW_TRIGGER in text.casefold() else ""
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
     """One power: printed name, the amount, buff or debuff, the printed text.
 
     `EB-467`: where the amount is an allowance counting down against a cap the
     power's own sentence states, the two numbers print in ONE clause -- "12 of
     20 left this turn" -- instead of standing apart and contradicting.
+
+    `EB-525`: and where the sentence describes a stack that arrives after the
+    card that adds it has already resolved, the page says which cards the
+    number counts.
     """
     cap = _turn_allowance(power)
     if cap is None:
@@ -340,7 +398,7 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
     if kind:
         line += f" ({kind})"
     if power["text"]:
-        line += f" — {power['text']}"
+        line += f" — {power['text']}{_slow_clause(power)}"
     return line
 
 

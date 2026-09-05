@@ -198,7 +198,16 @@ public sealed class TamakushiCasket : CustomRelicModel
         // reported rather than the printed one, because Vulnerable moves it
         // and the page is trying to account for a total. Outside a Plan the
         // call does nothing, which is why it is unconditional.
-        KokomiPlan.NoteRider(SourceName, dealt);
+        //
+        // `EB-518`. AND THE BODY IT STRUCK, because three entries reading
+        // "Tamakushi Casket 2" cannot be divided among three enemies. The r18
+        // seat predicted 5 + 2 on each of three bodies, read 1 / 9 / 7, and
+        // concluded a FOURTH strike was missing from the list -- when what had
+        // happened is that two of the three landed on the same body:
+        // `ElementalHit.Deal` resolves the reaction BEFORE the hit lands, so
+        // the Plan's own Hydro froze that body and this relic answered the
+        // Frozen as well as the Weak the same Plan applied.
+        KokomiPlan.NoteRider(SourceName, dealt, target);
         // `EB-335`. SHELL GUARD reads the STRIKE and not the debuff that caused
         // it, which is what keeps it separable from The Clouds Like Waves
         // Rippling (that card pays per debuff APPLIED). Hung here, at the one

@@ -258,7 +258,7 @@ public static class KleeMod
                         $"[gold]Hydro[/gold] meets [gold]Electro[/gold]: the reacted enemy loses [blue]{Elements.ReactionConstants.ElectroChargedDot}[/blue] HP at the start of its turn, 1 less each turn.",
                     ["KLEEMOD-FROZEN_PREVIEW.title"] = "Reaction preview: Frozen",
                     ["KLEEMOD-FROZEN_PREVIEW.description"] =
-                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals half damage, and the first Attack to hit it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] damage.",
+                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals half damage, and until it acts the first Attack to hit it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] damage.",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Frozen (Boss)",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
                         $"Bosses cannot be Frozen. [gold]Hydro[/gold] plus [gold]Cryo[/gold] is consumed and applies [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
@@ -504,13 +504,63 @@ public static class KleeMod
             LocManager.Instance.GetTable("powers").MergeWith(
                 new Dictionary<string, string>
                 {
+                    // `EB-523` PUT THE ATTACK BACK IN, and it is `EB-497`'s own
+                    // correction meeting the side of the board that row did
+                    // not read. "From cards" is complete on an ENEMY, where
+                    // everything that hits is a card or a potion, and silent on
+                    // the PLAYER, where the number that matters is a monster's
+                    // swing: the Kokomi r18 lane-2 seat wore `Vulnerable 99 --
+                    // Receive 50% more damage from cards for 99 turns` in front
+                    // of a 24-damage intent and could not price it. "That is
+                    // the single most decision-relevant number on the screen
+                    // and I could not price it."
+                    //
+                    // AND IT DOES COUNT. `VulnerablePower` gates on
+                    // `ValueProp.IsPoweredAttack()` -- a property of the HIT,
+                    // and a monster's move carries it; the sim says the same
+                    // structurally, `combat._enemy_attack` running every hit
+                    // through `powers.modify_damage_taken(state.player, ...)`.
+                    // So the sentence names both kinds of hit and keeps
+                    // `EB-497`'s potion clause, which is the one thing that
+                    // takes no multiplier on either engine.
                     ["VULNERABLE_POWER.description"] =
                         "Vulnerable creatures take [blue]50%[/blue] more "
-                      + "damage from cards, a potion's aside.",
+                      + "damage from any attack or card hit, a potion's aside.",
                     ["VULNERABLE_POWER.smartDescription"] =
                         "Receive [blue]{DamageIncrease:percentMore()}%[/blue] "
-                      + "more damage from cards for [blue]{Amount}[/blue] "
-                      + "{Amount:plural:turn|turns}.",
+                      + "more damage from any attack or card hit for "
+                      + "[blue]{Amount}[/blue] {Amount:plural:turn|turns}.",
+
+                    // `EB-521`, AND IT IS THE THIRD ROUND OF ONE FINDING.
+                    //
+                    // Kokomi r18 lane 2, fight 1: "Thorns printed 'When hit by
+                    // an attack, deal 2 damage back'. I played Kurage's Oath --
+                    // a SKILL -- into a Thorns-2 body and lost 2 HP ...
+                    // Vulnerable and Weak both print the clause 'a Skill's
+                    // damage too'; Thorns does not, and behaves as though it
+                    // did."
+                    //
+                    // THE ENGINE IS RIGHT AND ONLY THE WORDS ARE WRONG, which
+                    // is `EB-469`'s and `EB-481`'s sentence for the third time.
+                    // `ThornsPower.BeforeDamageReceived` asks for a dealer and
+                    // a POWERED attack and nothing else -- it never looks at
+                    // the `DamageResult`, which is why a fully blocked hit is
+                    // still thorned (`tier0/engine/refpowers.py`, written off
+                    // the decompile, and `test_si_powers`' two pins). A powered
+                    // attack is a property of the HIT, and every damage clause
+                    // the generator emits carries `ValueProp.Move` whatever
+                    // `type:` its sheet row declares. So "an attack" in the
+                    // game's sentence means an attack HIT, exactly as it does
+                    // in Weak's and Vulnerable's, and a potion's damage --
+                    // Unpowered on both engines -- is not one.
+                    ["THORNS_POWER.description"] =
+                        "When hit by an attack, deal your [gold]Thorns[/gold] "
+                      + "damage back. Every card hit is one, a Skill's too; a "
+                      + "potion's is not.",
+                    ["THORNS_POWER.smartDescription"] =
+                        "When hit by an attack, deal [blue]{Amount}[/blue] "
+                      + "damage back. Every card hit is one, a Skill's too; a "
+                      + "potion's is not.",
                 });
 #endif
 

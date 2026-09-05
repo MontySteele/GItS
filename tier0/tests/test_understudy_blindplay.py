@@ -3489,6 +3489,95 @@ def test_a_bridge_with_no_riders_prints_what_it_always_printed():
     assert "still planned when the fight ended" not in page
 
 
+# `EB-518`. THREE ENTRIES THAT DIVIDED FOUR WAYS.
+
+
+def _r18_casket_board() -> dict:
+    """Kokomi r18 fight 2, the morning after Charlotte marked one body.
+
+    War Council's Plan is "Deal 5 damage and apply 1 Weak to ALL enemies", so
+    the seat predicted 5 + 2 on each body. Two slimes, one wearing a Cryo aura:
+    the Plan's own Hydro hit froze it BEFORE the hit landed
+    (`ElementalHit.Deal` resolves the reaction first), Frozen is a debuff she
+    applied, and the Casket answered it as well as the Weak. Nine on that body,
+    seven on the other -- and three entries reading `Tamakushi Casket 2`.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["enemies"] = [
+        {"entity_id": f"slime_{cid}", "combat_id": cid, "name": "Twig Slime",
+         "hp": hp, "max_hp": 27, "block": 0, "status": [],
+         "intents": [{"type": "Attack", "label": "4"}]}
+        for cid, hp in ((1, 14), (2, 8))]
+    casket = [("1", 2), ("1", 2), ("2", 2)]
+    state["player"]["kokomi_plans"] = dict(TWO_PLANS, pending=0, queue=[],
+        carried_out=[{
+            "card": "War Council", "number": 5,
+            "line": "Bake-Kurage: War Council, 5",
+            "kind": "damage", "asked": 5, "on_play": False,
+            "moved": [{"target": "Twig Slime", "combat_id": "1", "amount": 9,
+                       "dead": False, "absorbed": 0},
+                      {"target": "Twig Slime", "combat_id": "2", "amount": 7,
+                       "dead": False, "absorbed": 0}],
+            "riders": [{"source": "Tamakushi Casket", "amount": amount,
+                        "target": "Twig Slime", "combat_id": cid}
+                       for cid, amount in casket],
+            "unfinished": False}])
+    return state
+
+
+def test_every_relic_strike_in_the_beat_names_the_body_it_landed_on():
+    """`EB-518`. THE FOURTH CASKET THAT WAS NEVER THERE.
+
+    Kokomi r18 lane 1, fight 2: "the carry-out block lists three casket hits,
+    but the numbers need four ... I only found the fourth by subtracting". It
+    did not need four. `EB-453` named the source and the number and not the
+    BODY, so three identical entries over bodies that had lost 9 and 7 divided
+    the even way -- one strike each -- and the arithmetic came up 2 short. Two
+    of the three had landed on the same body.
+
+    Seen to FAIL: the page printed `Tamakushi Casket 2, Tamakushi Casket 2,
+    Tamakushi Casket 2` and named nothing.
+    """
+    state = _r18_casket_board()
+    _new_process()
+    page = blindplay.render(blindplay.observation(state))
+
+    assert ("Inside the same beat: Tamakushi Casket 2 on Twig Slime (1), "
+            "Tamakushi Casket 2 on Twig Slime (1), "
+            "Tamakushi Casket 2 on Twig Slime (2).") in page
+    # And the names are the page's own, not the mod's bare title: the enemy
+    # list four lines down says `Twig Slime (1)` and the receipt must agree.
+    assert "**Twig Slime (1)**" in page
+    assert "Twig Slime (1) lost 9 HP" in page
+    assert "Twig Slime (2) lost 7 HP" in page
+
+
+def test_the_riders_and_the_plans_own_number_sum_to_what_each_body_lost():
+    """The row's acceptance, done as the reader now can: the clause's figure
+    plus that body's own riders is that body's `lost N HP`. Nine is 5 + 2 + 2
+    and seven is 5 + 2, which is the subtraction the seat had to do by hand and
+    could not close."""
+    state = _r18_casket_board()
+    _new_process()
+    said = blindplay.observation(state)["combat"]["plans"]["carried_out"][0]
+
+    for moved in said["moved"]:
+        rides = sum(r["amount"] for r in said["riders"]
+                    if r["combat_id"] == moved["combat_id"])
+        assert said["number"] + rides == moved["amount"], moved["target"]
+
+
+def test_a_rider_from_a_bridge_that_names_no_body_prints_as_it_always_did():
+    """ABSENT IS NOT EMPTY one field deeper. A build older than `EB-518` sends
+    a rider with no `target`, and the clause is the source and the number
+    alone -- exactly the sentence `EB-453` shipped."""
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(CARRIED_OUT_R13)))
+
+    assert "Inside the same beat: Tamakushi Casket 2." in page
+    assert " on " not in page.split("Inside the same beat:")[1].split(".")[0]
+
+
 def test_the_meter_ledger_stays_off_the_carry_out_block():
     """`R101b`. The page line is the ON-SCREEN text, and the ledger's rows --
     meter, before, after, price_paid -- are an instrument, not a surface a
@@ -3518,6 +3607,11 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
         for moved in row["moved"]:
             assert set(moved) == {"target", "combat_id", "amount", "dead",
                                   "absorbed"}
+        # `EB-518` added the body a rider struck, in `MovedRow`'s own two
+        # spellings, and nothing else: a strike landing on a creature is
+        # another thing a sighted player watched happen.
+        for rider in row["riders"]:
+            assert set(rider) == {"source", "amount", "target", "combat_id"}
 
 
 # --------------------------------------------------------------------------
@@ -6443,8 +6537,10 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         "Superconduct": ["reacted enemy gains ",
                          "which applies before this hit"],
         "Electro-Charged": [" HP at the start of its turn, 1 less each turn"],
-        "Frozen": ["ts next action deals half damage, and the first Attack "
-                   "to hit it Shatters for "],
+        # `EB-517` put the WINDOW on this row, in the C# and here in one
+        # commit, so the anchor holds the clause that says when it closes.
+        "Frozen": ["ts next action deals half damage, and until it acts the "
+                   "first Attack to hit it Shatters for "],
         # `EB-465`'s two trigger elements, held in step off the same
         # `keywordFallback` table the six above come from.
         "Swirl": ["aura is consumed and copied onto ALL enemies"],
@@ -6576,6 +6672,57 @@ def test_a_power_with_no_stated_per_turn_cap_reads_as_it_always_did():
     assert "Hardened Shell 24 (buff) — Skulking Colony cannot lose more " \
         "than 20 HP each turn." in over
     assert "left this turn" not in over
+
+
+# --- `EB-525`: THE STEP SLOW'S OWN SENTENCE LEAVES OUT ----------------------
+
+
+def slow_state(amount: int = 30, text: str | None = None) -> dict:
+    """The Bygone Effigy's Slow, as the wire sends it."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "SLOW_POWER", "name": "Slow", "amount": amount,
+         "type": "Debuff",
+         "description": text if text is not None else
+         "Whenever you play a card, this enemy receives 10% more damage "
+         "from Attacks this turn."}]
+    return state
+
+
+def test_the_slow_line_says_which_cards_its_number_counts():
+    """`EB-525`. THE ARITHMETIC THAT WAS OFF BY ONE STEP EVERY SLOW TURN.
+
+    Furina r12 lane 1, the elite: "I predicted 27 damage and got 25. By the
+    arithmetic, Soloist's+ resolved at Slow 30 (not 40) and Chevreuse at 40
+    (not 50) -- i.e. a card's own Slow increment does not apply to itself. The
+    printed text does not say that."
+
+    The stack arrives AFTER the card that adds it has resolved, which is
+    invisible in a sentence written in the present tense: "whenever you play a
+    card" is true of the card in your hand, and the number it hits with is the
+    one that was on the board before it.
+
+    Seen to FAIL: the line ended at the game's own sentence.
+    """
+    page = blindplay.observe(slow_state())
+
+    assert ("Slow 30 (debuff) — Whenever you play a card, this enemy receives "
+            "10% more damage from Attacks this turn. It counts the cards "
+            "played BEFORE this one.") in page
+
+
+def test_the_clause_rides_the_sentence_the_rule_is_about():
+    """`_turn_allowance`'s discipline one power over: the clause is added off
+    the sentence the game printed, so a power that happens to be called Slow
+    and says something else gets the line it always had."""
+    page = blindplay.observe(slow_state(
+        text="This enemy acts last for 2 turns."))
+
+    assert "Slow 30 (debuff) — This enemy acts last for 2 turns." in page
+    assert "BEFORE this one" not in page
+    # And no other power grows the clause.
+    assert "BEFORE this one" not in blindplay.observe(hardened_shell_state())
 
 
 def test_a_card_keyword_is_not_repeated_in_the_glossary():
@@ -6841,6 +6988,111 @@ def test_the_drop_verb_is_offered_on_a_rest_site_and_posts_the_wires_slot():
     # And by name, which is the same row.
     named = blindplay.act(state, 'drop potion "Blessing of the Forge"')
     assert named["post"] == {"action": "discard_potion", "slot": 0}
+
+
+# --- `EB-520`: THE ROOM THE PAGE COULD SEE AND THE ACTION COULD NOT ---------
+
+
+def test_rest_and_upgrade_resolve_to_the_printed_options():
+    """`EB-520`, the grammar half. Both words are the screen's own options, and
+    both post the same thing `choose` posts -- which is the whole reason the
+    seat's `choose "Rest"` worked a moment after `rest` did not, and the reason
+    the defect is not here."""
+    state = rest_state()
+    by_verb = blindplay.act(state, "rest")
+    by_name = blindplay.act(state, 'choose "Rest"')
+    assert by_verb["ok"] and by_verb["post"] == by_name["post"]
+    assert by_verb["post"] == {"action": "choose_rest_option", "index": 0}
+
+    smith = blindplay.act(state, "upgrade")
+    assert smith["ok"], smith["refusal"]
+    assert smith["post"] == {"action": "choose_rest_option", "index": 1}
+    assert smith["printed"] == {"option": "Smith"}
+
+
+class _LoadingRoom:
+    """A wire whose rest-site room answers `is not open` for the first N posts.
+
+    `BuildState` reports the room off `RunState`, which the walk commits at
+    once; `ExecuteChooseRestOption` needs `NRestSiteRoom.Instance`, the scene,
+    which Godot instantiates a frame or two later. This is that gap.
+    """
+
+    def __init__(self, shut: int, states=None):
+        self.shut = shut
+        self.posts: list[dict] = []
+        self.states = states or [rest_state()]
+
+    def get_state(self):
+        return self.states[min(len(self.posts), len(self.states) - 1)]
+
+    def post(self, action, **params):
+        self.posts.append({"action": action, **params})
+        if len(self.posts) <= self.shut:
+            return {"status": "error", "error": "Rest site room is not open"}
+        return {"status": "ok", "message": "Selecting rest site option: Rest"}
+
+    def health(self):
+        return {"mod_version": "0.0-scripted"}
+
+    def meter_ledger(self):
+        return {"status": "ok", "available": False, "rows": [], "count": 0}
+
+
+def test_a_room_that_has_not_loaded_yet_is_ridden_out_rather_than_refused():
+    """`EB-520`. THE REFUSAL THAT WAS A MOMENT.
+
+    Kokomi r18 lane 1, floor 10: `rest` came back "Rest site room is not open"
+    "while the screen was printing Rest as an option and listing `rest` as a
+    thing I could say", and `choose "Rest"` worked immediately after. Klee r10
+    hit it twice on `rest`; the Ironclad control seat hit it on `upgrade`
+    "issued immediately after `go` ... the room had not finished loading".
+
+    Seen to FAIL: one POST, one refusal, and the seat spent an action learning
+    that retrying works.
+    """
+    wire = _LoadingRoom(shut=2)
+
+    result = blindplay.post_when_the_room_is_open(
+        wire, "choose_rest_option", {"index": 0}, tries=6, delay=0)
+
+    assert result["status"] == "ok"
+    assert len(wire.posts) == 3
+    assert all(p == {"action": "choose_rest_option", "index": 0}
+               for p in wire.posts)
+
+
+def test_a_room_that_stays_shut_is_reported_rather_than_waited_on_forever():
+    """`_settle`'s own discipline: bounded, and the LAST answer is handed back,
+    so a wire that really is stuck reaches the seat as the sentence the game
+    gave rather than as a hang."""
+    wire = _LoadingRoom(shut=99)
+
+    result = blindplay.post_when_the_room_is_open(
+        wire, "choose_rest_option", {"index": 0}, tries=3, delay=0)
+
+    assert result["error"] == "Rest site room is not open"
+    assert len(wire.posts) == 4          # the first, then the bound
+
+
+def test_every_other_refusal_is_an_answer_and_is_posted_once():
+    """Only "room is not open" is a moment. A real refusal -- a disabled
+    option, an index off the end -- is the game answering, and re-posting it
+    would spend actions on a decision the seat has already been told about."""
+    calls: list[dict] = []
+
+    class _Refuses(_LoadingRoom):
+        def post(self, action, **params):
+            calls.append({"action": action, **params})
+            return {"status": "error",
+                    "error": "Rest option 2 (dig) is disabled"}
+
+    result = blindplay.post_when_the_room_is_open(
+        _Refuses(shut=0), "choose_rest_option", {"index": 2},
+        tries=6, delay=0)
+
+    assert result["error"].endswith("is disabled")
+    assert len(calls) == 1
 
 
 def test_the_drop_verb_reaches_the_reward_screen_that_refused_the_claim():
@@ -7250,6 +7502,97 @@ def test_the_no_upgrade_register_is_read_by_id_and_only_its_ids_cross():
     assert not qa_packet.leaks(blindplay.UNEXPLAINED_OMISSION)
 
 
+# --- `EB-528`: A CARD THE COMBAT MADE IS NOT A CARD THE RUN OWNS ------------
+
+
+def _combat_with_piles(round_no: int, hand: list[str],
+                       draw: list[str] | None = None) -> dict:
+    """A combat state whose four piles are the named titles."""
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["round"] = round_no
+    state["player"]["character"] = "Furina"
+    for pile, titles in (("hand", hand), ("draw_pile", draw or []),
+                         ("discard_pile", []), ("exhaust_pile", [])):
+        state["player"][pile] = [
+            {"id": f"KLEEMOD-{t.upper().replace(' ', '_')}", "name": t}
+            for t in titles]
+    return state
+
+
+def test_a_companion_generated_mid_fight_never_joins_the_remembered_deck():
+    """`EB-528`. THE CARD THE COMBAT MADE, IN THE RUN'S DECK LIST.
+
+    Furina r12 lane 1: "Lynette -- Bogglecat Box appeared in my end-of-act deck
+    list. It entered my hand from An Invitation ... Bennett, Barbara, Gorou and
+    Freminet -- Pers, which arrived by the same route, did not appear." Lane 2:
+    "Shinobu, generated mid-fight by An Invitation, appeared in my deck list at
+    the Smith."
+
+    THE MOD IS RIGHT AND THE MEMORY WAS WRONG. A generated Companion goes
+    through `CardPileCmd.AddGeneratedCardToCombat` into the HAND and onto no
+    permanent list; this page's own snapshot took a LATER round's union of the
+    piles whenever it was bigger than the deck it held, and a generated card
+    makes it bigger by one. That is also why only some of them got in: the seat
+    listed four that arrived the same way and did not.
+
+    Seen to FAIL: the second read replaced the deck with five cards.
+    """
+    blindplay.forget_deck()
+    blindplay.observe(_combat_with_piles(1, ["Strike", "Defend"],
+                                         ["Strike", "Defend"]))
+    assert len(blindplay._DECK_MEMORY["cards"]) == 4
+
+    blindplay.observe(_combat_with_piles(
+        3, ["Strike", "Defend", "Shinobu — Grass Ring"], ["Strike", "Defend"]))
+
+    titles = [c["title"] for c in blindplay._DECK_MEMORY["cards"]]
+    assert "Shinobu — Grass Ring" not in titles
+    assert len(titles) == 4
+    blindplay.forget_deck()
+
+
+def test_the_next_fights_first_round_is_where_a_real_addition_arrives():
+    """Nothing is lost by taking round one alone: a card the run really did
+    gain is in hand or draw at the next fight's round one, which is the read
+    this page already called the authoritative one."""
+    blindplay.forget_deck()
+    blindplay.observe(_combat_with_piles(1, ["Strike"], ["Defend"]))
+    assert len(blindplay._DECK_MEMORY["cards"]) == 2
+
+    blindplay.observe(_combat_with_piles(1, ["Strike", "Riptide"], ["Defend"]))
+
+    titles = [c["title"] for c in blindplay._DECK_MEMORY["cards"]]
+    assert titles.count("Riptide") == 1
+    assert len(titles) == 3
+    blindplay.forget_deck()
+
+
+def test_a_victory_screens_short_union_still_never_replaces_the_deck():
+    """The clause the old rule existed to prevent, kept: a later round can
+    lose cards to a pile the game has torn down, and the deck it held stands.
+    """
+    blindplay.forget_deck()
+    blindplay.observe(_combat_with_piles(1, ["Strike", "Defend"],
+                                         ["Riptide", "Flank"]))
+    assert len(blindplay._DECK_MEMORY["cards"]) == 4
+
+    blindplay.observe(_combat_with_piles(6, ["Strike"], []))
+
+    assert len(blindplay._DECK_MEMORY["cards"]) == 4
+    blindplay.forget_deck()
+
+
+def test_the_generator_adds_to_the_combat_and_to_no_permanent_list():
+    """The C# half of the read, which is why nothing moved there: the one
+    generation site in the mod goes through the combat-only door."""
+    src = (REPO / "klee-mod" / "KleeCode" / "Powers"
+           / "GuestStarGenerator.cs").read_text(encoding="utf-8")
+
+    assert "CardPileCmd.AddGeneratedCardToCombat(" in src
+    assert "PileType.Hand" in src
+    assert "MasterDeck" not in src
+
+
 # ------------- `EB-483`: what the Smith is offering, and what it becomes -----
 
 
@@ -7313,6 +7656,98 @@ def test_the_upgraded_face_moves_the_number_the_delta_names():
         "KLEEMOD-LYNETTE_BOX_TRICK", "Draw 2 cards.") == "Draw 3 cards."
 
 
+# --- `EB-529`: THE FOUR SMITH ROWS THAT SHOWED NOTHING AND SAID NOTHING ------
+#
+# THE FIND (Furina r12 lane 2). "The upgrade screen showed no upgrade at all
+# for `Aria of Recompense`, `Salon Debut`, `An Invitation` and `Fischl -- Oz`,
+# with no line saying why, while every other card printed an `Upgraded:`
+# preview."
+#
+# THE FOUR NAMED, AND THREE OF THEM ARE ONE SHAPE. `{IfUpgraded:show:A|B}`
+# prints arm B as the card stands and arm A once it is upgraded, and where
+# NEITHER arm holds a brace that is a swap this page can make exactly. The
+# fourth -- Salon Debut's `{IfUpgraded:show:Gain {Encore:diff()} Encore.|}` --
+# carries a hole inside an arm, which is two sentences rather than one sentence
+# with a number in it, and gets a REASON instead.
+
+#: The four, with the face each printed on the seat's own Smith screen.
+_R12_SMITH = (
+    ("KLEEMOD-PROTO_FR_ARIA_OF_RECOMPENSE",
+     "Gain 5 Encore. If you have at least 3 Fanfare, gain 5 more."),
+    ("KLEEMOD-PROTO_FR_SALON_DEBUT_NAMED", "Deploy Mademoiselle Crabaletta."),
+    ("KLEEMOD-AN_INVITATION",
+     "Add 1 random Common Companion card to your hand."),
+    ("KLEEMOD-PROTO_MC_FISCHL_OZ",
+     "Hexerei. At the end of your turn, Oz deals 5 Electro damage to a "
+     "random enemy."),
+)
+
+
+def test_every_one_of_the_four_now_prints_a_face_or_a_reason():
+    """The row's acceptance: every Smith row prints its upgraded face or says
+    why not. Silence is the one answer none of them may give."""
+    for card_id, printed in _R12_SMITH:
+        built, why = qa_packet.upgrade_preview(card_id, printed)
+        assert bool(built) != bool(why), card_id
+
+
+def test_the_two_arm_swap_writes_the_upgraded_arm():
+    """Three of the four, and no arithmetic in any of them: the pattern reads
+    the UNUPGRADED arm off the printed face and the render writes the other."""
+    assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
+        "Gain 8 Encore. If you have at least 3 Fanfare, gain 8 more.")
+    assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
+        "Add 1 random Common Companion card to your hand, free this turn.")
+    # AN EMPTY UNUPGRADED ARM TAKES THE SPACE IN FRONT OF IT WITH IT: the game
+    # prints the trimmed sentence, and the upgraded face needs the space back.
+    assert qa_packet.upgraded_face(*_R12_SMITH[3]) == (
+        "Hexerei. At the end of your turn, Oz deals 5 Electro damage to a "
+        "random enemy. Draw 1 card.")
+
+
+def test_the_one_that_cannot_be_rendered_says_which_kind_of_upgrade_it_is():
+    """Salon Debut's arm carries a hole of its own, so the upgrade is a second
+    sentence rather than a number in the first. The reason is a fact about the
+    CARD, which is what a reader deciding where to spend a Smith can act on."""
+    built, why = qa_packet.upgrade_preview(*_R12_SMITH[1])
+
+    assert built == ""
+    assert why == qa_packet.NO_PREVIEW_REWRITES
+    assert not qa_packet.leaks(why)
+
+
+def test_the_other_three_reasons_are_each_a_fact_about_the_card():
+    """A card this page has no written face for, one whose upgrade moves a
+    value the face does not print, and one whose printed text no longer
+    matches the sentence it was generated from."""
+    assert qa_packet.upgrade_preview("KLEEMOD-NOT_A_CARD", "Deal 6.")[1] == \
+        qa_packet.NO_PREVIEW_TEMPLATE
+    assert qa_packet.upgrade_preview(
+        "KLEEMOD-PROTO_KO_CHAIN_FUSE",
+        "Each Bomb on target enemy grows by 3.")[1] == \
+        qa_packet.NO_PREVIEW_UNMATCHED
+    for text in (qa_packet.NO_PREVIEW_TEMPLATE, qa_packet.NO_PREVIEW_NO_NUMBER,
+                 qa_packet.NO_PREVIEW_UNMATCHED):
+        assert not qa_packet.leaks(text)
+
+
+def test_the_reason_prints_on_the_smith_under_the_face_it_is_about():
+    """And it prints where the missing line was, so the two rows read as two
+    different facts rather than as one silence."""
+    smith = live("upgrade-fresh")
+    smith = json.loads(json.dumps(smith.get("state", smith)))
+    smith["card_select"]["cards"].append(
+        {"id": "KLEEMOD-PROTO_FR_SALON_DEBUT_NAMED", "name": "Salon Début",
+         "cost": "1", "type": "Skill",
+         "description": "Deploy Mademoiselle Crabaletta."})
+    page = blindplay.observe(smith)
+
+    assert ("    Upgraded: not shown -- its upgrade rewrites the sentence "
+            "rather than moving a number in it.") in page
+    # The rows that CAN be rendered are untouched by the new line.
+    assert "    Upgraded: Gain 11 Block." in page
+
+
 # ------------------------- `EB-377`: the base game's words on a face ---------
 
 
@@ -7328,7 +7763,8 @@ def test_a_base_keyword_a_face_names_is_defined_on_the_page():
     page = blindplay.observe(keyword_hand_state(
         ["Apply 1 Vulnerable. Plan: Apply 2 Vulnerable to ALL enemies."]))
     glossary = page.split("## Words on this screen")[1]
-    assert "- **Vulnerable** — Every card hit it takes deals 50% more" in glossary
+    assert ("- **Vulnerable** — An attack or card hit on it deals 50% more"
+            in glossary)
     assert "falls off at the end of each of its turns" in glossary
     # And the Plan tip is still there: two words, two definitions.
     assert "- **Plan** — " in glossary
@@ -7377,7 +7813,10 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         # `VulnerablePower` gates on the HIT. `EB-497` then narrowed "every
         # hit" to "every CARD hit" -- a potion's damage is not a powered
         # attack in either engine and takes no 1.5x.
-        "Vulnerable": ["Every card hit it takes deals 50% more, a Skill's "
+        # `EB-523` then put the ATTACK back in, for the side of the board
+        # `EB-497` did not read: "every card hit" is complete on an enemy and
+        # silent on a player, whose Vulnerable is about a monster's swing.
+        "Vulnerable": ["An attack or card hit on it deals 50% more, a Skill's "
                        "too. A ", "potion's does not. One stack falls off at "
                        "the end of each of ", "its turns."],
         # `EB-469` put the Skill case in this sentence, in the C# and here in
@@ -8337,6 +8776,78 @@ def test_act_takes_the_letter_beside_the_name():
     assert again["post"]["target"] == by_letter["post"]["target"]
 
 
+# --- `EB-519`: THE LETTER THAT LANDED ON THE JELLYFISH -----------------------
+
+
+def _lettered_board_with_a_pet() -> dict:
+    """Two bodies and the Bake-Kurage up, which is Kokomi r18's board.
+
+    The hand carries the recorded `Pearl Barrage` (no `can_target_pet` on the
+    feed, so a Plan goes through) and a copy that the game says CANNOT be
+    planned, because the two halves of this defect are those two cards.
+    """
+    state = _gardener_board(2)
+    state["player"]["kokomi_plans"] = TWO_PLANS
+    barred = json.loads(json.dumps(state["player"]["hand"][0]))
+    barred.update({"name": "Coral Blade", "can_target_pet": False,
+                   "index": len(state["player"]["hand"])})
+    state["player"]["hand"].append(barred)
+    return state
+
+
+def test_a_letter_names_a_body_and_never_the_jellyfish():
+    """`EB-519`. THE PLAN THE SEAT NEVER ASKED FOR.
+
+    Kokomi r18, both lanes. `EB-496`'s letter is matched exactly on the enemy
+    side and was matched by `_match`'s unique SUBSTRING on the pet side -- and
+    `Bake-Kurage` folds to `bakekurage`, which contains `a` and `b`. The pet
+    block runs first, so `on "A"` was refused as a Plan the card could not
+    carry and `on "B"` was silently ACCEPTED as one, aimed at the jellyfish
+    rather than at the second Gardener the page had just printed `[B]`.
+
+    Seen to FAIL: both letters posted `target: 41`, the pet's entity id.
+    """
+    state = _lettered_board_with_a_pet()
+    _new_process()
+    page = blindplay.observe(state)
+    assert "[A]" in page and "[B]" in page and "## The Bake-Kurage" in page
+
+    for letter, body in (("A", "gardener_1"), ("B", "gardener_2")):
+        res = blindplay.act(state, f'play "Pearl Barrage" on "{letter}"')
+        assert res["ok"], (letter, res["refusal"])
+        assert res["post"]["target"] == body, letter
+        # And the half the seat met as a refusal: a card the game will not let
+        # be planned is no longer refused for a Plan it was never aimed at.
+        barred = blindplay.act(state, f'play "Coral Blade" on "{letter}"')
+        assert barred["ok"], (letter, barred["refusal"])
+        assert barred["post"]["target"] == body, letter
+
+
+def test_the_jellyfish_still_answers_to_its_own_name():
+    """The other side of the same rule: only the LETTER is taken away. The pet
+    keeps its printed name and every unique substring of it that is not one."""
+    state = _lettered_board_with_a_pet()
+    _new_process()
+    blindplay.observe(state)
+    for word in ("Bake-Kurage", "Kurage"):
+        res = blindplay.act(state, f'play "Pearl Barrage" on "{word}"')
+        assert res["ok"], (word, res["refusal"])
+        assert res["post"]["target"] == TWO_PLANS["pet_entity_id"], word
+        assert res["printed"]["target"] == "Bake-Kurage", word
+
+
+def test_a_letter_no_body_carries_is_refused_about_the_other_side():
+    """A handle that resolves to nothing is refused with the ENEMIES listed --
+    never quietly re-read as the pet, which is how `B` was lost."""
+    state = _lettered_board_with_a_pet()
+    _new_process()
+    blindplay.observe(state)
+    res = blindplay.act(state, 'play "Pearl Barrage" on "F"')
+    assert not res["ok"] and res["post"] is None
+    assert "Bake-Kurage" not in res["refusal"]
+    assert "Phantasmal Gardener" in res["refusal"]
+
+
 # --- `EB-428`: THE REWARD THAT PRICED A REACTION CARD BLIND ------------------
 
 
@@ -8456,6 +8967,105 @@ def test_a_feed_that_never_answered_the_question_still_posts():
     state = _all_enemies_custom_state()
     del state["player"]["hand"][-1]["can_target_enemy"]
     assert blindplay.act(state, 'play "Riptide" on "Nibbit"')["ok"]
+
+
+# --- `EB-527`: TWO "ALL ENEMIES" FACES, TWO OPPOSITE FORMS -------------------
+
+
+def _two_all_faces_state() -> dict:
+    """Furina r12 lane 2's elite screen, one turn apart.
+
+    `Lynette -- Magic Trick` prints `Deal 4 damage to ALL enemies` and is AIMED
+    on the wire, because its Swirl half needs a body; `Chevreuse -- Ring of
+    Bursting Grenades` prints the same words and aims itself. Nothing on either
+    face tells them apart, and the seat met the two refusals a turn apart.
+    """
+    state = _gardener_board(3)
+    hand = state["player"]["hand"]
+    for name, aims in (("Lynette — Magic Trick", True),
+                       ("Chevreuse — Ring of Bursting Grenades", False)):
+        card = json.loads(json.dumps(hand[0]))
+        card.update({"id": f"KLEEMOD-{len(hand)}", "name": name,
+                     "description": "Deal 4 damage to ALL enemies.",
+                     "target_type": "40219", "keywords": [],
+                     "can_target_enemy": aims, "index": len(hand)})
+        hand.append(card)
+    return state
+
+
+def test_an_all_face_the_wire_aims_says_so_when_it_is_played_bare():
+    """`EB-527`. THE REFUSAL THAT COST AN ELITE TURN.
+
+    Furina r12 lane 2: `play "Lynette — Magic Trick: Astonishing Shift"` bare
+    was refused "there is more than one enemy, so say which" -- a sentence
+    about the board that says nothing about the card. "The very next turn the
+    opposite happened: Chevreuse ... refused with 'does its own aiming, so it
+    takes no `on`'. Two cards, both printing ALL enemies, with opposite
+    targeting rules and nothing on either face to tell them apart."
+
+    THE WIRE IS RIGHT AND THE FACE IS INCOMPLETE: Magic Trick's Swirl half
+    needs a body, so the game aims the card at one, and the ALL in its damage
+    clause is about what the hit does rather than how it is played. `EB-499`
+    gave the other direction its own sentence; this is that sentence's twin.
+
+    Seen to FAIL: the refusal was the board's generic one.
+    """
+    state = _two_all_faces_state()
+    _new_process()
+    blindplay.observe(state)
+
+    res = blindplay.act(state, 'play "Lynette — Magic Trick"')
+
+    assert not res["ok"] and res["post"] is None
+    assert ("'Lynette — Magic Trick' prints \"ALL enemies\" and is still aimed "
+            "at one body, so say which: ") in res["refusal"]
+    assert "Phantasmal Gardener (1)" in res["refusal"]
+    # And the form that works is offered, `EB-402`'s rule unchanged: every
+    # refusal ends in the commands that resolve (`_with_forms`).
+    assert 'play "Lynette — Magic Trick" on "Phantasmal Gardener (1)"'         in res["refusal"]
+
+
+def test_the_face_that_aims_itself_still_names_the_bare_form():
+    """`EB-499`'s half, unmoved: the twin sentence is the point, so the two
+    refusals a seat meets a turn apart each name the form that works."""
+    state = _two_all_faces_state()
+    _new_process()
+    blindplay.observe(state)
+
+    res = blindplay.act(
+        state, 'play "Chevreuse — Ring of Bursting Grenades" on "A"')
+
+    assert not res["ok"] and res["post"] is None
+    assert "does its own aiming" in res["refusal"]
+    assert 'play "Chevreuse — Ring of Bursting Grenades"' in res["refusal"]
+
+
+def test_an_aimed_all_face_plays_on_the_body_it_was_given():
+    """The decision is the WIRE's target type and not the face's words, so the
+    card the refusal is about still plays exactly as the game aims it."""
+    state = _two_all_faces_state()
+    _new_process()
+    blindplay.observe(state)
+
+    ok = blindplay.act(state, 'play "Lynette — Magic Trick" on "B"')
+
+    assert ok["ok"], ok["refusal"]
+    assert ok["post"]["target"] == "gardener_2"
+
+
+def test_a_single_target_face_keeps_the_boards_own_refusal():
+    """The clause is added off the FACE, and only where the face says the
+    thing that made the refusal confusing. An ordinary aimed card played bare
+    is refused about the board, exactly as it always was."""
+    state = _two_all_faces_state()
+    _new_process()
+    blindplay.observe(state)
+
+    res = blindplay.act(state, 'play "Pearl Barrage"')
+
+    assert not res["ok"]
+    assert "there is more than one enemy, so say which" in res["refusal"]
+    assert "ALL enemies" not in res["refusal"]
 
 
 # --- `EB-502`: THE PLANNED WEAK THAT WAS STILL IN THE ACTION QUEUE -----------

@@ -106,10 +106,27 @@ public static class BaseKeywordTips
     /// one rule with two printers, so <c>KleeMod.InjectLocStrings</c> now
     /// merges the arm's sentence into the <c>powers</c> table beside this one.
     /// </summary>
+    /// <remarks>
+    /// `EB-523` PUT THE ATTACK BACK IN, and it is `EB-497`'s own correction
+    /// meeting the side of the board that row did not read. "Every card hit"
+    /// is complete on an ENEMY, where everything that lands is a card or a
+    /// potion, and SILENT ON THE PLAYER, where the number that matters is a
+    /// monster's swing: the Kokomi r18 lane-2 seat wore <c>Vulnerable 99 --
+    /// Receive 50% more damage from cards for 99 turns</c> in front of a
+    /// 24-damage intent and could not price it -- "the single most
+    /// decision-relevant number on the screen and I could not price it".
+    ///
+    /// IT DOES COUNT. The gate is <c>ValueProp.IsPoweredAttack()</c>, a
+    /// property of the HIT, and a monster's move carries it; the sim says the
+    /// same structurally, running every enemy hit through
+    /// <c>powers.modify_damage_taken(state.player, ...)</c>. The potion clause
+    /// is untouched, because a potion's damage is the one thing that takes no
+    /// multiplier on either engine.
+    /// </remarks>
     public static IEnumerable<IHoverTip> ForVulnerable(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, VulnerableKey,
-            "Every card hit it takes deals 50% more, a Skill's too. A "
+            "An attack or card hit on it deals 50% more, a Skill's too. A "
           + "potion's does not. One stack falls off at the end of each of "
           + "its turns.");
 

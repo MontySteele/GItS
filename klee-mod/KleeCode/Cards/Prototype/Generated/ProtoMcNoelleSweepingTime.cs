@@ -67,7 +67,7 @@ public sealed class ProtoMcNoelleSweepingTime : CustomCardModel, IElementalCard,
         {
             new CalculationBaseVar(0m),
             new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => (int)card.Owner.Creature.Block)
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => (int)card.Owner.Creature.Block)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

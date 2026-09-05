@@ -53,7 +53,7 @@ public sealed class ProtoFrLetThePeopleRejoice : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(5m),
             new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaDrain.Amount(card))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaDrain.Amount(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

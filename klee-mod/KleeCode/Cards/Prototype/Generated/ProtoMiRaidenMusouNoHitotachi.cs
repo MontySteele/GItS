@@ -67,7 +67,7 @@ public sealed class ProtoMiRaidenMusouNoHitotachi : CustomCardModel, IElementalC
         {
             new CalculationBaseVar(20m),
             new ExtraDamageVar(5m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => CompanionPlays.PlayedThisCombat(card.Owner.Creature.CombatState, card.Owner).Count)
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => CompanionPlays.PlayedThisCombat(card.Owner.Creature.CombatState, card.Owner).Count)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

@@ -262,18 +262,28 @@ def test_the_aim_is_inert_on_a_stage_the_arm_never_touched():
 # ======================================================================
 
 def test_curtain_rises_hits_and_then_deploys(arm):
+    """`EB-530`: THE MEMBER IT FIELDS IS CHEVALMARIN.
+
+    Three seats read the row as the one they never wanted to play -- "it puts
+    the Usher at the front and converts the damage engine into a block
+    engine", the Usher himself "below a basic Defend" -- and the doctrine read
+    (card audit sec.5.7, FOLLOWS on C6) took the one-word change. The shape is
+    unchanged: a Deploy on an Attack, and the fielded member performs as she
+    arrives because `Deploy` is where that clause lives.
+    """
     st = _staged([], encore=9)
     hp = st.enemies[0].hp
-    printed = C.SALON_MEMBERS["usher"]["tick"]["block"]
+    printed = C.SALON_MEMBERS["chevalmarin"]["tick"]["damage"]
 
     effects.resolve_card(st, loader.get_card("proto_fr_curtain_rises"))
 
-    assert st.player.salon == ["usher"]
-    # The hit landed AND the usher performed as he arrived: 6 damage, then his
-    # Block. The two are separable because only one of them is Block.
-    assert st.enemies[0].hp == hp - 6
-    assert st.player.block == printed
-    assert _tick_members(st) == ["usher"]
+    assert st.player.salon == ["chevalmarin"]
+    # The hit landed AND she performed as she arrived: 6 damage, then her own
+    # 2 and the aura she applies. No Block anywhere on the row now.
+    assert st.enemies[0].hp == hp - 6 - printed
+    assert st.player.block == 0
+    assert st.enemies[0].aura == "hydro"
+    assert _tick_members(st) == ["chevalmarin"]
 
 
 def test_curtain_rises_deploys_without_performing_with_the_manual_leg_off(
@@ -284,11 +294,12 @@ def test_curtain_rises_deploys_without_performing_with_the_manual_leg_off(
     loader.reset_caches()
     monkeypatch.setattr(FR, "FURINA_REFRAME", True)
     st = _staged([], encore=9)
+    hp = st.enemies[0].hp
 
     effects.resolve_card(st, loader.get_card("proto_fr_curtain_rises"))
 
-    assert st.player.salon == ["usher"]
-    assert st.player.block == 0
+    assert st.player.salon == ["chevalmarin"]
+    assert st.enemies[0].hp == hp - 6              # the hit, and no performance
     assert _tick_members(st) == []
     loader.reset_caches()
 
@@ -296,11 +307,12 @@ def test_curtain_rises_deploys_without_performing_with_the_manual_leg_off(
 def test_curtain_rises_upgrades_its_damage_and_not_its_deploy(arm):
     st = _staged([], encore=9)
     hp = st.enemies[0].hp
+    printed = C.SALON_MEMBERS["chevalmarin"]["tick"]["damage"]
 
     effects.resolve_card(st, loader.get_card("proto_fr_curtain_rises+"))
 
-    assert st.enemies[0].hp == hp - 9
-    assert st.player.salon == ["usher"]
+    assert st.enemies[0].hp == hp - 9 - printed
+    assert st.player.salon == ["chevalmarin"]
 
 
 # ======================================================================
@@ -398,6 +410,39 @@ def test_second_course_at_the_affordability_boundary(arm, encore,
 # ======================================================================
 # 4. ROLLING TIDE -- the kit's own perform verb
 # ======================================================================
+
+def test_the_two_round_twelve_adjustments_are_on_the_sheet(arm):
+    """`EB-530`. THE PRICE THE SEATS NAMED, AND THE MEMBER THEY DID NOT WANT.
+
+    Round 12 (`review/active/furina-reframe-round-12-2026-09-05.md` sec.4)
+    asked one question of the assembled seat -- "name the turn on which you
+    would have played Rolling Tide at 1 energy, or name none" -- and got "4 of
+    6, and it would be a staple"; with round 11's four declines that is three
+    seats and one answer. Curtain Rises fielding the Usher was read the same
+    way by three seats. Both arms are FOLLOWS on the doctrine read (card audit
+    sec.5.7): C2 binds, because the remaining 1 energy still binds, and C6
+    holds on both, because neither is strictly better than the shipped row it
+    is compared against.
+
+    NOTHING ELSE MOVED: the seam (`furina_reframe.POOL_SUBS`) offers the same two
+    ids in place of the same two shipped rows, and both keep their shape --
+    an ALL-enemies Attack that performs the front, and a Deploy on an Attack.
+    """
+    import yaml
+    sheet = yaml.safe_load((REPO / "docs" / "prototype-surface.yaml")
+                           .read_text(encoding="utf-8"))
+    rows = {r["id"]: r for r in sheet}
+
+    assert loader.get_card("proto_fr_rolling_tide").cost == 1
+    assert rows["proto_fr_rolling_tide"]["cost"] == 1
+    # The face is codegen's business and `Card` carries no description, so the
+    # sheet is the one place the printed words live on this side.
+    face = rows["proto_fr_curtain_rises"]["description"]
+    assert "Surintendante Chevalmarin" in face
+    assert "Usher" not in face
+    assert FR.POOL_SUBS["undercurrent"] == "proto_fr_rolling_tide"
+    assert FR.POOL_SUBS["house_call"] == "proto_fr_curtain_rises"
+
 
 def test_rolling_tide_hits_all_enemies_twice_and_performs_the_front(arm):
     enemies = [make_enemy(hp=40), make_enemy(hp=40)]

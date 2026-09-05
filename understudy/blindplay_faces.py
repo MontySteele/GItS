@@ -569,10 +569,29 @@ def remember_deck(state: dict[str, Any]) -> None:
     round one every card is in hand or draw, so the union is exactly the deck
     and it is the only reading that can observe a REMOVAL. A later round can
     lose cards to an exhaust-and-clear or to a pile the game has already torn
-    down, so it is taken only when it is BIGGER than what is held -- without
-    that, the union read at a victory screen replaces a 13-card deck with 3.
-    A board belonging to a DIFFERENT character is a different run and simply
-    replaces what is held.
+    down, and the union read at a victory screen would replace a 13-card deck
+    with 3. A board belonging to a DIFFERENT character is a different run and
+    simply replaces what is held.
+
+    `EB-528`. AND ROUND ONE IS THE *ONLY* READ NOW. The clause this replaces
+    took a later round's union whenever it was BIGGER than what is held, and a
+    later round's union can grow for a reason that is not a deck at all: a
+    Companion generated mid-combat (`An Invitation`, `Guest List`) is added to
+    the HAND and to no permanent list -- `GuestStarGenerator.Generate` goes
+    through `CardPileCmd.AddGeneratedCardToCombat`, and the mod is right --
+    so the union grew by one and the generated card was written into the deck
+    this page remembers. Furina r12 met it twice: "Lynette -- Bogglecat Box
+    appeared in my end-of-act deck list ... Bennett, Barbara, Gorou and
+    Freminet, which arrived by the same route, did not" (lane 1), and
+    "Shinobu, generated mid-fight by An Invitation, appeared in my deck list
+    at the Smith" (lane 2). The tell is in the seat's own control: only the
+    generated cards whose fight happened to make the union bigger got in.
+
+    NOTHING IS LOST BY DROPPING IT. A card the run really did gain -- a
+    reward, an event, a Status -- is in hand or draw at the NEXT fight's round
+    one, which is the read this function already called the authoritative one.
+    What the page gives up is freshness INSIDE one combat, and it already
+    labels the deck it prints with the floor that read was taken on.
     """
     player = _blob(state, "player")
     if not any(isinstance(player.get(p), list) for p in _DECK_PILES):
@@ -589,7 +608,7 @@ def remember_deck(state: dict[str, Any]) -> None:
         return
     held = _held_deck()
     same_run = _fold(held.get("character")) == _fold(player.get("character"))
-    if same_run and _int(_blob(state, "battle").get("round")) != 1             and len(cards) <= len(held.get("cards") or []):
+    if same_run and _int(_blob(state, "battle").get("round")) != 1:
         return
     row = {"cards": cards,
            "character": _text(player.get("character")),

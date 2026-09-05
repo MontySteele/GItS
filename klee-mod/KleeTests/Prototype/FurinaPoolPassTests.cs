@@ -131,10 +131,16 @@ public class FurinaPoolPassTests
         // (`rewards.character_pool`); this is the same claim in the mod, read
         // off constructed models, which need no combat.
         //
-        // TYPE AND COST TOO, and that is the packet's own D default rather than
-        // a rule of the seam: each replaced row was chosen because it is a
-        // plain number card of the SAME type and cost as its replacement, so
-        // the swap moves what the card does and nothing about where it sits.
+        // TYPE TOO, and the rarity is the one that carries the claim: the odds
+        // a row is offered at are the tier's, so common-for-common is what
+        // makes the swap a face swap rather than a balance change.
+        //
+        // COST WAS THE PACKET'S D DEFAULT AND NOT A RULE OF THE SEAM, and
+        // `EB-530` is it moving: each replaced row was PICKED as a plain number
+        // card of the same type and cost, and round 12 then priced Rolling Tide
+        // at 1 on three seats' word (`Rolling_tide_costs_one_energy`). The
+        // exception is named here rather than the assertion dropped, so the
+        // other three still cannot drift by accident.
         foreach (var (protoType, shippedType) in ThePass)
         {
             var proto = New(protoType);
@@ -142,7 +148,11 @@ public class FurinaPoolPassTests
             Assert.Equal(CardRarity.Common, proto.Rarity);
             Assert.Equal(shipped.Rarity, proto.Rarity);
             Assert.Equal(shipped.Type, proto.Type);
-            Assert.Equal(shipped.EnergyCost.Canonical, proto.EnergyCost.Canonical);
+            if (protoType != typeof(ProtoFrRollingTide))
+            {
+                Assert.Equal(shipped.EnergyCost.Canonical,
+                    proto.EnergyCost.Canonical);
+            }
         }
     }
 
@@ -265,7 +275,39 @@ public class FurinaPoolPassTests
         var face = string.Join(" ", Il.Strings(
             Il.Method("ProtoFrCurtainRises", "get_Localization")));
         Assert.Contains("[gold]Deploy[/gold]", face);
-        Assert.Contains("Gentilhomme Usher", face);
+        Assert.Contains("Surintendante Chevalmarin", face);
+    }
+
+    [Fact]
+    public void Curtain_rises_fields_chevalmarin_and_no_longer_the_usher()
+    {
+        // `EB-530`, ROUND 12's SECOND ADJUSTMENT, and it is ONE WORD on the
+        // face. Three seats read the row the same way -- "the card I never
+        // wanted to play, because it puts the Usher at the front and converts
+        // the damage engine into a block engine", with the Usher himself "below
+        // a basic Defend" (3 Block a trigger, 2 dry) -- and the doctrine read
+        // (card audit sec.5.7) is FOLLOWS on C6: against the shipped
+        // `Surintendante Chevalmarin` (Common, 1 energy: deploy her, gain 3
+        // Encore) this gains 6 damage and loses the 3 Encore, so neither row is
+        // strictly better than the other.
+        //
+        // THE DEPLOY SHAPE IS UNCHANGED, which is the whole point of a one-word
+        // change: she performs as she arrives because that clause is
+        // `SalonMemberPower.Deploy`'s, and no row carries a copy of it. WHICH
+        // member the call names is the enum operand this harness cannot read
+        // (the class note above) and is pinned in
+        // `tier0/tests/test_furina_pool_pass.py`; what is pinned here is the
+        // PRINTED name and the tip derived from it, which is the half a player
+        // reads -- and `EB-272`'s defect is exactly a face and a tooltip
+        // naming different members.
+        var body = Il.Calls(Il.Method("ProtoFrCurtainRises", "OnPlay"));
+        Assert.Contains("SalonMemberPower.Deploy", body);
+        Assert.Contains("SalonMemberTips.ForCard",
+            Il.Calls(Il.Method("ProtoFrCurtainRises", "get_ExtraHoverTips")));
+
+        var face = string.Join(" ", Il.Strings(
+            Il.Method("ProtoFrCurtainRises", "get_Localization")));
+        Assert.DoesNotContain("Usher", face);
     }
 
     // ==================================================================
@@ -322,6 +364,26 @@ public class FurinaPoolPassTests
     // ==================================================================
     // 5. ROLLING TIDE -- the kit's own perform verb
     // ==================================================================
+
+    [Fact]
+    public void Rolling_tide_costs_one_energy()
+    {
+        // `EB-530`, ROUND 12's FIRST ADJUSTMENT, and it is a number with no
+        // text change. The round asked the assembled seat one question -- name
+        // the turn you would have played this at 1 energy, or name none -- and
+        // got "4 of 6, and it would be a staple"; the natural seat, offered it
+        // at a reward, "did not want it at 2 energy, less than Chevreuse for
+        // the same cost; would take it at 1". With round 11's four declines
+        // that is three seats and one answer, and the doctrine read (card audit
+        // sec.5.7) is FOLLOWS on C2 and C6: the remaining energy still binds,
+        // and against Cleave (Common, 1: 8 to ALL) the adjusted row deals 4 to
+        // ALL -- worse by 4 a body on an empty stage.
+        var card = new ProtoFrRollingTide();
+        Assert.Equal(1, (int)typeof(CardModel)
+            .GetProperty("CanonicalEnergyCost", HeadlessGame.All)!
+            .GetValue(card)!);
+        Assert.Equal(2m, card.DynamicVars.Damage.BaseValue);
+    }
 
     [Fact]
     public void Rolling_tide_hits_every_body_and_then_performs()

@@ -22,6 +22,11 @@ namespace KleeMod.Powers;
 /// standing post-errata) -- "skip a boss turn" is exactly the effect that warps
 /// balance math, so it was ruled out.
 ///
+/// WHILE FROZEN IS ONE ACTION LONG, which is <see cref="AfterSideTurnEnd"/>'s
+/// tick and is the fact <c>EB-517</c> put on the face: the Shatter window opens
+/// when the freeze lands and closes when the body takes the action the first
+/// clause halves, so the two clauses are one rider and not two.
+///
 /// Both halves ride the same hook, using the fact that
 /// ModifyDamageMultiplicative receives BOTH target and dealer: the -50% checks
 /// <c>dealer == Owner</c> (outgoing), Shatter checks <c>target == Owner</c>
@@ -40,8 +45,26 @@ public sealed class FrozenPower : PowerModel, ILocalizationProvider
             // (`KLEEMOD-FROZEN_PREVIEW`). "and removes Frozen" is a RULE, so
             // it stays: the packet's shorter form dropped it and the
             // sentence fits with it kept.
-            "Its next action deals 50% less damage. The first Attack to hit "
-          + $"it Shatters for [blue]{ReactionConstants.ShatterDamage}[/blue] "
+            //
+            // `EB-517`: AND THE WINDOW, WHICH IS THE HALF THAT WAS MISSING.
+            // The two clauses read as independent riders -- a halved action,
+            // and a standing promise about the next Attack -- and they are
+            // not: `AfterSideTurnEnd` ticks the counter down at the end of
+            // the enemy side's turn, so the Shatter window closes when the
+            // body takes the action the first clause halves. A Kokomi r18
+            // seat played a 2-damage Attack into a 7-HP body expecting 2 + 6,
+            // dealt 2, and read the freeze gone with nothing having Shattered
+            // it: "the one place in the round where I acted on the printed
+            // text and the printed text was wrong." "Until it acts" is LAW's
+            // one-action Frozen said on the face.
+            //
+            // "the first Attack" GOES, and nothing is lost: a Shatter removes
+            // Frozen, so there is never a second Attack inside the window for
+            // "first" to distinguish it from. That is the eleven characters
+            // the window clause needed to stay under the badge ceiling
+            // (`docs/current/text-conventions.md`, 125).
+            "Its next action deals 50% less damage. Until it acts, an Attack "
+          + $"Shatters it for [blue]{ReactionConstants.ShatterDamage}[/blue] "
           + "unblockable damage and removes Frozen."),
     };
 

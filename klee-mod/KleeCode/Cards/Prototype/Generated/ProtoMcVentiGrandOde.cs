@@ -67,7 +67,7 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
         {
             new CalculationBaseVar(8m),
             new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
             new DynamicVar("PowerAmount", 2m)
         };
 
