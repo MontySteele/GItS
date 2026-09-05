@@ -1,4 +1,4 @@
-Status: OPEN (one pick, §5; the defaults in §6 are applied)
+Status: RULED R261 2026-09-05
 
 # Klee round seventeen: the kit's identity cards are blank until a second placer exists
 
@@ -144,6 +144,18 @@ themselves). Options:
 3. Leave the starter; make Pop! and Mine Toss Neow-bundle guarantees or
    raise their offer weight in act 1: an access fix off the starter.
 4. Leave everything: the first placer is the draft's first decision.
+
+## 5a. The ruling (R261, 2026-09-05)
+
+[USER] took none of the four options as written: Pop! in the starter was
+declined ("I still would rather avoid putting too many actually good cards
+in the starting deck"), a relic-planted Bomb was reviewed by GPT and passed
+over (`review/records/klee-turn-one-design-review-2026-09-05.md`), and
+Innate on both basics was narrowed to one: **Jumpy Dumpty gains Innate;
+Ka-pow! does not.** The starter keeps its ten cards and its two kit cards;
+turn one always holds the placer, the detonator still has to be drawn, and
+the other draws still have to carry the Block. Built under `EB-557`. A
+rule change: [USER]'s act-1 run is due on its build.
 
 ## 6. Defaults applied (D and E), disclosed
 

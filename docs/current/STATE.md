@@ -181,7 +181,7 @@ are in [`workstreams.md`](workstreams.md).
   Fuse, Pocket Match) and eight archetype rows the comparison pass of
   round 17 on has to justify (stage-gate, *The loop inside Prototype*);
   the pool is 45. **Round 17 is READ, the first under the Prototype loop**
-  (`review/active/klee-overhaul-round-17-2026-09-05.md`): an assembled Cook
+  (`review/ruled/klee-overhaul-round-17-2026-09-05.md`): an assembled Cook
   deck and a natural run on `0.2.2674+proto`, floors 12 and 11, eleven of
   eleven fights; the hypothesis (preserve one large Bomb) partly supported,
   the Sparks paid by Mines rather than by holding; the payoff cards blank

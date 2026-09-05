@@ -270,8 +270,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R258 | 2026-09-04 | Furina round 5 pick 1 at its default -- Furina starts each combat with 2 Encore under the reframe arm | `4356352` |
 | R259 | 2026-09-05 | Claude merges every PR that asks nothing of [USER]; a PR is [USER]'s only for an open pick, LAW/EXPERIMENTS text, or a shipped number | `9a4251b` |
 | R260 | 2026-09-05 | Furina's stage starts every combat with a member on it (round-11 pick 1, option 2); EB-553 | `41ddb29` |
+| R261 | — | unresolved: pre-ledger, see tag pre-simplification-2026-08-06 | — |
 
-259 rows over the R1..R260 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 148 from a commit message, 0 unresolved.
+260 rows over the R1..R261 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 148 from a commit message, 1 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
