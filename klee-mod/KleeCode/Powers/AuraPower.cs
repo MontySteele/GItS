@@ -178,9 +178,67 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     /// <summary>
     /// Aura lifecycle + reaction side effects. Runs once per hit after the
     /// damage resolves, which is where the sim consumes the aura.
+    ///
+    /// NOT THE ONLY SITE SINCE `EB-515`: this broadcast does not happen at all
+    /// for a hit that KILLED, so the killing case is served by
+    /// <see cref="AfterDamageGiven"/> and the two are mutually exclusive by
+    /// construction. See that method for the whole argument.
     /// </summary>
     public override async Task AfterDamageReceived(
         PlayerChoiceContext choiceContext, Creature target, DamageResult result,
+        ValueProp props, Creature? dealer, CardModel? cardSource)
+    {
+        await ResolveLifecycle(choiceContext, target, props, dealer, cardSource);
+    }
+
+    /// <summary>
+    /// `EB-515`: THE KILLING HIT'S REACTION.
+    ///
+    /// THE DEFECT, in the r18 seat's words: "Overloaded did not fire. Raiden
+    /// killed a Corpse Slug wearing Pyro Aura 1; the 6 to ALL and the Weak
+    /// never landed, and a 1 HP slug beside it was untouched. Nothing on any
+    /// screen says a kill skips its reaction."
+    ///
+    /// THE CAUSE, and it is the base game's own order rather than anything of
+    /// ours: <c>CreatureCmd.Damage</c> guards its whole
+    /// <c>Hook.AfterDamageReceived</c> broadcast on the hit NOT having killed
+    /// (<c>if (!WasTargetKilled || !originalTarget.IsDead)</c>) -- the same
+    /// fact <c>BombPower.AfterDamageReceived</c> already records for early
+    /// detonation. So the aura's lifecycle, which has always hung off that
+    /// hook, simply never ran on a killing blow, and tier0 resolves the
+    /// reaction INSIDE the hit (<c>reactions.resolve_hit</c>) and always has.
+    /// The divergence was the mod's, and this closes it rather than writing
+    /// the mod's order onto the glossary.
+    ///
+    /// WHY THIS HOOK. <c>Hook.AfterDamageGiven</c> is broadcast from the same
+    /// <c>CreatureCmd.Damage</c>, over the same <c>IterateHookListeners</c>
+    /// set, per damage result, and it sits ABOVE the kill guard -- so it fires
+    /// for the killing hit, with the target's powers still attached (the kill
+    /// itself is <c>CreatureCmd.Kill</c>, further down). It is the earliest
+    /// site that can see the whole result.
+    ///
+    /// MUTUALLY EXCLUSIVE, NEVER BOTH. The guard below is the exact complement
+    /// of the base game's: this site acts only when the hit killed, that site
+    /// only when it did not, so no aura is consumed twice and no reaction
+    /// resolves twice. The ordinary hit's timing is untouched, which is what
+    /// keeps <c>test_reaction_phase_parity</c>'s reading of the pipeline true.
+    /// </summary>
+    public override async Task AfterDamageGiven(
+        PlayerChoiceContext choiceContext, Creature dealer, DamageResult result,
+        ValueProp props, Creature target, CardModel? cardSource)
+    {
+        // `result.Receiver` and NOT the `target` argument, which is the play's
+        // original target: a multi-target attack raises one result per body and
+        // the aura this power is about is the receiver's.
+        var hit = result.Receiver;
+        if (hit == null) return;
+        if (!result.WasTargetKilled && !hit.IsDead) return;
+        await ResolveLifecycle(choiceContext, hit, props, dealer, cardSource);
+    }
+
+    /// <summary>The lifecycle itself, reached from both sites above.</summary>
+    private async Task ResolveLifecycle(
+        PlayerChoiceContext choiceContext, Creature target,
         ValueProp props, Creature? dealer, CardModel? cardSource)
     {
         if (target != base.Owner) return;
