@@ -31,9 +31,9 @@ from tier0.tests.conftest import make_enemy, make_state
 @pytest.fixture
 def arm(monkeypatch):
     monkeypatch.setattr(C, "COMPANION_OVERHAUL", True)
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     yield
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
 
 
 def _state(guest_cast: bool):

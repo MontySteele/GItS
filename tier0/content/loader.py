@@ -1735,6 +1735,49 @@ def reset_caches() -> None:
     companion_standins._replacements.cache_clear()
 
 
+#: `EB-569`. THE MEMOIZED VIEWS WHOSE ANSWER MOVES WITH AN ARM FLAG.
+#:
+#: `reset_caches` above is the door for "the content tree on disk changed", and
+#: it costs a rebuild of `_card_index` and `_character_index` -- about 170ms,
+#: which is why no per-test fixture may take it. What an ARM test changes is
+#: not the tree, it is a flag; and exactly four memoized views answer
+#: differently on either side of one:
+#:
+#:   * `_card_prototype`   -- a `proto_` id resolves only through the flagged
+#:                            door, so a warm entry made under the arm is a
+#:                            prototype row a flag-off tree can still read;
+#:   * `_substituted_card_index` -- built from `_starter_ids` and
+#:                            `_pool_substitutions`, both of which READ THE
+#:                            FLAGS. This was the second leaker: warmed once
+#:                            under `KLEE_OVERHAUL`, it holds
+#:                            `proto_ko_jumpy_dumpty` and `proto_ko_kapow`
+#:                            for the rest of the worker's life, so
+#:                            `get_card("proto_ko_kapow")` stops raising and
+#:                            `has_upgrade` starts saying yes -- which is
+#:                            precisely the pair of flag-off tests that failed
+#:                            about one run in three;
+#:   * the two upgrade indices -- `_prototype_deltas` registers a row only
+#:                            while a live flag makes its id reachable.
+#:
+#: `_shipped_upgrade_index` is deliberately NOT here: it reads the sheets and
+#: nothing else, no flag moves it, and clearing it would cost a YAML re-read
+#: for nothing. Nor is `_card_index`: the quarantine keeps every prototype row
+#: out of it under every flag, which is the whole point of the quarantine.
+#:
+#: Callers that also want tier 0.5's `rewards.character_pool` clear it
+#: themselves -- tier0 may not import tier05.
+def reset_arm_caches() -> None:
+    """Drop every memoized view whose answer moves with an arm flag.
+
+    GUARDED, because a test may have monkeypatched one of these to a plain
+    function for the length of its own case (`test_kokomi_plan` does): a cache
+    that is not a cache right now has nothing to clear and is not an error.
+    """
+    for fn in (_card_prototype, _substituted_card_index,
+               upgrades._upgrade_index, upgrades._prototype_upgrade_index):
+        getattr(fn, "cache_clear", lambda: None)()
+
+
 def pilot_weights(pilot_id: str) -> dict:
     return _pilot_index()[pilot_id]["weights"]
 

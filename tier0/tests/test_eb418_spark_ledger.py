@@ -48,11 +48,11 @@ REPO = pathlib.Path(__file__).resolve().parents[2]
 @pytest.fixture
 def overhaul(monkeypatch):
     """The arm on, both id-resolving caches cleared either side."""
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
     monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
     yield
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
 
 

@@ -69,14 +69,22 @@ def overhaul(monkeypatch):
     it here is that discipline moved to the one door every arm test passes
     through, and their own clears are left where they are because a test that
     does not take this fixture still needs them.
-    """
-    from tier0.content import upgrades
 
+    AND THE FOURTH WAS THE SECOND LEAKER (`EB-569`, reopened 2026-09-06).
+    Naming caches by hand is how one gets missed, and the one that was missed
+    is `loader._substituted_card_index`: it is built from `_starter_ids` and
+    `_pool_substitutions`, both of which READ THE FLAGS, so warming it once
+    under this fixture leaves `proto_ko_jumpy_dumpty` and `proto_ko_kapow` in
+    it for the rest of the worker's life -- after which
+    `get_card("proto_ko_kapow")` no longer raises and `has_upgrade` says yes,
+    which is exactly the pair above failing about one run in three. The list
+    is now `loader.reset_arm_caches()`, stated once beside the flags it
+    depends on; `rewards.character_pool` stays here because tier0 may not
+    import tier05.
+    """
     def _clear():
-        loader._card_prototype.cache_clear()
+        loader.reset_arm_caches()
         rewards.character_pool.cache_clear()
-        upgrades._prototype_upgrade_index.cache_clear()
-        upgrades._upgrade_index.cache_clear()
 
     _clear()
     monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
@@ -150,10 +158,13 @@ def test_the_overhaul_ids_do_not_resolve_with_the_flag_off():
     NAMED, not read off `KLEE_OVERHAUL_STARTER_IDS[0]`, since draft 4 (R242):
     that slot is now the BASE GAME's `strike`, which resolves on every tree by
     design and would have turned this test green for the wrong reason."""
-    loader._card_prototype.cache_clear()
+    # `EB-569`: the whole flag-dependent family, not `_card_prototype` alone.
+    # `_substituted_card_index` warmed under the arm is what made this pass
+    # alone and fail about one run in three under `-n auto`.
+    loader.reset_arm_caches()
     with pytest.raises(KeyError):
         loader.get_card("proto_ko_kapow")
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
 
 
 def test_the_sparks_arm_is_untouched():

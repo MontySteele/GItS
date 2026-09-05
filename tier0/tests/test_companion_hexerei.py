@@ -38,7 +38,7 @@ FAMILY = {
 def _caches_clear():
     from tier05 import rewards
 
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     standins._replacements.cache_clear()
     rewards._companion_roster.cache_clear()
     rewards.companion_pool.cache_clear()
