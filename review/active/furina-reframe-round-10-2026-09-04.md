@@ -60,6 +60,6 @@ run, 98 actions. Nothing here is a strength reading.
 
 ## 4. Defaults applied (D and E), disclosed
 
-- **`EB-485` to `EB-488` minted; `EB-463`, `EB-477` cited.**
+- **`EB-485` to `EB-489` minted; `EB-463`, `EB-477` cited.**
 - **The Deploy-density reading goes to the Furina pool pass** with round
   9's; not a number, not a pick.
