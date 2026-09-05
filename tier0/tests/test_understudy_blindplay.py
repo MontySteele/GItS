@@ -1291,6 +1291,52 @@ def test_a_scripted_fight_runs_end_to_end(tmp_path):
                for r in rows if r["kind"] == "observation")
 
 
+def test_the_next_observe_after_a_play_re_reads_the_aura_off_the_feed(tmp_path):
+    """`EB-482` (Kokomi r16 (c) 5), and it is the row's ACCEPTANCE run as a
+    fixture: apply Electro, observe, the Hydro card in hand prints the preview.
+
+    The seat reported "the reaction preview arrives a turn late... it cannot
+    appear on the turn you play the card that CREATES the aura", and the row
+    was minted against a stale-board hypothesis. The loop has no board memory
+    at all: every iteration opens with `self.wire.get_state()` through
+    `settle_board`, and a card's preview is a hover tip the game rebuilds per
+    read (`KleeCardTooltips.ForCard` walks `CombatState.HittableEnemies` at
+    the moment it is asked). This pins that, so the hypothesis cannot be
+    re-minted.
+
+    The cause the seat actually met is one card, not the loop: `Amber --
+    Explosive Puppet` carries NO preview on any board, because its Pyro damage
+    is delivered later by `BaronBunnyPower` and `gen_klee_cards.emit` derives
+    the preview element from a damage or `apply_aura` op on the row itself.
+    """
+    bare = combat_state()
+    assert "Reaction preview" not in blindplay.observe(bare)
+
+    reacted = json.loads(json.dumps(bare))
+    reacted["battle"]["enemies"][0]["status"] = [
+        {"id": "ELECTRO_AURA", "name": "Electro Aura", "amount": 2,
+         "type": "Debuff", "keywords": [],
+         "description": "This enemy is wearing an Electro aura."}]
+    for card in reacted["player"]["hand"]:
+        if card["name"] == "Pearl Barrage":
+            card["keywords"] = list(card.get("keywords") or []) + [
+                {"name": "Reaction preview: Electro-Charged",
+                 "description": "Hydro meets Electro: the aura is consumed "
+                                "and both take a dot."}]
+
+    replies = [{"command": "end turn", "thinking": "set it up"},
+               {"command": 'play "Pearl Barrage" on "Nibbit"',
+                "thinking": "now it eats the aura"},
+               {"record": "one turn"}]
+    _s, _summary, _wire, thread = _session(
+        tmp_path, replies, states=[bare, reacted, reacted])
+
+    # The page the seat decided the SECOND action on was built off the second
+    # wire state, aura and all -- no observation was carried over.
+    assert "Reaction preview: Electro-Charged" not in thread.sent[0]
+    assert "Reaction preview: Electro-Charged" in thread.sent[1]
+
+
 def test_the_session_stops_on_the_action_budget(tmp_path):
     replies = [{"command": "end turn", "thinking": "x"} for _ in range(5)]
     replies.append({"record": "short run"})
