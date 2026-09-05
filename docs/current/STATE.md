@@ -213,10 +213,11 @@ are in [`workstreams.md`](workstreams.md).
   Scroll gave no card (`EB-459`), dual-intent attack numbers never land
   (`EB-461`), Kurage's Oath's tag contradicts its rider (`EB-462`); Tide
   Chart undrawn an eighth time; no pick. **Round 15 is READ, targeted**
-  (`review/active/kokomi-overhaul-round-15-2026-09-04.md`): Tide Chart
-  granted and dead as printed (zero draws on three of four plays), which
-  fires R254's re-ask trigger: **one pick**, the starter's density with a
-  Tide Chart redesign as the default; `EB-467`-`EB-469`. [USER]'s act-1 run is due on
+  (`review/ruled/kokomi-overhaul-round-15-2026-09-04.md`, RULED R257):
+  Tide Chart granted and dead as printed (zero draws on three of four
+  plays), which fired R254's re-ask trigger; **R257 took the default**: Tide
+  Chart redesigned to pay after the carry-outs (`EB-478`, GPT-audited before
+  a tester), the starter stays two kit cards; `EB-467`-`EB-469`. [USER]'s act-1 run is due on
   `0.2.2501+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the

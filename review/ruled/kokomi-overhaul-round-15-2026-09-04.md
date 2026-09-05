@@ -1,4 +1,4 @@
-Status: OPEN (pick 1 is [USER]'s: R254's re-ask trigger fired; the defaults in §5 are applied)
+Status: RULED R257 2026-09-04
 
 # Kokomi round fifteen, targeted: Tide Chart drawn at last, and it drew nothing
 
@@ -89,3 +89,10 @@ does not work as printed.
 - **`EB-467`, `EB-468`, `EB-469` minted; `EB-461`, `EB-447` reopened.**
 - **The intent label is rewritten neutral** (E) before the next round; two
   seats were pushed off blocking by it.
+
+## 6. Ruled
+
+R257, 2026-09-04: pick 1, the default. Tide Chart is redesigned ("Next turn,
+after the Bake-Kurage carries out its Plans, draw 1 card for each", 0 energy,
+Common, upgrade draws 1 more) and the starter stays two kit cards; GPT audits
+the row before a tester sees it. [USER]'s words are in the ruling commit.
