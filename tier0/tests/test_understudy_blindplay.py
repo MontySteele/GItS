@@ -5754,9 +5754,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-380`: the aim clause split in two (a single-target Plan skips
         # a Minion, an ALL Plan does not) and the modifier clause gained
         # Strength, which does not reach a carry-out at all.
+        # `EB-538`: the class a carry-out belongs to, in the Set off row's
+        # own words.
         "Plan": [", paid now; next turn: front ",
                  " counts; your ",
-                 " do not."],
+                 " do not. A carry-out is not a hit: no ",
+                 "when-hit power fires."],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
         # `EB-377` ADDED THESE TWO ROWS to the page, and their absence was the

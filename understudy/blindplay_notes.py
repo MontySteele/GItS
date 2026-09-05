@@ -566,9 +566,16 @@ ARM_KEYWORDS: dict[str, str] = {
     # face 4 under Vajra at Plan 10 expecting her Strength to ride it. It does
     # not -- the carry-out goes through `ElementalHit` UNPOWERED -- so the
     # clause names all three and says whose each one is.
+    # `EB-538` ADDED THE CLASS A CARRY-OUT BELONGS TO, and it is the Set off
+    # row's own sentence one kit over. Skittish gave no Block to a body hit by
+    # Oath's and Ambush's carry-outs and 6 Block to a plain Strike on the same
+    # enemy in the same fight (Kokomi r19 lane 2): a carry-out goes out through
+    # `ElementalHit.Deal` as an unpowered hit with no dealer, so nothing keyed
+    # on being hit can answer it. Same sentence as `ArmKeywordTips.ForPlan`.
     "Plan": ("On the Bake-Kurage, paid now; next turn: front non-Minion, or "
              "ALL, Minions too. Enemy Vulnerable counts; your Weak and "
-             "Strength do not."),
+             "Strength do not. A carry-out is not a hit: no when-hit power "
+             "fires."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
     # `EB-377` ADDED THESE TWO, and their absence was the same defect one row

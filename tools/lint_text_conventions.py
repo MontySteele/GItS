@@ -89,6 +89,16 @@ EXCEPTIONS = {
         "what stops them, what does not fire, where the aura goes and where a "
         "random one lands (EB-432, EB-490, EB-516) -- and none of them is "
         "droppable to make room"),
+    "PlanKey": (
+        "`EB-538` added the CLASS a carry-out belongs to, to a tip already at "
+        "135 of 135. Skittish gave no Block to a body hit by two carry-outs "
+        "and 6 Block to a plain Strike on the same enemy in the same fight "
+        "(Kokomi r19 lane 2), and the seat could not tell a defect from a "
+        "large undocumented advantage. The clause is `SetOffKey`'s own "
+        "sentence at the same call one kit over, and every clause above it is "
+        "a seat's finding: the aim, the ALL exception, and whose modifiers a "
+        "carry-out reads (EB-329, R250, EB-380, EB-538). None is droppable to "
+        "make room"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.

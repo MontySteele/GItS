@@ -624,6 +624,26 @@ public static class ArmKeywordTips
     /// falls back to the leftmost body when every enemy is a Minion -- and it
     /// is a board on which the compressed clause and the full one aim at the
     /// same creature.
+    ///
+    /// `EB-538` TOOK IT OVER THE CEILING, and it is <see cref="ForSetOff"/>'s
+    /// overage for <see cref="ForSetOff"/>'s reason. THE FIND (Kokomi r19 lane
+    /// 2): Skittish gave no Block to a body hit by Oath's and Ambush's
+    /// carry-outs and then 6 Block to a plain Strike on the same enemy in the
+    /// same fight, and the seat could not tell "a defect or a large
+    /// undocumented advantage of planning into blockers". It is the second: a
+    /// carry-out goes out through <see cref="ElementalHit.Deal"/>, which
+    /// reaches <c>CreatureCmd.Damage</c> as <c>ValueProp.Unpowered</c> with
+    /// <c>dealer: null</c>, so a power keyed on being HIT has neither an
+    /// attacker nor a powered hit to answer.
+    ///
+    /// SET OFF'S SENTENCE, WORD FOR WORD ("no when-hit power fires"), because
+    /// it is the same rule at the same call one kit over and `EB-490` already
+    /// paid for the wording: "when-hit power" is what a player calls the thing
+    /// on the enemy's status bar, and "Attack trigger" reads as something on
+    /// the player's own side of the board. Nothing above it is droppable --
+    /// every clause there is a seat's finding -- so the tip is carried in
+    /// `tools/lint_text_conventions.py` as a named exception with its reason,
+    /// which is the bargain `SetOffKey` already makes.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -631,7 +651,8 @@ public static class ArmKeywordTips
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front "
           + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. "
           + "Enemy [gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] "
-          + "and [gold]Strength[/gold] do not.");
+          + "and [gold]Strength[/gold] do not. A carry-out is not a hit: no "
+          + "when-hit power fires.");
 
     /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the

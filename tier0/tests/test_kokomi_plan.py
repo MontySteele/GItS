@@ -352,6 +352,34 @@ def test_an_attack_buff_on_kokomi_does_not_reach_a_planned_hit(overhaul):
     assert enemy.hp == 40 - 7
 
 
+def test_skittish_does_not_fire_on_a_carry_out(overhaul):
+    """`EB-538`. A CARRY-OUT IS NOT A HIT, and the seat could not tell.
+
+    Kokomi r19 lane 2: Skittish gave no Block to a body hit by Kurage's Oath's
+    and Ambush's carry-outs, and 6 Block to a plain Strike on the same enemy in
+    the same fight -- "either a defect or a large undocumented advantage of
+    planning into blockers". It is the second, and it is the rule Klee's Set
+    off already prints: `source="plan"` is not `"attack"`, and `"attack"` is
+    what gates Shatter, the on-hit detonation and Skittish in this engine, as
+    `ElementalHit.Deal`'s `ValueProp.Unpowered` does in the mod. The rule does
+    not move; the Plan tip now says it.
+    """
+    enemy = make_enemy(hp=200)
+    enemy.skittish = 6
+    st = kokomi_state(enemies=[enemy])
+
+    carry_out(st, [{"op": "damage", "amount": 9, "target": "front_enemy"}])
+
+    hit = next(e for e in st.log if e["event"] == "damage")
+    assert hit["source"] == "plan" != "attack"
+    assert enemy.block == 0, "Skittish is an Attack-card rule and did not fire"
+
+    # AND THE SAME BODY, SAME FIGHT, TAKES AN ATTACK CARD: the seat's own
+    # control, and what makes the first half a rule rather than an inert enemy.
+    effects.deal_damage_to_enemy(st, enemy, 6, source="attack")
+    assert enemy.block == 6
+
+
 def test_a_plan_caused_debuff_is_still_hers(overhaul):
     """`EB-334`, the half the flag deliberately does NOT move: the applier
     stays her, so the Tamakushi Casket answers a debuff a Plan applies. If the
