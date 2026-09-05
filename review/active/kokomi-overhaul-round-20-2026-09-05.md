@@ -102,6 +102,8 @@ reading.
 ## 5. Defaults applied (D and E), disclosed
 
 - **`EB-561` to `EB-563` minted; `EB-447`, `EB-249`-`EB-251` cited.**
-- **The Moon stays as built** until the read at the door.
+- **The Moon, read at the door the same evening:** the now-copy at half
+  (`EB-570`, D default), so writing is worse than playing exactly when
+  the whole number is needed now; round 21 reads it.
 - **The two records are the round's evidence.** Lane 1's death is an
   Infested split at Ascension 2, not a kit reading.
