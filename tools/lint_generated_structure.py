@@ -125,6 +125,43 @@ _TEXT_REF = re.compile(r"\{([A-Za-z]\w*)[:}]")
 # it is resolved by SimpleLoc and has no CanonicalVars declaration.
 PSEUDO_TOKENS = frozenset({"IfUpgraded"})
 
+# `EB-486`. A MOD VAR MAY NOT BE NAMED AFTER ITS TOKEN, and both of the ones
+# that are not say so out loud.
+#
+# The derivation above -- `<Name>Var` declares `Name` -- is the base game's own
+# convention and holds for every var the generator emits but two, both in
+# `SpotlightSystem`. `DeferredBlockVar` carries the token `BlockNextTurn`
+# (`EB-438`: it is a card's SECOND Block clause, and the first already owns
+# `Block`); `SpotlitBlockVar` carries `Block` itself (`EB-486`: it IS the first
+# clause, previewing a fold the play was already applying). A card declaring
+# either reads otherwise as one dangling reference plus one orphan -- which is
+# exactly what this lint reported the day the second landed.
+#
+# READ OFF THE C# AND NEVER LISTED HERE: each class states its own
+# `public const string Token`, so a rename carries this map with it and a third
+# such var joins by construction.
+_TOKEN_DECL = re.compile(
+    r"class\s+(\w+?)Var\b(?:(?!\bclass\b).)*?"
+    r"const string Token\s*=\s*\"(\w+)\"", re.S)
+
+
+def var_token_aliases() -> dict[str, str]:
+    """`{class stem: the token it actually declares}` for the mod's own vars."""
+    powers = (Path(__file__).resolve().parents[1]
+              / "klee-mod" / "KleeCode" / "Powers")
+    out: dict[str, str] = {}
+    if not powers.is_dir():
+        return out
+    for path in sorted(powers.rglob("*.cs")):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        for stem, token in _TOKEN_DECL.findall(text):
+            if stem != token:
+                out[stem] = token
+    return out
+
 # CalculationBase / CalculationExtra / ExtraDamage are the input slots of a
 # Calculated*Var triple: the Calculated var reads them off the card itself
 # rather than by name, so a card may declare them and never mention them
@@ -299,12 +336,15 @@ def canonical_vars_block(source: str) -> str:
 def declared_vars(source: str) -> set[str]:
     """Var names this file declares in CanonicalVars."""
     block = canonical_vars_block(source)
+    aliases = var_token_aliases()
     names = set(_NAMED_DECL.findall(block))
     for typed in _TYPED_DECL.findall(block):
         # `new List<DynamicVar>` and friends are not declarations.
         if typed in ("Dynamic", "Calculated"):
             continue
-        names.add(typed)
+        # `EB-486`: a mod var whose token is not its class name declares the
+        # TOKEN, which is what the face prints and what the body looks up.
+        names.add(aliases.get(typed, typed))
     return names
 
 
