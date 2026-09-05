@@ -250,7 +250,7 @@ are in [`workstreams.md`](workstreams.md).
   round 6, from 6), the
   starter stays two kit cards, **BUILT** as `proto_fr_aria_of_recompense`.
   **Round 5 is READ**
-  (`review/active/furina-reframe-round-5-2026-09-04.md`): two seats on
+  (`review/ruled/furina-reframe-round-5-2026-09-04.md`): two seats on
   `0.2.2476+proto`, floors 10 and 10, both budget-out; the turn one with no
   Encore in every fight, the reader carried at Fanfare 3 and its line never
   paid, nine rows (`EB-419`-`EB-425`, `EB-429`, `EB-430`); the Encore
