@@ -61,7 +61,7 @@ public sealed class IttoSuperlativeSuperstrength : CustomCardModel, ICompanionCa
             new CalculationBaseVar(14m),
             new ExtraDamageVar(1m),
             new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
-            new BlockVar(6m, ValueProp.Move)
+            new SpotlightSystem.SpotlitBlockVar(6m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in

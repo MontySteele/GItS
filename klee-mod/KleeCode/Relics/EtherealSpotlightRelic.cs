@@ -63,10 +63,25 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
         // card's own face is (`SpotlightCards.cs`): a Localization is read
         // once at registration. On a release build the selector has two modes
         // and a second play RE-AIMS, so the sentence would be false there.
+        //
+        // `EB-485` PUT THE DURATION IN IT, and the duration is the half a
+        // seat cannot infer. "It does nothing once your Companion cards are
+        // lit" reads as permanent; the lighting is a POWER and dies with the
+        // fight, so the 2 Encore is paid again every combat. The r10 seat
+        // weighed the Spotlight as a one-time purchase and met Chevreuse
+        // printing 7 again in fight 2 ((c) 1).
+        //
+        // "EACH TURN" PAID FOR IT, at the same 117 rendered characters as
+        // before and under the 120 relic ceiling. What went is the exact SITE
+        // of the grant, which the player sees anyway -- the card is in hand
+        // when the turn opens. What arrived is a rule no other surface stated.
+        // The card's own tip says it too (`FurinaRiderTips
+        // .ForSpotlightDuration`), because a relic is read once at the top of
+        // a run and the card is read on the turn the Encore is spent.
         ("description",
-            "At the start of your turn, add an [gold]Ethereal Spotlight[/gold] "
-          + "to your [gold]Hand[/gold]. It does nothing once your "
-          + "[gold]Companion[/gold] cards are lit."),
+            "Each turn, add an [gold]Ethereal Spotlight[/gold] to your "
+          + "[gold]Hand[/gold]. It does nothing once your "
+          + "[gold]Companion[/gold] cards are lit for this combat."),
 #else
         ("description",
             "At the start of your turn, add an [gold]Ethereal Spotlight[/gold] "

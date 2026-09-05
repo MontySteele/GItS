@@ -13,6 +13,7 @@ using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
 
@@ -483,6 +484,76 @@ public static class SpotlightSystem
             if (!card.IsMutable) return;
             if (card.Owner?.Creature == null) return;
             PreviewValue = PrintedBlock(card, BaseValue);
+        }
+    }
+
+    /// <summary>
+    /// `EB-486`. THE IMMEDIATE BLOCK CLAUSE OF A CARD WHOSE DAMAGE ALREADY
+    /// CONVERTS -- <see cref="DeferredBlockVar"/> under the token the face
+    /// actually prints.
+    ///
+    /// THE DEFECT. <i>Freminet -- Pressurized Floe: Backstroke</i> is "Deal
+    /// {CalculatedDamage} damage. Gain {Block} Block", and under Guest Cast
+    /// the Furina r10 seat watched the damage go 10, 15 lit, 18 upgraded while
+    /// the Block stayed 6 on every screen -- with Lynette's Block moving 5, 7,
+    /// 10 beside it. The play had been folding all along
+    /// (<c>CreatureCmd.GainBlock(..., new BlockVar(PrintedBlock(this, 6)))</c>);
+    /// only the face was not.
+    ///
+    /// WHY NOT `CalculatedBlockVar`, which is how Lynette's Block folds:
+    /// that var reads the single <c>CalculationBase</c>, and this card's
+    /// DAMAGE has already claimed it -- <c>spotlight_block_rider</c>'s own
+    /// exclusion, whose comment names this exact row as the only one it
+    /// bites. One base per card is the invariant, so the second number needs
+    /// a var of its own, which is precisely what `EB-438` built for
+    /// Charlotte's second Block clause.
+    ///
+    /// SAME CONSTRUCTION, SAME SEAM. <c>UpdateCardPreview</c> is the one the
+    /// game already owns, and <c>IntValue</c> stays <c>BaseValue</c> so the
+    /// play's own <see cref="PrintedBlock"/> wrap applies the fold exactly
+    /// once. Off the hand -- a compendium or reward copy, where
+    /// <c>runGlobalHooks</c> is false and there is no owner -- it prints its
+    /// base like a plain var.
+    ///
+    /// IT SUBCLASSES <c>BlockVar</c>, WHICH IS NOT DECORATION, and the pin
+    /// that says so caught it: <c>DynamicVarSet.Block</c> CASTS to
+    /// <c>BlockVar</c>, and the emitted play reads the base through exactly
+    /// that accessor. A plain <see cref="DynamicVar"/> under this token --
+    /// which is what <see cref="DeferredBlockVar"/> can afford to be, because
+    /// its own play reads a literal -- throws an <c>InvalidCastException</c>
+    /// the first time the card is played.
+    ///
+    /// AND THE HOOKS STILL RUN, over the folded number and in the play's own
+    /// order. <c>GainBlock</c> is handed <c>PrintedBlock(base)</c> and applies
+    /// Dexterity and Frail to THAT, so the preview folds first and then asks a
+    /// throwaway <c>BlockVar</c> for the same hook pass -- rather than the
+    /// other order, which would compound a percentage against the wrong base.
+    /// </summary>
+    public sealed class SpotlitBlockVar : BlockVar
+    {
+        public const string Token = "Block";
+
+        public SpotlitBlockVar(decimal amount)
+            : base(amount, ValueProp.Move)
+        {
+        }
+
+        public override void UpdateCardPreview(
+            CardModel card, CardPreviewMode previewMode, Creature? target,
+            bool runGlobalHooks)
+        {
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            if (!runGlobalHooks) return;
+            // A canonical (compendium) copy has no owner and the getter
+            // ASSERTS rather than returning null, which is why this guard is
+            // the shape `PlanDamageVar` uses.
+            if (!card.IsMutable) return;
+            if (card.Owner?.Creature == null) return;
+            var folded = new BlockVar(
+                PrintedBlock(card, BaseValue), ValueProp.Move);
+            folded.UpdateCardPreview(
+                card, previewMode, target, runGlobalHooks);
+            PreviewValue = folded.PreviewValue;
         }
     }
 

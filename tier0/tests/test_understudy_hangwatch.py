@@ -127,6 +127,70 @@ def test_an_exited_process_is_left_to_process_died():
     assert not v.hung and "process_died" in v.reason
 
 
+# ------- `EB-489`: the state endpoint alone is dead, and `/` still answers ---
+
+
+def test_a_root_that_answers_with_no_spin_signal_is_a_game_thread_stall():
+    """`EB-489` (Furina r10, lane 1). After `go "Unknown (path 1)"` from a
+    Treasure floor, nine consecutive `observe` calls timed out against
+    `/api/v1/singleplayer` while `/` went on answering, and the lane stayed
+    that way until it was torn down: 22 of 120 actions lost.
+
+    The pair is the diagnosis. `/` replies on the ThreadPool worker that took
+    the request; `/api/v1/singleplayer` hops to the game thread
+    (`RunOnMainThread(BuildGameState)` then `GetResult()` with no timeout)
+    whose queue is drained from `SceneTree.ProcessFrame`. A game thread that
+    stops reaching a process frame therefore kills the state endpoint for the
+    life of the process and parks one more worker per retry, which is why nine
+    tries did not recover and could not.
+    """
+    quiet = hangwatch.Probe(
+        log_path="godot.log", log_bytes_start=1_000_000,
+        log_bytes_end=1_012_000, elapsed_s=4.0,          # 3 KB/s
+        responding=(True, True, True), root_answers=True)
+    v = hangwatch.classify(quiet, alive=True, wire_dead=True)
+
+    assert not v.hung                      # not EB-1: nothing is spinning
+    assert hangwatch.STATE_STALL_KIND in v.reason
+    assert "ProcessFrame" in v.reason
+    assert v.evidence["root_answers"] is True
+
+
+def test_the_root_is_only_asked_after_the_spin_signature_has_failed():
+    """A spin answers `/` too -- the root handler never leaves the ThreadPool
+    worker -- so the root cannot be what tells the two apart. What tells them
+    apart is that a spin floods the log and stops the message pump."""
+    spinning = hangwatch.Probe(
+        log_path="godot.log", log_bytes_start=0, log_bytes_end=100_000_000,
+        elapsed_s=4.0, responding=(False, False, False), root_answers=True)
+    v = hangwatch.classify(spinning, alive=True, wire_dead=True)
+    assert v.hung and "EB-1's signature" in v.reason
+    assert hangwatch.STATE_STALL_KIND not in v.reason
+
+
+def test_a_root_nobody_asked_is_the_old_bridge_unreachable_verdict():
+    """`None` removes the signal rather than faking it, which is this module's
+    rule for every reading it could not take."""
+    v = hangwatch.classify(_probe(start=1_000_000, end=1_012_000, elapsed=4.0),
+                           alive=True, wire_dead=True)
+    assert not v.hung and "bridge_unreachable" in v.reason
+    assert v.evidence["root_answers"] is None
+
+
+def test_the_sampler_asks_the_root_only_when_it_is_given_a_way_to():
+    """The one WIRE call in the module, injected like every OS call: a caller
+    with no route leaves the field unknown, and a route that raises answers
+    `False` rather than throwing out of a watchdog."""
+    kw = dict(sizer=lambda _p: None, responder=lambda _n: False,
+              sleep=lambda _s: None, clock=lambda: 0.0, samples=2)
+    assert hangwatch.sample(None, "GAME.exe", **kw).root_answers is None
+    assert hangwatch.sample(None, "GAME.exe", rooter=lambda: {"status": "ok"},
+                            **kw).root_answers is True
+    assert hangwatch.sample(None, "GAME.exe",
+                            rooter=_raises_bridge_error("timed out"),
+                            **kw).root_answers is False
+
+
 def test_the_evidence_carries_the_two_byte_counts_that_produced_the_rate():
     """A defect record whose rate cannot be re-derived is a number nobody can
     check, which is the one thing this house does not ship."""

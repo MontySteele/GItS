@@ -70,6 +70,23 @@ public static class FurinaRiderTips
     // Salon power, and an empty stage has no badge at all.
     public const string CompanionPerformKey = "KLEEMOD-COMPANION_PERFORMS";
 
+    // `EB-485`. THE PRICE A SEAT WEIGHED AS A ONE-TIME PURCHASE.
+    //
+    // THE FIND (Furina r10 (c) 1). The relic reads "It does nothing once your
+    // Companion cards are lit", which is a permanent-sounding sentence about a
+    // per-combat state: the lighting is a POWER, it dies with the fight, and
+    // the 2 Encore is paid again every fight. The r10 seat priced the
+    // Spotlight as bought once and met Chevreuse printing 7 again in fight 2.
+    // Nothing on the relic, the card or the buff said which.
+    //
+    // ON THE CARD BECAUSE THE CARD IS WHERE THE PRICE IS PAID. The relic line
+    // now says "for this combat" as well, and both are needed: the relic is
+    // read once at the top of the run and the card is read on the turn the
+    // Encore is being spent. The buff face is left alone -- it is on screen
+    // only WHILE the lighting is live, which is the one moment the duration
+    // is not the question.
+    public const string SpotlightLastsKey = "KLEEMOD-SPOTLIGHT_LASTS";
+
     /// <summary>
     /// `EB-475`, the first word. What MOVES the Spotlight, and whether it has
     /// moved right now -- the house shape of this file (the rule, then what it
@@ -104,6 +121,30 @@ public static class FurinaRiderTips
         foreach (var tip in inherited) yield return tip;
         yield return new HoverTip(
             new LocString(Table, BowKey + ".title"), BowBody(card));
+    }
+
+    /// <summary>
+    /// `EB-485`. HOW LONG THE LIGHTING LASTS, on the card that buys it.
+    ///
+    /// A RULE AND NOT LIVE ARITHMETIC, so it yields off the board as readily
+    /// as on it -- unlike <see cref="ForCompanionPerform"/> below, whose
+    /// sentence is about a stage a deck view does not have. The selector is a
+    /// token that only ever exists in hand anyway; what matters is that the
+    /// sentence is there on the turn the Encore is being weighed.
+    ///
+    /// ARM-ONLY, at the CALL SITE rather than here (`SpotlightCards.cs`): a
+    /// release build's selector opens a two-mode choice and its own duration
+    /// question is a different one.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForSpotlightDuration(
+        IEnumerable<IHoverTip> inherited, CardModel card)
+    {
+        foreach (var tip in inherited) yield return tip;
+        yield return new HoverTip(
+            new LocString(Table, SpotlightLastsKey + ".title"),
+            "Lighting your [gold]Companion[/gold] cards lasts this combat. "
+          + "Every fight starts unlit, so the [gold]Encore[/gold] is paid "
+          + "again next fight.");
     }
 
     /// <summary>

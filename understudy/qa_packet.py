@@ -460,6 +460,188 @@ def no_upgrade_index(repo: Path | None = None) -> frozenset[str]:
     return frozenset(_no_upgrade_index_cached(root))
 
 
+# `EB-483`. THE FACE A CARD WOULD PRINT IF IT WERE UPGRADED.
+#
+# THE FIND (Kokomi r16 (c) 6). "The upgrade screen shows the current face,
+# never the upgraded one. Thirteen cards, no previews. I upgraded Deep Current
+# on a guess and found out it was 6 to 9 two fights later."
+#
+# THE UPGRADED FACE IS NOT ON THE WIRE. `BuildCardSelectState` serialises each
+# grid card through `BuildCardInfo`, which prints `GetDescriptionForPile` --
+# the card as it stands. The bridge CAN build the other one
+# (`SafeGetCardUpgradePreviewDescription`, which clones and calls
+# `UpgradeInternal`) but only the wiki endpoint asks it to, and adding a clone
+# per card per poll to the singleplayer builder is not a change to make from
+# this side of the line while `EB-489` is open.
+#
+# SO IT IS DERIVED, from the two things the CODEGEN already writes down: the
+# description TEMPLATE in `Localization` and the delta in `OnUpgrade`. The
+# template says where each number sits and what it is called; the delta says
+# which name moves and by how much. Everything between the holes is literal
+# text and is carried through untouched, so the upgraded face is the card's
+# own sentence with its own numbers moved -- not a summary of the delta.
+#
+# THE MATCH IS AGAINST THE WIRE'S OWN PRINTED FACE, never against the
+# template's base values, which is what makes the arithmetic the board's: the
+# template is turned into a pattern, the pattern reads the numbers the screen
+# is actually showing, and the delta is added to those. A face this module
+# cannot match gets NO upgraded line -- an absent face is silence, and the one
+# thing this page may never print is a guess.
+#
+# THE UPGRADE SCREEN ONLY, and that is a correctness bound rather than taste.
+# A `Calculated*` hole is `base + extra * multiplier`, so on a board where the
+# multiplier is live (Guest Cast, a Charge bank) a delta on `CalculationBase`
+# moves the printed number by MORE than the delta. A Smith is out of combat,
+# every multiplier is at rest, and the two are equal.
+_LOC_DESCRIPTION_RE = re.compile(
+    r'\("description",\s*((?:"(?:[^"\\]|\\.)*"\s*\+?\s*)+)\)')
+_CSHARP_LITERAL_RE = re.compile(r'"((?:[^"\\]|\\.)*)"')
+_UPGRADE_DELTA_RE = re.compile(
+    r"DynamicVars(?:\.([A-Za-z_][A-Za-z0-9_]*)|\[\"([A-Za-z_][A-Za-z0-9_]*)\"\])"
+    r"\.UpgradeValueBy\((-?\d+(?:\.\d+)?)m\)")
+#: One `{Name}` / `{Name:diff()}` / `{Name:plural:a|b}` hole. Deliberately
+#: refuses a nested brace: `{IfUpgraded:show:{Encore:diff()} ...|}` is a hole
+#: whose two arms are two different sentences, and a template carrying one is
+#: skipped whole rather than half-rendered.
+_HOLE_RE = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)(?::([^{}]*))?\}")
+
+
+def _loc_description(src: str) -> str:
+    """The `("description", ...)` row of the FIRST `Localization` in a file."""
+    m = _LOC_DESCRIPTION_RE.search(src)
+    if m is None:
+        return ""
+    return "".join(_CSHARP_LITERAL_RE.findall(m.group(1))).replace('\\"', '"')
+
+
+def _upgrade_deltas(src: str) -> dict[str, int]:
+    """`{var name: delta}` off every `UpgradeValueBy` in a card's source."""
+    out: dict[str, int] = {}
+    for dotted, indexed, amount in _UPGRADE_DELTA_RE.findall(src):
+        try:
+            out[dotted or indexed] = int(float(amount))
+        except ValueError:
+            continue
+    return out
+
+
+def _hole_deltas(template: str, deltas: dict[str, int]) -> dict[str, int]:
+    """The deltas re-keyed onto the HOLE names the template actually prints.
+
+    A delta usually lands on the var it is named for. `CalculationBase` is the
+    exception and the common one: it is the input to a `Calculated*` var, so
+    the face prints `{CalculatedDamage:diff()}` while `OnUpgrade` moves
+    `CalculationBase`. Resolved only where the template holds exactly ONE
+    `Calculated*` hole -- two would be a card computing both numbers off one
+    base, which the generator refuses to emit for that very reason.
+    """
+    holes = [m.group(1) for m in _HOLE_RE.finditer(template)]
+    out: dict[str, int] = {}
+    for name, delta in deltas.items():
+        if name in holes:
+            out[name] = delta
+            continue
+        if name == "CalculationBase":
+            calculated = [h for h in holes if h.startswith("Calculated")]
+            if len(set(calculated)) == 1:
+                out[calculated[0]] = delta
+                continue
+        return {}          # a delta with nowhere to land: render nothing
+    return out
+
+
+def _plural_arm(spec: str, value: int) -> str:
+    """SmartFormat's `plural:singular|plural`, resolved for `value`."""
+    arms = spec.split("|")
+    return arms[0] if value == 1 else arms[-1]
+
+
+@lru_cache(maxsize=4)
+def _upgraded_face_index_cached(
+        repo: Path) -> tuple[tuple[str, tuple[str, tuple[tuple[str, int], ...]]], ...]:
+    index: dict[str, tuple[str, tuple[tuple[str, int], ...]]] = {}
+    root = repo / "klee-mod"
+    if not root.is_dir():
+        return ()
+    for path in sorted(root.glob(_CARD_SOURCE_GLOB)):
+        try:
+            src = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        key = _class_key(src)
+        if not key or key in index:
+            continue
+        template = strip_markup(_loc_description(src))
+        if not template or "{IfUpgraded" in template:
+            continue
+        holes = _hole_deltas(template, _upgrade_deltas(src))
+        if holes:
+            index[key] = (template, tuple(sorted(holes.items())))
+    return tuple(sorted(index.items()))
+
+
+def upgraded_face(card_id: Any, printed: str,
+                  repo: Path | None = None) -> str:
+    """The face this card would print upgraded, or `""` where it cannot say.
+
+    `printed` is the wire's own current description, markup already stripped by
+    the bridge. See the block comment above for the whole argument, including
+    why this is the UPGRADE SCREEN's answer and not the hand's.
+    """
+    root = repo if repo is not None else Path(__file__).resolve().parents[1]
+    row = dict(_upgraded_face_index_cached(root)).get(card_key(card_id))
+    if row is None:
+        return ""
+    template, holes = row
+    deltas = dict(holes)
+
+    # The template as a PATTERN over the printed face: literal text escaped,
+    # every hole a group. A numeric hole reads the number the screen is
+    # showing; a plural hole reads whichever arm it printed.
+    pattern, pieces, at = [], [], 0
+    for m in _HOLE_RE.finditer(template):
+        pattern.append(re.escape(template[at:m.start()]))
+        pieces.append(("literal", template[at:m.start()], ""))
+        spec = m.group(2) or ""
+        if spec.startswith("plural:"):
+            arms = [re.escape(a) for a in spec[len("plural:"):].split("|")]
+            pattern.append("(?:" + "|".join(arms) + ")")
+        else:
+            pattern.append(r"(-?\d+)")
+        pieces.append(("hole", m.group(1), spec))
+        at = m.end()
+    pattern.append(re.escape(template[at:]))
+    pieces.append(("literal", template[at:], ""))
+
+    # SEARCHED, NOT FULL-MATCHED, and the surrounding text is kept verbatim:
+    # the game APPENDS its auto-keyword sentences to a card's body ("Applies
+    # Pyro.", "Retain."), so the template is the middle of the printed face
+    # rather than the whole of it. A template whose literal text this build
+    # has since reworded simply does not match, and the row prints nothing.
+    face = strip_markup(printed).strip()
+    hit = re.search("".join(pattern), face)
+    if hit is None:
+        return ""
+
+    values: dict[str, int] = {}
+    out: list[str] = []
+    group = 0
+    for kind, name, spec in pieces:
+        if kind == "literal":
+            out.append(name)
+            continue
+        if spec.startswith("plural:"):
+            # Resolved off the number this same face prints, so a 1 -> 2 that
+            # moves the word moves it here too.
+            out.append(_plural_arm(spec[len("plural:"):], values.get(name, 2)))
+            continue
+        group += 1
+        value = int(hit.group(group)) + deltas.get(name, 0)
+        values[name] = value
+        out.append(str(value))
+    return face[:hit.start()] + "".join(out) + face[hit.end():]
+
+
 # `EB-264`. THE WIRE'S UNPLAYABLE REASON IS AN ENUM NAME, AND A PLAYER CANNOT
 # READ IT. `unplayable_reason` on a hand entry is `UnplayableReason.ToString()`
 # (`McpMod.StateBuilder.cs:1324`), so the page printed
