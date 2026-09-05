@@ -466,8 +466,6 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
       twice -- Nereid's Ascension is up, so every Plan below happens TWICE. It
         is the one thing that makes the count stop being the number of things
         that will happen, which is why it is a field and not an inference.
-      also_now -- The Moon Overlooks the Waters is out, so a Plan written this
-        turn also happens immediately.
       queue -- ordered, front first: the card's name and how many clauses its
         Plan line carries.
       carried_out -- `EB-317`: what the jellyfish has already done THIS TURN,
@@ -484,9 +482,11 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
         read off a clause, so the Casket's answering strikes and a reaction's
         damage are inside it. `on_play` is which door the Plan came through,
         and it splits this list in two here: `carried_out` keeps the MORNING
-        and `fired_now` takes Change of Plans and The Moon Overlooks the
-        Waters, because "at the start of this turn" is a false sentence about
-        a Plan that fired as it was written.
+        and `fired_now` takes Change of Plans, because "at the start of this
+        turn" is a false sentence about a Plan that fired mid-turn. The
+        splitting stays a two-way one with The Moon Overlooks the Waters
+        withdrawn (`EB-570`): Change of Plans is a mid-turn door on its own
+        face.
     """
     raw = player.get("kokomi_plans")
     if not isinstance(raw, dict) or not raw:
@@ -505,7 +505,6 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
         "pet_entity_id": None if pet_id is None else _text(pet_id),
         "pending": _int(raw.get("pending")),
         "twice": bool(raw.get("twice")),
-        "also_now": bool(raw.get("also_now")),
         "queue": queue,
         "carried_out": [row for row in said if not row["on_play"]],
         "fired_now": [row for row in said if row["on_play"]],

@@ -792,8 +792,9 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
     "proto_kk_slack_water",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). THIRTY-FIVE rows since the
-# pool pass (`EB-492`), in the packet's own order -- the Tactician, the
+# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). THIRTY-FOUR rows since The
+# Moon Overlooks the Waters was withdrawn (`EB-570`), in the packet's own order
+# -- the Tactician, the
 # Priestess, the Commander, then the currencies, the one replay, the tempo
 # shelf and the pool pass. `EB-335` filed R246 pick 2's defensive pair with the
 # Priestess because that is the plan they answer for; round 9 pick 1's rows are
@@ -802,8 +803,20 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # `_pool_substitutions` cannot express this (it is a one-for-one map and this
 # is "her pool is these and nothing else"), so `loader.pool_replacement` is its
 # sibling seam, read at the same single door.
+#
+# THE MOON OVERLOOKS THE WATERS IS WITHDRAWN (`EB-570`, round 20's door read,
+# the loop's cut). "Plans also happen now" deleted the kit's one question
+# rather than answering it: rule 2 makes a Plan land a turn late, and a Rare
+# that pays the delay off outright made writing never worse than playing (r17
+# "the best of the six", r20). Battle Plan is why no smaller adjustment
+# reached it -- its Plan line is double its play line, so ANY now-copy takes
+# the price off waiting -- and the doctrine audit returned
+# REQUIRES_MODIFICATION on both smaller shapes (a half now-copy, and a
+# one-turn Exhaust Skill). The row and its pins left the surface under R213
+# B's deletion rule, exactly as Rolling Tide's did (`EB-552`), and the pool is
+# thirty-four.
 KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
-    # The Tactician -- Plans, and the cards that pay per Plan (9)
+    # The Tactician -- Plans, and the cards that pay per Plan (8)
     "proto_kk_feint",
     "proto_kk_ambush",
     "proto_kk_read_the_field",
@@ -812,7 +825,6 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_song_of_pearls",
     "proto_kk_war_council",
     "proto_kk_nereids_ascension",
-    "proto_kk_the_moon_overlooks_the_waters",
     # The Priestess -- Block through the jellyfish, Mend at Rare (9)
     "proto_kk_sea_salt_prayer",
     "proto_kk_deep_current",

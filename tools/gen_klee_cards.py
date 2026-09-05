@@ -2136,8 +2136,6 @@ APPLY_POWERS = {
     "kk_song_of_pearls": ("SongOfPearlsPower", None,
         "Once per turn, when the jellyfish carries out a [gold]Plan[/gold], "
         "gain {X} Block."),
-    "kk_plans_also_now": ("PlansAlsoNowPower", None,
-        "[gold]Plans[/gold] also happen now, as you write them."),
     # `EB-492`. Nereid's Ascension, redesigned from a Plan clause into the
     # Power it always read as: the old row spent the morning it was meant to
     # pay for. A marker power -- the stack means nothing, `CarryOutTimes`

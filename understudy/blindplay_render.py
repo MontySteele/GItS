@@ -164,13 +164,14 @@ def _moved_line(m: dict[str, Any]) -> str:
 def _render_carry_out(pl: dict[str, Any]) -> list[str]:
     """The morning, and then the Plans that fired as they were written.
 
-    `EB-329`. TWO HEADINGS, BECAUSE THEY ARE TWO MOMENTS. The r4c seat played
-    War Council with The Moon Overlooks the Waters out and was told on one
-    screen both that the jellyfish "carried these out at the start of this
-    turn" and that War Council was still planned; the first was simply not
-    true of that resolution. Change of Plans is the same door -- its own face
-    says "carries out your front Plan NOW" -- so both are filed together,
-    under a sentence that says WHEN.
+    `EB-329`. TWO HEADINGS, BECAUSE THEY ARE TWO MOMENTS. The r4c seat was
+    told on one screen both that the jellyfish "carried these out at the start
+    of this turn" and that the Plan in question was still planned; the first
+    was simply not true of a resolution that happened mid-turn. Change of
+    Plans is that door -- its own face says "carries out your front Plan NOW"
+    -- so it is filed under a heading that says WHEN. It is the only such door
+    since The Moon Overlooks the Waters was withdrawn (`EB-570`), and the
+    heading is kept because the door is.
     """
     out: list[str] = []
     if pl["carried_out"]:
@@ -647,8 +648,6 @@ def render(obs: dict[str, Any]) -> str:
                 if pl["twice"]:
                     out.append("- The jellyfish carries out EVERY Plan twice "
                                "while Nereid's Ascension lasts.")
-            if pl["also_now"]:
-                out.append("- Plans also happen NOW as you write them.")
             # `EB-329`: which of the two numbers under a Plan is which, once,
             # at the foot of the section rather than under the last card.
             if _board_note_wanted(pl):

@@ -3265,7 +3265,7 @@ def plans_combat_state(plans: dict | None) -> dict:
 
 TWO_PLANS = {
     "pet": True, "pet_name": "Bake-Kurage", "pet_entity_id": "41",
-    "pending": 2, "twice": False, "also_now": False,
+    "pending": 2, "twice": False,
     # `EB-322`: the wire carries the card's TITLE, and a prototype row
     # that shadows a shipped row prints the shipped row's title -- the
     # " (proto)" declaration is a sheet device and never reaches a face.
@@ -3303,14 +3303,18 @@ def test_an_empty_morning_says_so_rather_than_printing_a_zero():
     assert "in this order" not in page
 
 
-def test_the_two_rares_that_change_what_the_queue_means_are_printed():
+def test_the_rare_that_changes_what_the_queue_means_is_printed():
     """Nereid's Ascension makes the queue's LENGTH stop being the number of
-    things that will happen, and The Moon Overlooks the Waters makes a Plan
-    happen as it is written. Neither is visible from a count."""
+    things that will happen, which is not visible from a count.
+
+    ONE RARE AND NOT TWO SINCE `EB-570`: The Moon Overlooks the Waters was the
+    other, and its `also_now` field left the snapshot contract with the row.
+    A stale build that still sends the key is ignored rather than printed --
+    which this pins by sending it."""
     page = blindplay.render(blindplay.observation(
         plans_combat_state(dict(TWO_PLANS, twice=True, also_now=True))))
     assert "carries out EVERY Plan twice" in page
-    assert "Plans also happen NOW" in page
+    assert "also happen NOW" not in page
 
 
 # --------------------------------------------------------------------------
@@ -3992,13 +3996,15 @@ def test_the_block_reading_is_the_mods_own_subtraction():
 
 
 def test_an_on_play_firing_prints_under_its_own_heading():
-    """`EB-329`, the r4c seat's finding 4. With The Moon Overlooks the Waters
-    out, a War Council played mid-turn was reported on one screen both as
-    already carried out "at the start of this turn" and as still queued. Both
-    rows were true; the first sentence was not."""
+    """`EB-329`, the r4c seat's finding 4. A War Council carried out mid-turn
+    was reported on one screen both as already carried out "at the start of
+    this turn" and as still queued. Both rows were true; the first sentence
+    was not. The mid-turn door is Change of Plans since `EB-570` withdrew The
+    Moon Overlooks the Waters, and the heading is the row's, not the card's --
+    `on_play` is what splits the list."""
     blindplay.forget_fight()
     page = blindplay.render(blindplay.observation(plans_combat_state(
-        dict(TWO_PLANS, pending=1, also_now=True,
+        dict(TWO_PLANS, pending=1,
              queue=[{"name": "War Council", "clauses": 2}],
              carried_out=[{"card": "War Council", "number": 5,
                            "line": "Bake-Kurage: War Council, 5",

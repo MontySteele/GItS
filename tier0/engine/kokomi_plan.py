@@ -11,9 +11,8 @@ R241); slice `review/active/kokomi-overhaul-slice-1-2026-09-01.md` draft 6.
 THE C# IS THE SPEC, and where its prose and its code disagree the CODE is what
 this file mirrors. Three places that matters, all recorded at their sites
 below: the resolution HOOK (the slice's prose says "before the draw", the mod
-resolves at `AfterPlayerTurnStart` and its header says why), the Casket's
-DEALER (the pet, so no Strength rides the 2), and "Plans ALSO happen now"
-taken at its word (the Plan happens now AND is still queued).
+resolves at `AfterPlayerTurnStart` and its header says why), and the Casket's
+DEALER (the pet, so no Strength rides the 2).
 
 A SEPARATE MODULE, not a section of `effects.py`, for the reason
 `furina_reframe.py` is one: this is a whole rule with a queue, a resolution
@@ -133,7 +132,6 @@ QUARTER = 4
 #: Every one of them is applied by an ordinary `apply_power` op off a card row.
 TREATISE = "kk_treatise"                     # draw N once a turn, on a Plan
 SONG_OF_PEARLS = "kk_song_of_pearls"         # N Block once a turn, on a Plan
-PLANS_ALSO_NOW = "kk_plans_also_now"         # Plans also happen now
 CLOUDS_LIKE_WAVES = "kk_clouds_like_waves"   # Block per debuff she applies
 GENERALS_BANNER = "kk_generals_banner"       # Weak to the front, once a turn
 #: Nereid's Ascension (`EB-492`). A MARKER AND NOT A WINDOW: the Rare is a
@@ -470,11 +468,13 @@ def schedule(state: CombatState, card: Card,
     the exhaust pile. `replay` is that screen's other shape -- a chosen card
     with NO Plan line of its own, replayed whole.
 
-    THE MOON OVERLOOKS THE WATERS IS RESOLVED HERE, and "also" is taken at its
-    word (the C#'s reading, and its argument): the Rare's face is "Plans also
-    happen now", so the Plan happens NOW and is STILL queued for the start of
-    her next turn. Reading it as "instead" would delete rule 2 rather than
-    break it.
+    A PLAN IS ONLY EVER QUEUED HERE (`EB-570`). The Moon Overlooks the Waters
+    used to carry the entry out on the spot as well -- "Plans also happen now"
+    -- and the Rare deleted the kit's one question rather than answering it:
+    rule 2 is the delay, and Battle Plan's Plan line is double its play line,
+    so any now-copy took the price off waiting. The row is withdrawn and this
+    door is the writing alone; `resolve_all` and `resolve_front` are the two
+    that carry a Plan out.
     """
     if not live(state):
         return
@@ -518,8 +518,6 @@ def schedule(state: CombatState, card: Card,
     state.emit("plan_written", card=card.id, clauses=len(body),
                queued=len(state.kk_plan_queue),
                holds=None if held is None else held.id)
-    if state.player.powers.get(PLANS_ALSO_NOW, 0):
-        _resolve_entry(state, entry, why="also_now")
 
 
 def schedule_from_exhaust(state: CombatState, card: Card) -> None:
@@ -698,8 +696,8 @@ def carry_out_times(state: CombatState) -> int:
 def _resolve_entry(state: CombatState, entry: PlanEntry, why: str) -> None:
     """ONE PLAN CARRIED OUT -- the unit Treatise and Song of Pearls are priced
     in. "Whenever the jellyfish carries out a Plan" is once per ENTRY, and the
-    notify at the bottom is the only place it fires, so The Moon Overlooks the
-    Waters' extra resolution pays them too."""
+    notify at the bottom is the only place it fires, so Change of Plans' early
+    resolution pays them exactly as the morning's does."""
     state.emit("plan_carried_out", card=entry.card_id, why=why,
                clauses=len(entry.clauses))
     for clause in entry.clauses:
