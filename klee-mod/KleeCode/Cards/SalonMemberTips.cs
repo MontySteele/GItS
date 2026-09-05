@@ -245,6 +245,20 @@ public static class SalonMemberTips
         // non-Minion stands (`SalonMemberPower.AimPool`, R250's shape one roller
         // over), and the sentence that describes the aim is the sentence that
         // says so.
+        //
+        // `EB-476` ADDED THE CLASS THE PERFORMANCE BELONGS TO, and the seat
+        // could only find it by running the experiment twice. "A member
+        // performance is an Attack for Vulnerable but not for Frozen.
+        // Vulnerable 2 turned Crabaletta's 6 into 9... but a Frozen enemy
+        // survived two performances without Shattering. I could not tell
+        // whether a performance is an Attack" (Furina r9 (c) 3). BOTH
+        // observations are the mod's ONE rule, `EB-343`'s: a performance goes
+        // out through `ElementalHit.Deal`, which reaches `CreatureCmd.Damage`
+        // as `ValueProp.Unpowered`, so every gate that asks
+        // `IsPoweredAttack()` -- the Shatter mark, an enemy's on-Attack
+        // trigger -- refuses it, while `SimDamagePipeline.TargetMods` reads
+        // the target's Vulnerable with no such gate. One sentence says both,
+        // and it says them in the order the seat met them.
         if (FurinaReframe.ManualLiveFor(owner))
         {
             body =
@@ -255,7 +269,9 @@ public static class SalonMemberTips
               + "[gold]Evokes[/gold] the front member first. The leftmost "
               + "member is the front. A performing member picks its own "
               + "enemy, never a [gold]Minion[/gold] while another enemy "
-              + "stands. Member numbers gain +1 per "
+              + "stands. A performance is not an [gold]Attack[/gold]: "
+              + "[gold]Vulnerable[/gold] moves it, [gold]Shatter[/gold] and "
+              + "on-Attack triggers do not. Member numbers gain +1 per "
               + $"{SalonConstants.FocusPerFanfare} Fanfare you hold, and a "
               + "member with no Encore to spend performs at three-quarters.";
         }
