@@ -2,7 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using KleeMod.Cards;
+using KleeMod.Cards.Generated;
 using KleeMod.Cards.Prototype.Generated;
+using KleeMod.Powers;
+using KleeMod.Relics;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -414,5 +417,66 @@ public class Round12Tests
         // silently in the sentence above.
         Assert.Contains("No member is one.",
                         Printed("Powers/SpotlightSystem.cs"));
+    }
+
+    // ==================================================================
+    // `EB-526` -- "Spotlight every Companion card" and the card made after
+    // ==================================================================
+    //
+    // THE READ (Furina r12 lane 2). "Charlotte arrived printing 6 damage and
+    // Shinobu printing 6 block while `Guest Cast 1` was up. Every Companion
+    // that was in my deck when I played it showed its lit number immediately."
+    //
+    // SIX IS THE LIT NUMBER. Both rows are printed 4 on their sheets
+    // (`charlotte_freezing_point` deals 4, `shinobu_grass_ring_bond` gains 4)
+    // and Guest Cast is x1.5, so 4 -> 6 on each. The seat compared the two
+    // against a base of 6 and read the lit face as the unlit one.
+    //
+    // AND THE PREDICATE HAS NO MEMBERSHIP IN IT, which is why a card made
+    // after the lighting cannot be missed: `IsSpotlighted` asks the OWNER's
+    // live mode and the card's CLASS, and reads no list of cards that were
+    // present when the mode was set. A generated Companion is `ICompanionCard`
+    // and carries its owner (`GuestStarGenerator` hands `source.Owner` to
+    // `CreateCard`), so it answers the same question the same way.
+
+#if FURINA_REFRAME
+    [Fact(Skip = "-p:FurinaReframe=true replaces the shipped Spotlight rule this pin asserts. Arm properties are deploy-line only: see docs/current/operations/prototype.md.")]
+#else
+    [Fact]
+#endif
+    public void EB526_a_companion_made_after_the_lighting_is_lit_by_the_same_test()
+    {
+        // The lighting FIRST and the card SECOND, which is the whole of the
+        // seat's question: this copy did not exist when the mode was set.
+        var seat = Seat.Furina().WithRelic<CurtainNeverFalls>();
+        Assert.True(SpotlightSystem.BothModes(seat.Creature));
+
+        var made = new CharlotteFreezingPoint();
+        Seat.Set(made, "IsMutable", true);
+        Seat.Set(made, "Owner", seat.Player);
+
+        Assert.IsAssignableFrom<ICompanionCard>(made);
+        Assert.True(SpotlightSystem.IsSpotlighted(made));
+        // And the number the seat read IS the lit one: 4 printed, 6 shown.
+        Assert.Equal(6m, SpotlightSystem.PrintedDamage(made, 4m));
+    }
+
+#if FURINA_REFRAME
+    [Fact(Skip = "-p:FurinaReframe=true replaces the shipped Spotlight rule this pin asserts. Arm properties are deploy-line only: see docs/current/operations/prototype.md.")]
+#else
+    [Fact]
+#endif
+    public void EB526_an_unlit_seat_prints_the_four_the_sheet_prints()
+    {
+        // The other leg, so the pin above is not passing for a reason
+        // unrelated to the lighting: with no mode set the same copy of the
+        // same card prints its sheet number.
+        var seat = Seat.Furina().WithCombatState();
+        var made = new CharlotteFreezingPoint();
+        Seat.Set(made, "IsMutable", true);
+        Seat.Set(made, "Owner", seat.Player);
+
+        Assert.False(SpotlightSystem.IsSpotlighted(made));
+        Assert.Equal(4m, SpotlightSystem.PrintedDamage(made, 4m));
     }
 }
