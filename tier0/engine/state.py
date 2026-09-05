@@ -1346,6 +1346,18 @@ class CombatState:
     # which runs BEFORE the drain, so a morning with no Plans reads zero.
     # `KokomiOverhaulLedger.PlansThisMorning`'s twin.
     kk_plans_this_morning: int = 0
+    # QUARANTINED (C.KOKOMI_OVERHAUL, `EB-478`): TIDE CHART'S PROMISE -- "Next
+    # turn, after the Bake-Kurage carries out its Plans, draw 1 card for each."
+    # TWO NUMBERS AND NOT A LIST OF CARDS, because the promise is arithmetic:
+    # every copy played this turn adds its `per` to the first and its flat
+    # `amount` to the second, and the morning after pays
+    # `flat + per * kk_plans_this_morning` in one draw. A list of sources would
+    # let two copies pay different counts on one morning, which is a rule
+    # nothing printed. Cleared BY THE PAYMENT (`kokomi_plan.pay_tide_charts`),
+    # so an unpaid promise cannot survive into a second morning.
+    # `KokomiPlan._tideCharts`'s twin.
+    kk_tide_chart_per: int = 0
+    kk_tide_chart_flat: int = 0
     # QUARANTINED (C.KLEE_OVERHAUL): RULE 7'S TWO COUNTERS AND THE TWO
     # MEMORIES, the twin of `KleeOverhaulLedger`. Per FIGHT and per SEAT for
     # the reason `kk_plan_queue` above is: tier 0 runs one seat, so the C#'s

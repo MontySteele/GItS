@@ -2241,8 +2241,19 @@ had thirty rows at a flat cost, no energy gain, two draw cards and nothing
 that Retains, and the seats' dead turns were all dilution with no way to
 hold or hurry a Plan. Every row here is keyed to the Bake-Kurage:
 
-- **Tide Chart** (Common, 0): draw per Plan the Kurage holds, the draw that
-  reads the memory; blank with nothing written, which is the price.
+- **Tide Chart** (Common, 0): REDESIGNED by R257 (`EB-478`). It was "draw 1
+  card for each Plan the Bake-Kurage holds", read at PLAY time, and the r15
+  seat drew zero on three plays out of four: a seat plays its cheap cards
+  before it writes its Plans, so the count the row multiplied was the count it
+  had just been dealt rather than the one it was about to bank. The row now
+  reads "Next turn, after the Bake-Kurage carries out its Plans, draw 1 card
+  for each" -- a promise written on the play and paid at the top of the next
+  turn, after the carry-outs, for the Plans that were actually carried out.
+  The same play reads forward instead of backward, the blank case survives
+  (nothing carried out draws nothing), and the upgrade is one flat card on
+  top, which is the only reading that leaves the upgraded row live on a
+  morning with no Plans. Both engines carry the promise on one new op
+  (`draw_after_plans`) and pay it one line after the drain.
 - **Ripple** (Common, 0): a cheap Plan whose now-line is worth playing (2
   Block for 0) and whose Plan pays tempo (1 Energy and 4 Block).
 

@@ -306,6 +306,21 @@ public static class KokomiPlan
     private static readonly
         Dictionary<Player, List<CarriedOutPlan>> _carriedOut = new();
 
+    /// <summary>
+    /// TIDE CHART'S PROMISE, per seat (`EB-478`, R257): what the next morning
+    /// owes, as a rate per Plan carried out and a flat number beside it.
+    ///
+    /// TWO NUMBERS AND NOT A LIST OF CARDS, because the promise is arithmetic.
+    /// Every copy played this turn adds its own `per` and its own flat, and the
+    /// morning after pays <c>Flat + Per * PlansThisMorning</c> in one draw --
+    /// so two base copies pay twice the depth, and an upgraded copy beside a
+    /// base one adds its extra card once. A list of sources would let two
+    /// copies read different counts on one morning, which is a rule nothing
+    /// printed. Sim twin: `state.kk_tide_chart_per` / `kk_tide_chart_flat`.
+    /// </summary>
+    private static readonly Dictionary<Player, (int Per, int Flat)>
+        _tideCharts = new();
+
     /// <summary>Test seam: forget everything. The mod never calls it.</summary>
     public static void ResetAll()
     {
@@ -313,6 +328,7 @@ public static class KokomiPlan
         _queues.Clear();
         _showing.Clear();
         _carriedOut.Clear();
+        _tideCharts.Clear();
     }
 
     private static void Rebase(Creature kokomi)
@@ -323,6 +339,10 @@ public static class KokomiPlan
         _queues.Clear();
         _showing.Clear();
         _carriedOut.Clear();
+        // A promise is a fact about ONE combat, like the queue above it: a
+        // Tide Chart played on the last turn of a fight owes nothing to the
+        // next one.
+        _tideCharts.Clear();
     }
 
     /// <summary>This seat's queue, front first. Never null.</summary>
@@ -600,6 +620,91 @@ public static class KokomiPlan
             _showing.Remove(player);
             Vfx.KokomiPlanStrip.Refresh(kokomi);
         }
+    }
+
+    /// <summary>
+    /// TIDE CHART IS PLAYED: the draw is OWED, and paid next morning
+    /// (`EB-478`, R257).
+    ///
+    /// NOTHING IS DRAWN HERE, which is the whole redesign. The old row read
+    /// the queue at PLAY time -- "draw 1 card for each Plan the Bake-Kurage
+    /// holds" -- and drew zero on three plays out of four, because a seat
+    /// plays its cheap cards before it writes its Plans (Kokomi r15). The
+    /// promise is written down instead and read after the carry-outs, when
+    /// the number it multiplies is a fact rather than a guess.
+    ///
+    /// <paramref name="flat"/> IS THE UPGRADE'S HALF, folded in by the card
+    /// as an <c>IsUpgraded</c> literal rather than carried here as a flag:
+    /// this file holds what is owed, and which card owed it is the card's own
+    /// business. Sim twin: `kokomi_plan.promise_tide_chart`.
+    /// </summary>
+    public static void PromiseDraw(Creature? kokomi, int flat, int per)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var player = kokomi!.Player;
+        if (player == null) return;
+        Rebase(kokomi);
+        var owed = _tideCharts.TryGetValue(player, out var had)
+            ? had
+            : (Per: 0, Flat: 0);
+        _tideCharts[player] = (owed.Per + per, owed.Flat + flat);
+    }
+
+    /// <summary>
+    /// WHAT THIS MORNING OWES: <c>Flat + Per * PlansThisMorning</c>, and zero
+    /// when nothing is promised (`EB-478`, R257).
+    ///
+    /// A PURE READ, split out of the payment for the reason the arithmetic in
+    /// <c>KokomiPlanLedgerTests</c> is split out of <c>Sync</c>: a draw needs a
+    /// live <c>CombatState</c> and the headless boundary does not reach one,
+    /// so the number is checkable here and the DRAW is pinned structurally.
+    ///
+    /// THE COUNT IS THE MORNING'S DEPTH, <c>PlansThisMorning</c> -- the same
+    /// number Tide Wall reads, written at the drain and cleared by the
+    /// ledger's own roll, so a morning with no Plans reads an honest zero
+    /// rather than yesterday's.
+    /// </summary>
+    public static int PromisedDraw(Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return 0;
+        var player = kokomi!.Player;
+        if (player == null) return 0;
+        if (!_tideCharts.TryGetValue(player, out var owed)) return 0;
+        return owed.Flat
+             + owed.Per * KokomiOverhaulLedger.For(kokomi).PlansThisMorning;
+    }
+
+    /// <summary>
+    /// THE MORNING AFTER: every Tide Chart promise is paid, in one draw.
+    ///
+    /// CALLED ONE LINE AFTER <see cref="ResolveAll"/>, from
+    /// <c>ProtoBakeKuragePower.AfterPlayerTurnStart</c>, which is what the
+    /// face says -- "after the Bake-Kurage carries out its Plans". Called
+    /// unconditionally, because <see cref="ResolveAll"/> returns early on an
+    /// empty queue and a promise made on a turn that banked nothing still pays
+    /// its flat: the upgraded row draws 1 on an empty morning and the base row
+    /// draws 0, which is the ruled reading.
+    ///
+    /// THE COUNT IS THE MORNING'S DEPTH, <c>PlansThisMorning</c> -- the same
+    /// number Tide Wall reads, written at the drain and cleared by the
+    /// ledger's own roll, so a morning with no Plans reads an honest zero
+    /// rather than yesterday's. Sim twin: `kokomi_plan.pay_tide_charts`.
+    /// </summary>
+    public static async Task PayPromisedDraws(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var player = kokomi!.Player;
+        if (player == null) return;
+
+        Rebase(kokomi);
+        var cards = PromisedDraw(kokomi);
+        // CLEARED BEFORE THE DRAW, not after: a promise that survived its own
+        // payment would pay twice on the next morning, and clearing first is
+        // the shape that cannot.
+        _tideCharts.Remove(player);
+        if (cards <= 0) return;
+        await CardPileCmd.Draw(choiceContext, cards, player);
     }
 
     /// <summary>

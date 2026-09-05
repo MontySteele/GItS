@@ -516,6 +516,60 @@ def resolve_all(state: CombatState) -> None:
             _resolve_entry(state, entry, why="turn_start")
 
 
+def promise_tide_chart(state: CombatState, per: int, flat: int) -> None:
+    """Tide Chart is played: the draw is OWED, and paid next morning.
+
+    NOTHING IS DRAWN HERE, which is the whole redesign (`EB-478`, R257). The
+    old row read the queue at PLAY time and drew zero on three plays out of
+    four, because a seat plays its cheap cards before it writes its Plans. The
+    promise is written down instead and read after the carry-outs, when the
+    number it multiplies is a fact rather than a guess.
+
+    TWO NUMBERS ACCUMULATE. A second copy played the same turn adds its own
+    `per` and its own flat, so two base copies pay twice the morning's depth
+    and an upgraded copy beside a base one pays its extra 1 once.
+    `KokomiPlan.PromiseDraw`'s twin.
+    """
+    if not live(state):
+        return
+    state.kk_tide_chart_per += int(per)
+    state.kk_tide_chart_flat += int(flat)
+    state.emit("tide_chart_promised", per=int(per), flat=int(flat))
+
+
+def pay_tide_charts(state: CombatState) -> None:
+    """THE MORNING AFTER: every Tide Chart promise is paid, in one draw.
+
+    CALLED FROM `combat._player_turn` ONE LINE AFTER `resolve_all`, which is
+    what the face says -- "after the Bake-Kurage carries out its Plans" -- and
+    is where `ProtoBakeKuragePower.AfterPlayerTurnStart` calls
+    `KokomiPlan.PayPromisedDraws`. Unconditional, because `resolve_all` returns
+    early on an empty queue and a promise made on a turn that banked nothing
+    still pays its flat: the upgraded row draws 1 on an empty morning and the
+    base row draws 0, which is the ruled reading.
+
+    THE COUNT IS THE MORNING'S DEPTH (`kk_plans_this_morning`), the same number
+    Tide Wall reads and for the same reason -- it is written at the drain and
+    cleared by `roll_turn`, so a morning with no Plans reads an honest zero
+    rather than yesterday's.
+    """
+    if not live(state):
+        return
+    per, flat = state.kk_tide_chart_per, state.kk_tide_chart_flat
+    if not per and not flat:
+        return
+    # CLEARED BEFORE THE DRAW, not after: a drawn card can be played by nothing
+    # here, but a promise that survived its own payment would pay twice on the
+    # next morning, and clearing first is the shape that cannot.
+    state.kk_tide_chart_per = 0
+    state.kk_tide_chart_flat = 0
+    cards = flat + per * state.kk_plans_this_morning
+    state.emit("tide_chart_paid", cards=cards,
+               plans=state.kk_plans_this_morning)
+    if cards > 0:
+        state.draw(cards)
+
+
 def resolve_front(state: CombatState) -> None:
     """Change of Plans: "The jellyfish carries out your front Plan now."
 

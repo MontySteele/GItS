@@ -506,6 +506,12 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # vocabulary carries as a private write nowhere; Block is the player's own
     # pool and no other Block op declares a hook for it.
     "block_per_plan_this_morning": [_hook("private", "kurage", "read")],
+    # Tide Chart (`EB-478`, R257) reads the same morning's depth Tide Wall
+    # reads, one turn after the card that promised the draw was played, and
+    # pays CARDS rather than Block -- the draw pile is the player's own and no
+    # other draw op declares a hook for it, exactly as the line above says of
+    # Block.
+    "draw_after_plans": [_hook("private", "kurage", "read")],
 }
 
 # Ops whose value arrives at a card the player PICKS, through the pilot's

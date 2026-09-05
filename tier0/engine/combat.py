@@ -1053,6 +1053,13 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # but a reaction the hit causes can move the board under the loop.
     if C.KOKOMI_OVERHAUL:
         kokomi_plan.resolve_all(state)
+        # `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning
+        # and before anything else reads the hand: the face says "after the
+        # Bake-Kurage carries out its Plans, draw 1 card for each", so the
+        # count it multiplies is the depth the drain above just recorded.
+        # `ProtoBakeKuragePower.AfterPlayerTurnStart` calls
+        # `KokomiPlan.PayPromisedDraws` at exactly this point.
+        kokomi_plan.pay_tide_charts(state)
         # `EB-335`. SHELL GUARD'S WINDOW CLOSES AFTER THE MORNING, not on the
         # `roll_turn` line above: R246 pick 2 says the morning's Plans strike
         # the Casket inside the window, so the card's Block arrives before the
