@@ -97,9 +97,17 @@ public class KleeOverhaulRoundOneFixTests
         // and the text-conventions pass made the Mine sentence REPLACE "none
         // goes off by itself" rather than follow it (a pile holding a Mine
         // does answer the enemy's attack, which is `EB-260`'s whole point) --
-        // so the mined row differs in exactly two places, and this says which
-        // two by substituting them back and demanding what is left be the
+        // so the mined row differs in a named set of places, and this says
+        // which by substituting them back and demanding what is left be the
         // plain row, character for character.
+        //
+        // `EB-471` MADE IT THREE. The Mine face says WHEN the growth it names
+        // happens, because a Mine goes off on the enemy's turn and the seat
+        // could not tell which side of the tick that is; the plain face is at
+        // 125 of its 125-character ceiling and has no Mine to be about, so it
+        // keeps the shorter clause. That is a difference this guard has to
+        // NAME rather than one it may hide -- which is what listing it here
+        // does.
         var klee = Seat.Klee();
         var enemy = Seat.Klee(30).Creature;
         var pile = ProtoBombs.Place(enemy, klee.Creature,
@@ -110,6 +118,7 @@ public class KleeOverhaulRoundOneFixTests
             Row(pile, "smartDescription"),
             mined.Replace(", including [blue]{Mines}[/blue] "
                           + "[gold]Mine{Mines:plural:|s}[/gold]", string.Empty)
+                 .Replace("growing at your turn's start.", "growing each turn.")
                  .Replace(" A [gold]Mine[/gold] also goes off before this enemy's "
                           + "hit, which lands in full unless the Mine kills.",
                           " None goes off by itself."));

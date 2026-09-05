@@ -111,6 +111,58 @@ public class Round15Tests
         Assert.Equal(2, new DynamicVar("x", damage.BaseValue * 0.75m).IntValue);
     }
 
+    // ==================================================================
+    // `EB-471` -- which side of the growth tick a Mine goes off on
+    // ==================================================================
+    //
+    // THE FIND (Klee r15 run 2 (c) 3). "A Mine fires at its base size on the
+    // enemy's turn, before the growth tick, and nothing printed says which
+    // side of the tick it lands on: Jumpy Dumpty's Mine 3 paid 3, not 7, and I
+    // reverse-engineered it from HP." It changes whether the rider is worth
+    // the card.
+    //
+    // THE ROW'S FIRST OPTION IS FALSE HERE and cannot be printed: "Mines do
+    // not grow" is contradicted by `ProtoBombPower.GrowBy`, which walks EVERY
+    // charge on the pile, and a Mine is a charge -- a Mine that lives to the
+    // next turn start really is 7. What is true is the TIMING, and the badge
+    // is where it goes: growth at the start of your turn, the Mine off before
+    // the enemy's hit, so the number standing now is the number it pays.
+    //
+    // ON THE MINE FACE AND NOT ON `Bombs`, which is at 125 of its 125-char
+    // ceiling (its own note says so, and `lint_text_conventions` bites); the
+    // Mine faces already carry `_BOMB_FACE_REASON`'s exception.
+
+    [Fact]
+    public void The_mine_badge_says_when_the_growth_it_is_about_happens()
+    {
+        var mines = (string)typeof(ProtoBombPower)
+            .GetField("BombsWithMines", All)!.GetValue(null)!;
+        var plain = (string)typeof(ProtoBombPower)
+            .GetField("Bombs", All)!.GetValue(null)!;
+
+        Assert.EndsWith("growing at your turn's start.", mines);
+        // The no-Mine face is untouched: it has no room and no Mine to be
+        // about. `KleeOverhaulRoundFourTests` pins its wording.
+        Assert.EndsWith("growing each turn.", plain);
+    }
+
+    [Fact]
+    public void A_mine_is_a_charge_and_the_growth_walk_does_not_skip_it()
+    {
+        // The reason the row's other sentence could not be printed, asserted
+        // rather than asserted about: place a Mine, grow the pile, and the
+        // Mine is bigger.
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(30).Creature;
+        var pile = ProtoBombs.Place(enemy, klee.Creature,
+            new ProtoBombs.Charge(3, IsMine: true));
+
+        Assert.Equal(3, pile.TotalSize);
+        pile.GrowBy(KleeOverhaulLaw.BombGrowth);
+        Assert.Equal(3 + KleeOverhaulLaw.BombGrowth, pile.TotalSize);
+        Assert.Equal(1, pile.MineCount);
+    }
+
     [Fact]
     public void The_weak_tip_names_the_case_the_status_line_leaves_open()
     {

@@ -7945,14 +7945,16 @@ def test_the_target_and_the_aura_are_recorded_where_they_are_decided():
 #: `ProtoBombPower.Title` selected. The body is the arm's own, quoted, so the
 #: page half of this pin cannot pass on a sentence the game does not print.
 _MINE_FACE = ("Set off here deals 4 Pyro damage. Bombs here: 1, including 1 "
-              "Mine, growing each turn. A Mine also goes off before this "
-              "enemy's hit, which lands in full unless the Mine kills. A "
+              "Mine, growing at your turn's start. A Mine also goes off "
+              "before this enemy's hit, which lands in full unless the Mine "
+              "kills. A "
               "kill moves them to a "
               "survivor.")
 
 _MIXED_FACE = ("Set off here deals 12 Pyro damage. Bombs here: 2, including 1 "
-               "Mine, growing each turn. A Mine also goes off before this "
-               "enemy's hit, which lands in full unless the Mine kills. A "
+               "Mine, growing at your turn's start. A Mine also goes off "
+               "before this enemy's hit, which lands in full unless the Mine "
+               "kills. A "
                "kill moves them to a "
                "survivor.")
 
