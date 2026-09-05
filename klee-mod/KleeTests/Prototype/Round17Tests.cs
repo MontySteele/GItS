@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using BaseLib.Abstracts;
+using KleeMod.Cards.Furina;
 using KleeMod.Cards.Generated;
 using KleeMod.Elements;
 using KleeMod.Powers;
@@ -192,6 +194,105 @@ public class Round17Tests
             "await PerformMember(choiceContext, owner, entering);", source);
         Assert.DoesNotContain(
             "await PerformMember(choiceContext, owner, company[0]);", source);
+    }
+
+    // ==================================================================
+    // `EB-509` -- the relic that went on dealing a card the card refuses
+    // ==================================================================
+    //
+    // WHAT THE SEAT SAW (Furina r11, natural lane). The starting relic adds an
+    // Ethereal Spotlight to hand every turn. Under the reframe Center Stage is
+    // retired, so Guest Cast is the only target and the second copy is refused
+    // by the card's own `IsPlayable` -- "the Spotlight is already on your
+    // Companion cards". That is five to seven dead draws a fight.
+    //
+    // THE RELIC'S ARM FACE ALREADY SAID SO -- "It does nothing once your
+    // Companion cards are lit for this combat" -- and the sentence was true
+    // about the CARD and false about the relic.
+    //
+    // ONE PREDICATE, TWO CALLERS, which is the whole fix:
+    // `SpotlightSystem.DesignateOneModeIsRedundant` is what the card's refusal
+    // reads, and the grant now asks it one broadcast earlier.
+
+    [Fact]
+    public void The_grant_asks_the_cards_own_refusal_before_it_deals()
+    {
+        var calls = Il.Calls(Il.Method("EtherealSpotlightRelic",
+                                       "BeforeSideTurnStart"));
+
+        Assert.Contains(
+            calls, c => c.Contains("DesignateOneModeIsRedundant"));
+    }
+
+    [Fact]
+    public void The_card_refuses_on_the_very_predicate_the_grant_asks()
+    {
+        var refusal = Il.Calls(Il.Method("EtherealSpotlight", "get_IsPlayable"));
+
+        Assert.Contains(
+            refusal, c => c.Contains("DesignateOneModeIsRedundant"));
+    }
+
+    [Fact]
+    public void The_price_is_not_what_stops_the_grant()
+    {
+        // A seat short of Encore this turn may have it next turn, so the
+        // refusal on price is temporary and the card belongs in hand. The
+        // card asks both questions; the relic asks only the lasting one.
+        var grant = Il.Calls(Il.Method("EtherealSpotlightRelic",
+                                       "BeforeSideTurnStart"));
+        var refusal = Il.Calls(Il.Method("EtherealSpotlight", "get_IsPlayable"));
+
+        Assert.DoesNotContain(
+            grant, c => c.Contains("DesignateOneModeIsUnpayable"));
+        Assert.Contains(
+            refusal, c => c.Contains("DesignateOneModeIsUnpayable"));
+    }
+
+    [Fact]
+    public void A_lit_spotlight_is_what_redundant_means()
+    {
+        // The predicate itself, run for real on both sides of the arm.
+        using var arm = new FurinaReframeArm();
+        var seat = Seat.Furina().WithCombatState();
+
+        Assert.False(SpotlightSystem.DesignateOneModeIsRedundant(
+            seat.Creature));
+
+        CustomResources<SpotlightModeResource>
+            .Get(seat.Player.PlayerCombatState).Amount =
+                (int)SpotlightMode.GuestCast;
+
+        Assert.True(SpotlightSystem.DesignateOneModeIsRedundant(
+            seat.Creature));
+
+        arm.Off();
+        Assert.False(SpotlightSystem.DesignateOneModeIsRedundant(
+            seat.Creature));
+    }
+
+    private sealed class FurinaReframeArm : IDisposable
+    {
+        private readonly bool _enabled = FurinaReframe.Enabled;
+        private readonly bool _spotlight = FurinaReframe.SpotlightEnabled;
+
+        internal FurinaReframeArm()
+        {
+            FurinaReframe.Enabled = true;
+            FurinaReframe.SpotlightEnabled = true;
+        }
+
+        internal void Off()
+        {
+            FurinaReframe.Enabled = false;
+            FurinaReframe.SpotlightEnabled = false;
+        }
+
+        public void Dispose()
+        {
+            FurinaReframe.Enabled = _enabled;
+            FurinaReframe.SpotlightEnabled = _spotlight;
+        }
     }
 
     private static int IndexOf(

@@ -2322,7 +2322,7 @@ def _spotlight_designate_one_mode(state: CombatState) -> None:
     deferred with its reason.
     """
     p = state.player
-    if p.spotlight == C.SPOTLIGHT_GUEST_CAST:
+    if spotlight_designate_is_redundant(state):
         # Already aimed. Re-aiming at the same target buys nothing, so it
         # cannot be allowed to bill for nothing either.
         state.emit("spotlight_designate_redundant")
@@ -2338,6 +2338,24 @@ def _spotlight_designate_one_mode(state: CombatState) -> None:
     state.spotlight_moves_this_combat += 1
     state.emit("spotlight_designated", character=C.SPOTLIGHT_GUEST_CAST,
                mode="guest_cast")
+
+
+def spotlight_designate_is_redundant(state: CombatState) -> bool:
+    """Whether the one-mode designation has nothing left to choose.
+
+    `EB-509`: two callers, and they must never disagree. The designation
+    itself refuses a second aim here, and Furina's starting relic asks the
+    same question one broadcast earlier so it stops DEALING a card the
+    designation would refuse. C# twin:
+    `SpotlightSystem.DesignateOneModeIsRedundant`, read by both
+    `EtherealSpotlight.IsPlayable` and `EtherealSpotlightRelic
+    .BeforeSideTurnStart`.
+
+    The reframe's own gate, because Center Stage retires only under the arm:
+    off it the selector still has two targets and a second play RE-AIMS.
+    """
+    return (furina_reframe.spotlight_active(state.player)
+            and state.player.spotlight == C.SPOTLIGHT_GUEST_CAST)
 
 
 def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
@@ -6017,7 +6035,14 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
 def player_turn_start_triggers(state: CombatState) -> None:
     p = state.player
     if ("ethereal_spotlight" in p.relic_hooks           # Furina's relic
-            and not both_spotlight_modes(state)):
+            and not both_spotlight_modes(state)
+            # `EB-509`: and the Spotlight is not already lit. The relic's own
+            # arm face says "It does nothing once your Companion cards are lit
+            # for this combat", and until this line it went on dealing the
+            # selector anyway -- five to seven refused Ethereal draws a fight
+            # (Furina r11 lane 2). One predicate with the designation's own
+            # refusal, so the two cannot disagree about when that is.
+            and not spotlight_designate_is_redundant(state)):
         # Selector to hand each turn (kickoff §3.1). Ethereal: unplayed
         # copies vanish at end of turn (combat loop), so the deck never
         # silts up with selectors. Emits its own event, NOT add_card --
