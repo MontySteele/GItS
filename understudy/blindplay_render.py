@@ -20,6 +20,7 @@ from understudy.blindplay_notes import (AURA_NOTE,
                                         ENEMY_HANDLE_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
+                                        LAST_SALON_NOTE,
                                         METER_CAPPED_NOTE,
                                         METER_DEFINED_NOTE, METER_NOTE,
                                         METER_RULES,
@@ -1120,6 +1121,18 @@ def render(obs: dict[str, Any]) -> str:
                     LAST_MORNING_NOTE, ""] + _render_carry_out(lm)
             if _board_note_wanted(lm):
                 out += ["", CARRY_OUT_BOARD_NOTE]
+        # `EB-604`: the Salon's half of the same receipt, in the combat page's
+        # own order -- the Evoke leads (`EB-582`), then the performances, then
+        # the extra plays. No body is renamed here, because a reward screen
+        # has no enemy list to map a combat id onto; the mod's own title
+        # stands, which is the trade the carry-out block above already makes.
+        if obs.get("last_salon"):
+            ls = obs["last_salon"]
+            out += ["", "## The Salon's last beat", "", LAST_SALON_NOTE, ""]
+            out += [_render_evoke(row) for row in ls["evoked"]]
+            out += [_render_performance(row) for row in ls["performed"]]
+            out += [f"- **{name}** was played an extra time, and the extra "
+                    "play performed as well." for name in ls["replayed"]]
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
 

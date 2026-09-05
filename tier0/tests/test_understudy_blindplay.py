@@ -4191,6 +4191,57 @@ def test_the_last_carry_out_of_a_finished_fight_reaches_the_reward_screen():
         blindplay.observation(rewards_state()))
 
 
+def test_a_lethal_beats_salon_log_reaches_the_reward_screen():
+    """`EB-604`, and it is `EB-329`'s row one arm over.
+
+    A deliberate Evoke onto a full stage that KILLS ends the fight, the game
+    shows the reward screen next, and the combat block does not run for it --
+    so the beat a seat spent a whole turn building is the one beat of the run
+    with no receipt. Furina r16 lane 2 Evoked twice on purpose, at 10 and 7
+    Encore, and "the bridge printed nothing about either" because both were
+    lethal; r14 lane 1's Second Course was the same turn a round earlier.
+
+    THE WIRE ALREADY CARRIED IT. `furina_salon` is emitted OUTSIDE the combat
+    block, `FurinaReframeLedger.Snapshot` touches no `CombatState`, and the
+    ledger rolls at a TURN boundary that a fight ending into a reward screen
+    never crosses. Only the reader was missing.
+    """
+    state = rewards_state()
+    state["player"] = {
+        "hp": 45, "max_hp": 78, "gold": 99,
+        "furina_salon": {
+            "performed": [{"member": "Chevalmarin", "target": "Fogmog",
+                           "combat_id": "1", "element": "Hydro",
+                           "aura": "Hydro", "amount": 4, "paid": True}],
+            "evoked": [evoke_row(member="Crabaletta", aura_all=False,
+                                 target="Fogmog", combat_id="1", damage=14,
+                                 encore=0)]}}
+
+    page = blindplay.render(blindplay.observation(state))
+
+    assert "## The Salon's last beat" in page
+    assert "never reaches a battle screen" in page
+    assert "took its final bow" in page
+    assert "**Chevalmarin**" in page
+    # `EB-582`'s order, kept on this screen too: the bow leads.
+    assert page.index("took its final bow") < page.index("**Chevalmarin**")
+    # A reward screen from a build with no reframe is untouched.
+    assert "Salon" not in blindplay.render(
+        blindplay.observation(rewards_state()))
+
+
+def test_a_finished_fight_whose_stage_did_nothing_prints_no_last_beat():
+    """`last_morning`'s rule one arm over: nothing to say is said nowhere. An
+    EMPTY snapshot is "the rule is here and this seat is not playing it", and
+    that is not a receipt."""
+    state = rewards_state()
+    state["player"] = {"hp": 45, "max_hp": 78, "gold": 99,
+                       "furina_salon": {"performed": []}}
+
+    assert "## The Salon's last beat" not in blindplay.render(
+        blindplay.observation(state))
+
+
 def test_a_dead_enemy_s_leaked_locstring_key_humanises_instead_of_leaking():
     """`EB-370`, found live in the Kokomi round-9 seat's morning-log reprint.
 

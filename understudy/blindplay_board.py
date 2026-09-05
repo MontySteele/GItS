@@ -710,6 +710,50 @@ def last_morning(state: dict[str, Any]) -> dict[str, Any] | None:
             "fired_now": plans["fired_now"]}
 
 
+def last_salon(state: dict[str, Any]) -> dict[str, Any] | None:
+    """The last beat of a fight that is already over (`EB-604`).
+
+    `last_morning`'s twin one arm over, filed for the same defect and closed
+    the same way. A deliberate Evoke onto a full stage that KILLS ends the
+    fight, the game goes straight to the reward screen, and the combat block
+    does not run for it -- so the one beat the seat spent a turn building is
+    the one beat of the run with no receipt. Furina r16 lane 2 Evoked twice on
+    purpose, at 10 and 7 Encore, and "the bridge printed nothing about either
+    because both were lethal"; r14 lane 1's Second Course was the same turn a
+    round earlier.
+
+    THE WIRE ALREADY CARRIES IT. `furina_salon` is emitted OUTSIDE the combat
+    block (`McpMod.StateBuilder`, beside `kokomi_plans` and for `EB-329`'s
+    reason): `FurinaReframeLedger.Snapshot` reads per-Player records and
+    touches no `CombatState`, and the ledger is rolled at a TURN boundary --
+    which a fight ending into a reward screen never crosses. So the last
+    turn's acts are still there to be read; nothing but the reader was
+    missing.
+
+    THE LISTS ALONE, which is `last_morning`'s rule: the stage's `company`,
+    the Encore and every other live-board field are about a fight that no
+    longer exists, so this returns what HAPPENED and nothing about what is.
+
+    NO BODY IS RENAMED, and that is a boundary rather than an oversight: a
+    reward screen has no enemy list, so `name_performances` has nothing to map
+    a `combat_id` onto and the mod's own title stands. It is the same trade
+    `last_morning` makes on the same screen.
+
+    `None` where there is nothing to say -- a build with no reframe, a seat
+    who is not Furina, or a last turn whose stage did nothing.
+    """
+    salon = furina_salon(_player(state))
+    if salon is None:
+        return None
+    said = (salon["performed"] + salon["replayed"]
+            + salon.get("evoked", []))
+    if not said:
+        return None
+    return {"performed": salon["performed"],
+            "replayed": salon["replayed"],
+            "evoked": salon.get("evoked", [])}
+
+
 def _moved_row(row: dict[str, Any]) -> dict[str, Any]:
     """One enemy's share of one Plan (`EB-329`), off `KokomiPlan.MovedRow`.
 

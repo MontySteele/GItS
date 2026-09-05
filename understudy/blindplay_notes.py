@@ -307,6 +307,17 @@ LAST_MORNING_NOTE = (
     "in it -- printed here because a Plan whose kill ends a fight never "
     "reaches a battle screen.*")
 
+# `EB-604`. THE SAME SENTENCE ONE ARM OVER, for the same screen and the same
+# defect: a deliberate Evoke onto a full stage that KILLS ends the fight, and
+# the beat the seat spent a turn building is the one beat of the run with no
+# receipt. Furina r16 lane 2 Evoked twice on purpose, at 10 and 7 Encore, and
+# "the bridge printed nothing about either because both were lethal"; r14
+# lane 1's Second Course was the same turn a round earlier.
+LAST_SALON_NOTE = (
+    "*The fight is over. This is the last thing your Salon did in it -- "
+    "printed here because a beat whose kill ends a fight never reaches a "
+    "battle screen.*")
+
 # `EB-299`. THE NOTE WAS WRONG IN BOTH DIRECTIONS AND THE r2 OPUS SEAT CAUGHT
 # BOTH. It said *"Two cards here print the same name"* over a hand holding
 # THREE Coral Guards, over a hand with two separate duplicate PAIRS, and over
