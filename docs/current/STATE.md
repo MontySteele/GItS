@@ -301,8 +301,18 @@ are in [`workstreams.md`](workstreams.md).
   offer of two was passed for raw damage); The Moon Overlooks the Waters
   read as deleting the kit's question once it lands, to be read at the
   door before it moves; the Byrdonis elite beaten with zero Plans written;
-  no pick; `EB-561`-`EB-563`. [USER]'s act-1 run is due on
-  `0.2.2753+proto`. The Kurage
+  no pick; `EB-561`-`EB-563`. **The Moon is WITHDRAWN** (2026-09-05,
+  `EB-570`, card-audit ledger 5.9: two door reads, REQUIRES_MODIFICATION
+  on C1 both). **Round 21 is READ**
+  (`review/active/kokomi-overhaul-round-21-2026-09-06.md`): on
+  `0.2.2800+proto` the assembled lane found Nereid's Ascension doubling a
+  Battle Plan morning from turn one and Well Laid reading 0 on half its
+  draws; the natural lane wrote Plans on nine of eighteen turns and
+  declined four readers; every number reconciled on both lanes; the
+  coordinator granted the Kurage Memory Oath by mistake (`EB-581`); a
+  D default folds a card's enchantment into its Plan line (`EB-580`);
+  no pick; `EB-578`-`EB-581`. [USER]'s act-1 run is due on
+  `0.2.2800+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
