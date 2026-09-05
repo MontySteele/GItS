@@ -11,6 +11,7 @@ using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -109,6 +110,86 @@ public class Round15Tests
         // 3 x 0.75 = 2.25, truncated by the printer to the 2 the seat read.
         Assert.Equal(3m, damage.BaseValue);
         Assert.Equal(2, new DynamicVar("x", damage.BaseValue * 0.75m).IntValue);
+    }
+
+    // ==================================================================
+    // `EB-468` -- a promise advertised for a full turn after it was dead
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r15 (c) 4). Sayu -- Naptime played after a Strike put
+    // "Naptime 4 -- if you play no Attacks this turn, draw 4" on the bar for a
+    // full turn and paid nothing; the condition had already failed when the
+    // card was played. "A Glam replay stacked it 2 to 4 rather than firing
+    // twice" was the same seat's second half, and unprinted.
+    //
+    // THE RULE DOES NOT MOVE. The grant stands and the end-of-turn removal
+    // stands -- a play that granted nothing would leave nothing on screen at
+    // all, and the badge is what the player reads. What moves is the badge:
+    // while an Attack has already been played it prints the missed form, and
+    // the promise carries the stacking clause either way.
+
+    /// <summary>A Naptime badge on a live seat, with an id to key its faces
+    /// off. `ProtoBombsHarness`' shape, inline: the harness there exists
+    /// because a Bomb pile needs charges seeded, and this power needs nothing
+    /// but an owner and a stack.</summary>
+    private static (Seat Seat, NaptimePower Power) Napping(int amount = 2)
+    {
+        var seat = Seat.Kokomi().WithCombatState().WithPower<NaptimePower>(amount);
+        var power = seat.Creature.Powers.OfType<NaptimePower>().Single();
+        Seat.Force(power, "Id", new ModelId("POWER", "NAPTIME_TEST"));
+        return (seat, power);
+    }
+
+    [Fact]
+    public void Naptime_prints_the_missed_form_once_an_attack_has_been_played()
+    {
+        var (seat, power) = Napping();
+        var key = typeof(NaptimePower).GetProperty(
+            "SmartDescriptionLocKey", All)!;
+
+        // NOTHING PLAYED YET: the promise is live and the badge says so.
+        Assert.EndsWith(".smartDescription", (string)key.GetValue(power)!);
+
+        // ONE ATTACK, and the same badge now says the turn is spent. The
+        // ledger is the mod's own counter, the one `AfterSideTurnEnd` reads to
+        // decide whether to remove the power at all.
+        CompanionOverhaulLedger.For(seat.Creature).NoteAttack();
+
+        Assert.EndsWith(".smartDescriptionMissed",
+                        (string)key.GetValue(power)!);
+
+        var rows = power.Localization!;
+        Assert.Equal(
+            "Missed this turn: an [gold]Attack[/gold] has been played, so "
+          + "this draws nothing and leaves at the end of the turn.",
+            rows.Single(r => r.Item1 == "smartDescriptionMissed").Item2);
+    }
+
+    [Fact]
+    public void The_naptime_face_says_that_copies_add_up()
+    {
+        var (_, power) = Napping();
+        var rows = power.Localization!;
+
+        // Both the compendium row and the live one, because a replay is met
+        // in hand as often as on the bar.
+        foreach (var key in new[] { "description", "smartDescription" })
+        {
+            Assert.EndsWith("Copies add up.",
+                            rows.Single(r => r.Item1 == key).Item2);
+        }
+    }
+
+    [Fact]
+    public void A_replayed_naptime_reads_four_because_the_counter_adds()
+    {
+        // `PowerStackType.Counter` is what makes a second grant a bigger draw
+        // rather than a second draw -- which is the arithmetic the seat saw
+        // (2 -> 4) and the clause above now prints.
+        var (_, power) = Napping(4);
+
+        Assert.Equal(PowerStackType.Counter, power.StackType);
+        Assert.Equal(4m, power.Amount);
     }
 
     // ==================================================================

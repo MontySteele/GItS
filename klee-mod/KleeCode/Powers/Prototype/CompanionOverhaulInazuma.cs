@@ -303,19 +303,84 @@ public sealed class MujiMujiDarumaPower : PowerModel, ILocalizationProvider
 /// start-of-turn readers, and the fizzle is a REMOVAL, which has no position to
 /// defend -- the same argument the Mondstadt wave's own removals make.
 /// </summary>
+/// <summary>
+/// `EB-468` MADE THE BADGE SAY WHEN THE PROMISE IS ALREADY DEAD.
+///
+/// THE FIND (Kokomi r15 (c) 4). Played after a Strike, this put "Naptime 4 --
+/// if you play no Attacks this turn, draw 4" on the bar for a full turn and
+/// paid nothing: the condition had already failed when the card was played,
+/// and the badge went on advertising the draw until the turn ended. "A Glam
+/// replay stacked it 2 to 4 rather than firing twice" was the same seat's
+/// second half, and unprinted.
+///
+/// THE RULE DOES NOT MOVE, and that is the whole shape of the fix. The promise
+/// is still granted and still removed at the end of a turn that saw an Attack
+/// (<see cref="AfterSideTurnEnd"/>), because a grant refused outright would
+/// leave the play with nothing on screen at all -- the badge is what the
+/// player reads, so the badge is what has to be honest. What is added is the
+/// LIVE face: while an Attack has already been played this turn the row says
+/// so, and the stacking clause says what a second copy does.
+/// </summary>
 public sealed class NaptimePower : PowerModel, ILocalizationProvider
 {
+    /// <summary>The promise, still live. `Copies add up.` is `EB-468`'s
+    /// second half: two grants make one bigger draw and not two draws, which
+    /// is <see cref="StackType"/>'s own arithmetic and was printed nowhere.
+    /// </summary>
+    private const string Promise =
+        "If you play no Attacks this turn, draw [blue]{Amount}[/blue] "
+      + "card{Amount:plural:|s} at the start of your next turn. Copies add up.";
+
+    /// <summary>The row key the missed face is filed under. Declared once so
+    /// <see cref="Localization"/> and <see cref="SmartDescriptionLocKey"/>
+    /// cannot drift -- `SalonMemberPower.ManualKey`'s arrangement.</summary>
+    private const string MissedKey = "smartDescriptionMissed";
+
     public List<(string, string)>? Localization => new()
     {
         ("title", "Naptime"),
-        ("description",
-            "If you play no Attacks this turn, draw [blue]{Amount}[/blue] "
-          + "card{Amount:plural:|s} at the start of your next turn."),
+        ("description", Promise),
+        ("smartDescription", Promise),
+        (MissedKey,
+            "Missed this turn: an [gold]Attack[/gold] has been played, so "
+          + "this draws nothing and leaves at the end of the turn."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>
+    /// Which of the two faces this badge prints right now.
+    ///
+    /// `IsMutable` FIRST, `SalonMemberPower.SmartDescriptionLocKey`'s guard
+    /// and for its reason: `HasSmartDescription` probes this key on a
+    /// CANONICAL power too, and <c>PowerModel.Owner</c>'s getter asserts
+    /// mutability (`EB-94`). A compendium copy therefore prints the promise,
+    /// which is also the honest answer -- it has no turn to have missed.
+    ///
+    /// THE LEDGER READ NEVER THROWS. This getter runs on every tooltip read,
+    /// which is a SPECULATIVE call site (`CompanionOverhaulLedger`'s own
+    /// header), and `For` is a roll-on-read lookup rather than a mutation of
+    /// the counter -- but a face may not be the thing that takes a combat
+    /// down, so the read is wrapped.
+    /// </summary>
+    protected override string SmartDescriptionLocKey =>
+        IsMutable && Owner is { } owner && MissedFor(owner)
+            ? Id.Entry + "." + MissedKey
+            : base.SmartDescriptionLocKey;
+
+    private static bool MissedFor(Creature owner)
+    {
+        try
+        {
+            return CompanionOverhaulLedger.For(owner).AttacksPlayedThisTurn > 0;
+        }
+        catch (System.Exception)
+        {
+            return false;
+        }
+    }
 
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
