@@ -983,11 +983,23 @@ public static class ArmKeywordTips
     /// that also costs the member -- so it pays the performance's 1 and takes
     /// the performance's dry cut, and the word now says so in the words the
     /// Salon paragraph and the member tips already use.
+    ///
+    /// `EB-601` PUT THE TRIGGER FIRST, and it is one clause bought with the
+    /// word "The". THE FIND (Furina r16 lane 1 (c)): "a full stage Evokes the
+    /// front member" -- <see cref="ForDeploy"/>'s sentence -- read beside "a
+    /// Companion card you play performs Crabaletta" says, to a reader meeting
+    /// both on one screen, that playing a Companion card into a full stage
+    /// Evokes. It does not; only a Deploy does, and the misreading cost the
+    /// lane an elite turn. The Deploy word states the rule from its own side
+    /// and cannot state it from this one, because a player reading THIS word
+    /// is asking what makes an Evoke happen.
     /// </summary>
     public static IEnumerable<IHoverTip> ForEvoke(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, EvokeKey,
-            "The member performs and leaves. Its [gold]Fanfare[/gold] bonus "
+            "Only a [gold]Deploy[/gold] onto a full stage "
+          + "[gold]Evokes[/gold]. The member performs and leaves; its "
+          + "[gold]Fanfare[/gold] bonus "
           + "counts " + FurinaReframeLaw.EvokeFocusMult + " times and it "
           + "prints " + FurinaReframeLaw.FanfarePerEvoke
           + " [gold]Fanfare[/gold]. It spends "

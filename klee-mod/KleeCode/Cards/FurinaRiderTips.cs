@@ -194,6 +194,22 @@ public static class FurinaRiderTips
     /// (`ProtoBombPower`'s badge says what a pile is worth and never what to
     /// do with it).
     ///
+    /// `EB-600` REPLACED THAT WORDING, because what it left behind was still
+    /// false. "It is this turn's first action or not this fight" describes a
+    /// window that only ever shuts, and Encore is refillable: BOTH r16 lanes
+    /// broke the sentence. Lane 1 -- "Aria and Hearts Swelling grant Encore
+    /// without performing, and I broke the rule on turn 1 of the run." Lane 2
+    /// lit it AFTER a performance in three fights, off Chevalmarin's grant of
+    /// 3, and called working that out "the best moment in the kit".
+    ///
+    /// SO THE LINE STATES THE RULE AND LETS THE PLAYER DERIVE THE WINDOW,
+    /// which is what a rule is for: the price, what spends it, and what
+    /// refills it. The third clause is the R260 arrival's free performance
+    /// (`EB-558`'s <c>free</c>, <see cref="SalonPowers.PerformanceSpends"/>) --
+    /// every combat now opens with a member performing, so a line that said
+    /// "any performance spends one" was false about the fight's very first
+    /// act on every board.
+    ///
     /// ARM-ONLY, at the CALL SITE, exactly as the duration tip is: a release
     /// build's selector charges no Encore and this sentence would be false.
     /// </summary>
@@ -204,11 +220,11 @@ public static class FurinaRiderTips
 #if PROTOTYPE_CARDS
         yield return new HoverTip(
             new LocString(Table, SpotlightWindowKey + ".title"),
-            $"You open a fight with {FurinaReframeLaw.OpeningEncore} "
-          + "[gold]Encore[/gold] and this costs "
-          + $"{FurinaReframeLaw.SpotlightDesignateEncoreCost}. Any performance "
-          + "spends one, so it is this turn's first action or not this "
-          + "fight.");
+            $"It costs {FurinaReframeLaw.SpotlightDesignateEncoreCost} "
+          + "[gold]Encore[/gold] of the "
+          + $"{FurinaReframeLaw.OpeningEncore} you open with. Anything that "
+          + "performs spends 1; a card that grants [gold]Encore[/gold] "
+          + "reopens the window. An arrival's performance is free.");
 #endif
     }
 

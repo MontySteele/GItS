@@ -6088,7 +6088,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-587` replaced the price clause with the price, and the anchor
         # moved with it: the Evoke spends a performance's Encore, or resolves
         # at three-quarters when the pool is dry.
-        "Evoke": ["The member performs and leaves. Its ",
+        # `EB-601`: the trigger leads the word. The clause straddles two
+        # `[gold]` spans, so the anchors are the halves that are whole.
+        "Evoke": [" onto a full stage ",
+                  ". The member performs and leaves; its ",
                   ", or Evokes at 3/4."],
         "Drain": [" falls to nothing. What the card does ",
                   "next is priced off the amount it took"],
@@ -9053,36 +9056,44 @@ def test_the_turn_one_page_prints_the_spotlight_window():
     then played it first in every fight after; lane 2 the same way.
     """
     page = blindplay.observe(spotlight_turn_one_state())
-    assert ("*You open a fight with 2 Encore and **Ethereal Spotlight** costs "
-            "2 -- all of it. Any performance spends one, so it is this turn's "
-            "first action or not this fight.*") in page
+    assert ("*It costs 2 Encore of the 2 you open with. Anything that "
+            "performs spends 1; a card that grants Encore reopens the window. "
+            "An arrival's performance is free.*") in page
 
 
-def test_the_window_line_states_the_window_and_recommends_nothing():
-    """`EB-586`, and it is the row.
+def test_the_window_line_states_the_rule_and_recommends_nothing():
+    """`EB-600`, and it is the row -- with `EB-586`'s half kept whole.
 
     `EB-567`'s line ended "Light your Companion cards before anything
-    performs", which is a RECOMMENDATION -- and the r15 lane-1 seat refused it
-    on turn one of fight one and was right to: the starter holds two Companion
-    cards, the Spotlight costs the whole opening Encore, and "the correct
-    first move is to refuse the screen's own advice". Lane 2 paid it in most
-    fights and zeroed Encore twice, which is where nine of its eleven HP went.
-    The decision is REAL on both lanes, so the line states the window and the
-    price and stops.
+    performs", which is a RECOMMENDATION, and `EB-586` cut it. What that left
+    -- "it is this turn's first action or not this fight" -- describes a
+    window that only ever SHUTS, and both r16 lanes broke it: lane 1 "Aria and
+    Hearts Swelling grant Encore without performing, and I broke the rule on
+    turn 1 of the run"; lane 2 lit it after a performance in three fights off
+    Chevalmarin's grant of 3, and called working that out "the best moment in
+    the kit".
+
+    SO THE LINE IS THE RULE AND THE PLAYER DERIVES THE WINDOW: the price, what
+    spends it, what refills it. The last clause is R260's free arrival
+    (`EB-558`) -- the fight's own first performance on every board, and one
+    that spends nothing.
     """
     page = blindplay.observe(spotlight_turn_one_state())
 
-    assert "this turn's first action or not this fight" in page
-    for advice in ("Light your Companion cards", "locked out"):
-        assert advice not in page
+    assert "Anything that performs spends 1" in page
+    assert "a card that grants Encore reopens the window" in page
+    assert "An arrival's performance is free" in page
+    for wrong in ("Light your Companion cards", "locked out",
+                  "first action or not this fight"):
+        assert wrong not in page
 
 
-def test_the_window_line_is_turn_one_only():
-    """On any later turn the window is already open or already shut, and a
-    standing note about a decision that is gone is exactly the noise the
-    one-fact-per-line rule keeps off this page."""
-    page = blindplay.observe(spotlight_turn_one_state(round_no=2))
-    assert "first action or not this fight" not in page
+def test_the_window_line_prints_on_the_turn_the_window_reopens():
+    """`EB-600`'s other half. The note was round-one-only, on the reading that
+    by any later turn the window is settled; a window a card can REOPEN has to
+    be stated on the turn it reopens on."""
+    page = blindplay.observe(spotlight_turn_one_state(round_no=4))
+    assert "a card that grants Encore reopens the window" in page
 
 
 def test_the_window_line_needs_the_selector_in_hand():
@@ -9243,9 +9254,12 @@ def test_the_spotlight_tip_carries_the_window_and_keeps_the_refusal():
     assert "SpotlightWindowKey" in body
     assert "{FurinaReframeLaw.OpeningEncore}" in body
     assert "{FurinaReframeLaw.SpotlightDesignateEncoreCost}" in body
-    # `EB-586`: the window and the price, and no advice. The clause is split
-    # across two source literals, so the anchor is the half that is whole.
-    assert "spends one, so it is this turn's first action or not this" in body
+    # `EB-600`: the RULE, and no advice. `EB-586` had already cut the
+    # recommendation; what it left described a window that only shuts, and
+    # Encore refills. The clause is split across source literals, so the
+    # anchors are the halves that are whole.
+    assert "performs spends 1; a card that grants [gold]Encore[/gold] " in body
+    assert "reopens the window. An arrival's performance is free." in body
     assert "Light your" not in body
     # ITS OWN METHOD, chained at the call site: two facts, two tip rows, each
     # inside the 135-character ceiling on its own.

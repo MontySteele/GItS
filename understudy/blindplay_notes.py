@@ -421,10 +421,9 @@ PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
 # so, and this note is not a second copy of that sentence. It is the thing the
 # refusal cannot be -- a sentence that arrives BEFORE the decision.
 #
-# PRINTED ON TURN ONE AND ONLY THERE, with the card in hand: on any later turn
-# the window is already open or already shut, and a standing note about a
-# decision that is no longer available is the noise this page's one-fact-per-
-# line rule exists to keep off it.
+# PRINTED WHEREVER THE CARD IS IN HAND. It used to print on turn one and only
+# there, on the reading that by any later turn "the window is already open or
+# already shut"; `EB-600` is that reading being wrong, because Encore refills.
 #
 # `EB-586` TOOK THE ADVICE OUT AND LEFT THE WINDOW, in step with
 # `FurinaRiderTips.ForSpotlightWindow`. "Light your Companion cards before
@@ -435,11 +434,22 @@ PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
 # zeroed Encore twice, which is where nine of its eleven HP went. The decision
 # is REAL on both lanes, so this states the window and the price and stops --
 # which is what every other line on this page does.
+# `EB-600` REPLACED `EB-586`'s WORDING, because what it left behind was still
+# false. "It is this turn's first action or not this fight" describes a window
+# that only ever shuts, and BOTH r16 lanes broke it. Lane 1: "Aria and Hearts
+# Swelling grant Encore without performing, and I broke the rule on turn 1 of
+# the run." Lane 2 lit it AFTER a performance in three fights, off
+# Chevalmarin's grant of 3, and called working that out "the best moment in
+# the kit". So the line states the RULE -- the price, what spends it, what
+# refills it -- and lets the player derive the window; and its last clause is
+# R260's free arrival (`EB-558`), which is the fight's own first performance
+# on every board and spends nothing. Same sentence as
+# `FurinaRiderTips.ForSpotlightWindow`.
 SPOTLIGHT_WINDOW_NOTE = (
-    f"*You open a fight with {FURINA_OPENING_ENCORE} Encore and "
-    f"**Ethereal Spotlight** costs {SPOTLIGHT_ENCORE_COST} -- all of it. Any "
-    "performance spends one, so it is this turn's first action or not this "
-    "fight.*")
+    f"*It costs {SPOTLIGHT_ENCORE_COST} Encore of the "
+    f"{FURINA_OPENING_ENCORE} you open with. Anything that performs spends 1; "
+    "a card that grants Encore reopens the window. An arrival's performance "
+    "is free.*")
 
 
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
@@ -750,9 +760,16 @@ ARM_KEYWORDS: dict[str, str] = {
     # prints no Encore price, and it left the Evoke outside the economy every
     # other act on the stage pays into. An Evoke is a performance that also
     # costs the member, and it is priced like one.
-    "Evoke": ("The member performs and leaves. Its Fanfare bonus counts 3 "
-              "times and it prints 5 Fanfare. It spends 1 Encore, or Evokes "
-              "at 3/4."),
+    # `EB-601` PUT THE TRIGGER FIRST, in step with `ArmKeywordTips.ForEvoke`.
+    # "A full stage Evokes the front member" -- the Deploy row's sentence --
+    # read beside "a Companion card you play performs Crabaletta" says, to a
+    # reader meeting both on one screen, that playing a Companion card into a
+    # full stage Evokes. Only a Deploy does, and the misreading cost r16 lane
+    # 1 an elite turn. A player reading THIS word is asking what makes an
+    # Evoke happen, so that is the clause it opens with.
+    "Evoke": ("Only a Deploy onto a full stage Evokes. The member performs "
+              "and leaves; its Fanfare bonus counts 3 times and it prints 5 "
+              "Fanfare. It spends 1 Encore, or Evokes at 3/4."),
     "Drain": ("Your Fanfare falls to nothing. What the card does next is "
               "priced off the amount it took."),
     # `EB-407`. THE WORD PRINTED BEFORE THE PLAYER HOLDS ANY. Encore is named

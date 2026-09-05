@@ -703,7 +703,12 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # left the Evoke outside the economy every other act on the stage
             # pays into. An Evoke is a performance that also costs the member,
             # so it pays the performance's 1 and takes the performance's cut.
-            "The member performs and leaves. Its [gold]Fanfare[/gold] bonus ",
+            # `EB-601` PUT THE TRIGGER FIRST: "a full stage Evokes the front
+            # member" beside "a Companion card you play performs Crabaletta"
+            # read as a Companion play into a full stage Evoking, and the
+            # misreading cost r16 lane 1 an elite turn.
+            "Only a [gold]Deploy[/gold] onto a full stage ",
+            "[gold]Evokes[/gold]. The member performs and leaves; its ",
             " [gold]Fanfare[/gold]. It spends ",
             " [gold]Encore[/gold], or Evokes at 3/4.",
             "Your [gold]Fanfare[/gold] falls to nothing. What the card does ",
