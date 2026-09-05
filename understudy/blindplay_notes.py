@@ -932,8 +932,19 @@ REACTION_KEYWORDS: dict[str, str] = {
     "Overloaded": ("Pyro on an Electro aura, or Electro on a Pyro aura. "
                    "6 damage to ALL enemies and 1 Weak on the reacted "
                    "enemy."),
+    # `EB-472`. THE ORDER, on the one row where the order changes a number the
+    # reader is about to plan off. "Whether Superconduct's Vulnerable applies
+    # before or after the damage of the card that caused it. From the numbers
+    # it applies first, and Rosaria therefore amplifies herself by 50%. That is
+    # a 4-point swing on a 1-cost card and it is nowhere on the screen" (Klee
+    # r15 run 2 (c) 4). It applies FIRST: `ElementalHit.Deal` resolves the
+    # reaction and only then reads `SimDamagePipeline.TargetMods`, which
+    # `tier0/tests/test_reaction_phase_parity.py` pins -- and the clause is the
+    # C#'s own, added to `KLEEMOD-SUPERCONDUCT_PREVIEW` in the same commit, so
+    # the tooltip and this page cannot say different things about it.
     "Superconduct": ("Electro on a Cryo aura, or Cryo on an Electro aura. The "
-                     "reacted enemy gains 2 Vulnerable."),
+                     "reacted enemy gains 2 Vulnerable, which applies before "
+                     "this hit."),
     "Electro-Charged": ("Hydro on an Electro aura, or Electro on a Hydro "
                         "aura. The reacted enemy loses 4 HP at the start of "
                         "its turn, 1 less each turn."),

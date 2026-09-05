@@ -6103,6 +6103,38 @@ def test_a_second_element_brings_back_its_pair_and_only_its_pair():
     assert "NO REACTION IS REACHABLE" not in page
 
 
+def test_the_superconduct_row_says_its_vulnerable_lands_before_the_hit():
+    """`EB-472`. A 4-POINT SWING THE SEAT HAD TO FIND IN THE HP NUMBERS.
+
+    "Whether Superconduct's Vulnerable applies before or after the damage of
+    the card that caused it. From the numbers it applies first, and Rosaria
+    therefore amplifies herself by 50%. That is a 4-point swing on a 1-cost
+    card and it is nowhere on the screen" (Klee r15 run 2 (c) 4).
+
+    IT APPLIES FIRST, and the engine is not being changed to say so: the order
+    is `ElementalHit.Deal`'s, which resolves the reaction and only THEN reads
+    `SimDamagePipeline.TargetMods` -- a split
+    `tier0/tests/test_reaction_phase_parity.py` pins deliberately, "which is
+    what makes a Superconduct's Vulnerable amplify this same hit". The clause
+    is added to the mod's own preview row in the same commit, so the tooltip a
+    sighted player hovers and this page say one thing.
+
+    Seen to FAIL: the row named the debuff and not its timing.
+    """
+    page = blindplay.observe(
+        elemental_hand_state(elements=("Electro", "Cryo")))
+    assert ("- **Superconduct** — Electro on a Cryo aura, or Cryo on an "
+            "Electro aura. The reacted enemy gains 2 Vulnerable, which "
+            "applies before this hit.") in page
+    # The rows whose effect does NOT touch the triggering hit are unchanged:
+    # a clause that printed on all six would be six claims to check, five of
+    # them about nothing.
+    for word in ("Melt", "Vaporize", "Overloaded", "Frozen",
+                 "Electro-Charged"):
+        assert "applies before this hit" \
+            not in blindplay.REACTION_KEYWORDS[word], word
+
+
 def test_an_anemo_card_over_a_standing_aura_reaches_swirl():
     """`EB-465`, THE SENTENCE THAT CONTRADICTED A PREVIEW ON ITS OWN SCREEN.
 
@@ -6214,7 +6246,10 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         "Vaporize": ["his hit deals 1.5x damage and consumes the aura"],
         "Overloaded": [" damage to ALL enemies and ",
                        " on the reacted enemy"],
-        "Superconduct": ["reacted enemy gains "],
+        # `EB-472` put the order clause on this row, in the C# and here in
+        # one commit, so the anchor holds both halves of the sentence.
+        "Superconduct": ["reacted enemy gains ",
+                         "which applies before this hit"],
         "Electro-Charged": [" HP at the start of its turn, 1 less each turn"],
         "Frozen": ["ts next action deals half damage, and the first Attack "
                    "to hit it Shatters for "],
