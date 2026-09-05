@@ -19,7 +19,8 @@ from understudy.blindplay_faces import remember_elements
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
                                         COMPANION_SPARK, COMPANION_SPARK_MAX,
-                                        CRYSTALLIZE_BLOCK, SHATTER_DAMAGE,
+                                        CRYSTALLIZE_BLOCK, OPENING_SPARK,
+                                        SHATTER_DAMAGE,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
                                         WEAK_DEALT_PCT)
 
@@ -122,6 +123,28 @@ METER_RULES: dict[str, str] = {
                "1 each time it performs"),
     "Fanfare": "cards read it and none spends it",
 }
+
+# `EB-560`. WHERE THE FIRST SPARK COMES FROM, on the screen that has it.
+#
+# "Where Spark comes from is not on the combat screen. I opened fight 1 with 1
+# and could not tell whether that was a starting bank, a relic, or something a
+# card had done" (Klee r20 lane 2). The rule is R242 pick 1's and it IS printed
+# -- inside the Spark keyword tip -- but that tip is raised by a card that
+# PRINTS the word, so a seat whose opening hand holds no Spark-priced card
+# meets the meter row and nothing else.
+#
+# ROUND ONE ONLY, which is what makes it the opening rule rather than a fact
+# about the meter: a bank read on round 4 is the sum of everything since, and a
+# page repeating "you started with 1" on it would be answering a question
+# nobody is asking any more. `METER_RULES` is the wrong home for the same
+# reason -- those rows are true on every screen the meter appears on.
+#
+# AND ONLY WHERE THE GLOSSARY IS NOT ALREADY SAYING IT (`EB-407`): the Spark
+# tip carries the sentence in full, so a screen that raised it has the rule and
+# a second copy on the meter row would be the two-sources defect this page has
+# closed twice.
+SPARK_OPENING_RULE = (f"you start each combat with {OPENING_SPARK}, and cards "
+                      "that print a Spark price spend it")
 
 # `EB-263`. THE ENCHANT PICKER MARKS NOTHING, and the r3 Opus seat found out
 # the hard way: after `choose "Flame Dance"` "the whole list reprinted

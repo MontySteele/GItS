@@ -851,6 +851,62 @@ def test_the_arms_two_meters_print_their_zero_and_nobody_elses_does():
         assert f"- {hidden}: 0" not in furina
 
 
+def test_a_klee_board_prints_its_spark_at_zero_and_says_where_it_came_from():
+    """`EB-560`, `EB-487`'s twin one kit over, and the two halves of it.
+
+    "The Spark line disappears at 0 instead of printing 0, so 'do I have a
+    Spark' is answered by a line's absence" -- and "Where Spark comes from is
+    not on the combat screen. I opened fight 1 with 1 and could not tell
+    whether that was a starting bank, a relic, or something a card had done"
+    (Klee r20 lane 2, (c) 1 and (c) 3).
+
+    THE OPENING RULE IS ROUND ONE'S. On round 4 the bank is the sum of
+    everything since, and a page still saying "you started with 1" would be
+    answering a question nobody is asking.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["resources"]["KLEEMOD_SPARK"] = 0
+
+    # This board is Kokomi's, and the non-zero rule is untouched on it.
+    assert "- Spark: 0" not in blindplay.observe(state)
+
+    state["player"]["character"] = "Klee"
+    page = blindplay.observe(state)
+    assert "- Spark: 0 —" in page
+    assert blindplay.SPARK_OPENING_RULE in page
+    assert f"start each combat with {blindplay_notes.OPENING_SPARK}" in page
+
+    # ROUND TWO ONWARD: the row stays, the opening rule goes.
+    state["battle"]["round"] = 4
+    later = blindplay.observe(state)
+    assert "- Spark: 0 —" in later
+    assert blindplay.SPARK_OPENING_RULE not in later
+
+
+def test_the_opening_rule_is_klees_and_not_every_seats():
+    """`_zero_meters`' own question one block up: the Spark meter is registered
+    for every seat at the table, and the opening grant is Klee's kit rule. A
+    Kokomi board holding Sparks is told what a Spark is and nothing about a
+    bank she was never given."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["resources"]["KLEEMOD_SPARK"] = 2
+
+    assert "- Spark: 2" in blindplay.observe(state)
+    assert blindplay.SPARK_OPENING_RULE not in blindplay.observe(state)
+
+
+def test_the_pages_opening_spark_is_the_number_both_engines_grant():
+    """`EB-89`'s rule on a page that may not import either engine: the numeral
+    is mirrored, so it is held in step from this side or not at all."""
+    from tier0 import constants as C
+
+    assert blindplay_notes.OPENING_SPARK == C.KLEE_OVERHAUL_OPENING_SPARK
+    src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+           / "KleeOverhaul.cs").read_text(encoding="utf-8")
+    grant = re.search(r'OpeningSpark\s*=\s*(\d+)', src)
+    assert grant and int(grant.group(1)) == blindplay_notes.OPENING_SPARK
+
+
 def test_a_hand_printing_one_name_twice_says_an_enchant_would_not_show():
     """`EB-179`, gap three. The card builder emits no enchantment field, and
     the one place that bites a reader is a hand holding two cards they can see

@@ -65,6 +65,15 @@ SHATTER_DAMAGE = 6
 COMPANION_SPARK = 1
 COMPANION_SPARK_MAX = 3
 
+#: `EB-560`. THE SPARK A KLEE COMBAT OPENS WITH, `KleeOverhaulLaw.OpeningSpark`
+#: in the mod and `C.KLEE_OVERHAUL_OPENING_SPARK` in the sim, mirrored here for
+#: `BOMB_GROWTH`'s reason and held in step from the test side. R242 pick 1 put
+#: the opening bank into rule 4 and the Spark keyword tip says it -- but that
+#: tip is raised by a card that PRINTS the word, so a seat holding no
+#: Spark-priced card meets the meter row and nothing else: "Where Spark comes
+#: from is not on the combat screen" (Klee r20 lane 2).
+OPENING_SPARK = 1
+
 # `EB-340`. How long an aura clings, as `ReactionConstants.AuraDurationTurns`
 # sets it and the four `Applies <element>` tips interpolate it. Same discipline
 # as the line above: pinned from the other side, never imported.
