@@ -5441,6 +5441,21 @@ def _op_carry_out_front_plan(state: CombatState, fx: dict,
     kokomi_plan.resolve_front(state)
 
 
+def _op_draw_after_plans(state: CombatState, fx: dict, card: Card) -> None:
+    """Tide Chart (`EB-478`, R257): "Next turn, after the Bake-Kurage carries
+    out its Plans, draw 1 card for each."
+
+    THE PLAY WRITES A PROMISE AND DRAWS NOTHING. The count this row multiplies
+    does not exist yet on the turn the card is played -- that is the defect the
+    redesign answers -- so the whole op is one call into `kokomi_plan`, which
+    owns the promise and the payment alike.
+    """
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    kokomi_plan.promise_tide_chart(state, int(fx.get("per", 1)),
+                                   int(fx.get("amount", 0)))
+
+
 def _op_plan_from_exhaust(state: CombatState, fx: dict, card: Card) -> None:
     """Moon's Reflection's one screen. See `kokomi_plan.schedule_from_exhaust`
     for the two shapes it splits into and for the chooser's status."""
@@ -5590,6 +5605,8 @@ OPS = {
     "remove_debuff": _op_remove_debuff,
     "carry_out_front_plan": _op_carry_out_front_plan,
     "plan_from_exhaust": _op_plan_from_exhaust,
+    # `EB-478`, R257. Tide Chart's promise: a now-line that draws NOTHING now.
+    "draw_after_plans": _op_draw_after_plans,
     "damage_quarter_max_hp": _op_damage_quarter_max_hp,
     # The two PLAN-ONLY clauses. They never appear in an `effects:` list -- the
     # codegen refuses one there by name -- but they are registered here anyway,

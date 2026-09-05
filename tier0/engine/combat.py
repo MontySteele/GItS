@@ -1032,6 +1032,14 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # top of this function.
     klee_overhaul.turn_start_late(state)
 
+    # QUARANTINED (`furina_reframe.FURINA_REFRAME`, R258 / `EB-479`): THE
+    # OPENING ENCORE, at the same site as the opening Spark one line up and for
+    # the same reason -- this engine's combat-start effects fire on TURN 1
+    # after the block clear, the energy reset and the draw, so this is where a
+    # "starts each combat with" grant is true on both sides. The mod's twin is
+    # `FurinaReframeOpening.GrantEncore`, on `AfterPlayerTurnStart`.
+    furina_reframe.grant_opening_encore(state)
+
     # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): RULE 2's RESOLUTION POINT --
     # every Plan she wrote last turn is carried out, in order, HERE.
     #
@@ -1053,6 +1061,13 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # but a reaction the hit causes can move the board under the loop.
     if C.KOKOMI_OVERHAUL:
         kokomi_plan.resolve_all(state)
+        # `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning
+        # and before anything else reads the hand: the face says "after the
+        # Bake-Kurage carries out its Plans, draw 1 card for each", so the
+        # count it multiplies is the depth the drain above just recorded.
+        # `ProtoBakeKuragePower.AfterPlayerTurnStart` calls
+        # `KokomiPlan.PayPromisedDraws` at exactly this point.
+        kokomi_plan.pay_tide_charts(state)
         # `EB-335`. SHELL GUARD'S WINDOW CLOSES AFTER THE MORNING, not on the
         # `roll_turn` line above: R246 pick 2 says the morning's Plans strike
         # the Casket inside the window, so the card's Block arrives before the

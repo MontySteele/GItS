@@ -745,7 +745,8 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "mend", "next_companion_discount", "remove_debuff",
     "carry_out_front_plan", "plan_from_exhaust", "damage_quarter_max_hp",
     "plan_twice", "damage_per_companion_last_turn",
-    "play_copy_of_companion", "block_per_plan_this_morning"))
+    "play_copy_of_companion", "block_per_plan_this_morning",
+    "draw_after_plans"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -946,6 +947,16 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # the card's printed one. At face value from there, which is what
         # `block` is priced at inline.
         return _neutral_amount(fx, 0)
+    if op == "draw_after_plans":
+        # Tide Chart (`EB-478`, R257). ZERO, and it is `draw`'s zero rather
+        # than a refusal of its own: every draw op in this file is priced at
+        # STATIC_DRAW_VALUE, which the v3 flat-proxy sweep measured at 0.0, so
+        # a row that draws one card per Plan carried out is worth exactly what
+        # a row that draws one card is. The delay changes nothing a zero can
+        # express, and pricing it above `draw` would make the deferred version
+        # of a dead dial the only live one.
+        return (int(fx.get("amount", 0)) + int(fx.get("per", 1))) \
+            * STATIC_DRAW_VALUE
     if op == "plan_twice":
         # Nereid's Ascension's window: "for N turns the jellyfish carries out
         # every Plan twice". The value is ONE EXTRA PLAN CARRIED OUT PER TURN
@@ -2335,6 +2346,9 @@ STATIC_OP_PRICING: dict[str, str] = {
                                    "neutral single-unit estimate, since Plan "
                                    "density is a deck fact an offer screen "
                                    "cannot read",
+    "draw_after_plans": "ZERO: STATIC_DRAW_VALUE, the same dead dial `draw` "
+                        "is priced on -- one card per Plan carried out, paid "
+                        "a turn later, is still draw",
     "plan_twice": "STATIC_AUTOPLAY_VALUE per turn of the window: one extra "
                   "Plan carried out a turn, not one per Plan (density is a "
                   "deck fact an offer screen cannot read)",

@@ -95,6 +95,15 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         if (Owner == null || player.Creature != Owner) return;
         if (!KokomiOverhaul.LiveFor(Owner)) return;
         await KokomiPlan.ResolveAll(choiceContext, Owner);
+        // `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning:
+        // its face is "Next turn, after the Bake-Kurage carries out its Plans,
+        // draw 1 card for each", so the count it multiplies is the depth the
+        // drain above just recorded on the ledger. Unconditional for the same
+        // reason the close below is -- an upgraded Tide Chart draws its 1 on a
+        // morning with no Plans at all. Sim twin:
+        // `kokomi_plan.pay_tide_charts`, called from `combat._player_turn` at
+        // exactly this point.
+        await KokomiPlan.PayPromisedDraws(choiceContext, Owner);
         // `EB-335`. SHELL GUARD'S WINDOW CLOSES HERE, one line after the
         // morning rather than on the ledger's turn-start roll: R246 pick 2 says
         // "the morning's Plans that apply Weak strike it too, so the Block is

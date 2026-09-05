@@ -349,6 +349,11 @@ MIRRORED: dict[str, object] = {
     "FurinaReframeLaw.EvokeFocusMult": _reframe("EVOKE_FOCUS_MULT"),
     "FurinaReframeLaw.SpotlightDesignateEncoreCost":
         _reframe("SPOTLIGHT_DESIGNATE_ENCORE_COST"),
+    # A SIXTH since R258 (`EB-479`): the Encore she OPENS each combat with.
+    # Same terms as the five above -- both engines grant it, the Encore tip
+    # prints it out of the C# constant, and a pair that drifted would give the
+    # sim's Furina a different first turn from the mod's.
+    "FurinaReframeLaw.OpeningEncore": _reframe("OPENING_ENCORE"),
     # A SENTINEL rather than a balance number, and mirrored anyway because it
     # HAS a sim counterpart -- "the named member is not on the stage" is a
     # value both engines return and both engines test against, so filing it
