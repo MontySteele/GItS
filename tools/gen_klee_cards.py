@@ -941,6 +941,51 @@ def arm_keyword_tip_calls(description: str,
             if not (keyword.word == "Bomb" and includes_bomb_rules)]
 
 
+#: `EB-575`. The ops that resolve ONLY through a Bomb on the field. A row made
+#: of nothing but these (plus its own price) does nothing whatever on a bare
+#: board; a row with anything else still does that other thing.
+BOMB_ONLY_OPS = frozenset({"set_off", "merge_bombs", "grow_bombs",
+                           "multiply_set_off"})
+#: A PRICE IS NOT A LINE. `spend_spark` is what the card costs, not what it
+#: does, so a Spark-priced Set off with nothing else is still a blank -- and
+#: the fact that it charged the Spark anyway is the whole of the r21 finding.
+BOMB_PRICE_OPS = frozenset({"spend_spark", "spend_charge"})
+
+
+def reads_the_field(card: dict) -> bool:
+    """Does this row set off or merge Bombs? (`EB-575`.)
+
+    Through `iter_effects`, the repo's one walk, so a `set_off` inside a
+    conditional or a mode body counts exactly as a top-level one does.
+    """
+    return any(fx.get("op") in ("set_off", "merge_bombs")
+               for fx in iter_effects(card.get("effects") or []))
+
+
+def empty_field_tip_arg(card: dict) -> bool:
+    """`EB-575`. Does this row still do SOMETHING on a bare board?
+
+    True -> the rider reads "this card is only its own line" (Fwoosh!'s 6
+    damage, Countdown's draw, Bang Bang!'s placement). False -> "this card does
+    nothing" (Careful Arrangement, The Big One, Quick Fuse, Fireworks Show).
+
+    DERIVED AND NOT DECLARED, so a row that gains a line gains the other
+    sentence with it and a row that loses one loses it. A `set_off` carrying
+    its own `damage:` IS a line -- that is where Fwoosh!'s 6 lives -- so the
+    key is asked for as well as the op.
+    """
+    for fx in iter_effects(card.get("effects") or []):
+        op = fx.get("op")
+        if op in BOMB_PRICE_OPS:
+            continue
+        if op in BOMB_ONLY_OPS:
+            if op == "set_off" and fx.get("damage"):
+                return True
+            continue
+        return True
+    return False
+
+
 def base_keyword_tip_calls(description: str) -> list[str]:
     """The base-game tip calls this face owes, in table order (`EB-377`).
 
@@ -11952,6 +11997,20 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "ArmKeywordTips.ForPlanElement("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # `EB-575`, and it sits beside the two riders below it for their
+        # reason: it is a fact about THIS card on THIS board, read before the
+        # definition of a word. A `Set off` row and the merge are PLAYABLE with
+        # no Bomb anywhere -- the game takes the Energy and the Spark and
+        # resolves nothing -- while a Spark-priced card the bank cannot afford
+        # prints CANNOT BE PLAYED on the same screen (Klee r21 lane 1). Which
+        # of the two sentences a row gets is `empty_field_tip_arg`'s, derived
+        # from the effects, so a row that gains a line of its own gains the
+        # other sentence with it.
+        if reads_the_field(card):
+            own_line = "true" if empty_field_tip_arg(card) else "false"
+            tips_expr = (
+                "ArmKeywordTips.ForEmptyField("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this, {own_line})")
         # `EB-418`, and it goes here for `EB-378`'s reason one line up: a rider
         # is a fact about THIS card and is read before the definition of a
         # word. DERIVED FROM THE ROW rather than declared per card, and from

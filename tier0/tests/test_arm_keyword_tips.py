@@ -463,7 +463,11 @@ def test_every_table_row_has_a_method_and_a_registered_title_row(keyword):
 # ruled sentences already on it. They are named here so the count below stays a
 # real pin instead of a number somebody bumps.
 NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
-                    "KLEEMOD-ARM_OPENING_STAGE"}
+                    "KLEEMOD-ARM_OPENING_STAGE",
+                    # `EB-575`: the fourth rider here that titles no keyword,
+                    # and the first whose sentence comes and goes with the
+                    # board.
+                    "KLEEMOD-ARM_EMPTY_FIELD"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -476,6 +480,37 @@ def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
     assert all(k.startswith("KLEEMOD-ARM_") for k in keys)
     assert "KLEEMOD-BOMB" not in keys
     assert "KLEEMOD-SWIRL_PREVIEW" not in keys
+
+
+def test_a_set_off_row_on_a_bare_board_says_so():
+    """`EB-575`. The attach and which of the two sentences a row gets, both
+    derived from the row's own effects.
+
+    THE FIND (Klee r21 lane 1, (c) 2 and (c) 3). Careful Arrangement on a bare
+    board and Fwoosh! on another were ACCEPTED: the Energy went, the Spark
+    went, nothing resolved. On the same screen a Spark-priced card the bank was
+    short for printed CANNOT BE PLAYED and named the price and the bank.
+
+    Seen to FAIL: nothing on either face, in either engine, said the board was
+    empty.
+    """
+    rows = {row["id"]: row for row in proto._rows()}
+    # EVERY SET OFF AND THE MERGE, and nothing else.
+    readers = {rid for rid, row in rows.items() if gen.reads_the_field(row)}
+    assert "proto_ko_careful_arrangement" in readers
+    assert "proto_ko_fwoosh" in readers
+    assert "proto_ko_jumpy_dumpty" not in readers      # a placer reads nothing
+    # THE TWO SENTENCES. A row with a line of its own still does that line; a
+    # row that is nothing but the Bomb work does nothing whatever.
+    blanks = {rid for rid in readers if not gen.empty_field_tip_arg(rows[rid])}
+    assert blanks == {"proto_ko_careful_arrangement", "proto_ko_the_big_one",
+                      "proto_ko_quick_fuse", "proto_ko_fireworks_show"}
+    # AND THE ATTACH REACHED THE EMITTED C#, with the derived argument on it.
+    merge = (PROTOTYPE_DIR / "ProtoKoCarefulArrangement.cs").read_text(
+        encoding="utf-8")
+    assert "ArmKeywordTips.ForEmptyField(" in merge and ", this, false)" in merge
+    fwoosh = (PROTOTYPE_DIR / "ProtoKoFwoosh.cs").read_text(encoding="utf-8")
+    assert "ArmKeywordTips.ForEmptyField(" in fwoosh and ", this, true)" in fwoosh
 
 
 def test_rule_three_says_which_kill_it_means_on_all_three_surfaces():

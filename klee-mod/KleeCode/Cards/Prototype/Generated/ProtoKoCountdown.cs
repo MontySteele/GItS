@@ -35,7 +35,7 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoCountdown : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSetOff(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForEmptyField(base.ExtraHoverTips, this, true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_countdown");
 
