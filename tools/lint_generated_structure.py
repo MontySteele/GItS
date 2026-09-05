@@ -169,7 +169,18 @@ def var_token_aliases() -> dict[str, str]:
 # Calculated var to consume them -- otherwise they are a genuine orphan, which
 # is precisely the "half a rider" shape B1 shipped.
 CALCULATION_INPUTS = frozenset({"CalculationBase", "CalculationExtra", "ExtraDamage"})
+#: `EB-522`: a var that IS one of those consumers under another type name --
+#: `FrontFoldedDamageVar`, which subclasses the game's own -- is recognised by
+#: the TOKEN it declares rather than by its type, the same bargain
+#: `var_token_aliases` already strikes for `DeferredBlockVar`. Read off the
+#: alias map so a fourth such var joins by construction.
 _CALCULATED_CONSUMER = re.compile(r"new\s+Calculated\w*Var\(")
+
+
+def _consumes_the_calculation_inputs(source: str, declared: set[str]) -> bool:
+    """Does this file declare a var that reads the CalculationBase triple?"""
+    return (bool(_CALCULATED_CONSUMER.search(source))
+            or any(name.startswith("Calculated") for name in declared))
 
 
 @dataclass(frozen=True)
@@ -369,9 +380,9 @@ def structural_problems(source: str, where: str) -> list[str]:
             f"declared in CanonicalVars. Declared: {sorted(declared)}"
         )
 
-    exempt = (
-        CALCULATION_INPUTS if _CALCULATED_CONSUMER.search(source) else frozenset()
-    )
+    exempt = (CALCULATION_INPUTS
+              if _consumes_the_calculation_inputs(source, declared)
+              else frozenset())
     for name in sorted(declared - referenced - exempt):
         problems.append(
             f"{where}: L2 ORPHAN VAR -- '{name}' is declared but nothing reads "

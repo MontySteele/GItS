@@ -1,11 +1,10 @@
-using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 
-namespace KleeMod.Cards;
+namespace KleeMod.Powers;
 
 /// <summary>
 /// `EB-522`: a calculated damage face that prints what it will deal, on the
@@ -41,11 +40,14 @@ namespace KleeMod.Cards;
 /// creature a beat later, so a face that disagrees with the board is a red
 /// test rather than a number a seat stops trusting.
 ///
-/// QUARANTINED. The file sits under <c>Cards/Prototype/</c>, which
+/// QUARANTINED. The file sits under <c>Powers/Prototype/</c>, which
 /// <c>KleeCode.csproj</c> Compile-Removes from a release build, and
 /// <c>gen_klee_cards.build_vars</c> emits it for `proto_` rows only: the
 /// shipped sheets keep the game's own var, because what a card prints at rest
-/// is a surface R249 ruled is not repainted outside the arm.
+/// is a surface R249 ruled is not repainted outside the arm. It sits beside
+/// the arms' other vars rather than beside the cards for one further reason:
+/// <c>lint_generated_structure.var_token_aliases</c> reads this directory for
+/// the <c>Token</c> declaration below.
 ///
 /// WHAT NO HEADLESS PIN CAN SAY. <c>CalculatedDamageVar.UpdateCardPreview</c>
 /// reaches <c>CardModel.CombatState</c>, which needs a live combat this
@@ -56,6 +58,15 @@ namespace KleeMod.Cards;
 /// </summary>
 public sealed class FrontFoldedDamageVar : CalculatedDamageVar
 {
+    /// <summary>The token this var DECLARES, which is the game's own and not
+    /// the type name above: the base constructor names it, so a face still
+    /// prints `{CalculatedDamage:diff()}` and a body still looks it up under
+    /// that word. Stated as a const because
+    /// `tools/lint_generated_structure.var_token_aliases` reads exactly this
+    /// declaration, the way `DeferredBlockVar` and `SpotlitBlockVar` do.
+    /// </summary>
+    public const string Token = "CalculatedDamage";
+
     public FrontFoldedDamageVar(ValueProp props) : base(props)
     {
     }
