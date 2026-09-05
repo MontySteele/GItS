@@ -51,12 +51,21 @@ Crabaletta performs 6 Hydro to a random enemy, Usher 3 Block, Chevalmarin
    line with a member for an orb. Audit: FOLLOWS on C6.
 2. **Second Course** — Common Skill, 1; replaces Dinner Service (2 Block
    plus 2 per member). *Spend 3 Encore. Deploy Mademoiselle Crabaletta. She
-   performs once more.* Upgrade: spend 2. Unplayable below 3 Encore. Two
-   performances (12 random Hydro, 4 Fanfare) for an energy and three
-   Encore, which is three Block she would otherwise hold: the hold-or-spend
-   tension on a deploy. Against the shipped Mademoiselle Crabaletta (1:
-   deploy her): the second performance is bought with Encore. Audit:
-   FOLLOWS on C2, C5, C8.
+   performs once more.* Upgrade: spend 2. Unplayable below 3 Encore.
+   **The price, corrected 2026-09-05 (GPT review, item 2):** the printed 3
+   is spent at the cost line, and then the shipped Salon rule charges 1
+   Encore per performance or performs dry at three quarters
+   (`SALON_TICK_ENCORE_COST`, `SALON_DRY_DAMAGE_MULT`; the member tip
+   prints "paying 1 Encore"). So the card's full value costs five Encore:
+   at 3 both performances are dry (8 damage), at 4 one is paid (10), at 5
+   both are (12), and the pool is empty afterwards in every case. This
+   packet first wrote "12 for three Encore", an arithmetic that read the
+   card through a resolve that never paid the printed price; the boundary
+   is pinned by `test_second_course_at_the_affordability_boundary`. The
+   audit read the wrong arithmetic; its verdict (FOLLOWS on C2, C5, C8) is
+   kept with that caveat, because the corrected price binds harder, not
+   softer. The face is unchanged; whether "spend 3, then pay 2 more by a
+   rule on another tip" reads is round 17's to say.
 3. **Rolling Tide** — Common Attack, 2; replaces Undercurrent (2 to ALL
    three times). *Deal 2 damage to ALL enemies twice. The front Salon
    member performs.* Upgrade: 3. The kit's own perform verb, one hit of
@@ -76,7 +85,10 @@ Attack); kit-owned perform 1; Companion generators in the pool 1.
 No starter change. No Evoke row: Curtain Call and Exit Stage Left stand
 and the Encore opening (R258) is what they were waiting for. No Fanfare
 reader: the four rider copies are unread at their bars and stay. No member
-roster change. Nothing here is a number pick.
+roster change: the fourth, scaling member is ruled (reframe pick F1,
+option 2) and owed by a later slice, not re-asked here; the named
+Spotlight is `EB-466`, open and built next when a round reaches it. Both
+are approved work, not open questions. Nothing here is a number pick.
 
 ## 4. The audit and the build
 
