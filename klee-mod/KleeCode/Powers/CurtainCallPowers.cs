@@ -385,16 +385,30 @@ public sealed class SalonBowEncorePower : PowerModel, ILocalizationProvider
 
 /// <summary>Courtroom Drama: the first reaction each turn applies Vulnerable
 /// and Weak to its target. Activity-gated on the reaction, so a silent turn
-/// pays nothing and a reaction storm pays once.</summary>
+/// pays nothing and a reaction storm pays once.
+///
+/// `EB-591`. THE ORDER IS ON THE FACE NOW, and on this badge as well because
+/// the two must not fork. The r15 lane-2 seat watched one 1-cost card take a
+/// body from 50 to 19 and could not find the reason: the debuff lands INSIDE
+/// the reaction (<see cref="CurtainCallHooks.NoteFirstReaction"/>, reached
+/// from <c>ReactionEffects.Resolve</c>) one hook before the triggering hit's
+/// number is final, so the hit that applied the Vulnerable is itself moved by
+/// it. THE ENGINE IS NOT WHAT MOVED: that phase is RULED and pinned in both
+/// engines -- `tier0/tests/test_reaction_phase_parity.py`'s
+/// "courtroom-drama-vulnerable-is-multiplicative" row, EB-19/M1, which exists
+/// BECAUSE the mod once landed it a hook late and paid two different numbers
+/// for one reaction. What was missing was the sentence. The opening clause
+/// tightened to "Your first ... each turn" to pay for it under the ceiling;
+/// it is the same per-dealer window it always was.</summary>
 public sealed class CrossExaminationPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Courtroom Drama"),
         ("description",
-            "The first [gold]Elemental Reaction[/gold] you trigger each turn "
-          + "applies {Amount} [gold]Vulnerable[/gold] and {Amount} "
-          + "[gold]Weak[/gold] to its target."),
+            "Your first [gold]Elemental Reaction[/gold] each turn applies "
+          + "{Amount} [gold]Vulnerable[/gold] and {Amount} [gold]Weak[/gold] "
+          + "to its target. The [gold]Vulnerable[/gold] moves that hit."),
     };
 
     public override PowerType Type => PowerType.Buff;

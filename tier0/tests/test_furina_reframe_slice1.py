@@ -598,6 +598,13 @@ def test_the_focus_term_never_reaches_the_encore_refund_or_the_aura(evoke):
     test that would fail if the multiplier were ever plumbed into `_salon_bow`
     generally instead of into `_salon_amount`. Her Evoke refunds exactly its
     printed Encore at any meter and at any multiplier.
+
+    `EB-587` PUT THE UPKEEP ON THE OTHER SIDE OF THE SUBTRACTION and left the
+    invariant exactly where it was: an Evoke now pays a performance's 1 before
+    it resolves, so the pool moves by the printed refund MINUS that flat 1 --
+    a constant, unscaled by the meter, which is the whole claim. The two
+    Fanfare values below are what prove it: a Focus term that had reached the
+    refund would move this figure between them.
     """
     printed = C.SALON_MEMBERS["chevalmarin"]["bow"]["encore"]
     for fanfare in (0, 3 * C.SALON_FOCUS_PER):
@@ -606,7 +613,8 @@ def test_the_focus_term_never_reaches_the_encore_refund_or_the_aura(evoke):
 
         effects.resolve_card(st, _evoke_card())
 
-        assert st.player.encore - before == printed
+        assert (st.player.encore - before
+                == printed - C.SALON_TICK_ENCORE_COST)
 
 
 def test_an_evoke_card_is_unplayable_below_its_printed_encore_price(evoke):
@@ -620,13 +628,18 @@ def test_an_evoke_card_is_unplayable_below_its_printed_encore_price(evoke):
 
 
 def test_playing_an_evoke_card_spends_the_encore_price(evoke):
+    """AND THE PERFORMANCE'S OWN 1 (`EB-587`). Two spends from one pool, and
+    they are two different bills: the card's printed price, taken at the gate
+    before the op resolves (`F7` (1)), and the Evoke's upkeep, taken inside
+    `_salon_bow` because an Evoke is a performance and every performance pays
+    it."""
     st = _staged(["usher"], encore=5)
     card = _evoke_card(encore_cost=2)
     st.player.hand.append(card)
 
     combat.play_card(st, card)          # calls `_finish_play` itself
 
-    assert st.player.encore == 3
+    assert st.player.encore == 5 - 2 - C.SALON_TICK_ENCORE_COST
     assert st.player.salon == []
 
 

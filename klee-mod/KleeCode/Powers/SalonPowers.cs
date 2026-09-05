@@ -414,11 +414,19 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     /// chip that computed its own scaling would be a fourth hand-maintained
     /// projection of the same arithmetic.
     /// </summary>
-    public static int TickValue(Creature owner, SalonMember member, bool paid)
-    {
-        var amt = Scaled(owner, BaseTick(member));
-        return paid ? amt : (int)(amt * SalonConstants.DryDamageMultiplier);
-    }
+    public static int TickValue(Creature owner, SalonMember member, bool paid) =>
+        Dry(Scaled(owner, BaseTick(member)), paid);
+
+    /// <summary>
+    /// THE DRY CUT, in ONE place (`EB-587`). A member that cannot pay its
+    /// Encore acts at <see cref="SalonConstants.DryDamageMultiplier"/>, and
+    /// since the Evoke pays like a performance there are now two callers of
+    /// that arithmetic -- <see cref="TickValue"/> and <see cref="Bow"/> --
+    /// which is one caller too many for a repeated cast. Mirrors tier0
+    /// <c>effects._salon_dry</c>.
+    /// </summary>
+    private static int Dry(int amount, bool paid) =>
+        paid ? amount : (int)(amount * SalonConstants.DryDamageMultiplier);
 
     /// <summary>
     /// THE BODIES A MEMBER'S ROLL MAY PICK -- every hittable enemy, SKIPPING A
@@ -479,8 +487,33 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         bool evoked = false)
     {
         var mult = 1;
+        // `EB-587`. AN EVOKE IS A PERFORMANCE AND PAYS LIKE ONE: it spends the
+        // upkeep's 1 Encore, or resolves at three-quarters when the pool is
+        // dry. THE FIND (Furina r15 lane 1 (c) 1): at 0 Encore three
+        // performances printed and landed dry while the Evoke on the same turn
+        // delivered its full 14, so the one act that costs a member was the one
+        // act the economy did not price. The old rule -- the card's own printed
+        // Encore price pays for it -- had no answer on Curtain Rises, which
+        // deploys onto a full stage and prints no Encore price at all.
+        //
+        // ARM-SCOPED, like the Focus multiplier beside it: a SHIPPED bow is
+        // the displaced member's payoff and is not a performance, so the flag
+        // guard covers both halves and a release build's bow is untouched.
+        var evokePaid = true;
 #if PROTOTYPE_CARDS
-        if (evoked) mult = FurinaReframe.EvokeFocusMult(owner);
+        if (evoked)
+        {
+            mult = FurinaReframe.EvokeFocusMult(owner);
+            // `PerformancePays` and not a second copy of its comparison:
+            // "can this act afford the upkeep" is one question, and
+            // `PerformMember` already owns it.
+            evokePaid = PerformancePays(owner, free: false);
+            if (evokePaid)
+            {
+                FurinaResources.SpendEncore(
+                    owner, SalonConstants.TickEncoreCost);
+            }
+        }
 #endif
         // `EB-564`. WHAT THE BOW DID, carried out of the branches in these
         // locals and filed once below -- `PerformMember`'s own arrangement,
@@ -506,12 +539,15 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 // and it is the landed figure a seat reconciles HP against.
                 bowDamage = await ElementalHit.Deal(
                     choiceContext, target, Elements.Element.Hydro,
-                    Scaled(owner, SalonConstants.CrabalettaBow, mult), owner);
+                    Dry(Scaled(owner, SalonConstants.CrabalettaBow, mult),
+                        evokePaid),
+                    owner);
                 bowPicked = target;
                 break;
             }
             case SalonMember.Usher:
-                bowBlockLanded = Scaled(owner, SalonConstants.UsherBow, mult);
+                bowBlockLanded = Dry(
+                    Scaled(owner, SalonConstants.UsherBow, mult), evokePaid);
                 await CreatureCmd.GainBlock(
                     owner, bowBlockLanded,
                     ValueProp.Unpowered, null, fast: true);
@@ -901,16 +937,16 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         //
         // THE DEFECT. Furina r11 fight 3 turn 2 and fight 4 turn 6: the page's
         // Salon block reported a member's act at `TickValue`, which is read
-        // BEFORE `ElementalHit.Deal` runs the dealer's Weak, the reaction
-        // amplifier and the target's Vulnerable. Under a Weak stack a
-        // Crabaletta logged at 6 landed for 4, and a Vaporizing one logged at
-        // 4 landed for 6 -- so a seat reconciling the fight's HP against the
-        // block concluded that a reaction amplifier had been dropped by the
-        // CARD it had just played (Chevreuse printed 7, previewed Vaporize
-        // 1.5x, and was blamed for the 8 the arithmetic left over). Nothing
-        // was dropped: `Deal` composes Spotlight x Weak x Vaporize exactly,
+        // BEFORE `ElementalHit.Deal` runs the reaction amplifier and the
+        // target's Vulnerable. A Vaporizing Crabaletta logged at 4 landed for
+        // 6 -- so a seat reconciling the fight's HP against the block
+        // concluded that a reaction amplifier had been dropped by the CARD it
+        // had just played (Chevreuse printed 7, previewed Vaporize 1.5x, and
+        // was blamed for the 8 the arithmetic left over). Nothing was dropped
         // and the log was the only thing lying. `Deal` has RETURNED the
         // truncated landed amount since `EB-270`, for this exact reason.
+        // (The Weak half of that finding is gone since `EB-588` below: the
+        // dealer's terms no longer enter a performance at all.)
         var landed = amount;
         switch (member)
         {
@@ -920,9 +956,29 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 var target = combat!.RunState.Rng.CombatTargets
                     .NextItem(targets);
                 if (target == null) break;
+                // `EB-588`. `powered: false` -- THE DEALER'S TERMS DO NOT
+                // ENTER A PERFORMANCE. THE FIND (Furina r15 lane 2 (c) 4):
+                // Weak cut a member performance from 6 to 4 twice, while the
+                // Salon paragraph directly above it says "a performance is not
+                // an Attack and not a hit: Vulnerable moves it" and names no
+                // Weak. The paragraph is the rule and the pipeline was the
+                // defect: the hit already reaches `CreatureCmd.Damage` as
+                // `ValueProp.Unpowered` with `dealer: null`, and the mirror
+                // above it was still running `SimDamagePipeline.DealerMods`.
+                //
+                // ONE FLAG, so it takes STRENGTH with the Weak, and that is
+                // the flag's stated meaning rather than a second decision:
+                // `ElementalHit.Deal`'s own doc calls `powered: false` "the
+                // dealer's Strength and Weak, and with them every flat attack
+                // buff the mirror carries", and a second parameter meaning
+                // "half of Unpowered" is exactly what that doc refuses. What
+                // a member's number IS remains the member's own -- the printed
+                // base, the Fanfare Focus term and Grand Salon -- which is
+                // what `TickValue` and the Salon paragraph both say it is.
+                // Mirrors tier0 `salon_member_act`'s `powered=False`.
                 landed = await ElementalHit.Deal(
                     choiceContext, target, Elements.Element.Hydro,
-                    amount, owner);
+                    amount, owner, powered: false);
                 picked = target;
                 // THE AURA IS READ AFTER THE HIT, not assumed from the element
                 // supplied: `ElementalHit.Deal` applies Hydro to a bare body,

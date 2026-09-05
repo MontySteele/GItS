@@ -718,9 +718,15 @@ ARM_KEYWORDS: dict[str, str] = {
     "Deploy": ("A member joins and performs at once; a full stage Evokes the "
                "front member first. Afterwards only a Companion play performs "
                "a member."),
+    # `EB-587` REPLACED THE PRICE CLAUSE WITH THE PRICE, in step with
+    # `ArmKeywordTips.ForEvoke`: "the card's Encore price pays for it" is
+    # false on Curtain Rises, which Evokes by deploying onto a full stage and
+    # prints no Encore price, and it left the Evoke outside the economy every
+    # other act on the stage pays into. An Evoke is a performance that also
+    # costs the member, and it is priced like one.
     "Evoke": ("The member performs and leaves. Its Fanfare bonus counts 3 "
-              "times and it prints 5 Fanfare. The card's Encore price pays "
-              "for it."),
+              "times and it prints 5 Fanfare. It spends 1 Encore, or Evokes "
+              "at 3/4."),
     "Drain": ("Your Fanfare falls to nothing. What the card does next is "
               "priced off the amount it took."),
     # `EB-407`. THE WORD PRINTED BEFORE THE PLAYER HOLDS ANY. Encore is named

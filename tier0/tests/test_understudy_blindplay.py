@@ -6002,8 +6002,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Deploy": ["A member joins and performs at once; a full stage ",
                    " the front member first. Afterwards only a ",
                    " play performs a member."],
+        # `EB-587` replaced the price clause with the price, and the anchor
+        # moved with it: the Evoke spends a performance's Encore, or resolves
+        # at three-quarters when the pool is dry.
         "Evoke": ["The member performs and leaves. Its ",
-                  " price pays "],
+                  ", or Evokes at 3/4."],
         "Drain": [" falls to nothing. What the card does ",
                   "next is priced off the amount it took"],
         # `EB-407`. The arm's fourth Furina word and the one it did not

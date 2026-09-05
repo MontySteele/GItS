@@ -592,9 +592,15 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "A member joins and performs at once; a full stage ",
             "[gold]Evokes[/gold] the front member first. Afterwards only a ",
             "[gold]Companion[/gold] play performs a member.",
+            # `EB-587` REPLACED THE PRICE CLAUSE WITH THE PRICE. "The card's
+            # Encore price pays for it" is false on Curtain Rises, which Evokes
+            # by deploying onto a full stage and prints no Encore price, and it
+            # left the Evoke outside the economy every other act on the stage
+            # pays into. An Evoke is a performance that also costs the member,
+            # so it pays the performance's 1 and takes the performance's cut.
             "The member performs and leaves. Its [gold]Fanfare[/gold] bonus ",
-            " [gold]Fanfare[/gold]. The card's [gold]Encore[/gold] price pays ",
-            "for it.",
+            " [gold]Fanfare[/gold]. It spends ",
+            " [gold]Encore[/gold], or Evokes at 3/4.",
             "Your [gold]Fanfare[/gold] falls to nothing. What the card does ",
             "next is priced off the amount it took.",
     ):

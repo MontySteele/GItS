@@ -833,12 +833,17 @@ public static class ArmKeywordTips
     /// multiplier or the mint must not be able to leave this sentence quoting
     /// a retired number.
     ///
-    /// THE PRICE CLAUSE IS NOT DECORATION. `F7` (1) made the Evoke's cost the
-    /// card's own printed Encore, which is shipped machinery -- the gate and
-    /// the spend both run before the op resolves -- so the word means "this
-    /// card charges Encore" on every card that prints it, and a player who
-    /// met the word on a Rare should not have to discover that on the second
-    /// one.
+    /// `EB-587` REPLACED THE PRICE CLAUSE WITH THE PRICE. The old sentence --
+    /// "the card's Encore price pays for it", `F7` (1) -- was two claims at
+    /// once and both failed. It is FALSE on Curtain Rises, which Evokes by
+    /// deploying onto a full stage and prints no Encore price at all; and it
+    /// left the Evoke outside the economy every other act on the stage pays
+    /// into, which the r15 lane-1 seat read off its own board: at 0 Encore
+    /// three performances resolved dry at three-quarters while the Evoke on
+    /// the same turn delivered its full 14. An Evoke IS a performance -- one
+    /// that also costs the member -- so it pays the performance's 1 and takes
+    /// the performance's dry cut, and the word now says so in the words the
+    /// Salon paragraph and the member tips already use.
     /// </summary>
     public static IEnumerable<IHoverTip> ForEvoke(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -846,8 +851,9 @@ public static class ArmKeywordTips
             "The member performs and leaves. Its [gold]Fanfare[/gold] bonus "
           + "counts " + FurinaReframeLaw.EvokeFocusMult + " times and it "
           + "prints " + FurinaReframeLaw.FanfarePerEvoke
-          + " [gold]Fanfare[/gold]. The card's [gold]Encore[/gold] price pays "
-          + "for it.");
+          + " [gold]Fanfare[/gold]. It spends "
+          + SalonConstants.TickEncoreCost
+          + " [gold]Encore[/gold], or Evokes at 3/4.");
 
     /// <summary>
     /// SEC.4.6. TWO SENTENCES BECAUSE IT IS TWO FACTS, and the second is the
