@@ -92,8 +92,14 @@ public class Round16Tests
     {
         var body = Printed(typeof(BaseKeywordTips), "ForVulnerable");
 
+        // `EB-523` PUT THE ATTACK BACK IN, for the side of the board `EB-497`
+        // did not read: "every card hit" is complete on an ENEMY, where
+        // everything that lands is a card or a potion, and silent on the
+        // PLAYER, whose Vulnerable is about a monster's swing. The r18 lane-2
+        // seat wore `Vulnerable 99` in front of a 24-damage intent and could
+        // not price it.
         Assert.Equal(
-            "Every card hit it takes deals 50% more, a Skill's too. A "
+            "An attack or card hit on it deals 50% more, a Skill's too. A "
           + "potion's does not. One stack falls off at the end of each of "
           + "its turns.", body);
         // The tip a player hovers is inside the in-game box either way.
