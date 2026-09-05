@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using KleeMod.Cards;
+using KleeMod.Cards.Prototype;
+using KleeMod.Powers;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -97,5 +99,101 @@ public class Round16Tests
         Assert.True(body.Length <= 135, body.Length.ToString());
         Assert.Equal(Printed(typeof(BaseKeywordTips), "ForWeak").Length,
                      body.Length);
+    }
+
+    // ==================================================================
+    // `EB-490` -- the tax nobody was paying, and the two clauses that
+    //             pointed opposite ways
+    // ==================================================================
+    //
+    // THE FIND (Klee r16 (c)). The Gardener's "first time it is hit each turn,
+    // it gains 6 Block" never triggered on a Set off -- which is most of why
+    // Klee beats that elite -- and nothing printed says so. The seat "planned
+    // two turns around a tax it was not paying" and learned the rule by
+    // autopsy from a 26-HP body dying to 30 points of Bomb.
+    //
+    // WHY THE WORDS AND NOT THE RULE. `EB-443` put both halves on the tip:
+    // "Block stops them" and "no Attack trigger fires". They are each true and
+    // together they point opposite ways for a reader who does not already know
+    // Skittish is an ON-HIT power -- the first says a Bomb interacts with what
+    // the enemy has, the second says a Bomb sets nothing off, and "Attack
+    // trigger" reads as something on the player's own side of the board.
+
+    private static string SetOffTip() =>
+        Printed(typeof(ArmKeywordTips), "ForSetOff");
+
+    [Fact]
+    public void The_set_off_tip_names_the_powers_on_the_enemys_status_bar()
+    {
+        Assert.Contains("no when-hit power fires", SetOffTip());
+        Assert.DoesNotContain("Attack trigger", SetOffTip());
+        // The Block clause is untouched: the pair was the problem, not either
+        // half, and dropping one would put `EB-443`'s finding back.
+        Assert.Contains("[gold]Block[/gold] stops them", SetOffTip());
+    }
+
+    [Fact]
+    public void Renaming_the_class_cost_the_ceiling_nothing()
+    {
+        // "Attack trigger" and "when-hit power" are the same fourteen
+        // characters, so `EB-443`'s 132-of-135 reading stands as published.
+        var rendered = SetOffTip()
+            .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
+        Assert.Equal(132, rendered.Length);
+    }
+
+    [Fact]
+    public void A_set_off_hands_the_hit_no_attacker_so_skittish_cannot_fire()
+    {
+        // THE BEHAVIOURAL HALF, and it is STRUCTURAL for `EB-343`'s reason:
+        // an explosion needs a live `CombatState` (the README's headless
+        // boundary), so what a test can read is which method the call site
+        // calls and what that method's one damage call passes.
+        //
+        // The explosion asks the funnel for the dealer-free door...
+        var explode = typeof(ProtoBombPower)
+            .GetMethod("Explode", All)!;
+        Assert.Contains(Il.Calls(explode),
+                        c => c == "ElementalHit.DealWithoutDealerMods");
+
+        // ...and that door's `powered: false` path reaches `CreatureCmd.Damage`
+        // as an UNPOWERED hit with NO DEALER. A power keyed on being hit by an
+        // Attack therefore has neither an attacker nor a powered hit to answer,
+        // which is the whole of why Skittish stays unfired. Read off the source
+        // because an argument's VALUE is invisible to `Il`.
+        var source = Source("Powers/ElementalHit.cs");
+        Assert.Contains(
+            "await CreatureCmd.Damage(\n"
+          + "            choiceContext, target, landed,\n"
+          + "            ignoreBlock ? ValueProp.Unpowered | "
+          + "ValueProp.Unblockable\n"
+          + "                        : ValueProp.Unpowered,\n"
+          + "            dealer: null, cardSource: null, cardPlay: null);",
+            source.Replace("\r\n", "\n"));
+        Assert.Contains(
+            "ignoreBlock: false, powered: false);",
+            source.Replace("\r\n", "\n"));
+    }
+
+    /// <summary>A mod source file, read whole -- `Round12Tests.Printed`'s
+    /// idiom and its reason: a stale copy beside the dll is exactly the drift
+    /// a text pin exists to catch.</summary>
+    private static string Source(string relativePath)
+    {
+        var relative = System.IO.Path.Combine("klee-mod", "KleeCode",
+            relativePath.Replace('/', System.IO.Path.DirectorySeparatorChar));
+        var dir = new System.IO.DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = System.IO.Path.Combine(dir.FullName, relative);
+            if (System.IO.File.Exists(candidate))
+            {
+                return System.IO.File.ReadAllText(candidate);
+            }
+            dir = dir.Parent;
+        }
+
+        throw new System.IO.FileNotFoundException(
+            "no " + relative + " above " + AppContext.BaseDirectory);
     }
 }

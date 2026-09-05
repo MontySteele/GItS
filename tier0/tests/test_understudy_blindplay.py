@@ -5636,8 +5636,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                  "Not an Attack: only ", " and a cap ",
                  "Kills move it on"],
         # `EB-432`: the pile's own order, and which charge meets the aura.
+        # `EB-490` renamed the class and not the claim: "Attack trigger" read
+        # as something on the player's own side of the board, beside a Block
+        # clause pointing the other way.
         "Set off": ["go off first, oldest first, each ",
-                    "a Pyro hit. ", " stops them, no Attack trigger ",
+                    "a Pyro hit. ", " stops them, no when-hit power ",
                     "fires, the first takes the aura."],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
         # `EB-436`: the hit is in the sentence now.

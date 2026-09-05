@@ -492,8 +492,15 @@ ARM_KEYWORDS: dict[str, str] = {
     # into Skittish 6 as "Set off ignores enemy Block" when what happened is
     # that Skittish never fired. "For its size" paid for them: the live number
     # is the badge's, which is the split `EB-343` already made.
+    # `EB-490` NAMED THE CLASS INSTEAD OF THE TRIGGER. "No Attack trigger
+    # fires" and "Block stops them" point opposite ways to a reader who does
+    # not already know Skittish is an ON-HIT power: the r16 Klee seat planned
+    # two turns around a tax it was not paying and learned the rule by autopsy
+    # from a 26-HP Gardener dying to 30 points of Bomb. "No when-hit power
+    # fires" is the same claim in the same room, said about the thing on the
+    # enemy's status bar. Same sentence as `ArmKeywordTips.ForSetOff`.
     "Set off": ("The target's Bombs go off first, oldest first, each a Pyro "
-                "hit. Block stops them, no Attack trigger fires, the first "
+                "hit. Block stops them, no when-hit power fires, the first "
                 "takes the aura."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
