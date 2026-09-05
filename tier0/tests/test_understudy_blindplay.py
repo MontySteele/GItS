@@ -7943,12 +7943,63 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
 def test_the_one_that_cannot_be_rendered_says_which_kind_of_upgrade_it_is():
     """Salon Debut's arm carries a hole of its own, so the upgrade is a second
     sentence rather than a number in the first. The reason is a fact about the
-    CARD, which is what a reader deciding where to spend a Smith can act on."""
+    CARD, which is what a reader deciding where to spend a Smith can act on.
+
+    `EB-551` MADE IT THE RIGHT FACT. The warning said "rewrites the sentence",
+    and the r13 lane-2 seat spent a Smith pick on the strength of it: "Salon
+    Debut+ is 'Deploy Mademoiselle Crabaletta. Gain 2 Encore.' That is an
+    appended clause worth two Encore, not a rewritten sentence -- the warning
+    oversold it." An EMPTY unupgraded arm adds its arm; anything else replaces
+    one, and the two are one character apart in the template.
+    """
     built, why = qa_packet.upgrade_preview(*_R12_SMITH[1])
 
     assert built == ""
-    assert why == qa_packet.NO_PREVIEW_REWRITES
+    assert why == qa_packet.NO_PREVIEW_APPENDS
+    assert "adds a clause" in why
+    assert "rewrites" not in why
     assert not qa_packet.leaks(why)
+
+
+def test_a_real_rewrite_still_says_rewrite():
+    """The other arm of the same branch, so the narrowing did not simply
+    delete the word: a swap whose UNUPGRADED arm is non-empty replaces text,
+    and that is what "rewrites the sentence" is for."""
+    assert qa_packet._APPEND_ARM_RE.search(
+        "Deal 4. {IfUpgraded:show:Gain {Block:diff()} Block.|}") is not None
+    assert qa_packet._APPEND_ARM_RE.search(
+        "Deal 4. {IfUpgraded:show:Gain {Block:diff()} Block.|Draw 1.}") is None
+
+
+def test_the_smith_prints_the_keyword_an_upgrade_adds():
+    """`EB-551`. THE HALF THE PICK TURNED ON.
+
+    "The Smith's upgrade preview omits keywords: Aria+ showed only the number
+    change and not Innate, the most load-bearing keyword in the deck, chosen
+    without being shown" (Furina r13 lane 1).
+
+    Read off `OnUpgrade`'s own `AddKeyword` calls, which is where the number
+    deltas come from too, so a keyword and a number that moved in one edit
+    cannot fall out of step. Asked SEPARATELY from the face, because a row this
+    page cannot number still adds its keyword.
+
+    Seen to FAIL: no surface on the page carried a keyword delta at all.
+    """
+    assert qa_packet.upgrade_keywords("KLEEMOD-PROTO_KO_SORRY_JEAN") == (
+        "Retain",)
+    assert qa_packet.upgrade_keywords("KLEEMOD-NOT_A_CARD") == ()
+
+    smith = live("upgrade-fresh")
+    smith = json.loads(json.dumps(smith.get("state", smith)))
+    smith["card_select"]["cards"].append(
+        {"id": "KLEEMOD-PROTO_KO_SORRY_JEAN", "name": "Sorry, Jean...",
+         "cost": "1", "type": "Skill",
+         "description": "Remove one of your Bombs and gain Block equal to its "
+                        "size."})
+
+    page = blindplay.observe(smith)
+
+    assert "    Upgraded, and gains Retain." in page
 
 
 def test_the_other_three_reasons_are_each_a_fact_about_the_card():
@@ -7977,8 +8028,8 @@ def test_the_reason_prints_on_the_smith_under_the_face_it_is_about():
          "description": "Deploy Mademoiselle Crabaletta."})
     page = blindplay.observe(smith)
 
-    assert ("    Upgraded: not shown -- its upgrade rewrites the sentence "
-            "rather than moving a number in it.") in page
+    assert ("    Upgraded: not shown -- its upgrade adds a clause, and this "
+            "page has no unupgraded copy of the number in it.") in page
     # The rows that CAN be rendered are untouched by the new line.
     assert "    Upgraded: Gain 11 Block." in page
 

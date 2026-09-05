@@ -264,6 +264,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
                     raw.get("id"), face.get("text") or "")
                 face["upgraded_face"] = built
                 face["upgraded_note"] = why
+                # `EB-551`: AND THE KEYWORDS, which are a different question
+                # from the face and were the half the r13 seat lost -- "Aria+
+                # showed only the number change and not Innate, the most
+                # load-bearing keyword in the deck, chosen without being
+                # shown." Asked separately because a row with no renderable
+                # face still adds its keyword.
+                face["upgraded_keywords"] = list(
+                    qa_packet.upgrade_keywords(raw.get("id")))
         picked = [_card_face(c) for c in _preview_cards(state, st)]
         # How many results the transform screen has NOT chosen yet, and
         # whether its preview came through in a shape this page can read at
