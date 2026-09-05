@@ -70,8 +70,15 @@ public class KleeOverhaulRoundFourTests
 
         Assert.DoesNotContain("(", face);
         Assert.DoesNotContain("of them", face);
+        // `EB-514` PUT THE HIT COUNT BACK IN THE HEADLINE and kept it prose:
+        // the total is a SUM over the charges, so a two-charge stack printed
+        // one number where the board makes two hits and two Sparks, and the
+        // r18 seat budgeted one of each off this sentence. Still no bracket
+        // and still no "of them" -- the clause is a clause.
         Assert.Contains("[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
-                        + "Pyro damage.", face);
+                        + "Pyro damage, in [blue]{Count}[/blue] "
+                        + "hit{Count:plural:|s} for as many [gold]Sparks[/gold].",
+                        face);
         // `EB-289`: read off the CHARGE LIST, not `{Amount}` -- see the test
         // below and `ProtoBombPower.Bombs` for why the stack amount could not
         // be it. `EB-450` swapped the count for the charges themselves, which
@@ -129,8 +136,10 @@ public class KleeOverhaulRoundFourTests
 
         Assert.Equal(25, pile.PredictedSetOffDamage());   // 12 + 13, per charge
         Assert.EndsWith(".smartDescriptionVulnerable", LocKey(pile));
+        // `EB-514`: the hit-count clause follows the modifier clause, so the
+        // sentence still ends on the terms the number went through.
         Assert.Contains("[blue]{Size}[/blue] Pyro damage after "
-                        + "[gold]Vulnerable[/gold].",
+                        + "[gold]Vulnerable[/gold], in [blue]{Count}[/blue] ",
                         Row(pile, "smartDescriptionVulnerable"));
     }
 
@@ -166,7 +175,7 @@ public class KleeOverhaulRoundFourTests
 
         Assert.EndsWith(".smartDescriptionVulnerableHardToKill", LocKey(pile));
         Assert.Contains("Pyro damage after [gold]Vulnerable[/gold], capped by "
-                        + "[gold]Hard To Kill[/gold].",
+                        + "[gold]Hard To Kill[/gold], in [blue]{Count}[/blue] ",
                         Row(pile, "smartDescriptionVulnerableHardToKill"));
     }
 

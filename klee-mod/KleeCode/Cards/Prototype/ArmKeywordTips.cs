@@ -250,9 +250,16 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForSetOff(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SetOffKey,
+            // `EB-516`: the AIM clause. A random Set off draws from the
+            // enemies already carrying one of hers, and the two rows that do
+            // it (Tinder Toss, Rapid Fire) print "a random enemy" and cannot
+            // say where it lands -- so the rule lives on the word, which is the
+            // one surface both rows carry. Over the tip ceiling and excepted
+            // by name in `tools/lint_text_conventions.py`.
             "The target's [gold]Bombs[/gold] go off first, oldest first, each "
           + "a Pyro hit. [gold]Block[/gold] stops them, no when-hit power "
-          + "fires, the first takes the aura.");
+          + "fires, the first takes the aura. A random one picks a Bombed "
+          + "enemy first.");
 
     /// <summary>Rule 4. The gain rate is read from
     /// <see cref="KleeOverhaulLaw.SparkPerExplosion"/>, which is also
@@ -452,10 +459,11 @@ public static class ArmKeywordTips
     /// not the run holds Grounded, which is the state the seat was actually in.
     ///
     /// WHAT IT SAYS AND WHAT IT LEAVES TO THE CARD. The CONDITION is the whole
-    /// rule and it is what a Kaeya reader needs: nothing of yours went off last
-    /// turn. What Grounded pays for that is the Power card's own printed line
-    /// and moves with its upgrade, so the tip defers to it rather than quoting
-    /// a number that a second card would contradict.
+    /// rule and it is what a Kaeya reader needs: `EB-516` moved it to "you have
+    /// a Bomb on the field" and the tip moved with it. What Grounded pays for
+    /// that is the Power card's own printed line and moves with its upgrade, so
+    /// the tip defers to it rather than quoting a number that a second card
+    /// would contradict.
     /// </summary>
     /// ONE METHOD WITH AN OPTIONAL CARD, and not an overload: a POWER raises
     /// this tip too -- the buff Kaeya's card leaves behind prints the word for
@@ -469,7 +477,7 @@ public static class ArmKeywordTips
             // A card TYPE is a plain word, never golded
             // (`docs/current/text-conventions.md`, and the lint bites).
             "A Power that pays at the start of your turn, but "
-          + "only if none of your [gold]Bombs[/gold] went off last turn. Its "
+          + "only if you have a [gold]Bomb[/gold] on the field. Its "
           + "card prints what it pays.");
 
     /// <summary>

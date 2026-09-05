@@ -78,8 +78,17 @@ EXCEPTIONS = {
         "game has no static modal card to measure against"),
     "ProtoBombPower.description": (
         "the Bomb badge's static face carries rules 1, 2 and 6 in one "
-        "paragraph because a canonical copy has no live pile to quote; the "
-        "in-combat smart faces without a Mine meet the ceiling"),
+        "paragraph because a canonical copy has no live pile to quote; every "
+        "in-combat smart face is excepted below for its own reasons"),
+    "SetOffKey": (
+        "`EB-516` added the AIM to a tip already at 132 of 135. A random Set "
+        "off draws from the enemies carrying one of hers, and Tinder Toss and "
+        "Rapid Fire both print only 'a random enemy', so the word is the one "
+        "surface either row carries. The tip now states seven ruled facts -- "
+        "the order against the card's own hit, oldest first, the element, "
+        "what stops them, what does not fire, where the aura goes and where a "
+        "random one lands (EB-432, EB-490, EB-516) -- and none of them is "
+        "droppable to make room"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.
@@ -91,25 +100,27 @@ EXCEPTIONS = {
 #: in silently is the defect the row was raised on. Naming them costs
 #: characters, and the Mine axis multiplies whatever the modifier axis costs.
 #:
-#: THE PLAIN FACE IS NOT HERE and that is the point: `smartDescription`, the
-#: face a player reads on an unmodified enemy with no Mine in the pile, is 111
-#: of 125 and stays gated. Every entry below is that face plus a clause it is
-#: required to carry. Written as the grid rather than fifteen typed keys so it
-#: cannot fall out of step with `ProtoBombPower.Localization`, which builds its
-#: rows from the same two axes; the rot check still runs per key.
+#: THE PLAIN FACE JOINED THE GRID AT `EB-514`. It was the one row here that
+#: met the ceiling (125 of 125, no headroom at all), and the hit count is the
+#: clause that took it over: a stack's total is a SUM over the charges, so
+#: `deals 7` read as one hit and one Spark where the board made two of each,
+#: and the r18 seat planned a turn against it. Written as the grid rather than
+#: sixteen typed keys so it cannot fall out of step with
+#: `ProtoBombPower.Localization`, which builds its rows from the same two axes;
+#: the rot check still runs per key.
 _BOMB_FACE_REASON = (
     "the Bomb badge is the arm's one live-arithmetic surface, and R248 "
     "requires it to name every modifier folded into the number it prints "
     "(EB-343); the Mine axis is EB-260's, rule 6 firing on the enemy's turn "
-    "when no card is in front of the player. The unmodified face with no Mine "
-    "is under the ceiling and is not excepted")
+    "when no card is in front of the player; and EB-514 puts the HIT COUNT in "
+    "the headline, because the total is a sum over the charges and a stack "
+    "printed one number where the board makes several hits and several Sparks")
 EXCEPTIONS.update({
     "ProtoBombPower.smartDescription" + mines + vulnerable + cap:
         _BOMB_FACE_REASON
     for mines in ("", "Mines")
     for vulnerable in ("", "Vulnerable")
     for cap in ("", "HardToKill", "Intangible", "Capped")
-    if (mines or vulnerable or cap)
 })
 
 # --- the shipped exceptions: id -> reason. Same rot semantics. -----------
@@ -380,7 +391,12 @@ def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
                         if cap_text:
                             clause += ("," + cap_text) if vulnerable else cap_text
                         face = ("[gold]Set off[/gold] here deals "
-                                + consts["PyroTotal"] + clause + "."
+                                # `EB-514`: the hit count rides the total,
+                                # because the total is a SUM over the charges
+                                # and a stack printed one number where the
+                                # board makes several hits.
+                                + consts["PyroTotal"] + clause
+                                + consts["HitCount"] + "."
                                 + (consts["BombsWithMines"] if mines
                                    else consts["Bombs"])
                                 + (consts["MineClause"] if mines

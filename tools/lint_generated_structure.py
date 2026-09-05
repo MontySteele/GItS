@@ -116,6 +116,14 @@ PROFILES = (KLEE_PROFILE, FURINA_PROFILE, KOKOMI_PROFILE, PROTOTYPE_PROFILE)
 # and `gen_klee_cards.build_vars` reads the same shape from the other side.
 _NAMED_DECL = re.compile(r'new\s+(?:Dynamic|Calculated)Var\(\s*"([A-Za-z]\w*)"')
 _TYPED_DECL = re.compile(r"new\s+(?:[A-Za-z]\w*\.)*([A-Za-z]\w*)Var\(\s*(?!\")")
+# `EB-513`: a TYPED var may also be given a name -- the game's `BlockVar` and
+# `DamageVar` both take a `(string name, ...)` overload -- and a name declared
+# that way is the name the face prints and the body looks up, exactly as a
+# `DynamicVar("X", ...)` is. The companion rows whose bonus Block folds Frail
+# are declared this way, so a lint that read only the two untyped classes
+# reported the name as dangling.
+_NAMED_TYPED_DECL = re.compile(
+    r'new\s+(?:[A-Za-z]\w*\.)*[A-Za-z]\w*Var\(\s*"([A-Za-z]\w*)"')
 
 # References: body lookups in either idiom, plus localization text tokens.
 _BODY_REF = re.compile(r'DynamicVars(?:\.([A-Za-z]\w*)|\[\s*"([A-Za-z]\w*)"\s*\])')
@@ -338,6 +346,7 @@ def declared_vars(source: str) -> set[str]:
     block = canonical_vars_block(source)
     aliases = var_token_aliases()
     names = set(_NAMED_DECL.findall(block))
+    names |= set(_NAMED_TYPED_DECL.findall(block))
     for typed in _TYPED_DECL.findall(block):
         # `new List<DynamicVar>` and friends are not declarations.
         if typed in ("Dynamic", "Calculated"):

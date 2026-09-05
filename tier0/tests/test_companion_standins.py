@@ -372,3 +372,96 @@ def test_every_rule_is_inert_with_the_flag_off(monkeypatch):
     # Nothing was consumed either: with the arm off these are not this arm's
     # powers, and eating a stack would be a behaviour change of its own.
     assert state.player.powers[standins.COLD_BLOODED] == 1
+
+
+# ---------------------------------------------------------------------------
+# `EB-513` -- a companion's printed Block takes the card's Frail fold
+# ---------------------------------------------------------------------------
+
+def test_eb513_frail_bites_a_companions_printed_block(arms):
+    """`EB-513` (Klee r18 lane 2 (c) 3). "Frail applied to Defend but not to
+    Diona": Defend's face was rewritten 5 to 3 and Diona still printed and
+    delivered 4 + 5.
+
+    THE FOLD IS THE CARD'S, and the reason is what the sentence is printed on.
+    These three clauses are on the companion card's OWN face, in the same
+    breath as its primary Block, and they reach a power only because the
+    trigger is forward-looking ("goes off THIS turn"). `NC-11`'s "power-sourced
+    Block stays raw" is about Metallicize, the Ceremonial Garment rider and the
+    Kurage pulse -- passive effects a power owns, with no printed clause behind
+    them -- so it never covered these. `powers.modify_block_gained` is the same
+    funnel `_op_block` runs a kit card's Block through, which is what makes
+    Defend and Diona one rule.
+    """
+    state = _klee_state()
+    state.player.powers["frail"] = 2
+    enemy = state.enemies[0]
+
+    # DIONA, the one-shot. 5 printed, floor(5 * 0.75) = 3 delivered.
+    state.player.powers[standins.SHAKEN_NOT_PURRED] = 5
+    klee_overhaul.place(state, enemy, 6)
+    before = state.player.block
+    klee_overhaul.set_off(state, enemy)
+    assert state.player.block == before + 3
+
+    # NOELLE, per Mine.
+    state.player.powers[standins.I_GOT_YOUR_BACK] = 4
+    klee_overhaul.place(state, enemy, 5, is_mine=True)
+    before = state.player.block
+    klee_overhaul.set_off(state, enemy)
+    assert state.player.block == before + 3          # floor(4 * 0.75)
+
+    # BARBARA, per Bomb.
+    state.player.powers[standins.FRONT_ROW_SEAT] = 8
+    klee_overhaul.place(state, enemy, 5)
+    before = state.player.block
+    klee_overhaul.set_off(state, enemy)
+    assert state.player.block == before + 6          # floor(8 * 0.75)
+
+
+def test_eb513_the_ledger_reports_the_number_that_landed(arms):
+    """A ledger row carrying the PRINTED number while the board took the folded
+    one is the divergence the row is about, so both emitted rows say what the
+    player actually got."""
+    state = _klee_state()
+    state.player.powers["frail"] = 1
+    state.player.powers[standins.SHAKEN_NOT_PURRED] = 5
+    klee_overhaul.place(state, state.enemies[0], 6)
+    klee_overhaul.set_off(state, state.enemies[0])
+
+    paid = [e for e in state.log if e["event"] == "mc_shaken_not_purred"]
+    assert [e["amount"] for e in paid] == [3]
+
+
+def test_eb513_an_unfrail_board_is_untouched(arms):
+    """The acceptance condition on the change: with no Frail standing, every
+    one of the three pays exactly what it printed."""
+    state = _klee_state()
+    state.player.powers[standins.SHAKEN_NOT_PURRED] = 5
+    klee_overhaul.place(state, state.enemies[0], 6)
+    before = state.player.block
+    klee_overhaul.set_off(state, state.enemies[0])
+    assert state.player.block == before + 5
+
+
+def test_eb513_a_power_that_pays_at_turn_start_stays_raw(arms):
+    """WHAT DID NOT MOVE, and it is the distinction the row turns on. Jean's
+    Lion's Fang and Klee's own Grounded pay at the START of a turn off a Power
+    the card only granted -- a POWER's Block, not a card's -- so Frail does not
+    bite them, exactly as `GroundedPower` says in as many words."""
+    state = _klee_state()
+    state.player.powers["frail"] = 2
+    state.player.powers[standins.LIONS_FANG] = 8
+    state.player.draw_pile = [loader.peek_card("strike")] * 3
+    state.turn = 2
+    klee_overhaul.roll_to(state, state.turn)
+    standins.roll_turn(state)
+    before = state.player.block
+    standins.turn_start(state)
+    assert state.player.block == before + 8
+
+    state.player.powers[klee_overhaul.GROUNDED] = 6
+    klee_overhaul.place(state, state.enemies[0], 5)
+    before = state.player.block
+    klee_overhaul.turn_start_late(state)
+    assert state.player.block == before + 6

@@ -282,6 +282,21 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     /// null -- a spend is bookkeeping, not a power "given" by anyone, and
     /// keeping it out of the ModifyPowerAmountGiven chain means nothing can
     /// inflate or shrink the exact price.
+    ///
+    /// `EB-512`: THE PAYMENT IS VERIFIED AND NOT ASSUMED, which is the whole
+    /// of that row. The r18 seat played Stoke the Fuse at Spark 2, watched the
+    /// Mine grow 4 to 10 -- both Sparks counted -- and read `Spark 2` on the
+    /// very next screen: "the effect billed me and the counter did not". This
+    /// method used to `return true` the moment the command was awaited, and
+    /// <c>PowerCmd.ModifyAmount</c> returns having touched nothing on two of
+    /// its own guards (the combat is ending; the power's owner has no combat
+    /// state) before its hook chain can resize the offset at all. So the bank
+    /// stayed whole, the caller was told it had paid, and the X-price row's
+    /// payout -- read off <see cref="SparksAtPlay"/> BEFORE the call -- was
+    /// handed over in full. The bank is now read back and the answer is what
+    /// the bank actually did, so a caller can refuse its own payout; the
+    /// generated X-price body does exactly that
+    /// (<c>gen_klee_cards._stmt_spend_spark</c>).
     /// </summary>
     public static async Task<bool> Spend(
         PlayerChoiceContext choiceContext, Creature player, int amount,
@@ -304,10 +319,20 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
         int before = power.Amount;
         await PowerCmd.ModifyAmount(
             choiceContext, power, -amount, applier: null, cardSource: cardSource);
+        int paid = before - power.Amount;
+        SyncGauge(player);
+
+        // `EB-512`. A COMMAND THAT MOVED NOTHING IS NOT A PAYMENT. Same
+        // `EB-216` rule as the two refusals above, one step later: the row is
+        // written only when the bank actually moved, so "paid 0" stays a thing
+        // the ledger cannot say.
+        if (paid <= 0)
+        {
+            return false;
+        }
         Diagnostics.MeterLedger.Note(Diagnostics.MeterLedger.Spark,
             source ?? SourceOf(cardSource), power.Amount - before, before);
-        SyncGauge(player);
-        return true;
+        return paid >= amount;
     }
 
     /// <summary>

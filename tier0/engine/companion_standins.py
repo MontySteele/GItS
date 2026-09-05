@@ -64,6 +64,7 @@ from functools import lru_cache
 from typing import TYPE_CHECKING
 
 from tier0 import constants as C
+from tier0.engine import powers
 
 if TYPE_CHECKING:                                   # pragma: no cover
     from tier0.engine.state import Card, CombatState
@@ -213,6 +214,28 @@ def grounded_blind(state: "CombatState") -> bool:
     return C.COMPANION_OVERHAUL and state.mc_grounded_blind
 
 
+def _pay_block(state: "CombatState", amount: int, event: str) -> None:
+    """`EB-513`. One companion stand-in's printed Block, paid.
+
+    THROUGH `powers.modify_block_gained`, which is the SAME funnel `_op_block`
+    runs a kit card's printed Block through (`effects.py`, the `block` op), so
+    Dexterity and Frail move this number exactly as they move Defend's. The
+    amount banked on the power is the card's PRINTED number, so the fold is
+    applied once, here, at the moment the Block lands -- which is the moment
+    the mod's `Pay` folds it too.
+
+    The emitted rows are the pair every one of these sites already wrote, with
+    the LANDED number in both: a ledger that recorded the printed number while
+    the board took the folded one is the divergence this row is about.
+    """
+    landed = powers.modify_block_gained(state.player, amount)
+    if landed <= 0:
+        return
+    state.player.block += landed
+    state.emit("block", amount=landed)
+    state.emit(event, amount=landed)
+
+
 def note_explosion(state: "CombatState", is_mine: bool) -> None:
     """One explosion landed: pay whichever watcher is armed.
 
@@ -220,9 +243,22 @@ def note_explosion(state: "CombatState", is_mine: bool) -> None:
     through `_notify_explosion`: that bus carries no Mine flag, and widening it
     for one card would put a stand-in's rule inside the Klee arm's own hook.
 
-    BLOCK IS RAW, the argument `companion_overhaul_turn_start` makes for every
-    power-sourced Block on this arm: neither block funnel may touch a gain the
-    card that banked it is no longer the source of.
+    BLOCK TAKES THE CARD'S FOLD (`EB-513`), and it used to be raw. The old
+    argument was `NC-11`'s -- power-sourced Block stays out of the block funnel
+    -- and `NC-11` is about Metallicize, the Ceremonial Garment rider and the
+    Kurage pulse: passive effects a power owns, with no printed clause on any
+    card. These three are not those. The sentence is printed on the companion
+    card's OWN face, in the same breath as its primary Block, and it reaches a
+    power only because the trigger is forward-looking ("goes off THIS turn").
+    So the fold a kit card's Block takes is the fold this takes, and the r18
+    seat's screen is the reading: Frail rewrote Defend 5 to 3 and Diona printed
+    and delivered 4 + 5 in full.
+
+    ONE FOLD, NOT TWO: the card banks the PRINTED amount, `modify_block_gained`
+    runs once here, and the mod does the same thing at the same point (the C#
+    face folds in the card preview and its `Pay` passes `ValueProp.Move`).
+    `turn_start` below is untouched, and so is Grounded: a Power that pays at
+    the START of a turn is a POWER's Block and not a card's.
     """
     if not C.COMPANION_OVERHAUL:
         return
@@ -230,24 +266,18 @@ def note_explosion(state: "CombatState", is_mine: bool) -> None:
     # Diona -- ONE-SHOT, popped as it pays.
     n = p.powers.pop(SHAKEN_NOT_PURRED, 0)
     if n:
-        p.block += n
-        state.emit("block", amount=n)
-        state.emit("mc_shaken_not_purred", amount=n)
+        _pay_block(state, n, "mc_shaken_not_purred")
     # Noelle -- REPEATING, and MINES ONLY.
     if is_mine:
         n = p.powers.get(I_GOT_YOUR_BACK, 0)
         if n:
-            p.block += n
-            state.emit("block", amount=n)
-            state.emit("mc_i_got_your_back", amount=n)
+            _pay_block(state, n, "mc_i_got_your_back")
     # Barbara -- REPEATING, and EVERY Bomb (R252). Noelle's shape without her
     # Mines clause, which is the whole difference between the two cards: a
     # Mine is a Bomb, so Noelle's window is a subset of this one.
     n = p.powers.get(FRONT_ROW_SEAT, 0)
     if n:
-        p.block += n
-        state.emit("block", amount=n)
-        state.emit("mc_front_row_seat", amount=n)
+        _pay_block(state, n, "mc_front_row_seat")
 
 
 def on_played(state: "CombatState", card: "Card") -> None:
@@ -266,9 +296,7 @@ def on_played(state: "CombatState", card: "Card") -> None:
     p = state.player
     n = p.powers.pop(SHAKEN_NOT_PURRED, 0)
     if n:
-        p.block += n
-        state.emit("block", amount=n)
-        state.emit("mc_shaken_not_purred", amount=n)
+        _pay_block(state, n, "mc_shaken_not_purred")
 
 
 def turn_start(state: "CombatState") -> None:

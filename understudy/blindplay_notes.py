@@ -528,9 +528,14 @@ ARM_KEYWORDS: dict[str, str] = {
     # from a 26-HP Gardener dying to 30 points of Bomb. "No when-hit power
     # fires" is the same claim in the same room, said about the thing on the
     # enemy's status bar. Same sentence as `ArmKeywordTips.ForSetOff`.
+    # `EB-516`: the AIM clause, held in step with `ArmKeywordTips.ForSetOff`.
+    # A random Set off draws from the enemies already carrying one of hers,
+    # and the two rows that do it (Tinder Toss, Rapid Fire) print "a random
+    # enemy" and cannot say where it lands -- so the rule lives on the word,
+    # the one surface both rows carry.
     "Set off": ("The target's Bombs go off first, oldest first, each a Pyro "
                 "hit. Block stops them, no when-hit power fires, the first "
-                "takes the aura."),
+                "takes the aura. A random one picks a Bombed enemy first."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
     # `EB-373`: a Mine IS a Bomb, so the same fold moves it and the same
@@ -589,8 +594,9 @@ ARM_KEYWORDS: dict[str, str] = {
     # met the word in both acts, held neither the Power nor a screen that
     # defined it, and read it as noise. Held in step with
     # `ArmKeywordTips.ForGrounded`.
+    # `EB-516` moved the condition to the board and the tip moved with it.
     "Grounded": ("A Power that pays at the start of your turn, but only if "
-                 "none of your Bombs went off last turn. Its card prints what "
+                 "you have a Bomb on the field. Its card prints what "
                  "it pays."),
     # `EB-446`. THE NAME ONE CARD IS WRITTEN AGAINST AND ANOTHER GRANTS.
     # `Fischl -- Nightrider` prints "If Oz is out, he deals 5 Electro damage"

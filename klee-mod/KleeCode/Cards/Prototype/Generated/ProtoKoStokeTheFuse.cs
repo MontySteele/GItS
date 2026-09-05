@@ -75,7 +75,7 @@ public sealed class ProtoKoStokeTheFuse : CustomCardModel, ISparkPricedCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var sparksSpent = SparkPower.SparksAtPlay(Owner.Creature);
-        await SparkPower.Spend(choiceContext, Owner.Creature, sparksSpent, this);
+        if (!await SparkPower.Spend(choiceContext, Owner.Creature, sparksSpent, this)) return;
         ProtoBombPower.GrowLargestPerSpark(Owner.Creature, DynamicVars["Grow"].IntValue, sparksSpent);
     }
 
