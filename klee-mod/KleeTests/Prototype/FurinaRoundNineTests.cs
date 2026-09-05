@@ -50,6 +50,81 @@ public class FurinaRoundNineTests
     }
 
     // ==================================================================
+    // `EB-475` -- three words that gated decisions and defined nothing
+    // ==================================================================
+    //
+    // THE FIND (Furina r9 (c) 2). "'If you moved the Spotlight this turn'
+    // gates Director's Cut and Take It From the Top, and nothing ever defines
+    // what moving the Spotlight is... I passed on both cards purely because I
+    // could not tell whether I could turn the condition on." "'Guest Stars'
+    // appears inside Blocking Notes' scaling clause" undefined. And "'Take
+    // Your Bow -- The leftmost member of your Salon takes their bow' was
+    // offered as a card reward with no keyword, no number, and no glossary
+    // line... I declined a 0-cost card because I could not read it."
+    //
+    // TWO ARE DERIVED FROM THE PRINTED FACE (`gen_klee_cards`
+    // `prints_spotlight_move` / `prints_takes_bow`), so a row that prints
+    // either phrase carries the definition because it printed it. The third
+    // is not on any face -- it is in `CompanionBody`'s own clause -- so it
+    // rides the tip that prints the word.
+
+    /// <summary>The tip bodies a card yields, off the compiled attach: the
+    /// same reason `Round15Tests.Printed` reads `ldstr` rather than
+    /// enumerating -- a `HoverTip` title formats through `LocManager`, null
+    /// headless.</summary>
+    private static string Attached(Type owner, string method) =>
+        string.Concat(Il.Strings(owner.GetMethod(method,
+            System.Reflection.BindingFlags.Public
+            | System.Reflection.BindingFlags.NonPublic
+            | System.Reflection.BindingFlags.Static)!)
+            .Where(s => !s.StartsWith("KLEEMOD-", StringComparison.Ordinal)));
+
+    [Fact]
+    public void Every_face_gating_on_the_spotlight_move_carries_its_definition()
+    {
+        foreach (var card in new[] { "CurtainCue", "DirectorsCut",
+                                     "TakeItFromTheTop" })
+        {
+            var tips = Il.Calls(Il.Method(card, "get_ExtraHoverTips"));
+            Assert.Contains(tips,
+                c => c.Contains("FurinaRiderTips.ForSpotlightMove"));
+        }
+
+        // AND IT ANSWERS THE QUESTION THE SEAT ASKED: what turns it on.
+        var body = Attached(typeof(FurinaRiderTips), "SpotlightMoveBody");
+        Assert.Contains("Playing [gold]Ethereal Spotlight[/gold] moves it", body);
+        Assert.Contains("clears at the start of your turn", body);
+    }
+
+    [Fact]
+    public void Take_your_bow_carries_the_definition_of_its_verb()
+    {
+        Assert.Contains(Il.Calls(Il.Method("TakeYourBow", "get_ExtraHoverTips")),
+                        c => c.Contains("FurinaRiderTips.ForBow"));
+
+        var body = Attached(typeof(FurinaRiderTips), "BowBody");
+        Assert.Contains("leaves the stage and fires its payoff", body);
+        // The three payoffs are interpolated from the constants that pay them,
+        // so the sentence cannot quote a retired number (`EB-89`).
+        Assert.Contains("Crabaletta deals ", body);
+        Assert.Contains("the Usher gains ", body);
+        Assert.Contains("Chevalmarin applies Hydro to ALL enemies", body);
+    }
+
+    [Fact]
+    public void The_tip_that_prints_guest_star_defines_it()
+    {
+        // The word is printed by `CompanionBody`, not by a card face, so the
+        // attach is that tip -- and the two ride together or neither does.
+        var body = Attached(typeof(FurinaRiderTips), "ForCard");
+        Assert.Contains("A [gold]Companion[/gold] card created into your hand "
+                      + "during a fight rather than drafted into your deck.",
+                        body);
+        Assert.Contains("Guest Stars",
+                        Attached(typeof(FurinaRiderTips), "CompanionBody"));
+    }
+
+    // ==================================================================
     // `EB-476` -- is a performance an Attack? Two experiments, two answers
     // ==================================================================
     //

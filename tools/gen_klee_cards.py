@@ -500,6 +500,39 @@ def prints_burst_word(description: str) -> bool:
     return bool(BURST_WORD.search(description))
 
 
+# `EB-475`. TWO PHRASES OF FURINA'S THAT GATE A DECISION AND DEFINE NOTHING.
+#
+# "If you moved the [gold]Spotlight[/gold] this turn" is printed by three rows
+# and the Furina r9 seat passed on two of them ("I could not tell whether I
+# could turn the condition on"); "takes their bow" is Take Your Bow's whole
+# body and was declined at a reward, free, unread. Both are matched on the
+# BUILT description -- `EB-272`'s rule and its reason: the phrase on the face
+# is the surface the gap was reported against, and a row that prints it
+# tomorrow carries its definition without anybody remembering.
+#
+# THE GOLDED SPAN IS IN THE FIRST PATTERN AND NOT THE SECOND, because that is
+# how the two are actually printed: `Spotlight` is a keyword and carries the
+# markup, and "takes their bow" is a verb phrase in plain prose. Matching each
+# as it is written is what keeps either from silently missing.
+#
+# THE THIRD WORD, `Guest Star`, IS NOT HERE: no card face prints it. It
+# reaches the player inside `FurinaRiderTips.CompanionBody`'s clause, which is
+# where that tip attaches its definition.
+SPOTLIGHT_MOVE_PHRASE = re.compile(
+    r"moved the \[gold\]Spotlight\[/gold\] this turn")
+TAKES_BOW_PHRASE = re.compile(r"takes their bow")
+
+
+def prints_spotlight_move(description: str) -> bool:
+    """Does this built description gate on having moved the Spotlight?"""
+    return bool(SPOTLIGHT_MOVE_PHRASE.search(description))
+
+
+def prints_takes_bow(description: str) -> bool:
+    """Does this built description use the Salon's `bow` verb?"""
+    return bool(TAKES_BOW_PHRASE.search(description))
+
+
 # --- `EB-272`: the QUARANTINED ARMS' KEYWORDS --------------------------------
 #
 # THE DEFECT. Not one word the three prototype arms invented had a definition
@@ -11075,6 +11108,20 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         tips_expr = (
             "KleeCardTooltips.ForBurst("
             f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+    # `EB-475`, the two Furina phrases, on the same printed-word rule as the
+    # meter words above and in the same tip class the rest of her riders live
+    # in. Scoped to HER, because both phrases are about machinery only she has
+    # -- a row of Klee's quoting "takes their bow" would print a rule with no
+    # stage behind it.
+    if profile.character_id == "furina":
+        if prints_spotlight_move(desc):
+            tips_expr = (
+                "FurinaRiderTips.ForSpotlightMove("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        if prints_takes_bow(desc):
+            tips_expr = (
+                "FurinaRiderTips.ForBow("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     # `EB-272`, and it is LAST on purpose. Each call above wraps the list, so
     # the outermost wrapper's tip is yielded last: a card's live arithmetic (a
     # reaction preview, the Charge rate, the Garment window) says what THIS

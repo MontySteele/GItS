@@ -291,6 +291,16 @@ public static class KleeMod
                     // is directly player-visible.
                     [Cards.FurinaRiderTips.CompanionKey + ".title"] =
                         "Companion scaling",
+                    // `EB-475`: three words that gated decisions with no
+                    // definition anywhere. Same dictionary, same reason as the
+                    // four above -- a missing row here is directly
+                    // player-visible as the raw key.
+                    [Cards.FurinaRiderTips.SpotlightMoveKey + ".title"] =
+                        "Moved the Spotlight",
+                    [Cards.FurinaRiderTips.GuestStarKey + ".title"] =
+                        "Guest Star",
+                    [Cards.FurinaRiderTips.BowKey + ".title"] =
+                        "Takes their bow",
 
                     // B5: the member tips the deploy faces hand off to. Only
                     // the TITLES are rows -- the bodies are built live in

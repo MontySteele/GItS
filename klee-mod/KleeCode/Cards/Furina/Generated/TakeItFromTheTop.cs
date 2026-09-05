@@ -44,7 +44,7 @@ public sealed class TakeItFromTheTop : CustomCardModel, IElementalCard, ICharact
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
+        FurinaRiderTips.ForSpotlightMove(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("take_it_from_the_top");
 
