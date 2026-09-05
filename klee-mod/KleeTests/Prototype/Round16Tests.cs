@@ -93,14 +93,18 @@ public class Round16Tests
         var body = Printed(typeof(BaseKeywordTips), "ForVulnerable");
 
         Assert.Equal(
-            "The wearer takes 50% more damage from every hit it takes, a "
-          + "Skill's damage too. One stack falls off at the end of each of "
+            "Every card hit it takes deals 50% more, a Skill's too. A "
+          + "potion's does not. One stack falls off at the end of each of "
           + "its turns.", body);
-        // The tip a player hovers is inside the in-game box either way, and
-        // it is exactly its twin's length.
+        // The tip a player hovers is inside the in-game box either way.
+        //
+        // NO LONGER ITS TWIN'S LENGTH, and that assertion is gone rather than
+        // re-fitted: `EB-497` gave this box a clause `ForWeak` has no reason
+        // to carry (a potion's damage is not a powered attack, so Vulnerable
+        // has a case Weak does not), and a length equality between two
+        // sentences that no longer say the same shape of thing was a
+        // coincidence dressed as a rule.
         Assert.True(body.Length <= 135, body.Length.ToString());
-        Assert.Equal(Printed(typeof(BaseKeywordTips), "ForWeak").Length,
-                     body.Length);
     }
 
     // ==================================================================
