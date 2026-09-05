@@ -54,9 +54,11 @@
     "proto_kk_war_council",
     "proto_ko_alices_introduction_magic",
     "proto_ko_alices_recipe",
+    "proto_ko_all_of_my_treasures",
     "proto_ko_ammo_scavenging",
     "proto_ko_bang_bang",
     "proto_ko_big_badda_boom",
+    "proto_ko_bombs_away",
     "proto_ko_careful_arrangement",
     "proto_ko_careful_now",
     "proto_ko_catalytic_converter",
@@ -67,15 +69,21 @@
     "proto_ko_dig_in",
     "proto_ko_dodoco_cover",
     "proto_ko_explosives_workshop",
+    "proto_ko_fireworks_show",
+    "proto_ko_fish_blasting",
     "proto_ko_fish_flavored_bait",
     "proto_ko_flame_dance",
+    "proto_ko_flash_point",
     "proto_ko_fwoosh",
     "proto_ko_grounded",
     "proto_ko_jumpy_dumpty",
     "proto_ko_kapow",
+    "proto_ko_kindling",
+    "proto_ko_long_fuse",
     "proto_ko_mine_toss",
     "proto_ko_perfect_timing",
     "proto_ko_pocket_fireworks",
+    "proto_ko_pocket_match",
     "proto_ko_pop",
     "proto_ko_powder_charge",
     "proto_ko_quick_fuse",
@@ -84,10 +92,12 @@
     "proto_ko_sizzle",
     "proto_ko_sorry_jean",
     "proto_ko_sparks_n_splash",
+    "proto_ko_split_charge",
     "proto_ko_stoke_the_fuse",
     "proto_ko_sugar_rush",
     "proto_ko_the_big_one",
     "proto_ko_tinder_toss",
+    "proto_ko_vermillion_pact",
     "proto_ko_witches_circle",
     "proto_kurages_oath_memory",
     "proto_mc_albedo_solar_isotoma",
@@ -231,9 +241,11 @@
     "proto_kk_war_council": "kokomi",
     "proto_ko_alices_introduction_magic": "klee",
     "proto_ko_alices_recipe": "klee",
+    "proto_ko_all_of_my_treasures": "klee",
     "proto_ko_ammo_scavenging": "klee",
     "proto_ko_bang_bang": "klee",
     "proto_ko_big_badda_boom": "klee",
+    "proto_ko_bombs_away": "klee",
     "proto_ko_careful_arrangement": "klee",
     "proto_ko_careful_now": "klee",
     "proto_ko_catalytic_converter": "klee",
@@ -244,15 +256,21 @@
     "proto_ko_dig_in": "klee",
     "proto_ko_dodoco_cover": "klee",
     "proto_ko_explosives_workshop": "klee",
+    "proto_ko_fireworks_show": "klee",
+    "proto_ko_fish_blasting": "klee",
     "proto_ko_fish_flavored_bait": "klee",
     "proto_ko_flame_dance": "klee",
+    "proto_ko_flash_point": "klee",
     "proto_ko_fwoosh": "klee",
     "proto_ko_grounded": "klee",
     "proto_ko_jumpy_dumpty": "klee",
     "proto_ko_kapow": "klee",
+    "proto_ko_kindling": "klee",
+    "proto_ko_long_fuse": "klee",
     "proto_ko_mine_toss": "klee",
     "proto_ko_perfect_timing": "klee",
     "proto_ko_pocket_fireworks": "klee",
+    "proto_ko_pocket_match": "klee",
     "proto_ko_pop": "klee",
     "proto_ko_powder_charge": "klee",
     "proto_ko_quick_fuse": "klee",
@@ -261,10 +279,12 @@
     "proto_ko_sizzle": "klee",
     "proto_ko_sorry_jean": "klee",
     "proto_ko_sparks_n_splash": "klee",
+    "proto_ko_split_charge": "klee",
     "proto_ko_stoke_the_fuse": "klee",
     "proto_ko_sugar_rush": "klee",
     "proto_ko_the_big_one": "klee",
     "proto_ko_tinder_toss": "klee",
+    "proto_ko_vermillion_pact": "klee",
     "proto_ko_witches_circle": "klee",
     "proto_kurages_oath_memory": "kokomi",
     "proto_mc_albedo_solar_isotoma": "klee",
@@ -530,6 +550,9 @@
     "proto_ko_alices_recipe": {
       "cost": -1
     },
+    "proto_ko_all_of_my_treasures": {
+      "remove": "exhaust"
+    },
     "proto_ko_ammo_scavenging": {
       "bomb_size": 3
     },
@@ -539,6 +562,9 @@
     },
     "proto_ko_big_badda_boom": {
       "damage": 4
+    },
+    "proto_ko_bombs_away": {
+      "bomb_size": 2
     },
     "proto_ko_careful_arrangement": {
       "grow": 3
@@ -571,11 +597,20 @@
     "proto_ko_explosives_workshop": {
       "power_amount": 1
     },
+    "proto_ko_fireworks_show": {
+      "spark_price": -1
+    },
+    "proto_ko_fish_blasting": {
+      "damage": 3
+    },
     "proto_ko_fish_flavored_bait": {
       "damage": 3,
       "bomb_size": 2
     },
     "proto_ko_flame_dance": {
+      "damage": 3
+    },
+    "proto_ko_flash_point": {
       "damage": 3
     },
     "proto_ko_fwoosh": {
@@ -591,6 +626,13 @@
     "proto_ko_kapow": {
       "damage": 3
     },
+    "proto_ko_kindling": {
+      "grow": 2,
+      "grow_floor": 1
+    },
+    "proto_ko_long_fuse": {
+      "damage": 3
+    },
     "proto_ko_mine_toss": {
       "bomb_size": 3
     },
@@ -599,6 +641,9 @@
     },
     "proto_ko_pocket_fireworks": {
       "damage": 3
+    },
+    "proto_ko_pocket_match": {
+      "damage": 2
     },
     "proto_ko_pop": {
       "bomb_size": 2
@@ -624,6 +669,9 @@
     "proto_ko_sparks_n_splash": {
       "cost": -1
     },
+    "proto_ko_split_charge": {
+      "split_grow": 2
+    },
     "proto_ko_stoke_the_fuse": {
       "grow": 1
     },
@@ -635,6 +683,9 @@
     },
     "proto_ko_tinder_toss": {
       "damage": 2
+    },
+    "proto_ko_vermillion_pact": {
+      "cost": -1
     },
     "proto_ko_witches_circle": {
       "power_amount": 2

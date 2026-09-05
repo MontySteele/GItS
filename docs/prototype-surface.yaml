@@ -495,6 +495,86 @@
    effects: [{op: spend_spark, amount: all},
              {op: grow_largest_bomb, per_spark: 3}]}
 
+# THE POOL PASS, rounds 13 to 16 (2026-09-05, `EB-491`): ten rows, three
+# shelves and a bridge. Why each exists and what the rounds said:
+# docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_ko_long_fuse, name: "Long Fuse", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common, retain: true, rising_cost: 1,
+   description: "[gold]Set off[/gold]. Deal 6 damage. Costs 1 more each turn it stays in your hand.",
+   upgrade: {damage: +3},
+   effects: [{op: set_off, target: enemy, damage: 6}]}
+
+- {id: proto_ko_all_of_my_treasures, name: "All of My Treasures! (proto)", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "Place a [gold]Bomb[/gold] on the enemy equal to your largest [gold]Bomb[/gold].",
+   effects: [{op: plant_bomb_copy_largest, target: enemy}]}
+
+- {id: proto_ko_fish_blasting, name: "Fish Blasting (proto)", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 5 damage to ALL enemies. Add a [gold]Confiscated[/gold] to your draw pile.",
+   upgrade: {damage: +3},
+   effects: [{op: damage, amount: 5, target: all_enemies},
+             {op: add_card, card: confiscated, zone: draw, amount: 1}]}
+
+- {id: proto_ko_pocket_match, name: "Pocket Match", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common, retain: true,
+   description: "[gold]Set off[/gold]. Deal 5 damage.",
+   upgrade: {damage: +2},
+   effects: [{op: spend_spark, amount: 1},
+             {op: set_off, target: enemy, damage: 5}]}
+
+- {id: proto_ko_bombs_away, name: "Bombs Away! (proto)", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 3 damage to ALL enemies. Place a [gold]Bomb[/gold] 2 on ALL enemies.",
+   upgrade: {bomb_size: +2},
+   effects: [{op: damage, amount: 3, target: all_enemies},
+             {op: plant_bomb, target: all_enemies, size: 2}]}
+
+- {id: proto_ko_fireworks_show, name: "Fireworks Show", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   description: "[gold]Set off[/gold] ALL enemies.",
+   upgrade: {spark_price: -1},
+   effects: [{op: spend_spark, amount: 2},
+             {op: set_off, target: all_enemies}]}
+
+- {id: proto_ko_kindling, name: "Kindling", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "Each [gold]Bomb[/gold] on an enemy whose aura is not [gold]Pyro[/gold] grows by 4. If there is none, your largest [gold]Bomb[/gold] grows by {IfUpgraded:show:3|2}.",
+   upgrade: {grow: +2, grow_floor: +1},
+   effects: [{op: grow_bombs_off_aura, amount: 4, floor: 2}]}
+
+- {id: proto_ko_flash_point, name: "Flash Point", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "[gold]Set off[/gold]. Deal 7 damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 1 [gold]Spark[/gold] and draw 1 card.",
+   upgrade: {damage: +3},
+   effects: [{op: set_off, target: enemy, damage: 7},
+             {op: conditional, if: bomb_reacted_this_turn,
+              then: [{op: gain_spark, amount: 1},
+                     {op: draw, amount: 1}]}]}
+
+- {id: proto_ko_vermillion_pact, name: "Vermillion Pact (proto)", character: klee,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], the Attack that set it off triggers one too.",
+   upgrade: {cost: -1},
+   effects: [{op: apply_power, power: ko_vermillion_pact, amount: 1, target: self}]}
+
+- {id: proto_ko_split_charge, name: "Split Charge", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Split your largest [gold]Bomb[/gold] into two halves on random enemies.{IfUpgraded:show: Halves grow by 2.|}",
+   upgrade: {split_grow: +2},
+   effects: [{op: split_largest_bomb, growth: 0}]}
+
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and
 # which 13 of the workshop's 34 are absent: docs/notes/prototype-surface-provenance.md.
