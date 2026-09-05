@@ -41,7 +41,7 @@ public sealed class MatineePerformance : CustomCardModel, IElementalCard, IChara
     public string CharacterId => "furina";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
+        FurinaBurstRider.Keywords(new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro });
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         SalonMemberTips.ForSalonRules(KleeCardTooltips.ForBurst(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
@@ -51,7 +51,7 @@ public sealed class MatineePerformance : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Matinée Performance"),
-        ("description", "Deal {Damage:diff()} damage. Deal 2 damage once per [gold]Salon Member[/gold]. [gold]Burst[/gold] +5."),
+        ("description", FurinaBurstRider.Face("Deal {Damage:diff()} damage. Deal 2 damage once per [gold]Salon Member[/gold].", "Deal {Damage:diff()} damage. Deal 2 damage once per [gold]Salon Member[/gold]. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -38,7 +38,7 @@ public sealed class GentilhommeUsher : CustomCardModel, ICharacterCard, ISkillTa
     public string CharacterId => "furina";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.ElementalSkill };
+        FurinaBurstRider.Keywords(new[] { KleeKeywords.ElementalSkill });
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Usher }), this);
@@ -48,7 +48,7 @@ public sealed class GentilhommeUsher : CustomCardModel, ICharacterCard, ISkillTa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gentilhomme Usher"),
-        ("description", "Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. [gold]Burst[/gold] +5."),
+        ("description", FurinaBurstRider.Face("Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold].", "Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

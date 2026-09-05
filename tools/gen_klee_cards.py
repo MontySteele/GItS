@@ -9329,7 +9329,8 @@ def _authored_face_with_tokens(card: dict) -> str:
     return text
 
 
-def build_description(card: dict) -> str:
+def build_description(card: dict, *,
+                      include_burst_rider: bool = True) -> str:
     """
     Card text. Syntax is copied from base-game strings observed at runtime:
     single-braced SmartFormat placeholders, :diff() for the upgrade delta, and
@@ -10339,7 +10340,12 @@ def build_description(card: dict) -> str:
     # on none of the three companion sheets, so "carries the tag" and "is paid
     # the 5" are the same set today; a second predicate here would be a
     # second place for that set to be described wrongly.
-    if "skill_tag" in (card.get("tags") or ()):
+    # `EB-449`. `include_burst_rider=False` is the ARM's face, and it is a
+    # parameter rather than a second renderer so the two cannot drift: `emit`
+    # asks for both and hands them to `FurinaBurstRider.Face`, which decides at
+    # boot. Only Furina's `skill_tag` rows are asked twice; every other row on
+    # every other sheet takes the default and is unchanged.
+    if include_burst_rider and "skill_tag" in (card.get("tags") or ()):
         parts.append(f"[gold]Burst[/gold] +{BURST_PER_SKILL_TAG}.")
 
     if sly_riders(card):
@@ -11122,6 +11128,16 @@ def emit(
     upgrade = build_upgrade(card)
     _, no_upgrade_reason = upgrade_plan(card)
     desc = build_description(card)
+    # `EB-449`. THE ARM'S FACE, for the rows that print a meter the reframe
+    # retires: every FURINA row carrying `tags: [skill_tag]`, derived from the
+    # same field that emits `ISkillTagCard` so a fourteenth row inherits the
+    # blank. Klee's fifteen and Kokomi's one keep their meters and their line.
+    blanks_burst = (profile.character_id == "furina"
+                    and "skill_tag" in (card.get("tags") or ()))
+    desc_expr = f'"{desc}"'
+    if blanks_burst:
+        arm_desc = build_description(card, include_burst_rider=False)
+        desc_expr = f'FurinaBurstRider.Face("{arm_desc}", "{desc}")'
 
     interfaces = "CustomCardModel"
     if elemental:
@@ -11539,9 +11555,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     keywords.extend(ELEMENT_KEYWORD_BY_ELEMENT[e] for e in aura_elements)
     keywords_member = ""
     if keywords:
+        # `EB-449`. The keyword cannot be re-worded per arm -- its loc
+        # row is registered once at boot for every carrier -- so under
+        # the reframe the card does not carry it at all. Same predicate
+        # as the face above.
+        listed = "new[] { " + ", ".join(keywords) + " }"
+        if blanks_burst:
+            listed = f"FurinaBurstRider.Keywords({listed})"
         keywords_member = (
             "\n    public override IEnumerable<CardKeyword> CanonicalKeywords =>\n"
-            "        new[] { " + ", ".join(keywords) + " };\n"
+            "        " + listed + ";\n"
         )
 
     includes_confiscated_rules = any(
@@ -12115,7 +12138,7 @@ public sealed class {cls} : {interfaces}
     public override List<(string, string)>? Localization => new()
     {{
         ("title", "{title_cs}"),
-        ("description", "{desc}"),
+        ("description", {desc_expr}),
     }};{tags_member}{rising_cost_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

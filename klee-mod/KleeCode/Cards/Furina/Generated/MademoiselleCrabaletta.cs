@@ -38,7 +38,7 @@ public sealed class MademoiselleCrabaletta : CustomCardModel, ICharacterCard, IS
     public string CharacterId => "furina";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.ElementalSkill };
+        FurinaBurstRider.Keywords(new[] { KleeKeywords.ElementalSkill });
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Crabaletta }), this);
@@ -48,7 +48,7 @@ public sealed class MademoiselleCrabaletta : CustomCardModel, ICharacterCard, IS
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mademoiselle Crabaletta"),
-        ("description", "Add {PowerAmount:diff()} [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]. [gold]Burst[/gold] +5."),
+        ("description", FurinaBurstRider.Face("Add {PowerAmount:diff()} [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold].", "Add {PowerAmount:diff()} [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

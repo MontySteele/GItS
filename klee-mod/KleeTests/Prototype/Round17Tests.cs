@@ -1,8 +1,12 @@
+using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Reflection;
 using BaseLib.Abstracts;
 using KleeMod.Cards.Furina;
+using KleeMod.Cards;
+using KleeGen = KleeMod.Cards.Generated;
+using FurinaGen = KleeMod.Cards.Furina.Generated;
 using KleeMod.Cards.Generated;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Elements;
@@ -422,10 +426,122 @@ public class Round17Tests
             .Invoke(null, new object[] { KokomiPlan.Kind.Draw })!);
     }
 
+    // ==================================================================
+    // `EB-449` -- the printed half of a retired meter, by rule
+    // ==================================================================
+    //
+    // WHAT THE SEAT SAW (Furina r11, lane 1). Under the arm the Burst meter is
+    // retired, and r8 took the explanatory TIP off her faces. It did not touch
+    // the two things a seat actually reads: the printed "Burst +5." at the end
+    // of the body and the gold "Elemental Skill" keyword under it. The seat
+    // met both on Gentilhomme Usher at two rewards and skipped the card for
+    // it -- a Common enabler passed over because its face promised a resource
+    // that does not exist.
+    //
+    // BY RULE AND NOT BY NAME, which is the reopen: the set is every Furina
+    // face carrying `tags: [skill_tag]`, derived at codegen off the same field
+    // that emits `ISkillTagCard`, so a fourteenth row inherits the blank.
+    //
+    // SHEET-WIDE, over the classes themselves rather than a list retyped here.
+
+    private static IReadOnlyList<CustomCardModel> FurinaSkillTagFaces() =>
+        typeof(FurinaGen.GentilhommeUsher).Assembly.GetTypes()
+            .Where(t => !t.IsAbstract
+                     && typeof(CustomCardModel).IsAssignableFrom(t)
+                     && typeof(ISkillTagCard).IsAssignableFrom(t)
+                     && t.Namespace == typeof(FurinaGen.GentilhommeUsher)
+                                           .Namespace)
+            .Select(t => (CustomCardModel)Activator.CreateInstance(t)!)
+            .ToList();
+
+    [Fact]
+    public void Her_whole_skill_tag_sheet_is_found_by_the_rule()
+    {
+        var faces = FurinaSkillTagFaces();
+
+        // Thirteen today. The number is asserted so a row that silently loses
+        // its tag -- or a new one that never gained it -- is visible here,
+        // which is the census the row asked for.
+        Assert.Equal(13, faces.Count);
+        Assert.Contains(faces, card => card is FurinaGen.GentilhommeUsher);
+    }
+
+    [Fact]
+    public void No_face_under_the_arm_prints_the_retired_meter()
+    {
+        using var arm = new FurinaBurstArm(retired: true);
+
+        foreach (var card in FurinaSkillTagFaces())
+        {
+            var face = Face(card);
+            Assert.DoesNotContain("Burst", face);
+            Assert.DoesNotContain(KleeKeywords.ElementalSkill,
+                                  card.CanonicalKeywords);
+        }
+    }
+
+    [Fact]
+    public void Off_the_arm_every_one_of_them_still_prints_it()
+    {
+        // The quarantine's other half, and what makes the blank a fact about
+        // the ARM rather than a deletion: a release build is unchanged.
+        using var arm = new FurinaBurstArm(retired: false);
+
+        foreach (var card in FurinaSkillTagFaces())
+        {
+            Assert.Contains(
+                $"[gold]Burst[/gold] +{BurstConstants.PerSkillTag}.",
+                Face(card));
+            Assert.Contains(KleeKeywords.ElementalSkill,
+                            card.CanonicalKeywords);
+        }
+    }
+
+    [Fact]
+    public void The_gameplay_marker_is_untouched_on_both_sides()
+    {
+        // Only the WORDS move. `ISkillTagCard` still rides every row, and
+        // `FurinaResources` still decides whether it pays -- so the day the
+        // arm is withdrawn the meter and its words come back together.
+        using var arm = new FurinaBurstArm(retired: true);
+
+        Assert.All(FurinaSkillTagFaces(),
+                   card => Assert.IsAssignableFrom<ISkillTagCard>(card));
+    }
+
+    [Fact]
+    public void Klees_and_kokomis_faces_keep_their_meters()
+    {
+        // The blank is Furina-scoped: `skill_tag` is on fifteen Klee rows and
+        // one of Kokomi's, and those meters are not retired.
+        using var arm = new FurinaBurstArm(retired: true);
+        var line = $"[gold]Burst[/gold] +{BurstConstants.PerSkillTag}.";
+
+        Assert.Contains(line, Face(new KleeGen.MineToss()));
+    }
+
+    private sealed class FurinaBurstArm : IDisposable
+    {
+        private readonly bool _enabled = FurinaReframe.Enabled;
+        private readonly bool _burst = FurinaReframe.BurstEnabled;
+
+        internal FurinaBurstArm(bool retired)
+        {
+            FurinaReframe.Enabled = retired;
+            FurinaReframe.BurstEnabled = retired;
+        }
+
+        public void Dispose()
+        {
+            FurinaReframe.Enabled = _enabled;
+            FurinaReframe.BurstEnabled = _burst;
+        }
+    }
+
     /// <summary>A card's printed body, joined the way the generator writes
     /// it.</summary>
     private static string Face(CardModel card) =>
-        ((BaseLib.Abstracts.CustomCardModel)card).Localization!
+        ((CustomCardModel)card).Localization!
             .First(row => row.Item1 == "description").Item2;
 
     private static int IndexOf(

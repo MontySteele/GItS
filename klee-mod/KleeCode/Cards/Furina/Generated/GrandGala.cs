@@ -38,7 +38,7 @@ public sealed class GrandGala : CustomCardModel, ICharacterCard, ISkillTagCard
     public string CharacterId => "furina";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { CardKeyword.Exhaust, KleeKeywords.ElementalSkill };
+        FurinaBurstRider.Keywords(new[] { CardKeyword.Exhaust, KleeKeywords.ElementalSkill });
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Crabaletta, SalonMember.Chevalmarin, SalonMember.Usher }), this);
@@ -48,7 +48,7 @@ public sealed class GrandGala : CustomCardModel, ICharacterCard, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Gala"),
-        ("description", "Add 2 [gold]Mademoiselle Crabaletta[/gold], 1 [gold]Surintendante Chevalmarin[/gold], 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Gain {Encore:diff()} [gold]Encore[/gold]. [gold]Burst[/gold] +5."),
+        ("description", FurinaBurstRider.Face("Add 2 [gold]Mademoiselle Crabaletta[/gold], 1 [gold]Surintendante Chevalmarin[/gold], 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Gain {Encore:diff()} [gold]Encore[/gold].", "Add 2 [gold]Mademoiselle Crabaletta[/gold], 1 [gold]Surintendante Chevalmarin[/gold], 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Gain {Encore:diff()} [gold]Encore[/gold]. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
