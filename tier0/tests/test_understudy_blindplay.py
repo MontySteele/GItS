@@ -6935,6 +6935,111 @@ def test_the_drop_verb_is_offered_on_a_rest_site_and_posts_the_wires_slot():
     assert named["post"] == {"action": "discard_potion", "slot": 0}
 
 
+# --- `EB-520`: THE ROOM THE PAGE COULD SEE AND THE ACTION COULD NOT ---------
+
+
+def test_rest_and_upgrade_resolve_to_the_printed_options():
+    """`EB-520`, the grammar half. Both words are the screen's own options, and
+    both post the same thing `choose` posts -- which is the whole reason the
+    seat's `choose "Rest"` worked a moment after `rest` did not, and the reason
+    the defect is not here."""
+    state = rest_state()
+    by_verb = blindplay.act(state, "rest")
+    by_name = blindplay.act(state, 'choose "Rest"')
+    assert by_verb["ok"] and by_verb["post"] == by_name["post"]
+    assert by_verb["post"] == {"action": "choose_rest_option", "index": 0}
+
+    smith = blindplay.act(state, "upgrade")
+    assert smith["ok"], smith["refusal"]
+    assert smith["post"] == {"action": "choose_rest_option", "index": 1}
+    assert smith["printed"] == {"option": "Smith"}
+
+
+class _LoadingRoom:
+    """A wire whose rest-site room answers `is not open` for the first N posts.
+
+    `BuildState` reports the room off `RunState`, which the walk commits at
+    once; `ExecuteChooseRestOption` needs `NRestSiteRoom.Instance`, the scene,
+    which Godot instantiates a frame or two later. This is that gap.
+    """
+
+    def __init__(self, shut: int, states=None):
+        self.shut = shut
+        self.posts: list[dict] = []
+        self.states = states or [rest_state()]
+
+    def get_state(self):
+        return self.states[min(len(self.posts), len(self.states) - 1)]
+
+    def post(self, action, **params):
+        self.posts.append({"action": action, **params})
+        if len(self.posts) <= self.shut:
+            return {"status": "error", "error": "Rest site room is not open"}
+        return {"status": "ok", "message": "Selecting rest site option: Rest"}
+
+    def health(self):
+        return {"mod_version": "0.0-scripted"}
+
+    def meter_ledger(self):
+        return {"status": "ok", "available": False, "rows": [], "count": 0}
+
+
+def test_a_room_that_has_not_loaded_yet_is_ridden_out_rather_than_refused():
+    """`EB-520`. THE REFUSAL THAT WAS A MOMENT.
+
+    Kokomi r18 lane 1, floor 10: `rest` came back "Rest site room is not open"
+    "while the screen was printing Rest as an option and listing `rest` as a
+    thing I could say", and `choose "Rest"` worked immediately after. Klee r10
+    hit it twice on `rest`; the Ironclad control seat hit it on `upgrade`
+    "issued immediately after `go` ... the room had not finished loading".
+
+    Seen to FAIL: one POST, one refusal, and the seat spent an action learning
+    that retrying works.
+    """
+    wire = _LoadingRoom(shut=2)
+
+    result = blindplay.post_when_the_room_is_open(
+        wire, "choose_rest_option", {"index": 0}, tries=6, delay=0)
+
+    assert result["status"] == "ok"
+    assert len(wire.posts) == 3
+    assert all(p == {"action": "choose_rest_option", "index": 0}
+               for p in wire.posts)
+
+
+def test_a_room_that_stays_shut_is_reported_rather_than_waited_on_forever():
+    """`_settle`'s own discipline: bounded, and the LAST answer is handed back,
+    so a wire that really is stuck reaches the seat as the sentence the game
+    gave rather than as a hang."""
+    wire = _LoadingRoom(shut=99)
+
+    result = blindplay.post_when_the_room_is_open(
+        wire, "choose_rest_option", {"index": 0}, tries=3, delay=0)
+
+    assert result["error"] == "Rest site room is not open"
+    assert len(wire.posts) == 4          # the first, then the bound
+
+
+def test_every_other_refusal_is_an_answer_and_is_posted_once():
+    """Only "room is not open" is a moment. A real refusal -- a disabled
+    option, an index off the end -- is the game answering, and re-posting it
+    would spend actions on a decision the seat has already been told about."""
+    calls: list[dict] = []
+
+    class _Refuses(_LoadingRoom):
+        def post(self, action, **params):
+            calls.append({"action": action, **params})
+            return {"status": "error",
+                    "error": "Rest option 2 (dig) is disabled"}
+
+    result = blindplay.post_when_the_room_is_open(
+        _Refuses(shut=0), "choose_rest_option", {"index": 2},
+        tries=6, delay=0)
+
+    assert result["error"].endswith("is disabled")
+    assert len(calls) == 1
+
+
 def test_the_drop_verb_reaches_the_reward_screen_that_refused_the_claim():
     """The acceptance sentence: at three of three a seat drops one and claims
     the offered one. Both halves against the one state."""

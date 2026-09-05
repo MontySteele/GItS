@@ -615,7 +615,9 @@ class Session:
                                       verb=snap["verb"], turn=snap["turn"])
             post = dict(res["post"] or {})
             action = post.pop("action")
-            result = self.wire.post(action, **post)
+            result = post_when_the_room_is_open(
+                self.wire, action, post, tries=self.settle_tries,
+                delay=self.settle_delay_s)
             # `EB-216`, R225's clause. AFTER the POST, because the ledger row
             # this play minted does not exist until the play has resolved --
             # the board above is the decision, this is what the decision cost
@@ -671,6 +673,45 @@ class Session:
             "guardrail": PLAY_GUARDRAIL,
             **self.thread.identity(),
         }
+
+
+# `EB-520`. THE ROOM THE STATE READ CAN SEE AND THE ACTION CANNOT.
+#
+# THE DEFECT, three seats over two days. Kokomi r18 lane 1, floor 10: `rest`
+# came back `Rest site room is not open` "while the screen was printing Rest as
+# an option and listing `rest` as a thing I could say"; `choose "Rest"` a moment
+# later worked. Klee r10 saw it twice on `rest` and the Ironclad control seat
+# saw it on `upgrade` "issued immediately after `go` ... while simultaneously
+# echoing `Took: Smith` -- the room had not finished loading."
+#
+# THE TWO READS ARE OF DIFFERENT THINGS, which is why the page is not lying and
+# the post is not wrong. `BuildState` reports the room off `RunState`, which the
+# walk commits at once; `ExecuteChooseRestOption` needs `NRestSiteRoom.Instance`
+# -- the SCENE -- which Godot instantiates a frame or two later. Between the two
+# the page is a rest site with every option on it and the action has nothing to
+# click. `_settle` cannot see this: it asks the wire what SCREEN this is, and
+# the wire says rest site, correctly.
+#
+# SO IT IS RIDDEN OUT AT THE POST, `_settle`'s own shape one door over: poll,
+# bounded by the settle budget, and hand back the LAST answer when the bound
+# runs out so a room that really is shut is still reported to the seat. Only
+# this one sentence is retried -- a room that is not open is a moment, and every
+# other refusal the bridge gives is an answer.
+ROOM_NOT_OPEN = "room is not open"
+
+
+def post_when_the_room_is_open(wire: Any, action: str,
+                               params: dict[str, Any], *, tries: int,
+                               delay: float) -> dict[str, Any]:
+    """POST, and re-POST while the bridge says the room is still loading."""
+    result = wire.post(action, **params)
+    for _ in range(max(tries, 0)):
+        if ROOM_NOT_OPEN not in _text(
+                (result or {}).get("error") if isinstance(result, dict) else ""):
+            break
+        time.sleep(delay)
+        result = wire.post(action, **params)
+    return result
 
 
 def _result_line(result: Any) -> str:
