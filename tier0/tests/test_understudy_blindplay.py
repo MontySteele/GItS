@@ -8385,7 +8385,24 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         "Dexterity": [" the wearer gains. It ", "does not decay."],
     }
     page_only = {"Sharp", "Nimble", "Swift", "Bond of Life", "Exhaust"}
-    assert set(anchors) | page_only == set(blindplay.BASE_KEYWORDS)
+    # `EB-597`. A THIRD CLASS, AND SHRINK IS ITS ONLY MEMBER SO FAR: a word no
+    # face of ours prints -- so there is no `BaseKeywordTips` method to mirror
+    # -- whose rule this page and the GAME's own status line both have to
+    # state. `KleeMod.InjectLocStrings` merges the corrected rows into the
+    # `powers` table, which is `EB-481`'s mechanism, so the twin lives there.
+    loc_only = {"Shrink"}
+    assert set(anchors) | page_only | loc_only == set(blindplay.BASE_KEYWORDS)
+    mod = (REPO / "klee-mod" / "KleeCode" / "KleeMod.cs").read_text(
+        encoding="utf-8")
+    for word in loc_only:
+        key = word.upper() + "_POWER"
+        assert f'["{key}.description"]' in mod, word
+        assert f'["{key}.smartDescription"]' in mod, word
+        assert f"For{word}(" not in src, word
+    # The clause the row exists for, in both places: "Attacks" in the game's
+    # own sentence means attack HITS, and a Skill's damage is one.
+    assert "a Skill's damage too" in blindplay.BASE_KEYWORDS["Shrink"]
+    assert "a Skill's damage too" in mod
     for word, phrases in anchors.items():
         for phrase in phrases:
             assert phrase in src, (word, phrase)

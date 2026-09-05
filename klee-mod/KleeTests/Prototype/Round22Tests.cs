@@ -75,6 +75,73 @@ public class Round22Tests
                             StringComparison.Ordinal));
     }
 
+    // ==================================================================
+    // `EB-597` -- Shrink's gloss names Attacks and Shrink bites a Skill
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r22 lane 1, fight 2). Wearing `Shrink -1 -- While
+    // Shrinker Beetle is alive, your Attacks deal 30% less damage`, the seat
+    // watched `Kurage's Oath` -- printed `cost 1, skill` -- fall from 3 to 2.
+    // "Weak's glossary on the same screen goes out of its way to say 'a
+    // Skill's damage too'; Shrink's does not, and Shrink hits Skills anyway.
+    // That is a contradiction between a debuff's text and its behaviour."
+    //
+    // THE ENGINE IS RIGHT AND ONLY THE WORDS ARE WRONG, which is `EB-469`'s,
+    // `EB-481`'s and `EB-521`'s finding a fourth time -- so the fix is the
+    // `powers` loc merge and the page row, and this reads the assembly to say
+    // which of the two the row's question ("Attack-only or all player
+    // damage") actually has as its answer.
+
+    [Fact]
+    public void Shrink_gates_on_the_hit_exactly_as_weak_does()
+    {
+        var shrink = typeof(MegaCrit.Sts2.Core.Models.Powers.ShrinkPower)
+            .GetMethod("ModifyDamageMultiplicative", All)!;
+        var weak = typeof(MegaCrit.Sts2.Core.Models.Powers.WeakPower)
+            .GetMethod("ModifyDamageMultiplicative", All)!;
+
+        // ONE GATE AND IT IS THE PROP'S, not the card's type -- so a Skill
+        // that deals damage is Shrunk exactly as an Attack is, because every
+        // damage clause the generator emits carries `ValueProp.Move`.
+        Assert.Contains("ValuePropExtensions.IsPoweredAttack",
+                        Il.Calls(shrink));
+        Assert.Contains("ValuePropExtensions.IsPoweredAttack",
+                        Il.Calls(weak));
+        // And no card is in the question at all: nothing in that body reads a
+        // `CardModel`, which is the structural half of the same claim.
+        Assert.DoesNotContain(Il.Calls(shrink),
+                              c => c.StartsWith("CardModel.",
+                                                StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void The_shrink_rows_say_a_skills_damage_too_at_the_measured_rate()
+    {
+        // THE RATE IS THE POWER'S OWN, measured rather than typed: the
+        // canonical var `DamageDecrease` is already a percentage, and the
+        // blind page's `SHRINK_DEALT_PCT` quotes it.
+        var power = new MegaCrit.Sts2.Core.Models.Powers.ShrinkPower();
+        var vars = (System.Collections.IEnumerable)power.GetType()
+            .GetProperty("CanonicalVars", All)!.GetValue(power)!;
+        var rate = vars.Cast<object>()
+            .Select(v => (
+                name: (string)v.GetType().GetProperty("Name")!.GetValue(v)!,
+                value: (decimal)v.GetType().GetProperty("BaseValue")!
+                                 .GetValue(v)!))
+            .Single(v => v.name == "DamageDecrease").value;
+        Assert.Equal(30m, rate);
+
+        var mod = Read(System.IO.Path.Combine("klee-mod", "KleeCode",
+                                              "KleeMod.cs"));
+        Assert.Contains("[\"SHRINK_POWER.description\"]", mod);
+        Assert.Contains("[\"SHRINK_POWER.smartDescription\"]", mod);
+        // The clause the row is about, and the two holes the power fills.
+        Assert.Contains("[blue]30%[/blue] less damage with every hit it ",
+                        mod);
+        Assert.Contains("{ApplierName}", mod);
+        Assert.Contains("[blue]{DamageDecrease}%[/blue]", mod);
+    }
+
     // ------------------------------------------------------------ helpers --
 
     /// <summary>A source file under `klee-mod/KleeCode`.

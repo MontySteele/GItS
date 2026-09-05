@@ -24,6 +24,7 @@ from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
                                         CRYSTALLIZE_BLOCK, SHATTER_DAMAGE,
                                         FRAIL_BLOCK_PCT, FURINA_OPENING_ENCORE,
+                                        SHRINK_DEALT_PCT,
                                         SPOTLIGHT_ENCORE_COST,
                                         VULNERABLE_TAKEN_PCT,
                                         WEAK_DEALT_PCT)
@@ -1084,6 +1085,24 @@ BASE_KEYWORDS: dict[str, str] = {
     "Frail": (
         f"The wearer gains {FRAIL_BLOCK_PCT}% less Block. One stack falls "
         f"off at the end of each of its turns."),
+    # `EB-597`. THE SAME FINDING A FOURTH TIME, and this one the seat wrote up
+    # as a contradiction rather than a doubt: "Shrink's own text says `your
+    # Attacks deal 30% less damage`, but Kurage's Oath is printed `cost 1,
+    # skill` and it still fell 3 to 2. Weak's glossary on the same screen goes
+    # out of its way to say 'a Skill's damage too'; Shrink's does not, and
+    # Shrink hits Skills anyway" (Kokomi r22 lane 1, fight 2).
+    #
+    # THE ENGINE IS RIGHT AND ONLY THE WORDS ARE WRONG.
+    # `ShrinkPower.ModifyDamageMultiplicative` gates on `IsPoweredAttack()` and
+    # nothing else -- the identical gate `WeakPower` uses, MEASURED off the
+    # shipped assembly -- so "Attacks" in the game's sentence means attack
+    # HITS, exactly as it does in Weak's. This row is Weak's sentence with its
+    # own rate and its own duration clause, and `KleeMod.InjectLocStrings`
+    # merges the same rule into the game's `SHRINK_POWER` rows.
+    "Shrink": (
+        f"The wearer deals {SHRINK_DEALT_PCT}% less damage with every hit it "
+        f"lands, a Skill's damage too. It lasts while whoever applied it is "
+        f"alive."),
     # The two undecaying stat powers. Named on four prototype faces and on the
     # Plan's own tip, which says Strength does NOT reach a Plan -- a sentence
     # that cannot be read by somebody who does not know what Strength is.
@@ -1127,6 +1146,10 @@ _BASE_KEYWORD_RE = {
     "Vulnerable": re.compile(r"\bVulnerable\b"),
     "Weak": re.compile(r"\bWeak\b"),
     "Frail": re.compile(r"\bFrail\b"),
+    # `EB-597`: the debuff the Shrinker Beetle applies. SINGULAR ONLY, the
+    # rule the comment above states -- a status line reads "Shrink -1", never
+    # "Shrinks", and the verb is ordinary English.
+    "Shrink": re.compile(r"\bShrink\b"),
     "Strength": re.compile(r"\bStrength\b"),
     "Dexterity": re.compile(r"\bDexterity\b"),
     "Sharp": re.compile(r"\bSharp\b"),
