@@ -256,7 +256,7 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void Rule2_the_thirteen_planned_clauses_are_the_slices_eleven_and_two_more()
+    public void Rule2_the_twelve_planned_clauses_are_the_whitelist_the_codegen_reads()
     {
         // A card cannot schedule anything else: the enum IS the whitelist the
         // codegen validates a row's `plan:` list against
@@ -267,10 +267,15 @@ public class KokomiOverhaulRuleTests
         // `BlockPerPlanThisMorning`, Tide Wall's per-Plan scaler. Eleven was
         // the SLICE's number and never a ceiling: a fourteenth kind owes this
         // list a line too.
+        //
+        // TWELVE SINCE `EB-492`: `PlanTwice` was RETIRED with Nereid's
+        // Ascension's redesign into a Power, because a clause no row can spell
+        // is a rule nothing enforces. A retirement owes this list a line
+        // exactly as an addition does.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
-                    "ApplyWeak", "ApplyVulnerable", "PlanTwice",
+                    "ApplyWeak", "ApplyVulnerable",
                     "ReplayExhausted", "PlayCopyOfCompanion",
                     "BlockPerPlanThisMorning" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
@@ -283,7 +288,13 @@ public class KokomiOverhaulRuleTests
         // line says every enemy." Three spellings, and the queue stores NO
         // creature at all -- which is the difference from draft 2 and the
         // reason a Plan cannot hold a pointer to an enemy that died overnight.
-        Assert.Equal(new[] { "Self", "FrontEnemy", "AllEnemies" },
+        //
+        // A FOURTH SINCE `EB-492` (Flank), and it does not break the sentence
+        // above: `EnemiesIntendingAttack` fixes its SET when the Plan is
+        // written and holds it as `CombatId` STRINGS, so nothing here is a
+        // pointer either. `KokomiPoolPassTests` carries that aim's own pins.
+        Assert.Equal(new[] { "Self", "FrontEnemy", "AllEnemies",
+                             "EnemiesIntendingAttack" },
                      System.Enum.GetNames(typeof(KokomiPlan.Aim)));
 
         var planned = typeof(KokomiPlan.Planned);
@@ -585,15 +596,16 @@ public class KokomiOverhaulRuleTests
         Assert.True(drain.IndexOf("KokomiPlan.CarryOutTimes")
                     < drain.IndexOf("KokomiPlan.ResolveEntry"));
 
-        // And the window is a DURATION on her, so re-wearing extends rather
-        // than stacking.
-        var wear = typeof(PlanTwicePower).GetMethod("Wear", HeadlessGame.All)!;
-        var calls = Il.Calls(wear);
-        Assert.Contains("PowerCmd.Apply", calls);
-        Assert.Contains("PowerCmd.ModifyAmount", calls);
-        Assert.Contains("PowerCmd.TickDownDuration",
-                        Il.Calls(typeof(PlanTwicePower)
-                            .GetMethod("AfterSideTurnEnd", HeadlessGame.All)!));
+        // And what it reads is the POWER (`EB-492`): the Rare is played
+        // rather than planned now, so there is no window to extend and no
+        // duration to tick -- `KokomiPoolPassTests` carries the rest of that
+        // redesign.
+        var times = typeof(KokomiPlan)
+            .GetMethod("CarryOutTimes", HeadlessGame.All)!;
+        Assert.Equal(1, times.Invoke(
+            null, new object[] { Seat.Kokomi().Creature }));
+        Assert.Equal(2, times.Invoke(null, new object[] {
+            Seat.Kokomi().WithPower<NereidsAscensionPower>(1).Creature }));
     }
 
     [Fact]
@@ -754,7 +766,7 @@ public class KokomiOverhaulRuleTests
     // ---- the roster ------------------------------------------------------
 
     [Fact]
-    public void The_starter_is_ten_cards_and_the_pool_is_thirty()
+    public void The_starter_is_ten_cards_and_the_pool_is_thirty_five()
     {
         // Read off the IL rather than by building the models, which needs
         // ModelDb: `ModelDb.Card<T>()` throws until the game's pool build has
@@ -769,8 +781,11 @@ public class KokomiOverhaulRuleTests
         // THIRTY since round 9 pick 1's tempo shelf (2026-09-04) added Tide
         // Chart and Ripple. Its other two drafted rows, Held Tide and Tidal
         // Rhythm, were withdrawn on the R253 charter audit and are not built.
+        // THIRTY-FIVE since the pool pass (`EB-492`), which put the offer's
+        // Plan density on the Attacks: Riptide, Pincer, Flank, Well Laid and
+        // Feigned Retreat.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(30, Il.CallSequence(slice)
+        Assert.Equal(35, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 
