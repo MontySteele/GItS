@@ -174,7 +174,13 @@ are in [`workstreams.md`](workstreams.md).
   (`review/active/klee-overhaul-round-16-2026-09-04.md`): one seat on
   `0.2.2614+proto`, floor 11, five of five with the Gardener elite; the
   ordering decisions read as real and good, Skittish silently unfired by a
-  Bomb (`EB-490`), the last turn of every fight automatic; no pick. [USER]'s act-1 run is due on
+  Bomb (`EB-490`), the last turn of every fight automatic; no pick.
+  **Pool pass one is BUILT** (`review/active/klee-pool-pass-2026-09-05.md`,
+  `EB-491`, PR #395): ten rows, all FOLLOWS on the doctrine read, two of
+  them the Retained detonators the Retain-density reading asked for (Long
+  Fuse, Pocket Match) and eight archetype rows the comparison pass of
+  round 17 on has to justify (stage-gate, *The loop inside Prototype*);
+  the pool is 45. [USER]'s act-1 run is due on
   `0.2.2401+proto`. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
@@ -225,7 +231,13 @@ are in [`workstreams.md`](workstreams.md).
   action; a non-Plan card on the Bake-Kurage silently accepted (`EB-480`),
   Vulnerable's two texts (`EB-481`), the reaction preview a turn late
   (`EB-482`); the redesigned Tide Chart undrawn, so the next round grants
-  it; no pick. [USER]'s act-1 run is due on
+  it; no pick. **Pool pass one is BUILT**
+  (`review/active/kokomi-pool-pass-2026-09-05.md`, `EB-492`, PR #394):
+  Plan lines on three Attacks, a 0-cost payoff that reads the morning, a
+  Block-and-hit Plan, and Nereid's Ascension as a Rare Power (every Plan
+  twice, no Exhaust, no Plan slot) replacing its two-turn Plan row; six
+  FOLLOWS after three were re-priced off shipped cards; the pool is 35.
+  [USER]'s act-1 run is due on
   `0.2.2501+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
@@ -287,7 +299,16 @@ are in [`workstreams.md`](workstreams.md).
   room (`EB-489`); the Spotlight relic reads as permanent (`EB-485`),
   Backstroke's Block outside the fold (`EB-486`), Encore and Fanfare rows
   vanish at 0 (`EB-487`); the Salon was furniture with one Deploy in the
-  deck. [USER]'s act-1 run is due on that build. No stamp moves, nothing measured.
+  deck. **Pool pass one is BUILT**
+  (`review/active/furina-pool-pass-2026-09-05.md`, `EB-493`, PR #393):
+  four arm-only Commons swapped in for shipped ones at the same rarity
+  (a deploy on an Attack, a second performance bought with Encore, the
+  kit's own perform verb, An Invitation's verb in the pool), four
+  FOLLOWS; Second Course's full price is five Encore, the printed three
+  plus one per performance by the shipped Salon rule, and the packet says
+  so. Still owed from the reframe, ruled and not re-asked: the fourth,
+  scaling member (F1 option 2) and the named Spotlight (`EB-466`).
+  [USER]'s act-1 run is due on that build. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
