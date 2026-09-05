@@ -1,4 +1,4 @@
-Status: OPEN (one pick, §5; the defaults in §6 are applied)
+Status: RULED R260 (2026-09-05): pick 1 taken at option 2, the stage starts with a member; the defaults in §6 are applied
 
 # Furina reframe round eleven: the stage is full by turn two, and empty on turn one by construction
 
@@ -145,6 +145,15 @@ twenty-two otherwise.
 3. Curtain Rises replaces one Soloist's Solicitation in the starter: two
    deploys in ten, a second shape from fight one.
 4. Leave it: the first deploy is the fight's first decision.
+
+## 5a. The ruling (R260, 2026-09-05)
+
+[USER] took option 2: the stage starts every combat with a member on it,
+by the analogy of the Necrobinder's Osty (always summoned, so always a
+valid target) and the Defect's opening Lightning orb. Under the arm the
+starting relic fields Mademoiselle Crabaletta at combat start; Salon Début
+stays as printed and deploys a second body. Built under `EB-553`. This is
+a rule change, so [USER]'s act-1 run is due on its build.
 
 ## 6. Defaults applied (D and E), disclosed
 

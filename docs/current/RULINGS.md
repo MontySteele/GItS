@@ -270,9 +270,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R258 | 2026-09-04 | Furina round 5 pick 1 at its default -- Furina starts each combat with 2 Encore under the reframe arm | `4356352` |
 | R259 | 2026-09-05 | Claude merges every PR that asks nothing of [USER]; a PR is [USER]'s only for an open pick, LAW/EXPERIMENTS text, or a shipped number | `9a4251b` |
 
-258 rows over the R1..R259 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 147 from a commit message, 0 unresolved.
+258 rows over the R1..R260 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 147 from a commit message, 0 unresolved.
 
-1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
+2 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28, R260.
 
 Ledger retrieval point: `3907837` (tag `pre-simplification-2026-08-06`); ledger paths `tier0/DECISIONS.md`, `tier0/DECISIONS-archive-R39-R99.md`, `klee-mod/DECISIONS.md`.
 
