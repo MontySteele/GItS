@@ -167,7 +167,11 @@ are in [`workstreams.md`](workstreams.md).
   (`review/active/klee-overhaul-round-14-2026-09-04.md`): one seat on
   `0.2.2564+proto`, floor 8 at the bridge's cap, six of six fights, the
   Spark economy read as the kit's engine, an invisible Mine (`EB-457`), the
-  enemy block printed twice (`EB-458`); no pick. [USER]'s act-1 run is due on
+  enemy block printed twice (`EB-458`); no pick. **Round 15 is READ, targeted**
+  (`review/active/klee-overhaul-round-15-2026-09-04.md`): Countdown and
+  Stoke the Fuse granted, Stoke played five times with a real ordering
+  rule, Countdown quiet, the intent hedge and the map's deck list wrong
+  (`EB-461`, `EB-447` reopened); no pick. [USER]'s act-1 run is due on
   `0.2.2401+proto`. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
@@ -207,7 +211,11 @@ are in [`workstreams.md`](workstreams.md).
   `0.2.2564+proto`, floor 12 at the cap with the elite dying, Arcane
   Scroll gave no card (`EB-459`), dual-intent attack numbers never land
   (`EB-461`), Kurage's Oath's tag contradicts its rider (`EB-462`); Tide
-  Chart undrawn an eighth time; no pick. [USER]'s act-1 run is due on
+  Chart undrawn an eighth time; no pick. **Round 15 is READ, targeted**
+  (`review/active/kokomi-overhaul-round-15-2026-09-04.md`): Tide Chart
+  granted and dead as printed (zero draws on three of four plays), which
+  fires R254's re-ask trigger: **one pick**, the starter's density with a
+  Tide Chart redesign as the default; `EB-467`-`EB-469`. [USER]'s act-1 run is due on
   `0.2.2501+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
