@@ -172,7 +172,8 @@ from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
 from understudy.blindplay_observe import (   # noqa: E402,F401  (re-export)
     observation)
 from understudy.blindplay_render import (   # noqa: E402,F401  (re-export)
-    _colliding, observe, render, _render_card, _render_intent,
+    assert_one_page, _colliding, observe, render, _render_card,
+    _render_intent,
     _render_intents, _render_options, _render_power, sha256, still_in_fight)
 from understudy.blindplay_snapshot import (   # noqa: E402,F401  (re-export)
     ledger_rows, _snapshot_hand, _snapshot_meters, SNAPSHOT_VERBS,

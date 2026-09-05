@@ -33,7 +33,8 @@ import pytest
 
 from tier0 import constants as C
 from tier0.tests.conftest import seam_files
-from understudy import blindplay, blindplay_shape, embark, qa_packet, soak
+from understudy import (blindplay, blindplay_notes, blindplay_shape,
+                        embark, qa_packet, soak)
 
 REPO = Path(__file__).resolve().parents[2]
 RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
@@ -8115,6 +8116,8 @@ def test_the_salon_block_is_the_mods_own_snapshot_shape():
     assert 'snapshot["performed"]' in snapshot
     # `EB-420`: the second list on the same block, held in step the same way.
     assert 'snapshot["replayed"]' in snapshot
+    # `EB-506`: and the third, the stage in slot order.
+    assert 'snapshot["company"]' in snapshot
     bridge = (REPO / "vendor" / "STS2_MCP" / "gits"
               / "GitsFurinaSalon.cs").read_text(encoding="utf-8")
     assert '"KleeMod.Powers.FurinaReframeLedger"' in bridge
@@ -8499,3 +8502,200 @@ def test_a_hand_driven_read_settles_the_bodies_the_way_the_session_does():
     assert moving.reads > 1
     assert state["battle"]["enemies"][0]["status"][0]["name"] == "Weak"
     assert "Weak 3" in blindplay.observe(state)
+
+
+# --- `EB-504`: A RULE ABOUT A CHARACTER WHO IS NOT IN THE RUN ----------------
+
+
+def _hexerei_shop_state(character: str) -> dict:
+    """A shop shelf holding the Fischl companion both seats met, on one run.
+
+    A SHOP and not a fight, deliberately: `Hexerei` reached the Kokomi seat on
+    a shop glossary and `Oz` reached the Furina seat on a reward, and both are
+    screens the arm cannot be read off the board on -- which is why the row's
+    answer asks the wire's `character` rather than looking at what is out.
+    """
+    return {"state_type": "shop",
+            "player": {"character": character, "gold": 120},
+            "shop": {"items": [
+                {"name": "Fischl - Nightrider", "price": 74, "cost": "1",
+                 "type": "Skill", "is_available": True,
+                 "description": "A Hexerei card. Deal 7 Electro damage. "
+                                "If Oz is out, he deals 5 more."}]}}
+
+
+def test_a_kokomi_shop_prints_no_klee_rule():
+    """`EB-504`. THE ROW'S OWN ACCEPTANCE.
+
+    "*Hexerei -- A Companion card that prints the word, and Klee herself. Some
+    are Klee's own, some are not. Cards of hers pay when you play one.* I could
+    not extract a rule from that sentence, and it names a character who is not
+    in this run" (Kokomi r17 lane 2).
+
+    The word is still on the screen -- eighteen companion faces print it and
+    the whole roster drafts them -- so the page still lists it. What it does
+    not do is state a rule this run has no way to use.
+
+    Seen to FAIL: the whole Klee sentence printed on a Kokomi shop.
+    """
+    page = blindplay.observe(_hexerei_shop_state("Kokomi"))
+    glossary = page.split("## Words on this screen")[1]
+    assert "- **Hexerei**" in glossary
+    assert "Klee" not in glossary
+    assert "Cards of hers pay" not in page
+
+
+def test_a_furina_run_gets_neither_the_hexerei_nor_the_oz_rule():
+    """The second seat, and the second word. `Fischl -- Nightrider` printed
+    both rules on a Furina run: "I have no Klee cards, no way to obtain that
+    Power, and no idea what 'pay' means or what it would cost me ... half its
+    rules text was noise" (Furina r11 lane 2)."""
+    page = blindplay.observe(_hexerei_shop_state("Furina"))
+    glossary = page.split("## Words on this screen")[1]
+    assert "- **Hexerei**" in glossary and "- **Oz**" in glossary
+    assert "Fischl's raven" not in page
+    assert "Klee" not in glossary
+
+
+def test_a_klee_run_reads_both_rules_in_full():
+    """The other side, and the reason the rows exist at all: on the run whose
+    kit the words belong to, nothing about them has changed."""
+    page = blindplay.observe(_hexerei_shop_state("Klee"))
+    assert ("- **Hexerei** — A Companion card that prints the word, and Klee "
+            "herself.") in page
+    assert "- **Oz** — Fischl's raven, out while you hold the Power" in page
+
+
+def test_a_feed_that_does_not_say_who_is_playing_keeps_the_rule():
+    """`absent is not zero`, in this table's direction: silence about the
+    character is not evidence that it is somebody else's, and a page that
+    stripped a rule on a feed that never answered would be withholding it from
+    the one run that needs it."""
+    state = _hexerei_shop_state("Klee")
+    del state["player"]["character"]
+    assert "Cards of hers pay when you play one." in blindplay.observe(state)
+
+
+def test_every_other_arm_word_is_still_defined_on_every_run():
+    """The gate is exactly two rows wide. `Companion` already answers the arm
+    for its stage CLAUSE (`EB-460`) and keeps its definition on every run;
+    nothing else in the table is character-owned, and a gate that grew would
+    be taking rules off the seats that need them."""
+    assert set(blindplay_notes._ARM_KEYWORD_CHARACTER) == {
+        "Hexerei", "Oz"}
+    page = blindplay.observe(_klee_combat_state())
+    assert "- **Bomb** — " in page
+
+
+# --- `EB-506`: WHO IS AT THE FRONT ------------------------------------------
+
+
+def _stage_state(company: list[str], performed: list[dict] | None = None
+                 ) -> dict:
+    """A Furina combat whose wire carries the stage in slot order.
+
+    `company` is `FurinaReframeLedger.Snapshot`'s third list, front first --
+    the same one `SalonMemberPower.PerformLeftmost` takes `[0]` of and
+    `RotateLeftmost` moves the head of.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["furina_salon"] = {"performed": performed or [],
+                                       "replayed": [], "company": company}
+    return state
+
+
+def test_the_stage_prints_in_order_with_the_front_member_marked():
+    """`EB-506`. THE SEAT COULD NOT TELL WHO WOULD PERFORM NEXT.
+
+    "I could never tell who the front member was. The stage buff always names
+    one -- *A Companion card you play performs the Usher* -- but the Companion
+    glossary says a play *performs the front member, then sends it to the
+    back*, and after doing exactly that in fight 3 the line still named the
+    Usher. With two members up I was guessing which one my next Companion card
+    would fire" (Furina r11 lane 1, (c) 4).
+
+    The buff's face is a smart description keyed on the front member, so it is
+    a registered row redrawn when the game feels like it. The company is a
+    LIVE list, and its head is the answer by construction.
+
+    Seen to FAIL: no page printed the stage at all.
+    """
+    page = blindplay.observe(_stage_state(["the Usher", "Crabaletta"]))
+    stage = page.split("## Your Salon")[1].split("##")[0]
+    lines = [ln for ln in stage.splitlines() if ln.startswith("- ")]
+    assert lines[0].startswith("- **the Usher** — FRONT")
+    assert "performs this one, and then sends it to the back" in lines[0]
+    assert lines[1] == "- **Crabaletta**"
+
+
+def test_the_front_moves_with_the_rotation():
+    """The refresh the row asks for: after a performance the wire's own list
+    has rotated, so the next page names the new front and nothing on this side
+    has to remember that a play happened."""
+    rotated = blindplay.observe(_stage_state(["Crabaletta", "the Usher"]))
+    stage = rotated.split("## Your Salon")[1].split("##")[0]
+    lines = [ln for ln in stage.splitlines() if ln.startswith("- ")]
+    assert lines[0].startswith("- **Crabaletta** — FRONT")
+    assert lines[1] == "- **the Usher**"
+
+
+def test_an_empty_stage_prints_no_section_and_neither_does_a_klee():
+    """ABSENT IS NOT EMPTY, the block's standing split, and it decides two
+    different pages: a Furina with nobody up has no stage to print, and a
+    build with no reframe has no stage at all."""
+    assert "## Your Salon" not in blindplay.observe(_stage_state([]))
+    assert "## Your Salon" not in blindplay.observe(combat_state())
+    old = json.loads(json.dumps(combat_state()))
+    old["player"]["furina_salon"] = {"performed": [], "replayed": []}
+    assert "## Your Salon" not in blindplay.observe(old)
+
+
+def test_the_stage_and_what_it_did_are_two_sections():
+    """The order is the reader's: who is up NOW, then the receipt for what
+    already happened. The receipt prints only on a turn something acted; the
+    question the row is about is asked on every turn."""
+    page = blindplay.observe(_stage_state(
+        ["Crabaletta", "the Usher"],
+        [{"member": "Crabaletta", "target": "Nibbit", "combat_id": "",
+          "element": "Hydro", "aura": "Hydro", "amount": 6, "paid": True}]))
+    assert page.index("## Your Salon") < page.index(
+        "## What your Salon did this turn")
+
+
+# --- `EB-510`: ONE HAND AND ONE ENEMY LIST PER OBSERVE -----------------------
+
+
+def test_every_section_of_a_page_prints_once():
+    """`EB-510`. THE PAGE THAT PRINTED THE BOARD TWICE.
+
+    "Several observe screens printed `## Your hand` and `## The other side`
+    twice, with card bodies duplicated line-for-line. It never changed what I
+    could do, but it made two screens genuinely hard to read" (Furina r11 lane
+    2, (c) 8).
+
+    THE RENDER CANNOT PRODUCE IT, and that is the finding: every heading is
+    appended at one `out +=` on one branch, the branches are mutually
+    exclusive, and the two headings a combat page shares with the trailing
+    non-combat block are gated on `screen != "combat"`. So the doubling came
+    from something emitting this text twice, and what the row can pin from
+    here is the SHAPE -- a page whose sections are unique, checked at the one
+    place a page is finished.
+    """
+    for build in (combat_state, map_state, shop_state, rest_state,
+                  card_reward_state, rewards_state, treasure_state):
+        page = blindplay.observe(build())
+        headings = [ln for ln in page.splitlines()
+                    if ln.startswith("# ") or ln.startswith("## ")]
+        assert len(headings) == len(set(headings)), build.__name__
+
+
+def test_a_doubled_page_is_refused_rather_than_handed_over():
+    """The guard itself, driven: a page that carries a section twice raises
+    instead of reaching a seat, and the refusal names the heading so whoever
+    doubled it can be found."""
+    doubled = blindplay.observe(combat_state()) * 2
+    with pytest.raises(blindplay.BlindPlayError) as raised:
+        blindplay.assert_one_page(doubled)
+    assert "## Your hand" in str(raised.value)
+    assert "## The other side" in str(raised.value)
+    assert "printed a section twice" in str(raised.value)

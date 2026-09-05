@@ -586,6 +586,29 @@ def render(obs: dict[str, Any]) -> str:
             # at the foot of the section rather than under the last card.
             if _board_note_wanted(pl):
                 out += ["", CARRY_OUT_BOARD_NOTE]
+        # `EB-506`. WHO IS AT THE FRONT, printed as a LIST IN ORDER with the
+        # front marked, and refreshed off the live company on every screen.
+        #
+        # "I could never tell who the front member was ... after doing exactly
+        # that in fight 3 the line still named the Usher. With two members up I
+        # was guessing which one my next Companion card would fire" (Furina r11
+        # lane 1, (c) 4). The stage buff's face is a smart description keyed on
+        # the front member, so it is a registered row redrawn when the game
+        # feels like it; the company is a live list and its head IS the answer.
+        #
+        # ITS OWN SECTION, above what the stage DID this turn, because the
+        # order is a fact about the board now and the performances are a
+        # receipt for what has already happened -- and because the section
+        # below prints only on a turn something acted, while the question "who
+        # is in front" is asked on every turn including the quiet ones.
+        if c.get("salon") and c["salon"].get("company"):
+            company = c["salon"]["company"]
+            out += ["", "## Your Salon", ""]
+            for i, member in enumerate(company):
+                out.append(f"- **{member}**"
+                           + (" — FRONT: the next Companion card you play "
+                              "performs this one, and then sends it to the "
+                              "back" if i == 0 else ""))
         if c.get("salon") and (c["salon"]["performed"]
                                or c["salon"]["replayed"]):
             # `EB-405`. WHAT THE STAGE DID THIS TURN, one act per line --
@@ -936,14 +959,59 @@ def render(obs: dict[str, Any]) -> str:
     # word looks next, and where it does not push the board off the top.
     if obs.get("keywords"):
         out += ["", "## Words on this screen", ""]
-        out += [f"- **{k['name']}** — {k['text']}" for k in obs["keywords"]]
+        # `EB-504`: a row whose rule belongs to a character this run is not
+        # playing prints its NAME and stops. The word is on the screen and the
+        # page will not pretend it has no entry; what it has is no rule here.
+        out += [f"- **{k['name']}** — {k['text']}" if k["text"]
+                else f"- **{k['name']}**" for k in obs["keywords"]]
 
     out += ["", "## What you can say", ""]
     out += [f"- `{c}`" for c in obs["commands"]]
     out += ["", obs["guardrail"], ""]
     text = "\n".join(out).rstrip() + "\n"
+    assert_one_page(text)
     qa_packet.assert_blind(text, allow={st})
     return text
+
+
+#: A section heading, which on this page is the only line that opens with a
+#: hash. `EB-510`.
+_HEADING = re.compile(r"^#{1,2} .+$", re.MULTILINE)
+
+
+def assert_one_page(text: str) -> None:
+    """One section per heading, and one heading per section (`EB-510`).
+
+    WHAT THE SEAT SAW (Furina r11 lane 2, (c) 8): "several observe screens
+    printed `## Your hand` and `## The other side` twice, with card bodies
+    duplicated line-for-line. It never changed what I could do, but it made
+    two screens genuinely hard to read."
+
+    AND THE RENDER ABOVE CANNOT PRODUCE IT. Every heading is appended at
+    exactly one `out +=` on one branch, the branches are mutually exclusive,
+    and the two headings a combat page shares with the trailing non-combat
+    block (`## Your relics`, `## Potions`) are gated on `screen != "combat"`
+    -- so a page built by this function has each of its headings once, which
+    is what the check below asserts. A doubled page therefore came from
+    something that emitted this text TWICE: a caller that printed the page and
+    then appended a second read of it.
+
+    So the pin is here, at the one place the page is finished, and it is the
+    shape rather than the cause: whatever doubles a section -- a branch that
+    grows a second `out +=` tomorrow, or a caller that concatenates two reads
+    through `render` -- stops being a screen a seat has to read twice and
+    becomes a refusal naming the heading. It raises `BlindPlayError`, the same
+    class every other structural refusal on this page raises, so a driver that
+    already handles one handles this.
+    """
+    seen: dict[str, int] = {}
+    for heading in _HEADING.findall(text):
+        seen[heading] = seen.get(heading, 0) + 1
+    twice = sorted(h for h, n in seen.items() if n > 1)
+    if twice:
+        raise BlindPlayError(
+            "this page printed a section twice, so a reader would read the "
+            "same board as two boards: " + ", ".join(repr(h) for h in twice))
 
 
 def observe(state: dict[str, Any]) -> str:

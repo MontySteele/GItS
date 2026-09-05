@@ -701,6 +701,31 @@ COMPANION_STAGE_CLAUSE = (
 #: wire sends and a Title is not an id.
 _STAGE_CHARACTER = "furina"
 
+# `EB-504`. TWO ROWS WHOSE RULE IS ABOUT A CHARACTER WHO IS NOT IN THE RUN.
+#
+# WHAT TWO SEATS READ. On a Kokomi shop screen: "*Hexerei -- A Companion card
+# that prints the word, and Klee herself. Some are Klee's own, some are not.
+# Cards of hers pay when you play one.* I could not extract a rule from that
+# sentence, and it names a character who is not in this run" (Kokomi r17 lane
+# 2). And on a Furina run, `Fischl -- Nightrider` printed BOTH this and the
+# `Oz` row: "In a Furina run I have no Klee cards, no way to obtain that
+# Power, and no idea what 'pay' means or what it would cost me ... half its
+# rules text was noise" (Furina r11 lane 2).
+#
+# THE WORDS ARE PRINTED ON EVERY RUN AND THE RULES ARE NOT. `Hexerei` rides
+# eighteen companion faces the whole roster can draft, and its rule is Klee's
+# Spark rider; `Oz` is named by Fischl's face, which every character meets,
+# and the Power that fields him is Klee's. So the tag reaches every run and
+# the rule reaches one, which is `EB-460`'s finding one table over -- and its
+# answer too: the ARM is asked, not the board, off the wire's own `character`.
+#
+# THE TAG STILL PRINTS, NAME ONLY. A word on the screen with no entry at all
+# reads as a word the page failed to define; the name with no rule says what
+# is true, which is that this run has no rule for it. A feed that does not say
+# who is playing gets the rule, `absent is not zero`'s direction: silence
+# about the character is not evidence it is somebody else's.
+_ARM_KEYWORD_CHARACTER: dict[str, str] = {"Hexerei": "klee", "Oz": "klee"}
+
 # One pattern per word, and they are CASE-SENSITIVE on purpose: the game
 # capitalises a keyword wherever it prints one, and a case-blind `mine` or
 # `plan` would define a word out of ordinary prose. The plural is the same
@@ -1376,8 +1401,13 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     # every other arm gets the definition and the reward slot, which are true
     # on all of them.
     stage = _fold(obs.get("character")) == _STAGE_CHARACTER
+    # `EB-504`: and two rows are the ARM's outright. A word whose rule belongs
+    # to a character this run is not playing prints its name and no rule.
+    who = _fold(obs.get("character"))
     rows = [{"name": word,
-             "text": ARM_KEYWORDS[word].format(
+             "text": "" if (who and _ARM_KEYWORD_CHARACTER.get(word, who)
+                            != who) else
+             ARM_KEYWORDS[word].format(
                  growth=int(growth.group(1)) if growth else BOMB_GROWTH)
              + (COMPANION_STAGE_CLAUSE
                 if stage and word == "Companion" else "")}

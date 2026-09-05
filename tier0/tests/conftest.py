@@ -46,12 +46,23 @@ for _leaked in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE",
 # a top-level `understudy` import here would put the whole blind-play package
 # in front of every test in the tier0 suite -- including the fences that assert
 # what may import what.
+#
+# AND THE STORE IS MOVED, NOT ONLY EMPTIED. The suite runs under xdist and the
+# path is one file per LANE, so sixteen workers on lane 0 share one file: the
+# tests that drive the memory across a process boundary went red in the full
+# run and green alone, which is a shared-file race and not a flake. Each worker
+# gets its own directory (`getbasetemp` is already per worker), and the real
+# one under `understudy/logs` is never touched by a test.
 @pytest.fixture(autouse=True)
-def _fresh_blindplay_fight():
-    from understudy.blindplay_faces import forget_fight
-    forget_fight()
+def _fresh_blindplay_fight(tmp_path_factory):
+    from understudy import blindplay_faces as faces
+    store = tmp_path_factory.getbasetemp() / "blindplay-fight"
+    store.mkdir(parents=True, exist_ok=True)
+    held, faces._FIGHT_STORE_DIR = faces._FIGHT_STORE_DIR, store
+    faces.forget_fight()
     yield
-    forget_fight()
+    faces.forget_fight()
+    faces._FIGHT_STORE_DIR = held
 
 
 # --- THE SEAM FAMILY, FOR THE FENCES THAT READ SOURCE ----------------------

@@ -372,7 +372,14 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
     replayed = [name for name in
                 (_text(entry) for entry in (raw.get("replayed") or []))
                 if name]
-    return {"performed": performed, "replayed": replayed}
+    # `EB-506`: the stage itself, front first. ABSENT IS NOT EMPTY, this
+    # block's standing rule: a bridge or a klee.dll older than the field sends
+    # no `company` key and the page prints no stage line, exactly as before.
+    company = [name for name in
+               (_text(entry) for entry in (raw.get("company") or []))
+               if name]
+    return {"performed": performed, "replayed": replayed,
+            "company": company}
 
 
 def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],

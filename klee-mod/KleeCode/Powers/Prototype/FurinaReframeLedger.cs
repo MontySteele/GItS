@@ -340,6 +340,31 @@ public sealed class FurinaReframeLedger
         snapshot["replayed"] = For(creature).Replays
             .Select(card => (object?)card)
             .ToList();
+        // `EB-496`'s sibling, `EB-506`: WHO IS AT THE FRONT, and in what order
+        // the rest will follow.
+        //
+        // "I could never tell who the front member was. The stage buff always
+        // names one -- *A Companion card you play performs the Usher* -- but
+        // the Companion glossary says a play *performs the front member, then
+        // sends it to the back*, and after doing exactly that in fight 3 the
+        // line still named the Usher. With two members up I was guessing which
+        // one my next Companion card would fire" (Furina r11 lane 1, (c) 4).
+        //
+        // THE BUFF'S FACE IS NOT A LIVE READ AND CANNOT BE. It is a smart
+        // description keyed on the front member (<c>ManualKey</c>), so it is
+        // one of four registered rows and it refreshes when the game decides
+        // to redraw it -- which after a rotation it had not. The COMPANY is a
+        // live list, in slot order, front first: <c>PerformLeftmost</c> takes
+        // <c>company[0]</c> and <c>RotateLeftmost</c> moves it to the back, so
+        // the head of this list is the answer to the seat's question by
+        // construction rather than by a second copy of the rule.
+        //
+        // THE STAGE NAMES, not the card titles, because those are the words
+        // every Salon face and the buff itself already print
+        // (<c>SalonMemberPower.ManualFrontName</c>).
+        snapshot["company"] = SalonMemberPower.CompanyOf(creature)
+            .Select(member => (object?)SalonMemberPower.ManualFrontName(member))
+            .ToList();
         return snapshot;
     }
 }
