@@ -74,42 +74,14 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 ## before proto_pearl_barrage_turn
 
 ```
-# =============================================================================
-# KOKOMI SLICE 1 (R216) -- seven rows, three arms. Every one is a QUESTION put
-# to the engine, not a card: they are deleted when the slice is accepted or
-# rejected (the deletion rule above), and under R215 B no number measured on
-# any of them is quotable anywhere.
-#
-# THE HYPOTHESIS THEY TEST, in R213 C/E3's words: subsidised Block dissolves
-# the attack/defend decision. A card that hands you defence for free alongside
-# the play you wanted to make anyway leaves no second line, because there was
-# never a trade. Each pair below sets the shipped shape against a shape where
-# the Block costs SOMETHING -- an outcome, or an energy.
-#
-# NAMES. Every display name here is provisional and mine (R179). They are
-# deliberately ordinary card names rather than "(Priced)" or "(Variant)": the
-# QA grader reads printed titles on a design-blind packet, and a title that
-# names the experiment is a title that tells the grader what to answer. The
-# alternatives considered, and why they lost, are in
-# review/ruled/kokomi-slice-1-2026-08-27.md.
-#
-# `character:` ON A COMPANION ROW IS `klee`, AND THAT IS NOT A TYPO. It names
-# the CODEGEN PROFILE and the off-pool list, and every shipped Companion of
-# every nation is emitted through Klee's profile and pooled in
-# KleeOffPoolCards -- that is where CompanionRoster.All is carried, and it is
-# what gives a Companion its frame and its energy colour today. So a prototype
-# Companion declared `klee` resolves through exactly the path its shipped twin
-# resolves through, with no new machinery at all. `nation:` carries the pool
-# identity the sim reads (the shipped sheets get it from their FILENAME, which
-# this file does not have). The alternative -- a `character: companion` value
-# with a nation field, taught to the loader and the generator -- is recorded
-# in the packet and was rejected as machinery bought for one slice.
-#
-# OFF THE MUSTER POOL BY CONSTRUCTION, not by a filter: Muster and the reward
-# slot both read `CompanionRoster.All`, which is generated from the three
-# `*-companions.yaml` sheets and cannot see this file. The only door in is a
-# grant by id against a dev build.
-# =============================================================================
+# ---------- ARM 1: Pearl Barrage's counting basis (R215 C) -------------------
+# Shipped twin: `pearl_barrage` (docs/kokomi-cards.yaml). That card reads the
+# cost of THE ONE CARD you chose to Exhaust. This one reads how many cards have
+# been Exhausted THIS TURN -- the reading [USER] expected it to have. It still
+# Exhausts one chosen card itself, and that card is in its own count, so the
+# floor of the two shapes is the same number on a turn with one rotation in it.
+# Base 5 and per 3 are the shipped numbers, UNMOVED: the counting basis is the
+# question, and moving a number too would make the answer unattributable.
 ```
 
 ## before proto_pearl_barrage_turn
@@ -128,10 +100,27 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 ## before proto_shinobu_sanctifying_ring_either
 
 ```
-# ---------- ARM 2: mutually exclusive Block (R216 C, option 1) ---------------
-# Prune's shape: the card does the engine half OR the Block half, never both.
-# Defence is paid for in OUTCOME. Same amounts, same cost, same element as the
-# shipped twin -- only the conjunction moves.
+# Shipped twin: `shinobu_sanctifying_ring` (3 damage to all + Electro, 4 Block,
+# cost 2). The Electro rides the card-level interface, so the flag sits on the
+# attack mode and the Block mode applies nothing.
+#
+# THE MODE LABELS NAME THE ELEMENT'S SCOPE, and that is a text fix taken from
+# the round-1 pair read, which found "Choose one: ... | Gain 4 Block" printed
+# beside an "Applies Electro" keyword badge with nothing saying WHICH mode the
+# badge belongs to. The runtime answer is the damage mode only: the emitted
+# body sends the attack half through `DamageCmd.Attack(...).FromCard(this)`,
+# which is what applies an `IElementalCard`'s element, and sends the Block half
+# through `CreatureCmd.GainBlock`, which applies nothing. The label prints
+# that, and no number moves.
+#
+# THE LABEL SAYS "its element" RATHER THAN "Electro", and that is a lint
+# constraint rather than a preference: `lint_prose_constants` reads a display
+# string carrying an element name AND a bare numeral as a hand-typed reaction
+# constant, and "Electro ... 4 Block" collides with `ElectroChargedDot`. The
+# element is named by the card's own keyword badge, which is the thing the
+# scope clause exists to explain, so the face says WHICH MODE and lets the
+# badge say WHICH ELEMENT. Both `either` rows are worded the same way so the
+# two arms differ only in the card under test.
 ```
 
 ## before proto_shinobu_sanctifying_ring_either
@@ -189,65 +178,28 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 ## before proto_spark_priced_strike
 
 ```
-# =============================================================================
-# KLEE SLICE 1 (R213 E2) -- four rows, four arms. THE FOURTH ARM WAS HELD AND
-# IS NOW ADMITTED: `proto_spark_mode_bombs` / "Bag of Tricks" was stopped by
-# the independent seat's doctrine verdict, and holding it is the whole reason
-# the seat was asked before anything was authored. Round 1's verdict is in
-# review/qa/klee-slice-1-doctrine-review-codex-gpt-5.6-sol.md. The RE-ASK,
-# taken after `EB-182` built per-mode playability, is in
-# review/qa/bag-of-tricks-reask-doctrine-codex-gpt-5.6-sol.md: it RESOLVED D4
-# and left ONE clause -- the top-level-cost rule -- in front of [USER]. R225
-# amended that clause on 2026-08-30 (top level OR mode head) and the arm
-# proceeds as `EB-224`. Its row is at the foot of this block. NOTHING about it
-# was re-authored: the name, the id, the cost, the type, the rarity and both
-# mode bodies are the packet's, unmoved, and the verdict changed no number.
+# ---------- ARM 1: the Attack pays the bank instead of being paid by it ------
+# Shipped twin: `flame_on_the_wick` (0, Attack, Uncommon -- 6 damage to a
+# single enemy, bank untouched). Cost, type, rarity, target and the damage
+# figure all match, so the pair differs in one idea: this card charges the bank
+# and hits twice for having done so.
 #
-# THE QUESTION. R213 E2 reopened "Sparks mean free Attack" as "likely upstream
-# of Klee's Attack-spam identity". The engine says it more sharply than the
-# playtest did: `combat.card_cost` zeroes ANY Attack at the threshold and
-# `combat.play_card` debits the bank for it, both unconditionally, so the bank
-# has one destination and it is chosen for the player. Against D2's six
-# steerable verbs -- timing, targeting, placement, acquisition, conversion,
-# forgoing -- the base rule feeds none.
+# WHY THE PRINTED COST IS ZERO, AND IT IS NOT A ROUNDING CHOICE. A paid Attack
+# at a full bank is zeroed and DEBITED by the automatic rule, which would eat
+# the three Sparks before this card's own `spend_spark` ran -- the card would
+# pay for its cost line and then refuse its own payload. `play_card`'s debit
+# branch is guarded by `card.cost != 0` (there since R39/R34, for their own
+# reasons), so a printed-zero Attack takes no automatic debit and its top-level
+# spend is the only thing that moves the meter. The rule is sidestepped, not
+# altered.
 #
-# WHAT THESE ROWS DO NOT DO. The automatic rule is UNTOUCHED. Making it opt-in
-# is a change to a character mechanic (klee-character-design.md section 3), it
-# cannot be quarantined on a card surface, and the seat agreed it should not
-# ride along with a card-level slice because it would destroy attribution. It
-# also said plainly that the rule is the upstream problem and must eventually
-# move; that is [USER]'s, and it is in the packet, not here.
-#
-# ONE PRICE ACROSS THE SLICE: every row charges THREE Sparks. An attribution
-# call, not a balance one. Three is LIFTED, not picked -- it is the free
-# Attack's own threshold, which is the thing under test, so each pair asks
-# whether the bank is worth more as this card than as the rule. The three
-# SHIPPED sinks (powder_charge, hold_the_line, smoke_and_sparks) charge 2, but
-# 2 was authored against True Spark Knight's reduced threshold and would have
-# confounded the question. The seat was asked about this directly and agreed:
-# "Three is the right controlled price for this slice."
-#
-# EVERY NUMBER IS A SHIPPED NUMBER. 6 damage at cost 0 is
-# `flame_on_the_wick`'s. `times: 2` is the sheet's standard multi-hit count
-# (jumpy_dumpty, pocket_fireworks). Draw 3 is the twin's ceiling plus its
-# floor. Block 5 is `clockwork_toy`'s. Burst 10 is `combustion_study`'s. THERE
-# IS NO DERIVED NUMBER IN THIS SLICE AT ALL -- an earlier draft had one, and
-# the seat's arithmetic correction removed the need for it.
-#
-# NO NEW OP, NO NEW PREDICATE, NO NEW PRICED VERB. `spend_spark` has been in
-# both engines since EB-118 Phase 2 and has been printed by three shipped
-# Uncommons since R211's W3 window; its playability gate (`combat.spark_cost`)
-# and its no-partial-spend rule are shipped behaviour these rows only reuse.
-# The proposal's arm 2 would have needed a `spark_at_least_` predicate; the
-# seat's re-authoring of that arm removed the conditional and with it the
-# predicate, so this branch adds NOTHING to either engine's vocabulary.
-#
-# NAMES are provisional and mine (R179), ordinary card names by construction:
-# a blind grader reads printed titles, so no title here says spend, price,
-# conversion or prototype.
-#
-# I DESIGNED THESE ROWS AND MAY NOT GRADE THEM (R213's first guard).
-# =============================================================================
+# THE DECISION IT CREATES is the arm's whole content: with three Sparks and
+# this card plus any PAID Attack in hand, playing the paid Attack first makes
+# it free and empties the bank, which makes this card unplayable; playing this
+# card first takes the bank itself and leaves the other Attack at full price.
+# Two Attacks, one bank, and the player picks. That is D2's timing and
+# forgoing, on the Attack half of the kit that W3's three Skill sinks left
+# without a decision.
 ```
 
 ## before proto_spark_priced_strike
@@ -503,55 +455,95 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 ## before proto_kurages_oath_memory
 
 ```
-# =============================================================================
-# KOKOMI -- THE KURAGE'S MEMORY v3 (a RULE arm, not a card row)
+# KOKOMI KURAGE BASE KIT (sec.12 of
+# review/ruled/kokomi-kurage-memory-2026-08-29.md) -- ONE row, one arm.
 #
-# DECLARED HERE AND CARRYING NO ROW, DELIBERATELY. Every row in this file is a
-# CARD: `tools/gen_prototype_cards.py` requires an `id` starting `proto_`, a
-# `character` in the codegen profiles, and an effects list it can emit as a
-# C# class, and `tier0/content/loader.prototype_cards()` schema-checks it as a
-# card. The Kurage's memory is ENGINE BEHAVIOUR -- two entry rules, a price, a
-# turn-start fire, a pulse and a strip -- and it authors no card at all. A row
-# for it would either be a card nobody designed or a new row KIND, taught to
-# the loader, the generator, four lints and the surface tests. That is
-# machinery bought for one arm, which is the same trade this file's header
-# already refused for `character: companion`.
+# THE QUESTION IT SETTLES IS ALREADY RULED, so this row is a STAGED FACE
+# rather than an experiment: sec.12.4 pick 4 asked what happens to Kurage's
+# Oath once the jellyfish is always on and its pulse therefore fires every
+# turn, and [USER] answered on 2026-08-29, verbatim --
 #
-# So it is declared, not rowed, and the declaration is the audit trail:
+#     "Let's rewrite it to '3 block per memory played, upgrade to 5' as a
+#      placeholder and see if it needs adjusting later."
 #
-#   arm:          the Kurage's memory, v3
-#   character:    kokomi
-#   spec:         review/ruled/kokomi-kurage-memory-2026-08-29.md sec.11
-#                 (sec.11.1 is [USER]'s words and IS the spec)
-#   sim:          tier0 behind C.KURAGE_MEMORY, default off
-#   mod:          klee-mod/KleeCode/Powers/Prototype/KurageMemory.cs, compiled
-#                 only under `dotnet build -p:PrototypeCards=true` -- the SAME
-#                 switch that quarantines the card rows above, so a release
-#                 build contains no type from it and every seam that calls it
-#                 sits inside `#if PROTOTYPE_CARDS`
-#   authored_by:  [claude, gpt] -- the field's closed set is
-#                 {claude, gpt} (EB-190), so it records the MODEL FAMILIES and
-#                 not the people: Claude implemented the rule and made it
-#                 total, and [USER]'s advisor (GPT) wrote the rule statement
-#                 [USER] forwarded as the design, which is text and therefore
-#                 adds its family. [USER] SPECIFIED THE RULE and made four
-#                 rulings on it; that is not a model family and has no cell in
-#                 the field, so it is recorded here instead.
-#                 THE FIELD ITSELF IS ON ROWS, and this arm has none -- it
-#                 authors no card at all (see above) -- so `seat.py`'s refusal
-#                 has nothing to key on for the RULE. What it does key on is
-#                 the one row this chain does add,
-#                 `proto_kurages_oath_memory`, which carries `[claude]`:
-#                 [USER] ruled its numbers and its rule, Claude wrote it, and
-#                 no seat contributed text, a number or a mode to it.
-#   prints:       nothing. `play_front_memory` (provisional keyword "Stir",
-#                 R179) has its op in the sim and its door in the mod so
-#                 codegen can emit a card that prints it; no card does.
-#   revert:       the flag. Delete Powers/Prototype/KurageMemory.cs and its
-#                 `#if PROTOTYPE_CARDS` seams; the sim half is C.KURAGE_MEMORY.
+# So the ward stops riding the pulse and starts riding a MEMORY PLAY. The
+# trigger half of that is engine (`effects.kurage_fire`, behind
+# `C.KURAGE_MEMORY`, one site covering both the automatic turn-start fire and
+# the "Stir" keyword's manual one). The FACE half is this row.
 #
-# THE DELETION RULE AT THE TOP OF THIS FILE APPLIES TO THIS BLOCK TOO: when
-# the arm is accepted or rejected, this block leaves with it.
+# THE NUMBERS ARE [USER]'S AND ARE A PLACEHOLDER IN HIS OWN WORD. 3, and 5
+# upgraded. No measurement is attached to either and none may be: nothing has
+# been run on this shape, and under R213 B / R215 B no number measured on this
+# surface would be quotable if it had. "See if it needs adjusting later" is
+# the disposition, not a band.
+#
+# AUTHORSHIP. NUMBERS AND RULE: [USER]. IMPLEMENTATION AND WORDING: Claude.
+# Nothing on this row was designed by the doctrine seat, and nothing here has
+# been graded. `authored_by:` is a list of MODEL FAMILIES (EB-190, head of
+# file) and [USER] is not one of them, so the field on the row below reads
+# `[claude]` -- the family that wrote it -- and this paragraph is where his
+# ownership of the numbers is recorded.
+#
+# THE SHIPPED ROW IS UNTOUCHED. `kurages_oath` in docs/kokomi-cards.yaml still
+# prints ward 5 (7 upgraded) and still says "per Bake-Kurage play"; it is a
+# shipped number under an R213 freeze and it is not this branch's to move, and
+# leaving it alone is what makes accepting this arm a one-row re-authoring
+# rather than an engine change.
+#
+# THE SHIPPED TWIN IS NOT OFFERABLE UNDER THE FLAG, and that is a fix, not a
+# second staging rule. [USER] asked of the staged face: "Why does the power
+# print 5 instead of 3, exactly?" The answer was that the ward's amount is read
+# off whatever card applied it, so a flagged run that DRAFTED the shipped Oath
+# paid 5 per memory play under a face that says per pulse -- text that cannot
+# bind, which is D4. The sheets cannot move, so the OFFER side does: under
+# `C.KURAGE_MEMORY` this row substitutes for `kurages_oath` in Kokomi's
+# offerable pool at the same rarity (`loader._pool_substitutions`, read by
+# `rewards.character_pool`, which is every offer surface's one source). Flag
+# off, the shipped Oath is the only Oath and this row is unreachable as ever.
+#
+# THE UPGRADE IS ON THE ROW (`EB-213`). It used to be prose here and nothing
+# else: the surface had no upgrade channel at all, so the substituted Oath
+# could not be smithed at a campfire and [USER]'s upgraded 5 was a row note
+# rather than a card. The channel is now the `upgrade:` key below, registered
+# into the merged delta index by `tools/gen_prototype_cards.py` and read from
+# there by the SHIPPED upgrade path -- same expressibility check, same
+# `OnUpgrade`, same campfire. It lives on the row rather than in
+# `docs/kokomi-upgrades.yaml` because a `proto_` key in a shipped sheet would
+# give R213's deletion rule a second file to remember; when this row is
+# re-authored onto her real sheet the delta travels with it, into the
+# upgrades sheet, and both leave here together.
+#
+# THE DELTA IS THE SHIPPED OATH'S OWN, `kurage_ward: +2`. [USER] ruled the two
+# ENDPOINTS -- "3 block per memory played, upgrade to 5" -- and +2 is the
+# arithmetic between them, not a second pick; it is also, exactly, the delta
+# `kurages_oath` already carries (5 -> 7, R130). Nothing new is invented here
+# and no measurement is attached to either endpoint.
+#
+# NAME. "Kurage's Oath" is the shipped card's name and is [USER]'s; this row
+# keeps it, because the row IS that card with one clause rewritten and a blind
+# reader must see the card, not the experiment (R179).
+#
+# THE FACE, as it must read once the mod carries it:
+#
+#     Kurage's Oath -- 1 energy, Power, Common
+#     Whenever the Bake-Kurage plays a card from its memory, gain 3 Block.
+#     (Upgraded: 5.)
+#
+# THE ROW SAYS IT, through `description:` (`EB-215`). `gen_klee_cards`
+# renders a Power's description PER POWER ID, not per row, so `kurage_ward`
+# would print one string -- "Each Bake-Kurage pulse also grants {X} Block."
+# -- shared with the SHIPPED Oath, and moving that string would move a
+# shipped release face and make it false with the flag off, where the ward
+# really does ride the pulse. The mod used to work around that by MERGING a
+# replacement into the loc table at pool-build time, which left two channels
+# describing one card and the generated file wrong until the override ran.
+# R224 A takes `M57`(2) on those DUPLICATION grounds: the row's own text is
+# the one channel, emitted by codegen into the same `Localization` list every
+# shipped row uses, and the merge is deleted.
+#
+# The `{PowerAmount:diff()}` token is the SHIPPED renderer, not a prototype
+# one: it prints the ruled 3 and, past a campfire, the ruled 5, off the same
+# var `EB-213`'s upgrade delta moves.
 # =============================================================================
 ```
 
@@ -653,88 +645,17 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 ## before proto_pop_spark
 
 ```
-# =============================================================================
-# KLEE SPARKS -- SPARKS AS AN ALTERNATIVE COST (R213 E2). Seven rows.
+# ---------- PICK 1: the starter's Basic that MAKES ---------------------------
+# Shipped twin: `pop` / "Pop!" (0, Skill, Basic, skill_tag -- one Bomb at 5).
+# Cost, type, rarity, tag and the Bomb are unmoved; a Spark rider joins them,
+# which is the packet's option 1 verbatim: "the natural home is `pop` (0
+# energy, places a bomb), which becomes 'place a Bomb, gain 1 Spark'."
 #
-# AN EIGHTH ROW WAS AUTHORED AND IS NOT HERE, and the reason is the generator
-# rather than a doctrine hold. PICK 5's re-authored `true_spark_knight` --
-# "Spark Knight's Oath", Rare Power, 2 Energy, "Your Attacks that do not
-# already cost [Spark] cost 3 [Spark] instead of their Energy cost" -- applies
-# a power named `spark_attack_cost`, and `tools/gen_prototype_cards.py`
-# refuses it by name: "NOT EXPRESSIBLE: apply_power power 'spark_attack_cost'
-# (no PowerModel in the registry). A prototype row must be emittable today --
-# rewrite it inside the existing grammar, or take the runtime work first."
-# That refusal is correct and is left standing rather than worked around: the
-# C# `PowerModel` is owed work, and a row emitting a reference to a class that
-# does not exist would be a prototype that cannot be staged, which is the one
-# thing this surface promises its rows are not.
-#
-# THE SIM HALF OF THAT POWER IS BUILT AND TESTED ANYWAY, behind the same flag
-# (`combat.spark_power_price`, `C.SPARK_ATTACK_POWER_PRICE`,
-# tier0/tests/test_spark_alt_cost.py), because tier0 is the arm this branch is
-# for and the power is applied there by name. The row's exact text and the C#
-# it is waiting on are in the packet's sec.10, not commented out here -- the
-# deletion rule at the top of this file forbids a commented-out row.
-#
-# THESE ROWS DO NOT STAND ALONE, and that is the difference between this
-# slice and every other block on this surface. They are the CARD half of a
-# RULE change that lives in code behind `C.SPARK_ALT_COST_ENABLED` -- the
-# threshold rule ("At 3 Sparks, your Attacks cost 0. Playing one consumes 3")
-# is retired under that flag, and with it retired these rows are the only
-# thing the bank can be spent on. With the flag OFF the rule is the shipped
-# rule and these rows are eight cards nothing reaches. The packet is
-# review/ruled/klee-sparks-2026-08-29.md; sec.9 is the independent seat's
-# doctrine read and sec.1 is [USER]'s ruling that closed the direction.
-#
-# THE PICKS THESE ROWS ARE, in the seat's words (sec.9):
-#   PICK 1  "Options 1 and 5 together follow"  -- a Basic that MAKES and a
-#           Basic that SPENDS, exactly Regent's starter shape.
-#   PICK 3  "2, Tinder Toss; 3, Bang Bang!; 4, Dodoco Blast; 5, Firework
-#           Finale; best: 2. Option 1 ruled out -- R69 / R29d."
-#   PICK 4  "1, The tight set."  -- five conversions, pool stays 79.
-#   PICK 5  "1, STRICT conversion" + "(a), already-priced Attacks are
-#           unaffected".
-#
-# CANDIDATE 1 IS RENAMED, AND ONLY ITS NAME MOVED. sec.4.2 proposed `Sizzle`;
-# `Sizzle` is a shipped Klee Common Attack (docs/klee-cards.yaml:158) and the
-# seat ruled the candidate out by name under R69 / R29d. The card's rarity,
-# price, cost and body are the packet's, unchanged. The replacement is
-# `Fwoosh!` -- provisional and mine (R179), in the onomatopoeia family the
-# sheet already speaks (Snap!, Crackle, Pop!, Da-da-da!), checked against
-# docs/reserved-card-names.txt and every sheet name before use. The name is
-# [USER]'s to settle; the lint is the floor, not the ruling.
-#
-# EVERY DISPLAY NAME HERE IS PROVISIONAL (R179), including the two Basics'
-# and the Power's: a proto row may not reuse its twin's printed name, so
-# `Pop!`, `Kaboom!` and `True Spark Knight` each get a working title rather
-# than a design decision.
-#
-# THE PRICES ARE THE PACKET'S, and the packet says plainly what they are:
-# "shape, not ruled values", set against sec.2.4's measured income of ~1 Spark
-# per turn, so 1 Spark = one turn of income, 2 = a deck cycle, 3 = Regent's
-# median sink. NO NUMBER BELOW IS A BALANCE CLAIM (R215 B).
-#
-# EVERY DAMAGE FIGURE IS THE PACKET'S sec.4.2 TABLE VERBATIM, except the two
-# Basics, whose bodies are their shipped twins' unmoved (`kaboom` 7 damage,
-# `pop` one Bomb at 5) so that the starter substitution is a PRICE change and
-# nothing else.
-#
-# WHICH POOL ROW EACH ONE REPLACES (PICK 4, the tight set -- one for one, so
-# the pool stays at 79 and the generator:sink ratio moves at the same time).
-# The replacement is recorded HERE and executed nowhere: this surface cannot
-# reach a pool, and re-authoring the shipped sheet is what ACCEPTANCE means
-# under the deletion rule at the top of this file.
-#   Fwoosh!          <- sparkly_treasure  (Common, 0E, gain 1)
-#   Bang Bang!       <- spark_collection  (Common, 1E, gain 2)
-#   Tinder Toss      <- pocket_fireworks  (Common, 1E attack, no rider)
-#   Dodoco Blast     <- sugar_rush        (Uncommon, 1E, +1 energy + gain 1)
-#   Firework Finale  <- cant_catch_me     (Uncommon, 1E, block/gain/draw)
-#
-# I DESIGNED THESE ROWS AND MAY NOT GRADE THEM (R213's first guard). The seat
-# gated the PICKS; it wrote no text and picked no number here, so every row
-# is `authored_by: [claude]` -- including the renamed candidate, whose name
-# the seat ruled OUT and did not replace.
-# =============================================================================
+# WHY THE BUFFER GOES ON A CARD AND NOT ON THE RELIC (options 2 and 3): the
+# relic's grant would be unsteerable income, and the seat cited D2's "the
+# control must be reachable early and reliably -- starter kit, starting relic,
+# base system, or the ordinary pool" for putting it on a card the player
+# chooses to play. Pounding Surprise keeps its body unchanged and untouched.
 ```
 
 ## before proto_pop_spark
@@ -775,22 +696,10 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 ## before proto_spark_strike
 
 ```
-# ---------- PICK 3 / PICK 4: the tight set of Spark-cost Attacks -------------
-# All five are 0 Energy with a top-level `spend_spark`, which is the whole of
-# "cost Sparks instead of Energy" in both engines: `combat.spark_cost` derives
-# the price off the op, `card_playable` gates on it, and the payment is
-# `effects.spend_sparks`, all-or-nothing. NOTHING WAS BUILT FOR THESE ROWS --
-# the rail has shipped since EB-118 Phase 2 and has been printed by three
-# Uncommon Skills since R211. The only new thing in the branch is the RULE
-# these five now have to compete with the absence of.
-#
-# THE COST SITS AT TOP LEVEL OR AT A MODE HEAD (the rule authored at
-# `powder_charge`, enforced by the seat in Klee slice 1, and AMENDED BY R225 on
-# 2026-08-30 to admit a mode price): a spend at the card's top level is the
-# CARD's price, a spend at the HEAD of a `choose_one` mode is that MODE's
-# price, and a spend nested in a conditional or further down a mode body is
-# invisible to the playability gate and is refused. No row here has a
-# conditional.
+# Candidate 1, renamed. sec.4.2: "Spend 1 / 8 damage", mirroring Regent's
+# `GuidingStar` (1 star, 12 damage). Its twin on the printed sheet is
+# `sparkly_treasure`, whose entire body is "gain 1 Spark" -- the purest
+# generator in the pool becoming the cheapest sink in it.
 ```
 
 ## before proto_spark_strike
@@ -845,48 +754,11 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 ## before proto_powder_charge_spark
 
 ```
-# =============================================================================
-# KLEE SPARKS -- THE THREE HYBRID SPENDERS MIGRATE (R224 slate item 16;
-# BACKLOG EB-218). Three rows, and no new design.
-#
-# WHAT THIS IS. The shipped Klee pool already holds three Spark spenders whose
-# payoff is not a plain Attack -- `powder_charge`, `hold_the_line` and
-# `smoke_and_sparks`, all ratified in W3 (R211), all three HYBRIDS: 1 Energy
-# AND a top-level `spend_spark 2`. The packet's sec.14.2 preface records them
-# and sec.14.3 option (5) -- TAKEN by R224 -- rules what they become in the
-# priced-sink world: SPARK-ONLY. 0 Energy, the price paid wholly in Sparks,
-# which is the economy the eight rows above are testing.
-#
-# NOTHING IS REPRICED. Each row keeps its shipped Spark number (2) and its
-# shipped body byte for byte; the ONLY delta is that the 1 Energy is gone. A
-# migration that also moved a number would confound the question sec.14.4
-# asks, which is whether a bank with a NON-DAMAGE destination produces a hold.
-#
-# WHY THEY ARE PROTOTYPE ROWS AND NOT A SHEET EDIT. R224: "a dev-only
-# substitution, not a shipped-pool edit". `loader._pool_substitutions`' Klee
-# half under `C.SPARK_ALT_COST_ENABLED` (`C.SPARK_ALT_POOL_SUBS`) swaps each
-# shipped row for its Spark-only twin at the SAME rarity -- three Uncommons in,
-# three Uncommons out, so the offer odds do not move -- and with the flag OFF
-# the pool is byte-identical to shipped. That is the one cost sec.14.3 records
-# option (5) against itself, removed: no shipped face moves, and the act is as
-# reversible as deleting three rows.
-#
-# ENERGY-GATING IS THE THING BEING REMOVED, and sec.14.3 says why: a hybrid
-# cannot be reached by the bank alone, so a null read on a hybrid measures the
-# Energy gate rather than the sink. Under this migration the bank alone
-# reaches all three.
-#
-# NAMES ARE PROVISIONAL AND MINE (R179). A proto row may not reuse its twin's
-# printed name, so each takes a working title in the sheet's own register.
-# They are deliberately ordinary card names rather than "(Spark)" variants:
-# the QA grader reads printed titles on a design-blind packet, and a title
-# that names the experiment tells the grader what to answer. [USER] settles
-# the names; `lint_unique_names` is the floor, not the ruling.
-#
-# I AUTHORED NOTHING BUT THE NAMES AND THE ENERGY DELETION, and both are
-# R224's instruction, so every row is `authored_by: [claude]` and R213's first
-# guard applies to it: I may not grade these rows.
-# =============================================================================
+# Shipped twin: `powder_charge` / "Powder Charge" (docs/klee-cards.yaml:248 --
+# 1 Energy, Spend 2 Sparks, Uncommon Skill: detonate the target's Bombs for
+# +4 each). Cost 1 -> 0; the Spark price, the detonation and the +4 are
+# unmoved. Its shipped caveats ride along unchanged: dead on an unbombed
+# target, and the bank is spent either way.
 ```
 
 ## before proto_powder_charge_spark
@@ -2653,116 +2525,74 @@ worth naming: two would be two aura applications and two reaction rolls.
 `target_has_debuff` predicate already used, so the rider asks the question the
 branch asked.
 
-## the Kokomi pool pass -- five new rows and one redesign (`EB-492`)
+## before proto_fr_curtain_rises
 
-Packet: `review/active/kokomi-pool-pass-2026-09-05.md`, off the readings of
-rounds 10 to 16. The finding the pass answers is one sentence: **the seats
-drafted Attacks and the pool's Attacks mostly carried no Plan line.** Of the
-pool's Attacks before this pass exactly one Common (Feint) had one, so a seat
-that took the damage it was offered planned on five turns in sixteen (round
-14) and read "Nothing is planned" sixteen times (round 10). Density in the
-OFFER, not in the starter -- the starter stands under R254 and R257.
+The Furina pool pass, one (`EB-493`); the packet is
+`review/active/furina-pool-pass-2026-09-05.md` and all four rows are FOLLOWS on
+the doctrine read (`review/records/card-audit-2026-09-04.md` sec.5.5).
 
-All six rows went through the doctrine audit before a tester saw them
-(`review/records/card-audit-2026-09-04.md` §5.4); three were re-priced off
-shipped cards after a first C6 read and the fourth read passed all of them.
-Every number here is a Prototype number, D by the ladder, and none of it is
-quotable (R215 B).
+WHAT THE ROUNDS SAID. Rounds 9 and 10 read the Salon as FURNITURE: one Deploy
+in the whole deck, most Companion plays printing "No member on stage: performs
+nobody", the kit's headline mechanic spent as text explaining why nothing
+happened -- and the two turns it was live were the best of the run. The shipped
+sheet offers three single-deploy Commons in twenty-three, all Skills of one
+shape, and neither seat drafted one. Round 9 also found no legal way to make
+her act: a member idle, no Companion card in hand, and nothing of Furina's own
+that asks the stage for anything. The four rows answer one reading each.
 
-### `proto_kk_riptide` -- the heavy AoE, at 2
+**Curtain Rises** (replaces *House Call*) is the second Deploy SHAPE: a deploy
+on an Attack, with the usher's Block as he arrives. Against *Cold Snap* (1
+energy: 6 damage, channel Frost) it is the same line with a member for an orb.
+A deploy on an Attack was new to the surface and needed nothing built -- the
+damage aims, the deploy is the owner's, and one card carries both because they
+target different things.
 
-First written at 1 energy (5 and 9) and ruled a strictly better Kurage's Oath
-(basic, 1: 3 and 7). Re-priced at 2, where Deep Current (1: 6 to ALL) is the
-cheaper now-line and the Plan premium is the brief's usual four. No new engine.
+**Second Course** (replaces *Dinner Service*) buys a member's second
+performance for three Encore, which is three Block she would otherwise hold:
+the hold-or-spend tension on a deploy. The price is the `encore_cost` GATE and
+NOT the `spend_encore` op -- the packet's sentence is "Unplayable below 3
+Encore", and `spend_encore` is the overdraw primitive, which would have made
+the card playable at 0 Encore for 3 HP. That is *Breathless*' rule and it is
+printed on *Breathless*. The upgrade takes the price to 2, Aria's own printed 5
+less the 2 she opens with (R258); it moves on the seats' word.
 
-### `proto_kk_pincer` -- the multi-hit Plan clause
+**Rolling Tide** (replaces *Undercurrent*) is the kit's own perform verb on a
+card she can draft -- one hit of the shipped card traded for it. With an empty
+stage it is a worse Undercurrent, which is the losing line the row is written
+around.
 
-`times:` on a planned `damage` clause, and it is a LOOP OF WHOLE HITS rather
-than a multiplier: three hits of 3 and one hit of 9 are different against an
-aura, against anything hung off a strike, and against a body that dies partway.
-The aim is re-read between passes, so a front enemy killed by the first hit
-hands the next one to the enemy behind it -- "leftmost alive" read three times
-rather than a second rule. `KokomiPlan.Hit` and `kokomi_plan._hit` loop in the
-same order; `PLAN_TIMES_OPS` is the flat hit and nothing else, because the two
-scaled damage kinds already derive their size from a count and a debuff applied
-twice in one beat is two stacks rather than two applications.
+**Guest List** (replaces *Blocking Notes*) puts An Invitation's verb in the
+pool at a price: an energy and no Exhaust, three Block short of a Stage
+Presence. THE EXHAUST IS THE ONE GUARDRAIL THIS PASS MOVES, and it is the only
+one of kickoff sec.9's four that is a balance rule rather than a structural
+fact -- this-combat-only, equal-rarity and the companion-plus-Guest-Star pool
+are all properties of the code, while "generators Exhaust" is a sheet field.
+`gen_klee_cards.blocked_reason` still refuses a non-Exhaust generator on any
+`docs/*-cards.yaml` row; the exemption is the `proto_` prefix and nothing else,
+so a row promoted to a shipped sheet meets the bar again on the way in.
 
-First written at 4s (8 and 12) and ruled a strictly better Feint (1: 6, Plan
-10); re-priced at 3s -- 6 now in two hits, 9 planned in three.
+THE ONE THING BUILT FOR THE PASS is an ARGUMENT and not an op:
+`salon_perform` learned `member:`, so *Second Course* can say "she performs
+once more" about the member it just deployed rather than about whoever stands
+at the front (a deploy appends, so the two are only the same on an empty
+stage). It rides the shipped verb for the reason the aimed Evoke does --
+`tools/lint_op_parity.py` compares the KEY SET of the sim's op registry against
+the drafter's priced-op table, so an extra field leaves the priced set
+identical while a `salon_perform_member` synonym would have bought a
+`DRAFTER_VERSION` stamp for a verb both engines already have. A named member
+who is not on stage takes the FRONT, which is the slot-6 ruling's fallback for
+the aimed Evoke, and the fact is emitted (`salon_perform_target_absent`) rather
+than left silent.
 
-### `proto_kk_flank` -- the intent-keyed set aim
+WHICH FOUR SHIPPED ROWS, and it is the packet's sec.5 D default: each replaced
+row is a plain number card of the same type and cost as its replacement, so the
+swap moves what the card does and nothing about where it sits. Common for
+Common in every case, so the offer odds do not move. The choice moves on the
+seats' word. The shipped sheet stands (R213 B) -- the seam is
+`furina_reframe.POOL_SUBS` and `FurinaReframeRoster.SwapOfferedRiders`, and
+with the arm off no surface can see a `proto_fr_` id.
 
-`target: enemies_intending_attack`, and it is the one aim that LOOKS BACK. The
-set is fixed when the Plan is WRITTEN, off the intents on the screen at that
-moment, which is R250's rule for an aimed Plan applied to a set: that is what
-the player is reading when they decide to write it, and re-asking the board at
-carry-out would answer about the NEXT turn's intents instead. An enemy whose
-intent later changes is still hit; one that died is skipped.
-
-WHERE THE SET IS HELD is the one place this arm stores anything about a body.
-The C# keeps `Creature.CombatId`s on the clause (`KokomiPlan.Planned.Targets`)
-because the game tears a dead creature down and a stored reference would be a
-use-after-free; tier0 keeps the `Enemy` objects, because nothing in that engine
-tears one down (`Enemy.alive` is a read of `hp`). Same semantics either way --
-"this body, if it is still alive".
-
-An EMPTY set is written down rather than refused, the shape an empty Crystal
-Collapse capture already has: the Plan is real, the strip has to show it, and
-what it carries out is nothing. The strip says so -- `Flank: nothing`, or the
-names it caught -- through the same label channel Crystal Collapse uses.
-
-The intent predicate is the arm's existing one, split in two rather than
-rewritten: `CurtainCallHooks.IntendsAttack` is now the per-creature half of the
-board-wide `EnemyIntendsAttack` the Furina arm already read, and
-`kokomi_plan._intends_to_attack` gained the `sleep_turns` clause its shipped
-twin `enemy_intends_attack` always had.
-
-### `proto_kk_well_laid` -- the morning, read from the damage side
-
-`amount_formula: {base: 2, per: 3, count: plans_carried_out_this_morning}` on a
-NOW-line: Tide Wall's count on a hit instead of Block, at 0 energy, with a
-floor of 2. With no Plan carried out it is a worse Strike; with three it is 11
-for free, the morning paid a second time. This is the pool-pass half of rounds
-12 and 13's "a second copy of Tide Chart, or a Common that reads the memory" --
-a second reader, on the damage side, rather than a second copy.
-
-THE COUNT IS THE ONE TIDE WALL READS. `KokomiOverhaulLedger.PlansThisMorning`
-/ `state.kk_plans_this_morning` is written once, at the drain, before the first
-clause runs, and cleared on the turn boundary -- so the morning a now-line sees
-and the morning a Plan clause sees are one fact rather than two counts that can
-drift. Sango Isshin's `plan_carried_out_this_turn` is the same fact as a
-yes/no and is cleared on the same line; the two part only where the arm's
-mid-turn doors fire (Change of Plans, The Moon Overlooks the Waters carry a
-Plan out INSIDE the turn), which is the printed difference between "this turn"
-and "this morning".
-
-### `proto_kk_feigned_retreat` -- both halves, only when planned
-
-Against Read the Field (1: 5 Block, Plan 10 Block) and Ambush (1: 5 damage,
-Plan 12): less of either, both at once, and only when planned. Two plan
-clauses, Block then damage, which the queue has carried since War Council.
-
-### `proto_kk_nereids_ascension` -- the Rare, redesigned in place
-
-From "Exhaust. Plan: for 2 turns, the Bake-Kurage carries out every Plan twice"
-to "The Bake-Kurage carries out every Plan twice", a Rare Power at 2 (1
-upgraded). Round 14: it "reads like the kit's payoff and behaves like a tax" --
-two energy, an Exhaust and a Plan slot for two turns of doubling, in a deck
-with two Plan cards to double, and written as a Plan it also spent the morning
-it was meant to pay for. The same rule is broken (the brief's rule 3, "once, in
-order") for the whole fight instead of two mornings, and it is no longer a Plan
-itself. Its price is two energy on a turn that writes no Plan, and every turn
-after that it pays only what the deck plans.
-
-THE POWER IS A MARKER. `CarryOutTimes` reads whether it is worn and never its
-amount, so a second copy doubles nothing further; there is no duration, so
-nothing ticks it. It is read PER ENTRY inside the drain loop, which still
-matters with the clause gone: a Plan can play a card (Moon's Reflection reaches
-one), so a morning can install the Ascension partway through and the Plans
-after it are doubled while the ones already carried out are not.
-
-THE `plan_twice` CLAUSE IS RETIRED, not left standing. It was the only row that
-spelled it, and a clause no row can spell is a rule nothing enforces -- so it
-came off `PLAN_KINDS`, off `effects.OPS`, off `KokomiPlan.Kind`, off the
-drafter's price table and off the pilot's duration carve-out, with
-`PlanTwicePower` and its tests, in the same commit.
+NO ` (proto)` SUFFIX ON THESE FOUR, unlike the rider copies above. The riders
+are COPIES of a shipped card and share its name, which is what the shadow
+suffix is for (`EB-419`); these are new rows with names of their own, so there
+is nothing to shadow.

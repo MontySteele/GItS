@@ -2591,13 +2591,57 @@ def _op_salon_perform(state: CombatState, fx: dict, card: Card) -> None:
     The member STAYS on stage: this is a performance, not a bow, and not a
     rotation. `amount: N` therefore performs the leftmost member N times;
     pair it with `salon_rotate` to spread the acts across the company.
+
+    `member:` IS THE AIM (`EB-493`), AN ARGUMENT AND NOT A SECOND OP. *Second
+    Course* deploys Mademoiselle Crabaletta and then says "she performs once
+    more", which is a promise about the member the card NAMED and not about
+    whoever stands at the front of the queue -- a deploy appends, so the two
+    are only the same on an empty stage. The aim rides the shipped verb for the
+    reason `_op_salon_bow`'s own aim does and which that docstring writes out:
+    `tools/lint_op_parity.py` compares the KEY SET of `OPS` against
+    `tier05.draft.STATIC_OP_PRICING`, and `_op_price` branches on the op name
+    and reads no argument of it, so an extra field leaves the priced-op set
+    identical and this is not a `DRAFTER_VERSION` event. A `salon_perform_
+    member` synonym would have bought a stamp for a verb the engine already
+    has.
+
+    NOT FLAG-GATED, which is where it differs from the Evoke's aim. That one is
+    gated because a SHIPPED row could name a member and must not become aimable
+    in a release world; no shipped row carries `member:` on this op, and the
+    only row that does is a quarantined prototype. The gate is the field.
+
+    A NAMED MEMBER WHO IS NOT ON STAGE takes the FRONT -- the slot-6 ruling's
+    fallback for the aimed Evoke, applied to the aimed performance ("an aimed
+    card that cannot find its member is an unaimed one, never a wasted one") --
+    and it is EMITTED rather than silent, for the D4 reason
+    `salon_evoke_target_absent` exists: the aim leaves no trace in the state
+    afterwards, so a display that wants to say "she called for Crabaletta and
+    Crabaletta was not there" must be able to. Its own event name and not the
+    Evoke's, because the two verbs miss for different reasons. C# twin:
+    `SalonMemberPower.PerformLeftmost`'s `aim` parameter.
+
+    WHICH INDEX DOES NOT ARISE. `salon_member_act` takes a member NAME and
+    reads its numbers out of `C.SALON_MEMBERS`, so two Crabalettas on one stage
+    perform identically and the aim only ever has to answer "is she here at
+    all".
     """
     p = state.player
     if not p.salon:
         state.emit("salon_perform_whiffed")
         return
+    named = fx.get("member")
+    if named is not None and named != "front":
+        if named not in C.SALON_MEMBERS:
+            raise ValueError(f"unknown salon member {named!r}")
+        if named not in p.salon:
+            state.emit("salon_perform_target_absent", member=named)
+            named = None
+    else:
+        named = None
     for _ in range(_amount(state, fx.get("amount", 1))):
-        if not salon_member_act(state, p.salon[0]):
+        # `named or p.salon[0]` re-reads the front INSIDE the loop, so an
+        # unaimed call is byte-identical to what this op has always done.
+        if not salon_member_act(state, named or p.salon[0]):
             break
 
 

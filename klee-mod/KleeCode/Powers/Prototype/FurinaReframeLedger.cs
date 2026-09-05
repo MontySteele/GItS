@@ -126,6 +126,17 @@ public sealed class FurinaReframeLedger
     /// <summary>Who the last missed aim named.</summary>
     public SalonMember? LastAbsentAim { get; private set; }
 
+    /// <summary>`EB-493`. Aimed PERFORMANCES whose named member was not on the
+    /// stage, mirroring the sim's <c>salon_perform_target_absent</c>. Kept
+    /// apart from the Evoke's count above for that count's own reason: the two
+    /// verbs miss for different reasons and a display that wants to say which
+    /// one happened must be able to tell them apart. The performance still
+    /// happens, on the front.</summary>
+    public int PerformTargetAbsences { get; private set; }
+
+    /// <summary>Who the last missed PERFORMANCE aim named.</summary>
+    public SalonMember? LastAbsentPerformAim { get; private set; }
+
     // ---- THE DRAIN (slice two) ---------------------------------------
 
     /// <summary>Drains, mirroring the sim's <c>fanfare_drained</c> event, and
@@ -186,6 +197,12 @@ public sealed class FurinaReframeLedger
     {
         EvokeTargetAbsences++;
         LastAbsentAim = named;
+    }
+
+    public void NotePerformTargetAbsent(SalonMember named)
+    {
+        PerformTargetAbsences++;
+        LastAbsentPerformAim = named;
     }
 
     public void NoteDrain(int drained)
