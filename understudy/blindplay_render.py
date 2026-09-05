@@ -616,11 +616,23 @@ def render(obs: dict[str, Any]) -> str:
             # the meters block was the one place two sources could both fire.
             if name in defined:
                 rule = METER_DEFINED_NOTE
+            # `EB-568`: the floor is a CLAUSE on this row, not a row. The
+            # r14 lane-2 seat met `Fanfare Floor 8` and `Fanfare Cap Bonus 8`
+            # as two unexplained meters beside a Fanfare that had sat at 8 for
+            # three fights, and had no route from either number to the card
+            # that bought them. The cap bonus needs no clause: it is already
+            # inside the `/{top}` this row prints, which is the honest place
+            # for a number whose whole meaning is how much of the maximum was
+            # bought.
+            floor = (you.get("fanfare_parts") or {}).get("floor")
+            bound = (f", and it cannot fall below {floor}"
+                     if name == "Fanfare" and floor else "")
             if top:
-                out.append(f"- {name}: {amount}/{top} — "
+                out.append(f"- {name}: {amount}/{top}{bound} — "
                            f"{rule or METER_CAPPED_NOTE}")
             else:
-                out.append(f"- {name}: {amount} — {rule or METER_NOTE}")
+                out.append(f"- {name}: {amount}{bound} — "
+                           f"{rule or METER_NOTE}")
         for pw in you["powers"]:
             out.append(_render_power(pw, "- "))
         out.append(f"- Piles: {c['piles']['draw']} in the draw pile, "

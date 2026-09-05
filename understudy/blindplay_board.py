@@ -100,11 +100,68 @@ ZERO_METERS: dict[str, frozenset[str]] = {
     "furina": frozenset({"Encore", "Fanfare"}),
 }
 
+# `EB-568`. THE TWO METERS THAT ARE PARTS OF THE FANFARE ROW, not rows.
+#
+# THE FIND (Furina r14 lane 2 (c) 1). Rapturous Applause put `Fanfare Floor 8`
+# and `Fanfare Cap Bonus 8` in the status list, unexplained, and the seat --
+# who had already read Fanfare sitting at 8 for three fights -- had no route
+# from either number to the card that made them. Neither is a currency
+# anybody holds, spends or plans around: they are the two ENDS of the Fanfare
+# row that is already on the page.
+#
+# NOT `INTERNAL_METERS`, which is the other way of dealing with a row nobody
+# can read: those four have a surface elsewhere that states their rule, so
+# hiding them loses nothing. These two have no such surface, so they are
+# FOLDED -- the floor becomes a clause on the Fanfare line and the cap bonus
+# is already inside the ceiling that line prints, which is the honest place
+# for a number whose whole meaning is "this much of the maximum was bought".
+#
+# KEYED BY THE PRINTED NAME, `ZERO_METERS`' convention and for its reason:
+# these are rows the render would otherwise print.
+FANFARE_PARTS: dict[str, str] = {
+    "Fanfare Floor": "floor",
+    "Fanfare Cap Bonus": "cap_bonus",
+}
+
 
 def _zero_meters(player: dict[str, Any]) -> frozenset[str]:
     """The meter names this board prints at 0. Empty for every other arm."""
     return ZERO_METERS.get(_fold(_text(player.get("character"))),
                            frozenset())
+
+
+def _meters(player: dict[str, Any], resources: Any) -> dict[str, int]:
+    """The rows the meters block prints.
+
+    NON-ZERO ONLY, for `qa_packet.build`'s reason: the wire reports every
+    meter the mod REGISTERED, so a board with no Spotlight on it would
+    otherwise print "Spotlight Mode: 0" and teach the tester something this
+    screen does not show. `EB-386`: and NOT the mod's own bookkeeping, see
+    `INTERNAL_METERS`. `EB-487`: except the arm's own two, which print their
+    zero -- see `ZERO_METERS` for why the ARM is asked and not the board.
+    `EB-568`: and never the two parts of the Fanfare row, see
+    `FANFARE_PARTS`.
+    """
+    if not isinstance(resources, dict):
+        return {}
+    return {_label(k): _int(v) for k, v in resources.items()
+            if k not in INTERNAL_METERS
+            and _label(k) not in FANFARE_PARTS
+            and (_int(v) or _label(k) in _zero_meters(player))}
+
+
+def _fanfare_parts(resources: Any) -> dict[str, int]:
+    """`{slot: amount}` for the Fanfare row's two ends (`EB-568`).
+
+    A ZERO IS LEFT OUT rather than entered, `_meter_max`'s rule: a floor of 0
+    is the default every Furina starts a run on, and a clause saying Fanfare
+    cannot fall below nothing is a sentence about nothing.
+    """
+    if not isinstance(resources, dict):
+        return {}
+    by_name = {_label(k): _int(v) for k, v in resources.items()}
+    return {slot: by_name[name] for name, slot in FANFARE_PARTS.items()
+            if by_name.get(name)}
 
 
 ALREADY_UPGRADED = "already upgraded; an upgraded copy cannot be upgraded again"
@@ -235,11 +292,10 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             # `INTERNAL_METERS`.
             # `EB-487`: except the arm's own two, which print their zero. See
             # `ZERO_METERS` for why the ARM is asked and not the board.
-            "meters": ({_label(k): _int(v) for k, v in resources.items()
-                        if k not in INTERNAL_METERS
-                        and (_int(v)
-                             or _label(k) in _zero_meters(p))}
-                       if isinstance(resources, dict) else {}),
+            "meters": _meters(p, resources),
+            # `EB-568`: the two numbers `_meters` took OUT of that map,
+            # because they are parts of the Fanfare row rather than rows.
+            "fanfare_parts": _fanfare_parts(resources),
             # `EB-181`: the CEILING beside the amount, per meter, where the
             # meter declares one. `{printed name: max}`, and a meter that
             # declares none is simply absent from this map -- so the row for

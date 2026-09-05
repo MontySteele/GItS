@@ -851,6 +851,72 @@ def test_the_arms_two_meters_print_their_zero_and_nobody_elses_does():
         assert f"- {hidden}: 0" not in furina
 
 
+def test_the_fanfare_row_carries_its_floor_and_the_two_meters_are_gone():
+    """`EB-568`, and it is the row.
+
+    Rapturous Applause put `Fanfare Floor 8` and `Fanfare Cap Bonus 8` in the
+    status list, unexplained, beside a Fanfare that had sat at 8 for three
+    fights -- and the r14 lane-2 seat had no route from either number to the
+    card that bought them. Neither is a currency anybody holds, spends or
+    plans around: they are the two ENDS of the Fanfare row already on the
+    page, so the floor becomes a clause on it and the cap bonus is already
+    inside the ceiling that row prints.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["character"] = "Furina"
+    state["player"]["resources"] = {
+        "KLEEMOD_FANFARE": 8, "KLEEMOD_FANFARE_FLOOR": 8,
+        "KLEEMOD_FANFARE_CAP_BONUS": 8}
+    page = blindplay.observe(state)
+
+    assert "- Fanfare: 8, and it cannot fall below 8 —" in page
+    assert "Fanfare Floor" not in page
+    assert "Fanfare Cap Bonus" not in page
+
+
+def test_a_floor_of_zero_says_nothing_about_a_bound():
+    """`_meter_max`'s rule: a floor of 0 is the default every Furina starts a
+    run on, and a clause saying Fanfare cannot fall below nothing is a
+    sentence about nothing."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["character"] = "Furina"
+    state["player"]["resources"] = {
+        "KLEEMOD_FANFARE": 4, "KLEEMOD_FANFARE_FLOOR": 0}
+    page = blindplay.observe(state)
+
+    assert "- Fanfare: 4 —" in page
+    assert "cannot fall below" not in page
+
+
+def test_the_bound_rides_the_row_that_declares_a_ceiling_too():
+    """Both halves on one line: the ceiling the meter declares and the floor
+    the cards bought, which is the whole of what the two hidden rows were
+    saying separately."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["character"] = "Furina"
+    state["player"]["resources"] = {
+        "KLEEMOD_FANFARE": 12, "KLEEMOD_FANFARE_FLOOR": 8}
+    state["player"]["resource_info"] = {
+        "KLEEMOD_FANFARE": {"amount": 12, "max": 35}}
+    page = blindplay.observe(state)
+
+    assert "- Fanfare: 12/35, and it cannot fall below 8 —" in page
+
+
+def test_the_floor_clause_is_the_fanfare_rows_alone():
+    """Every other meter keeps the row it always had -- the fold is about the
+    two numbers that are PARTS of Fanfare, not a new grammar for meters."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["character"] = "Furina"
+    state["player"]["resources"] = {
+        "KLEEMOD_ENCORE": 5, "KLEEMOD_FANFARE": 8,
+        "KLEEMOD_FANFARE_FLOOR": 8}
+    page = blindplay.observe(state)
+
+    assert "- Encore: 5 —" in page
+    assert page.count("cannot fall below") == 1
+
+
 def test_a_hand_printing_one_name_twice_says_an_enchant_would_not_show():
     """`EB-179`, gap three. The card builder emits no enchantment field, and
     the one place that bites a reader is a hand holding two cards they can see

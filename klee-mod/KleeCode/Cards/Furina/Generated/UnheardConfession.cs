@@ -41,7 +41,7 @@ public sealed class UnheardConfession : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Unheard Confession"),
-        ("description", "[gold]Fanfare[/gold] +{FanfareFloor:diff()}. Whenever your [gold]Fanfare[/gold] changes amount, gain 1 [gold]Block[/gold]."),
+        ("description", "[gold]Fanfare[/gold] +{FanfareFloor:diff()}, and cannot fall below {FanfareFloor:diff()}. Whenever your [gold]Fanfare[/gold] changes amount, gain 1 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
