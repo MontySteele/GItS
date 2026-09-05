@@ -232,17 +232,18 @@ def test_the_ascension_doubles_the_morning():
     assert len(state.player.hand) - before == 2
 
 
-def test_the_moons_now_copy_is_single_under_the_ascension():
-    """The exception the face used to admit none of: the now-copy runs once,
-    whatever the Ascension says about the morning."""
+def test_writing_a_plan_under_the_ascension_carries_nothing_out():
+    """`EB-570`. THE MOON OVERLOOKS THE WATERS IS WITHDRAWN, so there is no
+    now-copy for the Ascension to be asked about: writing banks the Plan and
+    the board waits for the morning, which is rule 2 whole."""
     state = _state(ascension=True)
-    state.player.powers[kokomi_plan.PLANS_ALSO_NOW] = 1
     before = len(state.player.hand)
 
     kokomi_plan.schedule(state, _plan_card([{"op": "draw", "amount": 1}]))
 
-    assert len(state.player.hand) - before == 1
+    assert len(state.player.hand) - before == 0
     assert len(state.kk_plan_queue) == 1
+    assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
 
 
 def test_the_face_and_the_power_tip_both_name_the_morning():

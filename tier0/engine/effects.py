@@ -1866,13 +1866,19 @@ def salon_slots(player) -> int:
 
 
 def _deploy_salon_members(state: CombatState, amount: int,
-                          member: str = "crabaletta") -> None:
+                          member: str = "crabaletta",
+                          free_performance: bool = False) -> None:
     """Salon v2 deploy (rework plan §1): the typed FIFO queue with Defect
     evoke geometry. Deploying into full slots bows the OLDEST member OUT
     (its unique bow) and the new member takes the vacated slot — the v1
     rule (the excess deploy bowed itself and never entered) is the
     archive. powers['salon_member'] mirrors len(queue) so every count
-    read (has_salon_members, the pilot, instruments) is unchanged."""
+    read (has_salon_members, the pilot, instruments) is unchanged.
+
+    `free_performance` (`EB-558`) is passed straight through to
+    `salon_member_act` and has exactly one caller:
+    `furina_reframe.field_opening_member`, the relic's arrival. Every DEPLOY a
+    card makes pays its 1 as it always has."""
     p = state.player
     if member != "random" and member not in C.SALON_MEMBERS:
         raise ValueError(f"unknown salon member {member!r}")
@@ -1915,7 +1921,7 @@ def _deploy_salon_members(state: CombatState, amount: int,
         # implementation, so the upkeep price, the dry three-quarters and the
         # Focus term are inherited rather than restated.
         if furina_reframe.manual_active(p):
-            salon_member_act(state, entering)
+            salon_member_act(state, entering, free=free_performance)
         # Fortissimo Guard (Curtain Call B, R85): block per DEPLOY, per
         # deployment event rather than per card -- Full Ensemble's three
         # deploys are three cues. Direct add + emit, the _salon_bow block
@@ -6435,7 +6441,8 @@ def salon_aim_pool(living: list) -> list:
     return standing or living
 
 
-def salon_member_act(state: CombatState, member: str) -> bool:
+def salon_member_act(state: CombatState, member: str,
+                     free: bool = False) -> bool:
     """ONE member's slot passive, with the full standard bill: the Encore
     upkeep, the dry three-quarters when it goes unpaid, the Focus/Grand-Salon
     scaling, the burst particle, and the `salon_tick` telemetry row.
@@ -6446,6 +6453,16 @@ def salon_member_act(state: CombatState, member: str) -> bool:
     this shape exists to make impossible -- a card that performs a member
     must not be able to drift from the upkeep that performs the same member.
 
+    `free` (`EB-558`, R260's arithmetic) IS THE ONE PERFORMANCE NOBODY BUYS:
+    the relic's opening arrival. It performs PAID -- full value, not the dry
+    three-quarters -- and spends nothing, which is [USER]'s own analogy for the
+    pick ("one free Osty"): the Necrobinder's pet is summoned and out, and
+    nothing on turn one is billed for it being there. It is a PARAMETER on this
+    one function rather than a branch at the fielding site for this file's
+    standing reason -- a member performing has one implementation, and a caller
+    that wanted a free one by writing its own body would be the drift the shape
+    exists to prevent.
+
     Returns False when the stage cannot act at all (the player is dead, or
     there is no living enemy left to act against) -- the caller's break
     condition, kept here so the on-demand verb inherits it rather than
@@ -6455,9 +6472,9 @@ def salon_member_act(state: CombatState, member: str) -> bool:
     if not p.alive or not state.living_enemies:
         return False
     spec = C.SALON_MEMBERS[member]["tick"]
-    paid = p.encore >= C.SALON_TICK_ENCORE_COST
+    paid = free or p.encore >= C.SALON_TICK_ENCORE_COST
     state.emit("salon_tick", member=member, paid=paid)
-    if paid:
+    if paid and not free:
         # No `card`: the upkeep bill is the STAGE's, not any one card's,
         # and the per-member cut already exists on the `salon_tick` row
         # that tier05.encore_telemetry reads.

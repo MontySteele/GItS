@@ -364,15 +364,32 @@ def field_opening_member(state) -> None:
     SHE PERFORMS ON ARRIVAL, because this goes through
     `effects._deploy_salon_members` -- the one deploy -- and the arm's
     deploy-performs clause lives inside it. That is the ruling read straight:
-    the relic deploys, and a deploy performs. The consequence is that the
-    opening Encore (R258) pays this first performance's 1, so turn one opens on
-    `OPENING_ENCORE` minus `C.SALON_TICK_ENCORE_COST` rather than on the full
-    bank.
+    the relic deploys, and a deploy performs.
 
-    THE SITE IS `grant_opening_encore`'s, one line later and AFTER it: a
-    performance paid out of a pool that had not been filled yet would act dry
-    at three-quarters on the one turn the player could not have done anything
-    about it. `== 1` rather than `<= 1`, so an extra first turn cannot field
+    AND THE ARRIVAL IS FREE (`EB-558`, 2026-09-05). It was not at first, and
+    the arithmetic was the defect: the performance paid
+    `C.SALON_TICK_ENCORE_COST` out of the opening bank, so turn one opened on 1
+    Encore and could buy NEITHER of the two doors R258 sized its 2 for -- a
+    Spotlight designation and a wet performance both cost 2, and the pick was
+    sized to buy exactly one of them. [USER]'s own analogy for R260 is the
+    rule: "one free Osty". The Necrobinder's pet is summoned and out and
+    nothing on turn one is billed for it being there, so the relic's member
+    arrives, performs PAID -- full value, not the dry three-quarters -- and
+    spends nothing. R258's 2 stands untouched and turn one opens on all of it
+    with the stage occupied.
+
+    THE FREE PASS IS THE ONE PERFORMANCE AND NOT THE TURN. Everything after it
+    pays: next turn's upkeep bills her 1 like any member, and every DEPLOY a
+    card makes pays as it always has. `free=` is a parameter on
+    `salon_member_act` -- the one implementation of a member acting -- rather
+    than a branch written here, so this arrival cannot drift from the upkeep
+    that performs the same member.
+
+    THE SITE IS `grant_opening_encore`'s, one line later and AFTER it. The
+    ordering no longer decides the arithmetic now that the arrival is free, and
+    it stays where it is: the mint and the pilot both read a bank, and a
+    performance recorded before the bank exists would be a different turn one
+    on paper. `== 1` rather than `<= 1`, so an extra first turn cannot field
     twice. The mod's twin is `FurinaReframeOpening.FieldOpeningMember`.
     """
     from tier0.engine import effects              # late: avoids the cycle
@@ -382,7 +399,7 @@ def field_opening_member(state) -> None:
     if member is None:
         return
     state.emit("fr_opening_stage", member=member)
-    effects._deploy_salon_members(state, 1, member)
+    effects._deploy_salon_members(state, 1, member, free_performance=True)
 
 
 def evoke_focus_mult(player) -> int:

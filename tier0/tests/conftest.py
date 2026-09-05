@@ -65,6 +65,38 @@ def _fresh_blindplay_fight(tmp_path_factory):
     faces._FIGHT_STORE_DIR = held
 
 
+# `EB-401`. THE DECK'S MEMORY IS THE SAME HAZARD, and it is the one the
+# push-gate flake was actually about (fixer I's cause read).
+#
+# `_blindplay-deck-lane0.json` is one file per LANE, under `understudy/logs`,
+# and the whole suite runs on lane 0 -- so sixteen xdist workers share it. The
+# tests that drive the deck across a process boundary passed alone and failed
+# intermittently under `-n`: `test_the_map_prints_the_gold_and_the_deck` is the
+# one that showed it, reading a deck another worker had just forgotten or just
+# written. That is a shared-file race and not a flake.
+#
+# THE FIGHT STORE'S FIXTURE, VERBATIM, one store over: each worker gets its own
+# directory (`getbasetemp` is already per worker), the store is MOVED rather
+# than only emptied, and the real one under `understudy/logs` is never touched
+# by a test. The in-process cache is cleared at both ends by `forget_deck`, so
+# a test that never writes cannot inherit a neighbour's row either.
+#
+# IMPORTED INSIDE THE FIXTURE, for the reason the fixture above states: a
+# top-level `understudy` import in this conftest would put the whole blind-play
+# package in front of every test in the tier0 suite, including the fences that
+# assert what may import what.
+@pytest.fixture(autouse=True)
+def _fresh_blindplay_deck(tmp_path_factory):
+    from understudy import blindplay_faces as faces
+    store = tmp_path_factory.getbasetemp() / "blindplay-deck"
+    store.mkdir(parents=True, exist_ok=True)
+    held, faces._DECK_STORE_DIR = faces._DECK_STORE_DIR, store
+    faces.forget_deck()
+    yield
+    faces.forget_deck()
+    faces._DECK_STORE_DIR = held
+
+
 # --- THE SEAM FAMILY, FOR THE FENCES THAT READ SOURCE ----------------------
 # `EB-180` split `understudy/soak.py`, `blindplay.py` and `staged_turn.py`
 # into one module per concern. Half a dozen fences in this suite are written

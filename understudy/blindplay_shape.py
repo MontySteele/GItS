@@ -57,6 +57,20 @@ BOMB_GROWTH = 4
 #: reason and held in step from the test side.
 SHATTER_DAMAGE = 6
 
+#: `EB-567`. THE TWO NUMBERS THAT MAKE TURN ONE A DECISION under the Furina
+#: reframe: the Encore she opens a combat with (R258, `EB-479`) and what
+#: Ethereal Spotlight charges (R228). They are EQUAL, which is the whole
+#: shape -- the opening buys the Spotlight exactly once, and one performance
+#: spends the Encore that would have bought it.
+#:
+#: Spelled here for `CHARGE_SOURCE_LINE`'s reason -- this module may not reach
+#: `tier0` -- and held in step from the other side against
+#: `furina_reframe.OPENING_ENCORE` and
+#: `furina_reframe.SPOTLIGHT_DESIGNATE_ENCORE_COST`, which
+#: `lint_constant_parity` already pins to the mod's own pair.
+FURINA_OPENING_ENCORE = 2
+SPOTLIGHT_ENCORE_COST = 2
+
 #: `EB-535`. THE COMPANION SPARK, on the two numbers the Hexerei row prints.
 #: `KleeCompanionSpark.Base` and `.MaxPerPlay` in the mod, which are the kit
 #: declaration LAW:145 obliges Klee's kit to make, mirrored here for
@@ -64,6 +78,15 @@ SHATTER_DAMAGE = 6
 #: numbers are held in step from the test side and a retune goes red there.
 COMPANION_SPARK = 1
 COMPANION_SPARK_MAX = 3
+
+#: `EB-560`. THE SPARK A KLEE COMBAT OPENS WITH, `KleeOverhaulLaw.OpeningSpark`
+#: in the mod and `C.KLEE_OVERHAUL_OPENING_SPARK` in the sim, mirrored here for
+#: `BOMB_GROWTH`'s reason and held in step from the test side. R242 pick 1 put
+#: the opening bank into rule 4 and the Spark keyword tip says it -- but that
+#: tip is raised by a card that PRINTS the word, so a seat holding no
+#: Spark-priced card meets the meter row and nothing else: "Where Spark comes
+#: from is not on the combat screen" (Klee r20 lane 2).
+OPENING_SPARK = 1
 
 # `EB-340`. How long an aura clings, as `ReactionConstants.AuraDurationTurns`
 # sets it and the four `Applies <element>` tips interpolate it. Same discipline

@@ -289,11 +289,47 @@ public sealed class FurinaReframeLedger
 
     public void NoteReplay(string card) => _replays.Add(card);
 
+    // ---- `EB-564`: THE EVOKE WITH NOTHING NAMING IT -------------------
+    //
+    // WHAT THE SEAT SAW (Furina r14 lane 1 (c) 2). The Evoke fired twice, on
+    // the elite's turns 5 and 7, and "the Salon log printed the two
+    // performances and never printed the Evoke. I only knew it had happened
+    // by reading the auras" -- Encore jumping by three and every body wearing
+    // Hydro were the whole evidence for the kit's biggest single beat.
+    //
+    // WHY THE PERFORMANCE LIST COULD NOT CARRY IT. An Evoke is a BOW, and a
+    // bow is not a performance: `PerformMember` is the one site that files a
+    // `Performed` row, and `Bow` never passes through it. Chevalmarin's bow
+    // also does something no `Performed` row can say -- it applies Hydro to
+    // EVERY enemy and grants a flat Encore, with no single target and no
+    // damage figure. So this is its own list with its own fields, beside the
+    // performances the way `_replays` is.
+    //
+    // PER TURN, cleared with the performances: it answers "what happened on
+    // the turn I am looking at", the same question that list answers, on the
+    // same boundary.
+
+    /// <summary>One Evoke: who bowed, what the bow did, and what it minted.
+    /// `AuraAll` is Chevalmarin's whole-board Hydro, which has no target to
+    /// name; `Target`/`CombatId`/`Damage` are Crabaletta's hit; `Block` is the
+    /// Usher's.</summary>
+    public readonly record struct Evoked(
+        string Member, int FocusMult, int Fanfare, int Encore,
+        bool AuraAll, string? Target, string? CombatId, int Damage, int Block);
+
+    private readonly List<Evoked> _evokes = new();
+
+    /// <summary>This turn's Evokes, in the order they happened.</summary>
+    public IReadOnlyList<Evoked> EvokedThisTurn => _evokes;
+
+    public void NoteEvoked(Evoked evoked) => _evokes.Add(evoked);
+
     /// <summary>The turn boundary, and the only one this class has.</summary>
     public void ClearPerformances()
     {
         _performances.Clear();
         _replays.Clear();
+        _evokes.Clear();
     }
 
     /// <summary>
@@ -339,6 +375,23 @@ public sealed class FurinaReframeLedger
         // this list is the only thing that says a second PLAY happened at all.
         snapshot["replayed"] = For(creature).Replays
             .Select(card => (object?)card)
+            .ToList();
+        // `EB-564`. BESIDE them for the same reason and a stronger one: an
+        // Evoke is a BOW, so it is in neither list above, and the seat that
+        // met two of them had to read the auras to know they had happened.
+        snapshot["evoked"] = For(creature).EvokedThisTurn
+            .Select(row => (object?)new Dictionary<string, object?>
+            {
+                ["member"] = row.Member,
+                ["focus_mult"] = row.FocusMult,
+                ["fanfare"] = row.Fanfare,
+                ["encore"] = row.Encore,
+                ["aura_all"] = row.AuraAll,
+                ["target"] = row.Target,
+                ["combat_id"] = row.CombatId,
+                ["damage"] = row.Damage,
+                ["block"] = row.Block,
+            })
             .ToList();
         // `EB-496`'s sibling, `EB-506`: WHO IS AT THE FRONT, and in what order
         // the rest will follow.

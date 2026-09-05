@@ -576,3 +576,41 @@ def test_the_mod_swaps_exactly_the_rows_the_sim_swaps():
              if re.search(rf"\b(?:FurinaGen\.)?{re.escape(cls)}\b", body)}
 
     assert named == set(FR.POOL_SUBS) | set(FR.POOL_SUBS.values())
+
+
+# ======================================================================
+# `EB-566`: DEXTERITY UNDER THE ARM -- READ AND FOUND NOT A DEFECT
+# ======================================================================
+
+def test_dexterity_lifts_block_under_the_arm_and_the_face_already_carries_it(
+        arm):
+    """`EB-566`, READ 2026-09-05 AND CLOSED AS NOT A DEFECT.
+
+    The round-14 lane-1 seat filed "Dexterity does nothing under the arm" off
+    four measurements with Dexterity 1 from Oddly Smooth Stone: Charlotte
+    printed 5 and Guest List printed 4 for Block 9; Lynette printed 8 and gave
+    8; Stage Presence printed 7 and gave 7. Every one of those printed numbers
+    is the row's base PLUS ONE -- Charlotte 4, Guest List 3, Lynette upgraded
+    7, Stage Presence 6 -- so Dexterity had already landed by the time the
+    seat read the face, and the delivered Block matched the face because the
+    face was the answer.
+
+    THE FACE INCLUDES IT ON PURPOSE, in both engines: a `BlockVar` carries
+    `ValueProp.Move`, which is the prop Dexterity reads, and the preview runs
+    the same hook pass the play does (`SpotlightSystem.SpotlitBlockVar`'s
+    header states that order and why). The sim's `powers.modify_block_gained`
+    is the one funnel every Block clause here takes.
+
+    WHAT THE SEAT ACTUALLY MET is a legibility fact and not an arithmetic one:
+    a folded face cannot be told apart from an unfolded one, so a relic that
+    is working looks like a relic that is not -- and this seat refused a draft
+    (Gorou's War Banner) and a potion on that reading. That is worth knowing;
+    it is not this row's Block path, and there is no Block path to route.
+    """
+    for cid, printed in (("stage_presence", 6),
+                         ("charlotte_enduring_frosthelm", 4),
+                         ("proto_fr_guest_list", 3)):
+        st = furina_state()
+        st.player.powers["dexterity"] = 1
+        effects.resolve_card(st, loader.get_card(cid))
+        assert st.player.block == printed + 1, cid

@@ -34,6 +34,9 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKoJumpyDumpty : CustomCardModel
 {
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Innate };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForMine(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
 

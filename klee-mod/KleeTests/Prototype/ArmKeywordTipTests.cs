@@ -252,8 +252,11 @@ public class ArmKeywordTipTests
         // priced two fights on it. The reason those miss is what the clause
         // leads with now: a Bomb's hit is not an Attack. `EB-361`'s jump rule
         // shares the 135 characters with it: "their" and "to a survivor" paid.
+        // `EB-555` DEFINED THE CAP inside that clause, because the word was
+        // printed on two tips of one screen and defined on neither.
         Assert.Contains("Not an Attack: only [gold]Vulnerable[/gold] and a cap "
-                      + "move it.", printed);
+                      + "on the ", printed);
+        Assert.Contains("enemy's HP loss move it.", printed);
         Assert.Contains("Kills move it on.", printed);
 
         // `EB-89`, read the only way it can be read: the growth rate is NOT a

@@ -627,10 +627,14 @@ def test_sango_isshin_pays_the_quarter_only_after_a_plan_was_carried_out(overhau
 
 
 def test_the_condition_is_written_wherever_a_plan_is_carried_out(overhaul):
-    """"Carried out" is one event with three doors -- the morning queue,
-    Change of Plans and The Moon Overlooks the Waters -- and the flag is
-    written at the bottom of `_resolve_entry`, which all three pass through.
-    It is also a per-TURN fact: the boundary clears it."""
+    """"Carried out" is one event with two doors -- the morning queue and
+    Change of Plans -- and the flag is written at the bottom of
+    `_resolve_entry`, which both pass through. It is also a per-TURN fact: the
+    boundary clears it.
+
+    TWO DOORS AND NOT THREE SINCE `EB-570`: The Moon Overlooks the Waters was
+    the third and is withdrawn, so WRITING a Plan now carries nothing out.
+    """
     st = kokomi_state()
     kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 1}]))
     assert st.kk_plan_carried_out_this_turn is False   # written, not carried
@@ -640,9 +644,10 @@ def test_the_condition_is_written_wherever_a_plan_is_carried_out(overhaul):
     kokomi_plan.roll_turn(st)
     assert st.kk_plan_carried_out_this_turn is False
 
-    # And Moon's play-time resolution is the third door.
-    st.player.powers[kokomi_plan.PLANS_ALSO_NOW] = 1
+    # And the morning is the other door.
     kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 1}]))
+    assert st.kk_plan_carried_out_this_turn is False   # written, not carried
+    kokomi_plan.resolve_all(st)
     assert st.kk_plan_carried_out_this_turn is True
 
 
@@ -782,19 +787,38 @@ def test_the_queue_is_drained_before_the_first_clause_runs(overhaul):
     assert [e.card_id for e in st.kk_plan_queue] == ["proto_kk_child"]
 
 
-def test_plans_also_happen_now_and_are_still_queued(overhaul):
-    """The Moon Overlooks the Waters, and "also" taken at its word -- the C#'s
-    reading, with its argument: reading it as "instead" would DELETE rule 2
-    rather than break it."""
+def test_writing_a_plan_carries_nothing_out(overhaul):
+    """`EB-570`. THE MOON OVERLOOKS THE WATERS IS WITHDRAWN, so writing is
+    writing: the Plan is queued and the board does not move until the morning.
+
+    THE ROW WAS THE ONLY WAY IN. "Plans also happen now" deleted the kit's one
+    question rather than answering it -- rule 2 IS the delay -- and Battle
+    Plan is why no smaller shape reached it: its Plan line is double its play
+    line, so ANY now-copy takes the price off waiting. The withdrawal is
+    Rolling Tide's (`EB-552`), one arm over: the row and its pins left the
+    surface under R213 B's deletion rule.
+    """
     enemy = make_enemy(hp=40)
     st = kokomi_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.PLANS_ALSO_NOW] = 1
     kokomi_plan.schedule(st, plan_card([{"op": "damage", "amount": 6,
                                          "target": "front_enemy"}]))
-    assert enemy.hp == 34                      # it happened NOW
-    assert len(st.kk_plan_queue) == 1          # and it is still queued
+    assert enemy.hp == 40                      # nothing happened NOW
+    assert len(st.kk_plan_queue) == 1          # it is queued, whole
     kokomi_plan.resolve_all(st)
-    assert enemy.hp == 28
+    assert enemy.hp == 34
+
+
+def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
+    """`EB-570` from the other side: the row is not offerable, its power is
+    not a name this engine knows, and the pool moved by exactly one."""
+    from tier0 import constants as C
+    from tier0.content import loader
+
+    assert "proto_kk_the_moon_overlooks_the_waters"         not in C.KOKOMI_OVERHAUL_POOL_IDS
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 34
+    assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
+    ids = {card.id for card in loader.prototype_cards()}
+    assert "proto_kk_the_moon_overlooks_the_waters" not in ids
 
 
 def test_change_of_plans_carries_out_the_front_and_removes_it(overhaul):
@@ -920,22 +944,26 @@ def test_two_plans_in_one_morning_pay_the_bus_once(overhaul):
     assert st.player.block == 3
 
 
-def test_the_bus_pays_the_also_now_resolution_too(overhaul):
-    """The C#: "the notify at the bottom is the only place that fires -- so The Moon
-    Overlooks the Waters' extra resolution pays them too, which is what 'also
-    happen now' says."
+def test_the_bus_pays_change_of_plans_early_resolution_too(overhaul):
+    """The C#: "the notify at the bottom is the only place that fires", so
+    every door onto a carry-out pays the bus. Since `EB-570` withdrew The Moon
+    Overlooks the Waters, Change of Plans is the mid-turn door that pin is
+    about.
 
-    SINCE 2026-09-02 THE TURN IS THE CAP, so what "pays them too" now means is
-    that the extra resolution is what CLAIMS the turn's payout when it happens
+    SINCE 2026-09-02 THE TURN IS THE CAP, so what "pays them too" means is
+    that the early resolution is what CLAIMS the turn's payout when it happens
     first -- the morning that follows it in the same turn adds nothing, and the
-    NEXT turn pays again. The alternative reading, a bus that skipped the
-    now-resolution, would make Moon turn Song of Pearls off for a turn.
+    NEXT turn pays again. The alternative reading, a bus that skipped the early
+    resolution, would make Change of Plans turn Song of Pearls off for a turn.
     """
     st = kokomi_state()
     st.player.powers[kokomi_plan.SONG_OF_PEARLS] = 3
-    st.player.powers[kokomi_plan.PLANS_ALSO_NOW] = 1
-    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
-    assert st.player.block == 3                 # the now-resolution
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_a"))
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_b"))
+    kokomi_plan.resolve_front(st)               # Change of Plans' door
+    assert st.player.block == 3                 # the early resolution
     kokomi_plan.resolve_all(st)
     assert st.player.block == 3                 # the morning's is the cap
     kokomi_plan.roll_turn(st)

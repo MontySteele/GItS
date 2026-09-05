@@ -103,7 +103,11 @@ reading.
 
 - **`EB-561` to `EB-563` minted; `EB-447`, `EB-249`-`EB-251` cited.**
 - **The Moon, read at the door the same evening:** the now-copy at half
-  (`EB-570`, D default), so writing is worse than playing exactly when
-  the whole number is needed now; round 21 reads it.
+  was tried first, then a one-turn Exhaust Skill; the doctrine audit
+  returned REQUIRES_MODIFICATION on C1 for both, on Battle Plan (its
+  Plan line is double its play line, so any now-copy removes waiting's
+  price). The card is **withdrawn from the arm's offer** as Rolling Tide
+  was (`EB-570`, D default; ledger §5.9). Nereid's Ascension stays the
+  one rule-breaking Rare.
 - **The two records are the round's evidence.** Lane 1's death is an
   Infested split at Ascension 2, not a kit reading.

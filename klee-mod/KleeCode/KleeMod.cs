@@ -312,6 +312,12 @@ public static class KleeMod
                     // directly player-visible as the raw key.
                     [Cards.FurinaRiderTips.SpotlightLastsKey + ".title"] =
                         "Lit for this combat",
+                    // `EB-567`: the WINDOW, beside the duration above. Two
+                    // rows because they are two facts -- how long the
+                    // lighting lasts is about the next fight, and this is
+                    // about the only turn the Encore can buy it.
+                    [Cards.FurinaRiderTips.SpotlightWindowKey + ".title"] =
+                        "Buy it before anything performs",
 
                     // B5: the member tips the deploy faces hand off to. Only
                     // the TITLES are rows -- the bodies are built live in

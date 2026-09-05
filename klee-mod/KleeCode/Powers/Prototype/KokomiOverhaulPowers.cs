@@ -115,28 +115,6 @@ public sealed class SongOfPearlsPower
 }
 
 /// <summary>
-/// The Moon Overlooks the Waters (Rare): "Plans also happen now, as you write
-/// them." Rule 2's delay is gone.
-///
-/// It stores nothing and hooks nothing. <see cref="KokomiPlan.Schedule"/> asks
-/// for it at the one moment the question can be asked -- as a Plan is written
-/// -- because the extra resolution is a property of the WRITING, and a hook
-/// would have to reconstruct which Plans were new.
-/// </summary>
-public sealed class PlansAlsoNowPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "The Moon Overlooks the Waters"),
-        ("description", "[gold]Plans[/gold] also happen now, as you write them."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary>
 /// The Clouds Like Waves Rippling (Rare): "Whenever you apply a debuff to an
 /// enemy, gain 2 Block."
 ///
@@ -382,8 +360,7 @@ public sealed class ShellGuardPower : PowerModel, ILocalizationProvider
 /// takes a morning, it lasts the fight instead of two turns, and its price is
 /// two energy on a turn that writes no Plan.
 ///
-/// IT STORES NOTHING AND HOOKS NOTHING, exactly as
-/// <see cref="PlansAlsoNowPower"/> does and for the same reason:
+/// IT STORES NOTHING AND HOOKS NOTHING:
 /// <c>KokomiPlan.CarryOutTimes</c> asks for it at the one moment the question
 /// can be asked -- inside the drain loop, before each entry -- and a hook would
 /// have to reconstruct which Plans were still owed. The stack is a marker, so a

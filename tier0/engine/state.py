@@ -1343,9 +1343,9 @@ class CombatState:
     kk_once_per_turn: set[str] = field(default_factory=set)
     # QUARANTINED (C.KOKOMI_OVERHAUL): did the Bake-Kurage carry out a Plan
     # this turn? Sango Isshin's condition, written at the ONE place a Plan is
-    # carried out (`kokomi_plan._resolve_entry`) so the dawn resolution, Change
-    # of Plans' early one and The Moon Overlooks the Waters' play-time one all
-    # count -- they all carry a Plan out. `KokomiOverhaulLedger`'s twin.
+    # carried out (`kokomi_plan._resolve_entry`) so the dawn resolution and
+    # Change of Plans' early one both count -- they each carry a Plan out.
+    # `KokomiOverhaulLedger`'s twin.
     kk_plan_carried_out_this_turn: bool = False
     # QUARANTINED (C.KOKOMI_OVERHAUL): THE COMPANION CARDS SHE PLAYED THIS
     # TURN, in play order -- Crystal Collapse's "the last other Companion card

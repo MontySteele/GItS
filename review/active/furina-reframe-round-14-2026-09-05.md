@@ -1,6 +1,6 @@
 Status: OPEN (no pick; the defaults in §5 are applied)
 
-# Furina round fourteen: the withdrawn card was not missed, Second Course waits on Encore not price, and Dexterity does nothing
+# Furina round fourteen: the withdrawn card was not missed, Second Course waits on Encore not price, and a folded face reads as an unfolded one
 
 Written 2026-09-05, under the Prototype loop. Two blind Opus seats on
 `0.2.2753+proto` (round-19 head `a2eb3675`, fixer M in: Second Course at 1
@@ -60,12 +60,16 @@ all act, one Deploy never filling three slots. R260 (this afternoon) puts
 Crabaletta on stage at combat start; round 15 reads whether the turn-one
 Companion card performs, and whether the Evoke is reached by a natural deck.
 
-**Dexterity does nothing under the arm.** Lane 1 measured it four ways:
-Charlotte 5 plus Guest List 4 gave Block 9, Lynette 8 gave 8, Stage
-Presence 7 gave 7, all with Dexterity 1 on the state from Oddly Smooth
-Stone. It also cost a draft: the seat refused Gorou's War Banner on it.
-`EB-390` read Dexterity lifting Dig In and Barbara under Klee, so the miss
-is the Furina arm's Block path (`EB-566`).
+**Dexterity was applying; the face had already folded it.** Lane 1
+"measured" it four ways (Charlotte 5 plus Guest List 4 gave Block 9,
+Lynette 8 gave 8, Stage Presence 7 gave 7) and called it dead. Fixer P's
+read of the same screens: every printed number was already base plus one
+(Charlotte 4, Guest List 3, Lynette+ 7, Stage Presence 6), so the delivered
+Block matched the face exactly, in both engines. Not a defect (`EB-566`,
+rewritten with a pin). The finding underneath is legibility: a face that
+has folded a modifier is indistinguishable from one that has not, and this
+seat refused a draft (Gorou's War Banner) and would have refused a potion
+on that reading.
 
 **The Spotlight window is the kit's first decision and it is unprinted.**
 Both seats: Ethereal Spotlight costs 2 Encore, the fight opens with 2, and
@@ -121,18 +125,19 @@ here is a strength reading.
 
 ## 4. The smallest interventions, ranked
 
-1. **`EB-566` before any Block number is read again:** a Dexterity that
-   does nothing poisons every Block reading and every Dexterity draft.
-2. **`EB-567` and `EB-564`:** the first decision and the Evoke, both taught
-   by the screen after the fact or not at all.
+1. **`EB-567` and `EB-564`:** the first decision and the Evoke, both taught
+   by the screen after the fact or not at all (built by fixer P).
+2. **The folded face** (`EB-566`, not a defect): whether a face should say
+   when a modifier is already inside its number is a legibility question for
+   the next seat that meets Dexterity, not a build.
 3. **Round 15 on R260's build:** the turn-one Companion card with a member
    on stage; Second Course with the stage occupied; whether a natural deck
    reaches the Evoke.
 
 ## 5. Defaults applied (D and E), disclosed
 
-- **`EB-564` to `EB-568` minted; `EB-390`, `EB-410`, `EB-447`, `EB-463`,
-  `EB-507`, `EB-553` cited.**
+- **`EB-564` to `EB-568` minted (`EB-566` since read as not a defect);
+  `EB-390`, `EB-410`, `EB-447`, `EB-463`, `EB-507`, `EB-553` cited.**
 - **Second Course stays at 1 Encore; Rolling Tide stays withdrawn; Aria+
   stays without Innate.** Each read once on this build; none moves.
 - **The two records are the round's evidence.**

@@ -185,8 +185,7 @@ def test_the_starter_is_the_canonical_ten():
 
 def test_the_pool_is_all_thirty_of_the_slices_rows():
     """Slice draft 6 sec.4, whole. Pinned rather than described because it is
-    the slice's own scope statement, and because -- unlike the Klee arm, which
-    dropped Vermillion Pact on its packet's own escape -- NOTHING drops here.
+    the slice's own scope statement.
 
     TWENTY-EIGHT since `EB-335` (R246 pick 2): the slice's 26 plus Tide Wall
     and Shell Guard, the kit's own defence in act 2. THIRTY since round 9
@@ -195,10 +194,17 @@ def test_the_pool_is_all_thirty_of_the_slices_rows():
     withdrawn on the R253 charter audit and are not on the surface.
     THIRTY-FIVE since the pool pass (`EB-492`), which put the offer's Plan
     density on the Attacks: Riptide, Pincer, Flank, Well Laid and Feigned
-    Retreat."""
+    Retreat.
+
+    THIRTY-FOUR SINCE `EB-570`, the loop's cut and the first row this arm has
+    dropped: The Moon Overlooks the Waters deleted the kit's one question --
+    rule 2 IS the delay, and Battle Plan's Plan line is double its play line,
+    so any now-copy took the price off waiting. Its row and its pins left the
+    surface under R213 B's deletion rule, exactly as Rolling Tide's did one
+    arm over (`EB-552`)."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 35
-    assert len(set(ids)) == 35
+    assert len(ids) == 34
+    assert len(set(ids)) == 34
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
     assert {"proto_kk_tide_chart", "proto_kk_ripple"} <= set(ids)
@@ -206,6 +212,7 @@ def test_the_pool_is_all_thirty_of_the_slices_rows():
             "proto_kk_well_laid", "proto_kk_feigned_retreat"} <= set(ids)
     assert "proto_kk_held_tide" not in ids
     assert "proto_kk_tidal_rhythm" not in ids
+    assert "proto_kk_the_moon_overlooks_the_waters" not in ids
 
 
 def test_the_arm_carries_exactly_two_rule_numbers():
@@ -280,17 +287,21 @@ def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
 
 
 def test_the_pool_keeps_the_packets_rarity_split(overhaul):
-    """19 Common, 11 Uncommon, 5 Rare. The packet's sec.4 count was 13/8/5;
+    """19 Common, 11 Uncommon, 4 Rare. The packet's sec.4 count was 13/8/5;
     `EB-335`'s two defensive rows are both Uncommon (R246 pick 2), which is
     where the round-four-c packet designed them, and the tempo shelf adds two
     Commons (Tide Chart, Ripple). The pool pass (`EB-492`) adds four Commons
     -- Riptide, Pincer, Well Laid, Feigned Retreat -- and one Uncommon,
     Flank, which is where DENSITY belongs: the offer's Commons are what a seat
     actually sees. Pinned because the rarity buckets ARE the offer odds: a row
-    filed in the wrong tier changes how often it is seen."""
+    filed in the wrong tier changes how often it is seen.
+
+    THE RARES ARE FOUR SINCE `EB-570` withdrew The Moon Overlooks the Waters,
+    and the withdrawal is visible HERE rather than only in the count: a Rare
+    leaving moves the odds on every other Rare in the tier."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 19, "uncommon": 11, "rare": 5}
+        "common": 19, "uncommon": 11, "rare": 4}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

@@ -482,6 +482,15 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
 #if PROTOTYPE_CARDS
         if (evoked) mult = FurinaReframe.EvokeFocusMult(owner);
 #endif
+        // `EB-564`. WHAT THE BOW DID, carried out of the branches in these
+        // locals and filed once below -- `PerformMember`'s own arrangement,
+        // and for its reason: one recording site for the one implementation of
+        // a member bowing, so the page and the board cannot come apart.
+        Creature? bowPicked = null;
+        var bowDamage = 0;
+        var bowBlockLanded = 0;
+        var bowEncoreGranted = 0;
+        var bowAuraAll = false;
         switch (member)
         {
             case SalonMember.Crabaletta:
@@ -491,14 +500,20 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 var target = owner.Player?.RunState.Rng.CombatTargets
                     .NextItem(targets);
                 if (target == null) break;
-                await ElementalHit.Deal(
+                // THE NUMBER THAT LANDED and not the one the bow was worth,
+                // `EB-511`'s rule one method over: `Deal` runs the dealer's
+                // Weak, the reaction amplifier and the target's Vulnerable,
+                // and it is the landed figure a seat reconciles HP against.
+                bowDamage = await ElementalHit.Deal(
                     choiceContext, target, Elements.Element.Hydro,
                     Scaled(owner, SalonConstants.CrabalettaBow, mult), owner);
+                bowPicked = target;
                 break;
             }
             case SalonMember.Usher:
+                bowBlockLanded = Scaled(owner, SalonConstants.UsherBow, mult);
                 await CreatureCmd.GainBlock(
-                    owner, Scaled(owner, SalonConstants.UsherBow, mult),
+                    owner, bowBlockLanded,
                     ValueProp.Unpowered, null, fast: true);
                 break;
             case SalonMember.Chevalmarin:
@@ -512,9 +527,11 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                             choiceContext, enemy, Elements.Element.Hydro,
                             owner);
                     }
+                    bowAuraAll = targets.Count > 0;
                 }
                 FurinaResources.GainEncore(
                     owner, SalonConstants.ChevalmarinBowEncore);
+                bowEncoreGranted = SalonConstants.ChevalmarinBowEncore;
                 break;
             }
         }
@@ -554,6 +571,19 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
             // `_salon_bow` takes the same boolean from the same two callers.
             // With the arm off both callers pass false, so this is unreachable.
             FurinaReframeLedger.For(owner).NoteEvoke(member, mult);
+            // `EB-564`: AND THE ROW THE PAGE PRINTS. Filed BEFORE the mint so
+            // the two cannot disagree about the amount -- the figure recorded
+            // is the one `MintForEvoke` is about to add, read off the same
+            // constant through the same leg test.
+            FurinaReframeLedger.For(owner).NoteEvoked(
+                new FurinaReframeLedger.Evoked(
+                    ManualFrontName(member), mult,
+                    FurinaReframe.MeterLiveFor(owner)
+                        ? FurinaReframeLaw.FanfarePerEvoke : 0,
+                    bowEncoreGranted, bowAuraAll,
+                    bowPicked == null ? null : EnemyName(bowPicked),
+                    bowPicked?.CombatId.ToString(),
+                    bowDamage, bowBlockLanded));
             FurinaReframe.MintForEvoke(owner);
         }
 #endif
@@ -633,9 +663,14 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     /// itself fields the opening member at combat start, and the mirror
     /// <c>PowerCmd.Apply</c> below has taken a null source since
     /// <see cref="BowLeftmost"/> was written.</param>
+    /// <param name="freePerformance">`EB-558`: passed straight through to
+    /// <see cref="PerformMember"/> and with exactly one caller,
+    /// <c>FurinaReframeOpening.FieldOpeningMember</c> -- the relic's arrival.
+    /// Every deploy a CARD makes pays its 1 as it always has.</param>
     public static async Task<int> Deploy(
         PlayerChoiceContext choiceContext, Creature owner, int amount,
-        CardModel? cardSource, SalonMember? member)
+        CardModel? cardSource, SalonMember? member,
+        bool freePerformance = false)
     {
         var company = CompanyFor(owner);
         var replacements = 0;
@@ -685,7 +720,8 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
             // restated. Mirrors tier0 `_deploy_salon_members`.
             if (FurinaReframe.ManualLiveFor(owner))
             {
-                await PerformMember(choiceContext, owner, entering);
+                await PerformMember(choiceContext, owner, entering,
+                                    free: freePerformance);
             }
 #endif
 
@@ -798,8 +834,42 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     /// there is no hittable enemy left) -- the caller's break condition, kept
     /// here so the on-demand verb inherits it rather than restating it.
     /// </returns>
+    /// <param name="free">`EB-558` (R260's arithmetic): THE ONE PERFORMANCE
+    /// NOBODY BUYS -- the relic's opening arrival. It performs PAID (full
+    /// value, not the dry three-quarters) and spends nothing, which is
+    /// [USER]'s own analogy for the pick, "one free Osty". A PARAMETER here
+    /// rather than a branch at the fielding site, for this method's standing
+    /// reason: a member performing has ONE implementation, and a caller that
+    /// wanted a free one by writing its own body would be exactly the drift
+    /// the shape exists to prevent. Mirrors tier0 `salon_member_act`'s
+    /// `free=`. The two decisions it moves are split out into
+    /// <see cref="PerformancePays"/> and <see cref="PerformanceSpends"/> for
+    /// <see cref="FurinaReframeOpening.OpeningMemberFor"/>'s reason: this
+    /// method resolves through `ElementalHit` and is outside the headless
+    /// boundary, while "does this performance pay, and does it spend" is a
+    /// pure read the pins can ask for real.</param>
+    /// <summary>
+    /// `EB-558`. Does this performance land at FULL value? True when the owner
+    /// can afford the upkeep, and true unconditionally for the relic's free
+    /// arrival -- which is the half of "one free Osty" that is about the
+    /// number rather than about the price.
+    /// </summary>
+    public static bool PerformancePays(Creature owner, bool free) =>
+        free
+        || FurinaResources.Encore(owner) >= SalonConstants.TickEncoreCost;
+
+    /// <summary>
+    /// `EB-558`. Does this performance take the Encore? The other half, and
+    /// the one the arithmetic turned on: a free arrival pays full value and
+    /// spends nothing, so R258's opening bank is still whole when the player
+    /// makes their first decision.
+    /// </summary>
+    public static bool PerformanceSpends(Creature owner, bool free) =>
+        !free && PerformancePays(owner, free);
+
     public static async Task<bool> PerformMember(
-        PlayerChoiceContext choiceContext, Creature owner, SalonMember member)
+        PlayerChoiceContext choiceContext, Creature owner, SalonMember member,
+        bool free = false)
     {
         if (owner.IsDead) return false;
         var combat = owner.CombatState;
@@ -809,9 +879,8 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         var targets = AimPool(combat?.HittableEnemies);
         if (targets == null || targets.Count == 0) return false;
 
-        var paid = FurinaResources.Encore(owner)
-                   >= SalonConstants.TickEncoreCost;
-        if (paid)
+        var paid = PerformancePays(owner, free);
+        if (PerformanceSpends(owner, free))
         {
             FurinaResources.SpendEncore(owner, SalonConstants.TickEncoreCost);
         }

@@ -182,8 +182,10 @@ public class LiveBurn20260902Tests
                 .GetMethod("ForBomb", HeadlessGame.All)!));
 
         // `EB-373`: the same clause, narrowed to the two terms the fold reads.
+        // `EB-555` then defined the second of them where it stands.
         Assert.Contains("Not an Attack: only [gold]Vulnerable[/gold] and a cap "
-                      + "move it.", body);
+                      + "on the ", body);
+        Assert.Contains("enemy's HP loss move it.", body);
     }
 
     // ---- EB-293: the Plan keyword covers the plan-only case ---------------

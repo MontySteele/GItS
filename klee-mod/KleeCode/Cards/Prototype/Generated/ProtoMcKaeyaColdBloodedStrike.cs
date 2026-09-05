@@ -59,7 +59,7 @@ public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaeya — Cold-Blooded Strike"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Apply [gold]Cryo[/gold]. This turn, [gold]Grounded[/gold] counts nothing as having gone off."),
+        ("description", "Klee's own. Deal {CalculatedDamage:diff()} damage. Apply [gold]Cryo[/gold]. This turn, [gold]Grounded[/gold] counts nothing as having gone off."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -1332,13 +1332,40 @@ public sealed class CompanionOverhaulPlayWatcher : AbstractModel
         yield return _instance;
     }
 
+    /// <summary>
+    /// `EB-556`. THE STANDING POWERS THIS SEAT HELD BEFORE THE PLAY, and how
+    /// many stacks of each -- the snapshot half of "which power did this card
+    /// leave behind?".
+    ///
+    /// A DIFF AND NOT A CARD-TO-POWER MAP, which is what makes it general: a
+    /// map would be a second list to keep in step with the sheet, and the
+    /// question the badge is asking is answerable from the board. Any
+    /// <see cref="IUpgradeAwarePower"/> that is NEW after the play, or whose
+    /// stack GREW during it, was applied by the card that just resolved.
+    ///
+    /// KEYED BY REFERENCE, because two instances of one power can coexist
+    /// (R205's per-applier instancing) and a type key would confuse them.
+    /// Cleared and rebuilt per play, so nothing survives the card.
+    /// </summary>
+    private readonly Dictionary<PowerModel, int> _standingBefore = new();
+
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
         var owner = cardPlay.Card?.Owner?.Creature;
-        if (owner == null || cardPlay.Card?.Type != CardType.Attack)
+        if (owner == null) return Task.CompletedTask;
+
+        // `EB-556`: taken for EVERY play, because a Power card is not an
+        // Attack and the Attack gate below is the Lightfall blade's alone.
+        _standingBefore.Clear();
+        foreach (var power in owner.Powers.OfType<IUpgradeAwarePower>())
         {
-            return Task.CompletedTask;
+            if (power is PowerModel model)
+            {
+                _standingBefore[model] = model.Amount;
+            }
         }
+
+        if (cardPlay.Card?.Type != CardType.Attack) return Task.CompletedTask;
         var combat = owner.CombatState;
         if (combat == null) return Task.CompletedTask;
         foreach (var enemy in combat.HittableEnemies.ToList())
@@ -1358,10 +1385,22 @@ public sealed class CompanionOverhaulPlayWatcher : AbstractModel
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var owner = cardPlay.Card?.Owner?.Creature;
-        if (owner == null || cardPlay.Card?.Type != CardType.Attack)
+        if (owner == null) return Task.CompletedTask;
+
+        // `EB-556`. THE DIFF: the badge learns what the card was.
+        if (cardPlay.Card is { IsUpgraded: true })
         {
-            return Task.CompletedTask;
+            foreach (var power in owner.Powers.OfType<IUpgradeAwarePower>())
+            {
+                if (power is not PowerModel model) continue;
+                var before = _standingBefore.TryGetValue(model, out var was)
+                    ? was : 0;
+                if (model.Amount > before) power.NoteSourceUpgraded();
+            }
         }
+        _standingBefore.Clear();
+
+        if (cardPlay.Card?.Type != CardType.Attack) return Task.CompletedTask;
         CompanionOverhaulLedger.For(owner).NoteAttack();
         return Task.CompletedTask;
     }

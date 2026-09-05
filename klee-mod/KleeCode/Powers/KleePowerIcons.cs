@@ -99,16 +99,14 @@ internal static class KleePowerIcons
             "kokomi/powers/vigil_of_the_deep.png"),
         NereidsAscensionPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
-        // The five with no shipped Kokomi power to borrow from -- the Plan
-        // badge, its draw rider, its Rare and the two Commander powers -- take
+        // The four with no shipped Kokomi power to borrow from -- the Plan
+        // badge, its draw rider and the two Commander powers -- take
         // the nearest shipped SHAPE instead: a Klee companion power for the
         // two that read Companions, and her own Ancient's drip for the badge
         // that counts something waiting to arrive.
         PendingPlansPower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
         TreatisePower => KleePck.Path("klee/powers/spark_per_turn.png"),
-        PlansAlsoNowPower => KleePck.Path(
-            "kokomi/powers/princess_of_watatsumi.png"),
         GeneralsBannerPower => KleePck.Path("klee/powers/study_buddy.png"),
         NextCompanionDiscountPower =>
             KleePck.Path("klee/powers/friendly_visit.png"),

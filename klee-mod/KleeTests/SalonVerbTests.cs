@@ -64,9 +64,19 @@ public class SalonVerbTests
         // Encore upkeep, the scaled amount, the hit or the Block, the burst
         // particle. tier0's byte-for-byte pair covers the arithmetic; this
         // covers "the shared method is the one that pays it".
+        //
+        // `EB-558` SPLIT THE UPKEEP'S TWO DECISIONS OUT, so the read of the
+        // bank is one call further down: `PerformancePays` answers "at full
+        // value?" and `PerformanceSpends` answers "does it take the 1?", and
+        // the relic's free arrival is the one performance that answers those
+        // differently. Both are asked HERE, which is the claim this test makes.
         var calls = Il.Calls(Il.Method("SalonMemberPower", "PerformMember"));
 
-        Assert.Contains("FurinaResources.Encore", calls);
+        Assert.Contains("SalonMemberPower.PerformancePays", calls);
+        Assert.Contains("SalonMemberPower.PerformanceSpends", calls);
+        Assert.Contains("FurinaResources.Encore",
+                        Il.Calls(Il.Method("SalonMemberPower",
+                                           "PerformancePays")));
         Assert.Contains("FurinaResources.SpendEncore", calls);
         Assert.Contains("SalonMemberPower.TickValue", calls);
         Assert.Contains("ElementalHit.Deal", calls);

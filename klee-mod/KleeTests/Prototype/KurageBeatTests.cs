@@ -249,22 +249,25 @@ public class KurageBeatTests
     }
 
     [Fact]
-    public void The_two_mid_turn_doors_go_through_the_on_play_one()
+    public void The_mid_turn_door_goes_through_the_on_play_one()
     {
-        // Change of Plans and The Moon Overlooks the Waters resolve a Plan in
-        // the MIDDLE of a turn, and the morning drain does not. A bare `true`
-        // at two call sites is a fact no structural pin can read, so the flag
-        // has a named door and the split is in the call graph.
-        foreach (var door in new[] { "ResolveFront", "Schedule" })
-        {
-            Assert.Contains("KokomiPlan.ResolveNow",
-                            Il.Calls(Il.Method("KokomiPlan", door)));
-        }
+        // Change of Plans resolves a Plan in the MIDDLE of a turn and the
+        // morning drain does not. A bare `true` at the call site is a fact no
+        // structural pin can read, so the flag has a named door and the split
+        // is in the call graph.
+        //
+        // ONE DOOR AND NOT TWO SINCE `EB-570`: The Moon Overlooks the Waters
+        // was the other, and `Schedule` now only queues -- pinned from that
+        // side in `KokomiOverhaulRuleTests`.
+        Assert.Contains("KokomiPlan.ResolveNow",
+                        Il.Calls(Il.Method("KokomiPlan", "ResolveFront")));
+        Assert.DoesNotContain("KokomiPlan.ResolveNow",
+                              Il.Calls(Il.Method("KokomiPlan", "Schedule")));
         var morning = Il.Calls(Il.Method("KokomiPlan", "ResolveAll"));
         Assert.Contains("KokomiPlan.ResolveEntry", morning);
         Assert.DoesNotContain("KokomiPlan.ResolveNow", morning);
         // And the parameter it sets defaults to the morning's reading, so a
-        // fourth caller written tomorrow is not silently filed as on-play.
+        // third caller written tomorrow is not silently filed as on-play.
         var flag = Il.Method("KokomiPlan", "ResolveEntry").GetParameters()
                      .Single(p => p.Name == "onPlay");
         Assert.Equal(typeof(bool), flag.ParameterType);

@@ -139,11 +139,12 @@ internal static class KokomiOverhaulRoster
     internal static IEnumerable<CardModel> OfferablePool() =>
         Slice().Concat(RosterAncientCards.Kokomi);
 
-    /// <summary>The slice's own 35 rows, without the Ancient tail
-    /// <see cref="OfferablePool"/> adds.</summary>
+    /// <summary>The slice's own 34 rows, without the Ancient tail
+    /// <see cref="OfferablePool"/> adds. THIRTY-FOUR since The Moon Overlooks
+    /// the Waters was withdrawn (`EB-570`).</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
-        // The Tactician -- Plans, and the cards that pay per Plan (9)
+        // The Tactician -- Plans, and the cards that pay per Plan (8)
         ModelDb.Card<ProtoKkFeint>(),
         ModelDb.Card<ProtoKkAmbush>(),
         ModelDb.Card<ProtoKkReadTheField>(),
@@ -152,7 +153,6 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkSongOfPearls>(),
         ModelDb.Card<ProtoKkWarCouncil>(),
         ModelDb.Card<ProtoKkNereidsAscension>(),
-        ModelDb.Card<ProtoKkTheMoonOverlooksTheWaters>(),
         // The Priestess -- Block through the jellyfish, Mend at Rare (9)
         ModelDb.Card<ProtoKkSeaSaltPrayer>(),
         ModelDb.Card<ProtoKkDeepCurrent>(),

@@ -208,8 +208,17 @@ are in [`workstreams.md`](workstreams.md).
   **The round-17 pick is RULED R261** (2026-09-05,
   `review/ruled/klee-overhaul-round-17-2026-09-05.md`): Jumpy Dumpty
   alone gains Innate, the starter otherwise untouched; built under
-  `EB-557`. [USER]'s act-1 run is due on that build. The round-8 clear is
-  read against a control run (below).
+  `EB-557`. **Round 21 is READ**
+  (`review/active/klee-overhaul-round-21-2026-09-06.md`): on
+  `0.2.2789+proto` the Innate placer opened all eleven fights and the
+  placement is "a ritual"; the natural lane named the starter's one
+  detonator as the wait (held for a second reading, [USER]'s call if it
+  moves); the random Set off steers its first iteration only; Careful
+  Arrangement on a Mine as printed; Kaeya's face names a Grounded that
+  no longer exists (`EB-576`); a D default on offer shape for the Spark
+  sinks (`EB-577`); no pick; `EB-573`-`EB-577`. [USER]'s act-1 run is
+  due on this build. The round-8 clear is read against a control run
+  (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
   six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
@@ -292,8 +301,18 @@ are in [`workstreams.md`](workstreams.md).
   offer of two was passed for raw damage); The Moon Overlooks the Waters
   read as deleting the kit's question once it lands, to be read at the
   door before it moves; the Byrdonis elite beaten with zero Plans written;
-  no pick; `EB-561`-`EB-563`. [USER]'s act-1 run is due on
-  `0.2.2753+proto`. The Kurage
+  no pick; `EB-561`-`EB-563`. **The Moon is WITHDRAWN** (2026-09-05,
+  `EB-570`, card-audit ledger 5.9: two door reads, REQUIRES_MODIFICATION
+  on C1 both). **Round 21 is READ**
+  (`review/active/kokomi-overhaul-round-21-2026-09-06.md`): on
+  `0.2.2800+proto` the assembled lane found Nereid's Ascension doubling a
+  Battle Plan morning from turn one and Well Laid reading 0 on half its
+  draws; the natural lane wrote Plans on nine of eighteen turns and
+  declined four readers; every number reconciled on both lanes; the
+  coordinator granted the Kurage Memory Oath by mistake (`EB-581`); a
+  D default folds a card's enchantment into its Plan line (`EB-580`);
+  no pick; `EB-578`-`EB-581`. [USER]'s act-1 run is due on
+  `0.2.2800+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
@@ -392,13 +411,22 @@ are in [`workstreams.md`](workstreams.md).
   `0.2.2753+proto`, four of four and six of six fights with both elites;
   Rolling Tide not missed, Second Course playable once in five (Encore
   at 0 on most turns, the price stands), Aria+ pays without Innate;
-  Dexterity adds nothing to Block under the arm (`EB-566`), the Evoke
+  the faces fold Dexterity before a seat reads them (`EB-566`, not a
+  defect), the Evoke
   prints no line (`EB-564`), the Spotlight's turn-one window unprinted
   (`EB-567`), Rapturous Applause's face hides a floor (`EB-568`), Amber
   outside the Spotlight fold (`EB-565`); the empty stage read a fifth
   time, answered by R260 and read next on its build; no pick;
-  `EB-564`-`EB-568`. [USER]'s act-1 run is due on R260's build. No
-  stamp moves, nothing measured.
+  `EB-564`-`EB-568`. **Round 15 is READ**
+  (`review/active/furina-reframe-round-15-2026-09-06.md`): on
+  `0.2.2800+proto` R260 held on all twelve fights (the stage never
+  empty, the turn-one Companion card always performing); Second Course
+  playable beside a generator; the Evoke reached by the assembled deck
+  only, paying nothing when dry (`EB-587`, D default: it pays) and
+  printing out of order (`EB-582`); Skittish never fired on card hits
+  (`EB-592`) and Weak cut a performance (`EB-588`), both read before any
+  number; no pick; `EB-582`-`EB-592`. [USER]'s act-1 run is due on
+  `0.2.2800+proto`. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where

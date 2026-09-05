@@ -164,10 +164,11 @@ from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
     BOSS_ROOM, COMPANION_STAGE_CLAUSE, _elements_on_screen,
     _every_string, FROZEN_BOSS_CLAUSE, _GAME_KEYWORD_RE, GAME_KEYWORDS,
     HAND_REPEAT_NOTE, keyword_notes, METER_CAPPED_NOTE,
+    METER_DEFINED_NOTE,
     METER_NOTE, METER_RULES, MULTI_INTENT_LABEL, MULTI_INTENT_NOTE,
     PLAN_AIM_NOTE, PLAN_HYDRO_NOTE, POWER_NOTE,
     PREVIEW_LOCKED,
-    REACTION_KEYWORDS, SPREAD_REACTIONS,
+    REACTION_KEYWORDS, SPARK_OPENING_RULE, SPREAD_REACTIONS,
     SELECTION_NOTE, TRANSFORM_NOTE, TRANSFORM_UNREADABLE, _wire_keyword_rows)
 from understudy.blindplay_observe import (   # noqa: E402,F401  (re-export)
     observation)
@@ -238,6 +239,18 @@ def cmd_observe(args) -> int:
     try:
         print(observe(state))
     except qa_packet.PacketLeak as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 1
+    except BlindPlayError as exc:
+        # `EB-510`. THE SHAPE GUARD'S REFUSAL REACHES THE SEAT AS A LINE.
+        #
+        # `assert_one_page` raises where a page carries a section twice, and
+        # this door -- which is EVERY seat's, one process per call since round
+        # 9 -- let that out as a Python traceback on stderr with nothing at all
+        # on stdout. A seat that met one could report "the page was empty" or
+        # "the tool crashed" and neither names the heading the guard already
+        # knows. Same catch, same line and same exit code as the leak above,
+        # which is the refusal shape the brief already tells a seat to expect.
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 1
     return 0

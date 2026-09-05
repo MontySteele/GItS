@@ -237,7 +237,6 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkTheCloudsLikeWaves>(),
             ModelDb.Card<ProtoKkTheGeneralsBanner>(),
             ModelDb.Card<ProtoKkTheMoonAShip>(),
-            ModelDb.Card<ProtoKkTheMoonOverlooksTheWaters>(),
             ModelDb.Card<ProtoKkTideChart>(),
             ModelDb.Card<ProtoKkTideWall>(),
             ModelDb.Card<ProtoKkTreatise>(),

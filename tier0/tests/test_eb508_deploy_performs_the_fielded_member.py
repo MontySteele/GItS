@@ -117,5 +117,7 @@ def test_the_c_sharp_twin_performs_the_entering_member_too():
     source = (REPO / "klee-mod" / "KleeCode" / "Powers"
               / "SalonPowers.cs").read_text(encoding="utf-8")
 
-    assert "await PerformMember(choiceContext, owner, entering);" in source
+    # `EB-558` added the `free:` argument to the call; the member it names is
+    # the claim, and it is still `entering`.
+    assert "await PerformMember(choiceContext, owner, entering," in source
     assert "await PerformMember(choiceContext, owner, company[0]);" not in source
