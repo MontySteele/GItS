@@ -101,6 +101,14 @@ CARD_DIRS = tuple(dict.fromkeys(outdir for _p, outdir, _l in SHEETS))
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_kk_the_moon_overlooks_the_waters": (
+        "EB-570 (2026-09-05) WITHDREW The Moon Overlooks the Waters from the "
+        "Kokomi arm: the doctrine audit returned REQUIRES_MODIFICATION on C1 "
+        "twice (any now-copy removes waiting's price; card-audit ledger 5.9) "
+        "and the row was deleted under R213 B. Kept rather than deleted as "
+        "rising_tide and swift_currents are: a painted asset cleared through "
+        "SOURCES.tsv on a kokomi/ out-path, on disk for a future Kokomi Rare. "
+        "It is NOT coverage for anything and must never be counted as such."),
     # Printed strings stay ASCII: this runs on a cp1252 Windows console, where
     # a section sign comes out as a replacement char.
     "xingqiu_raincutter": (
