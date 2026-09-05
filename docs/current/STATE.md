@@ -417,8 +417,16 @@ are in [`workstreams.md`](workstreams.md).
   (`EB-567`), Rapturous Applause's face hides a floor (`EB-568`), Amber
   outside the Spotlight fold (`EB-565`); the empty stage read a fifth
   time, answered by R260 and read next on its build; no pick;
-  `EB-564`-`EB-568`. [USER]'s act-1 run is due on R260's build. No
-  stamp moves, nothing measured.
+  `EB-564`-`EB-568`. **Round 15 is READ**
+  (`review/active/furina-reframe-round-15-2026-09-06.md`): on
+  `0.2.2800+proto` R260 held on all twelve fights (the stage never
+  empty, the turn-one Companion card always performing); Second Course
+  playable beside a generator; the Evoke reached by the assembled deck
+  only, paying nothing when dry (`EB-587`, D default: it pays) and
+  printing out of order (`EB-582`); Skittish never fired on card hits
+  (`EB-592`) and Weak cut a performance (`EB-588`), both read before any
+  number; no pick; `EB-582`-`EB-592`. [USER]'s act-1 run is due on
+  `0.2.2800+proto`. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
