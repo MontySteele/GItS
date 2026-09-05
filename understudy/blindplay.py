@@ -241,6 +241,18 @@ def cmd_observe(args) -> int:
     except qa_packet.PacketLeak as exc:
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 1
+    except BlindPlayError as exc:
+        # `EB-510`. THE SHAPE GUARD'S REFUSAL REACHES THE SEAT AS A LINE.
+        #
+        # `assert_one_page` raises where a page carries a section twice, and
+        # this door -- which is EVERY seat's, one process per call since round
+        # 9 -- let that out as a Python traceback on stderr with nothing at all
+        # on stdout. A seat that met one could report "the page was empty" or
+        # "the tool crashed" and neither names the heading the guard already
+        # knows. Same catch, same line and same exit code as the leak above,
+        # which is the refusal shape the brief already tells a seat to expect.
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 1
     return 0
 
 

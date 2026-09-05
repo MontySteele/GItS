@@ -4188,6 +4188,49 @@ def test_a_string_that_is_not_a_locstring_key_is_left_alone():
         qa_packet.assert_blind({"name": "pearl_barrage"})
 
 
+def test_observe_refuses_a_doubled_page_as_a_line_not_a_traceback(
+        tmp_path, capsys, monkeypatch):
+    """`EB-510`, and it is the half of the row that is buildable headlessly.
+
+    `assert_one_page` has refused a page carrying a section twice since fixer
+    I, and the seats' own door -- `blindplay observe`, one process per call
+    since round 9 -- let that refusal out as a Python traceback on stderr with
+    nothing at all on stdout. A seat that met one could report "the page was
+    empty" or "the tool crashed", and neither names the heading the guard
+    already knows.
+
+    WHAT IS STILL OPEN, said here rather than left to the row: the render
+    cannot produce a doubled page -- every heading is appended at one `out +=`
+    on one mutually exclusive branch, and the check runs at the one place a
+    page is finished -- so the recurrence (Klee r20 lane 2, intermittent, on
+    one section) came from something between this print and the seat's reader.
+    Finding that needs a live lane with the process's own stdout captured; what
+    this pins is that when the guard does fire there, the seat is handed a line
+    naming the section instead of a stack trace.
+    """
+    raw = tmp_path / "board.json"
+    raw.write_text(json.dumps(combat_state()), encoding="utf-8")
+    args = argparse.Namespace(raw_file=str(raw))
+
+    real = blindplay.observe
+
+    def doubled(state):
+        # The guard itself, driven on a page that really was emitted twice.
+        blindplay.assert_one_page(real(state) * 2)
+        raise AssertionError("the guard did not fire")
+
+    monkeypatch.setattr(blindplay, "observe", doubled)
+
+    code = blindplay.cmd_observe(args)
+
+    assert code == 1
+    out, err = capsys.readouterr()
+    assert out == ""
+    assert err.startswith("REFUSED: ")
+    assert "printed a section twice" in err
+    assert "## The other side" in err
+
+
 def test_act_refuses_a_packet_leak_the_way_observe_does(tmp_path, capsys):
     """`EB-370`. `blindplay_grammar.act` reads through `observation()`
     before it resolves anything, so a `PacketLeak` on the read path it
