@@ -157,7 +157,15 @@ _SHEET_COST_RE = re.compile(r"[Ss]heet[^\n]*?\bcost[=:]?\s*(\d+)")
 # generated comment beside it says why it is declared once). Same key as the
 # energy index -- the class name, which is what BaseLib derives `Id.Entry`
 # from -- so a proto row and its same-named shipped twin cannot be confused.
-_SPARK_PRICE_RE = re.compile(r"PrintedSparkPrice\s*=>\s*(\d+)\s*;")
+#
+# `EB-491`. TWO SHAPES SINCE FIREWORKS SHOW, whose upgrade CUTS the price:
+# the flat literal, and `(IsUpgraded ? <up> : <base>)`. The index is keyed on
+# the CLASS and so cannot know which copy a seat is holding, exactly as the
+# energy index cannot -- so it reads the BASE branch, which is the number an
+# unupgraded card charges and the one every other figure on this page states.
+_SPARK_PRICE_RE = re.compile(
+    r"PrintedSparkPrice\s*=>\s*(?:\(IsUpgraded\s*\?\s*\d+\s*:\s*)?"
+    r"(\d+)\s*\)?\s*;")
 _CLASS_RE = re.compile(
     r"^\s*(?:public|internal)\s+(?:sealed\s+|abstract\s+|static\s+|partial\s+)*"
     r"class\s+([A-Za-z_][A-Za-z0-9_]*)", re.M)

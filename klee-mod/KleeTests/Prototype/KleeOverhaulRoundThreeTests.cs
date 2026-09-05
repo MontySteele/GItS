@@ -73,8 +73,11 @@ public class KleeOverhaulRoundThreeTests
         // THIRTY-FIVE SINCE THE ROUND-11 POOL PASS (2026-09-04): one row,
         // `ProtoKoStokeTheFuse`, the arm's Spark sink -- the other half of the
         // same finding, and the first X price on any sheet.
+        // FORTY-FIVE SINCE THE POOL PASS (2026-09-05, `EB-491`): TEN rows off
+        // the readings of rounds 13 to 16 -- three for Cook, three for Spray,
+        // three for React and one bridge.
         var slice = Cards("KleeOverhaulRoster", "Slice");
-        Assert.Equal(35, slice.Count);
+        Assert.Equal(45, slice.Count);
         Assert.Contains(slice, c => c.Contains("ProtoKoDigIn"));
         Assert.Contains(slice, c => c.Contains("ProtoKoPop"));
         // OFFERABLE means not Basic: a Basic row cannot be rolled.
@@ -139,14 +142,18 @@ public class KleeOverhaulRoundThreeTests
             .Where(c => Vars(c).OfType<DamageVar>().Any())
             .ToList();
 
-        // NINE. Flame Dance is in: its Damage var is its AoE hit's rather
+        // TWELVE. Flame Dance is in: its Damage var is its AoE hit's rather
         // than its Set off's (its Set off deals nothing of its own), and what
         // is being pinned is that a Set off row's printed number is a var,
         // whichever clause owns it. The Big One is OUT since R243 ([USER]:
         // "move The Big One to 4x with no flat number"): it calls SetOffAimed
         // with no hit of its own, declares no Damage var, and the filter
         // above drops it -- a card with no number has no number to print.
-        Assert.Equal(9, carriers.Count);
+        // NINE UNTIL THE POOL PASS (2026-09-05, `EB-491`), whose three new
+        // detonators each print a hit of their own: Long Fuse, Pocket Match
+        // and Flash Point. Fireworks Show is OUT for The Big One's reason --
+        // its whole body is a Set off and it deals nothing itself.
+        Assert.Equal(12, carriers.Count);
         foreach (var card in carriers)
         {
             Assert.Contains("{Damage:diff()}", Face(card));

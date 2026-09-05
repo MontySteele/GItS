@@ -2444,6 +2444,188 @@ spent". Same words, same reading, one markup pair.
 Numbers are Prototype numbers, D by the ladder; the seats read them on the next
 round before [USER] does.
 
+## the pool pass, rounds 13 to 16 (`EB-491`, 2026-09-05)
+
+Ten rows, and the readings that asked for each are in
+`review/active/klee-pool-pass-2026-09-05.md` §1. What follows is what the
+BUILD had to decide, per row and per new rule, and it is here rather than on
+the sheet for the reason the file's own header gives.
+
+**`proto_ko_long_fuse` -- the detonator that stays, and gets dearer.**
+Rounds 15 and 16 asked one question from opposite ends. Round 15: every
+drafted detonator discards at end of turn, so "hold the Bomb" meant "throw
+the detonator away" for most of a run, and a 55-gold Steady enchantment on
+Perfect Timing "opened more decision-space than any card I drafted". Round 16
+from the other end: once the pile passes the enemy's HP, Ka-pow! is free and
+Retained, so the last turn is automatic -- "charming twice, likely corrosive
+by the tenth time". A Retained detonator is what the first wants; one that
+gets MORE expensive the longer it waits is what stops it becoming the second.
+
+THE RULE IS THE BASE GAME'S OWN MODIFIER, which is the whole reason the build
+is four lines. `CardEnergyCost.AddUntilPlayed` accumulates, survives the turn
+boundary, is cleared by `AfterCardPlayedCleanup` when the card is played, and
+is combat-scoped like every other local modifier -- which is the printed rule
+exactly ("each turn it stays in your hand", never downward, gone when the card
+leaves, gone when the fight does). The sim spells the same lifetime with a
+field: `Card.rising_cost_risen`, added by `combat.card_cost`, rolled by
+`klee_overhaul.roll_rising_costs` at turn end, cleared in `_finish_play` and
+zeroed by `run_fight`'s per-combat walk beside `cost_set_this_combat`.
+
+A CARD FIELD AND NOT AN EFFECT, because nothing resolves when the card is
+played: it is what the card costs while it waits. So `rising_cost:` is a row
+key, the generated class declares `IRisingHandCostCard`, and the arm's ONE
+standing listener (`KleeOverhaulSweepHooks`) rolls the hand at end of turn --
+a second `AbstractModel` subscription for one card's rule would be a second
+thing to keep wired. Two Long Fuses in one hand burn separately, because the
+fuse is the card's and not the board's.
+
+`blocked_reason` REFUSES A RISING COST WITHOUT RETAIN. A card discarded at the
+end of the turn it was drawn can never stay in your hand, so the rule could
+never fire and the face would be printing something that cannot happen -- the
+face-that-lies defect, one field over. It also refuses the key on a shipped
+row, because the roller is Compile Remove'd out of a release build.
+
+**`proto_ko_all_of_my_treasures` -- a second pile the size of the first.**
+Careful Arrangement merges; this copies. The pile it is measured against is
+untouched and still growing, which is what makes it a cook decision (play it
+on a 12, or wait for a 16) rather than a second merge. THE COPY IS A PLAIN
+BOMB and carries no payload: a Mine's defence is not doubled by a card that
+prints "Bomb", and Jumpy Dumpty's Mines are that charge's own promise rather
+than its size. "Equal to" means equal WHEN PLACED -- from there it grows on its
+own schedule, which is rule 9. The row carries no number at all, and
+`blocked_reason` refuses one: the size is a read, and a figure on the row
+would be a second reading of "your largest Bomb".
+
+**`proto_ko_fish_blasting` -- the lore card, and a third `add_card` zone.**
+The brief's §2 asks for "AoE with a cost card" and this is it. The cost is a
+Confiscated, and the new decision was WHERE it goes: `add_card` had `hand` and
+`discard`, and a Status laid on the discard pile is a card the player knows
+the moment of. So the row uses `zone: draw` and both engines SHUFFLE it in --
+`CardPilePosition.Random` in the mod, a random index in `effects._add_token`
+-- because the whole cost of the Status is not knowing when it arrives. The
+face says "Add a Confiscated to your draw pile", which is the codegen's own
+`add_card` sentence with the third zone's name in it. It does NOT Set off:
+plain pressure, which is what separates it from every detonator beside it.
+
+**`proto_ko_pocket_match` -- the Spark-paid detonator that stays.**
+Round 16's turn one is what it is for: Bang Bang! unplayable at 1 Spark with
+no Set off in hand. The opening Spark pays this, and Retain means it is still
+there on the turn the pile is worth cashing. Fwoosh! with Retain and one less
+damage; no new rule.
+
+**`proto_ko_bombs_away` -- the placer that is not a Skill.**
+Round 13's Smoggy reading: one Skill per turn against a kit whose placers are
+Skills by rule. Fish-Flavored Bait and Bang Bang! are already Attacks that
+place; this is the wide one. Against Mine Toss (1 energy, Skill, Mine 4 on
+ALL): a hit now and half the charge, and no Mine. No new rule.
+
+**`proto_ko_fireworks_show` -- Set off ALL, and the first Spark price an
+upgrade moves.** `set_off` already had `target: all_enemies` (Flame Dance);
+this is that spelling with the aura filter off and no hit of its own, which is
+what puts it behind the `EB-261` gate -- its whole body is a damage-less Set
+off, so it refuses a Bomb-less board rather than eating two Sparks for
+nothing.
+
+THE UPGRADE IS THE NEW PART. No delta on any sheet had ever moved a Spark
+price, and this one cuts it to 1. It is `spark_price: -1`, it bumps the op's
+own `amount` in tier0 (so `combat.spark_price`'s gate and `spend_sparks`'
+payment move together by construction), and in C# it is a play-time
+`IsUpgraded` read used by BOTH `PrintedSparkPrice` and the `SparkPower.Spend`
+beside it -- one expression, so the badge, the gate and the payment cannot
+drift. THE FACE PRINTS NOTHING FOR IT, and that is `text-conventions`' own
+rule: a Spark price sits in the cost slot and the body does not restate it. So
+the fifth channel an upgrade can show through is the Spark BADGE, and
+`gen_prototype_cards`' upgrade-visibility gate learned to read it -- without
+that it would have called a real, visible upgrade invisible.
+
+**`proto_ko_kindling` -- the React shelf's floor.**
+Round 13 read Catalytic Converter as dead in a mono-Pyro deck by its own
+printed admission. R244 pick 2 ruled Witches' Circle dead alone ON PURPOSE, so
+"dead alone" is not by itself a defect -- but a shelf where every row is dead
+alone is a shelf nobody drafts first. This row has a floor: 4 per Bomb on
+every foreign aura when an applier went first, and 2 on the largest Bomb when
+none did.
+
+TWO READINGS DECIDED HERE. "Aura is not Pyro" is the enemy's CARRIED aura and
+no aura does not count, which is `set_off`'s existing `non_pyro` filter (Flame
+Dance) read the same way -- the two rows must not disagree about which enemies
+are off-element. And an aura'd enemy holding NO Bomb is not a match, because
+the face counts Bombs: a board of aura'd but Bomb-less enemies takes the
+floor.
+
+TWO PRINTED NUMBERS ON ONE FACE, which no other row on the surface carries, so
+the upgrade needed two keys. `grow: +2` moves the per-Bomb amount through the
+`Grow` var the three other grow rows already use; `grow_floor: +1` moves the
+floor as a play-time `IsUpgraded` literal, with the face carrying the base
+game's own `{IfUpgraded:show:3|2}` swap. A second var would render one number
+twice, which is how two spellings of one number come to disagree.
+
+**`proto_ko_flash_point` -- the tempo rider, and the arm's one card-borne
+Spark.** Sizzle's and Perfect Timing's conditional grammar, paying a Spark and
+a card where those pay damage. It is the FIRST slice card that mints a Spark,
+and `Rule4_no_slice_card_mints_a_spark` was a real pin on that -- so the pin
+now NAMES this one row rather than being deleted: the income is still keyed to
+an explosion (it pays only when a Bomb triggered a reaction this turn), and a
+SECOND row minting Sparks still fails the test.
+
+**`proto_ko_vermillion_pact` -- the row slice one deferred, built.**
+The slice packet's §5 named this as the one item that might drop out and set
+out the two roads it could take: re-applying the consumed aura between the
+explosion and the card's own hit, or threading a "do not consume" flag through
+`ElementalHit.Deal`. THIS IS THE FIRST. The second is a shared-layer change
+every character's reactions would have to be re-read against; this one is a
+Klee power writing to a Klee enemy through the ordinary front door
+(`AuraCmd.Apply` / `reactions.apply_aura`).
+
+THE PRICE OF THAT ROAD IS STATED RATHER THAN HIDDEN, and the deferral's own
+note predicted it: the aura really is back on the board, so a third hit in the
+same play sees it and every on-apply hook fires again. On a multi-charge pile
+that is the card compounding -- each reacting explosion hands the aura back,
+so the next charge reacts too and the Attack behind them all still finds it
+standing. That is what a 2-energy Rare printed as a rule-breaker buys, and it
+is what its face says.
+
+THE SCOPE IS THE FACE'S. "The Attack that Set it off": read off the card
+source at the explosion, so a Mine answering an enemy intent (no card at all)
+and a Skill's Set off (Quick Fuse, Countdown, Fireworks Show -- no hit behind
+the explosion for the aura to feed) both decline. `reacted` gates the payout,
+because an explosion into a Pyro aura refreshes rather than reacts and
+consumes nothing; a corpse and a board that already holds an aura decline too,
+the second being the one-aura invariant both engines keep. Dead alone, like
+Witches' Circle beside it: a deck with no applier never puts a foreign aura
+up.
+
+**`proto_ko_split_charge` -- the bridge.**
+Careful Arrangement's opposite, and the arm's one row that carries charge from
+Cook to Spray. The halves are `n // 2` and `n - n // 2`, so an odd Bomb loses
+nothing; each rolls its OWN destination, which is `JumpCharges`' rule and
+means both can land on one enemy -- on a single-enemy board they always do,
+which is the printed losing line (two piles growing 4 apiece where one grew 4,
+into Block, for a card and an energy). A MINE'S HALVES ARE PLAIN BOMBS: the
+Mine is one fuse and splitting it does not make two, which is the price of the
+bridge. A largest Bomb of 1 does nothing, because there is no split of 1 that
+leaves two Bombs and halving it would silently delete a charge.
+
+THE UPGRADE BUYS A CLAUSE THE BASE CARD DOES NOT HAVE, so there is no printed
+figure for a var to keep honest: `split_grow: +2` is a play-time `IsUpgraded`
+literal and the face states the clause in its own `{IfUpgraded:show:...}` hole
+-- Tide Chart's shape (`EB-478`).
+
+**FOUR RESPELLINGS, ALL FOUND BY LINTS AND NONE A DESIGN CHANGE.** Four names
+collide with shipped Klee cards the arm replaces (All of My Treasures!, Fish
+Blasting, Bombs Away!, Vermillion Pact), so each carries the `EB-322` shadow
+suffix -- `loader.display_name` strips " (proto)" in both engines, so the
+player still reads the bare name. Long Fuse's face drops the word "Retain",
+which is the keyword rail's and never a sentence (`text-conventions` rule 13).
+Fish Blasting says "Add ... to your draw pile" rather than "Shuffle ... into",
+which is the codegen's own `add_card` sentence and keeps the four verbs.
+Split Charge's upgrade clause reads "Halves grow by 2." because the
+`{IfUpgraded:show:...}` ceiling is 20 rendered characters and "Each half grows
+by 2." is 21.
+
+Numbers are Prototype numbers, D by the ladder; the seats read them on the
+next round before [USER] does.
+
 ## `proto_kk_undertow` -- one damage op with a rider (`EB-441`)
 
 The row was a `conditional` whose two branch numbers were LITERALS in the face,

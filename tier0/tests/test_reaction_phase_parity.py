@@ -1026,6 +1026,22 @@ CO_TENANCY_LEDGER = {
             "in (the overhaul arm's pool holds neither). If one ever could, "
             "the interaction is a dead enemy dropping out of this power's own "
             "candidate list, which it re-reads",
+        ("Powers/Prototype/KleeOverhaulSweep.cs", "KleeOverhaulSweepHooks"):
+            "QUARANTINED (the Klee overhaul). THE RISING HAND COST (`EB-491`, "
+            "Long Fuse): every rising-cost card in the hand costs its own "
+            "printed number more, applied through the base game's "
+            "`CardEnergyCost.AddUntilPlayed`. THE ORDERING QUESTION, answered: "
+            "what it WRITES is a per-CARD local cost modifier and nothing "
+            "else, and no co-tenant of this broadcast reads or writes a card's "
+            "cost -- the echo above reads a charge list, the two kit-grant "
+            "checks read a meter, the pending-draw flush reads a draw debt, "
+            "and the sequencer deals damage and grants Block. What it READS is "
+            "the hand's membership, which only a card play or the flush that "
+            "comes AFTER this broadcast can move. The sim runs it on the same "
+            "line and at the same site "
+            "(`klee_overhaul.turn_end` -> `roll_rising_costs`), ahead of the "
+            "hand flush, which is the one moment \"it stayed in your hand\" "
+            "is true of the turn just played",
         ("Powers/CompanionPowers.cs", "SolarIsotomaPower"):
             "duration tick-down of itself, player side",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):

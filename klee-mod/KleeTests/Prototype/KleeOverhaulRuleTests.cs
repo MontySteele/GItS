@@ -287,12 +287,27 @@ public class KleeOverhaulRuleTests
         Assert.Equal(1, KleeOverhaulLaw.SparkPerExplosion);
     }
 
+    /// <summary>
+    /// THE POOL PASS's one named exception (`EB-491`, Flash Point). Every
+    /// other card-borne Spark grant is still a finding.
+    /// </summary>
+    private static readonly string[] SparkMintersAllowed = { "ProtoKoFlashPoint" };
+
     [Fact]
-    public void Rule4_no_slice_card_mints_a_spark()
+    public void Rule4_no_slice_card_mints_a_spark_except_the_named_one()
     {
         // "Under this flag Sparks come ONLY from explosions." Every generated
-        // slice card is swept, so a future row that printed `gain_spark` would
-        // fail here rather than quietly opening a second income.
+        // slice card is swept, so a row that printed `gain_spark` fails here
+        // rather than quietly opening a second income.
+        //
+        // ONE ROW IS NAMED SINCE THE POOL PASS (2026-09-05, `EB-491`), and it
+        // is named rather than excused: Flash Point pays "gain 1 Spark and
+        // draw 1 card" and pays it ONLY when a Bomb triggered an Elemental
+        // Reaction this turn, so the income is still keyed to an explosion --
+        // it is the rider Catalytic Converter's Power already prints, bought
+        // on a card instead of on a Power. The list is the exception's whole
+        // record: a SECOND row minting Sparks fails here, which is the tooth
+        // this test was written for.
         var minters = typeof(ProtoBombPower).Assembly.GetTypes()
             .Where(t => t.Namespace == "KleeMod.Cards.Prototype.Generated"
                         && t.Name.StartsWith("ProtoKo"))
@@ -302,7 +317,7 @@ public class KleeOverhaulRuleTests
             .Select(m => m.DeclaringType!.Name)
             .Distinct()
             .ToList();
-        Assert.Empty(minters);
+        Assert.Equal(SparkMintersAllowed, minters);
     }
 
     [Fact]

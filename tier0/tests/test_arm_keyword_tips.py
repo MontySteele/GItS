@@ -840,6 +840,12 @@ DEFINED_BY_A_CARD_TIP = {
     "Muster": "KokomiRiderTips.ForMuster",
     "Burst": "KleeCardTooltips.ForBurst",
     "Burst Energy": "KleeCardTooltips.ForBurst",
+    # `EB-491` (Fish Blasting). Confiscated is a STATUS CARD, not a keyword: it
+    # is a card the player will hold, with its own printed face, and the rule a
+    # reader wants is what that card does -- which the tip on the row that
+    # makes one already states (`includesConfiscatedRules`). A glossary row
+    # could only name it a second time.
+    "Confiscated": "KleeCardTooltips.ForCard",
 }
 
 # `Exhaust` conjugates and the glossary keys do not, so the past participle

@@ -1887,3 +1887,495 @@ def test_stoke_the_fuse_on_a_bomb_less_board_still_spends(overhaul):
     assert klee_overhaul.set_off_only(load("proto_ko_stoke_the_fuse")) is False
 
 
+
+
+# ---------------------------------------------------------------------------
+# THE POOL PASS -- `EB-491` (rounds 13 to 16, 2026-09-05)
+# ---------------------------------------------------------------------------
+#
+# Ten rows and four new rules: a rising hand cost, a copy of the largest Bomb,
+# an aura-keyed grow with a floor, a Bomb split and the Vermillion Pact's
+# re-react. The C# twins are
+# `klee-mod/KleeTests/Prototype/PoolPassThreeTests.cs`, case for case; where a
+# case is structural there (the headless harness cannot apply a power or play a
+# card) it is a real board here.
+
+
+def aimed(state, enemy):
+    """Bind the play's aim, the way a real play does: `_pick_targets` reads
+    `state.card_aim` for a `target: enemy` effect."""
+    state.card_aim, state.card_aim_bound = enemy, True
+
+
+# --- All of My Treasures!: a copy of the largest Bomb ----------------------
+
+def test_treasures_copies_the_largest_bomb_onto_the_aimed_enemy(overhaul):
+    """"Place a Bomb on the enemy equal to your largest Bomb." A board-wide
+    read and an aimed placement -- `PlaceCopyOfLargest`."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 5)
+    klee_overhaul.place(state, b, 12)
+    aimed(state, a)
+
+    effects.resolve_card(state, load("proto_ko_all_of_my_treasures"))
+
+    assert sizes(a) == [5, 12]
+    assert sizes(b) == [12]              # the pile it was measured against
+
+
+def test_treasures_copies_a_mine_as_a_plain_bomb(overhaul):
+    """A Mine's defence is not doubled by a card that prints "Bomb", and the
+    copy carries no payload either."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 9, is_mine=True, payload_mine_all=3)
+    aimed(state, enemy)
+
+    effects.resolve_card(state, load("proto_ko_all_of_my_treasures"))
+
+    copy = enemy.ko_charges[-1]
+    assert (copy.size, copy.is_mine, copy.payload_mine_all) == (9, False, 0)
+
+
+def test_treasures_on_a_bomb_less_board_does_nothing(overhaul):
+    """Nothing to copy is nothing placed -- never a Bomb 0."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    aimed(state, enemy)
+
+    effects.resolve_card(state, load("proto_ko_all_of_my_treasures"))
+
+    assert sizes(enemy) == []
+
+
+# --- Kindling: an aura-keyed grow with a floor -----------------------------
+
+def test_kindling_grows_every_bomb_on_a_foreign_aura(overhaul):
+    """"Each Bomb on an enemy whose aura is not Pyro grows by 4." EVERY charge
+    on EVERY such enemy: `grow_bombs`'s spread over Flame Dance's filter."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    a.aura, b.aura = "hydro", "cryo"
+    klee_overhaul.place(state, a, 6)
+    klee_overhaul.place(state, a, 2)
+    klee_overhaul.place(state, b, 5)
+
+    effects.resolve_card(state, load("proto_ko_kindling"))
+
+    assert sizes(a) == [10, 6]
+    assert sizes(b) == [9]
+
+
+def test_kindling_skips_pyro_and_aura_less_enemies(overhaul):
+    """"Not Pyro" is the enemy's CARRIED aura and no aura does not count --
+    `_op_set_off`'s `non_pyro` filter, read the same way. With no match at all
+    the floor pays instead."""
+    pyro, bare = make_enemy(hp=200, name="p"), make_enemy(hp=200, name="q")
+    state = klee_state([pyro, bare])
+    pyro.aura = "pyro"
+    klee_overhaul.place(state, pyro, 6)
+    klee_overhaul.place(state, bare, 9)
+
+    effects.resolve_card(state, load("proto_ko_kindling"))
+
+    assert sizes(pyro) == [6]
+    assert sizes(bare) == [9 + 2]        # the floor, on the largest
+
+
+def test_kindling_floor_pays_the_largest_charge_only(overhaul):
+    """The floor is ONE charge, board-wide: Stoke the Fuse's scope, not Chain
+    Fuse's spread."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 4)
+    klee_overhaul.place(state, a, 11)
+    klee_overhaul.place(state, b, 7)
+
+    effects.resolve_card(state, load("proto_ko_kindling"))
+
+    assert sizes(a) == [4, 13]
+    assert sizes(b) == [7]
+
+
+def test_kindling_takes_the_floor_when_the_aura_holds_no_bomb(overhaul):
+    """The face counts BOMBS, not enemies: an aura'd but Bomb-less enemy is
+    not a match, so the board takes the floor."""
+    aura, bombed = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([aura, bombed])
+    aura.aura = "electro"
+    klee_overhaul.place(state, bombed, 8)
+
+    effects.resolve_card(state, load("proto_ko_kindling"))
+
+    assert sizes(aura) == []
+    assert sizes(bombed) == [8 + 2]
+
+
+def test_kindling_upgraded_moves_both_numbers(overhaul):
+    """`upgrade: {grow: +2, grow_floor: +1}` -- two printed numbers, two keys,
+    and the row is the only one on the surface that carries both."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    enemy.aura = "hydro"
+    klee_overhaul.place(state, enemy, 5)
+
+    effects.resolve_card(state, load("proto_ko_kindling+"))
+    assert sizes(enemy) == [11]
+
+    enemy.aura = None
+    effects.resolve_card(state, load("proto_ko_kindling+"))
+    assert sizes(enemy) == [14]
+
+
+def test_kindling_on_an_empty_board_does_nothing(overhaul):
+    """No Bomb anywhere is no growth anywhere: the floor has nothing to land
+    on."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+
+    effects.resolve_card(state, load("proto_ko_kindling"))
+
+    assert sizes(enemy) == []
+
+
+# --- Split Charge: the bridge ----------------------------------------------
+
+def test_split_charge_halves_the_largest_bomb(overhaul):
+    """"Split your largest Bomb into two halves on random enemies." On a
+    one-enemy board both halves land on it, which is the row's printed losing
+    line."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 12)
+
+    effects.resolve_card(state, load("proto_ko_split_charge"))
+
+    assert sorted(sizes(enemy)) == [6, 6]
+
+
+def test_split_charge_loses_nothing_on_an_odd_bomb(overhaul):
+    """`n // 2` and `n - n // 2`: 11 becomes 5 and 6, and the two still sum to
+    what was split."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 11)
+
+    effects.resolve_card(state, load("proto_ko_split_charge"))
+
+    assert sorted(sizes(enemy)) == [5, 6]
+
+
+def test_split_charge_leaves_the_smaller_piles_alone(overhaul):
+    """"Your largest Bomb" is ONE charge, board-wide. The 3 and the 4 are
+    exactly where they were."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 3)
+    klee_overhaul.place(state, a, 10)
+    klee_overhaul.place(state, b, 4)
+
+    effects.resolve_card(state, load("proto_ko_split_charge"))
+
+    assert sorted(sizes(a) + sizes(b)) == [3, 4, 5, 5]
+
+
+def test_split_charge_halves_a_mine_into_plain_bombs(overhaul):
+    """A Mine is one fuse and splitting it does not make two: the defence is
+    spent, which is the price of the bridge."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 8, is_mine=True)
+
+    effects.resolve_card(state, load("proto_ko_split_charge"))
+
+    assert sizes(enemy) == [4, 4]
+    assert klee_overhaul.mine_count(enemy) == 0
+
+
+def test_split_charge_refuses_a_bomb_of_one(overhaul):
+    """There is no split of 1 that leaves two Bombs, and halving it to 0 and 1
+    would silently delete a charge."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 1)
+
+    effects.resolve_card(state, load("proto_ko_split_charge"))
+
+    assert sizes(enemy) == [1]
+
+
+def test_split_charge_upgraded_grows_each_half(overhaul):
+    """`upgrade: {split_grow: +2}` -- an upgrade that BUYS a clause the base
+    card does not have, so the base face prints no figure for it."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 10)
+
+    effects.resolve_card(state, load("proto_ko_split_charge+"))
+
+    assert sorted(sizes(enemy)) == [7, 7]
+
+
+# --- Fireworks Show: Set off ALL, and a Spark price the upgrade cuts -------
+
+def test_fireworks_show_sets_off_every_enemy(overhaul):
+    """`set_off` with `target: all_enemies` and NO aura filter: Flame Dance's
+    spelling with the filter off and no hit of its own."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    state.player.sparks = 2
+    klee_overhaul.place(state, a, 7)
+    klee_overhaul.place(state, b, 5)
+
+    effects.resolve_card(state, load("proto_ko_fireworks_show"))
+
+    assert (a.hp, b.hp) == (193, 195)
+    assert sizes(a) == [] and sizes(b) == []
+
+
+def test_fireworks_show_upgraded_charges_one_spark(overhaul):
+    """`upgrade: {spark_price: -1}` -- the first delta on any sheet that moves
+    a Spark price. The gate and the payment are one number, so both move."""
+    base = load("proto_ko_fireworks_show")
+    up = load("proto_ko_fireworks_show+")
+    assert effects.spend_spark_price(base.effects[0]) == 2
+    assert effects.spend_spark_price(up.effects[0]) == 1
+
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.player.sparks = 1
+    klee_overhaul.place(state, enemy, 6)
+    assert combat.card_playable(state, base) is False
+    assert combat.card_playable(state, up) is True
+
+
+def test_fireworks_show_refuses_a_bomb_less_board(overhaul):
+    """`EB-261`: its whole body is a damage-less Set off, so it would pay two
+    Sparks and resolve to nothing unless something is holding a charge."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.player.sparks = 3
+    card = load("proto_ko_fireworks_show")
+
+    assert klee_overhaul.set_off_only(card) is True
+    assert combat.card_playable(state, card) is False
+    klee_overhaul.place(state, enemy, 4)
+    assert combat.card_playable(state, card) is True
+
+
+# --- Fish Blasting: the draw-pile zone -------------------------------------
+
+def test_fish_blasting_shuffles_a_confiscated_into_the_draw_pile(overhaul):
+    """The third `add_card` zone. It lands in the DRAW pile at a random index,
+    which is `CardPilePosition.Random` on the other side: the whole cost of the
+    Status is that the player does not know when it arrives."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    state.player.draw_pile = [probe([], cid="f%d" % i, ctype="skill")
+                              for i in range(4)]
+
+    effects.resolve_card(state, load("proto_ko_fish_blasting"))
+
+    assert (a.hp, b.hp) == (195, 195)
+    assert [c.id for c in state.player.draw_pile].count("confiscated") == 1
+    assert not any(c.id == "confiscated" for c in state.player.discard_pile)
+
+
+def test_fish_blasting_sets_nothing_off(overhaul):
+    """Plain pressure. The pile it hits over is untouched: this Attack does not
+    Set off, which is what separates it from every detonator beside it."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 8)
+
+    effects.resolve_card(state, load("proto_ko_fish_blasting"))
+
+    assert sizes(enemy) == [8]
+    assert counts(state)["ko_set_off"] == 0
+
+
+# --- Bombs Away!: the Attack placer ----------------------------------------
+
+def test_bombs_away_hits_and_places_on_every_enemy(overhaul):
+    """The Attack placer the Smoggy reading asked for: one Skill per turn does
+    not stop it, because it is not a Skill."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+
+    card = load("proto_ko_bombs_away")
+    assert card.type == "attack"
+    effects.resolve_card(state, card)
+
+    assert (a.hp, b.hp) == (197, 197)
+    assert sizes(a) == [2] and sizes(b) == [2]
+
+
+# --- Long Fuse: the rising hand cost ---------------------------------------
+
+def test_long_fuse_costs_one_more_for_every_turn_it_is_held(overhaul):
+    """"Costs 1 more each turn it stays in your hand." NEVER DOWNWARD, and it
+    accumulates: the base game's `AddUntilPlayed` in this engine's spelling."""
+    state = klee_state([make_enemy(hp=200)])
+    card = load("proto_ko_long_fuse")
+    state.player.hand.append(card)
+    assert combat.card_cost(state, card) == 1
+
+    klee_overhaul.turn_end(state)
+    assert combat.card_cost(state, card) == 2
+    klee_overhaul.turn_end(state)
+    assert combat.card_cost(state, card) == 3
+
+
+def test_long_fuse_burns_only_while_it_is_in_hand(overhaul):
+    """A card in the draw pile is not staying in your hand, so its fuse does
+    not burn."""
+    state = klee_state([make_enemy(hp=200)])
+    card = load("proto_ko_long_fuse")
+    state.player.draw_pile.append(card)
+
+    klee_overhaul.turn_end(state)
+
+    assert card.rising_cost_risen == 0
+
+
+def test_long_fuse_resets_when_it_is_played(overhaul):
+    """The `AfterCardPlayedCleanup` half: "each turn it stays in your hand"
+    stops being true the moment it leaves, so the accumulated modifier goes."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    card = load("proto_ko_long_fuse")
+    state.player.hand.append(card)
+    klee_overhaul.turn_end(state)
+    klee_overhaul.turn_end(state)
+    assert combat.card_cost(state, card) == 3
+
+    state.player.energy = 5
+    aimed(state, enemy)
+    combat.play_card(state, card)
+
+    assert card.rising_cost_risen == 0
+    assert combat.card_cost(state, card) == 1
+
+
+def test_long_fuse_two_copies_burn_separately(overhaul):
+    """The fuse is the CARD's and not the board's: a copy drawn a turn later is
+    a turn behind."""
+    state = klee_state([make_enemy(hp=200)])
+    first, second = load("proto_ko_long_fuse"), load("proto_ko_long_fuse")
+    state.player.hand.append(first)
+    klee_overhaul.turn_end(state)
+    state.player.hand.append(second)
+    klee_overhaul.turn_end(state)
+
+    assert combat.card_cost(state, first) == 3
+    assert combat.card_cost(state, second) == 2
+
+
+def test_long_fuse_is_retained_and_the_fuse_is_why(overhaul):
+    """The row prints Retain on the keyword rail, and `blocked_reason` refuses
+    a rising cost without it: a card discarded at end of turn can never stay in
+    your hand, so the fuse would print a rule that cannot fire."""
+    card = load("proto_ko_long_fuse")
+    assert card.retain is True
+    assert card.rising_cost == 1
+
+
+# --- The Vermillion Pact ---------------------------------------------------
+
+def pact(state):
+    """The Rare, standing."""
+    state.player.powers[klee_overhaul.VERMILLION_PACT] = 1
+
+
+def test_the_pact_hands_back_the_aura_a_bomb_consumed(overhaul):
+    """The brief's sec.5.3 rule-breaker: the aura the explosion ate is still
+    standing when the Attack behind it lands, so the Attack reacts too."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    enemy.aura = "hydro"
+    pact(state)
+    klee_overhaul.place(state, enemy, 6)
+    aimed(state, enemy)
+
+    effects.resolve_card(state, load("proto_ko_long_fuse"))
+
+    assert state.reactions_this_turn == 2
+
+
+def test_without_the_pact_the_aura_is_spent_by_the_first_hit(overhaul):
+    """The same board with the Power off: one aura, one reaction, which is the
+    shared rule the Rare breaks."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    enemy.aura = "hydro"
+    klee_overhaul.place(state, enemy, 6)
+    aimed(state, enemy)
+
+    effects.resolve_card(state, load("proto_ko_long_fuse"))
+
+    assert state.reactions_this_turn == 1
+
+
+def test_the_pact_ignores_a_skills_set_off(overhaul):
+    """"The Attack that Set it off": a Skill has no hit behind the explosion
+    for the aura to feed, so Quick Fuse, Countdown and Fireworks Show trigger
+    nothing."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    enemy.aura = "hydro"
+    pact(state)
+    state.player.sparks = 3
+    klee_overhaul.place(state, enemy, 6)
+    aimed(state, enemy)
+
+    effects.resolve_card(state, load("proto_ko_quick_fuse"))
+
+    assert state.reactions_this_turn == 1
+    assert enemy.aura is None
+
+
+def test_the_pact_ignores_a_mine_answering_an_attack(overhaul):
+    """A Mine carries no card at all, so `card is None` and the Pact declines:
+    rule 6's explosion is not an Attack's."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    enemy.aura = "hydro"
+    pact(state)
+    klee_overhaul.place(state, enemy, 6, is_mine=True)
+
+    klee_overhaul.mines_answer_attack(state, enemy)
+
+    assert state.reactions_this_turn == 1
+    assert enemy.aura is None
+
+
+def test_the_pact_does_nothing_when_the_explosion_did_not_react(overhaul):
+    """`reacted` is the whole gate: a Pyro aura REFRESHES rather than reacts
+    and consumes nothing, so nothing is owed back and the Pact must not top it
+    up."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    enemy.aura = "pyro"
+    pact(state)
+    klee_overhaul.place(state, enemy, 6)
+    aimed(state, enemy)
+
+    effects.resolve_card(state, load("proto_ko_long_fuse"))
+
+    assert state.reactions_this_turn == 0
+
+
+def test_the_pact_is_dead_on_an_aura_less_board(overhaul):
+    """Dead alone, like Witches' Circle beside it (R244 pick 2): a deck with no
+    applier never puts a foreign aura up and this Power never fires."""
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    pact(state)
+    klee_overhaul.place(state, enemy, 6)
+    aimed(state, enemy)
+
+    effects.resolve_card(state, load("proto_ko_long_fuse"))
+
+    assert state.reactions_this_turn == 0
+    assert counts(state)["ko_vermillion_pact"] == 0

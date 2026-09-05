@@ -137,8 +137,14 @@ internal static class KleeOverhaulRoster
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
-    /// THIRTY-FIVE SINCE THE ROUND-11 POOL PASS (2026-09-04), and the one
-    /// that arrived is <c>ProtoKoStokeTheFuse</c>: the arm's Spark SINK, the
+    /// FORTY-FIVE SINCE THE POOL PASS (2026-09-05, `EB-491`), and the TEN that
+    /// arrived are the readings of rounds 13 to 16 made into cards: three for
+    /// Cook, three for Spray, three for React and one bridge between Cook and
+    /// Spray. Their own block at the end, in the sim's order. The pool is 8
+    /// Rares, which is the brief's count.
+    ///
+    /// THIRTY-FIVE BEFORE THAT (the round-11 pool pass, 2026-09-04), and the
+    /// one that arrived is <c>ProtoKoStokeTheFuse</c>: the arm's Spark SINK, the
     /// other half of the deadlock round 10 answered with Countdown. The
     /// round-11 and round-12 seats ended fights holding 4 to 9 unspent
     /// Sparks; this is where the bank goes. Its own block at the end, in the
@@ -262,5 +268,24 @@ internal static class KleeOverhaulRoster
         // this gives the bank somewhere to go, and it pays only if a Bomb is
         // already cooking.
         ModelDb.Card<ProtoKoStokeTheFuse>(),
+        // THE POOL PASS (2026-09-05, `EB-491`). TEN rows off the readings of
+        // rounds 13 to 16, in the sim's order: Cook's three (a Retained
+        // detonator whose price rises while it waits, a second pile the size
+        // of the first, and the lore card's AoE with a cost), Spray's three
+        // (the Spark-paid Retained detonator, the Attack placer the Smoggy
+        // reading asked for, and the board-wide Set off), React's three (an
+        // aura-keyed grow with a floor, a tempo rider on the reaction, and the
+        // Pact that breaks the one-aura rule for her chain), and the bridge
+        // that splits a cooked pile in two.
+        ModelDb.Card<ProtoKoLongFuse>(),
+        ModelDb.Card<ProtoKoAllOfMyTreasures>(),
+        ModelDb.Card<ProtoKoFishBlasting>(),
+        ModelDb.Card<ProtoKoPocketMatch>(),
+        ModelDb.Card<ProtoKoBombsAway>(),
+        ModelDb.Card<ProtoKoFireworksShow>(),
+        ModelDb.Card<ProtoKoKindling>(),
+        ModelDb.Card<ProtoKoFlashPoint>(),
+        ModelDb.Card<ProtoKoVermillionPact>(),
+        ModelDb.Card<ProtoKoSplitCharge>(),
     };
 }
