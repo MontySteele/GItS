@@ -5,9 +5,11 @@ using System.Reflection;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype;
 using KleeMod.Powers;
+using KleeMod.Cards.Generated;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -309,13 +311,124 @@ public class Round16Tests
         }
     }
 
+    // ==================================================================
+    // `EB-486` -- the play folded and the face did not
+    // ==================================================================
+    //
+    // THE FIND (Furina r10 (c) 2). Under Guest Cast, <i>Freminet -- Pressurized
+    // Floe: Backstroke</i>'s damage went 10, 15 lit, 18 upgraded while its
+    // Block stayed 6 on every one of those screens -- and Lynette's Block
+    // moved 5, 7, 10 on the same screens. The PLAY had been folding all along
+    // (`GainBlock(..., new BlockVar(PrintedBlock(this, 6)))`); only the face
+    // was not, which is `EB-438`'s defect on the other Block clause.
+    //
+    // WHY NOT `CalculatedBlockVar`, which is how Lynette's folds: that var
+    // reads the single `CalculationBase`, and this card's DAMAGE has already
+    // claimed it. `spotlight_block_rider`'s own exclusion names this row as
+    // the only one it bites, and the reason is the invariant -- one
+    // `CalculationBase` per card. So the second number takes a var of its own.
+
+    [Fact]
+    public void Backstrokes_block_previews_the_fold_its_play_already_applied()
+    {
+        var src = Source("Cards/Generated/FreminetPressurizedFloe.cs");
+
+        // The face reads a var that previews the fold...
+        Assert.Contains("new SpotlightSystem.SpotlitBlockVar(6m)", src);
+        Assert.Contains("Gain {Block:diff()} [gold]Block[/gold].", src);
+        // ...and the PLAY is unchanged: the fold is applied once, there.
+        Assert.Contains(
+            "SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue)",
+            src);
+        // The damage keeps the Calculated rail it already had -- which is
+        // exactly why the Block could not have one.
+        Assert.Contains("new CalculationBaseVar(10m)", src);
+        Assert.Contains("new CalculatedDamageVar(ValueProp.Move)", src);
+    }
+
+    [Fact]
+    public void A_lit_backstroke_prints_and_gains_nine_block()
+    {
+        // 6 x 1.5 = 9, the number the seat should have been shown. Read off
+        // the shipped multiplier and the shipped base rather than typed, so a
+        // repricing of either moves this pin with it.
+        var floe = new FreminetPressurizedFloe();
+        var block = ((IEnumerable<DynamicVar>)typeof(
+                FreminetPressurizedFloe)
+            .GetProperty("CanonicalVars", All)!.GetValue(floe)!)
+            .Single(v => v is SpotlightSystem.SpotlitBlockVar);
+
+        Assert.Equal(6m, block.BaseValue);
+        Assert.Equal(
+            9m,
+            Math.Truncate(block.BaseValue
+                          * SpotlightSystem.GuestCastBaseMultiplier));
+
+        // AND THE ACCESSOR THE PLAY USES STILL RESOLVES. `DynamicVars.Block`
+        // is how the emitted `OnPlay` reads the base, and `DynamicVarSet.Block`
+        // CASTS to `BlockVar` -- which is why this var subclasses one rather
+        // than being the plain `DynamicVar` `DeferredBlockVar` can afford to
+        // be. Seen to FAIL as an `InvalidCastException` before it did.
+        var vars = typeof(CardModel)
+            .GetProperty("DynamicVars", All)!.GetValue(floe)!;
+        var read = vars.GetType().GetProperty("Block", All)!.GetValue(vars)!;
+        Assert.Equal(6m, ((DynamicVar)read).BaseValue);
+        Assert.IsType<SpotlightSystem.SpotlitBlockVar>(read);
+    }
+
+    [Fact]
+    public void The_upgrade_moves_the_damage_and_the_sheet_says_the_block_stays()
+    {
+        // "Upgraded moves too" is the DAMAGE, and it always did: the delta
+        // lands on the `CalculationBase` the Calculated rail reads, which is
+        // how the seat saw 18 lit-and-upgraded while the Block sat at 6.
+        var src = Source("Cards/Generated/FreminetPressurizedFloe.cs");
+        Assert.Contains("DynamicVars.CalculationBase.UpgradeValueBy(2m);", src);
+
+        // THE BLOCK NOT MOVING ON UPGRADE IS A RULED NUMBER AND NOT THIS
+        // DEFECT: `docs/furina-upgrades.yaml` says so in as many words, and a
+        // card-sheet number is not a thing a legibility row may change.
+        Assert.Contains(
+            "freminet_pressurized_floe:   {damage: +2}    # 10->12; Block "
+          + "stays 6",
+            Sheet("furina-upgrades.yaml"));
+    }
+
+    [Fact]
+    public void Every_companion_block_the_play_folds_now_previews_it()
+    {
+        // THE DENOMINATOR, and the reason the rule is derived rather than
+        // applied to one card: `emit` wraps EVERY block amount on a
+        // spotlight-capable row, and the two Calculated rails preview only
+        // some of them. Nine faces were printing a flat base while gaining a
+        // folded number; these are the shipped four.
+        foreach (var path in new[] {
+                     "Cards/Generated/FreminetPressurizedFloe.cs",
+                     "Cards/Generated/IttoSuperlativeSuperstrength.cs",
+                     "Cards/Generated/ShinobuSanctifyingRing.cs",
+                     "Cards/Generated/ThomaCrimsonOoyoroi.cs" })
+        {
+            var src = Source(path);
+            Assert.Contains("new SpotlightSystem.SpotlitBlockVar(", src);
+            Assert.Contains(
+                "SpotlightSystem.PrintedBlock(this, "
+              + "DynamicVars.Block.BaseValue)", src);
+        }
+    }
+
+    /// <summary>One ratified sheet, read whole, off the same walk.</summary>
+    private static string Sheet(string name) =>
+        Read(System.IO.Path.Combine("docs", name));
+
     /// <summary>A mod source file, read whole -- `Round12Tests.Printed`'s
     /// idiom and its reason: a stale copy beside the dll is exactly the drift
     /// a text pin exists to catch.</summary>
-    private static string Source(string relativePath)
+    private static string Source(string relativePath) =>
+        Read(System.IO.Path.Combine("klee-mod", "KleeCode",
+            relativePath.Replace('/', System.IO.Path.DirectorySeparatorChar)));
+
+    private static string Read(string relative)
     {
-        var relative = System.IO.Path.Combine("klee-mod", "KleeCode",
-            relativePath.Replace('/', System.IO.Path.DirectorySeparatorChar));
         var dir = new System.IO.DirectoryInfo(AppContext.BaseDirectory);
         while (dir != null)
         {

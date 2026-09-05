@@ -68,7 +68,7 @@ public sealed class ProtoMiIttoSuperlativeSuperstrength : CustomCardModel, IElem
             new CalculationBaseVar(14m),
             new ExtraDamageVar(1m),
             new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
-            new BlockVar(12m, ValueProp.Move)
+            new SpotlightSystem.SpotlitBlockVar(12m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

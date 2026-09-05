@@ -5048,6 +5048,33 @@ def build_vars(card: dict) -> list[str]:
                     'new CalculatedBlockVar(ValueProp.Move).WithMultiplier('
                     'static (card, _) => '
                     'SpotlightSystem.PrintedBlockDelta(card))')
+            elif spotlight_folds(card):
+                # `EB-486`. THE PLAY WAS FOLDING AND THE FACE WAS NOT, which
+                # is `EB-438`'s defect on the OTHER Block clause. `emit` wraps
+                # every block amount it emits for a spotlight-capable card in
+                # `SpotlightSystem.PrintedBlock` (the `spotlight_capable`
+                # branch below); the two rails above are the only ones that
+                # PREVIEW that wrap, and a card the two rails refuse printed a
+                # flat base while gaining a folded number. The r10 seat watched
+                # Backstroke's damage go 10, 15 lit, 18 upgraded with its Block
+                # at 6 throughout, beside Lynette's moving 5, 7, 10.
+                #
+                # THE RAILS REFUSE FOR ONE REASON APIECE AND EACH IS REAL:
+                # `CalculationBase` is a SINGLE var, so a card whose DAMAGE
+                # converts cannot also convert its Block off it (Backstroke is
+                # the row that comment names), and a card with two block
+                # effects would compute the second off the first's base. So
+                # the second number takes a var of its own -- the construction
+                # `EB-438` built for Charlotte's deferred clause, under the
+                # token this face prints.
+                #
+                # `spotlight_folds` AND NOT A SECOND SPELLING of the same
+                # question, for that row's own reason: the emitter's wrap and
+                # the face's var must be decided by one predicate or they
+                # drift, which is how this defect and Charlotte's both
+                # happened.
+                out.append(
+                    f'new SpotlightSystem.SpotlitBlockVar({eff["amount"]}m)')
             else:
                 out.append(f'new BlockVar({eff["amount"]}m, ValueProp.Move)')
         elif op == "set_off" and eff is set_off_damage_var_effect(card):

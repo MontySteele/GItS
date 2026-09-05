@@ -68,7 +68,7 @@ public sealed class ProtoShinobuSanctifyingRingPriced : CustomCardModel, IElemen
             new CalculationBaseVar(3m),
             new ExtraDamageVar(1m),
             new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
-            new BlockVar(4m, ValueProp.Move)
+            new SpotlightSystem.SpotlitBlockVar(4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
