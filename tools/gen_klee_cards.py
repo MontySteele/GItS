@@ -538,6 +538,33 @@ def prints_takes_bow(description: str) -> bool:
     return bool(TAKES_BOW_PHRASE.search(description))
 
 
+# `EB-488`. THE FOURTH FURINA WORD, and the one a REWARD screen needed.
+#
+# THE FIND (Furina r10 (c) 5). `Grand Salon` -- "[gold]Salon Member[/gold]
+# numbers are 1 higher" -- was the run's first card reward, offered on a screen
+# with no glossary for the words it is written in, and the seat passed on it
+# partly because it could not price it. The Salon tip had appeared exactly once
+# all run, on `Salon Debut` in fight 1.
+#
+# WHY IT WAS MISSING: `salon_member_tip_args` attaches from the EFFECT -- which
+# member does this row deploy -- which is right for the three member paragraphs
+# and wrong for the RULES paragraph. A face that names the word and deploys
+# nobody is precisely the face whose reader has never met it. So the rules tip
+# attaches from the PRINTED WORD, which is the rule the Companion tip already
+# reaches a reward screen by.
+#
+# GOLDED, because that is how every face prints it, and the plural is the same
+# word: `Salon Member{PowerAmount:plural:|s}` is one interpolated hole away
+# from `Salon Member` and means the same rule.
+SALON_MEMBER_PHRASE = re.compile(
+    r"\[gold\]Salon Member(?:s|\{[^{}]*\})?\[/gold\]")
+
+
+def prints_salon_member(description: str) -> bool:
+    """Does this built description print the words `Salon Member`? `EB-488`."""
+    return bool(SALON_MEMBER_PHRASE.search(description))
+
+
 # --- `EB-272`: the QUARANTINED ARMS' KEYWORDS --------------------------------
 #
 # THE DEFECT. Not one word the three prototype arms invented had a definition
@@ -5021,6 +5048,33 @@ def build_vars(card: dict) -> list[str]:
                     'new CalculatedBlockVar(ValueProp.Move).WithMultiplier('
                     'static (card, _) => '
                     'SpotlightSystem.PrintedBlockDelta(card))')
+            elif spotlight_folds(card):
+                # `EB-486`. THE PLAY WAS FOLDING AND THE FACE WAS NOT, which
+                # is `EB-438`'s defect on the OTHER Block clause. `emit` wraps
+                # every block amount it emits for a spotlight-capable card in
+                # `SpotlightSystem.PrintedBlock` (the `spotlight_capable`
+                # branch below); the two rails above are the only ones that
+                # PREVIEW that wrap, and a card the two rails refuse printed a
+                # flat base while gaining a folded number. The r10 seat watched
+                # Backstroke's damage go 10, 15 lit, 18 upgraded with its Block
+                # at 6 throughout, beside Lynette's moving 5, 7, 10.
+                #
+                # THE RAILS REFUSE FOR ONE REASON APIECE AND EACH IS REAL:
+                # `CalculationBase` is a SINGLE var, so a card whose DAMAGE
+                # converts cannot also convert its Block off it (Backstroke is
+                # the row that comment names), and a card with two block
+                # effects would compute the second off the first's base. So
+                # the second number takes a var of its own -- the construction
+                # `EB-438` built for Charlotte's deferred clause, under the
+                # token this face prints.
+                #
+                # `spotlight_folds` AND NOT A SECOND SPELLING of the same
+                # question, for that row's own reason: the emitter's wrap and
+                # the face's var must be decided by one predicate or they
+                # drift, which is how this defect and Charlotte's both
+                # happened.
+                out.append(
+                    f'new SpotlightSystem.SpotlitBlockVar({eff["amount"]}m)')
             else:
                 out.append(f'new BlockVar({eff["amount"]}m, ValueProp.Move)')
         elif op == "set_off" and eff is set_off_damage_var_effect(card):
@@ -11113,6 +11167,26 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "KokomiRiderTips.ForChargeRider("
             f"{tips_expr or 'base.ExtraHoverTips'}, this, "
             f"{charge_rider_args})")
+    # `EB-484`. BOTH NUMBERS OF A `bonus_vs_debuff` FOLD, on a screen with no
+    # enemy to resolve it.
+    #
+    # The fold is `EB-441` working: the face prints what the hovered enemy will
+    # take. On a SHOP shelf there is no hovered enemy, so `Undertow` printed
+    # "Deal 7 damage, already including 3 if the enemy has a debuff" and the
+    # r16 seat "could not determine whether that card deals 4 or 7" ((c) 7).
+    # The face cannot answer it -- a card's `Localization` is read once at
+    # registration and neither description getter is virtual -- so the pair
+    # goes on the tip, whose numbers are handed down from the SAME rider that
+    # emits the vars rather than re-derived.
+    for _eff in card.get("effects", []):
+        _debuff = debuff_calc_rider(card, _eff)
+        if _debuff is not None:
+            _base, _bonus = _debuff
+            tips_expr = (
+                "KokomiRiderTips.ForDebuffRider("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this, "
+                f"{_base}, {_bonus})")
+            break
     # B5: a deploy card carries the tip for every member it can field, plus
     # the cap rules its face no longer prints. Attached from the EFFECT, not
     # from a card list, so a new deploy card cannot ship naming a member that
@@ -11194,6 +11268,21 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         if prints_takes_bow(desc):
             tips_expr = (
                 "FurinaRiderTips.ForBow("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # `EB-488`, the third of hers and the one a REWARD screen needed. The
+        # rules paragraph attaches from the PRINTED WORD, unlike the three
+        # member paragraphs `salon_member_tip_args` attaches from the effect --
+        # a face that names the word and deploys nobody is exactly the face
+        # whose reader has never met it.
+        #
+        # AND NOT ON A DEPLOY CARD, which carries this same paragraph through
+        # `SalonMemberTips.ForCard` below: two copies of one definition on one
+        # face is what the game's own tip de-duplication would then be picking
+        # between. The exclusion is read off the same predicate that attach
+        # uses, so the two cannot drift.
+        if prints_salon_member(desc) and not salon_member_tip_args(card):
+            tips_expr = (
+                "SalonMemberTips.ForSalonRules("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     # `EB-477`. WHAT A COMPANION PLAY PERFORMS, AND THE REFUSAL FORM.
     #

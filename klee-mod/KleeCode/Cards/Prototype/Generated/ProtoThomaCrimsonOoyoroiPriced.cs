@@ -68,7 +68,7 @@ public sealed class ProtoThomaCrimsonOoyoroiPriced : CustomCardModel, IElemental
             new CalculationBaseVar(8m),
             new ExtraDamageVar(1m),
             new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
-            new BlockVar(3m, ValueProp.Move)
+            new SpotlightSystem.SpotlitBlockVar(3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

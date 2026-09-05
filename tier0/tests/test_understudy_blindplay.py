@@ -822,6 +822,34 @@ def test_a_meter_says_the_wire_carries_no_maximum_and_no_spend_rule():
     assert "no maximum" in page and "how it is spent" in page
 
 
+def test_the_arms_two_meters_print_their_zero_and_nobody_elses_does():
+    """`EB-487` (Furina r10 (c) 3). Encore and Fanfare dropped their row at 0,
+    so the seat inferred a load-bearing number from a missing line twice and
+    read Fanfare as arriving only once a member had performed.
+
+    The recorded turn carries EVERY registered resource at 0 (BaseLib's
+    registry knows nothing about who is playing), which is exactly why the ARM
+    is asked rather than the board."""
+    state = json.loads(json.dumps(combat_state()))
+    assert state["player"]["resources"]["KLEEMOD_ENCORE"] == 0
+    assert state["player"]["resources"]["KLEEMOD_FANFARE"] == 0
+
+    # This board is Kokomi's, and the non-zero rule is untouched on it.
+    kokomi = blindplay.observe(state)
+    assert "Encore: 0" not in kokomi and "Fanfare: 0" not in kokomi
+
+    state["player"]["character"] = "Furina"
+    furina = blindplay.observe(state)
+    assert "- Encore: 0 —" in furina
+    assert "- Fanfare: 0 —" in furina
+    # And only those two: every other registered meter still keeps its zero
+    # off the page, including the three Fanfare bookkeeping resources beside
+    # it and Kokomi's own Burst.
+    for hidden in ("Fanfare Floor", "Fanfare Cap Bonus", "Kokomi Burst",
+                   "Furina Burst", "Burst"):
+        assert f"- {hidden}: 0" not in furina
+
+
 def test_a_hand_printing_one_name_twice_says_an_enchant_would_not_show():
     """`EB-179`, gap three. The card builder emits no enchantment field, and
     the one place that bites a reader is a hand holding two cards they can see
@@ -1261,6 +1289,52 @@ def test_a_scripted_fight_runs_end_to_end(tmp_path):
                                          "record"}
     assert all(len(r["observation_sha256"]) == 64
                for r in rows if r["kind"] == "observation")
+
+
+def test_the_next_observe_after_a_play_re_reads_the_aura_off_the_feed(tmp_path):
+    """`EB-482` (Kokomi r16 (c) 5), and it is the row's ACCEPTANCE run as a
+    fixture: apply Electro, observe, the Hydro card in hand prints the preview.
+
+    The seat reported "the reaction preview arrives a turn late... it cannot
+    appear on the turn you play the card that CREATES the aura", and the row
+    was minted against a stale-board hypothesis. The loop has no board memory
+    at all: every iteration opens with `self.wire.get_state()` through
+    `settle_board`, and a card's preview is a hover tip the game rebuilds per
+    read (`KleeCardTooltips.ForCard` walks `CombatState.HittableEnemies` at
+    the moment it is asked). This pins that, so the hypothesis cannot be
+    re-minted.
+
+    The cause the seat actually met is one card, not the loop: `Amber --
+    Explosive Puppet` carries NO preview on any board, because its Pyro damage
+    is delivered later by `BaronBunnyPower` and `gen_klee_cards.emit` derives
+    the preview element from a damage or `apply_aura` op on the row itself.
+    """
+    bare = combat_state()
+    assert "Reaction preview" not in blindplay.observe(bare)
+
+    reacted = json.loads(json.dumps(bare))
+    reacted["battle"]["enemies"][0]["status"] = [
+        {"id": "ELECTRO_AURA", "name": "Electro Aura", "amount": 2,
+         "type": "Debuff", "keywords": [],
+         "description": "This enemy is wearing an Electro aura."}]
+    for card in reacted["player"]["hand"]:
+        if card["name"] == "Pearl Barrage":
+            card["keywords"] = list(card.get("keywords") or []) + [
+                {"name": "Reaction preview: Electro-Charged",
+                 "description": "Hydro meets Electro: the aura is consumed "
+                                "and both take a dot."}]
+
+    replies = [{"command": "end turn", "thinking": "set it up"},
+               {"command": 'play "Pearl Barrage" on "Nibbit"',
+                "thinking": "now it eats the aura"},
+               {"record": "one turn"}]
+    _s, _summary, _wire, thread = _session(
+        tmp_path, replies, states=[bare, reacted, reacted])
+
+    # The page the seat decided the SECOND action on was built off the second
+    # wire state, aura and all -- no observation was carried over.
+    assert "Reaction preview: Electro-Charged" not in thread.sent[0]
+    assert "Reaction preview: Electro-Charged" in thread.sent[1]
 
 
 def test_the_session_stops_on_the_action_budget(tmp_path):
@@ -4264,6 +4338,55 @@ def test_naming_no_target_still_plays_the_card_now():
     assert res["post"]["target"] == "NIBBIT_0"
 
 
+def _planning_hand(state: dict) -> dict:
+    """`EB-480`. The recorded turn with the wire's `can_target_pet` on it.
+
+    The capture predates the field (`EB-216` added it), so every hand entry
+    answers `None` there -- which is the case the refusal below deliberately
+    leaves alone. This fixture is the SAME hand with the field filled the way
+    a current bridge fills it: the Plan card answers true, the rest false.
+    """
+    out = json.loads(json.dumps(state))
+    for card in out["player"]["hand"]:
+        card["can_target_pet"] = (
+            card["name"] == "All Streams Flow to the Sea")
+    return out
+
+
+def test_a_card_that_cannot_be_planned_is_refused_on_the_jellyfish():
+    """`EB-480` (Kokomi r16 (c) 1). `play "Strike" on "Bake-Kurage"` returned
+    ok with an empty refusal, burned an action and changed nothing: energy,
+    discard and hand as before, "Nothing is planned."."""
+    state = _planning_hand(plans_combat_state(TWO_PLANS))
+    res = blindplay.act(state, 'play "Pearl Barrage" on "Bake-Kurage"')
+
+    assert not res["ok"]
+    assert "cannot be planned on Bake-Kurage" in res["refusal"]
+    # `EB-402`'s repair: the way out is IN the refusal. The one Plan card in
+    # this hand is offered by name, and so is the bare form.
+    assert ('play "All Streams Flow to the Sea" on "Bake-Kurage"'
+            in res["refusal"])
+    assert 'play "Pearl Barrage"' in res["refusal"]
+
+    # And the Plan card itself is still accepted, on the same board.
+    ok = blindplay.act(state, 'play "All Streams Flow to the Sea" '
+                              'on "Bake-Kurage"')
+    assert ok["ok"], ok
+    assert ok["post"]["target"] == "41"
+
+
+def test_a_feed_with_no_pet_target_field_plays_the_card_as_it_always_did():
+    """`EB-480`'s conservative half, `_aims_at_an_enemy`'s own rule: an ABSENT
+    `can_target_pet` is a bridge that predates the field, and it reads as the
+    behaviour that build has rather than as a refusal."""
+    state = plans_combat_state(TWO_PLANS)
+    assert all(c.get("can_target_pet") is None
+               for c in state["player"]["hand"])
+    res = blindplay.act(state, 'play "Pearl Barrage" on "Bake-Kurage"')
+    assert res["ok"], res
+    assert res["post"]["target"] == "41"
+
+
 # ==== The blind-render burn, rounds four (Klee) and two (Kokomi), 2026-09-02 =
 #
 # Five rows, all of them read off seat records rather than off this file:
@@ -5513,8 +5636,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                  "Not an Attack: only ", " and a cap ",
                  "Kills move it on"],
         # `EB-432`: the pile's own order, and which charge meets the aura.
+        # `EB-490` renamed the class and not the claim: "Attack trigger" read
+        # as something on the player's own side of the board, beside a Block
+        # clause pointing the other way.
         "Set off": ["go off first, oldest first, each ",
-                    "a Pyro hit. ", " stops them, no Attack trigger ",
+                    "a Pyro hit. ", " stops them, no when-hit power ",
                     "fires, the first takes the aura."],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
         # `EB-436`: the hit is in the sentence now.
@@ -7117,6 +7243,69 @@ def test_the_no_upgrade_register_is_read_by_id_and_only_its_ids_cross():
     assert not qa_packet.leaks(blindplay.UNEXPLAINED_OMISSION)
 
 
+# ------------- `EB-483`: what the Smith is offering, and what it becomes -----
+
+
+def test_the_smith_prints_the_upgraded_face_beside_the_current_one():
+    """`EB-483` (Kokomi r16 (c) 6). "The upgrade screen shows the current face,
+    never the upgraded one. Thirteen cards, no previews. I upgraded Deep
+    Current on a guess and found out it was 6 to 9 two fights later."
+
+    The RECORDED Smith screen, plus the card the finding is about, appended in
+    the shape that screen's own rows carry.
+
+    Seen to FAIL: the page printed thirteen current faces and nothing else.
+    """
+    smith = live("upgrade-fresh")
+    smith = json.loads(json.dumps(smith.get("state", smith)))
+    smith["card_select"]["cards"].append(
+        {"id": "KLEEMOD-PROTO_KK_DEEP_CURRENT", "name": "Deep Current",
+         "cost": "1", "type": "Attack",
+         "description": "Deal 6 damage to ALL enemies."})
+    page = blindplay.observe(smith)
+
+    # The card the seat guessed on, both faces, one under the other.
+    assert "    Deal 6 damage to ALL enemies." in page
+    assert "    Upgraded: Deal 9 damage to ALL enemies." in page
+    # And the screen's own rows, including one whose printed face carries the
+    # game's appended keyword sentence -- which is why the match is a search
+    # over the face rather than the whole of it.
+    assert "    Upgraded: Set off. Deal 10 damage. Applies Pyro." in page
+    assert "    Upgraded: Gain 11 Block." in page
+
+
+def test_a_face_the_upgrade_index_cannot_render_prints_no_second_face():
+    """The bound, and it is the page's oldest rule: an absent answer is
+    silence, never a guess. A row this build defines no delta for, a row whose
+    printed text no longer matches the template it was generated from, and a
+    card the index has never heard of all get exactly nothing."""
+    assert qa_packet.upgraded_face("KLEEMOD-NOT_A_CARD", "Deal 6 damage.") == ""
+    # Reworded since the capture: the wire says "on target enemy", the sheet
+    # says "on the enemy", and one number in the middle is not enough to make
+    # that a face this page may print.
+    assert qa_packet.upgraded_face(
+        "KLEEMOD-PROTO_KO_CHAIN_FUSE",
+        "Each Bomb on target enemy grows by 3.") == ""
+    # And it is off every screen but the Smith: a hand prints one face.
+    hand = blindplay.observe(combat_state())
+    assert "Upgraded:" not in hand
+
+
+def test_the_upgraded_face_moves_the_number_the_delta_names():
+    """`CalculationBase` is the input to a `Calculated*` var, so the face
+    prints one name and `OnUpgrade` moves another -- resolved only where the
+    template holds exactly one `Calculated*` hole, which is the same invariant
+    the generator emits under (`block_calc_rider`: one CalculationBase per
+    card)."""
+    assert qa_packet.upgraded_face(
+        "KLEEMOD-PROTO_KK_UNDERTOW",
+        "Deal 7 damage, already including 3 if the enemy has a debuff.") == (
+        "Deal 10 damage, already including 3 if the enemy has a debuff.")
+    # A plural arm follows the number it is about rather than being copied.
+    assert qa_packet.upgraded_face(
+        "KLEEMOD-LYNETTE_BOX_TRICK", "Draw 2 cards.") == "Draw 3 cards."
+
+
 # ------------------------- `EB-377`: the base game's words on a face ---------
 
 
@@ -7176,9 +7365,12 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "BaseKeywordTips.cs").read_text(encoding="utf-8")
     anchors = {
-        "Vulnerable": ["The wearer takes 50% more damage from every hit. "
-                       "One stack falls ", "off at the end of each of its "
-                       "turns."],
+        # `EB-481` put the Skill case in this one too, one round later and for
+        # the same reason: the game's status line says "from Attacks" and
+        # `VulnerablePower` gates on the HIT.
+        "Vulnerable": ["The wearer takes 50% more damage from every hit it "
+                       "takes, a ", "Skill's damage too. One stack falls off "
+                       "at the end of each of ", "its turns."],
         # `EB-469` put the Skill case in this sentence, in the C# and here in
         # one commit, so the anchor holds the clause that resolves the game's
         # own "Attacks".
