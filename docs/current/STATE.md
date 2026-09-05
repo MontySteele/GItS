@@ -216,8 +216,16 @@ are in [`workstreams.md`](workstreams.md).
   moves); the random Set off steers its first iteration only; Careful
   Arrangement on a Mine as printed; Kaeya's face names a Grounded that
   no longer exists (`EB-576`); a D default on offer shape for the Spark
-  sinks (`EB-577`); no pick; `EB-573`-`EB-577`. [USER]'s act-1 run is
-  due on this build. The round-8 clear is read against a control run
+  sinks (`EB-577`); no pick; `EB-573`-`EB-577`. **Round 22 is READ**
+  (`review/active/klee-overhaul-round-22-2026-09-06.md`): three natural
+  lanes on `0.2.2817+proto`, one void on a hard blocker (Hefty Tablet's
+  rare pick on `EB-577`'s canonical model, `EB-594`, fixed the same
+  night); the Spark-priced offer reached the seats and the economy
+  still read as never binding or circular; the starter's single
+  detonator read a third time (five dead-Bomb turns in six fights), to
+  be raised as [USER]'s own pick after the round lands; no pick in the
+  packet; `EB-593`-`EB-596`, `EB-605`. [USER]'s act-1 run is due on
+  the next build. The round-8 clear is read against a control run
   (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
