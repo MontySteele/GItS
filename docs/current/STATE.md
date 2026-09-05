@@ -276,8 +276,14 @@ are in [`workstreams.md`](workstreams.md).
   HP; enemy Block never printed (`EB-474`), three undefined terms
   (`EB-475`), a performance takes Vulnerable and does not Shatter
   (`EB-476`), an empty stage halves a Companion card silently (`EB-477`);
-  turn one read as a real choice, dry by construction. [USER]'s act-1 run
-  is due on that build. No stamp moves, nothing measured.
+  turn one read as a real choice, dry by construction. **Round 10 is READ**
+  (`review/active/furina-reframe-round-10-2026-09-04.md`): one seat on
+  `0.2.2614+proto` with the 2-Encore opening, floor 12, four of four with
+  the Gardener elite, stopped at 98 actions by a bridge hang on an Unknown
+  room (`EB-489`); the Spotlight relic reads as permanent (`EB-485`),
+  Backstroke's Block outside the fold (`EB-486`), Encore and Fanfare rows
+  vanish at 0 (`EB-487`); the Salon was furniture with one Deploy in the
+  deck. [USER]'s act-1 run is due on that build. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
