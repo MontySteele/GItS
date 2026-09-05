@@ -284,7 +284,10 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
                      "powers": _powers(e)}
                     for e, name, handle in zip(
                         _enemies(state),
-                        _enemy_names(_enemies(state)),
+                        # `EB-541`: with the round, which is what tells a body
+                        # replaced mid-fight from the first board of the next
+                        # fight -- the two share nothing with the memory alike.
+                        _enemy_names(_enemies(state), _int(battle.get("round"))),
                         _enemy_handles(_enemies(state)))],
     }
     # `EB-271`: the refusal that named nothing, given the board it is about.

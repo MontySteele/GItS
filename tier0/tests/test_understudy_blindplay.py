@@ -8692,7 +8692,8 @@ def _new_process() -> None:
     from understudy import blindplay_faces as faces
     faces._FIGHT_MEMORY.update({"roster": {}, "ordinals": {},
                                 "numbered": set(), "names": {},
-                                "handles": {}, "elements": set()})
+                                "handles": {}, "elements": set(),
+                                "round": None})
     faces._FIGHT_LOADED[0] = False
 
 
@@ -8742,6 +8743,94 @@ def test_every_enemy_carries_a_letter_that_a_kill_cannot_move():
          "hp": 10, "max_hp": 10, "block": 0, "status": [],
          "intents": [{"type": "Attack", "label": "3"}]})
     assert "- **Eye With Teeth** [E] — HP 10/10" in blindplay.observe(joined)
+
+
+# --- `EB-541`: THE LETTER A REPLACEMENT TOOK OFF A DEAD BODY ----------------
+
+
+def _gremlin_board(bodies: list[tuple[int, str, int]], round_: int) -> dict:
+    """A board of named bodies with their own combat ids, at a named round."""
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["round"] = round_
+    state["battle"]["enemies"] = [
+        {"entity_id": f"gremlin_{cid}", "combat_id": cid, "name": name,
+         "hp": hp, "max_hp": hp, "block": 0, "status": [],
+         "intents": [{"type": "Attack", "label": "6"}]}
+        for cid, name, hp in bodies]
+    return state
+
+
+def test_a_replacement_mints_the_next_letter_and_the_dead_ones_retires():
+    """`EB-541`. THE INVARIANT THE PAGE PRINTS WAS FALSE ON A SPLIT.
+
+    Kokomi r19 lane 1, floor 8. `Surprise 1` killed Gremlin Merc [A] and put a
+    Sneaky Gremlin and a Fat Gremlin in its place -- and the page lettered them
+    [A] and [B]. "The letter moved. I had been aiming by letter all fight."
+
+    THE CAUSE IS THE FIGHT-BOUNDARY TEST AND NOT THE MINTING. A board that
+    shares no body with the memory was read as a new fight, and a whole-board
+    replacement is exactly that board. The round separates them: a new fight
+    opens on round 1, a replacement lands on the round the fight had reached.
+
+    Seen to FAIL: the two new bodies came back [A] and [B].
+    """
+    merc = _gremlin_board([(1, "Gremlin Merc", 47)], round_=1)
+    assert "- **Gremlin Merc** [A] — HP 47/47" in blindplay.observe(merc)
+
+    _new_process()
+    split = _gremlin_board([(2, "Sneaky Gremlin", 13),
+                            (3, "Fat Gremlin", 14)], round_=2)
+    page = blindplay.observe(split)
+    assert "- **Sneaky Gremlin** [B] — HP 13/13" in page
+    assert "- **Fat Gremlin** [C] — HP 14/14" in page
+    assert "[A]" not in page, "the dead body's letter retires with it"
+
+
+def test_the_next_fight_still_starts_its_letters_at_a():
+    """The other side of `EB-541`, and the reason the round is what the test
+    asks rather than "the memory is not empty": a fight that shares no body
+    with the last one is a NEW FIGHT when it opens on round 1, and its first
+    body is [A] however many letters the last fight spent."""
+    blindplay.observe(_gremlin_board([(1, "Gremlin Merc", 47)], round_=1))
+    _new_process()
+    blindplay.observe(_gremlin_board([(2, "Sneaky Gremlin", 13),
+                                      (3, "Fat Gremlin", 14)], round_=2))
+
+    _new_process()
+    page = blindplay.observe(_gremlin_board([(7, "Corpse Slug", 27),
+                                             (8, "Sewer Clam", 30)], round_=1))
+    assert "- **Corpse Slug** [A] — HP 27/27" in page
+    assert "- **Sewer Clam** [B] — HP 30/30" in page
+
+
+def test_a_new_fight_joined_late_does_not_inherit_the_last_ones_letters():
+    """The third door `_is_a_new_fight` has to answer: a seat whose first
+    `observe` of a fight is not round 1. The round went BACKWARDS from the one
+    the memory was minted on, which no fight can do, so the memory is the last
+    fight's and goes."""
+    blindplay.observe(_gremlin_board([(1, "Gremlin Merc", 47)], round_=1))
+    _new_process()
+    blindplay.observe(_gremlin_board([(2, "Sneaky Gremlin", 13)], round_=6))
+
+    _new_process()
+    page = blindplay.observe(_gremlin_board([(9, "Corpse Slug", 27)], round_=3))
+    assert "- **Corpse Slug** [A] — HP 27/27" in page
+
+
+def test_the_grammar_aims_at_the_letter_the_replacement_minted():
+    """The page and the grammar read one memory, so the fix has to hold on both
+    sides or `on "C"` means a body the render never lettered. The grammar reads
+    the round off the same board (`_fight_round`)."""
+    blindplay.observe(_gremlin_board([(1, "Gremlin Merc", 47)], round_=1))
+    _new_process()
+    split = _gremlin_board([(2, "Sneaky Gremlin", 13),
+                            (3, "Fat Gremlin", 14)], round_=2)
+    blindplay.observe(split)
+
+    _new_process()
+    assert blindplay._resolve_enemy(split, "C") == ("gremlin_3", "")
+    assert blindplay._resolve_enemy(split, "B") == ("gremlin_2", "")
+    assert blindplay._resolve_enemy(split, "A")[0] == ""
 
 
 def test_the_enemy_list_carries_the_handle_rule_and_the_hand_note_does_not():
