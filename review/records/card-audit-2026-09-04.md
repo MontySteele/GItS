@@ -1466,3 +1466,147 @@ the comparison or counterexample it rests on and calls a bare verdict
 INCOMPLETE; the remedy ban is unchanged. The three bare Kokomi verdicts in
 5.4 were the seat obeying the old text. The comparisons written into the
 Kokomi pass packet are the author's derivations and are labelled so there.
+
+
+## 5.6 Klee round 18: two card adjustments (2026-09-05, morning)
+
+The first read under the amended protocol (a verdict carries its
+comparison). Two arms from `review/active/klee-overhaul-round-18-2026-09-05.md`
+§4: Grounded's condition moved from "nothing went off" to "a Bomb is on the
+field", and a random Set off preferring a bombed enemy (Tinder Toss, Rapid
+Fire). Both FOLLOWS, each with the standing line, the adjusted line and the
+turn on which the adjustment is worse for the player, which is what the
+protocol now asks. **Outcome:** both build under `EB-516`. Prompt, then
+reply, verbatim:
+
+```
+# Doctrine read: two Klee card adjustments from round 18
+
+Each numbered arm below is ONE ARM: an ADJUSTMENT to a row that stands on the
+sheet, with the standing text and the adjusted text both printed. For each,
+FOLLOWS or REQUIRES_MODIFICATION, the clause you ruled against, and the
+comparison the verdict rests on: the standing row's line against the adjusted
+line with the numbers, and the turn on which the adjustment is better or worse
+for the player. Read adversarially; the author is a different model family.
+The comparison is reading; a remedy is not, and none is asked for.
+
+## The charter
+
+- **C1 (owner).** "A successful design phase should not end with 'all agents
+  always win.'" A row that removes a losing line the kit is meant to keep,
+  instead of pricing it, is out.
+- **C2 (LAW D3).** A benefit carries a binding price; there is a real turn on
+  which the card is worse than a plain card of its cost.
+- **C3 (LAW D2).** The card's value turns on a choice the player makes (bank
+  or cash a Bomb), not on a number rising while you watch.
+- **C4 (Klee brief §6).** She cannot block on demand; every defence past the
+  base game's Defend is conditional on the decision just made.
+- **C5 (Klee brief §3 rule 7).** Nothing fires by itself: no automatic free
+  attack, no "at N Sparks".
+- **C6 (not strictly better).** Not a strictly better version of a shipped
+  pool row below, or of a base-game non-basic card at the same or lower
+  rarity and cost (Whirlwind is X-cost Uncommon: 5 to ALL per energy;
+  Skewer X-cost: 7 per energy to one; Sword Boomerang; Cleave).
+
+## The engine, Klee
+
+Her Attacks apply Pyro. A **Bomb** is a charge on an enemy that grows by 4
+at the start of each of her turns and goes off only when a card says **Set
+off** (every Bomb on that enemy, one at a time, each its own Pyro hit; not
+an Attack). Each Bomb grows separately. A **Mine** also goes off when its
+enemy attacks her, before the hit. **Spark**: she starts each combat with 1,
+gains 1 per Bomb going off (the relic, Pounding Surprise), and cards that
+print a Spark price spend Sparks instead of energy; no cap, lost at the end
+of combat. Energy 3, HP 62. Starter: 4 Strike, 4 Defend, Ka-pow! (basic, 0,
+Retain: Set off, 4 damage), Jumpy Dumpty (basic, 1: Bomb 8; when it goes
+off, a Mine 3 on ALL enemies).
+
+## What two rounds of seats said, verbatim
+
+Round 17, assembled Cook deck: "Grounded and the whole Bomb archetype are at
+war: it pays Sparks only while no Bomb goes off, and Sparks exist to set
+Bombs off." Round 18, assembled Cook deck, Sparks logged every turn: "Grounded
+is a trap in its own deck. 'If none of your Bombs went off last turn' pays you
+for skipping the kit's entire loop. In five fights it triggered once, and
+that was a turn I had already conceded." The ledger: something went off on
+10 of 19 turns of a Cook deck, seven of them a Mine on the enemy's beat.
+Round 17 natural: "Rapid Fire never once earned 2 energy: 'Set off a random
+enemy' means it cannot be pointed at the body I have spent two cards
+bombing." Round 18 Spray: "Tinder Toss is the one I never wanted: every other
+Spark card lets me aim at a bomb and get the Spark back; Tinder Toss gambles
+that, and when it loses the next card in hand prints CANNOT BE PLAYED."
+
+## The pool, every row pasted from the sheet (rarity, type, price)
+
+- Ka-pow! (Basic Attack, 0 energy, Retain): Set off. Deal 4 damage.
+- Jumpy Dumpty (Basic Skill, 1 energy): Place a Bomb 8. When it goes off, place a Mine 3 on ALL enemies.
+- Fish-Flavored Bait (Common Attack, 1 energy): Deal 4 damage. Place a Bomb 4.
+- Pocket Fireworks (Common Attack, 1 energy): Deal 9 damage.
+- Chain Fuse (Common Skill, 1 energy): Each Bomb on the enemy grows by 6.
+- Explosives Workshop (Uncommon Power, 1 energy): At the start of your turn, your Bombs grow by 1 more.
+- Careful Arrangement (Uncommon Skill, 1 energy): Move all your Bombs onto the enemy as one Bomb. It grows by 5.
+- Big Badda Boom (Uncommon Attack, 2 energy): Set off. Deal 12 damage. Then deal damage equal to what the Bombs dealt.
+- The Big One (Rare Attack, 3 energy): Set off for quadruple damage.
+- Alice's Recipe (Rare Power, 2 energy): Your Bombs grow twice each turn.
+- Pop! (Common Skill, 0 energy): Place a Bomb 5.
+- Mine Toss (Common Skill, 1 energy): Place a Mine 4 on ALL enemies.
+- Fwoosh! (Common Attack, 0 energy, 1 Spark): Set off. Deal 6 damage.
+- Tinder Toss (Common Attack, 0 energy, 1 Spark): Set off a random enemy and deal 4 damage to it, twice.
+- Quick Fuse (Common Skill, 0 energy, 1 Spark): Each Bomb on the enemy grows by 3. Set off.
+- Bang Bang! (Uncommon Attack, 0 energy, 2 Spark): Set off. Deal 8 damage. Place a Bomb 4.
+- Rapid Fire (Uncommon Attack, 2 energy): Set off a random enemy and deal 3 damage to it, 4 times.
+- Chained Reactions (Rare Power, 1 energy): Whenever one of your Bombs goes off, place a Bomb 3 on a random enemy.
+- Sparks 'n' Splash (proto) (Rare Power, 2 energy): At the end of your turn, deal Pyro damage to a random enemy equal to its largest Bomb.
+- Sizzle (Common Attack, 1 energy): Set off. Deal 6 damage. If a Bomb triggered an Elemental Reaction this turn, deal 6 additional damage.
+- Perfect Timing (Uncommon Attack, 1 energy): Set off. Deal 8 damage. If a Bomb triggered an Elemental Reaction this turn, play this again.
+- Flame Dance (Uncommon Attack, 1 energy): Set off each enemy whose aura is not Pyro. Deal 5 damage to ALL enemies.
+- Catalytic Converter (Uncommon Power, 1 energy): Whenever one of your Bombs triggers an Elemental Reaction, gain 1 additional Spark.
+- Ammo Scavenging (Common Skill, 1 energy): Place a Bomb 4. Draw 1 card for each of your Bombs that went off this turn.
+- Powder Charge (Uncommon Skill, 0 energy, 1 Spark): Place a Bomb 6.
+- Dig In (Common Skill, 0 energy, 1 Spark): Gain 8 Block.
+- Sugar Rush (Rare Skill, 0 energy, 2 Spark, Exhaust): Gain 2 Energy. Draw 1 card. Exhaust.
+- Run Away! (Common Skill, 0 energy): Gain 3 Block. If a Bomb went off this turn, gain 4 additional Block.
+- Grounded (Uncommon Power, 1 energy): At the start of your turn, if none of your Bombs went off last turn, gain 6 Block and 1 Spark.
+- Sorry, Jean... (Common Skill, 0 energy): Remove one of your Bombs. Gain Block equal to its size.
+- Dodoco Cover (Common Skill, 1 energy): Place a Bomb 4. Gain 5 Block.
+- Careful Now (Uncommon Skill, 1 energy, Retain): Gain Block equal to your largest Bomb when played, up to 10.
+- Coven Errand (Common Skill, 1 energy): Place a Bomb 5. If you played a Hexerei card this turn, place it on ALL enemies instead.
+- Witches' Circle (Uncommon Power, 1 energy): Whenever you play a Hexerei card, place a Bomb 3 on a random enemy.
+- Alice's Introduction Magic (Rare Skill, 1 energy): All cards in your hand count as Hexerei cards this turn.
+- Countdown (Common Skill, 1 energy): Set off. Draw 1 card1.
+- Stoke the Fuse (Uncommon Skill, 0 energy, all Spark): Spend all your Sparks. Your largest Bomb grows by 3 per Spark spent.
+- Long Fuse (Common Attack, 1 energy, Retain): Set off. Deal 6 damage. Costs 1 more each turn it stays in your hand.
+- All of My Treasures! (proto) (Rare Skill, 1 energy, Exhaust): Place a Bomb on the enemy equal to your largest Bomb.
+- Fish Blasting (proto) (Common Attack, 1 energy): Deal 5 damage to ALL enemies. Add a Confiscated to your draw pile.
+- Pocket Match (Common Attack, 0 energy, 1 Spark, Retain): Set off. Deal 5 damage.
+- Bombs Away! (proto) (Common Attack, 1 energy): Deal 3 damage to ALL enemies. Place a Bomb 2 on ALL enemies.
+- Fireworks Show (Uncommon Skill, 0 energy, 2 Spark): Set off ALL enemies.
+- Kindling (Common Skill, 0 energy): Each Bomb on an enemy whose aura is not Pyro grows by 4. If there is none, your largest Bomb grows by 1.
+- Flash Point (Uncommon Attack, 1 energy): Set off. Deal 7 damage. If a Bomb triggered an Elemental Reaction this turn, gain 1 Spark and draw 1 card.
+- Vermillion Pact (proto) (Rare Power, 2 energy): Whenever one of your Bombs triggers an Elemental Reaction, the Attack that set it off triggers one too.
+- Split Charge (Uncommon Skill, 1 energy): Split your largest Bomb into two halves on random enemies.1
+
+## The arms
+
+1. **Grounded, adjusted** (Uncommon Power, 1 energy). Standing: "At the start
+   of your turn, if none of your Bombs went off last turn, gain 6 Block and 1
+   Spark." Adjusted: "At the start of your turn, if you have a Bomb on the
+   field, gain 6 Block and 1 Spark." Upgrade unchanged (8 Block). The
+   condition moves from "nothing was cashed" to "something is cooking"; it
+   still pays nothing on a turn with an empty board, so it stays conditional
+   (C4) and it stops paying the player for not playing the kit.
+2. **A random Set off aims a bombed body first** (a rule on Tinder Toss and
+   Rapid Fire, no face text change beyond the tip): "Set off a random enemy"
+   picks among enemies carrying a Bomb; if none carries one, any enemy.
+   Tinder Toss (Common Attack, 0, 1 Spark: Set off a random enemy and deal 4
+   damage to it, twice) and Rapid Fire (Uncommon Attack, 2: Set off a random
+   enemy and deal 3 damage to it, 4 times) keep their numbers.
+
+Two verdicts, each with its clause and its comparison. Under 200 words.
+```
+
+```
+1. **FOLLOWS — C2, C3, C4, C6.** Standing Grounded: **1 energy; 6 Block + 1 Spark** if no Bomb went off last turn. Adjusted: **1 energy; 6 Block + 1 Spark** if a Bomb remains. On turn 2 with an empty field and no turn-1 detonation, adjusted yields **0 Block, 0 Spark**, losing **6 Block and 1 Spark** against standing; retaining a Bomb enables its benefit but postpones cashing that Bomb.
+
+2. **FOLLOWS — C1, C2, C6.** Standing and adjusted Tinder Toss both cost **1 Spark** for **4 damage twice**; Rapid Fire both cost **2 energy** for **3 damage four times**. With two enemies—one bombed and healthy, the other unbombed and attacking at **4 HP** (Tinder) or **3 HP** (Rapid)—the adjustment reduces the first hit’s chance of killing the attacker from **½ to 0**: that turn’s first hit delivers **4 or 3 less damage** to the urgent target. Guaranteed access to a Bomb therefore carries a targeting disadvantage; it does not dominate the standing rule.
+```
