@@ -633,3 +633,159 @@ Reply, verbatim:
 
 **Outcome:** FOLLOWS. The row builds under `EB-478`.
 
+
+
+## 5.3 The Klee pool pass, ten rows (2026-09-05, morning)
+
+The pass packet (`review/active/klee-pool-pass-2026-09-05.md`) put ten rows
+through the doctrine role on GPT 6 Astra at low effort, the second read on
+it, with the pool census pasted from the sheet by a script (37 rows) and
+two precedents stated in the prompt: a Rare may break the rule its loop
+names (the brief §5), and a reader Power may be dead alone (R244 pick 2).
+All ten came back FOLLOWS, each with a clause and an arithmetic line naming
+a pool row; the Vermillion Pact verdict names C5 as the Rare exception the
+prompt allowed. Nothing withdrawn. Prompt, then reply, verbatim:
+
+```
+# Doctrine read: ten Klee pool-pass rows against the kit charter
+
+Each numbered card below is ONE ARM. For each, FOLLOWS or
+REQUIRES_MODIFICATION, the clause (C1 to C6) you ruled against, and the line
+of the card with its arithmetic in one sentence, naming the pool row you
+compared it to. Read adversarially; the author is a different model family
+and the owner wants the row that should not reach a tester named. Two
+precedents you may cite: the kit's three Rares each break one of its rules
+by design (the brief, section 5), so a Rare breaking the rule its loop names
+is not a C5 failure by itself; and R244 pick 2 ruled a reader Power dead
+alone on purpose (drafted only by a deck that already holds what it reads),
+so "dead in a deck with no applier" is not by itself a failure either.
+
+## The charter
+
+- **C1 (owner).** "A successful design phase should not end with 'all agents
+  always win.'" A row that removes a losing line the kit is meant to keep,
+  instead of pricing it, is out.
+- **C2 (LAW D3).** A benefit carries a binding price; there is a real turn on
+  which the card is worse than a plain card of its cost.
+- **C3 (LAW D2).** The card's value turns on a choice the player makes (bank
+  or cash a Bomb), not on a number rising while you watch.
+- **C4 (Klee brief §6).** She cannot block on demand; every defence past the
+  base game's Defend is conditional on the decision just made.
+- **C5 (Klee brief §3 rule 7).** Nothing fires by itself: no automatic free
+  attack, no "at N Sparks".
+- **C6 (not strictly better).** Not a strictly better version of a shipped
+  pool row below, or of a base-game non-basic card at the same or lower
+  rarity and cost (Whirlwind is X-cost Uncommon: 5 to ALL per energy;
+  Skewer X-cost: 7 per energy to one; Sword Boomerang; Cleave).
+
+## The engine, Klee
+
+Her Attacks apply Pyro. A **Bomb** is a charge on an enemy that grows by 4
+at the start of each of her turns and goes off only when a card says **Set
+off** (every Bomb on that enemy, one at a time, each its own Pyro hit; not
+an Attack). Each Bomb grows separately. A **Mine** also goes off when its
+enemy attacks her. **Spark**: she starts each combat with 1, gains 1 per
+Bomb going off, and cards that print a Spark price spend Sparks instead of
+energy; no cap, lost at the end of combat. **Retain** keeps a card in hand
+at the end of the turn. A Confiscated is an unplayable status card. Energy
+3, HP 62. Starter: 4 Strike, 4 Defend, Ka-pow! (basic, 0 energy, Retain:
+"Set off. Deal 4 damage."), Jumpy Dumpty (basic, 1: "Place a Bomb 8. When
+it goes off, place a Mine 3 on ALL enemies.").
+
+The readings these rows answer, from rounds 13 to 16: Ka-pow! is the only
+Retained detonator, so with it undrawn "hold the Bomb" means "throw the
+detonator away", and with it in hand the last turn of a fight is
+automatic; a debuff that limits Skills per turn switches the kit off
+because every placer is a Skill; the React shelf is four rows and its
+reader Power is dead in a mono-Pyro deck.
+
+## The pool, every row pasted from the sheet (rarity, type, price)
+
+- Ka-pow! (Basic Attack, 0 energy, Retain): Set off. Deal 4 damage.
+- Jumpy Dumpty (Basic Skill, 1 energy): Place a Bomb 8. When it goes off, place a Mine 3 on ALL enemies.
+- Fish-Flavored Bait (Common Attack, 1 energy): Deal 4 damage. Place a Bomb 4.
+- Pocket Fireworks (Common Attack, 1 energy): Deal 9 damage.
+- Chain Fuse (Common Skill, 1 energy): Each Bomb on the enemy grows by 6.
+- Explosives Workshop (Uncommon Power, 1 energy): At the start of your turn, your Bombs grow by 1 more.
+- Careful Arrangement (Uncommon Skill, 1 energy): Move all your Bombs onto the enemy as one Bomb. It grows by 5.
+- Big Badda Boom (Uncommon Attack, 2 energy): Set off. Deal 12 damage. Then deal damage equal to what the Bombs dealt.
+- The Big One (Rare Attack, 3 energy): Set off for quadruple damage.
+- Alice's Recipe (Rare Power, 2 energy): Your Bombs grow twice each turn.
+- Pop! (Common Skill, 0 energy): Place a Bomb 5.
+- Mine Toss (Common Skill, 1 energy): Place a Mine 4 on ALL enemies.
+- Fwoosh! (Common Attack, 0 energy, 1 Spark): Set off. Deal 6 damage.
+- Tinder Toss (Common Attack, 0 energy, 1 Spark): Set off a random enemy and deal 4 damage to it, twice.
+- Quick Fuse (Common Skill, 0 energy, 1 Spark): Each Bomb on the enemy grows by 3. Set off.
+- Bang Bang! (Uncommon Attack, 0 energy, 2 Spark): Set off. Deal 8 damage. Place a Bomb 4.
+- Rapid Fire (Uncommon Attack, 2 energy): Set off a random enemy and deal 3 damage to it, 4 times.
+- Chained Reactions (Rare Power, 1 energy): Whenever one of your Bombs goes off, place a Bomb 3 on a random enemy.
+- Sparks 'n' Splash (proto) (Rare Power, 2 energy): At the end of your turn, deal Pyro damage to a random enemy equal to its largest Bomb.
+- Sizzle (Common Attack, 1 energy): Set off. Deal 6 damage. If a Bomb triggered an Elemental Reaction this turn, deal 6 additional damage.
+- Perfect Timing (Uncommon Attack, 1 energy): Set off. Deal 8 damage. If a Bomb triggered an Elemental Reaction this turn, play this again.
+- Flame Dance (Uncommon Attack, 1 energy): Set off each enemy whose aura is not Pyro. Deal 5 damage to ALL enemies.
+- Catalytic Converter (Uncommon Power, 1 energy): Whenever one of your Bombs triggers an Elemental Reaction, gain 1 additional Spark.
+- Ammo Scavenging (Common Skill, 1 energy): Place a Bomb 4. Draw 1 card for each of your Bombs that went off this turn.
+- Powder Charge (Uncommon Skill, 0 energy, 1 Spark): Place a Bomb 6.
+- Dig In (Common Skill, 0 energy, 1 Spark): Gain 8 Block.
+- Sugar Rush (Rare Skill, 0 energy, 2 Spark, Exhaust): Gain 2 Energy. Draw 1 card. Exhaust.
+- Run Away! (Common Skill, 0 energy): Gain 3 Block. If a Bomb went off this turn, gain 4 additional Block.
+- Grounded (Uncommon Power, 1 energy): At the start of your turn, if none of your Bombs went off last turn, gain 6 Block and 1 Spark.
+- Sorry, Jean... (Common Skill, 0 energy): Remove one of your Bombs. Gain Block equal to its size.
+- Dodoco Cover (Common Skill, 1 energy): Place a Bomb 4. Gain 5 Block.
+- Careful Now (Uncommon Skill, 1 energy, Retain): Gain Block equal to your largest Bomb when played, up to 10.
+- Coven Errand (Common Skill, 1 energy): Place a Bomb 5. If you played a Hexerei card this turn, place it on ALL enemies instead.
+- Witches' Circle (Uncommon Power, 1 energy): Whenever you play a Hexerei card, place a Bomb 3 on a random enemy.
+- Alice's Introduction Magic (Rare Skill, 1 energy): All cards in your hand count as Hexerei cards this turn.
+- Countdown (Common Skill, 1 energy): Set off. Draw 1 card.
+- Stoke the Fuse (Uncommon Skill, 0 energy, all Spark): Spend all your Sparks. Your largest Bomb grows by 3 per Spark spent.
+
+## The arms
+
+1. **Long Fuse** — Common Attack, 1 energy, Retain. Set off. Deal 6 damage.
+   Retain. Costs 1 more each turn it stays in your hand. Upgrade: 9 damage.
+2. **All of My Treasures!** — Rare Skill, 1 energy, Exhaust. Place a Bomb
+   on the enemy equal to your largest Bomb.
+3. **Fish Blasting** — Common Attack, 1 energy. Deal 5 damage to ALL
+   enemies. Shuffle a Confiscated into your draw pile. Upgrade: 8 damage.
+4. **Pocket Match** — Common Attack, 0 energy, 1 Spark, Retain. Set off.
+   Deal 5 damage. Upgrade: 7 damage.
+5. **Bombs Away!** — Common Attack, 1 energy. Deal 3 damage to ALL enemies.
+   Place a Bomb 2 on ALL enemies. Upgrade: Bomb 4.
+6. **Fireworks Show** — Uncommon Skill, 0 energy, 2 Sparks. Set off ALL
+   enemies. Upgrade: 1 Spark.
+7. **Kindling** — Common Skill, 0 energy. Each Bomb on an enemy whose aura
+   is not Pyro grows by 4. If there is none, your largest Bomb grows by 2.
+   Upgrade: 6 and 3.
+8. **Flash Point** — Uncommon Attack, 1 energy. Set off. Deal 7 damage. If
+   a Bomb triggered an Elemental Reaction this turn, gain 1 Spark and draw
+   1 card. Upgrade: 10 damage.
+9. **Vermillion Pact** — Rare Power, 2 energy. Whenever one of your Bombs
+   triggers an Elemental Reaction, the Attack that Set it off triggers one
+   too. Upgrade: 1 energy.
+10. **Split Charge** — Uncommon Skill, 1 energy. Split your largest Bomb
+    into two halves on random enemies. Upgrade: each half grows by 2.
+
+Ten verdicts, each with its clause and its line. Under 400 words.
+```
+
+```
+1. **FOLLOWS — C2.** Long Fuse’s 6 damage matches Sizzle’s floor, but retaining it once raises its cost from 1 to 2 energy: keeping the detonator carries a binding price.
+
+2. **FOLLOWS — C3.** All of My Treasures! makes one largest Bomb’s banked value into twice that value across two charges; unlike The Big One’s quadruple cash-out, it leaves detonation pending.
+
+3. **FOLLOWS — C6.** Fish Blasting deals 5 per enemy against Pocket Fireworks’ 9 to one, while adding a Confiscated; against Cleave’s 8 to ALL, it loses 3 per enemy and adds the status.
+
+4. **FOLLOWS — C6.** Pocket Match buys Retain by dealing 5 rather than Fwoosh!’s 6 at the same Spark price.
+
+5. **FOLLOWS — C6.** Bombs Away! delivers 3 immediate plus Bomb 2 per enemy, below Fish-Flavored Bait’s 4 plus Bomb 4 against one enemy; breadth costs concentrated output.
+
+6. **FOLLOWS — C2.** Fireworks Show spends 2 Sparks for field-wide detonation; against one enemy, Fwoosh! spends 1 and adds 6 damage, establishing a worse turn.
+
+7. **FOLLOWS — C2.** Kindling adds only 2 with exclusively Pyro auras, or 4 to one eligible Bomb, versus Pop!’s new Bomb 5; without existing Bombs it adds nothing.
+
+8. **FOLLOWS — C6.** Flash Point’s reaction payoff adds 1 Spark and 1 draw to 7 damage, while Sizzle reaches 6 + 6 = 12; the utility trades away 5 immediate damage.
+
+9. **FOLLOWS — C5.** Vermillion Pact’s automatic reaction is its named Rare exception; its 2-energy investment, compared with Catalytic Converter’s 1, produces zero payoff without a qualifying Bomb reaction.
+
+10. **FOLLOWS — C2.** Split Charge preserves the initial total across two halves and increases subsequent combined growth from 4 to 8, but random placement sacrifices targeting and supplies none of Careful Arrangement’s immediate +5.
+```
