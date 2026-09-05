@@ -517,9 +517,9 @@ def test_the_cost_clause_is_the_last_resort_and_only_at_two():
     from tier0.content import upgrades
 
     assert upgrades.prototype_default_delta(
-        "proto_kk_the_moon_overlooks_the_waters", 2, [
-            {"op": "apply_power", "power": "kk_plans_also_now", "amount": 1,
-             "target": "self"}]) == {"cost": -1}
+        "proto_kk_nereids_ascension", 2, [
+            {"op": "apply_power", "power": "kk_nereids_ascension",
+             "amount": 1, "target": "self"}]) == {"cost": -1}
     # The same row at cost 1: no discount -- it falls to the added draw.
     assert upgrades.prototype_default_delta(
         "proto_kk_treatise", 1, [

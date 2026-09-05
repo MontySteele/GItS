@@ -30,6 +30,7 @@ from understudy.blindplay_notes import (AURA_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         SPARK_OPENING_RULE,
+                                        SPOTLIGHT_WINDOW_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE)
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _fold
@@ -165,13 +166,14 @@ def _moved_line(m: dict[str, Any]) -> str:
 def _render_carry_out(pl: dict[str, Any]) -> list[str]:
     """The morning, and then the Plans that fired as they were written.
 
-    `EB-329`. TWO HEADINGS, BECAUSE THEY ARE TWO MOMENTS. The r4c seat played
-    War Council with The Moon Overlooks the Waters out and was told on one
-    screen both that the jellyfish "carried these out at the start of this
-    turn" and that War Council was still planned; the first was simply not
-    true of that resolution. Change of Plans is the same door -- its own face
-    says "carries out your front Plan NOW" -- so both are filed together,
-    under a sentence that says WHEN.
+    `EB-329`. TWO HEADINGS, BECAUSE THEY ARE TWO MOMENTS. The r4c seat was
+    told on one screen both that the jellyfish "carried these out at the start
+    of this turn" and that the Plan in question was still planned; the first
+    was simply not true of a resolution that happened mid-turn. Change of
+    Plans is that door -- its own face says "carries out your front Plan NOW"
+    -- so it is filed under a heading that says WHEN. It is the only such door
+    since The Moon Overlooks the Waters was withdrawn (`EB-570`), and the
+    heading is kept because the door is.
     """
     out: list[str] = []
     if pl["carried_out"]:
@@ -311,6 +313,47 @@ def _render_performance(row: dict[str, Any]) -> str:
     if not row["paid"]:
         line += " (dry: it could not pay its Encore, so it acted at "
         line += "three-quarters)"
+    return line + "."
+
+
+def _render_evoke(row: dict[str, Any]) -> str:
+    """One Evoke (`EB-564`): who bowed, what the bow did, and what it minted.
+
+    THE DEFECT, in the r14 lane-1 seat's words: "The Salon log printed the two
+    performances and never printed the Evoke. I only knew it had happened by
+    reading the auras." It fired twice in one elite -- the kit's biggest single
+    beat -- and the whole evidence was Encore jumping by three and every body
+    coming out wearing Hydro.
+
+    IT IS ITS OWN SENTENCE AND NOT A PERFORMANCE LINE. A bow does things a
+    performance never does: Chevalmarin's touches EVERY enemy and names no
+    body, and every Evoke leaves the member. So the line says the member left,
+    then what the bow did, then what it paid -- and the clauses that do not
+    apply to this member are simply absent, `_render_performance`'s own rule
+    about the Usher and the aura.
+    """
+    line = f"- **{row['member']}** took its final bow — an EVOKE, so it left "
+    line += "the stage"
+    did: list[str] = []
+    if row["aura_all"]:
+        did.append("left Hydro on every enemy")
+    if row["target"]:
+        did.append(f"hit {row['target']} for {row['damage']} Hydro")
+    if row["block"]:
+        did.append(f"gave you {row['block']} Block")
+    if row["encore"]:
+        did.append(f"granted {row['encore']} Encore")
+    if row["fanfare"]:
+        # THE FOCUS MULTIPLIER IS ON THE LINE because it is the whole
+        # difference between an Evoke and a performance the reader can see
+        # from the numbers -- the Fanfare is larger BECAUSE the bow cost a
+        # member, and the Focus term counted `focus_mult` times.
+        mult = (f", its Focus counting {row['focus_mult']} times"
+                if row["focus_mult"] > 1 else "")
+        did.append(f"minted {row['fanfare']} Fanfare{mult}")
+    if did:
+        line += ". It " + ", ".join(did[:-1] + [f"and {did[-1]}"]
+                                    if len(did) > 1 else did)
     return line + "."
 
 
@@ -598,11 +641,23 @@ def render(obs: dict[str, Any]) -> str:
             if (name == "Spark" and c["round"] == 1
                     and _fold(obs.get("character") or "") == "klee"):
                 rule = SPARK_OPENING_RULE
+            # `EB-568`: the floor is a CLAUSE on this row, not a row. The
+            # r14 lane-2 seat met `Fanfare Floor 8` and `Fanfare Cap Bonus 8`
+            # as two unexplained meters beside a Fanfare that had sat at 8 for
+            # three fights, and had no route from either number to the card
+            # that bought them. The cap bonus needs no clause: it is already
+            # inside the `/{top}` this row prints, which is the honest place
+            # for a number whose whole meaning is how much of the maximum was
+            # bought.
+            floor = (you.get("fanfare_parts") or {}).get("floor")
+            bound = (f", and it cannot fall below {floor}"
+                     if name == "Fanfare" and floor else "")
             if top:
-                out.append(f"- {name}: {amount}/{top} — "
+                out.append(f"- {name}: {amount}/{top}{bound} — "
                            f"{rule or METER_CAPPED_NOTE}")
             else:
-                out.append(f"- {name}: {amount} — {rule or METER_NOTE}")
+                out.append(f"- {name}: {amount}{bound} — "
+                           f"{rule or METER_NOTE}")
         for pw in you["powers"]:
             out.append(_render_power(pw, "- "))
         out.append(f"- Piles: {c['piles']['draw']} in the draw pile, "
@@ -672,8 +727,6 @@ def render(obs: dict[str, Any]) -> str:
                 if pl["twice"]:
                     out.append("- The jellyfish carries out EVERY Plan twice "
                                "while Nereid's Ascension lasts.")
-            if pl["also_now"]:
-                out.append("- Plans also happen NOW as you write them.")
             # `EB-329`: which of the two numbers under a Plan is which, once,
             # at the foot of the section rather than under the last card.
             if _board_note_wanted(pl):
@@ -702,7 +755,8 @@ def render(obs: dict[str, Any]) -> str:
                               "performs this one, and then sends it to the "
                               "back" if i == 0 else ""))
         if c.get("salon") and (c["salon"]["performed"]
-                               or c["salon"]["replayed"]):
+                               or c["salon"]["replayed"]
+                               or c["salon"].get("evoked")):
             # `EB-405`. WHAT THE STAGE DID THIS TURN, one act per line --
             # `EB-198`'s contract, the same one the carry-out block is under.
             #
@@ -729,6 +783,11 @@ def render(obs: dict[str, Any]) -> str:
             out += [f"- **{name}** was played an extra time, and the extra "
                     "play performed as well."
                     for name in c["salon"]["replayed"]]
+            # `EB-564`. LAST IN THE BLOCK, because that is where the bow
+            # happens: an Evoke is forced out BY a deploy onto a full stage or
+            # taken by the Evoke card, and either way it follows the acts
+            # above in the turn it belongs to.
+            out += [_render_evoke(row) for row in c["salon"].get("evoked", [])]
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page
@@ -830,6 +889,19 @@ def render(obs: dict[str, Any]) -> str:
             out.append("- (your hand is empty)")
         if c.get("hand_repeats"):
             out += ["", HAND_REPEAT_NOTE]
+        # `EB-567`. THE WINDOW, BEFORE THE REFUSAL RATHER THAN AFTER IT. Under
+        # the arm the Spotlight's price is the opening Encore exactly, so turn
+        # one is the only turn it can be bought -- and both r14 seats learned
+        # that from a refusal one action too late.
+        #
+        # GATED ON THE SALON BLOCK, which is the page's own test for "this
+        # build plays the reframe": the block is sent only under
+        # `FurinaReframe.ManualLiveFor`, and a release build's selector costs
+        # no Encore and would make this sentence false.
+        if (c["round"] == 1 and c.get("salon") is not None
+                and any(card["title"] == "Ethereal Spotlight"
+                        for card in c["hand"])):
+            out += ["", SPOTLIGHT_WINDOW_NOTE]
         out += ["", "## The other side", ""]
         for e in c["enemies"]:
             # `EB-496`: the letter in brackets after the name, where the card

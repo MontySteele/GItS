@@ -392,7 +392,8 @@ are in [`workstreams.md`](workstreams.md).
   `0.2.2753+proto`, four of four and six of six fights with both elites;
   Rolling Tide not missed, Second Course playable once in five (Encore
   at 0 on most turns, the price stands), Aria+ pays without Innate;
-  Dexterity adds nothing to Block under the arm (`EB-566`), the Evoke
+  the faces fold Dexterity before a seat reads them (`EB-566`, not a
+  defect), the Evoke
   prints no line (`EB-564`), the Spotlight's turn-one window unprinted
   (`EB-567`), Rapturous Applause's face hides a floor (`EB-568`), Amber
   outside the Spotlight fold (`EB-565`); the empty stage read a fifth

@@ -482,6 +482,15 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
 #if PROTOTYPE_CARDS
         if (evoked) mult = FurinaReframe.EvokeFocusMult(owner);
 #endif
+        // `EB-564`. WHAT THE BOW DID, carried out of the branches in these
+        // locals and filed once below -- `PerformMember`'s own arrangement,
+        // and for its reason: one recording site for the one implementation of
+        // a member bowing, so the page and the board cannot come apart.
+        Creature? bowPicked = null;
+        var bowDamage = 0;
+        var bowBlockLanded = 0;
+        var bowEncoreGranted = 0;
+        var bowAuraAll = false;
         switch (member)
         {
             case SalonMember.Crabaletta:
@@ -491,14 +500,20 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 var target = owner.Player?.RunState.Rng.CombatTargets
                     .NextItem(targets);
                 if (target == null) break;
-                await ElementalHit.Deal(
+                // THE NUMBER THAT LANDED and not the one the bow was worth,
+                // `EB-511`'s rule one method over: `Deal` runs the dealer's
+                // Weak, the reaction amplifier and the target's Vulnerable,
+                // and it is the landed figure a seat reconciles HP against.
+                bowDamage = await ElementalHit.Deal(
                     choiceContext, target, Elements.Element.Hydro,
                     Scaled(owner, SalonConstants.CrabalettaBow, mult), owner);
+                bowPicked = target;
                 break;
             }
             case SalonMember.Usher:
+                bowBlockLanded = Scaled(owner, SalonConstants.UsherBow, mult);
                 await CreatureCmd.GainBlock(
-                    owner, Scaled(owner, SalonConstants.UsherBow, mult),
+                    owner, bowBlockLanded,
                     ValueProp.Unpowered, null, fast: true);
                 break;
             case SalonMember.Chevalmarin:
@@ -512,9 +527,11 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                             choiceContext, enemy, Elements.Element.Hydro,
                             owner);
                     }
+                    bowAuraAll = targets.Count > 0;
                 }
                 FurinaResources.GainEncore(
                     owner, SalonConstants.ChevalmarinBowEncore);
+                bowEncoreGranted = SalonConstants.ChevalmarinBowEncore;
                 break;
             }
         }
@@ -554,6 +571,19 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
             // `_salon_bow` takes the same boolean from the same two callers.
             // With the arm off both callers pass false, so this is unreachable.
             FurinaReframeLedger.For(owner).NoteEvoke(member, mult);
+            // `EB-564`: AND THE ROW THE PAGE PRINTS. Filed BEFORE the mint so
+            // the two cannot disagree about the amount -- the figure recorded
+            // is the one `MintForEvoke` is about to add, read off the same
+            // constant through the same leg test.
+            FurinaReframeLedger.For(owner).NoteEvoked(
+                new FurinaReframeLedger.Evoked(
+                    ManualFrontName(member), mult,
+                    FurinaReframe.MeterLiveFor(owner)
+                        ? FurinaReframeLaw.FanfarePerEvoke : 0,
+                    bowEncoreGranted, bowAuraAll,
+                    bowPicked == null ? null : EnemyName(bowPicked),
+                    bowPicked?.CombatId.ToString(),
+                    bowDamage, bowBlockLanded));
             FurinaReframe.MintForEvoke(owner);
         }
 #endif

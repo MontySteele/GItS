@@ -2137,8 +2137,6 @@ APPLY_POWERS = {
     "kk_song_of_pearls": ("SongOfPearlsPower", None,
         "Once per turn, when the jellyfish carries out a [gold]Plan[/gold], "
         "gain {X} Block."),
-    "kk_plans_also_now": ("PlansAlsoNowPower", None,
-        "[gold]Plans[/gold] also happen now, as you write them."),
     # `EB-492`. Nereid's Ascension, redesigned from a Plan clause into the
     # Power it always read as: the old row spent the morning it was meant to
     # pay for. A marker power -- the stack means nothing, `CarryOutTimes`
@@ -9867,12 +9865,34 @@ def build_description(card: dict, *,
             parts.append("[gold]Fanfare Cap[/gold] +{FanfareCap:diff()}.")
 
         elif op == "gain_fanfare_floor":
-            # Bare "Fanfare +X" for the FULL grant -- current, baseline and
-            # cap together. The convention is only unambiguous because no card
+            # "Fanfare +X" for the FULL grant -- current, baseline and cap
+            # together. The convention is only unambiguous because no card
             # grants transient Fanfare directly (all four generation sources
             # are indirect); register lint L12 is the blocker that keeps it
             # that way, on the sheet AND on effects.OPS.
-            parts.append("[gold]Fanfare[/gold] +{FanfareFloor:diff()}.")
+            #
+            # `EB-568`: AND THE SECOND CLAUSE, which is the half that lasts.
+            # "+8" is the grant and it is gone the moment the meter moves; the
+            # BASELINE is the thing the card actually bought, and nothing on
+            # the face said so. The Furina r14 lane-2 seat watched Fanfare sit
+            # at 8 for three fights, met two meters it could not explain
+            # ("Fanfare Floor / Cap Bonus 8"), and called the card "much
+            # better than printed" -- a card under-reporting itself by its own
+            # durable effect. THE OP MOVES ALL THREE NUMBERS
+            # (`resources.gain_fanfare_floor`), so the sentence is two clauses
+            # because the effect is two facts, and both are true on every
+            # build; the arm is only where the second one is load-bearing,
+            # because there Fanfare is minted by performance alone and the
+            # floor is most of what a deck ever holds.
+            #
+            # `EB-507` MUST SKIP A ROW CARRYING THIS SENTENCE. That row blanks
+            # a Fanfare rider whose face promises Fanfare from something other
+            # than a performance; the floor clause promises no such thing --
+            # it states a bound the arm's own meter is read against -- and
+            # blanking it would delete the one true sentence this card had
+            # been missing.
+            parts.append("[gold]Fanfare[/gold] +{FanfareFloor:diff()}, and "
+                         "cannot fall below {FanfareFloor:diff()}.")
 
         elif op == "crash_fanfare":
             # Two sentences because it is two things happening, and the

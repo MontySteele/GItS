@@ -52,7 +52,6 @@
     "proto_kk_the_clouds_like_waves",
     "proto_kk_the_generals_banner",
     "proto_kk_the_moon_a_ship",
-    "proto_kk_the_moon_overlooks_the_waters",
     "proto_kk_tide_chart",
     "proto_kk_tide_wall",
     "proto_kk_treatise",
@@ -247,7 +246,6 @@
     "proto_kk_the_clouds_like_waves": "kokomi",
     "proto_kk_the_generals_banner": "kokomi",
     "proto_kk_the_moon_a_ship": "kokomi",
-    "proto_kk_the_moon_overlooks_the_waters": "kokomi",
     "proto_kk_tide_chart": "kokomi",
     "proto_kk_tide_wall": "kokomi",
     "proto_kk_treatise": "kokomi",
@@ -562,9 +560,6 @@
     "proto_kk_the_moon_a_ship": {
       "mend": 2,
       "plan_mend": 2
-    },
-    "proto_kk_the_moon_overlooks_the_waters": {
-      "cost": -1
     },
     "proto_kk_tide_chart": {
       "tide_draw": 1

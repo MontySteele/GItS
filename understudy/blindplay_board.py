@@ -106,11 +106,68 @@ ZERO_METERS: dict[str, frozenset[str]] = {
     "klee": frozenset({"Spark"}),
 }
 
+# `EB-568`. THE TWO METERS THAT ARE PARTS OF THE FANFARE ROW, not rows.
+#
+# THE FIND (Furina r14 lane 2 (c) 1). Rapturous Applause put `Fanfare Floor 8`
+# and `Fanfare Cap Bonus 8` in the status list, unexplained, and the seat --
+# who had already read Fanfare sitting at 8 for three fights -- had no route
+# from either number to the card that made them. Neither is a currency
+# anybody holds, spends or plans around: they are the two ENDS of the Fanfare
+# row that is already on the page.
+#
+# NOT `INTERNAL_METERS`, which is the other way of dealing with a row nobody
+# can read: those four have a surface elsewhere that states their rule, so
+# hiding them loses nothing. These two have no such surface, so they are
+# FOLDED -- the floor becomes a clause on the Fanfare line and the cap bonus
+# is already inside the ceiling that line prints, which is the honest place
+# for a number whose whole meaning is "this much of the maximum was bought".
+#
+# KEYED BY THE PRINTED NAME, `ZERO_METERS`' convention and for its reason:
+# these are rows the render would otherwise print.
+FANFARE_PARTS: dict[str, str] = {
+    "Fanfare Floor": "floor",
+    "Fanfare Cap Bonus": "cap_bonus",
+}
+
 
 def _zero_meters(player: dict[str, Any]) -> frozenset[str]:
     """The meter names this board prints at 0. Empty for every other arm."""
     return ZERO_METERS.get(_fold(_text(player.get("character"))),
                            frozenset())
+
+
+def _meters(player: dict[str, Any], resources: Any) -> dict[str, int]:
+    """The rows the meters block prints.
+
+    NON-ZERO ONLY, for `qa_packet.build`'s reason: the wire reports every
+    meter the mod REGISTERED, so a board with no Spotlight on it would
+    otherwise print "Spotlight Mode: 0" and teach the tester something this
+    screen does not show. `EB-386`: and NOT the mod's own bookkeeping, see
+    `INTERNAL_METERS`. `EB-487`: except the arm's own two, which print their
+    zero -- see `ZERO_METERS` for why the ARM is asked and not the board.
+    `EB-568`: and never the two parts of the Fanfare row, see
+    `FANFARE_PARTS`.
+    """
+    if not isinstance(resources, dict):
+        return {}
+    return {_label(k): _int(v) for k, v in resources.items()
+            if k not in INTERNAL_METERS
+            and _label(k) not in FANFARE_PARTS
+            and (_int(v) or _label(k) in _zero_meters(player))}
+
+
+def _fanfare_parts(resources: Any) -> dict[str, int]:
+    """`{slot: amount}` for the Fanfare row's two ends (`EB-568`).
+
+    A ZERO IS LEFT OUT rather than entered, `_meter_max`'s rule: a floor of 0
+    is the default every Furina starts a run on, and a clause saying Fanfare
+    cannot fall below nothing is a sentence about nothing.
+    """
+    if not isinstance(resources, dict):
+        return {}
+    by_name = {_label(k): _int(v) for k, v in resources.items()}
+    return {slot: by_name[name] for name, slot in FANFARE_PARTS.items()
+            if by_name.get(name)}
 
 
 ALREADY_UPGRADED = "already upgraded; an upgraded copy cannot be upgraded again"
@@ -241,11 +298,10 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             # `INTERNAL_METERS`.
             # `EB-487`: except the arm's own two, which print their zero. See
             # `ZERO_METERS` for why the ARM is asked and not the board.
-            "meters": ({_label(k): _int(v) for k, v in resources.items()
-                        if k not in INTERNAL_METERS
-                        and (_int(v)
-                             or _label(k) in _zero_meters(p))}
-                       if isinstance(resources, dict) else {}),
+            "meters": _meters(p, resources),
+            # `EB-568`: the two numbers `_meters` took OUT of that map,
+            # because they are parts of the Fanfare row rather than rows.
+            "fanfare_parts": _fanfare_parts(resources),
             # `EB-181`: the CEILING beside the amount, per meter, where the
             # meter declares one. `{printed name: max}`, and a meter that
             # declares none is simply absent from this map -- so the row for
@@ -365,6 +421,16 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
         it is printed at all -- "two Crabaletta lines ... for three
         Companion-card plays' worth of triggers", and "no line anywhere on the
         screen said Duet".
+
+      evoked -- `EB-564`. This turn's EVOKES, in order. An Evoke is a BOW and
+        a bow is not a performance, so it is in neither list above and the r14
+        seat that met two of them knew only from the auras: "the Salon log
+        printed the two performances and never printed the Evoke". `member` is
+        the stage name; `fanfare` is what the Evoke minted and `focus_mult`
+        how many times its Focus term counted; `encore` is Chevalmarin's flat
+        grant; `aura_all` is that member's whole-board Hydro, which has no
+        target to name; `target`/`combat_id`/`damage` are Crabaletta's hit and
+        `block` is the Usher's.
     """
     raw = player.get("furina_salon")
     if not isinstance(raw, dict) or not raw:
@@ -381,6 +447,20 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
     replayed = [name for name in
                 (_text(entry) for entry in (raw.get("replayed") or []))
                 if name]
+    # `EB-564`. ABSENT IS NOT EMPTY, this block's standing rule: a bridge or a
+    # klee.dll older than the field sends no `evoked` key and the page prints
+    # no Evoke line, exactly as before.
+    evoked = [
+        {"member": _text(row.get("member")),
+         "focus_mult": _int(row.get("focus_mult")),
+         "fanfare": _int(row.get("fanfare")),
+         "encore": _int(row.get("encore")),
+         "aura_all": bool(row.get("aura_all")),
+         "target": _text(row.get("target")),
+         "combat_id": _text(row.get("combat_id")),
+         "damage": _int(row.get("damage")),
+         "block": _int(row.get("block"))}
+        for row in (raw.get("evoked") or []) if isinstance(row, dict)]
     # `EB-506`: the stage itself, front first. ABSENT IS NOT EMPTY, this
     # block's standing rule: a bridge or a klee.dll older than the field sends
     # no `company` key and the page prints no stage line, exactly as before.
@@ -388,7 +468,7 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
                (_text(entry) for entry in (raw.get("company") or []))
                if name]
     return {"performed": performed, "replayed": replayed,
-            "company": company}
+            "evoked": evoked, "company": company}
 
 
 def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],
@@ -412,7 +492,11 @@ def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],
     by_id = {_text(raw.get("combat_id")): face["name"]
              for raw, face in zip(wire, printed)
              if _text(raw.get("combat_id"))}
-    for row in salon["performed"]:
+    # `EB-564`: THE EVOKE'S OWN BODY TAKES THE SAME NAMING. Crabaletta's bow
+    # picks a target the way its performance does, and a bow of that size is
+    # the most likely act in the fight to have KILLED what it hit -- which is
+    # exactly the case the title fallback exists for.
+    for row in salon["performed"] + salon.get("evoked", []):
         if not row["combat_id"]:
             continue
         row["target"] = (by_id.get(row["combat_id"])
@@ -472,8 +556,6 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
       twice -- Nereid's Ascension is up, so every Plan below happens TWICE. It
         is the one thing that makes the count stop being the number of things
         that will happen, which is why it is a field and not an inference.
-      also_now -- The Moon Overlooks the Waters is out, so a Plan written this
-        turn also happens immediately.
       queue -- ordered, front first: the card's name and how many clauses its
         Plan line carries.
       carried_out -- `EB-317`: what the jellyfish has already done THIS TURN,
@@ -490,9 +572,11 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
         read off a clause, so the Casket's answering strikes and a reaction's
         damage are inside it. `on_play` is which door the Plan came through,
         and it splits this list in two here: `carried_out` keeps the MORNING
-        and `fired_now` takes Change of Plans and The Moon Overlooks the
-        Waters, because "at the start of this turn" is a false sentence about
-        a Plan that fired as it was written.
+        and `fired_now` takes Change of Plans, because "at the start of this
+        turn" is a false sentence about a Plan that fired mid-turn. The
+        splitting stays a two-way one with The Moon Overlooks the Waters
+        withdrawn (`EB-570`): Change of Plans is a mid-turn door on its own
+        face.
     """
     raw = player.get("kokomi_plans")
     if not isinstance(raw, dict) or not raw:
@@ -511,7 +595,6 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
         "pet_entity_id": None if pet_id is None else _text(pet_id),
         "pending": _int(raw.get("pending")),
         "twice": bool(raw.get("twice")),
-        "also_now": bool(raw.get("also_now")),
         "queue": queue,
         "carried_out": [row for row in said if not row["on_play"]],
         "fired_now": [row for row in said if row["on_play"]],

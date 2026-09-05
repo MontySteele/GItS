@@ -22,6 +22,10 @@ from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
                                         CRYSTALLIZE_BLOCK, OPENING_SPARK,
                                         SHATTER_DAMAGE,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
+                                        CRYSTALLIZE_BLOCK, SHATTER_DAMAGE,
+                                        FRAIL_BLOCK_PCT, FURINA_OPENING_ENCORE,
+                                        SPOTLIGHT_ENCORE_COST,
+                                        VULNERABLE_TAKEN_PCT,
                                         WEAK_DEALT_PCT)
 
 
@@ -401,6 +405,31 @@ PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
                    "hit: it leaves a Hydro aura, or reacts with the aura "
                    "already there. A Plan that blocks, draws or applies a "
                    "debuff leaves no aura.")
+
+# `EB-567`. THE KIT'S FIRST DECISION, TAUGHT BY REFUSAL ONE ACTION TOO LATE.
+#
+# WHAT BOTH r14 SEATS MET. Ethereal Spotlight costs 2 Encore, the fight opens
+# with 2, and any performance spends one -- so the window is turn one before
+# anything performs, and it closes for the whole combat. Lane 1 lost it in
+# fight one ("by my second card the Spotlight was locked out") and played it
+# first in every fight after; lane 2 derived the same rule the same way. Both
+# seats learned it from the REFUSAL, which arrives after the turn it would
+# have changed.
+#
+# THE REFUSAL KEEPS ITS TEXT (`EB-364`): a card short of its price still says
+# so, and this note is not a second copy of that sentence. It is the thing the
+# refusal cannot be -- a sentence that arrives BEFORE the decision.
+#
+# PRINTED ON TURN ONE AND ONLY THERE, with the card in hand: on any later turn
+# the window is already open or already shut, and a standing note about a
+# decision that is no longer available is the noise this page's one-fact-per-
+# line rule exists to keep off it.
+SPOTLIGHT_WINDOW_NOTE = (
+    f"*You open a fight with {FURINA_OPENING_ENCORE} Encore and "
+    f"**Ethereal Spotlight** costs {SPOTLIGHT_ENCORE_COST} -- all of it. Light "
+    "your Companion cards before anything performs: one performance spends an "
+    "Encore, and the Spotlight is locked out for the rest of the combat.*")
+
 
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
              "`(debuff)`, because it is neither: it is the element left "

@@ -217,3 +217,57 @@ def test_the_grant_itself_is_untouched():
             continue
         assert "KleeBurstResource.Gain" in _companion_source(row["id"]), \
             row["id"]
+
+
+# ======================================================================
+# `EB-568`: THE FLOOR IS ON THE FACE, AND `EB-507` MUST NOT BLANK IT
+# ======================================================================
+#
+# WHAT THE SEAT SAW (Furina r14 lane 2, (c) 1). Rapturous Applause printed
+# "Fanfare +8" and the card's durable effect is a BASELINE of 8: Fanfare sat
+# at 8 for three fights, two meters the seat could not explain appeared
+# ("Fanfare Floor / Cap Bonus 8"), and the verdict was "much better than
+# printed" -- a card under-reporting itself by the half that lasts.
+#
+# THE OP MOVES ALL THREE NUMBERS (`resources.gain_fanfare_floor`: floor, cap
+# and current), so the face is two clauses because the effect is two facts.
+# Both are true on every build; the arm is only where the second is
+# load-bearing, because there Fanfare is minted by performance alone and the
+# floor is most of what a deck ever holds.
+
+FLOOR_LINE = ("[gold]Fanfare[/gold] +{FanfareFloor:diff()}, and cannot fall "
+              "below {FanfareFloor:diff()}.")
+
+#: Every shipped row carrying `gain_fanfare_floor`. Derived rather than named,
+#: `_tagged`'s rule one op over: a fourth row inherits the sentence.
+def _floor_rows() -> list[str]:
+    return [row["id"] for row in _sheet("furina")
+            if any(fx.get("op") == "gain_fanfare_floor"
+                   for fx in (row.get("effects") or ()))]
+
+
+def test_every_floor_row_prints_the_bound_it_buys():
+    rows = _floor_rows()
+
+    assert "rapturous_applause" in rows
+    for card_id in rows:
+        assert FLOOR_LINE in _class_source(card_id), card_id
+
+
+def test_the_floor_clause_is_not_a_fanfare_promise_eb507_may_blank():
+    """`EB-507` blanks a rider whose face promises Fanfare from something
+    other than a performance. THE FLOOR CLAUSE IS NOT ONE: it states a bound
+    the arm's own meter is read against, mints nothing, and is the one true
+    sentence this card had been missing. A blank that reached it would put the
+    row back where `EB-568` found it.
+
+    Pinned as the SENTENCE rather than as an exemption list, because the rule
+    is about what the words say: any future blanking rule that removes this
+    text fails here.
+    """
+    for card_id in _floor_rows():
+        source = _class_source(card_id)
+        assert "cannot fall below" in source, card_id
+        # The grant half is still printed -- the op really does raise current
+        # Fanfare -- so the two clauses stand or fall together.
+        assert "[gold]Fanfare[/gold] +{FanfareFloor:diff()}" in source, card_id

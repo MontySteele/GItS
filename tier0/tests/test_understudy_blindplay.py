@@ -905,6 +905,70 @@ def test_the_pages_opening_spark_is_the_number_both_engines_grant():
            / "KleeOverhaul.cs").read_text(encoding="utf-8")
     grant = re.search(r'OpeningSpark\s*=\s*(\d+)', src)
     assert grant and int(grant.group(1)) == blindplay_notes.OPENING_SPARK
+def test_the_fanfare_row_carries_its_floor_and_the_two_meters_are_gone():
+    """`EB-568`, and it is the row.
+
+    Rapturous Applause put `Fanfare Floor 8` and `Fanfare Cap Bonus 8` in the
+    status list, unexplained, beside a Fanfare that had sat at 8 for three
+    fights -- and the r14 lane-2 seat had no route from either number to the
+    card that bought them. Neither is a currency anybody holds, spends or
+    plans around: they are the two ENDS of the Fanfare row already on the
+    page, so the floor becomes a clause on it and the cap bonus is already
+    inside the ceiling that row prints.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["character"] = "Furina"
+    state["player"]["resources"] = {
+        "KLEEMOD_FANFARE": 8, "KLEEMOD_FANFARE_FLOOR": 8,
+        "KLEEMOD_FANFARE_CAP_BONUS": 8}
+    page = blindplay.observe(state)
+
+    assert "- Fanfare: 8, and it cannot fall below 8 —" in page
+    assert "Fanfare Floor" not in page
+    assert "Fanfare Cap Bonus" not in page
+
+
+def test_a_floor_of_zero_says_nothing_about_a_bound():
+    """`_meter_max`'s rule: a floor of 0 is the default every Furina starts a
+    run on, and a clause saying Fanfare cannot fall below nothing is a
+    sentence about nothing."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["character"] = "Furina"
+    state["player"]["resources"] = {
+        "KLEEMOD_FANFARE": 4, "KLEEMOD_FANFARE_FLOOR": 0}
+    page = blindplay.observe(state)
+
+    assert "- Fanfare: 4 —" in page
+    assert "cannot fall below" not in page
+
+
+def test_the_bound_rides_the_row_that_declares_a_ceiling_too():
+    """Both halves on one line: the ceiling the meter declares and the floor
+    the cards bought, which is the whole of what the two hidden rows were
+    saying separately."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["character"] = "Furina"
+    state["player"]["resources"] = {
+        "KLEEMOD_FANFARE": 12, "KLEEMOD_FANFARE_FLOOR": 8}
+    state["player"]["resource_info"] = {
+        "KLEEMOD_FANFARE": {"amount": 12, "max": 35}}
+    page = blindplay.observe(state)
+
+    assert "- Fanfare: 12/35, and it cannot fall below 8 —" in page
+
+
+def test_the_floor_clause_is_the_fanfare_rows_alone():
+    """Every other meter keeps the row it always had -- the fold is about the
+    two numbers that are PARTS of Fanfare, not a new grammar for meters."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["character"] = "Furina"
+    state["player"]["resources"] = {
+        "KLEEMOD_ENCORE": 5, "KLEEMOD_FANFARE": 8,
+        "KLEEMOD_FANFARE_FLOOR": 8}
+    page = blindplay.observe(state)
+
+    assert "- Encore: 5 —" in page
+    assert page.count("cannot fall below") == 1
 
 
 def test_a_hand_printing_one_name_twice_says_an_enchant_would_not_show():
@@ -3321,7 +3385,7 @@ def plans_combat_state(plans: dict | None) -> dict:
 
 TWO_PLANS = {
     "pet": True, "pet_name": "Bake-Kurage", "pet_entity_id": "41",
-    "pending": 2, "twice": False, "also_now": False,
+    "pending": 2, "twice": False,
     # `EB-322`: the wire carries the card's TITLE, and a prototype row
     # that shadows a shipped row prints the shipped row's title -- the
     # " (proto)" declaration is a sheet device and never reaches a face.
@@ -3359,14 +3423,18 @@ def test_an_empty_morning_says_so_rather_than_printing_a_zero():
     assert "in this order" not in page
 
 
-def test_the_two_rares_that_change_what_the_queue_means_are_printed():
+def test_the_rare_that_changes_what_the_queue_means_is_printed():
     """Nereid's Ascension makes the queue's LENGTH stop being the number of
-    things that will happen, and The Moon Overlooks the Waters makes a Plan
-    happen as it is written. Neither is visible from a count."""
+    things that will happen, which is not visible from a count.
+
+    ONE RARE AND NOT TWO SINCE `EB-570`: The Moon Overlooks the Waters was the
+    other, and its `also_now` field left the snapshot contract with the row.
+    A stale build that still sends the key is ignored rather than printed --
+    which this pins by sending it."""
     page = blindplay.render(blindplay.observation(
         plans_combat_state(dict(TWO_PLANS, twice=True, also_now=True))))
     assert "carries out EVERY Plan twice" in page
-    assert "Plans also happen NOW" in page
+    assert "also happen NOW" not in page
 
 
 # --------------------------------------------------------------------------
@@ -4048,13 +4116,15 @@ def test_the_block_reading_is_the_mods_own_subtraction():
 
 
 def test_an_on_play_firing_prints_under_its_own_heading():
-    """`EB-329`, the r4c seat's finding 4. With The Moon Overlooks the Waters
-    out, a War Council played mid-turn was reported on one screen both as
-    already carried out "at the start of this turn" and as still queued. Both
-    rows were true; the first sentence was not."""
+    """`EB-329`, the r4c seat's finding 4. A War Council carried out mid-turn
+    was reported on one screen both as already carried out "at the start of
+    this turn" and as still queued. Both rows were true; the first sentence
+    was not. The mid-turn door is Change of Plans since `EB-570` withdrew The
+    Moon Overlooks the Waters, and the heading is the row's, not the card's --
+    `on_play` is what splits the list."""
     blindplay.forget_fight()
     page = blindplay.render(blindplay.observation(plans_combat_state(
-        dict(TWO_PLANS, pending=1, also_now=True,
+        dict(TWO_PLANS, pending=1,
              queue=[{"name": "War Council", "clauses": 2}],
              carried_out=[{"card": "War Council", "number": 5,
                            "line": "Bake-Kurage: War Council, 5",
@@ -8724,7 +8794,8 @@ def test_the_encore_meter_line_does_not_repeat_the_gloss():
 
 # ---------------- EB-405: a Salon performance names its target -------------
 
-def salon_state(performed: list[dict]) -> dict:
+def salon_state(performed: list[dict], evoked: list[dict] | None = None
+                ) -> dict:
     """A combat whose wire carries this turn's Salon performances.
 
     SYNTHETIC, BUILT FROM THE MOD'S OWN SNAPSHOT SHAPE: every key below is
@@ -8733,8 +8804,202 @@ def salon_state(performed: list[dict]) -> dict:
     `test_the_salon_block_is_the_mods_own_snapshot_shape`.
     """
     state = json.loads(json.dumps(combat_state()))
-    state["player"]["furina_salon"] = {"performed": performed}
+    salon: dict = {"performed": performed}
+    # `EB-564`: ABSENT AND NOT EMPTY when a case is not about the Evoke, which
+    # is the wire's own three-state rule -- an older bridge sends no key.
+    if evoked is not None:
+        salon["evoked"] = evoked
+    state["player"]["furina_salon"] = salon
     return state
+
+
+def evoke_row(**kw) -> dict:
+    """One Evoke on the wire, in `FurinaReframeLedger.Evoked`'s field order.
+
+    THE DEFAULT IS CHEVALMARIN'S, which is the bow the r14 seat met twice:
+    Hydro on every enemy, a flat 3 Encore, no body named and no damage.
+    """
+    row = {"member": "Chevalmarin", "focus_mult": 3, "fanfare": 5,
+           "encore": 3, "aura_all": True, "target": "", "combat_id": "",
+           "damage": 0, "block": 0}
+    row.update(kw)
+    return row
+
+
+def test_an_evoke_prints_its_own_line():
+    """`EB-564`, and it is the row.
+
+    "The Salon log printed the two performances and never printed the Evoke.
+    I only knew it had happened by reading the auras" (Furina r14 lane 1, (c)
+    2). It fired twice in one elite -- the kit's biggest single beat -- and
+    the whole evidence was Encore jumping by three and every body coming out
+    wearing Hydro.
+
+    THE PERFORMANCE LIST COULD NOT HAVE CARRIED IT. An Evoke is a BOW, and a
+    bow never passes through `PerformMember`, the one site that files a
+    performance row. Chevalmarin's bow also does two things no performance row
+    can say: it touches EVERY enemy, so there is no body to name, and it
+    grants a flat Encore no `amount` field is about.
+    """
+    page = blindplay.observe(salon_state(
+        [{"member": "Crabaletta", "target": "Nibbit", "combat_id": "1",
+          "element": "Hydro", "aura": "Hydro", "amount": 6, "paid": True,
+          "evoked": False}],
+        evoked=[evoke_row()]))
+    assert "## What your Salon did this turn" in page
+    # The ordinary performance is still its own line, above.
+    assert "- **Crabaletta** hit Nibbit for 6 Hydro" in page
+    assert ("- **Chevalmarin** took its final bow \u2014 an EVOKE, so it left "
+            "the stage. It left Hydro on every enemy, granted 3 Encore, and "
+            "minted 5 Fanfare, its Focus counting 3 times.") in page
+
+
+def test_an_evoke_that_hits_names_the_body_and_the_number_that_landed():
+    """Crabaletta's bow picks a body the way its performance does, so the line
+    names it -- and the figure is what LANDED, `EB-511`'s rule at the bow."""
+    page = blindplay.observe(salon_state(
+        [], evoked=[evoke_row(member="Crabaletta", aura_all=False,
+                              target="Nibbit", combat_id="1", damage=18,
+                              encore=0)]))
+    assert ("- **Crabaletta** took its final bow \u2014 an EVOKE, so it left "
+            "the stage. It hit Nibbit for 18 Hydro, and minted 5 Fanfare, its "
+            "Focus counting 3 times.") in page
+
+
+def test_an_evoke_that_aims_at_nobody_says_what_it_did_instead():
+    """The Usher's bow blocks and touches no body, `_render_performance`'s own
+    rule one act over: the clauses that are not about this member are absent
+    rather than printed empty."""
+    page = blindplay.observe(salon_state(
+        [], evoked=[evoke_row(member="the Usher", aura_all=False, block=11,
+                              encore=0)]))
+    assert ("- **the Usher** took its final bow \u2014 an EVOKE, so it left "
+            "the stage. It gave you 11 Block, and minted 5 Fanfare, its Focus "
+            "counting 3 times.") in page
+    section = page.split("## What your Salon did this turn")[1]
+    assert "Hydro" not in section.split("\n\n")[1]
+
+
+# ------------- EB-567: the Spotlight window, before the refusal -----------
+
+def spotlight_turn_one_state(round_no: int = 1, hand_title: str =
+                             "Ethereal Spotlight", salon: bool = True
+                             ) -> dict:
+    """A Furina turn with the selector in hand, under the reframe.
+
+    THE SALON BLOCK IS THE ARM TEST, and it is the page's own: the wire
+    carries `furina_salon` only under `FurinaReframe.ManualLiveFor`, and a
+    release build's selector costs no Encore -- so the note would be false
+    there and must not print.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["round"] = round_no
+    if salon:
+        state["player"]["furina_salon"] = {"performed": []}
+    state["player"]["hand"] = [{
+        "id": "KLEEMOD-ETHEREAL_SPOTLIGHT", "name": hand_title,
+        "type": "Skill", "cost": "0", "star_cost": None,
+        "description": "Spotlight every Companion card. Their printed damage "
+                       "and Block are 50% stronger. Costs 2 Encore.",
+        "rarity": "Special", "is_upgraded": False, "keywords": [],
+        "index": 0, "target_type": "Self", "can_play": True,
+        "unplayable_reason": None}]
+    return state
+
+
+def test_the_turn_one_page_prints_the_spotlight_window():
+    """`EB-567`, and it is the row.
+
+    Ethereal Spotlight costs 2 Encore, the fight opens with 2, and any
+    performance spends one -- so the window is turn one before anything
+    performs and it shuts for the whole combat. Both r14 seats derived the
+    rule from the REFUSAL, which arrives one action after the turn it would
+    have changed: lane 1 "by my second card the Spotlight was locked out",
+    then played it first in every fight after; lane 2 the same way.
+    """
+    page = blindplay.observe(spotlight_turn_one_state())
+    assert ("*You open a fight with 2 Encore and **Ethereal Spotlight** costs "
+            "2 -- all of it. Light your Companion cards before anything "
+            "performs: one performance spends an Encore, and the Spotlight is "
+            "locked out for the rest of the combat.*") in page
+
+
+def test_the_window_line_is_turn_one_only():
+    """On any later turn the window is already open or already shut, and a
+    standing note about a decision that is gone is exactly the noise the
+    one-fact-per-line rule keeps off this page."""
+    page = blindplay.observe(spotlight_turn_one_state(round_no=2))
+    assert "locked out for the rest of the combat" not in page
+
+
+def test_the_window_line_needs_the_selector_in_hand():
+    """A turn-one hand without it has no decision to teach."""
+    page = blindplay.observe(spotlight_turn_one_state(hand_title="Defend"))
+    assert "locked out for the rest of the combat" not in page
+
+
+def test_the_window_line_is_arm_only():
+    """A release build's selector opens a two-mode choice and charges no
+    Encore, so the sentence would be false. The Salon block's absence is the
+    page's test for which build this is."""
+    page = blindplay.observe(spotlight_turn_one_state(salon=False))
+    assert "locked out for the rest of the combat" not in page
+
+
+def test_the_window_line_quotes_the_engines_own_two_numbers():
+    """`CHARGE_SOURCE_LINE`'s discipline: the page may not import `tier0`, so
+    the pair is spelled in `blindplay_shape` and held in step from HERE --
+    against the sim's opening Encore and the Spotlight's price, which
+    `lint_constant_parity` already pins to the mod's own two constants. The
+    line's whole point is that they are EQUAL."""
+    from tier0.engine import furina_reframe as FR
+    from understudy import blindplay_shape
+
+    assert blindplay_shape.FURINA_OPENING_ENCORE == FR.OPENING_ENCORE
+    assert (blindplay_shape.SPOTLIGHT_ENCORE_COST
+            == FR.SPOTLIGHT_DESIGNATE_ENCORE_COST)
+    assert (blindplay_shape.FURINA_OPENING_ENCORE
+            == blindplay_shape.SPOTLIGHT_ENCORE_COST)
+
+
+def test_the_spotlight_tip_carries_the_window_and_keeps_the_refusal():
+    """The mod half. The tip is the surface where the Encore is actually
+    weighed -- a card in hand on a turn -- and the refusal text is untouched
+    (`EB-364`): a refusal that arrives after the fact is not replaced, it is
+    preceded."""
+    tips = (REPO / "klee-mod" / "KleeCode" / "Cards"
+            / "FurinaRiderTips.cs").read_text(encoding="utf-8")
+    body = tips[tips.index("public static IEnumerable<IHoverTip> "
+                           "ForSpotlightWindow"):]
+    body = body[:body.index("\n    }")]
+    assert "SpotlightWindowKey" in body
+    assert "{FurinaReframeLaw.OpeningEncore}" in body
+    assert "{FurinaReframeLaw.SpotlightDesignateEncoreCost}" in body
+    assert "shut for this combat" in body
+    # ITS OWN METHOD, chained at the call site: two facts, two tip rows, each
+    # inside the 135-character ceiling on its own.
+    card = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina"
+            / "SpotlightCards.cs").read_text(encoding="utf-8")
+    assert "FurinaRiderTips.ForSpotlightWindow(" in card
+    # ...and the title row, or the key renders raw on a live screen.
+    mod = (REPO / "klee-mod" / "KleeCode"
+           / "KleeMod.cs").read_text(encoding="utf-8")
+    assert 'FurinaRiderTips.SpotlightWindowKey + ".title"' in mod
+    # The refusal is a different surface and still says what it said.
+    spotlight = (REPO / "klee-mod" / "KleeCode" / "Powers"
+                 / "SpotlightSystem.cs").read_text(encoding="utf-8")
+    assert "DesignateOneModeIsUnpayable" in spotlight
+
+
+def test_a_wire_without_the_evoke_key_prints_no_evoke_line():
+    """ABSENT IS NOT EMPTY. A bridge or a klee.dll older than `EB-564` sends
+    no `evoked` key, and the block prints exactly what it printed before."""
+    page = blindplay.observe(salon_state(
+        [{"member": "the Usher", "target": "", "combat_id": "",
+          "element": "", "aura": "", "amount": 3, "paid": True,
+          "evoked": False}]))
+    assert "- **the Usher** gave you 3 Block." in page
+    assert "final bow" not in page
 
 
 def test_a_salon_performance_names_the_body_it_picked_and_the_aura():
@@ -8955,6 +9220,11 @@ def test_the_salon_block_is_the_mods_own_snapshot_shape():
     assert 'snapshot["replayed"]' in snapshot
     # `EB-506`: and the third, the stage in slot order.
     assert 'snapshot["company"]' in snapshot
+    # `EB-564`: and the fourth, this turn's Evokes with their own fields.
+    assert 'snapshot["evoked"]' in snapshot
+    for field in ("focus_mult", "fanfare", "encore", "aura_all", "damage",
+                  "block"):
+        assert f'["{field}"]' in snapshot, field
     bridge = (REPO / "vendor" / "STS2_MCP" / "gits"
               / "GitsFurinaSalon.cs").read_text(encoding="utf-8")
     assert '"KleeMod.Powers.FurinaReframeLedger"' in bridge
@@ -8977,6 +9247,14 @@ def test_the_target_and_the_aura_are_recorded_where_they_are_decided():
     # ...and the turn boundary is the one place it exists.
     turn = salon[salon.index("public override async Task AfterPlayerTurnStart"):]
     assert "ClearPerformances()" in turn[:900]
+    # `EB-564`: the BOW's half, recorded in the one implementation of a member
+    # bowing and for the same reason -- `Bow` picks Crabaletta's body from
+    # `Rng.CombatTargets` and throws the reference away, and Chevalmarin's
+    # Encore grant is a local nothing polls back.
+    bow = salon[salon.index("private static async Task Bow("):]
+    bow = bow[:bow.index("\n    }")]
+    assert "FurinaReframeLedger.For(owner).NoteEvoked(" in bow
+    assert "bowEncoreGranted = SalonConstants.ChevalmarinBowEncore;" in bow
 
 
 # ------------------------------------- EB-417: a Mine reads as a Mine -------

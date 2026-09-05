@@ -361,23 +361,29 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void The_moon_overlooks_the_waters_resolves_a_plan_now_as_well()
+    public void Writing_a_plan_carries_nothing_out()
     {
-        // "ALSO happen now" taken at its word: the Plan happens now AND is
-        // still queued. Reading it as "instead" would delete rule 2 rather than
-        // break it.
-        //
-        // `EB-329` renamed the door, not the rule: this is a MID-TURN
-        // resolution, so it goes through `ResolveNow` -- `ResolveEntry` with
-        // the on-play flag set -- and the flag is what stops the blind page
-        // filing it under "carried out at the start of this turn".
+        // `EB-570`. THE MOON OVERLOOKS THE WATERS IS WITHDRAWN, so `Schedule`
+        // queues and nothing else: no `ResolveNow`, and no power on the board
+        // that could ask for one. The Rare deleted the kit's one question
+        // rather than answering it -- rule 2 IS the delay, and Battle Plan's
+        // Plan line is double its play line, so ANY now-copy took the price
+        // off waiting. Its row and its pins left the surface under R213 B's
+        // deletion rule, the way Rolling Tide's did one arm over (`EB-552`).
         var schedule = typeof(KokomiPlan)
             .GetMethod("Schedule", HeadlessGame.All)!;
         var calls = Il.CallSequence(schedule).ToList();
         Assert.Contains("List`1.Add", calls);
-        Assert.Contains("KokomiPlan.ResolveNow", calls);
-        Assert.True(calls.IndexOf("List`1.Add")
-                    < calls.IndexOf("KokomiPlan.ResolveNow"));
+        Assert.DoesNotContain("KokomiPlan.ResolveNow", calls);
+        Assert.DoesNotContain("KokomiPlan.ResolveEntry", calls);
+
+        // And the power class is gone with the row, so nothing can re-open
+        // the door by wearing it.
+        Assert.Null(typeof(KokomiPlan).Assembly
+            .GetType("KleeMod.Powers.PlansAlsoNowPower"));
+        Assert.Null(typeof(KokomiPlan).Assembly.GetType(
+            "KleeMod.Cards.Prototype.Generated"
+          + ".ProtoKkTheMoonOverlooksTheWaters"));
     }
 
     [Fact]
@@ -510,10 +516,11 @@ public class KokomiOverhaulRuleTests
     [Fact]
     public void The_flag_is_written_where_a_plan_is_carried_out_and_nowhere_else()
     {
-        // ONE EVENT, THREE DOORS: the morning queue, Change of Plans and The
-        // Moon Overlooks the Waters all reach `ResolveEntry`, so writing the
-        // flag there is what makes the card's printed "carried out a Plan this
-        // turn" true of all three without naming any of them.
+        // ONE EVENT, TWO DOORS: the morning queue and Change of Plans both
+        // reach `ResolveEntry`, so writing the flag there is what makes the
+        // card's printed "carried out a Plan this turn" true of both without
+        // naming either. Two and not three since `EB-570` withdrew The Moon
+        // Overlooks the Waters.
         var entry = typeof(KokomiPlan)
             .GetMethod("ResolveEntry", HeadlessGame.All)!;
         Assert.Contains("KokomiOverhaulLedger.NotePlanCarriedOut",
@@ -786,9 +793,11 @@ public class KokomiOverhaulRuleTests
         // Rhythm, were withdrawn on the R253 charter audit and are not built.
         // THIRTY-FIVE since the pool pass (`EB-492`), which put the offer's
         // Plan density on the Attacks: Riptide, Pincer, Flank, Well Laid and
-        // Feigned Retreat.
+        // Feigned Retreat. THIRTY-FOUR since `EB-570` withdrew The Moon
+        // Overlooks the Waters -- the first row this arm has dropped, and the
+        // count moving by one is what the withdrawal is.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(35, Il.CallSequence(slice)
+        Assert.Equal(34, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 

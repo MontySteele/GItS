@@ -547,14 +547,14 @@ public static class KokomiPlan
         await Sync(choiceContext, kokomi,
             SparkPower.SourceOf(source), before);
 
-        if (kokomi.Powers.OfType<PlansAlsoNowPower>().Any())
-        {
-            // `EB-329`: ON PLAY, and it is filed as such. This resolution
-            // happens in the middle of the turn that wrote it, so a page that
-            // heads it "carried out at the start of this turn" is stating the
-            // one thing about it a reader cannot check any other way.
-            await ResolveNow(choiceContext, kokomi, entry);
-        }
+        // `EB-570`: A PLAN IS ONLY EVER QUEUED HERE. The Moon Overlooks the
+        // Waters used to carry the entry out on the spot as well -- "Plans
+        // also happen now" -- and that Rare deleted the kit's one question
+        // rather than answering it: rule 2 IS the delay, and Battle Plan's
+        // Plan line is double its play line, so any now-copy took the price
+        // off waiting. The row is withdrawn under R213 B's deletion rule and
+        // this door is the writing alone; <see cref="ResolveAll"/> and
+        // <see cref="ResolveFront"/> are the two that carry a Plan out.
     }
 
     /// <summary>
@@ -935,11 +935,12 @@ public static class KokomiPlan
     /// A PLAN CARRIED OUT IN THE MIDDLE OF A TURN (`EB-329`).
     ///
     /// A NAMED METHOD FOR A SINGLE ARGUMENT, and the reason is that the
-    /// argument is the whole distinction: the two mid-turn doors -- Change of
-    /// Plans and The Moon Overlooks the Waters -- are the ones the page must
-    /// not file under "at the start of this turn", and a bare `true` at two
-    /// call sites is a fact no structural pin can see. Every caller of THIS
-    /// is on-play by construction and <see cref="ResolveAll"/> calls
+    /// argument is the whole distinction: the mid-turn door -- Change of
+    /// Plans, and since `EB-570` withdrew The Moon Overlooks the Waters it is
+    /// the only one -- is the one the page must not file under "at the start
+    /// of this turn", and a bare `true` at the call site is a fact no
+    /// structural pin can see. Every caller of THIS is on-play by
+    /// construction and <see cref="ResolveAll"/> calls
     /// <see cref="ResolveEntry"/> straight, so the split is readable from the
     /// call graph.
     /// </summary>
@@ -951,24 +952,23 @@ public static class KokomiPlan
     /// ONE PLAN CARRIED OUT, which is the unit Treatise and Song of Pearls are
     /// priced in: "Whenever the jellyfish carries out a Plan" is once per
     /// ENTRY, and the notify at the bottom is the only place that fires -- so
-    /// The Moon Overlooks the Waters' extra resolution pays them too, which is
-    /// what "also happen now" says.
+    /// Change of Plans' early resolution pays them exactly as the morning's
+    /// does.
     ///
-    /// <paramref name="onPlay"/> IS WHICH OF THE THREE DOORS THIS CAME
-    /// THROUGH (`EB-329`). The morning queue is one of them and the other two
-    /// -- Change of Plans, The Moon Overlooks the Waters -- happen in the
-    /// middle of a turn, so filing all three under "carried these out at the
-    /// start of this turn" is a false sentence about WHEN. The round-4c seat
-    /// read a War Council that fired on play and was told, on the same
-    /// screen, both that it had already resolved this morning and that it was
-    /// still queued; both were true and neither was legible. The flag rides
-    /// the record so the page can head the two apart.
+    /// <paramref name="onPlay"/> IS WHICH OF THE TWO DOORS THIS CAME
+    /// THROUGH (`EB-329`). The morning queue is one and Change of Plans is
+    /// the other, which happens in the middle of a turn, so filing both under
+    /// "carried these out at the start of this turn" is a false sentence
+    /// about WHEN. The round-4c seat read a Plan that fired mid-turn and was
+    /// told, on the same screen, both that it had already resolved this
+    /// morning and that it was still queued; both were true and neither was
+    /// legible. The flag rides the record so the page can head the two apart.
     ///
-    /// THE ARGUMENT FOR A PARAMETER RATHER THAN A READ: whether the Moon is
-    /// out is not the question. `ResolveFront` fires one Plan early with no
-    /// Moon anywhere, and a Moon that is out does not make the MORNING's
-    /// Plans on-play. The caller is the only thing that knows, so the caller
-    /// says.
+    /// THE ARGUMENT FOR A PARAMETER RATHER THAN A READ: no power on the
+    /// board answers this. `ResolveFront` fires one Plan early off its own
+    /// card's face, and nothing about the state it leaves behind says the
+    /// MORNING's Plans were on-play. The caller is the only thing that knows,
+    /// so the caller says.
     /// </summary>
     private static async Task ResolveEntry(
         PlayerChoiceContext choiceContext, Creature kokomi, Entry entry,
@@ -1038,10 +1038,9 @@ public static class KokomiPlan
         }
 
         // SANGO ISSHIN's condition, written HERE because this is the one place
-        // a Plan is carried out: the morning queue, Change of Plans' early
-        // resolution and The Moon Overlooks the Waters' play-time one all pass
-        // through, and all three are the card's printed "carried out a Plan
-        // this turn".
+        // a Plan is carried out: the morning queue and Change of Plans' early
+        // resolution both pass through, and both are the card's printed
+        // "carried out a Plan this turn".
         KokomiOverhaulLedger.For(kokomi).NotePlanCarriedOut();
 
         foreach (var power in kokomi.Powers.ToList())
@@ -1708,8 +1707,6 @@ public static class KokomiPlan
         // the number of things that will happen.
         snapshot["twice"] =
             creature!.Powers.OfType<NereidsAscensionPower>().Any();
-        snapshot["also_now"] =
-            creature.Powers.OfType<PlansAlsoNowPower>().Any();
         snapshot["queue"] = pending
             .Select(entry => (object?)new Dictionary<string, object?>
             {
