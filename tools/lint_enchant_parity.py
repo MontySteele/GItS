@@ -220,7 +220,17 @@ def _source_index() -> dict[str, Path]:
 _CANONICAL_VARS = re.compile(
     r"protected override IEnumerable<DynamicVar> CanonicalVars =>(.*?);\s*\n\s*\n",
     re.S)
-_BLOCK_VAR = re.compile(r"\bnew (?:Calculated)?BlockVar\(")
+# `EB-486` ADDED THE THIRD SPELLING, and the difference between it and the
+# fourth is the whole reason this is a list rather than a wildcard.
+# `SpotlightSystem.SpotlitBlockVar` SUBCLASSES `BlockVar` -- it has to, because
+# `DynamicVarSet.Block` casts -- so BaseLib's auto-detection still sees a Block
+# var and the card still answers `GainsBlock`, which is what keeps this lint's
+# reading true. `SpotlightSystem.DeferredBlockVar` is a plain `DynamicVar`
+# under its own token and is deliberately NOT here: a card whose only Block
+# arrives next turn does not gain Block on the play, which is what
+# `Nimble.CanEnchant` is asking about.
+_BLOCK_VAR = re.compile(
+    r"\bnew (?:Calculated)?BlockVar\(|\bnew SpotlightSystem\.SpotlitBlockVar\(")
 _CTOR_TYPE = re.compile(r":\s*base\([^)]*?CardType\.(\w+)")
 _COST_X = re.compile(r"protected override bool HasEnergyCostX\s*=>\s*true")
 

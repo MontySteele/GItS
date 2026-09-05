@@ -492,8 +492,15 @@ ARM_KEYWORDS: dict[str, str] = {
     # into Skittish 6 as "Set off ignores enemy Block" when what happened is
     # that Skittish never fired. "For its size" paid for them: the live number
     # is the badge's, which is the split `EB-343` already made.
+    # `EB-490` NAMED THE CLASS INSTEAD OF THE TRIGGER. "No Attack trigger
+    # fires" and "Block stops them" point opposite ways to a reader who does
+    # not already know Skittish is an ON-HIT power: the r16 Klee seat planned
+    # two turns around a tax it was not paying and learned the rule by autopsy
+    # from a 26-HP Gardener dying to 30 points of Bomb. "No when-hit power
+    # fires" is the same claim in the same room, said about the thing on the
+    # enemy's status bar. Same sentence as `ArmKeywordTips.ForSetOff`.
     "Set off": ("The target's Bombs go off first, oldest first, each a Pyro "
-                "hit. Block stops them, no Attack trigger fires, the first "
+                "hit. Block stops them, no when-hit power fires, the first "
                 "takes the aura."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
@@ -795,9 +802,17 @@ _GAME_KEYWORD_RE = {
 # same reason it was never missing: the word only ever appears on a body that
 # is one.
 BASE_KEYWORDS: dict[str, str] = {
+    # `EB-481` IS `EB-469` ONE DEBUFF OVER, found the same way one round later:
+    # the game's status line says "Receive 50% more damage from Attacks", this
+    # row said "every hit", and `Kurage's Oath` -- printed `cost 1, skill` --
+    # took the 1.5x (Kokomi r16 (c) 2). `VulnerablePower` is the TARGET's own
+    # power and gates on `IsPoweredAttack()` exactly as `WeakPower` does, so
+    # "Attacks" means attack HITS on both sides of the exchange. Same sentence
+    # as `BaseKeywordTips.ForVulnerable`, pinned to it.
     "Vulnerable": (
         f"The wearer takes {VULNERABLE_TAKEN_PCT}% more damage from every "
-        f"hit. One stack falls off at the end of each of its turns."),
+        f"hit it takes, a Skill's damage too. One stack falls off at the end "
+        f"of each of its turns."),
     # `EB-469`. THE GAME'S OWN STATUS LINE SAYS "Attacks deal 25% less damage
     # for 1 turn", and the Kokomi r15 seat read "Attacks" as the CARD TYPE --
     # "the status line told me skills were safe and the card told me they were

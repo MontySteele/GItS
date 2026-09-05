@@ -139,13 +139,19 @@ public class Round12Tests
     }
 
     [Fact]
-    public void The_set_off_tip_says_no_attack_trigger_fires()
+    public void The_set_off_tip_says_no_when_hit_power_fires()
     {
         // The hit reaches `CreatureCmd.Damage` as `ValueProp.Unpowered` with
         // `dealer: null`, so nothing an enemy keys on being hit by an Attack
         // can answer it. "Not an Attack" on the Bomb tip left that to
         // inference and the seat's inference went the other way.
-        Assert.Contains("no Attack trigger ", SetOffTip());
+        //
+        // `EB-490` RENAMED THE CLASS AND NOT THE CLAIM: "Attack trigger" reads
+        // as something on the PLAYER's side of the board, and the r16 seat
+        // read it that way beside "Block stops them". Same fact, same call,
+        // said about the thing on the enemy's status bar. `Round16Tests` holds
+        // that row's own pins.
+        Assert.Contains("no when-hit power ", SetOffTip());
         Assert.Contains("fires", SetOffTip());
     }
 

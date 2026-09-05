@@ -73,6 +73,12 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     if mark:
         head += f" — {mark}"
     out = [head, f"    {c['text'] or '(no printed text)'}"]
+    # `EB-483`: on the Smith's grid, the face this card would print UPGRADED,
+    # under the one it prints now. Absent on every other screen, and absent
+    # here for a row this page cannot render without guessing -- see
+    # `qa_packet.upgraded_face` for both bounds.
+    if c.get("upgraded_face"):
+        out.append(f"    Upgraded: {c['upgraded_face']}")
     note = qa_packet.cost_note(c)
     if note:
         out.append(f"    {note}")

@@ -7,6 +7,7 @@ using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 
@@ -52,6 +53,23 @@ public sealed class EtherealSpotlight
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Ethereal, CardKeyword.Exhaust };
+
+#if PROTOTYPE_CARDS && FURINA_REFRAME
+    /// <summary>
+    /// `EB-485`. HOW LONG THE THING THIS CARD BUYS LASTS.
+    ///
+    /// The r10 seat priced the Spotlight as a one-time purchase off the
+    /// relic's "It does nothing once your Companion cards are lit" and met
+    /// Chevreuse printing 7 again in fight 2. The relic line says "for this
+    /// combat" now; this is the same sentence on the surface where the Encore
+    /// is actually being weighed, which is a card in hand on a turn.
+    ///
+    /// SAME COMPILE GATE AS THE FACE ABOVE, and for its reason: a release
+    /// build's selector offers two modes and is a different card.
+    /// </summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        FurinaRiderTips.ForSpotlightDuration(base.ExtraHoverTips, this);
+#endif
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         System.Array.Empty<DynamicVar>();

@@ -69,12 +69,32 @@ public static class BaseKeywordTips
     /// decay is why `Exposed Flank` played directly and `Exposed Flank`
     /// planned are two different cards (r9 run 2, act 1, finding 2 -- "the
     /// Vulnerable case is the sharpest").
+    ///
+    /// `EB-481` IS `EB-469` ONE DEBUFF OVER, and the seat found it the same
+    /// way. The game's own status line reads "Receive 50% more damage from
+    /// Attacks", this box read "every hit", and <i>Kurage's Oath</i> --
+    /// printed `cost 1, skill` -- took the 1.5x (Kokomi r16 (c) 2). Two texts
+    /// disagreeing about whether a Skill is safe is a player sequencing badly,
+    /// and it was this box that was right.
+    ///
+    /// THE ENGINE IS AGAIN NOT WHAT IS WRONG. <c>VulnerablePower</c> is the
+    /// TARGET's own power -- the shape <see cref="KleeMod.Powers.AuraPower"/>
+    /// was written against -- and its <c>ModifyDamageMultiplicative</c> gates
+    /// on <c>ValueProp.IsPoweredAttack()</c>, a property of the HIT, exactly
+    /// as <c>WeakPower</c> does; every damage clause the generator emits
+    /// carries <c>ValueProp.Move</c> whatever <c>type:</c> its sheet row
+    /// declares. "Attacks" in the game's sentence means attack HITS on both
+    /// sides of the exchange. So the Skill case is named here in the words
+    /// <see cref="ForWeak"/> names it in, and
+    /// <c>blindplay_notes.BASE_KEYWORDS</c> carries the same sentence.
+    /// 132 of 135, the twin's own length.
     /// </summary>
     public static IEnumerable<IHoverTip> ForVulnerable(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, VulnerableKey,
-            "The wearer takes 50% more damage from every hit. One stack falls "
-          + "off at the end of each of its turns.");
+            "The wearer takes 50% more damage from every hit it takes, a "
+          + "Skill's damage too. One stack falls off at the end of each of "
+          + "its turns.");
 
     /// <summary>
     /// The mirror one debuff over, and the one the Plan tip's second sentence

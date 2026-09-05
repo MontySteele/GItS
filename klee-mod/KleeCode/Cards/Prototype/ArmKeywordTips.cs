@@ -226,12 +226,32 @@ public static class ArmKeywordTips
     /// badge, live, and that is `EB-343`'s own split between the two. "Each a
     /// Pyro hit" keeps what the tip can say -- separate hits, so separate
     /// reactions and separate Sparks. 132 of 135 rendered, no exception taken.
+    ///
+    /// `EB-490` NAMED THE CLASS INSTEAD OF THE TRIGGER, and the two clauses
+    /// `EB-443` landed are why it had to. "Block stops them" and "no Attack
+    /// trigger fires" point OPPOSITE WAYS to a reader who does not already
+    /// know that Skittish is an on-hit power: the first says a Bomb interacts
+    /// with what the enemy has, the second says a Bomb sets nothing off, and
+    /// "Attack trigger" reads as something on the player's side of the board.
+    /// The r16 Klee seat planned two turns around a tax it was not paying and
+    /// got the rule by autopsy -- a 26-HP Gardener dying to 30 points of Bomb
+    /// with its "first time hit each turn, gains 6 Block" never firing, which
+    /// is most of why Klee beats that elite.
+    ///
+    /// THE RULE DOES NOT MOVE AND THE CLAIM DOES NOT WIDEN. It is the same
+    /// fact read off the same call: the explosion reaches
+    /// <c>CreatureCmd.Damage</c> as <c>ValueProp.Unpowered</c> with
+    /// <c>dealer: null</c> (<see cref="ElementalHit.DealWithoutDealerMods"/>),
+    /// so a power keyed on being HIT has neither an attacker nor a powered hit
+    /// to answer. "When-hit power" is what a player calls the thing on the
+    /// enemy's status bar; "Attack trigger" is what the code calls it. Same
+    /// length to the character, so the ceiling reading above stands unchanged.
     /// </summary>
     public static IEnumerable<IHoverTip> ForSetOff(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SetOffKey,
             "The target's [gold]Bombs[/gold] go off first, oldest first, each "
-          + "a Pyro hit. [gold]Block[/gold] stops them, no Attack trigger "
+          + "a Pyro hit. [gold]Block[/gold] stops them, no when-hit power "
           + "fires, the first takes the aura.");
 
     /// <summary>Rule 4. The gain rate is read from

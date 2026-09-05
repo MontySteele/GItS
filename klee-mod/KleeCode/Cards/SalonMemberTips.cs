@@ -86,6 +86,40 @@ public static class SalonMemberTips
         }
     }
 
+    /// <summary>
+    /// `EB-488`. THE SALON RULES ON A FACE THAT NAMES A MEMBER AND DEPLOYS
+    /// NONE.
+    ///
+    /// THE FIND (Furina r10 (c) 5). <i>Grand Salon</i> -- "Salon Member
+    /// numbers are 1 higher" -- was the run's FIRST reward, offered on a
+    /// screen with no glossary for the words it is written in, and the seat
+    /// passed on it partly because it could not price it. The Salon tip had
+    /// appeared exactly once all run, on <i>Salon Debut</i> in fight 1.
+    ///
+    /// WHY IT WAS MISSING. <see cref="ForCard"/> attaches from the EFFECT --
+    /// which member does this card deploy -- and that is right for the member
+    /// paragraphs: a card that fields nobody must not print three of them.
+    /// But the RULES paragraph is about the word, and a face that prints
+    /// "Salon Member" and deploys none is exactly the face whose reader has
+    /// never met the word. So this attaches from the PRINTED WORD, which is
+    /// `ArmKeywordTips`' own bargain (`gen_klee_cards.emit` derives it from
+    /// the row's built description) and the way the Companion tip already
+    /// reaches a reward screen.
+    ///
+    /// NOT ON A DEPLOY CARD, which already carries this same paragraph
+    /// through <see cref="ForCard"/>; the generator excludes them, because two
+    /// copies of one definition on one face is what the game's own tip
+    /// de-duplication would then be picking between.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForSalonRules(
+        IEnumerable<IHoverTip> inherited, CardModel card)
+    {
+        foreach (var tip in inherited) yield return tip;
+        yield return new HoverTip(
+            new LocString(Table, SalonRulesKey + ".title"),
+            SalonRulesBody(card));
+    }
+
     /// <summary>Public because the salon STAGE shares this tooltip source
     /// verbatim (D1 §4): the per-slot hover on the stage and the keyword tip
     /// on a deploy card must be the same copy, not two that agree today.
