@@ -486,11 +486,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # Moon's Reflection reads the exhaust pile and writes the queue.
     "plan_from_exhaust": [_hook("shared", "exhaust_pile", "use"),
                           _hook("private", "kurage", "write")],
-    # THE PLAN-ONLY CLAUSES. `plan_twice` is a modifier on the queue's own
-    # resolution, so it writes the jellyfish; the per-Companion hit reads a
-    # per-turn count this vocabulary has no entry for and is damage otherwise,
-    # so it is `plays_this_turn` read and nothing else.
-    "plan_twice": [_hook("private", "kurage", "write")],
+    # THE PLAN-ONLY CLAUSES. The per-Companion hit reads a per-turn count this
+    # vocabulary has no entry for and is damage otherwise, so it is
+    # `plays_this_turn` read and nothing else. (`plan_twice` sat here as a
+    # write on the jellyfish until `EB-492` retired it with Nereid's
+    # Ascension's redesign into a Power.)
     "damage_per_companion_last_turn": [
         _hook("shared", "plays_this_turn", "read")],
     # Crystal Collapse (R236) READS the same shared play stream the count above

@@ -89,7 +89,7 @@ internal static class KleePowerIcons
         SongOfPearlsPower => KleePck.Path("kokomi/powers/kurages_oath.png"),
         CloudsLikeWavesPower => KleePck.Path(
             "kokomi/powers/vigil_of_the_deep.png"),
-        PlanTwicePower => KleePck.Path(
+        NereidsAscensionPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
         // The five with no shipped Kokomi power to borrow from -- the Plan
         // badge, its draw rider, its Rare and the two Commander powers -- take

@@ -53,7 +53,7 @@ from tier0.engine.state import Card, CombatState, Enemy, PlanEntry
 #: onto an enemy through a typo.
 PLAN_KINDS = frozenset((
     "draw", "energy", "block", "mend", "damage", "damage_quarter_max_hp",
-    "damage_per_companion_last_turn", "apply_power", "plan_twice",
+    "damage_per_companion_last_turn", "apply_power",
     "play_copy_of_companion", "block_per_plan_this_morning",
 ))
 
@@ -73,19 +73,32 @@ PLAN_APPLY_POWERS = frozenset(("weak", "vulnerable"))
 #: front enemy (leftmost alive) unless the line says every enemy." A
 #: self-facing clause (draw, energy, Block, Mend, the doubling) names no
 #: target at all, which is `Aim.Self`.
-PLAN_AIMS = frozenset(("front_enemy", "all_enemies"))
+#:
+#: `enemies_intending_attack` (`EB-492`, Flank) is the one aim that looks BACK:
+#: the set is fixed when the Plan is WRITTEN, off the intents the player was
+#: reading, and the carry-out lands on those of them still alive. See
+#: `schedule`, which does the capture, and `_aimed`, which resolves it.
+PLAN_AIMS = frozenset(("front_enemy", "all_enemies",
+                       "enemies_intending_attack"))
 
 #: The clauses that take an aim. Everything else is self-facing.
 PLAN_AIMED_OPS = frozenset((
     "damage", "damage_quarter_max_hp", "damage_per_companion_last_turn",
     "apply_power"))
 
+#: The clauses a `times:` may repeat: the FLAT hit, and nothing else
+#: (`EB-492`, Pincer's "Plan: Deal 3 damage three times"). The two scaled
+#: damage kinds already derive their size from a count, and a debuff applied
+#: twice in one beat is two stacks -- an `amount` -- rather than two
+#: applications. `gen_klee_cards.PLAN_TIMES_OPS` is the twin.
+PLAN_TIMES_OPS = frozenset(("damage",))
+
 #: Legal inside a `plan:` list and NOWHERE else. A top-level spelling would be
 #: a different, unpriced card, and this module is the only resolver of either.
 #: `effects.OPS` still registers them -- the loader validates a `plan:` list
 #: through the same vocabulary check the body takes -- and the registered
 #: handler refuses, which is what makes "plan-only" true rather than intended.
-PLAN_ONLY_OPS = frozenset(("plan_twice", "damage_per_companion_last_turn",
+PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            "play_copy_of_companion",
                            "block_per_plan_this_morning"))
 
@@ -123,10 +136,13 @@ SONG_OF_PEARLS = "kk_song_of_pearls"         # N Block once a turn, on a Plan
 PLANS_ALSO_NOW = "kk_plans_also_now"         # Plans also happen now
 CLOUDS_LIKE_WAVES = "kk_clouds_like_waves"   # Block per debuff she applies
 GENERALS_BANNER = "kk_generals_banner"       # Weak to the front, once a turn
-#: Nereid's Ascension's window. STACKS ARE TURNS, the engine's own grammar
-#: (`kurage_summon`, `intangible`, `double_damage`), which is also the C#'s
-#: (`PlanTwicePower.Amount` is turns remaining and ticks at her turn end).
-PLAN_TWICE = "kk_plan_twice"
+#: Nereid's Ascension (`EB-492`). A MARKER AND NOT A WINDOW: the Rare is a
+#: Power costing 2 that lasts the fight, so there is no duration to tick and
+#: `carry_out_times` reads only whether it is worn. It replaced a `plan_twice`
+#: CLAUSE, which spent the very morning it was meant to pay for -- and that op
+#: is retired rather than left standing with no row to spell it.
+#: `NereidsAscensionPower` is the twin.
+NEREIDS_ASCENSION = "kk_nereids_ascension"
 #: Rally's grant. ONE STACK, ALWAYS -- the card says "costs 1 less", not
 #: "per Rally" -- and it is consumed by the next Companion play.
 NEXT_COMPANION_DISCOUNT = "kk_next_companion_discount"
@@ -194,6 +210,8 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
             allowed.add("target")
         if op == "apply_power":
             allowed.add("power")
+        if op in PLAN_TIMES_OPS:
+            allowed.add("times")
         unknown = set(eff) - allowed
         if unknown:
             return (f"plan clause {op} field(s) {sorted(unknown)} "
@@ -208,6 +226,13 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
             if not isinstance(amount, int) or isinstance(amount, bool) \
                     or amount <= 0:
                 return f"plan clause {op} amount must be a positive literal int"
+        if "times" in eff:
+            times = eff["times"]
+            # A LITERAL, for `amount`'s reason one branch up: a Plan's repeat
+            # count is read a turn after it was written.
+            if not isinstance(times, int) or isinstance(times, bool)                     or times < 2:
+                return (f"plan clause {op} times must be a literal int of 2 "
+                        "or more")
         if op in PLAN_AIMED_OPS and eff.get("target") not in PLAN_AIMS:
             return (f"plan clause {op} target {eff.get('target')!r} -- a "
                     f"planned clause lands {sorted(PLAN_AIMS)}")
@@ -257,11 +282,27 @@ def front_enemy(state: CombatState) -> Optional[Enemy]:
     return next((e for e in living if not e.is_minion), living[0])
 
 
-def _aimed(state: CombatState, aim: Optional[str]) -> list[Enemy]:
-    """The bodies one clause lands on. `None` (a self-facing clause) is
-    empty by construction -- it names no target at all."""
+def _aimed(state: CombatState, clause: dict) -> list[Enemy]:
+    """The bodies one clause lands on, resolved AT CARRY-OUT. A clause with no
+    `target` (a self-facing one) is empty by construction -- it names no target
+    at all.
+
+    THE WHOLE CLAUSE AND NOT JUST ITS AIM (`EB-492`), because one aim reads
+    something the clause carries: `enemies_intending_attack` resolves the set
+    `schedule` captured, filtered to the bodies STILL ALIVE. An enemy whose
+    intent changed overnight is still in the set -- the set was the point --
+    and one that died drops out, which is the same "a Plan that lands on
+    nothing lands on nothing" rule every other aim already keeps.
+    `KokomiPlan.Aimed` is the twin; it holds combat IDS where this holds the
+    `Enemy` objects, because the game tears a dead creature down and this
+    engine never does (`Enemy.alive` is a read of `hp`).
+    """
+    aim = clause.get("target")
     if aim == "all_enemies":
         return list(state.living_enemies)
+    if aim == "enemies_intending_attack":
+        caught = clause.get("targets") or []
+        return [e for e in caught if e.alive]
     if aim == "front_enemy":
         front = front_enemy(state)
         return [front] if front is not None else []
@@ -342,10 +383,21 @@ def plan_aimed_at_pet(state: CombatState, card: Card) -> bool:
 def _intends_to_attack(enemy: Enemy) -> bool:
     """Is this enemy's CURRENT intent an attack? An enemy with no script at
     all (a hand-built fixture) intends nothing, which is the honest answer
-    rather than a crash."""
+    rather than a crash.
+
+    THE ARM'S ONE INTENT READ since `EB-492`: the pilot's plan-or-play
+    judgement (`plan_aimed_at_pet`) and Flank's captured set both ask it, and
+    the shipped predicate `enemy_intends_attack` spells the same two clauses
+    -- "intent kind is attack AND `sleep_turns` is zero". The sleep half was
+    missing here while the predicate beside it had it; the C# needs only the
+    first clause and says why (`CurtainCallHooks.IntendsAttack`), because a
+    sleeping creature telegraphs a SleepIntent and fails the intent test on
+    its own.
+    """
     if not enemy.intents:
         return False
-    return enemy.current_intent().get("kind") == "attack"
+    return (enemy.current_intent().get("kind") == "attack"
+            and enemy.sleep_turns == 0)
 
 
 # ---------------------------------------------------------------------------
@@ -393,6 +445,21 @@ def plan_label(card: Card, held: Optional[Card]) -> str:
     return f"{short}: {held.name if held is not None else 'nothing'}"
 
 
+def plan_aimed_label(card: Card, caught: Sequence[Enemy]) -> str:
+    """What the strip prints for a Plan that CAUGHT A SET (`EB-492`).
+
+    `plan_label`'s argument one aim over, and `KokomiPlan.AimedLabel`'s twin: a
+    Plan whose targets were decided when it was written means a different thing
+    every time it is written, and a player who cannot see which bodies it
+    caught cannot plan around it. "Flank: nothing" is the honest line for a
+    Plan written into a board of Defends -- it is queued, it will fire, and it
+    will hit no one.
+    """
+    if not caught:
+        return f"{card.name}: nothing"
+    return f"{card.name}: " + ", ".join(e.name for e in caught)
+
+
 def schedule(state: CombatState, card: Card,
              clauses: Optional[Sequence[dict]] = None,
              replay: Optional[Card] = None) -> None:
@@ -429,6 +496,23 @@ def schedule(state: CombatState, card: Card,
                               for c in body):
         held = last_other_companion(state, card)
         label = plan_label(card, held)
+    # `EB-492`, FLANK CAPTURES ITS SET AT WRITING TIME, and it is Crystal
+    # Collapse's argument one aim over: "each enemy that intends to attack" is
+    # a fact about the intents ON SCREEN NOW, which is what the player is
+    # reading when they decide to write the Plan; asking again at carry-out
+    # would answer about the NEXT turn's intents, a different question the face
+    # never asked. An EMPTY set is written down rather than refused -- the Plan
+    # is real, the strip shows it, and what it carries out is nothing.
+    #
+    # THE CLAUSE IS COPIED, never mutated: `body` is a shallow list of the
+    # ROW's own dicts, and writing a capture into one of them would put this
+    # turn's board on the printed card.
+    if any(c.get("target") == "enemies_intending_attack" for c in body):
+        caught = [e for e in state.living_enemies if _intends_to_attack(e)]
+        body = [dict(c, targets=list(caught))
+                if c.get("target") == "enemies_intending_attack" else c
+                for c in body]
+        label = plan_aimed_label(card, caught)
     entry = PlanEntry(card_id=card.id, clauses=body, card=held, label=label)
     state.kk_plan_queue.append(entry)
     state.emit("plan_written", card=card.id, clauses=len(body),
@@ -592,9 +676,10 @@ def resolve_front(state: CombatState) -> None:
 
 def carry_out_times(state: CombatState) -> int:
     """How many times ONE Plan is carried out right now: two while Nereid's
-    Ascension's window is up, one otherwise. A NAMED READ rather than an
-    inline predicate, because WHERE it is asked is the rule."""
-    return 2 if state.player.powers.get(PLAN_TWICE, 0) else 1
+    Ascension is on her, one otherwise. A NAMED READ rather than an inline
+    predicate, because WHERE it is asked is the rule -- inside the drain loop,
+    before each entry. `KokomiPlan.CarryOutTimes` is the twin."""
+    return 2 if state.player.powers.get(NEREIDS_ASCENSION, 0) else 1
 
 
 def _resolve_entry(state: CombatState, entry: PlanEntry, why: str) -> None:
@@ -712,20 +797,18 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
     elif op == "mend":
         effects.mend(state, amount)
     elif op == "damage":
-        _hit(state, aim, amount)
+        _hit(state, clause, amount)
     elif op == "damage_quarter_max_hp":
-        _hit(state, aim, quarter_of_max_hp(state))
+        _hit(state, clause, quarter_of_max_hp(state))
     elif op == "damage_per_companion_last_turn":
         # Chain of Command. "LAST TURN" IS READ AT CARRY-OUT: the Plan was
         # written on turn N and resolves at the top of N+1, and
         # `combat._player_turn` has already rolled the counter by then -- so
         # what this reads is turn N, the turn the player was looking at when
         # they wrote it. `KokomiOverhaulLedger.RollTo` is the same handover.
-        _hit(state, aim, amount * state.companion_plays_last_turn)
+        _hit(state, clause, amount * state.companion_plays_last_turn)
     elif op == "apply_power":
-        _debuff(state, aim, clause["power"], amount)
-    elif op == "plan_twice":
-        wear_plan_twice(state, amount)
+        _debuff(state, clause, clause["power"], amount)
     elif op == REPLAY_EXHAUSTED:
         _replay(state, entry.card)
     elif op == PLAY_COPY_OF_COMPANION:
@@ -745,7 +828,7 @@ def quarter_of_max_hp(state: CombatState) -> int:
     return state.player.max_hp // QUARTER
 
 
-def _hit(state: CombatState, aim: Optional[str], amount: int) -> None:
+def _hit(state: CombatState, clause: dict, amount: int) -> None:
     """A Plan's damage, and it is HYDRO, dealt BY THE BAKE-KURAGE.
 
     `EB-334`, RULED R246 pick 1 AT ITS DEFAULT: "the Bake-Kurage deals it. The
@@ -780,19 +863,30 @@ def _hit(state: CombatState, aim: Optional[str], amount: int) -> None:
 
     THE TARGET LIST IS SNAPSHOTTED before the first hit, so an enemy the volley
     kills does not change who is in it (`QuarterMaxHpAll`'s `.ToList()`).
+
+    `times` IS A LOOP OF WHOLE HITS AND NOT A MULTIPLIER (`EB-492`, Pincer's
+    "Deal 3 damage three times"). Three hits of 3 and one hit of 9 are
+    different against Block, against an aura and against a body that dies
+    partway, so every pass goes out through `deal_damage_to_enemy` on its own
+    and THE AIM IS RE-READ between passes -- a front enemy killed by the first
+    hit hands the next one to the enemy behind it, which is "leftmost alive"
+    read twice rather than a second rule. `KokomiPlan.Hit` loops in the same
+    order.
     """
     from tier0.engine import effects                # late import: cycle
 
     if amount <= 0:
         return
-    for enemy in _aimed(state, aim):
-        if not enemy.alive:
-            continue
-        effects.deal_damage_to_enemy(state, enemy, amount, element="hydro",
-                                     source="plan", powered=False)
+    for _ in range(max(1, int(clause.get("times", 1)))):
+        for enemy in _aimed(state, clause):
+            if not enemy.alive:
+                continue
+            effects.deal_damage_to_enemy(state, enemy, amount,
+                                         element="hydro", source="plan",
+                                         powered=False)
 
 
-def _debuff(state: CombatState, aim: Optional[str], power: str,
+def _debuff(state: CombatState, clause: dict, power: str,
             amount: int) -> None:
     """A planned Weak or Vulnerable, applied BY HER -- so the Casket answers it
     and The Clouds Like Waves pays for it, exactly as they do for a debuff off
@@ -804,7 +898,7 @@ def _debuff(state: CombatState, aim: Optional[str], power: str,
     itself is resolved over the LIVING, so the only corpse this can reach is
     one that died between the aim and the apply.
     """
-    for enemy in _aimed(state, aim):
+    for enemy in _aimed(state, clause):
         powers.apply_power(state, enemy, power, amount,
                            applier=state.player)
 
@@ -867,29 +961,6 @@ def _play_copy(state: CombatState, card: Optional[Card]) -> None:
     effects._free_play(state, _copy.deepcopy(card), force_exhaust=True)
 
 
-def wear_plan_twice(state: CombatState, turns: int) -> None:
-    """Nereid's Ascension: "for 2 turns, the jellyfish carries out every Plan
-    twice."
-
-    THE DURATION IS THE AMOUNT, so a second Ascension EXTENDS the window and
-    never doubles the doubling -- `PlanTwicePower.Wear`'s shape, and the
-    `never_reduces` reading the engine already has a flag for.
-
-    IT IS INSTALLED BY A PLAN, which is why the window starts one morning late
-    and covers the NEXT two: the card is played on turn N, the clause is
-    carried out at the top of N+1, and the tick runs at the end of N+1 and N+2.
-    """
-    standing = state.player.powers.get(PLAN_TWICE, 0)
-    if standing >= turns:
-        return
-    # THE DELTA, not the amount: `PlanTwicePower.Wear` calls
-    # `ModifyAmount(worn, turns - worn.Amount)`, which is a TOP-UP TO `turns`.
-    # `apply_power` is additive, so handing it the whole 2 on top of a
-    # standing 2 would make a second Ascension a four-turn window -- "doubles
-    # the doubling", the exact thing the C# says this construction rules out.
-    powers.apply_power(state, state.player, PLAN_TWICE, turns - standing)
-
-
 # ---------------------------------------------------------------------------
 # THE TURN BOUNDARIES
 # ---------------------------------------------------------------------------
@@ -926,25 +997,6 @@ def roll_turn(state: CombatState) -> None:
     # the capture happens while the Plan is written, so what survives the
     # boundary is the captured card on the entry and never the list.
     state.kk_companions_this_turn.clear()
-
-
-def tick_windows(state: CombatState) -> None:
-    """End of her turn: Nereid's window ticks down.
-
-    `PlanTwicePower.AfterSideTurnEnd`'s twin, and the placement is the rule --
-    a window installed by a Plan at the top of turn N+1 ticks at the END of
-    N+1, so "for 2 turns" is N+1 and N+2.
-    """
-    if not live(state):
-        return
-    n = state.player.powers.get(PLAN_TWICE, 0)
-    if not n:
-        return
-    if n <= 1:
-        state.player.powers.pop(PLAN_TWICE, None)
-    else:
-        state.player.powers[PLAN_TWICE] = n - 1
-    state.emit("plan_twice_tick", left=state.player.powers.get(PLAN_TWICE, 0))
 
 
 # ---------------------------------------------------------------------------

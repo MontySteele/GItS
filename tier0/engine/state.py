@@ -1075,10 +1075,17 @@ class PlanEntry:
                   a card sets one, because only such a Plan means something
                   different every time it is written.
 
-    NO STORED ENEMY, deliberately, and it is the C#'s own reason: a Plan
-    written last turn cannot hold a reference to an enemy that may be dead by
-    the time it resolves, so the target is a RULE (`front_enemy` /
+    NO STORED ENEMY ON THE ENTRY, deliberately, and it is the C#'s own reason:
+    a Plan written last turn cannot hold a reference to an enemy that may be
+    dead by the time it resolves, so the target is a RULE (`front_enemy` /
     `all_enemies`) resolved at carry-out.
+
+    THE ONE EXCEPTION IS ON THE CLAUSE AND NOT HERE (`EB-492`): Flank's
+    `enemies_intending_attack` aim is a SET fixed when the Plan was written,
+    and `kokomi_plan.schedule` writes it onto a COPY of that clause as
+    `targets`. It is still not a rule this dataclass keeps -- an entry holds
+    what the card wrote -- and the carry-out filters the set to the bodies
+    still alive, so a stored corpse changes nothing.
     """
     card_id: str
     clauses: list[dict] = field(default_factory=list)

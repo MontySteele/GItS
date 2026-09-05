@@ -744,7 +744,7 @@ KLEE_OVERHAUL_OPS = frozenset((
 KOKOMI_OVERHAUL_OPS = frozenset((
     "mend", "next_companion_discount", "remove_debuff",
     "carry_out_front_plan", "plan_from_exhaust", "damage_quarter_max_hp",
-    "plan_twice", "damage_per_companion_last_turn",
+    "damage_per_companion_last_turn",
     "play_copy_of_companion", "block_per_plan_this_morning",
     "draw_after_plans"))
 
@@ -957,15 +957,6 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # of a dead dial the only live one.
         return (int(fx.get("amount", 0)) + int(fx.get("per", 1))) \
             * STATIC_DRAW_VALUE
-    if op == "plan_twice":
-        # Nereid's Ascension's window: "for N turns the jellyfish carries out
-        # every Plan twice". The value is ONE EXTRA PLAN CARRIED OUT PER TURN
-        # of the window -- `STATIC_AUTOPLAY_VALUE`, this table's existing price
-        # for one neutral card resolved without being paid for, which is
-        # exactly what a doubled Plan is. One per turn and not one per Plan,
-        # because Plan DENSITY is a deck fact an offer screen cannot read; the
-        # same single-unit refusal the line above makes.
-        return _neutral_amount(fx, 0) * STATIC_AUTOPLAY_VALUE
     if op == "carry_out_front_plan":
         # Change of Plans: the front Plan is carried out NOW instead of at the
         # top of her next turn, and it leaves the queue (`resolve_front`), so
@@ -977,7 +968,7 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # Crystal Collapse (R236): "Plan: play a copy of the last other
         # Companion card you played this turn." ONE NEUTRAL CARD RESOLVED
         # WITHOUT BEING PAID FOR, which is `STATIC_AUTOPLAY_VALUE` and the same
-        # price `plan_twice` puts on the extra Plan it buys.
+        # price `carry_out_front_plan` puts on the resolution it moves.
         #
         # NO DELAY DISCOUNT APPLIED HERE, unlike `plan_from_exhaust` below: this
         # is a PLANNED clause, and the `plan:` list already takes the discount
@@ -985,7 +976,8 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # nothing measured asked for.
         #
         # THE CONDITION IS NOT PRICED DOWN, the single-unit refusal this file
-        # already makes twice (`damage_per_companion_last_turn`, `plan_twice`):
+        # already makes twice (`damage_per_companion_last_turn`,
+        # `block_per_plan_this_morning`):
         # how often a deck has another Companion to catch is a deck fact an
         # offer screen cannot read, so the neutral estimate is the printed one.
         return STATIC_AUTOPLAY_VALUE
@@ -2349,9 +2341,6 @@ STATIC_OP_PRICING: dict[str, str] = {
     "draw_after_plans": "ZERO: STATIC_DRAW_VALUE, the same dead dial `draw` "
                         "is priced on -- one card per Plan carried out, paid "
                         "a turn later, is still draw",
-    "plan_twice": "STATIC_AUTOPLAY_VALUE per turn of the window: one extra "
-                  "Plan carried out a turn, not one per Plan (density is a "
-                  "deck fact an offer screen cannot read)",
     "carry_out_front_plan": "one resolution moved a turn EARLIER, not created "
                             "-- STATIC_AUTOPLAY_VALUE times the delay it "
                             "cancels (1 - C.PLAN_DELAY_DISCOUNT)",

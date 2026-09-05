@@ -357,6 +357,23 @@ def _runtime_count(state: CombatState, token: str,
         # handover (`kokomi_plan.roll_turn`), so this reads the one count
         # rather than minting a second.
         return state.companion_plays_this_turn
+    if token == "plans_carried_out_this_morning":
+        # QUARANTINED USE ONLY (`EB-492`) -- Well Laid, "Deals 3 more for each
+        # Plan the Bake-Kurage carried out this morning", on a NOW-line.
+        #
+        # THE MORNING'S DEPTH, `kk_plans_this_morning`: written once at the
+        # drain, before the first clause runs, and cleared by `roll_turn`. It
+        # is the same number Tide Wall's planned clause multiplies, which is
+        # the point -- the morning a Plan card sees and the morning a now-line
+        # sees are one fact rather than two counts that can drift.
+        #
+        # NOT `plans_held` beside it: that is the queue, what she has WRITTEN
+        # and not yet carried out. This card pays for what already happened.
+        # Sango Isshin's `plan_carried_out_this_turn` is the same fact as a
+        # yes/no and parts from this only at the arm's mid-turn doors, which
+        # is the printed difference between "this turn" and "this morning".
+        # The C# twin is `KokomiOverhaulLedger.PlansThisMorning`.
+        return state.kk_plans_this_morning
     if token == "plans_held":
         # QUARANTINED USE ONLY (Kokomi round 9 pick 1, the tempo shelf) --
         # Tide Chart, "draw 1 card for each Plan the Bake-Kurage holds".
@@ -3554,6 +3571,11 @@ RUNTIME_COUNT_NAMES = frozenset({
     # validates every count token at LOAD off this set, so a token only the
     # resolver knows is a card that raises the first time it is played.
     "plans_held",
+    # QUARANTINED USE ONLY (`EB-492`) -- Well Laid's "for each Plan the
+    # Bake-Kurage carried out this morning". Registered here as well as
+    # resolved in `_runtime_count` for this registry's own reason: the loader
+    # validates every count token at LOAD off this set.
+    "plans_carried_out_this_morning",
     # QUARANTINED USE ONLY (R213 B) -- the FURINA REFRAME's drain slice. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
@@ -5615,7 +5637,6 @@ OPS = {
     # not be staged at all. `engine.kokomi_plan` resolves them off a `plan:`
     # list; reached from a BODY they refuse, which is what makes "plan-only"
     # a property of the code.
-    "plan_twice": _op_kokomi_plan_only,
     "damage_per_companion_last_turn": _op_kokomi_plan_only,
     # THREE now, and the third is Crystal Collapse's (R236). Same terms: it is
     # registered so `loader.prototype_cards` can validate the row's `plan:`

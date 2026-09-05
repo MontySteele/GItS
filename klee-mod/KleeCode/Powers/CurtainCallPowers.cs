@@ -112,12 +112,24 @@ public static class CurtainCallHooks
     {
         var enemies = owner.CombatState?.HittableEnemies;
         if (enemies == null) return false;
-        return enemies.Any(enemy =>
-            enemy.Monster != null
-            && !enemy.IsStunned
-            && enemy.Monster.NextMove.Intents.Any(
-                intent => intent.IntentType == IntentType.Attack));
+        return enemies.Any(IntendsAttack);
     }
+
+    /// <summary>
+    /// Is THIS enemy telegraphing an attack? The per-creature half of
+    /// <see cref="EnemyIntendsAttack"/> above, split out for `EB-492`:
+    /// Kokomi's Flank aims at "each enemy that intends to attack", which is the
+    /// same question asked of each body rather than of the board. ONE
+    /// definition, so a planned Flank and a Furina reader can never disagree
+    /// about what an attack intent was; the sim splits the same way
+    /// (`kokomi_plan._intends_to_attack`, which
+    /// `effects._predicate("enemy_intends_attack")` reads clause for clause).
+    /// </summary>
+    public static bool IntendsAttack(Creature enemy) =>
+        enemy.Monster != null
+        && !enemy.IsStunned
+        && enemy.Monster.NextMove.Intents.Any(
+            intent => intent.IntentType == IntentType.Attack);
 
     /// <summary>Drop keys whose combat is gone, so these maps cannot grow
     /// across a run. Cheap: they hold one entry per player, not per card.
