@@ -1300,3 +1300,144 @@ Three verdicts, each with its clause and its line. Under 150 words.
 2. FOLLOWS — C6 (not strictly better).
 3. FOLLOWS — C5 (nothing fires by itself); C6 (not strictly better).
 ```
+
+
+## 5.5 The Furina pool pass, four arm-only Commons (2026-09-05, morning)
+
+The pass packet (`review/active/furina-pool-pass-2026-09-05.md`) put four
+arm-only Commons through the doctrine role on GPT 6 Astra at low effort,
+each replacing one shipped Common at the same rarity through the pool seam.
+The census was the shipped sheet's twenty-three Commons rendered from their
+effects by a script (the shipped rows carry no prose) and the arm's ten
+rows from the surface; the prompt stated that a replaced row is not a C6
+reference, the lesson of the Kokomi reads (5.4). All four came back
+FOLLOWS with clauses and no line. **Outcome:** four FOLLOWS; the pass
+builds under `EB-493`. Prompt, then reply, verbatim:
+
+```
+# Doctrine read: four Furina arm-only Common rows against the kit charter
+
+You are the adversarial reviewer for a Slay the Spire 2 character mod. The
+owner's rule: a new or redesigned card ships to a tester only if you rule it
+FOLLOWS. Each numbered card below is ONE ARM. For each, FOLLOWS or
+REQUIRES_MODIFICATION, the clause you ruled against, and the line of the
+card with its arithmetic in one sentence, naming the pool row or base-game
+card you compared it to. Read adversarially; the author is a different
+model family and the owner wants the row that should not reach a tester
+named. You have no repo access; every card below is pasted from the sheet.
+
+## Clauses
+
+- **C1 (the owner's "not all agents always win").** A row that removes a
+  losing line the kit is meant to keep, instead of pricing it, is out.
+- **C2 (binding prices).** Every cost printed must bind at the moment it is
+  paid; a card whose cost is routinely free is out.
+- **C3 (player-controlled leverage).** The card's value must follow a
+  decision the player makes (which member, when to deploy, hold Encore or
+  spend it), not a state that arrives by itself.
+- **C5 (nothing fires by itself).** No card triggers without a play. Under
+  the arm a member performs only on a deploy, on a Companion play, on an
+  Evoke, or when a kit card says she performs; nothing ticks on its own.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a standing pool row (listed below) or of a base-game non-basic card at
+  the same or lower rarity and cost. Strike and Defend are basics and not
+  reference points. **Each arm below REPLACES one shipped Common at the same
+  rarity (named on the arm); the replaced row leaves the offer under the
+  arm and is not a C6 reference.** Base-game Commons for reference: Defect's
+  Ball Lightning (1: 7 damage, channel a Lightning orb), Cold Snap (1: 6
+  damage, channel a Frost orb), Coolheaded (1: channel Frost, draw 1),
+  Claw (0: 3 damage), Sweeping Beam (1: 6 to ALL, draw 1); Ironclad's Cleave
+  (1: 8 to ALL), Iron Wave (1: 5 Block, 5 damage), Twin Strike (1: 5 twice).
+- **C8 (Furina reframe section 4.1).** Under the arm Fanfare is minted by a
+  Salon member performing and by nothing else, 2 per trigger and 5 per
+  Evoke, decaying 20% a turn; a kit card that makes a member perform mints
+  the trigger amount, bounded by the kit's own declaration.
+
+## The engine, Furina under the reframe arm
+
+The **Salon** is a stage of three slots on her side. **Deploy** puts a named
+member on stage and she **performs** once as she arrives; deploying onto a
+full stage Evokes the front member to make room (automatic, front only, by
+ruling). A member performs when Furina plays a **Companion card** (a card
+from the companion sheets, drafted from their own reward slot; the starter's
+An Invitation adds one to hand). **Evoke** makes the named member perform
+with her Focus term applied three times and leave the stage; it is priced
+in Encore. Members: Mademoiselle Crabaletta performs 6 Hydro damage to a
+random enemy (Evoke: 14); Gentilhomme Usher performs 3 Block (Evoke: 9);
+Surintendante Chevalmarin performs 2 damage and applies Hydro (Evoke: Hydro
+to ALL and 3 Encore). Member numbers gain +1 per 10 Fanfare held. **Encore**
+absorbs damage after Block and is the Evoke price; she starts each combat
+with 2 (R258). Energy 3, HP 78. Starter: 3 Soloist's Solicitation (Attack
+1: 6), 3 Stage Presence (Skill 1: 6 Block), Regal Bearing (Skill 1: 3 Block,
+1 Weak), Aria of Recompense (Skill 1: 5 Encore, 5 more at 3 Fanfare), Salon
+Debut (Skill 1: Deploy Mademoiselle Crabaletta), An Invitation (Skill 0,
+Exhaust: add a random common Companion card to your hand).
+
+The readings these rows answer, rounds 7 to 10: with one Deploy in the deck
+(the starter's), the Salon was furniture for most of a run and most
+Companion plays printed "No member on stage: performs nobody"; one dead
+turn with a member idle and no legal way to make her act; Casting Call
+unplayable with one Deploy; the seats asked for Deploy density, a second
+Deploy shape, and the Companion-card density the stage needs.
+
+## The standing pool, Commons pasted from the shipped sheet (offered unchanged under the arm except where an arm below replaces one)
+
+- Casting Call (Common Power, 1 energy): apply 1 salon_cap_up to self.
+- Gentilhomme Usher (Common Skill, 1 energy): deploy usher; gain 4 Block.
+- Surintendante Chevalmarin (Common Skill, 1 energy): deploy chevalmarin; gain 3 Encore.
+- Mademoiselle Crabaletta (Common Skill, 1 energy): deploy crabaletta.
+- Dinner Service (Common Skill, 1 energy): gain 2 Block plus 2 per salon member.
+- Usher the Waves (Common Attack, 1 energy): deal 5 damage to enemy; apply 1 weak to enemy.
+- House Call (Common Attack, 1 energy): deal 6 damage to enemy plus 2 per salon member.
+- Suffering for Art (Common Skill, 0 energy): deal 1 damage to self; gain 3 Encore.
+- Lasting Impression (Common Skill, 1 energy, Exhaust): gain 4 Encore.
+- Stage Combat (Common Attack, 0 energy): deal 3 damage to enemy; if enemy_intends_attack: gain 3 Block.
+- Ebb and Flow (Common Skill, 1 energy, 1 Encore): gain 3 Encore; draw 1.
+- Applause Line (Common Attack, 0 energy): deal 3 damage to enemy plus 1 per 4 fanfare.
+- The House Holds Its Breath (Common Skill, 1 energy): gain 4 Block plus 1 per 4 fanfare.
+- Breathless (Common Attack, 1 energy): spend 4 Encore; deal 9 damage to enemy.
+- An Invitation (Common Skill, 0 energy, Exhaust): add a random common Companion card to your hand.
+- Shared Billing (Common Skill, 1 energy): apply_aura {"element": "hydro", "target": "random_enemy"}; apply 25 spotlight_mult_bonus_turn to self; energy {"amount": 1}.
+- Blocking Notes (Common Skill, 1 energy): gain 5 Block plus 2 per companion played this turn.
+- Stage Lights (Common Skill, 1 energy): apply 2 spotlight_flat_damage_turn to self; apply 1 weak to all_enemies; draw 1.
+- Slip Backstage (Common Skill, 1 energy): spend 5 Encore; gain 10 Block.
+- Commanding Gaze (Common Skill, 1 energy): gain 2 Block; apply 1 weak to all_enemies.
+- Macaron Break (Common Skill, 1 energy): gain 2 Encore; gain 2 Block.
+- Compose Herself (Common Skill, 1 energy): draw 2; if encore_at_least_8: draw 1.
+- Undercurrent (Common Attack, 2 energy): deal 2 damage to all_enemies x3.
+
+## The arm's own rows, pasted from the surface
+
+- Salon Début (Basic Skill, 1 energy): Deploy Mademoiselle Crabaletta.
+- Curtain Call (Common Skill, 1 energy, 2 Encore): Evoke the front Salon member.
+- Exit Stage Left (Uncommon Skill, 1 energy, 1 Encore): Evoke Surintendante Chevalmarin, or the front member if she is not on stage.
+- Let the People Rejoice (Rare Attack, 2 energy): Drain your Fanfare. Deal 8 damage to ALL enemies, plus 1 per Fanfare drained.
+- Intermission (Rare Skill, 1 energy): Drain your Fanfare. Gain Block equal to the Fanfare drained.
+- Florid Cadenza (proto) (Uncommon Skill, 0 energy): Draw 1 card. If you have at least 6 Fanfare, draw 2 more.
+- Dramatic Entrance (proto) (Uncommon Attack, 1 energy): Deal 7 damage. If you have at least 6 Fanfare, deal 7 damage to ALL enemies.
+- Universal Revelry (proto) (Rare Attack, 2 energy): Deal 9 damage to ALL enemies, plus 1 per 2 Fanfare. If you have at least 8 Fanfare, deal 6 more to ALL enemies.
+- Flood of Emotion (proto) (Rare Skill, 1 energy): Deal 14 damage. If you have at least 10 Fanfare, deal 14 more.
+- Aria of Recompense (proto) (Basic Skill, 1 energy): Gain 5 Encore. If you have at least 3 Fanfare, gain 5 more.
+
+## The arms
+
+1. **Curtain Rises** — Common Attack, 1 energy; replaces House Call. Deal 6
+   damage. Deploy Gentilhomme Usher. Upgrade: 9 damage.
+2. **Second Course** — Common Skill, 1 energy; replaces Dinner Service.
+   Spend 3 Encore. Deploy Mademoiselle Crabaletta. She performs once more.
+   Upgrade: spend 2 Encore. (Unplayable below 3 Encore.)
+3. **Rolling Tide** — Common Attack, 2 energy; replaces Undercurrent. Deal 2
+   damage to ALL enemies twice. The front Salon member performs. Upgrade: 3
+   damage.
+4. **Guest List** — Common Skill, 1 energy; replaces Blocking Notes. Gain 3
+   Block. Add a random common Companion card to your hand. Upgrade: 5 Block.
+
+Four verdicts, each with its clause and its line. Under 200 words.
+```
+
+```
+- **Curtain Rises — FOLLOWS.** Clause: C6.
+- **Second Course — FOLLOWS.** Clauses: C2, C5, C8.
+- **Rolling Tide — FOLLOWS.** Clauses: C3, C5, C8.
+- **Guest List — FOLLOWS.** Clauses: C1, C6.
+```

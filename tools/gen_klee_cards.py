@@ -2522,22 +2522,30 @@ SALON_MEMBER_CS = {
     "random": "null",
 }
 
-def salon_bow_aim(eff: dict) -> str:
-    """`SalonMemberPower.BowLeftmost`'s trailing `aim` argument, or "".
+def salon_member_aim(eff: dict) -> str:
+    """The trailing `aim` argument of a Salon verb that takes one, or "".
 
-    THE AIMED EVOKE (the slot-6 ruling, 2026-08-30). The verb's third parameter
-    DEFAULTS to null, which is the FRONT, so a row that names no member emits
-    NOTHING here and its call is byte-identical to what it was before the
-    ruling -- `take_your_bow` is the shipped row that proves it, and a
-    generated tree that moved for a feature no shipped card uses would be a
-    diff nobody could read. The sim spells the same sentinel as the string
-    "front"; C# spells it as a nullable enum, and
+    TWO VERBS TAKE ONE, AND ONE FUNCTION SERVES BOTH. `BowLeftmost`'s is THE
+    AIMED EVOKE (the slot-6 ruling, 2026-08-30); `PerformLeftmost`'s is THE
+    AIMED PERFORMANCE (`EB-493`), so *Second Course* can say "she performs once
+    more" about the member it just deployed rather than about whoever happens
+    to stand at the front. Both are an ARGUMENT on a shipped verb rather than a
+    second op, for the reason `effects._op_salon_bow` writes out: registering a
+    synonym would move the priced-op set `tools/lint_op_parity.py` compares,
+    and buy a `DRAFTER_VERSION` stamp for a verb both engines already have.
+
+    Either verb's aim parameter DEFAULTS to null, which is the FRONT, so a row
+    that names no member emits NOTHING here and its call is byte-identical to
+    what it was before -- `take_your_bow` and `change_the_bill` are the shipped
+    rows that prove it, and a generated tree that moved for a feature no
+    shipped card uses would be a diff nobody could read. The sim spells the
+    same sentinel as the string "front"; C# spells it as a nullable enum, and
     `FurinaReframe.EvokeTargetFront` is the name for it.
 
     Read through `SALON_MEMBER_CS`, the ONE member table, so the deploy verb
     and the Evoke verb cannot disagree about who Chevalmarin is. `random` is
     refused by `blocked_reason`: it is a legal DEPLOY (the stage rolls) and a
-    meaningless aim (an Evoke that names nobody already means the front).
+    meaningless aim (a verb that names nobody already means the front).
     """
     named = eff.get("member")
     if named in (None, "front"):
@@ -3555,26 +3563,36 @@ def blocked_reason(
             # with `amount` OPTIONAL: one rotation and one act are the
             # natural units, so `{op: salon_rotate}` is the common row
             # and the default is the sim's (1).
-            unknown = set(eff) - {"op", "amount"}
+            #
+            # `member` IS A PERFORM FIELD AND NOT A ROTATE ONE (`EB-493`): a
+            # performance can be aimed at whoever the card just deployed, and a
+            # rotation is a fact about the QUEUE's order that naming a member
+            # could not express.
+            allowed = {"op", "amount"} | ({"member"} if op == "salon_perform"
+                                          else set())
+            unknown = set(eff) - allowed
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
             amount = eff.get("amount", 1)
             if not isinstance(amount, int) or amount <= 0:
                 return f"{op} amount must be a positive literal int"
-        if op == "salon_bow" and "member" in eff:
-            # THE AIMED EVOKE (the slot-6 ruling, 2026-08-30), an ARGUMENT on
-            # the shipped verb and not a second op -- the sim put it there for
-            # the reason `effects._op_salon_bow` writes out, and registering a
-            # `salon_evoke` would have moved the priced-op set. Checked the way
-            # `apply_power`'s deploy member is (A11): an unrecognised name is a
-            # NAMED blocker here rather than a KeyError mid-emit, because a typo
-            # that degraded quietly into "the front member" is the one failure
-            # an aimed Evoke could hide for a whole sprint.
+        if op in {"salon_bow", "salon_perform"} and "member" in eff:
+            # THE AIMED EVOKE (the slot-6 ruling, 2026-08-30) and THE AIMED
+            # PERFORMANCE (`EB-493`), an ARGUMENT on the shipped verb and not a
+            # second op -- the sim put it there for the reason
+            # `effects._op_salon_bow` writes out, and registering a
+            # `salon_evoke` (or a `salon_perform_member`) would have moved the
+            # priced-op set. Checked the way `apply_power`'s deploy member is
+            # (A11): an unrecognised name is a NAMED blocker here rather than a
+            # KeyError mid-emit, because a typo that degraded quietly into "the
+            # front member" is the one failure an aimed verb could hide for a
+            # whole sprint.
             if (eff["member"] not in SALON_MEMBER_CS
                     or eff["member"] == "random"):
-                return (f"salon_bow member '{eff['member']}' is not one of "
+                return (f"{op} member '{eff['member']}' is not one of "
                         f"{sorted(set(SALON_MEMBER_CS) - {'random'})} -- an "
-                        "Evoke names a member or names none (the front)")
+                        "aimed Salon verb names a member or names none (the "
+                        "front)")
         if op == "spend_spark" and eff.get("amount") == SPEND_ALL:
             # THE X PRICE (the round-11 pool pass, Stoke the Fuse): "spend all
             # your Sparks". The one non-literal a Spark price may be spelled
@@ -3950,8 +3968,28 @@ def blocked_reason(
             if "cost_override" in eff and not isinstance(
                     eff["cost_override"], int):
                 return "generate_guest_star cost_override must be a literal int"
-            if not card.get("exhaust"):
+            if not card.get("exhaust") and not card["id"].startswith("proto_"):
                 return "generate_guest_star generator must Exhaust"
+            # THE EXHAUST GUARDRAIL IS A SHIPPED-SHEET RULE (`EB-493`).
+            #
+            # Kickoff sec.9 gives Guest Star generation four guardrails, and
+            # three of them are STRUCTURAL: this-combat-only (tokens live in
+            # combat piles), equal-rarity (the pool is filtered to the
+            # generator's own rarity), and a pool that is companions plus the
+            # Guest Star set (a playable character's personal rows are neither,
+            # so they cannot appear). The fourth -- "generators Exhaust" -- is
+            # a BALANCE rule written on a sheet field, and it is the one a
+            # prototype exists to try moving.
+            #
+            # *Guest List* moves it deliberately: the Furina pool pass buys An
+            # Invitation's verb back at a price, an Energy and no Exhaust and
+            # three Block short of a Stage Presence
+            # (`review/active/furina-pool-pass-2026-09-05.md` sec.2 item 4),
+            # because the arm's Companion trigger is starved between draws of
+            # the reward slot. The exemption is the PREFIX and nothing else, so
+            # it is exactly as wide as the quarantine: a `docs/*-cards.yaml`
+            # row still cannot generate without Exhaust, and a prototype that
+            # is promoted to a shipped sheet meets this bar again on the way in.
         if op == "conditional":
             unknown = set(eff) - CONDITIONAL_FIELDS
             if unknown:
@@ -7536,7 +7574,7 @@ def build_body(
             lines.append(
                 "await SalonMemberPower.BowLeftmost("
                 f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))}"
-                f"{salon_bow_aim(eff)});")
+                f"{salon_member_aim(eff)});")
 
         elif op == "drain_fanfare":
             # QUARANTINED (R213 B): the Furina reframe's drain, slice two.
@@ -7558,9 +7596,15 @@ def build_body(
             # turn-start upkeep calls, so the Encore upkeep, the dry cut, the
             # Focus scaling and the burst particle are inherited here rather
             # than restated on the card.
+            #
+            # `aim` is `EB-493`'s AIMED PERFORMANCE, the shipped verb's
+            # optional fourth argument rather than a second call -- the same
+            # shape and the same argument as the aimed Evoke above it. A row
+            # that names no member emits nothing and performs the front.
             lines.append(
                 "await SalonMemberPower.PerformLeftmost("
-                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
+                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))}"
+                f"{salon_member_aim(eff)});")
 
         elif op == "heal":
             lines.append(
@@ -8716,7 +8760,7 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
             body.append(
                 "await SalonMemberPower.BowLeftmost("
                 f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))}"
-                f"{salon_bow_aim(eff)});")
+                f"{salon_member_aim(eff)});")
         elif op == "drain_fanfare":
             body.append("FurinaDrain.Drain(Owner.Creature);")
         elif op == "salon_rotate":
@@ -8726,7 +8770,8 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
         elif op == "salon_perform":
             body.append(
                 "await SalonMemberPower.PerformLeftmost("
-                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
+                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))}"
+                f"{salon_member_aim(eff)});")
         elif op == "set_off":
             # The Klee overhaul's Perfect Timing is the slice's one repeat, and
             # its replayed body IS a Set off plus the card's own hit -- both of
@@ -9780,11 +9825,19 @@ def build_description(card: dict) -> str:
 
         elif op == "salon_perform":
             n = int(eff.get("amount", 1))
+            # `EB-493`, the AIMED performance: the row names a member, so the
+            # face names her too. A rendered row is what a player reads when
+            # nobody authored a `description:`, and "the leftmost member"
+            # would be a sentence about the queue for a card that is about a
+            # person. The name is `SALON_MEMBER_NAMES`', the same table the
+            # deploy face and the member's own tooltip title read.
+            named = eff.get("member")
+            who = ("The leftmost member of your [gold]Salon[/gold]"
+                   if named in (None, "front")
+                   else SALON_MEMBER_NAMES[named])
             parts.append(
-                "The leftmost member of your [gold]Salon[/gold] performs "
-                "now." if n == 1 else
-                f"The leftmost member of your [gold]Salon[/gold] performs "
-                f"now, {n} times.")
+                f"{who} performs now." if n == 1 else
+                f"{who} performs now, {n} times.")
 
         elif op == "heal":
             parts.append("Heal {Heal:diff()} HP.")

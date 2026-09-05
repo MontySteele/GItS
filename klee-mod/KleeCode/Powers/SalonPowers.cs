@@ -887,14 +887,55 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     ///
     /// Inert on an empty stage, matching the sim's `salon_perform`.
     /// </summary>
+    /// <param name="aim">Who performs, or NULL for the FRONT (`EB-493`). The
+    /// aimed performance is an ARGUMENT on the shipped verb and not a second
+    /// op, exactly as the aimed Evoke is on <see cref="BowLeftmost"/> and for
+    /// the same reason: `tools/lint_op_parity.py` compares the KEY SET of the
+    /// sim's op registry against the drafter's priced-op table, so an extra
+    /// argument leaves the priced set identical while a `salon_perform_member`
+    /// synonym would have bought a `DRAFTER_VERSION` stamp for a verb both
+    /// engines already have.
+    ///
+    /// NOT FLAG-GATED, and that is the one place it differs from the Evoke's
+    /// aim. The Evoke's is gated because a SHIPPED row could in principle name
+    /// a member and must not become aimable in a release world; no shipped row
+    /// carries `member:` on `salon_perform`, and the only row that does is a
+    /// quarantined prototype that cannot be compiled into a release build at
+    /// all. The gate is the field, not a switch.
+    ///
+    /// A NAMED MEMBER WHO IS NOT ON STAGE takes the FRONT, which is the ruled
+    /// fallback the aimed Evoke already has (slot 6, 2026-08-30: "an aimed
+    /// card that cannot find its member is an unaimed Evoke, never a wasted
+    /// one"), and it is noted rather than silent for that verb's D4 reason.
+    /// The one row that aims -- <i>Second Course</i> -- deploys her in the
+    /// sentence before, so the state is unreachable from the sheet as it
+    /// stands; the fallback is written down so it cannot be discovered later.
+    /// Mirrors tier0 `effects._op_salon_perform`.</param>
     public static async Task PerformLeftmost(
-        PlayerChoiceContext choiceContext, Creature owner, int amount)
+        PlayerChoiceContext choiceContext, Creature owner, int amount,
+        SalonMember? aim = null)
     {
         if (!FurinaResources.IsFurina(owner)) return;
         var company = CompanyFor(owner);
+        var aimed = aim;
+        if (aimed is { } named && !company.Contains(named))
+        {
+            aimed = null;
+#if PROTOTYPE_CARDS
+            FurinaReframeLedger.For(owner).NotePerformTargetAbsent(named);
+#endif
+        }
         for (var i = 0; i < amount && company.Count > 0; i++)
         {
-            if (!await PerformMember(choiceContext, owner, company[0])) break;
+            // `aimed ?? company[0]` re-reads the front INSIDE the loop, so an
+            // unaimed call is byte-identical to what this verb has always
+            // done. A performance moves nobody, so the two readings agree
+            // today -- the shape is kept because the loop's invariant is
+            // "whoever is leftmost NOW", not "whoever was leftmost first".
+            if (!await PerformMember(choiceContext, owner, aimed ?? company[0]))
+            {
+                break;
+            }
         }
     }
 
