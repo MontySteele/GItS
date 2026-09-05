@@ -795,9 +795,17 @@ _GAME_KEYWORD_RE = {
 # same reason it was never missing: the word only ever appears on a body that
 # is one.
 BASE_KEYWORDS: dict[str, str] = {
+    # `EB-481` IS `EB-469` ONE DEBUFF OVER, found the same way one round later:
+    # the game's status line says "Receive 50% more damage from Attacks", this
+    # row said "every hit", and `Kurage's Oath` -- printed `cost 1, skill` --
+    # took the 1.5x (Kokomi r16 (c) 2). `VulnerablePower` is the TARGET's own
+    # power and gates on `IsPoweredAttack()` exactly as `WeakPower` does, so
+    # "Attacks" means attack HITS on both sides of the exchange. Same sentence
+    # as `BaseKeywordTips.ForVulnerable`, pinned to it.
     "Vulnerable": (
         f"The wearer takes {VULNERABLE_TAKEN_PCT}% more damage from every "
-        f"hit. One stack falls off at the end of each of its turns."),
+        f"hit it takes, a Skill's damage too. One stack falls off at the end "
+        f"of each of its turns."),
     # `EB-469`. THE GAME'S OWN STATUS LINE SAYS "Attacks deal 25% less damage
     # for 1 turn", and the Kokomi r15 seat read "Attacks" as the CARD TYPE --
     # "the status line told me skills were safe and the card told me they were

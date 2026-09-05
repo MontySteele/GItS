@@ -7362,9 +7362,12 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "BaseKeywordTips.cs").read_text(encoding="utf-8")
     anchors = {
-        "Vulnerable": ["The wearer takes 50% more damage from every hit. "
-                       "One stack falls ", "off at the end of each of its "
-                       "turns."],
+        # `EB-481` put the Skill case in this one too, one round later and for
+        # the same reason: the game's status line says "from Attacks" and
+        # `VulnerablePower` gates on the HIT.
+        "Vulnerable": ["The wearer takes 50% more damage from every hit it "
+                       "takes, a ", "Skill's damage too. One stack falls off "
+                       "at the end of each of ", "its turns."],
         # `EB-469` put the Skill case in this sentence, in the C# and here in
         # one commit, so the anchor holds the clause that resolves the game's
         # own "Attacks".
