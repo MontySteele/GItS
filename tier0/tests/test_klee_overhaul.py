@@ -58,13 +58,30 @@ def overhaul(monkeypatch):
     the flag, so a test that flips the flag without clearing it would read a
     KeyError cached from an earlier test. `rewards.character_pool` is memoized
     too and its answer moves with the same flag. Cleared going in and out.
+
+    THE TWO UPGRADE INDICES JOINED THEM (2026-09-05). They are memoized on the
+    same flag -- a prototype row is upgradable only with the arm on -- and a
+    test that resolved a `proto_` card here left a populated index behind for
+    `test_no_prototype_row_is_upgradable_with_the_flags_off` and
+    `test_the_overhaul_ids_do_not_resolve_with_the_flag_off` to read on the
+    same xdist worker, which is exactly the intermittent pair those two turned
+    into. Three tests below already cleared them by hand in a `finally`; doing
+    it here is that discipline moved to the one door every arm test passes
+    through, and their own clears are left where they are because a test that
+    does not take this fixture still needs them.
     """
-    loader._card_prototype.cache_clear()
-    rewards.character_pool.cache_clear()
+    from tier0.content import upgrades
+
+    def _clear():
+        loader._card_prototype.cache_clear()
+        rewards.character_pool.cache_clear()
+        upgrades._prototype_upgrade_index.cache_clear()
+        upgrades._upgrade_index.cache_clear()
+
+    _clear()
     monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
     yield
-    loader._card_prototype.cache_clear()
-    rewards.character_pool.cache_clear()
+    _clear()
 
 
 def klee_fight(seed=SEED):
