@@ -52,7 +52,7 @@ public sealed class BennettPassion : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bennett — Passion Overload"),
-        ("description", "Your next Attack deals {PowerAmount:diff()} additional damage. Gain 5 [gold]Burst Energy[/gold]."),
+        ("description", FurinaBurstRider.Face("Your next Attack deals {PowerAmount:diff()} additional damage.", "Your next Attack deals {PowerAmount:diff()} additional damage. Gain 5 [gold]Burst Energy[/gold].")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

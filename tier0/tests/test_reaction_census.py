@@ -66,3 +66,20 @@ def test_check_fails_when_the_record_is_stale(tmp_path, monkeypatch):
         assert "STALE" in result.stdout
     finally:
         census.OUT.write_text(backup, encoding="utf-8")
+
+
+def test_committed_record_names_its_inputs():
+    """The census is pinned to the record files it was written over, so a
+    seat record landing after it does not turn the committed table stale."""
+    listed = census.listed_inputs(census.OUT.read_text(encoding="utf-8"))
+    assert listed, "the committed census carries no inputs footer"
+    assert all((census.REPO / p).is_file() for p in listed)
+
+
+def test_discovery_restricted_to_listed_inputs():
+    """`--check` reads exactly the files the record names: restricting
+    discovery to a two-file subset returns those two and nothing else."""
+    listed = census.listed_inputs(census.OUT.read_text(encoding="utf-8"))
+    subset = set(listed[:2])
+    found = census.discover_records(subset)
+    assert {r[3].relative_to(census.REPO).as_posix() for r in found} == subset

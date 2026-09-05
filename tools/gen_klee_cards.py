@@ -1961,6 +1961,27 @@ def plan_clause_cs(eff: dict, var: str | None = None) -> str:
             f"{aim}{tail})")
 
 
+#: `EB-513`. THE POWERS THAT PAY A CARD'S OWN PRINTED BLOCK, and nothing else.
+#:
+#: A companion row prints its bonus Block on its OWN face -- "If a Bomb goes
+#: off this turn, gain 5 Block" -- and reaches it through a power only because
+#: the trigger is forward-looking. So the number is a card's printed Block and
+#: takes a card's Frail fold, on the face (a `BlockVar` here) and on the way
+#: out (`ValueProp.Move` at the power's `Pay`). The r18 seat met the gap on one
+#: screen: Frail rewrote Defend 5 to 3 and Diona printed and delivered 4 + 5.
+#:
+#: WHAT IS NOT HERE, and why the set is named rather than derived: `NC-11`'s
+#: three (Metallicize, the Ceremonial Garment rider, the Kurage pulse) are
+#: passive effects a power owns with no printed card clause behind them, and
+#: `ko_grounded` and `mc_lions_fang` pay at TURN START off a Power the card
+#: only granted -- a POWER's Block, not a card's, which is the distinction
+#: `GroundedPower` states in as many words. Those stay raw.
+BLOCK_PAYING_POWERS = frozenset((
+    "mc_shaken_not_purred",
+    "mc_i_got_your_back",
+    "mc_front_row_seat",
+))
+
 # apply_power (power-card pass)
 # apply_power (power-card pass): sheet power id -> (C# PowerModel class,
 # stack cap or None, card-text template with {X} for the amount). Stackable
@@ -2035,8 +2056,8 @@ APPLY_POWERS = {
         "Whenever one of your [gold]Bombs[/gold] triggers an "
         "[gold]Elemental Reaction[/gold], gain {X} extra [gold]Spark[/gold]."),
     "ko_grounded": ("GroundedPower", None,
-        "At the start of your turn, if none of your [gold]Bombs[/gold] went "
-        "off last turn, gain {X} Block."),
+        "At the start of your turn, if you have a [gold]Bomb[/gold] on the "
+        "field, gain {X} Block."),
     # R244's coven reader. Chained Reactions' grammar one trigger over, and
     # DEAD ALONE by the ruling's own pick 2 -- a deck with no witch in it never
     # sets this off, which is what makes it the bridge card rather than a
@@ -2122,8 +2143,8 @@ APPLY_POWERS = {
     # pay for. A marker power -- the stack means nothing, `CarryOutTimes`
     # reads only whether it is worn.
     "kk_nereids_ascension": ("NereidsAscensionPower", None,
-        "The [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] "
-        "twice."),
+        "At the start of your turn, the [gold]Bake-Kurage[/gold] "
+        "carries out every [gold]Plan[/gold] twice."),
     "kk_clouds_like_waves": ("CloudsLikeWavesPower", None,
         "Whenever you apply a debuff to an enemy, gain {X} Block."),
     "kk_generals_banner": ("GeneralsBannerPower", None,
@@ -5224,6 +5245,36 @@ def salon_calc_var_decls(card: dict, eff: dict) -> list[str] | None:
     ]
 
 
+def calculated_damage_var(card: dict) -> str:
+    """Which calculated-damage var a row's face declares (`EB-522`).
+
+    THE FIND (Kokomi r18 lane 2, fight 5). "Well Laid printed 'Deal 8 damage'
+    and removed 12 HP. Riptide on the same screen printed 'Deal 9 damage to
+    ALL' for its immediate line and 'Plan: Deal 19' for its Plan line -- 19 is
+    13 x 1.5, so the Plan line IS multiplied by the enemy's Vulnerable on the
+    printed face while the immediate line is not. Two numbers on one card
+    computed to two different conventions."
+
+    NEITHER HALF IS A BUG IN THE PIPELINE. `UpdateCardPreview` is handed the
+    creature the card is being AIMED at, and the target-side multiplier is a
+    fact about that creature; a card sitting in a hand has no such creature,
+    and a blind page reads the face exactly there. `KokomiPlan.PlanDamageVar`
+    is the row that already answered it -- a Plan card is dragged onto the PET,
+    so its preview target is never the enemy that will be hit, and it reads the
+    front enemy itself. `FrontFoldedDamageVar` is that convention on the other
+    kind of face, folding ONLY where the game handed nobody, so it cannot fold
+    a multiplier twice.
+
+    `proto_` ROWS ONLY, and that is the arm quarantine rather than a hedge: the
+    var lives under `Cards/Prototype/`, which a release build Compile-Removes,
+    and what a SHIPPED card prints at rest is a surface R249 ruled is not
+    repainted outside the arm.
+    """
+    return ("FrontFoldedDamageVar"
+            if str(card.get("id") or "").startswith("proto_")
+            else "CalculatedDamageVar")
+
+
 def build_vars(card: dict) -> list[str]:
     """DynamicVar declarations, in the order the effects use them."""
     out = []
@@ -5248,7 +5299,7 @@ def build_vars(card: dict) -> list[str]:
                 out.append(f'new CalculationBaseVar({base}m)')
                 out.append(f'new ExtraDamageVar({extra}m)')
                 out.append(
-                    'new CalculatedDamageVar(ValueProp.Move)'
+                    f'new {calculated_damage_var(card)}(ValueProp.Move)'
                     f'.WithMultiplier({mult})')
             elif eff is not damage_var_effect(card):
                 pass          # literal; only the upgraded hit declares a var
@@ -5425,7 +5476,20 @@ def build_vars(card: dict) -> list[str]:
             # second apply_power on the same card must stay a literal, or the
             # duplicate "PowerAmount" key throws in the DynamicVarSet
             # constructor at reward time (2026-07-23 softlock).
-            out.append(f'new DynamicVar("PowerAmount", {int(eff["amount"])}m)')
+            # `EB-513`: A POWER THAT PAYS THE CARD'S OWN PRINTED BLOCK GETS A
+            # `BlockVar`, so the printed number folds Frail the way the card's
+            # primary Block does. `BlockVar.UpdateCardPreview` runs
+            # `Hook.ModifyBlock` and writes `PreviewValue`, which is what
+            # `{PowerAmount:diff()}` renders; `IntValue` is `(int)BaseValue`
+            # and is what the Apply hands the power, so the fold happens ONCE
+            # -- on the face here and on the payout in the power's own `Pay`
+            # -- and the two numbers agree.
+            if eff.get("power") in BLOCK_PAYING_POWERS:
+                out.append('new BlockVar("PowerAmount", '
+                           f'{int(eff["amount"])}m, ValueProp.Move)')
+            else:
+                out.append(
+                    f'new DynamicVar("PowerAmount", {int(eff["amount"])}m)')
         elif op == "discard_for_sparks" and discard_upgrade(card) != (0, 0):
             # R36: both numbers render, so both become vars together.
             out.append(f'new DynamicVar("Discards", {int(eff["amount"])}m)')
@@ -6583,10 +6647,19 @@ def _stmt_spend_spark(card: dict, eff: dict) -> str:
     # an emptied bank. tier0 answers the same question off `sparks_at_play`,
     # `SparksAtPlay`'s documented twin, and `blocked_reason` refuses the payout
     # on any row that does not open with this price.
+    #
+    # AND THE X PRICE IS GUARDED, which `EB-512` is the reason for. Its gate is
+    # a PRINTED price of one (`spark_price_expr` -> `PrintedSparkPrice`) while
+    # the payment asks for the WHOLE bank, so the two ask different questions
+    # and a failed spend is not one the gate could have refused. With the bool
+    # dropped, the r18 seat's Stoke the Fuse grew a Mine by 3 per Spark while
+    # the counter stayed at 2: the payout is priced off the PRE-spend read one
+    # line up, so an unpaid price still pays out unless the body abandons the
+    # play. `_stmt_spend_charge`'s shape, for `_stmt_spend_charge`'s reason.
     if eff.get("amount") == SPEND_ALL:
         return ("var sparksSpent = SparkPower.SparksAtPlay(Owner.Creature);\n"
-                "        await SparkPower.Spend(choiceContext, "
-                "Owner.Creature, sparksSpent, this);")
+                "        if (!await SparkPower.Spend(choiceContext, "
+                "Owner.Creature, sparksSpent, this)) return;")
     # `EB-491` (Fireworks Show): a `spark_price` delta moves what the card
     # CHARGES, so the payment and the declared price are ONE expression --
     # `spark_price_expr` is the builder both call, for the reason the X price
@@ -9329,7 +9402,8 @@ def _authored_face_with_tokens(card: dict) -> str:
     return text
 
 
-def build_description(card: dict) -> str:
+def build_description(card: dict, *,
+                      include_burst_rider: bool = True) -> str:
     """
     Card text. Syntax is copied from base-game strings observed at runtime:
     single-braced SmartFormat placeholders, :diff() for the upgrade delta, and
@@ -9715,6 +9789,15 @@ def build_description(card: dict) -> str:
                 )
 
         elif op == "burst_energy":
+            # `EB-524`. THE COMPANION SHEETS' HALF OF `EB-449`'s RULE. That row
+            # blanked the tag rider on Furina's own faces and the tip on every
+            # face (`KleeCardTooltips.ForBurst`, owner-gated); what it did not
+            # reach is the sentence a COMPANION row prints for its own
+            # `burst_energy` clause, because those rows are on nobody's
+            # character sheet. Furina r12 lane 1 met "Burst +5" on Bennett and
+            # Barbara with "no screen defining it, no meter appearing".
+            if not include_burst_rider:
+                continue
             if burst_upgrade(card):
                 parts.append("Gain {BurstEnergy:diff()} [gold]Burst Energy[/gold].")
             else:
@@ -10339,7 +10422,12 @@ def build_description(card: dict) -> str:
     # on none of the three companion sheets, so "carries the tag" and "is paid
     # the 5" are the same set today; a second predicate here would be a
     # second place for that set to be described wrongly.
-    if "skill_tag" in (card.get("tags") or ()):
+    # `EB-449`. `include_burst_rider=False` is the ARM's face, and it is a
+    # parameter rather than a second renderer so the two cannot drift: `emit`
+    # asks for both and hands them to `FurinaBurstRider.Face`, which decides at
+    # boot. Only Furina's `skill_tag` rows are asked twice; every other row on
+    # every other sheet takes the default and is unchanged.
+    if include_burst_rider and "skill_tag" in (card.get("tags") or ()):
         parts.append(f"[gold]Burst[/gold] +{BURST_PER_SKILL_TAG}.")
 
     if sly_riders(card):
@@ -11122,6 +11210,38 @@ def emit(
     upgrade = build_upgrade(card)
     _, no_upgrade_reason = upgrade_plan(card)
     desc = build_description(card)
+    # `EB-449`. THE ARM'S FACE, for the rows that print a meter the reframe
+    # retires: every FURINA row carrying `tags: [skill_tag]`, derived from the
+    # same field that emits `ISkillTagCard` so a fourteenth row inherits the
+    # blank. Klee's fifteen and Kokomi's one keep their meters and their line.
+    #
+    # `EB-524`. THE SECOND SOURCE, AND IT IS THE SAME RULE ONE SHEET OVER.
+    # A COMPANION row is on nobody's character sheet, so the predicate above
+    # never reached one -- and a companion is drafted by whoever is playing.
+    # Furina r12 lane 1: "Bennett and Barbara print 'Burst +5', no screen
+    # defines it, no meter appears." The rule those faces print is their own
+    # `burst_energy` clause, which `KleeBurstResource.Gain` already refuses to
+    # pay a creature whose meter the arm retired -- so the effect was already
+    # right and only the sentence was left promising.
+    #
+    # DERIVED FROM THE EFFECT, the same discipline `skill_tag` is derived from
+    # its field: a fourth companion row that grants Burst inherits the blank
+    # rather than having to be remembered.
+    #
+    # TWO PREDICATES AND NOT ONE, because the two sheets print the promise in
+    # different places: Furina's rows carry the `Elemental Skill` KEYWORD and
+    # the tag's rider, a companion row carries neither and prints its own
+    # clause. Only the first has a keyword to drop.
+    blanks_skill_tag = (profile.character_id == "furina"
+                        and "skill_tag" in (card.get("tags") or ()))
+    blanks_burst = blanks_skill_tag or (
+        is_companion(card)
+        and any(eff.get("op") == "burst_energy"
+                for eff in (card.get("effects") or ())))
+    desc_expr = f'"{desc}"'
+    if blanks_burst:
+        arm_desc = build_description(card, include_burst_rider=False)
+        desc_expr = f'FurinaBurstRider.Face("{arm_desc}", "{desc}")'
 
     interfaces = "CustomCardModel"
     if elemental:
@@ -11539,9 +11659,17 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     keywords.extend(ELEMENT_KEYWORD_BY_ELEMENT[e] for e in aura_elements)
     keywords_member = ""
     if keywords:
+        # `EB-449`. The keyword cannot be re-worded per arm -- its loc
+        # row is registered once at boot for every carrier -- so under
+        # the reframe the card does not carry it at all. The SKILL-TAG half
+        # of the face predicate above: `EB-524`'s companion rows carry no
+        # `Elemental Skill` keyword to drop, only the clause.
+        listed = "new[] { " + ", ".join(keywords) + " }"
+        if blanks_skill_tag:
+            listed = f"FurinaBurstRider.Keywords({listed})"
         keywords_member = (
             "\n    public override IEnumerable<CardKeyword> CanonicalKeywords =>\n"
-            "        new[] { " + ", ".join(keywords) + " };\n"
+            "        " + listed + ";\n"
         )
 
     includes_confiscated_rules = any(
@@ -11599,6 +11727,37 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 "KokomiRiderTips.ForDebuffRider("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this, "
                 f"{_base}, {_bonus})")
+            break
+    # `EB-539`. THE SAME SPLIT ONE COUNT OVER: a live MORNING total, whose
+    # face cannot say what it is made of.
+    #
+    # THE FIND (Kokomi r19 lane 2). On a bare morning `Well Laid` printed "Deal
+    # 2 damage, already including 3 for each Plan carried out this morning" and
+    # the seat read it as self-contradictory -- 2 cannot already include a 3
+    # that nothing paid. It is `EB-441`'s clause working exactly as written, on
+    # the one board where the fold is zero.
+    #
+    # So the FACE prints the live total alone and the rule moves to the tip,
+    # which is the only surface that can carry a rule AND a live count. Handed
+    # the SAME `base` and `per` the rider emits the vars from, so the sentence
+    # cannot quote a number the hit does not use.
+    #
+    # AND THE WORD GOES WITH IT. The arm-keyword attach below is derived from
+    # the words the card PRINTS, and this rider takes `Plan` off the face and
+    # prints it in the tip instead -- so without this the row would have gone
+    # on saying `Plan` with nothing on screen defining it, which is the exact
+    # silence that rule exists to make impossible. `rider_printed` carries the
+    # words a rider prints into the same scan the face feeds.
+    rider_printed = ""
+    for _eff in card.get("effects", []):
+        _morning = plans_carried_out_morning_rider(card, _eff)
+        if _morning is not None:
+            _base, _per, _ = _morning
+            tips_expr = (
+                "KokomiRiderTips.ForMorningDamageRider("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this, "
+                f"{_base}, {_per})")
+            rider_printed += " [gold]Plan[/gold]"
             break
     # B5: a deploy card carries the tip for every member it can field, plus
     # the cap rules its face no longer prints. Attached from the EFFECT, not
@@ -11752,7 +11911,8 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
-        for attach in arm_keyword_tip_calls(desc, includes_bomb_rules,
+        for attach in arm_keyword_tip_calls(desc + rider_printed,
+                                            includes_bomb_rules,
                                             spark_priced):
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
@@ -11816,8 +11976,26 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # the Ancient event's option handler and hangs the room (playtest
     # 2026-07-23). Mirror the hand-written Kaboom/DuckAndCover pair: the
     # basic attack is the character's Strike, the basic blocker its Defend.
+    #
+    # `EB-543` (and `EB-409`'s family): A PROTOTYPE BASIC TAKES NEITHER TAG.
+    # The tag is what base-game content means by "one of your Strikes", and
+    # under an overhaul arm the character's Strike and Defend are the BASE
+    # game's own pair -- `ArmStarterBasics` hands `StrikeIronclad` /
+    # `StrikeSilent` to every sweep site, and the arm's own starting deck deals
+    # four of them. A kit card also wearing the tag is a second answer to a
+    # question with one right answer, and it wins by being earlier in a deck
+    # scan: Neow's Talisman upgraded `Slack Water` and left four Strikes
+    # untouched all run (Kokomi r19 lane 1), and Strike Dummy paid on it before
+    # that (`EB-409`).
+    #
+    # THE THROW THIS RULE WAS WRITTEN AGAINST DOES NOT COME BACK. R11's
+    # predicate reads the pool's whole DECLARED membership, which no arm
+    # touches, so the SHIPPED basics keep it satisfied -- `Kaboom` and
+    # `Water's Edge` are hand-written or off the shipped sheets and are not
+    # touched here -- and the three unguarded `First()` sites are patched under
+    # the arm anyway (`ArmStarterBasics`, and its own sweep note).
     tag = None
-    if card["rarity"] == "basic":
+    if card["rarity"] == "basic" and not str(card["id"]).startswith("proto_"):
         if card["type"] == "attack" and any(
                 e.get("op") == "damage" and e.get("target") != "self"
                 for e in card["effects"]):
@@ -12115,7 +12293,7 @@ public sealed class {cls} : {interfaces}
     public override List<(string, string)>? Localization => new()
     {{
         ("title", "{title_cs}"),
-        ("description", "{desc}"),
+        ("description", {desc_expr}),
     }};{tags_member}{rising_cost_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

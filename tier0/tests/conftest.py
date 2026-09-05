@@ -36,6 +36,35 @@ for _leaked in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE",
     os.environ.pop(_leaked, None)
 
 
+# `EB-496`. THE FIGHT'S MEMORY IS ON DISK NOW, so it leaks between test FILES
+# and between xdist workers, not merely between tests in one module. The
+# blind-play module has carried its own `forget_fight` fixture since `EB-428`;
+# this is the same rule for every other file that renders a page, and it has to
+# be here because the store is one file per lane and the suite runs on lane 0.
+#
+# IMPORTED INSIDE THE FIXTURE. This conftest is imported during collection, and
+# a top-level `understudy` import here would put the whole blind-play package
+# in front of every test in the tier0 suite -- including the fences that assert
+# what may import what.
+#
+# AND THE STORE IS MOVED, NOT ONLY EMPTIED. The suite runs under xdist and the
+# path is one file per LANE, so sixteen workers on lane 0 share one file: the
+# tests that drive the memory across a process boundary went red in the full
+# run and green alone, which is a shared-file race and not a flake. Each worker
+# gets its own directory (`getbasetemp` is already per worker), and the real
+# one under `understudy/logs` is never touched by a test.
+@pytest.fixture(autouse=True)
+def _fresh_blindplay_fight(tmp_path_factory):
+    from understudy import blindplay_faces as faces
+    store = tmp_path_factory.getbasetemp() / "blindplay-fight"
+    store.mkdir(parents=True, exist_ok=True)
+    held, faces._FIGHT_STORE_DIR = faces._FIGHT_STORE_DIR, store
+    faces.forget_fight()
+    yield
+    faces.forget_fight()
+    faces._FIGHT_STORE_DIR = held
+
+
 # --- THE SEAM FAMILY, FOR THE FENCES THAT READ SOURCE ----------------------
 # `EB-180` split `understudy/soak.py`, `blindplay.py` and `staged_turn.py`
 # into one module per concern. Half a dozen fences in this suite are written

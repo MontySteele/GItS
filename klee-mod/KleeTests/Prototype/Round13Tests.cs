@@ -214,8 +214,18 @@ public class Round13Tests
 
         Assert.Contains("Bombs here: [blue]{Charges}[/blue]", plain);
         Assert.Contains("Bombs here: [blue]{Charges}[/blue]", mined);
-        Assert.DoesNotContain("{Count}", plain);
-        Assert.DoesNotContain("{Count}", mined);
+        // `EB-514`: the count is not in THIS sentence -- the list still says
+        // it more plainly here -- and it is in the HEADLINE, where the seat
+        // reads the number it plans against. Two number groups in one
+        // sentence is what this pin was written against; two sentences each
+        // saying their own thing is what it now reads.
+        Assert.DoesNotContain("Bombs here: [blue]{Charges}[/blue], "
+                              + "[blue]{Count}[/blue]", plain);
+        // `EB-536` spelled the Sparks out and dropped the plural: this is
+        // the MANY-charge half of the grid, so the clause is here and it is
+        // never printed for one.
+        Assert.Contains("Pyro damage, in [blue]{Count}[/blue] hits", plain);
+        Assert.Contains("Pyro damage, in [blue]{Count}[/blue] hits", mined);
     }
 
     // ==================================================================
@@ -269,6 +279,35 @@ public class Round13Tests
         Assert.Contains("unfinished", Il.Strings(row));
         Assert.Contains("source", Il.Strings(rider));
         Assert.Contains("amount", Il.Strings(rider));
+    }
+
+    [Fact]
+    public void A_rider_says_which_body_it_struck()
+    {
+        // `EB-518`. THE FOURTH CASKET THAT WAS NEVER THERE.
+        //
+        // Kokomi r18 lane 1, fight 2: "the carry-out block lists three casket
+        // hits, but the numbers need four ... I only found the fourth by
+        // subtracting." It did not need four. `EB-453` named the source and
+        // the number and NOT the body, so three identical entries over bodies
+        // that had lost 9 and 7 divided the even way -- one strike each -- and
+        // came up 2 short. Two of the three had landed on the SAME body:
+        // `ElementalHit.Deal` resolves the reaction before the hit lands, so
+        // the Plan's own Hydro froze that body and the relic answered the
+        // Frozen as well as the Weak the same Plan applied.
+        //
+        // TWO SPELLINGS AND THEY ARE `MovedRow`'s, so the page resolves a
+        // rider's body and a moved row's body through one lookup and cannot
+        // call the same creature two things in one receipt.
+        var rider = Il.Method("KokomiPlan", "RiderRow");
+
+        Assert.Contains("target", Il.Strings(rider));
+        Assert.Contains("combat_id", Il.Strings(rider));
+
+        // And the strike is what fills them: the relic is the one line that
+        // knows both what it is and whom it hit.
+        Assert.Contains("KokomiPlan.NoteRider",
+                        Il.Calls(Il.Method("TamakushiCasket", "Strike")));
     }
 
     [Fact]

@@ -52,7 +52,7 @@ public sealed class BarbaraMelody : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara — Let the Show Begin♪"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Gain 4 [gold]Burst Energy[/gold]."),
+        ("description", FurinaBurstRider.Face("Gain {CalculatedBlock:diff()} [gold]Block[/gold].", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Gain 4 [gold]Burst Energy[/gold].")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

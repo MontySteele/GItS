@@ -134,9 +134,12 @@ public sealed class EtherealSpotlight
             {
                 var bank = owner == null ? 0 : FurinaResources.Encore(owner);
                 var price = FurinaReframeLaw.SpotlightDesignateEncoreCost;
-                return bank <= 0
-                    ? $"you have no Encore, and this costs {price}"
-                    : $"you have {bank} Encore, and this costs {price}";
+                // `EB-505`: THROUGH THE ONE SENTENCE. This card's wording was
+                // the RIGHT one and the only one -- every `encore_cost` row
+                // was refused as an energy shortfall -- so the sentence moved
+                // to `KleeUnplayableReason` where both callers reach it and
+                // neither can reword it alone.
+                return KleeUnplayableReason.EncoreSentence(bank, price);
             }
 #endif
             return null;

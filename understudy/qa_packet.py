@@ -513,6 +513,62 @@ _UPGRADE_DELTA_RE = re.compile(
 #: skipped whole rather than half-rendered.
 _HOLE_RE = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)(?::([^{}]*))?\}")
 
+# `EB-529`. THE UPGRADE THAT IS A CLAUSE RATHER THAN A NUMBER.
+#
+# THE FIND (Furina r12 lane 2). "The upgrade screen showed no upgrade at all
+# for Aria of Recompense, Salon Debut, An Invitation and Fischl -- Oz, with no
+# line saying why, while every other card printed an `Upgraded:` preview."
+#
+# THREE OF THE FOUR ARE ONE SHAPE. `{IfUpgraded:show:A|B}` prints arm B on the
+# card as it stands and arm A once it is upgraded -- `Gain {IfUpgraded:show:8|5}
+# Encore`, `... to your hand{IfUpgraded:show:, free this turn|}`,
+# `{IfUpgraded:show:Draw 1 card.|}` -- and where NEITHER arm holds a brace, that
+# is a swap this module can make exactly: the pattern reads arm B off the
+# printed face and the render writes arm A. No arithmetic, no guess.
+#
+# THE FOURTH IS THE ONE THAT CANNOT BE. Salon Debut's arm carries a hole of its
+# own (`{IfUpgraded:show:Gain {Encore:diff()} [gold]Encore[/gold].|}`), which is
+# two sentences rather than one sentence with a number in it. That row gets a
+# REASON instead, which is the other half the seat asked for: "no line saying
+# why" was the complaint, and silence is what this module owes only where it
+# would otherwise be guessing.
+_IF_UPGRADED_RE = re.compile(r"\{IfUpgraded:show:([^{}|]*)\|([^{}|]*)\}")
+#: `EB-551`. The APPEND shape: an `{IfUpgraded:show:...|}` whose UNUPGRADED arm
+#: is empty, so the upgrade adds its arm rather than replacing anything. Written
+#: over the raw template because the arm this one has to see is the one
+#: `_IF_UPGRADED_RE` cannot match -- an arm carrying a hole of its own.
+_APPEND_ARM_RE = re.compile(r"\{IfUpgraded:show:.*\|\}")
+#: One piece of a template, in printed order: the two-arm swap FIRST, because a
+#: plain hole's `spec` (`[^{}]*`) would otherwise swallow `show:8|5`.
+_PIECE_RE = re.compile(
+    _IF_UPGRADED_RE.pattern
+    + r"|\{([A-Za-z_][A-Za-z0-9_]*)(?::([^{}]*))?\}")
+
+#: Why a row prints no upgraded face, in the player's own vocabulary. Each is
+#: a fact about THIS card rather than about this module: a reader who is
+#: deciding what to spend a Smith on can act on all four.
+NO_PREVIEW_TEMPLATE = "this page has no written face for this card"
+NO_PREVIEW_REWRITES = ("its upgrade rewrites the sentence rather than moving "
+                       "a number in it")
+#: `EB-551`. THE WARNING OVERSOLD AN APPENDED CLAUSE. The Furina r13 lane-2 seat
+#: spent a Smith pick investigating `Salon Debut` on the strength of "rewrites
+#: the sentence", and what the upgrade does is add one: "Deploy Mademoiselle
+#: Crabaletta. Gain 2 Encore." -- "that is an appended clause worth two Encore,
+#: not a rewritten sentence; the warning oversold it, and I would not have spent
+#: a pick investigating had the preview simply shown it."
+#:
+#: THE TWO SHAPES ARE ONE CHARACTER APART IN THE TEMPLATE and mean different
+#: things to a reader: `{IfUpgraded:show:X|}` with an EMPTY unupgraded arm ADDS
+#: X, while `{IfUpgraded:show:X|Y}` replaces Y with X. Both are unrenderable
+#: here for the same reason -- an arm carrying a hole of its own is a second
+#: sentence with a number this page has no unupgraded copy of -- and only one of
+#: them is a rewrite.
+NO_PREVIEW_APPENDS = ("its upgrade adds a clause, and this page has no "
+                      "unupgraded copy of the number in it")
+NO_PREVIEW_NO_NUMBER = "its upgrade changes nothing this face prints"
+NO_PREVIEW_UNMATCHED = ("the face on this screen is not the sentence this "
+                        "card was written with")
+
 
 def _loc_description(src: str) -> str:
     """The `("description", ...)` row of the FIRST `Localization` in a file."""
@@ -533,7 +589,31 @@ def _upgrade_deltas(src: str) -> dict[str, int]:
     return out
 
 
-def _hole_deltas(template: str, deltas: dict[str, int]) -> dict[str, int]:
+#: `EB-551`. The keywords an upgrade ADDS, off `OnUpgrade`'s own calls.
+_UPGRADE_KEYWORD_RE = re.compile(r"AddKeyword\(\s*CardKeyword\.(\w+)\s*\)")
+
+
+def _upgrade_keywords(src: str) -> tuple[str, ...]:
+    """The keyword rail an upgrade adds, in source order and de-duplicated.
+
+    THE FIND (Furina r13 lane 1). "The Smith's upgrade preview omits keywords:
+    Aria+ showed only the number change and not Innate, the most load-bearing
+    keyword in the deck, chosen without being shown."
+
+    READ OFF THE SAME SOURCE THE NUMBER DELTAS ARE (`_upgrade_deltas`), and for
+    its reason: `OnUpgrade` is where the codegen puts every upgrade effect, so a
+    keyword and a number that moved in the same edit cannot fall out of step
+    here. A card with no `OnUpgrade` call answers `()`, which is most of them.
+    """
+    out: list[str] = []
+    for name in _UPGRADE_KEYWORD_RE.findall(src):
+        if name not in out:
+            out.append(name)
+    return tuple(out)
+
+
+def _hole_deltas(template: str,
+                 deltas: dict[str, int]) -> dict[str, int] | None:
     """The deltas re-keyed onto the HOLE names the template actually prints.
 
     A delta usually lands on the var it is named for. `CalculationBase` is the
@@ -554,7 +634,11 @@ def _hole_deltas(template: str, deltas: dict[str, int]) -> dict[str, int]:
             if len(set(calculated)) == 1:
                 out[calculated[0]] = delta
                 continue
-        return {}          # a delta with nowhere to land: render nothing
+        # `EB-529`: a delta with nowhere to land. `None` and not `{}`, because
+        # "this card moves a number the face does not print" and "this card
+        # moves no number at all" are two different answers and the second one
+        # can still have a clause to swap.
+        return None
     return out
 
 
@@ -565,9 +649,23 @@ def _plural_arm(spec: str, value: int) -> str:
 
 
 @lru_cache(maxsize=4)
-def _upgraded_face_index_cached(
-        repo: Path) -> tuple[tuple[str, tuple[str, tuple[tuple[str, int], ...]]], ...]:
-    index: dict[str, tuple[str, tuple[tuple[str, int], ...]]] = {}
+def _upgraded_face_index_cached(repo: Path) -> tuple[
+        tuple[str, tuple[str, tuple[tuple[str, int], ...], str,
+                         tuple[str, ...]]], ...]:
+    """`{card id: (template, deltas, reason, keywords)}`, per emitted class.
+
+    `EB-551` PUT THE KEYWORDS IN IT, beside the number deltas and off the same
+    `OnUpgrade` body, because a row with no renderable face still owes the
+    reader the keyword its upgrade adds -- which is the half a Smith pick turns
+    on.
+
+    `EB-529` PUT THE REASON IN IT. A row this module cannot render is now a
+    row that says why, so the four faces the r12 seat met -- "no upgrade at
+    all ... with no line saying why" -- each carry one of `NO_PREVIEW_*`
+    instead of nothing. A row with a reason has no template to render and a
+    row with a template has no reason; never both.
+    """
+    index: dict[str, tuple[str, tuple[tuple[str, int], ...], str]] = {}
     root = repo / "klee-mod"
     if not root.is_dir():
         return ()
@@ -579,44 +677,82 @@ def _upgraded_face_index_cached(
         key = _class_key(src)
         if not key or key in index:
             continue
+        keywords = _upgrade_keywords(src)
         template = strip_markup(_loc_description(src))
-        if not template or "{IfUpgraded" in template:
+        if not template:
+            index[key] = ("", (), NO_PREVIEW_TEMPLATE, keywords)
+            continue
+        # `EB-529`: a two-arm swap whose arms are literal text is renderable;
+        # one whose arm carries a hole of its own is two sentences, and is the
+        # one shape here that has to say so instead.
+        if "{IfUpgraded" in _IF_UPGRADED_RE.sub("", template):
+            # `EB-551`: WHICH of the two it is. An empty unupgraded arm is an
+            # APPEND and the seat is owed that word; anything else is a rewrite.
+            appends = _APPEND_ARM_RE.search(template) is not None
+            index[key] = ("", (),
+                          NO_PREVIEW_APPENDS if appends else NO_PREVIEW_REWRITES,
+                          keywords)
             continue
         holes = _hole_deltas(template, _upgrade_deltas(src))
-        if holes:
-            index[key] = (template, tuple(sorted(holes.items())))
+        if holes is None:
+            index[key] = ("", (), NO_PREVIEW_NO_NUMBER, keywords)
+            continue
+        if not holes and not _IF_UPGRADED_RE.search(template):
+            index[key] = ("", (), NO_PREVIEW_NO_NUMBER, keywords)
+            continue
+        index[key] = (template, tuple(sorted(holes.items())), "", keywords)
     return tuple(sorted(index.items()))
 
 
-def upgraded_face(card_id: Any, printed: str,
-                  repo: Path | None = None) -> str:
-    """The face this card would print upgraded, or `""` where it cannot say.
+def upgrade_preview(card_id: Any, printed: str,
+                    repo: Path | None = None) -> tuple[str, str]:
+    """`(the face this card would print upgraded, why it cannot say)`.
 
-    `printed` is the wire's own current description, markup already stripped by
-    the bridge. See the block comment above for the whole argument, including
-    why this is the UPGRADE SCREEN's answer and not the hand's.
+    Exactly one of the two is ever non-empty. `printed` is the wire's own
+    current description, markup already stripped by the bridge. See the block
+    comment above for the whole argument, including why this is the UPGRADE
+    SCREEN's answer and not the hand's.
     """
     root = repo if repo is not None else Path(__file__).resolve().parents[1]
     row = dict(_upgraded_face_index_cached(root)).get(card_key(card_id))
     if row is None:
-        return ""
-    template, holes = row
+        return "", NO_PREVIEW_TEMPLATE
+    template, holes, reason, _keywords = row
+    if reason:
+        return "", reason
     deltas = dict(holes)
 
     # The template as a PATTERN over the printed face: literal text escaped,
     # every hole a group. A numeric hole reads the number the screen is
-    # showing; a plural hole reads whichever arm it printed.
+    # showing; a plural hole reads whichever arm it printed; a two-arm swap
+    # (`EB-529`) reads the UNUPGRADED arm, which is what the card in front of
+    # the player is showing, and writes the other one.
     pattern, pieces, at = [], [], 0
-    for m in _HOLE_RE.finditer(template):
+    for m in _PIECE_RE.finditer(template):
         pattern.append(re.escape(template[at:m.start()]))
         pieces.append(("literal", template[at:m.start()], ""))
-        spec = m.group(2) or ""
+        if m.group(1) is not None:
+            if not m.group(2):
+                # AN EMPTY UNUPGRADED ARM TAKES THE SPACE IN FRONT OF IT WITH
+                # IT. `... a random enemy. {IfUpgraded:show:Draw 1 card.|}`
+                # renders unupgraded as a sentence with a trailing space, and
+                # the game prints the trimmed one -- so the literal before an
+                # empty arm matches with or without its own tail whitespace.
+                # The PIECE keeps the space, because the upgraded face needs it
+                # between the two sentences.
+                pattern[-1] = (re.escape(template[at:m.start()].rstrip())
+                               + r"\s*")
+            pattern.append(re.escape(m.group(2)))
+            pieces.append(("swap", m.group(1), ""))
+            at = m.end()
+            continue
+        spec = m.group(4) or ""
         if spec.startswith("plural:"):
             arms = [re.escape(a) for a in spec[len("plural:"):].split("|")]
             pattern.append("(?:" + "|".join(arms) + ")")
         else:
             pattern.append(r"(-?\d+)")
-        pieces.append(("hole", m.group(1), spec))
+        pieces.append(("hole", m.group(3), spec))
         at = m.end()
     pattern.append(re.escape(template[at:]))
     pieces.append(("literal", template[at:], ""))
@@ -629,13 +765,18 @@ def upgraded_face(card_id: Any, printed: str,
     face = strip_markup(printed).strip()
     hit = re.search("".join(pattern), face)
     if hit is None:
-        return ""
+        return "", NO_PREVIEW_UNMATCHED
 
     values: dict[str, int] = {}
     out: list[str] = []
     group = 0
     for kind, name, spec in pieces:
         if kind == "literal":
+            out.append(name)
+            continue
+        if kind == "swap":
+            # `EB-529`: the upgraded arm, verbatim. `name` IS that arm -- the
+            # pattern above already consumed the other one off the screen.
             out.append(name)
             continue
         if spec.startswith("plural:"):
@@ -647,7 +788,28 @@ def upgraded_face(card_id: Any, printed: str,
         value = int(hit.group(group)) + deltas.get(name, 0)
         values[name] = value
         out.append(str(value))
-    return face[:hit.start()] + "".join(out) + face[hit.end():]
+    return face[:hit.start()] + "".join(out) + face[hit.end():], ""
+
+
+def upgraded_face(card_id: Any, printed: str,
+                  repo: Path | None = None) -> str:
+    """The face this card would print upgraded, or `""` where it cannot say."""
+    return upgrade_preview(card_id, printed, repo)[0]
+
+
+def upgrade_keywords(card_id: Any,
+                     repo: Path | None = None) -> tuple[str, ...]:
+    """The keywords this card's upgrade ADDS (`EB-551`), or `()`.
+
+    ASKED SEPARATELY FROM THE FACE, because the two answers are independent: a
+    card whose face this page cannot render still adds its keyword, and that is
+    the half the r13 seat lost -- "Aria+ showed only the number change and not
+    Innate, the most load-bearing keyword in the deck, chosen without being
+    shown."
+    """
+    root = repo if repo is not None else Path(__file__).resolve().parents[1]
+    row = dict(_upgraded_face_index_cached(root)).get(card_key(card_id))
+    return row[3] if row is not None else ()
 
 
 # `EB-264`. THE WIRE'S UNPLAYABLE REASON IS AN ENUM NAME, AND A PLAYER CANNOT

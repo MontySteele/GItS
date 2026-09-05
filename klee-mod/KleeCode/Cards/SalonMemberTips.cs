@@ -280,6 +280,27 @@ public static class SalonMemberTips
         // over), and the sentence that describes the aim is the sentence that
         // says so.
         //
+        // `EB-548` RENAMED THE CLASS'S SECOND HALF AND ADDED THE WORD
+        // "hit", which is `EB-490`'s finding on Klee's Set off arriving here.
+        // THE FIND (Furina r13 lane 2): "a member performance is not an
+        // Attack" is what let the assembled seat beat four Skittish 6 bodies
+        // -- "Chevalmarin hit C for 2 and C's HP moved by 2 with no Block
+        // gained... the correct line against Skittish is to spend the free
+        // perform first" -- and the seat called it "the most useful thing I
+        // learned and effectively invisible". The sentence was HERE the whole
+        // time and said "on-Attack triggers do not", which reads as something
+        // on the PLAYER's own side of the board; a player looking for the rule
+        // about the thing on the ENEMY's status bar does not find it there.
+        // "No when-hit power fires" is `ArmKeywordTips.ForSetOff`'s wording
+        // and `EB-538`'s, and this is the third surface to take it.
+        //
+        // "AND NOT A HIT" IS THE OTHER HALF, and it is why the clause reads
+        // as one sentence rather than two: `EB-476`'s "not an Attack" is
+        // ambiguous on its own -- Vulnerable moves a performance and Weak
+        // moves a Skill's damage, so "not an Attack" alone invites a reader to
+        // expect nothing on the enemy to answer it. The rule is about being
+        // HIT, and the sentence now says which half is which.
+        //
         // `EB-476` ADDED THE CLASS THE PERFORMANCE BELONGS TO, and the seat
         // could only find it by running the experiment twice. "A member
         // performance is an Attack for Vulnerable but not for Frozen.
@@ -303,9 +324,10 @@ public static class SalonMemberTips
               + "[gold]Evokes[/gold] the front member first. The leftmost "
               + "member is the front. A performing member picks its own "
               + "enemy, never a [gold]Minion[/gold] while another enemy "
-              + "stands. A performance is not an [gold]Attack[/gold]: "
-              + "[gold]Vulnerable[/gold] moves it, [gold]Shatter[/gold] and "
-              + "on-Attack triggers do not. Member numbers gain +1 per "
+              + "stands. A performance is not an [gold]Attack[/gold] and "
+              + "not a hit: [gold]Vulnerable[/gold] moves it, but no "
+              + "[gold]Shatter[/gold] and no when-hit power fires. Member "
+              + "numbers gain +1 per "
               + $"{SalonConstants.FocusPerFanfare} Fanfare you hold, and a "
               + "member with no Encore to spend performs at three-quarters.";
         }

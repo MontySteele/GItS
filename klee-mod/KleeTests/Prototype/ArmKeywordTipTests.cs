@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using KleeMod.Cards;
+using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -233,9 +235,16 @@ public class ArmKeywordTipTests
         // survivor, which three round-10 seats met with no wording anywhere.
         // Rule 2's "all at once" is what those 33 characters cost, and the
         // `Set off` tip two tests up states it in full.
+        //
+        // `EB-536` ADDED THE MINE TO RULE 7's CLAUSE. "Goes off only when Set
+        // off" was printed directly ABOVE the Mine tip, which says a Mine also
+        // goes off before its enemy's hit, so two surfaces of one screen
+        // contradicted each other and the r19 lane-2 seat read them that way.
+        // The tip goes over its ceiling for it and `BombKey` is carried in
+        // `tools/lint_text_conventions.py` by name with that reason.
         Assert.Contains("A charge on an enemy: grows ", printed);
-        Assert.Contains(" a turn, goes off only when [gold]Set off[/gold]. ",
-                        printed);
+        Assert.Contains(" a turn, goes off only when [gold]Set off[/gold], "
+                      + "or as a [gold]Mine[/gold]. ", printed);
         // `EB-373` REWROTE THE FOURTH RULE'S CLAUSE. The fold is `FoldedMods`
         // and it reads two things off the target -- Vulnerable, and whichever
         // power sets the lowest damage cap -- so "takes the enemy's debuffs"
@@ -255,6 +264,20 @@ public class ArmKeywordTipTests
         Assert.DoesNotContain(KleeOverhaulLaw.BombGrowth.ToString(), printed);
         Assert.Contains(Il.Calls(Tips.GetMethod("ForBomb", HeadlessGame.All)!),
                         c => c.Contains("Concat"));
+    }
+
+    [Fact]
+    public void EB553_the_opening_stage_tip_names_the_member_and_the_moment()
+    {
+        // R260. The reframe's stage is never unlit, and the relic that fields
+        // it is where a player reads so. Two facts and no more: WHEN (every
+        // fight, on its opening) and WHO (the member by name, in full -- the
+        // badge prints the short "Crabaletta" only because three rules and an
+        // identity have to fit under the power ceiling).
+        var body = Printed("ForOpeningStage");
+        Assert.Contains("Every fight opens with", body);
+        Assert.Contains("[gold]Mademoiselle Crabaletta[/gold]", body);
+        Assert.Contains("on stage.", body);
     }
 
     // ---- the shape --------------------------------------------------------
@@ -306,11 +329,19 @@ public class ArmKeywordTipTests
         // 134), and this word is read on every battle screen of every run.
         // `Printed` concatenates every literal in the method, so the loc KEY
         // comes off before the markup does.
+        // `EB-538` TOOK IT OVER, deliberately: the tip sat at exactly 135 and
+        // gained the class a carry-out belongs to, which is `SetOffKey`'s own
+        // sentence at the same call one kit over. Every clause here is a
+        // seat's finding and none was droppable, so `PlanKey` is carried in
+        // `tools/lint_text_conventions.py` by name. The length is pinned so
+        // the overage cannot grow quietly.
         var rendered = System.Text.RegularExpressions.Regex.Replace(
             body.Replace(Tips.GetField("PlanKey")!.GetRawConstantValue()
                              as string ?? string.Empty, string.Empty),
             @"\[/?[a-z]+\]", string.Empty);
-        Assert.True(rendered.Length <= 135, rendered.Length.ToString());
+        Assert.Equal(186, rendered.Length);
+        Assert.Contains("A carry-out is not a hit: no when-hit power fires.",
+                        body);
     }
 
     [Fact]
@@ -425,11 +456,103 @@ public class ArmKeywordTipTests
         // one companion card is written against and a DIFFERENT one grants, so
         // the face that prints it carries the definition. The r7 seat played
         // Fischl -- Nightrider five times without learning what puts Oz out.
-        Assert.Equal(16, attaches.Count);
+        //
+        // THE SEVENTEENTH IS `EB-553`'s `ForOpeningStage`, the third entry
+        // here that titles no keyword and the first that rides a RELIC rather
+        // than a card. R260 fields Mademoiselle Crabaletta at combat start, so
+        // the stage is never unlit -- and the relic's own arm face is at 117
+        // of the 120-character relic ceiling with two ruled sentences already
+        // on it, which leaves this table as the only surface with room.
+        Assert.Equal(17, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.Contains(attaches, m => m.Name == "ForCovenSpark");
+        Assert.Contains(attaches, m => m.Name == "ForOpeningStage");
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
                                          System.StringComparison.Ordinal)));
+    }
+
+    // --- `EB-504`: KLEE'S RULE ON A RUN THAT HAS NO KLEE IN IT --------------
+
+    private static CardModel Owned<T>(Seat seat) where T : CardModel, new()
+    {
+        var card = new T();
+        Seat.Set(card, "IsMutable", true);
+        Seat.Set(card, "Owner", seat.Player);
+        return card;
+    }
+
+    [Theory]
+    [InlineData("klee", true)]
+    [InlineData("kokomi", false)]
+    [InlineData("furina", false)]
+    public void EB504_klees_two_words_are_klees_runs_alone(
+        string character, bool printed)
+    {
+        // `EB-504`, REOPENED 2026-09-05. The row was closed on the page
+        // glossary off the r17 finding, and the r18 lane-2 seat then met the
+        // same sentence on a CARD: "two Companion cards in a Kokomi run
+        // printed 'Hexerei -- A Companion card that prints the word, and Klee
+        // herself ... Cards of hers pay when you play one.' I could not tell
+        // what is paid, by whom, or whether it applies to me at all, so I
+        // refused both cards partly on that."
+        //
+        // THE WORD IS EVERYONE'S AND THE RULE IS KLEE'S. `Hexerei` rides
+        // eighteen companion faces the whole roster can draft and its rule is
+        // her Spark rider; `Oz` is named by Fischl's face, which every
+        // character meets, and the Power that fields him is hers. So the tag
+        // reaches every run and the rule reaches one -- which is what
+        // `blindplay_notes._ARM_KEYWORD_CHARACTER` gates on the page side, and
+        // this is the second source that gate could not see.
+        //
+        // ONE CARD, THREE OWNERS, because that is the whole variable: Albedo
+        // is a Mondstadt Universal every character drafts, so nothing about
+        // the card changes between the three rows.
+        //
+        // THE PREDICATE AND NOT THE MATERIALISED TIP: building a `HoverTip`
+        // resolves a `LocString`, which needs the game's loc tables and is
+        // outside the headless boundary (README). What a test CAN do is ask
+        // the gate, and watch the gated call hand its inherited stack straight
+        // back -- which is the observable half either way.
+        var seat = character switch
+        {
+            "klee" => Seat.Klee(),
+            "kokomi" => Seat.Kokomi(),
+            _ => Seat.Furina(),
+        };
+        var card = Owned<ProtoMcAlbedoSolarIsotoma>(seat);
+
+        Assert.Equal(printed, ArmKeywordTips.KleesRuleBelongsHere(card));
+
+        var inherited = System.Array.Empty<IHoverTip>();
+        Assert.Equal(!printed,
+            ReferenceEquals(inherited, ArmKeywordTips.ForHexerei(inherited, card)));
+        Assert.Equal(!printed,
+            ReferenceEquals(inherited, ArmKeywordTips.ForOz(inherited, card)));
+    }
+
+    [Fact]
+    public void EB504_silence_about_the_character_still_prints_the_rule()
+    {
+        // The page's own direction (`absent is not zero`): where NOTHING says
+        // who is playing -- a canonical compendium copy, which ASSERTS on
+        // `Owner` rather than answering, with no run to read either -- the rule
+        // prints. A missing tooltip on a Klee run is the worse of the two
+        // failures, and it is the one this default avoids.
+        Assert.True(ArmKeywordTips.KleesRuleBelongsHere(
+            new ProtoMcAlbedoSolarIsotoma()));
+    }
+
+    [Fact]
+    public void EB504_both_words_ask_the_one_gate()
+    {
+        // Structural, `Every_keyword_goes_through_the_one_attach_point`'s
+        // shape: two words, one predicate, so a third word whose rule belongs
+        // to one character cannot arrive with its own copy of the question.
+        foreach (var word in new[] { "ForHexerei", "ForOz" })
+        {
+            Assert.Contains("ArmKeywordTips.KleesRuleBelongsHere",
+                            Il.Calls(Il.Method("ArmKeywordTips", word)));
+        }
     }
 }

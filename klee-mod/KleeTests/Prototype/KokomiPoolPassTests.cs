@@ -264,7 +264,12 @@ public class KokomiPoolPassTests
         // make the card pay for a morning it had just postponed.
         Assert.False(typeof(IPlannedCard)
                          .IsAssignableFrom(typeof(ProtoKkWellLaid)));
-        Assert.Contains("carried out this morning", Face(new ProtoKkWellLaid()));
+        // `EB-539`: the morning clause left the FACE for the rider tip -- a
+        // card has one face, and "already including 3" is a contradiction on a
+        // bare morning -- so the face is the live total alone and the rule is
+        // read one surface over (`Round19Tests`, `EB-539`).
+        Assert.Equal("Deal {CalculatedDamage:diff()} damage.",
+                     Face(new ProtoKkWellLaid()));
     }
 
     [Fact]

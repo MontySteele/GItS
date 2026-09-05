@@ -38,14 +38,14 @@ public sealed class ProtoFrCurtainRises : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForDeploy(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Usher }), this);
+        ArmKeywordTips.ForDeploy(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Chevalmarin }), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("house_call");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Curtain Rises"),
-        ("description", "Deal {Damage:diff()} damage. [gold]Deploy[/gold] Gentilhomme Usher."),
+        ("description", "Deal {Damage:diff()} damage. [gold]Deploy[/gold] Surintendante Chevalmarin."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -70,7 +70,7 @@ public sealed class ProtoFrCurtainRises : CustomCardModel, ICharacterCard
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Usher);
+        salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Chevalmarin);
     }
 
     protected override void OnUpgrade()

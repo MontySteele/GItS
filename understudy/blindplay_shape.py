@@ -52,6 +52,19 @@ KURAGE_COST_PER_ENERGY = 3
 # constant, the same discipline `CHARGE_SOURCE_LINE` is under.
 BOMB_GROWTH = 4
 
+#: `EB-537`. The Shatter's bonus damage, `ReactionConstants.ShatterDamage` in
+#: the mod and `C.SHATTER_DAMAGE` in the sim, mirrored here for `BOMB_GROWTH`'s
+#: reason and held in step from the test side.
+SHATTER_DAMAGE = 6
+
+#: `EB-535`. THE COMPANION SPARK, on the two numbers the Hexerei row prints.
+#: `KleeCompanionSpark.Base` and `.MaxPerPlay` in the mod, which are the kit
+#: declaration LAW:145 obliges Klee's kit to make, mirrored here for
+#: `BOMB_GROWTH`'s reason: this module may not import `tier0` at all, so the
+#: numbers are held in step from the test side and a retune goes red there.
+COMPANION_SPARK = 1
+COMPANION_SPARK_MAX = 3
+
 # `EB-340`. How long an aura clings, as `ReactionConstants.AuraDurationTurns`
 # sets it and the four `Applies <element>` tips interpolate it. Same discipline
 # as the line above: pinned from the other side, never imported.

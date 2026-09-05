@@ -300,15 +300,27 @@ public sealed class BombReactionSparkPower
 }
 
 /// <summary>
-/// Grounded: "At the start of your turn, if none of your Bombs went off last
-/// turn, gain 6 Block and 1 Spark." The card that pays for the quiet turn --
-/// the cook half of the contested thing, with Run Away! paying for the loud
-/// one.
+/// Grounded: "At the start of your turn, if you have a Bomb on the field, gain
+/// 6 Block and 1 Spark." The card that pays for the COOKING turn -- the cook
+/// half of the contested thing, with Run Away! paying for the loud one.
 ///
-/// LAST turn, not this one, and that is the whole design: the decision it pays
-/// for was made a turn ago, so the Block arrives before this turn's decision
-/// rather than as a reward for one already taken. <c>SetOffLastTurn</c> is the
-/// ledger's own read, rolled on the round stamp.
+/// `EB-516` REPLACED THE CONDITION (Klee r18, packet sec.4 item 1). It read "if
+/// none of your Bombs went off last turn" until now, and two seats in two
+/// rounds read that as paying for skipping the loop; the r18 ledgers say why,
+/// since under this relic something goes off on most turns even in a Cook deck
+/// (Mines fire on the enemy's beat), so the card paid ONCE in five fights and
+/// the seat called it "a trap in its own deck". Keying the payout to cooking
+/// rather than to not cashing keeps the card conditional (brief sec.6, C4) and
+/// makes the Cook half payable.
+///
+/// "A BOMB ON THE FIELD" IS <see cref="ProtoBombPower.AnyPlacedBy"/>: any Bomb
+/// or Mine of HERS on any living enemy. A Mine alone pays -- a Mine is a Bomb
+/// (`EB-373`) -- and a turn on which one Bomb went off while another is still
+/// cooking pays, which is the reading the old counter could not express.
+///
+/// BEFORE GROWTH IS IMMATERIAL, and it is said rather than relied on: the
+/// growth hook GROWS and neither places nor removes a charge (rule 7), so the
+/// set of enemies holding one is the same either side of it.
 ///
 /// THE SPARK IS `EB-344` (ruled R248). Rule 4 mints a Spark per EXPLOSION, so
 /// the turn this card is written for -- the one where nothing went off -- is by
@@ -325,30 +337,104 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
     {
         ("title", "Grounded"),
         ("description",
-            "At the start of your turn, if none of your [gold]Bombs[/gold] "
-          + "went off last turn, gain [blue]{Amount}[/blue] [gold]Block[/gold] "
+            "At the start of your turn, if you have a [gold]Bomb[/gold] on the "
+          + "field, gain [blue]{Amount}[/blue] [gold]Block[/gold] "
           + "and [blue]" + KleeOverhaulLaw.GroundedSpark + "[/blue] "
           + "[gold]Spark[/gold]."),
+        // `EB-533`. THE ANSWER, EITHER WAY, AND IT IS A ROW PER ANSWER for
+        // `ProtoBombPower.SmartDescriptionLocKey`'s reason: loc is registered
+        // once at boot and the board changes every turn, so the LIVE choice is
+        // a key and both faces have to exist before it can be made.
+        //
+        // THE KEYS ARE LITERALS HERE and constants below, and the pair is
+        // pinned equal rather than trusted: `tools/lint_text_conventions.py`
+        // reads these rows out of the SOURCE by the literal key, so a row
+        // written as `(PaidKey, ...)` is a player-facing string invisible to
+        // its own ceiling -- the same silence `EB-343` found on `MineKey`.
+        ("smartDescriptionPaid",
+            "This turn a [gold]Bomb[/gold] was on the field: paid "
+          + "[blue]{Amount}[/blue] [gold]Block[/gold] and [blue]"
+          + KleeOverhaulLaw.GroundedSpark + "[/blue] [gold]Spark[/gold]."),
+        ("smartDescriptionUnpaid",
+            "No [gold]Bomb[/gold] on the field this turn, so nothing was "
+          + "paid. It pays at the start of the next turn one is standing."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
+    /// <summary>
+    /// `EB-533`. GROUNDED FAILED SILENTLY, and the seat caught it by autopsy.
+    ///
+    /// THE FIND (Klee r19 lane 1). The card was logged every turn: paid three
+    /// times, failed twice, and both failures were the turn after the seat had
+    /// detonated everything -- which is the card's price rather than its trap,
+    /// and the seat named the turn it resolved as the round's best decision.
+    /// What was missing was a line: "the two failures printed no near-miss
+    /// line, I caught it only by diffing my own Block".
+    ///
+    /// A LATCH AND NOT A LIVE BOARD READ, which is the whole of why this field
+    /// exists. The badge is read at RENDER time and the condition is answered
+    /// at TURN START, and the seat's own failing turn is exactly the turn
+    /// those two disagree on: detonate everything, Grounded pays nothing, then
+    /// place a fresh Bomb. A badge that re-read the board would say "a Bomb is
+    /// on the field" over a turn that paid nothing, which is a second silent
+    /// failure rather than a fix. So the power records the answer it gave and
+    /// the face prints THAT.
+    ///
+    /// A `bool?` AND NOT A `bool`: null is "this power has not been asked yet"
+    /// -- the turn it is played, before any turn start -- and the face falls
+    /// back to the static rule there, because a badge that claimed a failure
+    /// the power never had is the same defect pointing the other way. A value
+    /// type, so `MutableClone`'s shallow copy carries it correctly and
+    /// `DeepCloneFields` has nothing to do (`SwirlChargePower.SwirledElement`'s
+    /// own note).
+    /// </summary>
+    private bool? _paid;
+
+    /// <summary>The loc suffixes <see cref="SmartDescriptionLocKey"/> selects.
+    /// BaseLib registers every pair this model returns under
+    /// `{Id.Entry}.{key}`, so a second face costs a row and nothing else.
+    /// </summary>
+    private const string PaidKey = "smartDescriptionPaid";
+    private const string UnpaidKey = "smartDescriptionUnpaid";
+
+    /// <summary>The face follows the answer the power last gave (`EB-533`).
+    /// A key with no row behind it falls back to the static description
+    /// (`PowerModel.HasSmartDescription` is a `LocString.Exists` probe), which
+    /// is what the unasked state wants and what it gets.</summary>
+    protected override string SmartDescriptionLocKey => _paid switch
+    {
+        true => Id.Entry + "." + PaidKey,
+        false => Id.Entry + "." + UnpaidKey,
+        null => Id.Entry + ".smartDescriptionUnasked",
+    };
+
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
         if (Owner == null || player.Creature != Owner) return;
-        // Read BEFORE the roll would be wrong and read after it is the point:
-        // `For` rolls the ledger to this round, so `SetOffLastTurn` is exactly
-        // the count that stood when the player last passed.
+        // `EB-516`: the BOARD, not the ledger. `AnyPlacedBy` is R205-scoped --
+        // her own charges only -- and skips a dead body, so a Bomb that outlived
+        // its enemy pays nothing.
         // KAEYA'S COVER STORY, and the only line the companion stand-in seam
-        // adds to this arm: Cold-Blooded Strike prints "This turn, Grounded
-        // counts nothing as having gone off" and it names GROUNDED -- so the
-        // blind is read HERE rather than written into the counter above, which
-        // Jean's stand-in also reads. False on every build with the companion
-        // arm off.
-        if (KleeOverhaulLedger.For(Owner).SetOffLastTurn > 0
-            && !CompanionStandIns.GroundedBlind(Owner)) return;
+        // adds to this arm: Cold-Blooded Strike makes Grounded pay this turn
+        // whatever its condition says, so the blind is read HERE rather than
+        // written into the explosion counter, which Jean's stand-in also reads.
+        // False on every build with the companion arm off. `EB-516` moved the
+        // condition beside it and left the read where it was; the stand-in's
+        // PRINTED words still name the old counter, which is a face defect and
+        // not a rules one.
+        if (!ProtoBombPower.AnyPlacedBy(Owner)
+            && !CompanionStandIns.GroundedBlind(Owner))
+        {
+            // `EB-533`: the answer is recorded BEFORE the return, which is the
+            // only line of this method the row moves.
+            _paid = false;
+            return;
+        }
+
+        _paid = true;
         await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null);
         // `EB-344`. ONE CONDITION, TWO PAYOUTS: both are behind the same test,
         // so a turn that grants no Block grants no Spark either and there is no

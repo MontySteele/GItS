@@ -17,6 +17,7 @@ from understudy.blindplay_notes import (AURA_NOTE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         DEFEND_INTENT_CLAUSE,
+                                        ENEMY_HANDLE_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
                                         METER_CAPPED_NOTE,
@@ -77,8 +78,22 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # under the one it prints now. Absent on every other screen, and absent
     # here for a row this page cannot render without guessing -- see
     # `qa_packet.upgraded_face` for both bounds.
+    # `EB-529`: and where it cannot be rendered, the REASON, because "no
+    # `Upgraded:` line" and "no upgrade" are the same silence to a reader
+    # deciding what to spend a Smith on.
     if c.get("upgraded_face"):
         out.append(f"    Upgraded: {c['upgraded_face']}")
+    elif c.get("upgraded_note"):
+        out.append(f"    Upgraded: not shown -- {c['upgraded_note']}.")
+    # `EB-551`: THE KEYWORD DELTAS, BESIDE THE NUMBER DELTAS. "Aria+ showed
+    # only the number change and not Innate, the most load-bearing keyword in
+    # the deck, chosen without being shown" (Furina r13 lane 1). Its own line
+    # rather than a tail on the face's, because it is true whether or not the
+    # face rendered -- a row this page cannot number still adds its keyword,
+    # and that is often the whole of what a Smith pick turns on.
+    if c.get("upgraded_keywords"):
+        out.append("    Upgraded, and gains "
+                   + ", ".join(c["upgraded_keywords"]) + ".")
     note = qa_packet.cost_note(c)
     if note:
         out.append(f"    {note}")
@@ -201,13 +216,28 @@ def _rider_clause(said: dict[str, Any]) -> str:
     it, because a subtraction has no sources; the mod names it at the line that
     deals it (`KokomiPlan.NoteRider`) and this prints the name.
 
-    ABSENT IS NOT EMPTY, this section's standing rule: a bridge with no
-    `riders` key sends none, and the row reads exactly as it always did.
+    AND ON WHICH BODY (`EB-518`). Naming the source was not enough to make the
+    beat add up, because a beat can strike ONE body twice: the r18 seat read
+    "Tamakushi Casket 2, Tamakushi Casket 2, Tamakushi Casket 2" over bodies
+    that had lost 1, 9 and 7, divided the three entries evenly, made every body
+    5 + 2, and concluded a FOURTH strike had gone unlisted. It had not -- two
+    of the three landed on the same body, because the Plan's own Hydro hit
+    froze it before the hit landed and the relic answered the Frozen as well as
+    the Weak. With the body named, each `lost N HP` line under this one is the
+    Plan's own number plus its own riders, and the subtraction the seat had to
+    do by hand is on the page.
+
+    ABSENT IS NOT EMPTY, this section's standing rule, and it is why the target
+    is a suffix rather than part of the format: a bridge with no `riders` key
+    sends none and the row reads as it always did, and one that sends riders
+    without the `EB-518` fields prints the source and the number alone.
     """
     riders = said.get("riders") or []
     if not riders:
         return ""
-    named = ", ".join(f"{r['source']} {r['amount']}" for r in riders)
+    named = ", ".join(f"{r['source']} {r['amount']}"
+                      + (f" on {r['target']}" if r.get("target") else "")
+                      for r in riders)
     return f" Inside the same beat: {named}."
 
 
@@ -322,12 +352,50 @@ def _turn_allowance(power: dict[str, Any]) -> int | None:
     return cap if 0 <= stacks <= cap else None
 
 
+# `EB-525`. THE STEP THE SENTENCE DOES NOT SAY IT LEAVES OUT.
+#
+# THE FIND (Furina r12 lane 1, the elite). The Bygone Effigy wears "Slow N --
+# Whenever you play a card, this enemy receives 10% more damage from Attacks
+# this turn", and the seat played three cheap cards and then two attacks: "I
+# predicted 27 damage and got 25. By the arithmetic, Soloist's+ resolved at
+# Slow 30 (not 40) and Chevreuse at 40 (not 50) -- i.e. a card's own Slow
+# increment does not apply to itself. The printed text does not say that."
+#
+# THE STACK ARRIVES AFTER THE CARD RESOLVES, which is the game's own trigger
+# order and is invisible in a sentence written in the present tense: "whenever
+# you play a card" is true of the card in your hand, and the number it hits
+# with is the one that was on the board before it. Every Slow turn the seat's
+# arithmetic was off by one step, and it read the difference as its own error
+# twice before deriving the rule.
+#
+# A CLAUSE ON THE PAGE AND NOT A NEW SENTENCE, `_turn_allowance`'s shape one
+# power over (`EB-467`): the wire sends a power as `name`, `amount`, `type` and
+# `description`, so what the page can add is a clause about the sentence the
+# game printed -- and it is added only where that sentence is the one the rule
+# is about, so a future power wearing a similar name gets the line it always
+# had.
+_SLOW_TRIGGER = "whenever you play a card"
+_SLOW_CLAUSE = " It counts the cards played BEFORE this one."
+
+
+def _slow_clause(power: dict[str, Any]) -> str:
+    """`EB-525`: the step Slow's own sentence leaves out, or ''."""
+    if str(power.get("name") or "").strip().casefold() != "slow":
+        return ""
+    text = str(power.get("text") or "")
+    return _SLOW_CLAUSE if _SLOW_TRIGGER in text.casefold() else ""
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
     """One power: printed name, the amount, buff or debuff, the printed text.
 
     `EB-467`: where the amount is an allowance counting down against a cap the
     power's own sentence states, the two numbers print in ONE clause -- "12 of
     20 left this turn" -- instead of standing apart and contradicting.
+
+    `EB-525`: and where the sentence describes a stack that arrives after the
+    card that adds it has already resolved, the page says which cards the
+    number counts.
     """
     cap = _turn_allowance(power)
     if cap is None:
@@ -339,7 +407,7 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
     if kind:
         line += f" ({kind})"
     if power["text"]:
-        line += f" — {power['text']}"
+        line += f" — {power['text']}{_slow_clause(power)}"
     return line
 
 
@@ -585,6 +653,29 @@ def render(obs: dict[str, Any]) -> str:
             # at the foot of the section rather than under the last card.
             if _board_note_wanted(pl):
                 out += ["", CARRY_OUT_BOARD_NOTE]
+        # `EB-506`. WHO IS AT THE FRONT, printed as a LIST IN ORDER with the
+        # front marked, and refreshed off the live company on every screen.
+        #
+        # "I could never tell who the front member was ... after doing exactly
+        # that in fight 3 the line still named the Usher. With two members up I
+        # was guessing which one my next Companion card would fire" (Furina r11
+        # lane 1, (c) 4). The stage buff's face is a smart description keyed on
+        # the front member, so it is a registered row redrawn when the game
+        # feels like it; the company is a live list and its head IS the answer.
+        #
+        # ITS OWN SECTION, above what the stage DID this turn, because the
+        # order is a fact about the board now and the performances are a
+        # receipt for what has already happened -- and because the section
+        # below prints only on a turn something acted, while the question "who
+        # is in front" is asked on every turn including the quiet ones.
+        if c.get("salon") and c["salon"].get("company"):
+            company = c["salon"]["company"]
+            out += ["", "## Your Salon", ""]
+            for i, member in enumerate(company):
+                out.append(f"- **{member}**"
+                           + (" — FRONT: the next Companion card you play "
+                              "performs this one, and then sends it to the "
+                              "back" if i == 0 else ""))
         if c.get("salon") and (c["salon"]["performed"]
                                or c["salon"]["replayed"]):
             # `EB-405`. WHAT THE STAGE DID THIS TURN, one act per line --
@@ -716,13 +807,24 @@ def render(obs: dict[str, Any]) -> str:
             out += ["", HAND_REPEAT_NOTE]
         out += ["", "## The other side", ""]
         for e in c["enemies"]:
-            line = f"- **{e['name']}** — HP {e['hp']}/{e['max_hp']}"
+            # `EB-496`: the letter in brackets after the name, where the card
+            # face already carries its element -- the handle at a glance,
+            # before the numbers.
+            line = f"- **{e['name']}**"
+            if e.get("handle"):
+                line += f" [{e['handle']}]"
+            line += f" — HP {e['hp']}/{e['max_hp']}"
             if e["block"]:
                 line += f", Block {e['block']}"
             out.append(line)
             out += _render_intents(e["intents"])
             for pw in e["powers"]:
                 out.append(_render_power(pw, "    "))
+        # `EB-496`: and the rule about both handles, under the list they are
+        # handles for. The hand's own note is about cards and says the
+        # opposite, which is what sent a seat's Melt into the wrong body.
+        if c["enemies"]:
+            out += ["", ENEMY_HANDLE_NOTE]
         # `EB-461`: ONCE PER SCREEN, and only where a telegraph has parts. The
         # note is about a claim the enemy block just made, so it sits with the
         # block's other two notes rather than under the line that made it.
@@ -924,14 +1026,59 @@ def render(obs: dict[str, Any]) -> str:
     # word looks next, and where it does not push the board off the top.
     if obs.get("keywords"):
         out += ["", "## Words on this screen", ""]
-        out += [f"- **{k['name']}** — {k['text']}" for k in obs["keywords"]]
+        # `EB-504`: a row whose rule belongs to a character this run is not
+        # playing prints its NAME and stops. The word is on the screen and the
+        # page will not pretend it has no entry; what it has is no rule here.
+        out += [f"- **{k['name']}** — {k['text']}" if k["text"]
+                else f"- **{k['name']}**" for k in obs["keywords"]]
 
     out += ["", "## What you can say", ""]
     out += [f"- `{c}`" for c in obs["commands"]]
     out += ["", obs["guardrail"], ""]
     text = "\n".join(out).rstrip() + "\n"
+    assert_one_page(text)
     qa_packet.assert_blind(text, allow={st})
     return text
+
+
+#: A section heading, which on this page is the only line that opens with a
+#: hash. `EB-510`.
+_HEADING = re.compile(r"^#{1,2} .+$", re.MULTILINE)
+
+
+def assert_one_page(text: str) -> None:
+    """One section per heading, and one heading per section (`EB-510`).
+
+    WHAT THE SEAT SAW (Furina r11 lane 2, (c) 8): "several observe screens
+    printed `## Your hand` and `## The other side` twice, with card bodies
+    duplicated line-for-line. It never changed what I could do, but it made
+    two screens genuinely hard to read."
+
+    AND THE RENDER ABOVE CANNOT PRODUCE IT. Every heading is appended at
+    exactly one `out +=` on one branch, the branches are mutually exclusive,
+    and the two headings a combat page shares with the trailing non-combat
+    block (`## Your relics`, `## Potions`) are gated on `screen != "combat"`
+    -- so a page built by this function has each of its headings once, which
+    is what the check below asserts. A doubled page therefore came from
+    something that emitted this text TWICE: a caller that printed the page and
+    then appended a second read of it.
+
+    So the pin is here, at the one place the page is finished, and it is the
+    shape rather than the cause: whatever doubles a section -- a branch that
+    grows a second `out +=` tomorrow, or a caller that concatenates two reads
+    through `render` -- stops being a screen a seat has to read twice and
+    becomes a refusal naming the heading. It raises `BlindPlayError`, the same
+    class every other structural refusal on this page raises, so a driver that
+    already handles one handles this.
+    """
+    seen: dict[str, int] = {}
+    for heading in _HEADING.findall(text):
+        seen[heading] = seen.get(heading, 0) + 1
+    twice = sorted(h for h, n in seen.items() if n > 1)
+    if twice:
+        raise BlindPlayError(
+            "this page printed a section twice, so a reader would read the "
+            "same board as two boards: " + ", ".join(repr(h) for h in twice))
 
 
 def observe(state: dict[str, Any]) -> str:

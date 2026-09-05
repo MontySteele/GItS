@@ -38,7 +38,7 @@ public sealed class RainOfRoses : CustomCardModel, ICharacterCard, ISkillTagCard
     public string CharacterId => "furina";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
+        FurinaBurstRider.Keywords(new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro });
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForBurst(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this);
@@ -48,7 +48,7 @@ public sealed class RainOfRoses : CustomCardModel, ICharacterCard, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rain of Roses"),
-        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Gain {IfUpgraded:show:7|5} [gold]Encore[/gold]. [gold]Burst[/gold] +5."),
+        ("description", FurinaBurstRider.Face("Apply [gold]Hydro[/gold] to ALL enemies. Gain {IfUpgraded:show:7|5} [gold]Encore[/gold].", "Apply [gold]Hydro[/gold] to ALL enemies. Gain {IfUpgraded:show:7|5} [gold]Encore[/gold]. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

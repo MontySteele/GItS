@@ -728,8 +728,10 @@ def turn_start_late(state: CombatState) -> None:
     mod say why they need it rather than `BeforeCombatStart` or site A:
     `KleeOverhaulOpening` records that the sim fires its combat-start effects
     on TURN 1 after the block clear, the energy reset and the draw, and
-    `GroundedPower` needs the ledger already rolled so `SetOffLastTurn` is the
-    count that stood when the player last passed.
+    `GroundedPower` pays before the turn's first decision rather than after it.
+    Since `EB-516` Grounded reads the BOARD and not the explosion ledger, so
+    the site is no longer forced by the roll -- it is kept because the payout
+    arriving before the turn's decisions is the card's whole shape.
     """
     if not live(state):
         return
@@ -747,10 +749,25 @@ def turn_start_late(state: CombatState) -> None:
         effects.gain_sparks(state, int(C.KLEE_OVERHAUL_OPENING_SPARK),
                             source="kit:opening_spark")
 
-    # GROUNDED: "if none of your Bombs went off LAST turn, gain N Block and 1
-    # Spark." Last turn and not this one is the whole design -- the decision it
-    # pays for was made a turn ago, so the payout arrives before this turn's
-    # decision rather than as a reward for one already taken.
+    # GROUNDED: "if you have a Bomb on the field, gain N Block and 1 Spark."
+    #
+    # `EB-516` REPLACED THE CONDITION (Klee r18, packet sec.4 item 1). It used
+    # to read "if none of your Bombs went off last turn", and two seats in two
+    # rounds read that as paying for skipping the loop; the r18 ledgers say
+    # why, since under this relic something goes off on most turns even in a
+    # Cook deck (Mines fire on the enemy's beat), so the card paid ONCE in five
+    # fights. The new condition keys the payout to COOKING rather than to not
+    # cashing, and leaves the card conditional (brief sec.6, C4).
+    #
+    # "A BOMB ON THE FIELD" IS `any_bomb_placed`: any Bomb or Mine of hers on
+    # any LIVING enemy. A Mine alone pays -- a Mine IS a Bomb (`EB-373`) -- and
+    # a turn on which one Bomb went off while another is still cooking pays,
+    # which is the reading the old counter could not express.
+    #
+    # BEFORE GROWTH IS IMMATERIAL, and it is said rather than relied on: this
+    # hook runs after `turn_start`, and that hook GROWS and neither places nor
+    # removes a charge (rule 7), so the set of enemies holding one is the same
+    # either side of it.
     #
     # THE SPARK IS `EB-344` (ruled R248) AND IT RIDES THE SAME CONDITION, so a
     # turn that grants no Block grants no Spark either and there is no second
@@ -763,21 +780,35 @@ def turn_start_late(state: CombatState) -> None:
     # Dexterity feeds it and no Frail bites it: it is a POWER's Block, not a
     # card's printed Block.
     # THE ONE READER OF KAEYA'S BLIND (QUARANTINED, C.COMPANION_OVERHAUL).
-    # Cold-Blooded Strike's stand-in prints "This turn, Grounded counts nothing
-    # as having gone off", and it names Grounded -- so the cover story is read
-    # HERE and not by zeroing the counter, which Jean's stand-in also reads.
-    # `grounded_blind` is False on every tree with the companion arm off.
+    # Cold-Blooded Strike's stand-in makes Grounded pay this turn whatever its
+    # condition says, so the cover story is read HERE and not by zeroing the
+    # explosion counter, which Jean's stand-in also reads. `grounded_blind` is
+    # False on every tree with the companion arm off. `EB-516` left the read
+    # where it was and moved only the condition beside it -- the stand-in's
+    # PRINTED words still name the old counter and are a face defect, not a
+    # rules one (reported, not fixed here).
     from tier0.engine import companion_standins    # late import: cycle
 
+    # `EB-533`: THE ANSWER IS EMITTED EITHER WAY. Klee r19 lane 1 logged the
+    # card every turn and it failed twice with "no near-miss line, I caught it
+    # only by diffing my own Block". The condition is unchanged and so is every
+    # payout; what is new is that the turn it says no says so. The mod's twin
+    # is `GroundedPower`'s latched badge face, which is the same claim on the
+    # surface that engine has.
     n = state.player.powers.get(GROUNDED, 0)
-    if n and (state.ko_set_off_last_turn == 0
-              or companion_standins.grounded_blind(state)):
-        state.player.block += n
-        state.emit("block", amount=n)
-        state.emit("ko_grounded", amount=n,
-                   spark=int(C.KLEE_OVERHAUL_GROUNDED_SPARK))
-        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_GROUNDED_SPARK),
-                            source="power:grounded/held_turn")
+    if not n:
+        return
+    paid = bool(any_bomb_placed(state)
+                or companion_standins.grounded_blind(state))
+    if not paid:
+        state.emit("ko_grounded", amount=0, spark=0, paid=False)
+        return
+    state.player.block += n
+    state.emit("block", amount=n)
+    state.emit("ko_grounded", amount=n,
+               spark=int(C.KLEE_OVERHAUL_GROUNDED_SPARK), paid=True)
+    effects.gain_sparks(state, int(C.KLEE_OVERHAUL_GROUNDED_SPARK),
+                        source="power:grounded/held_turn")
 
 
 def turn_end(state: CombatState) -> None:

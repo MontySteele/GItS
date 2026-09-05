@@ -38,7 +38,7 @@ public sealed class SurintendanteChevalmarin : CustomCardModel, ICharacterCard, 
     public string CharacterId => "furina";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.ElementalSkill };
+        FurinaBurstRider.Keywords(new[] { KleeKeywords.ElementalSkill });
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Chevalmarin }), this);
@@ -48,7 +48,7 @@ public sealed class SurintendanteChevalmarin : CustomCardModel, ICharacterCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Surintendante Chevalmarin"),
-        ("description", "Add 1 [gold]Surintendante Chevalmarin[/gold] to your [gold]Salon[/gold]. Gain {Encore:diff()} [gold]Encore[/gold]. [gold]Burst[/gold] +5."),
+        ("description", FurinaBurstRider.Face("Add 1 [gold]Surintendante Chevalmarin[/gold] to your [gold]Salon[/gold]. Gain {Encore:diff()} [gold]Encore[/gold].", "Add 1 [gold]Surintendante Chevalmarin[/gold] to your [gold]Salon[/gold]. Gain {Encore:diff()} [gold]Encore[/gold]. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

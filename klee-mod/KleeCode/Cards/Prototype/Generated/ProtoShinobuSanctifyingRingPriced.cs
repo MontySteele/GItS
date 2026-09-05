@@ -67,7 +67,7 @@ public sealed class ProtoShinobuSanctifyingRingPriced : CustomCardModel, IElemen
         {
             new CalculationBaseVar(3m),
             new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
             new SpotlightSystem.SpotlitBlockVar(4m)
         };
 

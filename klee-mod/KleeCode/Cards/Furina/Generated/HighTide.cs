@@ -41,7 +41,7 @@ public sealed class HighTide : CustomCardModel, IElementalCard, ICharacterCard, 
     public string CharacterId => "furina";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
+        FurinaBurstRider.Keywords(new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro });
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForBurst(FurinaRiderTips.ForCard(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, fanfarePer: 1, fanfareStep: 2), this);
@@ -51,7 +51,7 @@ public sealed class HighTide : CustomCardModel, IElementalCard, ICharacterCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "High Tide"),
-        ("description", "Deal {CalculatedDamage:diff()} damage, already including [gold]Fanfare[/gold]. [gold]Burst[/gold] +5."),
+        ("description", FurinaBurstRider.Face("Deal {CalculatedDamage:diff()} damage, already including [gold]Fanfare[/gold].", "Deal {CalculatedDamage:diff()} damage, already including [gold]Fanfare[/gold]. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

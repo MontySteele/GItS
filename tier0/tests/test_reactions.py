@@ -244,3 +244,57 @@ def test_aura_expiry_logged_as_waste(state):
         reactions.tick_auras(state)
     assert e.aura is None
     assert any(ev["event"] == "aura_wasted" for ev in state.log)
+
+
+# ---------------------------------------------------------------------------
+# `EB-515` -- a killing hit still fires its reaction
+# ---------------------------------------------------------------------------
+
+def test_eb515_a_killing_hit_still_fires_its_reaction():
+    """`EB-515` (Klee r18 lane 2 (c) 1). "Overloaded did not fire. Raiden
+    killed a Corpse Slug wearing Pyro Aura 1; the 6 to ALL and the Weak never
+    landed, and a 1 HP slug beside it was untouched. Nothing on any screen says
+    a kill skips its reaction."
+
+    THIS ENGINE IS THE ONE THAT WAS RIGHT, and this pin is what the mod was
+    fixed against. `deal_damage_to_enemy` resolves the reaction INSIDE the hit
+    (`reactions.resolve_hit`, before a point of HP moves), so a lethal hit
+    cannot skip it. The mod hung the same rule off `Hook.AfterDamageReceived`,
+    which the base game does not broadcast for a blow that killed
+    (`CreatureCmd.Damage`), and `AuraPower.AfterDamageGiven` is the site that
+    closes the gap.
+    """
+    from tier0.engine import effects
+
+    dying = make_enemy(hp=4, name="dying")
+    neighbour = make_enemy(hp=1, name="neighbour")
+    st = make_state(enemies=[dying, neighbour])
+
+    hit(st, dying, "pyro", 0)                     # a Pyro aura on the doomed
+    assert dying.aura == "pyro"
+
+    effects.deal_damage_to_enemy(st, dying, 20, element="electro",
+                                 source="attack")
+
+    assert dying.hp <= 0, "the hit killed"
+    # THE REACTION LANDED ON THE SURVIVOR: the splash and the stagger are the
+    # two halves the seat could not find.
+    assert neighbour.hp == 1 - C.OVERLOAD_SPLASH
+    assert dying.powers["weak"] == C.OVERLOAD_WEAK
+    assert dying.aura is None, "and the aura was consumed by it"
+
+
+def test_eb515_a_killing_amplifier_still_amplifies_its_own_hit():
+    """The other reaction class on the same boundary: an amplifier is folded
+    into the hit that killed, so a Vaporize that kills is still a Vaporize."""
+    from tier0.engine import effects
+
+    dying = make_enemy(hp=200, name="dying")
+    st = make_state(enemies=[dying])
+    hit(st, dying, "hydro", 0)
+
+    effects.deal_damage_to_enemy(st, dying, 10, element="pyro",
+                                 source="attack")
+
+    assert dying.hp == 200 - int(10 * C.VAPORIZE_MULT)
+    assert dying.aura is None

@@ -168,11 +168,14 @@ def test_the_grounded_tip_states_the_condition_and_defers_on_the_payout():
     the tip must not quote a number a second card would contradict."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert "that pays at the start of your turn, but " in tips
-    assert "only if none of your [gold]Bombs[/gold] went off last turn. Its "         in tips
+    assert "only if you have a [gold]Bomb[/gold] on the field. Its "         in tips
     assert "card prints what it pays." in tips
     sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
     assert "gain 6 [gold]Block[/gold] and 1 [gold]Spark[/gold]" in sheet
+    # `EB-516`: the sheet row's own condition, held in step with the tip.
+    assert ("if you have a [gold]Bomb[/gold] on the field, gain 6 "
+            "[gold]Block[/gold]") in sheet
 
 
 def test_the_attach_is_scoped_to_the_quarantined_surface():
@@ -407,9 +410,14 @@ def test_every_table_row_has_a_method_and_a_registered_title_row(keyword):
 # rider, which is a sentence about a card rather than a definition of a word.
 # `EB-418` put the second, the Spark Klee's KIT mints on a play of one of her
 # own Personal Companions -- a rule LAW:145 keeps off the Companion's face, so
-# no word on any card can carry it. They are named here so the count below
-# stays a real pin instead of a number somebody bumps.
-NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK"}
+# no word on any card can carry it. `EB-553` (R260) put the third, and it is
+# the first that rides a RELIC rather than a card: under the reframe the
+# starting relic fields Mademoiselle Crabaletta at combat start, and the
+# relic's own arm face is at 117 of the 120-character relic ceiling with two
+# ruled sentences already on it. They are named here so the count below stays a
+# real pin instead of a number somebody bumps.
+NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
+                    "KLEEMOD-ARM_OPENING_STAGE"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -452,7 +460,11 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # 2's "all at once" (the `Set off` clauses state it in full),
             # "their" and "to a survivor" paid for it: 133 rendered.
             "A charge on an enemy: grows ",
-            " a turn, goes off only when [gold]Set off[/gold]. ",
+            # `EB-536`: the Mine joins the sentence, because the Mine tip
+            # printed under it says a Mine also goes off before its enemy's
+            # hit and the two contradicted each other on one screen.
+            " a turn, goes off only when [gold]Set off[/gold], or as a ",
+            "[gold]Mine[/gold]. ",
             "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. ",
             "Kills move it on.",
             # `EB-432` named the order INSIDE the pile: `SetOff` walks the
@@ -468,8 +480,12 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # player's own side of the board, and the r16 seat read it that
             # way beside a Block clause pointing the other direction.
             "The target's [gold]Bombs[/gold] go off first, oldest first, each ",
+            # `EB-516` ADDED THE AIM, and it is on the WORD because the two
+            # rows that roll (Tinder Toss, Rapid Fire) print only "a random
+            # enemy" and cannot say where it lands.
             "a Pyro hit. [gold]Block[/gold] stops them, no when-hit power ",
-            "fires, the first takes the aura.",
+            "fires, the first takes the aura. A random one picks a Bombed ",
+            "enemy first.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
             "Start each combat with ",
             ". Pounding Surprise grants more. ",
@@ -508,6 +524,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # ALL if it says so" paid for both facts.
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front ",
             "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. ",
+            # `EB-538`: the class a carry-out belongs to, in `ForSetOff`'s
+            # own words -- the same rule at the same call one kit over.
+            "and [gold]Strength[/gold] do not. A carry-out is not a hit: no ",
+            "when-hit power fires.",
             "Enemy [gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] ",
             "and [gold]Strength[/gold] do not.",
             "heal N HP, never above the HP you entered ",
@@ -862,10 +882,23 @@ def _page_for_word(word: str) -> str:
     `_elements_on_screen` is what raises the six reaction rows. Everything else
     about the card is deliberately bare, so a definition on the page came from
     the glossary and not from a tip that happened to ride along.
+
+    `EB-504`. THE RUN IS THE WORD'S OWN WHERE THE RULE HAS ONE. Two rows --
+    `Hexerei` and `Oz` -- state a rule that belongs to Klee and printed it on
+    every character's screens, because the faces carrying the words are
+    drafted by the whole roster. Since that row they print their NAME alone on
+    a run that cannot use them, so this census asks the question on the run
+    the rule is about; the recorded fixture is a Kokomi, and asking it there
+    would be asking whether Klee's rule reaches a Kokomi -- which is the
+    defect, not the contract.
     """
     from tier0.tests.test_understudy_blindplay import combat_state
+    from understudy.blindplay_notes import _ARM_KEYWORD_CHARACTER
     import json
     state = json.loads(json.dumps(combat_state()))
+    owner = _ARM_KEYWORD_CHARACTER.get(word)
+    if owner:
+        state["player"]["character"] = owner.capitalize()
     state["player"]["hand"] = [{
         "id": "KLEEMOD-PROTO_GOLD_PROBE", "name": "Probe", "type": "Skill",
         "cost": "1", "can_play": True, "index": 0, "target_type": "AnyEnemy",
@@ -978,7 +1011,31 @@ def test_the_plan_tip_names_strength_among_the_modifiers_that_do_not_reach():
     assert "Enemy Vulnerable counts; your Weak and Strength do not." in body
 
 
-def test_the_plan_tip_stays_under_the_keyword_ceiling():
-    """135, the base game's own longest mechanic tip, and this word is read on
-    every battle screen of every run."""
-    assert len(blindplay.ARM_KEYWORDS["Plan"]) <= 135
+def test_the_plan_tip_names_the_class_a_carry_out_is_in():
+    """`EB-538`. Skittish gave no Block to a body hit by two carry-outs and 6
+    Block to a plain Strike on the same enemy in the same fight (r19 lane 2),
+    and the seat could not tell "a defect or a large undocumented advantage of
+    planning into blockers". It is Klee's Set off rule one kit over, at the
+    same call, so it is Set off's own sentence."""
+    body = blindplay.ARM_KEYWORDS["Plan"]
+    assert "A carry-out is not a hit: no when-hit power fires." in body
+    assert "no when-hit power fires" in blindplay.ARM_KEYWORDS["Set off"]
+
+
+def test_the_plan_tip_is_over_the_keyword_ceiling_and_the_lint_carries_it():
+    """`EB-538` TOOK IT OVER, deliberately and by name.
+
+    135 is the base game's own longest mechanic tip and this word is read on
+    every battle screen of every run, so the overage is a cost rather than an
+    oversight: the tip sat at exactly 135 and every clause on it is a seat's
+    finding (`EB-329`, R250, `EB-380`, and now this one). Nothing was droppable
+    to make room, so `tools/lint_text_conventions.py` carries `PlanKey` in
+    `EXCEPTIONS` with that reason -- the bargain `SetOffKey` already makes --
+    and this pin is what stops the overage from growing quietly.
+    """
+    from tools import lint_text_conventions as lint
+
+    body = blindplay.ARM_KEYWORDS["Plan"]
+    assert len(body) == 186
+    assert "PlanKey" in lint.EXCEPTIONS
+    assert "EB-538" in lint.EXCEPTIONS["PlanKey"]

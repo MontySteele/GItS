@@ -38,7 +38,7 @@ public sealed class FullEnsemble : CustomCardModel, ICharacterCard, ISkillTagCar
     public string CharacterId => "furina";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.ElementalSkill };
+        FurinaBurstRider.Keywords(new[] { KleeKeywords.ElementalSkill });
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Usher, SalonMember.Chevalmarin, SalonMember.Crabaletta }), this);
@@ -48,7 +48,7 @@ public sealed class FullEnsemble : CustomCardModel, ICharacterCard, ISkillTagCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Full Ensemble"),
-        ("description", "Add 1 [gold]Gentilhomme Usher[/gold], 1 [gold]Surintendante Chevalmarin[/gold], 1 [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]. [gold]Burst[/gold] +5."),
+        ("description", FurinaBurstRider.Face("Add 1 [gold]Gentilhomme Usher[/gold], 1 [gold]Surintendante Chevalmarin[/gold], 1 [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold].", "Add 1 [gold]Gentilhomme Usher[/gold], 1 [gold]Surintendante Chevalmarin[/gold], 1 [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

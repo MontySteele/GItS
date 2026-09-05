@@ -258,7 +258,7 @@ public static class KleeMod
                         $"[gold]Hydro[/gold] meets [gold]Electro[/gold]: the reacted enemy loses [blue]{Elements.ReactionConstants.ElectroChargedDot}[/blue] HP at the start of its turn, 1 less each turn.",
                     ["KLEEMOD-FROZEN_PREVIEW.title"] = "Reaction preview: Frozen",
                     ["KLEEMOD-FROZEN_PREVIEW.description"] =
-                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals half damage, and the first Attack to hit it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] damage.",
+                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals half damage, and until it acts the first Attack to hit it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] damage.",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Frozen (Boss)",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
                         $"Bosses cannot be Frozen. [gold]Hydro[/gold] plus [gold]Cryo[/gold] is consumed and applies [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
@@ -363,6 +363,13 @@ public static class KleeMod
                     // the same raw-key hazard as every row here.
                     [Cards.KokomiRiderTips.DebuffRiderKey + ".title"] =
                         "Against a debuffed enemy",
+                    // `EB-539`: the same split one count over. The face prints
+                    // the live morning TOTAL and this row titles the tip that
+                    // says what the total is made of -- because "Deal 2
+                    // damage, already including 3 for each Plan" is a
+                    // contradiction on the one board where the fold is zero.
+                    [Cards.KokomiRiderTips.MorningDamageKey + ".title"] =
+                        "Damage from the morning",
                     // QUARANTINED (R213 E1): the Charge KEYWORD's title. The
                     // BODY is built live in KokomiRiderTips, because it
                     // quotes CHARGE_PER_EXHAUST and reads the current bank --
@@ -446,6 +453,12 @@ public static class KleeMod
                     // before that. No collision: the shipped meter power
                     // titles itself and hangs no keyword tip.
                     [Cards.ArmKeywordTips.EncoreKey + ".title"] = "Encore",
+                    // `EB-553` (R260). The third rider here that titles no
+                    // keyword: the reframe's starting relic fields the stage
+                    // at combat start, and the relic's own face has no room
+                    // left for the sentence.
+                    [Cards.ArmKeywordTips.OpeningStageKey + ".title"] =
+                        "Opening stage",
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in
@@ -465,6 +478,104 @@ public static class KleeMod
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))
                 .ToDictionary(pair => pair.Key, pair => pair.Value));
+
+#if PROTOTYPE_CARDS
+            // `EB-481`, THE HALF THIS MOD DOES NOT OWN A KEYWORD FOR.
+            //
+            // The row was closed once on the tips and reopened on 2026-09-05,
+            // because a tip is not where a player meets Vulnerable: the seat
+            // met it on the ENEMY, whose status line is the base game's own
+            // `VULNERABLE_POWER` row and reads "more damage from Attacks"
+            // while `BaseKeywordTips.ForVulnerable` and the sim's glossary
+            // read the engine's rule. Two texts disagreeing about whether a
+            // Skill is safe is a player sequencing badly (Kokomi r16/r17),
+            // and the box was the one telling the truth.
+            //
+            // A ROW AND NOT A PATCH, because a description is a table lookup:
+            // the base game's own `powers` table is the only printer of that
+            // line, so the only way to correct it is to carry a row. The keys
+            // are the shipped ones, read off `SlayTheSpire2.pck` v0.111.0 --
+            // "Vulnerable creatures take [blue]50%[/blue] more damage from
+            // Attacks." and "Receive [blue]{DamageIncrease:percentMore()}%
+            // [/blue] more damage from Attacks for [blue]{Amount}[/blue]
+            // {Amount:plural:turn|turns}." -- so this is those two sentences
+            // with one word moved, holes and BBCode untouched.
+            //
+            // THE ONE WORD IS "CARDS", and `EB-497` is why it is not "hits":
+            // `VulnerablePower.ModifyDamageMultiplicative` gates on
+            // `ValueProp.IsPoweredAttack()`, which every damage clause the
+            // generator emits carries and a POTION's damage does not (a
+            // Vulnerable Sewer Clam took 10 off Explosive Ampoule, not 15 --
+            // Klee r17 lane 1). The sim says the same thing structurally:
+            // `potions.fire_potion` goes through `refpowers.unpowered_damage`,
+            // which never reaches `modify_damage_taken`.
+            //
+            // UNDER THE QUARANTINE, like the five keyword bodies above and for
+            // the same reason: a release build does not police the base game's
+            // English (`KleeSelfCheck` says so in as many words), and the
+            // glossary these words have to agree with is itself arm-only.
+            LocManager.Instance.GetTable("powers").MergeWith(
+                new Dictionary<string, string>
+                {
+                    // `EB-523` PUT THE ATTACK BACK IN, and it is `EB-497`'s own
+                    // correction meeting the side of the board that row did
+                    // not read. "From cards" is complete on an ENEMY, where
+                    // everything that hits is a card or a potion, and silent on
+                    // the PLAYER, where the number that matters is a monster's
+                    // swing: the Kokomi r18 lane-2 seat wore `Vulnerable 99 --
+                    // Receive 50% more damage from cards for 99 turns` in front
+                    // of a 24-damage intent and could not price it. "That is
+                    // the single most decision-relevant number on the screen
+                    // and I could not price it."
+                    //
+                    // AND IT DOES COUNT. `VulnerablePower` gates on
+                    // `ValueProp.IsPoweredAttack()` -- a property of the HIT,
+                    // and a monster's move carries it; the sim says the same
+                    // structurally, `combat._enemy_attack` running every hit
+                    // through `powers.modify_damage_taken(state.player, ...)`.
+                    // So the sentence names both kinds of hit and keeps
+                    // `EB-497`'s potion clause, which is the one thing that
+                    // takes no multiplier on either engine.
+                    ["VULNERABLE_POWER.description"] =
+                        "Vulnerable creatures take [blue]50%[/blue] more "
+                      + "damage from any attack or card hit, a potion's aside.",
+                    ["VULNERABLE_POWER.smartDescription"] =
+                        "Receive [blue]{DamageIncrease:percentMore()}%[/blue] "
+                      + "more damage from any attack or card hit for "
+                      + "[blue]{Amount}[/blue] {Amount:plural:turn|turns}.",
+
+                    // `EB-521`, AND IT IS THE THIRD ROUND OF ONE FINDING.
+                    //
+                    // Kokomi r18 lane 2, fight 1: "Thorns printed 'When hit by
+                    // an attack, deal 2 damage back'. I played Kurage's Oath --
+                    // a SKILL -- into a Thorns-2 body and lost 2 HP ...
+                    // Vulnerable and Weak both print the clause 'a Skill's
+                    // damage too'; Thorns does not, and behaves as though it
+                    // did."
+                    //
+                    // THE ENGINE IS RIGHT AND ONLY THE WORDS ARE WRONG, which
+                    // is `EB-469`'s and `EB-481`'s sentence for the third time.
+                    // `ThornsPower.BeforeDamageReceived` asks for a dealer and
+                    // a POWERED attack and nothing else -- it never looks at
+                    // the `DamageResult`, which is why a fully blocked hit is
+                    // still thorned (`tier0/engine/refpowers.py`, written off
+                    // the decompile, and `test_si_powers`' two pins). A powered
+                    // attack is a property of the HIT, and every damage clause
+                    // the generator emits carries `ValueProp.Move` whatever
+                    // `type:` its sheet row declares. So "an attack" in the
+                    // game's sentence means an attack HIT, exactly as it does
+                    // in Weak's and Vulnerable's, and a potion's damage --
+                    // Unpowered on both engines -- is not one.
+                    ["THORNS_POWER.description"] =
+                        "When hit by an attack, deal your [gold]Thorns[/gold] "
+                      + "damage back. Every card hit is one, a Skill's too; a "
+                      + "potion's is not.",
+                    ["THORNS_POWER.smartDescription"] =
+                        "When hit by an attack, deal [blue]{Amount}[/blue] "
+                      + "damage back. Every card hit is one, a Skill's too; a "
+                      + "potion's is not.",
+                });
+#endif
 
             // Klee's character strings moved onto the model itself
             // (Klee.Localization) when she became a CustomCharacterModel:

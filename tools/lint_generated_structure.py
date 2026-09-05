@@ -116,6 +116,14 @@ PROFILES = (KLEE_PROFILE, FURINA_PROFILE, KOKOMI_PROFILE, PROTOTYPE_PROFILE)
 # and `gen_klee_cards.build_vars` reads the same shape from the other side.
 _NAMED_DECL = re.compile(r'new\s+(?:Dynamic|Calculated)Var\(\s*"([A-Za-z]\w*)"')
 _TYPED_DECL = re.compile(r"new\s+(?:[A-Za-z]\w*\.)*([A-Za-z]\w*)Var\(\s*(?!\")")
+# `EB-513`: a TYPED var may also be given a name -- the game's `BlockVar` and
+# `DamageVar` both take a `(string name, ...)` overload -- and a name declared
+# that way is the name the face prints and the body looks up, exactly as a
+# `DynamicVar("X", ...)` is. The companion rows whose bonus Block folds Frail
+# are declared this way, so a lint that read only the two untyped classes
+# reported the name as dangling.
+_NAMED_TYPED_DECL = re.compile(
+    r'new\s+(?:[A-Za-z]\w*\.)*[A-Za-z]\w*Var\(\s*"([A-Za-z]\w*)"')
 
 # References: body lookups in either idiom, plus localization text tokens.
 _BODY_REF = re.compile(r'DynamicVars(?:\.([A-Za-z]\w*)|\[\s*"([A-Za-z]\w*)"\s*\])')
@@ -169,7 +177,18 @@ def var_token_aliases() -> dict[str, str]:
 # Calculated var to consume them -- otherwise they are a genuine orphan, which
 # is precisely the "half a rider" shape B1 shipped.
 CALCULATION_INPUTS = frozenset({"CalculationBase", "CalculationExtra", "ExtraDamage"})
+#: `EB-522`: a var that IS one of those consumers under another type name --
+#: `FrontFoldedDamageVar`, which subclasses the game's own -- is recognised by
+#: the TOKEN it declares rather than by its type, the same bargain
+#: `var_token_aliases` already strikes for `DeferredBlockVar`. Read off the
+#: alias map so a fourth such var joins by construction.
 _CALCULATED_CONSUMER = re.compile(r"new\s+Calculated\w*Var\(")
+
+
+def _consumes_the_calculation_inputs(source: str, declared: set[str]) -> bool:
+    """Does this file declare a var that reads the CalculationBase triple?"""
+    return (bool(_CALCULATED_CONSUMER.search(source))
+            or any(name.startswith("Calculated") for name in declared))
 
 
 @dataclass(frozen=True)
@@ -338,6 +357,7 @@ def declared_vars(source: str) -> set[str]:
     block = canonical_vars_block(source)
     aliases = var_token_aliases()
     names = set(_NAMED_DECL.findall(block))
+    names |= set(_NAMED_TYPED_DECL.findall(block))
     for typed in _TYPED_DECL.findall(block):
         # `new List<DynamicVar>` and friends are not declarations.
         if typed in ("Dynamic", "Calculated"):
@@ -369,9 +389,9 @@ def structural_problems(source: str, where: str) -> list[str]:
             f"declared in CanonicalVars. Declared: {sorted(declared)}"
         )
 
-    exempt = (
-        CALCULATION_INPUTS if _CALCULATED_CONSUMER.search(source) else frozenset()
-    )
+    exempt = (CALCULATION_INPUTS
+              if _consumes_the_calculation_inputs(source, declared)
+              else frozenset())
     for name in sorted(declared - referenced - exempt):
         problems.append(
             f"{where}: L2 ORPHAN VAR -- '{name}' is declared but nothing reads "

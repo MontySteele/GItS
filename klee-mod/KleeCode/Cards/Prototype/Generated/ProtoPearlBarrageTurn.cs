@@ -59,7 +59,7 @@ public sealed class ProtoPearlBarrageTurn : CustomCardModel, IElementalCard, ICh
         {
             new CalculationBaseVar(5m),
             new ExtraDamageVar(3m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiResources.ExhaustsThisTurn(card.Owner))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiResources.ExhaustsThisTurn(card.Owner))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

@@ -16,7 +16,7 @@ using Xunit;
 namespace KleeMod.Tests.Prototype;
 
 /// <summary>
-/// THE FURINA POOL PASS, ONE (<c>EB-493</c>) -- four arm-only Commons and the
+/// THE FURINA POOL PASS, ONE (<c>EB-493</c>) -- the arm-only Commons and the
 /// one argument they needed.
 /// <c>review/active/furina-pool-pass-2026-09-05.md</c> sec.2 is the design;
 /// all four are FOLLOWS on the doctrine read
@@ -29,8 +29,15 @@ namespace KleeMod.Tests.Prototype;
 ///
 ///   <c>ProtoFrCurtainRises</c>  a second Deploy SHAPE -- a deploy on an Attack
 ///   <c>ProtoFrSecondCourse</c>  a second performance, priced in Encore
-///   <c>ProtoFrRollingTide</c>   the kit's own perform verb, on a draftable row
 ///   <c>ProtoFrGuestList</c>     a Companion generator in the pool, no Exhaust
+///
+/// THREE OF THE FOUR REMAIN. <c>ProtoFrRollingTide</c> -- the kit's own perform
+/// verb on a draftable row -- was WITHDRAWN from the arm's offer in round 13
+/// (<c>EB-552</c>, a D default): four seats over three rounds read it the same
+/// way at 2 energy and at 1, so the price was never the reason and the row left
+/// rather than moving a third time. The shipped <i>Undercurrent</i> is offered
+/// again at that seam, and the row and its pins left the surface under
+/// R213 B's deletion rule -- which is what <c>ThePass</c> below is for.
 ///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL, the split
 /// <see cref="FurinaReframeSliceTwoTests"/> makes and for its reasons (README,
@@ -77,7 +84,6 @@ public class FurinaPoolPassTests
     {
         (typeof(ProtoFrCurtainRises), typeof(FurinaGen.HouseCall)),
         (typeof(ProtoFrSecondCourse), typeof(FurinaGen.DinnerService)),
-        (typeof(ProtoFrRollingTide), typeof(FurinaGen.Undercurrent)),
         (typeof(ProtoFrGuestList), typeof(FurinaGen.BlockingNotes)),
     };
 
@@ -105,7 +111,7 @@ public class FurinaPoolPassTests
     }
 
     [Fact]
-    public void All_four_rows_are_furinas()
+    public void Every_row_is_furinas()
     {
         // `ICharacterCard.CharacterId` is what puts a row in HER off-pool list
         // and what every character-aware mechanic reads. A row answering "klee"
@@ -131,10 +137,15 @@ public class FurinaPoolPassTests
         // (`rewards.character_pool`); this is the same claim in the mod, read
         // off constructed models, which need no combat.
         //
-        // TYPE AND COST TOO, and that is the packet's own D default rather than
-        // a rule of the seam: each replaced row was chosen because it is a
-        // plain number card of the SAME type and cost as its replacement, so
-        // the swap moves what the card does and nothing about where it sits.
+        // TYPE TOO, and the rarity is the one that carries the claim: the odds
+        // a row is offered at are the tier's, so common-for-common is what
+        // makes the swap a face swap rather than a balance change.
+        //
+        // COST WAS THE PACKET'S D DEFAULT AND NOT A RULE OF THE SEAM: each
+        // replaced row was PICKED as a plain number card of the same type and
+        // cost. The one row whose cost ever moved off its shipped twin's was
+        // Rolling Tide, and that row is withdrawn (`EB-552`), so the claim is
+        // whole again and holds for every row still on the pass.
         foreach (var (protoType, shippedType) in ThePass)
         {
             var proto = New(protoType);
@@ -142,7 +153,8 @@ public class FurinaPoolPassTests
             Assert.Equal(CardRarity.Common, proto.Rarity);
             Assert.Equal(shipped.Rarity, proto.Rarity);
             Assert.Equal(shipped.Type, proto.Type);
-            Assert.Equal(shipped.EnergyCost.Canonical, proto.EnergyCost.Canonical);
+            Assert.Equal(shipped.EnergyCost.Canonical,
+                proto.EnergyCost.Canonical);
         }
     }
 
@@ -153,7 +165,7 @@ public class FurinaPoolPassTests
         // reason: `ModelDb.Card<T>()` throws until the game's pool build has
         // run, so what is pinned is the WIRING -- that the swap reads the arm
         // flag and concats out of `PrototypeCards.For`, and that
-        // `FurinaCardPool` is the one thing that calls it. WHICH eight types it
+        // `FurinaCardPool` is the one thing that calls it. WHICH types it
         // names is an `isinst` operand rather than a call token, so that half
         // is pinned on the python side against `furina_reframe.POOL_SUBS`
         // (`tier0/tests/test_furina_pool_pass.py`), which is the map both
@@ -187,9 +199,6 @@ public class FurinaPoolPassTests
         var secondCourse = Il.Calls(Il.Method("ProtoFrSecondCourse", "OnPlay"));
         Assert.Contains("SalonMemberPower.Deploy", secondCourse);
         Assert.Contains("SalonMemberPower.PerformLeftmost", secondCourse);
-
-        var rollingTide = Il.Calls(Il.Method("ProtoFrRollingTide", "OnPlay"));
-        Assert.Contains("SalonMemberPower.PerformLeftmost", rollingTide);
 
         var guestList = Il.Calls(Il.Method("ProtoFrGuestList", "OnPlay"));
         Assert.Contains("GuestStarGenerator.Generate", guestList);
@@ -265,7 +274,39 @@ public class FurinaPoolPassTests
         var face = string.Join(" ", Il.Strings(
             Il.Method("ProtoFrCurtainRises", "get_Localization")));
         Assert.Contains("[gold]Deploy[/gold]", face);
-        Assert.Contains("Gentilhomme Usher", face);
+        Assert.Contains("Surintendante Chevalmarin", face);
+    }
+
+    [Fact]
+    public void Curtain_rises_fields_chevalmarin_and_no_longer_the_usher()
+    {
+        // `EB-530`, ROUND 12's SECOND ADJUSTMENT, and it is ONE WORD on the
+        // face. Three seats read the row the same way -- "the card I never
+        // wanted to play, because it puts the Usher at the front and converts
+        // the damage engine into a block engine", with the Usher himself "below
+        // a basic Defend" (3 Block a trigger, 2 dry) -- and the doctrine read
+        // (card audit sec.5.7) is FOLLOWS on C6: against the shipped
+        // `Surintendante Chevalmarin` (Common, 1 energy: deploy her, gain 3
+        // Encore) this gains 6 damage and loses the 3 Encore, so neither row is
+        // strictly better than the other.
+        //
+        // THE DEPLOY SHAPE IS UNCHANGED, which is the whole point of a one-word
+        // change: she performs as she arrives because that clause is
+        // `SalonMemberPower.Deploy`'s, and no row carries a copy of it. WHICH
+        // member the call names is the enum operand this harness cannot read
+        // (the class note above) and is pinned in
+        // `tier0/tests/test_furina_pool_pass.py`; what is pinned here is the
+        // PRINTED name and the tip derived from it, which is the half a player
+        // reads -- and `EB-272`'s defect is exactly a face and a tooltip
+        // naming different members.
+        var body = Il.Calls(Il.Method("ProtoFrCurtainRises", "OnPlay"));
+        Assert.Contains("SalonMemberPower.Deploy", body);
+        Assert.Contains("SalonMemberTips.ForCard",
+            Il.Calls(Il.Method("ProtoFrCurtainRises", "get_ExtraHoverTips")));
+
+        var face = string.Join(" ", Il.Strings(
+            Il.Method("ProtoFrCurtainRises", "get_Localization")));
+        Assert.DoesNotContain("Usher", face);
     }
 
     // ==================================================================
@@ -277,14 +318,20 @@ public class FurinaPoolPassTests
     {
         // THE PRICE IS THE `encore_cost` GATE AND NOT THE OVERDRAW OP. One
         // below the price is not "free with a shortfall" -- that is
-        // `Breathless`' rule and it is printed on `Breathless` -- and the
-        // packet's own sentence is "Unplayable below 3 Encore".
-        Assert.Equal(3, MeterCost.Priced(new ProtoFrSecondCourse())!.Value.Amount);
+        // `Breathless`' rule and it is printed on `Breathless`.
+        //
+        // THE PRINTED PRICE IS 1 (`EB-552`, FOLLOWS on the doctrine read,
+        // record sec.5.8). It was built at 3, and three rounds gave one
+        // reading: the printed 3 plus the shipped per-performance drain is FIVE
+        // Encore against an opening of 2, so the card was refused on all four
+        // draws it ever had and "contributed nothing". At 1 its full value is
+        // 3, which is the number the read compared against her opening.
+        Assert.Equal(1, MeterCost.Priced(new ProtoFrSecondCourse())!.Value.Amount);
 
         var face = string.Join(" ", Il.Strings(
             Il.Method("ProtoFrSecondCourse", "get_Localization")));
         Assert.Contains("[gold]Encore[/gold]", face);
-        Assert.Contains("3", face);
+        Assert.Contains("Spend 1", face);
     }
 
     [Fact]
@@ -296,7 +343,7 @@ public class FurinaPoolPassTests
         var card = Held<ProtoFrSecondCourse>(seat);
         var price = MeterCost.Priced(new ProtoFrSecondCourse())!.Value;
 
-        FurinaResources.GainEncore(seat.Creature, 2);
+        Assert.Equal(0, FurinaResources.Encore(seat.Creature));
         Assert.False(MeterCost.Affordable(card, price));
 
         FurinaResources.GainEncore(seat.Creature, 1);
@@ -304,58 +351,35 @@ public class FurinaPoolPassTests
     }
 
     [Fact]
-    public void The_upgrade_cuts_the_price_by_one()
+    public void The_upgrade_takes_the_price_to_nothing()
     {
         // `upgrade: {encore_cost: -1}` emits a real `UpgradeCostBy(-1)`, so the
         // GATE and the BADGE charge the moved number the moment the smith is
         // used -- a face that went on printing the canonical price would be a
         // printed number that is not the number the card charges
-        // (`EB-288`/`EB-291`'s defect class).
+        // (`EB-288`/`EB-291`'s defect class). The delta is unchanged by
+        // `EB-552`; at a printed 1 it makes the `+` card free, and the codegen
+        // drops the "Spend N Encore" sentence rather than printing "Spend 0"
+        // (text conventions, the Evoke row).
         var upgraded = new ProtoFrSecondCourse();
         Seat.Set(upgraded, "IsMutable", true);
         BaseLib.Abstracts.CustomResources<EncoreResource>.Cost(upgraded)!
             .UpgradeCostBy(-1);
 
-        Assert.Equal(2, MeterCost.Priced(upgraded)!.Value.Amount);
-    }
+        // A FREE CARD IS UNPRICED, which is the same fact said twice:
+        // `Priced` answers null below 1, so the `+` card carries no meter
+        // badge and no shortfall gate -- and that is what "drops the sentence"
+        // means downstream of the face.
+        Assert.Equal(0, MeterCost.PriceIn(upgraded, Meter.Encore));
+        Assert.Null(MeterCost.Priced(upgraded));
 
-    // ==================================================================
-    // 5. ROLLING TIDE -- the kit's own perform verb
-    // ==================================================================
-
-    [Fact]
-    public void Rolling_tide_hits_every_body_and_then_performs()
-    {
-        // ORDER MATTERS AND IS PINNED: the hit lands first, so a member that
-        // performs into a cleared board is the losing line rather than a
-        // wasted card, and `PerformMember`'s own "can the stage act at all"
-        // test is what refuses it.
-        var card = new ProtoFrRollingTide();
-        Assert.Equal(CardType.Attack, card.Type);
-        Assert.Equal(TargetType.AllEnemies, card.TargetType);
-
-        var order = Il.CallSequence(Il.Method("ProtoFrRollingTide", "OnPlay"));
-        var damage = order.ToList().FindIndex(
-            c => c.StartsWith("DamageCmd.", StringComparison.Ordinal));
-        var perform = order.ToList().IndexOf("SalonMemberPower.PerformLeftmost");
-        Assert.True(damage >= 0 && perform > damage,
-            "the hit lands before the performance");
-    }
-
-    [Fact]
-    public void Rolling_tide_names_the_front_member_on_its_face()
-    {
-        // The row is the one card of hers that ASKS a member to act, and with
-        // an empty stage it performs nobody -- the losing line the packet
-        // names. The face says whose act it is buying.
         var face = string.Join(" ", Il.Strings(
-            Il.Method("ProtoFrRollingTide", "get_Localization")));
-        Assert.Contains("[gold]Salon[/gold]", face);
-        Assert.Contains("front", face);
+            Il.Method("ProtoFrSecondCourse", "get_Localization")));
+        Assert.Contains("{IfUpgraded:show:|Spend 1 [gold]Encore[/gold]. }", face);
     }
 
     // ==================================================================
-    // 6. GUEST LIST -- a generator in the pool, and no Exhaust
+    // 5. GUEST LIST -- a generator in the pool, and no Exhaust
     // ==================================================================
 
     [Fact]

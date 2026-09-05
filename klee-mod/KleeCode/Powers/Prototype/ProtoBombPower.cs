@@ -137,11 +137,19 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             // key with no row behind it falls back to the static description
             // (`PowerModel.HasSmartDescription` is a `LocString.Exists` probe),
             // so a hole here is a silently blank face rather than a crash.
-            foreach (var mines in new[] { false, true })
+            // `EB-536` ADDED THE THIRD AXIS: whether the pile holds ONE
+            // charge or several. The hit clause is a fact about a STACK and
+            // reads as noise on a single Bomb, where the total and the hit are
+            // the same number.
+            foreach (var single in new[] { false, true })
             {
-                foreach (var mods in FoldedMods.All)
+                foreach (var mines in new[] { false, true })
                 {
-                    rows.Add((SmartKey(mines, mods), Face(mines, mods)));
+                    foreach (var mods in FoldedMods.All)
+                    {
+                        rows.Add((SmartKey(single, mines, mods),
+                                  Face(single, mines, mods)));
+                    }
                 }
             }
             return rows;
@@ -209,10 +217,55 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// filed it as the screen contradicting itself. The badge is where a player
     /// meets the survivor's stack, so it is where the rule is printed.
     /// </summary>
-    private static string Face(bool mines, FoldedMods mods) =>
-        "[gold]Set off[/gold] here deals " + PyroTotal + mods.Clause + "."
+    private static string Face(bool single, bool mines, FoldedMods mods) =>
+        "[gold]Set off[/gold] here deals " + PyroTotal + mods.Clause
+      + (single ? string.Empty : HitCount) + "."
       + (mines ? BombsWithMines : Bombs)
       + (mines ? MineClause : NoSelfSentence) + JumpSentence;
+
+    /// <summary>
+    /// `EB-514`: THE HIT COUNT, IN THE HEADLINE.
+    ///
+    /// THE DEFECT (Klee r18 lane 2 (c) 4). "`Mine 7 -- Set off here deals 7
+    /// Pyro damage. Bombs here: 4 / 3, including 2 Mines`. Reading only the
+    /// headline I would have budgeted one Spark of refund and one hit; it is
+    /// actually two hits and two Sparks, which matters enormously for whether
+    /// a Set off is free. The information is in the second sentence but the
+    /// number I plan against is in the first."
+    ///
+    /// AND THAT IS EXACTLY RIGHT: <see cref="PyroTotal"/> is a SUM over the
+    /// charges, so a stack prints one number where the board will produce
+    /// several hits -- several reactions, several Sparks, several chances for
+    /// one to land on a corpse. The queue was already on the face
+    /// (<c>EB-450</c>'s <c>{Charges}</c>) and the seat still planned against
+    /// the headline, which is the reading this clause is about: the count goes
+    /// where the total is, not one sentence later.
+    ///
+    /// SPARKS ARE NAMED RATHER THAN LEFT TO RULE 4. One Spark per explosion is
+    /// printed on the Spark tip, and the seat had read it -- the miss was that
+    /// "deals 7" hid how many explosions "7" was. "For as many Sparks" is the
+    /// same rule said where the arithmetic is, which is the whole of the row.
+    ///
+    /// <c>{Count}</c> IS `EB-289`'s VAR, off the charge list rather than off
+    /// the stack, so a Mine that has already self-popped is not counted; it
+    /// left <see cref="Bombs"/> at `EB-450` because the list said the count
+    /// more plainly there, and it comes back HERE because the headline is a
+    /// different sentence with a different job. Both faces are over the power
+    /// ceiling for it and both are excepted by name in
+    /// `tools/lint_text_conventions.py`.
+    /// </summary>
+    ///
+    /// `EB-536` CUT IT OFF THE SINGLE-CHARGE FACE AND SPELLED THE SPARKS OUT.
+    /// "In 1 hit for as many Sparks", printed on every Bomb block, "was never
+    /// comprehensible" (Klee r19 lane 2) -- and on a pile of one it is saying
+    /// nothing: the total IS the hit, and "as many" is a comparison to a
+    /// number the sentence has already spent. So the clause is a property of a
+    /// STACK, it appears only on a stack, and it names the Spark count instead
+    /// of pointing back at the hit count. The plural goes with it: this face
+    /// is only ever chosen for two charges or more.
+    private const string HitCount =
+        ", in [blue]{Count}[/blue] hits for [blue]{Count}[/blue] "
+      + "[gold]Sparks[/gold]";
 
     /// <summary>The total, with no full stop: a modifier clause may follow it.
     ///
@@ -242,8 +295,9 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// place the two axes are spelled into a key -- <see cref="Localization"/>
     /// writes the rows with it and <see cref="SmartDescriptionLocKey"/> reads
     /// one back, so a row and its selector cannot drift apart.</summary>
-    private static string SmartKey(bool mines, FoldedMods mods) =>
-        "smartDescription" + (mines ? "Mines" : string.Empty) + mods.KeySuffix;
+    private static string SmartKey(bool single, bool mines, FoldedMods mods) =>
+        "smartDescription" + (single ? "One" : string.Empty)
+      + (mines ? "Mines" : string.Empty) + mods.KeySuffix;
 
     /// <summary>
     /// `EB-289`. <c>{Count}</c> AND NOT <c>{Amount}</c>, and the difference is
@@ -295,9 +349,10 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// printing both would put two number groups in one sentence for no fact.
     ///
     /// THE WORDS "OLDEST FIRST" ARE NOT HERE AND THAT IS THE CEILING, said out
-    /// loud rather than left to be discovered. This face is 125 of its
+    /// loud rather than left to be discovered. This face was 125 of its
     /// 125-character power ceiling (`tools/lint_text_conventions.py`, and it
-    /// bites), so the clause has no room without rewriting `PyroTotal`,
+    /// bites) until `EB-514` put the hit count in the headline and took it
+    /// over, so the clause has no room without rewriting `PyroTotal`,
     /// `NoSelfSentence` or `JumpSentence` -- three ruled sentences, to restate
     /// a rule the reader already has: `EB-432` put "oldest first" on the
     /// `Set off` tip, which is printed on the card that will spend this pile.
@@ -356,7 +411,8 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// (KleeTests README, "The headless boundary").
     /// </summary>
     protected override string SmartDescriptionLocKey =>
-        Id.Entry + "." + SmartKey(MineCount > 0, LiveMods);
+        Id.Entry + "."
+      + SmartKey(_charges.Count == 1, MineCount > 0, LiveMods);
 
     /// <summary>The loc suffix <see cref="Title"/> selects when the pile is all
     /// Mines. `title` is the base game's own suffix and BaseLib registers every
@@ -988,6 +1044,18 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// before that hit lands -- four rolls is four Set offs, not one Set off
     /// and four hits. The candidates are re-read each time, so a hit that
     /// killed its target cannot be rolled again.
+    ///
+    /// `EB-516`, THE AIM (Klee r18, packet sec.4 item 2). The roll is drawn
+    /// from the enemies CARRYING one of her charges, and falls back to every
+    /// living enemy only when none does. Tinder Toss and Rapid Fire share one
+    /// fault and one rule fixes both: a random Set off landing on a Bomb-less
+    /// body breaks the arm's only economic loop -- a Spark-priced Set off into
+    /// a bombed body costs nothing net -- and the r17 and r18 seats named those
+    /// two rows the least-wanted cards in the pool. The NUMBERS are untouched:
+    /// the same rolls, the same hits, a narrower bag to draw from. The bag is
+    /// re-read per hit like the wider one, so a body whose last charge this hit
+    /// spent is out of it for the next roll. Sim twin: the `random_enemy` arm
+    /// of <c>effects._op_set_off</c>.
     /// </summary>
     public static async Task SetOffRandom(
         PlayerChoiceContext choiceContext, Creature applier,
@@ -998,14 +1066,32 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
 
         for (var i = 0; i < times; i++)
         {
-            var candidates = combat.HittableEnemies.Where(e => !e.IsDead).ToList();
-            if (candidates.Count == 0) return;
+            var living = combat.HittableEnemies.Where(e => !e.IsDead).ToList();
+            if (living.Count == 0) return;
+            var candidates = BombedFirst(living, applier);
             var target = combat.RunState.Rng.CombatTargets.NextItem(candidates);
             if (target == null) return;
 
             await SetOff(choiceContext, target, applier, cardSource);
             await DealCardDamage(choiceContext, target, damage, cardSource, cardPlay);
         }
+    }
+
+    /// <summary>
+    /// `EB-516`'s BAG: the bodies a random Set off draws from. The enemies
+    /// carrying one of <paramref name="applier"/>'s charges, or all of
+    /// <paramref name="living"/> when none does.
+    ///
+    /// PURE, AND A NAMED METHOD FOR THAT REASON: the roll around it needs a
+    /// live combat and cannot be reached headlessly, and this decision -- which
+    /// is the whole of the rule -- can. Sim twin: the `bombed or living` line
+    /// in <c>effects._op_set_off</c>.
+    /// </summary>
+    public static IReadOnlyList<Creature> BombedFirst(
+        IReadOnlyList<Creature> living, Creature applier)
+    {
+        var bombed = living.Where(e => HoldsChargeFrom(e, applier)).ToList();
+        return bombed.Count > 0 ? bombed : living;
     }
 
     /// <summary>The card's OWN hit, after its explosions. A powered Attack from

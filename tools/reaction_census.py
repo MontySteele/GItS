@@ -56,6 +56,7 @@ from __future__ import annotations
 import argparse
 import bisect
 import re
+import subprocess
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -263,8 +264,38 @@ class RecordInfo:
     companion_acquire_lines: int
 
 
-def discover_records() -> list[tuple[str, str, str, Path]]:
-    """[(kit, round, dir_name, file_path)], sorted, every file this reads."""
+INPUTS_RE = re.compile(r"^<!-- census-inputs: (.*) -->$", re.M)
+
+
+def inputs_footer(records: list[tuple[str, str, str, Path]]) -> str:
+    """One HTML comment naming every file the census read, repo-relative,
+    so `--check` can re-read exactly those and no newer ones."""
+    rel = [r[3].relative_to(REPO).as_posix() for r in records]
+    return "<!-- census-inputs: " + ";".join(rel) + " -->\n"
+
+
+def listed_inputs(text: str) -> list[str] | None:
+    """The paths a committed census names in its footer, or None when the
+    record predates the footer."""
+    m = INPUTS_RE.search(text)
+    if not m:
+        return None
+    return [x for x in m.group(1).split(";") if x]
+
+
+def tree_paths(rev: str) -> set[str]:
+    """Every path under review/qa in a git tree, repo-relative posix."""
+    out = subprocess.run(
+        ["git", "ls-tree", "-r", "--name-only", rev, "review/qa"],
+        cwd=REPO, capture_output=True, text=True, check=True).stdout
+    return {line.strip() for line in out.splitlines() if line.strip()}
+
+
+def discover_records(only: set[str] | None = None
+                     ) -> list[tuple[str, str, str, Path]]:
+    """[(kit, round, dir_name, file_path)], sorted, every file this reads.
+    With `only`, a set of repo-relative posix paths, files outside it are
+    skipped."""
     out: list[tuple[str, str, str, Path]] = []
     if not QA_DIR.is_dir():
         return out
@@ -277,6 +308,8 @@ def discover_records() -> list[tuple[str, str, str, Path]]:
         kit, round_label = classified
         for f in sorted(d.glob("*.md")):
             if SKIP_NAME.search(f.name):
+                continue
+            if only is not None and f.relative_to(REPO).as_posix() not in only:
                 continue
             out.append((kit, round_label, d.name, f))
     return out
@@ -518,16 +551,35 @@ def render(mentions: list[Mention], infos: list[RecordInfo],
             f"{m.trigger} | {m.reading} | {md_escape(truncate(m.sentence))} |")
     lines.append("")
 
-    return "\n".join(lines) + "\n"
+    return "\n".join(lines) + "\n" + inputs_footer(records)
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--check", action="store_true",
-                    help="verify the committed record, write nothing")
+                    help="verify the committed record against the files it "
+                         "names, write nothing")
+    ap.add_argument("--pin", metavar="REV",
+                    help="write over the record files present in this git "
+                         "tree (a published census gains its inputs footer "
+                         "without its numbers moving)")
     args = ap.parse_args(argv)
 
-    records = discover_records()
+    only: set[str] | None = None
+    if args.check and OUT.exists():
+        listed = listed_inputs(OUT.read_text(encoding="utf-8"))
+        if listed is not None:
+            only = set(listed)
+            missing = [x for x in listed if not (REPO / x).is_file()]
+            if missing:
+                print(f"reaction_census: {OUT.relative_to(REPO)} names "
+                      f"{len(missing)} record file(s) no longer on disk: "
+                      + ", ".join(missing[:5]))
+                return 1
+    elif args.pin:
+        only = tree_paths(args.pin)
+
+    records = discover_records(only)
     if not records:
         print("reaction_census: no matching records found under "
               f"{QA_DIR.relative_to(REPO)} -- check the directory patterns",
@@ -547,8 +599,12 @@ def main(argv: list[str] | None = None) -> int:
                   f"the seat records on disk no longer match the committed "
                   f"census. Run: python tools/reaction_census.py")
             return 1
+        newer = len(discover_records()) - len(records)
+        note = (f"; {newer} newer record file(s) under review/qa are not "
+                f"counted -- re-run without --check to refresh"
+                if newer else "")
         print(f"reaction_census: OK ({len(mentions)} mentions, "
-              f"{len(records)} records)")
+              f"{len(records)} records{note})")
         return 0
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

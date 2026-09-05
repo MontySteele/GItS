@@ -1466,3 +1466,464 @@ the comparison or counterexample it rests on and calls a bare verdict
 INCOMPLETE; the remedy ban is unchanged. The three bare Kokomi verdicts in
 5.4 were the seat obeying the old text. The comparisons written into the
 Kokomi pass packet are the author's derivations and are labelled so there.
+
+
+## 5.6 Klee round 18: two card adjustments (2026-09-05, morning)
+
+The first read under the amended protocol (a verdict carries its
+comparison). Two arms from `review/active/klee-overhaul-round-18-2026-09-05.md`
+§4: Grounded's condition moved from "nothing went off" to "a Bomb is on the
+field", and a random Set off preferring a bombed enemy (Tinder Toss, Rapid
+Fire). Both FOLLOWS, each with the standing line, the adjusted line and the
+turn on which the adjustment is worse for the player, which is what the
+protocol now asks. **Outcome:** both build under `EB-516`. Prompt, then
+reply, verbatim:
+
+```
+# Doctrine read: two Klee card adjustments from round 18
+
+Each numbered arm below is ONE ARM: an ADJUSTMENT to a row that stands on the
+sheet, with the standing text and the adjusted text both printed. For each,
+FOLLOWS or REQUIRES_MODIFICATION, the clause you ruled against, and the
+comparison the verdict rests on: the standing row's line against the adjusted
+line with the numbers, and the turn on which the adjustment is better or worse
+for the player. Read adversarially; the author is a different model family.
+The comparison is reading; a remedy is not, and none is asked for.
+
+## The charter
+
+- **C1 (owner).** "A successful design phase should not end with 'all agents
+  always win.'" A row that removes a losing line the kit is meant to keep,
+  instead of pricing it, is out.
+- **C2 (LAW D3).** A benefit carries a binding price; there is a real turn on
+  which the card is worse than a plain card of its cost.
+- **C3 (LAW D2).** The card's value turns on a choice the player makes (bank
+  or cash a Bomb), not on a number rising while you watch.
+- **C4 (Klee brief §6).** She cannot block on demand; every defence past the
+  base game's Defend is conditional on the decision just made.
+- **C5 (Klee brief §3 rule 7).** Nothing fires by itself: no automatic free
+  attack, no "at N Sparks".
+- **C6 (not strictly better).** Not a strictly better version of a shipped
+  pool row below, or of a base-game non-basic card at the same or lower
+  rarity and cost (Whirlwind is X-cost Uncommon: 5 to ALL per energy;
+  Skewer X-cost: 7 per energy to one; Sword Boomerang; Cleave).
+
+## The engine, Klee
+
+Her Attacks apply Pyro. A **Bomb** is a charge on an enemy that grows by 4
+at the start of each of her turns and goes off only when a card says **Set
+off** (every Bomb on that enemy, one at a time, each its own Pyro hit; not
+an Attack). Each Bomb grows separately. A **Mine** also goes off when its
+enemy attacks her, before the hit. **Spark**: she starts each combat with 1,
+gains 1 per Bomb going off (the relic, Pounding Surprise), and cards that
+print a Spark price spend Sparks instead of energy; no cap, lost at the end
+of combat. Energy 3, HP 62. Starter: 4 Strike, 4 Defend, Ka-pow! (basic, 0,
+Retain: Set off, 4 damage), Jumpy Dumpty (basic, 1: Bomb 8; when it goes
+off, a Mine 3 on ALL enemies).
+
+## What two rounds of seats said, verbatim
+
+Round 17, assembled Cook deck: "Grounded and the whole Bomb archetype are at
+war: it pays Sparks only while no Bomb goes off, and Sparks exist to set
+Bombs off." Round 18, assembled Cook deck, Sparks logged every turn: "Grounded
+is a trap in its own deck. 'If none of your Bombs went off last turn' pays you
+for skipping the kit's entire loop. In five fights it triggered once, and
+that was a turn I had already conceded." The ledger: something went off on
+10 of 19 turns of a Cook deck, seven of them a Mine on the enemy's beat.
+Round 17 natural: "Rapid Fire never once earned 2 energy: 'Set off a random
+enemy' means it cannot be pointed at the body I have spent two cards
+bombing." Round 18 Spray: "Tinder Toss is the one I never wanted: every other
+Spark card lets me aim at a bomb and get the Spark back; Tinder Toss gambles
+that, and when it loses the next card in hand prints CANNOT BE PLAYED."
+
+## The pool, every row pasted from the sheet (rarity, type, price)
+
+- Ka-pow! (Basic Attack, 0 energy, Retain): Set off. Deal 4 damage.
+- Jumpy Dumpty (Basic Skill, 1 energy): Place a Bomb 8. When it goes off, place a Mine 3 on ALL enemies.
+- Fish-Flavored Bait (Common Attack, 1 energy): Deal 4 damage. Place a Bomb 4.
+- Pocket Fireworks (Common Attack, 1 energy): Deal 9 damage.
+- Chain Fuse (Common Skill, 1 energy): Each Bomb on the enemy grows by 6.
+- Explosives Workshop (Uncommon Power, 1 energy): At the start of your turn, your Bombs grow by 1 more.
+- Careful Arrangement (Uncommon Skill, 1 energy): Move all your Bombs onto the enemy as one Bomb. It grows by 5.
+- Big Badda Boom (Uncommon Attack, 2 energy): Set off. Deal 12 damage. Then deal damage equal to what the Bombs dealt.
+- The Big One (Rare Attack, 3 energy): Set off for quadruple damage.
+- Alice's Recipe (Rare Power, 2 energy): Your Bombs grow twice each turn.
+- Pop! (Common Skill, 0 energy): Place a Bomb 5.
+- Mine Toss (Common Skill, 1 energy): Place a Mine 4 on ALL enemies.
+- Fwoosh! (Common Attack, 0 energy, 1 Spark): Set off. Deal 6 damage.
+- Tinder Toss (Common Attack, 0 energy, 1 Spark): Set off a random enemy and deal 4 damage to it, twice.
+- Quick Fuse (Common Skill, 0 energy, 1 Spark): Each Bomb on the enemy grows by 3. Set off.
+- Bang Bang! (Uncommon Attack, 0 energy, 2 Spark): Set off. Deal 8 damage. Place a Bomb 4.
+- Rapid Fire (Uncommon Attack, 2 energy): Set off a random enemy and deal 3 damage to it, 4 times.
+- Chained Reactions (Rare Power, 1 energy): Whenever one of your Bombs goes off, place a Bomb 3 on a random enemy.
+- Sparks 'n' Splash (proto) (Rare Power, 2 energy): At the end of your turn, deal Pyro damage to a random enemy equal to its largest Bomb.
+- Sizzle (Common Attack, 1 energy): Set off. Deal 6 damage. If a Bomb triggered an Elemental Reaction this turn, deal 6 additional damage.
+- Perfect Timing (Uncommon Attack, 1 energy): Set off. Deal 8 damage. If a Bomb triggered an Elemental Reaction this turn, play this again.
+- Flame Dance (Uncommon Attack, 1 energy): Set off each enemy whose aura is not Pyro. Deal 5 damage to ALL enemies.
+- Catalytic Converter (Uncommon Power, 1 energy): Whenever one of your Bombs triggers an Elemental Reaction, gain 1 additional Spark.
+- Ammo Scavenging (Common Skill, 1 energy): Place a Bomb 4. Draw 1 card for each of your Bombs that went off this turn.
+- Powder Charge (Uncommon Skill, 0 energy, 1 Spark): Place a Bomb 6.
+- Dig In (Common Skill, 0 energy, 1 Spark): Gain 8 Block.
+- Sugar Rush (Rare Skill, 0 energy, 2 Spark, Exhaust): Gain 2 Energy. Draw 1 card. Exhaust.
+- Run Away! (Common Skill, 0 energy): Gain 3 Block. If a Bomb went off this turn, gain 4 additional Block.
+- Grounded (Uncommon Power, 1 energy): At the start of your turn, if none of your Bombs went off last turn, gain 6 Block and 1 Spark.
+- Sorry, Jean... (Common Skill, 0 energy): Remove one of your Bombs. Gain Block equal to its size.
+- Dodoco Cover (Common Skill, 1 energy): Place a Bomb 4. Gain 5 Block.
+- Careful Now (Uncommon Skill, 1 energy, Retain): Gain Block equal to your largest Bomb when played, up to 10.
+- Coven Errand (Common Skill, 1 energy): Place a Bomb 5. If you played a Hexerei card this turn, place it on ALL enemies instead.
+- Witches' Circle (Uncommon Power, 1 energy): Whenever you play a Hexerei card, place a Bomb 3 on a random enemy.
+- Alice's Introduction Magic (Rare Skill, 1 energy): All cards in your hand count as Hexerei cards this turn.
+- Countdown (Common Skill, 1 energy): Set off. Draw 1 card1.
+- Stoke the Fuse (Uncommon Skill, 0 energy, all Spark): Spend all your Sparks. Your largest Bomb grows by 3 per Spark spent.
+- Long Fuse (Common Attack, 1 energy, Retain): Set off. Deal 6 damage. Costs 1 more each turn it stays in your hand.
+- All of My Treasures! (proto) (Rare Skill, 1 energy, Exhaust): Place a Bomb on the enemy equal to your largest Bomb.
+- Fish Blasting (proto) (Common Attack, 1 energy): Deal 5 damage to ALL enemies. Add a Confiscated to your draw pile.
+- Pocket Match (Common Attack, 0 energy, 1 Spark, Retain): Set off. Deal 5 damage.
+- Bombs Away! (proto) (Common Attack, 1 energy): Deal 3 damage to ALL enemies. Place a Bomb 2 on ALL enemies.
+- Fireworks Show (Uncommon Skill, 0 energy, 2 Spark): Set off ALL enemies.
+- Kindling (Common Skill, 0 energy): Each Bomb on an enemy whose aura is not Pyro grows by 4. If there is none, your largest Bomb grows by 1.
+- Flash Point (Uncommon Attack, 1 energy): Set off. Deal 7 damage. If a Bomb triggered an Elemental Reaction this turn, gain 1 Spark and draw 1 card.
+- Vermillion Pact (proto) (Rare Power, 2 energy): Whenever one of your Bombs triggers an Elemental Reaction, the Attack that set it off triggers one too.
+- Split Charge (Uncommon Skill, 1 energy): Split your largest Bomb into two halves on random enemies.1
+
+## The arms
+
+1. **Grounded, adjusted** (Uncommon Power, 1 energy). Standing: "At the start
+   of your turn, if none of your Bombs went off last turn, gain 6 Block and 1
+   Spark." Adjusted: "At the start of your turn, if you have a Bomb on the
+   field, gain 6 Block and 1 Spark." Upgrade unchanged (8 Block). The
+   condition moves from "nothing was cashed" to "something is cooking"; it
+   still pays nothing on a turn with an empty board, so it stays conditional
+   (C4) and it stops paying the player for not playing the kit.
+2. **A random Set off aims a bombed body first** (a rule on Tinder Toss and
+   Rapid Fire, no face text change beyond the tip): "Set off a random enemy"
+   picks among enemies carrying a Bomb; if none carries one, any enemy.
+   Tinder Toss (Common Attack, 0, 1 Spark: Set off a random enemy and deal 4
+   damage to it, twice) and Rapid Fire (Uncommon Attack, 2: Set off a random
+   enemy and deal 3 damage to it, 4 times) keep their numbers.
+
+Two verdicts, each with its clause and its comparison. Under 200 words.
+```
+
+```
+1. **FOLLOWS — C2, C3, C4, C6.** Standing Grounded: **1 energy; 6 Block + 1 Spark** if no Bomb went off last turn. Adjusted: **1 energy; 6 Block + 1 Spark** if a Bomb remains. On turn 2 with an empty field and no turn-1 detonation, adjusted yields **0 Block, 0 Spark**, losing **6 Block and 1 Spark** against standing; retaining a Bomb enables its benefit but postpones cashing that Bomb.
+
+2. **FOLLOWS — C1, C2, C6.** Standing and adjusted Tinder Toss both cost **1 Spark** for **4 damage twice**; Rapid Fire both cost **2 energy** for **3 damage four times**. With two enemies—one bombed and healthy, the other unbombed and attacking at **4 HP** (Tinder) or **3 HP** (Rapid)—the adjustment reduces the first hit’s chance of killing the attacker from **½ to 0**: that turn’s first hit delivers **4 or 3 less damage** to the urgent target. Guaranteed access to a Bomb therefore carries a targeting disadvantage; it does not dominate the standing rule.
+```
+
+
+## 5.7 Furina round 12: two card adjustments (2026-09-05, morning)
+
+Two arms from `review/active/furina-reframe-round-12-2026-09-05.md` §4:
+Rolling Tide at 1 energy, and Curtain Rises fielding Chevalmarin instead of
+the Usher. Both FOLLOWS with comparisons. The reviewer also caught an error
+in the prompt: the arm said Undercurrent costs 1 energy; the census pasted
+below it says 2, and the census is right (the shipped Undercurrent is a
+2-cost Attack). The verdict rested on Cleave and on the replaced-row rule,
+not on that line, so it stands; the packet's own arithmetic is corrected.
+**Outcome:** both build under `EB-530`. Prompt, then reply, verbatim:
+
+```
+# Doctrine read: two Furina card adjustments from round 12
+
+Each numbered arm below is ONE ARM: an ADJUSTMENT to an arm-only row that
+stands on the surface, with the standing text and the adjusted text both
+printed. For each, FOLLOWS or REQUIRES_MODIFICATION, the clause you ruled
+against, and the comparison the verdict rests on: the standing row's line
+against the adjusted line with the numbers, and the turn on which the
+adjustment is better or worse for the player. Read adversarially; the author
+is a different model family. The comparison is reading; a remedy is not, and
+none is asked for.
+
+## Clauses
+
+- **C1 (the owner's "not all agents always win").** A row that removes a
+  losing line the kit is meant to keep, instead of pricing it, is out.
+- **C2 (binding prices).** Every cost printed must bind at the moment it is
+  paid; a card whose cost is routinely free is out.
+- **C3 (player-controlled leverage).** The card's value must follow a
+  decision the player makes (which member, when to deploy, hold Encore or
+  spend it), not a state that arrives by itself.
+- **C5 (nothing fires by itself).** No card triggers without a play. Under
+  the arm a member performs only on a deploy, on a Companion play, on an
+  Evoke, or when a kit card says she performs; nothing ticks on its own.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a standing pool row (listed below) or of a base-game non-basic card at
+  the same or lower rarity and cost. Strike and Defend are basics and not
+  reference points. **Each arm below REPLACES one shipped Common at the same
+  rarity (named on the arm); the replaced row leaves the offer under the
+  arm and is not a C6 reference.** Base-game Commons for reference: Defect's
+  Ball Lightning (1: 7 damage, channel a Lightning orb), Cold Snap (1: 6
+  damage, channel a Frost orb), Coolheaded (1: channel Frost, draw 1),
+  Claw (0: 3 damage), Sweeping Beam (1: 6 to ALL, draw 1); Ironclad's Cleave
+  (1: 8 to ALL), Iron Wave (1: 5 Block, 5 damage), Twin Strike (1: 5 twice).
+- **C8 (Furina reframe section 4.1).** Under the arm Fanfare is minted by a
+  Salon member performing and by nothing else, 2 per trigger and 5 per
+  Evoke, decaying 20% a turn; a kit card that makes a member perform mints
+  the trigger amount, bounded by the kit's own declaration.
+
+## The engine, Furina under the reframe arm
+
+The **Salon** is a stage of three slots on her side. **Deploy** puts a named
+member on stage and she **performs** once as she arrives; deploying onto a
+full stage Evokes the front member to make room (automatic, front only, by
+ruling). A member performs when Furina plays a **Companion card** (a card
+from the companion sheets, drafted from their own reward slot; the starter's
+An Invitation adds one to hand). **Evoke** makes the named member perform
+with her Focus term applied three times and leave the stage; it is priced
+in Encore. Members: Mademoiselle Crabaletta performs 6 Hydro damage to a
+random enemy (Evoke: 14); Gentilhomme Usher performs 3 Block (Evoke: 9);
+Surintendante Chevalmarin performs 2 damage and applies Hydro (Evoke: Hydro
+to ALL and 3 Encore). Member numbers gain +1 per 10 Fanfare held. **Encore**
+absorbs damage after Block and is the Evoke price; she starts each combat
+with 2 (R258). Energy 3, HP 78. Starter: 3 Soloist's Solicitation (Attack
+1: 6), 3 Stage Presence (Skill 1: 6 Block), Regal Bearing (Skill 1: 3 Block,
+1 Weak), Aria of Recompense (Skill 1: 5 Encore, 5 more at 3 Fanfare), Salon
+Debut (Skill 1: Deploy Mademoiselle Crabaletta), An Invitation (Skill 0,
+Exhaust: add a random common Companion card to your hand).
+
+The readings that led to the pass (rounds 7 to 10): with one Deploy in the deck
+(the starter's), the Salon was furniture for most of a run and most
+Companion plays printed "No member on stage: performs nobody"; one dead
+turn with a member idle and no legal way to make her act; Casting Call
+unplayable with one Deploy; the seats asked for Deploy density, a second
+Deploy shape, and the Companion-card density the stage needs.
+
+## The standing pool, Commons pasted from the shipped sheet (offered unchanged under the arm except where an arm below replaces one)
+
+- Casting Call (Common Power, 1 energy): apply 1 salon_cap_up to self.
+- Gentilhomme Usher (Common Skill, 1 energy): deploy usher; gain 4 Block.
+- Surintendante Chevalmarin (Common Skill, 1 energy): deploy chevalmarin; gain 3 Encore.
+- Mademoiselle Crabaletta (Common Skill, 1 energy): deploy crabaletta.
+- Dinner Service (Common Skill, 1 energy): gain 2 Block plus 2 per salon member.
+- Usher the Waves (Common Attack, 1 energy): deal 5 damage to enemy; apply 1 weak to enemy.
+- House Call (Common Attack, 1 energy): deal 6 damage to enemy plus 2 per salon member.
+- Suffering for Art (Common Skill, 0 energy): deal 1 damage to self; gain 3 Encore.
+- Lasting Impression (Common Skill, 1 energy, Exhaust): gain 4 Encore.
+- Stage Combat (Common Attack, 0 energy): deal 3 damage to enemy; if enemy_intends_attack: gain 3 Block.
+- Ebb and Flow (Common Skill, 1 energy, 1 Encore): gain 3 Encore; draw 1.
+- Applause Line (Common Attack, 0 energy): deal 3 damage to enemy plus 1 per 4 fanfare.
+- The House Holds Its Breath (Common Skill, 1 energy): gain 4 Block plus 1 per 4 fanfare.
+- Breathless (Common Attack, 1 energy): spend 4 Encore; deal 9 damage to enemy.
+- An Invitation (Common Skill, 0 energy, Exhaust): add a random common Companion card to your hand.
+- Shared Billing (Common Skill, 1 energy): apply_aura {"element": "hydro", "target": "random_enemy"}; apply 25 spotlight_mult_bonus_turn to self; energy {"amount": 1}.
+- Blocking Notes (Common Skill, 1 energy): gain 5 Block plus 2 per companion played this turn.
+- Stage Lights (Common Skill, 1 energy): apply 2 spotlight_flat_damage_turn to self; apply 1 weak to all_enemies; draw 1.
+- Slip Backstage (Common Skill, 1 energy): spend 5 Encore; gain 10 Block.
+- Commanding Gaze (Common Skill, 1 energy): gain 2 Block; apply 1 weak to all_enemies.
+- Macaron Break (Common Skill, 1 energy): gain 2 Encore; gain 2 Block.
+- Compose Herself (Common Skill, 1 energy): draw 2; if encore_at_least_8: draw 1.
+- Undercurrent (Common Attack, 2 energy): deal 2 damage to all_enemies x3.
+
+## The arm's own rows, pasted from the surface
+
+- Salon Début (Basic Skill, 1 energy): Deploy Mademoiselle Crabaletta.
+- Curtain Call (Common Skill, 1 energy, 2 Encore): Evoke the front Salon member.
+- Exit Stage Left (Uncommon Skill, 1 energy, 1 Encore): Evoke Surintendante Chevalmarin, or the front member if she is not on stage.
+- Let the People Rejoice (Rare Attack, 2 energy): Drain your Fanfare. Deal 8 damage to ALL enemies, plus 1 per Fanfare drained.
+- Intermission (Rare Skill, 1 energy): Drain your Fanfare. Gain Block equal to the Fanfare drained.
+- Florid Cadenza (proto) (Uncommon Skill, 0 energy): Draw 1 card. If you have at least 6 Fanfare, draw 2 more.
+- Dramatic Entrance (proto) (Uncommon Attack, 1 energy): Deal 7 damage. If you have at least 6 Fanfare, deal 7 damage to ALL enemies.
+- Universal Revelry (proto) (Rare Attack, 2 energy): Deal 9 damage to ALL enemies, plus 1 per 2 Fanfare. If you have at least 8 Fanfare, deal 6 more to ALL enemies.
+- Flood of Emotion (proto) (Rare Skill, 1 energy): Deal 14 damage. If you have at least 10 Fanfare, deal 14 more.
+- Aria of Recompense (proto) (Basic Skill, 1 energy): Gain 5 Encore. If you have at least 3 Fanfare, gain 5 more.
+
+## What two rounds of seats said, verbatim
+
+Rolling Tide (2 energy: 2 to ALL twice, the front member performs). Round 11
+assembled: "never played, drawn in four of six fights and rejected every
+time; 2 energy for 4 damage per body, the worst rate in the deck." Round 12
+assembled, asked to log every hand holding it: "6 hands, played 2, held 4;
+filler at 2 energy against single targets; at 1 energy I'd have played it in
+4 of 6 and it would be a staple." Round 12 natural, offered it: "did not want
+it at 2 energy, less than Chevreuse for the same cost; would take it at 1."
+
+Curtain Rises (1 energy: 6 damage, Deploy Gentilhomme Usher). Round 11
+natural: "a draft trap with no warning: it reads as an Attack but puts a
+Block member into the rotation, so on a stacked stage only the first
+Companion card each turn reaches your damage member and the rest give 3
+Block." Round 12 assembled: "held 4 times because the Usher it fields is a
+Block member who then holds the front." Round 12 natural: "the card I never
+wanted to play, because it puts the Usher at the front and converts the
+damage engine into a block engine; Gentilhomme Usher is below a basic
+Defend (3 Block a trigger, 2 dry)."
+
+## The arms
+
+1. **Rolling Tide, adjusted** (Common Attack, replaces Undercurrent). Standing:
+   2 energy, "Deal 2 damage to ALL enemies twice. The front Salon member
+   performs." Adjusted: **1 energy**, same text, upgrade unchanged (3 damage).
+   Against Undercurrent (1 energy: 2 to ALL three times, no performance): one
+   hit fewer for a performance, at the same price.
+2. **Curtain Rises, adjusted** (Common Attack, replaces House Call). Standing:
+   1 energy, "Deal 6 damage. Deploy Gentilhomme Usher." Adjusted: 1 energy,
+   "Deal 6 damage. **Deploy Surintendante Chevalmarin.**" Upgrade unchanged (9
+   damage). Chevalmarin performs 2 damage and applies Hydro as she arrives
+   (Usher: 3 Block); a deploy that fields an applier on an Attack. Against
+   the shipped Surintendante Chevalmarin (Common Skill, 1: deploy her, gain 3
+   Encore): 6 damage in place of 3 Encore.
+
+Two verdicts, each with its clause and its comparison. Under 200 words.
+```
+
+```
+1. **FOLLOWS — C2, C6.** Standing Rolling Tide costs 2 energy for 2 damage to ALL twice plus one front-member performance; adjusted costs 1 for the identical effects. On the turn played, it saves 1 energy; the remaining energy cost binds. Against Cleave (Common, 1 energy: 8 to ALL), adjusted Tide deals 4 to ALL: with an empty Salon, it is worse by 4 damage per enemy that turn. Its performance benefit depends on stage composition. The shipped pool lists Undercurrent at **2 energy**, contradicting the arm’s comparison; Undercurrent is excluded as the replaced row.
+
+2. **FOLLOWS — C6.** Standing Curtain Rises costs 1 energy for 6 damage and Usher’s deploy performance of 3 Block; adjusted costs 1 for 6 damage and Chevalmarin’s 2 damage plus Hydro. At zero Fanfare, the adjustment adds 2 damage and Hydro but loses 3 Block that turn, exchanging defensive value for offense. Against shipped Surintendante Chevalmarin (Common, 1 energy: deploy her, gain 3 Encore), both deploy the same member; adjusted Curtain Rises gains 6 damage but loses 3 Encore that turn. Neither comparison establishes strict superiority.
+```
+
+
+## 5.8 Furina round 13: Second Course at a printed price of 1 (2026-09-05, afternoon)
+
+One arm from `review/active/furina-reframe-round-13-2026-09-05.md` §4:
+Second Course's printed Encore price from 3 to 1 (full value 3 with the
+shipped per-performance drain instead of 5), after three rounds in which
+it was unplayable at the opening Encore of 2. FOLLOWS on C2 and C6 with the
+comparison (turn one at 2 Encore: standing unplayable, adjusted 6 + 4 for
+all the Encore; against the shipped Mademoiselle Crabaletta, 4 more damage
+for the last Encore). **Outcome:** builds under `EB-552`, with Rolling
+Tide's withdrawal from the arm's offer (a D default, no read needed: a row
+leaving the arm is not a card reaching a tester) and Aria+ dropping Innate
+(`EB-550`, a D default on the upgrade). Prompt, then reply, verbatim:
+
+```
+# Doctrine read: one Furina card adjustment from round 13
+
+The numbered arm below is ONE ARM: an ADJUSTMENT to an arm-only row that
+stands on the surface, with the standing text and the adjusted text both
+printed. FOLLOWS or REQUIRES_MODIFICATION, the clause you ruled against, and
+the comparison the verdict rests on: the standing row's line against the
+adjusted line with the numbers, and the turn on which the adjustment is
+better or worse for the player. Read adversarially; the author is a
+different model family. The comparison is reading; a remedy is not, and none
+is asked for.
+
+## Clauses
+
+- **C1 (the owner's "not all agents always win").** A row that removes a
+  losing line the kit is meant to keep, instead of pricing it, is out.
+- **C2 (binding prices).** Every cost printed must bind at the moment it is
+  paid; a card whose cost is routinely free is out.
+- **C3 (player-controlled leverage).** The card's value must follow a
+  decision the player makes (which member, when to deploy, hold Encore or
+  spend it), not a state that arrives by itself.
+- **C5 (nothing fires by itself).** No card triggers without a play. Under
+  the arm a member performs only on a deploy, on a Companion play, on an
+  Evoke, or when a kit card says she performs; nothing ticks on its own.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a standing pool row (listed below) or of a base-game non-basic card at
+  the same or lower rarity and cost. Strike and Defend are basics and not
+  reference points. **Each arm below REPLACES one shipped Common at the same
+  rarity (named on the arm); the replaced row leaves the offer under the
+  arm and is not a C6 reference.** Base-game Commons for reference: Defect's
+  Ball Lightning (1: 7 damage, channel a Lightning orb), Cold Snap (1: 6
+  damage, channel a Frost orb), Coolheaded (1: channel Frost, draw 1),
+  Claw (0: 3 damage), Sweeping Beam (1: 6 to ALL, draw 1); Ironclad's Cleave
+  (1: 8 to ALL), Iron Wave (1: 5 Block, 5 damage), Twin Strike (1: 5 twice).
+- **C8 (Furina reframe section 4.1).** Under the arm Fanfare is minted by a
+  Salon member performing and by nothing else, 2 per trigger and 5 per
+  Evoke, decaying 20% a turn; a kit card that makes a member perform mints
+  the trigger amount, bounded by the kit's own declaration.
+
+## The engine, Furina under the reframe arm
+
+The **Salon** is a stage of three slots on her side. **Deploy** puts a named
+member on stage and she **performs** once as she arrives; deploying onto a
+full stage Evokes the front member to make room (automatic, front only, by
+ruling). A member performs when Furina plays a **Companion card** (a card
+from the companion sheets, drafted from their own reward slot; the starter's
+An Invitation adds one to hand). **Evoke** makes the named member perform
+with her Focus term applied three times and leave the stage; it is priced
+in Encore. Members: Mademoiselle Crabaletta performs 6 Hydro damage to a
+random enemy (Evoke: 14); Gentilhomme Usher performs 3 Block (Evoke: 9);
+Surintendante Chevalmarin performs 2 damage and applies Hydro (Evoke: Hydro
+to ALL and 3 Encore). Member numbers gain +1 per 10 Fanfare held. **Encore**
+absorbs damage after Block and is the Evoke price; she starts each combat
+with 2 (R258). Energy 3, HP 78. Starter: 3 Soloist's Solicitation (Attack
+1: 6), 3 Stage Presence (Skill 1: 6 Block), Regal Bearing (Skill 1: 3 Block,
+1 Weak), Aria of Recompense (Skill 1: 5 Encore, 5 more at 3 Fanfare), Salon
+Debut (Skill 1: Deploy Mademoiselle Crabaletta), An Invitation (Skill 0,
+Exhaust: add a random common Companion card to your hand).
+
+The readings that led to the pass (rounds 7 to 10): with one Deploy in the deck
+(the starter's), the Salon was furniture for most of a run and most
+Companion plays printed "No member on stage: performs nobody"; one dead
+turn with a member idle and no legal way to make her act; Casting Call
+unplayable with one Deploy; the seats asked for Deploy density, a second
+Deploy shape, and the Companion-card density the stage needs.
+
+## The standing pool, Commons pasted from the shipped sheet (offered unchanged under the arm except where an arm below replaces one)
+
+- Casting Call (Common Power, 1 energy): apply 1 salon_cap_up to self.
+- Gentilhomme Usher (Common Skill, 1 energy): deploy usher; gain 4 Block.
+- Surintendante Chevalmarin (Common Skill, 1 energy): deploy chevalmarin; gain 3 Encore.
+- Mademoiselle Crabaletta (Common Skill, 1 energy): deploy crabaletta.
+- Dinner Service (Common Skill, 1 energy): gain 2 Block plus 2 per salon member.
+- Usher the Waves (Common Attack, 1 energy): deal 5 damage to enemy; apply 1 weak to enemy.
+- House Call (Common Attack, 1 energy): deal 6 damage to enemy plus 2 per salon member.
+- Suffering for Art (Common Skill, 0 energy): deal 1 damage to self; gain 3 Encore.
+- Lasting Impression (Common Skill, 1 energy, Exhaust): gain 4 Encore.
+- Stage Combat (Common Attack, 0 energy): deal 3 damage to enemy; if enemy_intends_attack: gain 3 Block.
+- Ebb and Flow (Common Skill, 1 energy, 1 Encore): gain 3 Encore; draw 1.
+- Applause Line (Common Attack, 0 energy): deal 3 damage to enemy plus 1 per 4 fanfare.
+- The House Holds Its Breath (Common Skill, 1 energy): gain 4 Block plus 1 per 4 fanfare.
+- Breathless (Common Attack, 1 energy): spend 4 Encore; deal 9 damage to enemy.
+- An Invitation (Common Skill, 0 energy, Exhaust): add a random common Companion card to your hand.
+- Shared Billing (Common Skill, 1 energy): apply_aura {"element": "hydro", "target": "random_enemy"}; apply 25 spotlight_mult_bonus_turn to self; energy {"amount": 1}.
+- Blocking Notes (Common Skill, 1 energy): gain 5 Block plus 2 per companion played this turn.
+- Stage Lights (Common Skill, 1 energy): apply 2 spotlight_flat_damage_turn to self; apply 1 weak to all_enemies; draw 1.
+- Slip Backstage (Common Skill, 1 energy): spend 5 Encore; gain 10 Block.
+- Commanding Gaze (Common Skill, 1 energy): gain 2 Block; apply 1 weak to all_enemies.
+- Macaron Break (Common Skill, 1 energy): gain 2 Encore; gain 2 Block.
+- Compose Herself (Common Skill, 1 energy): draw 2; if encore_at_least_8: draw 1.
+- Undercurrent (Common Attack, 2 energy): deal 2 damage to all_enemies x3.
+
+## The arm's own rows, pasted from the surface
+
+- Salon Début (Basic Skill, 1 energy): Deploy Mademoiselle Crabaletta.
+- Curtain Call (Common Skill, 1 energy, 2 Encore): Evoke the front Salon member.
+- Exit Stage Left (Uncommon Skill, 1 energy, 1 Encore): Evoke Surintendante Chevalmarin, or the front member if she is not on stage.
+- Let the People Rejoice (Rare Attack, 2 energy): Drain your Fanfare. Deal 8 damage to ALL enemies, plus 1 per Fanfare drained.
+- Intermission (Rare Skill, 1 energy): Drain your Fanfare. Gain Block equal to the Fanfare drained.
+- Florid Cadenza (proto) (Uncommon Skill, 0 energy): Draw 1 card. If you have at least 6 Fanfare, draw 2 more.
+- Dramatic Entrance (proto) (Uncommon Attack, 1 energy): Deal 7 damage. If you have at least 6 Fanfare, deal 7 damage to ALL enemies.
+- Universal Revelry (proto) (Rare Attack, 2 energy): Deal 9 damage to ALL enemies, plus 1 per 2 Fanfare. If you have at least 8 Fanfare, deal 6 more to ALL enemies.
+- Flood of Emotion (proto) (Rare Skill, 1 energy): Deal 14 damage. If you have at least 10 Fanfare, deal 14 more.
+- Aria of Recompense (proto) (Basic Skill, 1 energy): Gain 5 Encore. If you have at least 3 Fanfare, gain 5 more.
+
+## The rule behind the price, and what three rounds of seats said
+
+Under the arm every member performance spends 1 Encore, or performs at
+three quarters if the pool is empty (the shipped Salon rule, printed on the
+member tips). She opens every combat with 2 Encore (R258). Second Course's
+printed price is on top of that drain, so its full value costs the printed
+price plus 2.
+
+Round 11 assembled (printed price 3): "locked out three separate times at
+Encore 2; strictly an after-Aria card, it never once was castable off the
+fight's opening Encore of 2." Round 12 assembled: "it is unplayable on turn
+1 of every fight, which leaves only two reliable Deploys"; two plays logged
+10 to 5 Encore for 6 and 6, and 4 to 0 for 6 and 4 dry. Round 13 assembled:
+"never once playable: four appearances, four CANNOT BE PLAYED: you have no
+Encore, and this costs 3." The stage was empty on turn one of every fight
+in all three rounds.
+
+## The arm
+
+1. **Second Course, adjusted** (Common Skill, 1 energy, replaces Dinner
+   Service). Standing: "Spend 3 Encore. Deploy Mademoiselle Crabaletta. She
+   performs once more." (upgrade: spend 2). Adjusted: **"Spend 1 Encore.
+   Deploy Mademoiselle Crabaletta. She performs once more."** (upgrade: spend
+   0). Everything else unchanged. With the drain, the full-value cost becomes
+   3 Encore (1 printed, 2 performances) instead of 5; at the opening 2 Encore
+   it is playable, pays 1, and performs once paid (6) and once dry (4). Against
+   the shipped Mademoiselle Crabaletta (Common Skill, 1: deploy her, which
+   performs once, 1 Encore by the drain): one more Encore for one more
+   performance.
+
+One verdict, its clause and its comparison. Under 120 words.
+```
+
+```
+1. **FOLLOWS — C2 (binding prices), C6 (not strictly better).** Standing Second Course costs 1 energy + 3 printed Encore, 5 including both performances; adjusted costs 1 energy + 1 printed Encore, 3 including both performances. On turn 1 with an empty stage and 2 Encore, standing is unplayable; adjusted deals 6 + 4 = 10 damage and leaves 0 Encore. Shipped Mademoiselle Crabaletta costs 1 energy, deals 6 on deploy, and leaves 1 Encore: adjusted gains 4 immediate damage but sacrifices that remaining Encore, so its advantage has a binding price.
+```

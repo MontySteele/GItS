@@ -569,10 +569,29 @@ def remember_deck(state: dict[str, Any]) -> None:
     round one every card is in hand or draw, so the union is exactly the deck
     and it is the only reading that can observe a REMOVAL. A later round can
     lose cards to an exhaust-and-clear or to a pile the game has already torn
-    down, so it is taken only when it is BIGGER than what is held -- without
-    that, the union read at a victory screen replaces a 13-card deck with 3.
-    A board belonging to a DIFFERENT character is a different run and simply
-    replaces what is held.
+    down, and the union read at a victory screen would replace a 13-card deck
+    with 3. A board belonging to a DIFFERENT character is a different run and
+    simply replaces what is held.
+
+    `EB-528`. AND ROUND ONE IS THE *ONLY* READ NOW. The clause this replaces
+    took a later round's union whenever it was BIGGER than what is held, and a
+    later round's union can grow for a reason that is not a deck at all: a
+    Companion generated mid-combat (`An Invitation`, `Guest List`) is added to
+    the HAND and to no permanent list -- `GuestStarGenerator.Generate` goes
+    through `CardPileCmd.AddGeneratedCardToCombat`, and the mod is right --
+    so the union grew by one and the generated card was written into the deck
+    this page remembers. Furina r12 met it twice: "Lynette -- Bogglecat Box
+    appeared in my end-of-act deck list ... Bennett, Barbara, Gorou and
+    Freminet, which arrived by the same route, did not" (lane 1), and
+    "Shinobu, generated mid-fight by An Invitation, appeared in my deck list
+    at the Smith" (lane 2). The tell is in the seat's own control: only the
+    generated cards whose fight happened to make the union bigger got in.
+
+    NOTHING IS LOST BY DROPPING IT. A card the run really did gain -- a
+    reward, an event, a Status -- is in hand or draw at the NEXT fight's round
+    one, which is the read this function already called the authoritative one.
+    What the page gives up is freshness INSIDE one combat, and it already
+    labels the deck it prints with the floor that read was taken on.
     """
     player = _blob(state, "player")
     if not any(isinstance(player.get(p), list) for p in _DECK_PILES):
@@ -589,7 +608,7 @@ def remember_deck(state: dict[str, Any]) -> None:
         return
     held = _held_deck()
     same_run = _fold(held.get("character")) == _fold(player.get("character"))
-    if same_run and _int(_blob(state, "battle").get("round")) != 1             and len(cards) <= len(held.get("cards") or []):
+    if same_run and _int(_blob(state, "battle").get("round")) != 1:
         return
     row = {"cards": cards,
            "character": _text(player.get("character")),
@@ -685,9 +704,90 @@ def _number_faces(faces: list[dict[str, Any]], field: str
 # reachable for the fight. It is the nearest honest reading of the row's "the
 # deck faces": the deck memory (`remember_deck`) keeps titles alone and cannot
 # answer what a card applies.
+#
+# `EB-496`. AND IT WAS PROCESS STATE, WHICH IS WHY THE SEATS STILL SAW IT
+# RENUMBER. Everything above is true of ONE PROCESS, and a seat does not have
+# one: the brief hands it `GITS_LANE=1 python -m understudy.blindplay observe`
+# and `... act "<command>"`, so every screen of a round is rendered by a fresh
+# interpreter with an empty dict. Each render therefore numbered the board it
+# was handed from 1 -- kill `Gardener (1)` and the next `observe` calls the
+# survivors `(1)`, `(2)`, `(3)` -- which is precisely the defect `EB-271` and
+# `EB-427` closed for the in-process `Session` driver and never closed for the
+# seats. The Klee r17 lane-1 seat aimed a 14-damage Melt at the body one row
+# down and only found out by reading max-HP off the next screen.
+#
+# SO THE MEMORY IS ON DISK, `_DECK_MEMORY`'s shape one memory over and in the
+# same directory, per lane, for the same reason: a session that renders every
+# screen in one process and a seat that spawns a process per call have to see
+# the same numbers. Sets are stored as sorted lists because JSON has no set;
+# the in-process dict is the working copy and the file is the truth.
+_FIGHT_STORE_DIR = Path(__file__).resolve().parent / "logs"
 _FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {},
                                  "numbered": set(), "names": {},
-                                 "elements": set()}
+                                 "handles": {}, "elements": set(),
+                                 "round": None}
+#: Whether this process has read the lane's store yet. The load is lazy and
+#: happens once: a fresh `observe` pays one file read, and a long-lived
+#: `Session` pays it on its first fight and never again.
+_FIGHT_LOADED = [False]
+
+
+def _fight_store() -> Path:
+    lane = re.sub(r"[^A-Za-z0-9]", "", os.environ.get("GITS_LANE", "")) or "0"
+    return _FIGHT_STORE_DIR / f"_blindplay-fight-lane{lane}.json"
+
+
+def _load_fight() -> None:
+    """Fill the in-process memory from the lane's store, once (`EB-496`)."""
+    if _FIGHT_LOADED[0]:
+        return
+    _FIGHT_LOADED[0] = True
+    try:
+        held = json.loads(_fight_store().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return
+    if not isinstance(held, dict):
+        return
+    # A tuple survives a JSON round trip as a list, and `roster` compares its
+    # values against `(fold, max_hp)` tuples -- so the shape is restored here
+    # rather than left for `_enemy_names` to trip over.
+    roster = held.get("roster")
+    if isinstance(roster, dict):
+        _FIGHT_MEMORY["roster"] = {
+            k: (str(v[0]), int(v[1])) for k, v in roster.items()
+            if isinstance(v, (list, tuple)) and len(v) == 2}
+    for key in ("ordinals", "names", "handles"):
+        value = held.get(key)
+        if isinstance(value, dict):
+            _FIGHT_MEMORY[key] = dict(value)
+    # `EB-541`: the battle round these letters were last minted on, which is
+    # the ONE fact that tells a replaced board from a new fight. Absent from a
+    # store written before that row, and absent is not 0 -- a memory that
+    # cannot say which round it is from falls back to the old reset.
+    held_round = held.get("round")
+    if isinstance(held_round, int):
+        _FIGHT_MEMORY["round"] = held_round
+    for key in ("numbered", "elements"):
+        value = held.get(key)
+        if isinstance(value, list):
+            _FIGHT_MEMORY[key] = {str(v) for v in value}
+
+
+def _save_fight() -> None:
+    """Write the memory back to the lane's store. A read-only tree keeps the
+    in-process copy and loses nothing else (`remember_deck`'s own bargain)."""
+    row = {"roster": {k: list(v) for k, v in _FIGHT_MEMORY["roster"].items()},
+           "ordinals": dict(_FIGHT_MEMORY["ordinals"]),
+           "names": dict(_FIGHT_MEMORY["names"]),
+           "handles": dict(_FIGHT_MEMORY["handles"]),
+           "numbered": sorted(_FIGHT_MEMORY["numbered"]),
+           "elements": sorted(_FIGHT_MEMORY["elements"]),
+           "round": _FIGHT_MEMORY["round"]}
+    try:
+        _FIGHT_STORE_DIR.mkdir(parents=True, exist_ok=True)
+        _fight_store().write_text(json.dumps(row), encoding="utf-8")
+    except OSError:
+        pass
 
 
 def forget_fight() -> None:
@@ -696,7 +796,14 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["ordinals"] = {}
     _FIGHT_MEMORY["numbered"] = set()
     _FIGHT_MEMORY["names"] = {}
+    _FIGHT_MEMORY["handles"] = {}
     _FIGHT_MEMORY["elements"] = set()
+    _FIGHT_MEMORY["round"] = None
+    _FIGHT_LOADED[0] = True
+    try:
+        _fight_store().unlink()
+    except OSError:
+        pass
 
 
 def remember_elements(found: set[str]) -> set[str]:
@@ -707,8 +814,19 @@ def remember_elements(found: set[str]) -> set[str]:
     a card that is in the discard this turn is in the hand two turns from now.
     Dropped with the rest of the fight's memory, so a Cryo drafted for one run
     is not still colouring the glossary of the next.
+
+    `EB-496` PUT IT ON DISK, and that is what closes `EB-428`'s reward half:
+    the reward screen is a different PROCESS from the fight it followed, so the
+    elements the deck had just shown were gone by the time the offer was read
+    and every reaction card was priced against its own element alone. The Klee
+    r17 lane-1 seat passed Dahlia (Hydro) twice holding Pyro and Electro and
+    was told, on both screens, that no reaction was reachable.
     """
+    _load_fight()
+    before = set(_FIGHT_MEMORY["elements"])
     _FIGHT_MEMORY["elements"] |= set(found)
+    if _FIGHT_MEMORY["elements"] != before:
+        _save_fight()
     return set(_FIGHT_MEMORY["elements"])
 
 
@@ -726,6 +844,7 @@ def remembered_enemy_name(combat_id: Any, title: str) -> str:
     here on the same two conditions it is numbered there, so a body cannot be
     called one thing in the enemy list and another in the receipt above it.
     """
+    _load_fight()
     key = f"c{combat_id}"
     name = _FIGHT_MEMORY["names"].get(key)
     if not name:
@@ -733,6 +852,37 @@ def remembered_enemy_name(combat_id: Any, title: str) -> str:
     if _fold(name) in _FIGHT_MEMORY["numbered"] and key in _FIGHT_MEMORY["ordinals"]:
         return f"{name} ({_FIGHT_MEMORY['ordinals'][key]})"
     return name
+
+
+# `EB-496`, THE SECOND HANDLE ON THE OTHER SIDE OF THE BOARD.
+#
+# A number is a name's copy count, and it is only a handle where a name
+# repeats: a board of one Gardener and one Sewer Clam prints neither. What the
+# seat asked for is a handle that is the same word on every screen of the
+# fight whatever dies, for every body, so a card can be aimed without reading
+# the list again -- and the letters are that. Assigned in the order the fight
+# first saw each body, kept beside the ordinal in the same memory, and dropped
+# with it.
+#
+# LETTERS AND NOT SLOTS. A slot is a place on the board and the board closes
+# up; a letter is minted once and never reused, which is the whole property
+# the number lacked. `E27` and up is the honest overflow rather than `AA`: no
+# encounter in the game fields twenty-seven bodies, and a reader meeting one
+# is better served by something that cannot be mistaken for a name.
+#
+# `EB-541`: AND THE PROPERTY WAS FALSE ON A REPLACEMENT. Kokomi r19 lane 1,
+# floor 8: `Surprise 1` killed Gremlin Merc [A] and put a Sneaky Gremlin and a
+# Fat Gremlin in its place -- and they were lettered [A] and [B]. The seat had
+# been aiming by letter all fight. The cause is the fight-boundary test below
+# and not the minting: a board that shares NO body with the memory was read as
+# a new fight, which is exactly what a whole-board replacement looks like. The
+# round tells them apart, and it is the one fact the wire already carries: a
+# new fight opens on round 1 and a replacement happens on the round the fight
+# had reached. So the reset now asks the round as well, the memory remembers
+# which round it was minted on, and a spawned or replaced body mints the next
+# unused letter while the dead body's letter retires with it.
+def _handle_for(nth: int) -> str:
+    return chr(ord("A") + nth) if nth < 26 else f"E{nth + 1}"
 
 
 def _enemy_key(entry: dict[str, Any]) -> str:
@@ -747,7 +897,31 @@ def _enemy_key(entry: dict[str, Any]) -> str:
     return f"c{cid}" if cid is not None else f"e{_entity_id(entry)}"
 
 
-def _enemy_names(enemies: list[dict[str, Any]]) -> list[str]:
+def _is_a_new_fight(round_: int | None) -> bool:
+    """Is a board that shares no body with the memory a NEW FIGHT (`EB-541`)?
+
+    It always was, until a whole board was replaced mid-fight. The two look
+    identical from the board alone -- every key is unknown either way -- so the
+    ROUND is what separates them, and it separates them three ways:
+
+      * the memory cannot say which round it holds (a store written before this
+        row, or a caller that does not know): the old answer, a new fight;
+      * the board is on round 1 or the wire carries no round: a new fight, and
+        this is the ordinary case every fight opens with;
+      * the round went BACKWARDS from the one the memory was minted on: a new
+        fight joined late, after an older one that ran longer.
+
+    Anything else is the fight going on -- a replacement, a summon, a split --
+    and the memory stands so the new bodies mint the next unused letters.
+    """
+    remembered = _FIGHT_MEMORY["round"]
+    if not isinstance(remembered, int) or round_ is None:
+        return True
+    return round_ <= 1 or round_ < remembered
+
+
+def _enemy_names(enemies: list[dict[str, Any]],
+                 round_: int | None = None) -> list[str]:
     """The printed enemy names, numbered ONCE and kept for the fight.
 
     Same output as `_number_names` on the opening board of any fight, which is
@@ -759,9 +933,16 @@ def _enemy_names(enemies: list[dict[str, Any]]) -> list[str]:
     and taking it away is the stale-number refusal this row's first half had
     to paper over. A name that has never repeated is left exactly as the game
     printed it.
+
+    `round_` IS THE BATTLE ROUND OF THE BOARD BEING READ (`EB-541`), and it is
+    optional because it is only ever needed to answer one question --
+    `_is_a_new_fight` -- which it answers for a board that shares nothing with
+    the memory. Every caller has the state and passes it; a caller that does
+    not gets the pre-`EB-541` reset.
     """
     if not enemies:
         return []
+    _load_fight()
     names = [_text(e.get("name")) for e in enemies]
     # An id the feed repeats on ONE board cannot identify a creature, and
     # collapsing two bodies onto one key would print one number twice -- the
@@ -781,25 +962,56 @@ def _enemy_names(enemies: list[dict[str, Any]]) -> list[str]:
     roster: dict[str, tuple[str, int]] = _FIGHT_MEMORY["roster"]
     shared = any(roster.get(k) == i for k, i in zip(keys, ident))
     clash = any(k in roster and roster[k] != i for k, i in zip(keys, ident))
-    if clash or not shared:
+    if clash or (not shared and _is_a_new_fight(round_)):
         forget_fight()
     roster = _FIGHT_MEMORY["roster"]
     ordinals: dict[str, int] = _FIGHT_MEMORY["ordinals"]
     numbered: set[str] = _FIGHT_MEMORY["numbered"]
 
+    handles: dict[str, str] = _FIGHT_MEMORY["handles"]
+    fresh = False
     for key, name, (fold, hp) in zip(keys, names, ident):
         if key in roster or not fold:
             continue
+        fresh = True
         roster[key] = (fold, hp)
         # `EB-427`: the printed name beside the ordinal, so a line about a body
         # that has since left the board can be given the same handle.
         _FIGHT_MEMORY["names"][key] = name
+        # `EB-496`: and the letter, minted in first-seen order and never
+        # reused, so a summon takes the next free one rather than a dead
+        # body's.
+        handles[key] = _handle_for(len(handles))
         seen = sum(1 for f, _ in roster.values() if f == fold)
         ordinals[key] = seen
         if seen > 1:
             numbered.add(fold)
+    if round_ is not None and _FIGHT_MEMORY["round"] != round_:
+        _FIGHT_MEMORY["round"] = round_
+        fresh = True
+    if fresh:
+        _save_fight()
     return [f"{n} ({ordinals[k]})" if _fold(n) in numbered and k in ordinals
             else n for k, n in zip(keys, names)]
+
+
+def _enemy_handles(enemies: list[dict[str, Any]]) -> list[str]:
+    """The per-fight letter of each body on this board, in its order (`EB-496`).
+
+    Read out of the memory `_enemy_names` fills, and only out of it: a body
+    this fight has never numbered has no letter, and the page prints none
+    rather than counting the list it happens to be holding -- which is the
+    counting this row exists to stop.
+    """
+    handles: dict[str, str] = _FIGHT_MEMORY["handles"]
+    seen_key: dict[str, int] = {}
+    out: list[str] = []
+    for entry in enemies:
+        key = _enemy_key(entry)
+        nth = seen_key.get(key, 0)
+        seen_key[key] = nth + 1
+        out.append(handles.get(key if nth == 0 else f"{key}#{nth}", ""))
+    return out
 
 
 # `EB-271`, THE SECOND HANDLE. THE ONE REFUSAL ON THE SCREEN THAT NAMED

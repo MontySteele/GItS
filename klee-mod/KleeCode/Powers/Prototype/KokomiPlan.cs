@@ -240,8 +240,26 @@ public static class KokomiPlan
     /// (<c>TamakushiCasket.Strike</c>), and the page prints the delivered
     /// total with that name beside it. A future rider that says nothing here
     /// leaves the page exactly as it was.
+    ///
+    /// AND WHICH BODY IT LANDED ON (`EB-518`). `EB-453`'s row named the source
+    /// and the number and not the target, so a beat that struck ONE body twice
+    /// and another once printed three identical entries -- "Tamakushi Casket
+    /// 2, Tamakushi Casket 2, Tamakushi Casket 2" -- with nothing to say how
+    /// they divided. The r18 seat had predicted 5 + 2 for each of three bodies,
+    /// read 1 / 9 / 7 off the board, and concluded a FOURTH strike had gone
+    /// unlisted: two of the three had in fact landed on the same body, because
+    /// <c>ElementalHit.Deal</c> resolves the reaction BEFORE the hit lands, so
+    /// the Plan's own Hydro froze that body and the Casket answered the Frozen
+    /// as well as the Weak. Three entries, four events' worth of arithmetic,
+    /// and no way to check it.
+    ///
+    /// <paramref name="CombatId"/> IS THE HANDLE AND <paramref name="Target"/>
+    /// IS THE FALLBACK, which is <see cref="MovedOn"/>'s split verbatim and
+    /// for its reasons: the page owns the numbered names, and a body the beat
+    /// KILLED is off the next board and keeps the title recorded here.
     /// </summary>
-    public readonly record struct Rider(string Source, int Amount);
+    public readonly record struct Rider(string Source, int Amount,
+                                        string Target, string CombatId);
 
     /// <summary>
     /// HOW MUCH THE BOARD ACTUALLY MOVED, on one creature, during one Plan
@@ -311,11 +329,20 @@ public static class KokomiPlan
     /// any part of it, which is exactly the gap `EB-453` is. Safe to call at
     /// any time -- outside a Plan it does nothing, which is what makes it a
     /// call a rider can make unconditionally.
+    ///
+    /// `EB-518` ADDS THE BODY, for the reason on <see cref="Rider"/>: three
+    /// identical entries cannot be divided among three enemies by a reader,
+    /// and the one that struck twice is exactly the one whose arithmetic does
+    /// not close. The target is read the way <see cref="MovedOn"/> reads it --
+    /// <see cref="EnemyName"/> for the title, <c>CombatId</c> for the handle --
+    /// so the page resolves both rows through one lookup.
     /// </summary>
-    public static void NoteRider(string source, int amount)
+    public static void NoteRider(string source, int amount,
+                                 Creature? target = null)
     {
         if (_riders == null || amount <= 0) return;
-        _riders.Add(new Rider(source, amount));
+        _riders.Add(new Rider(source, amount, EnemyName(target),
+                              target?.CombatId.ToString() ?? string.Empty));
     }
 
     /// <summary>
@@ -682,7 +709,22 @@ public static class KokomiPlan
         // than counted up inside the loop, so the answer does not depend on
         // where in the queue the Tide Wall sits. `kokomi_plan.resolve_all`
         // records the same number in the same place.
-        KokomiOverhaulLedger.For(kokomi).NoteMorning(due.Count);
+        //
+        // `EB-501`. THE DEPTH IS CARRY-OUTS AND NOT ENTRIES. All three readers
+        // say "carried out this morning" on their own faces -- Tide Wall, Well
+        // Laid and Tide Chart -- and under Nereid's Ascension a one-Plan
+        // morning is carried out twice. The r17 seat wrote its Plans under the
+        // Ascension and Well Laid paid the written count.
+        //
+        // STILL READ ONCE, AT THE DRAIN, for the reason above: the answer must
+        // not depend on where in the queue the reader sits. The one state it
+        // cannot see is an Ascension that ARRIVES mid-morning off a Plan of its
+        // own, which the loop below would honour and this number would not.
+        // That is the price of order-independence and it is deliberate.
+        // `kokomi_plan.resolve_all` multiplies by the same term in the same
+        // place.
+        KokomiOverhaulLedger.For(kokomi).NoteMorning(
+            due.Count * CarryOutTimes(kokomi));
         // The display list is handed over BEFORE the sync, because `Sync`
         // refreshes the strip and the strip reads `Showing`: the badge goes
         // away in the same beat the column stays up, which is the true
@@ -743,6 +785,13 @@ public static class KokomiPlan
     /// this file holds what is owed, and which card owed it is the card's own
     /// business. Sim twin: `kokomi_plan.promise_tide_chart`.
     /// </summary>
+    /// <summary>The card's printed title, said once (`EB-503`): the morning's
+    /// draw line names the card that promised it, and the page's own naming
+    /// rule is "by printed title" (`FurinaReframeLedger`'s replay list makes
+    /// the same choice). Sim twin: the `tide_chart_paid` row's own name.
+    /// </summary>
+    private const string TideChartTitle = "Tide Chart";
+
     public static void PromiseDraw(Creature? kokomi, int flat, int per)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
@@ -810,6 +859,31 @@ public static class KokomiPlan
         _tideCharts.Remove(player);
         if (cards <= 0) return;
         await CardPileCmd.Draw(choiceContext, cards, player);
+        // `EB-503`. THE ONE PLAN CARD THE BAKE-KURAGE BLOCK NEVER REPORTED ON.
+        // The r17 seat had two carry-outs pending, watched one extra card
+        // arrive, and found "no line anywhere" -- the draw happens inside the
+        // morning, after the jellyfish has finished speaking, and nothing said
+        // it was the Tide Chart's.
+        //
+        // A ROW AND NOT A BEAT, which is `NoteUnfinished`'s split and taken
+        // for a second reason here: `KurageBeat.Say` builds an
+        // `NSpeechBubbleVfx`, which needs a live scene tree, and this method
+        // is one of the few on this class the headless suite can reach
+        // (`KokomiOverhaulRuleTests` calls it directly). It still goes through
+        // `Record`, the one writer, so the draw files into the same list every
+        // carry-out lands in and the page needs to learn nothing --
+        // `KurageBeat.Line` gives it the ruled format ("Bake-Kurage: Tide
+        // Chart, 3") and `Kind.Draw`'s word the rest ("3 cards drawn").
+        //
+        // AFTER THE DRAW, not before, because the number the seat is owed is
+        // what arrived: this is the one site that knows both that a promise
+        // existed and what it came to.
+        //
+        // `onPlay: false` -- a morning event, so it files with the morning's
+        // carry-outs and not with the on-play doors.
+        Record(kokomi, new CarriedOutPlan(
+            TideChartTitle, cards, Vfx.KurageBeat.Line(TideChartTitle, cards),
+            null, false, NumberKind(Kind.Draw), cards, null));
     }
 
     /// <summary>
@@ -1127,12 +1201,33 @@ public static class KokomiPlan
     /// <summary>The enemy's printed title, or an empty string where the game
     /// will not answer. A state read must never throw
     /// (<c>Diagnostics.PlayTelemetry.NameOf</c> takes the same posture), and
-    /// the page has the combat id to name the creature with anyway.</summary>
-    private static string EnemyName(Creature enemy)
+    /// the page has the combat id to name the creature with anyway.
+    ///
+    /// `EB-542`: `GetFormattedText` AND NOT `ToString`. A `LocString`'s
+    /// `ToString` is its DEBUG form -- "LocString table monsters entry
+    /// CORPSE_SLUG.name" -- and that string reached the player-facing
+    /// carry-out log on Flank's set line, twice in one fight and again on
+    /// floor 5 with `CALCIFIED_CULTIST` and `DAMP_CULTIST` (Kokomi r19 lane 1).
+    ///
+    /// IT IS THE LOOKUP THE ENEMY LIST ALREADY USES, which is why only this
+    /// line showed it: the bridge names every body through
+    /// `SafeGetText`, which resolves a `LocString` with `GetFormattedText`, and
+    /// every OTHER row this class emits carries a `CombatId` the page renames
+    /// from its own fight memory (`MovedOn`, `Rider`). <see cref="AimedLabel"/>
+    /// bakes its names into a string with no id on it, so it is the one place
+    /// an unresolved title could survive to the screen.
+    ///
+    /// THE GUARD IS THE SAME GUARD, one call further in: `GetFormattedText`
+    /// throws on a model whose loc table has not been built
+    /// (<c>SalonPowers.PrintedTitle</c>'s own note), and this is read from
+    /// inside a resolution, where a throw reaches the player as a black screen.
+    /// </summary>
+    private static string EnemyName(Creature? enemy)
     {
+        if (enemy == null) return "";
         try
         {
-            return enemy.Monster?.Title.ToString() ?? "";
+            return enemy.Monster?.Title.GetFormattedText() ?? "";
         }
         catch (System.Exception)
         {
@@ -1544,13 +1639,17 @@ public static class KokomiPlan
         };
 
     /// One named rider inside one Plan's window (`EB-453`). A named method for
-    /// <see cref="CarriedOutRow"/>'s own reason: these two keys are read by
+    /// <see cref="CarriedOutRow"/>'s own reason: these keys are read by
     /// `understudy/blindplay._rider_row` and a pin has to see the literals.
+    /// `target` and `combat_id` are `EB-518`'s, and they are `MovedRow`'s two
+    /// spellings so the page resolves both rows through one lookup.
     private static object? RiderRow(Rider rider) =>
         new Dictionary<string, object?>
         {
             ["source"] = rider.Source,
             ["amount"] = rider.Amount,
+            ["target"] = rider.Target,
+            ["combat_id"] = rider.CombatId,
         };
 
     /// One enemy's share of one Plan, on the wire (`EB-329`).

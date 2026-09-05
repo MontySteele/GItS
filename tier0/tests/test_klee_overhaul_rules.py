@@ -976,9 +976,14 @@ def test_rule7_a_skipped_round_reports_an_honest_zero(overhaul):
     assert state.ko_set_off_last_turn == 0
 
 
-def test_rule7_grounded_pays_for_the_quiet_turn_and_not_the_loud_one(overhaul):
-    """Grounded's condition, end to end. LAST turn and not this one is the
-    whole design: the decision it pays for was made a turn ago.
+def test_eb516_grounded_pays_while_a_bomb_is_cooking(overhaul):
+    """`EB-516`. Grounded's condition, end to end, in its new shape: "if you
+    have a Bomb on the field".
+
+    THE PINS THE ROW NAMES. An empty field pays nothing; a Mine alone pays,
+    because a Mine IS a Bomb; and a turn on which one Bomb went off while
+    another is still cooking pays -- the reading the old counter could not
+    express, and the one the r18 ledgers showed was the common case.
 
     UNPOWERED, the mod's `ValueProp.Unpowered`: it is a POWER's Block, so Frail
     does not bite it."""
@@ -989,14 +994,84 @@ def test_rule7_grounded_pays_for_the_quiet_turn_and_not_the_loud_one(overhaul):
 
     klee_overhaul.roll_to(state, 1)
     klee_overhaul.turn_start_late(state)
-    assert state.player.block == 6, "quiet turn: paid, and unreduced by Frail"
+    assert state.player.block == 0, "an empty field pays nothing"
 
-    state.player.block = 0
-    klee_overhaul.place(state, enemy, 5)
-    klee_overhaul.set_off(state, enemy)          # a loud turn
+    # A MINE ALONE PAYS: a Mine is a Bomb.
+    klee_overhaul.place(state, enemy, 4, is_mine=True)
     klee_overhaul.roll_to(state, 2)
     klee_overhaul.turn_start_late(state)
-    assert state.player.block == 0, "it went off last turn: Grounded stays quiet"
+    assert state.player.block == 6, "a Mine pays, and Frail does not bite it"
+
+    # ONE WENT OFF, ANOTHER IS STILL COOKING.
+    state.player.block = 0
+    klee_overhaul.place(state, enemy, 5)
+    klee_overhaul.note_explosion(state, reacted=False, damage_dealt=4)
+    klee_overhaul.roll_to(state, 3)
+    klee_overhaul.turn_start_late(state)
+    assert state.player.block == 6, "a Bomb still on the field pays"
+
+    # AND AN EMPTY FIELD AFTER THE CASH-OUT PAYS NOTHING.
+    state.player.block = 0
+    klee_overhaul.set_off(state, enemy)
+    klee_overhaul.roll_to(state, 4)
+    klee_overhaul.turn_start_late(state)
+    assert state.player.block == 0, "nothing cooking, nothing paid"
+
+
+def test_eb533_grounded_says_its_answer_either_way(overhaul):
+    """`EB-533`. THE SILENT FAILURE, and it cost the seat a turn to find.
+
+    Klee r19 lane 1 logged the card every turn: paid three times, failed twice,
+    and both failures were the turn after it had detonated everything -- the
+    card's price rather than its trap, and the seat named the turn it resolved
+    as the round's best decision. What was missing was a line: "the two
+    failures printed no near-miss line, I caught it only by diffing my own
+    Block."
+
+    NOTHING ABOUT THE CONDITION MOVES and no payout moves; the turn that says
+    no now says so. The mod's twin is `GroundedPower`'s latched badge face,
+    which is the same claim on the surface that engine has, and it is LATCHED
+    for the reason this event is emitted at turn start: the answer is given
+    then, and the board a badge would re-read has moved by the time a player
+    looks at it.
+    """
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.player.powers[klee_overhaul.GROUNDED] = 6
+
+    # THE FAILING TURN, and it is the seat's own: an empty field.
+    klee_overhaul.roll_to(state, 1)
+    klee_overhaul.turn_start_late(state)
+
+    said = [ev for ev in state.log if ev["event"] == "ko_grounded"]
+    assert len(said) == 1, "a turn that pays nothing still says so"
+    assert said[0]["paid"] is False
+    assert said[0]["amount"] == 0 and said[0]["spark"] == 0
+    assert state.player.block == 0
+
+    # AND THE PAYING TURN SAYS THE SAME THING THE OTHER WAY.
+    klee_overhaul.place(state, enemy, 5)
+    klee_overhaul.roll_to(state, 2)
+    klee_overhaul.turn_start_late(state)
+
+    said = [ev for ev in state.log if ev["event"] == "ko_grounded"]
+    assert len(said) == 2
+    assert said[1]["paid"] is True
+    assert said[1]["amount"] == 6
+    assert said[1]["spark"] == int(C.KLEE_OVERHAUL_GROUNDED_SPARK)
+
+
+def test_eb533_a_seat_without_the_power_says_nothing(overhaul):
+    """The one silence that stays: a run that never drafted Grounded has no
+    answer to give, and a line about a Power nobody holds is noise on every
+    turn of every fight."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+
+    klee_overhaul.roll_to(state, 1)
+    klee_overhaul.turn_start_late(state)
+
+    assert [ev for ev in state.log if ev["event"] == "ko_grounded"] == []
 
 
 def test_eb344_the_held_turn_also_grants_one_spark(overhaul):
@@ -1012,6 +1087,8 @@ def test_eb344_the_held_turn_also_grants_one_spark(overhaul):
     state.player.powers[klee_overhaul.GROUNDED] = 6
     sparks_before = state.player.sparks
 
+    # `EB-516`: the paying turn is the one with something cooking.
+    klee_overhaul.place(state, enemy, 5)
     klee_overhaul.roll_to(state, 1)
     klee_overhaul.turn_start_late(state)
     assert state.player.block == 6
@@ -1019,13 +1096,12 @@ def test_eb344_the_held_turn_also_grants_one_spark(overhaul):
 
     banked = state.player.sparks
     state.player.block = 0
-    klee_overhaul.place(state, enemy, 5)
-    klee_overhaul.set_off(state, enemy)          # a loud turn
+    klee_overhaul.set_off(state, enemy)          # the field empties
     sparks_after_explosions = state.player.sparks
     klee_overhaul.roll_to(state, 2)
     klee_overhaul.turn_start_late(state)
 
-    assert state.player.block == 0, "no Block after a detonation"
+    assert state.player.block == 0, "no Block on an empty field"
     assert state.player.sparks == sparks_after_explosions, \
         "and no Spark either: one condition, both halves"
     assert banked <= sparks_after_explosions      # the explosion paid its own
@@ -1034,8 +1110,10 @@ def test_eb344_the_held_turn_also_grants_one_spark(overhaul):
 def test_eb344_the_upgrade_moves_the_block_and_not_the_spark(overhaul):
     """The number's home. `power_amount: +2` is the BLOCK (6 -> 8); the Spark
     is the kit's rate and is 1 at both levels."""
-    state = klee_state()
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
     state.player.powers[klee_overhaul.GROUNDED] = 8      # the upgraded card
+    klee_overhaul.place(state, enemy, 5)                 # `EB-516`'s condition
     sparks_before = state.player.sparks
 
     klee_overhaul.roll_to(state, 1)
@@ -1195,6 +1273,55 @@ def test_careful_arrangement_merges_the_board_into_one_bomb(overhaul):
     assert sizes(b) == [5 + 6 + 7 + 2]
     assert b.ko_charges[0].is_mine is True
     assert b.ko_charges[0].payload_mine_all == 3
+
+
+def test_eb534_the_face_says_the_merged_pile_is_still_a_mine(overhaul):
+    """`EB-534`. TWO SEATS, OPPOSITE READS, AND THE FACE SAID NEITHER.
+
+    Klee r18 lane 1 read Careful Arrangement as PRESERVING Mine status ("the
+    body line said so"); r19 lane 1 read it as converting Mines to plain Bombs
+    and never played the card, "worse than a blank card". The face said only
+    "as one Bomb".
+
+    BOTH ENGINES PRESERVE IT and always did, for the reason above this test: a
+    merge is a MOVE and a move must not silently delete the defence the player
+    set up. So r18 was right and the fix is one clause on the card. This pin is
+    the SHEET against the ENGINE, in one place, so the clause cannot outlive the
+    behaviour or the other way round.
+    """
+    from pathlib import Path
+
+    import yaml
+
+    repo = Path(__file__).resolve().parents[2]
+    sheet = yaml.safe_load((repo / "docs" / "prototype-surface.yaml")
+                           .read_text(encoding="utf-8"))
+    row = next(r for r in sheet if r["id"] == "proto_ko_careful_arrangement")
+    assert "[gold]Mine[/gold] if any of them was" in row["description"]
+
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 4, is_mine=True)
+    klee_overhaul.place(state, b, 6)
+
+    klee_overhaul.merge_all_to(state, b, growth=5)
+
+    assert sizes(b) == [4 + 6 + 5]
+    assert b.ko_charges[0].is_mine is True, "the face's clause, played"
+
+
+def test_eb534_a_merge_of_plain_bombs_stays_plain(overhaul):
+    """The other half of the clause, and the reason it reads "if any of them
+    was" rather than "a Mine": a board with no Mine on it merges into a plain
+    Bomb, so the card does not hand out a defence the player never placed."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 4)
+    klee_overhaul.place(state, b, 6)
+
+    klee_overhaul.merge_all_to(state, b, growth=5)
+
+    assert b.ko_charges[0].is_mine is False
 
 
 def test_chain_fuse_grows_one_enemys_pile_only(overhaul):
@@ -2379,3 +2506,104 @@ def test_the_pact_is_dead_on_an_aura_less_board(overhaul):
 
     assert state.reactions_this_turn == 0
     assert counts(state)["ko_vermillion_pact"] == 0
+
+
+# ---------------------------------------------------------------------------
+# ROUND 18 -- `EB-516`'s aim, and `EB-512`'s counter
+# ---------------------------------------------------------------------------
+
+def test_eb516_a_random_set_off_aims_a_bombed_body_every_time(overhaul):
+    """`EB-516` (Klee r18, packet sec.4 item 2). "A random Set off picks among
+    the enemies carrying a Bomb; if none, any enemy."
+
+    THE ROW'S OWN PIN: a two-enemy board with one Bomb hits the bombed body
+    EVERY time, over every seed. Tinder Toss and Rapid Fire share the fault and
+    this one rule fixes both -- a random Set off landing on a Bomb-less body
+    breaks the arm's only economic loop, and the r17 and r18 seats named the two
+    rows the least-wanted cards in the pool. `SetOffRandom` is the twin.
+    """
+    for seed in range(24):
+        bombed = make_enemy(hp=200, name="bombed")
+        bare = make_enemy(hp=200, name="bare")
+        state = make_state(enemies=[bombed, bare], hp=62, seed=seed)
+        state.player.character_id = "klee"
+        state.player.element = "pyro"
+        state.player.cadence = "catalyst"
+        state.in_player_turn = True
+        klee_overhaul.place(state, bombed, 5)
+        bare_hp = bare.hp
+
+        # ONE ROLL, so the bag is read once and the assertion is about the aim
+        # rather than about what the first hit left behind. The printed rows
+        # roll per hit (Tinder Toss twice, Rapid Fire four times), which is the
+        # next test.
+        effects.resolve_card(state, probe(
+            [{"op": "set_off", "target": "random_enemy",
+              "damage": 4, "times": 1}]))
+
+        assert sizes(bombed) == [], f"seed {seed}: the Bomb was cashed"
+        assert bare.hp == bare_hp, f"seed {seed}: the bare body was not rolled"
+
+
+def test_eb516_a_bomb_less_board_is_still_uniform(overhaul):
+    """The fallback is EVERY living enemy and not an empty bag: with nothing of
+    hers on the board the card resolves exactly as it did, which is what keeps
+    it a legal play rather than a refusal. Over enough seeds both bodies come
+    up."""
+    hit = set()
+    for seed in range(40):
+        a = make_enemy(hp=200, name="a")
+        b = make_enemy(hp=200, name="b")
+        state = make_state(enemies=[a, b], hp=62, seed=seed)
+        state.player.character_id = "klee"
+        state.player.element = "pyro"
+        state.player.cadence = "catalyst"
+        state.in_player_turn = True
+        effects.resolve_card(state, probe(
+            [{"op": "set_off", "target": "random_enemy",
+              "damage": 4, "times": 1}]))
+        if a.hp < 200:
+            hit.add("a")
+        if b.hp < 200:
+            hit.add("b")
+    assert hit == {"a", "b"}, "a Bomb-less board rolls both bodies"
+
+
+def test_eb516_rapid_fire_takes_the_same_aim(overhaul):
+    """One rule, two rows: Rapid Fire rolls four times and every roll is drawn
+    from the same bag."""
+    bombed = make_enemy(hp=200, name="bombed")
+    bare = make_enemy(hp=200, name="bare")
+    state = klee_state([bombed, bare])
+    klee_overhaul.place(state, bombed, 5)
+    state.player.energy = 3
+    card = load("proto_ko_rapid_fire")
+    state.player.hand.append(card)
+    combat.play_card(state, card)
+
+    assert sizes(bombed) == []
+    # The FIRST roll is the only one that can find a Bomb, and after it the
+    # board holds none -- so the remaining three fall back to every living
+    # body, which is the fallback doing its job rather than a stuck aim. The
+    # NUMBERS are untouched by any of it: four rolls, four hits.
+    assert bombed.hp < 200
+    assert counts(state)["ko_explosion"] == 1
+
+
+def test_eb512_stoke_the_fuse_leaves_the_counter_at_zero(overhaul):
+    """`EB-512`, the r18 seat's own board: Spark 2, the Mine 4 grows to 10, and
+    the counter reads 0 afterwards.
+
+    THE MOD IS WHERE THE DEFECT WAS -- `SparkPower.Spend` reported a payment
+    `PowerCmd.ModifyAmount` never made -- and this is the reading the sim has
+    always had, kept as the row's own pin so the two engines are asserted on
+    the same sentence.
+    """
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 4, is_mine=True)
+
+    stoke(state, [enemy], 2)
+
+    assert sizes(enemy) == [10]
+    assert state.player.sparks == 0

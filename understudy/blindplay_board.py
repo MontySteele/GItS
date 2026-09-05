@@ -11,7 +11,8 @@ from __future__ import annotations
 from typing import Any
 
 from understudy import qa_packet
-from understudy.blindplay_faces import (_card_face, _card_title, _enemy_names,
+from understudy.blindplay_faces import (_card_face, _card_title,
+                                        _enemy_handles, _enemy_names,
                                         _hook_note, _intents, _meter_max,
                                         _named_option, _number_faces, _powers,
                                         relic_faces, remember_deck,
@@ -270,6 +271,9 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # `EB-271`: numbered through the fight's memory, not by place in the
         # list the feed happens to be sending this screen.
         "enemies": [{"name": name,
+                     # `EB-496`: the letter this fight minted for the body,
+                     # which is the one handle a kill cannot move.
+                     "handle": handle,
                      "hp": _int(e.get("hp")),
                      "max_hp": _int(e.get("max_hp", e.get("hp"))),
                      "block": _int(e.get("block")),
@@ -278,8 +282,13 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
                      # hand is two intents on the wire and was one line here.
                      "intents": _intents(e.get("intents") or e.get("intent")),
                      "powers": _powers(e)}
-                    for e, name in zip(_enemies(state),
-                                       _enemy_names(_enemies(state)))],
+                    for e, name, handle in zip(
+                        _enemies(state),
+                        # `EB-541`: with the round, which is what tells a body
+                        # replaced mid-fight from the first board of the next
+                        # fight -- the two share nothing with the memory alike.
+                        _enemy_names(_enemies(state), _int(battle.get("round"))),
+                        _enemy_handles(_enemies(state)))],
     }
     # `EB-271`: the refusal that named nothing, given the board it is about.
     for face in combat["hand"]:
@@ -366,7 +375,14 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
     replayed = [name for name in
                 (_text(entry) for entry in (raw.get("replayed") or []))
                 if name]
-    return {"performed": performed, "replayed": replayed}
+    # `EB-506`: the stage itself, front first. ABSENT IS NOT EMPTY, this
+    # block's standing rule: a bridge or a klee.dll older than the field sends
+    # no `company` key and the page prints no stage line, exactly as before.
+    company = [name for name in
+               (_text(entry) for entry in (raw.get("company") or []))
+               if name]
+    return {"performed": performed, "replayed": replayed,
+            "company": company}
 
 
 def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],
@@ -419,7 +435,12 @@ def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],
              for raw, face in zip(wire, printed)
              if _text(raw.get("combat_id"))}
     for row in plans["carried_out"] + plans["fired_now"]:
-        for moved in row["moved"]:
+        # `EB-518`: the riders take the same names as the moved rows, out of
+        # the same lookup, because the page is asking a reader to add the two
+        # lists together body by body.
+        for moved in row["moved"] + row["riders"]:
+            if not moved["combat_id"]:
+                continue
             moved["target"] = (by_id.get(moved["combat_id"])
                                or remembered_enemy_name(moved["combat_id"],
                                                         moved["target"]))
@@ -554,8 +575,25 @@ def _rider_row(row: dict[str, Any]) -> dict[str, Any]:
     is the 2 the r13 seat could not account for. The mod names it because the
     mod is the only thing that can: the measurement is a subtraction and a
     subtraction has no sources.
+
+    `EB-518` ADDS THE BODY. Three entries reading `Tamakushi Casket 2` divide
+    among three enemies in more than one way, and the r18 seat divided them the
+    even way: it predicted 5 + 2 on each of three bodies, read 1 / 9 / 7 off
+    the board, and concluded a FOURTH strike had gone unlisted. Two of the
+    three had landed on ONE body -- the Plan's own Hydro hit froze it before
+    the hit landed, because `ElementalHit.Deal` resolves the reaction first, so
+    the relic answered the Frozen as well as the Weak the same Plan applied.
+    With the target named, each body's riders add to its own `moved` line and
+    the arithmetic closes.
+
+    `combat_id` IS THE HANDLE AND `target` IS THE FALLBACK, `_moved_row`'s own
+    split: `name_rider_rows` puts the numbered name this page has been using
+    on the row wherever the body can still be found.
     """
-    return {"source": _text(row.get("source")), "amount": _int(row.get("amount"))}
+    return {"source": _text(row.get("source")),
+            "amount": _int(row.get("amount")),
+            "target": _text(row.get("target")),
+            "combat_id": _text(row.get("combat_id"))}
 
 
 def last_morning(state: dict[str, Any]) -> dict[str, Any] | None:

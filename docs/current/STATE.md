@@ -180,8 +180,36 @@ are in [`workstreams.md`](workstreams.md).
   them the Retained detonators the Retain-density reading asked for (Long
   Fuse, Pocket Match) and eight archetype rows the comparison pass of
   round 17 on has to justify (stage-gate, *The loop inside Prototype*);
-  the pool is 45. [USER]'s act-1 run is due on
-  `0.2.2401+proto`. The round-8 clear is read against a control run (below).
+  the pool is 45. **Round 17 is READ, the first under the Prototype loop**
+  (`review/ruled/klee-overhaul-round-17-2026-09-05.md`): an assembled Cook
+  deck and a natural run on `0.2.2674+proto`, floors 12 and 11, eleven of
+  eleven fights; the hypothesis (preserve one large Bomb) partly supported,
+  the Sparks paid by Mines rather than by holding; the payoff cards blank
+  without a second placer, turn one generic a seventh time; **one pick**
+  (the starter's second placer, default Pop! for a Strike, PR #398);
+  `EB-496`-`EB-498`. **Round 18 is READ**
+  (`review/active/klee-overhaul-round-18-2026-09-05.md`): a Cook deck and
+  a Spray deck on `0.2.2696+proto`, Sparks logged every turn, both to floor
+  12 with different reward wants; the relic hypothesis confirmed (Spray
+  paid by count, Cook by Mines, Grounded fired once in five fights); two
+  adjustments FOLLOWS (Grounded pays with a Bomb on the field; a random
+  Set off prefers a bombed body, `EB-516`); no pick; `EB-512`-`EB-515`.
+  **Round 19 is READ** (`review/active/klee-overhaul-round-19-2026-09-05.md`):
+  the adjusted Grounded on `0.2.2729+proto` read as a decision (paid three
+  times, failed twice after a full detonation, the brief's Grounded-versus-
+  Run Away! tension played on the elite); the Spark bank outran its sinks a
+  fourth time (access); Careful Arrangement a cut candidate (`EB-534`); no
+  pick; `EB-533`-`EB-537`. **Round 20 is READ**
+  (`review/active/klee-overhaul-round-20-2026-09-05.md`): on
+  `0.2.2753+proto` both seats found the printed numbers "trustworthy to the
+  digit" and named cash-or-cook as the decision; the hallway read and
+  Careful Arrangement's Mine clause carried; the Set off preview does not
+  fold a pending reaction (`EB-559`); no pick; `EB-554`-`EB-560`.
+  **The round-17 pick is RULED R261** (2026-09-05,
+  `review/ruled/klee-overhaul-round-17-2026-09-05.md`): Jumpy Dumpty
+  alone gains Innate, the starter otherwise untouched; built under
+  `EB-557`. [USER]'s act-1 run is due on that build. The round-8 clear is
+  read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
   six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
@@ -237,8 +265,35 @@ are in [`workstreams.md`](workstreams.md).
   Block-and-hit Plan, and Nereid's Ascension as a Rare Power (every Plan
   twice, no Exhaust, no Plan slot) replacing its two-turn Plan row; six
   FOLLOWS after three were re-priced off shipped cards; the pool is 35.
-  [USER]'s act-1 run is due on
-  `0.2.2501+proto`. The Kurage
+  **Round 17 is READ** (`review/active/kokomi-overhaul-round-17-2026-09-05.md`):
+  an assembled deck (Tide Chart, Nereid's, The Moon, Battle Plan, Stolen
+  Chapter, Well Laid granted) and a natural run on `0.2.2674+proto`; the
+  doubler read as the deck's spine, Plan density paid, turn one presented
+  a decision on both lanes; three payoffs unreadable (Tide Chart silent,
+  Well Laid's face and count, Nereid's and The Moon not composing on the
+  face); the assembled seat died on an elite after a refusal listed no
+  form for an all-enemies card; no pick; `EB-499`-`EB-504`, `EB-481`
+  reopened, `EB-410` widened. **Round 18 is READ**
+  (`review/active/kokomi-overhaul-round-18-2026-09-05.md`): an assembled
+  deck (Tide Chart, Well Laid, Nereid's, Riptide, Pincer) and a natural run
+  on `0.2.2696+proto`; the morning trustworthy on every predicted carry-out,
+  Nereid's the spine, Tide Chart and Well Laid read as reader rows; the
+  letter handle fuzzy-matched the Bake-Kurage on both lanes (`EB-519`),
+  Frozen's face against its rule (`EB-517`); no pick; `EB-517`-`EB-523`,
+  `EB-504` reopened. **Round 19 is READ**
+  (`review/active/kokomi-overhaul-round-19-2026-09-05.md`): on
+  `0.2.2729+proto` with the letter handle fixed, the assembled seat reached
+  2 HP and stated the brief's weakness back ("a tempo loan, richest when
+  ahead and unusable when behind"); a carry-out is not a hit for on-hit
+  powers and the tip owes the sentence (`EB-538`); a spawned replacement
+  reused a dead body's letter (`EB-541`); no pick; `EB-538`-`EB-545`.
+  **Round 20 is READ** (`review/active/kokomi-overhaul-round-20-2026-09-05.md`):
+  two natural seats on `0.2.2753+proto`; no reader row drafted (the one
+  offer of two was passed for raw damage); The Moon Overlooks the Waters
+  read as deleting the kit's question once it lands, to be read at the
+  door before it moves; the Byrdonis elite beaten with zero Plans written;
+  no pick; `EB-561`-`EB-563`. [USER]'s act-1 run is due on
+  `0.2.2753+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
@@ -308,7 +363,42 @@ are in [`workstreams.md`](workstreams.md).
   plus one per performance by the shipped Salon rule, and the packet says
   so. Still owed from the reframe, ruled and not re-asked: the fourth,
   scaling member (F1 option 2) and the named Spotlight (`EB-466`).
-  [USER]'s act-1 run is due on that build. No stamp moves, nothing measured.
+  **Round 11 is READ** (`review/ruled/furina-reframe-round-11-2026-09-05.md`):
+  an assembled deck (the four Commons granted) and a natural run on
+  `0.2.2674+proto`, ten of ten fights including two elites, one for zero
+  HP; the stage occupied and performing from turn two in every fight,
+  Second Course landing at its five-Encore price, Rolling Tide never
+  played; turn one empty by construction (zero empty turns when Salon
+  Début was in the opening hand); what read as a lost amplifier was the
+  performance log filing pre-damage numbers (`EB-511`, built the same
+  day); **one pick** (the stage on turn one,
+  default Salon Début Innate, PR #398); `EB-505`-`EB-511`, `EB-449`
+  reopened, `EB-504` widened. **Round 12 is READ**
+  (`review/active/furina-reframe-round-12-2026-09-05.md`): an assembled deck
+  (the four Commons) and a natural run on `0.2.2696+proto`, ten of ten
+  fights; Rolling Tide's price answered by three seats (1 energy) and
+  Curtain Rises fielding a Block member at the front, both adjustments
+  FOLLOWS (`EB-530`); the empty first turn read a third time (the round-11
+  pick, waiting); no pick; `EB-524`-`EB-529`. **Round 13 is READ**
+  (`review/active/furina-reframe-round-13-2026-09-05.md`): on
+  `0.2.2729+proto`, Rolling Tide at 1 energy still the weakest card in the
+  deck and WITHDRAWN from the arm's offer (three rounds, four seats);
+  Second Course never playable at the opening Encore for a third round, its
+  printed price to 1 (FOLLOWS, `EB-552`); Aria+'s Innate defeated its own
+  Fanfare reader and the upgrade drops it (`EB-550`); the stage draw-gated
+  on one card, the round-11 pick's fourth reading; no pick;
+  `EB-546`-`EB-552`. **Round 14 is READ**
+  (`review/active/furina-reframe-round-14-2026-09-05.md`): two seats on
+  `0.2.2753+proto`, four of four and six of six fights with both elites;
+  Rolling Tide not missed, Second Course playable once in five (Encore
+  at 0 on most turns, the price stands), Aria+ pays without Innate;
+  Dexterity adds nothing to Block under the arm (`EB-566`), the Evoke
+  prints no line (`EB-564`), the Spotlight's turn-one window unprinted
+  (`EB-567`), Rapturous Applause's face hides a floor (`EB-568`), Amber
+  outside the Spotlight fold (`EB-565`); the empty stage read a fifth
+  time, answered by R260 and read next on its build; no pick;
+  `EB-564`-`EB-568`. [USER]'s act-1 run is due on R260's build. No
+  stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where

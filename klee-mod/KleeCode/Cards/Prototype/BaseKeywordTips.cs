@@ -87,13 +87,47 @@ public static class BaseKeywordTips
     /// sides of the exchange. So the Skill case is named here in the words
     /// <see cref="ForWeak"/> names it in, and
     /// <c>blindplay_notes.BASE_KEYWORDS</c> carries the same sentence.
-    /// 132 of 135, the twin's own length.
+    ///
+    /// `EB-497` NARROWED "EVERY HIT" TO "EVERY CARD HIT", and it is the same
+    /// row's own correction rather than a retreat from it. This box used to
+    /// say "every hit it takes", which is one case too wide: Explosive
+    /// Ampoule dealt 10, not 15, into a Vulnerable Sewer Clam (Klee r17 lane
+    /// 1). The engine is right there too and the rule is readable off it --
+    /// the shipped <c>VulnerablePower</c> gates on
+    /// <c>ValueProp.IsPoweredAttack()</c>, which a potion's damage is not,
+    /// and the sim's potion goes through <c>refpowers.unpowered_damage</c>,
+    /// which never reaches <c>modify_damage_taken</c>. So a card's hit is
+    /// amplified whatever its <c>type:</c>, and a potion's is flat, and the
+    /// box now says both. 128 of 135.
+    ///
+    /// `EB-481` REOPENED once for the surface this box does not own: the
+    /// game's own <c>VULNERABLE_POWER</c> status line on the enemy still read
+    /// "more damage from Attacks" while this box read the rule. The words are
+    /// one rule with two printers, so <c>KleeMod.InjectLocStrings</c> now
+    /// merges the arm's sentence into the <c>powers</c> table beside this one.
     /// </summary>
+    /// <remarks>
+    /// `EB-523` PUT THE ATTACK BACK IN, and it is `EB-497`'s own correction
+    /// meeting the side of the board that row did not read. "Every card hit"
+    /// is complete on an ENEMY, where everything that lands is a card or a
+    /// potion, and SILENT ON THE PLAYER, where the number that matters is a
+    /// monster's swing: the Kokomi r18 lane-2 seat wore <c>Vulnerable 99 --
+    /// Receive 50% more damage from cards for 99 turns</c> in front of a
+    /// 24-damage intent and could not price it -- "the single most
+    /// decision-relevant number on the screen and I could not price it".
+    ///
+    /// IT DOES COUNT. The gate is <c>ValueProp.IsPoweredAttack()</c>, a
+    /// property of the HIT, and a monster's move carries it; the sim says the
+    /// same structurally, running every enemy hit through
+    /// <c>powers.modify_damage_taken(state.player, ...)</c>. The potion clause
+    /// is untouched, because a potion's damage is the one thing that takes no
+    /// multiplier on either engine.
+    /// </remarks>
     public static IEnumerable<IHoverTip> ForVulnerable(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, VulnerableKey,
-            "The wearer takes 50% more damage from every hit it takes, a "
-          + "Skill's damage too. One stack falls off at the end of each of "
+            "An attack or card hit on it deals 50% more, a Skill's too. A "
+          + "potion's does not. One stack falls off at the end of each of "
           + "its turns.");
 
     /// <summary>

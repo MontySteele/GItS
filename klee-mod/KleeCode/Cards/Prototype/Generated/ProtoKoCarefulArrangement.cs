@@ -35,14 +35,14 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoCarefulArrangement : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForMine(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_careful_arrangement");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Careful Arrangement"),
-        ("description", "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold]. It grows by {Grow:diff()}."),
+        ("description", "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold], a [gold]Mine[/gold] if any of them was. It grows by {Grow:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

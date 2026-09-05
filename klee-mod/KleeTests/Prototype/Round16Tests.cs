@@ -92,15 +92,25 @@ public class Round16Tests
     {
         var body = Printed(typeof(BaseKeywordTips), "ForVulnerable");
 
+        // `EB-523` PUT THE ATTACK BACK IN, for the side of the board `EB-497`
+        // did not read: "every card hit" is complete on an ENEMY, where
+        // everything that lands is a card or a potion, and silent on the
+        // PLAYER, whose Vulnerable is about a monster's swing. The r18 lane-2
+        // seat wore `Vulnerable 99` in front of a 24-damage intent and could
+        // not price it.
         Assert.Equal(
-            "The wearer takes 50% more damage from every hit it takes, a "
-          + "Skill's damage too. One stack falls off at the end of each of "
+            "An attack or card hit on it deals 50% more, a Skill's too. A "
+          + "potion's does not. One stack falls off at the end of each of "
           + "its turns.", body);
-        // The tip a player hovers is inside the in-game box either way, and
-        // it is exactly its twin's length.
+        // The tip a player hovers is inside the in-game box either way.
+        //
+        // NO LONGER ITS TWIN'S LENGTH, and that assertion is gone rather than
+        // re-fitted: `EB-497` gave this box a clause `ForWeak` has no reason
+        // to carry (a potion's damage is not a powered attack, so Vulnerable
+        // has a case Weak does not), and a length equality between two
+        // sentences that no longer say the same shape of thing was a
+        // coincidence dressed as a rule.
         Assert.True(body.Length <= 135, body.Length.ToString());
-        Assert.Equal(Printed(typeof(BaseKeywordTips), "ForWeak").Length,
-                     body.Length);
     }
 
     // ==================================================================
@@ -138,10 +148,17 @@ public class Round16Tests
     public void Renaming_the_class_cost_the_ceiling_nothing()
     {
         // "Attack trigger" and "when-hit power" are the same fourteen
-        // characters, so `EB-443`'s 132-of-135 reading stands as published.
+        // characters, so `EB-443`'s 132-of-135 reading stood as published --
+        // and `EB-516` then took the tip OVER the ceiling by adding the aim,
+        // which is the fact this pin now carries. The clause is worth the
+        // overage because the two rows that roll (Tinder Toss, Rapid Fire)
+        // print only "a random enemy" and cannot say where it lands, and
+        // `tools/lint_text_conventions.py` carries `SetOffKey` as a named
+        // exception with that reason.
         var rendered = SetOffTip()
             .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
-        Assert.Equal(132, rendered.Length);
+        Assert.Equal(173, rendered.Length);
+        Assert.EndsWith("A random one picks a Bombed enemy first.", rendered);
     }
 
     [Fact]

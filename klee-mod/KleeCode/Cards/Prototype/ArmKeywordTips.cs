@@ -1,6 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 
@@ -90,6 +93,14 @@ public static class ArmKeywordTips
     // it is a sentence about the CARD in hand, printed where that card is met.
     public const string CovenSparkKey = "KLEEMOD-ARM_COVEN_SPARK";
 
+    // `EB-553` (R260). THE THIRD KEY HERE THAT TITLES NO KEYWORD, and it names
+    // the one rule the reframe's STARTING RELIC now carries: the stage is
+    // fielded before the first card is played. The relic's own face is at 117
+    // of the 120-character relic ceiling and already states two rules, so the
+    // third sentence rides beside it as a tip rather than displacing one of
+    // them -- and a tip is where a rule about the board belongs anyway.
+    public const string OpeningStageKey = "KLEEMOD-ARM_OPENING_STAGE";
+
     // ----------------------------------------------------------- Klee ------
     //
     // The four sentences are the ruled brief's sec.3 rules 1, 2, 4 and 6, as
@@ -165,7 +176,8 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
             "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
-          + " a turn, goes off only when [gold]Set off[/gold]. "
+          + " a turn, goes off only when [gold]Set off[/gold], or as a "
+          + "[gold]Mine[/gold]. "
           + "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. "
           + "Kills move it on.");
 
@@ -250,9 +262,16 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForSetOff(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SetOffKey,
+            // `EB-516`: the AIM clause. A random Set off draws from the
+            // enemies already carrying one of hers, and the two rows that do
+            // it (Tinder Toss, Rapid Fire) print "a random enemy" and cannot
+            // say where it lands -- so the rule lives on the word, which is the
+            // one surface both rows carry. Over the tip ceiling and excepted
+            // by name in `tools/lint_text_conventions.py`.
             "The target's [gold]Bombs[/gold] go off first, oldest first, each "
           + "a Pyro hit. [gold]Block[/gold] stops them, no when-hit power "
-          + "fires, the first takes the aura.");
+          + "fires, the first takes the aura. A random one picks a Bombed "
+          + "enemy first.");
 
     /// <summary>Rule 4. The gain rate is read from
     /// <see cref="KleeOverhaulLaw.SparkPerExplosion"/>, which is also
@@ -396,12 +415,43 @@ public static class ArmKeywordTips
     /// "IT DOES NOTHING BY ITSELF" LEFT and is not missed: it was true of a
     /// word with no readers, and three cards in Klee's pool have paid for it
     /// since R244. The last sentence says that instead.
+    ///
+    /// `EB-504`, REOPENED 2026-09-05: THE RULE IS KLEE'S AND THE WORD IS
+    /// EVERYONE'S. See <see cref="KleesRuleBelongsHere"/>. The page glossary
+    /// was gated on the r17 finding and this tip was the second source, so
+    /// Razor's own face still printed the whole sentence on a Kokomi run.
+    /// `EB-535`: AND THE LAST SENTENCE NOW SAYS WHAT THE PAYMENT IS.
+    ///
+    /// THE FIND (Klee r19 lane 2). "I read this a dozen times across five
+    /// fights and I still do not know what it does. 'Cards of hers pay' -- pay
+    /// what, to whom, and when? I played Razor four times and never saw
+    /// anything I could attribute to Hexerei." The rule was on a DIFFERENT
+    /// screen the whole time -- <see cref="ForCovenSpark"/>, which rides Klee's
+    /// own Personal Companions and not the family tag -- and the seat found it
+    /// late and still could not tell whether Razor was one of Klee's own.
+    ///
+    /// SO THE READER CLAUSE GAVE UP ITS ROOM. "Cards of hers pay when you play
+    /// one" is the sentence the seat could extract nothing from, and the cards
+    /// it is about print their own rule on their own faces; the family test and
+    /// the ownership split stay, because "some are Klee's own, some are not" is
+    /// the half that answers the Razor question. 135 of 135 rendered.
+    ///
+    /// THE NUMBERS ARE LIFTED, not typed (`EB-89`'s rule): they are
+    /// <see cref="KleeMod.Powers.KleeCompanionSpark"/>'s own, which is the
+    /// declaration LAW:145 obliges the KIT to make, so a retune cannot leave
+    /// this sentence quoting a retired figure. The BOUND is printed here and
+    /// deliberately not on <see cref="ForCovenSpark"/>, where it would state a
+    /// ceiling no single clause reaches; here it is the whole of what a player
+    /// asking "how much" needs.
     public static IEnumerable<IHoverTip> ForHexerei(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
+        !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, HexereiKey,
             "A [gold]Companion[/gold] card that prints the word, and Klee "
-          + "herself. Some are Klee's own, some are not. Cards of hers pay "
-          + "when you play one.");
+          + "herself. Some are Klee's own, some are not. Playing one of hers "
+          + "makes [blue]" + KleeCompanionSpark.Base + "[/blue] "
+          + "[gold]Spark[/gold], up to [blue]"
+          + KleeCompanionSpark.MaxPerPlay + "[/blue].");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.
@@ -424,8 +474,12 @@ public static class ArmKeywordTips
     /// says what Oz IS and which card puts him out and stops there, the way
     /// `ForGrounded` defers its payout to the Power card's own line.
     /// </summary>
+    /// `EB-504`, the second of the two words whose rule is Klee's: the Power
+    /// that fields Oz is hers, and Fischl's face is drafted by every
+    /// character. See <see cref="KleesRuleBelongsHere"/>.
     public static IEnumerable<IHoverTip> ForOz(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
+        !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, OzKey,
             // A card TITLE is a plain word, never golded
             // (`docs/current/text-conventions.md`, and the lint bites), and
@@ -452,10 +506,11 @@ public static class ArmKeywordTips
     /// not the run holds Grounded, which is the state the seat was actually in.
     ///
     /// WHAT IT SAYS AND WHAT IT LEAVES TO THE CARD. The CONDITION is the whole
-    /// rule and it is what a Kaeya reader needs: nothing of yours went off last
-    /// turn. What Grounded pays for that is the Power card's own printed line
-    /// and moves with its upgrade, so the tip defers to it rather than quoting
-    /// a number that a second card would contradict.
+    /// rule and it is what a Kaeya reader needs: `EB-516` moved it to "you have
+    /// a Bomb on the field" and the tip moved with it. What Grounded pays for
+    /// that is the Power card's own printed line and moves with its upgrade, so
+    /// the tip defers to it rather than quoting a number that a second card
+    /// would contradict.
     /// </summary>
     /// ONE METHOD WITH AN OPTIONAL CARD, and not an overload: a POWER raises
     /// this tip too -- the buff Kaeya's card leaves behind prints the word for
@@ -469,7 +524,7 @@ public static class ArmKeywordTips
             // A card TYPE is a plain word, never golded
             // (`docs/current/text-conventions.md`, and the lint bites).
             "A Power that pays at the start of your turn, but "
-          + "only if none of your [gold]Bombs[/gold] went off last turn. Its "
+          + "only if you have a [gold]Bomb[/gold] on the field. Its "
           + "card prints what it pays.");
 
     /// <summary>
@@ -603,6 +658,26 @@ public static class ArmKeywordTips
     /// falls back to the leftmost body when every enemy is a Minion -- and it
     /// is a board on which the compressed clause and the full one aim at the
     /// same creature.
+    ///
+    /// `EB-538` TOOK IT OVER THE CEILING, and it is <see cref="ForSetOff"/>'s
+    /// overage for <see cref="ForSetOff"/>'s reason. THE FIND (Kokomi r19 lane
+    /// 2): Skittish gave no Block to a body hit by Oath's and Ambush's
+    /// carry-outs and then 6 Block to a plain Strike on the same enemy in the
+    /// same fight, and the seat could not tell "a defect or a large
+    /// undocumented advantage of planning into blockers". It is the second: a
+    /// carry-out goes out through <see cref="ElementalHit.Deal"/>, which
+    /// reaches <c>CreatureCmd.Damage</c> as <c>ValueProp.Unpowered</c> with
+    /// <c>dealer: null</c>, so a power keyed on being HIT has neither an
+    /// attacker nor a powered hit to answer.
+    ///
+    /// SET OFF'S SENTENCE, WORD FOR WORD ("no when-hit power fires"), because
+    /// it is the same rule at the same call one kit over and `EB-490` already
+    /// paid for the wording: "when-hit power" is what a player calls the thing
+    /// on the enemy's status bar, and "Attack trigger" reads as something on
+    /// the player's own side of the board. Nothing above it is droppable --
+    /// every clause there is a seat's finding -- so the tip is carried in
+    /// `tools/lint_text_conventions.py` as a named exception with its reason,
+    /// which is the bargain `SetOffKey` already makes.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -610,7 +685,8 @@ public static class ArmKeywordTips
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front "
           + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. "
           + "Enemy [gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] "
-          + "and [gold]Strength[/gold] do not.");
+          + "and [gold]Strength[/gold] do not. A carry-out is not a hit: no "
+          + "when-hit power fires.");
 
     /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the
@@ -780,6 +856,28 @@ public static class ArmKeywordTips
         With(inherited, EncoreKey, EncoreBody());
 
     /// <summary>
+    /// `EB-553` (R260): the reframe's stage is never unlit, and the relic that
+    /// fields it is where a player reads so.
+    ///
+    /// Round 11 read both lanes' turn one as empty BY CONSTRUCTION and the
+    /// natural lane counted it -- zero empty turns in the fights where the
+    /// starter deploy was in the opening hand, six of twenty-two otherwise.
+    /// [USER] took the relic over an Innate starter, so the fact belongs to
+    /// the relic and not to a card: it is true on turn one of every fight
+    /// whatever the opening hand holds.
+    ///
+    /// THE MEMBER IS NAMED IN FULL here and short on the badge, which is the
+    /// shipped split: <c>SalonMemberPower.ManualFrontName</c> prints
+    /// "Crabaletta" because three rules and an identity have to fit under the
+    /// power ceiling, and a tip with one sentence in it can afford her title.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForOpeningStage(
+        IEnumerable<IHoverTip> inherited) =>
+        With(inherited, OpeningStageKey,
+             "Every fight opens with [gold]Mademoiselle Crabaletta[/gold] on "
+           + "stage.");
+
+    /// <summary>
     /// `EB-479` (R258): THE OPENING JOINS THE SENTENCE THAT DEFINES THE WORD,
     /// and only under the arm that grants it -- <see cref="SparkBody"/>'s
     /// shape one character over, for its reason.
@@ -830,5 +928,69 @@ public static class ArmKeywordTips
     {
         foreach (var tip in inherited) yield return tip;
         yield return new HoverTip(new LocString(Table, key + ".title"), body);
+    }
+
+    /// <summary>
+    /// `EB-504`. IS THERE A KLEE IN THIS RUN FOR KLEE'S RULE TO BE ABOUT?
+    ///
+    /// THE ROW WAS CLOSED ONCE ON THE PAGE GLOSSARY AND REOPENED ON THE CARD.
+    /// `Hexerei` rides eighteen companion faces the whole roster can draft and
+    /// its rule is Klee's Spark rider; `Oz` is named by Fischl's face, which
+    /// every character meets, and the Power that fields him is hers. So the
+    /// WORD reaches every run and the RULE reaches one.
+    /// `blindplay_notes._ARM_KEYWORD_CHARACTER` gated the page's own glossary
+    /// on the r17 finding, and the r18 lane-2 seat then met the same sentence
+    /// on Razor's own card: "two Companion cards in a Kokomi run printed
+    /// 'Hexerei -- ... Cards of hers pay when you play one.' I could not tell
+    /// what is paid, by whom, or whether it applies to me at all, so I refused
+    /// both cards partly on that." The card's tip is a second printer.
+    ///
+    /// THE OWNER FIRST, BECAUSE IT IS THE ONE THAT IS ALWAYS RIGHT. A card in
+    /// a hand or a deck belongs to a seat and that seat has a character; only
+    /// where there is no owner -- a shelf, a reward, a compendium page -- does
+    /// this fall back to the run's player list, which is the same question one
+    /// scope out and the one that answers in co-op.
+    ///
+    /// SILENCE IS NOT EVIDENCE, and it is the page's own direction here
+    /// (`absent is not zero`): where NOTHING says who is playing, the rule
+    /// prints. A missing tooltip on a Klee run would be the worse failure of
+    /// the two, and it is the one this returns true to avoid.
+    /// </summary>
+    public static bool KleesRuleBelongsHere(CardModel card)
+    {
+        var inRun = KleeAmongTheRunsPlayers();
+        Player? owner = null;
+        try
+        {
+            // A canonical (compendium) copy asserts on `Owner` rather than
+            // answering null -- `KokomiPlan.PlanDamageVar`'s guard, verbatim.
+            if (card.IsMutable) owner = card.Owner;
+        }
+        catch (System.Exception)
+        {
+            owner = null;
+        }
+        if (owner != null)
+        {
+            return owner.Character is IKleeCharacter || (inRun ?? false);
+        }
+        return inRun ?? true;
+    }
+
+    /// <summary>Is any seat in this run playing Klee, or does nothing answer?
+    /// A state read must never throw (<c>PlayTelemetry.NameOf</c> takes the
+    /// same posture), and outside a run there is nothing to read.</summary>
+    private static bool? KleeAmongTheRunsPlayers()
+    {
+        try
+        {
+            var players = RunManager.Instance?.DebugOnlyGetState()?.Players;
+            if (players == null) return null;
+            return players.Any(p => p?.Character is IKleeCharacter);
+        }
+        catch (System.Exception)
+        {
+            return null;
+        }
     }
 }

@@ -70,8 +70,20 @@ public class KleeOverhaulRoundFourTests
 
         Assert.DoesNotContain("(", face);
         Assert.DoesNotContain("of them", face);
+        // `EB-514` PUT THE HIT COUNT BACK IN THE HEADLINE and kept it prose:
+        // the total is a SUM over the charges, so a two-charge stack printed
+        // one number where the board makes two hits and two Sparks, and the
+        // r18 seat budgeted one of each off this sentence. Still no bracket
+        // and still no "of them" -- the clause is a clause.
+        // `EB-536` CUT THE CLAUSE OFF THE SINGLE-CHARGE FACE and spelled the
+        // Sparks out: "in 1 hit for as many Sparks" on a pile of one is saying
+        // nothing -- the total IS the hit -- and the r19 lane-2 seat called
+        // the sentence "never comprehensible". This pile holds TWO, so the
+        // clause is here and its plural is fixed.
         Assert.Contains("[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
-                        + "Pyro damage.", face);
+                        + "Pyro damage, in [blue]{Count}[/blue] "
+                        + "hits for [blue]{Count}[/blue] [gold]Sparks[/gold].",
+                        face);
         // `EB-289`: read off the CHARGE LIST, not `{Amount}` -- see the test
         // below and `ProtoBombPower.Bombs` for why the stack amount could not
         // be it. `EB-450` swapped the count for the charges themselves, which
@@ -98,6 +110,10 @@ public class KleeOverhaulRoundFourTests
         Assert.Equal(0, pile.MineCount);
         Assert.DoesNotContain("{Mines}", Row(pile, "smartDescription"));
         Assert.Contains("{Mines}", Row(pile, "smartDescriptionMines"));
+        // `EB-536`: and the same on the single-charge half of the grid, which
+        // is the face THIS pile actually selects.
+        Assert.DoesNotContain("{Mines}", Row(pile, "smartDescriptionOne"));
+        Assert.Contains("{Mines}", Row(pile, "smartDescriptionOneMines"));
     }
 
     // ---- EB-287 / EB-343: every modifier named, and only while true ------
@@ -129,8 +145,10 @@ public class KleeOverhaulRoundFourTests
 
         Assert.Equal(25, pile.PredictedSetOffDamage());   // 12 + 13, per charge
         Assert.EndsWith(".smartDescriptionVulnerable", LocKey(pile));
+        // `EB-514`: the hit-count clause follows the modifier clause, so the
+        // sentence still ends on the terms the number went through.
         Assert.Contains("[blue]{Size}[/blue] Pyro damage after "
-                        + "[gold]Vulnerable[/gold].",
+                        + "[gold]Vulnerable[/gold], in [blue]{Count}[/blue] ",
                         Row(pile, "smartDescriptionVulnerable"));
     }
 
@@ -146,17 +164,20 @@ public class KleeOverhaulRoundFourTests
         var capped = ProtoBombs.Place(hardToKill.Creature, klee.Creature,
             new ProtoBombs.Charge(9));
 
-        Assert.EndsWith(".smartDescriptionHardToKill", LocKey(capped));
+        // `EB-536`: a pile of ONE selects the `One` half of the grid, so the
+        // key carries both axes -- the cap that moved the number, and the fact
+        // that there is one charge behind it.
+        Assert.EndsWith(".smartDescriptionOneHardToKill", LocKey(capped));
         Assert.Contains("capped by [gold]Hard To Kill[/gold]",
-                        Row(capped, "smartDescriptionHardToKill"));
+                        Row(capped, "smartDescriptionOneHardToKill"));
 
         var intangible = Seat.Klee(30).WithPower<IntangiblePower>(1);
         var ghost = ProtoBombs.Place(intangible.Creature, klee.Creature,
             new ProtoBombs.Charge(9));
 
-        Assert.EndsWith(".smartDescriptionIntangible", LocKey(ghost));
+        Assert.EndsWith(".smartDescriptionOneIntangible", LocKey(ghost));
         Assert.Contains("capped by [gold]Intangible[/gold]",
-                        Row(ghost, "smartDescriptionIntangible"));
+                        Row(ghost, "smartDescriptionOneIntangible"));
 
         // Both terms at once read as ONE sentence, in pipeline order.
         var both = Seat.Klee(30).WithPower<VulnerablePower>(1)
@@ -164,10 +185,16 @@ public class KleeOverhaulRoundFourTests
         var pile = ProtoBombs.Place(both.Creature, klee.Creature,
             new ProtoBombs.Charge(9));
 
-        Assert.EndsWith(".smartDescriptionVulnerableHardToKill", LocKey(pile));
+        // A ONE-charge pile, so the `One` half of the grid and no hit
+        // clause: the two modifier terms still read as one sentence in
+        // pipeline order, which is what this pin is about.
+        Assert.EndsWith(".smartDescriptionOneVulnerableHardToKill",
+                        LocKey(pile));
         Assert.Contains("Pyro damage after [gold]Vulnerable[/gold], capped by "
                         + "[gold]Hard To Kill[/gold].",
-                        Row(pile, "smartDescriptionVulnerableHardToKill"));
+                        Row(pile, "smartDescriptionOneVulnerableHardToKill"));
+        Assert.DoesNotContain(
+            "{Count}", Row(pile, "smartDescriptionOneVulnerableHardToKill"));
     }
 
     [Fact]
@@ -188,19 +215,27 @@ public class KleeOverhaulRoundFourTests
 
         var rows = pile.Localization!.Select(r => r.Item1).ToList();
         var caps = new[] { "", "HardToKill", "Intangible", "Capped" };
-        foreach (var mines in new[] { "", "Mines" })
+        // `EB-536` ADDED THE THIRD AXIS: whether the pile holds one charge or
+        // several, because the hit clause is a fact about a STACK and reads as
+        // noise on a single Bomb.
+        foreach (var single in new[] { "", "One" })
         {
-            foreach (var vulnerable in new[] { "", "Vulnerable" })
+            foreach (var mines in new[] { "", "Mines" })
             {
-                foreach (var cap in caps)
+                foreach (var vulnerable in new[] { "", "Vulnerable" })
                 {
-                    Assert.Contains(
-                        "smartDescription" + mines + vulnerable + cap, rows);
+                    foreach (var cap in caps)
+                    {
+                        Assert.Contains(
+                            "smartDescription" + single + mines + vulnerable
+                            + cap, rows);
+                    }
                 }
             }
         }
-        // And no more than the grid: two axes, nothing hand-added beside them.
-        Assert.Equal(2 * 2 * caps.Length,
+        // And no more than the grid: three axes, nothing hand-added beside
+        // them.
+        Assert.Equal(2 * 2 * 2 * caps.Length,
                      rows.Count(r => r.StartsWith("smartDescription")));
 
         // Each modified row is the plain row with exactly its own clause in
