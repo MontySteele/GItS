@@ -355,6 +355,43 @@ AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
              "-- a hit of a different element consumes it and reacts.*")
 
 
+# `EB-461`. THE PAGE PROMISED A NUMBER AND THE ENEMY NEVER DEALT IT.
+#
+# WHAT THE SEATS SAW. "Every enemy turn where the intent listed an attack
+# number AND a second intent, the attack did not land. I planned two turns of
+# blocking around numbers that were never going to arrive" -- Kokomi r14 (c),
+# four for four across the Living Fog, a Gremlin Merc and a Terror Eel, with
+# Klee r14's Sludge Spinner the same shape.
+#
+# WHAT THE WIRE CARRIES, which decides which of the row's two options is
+# buildable at all. `BuildEnemyState` reads `monster.NextMove` and walks
+# `moveState.Intents`, sending one entry per intent with `type`, `label`,
+# `title` and `description` and NOTHING ELSE -- no order of resolution, no
+# condition, no likelihood, no marker of any kind separating a part that will
+# fire from a part that will not. So "print only the move the enemy will take"
+# is not something this side of the line can do: the feed does not know. The
+# other half of the row's next action is what is left, and it is the honest
+# one -- the page stops calling a multi-part telegraph's number damage that is
+# coming.
+#
+# WHY EVERY PART STILL PRINTS. `EB-342` put them all there and its finding
+# stands: the seat shown only the first row of a two-row telegraph opened the
+# next round with four `Burn`s in hand. Dropping a part would be that defect
+# again. What changes is the CLAIM the page makes about the number, not how
+# many parts it shows.
+MULTI_INTENT_NOTE = (
+    "*An enemy showing more than one intent is telegraphing every part of one "
+    "move, and this page's data feed carries nothing that says which of those "
+    "parts will resolve. On this build the damage part of a multi-part "
+    "telegraph has repeatedly not landed, so read such a number as a part the "
+    "enemy MAY perform rather than as damage it is about to deal.*")
+
+#: What a number on a multi-part telegraph is called ON THE LINE ITSELF, so a
+#: reader who plans off the enemy block without reaching the note under it is
+#: not left holding a bare promise.
+MULTI_INTENT_LABEL = ", a part it MAY perform"
+
+
 # `EB-272`. THE ARMS' OWN WORDS, DEFINED ONCE PER SCREEN.
 #
 # THE GAP. Every keyword a SHIPPED face prints has somewhere a player can read

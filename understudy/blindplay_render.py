@@ -20,6 +20,8 @@ from understudy.blindplay_notes import (AURA_NOTE,
                                         METER_CAPPED_NOTE,
                                         METER_DEFINED_NOTE, METER_NOTE,
                                         METER_RULES,
+                                        MULTI_INTENT_LABEL,
+                                        MULTI_INTENT_NOTE,
                                         PENDING_PICK_NOTE, PICKED_MARK,
                                         PLAN_AIM_NOTE,
                                         PLAN_HYDRO_NOTE,
@@ -293,14 +295,21 @@ def _render_intents(intents: list[dict[str, str]]) -> list[str]:
     then opened the next round with four `Burn`s in hand was reading the FIRST
     of two rows the wire sent, and there is no shape of one line that can hold
     two telegraphs without inventing a grammar for joining them.
+
+    `EB-461`: and where there IS more than one, every number on them is marked
+    as a part the enemy MAY perform. The feed sends no marker saying which
+    parts of a chosen move resolve, and four seats in a row blocked against a
+    damage number that never arrived -- see `MULTI_INTENT_NOTE`, which the
+    board prints once under the enemy block.
     """
     rows = list(intents) or [{}]
-    out = [f"    Intent: {_render_intent(rows[0])}"]
-    out += [f"      and also: {_render_intent(row)}" for row in rows[1:]]
+    part = len(rows) > 1
+    out = [f"    Intent: {_render_intent(rows[0], part)}"]
+    out += [f"      and also: {_render_intent(row, part)}" for row in rows[1:]]
     return out
 
 
-def _render_intent(intent: dict[str, str]) -> str:
+def _render_intent(intent: dict[str, str], part: bool = False) -> str:
     """One telegraph, with every field saying what it is (`EB-299`).
 
     The line used to be `kind`, `label` and `text` joined by commas, so a
@@ -318,8 +327,10 @@ def _render_intent(intent: dict[str, str]) -> str:
     kind = intent.get("type") or ""
     if head and kind and _fold(head) != _fold(kind):
         head = f"{head} ({kind})"
-    bits = [head, (f"the number on its icon is {intent['label']}"
-                   if intent.get("label") else ""), intent.get("text") or ""]
+    number = (f"the number on its icon is {intent['label']}"
+              + (MULTI_INTENT_LABEL if part else "")
+              if intent.get("label") else "")
+    bits = [head, number, intent.get("text") or ""]
     return " — ".join(b for b in bits if b) or "(no intent shown)"
 
 
@@ -642,6 +653,11 @@ def render(obs: dict[str, Any]) -> str:
             out += _render_intents(e["intents"])
             for pw in e["powers"]:
                 out.append(_render_power(pw, "    "))
+        # `EB-461`: ONCE PER SCREEN, and only where a telegraph has parts. The
+        # note is about a claim the enemy block just made, so it sits with the
+        # block's other two notes rather than under the line that made it.
+        if any(len(e["intents"]) > 1 for e in c["enemies"]):
+            out += ["", MULTI_INTENT_NOTE]
         if you["powers"] or any(e["powers"] for e in c["enemies"]):
             out += ["", POWER_NOTE]
         if any(p.get("kind") == "aura"

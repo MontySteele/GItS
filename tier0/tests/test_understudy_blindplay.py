@@ -6642,19 +6642,67 @@ def test_a_compound_intent_prints_every_component():
     Seen to FAIL: only the first row of the list reached the page.
     """
     page = blindplay.observe(compound_intent_state())
-    assert ("Intent: Aggressive (Attack) — the number on its icon is 8 "
-            "— This enemy intends to Attack for 8 damage.") in page
+    # `EB-461` MARKED THE NUMBERS ON A MULTI-PART TELEGRAPH, and nothing else
+    # about these lines moved: both parts still print, in the move's own order.
+    assert ("Intent: Aggressive (Attack) — the number on its icon is 8, a "
+            "part it MAY perform — This enemy intends to Attack for 8 "
+            "damage.") in page
     assert ("and also: Strategic (StatusCard) — the number on its icon "
-            "is 4 — This enemy intends to add 4 Burn to your hand.") \
-        in page
+            "is 4, a part it MAY perform — This enemy intends to add 4 Burn "
+            "to your hand.") in page
 
 
 def test_a_single_component_intent_reads_exactly_as_it_always_did():
-    """One row, one line, no continuation -- the recorded combat is the pin."""
+    """One row, one line, no continuation -- the recorded combat is the pin.
+
+    `EB-461` left this line alone on purpose: a one-part telegraph is the one
+    the enemy takes, so its number is a promise the page may keep making.
+    """
     page = blindplay.observe(combat_state())
     assert ("Intent: Aggressive (Attack) — the number on its icon is 12 "
             "— This enemy intends to Attack for 12 damage.") in page
     assert "and also:" not in page
+    assert "MAY perform" not in page
+    assert blindplay.MULTI_INTENT_NOTE not in page
+
+
+def test_a_dual_intent_number_is_labelled_a_part_the_enemy_may_perform():
+    """`EB-461`. THE PAGE PROMISED DAMAGE THE ENEMY NEVER DEALT.
+
+    "Every enemy turn where the intent listed an attack number AND a second
+    intent, the attack did not land. I planned two turns of blocking around
+    numbers that were never going to arrive" (Kokomi r14 (c) 2, four for four;
+    Klee r14's Sludge Spinner the same shape).
+
+    WHICH OF THE ROW'S TWO OPTIONS THIS IS, and why. `BuildEnemyState` walks
+    `monster.NextMove`'s `Intents` and sends `type`, `label`, `title` and
+    `description` per part and nothing else -- no resolution order, no
+    condition, no marker of any kind separating a part that fires from one
+    that does not. "Print only the move the enemy will take" is therefore not
+    available to this side of the line, so the number is LABELLED instead,
+    twice: on the line a reader plans off, and once under the block.
+
+    Seen to FAIL: the number printed bare, and no note said otherwise.
+    """
+    page = blindplay.observe(compound_intent_state())
+    assert "the number on its icon is 8, a part it MAY perform" in page
+    assert "the number on its icon is 4, a part it MAY perform" in page
+    # ONCE, with the block's other notes, however many enemies telegraph parts.
+    assert page.count(blindplay.MULTI_INTENT_NOTE) == 1
+    assert "damage it is about to deal" in page
+
+    # A part with no number on its icon says nothing new -- there is no
+    # promise on it to withdraw.
+    quiet = json.loads(json.dumps(combat_state()))
+    quiet["battle"]["enemies"][0]["intents"] = [
+        {"type": "Attack", "label": "6", "title": "Aggressive",
+         "description": "This enemy intends to Attack for 6 damage."},
+        {"type": "Buff", "label": "", "title": "Empower",
+         "description": "This enemy intends to use a Buff."}]
+    quiet_page = blindplay.observe(quiet)
+    assert "the number on its icon is 6, a part it MAY perform" in quiet_page
+    assert quiet_page.count("the number on its icon") == 1
+    assert blindplay.MULTI_INTENT_NOTE in quiet_page
 
 
 def discounted_hand_state() -> dict:
