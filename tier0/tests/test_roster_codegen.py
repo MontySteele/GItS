@@ -1342,7 +1342,9 @@ def test_codegen_honours_the_add_before_position(monkeypatch):
     assert gated < exhaust, "the appended discard must resolve first"
     # The FACE reads in the order it plays, or a positioned upgrade lies about
     # itself in exactly the way the position exists to prevent.
-    text_add = src.index("{IfUpgraded:show:Discard 1 card.|}")
+    # `EB-571`: the separator rides inside the shown branch when the clause
+    # is not last, so the base face has no double space where it vanishes.
+    text_add = src.index("{IfUpgraded:show:Discard 1 card. |}")
     text_exhaust = src.index("[gold]Exhaust[/gold] 1 card from your hand.")
     assert text_add < text_exhaust
 

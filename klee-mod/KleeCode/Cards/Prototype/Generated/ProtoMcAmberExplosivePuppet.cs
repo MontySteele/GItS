@@ -72,6 +72,7 @@ public sealed class ProtoMcAmberExplosivePuppet : CustomCardModel, ICompanionCar
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<BaronBunnyPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        SummonDamage.Note<BaronBunnyPower>(Owner.Creature, this, 8);
         if (IsUpgraded)
         {
             await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);

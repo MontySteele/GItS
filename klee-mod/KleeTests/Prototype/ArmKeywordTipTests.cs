@@ -257,7 +257,13 @@ public class ArmKeywordTipTests
         Assert.Contains("Not an Attack: only [gold]Vulnerable[/gold] and a cap "
                       + "on the ", printed);
         Assert.Contains("enemy's HP loss move it.", printed);
-        Assert.Contains("Kills move it on.", printed);
+        // `EB-574` SPELT RULE 3 OUT. "Kills move it on" read as a promise
+        // about the charge doing the killing: the r21 lane-1 seat set off
+        // Mine 11, killed Toadpole B and saw nothing arrive on A. Same words
+        // here, on the Mine tip and on the badge, so no two can be read
+        // against each other.
+        Assert.Contains("If this enemy dies with it still on, it moves to a "
+                      + "survivor.", printed);
 
         // `EB-89`, read the only way it can be read: the growth rate is NOT a
         // literal anywhere in this method -- the two halves of the sentence are
@@ -466,13 +472,156 @@ public class ArmKeywordTipTests
         // the stage is never unlit -- and the relic's own arm face is at 117
         // of the 120-character relic ceiling with two ruled sentences already
         // on it, which leaves this table as the only surface with room.
-        Assert.Equal(17, attaches.Count);
+        //
+        // THE EIGHTEENTH IS `EB-575`'s `ForEmptyField`, the fourth entry that
+        // titles no keyword and the FIRST whose sentence comes and goes with
+        // the board. A `Set off` row or the merge played with no Bomb anywhere
+        // is accepted, charges its Energy and its Spark, and resolves its own
+        // line or nothing at all -- while a Spark-priced card the bank is
+        // short for prints CANNOT BE PLAYED on the same screen (Klee r21 lane
+        // 1). It goes through the same `With`, twice: which of its two
+        // sentences a row gets is derived from the row's effects.
+        //
+        // THE NINETEENTH IS `EB-573`'s `ForMergeRiders`, the fifth entry that
+        // titles no keyword: what a merge keeps besides the Mine. Careful
+        // Arrangement's face promises "a Mine if any of them was" and says
+        // nothing about riders, while the merge sums `PayloadMineAll` across
+        // every charge it takes -- so Jumpy Dumpty's Mine-on-ALL survives it
+        // and grows in bulk (Klee r21 lane 1, "completely undiscoverable
+        // except by accident").
+        Assert.Equal(19, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.Contains(attaches, m => m.Name == "ForCovenSpark");
         Assert.Contains(attaches, m => m.Name == "ForOpeningStage");
+        Assert.Contains(attaches, m => m.Name == "ForEmptyField");
+        Assert.Contains(attaches, m => m.Name == "ForMergeRiders");
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
                                          System.StringComparison.Ordinal)));
+    }
+
+    // --- `EB-573`: WHAT THE MERGE KEEPS BESIDES THE MINE --------------------
+
+    [Fact]
+    public void EB573_the_merge_row_says_riders_survive_it()
+    {
+        Assert.Contains(
+            Il.Calls(Il.Method("ProtoKoCarefulArrangement",
+                               "get_ExtraHoverTips")),
+            c => c.Contains("ForMergeRiders"));
+        var body = Printed("ForMergeRiders");
+        Assert.Contains("The merged [gold]Bomb[/gold] keeps every rider its "
+                      + "charges carried, and their riders add up.", body);
+    }
+
+    [Fact]
+    public void EB573_the_badge_counts_the_rider_it_is_carrying()
+    {
+        // The RULE is on the card and the NUMBER is on the pile: a Bomb 21
+        // that was Jumpy's Bomb 8 two merges ago still drops Mine 3 on ALL,
+        // and the badge is where a player meets that pile.
+        ProtoBombPower.Register.Rebase(null);
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(30).Creature;
+        ProtoBombs.Board(klee.Creature, enemy);
+
+        var plain = ProtoBombs.Place(enemy, klee.Creature,
+                                     new ProtoBombs.Charge(8));
+        Assert.Equal(0, plain.PayloadTotal);
+        Assert.DoesNotContain("Rider", LocKeyOf(plain));
+
+        var rider = ProtoBombs.Place(enemy, klee.Creature,
+                                     new ProtoBombs.Charge(8, PayloadMineAll: 3),
+                                     new ProtoBombs.Charge(5, PayloadMineAll: 2));
+        // THE SUM, which is what `MergeAllTo` builds and `Explode` pays out.
+        Assert.Equal(5, rider.PayloadTotal);
+        Assert.Contains("Rider", LocKeyOf(rider));
+        ProtoBombPower.Register.Rebase(null);
+    }
+
+    private static string LocKeyOf(ProtoBombPower pile) =>
+        (string)typeof(ProtoBombPower)
+            .GetProperty("SmartDescriptionLocKey", HeadlessGame.All)!
+            .GetValue(pile)!;
+
+    // --- `EB-575`: THE BOARD A SET OFF NEEDS, AND WHAT IT DOES WITHOUT IT --
+    //
+    // THE FIND (Klee r21 lane 1, (c) 2 and (c) 3). Careful Arrangement on a
+    // bare board and Fwoosh! on another were both ACCEPTED: the Energy went,
+    // the Spark went, and nothing resolved. "A blank that the game charges you
+    // for" -- while a Spark-priced card the bank is short for prints CANNOT BE
+    // PLAYED on the same screen and names the price and the bank.
+
+    [Fact]
+    public void EB575_a_set_off_and_a_merge_carry_the_empty_field_rider()
+    {
+        // THE ATTACH IS THE GENERATOR'S and it is derived from the row's
+        // effects, so the pin is that the two faces the seat played carry it.
+        foreach (var card in new[] { "ProtoKoCarefulArrangement", "ProtoKoFwoosh",
+                                     "ProtoKoTheBigOne", "ProtoKoFireworksShow" })
+        {
+            Assert.Contains(Il.Calls(Il.Method(card, "get_ExtraHoverTips")),
+                            c => c.Contains("ForEmptyField"));
+        }
+    }
+
+    [Fact]
+    public void EB575_the_rider_prints_on_a_bare_board_and_not_on_a_cooked_one()
+    {
+        // A REAL BOARD, and the whole question this rider asks:
+        // `ProtoBombPower.AnyPlacedBy`, which is the same read Grounded's
+        // condition and Set off's playability gate make.
+        ProtoBombPower.Register.Rebase(null);
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(30).Creature;
+        ProtoBombs.Board(klee.Creature, enemy);
+
+        var merge = Owned<ProtoKoCarefulArrangement>(klee);
+        var setOff = Owned<ProtoKoFwoosh>(klee);
+        var none = System.Linq.Enumerable.Empty<IHoverTip>();
+
+        // THE PREDICATE AND NOT THE MATERIALISED TIP, `EB-504`'s rule one test
+        // down: building a `HoverTip` formats a `LocString` through a
+        // `LocManager` that is null until the game boots. What a test CAN do
+        // is ask the gate, and watch the gated call hand its inherited stack
+        // straight back -- which is the observable half either way.
+        Assert.True(ArmKeywordTips.FieldIsEmptyFor(merge));
+        Assert.True(ArmKeywordTips.FieldIsEmptyFor(setOff));
+        Assert.NotSame(none, ArmKeywordTips.ForEmptyField(none, merge, false));
+        Assert.NotSame(none, ArmKeywordTips.ForEmptyField(none, setOff, true));
+
+        // COOKED: silent. The sentence is about THIS board, so it goes when
+        // the board it names goes, and the call hands the stack straight back.
+        ProtoBombs.Place(enemy, klee.Creature, new ProtoBombs.Charge(6));
+        Assert.False(ArmKeywordTips.FieldIsEmptyFor(merge));
+        Assert.False(ArmKeywordTips.FieldIsEmptyFor(setOff));
+        Assert.Same(none, ArmKeywordTips.ForEmptyField(none, merge, false));
+        Assert.Same(none, ArmKeywordTips.ForEmptyField(none, setOff, true));
+
+        // AND OFF A BOARD ENTIRELY -- a reward, a shop, a deck view -- there is
+        // no field to be empty and the rider says nothing.
+        Assert.False(ArmKeywordTips.FieldIsEmptyFor(new ProtoKoFwoosh()));
+        ProtoBombPower.Register.Rebase(null);
+    }
+
+    [Fact]
+    public void EB575_the_two_sentences_are_the_ruled_ones()
+    {
+        var body = Printed("ForEmptyField");
+        // A ROW WITH A LINE OF ITS OWN still does that line (Fwoosh!'s 6,
+        // Countdown's draw), and a row that is nothing but the Bomb work does
+        // nothing whatever (Careful Arrangement, The Big One, Quick Fuse,
+        // Fireworks Show). Saying either sentence on the other row would be
+        // false, so both are printed and the generator picks.
+        Assert.Contains("No [gold]Bomb[/gold] on the field: this card is only "
+                      + "its own line.", body);
+        Assert.Contains("No [gold]Bomb[/gold] on the field: this card does "
+                      + "nothing.", body);
+        // And the gate is the BOARD, asked once.
+        Assert.Contains(
+            Il.Calls(Il.Method("ArmKeywordTips", "FieldIsEmptyFor")),
+            c => c.EndsWith("ProtoBombPower.AnyPlacedBy",
+                            System.StringComparison.Ordinal));
     }
 
     // --- `EB-504`: KLEE'S RULE ON A RUN THAT HAS NO KLEE IN IT --------------

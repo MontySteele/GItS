@@ -41,7 +41,7 @@ public sealed class SendTheRunner : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Send the Runner"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. {IfUpgraded:show:Discard 1 card.|} [gold]Exhaust[/gold] 1 card from your hand."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. {IfUpgraded:show:Discard 1 card. |}[gold]Exhaust[/gold] 1 card from your hand."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

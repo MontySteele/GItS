@@ -5928,10 +5928,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # arm and Ka-pow! is not, so the opening hand always holds a placer.
         # The keyword rail states that about one CARD, on the card; what a
         # reader of the WORD needs is the fact about the deck.
+        # `EB-574`: rule 3 says which kill it means, in the same words on
+        # both tips and the badge.
         "Bomb": ["A charge on an enemy", "goes off only when",
                  ", or as a ", "Not an Attack: only ",
                  " and a cap on the ", "enemy's HP loss move it",
-                 "Kills move it on", "Your deck opens with a placer"],
+                 "If this enemy dies with it still on, it moves to a "
+                 "survivor", "Your deck opens with a placer"],
         # `EB-432`: the pile's own order, and which charge meets the aura.
         # `EB-490` renamed the class and not the claim: "Attack trigger" read
         # as something on the player's own side of the board, beside a Block
@@ -6047,8 +6050,8 @@ def test_the_grounded_word_is_defined_wherever_a_face_names_it():
     defined every other arm word on it and not that one.
     """
     page = blindplay.observe(keyword_hand_state(
-        ["Deal 8 damage. Apply Cryo. This turn, Grounded counts nothing as "
-         "having gone off."]))
+        ["Deal 8 damage. Apply Cryo. This turn, Grounded counts a Bomb as "
+         "on the field."]))
     assert "- **Grounded** — A Power that pays at the start of your turn"         in page
     assert "you have a Bomb on the field" in page      # `EB-516`
 
@@ -6061,8 +6064,8 @@ def test_the_grounded_word_is_defined_wherever_a_face_names_it():
     state["player"]["status"] = [
         {"id": "KLEEMOD-COLD_BLOODED", "name": "Cold-Blooded", "amount": 1,
          "type": "Buff", "keywords": [],
-         "description": "This turn, Grounded counts nothing as having gone "
-                        "off."}]
+         "description": "This turn, Grounded counts a Bomb as on the "
+                        "field."}]
     assert "- **Grounded** — " in blindplay.observe(state)
 
 
@@ -8111,9 +8114,12 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
         "Add 1 random Common Companion card to your hand, free this turn.")
     # AN EMPTY UNUPGRADED ARM TAKES THE SPACE IN FRONT OF IT WITH IT: the game
     # prints the trimmed sentence, and the upgraded face needs the space back.
+    # `EB-571`: the added draw resolves ON PLAY and the body is the end-of-turn
+    # rule, so the clause LEADS -- appended, the page told a seat deciding a
+    # Smith that the draw happened at the end of the turn.
     assert qa_packet.upgraded_face(*_R12_SMITH[3]) == (
-        "Hexerei. At the end of your turn, Oz deals 5 Electro damage to a "
-        "random enemy. Draw 1 card.")
+        "Hexerei. Draw 1 card. At the end of your turn, Oz deals 5 Electro "
+        "damage to a random enemy.")
 
 
 def test_the_one_that_cannot_be_rendered_says_which_kind_of_upgrade_it_is():

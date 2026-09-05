@@ -93,6 +93,27 @@ public static class ArmKeywordTips
     // it is a sentence about the CARD in hand, printed where that card is met.
     public const string CovenSparkKey = "KLEEMOD-ARM_COVEN_SPARK";
 
+    // `EB-575`. THE FOURTH KEY HERE THAT TITLES NO KEYWORD, and the only one
+    // whose sentence appears and disappears with the board. A `Set off` or a
+    // merge played with no Bomb anywhere is ACCEPTED, charges its Energy and
+    // its Spark, and does its own line or nothing at all -- silently, while a
+    // Spark-priced card the bank cannot afford prints CANNOT BE PLAYED. The
+    // r21 lane-1 seat played Careful Arrangement on a bare board and Fwoosh!
+    // on another, and read both as blanks the game charged for. Furina's
+    // empty-stage rider is the same shape one arm over
+    // (<see cref="KleeMod.Cards.FurinaRiderTips.ForCompanionPerform"/>).
+    public const string EmptyFieldKey = "KLEEMOD-ARM_EMPTY_FIELD";
+
+    // `EB-573`. THE FIFTH KEY HERE THAT TITLES NO KEYWORD. Careful
+    // Arrangement's face promises the merged charge is "a Mine if any of them
+    // was" and says nothing about RIDERS -- and `ProtoBombPower.MergeAllTo`
+    // sums `PayloadMineAll` across every charge it takes, so Jumpy Dumpty's
+    // Mine-on-ALL survives the merge and grows in bulk. The r21 lane-1 seat
+    // met a Bomb 21 that was Jumpy's Bomb 8 two merges ago still dropping Mine
+    // 3 on ALL, called it a large part of the kit's ceiling, and said it was
+    // "completely undiscoverable except by accident".
+    public const string MergeRidersKey = "KLEEMOD-ARM_MERGE_RIDERS";
+
     // `EB-553` (R260). THE THIRD KEY HERE THAT TITLES NO KEYWORD, and it names
     // the one rule the reframe's STARTING RELIC now carries: the stage is
     // fielded before the first card is played. The relic's own face is at 117
@@ -136,6 +157,14 @@ public static class ArmKeywordTips
     /// rate, rule 7 and R248's burden are all still here, and the growth rate
     /// is still interpolated so a repricing cannot leave the sentence lying
     /// (`EB-89`).
+    ///
+    /// `EB-574` SPELT RULE 3 OUT. "Kills move it on" was read as a promise
+    /// about the charge that does the killing -- the r21 lane-1 seat set off
+    /// Mine 11, killed Toadpole B, watched nothing arrive on A and filed the
+    /// screen as contradicting itself. The rule is about the BODY, not the
+    /// charge: a charge that goes off is spent, and what travels is one still
+    /// sitting on an enemy that dies to something else. The sentence now says
+    /// which of the two it means, in the same words on both tips and the badge.
     ///
     /// THE LAST SENTENCE IS RULE 3, AND IT IS `EB-361`. A Bomb whose enemy dies
     /// moves to a survivor at its size, and that rule was on no card, no badge
@@ -207,7 +236,8 @@ public static class ArmKeywordTips
           + "[gold]Mine[/gold]. "
           + "Not an Attack: only [gold]Vulnerable[/gold] and a cap on the "
           + "enemy's HP loss move it. "
-          + "Kills move it on. Your deck opens with a placer.");
+          + "If this enemy dies with it still on, it moves to a survivor. "
+          + "Your deck opens with a placer.");
 
     /// <summary>
     /// Rule 2, and the one [USER] named ("Set Off has no tooltip text"). The
@@ -392,13 +422,23 @@ public static class ArmKeywordTips
     /// still here word for word and still names both terms, so `EB-343`'s
     /// rule survives whole; what went is the pointer, which a player standing
     /// in front of the badge does not need and a player in hand cannot use.
-    /// 133 of 135 rendered, no exception taken.
+    /// 133 of 135 rendered, no exception taken -- until `EB-574`.
+    ///
+    /// `EB-574` PUT RULE 3 ON THIS TIP TOO, and this is the surface the row was
+    /// filed on: the seat met "a kill moves them to a survivor" on the badge of
+    /// the body its Mine was about to kill and read it as a promise about that
+    /// Mine. A Mine kills more often than a plain Bomb does, so the tip that
+    /// says "unless the Mine kills" is exactly where the other reading has to
+    /// be closed. Same sentence as `ForBomb` and as the badge, word for word,
+    /// so no two of the three can be read against each other; `MineKey` is
+    /// carried in `tools/lint_text_conventions.py` by name for the room.
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off before its enemy's hit, "
           + "which lands in full unless the Mine kills. Only their "
-          + "[gold]Vulnerable[/gold] and a cap move it.");
+          + "[gold]Vulnerable[/gold] and a cap move it. "
+          + "If this enemy dies with it still on, it moves to a survivor.");
 
     /// <summary>
     /// KLEE'S FIFTH, R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`
@@ -531,8 +571,8 @@ public static class ArmKeywordTips
     /// PLAYER MAY NEVER HAVE OWNED.
     ///
     /// THE GAP. `Grounded` is a Power of Klee's, and Kaeya's Cold-Blooded
-    /// Strike is written against it -- "This turn, Grounded counts nothing as
-    /// having gone off" -- as is the buff that card leaves behind
+    /// Strike is written against it -- "This turn, Grounded counts a Bomb as
+    /// on the field" (`EB-576`) -- as is the buff that card leaves behind
     /// (<see cref="KleeMod.Powers.ColdBloodedPower"/>). A player who drafted
     /// Kaeya without ever drafting Grounded meets the word on a card face with
     /// nothing anywhere on the screen saying what it is, and the r9 seat read
@@ -770,6 +810,100 @@ public static class ArmKeywordTips
         With(inherited, MendKey,
             "[gold]Mend N[/gold]: heal N HP, never above the HP you entered "
           + "the fight with.");
+
+    /// <summary>
+    /// `EB-575`. THE BOARD THIS CARD NEEDS, AND WHAT IT DOES WITHOUT IT.
+    ///
+    /// THE DEFECT (Klee r21 lane 1, (c) 2 and (c) 3). A `Set off` row and the
+    /// merge are PLAYABLE with no Bomb on the field: the game takes the
+    /// Energy, takes the Spark where one is priced, and resolves nothing at
+    /// all. The seat played Careful Arrangement onto a bare board and called
+    /// it "a blank that the game charges you for", and the contrast is on the
+    /// same screen -- a Spark-priced card the bank is short for prints CANNOT
+    /// BE PLAYED and names the price and the bank.
+    ///
+    /// A RIDER AND NOT A REFUSAL, which is a design fact rather than an
+    /// implementation one: setting off nothing is a legal, sometimes correct
+    /// play (Bang Bang! places a Bomb, Countdown draws), so what is owed is
+    /// the sentence, not a block. Furina's Companion cards carry the same
+    /// shape for the same reason
+    /// (<see cref="KleeMod.Cards.FurinaRiderTips.ForCompanionPerform"/>,
+    /// "No member on stage: performs nobody").
+    ///
+    /// TWO BODIES, BECAUSE TWO THINGS ARE TRUE. A row with a line of its own
+    /// -- Fwoosh!'s 6 damage, Countdown's draw -- still does that line, and
+    /// saying "does nothing" there would be false. A row that is nothing BUT
+    /// the Bomb work (Careful Arrangement, The Big One, Quick Fuse, Fireworks
+    /// Show) does nothing whatever, and saying "only its own line" would send
+    /// a player looking for a line that is not there. Which body a card gets
+    /// is DERIVED from its effects in `gen_klee_cards.empty_field_tip_arg`, so
+    /// a row that gains a line gains the other sentence with it.
+    ///
+    /// LIVE, AND SILENT WHEN THE FIELD IS NOT EMPTY: it is a sentence about
+    /// THIS board, so it prints only while the board is in the state it names,
+    /// and nothing at all off a creature or out of combat.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForEmptyField(
+        IEnumerable<IHoverTip> inherited, CardModel card, bool ownLine)
+    {
+        if (!FieldIsEmptyFor(card)) return inherited;
+        return ownLine
+            ? With(inherited, EmptyFieldKey,
+                "No [gold]Bomb[/gold] on the field: this card is only its own "
+              + "line.")
+            : With(inherited, EmptyFieldKey,
+                "No [gold]Bomb[/gold] on the field: this card does nothing.");
+    }
+
+    /// <summary>
+    /// `EB-573`. WHAT THE MERGE KEEPS BESIDES THE MINE.
+    ///
+    /// THE FIND (Klee r21 lane 1, (c) 4). "A Bomb 21 that was Jumpy's Bomb 8
+    /// two merges and two turns ago still dropped Mine 3 on ALL when it went
+    /// off. This is a GOOD interaction and a large part of the kit's ceiling,
+    /// and it is completely undiscoverable except by accident. Careful
+    /// Arrangement's face says the merged charge is 'a Mine if any of them
+    /// was'; it says nothing about riders."
+    ///
+    /// THE CARD SAYS IT AND THE BADGE COUNTS IT. This sentence is the RULE, on
+    /// the card that does the merging, where a player decides whether to
+    /// merge; <c>ProtoBombPower.RiderClause</c> is the live number, on the pile
+    /// the rule produced. Neither is enough alone -- the rule is unreadable off
+    /// a number and the number is unreachable before the play.
+    ///
+    /// STATIC, unlike <see cref="ForEmptyField"/>: it is a fact about the CARD
+    /// and true in a reward screen and a shop as well as in a fight.
+    ///
+    /// ATTACHED BY THE MERGE OP, not by name
+    /// (`gen_klee_cards.reads_the_field`'s sibling), so a second merge row
+    /// carries the sentence the day its row exists.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForMergeRiders(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, MergeRidersKey,
+            "The merged [gold]Bomb[/gold] keeps every rider its charges "
+          + "carried, and their riders add up.");
+
+    /// <summary>
+    /// `EB-575`'s question, on its own so a pin can ask it. Is there a board
+    /// here, and is this player's field empty of Bombs?
+    ///
+    /// THE OWNER'S COMBAT AND NOT THE CARD'S. `CardModel.CombatState` walks the
+    /// card's PILE to find one and throws off a board -- it is the read the
+    /// headless boundary bites on -- while the owning creature carries the same
+    /// answer and answers null out of combat, which is the case this guard
+    /// exists for: a reward screen or a deck view has no field to be empty.
+    ///
+    /// `AnyPlacedBy` IS THE SAME READ Grounded's condition makes and the Set
+    /// off rows' playability gate makes (R205-scoped: her own charges, on a
+    /// living body), so the sentence cannot disagree with the card it rides.
+    /// </summary>
+    public static bool FieldIsEmptyFor(CardModel? card)
+    {
+        var owner = TipOwner.CreatureOf(card);
+        if (owner?.CombatState == null) return false;
+        return !ProtoBombPower.AnyPlacedBy(owner);
+    }
 
     // ------------------------------------------------------- companions ----
 

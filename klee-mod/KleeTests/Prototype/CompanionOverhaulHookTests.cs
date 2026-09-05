@@ -172,10 +172,16 @@ public class CompanionOverhaulHookTests
     [Theory]
     [InlineData(typeof(SacramentalShowerPower), CompanionOverhaulLaw.ShowerDamage)]
     [InlineData(typeof(LightningFangPower), CompanionOverhaulLaw.LightningFangDamage)]
-    [InlineData(typeof(BaronBunnyPower), CompanionOverhaulLaw.BaronBunnyDamage)]
     [InlineData(typeof(BaronBunnyPower), CompanionOverhaulLaw.BaronBunnyReduction)]
     [InlineData(typeof(LightfallSwordPower), CompanionOverhaulLaw.LightfallBase)]
     [InlineData(typeof(LightfallSwordPower), CompanionOverhaulLaw.LightfallPerAttack)]
+    // `EB-463` / `EB-565` TOOK TWO ROWS OFF THIS LIST, and neither number
+    // moved: `TamotoPower` and `BaronBunnyPower` print `{Damage}`, a var
+    // seeded from the same `CompanionOverhaulLaw` constant and rewritten at
+    // PLAY with the card's Guest Cast fold on it. The face and the hit still
+    // read one number -- `SummonDamageTests` is where that is pinned, because
+    // the number a `Localization` row prints is now a hole rather than a
+    // literal.
     public void Every_power_face_prints_the_number_it_pays(Type type, int number)
     {
         // FACE FROM BODY at the power level, exactly as the first pass pins

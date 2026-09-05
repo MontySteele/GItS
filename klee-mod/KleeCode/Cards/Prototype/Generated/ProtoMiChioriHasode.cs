@@ -75,6 +75,7 @@ public sealed class ProtoMiChioriHasode : CustomCardModel, ICompanionCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<TamotoPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        SummonDamage.Note<TamotoPower>(Owner.Creature, this, 6);
     }
 
     protected override void OnUpgrade()

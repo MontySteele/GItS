@@ -18,7 +18,7 @@ from functools import lru_cache
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine import companion_standins
+from tier0.engine import combat, companion_standins
 from tier0.engine.state import Card
 
 # The calibration references draft only from their own pool. For
@@ -329,9 +329,74 @@ def _present_rarity(pool: dict[str, list[Card]], rarity: str) -> str:
         f"{sorted(pool)}, which the ladder cannot reach from {rarity!r}")
 
 
+def _seeded_pick(candidates: list[Card], floor: int) -> Card:
+    """`EB-577`. WHICH Spark row, and NO RNG IS CONSUMED DOING IT.
+
+    The roll this runs after has already been made, so drawing here would move
+    the run's shared stream and a seed replayed with the arm off would diverge
+    for a reason that has nothing to do with combat. The pick is DERIVED
+    instead: the eligible rows in a stable order, indexed by the floor. It is
+    deterministic, it replays, and the run's two seeded screens get different
+    cards -- which is the whole of what a draw was wanted for. The mod's twin
+    (`CardFactory_CreateForReward_SparkSeed_Patch.Pick`) is the same rule, for
+    the same reason and in the same words.
+    """
+    ordered = sorted(candidates, key=lambda c: c.id)
+    return loader.get_card(ordered[(floor - 1) % len(ordered)].id)
+
+
+def _spark_seed(rng: random.Random, character_id: str,
+                offers: list[Card], floor: int | None) -> list[Card]:
+    """`EB-577`. The arm's first card rewards each carry a Spark-priced row.
+
+    THE READING SIX ROUNDS MADE. Sparks are inert until a sink is drafted
+    (Klee r17 through r21); the r21 lane-2 seat ended fights holding 3, 4 and 5
+    with Dig In the deck's one reader, so the resource the kit mints on every
+    explosion did nothing at all. The kit cannot teach its own resource on a
+    screen that never offers a reader, and the first two card rewards -- floors
+    1 to `C.KLEE_OVERHAUL_SPARK_SEED_FLOORS` -- are where the reading forms.
+
+    THE SMALLEST INTERVENTION IT COULD BE. Nothing about a card moves: no
+    rarity, no price, no face. One offer on one screen is swapped for a
+    Spark-priced row of the SAME rarity where the pool has one, and the roll is
+    otherwise the roll it was -- so a screen that already offered a reader is
+    untouched, and every screen from floor 4 on is untouched too.
+
+    QUARANTINED, like everything else in this arm: `C.KLEE_OVERHAUL` off, or
+    any character but Klee, and this is the identity. `floor` is None wherever
+    a caller has no floor to give (the event layer's card screens), which is
+    the same answer.
+    """
+    if floor is None or not C.KLEE_OVERHAUL or character_id != "klee":
+        return offers
+    if floor > int(C.KLEE_OVERHAUL_SPARK_SEED_FLOORS):
+        return offers
+    if any(combat.spark_cost(c) for c in offers):
+        return offers                        # the roll already seeded it
+    pool = character_pool(character_id)
+    # THE SAME RARITY FIRST, so the swap costs the screen nothing in tier: the
+    # offer it replaces was rolled at that rarity and the guarantee is about
+    # WHICH card, never about how good one is. A pool with no Spark row at that
+    # rarity falls back to any Spark row it has, and a pool with none at all
+    # leaves the screen exactly as it was.
+    for i, offer in enumerate(offers):
+        priced = [c for c in pool.get(offer.rarity, [])
+                  if combat.spark_cost(c) and c.id not in
+                  {o.id for o in offers}]
+        if priced:
+            offers[i] = _seeded_pick(priced, floor)
+            return offers
+    priced = [c for cs in pool.values() for c in cs
+              if combat.spark_cost(c) and c.id not in {o.id for o in offers}]
+    if priced and offers:
+        offers[-1] = _seeded_pick(priced, floor)
+    return offers
+
+
 def roll_card_offers(rng: random.Random, character_id: str, n: int,
                      card_rarity: str | None = None,
-                     distinct: bool = False) -> list[Card]:
+                     distinct: bool = False,
+                     floor: int | None = None) -> list[Card]:
     """`n` card offers rolled the way a reward screen rolls them: a rarity
     per offer through `C.RARITY_ODDS` FIRST, then a pick inside that tier.
 
@@ -387,7 +452,10 @@ def roll_card_offers(rng: random.Random, character_id: str, n: int,
         pick = loader.get_card(rng.choice(cands).id)
         offers.append(pick)
         taken.add(pick.id)
-    return offers
+    # `EB-577`, LAST: the roll is the roll, and the seed reads what it produced.
+    # Written after the loop rather than inside it so a screen that already
+    # offered a Spark row consumes no extra rng at all.
+    return _spark_seed(rng, character_id, offers, floor)
 
 
 def _nation_weighted_choice(rng: random.Random, cards: list[Card],
@@ -414,7 +482,8 @@ def roll_rewards(rng: random.Random, character_id: str,
                  companion_offers: int = 1,
                  banner: frozenset[str] | None = None,
                  companion_rarity: str | None = None,
-                 card_rarity: str | None = None) -> list[Card]:
+                 card_rarity: str | None = None,
+                 floor: int | None = None) -> list[Card]:
     """One post-fight reward screen: card offers + the companion slot.
     companion_offers > 1 is the pity/choose-3 slot (triage ruling 4
     pulled the mechanism forward from M7; the run model decides when).
@@ -449,7 +518,7 @@ def roll_rewards(rng: random.Random, character_id: str,
             "reward card must be owned by the character being offered it. "
             "Check the id, or that its sheet sets `character`.")
     offers = roll_card_offers(rng, character_id, C.REWARD_CARD_OFFERS,
-                              card_rarity=card_rarity)
+                              card_rarity=card_rarity, floor=floor)
     # companion_offers=0 is a CARD-ONLY screen (The Hunt's extra reward): the
     # slot is absent, not empty, so none of the companion machinery runs.
     if companion_offers and character_id not in NO_COMPANION_CHARACTERS:

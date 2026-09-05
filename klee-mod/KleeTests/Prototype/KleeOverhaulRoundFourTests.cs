@@ -92,8 +92,12 @@ public class KleeOverhaulRoundFourTests
         // `EB-361`: rule 1's growth is a CLAUSE on that count now, and rule 3
         // ends the face -- four sentences is the ceiling and the jump was the
         // fifth fact three round-10 seats needed and could not read anywhere.
+        // `EB-574` reworded the jump sentence: it is printed on the badge of
+        // the body the pile is about to kill, which is exactly where "a kill
+        // moves them to a survivor" reads as a promise about THESE charges.
         Assert.EndsWith(" growing each turn. None goes off by itself."
-                        + " A kill moves them to a survivor.", face);
+                        + " If this enemy dies with them still on, they move "
+                        + "to a survivor.", face);
     }
 
     [Fact]
@@ -218,24 +222,30 @@ public class KleeOverhaulRoundFourTests
         // `EB-536` ADDED THE THIRD AXIS: whether the pile holds one charge or
         // several, because the hit clause is a fact about a STACK and reads as
         // noise on a single Bomb.
+        // `EB-573` ADDED THE FOURTH: whether any charge here carries a rider
+        // (Jumpy Dumpty's Mine-on-ALL). It survives a merge and it grows in
+        // bulk, and until this row no surface said so.
         foreach (var single in new[] { "", "One" })
         {
             foreach (var mines in new[] { "", "Mines" })
             {
-                foreach (var vulnerable in new[] { "", "Vulnerable" })
+                foreach (var rider in new[] { "", "Rider" })
                 {
-                    foreach (var cap in caps)
+                    foreach (var vulnerable in new[] { "", "Vulnerable" })
                     {
-                        Assert.Contains(
-                            "smartDescription" + single + mines + vulnerable
-                            + cap, rows);
+                        foreach (var cap in caps)
+                        {
+                            Assert.Contains(
+                                "smartDescription" + single + mines + rider
+                                + vulnerable + cap, rows);
+                        }
                     }
                 }
             }
         }
-        // And no more than the grid: three axes, nothing hand-added beside
+        // And no more than the grid: four axes, nothing hand-added beside
         // them.
-        Assert.Equal(2 * 2 * 2 * caps.Length,
+        Assert.Equal(2 * 2 * 2 * 2 * caps.Length,
                      rows.Count(r => r.StartsWith("smartDescription")));
 
         // Each modified row is the plain row with exactly its own clause in

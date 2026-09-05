@@ -116,8 +116,8 @@ def test_the_shipped_bomb_keeps_its_own_definition_and_the_arm_stands_down():
 # ------------------------------------------- EB-372: Grounded travels too --
 #
 # THE FINDING. `Grounded` is a Power card of Klee's, and Kaeya's Cold-Blooded
-# Strike is written against it by name -- "This turn, Grounded counts nothing
-# as having gone off" -- as is the Cold-Blooded buff that card leaves behind.
+# Strike is written against it by name -- "This turn, Grounded counts a Bomb
+# as on the field" (`EB-576`) -- as is the buff that card leaves behind.
 # A seat that drafted Kaeya and never drafted Grounded met the word on a card
 # face with nothing on the screen saying what it is, and read it as noise in
 # both acts (r9 act 1 sec.(c) 3, act 2 sec.(c) 2).
@@ -129,8 +129,8 @@ def test_the_shipped_bomb_keeps_its_own_definition_and_the_arm_stands_down():
 
 def test_the_grounded_word_owes_its_definition_wherever_it_is_printed():
     assert gen.arm_keyword_tip_calls(
-        "This turn, [gold]Grounded[/gold] counts nothing as having gone "
-        "off.") == ["ArmKeywordTips.ForGrounded"]
+        "This turn, [gold]Grounded[/gold] counts a Bomb as on the "
+        "field.") == ["ArmKeywordTips.ForGrounded"]
     # The bare word in prose is not the keyword, the rule every row here is
     # under: the span has to be golded.
     assert gen.arm_keyword_tip_calls("This turn, Grounded counts nothing.")         == []
@@ -145,7 +145,7 @@ def test_kaeyas_face_carries_the_grounded_tip_in_the_shipped_generation():
     """
     card = (PROTOTYPE_DIR / "ProtoMcKaeyaColdBloodedStrike.cs").read_text(
         encoding="utf-8")
-    assert "[gold]Grounded[/gold] counts nothing as having gone off." in card
+    assert "[gold]Grounded[/gold] counts a Bomb as on the field." in card
     assert "ArmKeywordTips.ForGrounded(" in card
 
 
@@ -158,7 +158,7 @@ def test_the_buff_kaeyas_card_leaves_behind_carries_it_too():
     body = power[head:power.index("class LionsFangPower")]
     # The face's literal is split across two lines by the concatenation, so
     # the clause is asserted the way the source spells it.
-    assert "This turn, [gold]Grounded[/gold] counts nothing as having gone "         in body
+    assert "This turn, [gold]Grounded[/gold] counts a Bomb as on the "         in body
     assert "ArmKeywordTips.ForGrounded(base.ExtraHoverTips)" in body
 
 
@@ -463,7 +463,13 @@ def test_every_table_row_has_a_method_and_a_registered_title_row(keyword):
 # ruled sentences already on it. They are named here so the count below stays a
 # real pin instead of a number somebody bumps.
 NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
-                    "KLEEMOD-ARM_OPENING_STAGE"}
+                    "KLEEMOD-ARM_OPENING_STAGE",
+                    # `EB-575`: the fourth rider here that titles no keyword,
+                    # and the first whose sentence comes and goes with the
+                    # board.
+                    "KLEEMOD-ARM_EMPTY_FIELD",
+                    # `EB-573`: what a merge keeps besides the Mine.
+                    "KLEEMOD-ARM_MERGE_RIDERS"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -476,6 +482,91 @@ def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
     assert all(k.startswith("KLEEMOD-ARM_") for k in keys)
     assert "KLEEMOD-BOMB" not in keys
     assert "KLEEMOD-SWIRL_PREVIEW" not in keys
+
+
+def test_the_merge_row_says_riders_survive_it():
+    """`EB-573`. The rider the merge keeps, on the card that does the merging.
+
+    THE FIND (Klee r21 lane 1, (c) 4). "A Bomb 21 that was Jumpy's Bomb 8 two
+    merges and two turns ago still dropped Mine 3 on ALL when it went off. This
+    is a GOOD interaction and a large part of the kit's ceiling, and it is
+    completely undiscoverable except by accident."
+
+    Seen to FAIL: Careful Arrangement's face promises "a Mine if any of them
+    was" and says nothing about riders, and no badge counted one.
+    """
+    rows = {row["id"]: row for row in proto._rows()}
+    mergers = {rid for rid, row in rows.items() if gen.merges_bombs(row)}
+    assert mergers == {"proto_ko_careful_arrangement"}
+    merge = (PROTOTYPE_DIR / "ProtoKoCarefulArrangement.cs").read_text(
+        encoding="utf-8")
+    assert "ArmKeywordTips.ForMergeRiders(" in merge
+    # AND THE RIDER EXISTS TO SURVIVE: the one row that plants one.
+    riders = {rid for rid, row in rows.items()
+              if any(fx.get("payload_mine_all")
+                     for fx in gen.iter_effects(row.get("effects") or []))}
+    assert "proto_ko_jumpy_dumpty" in riders
+
+
+def test_a_set_off_row_on_a_bare_board_says_so():
+    """`EB-575`. The attach and which of the two sentences a row gets, both
+    derived from the row's own effects.
+
+    THE FIND (Klee r21 lane 1, (c) 2 and (c) 3). Careful Arrangement on a bare
+    board and Fwoosh! on another were ACCEPTED: the Energy went, the Spark
+    went, nothing resolved. On the same screen a Spark-priced card the bank was
+    short for printed CANNOT BE PLAYED and named the price and the bank.
+
+    Seen to FAIL: nothing on either face, in either engine, said the board was
+    empty.
+    """
+    rows = {row["id"]: row for row in proto._rows()}
+    # EVERY SET OFF AND THE MERGE, and nothing else.
+    readers = {rid for rid, row in rows.items() if gen.reads_the_field(row)}
+    assert "proto_ko_careful_arrangement" in readers
+    assert "proto_ko_fwoosh" in readers
+    assert "proto_ko_jumpy_dumpty" not in readers      # a placer reads nothing
+    # THE TWO SENTENCES. A row with a line of its own still does that line; a
+    # row that is nothing but the Bomb work does nothing whatever.
+    blanks = {rid for rid in readers if not gen.empty_field_tip_arg(rows[rid])}
+    assert blanks == {"proto_ko_careful_arrangement", "proto_ko_the_big_one",
+                      "proto_ko_quick_fuse", "proto_ko_fireworks_show"}
+    # AND THE ATTACH REACHED THE EMITTED C#, with the derived argument on it.
+    merge = (PROTOTYPE_DIR / "ProtoKoCarefulArrangement.cs").read_text(
+        encoding="utf-8")
+    assert "ArmKeywordTips.ForEmptyField(" in merge and ", this, false)" in merge
+    fwoosh = (PROTOTYPE_DIR / "ProtoKoFwoosh.cs").read_text(encoding="utf-8")
+    assert "ArmKeywordTips.ForEmptyField(" in fwoosh and ", this, true)" in fwoosh
+
+
+def test_rule_three_says_which_kill_it_means_on_all_three_surfaces():
+    """`EB-574`. The sentence is about the BODY, not the charge.
+
+    "Kills move it on" (Bomb tip) and "a kill moves them to a survivor" (the
+    badge) both read as a promise about the charge that does the killing, and
+    the badge prints its copy on the body the pile is about to kill -- which is
+    exactly where that reading is invited. The r21 lane-1 seat set off Mine 11,
+    killed Toadpole B, saw nothing arrive on A and filed the screen as
+    contradicting itself.
+
+    Seen to FAIL: the Mine tip carried no jump clause at all, so the surface a
+    Mine reader stands in front of said nothing about the rule.
+    """
+    import sys
+    sys.path.insert(0, str(REPO))
+    from tools import lint_text_conventions as ltc
+    tips = {row.ident: ltc.render(row.raw) for row in ltc.tip_rows()}
+    sentence = "If this enemy dies with it still on, it moves to a survivor."
+    assert sentence in tips["BombKey"]
+    assert sentence in tips["MineKey"]
+    # The badge speaks of a PILE, so the same claim in the plural.
+    badge = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+             / "ProtoBombPower.cs").read_text(encoding="utf-8")
+    assert (' " If this enemy dies with them still on, they move to a '
+            'survivor.";') in badge
+    # And the old wording is gone from every one of the three.
+    assert "Kills move it on" not in tips["BombKey"]
+    assert '" A kill moves them to a survivor.";' not in badge
 
 
 def test_the_ruled_sentences_are_the_ones_that_ship():
@@ -514,7 +605,11 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # `EB-555` defined the cap inside the clause that names it.
             "Not an Attack: only [gold]Vulnerable[/gold] and a cap on the ",
             "enemy's HP loss move it. ",
-            "Kills move it on.",
+            # `EB-574` SPELT RULE 3 OUT, in the same words on both tips and
+            # the badge: "kills move it on" read as a promise about the charge
+            # doing the killing, and the r21 lane-1 seat set off Mine 11,
+            # killed Toadpole B and saw nothing arrive on A.
+            "If this enemy dies with it still on, it moves to a survivor.",
             # `EB-432` named the order INSIDE the pile: `SetOff` walks the
             # charges in placement order and the first one meets the aura,
             # because a reaction consumes it. "Oldest first" carries "one at a
@@ -546,6 +641,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # `EB-373`: a Mine IS a Bomb, so the same two terms move it and
             # the two tips say so in the same words.
             "Only their ",
+            # `EB-574`: and the Mine tip carries rule 3 too -- a Mine kills
+            # more often than a plain Bomb, so this is the tip the row was
+            # filed on.
+            "[gold]Vulnerable[/gold] and a cap move it. ",
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.

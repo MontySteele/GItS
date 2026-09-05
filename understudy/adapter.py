@@ -109,6 +109,37 @@ _INTENT_DESC_RE = re.compile(r"[Aa]ttack for (\d+)")
 _BLK_RE = re.compile(r"[Gg]ain\s+(\d+)\s+[Bb]lock")
 
 
+#: `EB-572`. THE BASE GAME'S BASICS, WHICH THE KLEE ARM'S STARTER IS MADE OF.
+#:
+#: THE DEFECT. `resolve_card` resolved a `KLEEMOD-` id and nothing else, so
+#: every base-game card on a screen fell through to the text approximation and
+#: was dropped by the callers that want an EXACT row. Draft 4 (R242 pick 3)
+#: made Klee's starter four base Strikes, four base Defends and two rows of her
+#: own -- "Strike and Defend are the base game's cards", the ruling's own words
+#: -- so a Smith screen on floor 1 is eight base cards and two mod ones, and
+#: the Neow "Pomander" upgrade screen offers the starter alone. The Klee soak
+#: on `0.2.2789+proto` hit exactly that: "the sim declined this 'upgrade'
+#: screen (no option resolves to a sim card row)", index 0 forced
+#: (soak-20260905-132107 lane 1, seed 5DWBV3ET2FJZ, decision 8). The two
+#: earlier soaks on that build resolved theirs because their screens were mod
+#: rows.
+#:
+#: A CURATED MAP AND NOT A DERIVATION, the discipline `STATUS_MAP` above keeps
+#: for the same reason: a base id is decompiled game data and the sim's row is
+#: a committed sheet row, and the only honest join between the two is one
+#: somebody checked. `strike` and `defend` are `content/cards/ironclad_starter.yaml`
+#: at exactly the base stat line (6 damage, 5 Block), which is why
+#: `C.KLEE_OVERHAUL_STARTER_IDS` names them; `bash` rides with them because the
+#: same sheet carries it and the same reward-blind `basic` rarity keeps it off
+#: every other screen. An id NOT in this map is still approximate, loudly, as
+#: it always was.
+BASE_CARD_IDS = {
+    "STRIKE_IRONCLAD": "strike",
+    "DEFEND_IRONCLAD": "defend",
+    "BASH": "bash",
+}
+
+
 def sheet_id(bridge_id: str) -> str:
     """`KLEEMOD-ARIA_OF_RECOMPENSE` -> `aria_of_recompense`."""
     core = bridge_id[len(MOD_PREFIX):] if bridge_id.startswith(MOD_PREFIX) else bridge_id
@@ -139,6 +170,16 @@ def resolve_card(entry: dict[str, Any],
                 return copy.deepcopy(hit), False
         try:
             return loader.peek_card(sid), False
+        except (KeyError, ValueError):
+            pass
+    # `EB-572`: the base game's basics, which the Klee arm's starter is made
+    # of. Curated (`BASE_CARD_IDS`), never derived, and it answers EXACT --
+    # these are committed sheet rows at the base stat line, so a caller that
+    # refuses an approximation is right to accept them.
+    base = BASE_CARD_IDS.get(bid.upper())
+    if base is not None:
+        try:
+            return loader.peek_card(base), False
         except (KeyError, ValueError):
             pass
     return _text_card(entry), True
