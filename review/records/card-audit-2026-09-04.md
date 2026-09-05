@@ -1927,3 +1927,161 @@ One verdict, its clause and its comparison. Under 120 words.
 ```
 1. **FOLLOWS — C2 (binding prices), C6 (not strictly better).** Standing Second Course costs 1 energy + 3 printed Encore, 5 including both performances; adjusted costs 1 energy + 1 printed Encore, 3 including both performances. On turn 1 with an empty stage and 2 Encore, standing is unplayable; adjusted deals 6 + 4 = 10 damage and leaves 0 Encore. Shipped Mademoiselle Crabaletta costs 1 energy, deals 6 on deploy, and leaves 1 Encore: adjusted gains 4 immediate damage but sacrifices that remaining Encore, so its advantage has a binding price.
 ```
+
+## 5.9 Kokomi round 20: The Moon Overlooks the Waters, two readings, withdrawn (2026-09-05, night)
+
+One arm from `review/active/kokomi-overhaul-round-20-2026-09-05.md` §4
+item 1, read at the door twice. First reading: the now-copy at half.
+**REQUIRES_MODIFICATION on C1**, with the Battle Plan counterexample (play
+draws 1; Plan gains 1 Energy and draws 2; at half the now-copy still draws
+1, so writing matches playing this turn and adds the morning). Second
+reading: a one-turn Exhaust Skill ("This turn, Plans also happen now"),
+asked plainly whether a one-turn window is C1's concern. **REQUIRES_MODIFICATION
+on C1 again**: removing waiting's price for one turn still removes the
+losing line on that turn. The author agrees: the card's concept ("Plans
+also happen now") cannot survive C1 in any duration once a Plan line is
+double its play line. **Outcome:** withdrawn from the arm's offer as Rolling
+Tide was (`EB-570`, D default; the row and its upgrade deleted with their
+pins under R213 B); Nereid's Ascension stays the one rule-breaking Rare.
+First prompt, then its reply, then the second prompt's arm and its reply,
+verbatim:
+
+```
+# Doctrine read: one Kokomi card adjustment from round 20
+
+The one numbered arm below is an ADJUSTMENT to a row that stands on the
+sheet, with the standing text and the adjusted text both printed. FOLLOWS
+or REQUIRES_MODIFICATION, the clause you ruled against, and the comparison
+the verdict rests on: the standing row's line against the adjusted line
+with the numbers, and the turn on which the adjustment is better or worse
+for the player. Read adversarially; the author is a different model family.
+The comparison is reading; a remedy is not, and none is asked for.
+
+## The charter
+
+- **C1 (owner).** "A successful design phase should not end with 'all agents
+  always win.'" A row that removes a losing line the kit is meant to keep,
+  instead of pricing it, is out.
+- **C2 (LAW D3).** A benefit carries a binding price; there is a real turn on
+  which the card is worse than a plain card of its cost.
+- **C3 (LAW D2).** The card's value turns on a choice the player makes (bank
+  or cash a Bomb), not on a number rising while you watch.
+- **C4 (Klee brief §6).** She cannot block on demand; every defence past the
+  base game's Defend is conditional on the decision just made.
+- **C5 (Klee brief §3 rule 7).** Nothing fires by itself: no automatic free
+  attack, no "at N Sparks".
+- **C6 (not strictly better).** Not a strictly better version of a shipped
+  pool row below, or of a base-game non-basic card at the same or lower
+  rarity and cost (Whirlwind is X-cost Uncommon: 5 to ALL per energy;
+  Skewer X-cost: 7 per energy to one; Sword Boomerang; Cleave).
+
+## The engine, Kokomi
+
+The **Bake-Kurage** is on her side of the field for the whole combat; it
+is not a fighter and enemies cannot touch it. Some cards carry a **Plan:**
+line: what the jellyfish does at the start of her next turn, before she
+draws, if the card is played on the jellyfish instead of where it would
+normally go. The cost is paid now either way; a planned card leaves the
+hand like any played card. A planned Attack strikes the front enemy; a
+planned Skill acts on her; Plans are carried out in the order written, once
+each; her Strength and Dexterity count. Nothing happens by itself. The
+brief's decision (section 3): "Every Plan card in hand asks the same
+question: now, or next turn for more. The enemy's intent this turn is the
+price of waiting." The one sanctioned rule-breaking Rare is Nereid's
+Ascension (Power, 2: the jellyfish carries out every Plan twice), which
+breaks "once, in order". Energy 3, HP 80.
+
+## What the seats said, verbatim
+
+Round 17, assembled: "Battle Plan under the Moon refunds itself, the best
+of the six." Round 20, natural, after Moon+ from an event: "writing is never
+worse than playing, so the tension the kit is built on stops being asked;
+the strongest card I drew and the one that flattened my turns."
+
+## The pool, every row pasted from the sheet (rarity, type, price)
+
+- Kurage's Oath (proto) (Basic Skill, 1 energy): Deal 3 damage to ALL enemies. Plan: Deal 7 damage to ALL enemies.
+- Slack Water (proto) (Basic Attack, 1 energy): Deal 4 damage. Apply 1 Weak. Plan: Apply 1 Weak to ALL enemies.
+- Feint (Common Attack, 1 energy): Deal 6 damage. Plan: Deal 10 damage.
+- Ambush (Common Skill, 1 energy): Deal 5 damage. Plan: Deal 12 damage.
+- Read the Field (Common Skill, 1 energy): Gain 5 Block. Plan: Gain 10 Block.
+- Exposed Flank (Common Skill, 1 energy): Apply 1 Vulnerable. Plan: Apply 2 Vulnerable to ALL enemies.
+- Treatise (Uncommon Power, 1 energy): Once per turn, when the Bake-Kurage carries out a Plan, draw 1 card.
+- Song of Pearls (proto) (Uncommon Power, 1 energy): Once per turn, when the Bake-Kurage carries out a Plan, gain 3 Block.
+- War Council (Uncommon Skill, 1 energy): Apply 1 Weak to ALL enemies. Plan: Deal 5 damage and apply 1 Weak to ALL enemies.
+- Nereid's Ascension (proto) (Rare Power, 2 energy): At the start of your turn, the Bake-Kurage carries out every Plan twice.
+- The Moon Overlooks the Waters (Rare Power, 2 energy): Plans also happen now, as you write them.
+- Sea-Salt Prayer (Common Skill, 1 energy): Gain 4 Block. Apply 1 Weak.
+- Deep Current (Common Attack, 1 energy): Deal 6 damage to ALL enemies.
+- Coral Bulwark (Common Skill, 1 energy): Gain 6 Block. Plan: Gain 8 Block and apply 1 Weak.
+- Cleansing Wave (Uncommon Skill, 1 energy): Gain 5 Block. Remove one of your debuffs. Plan: Gain 10 Block.
+- Tide Wall (Uncommon Skill, 1 energy): Gain 4 Block. Plan: Gain 3 Block for each Plan the Bake-Kurage carries out this morning.
+- Shell Guard (Uncommon Skill, 1 energy): Gain 5 Block. Until your next turn, whenever the Tamakushi Casket strikes, gain 3 Block.
+- The Clouds Like Waves Rippling (Rare Power, 2 energy): Whenever you apply a debuff to an enemy, gain 2 Block.
+- The Moon, A Ship O'er the Seas (Rare Skill, 2 energy, Exhaust): Exhaust. Mend 3. Plan: Mend 6.
+- Sango Isshin (proto) (Rare Attack, 2 energy): Deal 8 damage. If the Bake-Kurage carried out a Plan this turn, deal a quarter of your Max HP to ALL enemies instead.
+- Rally (Common Skill, 1 energy): Apply 1 Weak. The next Companion card you play this turn costs 1 less.
+- Vanguard (Common Skill, 0 energy, Exhaust): Exhaust. Apply 1 Vulnerable. Plan: Apply 1 Vulnerable and 1 Weak.
+- The General's Banner (Uncommon Power, 1 energy): Once per turn, when you play a Companion card, apply 1 Weak to the front enemy.
+- Chain of Command (Uncommon Skill, 1 energy): Deal 3 damage for each Companion you played this turn. Plan: Deal 6 damage for each Companion you played last turn.
+- Stolen Chapter (proto) (Common Skill, 1 energy): Draw 1 card1. Plan: Draw 4 cards.
+- Change of Plans (Common Skill, 1 energy, Exhaust): Exhaust. The Bake-Kurage carries out your first Plan now.
+- Undertow (proto) (Common Attack, 1 energy): Deal 1 damage, already including 1 if the enemy has a debuff.
+- Salt Line (proto) (Common Skill, 1 energy, Exhaust): Exhaust. Gain 8 Block.
+- Battle Plan (Uncommon Skill, 1 energy): Draw 1 card. Plan: Gain 1 Energy and draw 2 cards.
+- Moon's Reflection (Uncommon Skill, 1 energy, Exhaust): Exhaust. Choose a card in your Exhaust Pile. Next turn, the Bake-Kurage carries out its Plan line, or plays it if it has none.
+- Tide Chart (Common Skill, 0 energy): Next turn, after the Bake-Kurage carries out its Plans, draw 1 card for each1.
+- Ripple (Common Skill, 0 energy): Gain 2 Block. Plan: Gain 1 Energy and 1 Block.
+- Riptide (Common Attack, 2 energy): Deal 9 damage to ALL enemies. Plan: Deal 13 damage to ALL enemies.
+- Pincer (Common Attack, 1 energy): Deal 3 damage twice. Plan: Deal 3 damage three times.
+- Flank (Uncommon Attack, 1 energy): Deal 8 damage. Plan: Deal 8 damage to each enemy that intends to attack.
+- Well Laid (Common Attack, 0 energy): Deal 1 damage.
+- Feigned Retreat (Common Skill, 1 energy): Gain 4 Block. Plan: Gain 4 Block and deal 6 damage.
+
+## The arm
+
+1. **The Moon Overlooks the Waters, adjusted** (Rare Power, 2 energy).
+   Standing: "Plans also happen now, as you write them." Adjusted: "Plans
+   also happen now at half strength, as you write them." The now-copy
+   carries out the Plan line at half its numbers, rounded down (a planned
+   Deal 10 deals 5 now and 10 next morning; a planned Gain 8 Block gains 4
+   now and 8 next morning); the morning copy is unchanged. The intent: under
+   the standing card writing is never worse than playing (the card gives
+   now AND later), which deletes the brief's decision; at half, playing the
+   card is better than writing it on the turn the whole number is needed
+   now (a lethal, a Block against a big hit), and writing is better
+   otherwise, which is the ordinary Plan trade with waiting's price halved.
+
+One verdict, its clause and its comparison. Under 150 words.
+```
+
+```
+1. **REQUIRES_MODIFICATION — C1 (owner), removing the losing line of waiting.** Counterexample: Moon is active, you have 2 Energy, Battle Plan is your only card, the next draw is Defend, and the enemy attacks this turn. Battle Plan costs 1: playing draws 1 now; its Plan grants 1 Energy and draws 2. Standing Moon gives that full Plan now and next morning; adjusted Moon gives 0 Energy and 1 card now, then 1 Energy and 2 cards next morning. The adjustment loses 1 immediate Energy and 1 immediate card versus standing Moon, but writing still matches playing’s draw and energy expenditure this turn—allowing the same Defend—and adds 1 Energy and 2 cards next turn, preserving a line where waiting has no price.
+```
+
+```
+## The arm (second reading; the first, the now-copy at half, was returned REQUIRES_MODIFICATION on C1 with the Battle Plan counterexample: its Plan line is double its play line, so any fraction of a now-copy removes waiting's price)
+
+1. **The Moon Overlooks the Waters, reshaped** from a Rare Power (2: "Plans
+   also happen now, as you write them", a combat-long effect) to a **Rare
+   Skill, 1 energy, Exhaust: "This turn, Plans also happen now, as you
+   write them."** Upgrade: costs 0. On the one turn it is played, every Plan
+   written is carried out now in full and again next morning in full; on
+   every other turn of the combat the ordinary trade stands (now, or next
+   turn for more). The intent: the card stops being a standing rule that
+   makes writing free for the rest of the fight and becomes one burst turn
+   the player chooses, the tempo version of Nereid's Ascension (which
+   doubles every morning, permanently, as the one sanctioned rule-breaking
+   Rare). The decision it adds: which turn is the Moon turn, and how many
+   Plans to hold in hand for it against the enemy's intent that turn.
+
+One verdict, its clause and its comparison; say plainly whether a one-turn
+window that removes waiting's price on that turn only is C1's concern or
+not, against the Battle Plan counterexample you gave. Under 150 words.
+```
+
+```
+1. **REQUIRES_MODIFICATION — C1 (owner).** Yes: removing waiting’s price for one turn still removes the losing line on that turn; limiting its duration does not preserve that line.
+
+   **Comparison and counterexample:** Standing Moon costs **2**, granting immediate Plans combat-long; adjusted Moon costs **1**, upgraded **0**, granting immediate Plans this turn. Battle Plan costs **1**: play draws **1**; Plan gains **1 Energy** and draws **2**. On a Moon+ turn with **3 Energy**, Battle Plan in hand, and an enemy attacking, writing Battle Plan leaves **3 Energy** and draws **2** immediately; playing it leaves **2 Energy** and draws **1**. Writing is therefore ahead **1 Energy and 1 card this turn**, with another **1 Energy and 2 cards next morning**. The attack intent imposes no waiting price on that choice.
+```
