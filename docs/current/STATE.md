@@ -329,8 +329,9 @@ are in [`workstreams.md`](workstreams.md).
   HP; the stage occupied and performing from turn two in every fight,
   Second Course landing at its five-Encore price, Rolling Tide never
   played; turn one empty by construction (zero empty turns when Salon
-  Début was in the opening hand); a reaction amplifier lost under the
-  Spotlight or Weak (`EB-511`); **one pick** (the stage on turn one,
+  Début was in the opening hand); what read as a lost amplifier was the
+  performance log filing pre-damage numbers (`EB-511`, built the same
+  day); **one pick** (the stage on turn one,
   default Salon Début Innate, PR #398); `EB-505`-`EB-511`, `EB-449`
   reopened, `EB-504` widened. [USER]'s act-1 run is due on
   `0.2.2674+proto`. No stamp moves, nothing measured.

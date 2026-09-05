@@ -57,14 +57,19 @@ and a 23-damage hit landed for nothing. The natural lane's Crabaletta-Hydro
 then Diona-Cryo then Frozen then Shatter kill "paid off exactly as the
 printed previews said it would".
 
-**A real engine defect, found by the natural seat.** Under the arm, a
-reaction amplifier is lost when another multiplier is already on the hit:
-Chevreuse printed 7, previewed Vaporize 1.5x, dealt 8 (base times Spotlight
-times Weak, no 1.5x); a dry Crabaletta on Hydro dealt 4, no 1.5x. In fight
-1, with neither Spotlight nor Weak up, Melt and Vaporize composed correctly
-(`EB-511`). A Deploy performed the wrong member: Salon Début fielded
-Crabaletta and the Usher performed first, spending the last Encore
-(`EB-508`).
+**What looked like a lost amplifier was a ledger that lied.** The natural
+seat read Chevreuse as printed 7, previewed Vaporize 1.5x, dealt 8, and a
+dry Crabaletta on Hydro as 4 with no 1.5x. Fixer J (same day) found the
+hit landed correctly: Guest Cast rewrites Chevreuse's printed 7 to 10, and
+10 times Weak times Vaporize is 11, which is what the enemy lost. The
+performance log filed each member's row at its pre-damage value, before
+Weak, the amplifier and Vulnerable were applied, so the seat's
+reconciliation left a remainder and the remainder landed on the card. The
+log now files what the hit dealt (`EB-511`, built). The same accounting
+explains the "Deploy performed the wrong member" read: the deploy did
+perform Crabaletta, but four performances from four causes were on one
+turn and only the deploy's row named its member (`EB-508`, the rule pinned
+as already right; the attribution is `EB-505` and `EB-506`).
 
 **What the pool pass displaced.** Rolling Tide: never played, drawn in four
 of six fights and declined every time, "2 energy for 4 damage per body, the
@@ -88,7 +93,9 @@ performance makes Fanfare; two meters appeared once, unexplained)
 once lit, five to seven dead draws a fight (`EB-509`). Several observe
 screens printed the hand and the enemy list twice (`EB-510`). "Burst +5" on
 Gentilhomme Usher at two rewards with no meter in the run (`EB-449`
-reopened; the build blanked five faces by name and not the sheet). Fischl's
+reopened and built the same day: the round-8 build had gated the hover tip
+by rule and left the face's own rider; it now blanks by rule at codegen
+for every Furina row carrying the Elemental Skill tag). Fischl's
 face printed Klee's Hexerei and Oz rules on a Furina run (`EB-504`
 widened). Not rows: a Swirl the seat could not audit and the Spotlight's
 reach into Gorou's delayed hit (`EB-410`, `EB-498` families); a Weak
@@ -109,8 +116,9 @@ strength reading.
 ## 4. The smallest interventions, ranked
 
 1. **Turn one: the starter's deploy in the opening hand** (the pick, §5).
-2. **`EB-511` before any number moves:** a kit whose amplifiers vanish under
-   its own Spotlight cannot be priced.
+2. **The ledger before any number moves** (`EB-511`, built): a kit whose
+   performance log reports pre-damage numbers cannot be priced by a seat,
+   and this round's two arithmetic readings were that log, not the engine.
 3. **Rolling Tide:** cut, or 1 energy; the first displaced-row reading with
    two seats behind it (the assembled seat declined it four times; the
    natural seat never drafted it). Held for the ruling on the pass's next
@@ -145,4 +153,13 @@ twenty-two otherwise.
 - **Rolling Tide, Guest List and Curtain Rises stay as built** for the next
   round; the readings are in §4.
 - **The relic stands** unless pick 1 option 2 is taken.
+- **`EB-507`, D:** under the arm, a shipped row that is nothing but a
+  retired Fanfare rider leaves the arm's offer (an arm-only exclusion at
+  the pool seam, the shipped sheet untouched under R213 B); a row with a
+  live body keeps it and the rider is blanked at codegen. Fixer J's census
+  names the four rows; the exclusion is the smallest intervention that
+  leaves no empty Rare in the offer.
+- **`EB-498` stays OPEN with its note:** a companion conditional preview
+  needs a second calculated-var family in the generator, which is
+  `EB-438`'s shape and a build of its own, not a tip.
 - **The two records are the round's evidence.**
