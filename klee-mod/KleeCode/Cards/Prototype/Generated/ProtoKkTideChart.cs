@@ -45,13 +45,13 @@ public sealed class ProtoKkTideChart : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tide Chart"),
-        ("description", "Draw 1 card for each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] holds. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Next turn, after the [gold]Bake-Kurage[/gold] carries out its [gold]Plans[/gold], draw 1 card for each{IfUpgraded:show:, plus 1|}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,15 +63,12 @@ public sealed class ProtoKkTideChart : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CardPileCmd.Draw(choiceContext, 0 + 1 * KokomiPlan.PlansHeld(Owner.Creature), Owner);
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
+        KokomiPlan.PromiseDraw(Owner.Creature, (IsUpgraded ? 1 : 0), 1);
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        // tide_draw: the promise's flat half reads IsUpgraded at play time (KokomiPlan.PromiseDraw);
+        // tier0 twin: upgrades.apply key 'tide_draw', which bumps the same op's `amount`.
     }
 }

@@ -1103,9 +1103,12 @@
 - {id: proto_kk_tide_chart, name: "Tide Chart", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Draw 1 card for each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] holds.",
-   upgrade: {add: {op: draw, amount: 1}},
-   effects: [{op: draw, amount_formula: {base: 0, per: 1, count: plans_held}}]}
+   # R257 (Kokomi r15): read at PLAY time this drew zero on three plays out
+   # of four, so it pays a turn later instead. Provenance carries the whole of
+   # it, under this id.
+   description: "Next turn, after the [gold]Bake-Kurage[/gold] carries out its [gold]Plans[/gold], draw 1 card for each{IfUpgraded:show:, plus 1|}.",
+   upgrade: {tide_draw: 1},
+   effects: [{op: draw_after_plans, amount: 0, per: 1}]}
 
 - {id: proto_kk_ripple, name: "Ripple", character: kokomi,
    authored_by: [claude],

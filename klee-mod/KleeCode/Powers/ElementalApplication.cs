@@ -146,6 +146,12 @@ public sealed class KleeElementalHooks : AbstractModel
     {
 #if PROTOTYPE_CARDS
         await KleeOverhaulOpening.GrantSpark(choiceContext, player);
+        // `EB-479` (R258): the reframe's opening Encore, at the same site and
+        // for the same reason as the opening Spark above it. Synchronous
+        // because `FurinaResources.GainEncore` is -- Encore needs no
+        // `PlayerChoiceContext`, and the funnel it goes through is the one the
+        // gauge and the stage ribbon already read.
+        FurinaReframeOpening.GrantEncore(player);
 #endif
         await KitGrant.GrantIfCharged(choiceContext, player);
     }
