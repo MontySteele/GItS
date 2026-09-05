@@ -262,6 +262,53 @@ public class Round19Tests
         Assert.True(paid > returned, "the paying branch records its own");
     }
 
+    // ==================================================================
+    // `EB-534` -- what the merge does to a Mine, said on the face
+    // ==================================================================
+    //
+    // TWO SEATS, OPPOSITE READS, AND THE FACE SAID NEITHER. Klee r18 lane 1
+    // read Careful Arrangement as PRESERVING Mine status ("the body line said
+    // so"); r19 lane 1 read it as converting Mines to plain Bombs and never
+    // played the card ("worse than a blank card"). The face said only "as one
+    // Bomb".
+    //
+    // THE ENGINES BOTH PRESERVE IT, and they always did: `MergeAllTo` folds
+    // `isMine |= charge.IsMine` and `merge_all_to` does the same, because a
+    // merge is a MOVE and a move must not silently delete the defence the
+    // player set up (`EB-395`, pinned in `KleeOverhaulRuleTests` and
+    // `test_klee_overhaul_rules`). So r18 was right, r19 was wrong, and the
+    // fix is one clause on the card rather than anything in the fold.
+    //
+    // THE GROWTH-TICK PRICE STAYS ON THE KEYWORD. "Merging N Bombs into one
+    // destroys N minus one growth ticks a turn" is the r19 seat's own
+    // arithmetic and it is true, but it is a consequence of the Bomb tip's
+    // "each grows N a turn" read over one pile instead of N -- a card says
+    // what it does and nothing about why (text conventions, rule 15), and the
+    // rule it would be restating is already on the word it prints.
+
+    [Fact]
+    public void Careful_arrangements_face_says_the_merged_pile_is_a_mine()
+    {
+        var face = string.Join(" ", Il.Strings(
+            Il.Method("ProtoKoCarefulArrangement", "get_Localization")));
+
+        Assert.Contains("as one [gold]Bomb[/gold]", face);
+        Assert.Contains("[gold]Mine[/gold] if any of them was", face);
+    }
+
+    [Fact]
+    public void And_the_fold_it_describes_is_the_one_the_arm_runs()
+    {
+        // The face is a claim about `MergeAllTo`, so it is checked against
+        // `MergeAllTo`: the fold READS `IsMine` off every charge it moves, and
+        // hands the result to the one placer. Structural for the reason every
+        // Bomb pin is -- a merge needs a live `CombatState`.
+        var il = Il.Calls(Il.Method("ProtoBombPower", "MergeAllTo"));
+
+        Assert.Contains(il, c => c.Contains("get_IsMine"));
+        Assert.Contains("ProtoBombPower.Place", il);
+    }
+
     /// <summary>The reframe's MANUAL leg on for one test, every flag back
     /// after it -- <c>FurinaRoundNineTests.Arm</c> verbatim, and for its
     /// reason: the six flags are process-global statics.</summary>

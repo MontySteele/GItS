@@ -1275,6 +1275,55 @@ def test_careful_arrangement_merges_the_board_into_one_bomb(overhaul):
     assert b.ko_charges[0].payload_mine_all == 3
 
 
+def test_eb534_the_face_says_the_merged_pile_is_still_a_mine(overhaul):
+    """`EB-534`. TWO SEATS, OPPOSITE READS, AND THE FACE SAID NEITHER.
+
+    Klee r18 lane 1 read Careful Arrangement as PRESERVING Mine status ("the
+    body line said so"); r19 lane 1 read it as converting Mines to plain Bombs
+    and never played the card, "worse than a blank card". The face said only
+    "as one Bomb".
+
+    BOTH ENGINES PRESERVE IT and always did, for the reason above this test: a
+    merge is a MOVE and a move must not silently delete the defence the player
+    set up. So r18 was right and the fix is one clause on the card. This pin is
+    the SHEET against the ENGINE, in one place, so the clause cannot outlive the
+    behaviour or the other way round.
+    """
+    from pathlib import Path
+
+    import yaml
+
+    repo = Path(__file__).resolve().parents[2]
+    sheet = yaml.safe_load((repo / "docs" / "prototype-surface.yaml")
+                           .read_text(encoding="utf-8"))
+    row = next(r for r in sheet if r["id"] == "proto_ko_careful_arrangement")
+    assert "[gold]Mine[/gold] if any of them was" in row["description"]
+
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 4, is_mine=True)
+    klee_overhaul.place(state, b, 6)
+
+    klee_overhaul.merge_all_to(state, b, growth=5)
+
+    assert sizes(b) == [4 + 6 + 5]
+    assert b.ko_charges[0].is_mine is True, "the face's clause, played"
+
+
+def test_eb534_a_merge_of_plain_bombs_stays_plain(overhaul):
+    """The other half of the clause, and the reason it reads "if any of them
+    was" rather than "a Mine": a board with no Mine on it merges into a plain
+    Bomb, so the card does not hand out a defence the player never placed."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 4)
+    klee_overhaul.place(state, b, 6)
+
+    klee_overhaul.merge_all_to(state, b, growth=5)
+
+    assert b.ko_charges[0].is_mine is False
+
+
 def test_chain_fuse_grows_one_enemys_pile_only(overhaul):
     """`GrowOn`: "Each Bomb on the enemy grows by 3." One body, every charge on
     it."""
