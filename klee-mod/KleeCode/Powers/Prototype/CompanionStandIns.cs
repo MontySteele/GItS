@@ -291,9 +291,21 @@ public sealed class ShakenNotPurredPower : PowerModel, ILocalizationProvider
     internal async Task Pay()
     {
         if (Owner == null || Amount <= 0) return;
-        // NC-11: power-sourced BLOCK stays raw; only power-sourced DAMAGE runs
-        // the pipeline (NC-1).
-        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null,
+        // `EB-513`. THE CARD'S OWN PRINTED BLOCK, SO THE CARD'S OWN FOLD.
+        // This used to pass `ValueProp.Unpowered` under NC-11 ("power-sourced
+        // BLOCK stays raw"), and NC-11 is about Metallicize, the Ceremonial
+        // Garment rider and the Kurage pulse -- passive effects a power owns,
+        // with no printed clause on a card anywhere. This is not one of those:
+        // the sentence is printed on the companion card's own face, in the
+        // same breath as its primary Block, and the power exists only because
+        // the trigger is forward-looking ("goes off THIS turn"). The r18 seat
+        // read the consequence off one screen: Frail rewrote Defend 5 to 3 and
+        // Diona still printed and delivered 4 + 5 in full.
+        // ONE FOLD, NOT TWO: the card applies this power at its PRINTED amount
+        // (`DynamicVars["PowerAmount"].IntValue` is the BASE value), the face
+        // folds in the preview because the codegen gives the row a
+        // `BlockVar`, and the fold on the way out is this one.
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null,
                                     fast: true);
         await PowerCmd.Remove(this);
     }
@@ -343,7 +355,8 @@ public sealed class IGotYourBackPower : PowerModel, ILocalizationProvider
     internal async Task Pay()
     {
         if (Owner == null || Amount <= 0) return;
-        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null,
+        // `EB-513`, and `ShakenNotPurredPower.Pay` carries the argument.
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null,
                                     fast: true);
     }
 
@@ -385,7 +398,8 @@ public sealed class FrontRowSeatPower : PowerModel, ILocalizationProvider
     internal async Task Pay()
     {
         if (Owner == null || Amount <= 0) return;
-        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null,
+        // `EB-513`, and `ShakenNotPurredPower.Pay` carries the argument.
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null,
                                     fast: true);
     }
 

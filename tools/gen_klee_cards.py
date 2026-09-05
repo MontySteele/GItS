@@ -1961,6 +1961,27 @@ def plan_clause_cs(eff: dict, var: str | None = None) -> str:
             f"{aim}{tail})")
 
 
+#: `EB-513`. THE POWERS THAT PAY A CARD'S OWN PRINTED BLOCK, and nothing else.
+#:
+#: A companion row prints its bonus Block on its OWN face -- "If a Bomb goes
+#: off this turn, gain 5 Block" -- and reaches it through a power only because
+#: the trigger is forward-looking. So the number is a card's printed Block and
+#: takes a card's Frail fold, on the face (a `BlockVar` here) and on the way
+#: out (`ValueProp.Move` at the power's `Pay`). The r18 seat met the gap on one
+#: screen: Frail rewrote Defend 5 to 3 and Diona printed and delivered 4 + 5.
+#:
+#: WHAT IS NOT HERE, and why the set is named rather than derived: `NC-11`'s
+#: three (Metallicize, the Ceremonial Garment rider, the Kurage pulse) are
+#: passive effects a power owns with no printed card clause behind them, and
+#: `ko_grounded` and `mc_lions_fang` pay at TURN START off a Power the card
+#: only granted -- a POWER's Block, not a card's, which is the distinction
+#: `GroundedPower` states in as many words. Those stay raw.
+BLOCK_PAYING_POWERS = frozenset((
+    "mc_shaken_not_purred",
+    "mc_i_got_your_back",
+    "mc_front_row_seat",
+))
+
 # apply_power (power-card pass)
 # apply_power (power-card pass): sheet power id -> (C# PowerModel class,
 # stack cap or None, card-text template with {X} for the amount). Stackable
@@ -2035,8 +2056,8 @@ APPLY_POWERS = {
         "Whenever one of your [gold]Bombs[/gold] triggers an "
         "[gold]Elemental Reaction[/gold], gain {X} extra [gold]Spark[/gold]."),
     "ko_grounded": ("GroundedPower", None,
-        "At the start of your turn, if none of your [gold]Bombs[/gold] went "
-        "off last turn, gain {X} Block."),
+        "At the start of your turn, if you have a [gold]Bomb[/gold] on the "
+        "field, gain {X} Block."),
     # R244's coven reader. Chained Reactions' grammar one trigger over, and
     # DEAD ALONE by the ruling's own pick 2 -- a deck with no witch in it never
     # sets this off, which is what makes it the bridge card rather than a
@@ -5425,7 +5446,20 @@ def build_vars(card: dict) -> list[str]:
             # second apply_power on the same card must stay a literal, or the
             # duplicate "PowerAmount" key throws in the DynamicVarSet
             # constructor at reward time (2026-07-23 softlock).
-            out.append(f'new DynamicVar("PowerAmount", {int(eff["amount"])}m)')
+            # `EB-513`: A POWER THAT PAYS THE CARD'S OWN PRINTED BLOCK GETS A
+            # `BlockVar`, so the printed number folds Frail the way the card's
+            # primary Block does. `BlockVar.UpdateCardPreview` runs
+            # `Hook.ModifyBlock` and writes `PreviewValue`, which is what
+            # `{PowerAmount:diff()}` renders; `IntValue` is `(int)BaseValue`
+            # and is what the Apply hands the power, so the fold happens ONCE
+            # -- on the face here and on the payout in the power's own `Pay`
+            # -- and the two numbers agree.
+            if eff.get("power") in BLOCK_PAYING_POWERS:
+                out.append('new BlockVar("PowerAmount", '
+                           f'{int(eff["amount"])}m, ValueProp.Move)')
+            else:
+                out.append(
+                    f'new DynamicVar("PowerAmount", {int(eff["amount"])}m)')
         elif op == "discard_for_sparks" and discard_upgrade(card) != (0, 0):
             # R36: both numbers render, so both become vars together.
             out.append(f'new DynamicVar("Discards", {int(eff["amount"])}m)')
@@ -6583,10 +6617,19 @@ def _stmt_spend_spark(card: dict, eff: dict) -> str:
     # an emptied bank. tier0 answers the same question off `sparks_at_play`,
     # `SparksAtPlay`'s documented twin, and `blocked_reason` refuses the payout
     # on any row that does not open with this price.
+    #
+    # AND THE X PRICE IS GUARDED, which `EB-512` is the reason for. Its gate is
+    # a PRINTED price of one (`spark_price_expr` -> `PrintedSparkPrice`) while
+    # the payment asks for the WHOLE bank, so the two ask different questions
+    # and a failed spend is not one the gate could have refused. With the bool
+    # dropped, the r18 seat's Stoke the Fuse grew a Mine by 3 per Spark while
+    # the counter stayed at 2: the payout is priced off the PRE-spend read one
+    # line up, so an unpaid price still pays out unless the body abandons the
+    # play. `_stmt_spend_charge`'s shape, for `_stmt_spend_charge`'s reason.
     if eff.get("amount") == SPEND_ALL:
         return ("var sparksSpent = SparkPower.SparksAtPlay(Owner.Creature);\n"
-                "        await SparkPower.Spend(choiceContext, "
-                "Owner.Creature, sparksSpent, this);")
+                "        if (!await SparkPower.Spend(choiceContext, "
+                "Owner.Creature, sparksSpent, this)) return;")
     # `EB-491` (Fireworks Show): a `spark_price` delta moves what the card
     # CHARGES, so the payment and the declared price are ONE expression --
     # `spark_price_expr` is the builder both call, for the reason the X price

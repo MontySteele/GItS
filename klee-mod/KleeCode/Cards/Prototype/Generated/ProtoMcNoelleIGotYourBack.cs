@@ -62,7 +62,7 @@ public sealed class ProtoMcNoelleIGotYourBack : CustomCardModel, ICompanionCard
             new CalculationBaseVar(6m),
             new CalculationExtraVar(1m),
             new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
-            new DynamicVar("PowerAmount", 4m)
+            new BlockVar("PowerAmount", 4m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

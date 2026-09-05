@@ -65,7 +65,7 @@ public sealed class ProtoMcBarbaraFrontRowSeat : CustomCardModel, ICompanionCard
             new CalculationBaseVar(5m),
             new CalculationExtraVar(1m),
             new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
-            new DynamicVar("PowerAmount", 3m)
+            new BlockVar("PowerAmount", 3m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
