@@ -194,8 +194,13 @@ are in [`workstreams.md`](workstreams.md).
   paid by count, Cook by Mines, Grounded fired once in five fights); two
   adjustments FOLLOWS (Grounded pays with a Bomb on the field; a random
   Set off prefers a bombed body, `EB-516`); no pick; `EB-512`-`EB-515`.
-  [USER]'s act-1 run is due on
-  `0.2.2696+proto`. The round-8 clear is read against a control run (below).
+  **Round 19 is READ** (`review/active/klee-overhaul-round-19-2026-09-05.md`):
+  the adjusted Grounded on `0.2.2729+proto` read as a decision (paid three
+  times, failed twice after a full detonation, the brief's Grounded-versus-
+  Run Away! tension played on the elite); the Spark bank outran its sinks a
+  fourth time (access); Careful Arrangement a cut candidate (`EB-534`); no
+  pick; `EB-533`-`EB-537`. [USER]'s act-1 run is due on
+  `0.2.2729+proto`. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
   six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
@@ -266,8 +271,15 @@ are in [`workstreams.md`](workstreams.md).
   Nereid's the spine, Tide Chart and Well Laid read as reader rows; the
   letter handle fuzzy-matched the Bake-Kurage on both lanes (`EB-519`),
   Frozen's face against its rule (`EB-517`); no pick; `EB-517`-`EB-523`,
-  `EB-504` reopened. [USER]'s act-1 run is due on
-  `0.2.2696+proto`. The Kurage
+  `EB-504` reopened. **Round 19 is READ**
+  (`review/active/kokomi-overhaul-round-19-2026-09-05.md`): on
+  `0.2.2729+proto` with the letter handle fixed, the assembled seat reached
+  2 HP and stated the brief's weakness back ("a tempo loan, richest when
+  ahead and unusable when behind"); a carry-out is not a hit for on-hit
+  powers and the tip owes the sentence (`EB-538`); a spawned replacement
+  reused a dead body's letter (`EB-541`); no pick; `EB-538`-`EB-545`.
+  [USER]'s act-1 run is due on
+  `0.2.2729+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
@@ -353,8 +365,16 @@ are in [`workstreams.md`](workstreams.md).
   fights; Rolling Tide's price answered by three seats (1 energy) and
   Curtain Rises fielding a Block member at the front, both adjustments
   FOLLOWS (`EB-530`); the empty first turn read a third time (the round-11
-  pick, waiting); no pick; `EB-524`-`EB-529`. [USER]'s act-1 run is due on
-  `0.2.2696+proto`. No stamp moves, nothing measured.
+  pick, waiting); no pick; `EB-524`-`EB-529`. **Round 13 is READ**
+  (`review/active/furina-reframe-round-13-2026-09-05.md`): on
+  `0.2.2729+proto`, Rolling Tide at 1 energy still the weakest card in the
+  deck and WITHDRAWN from the arm's offer (three rounds, four seats);
+  Second Course never playable at the opening Encore for a third round, its
+  printed price to 1 (FOLLOWS, `EB-552`); Aria+'s Innate defeated its own
+  Fanfare reader and the upgrade drops it (`EB-550`); the stage draw-gated
+  on one card, the round-11 pick's fourth reading; no pick;
+  `EB-546`-`EB-552`. [USER]'s act-1 run is due on
+  `0.2.2729+proto`. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
