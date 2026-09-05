@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using KleeMod.Cards;
+using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using Xunit;
@@ -307,6 +308,60 @@ public class Round19Tests
 
         Assert.Contains(il, c => c.Contains("get_IsMine"));
         Assert.Contains("ProtoBombPower.Place", il);
+    }
+
+    // ==================================================================
+    // `EB-545` -- Feigned Retreat's planned Block is paid and printed
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r19 lane 1). "Its two halves point in opposite
+    // directions": the seat read the Plan as adding damage but not Block,
+    // against a face that says "Plan: Gain 4 Block and deal 6 damage". So
+    // either the clause was not carried out or the morning block did not print
+    // it.
+    //
+    // IT IS NEITHER. The Plan carries both clauses, in the order the face
+    // prints them, and `ResolveOne`'s Block case RETURNS the Block it gained
+    // -- which is what makes it the number on the carry-out line, labelled by
+    // `NumberKind`, with the hit's own HP row under it. The seat's sentence is
+    // about the FACE: the now-line and the Plan line print the same 4, so
+    // waiting buys the damage and nothing more. That is the card's shape and a
+    // design reading, and no payment moves for it.
+
+    [Fact]
+    public void Feigned_retreats_plan_carries_both_clauses_in_printed_order()
+    {
+        var card = new ProtoKkFeignedRetreat();
+        var clauses = card.PlanClauses;
+
+        Assert.Equal(2, clauses.Count);
+        Assert.Equal(KokomiPlan.Kind.Block, clauses[0].Kind);
+        Assert.Equal(4, clauses[0].Amount);
+        Assert.Equal(KokomiPlan.Kind.Damage, clauses[1].Kind);
+        Assert.Equal(6, clauses[1].Amount);
+
+        // AND THE FACE PRINTS WHAT THE CLAUSES DO, which is the half the seat
+        // was reading: the same 4 now and planned, plus the damage.
+        var face = string.Join(" ", Il.Strings(
+            Il.Method("ProtoKkFeignedRetreat", "get_Localization")));
+        Assert.Contains("[gold]Plan[/gold]: Gain", face);
+        Assert.Contains("[gold]Block[/gold] and deal", face);
+    }
+
+    [Fact]
+    public void A_planned_block_is_paid_powered_and_is_the_number_on_the_line()
+    {
+        // The Block clause goes out through `CreatureCmd.GainBlock` and RETURNS
+        // what it gained, so it is `number` on the carry-out line -- the first
+        // clause that produces one wins, and this card's first clause is the
+        // Block. `NumberKind` labels it, which is what puts "the 4 is Block" on
+        // the page beside the hit's own HP row.
+        var resolve = Il.Calls(Il.Method("KokomiPlan", "ResolveOne"));
+        Assert.Contains("CreatureCmd.GainBlock", resolve);
+
+        var announce = Il.Calls(Il.Method("KokomiPlan", "ResolveEntry"));
+        Assert.Contains("KokomiPlan.NumberKind", announce);
+        Assert.Contains("KokomiPlan.Announce", announce);
     }
 
     /// <summary>The reframe's MANUAL leg on for one test, every flag back

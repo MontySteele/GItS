@@ -3826,6 +3826,32 @@ def test_a_block_carry_out_says_it_is_block_and_what_it_asked_for():
     assert "Bake-Kurage: Cleansing Wave, 7 —" in page
 
 
+def test_a_plan_that_blocks_and_hits_prints_both_halves():
+    """`EB-545`. FEIGNED RETREAT'S TWO HALVES, ON THE PAGE.
+
+    The Kokomi r19 lane-1 seat read the card's Plan as "adding damage but not
+    Block", against a face that says "Plan: Gain 4 Block and deal 6 damage" --
+    so the row asked whether the Block was unpaid or unprinted. It is NEITHER:
+    both engines pay it (`test_kokomi_plan.test_eb545_a_planned_feigned_retreat_
+    pays_both_halves`), and the morning block prints both numbers, in the two
+    slots each belongs in -- the LINE carries what the Plan's first clause
+    produced, labelled, and the HP row under it carries what the board lost.
+
+    This is the pin the row asks for on the page, and it is worth having
+    because the two halves are printed by two different mechanisms: a change
+    that dropped either would leave a Plan looking like the one-sided card the
+    seat described.
+    """
+    page = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Feigned Retreat", "number": 4,
+                    "line": "Bake-Kurage: Feigned Retreat, 4",
+                    "kind": "Block", "asked": 4, "on_play": False,
+                    "moved": [{"name": "Toadpole", "amount": 6}]}))))
+
+    assert "- Bake-Kurage: Feigned Retreat, 4 — the 4 is Block." in page
+    assert "lost 6 HP" in page
+
+
 def test_a_number_the_board_did_not_move_says_only_what_it_is():
     """The asked-for half is printed only where it differs, and the label is
     printed on every kind: "a bare number in the slot every other line uses for

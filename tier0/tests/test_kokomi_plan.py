@@ -352,6 +352,54 @@ def test_an_attack_buff_on_kokomi_does_not_reach_a_planned_hit(overhaul):
     assert enemy.hp == 40 - 7
 
 
+def test_eb545_a_planned_feigned_retreat_pays_both_halves(overhaul):
+    """`EB-545`. THE TWO HALVES THAT LOOKED LIKE THEY POINTED APART.
+
+    Kokomi r19 lane 1 read Feigned Retreat's Plan as adding damage but not
+    Block, while the face says "Plan: Gain 4 Block and deal 6 damage" -- so
+    either the Block clause was not carried out or the morning block did not
+    print it. THE BLOCK LANDS: the carry-out pays 4 Block and 6 damage, both
+    clauses, and this is the pin that says so from the sheet's own row rather
+    than from a probe card.
+
+    The seat's own sentence is about the FACE, not the payment: "the Plan adds
+    damage but not block, so the block half is strictly worse for waiting". The
+    now-line and the Plan line print the same 4, which is the card's shape and
+    a design reading, not a defect. Nothing in the payment moves here.
+    """
+    enemy = make_enemy(hp=200)
+    st = kokomi_state(enemies=[enemy])
+    st.player.block = 0
+
+    card = loader.get_card("proto_kk_feigned_retreat")
+    kokomi_plan.schedule(st, card)
+    kokomi_plan.resolve_all(st)
+
+    assert st.player.block == 4, "the planned Block is paid"
+    assert enemy.hp == 200 - 6
+    # BOTH CLAUSES SAY SO IN THE LOG, in the order the card prints them --
+    # which is what the morning block's line and its HP rows are built from.
+    said = [ev for ev in st.log
+            if ev["event"] in ("block", "damage")]
+    assert [ev["event"] for ev in said] == ["block", "damage"]
+    assert said[0]["amount"] == 4 and said[1]["amount"] == 6
+
+
+def test_eb545_the_upgrade_moves_both_planned_halves(overhaul):
+    """And the `+` card pays 6 and 8, which is the other half of the sheet's
+    own claim: `plan_block` and `plan_damage` are separate deltas and a card
+    that upgraded one of them would be the defect the row suspected."""
+    enemy = make_enemy(hp=200)
+    st = kokomi_state(enemies=[enemy])
+    st.player.block = 0
+
+    kokomi_plan.schedule(st, loader.get_card("proto_kk_feigned_retreat+"))
+    kokomi_plan.resolve_all(st)
+
+    assert st.player.block == 6
+    assert enemy.hp == 200 - 8
+
+
 def test_skittish_does_not_fire_on_a_carry_out(overhaul):
     """`EB-538`. A CARRY-OUT IS NOT A HIT, and the seat could not tell.
 
