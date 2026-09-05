@@ -325,6 +325,15 @@ def test_the_protocol_carries_the_whole_rule():
     assert "DISCARDED" in text
     for banned in ("card text", "a number", "a mode"):
         assert banned in text
+    # 2026-09-05 (the GPT review's first item): a verdict must carry the
+    # COMPARISON or counterexample it rests on, or it is INCOMPLETE. Three
+    # Kokomi pool-pass reads came back as bare verdicts under the old text
+    # and the author had to guess the comparison (card-audit record 5.4).
+    assert "COMPARISON" in text and "INCOMPLETE" in text
+    assert "counterexample" in text
+    # ...and the remedy ban still stands beside it: the comparison is
+    # reading, the fix is not.
+    assert "READING, not" in text
     assert seat.build_review_prompt("BODY").startswith(text)
     assert seat.build_review_prompt("BODY").endswith("BODY")
 

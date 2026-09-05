@@ -316,20 +316,33 @@ it.
 You are reading a proposal against a written charter or brief. Your output is,
 PER ARM:
 
-  * FOLLOWS, or REQUIRES_MODIFICATION; and
-  * the CLAUSE you ruled against, named.
+  * FOLLOWS, or REQUIRES_MODIFICATION;
+  * the CLAUSE you ruled against, named; and
+  * the COMPARISON the verdict rests on: the pool row or base-game card you
+    read the arm against, with both cards' printed numbers on the lines you
+    compared, and the gameplay consequence in one sentence (the turn on
+    which the arm is better or worse, and by how much). For a verdict that
+    rests on no comparison (C1, C3, C5), the counterexample instead: the
+    board on which the clause fails.
 
-That is the whole output. You may NOT supply card text, a number, a mode, a
-rewritten row, or any other remedy. A remedy you volunteer is DISCARDED
-unread, and the reasoning that produced it is discarded with it -- so a
-verdict that leans on your remedy is a verdict that gets thrown away. Where a
-number has to be chosen it is derived by lifting a value off a shipped card,
-and your only part in that is confirming that the derived row FOLLOWS.
+That is the whole output, and a verdict without its comparison or
+counterexample is INCOMPLETE and is sent back rather than recorded. You may
+NOT supply card text, a number, a mode, a rewritten row, or any other
+remedy. A remedy you volunteer is DISCARDED unread, and the reasoning that
+produced it is discarded with it -- so a verdict that leans on your remedy
+is a verdict that gets thrown away. Where a number has to be chosen it is
+derived by lifting a value off a shipped card, and your only part in that is
+confirming that the derived row FOLLOWS. The comparison is READING, not
+remedy: naming the card the arm dominates is your job; naming the number
+that would fix it is not.
 
 WHY. Independence here is by MODEL FAMILY, author against grader (R217 C).
 A seat that writes part of a row and then reads it has read its own work, and
-the reading is not evidence. Naming the clause keeps you on the reading side
-of that line; naming the fix moves you across it.
+the reading is not evidence. Naming the clause and the comparison keeps you
+on the reading side of that line; naming the fix moves you across it. A bare
+verdict is not evidence either: the author cannot act on it without guessing
+your comparison, and a guess recorded as your finding is a finding nobody
+made (the Kokomi pool-pass reads of 2026-09-05, card-audit record 5.4).
 """
 
 # THE SEAT HAS TWO REVIEW JOBS AND THEY HAVE DIFFERENT OUTPUT SHAPES.

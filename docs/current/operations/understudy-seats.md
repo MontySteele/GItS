@@ -174,8 +174,14 @@ not the shape.
 
 - **`--role doctrine`** (the default, so every existing caller is unchanged) —
   reading a slice proposal against the character charter BEFORE anything is
-  built. Answers **FOLLOWS** or **REQUIRES_MODIFICATION** per arm and **names
-  the clause**. That is the whole output.
+  built. Answers **FOLLOWS** or **REQUIRES_MODIFICATION** per arm, **names
+  the clause**, and **states the comparison the verdict rests on** (the row
+  or base-game card it read the arm against, both cards' numbers, the turn
+  on which it matters) or, for a clause with no comparison, the
+  counterexample board. That is the whole output, and a verdict without its
+  comparison is INCOMPLETE and goes back (2026-09-05: three Kokomi pool-pass
+  reads came back bare and the author had to guess the comparison,
+  card-audit record 5.4). The comparison is reading; the fix is not.
 - **`--role pair`** — the PAIR READ, run AFTER a round: shipped half against
   prototype half, with the forms, the falsifier's verdicts and the live
   replays inline. Answers the round's numbered questions per arm and ends each
