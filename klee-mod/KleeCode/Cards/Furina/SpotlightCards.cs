@@ -68,7 +68,11 @@ public sealed class EtherealSpotlight
     /// build's selector offers two modes and is a different card.
     /// </summary>
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForSpotlightDuration(base.ExtraHoverTips, this);
+        // `EB-567`: and the WINDOW, chained onto the duration. Two rows
+        // because they are two facts, each inside the tip ceiling on its own.
+        FurinaRiderTips.ForSpotlightWindow(
+            FurinaRiderTips.ForSpotlightDuration(base.ExtraHoverTips, this),
+            this);
 #endif
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

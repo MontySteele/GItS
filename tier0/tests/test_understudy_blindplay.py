@@ -8866,12 +8866,21 @@ def test_the_spotlight_tip_carries_the_window_and_keeps_the_refusal():
     tips = (REPO / "klee-mod" / "KleeCode" / "Cards"
             / "FurinaRiderTips.cs").read_text(encoding="utf-8")
     body = tips[tips.index("public static IEnumerable<IHoverTip> "
-                           "ForSpotlightDuration"):]
+                           "ForSpotlightWindow"):]
     body = body[:body.index("\n    }")]
     assert "SpotlightWindowKey" in body
     assert "{FurinaReframeLaw.OpeningEncore}" in body
     assert "{FurinaReframeLaw.SpotlightDesignateEncoreCost}" in body
-    assert "locked out for the rest of the combat" in body
+    assert "shut for this combat" in body
+    # ITS OWN METHOD, chained at the call site: two facts, two tip rows, each
+    # inside the 135-character ceiling on its own.
+    card = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina"
+            / "SpotlightCards.cs").read_text(encoding="utf-8")
+    assert "FurinaRiderTips.ForSpotlightWindow(" in card
+    # ...and the title row, or the key renders raw on a live screen.
+    mod = (REPO / "klee-mod" / "KleeCode"
+           / "KleeMod.cs").read_text(encoding="utf-8")
+    assert 'FurinaRiderTips.SpotlightWindowKey + ".title"' in mod
     # The refusal is a different surface and still says what it said.
     spotlight = (REPO / "klee-mod" / "KleeCode" / "Powers"
                  / "SpotlightSystem.cs").read_text(encoding="utf-8")

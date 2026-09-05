@@ -141,21 +141,6 @@ public static class FurinaRiderTips
     /// release build's selector opens a two-mode choice and its own duration
     /// question is a different one.
     ///
-    /// `EB-567` ADDED THE SECOND SENTENCE, and it is a different fact from the
-    /// first: how long the lighting lasts is about later fights, and the
-    /// WINDOW is about this turn. The Spotlight's price is the opening Encore
-    /// exactly (R228's 2 against R258's 2), and any performance spends one --
-    /// so the only turn it can be bought is turn one, before anything
-    /// performs, and after that it is shut for the combat. Both r14 seats
-    /// derived that rule from the REFUSAL, which arrives one action after the
-    /// turn it would have changed: lane 1 "by my second card the Spotlight was
-    /// locked out", lane 2 the same way. The refusal keeps its own text
-    /// (`EB-364`); this is the thing a refusal cannot be, which is a sentence
-    /// that comes first.
-    ///
-    /// BOTH NUMBERS INTERPOLATED and neither typed, `EtherealSpotlight`'s own
-    /// rule on the face above: a repricing must not be able to leave a tip
-    /// teaching a retired figure.
     /// </summary>
     public static IEnumerable<IHoverTip> ForSpotlightDuration(
         IEnumerable<IHoverTip> inherited, CardModel card)
@@ -166,15 +151,45 @@ public static class FurinaRiderTips
             "Lighting your [gold]Companion[/gold] cards lasts this combat. "
           + "Every fight starts unlit, so the [gold]Encore[/gold] is paid "
           + "again next fight.");
+    }
+
+    /// <summary>
+    /// `EB-567`. THE WINDOW, AND IT IS THE KIT'S FIRST DECISION.
+    ///
+    /// A SECOND METHOD RATHER THAN A SECOND `yield` IN THE ONE ABOVE, because
+    /// the two are different facts and each is one tip row against [USER]'s
+    /// 135-character ceiling: how long the lighting lasts is about the next
+    /// fight, and this is about the only turn the Encore can buy it.
+    ///
+    /// THE RULE. The Spotlight's price is the opening Encore exactly (R228's
+    /// 2 against R258's 2) and any performance spends one, so the only turn
+    /// it can be bought is turn one before anything performs; after that it
+    /// is shut for the combat. Both r14 seats derived that from the REFUSAL,
+    /// which arrives one action after the turn it would have changed -- lane
+    /// 1 "by my second card the Spotlight was locked out", then played it
+    /// first in every fight after; lane 2 the same way. The refusal keeps its
+    /// own text (`EB-364`); this is the thing a refusal cannot be, which is a
+    /// sentence that comes first.
+    ///
+    /// BOTH NUMBERS INTERPOLATED and neither typed, `EtherealSpotlight`'s own
+    /// rule on its face: a repricing must not be able to leave a tip teaching
+    /// a retired figure.
+    ///
+    /// ARM-ONLY, at the CALL SITE, exactly as the duration tip is: a release
+    /// build's selector charges no Encore and this sentence would be false.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForSpotlightWindow(
+        IEnumerable<IHoverTip> inherited, CardModel card)
+    {
+        foreach (var tip in inherited) yield return tip;
 #if PROTOTYPE_CARDS
         yield return new HoverTip(
             new LocString(Table, SpotlightWindowKey + ".title"),
             $"You open a fight with {FurinaReframeLaw.OpeningEncore} "
           + "[gold]Encore[/gold] and this costs "
-          + $"{FurinaReframeLaw.SpotlightDesignateEncoreCost} -- all of it. "
-          + "Light your [gold]Companion[/gold] cards before anything "
-          + "performs: one performance spends an [gold]Encore[/gold], and "
-          + "the Spotlight is locked out for the rest of the combat.");
+          + $"{FurinaReframeLaw.SpotlightDesignateEncoreCost}. Light your "
+          + "[gold]Companion[/gold] cards before anything performs, or it is "
+          + "shut for this combat.");
 #endif
     }
 
