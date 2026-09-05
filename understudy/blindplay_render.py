@@ -202,13 +202,28 @@ def _rider_clause(said: dict[str, Any]) -> str:
     it, because a subtraction has no sources; the mod names it at the line that
     deals it (`KokomiPlan.NoteRider`) and this prints the name.
 
-    ABSENT IS NOT EMPTY, this section's standing rule: a bridge with no
-    `riders` key sends none, and the row reads exactly as it always did.
+    AND ON WHICH BODY (`EB-518`). Naming the source was not enough to make the
+    beat add up, because a beat can strike ONE body twice: the r18 seat read
+    "Tamakushi Casket 2, Tamakushi Casket 2, Tamakushi Casket 2" over bodies
+    that had lost 1, 9 and 7, divided the three entries evenly, made every body
+    5 + 2, and concluded a FOURTH strike had gone unlisted. It had not -- two
+    of the three landed on the same body, because the Plan's own Hydro hit
+    froze it before the hit landed and the relic answered the Frozen as well as
+    the Weak. With the body named, each `lost N HP` line under this one is the
+    Plan's own number plus its own riders, and the subtraction the seat had to
+    do by hand is on the page.
+
+    ABSENT IS NOT EMPTY, this section's standing rule, and it is why the target
+    is a suffix rather than part of the format: a bridge with no `riders` key
+    sends none and the row reads as it always did, and one that sends riders
+    without the `EB-518` fields prints the source and the number alone.
     """
     riders = said.get("riders") or []
     if not riders:
         return ""
-    named = ", ".join(f"{r['source']} {r['amount']}" for r in riders)
+    named = ", ".join(f"{r['source']} {r['amount']}"
+                      + (f" on {r['target']}" if r.get("target") else "")
+                      for r in riders)
     return f" Inside the same beat: {named}."
 
 

@@ -3489,6 +3489,95 @@ def test_a_bridge_with_no_riders_prints_what_it_always_printed():
     assert "still planned when the fight ended" not in page
 
 
+# `EB-518`. THREE ENTRIES THAT DIVIDED FOUR WAYS.
+
+
+def _r18_casket_board() -> dict:
+    """Kokomi r18 fight 2, the morning after Charlotte marked one body.
+
+    War Council's Plan is "Deal 5 damage and apply 1 Weak to ALL enemies", so
+    the seat predicted 5 + 2 on each body. Two slimes, one wearing a Cryo aura:
+    the Plan's own Hydro hit froze it BEFORE the hit landed
+    (`ElementalHit.Deal` resolves the reaction first), Frozen is a debuff she
+    applied, and the Casket answered it as well as the Weak. Nine on that body,
+    seven on the other -- and three entries reading `Tamakushi Casket 2`.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["enemies"] = [
+        {"entity_id": f"slime_{cid}", "combat_id": cid, "name": "Twig Slime",
+         "hp": hp, "max_hp": 27, "block": 0, "status": [],
+         "intents": [{"type": "Attack", "label": "4"}]}
+        for cid, hp in ((1, 14), (2, 8))]
+    casket = [("1", 2), ("1", 2), ("2", 2)]
+    state["player"]["kokomi_plans"] = dict(TWO_PLANS, pending=0, queue=[],
+        carried_out=[{
+            "card": "War Council", "number": 5,
+            "line": "Bake-Kurage: War Council, 5",
+            "kind": "damage", "asked": 5, "on_play": False,
+            "moved": [{"target": "Twig Slime", "combat_id": "1", "amount": 9,
+                       "dead": False, "absorbed": 0},
+                      {"target": "Twig Slime", "combat_id": "2", "amount": 7,
+                       "dead": False, "absorbed": 0}],
+            "riders": [{"source": "Tamakushi Casket", "amount": amount,
+                        "target": "Twig Slime", "combat_id": cid}
+                       for cid, amount in casket],
+            "unfinished": False}])
+    return state
+
+
+def test_every_relic_strike_in_the_beat_names_the_body_it_landed_on():
+    """`EB-518`. THE FOURTH CASKET THAT WAS NEVER THERE.
+
+    Kokomi r18 lane 1, fight 2: "the carry-out block lists three casket hits,
+    but the numbers need four ... I only found the fourth by subtracting". It
+    did not need four. `EB-453` named the source and the number and not the
+    BODY, so three identical entries over bodies that had lost 9 and 7 divided
+    the even way -- one strike each -- and the arithmetic came up 2 short. Two
+    of the three had landed on the same body.
+
+    Seen to FAIL: the page printed `Tamakushi Casket 2, Tamakushi Casket 2,
+    Tamakushi Casket 2` and named nothing.
+    """
+    state = _r18_casket_board()
+    _new_process()
+    page = blindplay.render(blindplay.observation(state))
+
+    assert ("Inside the same beat: Tamakushi Casket 2 on Twig Slime (1), "
+            "Tamakushi Casket 2 on Twig Slime (1), "
+            "Tamakushi Casket 2 on Twig Slime (2).") in page
+    # And the names are the page's own, not the mod's bare title: the enemy
+    # list four lines down says `Twig Slime (1)` and the receipt must agree.
+    assert "**Twig Slime (1)**" in page
+    assert "Twig Slime (1) lost 9 HP" in page
+    assert "Twig Slime (2) lost 7 HP" in page
+
+
+def test_the_riders_and_the_plans_own_number_sum_to_what_each_body_lost():
+    """The row's acceptance, done as the reader now can: the clause's figure
+    plus that body's own riders is that body's `lost N HP`. Nine is 5 + 2 + 2
+    and seven is 5 + 2, which is the subtraction the seat had to do by hand and
+    could not close."""
+    state = _r18_casket_board()
+    _new_process()
+    said = blindplay.observation(state)["combat"]["plans"]["carried_out"][0]
+
+    for moved in said["moved"]:
+        rides = sum(r["amount"] for r in said["riders"]
+                    if r["combat_id"] == moved["combat_id"])
+        assert said["number"] + rides == moved["amount"], moved["target"]
+
+
+def test_a_rider_from_a_bridge_that_names_no_body_prints_as_it_always_did():
+    """ABSENT IS NOT EMPTY one field deeper. A build older than `EB-518` sends
+    a rider with no `target`, and the clause is the source and the number
+    alone -- exactly the sentence `EB-453` shipped."""
+    page = blindplay.render(blindplay.observation(
+        plans_combat_state(CARRIED_OUT_R13)))
+
+    assert "Inside the same beat: Tamakushi Casket 2." in page
+    assert " on " not in page.split("Inside the same beat:")[1].split(".")[0]
+
+
 def test_the_meter_ledger_stays_off_the_carry_out_block():
     """`R101b`. The page line is the ON-SCREEN text, and the ledger's rows --
     meter, before, after, price_paid -- are an instrument, not a surface a
@@ -3518,6 +3607,11 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
         for moved in row["moved"]:
             assert set(moved) == {"target", "combat_id", "amount", "dead",
                                   "absorbed"}
+        # `EB-518` added the body a rider struck, in `MovedRow`'s own two
+        # spellings, and nothing else: a strike landing on a creature is
+        # another thing a sighted player watched happen.
+        for rider in row["riders"]:
+            assert set(rider) == {"source", "amount", "target", "combat_id"}
 
 
 # --------------------------------------------------------------------------

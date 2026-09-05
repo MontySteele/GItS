@@ -240,8 +240,26 @@ public static class KokomiPlan
     /// (<c>TamakushiCasket.Strike</c>), and the page prints the delivered
     /// total with that name beside it. A future rider that says nothing here
     /// leaves the page exactly as it was.
+    ///
+    /// AND WHICH BODY IT LANDED ON (`EB-518`). `EB-453`'s row named the source
+    /// and the number and not the target, so a beat that struck ONE body twice
+    /// and another once printed three identical entries -- "Tamakushi Casket
+    /// 2, Tamakushi Casket 2, Tamakushi Casket 2" -- with nothing to say how
+    /// they divided. The r18 seat had predicted 5 + 2 for each of three bodies,
+    /// read 1 / 9 / 7 off the board, and concluded a FOURTH strike had gone
+    /// unlisted: two of the three had in fact landed on the same body, because
+    /// <c>ElementalHit.Deal</c> resolves the reaction BEFORE the hit lands, so
+    /// the Plan's own Hydro froze that body and the Casket answered the Frozen
+    /// as well as the Weak. Three entries, four events' worth of arithmetic,
+    /// and no way to check it.
+    ///
+    /// <paramref name="CombatId"/> IS THE HANDLE AND <paramref name="Target"/>
+    /// IS THE FALLBACK, which is <see cref="MovedOn"/>'s split verbatim and
+    /// for its reasons: the page owns the numbered names, and a body the beat
+    /// KILLED is off the next board and keeps the title recorded here.
     /// </summary>
-    public readonly record struct Rider(string Source, int Amount);
+    public readonly record struct Rider(string Source, int Amount,
+                                        string Target, string CombatId);
 
     /// <summary>
     /// HOW MUCH THE BOARD ACTUALLY MOVED, on one creature, during one Plan
@@ -311,11 +329,20 @@ public static class KokomiPlan
     /// any part of it, which is exactly the gap `EB-453` is. Safe to call at
     /// any time -- outside a Plan it does nothing, which is what makes it a
     /// call a rider can make unconditionally.
+    ///
+    /// `EB-518` ADDS THE BODY, for the reason on <see cref="Rider"/>: three
+    /// identical entries cannot be divided among three enemies by a reader,
+    /// and the one that struck twice is exactly the one whose arithmetic does
+    /// not close. The target is read the way <see cref="MovedOn"/> reads it --
+    /// <see cref="EnemyName"/> for the title, <c>CombatId</c> for the handle --
+    /// so the page resolves both rows through one lookup.
     /// </summary>
-    public static void NoteRider(string source, int amount)
+    public static void NoteRider(string source, int amount,
+                                 Creature? target = null)
     {
         if (_riders == null || amount <= 0) return;
-        _riders.Add(new Rider(source, amount));
+        _riders.Add(new Rider(source, amount, EnemyName(target),
+                              target?.CombatId.ToString() ?? string.Empty));
     }
 
     /// <summary>
@@ -1175,8 +1202,9 @@ public static class KokomiPlan
     /// will not answer. A state read must never throw
     /// (<c>Diagnostics.PlayTelemetry.NameOf</c> takes the same posture), and
     /// the page has the combat id to name the creature with anyway.</summary>
-    private static string EnemyName(Creature enemy)
+    private static string EnemyName(Creature? enemy)
     {
+        if (enemy == null) return "";
         try
         {
             return enemy.Monster?.Title.ToString() ?? "";
@@ -1591,13 +1619,17 @@ public static class KokomiPlan
         };
 
     /// One named rider inside one Plan's window (`EB-453`). A named method for
-    /// <see cref="CarriedOutRow"/>'s own reason: these two keys are read by
+    /// <see cref="CarriedOutRow"/>'s own reason: these keys are read by
     /// `understudy/blindplay._rider_row` and a pin has to see the literals.
+    /// `target` and `combat_id` are `EB-518`'s, and they are `MovedRow`'s two
+    /// spellings so the page resolves both rows through one lookup.
     private static object? RiderRow(Rider rider) =>
         new Dictionary<string, object?>
         {
             ["source"] = rider.Source,
             ["amount"] = rider.Amount,
+            ["target"] = rider.Target,
+            ["combat_id"] = rider.CombatId,
         };
 
     /// One enemy's share of one Plan, on the wire (`EB-329`).
