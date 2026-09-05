@@ -5519,10 +5519,17 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                   "next is priced off the amount it took"],
         # `EB-407`. The arm's fourth Furina word and the one it did not
         # invent. The clauses straddle the `[gold]Block[/gold]` span, so the
-        # anchors are the two literals either side of it.
-        "Encore": ["it absorbs damage before HP. One pool, ",
-                   "as each lands: a card pays to resolve, a member spends 1 ",
-                   "perform or acts at 3/4."],
+        # anchors are the literals either side of it.
+        #
+        # THE OFF BRANCH, since `EB-479` (R258) gave this tip a second one:
+        # under the reframe it also says "Start each combat with N", which is
+        # the opening bank the Spark row's own arm branch carries and which
+        # this table folds out for the same reason -- an interpolated law
+        # number has no place in a hand-written glossary row, so what is held
+        # in step is the sentence that is true either way.
+        "Encore": ["it absorbs damage before HP. ",
+                   "One pool, as each lands: a card pays to ",
+                   "resolve, a member spends 1 to perform or acts at 3/4."],
     }
     # `EB-329`: `Companion` is the one row with NO tooltip to be held in step
     # with, because the game hangs no tip on the word at all -- which is the

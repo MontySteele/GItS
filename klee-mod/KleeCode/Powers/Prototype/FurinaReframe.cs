@@ -185,6 +185,17 @@ public static class FurinaReframe
     public static bool IsFurina(Creature? creature) =>
         creature != null && FurinaResources.IsFurina(creature);
 
+    /// <summary>
+    /// Is the ARM ITSELF live for this creature? The MASTER flag and no leg of
+    /// its own, for the one rule that belongs to the whole reframe rather than
+    /// to a stage of it: `EB-479`'s opening Encore fixes that turn one had no
+    /// decision to make, and every leg was in the room for that. A sixth flag
+    /// would let a build run the arm with the opening it was ruled out of.
+    /// Mirrors <c>furina_reframe.opening_encore</c>'s own gate.
+    /// </summary>
+    public static bool LiveFor(Creature? creature) =>
+        Enabled && IsFurina(creature);
+
     /// <summary>Is the MANUAL leg live for this creature?</summary>
     public static bool ManualLiveFor(Creature? creature) =>
         Enabled && ManualEnabled && IsFurina(creature);
@@ -370,6 +381,19 @@ public static class FurinaReframeLaw
     /// rather than assumed away. Mirrors
     /// <c>furina_reframe.SPOTLIGHT_DESIGNATE_ENCORE_COST</c>.</summary>
     public const int SpotlightDesignateEncoreCost = 2;
+
+    /// <summary>
+    /// R258 (`EB-479`): the Encore she OPENS each combat with, so turn one can
+    /// pay one thing -- a Spotlight designation or a wet performance -- rather
+    /// than nothing. Rounds 5 to 8 each read the first turn as no decision at
+    /// 0 Encore and round 9 called the opening "by construction its own
+    /// weakest version".
+    ///
+    /// SIZED TO THE TWO PRICES IT UNLOCKS, which are both 2: the number buys
+    /// exactly one opening move and never two. Mirrors
+    /// <c>furina_reframe.OPENING_ENCORE</c>.
+    /// </summary>
+    public const int OpeningEncore = 2;
 }
 
 /// <summary>

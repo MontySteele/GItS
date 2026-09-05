@@ -1032,6 +1032,14 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # top of this function.
     klee_overhaul.turn_start_late(state)
 
+    # QUARANTINED (`furina_reframe.FURINA_REFRAME`, R258 / `EB-479`): THE
+    # OPENING ENCORE, at the same site as the opening Spark one line up and for
+    # the same reason -- this engine's combat-start effects fire on TURN 1
+    # after the block clear, the energy reset and the draw, so this is where a
+    # "starts each combat with" grant is true on both sides. The mod's twin is
+    # `FurinaReframeOpening.GrantEncore`, on `AfterPlayerTurnStart`.
+    furina_reframe.grant_opening_encore(state)
+
     # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): RULE 2's RESOLUTION POINT --
     # every Plan she wrote last turn is carried out, in order, HERE.
     #
