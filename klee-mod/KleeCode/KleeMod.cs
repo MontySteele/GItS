@@ -511,6 +511,37 @@ public static class KleeMod
                         "Receive [blue]{DamageIncrease:percentMore()}%[/blue] "
                       + "more damage from cards for [blue]{Amount}[/blue] "
                       + "{Amount:plural:turn|turns}.",
+
+                    // `EB-521`, AND IT IS THE THIRD ROUND OF ONE FINDING.
+                    //
+                    // Kokomi r18 lane 2, fight 1: "Thorns printed 'When hit by
+                    // an attack, deal 2 damage back'. I played Kurage's Oath --
+                    // a SKILL -- into a Thorns-2 body and lost 2 HP ...
+                    // Vulnerable and Weak both print the clause 'a Skill's
+                    // damage too'; Thorns does not, and behaves as though it
+                    // did."
+                    //
+                    // THE ENGINE IS RIGHT AND ONLY THE WORDS ARE WRONG, which
+                    // is `EB-469`'s and `EB-481`'s sentence for the third time.
+                    // `ThornsPower.BeforeDamageReceived` asks for a dealer and
+                    // a POWERED attack and nothing else -- it never looks at
+                    // the `DamageResult`, which is why a fully blocked hit is
+                    // still thorned (`tier0/engine/refpowers.py`, written off
+                    // the decompile, and `test_si_powers`' two pins). A powered
+                    // attack is a property of the HIT, and every damage clause
+                    // the generator emits carries `ValueProp.Move` whatever
+                    // `type:` its sheet row declares. So "an attack" in the
+                    // game's sentence means an attack HIT, exactly as it does
+                    // in Weak's and Vulnerable's, and a potion's damage --
+                    // Unpowered on both engines -- is not one.
+                    ["THORNS_POWER.description"] =
+                        "When hit by an attack, deal your [gold]Thorns[/gold] "
+                      + "damage back. Every card hit is one, a Skill's too; a "
+                      + "potion's is not.",
+                    ["THORNS_POWER.smartDescription"] =
+                        "When hit by an attack, deal [blue]{Amount}[/blue] "
+                      + "damage back. Every card hit is one, a Skill's too; a "
+                      + "potion's is not.",
                 });
 #endif
 
