@@ -369,24 +369,27 @@ def companion_play_trigger(state, card) -> None:
                company=list(p.salon))
 
 
-def companion_replay_no_trigger(state, card) -> None:
-    """A Companion REPLAY, which performs nobody -- said out loud (`EB-420`).
+def companion_replay(state, card) -> None:
+    """A Companion REPLAY -- the extra play, said out loud (`EB-420`).
 
-    THE RULE IS THE ONE ABOVE, unchanged: `combat._finish_play` gates the
-    trigger on `replay_index == 0`, and that is LAW:145's per-Companion-play
-    bound rather than an accident of the call site -- "a replay is one card
-    being resolved twice, and a per-play bound a replay can double is not a
-    bound" (`KleeCompanionSpark`, the same clause one kit over).
+    IT PERFORMS, SINCE `EB-464`. It did not until the r8 ruling:
+    `combat._finish_play` gated the trigger above on `replay_index == 0`, on
+    LAW:145 read through "a replay is one card being resolved twice, and a
+    per-play bound a replay can double is not a bound" (`KleeCompanionSpark`,
+    the same clause one kit over). That clause is about a resource MINT, and a
+    performance is not one -- so the gate came off this trigger and stayed on
+    Klee's mint, which is what it was written for.
 
-    THE FACT LEAVES NO TRACE, which is why it gets an event, the same argument
-    the whiff above is emitted under: two performs off two plays and two
-    performs off one Duet-doubled play are the same board a moment later. The
-    round-5 seat played Duet into Freminet, counted three Companion plays'
-    worth of triggers, got two, and found no line naming the second play at
-    all. C# twin: `SalonMemberPower.NoteCompanionReplay`, at the same gate.
+    THE FACT STILL LEAVES NO TRACE, which is why it keeps its event, the same
+    argument the whiff above is emitted under: two performs off two plays and
+    two performs off one Duet-doubled play are the same board a moment later,
+    and the performance list cannot tell them apart. The round-5 seat played
+    Duet into Freminet, counted three Companion plays' worth of triggers, got
+    two, and found no line naming the second play at all. C# twin:
+    `SalonMemberPower.NoteCompanionReplay`, at the same site.
 
     NOTHING HAPPENS HERE. It emits and returns; no rule reads the event back.
     """
     if not manual_active(state.player) or not card.is_companion:
         return
-    state.emit("salon_replay_no_trigger", card=card.id)
+    state.emit("salon_replay", card=card.id)

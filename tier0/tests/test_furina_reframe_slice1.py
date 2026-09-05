@@ -24,6 +24,7 @@ MEASURED, not asserted, in `test_furina_reframe_slot6.py`.
 """
 
 import random
+from pathlib import Path
 
 import pytest
 
@@ -32,6 +33,8 @@ from tier0.content import loader
 from tier0.engine import combat, effects, furina_reframe, resources
 from tier0.engine.state import Card, CombatState
 from tier0.tests.conftest import make_enemy
+
+REPO = Path(__file__).resolve().parents[2]
 
 FR = furina_reframe
 
@@ -254,27 +257,50 @@ def test_a_non_companion_play_never_triggers_the_stage(manual):
     assert _events(st, "salon_trigger") == []
 
 
-def test_a_doubled_companion_performs_once_and_says_so(manual):
-    """`EB-420`. Duet plays the next Companion card an extra time; the trigger
-    is gated on `replay_index == 0`, so the extra play performs nobody -- and
-    that gate is LAW:145's per-Companion-play bound rather than an accident of
-    the call site ("a per-play bound a replay can double is not a bound",
-    `KleeCompanionSpark`).
+def test_a_replayed_companion_performs_too_and_says_so(manual):
+    """`EB-464` (D default, Furina r8 packet sec.4), and `EB-420`'s line
+    beside it.
 
-    THE RULE WAS ALREADY THIS AND LEFT NO TRACE. The round-5 seat played Duet
-    into Freminet, counted three Companion plays' worth of triggers, got two,
-    and found no line on any screen naming the second play. So the replay is
-    emitted under its own name, the way the whiff is."""
+    THE FIND (r8 (c) 2). "A Replay of a Companion card does not perform a
+    member: the Companion tip says a played Companion card performs the front
+    member, Replay says it plays the card again, and twice the seat counted 16
+    where 20 was promised, Fanfare (2 per performance) agreeing with one."
+    Nothing said the replay skipped it.
+
+    WHAT THE GATE WAS FOR. `replay_index == 0` was LAW:145's per-Companion-play
+    bound ("a per-play bound a replay can double is not a bound",
+    `KleeCompanionSpark`) -- a clause about a resource MINT. A performance is
+    not one, so the gate comes off the trigger and stays on Klee's mint, which
+    the next test holds.
+
+    Seen to FAIL: one `salon_trigger`, and the stage turned once.
+    """
     st = _staged(["usher", "crabaletta"], encore=9)
     st.replay_next_companion = 1
 
     combat._finish_play(st, _companion())
 
-    # One play, two resolutions, ONE performance -- and the stage turned once.
-    assert len(_events(st, "salon_trigger")) == 1
-    assert st.player.salon == ["crabaletta", "usher"]
-    # ...and the resolution that performed nobody has a line of its own.
-    assert len(_events(st, "salon_replay_no_trigger")) == 1
+    # One play, two resolutions, TWO performances -- and the stage turned
+    # twice, which is what puts the Usher back in front.
+    assert len(_events(st, "salon_trigger")) == 2
+    assert st.player.salon == ["usher", "crabaletta"]
+    # ...and the extra PLAY still has a line of its own, because the two
+    # performances above cannot say that one of them came from a replay.
+    assert len(_events(st, "salon_replay")) == 1
+
+
+def test_a_replay_does_not_double_klees_mint(manual):
+    """The other half of `EB-464`, and the reason the gate was there. LAW:145
+    bounds what a Companion play GENERATES, so Klee's Little Hexenzirkul mint
+    keeps `replay_index == 0` while the performance loses it -- the two shared
+    a gate only because they share a call site."""
+    src = (REPO / "tier0" / "engine" / "combat.py").read_text(encoding="utf-8")
+    body = src[src.index("for replay_index in range(replays):"):]
+    body = body[:body.index("THE AUTOMATIC POWER FLOOR GRANT")]
+    mint = body.index("klee_personal_companion_spark")
+    gate = body.rindex("if replay_index == 0 and card.is_companion:", 0, mint)
+    perform = body.index("furina_reframe.companion_play_trigger(state, card)")
+    assert perform < gate
 
 
 def test_a_doubled_non_companion_says_nothing(manual):
@@ -285,18 +311,18 @@ def test_a_doubled_non_companion_says_nothing(manual):
 
     combat._finish_play(st, _card(id="not_a_companion"))
 
-    assert _events(st, "salon_replay_no_trigger") == []
+    assert _events(st, "salon_replay") == []
 
 
 def test_a_doubled_companion_says_nothing_with_the_flag_off():
-    """The OFF half: with no reframe there is no Companion trigger to miss, so
+    """The OFF half: with no reframe there is no Companion trigger at all, so
     there is nothing for the line to be about."""
     st = _staged(["usher"], encore=9)
     st.replay_next_companion = 1
 
     combat._finish_play(st, _companion())
 
-    assert _events(st, "salon_replay_no_trigger") == []
+    assert _events(st, "salon_replay") == []
 
 
 def test_the_trigger_performs_through_the_one_shared_act(manual):

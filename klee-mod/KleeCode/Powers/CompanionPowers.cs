@@ -211,63 +211,18 @@ public sealed class ReplayNextCompanionPower : PowerModel, ILocalizationProvider
         ("description",
             "The next [gold]Companion[/gold] card you play this turn is "
           + "played {Amount} extra time{Amount:plural:|s}."),
-#if PROTOTYPE_CARDS
-        // `EB-420`. THE ARM'S FACE, and it prints a RULE THIS CODE ALREADY
-        // KEEPS rather than changing one.
-        //
-        // Under the arm a Companion play makes the front Salon member perform
-        // (`SalonMemberPower.CompanionPlayTrigger`), and that trigger is gated
-        // on `IsFirstInSeries` -- once per play_card call, never once per
-        // replay. The gate is deliberate and its reason is written at Klee's
-        // twin, `KleeCompanionSpark`: LAW:145 (countersigned R224) permits a
-        // kit engine to answer a Companion play only where it "bounds the
-        // amount generated per Companion play", and "a per-play bound a replay
-        // can double is not a bound". Duet and Study Buddy are the two cards
-        // that replay, so the bound is exactly what they would double.
-        //
-        // WHAT THE SEAT GOT INSTEAD (round 5, run 1, fights 2 and 4): two
-        // Crabaletta performs where it counted three due, and no line on any
-        // screen naming Duet at all -- "I ended the turn unable to say whether
-        // Duet had fired at all". The rule was right and unprinted, which is
-        // why this is a sentence rather than a fix to the gate.
-        //
-        // ARM-ONLY because the rule is: with the arm off nothing performs off
-        // a Companion play, so the clause would name a trigger that does not
-        // exist. THE SHORTEST TRUE SENTENCE, and the choice was open: "once
-        // per Companion card played" is the bound's own wording and does not
-        // fit the 125-character power ceiling beside the shipped clause, and
-        // "on the first play only" says the same thing about the same play.
-        // NO SEMICOLON, the `EB-385` rule -- `lint_text_conventions` reads
-        // these literals out of the source and its regex stops at one.
-        ("smartDescriptionReframe",
-            "The next [gold]Companion[/gold] card you play this turn is "
-          + "played {Amount} extra time{Amount:plural:|s}. Your Salon "
-          + "performs on the first play only."),
-#endif
+        // `EB-420` PUT AN ARM FACE HERE AND `EB-464` TOOK IT AWAY. It read
+        // "Your Salon performs on the first play only", printing a rule this
+        // code kept: `SalonMemberPower.CompanionPlayTrigger` was gated on
+        // `IsFirstInSeries`, on LAW:145 read through `KleeCompanionSpark` ("a
+        // per-play bound a replay can double is not a bound"). The r8 ruling
+        // reversed the rule -- that clause is about a resource MINT and a
+        // performance is not one -- so a replayed Companion card performs, and
+        // the arm sentence would now be the only thing on any screen saying
+        // otherwise. The shipped face is true on every arm again, which is why
+        // there is no replacement clause and no `SmartDescriptionLocKey`
+        // override below.
     };
-
-#if PROTOTYPE_CARDS
-    /// <summary>
-    /// `EB-420`. Which face this badge prints -- `FanfareMeterPower`'s shape
-    /// (`EB-385`), gated on the MANUAL leg because that leg is the one that
-    /// owns the Companion trigger. `IsMutable` first for its reason:
-    /// `HasSmartDescription` probes this key on a canonical copy, whose
-    /// `Owner` getter asserts mutability (`EB-94`), and a Klee holding Study
-    /// Buddy reads the shipped sentence because `ManualLiveFor` is Furina's.
-    /// </summary>
-    protected override string SmartDescriptionLocKey
-    {
-        get
-        {
-            if (IsMutable && Owner is { } owner
-                && FurinaReframe.ManualLiveFor(owner))
-            {
-                return Id.Entry + ".smartDescriptionReframe";
-            }
-            return base.SmartDescriptionLocKey;
-        }
-    }
-#endif
 
     public override PowerType Type => PowerType.Buff;
 

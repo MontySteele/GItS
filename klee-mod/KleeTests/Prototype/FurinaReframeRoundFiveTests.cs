@@ -188,16 +188,18 @@ public class FurinaReframeRoundFiveTests
     }
 
     [Fact]
-    public void The_arms_replay_face_says_the_salon_still_performs_once()
+    public void The_replay_face_reads_the_same_on_the_arm_and_off_it()
     {
-        // The rule was already this and was printed nowhere: the trigger is
-        // gated on `IsFirstInSeries` (LAW:145's per-Companion-play bound), and
-        // the seat "ended the turn unable to say whether Duet had fired".
+        // `EB-420` PUT AN ARM CLAUSE HERE AND `EB-464` TOOK IT AWAY. It read
+        // "Your Salon performs on the first play only", which printed the rule
+        // the trigger's `IsFirstInSeries` gate kept; the r8 ruling reversed
+        // that rule, so a replayed Companion card performs and the clause
+        // would be the only thing on any screen saying otherwise.
         using var _ = new Arm(manual: true);
         var badge = Replay(Seat.Furina());
 
-        Assert.EndsWith(".smartDescriptionReframe", ReplayKey(badge));
-        Assert.Contains("performs on the first play only", ReplayFace(badge));
+        Assert.EndsWith(".smartDescription", ReplayKey(badge));
+        Assert.DoesNotContain("first play only", ReplayFace(badge));
     }
 
     [Fact]
@@ -227,8 +229,9 @@ public class FurinaReframeRoundFiveTests
     public void A_companion_replay_is_recorded_under_the_arm()
     {
         // The log half. `NoteCompanionReplay` is what the seam calls on the
-        // side of the gate that does NOT trigger, so the page can name the
-        // play that performed nobody.
+        // second and later resolutions of one play, so the page can name the
+        // extra play -- which since `EB-464` performs like any other, and is
+        // therefore invisible in the performance list.
         using var _ = new Arm(manual: true);
         FurinaReframeLedger.ResetAll();
         var seat = Seat.Furina();
@@ -236,7 +239,7 @@ public class FurinaReframeRoundFiveTests
         SalonMemberPower.NoteCompanionReplay(seat.Creature, Companion());
 
         Assert.Single(FurinaReframeLedger.For(seat.Creature)
-                          .ReplaysWithoutTrigger);
+                          .Replays);
     }
 
     [Fact]
@@ -250,7 +253,7 @@ public class FurinaReframeRoundFiveTests
         SalonMemberPower.NoteCompanionReplay(seat.Creature, NotACompanion());
 
         Assert.Empty(FurinaReframeLedger.For(seat.Creature)
-                         .ReplaysWithoutTrigger);
+                         .Replays);
     }
 
     [Fact]
@@ -263,7 +266,7 @@ public class FurinaReframeRoundFiveTests
         SalonMemberPower.NoteCompanionReplay(seat.Creature, Companion());
 
         Assert.Empty(FurinaReframeLedger.For(seat.Creature)
-                         .ReplaysWithoutTrigger);
+                         .Replays);
     }
 
     [Fact]
@@ -279,14 +282,15 @@ public class FurinaReframeRoundFiveTests
         SalonMemberPower.NoteCompanionReplay(seat.Creature, Companion());
         ledger.ClearPerformances();
 
-        Assert.Empty(ledger.ReplaysWithoutTrigger);
+        Assert.Empty(ledger.Replays);
     }
 
     [Fact]
     public void The_wire_carries_the_replays_beside_the_performances()
     {
-        // Beside and never inside: a replay that performed nobody is not a
-        // performance, and the reader has to be able to tell the two apart.
+        // Beside and never inside: this row is about a PLAY, and the reader
+        // has to be able to tell "the stage acted twice" from "you played the
+        // card twice".
         using var _ = new Arm(manual: true);
         FurinaReframeLedger.ResetAll();
         var seat = Seat.Furina();

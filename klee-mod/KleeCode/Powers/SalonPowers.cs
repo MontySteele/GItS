@@ -1014,23 +1014,26 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
 
     /// <summary>
     /// `EB-420`. A Companion REPLAY -- the second and later resolutions of one
-    /// play, which <see cref="CompanionPlayTrigger"/>'s `IsFirstInSeries` gate
-    /// deliberately does not answer.
+    /// play, recorded under its own name.
     ///
-    /// IT PERFORMS NOBODY, AND THAT IS THE RULE. LAW:145 (countersigned R224)
-    /// lets a kit engine respond to a Companion play only where it "bounds the
-    /// amount generated per Companion play"; `KleeCompanionSpark` states the
-    /// consequence for the two cards that replay -- "a replay is one card
-    /// being resolved twice, and a per-play bound a replay can double is not a
-    /// bound". Duet and Study Buddy are those two cards.
+    /// IT PERFORMS, SINCE `EB-464`. It did not until the r8 ruling: the
+    /// trigger above was gated on `IsFirstInSeries`, on LAW:145 read through
+    /// `KleeCompanionSpark`'s "a per-play bound a replay can double is not a
+    /// bound". That clause is about a RESOURCE MINT, and a performance is not
+    /// one -- the Companion tip says a played Companion card performs the
+    /// front member and Replay says it plays the card again, so the r8 seat
+    /// counted 16 where 20 was promised, twice. The gate is off
+    /// (<see cref="FurinaResources"/>'s <c>AfterCardPlayed</c>) and Klee's
+    /// mint keeps its own, which is where the LAW clause actually bites.
     ///
-    /// SO THIS METHOD CHANGES NOTHING AND ONLY RECORDS. The Furina round-5
-    /// seat played Duet into Freminet, got the doubled hit and two Crabaletta
-    /// performs where it counted three due, and found nothing on any screen
-    /// naming the second play: "I ended the turn unable to say whether Duet
-    /// had fired at all." The face says the rule now
-    /// (<c>ReplayNextCompanionPower</c>'s arm sentence) and the page says it
-    /// happened. Sim twin: <c>furina_reframe.companion_replay_no_trigger</c>.
+    /// SO THIS METHOD CHANGES NOTHING AND ONLY RECORDS, which is still worth
+    /// doing for the reason it was written: the Furina round-5 seat played Duet
+    /// into Freminet and found nothing on any screen naming the second play --
+    /// "I ended the turn unable to say whether Duet had fired at all" -- and a
+    /// performance list cannot say which of its acts came from a replay. The
+    /// face says the rule (<c>ReplayNextCompanionPower</c>'s arm sentence) and
+    /// the page says it happened. Sim twin:
+    /// <c>furina_reframe.companion_replay</c>.
     ///
     /// The same two guards as the trigger, in the same order and for the same
     /// reasons: the arm's MANUAL leg owns this rule, and the Companion test
@@ -1040,8 +1043,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     {
         if (!FurinaReframe.ManualLiveFor(owner)) return;
         if (card is not Cards.ICompanionCard) return;
-        FurinaReframeLedger.For(owner).NoteReplayWithoutTrigger(
-            PrintedTitle(card));
+        FurinaReframeLedger.For(owner).NoteReplay(PrintedTitle(card));
     }
 
     /// <summary>

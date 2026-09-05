@@ -7585,16 +7585,14 @@ def test_a_performance_on_a_body_this_fight_never_saw_keeps_the_mods_title():
 
 
 def test_a_replayed_companion_is_named_beside_the_performances():
-    """`EB-420`. Duet plays the next Companion card an extra time and the
-    extra play performs nobody -- LAW:145's per-Companion-play bound, which
-    `KleeCompanionSpark` states in as many words. The seat could not see that:
-    "two Crabaletta lines ... for three Companion-card plays' worth of
-    triggers", and "no line anywhere on the screen said Duet".
+    """`EB-420`. Duet plays the next Companion card an extra time and nothing
+    on any screen said so: "two Crabaletta lines ... for three Companion-card
+    plays' worth of triggers", and "no line anywhere on the screen said Duet".
 
-    A reader counting the acts above against the plays it made infers the
-    wrong rule, so the play that is MISSING from the list is named in the same
-    block -- beside the performances and never inside them, because a replay
-    that performed nobody is not a performance."""
+    `EB-464` FLIPPED WHAT THE LINE SAYS. The extra play performs now, so it is
+    no longer a play MISSING from the list above -- it is the reason one of
+    those rows is there, which a performance list cannot say for itself. Still
+    beside the performances and never inside them: this row is about a PLAY."""
     state = salon_state([
         {"member": "Crabaletta", "target": "Nibbit", "combat_id": "1",
          "element": "Hydro", "aura": "Hydro", "amount": 6, "paid": True,
@@ -7603,8 +7601,8 @@ def test_a_replayed_companion_is_named_beside_the_performances():
     page = blindplay.observe(state)
 
     assert "- **Crabaletta** hit Nibbit for 6 Hydro" in page
-    assert ("- **Freminet — Pers, Deploy!** was played an extra time, and an "
-            "extra play makes nobody perform.") in page
+    assert ("- **Freminet — Pers, Deploy!** was played an extra time, and the "
+            "extra play performed as well.") in page
 
 
 def test_a_replay_with_no_performance_still_gets_its_line():

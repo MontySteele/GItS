@@ -533,15 +533,18 @@ def render(obs: dict[str, Any]) -> str:
             # aura" rather than claiming Hydro that is not there.
             out += ["", "## What your Salon did this turn", ""]
             out += [_render_performance(row) for row in c["salon"]["performed"]]
-            # `EB-420`. THE PLAY THAT IS MISSING FROM THE LIST ABOVE, named.
-            # A Companion card played an extra time makes nobody perform --
-            # the trigger is once per Companion card played -- so the acts
-            # above are one short of the plays, and a reader counting them
-            # infers the wrong rule. The round-5 seat did: "two Crabaletta
-            # lines ... for three Companion-card plays' worth of triggers",
-            # and "no line anywhere on the screen said Duet".
-            out += [f"- **{name}** was played an extra time, and an extra "
-                    "play makes nobody perform."
+            # `EB-420`. THE PLAY BEHIND ONE OF THE ACTS ABOVE, named. The
+            # round-5 seat counted "two Crabaletta lines ... for three
+            # Companion-card plays' worth of triggers" and found "no line
+            # anywhere on the screen said Duet" -- and a performance list
+            # cannot say which of its acts came from a replay.
+            #
+            # `EB-464` FLIPPED THE SECOND HALF OF THE SENTENCE. The extra play
+            # used to perform nobody; it performs now, so the acts above are no
+            # longer one short of the plays and the line says what happened
+            # instead of what did not.
+            out += [f"- **{name}** was played an extra time, and the extra "
+                    "play performed as well."
                     for name in c["salon"]["replayed"]]
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip

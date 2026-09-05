@@ -306,13 +306,13 @@ def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
         number and three-quarters of it.
 
       replayed -- `EB-420`. This turn's Companion cards that were played an
-        EXTRA time, by printed title, one entry per extra play. The extra play
-        makes nobody perform -- the trigger is once per Companion card played,
-        LAW:145's bound -- so these are the plays that are missing from
-        `performed`, and a reader given only that list would count the stage's
-        acts and reach the wrong rule. The round-5 seat did exactly that: "two
-        Crabaletta lines ... for three Companion-card plays' worth of
-        triggers", and "no line anywhere on the screen said Duet".
+        EXTRA time, by printed title, one entry per extra play. Since `EB-464`
+        the extra play PERFORMS like any other, so these are no longer the
+        plays missing from `performed`: they are the reason one of its rows is
+        there, which that list cannot say for itself. The round-5 seat is why
+        it is printed at all -- "two Crabaletta lines ... for three
+        Companion-card plays' worth of triggers", and "no line anywhere on the
+        screen said Duet".
     """
     raw = player.get("furina_salon")
     if not isinstance(raw, dict) or not raw:
