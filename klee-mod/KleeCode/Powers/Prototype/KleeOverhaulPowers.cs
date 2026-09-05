@@ -422,9 +422,9 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
         // whatever its condition says, so the blind is read HERE rather than
         // written into the explosion counter, which Jean's stand-in also reads.
         // False on every build with the companion arm off. `EB-516` moved the
-        // condition beside it and left the read where it was; the stand-in's
-        // PRINTED words still name the old counter, which is a face defect and
-        // not a rules one.
+        // condition beside it and left the read where it was; `EB-576` brought
+        // the stand-in's PRINTED words the rest of the way, to "counts a Bomb
+        // as on the field", which is what this OR has always meant.
         if (!ProtoBombPower.AnyPlacedBy(Owner)
             && !CompanionStandIns.GroundedBlind(Owner))
         {

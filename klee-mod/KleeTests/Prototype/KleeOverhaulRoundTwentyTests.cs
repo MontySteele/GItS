@@ -283,103 +283,74 @@ public class KleeOverhaulRoundTwentyTests
         Assert.DoesNotContain(calls, c => c.Contains("KleeOverhaulLedger"));
         Assert.DoesNotContain(calls, c => c.Contains("PowerCmd"));
     }
-    // ---- `EB-556`: an upgraded power's buff line prints its clauses -------
+    // ---- `EB-571`: the added draw resolves on play, and reads that way ----
+    //
+    // `EB-556` ANSWERED THE r20 FIND THE OTHER WAY ROUND. The seat filed a
+    // DISAGREEMENT -- "the upgraded card reads '...gain 4 Block. Draw 1 card.'
+    // but the buff on my status line reads '...gain 4 Block.' with no draw"
+    // (Klee r20 lane 1, (c) 3) -- and the fix was a second smart row on the
+    // badge restating the card's clause. But the Prototype-stage rule appends
+    // that draw to the generated `OnPlay`, so it resolves as the card is
+    // PLAYED, while the badge is only ever about what the power does at the
+    // END of a turn. Restating it there made the badge say the draw was part
+    // of the later line, and appending it to the card's face said the same
+    // thing on the card. So the sentence LEADS on the card, where the order
+    // says when it happens, and the badge keeps the one row it can honestly
+    // carry.
 
     private static string PowerRow(PowerModel power, string key) =>
         ((ILocalizationProvider)power).Localization!
         .First(r => r.Item1 == key).Item2;
 
-    /// <summary>The `{IfUpgraded:show:X|}` payload on a card's own face, which
-    /// is the clause an upgraded copy adds.</summary>
-    private static string UpgradeClauseOf(CustomCardModel card)
-    {
-        var face = Face(card);
-        var hit = Regex.Match(face, @"\{IfUpgraded:show:([^|}]*)\|\}");
-        Assert.True(hit.Success, face);
-        return " " + hit.Groups[1].Value.Trim();
-    }
-
     [Fact]
-    public void An_upgraded_powers_buff_line_prints_its_upgraded_clauses()
+    public void EB571_the_added_draw_leads_the_card_face()
     {
-        // "The upgraded card reads '...gain 4 Block. Draw 1 card.' but the buff
-        // on my status line reads '...gain 4 Block.' with no draw. Seeing the
-        // unupgraded copy later (which genuinely has no draw) confirms the CARD
-        // is right and the buff readout is the incomplete one" (Klee r20 lane
-        // 1, (c) 3).
-        var bloom = Seat.Klee().WithPower<SolarIsotomaBloomPower>(1)
-            .Creature.Powers.OfType<SolarIsotomaBloomPower>().Single();
-
-        Assert.False(bloom.SourceUpgraded);
-        Assert.Equal(".smartDescription", bloom.SmartKeySuffix);
-
-        bloom.NoteSourceUpgraded();
-
-        Assert.True(bloom.SourceUpgraded);
-        Assert.Equal(".smartDescriptionUpgraded", bloom.SmartKeySuffix);
-        Assert.EndsWith(SolarIsotomaBloomPower.UpgradedClause,
-                        PowerRow(bloom, "smartDescriptionUpgraded"));
-    }
-
-    [Fact]
-    public void The_three_rows_of_an_upgrade_aware_power_stay_in_step()
-    {
-        // The helper that would have kept them in step is the one the text
-        // lint refuses (it skips a tuple built by a `Face(` call), so the
-        // agreement is a test instead: the compendium row and the base smart
-        // row are one sentence, and the upgraded row is that sentence plus the
-        // clause.
-        foreach (var (power, clause) in new (PowerModel, string)[]
-                 {
-                     (new SolarIsotomaBloomPower(),
-                      SolarIsotomaBloomPower.UpgradedClause),
-                     (new MondstadtOzPower(), MondstadtOzPower.UpgradedClause),
-                 })
+        foreach (var card in new CustomCardModel[]
+                 { new ProtoMcAlbedoSolarIsotoma(), new ProtoMcFischlOz() })
         {
-            var face = PowerRow(power, "description");
-            Assert.Equal(face, PowerRow(power, "smartDescription"));
-            Assert.Equal(face + clause,
-                         PowerRow(power, "smartDescriptionUpgraded"));
+            var face = Face(card);
+            // The clause is the FIRST sentence after the family tag, and the
+            // separator lives inside the shown branch so the base card does
+            // not open with a blank where the sentence is not.
+            Assert.Contains("{IfUpgraded:show:Draw 1 card. |}At the end of "
+                          + "your turn", face);
+            Assert.DoesNotContain("{IfUpgraded:show:Draw 1 card.|}", face);
         }
     }
 
     [Fact]
-    public void The_clause_a_badge_adds_is_the_clause_its_card_prints()
+    public void EB571_the_badge_restates_only_the_standing_clause()
     {
-        // A CURATED COPY, CHECKED: the power cannot read the card's
-        // `{IfUpgraded:show:...|}` token at render time -- loc is registered
-        // once at boot -- so the sentence is written on the power and held
-        // against the card's own face here, which is this repo's answer to a
-        // fact two files have to agree on.
-        Assert.Equal(UpgradeClauseOf(new ProtoMcAlbedoSolarIsotoma()),
-                     SolarIsotomaBloomPower.UpgradedClause);
-        Assert.Equal(UpgradeClauseOf(new ProtoMcFischlOz()),
-                     MondstadtOzPower.UpgradedClause);
+        foreach (var power in new PowerModel[]
+                 { new SolarIsotomaBloomPower(), new MondstadtOzPower() })
+        {
+            var rows = ((ILocalizationProvider)power).Localization!;
+            // ONE face, and no on-play clause on it.
+            Assert.DoesNotContain(rows, r => r.Item1.StartsWith(
+                "smartDescription", System.StringComparison.Ordinal));
+            Assert.DoesNotContain("Draw 1 card", PowerRow(power, "description"));
+            Assert.StartsWith("At the end of your turn",
+                              PowerRow(power, "description"));
+        }
     }
 
     [Fact]
-    public void The_badge_learns_what_the_card_was_from_the_board()
+    public void EB571_the_upgrade_aware_plumbing_left_with_the_clause()
     {
-        // A DIFF AND NOT A CARD-TO-POWER MAP, which is what makes it general:
-        // any `IUpgradeAwarePower` that is new after a play, or whose stack
-        // grew during it, was applied by the card that just resolved -- so a
-        // Power row added to the arm tomorrow is covered the day its power
-        // implements the interface, with no second list to keep in step.
-        //
-        // A SOURCE PIN, `Round17Tests`' own shape: `CardPlay` needs a live
-        // `CombatState` this harness cannot build (README, "The headless
-        // boundary"), so what is checkable is which locals the two hooks read.
+        // It existed only to choose between the two smart rows, so a build
+        // that keeps it keeps a seam nothing reads -- which is exactly the
+        // thing `lint_generated_structure` L2 refuses one level down.
         var source = System.IO.File.ReadAllText(
             System.IO.Path.Combine(Round17Tests.Repo(), "klee-mod", "KleeCode",
                                    "Powers", "Prototype",
                                    "CompanionOverhaulHooks.cs"));
-
-        // The snapshot is taken on EVERY play, above the Attack gate: a Power
-        // card is not an Attack, and that gate is the Lightfall blade's alone.
-        Assert.Contains("owner.Powers.OfType<IUpgradeAwarePower>()", source);
-        Assert.Contains("_standingBefore[model] = model.Amount;", source);
-        Assert.Contains("if (model.Amount > before) power.NoteSourceUpgraded();",
-                        source);
-        Assert.Contains("if (cardPlay.Card is { IsUpgraded: true })", source);
+        Assert.DoesNotContain("IUpgradeAwarePower", source);
+        Assert.DoesNotContain("NoteSourceUpgraded", source);
+        var powers = System.IO.File.ReadAllText(
+            System.IO.Path.Combine(Round17Tests.Repo(), "klee-mod", "KleeCode",
+                                   "Powers", "Prototype",
+                                   "CompanionOverhaulPowers.cs"));
+        Assert.DoesNotContain("IUpgradeAwarePower", powers);
+        Assert.DoesNotContain("UpgradedClause", powers);
     }
 }

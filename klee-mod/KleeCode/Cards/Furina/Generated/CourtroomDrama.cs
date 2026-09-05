@@ -41,7 +41,7 @@ public sealed class CourtroomDrama : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Courtroom Drama"),
-        ("description", "The first [gold]Elemental Reaction[/gold] you trigger each turn applies {PowerAmount:diff()} [gold]Vulnerable[/gold] and {PowerAmount:diff()} [gold]Weak[/gold] to its target."),
+        ("description", "Your first [gold]Elemental Reaction[/gold] each turn applies {PowerAmount:diff()} [gold]Vulnerable[/gold] and {PowerAmount:diff()} [gold]Weak[/gold] to its target. The [gold]Vulnerable[/gold] moves that hit."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -27,8 +27,8 @@ from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
 from understudy.blindplay_notes import (REWARD_ALTERNATIVE_RELICS,
                                         keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
-                                       _fold, _int, _player, _potions, _relics,
-                                       _screen, _text)
+                                       _fold, _hand, _int, _player, _potions,
+                                       _relics, _screen, _text)
 from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
                                         SELECT_SCREENS, UNDRIVEN_SCREENS)
 
@@ -167,9 +167,31 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # pet never sees this line.
         plans = obs["combat"].get("plans")
         if plans and plans.get("pet"):
-            obs["commands"].insert(
-                1, f'play "<card title>" on "{plans["pet_name"]}"'
-                   "   (writes its Plan instead of playing it now)")
+            # `EB-578`. THE FORM IS OFFERED ONLY WHEN THE HAND CAN USE IT.
+            #
+            # THE FIND (Kokomi r21 lane 2 (c) 1). The line was printed on
+            # every turn the jellyfish was out, including turns whose hand was
+            # four basics -- and `EB-480` REFUSES a basic aimed at the pet, so
+            # the seat met the form, tried it, was refused, and learned what a
+            # Plan card is by elimination on round three. A grammar this page
+            # advertises is one the tester can use; a form that is refused on
+            # the board it is printed beside is the wall that lesson was
+            # taught from.
+            #
+            # `can_target_pet` IS THE FACT and it is the game's own answer,
+            # asked per hand card by the bridge -- the same field `EB-480`'s
+            # refusal reads, so the offer and the refusal cannot disagree.
+            # ONLY AN EXPLICIT `false` TAKES A CARD OUT, that field's standing
+            # rule: an ABSENT field is a bridge older than it, and on such a
+            # feed this reads as the behaviour that build has and the form is
+            # printed exactly as before.
+            plans["plannable"] = any(
+                card.get("can_target_pet") is not False
+                for card in _hand(state))
+            if plans["plannable"]:
+                obs["commands"].insert(
+                    1, f'play "<card title>" on "{plans["pet_name"]}"'
+                       "   (writes its Plan instead of playing it now)")
     elif st == "map":
         obs["screen"] = "map"
         obs["nodes"] = _map_options(state)

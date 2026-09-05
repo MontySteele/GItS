@@ -1276,7 +1276,15 @@ def _pool_substitutions(spec: dict) -> dict[str, str]:
     `_card_index`.
     """
     character = spec.get("id")
-    if character == "kokomi" and C.KURAGE_MEMORY:
+    # `EB-581`: AND NOT UNDER THE OVERHAUL, because the two Kokomi arms do not
+    # stack. `KOKOMI_OVERHAUL` replaces her offerable pool WHOLE
+    # (`KOKOMI_OVERHAUL_POOL_IDS`), and the memory row's own power -- "whenever
+    # the Bake-Kurage plays a card from its memory" -- names a rule that arm
+    # does not have; a substitution that put it in front of a drafter there
+    # would be offering an inert card under a title the arm's own starter Skill
+    # already prints.
+    if (character == "kokomi" and C.KURAGE_MEMORY
+            and not C.KOKOMI_OVERHAUL):
         return {C.KURAGE_MEMORY_POOL_DROP: C.KURAGE_MEMORY_POOL_ADD}
     if character == "klee" and C.SPARK_ALT_COST_ENABLED:
         return dict(C.SPARK_ALT_POOL_SUBS)
@@ -1712,7 +1720,17 @@ def reset_caches() -> None:
     loader looks, must call this rather than picking caches by hand.
     """
     for cache in (_card_index, _card_prototype, _character_index,
-                  _substituted_card_index, _encounter_index, _pilot_index):
+                  _substituted_card_index, _encounter_index, _pilot_index,
+                  # `EB-593`: the prototype surface's own index is a memoized
+                  # view of the content tree like the six beside it -- it is
+                  # `prototype_cards()` cached -- and it was the one this door
+                  # did not name. It is not FLAG-dependent (the surface is the
+                  # surface), so it stays out of `reset_arm_caches` below; but
+                  # a fixture that repoints the tree and clears everything must
+                  # clear this too, or `_card_prototype`'s flagged branch and
+                  # `understudy.adapter` both read rows from a tree that is
+                  # gone.
+                  _prototype_index):
         cache.cache_clear()
     # EB-213: the merged upgrade index is derived from `_substituted_card_index`
     # (a prototype row's `upgrade:` block registers only while a live door
@@ -1725,6 +1743,49 @@ def reset_caches() -> None:
     # `personal_pool:`), so it is a memoized view of the content tree like the
     # rest and belongs behind the same one door.
     companion_standins._replacements.cache_clear()
+
+
+#: `EB-569`. THE MEMOIZED VIEWS WHOSE ANSWER MOVES WITH AN ARM FLAG.
+#:
+#: `reset_caches` above is the door for "the content tree on disk changed", and
+#: it costs a rebuild of `_card_index` and `_character_index` -- about 170ms,
+#: which is why no per-test fixture may take it. What an ARM test changes is
+#: not the tree, it is a flag; and exactly four memoized views answer
+#: differently on either side of one:
+#:
+#:   * `_card_prototype`   -- a `proto_` id resolves only through the flagged
+#:                            door, so a warm entry made under the arm is a
+#:                            prototype row a flag-off tree can still read;
+#:   * `_substituted_card_index` -- built from `_starter_ids` and
+#:                            `_pool_substitutions`, both of which READ THE
+#:                            FLAGS. This was the second leaker: warmed once
+#:                            under `KLEE_OVERHAUL`, it holds
+#:                            `proto_ko_jumpy_dumpty` and `proto_ko_kapow`
+#:                            for the rest of the worker's life, so
+#:                            `get_card("proto_ko_kapow")` stops raising and
+#:                            `has_upgrade` starts saying yes -- which is
+#:                            precisely the pair of flag-off tests that failed
+#:                            about one run in three;
+#:   * the two upgrade indices -- `_prototype_deltas` registers a row only
+#:                            while a live flag makes its id reachable.
+#:
+#: `_shipped_upgrade_index` is deliberately NOT here: it reads the sheets and
+#: nothing else, no flag moves it, and clearing it would cost a YAML re-read
+#: for nothing. Nor is `_card_index`: the quarantine keeps every prototype row
+#: out of it under every flag, which is the whole point of the quarantine.
+#:
+#: Callers that also want tier 0.5's `rewards.character_pool` clear it
+#: themselves -- tier0 may not import tier05.
+def reset_arm_caches() -> None:
+    """Drop every memoized view whose answer moves with an arm flag.
+
+    GUARDED, because a test may have monkeypatched one of these to a plain
+    function for the length of its own case (`test_kokomi_plan` does): a cache
+    that is not a cache right now has nothing to clear and is not an error.
+    """
+    for fn in (_card_prototype, _substituted_card_index,
+               upgrades._upgrade_index, upgrades._prototype_upgrade_index):
+        getattr(fn, "cache_clear", lambda: None)()
 
 
 def pilot_weights(pilot_id: str) -> dict:

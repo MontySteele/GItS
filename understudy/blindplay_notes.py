@@ -424,11 +424,21 @@ PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
 # the window is already open or already shut, and a standing note about a
 # decision that is no longer available is the noise this page's one-fact-per-
 # line rule exists to keep off it.
+#
+# `EB-586` TOOK THE ADVICE OUT AND LEFT THE WINDOW, in step with
+# `FurinaRiderTips.ForSpotlightWindow`. "Light your Companion cards before
+# anything performs" is a RECOMMENDATION, and the r15 lane-1 seat refused it on
+# turn one of fight one and was right to: the starter holds two Companion
+# cards, the Spotlight costs the whole opening Encore, and "the correct first
+# move is to refuse the screen's own advice". Lane 2 paid it in most fights and
+# zeroed Encore twice, which is where nine of its eleven HP went. The decision
+# is REAL on both lanes, so this states the window and the price and stops --
+# which is what every other line on this page does.
 SPOTLIGHT_WINDOW_NOTE = (
     f"*You open a fight with {FURINA_OPENING_ENCORE} Encore and "
-    f"**Ethereal Spotlight** costs {SPOTLIGHT_ENCORE_COST} -- all of it. Light "
-    "your Companion cards before anything performs: one performance spends an "
-    "Encore, and the Spotlight is locked out for the rest of the combat.*")
+    f"**Ethereal Spotlight** costs {SPOTLIGHT_ENCORE_COST} -- all of it. Any "
+    "performance spends one, so it is this turn's first action or not this "
+    "fight.*")
 
 
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
@@ -576,7 +586,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # something of Klee's.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
              "only when Set off, or as a Mine. Not an Attack: only Vulnerable "
-             "and a cap on the enemy's HP loss move it. Kills move it on. "
+             "and a cap on the enemy's HP loss move it. If this enemy dies "
+             "with it still on, it moves to a survivor. "
              "Your deck opens with a placer."),
     # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
     # walks the charges in placement order and the first one through the
@@ -615,9 +626,16 @@ ARM_KEYWORDS: dict[str, str] = {
     # an elite, five went off, "every hit landed in full, 36 to 18 HP". The
     # only thing a Mine does to the hit is stop it happening, by killing the
     # attacker (`EB-336`). "Read the badge:" paid for the clause.
+    # `EB-574`: rule 3, spelt out, and this is the tip the row was filed on.
+    # "Kills move it on" and the badge's "a kill moves them to a survivor" both
+    # read as a promise about the charge doing the killing -- the r21 lane-1
+    # seat set off Mine 11, killed Toadpole B and saw nothing arrive on A. A
+    # charge that goes off is spent; what travels is one still sitting on a
+    # body that dies to something else. Same words on both tips and the badge.
     "Mine": ("A Bomb that also goes off before its enemy's hit, which lands "
              "in full unless the Mine kills. Only their Vulnerable and a cap "
-             "move it."),
+             "move it. If this enemy dies with it still on, it moves to a "
+             "survivor."),
     # `EB-329`. "OR ALL IF IT SAYS SO" IS THE HALF THE OLD SENTENCE GOT
     # WRONG, and it was reprinted on every battle screen of every run: a
     # starter, Kurage's Oath, deals its Plan to ALL enemies, and the round-5
@@ -643,8 +661,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # `ElementalHit.Deal` as an unpowered hit with no dealer, so nothing keyed
     # on being hit can answer it. Same sentence as `ArmKeywordTips.ForPlan`.
     "Plan": ("On the Bake-Kurage, paid now; next turn: front non-Minion, or "
-             "ALL, Minions too. Enemy Vulnerable counts; your Weak and "
-             "Strength do not. A carry-out is not a hit: no when-hit power "
+             "ALL, Minions too. Enemy Vulnerable counts; no damage term of "
+             "yours does. A carry-out is not a hit: no when-hit power "
              "fires."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
@@ -687,8 +705,8 @@ ARM_KEYWORDS: dict[str, str] = {
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
     # is a Power card of Klee's, and Kaeya's Cold-Blooded Strike is written
-    # against it by name ("This turn, Grounded counts nothing as having gone
-    # off"), as is the Cold-Blooded buff that card leaves behind. The r9 seat
+    # against it by name ("This turn, Grounded counts a Bomb as on the
+    # field", `EB-576`), as is the Cold-Blooded buff it leaves behind. The r9 seat
     # met the word in both acts, held neither the Power nor a screen that
     # defined it, and read it as noise. Held in step with
     # `ArmKeywordTips.ForGrounded`.
@@ -718,9 +736,15 @@ ARM_KEYWORDS: dict[str, str] = {
     "Deploy": ("A member joins and performs at once; a full stage Evokes the "
                "front member first. Afterwards only a Companion play performs "
                "a member."),
+    # `EB-587` REPLACED THE PRICE CLAUSE WITH THE PRICE, in step with
+    # `ArmKeywordTips.ForEvoke`: "the card's Encore price pays for it" is
+    # false on Curtain Rises, which Evokes by deploying onto a full stage and
+    # prints no Encore price, and it left the Evoke outside the economy every
+    # other act on the stage pays into. An Evoke is a performance that also
+    # costs the member, and it is priced like one.
     "Evoke": ("The member performs and leaves. Its Fanfare bonus counts 3 "
-              "times and it prints 5 Fanfare. The card's Encore price pays "
-              "for it."),
+              "times and it prints 5 Fanfare. It spends 1 Encore, or Evokes "
+              "at 3/4."),
     "Drain": ("Your Fanfare falls to nothing. What the card does next is "
               "priced off the amount it took."),
     # `EB-407`. THE WORD PRINTED BEFORE THE PLAYER HOLDS ANY. Encore is named
@@ -829,6 +853,30 @@ _STAGE_CHARACTER = "furina"
 # who is playing gets the rule, `absent is not zero`'s direction: silence
 # about the character is not evidence it is somebody else's.
 _ARM_KEYWORD_CHARACTER: dict[str, str] = {"Hexerei": "klee", "Oz": "klee"}
+
+# `EB-583`. WHAT AN OFF-ARM WORD SAYS INSTEAD, and it is the correction to the
+# paragraph above rather than a second rule.
+#
+# THE FIND (Furina r15 lane 1 (c) 7). `Hexerei` printed on Sucrose's face and
+# on Razor's under the Furina arm, and the Words block answered with the name
+# and nothing after it. `EB-504`'s reasoning was that "a word on the screen
+# with no entry at all reads as a word the page failed to define"; a bare name
+# in a block of definitions reads as exactly the same thing -- the seat called
+# it "an empty definition" -- so the half that was missing is the sentence
+# saying WHY there is no rule to give.
+#
+# IT NAMES NO CHARACTER AND STATES NO OFF-ARM RULE, which is `EB-504`'s
+# finding kept whole: the sentence the seats could not use was the one that
+# named somebody else's kit and priced somebody else's resource. What is left
+# is the only fact a reader of THIS run needs -- the mark is inert here -- and
+# it is one line. The ON-arm row is untouched and is still the sentence held
+# in step with the C# tip.
+_OFF_ARM_KEYWORD: dict[str, str] = {
+    "Hexerei": ("A Companion family mark. No card you can draft in this run "
+                "reads it, so on this face it is decoration."),
+    "Oz": ("A summoned raven another kit's Power fields. Nothing you can "
+           "draft in this run puts him out, so the clause never fires."),
+}
 
 # One pattern per word, and they are CASE-SENSITIVE on purpose: the game
 # capitalises a keyword wherever it prints one, and a case-blind `mine` or
@@ -1618,8 +1666,11 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     # to a character this run is not playing prints its name and no rule.
     who = _fold(obs.get("character"))
     rows = [{"name": word,
-             "text": "" if (who and _ARM_KEYWORD_CHARACTER.get(word, who)
-                            != who) else
+             # `EB-583`: an off-arm word takes `_OFF_ARM_KEYWORD`'s sentence
+             # and never an empty string. A bare name in a block of
+             # definitions is what the r15 seat read as "an empty definition".
+             "text": _OFF_ARM_KEYWORD[word]
+             if (who and _ARM_KEYWORD_CHARACTER.get(word, who) != who) else
              ARM_KEYWORDS[word].format(
                  growth=int(growth.group(1)) if growth else BOMB_GROWTH)
              + (COMPANION_STAGE_CLAUSE

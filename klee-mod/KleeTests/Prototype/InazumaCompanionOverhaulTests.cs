@@ -315,7 +315,13 @@ public class InazumaCompanionOverhaulTests
     [InlineData(typeof(KyoukaPower), CompanionOverhaulLaw.KyoukaDamage)]
     [InlineData(typeof(KyoukaPower), CompanionOverhaulLaw.KyoukaFinale)]
     [InlineData(typeof(SurpriseDispatchPower), CompanionOverhaulLaw.SurpriseDispatchDamage)]
-    [InlineData(typeof(TamotoPower), CompanionOverhaulLaw.TamotoDamage)]
+    // `EB-463` / `EB-565` TOOK TWO ROWS OFF THIS LIST, and neither number
+    // moved: `TamotoPower` and `BaronBunnyPower` print `{Damage}`, a var
+    // seeded from the same `CompanionOverhaulLaw` constant and rewritten at
+    // PLAY with the card's Guest Cast fold on it. The face and the hit still
+    // read one number -- `SummonDamageTests` is where that is pinned, because
+    // the number a `Localization` row prints is now a hole rather than a
+    // literal.
     public void Every_power_face_prints_the_number_it_pays(Type type, int number)
     {
         // FACE FROM BODY at the power level: the description interpolates the

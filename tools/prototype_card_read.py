@@ -66,21 +66,29 @@ ARMS: dict[str, dict[str, str]] = {
 def arm_live(arm: str):
     """`C.<ARM>_OVERHAUL` True inside the block, restored on the way out.
 
-    Both memoized doors are cleared going in AND coming out: `_card_prototype`
-    answers a `proto_` id differently with the flag off, and
-    `rewards.character_pool` answers the whole offerable pool differently, so a
-    cache filled on one side of the flag is a wrong answer on the other.
+    Every memoized door is cleared going in AND coming out, because a cache
+    filled on one side of a flag is a wrong answer on the other. tier0's four
+    are `loader.reset_arm_caches()`, stated once beside the flags they depend
+    on; `rewards.character_pool` is tier 0.5's and is cleared here because
+    tier0 may not import it.
+
+    `EB-569`: this used to name `_card_prototype` alone, which left
+    `_substituted_card_index` and the two upgrade indices warm and holding the
+    arm's rows -- a read run in-process before anything else then answered as
+    if the arm were still on. The suite's own witness was
+    `test_prototype_surface.py` failing after this file's cohort test on the
+    same xdist worker.
     """
     flag = ARMS[arm]["flag"]
     previous = getattr(C, flag)
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
     setattr(C, flag, True)
     try:
         yield
     finally:
         setattr(C, flag, previous)
-        loader._card_prototype.cache_clear()
+        loader.reset_arm_caches()
         rewards.character_pool.cache_clear()
 
 

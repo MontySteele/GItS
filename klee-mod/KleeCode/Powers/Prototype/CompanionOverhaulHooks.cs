@@ -1122,15 +1122,38 @@ internal sealed class ShowerVar : DynamicVar
 ///
 /// Amount is the number of decoys; one hit spends one.
 /// </summary>
-public sealed class BaronBunnyPower : PowerModel, ILocalizationProvider
+public sealed class BaronBunnyPower
+    : PowerModel, ILocalizationProvider, ISummonDamagePower
 {
+    /// <summary>`EB-565`, `EB-463`'s grammar one card over: under Guest Cast
+    /// this printed 8 and dealt 8 while Chevreuse went 7 to 10 and Gorou 8 to
+    /// 12 (Furina r14 lane 2 (c) 2). The trap's damage is the CARD's printed
+    /// number, so it takes the card's fold, snapshotted at play.</summary>
+    public int SummonDamage { get; private set; } =
+        CompanionOverhaulLaw.BaronBunnyDamage;
+
+    public void NoteSummonDamage(int amount)
+    {
+        SummonDamage = amount;
+        var damage = DynamicVars["Damage"];
+        damage.BaseValue = amount;
+        damage.ResetToBase();
+        InvokeDisplayAmountChanged();
+    }
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new DynamicVar[]
+        {
+            new DynamicVar("Damage", CompanionOverhaulLaw.BaronBunnyDamage),
+        };
+
     public List<(string, string)>? Localization => new()
     {
         ("title", "Baron Bunny"),
         ("description",
             "The next time an enemy attacks you, take "
           + $"[blue]{CompanionOverhaulLaw.BaronBunnyReduction}[/blue] less damage and deal "
-          + $"[blue]{CompanionOverhaulLaw.BaronBunnyDamage}[/blue] [gold]Pyro[/gold] "
+          + "[blue]{Damage}[/blue] [gold]Pyro[/gold] "
           + "damage to ALL enemies."),
     };
 
@@ -1167,8 +1190,7 @@ public sealed class BaronBunnyPower : PowerModel, ILocalizationProvider
         foreach (var enemy in combat.HittableEnemies.ToList())
         {
             await ElementalHit.Deal(
-                choiceContext, enemy, Element.Pyro,
-                CompanionOverhaulLaw.BaronBunnyDamage, Owner);
+                choiceContext, enemy, Element.Pyro, SummonDamage, Owner);
         }
     }
 }
@@ -1332,39 +1354,18 @@ public sealed class CompanionOverhaulPlayWatcher : AbstractModel
         yield return _instance;
     }
 
-    /// <summary>
-    /// `EB-556`. THE STANDING POWERS THIS SEAT HELD BEFORE THE PLAY, and how
-    /// many stacks of each -- the snapshot half of "which power did this card
-    /// leave behind?".
-    ///
-    /// A DIFF AND NOT A CARD-TO-POWER MAP, which is what makes it general: a
-    /// map would be a second list to keep in step with the sheet, and the
-    /// question the badge is asking is answerable from the board. Any
-    /// <see cref="IUpgradeAwarePower"/> that is NEW after the play, or whose
-    /// stack GREW during it, was applied by the card that just resolved.
-    ///
-    /// KEYED BY REFERENCE, because two instances of one power can coexist
-    /// (R205's per-applier instancing) and a type key would confuse them.
-    /// Cleared and rebuilt per play, so nothing survives the card.
-    /// </summary>
-    private readonly Dictionary<PowerModel, int> _standingBefore = new();
-
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
         var owner = cardPlay.Card?.Owner?.Creature;
         if (owner == null) return Task.CompletedTask;
 
-        // `EB-556`: taken for EVERY play, because a Power card is not an
-        // Attack and the Attack gate below is the Lightfall blade's alone.
-        _standingBefore.Clear();
-        foreach (var power in owner.Powers.OfType<IUpgradeAwarePower>())
-        {
-            if (power is PowerModel model)
-            {
-                _standingBefore[model] = model.Amount;
-            }
-        }
-
+        // `EB-571` TOOK THE `EB-556` SNAPSHOT OUT. It existed so a standing
+        // Power's badge could learn that an upgraded copy had applied it and
+        // restate the card's added "Draw 1 card." That clause resolves ON
+        // PLAY, so the badge -- which is only ever about what the power does at
+        // the END of a turn -- was the one surface that could not honestly
+        // carry it. The sentence moved to the front of the card's own face
+        // instead, and the diff had nothing left to answer.
         if (cardPlay.Card?.Type != CardType.Attack) return Task.CompletedTask;
         var combat = owner.CombatState;
         if (combat == null) return Task.CompletedTask;
@@ -1386,19 +1387,6 @@ public sealed class CompanionOverhaulPlayWatcher : AbstractModel
     {
         var owner = cardPlay.Card?.Owner?.Creature;
         if (owner == null) return Task.CompletedTask;
-
-        // `EB-556`. THE DIFF: the badge learns what the card was.
-        if (cardPlay.Card is { IsUpgraded: true })
-        {
-            foreach (var power in owner.Powers.OfType<IUpgradeAwarePower>())
-            {
-                if (power is not PowerModel model) continue;
-                var before = _standingBefore.TryGetValue(model, out var was)
-                    ? was : 0;
-                if (model.Amount > before) power.NoteSourceUpgraded();
-            }
-        }
-        _standingBefore.Clear();
 
         if (cardPlay.Card?.Type != CardType.Attack) return Task.CompletedTask;
         CompanionOverhaulLedger.For(owner).NoteAttack();

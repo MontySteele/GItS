@@ -70,8 +70,15 @@ public sealed class EtherealSpotlight
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         // `EB-567`: and the WINDOW, chained onto the duration. Two rows
         // because they are two facts, each inside the tip ceiling on its own.
-        FurinaRiderTips.ForSpotlightWindow(
-            FurinaRiderTips.ForSpotlightDuration(base.ExtraHoverTips, this),
+        // `EB-590`: and the MOVER, a third for the same reason. "Moved the
+        // Spotlight" is a verb Director's Cut asks about and Guest Cast's
+        // duration is written against, and the r15 seats could not tell what
+        // performs it -- so the rule rides the card that DOES perform it, and
+        // it is `ForSpotlightMove`'s own sentence rather than a second copy.
+        FurinaRiderTips.ForSpotlightMove(
+            FurinaRiderTips.ForSpotlightWindow(
+                FurinaRiderTips.ForSpotlightDuration(base.ExtraHoverTips, this),
+                this),
             this);
 #endif
 

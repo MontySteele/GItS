@@ -129,4 +129,21 @@ public static class KleeOverhaulLaw
     /// value against tier0 rather than written as literals at the grant site.
     /// </summary>
     public const int GroundedSpark = 1;
+
+    /// <summary>
+    /// THE SPARK SEED (`EB-577`): the last floor on which a card reward under
+    /// this arm is guaranteed to carry a Spark-priced row. Mirrors
+    /// <c>C.KLEE_OVERHAUL_SPARK_SEED_FLOORS</c>.
+    ///
+    /// SIX ROUNDS SAID THE SAME THING. Sparks read as inert until a sink is
+    /// drafted (r17 through r21); r21 lane 2 ended fights holding 3, 4 and 5
+    /// with Dig In the deck's one reader, and the resource the kit mints on
+    /// every explosion did nothing at all for two acts. Three floors is the
+    /// first two card rewards of a run, which is where the reading forms.
+    ///
+    /// AN OFFER RULE AND NOT A SHEET CHANGE: no card's rarity, price or text
+    /// moves. What moves is which cards a reward screen may show while the
+    /// deck holds no reader.
+    /// </summary>
+    public const int SparkSeedFloors = 3;
 }

@@ -828,10 +828,23 @@ public sealed class GuestCastPower : PowerModel, ILocalizationProvider
         // that is on screen at the moment the question arises, so it answers
         // it here rather than leaving the reader to notice that "card" is
         // doing the work in the sentence above.
+        //
+        // `EB-584` PUT ONE DURATION SENTENCE ON BOTH FACES, and under this arm
+        // the shipped one was not merely confusing but circular: PLAYING
+        // Ethereal Spotlight is what moves the Spotlight, so "lasts until the
+        // Spotlight moves" reads as a buff ended by the thing that creates it
+        // (Furina r15 lane 1 (c) 4). `DesignateOneMode` never moves it off
+        // Guest Cast, so on this arm the duration that never elapses is
+        // exactly "this combat" -- which is the sentence
+        // `FurinaRiderTips.ForSpotlightDuration` already prints on the card
+        // that buys the lighting. Two surfaces, one sentence.
+        //
+        // THE SHIPPED FACE ABOVE IS UNTOUCHED and must stay so: a release
+        // build's selector offers two modes, so its Spotlight really does
+        // move and "until it moves" is the true duration there.
         ("smartDescriptionReframe",
             "Companion cards are Spotlighted: 50% stronger printed damage and "
-          + "[gold]Block[/gold]. No member is one. Lasts until the "
-          + "[gold]Spotlight[/gold] moves."),
+          + "[gold]Block[/gold]. No member is one. Lasts this combat."),
 #endif
     };
 

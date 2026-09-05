@@ -941,6 +941,62 @@ def arm_keyword_tip_calls(description: str,
             if not (keyword.word == "Bomb" and includes_bomb_rules)]
 
 
+#: `EB-575`. The ops that resolve ONLY through a Bomb on the field. A row made
+#: of nothing but these (plus its own price) does nothing whatever on a bare
+#: board; a row with anything else still does that other thing.
+BOMB_ONLY_OPS = frozenset({"set_off", "merge_bombs", "grow_bombs",
+                           "multiply_set_off"})
+#: A PRICE IS NOT A LINE. `spend_spark` is what the card costs, not what it
+#: does, so a Spark-priced Set off with nothing else is still a blank -- and
+#: the fact that it charged the Spark anyway is the whole of the r21 finding.
+BOMB_PRICE_OPS = frozenset({"spend_spark", "spend_charge"})
+
+
+def reads_the_field(card: dict) -> bool:
+    """Does this row set off or merge Bombs? (`EB-575`.)
+
+    Through `iter_effects`, the repo's one walk, so a `set_off` inside a
+    conditional or a mode body counts exactly as a top-level one does.
+    """
+    return any(fx.get("op") in ("set_off", "merge_bombs")
+               for fx in iter_effects(card.get("effects") or []))
+
+
+def merges_bombs(card: dict) -> bool:
+    """Does this row merge Bombs into one? (`EB-573`.)
+
+    `reads_the_field`'s narrower sibling, and derived for its reason: the merge
+    is what keeps the riders, so a second merge row carries the sentence the
+    day its row exists rather than the day somebody remembers it.
+    """
+    return any(fx.get("op") == "merge_bombs"
+               for fx in iter_effects(card.get("effects") or []))
+
+
+def empty_field_tip_arg(card: dict) -> bool:
+    """`EB-575`. Does this row still do SOMETHING on a bare board?
+
+    True -> the rider reads "this card is only its own line" (Fwoosh!'s 6
+    damage, Countdown's draw, Bang Bang!'s placement). False -> "this card does
+    nothing" (Careful Arrangement, The Big One, Quick Fuse, Fireworks Show).
+
+    DERIVED AND NOT DECLARED, so a row that gains a line gains the other
+    sentence with it and a row that loses one loses it. A `set_off` carrying
+    its own `damage:` IS a line -- that is where Fwoosh!'s 6 lives -- so the
+    key is asked for as well as the op.
+    """
+    for fx in iter_effects(card.get("effects") or []):
+        op = fx.get("op")
+        if op in BOMB_PRICE_OPS:
+            continue
+        if op in BOMB_ONLY_OPS:
+            if op == "set_off" and fx.get("damage"):
+                return True
+            continue
+        return True
+    return False
+
+
 def base_keyword_tip_calls(description: str) -> list[str]:
     """The base-game tip calls this face owes, in table order (`EB-377`).
 
@@ -2096,7 +2152,7 @@ APPLY_POWERS = {
         "Whenever one of your [gold]Bombs[/gold] goes off this turn, gain {X} "
         "Block."),
     "mc_cold_blooded": ("ColdBloodedPower", None,
-        "This turn, Grounded counts nothing as having gone off."),
+        "This turn, Grounded counts a Bomb as on the field."),
     "mc_lions_fang": ("LionsFangPower", None,
         "At the start of your turn, if none of your [gold]Bombs[/gold] went "
         "off last turn, gain {X} Block and draw 1 card."),
@@ -2470,9 +2526,19 @@ APPLY_POWERS = {
         "Whenever a [gold]Salon Member[/gold] takes its final bow, gain "
         "{X} [gold]Encore[/gold]."),
     "cross_examination": ("CrossExaminationPower", None,
-        "The first [gold]Elemental Reaction[/gold] you trigger each turn "
-        "applies {X} [gold]Vulnerable[/gold] and {X} [gold]Weak[/gold] to "
-        "its target."),
+        # `EB-591`. THE ORDER IS ON THE FACE NOW. The r15 lane-2 seat
+        # watched one 1-cost card take a body from 50 to 19 and could not
+        # find the reason: the debuff lands INSIDE the reaction, one hook
+        # before the triggering hit's number is final, so the hit that
+        # applied the Vulnerable is itself moved by it. That is the ruled
+        # phase in both engines (`test_reaction_phase_parity`'s
+        # "courtroom-drama-vulnerable-is-multiplicative", EB-19/M1), and
+        # nothing printed said so. The opening clause tightened to "Your
+        # first ... each turn" to pay for the sentence under the 120-char
+        # card ceiling; it is the same per-dealer window it always was.
+        "Your first [gold]Elemental Reaction[/gold] each turn applies "
+        "{X} [gold]Vulnerable[/gold] and {X} [gold]Weak[/gold] to its "
+        "target. The [gold]Vulnerable[/gold] moves that hit."),
     "encore_spend_draw": ("EncoreSpendDrawPower", None,
         "The first time you spend [gold]Encore[/gold] each turn, draw "
         "{X} card{XS}."),
@@ -2521,7 +2587,25 @@ APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
                       # Companion sheet annotations (oz/albedo): the summon's
                       # element and aura consumption live in the POWER's C#
                       # implementation; the fields are documentation.
-                      "summon_element", "consumes_aura"}
+                      "summon_element", "consumes_aura",
+                      # `EB-463`. THE SUMMON'S PRINTED DAMAGE, which is the
+                      # CARD's number and therefore takes the card's play-time
+                      # folds. A row whose whole body is `apply_power` prints a
+                      # number the POWER deals LATER, so it never passes the
+                      # card's own printed-damage path and Guest Cast could not
+                      # reach it: Chiori's 6 stayed 6 on a screen where
+                      # Lynette's and Diona's Block rewrote (Furina r8 (c) 1).
+                      # Both engines snapshot the fold at play -- the sim into
+                      # `Fighter.summon_damage`, the mod through
+                      # `SummonDamage.Note` onto the power instance, which is
+                      # also what lets the badge print the live number.
+                      "summon_damage"}
+
+#: `EB-463`. The powers whose C# class implements `ISummonDamagePower`, so a
+#: `summon_damage:` on the row has somewhere to land. Blocked by name for
+#: `never_reduces`' reason one block down: a row asking for the fold on a power
+#: that cannot bank it would ship a sim/mod split, silently.
+SUMMON_DAMAGE_POWERS = {"mi_tamoto", "mc_baron_bunny"}
 
 # Powers whose C# class implements the floor-not-clamp read (EB-26 D2). The
 # sim honours `never_reduces` at its own chokepoint for ANY power, but the mod
@@ -3716,6 +3800,14 @@ def blocked_reason(
             # EB-26 D2 option (d). The mode is only expressible where the C#
             # power implements it, and it is meaningless without a cap to
             # raise the stack toward -- refuse both shapes by name.
+            if "summon_damage" in eff:
+                if power not in SUMMON_DAMAGE_POWERS:
+                    return (f"summon_damage on power '{power}', which has no "
+                            "ISummonDamagePower implementation in C# "
+                            f"(implemented: {sorted(SUMMON_DAMAGE_POWERS)})")
+                n = eff["summon_damage"]
+                if not isinstance(n, int) or isinstance(n, bool) or n <= 0:
+                    return "summon_damage must be a literal positive int"
             if eff.get("never_reduces"):
                 if power not in NEVER_REDUCES_POWERS:
                     return (f"never_reduces on power '{power}', which has no "
@@ -7755,6 +7847,16 @@ def build_body(
                     f"await PowerCmd.Apply<{cls}>(choiceContext, Owner.Creature, "
                     f"{amount}, applier: Owner.Creature, cardSource: this);"
                 )
+                # `EB-463`. THE FOLD, BANKED ON THE POWER JUST APPLIED. It is
+                # emitted HERE and nowhere else because this is the one moment
+                # the card, the fold and the power all exist at once: the
+                # power fires turns later, when the card is gone (R72's
+                # snapshot rule). The sim's twin is
+                # `effects._op_apply_power`'s `summon_damage` branch.
+                if "summon_damage" in eff:
+                    lines.append(
+                        f"SummonDamage.Note<{cls}>(Owner.Creature, this, "
+                        f"{int(eff['summon_damage'])});")
 
         elif op == "detonate":
             # tier0 _op_detonate: only enemies WITH bombs detonate (DetonateOn
@@ -9027,6 +9129,31 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
 # reading the same way. The reason it is gone is in that caller's comment.
 
 
+def upgrade_add_leads(card: dict) -> bool:
+    """`EB-571`. Does this row's added upgrade clause print FIRST?
+
+    THE DEFECT (fixer O, `EB-556`; Albedo -- Solar Isotoma and Fischl -- Oz).
+    A `type: power` row's whole printed body is what the POWER does later --
+    "At the end of your turn, ..." -- and the Prototype-stage rule's added
+    draw resolves ON PLAY. Appended, it read as part of the end-of-turn clause:
+    "At the end of your turn, Oz deals 5 Electro damage to a random enemy. Draw
+    1 card." says the draw happens then, and it does not.
+
+    A POWER ROW AND NOTHING ELSE. On every other type the body IS the on-play
+    line, so an appended clause resolves exactly where it reads and moving it
+    would be the same defect pointed the other way. The test is the row's
+    `type`, which is the one field that says whether the printed body is a
+    now-line or a later-line.
+
+    ALL OF `_upgrade_add_text` AND NOT ONLY THE DRAW: every clause that
+    function emits is an on-play effect (a draw, an Encore gain, Block, a
+    discard), and on a Power row every one of them would read as the later
+    line. The rule is about WHEN the added effect resolves, not about which
+    effect it is.
+    """
+    return card.get("type") == "power" and bool(_upgrade_add_text(card))
+
+
 def _upgrade_add_text(card: dict) -> list[str]:
     """The `{IfUpgraded:show:...|}` clauses a structural `add` contributes.
 
@@ -9241,6 +9368,12 @@ LIVE_MODIFIED_FACE_KEYS = frozenset({"damage", "block"})
 #: the hole; see that function.
 _VANISHING_CLAUSE = re.compile(r"^\{IfUpgraded:show:\|(?P<base>.*)\}$", re.S)
 
+#: `EB-571`. The MIRROR: a clause whose BASE branch is empty, so the sentence
+#: appears only on the `+` card. It has always been appended, where a trailing
+#: space renders invisibly; a Power row prints it FIRST, where the join's space
+#: would leave the base face opening with a blank. Same trick, same reason.
+_UPGRADE_ONLY_CLAUSE = re.compile(r"^\{IfUpgraded:show:(?P<up>.*)\|\}$", re.S)
+
 
 def _face_from_parts(parts: list[str]) -> str:
     """A face from its sentences: one space between them, and no stray space
@@ -9256,13 +9389,21 @@ def _face_from_parts(parts: list[str]) -> str:
     One implementation for both face paths (rendered and authored), which is
     the same reason `meter_price_clauses` below is one builder for both.
     """
+    kept = [part for part in parts if part]
     out = ""
-    for part in parts:
-        if not part:
-            continue
+    for i, part in enumerate(kept):
+        last = i == len(kept) - 1
         vanishing = _VANISHING_CLAUSE.match(part)
+        upgrade_only = _UPGRADE_ONLY_CLAUSE.match(part)
         if vanishing:
             out += "{IfUpgraded:show:|" + vanishing.group("base") + " }"
+        elif upgrade_only and not last:
+            # `EB-571`: the separator goes inside the SHOWN branch, so a base
+            # card whose upgrade-only sentence renders as nothing does not
+            # open with a blank. Only where the clause has a sentence AFTER
+            # it: appended, the space is `rstrip`ed off and moving it inside
+            # would put a trailing one on every `+` face that already ships.
+            out += "{IfUpgraded:show:" + upgrade_only.group("up") + " |}"
         else:
             out += part + " "
     return out.rstrip()
@@ -9455,12 +9596,21 @@ def build_description(card: dict, *,
         # price comes off the row and is prepended here, exactly where the
         # rendered path puts it, and a prototype row's `description:` states
         # what the card DOES and never what it costs.
+        # `EB-571`: a Power row's added clause LEADS. Its printed body is the
+        # later line and the added effect resolves on play, so appending it
+        # says the draw happens at the end of the turn.
+        added = _upgrade_add_text(card)
+        lead, tail = (added, []) if upgrade_add_leads(card) else ([], added)
         face = _face_from_parts(
             meter_price_clauses(card, upgrade_plan(card)[0])
-            + [_authored_face_with_tokens(card)] + _upgrade_add_text(card))
+            + lead + [_authored_face_with_tokens(card)] + tail)
         return _face_riders(card, face)
     deltas = upgrade_plan(card)[0]
     parts = list(meter_price_clauses(card, deltas))
+    # `EB-571`, the rendered path's half of the same rule: a Power row's added
+    # clause leads, because its body is the later line.
+    if upgrade_add_leads(card) and added_effect_anchor(card) is None:
+        parts.extend(_upgrade_add_text(card))
     salon_named = False          # B5: has a deploy already said "your Salon"?
     deploy_amounts, deploy_skip, deploy_runs = merged_deploy_text(card)
     add_anchor = added_effect_anchor(card)
@@ -10376,7 +10526,7 @@ def build_description(card: dict, *,
                     text += f" Maximum {m}."
                 parts.append(text)
 
-    if added_effect_anchor(card) is None:
+    if added_effect_anchor(card) is None and not upgrade_add_leads(card):
         parts.extend(_upgrade_add_text(card))
     if added_repeat_upgrade(card):
         # Same sentence the printed repeat-conditional uses ("play this card
@@ -11951,6 +12101,31 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         if plan_applies_element(card, profile) and not elemental:
             tips_expr = (
                 "ArmKeywordTips.ForPlanElement("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # `EB-575`, and it sits beside the two riders below it for their
+        # reason: it is a fact about THIS card on THIS board, read before the
+        # definition of a word. A `Set off` row and the merge are PLAYABLE with
+        # no Bomb anywhere -- the game takes the Energy and the Spark and
+        # resolves nothing -- while a Spark-priced card the bank cannot afford
+        # prints CANNOT BE PLAYED on the same screen (Klee r21 lane 1). Which
+        # of the two sentences a row gets is `empty_field_tip_arg`'s, derived
+        # from the effects, so a row that gains a line of its own gains the
+        # other sentence with it.
+        if reads_the_field(card):
+            own_line = "true" if empty_field_tip_arg(card) else "false"
+            tips_expr = (
+                "ArmKeywordTips.ForEmptyField("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this, {own_line})")
+        # `EB-573`. WHAT THE MERGE KEEPS BESIDES THE MINE. Careful
+        # Arrangement's face promises "a Mine if any of them was" and says
+        # nothing about riders, while `ProtoBombPower.MergeAllTo` sums
+        # `PayloadMineAll` across every charge it takes -- so Jumpy Dumpty's
+        # Mine-on-ALL survives the merge and grows in bulk. The r21 lane-1 seat
+        # called it a large part of the kit's ceiling and "completely
+        # undiscoverable except by accident".
+        if merges_bombs(card):
+            tips_expr = (
+                "ArmKeywordTips.ForMergeRiders("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-418`, and it goes here for `EB-378`'s reason one line up: a rider
         # is a fact about THIS card and is read before the definition of a

@@ -319,7 +319,10 @@ def test_send_the_runner_upgrades_in_the_ruled_order():
     assert "DynamicVars.Cards.UpgradeValueBy(1m);" in src
     assert src.index("var pickedUpgrade") < src.index(
         "ExhaustSelection.Open(this);")
-    assert src.index("{IfUpgraded:show:Discard 1 card.|}") < src.index(
+    # `EB-571` moved the separator INSIDE the shown branch wherever an
+    # upgrade-only clause has a sentence after it, so the base card does not
+    # print a double space where the clause renders as nothing.
+    assert src.index("{IfUpgraded:show:Discard 1 card. |}") < src.index(
         "[gold]Exhaust[/gold] 1 card from your hand.")
     # The appended throw rides the SAME screen a printed chosen discard does.
     assert "CardSelectCmd.FromHandForDiscard(" in src
@@ -330,7 +333,7 @@ def test_wheel_the_ranks_gains_its_block_only_when_upgraded():
     src = _emit("wheel_the_ranks")
     assert ("await CreatureCmd.GainBlock(Owner.Creature, "
             "new BlockVar(3m, ValueProp.Move), cardPlay);" in src)
-    assert "{IfUpgraded:show:Gain 3 [gold]Block[/gold].|}" in src
+    assert "{IfUpgraded:show:Gain 3 [gold]Block[/gold]. |}" in src
     # Its Sly Block is a DIFFERENT number on a line the sim never upgrades.
     assert "[gold]Sly[/gold]: Gain 4 [gold]Block[/gold]." in src
 

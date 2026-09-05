@@ -104,6 +104,13 @@ from typing import Any
 
 import yaml
 
+# `EB-581`: the one tier0 read this door makes, and it is a NAME rather than a
+# rule -- `PROTOTYPE_ARM_SUPERSEDED` is the map of rows one arm of a kit
+# retires in another, stated once in `constants.py` and derived there from the
+# arms' own substitution maps, so a row added to an arm cannot be missed by
+# this door. `soak` already pulls tier0 in below, so this costs no import the
+# module did not already pay.
+from tier0 import constants as C
 from understudy import authorship, bridge, instances, report, soak
 # `EB-456`: the LANE'S action budget, and this is the one direction the blind
 # wall runs in. `blindplay` may never import this file; this file may read the
@@ -245,6 +252,34 @@ def check_arms(arms: list[str],
     a shipped row exists in a release build, so refusing one there would be a
     door refusing to open on a question nobody asked.
     """
+    # `EB-581`. A ROW ITS OWN KIT'S OTHER ARM HAS SUPERSEDED IS REFUSED HERE,
+    # before the id check, because it IS a row and the id check waves it
+    # through.
+    #
+    # THE FIND (Kokomi r21 lane 1, (c) 1 and (c) 2). The coordinator granted
+    # `proto_kurages_oath_memory` -- the `KURAGE_MEMORY` base kit -- into a
+    # `KOKOMI_OVERHAUL` run, where the row's power is INERT ("whenever the
+    # Bake-Kurage plays a card from its memory" names a rule that arm does not
+    # have) and where it prints the SAME TITLE as the arm's own starter Skill.
+    # The seat spent two rounds on a card that could not do anything, with
+    # nothing on screen to tell it from the one that could.
+    #
+    # A REFUSAL AND NOT A WARNING, this door's standing shape: a grant that
+    # half-works is the state it exists to prevent, and "these two arms of one
+    # kit do not stack" is not something a coordinator can read off a build
+    # stamp. THE OFFER DOORS ALREADY SAID IT -- each overhaul replaces its
+    # starter and pool WHOLE -- and this is the door that did not.
+    superseded = [a for a in arms if a in C.PROTOTYPE_ARM_SUPERSEDED]
+    if superseded:
+        named = ", ".join(f"{a} (superseded by {C.PROTOTYPE_ARM_SUPERSEDED[a]})"
+                          for a in superseded)
+        raise EmbarkError(
+            f"{named}: a row from an arm this kit's overhaul retires. The two "
+            f"arms of one kit do not stack -- the overhaul replaces the "
+            f"starter and the pool whole, and the superseded row's rule is "
+            f"not in that build for its power to fire on. Grant the "
+            f"overhaul's own row instead.")
+
     known = authorship.rows_authorship()
     shipped = shipped_ids()
     unknown = [a for a in arms if a not in known and a not in shipped]

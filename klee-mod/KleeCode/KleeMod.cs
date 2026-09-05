@@ -435,6 +435,17 @@ public static class KleeMod
                     // therefore had no surface at all.
                     [Cards.ArmKeywordTips.CovenSparkKey + ".title"] =
                         "Sparks from your Companion",
+                    // `EB-575`. The fourth rider here that titles no keyword,
+                    // and the only one whose sentence comes and goes with the
+                    // board: a Set off or a merge played with no Bomb on the
+                    // field is accepted, charged for, and silent.
+                    [Cards.ArmKeywordTips.EmptyFieldKey + ".title"] =
+                        "No Bomb on the field",
+                    // `EB-573`. The fifth rider here that titles no keyword:
+                    // what a merge keeps besides the Mine, on the card that
+                    // does the merging.
+                    [Cards.ArmKeywordTips.MergeRidersKey + ".title"] =
+                        "Riders survive the merge",
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
                     // `EB-378`. The rider, not a keyword: the rows whose Hydro

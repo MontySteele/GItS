@@ -41,7 +41,7 @@ public sealed class ProtoKoFwoosh : CustomCardModel, IElementalCard, ISparkPrice
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this), this);
+        ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_fwoosh");
 

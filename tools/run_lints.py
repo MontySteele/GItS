@@ -211,6 +211,15 @@ REGISTRY: tuple[Lint, ...] = (
     # them. The only pin `Slice` had was a COUNT, which goes red only if
     # somebody remembers to raise it.
     _ci("arm-pool-parity",      "tools/lint_arm_pool_parity.py"),
+    # `EB-581`, round 21. The FOURTH question about the surface's rows, and it
+    # is about the one thing a seat reads on the card: two rows may not print
+    # one TITLE. `lint_unique_names` reads the surface for declared shadows
+    # only -- a prototype row against a SHIPPED one -- so
+    # `proto_kurages_oath_memory` and `proto_kk_kurages_oath`, both "Kurage's
+    # Oath" on a card face, passed every gate while a coordinator granted the
+    # wrong one and a seat spent two rounds on a card whose power that arm
+    # cannot fire.
+    _ci("prototype-titles",     "tools/lint_prototype_titles.py"),
     _ci("role-tempo-artifacts", "tools/suggest_role_tempo_tags.py", "--check"),
     _ci("role-tempo-coverage",  "tools/lint_role_tempo_coverage.py", "--gate"),
     _ci("roster-registry",      "tools/lint_roster_registry.py"),

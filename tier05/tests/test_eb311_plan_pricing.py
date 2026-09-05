@@ -200,10 +200,10 @@ def _proto(cid: str) -> Card:
 def overhaul(monkeypatch):
     """Her flag on, with the id-resolving caches cleared both ways -- the
     `test_kokomi_overhaul` fixture's arrangement, for its reasons."""
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
     yield
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
 
 
 def test_no_prototype_kokomi_row_raises(overhaul):

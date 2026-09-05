@@ -34,7 +34,7 @@ def _caches_clear():
     """Every memo whose answer depends on the flag. Same list
     `test_companion_overhaul` clears, plus the stand-in map, which is derived
     from the surface and so is a view of the content tree like the rest."""
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     standins._replacements.cache_clear()
     rewards._companion_roster.cache_clear()
     rewards.companion_pool.cache_clear()
@@ -322,6 +322,50 @@ def test_kaeya_blinds_grounded_for_exactly_one_turn(arms):
     before = state.player.block
     klee_overhaul.turn_start_late(state)
     assert state.player.block == before
+
+
+def test_kaeya_pays_grounded_on_an_empty_field(arms):
+    """`EB-576`'s acceptance, and the pin the reworded face is about.
+
+    Grounded's condition since `EB-516` is "if you have a Bomb on the field",
+    so the state its cover story has to cover is the EMPTY board -- not the
+    noisy turn the old wording named. Kaeya, then nothing placed, and Grounded
+    pays on the next turn all the same.
+    """
+    state = _klee_state()
+    state.player.powers[klee_overhaul.GROUNDED] = 6
+    state.player.powers[standins.COLD_BLOODED] = 1
+    assert not klee_overhaul.any_bomb_placed(state)      # a bare board
+    state.turn = 2
+    klee_overhaul.roll_to(state, state.turn)
+    standins.roll_turn(state)
+    before = state.player.block
+    klee_overhaul.turn_start_late(state)
+    assert state.player.block == before + 6
+    # The marker is spent, so the next bare turn is refused.
+    state.turn = 3
+    klee_overhaul.roll_to(state, state.turn)
+    standins.roll_turn(state)
+    before = state.player.block
+    klee_overhaul.turn_start_late(state)
+    assert state.player.block == before
+
+
+def test_kaeyas_face_names_the_rule_grounded_has(arms):
+    """`EB-576`: two printed texts that could not both be true. The card's
+    clause and Grounded's own condition are read off the sheet together."""
+    from pathlib import Path
+    repo = Path(__file__).resolve().parents[2]
+    sheet = (repo / "docs" / "prototype-surface.yaml").read_text(
+        encoding="utf-8")
+    assert ("This turn, [gold]Grounded[/gold] counts a Bomb as on the field."
+            in sheet)
+    assert "counts nothing as having gone off" not in sheet
+    assert "if you have a [gold]Bomb[/gold] on the field" in sheet
+    card = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+            / "Generated" / "ProtoMcKaeyaColdBloodedStrike.cs").read_text(
+        encoding="utf-8")
+    assert "[gold]Grounded[/gold] counts a Bomb as on the field." in card
 
 
 def test_kaeya_does_not_pay_jean(arms):

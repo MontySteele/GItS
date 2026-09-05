@@ -216,8 +216,16 @@ are in [`workstreams.md`](workstreams.md).
   moves); the random Set off steers its first iteration only; Careful
   Arrangement on a Mine as printed; Kaeya's face names a Grounded that
   no longer exists (`EB-576`); a D default on offer shape for the Spark
-  sinks (`EB-577`); no pick; `EB-573`-`EB-577`. [USER]'s act-1 run is
-  due on this build. The round-8 clear is read against a control run
+  sinks (`EB-577`); no pick; `EB-573`-`EB-577`. **Round 22 is READ**
+  (`review/active/klee-overhaul-round-22-2026-09-06.md`): three natural
+  lanes on `0.2.2817+proto`, one void on a hard blocker (Hefty Tablet's
+  rare pick on `EB-577`'s canonical model, `EB-594`, fixed the same
+  night); the Spark-priced offer reached the seats and the economy
+  still read as never binding or circular; the starter's single
+  detonator read a third time (five dead-Bomb turns in six fights), to
+  be raised as [USER]'s own pick after the round lands; no pick in the
+  packet; `EB-593`-`EB-596`, `EB-605`. [USER]'s act-1 run is due on
+  the next build. The round-8 clear is read against a control run
   (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
@@ -311,8 +319,15 @@ are in [`workstreams.md`](workstreams.md).
   declined four readers; every number reconciled on both lanes; the
   coordinator granted the Kurage Memory Oath by mistake (`EB-581`); a
   D default folds a card's enchantment into its Plan line (`EB-580`);
-  no pick; `EB-578`-`EB-581`. [USER]'s act-1 run is due on
-  `0.2.2800+proto`. The Kurage
+  no pick; `EB-578`-`EB-581`. **Round 22 is READ**
+  (`review/active/kokomi-overhaul-round-22-2026-09-06.md`): on
+  `0.2.2817+proto` both lanes read the Plan trade as two-sided off the
+  face (Shrink makes writing win, Vulnerable makes playing win); the
+  Plan line previews the target's expiring debuff and the morning paid
+  7 on a printed 10 (`EB-599`, D default: the Plan line folds hers and
+  nothing of the target's); Shrink reduced a Skill against its gloss
+  (`EB-597`); the jellyfish's first turn now prints; no pick;
+  `EB-597`-`EB-599`. [USER]'s act-1 run is due on `0.2.2817+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
@@ -423,10 +438,18 @@ are in [`workstreams.md`](workstreams.md).
   empty, the turn-one Companion card always performing); Second Course
   playable beside a generator; the Evoke reached by the assembled deck
   only, paying nothing when dry (`EB-587`, D default: it pays) and
-  printing out of order (`EB-582`); Skittish never fired on card hits
-  (`EB-592`) and Weak cut a performance (`EB-588`), both read before any
-  number; no pick; `EB-582`-`EB-592`. [USER]'s act-1 run is due on
-  `0.2.2800+proto`. No stamp moves, nothing measured.
+  printing out of order (`EB-582`); Weak cut a performance (`EB-588`,
+  built); the Skittish read was a killing hit, not a defect (`EB-592`);
+  no pick; `EB-582`-`EB-592`. **Round 16 is READ**
+  (`review/active/furina-reframe-round-16-2026-09-06.md`): on
+  `0.2.2817+proto` the hit rules read as built (Skittish and Thorns on
+  card hits, never on performances; Weak off performances), the Evoke
+  pays dry and prints first, and a natural deck with three Deploys
+  Evoked on purpose (the reachability question closed by the draft);
+  the Spotlight's line is false since Encore refills (`EB-600`); the
+  fight-end screen swallows the lethal beat's log (`EB-604`); no pick;
+  `EB-600`-`EB-604`. [USER]'s act-1 run is due on `0.2.2817+proto`.
+  No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where

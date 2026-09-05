@@ -793,7 +793,13 @@ class _RunCtx:
             offers = rewards.roll_rewards(
                 self.rng, self.character, companion_offers=n_comp_i,
                 banner=self.banner, companion_rarity=forced,
-                card_rarity=forced)
+                card_rarity=forced,
+                # `EB-577`: the floor this screen is on, 1-based. `i` is the
+                # index this node took in `res.node_kinds` BEFORE the append,
+                # so the first room of a run is `i == 0` and floor 1. The only
+                # reader is the Klee arm's Spark seed, and it is the identity
+                # everywhere else.
+                floor=i + 1)
             # Read-only: the drafter, the relevance probes and the core
             # check below only SCORE the deck. Copying it three times per
             # screen was the run layer's single biggest cost.

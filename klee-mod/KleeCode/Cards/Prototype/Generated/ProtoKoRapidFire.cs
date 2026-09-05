@@ -41,7 +41,7 @@ public sealed class ProtoKoRapidFire : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSetOff(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this);
+        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_rapid_fire");
 

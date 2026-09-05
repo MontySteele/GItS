@@ -113,12 +113,22 @@ public class FurinaReframeRoundFiveTests
         // Nothing was ADDED: the mode buff still says what it multiplies and
         // when it ends, and the rate the meter mints at belongs to the meter's
         // own badge (`EB-385`), not to a second surface here.
+        //
+        // `EB-584` MOVED THE DURATION CLAUSE and did not remove it. On this
+        // arm the shipped sentence was circular: PLAYING Ethereal Spotlight is
+        // what moves the Spotlight, so "lasts until the Spotlight moves" reads
+        // as a buff ended by the thing that creates it (Furina r15 lane 1 (c)
+        // 4). `DesignateOneMode` never moves it off Guest Cast, so the
+        // duration that never elapses here is exactly "this combat" -- which
+        // is `FurinaRiderTips.ForSpotlightDuration`'s own sentence on the card
+        // that buys the lighting. Two surfaces, one sentence.
         using var _ = new Arm(meter: true);
         var badge = Badge(Seat.Furina());
 
         var face = FaceFor(badge);
         Assert.Contains("50% stronger printed damage", face);
-        Assert.Contains("Lasts until the [gold]Spotlight[/gold] moves", face);
+        Assert.Contains("Lasts this combat.", face);
+        Assert.DoesNotContain("until the [gold]Spotlight[/gold] moves", face);
     }
 
     [Fact]

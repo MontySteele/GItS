@@ -141,14 +141,20 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             // charge or several. The hit clause is a fact about a STACK and
             // reads as noise on a single Bomb, where the total and the hit are
             // the same number.
+            // `EB-573` ADDED THE FOURTH AXIS: whether any charge here carries
+            // a rider (`PayloadMineAll`, Jumpy Dumpty's Mine-on-ALL). It
+            // survives a merge and grows in bulk, and no surface said so.
             foreach (var single in new[] { false, true })
             {
                 foreach (var mines in new[] { false, true })
                 {
-                    foreach (var mods in FoldedMods.All)
+                    foreach (var rider in new[] { false, true })
                     {
-                        rows.Add((SmartKey(single, mines, mods),
-                                  Face(single, mines, mods)));
+                        foreach (var mods in FoldedMods.All)
+                        {
+                            rows.Add((SmartKey(single, mines, rider, mods),
+                                      Face(single, mines, rider, mods)));
+                        }
                     }
                 }
             }
@@ -217,10 +223,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// filed it as the screen contradicting itself. The badge is where a player
     /// meets the survivor's stack, so it is where the rule is printed.
     /// </summary>
-    private static string Face(bool single, bool mines, FoldedMods mods) =>
+    private static string Face(bool single, bool mines, bool rider,
+                              FoldedMods mods) =>
         "[gold]Set off[/gold] here deals " + PyroTotal + mods.Clause
       + (single ? string.Empty : HitCount) + "."
       + (mines ? BombsWithMines : Bombs)
+      + (rider ? RiderClause : string.Empty) + "."
       + (mines ? MineClause : NoSelfSentence) + JumpSentence;
 
     /// <summary>
@@ -295,9 +303,13 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// place the two axes are spelled into a key -- <see cref="Localization"/>
     /// writes the rows with it and <see cref="SmartDescriptionLocKey"/> reads
     /// one back, so a row and its selector cannot drift apart.</summary>
-    private static string SmartKey(bool single, bool mines, FoldedMods mods) =>
+    private static string SmartKey(bool single, bool mines, bool rider,
+                                  FoldedMods mods) =>
         "smartDescription" + (single ? "One" : string.Empty)
-      + (mines ? "Mines" : string.Empty) + mods.KeySuffix;
+      + (mines ? "Mines" : string.Empty)
+      // `EB-573`'s axis, and it is LAST of the three booleans so the
+      // thirty-two keys that existed before this row keep the names they had.
+      + (rider ? "Rider" : string.Empty) + mods.KeySuffix;
 
     /// <summary>
     /// `EB-289`. <c>{Count}</c> AND NOT <c>{Amount}</c>, and the difference is
@@ -375,8 +387,13 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// around it is comma-separated, and `Bombs here: 5, 8, 20, 12, growing
     /// each turn` hides where the pile stops. It costs nothing at the ceiling
     /// -- the lint renders a hole as one character however it is filled.
+    ///
+    /// `EB-573` TOOK THE FULL STOP OFF, and it is the only thing that moved
+    /// here: a pile carrying a rider ends the same sentence with
+    /// <see cref="RiderClause"/> instead. A clause and not a fifth sentence,
+    /// because four is the ceiling and every one of the four is a ruled fact.
     private const string Bombs =
-        " Bomb sizes here: [blue]{Charges}[/blue], growing each turn.";
+        " Bomb sizes here: [blue]{Charges}[/blue], growing each turn";
 
     /// <summary>
     /// `EB-471`. WHICH SIDE OF THE GROWTH TICK A MINE LANDS ON, and it is on
@@ -396,14 +413,50 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     private const string BombsWithMines =
         " Bomb sizes here: [blue]{Charges}[/blue], including [blue]{Mines}[/blue] "
-      + "[gold]Mine{Mines:plural:|s}[/gold], growing at your turn's start.";
+      + "[gold]Mine{Mines:plural:|s}[/gold], growing at your turn's start";
+
+    /// <summary>
+    /// `EB-573`. THE RIDER THE MERGE KEEPS, NAMED WHERE THE PILE IS.
+    ///
+    /// THE FIND (Klee r21 lane 1, (c) 4). "A Bomb 21 that was Jumpy's Bomb 8
+    /// two merges and two turns ago still dropped Mine 3 on ALL when it went
+    /// off. This is a GOOD interaction and a large part of the kit's ceiling,
+    /// and it is completely undiscoverable except by accident." Careful
+    /// Arrangement's face promises the Mine survives the merge and says
+    /// nothing about riders; <see cref="MergeAllTo"/> sums
+    /// <c>PayloadMineAll</c> across every charge it takes, so the rider
+    /// survives, grows in bulk and is printed nowhere.
+    ///
+    /// THE PILE IS WHERE IT BELONGS, for <c>EB-361</c>'s reason one clause up:
+    /// the rider is a fact about THIS pile with THIS number in it, and the
+    /// number is live. The card that placed it is two merges gone.
+    ///
+    /// A CLAUSE ON THE COUNT SENTENCE and not a fifth sentence, which is the
+    /// same bargain rule 3 took: four sentences is this face's ceiling and all
+    /// four are ruled facts. The FULL STOP lives here rather than on
+    /// <see cref="Bombs"/> so exactly one of the two prints it.
+    /// </summary>
+    private const string RiderClause =
+        ", and dropping [gold]Mine[/gold] [blue]{Payload}[/blue] on ALL "
+      + "enemies when they go off";
 
     /// <summary>Rule 3, `EB-361`. A Bomb whose enemy dies moves to a random
     /// LIVING enemy at its size -- see <see cref="JumpCharges"/>, which is what
     /// this sentence describes: every charge travels, Mines included, so the
     /// word is "a survivor" and not "the next enemy". Printed on both branches,
-    /// because a Mine jumps exactly as a plain Bomb does.</summary>
-    private const string JumpSentence = " A kill moves them to a survivor.";
+    /// because a Mine jumps exactly as a plain Bomb does.
+    ///
+    /// `EB-574` SAID WHICH KILL IT MEANS. "A kill moves them to a survivor" is
+    /// printed on the badge of the body the pile is about to kill, which is
+    /// exactly where it reads as a promise about THESE charges: the r21 lane-1
+    /// seat set off Mine 11, killed Toadpole B, saw nothing arrive on A and
+    /// filed the screen as contradicting itself. A charge that goes off is
+    /// spent; what travels is one still sitting on an enemy that dies to
+    /// something else. Same sentence as `ArmKeywordTips.ForBomb` and
+    /// `ForMine`, so no two of the three can be read against each
+    /// other.</summary>
+    private const string JumpSentence =
+        " If this enemy dies with them still on, they move to a survivor.";
 
     /// <summary>Rule 7 on a pile with no Mine in it. A pile holding a Mine
     /// prints <see cref="MineClause"/> INSTEAD, because "none goes off by
@@ -424,7 +477,8 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     protected override string SmartDescriptionLocKey =>
         Id.Entry + "."
-      + SmartKey(_charges.Count == 1, MineCount > 0, LiveMods);
+      + SmartKey(_charges.Count == 1, MineCount > 0, PayloadTotal > 0,
+                 LiveMods);
 
     /// <summary>The loc suffix <see cref="Title"/> selects when the pile is all
     /// Mines. `title` is the base game's own suffix and BaseLib registers every
@@ -648,6 +702,11 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <summary>How many of this pile's charges are Mines -- the fuse mark.</summary>
     public int MineCount => _charges.Count(c => c.IsMine);
 
+    /// <summary>`EB-573`. The riders this pile is carrying, summed -- the same
+    /// sum <see cref="MergeAllTo"/> builds and <see cref="Explode"/> pays out,
+    /// so the badge's number and the board's are one read.</summary>
+    public int PayloadTotal => _charges.Sum(c => c.PayloadMineAll);
+
     /// <summary>The charges, for the pins. Never handed out to a mutator.
     ///
     /// PUBLIC, like the pure mutators below and for the reason
@@ -705,6 +764,8 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             new DynamicVar("Count", 0m),
             // `EB-450`: the charges themselves, oldest first.
             new ChargeListVar(),
+            // `EB-573`: the rider the merge keeps, summed over the pile.
+            new DynamicVar("Payload", 0m),
         };
 
     /// <summary>
@@ -899,6 +960,10 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         var count = DynamicVars["Count"];
         count.BaseValue = _charges.Count;
         count.ResetToBase();
+        // `EB-573`: the rider total, kept in step with the list like the rest.
+        var payload = DynamicVars["Payload"];
+        payload.BaseValue = PayloadTotal;
+        payload.ResetToBase();
         InvokeDisplayAmountChanged();
     }
 

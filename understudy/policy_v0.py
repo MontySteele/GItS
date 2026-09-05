@@ -422,7 +422,17 @@ def _card_select(state: dict[str, Any]) -> Counterfactual:
         # engine creates, e.g. KLEEMOD-CENTER_STAGE_OPTION) resolves as
         # approximate. Passing it on would make rest_action raise on a lookup,
         # which is a crash in the counterfactual arm rather than a finding.
-        ids.append(None if is_approx else card.id)
+        #
+        # `EB-593`: AND THE `_resolves_to_a_sim_row` GUARD `_rest` ALREADY
+        # ASKS, because `is_approx` was only ever standing in for it and
+        # stopped standing in when the resolver learned to read a `proto_` row
+        # EXACTLY. The pilot knows that row; `peek_card` still does not, since
+        # a prototype id resolves in tier0 only behind an arm flag this process
+        # does not set. So the row is dropped from the LADDER exactly as it was
+        # when it was approximate -- what it gained is a real score on the
+        # screens that read the Card object instead of its id.
+        keep = not is_approx and _resolves_to_a_sim_row(card.id)
+        ids.append(card.id if keep else None)
         if is_approx:
             approx.append(card.name)
 

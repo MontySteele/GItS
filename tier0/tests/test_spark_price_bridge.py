@@ -35,10 +35,10 @@ def alt_cost(monkeypatch):
     `_card_prototype` is memoized and its answer for a `proto_` id depends on
     the flag.
     """
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     monkeypatch.setattr(C, "SPARK_ALT_COST_ENABLED", True)
     yield
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
 
 
 def board(hand, status=None):

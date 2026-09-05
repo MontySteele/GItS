@@ -226,6 +226,14 @@ KLEE_OVERHAUL_OPENING_SPARK = 1
 # why it is named here beside rule 4's other two rates rather than riding the
 # power's amount. C# twin `KleeOverhaulLaw.GroundedSpark`.
 KLEE_OVERHAUL_GROUNDED_SPARK = 1
+# THE SPARK SEED (`EB-577`, D default off the Klee r21 packet sec.5). Sparks
+# read as inert until a sink is drafted, six rounds running (r17-r21): r21 lane
+# 2 ended fights holding 3, 4 and 5 Sparks with Dig In the deck's only reader.
+# So the ARM's first card rewards guarantee a Spark-priced row -- floors 1 to 3,
+# which is the first two card rewards of a run. NOT A SHEET CHANGE: no card's
+# rarity, price or text moves, only which cards a reward screen may show while
+# the deck has no reader at all. C# twin `KleeOverhaulLaw.SparkSeedFloors`.
+KLEE_OVERHAUL_SPARK_SEED_FLOORS = 3
 
 # THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, in the
 # printed order.
@@ -1486,6 +1494,37 @@ KURAGE_MEMORY_POOL_ADD = "proto_kurages_oath_memory"
                               # pool and the staged row takes its slot, at the
                               # SAME rarity, so a flagged run can only ever be
                               # offered the 3.
+# `EB-581`. THE PROTOTYPE ROWS ONE ARM RETIRES IN ANOTHER, `{row id: the arm
+# that supersedes it}`, named once so every door reads the same list.
+#
+# THE FIND (Kokomi r21 lane 1, (c) 1 and (c) 2). The coordinator granted
+# `proto_kurages_oath_memory` -- the `KURAGE_MEMORY` base kit's Power -- into a
+# `KOKOMI_OVERHAUL` run. Its power is INERT there ("whenever the Bake-Kurage
+# plays a card from its memory" names a rule that arm does not have), and the
+# two rows print ONE title, "Kurage's Oath", so nothing on the seat's screen
+# could tell the granted copy from the arm's own starter Skill
+# (`proto_kk_kurages_oath`). Two rounds went on a card that could not act.
+#
+# NO ROW IS DELETED and neither superseded arm is touched: what this says is
+# only that two arms of ONE KIT do not stack. Both overhauls already say it at
+# the offer door by replacing the starter and the pool WHOLE
+# (`KOKOMI_OVERHAUL_STARTER_IDS` / `_POOL_IDS`, `KLEE_OVERHAUL_*`); this states
+# it where a door was still open -- `understudy.embark.check_arms`, the
+# `--arm` grant, which asks only whether an id is a row.
+#
+# DERIVED FROM THE ARMS' OWN SUBSTITUTION MAPS rather than re-listed, so a row
+# added to an arm cannot be missed here: a superseded arm's rows ARE the rows
+# it substitutes in.
+KLEE_SPARK_ALT_ROWS: tuple[str, ...] = tuple(dict.fromkeys(
+    [add for _, add in SPARK_ALT_STARTER_SUBS]
+    + list(SPARK_ALT_POOL_SUBS.values())))
+
+PROTOTYPE_ARM_SUPERSEDED: dict[str, str] = {
+    **{cid: "KOKOMI_OVERHAUL" for cid in (KURAGE_MEMORY_POOL_ADD,
+                                          KURAGE_MEMORY_STARTER_ADD)},
+    **{cid: "KLEE_OVERHAUL" for cid in KLEE_SPARK_ALT_ROWS},
+}
+
 KURAGE_MEMORY_COST_PER_ENERGY = 3
                               # [USER], v3: "cards cost Charge equal to 3x
                               # their Cost". The whole price rule. A 0-cost

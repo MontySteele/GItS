@@ -699,6 +699,16 @@ def render(obs: dict[str, Any]) -> str:
                 # asking what a Plan will do asks which body first.
                 out.append(PLAN_AIM_NOTE)
                 out.append(PLAN_HYDRO_NOTE)
+                # `EB-578`. AND WHEN THE HAND HOLDS NONE, one line saying so.
+                # The form under *What you can say* is gone on such a turn
+                # (`blindplay_observe`), and a form that disappears with no
+                # sentence in its place reads as a page that forgot it -- so
+                # the absence is stated where the jellyfish is described. The
+                # flag is only ever set on a build whose bridge answers
+                # `can_target_pet`, so an older feed prints neither this line
+                # nor a missing form.
+                if pl.get("plannable") is False:
+                    out.append("- No Plan card in hand: the jellyfish waits.")
             # `EB-317`. WHAT ALREADY HAPPENED, BEFORE WHAT IS STILL WAITING,
             # because that is the order the turn had: the morning's Plans were
             # carried out at the top of this turn and the queue below is what
@@ -769,6 +779,24 @@ def render(obs: dict[str, Any]) -> str:
             # hit, so a reaction that consumed the aura says "and left no
             # aura" rather than claiming Hydro that is not there.
             out += ["", "## What your Salon did this turn", ""]
+            # `EB-582`. THE EVOKE LEADS, because that is the order the card
+            # promises and the order the engines resolve. `EB-564` put the bow
+            # LAST here on the reading that "an Evoke follows the acts above",
+            # and the r15 lane-1 seat read the consequence off the page: the
+            # Deploy word says "a full stage [gold]Evokes[/gold] the front
+            # member first", the arriving member performs AFTER that bow, and
+            # the page printed the two the other way round (`EB-582`, Furina
+            # r15 lane 1 (c) 2).
+            #
+            # THE BOUNDARY, stated because the block cannot hide it: these are
+            # two lists and not one stream, so the grouping orders them by
+            # CLASS and cannot interleave. It is right for every turn whose
+            # Evoke came from a deploy -- which is every Evoke that has a
+            # performance beside it at all -- and the one turn it cannot order
+            # is a Companion play followed by a full-stage deploy, where the
+            # first performance belongs above the bow. Ordering that needs a
+            # per-act sequence on the wire, which the ledger does not carry.
+            out += [_render_evoke(row) for row in c["salon"].get("evoked", [])]
             out += [_render_performance(row) for row in c["salon"]["performed"]]
             # `EB-420`. THE PLAY BEHIND ONE OF THE ACTS ABOVE, named. The
             # round-5 seat counted "two Crabaletta lines ... for three
@@ -783,11 +811,6 @@ def render(obs: dict[str, Any]) -> str:
             out += [f"- **{name}** was played an extra time, and the extra "
                     "play performed as well."
                     for name in c["salon"]["replayed"]]
-            # `EB-564`. LAST IN THE BLOCK, because that is where the bow
-            # happens: an Evoke is forced out BY a deploy onto a full stage or
-            # taken by the Evoke card, and either way it follows the acts
-            # above in the turn it belongs to.
-            out += [_render_evoke(row) for row in c["salon"].get("evoked", [])]
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page

@@ -102,6 +102,19 @@ EXCEPTIONS = {
         "never necessarily the detonator. The keyword rail states that about "
         "one CARD, on the card; what a reader of the WORD needs is the fact "
         "about the DECK, which no other surface carries"),
+    "MineKey": (
+        "`EB-574` put rule 3 on this tip, at 133 of 135. The jump sentence "
+        "was printed on the BADGE of the body the pile was about to kill and "
+        "on the Bomb tip as 'kills move it on', and both read as a promise "
+        "about the charge doing the killing: the r21 lane-1 seat set off Mine "
+        "11, killed Toadpole B, saw nothing arrive on A and filed the screen "
+        "as contradicting itself. A Mine kills more often than a plain Bomb "
+        "does, so the tip that already says 'unless the Mine kills' is where "
+        "the other reading has to be closed, and it is closed in the same "
+        "words on all three surfaces. Every other clause is a ruled finding "
+        "-- when it goes off, what the hit does to the attack, and which two "
+        "terms move it (EB-436, EB-373) -- and none is droppable to make "
+        "room"),
     "PlanKey": (
         "`EB-538` added the CLASS a carry-out belongs to, to a tip already at "
         "135 of 135. Skittish gave no Block to a body hit by two carry-outs "
@@ -142,7 +155,9 @@ _BOMB_FACE_REASON = (
     "'Bombs here: 3, including 1 Mine' reads as a count and is a value -- the "
     "natural-lane seat misread it 'for a fight and a half' and got it only "
     "when a two-charge pile printed numbers the count reading could not "
-    "explain")
+    "explain; and `EB-573` names the RIDER the merge keeps, because a Bomb 21 "
+    "that was Jumpy's Bomb 8 two merges ago still dropped Mine 3 on ALL and "
+    "no surface said so (Klee r21 lane 1)")
 #: THE WHOLE GRID IS EXCEPTED SINCE `EB-536`. The plain single-charge face --
 #: one charge, no Mine, no modifier the total passes through -- was the one row
 #: here that met its ceiling exactly (125 of 125, no headroom at all) and was
@@ -153,9 +168,10 @@ _BOMB_FACE_REASON = (
 #: under a ceiling is the defect wearing a lint's clothes.
 EXCEPTIONS.update({
     "ProtoBombPower.smartDescription"
-    + single + mines + vulnerable + cap: _BOMB_FACE_REASON
+    + single + mines + rider + vulnerable + cap: _BOMB_FACE_REASON
     for single in ("", "One")
     for mines in ("", "Mines")
+    for rider in ("", "Rider")
     for vulnerable in ("", "Vulnerable")
     for cap in ("", "HardToKill", "Intangible", "Capped")
 })
@@ -450,41 +466,53 @@ def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
             # `EB-536` ADDED THE THIRD AXIS: a pile of ONE prints no hit
             # clause, because there the total IS the hit and the sentence was
             # "never comprehensible" on it.
+            # `EB-573` ADDED THE FOURTH AXIS: whether any charge here carries
+            # a rider (Jumpy Dumpty's Mine-on-ALL), which survives a merge and
+            # grows in bulk. The full stop moved off `Bombs` and
+            # `BombsWithMines` in the same edit, so exactly one of the two
+            # spellings prints it and the clause is a CLAUSE rather than a
+            # fifth sentence.
             for single in (False, True):
                 for mines in (False, True):
-                    for vulnerable in (False, True):
-                        for cap_key, cap_text in caps:
-                            clause = (consts["VulnerableClause"]
-                                      if vulnerable else "")
-                            if cap_text:
-                                clause += (("," + cap_text) if vulnerable
-                                           else cap_text)
-                            face = ("[gold]Set off[/gold] here deals "
-                                    # `EB-514`: the hit count rides the total,
-                                    # because the total is a SUM over the
-                                    # charges and a stack printed one number
-                                    # where the board makes several hits.
-                                    + consts["PyroTotal"] + clause
-                                    + ("" if single else consts["HitCount"])
-                                    + "."
-                                    + (consts["BombsWithMines"] if mines
-                                       else consts["Bombs"])
-                                    + (consts["MineClause"] if mines
-                                       else consts["NoSelfSentence"])
-                                    # `EB-361`: rule 3 prints on every face,
-                                    # and the growth sentence became a clause
-                                    # on `Bombs` in the same edit -- four
-                                    # sentences is the ceiling and the jump is
-                                    # a fifth fact.
-                                    + consts["JumpSentence"])
-                            rows.append(Row(
-                                "power",
-                                "ProtoBombPower.smartDescription"
-                                + ("One" if single else "")
-                                + ("Mines" if mines else "")
-                                + ("Vulnerable" if vulnerable else "")
-                                + cap_key,
-                                face, where))
+                    for rider in (False, True):
+                        for vulnerable in (False, True):
+                            for cap_key, cap_text in caps:
+                                clause = (consts["VulnerableClause"]
+                                          if vulnerable else "")
+                                if cap_text:
+                                    clause += (("," + cap_text) if vulnerable
+                                               else cap_text)
+                                face = ("[gold]Set off[/gold] here deals "
+                                        # `EB-514`: the hit count rides the
+                                        # total, because the total is a SUM
+                                        # over the charges and a stack printed
+                                        # one number where the board makes
+                                        # several hits.
+                                        + consts["PyroTotal"] + clause
+                                        + ("" if single else consts["HitCount"])
+                                        + "."
+                                        + (consts["BombsWithMines"] if mines
+                                           else consts["Bombs"])
+                                        + (consts["RiderClause"] if rider
+                                           else "")
+                                        + "."
+                                        + (consts["MineClause"] if mines
+                                           else consts["NoSelfSentence"])
+                                        # `EB-361`: rule 3 prints on every
+                                        # face, and the growth sentence became
+                                        # a clause on `Bombs` in the same edit
+                                        # -- four sentences is the ceiling and
+                                        # the jump is a fifth fact.
+                                        + consts["JumpSentence"])
+                                rows.append(Row(
+                                    "power",
+                                    "ProtoBombPower.smartDescription"
+                                    + ("One" if single else "")
+                                    + ("Mines" if mines else "")
+                                    + ("Rider" if rider else "")
+                                    + ("Vulnerable" if vulnerable else "")
+                                    + cap_key,
+                                    face, where))
     return rows
 
 
