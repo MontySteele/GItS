@@ -264,8 +264,14 @@ are in [`workstreams.md`](workstreams.md).
   `0.2.2564+proto`, floor 10 at the cap, six of six fights with the elite,
   Guest Cast skipping Chiori's hit (`EB-463`), a Replay performing no member
   (`EB-464`), five faces feeding a Burst no screen shows (`EB-449`), the
-  Encore opening read the same a fourth time. [USER]'s act-1 run is due on
-  that build. No stamp moves, nothing measured.
+  Encore opening read the same a fourth time. **Round 9 is READ**
+  (`review/active/furina-reframe-round-9-2026-09-04.md`): one seat on
+  `0.2.2577+proto`, floor 11 at the cap, six of six with the elite at zero
+  HP; enemy Block never printed (`EB-474`), three undefined terms
+  (`EB-475`), a performance takes Vulnerable and does not Shatter
+  (`EB-476`), an empty stage halves a Companion card silently (`EB-477`);
+  turn one read as a real choice, dry by construction. [USER]'s act-1 run
+  is due on that build. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
