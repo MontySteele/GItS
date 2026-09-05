@@ -93,6 +93,14 @@ public static class ArmKeywordTips
     // it is a sentence about the CARD in hand, printed where that card is met.
     public const string CovenSparkKey = "KLEEMOD-ARM_COVEN_SPARK";
 
+    // `EB-553` (R260). THE THIRD KEY HERE THAT TITLES NO KEYWORD, and it names
+    // the one rule the reframe's STARTING RELIC now carries: the stage is
+    // fielded before the first card is played. The relic's own face is at 117
+    // of the 120-character relic ceiling and already states two rules, so the
+    // third sentence rides beside it as a tip rather than displacing one of
+    // them -- and a tip is where a rule about the board belongs anyway.
+    public const string OpeningStageKey = "KLEEMOD-ARM_OPENING_STAGE";
+
     // ----------------------------------------------------------- Klee ------
     //
     // The four sentences are the ruled brief's sec.3 rules 1, 2, 4 and 6, as
@@ -846,6 +854,28 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForEncore(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, EncoreKey, EncoreBody());
+
+    /// <summary>
+    /// `EB-553` (R260): the reframe's stage is never unlit, and the relic that
+    /// fields it is where a player reads so.
+    ///
+    /// Round 11 read both lanes' turn one as empty BY CONSTRUCTION and the
+    /// natural lane counted it -- zero empty turns in the fights where the
+    /// starter deploy was in the opening hand, six of twenty-two otherwise.
+    /// [USER] took the relic over an Innate starter, so the fact belongs to
+    /// the relic and not to a card: it is true on turn one of every fight
+    /// whatever the opening hand holds.
+    ///
+    /// THE MEMBER IS NAMED IN FULL here and short on the badge, which is the
+    /// shipped split: <c>SalonMemberPower.ManualFrontName</c> prints
+    /// "Crabaletta" because three rules and an identity have to fit under the
+    /// power ceiling, and a tip with one sentence in it can afford her title.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForOpeningStage(
+        IEnumerable<IHoverTip> inherited) =>
+        With(inherited, OpeningStageKey,
+             "Every fight opens with [gold]Mademoiselle Crabaletta[/gold] on "
+           + "stage.");
 
     /// <summary>
     /// `EB-479` (R258): THE OPENING JOINS THE SENTENCE THAT DEFINES THE WORD,

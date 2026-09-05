@@ -11,6 +11,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Random;
 using MegaCrit.Sts2.Core.Runs;
@@ -88,6 +89,34 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
           + "to your [gold]Hand[/gold]."),
 #endif
     };
+
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// `EB-553` (R260). THE RELIC SAYS THE RULE IT NOW CARRIES: under the
+    /// reframe this talent fields Mademoiselle Crabaletta at combat start, so
+    /// the Salon stage is never unlit and every Companion card has somebody to
+    /// perform from turn one.
+    ///
+    /// A TIP AND NOT A THIRD SENTENCE ON THE FACE. The arm face above is 117
+    /// rendered characters of the 120-character relic ceiling
+    /// (`docs/current/text-conventions.md`), and both sentences it already
+    /// carries are ruled ones -- the selector and `EB-485`'s duration. A third
+    /// clause could only land by deleting one of those, so the rule rides
+    /// beside them instead, in the tip table every other arm sentence is
+    /// written in and under the ceiling that table measures
+    /// (`ArmKeywordTips.ForOpeningStage`).
+    ///
+    /// ARM-GATED AT READ TIME rather than by the compile constant the face
+    /// uses, and the difference is real: a `Localization` is read ONCE at
+    /// registration, while `ExtraHoverTips` is read every time the relic is
+    /// hovered, so this can ask the live flag and a dev build running the
+    /// reframe off prints nothing.
+    /// </summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        Powers.FurinaReframe.Enabled
+            ? Cards.ArmKeywordTips.ForOpeningStage(base.ExtraHoverTips)
+            : base.ExtraHoverTips;
+#endif
 
     /// <summary>
     /// FALLBACK ICON, and the OUTLINE atlas entry we ship no asset for --

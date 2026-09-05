@@ -446,6 +446,12 @@ public static class KleeMod
                     // before that. No collision: the shipped meter power
                     // titles itself and hangs no keyword tip.
                     [Cards.ArmKeywordTips.EncoreKey + ".title"] = "Encore",
+                    // `EB-553` (R260). The third rider here that titles no
+                    // keyword: the reframe's starting relic fields the stage
+                    // at combat start, and the relic's own face has no room
+                    // left for the sentence.
+                    [Cards.ArmKeywordTips.OpeningStageKey + ".title"] =
+                        "Opening stage",
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in

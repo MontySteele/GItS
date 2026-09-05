@@ -410,9 +410,14 @@ def test_every_table_row_has_a_method_and_a_registered_title_row(keyword):
 # rider, which is a sentence about a card rather than a definition of a word.
 # `EB-418` put the second, the Spark Klee's KIT mints on a play of one of her
 # own Personal Companions -- a rule LAW:145 keeps off the Companion's face, so
-# no word on any card can carry it. They are named here so the count below
-# stays a real pin instead of a number somebody bumps.
-NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK"}
+# no word on any card can carry it. `EB-553` (R260) put the third, and it is
+# the first that rides a RELIC rather than a card: under the reframe the
+# starting relic fields Mademoiselle Crabaletta at combat start, and the
+# relic's own arm face is at 117 of the 120-character relic ceiling with two
+# ruled sentences already on it. They are named here so the count below stays a
+# real pin instead of a number somebody bumps.
+NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
+                    "KLEEMOD-ARM_OPENING_STAGE"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():

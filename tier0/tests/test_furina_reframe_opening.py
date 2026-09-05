@@ -19,6 +19,7 @@ import random
 
 import pytest
 
+from tier0 import constants as C
 from tier0.engine import combat, furina_reframe
 from tier0.engine.state import Card, CombatState, Enemy, Player
 
@@ -30,6 +31,15 @@ def arm(monkeypatch):
     """The MASTER flag and no leg: the opening belongs to the whole reframe,
     which is what `opening_encore` reads and `FurinaReframe.LiveFor` mirrors."""
     monkeypatch.setattr(FR, "FURINA_REFRAME", True)
+
+
+@pytest.fixture
+def manual_arm(monkeypatch):
+    """The master AND the manual leg, which is the world the seats play: the
+    deploy-performs clause lives inside `_deploy_salon_members` and is gated on
+    `manual_active`, so the arrival performance only happens here."""
+    monkeypatch.setattr(FR, "FURINA_REFRAME", True)
+    monkeypatch.setattr(FR, "FURINA_REFRAME_MANUAL", True)
 
 
 def _furina(**kw):
@@ -111,3 +121,105 @@ def test_a_real_fight_with_the_flag_off_opens_on_nothing():
     st = _fight(_furina())
     assert [e for e in st.log if e["event"] == "fr_opening_encore"] == []
     assert st.player.encore == 0
+
+
+# ----------------------------------------------------------------------
+# THE STAGE STARTS WITH A MEMBER (`EB-553`, R260)
+# ----------------------------------------------------------------------
+#
+# Round 11 read both lanes' turn one as empty BY CONSTRUCTION: the stage starts
+# unlit, so on turn one every Companion card prints "performs nobody". The
+# natural lane's count is the fact -- zero empty turns in the fights where Salon
+# Debut was in the opening hand, six of twenty-two otherwise. [USER] took the
+# relic option over an Innate starter, by the analogy of the Necrobinder's Osty
+# and the Defect's first orb: the starting relic fields Mademoiselle Crabaletta
+# at combat start, and Salon Debut stays as printed and deploys a SECOND body.
+
+
+def test_the_arm_opens_the_combat_with_crabaletta_on_stage(arm):
+    st = _state()
+    FR.field_opening_member(st)
+    assert st.player.salon == [FR.OPENING_MEMBER] == ["crabaletta"]
+    assert st.player.powers["salon_member"] == 1
+
+
+def test_the_shipped_kit_opens_on_an_empty_stage():
+    """FLAG OFF NOTHING IS FIELDED: the stage is empty until a card deploys
+    onto it, which is the shipped rule and always has been."""
+    st = _state()
+    FR.field_opening_member(st)
+    assert st.player.salon == []
+    assert FR.opening_member(st.player) is None
+
+
+def test_no_other_seat_gets_a_stage(arm):
+    """In co-op the other seat may be Klee, who has no Salon at all."""
+    st = _state(player=Player(hp=200, max_hp=200, character_id="klee"))
+    FR.field_opening_member(st)
+    assert st.player.salon == []
+
+
+def test_the_stage_is_fielded_on_turn_one_and_never_again(arm):
+    """`== 1` rather than `<= 1`, the opening Encore's own guard one rule over:
+    a stage that refilled itself every turn would delete the Deploy cards'
+    whole job."""
+    st = _state(turn=2)
+    FR.field_opening_member(st)
+    assert st.player.salon == []
+
+
+def test_the_member_is_named_and_never_rolled(arm):
+    """`EB-416`'s finding one rule over: under the manual stage the FRONT
+    member is the one a Companion play makes perform, so a rolled opening would
+    decide for the player which member their first trigger fires."""
+    assert FR.OPENING_MEMBER == "crabaletta"
+    for seed in range(8):
+        st = _state()
+        st.rng = random.Random(seed)
+        FR.field_opening_member(st)
+        assert st.player.salon == ["crabaletta"]
+
+
+def test_she_performs_on_arrival_and_the_opening_encore_pays_for_it(manual_arm):
+    """A DEPLOY PERFORMS, and this is a deploy. The consequence is the turn-one
+    arithmetic the seats will read: the opening 2 pays her first performance's
+    1, leaving 1, and the enemy is down her full paid tick rather than the dry
+    three-quarters."""
+    st = _state()
+    FR.grant_opening_encore(st)
+    assert st.player.encore == FR.OPENING_ENCORE
+
+    FR.field_opening_member(st)
+
+    assert st.player.encore == FR.OPENING_ENCORE - C.SALON_TICK_ENCORE_COST == 1
+    assert st.enemies[0].hp < 99          # she acted, and she acted paid
+
+
+def test_a_deploy_after_it_puts_a_second_body_on_the_stage(manual_arm):
+    """Salon Debut stays as printed and deploys a SECOND body: duplicates on
+    the stage are legal and always have been -- Grand Gala deploys Crabaletta
+    twice on the shipped sheet."""
+    from tier0.engine import effects
+
+    st = _state()
+    FR.field_opening_member(st)
+    effects._deploy_salon_members(st, 1, "crabaletta")
+
+    assert st.player.salon == ["crabaletta", "crabaletta"]
+    assert st.player.powers["salon_member"] == 2
+
+
+def test_a_real_fight_opens_with_the_stage_lit_and_says_so_once(arm):
+    """The SITE, through the engine rather than the reader: the fielding lands
+    in `_player_turn` one line after the opening Encore, so a fight that starts
+    is a fight whose stage is already occupied."""
+    st = _fight(_furina())
+    fielded = [e for e in st.log if e["event"] == "fr_opening_stage"]
+    assert [e["member"] for e in fielded] == ["crabaletta"]
+    assert st.player.salon == ["crabaletta"]
+
+
+def test_a_real_fight_with_the_flag_off_opens_unlit():
+    st = _fight(_furina())
+    assert [e for e in st.log if e["event"] == "fr_opening_stage"] == []
+    assert st.player.salon == []

@@ -1043,4 +1043,132 @@ public class FurinaReframeRuleTests
         Assert.Contains("FurinaReframe.LiveFor", grant);
         Assert.Contains("FurinaResources.GainEncore", grant);
     }
+
+    // ==================================================================
+    // 9. `EB-553` (R260) -- the stage starts with a member
+    // ==================================================================
+    //
+    // Round 11 read both lanes' turn one as empty BY CONSTRUCTION: the stage
+    // starts unlit, so on turn one every Companion card prints "performs
+    // nobody". [USER] took the relic option -- the starting relic fields
+    // Mademoiselle Crabaletta at combat start, the way the Necrobinder's Osty
+    // and the Defect's first orb are already out -- over an Innate starter.
+    //
+    // REAL, not structural: `OpeningMemberFor` decides before the first await,
+    // so both sides of the flag, the turn guard and the identity scope are
+    // checkable here. What is structural is the DEPLOY, which resolves through
+    // `PowerCmd` and `ElementalHit` and needs a combat this harness cannot
+    // build.
+
+    [Fact]
+    public void EB553_the_arm_opens_every_combat_with_crabaletta_on_stage()
+    {
+        using var _ = new Arm();
+        var seat = Opening(Seat.Furina(), turn: 1);
+
+        Assert.Equal(SalonMember.Crabaletta,
+                     FurinaReframeOpening.OpeningMemberFor(seat.Player));
+    }
+
+    [Fact]
+    public void EB553_the_shipped_kit_opens_on_an_empty_stage()
+    {
+        // FLAG OFF NOTHING IS FIELDED, which is the shipped opening and always
+        // has been: the stage is empty until a card deploys onto it.
+        using var _ = new Arm(master: false);
+        var seat = Opening(Seat.Furina(), turn: 1);
+
+        Assert.Null(FurinaReframeOpening.OpeningMemberFor(seat.Player));
+    }
+
+    [Fact]
+    public void EB553_only_turn_one_fields_a_member()
+    {
+        // `== 1` rather than `<= 1`, the opening Encore's own guard one rule
+        // over: an extra first turn cannot field twice, and turn two fields
+        // nobody -- a stage that refilled itself every turn would delete the
+        // Deploy cards' whole job.
+        using var _ = new Arm();
+        var seat = Opening(Seat.Furina(), turn: 2);
+
+        Assert.Null(FurinaReframeOpening.OpeningMemberFor(seat.Player));
+    }
+
+    [Fact]
+    public void EB553_no_other_seat_gets_a_stage()
+    {
+        // In co-op the other seat may be Klee, who has no Salon at all.
+        using var _ = new Arm();
+        var seat = Opening(Seat.Klee(), turn: 1);
+
+        Assert.Null(FurinaReframeOpening.OpeningMemberFor(seat.Player));
+    }
+
+    [Fact]
+    public void EB553_the_member_is_named_and_never_rolled()
+    {
+        // `EB-416`'s finding one rule over: under the manual stage the FRONT
+        // member is the one a Companion play makes perform, so a rolled
+        // opening would decide for the player which member their first trigger
+        // fires. It is the starter deploy's own member.
+        Assert.Equal(SalonMember.Crabaletta, FurinaReframeOpening.OpeningMember);
+    }
+
+    [Fact]
+    public void EB553_the_site_is_the_turn_start_hook_after_the_grant()
+    {
+        // STRUCTURAL PIN (Il), and the ORDER is the point: the arrival
+        // performance spends Encore, so the fielding has to run AFTER the
+        // opening grant or she acts dry at three-quarters on the one turn the
+        // player could not have paid for her. Il cannot see a reordering
+        // inside one method, so the order is stated in the source comment and
+        // what is pinned here is that both calls are in the same hook.
+        var hook = Il.Calls(Il.Method("KleeElementalHooks", "AfterPlayerTurnStart"));
+        Assert.Contains("FurinaReframeOpening.GrantEncore", hook);
+        Assert.Contains("FurinaReframeOpening.FieldOpeningMember", hook);
+
+        // A DEPLOY AND NOT A SECOND WAY ONTO THE STAGE: it goes through
+        // `SalonMemberPower.Deploy`, the one implementation, which is what
+        // makes "she performs on arrival" inherited from the arm's
+        // deploy-performs clause rather than restated here.
+        var field = Il.Calls(
+            Il.Method("FurinaReframeOpening", "FieldOpeningMember"));
+        Assert.Contains("FurinaReframeOpening.OpeningMemberFor", field);
+        Assert.Contains("SalonMemberPower.Deploy", field);
+
+        var decide = Il.Calls(
+            Il.Method("FurinaReframeOpening", "OpeningMemberFor"));
+        Assert.Contains("FurinaReframe.LiveFor", decide);
+    }
+
+    [Fact]
+    public void EB553_the_relic_carries_the_rule_and_asks_the_live_flag()
+    {
+        // STRUCTURAL PIN (Il). Enumerating a hover tip end to end formats a
+        // `LocString` through `LocManager.Instance`, which is null until the
+        // game boots (README, the headless boundary; `ArmKeywordTipTests`
+        // records the same). What is reachable is the DECISION and the wiring.
+        //
+        // THE RULE BELONGS TO THE RELIC, which is true on turn one of every
+        // fight whatever the opening hand holds -- and it rides as a tip
+        // because the arm's relic face is at 117 of the 120-character relic
+        // ceiling with two ruled sentences already on it.
+        //
+        // AND IT ASKS THE FLAG AT READ TIME, not the compile constant its own
+        // face uses: a `Localization` is read once at registration while
+        // `ExtraHoverTips` is read on every hover, so a dev build running the
+        // reframe off prints nothing here.
+        var tips = Il.Calls(
+            Il.Method("EtherealSpotlightRelic", "get_ExtraHoverTips"));
+        Assert.Contains("ArmKeywordTips.ForOpeningStage", tips);
+        Assert.Contains("FurinaReframe.get_Enabled", tips);
+
+        // The sentence itself is `ArmKeywordTips`', measured against the
+        // 135-character tip ceiling by `tools/lint_text_conventions.py` and
+        // pinned in `ArmKeywordTipTests`.
+        Assert.Contains(
+            "Mademoiselle Crabaletta",
+            string.Concat(Il.Strings(
+                Il.Method("ArmKeywordTips", "ForOpeningStage"))));
+    }
 }

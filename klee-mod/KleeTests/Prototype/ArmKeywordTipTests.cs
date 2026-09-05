@@ -266,6 +266,20 @@ public class ArmKeywordTipTests
                         c => c.Contains("Concat"));
     }
 
+    [Fact]
+    public void EB553_the_opening_stage_tip_names_the_member_and_the_moment()
+    {
+        // R260. The reframe's stage is never unlit, and the relic that fields
+        // it is where a player reads so. Two facts and no more: WHEN (every
+        // fight, on its opening) and WHO (the member by name, in full -- the
+        // badge prints the short "Crabaletta" only because three rules and an
+        // identity have to fit under the power ceiling).
+        var body = Printed("ForOpeningStage");
+        Assert.Contains("Every fight opens with", body);
+        Assert.Contains("[gold]Mademoiselle Crabaletta[/gold]", body);
+        Assert.Contains("on stage.", body);
+    }
+
     // ---- the shape --------------------------------------------------------
 
     [Fact]
@@ -442,9 +456,17 @@ public class ArmKeywordTipTests
         // one companion card is written against and a DIFFERENT one grants, so
         // the face that prints it carries the definition. The r7 seat played
         // Fischl -- Nightrider five times without learning what puts Oz out.
-        Assert.Equal(16, attaches.Count);
+        //
+        // THE SEVENTEENTH IS `EB-553`'s `ForOpeningStage`, the third entry
+        // here that titles no keyword and the first that rides a RELIC rather
+        // than a card. R260 fields Mademoiselle Crabaletta at combat start, so
+        // the stage is never unlit -- and the relic's own arm face is at 117
+        // of the 120-character relic ceiling with two ruled sentences already
+        // on it, which leaves this table as the only surface with room.
+        Assert.Equal(17, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.Contains(attaches, m => m.Name == "ForCovenSpark");
+        Assert.Contains(attaches, m => m.Name == "ForOpeningStage");
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
                                          System.StringComparison.Ordinal)));
