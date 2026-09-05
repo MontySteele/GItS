@@ -120,6 +120,72 @@ public class ArmKeywordTipTests
         }
     }
 
+    // ---- the SECOND runtime branch (`EB-479`, R258) -----------------------
+
+    private static string EncoreBody()
+    {
+        var body = Tips.GetMethod("EncoreBody", HeadlessGame.All)
+            ?? throw new System.InvalidOperationException(
+                "ArmKeywordTips.EncoreBody is gone -- the Encore tip's arm "
+              + "branch moved, and with it the only surface that states the "
+              + "reframe's opening bank.");
+        return (string)body.Invoke(null, System.Array.Empty<object>())!;
+    }
+
+    [Fact]
+    public void Under_the_reframe_the_encore_tip_states_the_opening()
+    {
+        var was = FurinaReframe.Enabled;
+        try
+        {
+            FurinaReframe.Enabled = true;
+
+            var body = EncoreBody();
+
+            // R258's whole content, with the amount READ from the law rather
+            // than typed, so a repricing moves the expectation and the
+            // sentence together (`EB-89`, the Spark tip's rule above).
+            Assert.Contains(
+                "Start each combat with " + FurinaReframeLaw.OpeningEncore
+                + ".", body);
+            // And the three things that spend it are still named, which is
+            // what `EB-407` put on this tip in the first place.
+            Assert.Contains("After [gold]Block[/gold] it absorbs damage "
+                            + "before HP.", body);
+            Assert.Contains("a card pays", body);
+            Assert.Contains("a member spends 1 or acts at 3/4.", body);
+        }
+        finally
+        {
+            FurinaReframe.Enabled = was;
+        }
+    }
+
+    [Fact]
+    public void With_the_arm_off_the_encore_tip_claims_no_opening()
+    {
+        // The shipped kit grants none, so the release sentence stands exactly
+        // as `EB-407` wrote it -- a tip that promised an opening bank the kit
+        // does not hand out is the same class of defect as explaining one
+        // arm's word with the other arm's rules.
+        var was = FurinaReframe.Enabled;
+        try
+        {
+            FurinaReframe.Enabled = false;
+
+            var body = EncoreBody();
+
+            Assert.DoesNotContain("Start each combat", body);
+            Assert.Contains("One pool, as each lands: a card pays to resolve, "
+                            + "a member spends 1 to perform or acts at 3/4.",
+                            body);
+        }
+        finally
+        {
+            FurinaReframe.Enabled = was;
+        }
+    }
+
     // ---- the two sentences the row names ----------------------------------
 
     [Fact]

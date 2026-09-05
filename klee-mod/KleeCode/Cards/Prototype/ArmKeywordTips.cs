@@ -757,10 +757,45 @@ public static class ArmKeywordTips
     /// </summary>
     public static IEnumerable<IHoverTip> ForEncore(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, EncoreKey,
-            "After [gold]Block[/gold] it absorbs damage before HP. One pool, "
-          + "as each lands: a card pays to resolve, a member spends 1 to "
-          + "perform or acts at 3/4.");
+        With(inherited, EncoreKey, EncoreBody());
+
+    /// <summary>
+    /// `EB-479` (R258): THE OPENING JOINS THE SENTENCE THAT DEFINES THE WORD,
+    /// and only under the arm that grants it -- <see cref="SparkBody"/>'s
+    /// shape one character over, for its reason.
+    ///
+    /// Rounds 5 to 8 each read the reframe's turn one as no decision at 0
+    /// Encore, and round 9 called the opening "by construction its own weakest
+    /// version". The tip is where a player meets the word, and an opening bank
+    /// nobody is told about is one the first turn cannot be planned around.
+    /// The shipped kit grants none, so the release sentence stands untouched
+    /// with the arm off.
+    ///
+    /// THE THIRD CLAUSE PAID FOR IT. "As each lands" became "in order" and the
+    /// two "to resolve" / "to perform" tails went, which keeps all three
+    /// spenders AND the ordering fact inside the 135-character ceiling: 133
+    /// rendered under the arm, 134 with it off. The AMOUNT is interpolated
+    /// from the arm's own law (`EB-89`'s rule, one meter over), so a retune
+    /// cannot leave this sentence quoting a number nothing grants.
+    /// </summary>
+    private static string EncoreBody()
+    {
+        // NOT `word`, which is <see cref="SparkBody"/>'s name for its own
+        // half: `lint_text_conventions.tip_rows` reads these two bodies out of
+        // the SOURCE by const name, and a second `word` in the same file would
+        // have it measure the Spark tip's opening twice and this one never.
+        const string absorbs =
+            "After [gold]Block[/gold] it absorbs damage before HP. ";
+        if (!FurinaReframe.Enabled)
+        {
+            return absorbs + "One pool, as each lands: a card pays to "
+                 + "resolve, a member spends 1 to perform or acts at 3/4.";
+        }
+        return absorbs + "Start each combat with "
+             + FurinaReframeLaw.OpeningEncore
+             + ". One pool, in order: a card pays, a member spends 1 or acts "
+             + "at 3/4.";
+    }
 
     /// <summary>
     /// One tip, appended after whatever the card already carries.

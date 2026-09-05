@@ -396,6 +396,11 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "mend", "next_companion_discount", "remove_debuff",
                   "carry_out_front_plan", "plan_from_exhaust",
                   "damage_quarter_max_hp",
+                  # `EB-478`, R257: Tide Chart's promise. A now-line that draws
+                  # NOTHING now -- it is paid at the start of the next turn,
+                  # after the jellyfish has carried its Plans out, for the
+                  # Plans it actually carried out.
+                  "draw_after_plans",
                   # PLAN-ONLY verbs: legal inside a row's `plan:` list and
                   # nowhere else, which `plan_reason` and `blocked_reason`
                   # enforce by name. Each is one `KokomiPlan.Kind`.
@@ -1716,6 +1721,10 @@ CHANCE_BOMB_FIELDS = {"op", "chance", "bomb_damage"}
 # The Kokomi overhaul's own, same discipline (QUARANTINED, C.KOKOMI_OVERHAUL).
 MEND_FIELDS = {"op", "amount"}
 DAMAGE_QUARTER_MAX_HP_FIELDS = {"op", "target"}
+#: Tide Chart's two numbers (`EB-478`, R257): `per` is what one Plan carried
+#: out next morning is worth, `amount` is the FLAT half the upgrade buys. Both
+#: are on the ROW rather than in a rule, because both are printed.
+DRAW_AFTER_PLANS_FIELDS = {"op", "per", "amount"}
 
 #: The ops that are one whole printed clause and carry no number of their own.
 #: Any number they might carry belongs to a RULE, not to a card.
@@ -2588,6 +2597,13 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # reach `no_upgrade_path`: the campfire choice is real
                        # and paid, it simply is not paid by this file's output.
                        "kit_spark",
+                       # `EB-478`, R257. Tide Chart's FLAT half -- "draw 1
+                       # more", on top of the one per Plan carried out.
+                       # Emitted as the same play-time `IsUpgraded` read
+                       # `encore` takes (`_tide_draw_flat_expr`), because the
+                       # face states the rule in words and prints no figure a
+                       # var could keep honest.
+                       "tide_draw",
                        "encore",
                        "encore_cost", "fanfare_cost", "fanfare_cap",
                        "fanfare_floor", "heal",
@@ -3332,6 +3348,17 @@ def blocked_reason(
                 # `plan_reason`, which is the only place `front_enemy` is a
                 # legal spelling.
                 return f"damage_quarter_max_hp target '{eff.get('target')}'"
+        if op == "draw_after_plans":
+            unknown = set(eff) - DRAW_AFTER_PLANS_FIELDS
+            if unknown:
+                return (f"draw_after_plans field(s) {sorted(unknown)} "
+                        "not understood")
+            per, flat = eff.get("per"), eff.get("amount")
+            if not isinstance(per, int) or isinstance(per, bool) or per <= 0:
+                return "draw_after_plans per must be a positive literal int"
+            if not isinstance(flat, int) or isinstance(flat, bool) or flat < 0:
+                return ("draw_after_plans amount must be a literal int >= 0 "
+                        "-- the FLAT half, 0 on a row that pays per Plan only")
         if op in KOKOMI_BARE_OPS | {"block_half_damage"}:
             # No fields at all: each is one whole printed clause, and any
             # number they might carry is a rule's, not a card's.
@@ -5376,6 +5403,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # rule every key above it keeps.
         "cap": any(e["op"] == "block_largest_bomb" for e in effects),
         "mend": any(e["op"] == "mend" for e in effects),
+        # `EB-478`. Binds to the op that OWES the draw, the same one-owner rule
+        # every key here keeps; tier0 bumps that op's `amount` and nothing else.
+        "tide_draw": any(e["op"] == "draw_after_plans" for e in effects),
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
         "cost": str(card.get("cost")) != "X",
         # R36: both keys ride the one discard_for_sparks effect.
@@ -6295,6 +6325,21 @@ def _stmt_burst_energy(card: dict, eff: dict) -> str:
 def _encore_amount_expr(card: dict, eff: dict) -> str:
     base = int(eff["amount"])
     delta = encore_upgrade(card)
+    return f"(IsUpgraded ? {base + delta} : {base})" if delta else str(base)
+
+
+def _tide_draw_flat_expr(card: dict, eff: dict) -> str:
+    """Tide Chart's FLAT half, with its `tide_draw` delta folded in as a
+    play-time `IsUpgraded` read (`EB-478`, R257).
+
+    `_encore_amount_expr`'s shape one op over, and for the same reason: the
+    upgrade buys a number the face states in words rather than prints, so
+    there is no rendered figure a DynamicVar would be keeping honest. tier0
+    bumps this effect's `amount` (`upgrades.apply_upgrade`'s `tide_draw`), so
+    both engines move the same half of the same op.
+    """
+    base = int(eff.get("amount", 0))
+    delta = int(upgrade_plan(card)[0].get("tide_draw", 0))
     return f"(IsUpgraded ? {base + delta} : {base})" if delta else str(base)
 
 
@@ -7543,6 +7588,22 @@ def build_body(
             lines.append(
                 "await KokomiPlan.ScheduleFromExhaust("
                 "choiceContext, Owner, this);")
+
+        elif op == "draw_after_plans":
+            # Tide Chart (`EB-478`, R257). NOTHING IS DRAWN HERE: the play
+            # writes a promise, and `KokomiPlan.PayPromisedDraws` pays it at
+            # the top of the next turn, after the morning's carry-outs, for
+            # the Plans that were actually carried out.
+            #
+            # THE FLAT HALF IS AN `IsUpgraded` LITERAL and not a var, which is
+            # `_encore_amount_expr`'s shape and is here for its reason: the
+            # face states the rule rather than printing the number ("draw 1
+            # card for each, plus 1"), so there is no printed figure for a var
+            # to keep honest, and a `CardsVar` nothing reads would claim the
+            # `Cards` name this card never spends.
+            lines.append(
+                "KokomiPlan.PromiseDraw(Owner.Creature, "
+                f"{_tide_draw_flat_expr(card, eff)}, {int(eff['per'])});")
 
         elif op == "discard":
             # G6: an upgradeable count reads the VAR, so the loop bound and
@@ -10255,6 +10316,18 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(
             "// carrying the Spark number, upgraded or not. tier0 twin: "
             "upgrades.apply key 'kit_spark'.")
+    if "tide_draw" in deltas:
+        # `EB-478`, R257. `encore`'s shape: the flat half is read at play time
+        # off IsUpgraded (`_tide_draw_flat_expr`), because the face states the
+        # rule in words -- "draw 1 card for each, plus 1" -- and prints no
+        # figure a var could keep honest.
+        done.add("tide_draw")
+        lines.append(
+            "// tide_draw: the promise's flat half reads IsUpgraded at play "
+            "time (KokomiPlan.PromiseDraw);")
+        lines.append(
+            "// tier0 twin: upgrades.apply key 'tide_draw', which bumps the "
+            "same op's `amount`.")
     if "bombs" in deltas:
         done.add("bombs")
         lines.append(f'DynamicVars["Bombs"].UpgradeValueBy({int(deltas["bombs"])}m);')

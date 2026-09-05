@@ -946,5 +946,101 @@ public class FurinaReframeRuleTests
             FurinaReframeLaw.FanfarePerCompanionTriggerMax);
         Assert.True(FurinaReframeLaw.EvokeFocusMult > 1);
         Assert.True(FurinaReframeLaw.SpotlightDesignateEncoreCost > 0);
+        // `EB-479` (R258): the opening buys exactly ONE of the two turn-one
+        // doors and never two, which is the relation the value alone cannot
+        // state. The selector's price is the arm's own number and is the one
+        // this is sized against.
+        Assert.Equal(FurinaReframeLaw.SpotlightDesignateEncoreCost,
+                     FurinaReframeLaw.OpeningEncore);
+    }
+
+    // ==================================================================
+    // 8. `EB-479` (R258) -- the opening Encore
+    // ==================================================================
+    //
+    // Rounds 5 to 8 each read her first turn as no decision at 0 Encore, and
+    // round 9 called the opening "by construction its own weakest version":
+    // both turn-one doors the arm opens -- a Spotlight designation, a member
+    // performing wet rather than at 3/4 -- cost Encore, and she had none.
+    //
+    // REAL, not structural: `FurinaResources.GainEncore` needs a
+    // `PlayerCombatState` and nothing else, which `WithCombatState` builds, so
+    // the amount that lands is checkable here. What is structural is the SITE,
+    // read off the compiled turn-start hook.
+
+    private static Seat Opening(Seat seat, int turn)
+    {
+        var state = seat.WithCombatState().Player.PlayerCombatState!;
+        Seat.Force(state, "TurnNumber", turn);
+        return seat;
+    }
+
+    [Fact]
+    public void EB479_the_arm_opens_each_combat_with_two_encore()
+    {
+        using var _ = new Arm();
+        var seat = Opening(Seat.Furina(), turn: 1);
+
+        FurinaReframeOpening.GrantEncore(seat.Player);
+
+        Assert.Equal(FurinaReframeLaw.OpeningEncore,
+                     FurinaResources.Encore(seat.Creature));
+    }
+
+    [Fact]
+    public void EB479_the_shipped_kit_opens_on_nothing()
+    {
+        // FLAG OFF IS THE SHIPPED OPENING, which is zero and always has been.
+        using var _ = new Arm(master: false);
+        var seat = Opening(Seat.Furina(), turn: 1);
+
+        FurinaReframeOpening.GrantEncore(seat.Player);
+
+        Assert.Equal(0, FurinaResources.Encore(seat.Creature));
+    }
+
+    [Fact]
+    public void EB479_only_turn_one_is_paid()
+    {
+        // `== 1` rather than `<= 1`, the opening Spark's own guard: an extra
+        // first turn cannot pay twice and a second turn pays nothing.
+        using var _ = new Arm();
+        var seat = Opening(Seat.Furina(), turn: 2);
+
+        FurinaReframeOpening.GrantEncore(seat.Player);
+
+        Assert.Equal(0, FurinaResources.Encore(seat.Creature));
+    }
+
+    [Fact]
+    public void EB479_no_other_seat_is_paid()
+    {
+        // In co-op the other seat may be Klee, and a bare flag read would hand
+        // him a buffer he has no rule for. Identity is `IsFurina`, which is
+        // what `lint_prototype_patch_scope` requires of anything running on
+        // every seat at the table under the one prototype switch.
+        using var _ = new Arm();
+        var seat = Opening(Seat.Klee(), turn: 1);
+
+        FurinaReframeOpening.GrantEncore(seat.Player);
+
+        Assert.Equal(0, FurinaResources.Encore(seat.Creature));
+    }
+
+    [Fact]
+    public void EB479_the_site_is_the_turn_start_hook()
+    {
+        // STRUCTURAL PIN (Il). `BeforeCombatStart` sounds right and is wrong:
+        // the sim fires its combat-start effects on TURN 1 after the block
+        // clear, the energy reset and the draw, and turn 1 of this hook is
+        // that same moment. Sim twin: `combat._player_turn` calls
+        // `furina_reframe.grant_opening_encore` one line after the opening
+        // Spark's own call.
+        Assert.Contains("FurinaReframeOpening.GrantEncore", Il.Calls(
+            Il.Method("KleeElementalHooks", "AfterPlayerTurnStart")));
+
+        var grant = Il.Calls(Il.Method("FurinaReframeOpening", "GrantEncore"));
+        Assert.Contains("FurinaReframe.LiveFor", grant);
+        Assert.Contains("FurinaResources.GainEncore", grant);
     }
 }

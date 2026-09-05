@@ -297,7 +297,7 @@ def tip_rows() -> list[Row]:
     # the prose is allowed to contain.
     for name, body in re.findall(
             r"With\(inherited, (\w+Key),\s*(.*?)\);", src, re.S):
-        if "SparkBody()" in body:
+        if "SparkBody()" in body or "EncoreBody()" in body:
             continue
         rows.append(Row("tip", name, csharp_text(body), where))
     concat = r'("[^"]*"(?:\s*\+\s*"[^"]*")*)'
@@ -307,6 +307,26 @@ def tip_rows() -> list[Row]:
     rows.append(Row("tip", "SparkKey", word + "Start each combat with "
                     + csharp_text(arm.group(1)) + shared, where))
     rows.append(Row("tip", "SparkKey.sparks-arm", word + shared, where))
+    # `EB-479`. THE SECOND BODY DECIDED AT RUNTIME, measured the same way and
+    # for the same reason: the Encore tip gains the reframe's opening bank
+    # under `FurinaReframe.Enabled` and keeps the shipped sentence with the arm
+    # off, so BOTH faces are rows and each meets the ceiling on its own. A
+    # `With(...)` call whose body is a method reaches this file as an empty
+    # string, which is a face nothing measures -- the silence `EB-343` was
+    # filed on -- so the two are parsed out by name here.
+    absorbs = csharp_text(
+        re.search(r"const string absorbs =\s*" + concat + ";", src).group(1))
+    # THE CAPTURE STARTS AT THE OPENING QUOTE, unlike the Spark pair above,
+    # whose own capture begins after one: `csharp_text` reads LITERALS, so a
+    # group that starts INSIDE a string hands it ` + ` as if that were the
+    # prose. Both branches are taken whole and the ceiling does the rest.
+    off = re.search(r'return absorbs \+ ("One pool(?:[^;])*);', src)
+    rows.append(Row("tip", "EncoreKey.reframe-off",
+                    absorbs + csharp_text(off.group(1)), where))
+    on = re.search(
+        r'return absorbs \+ ("Start each combat with "(?:[^;])*);', src)
+    rows.append(Row("tip", "EncoreKey",
+                    absorbs + csharp_text(on.group(1)), where))
     return rows
 
 

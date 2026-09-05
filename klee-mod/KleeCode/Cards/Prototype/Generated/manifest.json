@@ -506,10 +506,7 @@
       "cost": -1
     },
     "proto_kk_tide_chart": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "tide_draw": 1
     },
     "proto_kk_tide_wall": {
       "block": 2,

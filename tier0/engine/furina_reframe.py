@@ -108,6 +108,16 @@ SPOTLIGHT_DESIGNATE_ENCORE_COST = 2
                                   # one unbounded buffer, beside the deferred
                                   # Block and the Evoke price -- and rules that
                                   # it is measured rather than assumed away.
+OPENING_ENCORE = 2                # R258 (`EB-479`): she starts each combat
+                                  # with this much Encore, so turn ONE can pay
+                                  # one thing -- a Spotlight designation or a
+                                  # wet performance -- instead of nothing.
+                                  # Rounds 5 to 8 each read the first turn as
+                                  # no decision at 0 Encore and round 9 called
+                                  # the opening "by construction its own
+                                  # weakest version". SIZED TO THE TWO PRICES
+                                  # IT UNLOCKS, which are both 2: the number
+                                  # buys exactly one opening move, never two.
 
 
 # ----------------------------------------------------------------------
@@ -245,6 +255,42 @@ def burst_retired(player) -> bool:
     `FurinaReframe.BurstRetiredFor`.
     """
     return FURINA_REFRAME and FURINA_REFRAME_BURST and is_furina(player)
+
+
+def opening_encore(player) -> int:
+    """R258 (`EB-479`): how much Encore she opens a combat with -- 2 under the
+    arm, 0 everywhere else.
+
+    THE MASTER FLAG AND NO LEG OF ITS OWN. The pick is a fact about the whole
+    reframe rather than about the manual stage, the Evoke or the meter: what
+    it fixes is that turn one had no decision to make, and every leg of the arm
+    was in the room for that. A sixth flag would let a build run the arm with
+    the opening it was ruled out of.
+    """
+    return OPENING_ENCORE if (FURINA_REFRAME and is_furina(player)) else 0
+
+
+def grant_opening_encore(state) -> None:
+    """Pay it, once, on turn one.
+
+    THE SITE IS `AfterPlayerTurnStart` ON BOTH SIDES, `KleeOverhaulOpening`'s
+    argument taken whole one character over: this engine fires its combat-start
+    effects on TURN 1 after the block clear, the energy reset and the draw, so
+    a grant written at true combat start would land before the setup that
+    follows it -- and turn 1 of that hook is the moment the blind-play page
+    renders its first Encore line, which is where the number has to show.
+
+    `== 1` rather than `<= 1`, so an extra first turn cannot pay twice. The
+    mod's twin is `FurinaReframeOpening.GrantEncore`.
+    """
+    from tier0.engine import resources           # late: avoids the cycle
+    if state.turn != 1:
+        return
+    n = opening_encore(state.player)
+    if n <= 0:
+        return
+    state.emit("fr_opening_encore", amount=n)
+    resources.gain_encore(state, n, "furina_reframe/opening_encore")
 
 
 def evoke_focus_mult(player) -> int:

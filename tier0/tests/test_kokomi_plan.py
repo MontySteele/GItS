@@ -34,13 +34,34 @@ BLOCKER = [{"kind": "block", "amount": 5}]
 @pytest.fixture
 def overhaul(monkeypatch):
     """The flag on, with both id-resolving caches cleared on the way in and
-    out -- `test_kokomi_overhaul.overhaul`'s fixture, for its reasons."""
+    out -- `test_kokomi_overhaul.overhaul`'s fixture, for its reasons.
+
+    THE UPGRADE INDEX IS THE THIRD, cleared for exactly the reason the two
+    above are: `upgrades._upgrade_index` is `lru_cache`d and carries the
+    PROTOTYPE deltas only when the flag was on the first time it was filled,
+    so a run that reached an upgrade with the flag off left every
+    `apply_upgrade` here raising "no applicable upgrade". A real cross-file
+    flake before anything in this file read it -- `-k "kokomi or upgrade"`
+    over the suite fell on `test_both_defensive_rows_load_and_smith` -- and it
+    belongs on the fixture that already owns the flag."""
+    def clear_upgrade_caches():
+        # GUARDED, because a test may have monkeypatched one of these to a
+        # plain function for the length of its own case: a cache that is not
+        # a cache right now has nothing to clear and is not an error.
+        from tier0.content import upgrades
+
+        for fn in (upgrades._upgrade_index,
+                   upgrades._prototype_upgrade_index):
+            getattr(fn, "cache_clear", lambda: None)()
+
     loader._card_prototype.cache_clear()
     rewards.character_pool.cache_clear()
+    clear_upgrade_caches()
     monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
     yield
     loader._card_prototype.cache_clear()
     rewards.character_pool.cache_clear()
+    clear_upgrade_caches()
 
 
 def kokomi_state(enemies=None, hp=80):
@@ -831,10 +852,12 @@ def test_the_bus_pays_the_also_now_resolution_too(overhaul):
 # this engine knows and nothing on the shelf Retains.
 
 def test_plans_held_is_the_queue_and_not_the_morning(overhaul):
-    """Tide Chart's count. "Holds" is WRITTEN AND NOT YET CARRIED OUT, so it
-    is `kk_plan_queue` -- `kk_plans_this_morning` keeps the drained morning's
-    depth and would pay for Plans the jellyfish no longer holds. The C# twin
-    `KokomiPlan.PlansHeld` reads `Pending` for the same reason."""
+    """"Holds" is WRITTEN AND NOT YET CARRIED OUT, so it is `kk_plan_queue` --
+    `kk_plans_this_morning` keeps the drained morning's depth and would answer
+    for Plans the jellyfish no longer holds. NO ROW SPENDS THIS COUNT since
+    R257 took it off Tide Chart; the C# twin `KokomiPlan.PlansHeld` is still
+    read, by Change of Plans' unplayable reason, and reads `Pending` for the
+    same reason this reads the queue."""
     st = kokomi_state()
     assert effects._runtime_count(st, "plans_held") == 0
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
@@ -847,22 +870,71 @@ def test_plans_held_is_the_queue_and_not_the_morning(overhaul):
     assert effects._runtime_count(st, "plans_held") == 0     # held, none
 
 
-def test_tide_chart_draws_one_per_plan_held(overhaul):
-    """The row itself, through the ordinary op chain: `{base: 0, per: 1,
-    count: plans_held}` on a `draw`. Blank with nothing written, which is the
-    price the row is designed around."""
+def _tide_chart_morning(st, plans, card):
+    """Play `card` this turn, bank `plans` Plans, and take the next turn's
+    start in `combat._player_turn`'s order: the roll, the morning, the
+    payment. Returns the hand the morning left."""
+    for i in range(plans):
+        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                           cid=f"proto_kk_p{i}"))
+    effects.resolve_card(st, card)
+    assert st.player.hand == []                 # THE PLAY DRAWS NOTHING
+    kokomi_plan.roll_turn(st)
+    kokomi_plan.resolve_all(st)
+    kokomi_plan.pay_tide_charts(st)
+    return st.player.hand
+
+
+def _tide_chart_state():
     st = kokomi_state()
     st.player.draw_pile = [plan_card([], cid=f"proto_kk_f{i}")
                            for i in range(6)]
+    return st
+
+
+def test_tide_chart_pays_the_morning_after_for_what_was_carried_out(overhaul):
+    """`EB-478`, R257: "Next turn, after the Bake-Kurage carries out its
+    Plans, draw 1 card for each." The play writes a promise and draws nothing;
+    the morning after pays for the Plans that were actually carried out.
+
+    THE OLD ROW READ THE QUEUE AT PLAY TIME and drew zero on three plays out
+    of four (Kokomi r15), because a seat plays its cheap cards before it
+    writes its Plans -- which is what this test now writes in the order that
+    used to pay nothing. `KokomiPlan.PromiseDraw` / `PayPromisedDraws`."""
     card = loader._card_prototype("proto_kk_tide_chart")
-    effects.resolve_card(st, card)
-    assert st.player.hand == []                 # nothing written, nothing drawn
+    assert len(_tide_chart_morning(_tide_chart_state(), 2, card)) == 2
+    # NONE CARRIED OUT DRAWS NOTHING: the base row is worth exactly the Plans
+    # the jellyfish had, and an empty morning had none.
+    assert _tide_chart_morning(_tide_chart_state(), 0, card) == []
+
+
+def test_tide_chart_upgraded_adds_one_flat_card(overhaul):
+    """"Draw 1 more": one card on top of the one per Plan carried out, which
+    is the ONLY reading that leaves the upgraded row live on an empty morning.
+    tier0 bumps the op's `amount` (`upgrades.apply_upgrade`'s `tide_draw`);
+    the C# reads the same half off `IsUpgraded` in `PromiseDraw`."""
+    from tier0.content import upgrades
+
+    up = upgrades.apply_upgrade(loader.get_card("proto_kk_tide_chart"))
+    assert up.effects == [{"op": "draw_after_plans", "amount": 1, "per": 1}]
+    assert len(_tide_chart_morning(_tide_chart_state(), 2, up)) == 3
+    assert len(_tide_chart_morning(_tide_chart_state(), 0, up)) == 1
+
+
+def test_a_tide_chart_promise_is_paid_once(overhaul):
+    """The promise is cleared BY the payment, so a second morning with no new
+    Tide Chart draws nothing -- `pay_tide_charts` clears before it draws, and
+    `PayPromisedDraws` removes the entry before its `CardPileCmd.Draw`."""
+    st = _tide_chart_state()
+    card = loader._card_prototype("proto_kk_tide_chart")
+    assert len(_tide_chart_morning(st, 2, card)) == 2
+    st.player.hand.clear()
+    kokomi_plan.roll_turn(st)
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                       cid="proto_kk_a"))
-    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                       cid="proto_kk_b"))
-    effects.resolve_card(st, card)
-    assert len(st.player.hand) == 2
+                                       cid="proto_kk_q"))
+    kokomi_plan.resolve_all(st)
+    kokomi_plan.pay_tide_charts(st)
+    assert st.player.hand == []
 
 
 def test_ripple_pays_block_now_and_energy_and_block_on_the_plan(overhaul):
