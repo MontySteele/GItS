@@ -65,7 +65,7 @@ public sealed class ProtoKkChainOfCommand : CustomCardModel, ICharacterCard, IPl
         {
             new CalculationBaseVar(0m),
             new ExtraDamageVar(3m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).CompanionsPlayedThisTurn),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).CompanionsPlayedThisTurn),
             new DynamicVar("PlanDamage", 6m)
         };
 

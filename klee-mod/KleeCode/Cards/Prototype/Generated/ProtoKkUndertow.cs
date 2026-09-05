@@ -59,7 +59,7 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
         {
             new CalculationBaseVar(7m),
             new ExtraDamageVar(3m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => target != null && KokomiOverhaulKit.HasDebuff(target) ? 1 : 0)
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => target != null && KokomiOverhaulKit.HasDebuff(target) ? 1 : 0)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

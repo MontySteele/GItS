@@ -59,7 +59,7 @@ public sealed class ProtoKkWellLaid : CustomCardModel, IElementalCard, ICharacte
         {
             new CalculationBaseVar(2m),
             new ExtraDamageVar(3m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).PlansThisMorning)
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).PlansThisMorning)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

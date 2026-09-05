@@ -5224,6 +5224,36 @@ def salon_calc_var_decls(card: dict, eff: dict) -> list[str] | None:
     ]
 
 
+def calculated_damage_var(card: dict) -> str:
+    """Which calculated-damage var a row's face declares (`EB-522`).
+
+    THE FIND (Kokomi r18 lane 2, fight 5). "Well Laid printed 'Deal 8 damage'
+    and removed 12 HP. Riptide on the same screen printed 'Deal 9 damage to
+    ALL' for its immediate line and 'Plan: Deal 19' for its Plan line -- 19 is
+    13 x 1.5, so the Plan line IS multiplied by the enemy's Vulnerable on the
+    printed face while the immediate line is not. Two numbers on one card
+    computed to two different conventions."
+
+    NEITHER HALF IS A BUG IN THE PIPELINE. `UpdateCardPreview` is handed the
+    creature the card is being AIMED at, and the target-side multiplier is a
+    fact about that creature; a card sitting in a hand has no such creature,
+    and a blind page reads the face exactly there. `KokomiPlan.PlanDamageVar`
+    is the row that already answered it -- a Plan card is dragged onto the PET,
+    so its preview target is never the enemy that will be hit, and it reads the
+    front enemy itself. `FrontFoldedDamageVar` is that convention on the other
+    kind of face, folding ONLY where the game handed nobody, so it cannot fold
+    a multiplier twice.
+
+    `proto_` ROWS ONLY, and that is the arm quarantine rather than a hedge: the
+    var lives under `Cards/Prototype/`, which a release build Compile-Removes,
+    and what a SHIPPED card prints at rest is a surface R249 ruled is not
+    repainted outside the arm.
+    """
+    return ("FrontFoldedDamageVar"
+            if str(card.get("id") or "").startswith("proto_")
+            else "CalculatedDamageVar")
+
+
 def build_vars(card: dict) -> list[str]:
     """DynamicVar declarations, in the order the effects use them."""
     out = []
@@ -5248,7 +5278,7 @@ def build_vars(card: dict) -> list[str]:
                 out.append(f'new CalculationBaseVar({base}m)')
                 out.append(f'new ExtraDamageVar({extra}m)')
                 out.append(
-                    'new CalculatedDamageVar(ValueProp.Move)'
+                    f'new {calculated_damage_var(card)}(ValueProp.Move)'
                     f'.WithMultiplier({mult})')
             elif eff is not damage_var_effect(card):
                 pass          # literal; only the upgraded hit declares a var

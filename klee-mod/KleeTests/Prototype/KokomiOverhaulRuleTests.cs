@@ -1,10 +1,13 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using BaseLib.Abstracts;
+using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models.Powers;
 using Xunit;
 
@@ -909,6 +912,49 @@ public class KokomiOverhaulRuleTests
         var preview = typeof(KokomiPlan.PlanDamageVar)
             .GetMethod("UpdateCardPreview", HeadlessGame.All)!;
         Assert.Contains("KokomiPlan.PlannedDamage", Il.Calls(preview));
+    }
+
+    [Fact]
+    public void EB522_a_calculated_face_folds_the_way_the_plan_line_does()
+    {
+        // `EB-522`. TWO NUMBERS ON ONE CARD, TWO CONVENTIONS.
+        //
+        // Kokomi r18 lane 2, fight 5: "Well Laid printed 'Deal 8 damage' and
+        // removed 12 HP. Riptide on the same screen printed 'Deal 9 damage to
+        // ALL' for its immediate line and 'Plan: Deal 19' for its Plan line --
+        // 19 is 13 x 1.5, so the Plan line IS multiplied by the enemy's
+        // Vulnerable on the printed face while the immediate line is not."
+        //
+        // NEITHER HALF IS A BUG IN THE PIPELINE. `UpdateCardPreview` is handed
+        // the creature a card is being AIMED at, and a card sitting in a hand
+        // has none -- which is exactly where a blind page reads the face. The
+        // pin above is the row that already answered it: a Plan card is
+        // dragged onto the PET, so its preview target is never the enemy that
+        // will be hit, and `PlanDamageVar` reads the front enemy itself.
+        // `FrontFoldedDamageVar` is that convention on the other kind of face.
+        //
+        // STRUCTURAL, and the class's own header says why: the base var
+        // reaches `CardModel.CombatState`, so the NUMBER needs a live combat
+        // this harness cannot build. What is pinned is the wiring.
+        var calculated = (object)new ProtoKkWellLaid().DynamicVars
+            .CalculatedDamage;
+        Assert.IsType<FrontFoldedDamageVar>(calculated);
+        // The game's own var underneath, so nothing about the multiplier, the
+        // extra term or the `{CalculatedDamage:diff()}` hole moves.
+        Assert.IsAssignableFrom<CalculatedDamageVar>(calculated);
+
+        var folded = typeof(FrontFoldedDamageVar)
+            .GetMethod("UpdateCardPreview", HeadlessGame.All)!;
+        var calls = Il.Calls(folded);
+        // The base's answer stands wherever the game had one to give ...
+        Assert.Contains(calls,
+            c => c.EndsWith("CalculatedDamageVar.UpdateCardPreview",
+                            StringComparison.Ordinal));
+        // ... the body it falls back to is the Plan line's own ...
+        Assert.Contains("KokomiPlan.FrontEnemy", calls);
+        // ... and the fold is the ONE call `ElementalHit.Deal` makes on the
+        // same creature a beat later, not a second expression (`EB-265`).
+        Assert.Contains("SimDamagePipeline.TargetMods", calls);
     }
 
     // --- `EB-335`: the kit's own defence in act 2 (R246 pick 2) -----------
