@@ -167,7 +167,12 @@ are in [`workstreams.md`](workstreams.md).
   (`review/active/klee-overhaul-round-14-2026-09-04.md`): one seat on
   `0.2.2564+proto`, floor 8 at the bridge's cap, six of six fights, the
   Spark economy read as the kit's engine, an invisible Mine (`EB-457`), the
-  enemy block printed twice (`EB-458`); no pick. [USER]'s act-1 run is due on
+  enemy block printed twice (`EB-458`); no pick. **Round 15 is READ, targeted**
+  (`review/active/klee-overhaul-round-15-2026-09-04.md`): two runs, Countdown and
+  Stoke the Fuse granted then Grounded and Sparks 'n' Splash; Stoke played
+  five times with a real ordering rule, Countdown quiet, Sparks 'n' Splash
+  never played in four fights of its own kit, the intent hedge and the map's deck list wrong
+  (`EB-461`, `EB-447` reopened); no pick. [USER]'s act-1 run is due on
   `0.2.2401+proto`. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
@@ -207,7 +212,12 @@ are in [`workstreams.md`](workstreams.md).
   `0.2.2564+proto`, floor 12 at the cap with the elite dying, Arcane
   Scroll gave no card (`EB-459`), dual-intent attack numbers never land
   (`EB-461`), Kurage's Oath's tag contradicts its rider (`EB-462`); Tide
-  Chart undrawn an eighth time; no pick. [USER]'s act-1 run is due on
+  Chart undrawn an eighth time; no pick. **Round 15 is READ, targeted**
+  (`review/ruled/kokomi-overhaul-round-15-2026-09-04.md`, RULED R257):
+  Tide Chart granted and dead as printed (zero draws on three of four
+  plays), which fired R254's re-ask trigger; **R257 took the default**: Tide
+  Chart redesigned to pay after the carry-outs (`EB-478`, GPT-audited before
+  a tester), the starter stays two kit cards; `EB-467`-`EB-469`. [USER]'s act-1 run is due on
   `0.2.2501+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
@@ -255,8 +265,14 @@ are in [`workstreams.md`](workstreams.md).
   `0.2.2564+proto`, floor 10 at the cap, six of six fights with the elite,
   Guest Cast skipping Chiori's hit (`EB-463`), a Replay performing no member
   (`EB-464`), five faces feeding a Burst no screen shows (`EB-449`), the
-  Encore opening read the same a fourth time. [USER]'s act-1 run is due on
-  that build. No stamp moves, nothing measured.
+  Encore opening read the same a fourth time. **Round 9 is READ**
+  (`review/active/furina-reframe-round-9-2026-09-04.md`): one seat on
+  `0.2.2577+proto`, floor 11 at the cap, six of six with the elite at zero
+  HP; enemy Block never printed (`EB-474`), three undefined terms
+  (`EB-475`), a performance takes Vulnerable and does not Shatter
+  (`EB-476`), an empty stage halves a Companion card silently (`EB-477`);
+  turn one read as a real choice, dry by construction. [USER]'s act-1 run
+  is due on that build. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
