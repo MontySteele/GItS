@@ -5640,9 +5640,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-490` renamed the class and not the claim: "Attack trigger" read
         # as something on the player's own side of the board, beside a Block
         # clause pointing the other way.
+        # `EB-516` added the aim, on the word rather than on the two rows
+        # that roll: they print only "a random enemy".
         "Set off": ["go off first, oldest first, each ",
                     "a Pyro hit. ", " stops them, no when-hit power ",
-                    "fires, the first takes the aura."],
+                    "fires, the first takes the aura. A random one picks a ",
+                    "enemy first."],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
         # `EB-436`: the hit is in the sentence now.
         "Mine": ["that also goes off before its enemy's hit, ",
@@ -5674,8 +5677,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                   "No ", "aura, no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
         # Strike is written against by name, met by a seat holding neither.
+        # `EB-516` moved the condition to the board.
         "Grounded": ["that pays at the start of your turn, but ",
-                     "went off last turn. Its ",
+                     "on the field. Its ",
                      "card prints what it pays."],
         # `EB-446`, Klee's seventh: a name Fischl -- Nightrider is written
         # against and a DIFFERENT companion card grants, so the face that
@@ -5742,7 +5746,7 @@ def test_the_grounded_word_is_defined_wherever_a_face_names_it():
         ["Deal 8 damage. Apply Cryo. This turn, Grounded counts nothing as "
          "having gone off."]))
     assert "- **Grounded** — A Power that pays at the start of your turn"         in page
-    assert "none of your Bombs went off last turn" in page
+    assert "you have a Bomb on the field" in page      # `EB-516`
 
     # WHETHER OR NOT THE DECK HOLDS IT, which is the state the seat was in:
     # the trigger is the printed word and nothing else. The buff the card

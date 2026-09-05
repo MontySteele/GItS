@@ -142,10 +142,17 @@ public class Round16Tests
     public void Renaming_the_class_cost_the_ceiling_nothing()
     {
         // "Attack trigger" and "when-hit power" are the same fourteen
-        // characters, so `EB-443`'s 132-of-135 reading stands as published.
+        // characters, so `EB-443`'s 132-of-135 reading stood as published --
+        // and `EB-516` then took the tip OVER the ceiling by adding the aim,
+        // which is the fact this pin now carries. The clause is worth the
+        // overage because the two rows that roll (Tinder Toss, Rapid Fire)
+        // print only "a random enemy" and cannot say where it lands, and
+        // `tools/lint_text_conventions.py` carries `SetOffKey` as a named
+        // exception with that reason.
         var rendered = SetOffTip()
             .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
-        Assert.Equal(132, rendered.Length);
+        Assert.Equal(173, rendered.Length);
+        Assert.EndsWith("A random one picks a Bombed enemy first.", rendered);
     }
 
     [Fact]

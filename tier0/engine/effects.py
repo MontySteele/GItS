@@ -5312,11 +5312,22 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
         # before that hit lands -- four rolls is four Set offs, not one Set off
         # and four hits. The candidates are re-read each time, so a hit that
         # killed its target cannot be rolled again.
+        #
+        # `EB-516`, THE AIM (Klee r18, packet sec.4 item 2). The roll is drawn
+        # from the enemies CARRYING one of her charges, and falls back to every
+        # living enemy only when none does. Tinder Toss and Rapid Fire share
+        # one fault and one rule fixes both: a random Set off that lands on a
+        # Bomb-less body breaks the arm's only economic loop (a Spark-priced
+        # Set off into a bombed body costs nothing net), and the r17 and r18
+        # seats named those two rows the least-wanted cards in the pool. The
+        # NUMBERS are untouched -- the same rolls, the same hits, a narrower
+        # bag to draw from -- and `SetOffRandom` is the twin.
         for _ in range(int(fx.get("times", 1))):
             living = state.living_enemies
             if not living:
                 return
-            enemy = state.rng.choice(living)
+            bombed = [e for e in living if klee_overhaul.holds_charge(e)]
+            enemy = state.rng.choice(bombed or living)
             klee_overhaul.set_off(state, enemy, card)
             hit(enemy)
         return

@@ -168,11 +168,14 @@ def test_the_grounded_tip_states_the_condition_and_defers_on_the_payout():
     the tip must not quote a number a second card would contradict."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert "that pays at the start of your turn, but " in tips
-    assert "only if none of your [gold]Bombs[/gold] went off last turn. Its "         in tips
+    assert "only if you have a [gold]Bomb[/gold] on the field. Its "         in tips
     assert "card prints what it pays." in tips
     sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
     assert "gain 6 [gold]Block[/gold] and 1 [gold]Spark[/gold]" in sheet
+    # `EB-516`: the sheet row's own condition, held in step with the tip.
+    assert ("if you have a [gold]Bomb[/gold] on the field, gain 6 "
+            "[gold]Block[/gold]") in sheet
 
 
 def test_the_attach_is_scoped_to_the_quarantined_surface():
@@ -468,8 +471,12 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # player's own side of the board, and the r16 seat read it that
             # way beside a Block clause pointing the other direction.
             "The target's [gold]Bombs[/gold] go off first, oldest first, each ",
+            # `EB-516` ADDED THE AIM, and it is on the WORD because the two
+            # rows that roll (Tinder Toss, Rapid Fire) print only "a random
+            # enemy" and cannot say where it lands.
             "a Pyro hit. [gold]Block[/gold] stops them, no when-hit power ",
-            "fires, the first takes the aura.",
+            "fires, the first takes the aura. A random one picks a Bombed ",
+            "enemy first.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
             "Start each combat with ",
             ". Pounding Surprise grants more. ",

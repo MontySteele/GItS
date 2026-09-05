@@ -300,15 +300,27 @@ public sealed class BombReactionSparkPower
 }
 
 /// <summary>
-/// Grounded: "At the start of your turn, if none of your Bombs went off last
-/// turn, gain 6 Block and 1 Spark." The card that pays for the quiet turn --
-/// the cook half of the contested thing, with Run Away! paying for the loud
-/// one.
+/// Grounded: "At the start of your turn, if you have a Bomb on the field, gain
+/// 6 Block and 1 Spark." The card that pays for the COOKING turn -- the cook
+/// half of the contested thing, with Run Away! paying for the loud one.
 ///
-/// LAST turn, not this one, and that is the whole design: the decision it pays
-/// for was made a turn ago, so the Block arrives before this turn's decision
-/// rather than as a reward for one already taken. <c>SetOffLastTurn</c> is the
-/// ledger's own read, rolled on the round stamp.
+/// `EB-516` REPLACED THE CONDITION (Klee r18, packet sec.4 item 1). It read "if
+/// none of your Bombs went off last turn" until now, and two seats in two
+/// rounds read that as paying for skipping the loop; the r18 ledgers say why,
+/// since under this relic something goes off on most turns even in a Cook deck
+/// (Mines fire on the enemy's beat), so the card paid ONCE in five fights and
+/// the seat called it "a trap in its own deck". Keying the payout to cooking
+/// rather than to not cashing keeps the card conditional (brief sec.6, C4) and
+/// makes the Cook half payable.
+///
+/// "A BOMB ON THE FIELD" IS <see cref="ProtoBombPower.AnyPlacedBy"/>: any Bomb
+/// or Mine of HERS on any living enemy. A Mine alone pays -- a Mine is a Bomb
+/// (`EB-373`) -- and a turn on which one Bomb went off while another is still
+/// cooking pays, which is the reading the old counter could not express.
+///
+/// BEFORE GROWTH IS IMMATERIAL, and it is said rather than relied on: the
+/// growth hook GROWS and neither places nor removes a charge (rule 7), so the
+/// set of enemies holding one is the same either side of it.
 ///
 /// THE SPARK IS `EB-344` (ruled R248). Rule 4 mints a Spark per EXPLOSION, so
 /// the turn this card is written for -- the one where nothing went off -- is by
@@ -325,8 +337,8 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
     {
         ("title", "Grounded"),
         ("description",
-            "At the start of your turn, if none of your [gold]Bombs[/gold] "
-          + "went off last turn, gain [blue]{Amount}[/blue] [gold]Block[/gold] "
+            "At the start of your turn, if you have a [gold]Bomb[/gold] on the "
+          + "field, gain [blue]{Amount}[/blue] [gold]Block[/gold] "
           + "and [blue]" + KleeOverhaulLaw.GroundedSpark + "[/blue] "
           + "[gold]Spark[/gold]."),
     };
@@ -338,16 +350,18 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Player player)
     {
         if (Owner == null || player.Creature != Owner) return;
-        // Read BEFORE the roll would be wrong and read after it is the point:
-        // `For` rolls the ledger to this round, so `SetOffLastTurn` is exactly
-        // the count that stood when the player last passed.
+        // `EB-516`: the BOARD, not the ledger. `AnyPlacedBy` is R205-scoped --
+        // her own charges only -- and skips a dead body, so a Bomb that outlived
+        // its enemy pays nothing.
         // KAEYA'S COVER STORY, and the only line the companion stand-in seam
-        // adds to this arm: Cold-Blooded Strike prints "This turn, Grounded
-        // counts nothing as having gone off" and it names GROUNDED -- so the
-        // blind is read HERE rather than written into the counter above, which
-        // Jean's stand-in also reads. False on every build with the companion
-        // arm off.
-        if (KleeOverhaulLedger.For(Owner).SetOffLastTurn > 0
+        // adds to this arm: Cold-Blooded Strike makes Grounded pay this turn
+        // whatever its condition says, so the blind is read HERE rather than
+        // written into the explosion counter, which Jean's stand-in also reads.
+        // False on every build with the companion arm off. `EB-516` moved the
+        // condition beside it and left the read where it was; the stand-in's
+        // PRINTED words still name the old counter, which is a face defect and
+        // not a rules one.
+        if (!ProtoBombPower.AnyPlacedBy(Owner)
             && !CompanionStandIns.GroundedBlind(Owner)) return;
         await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null);
         // `EB-344`. ONE CONDITION, TWO PAYOUTS: both are behind the same test,
