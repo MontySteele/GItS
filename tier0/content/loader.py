@@ -1276,7 +1276,15 @@ def _pool_substitutions(spec: dict) -> dict[str, str]:
     `_card_index`.
     """
     character = spec.get("id")
-    if character == "kokomi" and C.KURAGE_MEMORY:
+    # `EB-581`: AND NOT UNDER THE OVERHAUL, because the two Kokomi arms do not
+    # stack. `KOKOMI_OVERHAUL` replaces her offerable pool WHOLE
+    # (`KOKOMI_OVERHAUL_POOL_IDS`), and the memory row's own power -- "whenever
+    # the Bake-Kurage plays a card from its memory" -- names a rule that arm
+    # does not have; a substitution that put it in front of a drafter there
+    # would be offering an inert card under a title the arm's own starter Skill
+    # already prints.
+    if (character == "kokomi" and C.KURAGE_MEMORY
+            and not C.KOKOMI_OVERHAUL):
         return {C.KURAGE_MEMORY_POOL_DROP: C.KURAGE_MEMORY_POOL_ADD}
     if character == "klee" and C.SPARK_ALT_COST_ENABLED:
         return dict(C.SPARK_ALT_POOL_SUBS)

@@ -499,6 +499,30 @@ public static class KokomiPlan
         // listener order, and it is the same guard the sim needs for real
         // (there the play is recorded BEFORE the body resolves).
         var body = clauses.ToList();
+        // `EB-580`. THE CARD'S OWN ENCHANTMENT, FOLDED INTO THE NUMBER THAT IS
+        // WRITTEN DOWN -- see <see cref="Enchanted"/> for the finding and the
+        // measured API. AT WRITING TIME, Crystal Collapse's and Flank's rule
+        // below: the enchantment is what the player was looking at when they
+        // decided to write the Plan, and the card can be anywhere by the
+        // morning.
+        //
+        // THE PRINTED-DAMAGE CLAUSE ONLY, and that is exact rather than
+        // partial. `DamageQuarterMaxHp` and `DamagePerCompanionLastTurn` print
+        // no flat number for a flat rider to join -- one is read off Max HP and
+        // the other is a per-companion RATE, where a flat add would be paid
+        // once per body counted -- so there is nothing on those faces the fold
+        // could be about. `PlanDamageVar` previews the same call, so the number
+        // queued here is the number the face printed.
+        for (var i = 0; i < body.Count; i++)
+        {
+            if (body[i].Kind == Kind.Damage)
+            {
+                body[i] = body[i] with
+                {
+                    Amount = Enchanted(source, body[i].Amount),
+                };
+            }
+        }
         string? label = null;
         CardModel? held = null;
         if (body.Any(c => c.Kind == Kind.PlayCopyOfCompanion))
@@ -1803,6 +1827,47 @@ public static class KokomiPlan
             : (int)SimDamagePipeline.TargetMods(target, amount);
 
     /// <summary>
+    /// `EB-580`. THE CARD'S OWN ENCHANTMENT, FOLDED INTO ITS PLAN LINE.
+    ///
+    /// THE FIND (Kokomi r21 lane 2 (c) 3). A Sharp 2 raised Riptide's now-line
+    /// from 9 to 11 and left its Plan line printing 13, with nothing on screen
+    /// saying which of the two the enchantment had bought: the seat read the
+    /// pair as evidence that the Plan was now the worse half, and it
+    /// "silently reversed the right play on my best card". Ruled at the r21
+    /// packet's D default -- a card's own enchantment applies to BOTH its
+    /// lines, since both are the card's.
+    ///
+    /// WHY IT WAS MISSING RATHER THAN REFUSED. The game folds an enchantment
+    /// inside <c>Hook.ModifyDamage</c>, off the play's <c>cardSource</c> --
+    /// and a planned hit is not a card being played (`EB-538`), so it goes out
+    /// through <see cref="ElementalHit.Deal"/> and that hook never sees the
+    /// card at all. The rider is a fact about the CARD, so it is asked of the
+    /// card, here, once.
+    ///
+    /// <c>ValueProp.Move</c> AND NOT THE PLANNED HIT'S <c>Unpowered</c>, which
+    /// is the one argument in this method and is deliberate: the question is
+    /// what the enchantment adds to THIS CARD'S PRINTED DAMAGE -- which is
+    /// what a Plan line is -- and the base game's riders gate on the prop.
+    /// MEASURED on the shipped assembly rather than assumed:
+    /// <c>Corrupted</c> answers x1.5 to <c>Move</c> and x1 to
+    /// <c>Unpowered</c>, so passing the hit's own prop would have answered a
+    /// different question and dropped every multiplier; and
+    /// <c>Multiplicative</c> returns a MULTIPLIER (1 where there is none)
+    /// while <c>Additive</c> returns a DELTA.
+    ///
+    /// Sim twin: `kokomi_plan._enchanted`.
+    /// </summary>
+    public static int Enchanted(CardModel? source, int amount)
+    {
+        var enchantment = source?.Enchantment;
+        if (enchantment == null || amount <= 0) return amount;
+        var folded = amount
+                   + enchantment.EnchantDamageAdditive(amount, ValueProp.Move);
+        return (int)(folded * enchantment.EnchantDamageMultiplicative(
+            folded, ValueProp.Move));
+    }
+
+    /// <summary>
     /// THE PLAN LINE'S PRINTED HIT, READ AGAINST THE BOARD -- `EB-334`'s third
     /// clause, and the one a seat can check in one glance: "the Plan line on
     /// the card face prints the number it will deal against the enemy's current
@@ -1853,11 +1918,19 @@ public static class KokomiPlan
             // ASSERTS rather than returning null, which is why this guard is
             // the shape `ProtoBombPower.PredictedSetOffDamage` uses.
             if (!card.IsMutable) return;
+            // `EB-580`: THE ENCHANTMENT FIRST, AND WITHOUT A BOARD. It is a
+            // fact about THIS COPY of the card rather than about the fight, so
+            // it folds on a reward screen and in a deck view as well -- which
+            // is where the r21 seat was reading the two lines against each
+            // other. The target's terms are the ones that need an enemy, and
+            // they are still below.
+            var printed = Enchanted(card, (int)BaseValue);
+            PreviewValue = printed;
             var kokomi = card.Owner?.Creature;
             if (!KokomiOverhaul.LiveFor(kokomi)) return;
             var front = FrontEnemy(kokomi);
             if (front == null) return;
-            PreviewValue = PlannedDamage(front, (int)BaseValue);
+            PreviewValue = PlannedDamage(front, printed);
         }
     }
 }

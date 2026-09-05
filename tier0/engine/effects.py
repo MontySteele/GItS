@@ -877,8 +877,8 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     (R128, the rule the Shatter path below already keeps). Default False, so
     every shipped caller is byte-identical.
 
-    `powered` is QUARANTINED and has exactly THREE callers, across both
-    prototype arms. False drops the dealer's Strength and Weak
+    `powered` has exactly FOUR callers -- three QUARANTINED, one not.
+    False drops the dealer's Strength and Weak
     (`ValueProp.Unpowered` on the dealer's side) and nothing else -- the aura
     still lands, the reaction still fires, and the target's Vulnerable,
     Intangible cap and Block still apply -- so it is NOT
@@ -898,7 +898,13 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
       * C.KLEE_OVERHAUL -- `klee_overhaul._explode`, `EB-343` (ruled R248): a
         Bomb carries the TARGET's modifiers only, so a charge enters at its
         printed size. Here the dealer IS Klee, and the flag states the RULE
-        instead."""
+        instead.
+
+    THE FOURTH IS NOT QUARANTINED: `salon_member_act`, `EB-588`. A member's
+    performance is not Furina swinging, on the arm or on the shipped kit --
+    the Salon's own paragraph says "a performance is not an Attack and not a
+    hit" -- so the dealer's terms do not enter it either way, and there is one
+    implementation of a member acting to say so in."""
     # THE DEAD TAKE NOTHING (EB-136 / R210, C18). `CreatureCmd.Damage` opens
     # its per-target loop with `if (originalTarget2.IsDead) continue;`, so a
     # corpse absorbs no damage, fires no reaction and pays no on-hit rider --
@@ -1794,16 +1800,27 @@ def _salon_amount(state: CombatState, base: int, note: bool = True,
     return base + focus + p.powers.get("salon_damage_up", 0)
 
 
+def _salon_dry(amount: int, paid: bool) -> int:
+    """THE DRY CUT, in ONE place (`EB-587`). A member that cannot pay its
+    Encore acts at `SALON_DRY_DAMAGE_MULT`, and since the Evoke pays like a
+    performance that arithmetic has two callers -- `salon_tick_amount` and
+    `_salon_bow` -- which is one caller too many for a repeated expression.
+    C# twin: `SalonMemberPower.Dry`."""
+    return amount if paid else int(amount * C.SALON_DRY_DAMAGE_MULT)
+
+
 def _salon_bow(state: CombatState, member: str, evoked: bool = False) -> None:
     """The displaced member's final bow (Salon v2, rework plan §1): its
-    UNIQUE payoff. No Encore upkeep, Focus/Grand-Salon scaled numerics,
-    feeds the Burst meter like a tick.
+    UNIQUE payoff. Focus/Grand-Salon scaled numerics, feeds the Burst meter
+    like a tick.
 
     `evoked=True` is the Furina reframe's EVOKE (§4.4), and it changes exactly
-    two things: the Focus term is applied `EVOKE_FOCUS_MULT` times instead of
-    once (`F6` (1)), and the performance mints the larger Fanfare amount
-    (§4.1). Everything else about a bow -- which end of the queue it takes,
-    the aura, the Encore refund, the riders -- is the shipped bow, because the
+    three things: the Focus term is applied `EVOKE_FOCUS_MULT` times instead of
+    once (`F6` (1)), the performance mints the larger Fanfare amount (§4.1),
+    and since `EB-587` it PAYS THE UPKEEP -- 1 Encore, or three-quarters when
+    the pool is dry, exactly as a performance does. Everything else about a
+    bow -- which end of the queue it takes, the aura, the Encore refund, the
+    riders -- is the shipped bow, because the
     packet's own §2.2 finding is that the bow ALREADY IS the Defect-evoke
     analogue and the reframe renames it rather than rebuilding it. Both
     changes are inert unless `FURINA_REFRAME_EVOKE` / `_METER` are on, so an
@@ -1812,16 +1829,35 @@ def _salon_bow(state: CombatState, member: str, evoked: bool = False) -> None:
     p = state.player
     spec = C.SALON_MEMBERS[member]["bow"]
     mult = furina_reframe.evoke_focus_mult(p) if evoked else 1
+    # `EB-587`. AN EVOKE IS A PERFORMANCE AND PAYS LIKE ONE: it spends the
+    # upkeep's 1 Encore, or resolves at three-quarters when the pool is dry.
+    # THE FIND (Furina r15 lane 1 (c) 1): at 0 Encore three performances
+    # printed and landed dry while the Evoke on the same turn delivered its
+    # full 14, so the one act that costs a member was the one act the economy
+    # did not price. The rule it replaces -- the card's own printed Encore
+    # price pays for it -- had no answer on Curtain Rises, which deploys onto
+    # a full stage and prints no Encore price at all.
+    #
+    # ARM-SCOPED, like the Focus multiplier on the line above: a SHIPPED bow
+    # is the displaced member's payoff and is not a performance, so a release
+    # build's bow is byte-identical. C# twin: `SalonMemberPower.Bow`.
+    paid = True
+    if evoked:
+        paid = p.encore >= C.SALON_TICK_ENCORE_COST
+        if paid:
+            resources.spend_encore(state, C.SALON_TICK_ENCORE_COST,
+                                   "salon_evoke")
     dmg = spec.get("damage", 0)
     if dmg and state.living_enemies:
         # `EB-451`: the roll's pool, not the raw board.
         enemy = state.rng.choice(salon_aim_pool(state.living_enemies))
-        deal_damage_to_enemy(state, enemy,
-                             _salon_amount(state, dmg, focus_mult=mult),
-                             element="hydro", source="salon_final_bow")
+        deal_damage_to_enemy(
+            state, enemy,
+            _salon_dry(_salon_amount(state, dmg, focus_mult=mult), paid),
+            element="hydro", source="salon_final_bow")
     blk = spec.get("block", 0)
     if blk:
-        amt = _salon_amount(state, blk, focus_mult=mult)
+        amt = _salon_dry(_salon_amount(state, blk, focus_mult=mult), paid)
         p.block += amt
         state.emit("block", amount=amt)
     if spec.get("aura_all"):
@@ -6433,8 +6469,7 @@ def salon_tick_amount(state: CombatState, member: str, paid: bool,
     """
     spec = C.SALON_MEMBERS[member]["tick"]
     base = spec.get("damage", 0) or spec.get("block", 0)
-    amt = _salon_amount(state, base, note=note)
-    return amt if paid else int(amt * C.SALON_DRY_DAMAGE_MULT)
+    return _salon_dry(_salon_amount(state, base, note=note), paid)
 
 
 def salon_aim_pool(living: list) -> list:
@@ -6499,9 +6534,19 @@ def salon_member_act(state: CombatState, member: str,
     if spec.get("damage", 0):
         # `EB-451`: the roll's pool, not the raw board.
         enemy = state.rng.choice(salon_aim_pool(state.living_enemies))
+        # `EB-588`: `powered=False` -- THE DEALER'S TERMS DO NOT ENTER A
+        # PERFORMANCE. Weak cut a member performance 6 to 4 twice (Furina r15
+        # lane 2 (c) 4) while the Salon paragraph beside it says "a performance
+        # is not an Attack and not a hit: Vulnerable moves it" and names no
+        # Weak. ONE FLAG, so it drops Strength with the Weak -- that is what
+        # `powered` means in both engines, and a parameter meaning half of it
+        # is what `deal_damage_to_enemy`'s own docstring refuses. What a
+        # member's number IS stays the member's own: the printed base, the
+        # Fanfare Focus term and Grand Salon, through `salon_tick_amount`.
+        # C# twin: `SalonMemberPower.PerformMember`'s `powered: false`.
         deal_damage_to_enemy(state, enemy,
                              salon_tick_amount(state, member, paid),
-                             element="hydro", source="salon")
+                             element="hydro", source="salon", powered=False)
     if spec.get("block", 0):
         amt = salon_tick_amount(state, member, paid)
         p.block += amt

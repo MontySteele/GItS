@@ -141,6 +141,13 @@ public static class FurinaRiderTips
     /// release build's selector opens a two-mode choice and its own duration
     /// question is a different one.
     ///
+    /// `EB-590` PUT THE MOVER RULE BESIDE THIS ONE, chained at the same call
+    /// site: "moved the Spotlight" is a verb two faces use (Director's Cut's
+    /// condition, Guest Cast's duration) and the r15 seats could not tell what
+    /// performs it. <see cref="ForSpotlightMove"/> is the sentence that says
+    /// -- "playing Ethereal Spotlight moves it, and nothing else does" -- and
+    /// until now it rode Director's Cut alone, which is the card that ASKS the
+    /// question rather than the card that answers it.
     /// </summary>
     public static IEnumerable<IHoverTip> ForSpotlightDuration(
         IEnumerable<IHoverTip> inherited, CardModel card)
@@ -175,6 +182,18 @@ public static class FurinaRiderTips
     /// rule on its face: a repricing must not be able to leave a tip teaching
     /// a retired figure.
     ///
+    /// `EB-586` TOOK THE ADVICE OUT AND LEFT THE WINDOW. "Light your Companion
+    /// cards before anything performs" is a RECOMMENDATION, and the r15 lane-1
+    /// seat refused it on turn one of fight one and was right to: the starter
+    /// holds two Companion cards, the Spotlight costs the whole opening
+    /// Encore, and "the correct first move is to refuse the screen's own
+    /// advice". Lane 2 paid it in most fights and zeroed Encore twice, which
+    /// is where nine of its eleven HP went. The decision is REAL on both
+    /// lanes, so the sentence states the window and the price and stops --
+    /// which is the same discipline every other tip in this file is under
+    /// (`ProtoBombPower`'s badge says what a pile is worth and never what to
+    /// do with it).
+    ///
     /// ARM-ONLY, at the CALL SITE, exactly as the duration tip is: a release
     /// build's selector charges no Encore and this sentence would be false.
     /// </summary>
@@ -187,9 +206,9 @@ public static class FurinaRiderTips
             new LocString(Table, SpotlightWindowKey + ".title"),
             $"You open a fight with {FurinaReframeLaw.OpeningEncore} "
           + "[gold]Encore[/gold] and this costs "
-          + $"{FurinaReframeLaw.SpotlightDesignateEncoreCost}. Light your "
-          + "[gold]Companion[/gold] cards before anything performs, or it is "
-          + "shut for this combat.");
+          + $"{FurinaReframeLaw.SpotlightDesignateEncoreCost}. Any performance "
+          + "spends one, so it is this turn's first action or not this "
+          + "fight.");
 #endif
     }
 

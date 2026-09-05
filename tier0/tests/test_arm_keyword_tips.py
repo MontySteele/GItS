@@ -671,12 +671,16 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # ALL if it says so" paid for both facts.
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front ",
             "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. ",
+            # `EB-579` NAMED THE RULE INSTEAD OF THE LIST. "your Weak and
+            # Strength do not" reads as a complete enumeration, and the r21
+            # lane-2 seat had to TEST Shrink ("your Attacks deal 30% less") to
+            # learn it does not bite a carry-out either. The class is what a
+            # reader needs and it is one character shorter than the list was.
+            "Enemy [gold]Vulnerable[/gold] counts; no damage term of ",
             # `EB-538`: the class a carry-out belongs to, in `ForSetOff`'s
             # own words -- the same rule at the same call one kit over.
-            "and [gold]Strength[/gold] do not. A carry-out is not a hit: no ",
+            "yours does. A carry-out is not a hit: no ",
             "when-hit power fires.",
-            "Enemy [gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] ",
-            "and [gold]Strength[/gold] do not.",
             "heal N HP, never above the HP you entered ",
             # Furina, furina-reframe-2026-08-29.md sec.4.2 / sec.4.4 / sec.4.6,
             # staged as slice two. Three words the SHIPPED kit does not have:
@@ -691,9 +695,15 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "A member joins and performs at once; a full stage ",
             "[gold]Evokes[/gold] the front member first. Afterwards only a ",
             "[gold]Companion[/gold] play performs a member.",
+            # `EB-587` REPLACED THE PRICE CLAUSE WITH THE PRICE. "The card's
+            # Encore price pays for it" is false on Curtain Rises, which Evokes
+            # by deploying onto a full stage and prints no Encore price, and it
+            # left the Evoke outside the economy every other act on the stage
+            # pays into. An Evoke is a performance that also costs the member,
+            # so it pays the performance's 1 and takes the performance's cut.
             "The member performs and leaves. Its [gold]Fanfare[/gold] bonus ",
-            " [gold]Fanfare[/gold]. The card's [gold]Encore[/gold] price pays ",
-            "for it.",
+            " [gold]Fanfare[/gold]. It spends ",
+            " [gold]Encore[/gold], or Evokes at 3/4.",
             "Your [gold]Fanfare[/gold] falls to nothing. What the card does ",
             "next is priced off the amount it took.",
     ):
@@ -1155,7 +1165,7 @@ def test_the_plan_tip_names_strength_among_the_modifiers_that_do_not_reach():
             / "KokomiPlan.cs").read_text(encoding="utf-8")
     assert "UNPOWERED -- no Strength, no Weak" in plan
     body = blindplay.ARM_KEYWORDS["Plan"]
-    assert "Enemy Vulnerable counts; your Weak and Strength do not." in body
+    assert "Enemy Vulnerable counts; no damage term of yours does." in body
 
 
 def test_the_plan_tip_names_the_class_a_carry_out_is_in():
@@ -1179,10 +1189,17 @@ def test_the_plan_tip_is_over_the_keyword_ceiling_and_the_lint_carries_it():
     to make room, so `tools/lint_text_conventions.py` carries `PlanKey` in
     `EXCEPTIONS` with that reason -- the bargain `SetOffKey` already makes --
     and this pin is what stops the overage from growing quietly.
+
+    `EB-579` MADE IT SHORTER, which is the direction this pin exists to allow.
+    "your Weak and Strength do not" reads as a complete enumeration, and the
+    r21 lane-2 seat had to TEST Shrink ("your Attacks deal 30% less") to learn
+    it does not bite a carry-out either. Naming the CLASS -- "no damage term
+    of yours does" -- covers every debuff and buff on that side of the board
+    and costs one character less than the two-item list did.
     """
     from tools import lint_text_conventions as lint
 
     body = blindplay.ARM_KEYWORDS["Plan"]
-    assert len(body) == 186
+    assert len(body) == 185
     assert "PlanKey" in lint.EXCEPTIONS
     assert "EB-538" in lint.EXCEPTIONS["PlanKey"]

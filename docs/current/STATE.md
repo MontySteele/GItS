@@ -423,9 +423,9 @@ are in [`workstreams.md`](workstreams.md).
   empty, the turn-one Companion card always performing); Second Course
   playable beside a generator; the Evoke reached by the assembled deck
   only, paying nothing when dry (`EB-587`, D default: it pays) and
-  printing out of order (`EB-582`); Skittish never fired on card hits
-  (`EB-592`) and Weak cut a performance (`EB-588`), both read before any
-  number; no pick; `EB-582`-`EB-592`. [USER]'s act-1 run is due on
+  printing out of order (`EB-582`); Weak cut a performance (`EB-588`,
+  built); the Skittish read was a killing hit, not a defect (`EB-592`);
+  no pick; `EB-582`-`EB-592`. [USER]'s act-1 run is due on
   `0.2.2800+proto`. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family

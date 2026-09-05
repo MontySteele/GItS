@@ -1,6 +1,6 @@
 Status: OPEN (no pick; the defaults in §5 are applied)
 
-# Furina round fifteen: R260 read, the stage is never empty, and two hit rules came apart
+# Furina round fifteen: R260 read, the stage is never empty, and one hit rule came apart
 
 Written 2026-09-06, under the Prototype loop. Two blind Opus seats on
 `0.2.2800+proto` (round-21 branch with fixers O and P in: R260's stage,
@@ -70,15 +70,17 @@ paid it in most fights and zeroed Encore twice, which is where nine of
 its eleven HP went. The decision is real on both lanes and the line
 should not lean.
 
-**Two hit rules came apart, and both are the engine's.** Lane 2's elite:
-Skittish 6 never fired on any Gardener, "a 12-HP body died to a 13-damage
-card hit", where round 14's seat on the earlier build saw it fire on card
-hits and not on performances (`EB-592`). The same lane: Weak cut a member
+**One hit rule came apart, and one did not.** Lane 2: Weak cut a member
 performance 6 to 4 twice, against the Salon text's "a performance is not
 an Attack and not a hit: Vulnerable moves it", which names no Weak
-(`EB-588`, D default: the text stands). One says a card hit stopped
-counting as a hit; the other says a performance started counting as an
-Attack. Both are read before any Furina number is.
+(`EB-588`, D default: the text stands; built by fixer R, a performance
+now takes the unpowered door on the dealer's side too, so her Strength
+goes with the Weak). The same lane's "Skittish 6 never fired" was read by
+fixer R as not a defect: the witness, a 12-HP body dying to a 13-damage
+card hit, is a killing hit, and Skittish grants Block to nobody dead; the
+card-attack door did not move between the two builds, and it is pinned
+three ways (`EB-592`). The seat's reading was honest and wrong, which is
+the instrument working.
 
 **The face folds four modifiers and not the fifth.** Lane 2: Chevreuse
 printed 7, 10, 10 and delivered 11, 15, 22; the Spotlight, Weak and
@@ -116,9 +118,9 @@ under the arm (no seat met it). Nothing here is a strength reading.
 
 ## 4. The smallest interventions, ranked
 
-1. **`EB-592` and `EB-588` before any Furina number moves:** a card hit
-   that stopped being a hit and a performance that became an Attack are
-   the two rules the whole Salon rests on.
+1. **`EB-588` before any Furina number moves:** a performance that
+   became an Attack is the rule the whole Salon rests on (`EB-592`, the
+   other half of the reading, was not a defect).
 2. **`EB-587`, `EB-582`:** the Evoke paying, and printing in its order.
 3. **`EB-586`, `EB-590`, `EB-589`:** the Spotlight's line, its verb, and
    the face's fifth modifier.

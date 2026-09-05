@@ -458,15 +458,59 @@ def plan_aimed_label(card: Card, caught: Sequence[Enemy]) -> str:
     return f"{card.name}: " + ", ".join(e.name for e in caught)
 
 
+def _enchanted(card: Optional[Card], amount: int) -> int:
+    """`EB-580`. THE CARD'S OWN ENCHANTMENT, FOLDED INTO ITS PLAN LINE.
+
+    THE FIND (Kokomi r21 lane 2 (c) 3). A Sharp 2 raised Riptide's now-line
+    from 9 to 11 and left its Plan line printing 13, with nothing on screen
+    saying which of the two lines the enchantment had bought: the seat read
+    the pair as evidence that the Plan had become the worse half, and it
+    "silently reversed the right play on my best card". Ruled at the r21
+    packet's D default -- a card's own enchantment applies to BOTH its lines,
+    since both are the card's.
+
+    WHY IT WAS MISSING RATHER THAN REFUSED. The rider is folded where a CARD
+    deals damage (`effects` reads `enchant_damage` inside the `type ==
+    "attack"` branch), and a planned clause is not a card being played
+    (`EB-538`) -- so nothing on the path from the queue to the board had the
+    card in its hand to ask. It is asked here, once, at writing time.
+
+    THE ADDITIVE THEN THE MULTIPLIER, which is the order the card's own damage
+    takes one file over (Sharp lands with the flat riders, Corrupted's x1.5
+    multiplies the sum). `enchant_first_play_damage` (Vigorous) is DELIBERATELY
+    NOT HERE and it is the one rider a Plan cannot carry: "the first time this
+    card is PLAYED" is spent by the play that wrote the Plan, and paying it
+    again at the morning would pay one printed rider twice.
+
+    C# twin: `KokomiPlan.Enchanted`, which asks the base game's
+    `EnchantDamageAdditive` / `EnchantDamageMultiplicative` for the same two
+    terms in the same order.
+    """
+    if card is None or amount <= 0:
+        return amount
+    folded = amount + card.enchant_damage
+    if card.enchant_damage_mult != 1.0:
+        folded = int(folded * card.enchant_damage_mult)
+    return int(folded)
+
+
 def schedule(state: CombatState, card: Card,
              clauses: Optional[Sequence[dict]] = None,
-             replay: Optional[Card] = None) -> None:
+             replay: Optional[Card] = None,
+             enchanted_by: Optional[Card] = None) -> None:
     """Write one Plan down: rule 2's whole engine side.
 
     `clauses` defaults to the card's own printed line and is passed explicitly
     only by Moon's Reflection, which contributes the line of a card it found in
     the exhaust pile. `replay` is that screen's other shape -- a chosen card
     with NO Plan line of its own, replayed whole.
+
+    `enchanted_by` (`EB-580`) is WHOSE ENCHANTMENT FOLDS INTO THE LINE, and it
+    defaults to the writing card because on every ordinary Plan they are the
+    same card. Moon's Reflection is the one caller that separates them: the
+    line belongs to the card it FOUND, so that copy's Sharp is the one on it,
+    which is also the card `KokomiPlan.ScheduleFromExhaust` hands its own
+    `source` parameter.
 
     A PLAN IS ONLY EVER QUEUED HERE (`EB-570`). The Moon Overlooks the Waters
     used to carry the entry out on the spot as well -- "Plans also happen now"
@@ -481,6 +525,20 @@ def schedule(state: CombatState, card: Card,
     body = list(clauses if clauses is not None else card.plan)
     if not body:
         return
+    # `EB-580`. THE CARD'S OWN ENCHANTMENT, FOLDED INTO THE NUMBER THAT IS
+    # WRITTEN DOWN -- see `_enchanted` for the finding and the rule. It is
+    # folded HERE for the reason the two captures below are: the enchantment
+    # is what the player was looking at when they decided to write the Plan,
+    # and this card can be anywhere by the morning. It runs FIRST, and each
+    # rewrite below copies the clause it touches, so neither can un-fold it.
+    #
+    # MOON'S REFLECTION FOLDS THE CARD IT FOUND and not the card it is, which
+    # is what `enchanted_by` is for: an enchantment is a fact about the copy
+    # whose printed line this is.
+    owner = enchanted_by or card
+    body = [dict(c, amount=_enchanted(owner, int(c.get("amount", 0))))
+            if c.get("op") == "damage" else c
+            for c in body]
     # CRYSTAL COLLAPSE CAPTURES AT WRITING TIME, and that is the card. "The
     # last other Companion card you played THIS TURN" is a fact about the turn
     # the Plan was written on, and the Plan resolves on the next one -- so
@@ -551,7 +609,10 @@ def schedule_from_exhaust(state: CombatState, card: Card) -> None:
         pick = effects._best_card(planned)
         state.emit("plan_from_exhaust", card=card.id, chose=pick.id,
                    line="own")
-        schedule(state, card, clauses=pick.plan)
+        # `EB-580`: the LINE is `pick`'s, so `pick`'s enchantment is the one on
+        # it -- the same card `KokomiPlan.ScheduleFromExhaust` passes as its
+        # `source`.
+        schedule(state, card, clauses=pick.plan, enchanted_by=pick)
         return
     pick = effects._best_card(pool)
     state.emit("plan_from_exhaust", card=card.id, chose=pick.id, line="replay")
