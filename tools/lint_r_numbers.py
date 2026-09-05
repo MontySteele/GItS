@@ -45,7 +45,7 @@ DOCS = "docs/current"
 # is the direction the ceiling is allowed to run: it bounds what may be CITED,
 # and an unissued number below it is not a finding here. It resolves when the
 # branches meet.
-R_CEILING = 257
+R_CEILING = 258
 D_CEILING = 15
 
 HEADING = re.compile(r"(?m)^##\s+([RD]\d+)\b")
