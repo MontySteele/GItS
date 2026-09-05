@@ -16,6 +16,7 @@ import re
 from typing import Any
 
 from understudy.blindplay_faces import remember_elements
+from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
                                         CRYSTALLIZE_BLOCK,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
@@ -565,11 +566,33 @@ ARM_KEYWORDS: dict[str, str] = {
     # meets on a reward screen, which is where the seat needed them.
     "Companion": ("A card titled with a character's name, a dash, then its "
                   "own. Card rewards after a fight offer a fourth, "
-                  "Companion, choice. On Furina's stage playing one performs "
-                  "the front member, then sends it to the back; an empty "
-                  "stage performs nobody. The member picks its own enemy at "
-                  "random, never the card's target."),
+                  "Companion, choice."),
 }
+
+# `EB-460`. THE QUALIFIER WAS NOT ENOUGH, AND THE ROW SAID SO ITSELF.
+#
+# `EB-430` put Furina's perform rule on the shared `Companion` row and hung it
+# on the words "On Furina's stage", on the reasoning that a Klee reading a flat
+# sentence would be taught a rule her board does not have. The r14 Kokomi seat
+# read the qualified version and filed it anyway: "Nothing on any screen in
+# this run had a stage or a member order ... That entry appears to be
+# describing a different character's kit." A qualifier a reader has to
+# recognise as not-about-them is still three sentences of somebody else's kit
+# on every screen, which is `EB-444` one word over.
+#
+# SO THE STAGE HALF IS THE ARM'S, and the arm is asked rather than the board:
+# the word's home screen is a card REWARD, where a Furina board shows no stage
+# and the rule is exactly what the r5 run-2 seat needed. `obs["character"]` is
+# the wire's own answer and it is on every screen.
+COMPANION_STAGE_CLAUSE = (
+    " On Furina's stage playing one performs the front member, then sends it "
+    "to the back; an empty stage performs nobody. The member picks its own "
+    "enemy at random, never the card's target.")
+
+#: Whose stage it is. Matched the way `understudy/adapter.py` matches it -- on
+#: the character's printed Title, case-folded -- because that is the field the
+#: wire sends and a Title is not an id.
+_STAGE_CHARACTER = "furina"
 
 # One pattern per word, and they are CASE-SENSITIVE on purpose: the game
 # capitalises a keyword wherever it prints one, and a case-blind `mine` or
@@ -1211,9 +1234,16 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     meters = ((obs.get("combat") or {}).get("you") or {}).get("meters") or {}
     hay = "\n".join(list(_body_strings(obs)) + list(meters))
     growth = _BOMB_GROWTH_RE.search(hay)
+    # `EB-460`: ONE OF THESE ROWS IS ARM-CONDITIONAL. The stage half of
+    # `Companion` is Furina's rule, so it rides a Furina run and nothing else;
+    # every other arm gets the definition and the reward slot, which are true
+    # on all of them.
+    stage = _fold(obs.get("character")) == _STAGE_CHARACTER
     rows = [{"name": word,
              "text": ARM_KEYWORDS[word].format(
-                 growth=int(growth.group(1)) if growth else BOMB_GROWTH)}
+                 growth=int(growth.group(1)) if growth else BOMB_GROWTH)
+             + (COMPANION_STAGE_CLAUSE
+                if stage and word == "Companion" else "")}
             for word, pattern in _ARM_KEYWORD_RE.items() if pattern.search(hay)]
     rows += [{"name": word, "text": GAME_KEYWORDS[word]}
              for word, pattern in _GAME_KEYWORD_RE.items()

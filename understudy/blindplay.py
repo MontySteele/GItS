@@ -161,7 +161,7 @@ from understudy.blindplay_board import (   # noqa: E402,F401  (re-export)
     _selected_bundle, UNEXPLAINED_OMISSION, upgrade_deck_floor)
 from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
     _ARM_KEYWORD_RE, ARM_KEYWORDS, AURA_NOTE, _BASE_KEYWORD_RE, BASE_KEYWORDS,
-    BOSS_ROOM, _elements_on_screen,
+    BOSS_ROOM, COMPANION_STAGE_CLAUSE, _elements_on_screen,
     _every_string, FROZEN_BOSS_CLAUSE, _GAME_KEYWORD_RE, GAME_KEYWORDS,
     HAND_REPEAT_NOTE, keyword_notes, METER_CAPPED_NOTE,
     METER_NOTE, METER_RULES, PLAN_AIM_NOTE, PLAN_HYDRO_NOTE, POWER_NOTE,

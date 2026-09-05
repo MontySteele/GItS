@@ -98,6 +98,15 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         "blocked": "",
         "screen": "",
         "commands": [],
+        # `EB-460`: WHOSE RUN THIS IS, carried and never printed. A word whose
+        # rule differs by arm cannot be answered off the board -- a Companion
+        # card on a reward screen looks the same on every run -- and the wire
+        # has said which character is playing all along (`BuildPlayerState`
+        # writes `character`, the character's own printed Title). It rides on
+        # the observation rather than inside `combat` because the glossary
+        # fires on every screen a card is read on, and three of those are not
+        # fights.
+        "character": _text(_player(state).get("character")),
     }
     hazard = _hazard(state)
 

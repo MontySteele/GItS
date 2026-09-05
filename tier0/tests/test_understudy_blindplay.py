@@ -5614,12 +5614,53 @@ def test_the_companion_row_is_the_mods_own_sentence_about_the_slot():
     # two, and the ceiling it keeps is PER SENTENCE: no sentence here runs
     # longer than the 135-character tip the arm rows mirror, which is what
     # stops a row with no tip of its own from sprawling.
-    for sentence in re.split(r"(?<=\.)\s+", body):
+    for sentence in re.split(r"(?<=\.)\s+",
+                             body + blindplay.COMPANION_STAGE_CLAUSE):
         assert len(sentence) <= 135, (len(sentence), sentence)
-    # And the Salon half NAMES the stage it is about: Klee's Companions carry
-    # their own rider (Spark, on `KleeCompanionSpark`'s tip), so a flat
-    # sentence here would teach her a rule her board does not have.
-    assert "On Furina's stage" in body
+    # `EB-460`: AND THE SALON HALF IS OFF THE SHARED ROW ENTIRELY. Naming the
+    # stage was not enough -- the r14 Kokomi seat read the qualified sentences
+    # and still filed them as "describing a different character's kit" -- so
+    # the arm decides, and the shared row carries no stage at all.
+    assert "Furina" not in body and "stage" not in body
+    assert "On Furina's stage" in blindplay.COMPANION_STAGE_CLAUSE
+
+
+def test_the_companion_stage_sentence_prints_under_furina_and_no_other_arm():
+    """`EB-460`. A TIP THAT PRINTED ANOTHER CHARACTER'S RULES, which is
+    `EB-444` one word over.
+
+    "The Companion glossary entry talks about Furina's stage and a front member
+    being performed and sent to the back. Nothing on any screen in this run had
+    a stage or a member order ... That entry appears to be describing a
+    different character's kit" (Kokomi r14 (c)). `EB-430` had already qualified
+    the clauses with "On Furina's stage" and the qualifier did not save them: a
+    reader still has to recognise three sentences as not being about them, on
+    every screen a Companion card is read on.
+
+    THE ARM IS ASKED, NOT THE BOARD. The word's home screen is a card reward,
+    where a Furina board shows no stage either, so the gate is the wire's own
+    `character` field and it is on every screen.
+
+    Seen to FAIL: the stage sentences printed on the recorded Kokomi turn.
+    """
+    face = "Deal 3 damage for each Companion you played this turn."
+    kokomi = blindplay.observe(keyword_hand_state([face]))
+    assert "- **Companion** — A card titled with a character's name" in kokomi
+    assert "offer a fourth, Companion, choice" in kokomi
+    assert "Furina" not in kokomi and "front member" not in kokomi
+
+    state = keyword_hand_state([face])
+    state["player"]["character"] = "Furina"
+    furina = blindplay.observe(state)
+    assert "- **Companion** — A card titled with a character's name" in furina
+    assert "On Furina's stage playing one performs the front member" in furina
+    assert "picks its own enemy at random" in furina
+
+    # A Klee run is the third arm and reads like the Kokomi one: her
+    # Companions carry their own rider, on `KleeCompanionSpark`'s tip.
+    klee = json.loads(json.dumps(state))
+    klee["player"]["character"] = "Klee"
+    assert "On Furina's stage" not in blindplay.observe(klee)
 
 
 def test_the_companion_word_is_defined_where_a_card_prices_itself_on_it():
@@ -7508,7 +7549,10 @@ def test_the_companion_perform_clauses_are_the_perform_codes_own():
     """
     salon = (REPO / "klee-mod" / "KleeCode" / "Powers"
              / "SalonPowers.cs").read_text(encoding="utf-8")
-    body = blindplay.ARM_KEYWORDS["Companion"]
+    # `EB-460` MOVED THESE TWO CLAUSES OFF THE SHARED ROW. They are Furina's
+    # rule, so they live in `COMPANION_STAGE_CLAUSE` and print on her run only;
+    # what they SAY is still read off `SalonPowers` and pinned here.
+    body = blindplay.COMPANION_STAGE_CLAUSE
 
     # THE TARGET. `PerformMember` rolls it; the card's target reaches it
     # nowhere -- the method takes an owner and a member and no creature.
