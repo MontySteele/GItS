@@ -2553,13 +2553,13 @@ the hold-or-spend tension on a deploy. The price is the `encore_cost` GATE and
 NOT the `spend_encore` op -- the packet's sentence is "Unplayable below 3
 Encore", and `spend_encore` is the overdraw primitive, which would have made
 the card playable at 0 Encore for 3 HP. That is *Breathless*' rule and it is
-printed on *Breathless*. The upgrade takes the price to 2, Aria's own printed 5
-less the 2 she opens with (R258); it moves on the seats' word.
-
-**Rolling Tide** (replaces *Undercurrent*) is the kit's own perform verb on a
-card she can draft -- one hit of the shipped card traded for it. With an empty
-stage it is a worse Undercurrent, which is the losing line the row is written
-around.
+printed on *Breathless*. THE PRINTED PRICE IS 1 AND NOT THE 3 IT WAS BUILT AT (`EB-552`, round 13,
+FOLLOWS on the doctrine read, record sec.5.8): the printed 3 plus the shipped
+per-performance drain is five Encore against an opening of two, and across
+three rounds the card was refused on all four draws it ever had. At 1 the full
+value is 3. The upgrade's `-1` is unchanged, so the `+` card is free and the
+codegen drops the "Spend N Encore" sentence rather than printing "Spend 0"
+(text conventions, the Evoke row).
 
 **Guest List** (replaces *Blocking Notes*) puts An Invitation's verb in the
 pool at a price: an energy and no Exhaust, three Block short of a Stage
@@ -2584,7 +2584,16 @@ who is not on stage takes the FRONT, which is the slot-6 ruling's fallback for
 the aimed Evoke, and the fact is emitted (`salon_perform_target_absent`) rather
 than left silent.
 
-WHICH FOUR SHIPPED ROWS, and it is the packet's sec.5 D default: each replaced
+ROLLING TIDE IS WITHDRAWN (`EB-552`, round 13, a D default, and the loop's
+first cut). It replaced *Undercurrent* and was the kit's own perform verb on a
+card she could draft. Four seats over three rounds read it the same way at two
+energy and at one -- "4 damage into one body; zero against Plating 8; actively
+harmful against four Skittish bodies" -- so the price was never the reason and
+the row left the arm rather than moving a third time. The shipped Undercurrent
+is offered again at that seam, and the row left this sheet with its pins under
+R213 B's deletion rule.
+
+WHICH SHIPPED ROWS, and it is the packet's sec.5 D default: each replaced
 row is a plain number card of the same type and cost as its replacement, so the
 swap moves what the card does and nothing about where it sits. Common for
 Common in every case, so the offer odds do not move. The choice moves on the

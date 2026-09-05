@@ -85,6 +85,15 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
         out.append(f"    Upgraded: {c['upgraded_face']}")
     elif c.get("upgraded_note"):
         out.append(f"    Upgraded: not shown -- {c['upgraded_note']}.")
+    # `EB-551`: THE KEYWORD DELTAS, BESIDE THE NUMBER DELTAS. "Aria+ showed
+    # only the number change and not Innate, the most load-bearing keyword in
+    # the deck, chosen without being shown" (Furina r13 lane 1). Its own line
+    # rather than a tail on the face's, because it is true whether or not the
+    # face rendered -- a row this page cannot number still adds its keyword,
+    # and that is often the whole of what a Smith pick turns on.
+    if c.get("upgraded_keywords"):
+        out.append("    Upgraded, and gains "
+                   + ", ".join(c["upgraded_keywords"]) + ".")
     note = qa_packet.cost_note(c)
     if note:
         out.append(f"    {note}")

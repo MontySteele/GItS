@@ -10,8 +10,15 @@ reading:
 
     Curtain Rises   a second Deploy SHAPE: a deploy on an Attack
     Second Course   a second performance, priced in Encore
-    Rolling Tide    the kit's own perform verb on a card she can draft
     Guest List      a Companion generator in the offer pool, without Exhaust
+
+THREE OF THE FOUR REMAIN. *Rolling Tide* -- the kit's own perform verb on a
+card she can draft -- was WITHDRAWN from the arm's offer in round 13
+(`EB-552`, a D default): four seats over three rounds read it the same way at
+two prices, so the row left rather than moving a third time, and the shipped
+*Undercurrent* is offered again at that seam. Its row left
+`docs/prototype-surface.yaml` under R213 B's deletion rule and its pins left
+with it, which is what `PASS_ROWS` below is for.
 
 WHAT THIS FILE IS AND IS NOT, and it is `test_furina_reframe_slice2.py`'s note
 one pass later. `C# FIRST, sim at Balance`
@@ -49,7 +56,6 @@ REPO = Path(__file__).resolve().parents[2]
 PASS_ROWS = {
     "proto_fr_curtain_rises": "house_call",
     "proto_fr_second_course": "dinner_service",
-    "proto_fr_rolling_tide": "undercurrent",
     "proto_fr_guest_list": "blocking_notes",
 }
 
@@ -320,27 +326,37 @@ def test_curtain_rises_upgrades_its_damage_and_not_its_deploy(arm):
 # ======================================================================
 
 def test_second_course_is_unplayable_below_its_encore_price(arm):
-    """The packet's own sentence: "Unplayable below 3 Encore." That is the
-    `encore_cost` GATE (`combat.card_playable`) and never the `spend_encore`
-    OP, which is the overdraw primitive and would let the card be played at 0
-    Encore for 3 HP."""
-    card = loader.get_card("proto_fr_second_course")
-    assert card.encore_cost == 3
+    """The packet's own sentence, at the price round 13 gave it: "Unplayable
+    below 1 Encore." That is the `encore_cost` GATE (`combat.card_playable`)
+    and never the `spend_encore` OP, which is the overdraw primitive and would
+    let the card be played at 0 Encore for HP.
 
-    st = _staged([], encore=2)
+    THE PRINTED PRICE IS 1 (`EB-552`, FOLLOWS on the doctrine read, record
+    sec.5.8). It was built at 3, and three rounds read the same thing: the
+    printed 3 plus the shipped per-performance drain is FIVE Encore against an
+    opening of 2, so the card was refused on every draw it ever had. At 1 the
+    full value is 3.
+    """
+    card = loader.get_card("proto_fr_second_course")
+    assert card.encore_cost == 1
+
+    st = _staged([], encore=0)
     st.player.energy = 3            # the Energy gate is a separate line
     assert not combat.card_playable(st, card)
 
-    st.player.encore = 3
+    st.player.encore = 1
     assert combat.card_playable(st, card)
 
 
-def test_the_upgrade_cuts_the_price_by_one(arm):
-    st = _staged([], encore=2)
+def test_the_upgrade_takes_the_price_to_nothing(arm):
+    """The upgrade delta is unchanged at -1, which at a printed 1 is a free
+    card: the codegen drops the "Spend N Encore" sentence from the `+` face
+    rather than printing "Spend 0" (text conventions, the Evoke row)."""
+    st = _staged([], encore=0)
     st.player.energy = 3
     up = loader.get_card("proto_fr_second_course+")
 
-    assert up.encore_cost == 2
+    assert up.encore_cost == 0
     assert combat.card_playable(st, up)
 
 
@@ -375,18 +391,18 @@ def test_the_extra_performance_is_crabalettas_even_off_a_full_stage(arm):
 
 
 @pytest.mark.parametrize("encore, expected_hits", [
-    (3, "dry dry"), (4, "paid dry"), (5, "paid paid"),
+    (1, "dry dry"), (2, "paid dry"), (3, "paid paid"),
 ])
 def test_second_course_at_the_affordability_boundary(arm, encore,
                                                      expected_hits):
-    """GPT review, 2026-09-05, item 2. The printed price is 3 Encore, and the
-    SHIPPED Salon rule then charges `SALON_TICK_ENCORE_COST` per performance
-    or performs dry at `SALON_DRY_DAMAGE_MULT` -- the member tip says so, the
-    packet's first arithmetic did not. So the card's full-value price is
-    FIVE Encore: at exactly 3 both performances are dry, at 4 the first is
-    paid and the second dry, at 5 both are paid, and the Encore pool is
-    empty afterwards in every case. The reproduction GPT reported (8 / 10 /
-    12 at zero Fanfare against an empty stage) is what this pins."""
+    """GPT review, 2026-09-05, item 2, re-read at the printed 1 (`EB-552`).
+    The printed price is 1 Encore, and the SHIPPED Salon rule then charges
+    `SALON_TICK_ENCORE_COST` per performance or performs dry at
+    `SALON_DRY_DAMAGE_MULT` -- the member tip says so, the packet's first
+    arithmetic did not. So the card's full-value price is THREE Encore, which
+    is the number the doctrine read compared against her opening 2: at exactly
+    1 both performances are dry, at 2 the first is paid and the second dry, at
+    3 both are paid, and the Encore pool is empty afterwards in every case."""
     st = _staged([], encore=encore)
     st.player.energy = 3
     hp = st.enemies[0].hp
@@ -404,80 +420,57 @@ def test_second_course_at_the_affordability_boundary(arm, encore,
     expected = sum(paid if h == "paid" else dry for h in expected_hits.split())
     assert st.enemies[0].hp == hp - expected
     assert _tick_members(st) == ["crabaletta", "crabaletta"]
-    assert st.player.encore == 0, "the printed 3 and the per-performance drain"
+    assert st.player.encore == 0, "the printed 1 and the per-performance drain"
 
 
 # ======================================================================
-# 4. ROLLING TIDE -- the kit's own perform verb
+# 4. THE ROUND-12 ADJUSTMENT THAT STAYED, AND THE ROW THAT DID NOT
 # ======================================================================
 
-def test_the_two_round_twelve_adjustments_are_on_the_sheet(arm):
-    """`EB-530`. THE PRICE THE SEATS NAMED, AND THE MEMBER THEY DID NOT WANT.
+def test_the_round_twelve_adjustment_that_stayed_is_on_the_sheet(arm):
+    """`EB-530`. THE MEMBER THREE SEATS DID NOT WANT.
 
-    Round 12 (`review/active/furina-reframe-round-12-2026-09-05.md` sec.4)
-    asked one question of the assembled seat -- "name the turn on which you
-    would have played Rolling Tide at 1 energy, or name none" -- and got "4 of
-    6, and it would be a staple"; with round 11's four declines that is three
-    seats and one answer. Curtain Rises fielding the Usher was read the same
-    way by three seats. Both arms are FOLLOWS on the doctrine read (card audit
-    sec.5.7): C2 binds, because the remaining 1 energy still binds, and C6
-    holds on both, because neither is strictly better than the shipped row it
-    is compared against.
-
-    NOTHING ELSE MOVED: the seam (`furina_reframe.POOL_SUBS`) offers the same two
-    ids in place of the same two shipped rows, and both keep their shape --
-    an ALL-enemies Attack that performs the front, and a Deploy on an Attack.
+    Round 12 read Curtain Rises fielding the Usher the same way three times --
+    "it puts the Usher at the front and converts the damage engine into a block
+    engine" -- and the arm is FOLLOWS on the doctrine read (card audit
+    sec.5.7): C6 holds, because it is not strictly better than the shipped row
+    it is compared against. NOTHING ELSE MOVED: the seam
+    (`furina_reframe.POOL_SUBS`) offers the same id in place of the same
+    shipped row, and it keeps its shape -- a Deploy on an Attack.
     """
     import yaml
     sheet = yaml.safe_load((REPO / "docs" / "prototype-surface.yaml")
                            .read_text(encoding="utf-8"))
     rows = {r["id"]: r for r in sheet}
 
-    assert loader.get_card("proto_fr_rolling_tide").cost == 1
-    assert rows["proto_fr_rolling_tide"]["cost"] == 1
     # The face is codegen's business and `Card` carries no description, so the
     # sheet is the one place the printed words live on this side.
     face = rows["proto_fr_curtain_rises"]["description"]
     assert "Surintendante Chevalmarin" in face
     assert "Usher" not in face
-    assert FR.POOL_SUBS["undercurrent"] == "proto_fr_rolling_tide"
     assert FR.POOL_SUBS["house_call"] == "proto_fr_curtain_rises"
 
 
-def test_rolling_tide_hits_all_enemies_twice_and_performs_the_front(arm):
-    enemies = [make_enemy(hp=40), make_enemy(hp=40)]
-    st = _staged(["usher", "crabaletta"], encore=9, enemies=enemies)
+def test_rolling_tide_left_the_arm_and_undercurrent_is_offered_again(arm):
+    """`EB-552` (round 13, a D default), and the loop's FIRST CUT.
 
-    effects.resolve_card(st, loader.get_card("proto_fr_rolling_tide"))
+    Rolling Tide was the kit's own perform verb on a row she could draft. Four
+    seats over three rounds read it the same way at 2 energy and at 1 -- "4
+    damage into one body; zero against Plating 8; actively harmful against four
+    Skittish bodies" -- so the price was never the reason and the row left the
+    arm rather than moving a third time. What that means here is one thing and
+    it is checked in three places: the id is off the surface, the seam does not
+    name it, and the shipped `undercurrent` is back in the offer under the arm.
+    """
+    assert "proto_fr_rolling_tide" not in {c.id for c in
+                                           loader.prototype_cards()}
+    assert "undercurrent" not in FR.POOL_SUBS
+    assert "proto_fr_rolling_tide" not in set(FR.POOL_SUBS.values())
 
-    for e in st.enemies:
-        assert e.hp == 40 - 4                              # 2 damage, twice
-    assert _tick_members(st) == ["usher"]
-    assert st.player.salon == ["usher", "crabaletta"]      # a perform, not a
-                                                           # bow or a rotation
-
-
-def test_rolling_tide_performs_nobody_on_an_empty_stage_and_says_so(arm):
-    """The losing line the packet names: with an empty stage this is a worse
-    Undercurrent. `salon_perform_whiffed` is what a display reads to print
-    EB-477's "No member on stage: performs nobody"."""
-    enemies = [make_enemy(hp=40)]
-    st = _staged([], encore=9, enemies=enemies)
-
-    effects.resolve_card(st, loader.get_card("proto_fr_rolling_tide"))
-
-    assert st.enemies[0].hp == 40 - 4                      # the hit still lands
-    assert len(_events(st, "salon_perform_whiffed")) == 1
-    assert _tick_members(st) == []
-
-
-def test_rolling_tide_upgrades_every_hit(arm):
-    enemies = [make_enemy(hp=40)]
-    st = _staged([], encore=9, enemies=enemies)
-
-    effects.resolve_card(st, loader.get_card("proto_fr_rolling_tide+"))
-
-    assert st.enemies[0].hp == 40 - 6                      # 3 damage, twice
+    ids = {c.id for cards in rewards.character_pool("furina").values()
+           for c in cards}
+    assert "undercurrent" in ids
+    assert "proto_fr_rolling_tide" not in ids
 
 
 # ======================================================================

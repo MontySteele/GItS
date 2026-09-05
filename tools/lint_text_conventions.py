@@ -89,6 +89,24 @@ EXCEPTIONS = {
         "what stops them, what does not fire, where the aura goes and where a "
         "random one lands (EB-432, EB-490, EB-516) -- and none of them is "
         "droppable to make room"),
+    "BombKey": (
+        "`EB-536` added the Mine to a tip at 133 of 135. The tip said a Bomb "
+        "'goes off only when Set off' and the Mine tip printed DIRECTLY BELOW "
+        "it says a Mine also goes off before its enemy's hit, so two surfaces "
+        "on one screen contradicted each other (Klee r19 lane 2). Every other "
+        "clause is a ruled finding -- the growth rate, the class of the hit "
+        "and which terms move it, and the jump to a survivor (EB-373, EB-443, "
+        "EB-361) -- and none is droppable to make room"),
+    "PlanKey": (
+        "`EB-538` added the CLASS a carry-out belongs to, to a tip already at "
+        "135 of 135. Skittish gave no Block to a body hit by two carry-outs "
+        "and 6 Block to a plain Strike on the same enemy in the same fight "
+        "(Kokomi r19 lane 2), and the seat could not tell a defect from a "
+        "large undocumented advantage. The clause is `SetOffKey`'s own "
+        "sentence at the same call one kit over, and every clause above it is "
+        "a seat's finding: the aim, the ALL exception, and whose modifiers a "
+        "carry-out reads (EB-329, R250, EB-380, EB-538). None is droppable to "
+        "make room"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.
@@ -115,12 +133,20 @@ _BOMB_FACE_REASON = (
     "when no card is in front of the player; and EB-514 puts the HIT COUNT in "
     "the headline, because the total is a sum over the charges and a stack "
     "printed one number where the board makes several hits and several Sparks")
+#: THE ONE FACE OF THE GRID THAT MEETS ITS CEILING, and it is `EB-536`'s own
+#: result: a pile of ONE charge, on an enemy with no modifier the total passes
+#: through, prints 125 of 125 once the hit clause is gone. It is excluded here
+#: rather than left in with the rest, because the rot check is what would
+#: otherwise say so and an exception nobody needs is an exception nobody reads.
+_BOMB_FACE_UNDER_CEILING = "ProtoBombPower.smartDescriptionOne"
 EXCEPTIONS.update({
-    "ProtoBombPower.smartDescription" + mines + vulnerable + cap:
-        _BOMB_FACE_REASON
+    key: _BOMB_FACE_REASON
+    for single in ("", "One")
     for mines in ("", "Mines")
     for vulnerable in ("", "Vulnerable")
     for cap in ("", "HardToKill", "Intangible", "Capped")
+    if (key := "ProtoBombPower.smartDescription"
+               + single + mines + vulnerable + cap) != _BOMB_FACE_UNDER_CEILING
 })
 
 # --- the shipped exceptions: id -> reason. Same rot semantics. -----------
@@ -346,6 +372,18 @@ def _consts(src: str) -> dict[str, str]:
             re.findall(r"const string (\w+) =\s*((?:[^;])*);", src)}
 
 
+#: `EB-540`. `NextAttackRiderPower.CardTypeClause`, read out of the one file
+#: that declares it. Memoized because four faces in two files append it.
+_RIDER_CLAUSE: list[str] = []
+
+
+def _rider_card_type_clause() -> str:
+    if not _RIDER_CLAUSE:
+        src = read(MOD / "Powers" / "Prototype" / "CompanionOverhaulHooks.cs")
+        _RIDER_CLAUSE.append(_consts(src).get("CardTypeClause", ""))
+    return _RIDER_CLAUSE[0]
+
+
 def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
     rows: list[Row] = []
     for path in paths:
@@ -371,6 +409,20 @@ def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
             text = csharp_text(expr)
             if "MineClause" in expr:
                 text += consts.get("MineClause", "")
+            # `EB-540`: the next-Attack riders' shared clause. It is declared
+            # ONCE on `NextAttackRiderPower` -- the class whose own
+            # `BeforeCardPlayed` is the rule -- and appended by four faces in
+            # two files, so it is read from where it lives rather than from
+            # each caller's own `consts`. A clause reaching this file as a bare
+            # identifier is one numeral and therefore text no ceiling measures,
+            # which is the silence `EB-343` was filed on.
+            if "CardTypeClause" in expr:
+                # `csharp_text` has already counted the trailing identifier as
+                # ONE NUMERAL, which is right for a number and wrong for a
+                # sentence, so the numeral it stood in for comes off before the
+                # sentence goes on.
+                text = text[:-1] if text.endswith("6") else text
+                text += _rider_card_type_clause()
             rows.append(Row(surface, f"{cls}.{key}", text, where))
         if path.name == "ProtoBombPower.cs":
             # `EB-343` widened the second axis. The badge's face used to be two
@@ -384,35 +436,44 @@ def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
                     ("HardToKill", consts["HardToKillClause"]),
                     ("Intangible", consts["IntangibleClause"]),
                     ("Capped", consts["UnnamedCapClause"]))
-            for mines in (False, True):
-                for vulnerable in (False, True):
-                    for cap_key, cap_text in caps:
-                        clause = consts["VulnerableClause"] if vulnerable else ""
-                        if cap_text:
-                            clause += ("," + cap_text) if vulnerable else cap_text
-                        face = ("[gold]Set off[/gold] here deals "
-                                # `EB-514`: the hit count rides the total,
-                                # because the total is a SUM over the charges
-                                # and a stack printed one number where the
-                                # board makes several hits.
-                                + consts["PyroTotal"] + clause
-                                + consts["HitCount"] + "."
-                                + (consts["BombsWithMines"] if mines
-                                   else consts["Bombs"])
-                                + (consts["MineClause"] if mines
-                                   else consts["NoSelfSentence"])
-                                # `EB-361`: rule 3 prints on every face, and
-                                # the growth sentence became a clause on
-                                # `Bombs` in the same edit -- four sentences is
-                                # the ceiling and the jump is a fifth fact.
-                                + consts["JumpSentence"])
-                        rows.append(Row(
-                            "power",
-                            "ProtoBombPower.smartDescription"
-                            + ("Mines" if mines else "")
-                            + ("Vulnerable" if vulnerable else "")
-                            + cap_key,
-                            face, where))
+            # `EB-536` ADDED THE THIRD AXIS: a pile of ONE prints no hit
+            # clause, because there the total IS the hit and the sentence was
+            # "never comprehensible" on it.
+            for single in (False, True):
+                for mines in (False, True):
+                    for vulnerable in (False, True):
+                        for cap_key, cap_text in caps:
+                            clause = (consts["VulnerableClause"]
+                                      if vulnerable else "")
+                            if cap_text:
+                                clause += (("," + cap_text) if vulnerable
+                                           else cap_text)
+                            face = ("[gold]Set off[/gold] here deals "
+                                    # `EB-514`: the hit count rides the total,
+                                    # because the total is a SUM over the
+                                    # charges and a stack printed one number
+                                    # where the board makes several hits.
+                                    + consts["PyroTotal"] + clause
+                                    + ("" if single else consts["HitCount"])
+                                    + "."
+                                    + (consts["BombsWithMines"] if mines
+                                       else consts["Bombs"])
+                                    + (consts["MineClause"] if mines
+                                       else consts["NoSelfSentence"])
+                                    # `EB-361`: rule 3 prints on every face,
+                                    # and the growth sentence became a clause
+                                    # on `Bombs` in the same edit -- four
+                                    # sentences is the ceiling and the jump is
+                                    # a fifth fact.
+                                    + consts["JumpSentence"])
+                            rows.append(Row(
+                                "power",
+                                "ProtoBombPower.smartDescription"
+                                + ("One" if single else "")
+                                + ("Mines" if mines else "")
+                                + ("Vulnerable" if vulnerable else "")
+                                + cap_key,
+                                face, where))
     return rows
 
 

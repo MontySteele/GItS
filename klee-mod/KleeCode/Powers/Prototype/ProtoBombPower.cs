@@ -137,11 +137,19 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             // key with no row behind it falls back to the static description
             // (`PowerModel.HasSmartDescription` is a `LocString.Exists` probe),
             // so a hole here is a silently blank face rather than a crash.
-            foreach (var mines in new[] { false, true })
+            // `EB-536` ADDED THE THIRD AXIS: whether the pile holds ONE
+            // charge or several. The hit clause is a fact about a STACK and
+            // reads as noise on a single Bomb, where the total and the hit are
+            // the same number.
+            foreach (var single in new[] { false, true })
             {
-                foreach (var mods in FoldedMods.All)
+                foreach (var mines in new[] { false, true })
                 {
-                    rows.Add((SmartKey(mines, mods), Face(mines, mods)));
+                    foreach (var mods in FoldedMods.All)
+                    {
+                        rows.Add((SmartKey(single, mines, mods),
+                                  Face(single, mines, mods)));
+                    }
                 }
             }
             return rows;
@@ -209,9 +217,9 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// filed it as the screen contradicting itself. The badge is where a player
     /// meets the survivor's stack, so it is where the rule is printed.
     /// </summary>
-    private static string Face(bool mines, FoldedMods mods) =>
+    private static string Face(bool single, bool mines, FoldedMods mods) =>
         "[gold]Set off[/gold] here deals " + PyroTotal + mods.Clause
-      + HitCount + "."
+      + (single ? string.Empty : HitCount) + "."
       + (mines ? BombsWithMines : Bombs)
       + (mines ? MineClause : NoSelfSentence) + JumpSentence;
 
@@ -246,8 +254,17 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// ceiling for it and both are excepted by name in
     /// `tools/lint_text_conventions.py`.
     /// </summary>
+    ///
+    /// `EB-536` CUT IT OFF THE SINGLE-CHARGE FACE AND SPELLED THE SPARKS OUT.
+    /// "In 1 hit for as many Sparks", printed on every Bomb block, "was never
+    /// comprehensible" (Klee r19 lane 2) -- and on a pile of one it is saying
+    /// nothing: the total IS the hit, and "as many" is a comparison to a
+    /// number the sentence has already spent. So the clause is a property of a
+    /// STACK, it appears only on a stack, and it names the Spark count instead
+    /// of pointing back at the hit count. The plural goes with it: this face
+    /// is only ever chosen for two charges or more.
     private const string HitCount =
-        ", in [blue]{Count}[/blue] hit{Count:plural:|s} for as many "
+        ", in [blue]{Count}[/blue] hits for [blue]{Count}[/blue] "
       + "[gold]Sparks[/gold]";
 
     /// <summary>The total, with no full stop: a modifier clause may follow it.
@@ -278,8 +295,9 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// place the two axes are spelled into a key -- <see cref="Localization"/>
     /// writes the rows with it and <see cref="SmartDescriptionLocKey"/> reads
     /// one back, so a row and its selector cannot drift apart.</summary>
-    private static string SmartKey(bool mines, FoldedMods mods) =>
-        "smartDescription" + (mines ? "Mines" : string.Empty) + mods.KeySuffix;
+    private static string SmartKey(bool single, bool mines, FoldedMods mods) =>
+        "smartDescription" + (single ? "One" : string.Empty)
+      + (mines ? "Mines" : string.Empty) + mods.KeySuffix;
 
     /// <summary>
     /// `EB-289`. <c>{Count}</c> AND NOT <c>{Amount}</c>, and the difference is
@@ -393,7 +411,8 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// (KleeTests README, "The headless boundary").
     /// </summary>
     protected override string SmartDescriptionLocKey =>
-        Id.Entry + "." + SmartKey(MineCount > 0, LiveMods);
+        Id.Entry + "."
+      + SmartKey(_charges.Count == 1, MineCount > 0, LiveMods);
 
     /// <summary>The loc suffix <see cref="Title"/> selects when the pile is all
     /// Mines. `title` is the base game's own suffix and BaseLib registers every

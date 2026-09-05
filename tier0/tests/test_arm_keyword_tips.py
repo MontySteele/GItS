@@ -455,7 +455,11 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # 2's "all at once" (the `Set off` clauses state it in full),
             # "their" and "to a survivor" paid for it: 133 rendered.
             "A charge on an enemy: grows ",
-            " a turn, goes off only when [gold]Set off[/gold]. ",
+            # `EB-536`: the Mine joins the sentence, because the Mine tip
+            # printed under it says a Mine also goes off before its enemy's
+            # hit and the two contradicted each other on one screen.
+            " a turn, goes off only when [gold]Set off[/gold], or as a ",
+            "[gold]Mine[/gold]. ",
             "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. ",
             "Kills move it on.",
             # `EB-432` named the order INSIDE the pile: `SetOff` walks the
@@ -515,6 +519,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # ALL if it says so" paid for both facts.
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front ",
             "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. ",
+            # `EB-538`: the class a carry-out belongs to, in `ForSetOff`'s
+            # own words -- the same rule at the same call one kit over.
+            "and [gold]Strength[/gold] do not. A carry-out is not a hit: no ",
+            "when-hit power fires.",
             "Enemy [gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] ",
             "and [gold]Strength[/gold] do not.",
             "heal N HP, never above the HP you entered ",
@@ -998,7 +1006,31 @@ def test_the_plan_tip_names_strength_among_the_modifiers_that_do_not_reach():
     assert "Enemy Vulnerable counts; your Weak and Strength do not." in body
 
 
-def test_the_plan_tip_stays_under_the_keyword_ceiling():
-    """135, the base game's own longest mechanic tip, and this word is read on
-    every battle screen of every run."""
-    assert len(blindplay.ARM_KEYWORDS["Plan"]) <= 135
+def test_the_plan_tip_names_the_class_a_carry_out_is_in():
+    """`EB-538`. Skittish gave no Block to a body hit by two carry-outs and 6
+    Block to a plain Strike on the same enemy in the same fight (r19 lane 2),
+    and the seat could not tell "a defect or a large undocumented advantage of
+    planning into blockers". It is Klee's Set off rule one kit over, at the
+    same call, so it is Set off's own sentence."""
+    body = blindplay.ARM_KEYWORDS["Plan"]
+    assert "A carry-out is not a hit: no when-hit power fires." in body
+    assert "no when-hit power fires" in blindplay.ARM_KEYWORDS["Set off"]
+
+
+def test_the_plan_tip_is_over_the_keyword_ceiling_and_the_lint_carries_it():
+    """`EB-538` TOOK IT OVER, deliberately and by name.
+
+    135 is the base game's own longest mechanic tip and this word is read on
+    every battle screen of every run, so the overage is a cost rather than an
+    oversight: the tip sat at exactly 135 and every clause on it is a seat's
+    finding (`EB-329`, R250, `EB-380`, and now this one). Nothing was droppable
+    to make room, so `tools/lint_text_conventions.py` carries `PlanKey` in
+    `EXCEPTIONS` with that reason -- the bargain `SetOffKey` already makes --
+    and this pin is what stops the overage from growing quietly.
+    """
+    from tools import lint_text_conventions as lint
+
+    body = blindplay.ARM_KEYWORDS["Plan"]
+    assert len(body) == 186
+    assert "PlanKey" in lint.EXCEPTIONS
+    assert "EB-538" in lint.EXCEPTIONS["PlanKey"]

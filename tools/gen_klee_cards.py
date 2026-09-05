@@ -11944,8 +11944,26 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # the Ancient event's option handler and hangs the room (playtest
     # 2026-07-23). Mirror the hand-written Kaboom/DuckAndCover pair: the
     # basic attack is the character's Strike, the basic blocker its Defend.
+    #
+    # `EB-543` (and `EB-409`'s family): A PROTOTYPE BASIC TAKES NEITHER TAG.
+    # The tag is what base-game content means by "one of your Strikes", and
+    # under an overhaul arm the character's Strike and Defend are the BASE
+    # game's own pair -- `ArmStarterBasics` hands `StrikeIronclad` /
+    # `StrikeSilent` to every sweep site, and the arm's own starting deck deals
+    # four of them. A kit card also wearing the tag is a second answer to a
+    # question with one right answer, and it wins by being earlier in a deck
+    # scan: Neow's Talisman upgraded `Slack Water` and left four Strikes
+    # untouched all run (Kokomi r19 lane 1), and Strike Dummy paid on it before
+    # that (`EB-409`).
+    #
+    # THE THROW THIS RULE WAS WRITTEN AGAINST DOES NOT COME BACK. R11's
+    # predicate reads the pool's whole DECLARED membership, which no arm
+    # touches, so the SHIPPED basics keep it satisfied -- `Kaboom` and
+    # `Water's Edge` are hand-written or off the shipped sheets and are not
+    # touched here -- and the three unguarded `First()` sites are patched under
+    # the arm anyway (`ArmStarterBasics`, and its own sweep note).
     tag = None
-    if card["rarity"] == "basic":
+    if card["rarity"] == "basic" and not str(card["id"]).startswith("proto_"):
         if card["type"] == "attack" and any(
                 e.get("op") == "damage" and e.get("target") != "self"
                 for e in card["effects"]):

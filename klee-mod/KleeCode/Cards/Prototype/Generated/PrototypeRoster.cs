@@ -46,7 +46,6 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoFrGuestList>(),
             ModelDb.Card<ProtoFrIntermission>(),
             ModelDb.Card<ProtoFrLetThePeopleRejoice>(),
-            ModelDb.Card<ProtoFrRollingTide>(),
             ModelDb.Card<ProtoFrSalonDebutNamed>(),
             ModelDb.Card<ProtoFrSecondCourse>(),
             ModelDb.Card<ProtoFrUniversalRevelry>(),

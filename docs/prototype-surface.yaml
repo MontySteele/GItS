@@ -231,7 +231,7 @@
 - {id: proto_ko_careful_arrangement, name: "Careful Arrangement", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold]. It grows by 5.",
+   description: "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold], a [gold]Mine[/gold] if any of them was. It grows by 5.",
    upgrade: {grow: +3},
    effects: [{op: merge_bombs, target: enemy, growth: 5}]}
 
@@ -1642,12 +1642,12 @@
    replaces: aria_of_recompense,
    cost: 1, type: skill, rarity: basic,
    art_of: aria_of_recompense,
-   upgrade: {encore: +3, innate: true},
+   upgrade: {encore: +3},
    description: "Gain {IfUpgraded:show:8|5} [gold]Encore[/gold]. If you have at least 3 [gold]Fanfare[/gold], gain {IfUpgraded:show:8|5} more.",
    effects: [{op: gain_encore, amount: 5},
              {op: conditional, if: fanfare_at_least_3, then: [{op: gain_encore, amount: 5}]}]}
-# --- POOL PASS ONE (`EB-493`): four arm-only Commons swapped in at the offer
-# door for four shipped Commons of the same type and cost. Why each exists:
+# --- POOL PASS ONE (`EB-493`), three of its four: Rolling Tide was withdrawn
+# in round 13 (`EB-552`). Why each exists, and why that one left:
 # docs/notes/prototype-surface-provenance.md. ---
 
 - {id: proto_fr_curtain_rises, name: "Curtain Rises", character: furina,
@@ -1664,23 +1664,13 @@
 - {id: proto_fr_second_course, name: "Second Course", character: furina,
    authored_by: [claude],
    replaces: dinner_service,
-   register: salon, cost: 1, type: skill, rarity: common, encore_cost: 3,
+   register: salon, cost: 1, type: skill, rarity: common, encore_cost: 1,
    art_of: dinner_service,
    upgrade: {encore_cost: -1},
    description: "[gold]Deploy[/gold] Mademoiselle Crabaletta. She performs once more.",
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self,
               member: crabaletta},
              {op: salon_perform, member: crabaletta}]}
-
-- {id: proto_fr_rolling_tide, name: "Rolling Tide", character: furina,
-   authored_by: [claude],
-   replaces: undercurrent,
-   register: salon, cost: 1, type: attack, rarity: common,
-   art_of: undercurrent,
-   upgrade: {damage: +1},
-   description: "Deal 2 damage to ALL enemies twice. The front [gold]Salon[/gold] member performs.",
-   effects: [{op: damage, amount: 2, target: all_enemies, times: 2},
-             {op: salon_perform}]}
 
 - {id: proto_fr_guest_list, name: "Guest List", character: furina,
    authored_by: [claude],

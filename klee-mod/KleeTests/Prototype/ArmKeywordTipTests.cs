@@ -235,9 +235,16 @@ public class ArmKeywordTipTests
         // survivor, which three round-10 seats met with no wording anywhere.
         // Rule 2's "all at once" is what those 33 characters cost, and the
         // `Set off` tip two tests up states it in full.
+        //
+        // `EB-536` ADDED THE MINE TO RULE 7's CLAUSE. "Goes off only when Set
+        // off" was printed directly ABOVE the Mine tip, which says a Mine also
+        // goes off before its enemy's hit, so two surfaces of one screen
+        // contradicted each other and the r19 lane-2 seat read them that way.
+        // The tip goes over its ceiling for it and `BombKey` is carried in
+        // `tools/lint_text_conventions.py` by name with that reason.
         Assert.Contains("A charge on an enemy: grows ", printed);
-        Assert.Contains(" a turn, goes off only when [gold]Set off[/gold]. ",
-                        printed);
+        Assert.Contains(" a turn, goes off only when [gold]Set off[/gold], "
+                      + "or as a [gold]Mine[/gold]. ", printed);
         // `EB-373` REWROTE THE FOURTH RULE'S CLAUSE. The fold is `FoldedMods`
         // and it reads two things off the target -- Vulnerable, and whichever
         // power sets the lowest damage cap -- so "takes the enemy's debuffs"
@@ -308,11 +315,19 @@ public class ArmKeywordTipTests
         // 134), and this word is read on every battle screen of every run.
         // `Printed` concatenates every literal in the method, so the loc KEY
         // comes off before the markup does.
+        // `EB-538` TOOK IT OVER, deliberately: the tip sat at exactly 135 and
+        // gained the class a carry-out belongs to, which is `SetOffKey`'s own
+        // sentence at the same call one kit over. Every clause here is a
+        // seat's finding and none was droppable, so `PlanKey` is carried in
+        // `tools/lint_text_conventions.py` by name. The length is pinned so
+        // the overage cannot grow quietly.
         var rendered = System.Text.RegularExpressions.Regex.Replace(
             body.Replace(Tips.GetField("PlanKey")!.GetRawConstantValue()
                              as string ?? string.Empty, string.Empty),
             @"\[/?[a-z]+\]", string.Empty);
-        Assert.True(rendered.Length <= 135, rendered.Length.ToString());
+        Assert.Equal(186, rendered.Length);
+        Assert.Contains("A carry-out is not a hit: no when-hit power fires.",
+                        body);
     }
 
     [Fact]

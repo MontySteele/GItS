@@ -54,8 +54,6 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
         ("description", "Deal {Damage:diff()} damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold] to ALL enemies."),
     };
 
-    protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
-
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
     /// was written. Carried out by the Bake-Kurage at the start of her next
     /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>

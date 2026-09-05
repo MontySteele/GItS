@@ -16,7 +16,6 @@
     "proto_fr_guest_list",
     "proto_fr_intermission",
     "proto_fr_let_the_people_rejoice",
-    "proto_fr_rolling_tide",
     "proto_fr_salon_debut_named",
     "proto_fr_second_course",
     "proto_fr_universal_revelry",
@@ -212,7 +211,6 @@
     "proto_fr_guest_list": "furina",
     "proto_fr_intermission": "furina",
     "proto_fr_let_the_people_rejoice": "furina",
-    "proto_fr_rolling_tide": "furina",
     "proto_fr_salon_debut_named": "furina",
     "proto_fr_second_course": "furina",
     "proto_fr_universal_revelry": "furina",
@@ -421,8 +419,7 @@
   },
   "upgrades": {
     "proto_fr_aria_of_recompense": {
-      "encore": 3,
-      "innate": true
+      "encore": 3
     },
     "proto_fr_curtain_call": {
       "encore_cost": -1
@@ -450,9 +447,6 @@
     },
     "proto_fr_let_the_people_rejoice": {
       "cost": -1
-    },
-    "proto_fr_rolling_tide": {
-      "damage": 1
     },
     "proto_fr_salon_debut_named": {
       "add": {

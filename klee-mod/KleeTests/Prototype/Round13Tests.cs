@@ -221,10 +221,11 @@ public class Round13Tests
         // saying their own thing is what it now reads.
         Assert.DoesNotContain("Bombs here: [blue]{Charges}[/blue], "
                               + "[blue]{Count}[/blue]", plain);
-        Assert.Contains("Pyro damage, in [blue]{Count}[/blue] "
-                        + "hit{Count:plural:|s}", plain);
-        Assert.Contains("Pyro damage, in [blue]{Count}[/blue] "
-                        + "hit{Count:plural:|s}", mined);
+        // `EB-536` spelled the Sparks out and dropped the plural: this is
+        // the MANY-charge half of the grid, so the clause is here and it is
+        // never printed for one.
+        Assert.Contains("Pyro damage, in [blue]{Count}[/blue] hits", plain);
+        Assert.Contains("Pyro damage, in [blue]{Count}[/blue] hits", mined);
     }
 
     // ==================================================================

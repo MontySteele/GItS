@@ -514,6 +514,17 @@ def _potion_aims_at_an_enemy(entry: dict[str, Any]) -> bool:
     return bool(aim) and aim not in UNAIMED_TARGETS
 
 
+def _fight_round(state: dict[str, Any]) -> int:
+    """The battle round of this board (`EB-541`).
+
+    The grammar reads the same memory the render does, so it has to ask the
+    same fight-boundary question with the same fact -- a grammar that reset the
+    letters the render had just minted would put the two back out of step,
+    which is what `_resolve_enemy`'s own note is about.
+    """
+    return _int(_blob(state, "battle").get("round"))
+
+
 def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     """`(entity id, refusal)` for an enemy named the way the screen names it."""
     enemies = _enemies(state)
@@ -525,7 +536,7 @@ def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     # `EB-271`: and through the fight's memory, so the same is true of the
     # corpse the feed stops sending. Both sides read the same function off the
     # same list, which is what keeps the page and the grammar in step.
-    names = _enemy_names(enemies)
+    names = _enemy_names(enemies, _fight_round(state))
     # `EB-496`: the letter the page prints beside each body, which is the same
     # memory the numbers come out of. Read here so the grammar and the render
     # cannot mean different bodies by `B`.
@@ -554,7 +565,7 @@ def _living_enemy_names(state: dict[str, Any]) -> list[str]:
     """The printed names of the living enemies, numbered as the render numbers
     them (`EB-402`, and the numbering is `_resolve_enemy`'s own)."""
     enemies = _enemies(state)
-    names = _enemy_names(enemies)
+    names = _enemy_names(enemies, _fight_round(state))
     return [names[i] for i, e in enumerate(enemies) if _int(e.get("hp")) > 0]
 
 

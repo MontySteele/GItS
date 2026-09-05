@@ -18,7 +18,8 @@ from typing import Any
 from understudy.blindplay_faces import remember_elements
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
-                                        CRYSTALLIZE_BLOCK,
+                                        COMPANION_SPARK, COMPANION_SPARK_MAX,
+                                        CRYSTALLIZE_BLOCK, SHATTER_DAMAGE,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
                                         WEAK_DEALT_PCT)
 
@@ -505,9 +506,13 @@ ARM_KEYWORDS: dict[str, str] = {
     # round-10 seats met that rule for the first time as a stack they could
     # not account for. The page says it in the tip's own words, "Kills move
     # it on", because the glossary is pinned to the C# text word for word.
+    # `EB-536` ADDED THE MINE. "Goes off only when Set off" sat directly
+    # above the Mine row, which says a Mine also goes off before its enemy's
+    # hit, so two rows of one glossary contradicted each other and the Klee r19
+    # lane-2 seat said so. Same sentence as `ArmKeywordTips.ForBomb`.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
-             "only when Set off. Not an Attack: only Vulnerable and a cap "
-             "move it. Kills move it on."),
+             "only when Set off, or as a Mine. Not an Attack: only Vulnerable "
+             "and a cap move it. Kills move it on."),
     # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
     # walks the charges in placement order and the first one through the
     # funnel meets the aura, because every reaction consumes it -- the r11
@@ -566,9 +571,16 @@ ARM_KEYWORDS: dict[str, str] = {
     # face 4 under Vajra at Plan 10 expecting her Strength to ride it. It does
     # not -- the carry-out goes through `ElementalHit` UNPOWERED -- so the
     # clause names all three and says whose each one is.
+    # `EB-538` ADDED THE CLASS A CARRY-OUT BELONGS TO, and it is the Set off
+    # row's own sentence one kit over. Skittish gave no Block to a body hit by
+    # Oath's and Ambush's carry-outs and 6 Block to a plain Strike on the same
+    # enemy in the same fight (Kokomi r19 lane 2): a carry-out goes out through
+    # `ElementalHit.Deal` as an unpowered hit with no dealer, so nothing keyed
+    # on being hit can answer it. Same sentence as `ArmKeywordTips.ForPlan`.
     "Plan": ("On the Bake-Kurage, paid now; next turn: front non-Minion, or "
              "ALL, Minions too. Enemy Vulnerable counts; your Weak and "
-             "Strength do not."),
+             "Strength do not. A carry-out is not a hit: no when-hit power "
+             "fires."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
     # `EB-377` ADDED THESE TWO, and their absence was the same defect one row
@@ -582,9 +594,21 @@ ARM_KEYWORDS: dict[str, str] = {
     # Companion prints the tag now, so the first sentence is a test a player
     # can run; the second names the overlap with "Klee's own", which is the
     # Spark rider's phrase.
+    # `EB-535` PUT THE PAYMENT IN THE SENTENCE. "Cards of hers pay when you
+    # play one" -- "pay what, to whom, and when? I played Razor four times and
+    # never saw anything I could attribute to Hexerei" (Klee r19 lane 2). The
+    # rule was on a different screen all along, the Companion Spark rider, and
+    # the seat found it late and still could not tell whether Razor was one of
+    # Klee's own. The reader clause gave up its room to the payment; the family
+    # test and the ownership split stay, because those are what answer the
+    # Razor question. Same sentence as `ArmKeywordTips.ForHexerei`, with the
+    # two numerals the C# lifts from `KleeCompanionSpark` written out -- this
+    # page has no access to the mod's constants and
+    # `test_the_hexerei_line_names_the_payment_the_kit_declares` holds them in
+    # step from this side.
     "Hexerei": ("A Companion card that prints the word, and Klee herself. "
-                "Some are Klee's own, some are not. Cards of hers pay when "
-                "you play one."),
+                "Some are Klee's own, some are not. Playing one of hers makes "
+                f"{COMPANION_SPARK} Spark, up to {COMPANION_SPARK_MAX}."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
@@ -814,16 +838,36 @@ _ARM_KEYWORD_RE = {
 # (`MegaCrit.Sts2.Core.Models.Monsters.CeremonialBeast`), whose hover tip names
 # no power, so the first screen that carries the word is the one the affliction
 # lands on. The entry prints there, which is the turn the seat has to choose.
+#
+# `EB-537` PUT `Shatter` HERE, and the table's own rule is why it belongs. The
+# word is Frozen's second clause and NOT a reaction of its own, so it is in
+# neither `REACTION_KEYWORDS` nor `ARM_KEYWORDS` -- and it had no row at all.
+# The Klee r19 lane-2 seat was offered `Freminet -- Shattering Pressure`
+# ("Your Shatters deal 4 additional damage") on a run that never printed a
+# Shatter: "I could not have played it ... and the word is not in the glossary
+# on that screen." A row here prints on the WORD, on every screen that carries
+# it, which is exactly the rule a face naming an unreachable mechanic needs.
+#
+# THE SENTENCE IS `Frozen`'s OWN, not a second reading of the rule: the freeze
+# ends with the hit, which is the half the Frozen row leaves to inference
+# because it is written from the frozen enemy's side.
 GAME_KEYWORDS: dict[str, str] = {
     "Ringing": ("An enemy debuff on YOU: you can play only 1 card this turn. "
                 "The first play locks every other Ringing card in hand. Cards "
                 "that already carry a different affliction are never stamped "
                 "and stay playable; potions, relics and end-of-turn triggers "
                 "are not card plays and are untouched."),
+    "Shatter": (f"The first Attack to hit a Frozen enemy before it acts deals "
+                f"{SHATTER_DAMAGE} additional damage and ends the freeze. "
+                "Only a Frozen enemy can be Shattered."),
 }
 
 _GAME_KEYWORD_RE = {
     "Ringing": re.compile(r"\bRinging\b"),
+    # `EB-537`: the verb conjugates on the faces that print it -- Freminet's
+    # power says "Your Shatters", the Salon paragraph says "no Shatter", and
+    # the Frozen row says "Shatters for 6".
+    "Shatter": re.compile(r"\bShatter(?:s|ed|ing)?\b"),
 }
 
 
@@ -1026,7 +1070,20 @@ REACTION_KEYWORDS: dict[str, str] = {
         "own debuff sets off a relic that hits with the aura's own element, "
         "the aura is consumed and RE-APPLIED inside the same beat, so no "
         "screen ever shows it gone and the reaction looks as though it did "
-        "not happen. The reaction did happen -- its effect is on the body."),
+        "not happen. The reaction did happen -- its effect is on the body. "
+        # `EB-544`. WHERE AN ELEMENT COMES FROM, which no screen said and a
+        # seat spent a potion finding out: "a Fire Potion used to set up
+        # Vaporize left no Pyro aura at all, and nothing on any screen says
+        # which sources apply an element and which do not" (Kokomi r19 lane 1).
+        # The rule is one expression's -- `AuraCmd.ElementOfPlay`
+        # answers off the CARD being played (and, under the companion arm, a
+        # rider on the dealer), so a potion, which is played through no card at
+        # all, answers `Element.None` and applies nothing. Named here rather
+        # than on the six pair rows because it is true of all of them, and this
+        # is the row a mono-element deck reads.
+        "An element comes from a CARD that prints one and from nothing else: "
+        "a potion, a relic or an enemy applies none unless its own face says "
+        "so."),
     # `EB-345` (R249) retuned the six preview rows in `KleeMod.cs` -- each one
     # now leads with the pair that reacts instead of a 60-character preamble
     # about what the CARD supplies, and Electro-Charged says what the dot
@@ -1119,6 +1176,51 @@ REACTION_ELEMENTS: dict[str, frozenset[str]] = {
 # the board this instant, because a Swirl with nothing to spread does nothing
 # and the keyword's own last clause says so.
 SPREAD_REACTIONS: dict[str, str] = {"Swirl": "Anemo", "Crystallize": "Geo"}
+
+# `EB-537`. THE REACTION WORDS AS THEY ARE PRINTED, so a screen that NAMES one
+# defines it whether or not the deck could reach it. Case-sensitive and
+# word-bounded, `_ARM_KEYWORD_RE`'s discipline: the game capitalises a keyword
+# wherever it prints one, and the haystack is the observation's printed values
+# rather than this page's own prose. The umbrella is not here -- it is raised
+# by the element census with its own no-reaction clause, and a second copy
+# would print the paragraph twice on a screen that has both.
+_REACTION_WORD_RE: dict[str, "re.Pattern[str]"] = {
+    word: re.compile(rf"\b{re.escape(word)}\b")
+    for word in REACTION_KEYWORDS if word != "Elemental Reaction"
+}
+
+# `EB-547`. A SALON MEMBER IS AN ELEMENT SOURCE, and the census could not see
+# one.
+#
+# THE FIND (Furina r13 lane 2). "NO REACTION IS REACHABLE HERE: Pyro is the only
+# element this screen can supply" printed on a screen with `Salon Debut` -- a
+# card whose whole body is "Deploy Mademoiselle Crabaletta" -- in the hand. The
+# seat: "it was wrong in the most direct way available; the Hydro that broke the
+# claim was a card in the hand printed underneath it", and it broke the claim
+# two plays later.
+#
+# WHY THE THREE SOURCES MISSED IT. `EB-428`'s census reads a card's own
+# `element` indicator, an aura on a body, and the printed phrase `Applies X`. A
+# deploy card has none of the three: the element is the MEMBER's, and the member
+# supplies it on arrival because a deploy performs.
+#
+# MATCHED ON THE MEMBER'S NAME, which is the one handle every surface carries --
+# the deploy card's face names her, the member tip is titled with her, and the
+# stage line (`furina_salon.company`) is a list of exactly these names. The
+# Usher is absent on purpose and it is not an omission: he performs BLOCK and
+# supplies no element at all, so a screen holding only his deploy really can
+# reach nothing.
+SALON_MEMBER_ELEMENTS: dict[str, str] = {
+    "Crabaletta": "Hydro",
+    "Chevalmarin": "Hydro",
+}
+
+#: The surname alone, word-bounded and case-sensitive, `_ARM_KEYWORD_RE`'s
+#: discipline: the game capitalises a member's name wherever it prints one, and
+#: the full stage name and the short one both end in it.
+_SALON_MEMBER_RE = {
+    name: re.compile(rf"\b{name}\b") for name in SALON_MEMBER_ELEMENTS
+}
 
 _ELEMENTS = ("Pyro", "Hydro", "Electro", "Cryo")
 #: The trigger elements, in reach on the same three sources as the four above:
@@ -1281,6 +1383,13 @@ def _reachable_elements(obs: dict[str, Any]) -> set[str]:
                 walk(value)
         elif isinstance(blob, str):
             found.update(_APPLIES_RE.findall(blob))
+            # `EB-547`: and a Salon member named anywhere on the screen -- on a
+            # deploy card's face, on her own tip, or on the stage line -- is
+            # the element she performs with, because a deploy performs the
+            # member it fields at once.
+            for name, pattern in _SALON_MEMBER_RE.items():
+                if pattern.search(blob):
+                    found.add(SALON_MEMBER_ELEMENTS[name])
 
     walk(obs)
     # AND EVERY ELEMENT THIS FIGHT HAS ALREADY SHOWN. A screen is one turn and
@@ -1473,6 +1582,23 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
                   "text": REACTION_KEYWORDS[word]
                   + (FROZEN_BOSS_CLAUSE if boss and word == "Frozen" else "")}
                  for word in live if word not in named]
+    # `EB-537`. A WORD A FACE ON THIS SCREEN PRINTS IS DEFINED, REACHABLE OR
+    # NOT, and this is the rule the block above needs beside it rather than
+    # inside it. `EB-428`'s census answers "can this DECK build the pair", and
+    # that is the right question for a row the page raises on its own
+    # initiative -- six reactions listed at a mono-element deck is the noise it
+    # was filed on. It is the WRONG question for a word the screen is already
+    # showing the reader: Freminet's power printed `Shatter` at a seat whose
+    # run had no Cryo, and an offered card whose one mechanic is undefined
+    # cannot be priced at all, which is the decision the reward screen is
+    # asking for.
+    #
+    # OUTSIDE `_elements_on_screen`, deliberately: an offer screen may carry no
+    # element at all and still print the word, which is exactly the r19 board.
+    named = {row["name"] for row in rows}
+    rows += [{"name": word, "text": REACTION_KEYWORDS[word]}
+             for word, pattern in _REACTION_WORD_RE.items()
+             if word not in named and pattern.search(hay)]
     seen = {row["name"] for row in rows}
     for row in _wire_keyword_rows(obs):
         if row["name"] in seen:

@@ -168,7 +168,8 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
             "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
-          + " a turn, goes off only when [gold]Set off[/gold]. "
+          + " a turn, goes off only when [gold]Set off[/gold], or as a "
+          + "[gold]Mine[/gold]. "
           + "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. "
           + "Kills move it on.");
 
@@ -411,13 +412,38 @@ public static class ArmKeywordTips
     /// EVERYONE'S. See <see cref="KleesRuleBelongsHere"/>. The page glossary
     /// was gated on the r17 finding and this tip was the second source, so
     /// Razor's own face still printed the whole sentence on a Kokomi run.
+    /// `EB-535`: AND THE LAST SENTENCE NOW SAYS WHAT THE PAYMENT IS.
+    ///
+    /// THE FIND (Klee r19 lane 2). "I read this a dozen times across five
+    /// fights and I still do not know what it does. 'Cards of hers pay' -- pay
+    /// what, to whom, and when? I played Razor four times and never saw
+    /// anything I could attribute to Hexerei." The rule was on a DIFFERENT
+    /// screen the whole time -- <see cref="ForCovenSpark"/>, which rides Klee's
+    /// own Personal Companions and not the family tag -- and the seat found it
+    /// late and still could not tell whether Razor was one of Klee's own.
+    ///
+    /// SO THE READER CLAUSE GAVE UP ITS ROOM. "Cards of hers pay when you play
+    /// one" is the sentence the seat could extract nothing from, and the cards
+    /// it is about print their own rule on their own faces; the family test and
+    /// the ownership split stay, because "some are Klee's own, some are not" is
+    /// the half that answers the Razor question. 135 of 135 rendered.
+    ///
+    /// THE NUMBERS ARE LIFTED, not typed (`EB-89`'s rule): they are
+    /// <see cref="KleeMod.Powers.KleeCompanionSpark"/>'s own, which is the
+    /// declaration LAW:145 obliges the KIT to make, so a retune cannot leave
+    /// this sentence quoting a retired figure. The BOUND is printed here and
+    /// deliberately not on <see cref="ForCovenSpark"/>, where it would state a
+    /// ceiling no single clause reaches; here it is the whole of what a player
+    /// asking "how much" needs.
     public static IEnumerable<IHoverTip> ForHexerei(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, HexereiKey,
             "A [gold]Companion[/gold] card that prints the word, and Klee "
-          + "herself. Some are Klee's own, some are not. Cards of hers pay "
-          + "when you play one.");
+          + "herself. Some are Klee's own, some are not. Playing one of hers "
+          + "makes [blue]" + KleeCompanionSpark.Base + "[/blue] "
+          + "[gold]Spark[/gold], up to [blue]"
+          + KleeCompanionSpark.MaxPerPlay + "[/blue].");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.
@@ -624,6 +650,26 @@ public static class ArmKeywordTips
     /// falls back to the leftmost body when every enemy is a Minion -- and it
     /// is a board on which the compressed clause and the full one aim at the
     /// same creature.
+    ///
+    /// `EB-538` TOOK IT OVER THE CEILING, and it is <see cref="ForSetOff"/>'s
+    /// overage for <see cref="ForSetOff"/>'s reason. THE FIND (Kokomi r19 lane
+    /// 2): Skittish gave no Block to a body hit by Oath's and Ambush's
+    /// carry-outs and then 6 Block to a plain Strike on the same enemy in the
+    /// same fight, and the seat could not tell "a defect or a large
+    /// undocumented advantage of planning into blockers". It is the second: a
+    /// carry-out goes out through <see cref="ElementalHit.Deal"/>, which
+    /// reaches <c>CreatureCmd.Damage</c> as <c>ValueProp.Unpowered</c> with
+    /// <c>dealer: null</c>, so a power keyed on being HIT has neither an
+    /// attacker nor a powered hit to answer.
+    ///
+    /// SET OFF'S SENTENCE, WORD FOR WORD ("no when-hit power fires"), because
+    /// it is the same rule at the same call one kit over and `EB-490` already
+    /// paid for the wording: "when-hit power" is what a player calls the thing
+    /// on the enemy's status bar, and "Attack trigger" reads as something on
+    /// the player's own side of the board. Nothing above it is droppable --
+    /// every clause there is a seat's finding -- so the tip is carried in
+    /// `tools/lint_text_conventions.py` as a named exception with its reason,
+    /// which is the bargain `SetOffKey` already makes.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -631,7 +677,8 @@ public static class ArmKeywordTips
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front "
           + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. "
           + "Enemy [gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] "
-          + "and [gold]Strength[/gold] do not.");
+          + "and [gold]Strength[/gold] do not. A carry-out is not a hit: no "
+          + "when-hit power fires.");
 
     /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the

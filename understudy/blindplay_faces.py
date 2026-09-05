@@ -724,7 +724,8 @@ def _number_faces(faces: list[dict[str, Any]], field: str
 _FIGHT_STORE_DIR = Path(__file__).resolve().parent / "logs"
 _FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {},
                                  "numbered": set(), "names": {},
-                                 "handles": {}, "elements": set()}
+                                 "handles": {}, "elements": set(),
+                                 "round": None}
 #: Whether this process has read the lane's store yet. The load is lazy and
 #: happens once: a fresh `observe` pays one file read, and a long-lived
 #: `Session` pays it on its first fight and never again.
@@ -759,6 +760,13 @@ def _load_fight() -> None:
         value = held.get(key)
         if isinstance(value, dict):
             _FIGHT_MEMORY[key] = dict(value)
+    # `EB-541`: the battle round these letters were last minted on, which is
+    # the ONE fact that tells a replaced board from a new fight. Absent from a
+    # store written before that row, and absent is not 0 -- a memory that
+    # cannot say which round it is from falls back to the old reset.
+    held_round = held.get("round")
+    if isinstance(held_round, int):
+        _FIGHT_MEMORY["round"] = held_round
     for key in ("numbered", "elements"):
         value = held.get(key)
         if isinstance(value, list):
@@ -773,7 +781,8 @@ def _save_fight() -> None:
            "names": dict(_FIGHT_MEMORY["names"]),
            "handles": dict(_FIGHT_MEMORY["handles"]),
            "numbered": sorted(_FIGHT_MEMORY["numbered"]),
-           "elements": sorted(_FIGHT_MEMORY["elements"])}
+           "elements": sorted(_FIGHT_MEMORY["elements"]),
+           "round": _FIGHT_MEMORY["round"]}
     try:
         _FIGHT_STORE_DIR.mkdir(parents=True, exist_ok=True)
         _fight_store().write_text(json.dumps(row), encoding="utf-8")
@@ -789,6 +798,7 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["names"] = {}
     _FIGHT_MEMORY["handles"] = {}
     _FIGHT_MEMORY["elements"] = set()
+    _FIGHT_MEMORY["round"] = None
     _FIGHT_LOADED[0] = True
     try:
         _fight_store().unlink()
@@ -859,6 +869,18 @@ def remembered_enemy_name(combat_id: Any, title: str) -> str:
 # the number lacked. `E27` and up is the honest overflow rather than `AA`: no
 # encounter in the game fields twenty-seven bodies, and a reader meeting one
 # is better served by something that cannot be mistaken for a name.
+#
+# `EB-541`: AND THE PROPERTY WAS FALSE ON A REPLACEMENT. Kokomi r19 lane 1,
+# floor 8: `Surprise 1` killed Gremlin Merc [A] and put a Sneaky Gremlin and a
+# Fat Gremlin in its place -- and they were lettered [A] and [B]. The seat had
+# been aiming by letter all fight. The cause is the fight-boundary test below
+# and not the minting: a board that shares NO body with the memory was read as
+# a new fight, which is exactly what a whole-board replacement looks like. The
+# round tells them apart, and it is the one fact the wire already carries: a
+# new fight opens on round 1 and a replacement happens on the round the fight
+# had reached. So the reset now asks the round as well, the memory remembers
+# which round it was minted on, and a spawned or replaced body mints the next
+# unused letter while the dead body's letter retires with it.
 def _handle_for(nth: int) -> str:
     return chr(ord("A") + nth) if nth < 26 else f"E{nth + 1}"
 
@@ -875,7 +897,31 @@ def _enemy_key(entry: dict[str, Any]) -> str:
     return f"c{cid}" if cid is not None else f"e{_entity_id(entry)}"
 
 
-def _enemy_names(enemies: list[dict[str, Any]]) -> list[str]:
+def _is_a_new_fight(round_: int | None) -> bool:
+    """Is a board that shares no body with the memory a NEW FIGHT (`EB-541`)?
+
+    It always was, until a whole board was replaced mid-fight. The two look
+    identical from the board alone -- every key is unknown either way -- so the
+    ROUND is what separates them, and it separates them three ways:
+
+      * the memory cannot say which round it holds (a store written before this
+        row, or a caller that does not know): the old answer, a new fight;
+      * the board is on round 1 or the wire carries no round: a new fight, and
+        this is the ordinary case every fight opens with;
+      * the round went BACKWARDS from the one the memory was minted on: a new
+        fight joined late, after an older one that ran longer.
+
+    Anything else is the fight going on -- a replacement, a summon, a split --
+    and the memory stands so the new bodies mint the next unused letters.
+    """
+    remembered = _FIGHT_MEMORY["round"]
+    if not isinstance(remembered, int) or round_ is None:
+        return True
+    return round_ <= 1 or round_ < remembered
+
+
+def _enemy_names(enemies: list[dict[str, Any]],
+                 round_: int | None = None) -> list[str]:
     """The printed enemy names, numbered ONCE and kept for the fight.
 
     Same output as `_number_names` on the opening board of any fight, which is
@@ -887,6 +933,12 @@ def _enemy_names(enemies: list[dict[str, Any]]) -> list[str]:
     and taking it away is the stale-number refusal this row's first half had
     to paper over. A name that has never repeated is left exactly as the game
     printed it.
+
+    `round_` IS THE BATTLE ROUND OF THE BOARD BEING READ (`EB-541`), and it is
+    optional because it is only ever needed to answer one question --
+    `_is_a_new_fight` -- which it answers for a board that shares nothing with
+    the memory. Every caller has the state and passes it; a caller that does
+    not gets the pre-`EB-541` reset.
     """
     if not enemies:
         return []
@@ -910,7 +962,7 @@ def _enemy_names(enemies: list[dict[str, Any]]) -> list[str]:
     roster: dict[str, tuple[str, int]] = _FIGHT_MEMORY["roster"]
     shared = any(roster.get(k) == i for k, i in zip(keys, ident))
     clash = any(k in roster and roster[k] != i for k, i in zip(keys, ident))
-    if clash or not shared:
+    if clash or (not shared and _is_a_new_fight(round_)):
         forget_fight()
     roster = _FIGHT_MEMORY["roster"]
     ordinals: dict[str, int] = _FIGHT_MEMORY["ordinals"]
@@ -934,6 +986,9 @@ def _enemy_names(enemies: list[dict[str, Any]]) -> list[str]:
         ordinals[key] = seen
         if seen > 1:
             numbered.add(fold)
+    if round_ is not None and _FIGHT_MEMORY["round"] != round_:
+        _FIGHT_MEMORY["round"] = round_
+        fresh = True
     if fresh:
         _save_fight()
     return [f"{n} ({ordinals[k]})" if _fold(n) in numbered and k in ordinals

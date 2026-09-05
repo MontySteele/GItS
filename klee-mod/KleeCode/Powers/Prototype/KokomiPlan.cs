@@ -1201,13 +1201,33 @@ public static class KokomiPlan
     /// <summary>The enemy's printed title, or an empty string where the game
     /// will not answer. A state read must never throw
     /// (<c>Diagnostics.PlayTelemetry.NameOf</c> takes the same posture), and
-    /// the page has the combat id to name the creature with anyway.</summary>
+    /// the page has the combat id to name the creature with anyway.
+    ///
+    /// `EB-542`: `GetFormattedText` AND NOT `ToString`. A `LocString`'s
+    /// `ToString` is its DEBUG form -- "LocString table monsters entry
+    /// CORPSE_SLUG.name" -- and that string reached the player-facing
+    /// carry-out log on Flank's set line, twice in one fight and again on
+    /// floor 5 with `CALCIFIED_CULTIST` and `DAMP_CULTIST` (Kokomi r19 lane 1).
+    ///
+    /// IT IS THE LOOKUP THE ENEMY LIST ALREADY USES, which is why only this
+    /// line showed it: the bridge names every body through
+    /// `SafeGetText`, which resolves a `LocString` with `GetFormattedText`, and
+    /// every OTHER row this class emits carries a `CombatId` the page renames
+    /// from its own fight memory (`MovedOn`, `Rider`). <see cref="AimedLabel"/>
+    /// bakes its names into a string with no id on it, so it is the one place
+    /// an unresolved title could survive to the screen.
+    ///
+    /// THE GUARD IS THE SAME GUARD, one call further in: `GetFormattedText`
+    /// throws on a model whose loc table has not been built
+    /// (<c>SalonPowers.PrintedTitle</c>'s own note), and this is read from
+    /// inside a resolution, where a throw reaches the player as a black screen.
+    /// </summary>
     private static string EnemyName(Creature? enemy)
     {
         if (enemy == null) return "";
         try
         {
-            return enemy.Monster?.Title.ToString() ?? "";
+            return enemy.Monster?.Title.GetFormattedText() ?? "";
         }
         catch (System.Exception)
         {

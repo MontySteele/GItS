@@ -238,10 +238,13 @@ public class FurinaRoundNineTests
 
         var rules = SalonMemberTips.SalonRulesBody(seat.Creature);
 
+        // `EB-548` renamed the second half and added the word "hit": the
+        // rule is about being HIT, and "on-Attack triggers" named it from the
+        // player's own side of the board (`Round19Tests` holds that row).
         Assert.Contains(
-            "A performance is not an [gold]Attack[/gold]: "
-          + "[gold]Vulnerable[/gold] moves it, [gold]Shatter[/gold] and "
-          + "on-Attack triggers do not.", rules);
+            "A performance is not an [gold]Attack[/gold] and not a hit: "
+          + "[gold]Vulnerable[/gold] moves it, but no [gold]Shatter[/gold] "
+          + "and no when-hit power fires.", rules);
     }
 
     [Fact]

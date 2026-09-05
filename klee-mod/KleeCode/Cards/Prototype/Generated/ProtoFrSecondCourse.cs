@@ -45,7 +45,7 @@ public sealed class ProtoFrSecondCourse : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Second Course"),
-        ("description", "Spend {IfUpgraded:show:2|3} [gold]Encore[/gold]. [gold]Deploy[/gold] Mademoiselle Crabaletta. She performs once more."),
+        ("description", "{IfUpgraded:show:|Spend 1 [gold]Encore[/gold]. }[gold]Deploy[/gold] Mademoiselle Crabaletta. She performs once more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -59,7 +59,7 @@ public sealed class ProtoFrSecondCourse : CustomCardModel, ICharacterCard
     public ProtoFrSecondCourse()
         : base(1, CardType.Skill, CardRarity.Common, TargetType.Self, autoAdd: false)
     {
-        CustomResources<EncoreResource>.SetCanonicalCost(this, 3);
+        CustomResources<EncoreResource>.SetCanonicalCost(this, 1);
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)

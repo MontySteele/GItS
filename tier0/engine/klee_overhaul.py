@@ -789,15 +789,26 @@ def turn_start_late(state: CombatState) -> None:
     # rules one (reported, not fixed here).
     from tier0.engine import companion_standins    # late import: cycle
 
+    # `EB-533`: THE ANSWER IS EMITTED EITHER WAY. Klee r19 lane 1 logged the
+    # card every turn and it failed twice with "no near-miss line, I caught it
+    # only by diffing my own Block". The condition is unchanged and so is every
+    # payout; what is new is that the turn it says no says so. The mod's twin
+    # is `GroundedPower`'s latched badge face, which is the same claim on the
+    # surface that engine has.
     n = state.player.powers.get(GROUNDED, 0)
-    if n and (any_bomb_placed(state)
-              or companion_standins.grounded_blind(state)):
-        state.player.block += n
-        state.emit("block", amount=n)
-        state.emit("ko_grounded", amount=n,
-                   spark=int(C.KLEE_OVERHAUL_GROUNDED_SPARK))
-        effects.gain_sparks(state, int(C.KLEE_OVERHAUL_GROUNDED_SPARK),
-                            source="power:grounded/held_turn")
+    if not n:
+        return
+    paid = bool(any_bomb_placed(state)
+                or companion_standins.grounded_blind(state))
+    if not paid:
+        state.emit("ko_grounded", amount=0, spark=0, paid=False)
+        return
+    state.player.block += n
+    state.emit("block", amount=n)
+    state.emit("ko_grounded", amount=n,
+               spark=int(C.KLEE_OVERHAUL_GROUNDED_SPARK), paid=True)
+    effects.gain_sparks(state, int(C.KLEE_OVERHAUL_GROUNDED_SPARK),
+                        source="power:grounded/held_turn")
 
 
 def turn_end(state: CombatState) -> None:
