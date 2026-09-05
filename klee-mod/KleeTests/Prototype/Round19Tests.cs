@@ -179,7 +179,88 @@ public class Round19Tests
             c => c.StartsWith("DamageCmd.", StringComparison.Ordinal));
     }
 
-    // ---- helpers ---------------------------------------------------------
+
+    // ==================================================================
+    // `EB-533` -- Grounded says its answer either way
+    // ==================================================================
+    //
+    // THE FIND (Klee r19 lane 1). The card was logged every turn: paid three
+    // times, failed twice, and both failures were the turn after the seat had
+    // detonated everything, which is the card's price rather than its trap.
+    // What was missing was a line: "the two failures printed no near-miss
+    // line, I caught it only by diffing my own Block".
+    //
+    // A LATCH, NOT A LIVE BOARD READ. The badge is read at RENDER time and the
+    // condition is answered at TURN START, and the seat's failing turn is the
+    // one they disagree on: detonate everything, Grounded pays nothing, then
+    // place a fresh Bomb. A face that re-read the board would print "a Bomb is
+    // on the field" over a turn that paid nothing -- a second silent failure
+    // rather than a fix.
+
+    [Fact]
+    public void Grounded_carries_a_face_for_each_answer_and_neither_is_the_rule()
+    {
+        var rows = new GroundedPower().Localization!
+            .ToDictionary(r => r.Item1, r => r.Item2);
+
+        Assert.Contains("nothing was paid", rows["smartDescriptionUnpaid"]);
+        Assert.Contains("[gold]Bomb[/gold]", rows["smartDescriptionUnpaid"]);
+        Assert.Contains("paid", rows["smartDescriptionPaid"]);
+        Assert.Contains("[gold]Spark[/gold]", rows["smartDescriptionPaid"]);
+
+        // The static rule stays what it was: it is what the card promises, and
+        // the two faces above are what it did.
+        Assert.StartsWith("At the start of your turn,", rows["description"]);
+    }
+
+    [Fact]
+    public void The_selector_picks_the_answer_the_power_last_gave()
+    {
+        // The key is the live choice for `ProtoBombPower`'s reason: loc is
+        // registered once at boot and the board changes every turn. UNASKED is
+        // its own key with no row, so a power played this turn and never yet
+        // asked falls back to the static rule -- a badge claiming a failure the
+        // power never had is the same defect pointing the other way.
+        var power = new GroundedPower();
+        var key = typeof(GroundedPower)
+            .GetProperty("SmartDescriptionLocKey", All)!;
+        // The latch is a FIELD and `Seat.Set` reaches properties, so it is set
+        // by reflection here -- the value under test is the one the turn start
+        // writes, and no public door onto it exists or should.
+        var latch = typeof(GroundedPower).GetField("_paid", All)!;
+
+        Assert.EndsWith(".smartDescriptionUnasked", (string)key.GetValue(power)!);
+
+        latch.SetValue(power, false);
+        Assert.EndsWith(".smartDescriptionUnpaid", (string)key.GetValue(power)!);
+
+        latch.SetValue(power, true);
+        Assert.EndsWith(".smartDescriptionPaid", (string)key.GetValue(power)!);
+    }
+
+    [Fact]
+    public void Both_branches_of_the_turn_start_record_their_answer()
+    {
+        // STRUCTURAL, and read off the SOURCE because a field store is
+        // invisible to `Il` -- `Round16Tests` reads a source file the same way
+        // for the same reason. The claim is that the refusing branch records
+        // BEFORE it returns, which is the one line of this method the row
+        // moves: a `_paid = false` written after the return would compile and
+        // print nothing.
+        var body = Source("Powers/Prototype/KleeOverhaulPowers.cs")
+            .Replace("\r\n", "\n");
+        body = body[body.IndexOf("public sealed class GroundedPower",
+                                 StringComparison.Ordinal)..];
+        var refusal = body.IndexOf("&& !CompanionStandIns.GroundedBlind(Owner))",
+                                   StringComparison.Ordinal);
+        var returned = body.IndexOf("return;", refusal, StringComparison.Ordinal);
+        var unpaid = body.IndexOf("_paid = false;", StringComparison.Ordinal);
+        var paid = body.IndexOf("_paid = true;", StringComparison.Ordinal);
+
+        Assert.True(unpaid > refusal && unpaid < returned,
+                    "the refusing branch records its answer before returning");
+        Assert.True(paid > returned, "the paying branch records its own");
+    }
 
     /// <summary>The reframe's MANUAL leg on for one test, every flag back
     /// after it -- <c>FurinaRoundNineTests.Arm</c> verbatim, and for its

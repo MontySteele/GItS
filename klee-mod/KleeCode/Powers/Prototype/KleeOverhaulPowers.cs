@@ -341,10 +341,74 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
           + "field, gain [blue]{Amount}[/blue] [gold]Block[/gold] "
           + "and [blue]" + KleeOverhaulLaw.GroundedSpark + "[/blue] "
           + "[gold]Spark[/gold]."),
+        // `EB-533`. THE ANSWER, EITHER WAY, AND IT IS A ROW PER ANSWER for
+        // `ProtoBombPower.SmartDescriptionLocKey`'s reason: loc is registered
+        // once at boot and the board changes every turn, so the LIVE choice is
+        // a key and both faces have to exist before it can be made.
+        //
+        // THE KEYS ARE LITERALS HERE and constants below, and the pair is
+        // pinned equal rather than trusted: `tools/lint_text_conventions.py`
+        // reads these rows out of the SOURCE by the literal key, so a row
+        // written as `(PaidKey, ...)` is a player-facing string invisible to
+        // its own ceiling -- the same silence `EB-343` found on `MineKey`.
+        ("smartDescriptionPaid",
+            "This turn a [gold]Bomb[/gold] was on the field: paid "
+          + "[blue]{Amount}[/blue] [gold]Block[/gold] and [blue]"
+          + KleeOverhaulLaw.GroundedSpark + "[/blue] [gold]Spark[/gold]."),
+        ("smartDescriptionUnpaid",
+            "No [gold]Bomb[/gold] on the field this turn, so nothing was "
+          + "paid. It pays at the start of the next turn one is standing."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>
+    /// `EB-533`. GROUNDED FAILED SILENTLY, and the seat caught it by autopsy.
+    ///
+    /// THE FIND (Klee r19 lane 1). The card was logged every turn: paid three
+    /// times, failed twice, and both failures were the turn after the seat had
+    /// detonated everything -- which is the card's price rather than its trap,
+    /// and the seat named the turn it resolved as the round's best decision.
+    /// What was missing was a line: "the two failures printed no near-miss
+    /// line, I caught it only by diffing my own Block".
+    ///
+    /// A LATCH AND NOT A LIVE BOARD READ, which is the whole of why this field
+    /// exists. The badge is read at RENDER time and the condition is answered
+    /// at TURN START, and the seat's own failing turn is exactly the turn
+    /// those two disagree on: detonate everything, Grounded pays nothing, then
+    /// place a fresh Bomb. A badge that re-read the board would say "a Bomb is
+    /// on the field" over a turn that paid nothing, which is a second silent
+    /// failure rather than a fix. So the power records the answer it gave and
+    /// the face prints THAT.
+    ///
+    /// A `bool?` AND NOT A `bool`: null is "this power has not been asked yet"
+    /// -- the turn it is played, before any turn start -- and the face falls
+    /// back to the static rule there, because a badge that claimed a failure
+    /// the power never had is the same defect pointing the other way. A value
+    /// type, so `MutableClone`'s shallow copy carries it correctly and
+    /// `DeepCloneFields` has nothing to do (`SwirlChargePower.SwirledElement`'s
+    /// own note).
+    /// </summary>
+    private bool? _paid;
+
+    /// <summary>The loc suffixes <see cref="SmartDescriptionLocKey"/> selects.
+    /// BaseLib registers every pair this model returns under
+    /// `{Id.Entry}.{key}`, so a second face costs a row and nothing else.
+    /// </summary>
+    private const string PaidKey = "smartDescriptionPaid";
+    private const string UnpaidKey = "smartDescriptionUnpaid";
+
+    /// <summary>The face follows the answer the power last gave (`EB-533`).
+    /// A key with no row behind it falls back to the static description
+    /// (`PowerModel.HasSmartDescription` is a `LocString.Exists` probe), which
+    /// is what the unasked state wants and what it gets.</summary>
+    protected override string SmartDescriptionLocKey => _paid switch
+    {
+        true => Id.Entry + "." + PaidKey,
+        false => Id.Entry + "." + UnpaidKey,
+        null => Id.Entry + ".smartDescriptionUnasked",
+    };
 
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
@@ -362,7 +426,15 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
         // PRINTED words still name the old counter, which is a face defect and
         // not a rules one.
         if (!ProtoBombPower.AnyPlacedBy(Owner)
-            && !CompanionStandIns.GroundedBlind(Owner)) return;
+            && !CompanionStandIns.GroundedBlind(Owner))
+        {
+            // `EB-533`: the answer is recorded BEFORE the return, which is the
+            // only line of this method the row moves.
+            _paid = false;
+            return;
+        }
+
+        _paid = true;
         await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null);
         // `EB-344`. ONE CONDITION, TWO PAYOUTS: both are behind the same test,
         // so a turn that grants no Block grants no Spark either and there is no

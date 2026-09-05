@@ -1018,6 +1018,62 @@ def test_eb516_grounded_pays_while_a_bomb_is_cooking(overhaul):
     assert state.player.block == 0, "nothing cooking, nothing paid"
 
 
+def test_eb533_grounded_says_its_answer_either_way(overhaul):
+    """`EB-533`. THE SILENT FAILURE, and it cost the seat a turn to find.
+
+    Klee r19 lane 1 logged the card every turn: paid three times, failed twice,
+    and both failures were the turn after it had detonated everything -- the
+    card's price rather than its trap, and the seat named the turn it resolved
+    as the round's best decision. What was missing was a line: "the two
+    failures printed no near-miss line, I caught it only by diffing my own
+    Block."
+
+    NOTHING ABOUT THE CONDITION MOVES and no payout moves; the turn that says
+    no now says so. The mod's twin is `GroundedPower`'s latched badge face,
+    which is the same claim on the surface that engine has, and it is LATCHED
+    for the reason this event is emitted at turn start: the answer is given
+    then, and the board a badge would re-read has moved by the time a player
+    looks at it.
+    """
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.player.powers[klee_overhaul.GROUNDED] = 6
+
+    # THE FAILING TURN, and it is the seat's own: an empty field.
+    klee_overhaul.roll_to(state, 1)
+    klee_overhaul.turn_start_late(state)
+
+    said = [ev for ev in state.log if ev["event"] == "ko_grounded"]
+    assert len(said) == 1, "a turn that pays nothing still says so"
+    assert said[0]["paid"] is False
+    assert said[0]["amount"] == 0 and said[0]["spark"] == 0
+    assert state.player.block == 0
+
+    # AND THE PAYING TURN SAYS THE SAME THING THE OTHER WAY.
+    klee_overhaul.place(state, enemy, 5)
+    klee_overhaul.roll_to(state, 2)
+    klee_overhaul.turn_start_late(state)
+
+    said = [ev for ev in state.log if ev["event"] == "ko_grounded"]
+    assert len(said) == 2
+    assert said[1]["paid"] is True
+    assert said[1]["amount"] == 6
+    assert said[1]["spark"] == int(C.KLEE_OVERHAUL_GROUNDED_SPARK)
+
+
+def test_eb533_a_seat_without_the_power_says_nothing(overhaul):
+    """The one silence that stays: a run that never drafted Grounded has no
+    answer to give, and a line about a Power nobody holds is noise on every
+    turn of every fight."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+
+    klee_overhaul.roll_to(state, 1)
+    klee_overhaul.turn_start_late(state)
+
+    assert [ev for ev in state.log if ev["event"] == "ko_grounded"] == []
+
+
 def test_eb344_the_held_turn_also_grants_one_spark(overhaul):
     """`EB-344` (ruled R248): "gain 6 Block AND 1 Spark".
 
