@@ -792,10 +792,10 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
     "proto_kk_slack_water",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). THIRTY rows since the tempo
-# shelf: 15 Common, 10 Uncommon, 5 Rare, in the packet's own order -- the
-# Tactician, the Priestess, the Commander, then the currencies, the one replay,
-# and the tempo shelf. `EB-335` filed R246 pick 2's defensive pair with the
+# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). THIRTY-FIVE rows since the
+# pool pass (`EB-492`), in the packet's own order -- the Tactician, the
+# Priestess, the Commander, then the currencies, the one replay, the tempo
+# shelf and the pool pass. `EB-335` filed R246 pick 2's defensive pair with the
 # Priestess because that is the plan they answer for; round 9 pick 1's rows are
 # last, in the sheet's order. THE SHELF IS TWO AND NOT FOUR: Held Tide and
 # Tidal Rhythm were withdrawn on the R253 charter audit and are not built.
@@ -843,6 +843,16 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # `KokomiOverhaulRoster.Slice()` and to the sheet BY ORDER.
     "proto_kk_tide_chart",
     "proto_kk_ripple",
+    # POOL PASS ONE (`EB-492`, review/active/kokomi-pool-pass-2026-09-05.md):
+    # Plan density in the OFFER rather than in the starter -- three Attacks
+    # with a Plan line, the morning's payoff on a Common Attack, and a Skill
+    # that does both halves only when planned. LAST, in the sheet's own order,
+    # for the reason the shelf above is last.
+    "proto_kk_riptide",
+    "proto_kk_pincer",
+    "proto_kk_flank",
+    "proto_kk_well_laid",
+    "proto_kk_feigned_retreat",
 )
 
 # THE ONE INSTRUMENT DIAL THIS ARM ADDS, AND IT IS NOT A BALANCE NUMBER

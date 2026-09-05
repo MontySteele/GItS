@@ -945,11 +945,20 @@ def test_the_plan_tip_matches_the_two_aims_the_resolution_has():
     Driven against the RESOLUTION rather than restated: both branches are read
     out of `KokomiPlan.cs` here, so a tip that stops matching the code goes red
     from this side too.
+
+    THE TIP STILL NAMES TWO AND THERE ARE THREE (`EB-492`, Flank's
+    `EnemiesIntendingAttack`), and that is deliberate rather than a gap. The
+    tip is AT its 135-character ceiling and states the DEFAULT -- where a
+    planned hit lands when the line does not say -- while the third aim is a
+    clause the one card that uses it prints in full on its own face ("to each
+    enemy that intends to attack"). A tip that tried to carry it would have to
+    drop the modifier clause the r9 seat needed.
     """
     plan = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
             / "KokomiPlan.cs").read_text(encoding="utf-8")
     assert "hittable.FirstOrDefault(IsNotMinion)" in plan
-    assert "if (aim == Aim.AllEnemies)" in plan
+    assert "if (plan.Aim == Aim.AllEnemies)" in plan
+    assert "if (plan.Aim == Aim.EnemiesIntendingAttack)" in plan
     body = blindplay.ARM_KEYWORDS["Plan"]
     assert "front non-Minion" in body
     assert "or ALL, Minions too" in body

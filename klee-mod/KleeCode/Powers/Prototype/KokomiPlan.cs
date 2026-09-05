@@ -74,8 +74,15 @@ public static class KokomiPlan
     /// Kurage's Oath and War Council hit, Sango Isshin hits for a quarter of
     /// her Max HP, Chain of Command hits per Companion she played last turn,
     /// Slack Water and Exposed Flank and Vanguard and Coral Bulwark debuff,
-    /// Nereid's Ascension doubles, and Moon's Reflection replays a card out of
-    /// the exhaust pile that had no Plan line of its own.
+    /// and Moon's Reflection replays a card out of the exhaust pile that had
+    /// no Plan line of its own.
+    ///
+    /// NEREID'S ASCENSION IS OFF THIS LIST (`EB-492`). The Rare used to print
+    /// "Plan: for 2 turns, the jellyfish carries out every Plan twice" and so
+    /// spent the very morning it was meant to pay for; it is a POWER now
+    /// (<see cref="NereidsAscensionPower"/>), and the `PlanTwice` clause is
+    /// RETIRED rather than left standing unreachable -- a clause no row can
+    /// spell is a rule nothing enforces.
     /// </summary>
     public enum Kind
     {
@@ -88,7 +95,6 @@ public static class KokomiPlan
         DamagePerCompanionLastTurn,
         ApplyWeak,
         ApplyVulnerable,
-        PlanTwice,
         ReplayExhausted,
         // R236, Gorou's Crystal Collapse (the Inazuma workshop's one
         // Personal): "Plan: play a copy of the last other Companion card you
@@ -116,12 +122,25 @@ public static class KokomiPlan
     /// target is a RULE resolved at carry-out rather than a pointer captured at
     /// writing. It also makes the strip honest -- what it draws is what will
     /// happen, not what was true when the card was played.
+    ///
+    /// <see cref="EnemiesIntendingAttack"/> IS THE ONE AIM THAT LOOKS BACK, and
+    /// it looks at IDs rather than at creatures (`EB-492`, Flank). "Each enemy
+    /// that intends to attack" is a fact about the intents ON SCREEN WHEN THE
+    /// PLAN WAS WRITTEN -- that is what a player is reading when they choose to
+    /// write it, and re-asking the board at carry-out would answer about NEXT
+    /// turn's intents instead. So the SET is fixed at writing and stored on the
+    /// clause as <see cref="Planned.Targets"/>, a list of
+    /// <c>Creature.CombatId</c>s: an enemy whose intent later changes is still
+    /// hit, and one that died is simply not on the board to resolve. Ids and
+    /// not references keeps the rule above intact -- nothing here holds a
+    /// creature the game has torn down.
     /// </summary>
     public enum Aim
     {
         Self,
         FrontEnemy,
         AllEnemies,
+        EnemiesIntendingAttack,
     }
 
     /// <summary>
@@ -131,9 +150,25 @@ public static class KokomiPlan
     /// captured Companion), and is the one place a Plan holds an object rather
     /// than a number. Both are filled in when the Plan is written, never read
     /// off the board at carry-out.
+    ///
+    /// <paramref name="Times"/> IS HOW MANY SEPARATE HITS THE CLAUSE IS
+    /// (`EB-492`, Pincer). "Deal 3 damage three times" is three Hydro hits in
+    /// sequence and not one hit of nine: each one goes out through
+    /// <see cref="Hit"/> on its own, so each is absorbed by Block on its own,
+    /// each reacts on its own, and the aim is re-read between them. One is the
+    /// default and every clause the sheet wrote before this key existed keeps
+    /// its old shape exactly.
+    ///
+    /// <paramref name="Targets"/> IS <see cref="Aim.EnemiesIntendingAttack"/>'s
+    /// CAPTURED SET, by <c>Creature.CombatId</c>, filled in by
+    /// <see cref="Schedule"/> at the moment the Plan is written and read by
+    /// <see cref="Aimed"/> at carry-out. Empty is a real answer -- a Flank
+    /// written into a board of Defends is written and carries out nothing --
+    /// and null is "this clause does not aim that way".
     /// </summary>
     public readonly record struct Planned(
-        Kind Kind, int Amount, Aim Aim, CardModel? Card = null);
+        Kind Kind, int Amount, Aim Aim, CardModel? Card = null,
+        int Times = 1, IReadOnlyList<string>? Targets = null);
 
     /// <summary>
     /// ONE PLAN: the card that wrote it and the clauses it wrote. The card is
@@ -453,6 +488,32 @@ public static class KokomiPlan
             }
             label = Label(source, held);
         }
+        // `EB-492`, FLANK CAPTURES ITS SET AT WRITING TIME, and the argument is
+        // Crystal Collapse's above with one word changed: "each enemy that
+        // intends to attack" is a fact about the intents ON SCREEN NOW, which
+        // is what the player is reading when they decide to write the Plan.
+        // Asking again at carry-out would answer about the NEXT turn's intents
+        // -- a different question, and one the face never asked.
+        //
+        // AN EMPTY SET IS WRITTEN DOWN rather than refused, exactly as an empty
+        // Crystal Collapse capture is: the Plan is real, the strip has to show
+        // it, and what it carries out is nothing.
+        if (body.Any(c => c.Aim == Aim.EnemiesIntendingAttack))
+        {
+            var caught = IntendingAttack(kokomi);
+            for (var i = 0; i < body.Count; i++)
+            {
+                if (body[i].Aim == Aim.EnemiesIntendingAttack)
+                {
+                    body[i] = body[i] with
+                    {
+                        Targets = caught.Select(e => e.CombatId.ToString())
+                                        .ToList(),
+                    };
+                }
+            }
+            label = AimedLabel(source, caught);
+        }
         var entry = new Entry(source, body, label);
         int before = queue.Count;
         queue.Add(entry);
@@ -521,6 +582,47 @@ public static class KokomiPlan
         return $"{shortName}: {what}";
     }
 
+    /// <summary>
+    /// THE ENEMIES TELEGRAPHING AN ATTACK RIGHT NOW (`EB-492`, Flank).
+    ///
+    /// ONE DEFINITION, AND IT IS THE ARM'S EXISTING ONE.
+    /// <c>CurtainCallHooks.IntendsAttack</c> is the predicate the Furina arm
+    /// already reads for "is any enemy telegraphing an attack" and the sim
+    /// already twins (`effects._predicate("enemy_intends_attack")`); a second
+    /// intent test written here is exactly how two cards on one board come to
+    /// disagree about what an attack was.
+    ///
+    /// LIVING AND HITTABLE, the same list every other aim resolves over.
+    /// </summary>
+    private static List<Creature> IntendingAttack(Creature? kokomi) =>
+        kokomi?.CombatState?.HittableEnemies
+            .Where(IsAlive)
+            .Where(CurtainCallHooks.IntendsAttack)
+            .ToList() ?? new List<Creature>();
+
+    /// <summary>
+    /// What the strip prints for a Plan that CAUGHT A SET (`EB-492`).
+    ///
+    /// THE SAME ARGUMENT <see cref="Label"/> MAKES, one aim over: a Plan whose
+    /// targets were decided when it was written means a different thing every
+    /// time it is written, and a player who cannot see which bodies it caught
+    /// cannot plan around it. "Flank: nothing" is the honest line for a Plan
+    /// written into a board of Defends -- it is queued, it will fire, and it
+    /// will hit no one.
+    /// </summary>
+    private static string AimedLabel(CardModel? source,
+                                     IReadOnlyList<Creature> caught)
+    {
+        var name = source?.Title.ToString() ?? "Plan";
+        if (caught.Count == 0) return $"{name}: nothing";
+        var names = caught.Select(EnemyName)
+                          .Where(n => n.Length > 0)
+                          .ToList();
+        return names.Count == 0
+            ? $"{name}: {caught.Count}"
+            : $"{name}: {string.Join(", ", names)}";
+    }
+
     /// <summary>Keyed on the VERB, the way Rally's search screen was: one
     /// screen, one string, however many carriers eventually print it.</summary>
     public const string ReflectionPromptKey =
@@ -546,10 +648,13 @@ public static class KokomiPlan
     /// (Moon's Reflection's replay can reach a card that writes one, so this is
     /// no longer only a discipline.)
     ///
-    /// NEREID'S ASCENSION IS READ PER ENTRY, not once for the morning, and that
-    /// is a reading: its own clause is what installs the doubling, so reading
-    /// the power before each Plan is carried out means the Rare does not double
-    /// itself and every Plan written after it in the same morning is doubled --
+    /// NEREID'S ASCENSION IS READ PER ENTRY, not once for the morning, and it
+    /// stays that way now the Rare is a Power (`EB-492`): a Plan carried out
+    /// this morning can play a card -- Moon's Reflection's replay reaches one
+    /// -- and if that card is the Ascension, the Plans after it in the same
+    /// drain are doubled and the ones already carried out are not. Reading the
+    /// power once for the morning would have to pick one of those answers in
+    /// advance; reading it per entry says what is true when each Plan happens,
     /// which is what "the jellyfish carries out every Plan twice" says.
     /// </summary>
     public static async Task ResolveAll(
@@ -709,15 +814,20 @@ public static class KokomiPlan
 
     /// <summary>
     /// How many times ONE Plan is carried out right now: two while Nereid's
-    /// Ascension's window is up, one otherwise.
+    /// Ascension is on her, one otherwise.
     ///
     /// A NAMED READ rather than an inline predicate, because WHERE it is asked
     /// is the rule: <see cref="ResolveAll"/> calls it inside the drain loop,
-    /// before each entry, so the Rare's own clause does not double itself and
-    /// every Plan written after it in the same morning is doubled.
+    /// before each entry, so a Plan written in the same morning the Rare was
+    /// played is doubled too -- the power is on her by then.
+    ///
+    /// A POWER AND NO LONGER A WINDOW (`EB-492`). The Rare is a Power costing
+    /// 2 and lasting the fight; there is nothing to tick down, and "every Plan
+    /// twice" is read here at the one place the number of carry-outs is
+    /// decided.
     /// </summary>
     private static int CarryOutTimes(Creature kokomi) =>
-        kokomi.Powers.OfType<PlanTwicePower>().Any() ? 2 : 1;
+        kokomi.Powers.OfType<NereidsAscensionPower>().Any() ? 2 : 1;
 
     /// <summary>
     /// Change of Plans: "The jellyfish carries out your front Plan now."
@@ -807,8 +917,8 @@ public static class KokomiPlan
         // damage to ALL enemies and apply 1 Weak to each" and is ONE Plan, so
         // the number a player is watching for is the hit, which is also the
         // clause the sheet wrote first. A Plan whose clauses produce nothing at
-        // all (Moon's Reflection's replay, Nereid's window) says its name and
-        // no number, which is what the row asks for.
+        // all (Moon's Reflection's replay, Crystal Collapse's copy) says its
+        // name and no number, which is what the row asks for.
         int? number = null;
         // `EB-426`: the first numbered clause's KIND and the amount it asked
         // for, taken beside the number they belong to. `asked` is read BEFORE
@@ -1090,10 +1200,10 @@ public static class KokomiPlan
                     choiceContext, kokomi, plan.Amount);
 
             case Kind.Damage:
-                return await Hit(choiceContext, kokomi, plan.Aim, plan.Amount);
+                return await Hit(choiceContext, kokomi, plan, plan.Amount);
 
             case Kind.DamageQuarterMaxHp:
-                return await Hit(choiceContext, kokomi, plan.Aim,
+                return await Hit(choiceContext, kokomi, plan,
                                  KokomiRules.QuarterOfMaxHp(kokomi));
 
             case Kind.DamagePerCompanionLastTurn:
@@ -1101,7 +1211,7 @@ public static class KokomiPlan
                 // was written on turn N and resolves at the top of N+1, and the
                 // ledger has rolled by then, so the count it holds is turn N's
                 // -- the turn the player was looking at when they wrote it.
-                return await Hit(choiceContext, kokomi, plan.Aim,
+                return await Hit(choiceContext, kokomi, plan,
                                  plan.Amount * KokomiOverhaulLedger.For(kokomi)
                                                    .CompanionsPlayedLastTurn);
 
@@ -1112,13 +1222,6 @@ public static class KokomiPlan
             case Kind.ApplyVulnerable:
                 await Debuff<VulnerablePower>(choiceContext, kokomi, plan);
                 return plan.Amount;
-
-            case Kind.PlanTwice:
-                // NO NUMBER. Nereid's Ascension's amount is a window in TURNS,
-                // not something the Plan produced on the board, and printing it
-                // beside a card name would read as damage.
-                await PlanTwicePower.Wear(choiceContext, kokomi, plan.Amount);
-                return null;
 
             case Kind.ReplayExhausted:
                 // The replayed card prints its own numbers as it resolves; this
@@ -1145,10 +1248,9 @@ public static class KokomiPlan
     /// `Il.Strings` over a named method is what a headless pin can read.
     ///
     /// NULL WHERE THE CLAUSE PRODUCES NO NUMBER, which is the same set
-    /// <see cref="ResolveOne"/> returns null for -- Nereid's window is turns
-    /// and not a board figure, and a replay or a copy prints its own numbers
-    /// as it resolves. Those lines carry a card name and nothing else, so
-    /// there is no figure to label.
+    /// <see cref="ResolveOne"/> returns null for -- a replay or a copy prints
+    /// its own numbers as it resolves. Those lines carry a card name and
+    /// nothing else, so there is no figure to label.
     ///
     /// THE THREE DAMAGE KINDS ARE ONE WORD, because they are one quantity: a
     /// flat hit, a quarter of her Max HP and a per-Companion count all land as
@@ -1224,11 +1326,36 @@ public static class KokomiPlan
     private static bool IsNotMinion(Creature e) =>
         !e.Powers.OfType<MinionPower>().Any();
 
-    private static IEnumerable<Creature> Aimed(Creature kokomi, Aim aim)
+    /// <summary>
+    /// The bodies one clause lands on, resolved AT CARRY-OUT.
+    ///
+    /// THE WHOLE CLAUSE AND NOT JUST ITS AIM (`EB-492`), because one aim reads
+    /// something the clause carries: <see cref="Aim.EnemiesIntendingAttack"/>
+    /// resolves the ids <see cref="Schedule"/> captured, filtered to the bodies
+    /// STILL ON THE BOARD. An enemy whose intent changed overnight is still in
+    /// the set -- the set was the point -- and one that died is off
+    /// <c>HittableEnemies</c> and drops out, which is the same "a Plan that
+    /// lands on nothing lands on nothing" rule every other aim already keeps.
+    /// </summary>
+    private static IEnumerable<Creature> Aimed(Creature kokomi, Planned plan)
     {
         var combat = kokomi.CombatState;
         if (combat == null) yield break;
-        if (aim == Aim.AllEnemies)
+        if (plan.Aim == Aim.EnemiesIntendingAttack)
+        {
+            var caught = plan.Targets;
+            if (caught == null || caught.Count == 0) yield break;
+            foreach (var enemy in combat.HittableEnemies.Where(IsAlive)
+                                        .ToList())
+            {
+                if (caught.Contains(enemy.CombatId.ToString()))
+                {
+                    yield return enemy;
+                }
+            }
+            yield break;
+        }
+        if (plan.Aim == Aim.AllEnemies)
         {
             foreach (var enemy in combat.HittableEnemies.Where(e => !e.IsDead)
                                         .ToList())
@@ -1274,18 +1401,33 @@ public static class KokomiPlan
     /// Plan would have hit and the one the player is looking at; every number
     /// is still on screen over its own enemy, drawn by the engine.
     /// </remarks>
+    /// <remarks>
+    /// <c>Times</c> IS A LOOP OF WHOLE HITS AND NOT A MULTIPLIER (`EB-492`,
+    /// Pincer's "Deal 3 damage three times"). Three hits of 3 and one hit of 9
+    /// are different against Block, against an aura and against a body that
+    /// dies partway, so each pass goes out through <c>ElementalHit.Deal</c> on
+    /// its own and the AIM IS RE-READ between passes -- a front enemy killed by
+    /// the first hit hands the next one to the enemy behind it, which is the
+    /// same "leftmost alive" rule read twice rather than a second rule.
+    /// `kokomi_plan._hit` loops in the same order.
+    /// </remarks>
     private static async Task<int?> Hit(
-        PlayerChoiceContext choiceContext, Creature kokomi, Aim aim, int amount)
+        PlayerChoiceContext choiceContext, Creature kokomi, Planned plan,
+        int amount)
     {
         if (amount <= 0) return null;
+        var times = plan.Times < 1 ? 1 : plan.Times;
         int? first = null;
-        foreach (var target in Aimed(kokomi, aim))
+        for (var pass = 0; pass < times; pass++)
         {
-            if (target.IsDead) continue;
-            var landed = await ElementalHit.Deal(
-                choiceContext, target, Element.Hydro, amount, kokomi,
-                powered: false);
-            first ??= landed;
+            foreach (var target in Aimed(kokomi, plan))
+            {
+                if (target.IsDead) continue;
+                var landed = await ElementalHit.Deal(
+                    choiceContext, target, Element.Hydro, amount, kokomi,
+                    powered: false);
+                first ??= landed;
+            }
         }
         return first;
     }
@@ -1294,7 +1436,7 @@ public static class KokomiPlan
         PlayerChoiceContext choiceContext, Creature kokomi, Planned plan)
         where T : PowerModel
     {
-        foreach (var target in Aimed(kokomi, plan.Aim))
+        foreach (var target in Aimed(kokomi, plan))
         {
             if (target.IsDead) continue;
             await PowerCmd.Apply<T>(
@@ -1465,7 +1607,8 @@ public static class KokomiPlan
         // snapshot rather than being inferred from a Power's amount: Nereid's
         // Ascension is the one card that makes the queue's LENGTH stop being
         // the number of things that will happen.
-        snapshot["twice"] = creature!.Powers.OfType<PlanTwicePower>().Any();
+        snapshot["twice"] =
+            creature!.Powers.OfType<NereidsAscensionPower>().Any();
         snapshot["also_now"] =
             creature.Powers.OfType<PlansAlsoNowPower>().Any();
         snapshot["queue"] = pending
@@ -1675,57 +1818,4 @@ public sealed class PendingPlansPower : PowerModel, ILocalizationProvider
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary>
-/// Nereid's Ascension (Rare, her Burst): "Plan: for 2 turns, the jellyfish
-/// carries out every Plan twice."
-///
-/// THE DURATION IS THE AMOUNT, so a second Ascension extends the window and
-/// never doubles the doubling -- the same construction every other windowed
-/// power in this mod takes, and a tick-down at the end of her turn.
-///
-/// IT IS INSTALLED BY A PLAN, which is why the window starts one morning late
-/// and covers the NEXT two: the card is played on turn N, the clause is carried
-/// out at the top of N+1 and the power ticks at the end of N+1 and N+2.
-/// </summary>
-public sealed class PlanTwicePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Nereid's Ascension"),
-        ("description",
-            "The [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] "
-          + "twice. Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    /// <summary>Wear the window, or extend it to <paramref name="turns"/>.</summary>
-    public static async Task Wear(
-        PlayerChoiceContext choiceContext, Creature kokomi, int turns)
-    {
-        var worn = kokomi.Powers.OfType<PlanTwicePower>().FirstOrDefault();
-        if (worn == null)
-        {
-            await PowerCmd.Apply<PlanTwicePower>(
-                choiceContext, kokomi, turns, applier: kokomi,
-                cardSource: null);
-            return;
-        }
-        if (worn.Amount >= turns) return;
-        await PowerCmd.ModifyAmount(
-            choiceContext, worn, turns - worn.Amount, applier: kokomi,
-            cardSource: null);
-    }
-
-    public override async Task AfterSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
-    {
-        if (side != CombatSide.Player) return;
-        await PowerCmd.TickDownDuration(this);
-    }
 }

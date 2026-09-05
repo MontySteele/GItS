@@ -411,7 +411,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # PLAN-ONLY verbs: legal inside a row's `plan:` list and
                   # nowhere else, which `plan_reason` and `blocked_reason`
                   # enforce by name. Each is one `KokomiPlan.Kind`.
-                  "plan_twice", "damage_per_companion_last_turn",
+                  "damage_per_companion_last_turn",
                   # `EB-335`: Tide Wall's per-Plan Block scaler, plan-only for
                   # a reason of its own -- the count it multiplies is a fact
                   # about a MORNING.
@@ -1792,7 +1792,6 @@ PLAN_CLAUSE_KINDS = {
     "damage": "Damage",
     "damage_quarter_max_hp": "DamageQuarterMaxHp",
     "damage_per_companion_last_turn": "DamagePerCompanionLastTurn",
-    "plan_twice": "PlanTwice",
     "play_copy_of_companion": "PlayCopyOfCompanion",
     "block_per_plan_this_morning": "BlockPerPlanThisMorning",
     "apply_power": None,
@@ -1814,12 +1813,21 @@ PLAN_APPLY_POWERS = {"weak": "ApplyWeak", "vulnerable": "ApplyVulnerable"}
 PLAN_AIM_CS = {
     "front_enemy": "KokomiPlan.Aim.FrontEnemy",
     "all_enemies": "KokomiPlan.Aim.AllEnemies",
+    # `EB-492`, Flank: "Deal 8 damage to each enemy that intends to attack."
+    # THE SET IS FIXED WHEN THE PLAN IS WRITTEN, which is why this is an AIM
+    # and not a `conditional`: the clause carries the ids
+    # `KokomiPlan.Schedule` captured off the intents on screen, and the
+    # carry-out lands on those of them still alive.
+    "enemies_intending_attack": "KokomiPlan.Aim.EnemiesIntendingAttack",
 }
 PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
                   "damage_per_companion_last_turn", "apply_power"}
+#: The clauses a `times:` may repeat -- the flat hit, and nothing else
+#: (`EB-492`, Pincer). The twin of `kokomi_plan.PLAN_TIMES_OPS`.
+PLAN_TIMES_OPS = {"damage"}
 #: Legal inside a `plan:` list and NOWHERE else -- a top-level spelling would
 #: be a different, unpriced card, and `KokomiPlan` is the only caller of both.
-PLAN_ONLY_OPS = {"plan_twice", "damage_per_companion_last_turn",
+PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  "play_copy_of_companion", "block_per_plan_this_morning"}
 
 
@@ -1850,10 +1858,21 @@ def plan_reason(card: dict) -> str | None:
             allowed.add("target")
         if op == "apply_power":
             allowed.add("power")
+        # `EB-492`, Pincer's "Plan: Deal 3 damage three times". A repeat count
+        # on the FLAT hit and nowhere else: the two scaled damage kinds already
+        # derive their size from a count, and a debuff applied twice in one
+        # beat is two stacks -- an `amount` -- rather than two applications.
+        if op in PLAN_TIMES_OPS:
+            allowed.add("times")
         unknown = set(eff) - allowed
         if unknown:
             return (f"plan clause {op} field(s) {sorted(unknown)} "
                     "not understood")
+        if "times" in eff:
+            times = eff["times"]
+            if not isinstance(times, int) or isinstance(times, bool)                     or times < 2:
+                return (f"plan clause {op} times must be a literal int of 2 "
+                        "or more")
         if op not in PLAN_AMOUNTLESS_OPS:
             amount = eff.get("amount")
             if not isinstance(amount, int) or isinstance(amount, bool) \
@@ -1932,8 +1951,14 @@ def plan_clause_cs(eff: dict, var: str | None = None) -> str:
     else:
         amount = str(int(eff["amount"]))
     aim = PLAN_AIM_CS.get(eff.get("target"), "KokomiPlan.Aim.Self")
+    # `EB-492`. NAMED, and only where the row prints one: `Times` sits after
+    # the optional `Card` on the record, so a positional argument would have to
+    # pass a null the sheet never wrote -- and every clause authored before this
+    # key existed emits exactly the literal it always did.
+    times = eff.get("times")
+    tail = f", Times: {int(times)}" if isinstance(times, int) else ""
     return (f"new KokomiPlan.Planned(KokomiPlan.Kind.{kind}, {amount}, "
-            f"{aim})")
+            f"{aim}{tail})")
 
 
 # apply_power (power-card pass)
@@ -2092,6 +2117,13 @@ APPLY_POWERS = {
         "gain {X} Block."),
     "kk_plans_also_now": ("PlansAlsoNowPower", None,
         "[gold]Plans[/gold] also happen now, as you write them."),
+    # `EB-492`. Nereid's Ascension, redesigned from a Plan clause into the
+    # Power it always read as: the old row spent the morning it was meant to
+    # pay for. A marker power -- the stack means nothing, `CarryOutTimes`
+    # reads only whether it is worn.
+    "kk_nereids_ascension": ("NereidsAscensionPower", None,
+        "The [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] "
+        "twice."),
     "kk_clouds_like_waves": ("CloudsLikeWavesPower", None,
         "Whenever you apply a debuff to an enemy, gain {X} Block."),
     "kk_generals_banner": ("GeneralsBannerPower", None,
@@ -3208,6 +3240,7 @@ def blocked_reason(
                 and player_block_calc_rider(card, effect) is None
                 and companions_played_calc_rider(card, effect) is None
                 and kokomi_companions_this_turn_calc_rider(card, effect) is None
+                and plans_carried_out_morning_rider(card, effect) is None
                 and plans_held_draw_rider(card, effect) is None
                 and swirls_turn_calc_rider(card, effect) is None
                 and fanfare_drained_calc_rider(card, effect) is None
@@ -4245,6 +4278,44 @@ def kokomi_companions_this_turn_calc_rider(
             "card.Owner.Creature).CompanionsPlayedThisTurn")
 
 
+def plans_carried_out_morning_rider(
+        card: dict, eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: plans_carried_out_this_morning}` --
+    Well Laid (`EB-492`), "Deal 2 damage. Deals 3 more for each Plan the
+    Bake-Kurage carried out this morning."
+
+    THE SAME NUMBER TIDE WALL READS, and that is the point of reading it here
+    rather than counting anything up: `KokomiOverhaulLedger.PlansThisMorning`
+    is written once, at the drain, before the first clause runs, so the morning
+    a Plan card sees and the morning a now-line sees are one fact. Tide Wall
+    pays it in Block through a PLAN clause; this pays it in damage through an
+    Attack's now-line, which is the whole design of the row -- the morning paid
+    a second time, on the damage side, at 0 energy.
+
+    THE PLAN HALF AND THE BOOLEAN AGREE BY CONSTRUCTION. Sango Isshin's
+    `plan_carried_out_this_turn` is the same fact as a yes/no, and both are
+    cleared on the one turn boundary (`KokomiOverhaulLedger.RollTo`), so a
+    morning that drained three Plans reads three here and true there. They part
+    only where the arm's mid-turn doors fire -- Change of Plans and The Moon
+    Overlooks the Waters carry a Plan out inside the turn, which is a Plan
+    carried out and is NOT part of the morning -- and that is the printed
+    difference between "this turn" and "this morning", not a drift.
+
+    Same CalculatedDamageVar triple as the riders around it, and the same
+    damage-only restriction: the count moves every turn of the fight.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict):
+        return None
+    if formula.get("count") != "plans_carried_out_this_morning":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "static (card, _) => KokomiOverhaulLedger.For("
+            "card.Owner.Creature).PlansThisMorning")
+
+
 def plans_held_draw_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: plans_held}` on a DRAW -- Tide
     Chart (the tempo shelf, round 9 pick 1), "draw 1 card for each Plan the
@@ -5073,6 +5144,11 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     companions_this_turn = kokomi_companions_this_turn_calc_rider(card, eff)
     if companions_this_turn is not None:
         return companions_this_turn
+    # QUARANTINED USE ONLY (`EB-492`), and the same triple and the same
+    # damage-only rule as the two above: the count moves every morning.
+    plans_morning = plans_carried_out_morning_rider(card, eff)
+    if plans_morning is not None:
+        return plans_morning
     swirls_turn = swirls_turn_calc_rider(card, eff)
     if swirls_turn is not None:
         return swirls_turn
@@ -5707,6 +5783,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or exhausts_turn_calc_rider(card, e) is not None
             or player_block_calc_rider(card, e) is not None
             or companions_played_calc_rider(card, e) is not None
+            or kokomi_companions_this_turn_calc_rider(card, e) is not None
+            or plans_carried_out_morning_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
             for e in effects),
         "formula_base": any(
@@ -5716,6 +5794,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or exhausts_turn_calc_rider(card, e) is not None
             or player_block_calc_rider(card, e) is not None
             or companions_played_calc_rider(card, e) is not None
+            or kokomi_companions_this_turn_calc_rider(card, e) is not None
+            or plans_carried_out_morning_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
             for e in effects),
     }
