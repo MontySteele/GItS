@@ -2470,3 +2470,117 @@ worth naming: two would be two aura applications and two reaction rolls.
 `KokomiOverhaulKit.HasDebuff` and `kokomi_plan.has_debuff` are the twins the
 `target_has_debuff` predicate already used, so the rider asks the question the
 branch asked.
+
+## the Kokomi pool pass -- five new rows and one redesign (`EB-492`)
+
+Packet: `review/active/kokomi-pool-pass-2026-09-05.md`, off the readings of
+rounds 10 to 16. The finding the pass answers is one sentence: **the seats
+drafted Attacks and the pool's Attacks mostly carried no Plan line.** Of the
+pool's Attacks before this pass exactly one Common (Feint) had one, so a seat
+that took the damage it was offered planned on five turns in sixteen (round
+14) and read "Nothing is planned" sixteen times (round 10). Density in the
+OFFER, not in the starter -- the starter stands under R254 and R257.
+
+All six rows went through the doctrine audit before a tester saw them
+(`review/records/card-audit-2026-09-04.md` §5.4); three were re-priced off
+shipped cards after a first C6 read and the fourth read passed all of them.
+Every number here is a Prototype number, D by the ladder, and none of it is
+quotable (R215 B).
+
+### `proto_kk_riptide` -- the heavy AoE, at 2
+
+First written at 1 energy (5 and 9) and ruled a strictly better Kurage's Oath
+(basic, 1: 3 and 7). Re-priced at 2, where Deep Current (1: 6 to ALL) is the
+cheaper now-line and the Plan premium is the brief's usual four. No new engine.
+
+### `proto_kk_pincer` -- the multi-hit Plan clause
+
+`times:` on a planned `damage` clause, and it is a LOOP OF WHOLE HITS rather
+than a multiplier: three hits of 3 and one hit of 9 are different against an
+aura, against anything hung off a strike, and against a body that dies partway.
+The aim is re-read between passes, so a front enemy killed by the first hit
+hands the next one to the enemy behind it -- "leftmost alive" read three times
+rather than a second rule. `KokomiPlan.Hit` and `kokomi_plan._hit` loop in the
+same order; `PLAN_TIMES_OPS` is the flat hit and nothing else, because the two
+scaled damage kinds already derive their size from a count and a debuff applied
+twice in one beat is two stacks rather than two applications.
+
+First written at 4s (8 and 12) and ruled a strictly better Feint (1: 6, Plan
+10); re-priced at 3s -- 6 now in two hits, 9 planned in three.
+
+### `proto_kk_flank` -- the intent-keyed set aim
+
+`target: enemies_intending_attack`, and it is the one aim that LOOKS BACK. The
+set is fixed when the Plan is WRITTEN, off the intents on the screen at that
+moment, which is R250's rule for an aimed Plan applied to a set: that is what
+the player is reading when they decide to write it, and re-asking the board at
+carry-out would answer about the NEXT turn's intents instead. An enemy whose
+intent later changes is still hit; one that died is skipped.
+
+WHERE THE SET IS HELD is the one place this arm stores anything about a body.
+The C# keeps `Creature.CombatId`s on the clause (`KokomiPlan.Planned.Targets`)
+because the game tears a dead creature down and a stored reference would be a
+use-after-free; tier0 keeps the `Enemy` objects, because nothing in that engine
+tears one down (`Enemy.alive` is a read of `hp`). Same semantics either way --
+"this body, if it is still alive".
+
+An EMPTY set is written down rather than refused, the shape an empty Crystal
+Collapse capture already has: the Plan is real, the strip has to show it, and
+what it carries out is nothing. The strip says so -- `Flank: nothing`, or the
+names it caught -- through the same label channel Crystal Collapse uses.
+
+The intent predicate is the arm's existing one, split in two rather than
+rewritten: `CurtainCallHooks.IntendsAttack` is now the per-creature half of the
+board-wide `EnemyIntendsAttack` the Furina arm already read, and
+`kokomi_plan._intends_to_attack` gained the `sleep_turns` clause its shipped
+twin `enemy_intends_attack` always had.
+
+### `proto_kk_well_laid` -- the morning, read from the damage side
+
+`amount_formula: {base: 2, per: 3, count: plans_carried_out_this_morning}` on a
+NOW-line: Tide Wall's count on a hit instead of Block, at 0 energy, with a
+floor of 2. With no Plan carried out it is a worse Strike; with three it is 11
+for free, the morning paid a second time. This is the pool-pass half of rounds
+12 and 13's "a second copy of Tide Chart, or a Common that reads the memory" --
+a second reader, on the damage side, rather than a second copy.
+
+THE COUNT IS THE ONE TIDE WALL READS. `KokomiOverhaulLedger.PlansThisMorning`
+/ `state.kk_plans_this_morning` is written once, at the drain, before the first
+clause runs, and cleared on the turn boundary -- so the morning a now-line sees
+and the morning a Plan clause sees are one fact rather than two counts that can
+drift. Sango Isshin's `plan_carried_out_this_turn` is the same fact as a
+yes/no and is cleared on the same line; the two part only where the arm's
+mid-turn doors fire (Change of Plans, The Moon Overlooks the Waters carry a
+Plan out INSIDE the turn), which is the printed difference between "this turn"
+and "this morning".
+
+### `proto_kk_feigned_retreat` -- both halves, only when planned
+
+Against Read the Field (1: 5 Block, Plan 10 Block) and Ambush (1: 5 damage,
+Plan 12): less of either, both at once, and only when planned. Two plan
+clauses, Block then damage, which the queue has carried since War Council.
+
+### `proto_kk_nereids_ascension` -- the Rare, redesigned in place
+
+From "Exhaust. Plan: for 2 turns, the Bake-Kurage carries out every Plan twice"
+to "The Bake-Kurage carries out every Plan twice", a Rare Power at 2 (1
+upgraded). Round 14: it "reads like the kit's payoff and behaves like a tax" --
+two energy, an Exhaust and a Plan slot for two turns of doubling, in a deck
+with two Plan cards to double, and written as a Plan it also spent the morning
+it was meant to pay for. The same rule is broken (the brief's rule 3, "once, in
+order") for the whole fight instead of two mornings, and it is no longer a Plan
+itself. Its price is two energy on a turn that writes no Plan, and every turn
+after that it pays only what the deck plans.
+
+THE POWER IS A MARKER. `CarryOutTimes` reads whether it is worn and never its
+amount, so a second copy doubles nothing further; there is no duration, so
+nothing ticks it. It is read PER ENTRY inside the drain loop, which still
+matters with the clause gone: a Plan can play a card (Moon's Reflection reaches
+one), so a morning can install the Ascension partway through and the Plans
+after it are doubled while the ones already carried out are not.
+
+THE `plan_twice` CLAUSE IS RETIRED, not left standing. It was the only row that
+spelled it, and a clause no row can spell is a rule nothing enforces -- so it
+came off `PLAN_KINDS`, off `effects.OPS`, off `KokomiPlan.Kind`, off the
+drafter's price table and off the pilot's duration carve-out, with
+`PlanTwicePower` and its tests, in the same commit.
