@@ -7525,7 +7525,8 @@ def test_a_base_keyword_a_face_names_is_defined_on_the_page():
     page = blindplay.observe(keyword_hand_state(
         ["Apply 1 Vulnerable. Plan: Apply 2 Vulnerable to ALL enemies."]))
     glossary = page.split("## Words on this screen")[1]
-    assert "- **Vulnerable** — Every card hit it takes deals 50% more" in glossary
+    assert ("- **Vulnerable** — An attack or card hit on it deals 50% more"
+            in glossary)
     assert "falls off at the end of each of its turns" in glossary
     # And the Plan tip is still there: two words, two definitions.
     assert "- **Plan** — " in glossary
@@ -7574,7 +7575,10 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         # `VulnerablePower` gates on the HIT. `EB-497` then narrowed "every
         # hit" to "every CARD hit" -- a potion's damage is not a powered
         # attack in either engine and takes no 1.5x.
-        "Vulnerable": ["Every card hit it takes deals 50% more, a Skill's "
+        # `EB-523` then put the ATTACK back in, for the side of the board
+        # `EB-497` did not read: "every card hit" is complete on an enemy and
+        # silent on a player, whose Vulnerable is about a monster's swing.
+        "Vulnerable": ["An attack or card hit on it deals 50% more, a Skill's "
                        "too. A ", "potion's does not. One stack falls off at "
                        "the end of each of ", "its turns."],
         # `EB-469` put the Skill case in this sentence, in the C# and here in

@@ -504,13 +504,32 @@ public static class KleeMod
             LocManager.Instance.GetTable("powers").MergeWith(
                 new Dictionary<string, string>
                 {
+                    // `EB-523` PUT THE ATTACK BACK IN, and it is `EB-497`'s own
+                    // correction meeting the side of the board that row did
+                    // not read. "From cards" is complete on an ENEMY, where
+                    // everything that hits is a card or a potion, and silent on
+                    // the PLAYER, where the number that matters is a monster's
+                    // swing: the Kokomi r18 lane-2 seat wore `Vulnerable 99 --
+                    // Receive 50% more damage from cards for 99 turns` in front
+                    // of a 24-damage intent and could not price it. "That is
+                    // the single most decision-relevant number on the screen
+                    // and I could not price it."
+                    //
+                    // AND IT DOES COUNT. `VulnerablePower` gates on
+                    // `ValueProp.IsPoweredAttack()` -- a property of the HIT,
+                    // and a monster's move carries it; the sim says the same
+                    // structurally, `combat._enemy_attack` running every hit
+                    // through `powers.modify_damage_taken(state.player, ...)`.
+                    // So the sentence names both kinds of hit and keeps
+                    // `EB-497`'s potion clause, which is the one thing that
+                    // takes no multiplier on either engine.
                     ["VULNERABLE_POWER.description"] =
                         "Vulnerable creatures take [blue]50%[/blue] more "
-                      + "damage from cards, a potion's aside.",
+                      + "damage from any attack or card hit, a potion's aside.",
                     ["VULNERABLE_POWER.smartDescription"] =
                         "Receive [blue]{DamageIncrease:percentMore()}%[/blue] "
-                      + "more damage from cards for [blue]{Amount}[/blue] "
-                      + "{Amount:plural:turn|turns}.",
+                      + "more damage from any attack or card hit for "
+                      + "[blue]{Amount}[/blue] {Amount:plural:turn|turns}.",
 
                     // `EB-521`, AND IT IS THE THIRD ROUND OF ONE FINDING.
                     //
