@@ -6652,6 +6652,40 @@ def test_a_compound_intent_prints_every_component():
             "to your hand.") in page
 
 
+def test_no_observe_prints_the_enemy_block_twice():
+    """`EB-458`, and the row's premise did not hold: there is no duplicated
+    render path to find.
+
+    WHAT WAS FILED. "The page printed `## The other side` and the whole enemy
+    block twice, verbatim, on five observes across four fights" (Klee r14).
+
+    WHAT THE CODE SAYS. `render` emits that heading in exactly one place, in
+    the one `screen == "combat"` branch, and `observe` is `render(observation
+    (state))` -- there is no second emitter on this path (`qa_packet`'s is the
+    STAGED PACKET, a different surface with a different entry point). Every
+    recorded screen in `review/qa` renders it once.
+
+    WHAT ACTUALLY HAPPENED, on the seats' own evidence. Both r14 seats declare
+    piping `observe` through `sed -n '<ranges>p'` to re-read one block, and the
+    Klee r10 run-2 seat met the IDENTICAL symptom and diagnosed it itself:
+    "One such call early on used two overlapping `sed` ranges and printed the
+    enemy block twice -- a formatting error of mine, not a game one."
+
+    So this stands as the guard rather than the fix: the page prints the block
+    once, and a render path that ever emitted it twice goes red here.
+    """
+    for state in (combat_state(), compound_intent_state(),
+                  elemental_hand_state(aura=True),
+                  keyword_hand_state(["Gain 5 Block."])):
+        page = blindplay.observe(state)
+        assert page.count("## The other side") == 1, page.count(
+            "## The other side")
+        assert page.count("# Battle") == 1
+    src = (REPO / "understudy" / "blindplay_render.py").read_text(
+        encoding="utf-8")
+    assert src.count('"## The other side"') == 1
+
+
 def test_a_single_component_intent_reads_exactly_as_it_always_did():
     """One row, one line, no continuation -- the recorded combat is the pin.
 
