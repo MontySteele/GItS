@@ -7172,8 +7172,12 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         "Vulnerable": ["The wearer takes 50% more damage from every hit. "
                        "One stack falls ", "off at the end of each of its "
                        "turns."],
-        "Weak": ["The wearer deals 25% less damage. One stack falls off at "
-                 "the end ", "of each of its turns."],
+        # `EB-469` put the Skill case in this sentence, in the C# and here in
+        # one commit, so the anchor holds the clause that resolves the game's
+        # own "Attacks".
+        "Weak": ["The wearer deals 25% less damage with every hit it lands, a ",
+                 "Skill's damage too. One stack falls off at the end of each ",
+                 "of its turns."],
         # The two rows whose clause straddles a `[gold]` span are anchored
         # WITH the markup and folded out on the page side, the same way the
         # arm table's interpolated numerals are.

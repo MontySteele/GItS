@@ -76,13 +76,35 @@ public static class BaseKeywordTips
             "The wearer takes 50% more damage from every hit. One stack falls "
           + "off at the end of each of its turns.");
 
-    /// <summary>The mirror one debuff over, and the one the Plan tip's second
-    /// sentence assumes a reader already knows.</summary>
+    /// <summary>
+    /// The mirror one debuff over, and the one the Plan tip's second sentence
+    /// assumes a reader already knows.
+    ///
+    /// `EB-469` NAMED THE CASE THE GAME'S OWN STATUS LINE LEAVES AMBIGUOUS.
+    /// The wire's <c>WeakPower</c> sentence is "Attacks deal 25% less damage
+    /// for 1 turn", and the Kokomi r15 seat read "Attacks" as the CARD TYPE:
+    /// "the status line told me skills were safe and the card told me they
+    /// were not" ((c) 2). It had watched <i>Kurage's Oath</i> -- printed
+    /// `cost 1, skill` -- go from "Deal 3 damage to ALL enemies" to 2 while it
+    /// wore Weak.
+    ///
+    /// THE ENGINE IS NOT BEING CHANGED, because the engine is right and only
+    /// the words were unclear. <c>WeakPower.ModifyDamageMultiplicative</c>
+    /// gates on <c>ValueProp.IsPoweredAttack()</c> -- a property of the HIT,
+    /// not of the card -- and every damage clause the generator emits carries
+    /// <c>ValueProp.Move</c> whatever <c>type:</c> the sheet row declares, so
+    /// a Skill that deals damage is Weakened exactly like an Attack.
+    /// "Attacks" in the game's sentence means attack HITS. This tip says
+    /// which, in the mod's own words, on the face that printed the word, and
+    /// <c>blindplay_notes.BASE_KEYWORDS</c> carries the same sentence.
+    /// 132 of 135.
+    /// </summary>
     public static IEnumerable<IHoverTip> ForWeak(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, WeakKey,
-            "The wearer deals 25% less damage. One stack falls off at the end "
-          + "of each of its turns.");
+            "The wearer deals 25% less damage with every hit it lands, a "
+          + "Skill's damage too. One stack falls off at the end of each of "
+          + "its turns.");
 
     /// <summary>The third duration debuff. No quarantined face prints it
     /// today; the row exists because the attach is derived and a face that

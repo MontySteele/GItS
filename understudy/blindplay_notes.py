@@ -798,9 +798,20 @@ BASE_KEYWORDS: dict[str, str] = {
     "Vulnerable": (
         f"The wearer takes {VULNERABLE_TAKEN_PCT}% more damage from every "
         f"hit. One stack falls off at the end of each of its turns."),
+    # `EB-469`. THE GAME'S OWN STATUS LINE SAYS "Attacks deal 25% less damage
+    # for 1 turn", and the Kokomi r15 seat read "Attacks" as the CARD TYPE --
+    # "the status line told me skills were safe and the card told me they were
+    # not" ((c) 2), after watching `Kurage's Oath`, printed `cost 1, skill`,
+    # go from 3 to 2 while it wore Weak. The engine is not what is wrong:
+    # `WeakPower.ModifyDamageMultiplicative` gates on `IsPoweredAttack()`, a
+    # property of the HIT, and every damage clause the generator emits carries
+    # `ValueProp.Move` whatever `type:` its sheet row declares. So the page
+    # says which, in the mod's own words -- this row and
+    # `BaseKeywordTips.ForWeak` are one sentence, pinned to each other.
     "Weak": (
-        f"The wearer deals {WEAK_DEALT_PCT}% less damage. One stack falls "
-        f"off at the end of each of its turns."),
+        f"The wearer deals {WEAK_DEALT_PCT}% less damage with every hit it "
+        f"lands, a Skill's damage too. One stack falls off at the end of "
+        f"each of its turns."),
     "Frail": (
         f"The wearer gains {FRAIL_BLOCK_PCT}% less Block. One stack falls "
         f"off at the end of each of its turns."),
