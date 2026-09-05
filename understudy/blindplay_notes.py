@@ -687,8 +687,8 @@ ARM_KEYWORDS: dict[str, str] = {
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
     # is a Power card of Klee's, and Kaeya's Cold-Blooded Strike is written
-    # against it by name ("This turn, Grounded counts nothing as having gone
-    # off"), as is the Cold-Blooded buff that card leaves behind. The r9 seat
+    # against it by name ("This turn, Grounded counts a Bomb as on the
+    # field", `EB-576`), as is the Cold-Blooded buff it leaves behind. The r9 seat
     # met the word in both acts, held neither the Power nor a screen that
     # defined it, and read it as noise. Held in step with
     # `ArmKeywordTips.ForGrounded`.

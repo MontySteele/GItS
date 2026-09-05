@@ -784,9 +784,9 @@ def turn_start_late(state: CombatState) -> None:
     # condition says, so the cover story is read HERE and not by zeroing the
     # explosion counter, which Jean's stand-in also reads. `grounded_blind` is
     # False on every tree with the companion arm off. `EB-516` left the read
-    # where it was and moved only the condition beside it -- the stand-in's
-    # PRINTED words still name the old counter and are a face defect, not a
-    # rules one (reported, not fixed here).
+    # where it was and moved only the condition beside it, and `EB-576` brought
+    # the stand-in's PRINTED words the rest of the way: the face now reads
+    # "counts a Bomb as on the field", which is what this OR has always done.
     from tier0.engine import companion_standins    # late import: cycle
 
     # `EB-533`: THE ANSWER IS EMITTED EITHER WAY. Klee r19 lane 1 logged the

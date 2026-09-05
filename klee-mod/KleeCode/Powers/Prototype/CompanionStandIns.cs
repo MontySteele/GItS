@@ -413,7 +413,15 @@ public sealed class FrontRowSeatPower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// Kaeya, Cold-Blooded Strike: "Deal 8 damage. Apply Cryo. This turn, Grounded
-/// counts nothing as having gone off."
+/// counts a Bomb as on the field."
+///
+/// `EB-576`: THE FACE NAMES THE RULE THE ENGINE HAS. It printed the pre-r18
+/// Grounded ("counts nothing as having gone off") for as long as `EB-516` had
+/// been in, which put two printed texts on one screen that could not both be
+/// true. Nothing in the effect moved: the blind was always read as an OR
+/// beside Grounded's own condition (<c>GroundedPower.AfterPlayerTurnStart</c>),
+/// which is exactly "counts a Bomb as on the field", so this row is the words
+/// catching up with the code.
 ///
 /// A MARKER, and its stack is a flag rather than a number -- which is why the
 /// sheet row states its own upgrade instead of letting the Prototype-stage
@@ -433,8 +441,8 @@ public sealed class ColdBloodedPower : PowerModel, ILocalizationProvider
     {
         ("title", "Cold-Blooded"),
         ("description",
-            "This turn, [gold]Grounded[/gold] counts nothing as having gone "
-          + "off."),
+            "This turn, [gold]Grounded[/gold] counts a Bomb as on the "
+          + "field."),
     };
 
     /// <summary>

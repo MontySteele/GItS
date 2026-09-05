@@ -6047,8 +6047,8 @@ def test_the_grounded_word_is_defined_wherever_a_face_names_it():
     defined every other arm word on it and not that one.
     """
     page = blindplay.observe(keyword_hand_state(
-        ["Deal 8 damage. Apply Cryo. This turn, Grounded counts nothing as "
-         "having gone off."]))
+        ["Deal 8 damage. Apply Cryo. This turn, Grounded counts a Bomb as "
+         "on the field."]))
     assert "- **Grounded** — A Power that pays at the start of your turn"         in page
     assert "you have a Bomb on the field" in page      # `EB-516`
 
@@ -6061,8 +6061,8 @@ def test_the_grounded_word_is_defined_wherever_a_face_names_it():
     state["player"]["status"] = [
         {"id": "KLEEMOD-COLD_BLOODED", "name": "Cold-Blooded", "amount": 1,
          "type": "Buff", "keywords": [],
-         "description": "This turn, Grounded counts nothing as having gone "
-                        "off."}]
+         "description": "This turn, Grounded counts a Bomb as on the "
+                        "field."}]
     assert "- **Grounded** — " in blindplay.observe(state)
 
 

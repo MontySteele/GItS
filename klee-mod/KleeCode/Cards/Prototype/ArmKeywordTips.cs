@@ -531,8 +531,8 @@ public static class ArmKeywordTips
     /// PLAYER MAY NEVER HAVE OWNED.
     ///
     /// THE GAP. `Grounded` is a Power of Klee's, and Kaeya's Cold-Blooded
-    /// Strike is written against it -- "This turn, Grounded counts nothing as
-    /// having gone off" -- as is the buff that card leaves behind
+    /// Strike is written against it -- "This turn, Grounded counts a Bomb as
+    /// on the field" (`EB-576`) -- as is the buff that card leaves behind
     /// (<see cref="KleeMod.Powers.ColdBloodedPower"/>). A player who drafted
     /// Kaeya without ever drafting Grounded meets the word on a card face with
     /// nothing anywhere on the screen saying what it is, and the r9 seat read
