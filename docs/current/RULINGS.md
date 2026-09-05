@@ -269,10 +269,11 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R257 | 2026-09-04 | Kokomi round 15 pick 1 at its default -- Tide Chart redesigned to pay after the carry-outs, the starter stays two kit cards | `ee6da29` |
 | R258 | 2026-09-04 | Furina round 5 pick 1 at its default -- Furina starts each combat with 2 Encore under the reframe arm | `4356352` |
 | R259 | 2026-09-05 | Claude merges every PR that asks nothing of [USER]; a PR is [USER]'s only for an open pick, LAW/EXPERIMENTS text, or a shipped number | `9a4251b` |
+| R260 | 2026-09-05 | Furina's stage starts every combat with a member on it (round-11 pick 1, option 2); EB-553 | `41ddb29` |
 
-258 rows over the R1..R260 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 147 from a commit message, 0 unresolved.
+259 rows over the R1..R260 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 148 from a commit message, 0 unresolved.
 
-2 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28, R260.
+1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
 Ledger retrieval point: `3907837` (tag `pre-simplification-2026-08-06`); ledger paths `tier0/DECISIONS.md`, `tier0/DECISIONS-archive-R39-R99.md`, `klee-mod/DECISIONS.md`.
 
