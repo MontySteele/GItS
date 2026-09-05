@@ -505,9 +505,13 @@ ARM_KEYWORDS: dict[str, str] = {
     # round-10 seats met that rule for the first time as a stack they could
     # not account for. The page says it in the tip's own words, "Kills move
     # it on", because the glossary is pinned to the C# text word for word.
+    # `EB-536` ADDED THE MINE. "Goes off only when Set off" sat directly
+    # above the Mine row, which says a Mine also goes off before its enemy's
+    # hit, so two rows of one glossary contradicted each other and the Klee r19
+    # lane-2 seat said so. Same sentence as `ArmKeywordTips.ForBomb`.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
-             "only when Set off. Not an Attack: only Vulnerable and a cap "
-             "move it. Kills move it on."),
+             "only when Set off, or as a Mine. Not an Attack: only Vulnerable "
+             "and a cap move it. Kills move it on."),
     # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
     # walks the charges in placement order and the first one through the
     # funnel meets the aura, because every reaction consumes it -- the r11

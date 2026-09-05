@@ -168,7 +168,8 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
             "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
-          + " a turn, goes off only when [gold]Set off[/gold]. "
+          + " a turn, goes off only when [gold]Set off[/gold], or as a "
+          + "[gold]Mine[/gold]. "
           + "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. "
           + "Kills move it on.");
 

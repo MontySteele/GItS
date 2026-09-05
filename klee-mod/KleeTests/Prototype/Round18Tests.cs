@@ -305,14 +305,29 @@ public class Round18Tests
                                     new ProtoBombs.Charge(3));
         var rows = pile.Localization!;
 
+        // `EB-536` REWORDED THE CLAUSE AND NARROWED WHERE IT PRINTS. "For as
+        // many Sparks" was "never comprehensible" (r19 lane 2), so the Spark
+        // count is the number again; and the clause is a fact about a STACK,
+        // so it lives on the many-charge half of the grid only. This pile
+        // holds two, which is the reading the row was filed on.
         foreach (var key in new[] { "smartDescription", "smartDescriptionMines" })
         {
             var face = rows.First(r => r.Item1 == key).Item2;
-            Assert.Contains("Pyro damage, in [blue]{Count}[/blue] "
-                            + "hit{Count:plural:|s} for as many "
-                            + "[gold]Sparks[/gold].", face);
+            Assert.Contains("Pyro damage, in [blue]{Count}[/blue] hits for "
+                            + "[blue]{Count}[/blue] [gold]Sparks[/gold].",
+                            face);
             // The queue stays where `EB-450` put it: the sizes are a different
             // fact from the count, and the headline is where the plan is made.
+            Assert.Contains("Bombs here: [blue]{Charges}[/blue]", face);
+        }
+
+        // AND THE SINGLE-CHARGE FACE SAYS NOTHING ABOUT HITS, which is the
+        // half `EB-536` added: there the total IS the hit.
+        foreach (var key in new[] { "smartDescriptionOne",
+                                    "smartDescriptionOneMines" })
+        {
+            var face = rows.First(r => r.Item1 == key).Item2;
+            Assert.DoesNotContain("{Count}", face);
             Assert.Contains("Bombs here: [blue]{Charges}[/blue]", face);
         }
     }

@@ -455,7 +455,11 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # 2's "all at once" (the `Set off` clauses state it in full),
             # "their" and "to a survivor" paid for it: 133 rendered.
             "A charge on an enemy: grows ",
-            " a turn, goes off only when [gold]Set off[/gold]. ",
+            # `EB-536`: the Mine joins the sentence, because the Mine tip
+            # printed under it says a Mine also goes off before its enemy's
+            # hit and the two contradicted each other on one screen.
+            " a turn, goes off only when [gold]Set off[/gold], or as a ",
+            "[gold]Mine[/gold]. ",
             "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. ",
             "Kills move it on.",
             # `EB-432` named the order INSIDE the pile: `SetOff` walks the

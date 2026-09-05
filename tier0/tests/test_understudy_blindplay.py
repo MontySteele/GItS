@@ -5753,8 +5753,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # nothing else) and `EB-361` added rule 3 -- a Bomb whose enemy dies
         # moves to a survivor -- with rule 2's "all at once" paying for it on
         # the in-game tip (the `Set off` row below states it in full).
+        # `EB-536`: and the Mine, because the Mine row printed under this one
+        # says a Mine also goes off before its enemy's hit.
         "Bomb": ["A charge on an enemy", "goes off only when",
-                 "Not an Attack: only ", " and a cap ",
+                 ", or as a ", "Not an Attack: only ", " and a cap ",
                  "Kills move it on"],
         # `EB-432`: the pile's own order, and which charge meets the aura.
         # `EB-490` renamed the class and not the claim: "Attack trigger" read

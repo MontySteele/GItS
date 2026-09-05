@@ -141,7 +141,10 @@ public class KleeOverhaulRoundOneFixTests
 
         Assert.EndsWith(".smartDescriptionMines", LocKey(pile));
         pile.TakeMines();
-        Assert.EndsWith(".smartDescription", LocKey(pile));
+        // `EB-536`: one charge is left, so the face that follows the pile is
+        // the SINGLE-charge one -- which is the third axis working, and the
+        // whole point of this pin one axis wider.
+        Assert.EndsWith(".smartDescriptionOne", LocKey(pile));
     }
 
     // ---- EB-265: the number the set-off will actually deal ---------------

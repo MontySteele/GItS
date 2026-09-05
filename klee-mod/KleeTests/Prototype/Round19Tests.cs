@@ -364,6 +364,88 @@ public class Round19Tests
         Assert.Contains("KokomiPlan.Announce", announce);
     }
 
+    // ==================================================================
+    // `EB-536` -- the hit clause is a fact about a stack, and the two
+    //             Bomb tips stopped contradicting each other
+    // ==================================================================
+    //
+    // TWO FINDINGS, ONE ROW (Klee r19 lane 2). `EB-514`'s new headline clause
+    // "in 1 hit for as many Sparks" printed on EVERY Bomb block and "was never
+    // comprehensible" -- and on a pile of one it is saying nothing, because
+    // the total IS the hit and "as many" points back at a number the sentence
+    // has already spent. And the Bomb tip's "goes off only when Set off" was
+    // printed directly above the Mine tip, which says a Mine also goes off
+    // before its enemy's hit: two surfaces of one screen contradicting each
+    // other.
+
+    [Fact]
+    public void A_single_charge_headline_says_nothing_about_hits()
+    {
+        var pile = ProtoBombs.Place(Seat.Klee(60).Creature,
+                                    Seat.Klee().Creature,
+                                    new ProtoBombs.Charge(7));
+        var face = pile.Localization!
+            .First(r => r.Item1 == "smartDescriptionOne").Item2;
+
+        Assert.DoesNotContain("{Count}", face);
+        Assert.DoesNotContain("hit", face);
+        // The rest of the face is untouched: the total, the queue and rule 3.
+        Assert.Contains("[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
+                      + "Pyro damage.", face);
+        Assert.Contains("Bombs here: [blue]{Charges}[/blue]", face);
+    }
+
+    [Fact]
+    public void A_stack_still_names_its_hits_and_names_its_sparks()
+    {
+        var pile = ProtoBombs.Place(Seat.Klee(60).Creature,
+                                    Seat.Klee().Creature,
+                                    new ProtoBombs.Charge(4),
+                                    new ProtoBombs.Charge(3));
+        var face = pile.Localization!
+            .First(r => r.Item1 == "smartDescription").Item2;
+
+        // THE SPARK COUNT IS A NUMBER AGAIN. "For as many Sparks" asked the
+        // reader to carry the hit count across a clause; the number carries
+        // itself, and the plural is fixed because this face is only ever
+        // chosen for two charges or more.
+        Assert.Contains("in [blue]{Count}[/blue] hits for [blue]{Count}[/blue] "
+                      + "[gold]Sparks[/gold].", face);
+        Assert.DoesNotContain("as many", face);
+        Assert.DoesNotContain("plural", face);
+    }
+
+    [Fact]
+    public void The_live_face_follows_the_charge_count_off_the_board()
+    {
+        // The axis is READ, not assumed: the selector asks the live charge
+        // list, so a stack that loses a charge becomes a single and a single
+        // that gains one becomes a stack. `EB-289`'s var is what it asks --
+        // the stack amount cannot be lowered by the pure takes.
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(60).Creature;
+        var pile = ProtoBombs.Place(enemy, klee.Creature,
+                                    new ProtoBombs.Charge(4),
+                                    new ProtoBombs.Charge(6, IsMine: true));
+
+        Assert.EndsWith(".smartDescriptionMines", LocKey(pile));
+        pile.TakeMines();
+        Assert.EndsWith(".smartDescriptionOne", LocKey(pile));
+    }
+
+    [Fact]
+    public void The_bomb_tip_and_the_mine_tip_no_longer_disagree()
+    {
+        var bomb = Printed(typeof(ArmKeywordTips), "ForBomb");
+        var mine = Printed(typeof(ArmKeywordTips), "ForMine");
+
+        // The Bomb tip names the second door, so the Mine tip is not a
+        // correction to it any more.
+        Assert.Contains("goes off only when [gold]Set off[/gold], or as a "
+                      + "[gold]Mine[/gold].", bomb);
+        Assert.Contains("also goes off before its enemy's hit", mine);
+    }
+
     /// <summary>The reframe's MANUAL leg on for one test, every flag back
     /// after it -- <c>FurinaRoundNineTests.Arm</c> verbatim, and for its
     /// reason: the six flags are process-global statics.</summary>
@@ -398,6 +480,13 @@ public class Round19Tests
     }
 
     // ---- helpers ---------------------------------------------------------
+
+    /// <summary>The loc key a pile's badge is resolving right now.
+    /// <c>KleeOverhaulRoundOneFixTests.LocKey</c>, verbatim.</summary>
+    private static string LocKey(ProtoBombPower pile) =>
+        (string)typeof(ProtoBombPower)
+            .GetProperty("SmartDescriptionLocKey", All)!
+            .GetValue(pile)!;
 
     /// <summary>A source file under `klee-mod/KleeCode`.
     /// <see cref="Round16Tests"/>' helper, verbatim.</summary>
