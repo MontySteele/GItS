@@ -192,8 +192,11 @@
    description: "[gold]Set off[/gold]. Deal 4 damage.",
    effects: [{op: set_off, target: enemy, damage: 4}]}
 
+# R261 (`EB-557`): the placer is Innate and the detonator is not. See
+# docs/notes/prototype-surface-provenance.md.
 - {id: proto_ko_jumpy_dumpty, name: "Jumpy Dumpty", character: klee,
    authored_by: [claude],
+   innate: true,
    cost: 1, type: skill, rarity: basic,
    description: "Place a [gold]Bomb[/gold] 8. When it goes off, place a [gold]Mine[/gold] 3 on ALL enemies.",
    upgrade: {bomb_size: +3, payload_mine: +1},

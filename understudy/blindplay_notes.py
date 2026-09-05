@@ -19,7 +19,8 @@ from understudy.blindplay_faces import remember_elements
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
                                         COMPANION_SPARK, COMPANION_SPARK_MAX,
-                                        CRYSTALLIZE_BLOCK, SHATTER_DAMAGE,
+                                        CRYSTALLIZE_BLOCK, OPENING_SPARK,
+                                        SHATTER_DAMAGE,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
                                         WEAK_DEALT_PCT)
 
@@ -122,6 +123,28 @@ METER_RULES: dict[str, str] = {
                "1 each time it performs"),
     "Fanfare": "cards read it and none spends it",
 }
+
+# `EB-560`. WHERE THE FIRST SPARK COMES FROM, on the screen that has it.
+#
+# "Where Spark comes from is not on the combat screen. I opened fight 1 with 1
+# and could not tell whether that was a starting bank, a relic, or something a
+# card had done" (Klee r20 lane 2). The rule is R242 pick 1's and it IS printed
+# -- inside the Spark keyword tip -- but that tip is raised by a card that
+# PRINTS the word, so a seat whose opening hand holds no Spark-priced card
+# meets the meter row and nothing else.
+#
+# ROUND ONE ONLY, which is what makes it the opening rule rather than a fact
+# about the meter: a bank read on round 4 is the sum of everything since, and a
+# page repeating "you started with 1" on it would be answering a question
+# nobody is asking any more. `METER_RULES` is the wrong home for the same
+# reason -- those rows are true on every screen the meter appears on.
+#
+# AND ONLY WHERE THE GLOSSARY IS NOT ALREADY SAYING IT (`EB-407`): the Spark
+# tip carries the sentence in full, so a screen that raised it has the rule and
+# a second copy on the meter row would be the two-sources defect this page has
+# closed twice.
+SPARK_OPENING_RULE = (f"you start each combat with {OPENING_SPARK}, and cards "
+                      "that print a Spark price spend it")
 
 # `EB-263`. THE ENCHANT PICKER MARKS NOTHING, and the r3 Opus seat found out
 # the hard way: after `choose "Flame Dance"` "the whole list reprinted
@@ -510,9 +533,22 @@ ARM_KEYWORDS: dict[str, str] = {
     # above the Mine row, which says a Mine also goes off before its enemy's
     # hit, so two rows of one glossary contradicted each other and the Klee r19
     # lane-2 seat said so. Same sentence as `ArmKeywordTips.ForBomb`.
+    # `EB-557` (R261) ADDED THE STARTER LINE, in step with the same tip. Jumpy
+    # Dumpty is Innate under the arm and Ka-pow! is not, so the opening hand
+    # always holds a placer and never necessarily the detonator. The keyword
+    # rail says that about one CARD, on the card; the fact a reader of the WORD
+    # needs is about the deck.
+    # `EB-555` DEFINED THE CAP IN THE CLAUSE THAT ALREADY USED IT, in step
+    # with `ArmKeywordTips.ForBomb`. The word printed on two rows of this
+    # glossary and was defined on neither: "no screen I saw ever explained
+    # what a cap is ... a term with no definition anywhere in the text I was
+    # shown" (Klee r20 lane 1). A phrase and not a sentence, and it names
+    # whose HP it is -- which also rules out the reading that a cap might be
+    # something of Klee's.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
              "only when Set off, or as a Mine. Not an Attack: only Vulnerable "
-             "and a cap move it. Kills move it on."),
+             "and a cap on the enemy's HP loss move it. Kills move it on. "
+             "Your deck opens with a placer."),
     # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
     # walks the charges in placement order and the first one through the
     # funnel meets the aura, because every reaction consumes it -- the r11
@@ -606,9 +642,18 @@ ARM_KEYWORDS: dict[str, str] = {
     # page has no access to the mod's constants and
     # `test_the_hexerei_line_names_the_payment_the_kit_declares` holds them in
     # step from this side.
+    # `EB-554` MADE THE OWNERSHIP CLAUSE POINT AT A MARK. "Some are Klee's own,
+    # some are not" told a reader the split exists and gave them no way to run
+    # it: Klee r20 lane 1 played Albedo+ and Razor in one turn, both printing
+    # the word, and Spark stayed at 1 -- "nothing on either card face
+    # distinguishes 'hers' from not-hers, so as a reader I have no way to
+    # predict which Companion pays a Spark". The faces carry the mark now
+    # (`gen_klee_cards._family_tags`), so the sentence says ONLY the marked ones
+    # pay and names the mark it points at.
     "Hexerei": ("A Companion card that prints the word, and Klee herself. "
-                "Some are Klee's own, some are not. Playing one of hers makes "
-                f"{COMPANION_SPARK} Spark, up to {COMPANION_SPARK_MAX}."),
+                "Only the ones marked Klee's own pay: "
+                f"{COMPANION_SPARK} Spark a play, up to "
+                f"{COMPANION_SPARK_MAX}."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`

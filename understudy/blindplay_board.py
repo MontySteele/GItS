@@ -98,6 +98,12 @@ INTERNAL_METERS = frozenset({
 # way the page names them. Every other meter keeps the non-zero rule whole.
 ZERO_METERS: dict[str, frozenset[str]] = {
     "furina": frozenset({"Encore", "Fanfare"}),
+    # `EB-560`, `EB-487`'s twin one kit over. "The Spark line disappears at 0
+    # instead of printing 0, so 'do I have a Spark' is answered by a line's
+    # absence" (Klee r20 lane 2). The whole of Klee's arm is priced in this
+    # meter -- a Spark-priced card is playable or is not -- so a reader who
+    # cannot tell "none" from "the page did not say" cannot plan a turn.
+    "klee": frozenset({"Spark"}),
 }
 
 

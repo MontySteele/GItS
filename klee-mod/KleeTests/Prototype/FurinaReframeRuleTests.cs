@@ -1117,12 +1117,13 @@ public class FurinaReframeRuleTests
     [Fact]
     public void EB553_the_site_is_the_turn_start_hook_after_the_grant()
     {
-        // STRUCTURAL PIN (Il), and the ORDER is the point: the arrival
-        // performance spends Encore, so the fielding has to run AFTER the
-        // opening grant or she acts dry at three-quarters on the one turn the
-        // player could not have paid for her. Il cannot see a reordering
-        // inside one method, so the order is stated in the source comment and
-        // what is pinned here is that both calls are in the same hook.
+        // STRUCTURAL PIN (Il): both calls are in the same hook. The ORDER
+        // used to carry the arithmetic -- the arrival spent Encore, so a
+        // fielding before the grant would have acted dry at three-quarters --
+        // and since `EB-558` the arrival is free and the ordering carries only
+        // the ledger's reading. Il cannot see a reordering inside one method,
+        // so the order is stated in the source comment and what is pinned here
+        // is that both calls are in the same hook.
         var hook = Il.Calls(Il.Method("KleeElementalHooks", "AfterPlayerTurnStart"));
         Assert.Contains("FurinaReframeOpening.GrantEncore", hook);
         Assert.Contains("FurinaReframeOpening.FieldOpeningMember", hook);
@@ -1170,5 +1171,114 @@ public class FurinaReframeRuleTests
             "Mademoiselle Crabaletta",
             string.Concat(Il.Strings(
                 Il.Method("ArmKeywordTips", "ForOpeningStage"))));
+    }
+
+    // ==================================================================
+    // 10. `EB-558` (R260's arithmetic) -- the arrival is free
+    // ==================================================================
+    //
+    // THE DEFECT. `EB-553` built the arrival as a deploy, and a deploy
+    // performs, so the first performance paid `SalonConstants.TickEncoreCost`
+    // out of the opening bank: turn one opened on 1 Encore. Both of the doors
+    // R258 sized its 2 for -- a Spotlight designation, a member performing wet
+    // rather than at 3/4 -- cost 2 apiece, so the pick bought NEITHER of the
+    // two things it was sized for.
+    //
+    // THE RULE IS [USER]'s OWN ANALOGY for R260: "one free Osty". The
+    // Necrobinder's pet is summoned and out and nothing on turn one is billed
+    // for it being there, so the relic's member arrives, performs PAID -- full
+    // value, not the dry three-quarters -- and spends nothing.
+    //
+    // REAL, not structural, and that is why the two decisions were split out
+    // of `PerformMember`: the performance itself resolves through
+    // `ElementalHit` and needs a combat this harness cannot build, while "does
+    // it pay, and does it spend" is a pure read off the Encore funnel, which
+    // `WithCombatState` supports.
+
+    [Fact]
+    public void EB558_the_free_arrival_pays_full_value_and_spends_nothing()
+    {
+        using var _ = new Arm();
+        var seat = Opening(Seat.Furina(), turn: 1);
+        FurinaReframeOpening.GrantEncore(seat.Player);
+        Assert.Equal(FurinaReframeLaw.OpeningEncore,
+                     FurinaResources.Encore(seat.Creature));
+
+        // BOTH HALVES, because either alone would be a different rule.
+        Assert.True(SalonMemberPower.PerformancePays(seat.Creature, free: true));
+        Assert.False(
+            SalonMemberPower.PerformanceSpends(seat.Creature, free: true));
+    }
+
+    [Fact]
+    public void EB558_a_free_arrival_onto_an_empty_bank_still_pays_full_value()
+    {
+        // The half the ordering used to have to protect: with nothing banked
+        // at all the arrival is still a full-value performance, so the site
+        // cannot go back to deciding the number.
+        using var _ = new Arm();
+        var seat = Opening(Seat.Furina(), turn: 1);
+        Assert.Equal(0, FurinaResources.Encore(seat.Creature));
+
+        Assert.True(SalonMemberPower.PerformancePays(seat.Creature, free: true));
+        Assert.False(
+            SalonMemberPower.PerformanceSpends(seat.Creature, free: true));
+    }
+
+    [Fact]
+    public void EB558_every_other_performance_still_pays_its_one()
+    {
+        // The free pass is the one PERFORMANCE and not the turn: a deploy a
+        // CARD makes, and the turn-start upkeep, are billed exactly as before,
+        // and a dry one still acts at three-quarters.
+        using var _ = new Arm();
+        var seat = Opening(Seat.Furina(), turn: 1);
+        FurinaReframeOpening.GrantEncore(seat.Player);
+
+        Assert.True(SalonMemberPower.PerformancePays(seat.Creature, free: false));
+        Assert.True(
+            SalonMemberPower.PerformanceSpends(seat.Creature, free: false));
+
+        FurinaResources.SpendEncore(
+            seat.Creature, FurinaReframeLaw.OpeningEncore);
+        Assert.Equal(0, FurinaResources.Encore(seat.Creature));
+        Assert.False(SalonMemberPower.PerformancePays(seat.Creature, free: false));
+        Assert.False(
+            SalonMemberPower.PerformanceSpends(seat.Creature, free: false));
+    }
+
+    [Fact]
+    public void EB558_the_relic_tip_says_the_arrival_is_free()
+    {
+        // "Opens with her on stage" hid a price: a reader who knows the
+        // deploy-performs rule reads it as "opens one Encore down", which is
+        // what the build did until the arithmetic was settled. Both halves are
+        // printed, because "performs" without "free" is the reading that costs
+        // a player their opening move.
+        var body = string.Concat(Il.Strings(
+            Il.Method("ArmKeywordTips", "ForOpeningStage")));
+        Assert.Contains("She performs on arrival for free.", body);
+    }
+
+    [Fact]
+    public void EB558_the_one_free_performance_has_one_caller()
+    {
+        // `free` is a parameter on `PerformMember` -- the one implementation
+        // of a member acting -- rather than a branch at the fielding site, so
+        // this arrival cannot drift from the upkeep that performs the same
+        // member. The default is FALSE, which is what makes every other
+        // caller's behaviour unchanged by construction.
+        var perform = typeof(SalonMemberPower)
+            .GetMethod("PerformMember", HeadlessGame.All)!;
+        var free = perform.GetParameters().Single(p => p.Name == "free");
+        Assert.True(free.HasDefaultValue);
+        Assert.Equal(false, free.DefaultValue);
+
+        var deploy = typeof(SalonMemberPower)
+            .GetMethod("Deploy", HeadlessGame.All)!;
+        var through = deploy.GetParameters()
+            .Single(p => p.Name == "freePerformance");
+        Assert.True(through.HasDefaultValue);
+        Assert.Equal(false, through.DefaultValue);
     }
 }

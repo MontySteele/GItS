@@ -29,6 +29,7 @@ from understudy.blindplay_notes import (AURA_NOTE,
                                         PLAN_AIM_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
+                                        SPARK_OPENING_RULE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE)
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _fold
@@ -573,6 +574,30 @@ def render(obs: dict[str, Any]) -> str:
             # the meters block was the one place two sources could both fire.
             if name in defined:
                 rule = METER_DEFINED_NOTE
+            # `EB-560`. THE OPENING RULE, ONCE, ON THE FIRST SCREEN OF A
+            # FIGHT. "Where Spark comes from is not on the combat screen. I
+            # opened fight 1 with 1 and could not tell whether that was a
+            # starting bank, a relic, or something a card had done" (Klee r20
+            # lane 2, (c) 3).
+            #
+            # ROUND ONE ONLY, which is what makes it the OPENING rule: on round
+            # 4 the bank is the sum of everything since, and a page still
+            # saying "you started with 1" would answer a question nobody is
+            # asking. A `METER_RULES` row would print on every round and is the
+            # wrong home for the same reason.
+            #
+            # IT OVERRIDES THE GLOSSARY POINTER RATHER THAN DEFERRING TO IT,
+            # and `EB-407` is not breached: the page's own `Spark` row says
+            # what the word means ("cards cost Sparks instead of Energy") and
+            # not where this bank came from, because that row is printed on
+            # every arm and the opening grant is Klee's. Two facts, one screen,
+            # neither a second copy of the other.
+            #
+            # KLEE'S ARM AND NOT THE BOARD, `_zero_meters`' own question one
+            # block up: the meter is registered for every seat at the table.
+            if (name == "Spark" and c["round"] == 1
+                    and _fold(obs.get("character") or "") == "klee"):
+                rule = SPARK_OPENING_RULE
             if top:
                 out.append(f"- {name}: {amount}/{top} — "
                            f"{rule or METER_CAPPED_NOTE}")

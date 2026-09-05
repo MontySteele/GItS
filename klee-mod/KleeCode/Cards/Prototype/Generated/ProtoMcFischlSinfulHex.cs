@@ -59,7 +59,7 @@ public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fischl — Undone Be Thy Sinful Hex"),
-        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage. This turn, each [gold]Electro[/gold] [gold]Elemental Reaction[/gold] deals {PowerAmount:diff()} [gold]Electro[/gold] damage to a random enemy."),
+        ("description", "Klee's own [gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage. This turn, each [gold]Electro[/gold] [gold]Elemental Reaction[/gold] deals {PowerAmount:diff()} [gold]Electro[/gold] damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -171,6 +171,33 @@ public static class ArmKeywordTips
     /// used to take. The static badge face beside it (`ProtoBombPower`'s
     /// `description`) spells both halves out for the reader who wants them, the
     /// same split <c>MineClause</c> already has.
+    ///
+    /// `EB-557` (R261) ADDED THE STARTER LINE. Jumpy Dumpty is Innate under
+    /// the arm and Ka-pow! is not, so the opening hand always holds a placer
+    /// and never necessarily the detonator -- and the keyword rail's own
+    /// `Innate` banner says that about ONE CARD, on the card, to a player who
+    /// is holding it. The fact a reader of this word needs is about the DECK:
+    /// the first thing you can always do is plant. It is the last sentence
+    /// because it is the only one that is not about the charge itself.
+    ///
+    /// `EB-555` DEFINED THE CAP, IN THE CLAUSE THAT ALREADY USED IT. "Only
+    /// Vulnerable and a cap move it" printed on two tips of one screen and the
+    /// word was defined on neither: "no screen I saw ever explained what a cap
+    /// is. I verified the Vulnerable half; the other half is a term with no
+    /// definition anywhere in the text I was shown" (Klee r20 lane 1, (c) 2).
+    ///
+    /// A DEFINING PHRASE AND NOT A SENTENCE, because the fact is small and a
+    /// sentence of its own would spend thirty characters saying what six say
+    /// inside the clause: a cap is a limit on the HP the ENEMY can lose, which
+    /// is exactly what <c>ProtoBombPower.FoldedMods</c> reads -- whichever
+    /// power on the target returns the lowest <c>ModifyDamageCap</c>. Naming
+    /// whose HP it is also disposes of the reading the clause could not rule
+    /// out before, that a cap might be something of Klee's.
+    ///
+    /// THE MINE TIP'S COPY IS LEFT ALONE at 133 of 135. It prints directly
+    /// under this one, a Mine IS a Bomb, and the term is defined on the screen
+    /// either way -- which is the acceptance condition: one definition per
+    /// PAGE, rather than one per clause.
     /// </summary>
     public static IEnumerable<IHoverTip> ForBomb(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -178,8 +205,9 @@ public static class ArmKeywordTips
             "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
           + " a turn, goes off only when [gold]Set off[/gold], or as a "
           + "[gold]Mine[/gold]. "
-          + "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. "
-          + "Kills move it on.");
+          + "Not an Attack: only [gold]Vulnerable[/gold] and a cap on the "
+          + "enemy's HP loss move it. "
+          + "Kills move it on. Your deck opens with a placer.");
 
     /// <summary>
     /// Rule 2, and the one [USER] named ("Set Off has no tooltip text"). The
@@ -436,6 +464,17 @@ public static class ArmKeywordTips
     /// the ownership split stay, because "some are Klee's own, some are not" is
     /// the half that answers the Razor question. 135 of 135 rendered.
     ///
+    /// `EB-554` MADE THE OWNERSHIP CLAUSE POINT AT A MARK. "Some are Klee's
+    /// own, some are not" told a reader the split exists and gave them no way
+    /// to run it: Klee r20 lane 1 played Albedo+ and Razor in one turn, both
+    /// printing the word, and Spark stayed at 1 -- "nothing on either card
+    /// face distinguishes 'hers' from not-hers, so as a reader I have no way to
+    /// predict which Companion pays a Spark. This is the clearest thing I could
+    /// not resolve all round." The faces carry the mark now
+    /// (`gen_klee_cards._family_tags`), so the sentence says ONLY the marked
+    /// ones pay and names the mark it is pointing at. "A play" replaces the
+    /// bare cap's grammar and pays for the change.
+    ///
     /// THE NUMBERS ARE LIFTED, not typed (`EB-89`'s rule): they are
     /// <see cref="KleeMod.Powers.KleeCompanionSpark"/>'s own, which is the
     /// declaration LAW:145 obliges the KIT to make, so a retune cannot leave
@@ -448,10 +487,9 @@ public static class ArmKeywordTips
         !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, HexereiKey,
             "A [gold]Companion[/gold] card that prints the word, and Klee "
-          + "herself. Some are Klee's own, some are not. Playing one of hers "
-          + "makes [blue]" + KleeCompanionSpark.Base + "[/blue] "
-          + "[gold]Spark[/gold], up to [blue]"
-          + KleeCompanionSpark.MaxPerPlay + "[/blue].");
+          + "herself. Only the ones marked Klee's own pay: [blue]"
+          + KleeCompanionSpark.Base + "[/blue] [gold]Spark[/gold] a play, up "
+          + "to [blue]" + KleeCompanionSpark.MaxPerPlay + "[/blue].");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.
@@ -870,12 +908,21 @@ public static class ArmKeywordTips
     /// shipped split: <c>SalonMemberPower.ManualFrontName</c> prints
     /// "Crabaletta" because three rules and an identity have to fit under the
     /// power ceiling, and a tip with one sentence in it can afford her title.
+    ///
+    /// `EB-558` ADDED THE SECOND SENTENCE, because the first one hid a price.
+    /// The arrival is a deploy and a deploy performs, so a reader who knows
+    /// the deploy rule reads "opens with her on stage" as "opens one Encore
+    /// down" -- which is what the build did until R260's arithmetic was
+    /// settled. It does not now: the arrival performs at full value and costs
+    /// nothing, so turn one opens on the whole of R258's bank. Both halves are
+    /// stated, because "performs" without "free" is the reading that costs a
+    /// player their opening move.
     /// </summary>
     public static IEnumerable<IHoverTip> ForOpeningStage(
         IEnumerable<IHoverTip> inherited) =>
         With(inherited, OpeningStageKey,
              "Every fight opens with [gold]Mademoiselle Crabaletta[/gold] on "
-           + "stage.");
+           + "stage. She performs on arrival for free.");
 
     /// <summary>
     /// `EB-479` (R258): THE OPENING JOINS THE SENTENCE THAT DEFINES THE WORD,

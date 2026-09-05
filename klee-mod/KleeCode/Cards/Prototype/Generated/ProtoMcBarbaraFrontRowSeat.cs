@@ -56,7 +56,7 @@ public sealed class ProtoMcBarbaraFrontRowSeat : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara — Front Row Seat"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] twice. Whenever a [gold]Bomb[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Klee's own. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] twice. Whenever a [gold]Bomb[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

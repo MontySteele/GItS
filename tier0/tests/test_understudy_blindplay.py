@@ -851,6 +851,62 @@ def test_the_arms_two_meters_print_their_zero_and_nobody_elses_does():
         assert f"- {hidden}: 0" not in furina
 
 
+def test_a_klee_board_prints_its_spark_at_zero_and_says_where_it_came_from():
+    """`EB-560`, `EB-487`'s twin one kit over, and the two halves of it.
+
+    "The Spark line disappears at 0 instead of printing 0, so 'do I have a
+    Spark' is answered by a line's absence" -- and "Where Spark comes from is
+    not on the combat screen. I opened fight 1 with 1 and could not tell
+    whether that was a starting bank, a relic, or something a card had done"
+    (Klee r20 lane 2, (c) 1 and (c) 3).
+
+    THE OPENING RULE IS ROUND ONE'S. On round 4 the bank is the sum of
+    everything since, and a page still saying "you started with 1" would be
+    answering a question nobody is asking.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["resources"]["KLEEMOD_SPARK"] = 0
+
+    # This board is Kokomi's, and the non-zero rule is untouched on it.
+    assert "- Spark: 0" not in blindplay.observe(state)
+
+    state["player"]["character"] = "Klee"
+    page = blindplay.observe(state)
+    assert "- Spark: 0 —" in page
+    assert blindplay.SPARK_OPENING_RULE in page
+    assert f"start each combat with {blindplay_notes.OPENING_SPARK}" in page
+
+    # ROUND TWO ONWARD: the row stays, the opening rule goes.
+    state["battle"]["round"] = 4
+    later = blindplay.observe(state)
+    assert "- Spark: 0 —" in later
+    assert blindplay.SPARK_OPENING_RULE not in later
+
+
+def test_the_opening_rule_is_klees_and_not_every_seats():
+    """`_zero_meters`' own question one block up: the Spark meter is registered
+    for every seat at the table, and the opening grant is Klee's kit rule. A
+    Kokomi board holding Sparks is told what a Spark is and nothing about a
+    bank she was never given."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["resources"]["KLEEMOD_SPARK"] = 2
+
+    assert "- Spark: 2" in blindplay.observe(state)
+    assert blindplay.SPARK_OPENING_RULE not in blindplay.observe(state)
+
+
+def test_the_pages_opening_spark_is_the_number_both_engines_grant():
+    """`EB-89`'s rule on a page that may not import either engine: the numeral
+    is mirrored, so it is held in step from this side or not at all."""
+    from tier0 import constants as C
+
+    assert blindplay_notes.OPENING_SPARK == C.KLEE_OVERHAUL_OPENING_SPARK
+    src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+           / "KleeOverhaul.cs").read_text(encoding="utf-8")
+    grant = re.search(r'OpeningSpark\s*=\s*(\d+)', src)
+    assert grant and int(grant.group(1)) == blindplay_notes.OPENING_SPARK
+
+
 def test_a_hand_printing_one_name_twice_says_an_enchant_would_not_show():
     """`EB-179`, gap three. The card builder emits no enchantment field, and
     the one place that bites a reader is a hand holding two cards they can see
@@ -4132,6 +4188,49 @@ def test_a_string_that_is_not_a_locstring_key_is_left_alone():
         qa_packet.assert_blind({"name": "pearl_barrage"})
 
 
+def test_observe_refuses_a_doubled_page_as_a_line_not_a_traceback(
+        tmp_path, capsys, monkeypatch):
+    """`EB-510`, and it is the half of the row that is buildable headlessly.
+
+    `assert_one_page` has refused a page carrying a section twice since fixer
+    I, and the seats' own door -- `blindplay observe`, one process per call
+    since round 9 -- let that refusal out as a Python traceback on stderr with
+    nothing at all on stdout. A seat that met one could report "the page was
+    empty" or "the tool crashed", and neither names the heading the guard
+    already knows.
+
+    WHAT IS STILL OPEN, said here rather than left to the row: the render
+    cannot produce a doubled page -- every heading is appended at one `out +=`
+    on one mutually exclusive branch, and the check runs at the one place a
+    page is finished -- so the recurrence (Klee r20 lane 2, intermittent, on
+    one section) came from something between this print and the seat's reader.
+    Finding that needs a live lane with the process's own stdout captured; what
+    this pins is that when the guard does fire there, the seat is handed a line
+    naming the section instead of a stack trace.
+    """
+    raw = tmp_path / "board.json"
+    raw.write_text(json.dumps(combat_state()), encoding="utf-8")
+    args = argparse.Namespace(raw_file=str(raw))
+
+    real = blindplay.observe
+
+    def doubled(state):
+        # The guard itself, driven on a page that really was emitted twice.
+        blindplay.assert_one_page(real(state) * 2)
+        raise AssertionError("the guard did not fire")
+
+    monkeypatch.setattr(blindplay, "observe", doubled)
+
+    code = blindplay.cmd_observe(args)
+
+    assert code == 1
+    out, err = capsys.readouterr()
+    assert out == ""
+    assert err.startswith("REFUSED: ")
+    assert "printed a section twice" in err
+    assert "## The other side" in err
+
+
 def test_act_refuses_a_packet_leak_the_way_observe_does(tmp_path, capsys):
     """`EB-370`. `blindplay_grammar.act` reads through `observation()`
     before it resolves anything, so a `PacketLeak` on the read path it
@@ -5755,9 +5854,14 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # the in-game tip (the `Set off` row below states it in full).
         # `EB-536`: and the Mine, because the Mine row printed under this one
         # says a Mine also goes off before its enemy's hit.
+        # `EB-557` (R261): the starter line. Jumpy Dumpty is Innate under the
+        # arm and Ka-pow! is not, so the opening hand always holds a placer.
+        # The keyword rail states that about one CARD, on the card; what a
+        # reader of the WORD needs is the fact about the deck.
         "Bomb": ["A charge on an enemy", "goes off only when",
-                 ", or as a ", "Not an Attack: only ", " and a cap ",
-                 "Kills move it on"],
+                 ", or as a ", "Not an Attack: only ",
+                 " and a cap on the ", "enemy's HP loss move it",
+                 "Kills move it on", "Your deck opens with a placer"],
         # `EB-432`: the pile's own order, and which charge meets the aura.
         # `EB-490` renamed the class and not the claim: "Attack trigger" read
         # as something on the player's own side of the board, beside a Block
@@ -5798,10 +5902,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-535`: the last sentence names the PAYMENT now. "Cards of hers
         # pay" was the clause the r19 lane-2 seat could extract nothing from,
         # and the rule was on a different screen the whole time.
+        # `EB-554`: the ownership clause points at the mark the faces now
+        # carry, so a reader can run the test instead of being told one exists.
         "Hexerei": [" card that prints the word, and Klee ",
-                    "herself. Some are Klee's own, some are not. Playing one "
-                    "of hers ",
-                    "makes ", "up to "],
+                    "herself. Only the ones marked Klee's own pay: ",
+                    " a play, up ", "to "],
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
                   "No ", "aura, no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
@@ -6890,11 +6995,12 @@ def test_the_hexerei_line_names_the_payment_the_kit_declares():
         rf"MaxPerPlay\s*=\s*{blindplay_notes.COMPANION_SPARK_MAX}\b", src)
 
     row = blindplay_notes.ARM_KEYWORDS["Hexerei"]
-    assert (f"Playing one of hers makes {blindplay_notes.COMPANION_SPARK} "
-            f"Spark, up to {blindplay_notes.COMPANION_SPARK_MAX}.") in row
-    # The two clauses that answer the seat's OTHER question -- whether Razor is
-    # one of Klee's own -- are what paid for the room, and they stay.
-    assert "Some are Klee's own, some are not." in row
+    assert (f"{blindplay_notes.COMPANION_SPARK} Spark a play, up to "
+            f"{blindplay_notes.COMPANION_SPARK_MAX}.") in row
+    # `EB-554`: the clause that answers the seat's OTHER question -- whether
+    # Razor is one of Klee's own -- now points at the mark the faces carry
+    # instead of telling the reader a split exists that they cannot run.
+    assert "Only the ones marked Klee's own pay:" in row
     assert len(row) <= 135
 
 
@@ -9564,8 +9670,8 @@ def test_a_feed_that_does_not_say_who_is_playing_keeps_the_rule():
     the one run that needs it."""
     state = _hexerei_shop_state("Klee")
     del state["player"]["character"]
-    assert ("Playing one of hers makes "
-            f"{blindplay_notes.COMPANION_SPARK} Spark, up to "
+    assert ("Only the ones marked Klee's own pay: "
+            f"{blindplay_notes.COMPANION_SPARK} Spark a play, up to "
             f"{blindplay_notes.COMPANION_SPARK_MAX}.") in blindplay.observe(state)
 
 

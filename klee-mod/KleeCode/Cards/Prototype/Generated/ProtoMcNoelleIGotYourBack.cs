@@ -53,7 +53,7 @@ public sealed class ProtoMcNoelleIGotYourBack : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Noelle — I Got Your Back"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Whenever a [gold]Mine[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Klee's own. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Whenever a [gold]Mine[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

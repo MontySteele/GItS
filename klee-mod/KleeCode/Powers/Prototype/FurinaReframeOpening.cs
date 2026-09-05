@@ -106,18 +106,33 @@ public static class FurinaReframeOpening
     /// SHE PERFORMS ON ARRIVAL, because <c>SalonMemberPower.Deploy</c> is the
     /// one deploy and the arm's deploy-performs clause lives inside it. That
     /// is deliberate rather than inherited by accident: the ruling calls this
-    /// a deploy, and a deploy performs. It also means the opening Encore
-    /// (R258) pays this first performance's 1, so turn one opens on
-    /// <see cref="FurinaReframeLaw.OpeningEncore"/> minus
-    /// <c>SalonConstants.TickEncoreCost</c> rather than on the full bank.
+    /// a deploy, and a deploy performs.
+    ///
+    /// AND THE ARRIVAL IS FREE (`EB-558`, 2026-09-05). It was not at first,
+    /// and the arithmetic was the defect: the performance paid
+    /// <c>SalonConstants.TickEncoreCost</c> out of the opening bank, so turn
+    /// one opened on 1 Encore and could buy NEITHER of the two doors R258
+    /// sized its <see cref="FurinaReframeLaw.OpeningEncore"/> for -- a
+    /// Spotlight designation and a wet performance both cost 2, and the pick
+    /// was sized to buy exactly one of them. [USER]'s own analogy for R260 is
+    /// the rule: "one free Osty". The Necrobinder's pet is summoned and out
+    /// and nothing on turn one is billed for it being there, so the relic's
+    /// member arrives, performs PAID -- full value, not the dry three-quarters
+    /// -- and spends nothing. R258's 2 stands untouched.
+    ///
+    /// THE FREE PASS IS THE ONE PERFORMANCE AND NOT THE TURN. Next turn's
+    /// upkeep bills her 1 like any member, and every deploy a CARD makes pays
+    /// as it always has: <c>free</c> is a parameter on
+    /// <see cref="SalonMemberPower.PerformMember"/>, the one implementation,
+    /// rather than a branch written here.
     ///
     /// THE SITE IS <see cref="GrantEncore"/>'s, one line later and for its
     /// argument taken whole: this engine's combat-start effects fire on TURN 1
     /// after the block clear, the energy reset and the draw. AFTER the grant,
-    /// which is the ordering the arithmetic needs -- a performance paid out of
-    /// an Encore pool that had not been filled yet would act dry at
-    /// three-quarters on the one turn the player cannot have done anything
-    /// about it.
+    /// which no longer decides the arithmetic now that the arrival is free and
+    /// which stays where it is: the ledger and the page both read a bank, and
+    /// a performance recorded before the bank exists would be a different turn
+    /// one on paper.
     ///
     /// THE LEDGER SURVIVES IT. <c>SalonMemberPower.AfterPlayerTurnStart</c>
     /// empties the turn's performance list, and it is a POWER: the game
@@ -135,6 +150,7 @@ public static class FurinaReframeOpening
         // `cardSource: null` -- no card deployed this member, and the deploy's
         // own mirror apply has taken a null source since `BowLeftmost`.
         await SalonMemberPower.Deploy(
-            choiceContext, player.Creature!, 1, cardSource: null, member);
+            choiceContext, player.Creature!, 1, cardSource: null, member,
+            freePerformance: true);
     }
 }

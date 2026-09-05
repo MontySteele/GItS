@@ -20,7 +20,7 @@ import random
 import pytest
 
 from tier0 import constants as C
-from tier0.engine import combat, furina_reframe
+from tier0.engine import combat, effects, furina_reframe
 from tier0.engine.state import Card, CombatState, Enemy, Player
 
 FR = furina_reframe
@@ -180,19 +180,52 @@ def test_the_member_is_named_and_never_rolled(arm):
         assert st.player.salon == ["crabaletta"]
 
 
-def test_she_performs_on_arrival_and_the_opening_encore_pays_for_it(manual_arm):
-    """A DEPLOY PERFORMS, and this is a deploy. The consequence is the turn-one
-    arithmetic the seats will read: the opening 2 pays her first performance's
-    1, leaving 1, and the enemy is down her full paid tick rather than the dry
-    three-quarters."""
+def test_she_performs_on_arrival_and_the_arrival_is_free(manual_arm):
+    """`EB-558`: A DEPLOY PERFORMS, and this one is not billed.
+
+    THE DEFECT THIS REPLACES. The arrival used to pay
+    `SALON_TICK_ENCORE_COST` out of the opening bank, so turn one opened on 1
+    Encore -- and both of the doors R258 sized its 2 for cost 2 apiece, so the
+    pick bought neither. [USER]'s own analogy for R260 settles it: "one free
+    Osty". The Necrobinder's pet is out on turn one and nothing is billed for
+    it being there.
+
+    BOTH HALVES, because either alone would be a different rule: nothing is
+    spent, AND she performs paid rather than at the dry three-quarters.
+    """
     st = _state()
     FR.grant_opening_encore(st)
     assert st.player.encore == FR.OPENING_ENCORE
 
     FR.field_opening_member(st)
 
-    assert st.player.encore == FR.OPENING_ENCORE - C.SALON_TICK_ENCORE_COST == 1
-    assert st.enemies[0].hp < 99          # she acted, and she acted paid
+    assert st.player.encore == FR.OPENING_ENCORE == 2
+    assert st.enemies[0].hp < 99          # she acted
+    paid = [e for e in st.log if e["event"] == "salon_tick"]
+    assert [e["paid"] for e in paid] == [True]
+    # NOT a discount on the number, which is the other half of "performs paid":
+    # the hit is the full tick and not `SALON_DRY_MULT` of it.
+    dealt = 99 - st.enemies[0].hp
+    assert dealt == effects.salon_tick_amount(st, "crabaletta", True)
+
+
+def test_only_the_arrival_is_free_and_the_next_upkeep_bills_her(manual_arm):
+    """The free pass is the one PERFORMANCE and not the turn (`EB-558`).
+
+    A deploy a CARD makes pays its 1 exactly as it always has, and so does the
+    turn-start upkeep that finds her still on the stage -- so the relic buys
+    one performance, not a standing exemption.
+    """
+    st = _state()
+    FR.grant_opening_encore(st)
+    FR.field_opening_member(st)
+    assert st.player.encore == 2
+
+    effects._deploy_salon_members(st, 1, "crabaletta")
+    assert st.player.encore == 2 - C.SALON_TICK_ENCORE_COST
+
+    effects.salon_tick(st)
+    assert st.player.encore == 0
 
 
 def test_a_deploy_after_it_puts_a_second_body_on_the_stage(manual_arm):
@@ -223,3 +256,16 @@ def test_a_real_fight_with_the_flag_off_opens_unlit():
     st = _fight(_furina())
     assert [e for e in st.log if e["event"] == "fr_opening_stage"] == []
     assert st.player.salon == []
+
+
+def test_a_real_fight_opens_on_the_whole_bank_with_the_stage_lit(manual_arm):
+    """`EB-558`'s acceptance condition, through the engine rather than the
+    reader: a fight that starts under the arm reaches its first decision with
+    R258's bank intact AND a member already on the stage, which is the pair the
+    two rulings were meant to hand turn one and did not."""
+    st = _fight(_furina())
+    assert [e["member"] for e in st.log
+            if e["event"] == "fr_opening_stage"] == ["crabaletta"]
+    assert st.player.salon == ["crabaletta"]
+    assert st.player.encore == FR.OPENING_ENCORE == 2
+    assert [e["paid"] for e in st.log if e["event"] == "salon_tick"] == [True]

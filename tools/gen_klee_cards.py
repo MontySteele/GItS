@@ -102,7 +102,8 @@ from tier0.content.upgrades import PLAN_DELTA_OPS               # noqa: E402
 # name declares that with a ` (proto)` suffix, the suffix is a SHEET device,
 # and a second copy of the rule here is what would let the mod print a title
 # the sim does not -- which is exactly what the row forbids.
-from tier0.content.loader import display_name                   # noqa: E402
+from tier0.content.loader import (PROTOTYPE_ID_PREFIX,          # noqa: E402
+                                  display_name)
 
 SHEET = REPO / "docs" / "klee-cards.yaml"
 # Mirrors tier0/content/upgrades.py UPGRADE_SHEETS, in the same order.
@@ -10455,12 +10456,13 @@ def _face_riders(card: dict, text: str) -> str:
     `EB-293`. Both are live defects from [USER]'s own play of the arm.
     `EB-392` made it three for the same reason.
     """
-    return _hexerei_tag(
+    return _family_tags(
         card, _plan_only_line(card, _dedupe_printed_exhaust(card, text)))
 
 
-def _hexerei_tag(card: dict, text: str) -> str:
-    """`EB-392`: a Hexerei COMPANION says so on its own face.
+def _family_tags(card: dict, text: str) -> str:
+    """`EB-392` and `EB-554`: a Companion says what FAMILY it is in, on its own
+    face -- the Hexerei mark, and whether it is one of Klee's own.
 
     THE WORD WAS ON EIGHTEEN ROWS AND PRINTED ON FOUR. `hexerei: true` emitted
     `IHexereiCard` and nothing a player could see, so the family mark was
@@ -10488,12 +10490,56 @@ def _hexerei_tag(card: dict, text: str) -> str:
 
     IT LEADS, like `_plan_only_line`. What a card IS is read before what it
     does, and a trailing tag reads as a clause of the last effect sentence.
+
+    `EB-554` ADDED THE SECOND MARK, and it is the r12 seat's third word
+    arriving two rounds late. Klee r20 lane 1 played Albedo+ and Razor in one
+    turn -- "both print Hexerei" -- and Spark stayed at 1: "Nothing on either
+    card face distinguishes 'hers' from not-hers, so as a reader I have no way
+    to predict which Companion pays a Spark. This is the clearest thing I could
+    not resolve all round." The rule was right (`KleeCompanionSpark` pays on
+    Klee's own PERSONAL Companions, and Razor is a Universal) and unreadable.
+
+    DERIVED FROM THE ROW, from the same field the ENGINES ask: `is_companion`
+    and `personal_pool == "klee"` are exactly
+    `KleeCompanionSpark.IsOwnPersonalCompanion` and
+    `effects.klee_personal_companion_spark`'s two early returns, and the same
+    pair that already decides whether `ArmKeywordTips.ForCovenSpark` rides the
+    face. So the mark and the payment cannot disagree, and a Personal Companion
+    added tomorrow carries it the day its row exists.
+
+    ONE SENTENCE WHERE A ROW CARRIES BOTH, because two lead tags read as
+    stuttering and the ceiling is 120: "Klee's own [gold]Hexerei[/gold]." The
+    ownership is written as the ADJECTIVE rather than as a second clause both
+    because it reads as one fact and because it is a character shorter -- which
+    is not decoration on this sheet: Prune's Hexhunter Chime lands at exactly
+    120 of 120 with it and at 121 without.
+
+    UNGOLDED, because "Klee's own" is not a keyword and a golded token would
+    ask `arm_keyword_tip_calls` for a tooltip the mod does not define. The
+    phrase is the one `ArmKeywordTips.ForCovenSpark` and the Hexerei tip
+    already print, so the three surfaces meet under one spelling.
     """
-    if not (is_companion(card) and card.get("hexerei")):
+    if not is_companion(card):
         return text
-    if "[gold]Hexerei[/gold]" in text:
+    hexerei = bool(card.get("hexerei")) and "[gold]Hexerei[/gold]" not in text
+    # THE OWNERSHIP MARK IS THE PROTOTYPE SURFACE'S, and the scope is R213 B
+    # rather than taste: a shipped row is Balance-stage content and does not
+    # move for a prototype arm. The Hexerei half needs no such guard -- no
+    # shipped sheet carries the key at all -- and the defect the mark answers
+    # is the arm's own, a Universal and a Personal printing one word and paying
+    # differently. The shipped Prune keeps her printed face; her Spark is the
+    # kit's declaration and always was (`EB-219`).
+    own = (str(card.get("id", "")).startswith(PROTOTYPE_ID_PREFIX)
+           and personal_pool_id(card) == "klee")
+    if hexerei and own:
+        lead = "Klee's own [gold]Hexerei[/gold]. "
+    elif hexerei:
+        lead = "[gold]Hexerei[/gold]. "
+    elif own:
+        lead = "Klee's own. "
+    else:
         return text
-    return ("[gold]Hexerei[/gold]. " + text).strip()
+    return (lead + text).strip()
 
 
 def _dedupe_printed_exhaust(card: dict, text: str) -> str:

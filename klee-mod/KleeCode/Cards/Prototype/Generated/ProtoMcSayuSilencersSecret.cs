@@ -53,7 +53,7 @@ public sealed class ProtoMcSayuSilencersSecret : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sayu — Yoohoo Art: Silencer's Secret"),
-        ("description", "[gold]Swirl[/gold] a random enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, draw 1 card."),
+        ("description", "Klee's own. [gold]Swirl[/gold] a random enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
