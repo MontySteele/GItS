@@ -108,6 +108,56 @@ public class SparkSeededRewardTests
                          .Select(x => x.ParameterType.Name).ToArray());
     }
 
+    /// <summary>
+    /// `EB-594`. THE SWAPPED ROW IS NEVER THE CANONICAL MODEL.
+    ///
+    /// The rule draws its replacement from
+    /// <c>CardCreationOptions.GetPossibleCards</c>, which is the game's
+    /// REGISTRY: those rows are canonical models, and a canonical model handed
+    /// to a screen survives until something asserts on it. On
+    /// `0.2.2817+proto` lane 1 the assert came from
+    /// <c>CardChoiceHistoryEntry..ctor</c> serialising the pick
+    /// (<c>AbstractModel.AssertMutable</c> -> <c>CanonicalModelException: ...
+    /// ProtoKoSugarRush used in incorrect place</c>), thrown inside
+    /// <c>HeftyTablet.AfterObtained</c>, which left the Neow screen with an
+    /// empty option list and no legal verb: a hard blocker.
+    ///
+    /// A STRUCTURAL PIN (see <see cref="Il"/>), because constructing a real
+    /// reward result wants a live <c>RunState</c>, past the headless boundary.
+    /// The postfix constructs no <c>CardCreationResult</c> of its own at all,
+    /// so the ONLY door a row reaches a screen through is <c>Instantiate</c>,
+    /// and that one creates an instance first.
+    /// </summary>
+    [Fact]
+    public void The_swapped_row_is_an_instance_and_not_the_canonical_model()
+    {
+        var instantiate = Patch.GetMethod("Instantiate", HeadlessGame.All)!;
+        var calls = Il.Calls(instantiate);
+        // The call the base game's own reward path ends in, at RUN scope
+        // because a reward goes into the deck (CompanionSlot.Roll mirrors it).
+        Assert.Contains(calls, c => c.Contains("CreateCard"));
+        Assert.Contains(calls, c => c == "CardCreationResult..ctor");
+
+        // And the postfix hands nothing to a screen except through it.
+        var postfix = Il.Calls(Postfix);
+        Assert.DoesNotContain(postfix, c => c == "CardCreationResult..ctor");
+        Assert.Contains(postfix, c => c.Contains("Instantiate"));
+    }
+
+    /// <summary>
+    /// `EB-594`. POST-FIGHT REWARD SCREENS ONLY. <c>CreateForReward</c> also
+    /// rolls Neow's options, a relic's "choose one of three" (Hefty Tablet) and
+    /// a shop's stock; a floor number cannot tell those apart from the reward
+    /// after a fight, which is the only screen this rule was written about. The
+    /// gate is the same <c>CardCreationSource.Encounter</c> test the mod's four
+    /// <c>TryModifyCardRewardOptions</c> hooks already ask.
+    /// </summary>
+    [Fact]
+    public void The_rule_fires_on_the_post_fight_reward_screen_only()
+    {
+        Assert.Contains(Il.Calls(Postfix), c => c.Contains("get_Source"));
+    }
+
     [Fact]
     public void The_spark_test_is_the_arms_own_declaration()
     {

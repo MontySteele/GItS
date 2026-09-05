@@ -34,7 +34,7 @@ def _caches_clear():
     """Every memo whose answer depends on the flag. Same list
     `test_companion_overhaul` clears, plus the stand-in map, which is derived
     from the surface and so is a view of the content tree like the rest."""
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     standins._replacements.cache_clear()
     rewards._companion_roster.cache_clear()
     rewards.companion_pool.cache_clear()

@@ -43,7 +43,7 @@ SHIPPED_INAZUMA = tuple(sorted(
 
 
 def _caches_clear():
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards._companion_roster.cache_clear()
     rewards.companion_pool.cache_clear()
     rewards.five_star_roster.cache_clear()

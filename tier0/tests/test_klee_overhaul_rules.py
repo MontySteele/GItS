@@ -43,11 +43,11 @@ BLOCKER = [{"kind": "block", "amount": 5}]
 def overhaul(monkeypatch):
     """The flag on, with both id-resolving caches cleared on the way in and
     out -- `test_klee_overhaul.overhaul`'s fixture, for its reasons."""
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
     monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
     yield
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
 
 

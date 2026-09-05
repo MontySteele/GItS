@@ -34,10 +34,10 @@ from tier05 import draft
 @pytest.fixture
 def alt_cost(monkeypatch):
     monkeypatch.setattr(C, "SPARK_ALT_COST_ENABLED", True)
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     loader._substituted_card_index.cache_clear()
     yield
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     loader._substituted_card_index.cache_clear()
 
 

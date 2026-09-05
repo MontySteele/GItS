@@ -59,10 +59,10 @@ def alt_cost(monkeypatch):
     the flag, so a test that flips the flag without clearing it would read a
     KeyError cached from an earlier test. Cleared going in and coming out.
     """
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     monkeypatch.setattr(C, "SPARK_ALT_COST_ENABLED", True)
     yield
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
 
 
 def proto(card_id: str) -> Card:

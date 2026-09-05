@@ -68,12 +68,23 @@ def overhaul(monkeypatch):
     the flag, so a test that flips the flag without clearing it would read a
     KeyError cached from an earlier test. `rewards.character_pool` is memoized
     too and its answer moves with the same flag. Cleared going in and out.
+
+    `EB-569` (reopened 2026-09-06): the list is `loader.reset_arm_caches()`
+    now, and it is longer than the two lines that were here. The two upgrade
+    indices move with this flag (`upgrades._prototype_deltas` registers a row
+    only while a live flag makes its id reachable), and so does
+    `loader._substituted_card_index`, which is built from `_starter_ids` and
+    `_pool_substitutions` -- both of which read the flags. Warmed once under
+    this fixture it kept answering for the rest of the worker's life, which is
+    what made the flag-off tests in this file and in `test_klee_overhaul.py`
+    fail about one run in three under `-n auto` and pass alone.
+    `rewards.character_pool` stays here because tier0 may not import tier05.
     """
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
     monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
     yield
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
 
 
@@ -145,10 +156,13 @@ def test_the_overhaul_ids_do_not_resolve_with_the_flag_off():
     NAMED, not read off `KOKOMI_OVERHAUL_STARTER_IDS[0]`, since R242: that slot
     is now the BASE GAME's `strike`, which resolves on every tree by design and
     would have turned this test green for the wrong reason."""
-    loader._card_prototype.cache_clear()
+    # `EB-569`: the whole flag-dependent family, not `_card_prototype` alone.
+    # `_substituted_card_index` warmed under the arm is what made this pass
+    # alone and fail about one run in three under `-n auto`.
+    loader.reset_arm_caches()
     with pytest.raises(KeyError):
         loader.get_card("proto_kk_kurages_oath")
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
 
 
 def test_the_kurage_memory_arm_is_untouched():

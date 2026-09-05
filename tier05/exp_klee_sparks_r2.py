@@ -81,8 +81,9 @@ def _clear_caches() -> None:
     without clearing all three silently serves the other arm's cards.
     """
     from tier05 import rewards
-    loader._card_prototype.cache_clear()
-    loader._substituted_card_index.cache_clear()
+    # `EB-569`: tier0's four flag-dependent memos are one call, stated beside
+    # the flags they depend on; the two upgrade indices were missing here.
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
 
 

@@ -54,12 +54,12 @@ def overhaul(monkeypatch):
                    upgrades._prototype_upgrade_index):
             getattr(fn, "cache_clear", lambda: None)()
 
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
     clear_upgrade_caches()
     monkeypatch.setattr(C, "KOKOMI_OVERHAUL", True)
     yield
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
     clear_upgrade_caches()
 

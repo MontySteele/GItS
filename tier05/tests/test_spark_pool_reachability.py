@@ -35,7 +35,7 @@ from tier05 import rewards
 
 
 def _clear():
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     loader._substituted_card_index.cache_clear()
     rewards.character_pool.cache_clear()
 

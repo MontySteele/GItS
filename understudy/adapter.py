@@ -133,9 +133,24 @@ _BLK_RE = re.compile(r"[Gg]ain\s+(\d+)\s+[Bb]lock")
 #: same sheet carries it and the same reward-blind `basic` rarity keeps it off
 #: every other screen. An id NOT in this map is still approximate, loudly, as
 #: it always was.
+#:
+#: `EB-593`: AND THE SILENT PAIR, for exactly the reason the Ironclad pair is
+#: here. `KOKOMI_OVERHAUL_STARTER_IDS` is four `strike`, four `defend` and two
+#: rows of her own, and the mod's half of that is
+#: `ModelDb.Card<StrikeSilent>()` / `<DefendSilent>()` -- the constant's own
+#: note says so, and says why: "where a character's basics are a renamed Strike
+#: or Defend with the same stat line, the base game's Strike and Defend replace
+#: them" (R242). The decompiled source's own words are that the five starting
+#: Strikes differ in "portrait, attack vfx, and color" and nothing else, so the
+#: join to `content/cards/ironclad_starter.yaml` is the same checked one.
+#: The Kokomi soak on `0.2.2817+proto` met the gap: an `enchant` screen of four
+#: `STRIKE_SILENT` and one Slack Water resolved to nothing and took index 0 as
+#: a forced default (soak-20260905-161950 lane 1, decision 33).
 BASE_CARD_IDS = {
     "STRIKE_IRONCLAD": "strike",
     "DEFEND_IRONCLAD": "defend",
+    "STRIKE_SILENT": "strike",
+    "DEFEND_SILENT": "defend",
     "BASH": "bash",
 }
 
@@ -172,6 +187,34 @@ def resolve_card(entry: dict[str, Any],
             return loader.peek_card(sid), False
         except (KeyError, ValueError):
             pass
+        # `EB-593`. A PROTOTYPE ROW ON THE WIRE IS A PROTOTYPE ROW, whether or
+        # not this process happens to have the sim's arm flag on.
+        #
+        # `peek_card` above answers a `proto_` id only through
+        # `_card_prototype`'s FLAGGED door, and the pilot runs with the sim's
+        # constants at their shipped defaults -- so on a `+proto` build every
+        # arm card on every screen fell through to the text approximation
+        # below. The cost was not a rounding error: the Klee soak's floor-2
+        # reward scored Fwoosh! as a free 6-damage Attack, because the wire's
+        # `cost` is the ENERGY cost and a Spark-priced card prints "0" there
+        # (the row's real price is a `spend_spark` effect); and the Kokomi soak
+        # took two forced defaults at a "choose 2 commons" screen whose eight
+        # options were all `proto_kk_` rows, since `_choice_overlay` refuses an
+        # approximation (soak-20260905-161950 lane 1, decisions 38 and 39).
+        #
+        # NARROW BY CONSTRUCTION, and it is not the sim's quarantine moving.
+        # The test is the id's own `proto_` prefix, which no shipped row
+        # carries; nothing in tier0 or tier05 reads this; `loader._card_index`
+        # is untouched, so pools, rewards, drafts, digests and every version
+        # stamp still cannot see one. What moves is what the PILOT may READ off
+        # a screen the game has already put in front of it -- the same dev
+        # route `build_combat_state(prototype=True)` already declares, made
+        # automatic for the one id shape that can only ever come from a
+        # prototype build.
+        if sid.startswith(loader.PROTOTYPE_ID_PREFIX):
+            hit = loader._prototype_index().get(sid)
+            if hit is not None:
+                return copy.deepcopy(hit), False
     # `EB-572`: the base game's basics, which the Klee arm's starter is made
     # of. Curated (`BASE_CARD_IDS`), never derived, and it answers EXACT --
     # these are committed sheet rows at the base stat line, so a caller that
@@ -194,9 +237,18 @@ def _text_card(entry: dict[str, Any]) -> Card:
     m = _BLK_RE.search(desc)
     if m:
         effects.append({"op": "block", "amount": int(m.group(1))})
+    # `EB-593`: THE WIRE SENDS A STRING. `card_reward` and `card_select` print
+    # `"cost": "0"`, and this read `isinstance(cost, int)` -- so every
+    # approximated card on every out-of-combat screen was priced at 1
+    # regardless of what it printed, including the free ones. A cost the wire
+    # does not state at all (or states as `"X"`) is still 1, which is the
+    # conservative guess this fallback was always making.
     cost = entry.get("cost")
-    if not isinstance(cost, int):
-        cost = 1
+    if isinstance(cost, bool) or not isinstance(cost, int):
+        try:
+            cost = int(str(cost).strip())
+        except (TypeError, ValueError):
+            cost = 1
     return Card(
         id=str(entry.get("id") or "unknown"),
         name=str(entry.get("name") or entry.get("id") or "unknown"),

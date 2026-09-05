@@ -151,7 +151,8 @@ def _arm(flag_on: bool, fights: int, seed: int) -> dict:
     from tier0.engine.combat import run_fight
     from tier0.pilot.policy import make_pilot
 
-    loader._card_prototype.cache_clear()
+    # `EB-569`: every memo whose answer moves with the flag, not just one.
+    loader.reset_arm_caches()
     original = C.SPARK_ALT_COST_ENABLED
     C.SPARK_ALT_COST_ENABLED = flag_on
     try:
@@ -175,7 +176,7 @@ def _arm(flag_on: bool, fights: int, seed: int) -> dict:
         return total
     finally:
         C.SPARK_ALT_COST_ENABLED = original
-        loader._card_prototype.cache_clear()
+        loader.reset_arm_caches()
 
 
 def main(argv: list[str] | None = None) -> int:

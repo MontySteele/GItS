@@ -30,10 +30,10 @@ from tier05 import rewards
 @pytest.fixture
 def arm(monkeypatch):
     monkeypatch.setattr(C, "KLEE_OVERHAUL", True)
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
     yield
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
 
 
@@ -84,12 +84,12 @@ def test_the_seed_is_quarantined(monkeypatch):
     """`C.KLEE_OVERHAUL` off, any character but Klee, or a caller with no floor
     to give: the identity, in every direction."""
     monkeypatch.setattr(C, "KLEE_OVERHAUL", False)
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
     for seed in SEEDS:
         assert ([c.id for c in _offers(seed, 1)]
                 == [c.id for c in _offers(seed, None)])
-    loader._card_prototype.cache_clear()
+    loader.reset_arm_caches()
     rewards.character_pool.cache_clear()
 
 
