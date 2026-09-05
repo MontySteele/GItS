@@ -722,12 +722,17 @@ public static class ArmKeywordTips
     /// AND `STRENGTH` JOINED THE MODIFIER CLAUSE. The clause named Vulnerable
     /// and Weak and stopped, which reads as a complete list, and the seat
     /// priced `Kurage's Oath+` face 4 under Vajra at Plan 10 expecting her
-    /// Strength to ride it (r9 run 2, act 1, (c) 5). It does not: this class's
-    /// own header is why -- the carry-out goes through
-    /// <see cref="ElementalHit"/> UNPOWERED, so no Strength, no Weak and no
-    /// attack buff of hers reaches it. "Enemy" replaced the bare
-    /// `[gold]Vulnerable[/gold]` in the same breath, because the sentence is
-    /// about WHOSE modifiers are read and the old one left that to inference.
+    /// Strength to ride it (r9 run 2, act 1, (c) 5).
+    ///
+    /// `EB-599` REVERSED WHICH SIDE THAT CLAUSE NAMES, and it is a rule change
+    /// rather than a rewording: the Plan line now folds HER Strength at
+    /// writing time (<see cref="KokomiPlan.Hers"/>) and nothing of the
+    /// target's, because a Plan resolves next morning against whatever the
+    /// body wears then. The r22 lane-2 seat paid for a "Plan: Deal 10" that
+    /// arrived as 7 once the Vulnerable it was folding had expired: "the
+    /// committed number moving is the sharpest contradiction in the kit."
+    /// The clause says WHEN each side is read, which is the half the old
+    /// two-item list could not carry.
     ///
     /// 135 CHARACTERS RENDERED, at the ceiling and not over it: "the front
     /// enemy" compressed to "front non-Minion" and "or ALL if it says so"
@@ -762,9 +767,9 @@ public static class ArmKeywordTips
         With(inherited, PlanKey,
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front "
           + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. "
-          + "Enemy [gold]Vulnerable[/gold] counts; no damage term of "
-          + "yours does. A carry-out is not a hit: no "
-          + "when-hit power fires.");
+          + "Your [gold]Strength[/gold] folds in as you write it; the "
+          + "enemy's [gold]Vulnerable[/gold] counts at the morning. A "
+          + "carry-out is not a hit: no when-hit power fires.");
 
     /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the

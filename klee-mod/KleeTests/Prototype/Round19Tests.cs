@@ -85,9 +85,15 @@ public class Round19Tests
         // enumeration, and the r21 lane-2 seat had to TEST Shrink to learn it
         // does not bite a carry-out either. The class covers every term on
         // that side of the board and costs less than the two-item list.
+        //
+        // `EB-599` PUT 31 CHARACTERS BACK, and they buy a rule a class name
+        // cannot state: the line folds HER Strength at writing time and
+        // nothing of the target's, so the clause is about WHEN each side is
+        // read. A seat committing a turn on a number needs to know which half
+        // of it can still move.
         var rendered = PlanTip()
             .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
-        Assert.Equal(185, rendered.Length);
+        Assert.Equal(216, rendered.Length);
         Assert.EndsWith("A carry-out is not a hit: no when-hit power fires.",
                         rendered);
     }

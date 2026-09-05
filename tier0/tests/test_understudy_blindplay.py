@@ -3530,7 +3530,8 @@ def test_the_plan_keywords_aim_clause_stays_the_pointer():
     diverge and the keyword must not be emptied into the panel."""
     plan = blindplay.ARM_KEYWORDS["Plan"]
     assert "front non-Minion, or ALL, Minions too" in plan
-    assert "Enemy Vulnerable counts; no damage term of yours does." in plan
+    assert ("Your Strength folds in as you write it; the enemy's Vulnerable "
+            "counts at the morning.") in plan
 
 
 def test_a_board_with_no_jellyfish_is_told_no_aim_rule():
@@ -4717,27 +4718,28 @@ def test_an_older_bridge_prints_the_form_and_no_waiting_line():
     assert "the jellyfish waits" not in page
 
 
-def test_the_plan_word_names_the_class_and_not_a_list_of_terms():
-    """`EB-579`, and it is the row.
+def test_the_plan_word_says_when_each_side_of_the_line_is_read():
+    """`EB-599`, and it is what `EB-579`'s class name became.
 
-    THE FIND (Kokomi r21 lane 2 (c) 2). The word said "your Weak and Strength
-    do not", which reads as a COMPLETE list, and said nothing about Shrink
-    ("your Attacks deal 30% less") -- which also does not bite a carry-out.
-    The seat had to run the experiment to find that out.
+    THE FIND (Kokomi r22 lane 2). *Kurage's Oath* printed "Plan: Deal 10"
+    under the target's Vulnerable and the morning carried out 7 once that
+    Vulnerable had expired -- "the committed number moving is the sharpest
+    contradiction in the kit" -- while her Strength moved the own line and not
+    the Plan line. Two lines, two rules, neither written down.
 
-    THE CLASS IS THE RULE. `KokomiPlan.Hit` / `kokomi_plan._hit` deal a
-    carry-out with `powered=False`, which is not a list of two debuffs: it is
-    every term on the player's side of the pipeline at once. One clause
-    answers for all of them, named or not, and it is a character shorter than
-    the enumeration was.
+    THE RULE IS ABOUT WHEN, WHICH IS WHY A CLASS NAME COULD NOT CARRY IT. Her
+    Strength is folded when the Plan is WRITTEN (`kokomi_plan.hers`), because
+    that is the number the player commits the turn on; the target's Vulnerable
+    is read at the MORNING, against whatever the body wears then, which is
+    exactly the thing today's line cannot know. `Weak` is off the sentence
+    still: `powered=False` at the carry-out answers for every other term of
+    hers at once.
     """
     plan = blindplay.ARM_KEYWORDS["Plan"]
 
-    assert "no damage term of yours does" in plan
+    assert "Your Strength folds in as you write it" in plan
+    assert "the enemy's Vulnerable counts at the morning" in plan
     assert "Weak" not in plan
-    assert "Strength" not in plan
-    # The enemy's half is untouched -- the pair is the sentence.
-    assert "Enemy Vulnerable counts" in plan
 
 
 def test_a_feed_with_no_pet_target_field_plays_the_card_as_it_always_did():
@@ -6036,10 +6038,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Strength, which does not reach a carry-out at all.
         # `EB-538`: the class a carry-out belongs to, in the Set off row's
         # own words.
+        # `EB-599`: and the modifier clause became a clause about WHEN each
+        # side is read -- her Strength at writing time, the target's
+        # Vulnerable at the morning.
         "Plan": [", paid now; next turn: front ",
-                 " counts; no damage term of ",
-                 "yours does. A carry-out is not a hit: no ",
-                 "when-hit power fires."],
+                 " folds in as you write it; the ",
+                 " counts at the morning. A ",
+                 "carry-out is not a hit: no when-hit power fires."],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
         # `EB-377` ADDED THESE TWO ROWS to the page, and their absence was the

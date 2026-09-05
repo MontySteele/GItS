@@ -499,12 +499,12 @@ public static class KokomiPlan
         // listener order, and it is the same guard the sim needs for real
         // (there the play is recorded BEFORE the body resolves).
         var body = clauses.ToList();
-        // `EB-580`. THE CARD'S OWN ENCHANTMENT, FOLDED INTO THE NUMBER THAT IS
-        // WRITTEN DOWN -- see <see cref="Enchanted"/> for the finding and the
-        // measured API. AT WRITING TIME, Crystal Collapse's and Flank's rule
-        // below: the enchantment is what the player was looking at when they
-        // decided to write the Plan, and the card can be anywhere by the
-        // morning.
+        // `EB-580` AND `EB-599`. HER SIDE OF THE LINE, FOLDED INTO THE NUMBER
+        // THAT IS WRITTEN DOWN -- see <see cref="Hers"/> for both findings and
+        // the measured API. AT WRITING TIME, Crystal Collapse's and Flank's
+        // rule below: her Strength and this card's enchantment are what the
+        // player was looking at when they decided to write the Plan, and both
+        // the buff and the card can be anywhere by the morning.
         //
         // THE PRINTED-DAMAGE CLAUSE ONLY, and that is exact rather than
         // partial. `DamageQuarterMaxHp` and `DamagePerCompanionLastTurn` print
@@ -519,7 +519,7 @@ public static class KokomiPlan
             {
                 body[i] = body[i] with
                 {
-                    Amount = Enchanted(source, body[i].Amount),
+                    Amount = Hers(kokomi, source, body[i].Amount),
                 };
             }
         }
@@ -1803,17 +1803,19 @@ public static class KokomiPlan
 
     /// <summary>
     /// WHAT A PLANNED HIT OF <paramref name="amount"/> LANDS FOR RIGHT NOW --
-    /// the whole of what `EB-334` left live on a Plan's damage.
+    /// the whole of what `EB-334` left live on a Plan's damage AT THE MORNING.
     ///
     /// ONE TERM, and naming it is the point: R246 pick 1 took the dealer's
-    /// side off a planned hit, so the only modifier between the printed number
+    /// side off a planned hit, so the only modifier between the queued number
     /// and the board is the TARGET's, which is
     /// <see cref="SimDamagePipeline.TargetMods"/> -- the same call
     /// <see cref="ElementalHit.Deal"/> makes on the same target a beat later.
-    /// SHARED AND NOT RE-DERIVED, `EB-265`'s rule: the face
-    /// (<see cref="PlanDamageVar"/>) and the pins read this, so a face that
-    /// disagrees with the morning is a red test rather than a number a seat
-    /// stops trusting.
+    ///
+    /// `EB-599` TOOK THIS OFF THE FACE and left it here. It is a fact about
+    /// the body the hit finds NEXT MORNING, and the r22 lane-2 seat paid for
+    /// a "Plan: Deal 10" that arrived as 7 once the Vulnerable it was folding
+    /// had expired. So the line previews <see cref="Hers"/> and this stays
+    /// what the morning does -- the pins below are its readers.
     ///
     /// THE REACTION AMPLIFIER IS DELIBERATELY LEFT OUT, exactly as
     /// <c>ProtoBombPower.PredictedSetOffDamage</c> leaves it out and for the
@@ -1825,6 +1827,45 @@ public static class KokomiPlan
         target == null
             ? amount
             : (int)SimDamagePipeline.TargetMods(target, amount);
+
+    /// <summary>
+    /// `EB-599`. HER SIDE OF A PLAN LINE, FOLDED AT WRITING TIME -- her
+    /// Strength on top of <see cref="Enchanted"/>'s rider.
+    ///
+    /// THE FIND (Kokomi r22 lane 2). <i>Kurage's Oath</i> printed "Plan: Deal
+    /// 10" under the target's Vulnerable, the seat paid for it, and the
+    /// morning carried out 7 once the Vulnerable had expired: "for a mechanic
+    /// sold on committing a turn early, the committed number moving is the
+    /// sharpest contradiction in the kit." Both lanes then read the two lines
+    /// computing under two rules -- her Strength moved the own line only and
+    /// the target's Vulnerable moved the Plan line only.
+    ///
+    /// THE RULE (r22 packet sec.5, a D default): the Plan line folds HERS and
+    /// nothing of the target's. Rule 3 says her Strength counts for a
+    /// carry-out, and a Plan resolves next morning against whatever the target
+    /// wears THEN -- so the target's terms are exactly the ones a line written
+    /// today cannot honestly print, and hers are the ones it can.
+    ///
+    /// HER STRENGTH AND NOT <see cref="SimDamagePipeline.DealerMods"/>, which
+    /// is the one judgement in this method: that call also carries her Weak,
+    /// and round four-c's finding is what took her Weak off a carry-out. The
+    /// default names her Strength and her enchantments, so this folds those
+    /// two and no more.
+    ///
+    /// AT WRITING TIME AND ONCE. <see cref="Hit"/> still goes out
+    /// <c>powered: false</c>, so the queued number is the number the morning
+    /// deals and nothing adds her Strength a second time.
+    ///
+    /// Sim twin: `kokomi_plan.hers`.
+    /// </summary>
+    public static int Hers(Creature? kokomi, CardModel? source, int amount)
+    {
+        var folded = Enchanted(source, amount);
+        if (folded <= 0 || kokomi == null) return folded;
+        return folded
+             + (int)(kokomi.Powers.OfType<StrengthPower>()
+                           .FirstOrDefault()?.Amount ?? 0);
+    }
 
     /// <summary>
     /// `EB-580`. THE CARD'S OWN ENCHANTMENT, FOLDED INTO ITS PLAN LINE.
@@ -1885,17 +1926,22 @@ public static class KokomiPlan
     /// calls it on every var of a card in hand or in play whenever it refreshes
     /// a face, and <c>PreviewValue</c> is the number <c>{Var:diff()}</c> prints
     /// -- green when it is above the card's own, which is exactly the read a
-    /// Vulnerable enemy should produce. <c>IntValue</c> is untouched and stays
+    /// Strength buff should produce. <c>IntValue</c> is untouched and stays
     /// <c>BaseValue</c>, which is what matters: the emitted <c>PlanClauses</c>
-    /// property builds the queued clause off <c>IntValue</c>, so the number
-    /// WRITTEN into the Plan is still the printed base and the multiplier is
-    /// applied once, at the morning, by the pipeline.
+    /// property builds the queued clause off <c>IntValue</c> and
+    /// <see cref="Schedule"/> folds <see cref="Hers"/> onto it once, so the
+    /// fold is applied exactly once and by one call.
     ///
-    /// THE FRONT ENEMY, not the card's drag target, and for two reasons: a Plan
-    /// card is dragged onto the PET, so the target the preview is handed is
-    /// never the enemy that will be hit; and an all-enemies clause lands a
-    /// different number on each body, so the face takes the front enemy's --
-    /// the same enemy <see cref="Hit"/> reports for the same reason (`EB-317`).
+    /// `EB-599` TOOK THE TARGET'S SIDE OFF THIS LINE AND PUT HERS ON. It used
+    /// to fold the FRONT enemy's <see cref="PlannedDamage"/>, and the r22
+    /// lane-2 seat paid for a "Plan: Deal 10" that the morning carried out as
+    /// 7 once that Vulnerable had expired -- "for a mechanic sold on
+    /// committing a turn early, the committed number moving is the sharpest
+    /// contradiction in the kit". A Plan resolves against whatever the target
+    /// wears NEXT MORNING, which is a thing no line written today knows; her
+    /// Strength and this copy's enchantment are things it does know, and
+    /// <see cref="Hers"/> folds both into the number that is queued, so the
+    /// face and the queue print one number (`EB-265`'s rule).
     ///
     /// OUTSIDE COMBAT IT PRINTS ITS BASE. A compendium or reward copy has no
     /// combat and no enemies, and `runGlobalHooks` is false off the hand, so
@@ -1922,15 +1968,16 @@ public static class KokomiPlan
             // fact about THIS COPY of the card rather than about the fight, so
             // it folds on a reward screen and in a deck view as well -- which
             // is where the r21 seat was reading the two lines against each
-            // other. The target's terms are the ones that need an enemy, and
-            // they are still below.
-            var printed = Enchanted(card, (int)BaseValue);
-            PreviewValue = printed;
+            // other.
+            PreviewValue = Enchanted(card, (int)BaseValue);
             var kokomi = card.Owner?.Creature;
             if (!KokomiOverhaul.LiveFor(kokomi)) return;
-            var front = FrontEnemy(kokomi);
-            if (front == null) return;
-            PreviewValue = PlannedDamage(front, printed);
+            // `EB-599`: AND HER STRENGTH, WHICH NEEDS THE CREATURE. Nothing of
+            // the TARGET's is folded here any more: the Plan lands next
+            // morning, against whatever that body wears then, and the r22
+            // lane-2 seat paid for a "Plan: Deal 10" that arrived as 7 once
+            // the Vulnerable the line was folding had expired.
+            PreviewValue = Hers(kokomi, card, (int)BaseValue);
         }
     }
 }

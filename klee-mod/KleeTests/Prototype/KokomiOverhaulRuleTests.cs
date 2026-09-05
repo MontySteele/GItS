@@ -888,17 +888,80 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void EB334_an_attack_buff_on_kokomi_does_not_reach_a_planned_hit()
+    public void EB334_an_attack_buff_on_kokomi_does_not_reach_the_morning()
     {
         // Strength is the mirror's whole vocabulary for a flat attack buff --
         // `SimDamagePipeline.DealerMods` is where every one of them lands, and
         // Fantastic Voyage is the base game's name for the same term, which
         // the seat watched add to card attacks and not to Plans.
+        //
+        // `EB-599` MOVED THE READ AND NOT THE RULING. What the morning does
+        // to a queued number is still one term, the target's; her Strength is
+        // folded when the Plan is WRITTEN, which is the pin below.
         var kokomi = Seat.Kokomi().WithPower<StrengthPower>(5);
         var enemy = Seat.Kokomi(40).Creature;
 
         Assert.Equal(12m, SimDamagePipeline.DealerMods(kokomi.Creature, 7m));
         Assert.Equal(7, KokomiPlan.PlannedDamage(enemy, 7));
+    }
+
+    // ==================================================================
+    // `EB-599` -- the Plan line folds HERS, and nothing of the target's
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r22 lane 2). `Kurage's Oath` printed "Plan: Deal 10"
+    // under the target's Vulnerable, the seat paid for it, and the morning
+    // carried out 7 once that Vulnerable had expired: "for a mechanic sold on
+    // committing a turn early, the committed number moving is the sharpest
+    // contradiction in the kit." Both lanes then read the two lines computing
+    // under two rules -- her Strength moved the own line only, the target's
+    // Vulnerable moved the Plan line only.
+    //
+    // THE RULE (r22 packet sec.5, a D default): the Plan line folds HERS and
+    // nothing of the target's, because a Plan resolves next morning against
+    // whatever the body wears then.
+
+    [Fact]
+    public void EB599_the_plan_line_folds_her_strength_and_not_the_targets()
+    {
+        // THE ROW'S ACCEPTANCE, on real creatures carrying real powers: the
+        // Oath's printed 7 reads 9 at Strength 2, and the Vulnerable on the
+        // body it will hit is not in the number.
+        var kokomi = Seat.Kokomi().WithPower<StrengthPower>(2);
+
+        Assert.Equal(9, KokomiPlan.Hers(kokomi.Creature, null, 7));
+        // The same 7 at the MORNING, against a Vulnerable body, is the other
+        // call -- and it is the one the line no longer previews.
+        var enemy = Seat.Kokomi(60).WithPower<VulnerablePower>(2).Creature;
+        Assert.Equal(10, KokomiPlan.PlannedDamage(enemy, 7));
+    }
+
+    [Fact]
+    public void EB599_her_weak_is_not_folded_into_the_line_either()
+    {
+        // THE ONE TERM OF HERS THAT STAYS OFF, and round four-c is why: a
+        // Strategic enemy's Weak cut two banked Plans to x0.75 the next
+        // morning. The default names her Strength and her enchantments, so
+        // `Hers` is not `DealerMods`.
+        var kokomi = Seat.Kokomi().WithPower<WeakPower>(2);
+
+        Assert.Equal(9m, SimDamagePipeline.DealerMods(kokomi.Creature, 12m));
+        Assert.Equal(12, KokomiPlan.Hers(kokomi.Creature, null, 12));
+    }
+
+    [Fact]
+    public void EB599_the_number_written_and_the_number_printed_take_one_fold()
+    {
+        // ONE CALL, TWO READERS -- `EB-265`'s rule and `EB-580`'s own pin,
+        // now on the call that carries both terms. The face must not fold the
+        // target's side any more, so `PlannedDamage` is off the preview.
+        Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "Schedule")),
+                        c => c == "KokomiPlan.Hers");
+        var preview = typeof(KokomiPlan.PlanDamageVar)
+            .GetMethod("UpdateCardPreview", HeadlessGame.All)!;
+        var calls = Il.Calls(preview);
+        Assert.Contains(calls, c => c == "KokomiPlan.Hers");
+        Assert.DoesNotContain(calls, c => c == "KokomiPlan.PlannedDamage");
     }
 
     [Fact]
@@ -916,11 +979,11 @@ public class KokomiOverhaulRuleTests
         var hit = Il.Method("KokomiPlan", "Hit");
         Assert.Contains(Il.Calls(hit), c => c.Contains("ElementalHit.Deal"));
 
-        // The face reads the SAME arithmetic the pins above read, so it cannot
-        // drift from the morning.
+        // The face reads ONE shared call for what it can know about the line
+        // (`EB-599`'s `Hers`), so it cannot derive a second arithmetic.
         var preview = typeof(KokomiPlan.PlanDamageVar)
             .GetMethod("UpdateCardPreview", HeadlessGame.All)!;
-        Assert.Contains("KokomiPlan.PlannedDamage", Il.Calls(preview));
+        Assert.Contains("KokomiPlan.Hers", Il.Calls(preview));
     }
 
     [Fact]

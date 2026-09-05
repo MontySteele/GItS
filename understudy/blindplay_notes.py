@@ -660,10 +660,17 @@ ARM_KEYWORDS: dict[str, str] = {
     # enemy in the same fight (Kokomi r19 lane 2): a carry-out goes out through
     # `ElementalHit.Deal` as an unpowered hit with no dealer, so nothing keyed
     # on being hit can answer it. Same sentence as `ArmKeywordTips.ForPlan`.
+    # `EB-599` REVERSED WHICH SIDE THE MODIFIER CLAUSE NAMES, because the rule
+    # moved: the Plan line folds HER Strength at writing time and nothing of
+    # the target's, since a Plan resolves next morning against whatever the
+    # body wears then. The r22 lane-2 seat paid for a "Plan: Deal 10" that
+    # arrived as 7 once the Vulnerable it was folding had expired -- "the
+    # committed number moving is the sharpest contradiction in the kit". The
+    # clause now says WHEN each side is read.
     "Plan": ("On the Bake-Kurage, paid now; next turn: front non-Minion, or "
-             "ALL, Minions too. Enemy Vulnerable counts; no damage term of "
-             "yours does. A carry-out is not a hit: no when-hit power "
-             "fires."),
+             "ALL, Minions too. Your Strength folds in as you write it; the "
+             "enemy's Vulnerable counts at the morning. A carry-out is not a "
+             "hit: no when-hit power fires."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
     # `EB-377` ADDED THESE TWO, and their absence was the same defect one row

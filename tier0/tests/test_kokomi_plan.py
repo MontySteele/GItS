@@ -271,18 +271,24 @@ def test_damage_to_every_enemy(overhaul):
 
 
 def test_a_planned_hit_is_the_jellyfishs_and_applies_hydro(overhaul):
-    """`EB-334`, R246 pick 1. THE BAKE-KURAGE DEALS IT, so the printed number
-    goes out unchanged by anything of hers, and the Hydro still lands -- which
-    is the half of rule 3 the ruling left alone.
+    """`EB-334`, R246 pick 1. THE BAKE-KURAGE DEALS IT, so nothing of hers is
+    read AT THE MORNING, and the Hydro still lands -- which is the half of
+    rule 3 the ruling left alone.
 
     Round four-c is the defect: her Weak cut two banked Plans at the morning
     (12 to 9, 5 to 3) and no screen said so, while the enemy's own Vulnerable
     raised nothing. The three pins below are the three modifiers the row names,
-    one apiece."""
+    one apiece.
+
+    `EB-599` MOVED HER STRENGTH TO WRITING TIME, so the buff here is picked up
+    AFTER the Plan is written: what R246 pick 1 refuses is a carry-out reading
+    her buffs at the morning, and that is exactly what is still refused."""
     enemy = make_enemy(hp=40)
     st = kokomi_state(enemies=[enemy])
+    card = plan_card([{"op": "damage", "amount": 9, "target": "front_enemy"}])
+    kokomi_plan.schedule(st, card)
     st.player.powers["strength"] = 3
-    carry_out(st, [{"op": "damage", "amount": 9, "target": "front_enemy"}])
+    kokomi_plan.resolve_all(st)
     assert enemy.hp == 40 - 9
     assert enemy.aura == "hydro"
 
@@ -340,16 +346,22 @@ def test_enemy_vulnerable_multiplies_a_planned_hit(overhaul):
     assert enemy.hp == 60 - 18
 
 
-def test_an_attack_buff_on_kokomi_does_not_reach_a_planned_hit(overhaul):
-    """`EB-334` PIN 3: an attack buff on HER, no effect. Strength is this
-    engine's whole vocabulary for one -- `powers.modify_damage_dealt` is where
-    every flat attack bonus lands, and Fantastic Voyage is the C# name for the
-    same term -- so pinning Strength pins the class."""
+def test_an_attack_buff_on_kokomi_reaches_the_line_she_wrote_it_under(
+        overhaul):
+    """`EB-334` PIN 3, AS `EB-599` LEFT IT. Strength is this engine's whole
+    vocabulary for a flat attack buff -- `powers.modify_damage_dealt` is where
+    every one of them lands -- so what it pins is the class.
+
+    The r22 default reversed the direction: her Strength is folded into the
+    number WRITTEN DOWN, because that is what the player was reading when they
+    committed the turn. A buff she picks up afterwards still pays nothing,
+    which is the pin above.
+    """
     enemy = make_enemy(hp=40)
     st = kokomi_state(enemies=[enemy])
     st.player.powers["strength"] = 5
     carry_out(st, [{"op": "damage", "amount": 7, "target": "front_enemy"}])
-    assert enemy.hp == 40 - 7
+    assert enemy.hp == 40 - 12
 
 
 def test_eb545_a_planned_feigned_retreat_pays_both_halves(overhaul):
