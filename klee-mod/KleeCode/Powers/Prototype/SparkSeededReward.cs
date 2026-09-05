@@ -37,6 +37,31 @@ namespace KleeMod.Powers;
 /// off, or any character but Klee, and this patch returns having changed
 /// nothing. Floor 4 on is untouched too, so the rule expires by itself rather
 /// than becoming a permanent tax on the pool.
+///
+/// `EB-594`. TWO CORRECTIONS, BOTH FOUND LIVE ON `0.2.2817+proto`.
+///
+/// (1) THE SWAP HANDS BACK AN INSTANCE, never a canonical model. This first
+/// shipped as <c>new CardCreationResult(Pick(...))</c> over a row taken
+/// straight out of <c>options.GetPossibleCards(player)</c> -- which is the
+/// game's REGISTRY, whose rows are canonical models. A canonical model put on
+/// a screen survives until something asserts on it: on lane 1 the assert came
+/// from <c>CardChoiceHistoryEntry..ctor</c> serialising the pick
+/// (<c>AbstractModel.AssertMutable</c> ->
+/// <c>CanonicalModelException: ... ProtoKoSugarRush used in incorrect
+/// place</c>), which threw inside <c>HeftyTablet.AfterObtained</c> and left the
+/// Neow screen with an empty option list and no legal verb -- a hard blocker,
+/// not a cosmetic one. The base game's own reward path ends in
+/// <c>((ICardScope)player.RunState).CreateCard(model, player)</c>
+/// (<c>CompanionSlot.Roll</c> mirrors it for the same reason), so the swap
+/// does too, and the row it substitutes is indistinguishable from the ones the
+/// roll made.
+///
+/// (2) POST-FIGHT REWARDS ONLY. <c>CreateForReward</c> also rolls the cards for
+/// Neow's options, for a relic's "choose one of three" (Hefty Tablet) and for
+/// a shop's stock; a floor number does not tell those apart from the reward
+/// after a fight, which is the only screen the rule was written about. The
+/// gate is the same <c>CardCreationSource.Encounter</c> test the four reward
+/// hooks in this mod already ask.
 /// </summary>
 [HarmonyPatch(typeof(CardFactory), nameof(CardFactory.CreateForReward),
     new[] { typeof(Player), typeof(int), typeof(CardCreationOptions) })]
@@ -47,6 +72,15 @@ internal static class CardFactory_CreateForReward_SparkSeed_Patch
                                ref IEnumerable<CardCreationResult> __result)
     {
         if (!KleeOverhaul.Enabled || player?.Character is not IKleeCharacter)
+        {
+            return;
+        }
+
+        // `EB-594`. THE SCREEN, AND NOT THE FLOOR. Encounter is the enum's own
+        // name for the reward after a fight; Neow, a relic's choose-one-of-
+        // three and the shop all roll through this same factory and are none
+        // of the rule's business.
+        if (options == null || options.Source != CardCreationSource.Encounter)
         {
             return;
         }
@@ -78,13 +112,31 @@ internal static class CardFactory_CreateForReward_SparkSeed_Patch
             if (offer == null) continue;
             var sameTier = pool.Where(c => c.Rarity == offer.Rarity).ToList();
             if (sameTier.Count == 0) continue;
-            rolled[i] = new CardCreationResult(Pick(floor, sameTier));
+            var swap = Instantiate(player, Pick(floor, sameTier));
+            if (swap == null) return;
+            rolled[i] = swap;
             __result = rolled;
             return;
         }
 
-        rolled[rolled.Count - 1] = new CardCreationResult(Pick(floor, pool));
+        var last = Instantiate(player, Pick(floor, pool));
+        if (last == null) return;
+        rolled[rolled.Count - 1] = last;
         __result = rolled;
+    }
+
+    /// <summary>
+    /// `EB-594`. THE ROW A REWARD SCREEN MAY HOLD is an INSTANCE, and
+    /// <see cref="CardCreationOptions.GetPossibleCards"/> hands back canonical
+    /// models. Run scope, because a reward goes into the DECK and outlives the
+    /// combat -- the same call <c>CardFactory.CreateForReward</c> ends in and
+    /// the same one <c>CompanionSlot.Roll</c> makes for the appended companion
+    /// offer, so the swapped row cannot be told from a rolled one.
+    /// </summary>
+    private static CardCreationResult? Instantiate(Player player, CardModel model)
+    {
+        var made = ((ICardScope)player.RunState).CreateCard(model, player);
+        return made == null ? null : new CardCreationResult(made);
     }
 
     /// <summary>
