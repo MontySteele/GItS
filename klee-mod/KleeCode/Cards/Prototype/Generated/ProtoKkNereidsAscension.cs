@@ -45,7 +45,7 @@ public sealed class ProtoKkNereidsAscension : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Nereid's Ascension"),
-        ("description", "The [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] twice."),
+        ("description", "At the start of your turn, the [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] twice."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -2122,8 +2122,8 @@ APPLY_POWERS = {
     # pay for. A marker power -- the stack means nothing, `CarryOutTimes`
     # reads only whether it is worn.
     "kk_nereids_ascension": ("NereidsAscensionPower", None,
-        "The [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] "
-        "twice."),
+        "At the start of your turn, the [gold]Bake-Kurage[/gold] "
+        "carries out every [gold]Plan[/gold] twice."),
     "kk_clouds_like_waves": ("CloudsLikeWavesPower", None,
         "Whenever you apply a debuff to an enemy, gain {X} Block."),
     "kk_generals_banner": ("GeneralsBannerPower", None,

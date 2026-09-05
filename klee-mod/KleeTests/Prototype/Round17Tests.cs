@@ -4,6 +4,7 @@ using System.Reflection;
 using BaseLib.Abstracts;
 using KleeMod.Cards.Furina;
 using KleeMod.Cards.Generated;
+using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Elements;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
@@ -294,6 +295,138 @@ public class Round17Tests
             FurinaReframe.SpotlightEnabled = _spotlight;
         }
     }
+
+    // ==================================================================
+    // `EB-500` / `EB-501` / `EB-503` -- one number, three readers
+    // ==================================================================
+    //
+    // Three r17 findings that turn out to be the same quantity read three
+    // ways. Tide Wall, Well Laid and Tide Chart all print "carried out this
+    // morning" and all read `KokomiOverhaulLedger.PlansThisMorning`, which
+    // counted the Plans WRITTEN -- so under Nereid's Ascension a one-Plan
+    // morning was carried out twice and paid once. The number is now
+    // `due.Count * CarryOutTimes`, still taken once at the drain so a reader's
+    // answer does not depend on where in the queue it sits.
+    //
+    // `EB-500` is the sentence over the same rule: "carries out every Plan
+    // twice" admits no exception and the built rule has one -- the doubling is
+    // the MORNING's, and The Moon's now-copy is single. The rule stands (D
+    // default) and the face and the tip name the morning.
+    //
+    // `EB-503` is the line that was never said: Tide Chart's draw happens
+    // inside the morning and nothing reported it. It is paid through
+    // `Announce`, the block's own door, so it is a beat over the pet and a row
+    // in the list every carry-out already lands in -- rather than a second
+    // narration idiom the page would have to learn.
+
+    [Fact]
+    public void The_mornings_depth_is_carry_outs_and_is_read_once()
+    {
+        var sequence = Il.CallSequence(Il.Method("KokomiPlan", "ResolveAll"));
+        var times = IndexOf(sequence, c => c.Contains("CarryOutTimes"));
+        var note = IndexOf(sequence, c => c.Contains("NoteMorning"));
+        var resolve = IndexOf(sequence, c => c.Contains("ResolveEntry"));
+
+        Assert.True(times >= 0 && note > times, string.Join(", ", sequence));
+        Assert.True(note < resolve, string.Join(", ", sequence));
+    }
+
+    [Fact]
+    public void The_three_readers_still_ask_the_one_ledger()
+    {
+        // What makes the fix a fix rather than three: Well Laid's face var,
+        // Tide Wall's clause and Tide Chart's promise all read the same
+        // property, so moving the property moved all three.
+        var wellLaid = System.IO.File.ReadAllText(
+            System.IO.Path.Combine(Repo(), "klee-mod", "KleeCode", "Cards",
+                                   "Prototype", "Generated",
+                                   "ProtoKkWellLaid.cs"));
+
+        Assert.Contains("KokomiOverhaulLedger.For(card.Owner.Creature)"
+                      + ".PlansThisMorning", wellLaid);
+        Assert.Contains(
+            Il.Calls(Il.Method("KokomiPlan", "PromisedDraw")),
+            c => c.Contains("PlansThisMorning"));
+        Assert.Contains(
+            Il.Calls(Il.Method("KokomiPlan", "ResolveOne")),
+            c => c.Contains("PlansThisMorning"));
+    }
+
+    [Fact]
+    public void Well_laids_face_reads_as_a_result_and_not_a_promise()
+    {
+        var face = Face(new ProtoKkWellLaid());
+
+        Assert.Contains("already including", face);
+        Assert.Contains("carried out this morning", face);
+        Assert.DoesNotContain("Deals", face);
+    }
+
+    [Fact]
+    public void The_ascensions_face_and_its_power_both_name_the_morning()
+    {
+        var face = Face(new ProtoKkNereidsAscension());
+        var badge = new NereidsAscensionPower().Localization!
+            .Single(row => row.Item1 == "description").Item2;
+
+        Assert.StartsWith("At the start of your turn, ", face);
+        Assert.StartsWith("At the start of your turn, ", badge);
+        Assert.Contains("carries out every [gold]Plan[/gold] twice.", badge);
+    }
+
+    [Fact]
+    public void The_now_copy_never_asks_how_many_times()
+    {
+        // `EB-500`'s pin: the doubling is read in `ResolveAll` and nowhere
+        // else, so the two mid-turn doors -- The Moon's now-copy and Change of
+        // Plans' front-copy -- are single by construction.
+        Assert.DoesNotContain(
+            Il.Calls(Il.Method("KokomiPlan", "ResolveNow")),
+            c => c.Contains("CarryOutTimes"));
+        Assert.DoesNotContain(
+            Il.Calls(Il.Method("KokomiPlan", "ResolveFront")),
+            c => c.Contains("CarryOutTimes"));
+        Assert.Contains(
+            Il.Calls(Il.Method("KokomiPlan", "ResolveAll")),
+            c => c.Contains("CarryOutTimes"));
+    }
+
+    [Fact]
+    public void The_tide_charts_draw_says_so_in_the_block()
+    {
+        var sequence = Il.CallSequence(
+            Il.Method("KokomiPlan", "PayPromisedDraws"));
+        var draw = IndexOf(sequence, c => c.Contains("CardPileCmd.Draw"));
+        var said = IndexOf(sequence, c => c.Contains("Record"));
+
+        Assert.True(draw >= 0, string.Join(", ", sequence));
+        // AFTER the draw: the number the seat is owed is what arrived.
+        Assert.True(said > draw, string.Join(", ", sequence));
+    }
+
+    [Fact]
+    public void The_draw_line_names_the_card_and_the_kind()
+    {
+        var source = System.IO.File.ReadAllText(
+            System.IO.Path.Combine(Repo(), "klee-mod", "KleeCode", "Powers",
+                                   "Prototype", "KokomiPlan.cs"));
+
+        Assert.Contains("private const string TideChartTitle = \"Tide Chart\";",
+                        source);
+        Assert.Contains("Vfx.KurageBeat.Line(TideChartTitle, cards)", source);
+        Assert.Contains("NumberKind(Kind.Draw)", source);
+        // The word the page prints off `Kind.Draw`, so the row's number is
+        // read as cards and not as damage.
+        Assert.Equal("cards drawn", (string)typeof(KokomiPlan)
+            .GetMethod("NumberKind", All)!
+            .Invoke(null, new object[] { KokomiPlan.Kind.Draw })!);
+    }
+
+    /// <summary>A card's printed body, joined the way the generator writes
+    /// it.</summary>
+    private static string Face(CardModel card) =>
+        ((BaseLib.Abstracts.CustomCardModel)card).Localization!
+            .First(row => row.Item1 == "description").Item2;
 
     private static int IndexOf(
         System.Collections.Generic.IReadOnlyList<string> calls,
