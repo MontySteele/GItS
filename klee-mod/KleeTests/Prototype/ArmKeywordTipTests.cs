@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using KleeMod.Cards;
+using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -431,5 +433,89 @@ public class ArmKeywordTipTests
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
                                          System.StringComparison.Ordinal)));
+    }
+
+    // --- `EB-504`: KLEE'S RULE ON A RUN THAT HAS NO KLEE IN IT --------------
+
+    private static CardModel Owned<T>(Seat seat) where T : CardModel, new()
+    {
+        var card = new T();
+        Seat.Set(card, "IsMutable", true);
+        Seat.Set(card, "Owner", seat.Player);
+        return card;
+    }
+
+    [Theory]
+    [InlineData("klee", true)]
+    [InlineData("kokomi", false)]
+    [InlineData("furina", false)]
+    public void EB504_klees_two_words_are_klees_runs_alone(
+        string character, bool printed)
+    {
+        // `EB-504`, REOPENED 2026-09-05. The row was closed on the page
+        // glossary off the r17 finding, and the r18 lane-2 seat then met the
+        // same sentence on a CARD: "two Companion cards in a Kokomi run
+        // printed 'Hexerei -- A Companion card that prints the word, and Klee
+        // herself ... Cards of hers pay when you play one.' I could not tell
+        // what is paid, by whom, or whether it applies to me at all, so I
+        // refused both cards partly on that."
+        //
+        // THE WORD IS EVERYONE'S AND THE RULE IS KLEE'S. `Hexerei` rides
+        // eighteen companion faces the whole roster can draft and its rule is
+        // her Spark rider; `Oz` is named by Fischl's face, which every
+        // character meets, and the Power that fields him is hers. So the tag
+        // reaches every run and the rule reaches one -- which is what
+        // `blindplay_notes._ARM_KEYWORD_CHARACTER` gates on the page side, and
+        // this is the second source that gate could not see.
+        //
+        // ONE CARD, THREE OWNERS, because that is the whole variable: Albedo
+        // is a Mondstadt Universal every character drafts, so nothing about
+        // the card changes between the three rows.
+        //
+        // THE PREDICATE AND NOT THE MATERIALISED TIP: building a `HoverTip`
+        // resolves a `LocString`, which needs the game's loc tables and is
+        // outside the headless boundary (README). What a test CAN do is ask
+        // the gate, and watch the gated call hand its inherited stack straight
+        // back -- which is the observable half either way.
+        var seat = character switch
+        {
+            "klee" => Seat.Klee(),
+            "kokomi" => Seat.Kokomi(),
+            _ => Seat.Furina(),
+        };
+        var card = Owned<ProtoMcAlbedoSolarIsotoma>(seat);
+
+        Assert.Equal(printed, ArmKeywordTips.KleesRuleBelongsHere(card));
+
+        var inherited = System.Array.Empty<IHoverTip>();
+        Assert.Equal(!printed,
+            ReferenceEquals(inherited, ArmKeywordTips.ForHexerei(inherited, card)));
+        Assert.Equal(!printed,
+            ReferenceEquals(inherited, ArmKeywordTips.ForOz(inherited, card)));
+    }
+
+    [Fact]
+    public void EB504_silence_about_the_character_still_prints_the_rule()
+    {
+        // The page's own direction (`absent is not zero`): where NOTHING says
+        // who is playing -- a canonical compendium copy, which ASSERTS on
+        // `Owner` rather than answering, with no run to read either -- the rule
+        // prints. A missing tooltip on a Klee run is the worse of the two
+        // failures, and it is the one this default avoids.
+        Assert.True(ArmKeywordTips.KleesRuleBelongsHere(
+            new ProtoMcAlbedoSolarIsotoma()));
+    }
+
+    [Fact]
+    public void EB504_both_words_ask_the_one_gate()
+    {
+        // Structural, `Every_keyword_goes_through_the_one_attach_point`'s
+        // shape: two words, one predicate, so a third word whose rule belongs
+        // to one character cannot arrive with its own copy of the question.
+        foreach (var word in new[] { "ForHexerei", "ForOz" })
+        {
+            Assert.Contains("ArmKeywordTips.KleesRuleBelongsHere",
+                            Il.Calls(Il.Method("ArmKeywordTips", word)));
+        }
     }
 }
