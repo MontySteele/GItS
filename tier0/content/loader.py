@@ -1720,7 +1720,17 @@ def reset_caches() -> None:
     loader looks, must call this rather than picking caches by hand.
     """
     for cache in (_card_index, _card_prototype, _character_index,
-                  _substituted_card_index, _encounter_index, _pilot_index):
+                  _substituted_card_index, _encounter_index, _pilot_index,
+                  # `EB-593`: the prototype surface's own index is a memoized
+                  # view of the content tree like the six beside it -- it is
+                  # `prototype_cards()` cached -- and it was the one this door
+                  # did not name. It is not FLAG-dependent (the surface is the
+                  # surface), so it stays out of `reset_arm_caches` below; but
+                  # a fixture that repoints the tree and clears everything must
+                  # clear this too, or `_card_prototype`'s flagged branch and
+                  # `understudy.adapter` both read rows from a tree that is
+                  # gone.
+                  _prototype_index):
         cache.cache_clear()
     # EB-213: the merged upgrade index is derived from `_substituted_card_index`
     # (a prototype row's `upgrade:` block registers only while a live door
