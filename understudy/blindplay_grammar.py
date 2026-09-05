@@ -17,7 +17,8 @@ from understudy.blindplay_board import (_bundle_cards, _combat, _event_option,
                                         _map_options, _proceed_option,
                                         _relic_options, _rest_options,
                                         _reward_items, _screen_cards)
-from understudy.blindplay_faces import (_card_face, _card_title, _enemy_names,
+from understudy.blindplay_faces import (_card_face, _card_title,
+                                        _enemy_handles, _enemy_names,
                                         _named_option, _reward_option,
                                         _shop_items, _shop_options)
 from understudy.blindplay_notes import PREVIEW_LOCKED
@@ -512,12 +513,23 @@ def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     # corpse the feed stops sending. Both sides read the same function off the
     # same list, which is what keeps the page and the grammar in step.
     names = _enemy_names(enemies)
+    # `EB-496`: the letter the page prints beside each body, which is the same
+    # memory the numbers come out of. Read here so the grammar and the render
+    # cannot mean different bodies by `B`.
+    handles = _enemy_handles(enemies)
     living = [i for i, e in enumerate(enemies) if _int(e.get("hp")) > 0]
     if not name:
         if len(living) == 1:
             return _entity_id(enemies[living[0]]), ""
         return "", ("there is more than one enemy, so say which: "
                     f"{', '.join(names[i] for i in living)}")
+    # THE LETTER IS AN EXACT MATCH AND NOTHING ELSE. `_match` takes a unique
+    # SUBSTRING, and a bare `A` is a substring of half the names on any board;
+    # a handle is one token that either is or is not the body's own.
+    want = _fold(name)
+    for i in living:
+        if handles[i] and _fold(handles[i]) == want:
+            return _entity_id(enemies[i]), ""
     idx, why = _match([{"n": names[i]} for i in living], name,
                       key=lambda e: e["n"])
     if idx < 0:
@@ -620,6 +632,35 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
         post["target"] = pet
         printed["target"] = (_combat(state)["plans"]["pet_name"])
         return Resolution(True, "play", post, printed)
+    # `EB-499`. THE SAME REFUSAL AS `EB-319`, FOR THE CARDS WHOSE SPELLING IS A
+    # NUMBER -- and it is HERE, under the pet, because by this line the tester
+    # has not named the jellyfish and the only body left to mean is an enemy.
+    #
+    # THE DEFECT (Kokomi r17 lane 1, turn 1 of an 84-HP elite that gains
+    # Strength every round). `play "Riptide" on "Byrdonis"` was POSTED, and the
+    # bridge answered `Card 'Riptide' cannot be played on 'Byrdonis'` -- a
+    # sentence that names the card, names the enemy and names no way to play
+    # it. Riptide is "Deal 9 damage to ALL enemies"; the working form is the
+    # bare `play "Riptide"`, and the seat did not find it for four rounds:
+    # "that refusal is the largest single reason this run ended on floor 8".
+    #
+    # WHY `EB-319`'s GUARD MISSED IT. That guard reads the SPELLING, and the
+    # arm's cards do not have one: a custom target type renders as a bare
+    # NUMBER on the wire (`EB-216`), so `allenemies` never matched and the play
+    # fell through to the post. The fact is on the feed all the same --
+    # `can_target_enemy`, the game's own `IsValidTarget` asked per card
+    # (`EB-402`) -- and an explicit `false` beside a named enemy is this
+    # mistake exactly.
+    #
+    # ONLY AN EXPLICIT `false`, `EB-402`'s and `EB-480`'s shared rule: an
+    # ABSENT field is a bridge that predates it and keeps the behaviour that
+    # build has.
+    if (cmd.target and aim not in AIMED_TARGETS
+            and entry.get("can_target_enemy") is False):
+        return _refuse(
+            f'{titles[idx]!r} does its own aiming, so it takes no '
+            f'`on "{cmd.target}"`',
+            f'play "{titles[idx]}"')
     needs_target = _aims_at_an_enemy(entry)
     if cmd.target or needs_target:
         eid, why = _resolve_enemy(state, cmd.target)

@@ -1,3 +1,4 @@
+using System;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 
@@ -54,7 +55,9 @@ public static class KleeUnplayableReason
     /// </summary>
     public static string? For(CardModel card)
     {
-        return SparkShortfall(card) ?? OwnGate(card);
+        return SparkShortfall(card)
+               ?? EncoreShortfall(card)
+               ?? OwnGate(card);
     }
 
     /// <summary>
@@ -73,6 +76,75 @@ public static class KleeUnplayableReason
             ? $"you have no Spark, and this costs {price}"
             : $"you have {bank} Spark, and this costs {price}";
     }
+
+    /// <summary>
+    /// The same sentence for Furina's <c>encore_cost</c>, or null when the card
+    /// charges no Encore or the buffer covers it (`EB-505`).
+    ///
+    /// WHAT THE SEAT READ (Furina r11 lane 1, (c) 3). "With energy 3/3 and the
+    /// card costing 1, the face read <c>CANNOT BE PLAYED: you do not have
+    /// enough energy</c>. The actual shortfall was Encore (2 held, 3
+    /// required) ... I spent a genuine beat re-reading my energy bar trying to
+    /// work out what I had miscounted." Three times, on Second Course.
+    ///
+    /// WHY THE PAGE SAID ENERGY. An <c>encore_cost</c> is a BaseLib CUSTOM
+    /// RESOURCE COST, so the refusal comes back through the game's own
+    /// <c>UnplayableReason</c> enum as a cost failure and
+    /// <c>qa_packet.UNPLAYABLE_REASONS</c> renders that as "you do not have
+    /// enough energy" -- true of the enum and false of the board.
+    ///
+    /// AND THE RIGHT SENTENCE ALREADY EXISTED. The seat named it: "Ethereal
+    /// Spotlight in the same position printed the correct thing -- <c>you have
+    /// 1 Encore, and this costs 2</c> -- so the right message exists and Second
+    /// Course is not using it." That one is written by hand on
+    /// <c>EtherealSpotlight.UnplayableReason</c>, which reaches ONE card. This
+    /// is the same sentence answered centrally off the two numbers the cost
+    /// badge already reads (<see cref="MeterCost.PriceIn"/> resolves upgrades
+    /// and cost modifiers; <see cref="MeterCost.BankOf"/> is the buffer the
+    /// spend takes), so every row with the field gets it and the two copies
+    /// cannot drift.
+    /// </summary>
+    public static string? EncoreShortfall(CardModel card)
+    {
+        int price;
+        try
+        {
+            price = MeterCost.PriceIn(card, Meter.Encore);
+        }
+        catch (Exception)
+        {
+            // THE CLASS CONTRACT, and it is not decoration here: the resolved
+            // Encore cost walks the card's PILE to find its combat state
+            // (`CustomResourceCost.GetWithModifiers`), and a card that has an
+            // owner but is in no pile throws inside the game's own property.
+            // Every card this is asked about in play is in a hand, so the
+            // branch is unreachable there -- and a state read that lost the
+            // whole board over an off-pile copy is the failure this file's
+            // header refuses.
+            return null;
+        }
+        if (price <= 0) return null;
+
+        Creature? creature = SparkCost.OwnerCreatureOf(card);
+        int bank = MeterCost.BankOf(creature, Meter.Encore);
+        return bank >= price ? null : EncoreSentence(bank, price);
+    }
+
+    /// <summary>
+    /// THE ONE ENCORE SHORTFALL SENTENCE, and the reason it is a named method
+    /// is `EB-505`'s own finding: there were two, and only one of them was
+    /// right.
+    ///
+    /// <c>EtherealSpotlight.UnplayableReason</c> wrote this by hand for the
+    /// one card whose price is charged inside its op, and the seat read the
+    /// correct sentence there and the wrong one on Second Course in the same
+    /// position. Both spellings live here now, so a rewording moves both and
+    /// the page cannot be shown two grammars for one shortfall.
+    /// </summary>
+    public static string EncoreSentence(int bank, int price) =>
+        bank <= 0
+            ? $"you have no Encore, and this costs {price}"
+            : $"you have {bank} Encore, and this costs {price}";
 
     /// <summary>The card's own gate, when it has one that can explain itself
     /// (<see cref="IUnplayableReasonCard"/>).</summary>

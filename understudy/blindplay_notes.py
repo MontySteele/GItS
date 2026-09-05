@@ -298,6 +298,35 @@ HAND_REPEAT_NOTE = ("*More than one card in this hand prints the same name. "
                     "none and differ only by one, this page cannot say which "
                     "is which.*")
 
+# `EB-496`. THE WARNING WAS UNDER THE WRONG LIST, AND IT WAS ALSO WRONG.
+#
+# WHAT THE SEAT DID (Klee r17 lane 1, turn 2 of the four-Gardener elite). It
+# killed `Phantasmal Gardener (1)` with Pocket Fireworks and aimed Kaeya at
+# `Phantasmal Gardener (2)`. "The list had already renumbered the moment the
+# first one died, so my Kaeya hit what had been Gardener (3) ... I only found
+# out by reading max-HP values off the next screen." It cost a 14-damage Melt,
+# and the seat's own diagnosis names the page: the re-count warning is printed
+# under `Your hand`, where it is about CARDS, and there was nothing at all
+# under `The other side`.
+#
+# THE NUMBER NOW HOLDS, so the note says so rather than repeating the hand's
+# caveat one list down. `_FIGHT_MEMORY` is on disk since this row, so a body
+# keeps its number for the fight across the separate processes a seat's
+# `observe` and `act` each run in -- which is why the seats went on watching
+# it re-count long after `EB-271` and `EB-427` closed it for the in-process
+# driver.
+#
+# AND THE LETTER IS THE HANDLE FOR THE OTHER HALF of what the seat asked for:
+# "there is no way to name an enemy that survives a kill inside the same
+# turn". A number only appears where a name repeats; a letter is on every
+# body, is minted once and is never reused, so it is the one word that names
+# the same creature on every screen of the fight.
+ENEMY_HANDLE_NOTE = (
+    "*Each enemy keeps its letter and its number for the whole fight: a body "
+    "that dies does not renumber or re-letter the ones still standing, and a "
+    "summon takes the next free letter. Either handle aims a card -- "
+    "`on \"B\"` is the same body as the full name beside it.*")
+
 # `EB-294`. AN AURA IS NOT A BUFF, AND THE FEED SAYS BUFF. `AuraPower.Type` is
 # `PowerType.Buff` so that Artifact does not eat an elemental application
 # ([USER] 2026-08-23), which is a rule about Artifact and reads on a page as a
@@ -671,6 +700,31 @@ COMPANION_STAGE_CLAUSE = (
 #: the character's printed Title, case-folded -- because that is the field the
 #: wire sends and a Title is not an id.
 _STAGE_CHARACTER = "furina"
+
+# `EB-504`. TWO ROWS WHOSE RULE IS ABOUT A CHARACTER WHO IS NOT IN THE RUN.
+#
+# WHAT TWO SEATS READ. On a Kokomi shop screen: "*Hexerei -- A Companion card
+# that prints the word, and Klee herself. Some are Klee's own, some are not.
+# Cards of hers pay when you play one.* I could not extract a rule from that
+# sentence, and it names a character who is not in this run" (Kokomi r17 lane
+# 2). And on a Furina run, `Fischl -- Nightrider` printed BOTH this and the
+# `Oz` row: "In a Furina run I have no Klee cards, no way to obtain that
+# Power, and no idea what 'pay' means or what it would cost me ... half its
+# rules text was noise" (Furina r11 lane 2).
+#
+# THE WORDS ARE PRINTED ON EVERY RUN AND THE RULES ARE NOT. `Hexerei` rides
+# eighteen companion faces the whole roster can draft, and its rule is Klee's
+# Spark rider; `Oz` is named by Fischl's face, which every character meets,
+# and the Power that fields him is Klee's. So the tag reaches every run and
+# the rule reaches one, which is `EB-460`'s finding one table over -- and its
+# answer too: the ARM is asked, not the board, off the wire's own `character`.
+#
+# THE TAG STILL PRINTS, NAME ONLY. A word on the screen with no entry at all
+# reads as a word the page failed to define; the name with no rule says what
+# is true, which is that this run has no rule for it. A feed that does not say
+# who is playing gets the rule, `absent is not zero`'s direction: silence
+# about the character is not evidence it is somebody else's.
+_ARM_KEYWORD_CHARACTER: dict[str, str] = {"Hexerei": "klee", "Oz": "klee"}
 
 # One pattern per word, and they are CASE-SENSITIVE on purpose: the game
 # capitalises a keyword wherever it prints one, and a case-blind `mine` or
@@ -1347,8 +1401,13 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     # every other arm gets the definition and the reward slot, which are true
     # on all of them.
     stage = _fold(obs.get("character")) == _STAGE_CHARACTER
+    # `EB-504`: and two rows are the ARM's outright. A word whose rule belongs
+    # to a character this run is not playing prints its name and no rule.
+    who = _fold(obs.get("character"))
     rows = [{"name": word,
-             "text": ARM_KEYWORDS[word].format(
+             "text": "" if (who and _ARM_KEYWORD_CHARACTER.get(word, who)
+                            != who) else
+             ARM_KEYWORDS[word].format(
                  growth=int(growth.group(1)) if growth else BOMB_GROWTH)
              + (COMPANION_STAGE_CLAUSE
                 if stage and word == "Companion" else "")}

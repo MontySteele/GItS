@@ -862,10 +862,23 @@ def _page_for_word(word: str) -> str:
     `_elements_on_screen` is what raises the six reaction rows. Everything else
     about the card is deliberately bare, so a definition on the page came from
     the glossary and not from a tip that happened to ride along.
+
+    `EB-504`. THE RUN IS THE WORD'S OWN WHERE THE RULE HAS ONE. Two rows --
+    `Hexerei` and `Oz` -- state a rule that belongs to Klee and printed it on
+    every character's screens, because the faces carrying the words are
+    drafted by the whole roster. Since that row they print their NAME alone on
+    a run that cannot use them, so this census asks the question on the run
+    the rule is about; the recorded fixture is a Kokomi, and asking it there
+    would be asking whether Klee's rule reaches a Kokomi -- which is the
+    defect, not the contract.
     """
     from tier0.tests.test_understudy_blindplay import combat_state
+    from understudy.blindplay_notes import _ARM_KEYWORD_CHARACTER
     import json
     state = json.loads(json.dumps(combat_state()))
+    owner = _ARM_KEYWORD_CHARACTER.get(word)
+    if owner:
+        state["player"]["character"] = owner.capitalize()
     state["player"]["hand"] = [{
         "id": "KLEEMOD-PROTO_GOLD_PROBE", "name": "Probe", "type": "Skill",
         "cost": "1", "can_play": True, "index": 0, "target_type": "AnyEnemy",

@@ -172,7 +172,8 @@ from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
 from understudy.blindplay_observe import (   # noqa: E402,F401  (re-export)
     observation)
 from understudy.blindplay_render import (   # noqa: E402,F401  (re-export)
-    _colliding, observe, render, _render_card, _render_intent,
+    assert_one_page, _colliding, observe, render, _render_card,
+    _render_intent,
     _render_intents, _render_options, _render_power, sha256, still_in_fight)
 from understudy.blindplay_snapshot import (   # noqa: E402,F401  (re-export)
     ledger_rows, _snapshot_hand, _snapshot_meters, SNAPSHOT_VERBS,
@@ -208,9 +209,22 @@ def _load_state(args) -> dict[str, Any]:
     A LIVE read settles first and a saved one never does (`EB-175`): the
     operator driving `observe` / `act` by hand reads the wire on exactly the
     frames the driver does, and a fixture is a frame somebody chose.
+
+    `EB-502`. AND "EXACTLY THE FRAMES THE DRIVER DOES" WAS NOT TRUE. `settle`
+    waits for a SCREEN; `settle_board` waits for the BODIES to stop moving, and
+    `Session._settle` has done both since `EB-381` while this path did only the
+    first. Every seat since round 9 drives through this path -- the brief hands
+    it `blindplay observe` and `blindplay act`, one process per call -- so the
+    defect `EB-381` closed for the automated driver went on being reported by
+    the seats: "a planned `Exposed Flank+` fired the Casket on three bodies and
+    none printed Vulnerable for two actions" (Kokomi r9), and then, in the same
+    shape, a planned Weak that "did not appear in the enemy's power list" for
+    two turns while the intent it was cutting fell 11 to 8 (Kokomi r17 lane 1).
+    The morning's `PowerCmd.Apply` was still in the action queue when the page
+    read the board.
     """
     if not args.raw_file:
-        return settle(bridge.get_state())
+        return settle_board(settle(bridge.get_state()))
     blob = json.loads(Path(args.raw_file).read_text(encoding="utf-8"))
     inner = blob.get("state") if isinstance(blob, dict) else None
     if isinstance(inner, dict) and inner.get("state_type"):
