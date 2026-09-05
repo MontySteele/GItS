@@ -311,8 +311,15 @@ are in [`workstreams.md`](workstreams.md).
   declined four readers; every number reconciled on both lanes; the
   coordinator granted the Kurage Memory Oath by mistake (`EB-581`); a
   D default folds a card's enchantment into its Plan line (`EB-580`);
-  no pick; `EB-578`-`EB-581`. [USER]'s act-1 run is due on
-  `0.2.2800+proto`. The Kurage
+  no pick; `EB-578`-`EB-581`. **Round 22 is READ**
+  (`review/active/kokomi-overhaul-round-22-2026-09-06.md`): on
+  `0.2.2817+proto` both lanes read the Plan trade as two-sided off the
+  face (Shrink makes writing win, Vulnerable makes playing win); the
+  Plan line previews the target's expiring debuff and the morning paid
+  7 on a printed 10 (`EB-599`, D default: the Plan line folds hers and
+  nothing of the target's); Shrink reduced a Skill against its gloss
+  (`EB-597`); the jellyfish's first turn now prints; no pick;
+  `EB-597`-`EB-599`. [USER]'s act-1 run is due on `0.2.2817+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
