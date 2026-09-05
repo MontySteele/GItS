@@ -1018,7 +1018,8 @@ public class KokomiOverhaulRuleTests
         var folded = typeof(FrontFoldedDamageVar)
             .GetMethod("UpdateCardPreview", HeadlessGame.All)!;
         var calls = Il.Calls(folded);
-        // The base's answer stands wherever the game had one to give ...
+        // The base var runs first, so the DEALER's side of the face is the
+        // game's own answer and this adds nothing to it ...
         Assert.Contains(calls,
             c => c.EndsWith("CalculatedDamageVar.UpdateCardPreview",
                             StringComparison.Ordinal));
