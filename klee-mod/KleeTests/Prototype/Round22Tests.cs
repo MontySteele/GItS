@@ -142,6 +142,58 @@ public class Round22Tests
         Assert.Contains("[blue]{DamageDecrease}%[/blue]", mod);
     }
 
+    // ==================================================================
+    // `EB-602` -- the reaction preview folds the number the FACE prints
+    // ==================================================================
+    //
+    // THE FIND (Furina r16 lane 1 (c) 3). A lit Chevreuse's face read 10 off a
+    // printed 7; the reaction preview beside it named Vaporize off the 7; and
+    // 15 landed. `EB-589` put the folded total on this tip and then read the
+    // wrong number to fold: `IntValue` is the var's stored BASE, and the
+    // Spotlight, her Weak and Passion Overload all live between it and the
+    // face. The tip's own claim is that it folds the same number the face
+    // does, so it reads `PreviewValue` -- the figure `{Var:diff()}` renders.
+
+    [Fact]
+    public void The_previews_base_is_the_number_the_face_renders()
+    {
+        // MEASURED, because this is the whole of the row: a var built at 7
+        // whose preview says 10 answers 7 to `IntValue`. That gap is what the
+        // seat read off two surfaces of one card.
+        var v = new MegaCrit.Sts2.Core.Localization.DynamicVars.DynamicVar(
+            "Damage", 7m);
+        Assert.Equal(7, v.IntValue);
+        v.PreviewValue = 10m;
+        Assert.Equal(7, v.IntValue);
+        Assert.Equal(10m, v.PreviewValue);
+
+        var source = Source("Cards/KleeCardTooltips.cs").Replace("\r\n", "\n");
+        Assert.Contains("var preview = (int)dynamicVar.PreviewValue;", source);
+        Assert.Contains("return preview > 0 ? preview : dynamicVar.IntValue;",
+                        source);
+    }
+
+    [Fact]
+    public void And_a_face_that_already_folded_the_target_is_not_folded_twice()
+    {
+        // `EB-598` put the target's terms into `FrontFoldedDamageVar`'s own
+        // `PreviewValue`, so the branch that reads that preview must not ask
+        // `ResolveOnTarget` for them again. Asked BY NAME, because the class
+        // is Compile-Removed from a release build.
+        var source = Source("Cards/KleeCardTooltips.cs").Replace("\r\n", "\n");
+        Assert.Contains(
+            "calculated.GetType().Name == \"FrontFoldedDamageVar\"", source);
+
+        var amplified = typeof(KleeCardTooltips)
+            .GetMethod("AmplifiedBody", All)!;
+        var calls = Il.Calls(amplified);
+        Assert.Contains(calls, c => c == "KleeCardTooltips.TargetAlreadyFolded");
+        // Both branches end at the target's own cap, which is
+        // `ResolveOnTarget`'s last step and not a second arithmetic.
+        Assert.Contains(calls, c => c == "SimDamagePipeline.ResolveOnTarget");
+        Assert.Contains(calls, c => c == "KleeCardTooltips.Capped");
+    }
+
     // ------------------------------------------------------------ helpers --
 
     /// <summary>A source file under `klee-mod/KleeCode`.
