@@ -886,6 +886,19 @@ def render(obs: dict[str, Any]) -> str:
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
 
+    # `EB-473`: the relic row, on a screen that is not a fight, in the
+    # combat header's own words and under its own heading. A relic claimed at
+    # the reward of the LAST fight of a run had no later combat page to print
+    # it on, and the Klee r15 run-2 seat finished holding one it could not
+    # describe. Above the belt, because that is the order the combat page
+    # already has -- relics, then potions.
+    if obs.get("held_relics"):
+        out += ["", "## Your relics", ""] + [
+            f"- **{r['name']}**"
+            + (f" ({r['counter']})" if r.get("counter") else "")
+            + (f" — {r['text']}" if r["text"] else "")
+            for r in obs["held_relics"]]
+
     # `EB-371`: the belt, on a screen that is not a fight. A combat page has
     # printed it under the same heading since `EB-341`; every other screen was
     # offering `drop potion` over a list the reader could not see. Above the

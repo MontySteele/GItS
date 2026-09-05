@@ -22,7 +22,8 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         last_morning, upgrade_deck_floor)
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
-                                        _reward_option, _shop_options)
+                                        _reward_option, _shop_options,
+                                        relic_faces)
 from understudy.blindplay_notes import (REWARD_ALTERNATIVE_RELICS,
                                         keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
@@ -81,6 +82,36 @@ def _offer_drop(state: dict[str, Any], obs: dict[str, Any]) -> None:
                        for p in potions]
         obs["belt_slots"] = _potion_slots(state)
     obs["commands"] += list(_DROP_FORMS)
+
+
+# `EB-473`. THE RUN ENDED HOLDING A RELIC THE SEAT COULD NOT DESCRIBE.
+#
+# WHAT THE SEAT SAW. "`Beating Remnant` was claimed as an elite relic and no
+# subsequent screen reprinted its text, so I finished the run holding a relic
+# I cannot describe. Every other relic I own prints in the combat header"
+# (Klee r15 run 2 (c) 5).
+#
+# AND THE ROW'S DIAGNOSIS WAS WRONG, WHICH IS WHY THE FIX IS ELSEWHERE. There
+# is no cached subset: `relic_faces` reads `player.relics` straight off the
+# feed and prints every row of it with its own `description`, and the wire
+# fills that list from `player.Relics` on EVERY screen (`BuildPlayerState` is
+# called unconditionally, and only its COMBAT fields are gated). What is gated
+# is the PRINTING: `EB-238` put the block inside the combat branch. That relic
+# was claimed at the reward of fight 6 -- the last fight of the run -- so
+# there was no later combat page to print it on, and the seat is exactly
+# right that no screen it was given afterwards carried it.
+#
+# SO THE BELT'S SHAPE, ONE RULE OVER. `EB-371` met this on the potions and
+# settled it: the HUD carries the row through every screen of a run, so the
+# page does too, under the same heading, on every screen that is not a fight.
+# The combat header is untouched.
+def _show_relics(state: dict[str, Any], obs: dict[str, Any]) -> None:
+    """Print the relic row on the screens the combat header does not cover."""
+    if obs["blocked"] or obs["screen"] == "combat":
+        return
+    held = relic_faces(state)
+    if held:
+        obs["held_relics"] = held
 
 
 def observation(state: dict[str, Any]) -> dict[str, Any]:
@@ -414,6 +445,11 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     # the wire allows the action on. Before the sprite pass, so a potion face
     # that names an icon file reads like every other face on the page.
     _offer_drop(state, obs)
+
+    # `EB-473`: and the relic row, on the same screens and for the same
+    # reason. Before the sprite pass with the belt, because a relic's own text
+    # is one of the five places the wire prints an icon tag.
+    _show_relics(state, obs)
 
     # Sprite tags are rewritten HERE, at the boundary, rather than in each of
     # the dozen readers that could carry one: the wire prints them in card

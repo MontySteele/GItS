@@ -2479,6 +2479,60 @@ def test_a_run_with_no_relics_prints_no_relic_block():
     assert "## Your relics" not in blindplay.observe(state)
 
 
+BEATING_REMNANT = {
+    "id": "BEATING_REMNANT",
+    "name": "Beating Remnant",
+    "description": "You cannot lose more than 20 HP in a single turn.",
+    "counter": None,
+    "keywords": [],
+}
+
+
+def test_every_screen_that_is_not_a_fight_prints_the_relic_row():
+    """`EB-473`. A RUN THAT ENDED HOLDING A RELIC THE SEAT COULD NOT DESCRIBE.
+
+    "`Beating Remnant` was claimed as an elite relic and no subsequent screen
+    reprinted its text, so I finished the run holding a relic I cannot
+    describe. Every other relic I own prints in the combat header" (Klee r15
+    run 2 (c) 5).
+
+    THE ROW'S DIAGNOSIS -- a cached subset -- IS NOT WHAT HAPPENED, and the
+    difference is the whole fix. `relic_faces` reads `player.relics` off the
+    feed and prints every row of it; the wire fills that list on every screen,
+    because `BuildPlayerState` runs unconditionally and only its COMBAT fields
+    are gated. What was gated is the PRINTING: `EB-238` put the block inside
+    the combat branch, and that relic was claimed at the reward of the last
+    fight of the run, so no later combat page existed to carry it.
+
+    The repair is `EB-371`'s, one rule over: the HUD carries the row through
+    every screen, so the page does too, under the same heading.
+
+    Seen to FAIL: every screen below printed no relic block at all.
+    """
+    for build in (map_state, shop_state, rest_state, card_reward_state,
+                  rewards_state, treasure_state):
+        state = build()
+        state.setdefault("player", {})["relics"] = [BEATING_REMNANT]
+        page = blindplay.observe(state)
+        assert "## Your relics" in page, build.__name__
+        assert ("- **Beating Remnant** — You cannot lose more than 20 HP in "
+                "a single turn.") in page, build.__name__
+        # Once. The combat header is the only other emitter and this is not it.
+        assert page.count("## Your relics") == 1, build.__name__
+        assert "BEATING_REMNANT" not in page, build.__name__
+
+
+def test_a_screen_with_no_relics_still_prints_no_relic_block():
+    """The other half, on the screens `EB-473` reached: a run holding none
+    reads exactly as it always did, and so does a screen the page refuses to
+    drive at all."""
+    assert "## Your relics" not in blindplay.observe(map_state())
+    blocked = map_state()
+    blocked["state_type"] = "menu"
+    blocked["player"]["relics"] = [BEATING_REMNANT]
+    assert "## Your relics" not in blindplay.observe(blocked)
+
+
 # ------------------- EB-229: the forecast channel for a blind RUN ----------
 #
 # `KURAGEMEM002` graded `P1`, `P2` and `P4` UNREACHED and the display was not
