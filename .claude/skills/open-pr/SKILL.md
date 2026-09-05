@@ -30,8 +30,9 @@ would send, so you can check the footer without opening anything.
 
 ## Who merges
 
-Claude merges **plumbing** PRs itself on green CI (`tools/land_pr.py`, or
-`gh pr merge <n> --merge`) and says so in the turn. A plumbing PR touches no
-card-sheet number, no balance constant, no `LAW.md` / `EXPERIMENTS.md` text and
-no design prose. **Everything else is PR = [USER]** — open it and stop; do not
-end a turn waiting on the merge, stack the next branch and keep going.
+Claude merges every PR that asks nothing of [USER] itself on green CI
+(`tools/land_pr.py`, or `gh pr merge <n> --merge`) and says so in the turn
+(R259). **A PR is [USER]'s only when it carries an open A/B/C pick, amends
+`LAW.md` / `EXPERIMENTS.md` text, or moves a shipped-sheet number** — open it
+and stop; do not end a turn waiting on the merge, stack the next branch and
+keep going.
