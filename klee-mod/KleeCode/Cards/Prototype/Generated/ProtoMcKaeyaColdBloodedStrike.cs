@@ -52,7 +52,7 @@ public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalC
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForGrounded(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this), this);
+        ArmKeywordTips.ForGrounded(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_kaeya_frostgnaw");
 

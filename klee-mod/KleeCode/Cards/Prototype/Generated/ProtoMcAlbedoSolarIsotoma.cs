@@ -46,7 +46,7 @@ public sealed class ProtoMcAlbedoSolarIsotoma : CustomCardModel, ICompanionCard,
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForHexerei(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_albedo_solar_isotoma");
 

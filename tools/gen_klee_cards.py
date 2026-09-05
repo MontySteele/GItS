@@ -11122,6 +11122,20 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "FurinaRiderTips.ForBow("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+    # `EB-477`. WHAT A COMPANION PLAY PERFORMS, AND THE REFUSAL FORM.
+    #
+    # Under the Furina arm a Companion card you play performs the front member,
+    # and with an EMPTY stage it performs nobody in silence -- two turns lost
+    # in r9 including the elite's turn 1, and r8 lost two fights to the same
+    # thing. NOT SCOPED BY SHEET, unlike the two above: Furina holds shared
+    # Companions and Guest Stars as readily as her own rows, so the attach is
+    # every Companion row and the OWNER decides whether the sentence prints.
+    # `FurinaRiderTips.ForCompanionPerform` yields nothing off her, nothing
+    # with the arm's manual leg off, and nothing out of combat.
+    if is_companion(card):
+        tips_expr = (
+            "FurinaRiderTips.ForCompanionPerform("
+            f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     # `EB-272`, and it is LAST on purpose. Each call above wraps the list, so
     # the outermost wrapper's tip is yielded last: a card's live arithmetic (a
     # reaction preview, the Charge rate, the Garment window) says what THIS

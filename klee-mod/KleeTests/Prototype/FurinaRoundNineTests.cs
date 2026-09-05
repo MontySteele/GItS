@@ -125,6 +125,51 @@ public class FurinaRoundNineTests
     }
 
     // ==================================================================
+    // `EB-477` -- the half of a Companion card that goes missing in silence
+    // ==================================================================
+    //
+    // THE FIND (Furina r9 (b); r8 (c) two rounds earlier). Under the arm a
+    // Companion card you play performs the front member -- and with an EMPTY
+    // stage it performs nobody, silently. The r9 seat lost two turns to it,
+    // one of them the elite's turn 1; round 8 waited two fights to learn the
+    // same thing. There is no board surface that could have said so either:
+    // the stage badge IS the Salon power, and an empty stage has no badge.
+    //
+    // SO THE CARD SAYS IT, live, the way Ethereal Spotlight prints its
+    // refusal -- and off the OWNER rather than off the sheet, because Furina
+    // holds shared Companions and Guest Stars as readily as her own rows.
+
+    [Fact]
+    public void Every_companion_row_carries_the_performance_line()
+    {
+        // The attach is the generator's and it is by `is_companion`, so it
+        // reaches a Guest Star, one of Furina's own rows, and a shared
+        // Companion emitted from another character's sheet.
+        foreach (var card in new[] { "GuestNeuvilletteTears", "SayuNaptime",
+                                     "DionaIcyPaws" })
+        {
+            Assert.Contains(Il.Calls(Il.Method(card, "get_ExtraHoverTips")),
+                            c => c.Contains("ForCompanionPerform"));
+        }
+    }
+
+    [Fact]
+    public void An_empty_stage_prints_the_refusal_and_a_manned_one_does_not()
+    {
+        var body = Attached(typeof(FurinaRiderTips), "ForCompanionPerform");
+
+        Assert.Contains("No member on stage: performs nobody.", body);
+        Assert.Contains("Playing this performs ", body);
+
+        // AND THE GATE IS THE ARM'S: the sentence describes a rule the
+        // shipped kit does not have (its members act on their own turn), so
+        // the tip asks `ManualLiveFor` before it says anything at all.
+        Assert.Contains(
+            Il.Calls(Il.Method("FurinaRiderTips", "ForCompanionPerform")),
+            c => c.Contains("ManualLiveFor"));
+    }
+
+    // ==================================================================
     // `EB-476` -- is a performance an Attack? Two experiments, two answers
     // ==================================================================
     //

@@ -49,7 +49,7 @@ public sealed class GuestNeuvilletteDroplets : CustomCardModel, ICompanionCard
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true);
+        FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("guest_neuvillette_droplets");
 

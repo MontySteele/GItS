@@ -49,7 +49,7 @@ public sealed class ProtoMcSucroseAstable : CustomCardModel, ICompanionCard, IHe
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_astable");
 

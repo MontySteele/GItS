@@ -59,6 +59,17 @@ public static class FurinaRiderTips
     public const string GuestStarKey = "KLEEMOD-GUEST_STAR";
     public const string BowKey = "KLEEMOD-TAKES_BOW";
 
+    // `EB-477`. THE HALF OF A COMPANION CARD THAT GOES MISSING IN SILENCE.
+    //
+    // THE FIND (Furina r9 (b); r8 (c) said the same two rounds earlier). Under
+    // the arm a Companion card you play performs the front member -- and with
+    // an EMPTY stage it performs nobody, silently. The r9 seat lost two turns
+    // to it, one of them the elite's turn 1, and round 8 waited two fights to
+    // learn the same thing. Nothing on the card, and nothing on the board,
+    // says the second half is not going to happen: the stage badge is the
+    // Salon power, and an empty stage has no badge at all.
+    public const string CompanionPerformKey = "KLEEMOD-COMPANION_PERFORMS";
+
     /// <summary>
     /// `EB-475`, the first word. What MOVES the Spotlight, and whether it has
     /// moved right now -- the house shape of this file (the rule, then what it
@@ -93,6 +104,42 @@ public static class FurinaRiderTips
         foreach (var tip in inherited) yield return tip;
         yield return new HoverTip(
             new LocString(Table, BowKey + ".title"), BowBody(card));
+    }
+
+    /// <summary>
+    /// `EB-477`. What playing this Companion card will perform, live -- and
+    /// the refusal form when the stage is empty, which is the case the seats
+    /// lost turns to.
+    ///
+    /// THE RULE IS THE ARM'S, so the tip is too: with the manual leg off
+    /// members act on their own turn and a Companion play performs nobody at
+    /// all, which is a sentence about a rule that build does not have. It
+    /// yields NOTHING there, and nothing out of combat -- the stage is a
+    /// board fact, and a deck view has no board.
+    ///
+    /// ATTACHED TO EVERY COMPANION ROW, whichever character's sheet emitted
+    /// it, because Furina can hold a shared Companion and a Guest Star alike;
+    /// the OWNER decides whether the sentence prints, not the sheet.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForCompanionPerform(
+        IEnumerable<IHoverTip> inherited, CardModel card)
+    {
+        foreach (var tip in inherited) yield return tip;
+#if PROTOTYPE_CARDS
+        var owner = TipOwner.CreatureOf(card);
+        if (owner == null || card.CombatState == null) yield break;
+        if (!Powers.FurinaReframe.ManualLiveFor(owner)) yield break;
+        var member = SalonMemberPower.LeftmostMember(owner);
+        yield return new HoverTip(
+            new LocString(Table, CompanionPerformKey + ".title"),
+            member is { } who
+                ? $"Playing this performs {SalonMemberTips.DisplayName(who)}, "
+                + "your front member."
+                : "No member on stage: performs nobody. Deploy a member "
+                + "first, or this card is only its own line.");
+#else
+        yield break;
+#endif
     }
 
     public static IEnumerable<IHoverTip> ForCard(

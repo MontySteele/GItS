@@ -51,7 +51,7 @@ public sealed class ShinobuSanctifyingRing : CustomCardModel, IElementalCard, IC
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false);
+        FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("shinobu_sanctifying_ring");
 

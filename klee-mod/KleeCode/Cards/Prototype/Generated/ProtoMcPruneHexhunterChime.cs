@@ -52,7 +52,7 @@ public sealed class ProtoMcPruneHexhunterChime : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this), this), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("prune_witch_hunt");
 

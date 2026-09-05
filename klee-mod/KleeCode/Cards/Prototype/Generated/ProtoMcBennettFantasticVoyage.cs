@@ -53,7 +53,7 @@ public sealed class ProtoMcBennettFantasticVoyage : CustomCardModel, ICompanionC
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForStrength(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForStrength(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_bennett_fantastic_voyage");
 

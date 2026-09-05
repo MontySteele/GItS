@@ -301,6 +301,10 @@ public static class KleeMod
                         "Guest Star",
                     [Cards.FurinaRiderTips.BowKey + ".title"] =
                         "Takes their bow",
+                    // `EB-477`: the half of a Companion card that went missing
+                    // in silence on an empty stage.
+                    [Cards.FurinaRiderTips.CompanionPerformKey + ".title"] =
+                        "Performs a member",
 
                     // B5: the member tips the deploy faces hand off to. Only
                     // the TITLES are rows -- the bodies are built live in

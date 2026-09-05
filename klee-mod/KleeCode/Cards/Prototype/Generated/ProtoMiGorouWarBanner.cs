@@ -46,7 +46,7 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard
     public string? Nation => "inazuma";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForDexterity(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForDexterity(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_gorou_war_banner");
 

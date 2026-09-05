@@ -49,7 +49,7 @@ public sealed class ProtoMcSucroseCatalystConversion : CustomCardModel, ICompani
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForHexerei(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_catalyst_conversion");
 

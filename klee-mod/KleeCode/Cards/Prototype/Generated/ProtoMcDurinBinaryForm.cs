@@ -52,7 +52,7 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this);
+        ArmKeywordTips.ForHexerei(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_durin_binary_form");
 

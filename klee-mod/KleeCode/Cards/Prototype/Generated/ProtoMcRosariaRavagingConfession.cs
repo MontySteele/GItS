@@ -52,7 +52,7 @@ public sealed class ProtoMcRosariaRavagingConfession : CustomCardModel, IElement
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForVulnerable(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this);
+        BaseKeywordTips.ForVulnerable(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_rosaria_ravaging_confession");
 

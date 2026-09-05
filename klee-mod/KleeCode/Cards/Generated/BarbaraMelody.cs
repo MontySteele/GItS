@@ -45,7 +45,7 @@ public sealed class BarbaraMelody : CustomCardModel, ICompanionCard
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForBurst(base.ExtraHoverTips, this);
+        FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForBurst(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("barbara_melody");
 
