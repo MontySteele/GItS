@@ -6294,6 +6294,63 @@ def test_a_power_tip_the_wire_does_not_send_invents_nothing():
     assert "**Galvanized**" not in page
 
 
+def hardened_shell_state(amount: int = 12) -> dict:
+    """The Skulking Colony's per-turn damage cap, as the wire sends it.
+
+    `BuildPowersState` sends a power's `amount` and its `description` and
+    carries no maximum for it, so the cap in the sentence and the allowance in
+    the number are the only two facts the page has (`EB-467`).
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "HARDENED_SHELL", "name": "Hardened Shell", "amount": amount,
+         "type": "Buff",
+         "description": "Skulking Colony cannot lose more than 20 HP each "
+                        "turn."}]
+    return state
+
+
+def test_a_per_turn_allowance_prints_beside_the_cap_it_counts_down_from():
+    """`EB-467`. TWO NUMBERS OF TWO KINDS ON ONE LINE, AND NOTHING SAID WHICH.
+
+    "It prints `Hardened Shell 20` and the text says 20, but mid-turn it showed
+    `Hardened Shell 0` after I had dealt 20, and later `Hardened Shell 5` after
+    15 -- so the number is the remaining allowance this turn, not the cap in
+    the sentence next to it. Nothing on screen says so; I had to infer it from
+    my own damage" (Klee r3 opus record; Kokomi r15 (c) 3 filed it again, and
+    the Klee r15 seat called the countdown useful once it had worked it out).
+
+    The cap comes out of the power's OWN sentence, because the wire sends no
+    maximum for a power at all.
+
+    Seen to FAIL: the line printed `Hardened Shell 12` beside a sentence
+    saying 20.
+    """
+    page = blindplay.observe(hardened_shell_state())
+    assert ("Hardened Shell 12 of 20 left this turn (buff) — Skulking Colony "
+            "cannot lose more than 20 HP each turn.") in page
+    # Spent to nothing, which is the reading the r3 seat could not make.
+    assert "Hardened Shell 0 of 20 left this turn (buff)" \
+        in blindplay.observe(hardened_shell_state(0))
+
+
+def test_a_power_with_no_stated_per_turn_cap_reads_as_it_always_did():
+    """The other half: the clause is what makes the number an allowance.
+
+    A power whose sentence states no per-turn budget, and one whose amount has
+    climbed PAST the number in its sentence -- which is not a countdown against
+    it -- both print the line they always printed.
+    """
+    plain = blindplay.observe(galvanic_state())
+    assert "Galvanic 6 (buff) —" in plain
+    assert "left this turn" not in plain
+    over = blindplay.observe(hardened_shell_state(24))
+    assert "Hardened Shell 24 (buff) — Skulking Colony cannot lose more " \
+        "than 20 HP each turn." in over
+    assert "left this turn" not in over
+
+
 def test_a_card_keyword_is_not_repeated_in_the_glossary():
     """A card's own tips are printed under the card that declares them, so
     lifting them into the glossary as well would print every one twice."""

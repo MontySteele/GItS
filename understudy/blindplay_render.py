@@ -8,6 +8,7 @@ and `blindplay.observe(state)` still resolve.
 from __future__ import annotations
 
 import hashlib
+import re
 from typing import Any
 
 from understudy import qa_packet
@@ -275,9 +276,58 @@ def _render_performance(row: dict[str, Any]) -> str:
     return line + "."
 
 
+#: A per-turn ALLOWANCE stated in a power's own sentence (`EB-467`). The
+#: shipped shape is Hardened Shell's "cannot lose more than 20 HP each turn";
+#: the alternatives are the same sentence's other spellings of "each turn",
+#: which is the only clause that makes the number a per-turn budget rather
+#: than a total.
+_PER_TURN_CAP = re.compile(
+    r"more than (\d+)\s+\S+ (?:each|per|every|a|in a single|in one) turn",
+    re.IGNORECASE)
+
+
+def _turn_allowance(power: dict[str, Any]) -> int | None:
+    """The cap a power's number is COUNTING DOWN AGAINST, or None. `EB-467`.
+
+    THE DEFECT. "Hardened Shell 12 — Skulking Colony cannot lose more than 20
+    HP each turn" is two numbers of two different kinds on one line, and every
+    seat that met it read them as a contradiction: the r3 Klee seat watched the
+    badge go 20 -> 0 -> 5 and worked out from its OWN damage that the number is
+    what is LEFT this turn, "nothing on screen says so"; the Kokomi r15 seat
+    filed the same line again (`(c)` 3).
+
+    THE TEST IS THE POWER'S OWN SENTENCE, and it has to be, because the wire
+    sends a power as `name`, `amount`, `type` and `description` and carries no
+    maximum for one (`EB-181`'s finding, one rule over). So the cap is read out
+    of the description the game itself printed, and only where that sentence
+    states a PER-TURN allowance the amount fits inside. A power whose number
+    has climbed past the sentence's number is not counting down against it --
+    that is a different power wearing a similar sentence -- and gets the line
+    it always had.
+    """
+    found = _PER_TURN_CAP.search(str(power.get("text") or ""))
+    if not found:
+        return None
+    cap = int(found.group(1))
+    stacks = power.get("stacks")
+    if not isinstance(stacks, int) or isinstance(stacks, bool):
+        return None
+    return cap if 0 <= stacks <= cap else None
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
-    """One power: printed name, the amount, buff or debuff, the printed text."""
-    line = f"{indent}{power['name']} {power['stacks']}"
+    """One power: printed name, the amount, buff or debuff, the printed text.
+
+    `EB-467`: where the amount is an allowance counting down against a cap the
+    power's own sentence states, the two numbers print in ONE clause -- "12 of
+    20 left this turn" -- instead of standing apart and contradicting.
+    """
+    cap = _turn_allowance(power)
+    if cap is None:
+        line = f"{indent}{power['name']} {power['stacks']}"
+    else:
+        line = f"{indent}{power['name']} {power['stacks']} of {cap} left " \
+               f"this turn"
     kind = str(power.get("kind") or "").strip().lower()
     if kind:
         line += f" ({kind})"
