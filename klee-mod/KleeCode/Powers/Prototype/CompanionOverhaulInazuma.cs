@@ -992,14 +992,43 @@ public sealed class SurpriseDispatchPower : PowerModel, ILocalizationProvider
 /// it is still capped by Intangible, because unblockable is not uncappable
 /// (R128).
 /// </summary>
-public sealed class TamotoPower : PowerModel, ILocalizationProvider
+public sealed class TamotoPower
+    : PowerModel, ILocalizationProvider, ISummonDamagePower
 {
+    /// <summary>
+    /// `EB-463`. THE NUMBER THE CARD PRINTED, WITH THE CARD'S FOLD ON IT.
+    ///
+    /// Guest Cast raised Lynette's and Diona's Block and left this 6 at 6 on
+    /// the same screen (Furina r8 (c) 1), because Chiori's whole body is
+    /// `apply_power` and the damage never touched the card's own printed-
+    /// damage path. `SummonDamage.Note` banks the fold here at PLAY (R72), and
+    /// both the volley and the badge read it -- so `{Damage}` is what the
+    /// board will deal, and the constant is what an unfolded play leaves.
+    /// </summary>
+    public int SummonDamage { get; private set; } =
+        CompanionOverhaulLaw.TamotoDamage;
+
+    public void NoteSummonDamage(int amount)
+    {
+        SummonDamage = amount;
+        var damage = DynamicVars["Damage"];
+        damage.BaseValue = amount;
+        damage.ResetToBase();
+        InvokeDisplayAmountChanged();
+    }
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new DynamicVar[]
+        {
+            new DynamicVar("Damage", CompanionOverhaulLaw.TamotoDamage),
+        };
+
     public List<(string, string)>? Localization => new()
     {
         ("title", "Tamoto"),
         ("description",
             "At the end of your turn, deal "
-          + $"[blue]{CompanionOverhaulLaw.TamotoDamage}[/blue] [gold]Geo[/gold] "
+          + "[blue]{Damage}[/blue] [gold]Geo[/gold] "
           + "damage to a random enemy, ignoring [gold]Block[/gold]. "
           + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };
@@ -1016,7 +1045,7 @@ public sealed class TamotoPower : PowerModel, ILocalizationProvider
         {
             await ElementalHit.Deal(
                 choiceContext, target, Element.Geo,
-                CompanionOverhaulLaw.TamotoDamage, Owner, ignoreBlock: true);
+                SummonDamage, Owner, ignoreBlock: true);
         }
         await PowerCmd.TickDownDuration(this);
     }

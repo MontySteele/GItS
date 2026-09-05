@@ -2577,7 +2577,25 @@ APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
                       # Companion sheet annotations (oz/albedo): the summon's
                       # element and aura consumption live in the POWER's C#
                       # implementation; the fields are documentation.
-                      "summon_element", "consumes_aura"}
+                      "summon_element", "consumes_aura",
+                      # `EB-463`. THE SUMMON'S PRINTED DAMAGE, which is the
+                      # CARD's number and therefore takes the card's play-time
+                      # folds. A row whose whole body is `apply_power` prints a
+                      # number the POWER deals LATER, so it never passes the
+                      # card's own printed-damage path and Guest Cast could not
+                      # reach it: Chiori's 6 stayed 6 on a screen where
+                      # Lynette's and Diona's Block rewrote (Furina r8 (c) 1).
+                      # Both engines snapshot the fold at play -- the sim into
+                      # `Fighter.summon_damage`, the mod through
+                      # `SummonDamage.Note` onto the power instance, which is
+                      # also what lets the badge print the live number.
+                      "summon_damage"}
+
+#: `EB-463`. The powers whose C# class implements `ISummonDamagePower`, so a
+#: `summon_damage:` on the row has somewhere to land. Blocked by name for
+#: `never_reduces`' reason one block down: a row asking for the fold on a power
+#: that cannot bank it would ship a sim/mod split, silently.
+SUMMON_DAMAGE_POWERS = {"mi_tamoto", "mc_baron_bunny"}
 
 # Powers whose C# class implements the floor-not-clamp read (EB-26 D2). The
 # sim honours `never_reduces` at its own chokepoint for ANY power, but the mod
@@ -3772,6 +3790,14 @@ def blocked_reason(
             # EB-26 D2 option (d). The mode is only expressible where the C#
             # power implements it, and it is meaningless without a cap to
             # raise the stack toward -- refuse both shapes by name.
+            if "summon_damage" in eff:
+                if power not in SUMMON_DAMAGE_POWERS:
+                    return (f"summon_damage on power '{power}', which has no "
+                            "ISummonDamagePower implementation in C# "
+                            f"(implemented: {sorted(SUMMON_DAMAGE_POWERS)})")
+                n = eff["summon_damage"]
+                if not isinstance(n, int) or isinstance(n, bool) or n <= 0:
+                    return "summon_damage must be a literal positive int"
             if eff.get("never_reduces"):
                 if power not in NEVER_REDUCES_POWERS:
                     return (f"never_reduces on power '{power}', which has no "
@@ -7811,6 +7837,16 @@ def build_body(
                     f"await PowerCmd.Apply<{cls}>(choiceContext, Owner.Creature, "
                     f"{amount}, applier: Owner.Creature, cardSource: this);"
                 )
+                # `EB-463`. THE FOLD, BANKED ON THE POWER JUST APPLIED. It is
+                # emitted HERE and nowhere else because this is the one moment
+                # the card, the fold and the power all exist at once: the
+                # power fires turns later, when the card is gone (R72's
+                # snapshot rule). The sim's twin is
+                # `effects._op_apply_power`'s `summon_damage` branch.
+                if "summon_damage" in eff:
+                    lines.append(
+                        f"SummonDamage.Note<{cls}>(Owner.Creature, this, "
+                        f"{int(eff['summon_damage'])});")
 
         elif op == "detonate":
             # tier0 _op_detonate: only enemies WITH bombs detonate (DetonateOn

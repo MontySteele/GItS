@@ -846,7 +846,8 @@
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: pyro,
    cost: 1, type: skill,
    description: "The next time an enemy attacks you, take 3 less damage and deal 8 [gold]Pyro[/gold] damage to ALL enemies.",
-   effects: [{op: apply_power, power: mc_baron_bunny, amount: 1, target: self}]}
+   effects: [{op: apply_power, power: mc_baron_bunny, amount: 1, target: self,
+              summon_damage: 8}]}
 
 - {id: proto_mc_eula_glacial_illumination, name: "Eula — Glacial Illumination", character: klee,
    authored_by: [claude],
@@ -1450,7 +1451,8 @@
    nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: geo,
    cost: 1, type: skill, exhaust: true,
    description: "For 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold].",
-   effects: [{op: apply_power, power: mi_tamoto, amount: 3, target: self}]}
+   effects: [{op: apply_power, power: mi_tamoto, amount: 3, target: self,
+              summon_damage: 6}]}
 
 # coven Personals, PR: coven-personals. R236 / the Mondstadt workshop sec.4
 # plus its sec.3 Prune Prune entry: Klee-only rows on the Personal channel.

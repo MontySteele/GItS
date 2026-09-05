@@ -706,6 +706,25 @@ class Player(Fighter):
     # makes the card. Keeps decompiled card ids out of committed engine code
     # while letting a parity power create a character's own token.
     power_payloads: dict[str, str] = field(default_factory=dict)
+    # `EB-463`. A SUMMON'S PRINTED DAMAGE, SNAPSHOTTED AT PLAY.
+    #
+    # A row whose whole body is `apply_power` prints a damage number the POWER
+    # will deal later -- Chiori's Tamoto ("deal 6 Geo damage ... at the end of
+    # your turn"), Amber's Baron Bunny ("the next time an enemy attacks you
+    # ... deal 8 Pyro damage to ALL"). That number is the CARD's, so it takes
+    # the card's play-time folds; the power fires turns later, when the card
+    # is gone and the fold may have expired. Guest Cast raised Lynette's and
+    # Diona's printed Block and left Chiori's 6 at 6 on the same screen
+    # (Furina r8 (c) 1), because nothing between the card and the power
+    # carried the number.
+    #
+    # SO THE FOLDED NUMBER IS BANKED HERE, AT PLAY (R72's snapshot rule),
+    # keyed by power name exactly as `power_payloads` above is -- the engine's
+    # one answer to "this power needs a field beside its stack count". The
+    # sheet grammar that fills it is `apply_power`'s `summon_damage:`, and the
+    # power's firing site reads it with its constant as the fallback, so a
+    # power applied by anything but that grammar behaves as it always did.
+    summon_damage: dict[str, int] = field(default_factory=dict)
     # EB-83: THE STRUCTURED-POWER SIDECAR. `powers` is a `name -> int` map, so
     # a power carrying TWO numbers -- an amount AND a duration -- has nowhere
     # to put the second one. This is that second field, keyed by power name,

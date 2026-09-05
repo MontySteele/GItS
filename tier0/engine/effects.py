@@ -1963,6 +1963,22 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
     # leaves the engine holding only "whatever this power was told to make".
     if "payload" in fx:
         state.player.power_payloads[fx["power"]] = fx["payload"]
+    # `EB-463`. THE SUMMON'S PRINTED DAMAGE, FOLDED AND BANKED AT PLAY.
+    #
+    # `summon_damage:` says "this power will deal a number the CARD prints".
+    # The fold is the card's own -- today `_spotlight_scale`, the same helper
+    # the `damage` and `block` ops run their printed numbers through -- and it
+    # is taken HERE, while the card is in play, because the power fires turns
+    # later when the card is gone (R72's snapshot rule; the mod's twin is
+    # `SummonDamage.Note`).
+    #
+    # NOT A SECOND FOLD PATH. The reason a summon needed a grammar at all is
+    # that its damage never passes through `_op_damage`, so `spotlight_mult`
+    # had nothing to reach; this is the same call at the one moment the card
+    # can still be asked.
+    if "summon_damage" in fx:
+        state.player.summon_damage[fx["power"]] = _spotlight_scale(
+            state, card, int(fx["summon_damage"]))
     if fx.get("target", "self") == "self":
         if fx["power"] == "salon_member":
             _deploy_salon_members(state, amount,
@@ -6977,7 +6993,13 @@ def inazuma_overhaul_turn_end(state: CombatState) -> None:
     if p.powers.get("mi_tamoto", 0):
         if state.living_enemies:
             enemy = state.rng.choice(state.living_enemies)
-            deal_damage_to_enemy(state, enemy, C.MI_TAMOTO_DMG,
+            # `EB-463`: the number the CARD printed, with the card's own
+            # play-time fold on it. The constant is the fallback, so a Tamoto
+            # applied by anything but the `summon_damage:` grammar is the
+            # number it always was.
+            deal_damage_to_enemy(state, enemy,
+                                 p.summon_damage.get("mi_tamoto",
+                                                     C.MI_TAMOTO_DMG),
                                  element="geo", source="companion",
                                  ignore_block=True)
         _mi_tick(p, "mi_tamoto")
@@ -7199,8 +7221,11 @@ def companion_overhaul_before_enemy_hit(state: CombatState, enemy: Enemy,
     if p.powers.get("mc_baron_bunny", 0):
         _mc_spend_one(p, "mc_baron_bunny")
         dmg = max(0, dmg - C.MC_BARON_BUNNY_REDUCTION)
+        # `EB-565`, `EB-463`'s grammar one card over: the triggered damage is
+        # the number the CARD printed, folded at play.
+        puppet = p.summon_damage.get("mc_baron_bunny", C.MC_BARON_BUNNY_DMG)
         for other in list(state.living_enemies):
-            deal_damage_to_enemy(state, other, C.MC_BARON_BUNNY_DMG,
+            deal_damage_to_enemy(state, other, puppet,
                                  element="pyro", source="companion")
     return dmg
 

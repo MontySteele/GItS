@@ -1122,15 +1122,38 @@ internal sealed class ShowerVar : DynamicVar
 ///
 /// Amount is the number of decoys; one hit spends one.
 /// </summary>
-public sealed class BaronBunnyPower : PowerModel, ILocalizationProvider
+public sealed class BaronBunnyPower
+    : PowerModel, ILocalizationProvider, ISummonDamagePower
 {
+    /// <summary>`EB-565`, `EB-463`'s grammar one card over: under Guest Cast
+    /// this printed 8 and dealt 8 while Chevreuse went 7 to 10 and Gorou 8 to
+    /// 12 (Furina r14 lane 2 (c) 2). The trap's damage is the CARD's printed
+    /// number, so it takes the card's fold, snapshotted at play.</summary>
+    public int SummonDamage { get; private set; } =
+        CompanionOverhaulLaw.BaronBunnyDamage;
+
+    public void NoteSummonDamage(int amount)
+    {
+        SummonDamage = amount;
+        var damage = DynamicVars["Damage"];
+        damage.BaseValue = amount;
+        damage.ResetToBase();
+        InvokeDisplayAmountChanged();
+    }
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new DynamicVar[]
+        {
+            new DynamicVar("Damage", CompanionOverhaulLaw.BaronBunnyDamage),
+        };
+
     public List<(string, string)>? Localization => new()
     {
         ("title", "Baron Bunny"),
         ("description",
             "The next time an enemy attacks you, take "
           + $"[blue]{CompanionOverhaulLaw.BaronBunnyReduction}[/blue] less damage and deal "
-          + $"[blue]{CompanionOverhaulLaw.BaronBunnyDamage}[/blue] [gold]Pyro[/gold] "
+          + "[blue]{Damage}[/blue] [gold]Pyro[/gold] "
           + "damage to ALL enemies."),
     };
 
@@ -1167,8 +1190,7 @@ public sealed class BaronBunnyPower : PowerModel, ILocalizationProvider
         foreach (var enemy in combat.HittableEnemies.ToList())
         {
             await ElementalHit.Deal(
-                choiceContext, enemy, Element.Pyro,
-                CompanionOverhaulLaw.BaronBunnyDamage, Owner);
+                choiceContext, enemy, Element.Pyro, SummonDamage, Owner);
         }
     }
 }
