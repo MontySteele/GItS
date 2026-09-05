@@ -2525,6 +2525,41 @@ worth naming: two would be two aura applications and two reaction rolls.
 `target_has_debuff` predicate already used, so the rider asks the question the
 branch asked.
 
+## `proto_kk_well_laid` -- the face is the total, the rule is the tip (`EB-539`)
+
+The row's face carried the rule as well as the number: "Deal
+{CalculatedDamage:diff()} damage, already including {ExtraDamage:diff()} for
+each Plan carried out this morning". On a BARE morning that renders "Deal 2
+damage, already including 3 for each Plan carried out this morning", and the
+r19 lane-2 seat read it as self-contradictory -- 2 cannot already include a 3
+that nothing paid.
+
+Nothing is wrong with the number. It is `EB-441`'s clause working exactly as
+written, on the one board where the fold is zero: the face's total IS live and
+the count IS folded into it. What the sentence needs is to disappear at count 0
+and reappear above it, and a card has exactly ONE face -- `Localization` is
+read once at registration, neither description getter on the shipped
+`CardModel` is virtual, and BaseLib's only runtime swap is `{IfUpgraded:show:}`,
+which asks about the card and not the board.
+
+So the split is Undertow's, one count over (`EB-484`,
+`KokomiRiderTips.ForDebuffRider`): the FACE prints the live total and nothing
+else, and the RULE goes on the rider tip, which is the surface that can carry a
+rule and a live count at once -- "2, plus 3 for each Plan the Bake-Kurage
+carried out this morning; this morning: 0". Out of combat the rule stands
+without the count, which is the `FurinaRiderTips` rule every tip in that file
+keeps: a shop shelf has no morning, and "this morning: 0" printed there would be
+the same false certainty the row was filed on. The tip is handed the same `base`
+and `per` the rider emits the vars from, so it cannot quote a number the hit
+does not use.
+
+THE WORD MOVED WITH THE RULE. The arm-keyword attach is derived from the words
+a face PRINTS, and this split took `Plan` off the face -- so the generator now
+carries a rider's own printed words into that scan (`rider_printed`), and the
+row keeps `ArmKeywordTips.ForPlan`. Without it the card would have gone on
+saying `Plan` in its tip with nothing on screen defining it, which is the exact
+silence that rule exists to make impossible.
+
 ## before proto_fr_curtain_rises
 
 The Furina pool pass, one (`EB-493`); the packet is

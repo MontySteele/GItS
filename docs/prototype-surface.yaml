@@ -1245,7 +1245,8 @@
    # `EB-492`, the morning read from the damage side: Tide Wall's count on a
    # hit instead of Block, at 0 energy, with a floor of 2. With no Plan
    # carried out it is a worse Strike; with three it is 11 for free.
-   description: "Deal {CalculatedDamage:diff()} damage, already including {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this morning.",
+   description: "Deal {CalculatedDamage:diff()} damage.",
+   # `EB-539`: the face is the live total ALONE; the morning rule rides the tip.
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 2, per: 3,
                                count: plans_carried_out_this_morning}}],

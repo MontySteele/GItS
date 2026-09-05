@@ -158,11 +158,25 @@ def test_a_doubled_morning_pays_well_laid_six():
     assert _well_laid_damage(state) == 2 + 6
 
 
-def test_well_laids_face_reads_as_a_result_and_not_a_promise():
+def test_well_laids_face_prints_the_live_total_and_nothing_else():
+    """`EB-539` (Kokomi r19 lane 2, a D default). The face used to carry the
+    rule as well as the number -- "Deal 2 damage, already including 3 for each
+    Plan carried out this morning" -- and on a BARE morning the seat read that
+    as self-contradictory: 2 cannot already include a 3 that nothing paid. It
+    was `EB-441`'s clause working exactly as written, on the one board where
+    the fold is zero.
+
+    A card has ONE face and no runtime branch can print two live numbers
+    (`CardModel.Description` is not virtual; BaseLib's only runtime swap is
+    `{IfUpgraded:show:}`, which asks about the card and not the board), so the
+    remedy is the codebase's own for this shape -- Undertow's `ForDebuffRider`
+    (`EB-484`), one count over. The FACE prints the live total; the RULE and
+    the live count go on the rider tip
+    (`KokomiRiderTips.ForMorningDamageRider`)."""
     face = _face("proto_kk_well_laid")
 
-    assert "already including" in face
-    assert "carried out this morning" in face
+    assert face == "Deal {CalculatedDamage:diff()} damage."
+    assert "already including" not in face
     assert "Deals" not in face
 
 

@@ -628,9 +628,14 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     /// duplicates the Chevalmarin card). Rolled per deploy rather than once
     /// per card, so a multi-deploy card can field a mixed stage -- the sim
     /// rolls per iteration too.</param>
+    /// <param name="cardSource">The card that deployed, or NULL where no card
+    /// did. `EB-553` (R260) opened that second case: under the reframe the arm
+    /// itself fields the opening member at combat start, and the mirror
+    /// <c>PowerCmd.Apply</c> below has taken a null source since
+    /// <see cref="BowLeftmost"/> was written.</param>
     public static async Task<int> Deploy(
         PlayerChoiceContext choiceContext, Creature owner, int amount,
-        CardModel cardSource, SalonMember? member)
+        CardModel? cardSource, SalonMember? member)
     {
         var company = CompanyFor(owner);
         var replacements = 0;

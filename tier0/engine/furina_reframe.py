@@ -118,6 +118,18 @@ OPENING_ENCORE = 2                # R258 (`EB-479`): she starts each combat
                                   # weakest version". SIZED TO THE TWO PRICES
                                   # IT UNLOCKS, which are both 2: the number
                                   # buys exactly one opening move, never two.
+OPENING_MEMBER = "crabaletta"     # R260 (`EB-553`): who is already on the
+                                  # stage when the fight opens. NAMED and not
+                                  # rolled, which is `EB-416`'s finding one
+                                  # rule over -- under the manual stage the
+                                  # FRONT member is the one a Companion play
+                                  # makes perform, so a rolled opening would
+                                  # decide for the player which member their
+                                  # first trigger fires. It is the starter
+                                  # deploy's own member. A STRING and not a
+                                  # number, so `lint_constant_parity` does not
+                                  # read it; the mod's twin is
+                                  # `FurinaReframeOpening.OpeningMember`.
 
 
 # ----------------------------------------------------------------------
@@ -318,6 +330,59 @@ def grant_opening_encore(state) -> None:
         return
     state.emit("fr_opening_encore", amount=n)
     resources.gain_encore(state, n, "furina_reframe/opening_encore")
+
+
+def opening_member(player):
+    """R260 (`EB-553`): who is on the Salon stage when a combat opens, or None
+    where nobody is.
+
+    THE MASTER FLAG AND NO LEG OF ITS OWN, `opening_encore`'s gate one rule
+    over and for its reason: the pick is a fact about the whole reframe -- turn
+    one was empty BY CONSTRUCTION, so every Companion card printed "performs
+    nobody" on it -- and a sixth flag would let a build run the arm with the
+    opening it was ruled out of.
+
+    The mod's twin is `FurinaReframeOpening.OpeningMemberFor`.
+    """
+    return (OPENING_MEMBER
+            if (FURINA_REFRAME and is_furina(player)) else None)
+
+
+def field_opening_member(state) -> None:
+    """Field her, once, on turn one.
+
+    R260 (2026-09-05): under the reframe every combat opens with a member
+    ALREADY on the stage, the way the Necrobinder's Osty and the Defect's first
+    orb are already out. Round 11 read both lanes' turn one as empty by
+    construction and the natural lane counted it -- zero empty turns in the
+    fights where Salon Debut was in the opening hand, six of twenty-two
+    otherwise. [USER] took the relic over an Innate starter, so Salon Debut
+    stays as printed and deploys a SECOND body; duplicates on the stage are
+    legal and always have been (Grand Gala deploys Crabaletta twice on the
+    shipped sheet).
+
+    SHE PERFORMS ON ARRIVAL, because this goes through
+    `effects._deploy_salon_members` -- the one deploy -- and the arm's
+    deploy-performs clause lives inside it. That is the ruling read straight:
+    the relic deploys, and a deploy performs. The consequence is that the
+    opening Encore (R258) pays this first performance's 1, so turn one opens on
+    `OPENING_ENCORE` minus `C.SALON_TICK_ENCORE_COST` rather than on the full
+    bank.
+
+    THE SITE IS `grant_opening_encore`'s, one line later and AFTER it: a
+    performance paid out of a pool that had not been filled yet would act dry
+    at three-quarters on the one turn the player could not have done anything
+    about it. `== 1` rather than `<= 1`, so an extra first turn cannot field
+    twice. The mod's twin is `FurinaReframeOpening.FieldOpeningMember`.
+    """
+    from tier0.engine import effects              # late: avoids the cycle
+    if state.turn != 1:
+        return
+    member = opening_member(state.player)
+    if member is None:
+        return
+    state.emit("fr_opening_stage", member=member)
+    effects._deploy_salon_members(state, 1, member)
 
 
 def evoke_focus_mult(player) -> int:

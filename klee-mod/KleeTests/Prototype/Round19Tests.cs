@@ -626,6 +626,95 @@ public class Round19Tests
     }
 
     // ==================================================================
+    // `EB-539` -- Well Laid's bare face, and the rider-tip split
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r19 lane 2). On a bare morning `Well Laid` printed
+    // "Deal 2 damage, already including 3 for each Plan carried out this
+    // morning", and the seat read it as self-contradictory: 2 cannot already
+    // include a 3 that nothing paid.
+    //
+    // IT IS `EB-441`'s CLAUSE WORKING EXACTLY AS WRITTEN, on the one board
+    // where the fold is zero -- the face's number IS live and the count IS
+    // folded into it. What the row asked for is a face that says one thing at
+    // count 0 and another above it, and the engine does not have one
+    // (`Round16Tests.A_card_cannot_print_one_face_in_a_shop_and_another_in_a_fight`
+    // checks that against the shipped `sts2.dll`).
+    //
+    // THE REMEDY IS THE CODEBASE'S OWN FOR THIS SHAPE: Undertow's
+    // `ForDebuffRider` (`EB-484`), one count over. The FACE prints the live
+    // total and nothing else; the RULE and the live count go on the rider tip.
+
+    [Fact]
+    public void EB539_well_laids_face_is_the_live_total_and_nothing_else()
+    {
+        var card = Source(
+            "Cards/Prototype/Generated/ProtoKkWellLaid.cs");
+
+        Assert.Contains(
+            "(\"description\", \"Deal {CalculatedDamage:diff()} damage.\")",
+            card);
+        Assert.DoesNotContain("already including", card);
+        // The var triple is untouched: the number is still the live fold, and
+        // 2 on a bare morning is still what a bare morning pays.
+        Assert.Contains("new CalculationBaseVar(2m)", card);
+        Assert.Contains("new ExtraDamageVar(3m)", card);
+        Assert.Contains("PlansThisMorning", card);
+    }
+
+    [Fact]
+    public void EB539_the_rule_and_the_live_count_are_on_the_rider_tip()
+    {
+        var card = Source(
+            "Cards/Prototype/Generated/ProtoKkWellLaid.cs");
+        // Handed the SAME base and per the rider emits the vars from, so the
+        // sentence cannot quote a number the hit does not use.
+        Assert.Contains(
+            "KokomiRiderTips.ForMorningDamageRider(", card);
+        Assert.Contains(", this, 2, 3)", card);
+
+        var body = Printed(typeof(KokomiRiderTips), "MorningDamageBody");
+        Assert.Contains(", plus ", body);
+        Assert.Contains("for each [gold]Plan[/gold] the "
+                      + "[gold]Bake-Kurage[/gold] carried out this morning",
+                        body);
+        Assert.Contains("; this morning: ", body);
+
+        Assert.Equal("KLEEMOD-MORNING_DAMAGE_RIDER",
+                     KokomiRiderTips.MorningDamageKey);
+        Assert.Contains(
+            "[Cards.KokomiRiderTips.MorningDamageKey + \".title\"]",
+            Source("KleeMod.cs"));
+    }
+
+    [Fact]
+    public void EB539_off_the_board_the_rule_stands_without_a_count()
+    {
+        // The `FurinaRiderTips` rule every tip in that file keeps: a shop
+        // shelf and a deck view have no morning, and "this morning: 0" printed
+        // there would be the same false certainty the row was filed on. So the
+        // body asks for an owner and a combat before it counts.
+        var calls = Il.Calls(typeof(KokomiRiderTips)
+            .GetMethod("MorningDamageBody", All)!);
+        Assert.Contains(calls, c => c.Contains("CreatureOf"));
+        Assert.Contains(calls, c => c.Contains("get_CombatState"));
+        Assert.Contains(calls, c => c.Contains("get_PlansThisMorning"));
+    }
+
+    [Fact]
+    public void EB539_the_word_moved_with_the_rule_and_kept_its_definition()
+    {
+        // The arm-keyword attach is derived from the words the card PRINTS,
+        // and this split took `Plan` off the face. Without the generator
+        // carrying the rider's own word into that scan the row would have gone
+        // on saying `Plan` with nothing on screen defining it -- the silence
+        // the attach rule exists to make impossible.
+        Assert.Contains(
+            "ArmKeywordTips.ForPlan(",
+            Source("Cards/Prototype/Generated/ProtoKkWellLaid.cs"));
+    }
+
+    // ==================================================================
     // `EB-542` -- raw LocString keys in the carry-out log
     // ==================================================================
     //

@@ -152,6 +152,12 @@ public sealed class KleeElementalHooks : AbstractModel
         // `PlayerChoiceContext`, and the funnel it goes through is the one the
         // gauge and the stage ribbon already read.
         FurinaReframeOpening.GrantEncore(player);
+        // `EB-553` (R260): and the member the stage opens with, AFTER the
+        // grant. She performs on arrival -- a deploy performs -- and that
+        // performance spends Encore, so a fielding that ran before the line
+        // above would leave her acting dry at three-quarters on the one turn
+        // the player could not have paid for her.
+        await FurinaReframeOpening.FieldOpeningMember(choiceContext, player);
 #endif
         await KitGrant.GrantIfCharged(choiceContext, player);
     }

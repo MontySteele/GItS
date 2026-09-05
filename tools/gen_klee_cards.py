@@ -11728,6 +11728,37 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 f"{tips_expr or 'base.ExtraHoverTips'}, this, "
                 f"{_base}, {_bonus})")
             break
+    # `EB-539`. THE SAME SPLIT ONE COUNT OVER: a live MORNING total, whose
+    # face cannot say what it is made of.
+    #
+    # THE FIND (Kokomi r19 lane 2). On a bare morning `Well Laid` printed "Deal
+    # 2 damage, already including 3 for each Plan carried out this morning" and
+    # the seat read it as self-contradictory -- 2 cannot already include a 3
+    # that nothing paid. It is `EB-441`'s clause working exactly as written, on
+    # the one board where the fold is zero.
+    #
+    # So the FACE prints the live total alone and the rule moves to the tip,
+    # which is the only surface that can carry a rule AND a live count. Handed
+    # the SAME `base` and `per` the rider emits the vars from, so the sentence
+    # cannot quote a number the hit does not use.
+    #
+    # AND THE WORD GOES WITH IT. The arm-keyword attach below is derived from
+    # the words the card PRINTS, and this rider takes `Plan` off the face and
+    # prints it in the tip instead -- so without this the row would have gone
+    # on saying `Plan` with nothing on screen defining it, which is the exact
+    # silence that rule exists to make impossible. `rider_printed` carries the
+    # words a rider prints into the same scan the face feeds.
+    rider_printed = ""
+    for _eff in card.get("effects", []):
+        _morning = plans_carried_out_morning_rider(card, _eff)
+        if _morning is not None:
+            _base, _per, _ = _morning
+            tips_expr = (
+                "KokomiRiderTips.ForMorningDamageRider("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this, "
+                f"{_base}, {_per})")
+            rider_printed += " [gold]Plan[/gold]"
+            break
     # B5: a deploy card carries the tip for every member it can field, plus
     # the cap rules its face no longer prints. Attached from the EFFECT, not
     # from a card list, so a new deploy card cannot ship naming a member that
@@ -11880,7 +11911,8 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
-        for attach in arm_keyword_tip_calls(desc, includes_bomb_rules,
+        for attach in arm_keyword_tip_calls(desc + rider_printed,
+                                            includes_bomb_rules,
                                             spark_priced):
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")

@@ -359,10 +359,17 @@ public class Round17Tests
     [Fact]
     public void Well_laids_face_reads_as_a_result_and_not_a_promise()
     {
+        // `EB-539` (r19 lane 2) TOOK THE RULE OFF THIS FACE and left the
+        // result. The clause was written here so the face would read as a
+        // result rather than a promise ("already including", never "Deals N
+        // more"), and on a BARE morning that reading broke the other way: 2
+        // cannot already include a 3 that nothing paid. A card has one face,
+        // so the rule went to the rider tip and the number stayed. The
+        // ORIGINAL requirement -- a result, not a promise -- is stricter now
+        // than it was: the face is the total and nothing else.
         var face = Face(new ProtoKkWellLaid());
 
-        Assert.Contains("already including", face);
-        Assert.Contains("carried out this morning", face);
+        Assert.Equal("Deal {CalculatedDamage:diff()} damage.", face);
         Assert.DoesNotContain("Deals", face);
     }
 

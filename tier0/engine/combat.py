@@ -1055,6 +1055,16 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # `FurinaReframeOpening.GrantEncore`, on `AfterPlayerTurnStart`.
     furina_reframe.grant_opening_encore(state)
 
+    # QUARANTINED (`furina_reframe.FURINA_REFRAME`, R260 / `EB-553`): THE
+    # MEMBER THE STAGE OPENS WITH, at the same site and AFTER the grant one
+    # line up. She performs on arrival -- a deploy performs -- and that
+    # performance spends Encore, so a fielding that ran before the grant would
+    # leave her acting dry at three-quarters on the one turn the player could
+    # not have paid for her. The mod's twin is
+    # `FurinaReframeOpening.FieldOpeningMember`, on the same hook and in the
+    # same order.
+    furina_reframe.field_opening_member(state)
+
     # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): RULE 2's RESOLUTION POINT --
     # every Plan she wrote last turn is carried out, in order, HERE.
     #
