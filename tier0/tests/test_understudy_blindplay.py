@@ -5803,10 +5803,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-535`: the last sentence names the PAYMENT now. "Cards of hers
         # pay" was the clause the r19 lane-2 seat could extract nothing from,
         # and the rule was on a different screen the whole time.
+        # `EB-554`: the ownership clause points at the mark the faces now
+        # carry, so a reader can run the test instead of being told one exists.
         "Hexerei": [" card that prints the word, and Klee ",
-                    "herself. Some are Klee's own, some are not. Playing one "
-                    "of hers ",
-                    "makes ", "up to "],
+                    "herself. Only the ones marked Klee's own pay: ",
+                    " a play, up ", "to "],
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
                   "No ", "aura, no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
@@ -6895,11 +6896,12 @@ def test_the_hexerei_line_names_the_payment_the_kit_declares():
         rf"MaxPerPlay\s*=\s*{blindplay_notes.COMPANION_SPARK_MAX}\b", src)
 
     row = blindplay_notes.ARM_KEYWORDS["Hexerei"]
-    assert (f"Playing one of hers makes {blindplay_notes.COMPANION_SPARK} "
-            f"Spark, up to {blindplay_notes.COMPANION_SPARK_MAX}.") in row
-    # The two clauses that answer the seat's OTHER question -- whether Razor is
-    # one of Klee's own -- are what paid for the room, and they stay.
-    assert "Some are Klee's own, some are not." in row
+    assert (f"{blindplay_notes.COMPANION_SPARK} Spark a play, up to "
+            f"{blindplay_notes.COMPANION_SPARK_MAX}.") in row
+    # `EB-554`: the clause that answers the seat's OTHER question -- whether
+    # Razor is one of Klee's own -- now points at the mark the faces carry
+    # instead of telling the reader a split exists that they cannot run.
+    assert "Only the ones marked Klee's own pay:" in row
     assert len(row) <= 135
 
 
@@ -9569,8 +9571,8 @@ def test_a_feed_that_does_not_say_who_is_playing_keeps_the_rule():
     the one run that needs it."""
     state = _hexerei_shop_state("Klee")
     del state["player"]["character"]
-    assert ("Playing one of hers makes "
-            f"{blindplay_notes.COMPANION_SPARK} Spark, up to "
+    assert ("Only the ones marked Klee's own pay: "
+            f"{blindplay_notes.COMPANION_SPARK} Spark a play, up to "
             f"{blindplay_notes.COMPANION_SPARK_MAX}.") in blindplay.observe(state)
 
 

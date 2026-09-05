@@ -53,7 +53,7 @@ public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Mollis Favonius"),
-        ("description", "[gold]Hexerei[/gold]. [gold]Swirl[/gold]. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal {PowerAmount:diff()} additional damage."),
+        ("description", "Klee's own [gold]Hexerei[/gold]. [gold]Swirl[/gold]. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

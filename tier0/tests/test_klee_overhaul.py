@@ -723,3 +723,75 @@ def test_the_shipped_klee_opening_is_untouched_by_the_row():
     assert [c.id for c in player.draw_pile] == shuffled
     assert sorted(before) == sorted(shuffled)
     assert not any(c.innate for c in player.draw_pile)
+
+
+# --- `EB-554`: WHICH HEXEREI CARDS ARE KLEE'S OWN --------------------------
+
+def test_a_universal_hexerei_play_pays_nothing_and_a_personal_pays_a_spark(
+        overhaul):
+    """`EB-554`. THE PAIR THE SEAT COULD NOT TELL APART.
+
+    Klee r20 lane 1 played Albedo+ and Razor in one turn -- "both print
+    Hexerei" -- and Spark stayed at 1: "Nothing on either card face
+    distinguishes 'hers' from not-hers, so as a reader I have no way to predict
+    which Companion pays a Spark. This is the clearest thing I could not
+    resolve all round."
+
+    THE RULE WAS RIGHT AND UNREADABLE, which is what this pins: the payment
+    gate is the PERSONAL pool and not the family tag, so a Mondstadt Universal
+    printing `Hexerei` pays nothing and one of Klee's own pays
+    `KLEE_COMPANION_SPARK`. Both faces now say which they are
+    (`gen_klee_cards._family_tags`), and the mark is derived from the same
+    field this gate reads, so the two cannot disagree.
+    """
+    from tier0.engine.combat import play_card
+    from tier0.tests.conftest import make_state
+
+    universal = loader.get_card("proto_mc_razor_claw_and_thunder")
+    personal = loader.get_card("proto_mc_fischl_sinful_hex")
+    # The pair is a pair: both are Companions, both are marked Hexerei, and
+    # exactly one of them is Klee's own.
+    assert universal.is_companion and personal.is_companion
+    assert universal.personal_pool is None
+    assert personal.personal_pool == "klee"
+
+    state = make_state()
+    state.player.character_id = "klee"
+    state.player.hand = [universal]
+    play_card(state, universal)
+    assert state.player.sparks == 0
+
+    state.player.hand = [personal]
+    play_card(state, personal)
+    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
+
+
+def test_the_face_says_which_one_it_is(overhaul):
+    """The half the seat actually needed, on the two rows themselves: the
+    Universal prints the family word and nothing about ownership, and the
+    Personal prints both -- as one sentence, because two lead tags read as
+    stuttering and the card ceiling is 120."""
+    from tools import gen_klee_cards as gen
+
+    universal = dict(id="proto_mc_x", star=4, hexerei=True)
+    personal = dict(id="proto_mc_y", star=4, hexerei=True,
+                    personal_pool=["klee"])
+    plain_own = dict(id="proto_mc_z", star=4, personal_pool="klee")
+
+    assert gen._family_tags(universal, "Deal 8 damage.") == (
+        "[gold]Hexerei[/gold]. Deal 8 damage.")
+    assert gen._family_tags(personal, "Deal 8 damage.") == (
+        "Klee's own [gold]Hexerei[/gold]. Deal 8 damage.")
+    assert gen._family_tags(plain_own, "Deal 8 damage.") == (
+        "Klee's own. Deal 8 damage.")
+    # A Universal with neither mark is untouched, which is what keeps the tag
+    # a statement rather than decoration.
+    assert gen._family_tags(dict(id="proto_mc_w", star=4), "Deal 8 damage.") == (
+        "Deal 8 damage.")
+    # AND A SHIPPED ROW DOES NOT MOVE, which is R213 B and not taste: a shipped
+    # Personal Companion is Balance-stage content and does not gain a printed
+    # sentence for a prototype arm. The shipped Prune keeps her printed face;
+    # her Spark is the kit's declaration and always was (`EB-219`).
+    assert gen._family_tags(dict(id="prune_witch_hunt", star=4,
+                                 personal_pool="klee"), "Deal 8 damage.") == (
+        "Deal 8 damage.")

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BaseLib.Abstracts;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
@@ -164,4 +165,58 @@ public class KleeOverhaulRoundTwentyTests
                                            StringComparison.Ordinal))
         .Select(row => (row.Item1, row.Item2))
         .ToList();
+    // ---- `EB-554`: which Hexerei cards are Klee's own ---------------------
+
+    [Fact]
+    public void A_universal_hexerei_companion_prints_the_word_and_not_the_owner()
+    {
+        // Klee r20 lane 1, (c) 1: Albedo+ and Razor were played in one turn,
+        // both printing `Hexerei`, and Spark stayed at 1. "Nothing on either
+        // card face distinguishes 'hers' from not-hers, so as a reader I have
+        // no way to predict which Companion pays a Spark."
+        var razor = Face(new ProtoMcRazorClawAndThunder());
+        Assert.Contains("[gold]Hexerei[/gold].", razor);
+        Assert.DoesNotContain("Klee's own", razor);
+
+        // Razor is the Universal half of the pair: no personal pool, so
+        // `KleeCompanionSpark` pays nothing for him, and the face says so now.
+        Assert.Null(new ProtoMcRazorClawAndThunder().PersonalPool);
+    }
+
+    [Fact]
+    public void A_personal_companion_of_klees_says_so_on_its_face()
+    {
+        // ONE SENTENCE WHERE A ROW CARRIES BOTH MARKS: "Klee's own Hexerei."
+        // is the adjective form, which reads as one fact and is a character
+        // shorter than the two-clause spelling -- and one character is what
+        // Prune's Hexhunter Chime has at 120 of 120.
+        var fischl = Face(new ProtoMcFischlSinfulHex());
+        Assert.Contains("Klee's own [gold]Hexerei[/gold].", fischl);
+        Assert.Equal("klee", new ProtoMcFischlSinfulHex().PersonalPool);
+
+        // A Personal Companion that is not in the family carries the ownership
+        // alone, which is what makes the mark about the PAYMENT rather than
+        // about the word.
+        var noelle = Face(new ProtoMcNoelleIGotYourBack());
+        Assert.StartsWith("Klee's own.", noelle);
+        Assert.DoesNotContain("[gold]Hexerei[/gold]", noelle);
+    }
+
+    [Fact]
+    public void The_hexerei_tip_says_only_the_marked_ones_pay()
+    {
+        // "Some are Klee's own, some are not" told a reader the split exists
+        // and gave them no way to run it. The faces carry the mark now, so the
+        // sentence names it and says ONLY those pay.
+        var tip = Printed("ForHexerei");
+        Assert.Contains("Only the ones marked Klee's own pay:", tip);
+        Assert.DoesNotContain("Some are Klee's own, some are not.", tip);
+    }
+
+    /// <summary>The card's printed description.</summary>
+    private static string Face(CustomCardModel card) =>
+        (card.Localization ?? new List<(string, string)>())
+        .Where(row => row.Item1 == "description")
+        .Select(row => row.Item2)
+        .Single();
 }

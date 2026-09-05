@@ -619,9 +619,18 @@ ARM_KEYWORDS: dict[str, str] = {
     # page has no access to the mod's constants and
     # `test_the_hexerei_line_names_the_payment_the_kit_declares` holds them in
     # step from this side.
+    # `EB-554` MADE THE OWNERSHIP CLAUSE POINT AT A MARK. "Some are Klee's own,
+    # some are not" told a reader the split exists and gave them no way to run
+    # it: Klee r20 lane 1 played Albedo+ and Razor in one turn, both printing
+    # the word, and Spark stayed at 1 -- "nothing on either card face
+    # distinguishes 'hers' from not-hers, so as a reader I have no way to
+    # predict which Companion pays a Spark". The faces carry the mark now
+    # (`gen_klee_cards._family_tags`), so the sentence says ONLY the marked ones
+    # pay and names the mark it points at.
     "Hexerei": ("A Companion card that prints the word, and Klee herself. "
-                "Some are Klee's own, some are not. Playing one of hers makes "
-                f"{COMPANION_SPARK} Spark, up to {COMPANION_SPARK_MAX}."),
+                "Only the ones marked Klee's own pay: "
+                f"{COMPANION_SPARK} Spark a play, up to "
+                f"{COMPANION_SPARK_MAX}."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`

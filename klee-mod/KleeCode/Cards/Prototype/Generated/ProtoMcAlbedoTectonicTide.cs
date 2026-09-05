@@ -53,7 +53,7 @@ public sealed class ProtoMcAlbedoTectonicTide : CustomCardModel, ICompanionCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Albedo — Tectonic Tide"),
-        ("description", "[gold]Hexerei[/gold]. Whenever an [gold]Elemental Reaction[/gold] happens, deal {PowerAmount:diff()} damage to that enemy."),
+        ("description", "Klee's own [gold]Hexerei[/gold]. Whenever an [gold]Elemental Reaction[/gold] happens, deal {PowerAmount:diff()} damage to that enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

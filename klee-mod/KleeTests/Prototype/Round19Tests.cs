@@ -509,12 +509,16 @@ public class Round19Tests
         // THE NUMERALS ARE THE POWER'S AND ARE NOT TYPED HERE (`EB-89`), so
         // `Printed` -- which concatenates the LITERALS -- sees the sentence
         // with two holes in it. That is the pin: a typed digit would show up.
-        Assert.Contains("Playing one of hers makes [blue][/blue] "
-                      + "[gold]Spark[/gold], up to [blue][/blue].", hexerei);
+        // `EB-554` rewrote the ownership clause to point at the MARK the faces
+        // carry, so the payment sentence moved with it -- the holes and the
+        // absence of a typed digit are the pin, not the wording around them.
+        Assert.Contains("[blue][/blue] [gold]Spark[/gold] a play, up "
+                      + "to [blue][/blue].", hexerei);
         Assert.DoesNotContain("Cards of hers pay", hexerei);
-        // The clauses that answer the seat's OTHER question -- whether Razor is
-        // one of Klee's own -- are what paid for the room, and they stay.
-        Assert.Contains("Some are Klee's own, some are not.", hexerei);
+        // The clause that answers the seat's OTHER question -- whether Razor is
+        // one of Klee's own -- is what paid for the room, and it stays, now
+        // naming the mark instead of asserting a split the reader cannot run.
+        Assert.Contains("Only the ones marked Klee's own pay:", hexerei);
     }
 
     [Fact]

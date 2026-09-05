@@ -464,6 +464,17 @@ public static class ArmKeywordTips
     /// the ownership split stay, because "some are Klee's own, some are not" is
     /// the half that answers the Razor question. 135 of 135 rendered.
     ///
+    /// `EB-554` MADE THE OWNERSHIP CLAUSE POINT AT A MARK. "Some are Klee's
+    /// own, some are not" told a reader the split exists and gave them no way
+    /// to run it: Klee r20 lane 1 played Albedo+ and Razor in one turn, both
+    /// printing the word, and Spark stayed at 1 -- "nothing on either card
+    /// face distinguishes 'hers' from not-hers, so as a reader I have no way to
+    /// predict which Companion pays a Spark. This is the clearest thing I could
+    /// not resolve all round." The faces carry the mark now
+    /// (`gen_klee_cards._family_tags`), so the sentence says ONLY the marked
+    /// ones pay and names the mark it is pointing at. "A play" replaces the
+    /// bare cap's grammar and pays for the change.
+    ///
     /// THE NUMBERS ARE LIFTED, not typed (`EB-89`'s rule): they are
     /// <see cref="KleeMod.Powers.KleeCompanionSpark"/>'s own, which is the
     /// declaration LAW:145 obliges the KIT to make, so a retune cannot leave
@@ -476,10 +487,9 @@ public static class ArmKeywordTips
         !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, HexereiKey,
             "A [gold]Companion[/gold] card that prints the word, and Klee "
-          + "herself. Some are Klee's own, some are not. Playing one of hers "
-          + "makes [blue]" + KleeCompanionSpark.Base + "[/blue] "
-          + "[gold]Spark[/gold], up to [blue]"
-          + KleeCompanionSpark.MaxPerPlay + "[/blue].");
+          + "herself. Only the ones marked Klee's own pay: [blue]"
+          + KleeCompanionSpark.Base + "[/blue] [gold]Spark[/gold] a play, up "
+          + "to [blue]" + KleeCompanionSpark.MaxPerPlay + "[/blue].");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.

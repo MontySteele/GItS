@@ -53,7 +53,7 @@ public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jean — Lion's Fang, Fair Protector"),
-        ("description", "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain {PowerAmount:diff()} [gold]Block[/gold] and draw 1 card."),
+        ("description", "Klee's own. At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain {PowerAmount:diff()} [gold]Block[/gold] and draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

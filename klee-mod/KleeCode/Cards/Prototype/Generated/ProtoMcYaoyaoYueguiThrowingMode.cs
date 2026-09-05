@@ -56,7 +56,7 @@ public sealed class ProtoMcYaoyaoYueguiThrowingMode : CustomCardModel, ICompanio
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yaoyao — Yuegui: Throwing Mode"),
-        ("description", "For {PowerAmount:diff()} turns, at the end of your turn place a [gold]Bomb[/gold] 3 on a random enemy."),
+        ("description", "Klee's own. For {PowerAmount:diff()} turns, at the end of your turn place a [gold]Bomb[/gold] 3 on a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

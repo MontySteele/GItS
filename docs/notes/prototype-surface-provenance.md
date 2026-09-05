@@ -2640,3 +2640,25 @@ NO ` (proto)` SUFFIX ON THESE FOUR, unlike the rider copies above. The riders
 are COPIES of a shipped card and share its name, which is what the shadow
 suffix is for (`EB-419`); these are new rows with names of their own, so there
 is nothing to shadow.
+
+## proto_ko_jumpy_dumpty, `innate: true` (R261, `EB-557`, 2026-09-05)
+
+THE PLACER IS INNATE AND THE DETONATOR IS NOT. [USER] took none of the four
+round-17 options as written: Pop! in the starter was declined ("I still would
+rather avoid putting too many actually good cards in the starting deck"), a
+relic-planted Bomb was reviewed by GPT and passed over
+(`review/records/klee-turn-one-design-review-2026-09-05.md`), and Innate on
+both basics was narrowed to one -- "Jumpy Dumpty gains Innate; Ka-pow! does
+not". The starter keeps its ten cards and its two kit cards: turn one always
+holds the placer, the detonator still has to be drawn, and the other draws
+still have to carry the Block.
+
+ARM-SCOPED BY CONSTRUCTION rather than by a flag read. The row exists only on
+this surface, so with `KLEE_OVERHAUL` off nothing deals it and the shipped Klee
+opening hand is untouched -- which is why the field is on the row rather than
+inside a branch either engine has to remember to take.
+
+A FIELD AND NOT AN UPGRADE DELTA, so both faces carry it: an upgrade is a
+different card, and a player who smiths the placer must not lose the opening
+the ruling gave it.
+

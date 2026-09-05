@@ -238,7 +238,7 @@ def test_every_hexerei_companion_prints_the_family_tag():
     because Fischl's own face never prints the word Hexerei".
 
     THE DENOMINATOR IS THE POINT, exactly as it is for the Spark rider above:
-    the tag is DERIVED from the sheet key (`gen._hexerei_tag`), so a row that
+    the tag is DERIVED from the sheet key (`gen._family_tags`), so a row that
     joins the family carries the mark because it joined. The negative case is
     every unmarked Companion on the same sheet.
 
@@ -268,6 +268,52 @@ def test_every_hexerei_companion_prints_the_family_tag():
     for cls in sorted(marked):
         assert "ForHexerei" in (PROTOTYPE_DIR / f"{cls}.cs").read_text(
             encoding="utf-8"), cls
+
+
+def test_every_personal_companion_of_klees_says_it_is_one_of_her_own():
+    """`EB-554`, the committed tree. Every Companion row whose `personal_pool`
+    names Klee prints "Klee's own" on its own face, and no Universal does.
+
+    THE DEFECT (Klee r20 lane 1, (c) 1). Albedo+ and Razor were played in one
+    turn, both printing `Hexerei`, and Spark stayed at 1: "Nothing on either
+    card face distinguishes 'hers' from not-hers, so as a reader I have no way
+    to predict which Companion pays a Spark. This is the clearest thing I could
+    not resolve all round." The rule was right the whole time -- Razor is a
+    Mondstadt Universal and pays nothing -- and unreadable.
+
+    THE DENOMINATOR IS THE POINT, `EB-392`'s test one field over: the mark is
+    derived from the row's own `personal_pool`, which is the SAME pair of
+    reads the two engines' payment gates make, so the face and the Spark
+    cannot disagree and a Personal Companion added tomorrow is marked the day
+    its row exists.
+
+    ONE SENTENCE WHERE A ROW CARRIES BOTH MARKS. "Klee's own Hexerei." is the
+    adjective form, which reads as one fact and is a character shorter than the
+    two-clause spelling -- and a character is what Prune's Hexhunter Chime has
+    at 120 of 120.
+    """
+    own, printed = set(), set()
+    for row in proto._rows():
+        if not gen.is_companion(row):
+            continue
+        cls = gen.pascal(row["id"])
+        if gen.personal_pool_id(row) == "klee":
+            own.add(cls)
+        path = PROTOTYPE_DIR / f"{cls}.cs"
+        if not path.exists():
+            continue
+        if any("Klee's own" in face
+               for face in _descriptions(path.read_text(encoding="utf-8"))):
+            printed.add(cls)
+
+    assert own, "no Personal Companion of Klee's is not a read"
+    assert own == printed
+    # And a Universal Hexerei row prints the word and NOT the ownership, which
+    # is the pair the seat could not tell apart.
+    razor = _descriptions((PROTOTYPE_DIR / "ProtoMcRazorClawAndThunder.cs")
+                          .read_text(encoding="utf-8"))
+    assert razor and all("[gold]Hexerei[/gold]" in f for f in razor)
+    assert all("Klee's own" not in f for f in razor)
 
 
 def test_the_hexerei_readers_are_not_tagged_as_members():
@@ -465,7 +511,9 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # hit and the two contradicted each other on one screen.
             " a turn, goes off only when [gold]Set off[/gold], or as a ",
             "[gold]Mine[/gold]. ",
-            "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. ",
+            # `EB-555` defined the cap inside the clause that names it.
+            "Not an Attack: only [gold]Vulnerable[/gold] and a cap on the ",
+            "enemy's HP loss move it. ",
             "Kills move it on.",
             # `EB-432` named the order INSIDE the pile: `SetOff` walks the
             # charges in placement order and the first one meets the aura,
