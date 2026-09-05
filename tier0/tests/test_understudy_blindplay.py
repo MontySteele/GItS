@@ -822,6 +822,34 @@ def test_a_meter_says_the_wire_carries_no_maximum_and_no_spend_rule():
     assert "no maximum" in page and "how it is spent" in page
 
 
+def test_the_arms_two_meters_print_their_zero_and_nobody_elses_does():
+    """`EB-487` (Furina r10 (c) 3). Encore and Fanfare dropped their row at 0,
+    so the seat inferred a load-bearing number from a missing line twice and
+    read Fanfare as arriving only once a member had performed.
+
+    The recorded turn carries EVERY registered resource at 0 (BaseLib's
+    registry knows nothing about who is playing), which is exactly why the ARM
+    is asked rather than the board."""
+    state = json.loads(json.dumps(combat_state()))
+    assert state["player"]["resources"]["KLEEMOD_ENCORE"] == 0
+    assert state["player"]["resources"]["KLEEMOD_FANFARE"] == 0
+
+    # This board is Kokomi's, and the non-zero rule is untouched on it.
+    kokomi = blindplay.observe(state)
+    assert "Encore: 0" not in kokomi and "Fanfare: 0" not in kokomi
+
+    state["player"]["character"] = "Furina"
+    furina = blindplay.observe(state)
+    assert "- Encore: 0 —" in furina
+    assert "- Fanfare: 0 —" in furina
+    # And only those two: every other registered meter still keeps its zero
+    # off the page, including the three Fanfare bookkeeping resources beside
+    # it and Kokomi's own Burst.
+    for hidden in ("Fanfare Floor", "Fanfare Cap Bonus", "Kokomi Burst",
+                   "Furina Burst", "Burst"):
+        assert f"- {hidden}: 0" not in furina
+
+
 def test_a_hand_printing_one_name_twice_says_an_enchant_would_not_show():
     """`EB-179`, gap three. The card builder emits no enchantment field, and
     the one place that bites a reader is a hand holding two cards they can see
