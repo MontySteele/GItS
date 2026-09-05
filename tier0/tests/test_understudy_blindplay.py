@@ -5795,9 +5795,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # since R244 and neither had a page row, so the mod defined them on a
         # hover and the blind page defined them nowhere.
         # `EB-392` rewrote the word once every member could print it.
+        # `EB-535`: the last sentence names the PAYMENT now. "Cards of hers
+        # pay" was the clause the r19 lane-2 seat could extract nothing from,
+        # and the rule was on a different screen the whole time.
         "Hexerei": [" card that prints the word, and Klee ",
-                    "herself. Some are Klee's own, some are not. Cards of hers pay ",
-                    "when you play one."],
+                    "herself. Some are Klee's own, some are not. Playing one "
+                    "of hers ",
+                    "makes ", "up to "],
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
                   "No ", "aura, no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
@@ -6794,6 +6798,35 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
         bomb_tip="A charge on an enemy: grows 9 a turn, goes off only when "
                  "Set off."))
     assert "each grows 9 a turn" in live_tip
+
+
+def test_the_hexerei_line_names_the_payment_the_kit_declares():
+    """`EB-535`. WHAT "CARDS OF HERS PAY" NEVER SAID.
+
+    Klee r19 lane 2: "I read this a dozen times across five fights and I still
+    do not know what it does. 'Cards of hers pay' -- pay what, to whom, and
+    when? I played Razor four times and never saw anything I could attribute to
+    Hexerei." The rule was on a DIFFERENT screen the whole time -- the Companion
+    Spark rider, which rides Klee's own Personals and not the family tag.
+
+    So the row names the payment and its bound, and the two numerals are held
+    in step from THIS side, the way `BOMB_GROWTH` is: this module may not import
+    `tier0` at all, and the mod lifts them from `KleeCompanionSpark`, which is
+    the declaration LAW:145 obliges Klee's kit to make.
+    """
+    src = (REPO / "klee-mod" / "KleeCode" / "Powers"
+           / "KleeCompanionSpark.cs").read_text(encoding="utf-8")
+    assert re.search(rf"Base\s*=\s*{blindplay_notes.COMPANION_SPARK}\b", src)
+    assert re.search(
+        rf"MaxPerPlay\s*=\s*{blindplay_notes.COMPANION_SPARK_MAX}\b", src)
+
+    row = blindplay_notes.ARM_KEYWORDS["Hexerei"]
+    assert (f"Playing one of hers makes {blindplay_notes.COMPANION_SPARK} "
+            f"Spark, up to {blindplay_notes.COMPANION_SPARK_MAX}.") in row
+    # The two clauses that answer the seat's OTHER question -- whether Razor is
+    # one of Klee's own -- are what paid for the room, and they stay.
+    assert "Some are Klee's own, some are not." in row
+    assert len(row) <= 135
 
 
 def test_the_bomb_growth_fallback_is_the_mods_own_constant():
@@ -9309,7 +9342,9 @@ def test_a_feed_that_does_not_say_who_is_playing_keeps_the_rule():
     the one run that needs it."""
     state = _hexerei_shop_state("Klee")
     del state["player"]["character"]
-    assert "Cards of hers pay when you play one." in blindplay.observe(state)
+    assert ("Playing one of hers makes "
+            f"{blindplay_notes.COMPANION_SPARK} Spark, up to "
+            f"{blindplay_notes.COMPANION_SPARK_MAX}.") in blindplay.observe(state)
 
 
 def test_every_other_arm_word_is_still_defined_on_every_run():

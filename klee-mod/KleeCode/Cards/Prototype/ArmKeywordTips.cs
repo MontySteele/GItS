@@ -412,13 +412,38 @@ public static class ArmKeywordTips
     /// EVERYONE'S. See <see cref="KleesRuleBelongsHere"/>. The page glossary
     /// was gated on the r17 finding and this tip was the second source, so
     /// Razor's own face still printed the whole sentence on a Kokomi run.
+    /// `EB-535`: AND THE LAST SENTENCE NOW SAYS WHAT THE PAYMENT IS.
+    ///
+    /// THE FIND (Klee r19 lane 2). "I read this a dozen times across five
+    /// fights and I still do not know what it does. 'Cards of hers pay' -- pay
+    /// what, to whom, and when? I played Razor four times and never saw
+    /// anything I could attribute to Hexerei." The rule was on a DIFFERENT
+    /// screen the whole time -- <see cref="ForCovenSpark"/>, which rides Klee's
+    /// own Personal Companions and not the family tag -- and the seat found it
+    /// late and still could not tell whether Razor was one of Klee's own.
+    ///
+    /// SO THE READER CLAUSE GAVE UP ITS ROOM. "Cards of hers pay when you play
+    /// one" is the sentence the seat could extract nothing from, and the cards
+    /// it is about print their own rule on their own faces; the family test and
+    /// the ownership split stay, because "some are Klee's own, some are not" is
+    /// the half that answers the Razor question. 135 of 135 rendered.
+    ///
+    /// THE NUMBERS ARE LIFTED, not typed (`EB-89`'s rule): they are
+    /// <see cref="KleeMod.Powers.KleeCompanionSpark"/>'s own, which is the
+    /// declaration LAW:145 obliges the KIT to make, so a retune cannot leave
+    /// this sentence quoting a retired figure. The BOUND is printed here and
+    /// deliberately not on <see cref="ForCovenSpark"/>, where it would state a
+    /// ceiling no single clause reaches; here it is the whole of what a player
+    /// asking "how much" needs.
     public static IEnumerable<IHoverTip> ForHexerei(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, HexereiKey,
             "A [gold]Companion[/gold] card that prints the word, and Klee "
-          + "herself. Some are Klee's own, some are not. Cards of hers pay "
-          + "when you play one.");
+          + "herself. Some are Klee's own, some are not. Playing one of hers "
+          + "makes [blue]" + KleeCompanionSpark.Base + "[/blue] "
+          + "[gold]Spark[/gold], up to [blue]"
+          + KleeCompanionSpark.MaxPerPlay + "[/blue].");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.

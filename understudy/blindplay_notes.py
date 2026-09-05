@@ -18,6 +18,7 @@ from typing import Any
 from understudy.blindplay_faces import remember_elements
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
+                                        COMPANION_SPARK, COMPANION_SPARK_MAX,
                                         CRYSTALLIZE_BLOCK,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
                                         WEAK_DEALT_PCT)
@@ -593,9 +594,21 @@ ARM_KEYWORDS: dict[str, str] = {
     # Companion prints the tag now, so the first sentence is a test a player
     # can run; the second names the overlap with "Klee's own", which is the
     # Spark rider's phrase.
+    # `EB-535` PUT THE PAYMENT IN THE SENTENCE. "Cards of hers pay when you
+    # play one" -- "pay what, to whom, and when? I played Razor four times and
+    # never saw anything I could attribute to Hexerei" (Klee r19 lane 2). The
+    # rule was on a different screen all along, the Companion Spark rider, and
+    # the seat found it late and still could not tell whether Razor was one of
+    # Klee's own. The reader clause gave up its room to the payment; the family
+    # test and the ownership split stay, because those are what answer the
+    # Razor question. Same sentence as `ArmKeywordTips.ForHexerei`, with the
+    # two numerals the C# lifts from `KleeCompanionSpark` written out -- this
+    # page has no access to the mod's constants and
+    # `test_the_hexerei_line_names_the_payment_the_kit_declares` holds them in
+    # step from this side.
     "Hexerei": ("A Companion card that prints the word, and Klee herself. "
-                "Some are Klee's own, some are not. Cards of hers pay when "
-                "you play one."),
+                "Some are Klee's own, some are not. Playing one of hers makes "
+                f"{COMPANION_SPARK} Spark, up to {COMPANION_SPARK_MAX}."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`

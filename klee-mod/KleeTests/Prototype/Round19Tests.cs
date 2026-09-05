@@ -481,6 +481,72 @@ public class Round19Tests
 
     // ---- helpers ---------------------------------------------------------
 
+    // ==================================================================
+    // `EB-535` -- the Hexerei word says what the payment is
+    // ==================================================================
+    //
+    // THE FIND (Klee r19 lane 2). "I read this a dozen times across five
+    // fights and I still do not know what it does. 'Cards of hers pay' -- pay
+    // what, to whom, and when? I played Razor four times and never saw
+    // anything I could attribute to Hexerei." The rule was on a DIFFERENT
+    // screen the whole time -- the Companion Spark rider, which rides Klee's
+    // own Personals and not the family tag -- and the seat found it late and
+    // still could not tell whether Razor was one of Klee's own.
+
+    [Fact]
+    public void The_hexerei_word_names_the_spark_and_its_bound()
+    {
+        var hexerei = Printed(typeof(ArmKeywordTips), "ForHexerei");
+
+        // THE NUMERALS ARE THE POWER'S AND ARE NOT TYPED HERE (`EB-89`), so
+        // `Printed` -- which concatenates the LITERALS -- sees the sentence
+        // with two holes in it. That is the pin: a typed digit would show up.
+        Assert.Contains("Playing one of hers makes [blue][/blue] "
+                      + "[gold]Spark[/gold], up to [blue][/blue].", hexerei);
+        Assert.DoesNotContain("Cards of hers pay", hexerei);
+        // The clauses that answer the seat's OTHER question -- whether Razor is
+        // one of Klee's own -- are what paid for the room, and they stay.
+        Assert.Contains("Some are Klee's own, some are not.", hexerei);
+    }
+
+    [Fact]
+    public void The_numbers_are_the_kits_own_declaration_and_not_typed()
+    {
+        // `EB-89`'s rule: a retune of the rider must not leave this sentence
+        // quoting a retired figure, so both numerals come off
+        // `KleeCompanionSpark` -- which is the declaration LAW:145 obliges
+        // Klee's KIT to make, and the same source `ForCovenSpark` reads.
+        var hexerei = Printed(typeof(ArmKeywordTips), "ForHexerei");
+        var coven = Printed(typeof(ArmKeywordTips), "ForCovenSpark");
+
+        Assert.DoesNotContain(KleeCompanionSpark.Base.ToString(), hexerei);
+        Assert.DoesNotContain(KleeCompanionSpark.MaxPerPlay.ToString(), hexerei);
+        Assert.DoesNotContain(KleeCompanionSpark.Base.ToString(), coven);
+        // AND THE VALUES THEMSELVES, so the sentence and the grant move
+        // together: the cap is the sum of the three limbs, which is why the
+        // rider prints no bound and this word does.
+        Assert.Equal(1, KleeCompanionSpark.Base);
+        Assert.Equal(KleeCompanionSpark.Base + KleeCompanionSpark.ReactionBonus
+                     + KleeCompanionSpark.UpgradedBonus,
+                     KleeCompanionSpark.MaxPerPlay);
+        // THE BOUND IS ON THIS WORD AND NOT ON THE RIDER, deliberately: on the
+        // rider it would state a ceiling no single clause reaches, and here it
+        // is the whole of what a player asking "how much" needs.
+        Assert.Contains("up to", hexerei);
+        Assert.DoesNotContain("up to", coven);
+    }
+
+    [Fact]
+    public void And_the_word_still_says_nothing_on_a_run_that_is_not_klees()
+    {
+        // `EB-504`'s gate is untouched: the tag rides eighteen faces the whole
+        // roster can draft and the RULE is Klee's, so a Kokomi run meets the
+        // word and not the sentence. A payment named on a run that cannot make
+        // it would be the same defect `EB-504` closed, one clause louder.
+        var body = Il.Method("ArmKeywordTips", "ForHexerei");
+        Assert.Contains("ArmKeywordTips.KleesRuleBelongsHere", Il.Calls(body));
+    }
+
     /// <summary>The loc key a pile's badge is resolving right now.
     /// <c>KleeOverhaulRoundOneFixTests.LocKey</c>, verbatim.</summary>
     private static string LocKey(ProtoBombPower pile) =>
