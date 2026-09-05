@@ -192,8 +192,18 @@
    description: "[gold]Set off[/gold]. Deal 4 damage.",
    effects: [{op: set_off, target: enemy, damage: 4}]}
 
+# R261 (`EB-557`, 2026-09-05). THE PLACER IS INNATE AND THE DETONATOR IS NOT.
+# [USER] took none of the round-17 options as written -- Pop! in the starter was
+# declined ("I still would rather avoid putting too many actually good cards in
+# the starting deck") and a relic-planted Bomb was reviewed and passed over --
+# and narrowed Innate on both basics to ONE: turn one always holds the placer,
+# Ka-pow! still has to be drawn, and the other draws still have to carry the
+# Block. ARM-SCOPED BY CONSTRUCTION rather than by a flag read: this row exists
+# only on the prototype surface, so with `KLEE_OVERHAUL` off nothing deals it
+# and the shipped Klee opening hand is untouched.
 - {id: proto_ko_jumpy_dumpty, name: "Jumpy Dumpty", character: klee,
    authored_by: [claude],
+   innate: true,
    cost: 1, type: skill, rarity: basic,
    description: "Place a [gold]Bomb[/gold] 8. When it goes off, place a [gold]Mine[/gold] 3 on ALL enemies.",
    upgrade: {bomb_size: +3, payload_mine: +1},

@@ -510,9 +510,15 @@ ARM_KEYWORDS: dict[str, str] = {
     # above the Mine row, which says a Mine also goes off before its enemy's
     # hit, so two rows of one glossary contradicted each other and the Klee r19
     # lane-2 seat said so. Same sentence as `ArmKeywordTips.ForBomb`.
+    # `EB-557` (R261) ADDED THE STARTER LINE, in step with the same tip. Jumpy
+    # Dumpty is Innate under the arm and Ka-pow! is not, so the opening hand
+    # always holds a placer and never necessarily the detonator. The keyword
+    # rail says that about one CARD, on the card; the fact a reader of the WORD
+    # needs is about the deck.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
              "only when Set off, or as a Mine. Not an Attack: only Vulnerable "
-             "and a cap move it. Kills move it on."),
+             "and a cap move it. Kills move it on. Your deck opens with a "
+             "placer."),
     # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
     # walks the charges in placement order and the first one through the
     # funnel meets the aura, because every reaction consumes it -- the r11

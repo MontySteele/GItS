@@ -5755,9 +5755,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # the in-game tip (the `Set off` row below states it in full).
         # `EB-536`: and the Mine, because the Mine row printed under this one
         # says a Mine also goes off before its enemy's hit.
+        # `EB-557` (R261): the starter line. Jumpy Dumpty is Innate under the
+        # arm and Ka-pow! is not, so the opening hand always holds a placer.
+        # The keyword rail states that about one CARD, on the card; what a
+        # reader of the WORD needs is the fact about the deck.
         "Bomb": ["A charge on an enemy", "goes off only when",
                  ", or as a ", "Not an Attack: only ", " and a cap ",
-                 "Kills move it on"],
+                 "Kills move it on", "Your deck opens with a placer"],
         # `EB-432`: the pile's own order, and which charge meets the aura.
         # `EB-490` renamed the class and not the claim: "Attack trigger" read
         # as something on the player's own side of the board, beside a Block

@@ -96,7 +96,12 @@ EXCEPTIONS = {
         "on one screen contradicted each other (Klee r19 lane 2). Every other "
         "clause is a ruled finding -- the growth rate, the class of the hit "
         "and which terms move it, and the jump to a survivor (EB-373, EB-443, "
-        "EB-361) -- and none is droppable to make room"),
+        "EB-361) -- and none is droppable to make room. `EB-557` (R261) added "
+        "the STARTER LINE on top of that: Jumpy Dumpty is Innate under the arm "
+        "and Ka-pow! is not, so the opening hand always holds a placer and "
+        "never necessarily the detonator. The keyword rail states that about "
+        "one CARD, on the card; what a reader of the WORD needs is the fact "
+        "about the DECK, which no other surface carries"),
     "PlanKey": (
         "`EB-538` added the CLASS a carry-out belongs to, to a tip already at "
         "135 of 135. Skittish gave no Block to a body hit by two carry-outs "

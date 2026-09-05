@@ -655,3 +655,71 @@ def test_under_the_flag_a_prototype_row_smiths_into_a_different_card(overhaul):
     finally:
         upgrades._prototype_upgrade_index.cache_clear()
         upgrades._upgrade_index.cache_clear()
+
+
+# --- `EB-557` (R261): THE PLACER IS INNATE AND THE DETONATOR IS NOT ---------
+
+def test_the_arms_placer_is_innate_and_its_detonator_is_not(overhaul):
+    """R261, the row itself.
+
+    [USER] took none of the round-17 options as written -- Pop! in the starter
+    was declined and a relic-planted Bomb was passed over -- and narrowed
+    Innate on both basics to ONE: "Jumpy Dumpty gains Innate; Ka-pow! does
+    not." So turn one always holds the placer, the detonator still has to be
+    drawn, and the other draws still have to carry the Block.
+
+    THE FIELD AND NOT THE UPGRADE. `innate:` is on the row, so both faces
+    carry it: an upgrade is a different card and a player who smiths the
+    placer must not lose the opening it was ruled for.
+    """
+    assert loader.get_card("proto_ko_jumpy_dumpty").innate is True
+    assert loader.get_card("proto_ko_jumpy_dumpty+").innate is True
+    assert loader.get_card("proto_ko_kapow").innate is False
+    assert loader.get_card("proto_ko_kapow+").innate is False
+
+
+def test_every_opening_hand_under_the_arm_holds_the_placer(overhaul):
+    """The acceptance condition, driven on the real combat opening.
+
+    `combat._player_turn`'s first turn shuffles the built deck and calls
+    `surface_innate`, so the question "does the opening hand hold it" is
+    decided by the draw pile's top after that call -- which is what this walks,
+    over enough shuffles that a lucky seed cannot pass it.
+
+    KA-POW! IS DRAWN NORMALLY, and that is the half the ruling is about: it is
+    NOT asserted absent, because a normal draw finds it sometimes. What is
+    asserted is that it is never surfaced -- the placer is alone on top.
+    """
+    import random
+
+    from tier0.engine.combat import surface_innate
+
+    for seed in range(25):
+        player = loader.build_player("klee")
+        random.Random(seed).shuffle(player.draw_pile)
+        surface_innate(player.draw_pile)
+        assert player.draw_pile[0].id == "proto_ko_jumpy_dumpty", seed
+        # Five cards is the opening hand, and the placer is in it every time.
+        assert "proto_ko_jumpy_dumpty" in [c.id for c in player.draw_pile[:5]]
+        surfaced = [c.id for c in player.draw_pile if c.innate]
+        assert surfaced == ["proto_ko_jumpy_dumpty"], seed
+
+
+def test_the_shipped_klee_opening_is_untouched_by_the_row():
+    """Flag off, nothing changes: the printed starter carries no Innate at all,
+    so `surface_innate` reorders nothing and the shipped opening hand is the
+    shuffle's. The arm's row is unreachable here by construction -- it lives
+    only on the prototype surface -- which is why this is a statement about the
+    SHIPPED deck rather than about a flag branch."""
+    import random
+
+    from tier0.engine.combat import surface_innate
+
+    player = loader.build_player("klee")
+    before = [c.id for c in player.draw_pile]
+    random.Random(3).shuffle(player.draw_pile)
+    shuffled = [c.id for c in player.draw_pile]
+    surface_innate(player.draw_pile)
+    assert [c.id for c in player.draw_pile] == shuffled
+    assert sorted(before) == sorted(shuffled)
+    assert not any(c.innate for c in player.draw_pile)

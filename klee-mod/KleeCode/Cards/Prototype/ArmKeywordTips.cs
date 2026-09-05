@@ -171,6 +171,14 @@ public static class ArmKeywordTips
     /// used to take. The static badge face beside it (`ProtoBombPower`'s
     /// `description`) spells both halves out for the reader who wants them, the
     /// same split <c>MineClause</c> already has.
+    ///
+    /// `EB-557` (R261) ADDED THE STARTER LINE. Jumpy Dumpty is Innate under
+    /// the arm and Ka-pow! is not, so the opening hand always holds a placer
+    /// and never necessarily the detonator -- and the keyword rail's own
+    /// `Innate` banner says that about ONE CARD, on the card, to a player who
+    /// is holding it. The fact a reader of this word needs is about the DECK:
+    /// the first thing you can always do is plant. It is the last sentence
+    /// because it is the only one that is not about the charge itself.
     /// </summary>
     public static IEnumerable<IHoverTip> ForBomb(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -179,7 +187,7 @@ public static class ArmKeywordTips
           + " a turn, goes off only when [gold]Set off[/gold], or as a "
           + "[gold]Mine[/gold]. "
           + "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. "
-          + "Kills move it on.");
+          + "Kills move it on. Your deck opens with a placer.");
 
     /// <summary>
     /// Rule 2, and the one [USER] named ("Set Off has no tooltip text"). The
