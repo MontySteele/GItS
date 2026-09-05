@@ -1070,7 +1070,20 @@ REACTION_KEYWORDS: dict[str, str] = {
         "own debuff sets off a relic that hits with the aura's own element, "
         "the aura is consumed and RE-APPLIED inside the same beat, so no "
         "screen ever shows it gone and the reaction looks as though it did "
-        "not happen. The reaction did happen -- its effect is on the body."),
+        "not happen. The reaction did happen -- its effect is on the body. "
+        # `EB-544`. WHERE AN ELEMENT COMES FROM, which no screen said and a
+        # seat spent a potion finding out: "a Fire Potion used to set up
+        # Vaporize left no Pyro aura at all, and nothing on any screen says
+        # which sources apply an element and which do not" (Kokomi r19 lane 1).
+        # The rule is one expression's -- `AuraCmd.ElementOfPlay`
+        # answers off the CARD being played (and, under the companion arm, a
+        # rider on the dealer), so a potion, which is played through no card at
+        # all, answers `Element.None` and applies nothing. Named here rather
+        # than on the six pair rows because it is true of all of them, and this
+        # is the row a mono-element deck reads.
+        "An element comes from a CARD that prints one and from nothing else: "
+        "a potion, a relic or an enemy applies none unless its own face says "
+        "so."),
     # `EB-345` (R249) retuned the six preview rows in `KleeMod.cs` -- each one
     # now leads with the pair that reacts instead of a 60-character preamble
     # about what the CARD supplies, and Electro-Charged says what the dot

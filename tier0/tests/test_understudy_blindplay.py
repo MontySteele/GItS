@@ -6896,6 +6896,41 @@ def test_a_reaction_the_screen_names_is_defined_though_it_is_unreachable():
     assert "- **Superconduct** —" not in page
 
 
+def test_the_reaction_gloss_names_where_an_element_comes_from():
+    """`EB-544`. THE POTION THAT SET UP NOTHING.
+
+    Kokomi r19 lane 1: "a Fire Potion used to set up Vaporize left no Pyro aura
+    at all, and nothing on any screen says which sources apply an element and
+    which do not." The seat spent a potion on a reaction it could not have.
+
+    The rule is one expression's -- `AuraCmd.ElementOfPlay` answers off the CARD
+    being played -- so a play with no card behind it applies nothing. The line
+    is on the UMBRELLA row because it is true of all six pairs, and that row is
+    the one a mono-element deck reads.
+    """
+    row = blindplay_notes.REACTION_KEYWORDS["Elemental Reaction"]
+    assert "An element comes from a CARD that prints one" in row
+    assert "a potion, a relic or an enemy applies none" in row
+
+
+def test_a_fire_potion_leaves_no_aura_in_the_sim_either():
+    """The seat's own play, run: the sim resolves a Fire Potion through
+    `refpowers.unpowered_damage`, which carries no card and no element, so the
+    body takes 20 and wears nothing. The mod's twin is pinned in
+    `KleeTests/Prototype/Round19Tests.cs`."""
+    from tier0 import constants as C
+    from tier0.engine import potions
+    from tier0.tests.conftest import make_enemy, make_state
+
+    enemy = make_enemy(hp=200)
+    state = make_state(enemies=[enemy], hp=80)
+
+    potions.apply_potion(state, "fire_potion", enemy)
+
+    assert enemy.hp == 200 - C.POTION_FIRE_DAMAGE
+    assert getattr(enemy, "aura", None) in (None, "")
+
+
 def test_the_bomb_growth_fallback_is_the_mods_own_constant():
     """`BOMB_GROWTH` is held in step from THIS side, the way
     `CHARGE_SOURCE_LINE` and `KURAGE_COST_PER_ENERGY` are: this module may not

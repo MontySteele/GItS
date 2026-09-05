@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using KleeMod.Cards;
+using KleeMod.Elements;
 using BaseGame = MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using BaseLib.Abstracts;
@@ -714,6 +715,48 @@ public class Round19Tests
 
         Assert.Contains(CardTag.Strike, new BaseGame.StrikeSilent().Tags);
         Assert.Contains(CardTag.Strike, new BaseGame.StrikeIronclad().Tags);
+    }
+
+    // ==================================================================
+    // `EB-544` -- where an element comes from, and where it does not
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r19 lane 1). "A Fire Potion used to set up Vaporize
+    // left no Pyro aura at all, and nothing on any screen says which sources
+    // apply an element and which do not." The seat spent a potion on a
+    // reaction it could not have.
+    //
+    // THE RULE IS ONE EXPRESSION'S. `AuraCmd.ElementOfPlay`
+    // answers off the CARD being played -- and, under the companion arm, off a
+    // rider on the dealer -- so a play with no card behind it answers
+    // `Element.None` and applies nothing. A potion is exactly that play.
+
+    [Fact]
+    public void A_play_with_no_card_behind_it_applies_no_element()
+    {
+        var seat = Seat.Klee();
+
+        Assert.Equal(Element.None,
+                     AuraCmd.ElementOfPlay(null, seat.Creature));
+        // And with no dealer either, which is the shape a relic's own hit and
+        // an enemy's take.
+        Assert.Equal(Element.None,
+                     AuraCmd.ElementOfPlay(null, null));
+    }
+
+    [Fact]
+    public void A_card_that_prints_one_is_the_only_source_the_funnel_reads()
+    {
+        // The other half, so the gloss's "from a CARD that prints one" is a
+        // claim about this method and not about a card: the funnel asks the
+        // card for its element, and a card that declares none -- a Defend --
+        // answers none.
+        var seat = Seat.Klee();
+
+        Assert.Equal(Element.Pyro, AuraCmd.ElementOfPlay(
+            new Kaboom(), seat.Creature));
+        Assert.Equal(Element.None, AuraCmd.ElementOfPlay(
+            new DuckAndCover(), seat.Creature));
     }
 
     /// <summary>The loc key a pile's badge is resolving right now.
