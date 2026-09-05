@@ -221,10 +221,13 @@ public class Round15Tests
         var plain = (string)typeof(ProtoBombPower)
             .GetField("Bombs", All)!.GetValue(null)!;
 
-        Assert.EndsWith("growing at your turn's start.", mines);
+        // `EB-573` took the FULL STOP off both, because a pile carrying a
+        // rider ends the same sentence with `RiderClause` instead. The clause
+        // this row is about is otherwise untouched.
+        Assert.EndsWith("growing at your turn's start", mines);
         // The no-Mine face is untouched: it has no room and no Mine to be
         // about. `KleeOverhaulRoundFourTests` pins its wording.
-        Assert.EndsWith("growing each turn.", plain);
+        Assert.EndsWith("growing each turn", plain);
     }
 
     [Fact]

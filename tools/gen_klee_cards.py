@@ -962,6 +962,17 @@ def reads_the_field(card: dict) -> bool:
                for fx in iter_effects(card.get("effects") or []))
 
 
+def merges_bombs(card: dict) -> bool:
+    """Does this row merge Bombs into one? (`EB-573`.)
+
+    `reads_the_field`'s narrower sibling, and derived for its reason: the merge
+    is what keeps the riders, so a second merge row carries the sentence the
+    day its row exists rather than the day somebody remembers it.
+    """
+    return any(fx.get("op") == "merge_bombs"
+               for fx in iter_effects(card.get("effects") or []))
+
+
 def empty_field_tip_arg(card: dict) -> bool:
     """`EB-575`. Does this row still do SOMETHING on a bare board?
 
@@ -12011,6 +12022,17 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "ArmKeywordTips.ForEmptyField("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this, {own_line})")
+        # `EB-573`. WHAT THE MERGE KEEPS BESIDES THE MINE. Careful
+        # Arrangement's face promises "a Mine if any of them was" and says
+        # nothing about riders, while `ProtoBombPower.MergeAllTo` sums
+        # `PayloadMineAll` across every charge it takes -- so Jumpy Dumpty's
+        # Mine-on-ALL survives the merge and grows in bulk. The r21 lane-1 seat
+        # called it a large part of the kit's ceiling and "completely
+        # undiscoverable except by accident".
+        if merges_bombs(card):
+            tips_expr = (
+                "ArmKeywordTips.ForMergeRiders("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-418`, and it goes here for `EB-378`'s reason one line up: a rider
         # is a fact about THIS card and is read before the definition of a
         # word. DERIVED FROM THE ROW rather than declared per card, and from

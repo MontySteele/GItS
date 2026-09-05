@@ -222,24 +222,30 @@ public class KleeOverhaulRoundFourTests
         // `EB-536` ADDED THE THIRD AXIS: whether the pile holds one charge or
         // several, because the hit clause is a fact about a STACK and reads as
         // noise on a single Bomb.
+        // `EB-573` ADDED THE FOURTH: whether any charge here carries a rider
+        // (Jumpy Dumpty's Mine-on-ALL). It survives a merge and it grows in
+        // bulk, and until this row no surface said so.
         foreach (var single in new[] { "", "One" })
         {
             foreach (var mines in new[] { "", "Mines" })
             {
-                foreach (var vulnerable in new[] { "", "Vulnerable" })
+                foreach (var rider in new[] { "", "Rider" })
                 {
-                    foreach (var cap in caps)
+                    foreach (var vulnerable in new[] { "", "Vulnerable" })
                     {
-                        Assert.Contains(
-                            "smartDescription" + single + mines + vulnerable
-                            + cap, rows);
+                        foreach (var cap in caps)
+                        {
+                            Assert.Contains(
+                                "smartDescription" + single + mines + rider
+                                + vulnerable + cap, rows);
+                        }
                     }
                 }
             }
         }
-        // And no more than the grid: three axes, nothing hand-added beside
+        // And no more than the grid: four axes, nothing hand-added beside
         // them.
-        Assert.Equal(2 * 2 * 2 * caps.Length,
+        Assert.Equal(2 * 2 * 2 * 2 * caps.Length,
                      rows.Count(r => r.StartsWith("smartDescription")));
 
         // Each modified row is the plain row with exactly its own clause in

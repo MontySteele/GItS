@@ -35,7 +35,7 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoCarefulArrangement : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForMine(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(base.ExtraHoverTips, this, false), this), this);
+        ArmKeywordTips.ForMine(ArmKeywordTips.ForBomb(ArmKeywordTips.ForMergeRiders(ArmKeywordTips.ForEmptyField(base.ExtraHoverTips, this, false), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_careful_arrangement");
 

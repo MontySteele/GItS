@@ -441,6 +441,11 @@ public static class KleeMod
                     // field is accepted, charged for, and silent.
                     [Cards.ArmKeywordTips.EmptyFieldKey + ".title"] =
                         "No Bomb on the field",
+                    // `EB-573`. The fifth rider here that titles no keyword:
+                    // what a merge keeps besides the Mine, on the card that
+                    // does the merging.
+                    [Cards.ArmKeywordTips.MergeRidersKey + ".title"] =
+                        "Riders survive the merge",
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
                     // `EB-378`. The rider, not a keyword: the rows whose Hydro

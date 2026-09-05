@@ -481,15 +481,68 @@ public class ArmKeywordTipTests
         // short for prints CANNOT BE PLAYED on the same screen (Klee r21 lane
         // 1). It goes through the same `With`, twice: which of its two
         // sentences a row gets is derived from the row's effects.
-        Assert.Equal(18, attaches.Count);
+        //
+        // THE NINETEENTH IS `EB-573`'s `ForMergeRiders`, the fifth entry that
+        // titles no keyword: what a merge keeps besides the Mine. Careful
+        // Arrangement's face promises "a Mine if any of them was" and says
+        // nothing about riders, while the merge sums `PayloadMineAll` across
+        // every charge it takes -- so Jumpy Dumpty's Mine-on-ALL survives it
+        // and grows in bulk (Klee r21 lane 1, "completely undiscoverable
+        // except by accident").
+        Assert.Equal(19, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.Contains(attaches, m => m.Name == "ForCovenSpark");
         Assert.Contains(attaches, m => m.Name == "ForOpeningStage");
         Assert.Contains(attaches, m => m.Name == "ForEmptyField");
+        Assert.Contains(attaches, m => m.Name == "ForMergeRiders");
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
                                          System.StringComparison.Ordinal)));
     }
+
+    // --- `EB-573`: WHAT THE MERGE KEEPS BESIDES THE MINE --------------------
+
+    [Fact]
+    public void EB573_the_merge_row_says_riders_survive_it()
+    {
+        Assert.Contains(
+            Il.Calls(Il.Method("ProtoKoCarefulArrangement",
+                               "get_ExtraHoverTips")),
+            c => c.Contains("ForMergeRiders"));
+        var body = Printed("ForMergeRiders");
+        Assert.Contains("The merged [gold]Bomb[/gold] keeps every rider its "
+                      + "charges carried, and their riders add up.", body);
+    }
+
+    [Fact]
+    public void EB573_the_badge_counts_the_rider_it_is_carrying()
+    {
+        // The RULE is on the card and the NUMBER is on the pile: a Bomb 21
+        // that was Jumpy's Bomb 8 two merges ago still drops Mine 3 on ALL,
+        // and the badge is where a player meets that pile.
+        ProtoBombPower.Register.Rebase(null);
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(30).Creature;
+        ProtoBombs.Board(klee.Creature, enemy);
+
+        var plain = ProtoBombs.Place(enemy, klee.Creature,
+                                     new ProtoBombs.Charge(8));
+        Assert.Equal(0, plain.PayloadTotal);
+        Assert.DoesNotContain("Rider", LocKeyOf(plain));
+
+        var rider = ProtoBombs.Place(enemy, klee.Creature,
+                                     new ProtoBombs.Charge(8, PayloadMineAll: 3),
+                                     new ProtoBombs.Charge(5, PayloadMineAll: 2));
+        // THE SUM, which is what `MergeAllTo` builds and `Explode` pays out.
+        Assert.Equal(5, rider.PayloadTotal);
+        Assert.Contains("Rider", LocKeyOf(rider));
+        ProtoBombPower.Register.Rebase(null);
+    }
+
+    private static string LocKeyOf(ProtoBombPower pile) =>
+        (string)typeof(ProtoBombPower)
+            .GetProperty("SmartDescriptionLocKey", HeadlessGame.All)!
+            .GetValue(pile)!;
 
     // --- `EB-575`: THE BOARD A SET OFF NEEDS, AND WHAT IT DOES WITHOUT IT --
     //
