@@ -266,8 +266,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R254 | 2026-09-04 | Kokomi starter density stands; Furina's starter reader goes on Aria of Recompense; Klee owes [USER] nothing but the act-1 run | `54042ef` |
 | R255 | 2026-09-04 | M69 closed at pick 1 -- R188 stands, no Charge read budget; the rulings deprecation audit is opened | `7d8b267` |
 | R256 | 2026-09-04 | the rulings deprecation audit ruled at all four defaults -- six dead Charge/Burst pointers struck, R56 out, R58 scoped to Balance, each landing strikes its… | `5b6b457` |
+| R257 | 2026-09-04 | Kokomi round 15 pick 1 at its default -- Tide Chart redesigned to pay after the carry-outs, the starter stays two kit cards | `ee6da29` |
 
-255 rows over the R1..R256 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 144 from a commit message, 0 unresolved.
+256 rows over the R1..R257 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 145 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
