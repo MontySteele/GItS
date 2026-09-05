@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using KleeMod.Cards;
+using BaseGame = MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using BaseLib.Abstracts;
 using System.Collections.Generic;
@@ -668,6 +669,51 @@ public class Round19Tests
         var rider = typeof(KokomiPlan).GetNestedType("Rider", All)!;
         Assert.NotNull(moved.GetProperty("CombatId"));
         Assert.NotNull(rider.GetProperty("CombatId"));
+    }
+
+    // ==================================================================
+    // `EB-543` -- Neow's Talisman's Strike half, and who was wearing the tag
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r19 lane 1). "The relic printed 'Upgrade 1 of your
+    // Strikes' and no Strike in my deck was ever upgraded ... the deck census
+    // showed `Defend+` and `Slack Water+` -- and four unmodified Strikes, in
+    // every hand, all run. This also cost me Miniature Cannon value later."
+    //
+    // THE ANSWER TO THE ROW'S QUESTION IS YES AND THE DEFECT IS THE OTHER WAY
+    // ROUND. The kit's Strike IS the base game's -- `ArmStarterBasics` hands
+    // `StrikeSilent` to every sweep site and the arm's starting deck deals four
+    // of them -- so it has carried the tag all along. What it did not have was
+    // exclusivity: the codegen tagged EVERY basic attack, so `Slack Water`
+    // wore `CardTag.Strike` too and won the deck scan. That is `EB-409`'s
+    // family exactly (Strike Dummy paying on Slack Water), and the fix is the
+    // one that row named: a prototype basic takes neither tag.
+
+    [Theory]
+    [InlineData(typeof(ProtoKkSlackWater))]
+    [InlineData(typeof(ProtoKaboomSink))]
+    public void No_prototype_basic_wears_the_strike_or_defend_tag(Type row)
+    {
+        var card = (CardModel)Activator.CreateInstance(row)!;
+
+        Assert.Equal(CardRarity.Basic, card.Rarity);
+        Assert.DoesNotContain(CardTag.Strike, card.Tags);
+        Assert.DoesNotContain(CardTag.Defend, card.Tags);
+    }
+
+    [Fact]
+    public void And_the_card_the_relic_should_find_is_the_one_the_arm_deals()
+    {
+        // THE OTHER HALF, and it is what makes the removal safe rather than
+        // just narrower: both arms deal the BASE pair, which carries the tag
+        // by construction, so "one of your Strikes" has exactly one answer in
+        // an arm deck instead of two.
+        var seams = Il.Calls(Il.Method("ArmStarterBasics", "StrikeFor"));
+        Assert.Contains("KleeOverhaulRoster.StarterStrike", seams);
+        Assert.Contains("KokomiOverhaulRoster.StarterStrike", seams);
+
+        Assert.Contains(CardTag.Strike, new BaseGame.StrikeSilent().Tags);
+        Assert.Contains(CardTag.Strike, new BaseGame.StrikeIronclad().Tags);
     }
 
     /// <summary>The loc key a pile's badge is resolving right now.

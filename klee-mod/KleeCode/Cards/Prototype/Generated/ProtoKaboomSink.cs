@@ -51,8 +51,6 @@ public sealed class ProtoKaboomSink : CustomCardModel, IElementalCard, ISparkPri
         ("description", "Spend 1 [gold]Spark[/gold]. Deal {Damage:diff()} damage."),
     };
 
-    protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
-
     // The Spark cost line (EB-118): unplayable below the price,
     // which is how the cost is shown rather than silently failing.
     // The printed price is declared ONCE here, on ISparkPricedCard,
