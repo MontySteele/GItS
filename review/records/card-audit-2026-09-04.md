@@ -591,8 +591,10 @@ FOLLOWS — C1–C6; “Your largest Bomb grows by 3 per Spark spent” yields +
 
 ## 5.2 Tide Chart, redesigned under R257 (2026-09-04, evening)
 
-The seat model is now GPT 6 Astra at low effort (the CLI's ,
-), the first read on it. Prompt, verbatim:
+The seat model is now GPT 6 Astra at low effort (the CLI's `gpt-6-astra`,
+`model_reasoning_effort="low"`), the first read on it. The reply carried the
+verdict and the clause list and no reasoning lines, which the prompt allowed.
+Prompt, verbatim:
 
 > # Doctrine read: one redesigned Kokomi row
 >
