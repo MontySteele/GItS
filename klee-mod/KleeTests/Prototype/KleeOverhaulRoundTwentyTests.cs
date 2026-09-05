@@ -4,6 +4,7 @@ using System.Linq;
 using BaseLib.Abstracts;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
+using KleeMod.Elements;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -219,4 +220,65 @@ public class KleeOverhaulRoundTwentyTests
         .Where(row => row.Item1 == "description")
         .Select(row => row.Item2)
         .Single();
+    // ---- `EB-559`: the Set off preview folds a pending reaction -----------
+
+    [Fact]
+    public void The_set_off_preview_folds_the_reaction_the_pile_will_trigger()
+    {
+        // "With a Hydro aura up and Bomb 25 on the body it still printed 'Set
+        // off here deals 25 Pyro damage'; the real number was 39. I had to
+        // compute the Vaporize myself, and in fight 5 the difference between
+        // those two numbers was the difference between lethal and dying two
+        // short" (Klee r20 lane 2, (c) 2).
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(200);
+        var pile = ProtoBombs.Place(enemy.Creature, klee.Creature,
+            new ProtoBombs.Charge(10), new ProtoBombs.Charge(10));
+
+        Assert.Equal(20, pile.PredictedSetOffDamage());
+
+        enemy.WithPower<HydroAuraPower>(2);
+
+        // THE FIRST CHARGE ONLY, which is `EB-432`'s rule and not a compromise:
+        // the first explosion consumes the aura, so the second lands into a
+        // bare body. 10 x Vaporize, then 10 flat.
+        var amplified = (int)(10 * ReactionConstants.VaporizeMult);
+        Assert.Equal(amplified + 10, pile.PredictedSetOffDamage());
+        Assert.Equal(pile.PredictedSetOffDamage(), pile.DisplayAmount);
+    }
+
+    [Fact]
+    public void A_bare_body_and_a_pyro_one_preview_exactly_as_before()
+    {
+        // The two boards where nothing is pending: no aura at all, and an aura
+        // a Pyro hit REFRESHES rather than reacting with. Neither may move,
+        // which is what keeps the fold a fold rather than a new multiplier.
+        var klee = Seat.Klee();
+
+        var bare = Seat.Klee(200);
+        var barePile = ProtoBombs.Place(bare.Creature, klee.Creature,
+            new ProtoBombs.Charge(7), new ProtoBombs.Charge(5));
+        Assert.Equal(12, barePile.PredictedSetOffDamage());
+
+        var burning = Seat.Klee(200).WithPower<PyroAuraPower>(2);
+        var burningPile = ProtoBombs.Place(burning.Creature, klee.Creature,
+            new ProtoBombs.Charge(7), new ProtoBombs.Charge(5));
+        Assert.Equal(12, burningPile.PredictedSetOffDamage());
+    }
+
+    [Fact]
+    public void The_preview_reads_the_board_and_rolls_nothing()
+    {
+        // A face is read on every state poll, so the fold may touch no command
+        // and roll no counter -- which is why the amplifier is its own pure
+        // method and why The Big One's doubling is still left out of it.
+        var calls = Il.Calls(
+            Il.Method("ProtoBombPower", "PendingReactionMultiplier"));
+        Assert.Contains(calls, c => c.Contains("AuraCmd.Find"));
+        Assert.Contains(calls, c => c.Contains("ReactionTable.Lookup"));
+        Assert.Contains(calls,
+                        c => c.Contains("ReactionTable.AmplifierMultiplier"));
+        Assert.DoesNotContain(calls, c => c.Contains("KleeOverhaulLedger"));
+        Assert.DoesNotContain(calls, c => c.Contains("PowerCmd"));
+    }
 }

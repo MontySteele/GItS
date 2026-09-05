@@ -808,15 +808,39 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// exactly as the explosion loop does, so per-charge truncation and the
     /// per-HIT cap are the pipeline's rather than a second copy of them here.
     ///
-    /// TWO TERMS ARE DELIBERATELY LEFT OUT, and both are one-shot rather than
-    /// standing state:
-    ///   * the REACTION amplifier, because the first explosion of a Set off
-    ///     consumes the aura the rest would have reacted with -- there is no
-    ///     one multiplier for the pile;
-    ///   * The Big One's DOUBLING, because reading it means
-    ///     <c>KleeOverhaulLedger.For</c>, which rolls per-turn counters, and a
-    ///     face is read on every state poll -- a tooltip may not have side
-    ///     effects.
+    /// THE PENDING REACTION IS FOLDED IN SINCE `EB-559`, and the clause that
+    /// used to leave it out had the argument backwards. "With a Hydro aura up
+    /// and Bomb 25 on the body it still printed 'Set off here deals 25 Pyro
+    /// damage'; the real number was 39. I had to compute the Vaporize myself,
+    /// and in fight 5 the difference between those two numbers was the
+    /// difference between lethal and dying two short" (Klee r20 lane 2, (c) 2).
+    ///
+    /// "THERE IS NO ONE MULTIPLIER FOR THE PILE" IS TRUE AND IS NOT AN OBSTACLE:
+    /// the FIRST charge is the one that meets the aura -- `EB-432`'s rule, which
+    /// this file already prints on the `Set off` tip -- and every charge behind
+    /// it lands into a bare body because the reaction consumed the aura. So the
+    /// amplifier is a property of ONE charge, applied to the one the walk takes
+    /// first, and the rest resolve at 1 exactly as they did. One multiplier for
+    /// the PILE would have been wrong; one for the first charge is the board.
+    ///
+    /// PYRO, WHICH IS THE ELEMENT THE FACE PRINTS. The explosion asks
+    /// <c>CompanionCovenBombs.ElementFor</c>, which is an async command call a
+    /// tooltip may not make and which answers Pyro on every board but one --
+    /// Prune's Hexhunter Chime, for ONE explosion, under the companion arm. A
+    /// preview that is right on every other board and behind by one Chime is
+    /// the trade; the face's own "Pyro damage" makes the same claim already.
+    ///
+    /// THE DEALER IS CONSULTED FOR THIS ONE TERM AND R248 IS NOT BREACHED.
+    /// "Nothing of Klee's" is about her Strength and her Weak, which move a hit
+    /// she deals and never a charge sitting on an enemy. The amplifier is not
+    /// one of those: <c>ElementalHit.Deal</c> reads Vermillion Pact's boost off
+    /// the APPLIER when the explosion lands, so a preview that ignored it would
+    /// be predicting a number the board does not pay.
+    ///
+    /// ONE TERM IS STILL LEFT OUT, and it is one-shot rather than standing
+    /// state: The Big One's DOUBLING, because reading it means
+    /// <c>KleeOverhaulLedger.For</c>, which rolls per-turn counters, and a face
+    /// is read on every state poll -- a tooltip may not have side effects.
     /// </summary>
     public int PredictedSetOffDamage()
     {
@@ -828,11 +852,37 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         if (target == null) return TotalSize;
 
         var total = 0;
+        // `EB-559`: the first charge through the funnel is the one that meets
+        // the aura (`EB-432`, and `_charges` is placement order), so the
+        // amplifier rides it and every charge behind it lands into a bare body.
+        var amplifier = PendingReactionMultiplier(target);
         foreach (var charge in _charges)
         {
-            total += SimDamagePipeline.ResolveOnTarget(target, charge.Size, 1m);
+            total += SimDamagePipeline.ResolveOnTarget(
+                target, charge.Size, amplifier);
+            amplifier = 1m;
         }
         return total;
+    }
+
+    /// <summary>
+    /// `EB-559`. What the FIRST explosion's reaction multiplies its charge by,
+    /// or 1 where the target is bare, is already wearing Pyro, or wears an
+    /// element Pyro does not amplify.
+    ///
+    /// PURE, which is the whole reason it is a method of its own: this is read
+    /// on every state poll through <see cref="DisplayAmount"/> and
+    /// <c>SetOffDamageVar</c>, so it may touch no command and roll no counter.
+    /// <c>AuraCmd.Find</c>, <c>ReactionTable.Lookup</c> and
+    /// <c>ReactionTable.AmplifierMultiplier</c> are all reads.
+    /// </summary>
+    private decimal PendingReactionMultiplier(Creature target)
+    {
+        var aura = AuraCmd.Find(target);
+        if (aura == null || aura.Element == Elements.Element.Pyro) return 1m;
+        var reaction = ReactionTable.Lookup(aura.Element,
+                                            Elements.Element.Pyro);
+        return ReactionTable.AmplifierMultiplier(reaction, Applier);
     }
 
     /// <summary>Called after EVERY mutation of <see cref="_charges"/>. The badge
