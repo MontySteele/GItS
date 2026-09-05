@@ -338,12 +338,50 @@ def _turn_allowance(power: dict[str, Any]) -> int | None:
     return cap if 0 <= stacks <= cap else None
 
 
+# `EB-525`. THE STEP THE SENTENCE DOES NOT SAY IT LEAVES OUT.
+#
+# THE FIND (Furina r12 lane 1, the elite). The Bygone Effigy wears "Slow N --
+# Whenever you play a card, this enemy receives 10% more damage from Attacks
+# this turn", and the seat played three cheap cards and then two attacks: "I
+# predicted 27 damage and got 25. By the arithmetic, Soloist's+ resolved at
+# Slow 30 (not 40) and Chevreuse at 40 (not 50) -- i.e. a card's own Slow
+# increment does not apply to itself. The printed text does not say that."
+#
+# THE STACK ARRIVES AFTER THE CARD RESOLVES, which is the game's own trigger
+# order and is invisible in a sentence written in the present tense: "whenever
+# you play a card" is true of the card in your hand, and the number it hits
+# with is the one that was on the board before it. Every Slow turn the seat's
+# arithmetic was off by one step, and it read the difference as its own error
+# twice before deriving the rule.
+#
+# A CLAUSE ON THE PAGE AND NOT A NEW SENTENCE, `_turn_allowance`'s shape one
+# power over (`EB-467`): the wire sends a power as `name`, `amount`, `type` and
+# `description`, so what the page can add is a clause about the sentence the
+# game printed -- and it is added only where that sentence is the one the rule
+# is about, so a future power wearing a similar name gets the line it always
+# had.
+_SLOW_TRIGGER = "whenever you play a card"
+_SLOW_CLAUSE = " It counts the cards played BEFORE this one."
+
+
+def _slow_clause(power: dict[str, Any]) -> str:
+    """`EB-525`: the step Slow's own sentence leaves out, or ''."""
+    if str(power.get("name") or "").strip().casefold() != "slow":
+        return ""
+    text = str(power.get("text") or "")
+    return _SLOW_CLAUSE if _SLOW_TRIGGER in text.casefold() else ""
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
     """One power: printed name, the amount, buff or debuff, the printed text.
 
     `EB-467`: where the amount is an allowance counting down against a cap the
     power's own sentence states, the two numbers print in ONE clause -- "12 of
     20 left this turn" -- instead of standing apart and contradicting.
+
+    `EB-525`: and where the sentence describes a stack that arrives after the
+    card that adds it has already resolved, the page says which cards the
+    number counts.
     """
     cap = _turn_allowance(power)
     if cap is None:
@@ -355,7 +393,7 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
     if kind:
         line += f" ({kind})"
     if power["text"]:
-        line += f" — {power['text']}"
+        line += f" — {power['text']}{_slow_clause(power)}"
     return line
 
 

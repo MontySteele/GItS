@@ -6670,6 +6670,57 @@ def test_a_power_with_no_stated_per_turn_cap_reads_as_it_always_did():
     assert "left this turn" not in over
 
 
+# --- `EB-525`: THE STEP SLOW'S OWN SENTENCE LEAVES OUT ----------------------
+
+
+def slow_state(amount: int = 30, text: str | None = None) -> dict:
+    """The Bygone Effigy's Slow, as the wire sends it."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "SLOW_POWER", "name": "Slow", "amount": amount,
+         "type": "Debuff",
+         "description": text if text is not None else
+         "Whenever you play a card, this enemy receives 10% more damage "
+         "from Attacks this turn."}]
+    return state
+
+
+def test_the_slow_line_says_which_cards_its_number_counts():
+    """`EB-525`. THE ARITHMETIC THAT WAS OFF BY ONE STEP EVERY SLOW TURN.
+
+    Furina r12 lane 1, the elite: "I predicted 27 damage and got 25. By the
+    arithmetic, Soloist's+ resolved at Slow 30 (not 40) and Chevreuse at 40
+    (not 50) -- i.e. a card's own Slow increment does not apply to itself. The
+    printed text does not say that."
+
+    The stack arrives AFTER the card that adds it has resolved, which is
+    invisible in a sentence written in the present tense: "whenever you play a
+    card" is true of the card in your hand, and the number it hits with is the
+    one that was on the board before it.
+
+    Seen to FAIL: the line ended at the game's own sentence.
+    """
+    page = blindplay.observe(slow_state())
+
+    assert ("Slow 30 (debuff) — Whenever you play a card, this enemy receives "
+            "10% more damage from Attacks this turn. It counts the cards "
+            "played BEFORE this one.") in page
+
+
+def test_the_clause_rides_the_sentence_the_rule_is_about():
+    """`_turn_allowance`'s discipline one power over: the clause is added off
+    the sentence the game printed, so a power that happens to be called Slow
+    and says something else gets the line it always had."""
+    page = blindplay.observe(slow_state(
+        text="This enemy acts last for 2 turns."))
+
+    assert "Slow 30 (debuff) — This enemy acts last for 2 turns." in page
+    assert "BEFORE this one" not in page
+    # And no other power grows the clause.
+    assert "BEFORE this one" not in blindplay.observe(hardened_shell_state())
+
+
 def test_a_card_keyword_is_not_repeated_in_the_glossary():
     """A card's own tips are printed under the card that declares them, so
     lifting them into the glossary as well would print every one twice."""
