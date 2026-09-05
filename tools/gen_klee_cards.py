@@ -538,6 +538,33 @@ def prints_takes_bow(description: str) -> bool:
     return bool(TAKES_BOW_PHRASE.search(description))
 
 
+# `EB-488`. THE FOURTH FURINA WORD, and the one a REWARD screen needed.
+#
+# THE FIND (Furina r10 (c) 5). `Grand Salon` -- "[gold]Salon Member[/gold]
+# numbers are 1 higher" -- was the run's first card reward, offered on a screen
+# with no glossary for the words it is written in, and the seat passed on it
+# partly because it could not price it. The Salon tip had appeared exactly once
+# all run, on `Salon Debut` in fight 1.
+#
+# WHY IT WAS MISSING: `salon_member_tip_args` attaches from the EFFECT -- which
+# member does this row deploy -- which is right for the three member paragraphs
+# and wrong for the RULES paragraph. A face that names the word and deploys
+# nobody is precisely the face whose reader has never met it. So the rules tip
+# attaches from the PRINTED WORD, which is the rule the Companion tip already
+# reaches a reward screen by.
+#
+# GOLDED, because that is how every face prints it, and the plural is the same
+# word: `Salon Member{PowerAmount:plural:|s}` is one interpolated hole away
+# from `Salon Member` and means the same rule.
+SALON_MEMBER_PHRASE = re.compile(
+    r"\[gold\]Salon Member(?:s|\{[^{}]*\})?\[/gold\]")
+
+
+def prints_salon_member(description: str) -> bool:
+    """Does this built description print the words `Salon Member`? `EB-488`."""
+    return bool(SALON_MEMBER_PHRASE.search(description))
+
+
 # --- `EB-272`: the QUARANTINED ARMS' KEYWORDS --------------------------------
 #
 # THE DEFECT. Not one word the three prototype arms invented had a definition
@@ -11194,6 +11221,21 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         if prints_takes_bow(desc):
             tips_expr = (
                 "FurinaRiderTips.ForBow("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # `EB-488`, the third of hers and the one a REWARD screen needed. The
+        # rules paragraph attaches from the PRINTED WORD, unlike the three
+        # member paragraphs `salon_member_tip_args` attaches from the effect --
+        # a face that names the word and deploys nobody is exactly the face
+        # whose reader has never met it.
+        #
+        # AND NOT ON A DEPLOY CARD, which carries this same paragraph through
+        # `SalonMemberTips.ForCard` below: two copies of one definition on one
+        # face is what the game's own tip de-duplication would then be picking
+        # between. The exclusion is read off the same predicate that attach
+        # uses, so the two cannot drift.
+        if prints_salon_member(desc) and not salon_member_tip_args(card):
+            tips_expr = (
+                "SalonMemberTips.ForSalonRules("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     # `EB-477`. WHAT A COMPANION PLAY PERFORMS, AND THE REFUSAL FORM.
     #

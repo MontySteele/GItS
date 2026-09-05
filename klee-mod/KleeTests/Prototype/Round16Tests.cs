@@ -250,6 +250,65 @@ public class Round16Tests
             Source("KleeMod.cs"));
     }
 
+    // ==================================================================
+    // `EB-488` -- a reward screen with no glossary for the word on the card
+    // ==================================================================
+    //
+    // THE FIND (Furina r10 (c) 5). `Grand Salon` -- "Salon Member numbers are
+    // 1 higher" -- was the run's FIRST card reward, and the seat passed on it
+    // partly because it could not price it. The Salon tip had appeared exactly
+    // once all run, on `Salon Debut` in fight 1.
+    //
+    // WHY: the three member paragraphs attach from the EFFECT (which member
+    // does this row deploy), which is right for them and wrong for the RULES
+    // paragraph -- a face that names the word and deploys nobody is exactly
+    // the face whose reader has never met it. So the rules tip attaches from
+    // the PRINTED WORD, the way the Companion tip already reaches a reward.
+
+    [Fact]
+    public void A_face_that_names_a_salon_member_and_deploys_none_defines_it()
+    {
+        // The card the finding is about, and it fields nobody at all: its one
+        // effect is a Power that raises everyone else's numbers.
+        var grandSalon = Source("Cards/Furina/Generated/GrandSalon.cs");
+        Assert.Contains("[gold]Salon Member[/gold] numbers are", grandSalon);
+        Assert.Contains(
+            "SalonMemberTips.ForSalonRules(base.ExtraHoverTips, this)",
+            grandSalon);
+    }
+
+    [Fact]
+    public void Every_furina_face_printing_the_word_carries_the_definition()
+    {
+        // THE DENOMINATOR, and the reason the attach is DERIVED rather than
+        // applied by hand: eight of her shipped faces print the word, only one
+        // of them was the seat's, and a row that prints it tomorrow carries
+        // the definition because it printed it.
+        foreach (var cls in new[] { "GrandSalon", "CastingCall",
+                                    "FortissimoGuard", "PitOrchestra",
+                                    "TempoChange", "WatersEmbrace",
+                                    "ManyWatersMelody", "MatineePerformance" })
+        {
+            var src = Source("Cards/Furina/Generated/" + cls + ".cs");
+            Assert.Contains("[gold]Salon Member", src);
+            Assert.Contains("SalonMemberTips.ForSalonRules(", src);
+        }
+    }
+
+    [Fact]
+    public void A_deploy_card_is_left_with_the_one_copy_it_already_had()
+    {
+        // Two copies of one definition on one face is what the game's own tip
+        // de-duplication would then be picking between, so a row that DEPLOYS
+        // keeps `ForCard`'s paragraph and takes no second attach.
+        foreach (var cls in new[] { "SalonDebut", "EndlessWaltz" })
+        {
+            var src = Source("Cards/Furina/Generated/" + cls + ".cs");
+            Assert.Contains("SalonMemberTips.ForCard(", src);
+            Assert.DoesNotContain("SalonMemberTips.ForSalonRules(", src);
+        }
+    }
+
     /// <summary>A mod source file, read whole -- `Round12Tests.Printed`'s
     /// idiom and its reason: a stale copy beside the dll is exactly the drift
     /// a text pin exists to catch.</summary>

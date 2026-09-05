@@ -45,7 +45,7 @@ public sealed class ManyWatersMelody : CustomCardModel, ICharacterCard, ISkillTa
         new[] { KleeKeywords.ElementalSkill };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForBurst(base.ExtraHoverTips, this);
+        SalonMemberTips.ForSalonRules(KleeCardTooltips.ForBurst(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("many_waters_melody");
 
