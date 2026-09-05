@@ -379,17 +379,51 @@ AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
 # next round with four `Burn`s in hand. Dropping a part would be that defect
 # again. What changes is the CLAIM the page makes about the number, not how
 # many parts it shows.
+#
+# REOPENED 2026-09-04, AND THE FIRST WORDING WAS ITSELF A CLAIM. "Has
+# repeatedly not landed" and "MAY perform" are a FREQUENCY reading of four
+# turns, and the page has no standing to make one: both r15 seats read the
+# label as a warning and stopped blocking against five telegraphs that then
+# landed in full -- the same defect the row opened on, pointed the other way.
+# So the note and the label say only what the feed supports: there are several
+# parts, and the feed does not say which resolve. No history, no likelihood,
+# no advice. The fact the page is missing is a RESOLVING-PART MARKER on the
+# wire, and that is asked for in
+# `docs/current/operations/understudy-seats.md` rather than guessed at here.
 MULTI_INTENT_NOTE = (
     "*An enemy showing more than one intent is telegraphing every part of one "
     "move, and this page's data feed carries nothing that says which of those "
-    "parts will resolve. On this build the damage part of a multi-part "
-    "telegraph has repeatedly not landed, so read such a number as a part the "
-    "enemy MAY perform rather than as damage it is about to deal.*")
+    "parts resolve, in what order, or on what condition. Every part the feed "
+    "sends is printed above, exactly as it was sent; this page makes no claim "
+    "about which of them the enemy will perform.*")
+
+# `EB-474`. THE BLOCK ON THE BODY, AND THE PART THAT WILL ADD MORE.
+#
+# WHAT THE SEAT SAW. "Nibbit at 5 HP, I played a card printing *Deal 6
+# damage*, and it lived at 4. Nothing on the combat page showed the Block that
+# ate the other 5. That is the only outright unpredictable outcome of the run"
+# (Furina r9 (c) 1) -- and its own reading of it was "Block from the Defend
+# half of its previous multi-part telegraph".
+#
+# WHAT THE PAGE ALREADY DID, and it matters for what is left to build. The
+# enemy line has printed `, Block N` beside HP since `EB-180`, off the wire's
+# own `battle.enemies[].block`, which `BuildEnemyState` fills from
+# `creature.Block`. That half of the row was standing; it is now PINNED rather
+# than assumed, because nothing held it.
+#
+# WHAT WAS MISSING. The TELEGRAPH said nothing. `BuildEnemyState` sends a
+# `Defend` part with an empty `label` and, on every capture in `review/qa`, no
+# description at all, so the line read `Defensive (Defend)` -- a word with no
+# consequence attached, one row above the number it was about to change. A
+# reader who is shown Block only once it exists learns about it a turn late.
+DEFEND_INTENT_CLAUSE = ("this part adds Block to the Block on its line above, "
+                        "and the feed carries no number for how much")
 
 #: What a number on a multi-part telegraph is called ON THE LINE ITSELF, so a
-#: reader who plans off the enemy block without reaching the note under it is
-#: not left holding a bare promise.
-MULTI_INTENT_LABEL = ", a part it MAY perform"
+#: reader who plans off the enemy block without reaching the note under it
+#: knows the number belongs to one part of a several-part move. It says what
+#: the number IS and nothing about how often such a part has landed.
+MULTI_INTENT_LABEL = ", one part of this move"
 
 
 # `EB-272`. THE ARMS' OWN WORDS, DEFINED ONCE PER SCREEN.
@@ -764,9 +798,20 @@ BASE_KEYWORDS: dict[str, str] = {
     "Vulnerable": (
         f"The wearer takes {VULNERABLE_TAKEN_PCT}% more damage from every "
         f"hit. One stack falls off at the end of each of its turns."),
+    # `EB-469`. THE GAME'S OWN STATUS LINE SAYS "Attacks deal 25% less damage
+    # for 1 turn", and the Kokomi r15 seat read "Attacks" as the CARD TYPE --
+    # "the status line told me skills were safe and the card told me they were
+    # not" ((c) 2), after watching `Kurage's Oath`, printed `cost 1, skill`,
+    # go from 3 to 2 while it wore Weak. The engine is not what is wrong:
+    # `WeakPower.ModifyDamageMultiplicative` gates on `IsPoweredAttack()`, a
+    # property of the HIT, and every damage clause the generator emits carries
+    # `ValueProp.Move` whatever `type:` its sheet row declares. So the page
+    # says which, in the mod's own words -- this row and
+    # `BaseKeywordTips.ForWeak` are one sentence, pinned to each other.
     "Weak": (
-        f"The wearer deals {WEAK_DEALT_PCT}% less damage. One stack falls "
-        f"off at the end of each of its turns."),
+        f"The wearer deals {WEAK_DEALT_PCT}% less damage with every hit it "
+        f"lands, a Skill's damage too. One stack falls off at the end of "
+        f"each of its turns."),
     "Frail": (
         f"The wearer gains {FRAIL_BLOCK_PCT}% less Block. One stack falls "
         f"off at the end of each of its turns."),
@@ -898,8 +943,19 @@ REACTION_KEYWORDS: dict[str, str] = {
     "Overloaded": ("Pyro on an Electro aura, or Electro on a Pyro aura. "
                    "6 damage to ALL enemies and 1 Weak on the reacted "
                    "enemy."),
+    # `EB-472`. THE ORDER, on the one row where the order changes a number the
+    # reader is about to plan off. "Whether Superconduct's Vulnerable applies
+    # before or after the damage of the card that caused it. From the numbers
+    # it applies first, and Rosaria therefore amplifies herself by 50%. That is
+    # a 4-point swing on a 1-cost card and it is nowhere on the screen" (Klee
+    # r15 run 2 (c) 4). It applies FIRST: `ElementalHit.Deal` resolves the
+    # reaction and only then reads `SimDamagePipeline.TargetMods`, which
+    # `tier0/tests/test_reaction_phase_parity.py` pins -- and the clause is the
+    # C#'s own, added to `KLEEMOD-SUPERCONDUCT_PREVIEW` in the same commit, so
+    # the tooltip and this page cannot say different things about it.
     "Superconduct": ("Electro on a Cryo aura, or Cryo on an Electro aura. The "
-                     "reacted enemy gains 2 Vulnerable."),
+                     "reacted enemy gains 2 Vulnerable, which applies before "
+                     "this hit."),
     "Electro-Charged": ("Hydro on an Electro aura, or Electro on a Hydro "
                         "aura. The reacted enemy loses 4 HP at the start of "
                         "its turn, 1 less each turn."),

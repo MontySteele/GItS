@@ -46,7 +46,7 @@ public sealed class ProtoMcFischlOz : CustomCardModel, ICompanionCard, IHexereiC
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOz(ArmKeywordTips.ForHexerei(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForOz(ArmKeywordTips.ForHexerei(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_fischl_oz");
 

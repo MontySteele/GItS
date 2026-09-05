@@ -36,6 +36,112 @@ public static class FurinaRiderTips
     public const string SalonKey = "KLEEMOD-SALON_RIDER";
     public const string CompanionKey = "KLEEMOD-COMPANION_RIDER";
 
+    // `EB-475`. THREE WORDS THAT GATED DECISIONS AND WERE DEFINED NOWHERE.
+    //
+    // THE FIND (Furina r9 (c) 2). "'If you moved the Spotlight this turn'
+    // gates Director's Cut and Take It From the Top, and nothing ever defines
+    // what moving the Spotlight is. Ethereal Spotlight's own buff says 'Lasts
+    // until the Spotlight moves,' which restates the phrase instead of
+    // explaining it. I passed on both cards purely because I could not tell
+    // whether I could turn the condition on." Then "'Guest Stars' ... appears
+    // inside Blocking Notes' scaling clause", undefined; and "'Take Your Bow
+    // -- The leftmost member of your Salon takes their bow' was offered as a
+    // card reward with no keyword, no number, and no glossary line. I could
+    // guess it means Evoke, but I declined a 0-cost card because I could not
+    // read it."
+    //
+    // ATTACHED FROM THE FACE THAT PRINTS THE WORD, `EB-272`'s rule one sheet
+    // over: the first and third are DERIVED by `gen_klee_cards` from the built
+    // description, so a row that prints either phrase tomorrow carries the
+    // definition because it printed the phrase. The Guest Star row is the
+    // exception and says why at its own attach point.
+    public const string SpotlightMoveKey = "KLEEMOD-SPOTLIGHT_MOVE";
+    public const string GuestStarKey = "KLEEMOD-GUEST_STAR";
+    public const string BowKey = "KLEEMOD-TAKES_BOW";
+
+    // `EB-477`. THE HALF OF A COMPANION CARD THAT GOES MISSING IN SILENCE.
+    //
+    // THE FIND (Furina r9 (b); r8 (c) said the same two rounds earlier). Under
+    // the arm a Companion card you play performs the front member -- and with
+    // an EMPTY stage it performs nobody, silently. The r9 seat lost two turns
+    // to it, one of them the elite's turn 1, and round 8 waited two fights to
+    // learn the same thing. Nothing on the card, and nothing on the board,
+    // says the second half is not going to happen: the stage badge is the
+    // Salon power, and an empty stage has no badge at all.
+    public const string CompanionPerformKey = "KLEEMOD-COMPANION_PERFORMS";
+
+    /// <summary>
+    /// `EB-475`, the first word. What MOVES the Spotlight, and whether it has
+    /// moved right now -- the house shape of this file (the rule, then what it
+    /// is worth at this moment), because the question the seat could not
+    /// answer was "can I turn the condition on".
+    ///
+    /// <see cref="SpotlightSystem.Designate"/> is the ONLY writer of the mark
+    /// and <c>Ethereal Spotlight</c> is its only caller, and
+    /// <see cref="SpotlightSystem.ResetTurn"/> clears it from Furina's
+    /// <c>AfterPlayerTurnStart</c> -- so the mark is this turn's, and the
+    /// sequencing the tip is really about is "play the selector first".
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForSpotlightMove(
+        IEnumerable<IHoverTip> inherited, CardModel card)
+    {
+        foreach (var tip in inherited) yield return tip;
+        yield return new HoverTip(
+            new LocString(Table, SpotlightMoveKey + ".title"),
+            SpotlightMoveBody(card));
+    }
+
+    /// <summary>
+    /// `EB-475`, the third word, and the one the seat declined a free card
+    /// over. A bow is the payoff: the member LEAVES the stage and fires its
+    /// own line (<see cref="SalonMemberPower.BowLeftmost"/>). The three
+    /// payoffs are interpolated from the constants that pay them, so a retune
+    /// cannot leave this sentence quoting a retired number (`EB-89`).
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForBow(
+        IEnumerable<IHoverTip> inherited, CardModel card)
+    {
+        foreach (var tip in inherited) yield return tip;
+        yield return new HoverTip(
+            new LocString(Table, BowKey + ".title"), BowBody(card));
+    }
+
+    /// <summary>
+    /// `EB-477`. What playing this Companion card will perform, live -- and
+    /// the refusal form when the stage is empty, which is the case the seats
+    /// lost turns to.
+    ///
+    /// THE RULE IS THE ARM'S, so the tip is too: with the manual leg off
+    /// members act on their own turn and a Companion play performs nobody at
+    /// all, which is a sentence about a rule that build does not have. It
+    /// yields NOTHING there, and nothing out of combat -- the stage is a
+    /// board fact, and a deck view has no board.
+    ///
+    /// ATTACHED TO EVERY COMPANION ROW, whichever character's sheet emitted
+    /// it, because Furina can hold a shared Companion and a Guest Star alike;
+    /// the OWNER decides whether the sentence prints, not the sheet.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForCompanionPerform(
+        IEnumerable<IHoverTip> inherited, CardModel card)
+    {
+        foreach (var tip in inherited) yield return tip;
+#if PROTOTYPE_CARDS
+        var owner = TipOwner.CreatureOf(card);
+        if (owner == null || card.CombatState == null) yield break;
+        if (!Powers.FurinaReframe.ManualLiveFor(owner)) yield break;
+        var member = SalonMemberPower.LeftmostMember(owner);
+        yield return new HoverTip(
+            new LocString(Table, CompanionPerformKey + ".title"),
+            member is { } who
+                ? $"Playing this performs {SalonMemberTips.DisplayName(who)}, "
+                + "your front member."
+                : "No member on stage: performs nobody. Deploy a member "
+                + "first, or this card is only its own line.");
+#else
+        yield break;
+#endif
+    }
+
     public static IEnumerable<IHoverTip> ForCard(
         IEnumerable<IHoverTip> inherited,
         CardModel card,
@@ -77,7 +183,53 @@ public static class FurinaRiderTips
             yield return new HoverTip(
                 new LocString(Table, CompanionKey + ".title"),
                 CompanionBody(card, companionPer));
+            // `EB-475`, the second word, and the ONE of the three whose attach
+            // is not derived from the card's own description -- because no
+            // card face prints it. `Guest Star` reaches the player inside
+            // `CompanionBody`'s clause ("including Guest Stars"), which is
+            // exactly where the r9 seat met it: "it appears inside Blocking
+            // Notes' scaling clause". The attach is therefore the tip that
+            // prints the word, which is the same rule stated about the same
+            // surface.
+            yield return new HoverTip(
+                new LocString(Table, GuestStarKey + ".title"),
+                "A [gold]Companion[/gold] card created into your hand during "
+              + "a fight rather than drafted into your deck. It counts as a "
+              + "Companion card played, and it is gone when the fight ends.");
         }
+    }
+
+    /// <summary>`EB-475`. The rule, then whether it is on right now.</summary>
+    private static string SpotlightMoveBody(CardModel card)
+    {
+        var rule = "Playing [gold]Ethereal Spotlight[/gold] moves it, and "
+                 + "nothing else does. The mark clears at the start of your "
+                 + "turn, so a card asking this wants the Spotlight played "
+                 + "first, this turn.";
+        var owner = TipOwner.CreatureOf(card);
+        if (owner == null || card.CombatState == null) return rule;
+        return SpotlightSystem.MovedThisTurn(owner)
+            ? $"{rule} You HAVE moved it this turn."
+            : $"{rule} You have NOT moved it this turn.";
+    }
+
+    /// <summary>`EB-475`. What a bow is, and whether there is anyone to take
+    /// one. The stage read is <see cref="SalonBody"/>'s, one verb over.
+    /// </summary>
+    private static string BowBody(CardModel card)
+    {
+        var rule = "The member leaves the stage and fires its payoff: "
+                 + $"Crabaletta deals {SalonConstants.CrabalettaBow} Hydro "
+                 + $"damage, the Usher gains {SalonConstants.UsherBow} Block, "
+                 + "Chevalmarin applies Hydro to ALL enemies and grants "
+                 + $"{SalonConstants.ChevalmarinBowEncore} Encore.";
+        var owner = TipOwner.CreatureOf(card);
+        if (owner == null || card.CombatState == null) return rule;
+        var member = SalonMemberPower.LeftmostMember(owner);
+        return member is { } who
+            ? $"{rule} {SalonMemberTips.DisplayName(who)} is leftmost and "
+            + "would take it."
+            : $"{rule} Your stage is empty, so this bows nobody.";
     }
 
     /// <summary>The rate, plus what it is worth at this moment. Out of combat

@@ -311,9 +311,25 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     private const string Bombs =
         " Bombs here: [blue]{Charges}[/blue], growing each turn.";
 
+    /// <summary>
+    /// `EB-471`. WHICH SIDE OF THE GROWTH TICK A MINE LANDS ON, and it is on
+    /// THIS face rather than on <see cref="Bombs"/> because this is the face a
+    /// pile with a Mine in it prints and <see cref="Bombs"/> is at 125 of 125.
+    ///
+    /// THE FIND (Klee r15 run 2 (c) 3). "A Mine fires at its base size on the
+    /// enemy's turn, before the growth tick, and nothing printed says which
+    /// side of the tick it lands on: Jumpy Dumpty's Mine 3 paid 3, not 7, and
+    /// I reverse-engineered it from HP." The row offered "Mines do not grow"
+    /// as the sentence to print and that sentence is FALSE here:
+    /// <see cref="GrowBy"/> walks every charge and a Mine is a charge, so a
+    /// Mine that lives to the next turn start is 7. What is true, and what the
+    /// seat actually lacked, is WHEN the growth happens -- and paired with
+    /// <see cref="MineClause"/>'s "goes off before this enemy's hit" it says
+    /// the Mine pays the size it has now.
+    /// </summary>
     private const string BombsWithMines =
         " Bombs here: [blue]{Charges}[/blue], including [blue]{Mines}[/blue] "
-      + "[gold]Mine{Mines:plural:|s}[/gold], growing each turn.";
+      + "[gold]Mine{Mines:plural:|s}[/gold], growing at your turn's start.";
 
     /// <summary>Rule 3, `EB-361`. A Bomb whose enemy dies moves to a random
     /// LIVING enemy at its size -- see <see cref="JumpCharges"/>, which is what

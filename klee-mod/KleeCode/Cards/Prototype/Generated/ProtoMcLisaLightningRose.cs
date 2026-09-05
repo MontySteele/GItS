@@ -49,7 +49,7 @@ public sealed class ProtoMcLisaLightningRose : CustomCardModel, ICompanionCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForVulnerable(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForVulnerable(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_lisa_lightning_rose");
 

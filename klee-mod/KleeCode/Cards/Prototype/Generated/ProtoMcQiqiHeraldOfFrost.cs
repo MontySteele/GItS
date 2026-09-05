@@ -49,7 +49,7 @@ public sealed class ProtoMcQiqiHeraldOfFrost : CustomCardModel, ICompanionCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_qiqi_herald_of_frost");
 

@@ -8,6 +8,7 @@ and `blindplay.observe(state)` still resolve.
 from __future__ import annotations
 
 import hashlib
+import re
 from typing import Any
 
 from understudy import qa_packet
@@ -15,6 +16,7 @@ from understudy.blindplay_board import _pulse_phrase
 from understudy.blindplay_notes import (AURA_NOTE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
+                                        DEFEND_INTENT_CLAUSE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
                                         METER_CAPPED_NOTE,
@@ -275,9 +277,58 @@ def _render_performance(row: dict[str, Any]) -> str:
     return line + "."
 
 
+#: A per-turn ALLOWANCE stated in a power's own sentence (`EB-467`). The
+#: shipped shape is Hardened Shell's "cannot lose more than 20 HP each turn";
+#: the alternatives are the same sentence's other spellings of "each turn",
+#: which is the only clause that makes the number a per-turn budget rather
+#: than a total.
+_PER_TURN_CAP = re.compile(
+    r"more than (\d+)\s+\S+ (?:each|per|every|a|in a single|in one) turn",
+    re.IGNORECASE)
+
+
+def _turn_allowance(power: dict[str, Any]) -> int | None:
+    """The cap a power's number is COUNTING DOWN AGAINST, or None. `EB-467`.
+
+    THE DEFECT. "Hardened Shell 12 — Skulking Colony cannot lose more than 20
+    HP each turn" is two numbers of two different kinds on one line, and every
+    seat that met it read them as a contradiction: the r3 Klee seat watched the
+    badge go 20 -> 0 -> 5 and worked out from its OWN damage that the number is
+    what is LEFT this turn, "nothing on screen says so"; the Kokomi r15 seat
+    filed the same line again (`(c)` 3).
+
+    THE TEST IS THE POWER'S OWN SENTENCE, and it has to be, because the wire
+    sends a power as `name`, `amount`, `type` and `description` and carries no
+    maximum for one (`EB-181`'s finding, one rule over). So the cap is read out
+    of the description the game itself printed, and only where that sentence
+    states a PER-TURN allowance the amount fits inside. A power whose number
+    has climbed past the sentence's number is not counting down against it --
+    that is a different power wearing a similar sentence -- and gets the line
+    it always had.
+    """
+    found = _PER_TURN_CAP.search(str(power.get("text") or ""))
+    if not found:
+        return None
+    cap = int(found.group(1))
+    stacks = power.get("stacks")
+    if not isinstance(stacks, int) or isinstance(stacks, bool):
+        return None
+    return cap if 0 <= stacks <= cap else None
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
-    """One power: printed name, the amount, buff or debuff, the printed text."""
-    line = f"{indent}{power['name']} {power['stacks']}"
+    """One power: printed name, the amount, buff or debuff, the printed text.
+
+    `EB-467`: where the amount is an allowance counting down against a cap the
+    power's own sentence states, the two numbers print in ONE clause -- "12 of
+    20 left this turn" -- instead of standing apart and contradicting.
+    """
+    cap = _turn_allowance(power)
+    if cap is None:
+        line = f"{indent}{power['name']} {power['stacks']}"
+    else:
+        line = f"{indent}{power['name']} {power['stacks']} of {cap} left " \
+               f"this turn"
     kind = str(power.get("kind") or "").strip().lower()
     if kind:
         line += f" ({kind})"
@@ -297,10 +348,11 @@ def _render_intents(intents: list[dict[str, str]]) -> list[str]:
     two telegraphs without inventing a grammar for joining them.
 
     `EB-461`: and where there IS more than one, every number on them is marked
-    as a part the enemy MAY perform. The feed sends no marker saying which
-    parts of a chosen move resolve, and four seats in a row blocked against a
-    damage number that never arrived -- see `MULTI_INTENT_NOTE`, which the
-    board prints once under the enemy block.
+    as ONE PART of the move rather than as the move. The feed sends no marker
+    saying which parts of a chosen move resolve -- see `MULTI_INTENT_NOTE`,
+    which the board prints once under the enemy block. Neither the label nor
+    the note claims how often such a part lands: the first wording did, and
+    the r15 seats stopped blocking against telegraphs that landed in full.
     """
     rows = list(intents) or [{}]
     part = len(rows) > 1
@@ -322,6 +374,13 @@ def _render_intent(intent: dict[str, str], part: bool = False) -> str:
     word it does not modify. The wire's `type` -- the mechanical kind, which
     the page dropped the way it dropped a power's (`EB-179`) -- goes back on
     beside the hover tip's heading where the two differ.
+
+    `EB-474`: a `Defend` part says that it ADDS BLOCK. The feed sends that
+    part with an empty `label` and, on every capture in `review/qa`, no
+    description at all -- so the line read `Defensive (Defend)` and nothing on
+    it connected the part to the `Block N` on the body's own line one row up.
+    The Furina r9 seat played `Deal 6` into a 5-HP body that lived at 4 and
+    could not account for it, having read the HP line as the whole target.
     """
     head = intent.get("kind") or intent.get("type") or ""
     kind = intent.get("type") or ""
@@ -331,6 +390,8 @@ def _render_intent(intent: dict[str, str], part: bool = False) -> str:
               + (MULTI_INTENT_LABEL if part else "")
               if intent.get("label") else "")
     bits = [head, number, intent.get("text") or ""]
+    if _fold(kind) == "defend":
+        bits.append(DEFEND_INTENT_CLAUSE)
     return " — ".join(b for b in bits if b) or "(no intent shown)"
 
 
@@ -824,6 +885,19 @@ def render(obs: dict[str, Any]) -> str:
                 out += ["", CARRY_OUT_BOARD_NOTE]
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
+
+    # `EB-473`: the relic row, on a screen that is not a fight, in the
+    # combat header's own words and under its own heading. A relic claimed at
+    # the reward of the LAST fight of a run had no later combat page to print
+    # it on, and the Klee r15 run-2 seat finished holding one it could not
+    # describe. Above the belt, because that is the order the combat page
+    # already has -- relics, then potions.
+    if obs.get("held_relics"):
+        out += ["", "## Your relics", ""] + [
+            f"- **{r['name']}**"
+            + (f" ({r['counter']})" if r.get("counter") else "")
+            + (f" — {r['text']}" if r["text"] else "")
+            for r in obs["held_relics"]]
 
     # `EB-371`: the belt, on a screen that is not a fight. A combat page has
     # printed it under the same heading since `EB-341`; every other screen was

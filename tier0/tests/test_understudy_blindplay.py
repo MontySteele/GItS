@@ -2479,6 +2479,60 @@ def test_a_run_with_no_relics_prints_no_relic_block():
     assert "## Your relics" not in blindplay.observe(state)
 
 
+BEATING_REMNANT = {
+    "id": "BEATING_REMNANT",
+    "name": "Beating Remnant",
+    "description": "You cannot lose more than 20 HP in a single turn.",
+    "counter": None,
+    "keywords": [],
+}
+
+
+def test_every_screen_that_is_not_a_fight_prints_the_relic_row():
+    """`EB-473`. A RUN THAT ENDED HOLDING A RELIC THE SEAT COULD NOT DESCRIBE.
+
+    "`Beating Remnant` was claimed as an elite relic and no subsequent screen
+    reprinted its text, so I finished the run holding a relic I cannot
+    describe. Every other relic I own prints in the combat header" (Klee r15
+    run 2 (c) 5).
+
+    THE ROW'S DIAGNOSIS -- a cached subset -- IS NOT WHAT HAPPENED, and the
+    difference is the whole fix. `relic_faces` reads `player.relics` off the
+    feed and prints every row of it; the wire fills that list on every screen,
+    because `BuildPlayerState` runs unconditionally and only its COMBAT fields
+    are gated. What was gated is the PRINTING: `EB-238` put the block inside
+    the combat branch, and that relic was claimed at the reward of the last
+    fight of the run, so no later combat page existed to carry it.
+
+    The repair is `EB-371`'s, one rule over: the HUD carries the row through
+    every screen, so the page does too, under the same heading.
+
+    Seen to FAIL: every screen below printed no relic block at all.
+    """
+    for build in (map_state, shop_state, rest_state, card_reward_state,
+                  rewards_state, treasure_state):
+        state = build()
+        state.setdefault("player", {})["relics"] = [BEATING_REMNANT]
+        page = blindplay.observe(state)
+        assert "## Your relics" in page, build.__name__
+        assert ("- **Beating Remnant** — You cannot lose more than 20 HP in "
+                "a single turn.") in page, build.__name__
+        # Once. The combat header is the only other emitter and this is not it.
+        assert page.count("## Your relics") == 1, build.__name__
+        assert "BEATING_REMNANT" not in page, build.__name__
+
+
+def test_a_screen_with_no_relics_still_prints_no_relic_block():
+    """The other half, on the screens `EB-473` reached: a run holding none
+    reads exactly as it always did, and so does a screen the page refuses to
+    drive at all."""
+    assert "## Your relics" not in blindplay.observe(map_state())
+    blocked = map_state()
+    blocked["state_type"] = "menu"
+    blocked["player"]["relics"] = [BEATING_REMNANT]
+    assert "## Your relics" not in blindplay.observe(blocked)
+
+
 # ------------------- EB-229: the forecast channel for a blind RUN ----------
 #
 # `KURAGEMEM002` graded `P1`, `P2` and `P4` UNREACHED and the display was not
@@ -6103,6 +6157,38 @@ def test_a_second_element_brings_back_its_pair_and_only_its_pair():
     assert "NO REACTION IS REACHABLE" not in page
 
 
+def test_the_superconduct_row_says_its_vulnerable_lands_before_the_hit():
+    """`EB-472`. A 4-POINT SWING THE SEAT HAD TO FIND IN THE HP NUMBERS.
+
+    "Whether Superconduct's Vulnerable applies before or after the damage of
+    the card that caused it. From the numbers it applies first, and Rosaria
+    therefore amplifies herself by 50%. That is a 4-point swing on a 1-cost
+    card and it is nowhere on the screen" (Klee r15 run 2 (c) 4).
+
+    IT APPLIES FIRST, and the engine is not being changed to say so: the order
+    is `ElementalHit.Deal`'s, which resolves the reaction and only THEN reads
+    `SimDamagePipeline.TargetMods` -- a split
+    `tier0/tests/test_reaction_phase_parity.py` pins deliberately, "which is
+    what makes a Superconduct's Vulnerable amplify this same hit". The clause
+    is added to the mod's own preview row in the same commit, so the tooltip a
+    sighted player hovers and this page say one thing.
+
+    Seen to FAIL: the row named the debuff and not its timing.
+    """
+    page = blindplay.observe(
+        elemental_hand_state(elements=("Electro", "Cryo")))
+    assert ("- **Superconduct** — Electro on a Cryo aura, or Cryo on an "
+            "Electro aura. The reacted enemy gains 2 Vulnerable, which "
+            "applies before this hit.") in page
+    # The rows whose effect does NOT touch the triggering hit are unchanged:
+    # a clause that printed on all six would be six claims to check, five of
+    # them about nothing.
+    for word in ("Melt", "Vaporize", "Overloaded", "Frozen",
+                 "Electro-Charged"):
+        assert "applies before this hit" \
+            not in blindplay.REACTION_KEYWORDS[word], word
+
+
 def test_an_anemo_card_over_a_standing_aura_reaches_swirl():
     """`EB-465`, THE SENTENCE THAT CONTRADICTED A PREVIEW ON ITS OWN SCREEN.
 
@@ -6214,7 +6300,10 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         "Vaporize": ["his hit deals 1.5x damage and consumes the aura"],
         "Overloaded": [" damage to ALL enemies and ",
                        " on the reacted enemy"],
-        "Superconduct": ["reacted enemy gains "],
+        # `EB-472` put the order clause on this row, in the C# and here in
+        # one commit, so the anchor holds both halves of the sentence.
+        "Superconduct": ["reacted enemy gains ",
+                         "which applies before this hit"],
         "Electro-Charged": [" HP at the start of its turn, 1 less each turn"],
         "Frozen": ["ts next action deals half damage, and the first Attack "
                    "to hit it Shatters for "],
@@ -6292,6 +6381,63 @@ def test_a_power_tip_the_wire_does_not_send_invents_nothing():
     page = blindplay.observe(state)
     assert "Powers are afflicted with Galvanized." in page
     assert "**Galvanized**" not in page
+
+
+def hardened_shell_state(amount: int = 12) -> dict:
+    """The Skulking Colony's per-turn damage cap, as the wire sends it.
+
+    `BuildPowersState` sends a power's `amount` and its `description` and
+    carries no maximum for it, so the cap in the sentence and the allowance in
+    the number are the only two facts the page has (`EB-467`).
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "HARDENED_SHELL", "name": "Hardened Shell", "amount": amount,
+         "type": "Buff",
+         "description": "Skulking Colony cannot lose more than 20 HP each "
+                        "turn."}]
+    return state
+
+
+def test_a_per_turn_allowance_prints_beside_the_cap_it_counts_down_from():
+    """`EB-467`. TWO NUMBERS OF TWO KINDS ON ONE LINE, AND NOTHING SAID WHICH.
+
+    "It prints `Hardened Shell 20` and the text says 20, but mid-turn it showed
+    `Hardened Shell 0` after I had dealt 20, and later `Hardened Shell 5` after
+    15 -- so the number is the remaining allowance this turn, not the cap in
+    the sentence next to it. Nothing on screen says so; I had to infer it from
+    my own damage" (Klee r3 opus record; Kokomi r15 (c) 3 filed it again, and
+    the Klee r15 seat called the countdown useful once it had worked it out).
+
+    The cap comes out of the power's OWN sentence, because the wire sends no
+    maximum for a power at all.
+
+    Seen to FAIL: the line printed `Hardened Shell 12` beside a sentence
+    saying 20.
+    """
+    page = blindplay.observe(hardened_shell_state())
+    assert ("Hardened Shell 12 of 20 left this turn (buff) — Skulking Colony "
+            "cannot lose more than 20 HP each turn.") in page
+    # Spent to nothing, which is the reading the r3 seat could not make.
+    assert "Hardened Shell 0 of 20 left this turn (buff)" \
+        in blindplay.observe(hardened_shell_state(0))
+
+
+def test_a_power_with_no_stated_per_turn_cap_reads_as_it_always_did():
+    """The other half: the clause is what makes the number an allowance.
+
+    A power whose sentence states no per-turn budget, and one whose amount has
+    climbed PAST the number in its sentence -- which is not a countdown against
+    it -- both print the line they always printed.
+    """
+    plain = blindplay.observe(galvanic_state())
+    assert "Galvanic 6 (buff) —" in plain
+    assert "left this turn" not in plain
+    over = blindplay.observe(hardened_shell_state(24))
+    assert "Hardened Shell 24 (buff) — Skulking Colony cannot lose more " \
+        "than 20 HP each turn." in over
+    assert "left this turn" not in over
 
 
 def test_a_card_keyword_is_not_repeated_in_the_glossary():
@@ -6644,12 +6790,69 @@ def test_a_compound_intent_prints_every_component():
     page = blindplay.observe(compound_intent_state())
     # `EB-461` MARKED THE NUMBERS ON A MULTI-PART TELEGRAPH, and nothing else
     # about these lines moved: both parts still print, in the move's own order.
-    assert ("Intent: Aggressive (Attack) — the number on its icon is 8, a "
-            "part it MAY perform — This enemy intends to Attack for 8 "
+    assert ("Intent: Aggressive (Attack) — the number on its icon is 8, one "
+            "part of this move — This enemy intends to Attack for 8 "
             "damage.") in page
     assert ("and also: Strategic (StatusCard) — the number on its icon "
-            "is 4, a part it MAY perform — This enemy intends to add 4 Burn "
+            "is 4, one part of this move — This enemy intends to add 4 Burn "
             "to your hand.") in page
+
+
+def defending_enemy_state() -> dict:
+    """A body wearing Block, telegraphing a move that will add more.
+
+    The `Defend` part is the wire's own shape, off the `review/qa` captures:
+    `{"type": "Defend", "label": "", "title": "Defensive"}` -- no number, and
+    no description either.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["enemies"][0]["block"] = 5
+    state["battle"]["enemies"][0]["intents"] = [
+        {"type": "Attack", "label": "8", "title": "Aggressive",
+         "description": "This enemy intends to Attack for 8 damage."},
+        {"type": "Defend", "label": "", "title": "Defensive"}]
+    return state
+
+
+def test_an_enemys_block_prints_beside_its_hp():
+    """`EB-474`, the half that was already standing and had nothing holding it.
+
+    "Nibbit at 5 HP, I played a card printing *Deal 6 damage*, and it lived at
+    4. Nothing on the combat page showed the Block that ate the other 5. That
+    is the only outright unpredictable outcome of the run" (Furina r9 (c) 1).
+
+    The page has printed the clause off `battle.enemies[].block` since
+    `EB-180`, and `BuildEnemyState` fills that key from `creature.Block` -- so
+    the row's first half is a PIN, not a build, and it goes red the moment the
+    clause is dropped again. A body with no Block prints no clause: zero is
+    the default state of every enemy on the board and a `Block 0` on each line
+    is `EB-198`'s noise.
+    """
+    page = blindplay.observe(defending_enemy_state())
+    assert "- **Nibbit** — HP 38/45, Block 5" in page
+    assert "Block" not in blindplay.observe(combat_state()).split(
+        "## The other side")[1]
+
+
+def test_a_defend_part_of_a_telegraph_says_it_will_add_block():
+    """`EB-474`, the half that was missing: the TELEGRAPH said nothing.
+
+    `BuildEnemyState` sends a `Defend` part with an empty `label` and, on
+    every capture in `review/qa`, no description -- so the line read
+    `Defensive (Defend)`, a word with no consequence attached, one row above
+    the number it was about to change. The seat's own reading of its lost kill
+    was "Block from the Defend half of its previous multi-part telegraph": the
+    turn to have been told was that one.
+
+    Seen to FAIL: the part printed its title and its type and stopped.
+    """
+    page = blindplay.observe(defending_enemy_state())
+    assert ("and also: Defensive (Defend) — this part adds Block to the "
+            "Block on its line above, and the feed carries no number for how "
+            "much") in page
+    # Only a Defend part carries it -- the Attack half is untouched.
+    assert page.count("this part adds Block") == 1
+    assert "adds Block" not in blindplay.observe(compound_intent_state())
 
 
 def test_no_observe_prints_the_enemy_block_twice():
@@ -6689,44 +6892,55 @@ def test_no_observe_prints_the_enemy_block_twice():
 def test_a_single_component_intent_reads_exactly_as_it_always_did():
     """One row, one line, no continuation -- the recorded combat is the pin.
 
-    `EB-461` left this line alone on purpose: a one-part telegraph is the one
-    the enemy takes, so its number is a promise the page may keep making.
+    `EB-461` left this line alone on purpose: a one-part telegraph is the whole
+    of the move, so its number needs no part label and the note does not print.
     """
     page = blindplay.observe(combat_state())
     assert ("Intent: Aggressive (Attack) — the number on its icon is 12 "
             "— This enemy intends to Attack for 12 damage.") in page
     assert "and also:" not in page
-    assert "MAY perform" not in page
+    assert "one part of this move" not in page
     assert blindplay.MULTI_INTENT_NOTE not in page
 
 
-def test_a_dual_intent_number_is_labelled_a_part_the_enemy_may_perform():
-    """`EB-461`. THE PAGE PROMISED DAMAGE THE ENEMY NEVER DEALT.
+def test_a_dual_intent_number_is_labelled_one_part_of_the_move():
+    """`EB-461`, REOPENED. THE LABEL MADE A FREQUENCY CLAIM AND IT COST AS
+    MUCH AS THE BARE NUMBER DID.
 
-    "Every enemy turn where the intent listed an attack number AND a second
-    intent, the attack did not land. I planned two turns of blocking around
-    numbers that were never going to arrive" (Kokomi r14 (c) 2, four for four;
-    Klee r14's Sludge Spinner the same shape).
+    WHAT THE FIRST BUILD SAID. "a part it MAY perform", under a note reading
+    "on this build the damage part of a multi-part telegraph has repeatedly
+    not landed" -- a history read off four enemy turns (Kokomi r14 (c) 2, Klee
+    r14).
 
-    WHICH OF THE ROW'S TWO OPTIONS THIS IS, and why. `BuildEnemyState` walks
-    `monster.NextMove`'s `Intents` and sends `type`, `label`, `title` and
-    `description` per part and nothing else -- no resolution order, no
-    condition, no marker of any kind separating a part that fires from one
-    that does not. "Print only the move the enemy will take" is therefore not
-    available to this side of the line, so the number is LABELLED instead,
-    twice: on the line a reader plans off, and once under the block.
+    WHAT IT THEN DID. Both r15 seats read the label as advice and stopped
+    blocking against five multi-part telegraphs that landed in full. A page
+    that talks a reader OUT of a real number is the same defect as one that
+    talks them into an unreal one, and the page has standing for neither: the
+    feed carries `type`, `label`, `title` and `description` per part and no
+    marker of resolution, order or condition at all.
 
-    Seen to FAIL: the number printed bare, and no note said otherwise.
+    SO THE PAGE SAYS ONLY WHAT IT KNOWS. The number belongs to one part of a
+    several-part move; which parts resolve is not on the feed. No history, no
+    likelihood, no advice. The marker that would let the page say more is
+    asked of `STS2_MCP` in `docs/current/operations/understudy-seats.md`.
+
+    Seen to FAIL: the label and the note both carried the frequency claim.
     """
     page = blindplay.observe(compound_intent_state())
-    assert "the number on its icon is 8, a part it MAY perform" in page
-    assert "the number on its icon is 4, a part it MAY perform" in page
+    assert "the number on its icon is 8, one part of this move" in page
+    assert "the number on its icon is 4, one part of this move" in page
     # ONCE, with the block's other notes, however many enemies telegraph parts.
     assert page.count(blindplay.MULTI_INTENT_NOTE) == 1
-    assert "damage it is about to deal" in page
 
-    # A part with no number on its icon says nothing new -- there is no
-    # promise on it to withdraw.
+    # THE NEUTRAL FORM, and what it may not contain. No count of how often a
+    # part has landed, no verdict on what a reader should do about it.
+    for claim in ("repeatedly", "MAY perform", "has not landed",
+                  "never", "usually", "rarely", "often", "about to deal"):
+        assert claim not in blindplay.MULTI_INTENT_NOTE, claim
+        assert claim not in blindplay.MULTI_INTENT_LABEL, claim
+    assert "no claim" in blindplay.MULTI_INTENT_NOTE
+
+    # A part with no number on its icon has no number to attach a label to.
     quiet = json.loads(json.dumps(combat_state()))
     quiet["battle"]["enemies"][0]["intents"] = [
         {"type": "Attack", "label": "6", "title": "Aggressive",
@@ -6734,9 +6948,25 @@ def test_a_dual_intent_number_is_labelled_a_part_the_enemy_may_perform():
         {"type": "Buff", "label": "", "title": "Empower",
          "description": "This enemy intends to use a Buff."}]
     quiet_page = blindplay.observe(quiet)
-    assert "the number on its icon is 6, a part it MAY perform" in quiet_page
+    assert "the number on its icon is 6, one part of this move" in quiet_page
     assert quiet_page.count("the number on its icon") == 1
     assert blindplay.MULTI_INTENT_NOTE in quiet_page
+
+
+def test_the_seats_page_asks_the_bridge_for_a_resolving_part_marker():
+    """`EB-461`, the half this side of the line cannot build.
+
+    The neutral label is as far as the page can go without a fact the wire
+    does not carry. `BuildEnemyState` sends no marker of which part of a
+    multi-part move resolves, and `STS2_MCP` is vendored -- so the request is
+    written down where the seats' operations page keeps them, rather than
+    guessed at in the render.
+    """
+    doc = (REPO / "docs" / "current" / "operations"
+           / "understudy-seats.md").read_text(encoding="utf-8")
+    assert "resolving-part marker" in doc
+    assert "`EB-461`" in doc
+    assert "BuildEnemyState" in doc
 
 
 def discounted_hand_state() -> dict:
@@ -6942,8 +7172,12 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         "Vulnerable": ["The wearer takes 50% more damage from every hit. "
                        "One stack falls ", "off at the end of each of its "
                        "turns."],
-        "Weak": ["The wearer deals 25% less damage. One stack falls off at "
-                 "the end ", "of each of its turns."],
+        # `EB-469` put the Skill case in this sentence, in the C# and here in
+        # one commit, so the anchor holds the clause that resolves the game's
+        # own "Attacks".
+        "Weak": ["The wearer deals 25% less damage with every hit it lands, a ",
+                 "Skill's damage too. One stack falls off at the end of each ",
+                 "of its turns."],
         # The two rows whose clause straddles a `[gold]` span are anchored
         # WITH the markup and folded out on the page side, the same way the
         # arm table's interpolated numerals are.
@@ -7711,14 +7945,16 @@ def test_the_target_and_the_aura_are_recorded_where_they_are_decided():
 #: `ProtoBombPower.Title` selected. The body is the arm's own, quoted, so the
 #: page half of this pin cannot pass on a sentence the game does not print.
 _MINE_FACE = ("Set off here deals 4 Pyro damage. Bombs here: 1, including 1 "
-              "Mine, growing each turn. A Mine also goes off before this "
-              "enemy's hit, which lands in full unless the Mine kills. A "
+              "Mine, growing at your turn's start. A Mine also goes off "
+              "before this enemy's hit, which lands in full unless the Mine "
+              "kills. A "
               "kill moves them to a "
               "survivor.")
 
 _MIXED_FACE = ("Set off here deals 12 Pyro damage. Bombs here: 2, including 1 "
-               "Mine, growing each turn. A Mine also goes off before this "
-               "enemy's hit, which lands in full unless the Mine kills. A "
+               "Mine, growing at your turn's start. A Mine also goes off "
+               "before this enemy's hit, which lands in full unless the Mine "
+               "kills. A "
                "kill moves them to a "
                "survivor.")
 

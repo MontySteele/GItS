@@ -52,7 +52,7 @@ public sealed class ProtoMiGorouInuzaka : CustomCardModel, IElementalCard, IComp
         new[] { KleeKeywords.AppliesGeo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo, includesBombRules: false);
+        FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_gorou_inuzaka");
 

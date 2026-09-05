@@ -49,7 +49,7 @@ public sealed class ProtoMcDionaSignatureMix : CustomCardModel, ICompanionCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForWeak(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_diona_signature_mix");
 

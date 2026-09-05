@@ -240,8 +240,19 @@ public static class KleeMod
                     ["KLEEMOD-OVERLOAD_PREVIEW.description"] =
                         $"[gold]Pyro[/gold] meets [gold]Electro[/gold]: [blue]{Elements.ReactionConstants.OverloadSplash}[/blue] damage to ALL enemies and [blue]{Elements.ReactionConstants.OverloadWeak}[/blue] [gold]Weak[/gold] on the reacted enemy.",
                     ["KLEEMOD-SUPERCONDUCT_PREVIEW.title"] = "Reaction preview: Superconduct",
+                    // `EB-472`. THE ORDER, because this is the one reaction whose debuff
+                    // changes the number of the hit that caused it. `ElementalHit.Deal`
+                    // resolves the reaction and only then reads
+                    // `SimDamagePipeline.TargetMods`, so the Vulnerable it applies
+                    // multiplies THIS hit -- pinned by
+                    // `tier0/tests/test_reaction_phase_parity.py`, and worth 50% of a
+                    // card the Klee r15 run-2 seat had to reverse-engineer out of the HP
+                    // numbers ("that is a 4-point swing on a 1-cost card and it is
+                    // nowhere on the screen"). The comment sits ABOVE the key: this row
+                    // is scraped by `tools/gen_keyword_loc.py`, whose reader wants the
+                    // string to follow the `=` directly.
                     ["KLEEMOD-SUPERCONDUCT_PREVIEW.description"] =
-                        $"[gold]Electro[/gold] meets [gold]Cryo[/gold]: the reacted enemy gains [blue]{Elements.ReactionConstants.SuperconductVuln}[/blue] [gold]Vulnerable[/gold].",
+                        $"[gold]Electro[/gold] meets [gold]Cryo[/gold]: the reacted enemy gains [blue]{Elements.ReactionConstants.SuperconductVuln}[/blue] [gold]Vulnerable[/gold], which applies before this hit.",
                     ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.title"] = "Reaction preview: Electro-Charged",
                     ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.description"] =
                         $"[gold]Hydro[/gold] meets [gold]Electro[/gold]: the reacted enemy loses [blue]{Elements.ReactionConstants.ElectroChargedDot}[/blue] HP at the start of its turn, 1 less each turn.",
@@ -280,6 +291,20 @@ public static class KleeMod
                     // is directly player-visible.
                     [Cards.FurinaRiderTips.CompanionKey + ".title"] =
                         "Companion scaling",
+                    // `EB-475`: three words that gated decisions with no
+                    // definition anywhere. Same dictionary, same reason as the
+                    // four above -- a missing row here is directly
+                    // player-visible as the raw key.
+                    [Cards.FurinaRiderTips.SpotlightMoveKey + ".title"] =
+                        "Moved the Spotlight",
+                    [Cards.FurinaRiderTips.GuestStarKey + ".title"] =
+                        "Guest Star",
+                    [Cards.FurinaRiderTips.BowKey + ".title"] =
+                        "Takes their bow",
+                    // `EB-477`: the half of a Companion card that went missing
+                    // in silence on an empty stage.
+                    [Cards.FurinaRiderTips.CompanionPerformKey + ".title"] =
+                        "Performs a member",
 
                     // B5: the member tips the deploy faces hand off to. Only
                     // the TITLES are rows -- the bodies are built live in

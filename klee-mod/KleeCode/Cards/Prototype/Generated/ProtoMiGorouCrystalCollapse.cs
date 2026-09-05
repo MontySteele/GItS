@@ -46,7 +46,7 @@ public sealed class ProtoMiGorouCrystalCollapse : CustomCardModel, ICompanionCar
     public string? Nation => "inazuma";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForPlan(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_mi_gorou_juuga");
 
