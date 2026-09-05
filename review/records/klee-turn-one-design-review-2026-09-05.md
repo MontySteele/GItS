@@ -1,4 +1,4 @@
-Status: RECORD (a design review, not a doctrine read; 2026-09-05)
+Status: RECORD
 
 # Klee's first turn: a design review with alternatives, GPT 6 Astra
 
