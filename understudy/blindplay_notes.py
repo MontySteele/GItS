@@ -16,7 +16,9 @@ import re
 from typing import Any
 
 from understudy.blindplay_faces import remember_elements
+from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
+                                        CRYSTALLIZE_BLOCK,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
                                         WEAK_DEALT_PCT)
 
@@ -353,6 +355,43 @@ AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
              "-- a hit of a different element consumes it and reacts.*")
 
 
+# `EB-461`. THE PAGE PROMISED A NUMBER AND THE ENEMY NEVER DEALT IT.
+#
+# WHAT THE SEATS SAW. "Every enemy turn where the intent listed an attack
+# number AND a second intent, the attack did not land. I planned two turns of
+# blocking around numbers that were never going to arrive" -- Kokomi r14 (c),
+# four for four across the Living Fog, a Gremlin Merc and a Terror Eel, with
+# Klee r14's Sludge Spinner the same shape.
+#
+# WHAT THE WIRE CARRIES, which decides which of the row's two options is
+# buildable at all. `BuildEnemyState` reads `monster.NextMove` and walks
+# `moveState.Intents`, sending one entry per intent with `type`, `label`,
+# `title` and `description` and NOTHING ELSE -- no order of resolution, no
+# condition, no likelihood, no marker of any kind separating a part that will
+# fire from a part that will not. So "print only the move the enemy will take"
+# is not something this side of the line can do: the feed does not know. The
+# other half of the row's next action is what is left, and it is the honest
+# one -- the page stops calling a multi-part telegraph's number damage that is
+# coming.
+#
+# WHY EVERY PART STILL PRINTS. `EB-342` put them all there and its finding
+# stands: the seat shown only the first row of a two-row telegraph opened the
+# next round with four `Burn`s in hand. Dropping a part would be that defect
+# again. What changes is the CLAIM the page makes about the number, not how
+# many parts it shows.
+MULTI_INTENT_NOTE = (
+    "*An enemy showing more than one intent is telegraphing every part of one "
+    "move, and this page's data feed carries nothing that says which of those "
+    "parts will resolve. On this build the damage part of a multi-part "
+    "telegraph has repeatedly not landed, so read such a number as a part the "
+    "enemy MAY perform rather than as damage it is about to deal.*")
+
+#: What a number on a multi-part telegraph is called ON THE LINE ITSELF, so a
+#: reader who plans off the enemy block without reaching the note under it is
+#: not left holding a bare promise.
+MULTI_INTENT_LABEL = ", a part it MAY perform"
+
+
 # `EB-272`. THE ARMS' OWN WORDS, DEFINED ONCE PER SCREEN.
 #
 # THE GAP. Every keyword a SHIPPED face prints has somewhere a player can read
@@ -564,11 +603,33 @@ ARM_KEYWORDS: dict[str, str] = {
     # meets on a reward screen, which is where the seat needed them.
     "Companion": ("A card titled with a character's name, a dash, then its "
                   "own. Card rewards after a fight offer a fourth, "
-                  "Companion, choice. On Furina's stage playing one performs "
-                  "the front member, then sends it to the back; an empty "
-                  "stage performs nobody. The member picks its own enemy at "
-                  "random, never the card's target."),
+                  "Companion, choice."),
 }
+
+# `EB-460`. THE QUALIFIER WAS NOT ENOUGH, AND THE ROW SAID SO ITSELF.
+#
+# `EB-430` put Furina's perform rule on the shared `Companion` row and hung it
+# on the words "On Furina's stage", on the reasoning that a Klee reading a flat
+# sentence would be taught a rule her board does not have. The r14 Kokomi seat
+# read the qualified version and filed it anyway: "Nothing on any screen in
+# this run had a stage or a member order ... That entry appears to be
+# describing a different character's kit." A qualifier a reader has to
+# recognise as not-about-them is still three sentences of somebody else's kit
+# on every screen, which is `EB-444` one word over.
+#
+# SO THE STAGE HALF IS THE ARM'S, and the arm is asked rather than the board:
+# the word's home screen is a card REWARD, where a Furina board shows no stage
+# and the rule is exactly what the r5 run-2 seat needed. `obs["character"]` is
+# the wire's own answer and it is on every screen.
+COMPANION_STAGE_CLAUSE = (
+    " On Furina's stage playing one performs the front member, then sends it "
+    "to the back; an empty stage performs nobody. The member picks its own "
+    "enemy at random, never the card's target.")
+
+#: Whose stage it is. Matched the way `understudy/adapter.py` matches it -- on
+#: the character's printed Title, case-folded -- because that is the field the
+#: wire sends and a Title is not an id.
+_STAGE_CHARACTER = "furina"
 
 # One pattern per word, and they are CASE-SENSITIVE on purpose: the game
 # capitalises a keyword wherever it prints one, and a case-blind `mine` or
@@ -800,10 +861,18 @@ _BASE_KEYWORD_RE = {
 # by the same deck -- Charlotte supplies Cryo, Shinobu Electro, Barbara Hydro,
 # so Superconduct and Electro-Charged are one companion draft away. A glossary
 # that defined four of six would hide the two a seat is least likely to have
-# seen. `Swirl` and `Crystallize` are Anemo and Geo, which NO card in this
-# build supplies (`_ELEMENT_KEYWORD` reads four elements), so they stay out
-# under the same rule that keeps `Tide` and `Exert` out: a page defining them
-# would be teaching a rule this board does not have.
+# seen.
+#
+# `EB-465` MADE IT EIGHT. `Swirl` and `Crystallize` were kept out on the ground
+# that "NO card in this build supplies Anemo or Geo" -- and that ground went
+# when `EB-454` put both words in `_ELEMENT_KEYWORD`, because the faces were
+# there all along (`Jean -- Gale Blade` is Anemo, `Chiori -- Fluttering Hasode`
+# is Geo). The Furina r8 seat held an Anemo card over a live Swirl preview and
+# was told in capitals that NO REACTION IS REACHABLE HERE. Both are in the
+# mod's `Reaction` enum, both have a shipped preview row, and both are TRIGGER
+# elements: they pair with nothing and react with ANY aura already standing
+# (`ReactionTable.For`, the two lines above the pair switch). So they are
+# reachable on a different test from the six -- `SPREAD_REACTIONS` below.
 REACTION_KEYWORDS: dict[str, str] = {
     "Elemental Reaction": (
         "A hit of a different element than the aura an enemy is already "
@@ -838,6 +907,13 @@ REACTION_KEYWORDS: dict[str, str] = {
     "Frozen": ("Hydro on a Cryo aura, or Cryo on a Hydro aura. Its next "
                "action deals half damage, and the first Attack to hit it "
                "Shatters for 6 damage."),
+    # `EB-465`'s two, and they are the mod's own preview sentences the way the
+    # six above are. `Swirl` is `ARM_KEYWORDS`' row VERBATIM rather than a
+    # second copy of it, because ten Universals print the word as a verb and
+    # one screen must not carry two definitions of it.
+    "Swirl": ARM_KEYWORDS["Swirl"],
+    "Crystallize": ("Geo on any aura. The aura is consumed and you gain "
+                    f"{CRYSTALLIZE_BLOCK} Block."),
 }
 
 # `EB-428`. THE SIX ROWS FILLED 40% OF A SCREEN THAT COULD FIRE NONE OF THEM.
@@ -875,11 +951,29 @@ REACTION_ELEMENTS: dict[str, frozenset[str]] = {
     "Frozen": frozenset({"Hydro", "Cryo"}),
 }
 
+# `EB-465`. THE TWO THAT PAIR WITH NOTHING AND REACT WITH EVERYTHING.
+#
+# Anemo and Geo leave no aura of their own, so neither appears in the table
+# above and neither can ever be half of a pair. `ReactionTable.For` checks them
+# FIRST and against no partner at all -- "Trigger-only elements are checked
+# first: they react with ANY aura" -- so their reachability test is a different
+# one: the element in reach, and an aura standing on a body NOW.
+#
+# NOW, NOT REMEMBERED. The six are about what a DECK can draw, so they ride the
+# fight's memory of every element seen; a trigger element is about what is on
+# the board this instant, because a Swirl with nothing to spread does nothing
+# and the keyword's own last clause says so.
+SPREAD_REACTIONS: dict[str, str] = {"Swirl": "Anemo", "Crystallize": "Geo"}
+
 _ELEMENTS = ("Pyro", "Hydro", "Electro", "Cryo")
+#: The trigger elements, in reach on the same three sources as the four above:
+#: `EB-454` put both words in `_ELEMENT_KEYWORD`, so a face carries them.
+_SPREAD_ELEMENTS = tuple(sorted(set(SPREAD_REACTIONS.values())))
 #: The game's own phrase for a card that supplies an element, matched in any
 #: printed body -- a potion's rule and a relic's read the same way a card's
 #: keyword does, and the belt is one of the three sources the row names.
-_APPLIES_RE = re.compile(r"\bApplies (Pyro|Hydro|Electro|Cryo)\b")
+_APPLIES_RE = re.compile(
+    r"\bApplies (Pyro|Hydro|Electro|Cryo|Anemo|Geo)\b")
 #: `AuraPower.Localization` writes `("title", $"{Element} Aura")`, which is
 #: the same handle `_is_aura` reads and the only one this side of the line has.
 _AURA_NAME_RE = re.compile(r"^(Pyro|Hydro|Electro|Cryo) Aura$")
@@ -1020,7 +1114,7 @@ def _reachable_elements(obs: dict[str, Any]) -> set[str]:
     def walk(blob: Any) -> None:
         if isinstance(blob, dict):
             element = str(blob.get("element") or "").strip()
-            if element in _ELEMENTS:
+            if element in _ELEMENTS or element in _SPREAD_ELEMENTS:
                 found.add(element)
             aura = _AURA_NAME_RE.match(str(blob.get("name") or "").strip())
             if aura and str(blob.get("kind") or "").strip().lower() == "aura":
@@ -1040,7 +1134,27 @@ def _reachable_elements(obs: dict[str, Any]) -> set[str]:
     return remember_elements(found)
 
 
-def _no_reaction_clause(reach: set[str]) -> str:
+def _aura_on_board(obs: dict[str, Any]) -> bool:
+    """Is an elemental aura standing on a body RIGHT NOW? (`EB-465`)
+
+    The same badge `_is_aura` reads and `_reachable_elements` matches on, asked
+    of the screen rather than of the fight: a trigger element needs an aura in
+    front of it this instant, and one consumed two turns ago is not one.
+    """
+    def walk(blob: Any) -> bool:
+        if isinstance(blob, dict):
+            if (str(blob.get("kind") or "").strip().lower() == "aura"
+                    and _AURA_NAME_RE.match(
+                        str(blob.get("name") or "").strip())):
+                return True
+            return any(walk(v) for v in blob.values())
+        if isinstance(blob, list):
+            return any(walk(v) for v in blob)
+        return False
+    return walk(obs)
+
+
+def _no_reaction_clause(reach: set[str], aura: bool = False) -> str:
     """`EB-428`'s "otherwise one line", and it says WHY rather than only that.
 
     A reader told "no reaction is reachable" and nothing else cannot act on
@@ -1048,16 +1162,29 @@ def _no_reaction_clause(reach: set[str]) -> str:
     into a shopping list: one card of any other element brings a reaction back,
     and the umbrella sentence above already says what an element meeting its
     own aura does instead.
+
+    `EB-465` GAVE THE TRIGGER ELEMENTS THEIR OWN HALF. An Anemo card in hand is
+    not a fifth element to pair off -- it is a reaction waiting on an aura, and
+    a reader holding one needs to be told which of the two halves is missing.
+    Where the hand reaches Anemo or Geo and no body wears an aura, the clause
+    says so beside the pair half, because the two are different shopping lists.
     """
     tail = (" Each of the six is defined again on the first screen that "
             "reaches a second element.")
-    if len(reach) == 1:
-        only = next(iter(reach))
-        return (f" NO REACTION IS REACHABLE HERE: {only} is the only element "
-                f"this screen can supply, and {only} meeting a {only} aura "
-                f"refreshes it rather than reacting.{tail}")
-    return (" NO REACTION IS REACHABLE HERE: this screen supplies no element "
-            "at all." + tail)
+    pairs = sorted(reach & set(_ELEMENTS))
+    spread = sorted(reach & set(_SPREAD_ELEMENTS))
+    reasons: list[str] = []
+    if len(pairs) == 1:
+        only = pairs[0]
+        reasons.append(f"{only} is the only element this screen can supply, "
+                       f"and {only} meeting a {only} aura refreshes it rather "
+                       f"than reacting")
+    elif not pairs:
+        reasons.append("this screen supplies no element at all")
+    if spread and not aura:
+        reasons.append(f"{' and '.join(spread)} reacts with any aura already "
+                       f"standing, and no enemy is wearing one")
+    return " NO REACTION IS REACHABLE HERE: " + "; ".join(reasons) + "." + tail
 
 
 def _wire_keyword_rows(blob: Any) -> list[dict[str, str]]:
@@ -1144,9 +1271,16 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     meters = ((obs.get("combat") or {}).get("you") or {}).get("meters") or {}
     hay = "\n".join(list(_body_strings(obs)) + list(meters))
     growth = _BOMB_GROWTH_RE.search(hay)
+    # `EB-460`: ONE OF THESE ROWS IS ARM-CONDITIONAL. The stage half of
+    # `Companion` is Furina's rule, so it rides a Furina run and nothing else;
+    # every other arm gets the definition and the reward slot, which are true
+    # on all of them.
+    stage = _fold(obs.get("character")) == _STAGE_CHARACTER
     rows = [{"name": word,
              "text": ARM_KEYWORDS[word].format(
-                 growth=int(growth.group(1)) if growth else BOMB_GROWTH)}
+                 growth=int(growth.group(1)) if growth else BOMB_GROWTH)
+             + (COMPANION_STAGE_CLAUSE
+                if stage and word == "Companion" else "")}
             for word, pattern in _ARM_KEYWORD_RE.items() if pattern.search(hay)]
     rows += [{"name": word, "text": GAME_KEYWORDS[word]}
              for word, pattern in _GAME_KEYWORD_RE.items()
@@ -1161,13 +1295,24 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
         live = [word for word in REACTION_KEYWORDS
                 if word in REACTION_ELEMENTS
                 and REACTION_ELEMENTS[word] <= reach]
+        # `EB-465`: and the two that need an aura instead of a partner. The
+        # sentence below can no longer contradict a preview on the same screen,
+        # because the preview raises on exactly this board state.
+        aura = _aura_on_board(obs)
+        if aura:
+            live += [word for word, element in SPREAD_REACTIONS.items()
+                     if element in reach]
         rows.append({"name": "Elemental Reaction",
                      "text": REACTION_KEYWORDS["Elemental Reaction"]
-                     + ("" if live else _no_reaction_clause(reach))})
+                     + ("" if live else _no_reaction_clause(reach, aura))})
+        # A word an arm row already defined is not defined twice: `Swirl` is
+        # printed as a verb by ten Universals and carries an `ARM_KEYWORDS` row
+        # of its own, which is this row's sentence.
+        named = {row["name"] for row in rows}
         rows += [{"name": word,
                   "text": REACTION_KEYWORDS[word]
                   + (FROZEN_BOSS_CLAUSE if boss and word == "Frozen" else "")}
-                 for word in live]
+                 for word in live if word not in named]
     seen = {row["name"] for row in rows}
     for row in _wire_keyword_rows(obs):
         if row["name"] in seen:

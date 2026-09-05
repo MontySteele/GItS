@@ -5614,12 +5614,53 @@ def test_the_companion_row_is_the_mods_own_sentence_about_the_slot():
     # two, and the ceiling it keeps is PER SENTENCE: no sentence here runs
     # longer than the 135-character tip the arm rows mirror, which is what
     # stops a row with no tip of its own from sprawling.
-    for sentence in re.split(r"(?<=\.)\s+", body):
+    for sentence in re.split(r"(?<=\.)\s+",
+                             body + blindplay.COMPANION_STAGE_CLAUSE):
         assert len(sentence) <= 135, (len(sentence), sentence)
-    # And the Salon half NAMES the stage it is about: Klee's Companions carry
-    # their own rider (Spark, on `KleeCompanionSpark`'s tip), so a flat
-    # sentence here would teach her a rule her board does not have.
-    assert "On Furina's stage" in body
+    # `EB-460`: AND THE SALON HALF IS OFF THE SHARED ROW ENTIRELY. Naming the
+    # stage was not enough -- the r14 Kokomi seat read the qualified sentences
+    # and still filed them as "describing a different character's kit" -- so
+    # the arm decides, and the shared row carries no stage at all.
+    assert "Furina" not in body and "stage" not in body
+    assert "On Furina's stage" in blindplay.COMPANION_STAGE_CLAUSE
+
+
+def test_the_companion_stage_sentence_prints_under_furina_and_no_other_arm():
+    """`EB-460`. A TIP THAT PRINTED ANOTHER CHARACTER'S RULES, which is
+    `EB-444` one word over.
+
+    "The Companion glossary entry talks about Furina's stage and a front member
+    being performed and sent to the back. Nothing on any screen in this run had
+    a stage or a member order ... That entry appears to be describing a
+    different character's kit" (Kokomi r14 (c)). `EB-430` had already qualified
+    the clauses with "On Furina's stage" and the qualifier did not save them: a
+    reader still has to recognise three sentences as not being about them, on
+    every screen a Companion card is read on.
+
+    THE ARM IS ASKED, NOT THE BOARD. The word's home screen is a card reward,
+    where a Furina board shows no stage either, so the gate is the wire's own
+    `character` field and it is on every screen.
+
+    Seen to FAIL: the stage sentences printed on the recorded Kokomi turn.
+    """
+    face = "Deal 3 damage for each Companion you played this turn."
+    kokomi = blindplay.observe(keyword_hand_state([face]))
+    assert "- **Companion** — A card titled with a character's name" in kokomi
+    assert "offer a fourth, Companion, choice" in kokomi
+    assert "Furina" not in kokomi and "front member" not in kokomi
+
+    state = keyword_hand_state([face])
+    state["player"]["character"] = "Furina"
+    furina = blindplay.observe(state)
+    assert "- **Companion** — A card titled with a character's name" in furina
+    assert "On Furina's stage playing one performs the front member" in furina
+    assert "picks its own enemy at random" in furina
+
+    # A Klee run is the third arm and reads like the Kokomi one: her
+    # Companions carry their own rider, on `KleeCompanionSpark`'s tip.
+    klee = json.loads(json.dumps(state))
+    klee["player"]["character"] = "Klee"
+    assert "On Furina's stage" not in blindplay.observe(klee)
 
 
 def test_the_companion_word_is_defined_where_a_card_prices_itself_on_it():
@@ -6062,6 +6103,60 @@ def test_a_second_element_brings_back_its_pair_and_only_its_pair():
     assert "NO REACTION IS REACHABLE" not in page
 
 
+def test_an_anemo_card_over_a_standing_aura_reaches_swirl():
+    """`EB-465`, THE SENTENCE THAT CONTRADICTED A PREVIEW ON ITS OWN SCREEN.
+
+    The Furina r8 seat held an Anemo card with a live Swirl preview and was
+    told in capitals that NO REACTION IS REACHABLE HERE. Anemo and Geo pair
+    with nothing, so the four-element pair test could never see them; they
+    react with ANY aura already standing, which is a fact this page has.
+
+    Seen to FAIL: the capitals printed on this exact board, and no Swirl row
+    printed with them.
+    """
+    page = blindplay.observe(
+        elemental_hand_state(aura=True, elements=("Anemo",)))
+    assert "NO REACTION IS REACHABLE" not in page
+    assert "- **Swirl** — " in page
+    # ONCE. Ten Universals print the word as a verb and carry an arm row of
+    # their own, and one screen must not define it twice.
+    assert page.count("- **Swirl** ") == 1
+    assert "- **Elemental Reaction** — " in page
+    # Geo is the same rule one element over, and its row carries the Block the
+    # mod's own preview interpolates.
+    geo = blindplay.observe(
+        elemental_hand_state(aura=True, elements=("Geo",)))
+    assert "NO REACTION IS REACHABLE" not in geo
+    assert (f"- **Crystallize** — Geo on any aura. The aura is consumed and "
+            f"you gain {blindplay.CRYSTALLIZE_BLOCK} Block.") in geo
+
+
+def test_a_trigger_element_with_no_aura_out_is_told_which_half_is_missing():
+    """The other side of `EB-465`, and the reason the clause was rewritten
+    rather than deleted: a Swirl with nothing to spread does nothing, so the
+    sentence still fires -- and it now names the half that is absent instead of
+    calling an Anemo card "no element at all"."""
+    page = blindplay.observe(elemental_hand_state(elements=("Anemo",)))
+    assert ("NO REACTION IS REACHABLE HERE: this screen supplies no element "
+            "at all; Anemo reacts with any aura already standing, and no "
+            "enemy is wearing one.") in page
+    assert "- **Swirl** — " not in page
+    # And beside the pair half, because the two are different shopping lists.
+    both = blindplay.observe(elemental_hand_state(elements=("Pyro", "Anemo")))
+    assert "NO REACTION IS REACHABLE HERE: Pyro is the only element" in both
+    assert "Anemo reacts with any aura already standing" in both
+
+
+def test_the_crystallize_block_is_the_mods_own_constant():
+    """`CRYSTALLIZE_BLOCK` is held in step from THIS side, the way
+    `BOMB_GROWTH` and `AURA_DURATION_TURNS` are: this module may not import
+    `tier0`, so a retune of the C# constant goes red here (`EB-465`)."""
+    table = (REPO / "klee-mod" / "KleeCode" / "Elements"
+             / "ReactionTable.cs").read_text(encoding="utf-8")
+    assert re.search(
+        rf"CrystallizeBlock\s*=\s*{blindplay.CRYSTALLIZE_BLOCK}\b", table)
+
+
 def test_the_belt_supplies_an_element_through_its_printed_rule():
     """The row names three sources, and a potion is the one with no `element`
     field to read: the game writes `Applies X` into the printed body instead,
@@ -6123,6 +6218,10 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         "Electro-Charged": [" HP at the start of its turn, 1 less each turn"],
         "Frozen": ["ts next action deals half damage, and the first Attack "
                    "to hit it Shatters for "],
+        # `EB-465`'s two trigger elements, held in step off the same
+        # `keywordFallback` table the six above come from.
+        "Swirl": ["aura is consumed and copied onto ALL enemies"],
+        "Crystallize": ["he aura is consumed and you gain "],
     }
     assert set(anchors) | {"Elemental Reaction"} \
         == set(blindplay.REACTION_KEYWORDS)
@@ -6543,19 +6642,101 @@ def test_a_compound_intent_prints_every_component():
     Seen to FAIL: only the first row of the list reached the page.
     """
     page = blindplay.observe(compound_intent_state())
-    assert ("Intent: Aggressive (Attack) — the number on its icon is 8 "
-            "— This enemy intends to Attack for 8 damage.") in page
+    # `EB-461` MARKED THE NUMBERS ON A MULTI-PART TELEGRAPH, and nothing else
+    # about these lines moved: both parts still print, in the move's own order.
+    assert ("Intent: Aggressive (Attack) — the number on its icon is 8, a "
+            "part it MAY perform — This enemy intends to Attack for 8 "
+            "damage.") in page
     assert ("and also: Strategic (StatusCard) — the number on its icon "
-            "is 4 — This enemy intends to add 4 Burn to your hand.") \
-        in page
+            "is 4, a part it MAY perform — This enemy intends to add 4 Burn "
+            "to your hand.") in page
+
+
+def test_no_observe_prints_the_enemy_block_twice():
+    """`EB-458`, and the row's premise did not hold: there is no duplicated
+    render path to find.
+
+    WHAT WAS FILED. "The page printed `## The other side` and the whole enemy
+    block twice, verbatim, on five observes across four fights" (Klee r14).
+
+    WHAT THE CODE SAYS. `render` emits that heading in exactly one place, in
+    the one `screen == "combat"` branch, and `observe` is `render(observation
+    (state))` -- there is no second emitter on this path (`qa_packet`'s is the
+    STAGED PACKET, a different surface with a different entry point). Every
+    recorded screen in `review/qa` renders it once.
+
+    WHAT ACTUALLY HAPPENED, on the seats' own evidence. Both r14 seats declare
+    piping `observe` through `sed -n '<ranges>p'` to re-read one block, and the
+    Klee r10 run-2 seat met the IDENTICAL symptom and diagnosed it itself:
+    "One such call early on used two overlapping `sed` ranges and printed the
+    enemy block twice -- a formatting error of mine, not a game one."
+
+    So this stands as the guard rather than the fix: the page prints the block
+    once, and a render path that ever emitted it twice goes red here.
+    """
+    for state in (combat_state(), compound_intent_state(),
+                  elemental_hand_state(aura=True),
+                  keyword_hand_state(["Gain 5 Block."])):
+        page = blindplay.observe(state)
+        assert page.count("## The other side") == 1, page.count(
+            "## The other side")
+        assert page.count("# Battle") == 1
+    src = (REPO / "understudy" / "blindplay_render.py").read_text(
+        encoding="utf-8")
+    assert src.count('"## The other side"') == 1
 
 
 def test_a_single_component_intent_reads_exactly_as_it_always_did():
-    """One row, one line, no continuation -- the recorded combat is the pin."""
+    """One row, one line, no continuation -- the recorded combat is the pin.
+
+    `EB-461` left this line alone on purpose: a one-part telegraph is the one
+    the enemy takes, so its number is a promise the page may keep making.
+    """
     page = blindplay.observe(combat_state())
     assert ("Intent: Aggressive (Attack) — the number on its icon is 12 "
             "— This enemy intends to Attack for 12 damage.") in page
     assert "and also:" not in page
+    assert "MAY perform" not in page
+    assert blindplay.MULTI_INTENT_NOTE not in page
+
+
+def test_a_dual_intent_number_is_labelled_a_part_the_enemy_may_perform():
+    """`EB-461`. THE PAGE PROMISED DAMAGE THE ENEMY NEVER DEALT.
+
+    "Every enemy turn where the intent listed an attack number AND a second
+    intent, the attack did not land. I planned two turns of blocking around
+    numbers that were never going to arrive" (Kokomi r14 (c) 2, four for four;
+    Klee r14's Sludge Spinner the same shape).
+
+    WHICH OF THE ROW'S TWO OPTIONS THIS IS, and why. `BuildEnemyState` walks
+    `monster.NextMove`'s `Intents` and sends `type`, `label`, `title` and
+    `description` per part and nothing else -- no resolution order, no
+    condition, no marker of any kind separating a part that fires from one
+    that does not. "Print only the move the enemy will take" is therefore not
+    available to this side of the line, so the number is LABELLED instead,
+    twice: on the line a reader plans off, and once under the block.
+
+    Seen to FAIL: the number printed bare, and no note said otherwise.
+    """
+    page = blindplay.observe(compound_intent_state())
+    assert "the number on its icon is 8, a part it MAY perform" in page
+    assert "the number on its icon is 4, a part it MAY perform" in page
+    # ONCE, with the block's other notes, however many enemies telegraph parts.
+    assert page.count(blindplay.MULTI_INTENT_NOTE) == 1
+    assert "damage it is about to deal" in page
+
+    # A part with no number on its icon says nothing new -- there is no
+    # promise on it to withdraw.
+    quiet = json.loads(json.dumps(combat_state()))
+    quiet["battle"]["enemies"][0]["intents"] = [
+        {"type": "Attack", "label": "6", "title": "Aggressive",
+         "description": "This enemy intends to Attack for 6 damage."},
+        {"type": "Buff", "label": "", "title": "Empower",
+         "description": "This enemy intends to use a Buff."}]
+    quiet_page = blindplay.observe(quiet)
+    assert "the number on its icon is 6, a part it MAY perform" in quiet_page
+    assert quiet_page.count("the number on its icon") == 1
+    assert blindplay.MULTI_INTENT_NOTE in quiet_page
 
 
 def discounted_hand_state() -> dict:
@@ -7404,16 +7585,14 @@ def test_a_performance_on_a_body_this_fight_never_saw_keeps_the_mods_title():
 
 
 def test_a_replayed_companion_is_named_beside_the_performances():
-    """`EB-420`. Duet plays the next Companion card an extra time and the
-    extra play performs nobody -- LAW:145's per-Companion-play bound, which
-    `KleeCompanionSpark` states in as many words. The seat could not see that:
-    "two Crabaletta lines ... for three Companion-card plays' worth of
-    triggers", and "no line anywhere on the screen said Duet".
+    """`EB-420`. Duet plays the next Companion card an extra time and nothing
+    on any screen said so: "two Crabaletta lines ... for three Companion-card
+    plays' worth of triggers", and "no line anywhere on the screen said Duet".
 
-    A reader counting the acts above against the plays it made infers the
-    wrong rule, so the play that is MISSING from the list is named in the same
-    block -- beside the performances and never inside them, because a replay
-    that performed nobody is not a performance."""
+    `EB-464` FLIPPED WHAT THE LINE SAYS. The extra play performs now, so it is
+    no longer a play MISSING from the list above -- it is the reason one of
+    those rows is there, which a performance list cannot say for itself. Still
+    beside the performances and never inside them: this row is about a PLAY."""
     state = salon_state([
         {"member": "Crabaletta", "target": "Nibbit", "combat_id": "1",
          "element": "Hydro", "aura": "Hydro", "amount": 6, "paid": True,
@@ -7422,8 +7601,8 @@ def test_a_replayed_companion_is_named_beside_the_performances():
     page = blindplay.observe(state)
 
     assert "- **Crabaletta** hit Nibbit for 6 Hydro" in page
-    assert ("- **Freminet — Pers, Deploy!** was played an extra time, and an "
-            "extra play makes nobody perform.") in page
+    assert ("- **Freminet — Pers, Deploy!** was played an extra time, and the "
+            "extra play performed as well.") in page
 
 
 def test_a_replay_with_no_performance_still_gets_its_line():
@@ -7450,7 +7629,10 @@ def test_the_companion_perform_clauses_are_the_perform_codes_own():
     """
     salon = (REPO / "klee-mod" / "KleeCode" / "Powers"
              / "SalonPowers.cs").read_text(encoding="utf-8")
-    body = blindplay.ARM_KEYWORDS["Companion"]
+    # `EB-460` MOVED THESE TWO CLAUSES OFF THE SHARED ROW. They are Furina's
+    # rule, so they live in `COMPANION_STAGE_CLAUSE` and print on her run only;
+    # what they SAY is still read off `SalonPowers` and pinned here.
+    body = blindplay.COMPANION_STAGE_CLAUSE
 
     # THE TARGET. `PerformMember` rolls it; the card's target reaches it
     # nowhere -- the method takes an owner and a member and no creature.

@@ -702,15 +702,32 @@ def _finish_play(state: CombatState, card: Card,
         # Ascent pays on every Hexerei card played, and reads the mark
         # off the card. `tier0.engine.companion_hexerei`.
         companion_hexerei.note_card_played(state, card)
-        if replay_index == 0 and card.is_companion:
-            # FURINA REFRAME (§4.3, `F3` (1) / `F4` (1)): a Companion play
-            # makes the FRONT Salon member perform, then rotates it to the
-            # back. Beside Klee's mint and gated the same way for the same two
-            # reasons -- once per PLAY (a replay is one card resolved twice),
-            # and after a resolution has run. Inert unless
-            # `FURINA_REFRAME_MANUAL` is on, and inert for every other
-            # character in every world.
+        # FURINA REFRAME (§4.3, `F3` (1) / `F4` (1)): a Companion play makes
+        # the FRONT Salon member perform, then rotates it to the back.
+        #
+        # `EB-464` TOOK THIS ONE OUT OF THE `replay_index == 0` GATE. It shared
+        # the gate with Klee's mint below on LAW:145's clause -- "a per-play
+        # bound a replay can double is not a bound" -- and that clause is about
+        # a RESOURCE MINT. A performance is not one: the Companion tip says a
+        # played Companion card performs the front member and Replay says it
+        # plays the card again, so the r8 seat counted 16 where 20 was
+        # promised, twice, with Fanfare (2 per performance) agreeing with ONE
+        # performance (D default, r8 packet sec.4). Klee's mint keeps the gate,
+        # three lines down, which is where the clause actually bites.
+        #
+        # STILL AFTER A RESOLUTION HAS RUN, which is what this site is. Inert
+        # unless `FURINA_REFRAME_MANUAL` is on, and inert for every other
+        # character in every world. C# twin: the same call, ungated, in
+        # `FurinaResources.AfterCardPlayed`.
+        if card.is_companion:
             furina_reframe.companion_play_trigger(state, card)
+            if replay_index:
+                # `EB-420`'s RECORD OUTLIVES ITS REASON. The extra PLAY still
+                # leaves no trace of its own, because the act above is
+                # indistinguishable from any other row of the performance list.
+                # C# twin: `SalonMemberPower.NoteCompanionReplay`.
+                furina_reframe.companion_replay(state, card)
+        if replay_index == 0 and card.is_companion:
             # "Little Hexenzirkul" (EB-219): Klee's kit answering a PERSONAL
             # Companion play, which is where LAW:145 puts the grant now that
             # Prune's face may not carry it. INSIDE the loop but gated to the
@@ -721,14 +738,6 @@ def _finish_play(state: CombatState, card: Card,
             # read `reactions_this_card`, which does not exist until a
             # resolution has run. C# does the same at KleeElementalHooks.
             effects.klee_personal_companion_spark(state, card)
-        elif card.is_companion:
-            # `EB-420`. THE OTHER SIDE OF THAT GATE, said out loud. The bound
-            # is deliberate and the replay leaves no trace: Duet doubled a
-            # Companion's hit, the Salon performed once, and nothing named the
-            # second play. Emitted here rather than inside the trigger because
-            # this is the branch that does not call it. C# twin:
-            # `SalonMemberPower.NoteCompanionReplay`, at the same gate.
-            furina_reframe.companion_replay_no_trigger(state, card)
     # THE AUTOMATIC POWER FLOOR GRANT USED TO LIVE HERE. Deleted by the
     # Fanfare rework (2026-07-28, Track B, RULED): playing any Power silently
     # raised floor, cap and current by 5 (rares 8), printed on no card and

@@ -263,6 +263,39 @@ def test_a_planned_hit_is_the_jellyfishs_and_applies_hydro(overhaul):
     assert enemy.aura == "hydro"
 
 
+def test_the_oaths_now_line_applies_hydro_like_its_carry_out(overhaul):
+    """`EB-462` (D default, Kokomi r14 packet sec.4), the sim half.
+
+    "Kurage's Oath prints [Hydro] in its title while a rider says its own hit
+    applies no aura and only the carry-out is a Hydro hit; a seat built a turn
+    on the tag, and the same Electro-then-Hydro sequence reacted with Deep
+    Current and not with the Oath's now-line."
+
+    The row declares `applies_element` on its own damage clause, which beats
+    the cadence -- the cadence elements her ATTACKS and this is a Skill -- and
+    `_element_for` falls back to the CHARACTER's element for a character row,
+    which carries none of its own. The mod's twin is the `IElementalCard` the
+    generator now emits on this class.
+
+    Seen to FAIL: the enemy was bare after the now-line, and the Electro aura
+    below survived it.
+    """
+    enemy = make_enemy(hp=40)
+    st = kokomi_state(enemies=[enemy])
+    effects.resolve_card(st, loader.get_card("proto_kk_kurages_oath"))
+    assert enemy.hp == 40 - 3
+    assert enemy.aura == "hydro"
+
+    # AND IT REACTS, which is the thing the seat was denied: an Electro aura
+    # standing in front of the now-line is consumed rather than ignored.
+    charged = make_enemy(hp=40)
+    charged.aura = "electro"
+    charged.aura_turns_left = 3
+    st2 = kokomi_state(enemies=[charged])
+    effects.resolve_card(st2, loader.get_card("proto_kk_kurages_oath"))
+    assert charged.aura != "electro"
+
+
 def test_her_weak_does_not_shrink_a_planned_hit(overhaul):
     """`EB-334` PIN 1: Weak ON KOKOMI, no effect. The seat's own arithmetic --
     "Plan: Deal 12 damage" paying 9 the next morning, exactly x0.75."""

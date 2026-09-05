@@ -57,6 +57,13 @@ BOMB_GROWTH = 4
 # as the line above: pinned from the other side, never imported.
 AURA_DURATION_TURNS = 2
 
+# `EB-465`. The Block a Crystallize pays, as
+# `ReactionConstants.CrystallizeBlock` sets it and the shipped
+# `KLEEMOD-CRYSTALLIZE_PREVIEW` row interpolates it. Same discipline as the
+# line above -- spelled here, never imported -- and held in step from the other
+# side by `test_the_crystallize_block_is_the_mods_own_constant`.
+CRYSTALLIZE_BLOCK = 4
+
 # `EB-377`. THE THREE BASE-GAME DURATION DEBUFFS, AS PERCENTAGES.
 #
 # Spelled here for `CHARGE_SOURCE_LINE`'s reason and held in step from the

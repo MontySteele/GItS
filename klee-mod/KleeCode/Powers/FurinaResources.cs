@@ -1024,33 +1024,37 @@ public sealed class FurinaResourceHooks : AbstractModel
         // FURINA REFRAME (§4.3, `F3` (1) / `F4` (1)): a Companion play makes
         // the FRONT Salon member perform, then rotates it to the back.
         //
-        // BESIDE KLEE'S MINT AND GATED THE SAME WAY, for the same two reasons
-        // (see `KleeCompanionSpark`): once per PLAY, because
-        // `IsFirstInSeries` is the phase that means "once per play_card call"
-        // and a replay is one card resolved twice; and AFTER a resolution has
-        // run, which is what this broadcast is. The sim gates the identical
-        // call on `replay_index == 0 and card.is_companion` inside
-        // `combat._finish_play` and puts Klee's mint on the very next line.
+        // `EB-464` TOOK THE `IsFirstInSeries` GATE OFF THIS ONE.
+        //
+        // It sat here for `KleeCompanionSpark`'s reason -- "a per-play bound a
+        // replay can double is not a bound" -- and that argument is about a
+        // RESOURCE MINT, which a replay must not double. A performance is not
+        // a mint: the Companion tip says a played Companion card performs the
+        // front member, Replay says it plays the card again, and nothing said
+        // the performance was excepted. The Furina r8 seat counted 16 where 20
+        // was promised, twice, with Fanfare (2 per performance) agreeing with
+        // ONE performance. So the rule the faces state is the rule, and a
+        // replayed Companion card performs (D default, r8 packet sec.4).
+        //
+        // KLEE'S MINT IS UNMOVED, here and in the sim: `KleeCompanionSpark`
+        // keeps its gate, because it IS a per-play resource bound. The two
+        // rules were gated together only because they share a call site.
         //
         // PLACED BEFORE THE TWO FLUSHES BELOW so the performance's Block and
         // its Fanfare mint settle inside the play that caused them rather than
         // waiting for the next one. Inert unless the arm's MANUAL leg is on,
-        // and inert for every other character.
-        if (cardPlay.IsFirstInSeries)
+        // and inert for every other character. The sim's twin is the same
+        // call, ungated, inside `combat._finish_play`'s replay loop.
+        await SalonMemberPower.CompanionPlayTrigger(
+            choiceContext, owner, cardPlay.Card);
+        if (!cardPlay.IsFirstInSeries)
         {
-            await SalonMemberPower.CompanionPlayTrigger(
-                choiceContext, owner, cardPlay.Card);
-        }
-        else
-        {
-            // `EB-420`. THE OTHER SIDE OF THE SAME GATE, said out loud. The
-            // bound above is deliberate (LAW:145, and `KleeCompanionSpark`
-            // spells out why a replay must not double it), and it left no
-            // trace: Duet doubled Freminet's hit, the Salon performed once,
-            // and no line on any screen named the second play. Recorded at
-            // the gate rather than inside `CompanionPlayTrigger`, because
-            // this is the branch that does NOT call it, and the Companion and
-            // arm tests live in that method for the reason its doc gives.
+            // `EB-420`'S RECORD OUTLIVES ITS REASON. It was filed because the
+            // extra play left no trace at all -- "I ended the turn unable to
+            // say whether Duet had fired" -- and that is still true of the
+            // performance list, where the replay's act is indistinguishable
+            // from any other. So the replay keeps its own name in the ledger;
+            // what changed is that it performed, and the page says so.
             SalonMemberPower.NoteCompanionReplay(owner, cardPlay.Card);
         }
 #endif

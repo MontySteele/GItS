@@ -1,0 +1,164 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using KleeMod.Cards.Prototype;
+using KleeMod.Cards.Prototype.Generated;
+using KleeMod.Elements;
+using KleeMod.Powers;
+using KleeMod.Tests.Harness;
+using Xunit;
+
+namespace KleeMod.Tests.Prototype;
+
+/// <summary>
+/// ROUND 14, the rows the seats filed against faces that promised one thing
+/// and did another.
+/// </summary>
+[Collection(KleeOverhaulArm.Name)]
+public class Round14Tests
+{
+    /// <summary>A generated card's printed face, off an instance allocated
+    /// uninitialised: these `Localization` getters are pure string builders
+    /// (`Round13Tests`' idiom, and the headless boundary's reason).</summary>
+    private static string Face<T>() where T : notnull
+    {
+        var model = RuntimeHelpers.GetUninitializedObject(typeof(T));
+        var rows = (List<(string, string)>)model.GetType()
+            .GetProperty("Localization")!.GetValue(model)!;
+        return rows.Single(r => r.Item1 == "description").Item2;
+    }
+
+    // ==================================================================
+    // `EB-462` -- the tag and the rider disagreed, and the tag won
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r14 (c) 4). <i>Kurage's Oath</i> prints [Hydro] in its
+    // title while a rider said "its own hit applies no aura -- the Bake-Kurage
+    // carries out the Plan as a Hydro hit, which does". The seat built a turn
+    // on the tag: the same Electro-then-Hydro sequence that reacted through
+    // <i>Deep Current</i> did nothing through the Oath's now-line.
+    //
+    // THE RULING (D default, the r14 packet sec.4): the now-line applies Hydro
+    // like the carry-out, and the rider goes. It is declared ON THE SHEET --
+    // `applies_element: true` on the row's own damage clause -- which is a
+    // field both engines already read, so the two cannot drift: the generator
+    // emits `IElementalCard` from it and `effects._element_for` answers off the
+    // same key. `CatalystCadence.PrintedElement` tests `IElementalCard` FIRST,
+    // before it asks whether the card is an Attack, so a Skill that declares
+    // one elements its own hit.
+
+    [Fact]
+    public void The_oaths_now_line_declares_hydro()
+    {
+        var card = new ProtoKkKuragesOath();
+
+        Assert.IsAssignableFrom<IElementalCard>(card);
+        Assert.Equal(Element.Hydro, ((IElementalCard)card).Element);
+    }
+
+    [Fact]
+    public void The_declaration_is_what_the_cadence_reads()
+    {
+        // The join, and the reason the interface is enough: the cadence asks
+        // `IElementalCard` before it asks anything about the card's type, so
+        // this Skill's own hit is a Hydro hit at the aura funnel.
+        Assert.Equal(Element.Hydro,
+            CatalystCadence.PrintedElement(new ProtoKkKuragesOath(), null));
+    }
+
+    [Fact]
+    public void The_no_aura_rider_is_off_this_face()
+    {
+        // `ForPlanElement` explains a disagreement that no longer exists here.
+        // It still rides the rows whose now-line really does apply nothing --
+        // Ambush, Chain of Command, War Council -- so the pin is that this one
+        // is not among them.
+        var tips = Il.Calls(
+            Il.Method("ProtoKkKuragesOath", "get_ExtraHoverTips"));
+
+        Assert.DoesNotContain(tips, c => c.Contains("ForPlanElement"));
+        Assert.Contains(
+            Il.Calls(Il.Method("ProtoKkAmbush", "get_ExtraHoverTips")),
+            c => c.Contains("ForPlanElement"));
+    }
+
+    // ==================================================================
+    // `EB-464` -- a replayed Companion card performs the front member
+    // ==================================================================
+    //
+    // THE FIND (Furina r8 (c) 2). The Companion tip says a played Companion
+    // card performs the front member, Replay says it plays the card again, and
+    // twice the seat counted 16 where 20 was promised -- Fanfare, at 2 per
+    // performance, agreeing with ONE performance. Nothing said the replay
+    // skipped it.
+    //
+    // WHAT THE GATE WAS FOR. `AfterCardPlayed` gated the trigger on
+    // `IsFirstInSeries`, on LAW:145 read through `KleeCompanionSpark`: "a
+    // per-play bound a replay can double is not a bound". That clause is about
+    // a RESOURCE MINT. A performance is not one, so the gate came off the
+    // trigger and stays on Klee's mint, which is what it was written for
+    // (D default, r8 packet sec.4).
+
+    [Fact]
+    public void The_companion_trigger_runs_before_the_series_is_asked_about()
+    {
+        // The SHAPE of the ungating, read off the IL: the trigger call now
+        // precedes every `IsFirstInSeries` read in this method, and the only
+        // read left is the one guarding `EB-420`'s ledger row. A gate put back
+        // would have to read the flag first, which reverses this order.
+        var calls = Il.CallSequence(
+            Il.Method("FurinaResourceHooks", "AfterCardPlayed"));
+        var trigger = calls.ToList().FindIndex(
+            c => c.Contains("CompanionPlayTrigger"));
+        var series = calls.ToList().FindIndex(
+            c => c.Contains("IsFirstInSeries"));
+        var note = calls.ToList().FindIndex(
+            c => c.Contains("NoteCompanionReplay"));
+
+        Assert.True(trigger >= 0, "the trigger is not called at all");
+        Assert.True(series >= 0, "EB-420's ledger row lost its guard");
+        Assert.True(note >= 0, "the replay is no longer recorded");
+        Assert.True(trigger < series,
+            "the trigger is gated on the series again");
+        Assert.True(series < note, "the ledger row lost its guard");
+    }
+
+    [Fact]
+    public void Klees_mint_keeps_the_gate_the_performance_lost()
+    {
+        // The other half, and the reason the gate existed: LAW:145 bounds what
+        // a Companion play GENERATES, so the Spark mint still asks.
+        var calls = Il.Calls(
+            Il.Method("KleeElementalHooks", "AfterCardPlayed"));
+
+        Assert.Contains(calls, c => c.Contains("IsFirstInSeries"));
+    }
+
+    [Fact]
+    public void The_arm_face_no_longer_promises_one_performance()
+    {
+        // `ReplayNextCompanionPower`'s arm clause said "Your Salon performs on
+        // the first play only" and printed a rule that is gone. The shipped
+        // face is true on every arm again, so there is one face and no
+        // `smartDescriptionReframe` row to pick between.
+        var strings = Il.Strings(
+            Il.Method("ReplayNextCompanionPower", "get_Localization"));
+
+        Assert.DoesNotContain(strings, s => s.Contains("first play only"));
+        Assert.DoesNotContain(strings,
+            s => s.Contains("smartDescriptionReframe"));
+        Assert.Contains(strings, s => s.Contains("extra time"));
+    }
+
+    [Fact]
+    public void The_face_still_prints_the_plan_it_writes()
+    {
+        // Nothing about the printed rules moved: this is an element the card
+        // was already tagged with, applied where the tag said it was.
+        var face = Face<ProtoKkKuragesOath>();
+
+        Assert.Contains("damage to ALL enemies.", face);
+        Assert.Contains("[gold]Plan[/gold]", face);
+        Assert.DoesNotContain("aura", face);
+    }
+}

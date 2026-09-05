@@ -164,7 +164,25 @@ class CharacterProfile:
     arm_keyword_tips: bool = False
 
     def damage_applies_element(self, card: dict) -> bool:
-        """Whether this character card's damaging effects carry its element."""
+        """Whether this character card's damaging effects carry its element.
+
+        `EB-462`: A ROW MAY SAY SO ITSELF, AND THAT WINS OVER THE CADENCE. The
+        cadence is a default about a whole kit -- "every Attack of hers applies
+        Hydro" -- and `Kurage's Oath` is the row it is wrong about: it prints
+        `[Hydro]` in its title because its Plan's carry-out is a Hydro hit, and
+        its own now-line applied nothing, so the same Electro-then-Hydro
+        sequence reacted through `Deep Current` and not through the Oath
+        (Kokomi r14 (c) 4). The sheet already carries `applies_element` on a
+        damage clause -- it is in `EFFECT_FIELDS["damage"]` and the SIM has
+        always read it per effect (`effects._element_for`, its first test after
+        the Mondstadt override) -- and only this side asked the cadence and
+        nothing else. So an explicit declaration is honoured here too, which is
+        what puts the two engines back on one rule.
+        """
+        if any(effect.get("applies_element")
+               for effect in _effects_everywhere(card)
+               if effect.get("op") == "damage"):
+            return True
         if self.cadence == "catalyst_attack":
             return card.get("type") == "attack"
         if self.cadence == "skill_grade":
@@ -10836,7 +10854,15 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         # (SYS-10).
         char = profile.character_id.title()
         elem = profile.native_element.title()
-        if profile.cadence == "catalyst_attack":
+        declared = any(effect.get("applies_element")
+                       for effect in _effects_everywhere(card)
+                       if effect.get("op") == "damage")
+        if declared:
+            # `EB-462`: the row said so itself, so the sentence says that
+            # rather than reciting a cadence this card is an exception to.
+            sentence = (f"Sheet `applies_element: true` on this row's own "
+                        f"damage: it applies {elem} whatever the cadence says.")
+        elif profile.cadence == "catalyst_attack":
             sentence = (f"Sheet: all {char} attacks apply {elem} "
                         "(catalyst-grade cadence).")
         else:
