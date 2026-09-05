@@ -199,8 +199,17 @@ are in [`workstreams.md`](workstreams.md).
   times, failed twice after a full detonation, the brief's Grounded-versus-
   Run Away! tension played on the elite); the Spark bank outran its sinks a
   fourth time (access); Careful Arrangement a cut candidate (`EB-534`); no
-  pick; `EB-533`-`EB-537`. [USER]'s act-1 run is due on
-  `0.2.2729+proto`. The round-8 clear is read against a control run (below).
+  pick; `EB-533`-`EB-537`. **Round 20 is READ**
+  (`review/active/klee-overhaul-round-20-2026-09-05.md`): on
+  `0.2.2753+proto` both seats found the printed numbers "trustworthy to the
+  digit" and named cash-or-cook as the decision; the hallway read and
+  Careful Arrangement's Mine clause carried; the Set off preview does not
+  fold a pending reaction (`EB-559`); no pick; `EB-554`-`EB-560`.
+  **The round-17 pick is RULED R261** (2026-09-05,
+  `review/ruled/klee-overhaul-round-17-2026-09-05.md`): Jumpy Dumpty
+  alone gains Innate, the starter otherwise untouched; built under
+  `EB-557`. [USER]'s act-1 run is due on that build. The round-8 clear is
+  read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
   six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
@@ -278,8 +287,13 @@ are in [`workstreams.md`](workstreams.md).
   ahead and unusable when behind"); a carry-out is not a hit for on-hit
   powers and the tip owes the sentence (`EB-538`); a spawned replacement
   reused a dead body's letter (`EB-541`); no pick; `EB-538`-`EB-545`.
-  [USER]'s act-1 run is due on
-  `0.2.2729+proto`. The Kurage
+  **Round 20 is READ** (`review/active/kokomi-overhaul-round-20-2026-09-05.md`):
+  two natural seats on `0.2.2753+proto`; no reader row drafted (the one
+  offer of two was passed for raw damage); The Moon Overlooks the Waters
+  read as deleting the kit's question once it lands, to be read at the
+  door before it moves; the Byrdonis elite beaten with zero Plans written;
+  no pick; `EB-561`-`EB-563`. [USER]'s act-1 run is due on
+  `0.2.2753+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
