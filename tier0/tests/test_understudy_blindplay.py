@@ -8710,6 +8710,108 @@ def test_an_evoke_that_aims_at_nobody_says_what_it_did_instead():
     assert "Hydro" not in section.split("\n\n")[1]
 
 
+# ------------- EB-567: the Spotlight window, before the refusal -----------
+
+def spotlight_turn_one_state(round_no: int = 1, hand_title: str =
+                             "Ethereal Spotlight", salon: bool = True
+                             ) -> dict:
+    """A Furina turn with the selector in hand, under the reframe.
+
+    THE SALON BLOCK IS THE ARM TEST, and it is the page's own: the wire
+    carries `furina_salon` only under `FurinaReframe.ManualLiveFor`, and a
+    release build's selector costs no Encore -- so the note would be false
+    there and must not print.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["round"] = round_no
+    if salon:
+        state["player"]["furina_salon"] = {"performed": []}
+    state["player"]["hand"] = [{
+        "id": "KLEEMOD-ETHEREAL_SPOTLIGHT", "name": hand_title,
+        "type": "Skill", "cost": "0", "star_cost": None,
+        "description": "Spotlight every Companion card. Their printed damage "
+                       "and Block are 50% stronger. Costs 2 Encore.",
+        "rarity": "Special", "is_upgraded": False, "keywords": [],
+        "index": 0, "target_type": "Self", "can_play": True,
+        "unplayable_reason": None}]
+    return state
+
+
+def test_the_turn_one_page_prints_the_spotlight_window():
+    """`EB-567`, and it is the row.
+
+    Ethereal Spotlight costs 2 Encore, the fight opens with 2, and any
+    performance spends one -- so the window is turn one before anything
+    performs and it shuts for the whole combat. Both r14 seats derived the
+    rule from the REFUSAL, which arrives one action after the turn it would
+    have changed: lane 1 "by my second card the Spotlight was locked out",
+    then played it first in every fight after; lane 2 the same way.
+    """
+    page = blindplay.observe(spotlight_turn_one_state())
+    assert ("*You open a fight with 2 Encore and **Ethereal Spotlight** costs "
+            "2 -- all of it. Light your Companion cards before anything "
+            "performs: one performance spends an Encore, and the Spotlight is "
+            "locked out for the rest of the combat.*") in page
+
+
+def test_the_window_line_is_turn_one_only():
+    """On any later turn the window is already open or already shut, and a
+    standing note about a decision that is gone is exactly the noise the
+    one-fact-per-line rule keeps off this page."""
+    page = blindplay.observe(spotlight_turn_one_state(round_no=2))
+    assert "locked out for the rest of the combat" not in page
+
+
+def test_the_window_line_needs_the_selector_in_hand():
+    """A turn-one hand without it has no decision to teach."""
+    page = blindplay.observe(spotlight_turn_one_state(hand_title="Defend"))
+    assert "locked out for the rest of the combat" not in page
+
+
+def test_the_window_line_is_arm_only():
+    """A release build's selector opens a two-mode choice and charges no
+    Encore, so the sentence would be false. The Salon block's absence is the
+    page's test for which build this is."""
+    page = blindplay.observe(spotlight_turn_one_state(salon=False))
+    assert "locked out for the rest of the combat" not in page
+
+
+def test_the_window_line_quotes_the_engines_own_two_numbers():
+    """`CHARGE_SOURCE_LINE`'s discipline: the page may not import `tier0`, so
+    the pair is spelled in `blindplay_shape` and held in step from HERE --
+    against the sim's opening Encore and the Spotlight's price, which
+    `lint_constant_parity` already pins to the mod's own two constants. The
+    line's whole point is that they are EQUAL."""
+    from tier0.engine import furina_reframe as FR
+    from understudy import blindplay_shape
+
+    assert blindplay_shape.FURINA_OPENING_ENCORE == FR.OPENING_ENCORE
+    assert (blindplay_shape.SPOTLIGHT_ENCORE_COST
+            == FR.SPOTLIGHT_DESIGNATE_ENCORE_COST)
+    assert (blindplay_shape.FURINA_OPENING_ENCORE
+            == blindplay_shape.SPOTLIGHT_ENCORE_COST)
+
+
+def test_the_spotlight_tip_carries_the_window_and_keeps_the_refusal():
+    """The mod half. The tip is the surface where the Encore is actually
+    weighed -- a card in hand on a turn -- and the refusal text is untouched
+    (`EB-364`): a refusal that arrives after the fact is not replaced, it is
+    preceded."""
+    tips = (REPO / "klee-mod" / "KleeCode" / "Cards"
+            / "FurinaRiderTips.cs").read_text(encoding="utf-8")
+    body = tips[tips.index("public static IEnumerable<IHoverTip> "
+                           "ForSpotlightDuration"):]
+    body = body[:body.index("\n    }")]
+    assert "SpotlightWindowKey" in body
+    assert "{FurinaReframeLaw.OpeningEncore}" in body
+    assert "{FurinaReframeLaw.SpotlightDesignateEncoreCost}" in body
+    assert "locked out for the rest of the combat" in body
+    # The refusal is a different surface and still says what it said.
+    spotlight = (REPO / "klee-mod" / "KleeCode" / "Powers"
+                 / "SpotlightSystem.cs").read_text(encoding="utf-8")
+    assert "DesignateOneModeIsUnpayable" in spotlight
+
+
 def test_a_wire_without_the_evoke_key_prints_no_evoke_line():
     """ABSENT IS NOT EMPTY. A bridge or a klee.dll older than `EB-564` sends
     no `evoked` key, and the block prints exactly what it printed before."""

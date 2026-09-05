@@ -29,6 +29,7 @@ from understudy.blindplay_notes import (AURA_NOTE,
                                         PLAN_AIM_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
+                                        SPOTLIGHT_WINDOW_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE)
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _fold
@@ -851,6 +852,19 @@ def render(obs: dict[str, Any]) -> str:
             out.append("- (your hand is empty)")
         if c.get("hand_repeats"):
             out += ["", HAND_REPEAT_NOTE]
+        # `EB-567`. THE WINDOW, BEFORE THE REFUSAL RATHER THAN AFTER IT. Under
+        # the arm the Spotlight's price is the opening Encore exactly, so turn
+        # one is the only turn it can be bought -- and both r14 seats learned
+        # that from a refusal one action too late.
+        #
+        # GATED ON THE SALON BLOCK, which is the page's own test for "this
+        # build plays the reframe": the block is sent only under
+        # `FurinaReframe.ManualLiveFor`, and a release build's selector costs
+        # no Encore and would make this sentence false.
+        if (c["round"] == 1 and c.get("salon") is not None
+                and any(card["title"] == "Ethereal Spotlight"
+                        for card in c["hand"])):
+            out += ["", SPOTLIGHT_WINDOW_NOTE]
         out += ["", "## The other side", ""]
         for e in c["enemies"]:
             # `EB-496`: the letter in brackets after the name, where the card

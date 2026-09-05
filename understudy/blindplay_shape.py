@@ -57,6 +57,20 @@ BOMB_GROWTH = 4
 #: reason and held in step from the test side.
 SHATTER_DAMAGE = 6
 
+#: `EB-567`. THE TWO NUMBERS THAT MAKE TURN ONE A DECISION under the Furina
+#: reframe: the Encore she opens a combat with (R258, `EB-479`) and what
+#: Ethereal Spotlight charges (R228). They are EQUAL, which is the whole
+#: shape -- the opening buys the Spotlight exactly once, and one performance
+#: spends the Encore that would have bought it.
+#:
+#: Spelled here for `CHARGE_SOURCE_LINE`'s reason -- this module may not reach
+#: `tier0` -- and held in step from the other side against
+#: `furina_reframe.OPENING_ENCORE` and
+#: `furina_reframe.SPOTLIGHT_DESIGNATE_ENCORE_COST`, which
+#: `lint_constant_parity` already pins to the mod's own pair.
+FURINA_OPENING_ENCORE = 2
+SPOTLIGHT_ENCORE_COST = 2
+
 #: `EB-535`. THE COMPANION SPARK, on the two numbers the Hexerei row prints.
 #: `KleeCompanionSpark.Base` and `.MaxPerPlay` in the mod, which are the kit
 #: declaration LAW:145 obliges Klee's kit to make, mirrored here for
