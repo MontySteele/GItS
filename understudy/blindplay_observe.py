@@ -236,6 +236,24 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         if obs["select_kind"] == "upgrade":
             obs["omitted"] = _omitted_from_upgrade(state)
             obs["deck_floor"] = upgrade_deck_floor(state)
+            # `EB-483`. AND WHAT EACH OF THE ONES IT IS OFFERING BECOMES.
+            #
+            # "The upgrade screen shows the current face, never the upgraded
+            # one. Thirteen cards, no previews. I upgraded Deep Current on a
+            # guess and found out it was 6 to 9 two fights later" (Kokomi r16
+            # (c) 6). The id is read HERE, on the tool side, off the same raw
+            # entry `_card_face` was built from, and only the rendered
+            # SENTENCE crosses -- `printed_cost`'s own bargain one field over.
+            #
+            # THIS SCREEN AND NO OTHER: a `Calculated*` number is
+            # `base + extra * multiplier`, so the delta and the printed
+            # movement agree only where every multiplier is at rest, which a
+            # Smith is and a hand is not (`qa_packet.upgraded_face`).
+            for face, raw in zip(obs["offers"], _screen_cards(state)):
+                if face.get("upgraded"):
+                    continue
+                face["upgraded_face"] = qa_packet.upgraded_face(
+                    raw.get("id"), face.get("text") or "")
         picked = [_card_face(c) for c in _preview_cards(state, st)]
         # How many results the transform screen has NOT chosen yet, and
         # whether its preview came through in a shape this page can read at

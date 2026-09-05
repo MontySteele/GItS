@@ -7194,6 +7194,69 @@ def test_the_no_upgrade_register_is_read_by_id_and_only_its_ids_cross():
     assert not qa_packet.leaks(blindplay.UNEXPLAINED_OMISSION)
 
 
+# ------------- `EB-483`: what the Smith is offering, and what it becomes -----
+
+
+def test_the_smith_prints_the_upgraded_face_beside_the_current_one():
+    """`EB-483` (Kokomi r16 (c) 6). "The upgrade screen shows the current face,
+    never the upgraded one. Thirteen cards, no previews. I upgraded Deep
+    Current on a guess and found out it was 6 to 9 two fights later."
+
+    The RECORDED Smith screen, plus the card the finding is about, appended in
+    the shape that screen's own rows carry.
+
+    Seen to FAIL: the page printed thirteen current faces and nothing else.
+    """
+    smith = live("upgrade-fresh")
+    smith = json.loads(json.dumps(smith.get("state", smith)))
+    smith["card_select"]["cards"].append(
+        {"id": "KLEEMOD-PROTO_KK_DEEP_CURRENT", "name": "Deep Current",
+         "cost": "1", "type": "Attack",
+         "description": "Deal 6 damage to ALL enemies."})
+    page = blindplay.observe(smith)
+
+    # The card the seat guessed on, both faces, one under the other.
+    assert "    Deal 6 damage to ALL enemies." in page
+    assert "    Upgraded: Deal 9 damage to ALL enemies." in page
+    # And the screen's own rows, including one whose printed face carries the
+    # game's appended keyword sentence -- which is why the match is a search
+    # over the face rather than the whole of it.
+    assert "    Upgraded: Set off. Deal 10 damage. Applies Pyro." in page
+    assert "    Upgraded: Gain 11 Block." in page
+
+
+def test_a_face_the_upgrade_index_cannot_render_prints_no_second_face():
+    """The bound, and it is the page's oldest rule: an absent answer is
+    silence, never a guess. A row this build defines no delta for, a row whose
+    printed text no longer matches the template it was generated from, and a
+    card the index has never heard of all get exactly nothing."""
+    assert qa_packet.upgraded_face("KLEEMOD-NOT_A_CARD", "Deal 6 damage.") == ""
+    # Reworded since the capture: the wire says "on target enemy", the sheet
+    # says "on the enemy", and one number in the middle is not enough to make
+    # that a face this page may print.
+    assert qa_packet.upgraded_face(
+        "KLEEMOD-PROTO_KO_CHAIN_FUSE",
+        "Each Bomb on target enemy grows by 3.") == ""
+    # And it is off every screen but the Smith: a hand prints one face.
+    hand = blindplay.observe(combat_state())
+    assert "Upgraded:" not in hand
+
+
+def test_the_upgraded_face_moves_the_number_the_delta_names():
+    """`CalculationBase` is the input to a `Calculated*` var, so the face
+    prints one name and `OnUpgrade` moves another -- resolved only where the
+    template holds exactly one `Calculated*` hole, which is the same invariant
+    the generator emits under (`block_calc_rider`: one CalculationBase per
+    card)."""
+    assert qa_packet.upgraded_face(
+        "KLEEMOD-PROTO_KK_UNDERTOW",
+        "Deal 7 damage, already including 3 if the enemy has a debuff.") == (
+        "Deal 10 damage, already including 3 if the enemy has a debuff.")
+    # A plural arm follows the number it is about rather than being copied.
+    assert qa_packet.upgraded_face(
+        "KLEEMOD-LYNETTE_BOX_TRICK", "Draw 2 cards.") == "Draw 3 cards."
+
+
 # ------------------------- `EB-377`: the base game's words on a face ---------
 
 
