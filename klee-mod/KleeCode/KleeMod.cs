@@ -305,6 +305,13 @@ public static class KleeMod
                     // in silence on an empty stage.
                     [Cards.FurinaRiderTips.CompanionPerformKey + ".title"] =
                         "Performs a member",
+                    // `EB-485`: how long the lighting lasts, on the card that
+                    // pays for it. Same dictionary and the same reason as
+                    // every row above -- the pck's `card_keywords.json`
+                    // carries none of these, so a missing row here is
+                    // directly player-visible as the raw key.
+                    [Cards.FurinaRiderTips.SpotlightLastsKey + ".title"] =
+                        "Lit for this combat",
 
                     // B5: the member tips the deploy faces hand off to. Only
                     // the TITLES are rows -- the bodies are built live in
