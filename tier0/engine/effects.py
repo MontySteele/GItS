@@ -712,7 +712,16 @@ def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
             and fx["op"] == "damage" and card.type == "attack"):
         return state.mc_attack_element_override
     if "applies_element" in fx:
-        return card.element if fx["applies_element"] else None
+        # `EB-462`: A CHARACTER CARD DECLARING IT FALLS BACK TO THE CHARACTER,
+        # the way the catalyst branch below already does. Only companion rows
+        # carried this field until `Kurage's Oath`'s now-line took it, and a
+        # character row has no `element` of its own -- so a bare `card.element`
+        # answered `none` and the declaration applied nothing, which is this
+        # row's own defect one step further along.
+        if not fx["applies_element"]:
+            return None
+        return (card.element if card.element != "none"
+                else state.player.element)
     if (card.type == "attack" and fx["op"] == "damage"
             and state.player.cadence == "catalyst"
             and not _is_base_game_basic(card)):

@@ -283,22 +283,56 @@ def test_a_damaging_plan_declares_the_carry_outs_element():
 
 
 def test_the_plan_half_never_elements_the_cards_own_hit():
-    """The split that keeps this a DISPLAY fix. `elemental` is what puts
+    """The split that keeps `EB-378` a DISPLAY fix. `elemental` is what puts
     `IElementalCard` on the row, which is what
     `CatalystCadence.PrintedElement` reads to element the card's own play --
-    so a Skill with a damaging Plan gains the face declaration and its now-line
-    still applies nothing, which is what it did before this row."""
+    so a Skill whose ONLY damaging element source is its Plan gains the face
+    declaration and its now-line still applies nothing.
+
+    `EB-462` TOOK KURAGE'S OATH OUT OF THAT SET, by ruling and not by
+    accident: its now-line applies Hydro like the carry-out and the sheet says
+    so on the row. The rule pinned here is unmoved -- a Plan alone never
+    elements a hit -- so it is asked of a row that declares nothing, which is
+    the three the rider still rides.
+    """
     oath = {"id": "x", "type": "skill",
             "effects": [{"op": "damage", "amount": 3, "target": "all_enemies"}],
             "plan": [{"op": "damage", "amount": 7, "target": "all_enemies"}]}
     assert gen.KOKOMI_PROFILE.damage_applies_element(oath) is False
-    text = (proto.OUT_DIR / "ProtoKkKuragesOath.cs").read_text(
-        encoding="utf-8")
+    text = (proto.OUT_DIR / "ProtoKkAmbush.cs").read_text(encoding="utf-8")
     assert "IElementalCard" not in text
     assert "KleeKeywords.AppliesHydro" in text
     # And the sentence that says when, so the gem cannot be read as "this
     # card's own hit applies Hydro".
     assert "ArmKeywordTips.ForPlanElement(" in text
+
+
+def test_the_oaths_now_line_applies_hydro_like_its_carry_out():
+    """`EB-462` (D default, Kokomi r14 packet sec.4).
+
+    The card prints `[Hydro]` in its title and a rider said its own hit applied
+    no aura -- "a seat built a turn on the tag, and the same Electro-then-Hydro
+    sequence reacted with Deep Current and not with the Oath's now-line". Tag
+    and rider agree now: the row declares `applies_element` on its own damage,
+    a declaration beats the cadence in BOTH engines, and the rider that
+    explained the disagreement is off this face.
+
+    Seen to FAIL: the class carried no `IElementalCard` and did carry
+    `ForPlanElement`.
+    """
+    row = next(c for c in proto._rows()
+               if c["id"] == "proto_kk_kurages_oath")
+    assert [e for e in row["effects"] if e["op"] == "damage"]
+    assert all(e.get("applies_element") for e in row["effects"]
+               if e["op"] == "damage")
+    assert gen.KOKOMI_PROFILE.damage_applies_element(row) is True
+
+    text = (proto.OUT_DIR / "ProtoKkKuragesOath.cs").read_text(
+        encoding="utf-8")
+    assert "IElementalCard" in text
+    assert "public Element Element => Element.Hydro;" in text
+    assert "KleeKeywords.AppliesHydro" in text
+    assert "ArmKeywordTips.ForPlanElement(" not in text
 
 
 def test_a_plan_is_not_a_furina_rule():

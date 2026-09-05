@@ -840,7 +840,10 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
    description: "Deal 3 damage to ALL enemies. [gold]Plan[/gold]: Deal 7 damage to ALL enemies.",
-   effects: [{op: damage, amount: 3, target: all_enemies}],
+   # EB-462 (D default, r14 packet sec.4): the now-line applies Hydro like the
+   # carry-out. Per effect, and it beats the cadence.
+   effects: [{op: damage, amount: 3, target: all_enemies,
+              applies_element: true}],
    plan: [{op: damage, amount: 7, target: all_enemies}],
    # R250 pick 1 (round 4d sec.6, default): a now-line makes writing this
    # card a trade, Feint's shape; the now-line does not upgrade.
