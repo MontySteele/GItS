@@ -349,7 +349,7 @@ are in [`workstreams.md`](workstreams.md).
   plus one per performance by the shipped Salon rule, and the packet says
   so. Still owed from the reframe, ruled and not re-asked: the fourth,
   scaling member (F1 option 2) and the named Spotlight (`EB-466`).
-  **Round 11 is READ** (`review/active/furina-reframe-round-11-2026-09-05.md`):
+  **Round 11 is READ** (`review/ruled/furina-reframe-round-11-2026-09-05.md`):
   an assembled deck (the four Commons granted) and a natural run on
   `0.2.2674+proto`, ten of ten fights including two elites, one for zero
   HP; the stage occupied and performing from turn two in every fight,

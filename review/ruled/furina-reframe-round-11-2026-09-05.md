@@ -1,4 +1,4 @@
-Status: RULED R260 (2026-09-05): pick 1 taken at option 2, the stage starts with a member; the defaults in §6 are applied
+Status: RULED R260 2026-09-05
 
 # Furina reframe round eleven: the stage is full by turn two, and empty on turn one by construction
 
