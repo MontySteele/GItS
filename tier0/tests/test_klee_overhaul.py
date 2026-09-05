@@ -178,15 +178,14 @@ def test_the_starter_is_the_canonical_ten():
     assert "proto_ko_dig_in" in C.KLEE_OVERHAUL_POOL_IDS
 
 
-def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
-    """Slice packet sec.4, less the one row its sec.5 allows to drop and the
-    one draft 3 moved into the starter.
+def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
+    """Slice packet sec.4, plus the passes that followed it, less the one row
+    draft 3 moved into the starter.
 
-    The count is pinned rather than described because it is the slice's own
-    scope statement, and because the ABSENCE is the load-bearing half: an
-    unbuilt rule staged as a live card would be a face that lies (D4). See
-    `VermillionPactNotBuilt` for the reasoning and `C.KLEE_OVERHAUL_POOL_IDS`
-    for the record.
+    The count is pinned rather than described because each packet's count is
+    its own scope statement, and because an ABSENCE is load-bearing wherever a
+    row was drafted and withdrawn: a withdrawn row staged as a live card would
+    be a face nobody ruled. `C.KLEE_OVERHAUL_POOL_IDS` is the record.
 
     The last assertion is the disjointness one: the starter and the offer pool
     share no row, so a card in both would fail here rather than quietly double
@@ -225,11 +224,20 @@ def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
     Spark's value followed the banked Sparks; this row's follows the Bomb
     decision -- the bank buys growth on a charge the player chose to keep
     cooking, and buys nothing at all with no Bomb on the board.
+
+    FORTY-FIVE SINCE THE POOL PASS (2026-09-05, `EB-491`), and the TEN that
+    arrived are the readings of rounds 13 to 16 made into cards: three for
+    Cook, three for Spray, three for React and one bridge. `proto_ko_vermillion_pact`
+    IS AMONG THEM, and its arrival is the one thing this test used to pin the
+    other way round -- slice one's sec.5 allowed the row to drop because it
+    touches shared reaction code, and this pass built it. The absence pinned in
+    its place is the shape it did NOT take: no row here re-prices Sparks 'n'
+    Splash, Countdown or Catalytic Converter, which the packet's sec.1 leaves
+    as built.
     """
     ids = C.KLEE_OVERHAUL_POOL_IDS
-    assert len(ids) == 35
-    assert len(set(ids)) == 35
-    assert "proto_ko_vermillion_pact" not in ids
+    assert len(ids) == 45
+    assert len(set(ids)) == 45
     assert {"proto_ko_dig_in", "proto_ko_pop"} <= set(ids)
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
     # R244's three, and only three: `Hex and Wick` is the packet's sec.3
@@ -252,6 +260,14 @@ def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
     # this time keyed to the Bomb rather than to the bank -- the C3 clause
     # that withdrew Explosive Spark is what the row above it is answering.
     assert "proto_ko_stoke_the_fuse" in ids
+    # THE POOL PASS's ten (`EB-491`), by name, for the reason every block above
+    # names its own: the packet's scope statement is "ten", and an eleventh
+    # arriving without one is what this catches.
+    assert {"proto_ko_long_fuse", "proto_ko_all_of_my_treasures",
+            "proto_ko_fish_blasting", "proto_ko_pocket_match",
+            "proto_ko_bombs_away", "proto_ko_fireworks_show",
+            "proto_ko_kindling", "proto_ko_flash_point",
+            "proto_ko_vermillion_pact", "proto_ko_split_charge"} <= set(ids)
 
 
 def test_the_numbers_are_the_briefs_placeholders():
@@ -358,10 +374,17 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     finding it was written for. The round-11 pool pass adds ONE Uncommon
     (`proto_ko_stoke_the_fuse`) and NOT a Common, for the other half of the
     same argument: a sink that pays only into a Bomb already cooking is a card
-    a deck is built around rather than one every hand needs to be holding."""
+    a deck is built around rather than one every hand needs to be holding.
+
+    THE POOL PASS (`EB-491`) adds FIVE Commons, THREE Uncommons and TWO Rares,
+    which is where 21 / 16 / 8 comes from. The Rare count is the number the
+    packet's sec.2 states outright ("Rares 8, the brief's count"), and it is
+    pinned here rather than described because the brief's Rare budget is a
+    scope statement: a ninth Rare arriving without a ruling is what this
+    catches."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 16, "uncommon": 13, "rare": 6}
+        "common": 21, "uncommon": 16, "rare": 8}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):
