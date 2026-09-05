@@ -8,13 +8,17 @@
   "generated": [
     "proto_fr_aria_of_recompense",
     "proto_fr_curtain_call",
+    "proto_fr_curtain_rises",
     "proto_fr_dramatic_entrance",
     "proto_fr_exit_stage_left",
     "proto_fr_flood_of_emotion",
     "proto_fr_florid_cadenza",
+    "proto_fr_guest_list",
     "proto_fr_intermission",
     "proto_fr_let_the_people_rejoice",
+    "proto_fr_rolling_tide",
     "proto_fr_salon_debut_named",
+    "proto_fr_second_course",
     "proto_fr_universal_revelry",
     "proto_hold_the_line_spark",
     "proto_itto_superlative_superstrength_either",
@@ -185,13 +189,17 @@
   "owners": {
     "proto_fr_aria_of_recompense": "furina",
     "proto_fr_curtain_call": "furina",
+    "proto_fr_curtain_rises": "furina",
     "proto_fr_dramatic_entrance": "furina",
     "proto_fr_exit_stage_left": "furina",
     "proto_fr_flood_of_emotion": "furina",
     "proto_fr_florid_cadenza": "furina",
+    "proto_fr_guest_list": "furina",
     "proto_fr_intermission": "furina",
     "proto_fr_let_the_people_rejoice": "furina",
+    "proto_fr_rolling_tide": "furina",
     "proto_fr_salon_debut_named": "furina",
+    "proto_fr_second_course": "furina",
     "proto_fr_universal_revelry": "furina",
     "proto_hold_the_line_spark": "klee",
     "proto_itto_superlative_superstrength_either": "klee",
@@ -389,6 +397,9 @@
     "proto_fr_curtain_call": {
       "encore_cost": -1
     },
+    "proto_fr_curtain_rises": {
+      "damage": 3
+    },
     "proto_fr_dramatic_entrance": {
       "damage": 3
     },
@@ -401,17 +412,26 @@
     "proto_fr_florid_cadenza": {
       "condition": "unconditional"
     },
+    "proto_fr_guest_list": {
+      "block": 2
+    },
     "proto_fr_intermission": {
       "retain": true
     },
     "proto_fr_let_the_people_rejoice": {
       "cost": -1
     },
+    "proto_fr_rolling_tide": {
+      "damage": 1
+    },
     "proto_fr_salon_debut_named": {
       "add": {
         "op": "gain_encore",
         "amount": 2
       }
+    },
+    "proto_fr_second_course": {
+      "encore_cost": -1
     },
     "proto_fr_universal_revelry": {
       "damage": 3

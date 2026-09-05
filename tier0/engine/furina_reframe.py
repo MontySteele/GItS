@@ -121,19 +121,20 @@ OPENING_ENCORE = 2                # R258 (`EB-479`): she starts each combat
 
 
 # ----------------------------------------------------------------------
-# THE POOL SEAM (round 2 pick 1 at its default, 2026-09-04). `{shipped id:
-# prototype id}`, read by `loader._pool_substitutions` under `FURINA_REFRAME`
-# and nowhere else -- the Kurage's Oath shape, one for one and at the SAME
-# rarity, so the offer odds do not move (`rewards.character_pool` refuses a
-# substitution that would change a card's tier).
+# THE POOL SEAM (round 2 pick 1 at its default, 2026-09-04; widened by the
+# pool pass, `EB-493`, 2026-09-05). `{shipped id: prototype id}`, read by
+# `loader._pool_substitutions` under `FURINA_REFRAME` and nowhere else -- the
+# Kurage's Oath shape, one for one and at the SAME rarity, so the offer odds do
+# not move (`rewards.character_pool` refuses a substitution that would change a
+# card's tier).
 #
-# WHY THESE FOUR AND WHY A SWAP RATHER THAN A SHEET EDIT. The arm mints Fanfare
-# by performance only, 2 per trigger and 5 per Evoke, and across three rounds
-# the meter ranged 0 to 15 -- while the four shipped riders that GATE on it ask
-# 12, 12, 15 and 20. Two of them can essentially never pay under the arm. The
-# shipped sheet is Balance-stage content and does not move for a prototype arm
-# (R213 B), so the copies are prototype rows and the arm swaps them in at the
-# one offer door. WITH THE FLAG OFF this map is unread, `_pool_substitutions`
+# WHY THE FIRST FOUR AND WHY A SWAP RATHER THAN A SHEET EDIT. The arm mints
+# Fanfare by performance only, 2 per trigger and 5 per Evoke, and across three
+# rounds the meter ranged 0 to 15 -- while the four shipped riders that GATE on
+# it ask 12, 12, 15 and 20. Two of them can essentially never pay under the arm.
+# The shipped sheet is Balance-stage content and does not move for a prototype
+# arm (R213 B), so the copies are prototype rows and the arm swaps them in at
+# the one offer door. WITH THE FLAG OFF this map is unread, `_pool_substitutions`
 # returns `{}` for Furina exactly as before, and no surface can see a
 # `proto_fr_` id -- which is the acceptance condition, pinned by test.
 #
@@ -148,6 +149,24 @@ POOL_SUBS: dict[str, str] = {
     "dramatic_entrance": "proto_fr_dramatic_entrance",  # 12 -> 6,  uncommon
     "universal_revelry": "proto_fr_universal_revelry",  # 15 -> 8,  rare
     "flood_of_emotion": "proto_fr_flood_of_emotion",    # 20 -> 10, rare
+    # ---- POOL PASS ONE (`EB-493`, `review/active/furina-pool-pass-2026-09-05
+    # .md` sec.2; four FOLLOWS off the doctrine read, record 5.5). A DIFFERENT
+    # ARGUMENT AT THE SAME SEAM, and it is worth naming because this map now
+    # carries two. The four rows above are COPIES -- the same card at a bar
+    # this arm's meter can reach. The four below are NEW ROWS wearing a shipped
+    # Common's slot and its art, because rounds 9 and 10 read the Salon as
+    # FURNITURE: one Deploy in the whole deck, most Companion plays printing
+    # "No member on stage: performs nobody", and no card of her own that asks a
+    # member to act. Each row answers one of those readings.
+    #
+    # ALL FOUR ARE COMMON FOR COMMON, so the offer odds do not move here either,
+    # and each replaced row was chosen because it is a plain number card of the
+    # same type and cost as its replacement (the packet's sec.5 D default; it
+    # moves on the seats' word).
+    "house_call": "proto_fr_curtain_rises",        # a Deploy on an Attack
+    "dinner_service": "proto_fr_second_course",    # a priced 2nd performance
+    "undercurrent": "proto_fr_rolling_tide",       # the kit's own perform verb
+    "blocking_notes": "proto_fr_guest_list",       # a generator in the pool
 }
 
 

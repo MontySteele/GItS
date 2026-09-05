@@ -402,19 +402,27 @@ public static class FurinaReframeLaw
 /// <c>tier0.content.loader._pool_substitutions</c> at the one door
 /// <c>tier05.rewards.character_pool</c> already reads.
 ///
-/// WHY IT EXISTS. The arm mints Fanfare by performance ALONE -- 2 per trigger
-/// and 5 per Evoke -- and across three rounds the meter ranged 0 to 15, while
-/// four shipped rows gate on it at 12, 12, 15 and 20. Two of them essentially
-/// cannot pay under the arm, and a card whose printed condition the run cannot
-/// reach is a dead row rather than a hard one.
+/// WHY IT EXISTS, THE FIRST HALF. The arm mints Fanfare by performance ALONE
+/// -- 2 per trigger and 5 per Evoke -- and across three rounds the meter ranged
+/// 0 to 15, while four shipped rows gate on it at 12, 12, 15 and 20. Two of
+/// them essentially cannot pay under the arm, and a card whose printed
+/// condition the run cannot reach is a dead row rather than a hard one.
+///
+/// AND THE SECOND (`EB-493`, the pool pass). Rounds 9 and 10 read the Salon as
+/// FURNITURE: one Deploy in the whole deck, most Companion plays printing "No
+/// member on stage: performs nobody", and no card of Furina's own that asks a
+/// member to act. Four more Commons swap in against that -- a second Deploy
+/// shape on an Attack, a priced second performance, the kit's own perform verb
+/// and a Companion generator in the pool.
 ///
 /// A SWAP AND NOT A SHEET EDIT, which is the same argument
 /// <see cref="KurageMemory.SwapOfferedOath"/> makes one character over. The
 /// shipped sheet is Balance-stage content and does not move for a prototype
-/// arm (R213 B), so the copies are prototype rows carrying the arm's own
-/// thresholds (6, 6, 8, 10) and the arm swaps them in HERE, at the offer.
-/// Same rarity in and out -- two Uncommons and two Rares -- so the offer odds
-/// do not move.
+/// arm (R213 B), so the rows are prototype rows -- the riders carrying the
+/// arm's own thresholds (6, 6, 8, 10), the pool pass carrying its four new
+/// bodies -- and the arm swaps them in HERE, at the offer. Same rarity in and
+/// out on both halves (two Uncommons, two Rares, four Commons), so the offer
+/// odds do not move.
 ///
 /// ONE SEAM, for <c>SwapOfferedOath</c>'s reason verbatim:
 /// <c>FilterThroughEpochs</c> feeds <c>GetUnlockedCards</c>, which is the SOLE
@@ -433,7 +441,25 @@ public static class FurinaReframeLaw
 /// </summary>
 public static class FurinaReframeRoster
 {
-    /// <summary>The four shipped riders, out; the four arm copies, in.</summary>
+    /// <summary>
+    /// The shipped rows this arm takes off the offer, and the arm rows that
+    /// take their slots: FOUR RIDERS, plus THE POOL PASS'S FOUR (`EB-493`).
+    ///
+    /// THE SECOND FOUR ARE A DIFFERENT ARGUMENT AT THE SAME SEAM, worth naming
+    /// because this method now carries two. The riders are COPIES -- the same
+    /// card at a bar this arm's meter can reach. The pool pass's four are NEW
+    /// ROWS wearing a shipped Common's slot and art: <i>Curtain Rises</i>,
+    /// <i>Second Course</i>, <i>Rolling Tide</i> and <i>Guest List</i> for
+    /// <i>House Call</i>, <i>Dinner Service</i>, <i>Undercurrent</i> and
+    /// <i>Blocking Notes</i>. Rounds 9 and 10 read the Salon as furniture --
+    /// one Deploy in the deck, no card of her own that asks a member to act,
+    /// and a Companion density the reward slot alone decides -- and the pass
+    /// answers each with one row (`review/active/furina-pool-pass-2026-09-05.md`
+    /// sec.2). The shipped sheet is Balance-stage content and does not move for
+    /// a prototype arm (R213 B), so the arm carries the rows and swaps them in
+    /// HERE. Same rarity in and out on both halves -- four Commons, two
+    /// Uncommons, two Rares -- so the offer odds are untouched.
+    /// </summary>
     public static IEnumerable<CardModel> SwapOfferedRiders(
         IEnumerable<CardModel> offered)
     {
@@ -442,12 +468,20 @@ public static class FurinaReframeRoster
             .Where(card => card is not FurinaGen.FloridCadenza
                         && card is not FurinaGen.DramaticEntrance
                         && card is not FurinaGen.UniversalRevelry
-                        && card is not FurinaGen.FloodOfEmotion)
+                        && card is not FurinaGen.FloodOfEmotion
+                        && card is not FurinaGen.HouseCall
+                        && card is not FurinaGen.DinnerService
+                        && card is not FurinaGen.Undercurrent
+                        && card is not FurinaGen.BlockingNotes)
             .Concat(PrototypeCards.For("furina")
                         .Where(card => card is ProtoFrFloridCadenza
                                             or ProtoFrDramaticEntrance
                                             or ProtoFrUniversalRevelry
-                                            or ProtoFrFloodOfEmotion));
+                                            or ProtoFrFloodOfEmotion
+                                            or ProtoFrCurtainRises
+                                            or ProtoFrSecondCourse
+                                            or ProtoFrRollingTide
+                                            or ProtoFrGuestList));
     }
 
     /// <summary>

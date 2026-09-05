@@ -2470,3 +2470,75 @@ worth naming: two would be two aura applications and two reaction rolls.
 `KokomiOverhaulKit.HasDebuff` and `kokomi_plan.has_debuff` are the twins the
 `target_has_debuff` predicate already used, so the rider asks the question the
 branch asked.
+
+## before proto_fr_curtain_rises
+
+The Furina pool pass, one (`EB-493`); the packet is
+`review/active/furina-pool-pass-2026-09-05.md` and all four rows are FOLLOWS on
+the doctrine read (`review/records/card-audit-2026-09-04.md` sec.5.5).
+
+WHAT THE ROUNDS SAID. Rounds 9 and 10 read the Salon as FURNITURE: one Deploy
+in the whole deck, most Companion plays printing "No member on stage: performs
+nobody", the kit's headline mechanic spent as text explaining why nothing
+happened -- and the two turns it was live were the best of the run. The shipped
+sheet offers three single-deploy Commons in twenty-three, all Skills of one
+shape, and neither seat drafted one. Round 9 also found no legal way to make
+her act: a member idle, no Companion card in hand, and nothing of Furina's own
+that asks the stage for anything. The four rows answer one reading each.
+
+**Curtain Rises** (replaces *House Call*) is the second Deploy SHAPE: a deploy
+on an Attack, with the usher's Block as he arrives. Against *Cold Snap* (1
+energy: 6 damage, channel Frost) it is the same line with a member for an orb.
+A deploy on an Attack was new to the surface and needed nothing built -- the
+damage aims, the deploy is the owner's, and one card carries both because they
+target different things.
+
+**Second Course** (replaces *Dinner Service*) buys a member's second
+performance for three Encore, which is three Block she would otherwise hold:
+the hold-or-spend tension on a deploy. The price is the `encore_cost` GATE and
+NOT the `spend_encore` op -- the packet's sentence is "Unplayable below 3
+Encore", and `spend_encore` is the overdraw primitive, which would have made
+the card playable at 0 Encore for 3 HP. That is *Breathless*' rule and it is
+printed on *Breathless*. The upgrade takes the price to 2, Aria's own printed 5
+less the 2 she opens with (R258); it moves on the seats' word.
+
+**Rolling Tide** (replaces *Undercurrent*) is the kit's own perform verb on a
+card she can draft -- one hit of the shipped card traded for it. With an empty
+stage it is a worse Undercurrent, which is the losing line the row is written
+around.
+
+**Guest List** (replaces *Blocking Notes*) puts An Invitation's verb in the
+pool at a price: an energy and no Exhaust, three Block short of a Stage
+Presence. THE EXHAUST IS THE ONE GUARDRAIL THIS PASS MOVES, and it is the only
+one of kickoff sec.9's four that is a balance rule rather than a structural
+fact -- this-combat-only, equal-rarity and the companion-plus-Guest-Star pool
+are all properties of the code, while "generators Exhaust" is a sheet field.
+`gen_klee_cards.blocked_reason` still refuses a non-Exhaust generator on any
+`docs/*-cards.yaml` row; the exemption is the `proto_` prefix and nothing else,
+so a row promoted to a shipped sheet meets the bar again on the way in.
+
+THE ONE THING BUILT FOR THE PASS is an ARGUMENT and not an op:
+`salon_perform` learned `member:`, so *Second Course* can say "she performs
+once more" about the member it just deployed rather than about whoever stands
+at the front (a deploy appends, so the two are only the same on an empty
+stage). It rides the shipped verb for the reason the aimed Evoke does --
+`tools/lint_op_parity.py` compares the KEY SET of the sim's op registry against
+the drafter's priced-op table, so an extra field leaves the priced set
+identical while a `salon_perform_member` synonym would have bought a
+`DRAFTER_VERSION` stamp for a verb both engines already have. A named member
+who is not on stage takes the FRONT, which is the slot-6 ruling's fallback for
+the aimed Evoke, and the fact is emitted (`salon_perform_target_absent`) rather
+than left silent.
+
+WHICH FOUR SHIPPED ROWS, and it is the packet's sec.5 D default: each replaced
+row is a plain number card of the same type and cost as its replacement, so the
+swap moves what the card does and nothing about where it sits. Common for
+Common in every case, so the offer odds do not move. The choice moves on the
+seats' word. The shipped sheet stands (R213 B) -- the seam is
+`furina_reframe.POOL_SUBS` and `FurinaReframeRoster.SwapOfferedRiders`, and
+with the arm off no surface can see a `proto_fr_` id.
+
+NO ` (proto)` SUFFIX ON THESE FOUR, unlike the rider copies above. The riders
+are COPIES of a shipped card and share its name, which is what the shadow
+suffix is for (`EB-419`); these are new rows with names of their own, so there
+is nothing to shadow.
