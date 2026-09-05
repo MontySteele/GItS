@@ -180,8 +180,15 @@ are in [`workstreams.md`](workstreams.md).
   them the Retained detonators the Retain-density reading asked for (Long
   Fuse, Pocket Match) and eight archetype rows the comparison pass of
   round 17 on has to justify (stage-gate, *The loop inside Prototype*);
-  the pool is 45. [USER]'s act-1 run is due on
-  `0.2.2401+proto`. The round-8 clear is read against a control run (below).
+  the pool is 45. **Round 17 is READ, the first under the Prototype loop**
+  (`review/active/klee-overhaul-round-17-2026-09-05.md`): an assembled Cook
+  deck and a natural run on `0.2.2674+proto`, floors 12 and 11, eleven of
+  eleven fights; the hypothesis (preserve one large Bomb) partly supported,
+  the Sparks paid by Mines rather than by holding; the payoff cards blank
+  without a second placer, turn one generic a seventh time; **one pick**
+  (the starter's second placer, default Pop! for a Strike, PR #398);
+  `EB-496`-`EB-498`. [USER]'s act-1 run is due on
+  `0.2.2674+proto`. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
   six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
@@ -237,8 +244,16 @@ are in [`workstreams.md`](workstreams.md).
   Block-and-hit Plan, and Nereid's Ascension as a Rare Power (every Plan
   twice, no Exhaust, no Plan slot) replacing its two-turn Plan row; six
   FOLLOWS after three were re-priced off shipped cards; the pool is 35.
-  [USER]'s act-1 run is due on
-  `0.2.2501+proto`. The Kurage
+  **Round 17 is READ** (`review/active/kokomi-overhaul-round-17-2026-09-05.md`):
+  an assembled deck (Tide Chart, Nereid's, The Moon, Battle Plan, Stolen
+  Chapter, Well Laid granted) and a natural run on `0.2.2674+proto`; the
+  doubler read as the deck's spine, Plan density paid, turn one presented
+  a decision on both lanes; three payoffs unreadable (Tide Chart silent,
+  Well Laid's face and count, Nereid's and The Moon not composing on the
+  face); the assembled seat died on an elite after a refusal listed no
+  form for an all-enemies card; no pick; `EB-499`-`EB-504`, `EB-481`
+  reopened, `EB-410` widened. [USER]'s act-1 run is due on
+  `0.2.2674+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
@@ -308,7 +323,17 @@ are in [`workstreams.md`](workstreams.md).
   plus one per performance by the shipped Salon rule, and the packet says
   so. Still owed from the reframe, ruled and not re-asked: the fourth,
   scaling member (F1 option 2) and the named Spotlight (`EB-466`).
-  [USER]'s act-1 run is due on that build. No stamp moves, nothing measured.
+  **Round 11 is READ** (`review/active/furina-reframe-round-11-2026-09-05.md`):
+  an assembled deck (the four Commons granted) and a natural run on
+  `0.2.2674+proto`, ten of ten fights including two elites, one for zero
+  HP; the stage occupied and performing from turn two in every fight,
+  Second Course landing at its five-Encore price, Rolling Tide never
+  played; turn one empty by construction (zero empty turns when Salon
+  Début was in the opening hand); a reaction amplifier lost under the
+  Spotlight or Weak (`EB-511`); **one pick** (the stage on turn one,
+  default Salon Début Innate, PR #398); `EB-505`-`EB-511`, `EB-449`
+  reopened, `EB-504` widened. [USER]'s act-1 run is due on
+  `0.2.2674+proto`. No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
