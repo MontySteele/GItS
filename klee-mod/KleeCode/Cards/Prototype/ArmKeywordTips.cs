@@ -878,12 +878,21 @@ public static class ArmKeywordTips
     /// shipped split: <c>SalonMemberPower.ManualFrontName</c> prints
     /// "Crabaletta" because three rules and an identity have to fit under the
     /// power ceiling, and a tip with one sentence in it can afford her title.
+    ///
+    /// `EB-558` ADDED THE SECOND SENTENCE, because the first one hid a price.
+    /// The arrival is a deploy and a deploy performs, so a reader who knows
+    /// the deploy rule reads "opens with her on stage" as "opens one Encore
+    /// down" -- which is what the build did until R260's arithmetic was
+    /// settled. It does not now: the arrival performs at full value and costs
+    /// nothing, so turn one opens on the whole of R258's bank. Both halves are
+    /// stated, because "performs" without "free" is the reading that costs a
+    /// player their opening move.
     /// </summary>
     public static IEnumerable<IHoverTip> ForOpeningStage(
         IEnumerable<IHoverTip> inherited) =>
         With(inherited, OpeningStageKey,
              "Every fight opens with [gold]Mademoiselle Crabaletta[/gold] on "
-           + "stage.");
+           + "stage. She performs on arrival for free.");
 
     /// <summary>
     /// `EB-479` (R258): THE OPENING JOINS THE SENTENCE THAT DEFINES THE WORD,

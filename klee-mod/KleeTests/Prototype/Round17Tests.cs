@@ -195,10 +195,12 @@ public class Round17Tests
             System.IO.Path.Combine(Repo(), "klee-mod", "KleeCode", "Powers",
                                    "SalonPowers.cs"));
 
+        // `EB-558` added the `free:` argument to the call; the member it names
+        // is the claim, and it is still `entering`.
         Assert.Contains(
-            "await PerformMember(choiceContext, owner, entering);", source);
+            "await PerformMember(choiceContext, owner, entering,", source);
         Assert.DoesNotContain(
-            "await PerformMember(choiceContext, owner, company[0]);", source);
+            "await PerformMember(choiceContext, owner, company[0]", source);
     }
 
     // ==================================================================
