@@ -43,16 +43,21 @@ SEED = 11
 #: Every op slice one adds. Registered in `effects.OPS` so the loader's
 #: vocabulary check accepts a row, and priced in `draft.STATIC_OP_PRICING` so
 #: `lint_op_parity` stays green.
+#: `plan_twice` was one of them until `EB-492` redesigned Nereid's Ascension
+#: into a Power: the clause was RETIRED rather than left standing with no row
+#: to spell it, so it is off `effects.OPS`, off `PLAN_KINDS` and off the
+#: drafter's table together.
 OVERHAUL_OPS = ("mend", "next_companion_discount", "remove_debuff",
                 "carry_out_front_plan", "plan_from_exhaust",
-                "damage_quarter_max_hp", "plan_twice",
+                "damage_quarter_max_hp",
                 "damage_per_companion_last_turn")
 
 #: The two that are legal inside a `plan:` list and NOWHERE else. They are in
 #: `OPS` only because the loader validates a `plan:` list through the same
 #: vocabulary check the body takes, and they refuse from a body always -- with
 #: the flag on as well as off, which is what separates them from the six.
-PLAN_ONLY_OPS = ("plan_twice", "damage_per_companion_last_turn")
+PLAN_ONLY_OPS = ("damage_per_companion_last_turn",
+                 "block_per_plan_this_morning")
 
 
 @pytest.fixture
@@ -187,13 +192,18 @@ def test_the_pool_is_all_thirty_of_the_slices_rows():
     and Shell Guard, the kit's own defence in act 2. THIRTY since round 9
     pick 1's tempo shelf (2026-09-04), the two rows that let a Plan be held or
     hurried -- Held Tide and Tidal Rhythm, the drafted other two, were
-    withdrawn on the R253 charter audit and are not on the surface."""
+    withdrawn on the R253 charter audit and are not on the surface.
+    THIRTY-FIVE since the pool pass (`EB-492`), which put the offer's Plan
+    density on the Attacks: Riptide, Pincer, Flank, Well Laid and Feigned
+    Retreat."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 30
-    assert len(set(ids)) == 30
+    assert len(ids) == 35
+    assert len(set(ids)) == 35
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
     assert {"proto_kk_tide_chart", "proto_kk_ripple"} <= set(ids)
+    assert {"proto_kk_riptide", "proto_kk_pincer", "proto_kk_flank",
+            "proto_kk_well_laid", "proto_kk_feigned_retreat"} <= set(ids)
     assert "proto_kk_held_tide" not in ids
     assert "proto_kk_tidal_rhythm" not in ids
 
@@ -270,14 +280,17 @@ def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
 
 
 def test_the_pool_keeps_the_packets_rarity_split(overhaul):
-    """15 Common, 10 Uncommon, 5 Rare. The packet's sec.4 count was 13/8/5;
+    """19 Common, 11 Uncommon, 5 Rare. The packet's sec.4 count was 13/8/5;
     `EB-335`'s two defensive rows are both Uncommon (R246 pick 2), which is
     where the round-four-c packet designed them, and the tempo shelf adds two
-    Commons (Tide Chart, Ripple). Pinned because the rarity buckets ARE the
-    offer odds: a row filed in the wrong tier changes how often it is seen."""
+    Commons (Tide Chart, Ripple). The pool pass (`EB-492`) adds four Commons
+    -- Riptide, Pincer, Well Laid, Feigned Retreat -- and one Uncommon,
+    Flank, which is where DENSITY belongs: the offer's Commons are what a seat
+    actually sees. Pinned because the rarity buckets ARE the offer odds: a row
+    filed in the wrong tier changes how often it is seen."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 15, "uncommon": 10, "rare": 5}
+        "common": 19, "uncommon": 11, "rare": 5}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

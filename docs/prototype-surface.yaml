@@ -998,12 +998,16 @@
    # does not upgrade -- the delta below stays on the Plan half.
    upgrade: {plan_damage: 3}}
 
+# `EB-492`. THE RARE, REDESIGNED: it was a Plan itself, so the kit's payoff
+# spent the morning it was meant to pay for. Now a Power, for the fight.
 - {id: proto_kk_nereids_ascension, name: "Nereid's Ascension (proto)", character: kokomi,
    authored_by: [claude],
-   cost: 2, type: skill, rarity: rare, exhaust: true,
-   description: "Exhaust. [gold]Plan[/gold]: for 2 turns, the [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] twice.",
-   effects: [],
-   plan: [{op: plan_twice, amount: 2}]}
+   cost: 2, type: power, rarity: rare,
+   description: "The [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] twice.",
+   effects: [{op: apply_power, power: kk_nereids_ascension, amount: 1, target: self}],
+   # Its price is two energy on a turn that writes no Plan; the upgrade buys
+   # that turn back rather than moving a number the card does not print.
+   upgrade: {cost: -1}}
 
 - {id: proto_kk_the_moon_overlooks_the_waters, name: "The Moon Overlooks the Waters", character: kokomi,
    authored_by: [claude],
@@ -1198,6 +1202,65 @@
    effects: [{op: block, amount: 2}],
    plan: [{op: energy, amount: 1},
           {op: block, amount: 4}]}
+
+# --- POOL PASS ONE (`EB-492`): the offer's Plan density, on the Attacks.
+# Five rows, LAST in the sheet's own order (`lint_arm_pool_parity` compares BY
+# ORDER). Reasoning: docs/notes/prototype-surface-provenance.md. ---
+
+- {id: proto_kk_riptide, name: "Riptide", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: common,
+   description: "Deal 9 damage to ALL enemies. [gold]Plan[/gold]: Deal 13 damage to ALL enemies.",
+   effects: [{op: damage, amount: 9, target: all_enemies}],
+   plan: [{op: damage, amount: 13, target: all_enemies}],
+   # Priced off Deep Current (1: 6 to ALL) as the cheaper now-line, with the
+   # brief's usual four-point Plan premium; the first draft at 1 energy was a
+   # strictly better Kurage's Oath and was re-priced at 2.
+   upgrade: {damage: 3, plan_damage: 4}}
+
+- {id: proto_kk_pincer, name: "Pincer", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 3 damage twice. [gold]Plan[/gold]: Deal 3 damage three times.",
+   effects: [{op: damage, amount: 3, target: enemy, times: 2}],
+   plan: [{op: damage, amount: 3, target: front_enemy, times: 3}],
+   # `EB-492`, the multi-hit Plan clause. Worse into Block, better under
+   # Vulnerable, three Casket-sized hits the morning after; the upgrade moves
+   # the per-hit number on both halves, which is the multi-hit idiom.
+   upgrade: {damage: 1, plan_damage: 1}}
+
+- {id: proto_kk_flank, name: "Flank", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 8 damage. [gold]Plan[/gold]: Deal 8 damage to each enemy that intends to attack.",
+   effects: [{op: damage, amount: 8, target: enemy}],
+   # `EB-492`, the intent-keyed aim. THE SET IS FIXED WHEN THE PLAN IS
+   # WRITTEN -- R250's rule for an aimed Plan, applied to a set.
+   plan: [{op: damage, amount: 8, target: enemies_intending_attack}],
+   upgrade: {damage: 3, plan_damage: 3}}
+
+- {id: proto_kk_well_laid, name: "Well Laid", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common,
+   # `EB-492`, the morning read from the damage side: Tide Wall's count on a
+   # hit instead of Block, at 0 energy, with a floor of 2. With no Plan
+   # carried out it is a worse Strike; with three it is 11 for free.
+   description: "Deal {CalculatedDamage:diff()} damage. Deals {ExtraDamage:diff()} more for each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] carried out this morning.",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 2, per: 3,
+                               count: plans_carried_out_this_morning}}],
+   upgrade: {formula_base: 1, formula_per: 1}}
+
+- {id: proto_kk_feigned_retreat, name: "Feigned Retreat", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 4 [gold]Block[/gold] and deal 6 damage.",
+   effects: [{op: block, amount: 4}],
+   plan: [{op: block, amount: 4},
+          {op: damage, amount: 6, target: front_enemy}],
+   # Against Read the Field (1: 5 Block, Plan 10 Block) and Ambush (1: 5
+   # damage, Plan 12): less of either, both at once, and only when planned.
+   upgrade: {block: 2, plan_block: 2, plan_damage: 2}}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.

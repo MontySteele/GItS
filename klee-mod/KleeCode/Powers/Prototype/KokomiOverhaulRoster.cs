@@ -139,7 +139,7 @@ internal static class KokomiOverhaulRoster
     internal static IEnumerable<CardModel> OfferablePool() =>
         Slice().Concat(RosterAncientCards.Kokomi);
 
-    /// <summary>The slice's own 30 rows, without the Ancient tail
+    /// <summary>The slice's own 35 rows, without the Ancient tail
     /// <see cref="OfferablePool"/> adds.</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
@@ -186,6 +186,17 @@ internal static class KokomiOverhaulRoster
         // unofferable when a `Slice()` was forgotten.
         ModelDb.Card<ProtoKkTideChart>(),
         ModelDb.Card<ProtoKkRipple>(),
+        // POOL PASS ONE (`EB-492`,
+        // `review/active/kokomi-pool-pass-2026-09-05.md`): Plan density in the
+        // OFFER rather than in the starter. Three Attacks with a Plan line,
+        // the morning's payoff on a Common Attack, and a Skill that does both
+        // halves only when planned. LAST, in the sheet's own order, for the
+        // ordering reason the shelf above states.
+        ModelDb.Card<ProtoKkRiptide>(),
+        ModelDb.Card<ProtoKkPincer>(),
+        ModelDb.Card<ProtoKkFlank>(),
+        ModelDb.Card<ProtoKkWellLaid>(),
+        ModelDb.Card<ProtoKkFeignedRetreat>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the

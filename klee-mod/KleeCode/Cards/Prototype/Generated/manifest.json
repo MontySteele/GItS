@@ -28,13 +28,17 @@
     "proto_kk_coral_bulwark",
     "proto_kk_deep_current",
     "proto_kk_exposed_flank",
+    "proto_kk_feigned_retreat",
     "proto_kk_feint",
+    "proto_kk_flank",
     "proto_kk_kurages_oath",
     "proto_kk_moons_reflection",
     "proto_kk_nereids_ascension",
+    "proto_kk_pincer",
     "proto_kk_rally",
     "proto_kk_read_the_field",
     "proto_kk_ripple",
+    "proto_kk_riptide",
     "proto_kk_salt_line",
     "proto_kk_sango_isshin",
     "proto_kk_sea_salt_prayer",
@@ -52,6 +56,7 @@
     "proto_kk_undertow",
     "proto_kk_vanguard",
     "proto_kk_war_council",
+    "proto_kk_well_laid",
     "proto_ko_alices_introduction_magic",
     "proto_ko_alices_recipe",
     "proto_ko_all_of_my_treasures",
@@ -215,13 +220,17 @@
     "proto_kk_coral_bulwark": "kokomi",
     "proto_kk_deep_current": "kokomi",
     "proto_kk_exposed_flank": "kokomi",
+    "proto_kk_feigned_retreat": "kokomi",
     "proto_kk_feint": "kokomi",
+    "proto_kk_flank": "kokomi",
     "proto_kk_kurages_oath": "kokomi",
     "proto_kk_moons_reflection": "kokomi",
     "proto_kk_nereids_ascension": "kokomi",
+    "proto_kk_pincer": "kokomi",
     "proto_kk_rally": "kokomi",
     "proto_kk_read_the_field": "kokomi",
     "proto_kk_ripple": "kokomi",
+    "proto_kk_riptide": "kokomi",
     "proto_kk_salt_line": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
     "proto_kk_sea_salt_prayer": "kokomi",
@@ -239,6 +248,7 @@
     "proto_kk_undertow": "kokomi",
     "proto_kk_vanguard": "kokomi",
     "proto_kk_war_council": "kokomi",
+    "proto_kk_well_laid": "kokomi",
     "proto_ko_alices_introduction_magic": "klee",
     "proto_ko_alices_recipe": "klee",
     "proto_ko_all_of_my_treasures": "klee",
@@ -464,7 +474,16 @@
       "power_amount": 1,
       "plan_power_amount": 1
     },
+    "proto_kk_feigned_retreat": {
+      "block": 2,
+      "plan_block": 2,
+      "plan_damage": 2
+    },
     "proto_kk_feint": {
+      "damage": 3,
+      "plan_damage": 3
+    },
+    "proto_kk_flank": {
       "damage": 3,
       "plan_damage": 3
     },
@@ -477,6 +496,10 @@
     "proto_kk_nereids_ascension": {
       "cost": -1
     },
+    "proto_kk_pincer": {
+      "damage": 1,
+      "plan_damage": 1
+    },
     "proto_kk_rally": {
       "power_amount": 1
     },
@@ -486,6 +509,10 @@
     },
     "proto_kk_ripple": {
       "plan_block": 3
+    },
+    "proto_kk_riptide": {
+      "damage": 3,
+      "plan_damage": 4
     },
     "proto_kk_salt_line": {
       "block": 3
@@ -543,6 +570,10 @@
     },
     "proto_kk_war_council": {
       "plan_damage": 3
+    },
+    "proto_kk_well_laid": {
+      "formula_base": 1,
+      "formula_per": 1
     },
     "proto_ko_alices_introduction_magic": {
       "retain": true

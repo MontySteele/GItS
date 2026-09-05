@@ -379,16 +379,16 @@ def test_undertow_is_priced_at_the_mean_of_its_branches():
 
 
 def test_the_queue_verbs_price_off_dials_this_table_already_holds():
-    """Nereid's window, Change of Plans and Moon's Reflection, each derived
-    from `STATIC_AUTOPLAY_VALUE` -- one neutral card resolved without being
-    paid for, which is what all three of them hand you."""
-    # Nereid's: one extra Plan carried out per turn of the window, and the
-    # clause that installs it is itself planned.
-    card = _proto("proto_kk_nereids_ascension")
-    turns = card.plan[0]["amount"]
-    assert draft._static_power(card) == (
-        turns * draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT
-        / card.cost)
+    """Change of Plans and Moon's Reflection, each derived from
+    `STATIC_AUTOPLAY_VALUE` -- one neutral card resolved without being paid
+    for, which is what both of them hand you.
+
+    NEREID'S ASCENSION IS NOT ON THIS LIST ANY MORE (`EB-492`). It was a
+    `plan_twice` clause and had its own line here; it is a Rare POWER now, so
+    it takes the generic self-power credit every printed engine takes
+    (`STATIC_POWER_ENGINE_VALUE`) and the `plan_twice` price is retired with
+    the op. `test_the_rare_power_takes_the_engine_credit` below is the pin.
+    """
     # Change of Plans: one resolution moved a turn earlier, not created.
     card = _proto("proto_kk_change_of_plans")
     assert draft._static_power(card) == (
@@ -397,6 +397,20 @@ def test_the_queue_verbs_price_off_dials_this_table_already_holds():
     card = _proto("proto_kk_moons_reflection")
     assert draft._static_power(card) == (
         draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT / card.cost)
+
+
+def test_the_rare_power_takes_the_engine_credit():
+    """`EB-492`. Nereid's Ascension is a Rare Power printing one self
+    `apply_power`, so `_static_power` falls to the generic engine branch --
+    the drafter cannot see a payout curve at offer time, which is the same
+    conservative convention Durin and the Kurage summon take. The point of
+    pinning it is that the row reaches a branch AT ALL: the retired
+    `plan_twice` price would have been a stale entry, and `lint_op_parity`
+    calls one of those out."""
+    card = _proto("proto_kk_nereids_ascension")
+    assert card.type == "power" and card.plan == []
+    assert draft._static_power(card) == (
+        draft.STATIC_POWER_ENGINE_VALUE / card.cost)
 
 
 def test_damage_per_companion_last_turn_prices_against_one_companion():
@@ -458,15 +472,29 @@ def test_the_pilot_and_the_drafter_read_one_constant():
         8 * C.PLAN_DELAY_DISCOUNT
 
 
-def test_the_pilot_never_scales_a_duration():
-    """`plan_twice`'s amount is Nereid's window in TURNS. Three-quarters of a
-    turn is not a thing, so the discount leaves it alone -- and so it leaves
-    alone a clause with no numeric amount at all."""
+def test_the_pilot_never_scales_a_clause_with_no_magnitude():
+    """A clause with no numeric `amount` -- the Max-HP fraction, the exhaust
+    replay -- passes the discount untouched, because there is no magnitude to
+    scale.
+
+    THE DURATION CARVE-OUT IS GONE (`EB-492`): `plan_twice` was the one
+    planned amount that meant TURNS, and Nereid's Ascension is a Power now, so
+    every remaining numeric `amount` in a `plan:` list is a magnitude."""
     from tier0.pilot import policy
-    for fx in ({"op": "plan_twice", "amount": 2},
-               {"op": "damage_quarter_max_hp", "target": "all_enemies"},
+    for fx in ({"op": "damage_quarter_max_hp", "target": "all_enemies"},
                {"op": kokomi_plan.REPLAY_EXHAUSTED}):
         assert policy._plan_discounted(fx) == fx
+
+
+def test_the_pilot_never_scales_a_repeat_count():
+    """`EB-492`. `times` is a COUNT OF HITS, not a magnitude: Pincer's planned
+    line is three hits of a discounted 3, and every term downstream already
+    multiplies `amount` by `times`. Scaling both would take the delay twice."""
+    from tier0.pilot import policy
+    out = policy._plan_discounted(
+        {"op": "damage", "amount": 3, "target": "front_enemy", "times": 3})
+    assert out["times"] == 3
+    assert out["amount"] == 3 * C.PLAN_DELAY_DISCOUNT
 
 
 def test_the_discount_never_writes_on_the_sheets_own_clause():
