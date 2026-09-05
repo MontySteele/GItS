@@ -8333,6 +8333,78 @@ def test_act_takes_the_letter_beside_the_name():
     assert again["post"]["target"] == by_letter["post"]["target"]
 
 
+# --- `EB-519`: THE LETTER THAT LANDED ON THE JELLYFISH -----------------------
+
+
+def _lettered_board_with_a_pet() -> dict:
+    """Two bodies and the Bake-Kurage up, which is Kokomi r18's board.
+
+    The hand carries the recorded `Pearl Barrage` (no `can_target_pet` on the
+    feed, so a Plan goes through) and a copy that the game says CANNOT be
+    planned, because the two halves of this defect are those two cards.
+    """
+    state = _gardener_board(2)
+    state["player"]["kokomi_plans"] = TWO_PLANS
+    barred = json.loads(json.dumps(state["player"]["hand"][0]))
+    barred.update({"name": "Coral Blade", "can_target_pet": False,
+                   "index": len(state["player"]["hand"])})
+    state["player"]["hand"].append(barred)
+    return state
+
+
+def test_a_letter_names_a_body_and_never_the_jellyfish():
+    """`EB-519`. THE PLAN THE SEAT NEVER ASKED FOR.
+
+    Kokomi r18, both lanes. `EB-496`'s letter is matched exactly on the enemy
+    side and was matched by `_match`'s unique SUBSTRING on the pet side -- and
+    `Bake-Kurage` folds to `bakekurage`, which contains `a` and `b`. The pet
+    block runs first, so `on "A"` was refused as a Plan the card could not
+    carry and `on "B"` was silently ACCEPTED as one, aimed at the jellyfish
+    rather than at the second Gardener the page had just printed `[B]`.
+
+    Seen to FAIL: both letters posted `target: 41`, the pet's entity id.
+    """
+    state = _lettered_board_with_a_pet()
+    _new_process()
+    page = blindplay.observe(state)
+    assert "[A]" in page and "[B]" in page and "## The Bake-Kurage" in page
+
+    for letter, body in (("A", "gardener_1"), ("B", "gardener_2")):
+        res = blindplay.act(state, f'play "Pearl Barrage" on "{letter}"')
+        assert res["ok"], (letter, res["refusal"])
+        assert res["post"]["target"] == body, letter
+        # And the half the seat met as a refusal: a card the game will not let
+        # be planned is no longer refused for a Plan it was never aimed at.
+        barred = blindplay.act(state, f'play "Coral Blade" on "{letter}"')
+        assert barred["ok"], (letter, barred["refusal"])
+        assert barred["post"]["target"] == body, letter
+
+
+def test_the_jellyfish_still_answers_to_its_own_name():
+    """The other side of the same rule: only the LETTER is taken away. The pet
+    keeps its printed name and every unique substring of it that is not one."""
+    state = _lettered_board_with_a_pet()
+    _new_process()
+    blindplay.observe(state)
+    for word in ("Bake-Kurage", "Kurage"):
+        res = blindplay.act(state, f'play "Pearl Barrage" on "{word}"')
+        assert res["ok"], (word, res["refusal"])
+        assert res["post"]["target"] == TWO_PLANS["pet_entity_id"], word
+        assert res["printed"]["target"] == "Bake-Kurage", word
+
+
+def test_a_letter_no_body_carries_is_refused_about_the_other_side():
+    """A handle that resolves to nothing is refused with the ENEMIES listed --
+    never quietly re-read as the pet, which is how `B` was lost."""
+    state = _lettered_board_with_a_pet()
+    _new_process()
+    blindplay.observe(state)
+    res = blindplay.act(state, 'play "Pearl Barrage" on "F"')
+    assert not res["ok"] and res["post"] is None
+    assert "Bake-Kurage" not in res["refusal"]
+    assert "Phantasmal Gardener" in res["refusal"]
+
+
 # --- `EB-428`: THE REWARD THAT PRICED A REACTION CARD BLIND ------------------
 
 

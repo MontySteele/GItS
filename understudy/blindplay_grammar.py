@@ -545,6 +545,34 @@ def _living_enemy_names(state: dict[str, Any]) -> list[str]:
     return [names[i] for i, e in enumerate(enemies) if _int(e.get("hp")) > 0]
 
 
+# `EB-519`: A LETTER IS A BODY ON THE OTHER SIDE, AND NEVER THE PET.
+#
+# THE DEFECT (Kokomi r18, both lanes). `EB-496` minted the per-fight letter and
+# `_resolve_enemy` matches it EXACTLY, for the reason written there: a bare `A`
+# is a unique SUBSTRING of half the names on any board. The pet's own lookup
+# was left on `_match` and so kept the substring rule -- and the jellyfish is
+# called `Bake-Kurage`, which folds to `bakekurage` and therefore CONTAINS
+# `a`, `b`, `e`, `g`, `k`, `r` and `u`. Seven of the first letters a fight
+# hands out are the pet, and the pet block sits ABOVE the enemy block, so
+# `on "A"` was refused as a Plan the card could not carry ("cannot be planned
+# on Bake-Kurage") and `on "B"` was silently ACCEPTED as one -- writing a Plan
+# the seat never asked for out of a card it had aimed at the second body.
+#
+# THE SHAPE OF THE HANDLE IS THE TEST, not the board's current letters: one
+# letter, or `E27` and up, is `_handle_for`'s whole output and is not a name
+# anything in this game prints. Declining it here sends it one block down to
+# `_resolve_enemy`, which either resolves it exactly or refuses it with the
+# living bodies listed -- both of which are about the right side of the board.
+# The pet KEEPS ITS NAME: `Bake-Kurage`, and every unique substring of it that
+# is not a bare handle, still reach the jellyfish exactly as before.
+_ENEMY_HANDLE = re.compile(r"^(?:[a-z]|e[0-9]+)$")
+
+
+def _is_enemy_handle(name: str) -> bool:
+    """Is this word one of `EB-496`'s per-fight letters rather than a name?"""
+    return bool(_ENEMY_HANDLE.match(_fold(name)))
+
+
 def _pet_target(state: dict[str, Any], name: str) -> str | None:
     """`EB-216`. The jellyfish's entity id when the tester named IT, else None.
 
@@ -552,9 +580,13 @@ def _pet_target(state: dict[str, Any], name: str) -> str | None:
     the choice the slice exists to test (its sec.1), so a card that could go
     either way and was aimed at nothing is played NOW. Only the tester's own
     word sends it to the jellyfish.
+
+    `EB-519`: and never by a LETTER, for the reason written above this function.
     """
     plans = _combat(state).get("plans") if state else None
     if not plans or not plans.get("pet_entity_id") or not name:
+        return None
+    if _is_enemy_handle(name):
         return None
     idx, _ = _match([{"n": plans["pet_name"]}], name, key=lambda e: e["n"])
     return plans["pet_entity_id"] if idx == 0 else None
