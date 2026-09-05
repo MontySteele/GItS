@@ -515,10 +515,17 @@ ARM_KEYWORDS: dict[str, str] = {
     # always holds a placer and never necessarily the detonator. The keyword
     # rail says that about one CARD, on the card; the fact a reader of the WORD
     # needs is about the deck.
+    # `EB-555` DEFINED THE CAP IN THE CLAUSE THAT ALREADY USED IT, in step
+    # with `ArmKeywordTips.ForBomb`. The word printed on two rows of this
+    # glossary and was defined on neither: "no screen I saw ever explained
+    # what a cap is ... a term with no definition anywhere in the text I was
+    # shown" (Klee r20 lane 1). A phrase and not a sentence, and it names
+    # whose HP it is -- which also rules out the reading that a cap might be
+    # something of Klee's.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
              "only when Set off, or as a Mine. Not an Attack: only Vulnerable "
-             "and a cap move it. Kills move it on. Your deck opens with a "
-             "placer."),
+             "and a cap on the enemy's HP loss move it. Kills move it on. "
+             "Your deck opens with a placer."),
     # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
     # walks the charges in placement order and the first one through the
     # funnel meets the aura, because every reaction consumes it -- the r11

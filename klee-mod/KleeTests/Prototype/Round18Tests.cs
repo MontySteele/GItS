@@ -318,7 +318,7 @@ public class Round18Tests
                             face);
             // The queue stays where `EB-450` put it: the sizes are a different
             // fact from the count, and the headline is where the plan is made.
-            Assert.Contains("Bombs here: [blue]{Charges}[/blue]", face);
+            Assert.Contains("Bomb sizes here: [blue]{Charges}[/blue]", face);
         }
 
         // AND THE SINGLE-CHARGE FACE SAYS NOTHING ABOUT HITS, which is the
@@ -328,7 +328,7 @@ public class Round18Tests
         {
             var face = rows.First(r => r.Item1 == key).Item2;
             Assert.DoesNotContain("{Count}", face);
-            Assert.Contains("Bombs here: [blue]{Charges}[/blue]", face);
+            Assert.Contains("Bomb sizes here: [blue]{Charges}[/blue]", face);
         }
     }
 

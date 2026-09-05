@@ -179,6 +179,25 @@ public static class ArmKeywordTips
     /// is holding it. The fact a reader of this word needs is about the DECK:
     /// the first thing you can always do is plant. It is the last sentence
     /// because it is the only one that is not about the charge itself.
+    ///
+    /// `EB-555` DEFINED THE CAP, IN THE CLAUSE THAT ALREADY USED IT. "Only
+    /// Vulnerable and a cap move it" printed on two tips of one screen and the
+    /// word was defined on neither: "no screen I saw ever explained what a cap
+    /// is. I verified the Vulnerable half; the other half is a term with no
+    /// definition anywhere in the text I was shown" (Klee r20 lane 1, (c) 2).
+    ///
+    /// A DEFINING PHRASE AND NOT A SENTENCE, because the fact is small and a
+    /// sentence of its own would spend thirty characters saying what six say
+    /// inside the clause: a cap is a limit on the HP the ENEMY can lose, which
+    /// is exactly what <c>ProtoBombPower.FoldedMods</c> reads -- whichever
+    /// power on the target returns the lowest <c>ModifyDamageCap</c>. Naming
+    /// whose HP it is also disposes of the reading the clause could not rule
+    /// out before, that a cap might be something of Klee's.
+    ///
+    /// THE MINE TIP'S COPY IS LEFT ALONE at 133 of 135. It prints directly
+    /// under this one, a Mine IS a Bomb, and the term is defined on the screen
+    /// either way -- which is the acceptance condition: one definition per
+    /// PAGE, rather than one per clause.
     /// </summary>
     public static IEnumerable<IHoverTip> ForBomb(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -186,7 +205,8 @@ public static class ArmKeywordTips
             "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
           + " a turn, goes off only when [gold]Set off[/gold], or as a "
           + "[gold]Mine[/gold]. "
-          + "Not an Attack: only [gold]Vulnerable[/gold] and a cap move it. "
+          + "Not an Attack: only [gold]Vulnerable[/gold] and a cap on the "
+          + "enemy's HP loss move it. "
           + "Kills move it on. Your deck opens with a placer.");
 
     /// <summary>

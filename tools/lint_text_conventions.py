@@ -137,21 +137,27 @@ _BOMB_FACE_REASON = (
     "(EB-343); the Mine axis is EB-260's, rule 6 firing on the enemy's turn "
     "when no card is in front of the player; and EB-514 puts the HIT COUNT in "
     "the headline, because the total is a sum over the charges and a stack "
-    "printed one number where the board makes several hits and several Sparks")
-#: THE ONE FACE OF THE GRID THAT MEETS ITS CEILING, and it is `EB-536`'s own
-#: result: a pile of ONE charge, on an enemy with no modifier the total passes
-#: through, prints 125 of 125 once the hit clause is gone. It is excluded here
-#: rather than left in with the rest, because the rot check is what would
-#: otherwise say so and an exception nobody needs is an exception nobody reads.
-_BOMB_FACE_UNDER_CEILING = "ProtoBombPower.smartDescriptionOne"
+    "printed one number where the board makes several hits and several Sparks; "
+    "and `EB-536` (widened, Klee r20) labelled the list as SIZES, because "
+    "'Bombs here: 3, including 1 Mine' reads as a count and is a value -- the "
+    "natural-lane seat misread it 'for a fight and a half' and got it only "
+    "when a two-charge pile printed numbers the count reading could not "
+    "explain")
+#: THE WHOLE GRID IS EXCEPTED SINCE `EB-536`. The plain single-charge face --
+#: one charge, no Mine, no modifier the total passes through -- was the one row
+#: here that met its ceiling exactly (125 of 125, no headroom at all) and was
+#: carved out for it, on the rule that an exception nobody needs is an
+#: exception nobody reads. The six characters that name the list as sizes took
+#: it over, so the carve-out went rather than the label: the SIZES reading is
+#: what the row is about, and a face that prints the ambiguous label to stay
+#: under a ceiling is the defect wearing a lint's clothes.
 EXCEPTIONS.update({
-    key: _BOMB_FACE_REASON
+    "ProtoBombPower.smartDescription"
+    + single + mines + vulnerable + cap: _BOMB_FACE_REASON
     for single in ("", "One")
     for mines in ("", "Mines")
     for vulnerable in ("", "Vulnerable")
     for cap in ("", "HardToKill", "Intangible", "Capped")
-    if (key := "ProtoBombPower.smartDescription"
-               + single + mines + vulnerable + cap) != _BOMB_FACE_UNDER_CEILING
 })
 
 # --- the shipped exceptions: id -> reason. Same rot semantics. -----------

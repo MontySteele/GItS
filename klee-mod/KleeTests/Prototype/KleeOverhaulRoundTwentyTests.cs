@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
+using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
@@ -79,4 +82,86 @@ public class KleeOverhaulRoundTwentyTests
         // fact about the DECK: the first thing you can always do is plant.
         Assert.Contains("Your deck opens with a placer.", Printed("ForBomb"));
     }
+
+    // ---- `EB-555`: the cap is defined where it is used -------------------
+
+    [Fact]
+    public void The_bomb_tip_defines_the_cap_it_names()
+    {
+        // "The Bomb keyword says twice that only Vulnerable and a cap move it,
+        // and no screen I saw ever explained what a cap is. I verified the
+        // Vulnerable half; the other half is a term with no definition
+        // anywhere in the text I was shown" (Klee r20 lane 1, (c) 2).
+        //
+        // A DEFINING PHRASE AND NOT A SENTENCE, and it names whose HP it is:
+        // a cap limits the HP the ENEMY can lose, which is what `FoldedMods`
+        // reads off the target, and saying so also rules out the reading that
+        // a cap might be something of Klee's.
+        var bomb = Printed("ForBomb");
+        Assert.Contains("and a cap on the ", bomb);
+        Assert.Contains("enemy's HP loss move it.", bomb);
+    }
+
+    [Fact]
+    public void The_mine_tip_keeps_its_own_clause_unchanged()
+    {
+        // ONE DEFINITION PER PAGE, not one per clause. The Mine tip is at 133
+        // of its 135-character ceiling and prints directly under the Bomb tip;
+        // a Mine IS a Bomb, so the term is defined on the screen either way.
+        Assert.Contains("Vulnerable[/gold] and a cap move it.", Printed("ForMine"));
+    }
+
+    // ---- `EB-536` (widened): the pile's numbers are sizes -----------------
+
+    [Fact]
+    public void The_badge_labels_its_list_as_sizes_and_not_as_a_count()
+    {
+        // "Bombs here: 3, including 1 Mine reads as a count and is a VALUE. I
+        // misread it for a fight and a half until Bomb 21 ... Bombs here: 9 /
+        // 12 disambiguated it. When there is one Bomb the field is genuinely
+        // ambiguous" (Klee r20 lane 2, (c) 1). `EB-450` replaced the count
+        // with the list; the label was the half it left behind.
+        var faces = Faces(new ProtoBombPower()).Select(r => r.Body).ToList();
+        Assert.NotEmpty(faces);
+        foreach (var face in faces)
+        {
+            Assert.DoesNotContain("Bombs here:", face);
+        }
+        Assert.Contains(faces,
+            f => f.Contains("Bomb sizes here: [blue]{Charges}[/blue]"));
+    }
+
+    [Fact]
+    public void A_single_charge_block_still_prints_no_hit_clause()
+    {
+        // `EB-514`'s clause, cut off the one-charge faces by `EB-536` and
+        // pinned here beside the label it shares a row with: on a pile of one
+        // the total IS the hit, so "in 1 hit for 1 Spark" spends a sentence
+        // restating a number the reader already has. The axis is in the KEY --
+        // `SmartKey` writes "One" into it for the single-charge faces -- so
+        // this reads the pair rather than guessing from the body.
+        var rows = Faces(new ProtoBombPower());
+        Assert.NotEmpty(rows);
+        foreach (var (key, body) in rows)
+        {
+            if (!key.StartsWith("smartDescription", StringComparison.Ordinal))
+            {
+                continue;
+            }
+            var single = key.StartsWith("smartDescriptionOne",
+                                        StringComparison.Ordinal);
+            Assert.Equal(!single, body.Contains("hits for"));
+        }
+    }
+
+    /// <summary>Every localised body the Bomb badge registers, static face and
+    /// smart faces alike, with the key it is filed under.</summary>
+    private static List<(string Key, string Body)> Faces(ProtoBombPower power) =>
+        (power.Localization ?? new List<(string, string)>())
+        .Where(row => row.Item1.StartsWith("description",
+                                           StringComparison.Ordinal)
+                   || row.Item1.StartsWith("smartDescription",
+                                           StringComparison.Ordinal))
+        .Select(row => (row.Item1, row.Item2))
+        .ToList();
 }

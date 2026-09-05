@@ -359,12 +359,24 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// The tip says the ORDER and the badge now shows the QUEUE, which is the
     /// pairing the r13 seat was doing in its head.
     ///
+    /// `EB-536` (widened, Klee r20) MADE THE LABEL SAY WHAT THE NUMBERS ARE.
+    /// "Bombs here: 3, including 1 Mine" reads as a COUNT and is a list of
+    /// SIZES, and on a pile of one the two readings are indistinguishable: the
+    /// natural-lane seat read `Bombs here: 3` as three Bombs and "was
+    /// genuinely confused for a fight and a half", getting it only when a
+    /// later pile printed `Bomb 21 ... Bombs here: 9 / 12` and the arithmetic
+    /// refused the count reading. `EB-450` had already replaced the count with
+    /// the list and the label was the half it left behind. Six characters, on
+    /// two faces that are excepted from the power ceiling by name, and the
+    /// count is not lost with it -- a list of sizes says how many there are as
+    /// plainly as a number did.
+    ///
     /// SLASHES AND NOT COMMAS inside the list, for one reason: the sentence
     /// around it is comma-separated, and `Bombs here: 5, 8, 20, 12, growing
     /// each turn` hides where the pile stops. It costs nothing at the ceiling
     /// -- the lint renders a hole as one character however it is filled.
     private const string Bombs =
-        " Bombs here: [blue]{Charges}[/blue], growing each turn.";
+        " Bomb sizes here: [blue]{Charges}[/blue], growing each turn.";
 
     /// <summary>
     /// `EB-471`. WHICH SIDE OF THE GROWTH TICK A MINE LANDS ON, and it is on
@@ -383,7 +395,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// the Mine pays the size it has now.
     /// </summary>
     private const string BombsWithMines =
-        " Bombs here: [blue]{Charges}[/blue], including [blue]{Mines}[/blue] "
+        " Bomb sizes here: [blue]{Charges}[/blue], including [blue]{Mines}[/blue] "
       + "[gold]Mine{Mines:plural:|s}[/gold], growing at your turn's start.";
 
     /// <summary>Rule 3, `EB-361`. A Bomb whose enemy dies moves to a random

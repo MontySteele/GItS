@@ -400,7 +400,7 @@ public class Round19Tests
         // The rest of the face is untouched: the total, the queue and rule 3.
         Assert.Contains("[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
                       + "Pyro damage.", face);
-        Assert.Contains("Bombs here: [blue]{Charges}[/blue]", face);
+        Assert.Contains("Bomb sizes here: [blue]{Charges}[/blue]", face);
     }
 
     [Fact]
