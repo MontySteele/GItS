@@ -8782,6 +8782,105 @@ def test_a_feed_that_never_answered_the_question_still_posts():
     assert blindplay.act(state, 'play "Riptide" on "Nibbit"')["ok"]
 
 
+# --- `EB-527`: TWO "ALL ENEMIES" FACES, TWO OPPOSITE FORMS -------------------
+
+
+def _two_all_faces_state() -> dict:
+    """Furina r12 lane 2's elite screen, one turn apart.
+
+    `Lynette -- Magic Trick` prints `Deal 4 damage to ALL enemies` and is AIMED
+    on the wire, because its Swirl half needs a body; `Chevreuse -- Ring of
+    Bursting Grenades` prints the same words and aims itself. Nothing on either
+    face tells them apart, and the seat met the two refusals a turn apart.
+    """
+    state = _gardener_board(3)
+    hand = state["player"]["hand"]
+    for name, aims in (("Lynette — Magic Trick", True),
+                       ("Chevreuse — Ring of Bursting Grenades", False)):
+        card = json.loads(json.dumps(hand[0]))
+        card.update({"id": f"KLEEMOD-{len(hand)}", "name": name,
+                     "description": "Deal 4 damage to ALL enemies.",
+                     "target_type": "40219", "keywords": [],
+                     "can_target_enemy": aims, "index": len(hand)})
+        hand.append(card)
+    return state
+
+
+def test_an_all_face_the_wire_aims_says_so_when_it_is_played_bare():
+    """`EB-527`. THE REFUSAL THAT COST AN ELITE TURN.
+
+    Furina r12 lane 2: `play "Lynette — Magic Trick: Astonishing Shift"` bare
+    was refused "there is more than one enemy, so say which" -- a sentence
+    about the board that says nothing about the card. "The very next turn the
+    opposite happened: Chevreuse ... refused with 'does its own aiming, so it
+    takes no `on`'. Two cards, both printing ALL enemies, with opposite
+    targeting rules and nothing on either face to tell them apart."
+
+    THE WIRE IS RIGHT AND THE FACE IS INCOMPLETE: Magic Trick's Swirl half
+    needs a body, so the game aims the card at one, and the ALL in its damage
+    clause is about what the hit does rather than how it is played. `EB-499`
+    gave the other direction its own sentence; this is that sentence's twin.
+
+    Seen to FAIL: the refusal was the board's generic one.
+    """
+    state = _two_all_faces_state()
+    _new_process()
+    blindplay.observe(state)
+
+    res = blindplay.act(state, 'play "Lynette — Magic Trick"')
+
+    assert not res["ok"] and res["post"] is None
+    assert ("'Lynette — Magic Trick' prints \"ALL enemies\" and is still aimed "
+            "at one body, so say which: ") in res["refusal"]
+    assert "Phantasmal Gardener (1)" in res["refusal"]
+    # And the form that works is offered, `EB-402`'s rule unchanged: every
+    # refusal ends in the commands that resolve (`_with_forms`).
+    assert 'play "Lynette — Magic Trick" on "Phantasmal Gardener (1)"'         in res["refusal"]
+
+
+def test_the_face_that_aims_itself_still_names_the_bare_form():
+    """`EB-499`'s half, unmoved: the twin sentence is the point, so the two
+    refusals a seat meets a turn apart each name the form that works."""
+    state = _two_all_faces_state()
+    _new_process()
+    blindplay.observe(state)
+
+    res = blindplay.act(
+        state, 'play "Chevreuse — Ring of Bursting Grenades" on "A"')
+
+    assert not res["ok"] and res["post"] is None
+    assert "does its own aiming" in res["refusal"]
+    assert 'play "Chevreuse — Ring of Bursting Grenades"' in res["refusal"]
+
+
+def test_an_aimed_all_face_plays_on_the_body_it_was_given():
+    """The decision is the WIRE's target type and not the face's words, so the
+    card the refusal is about still plays exactly as the game aims it."""
+    state = _two_all_faces_state()
+    _new_process()
+    blindplay.observe(state)
+
+    ok = blindplay.act(state, 'play "Lynette — Magic Trick" on "B"')
+
+    assert ok["ok"], ok["refusal"]
+    assert ok["post"]["target"] == "gardener_2"
+
+
+def test_a_single_target_face_keeps_the_boards_own_refusal():
+    """The clause is added off the FACE, and only where the face says the
+    thing that made the refusal confusing. An ordinary aimed card played bare
+    is refused about the board, exactly as it always was."""
+    state = _two_all_faces_state()
+    _new_process()
+    blindplay.observe(state)
+
+    res = blindplay.act(state, 'play "Pearl Barrage"')
+
+    assert not res["ok"]
+    assert "there is more than one enemy, so say which" in res["refusal"]
+    assert "ALL enemies" not in res["refusal"]
+
+
 # --- `EB-502`: THE PLANNED WEAK THAT WAS STILL IN THE ACTION QUEUE -----------
 
 

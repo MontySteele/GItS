@@ -407,6 +407,19 @@ def _card_face_key(entry: dict[str, Any]) -> str:
     return f"{c['title']}|{c['cost']}|{c['upgraded']}|{c['text']}"
 
 
+def _prints_all_enemies(entry: dict[str, Any]) -> bool:
+    """Does this card's PRINTED face say `ALL enemies`? (`EB-527`.)
+
+    THE WORD IS THE BASE GAME'S OWN AND IT IS SPELLED ONE WAY: 47 uses, 0
+    lowercase (`docs/current/text-conventions.md` rule 4), so the test is the
+    literal rather than a pattern. It is asked ONLY to explain a refusal --
+    the target type is read off the WIRE and decides everything, exactly as
+    `EB-499` decided the other direction -- so a face that says something this
+    misses simply gets the sentence it always got.
+    """
+    return "ALL enemies" in _text(_card_face(entry).get("text"))
+
+
 # The wire's `target_type` spellings, split by what the BRIDGE does with each.
 #
 # `EB-269`. `ExecuteUsePotion` (`vendor/STS2_MCP/McpMod.Actions.cs:287-306`) is
@@ -700,6 +713,27 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
             # `EB-402`. A card that has to be aimed and was not is refused with
             # the `on` form listed back per living enemy, so the way out is in
             # the refusal rather than one screen away.
+            #
+            # `EB-527`. AND WHERE THE FACE SAYS OTHERWISE, THE REFUSAL SAYS SO.
+            # Two faces printing "ALL enemies" took opposite forms on one
+            # screen (Furina r12 lane 2): `Lynette -- Magic Trick` was refused
+            # BARE with "there is more than one enemy, so say which", and the
+            # very next turn `Chevreuse -- Ring of Bursting Grenades` was
+            # refused WITH `on` -- "two cards, both printing ALL enemies, with
+            # opposite targeting rules and nothing on either face to tell them
+            # apart", which cost the seat an elite turn.
+            #
+            # THE WIRE IS RIGHT AND THE FACE IS INCOMPLETE. Magic Trick's Swirl
+            # half needs a body, so the game aims the card at one; the ALL in
+            # its damage clause is true of what the hit does and not of how it
+            # is played. `EB-499` gave the other direction its own sentence
+            # ("does its own aiming, so it takes no `on`"); this is that
+            # sentence's twin, so both refusals name the form that works AND
+            # say why the face did not predict it.
+            if not cmd.target and _prints_all_enemies(entry):
+                why = (f"{titles[idx]!r} prints \"ALL enemies\" and is still "
+                       "aimed at one body, so say which: "
+                       + ", ".join(_living_enemy_names(state)))
             return _refuse(why, *(f'play "{titles[idx]}" on "{n}"'
                                   for n in _living_enemy_names(state)))
         post["target"] = eid
