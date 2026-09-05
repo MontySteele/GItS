@@ -64,7 +64,7 @@ Growth is 4 per turn (`KLEE_OVERHAUL_BOMB_GROWTH`).
 2. **All of My Treasures!** — Rare Skill, 1 energy, Exhaust. *Place a Bomb
    on the enemy equal to your largest Bomb.* Against Careful Arrangement
    (Uncommon, 1: merge and +5): a second pile the size of the first, once.
-   Playing it on a 12 or waiting for a 16 is the cook decision, and the
+   Playing it on a 12 or waiting for a 16 is the cook's call, and the
    copy grows on its own schedule (rule 9, each Bomb grows separately).
 3. **Fish Blasting** — Common Attack, 1 energy. *Deal 5 damage to ALL
    enemies. Shuffle a Confiscated into your draw pile.* The lore card,
