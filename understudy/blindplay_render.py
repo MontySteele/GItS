@@ -17,6 +17,7 @@ from understudy.blindplay_notes import (AURA_NOTE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         DEFEND_INTENT_CLAUSE,
+                                        ENEMY_HANDLE_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
                                         METER_CAPPED_NOTE,
@@ -716,13 +717,24 @@ def render(obs: dict[str, Any]) -> str:
             out += ["", HAND_REPEAT_NOTE]
         out += ["", "## The other side", ""]
         for e in c["enemies"]:
-            line = f"- **{e['name']}** — HP {e['hp']}/{e['max_hp']}"
+            # `EB-496`: the letter in brackets after the name, where the card
+            # face already carries its element -- the handle at a glance,
+            # before the numbers.
+            line = f"- **{e['name']}**"
+            if e.get("handle"):
+                line += f" [{e['handle']}]"
+            line += f" — HP {e['hp']}/{e['max_hp']}"
             if e["block"]:
                 line += f", Block {e['block']}"
             out.append(line)
             out += _render_intents(e["intents"])
             for pw in e["powers"]:
                 out.append(_render_power(pw, "    "))
+        # `EB-496`: and the rule about both handles, under the list they are
+        # handles for. The hand's own note is about cards and says the
+        # opposite, which is what sent a seat's Melt into the wrong body.
+        if c["enemies"]:
+            out += ["", ENEMY_HANDLE_NOTE]
         # `EB-461`: ONCE PER SCREEN, and only where a telegraph has parts. The
         # note is about a claim the enemy block just made, so it sits with the
         # block's other two notes rather than under the line that made it.

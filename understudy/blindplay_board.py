@@ -11,7 +11,8 @@ from __future__ import annotations
 from typing import Any
 
 from understudy import qa_packet
-from understudy.blindplay_faces import (_card_face, _card_title, _enemy_names,
+from understudy.blindplay_faces import (_card_face, _card_title,
+                                        _enemy_handles, _enemy_names,
                                         _hook_note, _intents, _meter_max,
                                         _named_option, _number_faces, _powers,
                                         relic_faces, remember_deck,
@@ -270,6 +271,9 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # `EB-271`: numbered through the fight's memory, not by place in the
         # list the feed happens to be sending this screen.
         "enemies": [{"name": name,
+                     # `EB-496`: the letter this fight minted for the body,
+                     # which is the one handle a kill cannot move.
+                     "handle": handle,
                      "hp": _int(e.get("hp")),
                      "max_hp": _int(e.get("max_hp", e.get("hp"))),
                      "block": _int(e.get("block")),
@@ -278,8 +282,10 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
                      # hand is two intents on the wire and was one line here.
                      "intents": _intents(e.get("intents") or e.get("intent")),
                      "powers": _powers(e)}
-                    for e, name in zip(_enemies(state),
-                                       _enemy_names(_enemies(state)))],
+                    for e, name, handle in zip(
+                        _enemies(state),
+                        _enemy_names(_enemies(state)),
+                        _enemy_handles(_enemies(state)))],
     }
     # `EB-271`: the refusal that named nothing, given the board it is about.
     for face in combat["hand"]:

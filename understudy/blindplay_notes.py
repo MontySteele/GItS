@@ -298,6 +298,35 @@ HAND_REPEAT_NOTE = ("*More than one card in this hand prints the same name. "
                     "none and differ only by one, this page cannot say which "
                     "is which.*")
 
+# `EB-496`. THE WARNING WAS UNDER THE WRONG LIST, AND IT WAS ALSO WRONG.
+#
+# WHAT THE SEAT DID (Klee r17 lane 1, turn 2 of the four-Gardener elite). It
+# killed `Phantasmal Gardener (1)` with Pocket Fireworks and aimed Kaeya at
+# `Phantasmal Gardener (2)`. "The list had already renumbered the moment the
+# first one died, so my Kaeya hit what had been Gardener (3) ... I only found
+# out by reading max-HP values off the next screen." It cost a 14-damage Melt,
+# and the seat's own diagnosis names the page: the re-count warning is printed
+# under `Your hand`, where it is about CARDS, and there was nothing at all
+# under `The other side`.
+#
+# THE NUMBER NOW HOLDS, so the note says so rather than repeating the hand's
+# caveat one list down. `_FIGHT_MEMORY` is on disk since this row, so a body
+# keeps its number for the fight across the separate processes a seat's
+# `observe` and `act` each run in -- which is why the seats went on watching
+# it re-count long after `EB-271` and `EB-427` closed it for the in-process
+# driver.
+#
+# AND THE LETTER IS THE HANDLE FOR THE OTHER HALF of what the seat asked for:
+# "there is no way to name an enemy that survives a kill inside the same
+# turn". A number only appears where a name repeats; a letter is on every
+# body, is minted once and is never reused, so it is the one word that names
+# the same creature on every screen of the fight.
+ENEMY_HANDLE_NOTE = (
+    "*Each enemy keeps its letter and its number for the whole fight: a body "
+    "that dies does not renumber or re-letter the ones still standing, and a "
+    "summon takes the next free letter. Either handle aims a card -- "
+    "`on \"B\"` is the same body as the full name beside it.*")
+
 # `EB-294`. AN AURA IS NOT A BUFF, AND THE FEED SAYS BUFF. `AuraPower.Type` is
 # `PowerType.Buff` so that Artifact does not eat an elemental application
 # ([USER] 2026-08-23), which is a rule about Artifact and reads on a page as a
