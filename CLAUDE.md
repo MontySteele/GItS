@@ -105,11 +105,16 @@ git show <commit>:<path>
   picks only and is empty most of the time. **No new `M` ids after
   2026-09-01:** existing ones close in place, and a new pick is named by its
   packet section until it is ruled and then by its `R` number.
-- **Claude merges plumbing PRs.** A plumbing PR touches no card-sheet number,
-  no balance constant, no `LAW.md` or `EXPERIMENTS.md` text and no design prose
-  for [USER]. With CI green, Claude merges it (`gh pr merge --merge`, matching
-  this repo's merge-commit history) and says so in the turn. Everything else is
-  PR = [USER], stacked in one batch per sitting; main's push rule is unchanged.
+- **Claude merges every PR that asks nothing of [USER]** (R259, 2026-09-05).
+  A PR is [USER]'s only when it carries an open A/B/C pick, amends `LAW.md`
+  or `EXPERIMENTS.md` text, or moves a shipped-sheet number or balance
+  constant (a staged lever is a C pick by itself). Everything else is
+  plumbing: round packets with no pick, built rows, prototype rows under a
+  disclosed D/E/F default, and the recording of a ruling already given. With
+  CI green, Claude merges it (`gh pr merge --merge`, matching this repo's
+  merge-commit history) and says so in the turn; [USER] reads packets when
+  one carries a pick, and vetoes on the merged text. Main's push rule is
+  unchanged.
 - **Experiments** keep pre-registration and blind grading at the Balance stage
   — see `EXPERIMENTS.md`. No looking at results before the grade is in.
 - **Audit findings triage three ways:** confirmed defect → `BACKLOG.md`; an

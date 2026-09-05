@@ -268,8 +268,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R256 | 2026-09-04 | the rulings deprecation audit ruled at all four defaults -- six dead Charge/Burst pointers struck, R56 out, R58 scoped to Balance, each landing strikes its… | `5b6b457` |
 | R257 | 2026-09-04 | Kokomi round 15 pick 1 at its default -- Tide Chart redesigned to pay after the carry-outs, the starter stays two kit cards | `ee6da29` |
 | R258 | 2026-09-04 | Furina round 5 pick 1 at its default -- Furina starts each combat with 2 Encore under the reframe arm | `4356352` |
+| R259 | 2026-09-05 | Claude merges every PR that asks nothing of [USER]; a PR is [USER]'s only for an open pick, LAW/EXPERIMENTS text, or a shipped number | `9a4251b` |
 
-257 rows over the R1..R258 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 146 from a commit message, 0 unresolved.
+258 rows over the R1..R259 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 147 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 

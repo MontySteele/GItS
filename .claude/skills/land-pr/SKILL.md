@@ -16,10 +16,11 @@ now is.
 
 ## Only for plumbing
 
-A plumbing PR touches **no** card-sheet number, **no** balance constant, **no**
-`LAW.md` or `EXPERIMENTS.md` text and **no** design prose for [USER]. That
-judgement is yours, not the tool's. Everything else is PR = [USER] — leave it
-open and say so.
+A PR is [USER]'s only when it carries an open A/B/C pick, amends `LAW.md` or
+`EXPERIMENTS.md` text, or moves a shipped-sheet number or balance constant
+(R259). Everything else is plumbing, round packets with no pick and built rows
+included, and Claude lands it on green CI. That judgement is yours, not the
+tool's; a [USER] PR is left open and said so.
 
 ## What it refuses, and why each refusal is real
 
