@@ -2,6 +2,12 @@ using System;
 using System.Linq;
 using System.Reflection;
 using KleeMod.Cards;
+using MegaCrit.Sts2.Core.Entities.Cards;
+using BaseLib.Abstracts;
+using System.Collections.Generic;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.ValueProps;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
@@ -545,6 +551,76 @@ public class Round19Tests
         // it would be the same defect `EB-504` closed, one clause louder.
         var body = Il.Method("ArmKeywordTips", "ForHexerei");
         Assert.Contains("ArmKeywordTips.KleesRuleBelongsHere", Il.Calls(body));
+    }
+
+    // ==================================================================
+    // `EB-540` -- a Skill's damage spends no next-Attack buff
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r19 lane 2). "Ambush is a `skill` whose entire text is
+    // 'Deal 5 damage.' Bennett buffs 'your next Attack', so Bennett's buff sat
+    // unspent on my bar while Ambush hit. The card types are internally
+    // consistent, but the faces give a blind reader no warning that a damage
+    // card can fail to be an Attack." The seat played the buff and the Skill in
+    // the same turn and read the result off its own status bar.
+    //
+    // THE SENTENCE IS ON THE BUFF, which is the surface the seat was reading
+    // and the one whose class owns the rule: `NextAttackRiderPower` refuses on
+    // the card TYPE in `BeforeCardPlayed`, and every subclass asks the same of
+    // `cardSource`. A kit's keyword would have carried a rule that is not
+    // about that kit -- the riders are Companion powers and reach every
+    // character -- and would have said it on Kokomi's Plan cards only.
+    //
+    // AND IT SAYS THE NARROW TRUE THING. "A Skill's damage is not an Attack"
+    // is one surface too wide: `EB-469`/`EB-481` measured the other half --
+    // a Skill's damage clause is emitted as `ValueProp.Move`, so Weak cuts it
+    // and Vulnerable raises it. What is true is the card TYPE.
+
+    [Theory]
+    [InlineData(typeof(PassionOverloadPower))]
+    [InlineData(typeof(SwirlChargePower))]
+    [InlineData(typeof(StarfrostDiscountPower))]
+    [InlineData(typeof(CrowfeatherCoverPower))]
+    public void Every_next_attack_rider_prints_the_card_type_rule(Type rider)
+    {
+        var power = (ILocalizationProvider)Activator.CreateInstance(rider)!;
+        var face = power.Localization!
+            .First(r => r.Item1 == "description").Item2;
+
+        Assert.Contains("Only an Attack card spends it, never a Skill.", face);
+        Assert.Contains("next Attack", face);
+    }
+
+    [Fact]
+    public void The_clause_is_declared_once_on_the_class_that_owns_the_rule()
+    {
+        // FOUR FACES, ONE SENTENCE. A second copy is a second sentence to keep
+        // in step, and the rule they are all describing is one method's.
+        var clause = typeof(NextAttackRiderPower)
+            .GetField("CardTypeClause", All)!.GetRawConstantValue() as string;
+        Assert.Equal(" Only an Attack card spends it, never a Skill.", clause);
+
+        Assert.Contains("CardModel.get_Type", Il.Calls(
+            Il.Method("NextAttackRiderPower", "BeforeCardPlayed")));
+    }
+
+    [Fact]
+    public void A_skills_damage_still_takes_weak_and_vulnerable()
+    {
+        // THE HALF THE CLAUSE DOES NOT CLAIM, pinned so a later rewording
+        // cannot widen it into `EB-469`'s defect: a Skill's damage clause is
+        // emitted as `ValueProp.Move`, which IS a powered attack, so the
+        // target's and the dealer's terms read it. Only the card TYPE gate
+        // refuses.
+        Assert.True(ValueProp.Move.IsPoweredAttack());
+
+        var vars = ((IEnumerable<DynamicVar>)typeof(ProtoKkKuragesOath)
+            .GetProperty("CanonicalVars", All)!
+            .GetValue(new ProtoKkKuragesOath())!).ToList();
+        var damage = vars.OfType<DamageVar>().Single();
+
+        Assert.Equal(CardType.Skill, new ProtoKkKuragesOath().Type);
+        Assert.Equal(ValueProp.Move, damage.Props);
     }
 
     /// <summary>The loc key a pile's badge is resolving right now.

@@ -633,7 +633,7 @@ public sealed class CrowfeatherCoverPower
         ("title", "Crowfeather Cover"),
         ("description",
             "Your next Attack this turn deals [blue]{Amount}[/blue] additional "
-          + "damage and applies [gold]Electro[/gold]."),
+          + "damage and applies [gold]Electro[/gold]." + CardTypeClause),
     };
 
     public override decimal ModifyDamageAdditive(

@@ -641,6 +641,41 @@ public sealed class MelodyLoopPower : PowerModel, ILocalizationProvider
 /// </summary>
 public abstract class NextAttackRiderPower : PowerModel
 {
+    /// <summary>
+    /// `EB-540`. THE CLAUSE EVERY RIDER OWES, spelled once on the class that
+    /// owns the rule.
+    ///
+    /// THE FIND (Kokomi r19 lane 2). "Ambush is a `skill` whose entire text is
+    /// 'Deal 5 damage.' Bennett buffs 'your next Attack', so Bennett's buff sat
+    /// unspent on my bar while Ambush hit. The card types are internally
+    /// consistent, but the faces give a blind reader no warning that a damage
+    /// card can fail to be an Attack." The seat played the buff and the Skill
+    /// in the same turn and read the result off its own status bar.
+    ///
+    /// THE RULE IS THIS CLASS'S: <see cref="BeforeCardPlayed"/> refuses on
+    /// <c>cardPlay.Card?.Type != CardType.Attack</c> and every subclass's
+    /// <c>ModifyDamageAdditive</c> asks the same of <c>cardSource</c>. So the
+    /// sentence belongs here rather than on a kit's keyword: it is true of
+    /// every rider, on every character, and of no other buff in the mod.
+    ///
+    /// AND IT SAYS WHAT IS TRUE AND NOT MORE. "A Skill's damage is not an
+    /// Attack" is the reading the row proposed, and it is too wide by one
+    /// surface: `EB-469`/`EB-481` measured the opposite half -- a Skill's
+    /// damage clause is emitted as `ValueProp.Move`, so Weak DOES cut it and
+    /// Vulnerable DOES raise it, and the base game's own Weak line says
+    /// "Attacks" about exactly that. What is narrow and true is the card TYPE:
+    /// a rider reads the card, and a Skill is not one.
+    /// </summary>
+    ///
+    /// FORTY-SIX CHARACTERS, and it is four faces' worth of ceiling: the
+    /// longest of them (`CrowfeatherCoverPower`) runs to 119 of 125 with this
+    /// on it, so no rider takes an exception for a sentence every rider owes.
+    /// "Never a Skill" rather than "never a Skill's damage" is what paid for
+    /// that, and it loses nothing: the rule is about the card's TYPE and a
+    /// Skill that deals no damage was never spending the buff either.
+    protected const string CardTypeClause =
+        " Only an Attack card spends it, never a Skill.";
+
     private CardPlay? _spendingOn;
     private int _spending;
 
@@ -700,7 +735,7 @@ public sealed class PassionOverloadPower : NextAttackRiderPower, ILocalizationPr
         ("title", "Passion Overload"),
         ("description",
             "Your next Attack this turn deals [blue]{Amount}[/blue] additional "
-          + "damage and applies [gold]Pyro[/gold]."),
+          + "damage and applies [gold]Pyro[/gold]." + CardTypeClause),
     };
 
     public override decimal ModifyDamageAdditive(
@@ -739,7 +774,7 @@ public sealed class SwirlChargePower : NextAttackRiderPower, ILocalizationProvid
         ("title", "Sturm und Drang"),
         ("description",
             "Your next Attack deals [blue]{Amount}[/blue] additional damage of "
-          + "the last [gold]Swirl[/gold]ed element."),
+          + "the last [gold]Swirl[/gold]ed element." + CardTypeClause),
     };
 
     /// <summary>The element the latest Swirl carried. LAST WINS.</summary>
@@ -771,7 +806,8 @@ public sealed class StarfrostDiscountPower : NextAttackRiderPower, ILocalization
     public List<(string, string)>? Localization => new()
     {
         ("title", "Starfrost Swirl"),
-        ("description", "Your next Attack costs [blue]{Amount}[/blue] less."),
+        ("description", "Your next Attack costs [blue]{Amount}[/blue] less."
+                      + CardTypeClause),
     };
 
     public override bool TryModifyEnergyCostInCombat(

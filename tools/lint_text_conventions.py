@@ -372,6 +372,18 @@ def _consts(src: str) -> dict[str, str]:
             re.findall(r"const string (\w+) =\s*((?:[^;])*);", src)}
 
 
+#: `EB-540`. `NextAttackRiderPower.CardTypeClause`, read out of the one file
+#: that declares it. Memoized because four faces in two files append it.
+_RIDER_CLAUSE: list[str] = []
+
+
+def _rider_card_type_clause() -> str:
+    if not _RIDER_CLAUSE:
+        src = read(MOD / "Powers" / "Prototype" / "CompanionOverhaulHooks.cs")
+        _RIDER_CLAUSE.append(_consts(src).get("CardTypeClause", ""))
+    return _RIDER_CLAUSE[0]
+
+
 def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
     rows: list[Row] = []
     for path in paths:
@@ -397,6 +409,20 @@ def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
             text = csharp_text(expr)
             if "MineClause" in expr:
                 text += consts.get("MineClause", "")
+            # `EB-540`: the next-Attack riders' shared clause. It is declared
+            # ONCE on `NextAttackRiderPower` -- the class whose own
+            # `BeforeCardPlayed` is the rule -- and appended by four faces in
+            # two files, so it is read from where it lives rather than from
+            # each caller's own `consts`. A clause reaching this file as a bare
+            # identifier is one numeral and therefore text no ceiling measures,
+            # which is the silence `EB-343` was filed on.
+            if "CardTypeClause" in expr:
+                # `csharp_text` has already counted the trailing identifier as
+                # ONE NUMERAL, which is right for a number and wrong for a
+                # sentence, so the numeral it stood in for comes off before the
+                # sentence goes on.
+                text = text[:-1] if text.endswith("6") else text
+                text += _rider_card_type_clause()
             rows.append(Row(surface, f"{cls}.{key}", text, where))
         if path.name == "ProtoBombPower.cs":
             # `EB-343` widened the second axis. The badge's face used to be two
