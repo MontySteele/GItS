@@ -387,8 +387,18 @@ are in [`workstreams.md`](workstreams.md).
   printed price to 1 (FOLLOWS, `EB-552`); Aria+'s Innate defeated its own
   Fanfare reader and the upgrade drops it (`EB-550`); the stage draw-gated
   on one card, the round-11 pick's fourth reading; no pick;
-  `EB-546`-`EB-552`. [USER]'s act-1 run is due on
-  `0.2.2729+proto`. No stamp moves, nothing measured.
+  `EB-546`-`EB-552`. **Round 14 is READ**
+  (`review/active/furina-reframe-round-14-2026-09-05.md`): two seats on
+  `0.2.2753+proto`, four of four and six of six fights with both elites;
+  Rolling Tide not missed, Second Course playable once in five (Encore
+  at 0 on most turns, the price stands), Aria+ pays without Innate;
+  Dexterity adds nothing to Block under the arm (`EB-566`), the Evoke
+  prints no line (`EB-564`), the Spotlight's turn-one window unprinted
+  (`EB-567`), Rapturous Applause's face hides a floor (`EB-568`), Amber
+  outside the Spotlight fold (`EB-565`); the empty stage read a fifth
+  time, answered by R260 and read next on its build; no pick;
+  `EB-564`-`EB-568`. [USER]'s act-1 run is due on R260's build. No
+  stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
