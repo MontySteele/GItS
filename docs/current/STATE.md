@@ -102,12 +102,10 @@ Slay the Spire 2 **v0.111.0**, commit `41cef1ea`, buildid `24724944`, appid
 v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
-`+proto` dev mark (R217 D). **Installed: `0.2.2564+proto`** (2026-09-04,
-the #373 stack at `fb7b12d8` on main `f1c6c9ec`, ALL FOUR arms on since R250:
-the round-9 to round-13 builds, R253's nine audited rows, R254's starter
-reader, Countdown, Stoke the Fuse, Aria's bar at 3, and the four fixers'
-27 face, tip, page and bridge rows including the bridge's action cap
-`EB-456`), the prototype arms behind
+`+proto` dev mark (R217 D). **Installed: `0.2.2614+proto`** (2026-09-05,
+#389's head `ee3e7996` on main `d2ea772e`, ALL FOUR arms on since R250:
+the round-9 to round-15 builds, R257's Tide Chart, R258's 2-Encore
+opening, and the six fixers' rows), the prototype arms behind
 `-p:PrototypeCards=true` and the Furina arm behind `-p:FurinaReframe=true`
 too; every arm ships OFF in a release package. **Last RELEASE
 package: `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
@@ -217,7 +215,13 @@ are in [`workstreams.md`](workstreams.md).
   Tide Chart granted and dead as printed (zero draws on three of four
   plays), which fired R254's re-ask trigger; **R257 took the default**: Tide
   Chart redesigned to pay after the carry-outs (`EB-478`, GPT-audited before
-  a tester), the starter stays two kit cards; `EB-467`-`EB-469`. [USER]'s act-1 run is due on
+  a tester), the starter stays two kit cards; `EB-467`-`EB-469`. **Round 16 is READ**
+  (`review/active/kokomi-overhaul-round-16-2026-09-04.md`): one seat on
+  `0.2.2614+proto`, floor 8 at the cap with the elite dead on the last
+  action; a non-Plan card on the Bake-Kurage silently accepted (`EB-480`),
+  Vulnerable's two texts (`EB-481`), the reaction preview a turn late
+  (`EB-482`); the redesigned Tide Chart undrawn, so the next round grants
+  it; no pick. [USER]'s act-1 run is due on
   `0.2.2501+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
