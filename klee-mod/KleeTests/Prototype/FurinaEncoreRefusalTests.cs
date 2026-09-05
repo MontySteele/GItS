@@ -67,19 +67,20 @@ public class FurinaEncoreRefusalTests
     }
 
     [Fact]
-    public void Second_course_at_two_encore_names_encore_and_the_price()
+    public void Second_course_on_an_empty_buffer_names_encore_and_the_price()
     {
-        // The row's own test, at the seat's own numbers: Second Course prints
-        // `Spend 3 Encore` and the buffer held 2.
+        // The row's own test, at the seat's own numbers. `EB-552` took the
+        // printed price from 3 to 1, so the shortfall this row can still show a
+        // player is the empty buffer -- which is the one every fight opens
+        // three turns of Encore decay away from.
         var seat = Seat.Furina().WithCombatState();
-        FurinaResources.GainEncore(seat.Creature, 2);
 
         int price = MeterCost.Priced(new ProtoFrSecondCourse())!.Value.Amount;
         int bank = MeterCost.BankOf(seat.Creature, Meter.Encore);
 
-        Assert.Equal(3, price);
-        Assert.Equal(2, bank);
-        Assert.Equal("you have 2 Encore, and this costs 3",
+        Assert.Equal(1, price);
+        Assert.Equal(0, bank);
+        Assert.Equal("you have no Encore, and this costs 1",
                      KleeUnplayableReason.EncoreSentence(bank, price));
     }
 
@@ -145,13 +146,15 @@ public class FurinaEncoreRefusalTests
         // The gate is as wide as the field and no wider: a row with no
         // `encore_cost` must not acquire a sentence about a meter it never
         // asks for. `DressRehearsal` is a shipped Furina row that DOES charge
-        // one, and it is here as the denominator.
-        Assert.Equal(0, MeterCost.PriceIn(new ProtoFrRollingTide(),
+        // one, and it is here as the denominator. (The unpriced row was Rolling
+        // Tide until `EB-552` withdrew it; Guest List is the same shape -- an
+        // arm Common on the pool pass with no `encore_cost` field at all.)
+        Assert.Equal(0, MeterCost.PriceIn(new ProtoFrGuestList(),
                                           Meter.Encore));
         Assert.Equal(2, MeterCost.PriceIn(new DressRehearsal(), Meter.Encore));
 
         var seat = Seat.Furina().WithCombatState();
         Assert.Null(KleeUnplayableReason.EncoreShortfall(
-            Owned(new ProtoFrRollingTide(), seat)));
+            Owned(new ProtoFrGuestList(), seat)));
     }
 }

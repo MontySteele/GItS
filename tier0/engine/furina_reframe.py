@@ -150,24 +150,32 @@ POOL_SUBS: dict[str, str] = {
     "universal_revelry": "proto_fr_universal_revelry",  # 15 -> 8,  rare
     "flood_of_emotion": "proto_fr_flood_of_emotion",    # 20 -> 10, rare
     # ---- POOL PASS ONE (`EB-493`, `review/active/furina-pool-pass-2026-09-05
-    # .md` sec.2; four FOLLOWS off the doctrine read, record 5.5). A DIFFERENT
-    # ARGUMENT AT THE SAME SEAM, and it is worth naming because this map now
-    # carries two. The four rows above are COPIES -- the same card at a bar
-    # this arm's meter can reach. The four below are NEW ROWS wearing a shipped
-    # Common's slot and its art, because rounds 9 and 10 read the Salon as
+    # .md` sec.2; four FOLLOWS off the doctrine read, record 5.5, one of them
+    # since withdrawn). A DIFFERENT ARGUMENT AT THE SAME SEAM, and it is worth
+    # naming because this map now carries two. The four rows above are COPIES
+    # -- the same card at a bar this arm's meter can reach. The three below are
+    # NEW ROWS wearing a shipped Common's slot and its art, because rounds 9
+    # and 10 read the Salon as
     # FURNITURE: one Deploy in the whole deck, most Companion plays printing
     # "No member on stage: performs nobody", and no card of her own that asks a
     # member to act. Each row answers one of those readings.
     #
-    # ALL FOUR ARE COMMON FOR COMMON, so the offer odds do not move here either,
+    # ALL OF THEM ARE COMMON FOR COMMON, so the offer odds do not move here,
     # and each replaced row was chosen because it is a plain number card of the
     # same type and cost as its replacement (the packet's sec.5 D default; it
     # moves on the seats' word).
     "house_call": "proto_fr_curtain_rises",        # a Deploy on an Attack
     "dinner_service": "proto_fr_second_course",    # a priced 2nd performance
-    "undercurrent": "proto_fr_rolling_tide",       # the kit's own perform verb
     "blocking_notes": "proto_fr_guest_list",       # a generator in the pool
 }
+# ROLLING TIDE WAS WITHDRAWN (`EB-552`, round 13, a D default). The kit's own
+# perform verb on a draftable row was read once at 2 energy and once at 1, by
+# four seats over three rounds, and the answer never moved: "4 damage into one
+# body; zero against Plating 8; actively harmful against four Skittish bodies".
+# The price was not the reason, so the row left rather than moving again -- the
+# loop's first cut. `undercurrent` is absent from this map, which is the whole
+# of the change on this side: the shipped Undercurrent is offered again at that
+# seam, and the row and its pins left the surface under R213 B's deletion rule.
 
 
 # ----------------------------------------------------------------------

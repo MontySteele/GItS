@@ -443,21 +443,27 @@ public static class FurinaReframeRoster
 {
     /// <summary>
     /// The shipped rows this arm takes off the offer, and the arm rows that
-    /// take their slots: FOUR RIDERS, plus THE POOL PASS'S FOUR (`EB-493`).
+    /// take their slots: FOUR RIDERS, plus THE POOL PASS'S THREE (`EB-493`).
     ///
-    /// THE SECOND FOUR ARE A DIFFERENT ARGUMENT AT THE SAME SEAM, worth naming
+    /// ROLLING TIDE WAS WITHDRAWN (`EB-552`, round 13, a D default): four
+    /// seats over three rounds read the kit's own perform verb the same way at
+    /// two prices, so the row left the arm rather than moving again, and
+    /// <i>Undercurrent</i> is offered here again. The row and its pins left
+    /// <c>docs/prototype-surface.yaml</c> under R213 B's deletion rule.
+    ///
+    /// THE SECOND GROUP IS A DIFFERENT ARGUMENT AT THE SAME SEAM, worth naming
     /// because this method now carries two. The riders are COPIES -- the same
-    /// card at a bar this arm's meter can reach. The pool pass's four are NEW
+    /// card at a bar this arm's meter can reach. The pool pass's rows are NEW
     /// ROWS wearing a shipped Common's slot and art: <i>Curtain Rises</i>,
-    /// <i>Second Course</i>, <i>Rolling Tide</i> and <i>Guest List</i> for
-    /// <i>House Call</i>, <i>Dinner Service</i>, <i>Undercurrent</i> and
-    /// <i>Blocking Notes</i>. Rounds 9 and 10 read the Salon as furniture --
+    /// <i>Second Course</i> and <i>Guest List</i> for <i>House Call</i>,
+    /// <i>Dinner Service</i> and <i>Blocking Notes</i>. Rounds 9 and 10 read
+    /// the Salon as furniture --
     /// one Deploy in the deck, no card of her own that asks a member to act,
     /// and a Companion density the reward slot alone decides -- and the pass
     /// answers each with one row (`review/active/furina-pool-pass-2026-09-05.md`
     /// sec.2). The shipped sheet is Balance-stage content and does not move for
     /// a prototype arm (R213 B), so the arm carries the rows and swaps them in
-    /// HERE. Same rarity in and out on both halves -- four Commons, two
+    /// HERE. Same rarity in and out on both halves -- three Commons, two
     /// Uncommons, two Rares -- so the offer odds are untouched.
     /// </summary>
     public static IEnumerable<CardModel> SwapOfferedRiders(
@@ -471,7 +477,6 @@ public static class FurinaReframeRoster
                         && card is not FurinaGen.FloodOfEmotion
                         && card is not FurinaGen.HouseCall
                         && card is not FurinaGen.DinnerService
-                        && card is not FurinaGen.Undercurrent
                         && card is not FurinaGen.BlockingNotes)
             .Concat(PrototypeCards.For("furina")
                         .Where(card => card is ProtoFrFloridCadenza
@@ -480,7 +485,6 @@ public static class FurinaReframeRoster
                                             or ProtoFrFloodOfEmotion
                                             or ProtoFrCurtainRises
                                             or ProtoFrSecondCourse
-                                            or ProtoFrRollingTide
                                             or ProtoFrGuestList));
     }
 

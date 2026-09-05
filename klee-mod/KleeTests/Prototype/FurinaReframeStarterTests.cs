@@ -158,6 +158,42 @@ public class FurinaReframeStarterTests
         Assert.Equal(paid, FurinaResources.Encore(seat.Creature));
     }
 
+    [Fact]
+    public void The_upgrade_gains_three_more_and_is_not_innate()
+    {
+        // `EB-550` (round 13, a D default). The upgrade WAS Innate, and Innate
+        // is what defeated the reader it rides on: an Innate card is in the
+        // opening hand, and on turn one Fanfare is always 0 because nothing has
+        // performed yet, so the "at least 3 Fanfare" half was structurally dead
+        // every fight across two lanes. The upgrade keeps its +3 Encore, which
+        // is the half a player can spend, and drops the keyword.
+        var card = new ProtoFrAriaOfRecompense();
+        var upgraded = Upgraded<ProtoFrAriaOfRecompense>();
+
+        Assert.DoesNotContain(CardKeyword.Innate, card.Keywords);
+        Assert.DoesNotContain(CardKeyword.Innate, upgraded.Keywords);
+    }
+
+    [Theory]
+    [InlineData(2, 8)]     // one under the bar: the upgraded shipped line
+    [InlineData(3, 16)]    // at the bar: both lines at the upgraded number
+    public void The_upgraded_copy_pays_three_more_on_each_line(int fanfare,
+                                                              int paid)
+    {
+        // The other half of `EB-550`: what the upgrade still buys. 5 -> 8 on
+        // the line every play pays, and the reader's line moves with it, so the
+        // card that can now be drawn after a performance is worth drawing.
+        using var _ = new Arm(master: true);
+        var seat = Seat.Furina().WithCombatState();
+        FurinaResources.GainFanfare(seat.Creature, fanfare);
+
+        var card = Upgraded<ProtoFrAriaOfRecompense>();
+        Seat.Set(card, "Owner", seat.Player);
+        Play(card);
+
+        Assert.Equal(paid, FurinaResources.Encore(seat.Creature));
+    }
+
     // ==================================================================
     // 3. WHAT THE NAMED DEBUT DEPLOYS (`EB-416`).
     // ==================================================================
@@ -223,6 +259,20 @@ public class FurinaReframeStarterTests
     // ==================================================================
     // Fixtures.
     // ==================================================================
+
+    /// <summary>Upgrade a card the way the campfire does. Lifted from
+    /// <c>HexereiReaderTests.Upgraded</c>, for its reason: `UpgradeInternal`
+    /// raises the level, calls the card's own `OnUpgrade` and finalizes each
+    /// DynamicVar's preview, so a keyword the upgrade adds is on the card
+    /// afterwards exactly as a player would find it.</summary>
+    private static T Upgraded<T>() where T : CardModel, new()
+    {
+        var card = new T();
+        Seat.Set(card, "IsMutable", true);
+        typeof(CardModel).GetMethod("UpgradeInternal", HeadlessGame.All)!
+            .Invoke(card, new object?[] { });
+        return card;
+    }
 
     /// <summary>The printed description, which is what the player reads.
     /// Lifted from <c>KleeOverhaulRoundThreeTests.Face</c>.</summary>

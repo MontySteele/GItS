@@ -207,6 +207,30 @@ def test_the_bar_is_the_starters_own_and_the_reader_is_the_only_new_clause(
     assert len(copy.effects) == 2
 
 
+def test_the_upgrade_gains_three_more_and_is_not_innate(reframe):
+    """`EB-550` (round 13, a D default), the sim twin of
+    `FurinaReframeStarterTests.The_upgrade_gains_three_more_and_is_not_innate`.
+
+    The upgrade WAS Innate, and Innate is what defeated the reader it rides on:
+    an Innate card is in the opening hand, and on turn one Fanfare is always 0
+    because nothing has performed yet, so the "at least 3 Fanfare" half was
+    structurally dead every fight across two lanes. The upgrade keeps its +3
+    Encore -- the half a player can spend -- and drops the keyword.
+    """
+    base = loader.peek_card(COPY)
+    up = loader.peek_card(COPY + "+")
+    assert not base.innate
+    assert not up.innate
+
+    st = _state(fanfare=2)
+    _play(st, COPY + "+")
+    assert st.player.encore == 8
+
+    st = _state(fanfare=3)
+    _play(st, COPY + "+")
+    assert st.player.encore == 16
+
+
 def test_the_shipped_card_still_ignores_the_meter_with_the_arm_off():
     """The R130 veto stands where it was ruled. Track 2.4 -- "the starter gets
     no payoff" -- was [USER]'s 2026-08-07 veto on the SHIPPED sheet, and R254
