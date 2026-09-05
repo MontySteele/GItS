@@ -1306,6 +1306,14 @@ def token_card(card_id: str) -> Card:
 def _add_token(state: CombatState, card: Card, zone: str) -> None:
     if zone == "hand" and len(state.player.hand) < C.MAX_HAND_SIZE:
         state.player.hand.append(card)
+    elif zone == "draw":
+        # `EB-491` (Fish Blasting), the third zone: SHUFFLED INTO the draw
+        # pile, which is `CardPilePosition.Random` on the C# side and a random
+        # index here. The whole cost of the Status is that the player does not
+        # know when it will arrive, so neither end of the pile is the honest
+        # answer. `draw` pops index 0, so the range spans top and bottom alike.
+        state.player.draw_pile.insert(
+            state.rng.randrange(len(state.player.draw_pile) + 1), card)
     else:
         state.player.discard_pile.append(card)
     # Kokomi §7 engine_closure diagnostic: every created card funnels
@@ -5210,7 +5218,7 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
             if fx.get("aura") == "non_pyro" and (
                     enemy.aura is None or enemy.aura == "pyro"):
                 continue
-            klee_overhaul.set_off(state, enemy)
+            klee_overhaul.set_off(state, enemy, card)
             hit(enemy)
         return
 
@@ -5225,7 +5233,7 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
             if not living:
                 return
             enemy = state.rng.choice(living)
-            klee_overhaul.set_off(state, enemy)
+            klee_overhaul.set_off(state, enemy, card)
             hit(enemy)
         return
 
@@ -5237,7 +5245,7 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
     # play, dead or alive). The card's own hit still fizzles on the corpse,
     # because `_op_damage` picks its targets with `allow_dead` False.
     for enemy in _pick_targets(state, spec, allow_dead=True):
-        klee_overhaul.set_off(state, enemy)
+        klee_overhaul.set_off(state, enemy, card)
         hit(enemy)
 
 
@@ -5292,6 +5300,35 @@ def _op_grow_bombs(state: CombatState, fx: dict, card: Card) -> None:
         klee_overhaul.grow_pile(enemy, amount)
         state.emit("ko_bombs_grew", amount=amount, target=enemy.name,
                    charges=len(enemy.ko_charges))
+
+
+def _op_plant_bomb_copy_largest(state: CombatState, fx: dict,
+                                card: Card) -> None:
+    """All of My Treasures! (`EB-491`). ONE call, and the row carries no
+    number: the size is read off the board inside `klee_overhaul`, so no card
+    can express a second reading of "your largest Bomb"."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    dest = _pick_targets(state, fx.get("target", "enemy"), allow_dead=True)
+    klee_overhaul.place_copy_of_largest(state, dest[0] if dest else None)
+
+
+def _op_grow_bombs_off_aura(state: CombatState, fx: dict, card: Card) -> None:
+    """Kindling (`EB-491`). ONE call with BOTH printed numbers, so the aura
+    clause and its floor cannot be reached by two different paths: the rule
+    that decides which of them applies is the arm's."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.grow_bombs_off_aura(state, int(fx["amount"]),
+                                      int(fx["floor"]))
+
+
+def _op_split_largest_bomb(state: CombatState, fx: dict, card: Card) -> None:
+    """Split Charge (`EB-491`). ONE call; the halving is the arm's arithmetic
+    and `growth` is what the upgrade adds to each half."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.split_largest(state, int(fx.get("growth", 0)))
 
 
 def _op_merge_bombs(state: CombatState, fx: dict, card: Card) -> None:
@@ -5569,6 +5606,12 @@ OPS = {
     "plant_bomb": _op_plant_bomb,
     "grow_bombs": _op_grow_bombs,
     "merge_bombs": _op_merge_bombs,
+    # THE POOL PASS's three (`EB-491`), on the same terms as every arm verb
+    # above: one call each into `klee_overhaul`, and a raise with the flag off
+    # or on a seat that is not Klee.
+    "plant_bomb_copy_largest": _op_plant_bomb_copy_largest,
+    "grow_bombs_off_aura": _op_grow_bombs_off_aura,
+    "split_largest_bomb": _op_split_largest_bomb,
     "remove_bomb_for_block": _op_remove_bomb_for_block,
     # R252's verb, the defence shelf's own (Careful Now). Beside Sorry, Jean...
     # because it reads the same pile, and distinct from it because it spends

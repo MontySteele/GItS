@@ -386,6 +386,16 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # meter -- which is the connection the row exists to make.
     "grow_largest_bomb": [_hook("private", "sparks", "read"),
                           _hook("private", "bombs", "write")],
+    # THE POOL PASS's three (`EB-491`). All of My Treasures! READS the pile for
+    # its size and WRITES a second one; Kindling reads the enemy's AURA and
+    # writes the pile; Split Charge reads and writes the pile alone -- it moves
+    # charge between enemies and mints nothing.
+    "plant_bomb_copy_largest": [_hook("private", "bombs", "read"),
+                                _hook("private", "bombs", "write")],
+    "grow_bombs_off_aura": [_hook("shared", "aura", "read"),
+                            _hook("private", "bombs", "write")],
+    "split_largest_bomb": [_hook("private", "bombs", "read"),
+                           _hook("private", "bombs", "write")],
     "damage_set_off_total": [_hook("private", "bombs", "read")],
     "multiply_set_off": [_hook("private", "bombs", "read")],
     "draw_per_set_off": [_hook("private", "bombs", "read"),

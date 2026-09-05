@@ -383,6 +383,19 @@ class Card:
     cost_delta_this_turn: int = 0
     cost_delta_this_combat: int = 0
     free_this_turn: bool = False
+    # QUARANTINED (`C.KLEE_OVERHAUL`) -- THE RISING HAND COST, `EB-491`. Long
+    # Fuse's second rule: "Costs 1 more each turn it stays in your hand."
+    # `rising_cost` is the ROW's printed number (how much per turn held) and
+    # `rising_cost_risen` is the accumulated modifier:
+    # `klee_overhaul.roll_rising_costs` adds to it at end of turn, `card_cost`
+    # reads it, `combat._finish_play` clears it when the card is played, and
+    # `run_fight` zeroes it at fight start. That lifetime is the base game's
+    # own `CardEnergyCost.AddUntilPlayed`, which the C# twin uses directly --
+    # it accumulates, it survives the turn boundary, it clears on play and it
+    # is combat-scoped. Both are 0 on every shipped card, so the frozen battery
+    # is byte-identical.
+    rising_cost: int = 0
+    rising_cost_risen: int = 0
     # EB-83, the on-draw hook. `EnergyCost.SetThisCombat` is the base game's
     # ABSOLUTE combat-scoped cost modifier -- the one Slither writes when the
     # card is drawn -- where every field above it is RELATIVE. Kept as its own

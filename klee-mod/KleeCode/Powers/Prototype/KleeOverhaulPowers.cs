@@ -360,30 +360,100 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Vermillion Pact: "When a Bomb reacts, the Attack that set it off reacts
-/// too." NOT BUILT IN SLICE ONE, and the slice packet's sec.5 names this row as
-/// the one that may drop out: "Vermillion Pact is the one item on this list
-/// that touches shared reaction code; if it costs more than a day it drops out
-/// of slice one and is tested in slice two."
+/// Vermillion Pact (the pool pass, `EB-491`): "Whenever one of your Bombs
+/// triggers an Elemental Reaction, the Attack that set it off triggers one
+/// too." The brief's sec.5.3 rule-breaker, and the third of its three
+/// rule-breaking Rares: the shared "one aura, consumed by the first hit" rule
+/// is broken, for her chain and nowhere else.
 ///
-/// WHY IT COSTS MORE THAN A DAY. The rule is not "react twice"; it is "the aura
-/// the explosion CONSUMED is still there for the Attack behind it". Every
-/// reaction in the mod runs through one funnel -- <c>ElementalHit.Deal</c>
-/// removes the aura and calls <c>ReactionEffects.Resolve</c>, which is also
-/// where Burst income, Courtroom Drama, Catalytic Converter and the amplifier
-/// multiplier all hang. Making the aura survive one hit means either
-/// re-applying it between the explosion and the card's own damage (which would
-/// change what a THIRD hit in the same play sees, and would re-trigger every
-/// on-apply hook) or threading a "do not consume" flag through the shared
-/// funnel (which every character's reaction would then have to be re-checked
-/// against). Both are shared-layer changes, and neither belongs in a build
-/// whose job is to find out whether the seven rules are fun.
+/// DEFERRED FROM SLICE ONE, AND ON WHICH OF THE TWO ROADS. The slice packet's
+/// sec.5 named this row as the one that might drop out -- "the one item on this
+/// list that touches shared reaction code" -- and set out the two shapes it
+/// could take: RE-APPLYING the consumed aura between the explosion and the
+/// card's own hit, or threading a "do not consume" flag through
+/// <c>ElementalHit.Deal</c>. This is the FIRST, and the reason is that the
+/// second is a shared-layer change every character's reactions would then have
+/// to be re-read against, while this one is a Klee power writing to a Klee
+/// enemy through the ordinary front door (<see cref="AuraCmd.Apply"/>).
 ///
-/// THE ROW IS OFF THE SURFACE. This type is not a stand-in and there is no card
-/// pointing at it: an unbuilt rule that shipped as a live card would be a face
-/// that lies, which is the defect D4 already names. The type stays as
-/// the written record of the decision and its reason.
+/// THE PRICE OF THAT ROAD, stated rather than hidden: the aura really is back
+/// on the board, so a THIRD hit in the same play sees it too, and every
+/// on-apply hook fires again for it. On a multi-charge pile that is the card
+/// compounding -- each reacting explosion hands the aura back, so the next
+/// charge reacts as well and the Attack behind them all still finds it
+/// standing. That is what a 2-energy Rare printed as a rule-breaker buys, and
+/// it is the reading the face states: the aura the Bomb ate is still there.
+///
+/// ATTACKS ONLY, AND ONLY A SET OFF THE CARD ITSELF MADE. The trigger is read
+/// off <c>cardSource</c> at <c>ProtoBombPower.Explode</c>: a Mine answering an
+/// enemy intent carries no card at all, and Quick Fuse, Countdown and Fireworks
+/// Show are Skills with no hit behind the explosion for the aura to feed. "The
+/// Attack that Set it off" is exactly the scope of the rule.
+///
+/// DEAD ALONE, like Witches' Circle beside it (R244 pick 2): a deck with no
+/// applier in it never puts a foreign aura up, and this Power then never fires.
+/// That is the card, not a defect.
+///
+/// STACKS DO NOTHING. The rule is a fact about the board, not a number, so a
+/// second copy adds no second aura -- the Counter is how the badge counts
+/// copies, exactly as <c>AlicesRecipePower</c>'s is. Sim twin:
+/// <c>klee_overhaul.VERMILLION_PACT</c> and its two reads at
+/// <c>klee_overhaul._explode</c>.
 /// </summary>
-internal static class VermillionPactNotBuilt
+public sealed class VermillionPactPower : PowerModel, ILocalizationProvider
 {
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Vermillion Pact"),
+        ("description",
+            "Whenever one of your [gold]Bombs[/gold] triggers an "
+          + "[gold]Elemental Reaction[/gold], the Attack that set it off "
+          + "triggers one too."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>
+    /// The aura this explosion is ABOUT TO CONSUME, or <c>Element.None</c>.
+    ///
+    /// Read BEFORE the hit, because the hit is what eats it: after
+    /// <c>ElementalHit</c> has run there is nothing left to ask, which is the
+    /// same fact <c>IProtoExplosionListener.reacted</c> exists for. PURE -- it
+    /// answers None on every board with no Pact, on a Skill's Set off and on a
+    /// Mine, so the caller pays one interface walk and nothing else.
+    /// </summary>
+    public static Element AuraToRestore(
+        Creature applier, CardModel? cardSource, Creature target)
+    {
+        if (cardSource is not { Type: CardType.Attack }) return Element.None;
+        if (!applier.Powers.OfType<VermillionPactPower>().Any())
+        {
+            return Element.None;
+        }
+        return AuraCmd.Find(target)?.Element ?? Element.None;
+    }
+
+    /// <summary>
+    /// Hand the consumed aura back, if the explosion really did react with it.
+    ///
+    /// <paramref name="reacted"/> IS THE WHOLE GATE and not a convenience: an
+    /// explosion into a Pyro aura refreshes rather than reacts and consumes
+    /// nothing, so there is nothing owed back -- and re-applying there would be
+    /// the Pact silently topping up an aura it never spent.
+    ///
+    /// IT REFUSES A BOARD THAT ALREADY HOLDS ONE (the one-aura invariant
+    /// <see cref="AuraCmd.Apply"/>'s own doc states) and a corpse: a dead enemy
+    /// takes no hit behind the explosion, so there is no second reaction for
+    /// the aura to make.
+    /// </summary>
+    public static async Task Restore(
+        PlayerChoiceContext choiceContext, Creature applier, Creature target,
+        Element aura, bool reacted)
+    {
+        if (!reacted || aura == Element.None || target.IsDead) return;
+        if (AuraCmd.Find(target) != null) return;
+        await AuraCmd.Apply(choiceContext, target, aura, applier,
+                            cardSource: null);
+    }
 }
