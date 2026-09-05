@@ -253,8 +253,9 @@ are in [`workstreams.md`](workstreams.md).
   (`review/active/furina-reframe-round-5-2026-09-04.md`): two seats on
   `0.2.2476+proto`, floors 10 and 10, both budget-out; the turn one with no
   Encore in every fight, the reader carried at Fanfare 3 and its line never
-  paid, nine rows (`EB-419`-`EB-425`, `EB-429`, `EB-430`); one pick, the
-  Encore opening. **Rounds 6 and 7 are READ**
+  paid, nine rows (`EB-419`-`EB-425`, `EB-429`, `EB-430`); the Encore
+  opening pick is **RULED R258** (2026-09-04): Furina starts each combat
+  with 2 Encore under the arm (`EB-479`), the packet is in `review/ruled/`. **Rounds 6 and 7 are READ**
   (`review/active/furina-reframe-round-6-2026-09-04.md`, `-round-7-`): one
   seat each on `0.2.2501+proto` and `0.2.2547+proto`, floors 11 and 10, the
   reader's bar moved to 3 (round 6 default), a member's roll spent the paid

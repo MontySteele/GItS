@@ -1,4 +1,4 @@
-Status: OPEN (pick 1 in §5; the defaults in §4 are applied)
+Status: RULED R258 2026-09-04
 
 # Furina round five: the reader in the starter, and the turn one that has no Encore
 
@@ -120,3 +120,12 @@ are rules, so [USER] plays the next build of whichever is picked.
 Default is 1 because it opens the decision without making Aria automatic;
 2 is what the seat reached for and would take if 1 reads as too much
 armour on turn one.
+
+## 6. Ruled
+
+R258, 2026-09-04: pick 1 at its default. Furina starts each combat with 2
+Encore under the reframe arm; `EB-479` builds it. Read against rounds 5 to 9
+(the dead first turn four times, then round 9's real choice "dry by
+construction") and the GPT review's point that Encore's depth is its
+destinations, which `EB-466` carries separately. [USER]'s words are in the
+ruling commit.
