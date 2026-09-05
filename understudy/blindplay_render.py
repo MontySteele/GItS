@@ -699,6 +699,16 @@ def render(obs: dict[str, Any]) -> str:
                 # asking what a Plan will do asks which body first.
                 out.append(PLAN_AIM_NOTE)
                 out.append(PLAN_HYDRO_NOTE)
+                # `EB-578`. AND WHEN THE HAND HOLDS NONE, one line saying so.
+                # The form under *What you can say* is gone on such a turn
+                # (`blindplay_observe`), and a form that disappears with no
+                # sentence in its place reads as a page that forgot it -- so
+                # the absence is stated where the jellyfish is described. The
+                # flag is only ever set on a build whose bridge answers
+                # `can_target_pet`, so an older feed prints neither this line
+                # nor a missing form.
+                if pl.get("plannable") is False:
+                    out.append("- No Plan card in hand: the jellyfish waits.")
             # `EB-317`. WHAT ALREADY HAPPENED, BEFORE WHAT IS STILL WAITING,
             # because that is the order the turn had: the morning's Plans were
             # carried out at the top of this turn and the queue below is what

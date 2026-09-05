@@ -3530,7 +3530,7 @@ def test_the_plan_keywords_aim_clause_stays_the_pointer():
     diverge and the keyword must not be emptied into the panel."""
     plan = blindplay.ARM_KEYWORDS["Plan"]
     assert "front non-Minion, or ALL, Minions too" in plan
-    assert "Enemy Vulnerable counts; your Weak and Strength do not." in plan
+    assert "Enemy Vulnerable counts; no damage term of yours does." in plan
 
 
 def test_a_board_with_no_jellyfish_is_told_no_aim_rule():
@@ -4663,6 +4663,81 @@ def test_a_card_that_cannot_be_planned_is_refused_on_the_jellyfish():
                               'on "Bake-Kurage"')
     assert ok["ok"], ok
     assert ok["post"]["target"] == "41"
+
+
+def test_the_pet_form_is_offered_only_when_a_plan_card_is_in_hand():
+    """`EB-578`, and it is the row.
+
+    THE FIND (Kokomi r21 lane 2 (c) 1). `on "Bake-Kurage"` was advertised
+    under *What you can say* on every turn the jellyfish was out -- including
+    turns whose hand was basics -- and `EB-480` REFUSES a basic aimed at the
+    pet. So the seat met the form, tried it, was refused, and learned what a
+    Plan card is by elimination on round three. A grammar this page advertises
+    has to be one the tester can use on the board it is printed beside.
+    """
+    state = _planning_hand(plans_combat_state(TWO_PLANS))
+    obs = blindplay.observation(state)
+
+    assert any('on "Bake-Kurage"' in c for c in obs["commands"]), obs["commands"]
+
+    # The same board with the one Plan card taken out of the hand.
+    barred = json.loads(json.dumps(state))
+    for card in barred["player"]["hand"]:
+        card["can_target_pet"] = False
+    obs = blindplay.observation(barred)
+
+    assert not any('on "Bake-Kurage"' in c for c in obs["commands"]), (
+        obs["commands"])
+
+
+def test_and_the_page_says_the_jellyfish_is_waiting():
+    """The other half of the row: a form that disappears with no sentence in
+    its place reads as a page that forgot it."""
+    barred = json.loads(json.dumps(
+        _planning_hand(plans_combat_state(TWO_PLANS))))
+    for card in barred["player"]["hand"]:
+        card["can_target_pet"] = False
+
+    page = blindplay.observe(barred)
+
+    assert "- No Plan card in hand: the jellyfish waits." in page
+
+
+def test_an_older_bridge_prints_the_form_and_no_waiting_line():
+    """`can_target_pet`'s standing rule, and the reason this row could not be
+    built on the hand's card faces: an ABSENT field is a bridge that predates
+    it, and on such a feed the page behaves exactly as it did."""
+    state = plans_combat_state(TWO_PLANS)
+    assert all(c.get("can_target_pet") is None
+               for c in state["player"]["hand"])
+
+    page = blindplay.observe(state)
+
+    assert 'on "Bake-Kurage"' in page
+    assert "the jellyfish waits" not in page
+
+
+def test_the_plan_word_names_the_class_and_not_a_list_of_terms():
+    """`EB-579`, and it is the row.
+
+    THE FIND (Kokomi r21 lane 2 (c) 2). The word said "your Weak and Strength
+    do not", which reads as a COMPLETE list, and said nothing about Shrink
+    ("your Attacks deal 30% less") -- which also does not bite a carry-out.
+    The seat had to run the experiment to find that out.
+
+    THE CLASS IS THE RULE. `KokomiPlan.Hit` / `kokomi_plan._hit` deal a
+    carry-out with `powered=False`, which is not a list of two debuffs: it is
+    every term on the player's side of the pipeline at once. One clause
+    answers for all of them, named or not, and it is a character shorter than
+    the enumeration was.
+    """
+    plan = blindplay.ARM_KEYWORDS["Plan"]
+
+    assert "no damage term of yours does" in plan
+    assert "Weak" not in plan
+    assert "Strength" not in plan
+    # The enemy's half is untouched -- the pair is the sentence.
+    assert "Enemy Vulnerable counts" in plan
 
 
 def test_a_feed_with_no_pet_target_field_plays_the_card_as_it_always_did():
@@ -5959,8 +6034,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-538`: the class a carry-out belongs to, in the Set off row's
         # own words.
         "Plan": [", paid now; next turn: front ",
-                 " counts; your ",
-                 " do not. A carry-out is not a hit: no ",
+                 " counts; no damage term of ",
+                 "yours does. A carry-out is not a hit: no ",
                  "when-hit power fires."],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
@@ -8951,9 +9026,27 @@ def test_the_turn_one_page_prints_the_spotlight_window():
     """
     page = blindplay.observe(spotlight_turn_one_state())
     assert ("*You open a fight with 2 Encore and **Ethereal Spotlight** costs "
-            "2 -- all of it. Light your Companion cards before anything "
-            "performs: one performance spends an Encore, and the Spotlight is "
-            "locked out for the rest of the combat.*") in page
+            "2 -- all of it. Any performance spends one, so it is this turn's "
+            "first action or not this fight.*") in page
+
+
+def test_the_window_line_states_the_window_and_recommends_nothing():
+    """`EB-586`, and it is the row.
+
+    `EB-567`'s line ended "Light your Companion cards before anything
+    performs", which is a RECOMMENDATION -- and the r15 lane-1 seat refused it
+    on turn one of fight one and was right to: the starter holds two Companion
+    cards, the Spotlight costs the whole opening Encore, and "the correct
+    first move is to refuse the screen's own advice". Lane 2 paid it in most
+    fights and zeroed Encore twice, which is where nine of its eleven HP went.
+    The decision is REAL on both lanes, so the line states the window and the
+    price and stops.
+    """
+    page = blindplay.observe(spotlight_turn_one_state())
+
+    assert "this turn's first action or not this fight" in page
+    for advice in ("Light your Companion cards", "locked out"):
+        assert advice not in page
 
 
 def test_the_window_line_is_turn_one_only():
@@ -8961,13 +9054,13 @@ def test_the_window_line_is_turn_one_only():
     standing note about a decision that is gone is exactly the noise the
     one-fact-per-line rule keeps off this page."""
     page = blindplay.observe(spotlight_turn_one_state(round_no=2))
-    assert "locked out for the rest of the combat" not in page
+    assert "first action or not this fight" not in page
 
 
 def test_the_window_line_needs_the_selector_in_hand():
     """A turn-one hand without it has no decision to teach."""
     page = blindplay.observe(spotlight_turn_one_state(hand_title="Defend"))
-    assert "locked out for the rest of the combat" not in page
+    assert "first action or not this fight" not in page
 
 
 def test_the_window_line_is_arm_only():
@@ -8975,7 +9068,122 @@ def test_the_window_line_is_arm_only():
     Encore, so the sentence would be false. The Salon block's absence is the
     page's test for which build this is."""
     page = blindplay.observe(spotlight_turn_one_state(salon=False))
-    assert "locked out for the rest of the combat" not in page
+    assert "first action or not this fight" not in page
+
+
+def test_both_spotlight_faces_agree_on_one_duration_sentence():
+    """`EB-584`, and it is the row.
+
+    THE FIND (Furina r15 lane 1 (c) 4). Guest Cast said "Lasts until the
+    [gold]Spotlight[/gold] moves" and Ethereal Spotlight's own tip said the
+    lighting "lasts this combat" -- two sentences for one duration, and the
+    first is CIRCULAR under this arm: playing Ethereal Spotlight is what moves
+    the Spotlight, so the buff read as ended by the thing that creates it.
+
+    `DesignateOneMode` never moves the Spotlight off Guest Cast, so on this
+    arm the duration that never elapses is exactly "this combat" -- which is
+    what the card that buys the lighting already says. The SHIPPED face keeps
+    "until it moves": a release build's selector offers two modes, so there
+    the Spotlight really does move.
+    """
+    tips = (REPO / "klee-mod" / "KleeCode" / "Cards"
+            / "FurinaRiderTips.cs").read_text(encoding="utf-8")
+    spotlight = (REPO / "klee-mod" / "KleeCode" / "Powers"
+                 / "SpotlightSystem.cs").read_text(encoding="utf-8")
+
+    assert "lasts this combat" in tips
+    arm = spotlight[spotlight.index('("smartDescriptionReframe",'):]
+    arm = arm[:arm.index("#endif")]
+    assert "Lasts this combat." in arm
+    assert "until the [gold]Spotlight[/gold] moves" not in arm
+    # The shipped face is untouched, and that is the half that must not move.
+    shipped = spotlight[spotlight.index("class GuestCastPower"):]
+    shipped = shipped[:shipped.index('("smartDescriptionReframe",')]
+    # The literal is split across two source lines, so the anchor is the
+    # half that carries the verb.
+    assert "no Fanfare. Lasts until the " in shipped
+
+
+def test_the_spotlight_card_names_what_moves_the_spotlight():
+    """`EB-590`, and it is the row.
+
+    THE FIND (Furina r15 lane 2 (c) 8, lane 1 (c) 4). "If you moved the
+    Spotlight this turn" (Director's Cut) and "Lasts until the Spotlight
+    moves" (Guest Cast) use a verb no card the seat saw performs, and neither
+    face says what does. The sentence exists -- `ForSpotlightMove`'s "playing
+    Ethereal Spotlight moves it, and nothing else does" -- and until now it
+    rode Director's Cut alone, which is the card that ASKS the question rather
+    than the card that answers it.
+    """
+    tips = (REPO / "klee-mod" / "KleeCode" / "Cards"
+            / "FurinaRiderTips.cs").read_text(encoding="utf-8")
+    card = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina"
+            / "SpotlightCards.cs").read_text(encoding="utf-8")
+
+    assert ("Playing [gold]Ethereal Spotlight[/gold] moves it, and "
+            in tips)
+    assert "nothing else does." in tips
+    # ONE SENTENCE, chained at the call site rather than copied: the card that
+    # moves it and the card that asks about it read the same words.
+    assert "FurinaRiderTips.ForSpotlightMove(" in card
+    directors = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina"
+                 / "Generated" / "DirectorsCut.cs").read_text(encoding="utf-8")
+    assert "FurinaRiderTips.ForSpotlightMove(" in directors
+
+
+
+def _vaporizing_companion_state() -> dict:
+    """A Pyro Companion card in hand while a body wears Hydro (`EB-589`).
+
+    The keyword row is the MOD's own string, as every keyword row on this page
+    is: `KleeCardTooltips.ForCard` raises the Vaporize preview only while a
+    matching aura is out, and since `EB-589` its body carries what this card's
+    printed number lands for. The arithmetic is pinned where it lives
+    (`Round21Tests`, against `SimDamagePipeline.ResolveOnTarget`); what this
+    fixture holds is that the number reaches the card's lines at all.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = [{
+        "id": "KLEEMOD-CHEVREUSE_INTERDICTION_FIRE",
+        "name": "Chevreuse - Interdiction Fire",
+        "type": "Attack", "cost": "1", "star_cost": None,
+        "description": "Deal 10 damage.",
+        "rarity": "Common", "is_upgraded": False,
+        "keywords": [
+            {"name": "Applies Pyro",
+             "description": "The hit leaves a Pyro aura on the enemy."},
+            {"name": "Vaporize",
+             "description":
+                 "The triggering hit deals 1.5x damage and consumes the "
+                 "aura. Into that Hydro aura this card's 10 lands 22."}],
+        "index": 0, "target_type": "AnyEnemy", "can_play": True,
+        "unplayable_reason": None}]
+    return state
+
+
+def test_a_pyro_companion_over_a_hydro_body_prints_the_vaporized_total():
+    """`EB-589`, and it is the row.
+
+    THE FIND (Furina r15 lane 2 (c) 2). Chevreuse printed 7, 10 and 10 and
+    delivered 11, 15 and 22: "the Spotlight and Weak and Passion Overload are
+    all folded into the number on the face; the previewed 1.5x Vaporize never
+    is. The face is right about four modifiers and silent about the biggest
+    one."
+
+    THE FACE CANNOT FOLD IT AND THE PREVIEW CAN, which is why the repair is
+    here. The amplifier and the target's Vulnerable are per-BODY terms, and a
+    card in hand has no target -- so the four the face carries are exactly the
+    four that are facts about the player. The reaction preview already walks
+    the board and knows which body raised it.
+    """
+    page = blindplay.observe(_vaporizing_companion_state())
+
+    card = page.split("Chevreuse - Interdiction Fire")[1]
+    card = card.split("## ")[0]
+    assert "this card's 10 lands 22." in card, card
+    # The printed face is still the face: the fold is a second line and never
+    # a rewrite of the number the game renders.
+    assert "Deal 10 damage." in card
 
 
 def test_the_window_line_quotes_the_engines_own_two_numbers():
@@ -9007,7 +9215,10 @@ def test_the_spotlight_tip_carries_the_window_and_keeps_the_refusal():
     assert "SpotlightWindowKey" in body
     assert "{FurinaReframeLaw.OpeningEncore}" in body
     assert "{FurinaReframeLaw.SpotlightDesignateEncoreCost}" in body
-    assert "shut for this combat" in body
+    # `EB-586`: the window and the price, and no advice. The clause is split
+    # across two source literals, so the anchor is the half that is whole.
+    assert "spends one, so it is this turn's first action or not this" in body
+    assert "Light your" not in body
     # ITS OWN METHOD, chained at the call site: two facts, two tip rows, each
     # inside the 135-character ceiling on its own.
     card = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Furina"
@@ -9962,6 +10173,55 @@ def test_a_furina_run_gets_neither_the_hexerei_nor_the_oz_rule():
     assert "- **Hexerei**" in glossary and "- **Oz**" in glossary
     assert "Fischl's raven" not in page
     assert "Klee" not in glossary
+
+
+def test_no_keyword_row_prints_an_empty_definition():
+    """`EB-583`, and it is the row.
+
+    THE FIND (Furina r15 lane 1 (c) 7). `Hexerei` printed on Sucrose's face
+    and on Razor's under the Furina arm, and the Words block answered with the
+    name and nothing after it -- "an empty definition". `EB-504`'s own
+    reasoning is what condemns that: "a word on the screen with no entry at
+    all reads as a word the page failed to define", and a bare name in a block
+    of definitions reads as precisely that.
+
+    WHAT WAS MISSING WAS THE SENTENCE SAYING WHY THERE IS NO RULE, not the
+    off-arm rule itself. `EB-504`'s finding is kept whole -- the line names no
+    character and prices no resource of somebody else's kit -- and what it
+    adds is the fact a reader of THIS run needs: the mark is inert here.
+    """
+    page = blindplay.observe(_hexerei_shop_state("Furina"))
+    glossary = page.split("## Words on this screen")[1]
+
+    for line in glossary.splitlines():
+        if line.startswith("- **"):
+            assert " — " in line, line
+
+    assert "- **Hexerei** — A Companion family mark." in glossary
+    assert "- **Oz** — A summoned raven another kit's Power fields." in glossary
+    # `EB-504` UNMOVED: no character named, no rule of another kit stated.
+    assert "Klee" not in glossary
+    assert "Fischl's raven" not in page
+    assert "Cards of hers pay" not in page
+
+
+def test_the_two_faces_the_seat_read_it_off_carry_the_row():
+    """Sucrose and Razor, the two Furina-arm faces the r15 seat met the bare
+    word on. The attach is derived from the printed face, so what this pins is
+    that a face carrying the word reaches the block at all -- the state the
+    seat was in was a row that arrived and said nothing."""
+    for title, face in (("Sucrose - Astable Invention",
+                         "A Hexerei card. Deal 6 Anemo damage."),
+                        ("Razor - Claw and Thunder",
+                         "A Hexerei card. Deal 9 Electro damage.")):
+        state = _hexerei_shop_state("Furina")
+        state["shop"]["items"][0]["name"] = title
+        state["shop"]["items"][0]["description"] = face
+
+        glossary = blindplay.observe(state).split(
+            "## Words on this screen")[1]
+
+        assert "- **Hexerei** — A Companion family mark." in glossary, title
 
 
 def test_a_klee_run_reads_both_rules_in_full():

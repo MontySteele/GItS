@@ -722,8 +722,8 @@ public static class ArmKeywordTips
         With(inherited, PlanKey,
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front "
           + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. "
-          + "Enemy [gold]Vulnerable[/gold] counts; your [gold]Weak[/gold] "
-          + "and [gold]Strength[/gold] do not. A carry-out is not a hit: no "
+          + "Enemy [gold]Vulnerable[/gold] counts; no damage term of "
+          + "yours does. A carry-out is not a hit: no "
           + "when-hit power fires.");
 
     /// <summary>

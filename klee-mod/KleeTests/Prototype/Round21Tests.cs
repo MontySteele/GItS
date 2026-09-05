@@ -299,6 +299,65 @@ public class Round21Tests
             c => c == "KokomiPlan.Enchanted");
     }
 
+    // ==================================================================
+    // `EB-589` -- the previewed reaction, folded into a number
+    // ==================================================================
+    //
+    // THE FIND (Furina r15 lane 2 (c) 2). Chevreuse printed 7, 10 and 10 and
+    // delivered 11, 15 and 22: "the Spotlight and Weak and Passion Overload
+    // are all folded into the number on the face; the previewed 1.5x Vaporize
+    // never is. The face is right about four modifiers and silent about the
+    // biggest one."
+    //
+    // AND THE FACE CANNOT FOLD IT, which is why the repair is on the PREVIEW.
+    // The amplifier and the target's Vulnerable are per-BODY terms and a card
+    // in hand has no target -- so the four modifiers the face does carry are
+    // exactly the four that are facts about the player. The reaction preview
+    // already walks the board and knows which body raised it, which makes it
+    // the one surface that can answer.
+
+    [Fact]
+    public void The_reaction_preview_folds_through_EB_559_s_own_reader()
+    {
+        var folded = Il.Calls(Il.Method("KleeCardTooltips", "AmplifiedBody"));
+
+        // ONE READER, NOT A SECOND COPY: `ResolveOnTarget` is
+        // `ElementalHit.Deal`'s own target-mods, truncation and per-hit cap,
+        // and it is what `ProtoBombPower.PredictedSetOffDamage` asks for the
+        // same question about a pile (`EB-559`).
+        Assert.Contains("SimDamagePipeline.ResolveOnTarget", folded);
+        Assert.Contains("ReactionTable.AmplifierMultiplier", folded);
+        Assert.Contains("KleeCardTooltips.PrintedDamage", folded);
+
+        // PURE, because it is read on every state poll: no command, no
+        // counter. `ProtoBombPower.PendingReactionMultiplier`'s rule, and this
+        // is the same claim about the same kind of surface.
+        Assert.DoesNotContain(folded,
+                              c => c.StartsWith("Cmd.", StringComparison.Ordinal)
+                                || c.Contains("Cmd."));
+    }
+
+    [Fact]
+    public void And_the_preview_substitutes_the_body_rather_than_a_new_row()
+    {
+        // The substitution mechanism is `EB-338`'s and the two title keys are
+        // its two: Vaporize and Melt are the only reactions that amplify
+        // (`ReactionTable.AmplifierMultiplier`), and they are exactly the pair
+        // `NoHitTitleKey` already names -- so an amplified body always has a
+        // registered title row to print under.
+        var forCard = Il.Calls(Il.Method("KleeCardTooltips", "ForCard"));
+
+        Assert.Contains("KleeCardTooltips.AmplifiedBody", forCard);
+        Assert.Contains("KleeCardTooltips.NoHitTitleKey", forCard);
+
+        var table = Source("Elements/ReactionTable.cs");
+        var amp = MethodBody(
+            table, @"public\s+static\s+decimal\s+AmplifierMultiplier\s*\(\s*Reaction");
+        Assert.Contains("Reaction.Vaporize", amp);
+        Assert.Contains("Reaction.Melt", amp);
+        Assert.Contains("_ => 1m", amp);
+    }
+
     // ------------------------------------------------------------ helpers --
 
     /// <summary>The body of a method matched by <paramref name="signature"/>,

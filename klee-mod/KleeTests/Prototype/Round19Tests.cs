@@ -79,9 +79,15 @@ public class Round19Tests
         // this clause and every clause on it is a seat's finding, so the
         // overage is deliberate and `tools/lint_text_conventions.py` carries
         // `PlanKey` by name with that reason -- the bargain `SetOffKey` makes.
+        //
+        // `EB-579` MADE IT ONE SHORTER, which is the direction this pin exists
+        // to allow: "your Weak and Strength do not" reads as a complete
+        // enumeration, and the r21 lane-2 seat had to TEST Shrink to learn it
+        // does not bite a carry-out either. The class covers every term on
+        // that side of the board and costs less than the two-item list.
         var rendered = PlanTip()
             .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
-        Assert.Equal(186, rendered.Length);
+        Assert.Equal(185, rendered.Length);
         Assert.EndsWith("A carry-out is not a hit: no when-hit power fires.",
                         rendered);
     }

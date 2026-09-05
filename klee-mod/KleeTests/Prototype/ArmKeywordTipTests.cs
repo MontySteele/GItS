@@ -324,8 +324,15 @@ public class ArmKeywordTipTests
         Assert.Contains("or ALL", body);
         Assert.Contains("Enemy ", body);
         Assert.Contains("Vulnerable", body);
-        Assert.Contains("Weak", body);
-        Assert.Contains("Strength", body);
+        // `EB-579` NAMED THE CLASS INSTEAD OF THE LIST. "your Weak and
+        // Strength do not" reads as a complete enumeration, and the r21
+        // lane-2 seat had to TEST Shrink ("your Attacks deal 30% less") to
+        // learn it does not bite a carry-out either. One clause now answers
+        // for every term on the player's side, named or not -- which is the
+        // rule `KokomiPlan.Hit`'s `powered: false` actually implements.
+        Assert.Contains("no damage term of yours does", body);
+        Assert.DoesNotContain("Weak", body);
+        Assert.DoesNotContain("Strength", body);
         Assert.DoesNotContain("never a Minion", body);
 
         // The ceiling is the base game's own longest mechanic tip (CHANNELING,
@@ -342,7 +349,7 @@ public class ArmKeywordTipTests
             body.Replace(Tips.GetField("PlanKey")!.GetRawConstantValue()
                              as string ?? string.Empty, string.Empty),
             @"\[/?[a-z]+\]", string.Empty);
-        Assert.Equal(186, rendered.Length);
+        Assert.Equal(185, rendered.Length);
         Assert.Contains("A carry-out is not a hit: no when-hit power fires.",
                         body);
     }

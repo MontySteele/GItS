@@ -216,13 +216,101 @@ public static class KleeCardTooltips
 
             // `EB-338`. The keyword's own TITLE ROW, so a reader still finds
             // the reaction by name, with the body the card can actually keep.
-            var substitute = appliesWithoutHit ? NoHitBody(reaction) : null;
+            //
+            // `EB-589`: and where the card HITS and the reaction AMPLIFIES,
+            // the body carries the folded number instead. Same substitution
+            // mechanism, same two title keys -- Vaporize and Melt are the two
+            // amplifying reactions and are exactly the pair `NoHitTitleKey`
+            // already names.
+            var substitute = appliesWithoutHit
+                ? NoHitBody(reaction)
+                : AmplifiedBody(card, reaction, enemy, aura.Element);
             yield return substitute == null
                 ? HoverTipFactory.FromKeyword(keyword)
                 : new HoverTip(
                     new LocString(Table, NoHitTitleKey(reaction) + ".title"),
                     substitute);
         }
+    }
+
+
+    /// <summary>
+    /// `EB-589`. THE PREVIEWED REACTION, FOLDED INTO A NUMBER -- `EB-559`'s
+    /// repair one surface over, and it reuses that row's reader rather than
+    /// deriving a second one.
+    ///
+    /// THE FIND (Furina r15 lane 2 (c) 2). Chevreuse printed 7, 10 and 10 and
+    /// delivered 11, 15 and 22: "the Spotlight and Weak and Passion Overload
+    /// are all folded into the number on the face; the previewed 1.5x Vaporize
+    /// never is. The face is right about four modifiers and silent about the
+    /// biggest one."
+    ///
+    /// WHY THE FACE CANNOT DO IT AND THIS CAN, which is the whole shape of the
+    /// row. The amplifier and the target's Vulnerable are per-BODY terms, and
+    /// a card in hand has no target -- <c>CalculatedDamageVar</c>'s preview is
+    /// handed one only while the card is dragged over an enemy, so the four
+    /// modifiers it does fold are exactly the four that are facts about the
+    /// PLAYER. This tip is the surface that already walks the board: it is
+    /// raised only while a matching aura is out, and it knows which body
+    /// raised it.
+    ///
+    /// <c>SimDamagePipeline.ResolveOnTarget</c> AND NOT A SECOND COPY of the
+    /// arithmetic: it is `ElementalHit.Deal`'s own target-mods, one truncation
+    /// and per-hit cap, and it is what `ProtoBombPower.PredictedSetOffDamage`
+    /// asks for the same question about a pile. So a face that disagrees with
+    /// the board is a red test rather than a number a seat stops trusting.
+    ///
+    /// THE FIRST BODY CARRYING THE AURA, because the loop above dedupes by
+    /// REACTION rather than by enemy: two Hydro bodies wearing different
+    /// Vulnerable would land different numbers and the preview names one. That
+    /// is the same trade `PredictedSetOffDamage` makes about the pile it walks,
+    /// and the alternative -- a row per body -- is the wall of tips this class
+    /// exists to keep off a card.
+    ///
+    /// PURE. It is read on every state poll, so it touches no command and
+    /// rolls no counter: <c>ReactionTable.AmplifierMultiplier</c>,
+    /// <c>ResolveOnTarget</c> and a var read are all reads.
+    ///
+    /// NULL WHERE THERE IS NOTHING TO FOLD -- no amplifier on this reaction,
+    /// or no damage number on this card -- and the keyword's own body prints
+    /// exactly as it always has.
+    /// </summary>
+    private static string? AmplifiedBody(
+        CardModel card, Reaction reaction, Creature enemy, Element aura)
+    {
+        var dealer = TipOwner.CreatureOf(card);
+        var mult = ReactionTable.AmplifierMultiplier(reaction, dealer);
+        if (mult == 1m) return null;
+        var printed = PrintedDamage(card);
+        if (printed <= 0) return null;
+
+        var landed = SimDamagePipeline.ResolveOnTarget(enemy, printed, mult);
+        return $"The triggering hit deals {mult:0.##}x damage and consumes "
+             + $"the aura. Into that {aura} aura this card's {printed} lands "
+             + $"{landed}.";
+    }
+
+    /// <summary>
+    /// `EB-589`. The number this card's face is printing right now, or 0 where
+    /// it prints none.
+    ///
+    /// TWO NAMES AND NOT A TYPE TEST: a generated Attack carries
+    /// <c>CalculatedDamage</c> (base, extra and the Spotlight multiplier
+    /// composed) and a hand-written one carries <c>Damage</c>, and
+    /// <c>TryGetValue</c> is the game's own way of asking which. The value is
+    /// <c>IntValue</c>, which is the figure the face renders.
+    /// </summary>
+    private static int PrintedDamage(CardModel card)
+    {
+        foreach (var name in new[] { "CalculatedDamage", "Damage" })
+        {
+            if (card.DynamicVars.TryGetValue(name, out var dynamicVar))
+            {
+                return dynamicVar.IntValue;
+            }
+        }
+
+        return 0;
     }
 
     /// <summary>
