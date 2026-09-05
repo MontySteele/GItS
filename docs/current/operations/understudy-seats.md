@@ -971,6 +971,24 @@ vendored bridge's own version and never ours — run seed read back off the
 wire, prompt sha256, action count, termination reason) and the model's
 records verbatim under the R217 G label. The author's own model family is refused as tester (R217 C). Beside it, `wire.json` carries the **per-turn wire snapshot** (`EB-216` / `M56`): one machine-written row per play and per `end turn` — turn, energy, every meter (BaseLib's registered resources AND the power-shaped ones, which is where Sparks ride), the hand with its printed energy and Spark prices, the Kurage queue strip and the pending PLANS with their targets where the build serves them (`EB-273`, the same absent / empty / populated contract), and the enemy count with intents — lifted off the API and **never shown to the tester**, because the tester's page is the grading surface and this is the grader's (R101b); each row also carries the **meter ledger** the play minted (R225: `before / price paid / gains by source / after`, read after the POST off `GET /api/v1/gits/meter_ledger`, with `blindplay.read_snapshots` and `blindplay.meter_plays` as the grader's read — instrument only, and nothing already published is re-graded on it).
 
+**Asked of `STS2_MCP`: a resolving-part marker on a multi-part intent
+(`EB-461`).** `BuildEnemyState` walks `monster.NextMove`'s `moveState.Intents`
+and sends one entry per part carrying `type`, `label`, `title` and
+`description` — and nothing that separates a part which will resolve from one
+which will not: no order, no condition, no likelihood, no flag. So a blind page
+shown a two-part telegraph can print both parts and say which enemy they belong
+to, and can say nothing whatever about which of them lands. Two rounds of seats
+have now been hurt by each of the two guesses available without that fact: a
+bare number read as a promise (r14, four turns of blocking against damage that
+never arrived) and a hedged number read as a warning (r15, five telegraphs that
+landed in full while the seat did not block). The page's wording is therefore
+neutral and will stay neutral until the wire carries the fact. What would close
+it is one key per intent on `BuildEnemyState` — a resolving/conditional marker,
+or the resolution order the move already knows internally — at which point the
+render can name the part that lands instead of listing parts. `STS2_MCP` is
+vendored (`vendor/STS2_MCP/`, `PROVENANCE.md`); this is a request to upstream,
+not a local edit to make on a whim.
+
 **After PLAYABLE.** A prototype arm the pair read calls PLAYABLE goes to **whole-fight
 blind play on a dev build**, automatically. It is the next gate, not a pick, and
 nobody is asked for a form to start it. It has not run for any arm yet, and the

@@ -297,10 +297,11 @@ def _render_intents(intents: list[dict[str, str]]) -> list[str]:
     two telegraphs without inventing a grammar for joining them.
 
     `EB-461`: and where there IS more than one, every number on them is marked
-    as a part the enemy MAY perform. The feed sends no marker saying which
-    parts of a chosen move resolve, and four seats in a row blocked against a
-    damage number that never arrived -- see `MULTI_INTENT_NOTE`, which the
-    board prints once under the enemy block.
+    as ONE PART of the move rather than as the move. The feed sends no marker
+    saying which parts of a chosen move resolve -- see `MULTI_INTENT_NOTE`,
+    which the board prints once under the enemy block. Neither the label nor
+    the note claims how often such a part lands: the first wording did, and
+    the r15 seats stopped blocking against telegraphs that landed in full.
     """
     rows = list(intents) or [{}]
     part = len(rows) > 1

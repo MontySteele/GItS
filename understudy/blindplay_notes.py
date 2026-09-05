@@ -379,17 +379,29 @@ AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
 # next round with four `Burn`s in hand. Dropping a part would be that defect
 # again. What changes is the CLAIM the page makes about the number, not how
 # many parts it shows.
+#
+# REOPENED 2026-09-04, AND THE FIRST WORDING WAS ITSELF A CLAIM. "Has
+# repeatedly not landed" and "MAY perform" are a FREQUENCY reading of four
+# turns, and the page has no standing to make one: both r15 seats read the
+# label as a warning and stopped blocking against five telegraphs that then
+# landed in full -- the same defect the row opened on, pointed the other way.
+# So the note and the label say only what the feed supports: there are several
+# parts, and the feed does not say which resolve. No history, no likelihood,
+# no advice. The fact the page is missing is a RESOLVING-PART MARKER on the
+# wire, and that is asked for in
+# `docs/current/operations/understudy-seats.md` rather than guessed at here.
 MULTI_INTENT_NOTE = (
     "*An enemy showing more than one intent is telegraphing every part of one "
     "move, and this page's data feed carries nothing that says which of those "
-    "parts will resolve. On this build the damage part of a multi-part "
-    "telegraph has repeatedly not landed, so read such a number as a part the "
-    "enemy MAY perform rather than as damage it is about to deal.*")
+    "parts resolve, in what order, or on what condition. Every part the feed "
+    "sends is printed above, exactly as it was sent; this page makes no claim "
+    "about which of them the enemy will perform.*")
 
 #: What a number on a multi-part telegraph is called ON THE LINE ITSELF, so a
-#: reader who plans off the enemy block without reaching the note under it is
-#: not left holding a bare promise.
-MULTI_INTENT_LABEL = ", a part it MAY perform"
+#: reader who plans off the enemy block without reaching the note under it
+#: knows the number belongs to one part of a several-part move. It says what
+#: the number IS and nothing about how often such a part has landed.
+MULTI_INTENT_LABEL = ", one part of this move"
 
 
 # `EB-272`. THE ARMS' OWN WORDS, DEFINED ONCE PER SCREEN.

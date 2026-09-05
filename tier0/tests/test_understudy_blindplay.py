@@ -6644,11 +6644,11 @@ def test_a_compound_intent_prints_every_component():
     page = blindplay.observe(compound_intent_state())
     # `EB-461` MARKED THE NUMBERS ON A MULTI-PART TELEGRAPH, and nothing else
     # about these lines moved: both parts still print, in the move's own order.
-    assert ("Intent: Aggressive (Attack) — the number on its icon is 8, a "
-            "part it MAY perform — This enemy intends to Attack for 8 "
+    assert ("Intent: Aggressive (Attack) — the number on its icon is 8, one "
+            "part of this move — This enemy intends to Attack for 8 "
             "damage.") in page
     assert ("and also: Strategic (StatusCard) — the number on its icon "
-            "is 4, a part it MAY perform — This enemy intends to add 4 Burn "
+            "is 4, one part of this move — This enemy intends to add 4 Burn "
             "to your hand.") in page
 
 
@@ -6689,44 +6689,55 @@ def test_no_observe_prints_the_enemy_block_twice():
 def test_a_single_component_intent_reads_exactly_as_it_always_did():
     """One row, one line, no continuation -- the recorded combat is the pin.
 
-    `EB-461` left this line alone on purpose: a one-part telegraph is the one
-    the enemy takes, so its number is a promise the page may keep making.
+    `EB-461` left this line alone on purpose: a one-part telegraph is the whole
+    of the move, so its number needs no part label and the note does not print.
     """
     page = blindplay.observe(combat_state())
     assert ("Intent: Aggressive (Attack) — the number on its icon is 12 "
             "— This enemy intends to Attack for 12 damage.") in page
     assert "and also:" not in page
-    assert "MAY perform" not in page
+    assert "one part of this move" not in page
     assert blindplay.MULTI_INTENT_NOTE not in page
 
 
-def test_a_dual_intent_number_is_labelled_a_part_the_enemy_may_perform():
-    """`EB-461`. THE PAGE PROMISED DAMAGE THE ENEMY NEVER DEALT.
+def test_a_dual_intent_number_is_labelled_one_part_of_the_move():
+    """`EB-461`, REOPENED. THE LABEL MADE A FREQUENCY CLAIM AND IT COST AS
+    MUCH AS THE BARE NUMBER DID.
 
-    "Every enemy turn where the intent listed an attack number AND a second
-    intent, the attack did not land. I planned two turns of blocking around
-    numbers that were never going to arrive" (Kokomi r14 (c) 2, four for four;
-    Klee r14's Sludge Spinner the same shape).
+    WHAT THE FIRST BUILD SAID. "a part it MAY perform", under a note reading
+    "on this build the damage part of a multi-part telegraph has repeatedly
+    not landed" -- a history read off four enemy turns (Kokomi r14 (c) 2, Klee
+    r14).
 
-    WHICH OF THE ROW'S TWO OPTIONS THIS IS, and why. `BuildEnemyState` walks
-    `monster.NextMove`'s `Intents` and sends `type`, `label`, `title` and
-    `description` per part and nothing else -- no resolution order, no
-    condition, no marker of any kind separating a part that fires from one
-    that does not. "Print only the move the enemy will take" is therefore not
-    available to this side of the line, so the number is LABELLED instead,
-    twice: on the line a reader plans off, and once under the block.
+    WHAT IT THEN DID. Both r15 seats read the label as advice and stopped
+    blocking against five multi-part telegraphs that landed in full. A page
+    that talks a reader OUT of a real number is the same defect as one that
+    talks them into an unreal one, and the page has standing for neither: the
+    feed carries `type`, `label`, `title` and `description` per part and no
+    marker of resolution, order or condition at all.
 
-    Seen to FAIL: the number printed bare, and no note said otherwise.
+    SO THE PAGE SAYS ONLY WHAT IT KNOWS. The number belongs to one part of a
+    several-part move; which parts resolve is not on the feed. No history, no
+    likelihood, no advice. The marker that would let the page say more is
+    asked of `STS2_MCP` in `docs/current/operations/understudy-seats.md`.
+
+    Seen to FAIL: the label and the note both carried the frequency claim.
     """
     page = blindplay.observe(compound_intent_state())
-    assert "the number on its icon is 8, a part it MAY perform" in page
-    assert "the number on its icon is 4, a part it MAY perform" in page
+    assert "the number on its icon is 8, one part of this move" in page
+    assert "the number on its icon is 4, one part of this move" in page
     # ONCE, with the block's other notes, however many enemies telegraph parts.
     assert page.count(blindplay.MULTI_INTENT_NOTE) == 1
-    assert "damage it is about to deal" in page
 
-    # A part with no number on its icon says nothing new -- there is no
-    # promise on it to withdraw.
+    # THE NEUTRAL FORM, and what it may not contain. No count of how often a
+    # part has landed, no verdict on what a reader should do about it.
+    for claim in ("repeatedly", "MAY perform", "has not landed",
+                  "never", "usually", "rarely", "often", "about to deal"):
+        assert claim not in blindplay.MULTI_INTENT_NOTE, claim
+        assert claim not in blindplay.MULTI_INTENT_LABEL, claim
+    assert "no claim" in blindplay.MULTI_INTENT_NOTE
+
+    # A part with no number on its icon has no number to attach a label to.
     quiet = json.loads(json.dumps(combat_state()))
     quiet["battle"]["enemies"][0]["intents"] = [
         {"type": "Attack", "label": "6", "title": "Aggressive",
@@ -6734,9 +6745,25 @@ def test_a_dual_intent_number_is_labelled_a_part_the_enemy_may_perform():
         {"type": "Buff", "label": "", "title": "Empower",
          "description": "This enemy intends to use a Buff."}]
     quiet_page = blindplay.observe(quiet)
-    assert "the number on its icon is 6, a part it MAY perform" in quiet_page
+    assert "the number on its icon is 6, one part of this move" in quiet_page
     assert quiet_page.count("the number on its icon") == 1
     assert blindplay.MULTI_INTENT_NOTE in quiet_page
+
+
+def test_the_seats_page_asks_the_bridge_for_a_resolving_part_marker():
+    """`EB-461`, the half this side of the line cannot build.
+
+    The neutral label is as far as the page can go without a fact the wire
+    does not carry. `BuildEnemyState` sends no marker of which part of a
+    multi-part move resolves, and `STS2_MCP` is vendored -- so the request is
+    written down where the seats' operations page keeps them, rather than
+    guessed at in the render.
+    """
+    doc = (REPO / "docs" / "current" / "operations"
+           / "understudy-seats.md").read_text(encoding="utf-8")
+    assert "resolving-part marker" in doc
+    assert "`EB-461`" in doc
+    assert "BuildEnemyState" in doc
 
 
 def discounted_hand_state() -> dict:
