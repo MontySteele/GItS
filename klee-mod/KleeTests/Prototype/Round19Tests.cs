@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using KleeMod.Cards;
+using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using Xunit;
 
@@ -108,6 +109,109 @@ public class Round19Tests
         Assert.DoesNotContain(Il.Calls(Il.Method("KokomiPlan", "Hit")),
                               c => c.StartsWith("DamageCmd.",
                                                 StringComparison.Ordinal));
+    }
+
+    // ==================================================================
+    // `EB-548` -- a performance is not a hit, `EB-538`'s twin
+    // ==================================================================
+    //
+    // THE FIND (Furina r13 lane 2). Member performances bypass Skittish while
+    // the enemy's own buff says "hit": "Chevalmarin hit C for 2 and C's HP
+    // moved by 2 with no Block gained... the correct line against Skittish is
+    // to spend the free perform first". The seat called it "the most useful
+    // thing I learned and effectively invisible".
+    //
+    // THE SENTENCE WAS ALREADY THERE AND NAMED THE WRONG SIDE OF THE BOARD.
+    // `EB-476` put "a performance is not an Attack: Vulnerable moves it,
+    // Shatter and on-Attack triggers do not" on the Salon paragraph, which is
+    // exactly `EB-490`'s finding one kit over: "on-Attack trigger" reads as
+    // something on the PLAYER's side, and a player looking for the rule about
+    // the thing on the ENEMY's status bar does not find it. Same call, same
+    // rule, same words as Set off and the Plan.
+
+    [Fact]
+    public void The_salon_paragraph_says_a_performance_is_not_a_hit()
+    {
+        using var _ = new ReframeArm();
+        var seat = Seat.Furina().WithCombatState();
+
+        var rules = SalonMemberTips.SalonRulesBody(seat.Creature);
+
+        Assert.Contains("not a hit", rules);
+        Assert.Contains("no when-hit power fires", rules);
+        // The Vulnerable half is untouched: the pair is the sentence, and
+        // dropping either puts `EB-476`'s finding back.
+        Assert.Contains("[gold]Vulnerable[/gold] moves it", rules);
+        Assert.DoesNotContain("on-Attack triggers", rules);
+    }
+
+    [Fact]
+    public void The_three_surfaces_say_it_in_the_same_words()
+    {
+        // ONE RULE AT ONE CALL, on the three words a player can meet it
+        // through. A surface that said it differently would be a fourth rule
+        // to learn, which is the whole of what `EB-490` was about.
+        using var _ = new ReframeArm();
+        var seat = Seat.Furina().WithCombatState();
+
+        foreach (var surface in new[]
+                 {
+                     Printed(typeof(ArmKeywordTips), "ForSetOff"),
+                     PlanTip(),
+                     SalonMemberTips.SalonRulesBody(seat.Creature),
+                 })
+        {
+            Assert.Contains("when-hit power", surface);
+        }
+    }
+
+    [Fact]
+    public void A_performance_hands_the_hit_no_attacker_either()
+    {
+        // The behavioural half, structural for the reason `EB-538`'s is:
+        // `PerformMember` is the ONE implementation of a member acting and it
+        // asks the same unpowered funnel a carry-out does, so neither can fire
+        // a power keyed on being hit.
+        Assert.Contains(Il.Calls(Il.Method("SalonMemberPower", "PerformMember")),
+                        c => c == "ElementalHit.Deal");
+        Assert.DoesNotContain(
+            Il.Calls(Il.Method("SalonMemberPower", "PerformMember")),
+            c => c.StartsWith("DamageCmd.", StringComparison.Ordinal));
+    }
+
+    // ---- helpers ---------------------------------------------------------
+
+    /// <summary>The reframe's MANUAL leg on for one test, every flag back
+    /// after it -- <c>FurinaRoundNineTests.Arm</c> verbatim, and for its
+    /// reason: the six flags are process-global statics.</summary>
+    private sealed class ReframeArm : IDisposable
+    {
+        private readonly bool _enabled = FurinaReframe.Enabled;
+        private readonly bool _manual = FurinaReframe.ManualEnabled;
+        private readonly bool _evoke = FurinaReframe.EvokeEnabled;
+        private readonly bool _meter = FurinaReframe.MeterEnabled;
+        private readonly bool _spotlight = FurinaReframe.SpotlightEnabled;
+        private readonly bool _burst = FurinaReframe.BurstEnabled;
+
+        internal ReframeArm(bool master = true)
+        {
+            FurinaReframe.Enabled = master;
+            FurinaReframe.ManualEnabled = master;
+            FurinaReframe.EvokeEnabled = false;
+            FurinaReframe.MeterEnabled = false;
+            FurinaReframe.SpotlightEnabled = false;
+            FurinaReframe.BurstEnabled = false;
+        }
+
+        public void Dispose()
+        {
+            FurinaReframe.Enabled = _enabled;
+            FurinaReframe.ManualEnabled = _manual;
+            FurinaReframe.EvokeEnabled = _evoke;
+            FurinaReframe.MeterEnabled = _meter;
+            FurinaReframe.SpotlightEnabled = _spotlight;
+            FurinaReframe.BurstEnabled = _burst;
+        }
     }
 
     // ---- helpers ---------------------------------------------------------
