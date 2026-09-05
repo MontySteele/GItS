@@ -208,8 +208,17 @@ are in [`workstreams.md`](workstreams.md).
   **The round-17 pick is RULED R261** (2026-09-05,
   `review/ruled/klee-overhaul-round-17-2026-09-05.md`): Jumpy Dumpty
   alone gains Innate, the starter otherwise untouched; built under
-  `EB-557`. [USER]'s act-1 run is due on that build. The round-8 clear is
-  read against a control run (below).
+  `EB-557`. **Round 21 is READ**
+  (`review/active/klee-overhaul-round-21-2026-09-06.md`): on
+  `0.2.2789+proto` the Innate placer opened all eleven fights and the
+  placement is "a ritual"; the natural lane named the starter's one
+  detonator as the wait (held for a second reading, [USER]'s call if it
+  moves); the random Set off steers its first iteration only; Careful
+  Arrangement on a Mine as printed; Kaeya's face names a Grounded that
+  no longer exists (`EB-576`); a D default on offer shape for the Spark
+  sinks (`EB-577`); no pick; `EB-573`-`EB-577`. [USER]'s act-1 run is
+  due on this build. The round-8 clear is read against a control run
+  (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
   six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
