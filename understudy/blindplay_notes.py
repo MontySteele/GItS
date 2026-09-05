@@ -1040,9 +1040,12 @@ REACTION_KEYWORDS: dict[str, str] = {
                         "aura. The reacted enemy loses 4 HP at the start of "
                         "its turn, 1 less each turn."),
     # `EB-366` SPLIT THE BOSS CLAUSE OFF THIS ROW. See `FROZEN_BOSS_CLAUSE`.
+    # `EB-517` PUT THE WINDOW ON IT, in the C# and here in one commit: the two
+    # clauses read as independent riders and are one, because the freeze ticks
+    # down at the end of the turn the halved action is taken on.
     "Frozen": ("Hydro on a Cryo aura, or Cryo on a Hydro aura. Its next "
-               "action deals half damage, and the first Attack to hit it "
-               "Shatters for 6 damage."),
+               "action deals half damage, and until it acts the first Attack "
+               "to hit it Shatters for 6 damage."),
     # `EB-465`'s two, and they are the mod's own preview sentences the way the
     # six above are. `Swirl` is `ARM_KEYWORDS`' row VERBATIM rather than a
     # second copy of it, because ten Universals print the word as a verb and

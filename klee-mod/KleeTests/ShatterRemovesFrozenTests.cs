@@ -146,6 +146,32 @@ public class ShatterRemovesFrozenTests
     }
 
     [Fact]
+    public void The_badge_says_when_the_shatter_window_closes()
+    {
+        // `EB-517`. THE ONE PLACE A SEAT ACTED ON THE PRINTED TEXT AND THE
+        // PRINTED TEXT WAS WRONG.
+        //
+        // Kokomi r18 lane 1, fight 5: "Its next action deals 50% less damage.
+        // The first Attack to hit it Shatters for 6 unblockable damage and
+        // removes Frozen" read as TWO INDEPENDENT RIDERS -- a halved action,
+        // and a standing promise about the next Attack -- so the seat played a
+        // 2-damage Attack into a 7-HP Brute expecting 2 + 6 and a free kill.
+        // It dealt 2: the Brute had taken its halved action the turn before
+        // and the freeze had gone with nothing having Shattered it.
+        //
+        // THE RULE WAS ALWAYS ONE ACTION LONG. `AfterSideTurnEnd` ticks the
+        // counter down at the end of the enemy side's turn, which is LAW's
+        // per-turn-decrementing Frozen. The face says so now, and the two
+        // halves are pinned in one test so neither can move without the other.
+        var face = string.Join(" ", Il.Strings(
+            Il.Method("FrozenPower", "get_Localization")));
+        Assert.Contains("Until it acts", face);
+
+        Assert.Contains("PowerCmd.TickDownDuration",
+            Il.Calls(Il.Method("FrozenPower", "AfterSideTurnEnd")));
+    }
+
+    [Fact]
     public void The_frozen_reaction_reads_the_mark()
     {
         // And only the Frozen branch does: the aura is still consumed, the

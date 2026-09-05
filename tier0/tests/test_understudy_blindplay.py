@@ -6439,8 +6439,10 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         "Superconduct": ["reacted enemy gains ",
                          "which applies before this hit"],
         "Electro-Charged": [" HP at the start of its turn, 1 less each turn"],
-        "Frozen": ["ts next action deals half damage, and the first Attack "
-                   "to hit it Shatters for "],
+        # `EB-517` put the WINDOW on this row, in the C# and here in one
+        # commit, so the anchor holds the clause that says when it closes.
+        "Frozen": ["ts next action deals half damage, and until it acts the "
+                   "first Attack to hit it Shatters for "],
         # `EB-465`'s two trigger elements, held in step off the same
         # `keywordFallback` table the six above come from.
         "Swirl": ["aura is consumed and copied onto ALL enemies"],

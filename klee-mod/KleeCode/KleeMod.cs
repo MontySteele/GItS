@@ -258,7 +258,7 @@ public static class KleeMod
                         $"[gold]Hydro[/gold] meets [gold]Electro[/gold]: the reacted enemy loses [blue]{Elements.ReactionConstants.ElectroChargedDot}[/blue] HP at the start of its turn, 1 less each turn.",
                     ["KLEEMOD-FROZEN_PREVIEW.title"] = "Reaction preview: Frozen",
                     ["KLEEMOD-FROZEN_PREVIEW.description"] =
-                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals half damage, and the first Attack to hit it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] damage.",
+                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals half damage, and until it acts the first Attack to hit it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] damage.",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Frozen (Boss)",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
                         $"Bosses cannot be Frozen. [gold]Hydro[/gold] plus [gold]Cryo[/gold] is consumed and applies [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
