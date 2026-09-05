@@ -92,8 +92,12 @@ public class KleeOverhaulRoundFourTests
         // `EB-361`: rule 1's growth is a CLAUSE on that count now, and rule 3
         // ends the face -- four sentences is the ceiling and the jump was the
         // fifth fact three round-10 seats needed and could not read anywhere.
+        // `EB-574` reworded the jump sentence: it is printed on the badge of
+        // the body the pile is about to kill, which is exactly where "a kill
+        // moves them to a survivor" reads as a promise about THESE charges.
         Assert.EndsWith(" growing each turn. None goes off by itself."
-                        + " A kill moves them to a survivor.", face);
+                        + " If this enemy dies with them still on, they move "
+                        + "to a survivor.", face);
     }
 
     [Fact]

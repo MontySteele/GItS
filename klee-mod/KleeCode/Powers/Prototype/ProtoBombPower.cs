@@ -402,8 +402,19 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// LIVING enemy at its size -- see <see cref="JumpCharges"/>, which is what
     /// this sentence describes: every charge travels, Mines included, so the
     /// word is "a survivor" and not "the next enemy". Printed on both branches,
-    /// because a Mine jumps exactly as a plain Bomb does.</summary>
-    private const string JumpSentence = " A kill moves them to a survivor.";
+    /// because a Mine jumps exactly as a plain Bomb does.
+    ///
+    /// `EB-574` SAID WHICH KILL IT MEANS. "A kill moves them to a survivor" is
+    /// printed on the badge of the body the pile is about to kill, which is
+    /// exactly where it reads as a promise about THESE charges: the r21 lane-1
+    /// seat set off Mine 11, killed Toadpole B, saw nothing arrive on A and
+    /// filed the screen as contradicting itself. A charge that goes off is
+    /// spent; what travels is one still sitting on an enemy that dies to
+    /// something else. Same sentence as `ArmKeywordTips.ForBomb` and
+    /// `ForMine`, so no two of the three can be read against each
+    /// other.</summary>
+    private const string JumpSentence =
+        " If this enemy dies with them still on, they move to a survivor.";
 
     /// <summary>Rule 7 on a pile with no Mine in it. A pile holding a Mine
     /// prints <see cref="MineClause"/> INSTEAD, because "none goes off by

@@ -102,6 +102,19 @@ EXCEPTIONS = {
         "never necessarily the detonator. The keyword rail states that about "
         "one CARD, on the card; what a reader of the WORD needs is the fact "
         "about the DECK, which no other surface carries"),
+    "MineKey": (
+        "`EB-574` put rule 3 on this tip, at 133 of 135. The jump sentence "
+        "was printed on the BADGE of the body the pile was about to kill and "
+        "on the Bomb tip as 'kills move it on', and both read as a promise "
+        "about the charge doing the killing: the r21 lane-1 seat set off Mine "
+        "11, killed Toadpole B, saw nothing arrive on A and filed the screen "
+        "as contradicting itself. A Mine kills more often than a plain Bomb "
+        "does, so the tip that already says 'unless the Mine kills' is where "
+        "the other reading has to be closed, and it is closed in the same "
+        "words on all three surfaces. Every other clause is a ruled finding "
+        "-- when it goes off, what the hit does to the attack, and which two "
+        "terms move it (EB-436, EB-373) -- and none is droppable to make "
+        "room"),
     "PlanKey": (
         "`EB-538` added the CLASS a carry-out belongs to, to a tip already at "
         "135 of 135. Skittish gave no Block to a body hit by two carry-outs "

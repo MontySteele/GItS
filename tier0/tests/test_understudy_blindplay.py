@@ -5928,10 +5928,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # arm and Ka-pow! is not, so the opening hand always holds a placer.
         # The keyword rail states that about one CARD, on the card; what a
         # reader of the WORD needs is the fact about the deck.
+        # `EB-574`: rule 3 says which kill it means, in the same words on
+        # both tips and the badge.
         "Bomb": ["A charge on an enemy", "goes off only when",
                  ", or as a ", "Not an Attack: only ",
                  " and a cap on the ", "enemy's HP loss move it",
-                 "Kills move it on", "Your deck opens with a placer"],
+                 "If this enemy dies with it still on, it moves to a "
+                 "survivor", "Your deck opens with a placer"],
         # `EB-432`: the pile's own order, and which charge meets the aura.
         # `EB-490` renamed the class and not the claim: "Attack trigger" read
         # as something on the player's own side of the board, beside a Block

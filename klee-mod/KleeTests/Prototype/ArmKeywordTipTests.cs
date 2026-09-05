@@ -257,7 +257,13 @@ public class ArmKeywordTipTests
         Assert.Contains("Not an Attack: only [gold]Vulnerable[/gold] and a cap "
                       + "on the ", printed);
         Assert.Contains("enemy's HP loss move it.", printed);
-        Assert.Contains("Kills move it on.", printed);
+        // `EB-574` SPELT RULE 3 OUT. "Kills move it on" read as a promise
+        // about the charge doing the killing: the r21 lane-1 seat set off
+        // Mine 11, killed Toadpole B and saw nothing arrive on A. Same words
+        // here, on the Mine tip and on the badge, so no two can be read
+        // against each other.
+        Assert.Contains("If this enemy dies with it still on, it moves to a "
+                      + "survivor.", printed);
 
         // `EB-89`, read the only way it can be read: the growth rate is NOT a
         // literal anywhere in this method -- the two halves of the sentence are

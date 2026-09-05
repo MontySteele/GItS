@@ -576,7 +576,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # something of Klee's.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
              "only when Set off, or as a Mine. Not an Attack: only Vulnerable "
-             "and a cap on the enemy's HP loss move it. Kills move it on. "
+             "and a cap on the enemy's HP loss move it. If this enemy dies "
+             "with it still on, it moves to a survivor. "
              "Your deck opens with a placer."),
     # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
     # walks the charges in placement order and the first one through the
@@ -615,9 +616,16 @@ ARM_KEYWORDS: dict[str, str] = {
     # an elite, five went off, "every hit landed in full, 36 to 18 HP". The
     # only thing a Mine does to the hit is stop it happening, by killing the
     # attacker (`EB-336`). "Read the badge:" paid for the clause.
+    # `EB-574`: rule 3, spelt out, and this is the tip the row was filed on.
+    # "Kills move it on" and the badge's "a kill moves them to a survivor" both
+    # read as a promise about the charge doing the killing -- the r21 lane-1
+    # seat set off Mine 11, killed Toadpole B and saw nothing arrive on A. A
+    # charge that goes off is spent; what travels is one still sitting on a
+    # body that dies to something else. Same words on both tips and the badge.
     "Mine": ("A Bomb that also goes off before its enemy's hit, which lands "
              "in full unless the Mine kills. Only their Vulnerable and a cap "
-             "move it."),
+             "move it. If this enemy dies with it still on, it moves to a "
+             "survivor."),
     # `EB-329`. "OR ALL IF IT SAYS SO" IS THE HALF THE OLD SENTENCE GOT
     # WRONG, and it was reprinted on every battle screen of every run: a
     # starter, Kurage's Oath, deals its Plan to ALL enemies, and the round-5

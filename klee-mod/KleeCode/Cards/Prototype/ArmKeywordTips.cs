@@ -137,6 +137,14 @@ public static class ArmKeywordTips
     /// is still interpolated so a repricing cannot leave the sentence lying
     /// (`EB-89`).
     ///
+    /// `EB-574` SPELT RULE 3 OUT. "Kills move it on" was read as a promise
+    /// about the charge that does the killing -- the r21 lane-1 seat set off
+    /// Mine 11, killed Toadpole B, watched nothing arrive on A and filed the
+    /// screen as contradicting itself. The rule is about the BODY, not the
+    /// charge: a charge that goes off is spent, and what travels is one still
+    /// sitting on an enemy that dies to something else. The sentence now says
+    /// which of the two it means, in the same words on both tips and the badge.
+    ///
     /// THE LAST SENTENCE IS RULE 3, AND IT IS `EB-361`. A Bomb whose enemy dies
     /// moves to a survivor at its size, and that rule was on no card, no badge
     /// and no tip: three round-10 seats met it as a surprise, one of them
@@ -207,7 +215,8 @@ public static class ArmKeywordTips
           + "[gold]Mine[/gold]. "
           + "Not an Attack: only [gold]Vulnerable[/gold] and a cap on the "
           + "enemy's HP loss move it. "
-          + "Kills move it on. Your deck opens with a placer.");
+          + "If this enemy dies with it still on, it moves to a survivor. "
+          + "Your deck opens with a placer.");
 
     /// <summary>
     /// Rule 2, and the one [USER] named ("Set Off has no tooltip text"). The
@@ -392,13 +401,23 @@ public static class ArmKeywordTips
     /// still here word for word and still names both terms, so `EB-343`'s
     /// rule survives whole; what went is the pointer, which a player standing
     /// in front of the badge does not need and a player in hand cannot use.
-    /// 133 of 135 rendered, no exception taken.
+    /// 133 of 135 rendered, no exception taken -- until `EB-574`.
+    ///
+    /// `EB-574` PUT RULE 3 ON THIS TIP TOO, and this is the surface the row was
+    /// filed on: the seat met "a kill moves them to a survivor" on the badge of
+    /// the body its Mine was about to kill and read it as a promise about that
+    /// Mine. A Mine kills more often than a plain Bomb does, so the tip that
+    /// says "unless the Mine kills" is exactly where the other reading has to
+    /// be closed. Same sentence as `ForBomb` and as the badge, word for word,
+    /// so no two of the three can be read against each other; `MineKey` is
+    /// carried in `tools/lint_text_conventions.py` by name for the room.
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off before its enemy's hit, "
           + "which lands in full unless the Mine kills. Only their "
-          + "[gold]Vulnerable[/gold] and a cap move it.");
+          + "[gold]Vulnerable[/gold] and a cap move it. "
+          + "If this enemy dies with it still on, it moves to a survivor.");
 
     /// <summary>
     /// KLEE'S FIFTH, R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`

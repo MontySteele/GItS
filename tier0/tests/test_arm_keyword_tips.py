@@ -478,6 +478,36 @@ def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
     assert "KLEEMOD-SWIRL_PREVIEW" not in keys
 
 
+def test_rule_three_says_which_kill_it_means_on_all_three_surfaces():
+    """`EB-574`. The sentence is about the BODY, not the charge.
+
+    "Kills move it on" (Bomb tip) and "a kill moves them to a survivor" (the
+    badge) both read as a promise about the charge that does the killing, and
+    the badge prints its copy on the body the pile is about to kill -- which is
+    exactly where that reading is invited. The r21 lane-1 seat set off Mine 11,
+    killed Toadpole B, saw nothing arrive on A and filed the screen as
+    contradicting itself.
+
+    Seen to FAIL: the Mine tip carried no jump clause at all, so the surface a
+    Mine reader stands in front of said nothing about the rule.
+    """
+    import sys
+    sys.path.insert(0, str(REPO))
+    from tools import lint_text_conventions as ltc
+    tips = {row.ident: ltc.render(row.raw) for row in ltc.tip_rows()}
+    sentence = "If this enemy dies with it still on, it moves to a survivor."
+    assert sentence in tips["BombKey"]
+    assert sentence in tips["MineKey"]
+    # The badge speaks of a PILE, so the same claim in the plural.
+    badge = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+             / "ProtoBombPower.cs").read_text(encoding="utf-8")
+    assert (' " If this enemy dies with them still on, they move to a '
+            'survivor.";') in badge
+    # And the old wording is gone from every one of the three.
+    assert "Kills move it on" not in tips["BombKey"]
+    assert '" A kill moves them to a survivor.";' not in badge
+
+
 def test_the_ruled_sentences_are_the_ones_that_ship():
     """The wording pin. Every clause below is quoted from the ruled slice
     packets; `Mend`'s bound is the one `EB-272` names outright."""
@@ -514,7 +544,11 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # `EB-555` defined the cap inside the clause that names it.
             "Not an Attack: only [gold]Vulnerable[/gold] and a cap on the ",
             "enemy's HP loss move it. ",
-            "Kills move it on.",
+            # `EB-574` SPELT RULE 3 OUT, in the same words on both tips and
+            # the badge: "kills move it on" read as a promise about the charge
+            # doing the killing, and the r21 lane-1 seat set off Mine 11,
+            # killed Toadpole B and saw nothing arrive on A.
+            "If this enemy dies with it still on, it moves to a survivor.",
             # `EB-432` named the order INSIDE the pile: `SetOff` walks the
             # charges in placement order and the first one meets the aura,
             # because a reaction consumes it. "Oldest first" carries "one at a
@@ -546,6 +580,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # `EB-373`: a Mine IS a Bomb, so the same two terms move it and
             # the two tips say so in the same words.
             "Only their ",
+            # `EB-574`: and the Mine tip carries rule 3 too -- a Mine kills
+            # more often than a plain Bomb, so this is the tip the row was
+            # filed on.
+            "[gold]Vulnerable[/gold] and a cap move it. ",
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.
