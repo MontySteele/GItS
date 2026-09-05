@@ -168,9 +168,10 @@ are in [`workstreams.md`](workstreams.md).
   `0.2.2564+proto`, floor 8 at the bridge's cap, six of six fights, the
   Spark economy read as the kit's engine, an invisible Mine (`EB-457`), the
   enemy block printed twice (`EB-458`); no pick. **Round 15 is READ, targeted**
-  (`review/active/klee-overhaul-round-15-2026-09-04.md`): Countdown and
-  Stoke the Fuse granted, Stoke played five times with a real ordering
-  rule, Countdown quiet, the intent hedge and the map's deck list wrong
+  (`review/active/klee-overhaul-round-15-2026-09-04.md`): two runs, Countdown and
+  Stoke the Fuse granted then Grounded and Sparks 'n' Splash; Stoke played
+  five times with a real ordering rule, Countdown quiet, Sparks 'n' Splash
+  never played in four fights of its own kit, the intent hedge and the map's deck list wrong
   (`EB-461`, `EB-447` reopened); no pick. [USER]'s act-1 run is due on
   `0.2.2401+proto`. The round-8 clear is read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
