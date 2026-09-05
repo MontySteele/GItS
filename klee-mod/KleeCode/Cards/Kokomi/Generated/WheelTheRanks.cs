@@ -45,7 +45,7 @@ public sealed class WheelTheRanks : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Wheel the Ranks"),
-        ("description", "Discard 1 card. Draw {Cards:diff()} card{Cards:plural:|s}. {IfUpgraded:show:Gain 3 [gold]Block[/gold].|} [gold]Sly[/gold]: Gain 4 [gold]Block[/gold]."),
+        ("description", "Discard 1 card. Draw {Cards:diff()} card{Cards:plural:|s}. {IfUpgraded:show:Gain 3 [gold]Block[/gold]. |}[gold]Sly[/gold]: Gain 4 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -8114,9 +8114,12 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
         "Add 1 random Common Companion card to your hand, free this turn.")
     # AN EMPTY UNUPGRADED ARM TAKES THE SPACE IN FRONT OF IT WITH IT: the game
     # prints the trimmed sentence, and the upgraded face needs the space back.
+    # `EB-571`: the added draw resolves ON PLAY and the body is the end-of-turn
+    # rule, so the clause LEADS -- appended, the page told a seat deciding a
+    # Smith that the draw happened at the end of the turn.
     assert qa_packet.upgraded_face(*_R12_SMITH[3]) == (
-        "Hexerei. At the end of your turn, Oz deals 5 Electro damage to a "
-        "random enemy. Draw 1 card.")
+        "Hexerei. Draw 1 card. At the end of your turn, Oz deals 5 Electro "
+        "damage to a random enemy.")
 
 
 def test_the_one_that_cannot_be_rendered_says_which_kind_of_upgrade_it_is():

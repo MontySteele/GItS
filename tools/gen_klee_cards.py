@@ -9083,6 +9083,31 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
 # reading the same way. The reason it is gone is in that caller's comment.
 
 
+def upgrade_add_leads(card: dict) -> bool:
+    """`EB-571`. Does this row's added upgrade clause print FIRST?
+
+    THE DEFECT (fixer O, `EB-556`; Albedo -- Solar Isotoma and Fischl -- Oz).
+    A `type: power` row's whole printed body is what the POWER does later --
+    "At the end of your turn, ..." -- and the Prototype-stage rule's added
+    draw resolves ON PLAY. Appended, it read as part of the end-of-turn clause:
+    "At the end of your turn, Oz deals 5 Electro damage to a random enemy. Draw
+    1 card." says the draw happens then, and it does not.
+
+    A POWER ROW AND NOTHING ELSE. On every other type the body IS the on-play
+    line, so an appended clause resolves exactly where it reads and moving it
+    would be the same defect pointed the other way. The test is the row's
+    `type`, which is the one field that says whether the printed body is a
+    now-line or a later-line.
+
+    ALL OF `_upgrade_add_text` AND NOT ONLY THE DRAW: every clause that
+    function emits is an on-play effect (a draw, an Encore gain, Block, a
+    discard), and on a Power row every one of them would read as the later
+    line. The rule is about WHEN the added effect resolves, not about which
+    effect it is.
+    """
+    return card.get("type") == "power" and bool(_upgrade_add_text(card))
+
+
 def _upgrade_add_text(card: dict) -> list[str]:
     """The `{IfUpgraded:show:...|}` clauses a structural `add` contributes.
 
@@ -9297,6 +9322,12 @@ LIVE_MODIFIED_FACE_KEYS = frozenset({"damage", "block"})
 #: the hole; see that function.
 _VANISHING_CLAUSE = re.compile(r"^\{IfUpgraded:show:\|(?P<base>.*)\}$", re.S)
 
+#: `EB-571`. The MIRROR: a clause whose BASE branch is empty, so the sentence
+#: appears only on the `+` card. It has always been appended, where a trailing
+#: space renders invisibly; a Power row prints it FIRST, where the join's space
+#: would leave the base face opening with a blank. Same trick, same reason.
+_UPGRADE_ONLY_CLAUSE = re.compile(r"^\{IfUpgraded:show:(?P<up>.*)\|\}$", re.S)
+
 
 def _face_from_parts(parts: list[str]) -> str:
     """A face from its sentences: one space between them, and no stray space
@@ -9312,13 +9343,21 @@ def _face_from_parts(parts: list[str]) -> str:
     One implementation for both face paths (rendered and authored), which is
     the same reason `meter_price_clauses` below is one builder for both.
     """
+    kept = [part for part in parts if part]
     out = ""
-    for part in parts:
-        if not part:
-            continue
+    for i, part in enumerate(kept):
+        last = i == len(kept) - 1
         vanishing = _VANISHING_CLAUSE.match(part)
+        upgrade_only = _UPGRADE_ONLY_CLAUSE.match(part)
         if vanishing:
             out += "{IfUpgraded:show:|" + vanishing.group("base") + " }"
+        elif upgrade_only and not last:
+            # `EB-571`: the separator goes inside the SHOWN branch, so a base
+            # card whose upgrade-only sentence renders as nothing does not
+            # open with a blank. Only where the clause has a sentence AFTER
+            # it: appended, the space is `rstrip`ed off and moving it inside
+            # would put a trailing one on every `+` face that already ships.
+            out += "{IfUpgraded:show:" + upgrade_only.group("up") + " |}"
         else:
             out += part + " "
     return out.rstrip()
@@ -9511,12 +9550,21 @@ def build_description(card: dict, *,
         # price comes off the row and is prepended here, exactly where the
         # rendered path puts it, and a prototype row's `description:` states
         # what the card DOES and never what it costs.
+        # `EB-571`: a Power row's added clause LEADS. Its printed body is the
+        # later line and the added effect resolves on play, so appending it
+        # says the draw happens at the end of the turn.
+        added = _upgrade_add_text(card)
+        lead, tail = (added, []) if upgrade_add_leads(card) else ([], added)
         face = _face_from_parts(
             meter_price_clauses(card, upgrade_plan(card)[0])
-            + [_authored_face_with_tokens(card)] + _upgrade_add_text(card))
+            + lead + [_authored_face_with_tokens(card)] + tail)
         return _face_riders(card, face)
     deltas = upgrade_plan(card)[0]
     parts = list(meter_price_clauses(card, deltas))
+    # `EB-571`, the rendered path's half of the same rule: a Power row's added
+    # clause leads, because its body is the later line.
+    if upgrade_add_leads(card) and added_effect_anchor(card) is None:
+        parts.extend(_upgrade_add_text(card))
     salon_named = False          # B5: has a deploy already said "your Salon"?
     deploy_amounts, deploy_skip, deploy_runs = merged_deploy_text(card)
     add_anchor = added_effect_anchor(card)
@@ -10432,7 +10480,7 @@ def build_description(card: dict, *,
                     text += f" Maximum {m}."
                 parts.append(text)
 
-    if added_effect_anchor(card) is None:
+    if added_effect_anchor(card) is None and not upgrade_add_leads(card):
         parts.extend(_upgrade_add_text(card))
     if added_repeat_upgrade(card):
         # Same sentence the printed repeat-conditional uses ("play this card
