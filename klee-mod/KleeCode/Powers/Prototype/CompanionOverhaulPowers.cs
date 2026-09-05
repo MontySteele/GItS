@@ -16,6 +16,44 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
+/// `EB-556`. A STANDING POWER WHOSE BADGE HAS TO KNOW ITS CARD WAS UPGRADED.
+///
+/// THE FIND (Klee r20 lane 1, (c) 3). "The upgraded card reads '...deal 8
+/// damage to that enemy and gain 4 Block. Draw 1 card.' but the buff on my
+/// status line reads '...deal 8 damage to that enemy and gain 4 Block.' with no
+/// draw. Seeing the unupgraded copy later (which genuinely has no draw)
+/// confirms the CARD is right and the buff readout is the incomplete one.
+/// Minor, but it is the one place where two screens disagreed about the same
+/// effect."
+///
+/// WHAT THE BADGE COULD NOT KNOW. A power's face is a hand-written sentence
+/// registered once at boot, and <c>PowerCmd.Apply</c> carries no card into the
+/// power it applies -- so a Power card's badge printed its BASE row whichever
+/// copy was played, and the two screens parted company the moment an upgrade
+/// added a clause.
+///
+/// A CLAUSE THE CARD ALREADY PRINTS, and this is worth stating plainly because
+/// the ruling did not have it: the added clause is the Prototype-stage upgrade
+/// rule's own (`EB-283`, "a card of cost 2 or more with no number costs 1 less"
+/// falling through to an added draw), and it resolves ON PLAY, in the generated
+/// <c>OnPlay</c>, not at the end of the turn with the rest of the power. The
+/// card's face does not say so either -- the clause is a bare sentence after
+/// "At the end of your turn, ..." -- so what this closes is the DISAGREEMENT
+/// the seat filed, and the timing is the card's own ambiguity, on both surfaces
+/// and no longer on one.
+/// </summary>
+public interface IUpgradeAwarePower
+{
+    /// <summary>An upgraded copy applied this power. Latching and never
+    /// cleared: a stack raised once by an upgraded copy carries the clause for
+    /// as long as it stands, which is what the player is holding.</summary>
+    void NoteSourceUpgraded();
+
+    /// <summary>Whether an upgraded copy has applied it.</summary>
+    bool SourceUpgraded { get; }
+}
+
+/// <summary>
 /// THE MONDSTADT COMPANION OVERHAUL'S POWERS (QUARANTINED, R213 B).
 ///
 /// Nine powers, in two shapes the engine already runs: a START-OF-TURN payout
@@ -275,8 +313,21 @@ public sealed class GlacialWaltzPower : PowerModel, ILocalizationProvider
 ///
 /// Amount is the number of COPIES: two Ozes, two volleys.
 /// </summary>
-public sealed class MondstadtOzPower : PowerModel, ILocalizationProvider
+public sealed class MondstadtOzPower
+    : PowerModel, ILocalizationProvider, IUpgradeAwarePower
 {
+    /// <summary>`EB-556`, `SolarIsotomaBloomPower`'s clause one card over:
+    /// Fischl -- Oz is the arm's OTHER Power row whose upgrade adds a clause,
+    /// so it is the other badge that could disagree with its card. Curated and
+    /// checked against the card's own token by the same test.</summary>
+    public const string UpgradedClause = " Draw 1 card.";
+
+    private bool _sourceUpgraded;
+
+    public void NoteSourceUpgraded() => _sourceUpgraded = true;
+
+    public bool SourceUpgraded => _sourceUpgraded;
+
     public List<(string, string)>? Localization => new()
     {
         ("title", "Oz, at Your Side"),
@@ -284,7 +335,30 @@ public sealed class MondstadtOzPower : PowerModel, ILocalizationProvider
             "At the end of your turn, Oz deals "
           + $"[blue]{CompanionOverhaulLaw.OzDamage}[/blue] [gold]Electro[/gold] "
           + "damage to a random enemy."),
+        // Written out rather than composed, for `SolarIsotomaBloomPower`'s
+        // reason one class up: the text lint reads the source and skips a
+        // tuple built by a helper.
+        ("smartDescription",
+            "At the end of your turn, Oz deals "
+          + $"[blue]{CompanionOverhaulLaw.OzDamage}[/blue] [gold]Electro[/gold] "
+          + "damage to a random enemy."),
+        ("smartDescriptionUpgraded",
+            "At the end of your turn, Oz deals "
+          + $"[blue]{CompanionOverhaulLaw.OzDamage}[/blue] [gold]Electro[/gold] "
+          + "damage to a random enemy."
+          + UpgradedClause),
     };
+
+    /// <summary>Which of the two smart rows this badge is on. Split out from
+    /// <see cref="SmartDescriptionLocKey"/> for
+    /// <c>FurinaReframeOpening.OpeningMemberFor</c>'s reason: `Id` is assigned
+    /// by BaseLib at registration and is null on a headless instance, so the
+    /// full key cannot be read by a pin while the CHOICE can.</summary>
+    public string SmartKeySuffix =>
+        _sourceUpgraded ? ".smartDescriptionUpgraded" : ".smartDescription";
+
+    protected override string SmartDescriptionLocKey =>
+        Id.Entry + SmartKeySuffix;
 
     public override PowerType Type => PowerType.Buff;
 
@@ -455,16 +529,71 @@ public sealed class DandelionBreezePower : PowerModel, ILocalizationProvider
 /// Block" reads as one guarded sentence -- unlike Jean's, whose two clauses are
 /// joined by a bare "and" with no condition in front of them.
 /// </summary>
-public sealed class SolarIsotomaBloomPower : PowerModel, ILocalizationProvider
+public sealed class SolarIsotomaBloomPower
+    : PowerModel, ILocalizationProvider, IUpgradeAwarePower
 {
+    /// <summary>
+    /// `EB-556`. THE UPGRADED FACE'S ADDED CLAUSE, verbatim from the card.
+    ///
+    /// Written here rather than parsed out of
+    /// <c>ProtoMcAlbedoSolarIsotoma</c>'s `{IfUpgraded:show:...|}` token at
+    /// render time, for `SmartDescriptionLocKey`'s own reason: loc is
+    /// registered once at boot, so the rows have to exist before the live
+    /// choice between them can be made. It is a curated copy and it is CHECKED
+    /// -- `KleeOverhaulRoundTwentyTests` reads the card's own token and
+    /// compares -- which is this repo's answer to a fact two files have to
+    /// agree on.
+    /// </summary>
+    public const string UpgradedClause = " Draw 1 card.";
+
+    private bool _sourceUpgraded;
+
+    public void NoteSourceUpgraded() => _sourceUpgraded = true;
+
+    public bool SourceUpgraded => _sourceUpgraded;
+
     public List<(string, string)>? Localization => new()
     {
         ("title", "Solar Isotoma"),
+        // THE STATIC (compendium) ROW IS THE BASE CARD'S, because a canonical
+        // copy has no card behind it to have been upgraded.
         ("description",
             "At the end of your turn, if any enemy has an aura, deal "
           + $"[blue]{CompanionOverhaulLaw.IsotomaDamage}[/blue] damage to that enemy and "
           + $"gain [blue]{CompanionOverhaulLaw.IsotomaBlock}[/blue] [gold]Block[/gold]."),
+        // TWO SMART ROWS AND A LIVE CHOICE BETWEEN THEM, which is
+        // `ProtoBombPower`'s shape: a row cannot carry a conditional, because
+        // BaseLib registers loc once at boot and the answer changes when the
+        // card is played.
+        //
+        // WRITTEN OUT RATHER THAN COMPOSED FROM A HELPER, and that is the
+        // lint's rule and not repetition for its own sake:
+        // `tools/lint_text_conventions.py` reads these bodies out of the
+        // SOURCE and skips any tuple whose expression calls a `Face(` helper,
+        // so a face built by a method is a player-facing string no ceiling
+        // measures. `KleeOverhaulRoundTwentyTests` holds the three rows in
+        // step with each other, which is what the helper would have bought.
+        ("smartDescription",
+            "At the end of your turn, if any enemy has an aura, deal "
+          + $"[blue]{CompanionOverhaulLaw.IsotomaDamage}[/blue] damage to that enemy and "
+          + $"gain [blue]{CompanionOverhaulLaw.IsotomaBlock}[/blue] [gold]Block[/gold]."),
+        ("smartDescriptionUpgraded",
+            "At the end of your turn, if any enemy has an aura, deal "
+          + $"[blue]{CompanionOverhaulLaw.IsotomaDamage}[/blue] damage to that enemy and "
+          + $"gain [blue]{CompanionOverhaulLaw.IsotomaBlock}[/blue] [gold]Block[/gold]."
+          + UpgradedClause),
     };
+
+    /// <summary>Which of the two smart rows this badge is on. Split out from
+    /// <see cref="SmartDescriptionLocKey"/> for
+    /// <c>FurinaReframeOpening.OpeningMemberFor</c>'s reason: `Id` is assigned
+    /// by BaseLib at registration and is null on a headless instance, so the
+    /// full key cannot be read by a pin while the CHOICE can.</summary>
+    public string SmartKeySuffix =>
+        _sourceUpgraded ? ".smartDescriptionUpgraded" : ".smartDescription";
+
+    protected override string SmartDescriptionLocKey =>
+        Id.Entry + SmartKeySuffix;
 
     public override PowerType Type => PowerType.Buff;
 
