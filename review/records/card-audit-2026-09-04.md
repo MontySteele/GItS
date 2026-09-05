@@ -589,3 +589,45 @@ single arm below; the reply verbatim:
 FOLLOWS — C1–C6; “Your largest Bomb grows by 3 per Spark spent” yields +3 for 1 Spark, matching Quick Fuse’s pool-row rate while lacking its Set off.
 ```
 
+## 5.2 Tide Chart, redesigned under R257 (2026-09-04, evening)
+
+The seat model is now GPT 6 Astra at low effort (the CLI's ,
+), the first read on it. Prompt, verbatim:
+
+> # Doctrine read: one redesigned Kokomi row
+>
+> You are the adversarial reviewer for a Slay the Spire 2 character mod. The owner's rule: a new or redesigned card ships to a tester only if you rule it FOLLOWS. Read the one row below against the clauses and answer in this exact form: first line `FOLLOWS` or `REQUIRES_MODIFICATION`, then the clause ids you weighed, then at most ten lines of reasoning, then (if REQUIRES_MODIFICATION) the smallest modification that would make it FOLLOWS. No other text. You have no repo access; everything you need is here, and every card text below is pasted verbatim from the sheet.
+>
+> ## Clauses
+>
+> - **C1 (the owner's "not all agents always win").** A row that removes a losing line the kit is meant to keep, instead of pricing it, is out.
+> - **C2 (binding prices).** Every cost printed must bind at the moment it is paid; a card whose cost is routinely free is out.
+> - **C3 (player-controlled leverage).** The card's value must follow a decision the player makes, not a state that arrives by itself.
+> - **C4 (the kit's own constraint).** Kokomi's defence is Block and prevention only; nothing heals below Rare.
+> - **C5 (nothing fires by itself).** No card triggers without a play or a Plan the player wrote.
+> - **C6 (not strictly better).** A row may not be a strictly better version of a shipped POOL row (listed below) or of a base-game non-basic card at the same or lower rarity and cost. Strike and Defend are basics and are not reference points. Base-game draw Commons at 0 or 1 energy for reference: Acrobatics (Common, 1: draw 3, discard 1), Backflip (Common, 1: 4 Block, draw 2), Prepared (Common, 0: draw 1, discard 1), Skim (Uncommon, 1: draw 3).
+>
+> ## The engine, Kokomi (the Plan kit)
+>
+> A **Bake-Kurage** (jellyfish) is on her field every fight. Some cards print two halves: a now-line ("Apply 1 Weak to ALL enemies") and a **Plan** line ("Plan: Deal 5 damage and apply 1 Weak to ALL enemies"). Playing the card onto the Bake-Kurage *writes the Plan*: it does nothing now, and at the start of her next turn the Bake-Kurage *carries out* every Plan it holds, in order, as its own Hydro hits. Carry-outs take the target's Vulnerable; her Weak and Strength do not fold in. Plans are written by paying the card's energy the turn before. Starter: 4 Strike, 4 Defend, Kurage's Oath, Nereid's Ascension, Slack Water; 3 energy; HP 80. Relic: Tamakushi Casket, 2 Hydro damage to an enemy whenever she applies a debuff to it.
+>
+> ## The pool rows this one is read against (verbatim)
+>
+> - Read the Field (Common Skill, 1): "Gain 5 Block. Plan: Gain 10 Block."
+> - Treatise (Uncommon Power, 1): "Once per turn, when the Bake-Kurage carries out a Plan, draw 1 card."
+> - War Council (Uncommon Skill, 1): "Apply 1 Weak to ALL enemies. Plan: Deal 5 damage and apply 1 Weak to ALL enemies."
+> - Nereid's Ascension (Rare Skill, 2, Exhaust): "Exhaust. Plan: for 2 turns, the Bake-Kurage carries out every Plan twice."
+> - Change of Plans (Common Skill, 1, Exhaust): "Exhaust. The Bake-Kurage carries out your first Plan now."
+> - Tide Chart as shipped today (Common Skill, 0): "Draw 1 card for each Plan the Bake-Kurage holds." — in a targeted blind run it drew zero on three of four plays, because it reads the memory before the Plans are written and after they are written the turn is ending. This row is being replaced.
+>
+> ## The row under review
+>
+> - **Tide Chart, redesigned (Common Skill, 0 energy):** "Next turn, after the Bake-Kurage carries out its Plans, draw 1 card for each." Upgrade: draw 1 more (so 1 per Plan, plus 1). Played on the turn the Plans are written; pays at the start of the next turn, after the carry-outs, for the Plans that were actually carried out. With no Plan written it draws nothing (base) or 1 (upgraded).
+
+Reply, verbatim:
+
+> FOLLOWS
+> C1, C2, C3, C4, C5, C6
+
+**Outcome:** FOLLOWS. The row builds under `EB-478`.
+
