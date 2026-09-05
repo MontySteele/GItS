@@ -363,6 +363,13 @@ public static class KleeMod
                     // the same raw-key hazard as every row here.
                     [Cards.KokomiRiderTips.DebuffRiderKey + ".title"] =
                         "Against a debuffed enemy",
+                    // `EB-539`: the same split one count over. The face prints
+                    // the live morning TOTAL and this row titles the tip that
+                    // says what the total is made of -- because "Deal 2
+                    // damage, already including 3 for each Plan" is a
+                    // contradiction on the one board where the fold is zero.
+                    [Cards.KokomiRiderTips.MorningDamageKey + ".title"] =
+                        "Damage from the morning",
                     // QUARANTINED (R213 E1): the Charge KEYWORD's title. The
                     // BODY is built live in KokomiRiderTips, because it
                     // quotes CHARGE_PER_EXHAUST and reads the current bank --

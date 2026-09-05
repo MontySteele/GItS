@@ -44,14 +44,14 @@ public sealed class ProtoKkWellLaid : CustomCardModel, IElementalCard, ICharacte
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
+        ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KokomiRiderTips.ForMorningDamageRider(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, 2, 3), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_well_laid");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Well Laid"),
-        ("description", "Deal {CalculatedDamage:diff()} damage, already including {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this morning."),
+        ("description", "Deal {CalculatedDamage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

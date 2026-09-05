@@ -68,6 +68,25 @@ public static class KokomiRiderTips
     // branch, which is the split this whole file exists for.
     public const string DebuffRiderKey = "KLEEMOD-DEBUFF_RIDER";
 
+    // `EB-539`. THE SAME SPLIT AS `DebuffRiderKey`, one count over, and the
+    // seat's reading is the reason it is the same split.
+    //
+    // THE FIND (Kokomi r19 lane 2). On a bare morning `Well Laid` printed
+    // "Deal 2 damage, already including 3 for each Plan carried out this
+    // morning", and the seat read it as self-contradictory: 2 cannot already
+    // include a 3 that nothing paid. It was `EB-441`'s clause working exactly
+    // as written -- the face's number IS live and the count IS folded into it
+    // -- on the one board where the fold is zero and the sentence says
+    // otherwise.
+    //
+    // AND THE FACE CANNOT BRANCH, for `DebuffRiderKey`'s reason verbatim: a
+    // card has exactly ONE face, `Localization` is read once at registration,
+    // neither description getter is virtual, and BaseLib's only runtime swap
+    // is `{IfUpgraded:show:}` -- which asks about the card, not the board. So
+    // the FACE prints the live total and nothing else, and the RULE that made
+    // it moves here, where a live count can stand beside it.
+    public const string MorningDamageKey = "KLEEMOD-MORNING_DAMAGE_RIDER";
+
     /// <summary>
     /// L4b: the printed Charge rider's RATE.
     ///
@@ -289,6 +308,51 @@ public static class KokomiRiderTips
             $"{baseDamage} against an undebuffed enemy, {baseDamage + bonus} "
           + "against a debuffed one. The face shows whichever applies to the "
           + "enemy you are aiming at.");
+    }
+
+    /// <summary>
+    /// `EB-539`. THE RULE BEHIND A LIVE MORNING TOTAL, on the surface that can
+    /// carry a rule and a live count at once.
+    ///
+    /// See <see cref="MorningDamageKey"/> for the find and for why the FACE
+    /// cannot answer it. The remedy is this file's own: the face prints the
+    /// live total ONLY -- "Deal 2 damage." on a bare morning, "Deal 11
+    /// damage." after three -- and the arithmetic that produced it lives here,
+    /// which is <see cref="ForChargeRider"/>'s bargain one count over.
+    ///
+    /// THE COUNT IS THE MORNING'S OWN, read through the accessor the
+    /// resolution reads (<c>KokomiOverhaulLedger.PlansThisMorning</c>, the
+    /// same number the emitted <c>WithMultiplier</c> asks for), so the tip
+    /// cannot disagree with the hit. Do not re-derive it here.
+    ///
+    /// OUT OF COMBAT THE RATE STANDS ALONE -- a shop shelf and a deck view
+    /// have no morning, and a "this morning: 0" printed there would be the
+    /// same false certainty the row was filed on. That is the FurinaRiderTips
+    /// rule, kept by every tip in this file.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForMorningDamageRider(
+        IEnumerable<IHoverTip> inherited, CardModel card,
+        int baseDamage, int per)
+    {
+        foreach (var tip in inherited) yield return tip;
+        yield return new HoverTip(
+            new LocString(Table, MorningDamageKey + ".title"),
+            MorningDamageBody(card, baseDamage, per));
+    }
+
+    private static string MorningDamageBody(
+        CardModel card, int baseDamage, int per)
+    {
+        var rule = $"{baseDamage}, plus {per} for each [gold]Plan[/gold] the "
+                 + "[gold]Bake-Kurage[/gold] carried out this morning";
+        var owner = TipOwner.CreatureOf(card);
+        if (owner == null || card.CombatState == null) return rule + ".";
+#if PROTOTYPE_CARDS
+        return rule + "; this morning: "
+             + Powers.KokomiOverhaulLedger.For(owner).PlansThisMorning + ".";
+#else
+        return rule + ".";
+#endif
     }
 
     /// <summary>
