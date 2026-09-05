@@ -432,8 +432,16 @@ are in [`workstreams.md`](workstreams.md).
   only, paying nothing when dry (`EB-587`, D default: it pays) and
   printing out of order (`EB-582`); Weak cut a performance (`EB-588`,
   built); the Skittish read was a killing hit, not a defect (`EB-592`);
-  no pick; `EB-582`-`EB-592`. [USER]'s act-1 run is due on
-  `0.2.2800+proto`. No stamp moves, nothing measured.
+  no pick; `EB-582`-`EB-592`. **Round 16 is READ**
+  (`review/active/furina-reframe-round-16-2026-09-06.md`): on
+  `0.2.2817+proto` the hit rules read as built (Skittish and Thorns on
+  card hits, never on performances; Weak off performances), the Evoke
+  pays dry and prints first, and a natural deck with three Deploys
+  Evoked on purpose (the reachability question closed by the draft);
+  the Spotlight's line is false since Encore refills (`EB-600`); the
+  fight-end screen swallows the lethal beat's log (`EB-604`); no pick;
+  `EB-600`-`EB-604`. [USER]'s act-1 run is due on `0.2.2817+proto`.
+  No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
   playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
