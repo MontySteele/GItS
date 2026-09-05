@@ -7498,6 +7498,97 @@ def test_the_no_upgrade_register_is_read_by_id_and_only_its_ids_cross():
     assert not qa_packet.leaks(blindplay.UNEXPLAINED_OMISSION)
 
 
+# --- `EB-528`: A CARD THE COMBAT MADE IS NOT A CARD THE RUN OWNS ------------
+
+
+def _combat_with_piles(round_no: int, hand: list[str],
+                       draw: list[str] | None = None) -> dict:
+    """A combat state whose four piles are the named titles."""
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["round"] = round_no
+    state["player"]["character"] = "Furina"
+    for pile, titles in (("hand", hand), ("draw_pile", draw or []),
+                         ("discard_pile", []), ("exhaust_pile", [])):
+        state["player"][pile] = [
+            {"id": f"KLEEMOD-{t.upper().replace(' ', '_')}", "name": t}
+            for t in titles]
+    return state
+
+
+def test_a_companion_generated_mid_fight_never_joins_the_remembered_deck():
+    """`EB-528`. THE CARD THE COMBAT MADE, IN THE RUN'S DECK LIST.
+
+    Furina r12 lane 1: "Lynette -- Bogglecat Box appeared in my end-of-act deck
+    list. It entered my hand from An Invitation ... Bennett, Barbara, Gorou and
+    Freminet -- Pers, which arrived by the same route, did not appear." Lane 2:
+    "Shinobu, generated mid-fight by An Invitation, appeared in my deck list at
+    the Smith."
+
+    THE MOD IS RIGHT AND THE MEMORY WAS WRONG. A generated Companion goes
+    through `CardPileCmd.AddGeneratedCardToCombat` into the HAND and onto no
+    permanent list; this page's own snapshot took a LATER round's union of the
+    piles whenever it was bigger than the deck it held, and a generated card
+    makes it bigger by one. That is also why only some of them got in: the seat
+    listed four that arrived the same way and did not.
+
+    Seen to FAIL: the second read replaced the deck with five cards.
+    """
+    blindplay.forget_deck()
+    blindplay.observe(_combat_with_piles(1, ["Strike", "Defend"],
+                                         ["Strike", "Defend"]))
+    assert len(blindplay._DECK_MEMORY["cards"]) == 4
+
+    blindplay.observe(_combat_with_piles(
+        3, ["Strike", "Defend", "Shinobu — Grass Ring"], ["Strike", "Defend"]))
+
+    titles = [c["title"] for c in blindplay._DECK_MEMORY["cards"]]
+    assert "Shinobu — Grass Ring" not in titles
+    assert len(titles) == 4
+    blindplay.forget_deck()
+
+
+def test_the_next_fights_first_round_is_where_a_real_addition_arrives():
+    """Nothing is lost by taking round one alone: a card the run really did
+    gain is in hand or draw at the next fight's round one, which is the read
+    this page already called the authoritative one."""
+    blindplay.forget_deck()
+    blindplay.observe(_combat_with_piles(1, ["Strike"], ["Defend"]))
+    assert len(blindplay._DECK_MEMORY["cards"]) == 2
+
+    blindplay.observe(_combat_with_piles(1, ["Strike", "Riptide"], ["Defend"]))
+
+    titles = [c["title"] for c in blindplay._DECK_MEMORY["cards"]]
+    assert titles.count("Riptide") == 1
+    assert len(titles) == 3
+    blindplay.forget_deck()
+
+
+def test_a_victory_screens_short_union_still_never_replaces_the_deck():
+    """The clause the old rule existed to prevent, kept: a later round can
+    lose cards to a pile the game has torn down, and the deck it held stands.
+    """
+    blindplay.forget_deck()
+    blindplay.observe(_combat_with_piles(1, ["Strike", "Defend"],
+                                         ["Riptide", "Flank"]))
+    assert len(blindplay._DECK_MEMORY["cards"]) == 4
+
+    blindplay.observe(_combat_with_piles(6, ["Strike"], []))
+
+    assert len(blindplay._DECK_MEMORY["cards"]) == 4
+    blindplay.forget_deck()
+
+
+def test_the_generator_adds_to_the_combat_and_to_no_permanent_list():
+    """The C# half of the read, which is why nothing moved there: the one
+    generation site in the mod goes through the combat-only door."""
+    src = (REPO / "klee-mod" / "KleeCode" / "Powers"
+           / "GuestStarGenerator.cs").read_text(encoding="utf-8")
+
+    assert "CardPileCmd.AddGeneratedCardToCombat(" in src
+    assert "PileType.Hand" in src
+    assert "MasterDeck" not in src
+
+
 # ------------- `EB-483`: what the Smith is offering, and what it becomes -----
 
 
