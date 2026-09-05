@@ -30,7 +30,24 @@ public static class GuestStarGenerator
             _ => throw new ArgumentOutOfRangeException(
                 nameof(rarity), rarity, "Guest Stars must be Common or Uncommon."),
         };
-        var pool = CompanionRoster.All
+        // `EB-549`. `CompanionPool.All` AND NOT `CompanionRoster.All`, which is
+        // the arm-aware door and the same one every offer surface uses.
+        //
+        // THE FIND (Furina r13 lane 1). "Two cards in this run share a name
+        // with a completely different card": the card-reward copy of
+        // `Kaeya -- Frostgnaw` read "Deal 8 damage. Gain 3 Block" and the copy
+        // An Invitation fetched into hand read a 6-damage no-Block card under
+        // the same title; `Dahlia -- Sacramental Shower` was an Attack in play
+        // and a Skill at a reward. "From the seat they are simply two different
+        // cards with one name."
+        //
+        // THEY ARE THE ARM'S ROW AND THE SHIPPED ROW IT REWRITES. A prototype
+        // row that shadows a shipped one keeps its printed name, and the whole
+        // premise of that (`EB-322`, and `lint_unique_names`' shadow rule) is
+        // that the arm substitutes the shipped row out so ONE of the pair is
+        // reachable. `CompanionPool.All` makes that true at the offer door and
+        // this generator went around it -- `EB-491`'s lesson one door over.
+        var pool = CompanionPool.All
             .Concat(GuestStarRoster.All)
             .Where(card => card.Rarity == targetRarity)
             // personal_pool rows are the owning character's kit, distinct

@@ -85,6 +85,25 @@ RELIC_DIRS = (REPO / "klee-mod" / "KleeCode" / "Relics",)
 #: `tools/run_lints.py` and the atlas both invoke it.
 SHADOW_SUFFIX = " (proto)"
 
+#: `EB-549`. THE SHADOW RULE HAD NO ROWS TO RULE ON.
+#:
+#: `EB-322` taught this lint what a ` (proto)` name means, and then no
+#: invocation ever handed it a sheet holding one: `loader.DOCS_CARD_SHEETS` is
+#: the shipped six, and every declared shadow lives on
+#: `docs/prototype-surface.yaml`. So the rule was dead code and the Furina r13
+#: seat met both halves of one -- `Kaeya -- Frostgnaw` as an 8-damage reward
+#: card and as a 6-damage fetched one, `Dahlia -- Sacramental Shower` as an
+#: Attack and as a Skill -- with the lint green throughout.
+#:
+#: THE SURFACE COMES IN SHADOW ROWS ONLY, and that is a scope rule rather than
+#: a convenience. Most of the surface is a WHOLE-KIT swap: Klee's overhaul
+#: replaces her entire offerable pool, so `proto_ko_pop` and the shipped `Pop!`
+#: are the same card at two stages and no run can show both. Those rows declare
+#: no shadow and are not in this namespace. A row that ends in ` (proto)` is
+#: making the opposite claim -- "I rewrite ONE shipped row, and the arm hides
+#: it" -- and that claim is exactly what this lint exists to check.
+SHADOW_ONLY_SHEETS = ("prototype-surface.yaml",)
+
 #: `("title", "Some Name"),` inside a Localization initializer. Deliberately
 #: matched on the literal rather than parsed: these files are hand-written C#
 #: and a real parser is a dependency this lint does not need.
@@ -135,11 +154,16 @@ def main(argv):
     # meet here rather than passing each other as two unrelated strings.
     seen = {}
     for sheet in sheets:
+        shadows_only = Path(sheet).name in SHADOW_ONLY_SHEETS
         for c in load_cards(sheet):
             name = c.get("name")
             if not name:
                 continue
             shadow = name.endswith(SHADOW_SUFFIX)
+            # `EB-549`: a whole-kit swap declares no shadow and is not in this
+            # namespace -- see `SHADOW_ONLY_SHEETS`.
+            if shadows_only and not shadow:
+                continue
             bare = name[:-len(SHADOW_SUFFIX)] if shadow else name
             seen.setdefault(bare, []).append(
                 ("card", Path(sheet).name, c.get("id", "?"), shadow))

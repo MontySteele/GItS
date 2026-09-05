@@ -571,3 +571,54 @@ def test_every_overhaul_row_resolves_without_raising(overhaul):
         _play(st, cid)
         effects.companion_overhaul_turn_end(st)
         effects.companion_overhaul_turn_start(st)
+
+
+# ---------------------------------------------------------------------------
+# `EB-549` -- THE OTHER DOOR, and it went around the roster
+# ---------------------------------------------------------------------------
+#
+# THE FIND (Furina r13 lane 1). "Two cards in this run share a name with a
+# completely different card": the card-reward copy of `Kaeya -- Frostgnaw` read
+# "Deal 8 damage. Gain 3 Block" and the copy An Invitation fetched into hand was
+# a 6-damage, no-Block card under the same title. `Dahlia -- Sacramental Shower`
+# was a cost-1 Attack in play and a cost-1 Skill at a reward. "From the seat
+# they are simply two different cards with one name."
+#
+# THEY ARE THE ARM'S ROW AND THE SHIPPED ROW IT REWRITES. A prototype row that
+# shadows a shipped one keeps its printed name, and the whole premise of that
+# (`EB-322`) is that the arm substitutes the shipped row out, so ONE of the pair
+# is reachable in a build. `companion_roster_replacement` makes that true at the
+# offer door; the Guest Star generation pool read `_card_index` and went around
+# it -- `EB-491`'s lesson one door over.
+
+
+def test_the_generated_pool_offers_the_arms_row_and_not_the_shipped_one(
+        overhaul):
+    """The seat's own pair, at the door that fetched the wrong half."""
+    ids = {c.id for c in loader.guest_star_generation_pool("common")}
+
+    assert "proto_mc_kaeya_frostgnaw" in ids
+    assert "kaeya_frostgnaw" not in ids
+    assert "proto_mc_dahlia_sacramental_shower" in ids
+    assert "dahlia_sacramental_shower" not in ids
+
+
+def test_no_name_the_generated_pool_can_show_is_offerable_twice(overhaul):
+    """The row's acceptance, stated over the whole pool rather than the two
+    rows that were caught: a shadow and the row it shadows print one title, so
+    a build in which BOTH are reachable is the defect whatever the pair."""
+    for rarity in ("common", "uncommon"):
+        names = [loader.display_name(c.name)
+                 for c in loader.guest_star_generation_pool(rarity)]
+        assert len(names) == len(set(names)), sorted(names)
+
+
+def test_the_flag_off_pool_is_byte_for_byte_what_it_always_was():
+    """The acceptance condition on the flag, and the half that makes the change
+    narrow: with no replacement the companion half is the shipped index
+    filtered exactly as it was, and the Guest Star half never moved at all."""
+    _caches_clear()
+    ids = {c.id for c in loader.guest_star_generation_pool("common")}
+    assert "kaeya_frostgnaw" in ids
+    assert "proto_mc_kaeya_frostgnaw" not in ids
+    _caches_clear()

@@ -1646,12 +1646,9 @@
    description: "Gain {IfUpgraded:show:8|5} [gold]Encore[/gold]. If you have at least 3 [gold]Fanfare[/gold], gain {IfUpgraded:show:8|5} more.",
    effects: [{op: gain_encore, amount: 5},
              {op: conditional, if: fanfare_at_least_3, then: [{op: gain_encore, amount: 5}]}]}
-# --- POOL PASS ONE (`EB-493`): arm-only Commons swapped in at the offer door
-# for shipped Commons of the same type and cost. Why each exists:
-# docs/notes/prototype-surface-provenance.md. THREE OF THE FOUR REMAIN --
-# Rolling Tide was withdrawn from the arm's offer in round 13 (`EB-552`) and
-# its row left this sheet with its pins, so the shipped Undercurrent is
-# offered again at that seam. ---
+# --- POOL PASS ONE (`EB-493`), three of its four: Rolling Tide was withdrawn
+# in round 13 (`EB-552`). Why each exists, and why that one left:
+# docs/notes/prototype-surface-provenance.md. ---
 
 - {id: proto_fr_curtain_rises, name: "Curtain Rises", character: furina,
    authored_by: [claude],

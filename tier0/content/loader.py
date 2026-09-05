@@ -858,10 +858,23 @@ def guest_star_generation_pool(rarity: str) -> list[Card]:
     mint a Klee kit card on Furina. LAW.md:98-110 makes personal-pool
     companions the character's kit, distinct from generated Guest Star
     cameos; rewards, the shop and the mod's own IsOfferable all filter, and
-    this was the sole consumer that skipped it (EB-99)."""
-    pool = [c for c in _card_index().values()
-            if (c.is_companion or c.guest_star)
-            and c.rarity == rarity and not c.kit_card
+    this was the sole consumer that skipped it (EB-99).
+
+    `EB-549`: THE COMPANION HALF GOES THROUGH THE ARM'S ROSTER. A prototype
+    row that shadows a shipped companion keeps its printed name, and the whole
+    premise of that (`EB-322`) is that the arm substitutes the shipped row out,
+    so one of the pair is reachable in a build. `companion_roster_replacement`
+    makes that true at the offer door; this pool read `_card_index` and went
+    around it, so a Furina r13 seat met `Kaeya -- Frostgnaw` as an 8-damage
+    reward card AND as a 6-damage fetched one. The GUEST STAR half is not
+    replaced by any arm and still comes off the index."""
+    replaced = companion_roster_replacement()
+    companions = (replaced if replaced is not None
+                  else [c for c in _card_index().values() if c.is_companion])
+    pool = [c for c in list(companions)
+            + [c for c in _card_index().values() if c.guest_star
+               and not c.is_companion]
+            if c.rarity == rarity and not c.kit_card
             and c.personal_pool is None]
     if not pool:
         raise ValueError(f"empty guest-star pool at rarity {rarity!r}")

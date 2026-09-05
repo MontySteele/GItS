@@ -651,7 +651,12 @@ def test_card_names_are_unique():
     the Silent's. No instrument here could have. The list is the record of
     those catches; append to it, and don't prune without a reason on file.
     """
+    # `EB-549`: AND THE PROTOTYPE SURFACE, in shadow rows only. `EB-322`
+    # taught this lint what a ` (proto)` name means and then no invocation
+    # ever handed it one -- every declared shadow lives on that sheet -- so
+    # the rule was dead code while a Furina r13 seat met both halves of one.
     sheets = [str(loader.DOCS_DIR / s) for s in loader.DOCS_CARD_SHEETS]
+    sheets.append(str(loader.DOCS_DIR / "prototype-surface.yaml"))
     res = subprocess.run(
         [sys.executable, str(REPO / "tools" / "lint_unique_names.py"),
          *sheets],
@@ -662,6 +667,35 @@ def test_card_names_are_unique():
     # that scans them all (the §3.1/§3.7 dead-gate class).
     assert "relic names unique" in res.stdout
     assert " 0 relic " not in res.stdout
+    # AND THE SHADOW ROWS REACHED IT, the same dead-gate argument one sheet
+    # over: a run over seven sheets that saw no shadow would print this same
+    # clean line.
+    assert "7 sheet(s)" in res.stdout
+
+
+def test_the_shadow_rule_bites_on_the_sheet_it_was_written_for(tmp_path):
+    """`EB-549`'s negative test, and it is the state the r13 seat was in: a
+    prototype row declaring a shadow of a name NO live row holds prints a bare
+    title nothing checked. The whole-kit swaps on the same sheet are excluded
+    by construction -- they declare no shadow -- so this is the one claim the
+    surface makes that this lint can hold."""
+    lint = str(REPO / "tools" / "lint_unique_names.py")
+    surface = tmp_path / "prototype-surface.yaml"
+    surface.write_text(
+        '- {id: proto_shadows_nothing, name: "A Name No Row Holds (proto)",\n'
+        '   cost: 1, type: skill, rarity: common}\n'
+        '- {id: proto_whole_kit_swap, name: "Sizzle",\n'
+        '   cost: 1, type: skill, rarity: common}\n', encoding="utf-8")
+
+    res = subprocess.run([sys.executable, lint, str(surface)],
+                         capture_output=True, text=True)
+
+    assert res.returncode == 1, res.stdout + res.stderr
+    assert "A Name No Row Holds" in res.stdout
+    # And the row with no suffix was never in the namespace at all: it is a
+    # whole-kit swap, and the shipped `Sizzle` it names is not offered beside
+    # it in any build.
+    assert "Sizzle" not in res.stdout
 
 
 def test_a_card_relic_name_collision_fails_the_lint(tmp_path):

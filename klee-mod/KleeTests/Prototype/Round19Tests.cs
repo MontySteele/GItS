@@ -829,6 +829,46 @@ public class Round19Tests
                     "amplifier, then the target's terms, then the hit");
     }
 
+    // ==================================================================
+    // `EB-549` -- two cards, one name, and the door that let both in
+    // ==================================================================
+    //
+    // THE FIND (Furina r13 lane 1). "Two cards in this run share a name with a
+    // completely different card": the card-reward copy of `Kaeya --
+    // Frostgnaw` read "Deal 8 damage. Gain 3 Block", and the copy An
+    // Invitation fetched into hand was a 6-damage no-Block card under the same
+    // title. "From the seat they are simply two different cards with one
+    // name."
+    //
+    // THEY ARE THE ARM'S ROW AND THE SHIPPED ROW IT REWRITES. A prototype row
+    // that shadows a shipped one keeps its printed name, and the premise of
+    // that (`EB-322`, and `lint_unique_names`' shadow rule) is that the arm
+    // substitutes the shipped row out. `CompanionPool.All` makes that true at
+    // the offer door; this generator read `CompanionRoster.All` and went
+    // around it -- `EB-491`'s lesson one door over.
+
+    [Fact]
+    public void The_guest_star_generator_reads_the_arm_aware_door()
+    {
+        var calls = Il.Calls(Il.Method("GuestStarGenerator", "Generate"));
+
+        Assert.Contains("CompanionPool.get_All", calls);
+        Assert.DoesNotContain("CompanionRoster.get_All", calls);
+    }
+
+    [Fact]
+    public void And_that_door_is_the_one_the_offer_surfaces_read()
+    {
+        // The claim the fix rests on, read where it lives: `CompanionPool.All`
+        // answers the ARM's roster while the arm is on and the shipped one
+        // otherwise, so every consumer of it sees one row per printed name.
+        var door = Il.Calls(Il.Method("CompanionPool", "get_All"));
+
+        Assert.Contains("CompanionOverhaul.get_Enabled", door);
+        Assert.Contains("CompanionOverhaulRoster.Roster", door);
+        Assert.Contains("CompanionRoster.get_All", door);
+    }
+
     /// <summary>The loc key a pile's badge is resolving right now.
     /// <c>KleeOverhaulRoundOneFixTests.LocKey</c>, verbatim.</summary>
     private static string LocKey(ProtoBombPower pile) =>
