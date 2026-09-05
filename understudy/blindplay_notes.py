@@ -397,6 +397,28 @@ MULTI_INTENT_NOTE = (
     "sends is printed above, exactly as it was sent; this page makes no claim "
     "about which of them the enemy will perform.*")
 
+# `EB-474`. THE BLOCK ON THE BODY, AND THE PART THAT WILL ADD MORE.
+#
+# WHAT THE SEAT SAW. "Nibbit at 5 HP, I played a card printing *Deal 6
+# damage*, and it lived at 4. Nothing on the combat page showed the Block that
+# ate the other 5. That is the only outright unpredictable outcome of the run"
+# (Furina r9 (c) 1) -- and its own reading of it was "Block from the Defend
+# half of its previous multi-part telegraph".
+#
+# WHAT THE PAGE ALREADY DID, and it matters for what is left to build. The
+# enemy line has printed `, Block N` beside HP since `EB-180`, off the wire's
+# own `battle.enemies[].block`, which `BuildEnemyState` fills from
+# `creature.Block`. That half of the row was standing; it is now PINNED rather
+# than assumed, because nothing held it.
+#
+# WHAT WAS MISSING. The TELEGRAPH said nothing. `BuildEnemyState` sends a
+# `Defend` part with an empty `label` and, on every capture in `review/qa`, no
+# description at all, so the line read `Defensive (Defend)` -- a word with no
+# consequence attached, one row above the number it was about to change. A
+# reader who is shown Block only once it exists learns about it a turn late.
+DEFEND_INTENT_CLAUSE = ("this part adds Block to the Block on its line above, "
+                        "and the feed carries no number for how much")
+
 #: What a number on a multi-part telegraph is called ON THE LINE ITSELF, so a
 #: reader who plans off the enemy block without reaching the note under it
 #: knows the number belongs to one part of a several-part move. It says what

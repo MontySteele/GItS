@@ -16,6 +16,7 @@ from understudy.blindplay_board import _pulse_phrase
 from understudy.blindplay_notes import (AURA_NOTE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
+                                        DEFEND_INTENT_CLAUSE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
                                         METER_CAPPED_NOTE,
@@ -373,6 +374,13 @@ def _render_intent(intent: dict[str, str], part: bool = False) -> str:
     word it does not modify. The wire's `type` -- the mechanical kind, which
     the page dropped the way it dropped a power's (`EB-179`) -- goes back on
     beside the hover tip's heading where the two differ.
+
+    `EB-474`: a `Defend` part says that it ADDS BLOCK. The feed sends that
+    part with an empty `label` and, on every capture in `review/qa`, no
+    description at all -- so the line read `Defensive (Defend)` and nothing on
+    it connected the part to the `Block N` on the body's own line one row up.
+    The Furina r9 seat played `Deal 6` into a 5-HP body that lived at 4 and
+    could not account for it, having read the HP line as the whole target.
     """
     head = intent.get("kind") or intent.get("type") or ""
     kind = intent.get("type") or ""
@@ -382,6 +390,8 @@ def _render_intent(intent: dict[str, str], part: bool = False) -> str:
               + (MULTI_INTENT_LABEL if part else "")
               if intent.get("label") else "")
     bits = [head, number, intent.get("text") or ""]
+    if _fold(kind) == "defend":
+        bits.append(DEFEND_INTENT_CLAUSE)
     return " — ".join(b for b in bits if b) or "(no intent shown)"
 
 

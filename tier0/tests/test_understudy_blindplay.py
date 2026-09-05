@@ -6709,6 +6709,63 @@ def test_a_compound_intent_prints_every_component():
             "to your hand.") in page
 
 
+def defending_enemy_state() -> dict:
+    """A body wearing Block, telegraphing a move that will add more.
+
+    The `Defend` part is the wire's own shape, off the `review/qa` captures:
+    `{"type": "Defend", "label": "", "title": "Defensive"}` -- no number, and
+    no description either.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["enemies"][0]["block"] = 5
+    state["battle"]["enemies"][0]["intents"] = [
+        {"type": "Attack", "label": "8", "title": "Aggressive",
+         "description": "This enemy intends to Attack for 8 damage."},
+        {"type": "Defend", "label": "", "title": "Defensive"}]
+    return state
+
+
+def test_an_enemys_block_prints_beside_its_hp():
+    """`EB-474`, the half that was already standing and had nothing holding it.
+
+    "Nibbit at 5 HP, I played a card printing *Deal 6 damage*, and it lived at
+    4. Nothing on the combat page showed the Block that ate the other 5. That
+    is the only outright unpredictable outcome of the run" (Furina r9 (c) 1).
+
+    The page has printed the clause off `battle.enemies[].block` since
+    `EB-180`, and `BuildEnemyState` fills that key from `creature.Block` -- so
+    the row's first half is a PIN, not a build, and it goes red the moment the
+    clause is dropped again. A body with no Block prints no clause: zero is
+    the default state of every enemy on the board and a `Block 0` on each line
+    is `EB-198`'s noise.
+    """
+    page = blindplay.observe(defending_enemy_state())
+    assert "- **Nibbit** — HP 38/45, Block 5" in page
+    assert "Block" not in blindplay.observe(combat_state()).split(
+        "## The other side")[1]
+
+
+def test_a_defend_part_of_a_telegraph_says_it_will_add_block():
+    """`EB-474`, the half that was missing: the TELEGRAPH said nothing.
+
+    `BuildEnemyState` sends a `Defend` part with an empty `label` and, on
+    every capture in `review/qa`, no description -- so the line read
+    `Defensive (Defend)`, a word with no consequence attached, one row above
+    the number it was about to change. The seat's own reading of its lost kill
+    was "Block from the Defend half of its previous multi-part telegraph": the
+    turn to have been told was that one.
+
+    Seen to FAIL: the part printed its title and its type and stopped.
+    """
+    page = blindplay.observe(defending_enemy_state())
+    assert ("and also: Defensive (Defend) — this part adds Block to the "
+            "Block on its line above, and the feed carries no number for how "
+            "much") in page
+    # Only a Defend part carries it -- the Attack half is untouched.
+    assert page.count("this part adds Block") == 1
+    assert "adds Block" not in blindplay.observe(compound_intent_state())
+
+
 def test_no_observe_prints_the_enemy_block_twice():
     """`EB-458`, and the row's premise did not hold: there is no duplicated
     render path to find.
