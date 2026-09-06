@@ -283,7 +283,8 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
                 if face.get("upgraded"):
                     continue
                 built, why = qa_packet.upgrade_preview(
-                    raw.get("id"), face.get("text") or "")
+                    raw.get("id"), face.get("text") or "",
+                    title=face.get("title") or raw.get("name"))
                 face["upgraded_face"] = built
                 face["upgraded_note"] = why
                 # `EB-551`: AND THE KEYWORDS, which are a different question

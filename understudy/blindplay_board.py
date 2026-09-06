@@ -176,6 +176,21 @@ UNEXPLAINED_OMISSION = ("on the screen's list nowhere, and nothing on the feed "
                         "says why")
 
 
+#: `EB-332`. THE GAME PARKS A BOSS ON A SENTINEL WHILE IT CHANGES PHASE. The
+#: Kokomi r4c act-2 seat read `Waterfall Giant -- HP 999999997/999999999` for a
+#: whole turn -- "the single worst thing I saw" -- and could not tell won from
+#: lost. No real body has a hundred million HP, so a max above this line is the
+#: sentinel and not a number, and the render says what the HP bar is doing
+#: instead of quoting it.
+PHASE_FLIP_HP_FLOOR = 100_000_000
+PHASE_FLIP_LINE = "changing phase (its HP is not a number this turn)"
+
+
+def is_phase_flip_hp(hp: int, max_hp: int) -> bool:
+    """Is this HP pair the game's phase-change sentinel rather than a body's?"""
+    return max(hp, max_hp) >= PHASE_FLIP_HP_FLOOR
+
+
 def upgrade_deck_floor(state: dict[str, Any]) -> int:
     """The floor the deck behind `_omitted_from_upgrade` was read on. `0` if none."""
     return _int((remembered_deck(state) or {}).get("floor"))
@@ -210,7 +225,9 @@ def _omitted_from_upgrade(state: dict[str, Any]) -> list[dict[str, str]]:
         if isinstance(entry, dict):
             grid.append((_fold(_text(entry.get("name"))),
                          bool(entry.get("is_upgraded")
-                              or entry.get("upgraded"))))
+                              or entry.get("upgraded")
+                              or _text(entry.get("name")).rstrip()
+                              .endswith("+"))))      # `EB-609`
     debt = qa_packet.no_upgrade_index()
     out: list[dict[str, str]] = []
     for card in deck:
@@ -338,6 +355,12 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
                      "handle": handle,
                      "hp": _int(e.get("hp")),
                      "max_hp": _int(e.get("max_hp", e.get("hp"))),
+                     # `EB-332`: a boss's phase flip parks its HP on a
+                     # sentinel for a turn; the page says so instead of
+                     # printing a billion.
+                     "phase_flip": is_phase_flip_hp(
+                         _int(e.get("hp")),
+                         _int(e.get("max_hp", e.get("hp")))),
                      "block": _int(e.get("block")),
                      # `EB-342`: EVERY component of the telegraph, not the
                      # first. A move that attacks and also puts four Burns in

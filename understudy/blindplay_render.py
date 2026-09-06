@@ -12,7 +12,7 @@ import re
 from typing import Any
 
 from understudy import qa_packet
-from understudy.blindplay_board import _pulse_phrase
+from understudy.blindplay_board import PHASE_FLIP_LINE, _pulse_phrase
 from understudy.blindplay_notes import (AURA_NOTE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
@@ -933,7 +933,11 @@ def render(obs: dict[str, Any]) -> str:
             line = f"- **{e['name']}**"
             if e.get("handle"):
                 line += f" [{e['handle']}]"
-            line += f" — HP {e['hp']}/{e['max_hp']}"
+            if e.get("phase_flip"):
+                # `EB-332`: the sentinel is not printed, the event is.
+                line += f" — {PHASE_FLIP_LINE}"
+            else:
+                line += f" — HP {e['hp']}/{e['max_hp']}"
             if e["block"]:
                 line += f", Block {e['block']}"
             out.append(line)
