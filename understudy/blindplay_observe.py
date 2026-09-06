@@ -20,7 +20,8 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         _rest_options, _reward_items,
                                         _screen_cards, _selected_bundle,
                                         enchant_in_prompt, last_morning,
-                                        last_salon, upgrade_deck_floor)
+                                        last_salon, map_floor,
+                                        upgrade_deck_floor)
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_options,
@@ -211,6 +212,12 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             obs["gold"] = _int(_player(state).get("gold"))
         obs["deck"] = deck_titles(state)
         obs["deck_floor"] = upgrade_deck_floor(state)
+        # `EB-323`: and WHERE THIS IS, in the run's own floor number. The map
+        # named a room by a path number and the bridge answers `go` with a
+        # grid coordinate; the only screen that ever said `floor` was the
+        # run-over page. Absent from a feed that sends no floor.
+        obs["floor"] = map_floor(state)
+        obs["act"] = _int(_blob(state, "run").get("act"))
         obs["commands"] = ['go "<node>"']
     elif st == "card_reward":
         blob = _blob(state, "card_reward")
@@ -437,6 +444,10 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["commands"] = ['choose "<option>"']
         if obs["in_dialogue"] or _proceed_option(state) >= 0:
             obs["commands"].append("proceed")
+        # `EB-393`: and where neither is true, the room has no way out but
+        # through -- the Bugslayer seat "had no option to decline" and went
+        # looking for a button this page has no verb for.
+        obs["must_choose"] = "proceed" not in obs["commands"]
     elif st == "rewards":
         obs["screen"] = "rewards"
         # `EB-290`: named by what each row hands over, and the repeats
