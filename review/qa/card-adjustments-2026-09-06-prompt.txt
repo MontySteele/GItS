@@ -1,0 +1,140 @@
+# Doctrine read: six adjusted or re-seamed prototype rows against the kit charters
+
+Each numbered card below is ONE ARM. For each arm, in order, give FOLLOWS or
+REQUIRES_MODIFICATION and name the clause (C1 to C8) you ruled against, and
+quote the line of the card and the arithmetic (energy, Block, damage, cards,
+turns) that breaches it, in one sentence. A verdict with no clause named is
+not a verdict. Read adversarially: the author is a different model family and
+the owner wants the row that should not reach a tester named. Do not soften.
+Name clauses, not remedies: a number, a face or a rewritten row you volunteer
+is DISCARDED.
+
+Five of the six arms are ADJUSTMENTS to rows that passed this door on
+2026-09-04 or 2026-09-05, and the sixth moves an existing row into the
+natural offer. For an adjusted row, the earlier verdict and its reasoning are
+stated; rule on the row AS IT NOW READS, and say in your one sentence whether
+the earlier reasoning still holds.
+
+## The charter
+
+- **C1 (owner, 2026-09-04).** "I don't want us to end up gaming the metric
+  of 'can an agent beat the game' by printing overly strong cards. Canonical
+  characters still die in the hands of the same agents, so a successful
+  design phase should not end with 'all agents always win.'" A row that
+  removes a losing line the kit is meant to keep, instead of pricing it, is
+  out of charter.
+- **C2 (LAW D3, binding prices).** A benefit carries a binding price. The
+  counterfactual test: there must be a real turn in which the card is worse
+  than a plain card of its cost. Repeatable energy or draw at Uncommon or
+  below is priced by something past the card's own cost. The owner's own
+  reading of one row: "'once per turn, gain 1 Energy' with no drawback is
+  one free energy, Echo Form territory for a 1-cost Uncommon Power."
+- **C3 (LAW D2, player-controlled leverage).** The card's value is decided
+  by a choice the player makes (bank or cash a Bomb; play a Plan now or write
+  it; make the stage perform), not by a number that rises while you watch.
+- **C4 (Klee brief §6).** "She cannot stall, and she cannot block on demand.
+  Her only plain Block is Duck and Cover, 5 for 1. Every other defence she
+  has is conditional on the decision she just made." The weakness is
+  load-bearing because it is what makes cooking a bet.
+- **C5 (Klee brief §3 rule 7; Kokomi brief §2 rule 4).** Nothing fires by
+  itself: no automatic free attack, no passive feed; every effect is a card
+  the player played and paid for.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a shipped pool row or of a base-game card at the same or lower rarity
+  and cost. Defend is a BASIC card and every class's Common block card
+  exceeds it by design; compare against Commons and Uncommons (Iron Wave,
+  Shrug It Off, Flame Barrier), not against Defend. Other reference points:
+  Second Wind, Berserk (Uncommon Power, 0: 1 Energy a turn, 2 Vulnerable),
+  Echo Form (Rare, 3), Offering, Battle Trance, Adrenaline (Rare, 0: 2
+  Energy, draw 2, Exhaust), Skim (Uncommon, 1: draw 3), Barricade,
+  Calculated Gamble.
+- **C7 (Kokomi identity Law 4).** In her pool a Common never increases deck
+  size.
+- **C8 (Furina reframe §4.1, D2).** Under the arm Fanfare is minted by a
+  Salon member performing and by nothing else, 2 per trigger and 5 per
+  Evoke, decaying 20% a turn. An arm-only copy of a shipped rider changes
+  the threshold only, and the copy's threshold has to sit in the observed
+  range (0 to 15 across the rounds so far) the way the shipped threshold sat
+  in the shipped economy's range (20 to 30 reached).
+
+## The engines
+
+**Klee.** Her Attacks apply Pyro. A **Bomb** is a charge on an enemy that
+grows by 4 at the start of each of her turns and goes off only when a card
+says **Set off** (every Bomb on that enemy, each as its own Pyro hit; not an
+Attack; Block absorbs it). A **Mine** also goes off when its enemy attacks
+her. **Spark**: 1 at combat start, +1 per Bomb going off, spent by some cards
+instead of energy; Sparks are lost after combat. Starter: 4 Strike, 4 Defend,
+Ka-pow! (0, Retain, Set off, deal 4), Jumpy Dumpty (1, Innate, Bomb 8; when
+it goes off, Mine 3 on all enemies). Energy 3, HP 62. The pool's other
+detonators, for calibration: Fwoosh! (Common Attack, 0 energy, 1 Spark: Set
+off, deal 6); Pocket Match (Common Attack, 0 energy, 1 Spark, Retain: Set
+off, deal 5; upgrade 7); Sizzle (Common Attack, 1: Set off, deal 6, 6 more
+if a Bomb reacted this turn); Countdown (Common Skill, 1: Set off, draw 1);
+Tinder Toss (Common Attack, 0 energy, 1 Spark: twice, Set off a random enemy
+and deal 4). Seat evidence on the row below, three readings: "never a
+decision ... the Retain is a lie told by the card frame"; passed "because
+Retain plus an escalating cost is a card that punishes the exact
+hand-holding the rest of the kit rewards"; an assembled deck of Spark-priced
+cards deadlocked at the act-1 elite with its only detonator priced out.
+
+**Furina.** Under the arm the shipped Burst meter is gone; Fanfare is minted
+only by performance (C8) and DRAINED to 0 by two Rares (the floor and cap are
+untouched by a drain). The Salon: up to three members on a stage; a Companion
+card play makes the FRONT member perform and rotate; a Deploy puts a member
+on and performs it; a Deploy onto a full stage EVOKES the front member (it
+performs with its Focus term three times, mints 5 Fanfare, and leaves).
+Spotlight, under the arm: the player pays 2 Encore to designate the
+Spotlighted Companion; Spotlighted numbers carry a base multiplier and the
+riders add to it for the turn. Encore: she opens each combat with 2, gains it
+from her own cards, and it decays. Energy 3, HP 78. Starter: 3 Strike-grade,
+3 Defend-grade, Regal Bearing, Aria of Recompense (1: gain 5 Encore; at 3
+Fanfare gain 5 more), Salon Début (1: Deploy Crabaletta), An Invitation (0,
+Exhaust: add a random Common Companion card). Shipped comparison rows in the
+arm's offer: Limelight (Uncommon Skill, 1, Exhaust: spend 1 Encore,
+Spotlighted +25% this turn, gain 1 Energy, draw 1; upgrade draw 2); Deep
+Breath (Uncommon Skill, 1, Exhaust: choose gain 1 Energy and 2 Encore, or
+another mode; upgrade cost 0); Compose Herself (Common, 1: draw 2, draw 1
+more at 8 Encore); Universal Revelry (arm copy, Rare Attack, 2: 9 to ALL
+plus 1 per 2 Fanfare, 6 more to ALL at 8 Fanfare).
+
+## The arms
+
+1. **Long Fuse (adjusted)** — Klee, Common Attack, 1 energy, Retain. Set
+   off. Deal 6 damage. Upgrade: 9 damage. WAS: the same card with "Costs 1
+   more each turn it stays in your hand"; that row was ruled FOLLOWS on C2
+   on 2026-09-04 BECAUSE "retaining it once raises its cost from 1 to 2
+   energy: keeping the detonator carries a binding price". The escalation is
+   now gone. Precedent to weigh: Held Tide (Kokomi, Uncommon Attack, 1,
+   Retain, deal 6 or 12 after a carry-out) was WITHDRAWN on C1 because
+   "Retain waits out the dead turns". Nearest neighbours: Pocket Match
+   (above), Sizzle, Ka-pow!.
+2. **Florid Cadenza (arm copy, upgrade adjusted)** — Furina, Uncommon Skill,
+   0 energy. Draw 1 card. If you have at least 6 Fanfare, draw 2 more.
+   Upgrade: the bar moves to 3 Fanfare. WAS: the upgrade dropped the gate
+   (upgraded: draw 3 for 0 with no condition); the base card passed on C8 on
+   2026-09-04 and the upgrade was not read.
+3. **Shared Billing (arm copy, upgrade adjusted)** — Furina, Common Skill, 1
+   energy. Apply Hydro to a random enemy. Spotlighted Companion cards gain
+   25% this turn. Gain 1 Energy. Upgrade: also draw 1 card. WAS: the shipped
+   upgrade takes the cost to 0 (a 0-cost card that gains 1 Energy). Read the
+   base card and the upgrade both.
+4. **Rapturous Applause (arm copy)** — Furina, Rare Power, 1 energy. Your
+   Attacks deal 2 additional damage per 10 Fanfare. Upgrade: 3. WAS: the
+   shipped row also grants "Fanfare +8, and cannot fall below 8" (a
+   permanent floor, which under the arm satisfies every rider bar without a
+   performance); the floor is removed and the per-10 amount doubled for the
+   arm's 0-to-15 range.
+5. **Unheard Confession (arm copy)** — Furina, Rare Power, 2 energy.
+   Whenever your Fanfare changes amount, gain 1 Block. Upgrade: costs 1. WAS:
+   the shipped row also grants the same "Fanfare +8" floor; the floor is
+   removed and nothing else moves.
+6. **Let the People Rejoice (enters the offer)** — Furina, Rare Attack, 2
+   energy. Drain your Fanfare. Deal 5 damage to ALL enemies, plus 1 per
+   Fanfare drained. Upgrade: none yet. It passed this door as a grant-only
+   row on 2026-09-04; it now takes the Rare offer slot of The Sea Is My Stage
+   (Rare Power, 1: Fanfare +15 and cannot fall below 15), which leaves the
+   arm's offer. Rule on it as an OFFERED Rare against C6 (Universal Revelry's
+   arm copy is its nearest shipped neighbour) and C1.
+
+Six verdicts, each with its clause and its breaching line. Under 700 words.

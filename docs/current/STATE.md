@@ -239,6 +239,11 @@ are in [`workstreams.md`](workstreams.md).
   ten pool-pass rows earn their place, Long Fuse's escalation goes to the
   audit door, Fireworks Show and Kindling are held, the pool stays 45, and
   round 24's hypothesis is the React deck; no pick.
+  **Long Fuse's escalation is OFF on the branch** (`EB-617`, 2026-09-06),
+  built on both engines and not deployed: the audit door reads it first
+  (`review/qa/card-adjustments-2026-09-06-prompt.txt`, arm 1); round 25's
+  hypothesis (an Energy-priced detonator beside the Spark-priced ones) is
+  drafted in the comparison pass §4 from the GPT balance review.
   [USER]'s act-1 run is due on `0.2.2830+proto`. The round-8 clear is
   read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
@@ -343,6 +348,10 @@ are in [`workstreams.md`](workstreams.md).
   (`EB-597`); the jellyfish's first turn now prints; no pick;
   `EB-597`-`EB-599`. [USER]'s act-1 run is due on `0.2.2817+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
+  **The next assembled round's hypothesis is drafted** (r22 packet §5, from
+  the GPT balance review of 2026-09-06): Nereid's over Tide Wall, Ripple and
+  Battle Plan pays 50 Block, 4 Energy and 6 cards for 2 Energy the morning
+  before, since the reader counts carry-outs (`EB-501`); a test, not a nerf.
 - **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
   sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
   2's five `proto_fr_` rows are built** (2026-09-02; nine with round 4's
@@ -463,6 +472,15 @@ are in [`workstreams.md`](workstreams.md).
   the Spotlight's line is false since Encore refills (`EB-600`); the
   fight-end screen swallows the lethal beat's log (`EB-604`); no pick;
   `EB-600`-`EB-604`. [USER]'s act-1 run is due on `0.2.2817+proto`.
+  **`EB-507` and `EB-616` are BUILT on the branch, audit owed** (2026-09-06,
+  from the GPT balance review): under the arm no offered face grants a
+  Fanfare floor (Rapturous Applause and Unheard Confession as arm copies
+  without it, The Sea Is My Stage's Rare slot to Let the People Rejoice, the
+  arm's own drain, formerly grant-only), Cadenza's upgrade moves its bar 6
+  to 3 instead of dropping it, and Shared Billing's upgrade draws 1 instead
+  of costing 0; the door reads all six rows from
+  `review/qa/card-adjustments-2026-09-06-prompt.txt` on the local machine
+  before a deploy. Round 17's hypothesis is in the r16 packet §5.
   No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
