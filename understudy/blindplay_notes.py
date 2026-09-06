@@ -697,10 +697,18 @@ ARM_KEYWORDS: dict[str, str] = {
     # predict which Companion pays a Spark". The faces carry the mark now
     # (`gen_klee_cards._family_tags`), so the sentence says ONLY the marked ones
     # pay and names the mark it points at.
-    "Hexerei": ("A Companion card that prints the word, and Klee herself. "
-                "Only the ones marked Klee's own pay: "
-                f"{COMPANION_SPARK} Spark a play, up to "
-                f"{COMPANION_SPARK_MAX}."),
+    # `EB-596` REWROTE IT AS WHO IS PAID, HOW MUCH, AND WHAT THE CAP COUNTS.
+    # The r22 lane-2 and r23 lane-1 seats read "pay" as a SURCHARGE Klee
+    # pays -- Jean at "cost 2" read as 2 Energy and a hidden Spark -- and
+    # could not tell whether "up to 3" capped Sparks, plays or turns; and
+    # "and Klee herself" read as a rule making every Klee card satisfy Coven
+    # Errand, which no engine implements (only a card carrying the mark
+    # counts, `companion_hexerei.is_hexerei`). So: the family test is the
+    # face; the Spark is a GAIN, bounded per play; and the clause that
+    # carried no rule is gone.
+    "Hexerei": ("A Companion card whose face prints the word. Playing one "
+                f"marked Klee's own gives Klee {COMPANION_SPARK} Spark, up to "
+                f"{COMPANION_SPARK_MAX} a play; it never costs Spark."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`

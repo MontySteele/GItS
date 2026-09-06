@@ -212,7 +212,8 @@ public class KleeOverhaulRoundTwentyTests
         // and gave them no way to run it. The faces carry the mark now, so the
         // sentence names it and says ONLY those pay.
         var tip = Printed("ForHexerei");
-        Assert.Contains("Only the ones marked Klee's own pay:", tip);
+        Assert.Contains("marked Klee's own gives Klee", tip);
+        Assert.Contains("it never costs", tip);
         Assert.DoesNotContain("Some are Klee's own, some are not.", tip);
     }
 
