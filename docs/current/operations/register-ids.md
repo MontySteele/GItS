@@ -2,8 +2,10 @@
 
 `tools/lint_register_ids.py` is the gate: one id, one row, once ever, across
 `docs/current/BACKLOG.md` (the `EB` series) and `docs/current/QUEUE.md` (the
-`M` series). This page is the procedure it enforces, and the ledger of what
-every retired number was.
+`M` series, CLOSED 2026-09-01: existing `M` rows close in place, and a new
+pick is named by its packet section, which `tools/mint_row.py QUEUE --id`
+takes and `next_free("QUEUE")` refuses -- `EB-606`). This page is the
+procedure it enforces, and the ledger of what every retired number was.
 
 ## The three guarantees, unchanged since `EB-127`
 

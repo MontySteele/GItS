@@ -322,7 +322,8 @@ def test_two_branches_each_minting_a_row_merge_with_no_conflict_in_the_lint(
     lint_before = (root / "tools" / "lint_register_ids.py").read_bytes()
 
     _branch(root, "a", "tools")                      # the next free EB
-    _branch(root, "b", "3", register="QUEUE",        # the next free M; §3 holds a table
+    _branch(root, "b", "3", register="QUEUE",        # section-named (EB-606); §3 holds a table
+            id="a-synthetic-pick 1",
             decision="**CHOOSE** between (1) a and (2) b",
             status="OPEN -- gated on the test")
 
@@ -404,3 +405,32 @@ def test_a_close_that_records_no_retirement_leaves_a_hole_the_lint_finds(
     assert checked.returncode == 1, checked.stdout
     assert f"UNRECORDED RETIREMENT: EB-{victim}" in checked.stdout, \
         checked.stdout
+
+
+# --- EB-606: QUEUE mints no M id ---------------------------------------------
+
+def test_a_queue_mint_without_a_section_name_refuses(tmp_path):
+    """`EB-606`. The 2026-09-06 starter pick minted `M70` against the
+    2026-09-01 rule (no new `M` id; a pick is named by its packet section
+    until ruled). The mint now refuses to derive one and says why."""
+    root = _hermetic(tmp_path)
+    res = _mint(root, "3", register="QUEUE",
+                decision="**CHOOSE** between (1) a and (2) b",
+                status="OPEN -- gated on the test")
+    assert res.returncode != 0
+    assert "no new M id" in res.stdout + res.stderr
+    assert "--id" in res.stdout + res.stderr
+    assert "M7" not in res.stdout        # nothing derived, nothing printed
+
+
+def test_a_section_named_queue_row_passes_both_register_lints(tmp_path):
+    """The other half of `EB-606`'s acceptance: the lints are green on a row
+    whose id is a packet section name, and no `M` id appears."""
+    root = _hermetic(tmp_path)
+    res = _mint(root, "3", register="QUEUE", id="a-synthetic-pick 1",
+                decision="**CHOOSE** between (1) a and (2) b",
+                status="OPEN -- gated on the test")
+    assert res.returncode == 0, res.stdout + res.stderr
+    page = (root / "docs/current/QUEUE.md").read_text(encoding="utf-8")
+    assert "| `a-synthetic-pick 1` |" in page
+    assert "M70" not in page
