@@ -1,4 +1,4 @@
-Status: OPEN (no pick here; the starter's detonator is [USER]'s open pick, PR #405)
+Status: OPEN (no pick here; the starter's detonator was ruled R262, hold)
 
 # Klee round twenty-three: the Spark loop from both edges, never scarce and then deadlocked
 
@@ -39,9 +39,9 @@ printed 23. Energy and Sparks idled on different turns, "2 to 3 Energy
 unspent on four turns, 4 to 5 Sparks stranded on others." The hypothesis's
 first clause is answered both ways: the price bound only when every
 detonator carried one. Eight rounds of readings now lie on one line, and
-the line is the pick (#405): the loop has no Energy-priced exit in the
-starter and no floor in the relic. The assembled lane's deadlock was added
-to that packet the same morning, and the recommendation moved to option 3.
+the line is the starter pick (ruled R262, hold): the loop has no
+Energy-priced exit in the starter and no floor in the relic. The assembled
+lane's deadlock was added to that packet the same morning.
 
 **The starter's detonator, fourth natural reading.** Lane 1: four turns
 with a Bomb up and nothing to set it off, one "a 28-damage pile under an
@@ -98,8 +98,8 @@ offered). Nothing here is a strength reading.
 
 ## 4. The smallest interventions, ranked
 
-1. **The pick (#405):** every reading in this packet is its evidence, and
-   nothing here moves until it is ruled.
+1. **The starter pick** (`review/ruled/klee-starter-detonator-pick-2026-09-06.md`):
+   every reading in this packet is its evidence; RULED R262, hold.
 2. **`EB-596`** with the three exact questions; **`EB-610`** the Spark
    row's sources.
 3. **`EB-611`, `EB-612`, `EB-607`-`EB-609`.**
@@ -107,6 +107,7 @@ offered). Nothing here is a strength reading.
 ## 5. Defaults applied (D and E), disclosed
 
 - **`EB-607` to `EB-612` minted; `EB-495`, `EB-596` cited.**
-- **The assembled lane's deadlock was appended to the open pick packet**
-  (PR #405) the same morning; the recommendation there moved from 1 to 3.
+- **The assembled lane's deadlock was appended to the starter pick packet**
+  the same morning; the recommendation there moved from 1 to 3, and R262
+  took 1.
 - **The two records are the round's evidence.**
