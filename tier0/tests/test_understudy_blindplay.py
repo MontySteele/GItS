@@ -6052,9 +6052,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # and the rule was on a different screen the whole time.
         # `EB-554`: the ownership clause points at the mark the faces now
         # carry, so a reader can run the test instead of being told one exists.
-        "Hexerei": [" card that prints the word, and Klee ",
-                    "herself. Only the ones marked Klee's own pay: ",
-                    " a play, up ", "to "],
+        "Hexerei": [" card whose face prints the word. Playing ",
+                    "one marked Klee's own gives Klee ", ", up to ",
+                    " a play; it never costs "],
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
                   "No ", "aura, no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
@@ -7146,12 +7146,15 @@ def test_the_hexerei_line_names_the_payment_the_kit_declares():
         rf"MaxPerPlay\s*=\s*{blindplay_notes.COMPANION_SPARK_MAX}\b", src)
 
     row = blindplay_notes.ARM_KEYWORDS["Hexerei"]
-    assert (f"{blindplay_notes.COMPANION_SPARK} Spark a play, up to "
-            f"{blindplay_notes.COMPANION_SPARK_MAX}.") in row
+    assert (f"gives Klee {blindplay_notes.COMPANION_SPARK} Spark, up to "
+            f"{blindplay_notes.COMPANION_SPARK_MAX} a play;") in row
     # `EB-554`: the clause that answers the seat's OTHER question -- whether
     # Razor is one of Klee's own -- now points at the mark the faces carry
     # instead of telling the reader a split exists that they cannot run.
-    assert "Only the ones marked Klee's own pay:" in row
+    # `EB-596`: and the verb is a gain, not a price, because two seats read
+    # "pay" the other way round.
+    assert "marked Klee's own gives Klee" in row
+    assert "it never costs Spark" in row
     assert len(row) <= 135
 
 
@@ -10234,8 +10237,8 @@ def test_a_klee_run_reads_both_rules_in_full():
     """The other side, and the reason the rows exist at all: on the run whose
     kit the words belong to, nothing about them has changed."""
     page = blindplay.observe(_hexerei_shop_state("Klee"))
-    assert ("- **Hexerei** — A Companion card that prints the word, and Klee "
-            "herself.") in page
+    assert ("- **Hexerei** — A Companion card whose face prints the word. "
+            "Playing one marked Klee's own gives Klee") in page
     assert "- **Oz** — Fischl's raven, out while you hold the Power" in page
 
 
@@ -10246,9 +10249,9 @@ def test_a_feed_that_does_not_say_who_is_playing_keeps_the_rule():
     the one run that needs it."""
     state = _hexerei_shop_state("Klee")
     del state["player"]["character"]
-    assert ("Only the ones marked Klee's own pay: "
-            f"{blindplay_notes.COMPANION_SPARK} Spark a play, up to "
-            f"{blindplay_notes.COMPANION_SPARK_MAX}.") in blindplay.observe(state)
+    assert ("marked Klee's own gives Klee "
+            f"{blindplay_notes.COMPANION_SPARK} Spark, up to "
+            f"{blindplay_notes.COMPANION_SPARK_MAX} a play;") in blindplay.observe(state)
 
 
 def test_every_other_arm_word_is_still_defined_on_every_run():

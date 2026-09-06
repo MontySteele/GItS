@@ -524,7 +524,7 @@ public class Round19Tests
         // The clause that answers the seat's OTHER question -- whether Razor is
         // one of Klee's own -- is what paid for the room, and it stays, now
         // naming the mark instead of asserting a split the reader cannot run.
-        Assert.Contains("Only the ones marked Klee's own pay:", hexerei);
+        Assert.Contains("marked Klee's own gives Klee", hexerei);
     }
 
     [Fact]
