@@ -40,8 +40,11 @@ they are collected.
    rule (`LAW.md` §Combat).
 5. **Overload** (Pyro, Electro) deals 6 to every enemy through Block and
    Weakens the target; **Superconduct** (Electro, Cryo) applies Vulnerable
-   2; **Electro-Charged** (Hydro, Electro) deals 4 a turn for two turns
-   through Block; **Crystallize** (Geo on any aura) gives you 4 Block.
+   2; **Electro-Charged** (Hydro, Electro) puts a Poison-shaped stack of 4
+   on the target that ticks through Block and decays by one a turn (4, 3,
+   2, 1) and stacks on a repeat (`tier0/engine/powers.py`, the `dot` power;
+   the mod applies the base game's PoisonPower); **Crystallize** (Geo on
+   any aura) gives you 4 Block.
 6. **Frozen** (Hydro, Cryo) halves the enemy's next action and lets the
    first Attack hit Shatter it for 6; in a boss room a non-Minion takes
    Vulnerable 2 instead. **Swirl** (Anemo on any aura) copies that aura to
@@ -59,7 +62,7 @@ they are collected.
 | Swirl | which aura to copy and on what turn, since it copies what is standing | a Hydro or Pyro character against three enemies |
 | Overload | none at the table; in the draft, whether a Pyro-into-Electro pair is worth a slot for the 6 to all | Klee against packs |
 | Superconduct | none at the table; in the draft, the same | any deck, but see §4 |
-| Electro-Charged | none at the table | the Hydro characters with an Electro companion |
+| Electro-Charged | when to stack it, since a second application adds to the count | the Hydro characters with an Electro companion |
 | Crystallize | none; 4 Block arrives | a Geo companion's only sentence |
 
 Four of eight ask nothing once the cards are drafted. That is not a defect
@@ -75,7 +78,7 @@ The nation sheets, by row (`docs/mondstadt-companions.yaml` 17,
 | character | own element | same-nation elements | one-companion reactions | two-companion only |
 |---|---|---|---|---|
 | Klee (Pyro) | Pyro | Hydro 4, Pyro 4, Anemo 4, Electro 2, Cryo 2, Geo 1 | Vaporize, Melt, Overload, Swirl, Crystallize | Superconduct, Electro-Charged, Frozen |
-| Kokomi (Hydro) | Hydro | Electro 6, Geo 4, Anemo 3, Pyro 2 | Electro-Charged, Crystallize, Swirl, Vaporize | Frozen, Melt, Overload, Superconduct |
+| Kokomi (Hydro) | Hydro | Electro 6, Geo 4, Anemo 3, Pyro 2; the prototype pool the seats play (`docs/prototype-surface.yaml`, `proto_mi_*`) adds Ayaka (Cryo) and Ayato (Hydro), both 5-star behind the Featured Banner | Electro-Charged, Crystallize, Swirl, Vaporize; Frozen through Ayaka when the banner shows her | Melt, Overload, Superconduct |
 | Furina (Hydro) | Hydro | Cryo 6, Hydro 4, Pyro 4, Anemo 3, Geo 1, Electro 1 | Frozen, Vaporize, Swirl, Crystallize, Electro-Charged (one row) | Melt, Overload, Superconduct |
 
 Three facts fall out of the table and are the brief's own findings:
@@ -84,9 +87,11 @@ Three facts fall out of the table and are the brief's own findings:
   and Cryo are nobody's element, so it is never the second half of a
   sentence a character started. That is why the old packet found it "found
   by HP arithmetic": nobody planned it, because nobody could with one draft.
-- **Kokomi's home nation has no Cryo,** so Frozen, the reaction whose
-  targeting question suits a Plan-writing character best, is off-nation for
-  her (Inazuma: Electro 6, Geo 4, Anemo 3, Pyro 2).
+- **Kokomi's home Cryo is one 5-star row behind the banner** (Ayaka, in
+  the prototype pool; the shipped sheet has none), so Frozen, the reaction
+  whose targeting question suits a Plan-writing character best, is
+  off-nation for her on most runs (Inazuma 4-stars: Electro 6, Geo 4,
+  Anemo 3, Pyro 2).
 - **Klee reaches both amplifiers at home** (Hydro 4, Cryo 2), which is the
   layer working as designed: the ordering question the seats called the
   puzzle four rounds running is the one her nation sells.
@@ -102,10 +107,12 @@ Three facts fall out of the table and are the brief's own findings:
   companion tomorrow; an Electro Universal from Inazuma turns that into
   Electro-Charged, a number, and the layer's first real question for her
   waits on Cryo.
-- **Furina.** The Salon performs every turn and a member carries an
-  element (`EB-547`), so once a Cryo member stands the stage freezes on its
-  own; fight one with a member teaches that the performance is the second
-  colour and her own hit the first, or the reverse.
+- **Furina.** The Salon performs every turn and all three members are
+  Hydro (`SALON_MEMBERS`, `tier0/constants.py`; a member's element counts
+  as on screen, `EB-547`), so the stage is the Hydro half of every
+  reaction and the card in hand is the other; fight one with a member
+  teaches that the performance paints and the card answers, or the
+  reverse.
 
 None of the three starters carries an off-element card, by law, so the
 layer's tutorial is the first companion reward, and the reward screen is
@@ -123,8 +130,8 @@ where the preview (`EB-428`'s reward half) has to do the teaching.
    is never named on the page, from any source.
 3. **A second colour with no sentence.** A companion whose only reaction
    is Crystallize, or whose element the character cannot pair with anything
-   at home (Kokomi and Cryo). The draft cannot fix what the nation sheet
-   does not sell.
+   at home (Kokomi and Cryo, one banner-gated row). The draft cannot fix
+   what the nation sheet does not sell.
 4. **A setup nobody can afford.** A two-companion reaction is two drafts
    for one payoff; where the reading shows it never planned, the answer is
    access (a character or a member of that element), not a rule change.

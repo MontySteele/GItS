@@ -82,8 +82,16 @@ Dendro stands", so a seat is never surprised by a vanished aura.
   so it wakes no Thorns and no Skittish. Unlike Overload it does not pass
   Block: a Core is a thing that explodes, not a shock.
 - **How many.** At most `CORE_CAP` Cores on one enemy; a Bloom past the cap
-  refreshes the oldest instead of adding. A Core outlives the aura that made
-  it and dies with its enemy.
+  **bursts the oldest** (a plain burst, to that enemy) and adds the new one,
+  so repeating the central interaction never postpones its reward; the
+  repeat-trigger this allows is part of what a round tests. A Core outlives
+  the aura that made it. A killing Pyro or Electro hit still takes its
+  Burgeon or Hyperbloom, the rule `EB-515` already set for reactions on a
+  killing hit; a Core on a body that dies any other way is lost with it.
+- **Plain Bloom stands alone.** Hydro plus one Dendro companion has to be
+  worth the draft by itself: the timer burst is the ordinary payoff, and
+  Burgeon and Hyperbloom reward a second element rather than rescue the
+  first. `CORE_BURST` is priced for that, not for the popped case.
 - **Cores and Bombs** (pick 4). Default: a Core is not a Bomb. Klee's Set off
   ignores it, the Bomb counter does not count it, the Splash reads nothing
   from it. But a Bomb's explosion is a Pyro hit, so it Burgeons a Core
@@ -112,16 +120,23 @@ sit on an enemy; Quicken consumes the aura like every other reaction, so the
 one-aura rule is untouched.
 
 Canon gates the bonus to Electro hits (*Aggravate*) and Dendro hits
-(*Spread*). Gated that way, only companion hits would collect it in this
-mod, and companions are enablers, never the carry (`LAW.md` §Companions), so
-the default pays every hit and the canon gating is pick 3's option 2. The
-honest limit: Quicken is Electro plus Dendro, and no character is either, so
-it is a **two-companion reaction for every current character**, the same
-access Superconduct has (the reaction brief, `reaction-brief-2026-09-06.md`
-§4, shows this is why Superconduct is never planned). Quicken is designed as
-a two-draft payoff and is priced generously for it; if the reading under
-R263 pick 2 shows two-companion reactions never get planned, Quicken's
-answer is a Dendro character, not a bigger number.
+(*Spread*), and **that gating is the default**, revised on GPT's review of
+2026-09-06. The first draft paid every hit, on the argument that only
+companion hits would otherwise collect it. Two things outweigh that. An
+all-hit Quicken is a generic multi-hit damage package that every future
+character inherits, which blurs the reaction's identity into Superconduct's
+neighbourhood again; and the companions that supply Electro in this mod hit
+repeatedly on their own (Oz's tick, Shinobu's ring, Sara's rider), so a
+gated bonus is collected several times per fight without making any
+companion the carry. The all-hit shape stays as pick 3's option 2. The
+honest limit holds either way: Quicken is Electro plus Dendro, and no
+character is either, so it is a **two-companion reaction for every current
+character**, Superconduct's access exactly. The reading
+(`review/records/reaction-sequences-2026-09-06.md` §1, §5 item 6) shows
+two-companion reactions do get planned where the sheets sell the pair, so
+that access is a price, not a wall; Klee has Burning at one companion and
+the Hydro characters have Bloom, and neither needs every Dendro payoff to be
+one draft away.
 
 ## 5. Burning
 
@@ -131,9 +146,12 @@ Dendro hit re-lights it; any other reaction on that enemy ends it, because
 that reaction consumed the aura Burning was holding. The decision is the
 second half: a burning enemy is a lit Pyro aura, so a Hydro or Cryo hit
 cashes it into Vaporize or Melt now and gives up the ticks. Electro-Charged
-is four a turn for two turns through Block and pipeline-free (`LAW.md`
-§Combat); Burning is smaller, longer, stopped by Block, and holds an aura,
-so they are not the same number twice. For Klee every hit is Pyro, so a
+is a decaying Poison-shaped stack through Block that grows on a repeat
+(`LAW.md` §Combat, stacking DoT); Burning is a fixed tick, stopped by Block,
+that **never stacks**: a Pyro or Dendro hit on a burning enemy resets the
+duration and leaves the tick where it was, so repeated application cannot
+escalate it and the only way it ends early is another reaction. That is
+what makes it a different thing rather than the same number twice. For Klee every hit is Pyro, so a
 Dendro companion makes everything she touches burn: that is her one-companion
 Dendro loop, the way Bloom is the Hydro characters'.
 
@@ -155,7 +173,8 @@ after `EB-410`.
 
 Every number here is a D pick the sim decides at build time, disclosed now
 at its default: `CORE_BURST` 6, `HYPERBLOOM_MULT` 2, `CORE_CAP` 2,
-`QUICKEN_BONUS` 2, `QUICKEN_TURNS` 2, `BURNING_DOT` 3, `BURNING_TURNS` 3.
+`QUICKEN_BONUS` 3 under the gated default (2 under the all-hit shape),
+`QUICKEN_TURNS` 2, `BURNING_DOT` 3, `BURNING_TURNS` 3.
 
 ## 7. Picks
 
@@ -170,10 +189,11 @@ at its default: `CORE_BURST` 6, `HYPERBLOOM_MULT` 2, `CORE_CAP` 2,
    reaction"* [default]. (2) The new element overwrites the aura, no
    reaction. (3) Dendro and Cryo coexist on one enemy, which breaks the
    one-aura rule and needs a LAW line.
-3. **Quicken's shape.** (1) *Every hit on the Quickened enemy deals +2 for
-   two turns* [default]. (2) Canon gating: Electro hits and Dendro hits
-   only, at +3. (3) Count-capped: the next four hits deal +2, however long
-   they take.
+3. **Quicken's shape.** (1) *Canon gating: Electro hits and Dendro hits on
+   the Quickened enemy deal +3 for two turns* [default, moved here on the
+   2026-09-06 GPT review; the first draft's default was (2)]. (2) Every hit
+   deals +2 for two turns. (3) Count-capped: the next four hits deal +2,
+   however long they take.
 4. **Cores and Bombs.** (1) *A Core is not a Bomb; Set off ignores it; a
    Bomb's explosion, being Pyro, Burgeons it* [default]. (2) A Core counts as
    a Bomb for Klee: Set off pops it as Burgeon and the counter includes it.

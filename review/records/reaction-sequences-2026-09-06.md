@@ -275,10 +275,21 @@ order of intervention (`operations/stage-gate.md`, smallest first):
    roll, read on an assembled deck and a natural lane like any other. It
    is disclosed here as the candidate; it is not built, and no constant
    moves until a round reads it. The alternative that is a design direction
-   and not a hypothesis, a Cryo row on the Inazuma sheet so Kokomi reaches
-   Frozen at home, returns as a pick only if the flag fails.
+   and not a hypothesis, a 4-star Cryo Universal on the Inazuma sheet so
+   Kokomi reaches Frozen at home more often than Ayaka's banner slot
+   allows, returns as a pick only if the flag fails.
+8. **Swirl on a mono-element deck: demonstrated, and the smallest
+   intervention is a rule, because the value is missing and not hidden.**
+   Klee's and Kokomi's seats pass every Anemo row at the draft (§2, §4) on
+   one true sentence: copying your own aura does nothing until a second
+   element exists. A preview cannot fix that; it would print the same
+   sentence. GPT's candidate (review of 2026-09-06) is the second flagged
+   hypothesis: Swirl deals a small fixed, non-recursive damage to every
+   enemy and spreads the aura as now, so the first Anemo companion pays at
+   once and a second element makes the spread strategic. The number is a
+   D pick at build (2 to start); it is not built here.
 
 Nothing here moves a constant, a sheet or a law. The two display items (1
 and 4) are the sweep's next rows; both are page and preview text, and the
-fired-line half of item 1 is `EB-410`'s bridge build. Item 7 is the first
-flagged hypothesis and waits on the game.
+fired-line half of item 1 is `EB-410`'s bridge build. Items 7 and 8 are the
+first two flagged hypotheses, in that order, and wait on the game.
