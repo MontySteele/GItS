@@ -26,6 +26,7 @@ findings stop being trustworthy.
 from __future__ import annotations
 
 import copy
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -616,6 +617,18 @@ def _iter_effects(effects: list[dict]):
                 yield from _iter_effects(fx[branch])
 
 
+#: A METER BAR, split into the meter and the number it asks for
+#: (`fanfare_at_least_6` -> `fanfare`, `6`). Only the `condition` delta reads
+#: it, and only to check that an upgraded bar asks the SAME meter as the
+#: printed one -- the bar itself is authored on the row in both places, so no
+#: threshold is ever computed here. The codegen holds the same shape one
+#: predicate family at a time (`gen_klee_cards._FANFARE_BAR` and its
+#: neighbours); this is deliberately the family-blind form, because the rule
+#: it enforces is about the two bars agreeing rather than about which meter
+#: they read.
+_SAME_METER_BAR = re.compile(r"^(.+)_at_least_(\d+)$")
+
+
 def _bump_first(candidates, field: str, delta: int) -> bool:
     for fx in candidates:
         if field in fx and isinstance(fx[field], int):
@@ -730,6 +743,34 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                 else:
                     out.append(fx)
             card.effects = out
+        elif key == "condition":
+            # THE SECOND SPELLING OF THE SAME KEY (2026-09-06): the upgrade
+            # MOVES THE BAR instead of dropping it. `unconditional` above is
+            # the whole gate deleted; `condition: <predicate>` rewrites the
+            # top-level conditional's `if:` to a LOWER bar of the same meter,
+            # so the upgraded card still asks a question -- one the run can
+            # answer earlier. Both bars are named on the row, so nothing here
+            # computes a threshold; this only swaps one authored name for the
+            # other. Codegen's twin is `gen_klee_cards.condition_bar_upgrade`,
+            # which emits the same pair as `bank >= (IsUpgraded ? up : base)`.
+            if not _SAME_METER_BAR.match(str(val)):
+                raise ValueError(
+                    f"condition delta on {base_id!r} must be 'unconditional' "
+                    f"or a meter bar predicate, got {val!r}")
+            cond = next((fx for fx in top if fx.get("op") == "conditional"
+                         and _SAME_METER_BAR.match(str(fx.get("if", "")))),
+                        None)
+            ok = cond is not None
+            if ok:
+                base_bar = _SAME_METER_BAR.match(str(cond["if"]))
+                up_bar = _SAME_METER_BAR.match(str(val))
+                if base_bar.group(1) != up_bar.group(1):
+                    raise ValueError(
+                        f"condition delta on {base_id!r}: the upgraded bar "
+                        f"{val!r} reads a different meter from the printed "
+                        f"{cond['if']!r} -- an upgrade moves a bar, it does "
+                        "not change the question")
+                cond["if"] = val
         elif key == "damage":
             # chain_attack is a damage op whose repeat count is decided by
             # the kills it scores, so its printed number upgrades like any
