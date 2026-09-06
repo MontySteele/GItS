@@ -136,8 +136,11 @@ plus 1 per 2 Fanfare, 6 more to ALL at 8 Fanfare).
    Whenever your Fanfare changes amount, gain 2 Block. Upgrade: costs 1. WAS:
    the shipped row also grants the same "Fanfare +8" floor at 1 Block per
    change; the floor is removed and the payout is 2. It pays per change
-   EVENT, not per point: a trigger, an Evoke and the turn-start decay are one
-   event each, so a turn with two performances pays 4 to 6.
+   EVENT, not per point: a trigger, an Evoke and a drain are one event each.
+   The turn-start decay is also an event, but the engine decays Fanfare
+   BEFORE the turn-start Block clear, so decay's 2 Block is wiped before the
+   player acts and buys nothing. A turn with two performances therefore
+   yields 4 usable Block, and a drain the same turn 2 more.
 6. **Let the People Rejoice (enters the offer, re-priced)** — Furina, Rare
    Attack, 2 energy. Drain your Fanfare. Deal 5 damage to ALL enemies, plus 2
    per Fanfare drained. Upgrade: the Prototype-stage default, costs 1. It
