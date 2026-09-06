@@ -177,8 +177,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R261 | 2026-09-05 | Jumpy Dumpty gains Innate (round-17 Klee pick 1, ruled off-list); EB-557 | `e458db7` |
 | R262 | 2026-09-06 | Klee's starter holds at R261 (starter pick option 1); two kit cards, Innate on Jumpy Dumpty alone | `050765e` |
 | R263 | 2026-09-06 | the Dendro and elemental-reaction sweep packet ruled on all three picks (PR #397) | `0de8dc6` |
+| R264 | 2026-09-06 | Dendro's boundaries ruled at all four defaults (Kirara and Emilie; non-reacting pairs stand; Quicken canon-gated at +3; a Core is not a Bomb) | `2544f7c` |
 
-166 rows over the R1..R263 namespace — 0 resolved from the retired ledgers (0 from the current-law digest, 0 from a ledger heading, 0 from a bold ledger definition), 31 from a commit message, 135 unresolved.
+167 rows over the R1..R264 namespace — 0 resolved from the retired ledgers (0 from the current-law digest, 0 from a ledger heading, 0 from a bold ledger definition), 32 from a commit message, 135 unresolved.
 
 97 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R3, R9-R12, R15, R21-R22, R25, R27-R32, R35, R38, R40, R42-R43, R46, R48-R50, R53-R54, R57, R74-R76, R88-R89, R98-R106, R112-R113, R115, R119-R120, R122-R123, R125-R126, R128-R133, R135, R137, R140, R142-R143, R145-R148, R150, R152-R158, R162-R163, R165, R168-R170, R173, R175, R177-R178, R182, R185-R187, R192-R193, R196-R197, R200, R203, R235, R238-R239, R243.
 
