@@ -2333,39 +2333,44 @@ Ten rows, and the readings that asked for each are in
 BUILD had to decide, per row and per new rule, and it is here rather than on
 the sheet for the reason the file's own header gives.
 
-**`proto_ko_long_fuse` -- the detonator that stays, and gets dearer.**
-Rounds 15 and 16 asked one question from opposite ends. Round 15: every
-drafted detonator discards at end of turn, so "hold the Bomb" meant "throw
-the detonator away" for most of a run, and a 55-gold Steady enchantment on
-Perfect Timing "opened more decision-space than any card I drafted". Round 16
-from the other end: once the pile passes the enemy's HP, Ka-pow! is free and
-Retained, so the last turn is automatic -- "charming twice, likely corrosive
-by the tenth time". A Retained detonator is what the first wants; one that
-gets MORE expensive the longer it waits is what stops it becoming the second.
+**`proto_ko_long_fuse` -- the detonator that stays.** As BUILT (rounds 15 and
+16) it was the Retained detonator that got dearer the longer it waited: round
+15 wanted a detonator that could be held at all, round 16 wanted the free
+Retained Ka-pow! last turn to stop being automatic, and a rising hand cost
+(`rising_cost: 1`, the base game's own `CardEnergyCost.AddUntilPlayed`,
+refused by `blocked_reason` without `retain:`) answered both at once.
 
-THE RULE IS THE BASE GAME'S OWN MODIFIER, which is the whole reason the build
-is four lines. `CardEnergyCost.AddUntilPlayed` accumulates, survives the turn
-boundary, is cleared by `AfterCardPlayedCleanup` when the card is played, and
-is combat-scoped like every other local modifier -- which is the printed rule
-exactly ("each turn it stays in your hand", never downward, gone when the card
-leaves, gone when the fight does). The sim spells the same lifetime with a
-field: `Card.rising_cost_risen`, added by `combat.card_cost`, rolled by
+**THE ESCALATION CAME OFF on the comparison pass of 2026-09-06**
+(`review/active/klee-pool-comparison-pass-2026-09-06.md` §1 and §3 item 1), on
+three seat readings that all landed on the same clause: "never a decision ...
+the Retain is a lie told by the card frame" (r17), passed "because Retain plus
+an escalating cost is a card that punishes the exact hand-holding the rest of
+the kit rewards" (r18 Spray), passed without comment (r22 b). The pass wanted a
+card that stays in hand for hold-or-fire and Pocket Match already delivers that
+at a Spark, so the smallest intervention was the existing card adjusted rather
+than a display fix or a replacement: the row keeps `retain: true`, the frame
+renders the keyword, and the face is now "[gold]Set off[/gold]. Deal 6
+damage." -- **Pocket Match's Energy-priced twin**, and the Energy-priced exit
+the r23 assembled deadlock lacked. Sizzle keeps the reaction line, Countdown
+the draw, Ka-pow! stays the free one.
+
+**THE AUDIT IS STILL OWED AT THE DOOR.** The adjusted row goes through
+`understudy.seat review` on the Codex bridge before any tester sees it, and
+that needs the local machine -- it was not run with this edit. The reading it
+has to answer is the audit's own: Long Fuse FOLLOWED C2 because
+"retaining it once raises its cost from 1 to 2 energy: keeping the detonator
+carries a binding price" (`review/records/card-audit-2026-09-04.md`, §5.3 reply
+1), and Held Tide was WITHDRAWN on C1 because "Retain waits out the dead
+turns".
+
+THE `rising_cost:` MACHINERY STAYS, UNUSED BY ANY ROW. No sheet row carries the
+key now, but both engines keep the rule wired -- `Card.rising_cost` /
+`rising_cost_risen` added by `combat.card_cost`, rolled by
 `klee_overhaul.roll_rising_costs` at turn end, cleared in `_finish_play` and
-zeroed by `run_fight`'s per-combat walk beside `cost_set_this_combat`.
-
-A CARD FIELD AND NOT AN EFFECT, because nothing resolves when the card is
-played: it is what the card costs while it waits. So `rising_cost:` is a row
-key, the generated class declares `IRisingHandCostCard`, and the arm's ONE
-standing listener (`KleeOverhaulSweepHooks`) rolls the hand at end of turn --
-a second `AbstractModel` subscription for one card's rule would be a second
-thing to keep wired. Two Long Fuses in one hand burn separately, because the
-fuse is the card's and not the board's.
-
-`blocked_reason` REFUSES A RISING COST WITHOUT RETAIN. A card discarded at the
-end of the turn it was drawn can never stay in your hand, so the rule could
-never fire and the face would be printing something that cannot happen -- the
-face-that-lies defect, one field over. It also refuses the key on a shipped
-row, because the roller is Compile Remove'd out of a release build.
+zeroed by `run_fight`; `IRisingHandCostCard` read by
+`KleeOverhaulRisingCost.RollHand` off the arm's one standing turn-end
+listener, with the codegen's `retain:` refusal intact. It is covered by a synthetic row in the tests rather
+than through this card.
 
 **`proto_ko_all_of_my_treasures` -- a second pile the size of the first.**
 Careful Arrangement merges; this copies. The pile it is measured against is

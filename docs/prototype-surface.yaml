@@ -504,8 +504,8 @@
 
 - {id: proto_ko_long_fuse, name: "Long Fuse", character: klee,
    authored_by: [claude],
-   cost: 1, type: attack, rarity: common, retain: true, rising_cost: 1,
-   description: "[gold]Set off[/gold]. Deal 6 damage. Costs 1 more each turn it stays in your hand.",
+   cost: 1, type: attack, rarity: common, retain: true,
+   description: "[gold]Set off[/gold]. Deal 6 damage.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy, damage: 6}]}
 
