@@ -6111,7 +6111,15 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     # `EB-329`: `Companion` is the one row with NO tooltip to be held in step
     # with, because the game hangs no tip on the word at all -- which is the
     # finding. Its own source is pinned one test down.
-    assert set(anchors) | {"Companion"} == set(blindplay.ARM_KEYWORDS)
+    #
+    # `Spotlighted` (2026-09-06) is the SECOND of exactly that kind and is
+    # named for the same reason rather than a new one: five Furina surfaces
+    # print the word, every one of them says what a Spotlighted card gains,
+    # and none says which card is one. Its sentence is read off
+    # `SpotlightSystem.IsSpotlighted` -- there is no tip to be in step with,
+    # which is the finding and not an exemption from it.
+    assert (set(anchors) | {"Companion", "Spotlighted"}
+            == set(blindplay.ARM_KEYWORDS))
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
                 "PlanKey", "DeployKey", "EvokeKey", "DrainKey", "HexereiKey",
                 "SwirlKey", "GroundedKey"):

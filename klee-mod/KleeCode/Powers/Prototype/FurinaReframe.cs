@@ -421,7 +421,7 @@ public static class FurinaReframeLaw
 /// arm (R213 B), so the rows are prototype rows -- the riders carrying the
 /// arm's own thresholds (6, 6, 8, 10), the pool pass carrying its four new
 /// bodies -- and the arm swaps them in HERE, at the offer. Same rarity in and
-/// out on both halves (two Uncommons, two Rares, four Commons), so the offer
+/// out on every group (two Uncommons, four Commons, five Rares), so the offer
 /// odds do not move.
 ///
 /// ONE SEAM, for <c>SwapOfferedOath</c>'s reason verbatim:
@@ -443,7 +443,24 @@ public static class FurinaReframeRoster
 {
     /// <summary>
     /// The shipped rows this arm takes off the offer, and the arm rows that
-    /// take their slots: FOUR RIDERS, plus THE POOL PASS'S THREE (`EB-493`).
+    /// take their slots: FOUR RIDERS, THE POOL PASS'S THREE (`EB-493`), and
+    /// `EB-507`'s FOUR (2026-09-06).
+    ///
+    /// THE THIRD GROUP IS `EB-507`, and it is the plainest of the three
+    /// arguments this method now carries: the arm mints Fanfare by PERFORMING,
+    /// and <c>gain_fanfare_floor</c> mints it for being played. Three shipped
+    /// Rares print that rider, so with the arm on the offer surface
+    /// contradicted the arm's one sentence about where the meter comes from.
+    /// Two of them are a body plus the rider and the arm carries the body
+    /// without it (<i>Rapturous Applause</i>, at 2 per 10 rather than the
+    /// shipped 1, because the copy pays for the floor it no longer mints; and
+    /// <i>Unheard Confession</i>). The third, <i>The Sea Is My Stage</i>, is
+    /// NOTHING but the rider -- there is no body to copy, so its Rare slot
+    /// goes to the arm's own Rare drain, <i>Let the People Rejoice</i>, which
+    /// until now was granted from a scenario and offered by nothing. The
+    /// fourth pair is the 2026-09-06 balance review's <i>Shared Billing</i>:
+    /// same printed body, and the `+` card buys a card instead of going to 0
+    /// Energy on a card that already refunds its own.
     ///
     /// ROLLING TIDE WAS WITHDRAWN (`EB-552`, round 13, a D default): four
     /// seats over three rounds read the kit's own perform verb the same way at
@@ -463,8 +480,8 @@ public static class FurinaReframeRoster
     /// answers each with one row (`review/active/furina-pool-pass-2026-09-05.md`
     /// sec.2). The shipped sheet is Balance-stage content and does not move for
     /// a prototype arm (R213 B), so the arm carries the rows and swaps them in
-    /// HERE. Same rarity in and out on both halves -- three Commons, two
-    /// Uncommons, two Rares -- so the offer odds are untouched.
+    /// HERE. Same rarity in and out on every group -- four Commons, two
+    /// Uncommons, five Rares -- so the offer odds are untouched.
     /// </summary>
     public static IEnumerable<CardModel> SwapOfferedRiders(
         IEnumerable<CardModel> offered)
@@ -477,7 +494,11 @@ public static class FurinaReframeRoster
                         && card is not FurinaGen.FloodOfEmotion
                         && card is not FurinaGen.HouseCall
                         && card is not FurinaGen.DinnerService
-                        && card is not FurinaGen.BlockingNotes)
+                        && card is not FurinaGen.BlockingNotes
+                        && card is not FurinaGen.SharedBilling
+                        && card is not FurinaGen.RapturousApplause
+                        && card is not FurinaGen.UnheardConfession
+                        && card is not FurinaGen.TheSeaIsMyStage)
             .Concat(PrototypeCards.For("furina")
                         .Where(card => card is ProtoFrFloridCadenza
                                             or ProtoFrDramaticEntrance
@@ -485,7 +506,11 @@ public static class FurinaReframeRoster
                                             or ProtoFrFloodOfEmotion
                                             or ProtoFrCurtainRises
                                             or ProtoFrSecondCourse
-                                            or ProtoFrGuestList));
+                                            or ProtoFrGuestList
+                                            or ProtoFrSharedBilling
+                                            or ProtoFrRapturousApplause
+                                            or ProtoFrUnheardConfession
+                                            or ProtoFrLetThePeopleRejoice));
     }
 
     /// <summary>

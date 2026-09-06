@@ -1578,6 +1578,7 @@
 
 - {id: proto_fr_let_the_people_rejoice, name: "Let the People Rejoice", character: furina,
    authored_by: [claude],
+   replaces: the_sea_is_my_stage,
    register: archon, cost: 2, type: attack, rarity: rare,
    art_of: let_the_people_rejoice,
    description: "[gold]Drain[/gold] your [gold]Fanfare[/gold]. Deal {CalculatedDamage:diff()} damage to ALL enemies, plus {ExtraDamage:diff()} per [gold]Fanfare[/gold] drained.",
@@ -1601,8 +1602,8 @@
    authored_by: [claude],
    replaces: florid_cadenza,
    cost: 0, type: skill, rarity: uncommon,
-   upgrade: {condition: unconditional},
-   description: "Draw 1 card. {IfUpgraded:show:Draw 2 more.|If you have at least 6 [gold]Fanfare[/gold], draw 2 more.}",
+   upgrade: {condition: fanfare_at_least_3},
+   description: "Draw 1 card. If you have at least {IfUpgraded:show:3|6} [gold]Fanfare[/gold], draw 2 more.",
    effects: [{op: draw, amount: 1},
              {op: conditional, if: fanfare_at_least_6, then: [{op: draw, amount: 2}]}]}
 
@@ -1682,3 +1683,37 @@
    effects: [{op: block, amount: 3},
              {op: generate_guest_star, rarity: common, amount: 1}]}
 
+# --- SHARED BILLING'S ARM COPY: the shipped body, and a `+` that buys a card
+# rather than going free (2026-09-06). Why: provenance. ---
+
+- {id: proto_fr_shared_billing, name: "Shared Billing", character: furina,
+   authored_by: [claude],
+   replaces: shared_billing,
+   register: salon, cost: 1, type: skill, rarity: common,
+   art_of: shared_billing,
+   upgrade: {add: {op: draw, amount: 1}},
+   description: "Apply [gold]Hydro[/gold] to a random enemy. [gold]Spotlighted[/gold] Companion cards gain 25% this turn. Gain 1 [gold]Energy[/gold].",
+   effects: [{op: apply_aura, element: hydro, target: random_enemy},
+             {op: apply_power, power: spotlight_mult_bonus_turn, amount: 25, target: self},
+             {op: energy, amount: 1}]}
+# --- `EB-507`: under the arm no offered face promises Fanfare for being
+# played. Two shipped Rares, carried without their `gain_fanfare_floor` rider;
+# the third is only the rider, and its slot went to the drain above. ---
+
+- {id: proto_fr_rapturous_applause, name: "Rapturous Applause", character: furina,
+   authored_by: [claude],
+   replaces: rapturous_applause,
+   register: archon, cost: 1, type: power, rarity: rare,
+   art_of: rapturous_applause,
+   upgrade: {power_amount: +1},
+   description: "Your Attacks deal {PowerAmount:diff()} additional damage per 10 [gold]Fanfare[/gold].",
+   effects: [{op: apply_power, power: fanfare_attack_per10, amount: 2, target: self}]}
+
+- {id: proto_fr_unheard_confession, name: "Unheard Confession", character: furina,
+   authored_by: [claude],
+   replaces: unheard_confession,
+   register: archon, cost: 2, type: power, rarity: rare,
+   art_of: unheard_confession,
+   upgrade: {cost: -1},
+   description: "Whenever your [gold]Fanfare[/gold] changes amount, gain 1 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: fanfare_delta_block, amount: 1, target: self}]}

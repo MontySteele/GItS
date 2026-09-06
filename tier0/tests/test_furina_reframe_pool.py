@@ -12,13 +12,21 @@ already reads (fight rewards, the shop, every event card screen and the tier
 0.5 drafter). Its C# twin is `FurinaReframeRoster.SwapOfferedRiders`, wired
 into `FurinaCardPool.FilterThroughEpochs` beside Kokomi's Oath swap.
 
+THE SAME SEAM NOW CARRIES `EB-507` (2026-09-06). The arm mints Fanfare by
+PERFORMING, and `gain_fanfare_floor` mints it for being played -- a second
+source the reframe neither has nor priced, printed by three shipped Rares. Two
+of them are swapped for the same body without the rider; the third is nothing
+BUT the rider, so its Rare slot goes to the arm's own Rare drain. The same
+change re-prices two arm `+` cards (Florid Cadenza's copy moves its bar rather
+than deleting its gate; Shared Billing's buys a card rather than going free).
+
 NOTHING MEASURED HERE IS QUOTABLE (R215 B): these are shape assertions about an
 offer surface, not numbers about a game.
 """
 
 import pytest
 
-from tier0.content import loader
+from tier0.content import loader, upgrades
 from tier0.engine import furina_reframe as fr
 from tier05 import rewards
 
@@ -102,14 +110,75 @@ def test_the_swap_moves_no_card_between_rarity_tiers(reframe):
 def test_the_copies_carry_the_arms_thresholds_and_the_shipped_rows_do_not(
         reframe):
     """The whole reason the swap exists. The shipped bars are 12, 12, 15 and
-    20; the copies read 6, 6, 8 and 10, and the shipped rows are untouched."""
-    bars = {"florid_cadenza": ("fanfare_at_least_12", "fanfare_at_least_6"),
-            "dramatic_entrance": ("fanfare_at_least_12", "fanfare_at_least_6"),
-            "universal_revelry": ("fanfare_at_least_15", "fanfare_at_least_8"),
-            "flood_of_emotion": ("fanfare_at_least_20", "fanfare_at_least_10")}
-    for shipped, (shipped_bar, proto_bar) in bars.items():
+    20; the copies read 6, 6, 8 and 10, and the shipped rows are untouched.
+
+    THE THIRD COLUMN IS THE `+` CARD (2026-09-06). Only Florid Cadenza's copy
+    moves its bar at the smith -- its upgrade used to DELETE the gate, which
+    made a 0-cost draw-3 that asks nothing -- and the other three ask the same
+    question upgraded as they do printed. Written as one column rather than a
+    second test so that "which copies move a bar, and to where" is one table
+    to read, and a copy that starts moving one cannot do it unnoticed."""
+    bars = {"florid_cadenza": ("fanfare_at_least_12", "fanfare_at_least_6",
+                               "fanfare_at_least_3"),
+            "dramatic_entrance": ("fanfare_at_least_12", "fanfare_at_least_6",
+                                  "fanfare_at_least_6"),
+            "universal_revelry": ("fanfare_at_least_15", "fanfare_at_least_8",
+                                  "fanfare_at_least_8"),
+            "flood_of_emotion": ("fanfare_at_least_20", "fanfare_at_least_10",
+                                 "fanfare_at_least_10")}
+    for shipped, (shipped_bar, proto_bar, upgraded_bar) in bars.items():
+        proto = loader.peek_card(fr.POOL_SUBS[shipped])
         assert _bar(loader.get_card(shipped)) == shipped_bar
-        assert _bar(loader.peek_card(fr.POOL_SUBS[shipped])) == proto_bar
+        assert _bar(proto) == proto_bar
+        assert _bar(upgrades.apply_upgrade(proto)) == upgraded_bar
+
+
+def test_the_cadenza_copy_upgrades_by_moving_its_bar_not_by_dropping_it(
+        reframe):
+    """`{condition: fanfare_at_least_3}`, the grammar's second spelling.
+
+    The delta this row used to carry was `{condition: unconditional}`, which
+    hoists the branch out and leaves a 0-cost "draw 3" with no question on it.
+    The upgraded card still draws 1 and still asks; it asks for less. Pinned as
+    the SHAPE of the upgraded body -- one conditional, still there, with a
+    lower bar -- because the failure it guards against is the branch being
+    hoisted again and the test passing on the numbers alone."""
+    proto = loader.peek_card(fr.POOL_SUBS["florid_cadenza"])
+    upgraded = upgrades.apply_upgrade(proto)
+
+    assert [fx["op"] for fx in upgraded.effects] == ["draw", "conditional"]
+    assert upgraded.effects[0]["amount"] == 1
+    assert upgraded.effects[1]["if"] == "fanfare_at_least_3"
+    assert upgraded.effects[1]["then"] == [{"op": "draw", "amount": 2}]
+
+
+def test_no_offered_card_promises_fanfare_for_being_played(reframe):
+    """`EB-507`'s acceptance condition, and the arm's one sentence about its
+    meter: Fanfare is minted by PERFORMING. `gain_fanfare_floor` mints it for
+    being played, which is a second source the reframe neither has nor priced,
+    and three shipped Rares print one. With the arm on, no card any offer
+    surface can roll carries the op."""
+    for card in _offerable():
+        assert not any(fx.get("op") == "gain_fanfare_floor"
+                       for fx in card.effects), card.id
+
+
+def test_the_arm_off_still_offers_all_three_floor_rows():
+    """The other half of the same claim, and the acceptance condition on the
+    flag: the three shipped floor Rares are Balance-stage content and do not
+    move for a prototype arm (R213 B)."""
+    loader.reset_caches()
+    rewards.character_pool.cache_clear()
+    floors = {card.id for card in _offerable()
+              if any(fx.get("op") == "gain_fanfare_floor"
+                     for fx in card.effects)}
+    assert floors == {"rapturous_applause", "unheard_confession",
+                      "the_sea_is_my_stage"}
+
+
+def _offerable(character="furina"):
+    return [c for cards in rewards.character_pool(character).values()
+            for c in cards]
 
 
 def _bar(card):

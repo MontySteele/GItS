@@ -16,8 +16,11 @@
     "proto_fr_guest_list",
     "proto_fr_intermission",
     "proto_fr_let_the_people_rejoice",
+    "proto_fr_rapturous_applause",
     "proto_fr_salon_debut_named",
     "proto_fr_second_course",
+    "proto_fr_shared_billing",
+    "proto_fr_unheard_confession",
     "proto_fr_universal_revelry",
     "proto_hold_the_line_spark",
     "proto_itto_superlative_superstrength_either",
@@ -210,8 +213,11 @@
     "proto_fr_guest_list": "furina",
     "proto_fr_intermission": "furina",
     "proto_fr_let_the_people_rejoice": "furina",
+    "proto_fr_rapturous_applause": "furina",
     "proto_fr_salon_debut_named": "furina",
     "proto_fr_second_course": "furina",
+    "proto_fr_shared_billing": "furina",
+    "proto_fr_unheard_confession": "furina",
     "proto_fr_universal_revelry": "furina",
     "proto_hold_the_line_spark": "klee",
     "proto_itto_superlative_superstrength_either": "klee",
@@ -435,7 +441,7 @@
       "damage": 3
     },
     "proto_fr_florid_cadenza": {
-      "condition": "unconditional"
+      "condition": "fanfare_at_least_3"
     },
     "proto_fr_guest_list": {
       "block": 2
@@ -446,6 +452,9 @@
     "proto_fr_let_the_people_rejoice": {
       "cost": -1
     },
+    "proto_fr_rapturous_applause": {
+      "power_amount": 1
+    },
     "proto_fr_salon_debut_named": {
       "add": {
         "op": "gain_encore",
@@ -454,6 +463,15 @@
     },
     "proto_fr_second_course": {
       "encore_cost": -1
+    },
+    "proto_fr_shared_billing": {
+      "add": {
+        "op": "draw",
+        "amount": 1
+      }
+    },
+    "proto_fr_unheard_confession": {
+      "cost": -1
     },
     "proto_fr_universal_revelry": {
       "damage": 3

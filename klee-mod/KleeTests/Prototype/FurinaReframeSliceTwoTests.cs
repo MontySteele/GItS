@@ -629,6 +629,48 @@ public class FurinaReframeSliceTwoTests
             new ProtoFrUniversalRevelry().Rarity);
         Assert.Equal(new FurinaGen.FloodOfEmotion().Rarity,
             new ProtoFrFloodOfEmotion().Rarity);
+        // `EB-507`'s three and the balance review's one, on the same claim.
+        // The Sea Is My Stage is the odd pair -- it has no body to copy, so
+        // its Rare slot goes to the arm's own Rare drain -- and it is exactly
+        // the pair a rarity slip would ride in on.
+        Assert.Equal(new FurinaGen.SharedBilling().Rarity,
+            new ProtoFrSharedBilling().Rarity);
+        Assert.Equal(new FurinaGen.RapturousApplause().Rarity,
+            new ProtoFrRapturousApplause().Rarity);
+        Assert.Equal(new FurinaGen.UnheardConfession().Rarity,
+            new ProtoFrUnheardConfession().Rarity);
+        Assert.Equal(new FurinaGen.TheSeaIsMyStage().Rarity,
+            new ProtoFrLetThePeopleRejoice().Rarity);
+    }
+
+    [Fact]
+    public void No_row_the_arm_offers_promises_Fanfare_for_being_played()
+    {
+        // `EB-507`'s acceptance condition in the mod, read off the compiled
+        // bodies: `FurinaResources.GainFanfareFloor` is the mint-for-being-
+        // played the arm does not have, three shipped Rares call it, and none
+        // of the rows this arm puts in their slots may. Structural for this
+        // harness's usual reason -- `ModelDb.Card<T>()` throws until the
+        // game's pool build has run -- and read the SHIPPED side too, so a
+        // green here cannot mean the call simply moved somewhere else.
+        foreach (var type in new[]
+                 {
+                     "ProtoFrRapturousApplause", "ProtoFrUnheardConfession",
+                     "ProtoFrLetThePeopleRejoice", "ProtoFrSharedBilling",
+                 })
+        {
+            Assert.DoesNotContain("FurinaResources.GainFanfareFloor",
+                Il.Calls(Il.Method(type, "OnPlay")));
+        }
+
+        foreach (var type in new[]
+                 {
+                     "RapturousApplause", "UnheardConfession", "TheSeaIsMyStage",
+                 })
+        {
+            Assert.Contains("FurinaResources.GainFanfareFloor",
+                Il.Calls(Il.Method(type, "OnPlay")));
+        }
     }
 
     [Fact]
@@ -649,17 +691,38 @@ public class FurinaReframeSliceTwoTests
             Bar("ProtoFrFloridCadenza"), Bar("ProtoFrDramaticEntrance"),
             Bar("ProtoFrUniversalRevelry"), Bar("ProtoFrFloodOfEmotion"),
         });
+
+        // AND THE ONE BAR THAT MOVES AT THE SMITH (2026-09-06). Florid
+        // Cadenza's copy upgraded by DELETING its gate, which is a 0-cost
+        // draw-3 asking nothing; the `+` card now asks the same question at 3.
+        // Read off the face, like the bars above it: the row prints both
+        // numbers through one {IfUpgraded:show:...} token, so the printed gate
+        // and the upgraded one cannot drift apart in the source either.
+        Assert.Equal("3", Bar("ProtoFrFloridCadenza", upgraded: true));
+        Assert.Equal("6", Bar("ProtoFrFloridCadenza"));
     }
 
     /// <summary>The Fanfare threshold a row prints: the number after "at
-    /// least" in its emitted description.</summary>
-    private static string Bar(string type)
+    /// least" in its emitted description, on the base card or (with
+    /// <paramref name="upgraded"/>) on the `+` one.
+    ///
+    /// A ROW MAY PRINT BOTH. A bar-moving upgrade renders its two thresholds
+    /// as one {IfUpgraded:show:up|base} token, which is the same string the
+    /// game swaps at runtime -- so both readings come off the same face and
+    /// neither is a number this test carries.</summary>
+    private static string Bar(string type, bool upgraded = false)
     {
         var face = string.Join(" ", Il.Strings(
             Il.Method(type, "get_Localization")));
         var hit = System.Text.RegularExpressions.Regex.Match(
-            face, @"at least (\d+) \[gold\]Fanfare");
+            face,
+            @"at least (?:\{IfUpgraded:show:(\d+)\|(\d+)\}|(\d+)) \[gold\]Fanfare");
         Assert.True(hit.Success, $"{type} prints no Fanfare bar: {face}");
-        return hit.Groups[1].Value;
+        var swapped = hit.Groups[1].Success;
+        if (!swapped)
+        {
+            return hit.Groups[3].Value;
+        }
+        return upgraded ? hit.Groups[1].Value : hit.Groups[2].Value;
     }
 }

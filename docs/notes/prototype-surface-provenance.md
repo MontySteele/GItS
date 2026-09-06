@@ -2060,6 +2060,16 @@ row inexpressible by name in the emitter ("hand-write it against the KitBurst
 machinery"), and a `requires: burst_energy_full` would put back the threshold
 the reframe took out. The shipped row keeps both and costs 0; this one costs 2.
 
+IT NOW HAS A SLOT (`EB-507`, 2026-09-06). Until this change the row was granted
+from a scenario and offered by nothing -- the arm's own Rare drain, unreachable
+in a run. `EB-507` took the three shipped Fanfare-floor Rares off the arm's
+offer surface, and one of them, `the_sea_is_my_stage`, is NOTHING but the
+floor rider: one `gain_fanfare_floor 15` op and no body. There is no copy to
+make of a card with no body, so what it hands over is its Rare slot, and the
+drain takes it. Rare for Rare, so the offer odds do not move; the row itself is
+unchanged, and the shipped card still exists and is still dealt with the arm
+off (R213 B).
+
 ## proto_fr_intermission
 
 Face: "Drain your Fanfare. Gain Block equal to the Fanfare drained." `F12` (1):
@@ -2662,3 +2672,84 @@ A FIELD AND NOT AN UPGRADE DELTA, so both faces carry it: an upgrade is a
 different card, and a player who smiths the placer must not lose the opening
 the ruling gave it.
 
+## proto_fr_florid_cadenza, the upgrade (2026-09-06)
+
+THE `+` CARD MOVES THE BAR INSTEAD OF DELETING IT. The rider copy is the
+shipped Florid Cadenza at the arm's meter -- draw 1, and 2 more at 6 Fanfare
+instead of 12 -- and it inherited the shipped row's `{condition: unconditional}`
+upgrade, which HOISTS the gated clause out. That made the `+` card a 0-cost
+"draw 3" that asks nothing at all: the strongest card in the arm's pool, and
+the one card in it with no relationship to the meter the whole reframe is
+about. The 2026-09-06 GPT balance review read it that way and the main session
+took the D default.
+
+So the delta is `{condition: fanfare_at_least_3}`: the gate STAYS and its
+threshold falls 6 -> 3. The upgraded card still draws 1, still asks the arm's
+question, and asks it at a bar an opening turn can reach -- the same 3 R254's
+starter reader was moved to, and for the same measured reason (the meter an
+early turn actually holds).
+
+THE GRAMMAR IS NEW AND IT IS THE SMALLER OF THE TWO SPELLINGS. `condition:`
+used to accept only `unconditional`. It now also accepts a meter bar naming the
+upgraded threshold: tier0 rewrites the top-level conditional's `if:`
+(`content/upgrades.py`), and the codegen emits ONE comparison whose threshold is
+`(IsUpgraded ? 3 : 6)` with the face printing both numbers through a single
+`{IfUpgraded:show:3|6}` token (`gen_klee_cards.moved_bar_predicate_cs`). Both
+bars are authored on the row; nothing computes a threshold. Both engines refuse
+a bar that reads a different meter from the printed one.
+
+Nothing else on the row moves, and `docs/furina-cards.yaml` and
+`docs/furina-upgrades.yaml` do not move at all: the shipped Florid Cadenza and
+its shipped `{condition: unconditional}` are Balance-stage content (R213 B).
+
+## proto_fr_shared_billing
+
+Face: the shipped Shared Billing's, unchanged -- "Apply Hydro to a random
+enemy. Spotlighted Companion cards gain 25% this turn. Gain 1 Energy." Same
+cost, same rarity, same three effects, same art (`art_of`, R179).
+
+ONLY THE UPGRADE DIFFERS, and that is the whole row (the 2026-09-06 GPT
+balance review; the main session's D default). The shipped delta is
+`{cost: -1}`, which takes a Common that already REFUNDS its Energy down to 0 --
+a card that costs nothing, gives a card's worth of Energy back, and is handed
+out at every campfire. The arm copy buys a card instead:
+`{add: {op: draw, amount: 1}}`, the shape `proto_fr_salon_debut_named` already
+uses, rendered by the emitter as an `IsUpgraded`-gated draw appended after the
+printed body and an `{IfUpgraded:show:Draw 1 card.|}` clause on the face.
+
+Common for Common at the same seam as the rider copies
+(`furina_reframe.POOL_SUBS`, `FurinaReframeRoster.SwapOfferedRiders`). The
+shipped row and its shipped delta stand (R213 B).
+
+## proto_fr_rapturous_applause
+
+Face: "Your Attacks deal 2 additional damage per 10 Fanfare." The shipped
+Rare's body with its `gain_fanfare_floor 8` rider removed (`EB-507`).
+
+WHY THE RIDER GOES. The reframe mints Fanfare by PERFORMING -- 2 per trigger, 5
+per Evoke -- and `gain_fanfare_floor` mints it for being played. That is a
+second source the arm neither has nor priced, and with the arm on it is the
+offer surface contradicting the arm's one sentence about where the meter comes
+from. Three shipped Rares print the rider; this is one of the two that have a
+body underneath it.
+
+WHY 2 AND NOT THE SHIPPED 1. The floor the copy no longer mints was also this
+card's own opening payment -- it arrived with 8 Fanfare already on the meter,
+which is most of the first 10 the per-10 clause reads. The copy pays for that
+loss in the printed number rather than by keeping a rider the arm cannot have.
+The upgrade is the shipped `{power_amount: +1}`, so the `+` card reads 3 per 10.
+
+Rare for Rare, art borrowed from the shipped row (`art_of`, R179), shipped
+sheet unmoved (R213 B).
+
+## proto_fr_unheard_confession
+
+Face: "Whenever your Fanfare changes amount, gain 1 Block." The shipped Rare's
+body with its `gain_fanfare_floor 8` rider removed, for `EB-507`'s reason
+above.
+
+NOTHING ELSE MOVES. Cost 2, the shipped `{cost: -1}` upgrade, and the
+Block-per-change at the shipped 1 -- unlike Rapturous Applause there is no
+number to compensate, because this card's payout reads CHANGES in the meter and
+not its height, and a floor it starts at is worth one change. Rare for Rare,
+art borrowed (`art_of`, R179), shipped sheet unmoved (R213 B).
