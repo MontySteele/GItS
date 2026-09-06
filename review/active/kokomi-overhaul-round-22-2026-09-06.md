@@ -123,9 +123,12 @@ a strength reading.
   assembled deck (Nereid's, Tide Wall, Ripple, Battle Plan granted) still
   presents a real now-or-later choice under sustained pressure and
   alternating attack/setup intents, and Ripple's forgone 2 Block is a
-  price the seat can name." The lever if it is not: Tide Wall's count
-  reads entries rather than carry-outs (`EB-501`'s default reversed), which
-  halves that morning to 18 and leaves the Rare's own doubling untouched.
+  price the seat can name." The grants are Nereid's Ascension, Tide Wall,
+  Ripple+ and Battle Plan+ (the upgraded copies, since the arithmetic is
+  theirs). The lever if it is not: Tide Wall's count reads entries rather
+  than carry-outs (`EB-501`'s default reversed), which takes Tide Wall's 36
+  to 18 and the morning's 50 Block to 32, with the 4 Energy and 6 cards
+  untouched, and leaves the Rare's own doubling alone.
   The natural lane asks whether ordinary drafting reaches the package
   without excessive concessions; round 21's natural lane declined four
   readers, which is the prior.

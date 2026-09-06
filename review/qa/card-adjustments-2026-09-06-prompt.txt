@@ -109,16 +109,23 @@ plus 1 per 2 Fanfare, 6 more to ALL at 8 Fanfare).
    Retain, deal 6 or 12 after a carry-out) was WITHDRAWN on C1 because
    "Retain waits out the dead turns". Nearest neighbours: Pocket Match
    (above), Sizzle, Ka-pow!.
-2. **Florid Cadenza (arm copy, upgrade adjusted)** — Furina, Uncommon Skill,
-   0 energy. Draw 1 card. If you have at least 6 Fanfare, draw 2 more.
-   Upgrade: the bar moves to 3 Fanfare. WAS: the upgrade dropped the gate
-   (upgraded: draw 3 for 0 with no condition); the base card passed on C8 on
-   2026-09-04 and the upgrade was not read.
-3. **Shared Billing (arm copy, upgrade adjusted)** — Furina, Common Skill, 1
-   energy. Apply Hydro to a random enemy. Spotlighted Companion cards gain
-   25% this turn. Gain 1 Energy. Upgrade: also draw 1 card. WAS: the shipped
-   upgrade takes the cost to 0 (a 0-cost card that gains 1 Energy). Read the
-   base card and the upgrade both.
+2. **Florid Cadenza (arm copy, adjusted twice)** — Furina, Uncommon Skill,
+   0 energy, Exhaust. Draw 1 card. If you have at least 6 Fanfare, draw 2
+   more. Upgrade: the bar moves to 3 Fanfare. WAS: the upgrade dropped the
+   gate (draw 3 for 0 with no condition), and the copy did not Exhaust; the
+   base card passed on C8 on 2026-09-04 and the upgrade was not read. The
+   second review found that a bar which does not deplete makes three copies a
+   loop by HOLDING the rest of the deck in hand (hand cap 10, overflow to
+   discard), at bar 6 as much as at 3, so the copy is now one shot per copy.
+   Read C2 against that technique and C6 against Skim and Adrenaline.
+3. **Shared Billing (arm copy, upgrade adjusted twice)** — Furina, Common
+   Skill, 1 energy. Apply Hydro to a random enemy. Spotlighted Companion
+   cards gain 25% this turn. Gain 1 Energy. Upgrade: also gain 3 Block. WAS:
+   the shipped upgrade takes the cost to 0 (a 0-cost card that gains 1
+   Energy); the first adjustment made the upgrade draw 1, which the second
+   review found is the same loop piece (refunds its own Energy and replaces
+   itself; two copies cycle at no cost, stacking the Spotlight rider). Read
+   the base card and the upgrade both, C2 against the holding technique.
 4. **Rapturous Applause (arm copy)** — Furina, Rare Power, 1 energy. Your
    Attacks deal 2 additional damage per 10 Fanfare. Upgrade: 3. WAS: the
    shipped row also grants "Fanfare +8, and cannot fall below 8" (a
@@ -126,15 +133,23 @@ plus 1 per 2 Fanfare, 6 more to ALL at 8 Fanfare).
    performance); the floor is removed and the per-10 amount doubled for the
    arm's 0-to-15 range.
 5. **Unheard Confession (arm copy)** — Furina, Rare Power, 2 energy.
-   Whenever your Fanfare changes amount, gain 1 Block. Upgrade: costs 1. WAS:
-   the shipped row also grants the same "Fanfare +8" floor; the floor is
-   removed and nothing else moves.
-6. **Let the People Rejoice (enters the offer)** — Furina, Rare Attack, 2
-   energy. Drain your Fanfare. Deal 5 damage to ALL enemies, plus 1 per
-   Fanfare drained. Upgrade: none yet. It passed this door as a grant-only
-   row on 2026-09-04; it now takes the Rare offer slot of The Sea Is My Stage
-   (Rare Power, 1: Fanfare +15 and cannot fall below 15), which leaves the
-   arm's offer. Rule on it as an OFFERED Rare against C6 (Universal Revelry's
-   arm copy is its nearest shipped neighbour) and C1.
+   Whenever your Fanfare changes amount, gain 2 Block. Upgrade: costs 1. WAS:
+   the shipped row also grants the same "Fanfare +8" floor at 1 Block per
+   change; the floor is removed and the payout is 2. It pays per change
+   EVENT, not per point: a trigger, an Evoke and the turn-start decay are one
+   event each, so a turn with two performances pays 4 to 6.
+6. **Let the People Rejoice (enters the offer, re-priced)** — Furina, Rare
+   Attack, 2 energy. Drain your Fanfare. Deal 5 damage to ALL enemies, plus 2
+   per Fanfare drained. Upgrade: the Prototype-stage default, costs 1. It
+   passed this door as a grant-only row on 2026-09-04 at 1 per drained; it
+   now takes the Rare offer slot of The Sea Is My Stage (Rare Power, 1:
+   Fanfare +15 and cannot fall below 15), which leaves the arm's offer. The
+   arithmetic against Universal Revelry's arm copy (2 energy, 9 to ALL plus 1
+   per 2 Fanfare, 6 more at 8, meter KEPT): at 1 per drained the drain dealt
+   15 to Revelry's 20 at 10 Fanfare and 20 to 22 at 15, never ahead in the
+   range while also emptying the meter; at 2 per it deals 25 to 20 at 10 and
+   35 to 22 at 15, and the meter it empties is what the next turn's readers
+   were going to read. Rule on the base and the 1-energy upgrade against C6
+   and C1.
 
 Six verdicts, each with its clause and its breaching line. Under 700 words.

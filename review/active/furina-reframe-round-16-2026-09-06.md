@@ -124,3 +124,14 @@ Nothing here is a strength reading.
   base card's question after the upgrade." Curtain Call, Exit Stage Left and
   Intermission stay grant-only until that reads; the drain pair's other half
   is the next access question, not this round's.
+- **The second-wave review (same day) moved three of those rows again, D
+  defaults:** the loop is by holding the deck in hand (hand cap 10, overflow
+  to discard), not by removal, so a 0-cost draw-3 whose bar does not deplete
+  loops at bar 6 as much as at 3, and a card that refunds its Energy and
+  replaces itself is the same piece. The Cadenza copy now Exhausts (the bar
+  move stays), Shared Billing's upgrade gains 3 Block instead of drawing 1,
+  Unheard Confession pays 2 per change (it pays per EVENT, so 1 was a dead
+  Rare without its floor), and the drain pays 5 plus 2 per Fanfare drained
+  (at 1 per it never out-damaged Universal Revelry's copy in the 0-15 range
+  while also emptying the meter; its Prototype-default upgrade costs 1). The
+  audit prompt states each arithmetic.

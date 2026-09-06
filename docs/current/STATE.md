@@ -480,7 +480,11 @@ are in [`workstreams.md`](workstreams.md).
   to 3 instead of dropping it, and Shared Billing's upgrade draws 1 instead
   of costing 0; the door reads all six rows from
   `review/qa/card-adjustments-2026-09-06-prompt.txt` on the local machine
-  before a deploy. Round 17's hypothesis is in the r16 packet §5.
+  before a deploy. The second-wave review the same day moved three of them
+  again (the loop is by holding the deck, not removal): the Cadenza copy
+  Exhausts, Shared Billing's upgrade gains Block, Unheard pays 2 per change,
+  the drain 2 per Fanfare drained. Round 17's hypothesis is in the r16
+  packet §5.
   No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
