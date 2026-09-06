@@ -175,7 +175,7 @@ local machine and with no playtest possible for two days. Read against §5:
    planter "which this mod does not have" an element for). So the Dendro
    source is the companion slot in the nations that already exist, not a
    fourth sheet. The boundaries paper is
-   `review/active/dendro-boundaries-2026-09-06.md`; it carries its own
+   `review/ruled/dendro-boundaries-2026-09-06.md`; it carries its own
    picks and the Core stays the first mechanic.
 2. **The sweep: option 1, with a corrected baseline and a broader
    evaluation.** The order is fixed: (i) fix visibility (`EB-428` is
