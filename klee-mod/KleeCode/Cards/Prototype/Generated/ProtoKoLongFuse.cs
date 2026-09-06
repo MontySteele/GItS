@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoLongFuse : CustomCardModel, IElementalCard, IRisingHandCostCard
+public sealed class ProtoKoLongFuse : CustomCardModel, IElementalCard
 {
     /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>
     public Element Element => Element.Pyro;
@@ -48,15 +48,8 @@ public sealed class ProtoKoLongFuse : CustomCardModel, IElementalCard, IRisingHa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Long Fuse"),
-        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. Costs 1 more each turn it stays in your hand."),
+        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage."),
     };
-
-    // `EB-491`, the rising hand cost: this card costs this much more
-    // for every turn it stays in hand, applied by
-    // `KleeOverhaulRisingCost.RollHand` through the base game's own
-    // `CardEnergyCost.AddUntilPlayed` -- which accumulates, survives the
-    // turn boundary, clears when the card is played and is combat-scoped.
-    public int HandCostRise => 1;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -18,8 +18,10 @@ namespace KleeMod.Tests.Prototype;
 /// <c>review/active/klee-pool-pass-2026-09-05.md</c>).
 ///
 /// FOUR NEW RULES ARRIVE WITH THEM and they are what this file is about: a
-/// hand cost that RISES while the card waits (Long Fuse), a Bomb COPIED at the
-/// size of the largest one on the board (All of My Treasures!), a grow keyed to
+/// hand cost that RISES while the card waits (built for Long Fuse; its
+/// escalation came off on the comparison pass of 2026-09-06, and the rule is
+/// still wired with no row printing it), a Bomb COPIED at the size of the
+/// largest one on the board (All of My Treasures!), a grow keyed to
 /// the enemy's AURA with a floor under it (Kindling), a Bomb SPLIT into two
 /// halves on random enemies (Split Charge), and the VERMILLION PACT, which
 /// hands back the aura an explosion consumed so the Attack behind it reacts
@@ -271,24 +273,27 @@ public class PoolPassThreeTests
                         .IsAssignableFrom(typeof(ProtoKoFireworksShow)));
     }
 
-    // ---- Long Fuse: the rising hand cost ----------------------------------
+    // ---- Long Fuse, and the rising hand cost no row prints ----------------
 
     [Fact]
-    public void Long_fuse_declares_its_fuse_and_retains()
+    public void Long_fuse_retains_and_prints_no_escalation()
     {
-        // The number is the ROW's, declared where the arm's one standing
-        // turn-end listener reads it back -- `ISparkPricedCard`'s discipline,
-        // one cost over. RETAIN is on the keyword rail beside it and is not
-        // decoration: a card discarded at end of turn can never stay in your
-        // hand, so the codegen refuses a rising cost without it.
+        // THE ESCALATION CAME OFF on the comparison pass of 2026-09-06
+        // (`review/active/klee-pool-comparison-pass-2026-09-06.md` sec.3 item
+        // 1), on three seat readings against "Retain plus an escalating cost".
+        // RETAIN STAYS and is not decoration: it is what the card is, Pocket
+        // Match's twin one Energy over, and the frame renders it off the
+        // keyword rail rather than the face -- `ProtoKoPocketMatch`'s
+        // spelling. The row declares no fuse at all now, so it carries the
+        // interface no more than any other Attack does. Twin:
+        // `test_long_fuse_retains_and_no_longer_escalates`.
         var card = new ProtoKoLongFuse();
 
-        Assert.True(typeof(IRisingHandCostCard)
-                        .IsAssignableFrom(typeof(ProtoKoLongFuse)));
-        Assert.Equal(1, ((IRisingHandCostCard)card).HandCostRise);
+        Assert.False(typeof(IRisingHandCostCard)
+                         .IsAssignableFrom(typeof(ProtoKoLongFuse)));
         Assert.Contains(card.CanonicalKeywords, k => k == CardKeyword.Retain);
-        Assert.Contains("Costs 1 more each turn it stays in your hand",
-                        Face(card));
+        Assert.Equal("[gold]Set off[/gold]. Deal {Damage:diff()} damage.",
+                     Face(card));
     }
 
     [Fact]
@@ -299,9 +304,12 @@ public class PoolPassThreeTests
         // and what it writes is `AddUntilPlayed` -- the base game's own
         // modifier, which accumulates, survives the turn boundary, clears when
         // the card is played and does not outlive the combat. `AddThisTurn`
-        // or `SetThisCombat` here would each be a different card. Twins:
-        // `test_long_fuse_costs_one_more_for_every_turn_it_is_held`,
-        // `test_long_fuse_resets_when_it_is_played`.
+        // or `SetThisCombat` here would each be a different card. THE RULE IS
+        // WIRED WITH NO ROW PRINTING IT since Long Fuse's escalation came off
+        // (2026-09-06), and it stays pinned here for the same reason the sim
+        // pins it through a synthetic row. Twins:
+        // `test_a_rising_cost_card_costs_one_more_for_every_turn_it_is_held`,
+        // `test_a_rising_cost_resets_when_the_card_is_played`.
         var roll = Il.Calls(Il.Method("KleeOverhaulRisingCost", "RollHand"));
 
         Assert.Contains(roll, c => c.Contains("CardPile.Get"));
