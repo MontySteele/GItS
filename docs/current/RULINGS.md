@@ -271,8 +271,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R259 | 2026-09-05 | Claude merges every PR that asks nothing of [USER]; a PR is [USER]'s only for an open pick, LAW/EXPERIMENTS text, or a shipped number | `9a4251b` |
 | R260 | 2026-09-05 | Furina's stage starts every combat with a member on it (round-11 pick 1, option 2); EB-553 | `41ddb29` |
 | R261 | 2026-09-05 | Jumpy Dumpty gains Innate (round-17 Klee pick 1, ruled off-list); EB-557 | `e458db7` |
+| R262 | 2026-09-06 | Klee's starter holds at R261 (starter pick option 1); two kit cards, Innate on Jumpy Dumpty alone | `050765e` |
 
-260 rows over the R1..R261 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 149 from a commit message, 0 unresolved.
+261 rows over the R1..R262 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 150 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 

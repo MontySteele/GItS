@@ -225,9 +225,10 @@ are in [`workstreams.md`](workstreams.md).
   detonator read a third time (five dead-Bomb turns in six fights), to
   be raised as [USER]'s own pick after the round lands; no pick in the
   packet; `EB-593`-`EB-596`, `EB-605`. **The starter's detonator is
-  [USER]'s open pick** (PR #405, `git show 94e7e505:review/active/klee-starter-detonator-pick-2026-09-06.md`,
-  four natural readings and one assembled deadlock; default hold,
-  recommendation a second basic detonator for a Strike). **Round 23 is
+  RULED R262** (2026-09-06,
+  `review/ruled/klee-starter-detonator-pick-2026-09-06.md`): hold, R261
+  re-affirmed, the starter at two kit cards with Innate on Jumpy Dumpty
+  alone; the draft is the fix and nothing builds. **Round 23 is
   READ** (`review/active/klee-overhaul-round-23-2026-09-06.md`): on
   `0.2.2830+proto` the Spark loop read from both edges, never scarce on
   the natural lane and deadlocked on a deck of Spark cards (the act-1
