@@ -1583,7 +1583,7 @@
    art_of: let_the_people_rejoice,
    description: "[gold]Drain[/gold] your [gold]Fanfare[/gold]. Deal {CalculatedDamage:diff()} damage to ALL enemies, plus {ExtraDamage:diff()} per [gold]Fanfare[/gold] drained.",
    effects: [{op: drain_fanfare},
-             {op: damage, amount_formula: {base: 5, per: 1, count: fanfare_drained},
+             {op: damage, amount_formula: {base: 5, per: 2, count: fanfare_drained},
               target: all_enemies}]}
 
 - {id: proto_fr_intermission, name: "Intermission", character: furina,
@@ -1601,9 +1601,9 @@
 - {id: proto_fr_florid_cadenza, name: "Florid Cadenza (proto)", character: furina,
    authored_by: [claude],
    replaces: florid_cadenza,
-   cost: 0, type: skill, rarity: uncommon,
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
    upgrade: {condition: fanfare_at_least_3},
-   description: "Draw 1 card. If you have at least {IfUpgraded:show:3|6} [gold]Fanfare[/gold], draw 2 more.",
+   description: "Draw 1 card. If you have at least {IfUpgraded:show:3|6} [gold]Fanfare[/gold], draw 2 more. Exhaust.",
    effects: [{op: draw, amount: 1},
              {op: conditional, if: fanfare_at_least_6, then: [{op: draw, amount: 2}]}]}
 
@@ -1683,7 +1683,7 @@
    effects: [{op: block, amount: 3},
              {op: generate_guest_star, rarity: common, amount: 1}]}
 
-# --- SHARED BILLING'S ARM COPY: the shipped body, and a `+` that buys a card
+# --- SHARED BILLING'S ARM COPY: the shipped body, and a `+` that buys 3 Block
 # rather than going free (2026-09-06). Why: provenance. ---
 
 - {id: proto_fr_shared_billing, name: "Shared Billing", character: furina,
@@ -1691,7 +1691,7 @@
    replaces: shared_billing,
    register: salon, cost: 1, type: skill, rarity: common,
    art_of: shared_billing,
-   upgrade: {add: {op: draw, amount: 1}},
+   upgrade: {add: {op: block, amount: 3}},
    description: "Apply [gold]Hydro[/gold] to a random enemy. [gold]Spotlighted[/gold] Companion cards gain 25% this turn. Gain 1 [gold]Energy[/gold].",
    effects: [{op: apply_aura, element: hydro, target: random_enemy},
              {op: apply_power, power: spotlight_mult_bonus_turn, amount: 25, target: self},
@@ -1715,5 +1715,5 @@
    register: archon, cost: 2, type: power, rarity: rare,
    art_of: unheard_confession,
    upgrade: {cost: -1},
-   description: "Whenever your [gold]Fanfare[/gold] changes amount, gain 1 [gold]Block[/gold].",
-   effects: [{op: apply_power, power: fanfare_delta_block, amount: 1, target: self}]}
+   description: "Whenever your [gold]Fanfare[/gold] changes amount, gain 2 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: fanfare_delta_block, amount: 2, target: self}]}

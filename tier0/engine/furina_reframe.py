@@ -202,16 +202,18 @@ POOL_SUBS: dict[str, str] = {
     "rapturous_applause": "proto_fr_rapturous_applause",   # body, no floor
     "unheard_confession": "proto_fr_unheard_confession",   # body, no floor
     "the_sea_is_my_stage": "proto_fr_let_the_people_rejoice",  # rider -> drain
-    # ---- THE TWO 2026-09-06 UPGRADE ADJUSTMENTS (the GPT balance review, the
-    # main session's D default). Both are `+` cards and neither moves a base
-    # face. Florid Cadenza's copy upgraded by DELETING its gate, which made a
-    # 0-cost draw-3 with nothing asked; it now MOVES the bar 6 -> 3, so the `+`
-    # card still asks the arm's question at a bar an opening turn can reach.
+    # ---- THE 2026-09-06 UPGRADE ADJUSTMENTS (the GPT balance review and the
+    # second-wave read of the same day, the main session's D defaults). Neither
+    # moves a base face. Florid Cadenza's copy upgraded by DELETING its gate,
+    # which made a 0-cost draw-3 with nothing asked; it now MOVES the bar
+    # 6 -> 3, so the `+` card still asks the arm's question at a bar an opening
+    # turn can reach -- and the copy EXHAUSTS, because a 0-cost draw whose gate
+    # depletes nothing is the same hold-the-deck loop at 3 as at 6.
     # Shared Billing's shipped upgrade is `cost: -1`, and a card that refunds
     # its own Energy at 0 is a free play handed out at every campfire; the arm
-    # copy buys a card instead. Both are the same copy-and-swap shape as the
-    # four riders at the top of this map.
-    "shared_billing": "proto_fr_shared_billing",   # +draw, not +free
+    # copy buys 3 Block instead, which is neither energy nor draw. Both are the
+    # same copy-and-swap shape as the four riders at the top of this map.
+    "shared_billing": "proto_fr_shared_billing",   # +block, not +free
 }
 # ROLLING TIDE WAS WITHDRAWN (`EB-552`, round 13, a D default). The kit's own
 # perform verb on a draftable row was read once at 2 energy and once at 1, by

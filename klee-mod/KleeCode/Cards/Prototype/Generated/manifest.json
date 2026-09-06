@@ -466,8 +466,8 @@
     },
     "proto_fr_shared_billing": {
       "add": {
-        "op": "draw",
-        "amount": 1
+        "op": "block",
+        "amount": 3
       }
     },
     "proto_fr_unheard_confession": {

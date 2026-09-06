@@ -41,7 +41,7 @@ public sealed class ProtoFrUnheardConfession : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Unheard Confession"),
-        ("description", "Whenever your [gold]Fanfare[/gold] changes amount, gain 1 [gold]Block[/gold]."),
+        ("description", "Whenever your [gold]Fanfare[/gold] changes amount, gain 2 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -59,7 +59,7 @@ public sealed class ProtoFrUnheardConfession : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<FanfareDeltaBlockPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<FanfareDeltaBlockPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

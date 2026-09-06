@@ -34,6 +34,10 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoFrSharedBilling : CustomCardModel, ICharacterCard
 {
+    /// <summary>Block arrives only from the ruled upgrade (`add: block`), so the
+    /// claim moves with it -- see gen_klee_cards `_upgrade_add_lines` (EB-122).</summary>
+    public override bool GainsBlock => IsUpgraded;
+
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
@@ -48,13 +52,13 @@ public sealed class ProtoFrSharedBilling : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shared Billing"),
-        ("description", "Apply [gold]Hydro[/gold] to a random enemy. [gold]Spotlighted[/gold] Companion cards gain 25% this turn. Gain 1 [gold]Energy[/gold]. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Apply [gold]Hydro[/gold] to a random enemy. [gold]Spotlighted[/gold] Companion cards gain 25% this turn. Gain 1 [gold]Energy[/gold]. {IfUpgraded:show:Gain 3 [gold]Block[/gold].|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,12 +85,12 @@ public sealed class ProtoFrSharedBilling : CustomCardModel, ICharacterCard
         await PlayerCmd.GainEnergy(1, Owner);
         if (IsUpgraded)
         {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(3m, ValueProp.Move), cardPlay);
         }
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        // add: block -- expressed at play time as an IsUpgraded-gated effect appended after the base effects.
     }
 }

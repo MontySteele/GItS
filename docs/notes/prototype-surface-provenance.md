@@ -2070,6 +2070,21 @@ drain takes it. Rare for Rare, so the offer odds do not move; the row itself is
 unchanged, and the shipped card still exists and is still dealt with the arm
 off (R213 B).
 
+THE SLOPE IS 2 PER DRAINED (the second-wave review of 2026-09-06; a D default).
+At `per: 1` the Rare never out-damaged Universal Revelry's arm copy anywhere in
+the meter's measured 0-to-15 range -- and it emptied the meter to do it, so the
+card paid twice and bought nothing. `{base: 5, per: 2, count: fanfare_drained}`
+is the printed slope; the face renders it through `{ExtraDamage:diff()}`, which
+the emitter reads off `per:` (`fanfare_drained_calc_rider`).
+
+ITS UPGRADE IS `{cost: -1}`, 2 Energy to 1, and it is DERIVED rather than
+authored: the row carries no `upgrade:` key, so
+`upgrades.prototype_default_delta` decides, and every number-moving clause of
+that rule passes over it -- the damage op is formula-scaled and carries no
+literal `amount`, which `_proto_hit` skips by name -- leaving the rule's cost
+clause, "a card of cost 2 or more with no printed number costs 1 less". The
+slope moving 1 to 2 does not change which clause fires.
+
 ## proto_fr_intermission
 
 Face: "Drain your Fanfare. Gain Block equal to the Fanfare drained." `F12` (1):
@@ -2677,7 +2692,7 @@ A FIELD AND NOT AN UPGRADE DELTA, so both faces carry it: an upgrade is a
 different card, and a player who smiths the placer must not lose the opening
 the ruling gave it.
 
-## proto_fr_florid_cadenza, the upgrade (2026-09-06)
+## proto_fr_florid_cadenza, the arm copy (2026-09-06)
 
 THE `+` CARD MOVES THE BAR INSTEAD OF DELETING IT. The rider copy is the
 shipped Florid Cadenza at the arm's meter -- draw 1, and 2 more at 6 Fanfare
@@ -2703,9 +2718,22 @@ upgraded threshold: tier0 rewrites the top-level conditional's `if:`
 bars are authored on the row; nothing computes a threshold. Both engines refuse
 a bar that reads a different meter from the printed one.
 
-Nothing else on the row moves, and `docs/furina-cards.yaml` and
-`docs/furina-upgrades.yaml` do not move at all: the shipped Florid Cadenza and
-its shipped `{condition: unconditional}` are Balance-stage content (R213 B).
+AND THE COPY EXHAUSTS (the second-wave review of 2026-09-06; a D default). A
+0-cost non-Exhaust draw-3 whose bar does not deplete is a
+hold-the-rest-of-the-deck loop -- three copies, a hand cap of 10, the overflow
+to discard -- and it is that at bar 6 exactly as much as at bar 3, so the bar
+move above was never the whole answer. `exhaust: true` makes each copy a
+one-shot and the moved bar stays as it is.
+
+The sheet's sentence keeps the word and the emitted face drops it
+(`_dedupe_printed_exhaust`, `EB-293`): `exhaust: true` puts
+`CardKeyword.Exhaust` on the card and the game's keyword rail prints the
+banner, so a face that also wrote it would print it twice.
+
+Nothing else on the row moves -- same cost, same rarity, same body -- and
+`docs/furina-cards.yaml` and `docs/furina-upgrades.yaml` do not move at all:
+the shipped Florid Cadenza, its shipped `{condition: unconditional}` and the
+absence of Exhaust on it are Balance-stage content (R213 B).
 
 ## proto_fr_shared_billing
 
@@ -2717,10 +2745,18 @@ ONLY THE UPGRADE DIFFERS, and that is the whole row (the 2026-09-06 GPT
 balance review; the main session's D default). The shipped delta is
 `{cost: -1}`, which takes a Common that already REFUNDS its Energy down to 0 --
 a card that costs nothing, gives a card's worth of Energy back, and is handed
-out at every campfire. The arm copy buys a card instead:
-`{add: {op: draw, amount: 1}}`, the shape `proto_fr_salon_debut_named` already
-uses, rendered by the emitter as an `IsUpgraded`-gated draw appended after the
-printed body and an `{IfUpgraded:show:Draw 1 card.|}` clause on the face.
+out at every campfire.
+
+IT BUYS BLOCK, NOT A CARD (the second-wave review of 2026-09-06; a D default).
+The first pass bought a card, `{add: {op: draw, amount: 1}}`, and a card that
+refunds its own Energy and then replaces itself is the same loop piece the
+shipped `{cost: -1}` was taken off for -- free, repeatable, and net-positive on
+both of the resources a loop needs. Block is neither energy nor draw, so the
+delta is `{add: {op: block, amount: 3}}`: the `+` card buys survival and the
+loop stays shut. Rendered by the emitter as an `IsUpgraded`-gated Block
+appended after the printed body, with `GainsBlock => IsUpgraded` so the base
+card claims none (`EB-122`), and an
+`{IfUpgraded:show:Gain 3 [gold]Block[/gold].|}` clause on the face.
 
 Common for Common at the same seam as the rider copies
 (`furina_reframe.POOL_SUBS`, `FurinaReframeRoster.SwapOfferedRiders`). The
@@ -2749,12 +2785,15 @@ sheet unmoved (R213 B).
 
 ## proto_fr_unheard_confession
 
-Face: "Whenever your Fanfare changes amount, gain 1 Block." The shipped Rare's
+Face: "Whenever your Fanfare changes amount, gain 2 Block." The shipped Rare's
 body with its `gain_fanfare_floor 8` rider removed, for `EB-507`'s reason
 above.
 
-NOTHING ELSE MOVES. Cost 2, the shipped `{cost: -1}` upgrade, and the
-Block-per-change at the shipped 1 -- unlike Rapturous Applause there is no
-number to compensate, because this card's payout reads CHANGES in the meter and
-not its height, and a floor it starts at is worth one change. Rare for Rare,
-art borrowed (`art_of`, R179), shipped sheet unmoved (R213 B).
+TWO PER CHANGE, NOT THE SHIPPED ONE (the second-wave review of 2026-09-06; a D
+default). The power pays per change EVENT and not per point moved, which is
+what the first pass read as "no number to compensate" -- but it is also the
+reason 1 is not a Rare's payout: a 2-cost Rare Power that pays 1 Block each
+time the meter ticks is a dead card on a meter that ticks a few times a turn.
+2 is the floor that makes the slot worth a Rare. Cost 2 and the shipped
+`{cost: -1}` upgrade are unchanged. Rare for Rare, art borrowed (`art_of`,
+R179), shipped sheet unmoved (R213 B).

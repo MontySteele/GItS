@@ -454,13 +454,16 @@ public static class FurinaReframeRoster
     /// Two of them are a body plus the rider and the arm carries the body
     /// without it (<i>Rapturous Applause</i>, at 2 per 10 rather than the
     /// shipped 1, because the copy pays for the floor it no longer mints; and
-    /// <i>Unheard Confession</i>). The third, <i>The Sea Is My Stage</i>, is
+    /// <i>Unheard Confession</i>, whose per-change payout is 2 Block and not
+    /// the shipped 1: the power pays per change EVENT, and at 1 a 2-cost Rare
+    /// is a dead slot). The third, <i>The Sea Is My Stage</i>, is
     /// NOTHING but the rider -- there is no body to copy, so its Rare slot
     /// goes to the arm's own Rare drain, <i>Let the People Rejoice</i>, which
     /// until now was granted from a scenario and offered by nothing. The
     /// fourth pair is the 2026-09-06 balance review's <i>Shared Billing</i>:
-    /// same printed body, and the `+` card buys a card instead of going to 0
-    /// Energy on a card that already refunds its own.
+    /// same printed body, and the `+` card buys 3 Block instead of going to 0
+    /// Energy on a card that already refunds its own -- Block being neither of
+    /// the two resources a loop needs.
     ///
     /// ROLLING TIDE WAS WITHDRAWN (`EB-552`, round 13, a D default): four
     /// seats over three rounds read the kit's own perform verb the same way at

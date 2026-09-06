@@ -10,7 +10,9 @@ using KleeMod.Cards.Prototype.Generated;
 using FurinaGen = KleeMod.Cards.Furina.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
@@ -702,6 +704,101 @@ public class FurinaReframeSliceTwoTests
         Assert.Equal("6", Bar("ProtoFrFloridCadenza"));
     }
 
+    // ---- the second-wave review (2026-09-06), three more re-priced rows --
+
+    [Fact]
+    public void The_cadenza_copy_exhausts_and_the_shipped_row_does_not()
+    {
+        // WHAT THE MOVED BAR DID NOT FIX. A 0-cost draw whose gate does not
+        // DEPLETE anything is a hold-the-rest-of-the-deck loop -- three copies,
+        // a hand cap of 10, the overflow to discard -- and it is the same loop
+        // at 3 as at 6, so the smith-side fix above was only half the answer.
+        // Exhaust makes each copy a one-shot, which is the half that closes it.
+        Assert.Contains(CardKeyword.Exhaust,
+            new ProtoFrFloridCadenza().CanonicalKeywords);
+        Assert.DoesNotContain(CardKeyword.Exhaust,
+            new FurinaGen.FloridCadenza().CanonicalKeywords);
+
+        // AND THE FACE DOES NOT WRITE THE WORD (`EB-293`): the keyword above is
+        // what the game's own rail prints the banner from, so a face that said
+        // it too would print it twice. The sheet's sentence keeps it and the
+        // emitted face drops it.
+        Assert.DoesNotContain("Exhaust", Face("ProtoFrFloridCadenza"));
+    }
+
+    [Fact]
+    public void The_drain_pays_five_plus_two_per_Fanfare_drained()
+    {
+        // The `CalculatedDamageVar` TRIPLE, read off the row: the base is the
+        // floor an empty meter pays, the extra is the per-Fanfare slope, and
+        // the multiplier is the drained count (pinned as a call token by
+        // `The_two_drain_rows_read_the_drain_and_never_the_meter`).
+        //
+        // WHY THE SLOPE IS 2. At 1 the Rare never out-damaged Universal
+        // Revelry's arm copy anywhere in the meter's measured 0-to-15 range,
+        // and it emptied the meter to do it -- so it paid twice and bought
+        // nothing.
+        var vars = Vars(new ProtoFrLetThePeopleRejoice());
+        Assert.Equal(5m, vars.Single(v => v.Name == "CalculationBase").BaseValue);
+        Assert.Equal(2m, vars.Single(v => v.Name == "ExtraDamage").BaseValue);
+        Assert.Contains(vars, v => v.Name == "CalculatedDamage");
+    }
+
+    [Fact]
+    public void Shared_Billings_arm_upgrade_buys_Block_and_never_a_card()
+    {
+        // A Common that already REFUNDS its Energy and then replaces itself is
+        // the same loop piece the shipped `{cost: -1}` was taken off for, so
+        // the first pass's added draw bought back what it had just sold. Block
+        // is neither energy nor draw. Read off the face and off the compiled
+        // body, because the two have to agree: the sentence appears only on the
+        // `+` card and so does the effect.
+        var face = Face("ProtoFrSharedBilling");
+        Assert.Contains("{IfUpgraded:show:Gain 3 [gold]Block[/gold].|}", face);
+        Assert.DoesNotContain("Draw", face);
+
+        var calls = Il.Calls(Il.Method("ProtoFrSharedBilling", "OnPlay"));
+        Assert.Contains("CreatureCmd.GainBlock", calls);
+        Assert.DoesNotContain("CardPileCmd.Draw", calls);
+
+        // `EB-122`: the base card must not CLAIM the Block its upgrade buys --
+        // the eligibility predicates read `GainsBlock`, so an unupgraded copy
+        // saying yes would be a split the moment it shipped.
+        Assert.False(new ProtoFrSharedBilling().GainsBlock);
+        var upgraded = new ProtoFrSharedBilling();
+        Seat.Set(upgraded, "IsMutable", true);
+        typeof(CardModel).GetMethod("UpgradeInternal", HeadlessGame.All)!
+            .Invoke(upgraded, new object?[] { });
+        Assert.True(upgraded.GainsBlock);
+    }
+
+    [Fact]
+    public void The_confession_copy_pays_two_Block_per_change()
+    {
+        // The payout reads a change EVENT and not the points that moved, which
+        // is why the first pass left it at the shipped 1 -- and is also why 1
+        // is not a Rare's payout: a 2-cost Rare Power paying 1 Block per tick
+        // of a meter that ticks a few times a turn is a dead card. The face is
+        // the number, and it is the only place this row states one.
+        Assert.Contains("gain 2 [gold]Block[/gold]",
+            Face("ProtoFrUnheardConfession"));
+        // ... and the shipped Rare is untouched, at its own 1 (R213 B).
+        Assert.Contains("gain 1 [gold]Block[/gold]", Face("UnheardConfession"));
+    }
+
+    /// <summary>A row's emitted face, joined: every string literal in its
+    /// generated `Localization` property, which is where an authored face
+    /// lands (`EB-215`).</summary>
+    private static string Face(string type) =>
+        string.Join(" ", Il.Strings(Il.Method(type, "get_Localization")));
+
+    /// <summary>A card's declared `CanonicalVars`, which is where a
+    /// `Calculated*Var` triple's two numbers are written.</summary>
+    private static IReadOnlyList<DynamicVar> Vars(CardModel card) =>
+        ((IEnumerable<DynamicVar>)typeof(CardModel)
+            .GetProperty("CanonicalVars", HeadlessGame.All)!
+            .GetValue(card)!).ToList();
+
     /// <summary>The Fanfare threshold a row prints: the number after "at
     /// least" in its emitted description, on the base card or (with
     /// <paramref name="upgraded"/>) on the `+` one.
@@ -712,8 +809,7 @@ public class FurinaReframeSliceTwoTests
     /// neither is a number this test carries.</summary>
     private static string Bar(string type, bool upgraded = false)
     {
-        var face = string.Join(" ", Il.Strings(
-            Il.Method(type, "get_Localization")));
+        var face = Face(type);
         var hit = System.Text.RegularExpressions.Regex.Match(
             face,
             @"at least (?:\{IfUpgraded:show:(\d+)\|(\d+)\}|(\d+)) \[gold\]Fanfare");

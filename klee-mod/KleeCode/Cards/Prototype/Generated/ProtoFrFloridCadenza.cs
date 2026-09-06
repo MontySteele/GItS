@@ -36,6 +36,9 @@ public sealed class ProtoFrFloridCadenza : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Exhaust };
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fr_florid_cadenza");
 
     public override List<(string, string)>? Localization => new()
