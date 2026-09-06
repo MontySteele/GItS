@@ -166,6 +166,13 @@ _SHEET_COST_RE = re.compile(r"[Ss]heet[^\n]*?\bcost[=:]?\s*(\d+)")
 _SPARK_PRICE_RE = re.compile(
     r"PrintedSparkPrice\s*=>\s*(?:\(IsUpgraded\s*\?\s*\d+\s*:\s*)?"
     r"(\d+)\s*\)?\s*;")
+#: `EB-445`. AN ALL-IN PRICE HAS A GATE OF 1 AND A PRICE OF EVERYTHING. Stoke
+#: the Fuse declares `PrintedSparkPrice => 1` (the gate the playability check
+#: reads) and spends `SparkPower.SparksAtPlay(...)` -- the whole bank -- so a
+#: cost slot that printed the gate said "1 Spark" on a face that says "Spend
+#: all your Sparks". The spend-all call is the mark the generator writes for
+#: exactly that shape, so it is what this reads.
+_SPARK_SPEND_ALL_RE = re.compile(r"SparkPower\.SparksAtPlay\(")
 _CLASS_RE = re.compile(
     r"^\s*(?:public|internal)\s+(?:sealed\s+|abstract\s+|static\s+|partial\s+)*"
     r"class\s+([A-Za-z_][A-Za-z0-9_]*)", re.M)
@@ -413,6 +420,31 @@ def _printed_spark_index_cached(repo: Path) -> tuple[tuple[str, int], ...]:
         if key:
             index.setdefault(key, int(price.group(1)))
     return tuple(sorted(index.items()))
+
+
+@lru_cache(maxsize=4)
+def _spend_all_spark_index_cached(repo: Path) -> frozenset[str]:
+    """`EB-445`. The card ids whose Spark price is the whole bank."""
+    ids: set[str] = set()
+    root = repo / "klee-mod"
+    if not root.is_dir():
+        return frozenset()
+    for path in sorted(root.glob(_CARD_SOURCE_GLOB)):
+        try:
+            src = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        if _SPARK_SPEND_ALL_RE.search(src) and _SPARK_PRICE_RE.search(src):
+            key = _class_key(src)
+            if key:
+                ids.add(key)
+    return frozenset(ids)
+
+
+def spends_all_sparks(card_id: Any, repo: Path | None = None) -> bool:
+    """`EB-445`. Does this card's Spark price take the whole bank?"""
+    root = repo if repo is not None else Path(__file__).resolve().parents[1]
+    return card_key(card_id) in _spend_all_spark_index_cached(root)
 
 
 def printed_spark_index(repo: Path | None = None) -> dict[str, int]:
@@ -933,7 +965,12 @@ def cost_label(card: dict[str, Any]) -> str:
     price = card.get("printed_spark")
     if not isinstance(price, int) or price <= 0:
         return shown
-    sparks = f"{price} Spark" if price == 1 else f"{price} Sparks"
+    if card.get("spark_all"):
+        # `EB-445`: the price is the bank, and the gate is what it takes to
+        # be playable at all.
+        sparks = f"all your Sparks ({price} to play)"
+    else:
+        sparks = f"{price} Spark" if price == 1 else f"{price} Sparks"
     return sparks if shown in ("0", "-") else f"{shown} and {sparks}"
 
 

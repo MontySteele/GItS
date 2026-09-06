@@ -274,6 +274,13 @@ CARD_REWARD_ALTERNATIVE_NOTE = (
     "the next fight.*")
 
 PICKED_MARK = "PICKED"
+# `EB-393`. "(Clone)" ON A TITLE READ AS A SECOND COPY. The enchant confirm
+# listed two picked rows, one tagged `(Clone)`, and the Klee r10 seat read them
+# as two cards; the deck held one. Clone is the game's own mark.
+CLONE_NOTE = ("*A title ending in (Clone) is the game's mark for a card that "
+              "can be duplicated at a Rest Site. It is one card, not a copy; "
+              "a row above and its (Clone) row are the same card.*")
+
 PENDING_PICK_NOTE = ("*Already listed above. These rows are the pick this "
                      "screen is holding, printed a second time so you can "
                      "read its face -- each is one of the cards in the list "
@@ -308,6 +315,12 @@ LAST_SALON_NOTE = (
     "*The fight is over. This is what your Salon did in its last beat -- "
     "printed here because a performance or an Evoke whose kill ends a fight "
     "never reaches a battle screen.*")
+
+# `EB-360`. A SHOP THE FEED SENT NOTHING FOR.
+EMPTY_SHELVES_NOTE = (
+    "*The feed returned no shelves for this shop, so nothing is listed. This "
+    "page cannot tell a sold-out shop from a shop the feed did not send; if "
+    "the game shows wares, observe again, and say `proceed` to leave.*")
 
 LAST_MORNING_NOTE = (
     "*The fight is over. This is the last thing the Bake-Kurage carried out "
@@ -414,6 +427,15 @@ PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
                    "already there. A Plan that blocks, draws or applies a "
                    "debuff leaves no aura.")
 
+# `EB-563` / `EB-330` / `EB-357`. THE COUNT WAS READ AS A CAPACITY. The buff
+# prints `Plan 1`, the box says "the Plan", and three seats wrote one Plan at
+# a time for fights on end (one for four fights) before trying two; nothing in
+# `KokomiPlan.cs` caps the queue. Said on the panel, beside the two rules a
+# Plan is already read against.
+PLAN_COUNT_NOTE = ("- The jellyfish holds any number of Plans and carries them "
+                   "out in the order written; the number on its buff is how "
+                   "many are written, not a limit.")
+
 # `EB-567`. THE KIT'S FIRST DECISION, TAUGHT BY REFUSAL ONE ACTION TOO LATE.
 #
 # WHAT BOTH r14 SEATS MET. Ethereal Spotlight costs 2 Encore, the fight opens
@@ -442,11 +464,15 @@ PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
 # zeroed Encore twice, which is where nine of its eleven HP went. The decision
 # is REAL on both lanes, so this states the window and the price and stops --
 # which is what every other line on this page does.
+# `EB-600` REWORDED THE WINDOW TO THE RULE. "First action or not this fight"
+# was false: Aria of Recompense and Hearts Swelling grant Encore without
+# performing, and the r16 lane-1 seat lit the Spotlight after both. The window
+# is "before anything spends Encore, or after a card refills it", in step with
+# `FurinaRiderTips.ForSpotlightWindow`.
 SPOTLIGHT_WINDOW_NOTE = (
     f"*You open a fight with {FURINA_OPENING_ENCORE} Encore and "
-    f"**Ethereal Spotlight** costs {SPOTLIGHT_ENCORE_COST} -- all of it. Any "
-    "performance spends one, so it is this turn's first action or not this "
-    "fight.*")
+    f"**Ethereal Spotlight** costs {SPOTLIGHT_ENCORE_COST} -- all of it. A "
+    "performance spends one; a card that grants Encore reopens the window.*")
 
 
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
@@ -998,6 +1024,14 @@ GAME_KEYWORDS: dict[str, str] = {
     "Shatter": (f"The first Attack to hit a Frozen enemy before it acts deals "
                 f"{SHATTER_DAMAGE} additional damage and ends the freeze. "
                 "Only a Frozen enemy can be Shattered."),
+    # `EB-359`. THE GAME'S OWN TIP FOR THE WORD IS THE CARD-SIDE REMINDER
+    # ("Gain 2 Tainted when played") and never what Tainted DOES; two seats
+    # spent a card to read their own status line for it. The rule is that
+    # status line's, verbatim from the wire (Kokomi r4d act 2, Klee r8 run 2).
+    "Tainted": ("A debuff on YOU: take N additional damage from Attacks this "
+                "turn, N being the stack, and per hit of a multi-hit intent. "
+                "A card that says Gain 2 Tainted puts 2 on you when played; "
+                "it wears off at the end of your turn."),
 }
 
 _GAME_KEYWORD_RE = {
@@ -1006,6 +1040,7 @@ _GAME_KEYWORD_RE = {
     # power says "Your Shatters", the Salon paragraph says "no Shatter", and
     # the Frozen row says "Shatters for 6".
     "Shatter": re.compile(r"\bShatter(?:s|ed|ing)?\b"),
+    "Tainted": re.compile(r"\bTainted\b"),
 }
 
 
@@ -1247,9 +1282,15 @@ REACTION_KEYWORDS: dict[str, str] = {
     "Superconduct": ("Electro on a Cryo aura, or Cryo on an Electro aura. The "
                      "reacted enemy gains 2 Vulnerable, which applies before "
                      "this hit."),
+    # `EB-357`: AND WHAT IT LOOKS LIKE ON THE PANEL. The dot is the game's own
+    # Poison stack, so it prints as `Poison N`, the stacks add (3, 10, 13 on
+    # one Eel), and it ticks before the enemy acts; the entry said none of
+    # that and the r5 seat could not price a tick from it.
     "Electro-Charged": ("Hydro on an Electro aura, or Electro on a Hydro "
                         "aura. The reacted enemy loses 4 HP at the start of "
-                        "its turn, 1 less each turn."),
+                        "its turn, 1 less each turn. On its panel that is the "
+                        "Poison stack: stacks add, and it ticks before the "
+                        "enemy acts."),
     # `EB-366` SPLIT THE BOSS CLAUSE OFF THIS ROW. See `FROZEN_BOSS_CLAUSE`.
     # `EB-517` PUT THE WINDOW ON IT, in the C# and here in one commit: the two
     # clauses read as independent riders and are one, because the freeze ticks

@@ -34,8 +34,8 @@ import pytest
 
 from tier0 import constants as C
 from tier0.tests.conftest import seam_files
-from understudy import (blindplay, blindplay_notes, blindplay_shape,
-                        embark, qa_packet, soak)
+from understudy import (blindplay, blindplay_board, blindplay_notes,
+                        blindplay_shape, embark, qa_packet, soak)
 
 REPO = Path(__file__).resolve().parents[2]
 RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
@@ -3078,7 +3078,10 @@ def test_a_spent_live_rest_site_offers_only_proceed():
     page = blindplay.observe(live("rest-spent"))
     assert "nothing left to offer" in page
     verbs = [line for line in page.splitlines() if line.startswith("- `")]
-    assert [v for v in verbs if "drop potion" not in v] == ["- `proceed`"]
+    # `EB-356` added the belt's OTHER verb, `use potion`, on the same terms as
+    # `drop potion`: the belt's, never the room's.
+    assert [v for v in verbs
+            if "drop potion" not in v and "use potion" not in v] == ["- `proceed`"]
 
 
 def test_a_fresh_live_rest_site_offers_the_verbs_it_actually_has():
@@ -9035,9 +9038,12 @@ def test_the_turn_one_page_prints_the_spotlight_window():
     then played it first in every fight after; lane 2 the same way.
     """
     page = blindplay.observe(spotlight_turn_one_state())
+    # `EB-600`: the window is the rule, not "first action or not this fight"
+    # -- Aria of Recompense and Hearts Swelling grant Encore without
+    # performing, and the r16 lane-1 seat lit the Spotlight after both.
     assert ("*You open a fight with 2 Encore and **Ethereal Spotlight** costs "
-            "2 -- all of it. Any performance spends one, so it is this turn's "
-            "first action or not this fight.*") in page
+            "2 -- all of it. A performance spends one; a card that grants "
+            "Encore reopens the window.*") in page
 
 
 def test_the_window_line_states_the_window_and_recommends_nothing():
@@ -9054,7 +9060,7 @@ def test_the_window_line_states_the_window_and_recommends_nothing():
     """
     page = blindplay.observe(spotlight_turn_one_state())
 
-    assert "this turn's first action or not this fight" in page
+    assert "a card that grants Encore reopens the window" in page
     for advice in ("Light your Companion cards", "locked out"):
         assert advice not in page
 
@@ -9064,13 +9070,13 @@ def test_the_window_line_is_turn_one_only():
     standing note about a decision that is gone is exactly the noise the
     one-fact-per-line rule keeps off this page."""
     page = blindplay.observe(spotlight_turn_one_state(round_no=2))
-    assert "first action or not this fight" not in page
+    assert "reopens the window" not in page
 
 
 def test_the_window_line_needs_the_selector_in_hand():
     """A turn-one hand without it has no decision to teach."""
     page = blindplay.observe(spotlight_turn_one_state(hand_title="Defend"))
-    assert "first action or not this fight" not in page
+    assert "reopens the window" not in page
 
 
 def test_the_window_line_is_arm_only():
@@ -9078,7 +9084,7 @@ def test_the_window_line_is_arm_only():
     Encore, so the sentence would be false. The Salon block's absence is the
     page's test for which build this is."""
     page = blindplay.observe(spotlight_turn_one_state(salon=False))
-    assert "first action or not this fight" not in page
+    assert "reopens the window" not in page
 
 
 def test_both_spotlight_faces_agree_on_one_duration_sentence():
@@ -9227,7 +9233,7 @@ def test_the_spotlight_tip_carries_the_window_and_keeps_the_refusal():
     assert "{FurinaReframeLaw.SpotlightDesignateEncoreCost}" in body
     # `EB-586`: the window and the price, and no advice. The clause is split
     # across two source literals, so the anchor is the half that is whole.
-    assert "spends one, so it is this turn's first action or not this" in body
+    assert "a card that grants [gold]Encore[/gold] reopens the " in body
     assert "Light your" not in body
     # ITS OWN METHOD, chained at the call site: two facts, two tip rows, each
     # inside the 135-character ceiling on its own.
@@ -10476,3 +10482,207 @@ def test_the_salons_last_beat_reaches_the_reward_screen():
     assert body.index("Evoke") < body.rindex("Crabaletta")
     # A reward screen with no Salon on the wire is untouched.
     assert "Salon" not in blindplay.render(blindplay.observation(rewards_state()))
+
+
+# --- The offline sitting's page rows -----------------------------------------
+
+def test_tainted_prints_what_it_does_not_the_cards_reminder():
+    """`EB-359`. Two seats spent a card to learn what Tainted does; the game's
+    own tip for the word is the card-side reminder. The rule is the status
+    line's, from the wire."""
+    page = blindplay.observe(keyword_hand_state(["Gain 2 Tainted when played."]))
+    assert "- **Tainted** — " in page
+    assert "additional damage from Attacks" in page
+    assert "per hit of a multi-hit intent" in page
+
+
+def test_electro_charged_names_the_poison_stack_and_its_tick():
+    """`EB-357`. The dot renders as `Poison N`, stacks add, and it ticks before
+    the enemy acts; the entry said none of that."""
+    text = blindplay_notes.REACTION_KEYWORDS["Electro-Charged"]
+    assert "Poison stack" in text and "before the enemy acts" in text
+
+
+def test_an_empty_shop_says_the_feed_sent_no_shelves():
+    """`EB-360` (the shop half). An Unknown node resolved into a shop with 400
+    gold in hand and "zero items on every shelf, two observes running"; the
+    page printed an empty shop as if that were the shop."""
+    state = shop_state()
+    state["player"]["gold"] = 400
+    state["shop"]["items"] = []
+    page = blindplay.observe(state)
+    assert "You have 400 gold." in page
+    assert blindplay.EMPTY_SHELVES_NOTE in page
+    assert "On the shelves:" not in page
+    # A stocked shop reads exactly as it always did.
+    assert "On the shelves:" in blindplay.observe(shop_state())
+
+
+def test_gold_prints_on_the_reward_and_rest_screens():
+    """`EB-350` (the gold half). "Gold and HP never print on the map page" was
+    fixed for the map (`EB-447`); the reward and rest screens, where a purchase
+    or a route is weighed against it, still said nothing."""
+    state = rewards_state()
+    state["player"] = {"hp": 26, "max_hp": 78, "gold": 143}
+    assert "You have 143 gold." in blindplay.render(blindplay.observation(state))
+    rest = rest_state()
+    rest.setdefault("player", {})["gold"] = 88
+    assert "88 gold" in blindplay.observe(rest)
+
+
+def test_one_enemy_prints_once_with_its_block():
+    """`EB-391` (the page half). "The enemy block prints twice whenever exactly
+    one enemy is alive; a seat read fight 3 as two Shrinker Beetles." Pinned
+    on the recorded fight cut to one body."""
+    state = copy.deepcopy(combat_state())
+    state["battle"]["enemies"] = state["battle"]["enemies"][:1]
+    state["battle"]["enemies"][0]["block"] = 7
+    page = blindplay.observe(state)
+    name = state["battle"]["enemies"][0]["name"]
+    assert page.count("## The other side") == 1
+    assert sum(1 for line in page.splitlines()
+               if line.startswith(f"- **{name}**")) == 1
+    assert "Block 7" in page
+
+
+def test_a_won_or_lost_run_says_what_it_ended_with():
+    """`EB-333` (the game-over half). "The run-over page is one line and a
+    floor number ... a won run's game_over says nothing." The summary is the
+    feed's own last player blob."""
+    state = game_over_state()
+    state["run"] = {"floor": 17, "act": 1}
+    state["player"] = {"hp": 0, "max_hp": 62, "gold": 231,
+                       "relics": [{"name": "Pounding Surprise"}],
+                       "potions": [{"name": "Fire Potion", "slot": 0}]}
+    page = blindplay.observe(state)
+    assert "The run ended on floor 17: Defeat" in page
+    assert "What the run ended with:" in page
+    assert "- Act 1" in page and "- HP 0/62" in page and "- 231 gold" in page
+    assert "- Relics: Pounding Surprise" in page
+    assert "- Potions: Fire Potion" in page
+    # A bare game-over blob prints the floor and nothing invented.
+    bare = blindplay.observe(game_over_state())
+    assert "What the run ended with" not in bare
+
+
+def test_the_plan_panel_says_the_jellyfish_holds_any_number_of_plans():
+    """`EB-563` / `EB-330` / `EB-357`. The buff's `Plan 1` and the box's "the
+    Plan" read as a capacity, and a seat wrote one Plan at a time for four
+    fights. Said beside the two rules the panel already carries."""
+    page = blindplay.observe(plans_combat_state(
+        morning_of({"card": "Cleansing Wave", "number": 7,
+                    "line": "Bake-Kurage: Cleansing Wave, 7",
+                    "kind": "Block", "asked": 10})))
+    lines = page.splitlines()
+    assert blindplay.PLAN_COUNT_NOTE in lines
+    assert lines.index(blindplay.PLAN_HYDRO_NOTE) + 1 == \
+        lines.index(blindplay.PLAN_COUNT_NOTE)
+
+
+def test_an_all_in_spark_price_prints_as_all_not_as_its_gate():
+    """`EB-445`. Stoke the Fuse's gate is 1 and its price is the whole bank;
+    the cost slot printed the gate."""
+    assert qa_packet.spends_all_sparks("KLEEMOD-PROTO_KO_STOKE_THE_FUSE")
+    assert not qa_packet.spends_all_sparks("KLEEMOD-PROTO_KO_FWOOSH")
+    assert qa_packet.cost_label({"cost": "0", "printed_spark": 1,
+                                 "spark_all": True}) == "all your Sparks (1 to play)"
+    assert qa_packet.cost_label({"cost": "0", "printed_spark": 1}) == "1 Spark"
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-PROTO_KO_STOKE_THE_FUSE", "name": "Stoke the Fuse",
+         "type": "Skill", "cost": "0", "can_play": True, "index": 0,
+         "target_type": "None", "is_upgraded": False, "keywords": [],
+         "description": "Spend all your Sparks. Your largest Bomb grows by 3 "
+                        "per Spark spent."}]
+    page = blindplay.observe(state)
+    assert "all your Sparks (1 to play)" in page
+
+
+def test_a_reward_screen_offers_use_potion_when_the_belt_holds_one():
+    """`EB-356`. A Regen Potion at 24/80 and a Snecko Oil were lost to a reward
+    screen whose grammar was `choose` and `proceed`; the bridge drinks a
+    non-combat potion anywhere, so the verb is offered."""
+    state = rewards_state()
+    state["player"] = {"hp": 24, "max_hp": 80, "gold": 10, "max_potion_slots": 3,
+                       "potions": [{"name": "Regen Potion", "slot": 1,
+                                    "target_type": "Self"}]}
+    page = blindplay.observe(state)
+    assert 'use potion "<potion>"' in page
+    res = blindplay.act(state, 'use potion "Regen Potion"')
+    assert res["ok"], res
+    assert res["post"] == {"action": "use_potion", "slot": 1}
+    # An empty belt is not offered the verb.
+    assert 'use potion' not in blindplay.observe(rewards_state())
+
+
+def _enchant_state(picked: bool = True, clone: bool = False) -> dict:
+    """The deck enchant picker as the wire spells it (`screen_type: enchant`,
+    `EB-263`), with a Sharp 2 prompt and one Attack picked."""
+    edge = {"id": "KLEEMOD-WATERS_EDGE", "name": "Water's Edge",
+            "type": "Attack", "cost": "1", "description": "Deal 7 damage."}
+    cards = [edge, {"id": "KLEEMOD-PROTO_KO_SIZZLE", "name": "Sizzle",
+                    "type": "Attack", "cost": "1",
+                    "description": "Set off. Deal 6 damage."}]
+    if clone:
+        cards.append({**edge, "name": "Water's Edge (Clone)"})
+    return {"state_type": "card_select",
+            "player": {"hp": 40, "max_hp": 70, "gold": 50},
+            "card_select": {"screen_type": "enchant",
+                            "prompt": "Choose an Attack to Enchant with Sharp 2.",
+                            "cards": cards,
+                            "preview_cards": [edge] if picked else [],
+                            "preview_showing": picked,
+                            "can_confirm": picked, "can_cancel": False}}
+
+
+def test_the_enchant_confirm_names_the_number_it_moves():
+    """`EB-355` (the preview half) and `EB-393` (the gloss beside the pick).
+    "Sharp raises the hand number ... unsaid" at an irreversible branch; the
+    prompt names the enchant and the picked face carries the number."""
+    page = blindplay.observe(_enchant_state())
+    assert "- Sharp 2 on **Water's Edge**: Deal 7 → 9 damage." in page
+    # The verbs are the ones the wire says will work: no `skip` without a
+    # cancel button (`EB-259`), which is `EB-355`'s "only verbs that resolve".
+    assert "- `skip`" not in page
+    assert "- `confirm`" in page
+    # Nothing picked yet: no arithmetic is claimed.
+    assert "Sharp 2 on" not in blindplay.observe(_enchant_state(picked=False))
+    # The helper's other two words.
+    assert blindplay_board.enchant_moves_line(
+        {"word": "Nimble", "amount": 3}, "Defend", "Gain 5 Block.") \
+        == "- Nimble 3 on **Defend**: Gain 5 → 8 Block."
+    assert "draw 1" in blindplay_board.enchant_moves_line(
+        {"word": "Swift", "amount": 1}, "Oz", "Summon Oz.")
+
+
+def test_a_clone_marked_title_is_explained_as_one_card():
+    """`EB-393`. Two picked rows, one tagged (Clone), read as two copies; the
+    deck held one. The mark is the game's and the page says what it is."""
+    page = blindplay.observe(_enchant_state(clone=True))
+    assert blindplay.CLONE_NOTE in page
+    assert blindplay.CLONE_NOTE not in blindplay.observe(_enchant_state())
+
+
+def test_an_events_own_words_print_under_the_option_that_uses_them():
+    """`EB-397`. "Words on this screen at the Crystal Sphere printed one entry,
+    Kokomi's Plan tip, on a Klee run, and none for Divine or Debt, the two
+    words the screen used." `EB-448` put an option's own hover tips under the
+    option (the wire's `keywords`), and `EB-504` stopped an off-arm rule from
+    printing on another character's run; this pins the two together."""
+    state = {"state_type": "event", "player": {"character": "Klee", "gold": 50},
+             "event": {"event_id": "CRYSTAL_SPHERE", "event_name": "Crystal Sphere",
+                       "in_dialogue": False,
+                       "body": "A Divine sphere hums. Your Debt weighs.",
+                       "options": [
+                           {"index": 0, "title": "Uncover Future",
+                            "keywords": [
+                                {"name": "Divine",
+                                 "description": "Divine cards cost 0 the first time."},
+                                {"name": "Debt",
+                                 "description": "Lose gold at the end of the act."}]},
+                           {"index": 1, "title": "Leave"}]}}
+    page = blindplay.observe(state)
+    assert "**Divine** — Divine cards cost 0 the first time." in page
+    assert "**Debt** — Lose gold at the end of the act." in page
+    # No rule of another character's kit is defined on this run's event.
+    assert "Bake-Kurage" not in page and "carry-out" not in page.lower()

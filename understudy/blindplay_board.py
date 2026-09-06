@@ -8,6 +8,7 @@ and what each screen is offering. Re-exported from `blindplay.py`, so
 """
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from understudy import qa_packet
@@ -189,6 +190,44 @@ PHASE_FLIP_LINE = "changing phase (its HP is not a number this turn)"
 def is_phase_flip_hp(hp: int, max_hp: int) -> bool:
     """Is this HP pair the game's phase-change sentinel rather than a body's?"""
     return max(hp, max_hp) >= PHASE_FLIP_HP_FLOOR
+
+
+#: `EB-355` / `EB-393`. THE NUMBER AN ENCHANT MOVES, NAMED AT THE PICK. "Sharp
+#: raises the hand number, an upgrade the Plan number, unsaid" (Kokomi r5 run
+#: 2): the branch is irreversible and the page had the word's definition but
+#: not this card's arithmetic. The prompt names the enchant and its amount
+#: ("Choose an Attack to Enchant with Sharp 2."), the picked face carries the
+#: one number the enchant touches, so the line is the two put together.
+_ENCHANT_PROMPT_RE = re.compile(r"\bEnchant with (Sharp|Nimble|Swift)\s*(\d+)")
+_ENCHANT_MOVES = {
+    "Sharp": re.compile(r"\bDeal (\d+) damage"),
+    "Nimble": re.compile(r"\bGain (\d+) Block"),
+}
+
+
+def enchant_in_prompt(prompt: str) -> dict[str, Any] | None:
+    """`{"word", "amount"}` for a selection prompt that names an enchant."""
+    m = _ENCHANT_PROMPT_RE.search(prompt or "")
+    if m is None:
+        return None
+    return {"word": m.group(1), "amount": int(m.group(2))}
+
+
+def enchant_moves_line(enchant: dict[str, Any], title: str, text: str) -> str:
+    """One line: what this enchant does to THIS card's printed number."""
+    word, amount = enchant["word"], enchant["amount"]
+    if word == "Swift":
+        return (f"- {word} {amount} on **{title}**: the first time you play "
+                f"it in a fight, draw {amount}.")
+    m = _ENCHANT_MOVES[word].search(text or "")
+    if m is None:
+        return (f"- {word} {amount} on **{title}**: this face prints no "
+                f"{'damage' if word == 'Sharp' else 'Block'} number for it "
+                "to move.")
+    n = int(m.group(1))
+    unit = "damage" if word == "Sharp" else "Block"
+    return (f"- {word} {amount} on **{title}**: {m.group(0).split(' ')[0]} "
+            f"{n} → {n + amount} {unit}.")
 
 
 def upgrade_deck_floor(state: dict[str, Any]) -> int:

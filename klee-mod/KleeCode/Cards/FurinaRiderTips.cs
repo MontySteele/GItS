@@ -206,9 +206,9 @@ public static class FurinaRiderTips
             new LocString(Table, SpotlightWindowKey + ".title"),
             $"You open a fight with {FurinaReframeLaw.OpeningEncore} "
           + "[gold]Encore[/gold] and this costs "
-          + $"{FurinaReframeLaw.SpotlightDesignateEncoreCost}. Any performance "
-          + "spends one, so it is this turn's first action or not this "
-          + "fight.");
+          + $"{FurinaReframeLaw.SpotlightDesignateEncoreCost}. A performance "
+          + "spends one; a card that grants [gold]Encore[/gold] reopens the "
+          + "window.");
 #endif
     }
 
