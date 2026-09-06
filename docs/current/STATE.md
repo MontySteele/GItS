@@ -224,9 +224,17 @@ are in [`workstreams.md`](workstreams.md).
   still read as never binding or circular; the starter's single
   detonator read a third time (five dead-Bomb turns in six fights), to
   be raised as [USER]'s own pick after the round lands; no pick in the
-  packet; `EB-593`-`EB-596`, `EB-605`. [USER]'s act-1 run is due on
-  the next build. The round-8 clear is read against a control run
-  (below).
+  packet; `EB-593`-`EB-596`, `EB-605`. **The starter's detonator is
+  [USER]'s open pick** (PR #405, `git show 94e7e505:review/active/klee-starter-detonator-pick-2026-09-06.md`,
+  four natural readings and one assembled deadlock; default hold,
+  recommendation a second basic detonator for a Strike). **Round 23 is
+  READ** (`review/active/klee-overhaul-round-23-2026-09-06.md`): on
+  `0.2.2830+proto` the Spark loop read from both edges, never scarce on
+  the natural lane and deadlocked on a deck of Spark cards (the act-1
+  elite lost to a priced-out detonator, not to damage); Hexerei's three
+  exact questions to `EB-596`; no pick here; `EB-607`-`EB-612`.
+  [USER]'s act-1 run is due on `0.2.2830+proto`. The round-8 clear is
+  read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
   six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
