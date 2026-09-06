@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import copy
 import inspect
 import json
 import re
@@ -10377,3 +10378,101 @@ def test_a_doubled_page_is_refused_rather_than_handed_over():
     assert "## Your hand" in str(raised.value)
     assert "## The other side" in str(raised.value)
     assert "printed a section twice" in str(raised.value)
+
+
+# `EB-332`: A BOSS'S PHASE FLIP IS AN EVENT, NOT A NUMBER ---------------------
+
+def test_a_phase_flip_sentinel_prints_as_an_event_not_a_billion_hp():
+    """`EB-332`. "Waterfall Giant -- HP 999999997/999999999. A phase transition
+    rendered as a raw sentinel. For one turn the boss had a billion HP on
+    screen. This is the single worst thing I saw" (Kokomi r4c act 2, fight 9).
+
+    The wire parks the body on the sentinel while the game changes its phase;
+    no real body has a hundred million HP, so the page names the event and
+    prints no number. Seen to FAIL: the line quoted the sentinel verbatim."""
+    state = copy.deepcopy(combat_state())
+    body = state["battle"]["enemies"][0]
+    body["hp"], body["max_hp"] = 999999997, 999999999
+    page = blindplay.observe(state)
+    assert "999999" not in page
+    assert f"**{body['name']}**" in page
+    assert blindplay.PHASE_FLIP_LINE in page
+    # A real body is untouched by the guard.
+    plain = blindplay.observe(combat_state())
+    assert "HP 38/45" in plain
+    assert blindplay.PHASE_FLIP_LINE not in plain
+
+
+def test_the_smith_reads_an_upgraded_card_off_its_plus_when_the_flag_is_absent():
+    """`EB-609` (the second half). The Klee r23 lane-1 seat's Smith listed its
+    already-upgraded cards under "on the screen's list nowhere, and nothing on
+    the feed says why" while saying "already upgraded" for Sizzle+ alone: the
+    pile entries that carried `is_upgraded` were read and the ones that carried
+    only the game's `+` on the title were not. The title is the fact the reader
+    sees, so it is read too. Seen to FAIL: Chain Fuse+ printed the unexplained
+    line."""
+    blindplay.forget_deck()
+    fight, smith = upgrade_run_states()
+    fight = copy.deepcopy(fight)
+    fight["player"]["draw_pile"].append(
+        {"id": "KLEEMOD-PROTO_KO_CHAIN_FUSE", "name": "Chain Fuse+",
+         "type": "Skill", "cost": "1",
+         "description": "Each Bomb on target enemy grows by 5."})
+    blindplay.observe(fight)
+    page = blindplay.observe(smith)
+    assert ("- **Chain Fuse+** — " + blindplay.ALREADY_UPGRADED) in page
+    assert ("- **Chain Fuse+** — " + blindplay.UNEXPLAINED_OMISSION) not in page
+    blindplay.forget_deck()
+
+
+def test_the_smith_prints_the_basics_upgraded_faces():
+    """`EB-609` (the first half). "Every Strike and Defend read 'Upgraded: not
+    shown -- this page has no written face for this card'" (Klee r23 lane 1
+    (c) 5). The index is built off the mod's C# and the basics are the base
+    game's, so their two faces are written down: one number, +3, the base
+    game's own idiom. Seen to FAIL: both rows printed the no-face line."""
+    assert qa_packet.upgrade_preview("STRIKE", "Deal 6 damage.",
+                                     title="Strike") == ("Deal 9 damage.", "")
+    assert qa_packet.upgrade_preview("DEFEND", "Gain 5 Block.",
+                                     title="Defend") == ("Gain 8 Block.", "")
+    # A mod card that merely says Strike in its name never takes this path.
+    assert qa_packet.upgrade_preview(
+        "KLEEMOD-NOT_A_CARD", "Deal 6 damage.",
+        title="Kaeya — Cold-Blooded Strike") == ("", qa_packet.NO_PREVIEW_TEMPLATE)
+    smith = live("upgrade-fresh")
+    smith = json.loads(json.dumps(smith.get("state", smith)))
+    smith["card_select"]["cards"] += [
+        {"id": "STRIKE", "name": "Strike", "cost": "1", "type": "Attack",
+         "description": "Deal 6 damage."},
+        {"id": "DEFEND", "name": "Defend", "cost": "1", "type": "Skill",
+         "description": "Gain 5 Block."}]
+    page = blindplay.observe(smith)
+    assert "    Upgraded: Deal 9 damage." in page
+    assert "    Upgraded: Gain 8 Block." in page
+
+
+def test_the_salons_last_beat_reaches_the_reward_screen():
+    """`EB-604`. "Two deliberate Evokes onto a full stage (Encore 10 and 7
+    held) printed nothing because both were lethal" (Furina r16 lane 2; r14
+    lane 1's Second Course the same). The bridge emits `furina_salon` on every
+    player state beside `kokomi_plans`, so the receipt is on the reward
+    screen's own wire and the page reads it there, Evoke first (`EB-582`).
+    Seen to FAIL: the reward screen printed the rewards and nothing of the
+    beat."""
+    state = rewards_state()
+    state["player"] = {"hp": 26, "max_hp": 78, "gold": 99, "furina_salon": {
+        "performed": [{"member": "Crabaletta", "target": "Toadpole",
+                       "combat_id": "1", "element": "Hydro", "aura": "",
+                       "amount": 9, "paid": True, "evoked": False}],
+        "replayed": [],
+        "evoked": [evoke_row(member="Crabaletta", target="Toadpole",
+                             combat_id="1", damage=12, aura_all=False)]}}
+    page = blindplay.render(blindplay.observation(state))
+    assert "## What your Salon did in the fight's last beat" in page
+    assert "never reaches a battle screen" in page
+    body = page.split("## What your Salon did in the fight's last beat")[1]
+    assert "Crabaletta" in body and "Toadpole" in body
+    # The Evoke's line leads the performance's, as on a battle screen.
+    assert body.index("Evoke") < body.rindex("Crabaletta")
+    # A reward screen with no Salon on the wire is untouched.
+    assert "Salon" not in blindplay.render(blindplay.observation(rewards_state()))

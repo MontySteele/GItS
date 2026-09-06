@@ -78,9 +78,18 @@ def build(args) -> tuple[str, str]:
     """`(id, row text)` for the arguments given."""
     if args.id:
         cid = args.id
+    elif args.register == "QUEUE":
+        # `EB-606`. NO NEW `M` ID AFTER 2026-09-01 (CLAUDE.md sec.Norms): a
+        # pick is named by its packet section until it is ruled, and by its
+        # `R` number after. The 2026-09-06 starter pick minted `M70` because
+        # this branch still derived one; now it refuses, and the id is the
+        # section name the packet gives the pick.
+        raise SystemExit("QUEUE rows take no derived id: no new M id is "
+                         "minted after 2026-09-01. Name the row by its "
+                         "packet section, e.g. --id 'klee-starter-pick 1'.")
     else:
         series, number = register_io.next_free(args.register)
-        cid = f"{series}-{number}" if series == "EB" else f"{series}{number}"
+        cid = f"{series}-{number}"
     if args.register == "BACKLOG":
         missing = [n for n, v in (("--scope", args.scope),
                                   ("--next-action", args.next_action),
@@ -151,7 +160,7 @@ def main(argv: list[str]) -> int:
         else:
             print(row)
             print()
-            print(f"id:     {cid} ({'forced' if args.id else 'derived'})")
+            print(f"id:     {cid} ({'section-named' if args.register == 'QUEUE' else 'forced' if args.id else 'derived'})")
             print(f"length: {length} chars against the {limit} gate -- "
                   f"{'ok' if fits else 'TOO LONG, shorten it'}")
             print(f"target: {args.register} section {args.section!r}")

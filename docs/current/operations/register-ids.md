@@ -2,8 +2,10 @@
 
 `tools/lint_register_ids.py` is the gate: one id, one row, once ever, across
 `docs/current/BACKLOG.md` (the `EB` series) and `docs/current/QUEUE.md` (the
-`M` series). This page is the procedure it enforces, and the ledger of what
-every retired number was.
+`M` series, CLOSED 2026-09-01: existing `M` rows close in place, and a new
+pick is named by its packet section, which `tools/mint_row.py QUEUE --id`
+takes and `next_free("QUEUE")` refuses -- `EB-606`). This page is the
+procedure it enforces, and the ledger of what every retired number was.
 
 ## The three guarantees, unchanged since `EB-127`
 
@@ -1515,3 +1517,4 @@ M69 RETIRED 2026-09-04 under R255, pick 1 on the X9 re-read (review/records/x9re
 EB-183 RETIRED 2026-09-04 under R256 (pick 1): R213 E1's second reading, Muster's Charge subsidy at the funnel, is overtaken; the Plan kit (R240) has neither Muster nor Charge. The built subsidy: waived op stays flag-off; the EB183-MF slate was never countersigned or run.
 EB-458 RETIRED 2026-09-04 as not a defect: render emits the enemy block once on all 41 recorded screens; both r14 seats piped observe through overlapping sed ranges, the r10 seat's own diagnosis; a pin keeps it single.
 EB-526 RETIRED 2026-09-05 as not a defect: a generated Companion IS lit -- `SpotlightSystem.IsSpotlighted` asks the owner's live mode and the card's class and reads no membership snapshot, so a card made after the lighting answers the same test. Charlotte and Shinobu are printed 4 on their sheets and Guest Cast is x1.5, so the 6 the seat read on each WAS the lit number; the seat compared it against a base of 6. Pinned both ways in Round12Tests. What stands is that a face gives no way to tell a lit number from a base one, which is EB-438's family and not this row.
+EB-566 RETIRED 2026-09-06 as not a defect (read 2026-09-05): every Block number the Furina r14 seat read was the row's base plus the Dexterity, and the delivered Block matched the face because the face already folds it (`BlockVar` carries `ValueProp.Move`; pinned in `test_furina_pool_pass.py`).

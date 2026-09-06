@@ -704,19 +704,51 @@ def _upgraded_face_index_cached(repo: Path) -> tuple[
     return tuple(sorted(index.items()))
 
 
+#: `EB-609`. THE BASICS ARE THE BASE GAME'S AND HAVE NO SOURCE FILE HERE. Every
+#: Strike and Defend on the Klee r23 Smith read "this page has no written face
+#: for this card", which is true of the index and useless to a reader: the
+#: index is built off the mod's own C#, and the starter's basics are the game's.
+#: Their upgrade is the base game's own idiom -- one number, +3 (Strike 6 to 9,
+#: Defend 5 to 8; tier0 mirrors the same idiom as `PROTOTYPE_DAMAGE_DELTA` and
+#: `PROTOTYPE_BLOCK_DELTA`) -- so the two faces are written here, keyed on the
+#: printed TITLE and matched against the WHOLE printed face, so a mod card that
+#: borrows the word Strike in its name never takes this path.
+_BASE_GAME_BASICS: dict[str, tuple[re.Pattern[str], int]] = {
+    "strike": (re.compile(r"^Deal (\d+) damage\.$"), 3),
+    "defend": (re.compile(r"^Gain (\d+) Block\.$"), 3),
+}
+
+
+def _base_game_basic_face(title: Any, printed: str) -> str:
+    """The upgraded face of a base-game Strike or Defend, or `""`."""
+    key = str(title or "").strip().lower()
+    if key not in _BASE_GAME_BASICS:
+        return ""
+    pattern, delta = _BASE_GAME_BASICS[key]
+    face = strip_markup(printed).strip()
+    m = pattern.match(face)
+    if m is None:
+        return ""
+    value = int(m.group(1)) + delta
+    return face[:m.start(1)] + str(value) + face[m.end(1):]
+
+
 def upgrade_preview(card_id: Any, printed: str,
-                    repo: Path | None = None) -> tuple[str, str]:
+                    repo: Path | None = None,
+                    title: Any = None) -> tuple[str, str]:
     """`(the face this card would print upgraded, why it cannot say)`.
 
     Exactly one of the two is ever non-empty. `printed` is the wire's own
     current description, markup already stripped by the bridge. See the block
     comment above for the whole argument, including why this is the UPGRADE
-    SCREEN's answer and not the hand's.
+    SCREEN's answer and not the hand's. `title` is the printed name, read only
+    when the index has no row (`EB-609`, the base game's basics).
     """
     root = repo if repo is not None else Path(__file__).resolve().parents[1]
     row = dict(_upgraded_face_index_cached(root)).get(card_key(card_id))
     if row is None:
-        return "", NO_PREVIEW_TEMPLATE
+        basic = _base_game_basic_face(title, printed)
+        return (basic, "") if basic else ("", NO_PREVIEW_TEMPLATE)
     template, holes, reason, _keywords = row
     if reason:
         return "", reason

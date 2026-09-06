@@ -301,6 +301,14 @@ CARRY_OUT_BOARD_NOTE = (
 # screen is ever drawn for. The mod now records its line on the way out
 # (`KokomiPlan.ResolveEntry`'s finally) and the bridge sends the record on a
 # screen with no combat behind it, so the receipt has somewhere to land.
+# `EB-604`. THE SAME RECEIPT ONE ARM OVER: a lethal Evoke or performance ends
+# the fight and the next screen is the reward screen, so the winning beat had
+# no line anywhere (Furina r16 lane 2, r14 lane 1).
+LAST_SALON_NOTE = (
+    "*The fight is over. This is what your Salon did in its last beat -- "
+    "printed here because a performance or an Evoke whose kill ends a fight "
+    "never reaches a battle screen.*")
+
 LAST_MORNING_NOTE = (
     "*The fight is over. This is the last thing the Bake-Kurage carried out "
     "in it -- printed here because a Plan whose kill ends a fight never "

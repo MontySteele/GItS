@@ -600,10 +600,16 @@ def remember_deck(state: dict[str, Any]) -> None:
     for pile in _DECK_PILES:
         for entry in player.get(pile) or []:
             if isinstance(entry, dict) and _text(entry.get("name")):
+                # `EB-609`: the pile entry's flag OR the `+` the game prints
+                # on an upgraded title. The Klee r23 seat's Smith listed its
+                # upgraded cards under "nowhere, and nothing on the feed says
+                # why" because the flag was absent and the title was not read.
                 cards.append({"title": _text(entry.get("name")),
                               "key": qa_packet.card_key(entry.get("id")),
                               "upgraded": bool(entry.get("is_upgraded")
-                                               or entry.get("upgraded"))})
+                                               or entry.get("upgraded")
+                                               or _text(entry.get("name"))
+                                               .rstrip().endswith("+"))})
     if not cards:
         return
     held = _held_deck()
