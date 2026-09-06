@@ -10449,3 +10449,30 @@ def test_the_smith_prints_the_basics_upgraded_faces():
     page = blindplay.observe(smith)
     assert "    Upgraded: Deal 9 damage." in page
     assert "    Upgraded: Gain 8 Block." in page
+
+
+def test_the_salons_last_beat_reaches_the_reward_screen():
+    """`EB-604`. "Two deliberate Evokes onto a full stage (Encore 10 and 7
+    held) printed nothing because both were lethal" (Furina r16 lane 2; r14
+    lane 1's Second Course the same). The bridge emits `furina_salon` on every
+    player state beside `kokomi_plans`, so the receipt is on the reward
+    screen's own wire and the page reads it there, Evoke first (`EB-582`).
+    Seen to FAIL: the reward screen printed the rewards and nothing of the
+    beat."""
+    state = rewards_state()
+    state["player"] = {"hp": 26, "max_hp": 78, "gold": 99, "furina_salon": {
+        "performed": [{"member": "Crabaletta", "target": "Toadpole",
+                       "combat_id": "1", "element": "Hydro", "aura": "",
+                       "amount": 9, "paid": True, "evoked": False}],
+        "replayed": [],
+        "evoked": [evoke_row(member="Crabaletta", target="Toadpole",
+                             combat_id="1", damage=12, aura_all=False)]}}
+    page = blindplay.render(blindplay.observation(state))
+    assert "## What your Salon did in the fight's last beat" in page
+    assert "never reaches a battle screen" in page
+    body = page.split("## What your Salon did in the fight's last beat")[1]
+    assert "Crabaletta" in body and "Toadpole" in body
+    # The Evoke's line leads the performance's, as on a battle screen.
+    assert body.index("Evoke") < body.rindex("Crabaletta")
+    # A reward screen with no Salon on the wire is untouched.
+    assert "Salon" not in blindplay.render(blindplay.observation(rewards_state()))

@@ -13,7 +13,7 @@ from typing import Any
 
 from understudy import qa_packet
 from understudy.blindplay_board import PHASE_FLIP_LINE, _pulse_phrase
-from understudy.blindplay_notes import (AURA_NOTE,
+from understudy.blindplay_notes import (AURA_NOTE, LAST_SALON_NOTE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         DEFEND_INTENT_CLAUSE,
@@ -1115,6 +1115,16 @@ def render(obs: dict[str, Any]) -> str:
                     LAST_MORNING_NOTE, ""] + _render_carry_out(lm)
             if _board_note_wanted(lm):
                 out += ["", CARRY_OUT_BOARD_NOTE]
+        # `EB-604`: the Salon's last beat, the same way. The Evoke leads, as
+        # it does on a battle screen (`EB-582`).
+        if obs.get("last_salon"):
+            ls = obs["last_salon"]
+            out += ["", "## What your Salon did in the fight's last beat", "",
+                    LAST_SALON_NOTE, ""]
+            out += [_render_evoke(row) for row in ls["evoked"]]
+            out += [_render_performance(row) for row in ls["performed"]]
+            out += [f"- **{name}** was played an extra time, and the extra "
+                    "play performed as well." for name in ls["replayed"]]
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
 

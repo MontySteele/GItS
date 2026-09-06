@@ -19,7 +19,8 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         _proceed_option, _relic_options,
                                         _rest_options, _reward_items,
                                         _screen_cards, _selected_bundle,
-                                        last_morning, upgrade_deck_floor)
+                                        last_morning, last_salon,
+                                        upgrade_deck_floor)
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_options,
@@ -468,6 +469,7 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # receipt lands here. `None` -- and so printed nowhere -- on every
         # reward screen of a build without the rule.
         obs["last_morning"] = last_morning(state)
+        obs["last_salon"] = last_salon(state)          # `EB-604`
     elif st in ("treasure", "relic_select"):
         obs["screen"] = st
         obs["items"] = [_named_option(r) for r in _relic_options(state)]

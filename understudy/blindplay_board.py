@@ -733,6 +733,30 @@ def last_morning(state: dict[str, Any]) -> dict[str, Any] | None:
             "fired_now": plans["fired_now"]}
 
 
+def last_salon(state: dict[str, Any]) -> dict[str, Any] | None:
+    """The last beat of a Salon whose fight is already over (`EB-604`).
+
+    `last_morning` ONE ARM OVER. Two deliberate Evokes onto a full stage, with
+    Encore 10 and 7 held, "printed nothing because both were lethal" (Furina
+    r16 lane 2; r14 lane 1's Second Course the same): the beat that ends a
+    fight is the one beat no battle screen is drawn for, and the seat could
+    not read what its winning play did. The bridge emits `furina_salon` beside
+    `kokomi_plans` on every player state (`McpMod.StateBuilder.cs`, the
+    `EB-405` block), so the receipt is on the reward screen's own wire; this
+    reads it there, acts only -- the company is a fact about a stage that no
+    longer exists. `None` where there is nothing to say.
+    """
+    salon = furina_salon(_player(state))
+    if salon is None:
+        return None
+    if not (salon["performed"] or salon["replayed"] or salon.get("evoked")):
+        return None
+    # No board to name bodies against: the mod's own titles stand, which is
+    # `name_performances`' fallback for a body the act killed.
+    return {"performed": salon["performed"], "replayed": salon["replayed"],
+            "evoked": list(salon.get("evoked") or [])}
+
+
 def _moved_row(row: dict[str, Any]) -> dict[str, Any]:
     """One enemy's share of one Plan (`EB-329`), off `KokomiPlan.MovedRow`.
 
