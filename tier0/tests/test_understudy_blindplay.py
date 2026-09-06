@@ -34,8 +34,8 @@ import pytest
 
 from tier0 import constants as C
 from tier0.tests.conftest import seam_files
-from understudy import (blindplay, blindplay_notes, blindplay_shape,
-                        embark, qa_packet, soak)
+from understudy import (blindplay, blindplay_board, blindplay_notes,
+                        blindplay_shape, embark, qa_packet, soak)
 
 REPO = Path(__file__).resolve().parents[2]
 RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
@@ -9038,9 +9038,12 @@ def test_the_turn_one_page_prints_the_spotlight_window():
     then played it first in every fight after; lane 2 the same way.
     """
     page = blindplay.observe(spotlight_turn_one_state())
+    # `EB-600`: the window is the rule, not "first action or not this fight"
+    # -- Aria of Recompense and Hearts Swelling grant Encore without
+    # performing, and the r16 lane-1 seat lit the Spotlight after both.
     assert ("*You open a fight with 2 Encore and **Ethereal Spotlight** costs "
-            "2 -- all of it. Any performance spends one, so it is this turn's "
-            "first action or not this fight.*") in page
+            "2 -- all of it. A performance spends one; a card that grants "
+            "Encore reopens the window.*") in page
 
 
 def test_the_window_line_states_the_window_and_recommends_nothing():
@@ -9057,7 +9060,7 @@ def test_the_window_line_states_the_window_and_recommends_nothing():
     """
     page = blindplay.observe(spotlight_turn_one_state())
 
-    assert "this turn's first action or not this fight" in page
+    assert "a card that grants Encore reopens the window" in page
     for advice in ("Light your Companion cards", "locked out"):
         assert advice not in page
 
@@ -9067,13 +9070,13 @@ def test_the_window_line_is_turn_one_only():
     standing note about a decision that is gone is exactly the noise the
     one-fact-per-line rule keeps off this page."""
     page = blindplay.observe(spotlight_turn_one_state(round_no=2))
-    assert "first action or not this fight" not in page
+    assert "reopens the window" not in page
 
 
 def test_the_window_line_needs_the_selector_in_hand():
     """A turn-one hand without it has no decision to teach."""
     page = blindplay.observe(spotlight_turn_one_state(hand_title="Defend"))
-    assert "first action or not this fight" not in page
+    assert "reopens the window" not in page
 
 
 def test_the_window_line_is_arm_only():
@@ -9081,7 +9084,7 @@ def test_the_window_line_is_arm_only():
     Encore, so the sentence would be false. The Salon block's absence is the
     page's test for which build this is."""
     page = blindplay.observe(spotlight_turn_one_state(salon=False))
-    assert "first action or not this fight" not in page
+    assert "reopens the window" not in page
 
 
 def test_both_spotlight_faces_agree_on_one_duration_sentence():
@@ -9230,7 +9233,7 @@ def test_the_spotlight_tip_carries_the_window_and_keeps_the_refusal():
     assert "{FurinaReframeLaw.SpotlightDesignateEncoreCost}" in body
     # `EB-586`: the window and the price, and no advice. The clause is split
     # across two source literals, so the anchor is the half that is whole.
-    assert "spends one, so it is this turn's first action or not this" in body
+    assert "a card that grants [gold]Encore[/gold] reopens the " in body
     assert "Light your" not in body
     # ITS OWN METHOD, chained at the call site: two facts, two tip rows, each
     # inside the 135-character ceiling on its own.
@@ -10610,3 +10613,51 @@ def test_a_reward_screen_offers_use_potion_when_the_belt_holds_one():
     assert res["post"] == {"action": "use_potion", "slot": 1}
     # An empty belt is not offered the verb.
     assert 'use potion' not in blindplay.observe(rewards_state())
+
+
+def _enchant_state(picked: bool = True, clone: bool = False) -> dict:
+    """The deck enchant picker as the wire spells it (`screen_type: enchant`,
+    `EB-263`), with a Sharp 2 prompt and one Attack picked."""
+    edge = {"id": "KLEEMOD-WATERS_EDGE", "name": "Water's Edge",
+            "type": "Attack", "cost": "1", "description": "Deal 7 damage."}
+    cards = [edge, {"id": "KLEEMOD-PROTO_KO_SIZZLE", "name": "Sizzle",
+                    "type": "Attack", "cost": "1",
+                    "description": "Set off. Deal 6 damage."}]
+    if clone:
+        cards.append({**edge, "name": "Water's Edge (Clone)"})
+    return {"state_type": "card_select",
+            "player": {"hp": 40, "max_hp": 70, "gold": 50},
+            "card_select": {"screen_type": "enchant",
+                            "prompt": "Choose an Attack to Enchant with Sharp 2.",
+                            "cards": cards,
+                            "preview_cards": [edge] if picked else [],
+                            "preview_showing": picked,
+                            "can_confirm": picked, "can_cancel": False}}
+
+
+def test_the_enchant_confirm_names_the_number_it_moves():
+    """`EB-355` (the preview half) and `EB-393` (the gloss beside the pick).
+    "Sharp raises the hand number ... unsaid" at an irreversible branch; the
+    prompt names the enchant and the picked face carries the number."""
+    page = blindplay.observe(_enchant_state())
+    assert "- Sharp 2 on **Water's Edge**: Deal 7 → 9 damage." in page
+    # The verbs are the ones the wire says will work: no `skip` without a
+    # cancel button (`EB-259`), which is `EB-355`'s "only verbs that resolve".
+    assert "- `skip`" not in page
+    assert "- `confirm`" in page
+    # Nothing picked yet: no arithmetic is claimed.
+    assert "Sharp 2 on" not in blindplay.observe(_enchant_state(picked=False))
+    # The helper's other two words.
+    assert blindplay_board.enchant_moves_line(
+        {"word": "Nimble", "amount": 3}, "Defend", "Gain 5 Block.") \
+        == "- Nimble 3 on **Defend**: Gain 5 → 8 Block."
+    assert "draw 1" in blindplay_board.enchant_moves_line(
+        {"word": "Swift", "amount": 1}, "Oz", "Summon Oz.")
+
+
+def test_a_clone_marked_title_is_explained_as_one_card():
+    """`EB-393`. Two picked rows, one tagged (Clone), read as two copies; the
+    deck held one. The mark is the game's and the page says what it is."""
+    page = blindplay.observe(_enchant_state(clone=True))
+    assert blindplay.CLONE_NOTE in page
+    assert blindplay.CLONE_NOTE not in blindplay.observe(_enchant_state())

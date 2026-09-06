@@ -274,6 +274,13 @@ CARD_REWARD_ALTERNATIVE_NOTE = (
     "the next fight.*")
 
 PICKED_MARK = "PICKED"
+# `EB-393`. "(Clone)" ON A TITLE READ AS A SECOND COPY. The enchant confirm
+# listed two picked rows, one tagged `(Clone)`, and the Klee r10 seat read them
+# as two cards; the deck held one. Clone is the game's own mark.
+CLONE_NOTE = ("*A title ending in (Clone) is the game's mark for a card that "
+              "can be duplicated at a Rest Site. It is one card, not a copy; "
+              "a row above and its (Clone) row are the same card.*")
+
 PENDING_PICK_NOTE = ("*Already listed above. These rows are the pick this "
                      "screen is holding, printed a second time so you can "
                      "read its face -- each is one of the cards in the list "
@@ -457,11 +464,15 @@ PLAN_COUNT_NOTE = ("- The jellyfish holds any number of Plans and carries them "
 # zeroed Encore twice, which is where nine of its eleven HP went. The decision
 # is REAL on both lanes, so this states the window and the price and stops --
 # which is what every other line on this page does.
+# `EB-600` REWORDED THE WINDOW TO THE RULE. "First action or not this fight"
+# was false: Aria of Recompense and Hearts Swelling grant Encore without
+# performing, and the r16 lane-1 seat lit the Spotlight after both. The window
+# is "before anything spends Encore, or after a card refills it", in step with
+# `FurinaRiderTips.ForSpotlightWindow`.
 SPOTLIGHT_WINDOW_NOTE = (
     f"*You open a fight with {FURINA_OPENING_ENCORE} Encore and "
-    f"**Ethereal Spotlight** costs {SPOTLIGHT_ENCORE_COST} -- all of it. Any "
-    "performance spends one, so it is this turn's first action or not this "
-    "fight.*")
+    f"**Ethereal Spotlight** costs {SPOTLIGHT_ENCORE_COST} -- all of it. A "
+    "performance spends one; a card that grants Encore reopens the window.*")
 
 
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "

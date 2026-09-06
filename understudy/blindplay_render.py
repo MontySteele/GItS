@@ -12,8 +12,9 @@ import re
 from typing import Any
 
 from understudy import qa_packet
-from understudy.blindplay_board import PHASE_FLIP_LINE, _pulse_phrase
-from understudy.blindplay_notes import (AURA_NOTE, EMPTY_SHELVES_NOTE,
+from understudy.blindplay_board import (PHASE_FLIP_LINE, _pulse_phrase,
+                                        enchant_moves_line)
+from understudy.blindplay_notes import (AURA_NOTE, CLONE_NOTE, EMPTY_SHELVES_NOTE,
                                         LAST_SALON_NOTE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
@@ -1010,6 +1011,13 @@ def render(obs: dict[str, Any]) -> str:
                         PENDING_PICK_NOTE, ""]
                 for card in obs["selected"]:
                     out += _render_card(card, mark=PICKED_MARK)
+                # `EB-355` / `EB-393`: the number the enchant moves, on the
+                # picked card, before the irreversible confirm.
+                if obs.get("enchant"):
+                    out += [""] + [enchant_moves_line(obs["enchant"],
+                                                      c["title"],
+                                                      c.get("text") or "")
+                                   for c in obs["selected"]]
                 # `EB-314`: on a transform screen the cards above are the ones
                 # going IN, and what comes out is still unrolled.
                 if obs.get("undecided"):
@@ -1028,6 +1036,8 @@ def render(obs: dict[str, Any]) -> str:
             # feed at all, so the subtraction is against the deck this page
             # printed for itself in the last fight -- and it says so, because a
             # card drafted since that fight is in neither half of it.
+            if obs.get("clone_marked"):
+                out += ["", CLONE_NOTE]
             if obs.get("omitted"):
                 out += ["", "## Not on this list, and why", ""]
                 out += [f"- **{o['title']}** — {o['reason']}"

@@ -19,8 +19,8 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         _proceed_option, _relic_options,
                                         _rest_options, _reward_items,
                                         _screen_cards, _selected_bundle,
-                                        last_morning, last_salon,
-                                        upgrade_deck_floor)
+                                        enchant_in_prompt, last_morning,
+                                        last_salon, upgrade_deck_floor)
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_options,
@@ -336,6 +336,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             obs["commands"].append("confirm")
         if obs["can_skip"]:
             obs["commands"].append("skip")
+        # `EB-355` / `EB-393`: the enchant the prompt names, so the confirm can
+        # say what it does to the picked card's own number; and whether any
+        # title on the screen carries the game's (Clone) mark.
+        obs["enchant"] = (enchant_in_prompt(obs["prompt"])
+                          if obs["select_kind"] == "enchant" else None)
+        obs["clone_marked"] = any(
+            "(Clone)" in _text(c.get("title"))
+            for c in obs["offers"] + obs["selected"])
     elif st == "bundle_select":
         # `EB-173`: A BUNDLE HAS NO NAME, and asking for one printed
         # `- **(unnamed)**` twice, on a screen whose only verb is

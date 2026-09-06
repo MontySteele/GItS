@@ -288,7 +288,7 @@
 - {id: proto_ko_tinder_toss, name: "Tinder Toss", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "[gold]Set off[/gold] a random enemy and deal 4 damage to it, twice.",
+   description: "Twice: [gold]Set off[/gold] a random enemy and deal 4 damage to it.",
    upgrade: {damage: +2},
    effects: [{op: spend_spark, amount: 1},
              {op: set_off, target: random_enemy, damage: 4, times: 2}]}
@@ -313,7 +313,7 @@
 - {id: proto_ko_rapid_fire, name: "Rapid Fire", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] a random enemy and deal 3 damage to it, 4 times.",
+   description: "4 times: [gold]Set off[/gold] a random enemy and deal 3 damage to it.",
    effects: [{op: set_off, target: random_enemy, damage: 3, times: 4}]}
 
 - {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
@@ -493,7 +493,7 @@
 - {id: proto_ko_stoke_the_fuse, name: "Stoke the Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Spend all your [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] grows by 3 per [gold]Spark[/gold] spent.",
+   description: "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] grows by 3 per [gold]Spark[/gold] spent.",
    upgrade: {grow: +1},
    effects: [{op: spend_spark, amount: all},
              {op: grow_largest_bomb, per_spark: 3}]}
