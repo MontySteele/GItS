@@ -13,7 +13,8 @@ from typing import Any
 
 from understudy import qa_packet
 from understudy.blindplay_board import PHASE_FLIP_LINE, _pulse_phrase
-from understudy.blindplay_notes import (AURA_NOTE, LAST_SALON_NOTE,
+from understudy.blindplay_notes import (AURA_NOTE, EMPTY_SHELVES_NOTE,
+                                        LAST_SALON_NOTE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         DEFEND_INTENT_CLAUSE,
@@ -27,6 +28,7 @@ from understudy.blindplay_notes import (AURA_NOTE, LAST_SALON_NOTE,
                                         MULTI_INTENT_NOTE,
                                         PENDING_PICK_NOTE, PICKED_MARK,
                                         PLAN_AIM_NOTE,
+                                        PLAN_COUNT_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         SPARK_OPENING_RULE,
@@ -587,6 +589,8 @@ def render(obs: dict[str, Any]) -> str:
         if obs["screen"] == "game_over":
             body += ["", f"The run ended on floor {obs['floor']}"
                          + (f": {obs['result']}" if obs["result"] else ".")]
+            if obs.get("summary"):
+                body += ["", "What the run ended with:", ""] + obs["summary"]
         text = "\n".join(body) + "\n"
         qa_packet.assert_blind(text, allow={st})
         return text
@@ -699,6 +703,7 @@ def render(obs: dict[str, Any]) -> str:
                 # asking what a Plan will do asks which body first.
                 out.append(PLAN_AIM_NOTE)
                 out.append(PLAN_HYDRO_NOTE)
+                out.append(PLAN_COUNT_NOTE)
                 # `EB-578`. AND WHEN THE HAND HOLDS NONE, one line saying so.
                 # The form under *What you can say* is gone on such a turn
                 # (`blindplay_observe`), and a form that disappears with no
@@ -1071,11 +1076,21 @@ def render(obs: dict[str, Any]) -> str:
         elif obs.get("selected", -1) < 0:
             out += ["*Nothing is picked yet.*", ""]
     elif obs["screen"] == "shop":
-        out += ["# The shop", "", f"You have {obs['gold']} gold.", "",
-                "On the shelves:", ""] + _render_options(obs["items"])
+        out += ["# The shop", "", f"You have {obs['gold']} gold.", ""]
+        if obs["items"]:
+            out += ["On the shelves:", ""] + _render_options(obs["items"])
+        else:
+            # `EB-360`: the wire returned NO shelves. The r5 seat met a shop
+            # with 400 gold in hand and "zero items on every shelf, two
+            # observes running", and the page printed an empty shop as if that
+            # were the shop. It cannot tell a sold-out shop from a feed that
+            # sent nothing, so it says exactly that.
+            out += [EMPTY_SHELVES_NOTE]
     elif obs["screen"] == "rest_site":
         out += ["# A place to rest", "",
-                f"HP {obs['hp']}/{obs['max_hp']}", ""] \
+                f"HP {obs['hp']}/{obs['max_hp']}"
+                + (f", {obs['gold']} gold" if obs.get("gold") is not None
+                   else ""), ""] \
             + (_render_options(obs["options"]) if obs["options"]
                else ["- (this rest site has nothing left to offer; "
                      "its choice has already been taken)"])
@@ -1091,6 +1106,10 @@ def render(obs: dict[str, Any]) -> str:
                   "treasure": "# An open chest",
                   "relic_select": "# Choose one"}
         out += [titles[obs["screen"]], ""]
+        # `EB-350`: the gold, on the screens where a route or a purchase is
+        # weighed against it, not only on the map and in the shop.
+        if obs.get("gold") is not None:
+            out += [f"You have {obs['gold']} gold.", ""]
         if obs.get("message"):
             out += [obs["message"], ""]
         out += (_render_options(obs["items"]) if obs["items"]
@@ -1100,11 +1119,17 @@ def render(obs: dict[str, Any]) -> str:
         # exactly as it always did.
         if obs.get("potion_offered") and obs.get("potion_slots") \
                 and obs["potions_held"] >= obs["potion_slots"]:
+            # `EB-356`: and the way out, on the same line. The bridge drinks
+            # a non-combat potion here (`ExecuteUsePotion` refuses only the
+            # CombatOnly ones), so the verb is offered under "What you can
+            # say" and named where the seat is told the belt is full.
             out += ["", f"*Your potion slots are full: "
                         f"{obs['potions_held']} of {obs['potion_slots']}. A "
                         f"potion claimed now has nowhere to go, and the game "
                         f"says nothing when one is dropped -- so this page "
-                        f"will not claim it until a slot is free.*"]
+                        f"will not claim it until a slot is free. Drink one "
+                        f"first (`use potion`) if the game allows it here, or "
+                        f"drop one (`drop potion`).*"]
         # `EB-329`: the receipt for a morning that ended the fight, on the
         # screen the fight ended into. Nothing is claimed about WHY the fight
         # ended -- the note says the fight is over and that this is the last

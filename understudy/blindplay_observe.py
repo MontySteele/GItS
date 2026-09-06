@@ -494,6 +494,9 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["result"] = _text(blob.get("result") or blob.get("outcome"))
         obs["floor"] = _int(_blob(state, "run").get("floor"))
         obs["blocked"] = "the run is over; there is nothing left to play"
+        # `EB-333`: the run's last state, off the same feed, so the one-line
+        # page says what the run ended WITH and not only where.
+        obs["summary"] = _run_summary(state)
     elif st == "menu":
         obs["screen"] = "menu"
         obs["blocked"] = ("this is a menu, not a play screen. Start the run "
@@ -560,4 +563,44 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     if obs.get("select_kind"):
         allow.add(obs["select_kind"])
     qa_packet.assert_blind(obs, allow=allow)
+    # `EB-350`: the gold is on every player blob the feed sends, and a route,
+    # a reward and a rest are all weighed against it; the map and the shop
+    # already read it, so this fills the other screens without moving those.
+    if "gold" not in obs and _player(state).get("gold") is not None:
+        obs["gold"] = _int(_player(state).get("gold"))
+    # `EB-356`: `use potion` wherever the game lets one be drunk. The bridge's
+    # `ExecuteUsePotion` refuses only a CombatOnly potion outside a fight, so
+    # a belt with anything on it is offered the verb on every driven
+    # non-combat screen; a refusal comes back in the game's own words. The r5
+    # seat lost a Regen Potion at 24/80 and a Snecko Oil to a reward screen
+    # whose grammar was `choose` and `proceed` alone.
+    if (st not in COMBAT_SCREENS and not obs.get("blocked")
+            and isinstance(obs.get("commands"), list) and _potions(state)
+            and not any(c.startswith("use potion") for c in obs["commands"])):
+        obs["commands"].append('use potion "<potion>"')
     return obs
+
+
+def _run_summary(state: dict[str, Any]) -> list[str]:
+    """`EB-333`. What a run ended with, in the player blob's own words.
+
+    "The run-over page is one line and a floor number ... a won run's
+    game_over says nothing" (Kokomi r4c act 2b). Only what the feed carries:
+    the act, the HP, the gold, the relics and potions by name. Absent fields
+    print nothing rather than a zero."""
+    p = _player(state)
+    run = _blob(state, "run")
+    out: list[str] = []
+    if run.get("act") is not None:
+        out.append(f"- Act {_int(run.get('act'))}")
+    if p.get("hp") is not None:
+        out.append(f"- HP {_int(p.get('hp'))}/{_int(p.get('max_hp'))}")
+    if p.get("gold") is not None:
+        out.append(f"- {_int(p.get('gold'))} gold")
+    relics = [_text(r.get("name")) for r in _relics(state) if _text(r.get("name"))]
+    if relics:
+        out.append("- Relics: " + ", ".join(relics))
+    potions = [_text(q.get("name")) for q in _potions(state) if _text(q.get("name"))]
+    if potions:
+        out.append("- Potions: " + ", ".join(potions))
+    return out

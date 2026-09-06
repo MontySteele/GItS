@@ -175,6 +175,8 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
                 qa_packet.card_key(entry.get("id")))
             or (_int(entry.get("spark_price"))
                 if entry.get("spark_price") is not None else None)),
+        # `EB-445`: whether that price is the whole bank.
+        "spark_all": qa_packet.spends_all_sparks(entry.get("id")),
         "kind": _text(entry.get("type")),
         "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
         "keywords": kws,
@@ -344,7 +346,8 @@ def _named_option(entry: Any) -> dict[str, Any]:
             break
     spark = (qa_packet.printed_spark_index().get(qa_packet.card_key(card_id))
              if card_id is not None else None)
-    cost = qa_packet.cost_label({"cost": energy, "printed_spark": spark})
+    cost = qa_packet.cost_label({"cost": energy, "printed_spark": spark,
+                                 "spark_all": qa_packet.spends_all_sparks(card_id)})
     # `EB-262`, the other half, AND IT IS NOT OURS TO FIX. A card shelf's
     # name, text and cost all live behind `entry.CreationResult?.Card`, and
     # `MerchantCardEntry.IsStocked` IS `CreationResult != null` -- so the
