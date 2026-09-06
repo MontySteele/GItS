@@ -472,6 +472,18 @@ are in [`workstreams.md`](workstreams.md).
   three of seven kit runs. The clears are the kits'; a clear on a 30-row pool
   is consistency as much as strength. The second control (same afternoon,
   §5) died on the same floor to the same Death Blow; no third is queued.
+- **Elements and reactions — RULED R263** (2026-09-06,
+  `review/ruled/elements-reaction-sweep-2026-09-05.md` §6): Dendro's build
+  is deferred out of the rebuild milestone, its boundaries drawn now with
+  Sumeru struck as a prerequisite (`review/active/dendro-boundaries-2026-09-06.md`,
+  four picks); the sweep runs visibility, then a READING of the concrete
+  sequences and companion choices
+  (`review/records/reaction-sequences-2026-09-06.md`), then a change only
+  where that reading shows a weakness; Quicken is additive under the iron
+  rule as read, no amendment. The layer's brief is
+  `review/active/reaction-brief-2026-09-06.md` (no pick, GPT audit owed);
+  the census (`review/records/reaction-census-2026-09-05.md`) is the count
+  the reading corrects. `EB-428` built, `EB-410` the open display half.
 - **Companion cards** — R234 ruled the slate whole, Mondstadt first, in
   parallel; `EB-249` / `EB-250` / `EB-251` are what it owes; Itto and Gorou's
   rate are noted there from the round-5 and act-1 reads.
