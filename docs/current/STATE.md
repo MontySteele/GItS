@@ -234,6 +234,11 @@ are in [`workstreams.md`](workstreams.md).
   the natural lane and deadlocked on a deck of Spark cards (the act-1
   elite lost to a priced-out detonator, not to damage); Hexerei's three
   exact questions to `EB-596`; no pick here; `EB-607`-`EB-612`.
+  **Comparison pass one is WRITTEN**
+  (`review/active/klee-pool-comparison-pass-2026-09-06.md`): seven of the
+  ten pool-pass rows earn their place, Long Fuse's escalation goes to the
+  audit door, Fireworks Show and Kindling are held, the pool stays 45, and
+  round 24's hypothesis is the React deck; no pick.
   [USER]'s act-1 run is due on `0.2.2830+proto`. The round-8 clear is
   read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
