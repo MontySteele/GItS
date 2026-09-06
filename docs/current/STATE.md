@@ -475,8 +475,8 @@ are in [`workstreams.md`](workstreams.md).
 - **Elements and reactions — RULED R263** (2026-09-06,
   `review/ruled/elements-reaction-sweep-2026-09-05.md` §6): Dendro's build
   is deferred out of the rebuild milestone, its boundaries drawn now with
-  Sumeru struck as a prerequisite (`review/active/dendro-boundaries-2026-09-06.md`,
-  four picks); the sweep runs visibility, then a READING of the concrete
+  Sumeru struck as a prerequisite (`review/ruled/dendro-boundaries-2026-09-06.md`,
+  its four picks RULED R264 at their defaults, Quicken canon-gated); the sweep runs visibility, then a READING of the concrete
   sequences and companion choices
   (`review/records/reaction-sequences-2026-09-06.md`), then a change only
   where that reading shows a weakness; Quicken is additive under the iron

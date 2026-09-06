@@ -1,4 +1,4 @@
-Status: OPEN (four picks for [USER]; paper only, no build, no row, no LAW text moved)
+Status: RULED R264 2026-09-06
 
 # Dendro: the boundaries, drawn now, built later
 
@@ -197,3 +197,17 @@ at its default: `CORE_BURST` 6, `HYPERBLOOM_MULT` 2, `CORE_CAP` 2,
 4. **Cores and Bombs.** (1) *A Core is not a Bomb; Set off ignores it; a
    Bomb's explosion, being Pyro, Burgeons it* [default]. (2) A Core counts as
    a Bomb for Klee: Set off pops it as Burgeon and the counter includes it.
+
+## 8. The ruling (R264, 2026-09-06)
+
+[USER] took all four picks at their defaults, in one line ("let's take
+defaults and proceed"), after the reconciliation on GPT's review moved
+pick 3's default to canon gating. So: (1) Kirara gains Dendro at the build
+and Emilie enters Fontaine as a 5-star Rare applier, Yaoyao stays
+element-less; (2) Dendro with Cryo, and Anemo or Geo on Dendro, are plain
+hits that leave the standing aura, previewed as "no reaction"; (3) Quicken
+pays +3 on Electro and Dendro hits for two turns and nothing on other hits;
+(4) a Core is not a Bomb, and a Bomb's explosion Burgeons it. The numbers in
+§6 stay D picks for the sim at build time. Nothing builds from this ruling:
+the build waits, as §3 says, on `EB-410` and on the sweep's reading-ordered
+work, and rows are minted when it is scheduled. No LAW line moves.

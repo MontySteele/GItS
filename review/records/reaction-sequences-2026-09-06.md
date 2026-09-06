@@ -262,7 +262,7 @@ order of intervention (`operations/stage-gate.md`, smallest first):
 6. **Two-companion reactions are planned when the nation sells both
    elements** (Furina), and reached as an instrument when it does not
    (Klee). This is the fact the boundaries paper's §4 needs
-   (`review/active/dendro-boundaries-2026-09-06.md`): Quicken at two drafts
+   (`review/ruled/dendro-boundaries-2026-09-06.md`): Quicken at two drafts
    is Superconduct's access, and Superconduct at two drafts does get
    planned; the price is not prohibitive where the sheets sell the pair.
 7. **Reach: demonstrated for Kokomi, and the smallest intervention is
