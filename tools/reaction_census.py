@@ -376,7 +376,7 @@ def render(mentions: list[Mention], infos: list[RecordInfo],
                  "say fired, and how")
     lines.append("")
     lines.append(
-        f"A keyword census, run 2026-09-05 by `tools/reaction_census.py` "
+        f"A keyword census, run 2026-09-05 and regenerated 2026-09-06 by `tools/reaction_census.py` "
         f"over {n_records} blind-seat record files under `review/qa/` "
         f"(every `klee-round-*`, `kokomi-round-*`, `furina-reframe-round-*` "
         f"and `control-ironclad-*` directory), for the sweep packet's §4 "
