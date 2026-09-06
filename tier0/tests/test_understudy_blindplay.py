@@ -10661,3 +10661,28 @@ def test_a_clone_marked_title_is_explained_as_one_card():
     page = blindplay.observe(_enchant_state(clone=True))
     assert blindplay.CLONE_NOTE in page
     assert blindplay.CLONE_NOTE not in blindplay.observe(_enchant_state())
+
+
+def test_an_events_own_words_print_under_the_option_that_uses_them():
+    """`EB-397`. "Words on this screen at the Crystal Sphere printed one entry,
+    Kokomi's Plan tip, on a Klee run, and none for Divine or Debt, the two
+    words the screen used." `EB-448` put an option's own hover tips under the
+    option (the wire's `keywords`), and `EB-504` stopped an off-arm rule from
+    printing on another character's run; this pins the two together."""
+    state = {"state_type": "event", "player": {"character": "Klee", "gold": 50},
+             "event": {"event_id": "CRYSTAL_SPHERE", "event_name": "Crystal Sphere",
+                       "in_dialogue": False,
+                       "body": "A Divine sphere hums. Your Debt weighs.",
+                       "options": [
+                           {"index": 0, "title": "Uncover Future",
+                            "keywords": [
+                                {"name": "Divine",
+                                 "description": "Divine cards cost 0 the first time."},
+                                {"name": "Debt",
+                                 "description": "Lose gold at the end of the act."}]},
+                           {"index": 1, "title": "Leave"}]}}
+    page = blindplay.observe(state)
+    assert "**Divine** — Divine cards cost 0 the first time." in page
+    assert "**Debt** — Lose gold at the end of the act." in page
+    # No rule of another character's kit is defined on this run's event.
+    assert "Bake-Kurage" not in page and "carry-out" not in page.lower()
