@@ -737,6 +737,20 @@ def _result_line(result: Any) -> str:
                                 _text(result.get("error"))) if x)
     leaks = qa_packet.leaks(text)
     if leaks:
+        # `EB-393`. THE REDACTION NAMES WHAT IT WITHHELD. One leaking token
+        # used to cost the whole answer: Klee r10 claimed "Take your stolen
+        # card back", read this sentence, and "never learned which card came
+        # back". The words around the token leaked nothing, so they stay, and
+        # the line says how many were taken out and what kind they were. A
+        # redaction `qa_packet` cannot verify is refused there and this falls
+        # back to the flat sentence, unchanged.
+        clean, withheld = qa_packet.redact(text)
+        if clean:
+            kinds = ", ".join(sorted(set(withheld)))
+            return (f"{clean} (the game's answer named {len(withheld)} thing"
+                    f"{'' if len(withheld) == 1 else 's'} this page may not "
+                    f"repeat -- {kinds} -- and nothing else in it was "
+                    f"changed)")
         return "(the game answered with something this tool will not repeat)"
     return text
 
@@ -744,10 +758,10 @@ def _result_line(result: Any) -> str:
 # What each verb's answer opens with. A word per verb rather than one flat
 # "Took", because "Bought" and "Went to" are what a player would say and this
 # line is read in a stream of them.
-_TAKEN_VERB = {"buy": "Bought", "go": "Went to"}
+_TAKEN_VERB = {"buy": "Bought", "go": "Went to", "skip": "Skipped"}
 # The keys a resolution files its printed decision under, best first. One
 # resolution ever carries one of them.
-_TAKEN_KEYS = ("option", "card", "bundle", "item", "node")
+_TAKEN_KEYS = ("option", "card", "bundle", "item", "node", "skipped")
 
 
 def taken_line(res: dict[str, Any]) -> str:

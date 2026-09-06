@@ -1039,6 +1039,17 @@ def _map_boss(state: dict[str, Any]) -> str:
     return ", ".join(n for n in (_text(b.get("name")) for b in bosses) if n)
 
 
+def map_floor(state: dict[str, Any]) -> int:
+    """The run's own floor number on THIS screen, or `0` (`EB-323`).
+
+    One field, `run.floor` -- the same one the run-over page prints, so the
+    two screens count in one vocabulary. `0` where the feed sends none, which
+    the callers print nothing at all for rather than a number they cannot
+    stand behind.
+    """
+    return _int(_blob(state, "run").get("floor"))
+
+
 def _bundle_cards(bundle: Any) -> list[dict[str, Any]]:
     """The cards inside one bundle entry, in the order the wire lists them."""
     if not isinstance(bundle, dict):
@@ -1160,6 +1171,33 @@ def _option_faces(entry: Any, skip: str = "") -> list[dict[str, str]]:
     return out
 
 
+# `EB-393`. THE OPTION THAT ADDS A CARD THE FEED DOES NOT CARRY.
+#
+# THE FIND (Klee r10 act 2). The Bugslayer event offered "Learn Extermination
+# Technique -- Add Exterminate to your Deck" and "Learn Squash Technique --
+# Add Squash to your Deck", "with no rules text for either card, no cost, no
+# type... Every other choice screen in the game prints the full card. I picked
+# Exterminate off the name alone."
+#
+# AND THE PAGE CANNOT PRINT WHAT IT WAS NOT SENT. `EB-448` reads both channels
+# a named thing can arrive on -- the category-prefixed face and `opt.HoverTips`
+# -- and this event sends neither, so there is no face here to print and
+# nothing on this side that could invent one without reading a sheet. What is
+# left is `EB-529`'s answer one screen over: say that the face is missing, so
+# a blank is a stated gap rather than a card with no text.
+OPTION_UNNAMED_GRANT = (
+    "this option's own words promise a card and the feed carried no face for "
+    "it -- no rules text, no cost, no type -- so this page can offer it by "
+    "name only")
+
+# `EB-393`: the sentence shape an option uses when it is handing over a card.
+# Deliberately narrow -- the words the game itself writes on these rows ("Add
+# Exterminate to your Deck", "Add a card to your deck") -- so a row that
+# promises gold, HP or a relic is untouched and the note cannot become
+# furniture on every event in the game.
+_GRANTS_A_CARD = re.compile(r"\badd\b[^.]*\bto your deck\b", re.I)
+
+
 def _event_option(entry: Any) -> dict[str, Any]:
     """One event option, plus what it names and whether it has been taken.
 
@@ -1171,6 +1209,11 @@ def _event_option(entry: Any) -> dict[str, Any]:
     option = _named_option(entry)
     option["names"] = _option_faces(entry, skip=option["name"])
     option["taken"] = bool(isinstance(entry, dict) and entry.get("was_chosen"))
+    # `EB-393`: and where the row's own sentence promises a card that neither
+    # channel carried, the gap is stated rather than left as a title with no
+    # face under it (the Bugslayer event, Klee r10 act 2).
+    if not option["names"] and _GRANTS_A_CARD.search(option.get("text") or ""):
+        option["note"] = OPTION_UNNAMED_GRANT
     return option
 
 

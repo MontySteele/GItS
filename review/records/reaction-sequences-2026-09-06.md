@@ -290,6 +290,7 @@ order of intervention (`operations/stage-gate.md`, smallest first):
    D pick at build (2 to start); it is not built here.
 
 Nothing here moves a constant, a sheet or a law. The two display items (1
-and 4) are the sweep's next rows; both are page and preview text, and the
+and 4) are the sweep's next rows, minted 2026-09-06 as `EB-613` and
+`EB-614`; both are page and preview text, and the
 fired-line half of item 1 is `EB-410`'s bridge build. Items 7 and 8 are the
 first two flagged hypotheses, in that order, and wait on the game.

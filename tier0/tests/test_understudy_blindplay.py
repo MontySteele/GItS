@@ -5549,11 +5549,14 @@ def test_a_bridge_refusal_reaches_the_page_as_words():
     line = blindplay._result_line(
         {"status": "error", "error": "No potion in slot 0"})
     assert line == "error No potion in slot 0"
-    # An OK answer is unchanged, and a leaky one is still swallowed whole.
+    # An OK answer is unchanged. A leaky one keeps the words that leaked
+    # nothing since `EB-393`; only the token goes, and the line says so.
     assert blindplay._result_line(
         {"status": "ok", "message": "Using potion"}) == "ok Using potion"
-    assert "will not repeat" in blindplay._result_line(
+    leaky = blindplay._result_line(
         {"status": "error", "error": "card KLEEMOD-KABOOM is not in hand"})
+    assert "KABOOM" not in leaky and "is not in hand" in leaky
+    assert "may not repeat" in leaky
 
 
 # ------------------------------------------ EB-271: a number that went stale
@@ -8005,10 +8008,17 @@ def test_the_no_upgrade_register_is_read_by_id_and_only_its_ids_cross():
 
 
 def _combat_with_piles(round_no: int, hand: list[str],
-                       draw: list[str] | None = None) -> dict:
-    """A combat state whose four piles are the named titles."""
+                       draw: list[str] | None = None,
+                       floor: int = 2) -> dict:
+    """A combat state whose four piles are the named titles.
+
+    `floor` is the run's own floor, and a fight is one room: `EB-447` takes the
+    FIRST round-one read of a floor and refuses the rest, so a caller staging
+    the NEXT fight moves it the way a run does.
+    """
     state = json.loads(json.dumps(combat_state()))
     state["battle"]["round"] = round_no
+    state["run"] = dict(state.get("run") or {}, floor=floor)
     state["player"]["character"] = "Furina"
     for pile, titles in (("hand", hand), ("draw_pile", draw or []),
                          ("discard_pile", []), ("exhaust_pile", [])):
@@ -8058,7 +8068,8 @@ def test_the_next_fights_first_round_is_where_a_real_addition_arrives():
     blindplay.observe(_combat_with_piles(1, ["Strike"], ["Defend"]))
     assert len(blindplay._DECK_MEMORY["cards"]) == 2
 
-    blindplay.observe(_combat_with_piles(1, ["Strike", "Riptide"], ["Defend"]))
+    blindplay.observe(_combat_with_piles(1, ["Strike", "Riptide"], ["Defend"],
+                                         floor=3))
 
     titles = [c["title"] for c in blindplay._DECK_MEMORY["cards"]]
     assert titles.count("Riptide") == 1
@@ -10686,3 +10697,305 @@ def test_an_events_own_words_print_under_the_option_that_uses_them():
     assert "**Debt** — Lose gold at the end of the act." in page
     # No rule of another character's kit is defined on this run's event.
     assert "Bake-Kurage" not in page and "carry-out" not in page.lower()
+
+
+def test_the_map_and_the_go_receipt_count_in_the_runs_own_floors():
+    """`EB-323` (the floor half). The map named a room by a path number, the
+    bridge answered `go` with a coordinate (`ok Traveling to Ancient at
+    (3,0)`), and only the run-over page ever said `floor`."""
+    state = map_state()
+    page = blindplay.observe(state)
+    assert "You are on floor 3 of act 1; the rooms above are floor 4." in page
+    assert "not a grid coordinate" in page
+    res = blindplay.act(state, 'go "rest site (path 3)"')
+    assert res["ok"], res
+    assert blindplay.taken_line(res) == "Went to: Rest Site (path 3) — floor 4."
+    # A feed with no floor claims none, rather than counting from zero.
+    bare = copy.deepcopy(state)
+    bare.pop("run")
+    assert "You are on floor" not in blindplay.observe(bare)
+    assert blindplay.taken_line(blindplay.act(bare, 'go "Monster (path 1)"')) \
+        == "Went to: Monster (path 1)."
+
+
+def test_a_buff_intent_says_whose_side_it_is_on():
+    """`EB-323` (the intent half). `Empower (Buff)` was a heading and a
+    bracketed kind on a board of three bodies, with no number and no target
+    (Klee r7). The wire carries no target for an intent part; the page says
+    which side the part is on and says the gap."""
+    state = copy.deepcopy(combat_state())
+    state["battle"]["enemies"][0]["intents"] = [
+        {"type": "Buff", "title": "Empower"}]
+    page = blindplay.observe(state)
+    assert "Intent: Empower (Buff) — " + blindplay.BUFF_INTENT_CLAUSE in page
+    # An Attack part is untouched.
+    assert blindplay.BUFF_INTENT_CLAUSE not in blindplay.observe(combat_state())
+
+
+def test_proceed_on_an_event_names_what_the_option_handed_over():
+    """`EB-333` (the grant half). ""This or That?" granted `Red Mask` and
+    `Clumsy` and printed "Proceed"" (Kokomi r4c act 2b, finding 8): the
+    `proceed` branch built its row with `_named_option`, so the option's own
+    body and the faces of what it names were dropped on the one verb that
+    takes a grant. It goes through `choose`'s namer now."""
+    state = granting_event_state()
+    state["event"]["options"][0]["is_proceed"] = True
+    state["event"]["options"][0]["title"] = "Proceed"
+    res = blindplay.act(state, "proceed")
+    assert res["ok"], res
+    line = blindplay.taken_line(res)
+    assert line.startswith("Took: Proceed — Add a card to your deck.")
+    assert "It names **Bathysmal Egg**: Unplayable." in line
+    # And the same option taken by name says the same thing.
+    assert blindplay.taken_line(blindplay.act(state, 'choose "Proceed"')) == line
+
+
+def test_skip_on_a_card_reward_says_what_it_did_and_what_it_did_not():
+    """`EB-333` (the skip half). "`skip` on a card reward neither finalises nor
+    says the reward waits until you proceed" (finding 11). The line is worded
+    off `ExecuteSkipCardReward`, which presses the screen's ALTERNATIVE button
+    -- so it stops short of calling that button a plain skip (`EB-374`)."""
+    res = blindplay.act(card_reward_state(), "skip")
+    assert res["ok"], res
+    line = blindplay.taken_line(res)
+    assert line.startswith("Skipped: the card reward.")
+    assert "No card is added to your deck." in line
+    assert "`proceed` is the verb that leaves." in line
+    # A reward that cannot be skipped is still refused, and says nothing.
+    state = card_reward_state()
+    state["card_reward"]["can_skip"] = False
+    assert not blindplay.act(state, "skip")["ok"]
+
+
+def test_an_event_option_that_promises_a_card_the_feed_did_not_send_says_so():
+    """`EB-393` (the event half). The Bugslayer event offered "Add Exterminate
+    to your Deck" and "Add Squash to your Deck" "with no rules text for either
+    card, no cost, no type, and no option to decline" (Klee r10 act 2). Neither
+    channel `EB-448` reads carried a face, so the page states the gap and says
+    the room has no Proceed."""
+    state = {"state_type": "event", "run": {"act": 2, "floor": 14},
+             "player": {"hp": 30, "max_hp": 62, "gold": 40},
+             "event": {"event_id": "BUGSLAYER", "event_name": "Bugslayer",
+                       "in_dialogue": False,
+                       "body": "The exterminator sizes you up.",
+                       "options": [
+                           {"index": 0, "title": "Learn Extermination Technique",
+                            "description": "Add Exterminate to your Deck"},
+                           {"index": 1, "title": "Learn Squash Technique",
+                            "description": "Add Squash to your Deck"}]}}
+    page = blindplay.observe(state)
+    assert page.count(blindplay.OPTION_UNNAMED_GRANT) == 2
+    assert blindplay.EVENT_NO_DECLINE_NOTE in page
+    # An option the feed DOES carry a face for keeps EB-448's line and gets no
+    # note, and a room with a Proceed is not told it has none.
+    granted = blindplay.observe(granting_event_state())
+    assert "· **Bathysmal Egg**" in granted
+    assert blindplay.OPTION_UNNAMED_GRANT not in granted
+    assert blindplay.EVENT_NO_DECLINE_NOTE not in blindplay.observe(
+        proceed_event_state())
+
+
+def test_a_redacted_answer_names_what_it_withheld():
+    """`EB-393` (the redaction half). "Claiming the fight-1 reward *Take your
+    stolen card back* returned `(the game answered with something this tool
+    will not repeat)`. I never learned which card came back" (Klee r10 act 2,
+    finding 6). One token cost the whole sentence."""
+    line = blindplay._result_line(
+        {"status": "ok",
+         "message": "Returning stolen card: Strike (all_streams_flow)"})
+    assert "Returning stolen card: Strike" in line
+    assert "all_streams_flow" not in line
+    assert "[an internal id]" in line
+    assert "named 1 thing this page may not repeat" in line
+    # The helper refuses a redaction it cannot verify, and the caller then
+    # drops the sentence exactly as it always did.
+    assert qa_packet.redact("no leak here") == ("", [])
+    clean, withheld = qa_packet.redact("EB-1 and R2 and pearl_barrage")
+    assert not qa_packet.leaks(clean)
+    assert withheld == ["[a register id]", "[a ruling id]", "[an internal id]"]
+
+
+def test_an_auto_played_turn_is_named_by_the_relic_that_took_it():
+    """`EB-349` (the auto-turn half). Whispering Earring's Vakuu opened six
+    fights and five rendered as an empty hand with no card, target or result
+    named (Kokomi r4d act 3): "Vakuu had spent my whole turn before I was shown
+    anything." The ledger is not on the wire -- nothing on the feed records a
+    card resolving -- so the page names the relic and states the gap."""
+    state = copy.deepcopy(combat_state())
+    state["battle"]["round"] = 1
+    state["player"]["hand"] = []
+    state["player"]["relics"] = [
+        {"name": "Whispering Earring",
+         "description": "Gain 1 Energy at the start of each turn. Vakuu plays "
+                        "your first turn for you."}]
+    page = blindplay.observe(state)
+    assert "**Whispering Earring** plays a turn of yours for you" in page
+    assert "not a fault" in page
+    # Round two is not that turn, and a run holding no such relic says nothing.
+    state["battle"]["round"] = 2
+    assert "plays a turn of yours" not in blindplay.observe(state)
+    assert "plays a turn of yours" not in blindplay.observe(combat_state())
+
+
+def test_a_per_hit_debuff_is_netted_against_a_multi_hit_icon():
+    """`EB-349` (the netting half). "With `Tainted 4` the screen printed `6x3`
+    = 18 ... I took 15", and the round after, a one-hit icon printed 8 + 4 with
+    the same debuff folded in (Kokomi r4d act 2, elite 4). The page nets the
+    stack per hit and prints both readings, claiming neither."""
+    state = copy.deepcopy(combat_state())
+    state["player"]["status"] = [
+        {"title": "Tainted", "name": "Tainted", "amount": 4, "type": "Debuff",
+         "description": "Take 4 additional damage from Attacks this turn."}]
+    state["battle"]["enemies"][0]["intents"] = [
+        {"type": "Attack", "label": "6x3", "title": "Aggressive",
+         "description": "This enemy intends to Attack 3 times."}]
+    page = blindplay.observe(state)
+    assert "You are carrying Tainted 4" in page
+    assert "`6x3` is 3 hits: 18 in all if the game's figure already counts " \
+           "your Tainted, 30 if it does not" in page
+    # A one-hit icon gets no netting line, and neither does a board with no
+    # per-hit debuff on the player.
+    state["battle"]["enemies"][0]["intents"] = [
+        {"type": "Attack", "label": "12", "title": "Aggressive"}]
+    assert "You are carrying Tainted 4" not in blindplay.observe(state)
+    assert "You are carrying" not in blindplay.observe(combat_state())
+
+
+def test_a_one_use_discount_says_it_pays_for_one_card():
+    """`EB-349` (the discount half). Pounce's "the next Skill you play costs 0"
+    prints the cut price on every Skill in hand -- the game's own "if played
+    now" preview, read as a hand-wide sale (Kokomi r4d)."""
+    state = copy.deepcopy(combat_state())
+    state["player"]["status"] = [
+        {"title": "Pounce", "name": "Pounce", "amount": 1, "type": "Buff",
+         "description": "The next Skill you play costs 0 Energy."}]
+    page = blindplay.observe(state)
+    assert "**Pounce** pays for ONE card" in page
+    assert 'its own words are "the next Skill you play"' in page
+    assert "only the first one you actually play is charged it" in page
+    assert "pays for ONE card" not in blindplay.observe(combat_state())
+
+
+def test_the_last_copy_of_a_pair_keeps_the_number_it_was_given():
+    """`EB-427`, the two-copy case the row asks for by name. Three copies and a
+    death is pinned above; a PAIR and a death is the other half of the rule --
+    "a name that has ever repeated in this fight stays numbered even when one
+    body is left", because the number is the handle the seat has been aiming
+    with and taking it back is the stale-number refusal the row is about."""
+    blindplay.forget_fight()
+    state = two_body_state(morning_of())
+    first = blindplay.render(blindplay.observation(state))
+    assert "**Nibbit (1)**" in first and "**Nibbit (2)**" in first
+    # The FIRST body dies and leaves the feed; the survivor is still (2).
+    alone = copy.deepcopy(state)
+    alone["battle"]["enemies"] = [alone["battle"]["enemies"][1]]
+    after = blindplay.render(blindplay.observation(alone))
+    assert "**Nibbit (2)**" in after
+    assert "**Nibbit (1)**" not in after and "- **Nibbit**" not in after
+    # And the grammar aims by the number the page just printed. A tester who
+    # types the DEAD body's number falls through `EB-271`'s stale-number rule
+    # to the one body left, and the receipt says which body that was -- so the
+    # number on the page and the number in the answer cannot disagree.
+    aimed = blindplay.act(alone, 'play "Pearl Barrage" on "Nibbit (2)"')
+    assert aimed["ok"] and aimed["printed"]["target"] == "Nibbit (2)"
+    stale = blindplay.act(alone, 'play "Pearl Barrage" on "Nibbit (1)"')
+    assert stale["ok"] and stale["printed"]["target"] == "Nibbit (2)"
+
+
+def test_the_map_deck_holds_neither_the_dazed_nor_the_played_power():
+    """`EB-447`, the row's own acceptance. "After the Haunted Ship [the map]
+    listed `Dazed x 5`, which are combat-only status cards and were gone by the
+    next fight. Earlier, after I played Catalytic Converter as a Power, the
+    same list dropped Catalytic Converter entirely. Both directions of error,
+    in the one place I go to plan a draft" (Klee r15 (c)).
+
+    BOTH HAPPEN INSIDE ROUND ONE, which is what makes them one fix: a Power
+    leaves all four piles when it resolves, the ship's Status cards arrive in
+    the draw pile on the turn they land, and the wire answers a GET after the
+    enemy has acted with the round still reading 1 (`EB-175`). The first
+    round-one read of a floor is the deck now; every later one is the fight."""
+    blindplay.forget_deck()
+    opening = _combat_with_piles(
+        1, ["Catalytic Converter", "Stoke the Fuse"], ["Strike", "Defend"],
+        floor=8)
+    blindplay.observe(opening)
+    # Same fight, same round on the wire: the Power has resolved out of every
+    # pile and five Dazed have landed in the draw pile.
+    later = _combat_with_piles(
+        1, ["Stoke the Fuse"], ["Strike", "Defend"] + ["Dazed"] * 5, floor=8)
+    blindplay.observe(later)
+
+    page = blindplay.observe(dict(map_state(), run={"act": 1, "floor": 8},
+                                  player={"hp": 20, "max_hp": 62, "gold": 30,
+                                          "character": "Furina"}))
+    assert "**Catalytic Converter**" in page
+    assert "Dazed" not in page
+    assert "as it stood in the last fight (floor 8)" in page
+    blindplay.forget_deck()
+
+
+def _strength_board(labels: tuple[str, str], strength: int) -> dict:
+    """Two bodies telegraphing an Attack, both wearing Strength (`EB-607`).
+
+    Built from the recorded board so each enemy carries the fields the bridge
+    really sends. The two labels are the point: the r23 lane-1 seat watched one
+    icon move under Strength and the other not, and the page's job is to print
+    each enemy's own figure -- the feed's `label`, unchanged -- and to say
+    where it came from.
+    """
+    state = copy.deepcopy(combat_state())
+    base = state["battle"]["enemies"][0]
+    bodies = []
+    for n, (name, label) in enumerate(
+            zip(("Fossil Stalker", "Corpse Slug"), labels), 1):
+        bodies.append(dict(base, name=name, combat_id=n,
+                           entity_id=f"BODY_{n}",
+                           status=[{"title": "Strength", "name": "Strength",
+                                    "amount": strength, "type": "Buff",
+                                    "description": "Deals additional damage."}],
+                           intents=[{"type": "Attack", "label": label,
+                                     "title": "Aggressive"}]))
+    state["battle"] = dict(state["battle"], enemies=bodies)
+    return state
+
+
+def test_an_intent_number_is_the_feeds_own_figure_and_says_so():
+    """`EB-607`. "Fossil Stalker showed 'the number on its icon is 12' both
+    before and after it gained Strength 3, while Corpse Slug's icon *did* move
+    (3x2 to 7x2 at Strength 4)" (Klee r23 lane 1 (c) 3).
+
+    THE READ THE ROW ASKS FOR: there is one source and it is the same one for
+    every enemy -- `BuildEnemyState` fills `label` from the game's own
+    `GetIntentLabel(targets, creature)` and this page prints that string
+    unchanged. So the page moves exactly as the feed moves, on both bodies, and
+    it states the provenance rather than implying a number it did not compute.
+    """
+    blindplay.forget_fight()
+    before = blindplay.observe(_strength_board(("12", "3x2"), 0))
+    assert "the number on its icon is 12" in before
+    assert "the number on its icon is 3x2" in before
+    blindplay.forget_fight()
+    after = blindplay.observe(_strength_board(("12", "7x2"), 4))
+    assert "the number on its icon is 12" in after
+    assert "the number on its icon is 7x2" in after
+    assert blindplay.INTENT_SOURCE_NOTE in after
+    # No Strength on the board, no provenance note.
+    assert blindplay.INTENT_SOURCE_NOTE not in blindplay.observe(combat_state())
+
+
+def test_an_icon_and_its_sentence_that_cannot_agree_say_so():
+    """`EB-607`, the fold. The icon figure and the hover sentence are two wire
+    fields printed side by side with nothing said about the pair."""
+    state = copy.deepcopy(combat_state())
+    state["battle"]["enemies"][0]["intents"] = [
+        {"type": "Attack", "label": "15", "title": "Aggressive",
+         "description": "This enemy intends to Attack for 12 damage."}]
+    assert blindplay.INTENT_NUMBER_DISAGREES in blindplay.observe(state)
+    # The recorded board agrees with itself, and a sentence sharing the icon's
+    # own number (`6x3` and "Attack 3 times") is not a disagreement.
+    assert blindplay.INTENT_NUMBER_DISAGREES not in blindplay.observe(
+        combat_state())
+    state["battle"]["enemies"][0]["intents"] = [
+        {"type": "Attack", "label": "6x3", "title": "Aggressive",
+         "description": "This enemy intends to Attack 3 times."}]
+    assert blindplay.INTENT_NUMBER_DISAGREES not in blindplay.observe(state)

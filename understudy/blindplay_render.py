@@ -14,12 +14,19 @@ from typing import Any
 from understudy import qa_packet
 from understudy.blindplay_board import (PHASE_FLIP_LINE, _pulse_phrase,
                                         enchant_moves_line)
-from understudy.blindplay_notes import (AURA_NOTE, CLONE_NOTE, EMPTY_SHELVES_NOTE,
+from understudy.blindplay_notes import (AURA_NOTE, AUTO_TURN_NOTE,
+                                        BUFF_INTENT_CLAUSE,
+                                        CLONE_NOTE, EMPTY_SHELVES_NOTE,
+                                        INTENT_NUMBER_DISAGREES,
+                                        INTENT_SOURCE_NOTE,
+                                        ONE_USE_DISCOUNT_NOTE, PER_HIT_NOTE,
                                         LAST_SALON_NOTE,
+                                        MAP_FLOOR_LINE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         DEFEND_INTENT_CLAUSE,
                                         ENEMY_HANDLE_NOTE,
+                                        EVENT_NO_DECLINE_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
                                         METER_CAPPED_NOTE,
@@ -458,6 +465,106 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
     return line
 
 
+# `EB-349`. The three sentences the page reads a rule out of, each the printed
+# words of a thing already on the screen: a relic that takes a turn, a status
+# that adds damage to every hit, and a power that pays for one card. Matched on
+# the sentence and never on a name, so a second relic, debuff or power worded
+# the same way gets the same line and a renamed one does not go silent.
+_PLAYS_YOUR_TURN = re.compile(r"plays your (?:\w+ )?turn for you", re.I)
+_PER_HIT_DAMAGE = re.compile(r"additional damage from attacks", re.I)
+_MULTI_HIT_LABEL = re.compile(r"^\s*(\d+)\s*[x×]\s*(\d+)\s*$")
+_ONE_USE_DISCOUNT = re.compile(r"the next (\w+) you play costs", re.I)
+
+
+def _auto_turn_note(you: dict[str, Any], round_: Any) -> list[str]:
+    """`EB-349`: the turn a relic played, named on the turn it played it.
+
+    Round one only, which is the turn the relic's own sentence is about, and
+    off the relic row this page already prints. The ledger itself is the
+    bridge's -- there is no record of a card resolving anywhere on the feed.
+    """
+    if round_ != 1:
+        return []
+    for relic in you.get("relics") or []:
+        if _PLAYS_YOUR_TURN.search(str(relic.get("text") or "")):
+            return ["", AUTO_TURN_NOTE.format(relic=f"**{relic['name']}**")]
+    return []
+
+
+def _per_hit_note(you: dict[str, Any],
+                  enemies: list[dict[str, Any]]) -> list[str]:
+    """`EB-349`: a per-hit modifier netted against a multi-hit icon.
+
+    Fires only where both halves are on this screen -- a status of the
+    player's whose printed rule is per-hit damage from Attacks, and an icon
+    figure of the shape `AxB` -- and prints both readings of that icon. The
+    first such pair on the board carries the note; it is one rule about the
+    board and not a line per enemy.
+    """
+    hit = next((p for p in you.get("powers") or []
+                if _PER_HIT_DAMAGE.search(str(p.get("text") or ""))
+                and isinstance(p.get("stacks"), int)), None)
+    if not hit:
+        return []
+    for enemy in enemies:
+        for intent in enemy.get("intents") or []:
+            found = _MULTI_HIT_LABEL.match(str(intent.get("label") or ""))
+            if not found:
+                continue
+            each, hits = int(found.group(1)), int(found.group(2))
+            return ["", PER_HIT_NOTE.format(
+                name=hit["name"], n=hit["stacks"],
+                label=str(intent["label"]).strip(), hits=hits,
+                low=each * hits, high=(each + hit["stacks"]) * hits)]
+    return []
+
+
+def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
+    """`EB-349`: a discount the game prices onto every row and pays once."""
+    for power in you.get("powers") or []:
+        found = _ONE_USE_DISCOUNT.search(str(power.get("text") or ""))
+        if found:
+            return ["", ONE_USE_DISCOUNT_NOTE.format(
+                power=f"**{power['name']}**", kind=found.group(1))]
+    return []
+
+
+_NUMBER = re.compile(r"\d+")
+
+
+def _numbers_disagree(intent: dict[str, str]) -> bool:
+    """`EB-607`: does the hover sentence's number contradict the icon's?
+
+    Only where BOTH fields carry a number and they share none: `6x3` beside
+    "Attack 3 times" agrees on the 3 and says nothing, and a sentence with no
+    number at all -- which is most of them -- is not a disagreement. The page
+    reports the pair; it does not pick between them or do arithmetic to
+    reconcile them, because it has no third field to check either against.
+    """
+    on_icon = set(_NUMBER.findall(str(intent.get("label") or "")))
+    in_words = set(_NUMBER.findall(str(intent.get("text") or "")))
+    return bool(on_icon and in_words and not (on_icon & in_words))
+
+
+def _intent_source_note(enemies: list[dict[str, Any]]) -> list[str]:
+    """`EB-607`: where an icon number comes from, said where Strength is up.
+
+    Printed only on a board that raises the question -- an enemy wearing
+    Strength and telegraphing an Attack -- because on every other board the
+    provenance of a number nobody is checking against a modifier is furniture.
+    Keyed on the power's printed name, which is the row this page prints and
+    the word the reader is reading it against.
+    """
+    for enemy in enemies:
+        if not any(_fold(p.get("name")) == "strength"
+                   for p in enemy.get("powers") or []):
+            continue
+        if any(_fold(i.get("type")) == "attack" or i.get("label")
+               for i in enemy.get("intents") or []):
+            return ["", INTENT_SOURCE_NOTE]
+    return []
+
+
 def _render_intents(intents: list[dict[str, str]]) -> list[str]:
     """Every component of one telegraph, one line each (`EB-342`).
 
@@ -511,8 +618,18 @@ def _render_intent(intent: dict[str, str], part: bool = False) -> str:
               + (MULTI_INTENT_LABEL if part else "")
               if intent.get("label") else "")
     bits = [head, number, intent.get("text") or ""]
+    # `EB-607`: the two numbers on this line are two fields of the feed --
+    # `GetIntentLabel`'s icon figure and `GetHoverTip`'s sentence -- and the
+    # page printed both and said nothing about the pair.
+    if _numbers_disagree(intent):
+        bits.append(INTENT_NUMBER_DISAGREES)
     if _fold(kind) == "defend":
         bits.append(DEFEND_INTENT_CLAUSE)
+    # `EB-323`: and a `Buff` part says whose side it is on. `Empower (Buff)`
+    # was a heading, a bracketed kind and nothing else on a board of three
+    # bodies; the target itself is not on the wire and the clause says so.
+    if _fold(kind) == "buff":
+        bits.append(BUFF_INTENT_CLAUSE)
     return " — ".join(b for b in bits if b) or "(no intent shown)"
 
 
@@ -678,6 +795,10 @@ def render(obs: dict[str, Any]) -> str:
                 + (f" ({r['counter']})" if r.get("counter") else "")
                 + (f" — {r['text']}" if r["text"] else "")
                 for r in you["relics"]]
+            # `EB-349`: and where one of them has already taken this turn, the
+            # line saying so -- under the relic row, because it is that
+            # relic's sentence being applied to the board above.
+            out += _auto_turn_note(you, c["round"])
         if c.get("plans"):
             # `EB-216`, the Kokomi draft-6 half, and the page's contract is
             # `EB-198`'s lesson restated: ONE FACT PER LINE. The strip that
@@ -918,6 +1039,9 @@ def render(obs: dict[str, Any]) -> str:
             out.append("- (your hand is empty)")
         if c.get("hand_repeats"):
             out += ["", HAND_REPEAT_NOTE]
+        # `EB-349`: the one-use discount, under the hand it is priced onto.
+        if c["hand"]:
+            out += _one_use_discount_note(you)
         # `EB-567`. THE WINDOW, BEFORE THE REFUSAL RATHER THAN AFTER IT. Under
         # the arm the Spotlight's price is the opening Encore exactly, so turn
         # one is the only turn it can be bought -- and both r14 seats learned
@@ -960,6 +1084,13 @@ def render(obs: dict[str, Any]) -> str:
         # block's other two notes rather than under the line that made it.
         if any(len(e["intents"]) > 1 for e in c["enemies"]):
             out += ["", MULTI_INTENT_NOTE]
+        # `EB-349`: and where a per-hit modifier meets a multi-hit icon, the
+        # arithmetic both ways -- beside the note above, because both are
+        # about a claim the enemy block has just made.
+        out += _per_hit_note(you, c["enemies"])
+        # `EB-607`: and where an enemy is wearing Strength, where the number
+        # on its icon came from -- one field, printed unchanged.
+        out += _intent_source_note(c["enemies"])
         if you["powers"] or any(e["powers"] for e in c["enemies"]):
             out += ["", POWER_NOTE]
         if any(p.get("kind") == "aura"
@@ -967,8 +1098,17 @@ def render(obs: dict[str, Any]) -> str:
                                          for x in e["powers"]]):
             out += ["", AURA_NOTE]
     elif obs["screen"] == "map":
-        out += ["# The map", "",
-                "Where you can go next:", ""] + _render_options(obs["nodes"])
+        out += ["# The map", ""]
+        # `EB-323`: the floor first, because it is the frame the rest of this
+        # screen is read in -- the lookahead below counts floors and the
+        # run-over page counts floors, and nothing in between ever said which
+        # one you were standing on.
+        if obs.get("floor"):
+            out += [MAP_FLOOR_LINE.format(
+                here=obs["floor"],
+                act=f" of act {obs['act']}" if obs.get("act") else "",
+                next=obs["floor"] + 1), ""]
+        out += ["Where you can go next:", ""] + _render_options(obs["nodes"])
         # `EB-298`: the rest of the act, which was on the feed all along.
         if obs.get("ahead"):
             out += ["", "The floors ahead of you, nearest first — every room "
@@ -1111,6 +1251,10 @@ def render(obs: dict[str, Any]) -> str:
         if obs["in_dialogue"]:
             out += ["(the scene is still being told; say `proceed`)", ""]
         out += _render_options(obs["options"])
+        # `EB-393`: the decline half. Under the rows, because it is a fact
+        # about the list and not about any one of them.
+        if obs.get("must_choose"):
+            out += ["", EVENT_NO_DECLINE_NOTE]
     elif obs["screen"] in ("rewards", "treasure", "relic_select"):
         titles = {"rewards": "# What the fight left behind",
                   "treasure": "# An open chest",
