@@ -1,4 +1,4 @@
-Status: OPEN (one pick, §5; four E and D defaults applied, §6)
+Status: OPEN (one pick, §8 revising §5; four E and D defaults applied, §6)
 
 # Kokomi, [USER]'s first act-1 run under the overhaul: better than before, the central loop reads as auto-pilot
 
@@ -134,12 +134,17 @@ carries its turn: "next turn" on the first two, "in 2 turns" after. The
 badge prints "2 of 3". A defensive Plan past the cap is therefore written
 knowing it lands a turn late, which is the point.
 
-**What the examples do not settle.** Whether "queue everything, best two
-first" is the dominant habit on ordinary turns is exactly what the seat
-round on the built rule reads; the examples show the decision exists,
-not that it is met often enough. Ripple's now-line (2 Block for 0) is
-weak on a safe turn under either rule, and the pool pass after the rule
-reads the now-lines against the cap together.
+**What the examples do not settle, and where two of them are wrong.**
+GPT's second reading (2026-09-07, evening) corrects two of the three, and
+it is right both times. The safe turn: Vanguard into Undertow kills now
+under today's rule as well, so that example shows an existing reason to
+act now, not one the cap creates. The congested queue: the cap does not
+stop the other Plans being written, it delays them, so "one is written"
+overstates it; the honest question is whether committing a card to land
+in two turns is worse than its now-line or than letting it discard, and
+for Ripple's 2 Block it usually is not. Only the dangerous turn stands as
+written. So the examples show the decision can exist; they do not show
+the cap makes it common, and §7 says what would.
 
 ## 5. Pick
 
@@ -161,6 +166,95 @@ once it is built and the seats have read it.
    a turn, a prompt every turn, and every count-reader changes meaning.
 3. Hold the loop as it is and read again after the next seat rounds and
    [USER]'s next run; the seats did not name the problem.
+
+## 7. What Plan is for, and the paths (2026-09-07, evening)
+
+[USER]'s question after the run: is there enough richness and depth
+around Plan to make it a design, rather than a one-note "play cards next
+turn" loop. GPT's review says keep Plan, and it names the test: does
+preparation change the value of the decisions that follow it, the way a
+Bomb changes which enemy Klee aims at, whether she waits, and what she
+drafts. That is the right test, and by it the current pool is narrow: of
+Kokomi's 40 rows, 21 carry a Plan line and nearly all of them are the same
+question at a different number, with the brief's own payoff ("three Plans
+land at once"), its two readers (Treatise, Song of Pearls) and its Rare
+(Nereid's) all pointing the same way: prepare more, collect more.
+
+**What is already there and under-used.** Battle Plan prepares Energy and
+draw; Exposed Flank and Slack Water prepare debuffs for ALL; Change of
+Plans carries out the first Plan now; Tide Chart reads the count; Moon's
+Reflection re-plans an exhausted card. Those are four different uses of
+preparation (resources, position, timing, recursion), and the round
+records show them drafted as "more Plan", not as different plans.
+
+**Four ways to give the queue a second question, mine.** Each is a pool
+change or a small rule, each answers a different half of the complaint,
+and none needs the cap.
+
+1. **Order matters: riders that touch the next Plan.** "Plan: 2
+   Vulnerable to ALL; the next Plan's damage is doubled." "Plan: the next
+   Plan carries out twice." "Plan: gain 6 Block; the next Plan's Block is
+   kept through the enemy's turn." With two or three of these in a deck,
+   writing on a free turn is a sequencing puzzle in the sense [USER]
+   asked for: the order written is the order carried out, and the riders
+   make it pay differently. No rule changes.
+2. **The queue is a resource to spend, not only to wait on.** Change of
+   Plans accelerates; add the other verbs. Cash: "Exhaust. Cancel your
+   last Plan; its card returns to your hand and you gain its cost."
+   Convert: "Gain 1 Energy for each Plan queued; they still carry out."
+   Redirect: "Aim every queued Attack Plan at one enemy." This is the
+   Bomb's hold-or-cash tension on the jellyfish, and it is what makes
+   "something committed" a reason to do something else this turn.
+3. **Timing agency: two moments to land.** Today every Plan lands at the
+   start of next turn, after the enemy has hit, which is why a Block Plan
+   reads as "for the turn after". Give some Plans a dusk line, carried
+   out at the end of this turn before the enemy acts, at a smaller number
+   than the dawn line. A defensive Plan then asks "cover this hit for
+   less, or the next for more", which is the preparation under
+   uncertainty GPT asks for, in one keyword variant rather than a new
+   system. If a second word is too many, the narrower form is "Block from
+   a Plan is kept through the enemy's turn", which makes dawn Block worth
+   writing under an attack.
+4. **The queue can be shaken.** Unblocked damage above a threshold on the
+   enemy's turn loses the last Plan written. This is what makes dumping
+   the hand a bet rather than a habit: on an off-turn it is safe, and
+   should be, since free turns are allowed obvious plays; under a
+   telegraphed attack it is exposure. It is a rule change to the loop and
+   the most invasive of the four; the brief's "enemies cannot touch the
+   jellyfish" stands, since it is Kokomi who is hit.
+
+**On the two-Plan cap.** It is a candidate, not the fix. GPT is right
+that a fixed allowance is a choice about what Kokomi becomes (fewer,
+larger entries; decks of many small Plans pushed out) and that the
+examples in §4b were built around the rule. It stays as one lane of the
+next round, not as the rule.
+
+**The path.** Pool pass two for Kokomi, authored by Claude through the
+audit door: six to eight rows on paths 1 and 2 (two "next Plan" riders on
+existing Common shapes, one "carries out twice" Common, the cash card,
+the convert card, the redirect card), and the dusk/dawn variant on two
+Block Plans as a trial of path 3. Then one round on four lanes: the three
+decks GPT's table names (steady defence, concentrated attack,
+mostly-immediate with selective Plans) assembled, plus a natural lane,
+with the cap on in one assembled lane only. The reads: do the three decks
+want different rewards; is a Plan cancelled, converted or accelerated on
+purpose; does the order written change on a free turn; does the natural
+lane reach any of it. Path 4 waits on that round. The stage holds at
+Prototype through it.
+
+## 8. Pick, revised
+
+**Pick 1, the carry-out and the queue** (replaces the pick in §5).
+
+1. **(default)** Pool first: pass two on paths 1 and 2, the dusk/dawn
+   trial on two Block Plans, the cap as one lane of the round; the rule
+   decided on the round's reads. Nothing in the loop changes before the
+   round, so nothing is played by [USER] before it.
+2. The two-Plan cap as the rule now, and the pool pass after it.
+3. Path 4 (the shaken queue) as the rule now, with pass two.
+4. Pivot: Plan stays a supporting mechanic and something else carries the
+   character. GPT's own third choice, and only if the round collapses
+   into "queue the best values, collect, repeat".
 
 ## 6. Defaults applied (D and E), disclosed
 
