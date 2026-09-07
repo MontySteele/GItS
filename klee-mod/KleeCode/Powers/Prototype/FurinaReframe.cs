@@ -452,8 +452,10 @@ public static class FurinaReframeRoster
     /// Rares print that rider, so with the arm on the offer surface
     /// contradicted the arm's one sentence about where the meter comes from.
     /// Two of them are a body plus the rider and the arm carries the body
-    /// without it (<i>Rapturous Applause</i>, at 2 per 10 rather than the
-    /// shipped 1, because the copy pays for the floor it no longer mints; and
+    /// without it (<i>Rapturous Applause</i>, at 1 per 5 rather than the
+    /// shipped 1 per 10 -- an arm copy moves a THRESHOLD and never a payout,
+    /// and the arm's meter runs 0 to 15 where the shipped one runs 20 to 30,
+    /// so the bar halves and the slope stands; and
     /// <i>Unheard Confession</i>, whose per-change payout is 2 Block and not
     /// the shipped 1: the power pays per change EVENT, and at 1 a 2-cost Rare
     /// is a dead slot). The third, <i>The Sea Is My Stage</i>, is

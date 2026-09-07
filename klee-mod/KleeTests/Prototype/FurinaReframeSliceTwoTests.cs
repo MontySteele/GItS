@@ -773,6 +773,35 @@ public class FurinaReframeSliceTwoTests
     }
 
     [Fact]
+    public void The_applause_copy_halves_the_bar_and_keeps_the_slope()
+    {
+        // AN ARM COPY MOVES A THRESHOLD AND NEVER A PAYOUT (2026-09-07). The
+        // first pass paid for the floor `EB-507` removed by doubling the
+        // printed number -- 2 per 10 -- which is twice the shipped card at 20
+        // Fanfare and nothing at all below 10. The mapping every other copy
+        // here uses is the threshold's: the arm's meter runs 0 to 15 where the
+        // shipped one runs 20 to 30, so the bar halves and the slope stands.
+        // Read off the face AND off the compiled body, which have to agree,
+        // and off the shipped row too, so a green cannot mean the clause
+        // simply moved.
+        Assert.Contains("additional damage per 5 [gold]Fanfare[/gold]",
+            Face("ProtoFrRapturousApplause"));
+        Assert.Contains("additional damage per 10 [gold]Fanfare[/gold]",
+            Face("RapturousApplause"));
+
+        // `CallSequence` and not `Calls`: the power applied is the call's TYPE
+        // ARGUMENT, and only the sequence reader names one.
+        Assert.Contains("PowerCmd.Apply<FanfareAttackPer5Power>",
+            Il.CallSequence(Il.Method("ProtoFrRapturousApplause", "OnPlay")));
+        Assert.Contains("PowerCmd.Apply<FanfareAttackPer10Power>",
+            Il.CallSequence(Il.Method("RapturousApplause", "OnPlay")));
+
+        // ... and the payout it applies is the shipped 1.
+        Assert.Equal(1m, Vars(new ProtoFrRapturousApplause())
+            .Single(v => v.Name == "PowerAmount").BaseValue);
+    }
+
+    [Fact]
     public void The_confession_copy_pays_two_Block_per_change()
     {
         // The payout reads a change EVENT and not the points that moved, which

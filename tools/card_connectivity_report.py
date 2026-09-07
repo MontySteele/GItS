@@ -676,6 +676,10 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                             _hook("shared", "block_held", "write")],
     "fanfare_attack_per10": [_hook("private", "fanfare", "read"),
                              _hook("shared", "card_identity", "write")],
+    # The reframe arm's copy of the same rider: the threshold halves for a
+    # meter half the size, so the hooks are the per-10 row's, unchanged.
+    "fanfare_attack_per5": [_hook("private", "fanfare", "read"),
+                            _hook("shared", "card_identity", "write")],
     "first_attack_draw": [_hook("shared", "plays_this_turn", "read"),
                           _hook("shared", "draw_pile", "use"),
                           _hook("shared", "universal_verb_power", "write")],

@@ -2525,6 +2525,11 @@ APPLY_POWERS = {
         "gain each turn."),
     "fanfare_attack_per10": ("FanfareAttackPer10Power", None,
         "Your Attacks deal {X} additional damage per 10 [gold]Fanfare[/gold]."),
+    # The reframe arm's copy of the row above, at the arm's granularity: a
+    # meter that ranges 0-15 reads the shipped 20-30 meter's clause with its
+    # THRESHOLD halved, so the payout stays 1 and the bar becomes 5.
+    "fanfare_attack_per5": ("FanfareAttackPer5Power", None,
+        "Your Attacks deal {X} additional damage per 5 [gold]Fanfare[/gold]."),
     # B5 (2026-07-28): the face NAMES the member and says nothing else. The
     # member's act, its bow, and the cap rules moved to hover tips
     # (SalonMemberTips) -- eight cards were reprinting one paragraph that

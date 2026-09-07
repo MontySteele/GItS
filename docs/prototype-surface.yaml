@@ -1706,8 +1706,8 @@
    register: archon, cost: 1, type: power, rarity: rare,
    art_of: rapturous_applause,
    upgrade: {power_amount: +1},
-   description: "Your Attacks deal {PowerAmount:diff()} additional damage per 10 [gold]Fanfare[/gold].",
-   effects: [{op: apply_power, power: fanfare_attack_per10, amount: 2, target: self}]}
+   description: "Your Attacks deal {PowerAmount:diff()} additional damage per 5 [gold]Fanfare[/gold].",
+   effects: [{op: apply_power, power: fanfare_attack_per5, amount: 1, target: self}]}
 
 - {id: proto_fr_unheard_confession, name: "Unheard Confession", character: furina,
    authored_by: [claude],

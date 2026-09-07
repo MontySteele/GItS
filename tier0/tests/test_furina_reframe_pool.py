@@ -38,7 +38,7 @@ import pytest
 
 from tier0.content import loader, upgrades
 from tier0.engine import combat, effects, furina_reframe as fr, resources
-from tier0.engine.state import CombatState
+from tier0.engine.state import Card, CombatState
 from tier0.tests.conftest import make_enemy
 from tier05 import rewards
 
@@ -283,6 +283,56 @@ def test_the_confession_copy_pays_two_block_per_change(reframe):
     shipped = next(fx for fx in loader.peek_card("unheard_confession").effects
                    if fx.get("power") == "fanfare_delta_block")
     assert shipped["amount"] == 1
+
+
+def test_the_applause_copy_halves_the_bar_and_keeps_the_slope(reframe):
+    """THE ARM COPY MOVES A THRESHOLD, NEVER A PAYOUT (2026-09-07).
+
+    `EB-507` took the `gain_fanfare_floor` rider off this Rare, and the first
+    pass paid for the lost floor by DOUBLING the printed number: 2 per 10. That
+    is the one thing an arm copy may not do -- every other copy in `POOL_SUBS`
+    moves the bar the arm's meter has to reach (12 to 6, 15 to 8, 20 to 10) and
+    leaves what the row pays alone, because the arm's meter runs 0 to 15 where
+    the shipped one runs 20 to 30. The same mapping here is 1 per 5: the same
+    slope, read at the granularity the arm's range can actually reach, where
+    2 per 10 was twice the shipped card at 20 and paid nothing at all below 10.
+
+    Read on the ROW, at the smith, and in play."""
+    proto = loader.peek_card(fr.POOL_SUBS["rapturous_applause"])
+    power = next(fx for fx in proto.effects
+                 if fx["op"] == "apply_power")
+    assert power["power"] == "fanfare_attack_per5"
+    assert power["amount"] == 1
+
+    # The shipped row is untouched, at its own per-10 clause (R213 B).
+    shipped = next(fx for fx in loader.peek_card("rapturous_applause").effects
+                   if fx.get("power") == "fanfare_attack_per10")
+    assert shipped["amount"] == 1
+
+    # `get_card`, for the reason in the Cadenza pin above: `apply_upgrade`
+    # rewrites the card it is handed.
+    upgraded = upgrades.apply_upgrade(
+        loader.get_card(fr.POOL_SUBS["rapturous_applause"]))
+    assert next(fx for fx in upgraded.effects
+                if fx["op"] == "apply_power")["amount"] == 2
+
+
+@pytest.mark.parametrize("held,extra", [(4, 0), (5, 1), (10, 2), (15, 3)])
+def test_the_per_five_power_pays_one_for_every_five_held(held, extra):
+    """The power the row above applies, in play. One point per full 5 held and
+    nothing for the remainder -- so an empty-ish meter pays nothing, and the
+    arm's measured ceiling of 15 pays 3. No flag: the power is a rail, and the
+    quarantine is on the ROW that applies it."""
+    enemy = make_enemy(hp=300)
+    st = _state(enemies=[enemy])
+    resources.gain_fanfare(st, held, "fixture")
+    st.player.powers["fanfare_attack_per5"] = 1
+
+    effects.resolve_card(st, Card(
+        id="t", name="t", cost=1, type="attack", character="furina",
+        effects=[{"op": "damage", "amount": 5, "target": "enemy"}]))
+
+    assert 300 - enemy.hp == 5 + extra
 
 
 def _offerable(character="furina"):

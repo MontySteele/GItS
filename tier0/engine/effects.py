@@ -6095,6 +6095,16 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
         if not valuation:                          # EB-253, see the docstring
             resources.note_fanfare_read(state, "attack_power")
         bonus += n * (resources.readable(p) // 10)
+    # THE SAME CLAUSE AT THE REFRAME ARM'S GRANULARITY (2026-09-07). The arm's
+    # meter ranges 0-15 where the shipped one ranges 20-30, so the arm copy of
+    # this rider halves the THRESHOLD and keeps the payout: 1 per 5 Fanfare is
+    # the shipped 1 per 10 read on a meter half the size, and not a bigger
+    # number on the same one.
+    n5 = p.powers.get("fanfare_attack_per5", 0)
+    if n5:
+        if not valuation:                          # EB-253, see the docstring
+            resources.note_fanfare_read(state, "attack_power")
+        bonus += n5 * (resources.readable(p) // 5)
     # Ceremonial Garment (Kokomi kit, kickoff §2.2 Shape B): while the state
     # is active her attack cards READ Charge, scaled down by the divisor
     # knob — repeated-but-bounded payoff, never a spend.

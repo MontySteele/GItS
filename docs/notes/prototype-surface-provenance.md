@@ -2764,8 +2764,9 @@ shipped row and its shipped delta stand (R213 B).
 
 ## proto_fr_rapturous_applause
 
-Face: "Your Attacks deal 2 additional damage per 10 Fanfare." The shipped
-Rare's body with its `gain_fanfare_floor 8` rider removed (`EB-507`).
+Face: "Your Attacks deal 1 additional damage per 5 Fanfare." The shipped
+Rare's body with its `gain_fanfare_floor 8` rider removed (`EB-507`), read at
+the arm's own granularity.
 
 WHY THE RIDER GOES. The reframe mints Fanfare by PERFORMING -- 2 per trigger, 5
 per Evoke -- and `gain_fanfare_floor` mints it for being played. That is a
@@ -2774,11 +2775,24 @@ offer surface contradicting the arm's one sentence about where the meter comes
 from. Three shipped Rares print the rider; this is one of the two that have a
 body underneath it.
 
-WHY 2 AND NOT THE SHIPPED 1. The floor the copy no longer mints was also this
-card's own opening payment -- it arrived with 8 Fanfare already on the meter,
-which is most of the first 10 the per-10 clause reads. The copy pays for that
-loss in the printed number rather than by keeping a rider the arm cannot have.
-The upgrade is the shipped `{power_amount: +1}`, so the `+` card reads 3 per 10.
+WHY PER 5 AND NOT THE SHIPPED PER 10. The floor the copy no longer mints was
+also this card's own opening payment -- it arrived with 8 Fanfare already on
+the meter, which is most of the first 10 the shipped clause reads -- and a
+per-10 clause on a meter that runs 0 to 15 pays on the top third of the range
+or not at all. So the copy takes the THRESHOLD mapping every other arm copy in
+`POOL_SUBS` takes: the shipped bars 12, 12, 15 and 20 became 6, 6, 8 and 10
+because the shipped meter's 20-to-30 range maps to the arm's 0-to-15, and this
+row's 10 becomes 5 for the same reason. The upgrade is the shipped
+`{power_amount: +1}`, so the `+` card reads 2 per 5.
+
+THE FIRST READ WAS 2 PER 10, AND THE AUDIT OF 2026-09-07 RULED IT
+REQUIRES_MODIFICATION ON C8. That number pays for the lost floor out of the
+PAYOUT rather than the threshold, which is the one move an arm copy of a
+shipped rider may not make: it is the shipped card at 10 Fanfare, twice the
+shipped card at 20, and nothing at all below 10. 1 per 5 is the same slope --
+one point of damage for every ten points of shipped Fanfare, or every five of
+the arm's -- and the granularity is the only thing that changed, which is what
+puts the copy back on the mapping the other four rows already use.
 
 Rare for Rare, art borrowed from the shipped row (`art_of`, R179), shipped
 sheet unmoved (R213 B).

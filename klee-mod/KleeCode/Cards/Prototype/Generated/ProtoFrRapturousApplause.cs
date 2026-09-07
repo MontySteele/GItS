@@ -41,13 +41,13 @@ public sealed class ProtoFrRapturousApplause : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rapturous Applause"),
-        ("description", "Your Attacks deal {PowerAmount:diff()} additional damage per 10 [gold]Fanfare[/gold]."),
+        ("description", "Your Attacks deal {PowerAmount:diff()} additional damage per 5 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 2m)
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -59,7 +59,7 @@ public sealed class ProtoFrRapturousApplause : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<FanfareAttackPer10Power>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<FanfareAttackPer5Power>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

@@ -127,11 +127,14 @@ plus 1 per 2 Fanfare, 6 more to ALL at 8 Fanfare).
    itself; two copies cycle at no cost, stacking the Spotlight rider). Read
    the base card and the upgrade both, C2 against the holding technique.
 4. **Rapturous Applause (arm copy)** — Furina, Rare Power, 1 energy. Your
-   Attacks deal 2 additional damage per 10 Fanfare. Upgrade: 3. WAS: the
-   shipped row also grants "Fanfare +8, and cannot fall below 8" (a
-   permanent floor, which under the arm satisfies every rider bar without a
-   performance); the floor is removed and the per-10 amount doubled for the
-   arm's 0-to-15 range.
+   Attacks deal 1 additional damage per 5 Fanfare. Upgrade: 2. WAS: the
+   shipped row is 1 per 10 and also grants "Fanfare +8, and cannot fall
+   below 8" (a permanent floor, which under the arm satisfies every rider bar
+   without a performance); the floor is removed, and the first read of this
+   copy paid for it by doubling the amount to 2 per 10, which moves the
+   PAYOUT. This is the C8 threshold mapping instead — the shipped meter's
+   20-to-30 range maps to the arm's 0-to-15, so the bar halves and the slope
+   stands, exactly as the four rider copies' 12/12/15/20 became 6/6/8/10.
 5. **Unheard Confession (arm copy)** — Furina, Rare Power, 2 energy.
    Whenever your Fanfare changes amount, gain 2 Block. Upgrade: costs 1. WAS:
    the shipped row also grants the same "Fanfare +8" floor at 1 Block per
