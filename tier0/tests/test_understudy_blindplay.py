@@ -9152,7 +9152,7 @@ def test_the_turn_one_page_prints_the_spotlight_window():
     page = blindplay.observe(spotlight_turn_one_state())
     assert ("*It costs 2 Encore of the 2 you open with. Anything that "
             "performs spends 1; a card that grants Encore reopens the window. "
-            "An arrival's performance is free.*") in page
+            "The opening arrival's performance is free.*") in page
 
 
 def test_the_window_line_states_the_rule_and_recommends_nothing():
@@ -9176,7 +9176,9 @@ def test_the_window_line_states_the_rule_and_recommends_nothing():
 
     assert "Anything that performs spends 1" in page
     assert "a card that grants Encore reopens the window" in page
-    assert "An arrival's performance is free" in page
+    assert "The opening arrival's performance is free" in page
+    # `EB-638`: only the OPENING arrival is free; a Deploy's performance pays.
+    assert "An arrival's performance is free" not in page
     for wrong in ("Light your Companion cards", "locked out",
                   "first action or not this fight"):
         assert wrong not in page
@@ -9353,7 +9355,7 @@ def test_the_spotlight_tip_carries_the_window_and_keeps_the_refusal():
     # Encore refills. The clause is split across source literals, so the
     # anchors are the halves that are whole.
     assert "performs spends 1; a card that grants [gold]Encore[/gold] " in body
-    assert "reopens the window. An arrival's performance is free." in body
+    assert "reopens the window. The opening arrival's performance is free." in body
     assert "Light your" not in body
     # ITS OWN METHOD, chained at the call site: two facts, two tip rows, each
     # inside the 135-character ceiling on its own.

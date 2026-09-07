@@ -610,14 +610,15 @@ PLAN_COUNT_NOTE = ("- The jellyfish holds any number of Plans and carries them "
 # Chevalmarin's grant of 3, and called working that out "the best moment in
 # the kit". So the line states the RULE -- the price, what spends it, what
 # refills it -- and lets the player derive the window; and its last clause is
-# R260's free arrival (`EB-558`), which is the fight's own first performance
-# on every board and spends nothing. Same sentence as
-# `FurinaRiderTips.ForSpotlightWindow`.
+# R260's free OPENING arrival (`EB-558`), which is the fight's own first
+# performance on every board and spends nothing. `EB-638`: "an arrival's"
+# read as every deploy, and a card's deploy pays its 1, so the clause names
+# the opening one. Same sentence as `FurinaRiderTips.ForSpotlightWindow`.
 SPOTLIGHT_WINDOW_NOTE = (
     f"*It costs {SPOTLIGHT_ENCORE_COST} Encore of the "
     f"{FURINA_OPENING_ENCORE} you open with. Anything that performs spends 1; "
-    "a card that grants Encore reopens the window. An arrival's performance "
-    "is free.*")
+    "a card that grants Encore reopens the window. The opening arrival's "
+    "performance is free.*")
 
 
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
