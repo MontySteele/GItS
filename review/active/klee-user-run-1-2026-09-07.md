@@ -1,4 +1,4 @@
-Status: OPEN (two picks, §5; four D and E defaults applied, §6)
+Status: OPEN (two picks, §5; three D and E defaults applied and one read, §6)
 
 # Klee, [USER]'s first act-1 run under the overhaul: the concept reads as sound, seven notes triaged
 
@@ -66,11 +66,15 @@ applied.
 **A lot of Rares.** The game's own roll says otherwise for the card slots:
 thirty-five rolls in the log, two of them under the rare threshold. The run
 still took four Rares in ten picks (Alice's Introduction Magic, Mona, Jean
-— Lion's Fang, Sparks 'n' Splash), and the difference is the fourth reward
-slot: Klee's Companion rows are 11 Rare of 47, and the slot draws from that
-roster with no rarity roll at all, so a Rare Companion is on offer in about
-one reward in four. `EB-620`: the slot rolls rarity the way the card slots
-do. D default, applied.
+— Lion's Fang, Sparks 'n' Splash). The first suspect was the fourth reward
+slot, the Companion, drawing from a roster that is 11 Rare of 47 with no
+roll; the build read (`EB-620`) found the slot has always rolled, at the
+sim's flat 5% with no pity offset, mirrored in both engines, and the
+missing thing was a pin, now in place. So two of the four Rares are the
+roll's own, and the other two came through the Companion slot or an
+elite's raised odds; the log records picks, not offers, so it cannot say
+which. Nothing moved. If it recurs, the seat records log every offer and
+a census over them answers it.
 
 ## 3. What the run did not test
 
@@ -119,8 +123,8 @@ three readers.
 
 - **`EB-619`** the tip's "it never costs Spark" clause dropped, both
   surfaces (E).
-- **`EB-620`** the Companion reward slot rolls rarity with the game's own
-  roll and offset (D).
+- **`EB-620`** read, not moved: the Companion slot already rolls rarity
+  (5% Rare, both engines); the roll is pinned (E).
 - **`EB-621`** a Spark badge beside Energy on Klee's seat (E).
 - **`EB-622`** Sucrose's upgrade keeps Exhaust and draws 2; Mona's Omen
   applies 2 Vulnerable; Grounded pays 4 Block, upgrade 6 (D).
