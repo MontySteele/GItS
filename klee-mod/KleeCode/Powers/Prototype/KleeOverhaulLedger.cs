@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Logging;
 
 namespace KleeMod.Powers;
 
@@ -85,6 +86,54 @@ public sealed class KleeOverhaulLedger
     {
         _combat = null;
         _byKlee.Clear();
+    }
+
+    /// <summary>
+    /// `EB-318` / `EB-450`: THE ARM'S LINE LOG, and this arm had none.
+    ///
+    /// THE TWO FINDS ARE ONE GAP. A detonation of `Jumpy Dumpty` places a Mine
+    /// on ALL enemies and the round-7 seat could only confirm ONE had happened
+    /// by watching a Spark tick over; a Mine firing into a Cryo aura on the
+    /// enemy's turn moved an enemy 12 where the badge printed 7, with the
+    /// reaction named nowhere (r13 f6). Both are the same thing missing: the
+    /// board says what IS, never what just happened, and the two moments that
+    /// matter here happen while no card is in front of the player.
+    ///
+    /// LINES AND NOT COUNTERS. A counter nothing reads is dead weight (rule 7's
+    /// two exist because six cards read them); what these two rows ask for is a
+    /// SENTENCE, in the player's own vocabulary, that a run record carries. So
+    /// each is written once, at the site that knows it, and mirrored to
+    /// `godot.log` -- the channel this repo already reads a live run's truth
+    /// out of -- so a round's record can quote it.
+    ///
+    /// PER COMBAT AND NOT PER TURN: <see cref="RollTo"/> deliberately does not
+    /// clear this. A log that forgot the last turn could not answer the
+    /// question either seat was asking, which was about a beat that had already
+    /// passed. Capped at <see cref="LineCap"/> so a long fight cannot grow it
+    /// without bound, oldest dropped first, and dropped whole with the rest of
+    /// the table when the combat changes.
+    ///
+    /// WHAT IT IS NOT: a wire route. The bridge answers a play BEFORE the card
+    /// resolves (`McpMod.Actions.ExecutePlayCard` enqueues and returns), so
+    /// there is no post-resolution channel to the blind page today, and
+    /// `GitsMeterLedger`'s own header records why a developer-vocabulary
+    /// ledger is kept off a grading surface. The page half of both rows is the
+    /// board it already reads.
+    /// </summary>
+    public IReadOnlyList<string> Lines => _lines;
+
+    private const int LineCap = 200;
+
+    private readonly List<string> _lines = new();
+
+    /// <summary>Write one line. The ONE door, so every line reaches the log in
+    /// the same shape and a pin can read them back without a game.</summary>
+    public void NoteLine(string line)
+    {
+        if (string.IsNullOrEmpty(line)) return;
+        _lines.Add(line);
+        if (_lines.Count > LineCap) _lines.RemoveAt(0);
+        Log.Info($"[{KleeMod.ModId}] {line}");
     }
 
     /// <summary>Counter one: Bombs that went off this turn.</summary>

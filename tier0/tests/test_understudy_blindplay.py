@@ -6068,7 +6068,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-574`: rule 3 says which kill it means, in the same words on
         # both tips and the badge.
         "Bomb": ["A charge on an enemy", "goes off only when",
-                 ", or as a ", "Not an Attack: only ",
+                 ", or as a ", "Not an Attack, but ",
+                 " stops it: only ",
                  " and a cap on the ", "enemy's HP loss move it",
                  "If this enemy dies with it still on, it moves to a "
                  "survivor", "Your deck opens with a placer"],
@@ -6085,7 +6086,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
         # `EB-436`: the hit is in the sentence now.
         "Mine": ["that also goes off before its enemy's hit, ",
-                 "which lands in full unless the Mine kills. Only their "],
+                 "which lands in full unless the Mine kills. Their ",
+                 # `EB-400`: the Block clause straddles a [gold] span,
+                 # so the anchor is the half that is whole.
+                 " stops it, and only their "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
@@ -7195,7 +7199,7 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     clause and `EB-361` added a rule, and both of this test's claims survive
     all three. [USER] held the in-game word to its 135-character ceiling, so
     the tip reads "A charge on an enemy: grows 4 a turn, goes off only when
-    Set off. Not an Attack: only Vulnerable and a cap move it. Kills move it
+    Set off. Not an Attack, but Block stops it: only Vulnerable and a cap
     on." The glossary keeps "each" on top of the first sentence, because the
     fact that growth is PER BOMB lives on the badge in game and the seat page
     has no badge.

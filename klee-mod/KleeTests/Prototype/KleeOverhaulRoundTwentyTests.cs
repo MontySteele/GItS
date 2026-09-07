@@ -112,7 +112,11 @@ public class KleeOverhaulRoundTwentyTests
         // ONE DEFINITION PER PAGE, not one per clause. The Mine tip is at 133
         // of its 135-character ceiling and prints directly under the Bomb tip;
         // a Mine IS a Bomb, so the term is defined on the screen either way.
-        Assert.Contains("Vulnerable[/gold] and a cap move it.", Printed("ForMine"));
+        // `EB-400` added Block to this clause; the cap half is untouched.
+        Assert.Contains("[gold]Vulnerable[/gold] and a cap move it.",
+                        Printed("ForMine"));
+        Assert.Contains("[gold]Block[/gold] stops it, and only their ",
+                        Printed("ForMine"));
     }
 
     // ---- `EB-536` (widened): the pile's numbers are sizes -----------------
@@ -132,7 +136,8 @@ public class KleeOverhaulRoundTwentyTests
             Assert.DoesNotContain("Bombs here:", face);
         }
         Assert.Contains(faces,
-            f => f.Contains("Bomb sizes here: [blue]{Charges}[/blue]"));
+            f => f.Contains(
+                "Bomb sizes here, oldest first: [blue]{Charges}[/blue]"));
     }
 
     [Fact]

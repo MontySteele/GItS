@@ -421,7 +421,10 @@ public class Round19Tests
         // The rest of the face is untouched: the total, the queue and rule 3.
         Assert.Contains("[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
                       + "Pyro damage.", face);
-        Assert.Contains("Bomb sizes here: [blue]{Charges}[/blue]", face);
+        // `EB-450` put the ORDER in the label, and the label is what
+        // this pin reads.
+        Assert.Contains("Bomb sizes here, oldest first: [blue]{Charges}[/blue]",
+                        face);
     }
 
     [Fact]

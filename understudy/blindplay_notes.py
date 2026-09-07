@@ -969,11 +969,17 @@ ARM_KEYWORDS: dict[str, str] = {
     # shown" (Klee r20 lane 1). A phrase and not a sentence, and it names
     # whose HP it is -- which also rules out the reading that a cap might be
     # something of Klee's.
+    # `EB-400` NAMED BLOCK, in step with `ArmKeywordTips.ForBomb`. "Not an
+    # Attack: only Vulnerable and a cap move it" reads as a list of the only
+    # two things that touch the hit, with Block outside it -- and the r10 seat
+    # priced a Set off as unblockable and was wrong (12 into 20 HP behind
+    # Block 5 left 13). The `Set off` row two entries down has said "Block
+    # stops them" since `EB-443`, so two rows of one glossary disagreed.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
-             "only when Set off, or as a Mine. Not an Attack: only Vulnerable "
-             "and a cap on the enemy's HP loss move it. If this enemy dies "
-             "with it still on, it moves to a survivor. "
-             "Your deck opens with a placer."),
+             "only when Set off, or as a Mine. Not an Attack, but Block "
+             "stops it: only Vulnerable and a cap on the enemy's HP loss "
+             "move it. If this enemy dies with it still on, it moves to a "
+             "survivor. Your deck opens with a placer."),
     # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
     # walks the charges in placement order and the first one through the
     # funnel meets the aura, because every reaction consumes it -- the r11
@@ -1017,10 +1023,12 @@ ARM_KEYWORDS: dict[str, str] = {
     # seat set off Mine 11, killed Toadpole B and saw nothing arrive on A. A
     # charge that goes off is spent; what travels is one still sitting on a
     # body that dies to something else. Same words on both tips and the badge.
+    # `EB-400`: the same three words on the same clause, in step with
+    # `ArmKeywordTips.ForMine`. A Mine IS a Bomb.
     "Mine": ("A Bomb that also goes off before its enemy's hit, which lands "
-             "in full unless the Mine kills. Only their Vulnerable and a cap "
-             "move it. If this enemy dies with it still on, it moves to a "
-             "survivor."),
+             "in full unless the Mine kills. Their Block stops it, and only "
+             "their Vulnerable and a cap move it. If this enemy dies with it "
+             "still on, it moves to a survivor."),
     # `EB-329`. "OR ALL IF IT SAYS SO" IS THE HALF THE OLD SENTENCE GOT
     # WRONG, and it was reprinted on every battle screen of every run: a
     # starter, Kurage's Oath, deals its Plan to ALL enemies, and the round-5

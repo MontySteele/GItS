@@ -609,7 +609,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             " a turn, goes off only when [gold]Set off[/gold], or as a ",
             "[gold]Mine[/gold]. ",
             # `EB-555` defined the cap inside the clause that names it.
-            "Not an Attack: only [gold]Vulnerable[/gold] and a cap on the ",
+            # `EB-400`: Block, named in the clause that read as a list of
+            # the only two things that touch the hit.
+            "Not an Attack, but [gold]Block[/gold] stops it: only ",
+            "[gold]Vulnerable[/gold] and a cap on the ",
             "enemy's HP loss move it. ",
             # `EB-574` SPELT RULE 3 OUT, in the same words on both tips and
             # the badge: "kills move it on" read as a promise about the charge
@@ -646,7 +649,8 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "which lands in full unless the Mine kills.",
             # `EB-373`: a Mine IS a Bomb, so the same two terms move it and
             # the two tips say so in the same words.
-            "Only their ",
+            # `EB-400`: the same three words on the same clause.
+            "[gold]Block[/gold] stops it, and only their ",
             # `EB-574`: and the Mine tip carries rule 3 too -- a Mine kills
             # more often than a plain Bomb, so this is the tip the row was
             # filed on.

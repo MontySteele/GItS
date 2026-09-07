@@ -59,6 +59,7 @@ import contextlib
 from typing import Iterator, Optional, Sequence
 
 from tier0 import constants as C
+from tier0.engine import powers
 from tier0.engine.state import Card, CombatState, Enemy, KleeCharge
 
 # ---------------------------------------------------------------------------
@@ -1003,8 +1004,14 @@ def remove_largest_for_block(state: CombatState) -> int:
     exit whose size is a coin flip is not an exit.
 
     ONE CALL, so the number removed and the number gained are the same number
-    by construction and no printed value can drift from either. The Block is
-    UNPOWERED, the mod's `ValueProp.Unpowered`.
+    by construction and no printed value can drift from either.
+
+    `EB-390`: THE BLOCK GOES THROUGH THE CARD-BLOCK FUNNEL, the mod's
+    `ValueProp.Move`. Under Dexterity 2 the r10 run-2 seat watched Dig In go 8
+    to 10 and Barbara's 5 to 7 while this card paid 13 for a Bomb 13, and this
+    card's face says "gain Block" -- the sentence Dexterity's own face is
+    about. `powers.modify_block_gained` is the funnel every printed card Block
+    takes, so Dexterity adds and Frail bites, in the engine's order.
     """
     if not live(state):
         return 0
@@ -1018,8 +1025,11 @@ def remove_largest_for_block(state: CombatState) -> int:
     if best_enemy is None:
         return 0
     removed = best_enemy.ko_charges.pop(best_index)
-    state.player.block += removed.size
-    state.emit("block", amount=removed.size)
+    gained = powers.modify_block_gained(state.player, removed.size)
+    state.player.block += gained
+    state.emit("block", amount=gained)
+    # The SIZE, not the Block: the card's second clause is about the charge it
+    # spent, and `EB-390`'s Dexterity rides the gain and not the Bomb.
     state.emit("ko_bomb_removed", target=best_enemy.name, size=removed.size)
     return removed.size
 
@@ -1046,7 +1056,11 @@ def block_for_largest_bomb(state: CombatState, cap: int) -> int:
     Grounded's cook turn into a stall. A cap of 0 or less is a sheet defect
     rather than an uncapped card, so it grants nothing.
 
-    UNPOWERED, like every other power- or rule-sourced Block on this arm.
+    `EB-390`: THE CARD-BLOCK FUNNEL, `powers.modify_block_gained`, for
+    `remove_largest_for_block`'s reason one rule up -- two Bomb-sized Blocks
+    that disagree about Dexterity is that row's defect a card later. The CAP
+    is on the Bomb's size and Dexterity lands on top of it, exactly as a
+    printed Block's does.
     """
     if not live(state):
         return 0
@@ -1057,11 +1071,12 @@ def block_for_largest_bomb(state: CombatState, cap: int) -> int:
     amount = min(largest, cap)
     if amount <= 0:
         return 0
-    state.player.block += amount
-    state.emit("block", amount=amount)
-    state.emit("ko_block_largest_bomb", amount=amount, largest=largest,
+    gained = powers.modify_block_gained(state.player, amount)
+    state.player.block += gained
+    state.emit("block", amount=gained)
+    state.emit("ko_block_largest_bomb", amount=gained, largest=largest,
                cap=cap)
-    return amount
+    return gained
 
 
 def grow_largest_per_spark(state: CombatState, per_spark: int) -> int:
