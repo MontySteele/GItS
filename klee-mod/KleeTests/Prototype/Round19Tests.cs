@@ -524,8 +524,10 @@ public class Round19Tests
         // `EB-554` rewrote the ownership clause to point at the MARK the faces
         // carry, so the payment sentence moved with it -- the holes and the
         // absence of a typed digit are the pin, not the wording around them.
-        Assert.Contains("[blue][/blue] [gold]Spark[/gold] a play, up "
-                      + "to [blue][/blue].", hexerei);
+        // `EB-596` reordered the sentence (who is paid, how much, what the
+        // cap counts); the two holes are still the pin.
+        Assert.Contains("[blue][/blue] [gold]Spark[/gold], up to [blue][/blue] "
+                      + "a play; it never costs [gold]Spark[/gold].", hexerei);
         Assert.DoesNotContain("Cards of hers pay", hexerei);
         // The clause that answers the seat's OTHER question -- whether Razor is
         // one of Klee's own -- is what paid for the room, and it stays, now

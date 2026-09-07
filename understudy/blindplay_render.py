@@ -1311,7 +1311,8 @@ def render(obs: dict[str, Any]) -> str:
         # stands, which is the trade the carry-out block above already makes.
         if obs.get("last_salon"):
             ls = obs["last_salon"]
-            out += ["", "## The Salon's last beat", "", LAST_SALON_NOTE, ""]
+            out += ["", "## What your Salon did in the fight's last beat", "",
+                    LAST_SALON_NOTE, ""]
             out += [_render_evoke(row) for row in ls["evoked"]]
             out += [_render_performance(row) for row in ls["performed"]]
             out += [f"- **{name}** was played an extra time, and the extra "

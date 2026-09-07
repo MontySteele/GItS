@@ -4223,7 +4223,7 @@ def test_a_lethal_beats_salon_log_reaches_the_reward_screen():
 
     page = blindplay.render(blindplay.observation(state))
 
-    assert "## The Salon's last beat" in page
+    assert "## What your Salon did in the fight's last beat" in page
     assert "never reaches a battle screen" in page
     assert "took its final bow" in page
     assert "**Chevalmarin**" in page
@@ -4242,7 +4242,7 @@ def test_a_finished_fight_whose_stage_did_nothing_prints_no_last_beat():
     state["player"] = {"hp": 45, "max_hp": 78, "gold": 99,
                        "furina_salon": {"performed": []}}
 
-    assert "## The Salon's last beat" not in blindplay.render(
+    assert "## What your Salon did in the fight's last beat" not in blindplay.render(
         blindplay.observation(state))
 
 
