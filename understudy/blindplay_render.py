@@ -39,6 +39,7 @@ from understudy.blindplay_notes import (ATTACK_BUFF_NOTE, AURA_NOTE,
                                         PENDING_PICK_NOTE, PICKED_MARK,
                                         PLAN_AIM_NOTE,
                                         PLAN_BLOCK_NOTE,
+                                        PLAN_CASKET_AURA_CLAUSE,
                                         PLAN_COUNT_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
@@ -487,6 +488,12 @@ _ATTACK_DAMAGE_BUFF = re.compile(
     r"your attacks deal[^.]*additional damage", re.I)
 _MULTI_HIT_LABEL = re.compile(r"^\s*(\d+)\s*[x×]\s*(\d+)\s*$")
 _ONE_USE_DISCOUNT = re.compile(r"the next (\w+) you play costs", re.I)
+# `EB-433`. A relic that answers a debuff with an elemental hit, which is what
+# makes the panel's "leaves no aura" clause false for a debuff Plan. The
+# Tamakushi Casket's own sentence, with the element left open: the clause is
+# about a hit that carries one, and the Plan is Hydro either way.
+_DEBUFF_ANSWERING_HIT = re.compile(
+    r"whenever you apply a debuff[^.]*damage", re.I)
 
 
 def _auto_turn_note(you: dict[str, Any], round_: Any) -> list[str]:
@@ -530,6 +537,28 @@ def _per_hit_note(you: dict[str, Any],
                 label=str(intent["label"]).strip(), hits=hits,
                 low=each * hits, high=(each + hit["stacks"]) * hits)]
     return []
+
+
+def _casket_aura_clause(you: dict[str, Any]) -> str:
+    """`EB-433`: the exception a held relic makes to the panel's aura rule.
+
+    THE CLAUSE IS FALSE WITHOUT IT AND FALSE WITHOUT THE RELIC, which is why it
+    is gated and not printed flat: "A Plan that blocks, draws or applies a
+    debuff leaves no aura" is true of the PLAN and was wrong about the board,
+    because the Tamakushi Casket answers the debuff with a Hydro hit of its own
+    and that hit lays the aura. A run that is not holding it reads the short
+    rule, which is then true.
+
+    Matched on the relic's own sentence rather than its name, `_PLAYS_YOUR_TURN`'s
+    discipline: a second relic that answers a debuff with an elemental hit says
+    the same thing, and a renamed one does not go silent. `""` where no relic
+    on the feed says it, which is every board the clause would be noise on.
+    """
+    for relic in you.get("relics") or []:
+        if _DEBUFF_ANSWERING_HIT.search(str(relic.get("text") or "")):
+            return PLAN_CASKET_AURA_CLAUSE.format(
+                relic=f"**{relic['name']}**")
+    return ""
 
 
 def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
@@ -861,7 +890,9 @@ def render(obs: dict[str, Any]) -> str:
                 # one Plan in the queue below. The aim rule leads: a reader
                 # asking what a Plan will do asks which body first.
                 out.append(PLAN_AIM_NOTE)
-                out.append(PLAN_HYDRO_NOTE)
+                # `EB-433`: and the exception the starter relic makes to it,
+                # appended to the sentence it is an exception to.
+                out.append(PLAN_HYDRO_NOTE + _casket_aura_clause(you))
                 # `EB-411`: and what the hit meets when it gets there -- the
                 # enemy's own Block, which YOUR turn start does not clear and
                 # which no play of yours can strip before the morning.

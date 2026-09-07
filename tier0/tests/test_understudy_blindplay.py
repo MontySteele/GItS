@@ -8551,10 +8551,15 @@ def test_the_kurage_panel_says_the_planned_hit_is_hydro():
 
 
 def test_the_panel_note_says_which_plans_leave_no_aura():
-    """The half a reader prices a reaction with: a Plan that blocks, draws or
-    applies a debuff is not a hit and leaves nothing clinging."""
-    assert "blocks, draws or applies a debuff leaves no aura" \
-        in blindplay.PLAN_HYDRO_NOTE
+    """The half a reader prices a reaction with: a Plan that is not a hit
+    leaves nothing clinging.
+
+    `EB-433` NARROWED THE SENTENCE. It used to name the debuff Plan among them
+    and that was false with the starter relic on -- see
+    `test_a_debuff_plan_leaves_an_aura_while_the_casket_is_held`.
+    """
+    assert "only blocks or draws leaves no aura" in blindplay.PLAN_HYDRO_NOTE
+    assert "debuff" not in blindplay.PLAN_HYDRO_NOTE
 
 
 # ------------------- `EB-381`: the body must not lag the board -------------
@@ -11223,3 +11228,54 @@ def test_a_board_with_no_jellyfish_prints_no_plan_rules():
     """The panel's own gate, unmoved: the four rules ride the pet's line, so a
     board with no Plan rule in it prints none of them."""
     assert blindplay.PLAN_BLOCK_NOTE not in blindplay.observe(combat_state())
+
+
+# --- `EB-433`: THE AURA CLAUSE THE STARTER RELIC MAKES FALSE ----------------
+
+
+def _casket_plans_state() -> dict:
+    """The Plan board with the Tamakushi Casket on the belt.
+
+    The relic's own localisation, verbatim off `Relics/TamakushiCasket.cs` with
+    the markup the wire carries: the clause is matched on that sentence and
+    never on the title, so the fixture has to send the sentence.
+    """
+    state = copy.deepcopy(plans_combat_state(TWO_PLANS))
+    state["player"]["relics"] = [
+        {"id": "KLEEMOD-TAMAKUSHI_CASKET", "name": "Tamakushi Casket",
+         "description": ("Start each combat with the [gold]Bake-Kurage[/gold]."
+                         " Whenever you apply a debuff to an enemy, it deals "
+                         "[blue]2[/blue] [gold]Hydro[/gold] damage to that "
+                         "enemy."),
+         "counter": None, "keywords": []}]
+    return state
+
+
+def test_a_debuff_plan_leaves_an_aura_while_the_casket_is_held():
+    """`EB-433`. THE PANEL CONTRADICTED THE BOARD.
+
+    "The Bake-Kurage panel prints 'A Plan that blocks, draws or applies a
+    debuff leaves no aura', and Slack Water's debuff Plan left Hydro Aura 1 on
+    all three enemies" (Kokomi r11 run 2 (c)).
+
+    The clause was true of the PLAN and wrong about the board: the Casket's
+    answering strike is a real hit through the same `ElementalHit` funnel every
+    other non-attack hit in this mod uses, so it lays the aura the Plan did
+    not. Said as a clause on the sentence it is the exception to, and gated on
+    the relic actually being on the feed.
+
+    Seen to FAIL: the panel printed the false sentence flat on every board.
+    """
+    page = blindplay.observe(_casket_plans_state())
+    assert (blindplay.PLAN_HYDRO_NOTE
+            + blindplay.PLAN_CASKET_AURA_CLAUSE.format(
+                relic="**Tamakushi Casket**")) in page.splitlines()
+
+
+def test_a_run_without_the_relic_reads_the_short_rule():
+    """GATED ON THE RELIC, because the short rule is true without it: the
+    recorded belt holds the Pearl of Wisdom and the Scissors, and neither
+    answers a debuff with a hit."""
+    page = blindplay.observe(plans_combat_state(TWO_PLANS))
+    assert blindplay.PLAN_HYDRO_NOTE in page.splitlines()
+    assert "answering strike" not in page

@@ -623,8 +623,35 @@ PLAN_BLOCK_NOTE = ("- A Plan is carried out before you play anything, so it "
 
 PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
                    "hit: it leaves a Hydro aura, or reacts with the aura "
-                   "already there. A Plan that blocks, draws or applies a "
-                   "debuff leaves no aura.")
+                   "already there. A Plan that only blocks or draws leaves no "
+                   "aura.")
+
+# `EB-433`. THE CLAUSE THAT WAS FALSE WITH THE STARTER RELIC ON.
+#
+# THE FIND (Kokomi r11 run 2 (c)). The panel printed "A Plan that blocks, draws
+# or applies a debuff leaves no aura", and Slack Water's debuff Plan left Hydro
+# Aura 1 on all three enemies. The clause was right about the PLAN and wrong
+# about the board, and nothing on the page closed the gap.
+#
+# WHY IT HAPPENS, in the relic's own words: the Tamakushi Casket reads
+# "Whenever you apply a debuff to an enemy, it deals 2 Hydro damage to that
+# enemy", and that strike is a REAL hit through the same `ElementalHit` funnel
+# every other non-attack hit in this mod uses -- its own header says so, and
+# lists the aura and the reaction among what it therefore applies. So a debuff
+# Plan lays Hydro through the relic rather than through the Plan, which is
+# exactly the distinction a reader cannot make from a board.
+#
+# A CLAUSE AND NOT A ROW, appended to the sentence it is the exception to: the
+# aura rule is one fact and printing a second bullet contradicting the first is
+# how the panel becomes the wall `PLAN_AIM_NOTE` refuses to build.
+#
+# GATED ON THE RELIC BEING HELD, and matched on its SENTENCE rather than its
+# name -- `_PLAYS_YOUR_TURN`'s discipline -- so a run that never had it reads
+# the true short rule, and a second relic that answers a debuff with an
+# elemental hit gets the same clause.
+PLAN_CASKET_AURA_CLAUSE = (
+    " A Plan that applies a DEBUFF leaves one anyway while you hold "
+    "{relic}: its answering strike is itself a Hydro hit.")
 
 # `EB-563` / `EB-330` / `EB-357`. THE COUNT WAS READ AS A CAPACITY. The buff
 # prints `Plan 1`, the box says "the Plan", and three seats wrote one Plan at
