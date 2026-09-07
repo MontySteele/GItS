@@ -112,6 +112,14 @@ VULNERABLE_TAKEN_PCT = 50
 WEAK_DEALT_PCT = 25
 FRAIL_BLOCK_PCT = 25
 
+# `EB-597`. A FOURTH, AND IT IS THE ONE THE SIM DOES NOT MODEL. Shrink is an
+# enemy-applied debuff of the base game's (the Shrinker Beetle's), so there is
+# no `C.` rate on this side to hold it in step with. The figure is the shipped
+# `ShrinkPower`'s own `DamageDecrease` canonical var, MEASURED off the
+# assembly -- 30, already a percentage -- and `Round22Tests` reads that var
+# from the other side so this page cannot be left teaching a retired number.
+SHRINK_DEALT_PCT = 30
+
 REPO = Path(__file__).resolve().parents[1]
 LOG_ROOT = Path(__file__).resolve().parent / "logs" / "blindplay"
 RECORD_ROOT = REPO / "review" / "qa" / "blindplay"

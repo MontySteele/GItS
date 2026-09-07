@@ -24,6 +24,7 @@ from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
                                         CRYSTALLIZE_BLOCK, SHATTER_DAMAGE,
                                         FRAIL_BLOCK_PCT, FURINA_OPENING_ENCORE,
+                                        SHRINK_DEALT_PCT,
                                         SPOTLIGHT_ENCORE_COST,
                                         VULNERABLE_TAKEN_PCT,
                                         WEAK_DEALT_PCT)
@@ -458,6 +459,12 @@ LAST_MORNING_NOTE = (
     "in it -- printed here because a Plan whose kill ends a fight never "
     "reaches a battle screen.*")
 
+# `EB-604`. THE SAME SENTENCE ONE ARM OVER, for the same screen and the same
+# defect: a deliberate Evoke onto a full stage that KILLS ends the fight, and
+# the beat the seat spent a turn building is the one beat of the run with no
+# receipt. Furina r16 lane 2 Evoked twice on purpose, at 10 and 7 Encore, and
+# "the bridge printed nothing about either because both were lethal"; r14
+# lane 1's Second Course was the same turn a round earlier.
 # `EB-299`. THE NOTE WAS WRONG IN BOTH DIRECTIONS AND THE r2 OPUS SEAT CAUGHT
 # BOTH. It said *"Two cards here print the same name"* over a hand holding
 # THREE Coral Guards, over a hand with two separate duplicate PAIRS, and over
@@ -581,10 +588,9 @@ PLAN_COUNT_NOTE = ("- The jellyfish holds any number of Plans and carries them "
 # so, and this note is not a second copy of that sentence. It is the thing the
 # refusal cannot be -- a sentence that arrives BEFORE the decision.
 #
-# PRINTED ON TURN ONE AND ONLY THERE, with the card in hand: on any later turn
-# the window is already open or already shut, and a standing note about a
-# decision that is no longer available is the noise this page's one-fact-per-
-# line rule exists to keep off it.
+# PRINTED WHEREVER THE CARD IS IN HAND. It used to print on turn one and only
+# there, on the reading that by any later turn "the window is already open or
+# already shut"; `EB-600` is that reading being wrong, because Encore refills.
 #
 # `EB-586` TOOK THE ADVICE OUT AND LEFT THE WINDOW, in step with
 # `FurinaRiderTips.ForSpotlightWindow`. "Light your Companion cards before
@@ -595,15 +601,22 @@ PLAN_COUNT_NOTE = ("- The jellyfish holds any number of Plans and carries them "
 # zeroed Encore twice, which is where nine of its eleven HP went. The decision
 # is REAL on both lanes, so this states the window and the price and stops --
 # which is what every other line on this page does.
-# `EB-600` REWORDED THE WINDOW TO THE RULE. "First action or not this fight"
-# was false: Aria of Recompense and Hearts Swelling grant Encore without
-# performing, and the r16 lane-1 seat lit the Spotlight after both. The window
-# is "before anything spends Encore, or after a card refills it", in step with
+# `EB-600` REPLACED `EB-586`'s WORDING, because what it left behind was still
+# false. "It is this turn's first action or not this fight" describes a window
+# that only ever shuts, and BOTH r16 lanes broke it. Lane 1: "Aria and Hearts
+# Swelling grant Encore without performing, and I broke the rule on turn 1 of
+# the run." Lane 2 lit it AFTER a performance in three fights, off
+# Chevalmarin's grant of 3, and called working that out "the best moment in
+# the kit". So the line states the RULE -- the price, what spends it, what
+# refills it -- and lets the player derive the window; and its last clause is
+# R260's free arrival (`EB-558`), which is the fight's own first performance
+# on every board and spends nothing. Same sentence as
 # `FurinaRiderTips.ForSpotlightWindow`.
 SPOTLIGHT_WINDOW_NOTE = (
-    f"*You open a fight with {FURINA_OPENING_ENCORE} Encore and "
-    f"**Ethereal Spotlight** costs {SPOTLIGHT_ENCORE_COST} -- all of it. A "
-    "performance spends one; a card that grants Encore reopens the window.*")
+    f"*It costs {SPOTLIGHT_ENCORE_COST} Encore of the "
+    f"{FURINA_OPENING_ENCORE} you open with. Anything that performs spends 1; "
+    "a card that grants Encore reopens the window. An arrival's performance "
+    "is free.*")
 
 
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
@@ -863,10 +876,17 @@ ARM_KEYWORDS: dict[str, str] = {
     # enemy in the same fight (Kokomi r19 lane 2): a carry-out goes out through
     # `ElementalHit.Deal` as an unpowered hit with no dealer, so nothing keyed
     # on being hit can answer it. Same sentence as `ArmKeywordTips.ForPlan`.
+    # `EB-599` REVERSED WHICH SIDE THE MODIFIER CLAUSE NAMES, because the rule
+    # moved: the Plan line folds HER Strength at writing time and nothing of
+    # the target's, since a Plan resolves next morning against whatever the
+    # body wears then. The r22 lane-2 seat paid for a "Plan: Deal 10" that
+    # arrived as 7 once the Vulnerable it was folding had expired -- "the
+    # committed number moving is the sharpest contradiction in the kit". The
+    # clause now says WHEN each side is read.
     "Plan": ("On the Bake-Kurage, paid now; next turn: front non-Minion, or "
-             "ALL, Minions too. Enemy Vulnerable counts; no damage term of "
-             "yours does. A carry-out is not a hit: no when-hit power "
-             "fires."),
+             "ALL, Minions too. Your Strength folds in as you write it; the "
+             "enemy's Vulnerable counts at the morning. A carry-out is not a "
+             "hit: no when-hit power fires."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
     # `EB-377` ADDED THESE TWO, and their absence was the same defect one row
@@ -953,9 +973,16 @@ ARM_KEYWORDS: dict[str, str] = {
     # prints no Encore price, and it left the Evoke outside the economy every
     # other act on the stage pays into. An Evoke is a performance that also
     # costs the member, and it is priced like one.
-    "Evoke": ("The member performs and leaves. Its Fanfare bonus counts 3 "
-              "times and it prints 5 Fanfare. It spends 1 Encore, or Evokes "
-              "at 3/4."),
+    # `EB-601` PUT THE TRIGGER FIRST, in step with `ArmKeywordTips.ForEvoke`.
+    # "A full stage Evokes the front member" -- the Deploy row's sentence --
+    # read beside "a Companion card you play performs Crabaletta" says, to a
+    # reader meeting both on one screen, that playing a Companion card into a
+    # full stage Evokes. Only a Deploy does, and the misreading cost r16 lane
+    # 1 an elite turn. A player reading THIS word is asking what makes an
+    # Evoke happen, so that is the clause it opens with.
+    "Evoke": ("Only a Deploy onto a full stage Evokes. The member performs "
+              "and leaves; its Fanfare bonus counts 3 times and it prints 5 "
+              "Fanfare. It spends 1 Encore, or Evokes at 3/4."),
     "Drain": ("Your Fanfare falls to nothing. What the card does next is "
               "priced off the amount it took."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
@@ -1327,6 +1354,24 @@ BASE_KEYWORDS: dict[str, str] = {
     "Frail": (
         f"The wearer gains {FRAIL_BLOCK_PCT}% less Block. One stack falls "
         f"off at the end of each of its turns."),
+    # `EB-597`. THE SAME FINDING A FOURTH TIME, and this one the seat wrote up
+    # as a contradiction rather than a doubt: "Shrink's own text says `your
+    # Attacks deal 30% less damage`, but Kurage's Oath is printed `cost 1,
+    # skill` and it still fell 3 to 2. Weak's glossary on the same screen goes
+    # out of its way to say 'a Skill's damage too'; Shrink's does not, and
+    # Shrink hits Skills anyway" (Kokomi r22 lane 1, fight 2).
+    #
+    # THE ENGINE IS RIGHT AND ONLY THE WORDS ARE WRONG.
+    # `ShrinkPower.ModifyDamageMultiplicative` gates on `IsPoweredAttack()` and
+    # nothing else -- the identical gate `WeakPower` uses, MEASURED off the
+    # shipped assembly -- so "Attacks" in the game's sentence means attack
+    # HITS, exactly as it does in Weak's. This row is Weak's sentence with its
+    # own rate and its own duration clause, and `KleeMod.InjectLocStrings`
+    # merges the same rule into the game's `SHRINK_POWER` rows.
+    "Shrink": (
+        f"The wearer deals {SHRINK_DEALT_PCT}% less damage with every hit it "
+        f"lands, a Skill's damage too. It lasts while whoever applied it is "
+        f"alive."),
     # The two undecaying stat powers. Named on four prototype faces and on the
     # Plan's own tip, which says Strength does NOT reach a Plan -- a sentence
     # that cannot be read by somebody who does not know what Strength is.
@@ -1370,6 +1415,10 @@ _BASE_KEYWORD_RE = {
     "Vulnerable": re.compile(r"\bVulnerable\b"),
     "Weak": re.compile(r"\bWeak\b"),
     "Frail": re.compile(r"\bFrail\b"),
+    # `EB-597`: the debuff the Shrinker Beetle applies. SINGULAR ONLY, the
+    # rule the comment above states -- a status line reads "Shrink -1", never
+    # "Shrinks", and the verb is ordinary English.
+    "Shrink": re.compile(r"\bShrink\b"),
     "Strength": re.compile(r"\bStrength\b"),
     "Dexterity": re.compile(r"\bDexterity\b"),
     "Sharp": re.compile(r"\bSharp\b"),

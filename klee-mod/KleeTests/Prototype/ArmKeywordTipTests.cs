@@ -328,17 +328,17 @@ public class ArmKeywordTipTests
         Assert.Contains("front non-", body);
         Assert.Contains("Minion", body);
         Assert.Contains("or ALL", body);
-        Assert.Contains("Enemy ", body);
         Assert.Contains("Vulnerable", body);
-        // `EB-579` NAMED THE CLASS INSTEAD OF THE LIST. "your Weak and
-        // Strength do not" reads as a complete enumeration, and the r21
-        // lane-2 seat had to TEST Shrink ("your Attacks deal 30% less") to
-        // learn it does not bite a carry-out either. One clause now answers
-        // for every term on the player's side, named or not -- which is the
-        // rule `KokomiPlan.Hit`'s `powered: false` actually implements.
-        Assert.Contains("no damage term of yours does", body);
+        // `EB-599` REVERSED THE MODIFIER CLAUSE, because the rule moved: the
+        // line folds HER Strength when the Plan is written and nothing of the
+        // target's, since a Plan resolves next morning against whatever the
+        // body wears then. The r22 lane-2 seat paid for a "Plan: Deal 10"
+        // that arrived as 7 once that Vulnerable had expired. `Weak` stays
+        // off the sentence -- `powered: false` at the carry-out answers for
+        // every other term of hers at once.
+        Assert.Contains("folds in as you write it", body);
+        Assert.Contains("counts at the morning", body);
         Assert.DoesNotContain("Weak", body);
-        Assert.DoesNotContain("Strength", body);
         Assert.DoesNotContain("never a Minion", body);
 
         // The ceiling is the base game's own longest mechanic tip (CHANNELING,
@@ -355,7 +355,10 @@ public class ArmKeywordTipTests
             body.Replace(Tips.GetField("PlanKey")!.GetRawConstantValue()
                              as string ?? string.Empty, string.Empty),
             @"\[/?[a-z]+\]", string.Empty);
-        Assert.Equal(185, rendered.Length);
+        // `EB-599` PUT 31 BACK for a rule a class name cannot state: the line
+        // folds her Strength at writing time and nothing of the target's, so
+        // the clause is about WHEN each side is read.
+        Assert.Equal(216, rendered.Length);
         Assert.Contains("A carry-out is not a hit: no when-hit power fires.",
                         body);
     }

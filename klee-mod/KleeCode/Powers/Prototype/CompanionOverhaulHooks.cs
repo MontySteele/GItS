@@ -88,7 +88,17 @@ public sealed class CompanionOverhaulLedger
     public static CompanionOverhaulLedger For(Creature owner)
     {
         var combat = (object?)owner.CombatState;
-        if (!ReferenceEquals(_combat, combat))
+        // `EB-603`. A CREATURE WITH NO COMBAT IS NOT A NEW COMBAT, and the
+        // guard is a null check because the alternative is a table-wide wipe.
+        // This method is a ROLL-ON-READ lookup called from speculative sites
+        // -- a face's multiplier lambda (`ProtoMiHeizouHeartstopper`), a
+        // smart-description getter (`WarBannerPower.MissedFor`, "on every
+        // tooltip read") -- and any of them can be handed a card whose owner
+        // is off the board: a compendium copy, a reward-screen copy, a deck
+        // view. Answering `null` there used to set `_combat` to null and drop
+        // every ledger in the table, including the play-scoped damage total
+        // that Gorou's second clause was about to halve.
+        if (combat != null && !ReferenceEquals(_combat, combat))
         {
             _combat = combat;
             _byOwner.Clear();
@@ -139,9 +149,13 @@ public sealed class CompanionOverhaulLedger
     /// pays nothing for the machinery.
     ///
     /// HP, not the swing: it is the conservative reading of "the damage dealt"
-    /// (R212's one-way rule -- the doubt pays LESS Block), and it is the number
-    /// <c>DamageResult.UnblockedDamage</c> already hands over without a second
-    /// definition. Sim twin: `state.mi_damage_dealt_this_card`.
+    /// (R212's one-way rule -- the doubt pays LESS Block), and `EB-603` is
+    /// what made the sentence true. <c>UnblockedDamage</c> alone is the swing
+    /// past Block and carries the OVERKILL, so a killing blow paid Block for
+    /// damage no body took; <c>DamageResult</c> carries the overkill as its
+    /// own field, so subtracting it is a read rather than a second
+    /// definition. Sim twin: `state.mi_damage_dealt_this_card`, fed by
+    /// `deal_damage_to_enemy`'s own overkill-clamped `removed`.
     /// </summary>
     public int DamageDealtThisPlay { get; private set; }
 
@@ -1414,8 +1428,14 @@ public sealed class CompanionOverhaulPlayWatcher : AbstractModel
         {
             return Task.CompletedTask;
         }
+        // `EB-603`: THE HP THE BODY ACTUALLY LOST, which is
+        // `UnblockedDamage` less the part that landed past 0.
+        // `DamageResult` carries both, so this is a read rather than a second
+        // definition -- and it is the number the sim's twin now hands its own
+        // reader (`effects.deal_damage_to_enemy`'s `removed`). Gorou killing
+        // an 8-HP body with a 12 gains 4, not 6, and gains it on the kill.
         CompanionOverhaulLedger.For(dealer)
-            .NoteDamage((int)result.UnblockedDamage);
+            .NoteDamage(result.UnblockedDamage - result.OverkillDamage);
         return Task.CompletedTask;
     }
 }

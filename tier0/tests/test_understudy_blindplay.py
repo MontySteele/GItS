@@ -3534,7 +3534,8 @@ def test_the_plan_keywords_aim_clause_stays_the_pointer():
     diverge and the keyword must not be emptied into the panel."""
     plan = blindplay.ARM_KEYWORDS["Plan"]
     assert "front non-Minion, or ALL, Minions too" in plan
-    assert "Enemy Vulnerable counts; no damage term of yours does." in plan
+    assert ("Your Strength folds in as you write it; the enemy's Vulnerable "
+            "counts at the morning.") in plan
 
 
 def test_a_board_with_no_jellyfish_is_told_no_aim_rule():
@@ -4194,6 +4195,57 @@ def test_the_last_carry_out_of_a_finished_fight_reaches_the_reward_screen():
         blindplay.observation(rewards_state()))
 
 
+def test_a_lethal_beats_salon_log_reaches_the_reward_screen():
+    """`EB-604`, and it is `EB-329`'s row one arm over.
+
+    A deliberate Evoke onto a full stage that KILLS ends the fight, the game
+    shows the reward screen next, and the combat block does not run for it --
+    so the beat a seat spent a whole turn building is the one beat of the run
+    with no receipt. Furina r16 lane 2 Evoked twice on purpose, at 10 and 7
+    Encore, and "the bridge printed nothing about either" because both were
+    lethal; r14 lane 1's Second Course was the same turn a round earlier.
+
+    THE WIRE ALREADY CARRIED IT. `furina_salon` is emitted OUTSIDE the combat
+    block, `FurinaReframeLedger.Snapshot` touches no `CombatState`, and the
+    ledger rolls at a TURN boundary that a fight ending into a reward screen
+    never crosses. Only the reader was missing.
+    """
+    state = rewards_state()
+    state["player"] = {
+        "hp": 45, "max_hp": 78, "gold": 99,
+        "furina_salon": {
+            "performed": [{"member": "Chevalmarin", "target": "Fogmog",
+                           "combat_id": "1", "element": "Hydro",
+                           "aura": "Hydro", "amount": 4, "paid": True}],
+            "evoked": [evoke_row(member="Crabaletta", aura_all=False,
+                                 target="Fogmog", combat_id="1", damage=14,
+                                 encore=0)]}}
+
+    page = blindplay.render(blindplay.observation(state))
+
+    assert "## What your Salon did in the fight's last beat" in page
+    assert "never reaches a battle screen" in page
+    assert "took its final bow" in page
+    assert "**Chevalmarin**" in page
+    # `EB-582`'s order, kept on this screen too: the bow leads.
+    assert page.index("took its final bow") < page.index("**Chevalmarin**")
+    # A reward screen from a build with no reframe is untouched.
+    assert "Salon" not in blindplay.render(
+        blindplay.observation(rewards_state()))
+
+
+def test_a_finished_fight_whose_stage_did_nothing_prints_no_last_beat():
+    """`last_morning`'s rule one arm over: nothing to say is said nowhere. An
+    EMPTY snapshot is "the rule is here and this seat is not playing it", and
+    that is not a receipt."""
+    state = rewards_state()
+    state["player"] = {"hp": 45, "max_hp": 78, "gold": 99,
+                       "furina_salon": {"performed": []}}
+
+    assert "## What your Salon did in the fight's last beat" not in blindplay.render(
+        blindplay.observation(state))
+
+
 def test_a_dead_enemy_s_leaked_locstring_key_humanises_instead_of_leaking():
     """`EB-370`, found live in the Kokomi round-9 seat's morning-log reprint.
 
@@ -4721,27 +4773,28 @@ def test_an_older_bridge_prints_the_form_and_no_waiting_line():
     assert "the jellyfish waits" not in page
 
 
-def test_the_plan_word_names_the_class_and_not_a_list_of_terms():
-    """`EB-579`, and it is the row.
+def test_the_plan_word_says_when_each_side_of_the_line_is_read():
+    """`EB-599`, and it is what `EB-579`'s class name became.
 
-    THE FIND (Kokomi r21 lane 2 (c) 2). The word said "your Weak and Strength
-    do not", which reads as a COMPLETE list, and said nothing about Shrink
-    ("your Attacks deal 30% less") -- which also does not bite a carry-out.
-    The seat had to run the experiment to find that out.
+    THE FIND (Kokomi r22 lane 2). *Kurage's Oath* printed "Plan: Deal 10"
+    under the target's Vulnerable and the morning carried out 7 once that
+    Vulnerable had expired -- "the committed number moving is the sharpest
+    contradiction in the kit" -- while her Strength moved the own line and not
+    the Plan line. Two lines, two rules, neither written down.
 
-    THE CLASS IS THE RULE. `KokomiPlan.Hit` / `kokomi_plan._hit` deal a
-    carry-out with `powered=False`, which is not a list of two debuffs: it is
-    every term on the player's side of the pipeline at once. One clause
-    answers for all of them, named or not, and it is a character shorter than
-    the enumeration was.
+    THE RULE IS ABOUT WHEN, WHICH IS WHY A CLASS NAME COULD NOT CARRY IT. Her
+    Strength is folded when the Plan is WRITTEN (`kokomi_plan.hers`), because
+    that is the number the player commits the turn on; the target's Vulnerable
+    is read at the MORNING, against whatever the body wears then, which is
+    exactly the thing today's line cannot know. `Weak` is off the sentence
+    still: `powered=False` at the carry-out answers for every other term of
+    hers at once.
     """
     plan = blindplay.ARM_KEYWORDS["Plan"]
 
-    assert "no damage term of yours does" in plan
+    assert "Your Strength folds in as you write it" in plan
+    assert "the enemy's Vulnerable counts at the morning" in plan
     assert "Weak" not in plan
-    assert "Strength" not in plan
-    # The enemy's half is untouched -- the pair is the sentence.
-    assert "Enemy Vulnerable counts" in plan
 
 
 def test_a_feed_with_no_pet_target_field_plays_the_card_as_it_always_did():
@@ -6043,10 +6096,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Strength, which does not reach a carry-out at all.
         # `EB-538`: the class a carry-out belongs to, in the Set off row's
         # own words.
+        # `EB-599`: and the modifier clause became a clause about WHEN each
+        # side is read -- her Strength at writing time, the target's
+        # Vulnerable at the morning.
         "Plan": [", paid now; next turn: front ",
-                 " counts; no damage term of ",
-                 "yours does. A carry-out is not a hit: no ",
-                 "when-hit power fires."],
+                 " folds in as you write it; the ",
+                 " counts at the morning. A ",
+                 "carry-out is not a hit: no when-hit power fires."],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
         # `EB-377` ADDED THESE TWO ROWS to the page, and their absence was the
@@ -6090,7 +6146,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-587` replaced the price clause with the price, and the anchor
         # moved with it: the Evoke spends a performance's Encore, or resolves
         # at three-quarters when the pool is dry.
-        "Evoke": ["The member performs and leaves. Its ",
+        # `EB-601`: the trigger leads the word. The clause straddles two
+        # `[gold]` spans, so the anchors are the halves that are whole.
+        "Evoke": [" onto a full stage ",
+                  ". The member performs and leaves; its ",
                   ", or Evokes at 3/4."],
         "Drain": [" falls to nothing. What the card does ",
                   "next is priced off the amount it took"],
@@ -8406,7 +8465,24 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         "Dexterity": [" the wearer gains. It ", "does not decay."],
     }
     page_only = {"Sharp", "Nimble", "Swift", "Bond of Life", "Exhaust"}
-    assert set(anchors) | page_only == set(blindplay.BASE_KEYWORDS)
+    # `EB-597`. A THIRD CLASS, AND SHRINK IS ITS ONLY MEMBER SO FAR: a word no
+    # face of ours prints -- so there is no `BaseKeywordTips` method to mirror
+    # -- whose rule this page and the GAME's own status line both have to
+    # state. `KleeMod.InjectLocStrings` merges the corrected rows into the
+    # `powers` table, which is `EB-481`'s mechanism, so the twin lives there.
+    loc_only = {"Shrink"}
+    assert set(anchors) | page_only | loc_only == set(blindplay.BASE_KEYWORDS)
+    mod = (REPO / "klee-mod" / "KleeCode" / "KleeMod.cs").read_text(
+        encoding="utf-8")
+    for word in loc_only:
+        key = word.upper() + "_POWER"
+        assert f'["{key}.description"]' in mod, word
+        assert f'["{key}.smartDescription"]' in mod, word
+        assert f"For{word}(" not in src, word
+    # The clause the row exists for, in both places: "Attacks" in the game's
+    # own sentence means attack HITS, and a Skill's damage is one.
+    assert "a Skill's damage too" in blindplay.BASE_KEYWORDS["Shrink"]
+    assert "a Skill's damage too" in mod
     for word, phrases in anchors.items():
         for phrase in phrases:
             assert phrase in src, (word, phrase)
@@ -9057,39 +9133,44 @@ def test_the_turn_one_page_prints_the_spotlight_window():
     then played it first in every fight after; lane 2 the same way.
     """
     page = blindplay.observe(spotlight_turn_one_state())
-    # `EB-600`: the window is the rule, not "first action or not this fight"
-    # -- Aria of Recompense and Hearts Swelling grant Encore without
-    # performing, and the r16 lane-1 seat lit the Spotlight after both.
-    assert ("*You open a fight with 2 Encore and **Ethereal Spotlight** costs "
-            "2 -- all of it. A performance spends one; a card that grants "
-            "Encore reopens the window.*") in page
+    assert ("*It costs 2 Encore of the 2 you open with. Anything that "
+            "performs spends 1; a card that grants Encore reopens the window. "
+            "An arrival's performance is free.*") in page
 
 
-def test_the_window_line_states_the_window_and_recommends_nothing():
-    """`EB-586`, and it is the row.
+def test_the_window_line_states_the_rule_and_recommends_nothing():
+    """`EB-600`, and it is the row -- with `EB-586`'s half kept whole.
 
     `EB-567`'s line ended "Light your Companion cards before anything
-    performs", which is a RECOMMENDATION -- and the r15 lane-1 seat refused it
-    on turn one of fight one and was right to: the starter holds two Companion
-    cards, the Spotlight costs the whole opening Encore, and "the correct
-    first move is to refuse the screen's own advice". Lane 2 paid it in most
-    fights and zeroed Encore twice, which is where nine of its eleven HP went.
-    The decision is REAL on both lanes, so the line states the window and the
-    price and stops.
+    performs", which is a RECOMMENDATION, and `EB-586` cut it. What that left
+    -- "it is this turn's first action or not this fight" -- describes a
+    window that only ever SHUTS, and both r16 lanes broke it: lane 1 "Aria and
+    Hearts Swelling grant Encore without performing, and I broke the rule on
+    turn 1 of the run"; lane 2 lit it after a performance in three fights off
+    Chevalmarin's grant of 3, and called working that out "the best moment in
+    the kit".
+
+    SO THE LINE IS THE RULE AND THE PLAYER DERIVES THE WINDOW: the price, what
+    spends it, what refills it. The last clause is R260's free arrival
+    (`EB-558`) -- the fight's own first performance on every board, and one
+    that spends nothing.
     """
     page = blindplay.observe(spotlight_turn_one_state())
 
+    assert "Anything that performs spends 1" in page
     assert "a card that grants Encore reopens the window" in page
-    for advice in ("Light your Companion cards", "locked out"):
-        assert advice not in page
+    assert "An arrival's performance is free" in page
+    for wrong in ("Light your Companion cards", "locked out",
+                  "first action or not this fight"):
+        assert wrong not in page
 
 
-def test_the_window_line_is_turn_one_only():
-    """On any later turn the window is already open or already shut, and a
-    standing note about a decision that is gone is exactly the noise the
-    one-fact-per-line rule keeps off this page."""
-    page = blindplay.observe(spotlight_turn_one_state(round_no=2))
-    assert "reopens the window" not in page
+def test_the_window_line_prints_on_the_turn_the_window_reopens():
+    """`EB-600`'s other half. The note was round-one-only, on the reading that
+    by any later turn the window is settled; a window a card can REOPEN has to
+    be stated on the turn it reopens on."""
+    page = blindplay.observe(spotlight_turn_one_state(round_no=4))
+    assert "a card that grants Encore reopens the window" in page
 
 
 def test_the_window_line_needs_the_selector_in_hand():
@@ -9250,9 +9331,12 @@ def test_the_spotlight_tip_carries_the_window_and_keeps_the_refusal():
     assert "SpotlightWindowKey" in body
     assert "{FurinaReframeLaw.OpeningEncore}" in body
     assert "{FurinaReframeLaw.SpotlightDesignateEncoreCost}" in body
-    # `EB-586`: the window and the price, and no advice. The clause is split
-    # across two source literals, so the anchor is the half that is whole.
-    assert "a card that grants [gold]Encore[/gold] reopens the " in body
+    # `EB-600`: the RULE, and no advice. `EB-586` had already cut the
+    # recommendation; what it left described a window that only shuts, and
+    # Encore refills. The clause is split across source literals, so the
+    # anchors are the halves that are whole.
+    assert "performs spends 1; a card that grants [gold]Encore[/gold] " in body
+    assert "reopens the window. An arrival's performance is free." in body
     assert "Light your" not in body
     # ITS OWN METHOD, chained at the call site: two facts, two tip rows, each
     # inside the 135-character ceiling on its own.

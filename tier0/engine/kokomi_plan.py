@@ -494,6 +494,41 @@ def _enchanted(card: Optional[Card], amount: int) -> int:
     return int(folded)
 
 
+def hers(state: CombatState, card: Optional[Card], amount: int) -> int:
+    """`EB-599`. HER SIDE OF A PLAN LINE, FOLDED AT WRITING TIME.
+
+    THE FIND (Kokomi r22 lane 2). `Kurage's Oath` printed "Plan: Deal 10"
+    under the target's Vulnerable, the seat paid for it, and the morning
+    carried out 7 once the Vulnerable had expired -- "for a mechanic sold on
+    committing a turn early, the committed number moving is the sharpest
+    contradiction in the kit". Both lanes then read the two lines computing
+    under two rules: her Strength moved the own line only and the target's
+    Vulnerable moved the Plan line only.
+
+    THE RULE (r22 packet sec.5, a D default): the Plan line folds HERS -- her
+    Strength and her enchantment -- and NOTHING of the target's. Rule 3 says
+    her Strength counts for a carry-out, and a Plan resolves next morning
+    against whatever the target wears THEN, so the target's terms are exactly
+    the ones no line written today can honestly print.
+
+    HER STRENGTH AND NOT `powers.modify_damage_dealt`, which is the one
+    argument here and is deliberate: that funnel also carries her Weak, and
+    round four-c's finding is what took her Weak off a carry-out ("a Strategic
+    enemy's Weak cut two banked Plans to x0.75 the next morning"). The default
+    names her Strength and her enchantments; this folds those two and no more.
+
+    THE ENCHANTMENT FIRST, THEN THE STRENGTH, which is the order a card's own
+    damage takes one file over: `effects` reads `enchant_damage` and
+    `modify_damage_dealt` adds Strength after it.
+
+    C# twin: `KokomiPlan.Hers`.
+    """
+    folded = _enchanted(card, amount)
+    if folded <= 0:
+        return folded
+    return folded + int(state.player.powers.get("strength", 0))
+
+
 def schedule(state: CombatState, card: Card,
              clauses: Optional[Sequence[dict]] = None,
              replay: Optional[Card] = None,
@@ -525,18 +560,19 @@ def schedule(state: CombatState, card: Card,
     body = list(clauses if clauses is not None else card.plan)
     if not body:
         return
-    # `EB-580`. THE CARD'S OWN ENCHANTMENT, FOLDED INTO THE NUMBER THAT IS
-    # WRITTEN DOWN -- see `_enchanted` for the finding and the rule. It is
-    # folded HERE for the reason the two captures below are: the enchantment
-    # is what the player was looking at when they decided to write the Plan,
-    # and this card can be anywhere by the morning. It runs FIRST, and each
-    # rewrite below copies the clause it touches, so neither can un-fold it.
+    # `EB-580` AND `EB-599`. HER SIDE OF THE LINE, FOLDED INTO THE NUMBER THAT
+    # IS WRITTEN DOWN -- see `hers` for both findings and the rule. It is
+    # folded HERE for the reason the two captures below are: her Strength and
+    # this card's enchantment are what the player was looking at when they
+    # decided to write the Plan, and both the card and the buff can be
+    # anywhere by the morning. It runs FIRST, and each rewrite below copies
+    # the clause it touches, so neither can un-fold it.
     #
     # MOON'S REFLECTION FOLDS THE CARD IT FOUND and not the card it is, which
     # is what `enchanted_by` is for: an enchantment is a fact about the copy
-    # whose printed line this is.
+    # whose printed line this is. Her Strength is hers either way.
     owner = enchanted_by or card
-    body = [dict(c, amount=_enchanted(owner, int(c.get("amount", 0))))
+    body = [dict(c, amount=hers(state, owner, int(c.get("amount", 0))))
             if c.get("op") == "damage" else c
             for c in body]
     # CRYSTAL COLLAPSE CAPTURES AT WRITING TIME, and that is the card. "The

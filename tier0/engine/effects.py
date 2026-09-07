@@ -980,6 +980,11 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     hp_dmg = dmg - blocked
     was_alive = enemy.alive
     effective = min(hp_dmg, max(0, enemy.hp))   # overkill doesn't count
+    # `EB-603`. THE SAME CLAMP, KEPT for the arm reader at the tail. `hp_dmg`
+    # is the swing past Block and carries the OVERKILL; `effective` is what
+    # the body actually lost, which is the number the `damage` emit has always
+    # printed and the number Gorou's "half the damage dealt" is about.
+    removed = effective
     enemy.hp -= hp_dmg
     state.emit("damage", target=enemy.name, amount=effective, blocked=blocked,
                base=base, source=source)
@@ -1031,6 +1036,9 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         # the same hit depending on which you read. The docstring promises
         # "damage actually dealt to HP", which is the clamped one.
         hp_dmg += sh
+        # `EB-603`: `sh` is already overkill-clamped, so the arm's total takes
+        # it whole.
+        removed += sh
     if was_alive and not enemy.alive:
         state.kills_this_card += 1
         # The base game's Fatal gate: cardPlay.Target.Powers.All(p =>
@@ -1061,7 +1069,11 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # `companion_overhaul_damage_dealt` for what each one is and why it is
     # here rather than anywhere else.
     if C.COMPANION_OVERHAUL:
-        companion_overhaul_damage_dealt(state, enemy, hp_dmg, source)
+        # `EB-603`: `removed` AND NOT `hp_dmg`, which is what this function's
+        # own docstring has always promised ("it counts damage that reached
+        # HP, not the swing") and what `hp_dmg` is not: the swing carries the
+        # overkill, so a killing blow paid Block for damage no body took.
+        companion_overhaul_damage_dealt(state, enemy, removed, source)
     return hp_dmg
 
 
@@ -7482,9 +7494,15 @@ def companion_overhaul_damage_dealt(state: CombatState, enemy: Enemy,
 
     IT COUNTS DAMAGE THAT REACHED HP, not the swing. That is the conservative
     reading of "the damage dealt" (R212's one-way rule: the doubt pays LESS
-    Block), it is what this function already returns to every other caller, and
-    it is the number the C# twin can read off `DamageResult.UnblockedDamage`
-    without a second definition.
+    Block), and it is what a body actually lost.
+
+    `EB-603` MADE THAT SENTENCE TRUE. The caller used to hand this `hp_dmg`,
+    which is the swing PAST BLOCK and carries the overkill, so a killing blow
+    paid Block for damage no body took -- and `deal_damage_to_enemy` had the
+    clamped figure in hand all along, because it is the number its own
+    `damage` event prints. The C# twin reads
+    `DamageResult.UnblockedDamage - OverkillDamage`, which is that same
+    quantity on the other side and not a second definition.
 
     YOIMIYA'S MARK. "Whenever it takes damage from a card that is not an
     Attack, deal 6 Pyro damage to all enemies." `source` is this engine's own

@@ -216,7 +216,8 @@ public class PoolPassTwoTests
         var card = new ProtoKoStokeTheFuse();
 
         Assert.Contains("{Grow:diff()}", Face(card));
-        Assert.Contains("all your [gold]Sparks[/gold]", Face(card));
+        // `EB-612`: "Spend all your remaining Sparks", the price first.
+        Assert.Contains("all your remaining [gold]Sparks[/gold]", Face(card));
         Assert.Equal(3m, Vars(card).Single().BaseValue);
         Assert.Contains(
             Il.Calls(Il.Method("ProtoKoStokeTheFuse", "OnUpgrade")),

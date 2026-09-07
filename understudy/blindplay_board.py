@@ -773,27 +773,47 @@ def last_morning(state: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def last_salon(state: dict[str, Any]) -> dict[str, Any] | None:
-    """The last beat of a Salon whose fight is already over (`EB-604`).
+    """The last beat of a fight that is already over (`EB-604`).
 
-    `last_morning` ONE ARM OVER. Two deliberate Evokes onto a full stage, with
-    Encore 10 and 7 held, "printed nothing because both were lethal" (Furina
-    r16 lane 2; r14 lane 1's Second Course the same): the beat that ends a
-    fight is the one beat no battle screen is drawn for, and the seat could
-    not read what its winning play did. The bridge emits `furina_salon` beside
-    `kokomi_plans` on every player state (`McpMod.StateBuilder.cs`, the
-    `EB-405` block), so the receipt is on the reward screen's own wire; this
-    reads it there, acts only -- the company is a fact about a stage that no
-    longer exists. `None` where there is nothing to say.
+    `last_morning`'s twin one arm over, filed for the same defect and closed
+    the same way. A deliberate Evoke onto a full stage that KILLS ends the
+    fight, the game goes straight to the reward screen, and the combat block
+    does not run for it -- so the one beat the seat spent a turn building is
+    the one beat of the run with no receipt. Furina r16 lane 2 Evoked twice on
+    purpose, at 10 and 7 Encore, and "the bridge printed nothing about either
+    because both were lethal"; r14 lane 1's Second Course was the same turn a
+    round earlier.
+
+    THE WIRE ALREADY CARRIES IT. `furina_salon` is emitted OUTSIDE the combat
+    block (`McpMod.StateBuilder`, beside `kokomi_plans` and for `EB-329`'s
+    reason): `FurinaReframeLedger.Snapshot` reads per-Player records and
+    touches no `CombatState`, and the ledger is rolled at a TURN boundary --
+    which a fight ending into a reward screen never crosses. So the last
+    turn's acts are still there to be read; nothing but the reader was
+    missing.
+
+    THE LISTS ALONE, which is `last_morning`'s rule: the stage's `company`,
+    the Encore and every other live-board field are about a fight that no
+    longer exists, so this returns what HAPPENED and nothing about what is.
+
+    NO BODY IS RENAMED, and that is a boundary rather than an oversight: a
+    reward screen has no enemy list, so `name_performances` has nothing to map
+    a `combat_id` onto and the mod's own title stands. It is the same trade
+    `last_morning` makes on the same screen.
+
+    `None` where there is nothing to say -- a build with no reframe, a seat
+    who is not Furina, or a last turn whose stage did nothing.
     """
     salon = furina_salon(_player(state))
     if salon is None:
         return None
-    if not (salon["performed"] or salon["replayed"] or salon.get("evoked")):
+    said = (salon["performed"] + salon["replayed"]
+            + salon.get("evoked", []))
+    if not said:
         return None
-    # No board to name bodies against: the mod's own titles stand, which is
-    # `name_performances`' fallback for a body the act killed.
-    return {"performed": salon["performed"], "replayed": salon["replayed"],
-            "evoked": list(salon.get("evoked") or [])}
+    return {"performed": salon["performed"],
+            "replayed": salon["replayed"],
+            "evoked": salon.get("evoked", [])}
 
 
 def _moved_row(row: dict[str, Any]) -> dict[str, Any]:
