@@ -25,11 +25,11 @@ assumptions:
      before the Companion play and before the fourth Deploy."
 
 steps:
-  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
   - give: {card: KLEEMOD-CHEVREUSE_INTERDICTION_FIRE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
   - set_energy: {amount: 6}
   - play: {card: "Salon Début"}
   - play: {card: "Salon Début"}
