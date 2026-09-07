@@ -169,7 +169,11 @@ _BOMB_FACE_REASON = (
     "when a two-charge pile printed numbers the count reading could not "
     "explain; and `EB-573` names the RIDER the merge keeps, because a Bomb 21 "
     "that was Jumpy's Bomb 8 two merges ago still dropped Mine 3 on ALL and "
-    "no surface said so (Klee r21 lane 1)")
+    "no surface said so (Klee r21 lane 1); and `EB-450`'s other half names "
+    "the list's ORDER in its label, because the `Set off` tip says the "
+    "charges go off oldest first and the list that replaced the count did "
+    "not say it was in that order -- on a Cryo body, which charge Melts was "
+    "a fact the r13 seat carried in its head for a whole fight")
 #: THE WHOLE GRID IS EXCEPTED SINCE `EB-536`. The plain single-charge face --
 #: one charge, no Mine, no modifier the total passes through -- was the one row
 #: here that met its ceiling exactly (125 of 125, no headroom at all) and was

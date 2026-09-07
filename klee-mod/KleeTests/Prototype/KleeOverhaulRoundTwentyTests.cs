@@ -132,7 +132,8 @@ public class KleeOverhaulRoundTwentyTests
             Assert.DoesNotContain("Bombs here:", face);
         }
         Assert.Contains(faces,
-            f => f.Contains("Bomb sizes here: [blue]{Charges}[/blue]"));
+            f => f.Contains(
+                "Bomb sizes here, oldest first: [blue]{Charges}[/blue]"));
     }
 
     [Fact]

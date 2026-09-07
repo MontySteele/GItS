@@ -99,6 +99,63 @@ public class LiveFixes20260907Tests
         Assert.Equal(byCard.DisplayAmount, byRider.DisplayAmount);
     }
 
+    // ==================================================================
+    // `EB-450` -- the queue prints the order it actually holds
+    // ==================================================================
+    //
+    // THE FIND (Klee r13 f6). The badge printed `Bomb 45 (4 bombs)` -- a sum
+    // and a count -- while `EB-432`'s `Set off` tip says the charges go off
+    // oldest first and the FIRST one takes the aura. The list replaced the
+    // count on 2026-09-04 and still did not say it was IN that order, so on a
+    // Cryo body which charge Melts stayed a fact the seat had to remember
+    // placing rather than read.
+    //
+    // ONE ORDER AND NOT TWO: `_charges` is placement order, `TakeAll` copies
+    // that list, and `SetOff` walks the copy front to back. The label now says
+    // so, on both list faces, in the words the tip already uses.
+
+    [Fact]
+    public void The_badge_lists_the_charges_in_the_order_they_go_off()
+    {
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(60).Creature;
+        var pile = ProtoBombs.Place(enemy, klee.Creature,
+            new ProtoBombs.Charge(5));
+        // Through the power's own door, so the list grows the way it grows in
+        // a fight: oldest first is placement order and nothing else.
+        pile.AddCharge(new ProtoBombPower.ProtoCharge(8, false, 0));
+        pile.AddCharge(new ProtoBombPower.ProtoCharge(20, false, 0));
+        pile.AddCharge(new ProtoBombPower.ProtoCharge(12, false, 0));
+
+        Assert.Equal("5 / 8 / 20 / 12",
+                     pile.DynamicVars["Charges"].ToString());
+        // And the take the explosions walk hands the same order back.
+        Assert.Equal(new[] { 5, 8, 20, 12 },
+                     pile.TakeAll()!.Select(c => c.Size).ToArray());
+    }
+
+    [Fact]
+    public void Both_list_faces_say_which_end_of_the_list_goes_first()
+    {
+        var klee = Seat.Klee();
+        var enemy = Seat.Klee(60).Creature;
+        var pile = ProtoBombs.Place(enemy, klee.Creature,
+            new ProtoBombs.Charge(5), new ProtoBombs.Charge(8, IsMine: true));
+
+        // EVERY face that prints the list, read off the power rather than
+        // listed, so a new axis cannot be added without the order coming with
+        // it -- the same claim `EB-289`'s pin makes about `{Charges}` itself.
+        var listing = pile.Localization!
+            .Where(r => r.Item1.StartsWith("smartDescription", StringComparison.Ordinal)
+                        && r.Item2.Contains("{Charges}"))
+            .ToList();
+        Assert.NotEmpty(listing);
+        foreach (var (_, face) in listing)
+        {
+            Assert.Contains("Bomb sizes here, oldest first:", face);
+        }
+    }
+
     // ------------------------------------------------------------------
 
     internal static string Source(string relativePath) =>

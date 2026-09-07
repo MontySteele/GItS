@@ -392,8 +392,21 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// here: a pile carrying a rider ends the same sentence with
     /// <see cref="RiderClause"/> instead. A clause and not a fifth sentence,
     /// because four is the ceiling and every one of the four is a ruled fact.
+    ///
+    /// `EB-450` (the other half, Klee r13 f6) PUT THE ORDER ON THE LIST. The
+    /// badge printed a SUM and a count, `EB-432`'s `Set off` tip said the
+    /// charges go off oldest first and the first one takes the aura, and the
+    /// list that replaced the count still did not say it was IN that order --
+    /// so on a bombed body wearing Cryo which charge Melts was a fact the r13
+    /// seat carried in its head for a whole fight. THREE WORDS AND NOT A
+    /// SENTENCE, in the label rather than after the numbers, because the
+    /// reader needs the order BEFORE reading the list; the face is excepted
+    /// from the power ceiling by name and the exception now says so. The
+    /// order is not a second definition of anything: `_charges` is placement
+    /// order, `TakeAll` copies it, and `SetOff` walks the copy front to back.
     private const string Bombs =
-        " Bomb sizes here: [blue]{Charges}[/blue], growing each turn";
+        " Bomb sizes here, oldest first: [blue]{Charges}[/blue], growing each "
+      + "turn";
 
     /// <summary>
     /// `EB-471`. WHICH SIDE OF THE GROWTH TICK A MINE LANDS ON, and it is on
@@ -411,9 +424,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <see cref="MineClause"/>'s "goes off before this enemy's hit" it says
     /// the Mine pays the size it has now.
     /// </summary>
+    /// `EB-450`'s order clause rides this face too, in the same words and the
+    /// same place, so the two lists cannot be read against each other.
     private const string BombsWithMines =
-        " Bomb sizes here: [blue]{Charges}[/blue], including [blue]{Mines}[/blue] "
-      + "[gold]Mine{Mines:plural:|s}[/gold], growing at your turn's start";
+        " Bomb sizes here, oldest first: [blue]{Charges}[/blue], including "
+      + "[blue]{Mines}[/blue] [gold]Mine{Mines:plural:|s}[/gold], growing at "
+      + "your turn's start";
 
     /// <summary>
     /// `EB-573`. THE RIDER THE MERGE KEEPS, NAMED WHERE THE PILE IS.
