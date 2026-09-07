@@ -63,6 +63,55 @@ bonus. The clauses on Attacks, Shatter, when-hit powers and Minions move to
 the Evoke tip and the member tips, where they are read at the moment they
 matter.
 
+## 3b. The layout revised on the first frame (2026-09-07, evening)
+
+The first build of §3 was deployed (`0.2.2917+proto`) and a lane-1
+scenario produced a frame (`understudy/logs/frames/frame-20260907-154029-
+furina-strip-t4.png`). [USER] on it: the font and icon sizes need
+controlling, Fanfare too large; Encore not visible anywhere; Encore,
+Fanfare and the member count should leave the power row. GPT, on the same
+frame: the problem is hierarchy and placement more than size, Fanfare
+nearly as prominent as Energy while the members a decision is about are
+tiny, low-contrast and overlapping the health area; the modifier read at
+bottom left is separated from the effects it modifies. Both are taken,
+and the widgets become **one Salon panel**, the shape the follow-up build
+now targets (`EB-630`-`EB-637`):
+
+- **One group beside Furina**, above and clear of her HP bar and status
+  row, wide enough for three distinct chips, on a restrained dark backing,
+  anchored to her combat area so hand expansion and targeting never cover
+  it.
+- **Each chip**: portrait, short name, and its current performance effect
+  as the largest thing on it ("5" with the Hydro icon, "3 Block"),
+  duplicates visibly separate. **Chip 0 says "FRONT"** in words; a gold
+  border alone does not teach who performs.
+- **A resource line on the panel**: "Encore N · Fanfare N · Member bonus
+  +N". Encore has a name and a number before any pips; Fanfare's next
+  threshold lives in its hover, not on the line; the Fanfare badge beside
+  the energy orb goes, and Energy stays where it is.
+- **Pips are secondary**: visible at zero, never permanently coloured as
+  the Spotlight's price (a hover on the Spotlight shows what it would
+  spend, if cheap; else the colouring simply goes). At Encore 0 the chip
+  numbers fold the dry cut and the panel says "Reduced performance", so
+  an empty meter does not read as a stopped stage.
+- **A hierarchy table, not a scale table**: performance numbers first,
+  names and the resource line second, explanations third, every element
+  reading its tier.
+- **Card-hover previews** are the next wave (`EB-637`): a Companion card
+  highlights the front member; a Deploy on a full stage marks who leaves,
+  shows the Evoke payoff with Chevalmarin's refund and where the newcomer
+  enters; the Encore change is previewed with them. This is the biggest
+  step past static layout and is built after the panel lands.
+- Also from the frame and the review: the Spotlight refused after three
+  free arrivals (`EB-630`, a rule question), member tips carrying clauses
+  about effects the member lacks (`EB-631`), Chevalmarin's Evoke label
+  without her refund (`EB-632`), the meters out of the power row
+  (`EB-636`).
+
+**The eyes-on is revised with it (§5):** not one frame but the short
+combat sequence GPT proposed, a frame at each step: identify who acts,
+predict the number, spend Encore, replace the front member.
+
 ## 4. What this does not touch
 
 The kit's rules, numbers and pool. Round 17's hypothesis (the r16 packet)
@@ -70,10 +119,12 @@ runs unchanged once the strip is in.
 
 ## 5. Eyes-on
 
-**A frame on the next `+proto` deploy**, taken in a fight with a full
-stage and a lit Spotlight: does the strip say who and what, do the pips
-read as ticks, does the Fanfare badge read beside the orb. [USER] vetoes
-on sight; a veto returns the layout to design, not to the silhouettes.
+**A short combat sequence on the next `+proto` deploy**, a frame at each
+step on a lane-1 scenario: a full stage; a Companion card hovered and
+played (who performs, at what number); Encore spent to zero (the reduced
+numbers and the "Reduced performance" note); a Deploy onto the full stage
+(who leaves, the Evoke line with the refund, who enters). [USER] vetoes on
+sight; a veto returns the layout to design, not to the silhouettes.
 
 ## 6. Defaults applied, disclosed
 
