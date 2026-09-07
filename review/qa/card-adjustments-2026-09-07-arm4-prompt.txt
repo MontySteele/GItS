@@ -1,0 +1,95 @@
+# Doctrine read, second pass: one adjusted prototype row against the kit charter
+
+Each numbered card below is ONE ARM. For each arm, in order, give FOLLOWS or
+REQUIRES_MODIFICATION and name the clause (C1 to C8) you ruled against, and
+quote the line of the card and the arithmetic (energy, Block, damage, cards,
+turns) that breaches it, in one sentence. A verdict with no clause named is
+not a verdict. Read adversarially: the author is a different model family and
+the owner wants the row that should not reach a tester named. Do not soften.
+Name clauses, not remedies: a number, a face or a rewritten row you volunteer
+is DISCARDED.
+
+This is ONE ARM, re-read. On 2026-09-07 this door ruled the row's previous
+form REQUIRES_MODIFICATION on C8: "changes the payout rather than only the
+threshold, doubling the stated shipped base payout from 1 to 2 per 10". The
+row has been changed in answer; the earlier verdict and its reasoning are
+stated in the arm. Rule on the row AS IT NOW READS, and say in your one
+sentence whether the C8 objection is answered.
+
+## The charter
+
+- **C1 (owner, 2026-09-04).** "I don't want us to end up gaming the metric
+  of 'can an agent beat the game' by printing overly strong cards. Canonical
+  characters still die in the hands of the same agents, so a successful
+  design phase should not end with 'all agents always win.'" A row that
+  removes a losing line the kit is meant to keep, instead of pricing it, is
+  out of charter.
+- **C2 (LAW D3, binding prices).** A benefit carries a binding price. The
+  counterfactual test: there must be a real turn in which the card is worse
+  than a plain card of its cost. Repeatable energy or draw at Uncommon or
+  below is priced by something past the card's own cost. The owner's own
+  reading of one row: "'once per turn, gain 1 Energy' with no drawback is
+  one free energy, Echo Form territory for a 1-cost Uncommon Power."
+- **C3 (LAW D2, player-controlled leverage).** The card's value is decided
+  by a choice the player makes (bank or cash a Bomb; play a Plan now or write
+  it; make the stage perform), not by a number that rises while you watch.
+- **C4 (Klee brief §6).** "She cannot stall, and she cannot block on demand.
+  Her only plain Block is Duck and Cover, 5 for 1. Every other defence she
+  has is conditional on the decision she just made." The weakness is
+  load-bearing because it is what makes cooking a bet.
+- **C5 (Klee brief §3 rule 7; Kokomi brief §2 rule 4).** Nothing fires by
+  itself: no automatic free attack, no passive feed; every effect is a card
+  the player played and paid for.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a shipped pool row or of a base-game card at the same or lower rarity
+  and cost. Defend is a BASIC card and every class's Common block card
+  exceeds it by design; compare against Commons and Uncommons (Iron Wave,
+  Shrug It Off, Flame Barrier), not against Defend. Other reference points:
+  Second Wind, Berserk (Uncommon Power, 0: 1 Energy a turn, 2 Vulnerable),
+  Echo Form (Rare, 3), Offering, Battle Trance, Adrenaline (Rare, 0: 2
+  Energy, draw 2, Exhaust), Skim (Uncommon, 1: draw 3), Barricade,
+  Calculated Gamble.
+- **C7 (Kokomi identity Law 4).** In her pool a Common never increases deck
+  size.
+- **C8 (Furina reframe §4.1, D2).** Under the arm Fanfare is minted by a
+  Salon member performing and by nothing else, 2 per trigger and 5 per
+  Evoke, decaying 20% a turn. An arm-only copy of a shipped rider changes
+  the threshold only, and the copy's threshold has to sit in the observed
+  range (0 to 15 across the rounds so far) the way the shipped threshold sat
+  in the shipped economy's range (20 to 30 reached).
+
+## The engines
+
+**Furina.** Under the arm the shipped Burst meter is gone; Fanfare is minted
+only by performance (C8) and DRAINED to 0 by two Rares (the floor and cap are
+untouched by a drain). The Salon: up to three members on a stage; a Companion
+card play makes the FRONT member perform and rotate; a Deploy puts a member
+on and performs it; a Deploy onto a full stage EVOKES the front member (it
+performs with its Focus term three times, mints 5 Fanfare, and leaves).
+Spotlight, under the arm: the player pays 2 Encore to designate the
+Spotlighted Companion; Spotlighted numbers carry a base multiplier and the
+riders add to it for the turn. Encore: she opens each combat with 2, gains it
+from her own cards, and it decays. Energy 3, HP 78. Starter: 3 Strike-grade,
+3 Defend-grade, Regal Bearing, Aria of Recompense (1: gain 5 Encore; at 3
+Fanfare gain 5 more), Salon Début (1: Deploy Crabaletta), An Invitation (0,
+Exhaust: add a random Common Companion card). Shipped comparison rows in the
+arm's offer: Limelight (Uncommon Skill, 1, Exhaust: spend 1 Encore,
+Spotlighted +25% this turn, gain 1 Energy, draw 1; upgrade draw 2); Deep
+Breath (Uncommon Skill, 1, Exhaust: choose gain 1 Energy and 2 Encore, or
+another mode; upgrade cost 0); Compose Herself (Common, 1: draw 2, draw 1
+more at 8 Encore); Universal Revelry (arm copy, Rare Attack, 2: 9 to ALL
+plus 1 per 2 Fanfare, 6 more to ALL at 8 Fanfare).
+
+## The arm
+
+1. **Rapturous Applause (arm copy)** — Furina, Rare Power, 1 energy. Your
+   Attacks deal 1 additional damage per 5 Fanfare. Upgrade: 2. WAS: the
+   shipped row is 1 per 10 and also grants "Fanfare +8, and cannot fall
+   below 8" (a permanent floor, which under the arm satisfies every rider bar
+   without a performance); the floor is removed, and the first read of this
+   copy paid for it by doubling the amount to 2 per 10, which moves the
+   PAYOUT. This is the C8 threshold mapping instead — the shipped meter's
+   20-to-30 range maps to the arm's 0-to-15, so the bar halves and the slope
+   stands, exactly as the four rider copies' 12/12/15/20 became 6/6/8/10.
+
+One verdict, with its clause and its breaching or satisfied line. Under 200 words.

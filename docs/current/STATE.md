@@ -102,10 +102,10 @@ Slay the Spire 2 **v0.111.0**, commit `41cef1ea`, buildid `24724944`, appid
 v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
 8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
 `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
-`+proto` dev mark (R217 D). **Installed: `0.2.2614+proto`** (2026-09-05,
-#389's head `ee3e7996` on main `d2ea772e`, ALL FOUR arms on since R250:
-the round-9 to round-15 builds, R257's Tide Chart, R258's 2-Encore
-opening, and the six fixers' rows), the prototype arms behind
+`+proto` dev mark (R217 D). **Installed: `0.2.2876+proto`** (2026-09-07,
+main `ac2adb39` after #413, ALL FOUR arms on since R250: the round-9 to
+round-23 builds, R257's Tide Chart, R258's 2-Encore opening, R261's Innate
+placer, and fixers I to T), the prototype arms behind
 `-p:PrototypeCards=true` and the Furina arm behind `-p:FurinaReframe=true`
 too; every arm ships OFF in a release package. **Last RELEASE
 package: `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
@@ -239,12 +239,12 @@ are in [`workstreams.md`](workstreams.md).
   ten pool-pass rows earn their place, Long Fuse's escalation goes to the
   audit door, Fireworks Show and Kindling are held, the pool stays 45, and
   round 24's hypothesis is the React deck; no pick.
-  **Long Fuse's escalation is OFF on the branch** (`EB-617`, 2026-09-06),
-  built on both engines and not deployed: the audit door reads it first
-  (`review/qa/card-adjustments-2026-09-06-prompt.txt`, arm 1); round 25's
-  hypothesis (an Energy-priced detonator beside the Spark-priced ones) is
-  drafted in the comparison pass §4 from the GPT balance review.
-  [USER]'s act-1 run is due on `0.2.2830+proto`. The round-8 clear is
+  **Long Fuse's escalation is OFF** (`EB-617`, built 2026-09-06, audited
+  FOLLOWS 2026-09-07 on C2 and C6,
+  `review/records/card-audit-2026-09-07.md` row 1); round 25's hypothesis
+  (an Energy-priced detonator beside the Spark-priced ones) is drafted in
+  the comparison pass §4 from the GPT balance review.
+  [USER]'s act-1 run is due on `0.2.2876+proto`. The round-8 clear is
   read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
@@ -346,7 +346,7 @@ are in [`workstreams.md`](workstreams.md).
   7 on a printed 10 (`EB-599`, D default: the Plan line folds hers and
   nothing of the target's); Shrink reduced a Skill against its gloss
   (`EB-597`); the jellyfish's first turn now prints; no pick;
-  `EB-597`-`EB-599`. [USER]'s act-1 run is due on `0.2.2817+proto`. The Kurage
+  `EB-597`-`EB-599`, built on #413. [USER]'s act-1 run is due on `0.2.2876+proto`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
   **The next assembled round's hypothesis is drafted** (r22 packet §5, from
   the GPT balance review of 2026-09-06): Nereid's over Tide Wall, Ripple and
@@ -471,20 +471,18 @@ are in [`workstreams.md`](workstreams.md).
   Evoked on purpose (the reachability question closed by the draft);
   the Spotlight's line is false since Encore refills (`EB-600`); the
   fight-end screen swallows the lethal beat's log (`EB-604`); no pick;
-  `EB-600`-`EB-604`. [USER]'s act-1 run is due on `0.2.2817+proto`.
-  **`EB-507` and `EB-616` are BUILT on the branch, audit owed** (2026-09-06,
-  from the GPT balance review): under the arm no offered face grants a
-  Fanfare floor (Rapturous Applause and Unheard Confession as arm copies
-  without it, The Sea Is My Stage's Rare slot to Let the People Rejoice, the
-  arm's own drain, formerly grant-only), Cadenza's upgrade moves its bar 6
-  to 3 instead of dropping it, and Shared Billing's upgrade draws 1 instead
-  of costing 0; the door reads all six rows from
-  `review/qa/card-adjustments-2026-09-06-prompt.txt` on the local machine
-  before a deploy. The second-wave review the same day moved three of them
-  again (the loop is by holding the deck, not removal): the Cadenza copy
-  Exhausts, Shared Billing's upgrade gains Block, Unheard pays 2 per change,
-  the drain 2 per Fanfare drained. Round 17's hypothesis is in the r16
-  packet §5.
+  `EB-600`-`EB-604`, built on #413. [USER]'s act-1 run is due on `0.2.2876+proto`.
+  **`EB-507` and `EB-616` are BUILT and AUDITED**
+  (`review/records/card-audit-2026-09-07.md`, six rows read by GPT, five
+  FOLLOWS on the first call): under the arm no offered face grants a Fanfare
+  floor (Rapturous Applause and Unheard Confession as arm copies without it,
+  The Sea Is My Stage's Rare slot to Let the People Rejoice, the arm's own
+  drain at 2 per Fanfare drained), the Cadenza copy Exhausts and its upgrade
+  moves the bar 6 to 3, Shared Billing's upgrade gains 3 Block, Unheard pays
+  2 per change. Rapturous Applause REQUIRED MODIFICATION on C8 (a doubled
+  payout, not a threshold) and takes the threshold mapping, 1 per 5 Fanfare
+  (`fanfare_attack_per5`), FOLLOWS on the re-read. Round 17's hypothesis is
+  in the r16 packet §5.
   No stamp moves, nothing measured.
 - **Control run** — R250 pick 4, RUN 2026-09-04
   (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
