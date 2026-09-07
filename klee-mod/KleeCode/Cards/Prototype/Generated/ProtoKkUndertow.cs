@@ -44,14 +44,14 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForGarmentAttack(KokomiRiderTips.ForDebuffRider(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, 7, 3), this);
+        KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_undertow");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undertow"),
-        ("description", "Deal {CalculatedDamage:diff()} damage, already including {ExtraDamage:diff()} if the enemy has a debuff."),
+        ("description", "Deal {PlainDamage:diff()} damage. If the enemy has a debuff, deal {DebuffDamage:diff()} instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -59,7 +59,9 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
         {
             new CalculationBaseVar(7m),
             new ExtraDamageVar(3m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => target != null && KokomiOverhaulKit.HasDebuff(target) ? 1 : 0)
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => target != null && KokomiOverhaulKit.HasDebuff(target) ? 1 : 0),
+            new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move),
+            new FoldedDamageVar("DebuffDamage", 10m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -82,5 +84,7 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
     protected override void OnUpgrade()
     {
         DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
+        DynamicVars["DebuffDamage"].UpgradeValueBy(3m);
     }
 }

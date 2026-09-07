@@ -1152,7 +1152,11 @@
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
    # `EB-441`: one damage op with a rider, not two literal branches.
-   description: "Deal {CalculatedDamage:diff()} damage, already including {ExtraDamage:diff()} if the enemy has a debuff.",
+   # `EB-624`: and the FACE is the base game's conditional again -- two
+   # numbers, both live. `PlainDamage` is the hit with no rider and
+   # `DebuffDamage` the hit with it, both folded exactly as the one number
+   # was (`FoldedDamageVar`); the rider itself still decides which lands.
+   description: "Deal {PlainDamage:diff()} damage. If the enemy has a debuff, deal {DebuffDamage:diff()} instead.",
    effects: [{op: damage, amount: 7, target: enemy, bonus_vs_debuff: 3}],
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {damage: +3}}

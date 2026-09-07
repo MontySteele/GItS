@@ -6170,6 +6170,14 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Encore": ["it absorbs damage before HP. ",
                    "One pool, as each lands: a card pays to ",
                    "resolve, a member spends 1 to perform or acts at 3/4."],
+        # `EB-625`. The relic Shell Guard's payout hangs off, in the relic's
+        # own words. The strike number is interpolated on both sides -- the
+        # mod off `KokomiOverhaulLaw.CasketStrike`, the page off
+        # `blindplay_shape.CASKET_STRIKE` -- so what is held in step is the
+        # prose either side of it, the same fold-out the Encore row makes.
+        "Tamakushi Casket": [
+            "Your relic. Whenever you apply a debuff to an enemy, it deals ",
+            " damage to ", "that enemy."],
     }
     # `EB-329`: `Companion` is the one row with NO tooltip to be held in step
     # with, because the game hangs no tip on the word at all -- which is the
@@ -8230,10 +8238,13 @@ def test_the_upgraded_face_moves_the_number_the_delta_names():
     template holds exactly one `Calculated*` hole, which is the same invariant
     the generator emits under (`block_calc_rider`: one CalculationBase per
     card)."""
+    # `EB-624`: and a face that prints TWO numbers off two bases of its own
+    # moves both, while the `CalculationBase` that feeds the DEALT number has
+    # no hole to land in and needs none.
     assert qa_packet.upgraded_face(
         "KLEEMOD-PROTO_KK_UNDERTOW",
-        "Deal 7 damage, already including 3 if the enemy has a debuff.") == (
-        "Deal 10 damage, already including 3 if the enemy has a debuff.")
+        "Deal 7 damage. If the enemy has a debuff, deal 10 instead.") == (
+        "Deal 10 damage. If the enemy has a debuff, deal 13 instead.")
     # A plural arm follows the number it is about rather than being copied.
     assert qa_packet.upgraded_face(
         "KLEEMOD-LYNETTE_BOX_TRICK", "Draw 2 cards.") == "Draw 3 cards."

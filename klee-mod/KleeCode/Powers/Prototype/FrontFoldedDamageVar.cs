@@ -102,3 +102,56 @@ public sealed class FrontFoldedDamageVar : CalculatedDamageVar
         PreviewValue = (int)SimDamagePipeline.TargetMods(body, PreviewValue);
     }
 }
+
+/// <summary>
+/// `EB-624`: the OTHER branch of a conditional hit, folded the same way, under
+/// a name of its own.
+///
+/// THE SHAPE THE BASE GAME USES. <c>FLATTEN</c> and its family print "Deal 8
+/// damage. If X, deal 12 instead." -- two numbers, both live, and the reader
+/// picks. <i>Undertow</i> printed `EB-598`'s one-number form instead ("Deal 10
+/// damage, already including 3 if the enemy has a debuff"), which [USER]'s
+/// act-1 run of 2026-09-07 read as a sentence arguing with itself: 10 cannot
+/// already include a 3 that the enemy it is aimed at has not earned.
+///
+/// WHY A SECOND VAR AND NOT A SECOND <see cref="FrontFoldedDamageVar"/>. The
+/// game's <c>CalculatedDamageVar</c> hardcodes the token `CalculatedDamage` in
+/// its constructor and <c>DynamicVar.Name</c> is get-only, so two of them on
+/// one card is one var: a face needs two tokens. <c>DamageVar</c> is the one
+/// damage var the game gives a <c>(string name, ...)</c> overload, and its
+/// preview is the same <c>Hook.ModifyDamage(..., ModifyDamageHookType.All)</c>
+/// call the calculated var makes -- Strike's own fold. So the dealer's side is
+/// the game's, by the game's own call, and the target's side is the shared
+/// <see cref="SimDamagePipeline.TargetMods"/> the var above already adds.
+///
+/// THE HIT IS UNTOUCHED. <c>CalculatedDamage</c> stays on the card and stays
+/// what <c>DamageCmd.Attack</c> is handed; these two are printed and nothing
+/// else, which is why they may be plain <c>DamageVar</c>s carrying the two
+/// sheet numbers rather than the base/extra pair the multiplier reads.
+///
+/// QUARANTINED, for <see cref="FrontFoldedDamageVar"/>'s reason and by the
+/// same csproj rule.
+/// </summary>
+public sealed class FoldedDamageVar : DamageVar
+{
+    public FoldedDamageVar(string name, decimal damage, ValueProp props)
+        : base(name, damage, props)
+    {
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+        // Off a card that is not in play the game runs no hooks, and neither
+        // does this: a shop shelf and a deck view print the sheet's numbers,
+        // which is the screen `EB-484` was filed from and the screen this
+        // shape finally answers.
+        if (!runGlobalHooks) return;
+        if (!card.IsMutable) return;
+        var body = target ?? KokomiPlan.FrontEnemy(card.Owner?.Creature);
+        if (body == null) return;
+        PreviewValue = (int)SimDamagePipeline.TargetMods(body, PreviewValue);
+    }
+}

@@ -707,6 +707,7 @@ def _hole_deltas(template: str,
     base, which the generator refuses to emit for that very reason.
     """
     holes = [m.group(1) for m in _HOLE_RE.finditer(template)]
+    named = {n for n in deltas if n in holes}
     out: dict[str, int] = {}
     for name, delta in deltas.items():
         if name in holes:
@@ -716,6 +717,17 @@ def _hole_deltas(template: str,
             calculated = [h for h in holes if h.startswith("Calculated")]
             if len(set(calculated)) == 1:
                 out[calculated[0]] = delta
+                continue
+            # `EB-624`. THE BASE FEEDS A NUMBER THE FACE DOES NOT PRINT.
+            # Undertow's conditional deals one number through
+            # `CalculatedDamage` and PRINTS two others (`PlainDamage`,
+            # `DebuffDamage`), each carrying its own base and its own delta.
+            # So the `CalculationBase` delta has no hole and needs none --
+            # but only where the face prints no `Calculated*` hole at all and
+            # every hole it does print is already moved by a delta of its own.
+            # A face with a hole nothing moves still answers `None`, which is
+            # `EB-529`'s bound and the reason this is not a blanket skip.
+            if not calculated and holes and set(holes) <= named:
                 continue
         # `EB-529`: a delta with nowhere to land. `None` and not `{}`, because
         # "this card moves a number the face does not print" and "this card

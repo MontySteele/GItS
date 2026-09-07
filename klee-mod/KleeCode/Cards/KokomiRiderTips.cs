@@ -48,25 +48,22 @@ public static class KokomiRiderTips
     /// one titles a per-card RATE tip on a reader).</summary>
     public const string ChargeWordKey = "KLEEMOD-CHARGE";
 
-    // `EB-484`. THE FOLD READ ON A SCREEN WITH NO ENEMY ON IT.
+    // `EB-484` WAS A TIP AND IS NOW THE FACE, so no key lives here any more.
     //
     // THE FIND (Kokomi r16 (c) 7). On a SHOP shelf, `Undertow` printed "Deal 7
     // damage, already including 3 if the enemy has a debuff" and "I could not
-    // determine whether that card deals 4 or 7."
+    // determine whether that card deals 4 or 7." Both readings of that
+    // sentence are available and only one is true.
     //
-    // BOTH READINGS OF THAT SENTENCE ARE AVAILABLE and only one is true. The
-    // number is `CalculationBase + ExtraDamage * (debuff ? 1 : 0)`, so it is 7
-    // with nothing aimed at and 10 on a debuffed enemy -- "already including
-    // 3" is the clause `EB-441` needed for the HOVERED case, where the 10 does
-    // already include the 3, and it reads as 4 + 3 everywhere else.
-    //
-    // WHY THE FACE CANNOT SAY WHICH. A card's `Localization` is read ONCE at
-    // registration and neither `CardModel.Description` nor
-    // `GetDescriptionForPile` is virtual (checked by reflection against the
-    // shipped `sts2.dll`), so a card has exactly one face and it is the same
-    // face in a shop as in a fight. The rider tip is the surface that CAN
-    // branch, which is the split this whole file exists for.
-    public const string DebuffRiderKey = "KLEEMOD-DEBUFF_RIDER";
+    // THE FIRST REMEDY WAS THIS FILE'S SPLIT -- the pair on a tip, because a
+    // card's `Localization` is read once at registration and neither
+    // description getter is virtual, so a face cannot branch. `EB-624` found
+    // that it never had to: the base game's conditional prints BOTH numbers on
+    // one face ("Deal A damage. If the enemy has a debuff, deal B instead."),
+    // and `FoldedDamageVar` makes each of them live. A tip repeating the SHEET
+    // numbers beside a face printing the FOLDED ones would be `EB-441`'s own
+    // defect arriving on the other surface, so the tip is gone rather than
+    // reworded.
 
     // `EB-539`. THE SAME SPLIT AS `DebuffRiderKey`, one count over, and the
     // seat's reading is the reason it is the same split.
@@ -278,36 +275,6 @@ public static class KokomiRiderTips
         foreach (var tip in inherited) yield return tip;
         yield return new HoverTip(
             new LocString(Table, PulseKey + ".title"), PulseBody(card));
-    }
-
-    /// <summary>
-    /// `EB-484`. BOTH NUMBERS OF A `bonus_vs_debuff` FOLD, on every screen.
-    ///
-    /// See <see cref="DebuffRiderKey"/> for the find and for why the FACE
-    /// cannot answer it: a card's description is registered once and neither
-    /// description getter is virtual, so the face a shop shows is the face a
-    /// fight shows. What varies is what is aimed at, and the fold makes the
-    /// printed number vary with it -- which is `EB-441` working, and is
-    /// exactly what leaves a buyer with one number and two readings.
-    ///
-    /// SO THE TIP PRINTS THE PAIR, always, and says which one the face is
-    /// showing. It does not branch on being in combat -- unlike every other
-    /// tip in this file, whose numbers come off a live meter: these two are
-    /// the SHEET's, handed down by the generator from the same
-    /// `debuff_calc_rider` that emits the vars, so they are as true on a shop
-    /// shelf as on a board and a branch would only make the shelf the screen
-    /// that says less.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForDebuffRider(
-        IEnumerable<IHoverTip> inherited, CardModel card,
-        int baseDamage, int bonus)
-    {
-        foreach (var tip in inherited) yield return tip;
-        yield return new HoverTip(
-            new LocString(Table, DebuffRiderKey + ".title"),
-            $"{baseDamage} against an undebuffed enemy, {baseDamage + bonus} "
-          + "against a debuffed one. The face shows whichever applies to the "
-          + "enemy you are aiming at.");
     }
 
     /// <summary>
