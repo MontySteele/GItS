@@ -184,6 +184,19 @@ public static class SalonVisualsBridge
 
         DiscardDisplay(player);
 
+#if PROTOTYPE_CARDS
+        // `EB-627`. UNDER THE MANUAL LEG THE STAGE IS A STRIP, and the two
+        // never both draw: the strip stands on the stage's own anchor, so a
+        // build that drew both would draw silhouettes through chips. The
+        // shipped stage below is untouched and is what a release build and an
+        // arm-off dev build still get.
+        if (SalonMemberStrip.AppliesTo(creature))
+        {
+            SalonMemberStrip.Setup(combatRoom, player);
+            return;
+        }
+#endif
+
         var display = TrackedDisplayBridge.Spawn(
             combatRoom, ScenePathRelative, ref _warnedMissingScene,
             "Salon stage disabled");
@@ -212,6 +225,15 @@ public static class SalonVisualsBridge
             return;
         }
 
+#if PROTOTYPE_CARDS
+        // `EB-627`: same funnel, same moment, one element or the other.
+        if (SalonMemberStrip.AppliesTo(creature))
+        {
+            SalonMemberStrip.Refresh(creature);
+            return;
+        }
+#endif
+
         var display = GetDisplay(player);
         if (display == null)
         {
@@ -230,7 +252,13 @@ public static class SalonVisualsBridge
         RefreshDisplay(display, creature, animate: true);
     }
 
-    public static void DiscardDisplay(Player player) => Displays.Discard(player);
+    public static void DiscardDisplay(Player player)
+    {
+        Displays.Discard(player);
+#if PROTOTYPE_CARDS
+        SalonMemberStrip.Discard(player);
+#endif
+    }
 
     private static Node2D? GetDisplay(Player player) => Displays.Get(player);
 
