@@ -328,13 +328,17 @@ public class FurinaReframeRoundTwoTests
     public void The_arms_salon_rules_keep_the_dry_clause()
     {
         // The three-quarters cut is what makes 1 and 2 the same member on two
-        // turns, and the arm's own rules paragraph had dropped it.
+        // turns, and the arm's own rules paragraph had dropped it. `EB-629`
+        // moved it to the MEMBER's tip, which is the surface that prints the
+        // number the cut applies to.
         using var _ = new Arm(manual: true);
         var seat = Stage(0, SalonMember.Chevalmarin);
 
-        var rules = global::KleeMod.Cards.SalonMemberTips.SalonRulesBody(seat.Creature);
+        var tip = global::KleeMod.Cards.SalonMemberTips.BodyFor(
+            SalonMember.Chevalmarin, seat.Creature);
+        Assert.Contains("three-quarters", tip);
 
-        Assert.Contains("three-quarters", rules);
+        var rules = global::KleeMod.Cards.SalonMemberTips.SalonRulesBody(seat.Creature);
         Assert.DoesNotContain("bows the OLDEST member out", rules);
     }
 

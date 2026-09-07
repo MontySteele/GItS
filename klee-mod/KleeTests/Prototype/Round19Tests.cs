@@ -159,7 +159,9 @@ public class Round19Tests
         using var _ = new ReframeArm();
         var seat = Seat.Furina().WithCombatState();
 
-        var rules = SalonMemberTips.SalonRulesBody(seat.Creature);
+        // `EB-629` moved the sentence to the member tips; the words are
+        // unchanged and every member carries them.
+        var rules = SalonMemberTips.BodyFor(SalonMember.Usher, seat.Creature);
 
         Assert.Contains("not a hit", rules);
         Assert.Contains("no when-hit power fires", rules);
@@ -182,7 +184,8 @@ public class Round19Tests
                  {
                      Printed(typeof(ArmKeywordTips), "ForSetOff"),
                      PlanTip(),
-                     SalonMemberTips.SalonRulesBody(seat.Creature),
+                     SalonMemberTips.BodyFor(SalonMember.Crabaletta,
+                                             seat.Creature),
                  })
         {
             Assert.Contains("when-hit power", surface);

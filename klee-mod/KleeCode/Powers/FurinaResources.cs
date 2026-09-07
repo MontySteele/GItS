@@ -370,6 +370,18 @@ public static class FurinaResources
     {
 #if PROTOTYPE_CARDS
         if (FurinaReframe.BurstRetiredFor(creature)) return false;
+        // `EB-628`. THE DISPLAY HALF IS WIDER THAN THE RULES HALF, and the
+        // reason is what [USER] read on screen: "an overhead bar reading
+        // 10/70", which is a value over a ceiling in the shipped Burst
+        // meter's shape. Under the arm no overhead value/max bar is honest --
+        // Fanfare's own cap is a demoted safety rail that F-A5 measured as
+        // never binding, and the Burst engine is retired -- so the whole
+        // overhead slot stands down whenever the MASTER is live, not only
+        // when the Burst LEG is. The rules half (the income funnel, the kit
+        // grant, the sim's `burst_retired`) stays on `BurstRetiredFor`: a
+        // build running the arm with the Burst leg deliberately off is still
+        // a build whose overhead bar would say nothing.
+        if (FurinaReframe.LiveFor(creature)) return false;
 #endif
         return IsFurina(creature);
     }
@@ -897,6 +909,12 @@ public static class FurinaResources
         // Burst's gauge refresh used to ride the badge apply; now it is
         // explicit, so the overhead meter still tracks every sync moment.
         Vfx.GaugeBridge.Refresh(creature);
+#if PROTOTYPE_CARDS
+        // `EB-628`. The Fanfare badge in the energy area rides THIS funnel and
+        // no other, so the badge, the meter power above it and the member
+        // numbers on the strip cannot come from different reads of one meter.
+        Vfx.FanfareCounter.Refresh(creature);
+#endif
     }
 
     private static async Task SyncMeter<T>(
