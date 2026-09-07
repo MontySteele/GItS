@@ -272,16 +272,19 @@ public class Round12Tests
         // body from `Rng.CombatTargets` and is the only implementation of a
         // member acting -- so it is on the paragraph every Salon card carries
         // rather than on one card's face.
+        // `EB-629` MOVED IT ONE SURFACE DOWN, to the member's own tip: the
+        // rules paragraph had grown to seven rules and was read as a wall of
+        // text, and the aim is a fact about the member that is about to
+        // perform. Still one string for all three members, still the
+        // paragraph-behind-the-word rather than a card face.
         var body = string.Concat(Il.Strings(typeof(SalonMemberTips)
-            .GetMethod("SalonRulesBody",
-                       HeadlessGame.All,
-                       new[] { typeof(Creature) })!));
+            .GetMethod("BodyFor", HeadlessGame.All)!));
 
         // `EB-451` extended the sentence rather than replacing it: the aim is
         // still the member's own, and the clause after the comma is the limit
         // r7 paid for. The pin follows the sentence it is about.
-        Assert.Contains("A performing member picks its own enemy, never a "
-                      + "[gold]Minion[/gold] while another enemy stands.",
+        Assert.Contains("picks its own enemy, never a "
+                      + "[gold]Minion[/gold] while another enemy stands",
                         body);
     }
 
