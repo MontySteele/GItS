@@ -7,9 +7,10 @@ Written 2026-09-07. [USER] played Kokomi's act 1 on `0.2.2888+proto` (main
 Plan of R250, the tempo shelf of R253, the fixer-T faces of #413). This is
 the first read of the kit's rules by [USER] since the R250 rulings, and the
 Prototype stage is graded on it. Evidence: [USER]'s notes, quoted in the
-commit that carries this packet, and the run's `godot.log` (the picks:
-Arlecchino — Masque of the Red Death, Vanguard, Nereid's Ascension, Song of
-Pearls; Happy Flower, Mango, Strawberry).
+commit that carries this packet, and the run's `godot.log`: Ascension 3,
+seed `1EQL0MZ0USJN`; the picks Gorou, Arlecchino — Masque of the Red Death,
+Vanguard, Nereid's Ascension, Song of Pearls, Mizuki; Mango and Strawberry;
+the death to the Terror Eel, the act-1 elite.
 
 ## 1. The verdict
 
@@ -62,8 +63,8 @@ numbers may render with raw tags. `EB-626`, a defect, minted.
 
 ## 3. What the run did not test
 
-The act-1 boss's outcome is not in the notes; act 2; the tempo shelf (Tide
-Chart, Ripple) under a deck that reaches it. Nothing here is a strength
+The act-1 boss (the run ended at the Terror Eel elite, at Ascension 3);
+act 2; the tempo shelf (Tide Chart, Ripple) under a deck that reaches it. Nothing here is a strength
 reading.
 
 ## 4. What the loop question is, in one paragraph
