@@ -11430,3 +11430,51 @@ def test_a_page_assembled_from_one_screen_is_handed_over_unchanged(tmp_path):
     assert body.startswith(screen)
     assert "## What happened last time" in body
     assert body.count("## Your hand") == 1
+
+
+# --- `EB-374`: THE CAVEAT POINTS AT THE ANSWER ON THE SAME PAGE -------------
+
+
+def _wing_reward_state() -> dict:
+    """A card reward taken while the run holds Pael's Wing.
+
+    The relic is matched on its FOLDED printed name (`REWARD_ALTERNATIVE_RELICS`)
+    because a relic's id may not cross to a tester, so the fixture sends the
+    printed name and a face for it.
+    """
+    state = copy.deepcopy(card_reward_state())
+    state["player"] = {
+        "hp": 40, "max_hp": 70,
+        "relics": [{"id": "PAELS_WING", "name": "Pael's Wing",
+                    "description": "Card rewards offer a sacrifice.",
+                    "counter": None, "keywords": []}]}
+    return state
+
+
+def test_the_reward_caveat_points_at_the_relic_row_on_the_same_page():
+    """`EB-374`, the page half's stale pointer.
+
+    The caveat is right about the feed -- a card reward carries the cards and
+    one boolean, never the alternative button's words -- and it ended by
+    sending the reader to "your relic row in the next fight". That was true
+    when the row was written and stopped being true at `EB-473`, which prints
+    the relic block on every screen that is not a fight. A card reward IS one
+    of them, so the words are on this page, below the caveat.
+
+    Seen to FAIL: the note sent the reader off the screen the decision is
+    taken on, to a fight that had not happened yet.
+    """
+    page = blindplay.observe(_wing_reward_state())
+    assert "Pael's Wing" in page
+    assert "in the next fight" not in page
+    assert "under *Your relics* on this page" in page
+    # And the row it points at is really there, under the caveat.
+    assert page.index("under *Your relics* on this page") < page.index(
+        "## Your relics")
+
+
+def test_a_reward_with_no_such_relic_prints_no_caveat():
+    """The register is the gate, unmoved: a run holding none of the relics
+    known to rewrite this screen's alternative is taught no doubt."""
+    assert "changes what the alternative" not in blindplay.observe(
+        card_reward_state())

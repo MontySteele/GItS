@@ -259,6 +259,15 @@ PREVIEW_LOCKED = ("your pick is already made and this screen is showing it "
 # screen's alternative, because a page that printed the caveat on every reward
 # screen of every run would be teaching a doubt that is not there. Carrying the
 # control itself is a bridge change and belongs to `EB-310`'s family.
+#
+# THE POINTER WAS STALE, AND THAT IS THE ONLY THING THAT MOVED HERE
+# (2026-09-07). It read "on your relic row in the next fight", which was true
+# when the row was written and stopped being true at `EB-473`: the relic block
+# now prints on every screen that is not a fight, and a card reward is one of
+# them, so the words this line sends a reader hunting for are four lines below
+# it on the same page. A caveat that sends the reader away from the answer is
+# worse than the caveat alone, and this one did it on the screen where the
+# decision is taken.
 # FOLDED KEYS, and the fold is `_fold`'s: an apostrophe is punctuation there,
 # so the relic the game prints as `Pael's Wing` is three words here. Written as
 # the folded spelling rather than the printed one so the register cannot be a
@@ -272,8 +281,8 @@ CARD_REWARD_ALTERNATIVE_NOTE = (
     "cards and whether an alternative button exists -- never what that button "
     "says or does -- so `skip` here presses whatever the button has become, "
     "and this page cannot tell you whether that is a plain skip or the "
-    "relic's own option. The relic's printed words are on your relic row in "
-    "the next fight.*")
+    "relic's own option. Its own printed words are under *Your relics* on "
+    "this page.*")
 
 # `EB-333`. WHAT `skip` DID, SAID BY THE PAGE THAT TOOK IT. The verb answered
 # `ok Skipping card reward`, no card was added, the run stayed where it was and
