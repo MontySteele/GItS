@@ -8554,10 +8554,15 @@ def test_the_kurage_panel_says_the_planned_hit_is_hydro():
 
 
 def test_the_panel_note_says_which_plans_leave_no_aura():
-    """The half a reader prices a reaction with: a Plan that blocks, draws or
-    applies a debuff is not a hit and leaves nothing clinging."""
-    assert "blocks, draws or applies a debuff leaves no aura" \
-        in blindplay.PLAN_HYDRO_NOTE
+    """The half a reader prices a reaction with: a Plan that is not a hit
+    leaves nothing clinging.
+
+    `EB-433` NARROWED THE SENTENCE. It used to name the debuff Plan among them
+    and that was false with the starter relic on -- see
+    `test_a_debuff_plan_leaves_an_aura_while_the_casket_is_held`.
+    """
+    assert "only blocks or draws leaves no aura" in blindplay.PLAN_HYDRO_NOTE
+    assert "debuff" not in blindplay.PLAN_HYDRO_NOTE
 
 
 # ------------------- `EB-381`: the body must not lag the board -------------
@@ -10698,7 +10703,9 @@ def test_the_plan_panel_says_the_jellyfish_holds_any_number_of_plans():
                     "kind": "Block", "asked": 10})))
     lines = page.splitlines()
     assert blindplay.PLAN_COUNT_NOTE in lines
-    assert lines.index(blindplay.PLAN_HYDRO_NOTE) + 1 == \
+    # `EB-411` put the Block rule between the two: the count is still the last
+    # of the panel's rules and still sits under the Hydro one.
+    assert lines.index(blindplay.PLAN_HYDRO_NOTE) + 2 == \
         lines.index(blindplay.PLAN_COUNT_NOTE)
 
 
@@ -11111,3 +11118,366 @@ def test_an_icon_and_its_sentence_that_cannot_agree_say_so():
         {"type": "Attack", "label": "6x3", "title": "Aggressive",
          "description": "This enemy intends to Attack 3 times."}]
     assert blindplay.INTENT_NUMBER_DISAGREES not in blindplay.observe(state)
+
+
+# --- `EB-408`: ONE CARD, ONE BUFF, TWO PRINTED NUMBERS ----------------------
+
+
+def _voyage_board(stacks: int = 5, hand: list | None = None) -> dict:
+    """The recorded turn with a flat Attack buff standing on the player.
+
+    `AttackUpThisTurnPower`'s own words, verbatim off the C# localisation
+    (`KleeCode/Powers/CompanionPowers.cs`), with the markup the wire carries:
+    the note is matched on that sentence and never on the title, so the fixture
+    has to send the sentence.
+    """
+    state = copy.deepcopy(combat_state())
+    state["player"]["status"] = [
+        {"title": "Fantastic Voyage", "name": "Fantastic Voyage",
+         "amount": stacks, "type": "Buff",
+         "description": ("Your Attacks deal [blue]" + str(stacks)
+                         + "[/blue] additional damage this turn.")}]
+    if hand is not None:
+        state["player"]["hand"] = hand
+    return state
+
+
+def test_a_flat_attack_buff_says_where_each_printed_number_came_from():
+    """`EB-408`. THE SAME STRIKE, THE SAME BUFF, TWO NUMBERS.
+
+    "Sara's `Fantastic Voyage 5` was **not** folded in the first time -- fight
+    3 round 2 printed `Strike -- Deal 6 damage` while the buff was up, and it
+    hit for 11 -- but **was** folded in later (fight 4 round 3 printed `Deal 11
+    damage`, same buff, same card)" (Kokomi r10 run 2 (c) 3).
+
+    A card's body is the game's own resolved description, carried as one wire
+    field and printed here unchanged: there is no base, no modifier list and no
+    second field on the feed, so this page can neither fold the buff in nor say
+    whether the game already has. What it owes is the provenance, printed where
+    the buff and the faces are both on the screen.
+
+    Seen to FAIL: the hand printed its numbers with nothing said about the
+    buff sitting three lines above them.
+    """
+    page = blindplay.observe(_voyage_board())
+    assert "Fantastic Voyage 5" in page
+    assert blindplay.ATTACK_BUFF_NOTE.format(
+        name="**Fantastic Voyage**", n=5) in page
+    # The note is about the hand, so it sits under it and above the enemies.
+    assert page.index("## Your hand") < page.index("additional damage on your")
+    assert page.index("additional damage on your") < page.index(
+        "## The other side")
+
+
+def test_no_buff_and_no_attack_face_take_no_line():
+    """BOTH HALVES ON THE SCREEN, `_per_hit_note`'s rule. A board with no such
+    buff raises no question, and neither does one whose hand holds no Attack
+    printing a figure -- the note is about a number a reader is pricing off."""
+    assert "additional damage on your Attacks" not in blindplay.observe(
+        combat_state())
+    skills = [c for c in combat_state()["player"]["hand"]
+              if c["type"] != "Attack"]
+    assert skills, "the recorded hand must carry a non-Attack row"
+    assert "additional damage on your Attacks" not in blindplay.observe(
+        _voyage_board(hand=skills))
+
+
+def test_the_same_state_prints_the_same_face_on_every_observe():
+    """`EB-408`'s acceptance, and the half this side can actually hold: the
+    render is a pure function of the state it is handed, so two observes of ONE
+    state cannot print two numbers for one card. The seat's two numbers came
+    from two states a fight apart, and the difference is the game's."""
+    state = _voyage_board()
+    first, second = blindplay.observe(state), blindplay.observe(state)
+    assert first == second
+    assert "Deal 6 damage" in first
+    # And the buff does not move the printed face on this side either -- the
+    # page prints the feed's own string and does no arithmetic on it.
+    assert "Deal 6 damage" in blindplay.observe(combat_state())
+
+
+# --- `EB-411`: WHAT A CARRY-OUT LANDS IN ------------------------------------
+
+
+def test_the_plan_panel_says_a_carry_out_lands_in_standing_block():
+    """`EB-411`. THE PLATING THAT ATE A WHOLE PLAN.
+
+    "Whether to plan *at all* into a `Plating 8` enemy. This one was real and
+    also the least fair, because the reason the answer is no -- the carry-out
+    lands at the start of my turn, before I can strip block -- is nowhere on
+    the card" (Kokomi r10 run 2 (c) 4, fight 4).
+
+    The engine's turn-start order is fixed and pinned one file over
+    (`test_reaction_phase_parity.TURN_START_BROADCAST_ORDER`): the block clear
+    in it is the PLAYER's, and the morning resolves at the last broadcast of
+    the list, before the player has played anything. So the enemy's own Block
+    is standing when the Plan arrives and nothing can strip it first.
+
+    Seen to FAIL: the panel carried the aim rule, the Hydro rule and the count
+    rule and said nothing about Block.
+    """
+    page = blindplay.observe(plans_combat_state(TWO_PLANS))
+    lines = page.splitlines()
+    assert blindplay.PLAN_BLOCK_NOTE in lines
+    # The panel reads in the order a Plan resolves in: which body, what the
+    # hit is, then what is in the way when it gets there.
+    assert lines.index(blindplay.PLAN_HYDRO_NOTE) + 1 == \
+        lines.index(blindplay.PLAN_BLOCK_NOTE)
+    assert lines.index(blindplay.PLAN_BLOCK_NOTE) + 1 == \
+        lines.index(blindplay.PLAN_COUNT_NOTE)
+
+
+def test_a_board_with_no_jellyfish_prints_no_plan_rules():
+    """The panel's own gate, unmoved: the four rules ride the pet's line, so a
+    board with no Plan rule in it prints none of them."""
+    assert blindplay.PLAN_BLOCK_NOTE not in blindplay.observe(combat_state())
+
+
+# --- `EB-433`: THE AURA CLAUSE THE STARTER RELIC MAKES FALSE ----------------
+
+
+def _casket_plans_state() -> dict:
+    """The Plan board with the Tamakushi Casket on the belt.
+
+    The relic's own localisation, verbatim off `Relics/TamakushiCasket.cs` with
+    the markup the wire carries: the clause is matched on that sentence and
+    never on the title, so the fixture has to send the sentence.
+    """
+    state = copy.deepcopy(plans_combat_state(TWO_PLANS))
+    state["player"]["relics"] = [
+        {"id": "KLEEMOD-TAMAKUSHI_CASKET", "name": "Tamakushi Casket",
+         "description": ("Start each combat with the [gold]Bake-Kurage[/gold]."
+                         " Whenever you apply a debuff to an enemy, it deals "
+                         "[blue]2[/blue] [gold]Hydro[/gold] damage to that "
+                         "enemy."),
+         "counter": None, "keywords": []}]
+    return state
+
+
+def test_a_debuff_plan_leaves_an_aura_while_the_casket_is_held():
+    """`EB-433`. THE PANEL CONTRADICTED THE BOARD.
+
+    "The Bake-Kurage panel prints 'A Plan that blocks, draws or applies a
+    debuff leaves no aura', and Slack Water's debuff Plan left Hydro Aura 1 on
+    all three enemies" (Kokomi r11 run 2 (c)).
+
+    The clause was true of the PLAN and wrong about the board: the Casket's
+    answering strike is a real hit through the same `ElementalHit` funnel every
+    other non-attack hit in this mod uses, so it lays the aura the Plan did
+    not. Said as a clause on the sentence it is the exception to, and gated on
+    the relic actually being on the feed.
+
+    Seen to FAIL: the panel printed the false sentence flat on every board.
+    """
+    page = blindplay.observe(_casket_plans_state())
+    assert (blindplay.PLAN_HYDRO_NOTE
+            + blindplay.PLAN_CASKET_AURA_CLAUSE.format(
+                relic="**Tamakushi Casket**")) in page.splitlines()
+
+
+def test_a_run_without_the_relic_reads_the_short_rule():
+    """GATED ON THE RELIC, because the short rule is true without it: the
+    recorded belt holds the Pearl of Wisdom and the Scissors, and neither
+    answers a debuff with a hit."""
+    page = blindplay.observe(plans_combat_state(TWO_PLANS))
+    assert blindplay.PLAN_HYDRO_NOTE in page.splitlines()
+    assert "answering strike" not in page
+
+
+# --- `EB-605`: TWO NUMBERS FOR ONE BOMB IN ONE SENTENCE ---------------------
+
+
+def _bomb_board(headline: int, sizes: str, aura: str | None = None) -> dict:
+    """One body wearing a Bomb pile, and optionally an aura.
+
+    The badge's text is `ProtoBombPower.Face`'s own shape -- the headline
+    forecast sentence and the `Bomb sizes here:` clause -- because both halves
+    of the note are matched on those words and never on the power's name.
+    """
+    state = copy.deepcopy(combat_state())
+    rows = [{"title": "Bomb", "name": "Bomb", "amount": headline,
+             "type": "Debuff",
+             "description": (f"Set off here deals {headline} Pyro damage. "
+                             f"Bomb sizes here: {sizes}, growing each turn.")}]
+    if aura:
+        rows.append({"title": f"{aura} Aura", "name": f"{aura} Aura",
+                     "amount": 2, "type": "Buff",
+                     "description": f"This enemy is wearing {aura}."})
+    body = dict(state["battle"]["enemies"][0], status=rows)
+    state["battle"] = dict(state["battle"], enemies=[body])
+    return state
+
+
+def test_a_bomb_badge_whose_two_numbers_disagree_says_which_is_which():
+    """`EB-605`. "`Bomb 6 ... Bomb sizes here: 4`. Two numbers for one bomb in
+    one sentence. I believe the 6 is the Vaporize-adjusted forecast against a
+    Hydro aura, but I inferred that from a Spark counter, not from any printed
+    word" (Klee r22 lane 1 re-run (c) 2).
+
+    The headline is `DisplayAmount`, which is `PredictedSetOffDamage()` -- what
+    setting the pile off would deal into this body now -- and `{Charges}` is
+    the list of sizes before any of that. The badge's own modifier clause names
+    Vulnerable and the cap and never the reaction, which is the whole of the
+    gap. The page claims neither figure and computes neither; it says what each
+    one is, and names the reaction off the same table its glossary uses.
+
+    Seen to FAIL: the two numbers stood in one sentence with nothing said.
+    """
+    page = blindplay.observe(_bomb_board(6, "4", aura="Hydro"))
+    assert "Bomb 6" in page
+    assert "Bomb sizes here: 4" in page
+    assert blindplay.BOMB_FORECAST_NOTE.format(n=6, total=4).rstrip("*") in page
+    assert blindplay.BOMB_REACTION_CLAUSE.format(
+        aura="Hydro", element="Pyro", reaction="Vaporize") in page
+
+
+def test_a_lone_bomb_that_agrees_with_itself_prints_no_note():
+    """The row's own acceptance: a lone Bomb 6 prints 6 everywhere on its line,
+    so there is nothing to explain and no line is added. A pile of several
+    charges that adds up to its headline is the same case."""
+    assert "on this badge is what setting these off" not in blindplay.observe(
+        _bomb_board(6, "6"))
+    assert "on this badge is what setting these off" not in blindplay.observe(
+        _bomb_board(22, "14 / 8"))
+
+
+def test_a_bomb_gap_with_no_reactable_aura_names_no_reaction():
+    """The reaction clause rides an aura the pile's OWN element pairs with. A
+    body wearing nothing, or wearing the pile's own element (which refreshes
+    rather than reacts), gets the first sentence and not the second."""
+    bare = blindplay.observe(_bomb_board(9, "6"))
+    assert blindplay.BOMB_FORECAST_NOTE.format(n=9, total=6) in bare
+    assert "is wearing a" not in bare
+    same = blindplay.observe(_bomb_board(9, "6", aura="Pyro"))
+    assert "and Pyro into Pyro is" not in same
+
+
+# --- `EB-585`: THE ARRIVAL THAT PERFORMED AND WAS NOT FILED -----------------
+
+
+def test_a_first_screen_stage_with_no_act_filed_says_the_receipt_is_missing():
+    """`EB-585`. "Stage at turn one: `Crabaletta`. Fogmog opened at 68/74, i.e.
+    the free performance had landed, but this screen printed no *What your
+    Salon did this turn*" (Furina r15 lane 1, fight 4).
+
+    THE READ eliminates both of the row's candidates: the page prints every act
+    the ledger files, and `FieldOpeningMember`'s own header settles the
+    broadcast order -- powers before mod models, and on turn 1 the power does
+    not exist yet -- so the turn-start clear cannot beat the arrival. What the
+    page can say is what `AUTO_TURN_NOTE` says one relic over: the act happened,
+    its receipt is not on this feed, and the board above is what it left.
+
+    Seen to FAIL: the stage printed and the silence under it said nothing.
+    """
+    page = blindplay.observe(_stage_state(["Crabaletta"]))
+    assert "## Your Salon" in page
+    assert blindplay.SALON_ARRIVAL_NOTE in page
+    # It is a fact about the stage, so it rides the stage section.
+    assert page.index("## Your Salon") < page.index(
+        blindplay.SALON_ARRIVAL_NOTE)
+
+
+def test_a_filed_arrival_and_a_later_round_print_no_such_line():
+    """ROUND ONE AND AN EMPTY LIST, the only board the sentence is true on. A
+    stage whose act IS filed has its receipt under the heading below, and by
+    round two an occupied stage is no longer evidence of an arrival."""
+    filed = _stage_state(
+        ["Crabaletta"],
+        [{"member": "Crabaletta", "target": "Nibbit", "combat_id": "",
+          "element": "Hydro", "aura": "Hydro", "amount": 6, "paid": True}])
+    assert blindplay.SALON_ARRIVAL_NOTE not in blindplay.observe(filed)
+    later = _stage_state(["Crabaletta"])
+    later["battle"] = dict(later["battle"], round=3)
+    assert blindplay.SALON_ARRIVAL_NOTE not in blindplay.observe(later)
+    # And a build with no stage at all prints neither the section nor the line.
+    assert blindplay.SALON_ARRIVAL_NOTE not in blindplay.observe(combat_state())
+
+
+# --- `EB-510`: THE GUARD MOVES TO THE MESSAGE, NOT ONLY THE SCREEN ----------
+
+
+def test_the_body_a_seat_is_handed_is_checked_for_doubled_sections(tmp_path):
+    """`EB-510`. "Several observe screens printed `## Your hand` and `## The
+    other side` twice, with card bodies duplicated line-for-line" (Furina r11
+    lane 2, (c) 8; Klee r20 lane 2 saw it again, intermittent).
+
+    THE RENDER CANNOT PRODUCE IT and that has been pinned since the row was
+    filed -- every heading is appended at one `out +=` on one branch. The row's
+    own reading is that the doubling is between that print and the reader, and
+    `Session._page` is the one step in that gap: it is where a screen stops
+    being a screen and becomes the message. So the guard runs over the
+    ASSEMBLED body too, which is the string a seat actually reads.
+
+    Seen to FAIL: `_page` joined its parts and handed them over unchecked, so
+    anything that put a second copy of a section into the forecast or the
+    feedback block reached the seat as two boards.
+    """
+    session = blindplay.Session(
+        blindplay.ScriptedThread([]), wire=blindplay.ScriptedWire([]),
+        session_id="t", log_root=tmp_path)
+    screen = blindplay.observe(combat_state())
+    with pytest.raises(blindplay.BlindPlayError) as raised:
+        session._page(screen, screen)
+    assert "printed a section twice" in str(raised.value)
+    assert "## Your hand" in str(raised.value)
+
+
+def test_a_page_assembled_from_one_screen_is_handed_over_unchanged(tmp_path):
+    """The guard refuses a doubled body and touches nothing else: a real screen
+    with a real feedback block under it is the message it always was."""
+    session = blindplay.Session(
+        blindplay.ScriptedThread([]), wire=blindplay.ScriptedWire([]),
+        session_id="t", log_root=tmp_path)
+    screen = blindplay.observe(combat_state())
+    body = session._page(screen, "ok Playing Coral Guard")
+    assert body.startswith(screen)
+    assert "## What happened last time" in body
+    assert body.count("## Your hand") == 1
+
+
+# --- `EB-374`: THE CAVEAT POINTS AT THE ANSWER ON THE SAME PAGE -------------
+
+
+def _wing_reward_state() -> dict:
+    """A card reward taken while the run holds Pael's Wing.
+
+    The relic is matched on its FOLDED printed name (`REWARD_ALTERNATIVE_RELICS`)
+    because a relic's id may not cross to a tester, so the fixture sends the
+    printed name and a face for it.
+    """
+    state = copy.deepcopy(card_reward_state())
+    state["player"] = {
+        "hp": 40, "max_hp": 70,
+        "relics": [{"id": "PAELS_WING", "name": "Pael's Wing",
+                    "description": "Card rewards offer a sacrifice.",
+                    "counter": None, "keywords": []}]}
+    return state
+
+
+def test_the_reward_caveat_points_at_the_relic_row_on_the_same_page():
+    """`EB-374`, the page half's stale pointer.
+
+    The caveat is right about the feed -- a card reward carries the cards and
+    one boolean, never the alternative button's words -- and it ended by
+    sending the reader to "your relic row in the next fight". That was true
+    when the row was written and stopped being true at `EB-473`, which prints
+    the relic block on every screen that is not a fight. A card reward IS one
+    of them, so the words are on this page, below the caveat.
+
+    Seen to FAIL: the note sent the reader off the screen the decision is
+    taken on, to a fight that had not happened yet.
+    """
+    page = blindplay.observe(_wing_reward_state())
+    assert "Pael's Wing" in page
+    assert "in the next fight" not in page
+    assert "under *Your relics* on this page" in page
+    # And the row it points at is really there, under the caveat.
+    assert page.index("under *Your relics* on this page") < page.index(
+        "## Your relics")
+
+
+def test_a_reward_with_no_such_relic_prints_no_caveat():
+    """The register is the gate, unmoved: a run holding none of the relics
+    known to rewrite this screen's alternative is taught no doubt."""
+    assert "changes what the alternative" not in blindplay.observe(
+        card_reward_state())
