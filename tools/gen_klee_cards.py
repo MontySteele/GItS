@@ -4910,6 +4910,19 @@ def salon_deploy_card(card: dict) -> bool:
         for e in card.get("effects", []))
 
 
+def salon_deploy_count(card: dict) -> int:
+    """The card's static deploy total: the sum of its `salon_member` amounts,
+    each read as its base (an upgradeable count is previewed at its base --
+    the board's hover preview is a preview). `ISalonDeployCard`'s one
+    member."""
+    total = 0
+    for eff in card.get("effects", []):
+        if eff.get("op") == "apply_power" and eff.get("power") == "salon_member":
+            amount = eff.get("amount", 1)
+            total += amount if isinstance(amount, int) else 1
+    return max(1, total)
+
+
 # The var each scaled op renders through, and which replacement constant
 # scales it. Damage and block bow x3, every other numeric x2 -- the split the
 # inline `(salonReplacements > 0 ? 3 : 1)` / `? 2 : 1` expressions encoded.
@@ -11792,6 +11805,13 @@ def emit(
         interfaces += ", ICompanionCard"
     elif profile.emit_character_identity:
         interfaces += ", ICharacterCard"
+    # `EB-637` / `EB-644`. A row that fields a Salon member says so on the
+    # class, and says how many: the board reads the mark off the card under
+    # the cursor to preview who leaves a full stage and which seat fills. The
+    # rule is `SalonMemberPower.Deploy`'s; this is the card's own count, the
+    # same figure `WillReplace` is asked with.
+    if salon_deploy_card(card):
+        interfaces += ", ISalonDeployCard"
     # QUARANTINED (the Mondstadt companion overhaul, R236 sec.3). Sheet
     # `hexerei` -> IHexereiCard, a MARKER with no members: the family mark
     # decides one rule, Nicole's Ladder of Divine Ascent, and that power asks
@@ -12119,6 +12139,13 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "    /// this application raises the power toward NeverReducingCap and\n"
             "    /// never lowers a higher standing stack.</summary>\n"
             f"    public int NeverReducingCap => {int(never_reduces_eff['max_stacks'])};\n"
+        )
+    if salon_deploy_card(card):
+        element_member += (
+            "\n    /// <summary>`EB-637`: how many members this card fields, for the\n"
+            "    /// board's hover preview. The rule is `SalonMemberPower.Deploy`'s.\n"
+            "    /// </summary>\n"
+            f"    public int SalonDeployCount => {salon_deploy_count(card)};\n"
         )
     if is_companion(card):
         personal = card.get("personal_pool")

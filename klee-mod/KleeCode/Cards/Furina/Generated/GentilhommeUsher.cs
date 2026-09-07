@@ -32,10 +32,15 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Furina.Generated;
 
-public sealed class GentilhommeUsher : CustomCardModel, ICharacterCard, ISkillTagCard
+public sealed class GentilhommeUsher : CustomCardModel, ICharacterCard, ISalonDeployCard, ISkillTagCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
+
+    /// <summary>`EB-637`: how many members this card fields, for the
+    /// board's hover preview. The rule is `SalonMemberPower.Deploy`'s.
+    /// </summary>
+    public int SalonDeployCount => 1;
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         FurinaBurstRider.Keywords(new[] { KleeKeywords.ElementalSkill });

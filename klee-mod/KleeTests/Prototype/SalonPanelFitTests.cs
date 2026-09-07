@@ -13,8 +13,8 @@ using Xunit;
 namespace KleeMod.Tests.Prototype;
 
 /// <summary>
-/// `EB-639`, `EB-640`, `EB-641`: THE PANEL FITS ITS OWN WORDS, SAYS THEM
-/// UNAMBIGUOUSLY, AND LEAVES WITH THE FIGHT.
+/// `EB-639`, `EB-640`, `EB-641`, `EB-644`: THE PANEL FITS ITS OWN WORDS, SAYS
+/// THEM UNAMBIGUOUSLY, IS ONE OBJECT, AND LEAVES WITH THE FIGHT.
 ///
 /// THE FIND. The first live frames of the panel, `0.2.2927+proto`, 2026-09-07.
 /// Beat 1 drew "5 Hydro3 Block5 Hydro" -- three chips 70 pixels wide carrying
@@ -209,22 +209,60 @@ public class SalonPanelFitTests
     }
 
     [Fact]
-    public void Every_replace_footer_fits_the_panel()
+    public void Every_header_and_footer_string_fits_the_slot_row()
     {
-        // The footer is the one string that is wider than a chip -- it is a
-        // whole clause -- so the box takes ITS width into account too, and the
-        // footer is drawn against the panel rather than clipped to the chip.
-        var available = SalonPanel.PanelWidth
-                      - 2f * FurinaBoardScale.PanelPad;
+        // `EB-644`. THE SLOT ROW IS THE BOX, and no message may widen it: the
+        // third pass let the widest footer set the panel's width, which is the
+        // "uncontrolled expansion" GPT's review named. So the width is a
+        // function of the chip count alone, and every header and footer string
+        // is measured against it AT ITS OWN TIER -- no step-down -- and would
+        // be shortened here, at design time, rather than move the panel.
+        using var _ = new Arm();
+        var inner = SalonPanel.InnerWidth;
+        var size = FurinaBoardScale.Tier2FontSize;
+
+        Assert.Equal(
+            FurinaBoardScale.PanelWidthFor(SalonConstants.MemberSlots,
+                                           SalonPanel.ChipContentWidth),
+            SalonPanel.PanelWidth);
+        Assert.Equal(SalonPanel.PanelWidth - 2f * FurinaBoardScale.PanelPad,
+                     inner);
+        // The width function takes the chip count and the chip content and
+        // NOTHING about the header or the footer.
+        Assert.Equal(2, typeof(FurinaBoardScale)
+            .GetMethod("PanelWidthFor")!.GetParameters().Length);
 
         foreach (var member in Members())
         {
             var text = SalonPanel.ReplaceText(member);
             Assert.True(
-                FurinaBoardScale.TextWidth(
-                    text, FurinaBoardScale.Tier2FontSize) <= available,
-                $"'{text}' does not fit the panel");
+                FurinaBoardScale.TextWidth(text, size) <= inner,
+                $"'{text}' does not fit the slot row at tier 2");
         }
+
+        foreach (var encore in new[] { 0, 1, 99 })
+        {
+            var seat = Stage(encore, SalonMember.Crabaletta);
+            FurinaResources.GainFanfare(seat.Creature, 999);
+            foreach (var text in new[]
+                     {
+                         SalonPanel.EncoreText(seat.Creature),
+                         SalonPanel.MeterText(seat.Creature),
+                         SalonPanel.StepText(seat.Creature),
+                     })
+            {
+                Assert.True(
+                    FurinaBoardScale.TextWidth(text, size) <= inner,
+                    $"'{text}' does not fit the slot row at tier 2");
+            }
+        }
+
+        // And the footer is drawn at the row's width, on the panel's ground,
+        // never sized to its own text or given a strip of its own.
+        var source = Source("Vfx/Prototype/SalonPanel.cs");
+        Assert.DoesNotContain("FootBack", source);
+        Assert.DoesNotContain("FooterContentWidth", source);
+        Assert.Contains("InnerWidth, FurinaBoardScale.FooterRowHeight", source);
     }
 
     [Fact]
@@ -273,13 +311,25 @@ public class SalonPanelFitTests
         Assert.True(FurinaBoardScale.FooterRowY
                     >= FurinaBoardScale.ChipsRowY
                      + FurinaBoardScale.ChipHeight);
-        Assert.True(FurinaBoardScale.NoticeRowY
-                    >= FurinaBoardScale.FooterRowY
-                     + FurinaBoardScale.FooterRowHeight);
         // And the box holds the last row.
         Assert.True(FurinaBoardScale.PanelHeight
-                    >= FurinaBoardScale.NoticeRowY
-                     + FurinaBoardScale.NoticeRowHeight);
+                    >= FurinaBoardScale.FooterRowY
+                     + FurinaBoardScale.FooterRowHeight);
+
+        // ONE RHYTHM (`EB-644`): the same gap above the chips as below them,
+        // the same inset on every row, and the footer is the last row -- no
+        // notice hangs under it.
+        Assert.Equal(FurinaBoardScale.MeterRowY + FurinaBoardScale.MeterRowHeight
+                         + FurinaBoardScale.RowGap,
+                     FurinaBoardScale.ChipsRowY);
+        Assert.Equal(FurinaBoardScale.ChipsRowY + FurinaBoardScale.ChipHeight
+                         + FurinaBoardScale.RowGap,
+                     FurinaBoardScale.FooterRowY);
+        Assert.Equal(FurinaBoardScale.PanelPad, FurinaBoardScale.ResourceRowY);
+        Assert.Equal(FurinaBoardScale.FooterRowY + FurinaBoardScale.FooterRowHeight
+                         + FurinaBoardScale.PanelPad,
+                     FurinaBoardScale.PanelHeight);
+        Assert.Null(typeof(FurinaBoardScale).GetField("NoticeRowY"));
 
         // The chip's own rows are the chip's height, exactly.
         Assert.Equal(
@@ -307,15 +357,40 @@ public class SalonPanelFitTests
     }
 
     [Fact]
-    public void The_reduced_note_has_a_row_to_itself_under_everything()
+    public void The_reduced_word_sits_beside_the_encore_number()
     {
-        // `EB-641` point 6. It is drawn at zero Encore, and the row it is drawn
-        // in is below the footer that used to sit on top of it.
-        var source = Source("Vfx/Prototype/SalonPanel.cs")
-            .Replace("\r\n", "\n");
-        Assert.Contains("notice.Visible = !paid;", source);
-        Assert.Contains("FurinaBoardScale.NoticeRowY", source);
-        Assert.True(FurinaBoardScale.NoticeRowY > FurinaBoardScale.FooterRowY);
+        // `EB-644`. "Reduced performance" hung under the footer on a row of
+        // its own -- a fourth widget. The condition now sits beside its cause:
+        // the Encore line says "Encore 0 · Reduced", in the reduced tint, and
+        // there is no notice row at all.
+        using var _ = new Arm();
+
+        Assert.Equal("Encore 0 · Reduced",
+                     SalonPanel.EncoreText(Stage(0, SalonMember.Usher).Creature));
+        Assert.Equal("Encore 1",
+                     SalonPanel.EncoreText(Stage(1, SalonMember.Usher).Creature));
+
+        var source = Source("Vfx/Prototype/SalonPanel.cs");
+        Assert.DoesNotContain("Notice", source);
+        Assert.Contains("paid ? StsColors.cream : ReducedText", source);
+    }
+
+    [Fact]
+    public void The_three_bands_start_at_one_inset_and_stand_on_one_ground()
+    {
+        // `EB-644`'s composition, as the drawing declares it: the chip group
+        // starts at the panel's inset like every other row (it was centred in
+        // a box the footer could widen), the header and the footer have no
+        // ground of their own, and a hairline sits in each row gap so the
+        // bands read as sections of one object.
+        var source = Source("Vfx/Prototype/SalonPanel.cs");
+        Assert.Contains("var left = FurinaBoardScale.PanelPad;", source);
+        Assert.Contains("Hairline(\"RuleTop\"", source);
+        Assert.Contains("Hairline(\"RuleBottom\"", source);
+        Assert.Contains("root.AddChildSafely(BuildFooter());", source);
+        // TWO `Back` rects in the whole file: the panel's and the chip's. The
+        // header and the footer add none.
+        Assert.Equal(2, source.Split("Name = \"Back\"").Length - 1);
     }
 
     // === 4. the words ====================================================
@@ -358,14 +433,16 @@ public class SalonPanelFitTests
                          SalonMember.Usher);
         FurinaResources.GainFanfare(seat.Creature, 15);
 
+        var dry = Stage(0, SalonMember.Usher);
         var strings = new List<string>
         {
             SalonPanel.EncoreText(seat.Creature),
+            SalonPanel.EncoreText(dry.Creature),
             SalonPanel.MeterText(seat.Creature),
             SalonPanel.StepText(seat.Creature),
-            SalonPanel.ReducedNotice,
-            SalonPanel.FrontWord,
+            SalonPanel.FrontTip,
         };
+        strings.AddRange(SalonPanel.SlotWords);
         foreach (var member in Members())
         {
             strings.Add(SalonPanel.ShortName(member));
@@ -386,6 +463,9 @@ public class SalonPanelFitTests
         Assert.Equal("Encore 4", SalonPanel.EncoreText(seat.Creature));
         Assert.Equal("Fanfare 15 · Bonus +1",
                      SalonPanel.MeterText(seat.Creature));
+        // And the footnote names the bonus the NEXT threshold buys
+        // (`EB-644`): "+1 at 20" beside 15 read as the bonus already held.
+        Assert.Equal("Bonus +2 at 20", SalonPanel.StepText(seat.Creature));
     }
 
     [Fact]

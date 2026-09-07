@@ -29,7 +29,9 @@ steps:
   - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
   - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
   - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  # the fourth Debut is granted just before beat 3: five grants on top of a
+  # drawn hand of six overflow the hand cap of ten and the game drops one
+  # (0.2.2985 run of 2026-09-07 18:37: beat 3 found no Debut in hand)
   - set_energy: {amount: 6}
   - play: {card: "Salon Début"}
   - play: {card: "Salon Début"}
@@ -44,7 +46,9 @@ steps:
   - wait: {seconds: 25}
   - set_resource: {name: KLEEMOD_ENCORE, amount: 2}
   # beat 3: a Deploy onto the full stage Evokes the front member first
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
   - play: {card: "Salon Début"}
   - wait: {seconds: 25}
+  # the stage is still three after the Evoke and the arrival
   - expect:
-      description_contains: {card: "Salon Début", text: "Deploy"}
+      power: {who: player, name: "salon member", stacks: 3}

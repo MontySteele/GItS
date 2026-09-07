@@ -108,12 +108,18 @@ public class SalonPanelResourceLineTests
         // WORD and the NUMBER, and the pips are a second reading of it.
         using var _ = new Arm();
 
-        foreach (var encore in new[] { 0, 1, 2, 7 })
+        foreach (var encore in new[] { 1, 2, 7 })
         {
             var seat = Stage(encore, SalonMember.Usher);
             Assert.Equal($"Encore {encore}",
                          SalonPanel.EncoreText(seat.Creature));
         }
+
+        // At zero the word and the number are still first; the condition
+        // follows them on the same line (`EB-644`).
+        Assert.StartsWith("Encore 0",
+                          SalonPanel.EncoreText(
+                              Stage(0, SalonMember.Usher).Creature));
     }
 
     [Fact]
@@ -168,13 +174,18 @@ public class SalonPanelResourceLineTests
         var seat = Stage(0, SalonMember.Crabaletta);
 
         Assert.Equal(step, SalonPanel.NextThreshold(seat.Creature));
-        Assert.Equal($"+1 at {step}", SalonPanel.StepText(seat.Creature));
+        // IT NAMES THE BONUS THE NEXT THRESHOLD BUYS (`EB-644`): "+1 at 10"
+        // beside a Fanfare of 13 read as the bonus already held OR the next
+        // one. "Bonus +1 at 10" at zero, "Bonus +2 at 20" past the first.
+        Assert.Equal($"Bonus +1 at {step}", SalonPanel.StepText(seat.Creature));
 
         // STANDING EXACTLY ON ONE points at the NEXT, not at itself: a badge
         // that says "+1 at 10" while holding 10 is telling the player about a
         // bonus they already have.
         FurinaResources.GainFanfare(seat.Creature, step);
         Assert.Equal(2 * step, SalonPanel.NextThreshold(seat.Creature));
+        Assert.Equal($"Bonus +2 at {2 * step}",
+                     SalonPanel.StepText(seat.Creature));
 
         // And it is off the line itself.
         Assert.DoesNotContain("+1 at", SalonPanel.MeterText(seat.Creature));
@@ -217,7 +228,7 @@ public class SalonPanelResourceLineTests
         var source = Source("Vfx/Prototype/SalonPanel.cs")
             .Replace("\r\n", "\n");
         Assert.Contains("pip.Visible = i < drawn;", source);
-        Assert.Contains("pip.Color = PipFull;", source);
+        Assert.Contains("pip.Color = i < spend ? PipSpend : PipFull;", source);
         Assert.Contains("encore.Text = EncoreText(owner);", source);
 
         // And the Spotlight's price is NOT permanently coloured into them any
@@ -244,11 +255,16 @@ public class SalonPanelResourceLineTests
 
         var source = Source("Vfx/Prototype/SalonPanel.cs")
             .Replace("\r\n", "\n");
-        // ONE condition for the notice, the chips and the pips, so the note
-        // and the numbers cannot disagree about whether the buffer is dry.
-        Assert.Contains("notice.Visible = !paid;", source);
+        // ONE condition for the word, the chips and the pips, so the word
+        // and the numbers cannot disagree about whether the buffer is dry --
+        // and the word rides the Encore line itself (`EB-644`), in its tint,
+        // rather than a row of its own.
         Assert.Contains("var paid = Paid(owner);", source);
-        Assert.Equal("Reduced performance", SalonPanel.ReducedNotice);
+        Assert.Equal("Reduced", SalonPanel.ReducedWord);
+        Assert.Equal("Encore 0 · Reduced", SalonPanel.EncoreText(dry.Creature));
+        Assert.Equal($"Encore {SalonConstants.TickEncoreCost}",
+                     SalonPanel.EncoreText(wet.Creature));
+        Assert.Contains("paid ? StsColors.cream : ReducedText", source);
     }
 
     [Fact]
