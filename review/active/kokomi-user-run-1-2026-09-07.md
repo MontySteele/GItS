@@ -1,4 +1,4 @@
-Status: OPEN (one pick, §5; three E and D defaults applied, §6)
+Status: OPEN (one pick, §5; four E and D defaults applied, §6)
 
 # Kokomi, [USER]'s first act-1 run under the overhaul: better than before, the central loop reads as auto-pilot
 
@@ -48,18 +48,25 @@ The base game's shape carries the same truth: "Deal 7 damage. If the enemy
 has a debuff, deal 10 instead", each number the folded live total.
 D default, `EB-624`, applied.
 
-**Shell Guard sounds wrong, and the Casket is unexplained.** Both right.
-"Until your next turn, whenever the Tamakushi Casket strikes" says when the
-window closes and not what opens it: the Casket is her relic, and it
-strikes whenever she applies a debuff to an enemy, which she does on her
-own turn after playing the card. The face becomes "This turn, whenever the
-Tamakushi Casket strikes, gain 3 more Block", and a Casket keyword tip rides
-every face that names it. Hygiene, `EB-625`, applied.
+**Shell Guard sounds wrong, and the Casket is unexplained.** Half right.
+The Casket is her relic: whenever she applies a debuff to an enemy it deals
+2 Hydro damage to that enemy, and nothing on the screen said so. A Casket
+keyword tip now rides every face that names it (`EB-625`, applied). The
+window, though, is real and the face keeps "Until your next turn": R246
+pick 2 rules that the next turn's Plans applying Weak strike the Casket
+before the enemy swings, and both engines close the window one line after
+the carry-out to make that true, so the strikes do come after the turn the
+card was played on. "This turn" would have printed a smaller window than
+the rule has.
 
 **Seen in the log, not in the notes.** The mod's own self-check reported
-seven Power descriptions carrying a `[blue]` tag the game's renderer does
-not know (Arlecchino's Masque among them, which [USER] held), so their
-numbers may render with raw tags. `EB-626`, a defect, minted.
+seven Power descriptions carrying a `[blue]` tag it did not know
+(Arlecchino's Masque among them). The build read found the checker wrong
+and the strings right: `[blue]` is the base game's own numeral tag in
+power and relic text, eighty-three of the mod's powers print it, and the
+check's tag list simply lacked it. One entry added, a headless test now
+runs the same check over every power, nothing any power says moved
+(`EB-626`).
 
 ## 3. What the run did not test
 
@@ -105,7 +112,7 @@ once it is built and the seats have read it.
 - **`EB-623`** "Morning" retired from every printed surface (E).
 - **`EB-624`** Undertow in the base game's conditional shape, both numbers
   folded (D).
-- **`EB-625`** Shell Guard's window stated as the turn it is, and a Casket
-  tip on every face that names the relic (E).
-- **`EB-626`** the `[blue]` self-check defect, minted, not yet built (E).
+- **`EB-625`** a Casket tip on every face that names the relic; the face's
+  window stands, being the rule's (E).
+- **`EB-626`** the self-check's tag list corrected; no power text moved (E).
 - No shipped-sheet number moves; no stamp moves; nothing measured.
