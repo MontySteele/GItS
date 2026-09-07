@@ -217,13 +217,21 @@ public class SalonTipInThreeSentencesTests
     public void The_front_marker_is_what_replaced_the_leftmost_sentence()
     {
         // "The leftmost member is the front" left with no new home in TEXT
-        // because `EB-627` gave it a better one: chip 0 wears a highlight
-        // frame. This is the pin that ties the two rows together -- if the
-        // mark ever goes, the sentence has to come back.
+        // because `EB-627` gave it a better one: chip 0 on the Salon panel
+        // wears a highlight frame AND the word FRONT. This is the pin that
+        // ties the two rows together -- if the mark ever goes, the sentence
+        // has to come back.
+        //
+        // THE WORD IS THE HALF THE FIRST REBUILD DID NOT HAVE. A gold border
+        // says "this one is special" and does not say WHAT is special about
+        // it, which is the rule a Companion play acts on, so the frame alone
+        // was not enough to have dropped the sentence on.
         var source = System.IO.File.ReadAllText(SourcePath(
-            "Vfx/Prototype/SalonMemberStrip.cs"));
+            "Vfx/Prototype/SalonPanel.cs"));
         Assert.Contains("front: i == 0", source);
         Assert.Contains("frame.Visible = occupied && front;", source);
+        Assert.Contains("frontLabel.Visible = front;", source);
+        Assert.Equal("FRONT", Vfx.SalonPanel.FrontWord);
     }
 
     // === 3. the shipped paragraph is untouched ===========================

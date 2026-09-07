@@ -190,9 +190,9 @@ public static class SalonVisualsBridge
         // build that drew both would draw silhouettes through chips. The
         // shipped stage below is untouched and is what a release build and an
         // arm-off dev build still get.
-        if (SalonMemberStrip.AppliesTo(creature))
+        if (SalonPanel.AppliesTo(creature))
         {
-            SalonMemberStrip.Setup(combatRoom, player);
+            SalonPanel.Setup(combatRoom, player);
             return;
         }
 #endif
@@ -227,9 +227,9 @@ public static class SalonVisualsBridge
 
 #if PROTOTYPE_CARDS
         // `EB-627`: same funnel, same moment, one element or the other.
-        if (SalonMemberStrip.AppliesTo(creature))
+        if (SalonPanel.AppliesTo(creature))
         {
-            SalonMemberStrip.Refresh(creature);
+            SalonPanel.Refresh(creature);
             return;
         }
 #endif
@@ -256,7 +256,7 @@ public static class SalonVisualsBridge
     {
         Displays.Discard(player);
 #if PROTOTYPE_CARDS
-        SalonMemberStrip.Discard(player);
+        SalonPanel.Discard(player);
 #endif
     }
 

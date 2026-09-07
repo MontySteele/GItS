@@ -16,9 +16,9 @@ namespace KleeMod.Tests.Prototype;
 ///
 /// THE FIND. [USER] on the `0.2.2917+proto` frame: Encore, Fanfare and the
 /// Salon member count should not sit in the power row once the board carries
-/// them. The frame shows a "3" and a "13" among Furina's statuses while the
-/// member strip at her feet already names three members and the badge beside
-/// the energy orb already prints the Fanfare with its next threshold.
+/// them. The frame shows a "3" and a "13" among Furina's statuses while
+/// `SalonPanel` above her already names three members and prints the Encore,
+/// the Fanfare and the member bonus on one line.
 ///
 /// WHAT IS REAL HERE. Both halves of the decision: which powers are suppressed
 /// under which leg, whose creature it is judged on, and -- the half that
@@ -35,7 +35,7 @@ public class FurinaBoardBadgeTests
     private const BindingFlags All = HeadlessGame.All;
 
     /// <summary>Every reframe flag moved together and every one restored --
-    /// <see cref="SalonMemberStripPinTests"/>' fixture, and for its reason.
+    /// <see cref="SalonPanelPinTests"/>' fixture, and for its reason.
     /// The `manual` and `meter` legs are settable on their own because the two
     /// meters hide under different legs and the pins say which.</summary>
     private sealed class Arm : IDisposable
@@ -109,9 +109,9 @@ public class FurinaBoardBadgeTests
     {
         // A meter whose replacement is not compiled into this build must KEEP
         // its badge, or the number leaves the screen altogether. The company
-        // and the pips are the member strip, which is the MANUAL leg
-        // (`SalonMemberStrip.AppliesTo`); the Fanfare badge beside the energy
-        // orb is the METER leg (`FanfareCounter.AppliesTo`).
+        // and the Encore are the panel, which is the MANUAL leg
+        // (`SalonPanel.AppliesTo`); the Fanfare and its member bonus are the
+        // panel's resource line, which the METER leg mints into.
         var furina = Seat.Furina()
                          .WithPower<SalonMemberPower>(3)
                          .WithPower<EncoreMeterPower>(2)
@@ -135,11 +135,11 @@ public class FurinaBoardBadgeTests
                 PowerOn<FanfareMeterPower>(furina)));
         }
 
-        // And the two predicates ARE the two elements' own scopes rather than
-        // second copies of them.
+        // And the MANUAL predicate IS the panel's own scope rather than a
+        // second copy of it.
         using var _ = new Arm();
-        Assert.True(SalonMemberStrip.AppliesTo(furina.Creature));
-        Assert.True(FanfareCounter.AppliesTo(furina.Creature));
+        Assert.True(SalonPanel.AppliesTo(furina.Creature));
+        Assert.True(FurinaReframe.MeterLiveFor(furina.Creature));
     }
 
     [Fact]

@@ -12,11 +12,11 @@ namespace KleeMod.Vfx;
 /// THE FIND. [USER] on the `0.2.2917+proto` frame: Encore, Fanfare and the
 /// Salon member count should not sit in the power row once the board carries
 /// them. The frame shows exactly that -- a status strip under Furina's HP bar
-/// holding a "3" and a "13" beside her actual statuses, while the strip at her
-/// feet already draws three named chips and the badge beside the energy orb
-/// already draws the Fanfare with its next threshold. Two of the three numbers
-/// on that frame were printed twice, and the third (Encore) is a resource
-/// rather than a status in the first place.
+/// holding a "3" and a "13" beside her actual statuses, while
+/// <see cref="SalonPanel"/> above her already names three members and prints
+/// the Encore, the Fanfare and the member bonus on one line. Two of the three
+/// numbers on that frame were printed twice, and the third (Encore) is a
+/// resource rather than a status in the first place.
 ///
 /// WHY IT IS THE ROW THAT MOVES AND NOT THE POWER. Because the POWER is how
 /// the understudy sees the meter: the bridge serialises a creature's
@@ -44,14 +44,14 @@ namespace KleeMod.Vfx;
 /// whose replacement is not compiled into this build must keep its badge or
 /// the number leaves the screen altogether:
 ///
-///   * <c>SalonMemberPower</c> hides under the MANUAL leg, which is
-///     <see cref="SalonMemberStrip.AppliesTo"/>'s own gate -- the strip is the
-///     count, named and drawn per member.
-///   * <c>EncoreMeterPower</c> hides under the MANUAL leg too: the pip row is
-///     part of the strip and lives or dies with it.
-///   * <c>FanfareMeterPower</c> hides under the METER leg, which is
-///     <see cref="FanfareCounter.AppliesTo"/>'s own gate -- the badge beside
-///     the energy orb is the count and its next threshold.
+///   * <c>SalonMemberPower</c> and <c>EncoreMeterPower</c> hide under the
+///     MANUAL leg, which is <see cref="SalonPanel.AppliesTo"/>'s own gate --
+///     the panel's chips ARE the company, named and drawn per member, and its
+///     resource line leads with the Encore.
+///   * <c>FanfareMeterPower</c> hides under the METER leg, the leg that makes
+///     a performance the only thing that mints: the panel's resource line
+///     prints the Fanfare and the member bonus it is buying, with the next
+///     threshold on its hover.
 ///
 /// NOTHING ELSE FURINA CARRIES IS TOUCHED. Her auras, her Spotlight power and
 /// every status she can be given keep their badges: they are STATUSES, and the
@@ -79,9 +79,9 @@ public static class FurinaBoardBadges
     /// shape that took two blind sessions down.
     ///
     /// And it is asked of the POWER'S OWN OWNER rather than of the local seat,
-    /// for <see cref="SparkGauge.HidesBadge"/>'s reason: the replacements are
-    /// Furina's board and her energy corner, and a co-op partner watching her
-    /// strip should not also see the row she replaced.
+    /// for <see cref="SparkGauge.HidesBadge"/>'s reason: the replacement is
+    /// Furina's own panel, drawn on her creature, and a co-op partner watching
+    /// it should not also see the row it replaced.
     /// </summary>
     public static bool HidesBadge(PowerModel power)
     {
@@ -93,11 +93,11 @@ public static class FurinaBoardBadges
 
         return power switch
         {
-            // The strip draws the company, named and per member.
+            // The panel's chips are the company, named and per member.
             SalonMemberPower => FurinaReframe.ManualLiveFor(owner),
-            // The pip row is part of that same strip.
+            // The panel's resource line leads with the Encore.
             EncoreMeterPower => FurinaReframe.ManualLiveFor(owner),
-            // The badge beside the energy orb draws this one.
+            // And carries the Fanfare and the bonus it is buying.
             FanfareMeterPower => FurinaReframe.MeterLiveFor(owner),
             _ => false,
         };

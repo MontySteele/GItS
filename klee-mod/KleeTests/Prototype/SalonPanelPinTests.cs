@@ -12,9 +12,9 @@ using Xunit;
 namespace KleeMod.Tests.Prototype;
 
 /// <summary>
-/// `EB-627`: THE SALON AS A MEMBER STRIP, under the reframe's manual leg.
+/// `EB-627`: THE SALON AS ONE PANEL, under the reframe's manual leg.
 ///
-/// WHAT IS REAL HERE. Every DECISION the strip takes runs on live objects: who
+/// WHAT IS REAL HERE. Every DECISION the panel takes runs on live objects: who
 /// gets it, how many chips, which member is in which chip, what each chip's
 /// next act says, and that the Fanfare bonus is folded into the number by the
 /// same call the performance resolves through.
@@ -22,18 +22,19 @@ namespace KleeMod.Tests.Prototype;
 /// WHAT IS STRUCTURAL, and labelled. The element is a Godot node tree and Godot
 /// nodes are process death in this host (KleeTests README, the headless
 /// boundary), so the DRAWING is pinned as source text and call sets: that the
-/// chips read the company by index, that chip 0 is the front, that the strip is
-/// built at the stage's own door, that no texture is cached across a scene and
-/// that nothing polls.
+/// chips read the company by index, that chip 0 is the front and says so in a
+/// word, that everything sits inside ONE backing rectangle above the creature,
+/// that the panel is built at the stage's own door, that no texture is cached
+/// across a scene and that nothing polls.
 ///
-/// WHAT NOTHING HERE CAN VERIFY: the look. Whether the strip reads at combat
-/// scale, whether the chips clear the HP bar, whether the face crops are
-/// legible at 58 pixels. That is a frame on the next `+proto` deploy and no
-/// assertion in this file claims it.
+/// WHAT NOTHING HERE CAN VERIFY: the look. Whether the panel reads at combat
+/// scale, whether the anchor clears the hand's expansion and the targeting
+/// arrows, whether the face crops are legible. That is a frame on the next
+/// `+proto` deploy and no assertion in this file claims it.
 ///
 /// NOTHING MEASURED HERE IS QUOTABLE (R215 B).
 /// </summary>
-public class SalonMemberStripPinTests
+public class SalonPanelPinTests
 {
     private const BindingFlags All = HeadlessGame.All;
 
@@ -97,7 +98,7 @@ public class SalonMemberStripPinTests
     // --- the quarantine ---------------------------------------------------
 
     [Fact]
-    public void The_strip_is_compiled_only_under_the_prototype_arm()
+    public void The_panel_is_compiled_only_under_the_prototype_arm()
     {
         // THE QUARANTINE IS THE FILE'S LOCATION, not an `#if` inside it:
         // `KleeCode.csproj` `Compile Remove`s `Vfx/Prototype/**/*.cs` without
@@ -105,14 +106,14 @@ public class SalonMemberStripPinTests
         // arm, so its mere compilation is the other half.
         Assert.Contains("<Compile Remove=\"Vfx/Prototype/**/*.cs\" />",
                         Source("KleeCode.csproj"));
-        Assert.NotNull(Source("Vfx/Prototype/SalonMemberStrip.cs"));
-        Assert.Equal("KleeMod.Vfx", typeof(SalonMemberStrip).Namespace);
+        Assert.NotNull(Source("Vfx/Prototype/SalonPanel.cs"));
+        Assert.Equal("KleeMod.Vfx", typeof(SalonPanel).Namespace);
     }
 
     // --- who gets it ------------------------------------------------------
 
     [Fact]
-    public void Furina_gets_the_strip_under_the_manual_leg_and_nobody_else()
+    public void Furina_gets_the_panel_under_the_manual_leg_and_nobody_else()
     {
         var furina = Seat.Furina();
         var klee = Seat.Klee();
@@ -120,22 +121,22 @@ public class SalonMemberStripPinTests
 
         using (new Arm())
         {
-            Assert.True(SalonMemberStrip.AppliesTo(furina.Creature));
+            Assert.True(SalonPanel.AppliesTo(furina.Creature));
             // Both are at the same table in co-op and neither has a Salon.
-            Assert.False(SalonMemberStrip.AppliesTo(klee.Creature));
-            Assert.False(SalonMemberStrip.AppliesTo(kokomi.Creature));
+            Assert.False(SalonPanel.AppliesTo(klee.Creature));
+            Assert.False(SalonPanel.AppliesTo(kokomi.Creature));
         }
 
         // THE ACCEPTANCE CONDITION. Off the arm there is no strip at all, so
         // the shipped stage is exactly the shipped stage.
         using (new Arm(master: false))
         {
-            Assert.False(SalonMemberStrip.AppliesTo(furina.Creature));
+            Assert.False(SalonPanel.AppliesTo(furina.Creature));
         }
 
         // And a creature it is never asked about answers false rather than
         // throwing: `Refresh` is called from the stage's own funnel.
-        Assert.False(SalonMemberStrip.AppliesTo(null));
+        Assert.False(SalonPanel.AppliesTo(null));
     }
 
     [Fact]
@@ -144,8 +145,8 @@ public class SalonMemberStripPinTests
         // The member tips branch on `ManualLiveFor` too. Two predicates would
         // be two things to keep true, and the strip draws exactly the rules
         // that leg makes true.
-        var calls = Il.Calls(typeof(SalonMemberStrip)
-            .GetMethod(nameof(SalonMemberStrip.AppliesTo), All)!);
+        var calls = Il.Calls(typeof(SalonPanel)
+            .GetMethod(nameof(SalonPanel.AppliesTo), All)!);
         Assert.Contains(calls,
             c => c.EndsWith("FurinaReframe.ManualLiveFor",
                             StringComparison.Ordinal));
@@ -163,7 +164,7 @@ public class SalonMemberStripPinTests
         Assert.Equal(
             new[] { SalonMember.Usher, SalonMember.Chevalmarin,
                     SalonMember.Crabaletta },
-            SalonMemberStrip.Company(seat.Creature));
+            SalonPanel.Company(seat.Creature));
     }
 
     [Fact]
@@ -176,8 +177,8 @@ public class SalonMemberStripPinTests
         var seat = Stage(SalonMember.Usher, SalonMember.Usher,
                          SalonMember.Usher);
 
-        Assert.Equal(3, SalonMemberStrip.Company(seat.Creature).Count);
-        Assert.All(SalonMemberStrip.Company(seat.Creature),
+        Assert.Equal(3, SalonPanel.Company(seat.Creature).Count);
+        Assert.All(SalonPanel.Company(seat.Creature),
                    m => Assert.Equal(SalonMember.Usher, m));
     }
 
@@ -188,16 +189,16 @@ public class SalonMemberStripPinTests
         var seat = Stage(SalonMember.Usher);
 
         Assert.Equal(SalonConstants.MemberSlots,
-                     SalonMemberStrip.Slots(seat.Creature));
+                     SalonPanel.Slots(seat.Creature));
         Assert.Equal(SalonMemberPower.SlotsFor(seat.Creature),
-                     SalonMemberStrip.Slots(seat.Creature));
+                     SalonPanel.Slots(seat.Creature));
 
         // A cap past what the row can hold is clamped rather than silently
         // invisible -- the sprint-2 gap where a fourth member ticked, bowed and
         // counted for every rider while nothing on screen said so.
         var wide = Stage(SalonMember.Usher).WithPower<SalonCapUpPower>(9);
-        Assert.Equal(SalonMemberStrip.MaxChips,
-                     SalonMemberStrip.Slots(wide.Creature));
+        Assert.Equal(SalonPanel.MaxChips,
+                     SalonPanel.Slots(wide.Creature));
     }
 
     [Fact]
@@ -207,7 +208,7 @@ public class SalonMemberStripPinTests
         // only actionable if the player can see which one it is, and the strip
         // is now the only surface that says so -- `EB-629` drops the sentence
         // from the rules paragraph on the strength of this mark.
-        var source = Source("Vfx/Prototype/SalonMemberStrip.cs")
+        var source = Source("Vfx/Prototype/SalonPanel.cs")
             .Replace("\r\n", "\n");
         Assert.Contains("front: i == 0", source);
         Assert.Contains("frame.Visible = occupied && front;", source);
@@ -222,7 +223,7 @@ public class SalonMemberStripPinTests
     public void The_act_word_is_the_one_the_member_tip_prints(
         SalonMember member, string word)
     {
-        Assert.Equal(word, SalonMemberStrip.ActWord(member));
+        Assert.Equal(word, SalonPanel.ActWord(member));
     }
 
     [Fact]
@@ -235,13 +236,13 @@ public class SalonMemberStripPinTests
         // The printed ticks, from the constants the member tips interpolate:
         // a repricing moves both surfaces or neither.
         Assert.Equal($"{SalonConstants.CrabalettaTick} Hydro",
-            SalonMemberStrip.NextAct(seat.Creature, SalonMember.Crabaletta,
+            SalonPanel.NextAct(seat.Creature, SalonMember.Crabaletta,
                                      paid: true));
         Assert.Equal($"{SalonConstants.UsherTick} Block",
-            SalonMemberStrip.NextAct(seat.Creature, SalonMember.Usher,
+            SalonPanel.NextAct(seat.Creature, SalonMember.Usher,
                                      paid: true));
         Assert.Equal($"{SalonConstants.ChevalmarinTick} Hydro",
-            SalonMemberStrip.NextAct(seat.Creature, SalonMember.Chevalmarin,
+            SalonPanel.NextAct(seat.Creature, SalonMember.Chevalmarin,
                                      paid: true));
     }
 
@@ -262,7 +263,7 @@ public class SalonMemberStripPinTests
             seat.Creature, SalonMember.Crabaletta, paid: true);
         Assert.Equal(SalonConstants.CrabalettaTick + 1, folded);
         Assert.Equal($"{folded} Hydro",
-            SalonMemberStrip.NextAct(seat.Creature, SalonMember.Crabaletta,
+            SalonPanel.NextAct(seat.Creature, SalonMember.Crabaletta,
                                      paid: true));
 
         // And the dry cut is the same one expression too: a member that cannot
@@ -271,11 +272,11 @@ public class SalonMemberStripPinTests
         var dry = SalonMemberPower.TickValue(
             seat.Creature, SalonMember.Crabaletta, paid: false);
         Assert.Equal($"{dry} Hydro",
-            SalonMemberStrip.NextAct(seat.Creature, SalonMember.Crabaletta,
+            SalonPanel.NextAct(seat.Creature, SalonMember.Crabaletta,
                                      paid: false));
 
-        var calls = Il.Calls(typeof(SalonMemberStrip)
-            .GetMethod(nameof(SalonMemberStrip.NextAct), All)!);
+        var calls = Il.Calls(typeof(SalonPanel)
+            .GetMethod(nameof(SalonPanel.NextAct), All)!);
         Assert.Contains(calls,
             c => c.EndsWith("SalonMemberPower.TickValue",
                             StringComparison.Ordinal));
@@ -289,9 +290,9 @@ public class SalonMemberStripPinTests
         // front chip and only while the stage is full, which is the one board
         // state a deploy reaches it from.
         Assert.Equal($"Evoke {SalonConstants.CrabalettaBow} Hydro",
-                     SalonMemberStrip.EvokeAct(SalonMember.Crabaletta));
+                     SalonPanel.EvokeAct(SalonMember.Crabaletta));
         Assert.Equal($"Evoke {SalonConstants.UsherBow} Block",
-                     SalonMemberStrip.EvokeAct(SalonMember.Usher));
+                     SalonPanel.EvokeAct(SalonMember.Usher));
         // `EB-630`: and her REFUND rides the same line. "Hydro to ALL" alone
         // was half her Evoke, and the half it dropped -- the Encore she gives
         // back -- is the number that makes replacing her a decision rather
@@ -299,9 +300,9 @@ public class SalonMemberStripPinTests
         Assert.Equal(
             $"Evoke Hydro to ALL, +{SalonConstants.ChevalmarinBowEncore} "
           + "Encore",
-            SalonMemberStrip.EvokeAct(SalonMember.Chevalmarin));
+            SalonPanel.EvokeAct(SalonMember.Chevalmarin));
 
-        var source = Source("Vfx/Prototype/SalonMemberStrip.cs")
+        var source = Source("Vfx/Prototype/SalonPanel.cs")
             .Replace("\r\n", "\n");
         Assert.Contains("evoke.Visible = front && full;", source);
     }
@@ -310,12 +311,12 @@ public class SalonMemberStripPinTests
     public void Every_member_has_a_short_name_and_a_face()
     {
         var faces = (IDictionary<SalonMember, string>)
-            typeof(SalonMemberStrip).GetField("Faces", All)!.GetValue(null)!;
+            typeof(SalonPanel).GetField("Faces", All)!.GetValue(null)!;
 
         foreach (SalonMember member in Enum.GetValues(typeof(SalonMember)))
         {
             Assert.False(string.IsNullOrWhiteSpace(
-                SalonMemberStrip.ShortName(member)));
+                SalonPanel.ShortName(member)));
             // The pck art the stage's silhouettes are cut from, reused rather
             // than re-cut: no new asset and no new generator.
             Assert.True(faces.ContainsKey(member));
@@ -335,23 +336,23 @@ public class SalonMemberStripPinTests
         Assert.Contains(
             Il.Calls(typeof(SalonVisualsBridge)
                 .GetMethod(nameof(SalonVisualsBridge.Setup), All)!),
-            c => c.EndsWith("SalonMemberStrip.Setup", StringComparison.Ordinal));
+            c => c.EndsWith("SalonPanel.Setup", StringComparison.Ordinal));
         Assert.Contains(
             Il.Calls(typeof(SalonVisualsBridge)
                 .GetMethod(nameof(SalonVisualsBridge.Refresh), All)!),
-            c => c.EndsWith("SalonMemberStrip.Refresh",
+            c => c.EndsWith("SalonPanel.Refresh",
                             StringComparison.Ordinal));
         Assert.Contains(
             Il.Calls(typeof(SalonVisualsBridge)
                 .GetMethod(nameof(SalonVisualsBridge.DiscardDisplay), All)!),
-            c => c.EndsWith("SalonMemberStrip.Discard",
+            c => c.EndsWith("SalonPanel.Discard",
                             StringComparison.Ordinal));
     }
 
     [Fact]
     public void Nothing_polls_and_no_texture_is_held_across_a_scene()
     {
-        var source = Source("Vfx/Prototype/SalonMemberStrip.cs")
+        var source = Source("Vfx/Prototype/SalonPanel.cs")
             .Replace("\r\n", "\n");
 
         // A per-frame `_Process` would be a second cadence, and two cadences
@@ -363,6 +364,69 @@ public class SalonMemberStripPinTests
         // stuck a room and ended a run.
         Assert.Contains("ResourceLoader.Load<Texture2D>(path)", source);
         Assert.DoesNotContain("static Texture2D", source);
+    }
+
+    // --- one panel --------------------------------------------------------
+
+    [Fact]
+    public void Everything_is_inside_one_backing_rectangle()
+    {
+        // `EB-627`'s revision, and the reason the four widgets became one. The
+        // frame showed the state a player prices a Companion play against --
+        // who is in front, what it pays, whether the stage can pay -- split
+        // across the creature's feet, the bottom-left corner and the status
+        // strip, with the piece answering "can she pay" invisible. One group,
+        // one ground: everything about the Salon is in this rectangle and
+        // nothing about the Salon is anywhere else.
+        var source = Source("Vfx/Prototype/SalonPanel.cs");
+
+        Assert.Contains("Name = \"Back\"", source);
+        Assert.Contains("Color = PanelBack", source);
+        Assert.Contains("root.AddChildSafely(BuildResourceRow", source);
+        Assert.Contains("root.AddChildSafely(BuildChip(i))", source);
+        // The chips, the line and the notice are all children of the one root.
+        Assert.Contains("Text(\"Notice\"", source);
+    }
+
+    [Fact]
+    public void The_panel_sits_above_the_rig_and_clear_of_the_hp_band()
+    {
+        // THE BAND UNDER HER FEET IS NOT OURS. `NCreatureStateDisplay` draws
+        // the HP bar and the block badge there, and both earlier layouts lost
+        // a row to it -- the 2026-07-25 ribbon's number, then `EB-635`'s pip
+        // row. The overhead region is the one MEASURED clear space on this rig
+        // (`GaugeBridge`: Furina's box tops out at -280, the Burst slot is
+        // -300 and draws nothing under this arm), so the panel's bottom edge
+        // is that slot.
+        var anchor = (Godot.Vector2)typeof(SalonPanel)
+            .GetField("AnchorOffset", All)!.GetValue(null)!;
+
+        Assert.Equal(-300f, anchor.Y + FurinaBoardScale.PanelHeight);
+        Assert.True(anchor.Y < -300f);
+
+        // AND INSIDE THE CREATURE'S OWN BOUNDS, centred: 240 is the bounds
+        // width, so the panel cannot overhang into the enemy intent or the
+        // targeting lanes on either side.
+        Assert.Equal(-FurinaBoardScale.PanelWidth / 2f, anchor.X);
+        Assert.Equal(240f, FurinaBoardScale.PanelWidth);
+    }
+
+    [Fact]
+    public void Chip_zero_says_FRONT_in_a_word_and_not_only_in_a_border()
+    {
+        // A gold border says "this one is special" and does not say WHAT is
+        // special about it -- and what is special about it is the rule a
+        // Companion play acts on. `EB-629` drops "the leftmost member is the
+        // front" from the rules paragraph on the strength of this, so the mark
+        // has to teach the rule rather than merely point at it.
+        var source = Source("Vfx/Prototype/SalonPanel.cs");
+
+        Assert.Equal("FRONT", SalonPanel.FrontWord);
+        Assert.Contains("frontLabel.Visible = front;", source);
+        Assert.Contains("frontLabel.Text = FrontWord;", source);
+        // And the frame is still there beside it: two channels, because the
+        // dry grey eats one of them.
+        Assert.Contains("frame.Visible = occupied && front;", source);
     }
 
     // --- source access ----------------------------------------------------
