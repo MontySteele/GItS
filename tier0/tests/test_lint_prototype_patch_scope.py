@@ -93,23 +93,26 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     hits, markers, count = lint.scan()
     assert hits == [], hits
     assert count >= 3, "the prototype directories must still hold patches"
-    # Every exemption is visible, and there are FOUR: the pile-screen
+    # Every exemption is visible, and there are FIVE: the pile-screen
     # teardown, the Kokomi Plan strip's teardown (whose character scope is one
     # call in, on the guarded seat resolver), the Kokomi arm's target-type
     # registration, which runs at `ModelDb.Init` before any run exists, and --
-    # since `EB-621` -- the Spark counter's teardown.
+    # since `EB-621` and `EB-628` -- the Spark counter's and the Fanfare
+    # counter's teardowns.
     #
-    # THE FOURTH WAS A REVIEW QUESTION AND THIS IS THE ANSWER. Its postfix
-    # takes the `NCombatUi` Harmony hands it and frees, by name, the one child
-    # node that file added; it reads no run state, no player and no creature,
-    # so there is no seat to resolve and no character to scope to. That is the
-    # STRONGEST form of the rule rather than a hole in it: `NCombatUi.
-    # Deactivate` runs while the next room is still being built, and a teardown
-    # that has to name a seat there is exactly the shape that ended two blind
-    # sessions and minted this lint. The scope lives at the only door that
-    # BUILDS the node (`SparkCounter.Setup`, through `SparkGauge.AppliesTo`).
-    # A FIFTH appearing here is the next review question.
-    assert len(markers) == 4, markers
+    # THE LAST TWO WERE A REVIEW QUESTION AND THIS IS THE ANSWER; they are one
+    # shape, a badge in the energy area per arm. Each postfix takes the
+    # `NCombatUi` Harmony hands it and frees, by name, the one child node its
+    # file added; it reads no run state, no player and no creature, so there is
+    # no seat to resolve and no character to scope to. That is the STRONGEST
+    # form of the rule rather than a hole in it: `NCombatUi.Deactivate` runs
+    # while the next room is still being built, and a teardown that has to name
+    # a seat there is exactly the shape that ended two blind sessions and minted
+    # this lint. The scope lives at the only door that BUILDS each node
+    # (`SparkCounter.Setup` through `SparkGauge.AppliesTo`,
+    # `FanfareCounter.Setup` through `FurinaReframe.MeterLiveFor`).
+    # A SIXTH appearing here is the next review question.
+    assert len(markers) == 5, markers
 
 
 def test_registered_in_the_ci_lane() -> None:
