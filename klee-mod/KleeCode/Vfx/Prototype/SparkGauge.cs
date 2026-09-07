@@ -136,6 +136,11 @@ public static class SparkGauge
         }
 
         GaugeBridge.Refresh(creature);
+        // `EB-621`: the SECOND display of the same bank -- the badge in the
+        // energy area -- rides the same funnel, so the two can never come from
+        // different reads. It scopes itself to the LOCAL seat; the overhead
+        // gauge is drawn on the creature and both seats see it.
+        SparkCounter.Refresh(creature);
     }
 
     /// <summary>
