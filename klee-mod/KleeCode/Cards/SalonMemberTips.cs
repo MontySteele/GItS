@@ -176,10 +176,18 @@ public static class SalonMemberTips
         // performance belongs to (`EB-476`, `EB-548`, one rule: `EB-343`'s
         // `ValueProp.Unpowered`) and the dry cut (R220 A, `EB-587`) -- so this
         // is the tip they are read on at the moment they matter, which is what
-        // the rules paragraph never was. They are one shared string
-        // (<see cref="PerformanceRules"/>) rather than three copies, on
-        // `SalonConstants`' own argument: a rule restated per member is a rule
-        // that goes stale one member at a time.
+        // the rules paragraph never was.
+        //
+        // `EB-632` THEN SPLIT THEM, because appending all three to all three
+        // members moved the wall instead of shrinking it. Two of the clauses
+        // are about DEALING DAMAGE and the Usher deals none, so his tip was
+        // printing an enemy-selection rule that never runs for him and a
+        // Shatter exception he can never be on either side of. Each member now
+        // carries only its own: the damage pair
+        // (<see cref="DamagePerformanceRules"/>) on Crabaletta and
+        // Chevalmarin, and <see cref="DryCut"/> on all three, since all three
+        // can be asked to perform on an empty buffer. Two strings and no
+        // typed copies, which is `SalonConstants`' own argument one level up.
         if (FurinaReframe.ManualLiveFor(owner))
         {
             return member switch
@@ -188,18 +196,22 @@ public static class SalonMemberTips
                     $"Performs for {SalonConstants.CrabalettaTick} Hydro "
                   + $"damage, paying {SalonConstants.TickEncoreCost} Encore. "
                   + $"Evokes for {SalonConstants.CrabalettaBow} Hydro damage "
-                  + "and leaves the stage. " + PerformanceRules,
+                  + "and leaves the stage. "
+                  + DamagePerformanceRules + " " + DryCut,
+                // THE USHER GAINS BLOCK AND HITS NOBODY, so neither damage
+                // clause is a fact about him. The dry cut is: his Block is
+                // three-quarters too.
                 SalonMember.Usher =>
                     $"Performs for {SalonConstants.UsherTick} Block, paying "
                   + $"{SalonConstants.TickEncoreCost} Encore. Evokes for "
                   + $"{SalonConstants.UsherBow} Block and leaves the stage. "
-                  + PerformanceRules,
+                  + DryCut,
                 _ =>
                     $"Performs for {SalonConstants.ChevalmarinTick} Hydro "
                   + $"damage, paying {SalonConstants.TickEncoreCost} Encore. "
                   + "Evokes by applying Hydro to ALL enemies and granting "
                   + $"{SalonConstants.ChevalmarinBowEncore} Encore. "
-                  + PerformanceRules,
+                  + DamagePerformanceRules + " " + DryCut,
             };
         }
 #endif
@@ -207,13 +219,26 @@ public static class SalonMemberTips
     }
 
     /// <summary>
-    /// THE THREE CLAUSES `EB-629` MOVED OFF THE RULES PARAGRAPH, written once
-    /// and appended to every member's arm tip.
+    /// THE CLAUSES `EB-629` MOVED OFF THE RULES PARAGRAPH, split by `EB-632`
+    /// so that each member's tip carries only its own.
     ///
-    /// ONE STRING, THREE MEMBERS. The alternative was the same three sentences
-    /// typed into three switch arms, which is the drift `SalonConstants` exists
-    /// to prevent one level up: a rule restated per member is a rule that goes
-    /// stale one member at a time.
+    /// WHAT `EB-632` FOUND (GPT review, 2026-09-07). `EB-629` shrank the Salon
+    /// rules paragraph by moving three clauses onto the member tips, and wrote
+    /// them as ONE shared string appended to all three members. Two of the
+    /// three are facts about DEALING DAMAGE -- which enemy the roll takes, and
+    /// which damage class the hit belongs to -- and the Usher deals none: he
+    /// gains <see cref="SalonConstants.UsherTick"/> Block. So his tip was
+    /// carrying an enemy-selection rule that never runs for him and a Shatter
+    /// exception he can never be on either side of. The wall had moved rather
+    /// than shrunk, one member over.
+    ///
+    /// SO THERE ARE TWO STRINGS AND NOT THREE COPIES.
+    /// <see cref="DamagePerformanceRules"/> is the pair that belongs to a
+    /// member whose performance is a hit; <see cref="DryCut"/> is the one that
+    /// belongs to every member, because every member can be dry. The
+    /// per-member switch below picks between them and no sentence is typed
+    /// twice -- which is `SalonConstants`' own argument one level up: a rule
+    /// restated per member is a rule that goes stale one member at a time.
     ///
     /// EACH SENTENCE IS A RULED FINDING AND CARRIES ITS OWN ID, so a reader
     /// asking why a clause is worded this way has the run to go to:
@@ -223,7 +248,8 @@ public static class SalonMemberTips
     ///     something the face warns you about"); `EB-451` limited it after the
     ///     r7 seat's one PAID performance rolled a 6-HP Eye with Teeth that
     ///     revives at full. The implementation is `SalonMemberPower.AimPool`,
-    ///     R250's shape one roller over.
+    ///     R250's shape one roller over -- and it is reached only from the
+    ///     damage branch, which is the code half of this split.
     ///   * THE CLASS. `EB-476` and `EB-548`, one rule (`EB-343`): a
     ///     performance reaches `CreatureCmd.Damage` as `ValueProp.Unpowered`,
     ///     so every `IsPoweredAttack()` gate -- the Shatter mark, an enemy's
@@ -231,18 +257,27 @@ public static class SalonMemberTips
     ///     Vulnerable. "Not an Attack" alone is ambiguous, which is why the
     ///     sentence says which half is which; "no when-hit power fires" is
     ///     `ArmKeywordTips.ForSetOff`'s own wording.
-    ///   * THE DRY CUT. R220 A and `EB-587`: three-quarters, from
-    ///     <see cref="SalonConstants.DryDamageMultiplier"/> in words, because a
-    ///     player pricing a performance needs the reduced number's REASON and
-    ///     the strip already prints its size.
     /// </summary>
-    private const string PerformanceRules =
+    private const string DamagePerformanceRules =
         "It picks its own enemy, never a [gold]Minion[/gold] while another "
-      + "enemy stands, and performs at three-quarters with no "
-      + "[gold]Encore[/gold]. "
+      + "enemy stands. "
       + "A performance is not an [gold]Attack[/gold] and not a hit: "
       + "[gold]Vulnerable[/gold] moves it, but no [gold]Shatter[/gold] and no "
       + "when-hit power fires.";
+
+    /// <summary>
+    /// THE DRY CUT, and it is on ALL THREE MEMBERS because all three can be
+    /// asked to perform with an empty buffer. R220 A and `EB-587`:
+    /// three-quarters, from <see cref="SalonConstants.DryDamageMultiplier"/>
+    /// in words, because a player pricing a performance needs the reduced
+    /// number's REASON and the strip already prints its size.
+    ///
+    /// `EB-633` is the other half of the same sentence, one surface over: the
+    /// pip row counts FULL-STRENGTH performances, so a row at zero does not
+    /// mean the stage is idle, and this is where the tip says so.
+    /// </summary>
+    private const string DryCut =
+        "With no [gold]Encore[/gold] it performs at three-quarters.";
 
     /// <summary>The shipped upkeep's wording, unmoved and unreachable from the
     /// arm's branch, so a release build's tip is the same expression it has

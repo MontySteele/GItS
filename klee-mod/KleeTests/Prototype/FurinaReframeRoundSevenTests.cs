@@ -172,17 +172,24 @@ public class FurinaReframeRoundSevenTests
         // carrying seven rules and [USER] read it as a wall of text; the aim is
         // a fact about A MEMBER ABOUT TO PERFORM, so the tip of the thing that
         // performs is where it is read at the moment it matters. The words are
-        // unchanged, and every member carries them.
+        // unchanged.
+        //
+        // `EB-632` NARROWED WHO CARRIES THEM to the members whose performance
+        // is a hit. The Usher gains Block and picks no enemy, so the clause
+        // was never a fact about him; the words themselves did not move again.
         using var _ = new Arm();
         var seat = Seat.Furina().WithCombatState();
 
-        foreach (SalonMember member in
-                 System.Enum.GetValues(typeof(SalonMember)))
+        foreach (var member in new[]
+                 { SalonMember.Crabaletta, SalonMember.Chevalmarin })
         {
             Assert.Contains("picks its own enemy, never a [gold]Minion[/gold] "
                           + "while another enemy stands",
                             SalonMemberTips.BodyFor(member, seat.Creature));
         }
+
+        Assert.DoesNotContain("picks its own enemy",
+            SalonMemberTips.BodyFor(SalonMember.Usher, seat.Creature));
     }
 
     [Fact]
