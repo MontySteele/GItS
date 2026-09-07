@@ -749,7 +749,13 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "carry_out_front_plan", "plan_from_exhaust", "damage_quarter_max_hp",
     "damage_per_companion_last_turn",
     "play_copy_of_companion", "block_per_plan_this_morning",
-    "draw_after_plans"))
+    "draw_after_plans",
+    # POOL PASS TWO (`EB-643`, R265). Three now-lines that operate on the
+    # QUEUE and three drain-positional plan clauses, each with its own branch
+    # in `_op_price` on this set's own EB-311 terms.
+    "cancel_last_plan", "cancel_all_plans_cash", "redirect_queued_plans",
+    "draw_per_plan_after", "next_plan_double_damage",
+    "next_plan_extra_carry_out"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -960,6 +966,57 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # of a dead dial the only live one.
         return (int(fx.get("amount", 0)) + int(fx.get("per", 1))) \
             * STATIC_DRAW_VALUE
+    if op == "draw_per_plan_after":
+        # Scout Ahead (`EB-643`). ZERO, and it is `draw_after_plans`' zero one
+        # row up rather than a refusal of its own: every draw op in this file
+        # is priced at STATIC_DRAW_VALUE, which the v3 flat-proxy sweep
+        # measured at 0.0, so a row that draws one card per later carry-out is
+        # worth exactly what a row that draws one card is. ONE later carry-out
+        # is the neutral single-unit estimate this file already takes three
+        # times over -- how deep a morning a deck banks is a deck fact an
+        # offer screen cannot read.
+        return _neutral_amount(fx, 0) * STATIC_DRAW_VALUE
+    if op == "next_plan_double_damage":
+        # Opening Gambit's rider (`EB-643`). ZERO, and it is a REFUSAL that
+        # says why rather than a dial: what this doubles is the next entry's
+        # damage, and an offer screen cannot see whether the deck has a Plan
+        # to put behind it, let alone how big. Every quantity in the price
+        # would be the drafted deck's and not the card's -- the same reading
+        # `block_per_plan_this_morning` makes about Plan density, taken to its
+        # end. The card's Vulnerable half is priced by its own clause, so the
+        # row is not worth nothing to the drafter.
+        return 0.0
+    if op == "next_plan_extra_carry_out":
+        # Second Wave's rider (`EB-643`). ZERO, on the line above's argument
+        # word for word: an extra carry-out of an entry the offer screen
+        # cannot see is a quantity about the drafted deck.
+        return 0.0
+    if op == "cancel_last_plan":
+        # Second Thoughts (`EB-643`). ZERO, and it is the honest answer rather
+        # than a gap: nothing is created. One Plan is unwritten and the card
+        # that wrote it comes back with its Energy, so what the play produces
+        # is exactly the play it undoes -- and `cost_mod`'s measured dead dial
+        # is what this repo prices returned Energy at anyway. A card that costs
+        # 0 and gives back what it takes is a rewind, and a rewind's value is
+        # the mistake it repairs, which no offer screen can see.
+        return 0.0
+    if op == "cancel_all_plans_cash":
+        # Ebb Tide (`EB-643`). ONE QUEUED PLAN, the neutral single-unit
+        # estimate every live count in this file takes -- so one Energy and
+        # one card, both of which this file prices at their measured dead
+        # dials (STATIC_ENERGY_VALUE, STATIC_DRAW_VALUE). What is GIVEN UP is
+        # deliberately not subtracted: the cancelled Plan's own value is a
+        # deck fact, and a price that guessed it could go negative on a card
+        # that is never played into an empty queue.
+        return STATIC_ENERGY_VALUE + STATIC_DRAW_VALUE
+    if op == "redirect_queued_plans":
+        # Converging Tide (`EB-643`). ZERO, and it is the refusal `EB-311`
+        # asks to be said out loud: re-aiming a queue moves no quantity at all
+        # -- the same damage lands, on a body the player chose instead of the
+        # front one. What it is worth is a board fact (a decoy in front, a
+        # priority target behind) that an offer screen cannot read, and the
+        # row's Block half carries its printed number on its own clause.
+        return 0.0
     if op == "carry_out_front_plan":
         # Change of Plans: the front Plan is carried out NOW instead of at the
         # top of her next turn, and it leaves the queue (`resolve_front`), so
@@ -2346,6 +2403,26 @@ STATIC_OP_PRICING: dict[str, str] = {
     "draw_after_plans": "ZERO: STATIC_DRAW_VALUE, the same dead dial `draw` "
                         "is priced on -- one card per Plan carried out, paid "
                         "a turn later, is still draw",
+    "draw_per_plan_after": "ZERO: STATIC_DRAW_VALUE on ONE later carry-out -- "
+                           "the same dead dial `draw` is priced on, and the "
+                           "same neutral single-unit estimate",
+    "next_plan_double_damage": "ZERO, and it is a refusal: what it doubles is "
+                               "the NEXT entry's damage, a quantity about the "
+                               "drafted deck and not about this card",
+    "next_plan_extra_carry_out": "ZERO, on the line above's argument -- an "
+                                 "extra carry-out of an entry the offer "
+                                 "screen cannot see",
+    "cancel_last_plan": "ZERO: nothing is created. One Plan is unwritten and "
+                        "its card comes back with its Energy, so the play is "
+                        "exactly the play it undoes",
+    "cancel_all_plans_cash": "ONE queued Plan's worth -- STATIC_ENERGY_VALUE "
+                             "+ STATIC_DRAW_VALUE, both measured dead dials. "
+                             "What is given up is a deck fact and is not "
+                             "subtracted",
+    "redirect_queued_plans": "ZERO: re-aiming a queue moves no quantity -- "
+                             "the same damage lands on a body the player "
+                             "chose, and which body is worth more is a board "
+                             "fact an offer screen cannot read",
     "carry_out_front_plan": "one resolution moved a turn EARLIER, not created "
                             "-- STATIC_AUTOPLAY_VALUE times the delay it "
                             "cancels (1 - C.PLAN_DELAY_DISCOUNT)",

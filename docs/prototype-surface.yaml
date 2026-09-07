@@ -1266,6 +1266,99 @@
    # damage, Plan 12): less of either, both at once, and only when planned.
    upgrade: {block: 2, plan_block: 2, plan_damage: 2}}
 
+# --- POOL PASS TWO (`EB-643`, R265): the QUEUE as something the player
+# operates on. Eight rows, LAST in the sheet's own order. The finding, the
+# eight readings and the audit: docs/notes/prototype-surface-provenance.md ---
+
+- {id: proto_kk_opening_gambit, name: "Opening Gambit", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Deal 5 damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The next [gold]Plan[/gold] deals double damage.",
+   effects: [{op: damage, amount: 5, target: enemy}],
+   # THE RIDER IS THE SECOND CLAUSE and it aims at nothing: "the next Plan" is
+   # the entry carried out immediately after this one in the same drain.
+   # Order and the upgrade's one half: the provenance note.
+   plan: [{op: apply_power, power: vulnerable, amount: 1, target: all_enemies},
+          {op: next_plan_double_damage}],
+   upgrade: {damage: 2}}
+
+- {id: proto_kk_second_wave, name: "Second Wave", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: The next [gold]Plan[/gold] is carried out twice.",
+   effects: [{op: block, amount: 4}],
+   # A FLAG AND NOT A COUNT: under Nereid's Ascension the entry this reaches
+   # is carried out THREE times (`CarryOutTimes + 1`) and not four, which is
+   # the rule stated at `kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT`.
+   plan: [{op: next_plan_extra_carry_out}],
+   upgrade: {block: 2}}
+
+- {id: proto_kk_scout_ahead, name: "Scout Ahead", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each [gold]Plan[/gold] carried out after this one.",
+   effects: [{op: draw, amount: 1}],
+   # THE ROW WHOSE VALUE IS ITS POSITION: first of a three-entry morning it
+   # draws 2, last it draws 0, and the count is CARRY-OUTS. Why the upgrade
+   # moves the cost and not the rate: the provenance note.
+   plan: [{op: draw_per_plan_after, amount: 1}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_second_thoughts, name: "Second Thoughts", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common, exhaust: true,
+   description: "Cancel your last [gold]Plan[/gold]: its card returns to your hand and you regain its cost.",
+   # THE NEWEST PLAN, where Change of Plans hurries the OLDEST -- the two
+   # tempo cards work opposite ends of one queue. No `plan:` line: a card that
+   # unwrites a Plan cannot also be one.
+   effects: [{op: cancel_last_plan}],
+   upgrade: {add: {op: draw, amount: 1}}}
+
+- {id: proto_kk_ebb_tide, name: "Ebb Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Cancel every [gold]Plan[/gold]. Gain 1 [gold]Energy[/gold] and draw 1 card for each.",
+   # PER ENTRY and not per carry-out: "for each" counts the Plans she is
+   # holding, which is what the pending badge shows.
+   effects: [{op: cancel_all_plans_cash}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_converging_tide, name: "Converging Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 4 [gold]Block[/gold]. Your queued [gold]Plans[/gold] aim at this enemy instead of the front.",
+   # ONLY THE FRONT AIM MOVES -- an ALL clause does not aim at the front, so
+   # there is nothing on it for "instead of the front" to be about -- and a
+   # dead target falls back to the front at carry-out.
+   effects: [{op: block, amount: 4},
+             {op: redirect_queued_plans, target: enemy}],
+   upgrade: {block: 2}}
+
+- {id: proto_kk_breakwater, name: "Breakwater", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 4 [gold]Block[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain 7 [gold]Block[/gold].",
+   # DUSK: the line lands at the END of this turn, before the enemies act, so
+   # the Block guards the swing the now-line was too small for. Priced against
+   # Read the Field; the comparison is in the provenance note.
+   effects: [{op: block, amount: 4}],
+   plan: [{op: block, amount: 7}],
+   plan_dusk: true,
+   upgrade: {block: 1, plan_block: 2}}
+
+- {id: proto_kk_night_watch, name: "Night Watch", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 3 [gold]Block[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain 5 [gold]Block[/gold] and apply 1 [gold]Weak[/gold].",
+   # THE SECOND DUSK ROW, and the one whose Weak is the point: it lands before
+   # the enemies act, so it cuts the swing it was written for rather than the
+   # one after it. Priced against Coral Bulwark in the provenance note.
+   effects: [{op: block, amount: 3}],
+   plan: [{op: block, amount: 5},
+          {op: apply_power, power: weak, amount: 1, target: front_enemy}],
+   plan_dusk: true,
+   upgrade: {block: 2, plan_block: 2}}
+
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.
 # Source, readings and hooks: docs/notes/prototype-surface-provenance.md.

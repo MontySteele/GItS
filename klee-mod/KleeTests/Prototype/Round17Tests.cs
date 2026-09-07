@@ -328,10 +328,14 @@ public class Round17Tests
     [Fact]
     public void The_mornings_depth_is_carry_outs_and_is_read_once()
     {
+        // `EB-643` MOVED THE CARRY-OUT LOOP INTO `Drain`, which both drains
+        // now share, so the thing the note must precede is the DRAIN CALL --
+        // the same assertion one name over, and the same rule: the depth is
+        // written before anything is carried out.
         var sequence = Il.CallSequence(Il.Method("KokomiPlan", "ResolveAll"));
         var times = IndexOf(sequence, c => c.Contains("CarryOutTimes"));
         var note = IndexOf(sequence, c => c.Contains("NoteMorning"));
-        var resolve = IndexOf(sequence, c => c.Contains("ResolveEntry"));
+        var resolve = IndexOf(sequence, c => c.Contains("KokomiPlan.Drain"));
 
         Assert.True(times >= 0 && note > times, string.Join(", ", sequence));
         Assert.True(note < resolve, string.Join(", ", sequence));

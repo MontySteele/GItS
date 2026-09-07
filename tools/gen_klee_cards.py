@@ -409,6 +409,13 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # after the jellyfish has carried its Plans out, for the
                   # Plans it actually carried out.
                   "draw_after_plans",
+                  # `EB-643`, R265: the three now-lines that operate on the
+                  # QUEUE. Take the newest Plan back (Second Thoughts), cash
+                  # the whole queue in (Ebb Tide), re-aim what is already
+                  # written (Converging Tide). They are the arm's first verbs
+                  # that UNWRITE a Plan, which is what the pool pass is for.
+                  "cancel_last_plan", "cancel_all_plans_cash",
+                  "redirect_queued_plans",
                   # PLAN-ONLY verbs: legal inside a row's `plan:` list and
                   # nowhere else, which `plan_reason` and `blocked_reason`
                   # enforce by name. Each is one `KokomiPlan.Kind`.
@@ -417,6 +424,12 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # a reason of its own -- the count it multiplies is a fact
                   # about a MORNING.
                   "block_per_plan_this_morning",
+                  # `EB-643`: the three DRAIN-POSITIONAL clauses, plan-only
+                  # for a reason they share -- each names a place in a running
+                  # drain ("the next Plan", "after this one"), so a now-line
+                  # spelling would name a drain that is not running.
+                  "draw_per_plan_after", "next_plan_double_damage",
+                  "next_plan_extra_carry_out",
                   # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, R213 B) --
                   # ONE verb, on the same terms as the two blocks above. Gorou's
                   # Inuzaka All-Round Defense prints "Gain Block equal to half
@@ -662,6 +675,14 @@ ARM_KEYWORDS = (
     # explain a mechanic that is not there.
     ArmKeyword("Mend", ("Mend", "Mends"), "ArmKeywordTips.ForMend"),
     ArmKeyword("Plan", ("Plan", "Plans"), "ArmKeywordTips.ForPlan"),
+    # Kokomi's FOURTH, `EB-643` (R265). `Dusk` is the pool pass's one new word
+    # and it is a rule about WHEN: the Bake-Kurage carries a Dusk Plan out at
+    # the end of the turn it was written on, before the enemies act, instead of
+    # next morning. A word of its own rather than a clause on the Plan tip,
+    # because that tip is at its 135-character ceiling and carries five
+    # findings already -- and because a player meeting the word on a card needs
+    # the definition beside the word. NO PLURAL: it names one moment.
+    ArmKeyword("Dusk", ("Dusk",), "ArmKeywordTips.ForDusk"),
     # Kokomi's THIRD, `EB-625`. `Tamakushi Casket` is her relic, and
     # `Shell Guard` is written against it by name -- "whenever the Tamakushi
     # Casket strikes" -- with nothing on screen saying what the Casket is or
@@ -1903,8 +1924,20 @@ DRAW_AFTER_PLANS_FIELDS = {"op", "per", "amount"}
 
 #: The ops that are one whole printed clause and carry no number of their own.
 #: Any number they might carry belongs to a RULE, not to a card.
+#:
+#: `EB-643` (R265) ADDED TWO. Second Thoughts takes the newest Plan back and
+#: Ebb Tide cashes the whole queue in, and neither prints a number: what one
+#: pays is the returned card's own cost and what the other pays is the depth
+#: of the queue it emptied. Converging Tide is NOT here -- it aims, so it takes
+#: a `target` and has its own field set below.
 KOKOMI_BARE_OPS = {"next_companion_discount", "remove_debuff",
-                   "carry_out_front_plan", "plan_from_exhaust"}
+                   "carry_out_front_plan", "plan_from_exhaust",
+                   "cancel_last_plan", "cancel_all_plans_cash"}
+
+#: Converging Tide's one field (`EB-643`): the enemy the queue re-aims at, which
+#: is the enemy the card was played on -- the same `target:` spelling every
+#: other aimed now-line takes, so "this enemy" has one definition.
+REDIRECT_QUEUED_PLANS_FIELDS = {"op", "target"}
 
 #: What a row's `plan:` list may say, and the `KokomiPlan.Kind` each spelling
 #: maps to. Draft 6 (`kokomi-overhaul-slice-1-2026-09-01.md` sec.4) prints
@@ -1922,13 +1955,26 @@ PLAN_CLAUSE_KINDS = {
     "damage_per_companion_last_turn": "DamagePerCompanionLastTurn",
     "play_copy_of_companion": "PlayCopyOfCompanion",
     "block_per_plan_this_morning": "BlockPerPlanThisMorning",
+    # `EB-643` (R265), THE THREE DRAIN-POSITIONAL CLAUSES. Scout Ahead counts
+    # the carry-outs still to come, and Opening Gambit and Second Wave write a
+    # RIDER on the entry that follows them in the same drain. All three are
+    # PLAN-ONLY below for one reason they share: each names a place in a
+    # running drain, and a now-line spelling would name a drain that is not
+    # running.
+    "draw_per_plan_after": "DrawPerPlanAfter",
+    "next_plan_double_damage": "NextPlanDoubleDamage",
+    "next_plan_extra_carry_out": "NextPlanExtraCarryOut",
     "apply_power": None,
 }
 
 #: The clauses that carry NO `amount`: a derived size (Sango Isshin's quarter
-#: of Max HP) and a held CARD (Crystal Collapse's copy). The twin of
+#: of Max HP), a held CARD (Crystal Collapse's copy) and `EB-643`'s two
+#: RIDERS, which are switches thrown on the next entry -- "double" and "once
+#: more" have no size to print. The twin of
 #: `kokomi_plan.PLAN_AMOUNTLESS_OPS`.
-PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion"}
+PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
+                       "next_plan_double_damage",
+                       "next_plan_extra_carry_out"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
 #: carries out what the card wrote, and "any power" would let a row schedule a
@@ -1956,7 +2002,12 @@ PLAN_TIMES_OPS = {"damage"}
 #: Legal inside a `plan:` list and NOWHERE else -- a top-level spelling would
 #: be a different, unpriced card, and `KokomiPlan` is the only caller of both.
 PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
-                 "play_copy_of_companion", "block_per_plan_this_morning"}
+                 "play_copy_of_companion", "block_per_plan_this_morning",
+                 # `EB-643`. The three drain-positional clauses -- see
+                 # `PLAN_CLAUSE_KINDS` above for the one reason all three are
+                 # here. `kokomi_plan.PLAN_ONLY_OPS` is the twin.
+                 "draw_per_plan_after", "next_plan_double_damage",
+                 "next_plan_extra_carry_out"}
 
 
 def plan_reason(card: dict) -> str | None:
@@ -3034,7 +3085,12 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # ONLY aimed op is this one must declare an enemy TargetType or
               # throw on every play. Draft 6 retired the Surge and Sango
               # Isshin's now-line took the slot.
-              "damage_quarter_max_hp")
+              "damage_quarter_max_hp",
+              # `EB-643`, Converging Tide: the arm's second aimed verb, and it
+              # aims for a reason nothing else here does -- it does not hit the
+              # body, it points the QUEUE at it. It still dereferences
+              # `cardPlay.Target`, which is the whole test this tuple applies.
+              "redirect_queued_plans")
 
 
 def _aims_at_chosen_enemy(eff: dict) -> bool:
@@ -3073,6 +3129,18 @@ CARD_FIELDS = {
     # context the Plan will not have when it resolves. Prototype surface only,
     # like `description:`: a shipped sheet has no Plan rule to print.
     "plan",
+    # `EB-643` (R265), DUSK: this row's Plan line is carried out at the END of
+    # the turn it was written on, before the enemies act, instead of next
+    # morning.
+    #
+    # A ROW FIELD AND NOT A CLAUSE, deliberately, and the reason is what the
+    # word means: Dusk is WHEN the whole line lands, so a card cannot have one
+    # dusk clause and one morning clause any more than it can be played on two
+    # turns. It also keeps `PLAN_CLAUSE_KINDS` closed on what a Plan DOES.
+    # Prototype surface only, and only beside a `plan:` list -- both checked
+    # in `card_level_reason`, and `loader._validate_plan_dusk` refuses the same
+    # two from the other side.
+    "plan_dusk",
     # A9 (2026-07-28): Innate on the BASE card, not only as an upgrade delta.
     # tier0 needed nothing -- Card.innate already existed and combat's
     # surface_innate reads it on any card -- but the generator emitted the
@@ -3200,6 +3268,18 @@ def card_level_reason(
     if card.get("plan") is not None and profile.character_id != "kokomi":
         return (f"`plan:` on a {profile.character_id} row -- the Plan is the "
                 "Kokomi overhaul's rule and only her rows may print it")
+    # `EB-643`. DUSK SAYS WHEN A PLAN LANDS, so it needs a Plan to be about,
+    # and the value is literally `True` -- the `innate:` / `retain:`
+    # precedent, where only true is a ruling and `false` would be a second
+    # spelling of the default. `loader._validate_plan_dusk` is the twin.
+    dusk = card.get("plan_dusk")
+    if dusk is not None:
+        if dusk is not True:
+            return ("plan_dusk must be true -- it is a ruling and not a "
+                    "switch, the way `innate:` is")
+        if not card.get("plan"):
+            return ("plan_dusk on a row with no `plan:` line -- Dusk says "
+                    "WHEN a Plan is carried out, so there has to be one")
     # `EB-491`. THE RISING HAND COST IS QUARANTINED, AND IT ONLY MEANS
     # ANYTHING ON A CARD THAT STAYS. `KleeOverhaulRisingCost` is Compile
     # Remove'd out of a release build, so a shipped row naming it would emit an
@@ -3729,6 +3809,19 @@ def blocked_reason(
             if not isinstance(flat, int) or isinstance(flat, bool) or flat < 0:
                 return ("draw_after_plans amount must be a literal int >= 0 "
                         "-- the FLAT half, 0 on a row that pays per Plan only")
+        if op == "redirect_queued_plans":
+            # `EB-643`, Converging Tide. ONE FIELD and it is the aim, checked
+            # against the same two spellings `damage_quarter_max_hp` above
+            # takes: `front_enemy` is a PLAN aim and this is a now-line, so a
+            # row spelling it here would be pointing at a rule it does not run.
+            unknown = set(eff) - REDIRECT_QUEUED_PLANS_FIELDS
+            if unknown:
+                return (f"redirect_queued_plans field(s) {sorted(unknown)} "
+                        "not understood")
+            if eff.get("target") != "enemy":
+                return ("redirect_queued_plans target "
+                        f"'{eff.get('target')}' -- the queue re-aims at the "
+                        "enemy the card was played on")
         if op in KOKOMI_BARE_OPS | {"block_half_damage"}:
             # No fields at all: each is one whole printed clause, and any
             # number they might carry is a rule's, not a card's.
@@ -8343,6 +8436,36 @@ def build_body(
                 "await KokomiPlan.ResolveFront("
                 "choiceContext, Owner.Creature);")
 
+        elif op == "cancel_last_plan":
+            # Second Thoughts (`EB-643`). THE NEWEST Plan, where Change of
+            # Plans above hurries the OLDEST: the two tempo cards work
+            # opposite ends of one queue. The card that wrote it comes back
+            # from the discard pile and its cost is refunded, both inside
+            # `KokomiPlan.CancelLast` -- which is where the paths that return
+            # nothing (an exhausted source, a Plan written off the exhaust
+            # pile by Moon's Reflection) are recorded.
+            lines.append(
+                "await KokomiPlan.CancelLast("
+                "choiceContext, Owner.Creature);")
+
+        elif op == "cancel_all_plans_cash":
+            # Ebb Tide (`EB-643`). PER ENTRY and not per carry-out -- "for
+            # each" counts the Plans she is holding, which is the number the
+            # pending badge shows and `PlansHeld` answers.
+            lines.append(
+                "await KokomiPlan.CancelAllForCash("
+                "choiceContext, Owner.Creature);")
+
+        elif op == "redirect_queued_plans":
+            # Converging Tide (`EB-643`). The QUEUE AS IT STANDS re-aims at
+            # the body this card was played on; a Plan written after it aims
+            # at the front as usual, because the face names the queue and not
+            # the turn. Only the front aim moves, and a dead target falls back
+            # to the front at carry-out -- both inside `KokomiPlan.Redirect`.
+            _target_guard(lines, ctx)
+            lines.append(
+                "KokomiPlan.Redirect(Owner.Creature, cardPlay.Target);")
+
         elif op == "plan_from_exhaust":
             # Moon's Reflection. The CHOSEN CARD rides on the queue, not a
             # closure: the clause is resolved a turn later, by which time the
@@ -11562,6 +11685,12 @@ def emit(
         if eff["op"] in ("apply_aura", "swirl"):
             target_type = TARGET_CS[eff.get("target", "enemy")]
             break
+        # `EB-643`, Converging Tide: it points the QUEUE at a body rather than
+        # hitting it, and it still needs the player to pick one -- so the card
+        # is enemy-targeted for the reason every op above it is.
+        if eff["op"] == "redirect_queued_plans":
+            target_type = TARGET_CS[eff.get("target", "enemy")]
+            break
         # EB-118: a modal's aiming verb sits inside a mode body, so a card
         # whose only enemy-facing effect is modal would declare TargetType.Self
         # and be unaimable. blocked_reason has already refused modes that
@@ -11606,8 +11735,14 @@ def emit(
         # jellyfish?" is a property of the play rather than of a mode, a
         # keyword or a second card. A plan-ONLY row takes no branch at all --
         # it cannot be played anywhere else.
+        # `EB-643`. THE DUSK FLAG RIDES THE WRITE, because Dusk is a fact about
+        # WHEN this card's line lands and the entry is the only thing that
+        # survives the play. `dusk:` is passed only where the row declares it,
+        # so every card authored before the field existed emits exactly the
+        # call it always did.
+        dusk_arg = ", dusk: true" if card.get("plan_dusk") else ""
         schedule = ("await KokomiPlan.Schedule(choiceContext, Owner.Creature, "
-                    "this, PlanClauses);")
+                    f"this, PlanClauses{dusk_arg});")
         body = ([schedule] if not card.get("effects") else
                 [f"if (KokomiPlan.PlayedOnPet(cardPlay))",
                  "{",

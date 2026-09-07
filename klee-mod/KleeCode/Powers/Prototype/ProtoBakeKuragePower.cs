@@ -116,6 +116,33 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
+    /// `EB-643` (R265), DUSK's resolution point: "the Bake-Kurage carries this
+    /// Plan out at the end of this turn, before enemies act."
+    ///
+    /// <c>BeforeSideTurnEnd</c> ON THE PLAYER SIDE, which is the nearest
+    /// broadcast this mod has to the printed sentence and the one the sim
+    /// mirrors (`combat._player_turn`, beside `klee_overhaul.turn_end`). What
+    /// this point buys is the whole promise: the Block is on her before the
+    /// swing, which is the only clause of the face a card can tell apart. The
+    /// morning hook one method up is deliberately NOT reused -- a Dusk Plan
+    /// that landed next morning would be an ordinary Plan wearing a new word.
+    ///
+    /// HOSTED HERE for the reason the morning drain is: rule 1 guarantees this
+    /// power is on her for every turn of every combat, so a boundary hung off
+    /// it happens on every board. <see cref="KokomiPlan.ResolveDusk"/> returns
+    /// early where nothing dusk is queued, which is most turns.
+    /// </summary>
+    public override async Task BeforeSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        if (Owner == null) return;
+        if (!KokomiOverhaul.LiveFor(Owner)) return;
+        await KokomiPlan.ResolveDusk(choiceContext, Owner);
+    }
+
+    /// <summary>
     /// CRYSTAL COLLAPSE'S MEMORY (R236) AND CHAIN OF COMMAND'S COUNT
     /// (`EB-362`): the last Companion card she played this turn, and how many.
     ///

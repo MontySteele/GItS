@@ -103,7 +103,11 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # TWENTY-ONE after the pool pass (`EB-492`): Riptide, Pincer, Flank and
     # Feigned Retreat printed one, and Nereid's Ascension GAVE one up -- it is
     # a Power now, so the Rare that doubles Plans is no longer a Plan.
-    assert len(planned) == 21
+    # TWENTY-SIX after pool pass two (`EB-643`): Opening Gambit,
+    # Second Wave, Scout Ahead and the two DUSK rows print a Plan
+    # line; Second Thoughts, Ebb Tide and Converging Tide are
+    # now-lines that operate on the queue and print none.
+    assert len(planned) == 26
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -786,7 +790,7 @@ def test_the_queue_is_drained_before_the_first_clause_runs(overhaul):
     st = kokomi_state()
     written = plan_card([{"op": "draw", "amount": 1}], cid="proto_kk_child")
 
-    def child(_state, _entry, _clause):
+    def child(_state, _entry, _clause, **_kwargs):
         kokomi_plan.schedule(st, written)
 
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
@@ -827,7 +831,11 @@ def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
     from tier0.content import loader
 
     assert "proto_kk_the_moon_overlooks_the_waters"         not in C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 34
+    # FORTY-TWO after pool pass two (`EB-643`, R265): eight rows
+    # that reach INTO the queue. The count the row was filed
+    # against was 34, and what it pins is the withdrawal, not the
+    # size -- so it moves with the pool and the absence does not.
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 42
     assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
     ids = {card.id for card in loader.prototype_cards()}
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
@@ -1924,3 +1932,413 @@ def test_a_morning_that_drained_nothing_reads_an_honest_zero(overhaul):
         st, "plans_carried_out_this_morning") == 0
     effects.resolve_card(st, well_laid())
     assert enemy.hp == 60 - 2
+
+
+# --- POOL PASS TWO (`EB-643`, R265): the queue as something you operate on --
+#
+# Eight rows, one trial keyword (Dusk), three plan clauses, three now-lines and
+# one lane rule. The C# is the spec and these are the sim twin's pins; the
+# structural half is `KokomiPoolPassTwoTests`. Prototype numbers, D by the
+# ladder, and nothing here is quotable (R215 B).
+
+
+def dusk_card(clauses, effects_=None, cid="proto_kk_dusk_probe"):
+    """A probe row whose Plan line is a DUSK line."""
+    card = plan_card(clauses, effects_, cid=cid)
+    card.plan_dusk = True
+    return card
+
+
+def hit(amount, target="front_enemy"):
+    return {"op": "damage", "amount": amount, "target": target}
+
+
+# --- the two riders: order, and what "the next Plan" means -----------------
+
+def test_gambit_then_riptide_doubles_riptide(overhaul):
+    """The next Plan is the entry carried out IMMEDIATELY AFTER this one in
+    the same drain, so a rider written first reaches the hit written second."""
+    enemy = make_enemy(hp=200)
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE}], cid="proto_kk_gambit"))
+    kokomi_plan.schedule(st, plan_card([hit(13)], cid="proto_kk_riptide"))
+    kokomi_plan.resolve_all(st)
+    assert enemy.hp == 200 - 26
+
+
+def test_riptide_then_gambit_doubles_nothing(overhaul):
+    """A rider written by the LAST entry of a drain reaches nothing: it falls
+    off the end of a local rather than waiting for a morning nobody wrote it
+    in. The pin is the ORDER, and it is the whole of the rider's rule."""
+    enemy = make_enemy(hp=200)
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.schedule(st, plan_card([hit(13)], cid="proto_kk_riptide"))
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE}], cid="proto_kk_gambit"))
+    kokomi_plan.resolve_all(st)
+    assert enemy.hp == 200 - 13
+    # And it does not survive into the next morning either.
+    kokomi_plan.roll_turn(st)
+    kokomi_plan.schedule(st, plan_card([hit(13)], cid="proto_kk_riptide2"))
+    kokomi_plan.resolve_all(st)
+    assert enemy.hp == 200 - 26
+
+
+def test_two_riders_in_a_row_reach_two_different_entries(overhaul):
+    """Each rider is spent by the entry it reaches, so two in a row cannot
+    both land on a third: the doubling rides onto Second Wave, and Second
+    Wave's own rider rides onto the hit."""
+    enemy = make_enemy(hp=200)
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE}], cid="proto_kk_gambit"))
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT}],
+        cid="proto_kk_second_wave"))
+    kokomi_plan.schedule(st, plan_card([hit(13)], cid="proto_kk_riptide"))
+    kokomi_plan.resolve_all(st)
+    assert enemy.hp == 200 - 26
+
+
+def test_two_riders_on_one_entry_stack_on_the_entry_that_follows(overhaul):
+    """Both riders printed by ONE Plan reach the one entry after it: the hit
+    is doubled AND carried out twice."""
+    enemy = make_enemy(hp=200)
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE},
+         {"op": kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT}],
+        cid="proto_kk_both"))
+    kokomi_plan.schedule(st, plan_card([hit(13)], cid="proto_kk_riptide"))
+    kokomi_plan.resolve_all(st)
+    assert enemy.hp == 200 - 52
+
+
+def test_second_wave_under_nereids_is_three_carry_outs(overhaul):
+    """The rider is a FLAG and not a count: an entry carried out twice prints
+    its rider twice, and carried-out-twice said twice is still twice -- so the
+    entry it reaches runs `carry_out_times` + 1 = 3."""
+    st = kokomi_state()
+    st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
+    st.player.energy = 0
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT}],
+        cid="proto_kk_second_wave"))
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_payload"))
+    kokomi_plan.resolve_all(st)
+    assert st.player.energy == 3
+
+
+def test_change_of_plans_neither_sets_nor_consumes_a_rider(overhaul):
+    """`resolve_front` carries ONE entry out and there is no next for the word
+    to name."""
+    enemy = make_enemy(hp=200)
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE}], cid="proto_kk_gambit"))
+    kokomi_plan.schedule(st, plan_card([hit(13)], cid="proto_kk_riptide"))
+    kokomi_plan.resolve_front(st)          # the Gambit, alone
+    kokomi_plan.resolve_all(st)            # the hit, next morning
+    assert enemy.hp == 200 - 13
+
+
+# --- Scout Ahead ----------------------------------------------------------
+
+@pytest.mark.parametrize("position,cards", [(0, 2), (2, 0)])
+def test_scout_ahead_counts_the_carry_outs_after_it(overhaul, position, cards):
+    """First of three draws 2, last draws 0."""
+    st = kokomi_state()
+    rows = [plan_card([{"op": "energy", "amount": 1}], cid=f"proto_kk_p{i}")
+            for i in range(3)]
+    rows[position] = plan_card(
+        [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
+        cid="proto_kk_scout")
+    for row in rows:
+        kokomi_plan.schedule(st, row)
+    kokomi_plan.resolve_all(st)
+    drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
+    assert [e["cards"] for e in drew] == [cards]
+
+
+def test_scout_ahead_first_of_three_under_nereids_reads_four(overhaul):
+    """The count is CARRY-OUTS and not entries (`EB-501`'s reading pointed
+    forwards): the two entries behind it are four carry-outs."""
+    st = kokomi_state()
+    st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
+        cid="proto_kk_scout"))
+    for i in range(2):
+        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                           cid=f"proto_kk_p{i}"))
+    kokomi_plan.resolve_all(st)
+    drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
+    # Carried out twice itself, and each carry-out reads the same 4.
+    assert [e["cards"] for e in drew] == [4, 4]
+
+
+# --- Second Thoughts ------------------------------------------------------
+
+def test_second_thoughts_returns_the_card_and_refunds_its_cost(overhaul):
+    """The LAST entry, its card out of the discard pile into the hand, and the
+    Energy back."""
+    st = kokomi_state()
+    st.player.energy = 0
+    written = plan_card([hit(10)], cid="proto_kk_written")
+    written.cost = 2
+    st.player.discard_pile.append(written)
+    kokomi_plan.schedule(st, written)
+    kokomi_plan.cancel_last_plan(st)
+    assert st.kk_plan_queue == []
+    assert written in st.player.hand
+    assert written not in st.player.discard_pile
+    assert st.player.energy == 2
+
+
+def test_second_thoughts_takes_the_newest_and_leaves_the_rest(overhaul):
+    """Change of Plans hurries the OLDEST; this takes back the NEWEST."""
+    st = kokomi_state()
+    for i in range(2):
+        kokomi_plan.schedule(st, plan_card([hit(5)], cid=f"proto_kk_p{i}"))
+    kokomi_plan.cancel_last_plan(st)
+    assert [e.card_id for e in st.kk_plan_queue] == ["proto_kk_p0"]
+
+
+def test_second_thoughts_on_an_empty_queue_is_a_printed_no_op(overhaul):
+    st = kokomi_state()
+    st.player.energy = 0
+    kokomi_plan.cancel_last_plan(st)
+    assert counts(st)["plan_cancel_last_empty"] == 1
+    assert st.player.energy == 0
+
+
+def test_a_moons_reflection_entry_returns_nothing(overhaul):
+    """The Plan is cancelled and no card comes back: what the face promises is
+    the card, and one written off the EXHAUST pile is not in the discard pile
+    to promise."""
+    st = kokomi_state()
+    st.player.energy = 0
+    exhausted = plan_card([hit(9)], cid="proto_kk_exhausted")
+    exhausted.cost = 3
+    st.player.exhaust_pile.append(exhausted)
+    moon = Card(id="proto_kk_moon", name="probe", cost=1, type="skill",
+                effects=[{"op": "plan_from_exhaust"}])
+    kokomi_plan.schedule_from_exhaust(st, moon)
+    assert len(st.kk_plan_queue) == 1
+    kokomi_plan.cancel_last_plan(st)
+    assert st.kk_plan_queue == []
+    assert st.player.energy == 0
+    assert st.player.hand == []
+
+
+# --- Ebb Tide -------------------------------------------------------------
+
+def test_ebb_tide_cashes_the_whole_queue_per_entry(overhaul):
+    """Three queued: 3 Energy, 3 cards, queue empty."""
+    st = kokomi_state()
+    st.player.energy = 0
+    st.player.draw_pile = [Card(id=f"strike{i}", name="s", cost=1,
+                                type="attack", effects=[])
+                           for i in range(5)]
+    for i in range(3):
+        kokomi_plan.schedule(st, plan_card([hit(5)], cid=f"proto_kk_p{i}"))
+    kokomi_plan.cancel_all_plans_cash(st)
+    assert st.kk_plan_queue == []
+    assert st.player.energy == 3
+    assert len(st.player.hand) == 3
+
+
+def test_ebb_tide_on_an_empty_queue_pays_nothing(overhaul):
+    st = kokomi_state()
+    st.player.energy = 0
+    kokomi_plan.cancel_all_plans_cash(st)
+    assert st.player.energy == 0
+
+
+# --- Converging Tide ------------------------------------------------------
+
+def test_converging_tide_lands_front_aimed_plans_on_the_target(overhaul):
+    front = make_enemy(hp=80, name="front")
+    back = make_enemy(hp=80, name="back")
+    st = kokomi_state(enemies=[front, back])
+    kokomi_plan.schedule(st, plan_card([hit(10)], cid="proto_kk_feint"))
+    kokomi_plan.redirect_queued_plans(st, back)
+    kokomi_plan.resolve_all(st)
+    assert front.hp == 80 and back.hp == 70
+
+
+def test_converging_tide_leaves_an_all_enemies_clause_alone(overhaul):
+    """An ALL clause does not aim at the front, so there is nothing on it for
+    instead-of-the-front to be about."""
+    front = make_enemy(hp=80, name="front")
+    back = make_enemy(hp=80, name="back")
+    st = kokomi_state(enemies=[front, back])
+    kokomi_plan.schedule(st, plan_card([hit(10, target="all_enemies")],
+                                       cid="proto_kk_oath"))
+    kokomi_plan.redirect_queued_plans(st, back)
+    kokomi_plan.resolve_all(st)
+    assert front.hp == 70 and back.hp == 70
+
+
+def test_a_dead_redirect_target_falls_back_to_the_front(overhaul):
+    front = make_enemy(hp=80, name="front")
+    back = make_enemy(hp=80, name="back")
+    st = kokomi_state(enemies=[front, back])
+    kokomi_plan.schedule(st, plan_card([hit(10)], cid="proto_kk_feint"))
+    kokomi_plan.redirect_queued_plans(st, back)
+    back.hp = 0
+    kokomi_plan.resolve_all(st)
+    assert front.hp == 70
+
+
+def test_a_plan_written_after_the_redirect_aims_at_the_front(overhaul):
+    """The face names the queue as it stands; a rule that kept re-aiming later
+    writes would be a Power the row does not print."""
+    front = make_enemy(hp=80, name="front")
+    back = make_enemy(hp=80, name="back")
+    st = kokomi_state(enemies=[front, back])
+    kokomi_plan.redirect_queued_plans(st, back)
+    kokomi_plan.schedule(st, plan_card([hit(10)], cid="proto_kk_feint"))
+    kokomi_plan.resolve_all(st)
+    assert front.hp == 70 and back.hp == 80
+
+
+# --- DUSK -----------------------------------------------------------------
+
+def test_a_dusk_plan_lands_at_the_end_of_the_turn_it_was_written_on(overhaul):
+    """Breakwater's 7 Block is on her when the enemy hits."""
+    st = kokomi_state()
+    kokomi_plan.schedule(st, dusk_card([{"op": "block", "amount": 7}],
+                                       cid="proto_kk_breakwater"))
+    assert st.player.block == 0
+    kokomi_plan.resolve_dusk(st)
+    assert st.player.block == 7
+    assert st.kk_plan_queue == []
+
+
+def test_a_dusk_drain_leaves_the_morning_entries_where_they_are(overhaul):
+    st = kokomi_state()
+    kokomi_plan.schedule(st, plan_card([hit(5)], cid="proto_kk_morning"))
+    kokomi_plan.schedule(st, dusk_card([{"op": "block", "amount": 7}],
+                                       cid="proto_kk_breakwater"))
+    kokomi_plan.resolve_dusk(st)
+    assert [e.card_id for e in st.kk_plan_queue] == ["proto_kk_morning"]
+
+
+def test_a_dusk_carry_out_is_a_carry_out(overhaul):
+    """Treatise draws on it, and the `plan_carried_out` event fires."""
+    st = kokomi_state()
+    st.player.powers[kokomi_plan.TREATISE] = 1
+    st.player.draw_pile = [Card(id="strike", name="s", cost=1, type="attack",
+                                effects=[])]
+    kokomi_plan.schedule(st, dusk_card([{"op": "block", "amount": 7}],
+                                       cid="proto_kk_breakwater"))
+    kokomi_plan.resolve_dusk(st)
+    assert counts(st)["plan_carried_out"] == 1
+    assert counts(st)["plan_treatise"] == 1
+
+
+def test_a_dusk_carry_out_does_not_touch_the_mornings_depth(overhaul):
+    """Tide Wall, Well Laid and Tide Chart print this morning, and an evening
+    is not one."""
+    st = kokomi_state()
+    kokomi_plan.schedule(st, dusk_card([{"op": "block", "amount": 7}],
+                                       cid="proto_kk_breakwater"))
+    kokomi_plan.resolve_dusk(st)
+    assert st.kk_plans_this_morning == 0
+
+
+def test_change_of_plans_pops_a_dusk_entry_too(overhaul):
+    """The card says your front Plan, the queue is one queue, and a Dusk Plan
+    at the front of it is the front Plan."""
+    st = kokomi_state()
+    kokomi_plan.schedule(st, dusk_card([{"op": "block", "amount": 7}],
+                                       cid="proto_kk_breakwater"))
+    kokomi_plan.resolve_front(st)
+    assert st.player.block == 7
+    assert st.kk_plan_queue == []
+
+
+def test_a_dusk_rider_reaches_only_the_dusk_drain(overhaul):
+    """Riders written on a dusk entry apply to the next entry in THAT drain."""
+    enemy = make_enemy(hp=200)
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.schedule(st, dusk_card(
+        [{"op": kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE}],
+        cid="proto_kk_dusk_gambit"))
+    kokomi_plan.schedule(st, plan_card([hit(13)], cid="proto_kk_riptide"))
+    kokomi_plan.resolve_dusk(st)
+    kokomi_plan.resolve_all(st)
+    assert enemy.hp == 200 - 13
+
+
+def test_the_sheets_two_dusk_rows_are_the_only_ones(overhaul):
+    """`plan_dusk:` is a ROW flag and the sheet is where it is declared."""
+    dusk = [c.id for c in loader.prototype_cards() if c.plan_dusk]
+    assert dusk == ["proto_kk_breakwater", "proto_kk_night_watch"]
+
+
+# --- the two-Plan cap -----------------------------------------------------
+
+def test_the_cap_carries_out_two_and_holds_the_third(monkeypatch, overhaul):
+    """At 2, three queued entries carry out two and the third waits for the
+    next morning -- in order, and not re-sorted."""
+    monkeypatch.setattr(C, "KOKOMI_PLAN_CAP", 2)
+    st = kokomi_state()
+    st.player.energy = 0
+    for i in range(3):
+        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                           cid=f"proto_kk_p{i}"))
+    kokomi_plan.resolve_all(st)
+    assert st.player.energy == 2
+    assert [e.card_id for e in st.kk_plan_queue] == ["proto_kk_p2"]
+    assert st.kk_plans_this_morning == 2
+    kokomi_plan.roll_turn(st)
+    kokomi_plan.resolve_all(st)
+    assert st.player.energy == 3
+    assert st.kk_plan_queue == []
+
+
+def test_the_cap_does_not_count_dusk_carry_outs(monkeypatch, overhaul):
+    """A Dusk Plan has already waited for nothing, so the morning's allowance
+    is untouched by one."""
+    monkeypatch.setattr(C, "KOKOMI_PLAN_CAP", 2)
+    st = kokomi_state()
+    st.player.energy = 0
+    kokomi_plan.schedule(st, dusk_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_dusk"))
+    for i in range(2):
+        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                           cid=f"proto_kk_p{i}"))
+    kokomi_plan.resolve_dusk(st)
+    assert st.player.energy == 1
+    kokomi_plan.resolve_all(st)
+    assert st.player.energy == 3
+    assert st.kk_plan_queue == []
+
+
+def test_the_cap_defaults_to_unlimited(overhaul):
+    """0 is today's behaviour, which is what makes the toggle a trial."""
+    assert C.KOKOMI_PLAN_CAP == 0
+    st = kokomi_state()
+    st.player.energy = 0
+    for i in range(4):
+        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                           cid=f"proto_kk_p{i}"))
+    kokomi_plan.resolve_all(st)
+    assert st.player.energy == 4
+    assert st.kk_plan_queue == []
+
+
+def test_the_new_clauses_are_plan_only_from_a_body(overhaul):
+    """A now-line spelling would name a drain that is not running."""
+    for op in (kokomi_plan.DRAW_PER_PLAN_AFTER,
+               kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE,
+               kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT):
+        assert op in kokomi_plan.PLAN_ONLY_OPS
+        with pytest.raises(NotImplementedError, match="PLAN-ONLY"):
+            effects.OPS[op](kokomi_state(), {"op": op},
+                            Card(id="proto_kk_x", name="x", cost=1,
+                                 type="skill", effects=[]))

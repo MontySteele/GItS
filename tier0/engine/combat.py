@@ -1203,6 +1203,19 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # goes off, no Spark is minted and the arm's ledger never moves. A second
     # copy is its own hit (EB-358): the loop runs once per stack.
     klee_overhaul.turn_end(state)
+    # QUARANTINED (C.KOKOMI_OVERHAUL). DUSK (`EB-643`, R265): "the Bake-Kurage
+    # carries this Plan out at the end of this turn, before enemies act."
+    #
+    # HERE, at this engine's `BeforeSideTurnEnd` on the player side, which is
+    # the same site `klee_overhaul.turn_end` above takes and where the mod's
+    # `ProtoBakeKuragePower.BeforeSideTurnEnd` runs the same drain. It is
+    # AFTER the hand's own end-of-turn triggers, so a Dusk Block is the last
+    # thing on her side of the boundary; BEFORE `_settle_phases`, so a Dusk
+    # carry-out that kills settles the board it killed exactly as the turn-end
+    # burst one line up does; and before any enemy acts, which is the printed
+    # promise and the only clause of the sentence a card can tell apart.
+    # `kokomi_plan.resolve_dusk` carries the rest of the argument.
+    kokomi_plan.resolve_dusk(state)
     _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
     #                              drop a phased boss
     # Injected Burn/Wither (§10.2): end-of-turn damage while in hand,

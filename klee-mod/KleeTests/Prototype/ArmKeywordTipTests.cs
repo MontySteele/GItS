@@ -516,7 +516,14 @@ public class ArmKeywordTipTests
         // Casket strikes" named a thing nothing on screen defined, and
         // [USER]'s act-1 run read the card and asked how the Casket could
         // strike at all. `Grounded`'s shape and `Oz`'s, one kit over.
-        Assert.Equal(20, attaches.Count);
+        //
+        // THE TWENTY-FIRST IS `EB-643`'s `ForDusk`, the pool pass's one new
+        // word and a rule about WHEN alone: the Bake-Kurage carries a Dusk
+        // Plan out at the end of the turn it was written on, before the
+        // enemies act. A word of its own rather than a sixth clause on the
+        // Plan tip, which is at its ceiling and carries five seats' findings.
+        Assert.Equal(21, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForDusk");
         Assert.Contains(attaches, m => m.Name == "ForCasket");
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.Contains(attaches, m => m.Name == "ForCovenSpark");

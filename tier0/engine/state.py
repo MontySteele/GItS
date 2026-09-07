@@ -309,6 +309,16 @@ class Card:
     # prints a Plan, and `tools/gen_klee_cards.card_level_reason` refuses one
     # on any character but Kokomi.
     plan: list[dict] = field(default_factory=list)
+    # `EB-643`, DUSK: this row's Plan line is carried out at the END of the
+    # turn it was written on, before the enemies act, instead of next morning.
+    #
+    # A FLAG ON THE ROW AND NOT A CLAUSE, deliberately, and the reason is what
+    # the word means: Dusk is WHEN the whole line lands, so a card cannot have
+    # one dusk clause and one morning clause any more than it can be played on
+    # two turns. It also keeps the clause table closed -- `PLAN_KINDS` still
+    # types what a Plan DOES, and this types when. `plan_dusk:` on the sheet,
+    # `KokomiPlan.Entry.Dusk` on the entry the card writes.
+    plan_dusk: bool = False
     # SLY -- ONE field, ONE word, one trigger (EB-71, R174; formerly two
     # near-identical mechanics, `sly` and `sly_keyword`). Effects that fire
     # when this card is discarded BY A CARD EFFECT. The end-of-turn hand
@@ -1118,11 +1128,30 @@ class PlanEntry:
     `targets`. It is still not a rule this dataclass keeps -- an entry holds
     what the card wrote -- and the carry-out filters the set to the bodies
     still alive, so a stored corpse changes nothing.
+
+    THE SECOND EXCEPTION IS `aim_override`, AND IT IS `EB-643`'s ONE STORED
+    BODY. Converging Tide's now-line re-aims Plans ALREADY WRITTEN, which is a
+    fact about a choice the player made this turn and cannot be re-derived
+    next morning from anything on the board -- so the chosen enemy is stamped
+    on the entry. It does not break the rule above, it states its one limit:
+    the carry-out reads the override only while that body is ALIVE and falls
+    back to `front_enemy` otherwise, so a stored corpse changes nothing here
+    either. `KokomiPlan.Entry.AimOverride` holds a `CombatId` for the reason
+    Flank's set does; this holds the object, because this engine never tears a
+    dead creature down.
+
+      dusk  -- `EB-643`. This Plan is carried out at the END of the turn it
+               was written on, before the enemies act, instead of next
+               morning (`kokomi_plan.resolve_dusk`). A property of the WRITING
+               CARD's face (`plan_dusk:` on the row) and not of the clauses,
+               which is why it sits on the entry beside them.
     """
     card_id: str
     clauses: list[dict] = field(default_factory=list)
     card: Optional["Card"] = None
     label: Optional[str] = None
+    dusk: bool = False
+    aim_override: Optional["Enemy"] = None
 
 @dataclass
 class CombatState:

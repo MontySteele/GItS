@@ -363,8 +363,11 @@ public class KokomiPoolPassTests
         var risen = Seat.Kokomi().WithPower<NereidsAscensionPower>(1);
         Assert.Equal(2, times.Invoke(null, new object[] { risen.Creature }));
 
-        var all = typeof(KokomiPlan).GetMethod("ResolveAll", All)!;
-        var drain = Il.CallSequence(all).ToList();
+        // `EB-643` MOVED THE LOOP INTO `Drain`, which the morning and the
+        // dusk drain now share, so the per-entry read is pinned where the
+        // loop is -- the same sentence about the same call order.
+        var loop = typeof(KokomiPlan).GetMethod("Drain", All)!;
+        var drain = Il.CallSequence(loop).ToList();
         Assert.True(drain.IndexOf("KokomiPlan.CarryOutTimes")
                     < drain.IndexOf("KokomiPlan.ResolveEntry"));
     }

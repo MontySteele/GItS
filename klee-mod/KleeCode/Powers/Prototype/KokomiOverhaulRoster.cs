@@ -197,6 +197,23 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkFlank>(),
         ModelDb.Card<ProtoKkWellLaid>(),
         ModelDb.Card<ProtoKkFeignedRetreat>(),
+        // POOL PASS TWO (`EB-643`, R265): the QUEUE as something the player
+        // operates on rather than something that empties on a timer. Two
+        // riders on the entry that follows (Opening Gambit, Second Wave), a
+        // draw that counts the entries after it (Scout Ahead), three now-lines
+        // that unwrite or re-aim what is already queued (Second Thoughts, Ebb
+        // Tide, Converging Tide), and the two DUSK rows whose Plan lands at
+        // the end of the turn it was written on (Breakwater, Night Watch).
+        // LAST, in the sheet's own order, for the ordering reason the shelf
+        // above states.
+        ModelDb.Card<ProtoKkOpeningGambit>(),
+        ModelDb.Card<ProtoKkSecondWave>(),
+        ModelDb.Card<ProtoKkScoutAhead>(),
+        ModelDb.Card<ProtoKkSecondThoughts>(),
+        ModelDb.Card<ProtoKkEbbTide>(),
+        ModelDb.Card<ProtoKkConvergingTide>(),
+        ModelDb.Card<ProtoKkBreakwater>(),
+        ModelDb.Card<ProtoKkNightWatch>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the

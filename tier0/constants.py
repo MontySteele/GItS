@@ -873,7 +873,40 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_flank",
     "proto_kk_well_laid",
     "proto_kk_feigned_retreat",
+    # POOL PASS TWO (`EB-643`, R265): the answer to "the Plan plays itself".
+    # Eight rows that make the QUEUE something the player operates on rather
+    # than something that empties on a timer -- two riders on the next Plan
+    # (Opening Gambit, Second Wave), a draw that reads the entries after it
+    # (Scout Ahead), three now-lines that cancel or re-aim what is already
+    # written (Second Thoughts, Ebb Tide, Converging Tide) and the two DUSK
+    # rows whose Plan lands at the END of the turn it was written on
+    # (Breakwater, Night Watch). LAST, in the sheet's own order, for the reason
+    # the pass above is last (`tools/lint_arm_pool_parity.py` compares the
+    # tuple, `KokomiOverhaulRoster.Slice()` and the sheet BY ORDER).
+    "proto_kk_opening_gambit",
+    "proto_kk_second_wave",
+    "proto_kk_scout_ahead",
+    "proto_kk_second_thoughts",
+    "proto_kk_ebb_tide",
+    "proto_kk_converging_tide",
+    "proto_kk_breakwater",
+    "proto_kk_night_watch",
 )
+
+# THE TWO-PLAN CAP -- A LANE RULE BEHIND A RUNTIME TOGGLE, DEFAULT OFF
+# (`EB-643`, R265). "At most N Plans a morning; the rest wait, in order" is a
+# TRIAL and not a shipped rule, so the default is 0 and 0 means unlimited: with
+# it unset the drain is what it was, which `tier0/tests/test_kokomi_plan.py`
+# pins as a whole-log digest rather than intends. DUSK carry-outs are not
+# counted against it -- they are not a morning (`kokomi_plan.resolve_dusk`).
+#
+# WHAT IT IS NOT: a balance number, and not a `lint_constant_parity` mirror.
+# The mod reads its own toggle out of the environment at load
+# (`GITS_KOKOMI_PLAN_CAP`, `KokomiPlan.PlanCap`) because a LANE sets it per run
+# and not being obliged to rebuild per arm is the whole point of the toggle;
+# the two engines share the RULE and never a literal, so comparing the two
+# defaults by value would pin nothing.
+KOKOMI_PLAN_CAP = 0
 
 # THE ONE INSTRUMENT DIAL THIS ARM ADDS, AND IT IS NOT A BALANCE NUMBER
 # (`EB-311`). Nothing on any sheet, in the brief or in the slice says what a

@@ -73,6 +73,7 @@ public static class ArmKeywordTips
     public const string OzKey = "KLEEMOD-ARM_OZ";
     public const string MendKey = "KLEEMOD-ARM_MEND";
     public const string PlanKey = "KLEEMOD-ARM_PLAN";
+    public const string DuskKey = "KLEEMOD-ARM_DUSK";
     public const string CasketKey = "KLEEMOD-ARM_CASKET";
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
     public const string DeployKey = "KLEEMOD-ARM_DEPLOY";
@@ -814,6 +815,33 @@ public static class ArmKeywordTips
           + "Your [gold]Strength[/gold] folds in as you write it; the "
           + "enemy's [gold]Vulnerable[/gold] counts next turn. A "
           + "carry-out is not a hit: no when-hit power fires.");
+
+    /// <summary>
+    /// `EB-643` (R265), THE POOL PASS'S ONE NEW WORD, and it is a rule about
+    /// WHEN and nothing else: a Dusk Plan is carried out at the END of the turn
+    /// it was written on, before the enemies act, instead of at the start of
+    /// her next one.
+    ///
+    /// A WORD OF ITS OWN RATHER THAN A CLAUSE ON <see cref="ForPlan"/>, for
+    /// two reasons and either would do. The Plan tip is AT its 135-character
+    /// ceiling and carries five seats' findings, so a sixth clause would have
+    /// to displace one of them -- the trade `EB-334` already refused once. And
+    /// the two rows that print the word print it in place of "Plan:", so the
+    /// player meets `Dusk` where a definition can sit beside it.
+    ///
+    /// "BEFORE ENEMIES ACT" IS THE LOAD-BEARING HALF and it is why the whole
+    /// rule fits in one sentence: everything else about a Dusk Plan is a Plan
+    /// (it is written by playing the card on the jellyfish, it is one entry in
+    /// one queue, Change of Plans can still hurry it, Treatise still draws on
+    /// it), and the tip beside this one says all of that. What a player cannot
+    /// get from anywhere else is that the Block arrives in time for the swing.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForDusk(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, DuskKey,
+            "[gold]Dusk[/gold]: the [gold]Bake-Kurage[/gold] carries this "
+          + "[gold]Plan[/gold] out at the end of this turn, before enemies "
+          + "act.");
 
     /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the

@@ -251,11 +251,18 @@ public class KokomiOverhaulRuleTests
         // THE QUEUE IS DRAINED BEFORE THE FIRST CLAUSE RUNS, so a Plan written
         // during resolution -- which Moon's Reflection's replay can reach --
         // waits for the next turn like every other.
+        //
+        // `EB-643` MOVED THE LOOP INTO `Drain`, which both drains now share,
+        // so the call this is read against is the DRAIN and not the entry --
+        // the same assertion one name over, and the same rule.
         var all = typeof(KokomiPlan)
             .GetMethod("ResolveAll", HeadlessGame.All)!;
         var calls = Il.CallSequence(all).ToList();
         Assert.True(calls.IndexOf("List`1.Clear")
-                    < calls.IndexOf("KokomiPlan.ResolveEntry"));
+                    < calls.IndexOf("KokomiPlan.Drain"));
+        Assert.Contains("KokomiPlan.ResolveEntry",
+                        Il.Calls(typeof(KokomiPlan)
+                            .GetMethod("Drain", HeadlessGame.All)!));
     }
 
     [Fact]
@@ -275,12 +282,20 @@ public class KokomiOverhaulRuleTests
         // Ascension's redesign into a Power, because a clause no row can spell
         // is a rule nothing enforces. A retirement owes this list a line
         // exactly as an addition does.
+        //
+        // FIFTEEN SINCE `EB-643` (R265), and the three are one group: each
+        // names a PLACE IN A RUNNING DRAIN rather than a quantity, which is
+        // what makes all three plan-only. `DrawPerPlanAfter` is Scout Ahead's
+        // count of the carry-outs still to come, and the two `NextPlan*` kinds
+        // are riders on the entry carried out immediately after the one that
+        // prints them.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
                     "ApplyWeak", "ApplyVulnerable",
                     "ReplayExhausted", "PlayCopyOfCompanion",
-                    "BlockPerPlanThisMorning" },
+                    "BlockPerPlanThisMorning", "DrawPerPlanAfter",
+                    "NextPlanDoubleDamage", "NextPlanExtraCarryOut" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -600,9 +615,11 @@ public class KokomiOverhaulRuleTests
         // drain loop, before each entry is carried out. So the Rare's own
         // clause -- which is what installs the power -- is not doubled, and
         // every Plan written after it in the same morning is.
-        var all = typeof(KokomiPlan)
-            .GetMethod("ResolveAll", HeadlessGame.All)!;
-        var drain = Il.CallSequence(all).ToList();
+        //
+        // `EB-643` MOVED THE LOOP INTO `Drain`, so the reading is pinned where
+        // the loop now is -- the same sentence about the same call order.
+        var drain = Il.CallSequence(typeof(KokomiPlan)
+            .GetMethod("Drain", HeadlessGame.All)!).ToList();
         Assert.True(drain.IndexOf("KokomiPlan.CarryOutTimes")
                     < drain.IndexOf("KokomiPlan.ResolveEntry"));
 
@@ -795,9 +812,13 @@ public class KokomiOverhaulRuleTests
         // Plan density on the Attacks: Riptide, Pincer, Flank, Well Laid and
         // Feigned Retreat. THIRTY-FOUR since `EB-570` withdrew The Moon
         // Overlooks the Waters -- the first row this arm has dropped, and the
-        // count moving by one is what the withdrawal is.
+        // count moving by one is what the withdrawal is. FORTY-TWO since pool
+        // pass two (`EB-643`, R265), which put the QUEUE in the player's
+        // hands: two riders on the entry that follows, a draw that counts the
+        // entries after it, three now-lines that unwrite or re-aim what is
+        // already queued, and the two DUSK rows.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(34, Il.CallSequence(slice)
+        Assert.Equal(42, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 

@@ -1064,6 +1064,13 @@ ARM_KEYWORDS: dict[str, str] = {
              "ALL, Minions too. Your Strength folds in as you write it; the "
              "enemy's Vulnerable counts next turn. A carry-out is not a "
              "hit: no when-hit power fires."),
+    # `EB-643` (R265). THE POOL PASS'S ONE NEW WORD, and it is a rule about
+    # WHEN and nothing else: everything else about a Dusk Plan is a Plan, and
+    # the row above says all of it. What a reader cannot get from anywhere else
+    # is that the Block arrives in time for the swing. Same sentence as
+    # `ArmKeywordTips.ForDusk`.
+    "Dusk": ("Dusk: the Bake-Kurage carries this Plan out at the end of this "
+             "turn, before enemies act."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
@@ -1346,6 +1353,9 @@ _ARM_KEYWORD_RE = {
     "Spark": re.compile(r"\bSparks?\b"),
     "Mine": re.compile(r"\bMines?\b"),
     "Plan": re.compile(r"\bPlans?\b"),
+    # `EB-643`. NO PLURAL: the word names one moment. It fires on the two rows
+    # that print it and on the strip line a queued Dusk entry draws.
+    "Dusk": re.compile(r"\bDusk\b"),
     "Mend": re.compile(r"\bMends?\b"),
     # `EB-377`'s two. `Hexerei` takes no plural -- the word is a family name
     # and every face that prints it prints "a Hexerei card" -- and `Swirl` is
