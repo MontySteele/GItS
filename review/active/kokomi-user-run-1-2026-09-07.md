@@ -88,6 +88,59 @@ seats have already read the Plan badge's number as a capacity three times
 (`EB-330`, `EB-563`), which is a sign the first shape is the one a player
 expects.
 
+## 4b. Three turns from the actual pool, under a carry-out of two
+
+GPT's review of 2026-09-07 asked for these before the rule builds, and it
+is the right ask: a queue that only delays rewards is not a decision. The
+numbers are the pool's (`docs/prototype-surface.yaml`): Kurage's Oath 1,
+deal 3 to ALL, Plan 7 to ALL; Undertow 1, deal 7, or 10 on a debuffed
+enemy; Vanguard 0, Exhaust, 1 Vulnerable, Plan 1 Vulnerable and 1 Weak;
+Ripple 0, 2 Block, Plan 1 Energy and 4 Block; Coral Bulwark 1, 6 Block,
+Plan 8 Block and 1 Weak; Tide Wall 1, 4 Block, Plan 3 Block per Plan
+carried out with it; Battle Plan 1, draw 1, Plan 1 Energy and draw 2. The
+Casket strikes for 2 on each debuff she applies.
+
+**A safe turn where playing now is right.** The enemy is buffing; one
+enemy at 12 HP; hand Oath, Undertow, Vanguard, Ripple, Battle Plan; three
+Energy. Oath and Battle Plan are written (7 to ALL, and Energy plus two
+cards, next turn); the queue is full. Vanguard's Plan would land the turn
+after next, so it is played now instead: 1 Vulnerable, the Casket's 2,
+and Undertow's 10 becomes 15, which kills. Under today's rule Vanguard is
+written as well, for free, and playing it now is the worse line; under
+the cap the immediate play is the good one.
+
+**A dangerous turn where committing is still right.** The enemy attacks
+for 14; hand Coral Bulwark, Tide Wall, Ripple, Oath, Undertow; three
+Energy. Everything now is 6 + 4 + 2 = 12 Block, two short, and nothing
+lands next turn. The other line takes 6: Bulwark now (6 Block) and Ripple
+now (2), Oath and Tide Wall written, so next turn opens with 7 to ALL and
+Tide Wall's 6 Block before the draw. Six HP for a morning that clears the
+hallway and blocks the follow-up is the brief's decision, and the cap does
+not remove it.
+
+**A congested queue where the priority changes which card.** Oath is
+already written from last turn, so one slot is open; hand Battle Plan,
+Ripple, Coral Bulwark, Undertow; the enemy's next intent is an attack for
+9. Under today's rule all three Plans are written. Under the cap one is:
+Bulwark's Plan (8 Block and Weak, covering the 9 and shrinking the next
+swing) if the attack is real, Battle Plan's (Energy and two cards) if the
+intent were a buff, Ripple's only if Energy next turn is the constraint.
+That is a choice of which, not of order, and it is decided by the intent
+line, which is where the brief wanted the price to come from.
+
+**How the player knows when a delayed Plan lands.** The queue is drawn on
+the Bake-Kurage in order (the Plan strip), and under the cap each entry
+carries its turn: "next turn" on the first two, "in 2 turns" after. The
+badge prints "2 of 3". A defensive Plan past the cap is therefore written
+knowing it lands a turn late, which is the point.
+
+**What the examples do not settle.** Whether "queue everything, best two
+first" is the dominant habit on ordinary turns is exactly what the seat
+round on the built rule reads; the examples show the decision exists,
+not that it is met often enough. Ripple's now-line (2 Block for 0) is
+weak on a safe turn under either rule, and the pool pass after the rule
+reads the now-lines against the cap together.
+
 ## 5. Pick
 
 **Pick 1 — the carry-out.** A rule change to the loop, so [USER] plays it
@@ -100,7 +153,9 @@ once it is built and the seats have read it.
    a real choice (it lands a turn later, and its order matters), a
    telegraphed attack turn still asks now-or-later, and Tide Wall and Tide
    Chart keep counting carry-outs. The cost is pace: a four-Plan deck pays
-   out over two turns. One number (the two) is the sim's to tune.
+   out over two turns. One number (the two) is the sim's to tune. §4b
+   shows the three turns; the seat round on the built rule is what says
+   whether the choice is met often enough (GPT review 2026-09-07).
 2. The player **chooses one Plan** to carry out at the start of each turn;
    the others wait. The sharpest puzzle and the slowest engine: one payout
    a turn, a prompt every turn, and every count-reader changes meaning.
