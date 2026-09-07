@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalCard, ICompanionCard
+public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalCard, ICompanionCard, IHexereiCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Cryo;
@@ -52,14 +52,14 @@ public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalC
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForGrounded(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this), this), this);
+        ArmKeywordTips.ForGrounded(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_kaeya_frostgnaw");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaeya — Cold-Blooded Strike"),
-        ("description", "Klee's own. Deal {CalculatedDamage:diff()} damage. Apply [gold]Cryo[/gold]. This turn, [gold]Grounded[/gold] counts a Bomb as on the field."),
+        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage. Apply [gold]Cryo[/gold]. This turn, [gold]Grounded[/gold] counts a Bomb as on the field."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

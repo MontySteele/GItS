@@ -112,7 +112,11 @@ public class KleeOverhaulRoundTwentyTests
         // ONE DEFINITION PER PAGE, not one per clause. The Mine tip is at 133
         // of its 135-character ceiling and prints directly under the Bomb tip;
         // a Mine IS a Bomb, so the term is defined on the screen either way.
-        Assert.Contains("Vulnerable[/gold] and a cap move it.", Printed("ForMine"));
+        // `EB-400` added Block to this clause; the cap half is untouched.
+        Assert.Contains("[gold]Vulnerable[/gold] and a cap move it.",
+                        Printed("ForMine"));
+        Assert.Contains("[gold]Block[/gold] stops it, and only their ",
+                        Printed("ForMine"));
     }
 
     // ---- `EB-536` (widened): the pile's numbers are sizes -----------------
@@ -132,7 +136,8 @@ public class KleeOverhaulRoundTwentyTests
             Assert.DoesNotContain("Bombs here:", face);
         }
         Assert.Contains(faces,
-            f => f.Contains("Bomb sizes here: [blue]{Charges}[/blue]"));
+            f => f.Contains(
+                "Bomb sizes here, oldest first: [blue]{Charges}[/blue]"));
     }
 
     [Fact]
@@ -181,38 +186,42 @@ public class KleeOverhaulRoundTwentyTests
         Assert.Contains("[gold]Hexerei[/gold].", razor);
         Assert.DoesNotContain("Klee's own", razor);
 
-        // Razor is the Universal half of the pair: no personal pool, so
-        // `KleeCompanionSpark` pays nothing for him, and the face says so now.
+        // `EB-642` ANSWERED IT BY MOVING THE RULE. Razor is the Universal half
+        // of the pair and he pays now, exactly as the Personal half does, so
+        // the face saying only the family word is the whole truth about him.
         Assert.Null(new ProtoMcRazorClawAndThunder().PersonalPool);
     }
 
     [Fact]
-    public void A_personal_companion_of_klees_says_so_on_its_face()
+    public void A_personal_companion_of_klees_reads_exactly_as_a_universal_does()
     {
-        // ONE SENTENCE WHERE A ROW CARRIES BOTH MARKS: "Klee's own Hexerei."
-        // is the adjective form, which reads as one fact and is a character
-        // shorter than the two-clause spelling -- and one character is what
-        // Prune's Hexhunter Chime has at 120 of 120.
+        // `EB-642`: one payer set, one mark. The adjective form ("Klee's own
+        // Hexerei.") and the bare ownership lead are both gone, because the
+        // distinction they drew is gone -- [USER], on his own act-1 run: "the
+        // 'Klee's own' text on the Personals is not needed."
         var fischl = Face(new ProtoMcFischlSinfulHex());
-        Assert.Contains("Klee's own [gold]Hexerei[/gold].", fischl);
+        Assert.StartsWith("[gold]Hexerei[/gold].", fischl);
+        Assert.DoesNotContain("Klee's own", fischl);
         Assert.Equal("klee", new ProtoMcFischlSinfulHex().PersonalPool);
 
-        // A Personal Companion that is not in the family carries the ownership
-        // alone, which is what makes the mark about the PAYMENT rather than
-        // about the word.
+        // And so does a coven Personal that carried no family word before
+        // `EB-642`'s follow-up: the coven IS the family, so Noelle prints the
+        // one mark too and the eight rows R265's one-word rule would have cut
+        // the grant from keep it.
         var noelle = Face(new ProtoMcNoelleIGotYourBack());
-        Assert.StartsWith("Klee's own.", noelle);
-        Assert.DoesNotContain("[gold]Hexerei[/gold]", noelle);
+        Assert.StartsWith("[gold]Hexerei[/gold].", noelle);
+        Assert.DoesNotContain("Klee's own", noelle);
     }
 
     [Fact]
-    public void The_hexerei_tip_says_only_the_marked_ones_pay()
+    public void The_hexerei_tip_says_every_marked_card_pays()
     {
         // "Some are Klee's own, some are not" told a reader the split exists
-        // and gave them no way to run it. The faces carry the mark now, so the
-        // sentence names it and says ONLY those pay.
+        // and gave them no way to run it. `EB-642` removed the split instead:
+        // the first sentence's test IS the payer set.
         var tip = Printed("ForHexerei");
-        Assert.Contains("marked Klee's own gives Klee", tip);
+        Assert.Contains("Playing one gives Klee", tip);
+        Assert.DoesNotContain("Klee's own", tip);
         // `EB-619`: and the price-denial clause is gone -- a card's cost line
         // is where a cost belongs, and the keyword page denying one raised the
         // doubt it was meant to settle.

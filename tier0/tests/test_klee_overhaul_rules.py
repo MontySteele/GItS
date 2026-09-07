@@ -1342,6 +1342,38 @@ def test_chain_fuse_grows_one_enemys_pile_only(overhaul):
     assert sizes(b) == [6]
 
 
+def test_one_detonation_places_one_rider_mine_per_living_enemy(overhaul):
+    """`EB-318`. One detonation of Jumpy Dumpty ("when it goes off, place a
+    Mine 3 on ALL enemies") left two Mine 3s on the one enemy in the round-7
+    act-1 seat's fight 4, and a Spark +1 said only one Bomb had gone off. The
+    row asked which of three shapes the rider has -- per hit, per enemy slot,
+    or a jump doubling it -- and this is the answer, run rather than argued:
+    ONE Mine per living enemy per detonation, the host included, and the log
+    names every one of them.
+
+    THE HOST IS IN THE SWEEP and that is the rule, not an oversight: the card
+    says ALL enemies and the body whose charge just went off is one of them.
+    A CORPSE IS NOT, which is `EB-457`'s fix on the C# side and has always
+    been true here -- the sweep walks `living_enemies`.
+    """
+    a, b = make_enemy(hp=400, name="a"), make_enemy(hp=400, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 8, payload_mine_all=3)
+
+    assert klee_overhaul.set_off(state, a) == 1        # ONE explosion
+
+    assert sizes(a) == [3] and sizes(b) == [3]
+    assert [c.is_mine for c in a.ko_charges] == [True]
+    assert [c.is_mine for c in b.ko_charges] == [True]
+    # THE LOG SAYS IT HAPPENED, which is the disclosure half of the row: the
+    # rider's placements are their own rows, one per body, with the size on
+    # them. `KleeOverhaulLedger.NoteLine` is the C# twin.
+    placed = [row for row in state.log
+              if row["event"] == "ko_bomb_placed" and row["mine"]]
+    assert [(row["target"], row["size"]) for row in placed] == [
+        ("a", 3), ("b", 3)]
+
+
 def test_sorry_jean_removes_the_largest_and_blocks_for_its_size(overhaul):
     """`The_emergency_exit_removes_one_charge_and_reports_its_size`, plus the
     reported default the card text does not state: THE LARGEST, the only
@@ -1356,6 +1388,36 @@ def test_sorry_jean_removes_the_largest_and_blocks_for_its_size(overhaul):
 
     assert sizes(a) == [3] and sizes(b) == [7]
     assert state.player.block == 11
+
+
+def test_bomb_sized_block_takes_dexterity_like_every_other_card_block(overhaul):
+    """`EB-390`. Dexterity 2 raised Dig In 8 to 10 and Barbara's 5 to 7 and
+    left Sorry, Jean... at exactly the Bomb's size, 13 for 13 (Klee r10 run 2
+    act 2, finding 3) -- while the card's face says "gain Block", which is the
+    sentence Dexterity's own face is about.
+
+    ONE RULE FOR BOTH BOMB-SIZED BLOCKS, which is what the row asked for: two
+    cards printing the same verb and disagreeing about Dexterity is the same
+    defect a card later, so Careful Now takes the switch with it. The cap is
+    on the BOMB's size and Dexterity lands on top of it, exactly as a printed
+    Block's does.
+    """
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    state.player.powers["dexterity"] = 2
+    klee_overhaul.place(state, enemy, 13)
+
+    effects.resolve_card(state, load("proto_ko_sorry_jean"))
+    assert state.player.block == 15         # 13 + 2, and the charge is spent
+    assert sizes(enemy) == []
+
+    state = klee_state([enemy := make_enemy(hp=400)])
+    state.player.powers["dexterity"] = 2
+    klee_overhaul.place(state, enemy, 13)
+
+    effects.resolve_card(state, load("proto_ko_careful_now"))
+    assert state.player.block == 12         # capped at 10, then + 2
+    assert sizes(enemy) == [13]             # and it spends nothing
 
 
 def test_sorry_jean_on_an_empty_board_is_a_printed_no_op(overhaul):

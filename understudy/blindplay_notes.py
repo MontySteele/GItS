@@ -259,6 +259,15 @@ PREVIEW_LOCKED = ("your pick is already made and this screen is showing it "
 # screen's alternative, because a page that printed the caveat on every reward
 # screen of every run would be teaching a doubt that is not there. Carrying the
 # control itself is a bridge change and belongs to `EB-310`'s family.
+#
+# THE POINTER WAS STALE, AND THAT IS THE ONLY THING THAT MOVED HERE
+# (2026-09-07). It read "on your relic row in the next fight", which was true
+# when the row was written and stopped being true at `EB-473`: the relic block
+# now prints on every screen that is not a fight, and a card reward is one of
+# them, so the words this line sends a reader hunting for are four lines below
+# it on the same page. A caveat that sends the reader away from the answer is
+# worse than the caveat alone, and this one did it on the screen where the
+# decision is taken.
 # FOLDED KEYS, and the fold is `_fold`'s: an apostrophe is punctuation there,
 # so the relic the game prints as `Pael's Wing` is three words here. Written as
 # the folded spelling rather than the printed one so the register cannot be a
@@ -272,8 +281,8 @@ CARD_REWARD_ALTERNATIVE_NOTE = (
     "cards and whether an alternative button exists -- never what that button "
     "says or does -- so `skip` here presses whatever the button has become, "
     "and this page cannot tell you whether that is a plain skip or the "
-    "relic's own option. The relic's printed words are on your relic row in "
-    "the next fight.*")
+    "relic's own option. Its own printed words are under *Your relics* on "
+    "this page.*")
 
 # `EB-333`. WHAT `skip` DID, SAID BY THE PAGE THAT TOOK IT. The verb answered
 # `ok Skipping card reward`, no card was added, the run stayed where it was and
@@ -351,6 +360,112 @@ PER_HIT_NOTE = (
     "{high} if it does not. This page's feed carries no breakdown of an icon "
     "number, so it cannot say which of the two this is -- both have been "
     "seen, on one-hit and multi-hit parts of the same fight.*")
+
+# `EB-408`. THE SAME CARD, THE SAME BUFF, TWO PRINTED NUMBERS.
+#
+# THE FIND (Kokomi r10 run 2 (c) 3). "Weak on me *was* folded into printed
+# numbers (Oath showed 2, Slack Water 3). Sara's `Fantastic Voyage 5` was
+# **not** folded in the first time -- fight 3 round 2 printed `Strike -- Deal 6
+# damage` while the buff was up, and it hit for 11 -- but **was** folded in
+# later (fight 4 round 3 printed `Deal 11 damage`, same buff, same card)."
+#
+# WHERE THE NUMBER COMES FROM, and it is `INTENT_SOURCE_NOTE`'s answer one side
+# of the board over: a card's printed body is the game's own resolved
+# `SmartDescription`, carried on the wire as `description` and printed here
+# unchanged (`blindplay_faces._card_face`). There is no base anywhere on the
+# feed, no modifier list and no second field -- so this page cannot fold a buff
+# in, cannot unfold one, and cannot tell which of the two a given row is. The
+# render is a pure function of the state it is given, so TWO OBSERVES OF ONE
+# STATE cannot disagree; the two numbers the seat read came from two states,
+# and the difference is the game's.
+#
+# SO WHAT IS OWED IS THE PROVENANCE, printed where a reader is about to price a
+# hit off a row that may or may not already count the buff. Matched on the
+# BUFF'S OWN SENTENCE rather than on its name -- `_PLAYS_YOUR_TURN`'s
+# discipline -- so a second power worded the same way gets the same line and a
+# renamed one does not go silent. `PER_HIT_NOTE` is the twin for a modifier
+# that is per HIT and meets a multi-hit icon; this one is about the flat term
+# on the player's own Attacks and the faces in front of them.
+ATTACK_BUFF_NOTE = (
+    "*You are carrying {name} {n}, and its own line says that is additional "
+    "damage on your Attacks. The damage printed on each Attack above is the "
+    "one figure the game's data feed sends for that card, printed here "
+    "unchanged: this page has no base, no modifier list and no second source "
+    "for it, and does no arithmetic on it. So a row may already count your "
+    "{n} or may not, and this page cannot say which -- both have been seen "
+    "under one live buff.*")
+
+# `EB-585`. THE ARRIVAL THAT PERFORMED AND WAS NOT FILED.
+#
+# THE FIND (Furina r15 lane 1, fight 4). "Stage at turn one: `Crabaletta`.
+# Fogmog opened at 68/74, i.e. the free performance had landed, but this screen
+# printed no *What your Salon did this turn*." Five of the run's six fights
+# printed it.
+#
+# THE READ (2026-09-07) ELIMINATES BOTH OF THE ROW'S CANDIDATES. The page is
+# not dropping the row: it prints every act the ledger files, and the arrival
+# is filed inside `SalonMemberPower.PerformMember` like any other. Nor does the
+# turn-start clear beat it -- `FurinaReframeOpening.FieldOpeningMember`'s own
+# header settles the order ("the game broadcasts to powers before the
+# subscribed mod models ... on turn 1 the power does not exist yet anyway"),
+# and `PerformMember`'s no-hittable-body early return is refused by the r15
+# evidence, which is 6 HP off the body. What is left is a read that beat the
+# ledger write, and a third candidate the row had not named:
+# `FurinaReframeLedger.For` drops the WHOLE table whenever the combat instance
+# it last saw changes, so any call on a creature whose `CombatState` has moved
+# empties it before returning.
+#
+# WHAT THE PAGE CAN SAY MEANWHILE, and it is `AUTO_TURN_NOTE`'s shape: the
+# stage list is the arm's own evidence that a member is up, an arrival performs
+# by construction (a deploy performs, and the relic's is a deploy), and the
+# receipt for it is not on this screen's feed. So the page states the act and
+# states the gap, rather than leaving a reader to read the silence as "nothing
+# happened" -- which is exactly the reading the r15 seat had to argue itself
+# out of, off an enemy's HP bar.
+#
+# ROUND ONE AND AN EMPTY LIST, which is the only board the sentence is true on:
+# a stage occupied on the fight's first screen was occupied by the arrival, and
+# a stage that has already acted has its act printed under the heading below.
+SALON_ARRIVAL_NOTE = (
+    "*The fight opened with the stage already lit, and an arriving member "
+    "performs on arrival for free. That performance is not on this screen's "
+    "data feed -- the acts below are what the game filed, and it filed nothing "
+    "for the arrival -- so the enemy HP above is the board that performance "
+    "LEFT and not a report of it.*")
+
+# `EB-605`. TWO NUMBERS FOR ONE BOMB IN ONE SENTENCE.
+#
+# THE FIND (Klee r22 lane 1 re-run (c) 2, fight 6 turn 4). "`Bomb 6 ... Bomb
+# sizes here: 4`. Two numbers for one bomb in one sentence. I believe the 6 is
+# the Vaporize-adjusted forecast against a Hydro aura, but I inferred that from
+# a Spark counter, not from any printed word."
+#
+# WHAT THE TWO NUMBERS ARE, read off `ProtoBombPower`: the badge's headline is
+# `DisplayAmount`, which is `PredictedSetOffDamage()` -- what setting the pile
+# off would deal into THIS body right now, through everything standing on it --
+# and `{Charges}` is the list of charge SIZES before any of that. The badge's
+# own `mods.Clause` names two of the modifiers it folds in (Vulnerable, and a
+# cap that clamps) and the REACTION multiplier is not among them, which is
+# exactly the gap the seat fell into: 4 into a Hydro aura is a 1.5x Vaporize
+# and prints as 6 with nothing saying so.
+#
+# THE PAGE DOES NOT DO THE ARITHMETIC AND CLAIMS NO NUMBER. Both figures are
+# the game's and the page prints them unchanged, `INTENT_SOURCE_NOTE`'s rule.
+# What it adds is which is which, and it adds it ONLY where they disagree --
+# the row's own acceptance is that a lone Bomb 6 prints 6 everywhere on its
+# line, and a badge that agrees with itself raises no question to answer.
+BOMB_FORECAST_NOTE = (
+    "*The {n} on this badge is what setting these off would deal into this "
+    "body NOW, through everything standing on it; the sizes in its own "
+    "sentence are the charges themselves, {total} between them. The gap is "
+    "this body's and not the pile's.*")
+
+#: `EB-605`, the half the seat had to infer from a Spark counter. Where the
+#: body is wearing an aura the pile's own element reacts with, the reaction is
+#: named -- off `REACTION_ELEMENTS`, the same table the glossary on this screen
+#: is built from, so the two cannot say different things about one pair.
+BOMB_REACTION_CLAUSE = (" It is wearing a {aura} aura, and {element} into "
+                        "{aura} is {reaction}.")
 
 # `EB-349`, the third half. A ONE-USE DISCOUNT PRICED ONTO EVERY ROW.
 #
@@ -561,10 +676,63 @@ PLAN_AIM_NOTE = ("- A Plan with one target hits the front enemy and never a "
                  "front one anyway. A Plan whose card says ALL hits every "
                  "living enemy, Minions included.")
 
+# `EB-411`. THE PLATING THAT ATE A WHOLE PLAN.
+#
+# THE FIND (Kokomi r10 run 2 (c) 4, fight 4). "Whether to plan *at all* into a
+# `Plating 8` enemy. This one was real and also the least fair, because the
+# reason the answer is no -- the carry-out lands at the start of my turn,
+# before I can strip block -- is nowhere on the card." The keyword's own clause
+# says WHEN ("at the start of your next turn, before you draw") and nothing
+# about what the hit meets when it gets there.
+#
+# THE ORDER IS THE ENGINE'S, and it is written down: the turn-start broadcast
+# is `BeforeSideTurnStart`, BLOCK CLEAR, `AfterBlockCleared`, ENERGY RESET,
+# HAND DRAW, `AfterPlayerTurnStart` (`ProtoBakeKuragePower`'s header, read off
+# the decompile and pinned by `TURN_START_BROADCAST_ORDER`), and the morning
+# resolves at the last of those. The block clear in that list is YOURS. An
+# enemy's Block falls at ITS turn start, so whatever it raised on its own turn
+# is still standing when the morning arrives -- and the morning arrives before
+# the player has played a card, so there is no move that strips it first.
+#
+# ONE SENTENCE, ON THE PANEL, in the order the engine resolves. The `Plan`
+# keyword is at its 135-character ceiling and cannot carry this
+# (`PLAN_AIM_NOTE`'s argument, whole); the panel has no ceiling, and it is the
+# screen every Plan is written from.
+PLAN_BLOCK_NOTE = ("- A Plan is carried out before you play anything, so it "
+                   "lands in whatever Block the enemy is still standing in "
+                   "from its own turn -- you cannot strip that Block first.")
+
 PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
                    "hit: it leaves a Hydro aura, or reacts with the aura "
-                   "already there. A Plan that blocks, draws or applies a "
-                   "debuff leaves no aura.")
+                   "already there. A Plan that only blocks or draws leaves no "
+                   "aura.")
+
+# `EB-433`. THE CLAUSE THAT WAS FALSE WITH THE STARTER RELIC ON.
+#
+# THE FIND (Kokomi r11 run 2 (c)). The panel printed "A Plan that blocks, draws
+# or applies a debuff leaves no aura", and Slack Water's debuff Plan left Hydro
+# Aura 1 on all three enemies. The clause was right about the PLAN and wrong
+# about the board, and nothing on the page closed the gap.
+#
+# WHY IT HAPPENS, in the relic's own words: the Tamakushi Casket reads
+# "Whenever you apply a debuff to an enemy, it deals 2 Hydro damage to that
+# enemy", and that strike is a REAL hit through the same `ElementalHit` funnel
+# every other non-attack hit in this mod uses -- its own header says so, and
+# lists the aura and the reaction among what it therefore applies. So a debuff
+# Plan lays Hydro through the relic rather than through the Plan, which is
+# exactly the distinction a reader cannot make from a board.
+#
+# A CLAUSE AND NOT A ROW, appended to the sentence it is the exception to: the
+# aura rule is one fact and printing a second bullet contradicting the first is
+# how the panel becomes the wall `PLAN_AIM_NOTE` refuses to build.
+#
+# GATED ON THE RELIC BEING HELD, and matched on its SENTENCE rather than its
+# name -- `_PLAYS_YOUR_TURN`'s discipline -- so a run that never had it reads
+# the true short rule, and a second relic that answers a debuff with an
+# elemental hit gets the same clause.
+PLAN_CASKET_AURA_CLAUSE = (
+    " A Plan that applies a DEBUFF leaves one anyway while you hold "
+    "{relic}: its answering strike is itself a Hydro hit.")
 
 # `EB-563` / `EB-330` / `EB-357`. THE COUNT WAS READ AS A CAPACITY. The buff
 # prints `Plan 1`, the box says "the Plan", and three seats wrote one Plan at
@@ -802,11 +970,17 @@ ARM_KEYWORDS: dict[str, str] = {
     # shown" (Klee r20 lane 1). A phrase and not a sentence, and it names
     # whose HP it is -- which also rules out the reading that a cap might be
     # something of Klee's.
+    # `EB-400` NAMED BLOCK, in step with `ArmKeywordTips.ForBomb`. "Not an
+    # Attack: only Vulnerable and a cap move it" reads as a list of the only
+    # two things that touch the hit, with Block outside it -- and the r10 seat
+    # priced a Set off as unblockable and was wrong (12 into 20 HP behind
+    # Block 5 left 13). The `Set off` row two entries down has said "Block
+    # stops them" since `EB-443`, so two rows of one glossary disagreed.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
-             "only when Set off, or as a Mine. Not an Attack: only Vulnerable "
-             "and a cap on the enemy's HP loss move it. If this enemy dies "
-             "with it still on, it moves to a survivor. "
-             "Your deck opens with a placer."),
+             "only when Set off, or as a Mine. Not an Attack, but Block "
+             "stops it: only Vulnerable and a cap on the enemy's HP loss "
+             "move it. If this enemy dies with it still on, it moves to a "
+             "survivor. Your deck opens with a placer."),
     # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
     # walks the charges in placement order and the first one through the
     # funnel meets the aura, because every reaction consumes it -- the r11
@@ -850,10 +1024,12 @@ ARM_KEYWORDS: dict[str, str] = {
     # seat set off Mine 11, killed Toadpole B and saw nothing arrive on A. A
     # charge that goes off is spent; what travels is one still sitting on a
     # body that dies to something else. Same words on both tips and the badge.
+    # `EB-400`: the same three words on the same clause, in step with
+    # `ArmKeywordTips.ForMine`. A Mine IS a Bomb.
     "Mine": ("A Bomb that also goes off before its enemy's hit, which lands "
-             "in full unless the Mine kills. Only their Vulnerable and a cap "
-             "move it. If this enemy dies with it still on, it moves to a "
-             "survivor."),
+             "in full unless the Mine kills. Their Block stops it, and only "
+             "their Vulnerable and a cap move it. If this enemy dies with it "
+             "still on, it moves to a survivor."),
     # `EB-329`. "OR ALL IF IT SAYS SO" IS THE HALF THE OLD SENTENCE GOT
     # WRONG, and it was reprinted on every battle screen of every run: a
     # starter, Kurage's Oath, deals its Plan to ALL enemies, and the round-5
@@ -944,8 +1120,13 @@ ARM_KEYWORDS: dict[str, str] = {
     # the card's own cost section say that?"). A price a card does not charge
     # belongs on the cost line or nowhere -- denying it on the keyword page is
     # what raised the doubt. Held in step with `ArmKeywordTips.ForHexerei`.
+    # `EB-642` DROPPED THE OWNERSHIP CLAUSE, because R265 pick 1 dropped the
+    # distinction it pointed at: every Hexerei card gives Klee a Spark now,
+    # Universals included, so the first sentence's test IS the payer set and
+    # "marked Klee's own" would narrow it falsely. The mark leaves the faces in
+    # the same commit -- one word, one rule.
     "Hexerei": ("A Companion card whose face prints the word. Playing one "
-                f"marked Klee's own gives Klee {COMPANION_SPARK} Spark, up to "
+                f"gives Klee {COMPANION_SPARK} Spark, up to "
                 f"{COMPANION_SPARK_MAX} a play."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),

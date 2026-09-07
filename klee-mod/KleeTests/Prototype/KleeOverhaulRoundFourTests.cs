@@ -88,7 +88,10 @@ public class KleeOverhaulRoundFourTests
         // below and `ProtoBombPower.Bombs` for why the stack amount could not
         // be it. `EB-450` swapped the count for the charges themselves, which
         // says the same number and adds the order the aura clause is about.
-        Assert.Contains(" Bomb sizes here: [blue]{Charges}[/blue], ", face);
+        // `EB-450` put the ORDER in the label, and the label is what
+        // this pin reads.
+        Assert.Contains(" Bomb sizes here, oldest first: [blue]{Charges}[/blue], ",
+                        face);
         // `EB-361`: rule 1's growth is a CLAUSE on that count now, and rule 3
         // ends the face -- four sentences is the ceiling and the jump was the
         // fifth fact three round-10 seats needed and could not read anywhere.

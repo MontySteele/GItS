@@ -117,9 +117,11 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
                     "A charge on this enemy that grows at the start of your "
                   + "turn. Every [gold]Bomb[/gold] here goes off as Pyro "
                   + "damage when [gold]Set off[/gold], never by itself. The "
-                  + "hit is not an Attack, so only this enemy's "
-                  + "[gold]Vulnerable[/gold] and a damage cap move it, never a "
-                  + "debuff that answers Attacks and never anything of yours."
+                  + "hit is not an Attack, but their [gold]Block[/gold] "
+                  + "absorbs it, and only this enemy's "
+                  + "[gold]Vulnerable[/gold] and a damage cap move the "
+                  + "number, never a debuff that answers Attacks and never "
+                  + "anything of yours."
                   + MineClause),
             };
             // EB-260, EB-287 and `EB-343`. ROWS, not one row with conditionals
@@ -392,8 +394,21 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// here: a pile carrying a rider ends the same sentence with
     /// <see cref="RiderClause"/> instead. A clause and not a fifth sentence,
     /// because four is the ceiling and every one of the four is a ruled fact.
+    ///
+    /// `EB-450` (the other half, Klee r13 f6) PUT THE ORDER ON THE LIST. The
+    /// badge printed a SUM and a count, `EB-432`'s `Set off` tip said the
+    /// charges go off oldest first and the first one takes the aura, and the
+    /// list that replaced the count still did not say it was IN that order --
+    /// so on a bombed body wearing Cryo which charge Melts was a fact the r13
+    /// seat carried in its head for a whole fight. THREE WORDS AND NOT A
+    /// SENTENCE, in the label rather than after the numbers, because the
+    /// reader needs the order BEFORE reading the list; the face is excepted
+    /// from the power ceiling by name and the exception now says so. The
+    /// order is not a second definition of anything: `_charges` is placement
+    /// order, `TakeAll` copies it, and `SetOff` walks the copy front to back.
     private const string Bombs =
-        " Bomb sizes here: [blue]{Charges}[/blue], growing each turn";
+        " Bomb sizes here, oldest first: [blue]{Charges}[/blue], growing each "
+      + "turn";
 
     /// <summary>
     /// `EB-471`. WHICH SIDE OF THE GROWTH TICK A MINE LANDS ON, and it is on
@@ -411,9 +426,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <see cref="MineClause"/>'s "goes off before this enemy's hit" it says
     /// the Mine pays the size it has now.
     /// </summary>
+    /// `EB-450`'s order clause rides this face too, in the same words and the
+    /// same place, so the two lists cannot be read against each other.
     private const string BombsWithMines =
-        " Bomb sizes here: [blue]{Charges}[/blue], including [blue]{Mines}[/blue] "
-      + "[gold]Mine{Mines:plural:|s}[/gold], growing at your turn's start";
+        " Bomb sizes here, oldest first: [blue]{Charges}[/blue], including "
+      + "[blue]{Mines}[/blue] [gold]Mine{Mines:plural:|s}[/gold], growing at "
+      + "your turn's start";
 
     /// <summary>
     /// `EB-573`. THE RIDER THE MERGE KEEPS, NAMED WHERE THE PILE IS.
@@ -1348,6 +1366,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         Vfx.KleeCombatVfx.SpawnBombLob(applier, target);
 
         var reactionsBefore = ReactionEffects.TotalResolved;
+        // `EB-450`: which reaction this explosion is about to cause, read
+        // before the hit consumes the aura that decides it.
+        var pendingAura = AuraCmd.Find(target);
+        var pending = pendingAura == null
+            ? Elements.Reaction.None
+            : ReactionTable.Lookup(pendingAura.Element, Element.Pyro);
         // `EB-270`: the number the hit LANDED for, straight off the funnel that
         // computed it. Big Badda Boom's second clause reads this through the
         // ledger and its face says "the damage the Bombs dealt", so the two
@@ -1377,6 +1401,19 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         var reacted = ReactionEffects.TotalResolved > reactionsBefore;
 
         ledger.NoteExplosion(reacted, dealt);
+        // `EB-450`, the log half. The badge printed 7 and 12 landed, with the
+        // reaction named nowhere, because a Mine fires on the ENEMY's turn
+        // where no card is in front of the player to price it. The reaction is
+        // NAMED rather than flagged: `pending` is the same lookup
+        // `PendingReactionMultiplier` makes for the badge, taken BEFORE the
+        // funnel because the funnel consumes the aura, so the line and the
+        // preview cannot disagree about which reaction this was.
+        ledger.NoteLine(
+            (charge.IsMine ? "Mine " : "Bomb ") + size + " went off on "
+          + NameOf(target) + " for " + dealt
+          + (reacted && pending != Elements.Reaction.None
+                ? " (" + pending + ")"
+                : reacted ? " (a reaction)" : string.Empty));
         // THE VERMILLION PACT (the pool pass, `EB-491`). The Rare's whole rule
         // is that the aura the explosion CONSUMED is still standing when the
         // Attack behind it lands, so the Attack reacts too -- re-applied HERE,
@@ -1397,16 +1434,63 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         // the card, which is the whole of what makes the starter's promise
         // legible: the Mines arrive when the big Bomb finally goes off, not
         // when it was planted.
+        //
+        // `EB-457`: THE CORPSE GUARD, and this sweep was the ONE placement
+        // walk in the file without it -- <see cref="PlaceOnAll"/>,
+        // <see cref="PlaceOnRandom"/>, <see cref="SetOffAll"/> and
+        // <see cref="JumpCharges"/> all filter the dead. A Set off kills, and
+        // this loop runs BETWEEN the explosions of one pile, so a body that
+        // the charge before this one killed is still in `HittableEnemies` when
+        // the rider sweeps it. The Mine that lands there is real -- the
+        // register holds it and `SweepJumps` will walk it to a survivor at the
+        // next beat -- and it prints on no status block in between, which is
+        // exactly the shape the r14 seat reported. `isMine: true` and
+        // `payloadMineAll: 0` are what make the rider's Mine the same charge a
+        // Mine Toss places, so the pile it lands in prints the Mine face and
+        // never the rider one.
         if (charge.PayloadMineAll > 0 && applier.CombatState != null)
         {
+            var landed = 0;
             foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
             {
+                if (enemy.IsDead) continue;
                 await Place(choiceContext, enemy, charge.PayloadMineAll,
                             isMine: true, payloadMineAll: 0, applier, cardSource);
+                landed++;
+            }
+            // `EB-318`: THE RIDER SAYS IT FIRED. One detonation of Jumpy
+            // Dumpty put a Mine on every enemy and the round-7 seat could
+            // confirm it had happened only by watching a Spark tick over --
+            // the rule is on the card, the result is on the badges, and
+            // nothing joined the two at the moment it happened. The COUNT is
+            // in the line because the count is what the seat was trying to
+            // read: one Mine per living enemy per detonation, said out loud.
+            if (landed > 0)
+            {
+                ledger.NoteLine(
+                    "Its rider placed Mine " + charge.PayloadMineAll + " on "
+                  + landed + (landed == 1 ? " enemy" : " enemies"));
             }
         }
 
         await NotifyExplosionListeners(choiceContext, applier, target, size, reacted);
+    }
+
+    /// <summary>The body a log line names. `Monster.Title` is what the seat's
+    /// own screen calls it, and a `LocString` cannot be resolved outside a
+    /// booted game -- so a headless read falls back to the type's name rather
+    /// than throwing inside a log call.</summary>
+    private static string NameOf(Creature creature)
+    {
+        try
+        {
+            var title = creature.Monster?.Title.GetFormattedText();
+            return string.IsNullOrEmpty(title) ? "the enemy" : title!;
+        }
+        catch (System.Exception)
+        {
+            return "the enemy";
+        }
     }
 
     /// <summary>
@@ -1906,13 +1990,33 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <summary>Sorry, Jean..., whole: remove the largest Bomb and gain Block
     /// equal to its size. ONE call, so the number removed and the number gained
     /// are the same number by construction and no printed value can drift from
-    /// either.</summary>
+    /// either.
+    ///
+    /// `EB-390`: <c>ValueProp.Move</c>, WHICH IS THE CARD-BLOCK PIPELINE, and
+    /// the row's own "one rule" default. Under Dexterity 2 the r10 run-2 seat
+    /// watched Dig In go 8 to 10 and Barbara's 5 to 7 while this card paid 13
+    /// for a Bomb 13 -- and its face says "gain Block", which is the sentence
+    /// Dexterity's own face is about ("Block gained from cards"). The other
+    /// reading was available (print that the size is paid raw) and it costs a
+    /// card its verb, so the rule moves instead of the words:
+    /// <c>DexterityPower.ModifyBlockAdditive</c> and <c>FrailPower</c>'s
+    /// multiplicative hook share one predicate,
+    /// <c>props.IsPoweredCardOrMonsterMoveBlock()</c>, so this is one switch
+    /// and both terms arrive with it.
+    ///
+    /// <see cref="BlockForLargestBomb"/> TAKES THE SAME SWITCH, because it is
+    /// the same rule on the other card: two Bomb-sized Blocks that disagree
+    /// about Dexterity is the defect this row is about, one card later. What
+    /// stays <c>Unpowered</c> is Block no card printed -- a power's or a
+    /// relic's -- which is the line the engine's own predicate draws. Sim
+    /// twin: <c>klee_overhaul.remove_largest_for_block</c>, through
+    /// <c>powers.modify_block_gained</c>.</summary>
     public static async Task RemoveLargestForBlockAndGain(
         PlayerChoiceContext choiceContext, Creature applier)
     {
         var size = await RemoveLargestForBlock(choiceContext, applier);
         if (size <= 0) return;
-        await CreatureCmd.GainBlock(applier, size, ValueProp.Unpowered, null);
+        await CreatureCmd.GainBlock(applier, size, ValueProp.Move, null);
     }
 
     /// <summary>
@@ -1937,10 +2041,14 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// upgrade moves (<c>upgrade: {cap: +3}</c>), and it is what keeps the row
     /// from turning Grounded's cook turn into a stall.
     ///
-    /// UNPOWERED (<c>ValueProp.Unpowered</c>), like every other rule-sourced
-    /// Block on this arm: no Dexterity feeds it and no Frail bites it, because
-    /// it is a RULE's Block and not a card's printed Block. Sim twin:
-    /// <c>klee_overhaul.block_for_largest_bomb</c>.
+    /// `EB-390`: <c>ValueProp.Move</c>, THE CARD-BLOCK PIPELINE, for the
+    /// reason <see cref="RemoveLargestForBlockAndGain"/> gives at length. It
+    /// used to be <c>Unpowered</c> on the reading that a Bomb-sized Block is a
+    /// rule's Block rather than a card's; the row's finding is that a face
+    /// saying "gain Block" is what Dexterity's own face is about, and two
+    /// Bomb-sized Blocks disagreeing about it is the same defect twice. Sim
+    /// twin: <c>klee_overhaul.block_for_largest_bomb</c>, through
+    /// <c>powers.modify_block_gained</c>.
     /// </summary>
     public static async Task<int> BlockForLargestBomb(
         PlayerChoiceContext choiceContext, Creature applier, int cap)
@@ -1956,7 +2064,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         }
         var amount = largest < cap ? largest : cap;
         if (amount <= 0) return 0;
-        await CreatureCmd.GainBlock(applier, amount, ValueProp.Unpowered, null);
+        await CreatureCmd.GainBlock(applier, amount, ValueProp.Move, null);
         return amount;
     }
 

@@ -235,7 +235,17 @@ public static class ArmKeywordTips
             "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
           + " a turn, goes off only when [gold]Set off[/gold], or as a "
           + "[gold]Mine[/gold]. "
-          + "Not an Attack: only [gold]Vulnerable[/gold] and a cap on the "
+          // `EB-400`: BLOCK, NAMED. "Not an Attack: only Vulnerable and a
+          // cap move it" is a true sentence that reads as a false one -- a
+          // list of the only two things that touch the hit, with Block
+          // outside it -- and the r10 seat priced a Set off as unblockable
+          // and was wrong: 12 into 20 HP behind Block 5 left 13. The
+          // explosion passes `ignoreBlock: false`, so Block absorbs it like
+          // anything else, and the `Set off` tip has said so since `EB-443`
+          // in these same three words. The exclusion the sentence is really
+          // about is the ATTACK-keyed debuff, and it still says that.
+          + "Not an Attack, but [gold]Block[/gold] stops it: only "
+          + "[gold]Vulnerable[/gold] and a cap on the "
           + "enemy's HP loss move it. "
           + "If this enemy dies with it still on, it moves to a survivor. "
           + "Your deck opens with a placer.");
@@ -437,7 +447,11 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off before its enemy's hit, "
-          + "which lands in full unless the Mine kills. Only their "
+          + "which lands in full unless the Mine kills. Their "
+          // `EB-400`, the same three words on the same clause: a Mine IS a
+          // Bomb, so a tip that lists what moves the hit and leaves Block out
+          // reads as Block immunity here for the same reason.
+          + "[gold]Block[/gold] stops it, and only their "
           + "[gold]Vulnerable[/gold] and a cap move it. "
           + "If this enemy dies with it still on, it moves to a survivor.");
 
@@ -531,12 +545,19 @@ public static class ArmKeywordTips
     /// keyword page owes: the cost line is where a player looks for what a
     /// card costs, and a keyword that denies a price no face prints invites
     /// the doubt it was written to settle. The sentence ends at "a play."
+    ///
+    /// `EB-642` DROPPED THE OWNERSHIP CLAUSE, because R265 pick 1 dropped the
+    /// distinction it pointed at. [USER] read "one marked Klee's own" off his
+    /// own act-1 run as noise, and the rule now pays every Hexerei card,
+    /// Universals included -- so the first sentence's test IS the payer set and
+    /// a second clause narrowing it would be false. One word, one rule: the
+    /// face prints `Hexerei` if and only if playing it pays.
     public static IEnumerable<IHoverTip> ForHexerei(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, HexereiKey,
             "A [gold]Companion[/gold] card whose face prints the word. Playing "
-          + "one marked Klee's own gives Klee [blue]" + KleeCompanionSpark.Base
+          + "one gives Klee [blue]" + KleeCompanionSpark.Base
           + "[/blue] [gold]Spark[/gold], up to [blue]" + KleeCompanionSpark.MaxPerPlay
           + "[/blue] a play.");
 
@@ -643,10 +664,19 @@ public static class ArmKeywordTips
     /// (<see cref="KleeMod.Powers.KleeCompanionSpark.MaxPerPlay"/>), so a
     /// fourth clause would state a bound no reachable play can meet.
     /// </summary>
+    /// `EB-642`: THE RIDER NAMES THE MARK, NOT THE POOL. R265 pick 1 made the
+    /// printed word the whole rule, so this sentence says "a Hexerei card" --
+    /// the same set the face above it prints and the same set
+    /// <see cref="KleeMod.Powers.KleeCompanionSpark.PaysKleesSpark"/> tests.
+    /// AND IT NOW ASKS <see cref="KleesRuleBelongsHere"/>, which it did not
+    /// have to while it rode only Klee's own Personals: a Hexerei Universal is
+    /// drafted by every character, and Klee's rule on a Kokomi shop screen is
+    /// `EB-504` exactly.
     public static IEnumerable<IHoverTip> ForCovenSpark(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
+        !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, CovenSparkKey,
-            "Playing one of Klee's own [gold]Companions[/gold] makes [blue]"
+            "Playing a [gold]Hexerei[/gold] card makes [blue]"
           + KleeCompanionSpark.Base + "[/blue] [gold]Spark[/gold], [blue]"
           + KleeCompanionSpark.ReactionBonus + "[/blue] more if it triggered "
           + "an [gold]Elemental Reaction[/gold] and [blue]"

@@ -110,7 +110,7 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
    # resource where that character's kit explicitly declares the trigger and
    # bounds the amount generated per Companion play." The declaration is
    # constants.KLEE_COMPANION_SPARK_* ("Little Hexenzirkul"), the engine site is
-   # effects.klee_personal_companion_spark, and the player's yield is UNCHANGED
+   # effects.klee_companion_spark, and the player's yield is UNCHANGED
    # -- 1 / 2 / 2 / 3, the same four numbers this row used to pay.
    #
    # The `then: []` branch is deliberate and is not a stub: the conditional

@@ -14,7 +14,12 @@ from typing import Any
 from understudy import qa_packet
 from understudy.blindplay_board import (PHASE_FLIP_LINE, _pulse_phrase,
                                         enchant_moves_line)
-from understudy.blindplay_notes import (AURA_NOTE, AUTO_TURN_NOTE,
+from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
+                                        AURA_NOTE, BOMB_FORECAST_NOTE,
+                                        BOMB_REACTION_CLAUSE,
+                                        REACTION_ELEMENTS,
+                                        SALON_ARRIVAL_NOTE,
+                                        AUTO_TURN_NOTE,
                                         BUFF_INTENT_CLAUSE,
                                         CLONE_NOTE, EMPTY_SHELVES_NOTE,
                                         INTENT_NUMBER_DISAGREES,
@@ -37,6 +42,8 @@ from understudy.blindplay_notes import (AURA_NOTE, AUTO_TURN_NOTE,
                                         MULTI_INTENT_NOTE,
                                         PENDING_PICK_NOTE, PICKED_MARK,
                                         PLAN_AIM_NOTE,
+                                        PLAN_BLOCK_NOTE,
+                                        PLAN_CASKET_AURA_CLAUSE,
                                         PLAN_COUNT_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
@@ -474,8 +481,23 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
 # the same way gets the same line and a renamed one does not go silent.
 _PLAYS_YOUR_TURN = re.compile(r"plays your (?:\w+ )?turn for you", re.I)
 _PER_HIT_DAMAGE = re.compile(r"additional damage from attacks", re.I)
+# `EB-408`. The flat term on the PLAYER's own Attacks, which is a different
+# sentence from the debuff above and belongs to a different note: Fantastic
+# Voyage prints "Your Attacks deal 5 additional damage this turn." The figure
+# between the two halves is the game's own hole and reaches this list with its
+# `[blue]` markup still on it (`qa_packet._powers` copies the description as
+# sent), so the pattern steps over whatever sits between them rather than
+# spelling a number it would then have to un-tag.
+_ATTACK_DAMAGE_BUFF = re.compile(
+    r"your attacks deal[^.]*additional damage", re.I)
 _MULTI_HIT_LABEL = re.compile(r"^\s*(\d+)\s*[x×]\s*(\d+)\s*$")
 _ONE_USE_DISCOUNT = re.compile(r"the next (\w+) you play costs", re.I)
+# `EB-433`. A relic that answers a debuff with an elemental hit, which is what
+# makes the panel's "leaves no aura" clause false for a debuff Plan. The
+# Tamakushi Casket's own sentence, with the element left open: the clause is
+# about a hit that carries one, and the Plan is Hydro either way.
+_DEBUFF_ANSWERING_HIT = re.compile(
+    r"whenever you apply a debuff[^.]*damage", re.I)
 
 
 def _auto_turn_note(you: dict[str, Any], round_: Any) -> list[str]:
@@ -521,6 +543,73 @@ def _per_hit_note(you: dict[str, Any],
     return []
 
 
+# `EB-605`. The two number groups on a Bomb badge, each matched on the badge's
+# own words rather than on the power's name: the headline forecast names the
+# element it would deal, and the list of charge sizes is its own clause.
+_BOMB_FORECAST = re.compile(
+    r"set off here deals[^.]*?(Pyro|Hydro|Electro|Cryo)", re.I)
+_BOMB_SIZES = re.compile(r"bomb sizes here:\s*([0-9/ ]+)", re.I)
+
+
+def _bomb_forecast_note(power: dict[str, Any],
+                        others: list[dict[str, Any]],
+                        indent: str) -> list[str]:
+    """`EB-605`: which of a Bomb badge's two number groups is which.
+
+    ONLY WHERE THEY DISAGREE, which is the row's own acceptance: a lone Bomb 6
+    prints 6 everywhere on its line and has nothing to explain. The page claims
+    neither figure and computes neither -- both are the game's, printed
+    unchanged -- it says what each one is, and where the body is wearing an
+    aura the pile's element reacts with, it names the reaction the seat had to
+    infer from a Spark counter.
+    """
+    text = str(power.get("text") or "")
+    forecast, sizes = _BOMB_FORECAST.search(text), _BOMB_SIZES.search(text)
+    if not forecast or not sizes or not isinstance(power.get("stacks"), int):
+        return []
+    charges = [int(n) for n in _NUMBER.findall(sizes.group(1))]
+    total = sum(charges)
+    if not charges or total == power["stacks"]:
+        return []
+    element = forecast.group(1).capitalize()
+    line = BOMB_FORECAST_NOTE.format(n=power["stacks"], total=total)
+    aura = next((_AURA_NAME_RE.match(str(row.get("name") or "").strip())
+                 for row in others
+                 if str(row.get("kind") or "").strip().lower() == "aura"
+                 and _AURA_NAME_RE.match(str(row.get("name") or "").strip())),
+                None)
+    if aura:
+        pair = frozenset({element, aura.group(1)})
+        named = next((word for word, elements in REACTION_ELEMENTS.items()
+                      if elements == pair), "")
+        if named:
+            line = line.rstrip("*") + BOMB_REACTION_CLAUSE.format(
+                aura=aura.group(1), element=element, reaction=named) + "*"
+    return [indent + line]
+
+
+def _casket_aura_clause(you: dict[str, Any]) -> str:
+    """`EB-433`: the exception a held relic makes to the panel's aura rule.
+
+    THE CLAUSE IS FALSE WITHOUT IT AND FALSE WITHOUT THE RELIC, which is why it
+    is gated and not printed flat: "A Plan that blocks, draws or applies a
+    debuff leaves no aura" is true of the PLAN and was wrong about the board,
+    because the Tamakushi Casket answers the debuff with a Hydro hit of its own
+    and that hit lays the aura. A run that is not holding it reads the short
+    rule, which is then true.
+
+    Matched on the relic's own sentence rather than its name, `_PLAYS_YOUR_TURN`'s
+    discipline: a second relic that answers a debuff with an elemental hit says
+    the same thing, and a renamed one does not go silent. `""` where no relic
+    on the feed says it, which is every board the clause would be noise on.
+    """
+    for relic in you.get("relics") or []:
+        if _DEBUFF_ANSWERING_HIT.search(str(relic.get("text") or "")):
+            return PLAN_CASKET_AURA_CLAUSE.format(
+                relic=f"**{relic['name']}**")
+    return ""
+
+
 def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
     """`EB-349`: a discount the game prices onto every row and pays once."""
     for power in you.get("powers") or []:
@@ -532,6 +621,30 @@ def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
 
 
 _NUMBER = re.compile(r"\d+")
+
+
+def _attack_buff_note(you: dict[str, Any],
+                      hand: list[dict[str, Any]]) -> list[str]:
+    """`EB-408`: a flat Attack buff beside the faces it may or may not be in.
+
+    BOTH HALVES ON THIS SCREEN, `_per_hit_note`'s rule: a status of the
+    player's whose printed sentence says its number is additional damage on
+    Attacks, and an Attack in hand printing a number of its own. The first such
+    status carries the note; it is one rule about the hand and not a line per
+    card. A hand with no Attack in it, or one whose Attacks print no figure,
+    raises no question and gets no line.
+    """
+    buff = next((p for p in you.get("powers") or []
+                 if _ATTACK_DAMAGE_BUFF.search(str(p.get("text") or ""))
+                 and isinstance(p.get("stacks"), int)), None)
+    if not buff:
+        return []
+    if not any(str(card.get("kind") or "").strip().casefold() == "attack"
+               and _NUMBER.search(str(card.get("text") or ""))
+               for card in hand):
+        return []
+    return ["", ATTACK_BUFF_NOTE.format(name=f"**{buff['name']}**",
+                                        n=buff["stacks"])]
 
 
 def _numbers_disagree(intent: dict[str, str]) -> bool:
@@ -826,7 +939,13 @@ def render(obs: dict[str, Any]) -> str:
                 # one Plan in the queue below. The aim rule leads: a reader
                 # asking what a Plan will do asks which body first.
                 out.append(PLAN_AIM_NOTE)
-                out.append(PLAN_HYDRO_NOTE)
+                # `EB-433`: and the exception the starter relic makes to it,
+                # appended to the sentence it is an exception to.
+                out.append(PLAN_HYDRO_NOTE + _casket_aura_clause(you))
+                # `EB-411`: and what the hit meets when it gets there -- the
+                # enemy's own Block, which YOUR turn start does not clear and
+                # which no play of yours can strip before the morning.
+                out.append(PLAN_BLOCK_NOTE)
                 out.append(PLAN_COUNT_NOTE)
                 # `EB-578`. AND WHEN THE HAND HOLDS NONE, one line saying so.
                 # The form under *What you can say* is gone on such a turn
@@ -894,6 +1013,14 @@ def render(obs: dict[str, Any]) -> str:
                            + (" — FRONT: the next Companion card you play "
                               "performs this one, and then sends it to the "
                               "back" if i == 0 else ""))
+            # `EB-585`. THE ARRIVAL THAT PERFORMED AND WAS NOT FILED. On the
+            # fight's first screen an occupied stage was occupied by the
+            # relic's arrival, and an arrival performs -- so an empty
+            # performance list here is a receipt that did not reach the feed,
+            # not a member that did nothing. Round one and an empty list are
+            # the only board the sentence is true on.
+            if c["round"] == 1 and not c["salon"]["performed"]:
+                out += ["", SALON_ARRIVAL_NOTE]
         if c.get("salon") and (c["salon"]["performed"]
                                or c["salon"]["replayed"]
                                or c["salon"].get("evoked")):
@@ -1045,6 +1172,10 @@ def render(obs: dict[str, Any]) -> str:
         # `EB-349`: the one-use discount, under the hand it is priced onto.
         if c["hand"]:
             out += _one_use_discount_note(you)
+        # `EB-408`: and where a flat Attack buff is up, where the damage
+        # figure on each of those faces came from -- one field of the feed,
+        # printed unchanged, which may or may not already count the buff.
+        out += _attack_buff_note(you, c["hand"])
         # `EB-567`. THE WINDOW, BEFORE THE REFUSAL RATHER THAN AFTER IT. Under
         # the arm the Spotlight's price is the opening Encore exactly, and
         # both r14 seats learned that from a refusal one action too late.
@@ -1086,6 +1217,9 @@ def render(obs: dict[str, Any]) -> str:
             out += _render_intents(e["intents"])
             for pw in e["powers"]:
                 out.append(_render_power(pw, "    "))
+                # `EB-605`: and where a Bomb badge's headline and its list of
+                # charge sizes are two different numbers, which is which.
+                out += _bomb_forecast_note(pw, e["powers"], "    ")
         # `EB-496`: and the rule about both handles, under the list they are
         # handles for. The hand's own note is about cards and says the
         # opposite, which is what sent a seat's Melt into the wrong body.
