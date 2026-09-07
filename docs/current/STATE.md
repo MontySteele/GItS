@@ -244,7 +244,12 @@ are in [`workstreams.md`](workstreams.md).
   `review/records/card-audit-2026-09-07.md` row 1); round 25's hypothesis
   (an Energy-priced detonator beside the Spark-priced ones) is drafted in
   the comparison pass §4 from the GPT balance review.
-  [USER]'s act-1 run is due on `0.2.2888+proto`. The round-8 clear is
+  **[USER]'s act-1 run is PLAYED** (2026-09-07, `0.2.2888+proto`,
+  `review/active/klee-user-run-1-2026-09-07.md`): the concept read as
+  sound, the early fragility and the every-turn Block puzzle as the
+  brief's tension; seven notes triaged, `EB-619`-`EB-622` applied as D
+  and E defaults, **two picks** (the Hexerei ownership rule; whether the
+  tag earns its place). The round-8 clear is
   read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):

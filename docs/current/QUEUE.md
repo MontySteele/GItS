@@ -91,7 +91,10 @@ against the shipped kits and the richness playtest; the Kokomi items retire
 with the overhaul, Spotlight was answered by R228, and anything of the Furina
 items that survives returns through the reframe's own round packets.
 
-**Nothing is open in this section.**
+| ID | Decision needed | Status | Provenance |
+|---|---|---|---|
+| `klee-user-run-1 pick 2` | **Ask:** choose whether the Hexerei tag earns its place (klee-user-run-1-2026-09-07 sec.5). **Pick:** (1, default) keep it and test the existing package first, a deliberate Hexerei lane in round 24 or 25; (2) keep it and add two Common readers in pool pass two through the audit door; (3) drop the tag: the readers leave or are rewritten, the Spark pays on every Companion play. | OPEN — [USER]'s pick | klee-user-run-1-2026-09-07 |
+| `klee-user-run-1 pick 1` | **Ask:** choose the Hexerei ownership rule (klee-user-run-1-2026-09-07 sec.5). **Pick:** (1, default) every Hexerei card pays the Spark, Universals included, and 'Klee's own' leaves the faces and the tip; (2) keep the rule, drop the face text, the tip says 'a Companion from Klee's coven'; (3) keep both as they are. | OPEN — [USER]'s pick; a rule change, played once built | klee-user-run-1-2026-09-07 |
 
 ## 6. Prototype slices (R213) — held arms, re-authored kits, and the rules under them
 
