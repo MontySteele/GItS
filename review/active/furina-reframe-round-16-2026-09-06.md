@@ -106,3 +106,32 @@ Nothing here is a strength reading.
 - **The Evoke's reachability question is closed** by the natural draft
   (three Deploys, two Evokes on purpose).
 - **The two records are the round's evidence.**
+- **Round 17's hypothesis is drafted here (E), from the GPT balance review
+  of 2026-09-06**, which read the arm's offer off the sheets and found two
+  things the rounds had not: the upgrade economy (Cadenza+ at 0 energy draws
+  3 with no bar, Shared Billing+ at 0 energy gains 1 Energy, a cycle that
+  is card- and energy-positive at four cards), and the three shipped Fanfare
+  floors still offered under an arm whose premise is earning Fanfare by
+  performance (`EB-507`, open since round 11; a floor of 15 satisfies every
+  rider bar for the whole fight). Both are built arm-only on the branch,
+  audit owed at the door (`review/qa/card-adjustments-2026-09-06-prompt.txt`,
+  arms 2 to 6): Cadenza's upgrade moves its bar 6 to 3 instead of dropping
+  it, Shared Billing's upgrade draws 1 instead of costing 0, Rapturous
+  Applause and Unheard Confession keep their bodies without the floor, and
+  The Sea Is My Stage's Rare slot goes to Let the People Rejoice, the arm's
+  own Rare drain, which was grant-only. "A natural deck reaches a drain and
+  spends Fanfare on purpose, and Cadenza+ and Shared Billing+ still ask the
+  base card's question after the upgrade." Curtain Call, Exit Stage Left and
+  Intermission stay grant-only until that reads; the drain pair's other half
+  is the next access question, not this round's.
+- **The second-wave review (same day) moved three of those rows again, D
+  defaults:** the loop is by holding the deck in hand (hand cap 10, overflow
+  to discard), not by removal, so a 0-cost draw-3 whose bar does not deplete
+  loops at bar 6 as much as at 3, and a card that refunds its Energy and
+  replaces itself is the same piece. The Cadenza copy now Exhausts (the bar
+  move stays), Shared Billing's upgrade gains 3 Block instead of drawing 1,
+  Unheard Confession pays 2 per change (it pays per EVENT, so 1 was a dead
+  Rare without its floor), and the drain pays 5 plus 2 per Fanfare drained
+  (at 1 per it never out-damaged Universal Revelry's copy in the 0-15 range
+  while also emptying the meter; its Prototype-default upgrade costs 1). The
+  audit prompt states each arithmetic.

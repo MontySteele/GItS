@@ -294,7 +294,15 @@ def test_v3_added_exactly_one_power_row_and_no_vocabulary_entry():
     assert ccr.VOCAB_VERSION == "eb118-connectivity-v3"
     assert set(ccr.SHARED_STATES) == V2_SHARED_ENTRIES
     assert set(ccr.PRIVATE_STATES) == V2_PRIVATE_ENTRIES
-    assert set(ccr.POWER_HOOKS) - V2_POWER_ROWS == {"bomb_damage_per_rotation"}
+    # `fanfare_attack_per5` joins the delta on the same argument
+    # (2026-09-07): it is the reframe arm's copy of `fanfare_attack_per10` at
+    # a halved threshold, exists in NO pre-door sheet -- only in
+    # `docs/prototype-surface.yaml`, which no baseline corpus reads -- and its
+    # hook row is the per-10 row's, verbatim.
+    assert set(ccr.POWER_HOOKS) - V2_POWER_ROWS == {
+        "bomb_damage_per_rotation", "fanfare_attack_per5"}
+    assert ccr.POWER_HOOKS["fanfare_attack_per5"] == \
+        ccr.POWER_HOOKS["fanfare_attack_per10"]
     assert not V2_POWER_ROWS - set(ccr.POWER_HOOKS)
 
 

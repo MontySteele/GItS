@@ -161,6 +161,22 @@ card. **No evidence on the card.**
 - The Flash Point overkill line is recorded as a reading and mints no row.
 - Round 24's hypothesis is drafted here (E), for the seats when the machine
   is back.
+- **Round 25's hypothesis is drafted here too (E), from the GPT balance
+  review of 2026-09-06**, which read the Spark loop off the card costs alone
+  and reached the r23 finding: Fwoosh! refunds its Spark on one detonation
+  and is Spark-positive on two, while setup and defence spend without a
+  refund, so a detonator-rich deck never feels the price and a setup-heavy
+  one can strand itself. "A natural lane that holds one Energy-priced
+  detonator (Countdown, Sizzle, or the adjusted Long Fuse) beside its
+  Spark-priced ones reaches a turn where the Spark price binds without
+  deadlocking, and the seat can say which price it paid and why." Read
+  alongside it: whether Powder Charge (1 Spark, Bomb 6) earns its Spark over
+  Pop! (0, Bomb 5), and whether any Spark spend is a choice other than
+  "refund it now" or "get stuck".
+- **Long Fuse's adjustment is BUILT on the branch** (§3 item 1), not
+  deployed: the audit door reads it first, from
+  `review/qa/card-adjustments-2026-09-06-prompt.txt` (arm 1), on the local
+  machine.
 - No register row minted, no number moved, nothing deployed.
 
 No pick.

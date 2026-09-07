@@ -111,3 +111,24 @@ a strength reading.
   enchantments and nothing of the target's; the own line folds the
   target's state now.
 - **The two records are the round's evidence.**
+- **The next assembled round's hypothesis is drafted here (E), from the GPT
+  balance review of 2026-09-06.** The arithmetic it found is the engine's
+  own and deliberate (`EB-501`: the morning's count is CARRY-OUTS, so under
+  Nereid's Ascension a three-Plan morning reads six and Tide Wall pays 3 x 6
+  twice, 36 Block where the plain morning pays 9). Ripple+, Tide Wall and
+  Battle Plan+ written under an installed Ascension cost 2 Energy and pay 50
+  Block, 4 Energy and 6 cards the next morning. The brief wants spectacular
+  prepared mornings and a Rare that doubles Plans; the question is whether
+  the package deletes the now-or-later decision once it lands. "An
+  assembled deck (Nereid's, Tide Wall, Ripple, Battle Plan granted) still
+  presents a real now-or-later choice under sustained pressure and
+  alternating attack/setup intents, and Ripple's forgone 2 Block is a
+  price the seat can name." The grants are Nereid's Ascension, Tide Wall,
+  Ripple+ and Battle Plan+ (the upgraded copies, since the arithmetic is
+  theirs). The lever if it is not: Tide Wall's count reads entries rather
+  than carry-outs (`EB-501`'s default reversed), which takes Tide Wall's 36
+  to 18 and the morning's 50 Block to 32, with the 4 Energy and 6 cards
+  untouched, and leaves the Rare's own doubling alone.
+  The natural lane asks whether ordinary drafting reaches the package
+  without excessive concessions; round 21's natural lane declined four
+  readers, which is the prior.

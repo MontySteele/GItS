@@ -36,12 +36,15 @@ public sealed class ProtoFrFloridCadenza : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Exhaust };
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fr_florid_cadenza");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Florid Cadenza"),
-        ("description", "Draw 1 card. {IfUpgraded:show:Draw 2 more.|If you have at least 6 [gold]Fanfare[/gold], draw 2 more.}"),
+        ("description", "Draw 1 card. If you have at least {IfUpgraded:show:3|6} [gold]Fanfare[/gold], draw 2 more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -60,7 +63,7 @@ public sealed class ProtoFrFloridCadenza : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        if (IsUpgraded || FurinaResources.ReadableFanfare(Owner.Creature) >= 6)
+        if (FurinaResources.ReadableFanfare(Owner.Creature) >= (IsUpgraded ? 3 : 6))
         {
             await CardPileCmd.Draw(choiceContext, 2m, Owner);
         }
@@ -68,6 +71,6 @@ public sealed class ProtoFrFloridCadenza : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // condition: unconditional -- expressed at play time as (IsUpgraded || predicate); the text swaps via {IfUpgraded:show:...}.
+        // condition: fanfare_at_least_3 -- the printed gate stays and its threshold is read at play time as (IsUpgraded ? up : base).
     }
 }
