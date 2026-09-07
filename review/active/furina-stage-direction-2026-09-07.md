@@ -164,5 +164,5 @@ Deploy-hover frames are taken before any new pass, as the baseline.
 
 ## 7. What this does not touch
 
-Klee, Kokomi, any shipped number, the Balance stage. Round 17's hypothesis
-waits on `furina-stage-direction pick 1` (QUEUE §3).
+Klee, Kokomi, any shipped number, the Balance stage. Round 17 has no
+hypothesis yet; the pick in §6 (QUEUE §3) sets it.
