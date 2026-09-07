@@ -75,7 +75,7 @@ nearly as prominent as Energy while the members a decision is about are
 tiny, low-contrast and overlapping the health area; the modifier read at
 bottom left is separated from the effects it modifies. Both are taken,
 and the widgets become **one Salon panel**, the shape the follow-up build
-now targets (`EB-630`-`EB-637`):
+now targets (`EB-630`-`EB-638`):
 
 - **One group beside Furina**, above and clear of her HP bar and status
   row, wide enough for three distinct chips, on a restrained dark backing,
@@ -103,10 +103,14 @@ now targets (`EB-630`-`EB-637`):
   enters; the Encore change is previewed with them. This is the biggest
   step past static layout and is built after the panel lands.
 - Also from the frame and the review: the Spotlight refused after three
-  free arrivals (`EB-630`, a rule question), member tips carrying clauses
-  about effects the member lacks (`EB-631`), Chevalmarin's Evoke label
-  without her refund (`EB-632`), the meters out of the power row
-  (`EB-636`).
+  deploys (`EB-631`): measured off the scenario's own log, Encore went 2,
+  1, 0, 0, because R260's free arrival is Crabaletta's opening one only
+  (`EB-553`, `EB-558`) and a Deploy's performance pays 1, so the refusal
+  was correct and the packet's "three free arrivals" above was wrong; the
+  Spotlight window tip's last clause says the same wrong thing and is
+  corrected (`EB-638`). Member tips carrying clauses about effects the
+  member lacks (`EB-632`), Chevalmarin's Evoke label without her refund
+  (`EB-630`), the meters out of the power row (`EB-636`).
 
 **The eyes-on is revised with it (§5):** not one frame but the short
 combat sequence GPT proposed, a frame at each step: identify who acts,
