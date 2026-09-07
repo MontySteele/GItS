@@ -445,7 +445,8 @@ public class ArmKeywordTipTests
         // cannot arrive with a different shape by accident.
         var attaches = Attaches().ToList();
 
-        // SIXTEEN: FOURTEEN KEYWORDS AND TWO RIDERS. Draft 6 cut Tide, Surge, Exert and the Garment as
+        // SEVENTEEN KEYWORDS AND FIVE RIDERS (`EB-625` made the words
+        // fifteen). Originally: SIXTEEN, FOURTEEN KEYWORDS AND TWO RIDERS. Draft 6 cut Tide, Surge, Exert and the Garment as
         // keywords and their four `For*` methods left with the rules they
         // defined, taking the table from eleven to seven; the Furina reframe's
         // slice two put Deploy, Evoke and Drain on it (2026-09-02), and R244
@@ -503,7 +504,14 @@ public class ArmKeywordTipTests
         // every charge it takes -- so Jumpy Dumpty's Mine-on-ALL survives it
         // and grows in bulk (Klee r21 lane 1, "completely undiscoverable
         // except by accident").
-        Assert.Equal(19, attaches.Count);
+        //
+        // THE TWENTIETH IS `EB-625`'s `ForCasket`, and it IS a keyword: the
+        // relic Shell Guard's payout hangs off. "Whenever the Tamakushi
+        // Casket strikes" named a thing nothing on screen defined, and
+        // [USER]'s act-1 run read the card and asked how the Casket could
+        // strike at all. `Grounded`'s shape and `Oz`'s, one kit over.
+        Assert.Equal(20, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForCasket");
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.Contains(attaches, m => m.Name == "ForCovenSpark");
         Assert.Contains(attaches, m => m.Name == "ForOpeningStage");

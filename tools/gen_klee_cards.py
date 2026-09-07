@@ -662,6 +662,14 @@ ARM_KEYWORDS = (
     # explain a mechanic that is not there.
     ArmKeyword("Mend", ("Mend", "Mends"), "ArmKeywordTips.ForMend"),
     ArmKeyword("Plan", ("Plan", "Plans"), "ArmKeywordTips.ForPlan"),
+    # Kokomi's THIRD, `EB-625`. `Tamakushi Casket` is her relic, and
+    # `Shell Guard` is written against it by name -- "whenever the Tamakushi
+    # Casket strikes" -- with nothing on screen saying what the Casket is or
+    # what makes it strike. `Grounded`'s shape and `Oz`'s: the attach travels
+    # with the printed word, so a second row naming the relic carries the
+    # definition the day it is authored. NO PLURAL: there is one Casket.
+    ArmKeyword("Tamakushi Casket", ("Tamakushi Casket",),
+               "ArmKeywordTips.ForCasket"),
     # The companion arm's one. `Swirl` is the shared Anemo reaction printed as
     # a VERB by ten Universals; the eight reaction PREVIEWS are board-aware and
     # say nothing over an aura-less board.

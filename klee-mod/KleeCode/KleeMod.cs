@@ -446,6 +446,11 @@ public static class KleeMod
                         "Riders survive the merge",
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
+                    // `EB-625`: the relic behind Shell Guard's payout, on
+                    // the face that names it. Same raw-key hazard as every
+                    // row here.
+                    [Cards.ArmKeywordTips.CasketKey + ".title"] =
+                        "Tamakushi Casket",
                     // `EB-378`. The rider, not a keyword: the rows whose Hydro
                     // arrives with the jellyfish's carry-out rather than with
                     // the play.

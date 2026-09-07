@@ -73,6 +73,7 @@ public static class ArmKeywordTips
     public const string OzKey = "KLEEMOD-ARM_OZ";
     public const string MendKey = "KLEEMOD-ARM_MEND";
     public const string PlanKey = "KLEEMOD-ARM_PLAN";
+    public const string CasketKey = "KLEEMOD-ARM_CASKET";
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
     public const string DeployKey = "KLEEMOD-ARM_DEPLOY";
     public const string EvokeKey = "KLEEMOD-ARM_EVOKE";
@@ -828,6 +829,34 @@ public static class ArmKeywordTips
         With(inherited, MendKey,
             "[gold]Mend N[/gold]: heal N HP, never above the HP you entered "
           + "the fight with.");
+
+    /// <summary>
+    /// `EB-625`. WHAT THE CASKET IS, on every face that names it.
+    ///
+    /// THE FIND ([USER]'s Kokomi act-1 run, 2026-09-07). `Shell Guard` reads
+    /// "whenever the [gold]Tamakushi Casket[/gold] strikes" and nothing on
+    /// screen says what the Casket is or what makes it strike -- so the card's
+    /// whole payout hangs off a proper noun the player has met only as a relic
+    /// name. It is `Grounded` and `Oz` one kit over: a face written against a
+    /// thing it cannot itself introduce.
+    ///
+    /// THE RELIC'S OWN SENTENCE, WORD FOR WORD, because the relic already
+    /// prints the rule and two spellings of one rule is how a player learns
+    /// there are two rules. The number is read off
+    /// <see cref="KokomiOverhaulLaw.CasketStrike"/> -- the same constant the
+    /// relic's face interpolates and <see cref="TamakushiCasket.Strike"/>
+    /// deals -- so a retune cannot leave this quoting a retired number.
+    ///
+    /// AND IT SAYS "your relic" FIRST, which is the half the relic's own face
+    /// cannot say: a player reading Shell Guard in a shop has to know where to
+    /// look for the thing before the rule means anything.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForCasket(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, CasketKey,
+            "Your relic. Whenever you apply a debuff to an enemy, it deals "
+          + KokomiOverhaulLaw.CasketStrike + " [gold]Hydro[/gold] damage to "
+          + "that enemy.");
 
     /// <summary>
     /// `EB-575`. THE BOARD THIS CARD NEEDS, AND WHAT IT DOES WITHOUT IT.

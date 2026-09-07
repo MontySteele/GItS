@@ -57,6 +57,14 @@ BOMB_GROWTH = 4
 #: reason and held in step from the test side.
 SHATTER_DAMAGE = 6
 
+#: `EB-625`. What one Tamakushi Casket strike deals --
+#: `KokomiOverhaulLaw.CasketStrike` in the mod and
+#: `C.KOKOMI_OVERHAUL_CASKET_STRIKE` in the sim. Mirrored here for
+#: `BOMB_GROWTH`'s reason (this module may not reach `tier0`) and held in step
+#: from the test side against both, so a retune cannot leave the page's Casket
+#: glossary quoting a retired number while the mod's hover tip moves.
+CASKET_STRIKE = 2
+
 #: `EB-567`. THE TWO NUMBERS THAT MAKE TURN ONE A DECISION under the Furina
 #: reframe: the Encore she opens a combat with (R258, `EB-479`) and what
 #: Ethereal Spotlight charges (R228). They are EQUAL, which is the whole
