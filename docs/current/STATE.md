@@ -244,7 +244,15 @@ are in [`workstreams.md`](workstreams.md).
   `review/records/card-audit-2026-09-07.md` row 1); round 25's hypothesis
   (an Energy-priced detonator beside the Spark-priced ones) is drafted in
   the comparison pass §4 from the GPT balance review.
-  [USER]'s act-1 run is due on `0.2.2888+proto`. The round-8 clear is
+  **[USER]'s act-1 run is PLAYED** (2026-09-07, `0.2.2888+proto`,
+  `review/ruled/klee-user-run-1-2026-09-07.md`): the concept read as
+  sound, the early fragility and the every-turn Block puzzle as the
+  brief's tension; seven notes triaged, `EB-619`-`EB-622` applied as D
+  and E defaults; **both picks RULED R265** (2026-09-07, packet now in
+  `review/ruled/`): every Hexerei card gives a Spark and "Klee's own" leaves
+  the faces (`EB-642`, a rule change [USER] plays once built); the tag stays
+  and round 24 or 25 carries a deliberate Hexerei lane before any reader is
+  added. The round-8 clear is
   read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
@@ -346,7 +354,14 @@ are in [`workstreams.md`](workstreams.md).
   7 on a printed 10 (`EB-599`, D default: the Plan line folds hers and
   nothing of the target's); Shrink reduced a Skill against its gloss
   (`EB-597`); the jellyfish's first turn now prints; no pick;
-  `EB-597`-`EB-599`, built on #413. [USER]'s act-1 run is due on `0.2.2888+proto`. The Kurage
+  `EB-597`-`EB-599`, built on #413. **[USER]'s act-1 run is PLAYED**
+  (2026-09-07, `0.2.2888+proto`,
+  `review/ruled/kokomi-user-run-1-2026-09-07.md`): "not bad, better than
+  before, but the central loop feels too auto-pilot"; an off-turn is
+  "play all my Plan cards" with nothing to sequence; **RULED R265**
+  (2026-09-07, packet in `review/ruled/`): pool first, order riders and the
+  queue as a resource, a dusk/dawn trial, the two-Plan cap as one lane of the
+  next round, the rule decided on its reads (`EB-643`); `EB-623`-`EB-626`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
   **The next assembled round's hypothesis is drafted** (r22 packet §5, from
   the GPT balance review of 2026-09-06): Nereid's over Tide Wall, Ripple and
@@ -471,7 +486,14 @@ are in [`workstreams.md`](workstreams.md).
   Evoked on purpose (the reachability question closed by the draft);
   the Spotlight's line is false since Encore refills (`EB-600`); the
   fight-end screen swallows the lethal beat's log (`EB-604`); no pick;
-  `EB-600`-`EB-604`, built on #413. [USER]'s act-1 run is due on `0.2.2888+proto`.
+  `EB-600`-`EB-604`, built on #413. **[USER]'s act-1 run is PLAYED**
+  (2026-09-07, `0.2.2888+proto`, a short run ending at a Corpse Slug,
+  `review/active/furina-user-run-1-2026-09-07.md`): the notes are the
+  interface, not the kit ("still has basic UI legibility issues"; the
+  Encore idea liked, the stage unreadable, the Salon tip a wall);
+  `EB-627`-`EB-629` applied as E defaults (a member strip, Encore pips and
+  a Fanfare badge, the Salon tip in three sentences), **one eyes-on** on
+  the next deploy; no fun verdict recorded.
   **`EB-507` and `EB-616` are BUILT and AUDITED**
   (`review/records/card-audit-2026-09-07.md`, six rows read by GPT, five
   FOLLOWS on the first call): under the arm no offered face grants a Fanfare
