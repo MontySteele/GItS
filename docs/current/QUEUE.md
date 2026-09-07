@@ -91,7 +91,9 @@ against the shipped kits and the richness playtest; the Kokomi items retire
 with the overhaul, Spotlight was answered by R228, and anything of the Furina
 items that survives returns through the reframe's own round packets.
 
-**Nothing is open in this section.**
+| ID | Decision needed | Status | Provenance |
+|---|---|---|---|
+| `kokomi-user-run-1 pick 1` | **Ask:** choose the Bake-Kurage's carry-out (kokomi-user-run-1-2026-09-07 sec.5). **Pick:** (1, default) up to two Plans a turn in the order written, the rest wait, Nereid's doubles the two, the badge prints '2 of 5'; (2) the player chooses one Plan to carry out each turn, the others wait; (3) hold the loop and read again after the next rounds and [USER]'s next run. | OPEN — [USER]'s pick; a loop change, played once built | kokomi-user-run-1-2026-09-07 |
 
 ## 6. Prototype slices (R213) — held arms, re-authored kits, and the rules under them
 
