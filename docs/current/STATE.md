@@ -245,11 +245,14 @@ are in [`workstreams.md`](workstreams.md).
   (an Energy-priced detonator beside the Spark-priced ones) is drafted in
   the comparison pass §4 from the GPT balance review.
   **[USER]'s act-1 run is PLAYED** (2026-09-07, `0.2.2888+proto`,
-  `review/active/klee-user-run-1-2026-09-07.md`): the concept read as
+  `review/ruled/klee-user-run-1-2026-09-07.md`): the concept read as
   sound, the early fragility and the every-turn Block puzzle as the
   brief's tension; seven notes triaged, `EB-619`-`EB-622` applied as D
-  and E defaults, **two picks** (the Hexerei ownership rule; whether the
-  tag earns its place). The round-8 clear is
+  and E defaults; **both picks RULED R265** (2026-09-07, packet now in
+  `review/ruled/`): every Hexerei card gives a Spark and "Klee's own" leaves
+  the faces (`EB-642`, a rule change [USER] plays once built); the tag stays
+  and round 24 or 25 carries a deliberate Hexerei lane before any reader is
+  added. The round-8 clear is
   read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
@@ -353,10 +356,12 @@ are in [`workstreams.md`](workstreams.md).
   (`EB-597`); the jellyfish's first turn now prints; no pick;
   `EB-597`-`EB-599`, built on #413. **[USER]'s act-1 run is PLAYED**
   (2026-09-07, `0.2.2888+proto`,
-  `review/active/kokomi-user-run-1-2026-09-07.md`): "not bad, better than
+  `review/ruled/kokomi-user-run-1-2026-09-07.md`): "not bad, better than
   before, but the central loop feels too auto-pilot"; an off-turn is
-  "play all my Plan cards" with nothing to sequence; **one pick** (the
-  carry-out: up to two Plans a turn, default); `EB-623`-`EB-626`. The Kurage
+  "play all my Plan cards" with nothing to sequence; **RULED R265**
+  (2026-09-07, packet in `review/ruled/`): pool first, order riders and the
+  queue as a resource, a dusk/dawn trial, the two-Plan cap as one lane of the
+  next round, the rule decided on its reads (`EB-643`); `EB-623`-`EB-626`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
   **The next assembled round's hypothesis is drafted** (r22 packet §5, from
   the GPT balance review of 2026-09-06): Nereid's over Tide Wall, Ripple and

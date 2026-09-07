@@ -1,4 +1,4 @@
-Status: OPEN (one pick, §8 revising §5; four E and D defaults applied, §6)
+Status: RULED R265 2026-09-07
 
 # Kokomi, [USER]'s first act-1 run under the overhaul: better than before, the central loop reads as auto-pilot
 
@@ -265,3 +265,12 @@ Prototype through it.
   window stands, being the rule's (E).
 - **`EB-626`** the self-check's tag list corrected; no power text moved (E).
 - No shipped-sheet number moves; no stamp moves; nothing measured.
+
+## 9. Ruled (R265, 2026-09-07)
+
+Pick 1 of §8 at its default, pool first. Pool pass two on paths 1 and 2 of
+§7 (order riders, the queue as a resource), the dusk/dawn trial on two Block
+Plans, the two-Plan cap as one lane of the next round, and the rule decided
+on that round's reads; nothing in the loop changes before it, so nothing is
+played by [USER] before it. Built under `EB-643`. The cap of §5 is not the
+rule.

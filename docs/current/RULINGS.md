@@ -274,8 +274,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R262 | 2026-09-06 | Klee's starter holds at R261 (starter pick option 1); two kit cards, Innate on Jumpy Dumpty alone | `050765e` |
 | R263 | 2026-09-06 | the Dendro and elemental-reaction sweep packet ruled on all three picks (PR #397) | `0de8dc6` |
 | R264 | 2026-09-06 | Dendro's boundaries ruled at all four defaults (Kirara and Emilie; non-reacting pairs stand; Quicken canon-gated at +3; a Core is not a Bomb) | `2544f7c` |
+| R265 | 2026-09-07 | the three run picks at their defaults (Klee: every Hexerei card gives a Spark, the tag tested before readers are added; Kokomi: pool first, the cap as one lane) | `507973c` |
 
-263 rows over the R1..R264 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 152 from a commit message, 0 unresolved.
+264 rows over the R1..R265 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 153 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
