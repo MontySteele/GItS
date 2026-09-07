@@ -204,7 +204,9 @@ public static class FurinaRiderTips
     ///
     /// SO THE LINE STATES THE RULE AND LETS THE PLAYER DERIVE THE WINDOW,
     /// which is what a rule is for: the price, what spends it, and what
-    /// refills it. The third clause is the R260 arrival's free performance
+    /// refills it. The third clause is the R260 OPENING arrival's free
+    /// performance -- the opening one and no other (`EB-638`: "an
+    /// arrival's" read as every deploy, and a card's deploy pays its 1) --
     /// (`EB-558`'s <c>free</c>, <see cref="SalonPowers.PerformanceSpends"/>) --
     /// every combat now opens with a member performing, so a line that said
     /// "any performance spends one" was false about the fight's very first
@@ -224,7 +226,7 @@ public static class FurinaRiderTips
           + "[gold]Encore[/gold] of the "
           + $"{FurinaReframeLaw.OpeningEncore} you open with. Anything that "
           + "performs spends 1; a card that grants [gold]Encore[/gold] "
-          + "reopens the window. An arrival's performance is free.");
+          + "reopens the window. The opening arrival's performance is free.");
 #endif
     }
 

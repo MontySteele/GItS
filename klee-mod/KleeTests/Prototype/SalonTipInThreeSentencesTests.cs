@@ -229,9 +229,12 @@ public class SalonTipInThreeSentencesTests
         var source = System.IO.File.ReadAllText(SourcePath(
             "Vfx/Prototype/SalonPanel.cs"));
         Assert.Contains("front: i == 0", source);
-        Assert.Contains("frame.Visible = occupied && front;", source);
-        Assert.Contains("frontLabel.Visible = front;", source);
+        Assert.Contains("frame.Visible = lit || (occupied && front);", source);
+        Assert.Contains("wordLabel.Text = word;", source);
         Assert.Equal("FRONT", Vfx.SalonPanel.FrontWord);
+        Assert.Equal("FRONT", Vfx.SalonPanel.SlotWord(
+            0, 1, Powers.SalonConstants.MemberSlots,
+            Vfx.SalonPanel.HoverKind.None, 0));
     }
 
     // === 3. the shipped paragraph is untouched ===========================

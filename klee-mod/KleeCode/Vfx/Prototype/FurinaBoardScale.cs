@@ -233,29 +233,37 @@ public static class FurinaBoardScale
 
     // -------------------------------------------------------- the panel --
 
-    /// <summary>Inset of every row from the panel's edge.</summary>
-    public const float PanelPad = 6f;
+    /// <summary>Inset of every row from the panel's edge -- the ONE inset
+    /// (`EB-644`): header, chips and footer all start here.</summary>
+    public const float PanelPad = 8f;
 
     /// <summary>
     /// The panel's box width for a stage of <paramref name="slots"/> chips: the
-    /// chips and their gaps, or the front chip's Replace footer, whichever
-    /// needs more room, plus the pad on either side.
+    /// chips and their gaps, plus the pad on either side. A FUNCTION OF THE
+    /// CHIP COUNT AND NOTHING ELSE.
     ///
-    /// THE CONTENT DECIDES (`EB-641`). The first box was Furina's own 240-wide
-    /// creature bounds, chosen so the panel could not overhang the lanes on
-    /// either side -- and the text did not fit in it, which is the defect. A
-    /// box measured from the words is wider than that and still nowhere near
-    /// the enemy: it is centred on a creature standing in the left third of the
-    /// screen, and the whole group moved to ONE dark backing precisely so the
-    /// player reads it as one thing wherever it sits.
+    /// THE CONTENT DECIDES (`EB-641`) -- and the content is the SLOT ROW
+    /// (`EB-644`). The third pass let the widest footer widen the box, which
+    /// is the "uncontrolled expansion" GPT's review named: a panel whose width
+    /// follows whichever message is on it moves every time a message changes.
+    /// So the slot row is the box, and every header and footer string is
+    /// measured AGAINST it at its own tier and shortened at design time if it
+    /// does not fit -- never the other way round. The pin is
+    /// `SalonPanelFitTests.Every_header_and_footer_string_fits_the_slot_row`.
+    ///
+    /// The first box was Furina's own 240-wide creature bounds, chosen so the
+    /// panel could not overhang the lanes on either side -- and the text did
+    /// not fit in it, which is the defect. A box measured from the chips is
+    /// wider than that and still nowhere near the enemy: it is centred on a
+    /// creature standing in the left third of the screen, and the whole group
+    /// stands on ONE dark backing precisely so the player reads it as one
+    /// thing wherever it sits.
     /// </summary>
-    public static float PanelWidthFor(
-        int slots, float chipContentWidth, float footerWidth)
+    public static float PanelWidthFor(int slots, float chipContentWidth)
     {
         var chips = Math.Max(1, slots);
-        var group = chips * (chipContentWidth + 2f * ChipPad)
-                  + (chips - 1) * ChipGap;
-        return 2f * PanelPad + Math.Max(group, footerWidth);
+        return 2f * PanelPad + chips * (chipContentWidth + 2f * ChipPad)
+             + (chips - 1) * ChipGap;
     }
 
     /// <summary>
@@ -295,10 +303,29 @@ public static class FurinaBoardScale
     // row starts at or after the previous one's bottom edge. That is the whole
     // of `EB-639`'s no-overlap rule in the vertical direction, and the pins
     // read these numbers rather than a frame.
+    //
+    // AND ONE RHYTHM (`EB-644`). GPT's read of the third pass: "several
+    // widgets assembled together -- the header floats above the member
+    // backgrounds, the replacement text sits on a separate strip, and
+    // 'Reduced performance' hangs underneath." Three rows with three insets
+    // and three grounds is three widgets. So every row now starts at
+    // <see cref="PanelPad"/> from the left edge, every row is separated from
+    // the next by the same <see cref="RowGap"/>, the header and the footer
+    // stand on the PANEL's ground rather than on strips of their own, and a
+    // one-pixel <see cref="RuleHeight"/> hairline sits in each gap so the
+    // three bands read as sections of one object.
+
+    /// <summary>The gap between two rows of the panel, and it is the same gap
+    /// everywhere: header to chips, chips to footer.</summary>
+    public const float RowGap = 5f;
+
+    /// <summary>The hairline drawn in each row gap.</summary>
+    public const float RuleHeight = 1f;
 
     /// <summary>Line 1 of the resource header: "Encore N" and the FILLED
-    /// pips.</summary>
-    public const float ResourceRowY = 5f;
+    /// pips, and "· Reduced" beside the number when the buffer cannot pay
+    /// (`EB-644`: the condition sits beside its cause).</summary>
+    public const float ResourceRowY = PanelPad;
     public const float ResourceRowHeight = 19f;
 
     /// <summary>Line 2 of the resource header: the Fanfare and what it is
@@ -308,7 +335,7 @@ public static class FurinaBoardScale
     public const float MeterRowHeight = 17f;
 
     /// <summary>The chip row.</summary>
-    public const float ChipsRowY = MeterRowY + MeterRowHeight + 3f;
+    public const float ChipsRowY = MeterRowY + MeterRowHeight + RowGap;
 
     /// <summary>How much of a chip the member's face crop occupies. Enlarged
     /// with the chip (`EB-641`): "seahorse, crab, seahorse" has to read at a
@@ -321,25 +348,24 @@ public static class FurinaBoardScale
     /// <summary>The number, its glyph and its unit.</summary>
     public const float ActRowHeight = 24f;
 
-    /// <summary>The FRONT marker's own row, so the word never lands on the
-    /// number above it.</summary>
+    /// <summary>The slot word's own row -- FRONT, or what the hovered card
+    /// will do to this seat -- so the word never lands on the number above
+    /// it.</summary>
     public const float FrontRowHeight = 13f;
 
     public const float ChipHeight =
         FaceHeight + 2f + NameRowHeight + ActRowHeight + FrontRowHeight;
 
-    /// <summary>The front chip's Replace footer, touching the chip's bottom
-    /// edge so it reads as part of it.</summary>
-    public const float FooterRowY = ChipsRowY + ChipHeight;
+    /// <summary>The contextual footer: what replacing the front member pays,
+    /// on the panel's own ground, the same gap under the chips as the header
+    /// has above them. ALWAYS a row, so the panel's height and anchor never
+    /// move with the message.</summary>
+    public const float FooterRowY = ChipsRowY + ChipHeight + RowGap;
     public const float FooterRowHeight = 17f;
-
-    /// <summary>The reduced-performance note's row, under everything.</summary>
-    public const float NoticeRowY = FooterRowY + FooterRowHeight + 2f;
-    public const float NoticeRowHeight = 15f;
 
     /// <summary>The panel's height: the last row's bottom edge and the
     /// pad.</summary>
-    public const float PanelHeight = NoticeRowY + NoticeRowHeight + PanelPad;
+    public const float PanelHeight = FooterRowY + FooterRowHeight + PanelPad;
 
     // ---------------------------------------------------------- the pips --
 

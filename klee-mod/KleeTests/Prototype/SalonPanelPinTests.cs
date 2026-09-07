@@ -211,7 +211,9 @@ public class SalonPanelPinTests
         var source = Source("Vfx/Prototype/SalonPanel.cs")
             .Replace("\r\n", "\n");
         Assert.Contains("front: i == 0", source);
-        Assert.Contains("frame.Visible = occupied && front;", source);
+        // The frame: the front's, or the hover's (`EB-637`), never neither
+        // on an occupied front seat.
+        Assert.Contains("frame.Visible = lit || (occupied && front);", source);
     }
 
     // --- what a chip says -------------------------------------------------
@@ -313,11 +315,15 @@ public class SalonPanelPinTests
 
         var source = Source("Vfx/Prototype/SalonPanel.cs")
             .Replace("\r\n", "\n");
-        Assert.Contains("footer.Visible = full && front is { };", source);
+        // The footer prints exactly when a deploy would reach the front
+        // member -- a full stage -- and the row itself never leaves
+        // (`EB-644`).
+        Assert.Contains("footer.Text = FooterText(company, slots);", source);
+        Assert.Contains("footer.Visible = footer.Text.Length > 0;", source);
         // TIER 2, not the footnote tier: a price a player reads before
         // committing a card is not a footnote to anything.
         Assert.Contains(
-            "Text(\"Text\", FurinaBoardScale.Tier2FontSize", source);
+            "Text(\"Footer\", FurinaBoardScale.Tier2FontSize", source);
     }
 
     [Fact]
@@ -397,8 +403,12 @@ public class SalonPanelPinTests
         Assert.Contains("Color = PanelBack", source);
         Assert.Contains("root.AddChildSafely(BuildResourceRow", source);
         Assert.Contains("root.AddChildSafely(BuildChip(i))", source);
-        // The chips, the line and the notice are all children of the one root.
-        Assert.Contains("Text(\"Notice\"", source);
+        // The chips, the header, the hairlines and the footer are all children
+        // of the one root, and the footer is a LABEL on the panel's ground --
+        // no strip of its own (`EB-644`).
+        Assert.Contains("root.AddChildSafely(BuildFooter());", source);
+        Assert.Contains("private static Label BuildFooter()", source);
+        Assert.DoesNotContain("FootBack", source);
     }
 
     [Fact]
@@ -437,11 +447,20 @@ public class SalonPanelPinTests
         var source = Source("Vfx/Prototype/SalonPanel.cs");
 
         Assert.Equal("FRONT", SalonPanel.FrontWord);
-        Assert.Contains("frontLabel.Visible = front;", source);
-        Assert.Contains("frontLabel.Text = FrontWord;", source);
+        // The word is the seat's STATE (`EB-637`): FRONT with no card under
+        // the cursor, and only on chip 0 when someone is in it.
+        Assert.Equal("FRONT", SalonPanel.SlotWord(
+            0, 1, SalonConstants.MemberSlots, SalonPanel.HoverKind.None, 0));
+        Assert.Equal("", SalonPanel.SlotWord(
+            1, 3, SalonConstants.MemberSlots, SalonPanel.HoverKind.None, 0));
+        Assert.Equal("", SalonPanel.SlotWord(
+            0, 0, SalonConstants.MemberSlots, SalonPanel.HoverKind.None, 0));
+        Assert.Contains("wordLabel.Text = word;", source);
+        Assert.Contains("word: SlotWord(i, company.Count, slots, hover, deploys)",
+                        source);
         // And the frame is still there beside it: two channels, because the
         // dry grey eats one of them.
-        Assert.Contains("frame.Visible = occupied && front;", source);
+        Assert.Contains("frame.Visible = lit || (occupied && front);", source);
     }
 
     // --- source access ----------------------------------------------------

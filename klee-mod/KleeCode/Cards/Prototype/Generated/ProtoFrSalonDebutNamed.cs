@@ -32,10 +32,15 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFrSalonDebutNamed : CustomCardModel, ICharacterCard
+public sealed class ProtoFrSalonDebutNamed : CustomCardModel, ICharacterCard, ISalonDeployCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
+
+    /// <summary>`EB-637`: how many members this card fields, for the
+    /// board's hover preview. The rule is `SalonMemberPower.Deploy`'s.
+    /// </summary>
+    public int SalonDeployCount => 1;
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForEncore(ArmKeywordTips.ForDeploy(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Crabaletta }), this), this);

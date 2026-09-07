@@ -588,7 +588,8 @@ UNMIRRORED: dict[str, str] = {
     "FurinaBoardScale.PanelHeight":
         "presentation: the panel's height in pixels.",
     "FurinaBoardScale.PanelPad":
-        "presentation: every row's inset from the panel edge, in pixels.",
+        "presentation: every row's inset from the panel edge, in pixels -- the "
+        "ONE inset (`EB-644`).",
     "FurinaBoardScale.ResourceRowY":
         "presentation: where the resource line sits inside the panel.",
     "FurinaBoardScale.ResourceRowHeight":
@@ -631,10 +632,12 @@ UNMIRRORED: dict[str, str] = {
         "presentation: the gap between the Encore number and the first pip -- "
         "what 'beside the number' is in pixels, now that where the number ENDS "
         "is measured rather than guessed at.",
-    "FurinaBoardScale.NoticeRowY":
-        "presentation: where the reduced-performance note sits.",
-    "FurinaBoardScale.NoticeRowHeight":
-        "presentation: the notice row's height in pixels.",
+    "FurinaBoardScale.RowGap":
+        "presentation: the one gap between the panel's rows -- header to "
+        "chips, chips to footer -- in pixels (`EB-644`: one rhythm, so the "
+        "three bands read as one object).",
+    "FurinaBoardScale.RuleHeight":
+        "presentation: the hairline drawn in each row gap, in pixels.",
     "SalonPanel.MaxChips":
         "presentation: how many chips the panel can draw before it overflows "
         "the bounds box. Not a cap on the Salon -- `SalonMemberPower.SlotsFor` "
