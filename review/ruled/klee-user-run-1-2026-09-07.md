@@ -1,4 +1,4 @@
-Status: OPEN (two picks, §5; three D and E defaults applied and one read, §6)
+Status: RULED R265 2026-09-07
 
 # Klee, [USER]'s first act-1 run under the overhaul: the concept reads as sound, seven notes triaged
 
@@ -135,3 +135,14 @@ three readers.
 - **`EB-622`** Sucrose's upgrade keeps Exhaust and draws 2; Mona's Omen
   applies 2 Vulnerable; Grounded pays 4 Block, upgrade 6 (D).
 - No shipped-sheet number moves; no stamp moves; nothing measured.
+
+## 7. Ruled (R265, 2026-09-07)
+
+Both picks at their defaults. **Pick 1:** every Hexerei card gives Klee a
+Spark, Universals included; "Klee's own" leaves the faces and the tip, which
+reads "A Companion card whose face prints the word. Playing one gives Klee 1
+Spark, up to 3 a play." Built under `EB-642`; a rule change, so [USER] plays
+it once built. **Pick 2:** the tag stays and the existing package is tested
+first: round 24 or 25 carries a deliberate Hexerei lane (the three readers
+granted beside a coven deck) and reads whether the tag changes what the seat
+drafts and plays. No new readers before that read.
