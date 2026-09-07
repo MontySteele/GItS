@@ -1218,6 +1218,13 @@ class CombatState:
     fanfare_drained_this_card: int = 0
     last_drawn_type: str = ""             # EscapePlan's drawn-card branch
     salon_replacements_this_card: int = 0 # overflow count for current card
+    # `EB-412`. WILL THIS CARD BOW SOMEONE OUT? The same closed form the mod
+    # asks (`SalonMemberPower.WillReplace`), seeded at `resolve_card` start off
+    # the PRE-PLAY company, so a numeric printed BEFORE the card's own deploys
+    # still doubles. The counter above stays the honest count of bows that have
+    # actually happened; every reader of the replacement rule asks
+    # `effects.salon_numerics_replaced`, which is the OR of the two.
+    salon_will_replace_this_card: bool = False
     cards_exhausted_this_turn: int = 0     # EvilEye / ForgottenRitual
     # CARDS THAT REACHED THE EXHAUST PILE THIS PLAYER TURN, counted AT THE
     # APPEND rather than at the AfterCardExhausted hook -- which is what makes

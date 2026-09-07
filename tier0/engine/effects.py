@@ -1739,7 +1739,7 @@ def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
         n = _calc_amount(state, fx["amount_formula"], card)
     else:
         n = _amount(state, fx.get("amount"))
-    if state.salon_replacements_this_card:
+    if salon_numerics_replaced(state):
         n *= C.SALON_REPLACE_NUMERIC_MULT
     state.draw(n)
     state.emit("extra_draw", amount=n)   # A5 velocity accounting
@@ -1917,6 +1917,59 @@ def salon_slots(player) -> int:
     return C.SALON_MEMBER_SLOTS + player.powers.get("salon_cap_up", 0)
 
 
+def salon_numerics_replaced(state: CombatState) -> bool:
+    """THE REPLACEMENT RULE'S QUESTION FOR THE x2 NUMERICS: does this card's
+    draw / Encore / power / aura / heal take `SALON_REPLACE_NUMERIC_MULT`
+    (`EB-412`)?
+
+    SCOPE, AND IT IS DELIBERATE. `SALON_REPLACE_DAMAGE_MULT`'s sites (damage,
+    block, the deferred block) still read the running COUNT and are unchanged,
+    so no card's damage or Block moves off this row -- Curtain Rises prints its
+    damage above its deploy and is not this row's card to reprice. What
+    `EB-412` needed is that MOVING a numeric above the deploys costs it
+    nothing, and the numeric it moved is a power.
+
+    Two terms, and the OR of them is the rule. `salon_replacements_this_card`
+    is the count of bows that have already happened, which is the whole answer
+    for every numeric printed AFTER the card's deploys.
+    `salon_will_replace_this_card` is the pre-play closed form, seeded at
+    `_resolve_card_bound`, and it is what makes a numeric printed BEFORE them
+    read the same -- Endless Waltz prints its crescendo first so the pair it
+    fields performs under the buff, and an ordering that charged a number for
+    that would be a second defect paying for the first.
+
+    The mod has only the second term: `SalonMemberPower.ReplacementDelta` asks
+    `WillReplace` off the pre-play company and the generated bodies capture the
+    scaled value at the top of `OnPlay`. So this OR is what keeps the engines
+    agreeing rather than a sim-side extra."""
+    return bool(state.salon_replacements_this_card
+                or state.salon_will_replace_this_card)
+
+
+def _card_will_replace(state: CombatState, card: Card) -> bool:
+    """`SalonMemberPower.WillReplace`'s twin: does the card's own deploy run
+    bow anybody out, asked against the PRE-PLAY company?
+
+    Iteration i of the deploy loop sees a company of `min(count + i, slots)`,
+    so the last deploy answers for all of them. The count has to be STATIC for
+    the closed form to hold -- a runtime amount falls back to the honest count
+    as it resolves, exactly as `gen_klee_cards._salon_calc_target` disqualifies
+    such a card from the C# closed form."""
+    deploys = 0
+    for fx in getattr(card, "effects", None) or []:
+        if not (fx.get("op") == "apply_power"
+                and fx.get("power") == "salon_member"
+                and fx.get("target", "self") == "self"):
+            continue
+        amount = fx.get("amount", 1)
+        if not isinstance(amount, int):
+            return False
+        deploys += amount
+    if deploys <= 0:
+        return False
+    return len(state.player.salon) + deploys - 1 >= salon_slots(state.player)
+
+
 def _deploy_salon_members(state: CombatState, amount: int,
                           member: str = "crabaletta",
                           free_performance: bool = False) -> None:
@@ -1999,7 +2052,7 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
         # Through _amount, so a power amount can be X, -X or a runtime count
         # like every other op's. Literal ints pass through untouched.
         amount = _amount(state, fx["amount"])
-    if (state.salon_replacements_this_card
+    if (salon_numerics_replaced(state)
             and fx["power"] != "salon_member"):
         amount *= C.SALON_REPLACE_NUMERIC_MULT
     # MoltenFist reads the target's current Vulnerable and applies that many
@@ -2095,7 +2148,7 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
 
 def _op_apply_aura(state: CombatState, fx: dict, card: Card) -> None:
     times = (C.SALON_REPLACE_NUMERIC_MULT
-             if state.salon_replacements_this_card else 1)
+             if salon_numerics_replaced(state) else 1)
     for _ in range(times):
         # R210 Q3: `ElementalHit.ApplyOnly` reaches `AuraCmd.Apply`, which is
         # `PowerCmd.Apply<XAuraPower>` -- the corpse-accepting door. An aura
@@ -2353,7 +2406,7 @@ def _op_spend_spark(state: CombatState, fx: dict, card: Card) -> None:
 def _op_gain_encore(state: CombatState, fx: dict, card: Card) -> None:
     # Her "healing" effects grant Encore (kickoff §4). Unbounded per-combat.
     amount = _amount(state, fx["amount"])
-    if state.salon_replacements_this_card:
+    if salon_numerics_replaced(state):
         amount *= C.SALON_REPLACE_NUMERIC_MULT
     resources.gain_encore(state, amount, "gain_encore_op", card.id)
 
@@ -2892,7 +2945,7 @@ def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
 def _op_heal(state: CombatState, fx: dict, card: Card) -> None:
     p = state.player
     amount = fx["amount"]
-    if state.salon_replacements_this_card:
+    if salon_numerics_replaced(state):
         amount *= C.SALON_REPLACE_NUMERIC_MULT
     healed = min(amount, p.max_hp - p.hp)
     p.hp += healed
@@ -5926,6 +5979,9 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     state.fanfare_drained_this_card = 0
     state.last_drawn_type = ""
     state.salon_replacements_this_card = 0
+    # `EB-412`: the pre-play half of the replacement rule, seeded HERE because
+    # here is the last moment the company is the one the card face read.
+    state.salon_will_replace_this_card = _card_will_replace(state, card)
     state.detonations_at_card_start = state.detonations_total
     # QUARANTINED (C.KLEE_OVERHAUL). Big Badda Boom's play-scoped memory,
     # opened BY THE CARD THAT READS IT and by no other row -- the emitter

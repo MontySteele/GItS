@@ -808,7 +808,11 @@ _ABSENT = object()
 _FREE_PLAY_CONTEXT = (
     "current_card_companion", "reactions_this_card", "kills_this_card",
     "fatal_kills_this_card", "exhausted_this_card", "block_gains_this_card",
-    "salon_replacements_this_card", "detonations_at_card_start",
+    # `EB-412` put the pre-play half of the replacement rule beside the count,
+    # and it is saved for the count's reason: a free play resolved inside a
+    # deploy card must not leave its own answer behind.
+    "salon_replacements_this_card", "salon_will_replace_this_card",
+    "detonations_at_card_start",
     "repeat_requested", "target_had_offelement_aura", "target_had_aura",
     "current_attack_bonus",
     # QUARANTINED (C.COMPANION_OVERHAUL). The element override is per-CARD, set
