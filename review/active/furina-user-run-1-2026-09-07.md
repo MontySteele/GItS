@@ -75,7 +75,7 @@ nearly as prominent as Energy while the members a decision is about are
 tiny, low-contrast and overlapping the health area; the modifier read at
 bottom left is separated from the effects it modifies. Both are taken,
 and the widgets become **one Salon panel**, the shape the follow-up build
-now targets (`EB-630`-`EB-638`):
+now targets (`EB-630`-`EB-640`):
 
 - **One group beside Furina**, above and clear of her HP bar and status
   row, wide enough for three distinct chips, on a restrained dark backing,
@@ -129,6 +129,30 @@ played (who performs, at what number); Encore spent to zero (the reduced
 numbers and the "Reduced performance" note); a Deploy onto the full stage
 (who leaves, the Evoke line with the refund, who enters). [USER] vetoes on
 sight; a veto returns the layout to design, not to the silhouettes.
+
+## 5b. The frames, taken 2026-09-07 on `0.2.2927+proto`
+
+Lane-1 runs of `understudy/scenarios/furina-combat-sequence.yaml`, captured
+by `understudy.harness frame` (Guardrail-7: material, not evidence):
+
+- **Beat 1**, the full stage at Encore 0:
+  `understudy/logs/frames/frame-20260907-163516-furina-seq-t05.png`. The
+  panel above Furina; "Encore 0" with dim pips, "Fanfare 13", "Member bonus
+  +1"; chip 0 "FRONT" with "Evoke 14 Hydro"; "Reduced performance". The
+  chip numbers run together across the chips and the Evoke line sits on
+  the reduced note (`EB-639`).
+- **Beat 2**, the front member performing on a Companion card:
+  `frame-20260907-163926-furina-seq2-t07.png`. In the fight; "Encore 1",
+  "Fanfare 15"; the front Chevalmarin's Evoke line carries "+3 Encore";
+  nothing beside the energy orb; no meter in the status row.
+- **Beat 3**, the fourth Deploy evoking the front member:
+  `frame-20260907-164358-furina-seq4-t09.png`. The Evoke was lethal, so
+  the frame is the loot screen with the panel still drawn behind it
+  (`EB-640`: the panel outlives the fight).
+
+The first frame of the day, before the panel
+(`frame-20260907-154029-furina-strip-t4.png`), is what [USER]'s and GPT's
+notes in §3b were written on.
 
 ## 6. Defaults applied, disclosed
 
