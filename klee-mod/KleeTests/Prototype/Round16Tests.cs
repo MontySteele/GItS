@@ -447,8 +447,12 @@ public class Round16Tests
     // clause `EB-441` needed for the HOVERED case, where the 10 does include
     // the 3, and it reads as 4 + 3 on every other screen.
     //
-    // THE FACE CANNOT ANSWER IT, which is why this row lands on the tip and
-    // not on the description: see the pin below.
+    // THE FIRST REMEDY PUT THE PAIR ON A TIP, on the reading that a face is
+    // registered once and cannot branch. True, and beside the point: the base
+    // game's conditional prints BOTH numbers on one unbranching face, and
+    // `EB-624` gave the row that shape -- so the pin below moved from the tip
+    // to the description, and the tip is gone rather than left restating the
+    // sheet numbers beside a face printing the folded ones.
 
     [Fact]
     public void A_card_cannot_print_one_face_in_a_shop_and_another_in_a_fight()
@@ -472,51 +476,64 @@ public class Round16Tests
     }
 
     [Fact]
-    public void The_debuff_rider_tip_prints_both_numbers_on_every_screen()
+    public void The_face_prints_both_numbers_on_every_screen()
     {
-        // The pair, and which one the face is showing. Interpolated from the
-        // generator's own `debuff_calc_rider` -- the same pair that emits the
-        // vars -- so a repricing cannot leave this quoting a retired number.
+        // `EB-624`. THE PAIR IS THE FACE NOW, in the base game's own shape:
+        // "Deal A damage. If the enemy has a debuff, deal B instead." Both
+        // tokens come from the SAME base and bonus the rider emits the vars
+        // from, so a repricing cannot leave one of them quoting a retired
+        // number.
         var undertow = Source(
             "Cards/Prototype/Generated/ProtoKkUndertow.cs");
         Assert.Contains(
-            "KokomiRiderTips.ForDebuffRider(", undertow);
-        Assert.Contains(", this, 7, 3)", undertow);
+            "\"Deal {PlainDamage:diff()} damage. If the enemy has a debuff, "
+          + "deal {DebuffDamage:diff()} instead.\"", undertow);
         Assert.Contains("new CalculationBaseVar(7m)", undertow);
         Assert.Contains("new ExtraDamageVar(3m)", undertow);
-
-        var body = Printed(typeof(KokomiRiderTips), "ForDebuffRider");
-        // The interpolated numerals are holes in the compiled literals, so
-        // what is read back is the prose around them.
-        Assert.Contains("against an undebuffed enemy", body);
-        Assert.Contains("against a debuffed one", body);
-        Assert.Contains("The face shows whichever applies to the enemy you "
-                      + "are aiming at.", body);
-        // 122 of 135 with both numbers in: 7 and 10, one digit and two.
-        Assert.True(
-            (body.Length + "7".Length + "10".Length) <= 135,
-            body.Length.ToString());
+        Assert.Contains(
+            "new FoldedDamageVar(\"PlainDamage\", 7m, ValueProp.Move)",
+            undertow);
+        Assert.Contains(
+            "new FoldedDamageVar(\"DebuffDamage\", 10m, ValueProp.Move)",
+            undertow);
+        // The number the card DEALS is untouched: still the calculated var
+        // whose multiplier is the rider.
+        Assert.Contains("DamageCmd.Attack(DynamicVars.CalculatedDamage)",
+                        undertow);
+        // And the upgrade moves all three, or the face and the hit part on
+        // the first forge.
+        Assert.Contains("DynamicVars.CalculationBase.UpgradeValueBy(3m);",
+                        undertow);
+        Assert.Contains(
+            "DynamicVars[\"PlainDamage\"].UpgradeValueBy(3m);", undertow);
+        Assert.Contains(
+            "DynamicVars[\"DebuffDamage\"].UpgradeValueBy(3m);", undertow);
     }
 
     [Fact]
-    public void The_debuff_tip_does_not_go_quiet_off_the_board()
+    public void Both_printed_numbers_fold_the_way_the_dealt_one_does()
     {
-        // UNLIKE EVERY OTHER TIP IN THAT FILE, which reads a live meter and
-        // stands down out of combat rather than printing a misleading zero.
-        // These two numbers are the SHEET's, so a shop shelf is exactly the
-        // screen that must have them -- and it is the screen the row was
-        // filed from.
-        var il = Il.Strings(typeof(KokomiRiderTips)
-            .GetMethod("ForDebuffRider", All)!).ToList();
-        Assert.Contains(il, s => s.Contains("undebuffed"));
-        Assert.DoesNotContain(Il.Calls(typeof(KokomiRiderTips)
-                .GetMethod("ForDebuffRider", All)!),
-            c => c.Contains("CreatureOf"));
+        // THE CLAIM OF THE ROW, and the part a headless pin can reach: the
+        // two printed halves go through the same two folds the dealt number
+        // does -- the game's own dealer hook, inherited from `DamageVar`
+        // (Strike's var), and `SimDamagePipeline`'s target side, added by
+        // `FoldedDamageVar` exactly as `FrontFoldedDamageVar` adds it. The
+        // NUMBERS need a live combat (KleeTests/README.md, "The headless
+        // boundary"), which is where the delivered-versus-printed read is.
+        var folded = typeof(FoldedDamageVar);
+        Assert.Equal(
+            typeof(DamageVar),
+            folded.BaseType);
+        var calls = Il.Calls(
+            folded.GetMethod("UpdateCardPreview", All)!).ToList();
+        Assert.Contains(calls, c => c.Contains("TargetMods"));
+        Assert.Contains(calls, c => c.Contains("FrontEnemy"));
+        Assert.Contains(calls, c => c.Contains("UpdateCardPreview"));
 
-        Assert.Equal("KLEEMOD-DEBUFF_RIDER", KokomiRiderTips.DebuffRiderKey);
-        Assert.Contains(
-            "[Cards.KokomiRiderTips.DebuffRiderKey + \".title\"]",
-            Source("KleeMod.cs"));
+        // And the tip that used to carry the pair is gone rather than left
+        // restating the sheet numbers beside a face printing folded ones.
+        Assert.Null(typeof(KokomiRiderTips).GetMethod("ForDebuffRider", All));
+        Assert.DoesNotContain("DebuffRiderKey", Source("KleeMod.cs"));
     }
 
     /// <summary>One ratified sheet, read whole, off the same walk.</summary>

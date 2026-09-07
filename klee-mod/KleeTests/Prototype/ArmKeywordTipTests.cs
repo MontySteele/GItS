@@ -337,7 +337,9 @@ public class ArmKeywordTipTests
         // off the sentence -- `powered: false` at the carry-out answers for
         // every other term of hers at once.
         Assert.Contains("folds in as you write it", body);
-        Assert.Contains("counts at the morning", body);
+        // `EB-623`: "morning" is retired from every printed surface.
+        Assert.Contains("counts next turn", body);
+        Assert.DoesNotContain("morning", body);
         Assert.DoesNotContain("Weak", body);
         Assert.DoesNotContain("never a Minion", body);
 
@@ -358,7 +360,9 @@ public class ArmKeywordTipTests
         // `EB-599` PUT 31 BACK for a rule a class name cannot state: the line
         // folds her Strength at writing time and nothing of the target's, so
         // the clause is about WHEN each side is read.
-        Assert.Equal(216, rendered.Length);
+        // `EB-623` TOOK FIVE OFF for free: "counts at the morning" became
+        // "counts next turn", the same fact in the base game's timing words.
+        Assert.Equal(211, rendered.Length);
         Assert.Contains("A carry-out is not a hit: no when-hit power fires.",
                         body);
     }
@@ -441,7 +445,8 @@ public class ArmKeywordTipTests
         // cannot arrive with a different shape by accident.
         var attaches = Attaches().ToList();
 
-        // SIXTEEN: FOURTEEN KEYWORDS AND TWO RIDERS. Draft 6 cut Tide, Surge, Exert and the Garment as
+        // SEVENTEEN KEYWORDS AND FIVE RIDERS (`EB-625` made the words
+        // fifteen). Originally: SIXTEEN, FOURTEEN KEYWORDS AND TWO RIDERS. Draft 6 cut Tide, Surge, Exert and the Garment as
         // keywords and their four `For*` methods left with the rules they
         // defined, taking the table from eleven to seven; the Furina reframe's
         // slice two put Deploy, Evoke and Drain on it (2026-09-02), and R244
@@ -499,7 +504,14 @@ public class ArmKeywordTipTests
         // every charge it takes -- so Jumpy Dumpty's Mine-on-ALL survives it
         // and grows in bulk (Klee r21 lane 1, "completely undiscoverable
         // except by accident").
-        Assert.Equal(19, attaches.Count);
+        //
+        // THE TWENTIETH IS `EB-625`'s `ForCasket`, and it IS a keyword: the
+        // relic Shell Guard's payout hangs off. "Whenever the Tamakushi
+        // Casket strikes" named a thing nothing on screen defined, and
+        // [USER]'s act-1 run read the card and asked how the Casket could
+        // strike at all. `Grounded`'s shape and `Oz`'s, one kit over.
+        Assert.Equal(20, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForCasket");
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.Contains(attaches, m => m.Name == "ForCovenSpark");
         Assert.Contains(attaches, m => m.Name == "ForOpeningStage");

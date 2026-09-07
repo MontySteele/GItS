@@ -91,9 +91,12 @@ public class Round19Tests
         // nothing of the target's, so the clause is about WHEN each side is
         // read. A seat committing a turn on a number needs to know which half
         // of it can still move.
+        //
+        // `EB-623` TOOK FIVE OFF for free: "counts at the morning" became
+        // "counts next turn", the same fact in the base game's timing words.
         var rendered = PlanTip()
             .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
-        Assert.Equal(216, rendered.Length);
+        Assert.Equal(211, rendered.Length);
         Assert.EndsWith("A carry-out is not a hit: no when-hit power fires.",
                         rendered);
     }
@@ -699,10 +702,12 @@ public class Round19Tests
 
         var body = Printed(typeof(KokomiRiderTips), "MorningDamageBody");
         Assert.Contains(", plus ", body);
+        // `EB-623`: the clause says WHEN in the base game's timing words.
         Assert.Contains("for each [gold]Plan[/gold] the "
-                      + "[gold]Bake-Kurage[/gold] carried out this morning",
+                      + "[gold]Bake-Kurage[/gold] carried out at the start of "
+                      + "this turn",
                         body);
-        Assert.Contains("; this morning: ", body);
+        Assert.Contains("; it carried out ", body);
 
         Assert.Equal("KLEEMOD-MORNING_DAMAGE_RIDER",
                      KokomiRiderTips.MorningDamageKey);
@@ -715,7 +720,7 @@ public class Round19Tests
     public void EB539_off_the_board_the_rule_stands_without_a_count()
     {
         // The `FurinaRiderTips` rule every tip in that file keeps: a shop
-        // shelf and a deck view have no morning, and "this morning: 0" printed
+        // shelf and a deck view have no morning, and "it carried out 0" printed
         // there would be the same false certainty the row was filed on. So the
         // body asks for an owner and a combat before it counts.
         var calls = Il.Calls(typeof(KokomiRiderTips)
