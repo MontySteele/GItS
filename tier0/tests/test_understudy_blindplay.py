@@ -3423,7 +3423,8 @@ def test_an_empty_morning_says_so_rather_than_printing_a_zero():
     state reads as a state. Nothing pending is nothing to say."""
     page = blindplay.render(blindplay.observation(
         plans_combat_state(dict(TWO_PLANS, pending=0, queue=[]))))
-    assert "Nothing is planned. The morning is empty." in page
+    assert ("Nothing is planned. Nothing will be carried out at the start "
+            "of your next turn.") in page
     assert "in this order" not in page
 
 
@@ -3535,7 +3536,7 @@ def test_the_plan_keywords_aim_clause_stays_the_pointer():
     plan = blindplay.ARM_KEYWORDS["Plan"]
     assert "front non-Minion, or ALL, Minions too" in plan
     assert ("Your Strength folds in as you write it; the enemy's Vulnerable "
-            "counts at the morning.") in plan
+            "counts next turn.") in plan
 
 
 def test_a_board_with_no_jellyfish_is_told_no_aim_rule():
@@ -4137,7 +4138,8 @@ def test_an_on_play_firing_prints_under_its_own_heading():
                            "moved": [{"target": "Nibbit", "combat_id": "1",
                                       "amount": 7, "dead": False}]}]))))
     assert "carried these out at the start of this turn" not in page
-    assert "the moment each was written, and not this morning" in page
+    assert ("the moment each was written, and not at the start of the turn"
+            in page)
     assert "- Bake-Kurage: War Council, 5" in page
     assert "- Nibbit lost 7 HP" in page
     # The queue below still says the Plan is waiting for the morning, which
@@ -4793,7 +4795,7 @@ def test_the_plan_word_says_when_each_side_of_the_line_is_read():
     plan = blindplay.ARM_KEYWORDS["Plan"]
 
     assert "Your Strength folds in as you write it" in plan
-    assert "the enemy's Vulnerable counts at the morning" in plan
+    assert "the enemy's Vulnerable counts next turn" in plan
     assert "Weak" not in plan
 
 
@@ -6101,7 +6103,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Vulnerable at the morning.
         "Plan": [", paid now; next turn: front ",
                  " folds in as you write it; the ",
-                 " counts at the morning. A ",
+                 " counts next turn. A ",
                  "carry-out is not a hit: no when-hit power fires."],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],

@@ -742,7 +742,12 @@ public static class ArmKeywordTips
     /// The clause says WHEN each side is read, which is the half the old
     /// two-item list could not carry.
     ///
-    /// 135 CHARACTERS RENDERED, at the ceiling and not over it: "the front
+    /// `EB-623` RETIRED "the morning" FROM THE PRINTED CLAUSE: the enemy's
+    /// Vulnerable "counts next turn", which is the same fact in the base
+    /// game's own timing words and five characters cheaper.
+    ///
+    /// 135 CHARACTERS RENDERED WHEN THAT CLAUSE STILL SAID "morning", at the
+    /// ceiling and not over it: "the front
     /// enemy" compressed to "front non-Minion" and "or ALL if it says so"
     /// to "or ALL", which is what paid for the two new facts. The
     /// all-Minions board is the one corner left unsaid -- `FrontTarget`
@@ -776,7 +781,7 @@ public static class ArmKeywordTips
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front "
           + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. "
           + "Your [gold]Strength[/gold] folds in as you write it; the "
-          + "enemy's [gold]Vulnerable[/gold] counts at the morning. A "
+          + "enemy's [gold]Vulnerable[/gold] counts next turn. A "
           + "carry-out is not a hit: no when-hit power fires.");
 
     /// <summary>

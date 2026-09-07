@@ -885,7 +885,7 @@ ARM_KEYWORDS: dict[str, str] = {
     # clause now says WHEN each side is read.
     "Plan": ("On the Bake-Kurage, paid now; next turn: front non-Minion, or "
              "ALL, Minions too. Your Strength folds in as you write it; the "
-             "enemy's Vulnerable counts at the morning. A carry-out is not a "
+             "enemy's Vulnerable counts next turn. A carry-out is not a "
              "hit: no when-hit power fires."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),

@@ -375,7 +375,7 @@ public static class KleeMod
                     // damage, already including 3 for each Plan" is a
                     // contradiction on the one board where the fold is zero.
                     [Cards.KokomiRiderTips.MorningDamageKey + ".title"] =
-                        "Damage from the morning",
+                        "Damage from carried-out Plans",
                     // QUARANTINED (R213 E1): the Charge KEYWORD's title. The
                     // BODY is built live in KokomiRiderTips, because it
                     // quotes CHARGE_PER_EXHAUST and reads the current bank --

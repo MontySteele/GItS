@@ -326,7 +326,7 @@ public static class KokomiRiderTips
     /// cannot disagree with the hit. Do not re-derive it here.
     ///
     /// OUT OF COMBAT THE RATE STANDS ALONE -- a shop shelf and a deck view
-    /// have no morning, and a "this morning: 0" printed there would be the
+    /// have no morning, and an "it carried out 0" printed there would be the
     /// same false certainty the row was filed on. That is the FurinaRiderTips
     /// rule, kept by every tip in this file.
     /// </summary>
@@ -343,12 +343,16 @@ public static class KokomiRiderTips
     private static string MorningDamageBody(
         CardModel card, int baseDamage, int per)
     {
+        // `EB-623`: the printed clause says WHEN in the base game's own timing
+        // words -- "at the start of this turn" -- and the live count says how
+        // many. The accessor and its name are unchanged; only the words are.
         var rule = $"{baseDamage}, plus {per} for each [gold]Plan[/gold] the "
-                 + "[gold]Bake-Kurage[/gold] carried out this morning";
+                 + "[gold]Bake-Kurage[/gold] carried out at the start of this "
+                 + "turn";
         var owner = TipOwner.CreatureOf(card);
         if (owner == null || card.CombatState == null) return rule + ".";
 #if PROTOTYPE_CARDS
-        return rule + "; this morning: "
+        return rule + "; it carried out "
              + Powers.KokomiOverhaulLedger.For(owner).PlansThisMorning + ".";
 #else
         return rule + ".";

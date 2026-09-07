@@ -337,7 +337,9 @@ public class ArmKeywordTipTests
         // off the sentence -- `powered: false` at the carry-out answers for
         // every other term of hers at once.
         Assert.Contains("folds in as you write it", body);
-        Assert.Contains("counts at the morning", body);
+        // `EB-623`: "morning" is retired from every printed surface.
+        Assert.Contains("counts next turn", body);
+        Assert.DoesNotContain("morning", body);
         Assert.DoesNotContain("Weak", body);
         Assert.DoesNotContain("never a Minion", body);
 
@@ -358,7 +360,9 @@ public class ArmKeywordTipTests
         // `EB-599` PUT 31 BACK for a rule a class name cannot state: the line
         // folds her Strength at writing time and nothing of the target's, so
         // the clause is about WHEN each side is read.
-        Assert.Equal(216, rendered.Length);
+        // `EB-623` TOOK FIVE OFF for free: "counts at the morning" became
+        // "counts next turn", the same fact in the base game's timing words.
+        Assert.Equal(211, rendered.Length);
         Assert.Contains("A carry-out is not a hit: no when-hit power fires.",
                         body);
     }

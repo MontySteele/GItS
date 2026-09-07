@@ -193,7 +193,8 @@ def _render_carry_out(pl: dict[str, Any]) -> list[str]:
         out += _carry_out_rows(pl["carried_out"])
     if pl["fired_now"]:
         out.append(f"- The {pl['pet_name']} carried these out THIS TURN, the "
-                   "moment each was written, and not this morning:")
+                   "moment each was written, and not at the start of the "
+                   "turn:")
         out += _carry_out_rows(pl["fired_now"])
     return out
 
@@ -855,7 +856,8 @@ def render(obs: dict[str, Any]) -> str:
             # moved 3.
             out += _render_carry_out(pl)
             if not pl["queue"]:
-                out.append("- Nothing is planned. The morning is empty.")
+                out.append("- Nothing is planned. Nothing will be carried "
+                           "out at the start of your next turn.")
             else:
                 out.append(
                     f"- Planned, and carried out at the start of your next "
