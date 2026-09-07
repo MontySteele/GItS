@@ -97,11 +97,13 @@ which is which. [USER] read that mark as noise.
 1. **(default)** Every Hexerei card pays the Spark, Universals included.
    "Klee's own" leaves the faces and the tip; the tip becomes "A Companion
    card whose face prints the word. Playing one gives Klee 1 Spark, up to 3
-   a play." One word, one rule. The cost is that a Universal met in a shop
-   or event pays like a Personal, which is a small gain of Sparks on a
-   channel the rounds have not found scarce. Both engines and LAW:145's
-   kit declaration move with it, so this is the rule change that the kit
-   plays once more.
+   a play." One word, one rule; "gives", never "pays", since the seats
+   read "pay" as a surcharge (GPT's review agrees). The cost is that a
+   Universal met in a shop or event grants like a Personal, a small gain
+   of Sparks on a channel the rounds have not found scarce, and round 25's
+   Spark-spending read is where that gain is watched. Both engines and
+   LAW:145's kit declaration move with it, so this is the rule change that
+   the kit plays once more.
 2. Keep the rule, drop the face text, and let the tip say "a Companion
    from Klee's coven". Readable only by a player who already knows which
    companions are in her coven; the r20 lane-1 defect returns.
@@ -111,13 +113,17 @@ which is which. [USER] read that mark as noise.
 card on the table reads is invisible, and one act-1 run met none of its
 three readers.
 
-1. **(default)** Keep the tag; two Common readers join the pool in pool
-   pass two (authored by Claude, through the audit door), so an act-1 run
-   meets one. The pool grows to 47 and the pass says what they displace.
-2. Keep the tag as it is and read again after rounds 24 and 25 and
-   [USER]'s next run; the readers may simply not have been rolled.
+1. **(default)** Keep the tag and test the package that exists before
+   adding to it: round 24 or 25 carries a deliberate Hexerei lane (Coven
+   Errand, Witches' Circle and Venti's stand-in granted beside a coven
+   deck), and the read is whether the tag changes what the seat drafts and
+   plays when it meets it. GPT's review (2026-09-07) made the case: more
+   readers buy access, not interest, and Coven Errand is Common already.
+2. Keep the tag and add two Common readers in pool pass two (Claude
+   authors, through the audit door), so an act-1 run meets one; the pool
+   grows to 47 and the pass says what they displace.
 3. Drop the tag. The three readers leave or are rewritten without it, and
-   the Spark pays on every Companion play.
+   the Spark comes on every Companion play.
 
 ## 6. Defaults applied (D and E), disclosed
 
