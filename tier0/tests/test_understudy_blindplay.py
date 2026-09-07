@@ -11108,3 +11108,79 @@ def test_an_icon_and_its_sentence_that_cannot_agree_say_so():
         {"type": "Attack", "label": "6x3", "title": "Aggressive",
          "description": "This enemy intends to Attack 3 times."}]
     assert blindplay.INTENT_NUMBER_DISAGREES not in blindplay.observe(state)
+
+
+# --- `EB-408`: ONE CARD, ONE BUFF, TWO PRINTED NUMBERS ----------------------
+
+
+def _voyage_board(stacks: int = 5, hand: list | None = None) -> dict:
+    """The recorded turn with a flat Attack buff standing on the player.
+
+    `AttackUpThisTurnPower`'s own words, verbatim off the C# localisation
+    (`KleeCode/Powers/CompanionPowers.cs`), with the markup the wire carries:
+    the note is matched on that sentence and never on the title, so the fixture
+    has to send the sentence.
+    """
+    state = copy.deepcopy(combat_state())
+    state["player"]["status"] = [
+        {"title": "Fantastic Voyage", "name": "Fantastic Voyage",
+         "amount": stacks, "type": "Buff",
+         "description": ("Your Attacks deal [blue]" + str(stacks)
+                         + "[/blue] additional damage this turn.")}]
+    if hand is not None:
+        state["player"]["hand"] = hand
+    return state
+
+
+def test_a_flat_attack_buff_says_where_each_printed_number_came_from():
+    """`EB-408`. THE SAME STRIKE, THE SAME BUFF, TWO NUMBERS.
+
+    "Sara's `Fantastic Voyage 5` was **not** folded in the first time -- fight
+    3 round 2 printed `Strike -- Deal 6 damage` while the buff was up, and it
+    hit for 11 -- but **was** folded in later (fight 4 round 3 printed `Deal 11
+    damage`, same buff, same card)" (Kokomi r10 run 2 (c) 3).
+
+    A card's body is the game's own resolved description, carried as one wire
+    field and printed here unchanged: there is no base, no modifier list and no
+    second field on the feed, so this page can neither fold the buff in nor say
+    whether the game already has. What it owes is the provenance, printed where
+    the buff and the faces are both on the screen.
+
+    Seen to FAIL: the hand printed its numbers with nothing said about the
+    buff sitting three lines above them.
+    """
+    page = blindplay.observe(_voyage_board())
+    assert "Fantastic Voyage 5" in page
+    assert blindplay.ATTACK_BUFF_NOTE.format(
+        name="**Fantastic Voyage**", n=5) in page
+    # The note is about the hand, so it sits under it and above the enemies.
+    assert page.index("## Your hand") < page.index("additional damage on your")
+    assert page.index("additional damage on your") < page.index(
+        "## The other side")
+
+
+def test_no_buff_and_no_attack_face_take_no_line():
+    """BOTH HALVES ON THE SCREEN, `_per_hit_note`'s rule. A board with no such
+    buff raises no question, and neither does one whose hand holds no Attack
+    printing a figure -- the note is about a number a reader is pricing off."""
+    assert "additional damage on your Attacks" not in blindplay.observe(
+        combat_state())
+    skills = [c for c in combat_state()["player"]["hand"]
+              if c["type"] != "Attack"]
+    assert skills, "the recorded hand must carry a non-Attack row"
+    assert "additional damage on your Attacks" not in blindplay.observe(
+        _voyage_board(hand=skills))
+
+
+def test_the_same_state_prints_the_same_face_on_every_observe():
+    """`EB-408`'s acceptance, and the half this side can actually hold: the
+    render is a pure function of the state it is handed, so two observes of ONE
+    state cannot print two numbers for one card. The seat's two numbers came
+    from two states a fight apart, and the difference is the game's."""
+    state = _voyage_board()
+    first, second = blindplay.observe(state), blindplay.observe(state)
+    assert first == second
+    assert "Deal 6 damage" in first
+    # And the buff does not move the printed face on this side either -- the
+    # page prints the feed's own string and does no arithmetic on it.
+    assert "Deal 6 damage" in blindplay.observe(combat_state())

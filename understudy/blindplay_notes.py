@@ -352,6 +352,40 @@ PER_HIT_NOTE = (
     "number, so it cannot say which of the two this is -- both have been "
     "seen, on one-hit and multi-hit parts of the same fight.*")
 
+# `EB-408`. THE SAME CARD, THE SAME BUFF, TWO PRINTED NUMBERS.
+#
+# THE FIND (Kokomi r10 run 2 (c) 3). "Weak on me *was* folded into printed
+# numbers (Oath showed 2, Slack Water 3). Sara's `Fantastic Voyage 5` was
+# **not** folded in the first time -- fight 3 round 2 printed `Strike -- Deal 6
+# damage` while the buff was up, and it hit for 11 -- but **was** folded in
+# later (fight 4 round 3 printed `Deal 11 damage`, same buff, same card)."
+#
+# WHERE THE NUMBER COMES FROM, and it is `INTENT_SOURCE_NOTE`'s answer one side
+# of the board over: a card's printed body is the game's own resolved
+# `SmartDescription`, carried on the wire as `description` and printed here
+# unchanged (`blindplay_faces._card_face`). There is no base anywhere on the
+# feed, no modifier list and no second field -- so this page cannot fold a buff
+# in, cannot unfold one, and cannot tell which of the two a given row is. The
+# render is a pure function of the state it is given, so TWO OBSERVES OF ONE
+# STATE cannot disagree; the two numbers the seat read came from two states,
+# and the difference is the game's.
+#
+# SO WHAT IS OWED IS THE PROVENANCE, printed where a reader is about to price a
+# hit off a row that may or may not already count the buff. Matched on the
+# BUFF'S OWN SENTENCE rather than on its name -- `_PLAYS_YOUR_TURN`'s
+# discipline -- so a second power worded the same way gets the same line and a
+# renamed one does not go silent. `PER_HIT_NOTE` is the twin for a modifier
+# that is per HIT and meets a multi-hit icon; this one is about the flat term
+# on the player's own Attacks and the faces in front of them.
+ATTACK_BUFF_NOTE = (
+    "*You are carrying {name} {n}, and its own line says that is additional "
+    "damage on your Attacks. The damage printed on each Attack above is the "
+    "one figure the game's data feed sends for that card, printed here "
+    "unchanged: this page has no base, no modifier list and no second source "
+    "for it, and does no arithmetic on it. So a row may already count your "
+    "{n} or may not, and this page cannot say which -- both have been seen "
+    "under one live buff.*")
+
 # `EB-349`, the third half. A ONE-USE DISCOUNT PRICED ONTO EVERY ROW.
 #
 # THE FIND (Kokomi r4d). Pounce reads "Deal 14 damage. The next Skill you play

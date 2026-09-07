@@ -14,7 +14,8 @@ from typing import Any
 from understudy import qa_packet
 from understudy.blindplay_board import (PHASE_FLIP_LINE, _pulse_phrase,
                                         enchant_moves_line)
-from understudy.blindplay_notes import (AURA_NOTE, AUTO_TURN_NOTE,
+from understudy.blindplay_notes import (ATTACK_BUFF_NOTE, AURA_NOTE,
+                                        AUTO_TURN_NOTE,
                                         BUFF_INTENT_CLAUSE,
                                         CLONE_NOTE, EMPTY_SHELVES_NOTE,
                                         INTENT_NUMBER_DISAGREES,
@@ -474,6 +475,15 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
 # the same way gets the same line and a renamed one does not go silent.
 _PLAYS_YOUR_TURN = re.compile(r"plays your (?:\w+ )?turn for you", re.I)
 _PER_HIT_DAMAGE = re.compile(r"additional damage from attacks", re.I)
+# `EB-408`. The flat term on the PLAYER's own Attacks, which is a different
+# sentence from the debuff above and belongs to a different note: Fantastic
+# Voyage prints "Your Attacks deal 5 additional damage this turn." The figure
+# between the two halves is the game's own hole and reaches this list with its
+# `[blue]` markup still on it (`qa_packet._powers` copies the description as
+# sent), so the pattern steps over whatever sits between them rather than
+# spelling a number it would then have to un-tag.
+_ATTACK_DAMAGE_BUFF = re.compile(
+    r"your attacks deal[^.]*additional damage", re.I)
 _MULTI_HIT_LABEL = re.compile(r"^\s*(\d+)\s*[x×]\s*(\d+)\s*$")
 _ONE_USE_DISCOUNT = re.compile(r"the next (\w+) you play costs", re.I)
 
@@ -532,6 +542,30 @@ def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
 
 
 _NUMBER = re.compile(r"\d+")
+
+
+def _attack_buff_note(you: dict[str, Any],
+                      hand: list[dict[str, Any]]) -> list[str]:
+    """`EB-408`: a flat Attack buff beside the faces it may or may not be in.
+
+    BOTH HALVES ON THIS SCREEN, `_per_hit_note`'s rule: a status of the
+    player's whose printed sentence says its number is additional damage on
+    Attacks, and an Attack in hand printing a number of its own. The first such
+    status carries the note; it is one rule about the hand and not a line per
+    card. A hand with no Attack in it, or one whose Attacks print no figure,
+    raises no question and gets no line.
+    """
+    buff = next((p for p in you.get("powers") or []
+                 if _ATTACK_DAMAGE_BUFF.search(str(p.get("text") or ""))
+                 and isinstance(p.get("stacks"), int)), None)
+    if not buff:
+        return []
+    if not any(str(card.get("kind") or "").strip().casefold() == "attack"
+               and _NUMBER.search(str(card.get("text") or ""))
+               for card in hand):
+        return []
+    return ["", ATTACK_BUFF_NOTE.format(name=f"**{buff['name']}**",
+                                        n=buff["stacks"])]
 
 
 def _numbers_disagree(intent: dict[str, str]) -> bool:
@@ -1045,6 +1079,10 @@ def render(obs: dict[str, Any]) -> str:
         # `EB-349`: the one-use discount, under the hand it is priced onto.
         if c["hand"]:
             out += _one_use_discount_note(you)
+        # `EB-408`: and where a flat Attack buff is up, where the damage
+        # figure on each of those faces came from -- one field of the feed,
+        # printed unchanged, which may or may not already count the buff.
+        out += _attack_buff_note(you, c["hand"])
         # `EB-567`. THE WINDOW, BEFORE THE REFUSAL RATHER THAN AFTER IT. Under
         # the arm the Spotlight's price is the opening Encore exactly, and
         # both r14 seats learned that from a refusal one action too late.
