@@ -13,6 +13,7 @@ using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
+using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
@@ -946,6 +947,28 @@ public sealed class FurinaResourceHooks : AbstractModel
         _instance ??= ModelDb.GetById<FurinaResourceHooks>(
             ModelDb.GetId<FurinaResourceHooks>());
         yield return _instance;
+    }
+
+    /// <summary>
+    /// THE COMBAT-END SEAM, and the Salon's display leaves with the combat
+    /// (`EB-640`). Both of the base game's end hooks call the same teardown:
+    /// `AfterCombatEnd` is the one every fight reaches and `AfterCombatVictory`
+    /// runs later in the same `EndCombatInternal`, still before the reward
+    /// screen opens -- which is the frame the row was filed on, a lethal Evoke
+    /// leaving the panel drawn behind the Loot dialog. The call is by NODE and
+    /// takes no seat, so an end that holds no player cannot throw here.
+    /// </summary>
+    public override Task AfterCombatEnd(CombatRoom room)
+    {
+        Vfx.SalonVisualsBridge.Teardown();
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc cref="AfterCombatEnd"/>
+    public override Task AfterCombatVictory(CombatRoom room)
+    {
+        Vfx.SalonVisualsBridge.Teardown();
+        return Task.CompletedTask;
     }
 
     public override Task BeforeCardPlayed(CardPlay cardPlay)

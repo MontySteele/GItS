@@ -123,11 +123,14 @@ public class SalonPanelResourceLineTests
         var step = SalonConstants.FocusPerFanfare;
         var seat = Stage(0, SalonMember.Crabaletta);
 
-        Assert.Equal("- Fanfare 0 - Member bonus +0",
+        // `EB-641`: LINE 2 of a two-line header, and as short as it can be
+        // while still saying what the meter is buying. The chips it lands on
+        // are six pixels below it.
+        Assert.Equal("Fanfare 0 · Bonus +0",
                      SalonPanel.MeterText(seat.Creature));
 
         FurinaResources.GainFanfare(seat.Creature, 2 * step);
-        Assert.Equal($"- Fanfare {2 * step} - Member bonus +2",
+        Assert.Equal($"Fanfare {2 * step} · Bonus +2",
                      SalonPanel.MeterText(seat.Creature));
 
         // THE BONUS IS THE ONE THING FANFARE DOES under the arm, and the panel
@@ -202,14 +205,20 @@ public class SalonPanelResourceLineTests
     }
 
     [Fact]
-    public void Every_pip_slot_is_drawn_at_zero_rather_than_the_row_vanishing()
+    public void Only_the_pips_the_meter_holds_are_drawn_at_all()
     {
-        // `EB-635`'s other half: a strip that shrank at zero would make an
-        // empty meter look like a missing row, which is what was filed.
+        // `EB-635`'s other half was that a strip which SHRANK at zero would
+        // make an empty meter look like a missing row. The answer then was to
+        // draw all six slots and dim the unpaid ones; `EB-641` corrects it,
+        // because an empty TRACK behind the lit pips draws a MAXIMUM and Encore
+        // has none -- one pip out of six reads as nearly out of something the
+        // player is not. The row cannot vanish either way: the WORD and the
+        // NUMBER lead the line and they are always drawn.
         var source = Source("Vfx/Prototype/SalonPanel.cs")
             .Replace("\r\n", "\n");
-        Assert.Contains("pip.Visible = true;", source);
-        Assert.Contains("pip.Color = i < drawn ? PipFull : PipEmpty;", source);
+        Assert.Contains("pip.Visible = i < drawn;", source);
+        Assert.Contains("pip.Color = PipFull;", source);
+        Assert.Contains("encore.Text = EncoreText(owner);", source);
 
         // And the Spotlight's price is NOT permanently coloured into them any
         // more: two marked pips were a standing claim about one card, in a
@@ -259,8 +268,9 @@ public class SalonPanelResourceLineTests
         var wet = SalonMemberPower.TickValue(
             seat.Creature, SalonMember.Crabaletta, paid: true);
         Assert.True(dry < wet);
-        Assert.Equal($"{dry} Hydro",
-            SalonPanel.NextAct(seat.Creature, SalonMember.Crabaletta, paid));
+        Assert.Equal($"{dry} damage",
+            SalonPanel.EffectText(seat.Creature, SalonMember.Crabaletta,
+                                  paid));
     }
 
     // === 4. the scale table ==============================================
@@ -288,9 +298,10 @@ public class SalonPanelResourceLineTests
         foreach (var name in new[]
                  {
                      "Tier1FontSize", "Tier2FontSize", "Tier3FontSize",
-                     "PanelWidth", "PanelHeight", "ChipWidth", "ChipHeight",
-                     "FaceHeight", "ChipPitchMax", "PipWidth", "PipHeight",
-                     "PipGap", "ResourceFontSize",
+                     "PanelWidthFor", "PanelHeight", "ChipWidthFor",
+                     "ChipHeight", "ChipPad", "ChipGap", "FaceHeight",
+                     "PipWidth", "PipHeight", "PipGap", "ResourceFontSize",
+                     "TextWidth", "FitFontSize",
                  })
         {
             Assert.Contains($"FurinaBoardScale.{name}", source);

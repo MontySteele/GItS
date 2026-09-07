@@ -539,13 +539,19 @@ UNMIRRORED: dict[str, str] = {
         "than collapsing to nothing.",
     "SparkCounter.CountFontSize":
         "presentation: the Spark count's font size.",
-    # FURINA'S BOARD (`EB-627`, `EB-628`, `EB-633`, `EB-634`, `EB-635`), which
-    # is ONE panel and one table. `EB-634` replaced four elements sizing
-    # themselves with `FurinaBoardScale`: three TIERS -- what a performance
-    # pays, who is on stage and what is in the bank, and everything that
-    # qualifies something else -- plus the panel's geometry inside Furina's own
-    # 240-wide bounds box. Every number is a pixel or a font size and the sim
-    # models neither.
+    # FURINA'S BOARD (`EB-627`, `EB-628`, `EB-633`, `EB-634`, `EB-635`,
+    # `EB-639`, `EB-641`), which is ONE panel and one table. `EB-634` replaced
+    # four elements sizing themselves with `FurinaBoardScale`: three TIERS --
+    # what a performance pays, who is on stage and what is in the bank, and
+    # everything that qualifies something else -- plus the panel's rows, its
+    # paddings, and the character table its widths are MEASURED with. Every
+    # number is a pixel, a font size or a fraction of one, and the sim models
+    # none of them.
+    #
+    # The panel's own WIDTH is not a constant anywhere any more: `EB-639` filed
+    # text running together across the chips because the box was the creature's
+    # 240-wide bounds and the strings were never measured against it, so the
+    # width is computed in `SalonPanel` from the words the panel prints.
     #
     # What the panel SAYS is rules and none of it is written here: the chip
     # count is `SalonMemberPower.SlotsFor`, the act is `TickValue`, the pip
@@ -564,9 +570,19 @@ UNMIRRORED: dict[str, str] = {
         "the size Klee's badge mirrors `NStarCounter`'s number at -- so "
         "`EB-634`'s rule that the Fanfare number is smaller than the orb's is "
         "enforced against a measured figure rather than a guess.",
-    "FurinaBoardScale.PanelWidth":
-        "presentation: the panel's width, the creature's own 240-wide bounds "
-        "box, so it cannot overhang into the enemy intent or targeting lanes.",
+    "FurinaBoardScale.WideCharEm":
+        "presentation: how wide a digit, a capital or an unknown glyph is as a "
+        "fraction of the font size. The conservative half of `EB-639`'s fit "
+        "table -- there is no live font where the panel is built and none at "
+        "all in the test host, so the width is a documented table that "
+        "OVER-estimates: too wide is a box, too narrow is a collision.",
+    "FurinaBoardScale.NarrowCharEm":
+        "presentation: ordinary lowercase, as a fraction of the font size.",
+    "FurinaBoardScale.SpaceEm":
+        "presentation: the space, as a fraction of the font size.",
+    "FurinaBoardScale.PunctEm":
+        "presentation: punctuation and the thin lowercase letters, as a "
+        "fraction of the font size.",
     "FurinaBoardScale.PanelHeight":
         "presentation: the panel's height in pixels.",
     "FurinaBoardScale.PanelPad":
@@ -577,27 +593,42 @@ UNMIRRORED: dict[str, str] = {
         "presentation: the resource line's height in pixels.",
     "FurinaBoardScale.ChipsRowY":
         "presentation: where the chip row sits inside the panel.",
-    "FurinaBoardScale.ChipWidth":
-        "presentation: one chip's width in pixels.",
-    "FurinaBoardScale.ChipHeight":
-        "presentation: one chip's height in pixels.",
+    "FurinaBoardScale.ChipPad":
+        "presentation: the padding inside a chip, left and right of its "
+        "widest text. The chip's WIDTH is no longer a constant at all: it is "
+        "measured from the strings the panel prints (`SalonPanel."
+        "ChipContentWidth`), which is what `EB-639` filed.",
+    "FurinaBoardScale.ChipGap":
+        "presentation: the gap between two chips, in pixels.",
+    "FurinaBoardScale.IconGap":
+        "presentation: the gap between the number and the element glyph "
+        "beside it, in pixels.",
+    "FurinaBoardScale.NameRowHeight":
+        "presentation: the member name's row height inside a chip.",
+    "FurinaBoardScale.ActRowHeight":
+        "presentation: the number-and-unit row's height inside a chip.",
+    "FurinaBoardScale.FrontRowHeight":
+        "presentation: the FRONT marker's own row height inside a chip.",
+    "FurinaBoardScale.MeterRowY":
+        "presentation: where line 2 of the resource header sits.",
+    "FurinaBoardScale.MeterRowHeight":
+        "presentation: line 2's height in pixels.",
+    "FurinaBoardScale.FooterRowY":
+        "presentation: where the front chip's Replace footer sits.",
+    "FurinaBoardScale.FooterRowHeight":
+        "presentation: the footer row's height in pixels.",
     "FurinaBoardScale.FaceHeight":
         "presentation: how much of a chip the member's face crop occupies.",
-    "FurinaBoardScale.ChipPitchMax":
-        "presentation: the widest gap between chip centres, so a normal "
-        "Furina's panel does not move when a card could have raised her cap.",
     "FurinaBoardScale.PipWidth":
         "presentation: one Encore pip's width in pixels.",
     "FurinaBoardScale.PipHeight":
         "presentation: one Encore pip's height in pixels.",
     "FurinaBoardScale.PipGap":
         "presentation: the gap between pips, in pixels.",
-    "FurinaBoardScale.PipStripX":
-        "presentation: where the pip strip starts inside the resource row, "
-        "i.e. what 'beside the Encore number' is in pixels.",
-    "FurinaBoardScale.PipStripWidth":
-        "presentation: how wide the pip strip may be before the Fanfare half "
-        "of the line starts.",
+    "FurinaBoardScale.PipStripGap":
+        "presentation: the gap between the Encore number and the first pip -- "
+        "what 'beside the number' is in pixels, now that where the number ENDS "
+        "is measured rather than guessed at.",
     "FurinaBoardScale.NoticeRowY":
         "presentation: where the reduced-performance note sits.",
     "FurinaBoardScale.NoticeRowHeight":
