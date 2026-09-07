@@ -160,8 +160,11 @@ public class Round19Tests
         var seat = Seat.Furina().WithCombatState();
 
         // `EB-629` moved the sentence to the member tips; the words are
-        // unchanged and every member carries them.
-        var rules = SalonMemberTips.BodyFor(SalonMember.Usher, seat.Creature);
+        // unchanged. `EB-632` then narrowed WHICH member tip carries it to the
+        // ones that deal damage -- the sentence is about a hit, and the Usher
+        // gains Block -- so the surface read here is Crabaletta's.
+        var rules = SalonMemberTips.BodyFor(SalonMember.Crabaletta,
+                                            seat.Creature);
 
         Assert.Contains("not a hit", rules);
         Assert.Contains("no when-hit power fires", rules);

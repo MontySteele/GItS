@@ -564,10 +564,6 @@ internal static class NCombatUi_Activate_GaugeSetup
         // `EB-621`, on the same rule: ONE element for the LOCAL seat, built
         // outside the per-player loop. Klee's Spark bank beside the energy orb.
         SparkCounter.Setup(state);
-        // `EB-628`, on the same rule and into the same corner: Furina's
-        // Fanfare beside the energy orb under her own arm. She and Klee are
-        // never the same seat, so the two badges never both draw.
-        FanfareCounter.Setup(state);
 #endif
     }
 }

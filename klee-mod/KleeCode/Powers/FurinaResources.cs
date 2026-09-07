@@ -904,17 +904,16 @@ public static class FurinaResources
         // dry-state moment, and the stage reads composition + Encore here.
         // The member tooltip's live cap rides the same moment, which is what
         // makes a Casting Call raise visible as soon as the card resolves.
+        //
+        // `EB-628`, folded into this one call rather than hung beside it: the
+        // arm's `SalonPanel` rides this funnel too, so the chips, the Encore
+        // number, the Fanfare and the member bonus all come from ONE read of
+        // the meters and cannot disagree.
         SalonMemberPower.SyncSlotsDisplay(creature);
         Vfx.SalonVisualsBridge.Refresh(creature);
         // Burst's gauge refresh used to ride the badge apply; now it is
         // explicit, so the overhead meter still tracks every sync moment.
         Vfx.GaugeBridge.Refresh(creature);
-#if PROTOTYPE_CARDS
-        // `EB-628`. The Fanfare badge in the energy area rides THIS funnel and
-        // no other, so the badge, the meter power above it and the member
-        // numbers on the strip cannot come from different reads of one meter.
-        Vfx.FanfareCounter.Refresh(creature);
-#endif
     }
 
     private static async Task SyncMeter<T>(
