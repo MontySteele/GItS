@@ -11347,3 +11347,44 @@ def test_a_bomb_gap_with_no_reactable_aura_names_no_reaction():
     assert "is wearing a" not in bare
     same = blindplay.observe(_bomb_board(9, "6", aura="Pyro"))
     assert "and Pyro into Pyro is" not in same
+
+
+# --- `EB-585`: THE ARRIVAL THAT PERFORMED AND WAS NOT FILED -----------------
+
+
+def test_a_first_screen_stage_with_no_act_filed_says_the_receipt_is_missing():
+    """`EB-585`. "Stage at turn one: `Crabaletta`. Fogmog opened at 68/74, i.e.
+    the free performance had landed, but this screen printed no *What your
+    Salon did this turn*" (Furina r15 lane 1, fight 4).
+
+    THE READ eliminates both of the row's candidates: the page prints every act
+    the ledger files, and `FieldOpeningMember`'s own header settles the
+    broadcast order -- powers before mod models, and on turn 1 the power does
+    not exist yet -- so the turn-start clear cannot beat the arrival. What the
+    page can say is what `AUTO_TURN_NOTE` says one relic over: the act happened,
+    its receipt is not on this feed, and the board above is what it left.
+
+    Seen to FAIL: the stage printed and the silence under it said nothing.
+    """
+    page = blindplay.observe(_stage_state(["Crabaletta"]))
+    assert "## Your Salon" in page
+    assert blindplay.SALON_ARRIVAL_NOTE in page
+    # It is a fact about the stage, so it rides the stage section.
+    assert page.index("## Your Salon") < page.index(
+        blindplay.SALON_ARRIVAL_NOTE)
+
+
+def test_a_filed_arrival_and_a_later_round_print_no_such_line():
+    """ROUND ONE AND AN EMPTY LIST, the only board the sentence is true on. A
+    stage whose act IS filed has its receipt under the heading below, and by
+    round two an occupied stage is no longer evidence of an arrival."""
+    filed = _stage_state(
+        ["Crabaletta"],
+        [{"member": "Crabaletta", "target": "Nibbit", "combat_id": "",
+          "element": "Hydro", "aura": "Hydro", "amount": 6, "paid": True}])
+    assert blindplay.SALON_ARRIVAL_NOTE not in blindplay.observe(filed)
+    later = _stage_state(["Crabaletta"])
+    later["battle"] = dict(later["battle"], round=3)
+    assert blindplay.SALON_ARRIVAL_NOTE not in blindplay.observe(later)
+    # And a build with no stage at all prints neither the section nor the line.
+    assert blindplay.SALON_ARRIVAL_NOTE not in blindplay.observe(combat_state())

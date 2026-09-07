@@ -386,6 +386,44 @@ ATTACK_BUFF_NOTE = (
     "{n} or may not, and this page cannot say which -- both have been seen "
     "under one live buff.*")
 
+# `EB-585`. THE ARRIVAL THAT PERFORMED AND WAS NOT FILED.
+#
+# THE FIND (Furina r15 lane 1, fight 4). "Stage at turn one: `Crabaletta`.
+# Fogmog opened at 68/74, i.e. the free performance had landed, but this screen
+# printed no *What your Salon did this turn*." Five of the run's six fights
+# printed it.
+#
+# THE READ (2026-09-07) ELIMINATES BOTH OF THE ROW'S CANDIDATES. The page is
+# not dropping the row: it prints every act the ledger files, and the arrival
+# is filed inside `SalonMemberPower.PerformMember` like any other. Nor does the
+# turn-start clear beat it -- `FurinaReframeOpening.FieldOpeningMember`'s own
+# header settles the order ("the game broadcasts to powers before the
+# subscribed mod models ... on turn 1 the power does not exist yet anyway"),
+# and `PerformMember`'s no-hittable-body early return is refused by the r15
+# evidence, which is 6 HP off the body. What is left is a read that beat the
+# ledger write, and a third candidate the row had not named:
+# `FurinaReframeLedger.For` drops the WHOLE table whenever the combat instance
+# it last saw changes, so any call on a creature whose `CombatState` has moved
+# empties it before returning.
+#
+# WHAT THE PAGE CAN SAY MEANWHILE, and it is `AUTO_TURN_NOTE`'s shape: the
+# stage list is the arm's own evidence that a member is up, an arrival performs
+# by construction (a deploy performs, and the relic's is a deploy), and the
+# receipt for it is not on this screen's feed. So the page states the act and
+# states the gap, rather than leaving a reader to read the silence as "nothing
+# happened" -- which is exactly the reading the r15 seat had to argue itself
+# out of, off an enemy's HP bar.
+#
+# ROUND ONE AND AN EMPTY LIST, which is the only board the sentence is true on:
+# a stage occupied on the fight's first screen was occupied by the arrival, and
+# a stage that has already acted has its act printed under the heading below.
+SALON_ARRIVAL_NOTE = (
+    "*The fight opened with the stage already lit, and an arriving member "
+    "performs on arrival for free. That performance is not on this screen's "
+    "data feed -- the acts below are what the game filed, and it filed nothing "
+    "for the arrival -- so the enemy HP above is the board that performance "
+    "LEFT and not a report of it.*")
+
 # `EB-605`. TWO NUMBERS FOR ONE BOMB IN ONE SENTENCE.
 #
 # THE FIND (Klee r22 lane 1 re-run (c) 2, fight 6 turn 4). "`Bomb 6 ... Bomb

@@ -18,6 +18,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         AURA_NOTE, BOMB_FORECAST_NOTE,
                                         BOMB_REACTION_CLAUSE,
                                         REACTION_ELEMENTS,
+                                        SALON_ARRIVAL_NOTE,
                                         AUTO_TURN_NOTE,
                                         BUFF_INTENT_CLAUSE,
                                         CLONE_NOTE, EMPTY_SHELVES_NOTE,
@@ -1012,6 +1013,14 @@ def render(obs: dict[str, Any]) -> str:
                            + (" — FRONT: the next Companion card you play "
                               "performs this one, and then sends it to the "
                               "back" if i == 0 else ""))
+            # `EB-585`. THE ARRIVAL THAT PERFORMED AND WAS NOT FILED. On the
+            # fight's first screen an occupied stage was occupied by the
+            # relic's arrival, and an arrival performs -- so an empty
+            # performance list here is a receipt that did not reach the feed,
+            # not a member that did nothing. Round one and an empty list are
+            # the only board the sentence is true on.
+            if c["round"] == 1 and not c["salon"]["performed"]:
+                out += ["", SALON_ARRIVAL_NOTE]
         if c.get("salon") and (c["salon"]["performed"]
                                or c["salon"]["replayed"]
                                or c["salon"].get("evoked")):
