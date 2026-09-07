@@ -260,6 +260,32 @@ public static class SalonVisualsBridge
 #endif
     }
 
+    /// <summary>
+    /// THE FIGHT IS OVER (`EB-640`): take the arm's panel down.
+    ///
+    /// The room's VFX container survives into the reward screen by design --
+    /// the creature and her HP bar are still drawn, dimmed, behind the Loot
+    /// dialog -- so anything this bridge parked in it has to remove itself, and
+    /// the frame that filed the row shows what happens when it does not: a
+    /// panel describing a stage for a combat that no longer exists.
+    ///
+    /// BY NODE AND NOT BY SEAT, and this is the call Furina's combat-end hooks
+    /// make (`FurinaResourceHooks`, which run inside `EndCombatInternal` BEFORE
+    /// the reward screen opens) as well as the arm's own `NCombatUi.Deactivate`
+    /// postfix. Two doors, because a fight can end without a victory screen and
+    /// a room can change without a fight ending.
+    ///
+    /// The SHIPPED stage is left alone: it is a scene instanced into the same
+    /// container and it has never been reported outliving a fight, and a
+    /// display retirement inside one arm is not a roster change.
+    /// </summary>
+    public static void Teardown()
+    {
+#if PROTOTYPE_CARDS
+        SalonPanel.Hide();
+#endif
+    }
+
     private static Node2D? GetDisplay(Player player) => Displays.Get(player);
 
     private static Texture2D? GlyphFor(SalonMember member) =>

@@ -217,17 +217,22 @@ public class SalonPanelPinTests
     // --- what a chip says -------------------------------------------------
 
     [Theory]
-    [InlineData(SalonMember.Crabaletta, "Hydro")]
-    [InlineData(SalonMember.Chevalmarin, "Hydro")]
+    [InlineData(SalonMember.Crabaletta, "damage")]
+    [InlineData(SalonMember.Chevalmarin, "damage")]
     [InlineData(SalonMember.Usher, "Block")]
-    public void The_act_word_is_the_one_the_member_tip_prints(
+    public void The_unit_is_what_the_number_is_in_and_never_the_element(
         SalonMember member, string word)
     {
-        Assert.Equal(word, SalonPanel.ActWord(member));
+        // `EB-641`. It was the ELEMENT'S NAME -- "5 Hydro" -- which is not a
+        // quantity a play can be priced against: it reads as five of a
+        // substance. A performance deals damage or gains Block, and the element
+        // rides beside the number as the glyph every card face already wears.
+        Assert.Equal(word, SalonPanel.EffectUnit(member));
+        Assert.DoesNotContain("Hydro", SalonPanel.EffectUnit(member));
     }
 
     [Fact]
-    public void The_next_act_is_the_performance_number_and_its_word()
+    public void The_next_act_is_the_performance_number_and_its_unit()
     {
         using var _ = new Arm();
         var seat = Stage(SalonMember.Crabaletta, SalonMember.Usher,
@@ -235,15 +240,15 @@ public class SalonPanelPinTests
 
         // The printed ticks, from the constants the member tips interpolate:
         // a repricing moves both surfaces or neither.
-        Assert.Equal($"{SalonConstants.CrabalettaTick} Hydro",
-            SalonPanel.NextAct(seat.Creature, SalonMember.Crabaletta,
-                                     paid: true));
+        Assert.Equal($"{SalonConstants.CrabalettaTick} damage",
+            SalonPanel.EffectText(seat.Creature, SalonMember.Crabaletta,
+                                  paid: true));
         Assert.Equal($"{SalonConstants.UsherTick} Block",
-            SalonPanel.NextAct(seat.Creature, SalonMember.Usher,
-                                     paid: true));
-        Assert.Equal($"{SalonConstants.ChevalmarinTick} Hydro",
-            SalonPanel.NextAct(seat.Creature, SalonMember.Chevalmarin,
-                                     paid: true));
+            SalonPanel.EffectText(seat.Creature, SalonMember.Usher,
+                                  paid: true));
+        Assert.Equal($"{SalonConstants.ChevalmarinTick} damage",
+            SalonPanel.EffectText(seat.Creature, SalonMember.Chevalmarin,
+                                  paid: true));
     }
 
     [Fact]
@@ -262,49 +267,57 @@ public class SalonPanelPinTests
         var folded = SalonMemberPower.TickValue(
             seat.Creature, SalonMember.Crabaletta, paid: true);
         Assert.Equal(SalonConstants.CrabalettaTick + 1, folded);
-        Assert.Equal($"{folded} Hydro",
-            SalonPanel.NextAct(seat.Creature, SalonMember.Crabaletta,
-                                     paid: true));
+        Assert.Equal($"{folded} damage",
+            SalonPanel.EffectText(seat.Creature, SalonMember.Crabaletta,
+                                  paid: true));
 
         // And the dry cut is the same one expression too: a member that cannot
         // pay acts at three-quarters, and the chip says the number it will
         // actually deal rather than the one it would like to.
         var dry = SalonMemberPower.TickValue(
             seat.Creature, SalonMember.Crabaletta, paid: false);
-        Assert.Equal($"{dry} Hydro",
-            SalonPanel.NextAct(seat.Creature, SalonMember.Crabaletta,
-                                     paid: false));
+        Assert.Equal($"{dry} damage",
+            SalonPanel.EffectText(seat.Creature, SalonMember.Crabaletta,
+                                  paid: false));
 
         var calls = Il.Calls(typeof(SalonPanel)
-            .GetMethod(nameof(SalonPanel.NextAct), All)!);
+            .GetMethod(nameof(SalonPanel.EffectNumber), All)!);
         Assert.Contains(calls,
             c => c.EndsWith("SalonMemberPower.TickValue",
                             StringComparison.Ordinal));
     }
 
     [Fact]
-    public void The_evoke_line_is_the_members_own_bow_in_the_tips_words()
+    public void The_footer_is_what_replacing_the_front_member_pays()
     {
         // "Hydro to ALL" is CHEVALMARIN'S EVOKE and not her performance -- she
-        // performs for 2 Hydro at one body -- so the strip prints it on the
-        // front chip and only while the stage is full, which is the one board
-        // state a deploy reaches it from.
-        Assert.Equal($"Evoke {SalonConstants.CrabalettaBow} Hydro",
-                     SalonPanel.EvokeAct(SalonMember.Crabaletta));
-        Assert.Equal($"Evoke {SalonConstants.UsherBow} Block",
-                     SalonPanel.EvokeAct(SalonMember.Usher));
+        // performs for 2 damage at one body -- so the panel prints it on the
+        // front chip's footer and only while the stage is full, which is the
+        // one board state a deploy reaches it from.
+        //
+        // `EB-641`: the VERB is the player's. The line read "Evoke 14 Hydro" in
+        // footnote type; the choice being priced is deploying onto a full
+        // stage, and what that does to this member is REPLACE it.
+        Assert.Equal($"Replace: {SalonConstants.CrabalettaBow} damage",
+                     SalonPanel.ReplaceText(SalonMember.Crabaletta));
+        Assert.Equal($"Replace: {SalonConstants.UsherBow} Block",
+                     SalonPanel.ReplaceText(SalonMember.Usher));
         // `EB-630`: and her REFUND rides the same line. "Hydro to ALL" alone
         // was half her Evoke, and the half it dropped -- the Encore she gives
         // back -- is the number that makes replacing her a decision rather
         // than a loss. Interpolated from the constant, like the other two.
         Assert.Equal(
-            $"Evoke Hydro to ALL, +{SalonConstants.ChevalmarinBowEncore} "
-          + "Encore",
-            SalonPanel.EvokeAct(SalonMember.Chevalmarin));
+            "Replace: Hydro to ALL · "
+          + $"+{SalonConstants.ChevalmarinBowEncore} Encore",
+            SalonPanel.ReplaceText(SalonMember.Chevalmarin));
 
         var source = Source("Vfx/Prototype/SalonPanel.cs")
             .Replace("\r\n", "\n");
-        Assert.Contains("evoke.Visible = front && full;", source);
+        Assert.Contains("footer.Visible = full && front is { };", source);
+        // TIER 2, not the footnote tier: a price a player reads before
+        // committing a card is not a footnote to anything.
+        Assert.Contains(
+            "Text(\"Text\", FurinaBoardScale.Tier2FontSize", source);
     }
 
     [Fact]
@@ -404,11 +417,13 @@ public class SalonPanelPinTests
         Assert.Equal(-300f, anchor.Y + FurinaBoardScale.PanelHeight);
         Assert.True(anchor.Y < -300f);
 
-        // AND INSIDE THE CREATURE'S OWN BOUNDS, centred: 240 is the bounds
-        // width, so the panel cannot overhang into the enemy intent or the
-        // targeting lanes on either side.
-        Assert.Equal(-FurinaBoardScale.PanelWidth / 2f, anchor.X);
-        Assert.Equal(240f, FurinaBoardScale.PanelWidth);
+        // AND CENTRED ON HER. The box is the CONTENT's width now (`EB-641`)
+        // rather than the creature's 240-wide bounds: a box that cannot hold
+        // its own words is not a narrower panel, it is the broken one the first
+        // frame showed. It is still one group on one backing rectangle, and she
+        // stands in the left third of the screen.
+        Assert.Equal(-SalonPanel.PanelWidth / 2f, anchor.X);
+        Assert.True(SalonPanel.PanelWidth > 240f);
     }
 
     [Fact]
