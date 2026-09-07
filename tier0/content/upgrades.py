@@ -1095,7 +1095,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # nothing on the face to bump -- that is the point of the clause --
             # so this key applies NO effect delta and is not a silent no-op
             # either: the engine expresses it at play time by reading the
-            # upgraded flag (effects.klee_personal_companion_spark), the same
+            # upgraded flag (effects.klee_companion_spark), the same
             # shape the `condition` key uses, and the codegen emits the matching
             # play-time comment rather than flagging a missing upgrade path.
             #

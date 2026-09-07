@@ -197,7 +197,8 @@ def test_the_banner_roster_moves_with_the_pool(overhaul):
 # HEXEREI: ONE WORD, NO EFFECT
 # ---------------------------------------------------------------------------
 
-#: The rows the workshop's sec.3 marks Hexerei, across all thirty-four.
+#: The rows in the Hexerei family: the ones the workshop's sec.3 marks, across
+#: all thirty-four, plus Klee's own coven (`EB-642`).
 HEXEREI_ROWS = {
     "proto_mc_albedo_solar_isotoma",
     "proto_mc_fischl_nightrider",
@@ -224,6 +225,20 @@ HEXEREI_ROWS = {
     "proto_mc_fischl_sinful_hex",
     "proto_mc_nicole_ladder_of_ascent",
     "proto_mc_sucrose_mollis_favonius",
+    # THE COVEN, `EB-642`'s follow-up (a D default, disclosed): the eight
+    # Personals of Klee's that carried no mark. R265 pick 1 made the printed
+    # word the payer set, and the workshop's tagged list would have cut the
+    # grant from her own coven -- which the pick did not name as a cost -- so
+    # the coven joins the family it was always the middle of. They are the
+    # rows carrying `personal_pool: klee`, and no other row moved.
+    "proto_mc_barbara_front_row_seat",
+    "proto_mc_diona_shaken_not_purred",
+    "proto_mc_noelle_i_got_your_back",
+    "proto_mc_kaeya_cold_blooded_strike",
+    "proto_mc_jean_lions_fang",
+    "proto_mc_sayu_silencers_secret",
+    "proto_mc_qiqi_herald_of_frost",
+    "proto_mc_yaoyao_yuegui_throwing_mode",
 }
 
 

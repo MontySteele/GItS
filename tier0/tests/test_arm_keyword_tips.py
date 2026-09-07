@@ -189,35 +189,39 @@ def test_the_attach_is_scoped_to_the_quarantined_surface():
         assert proto._profile_for(character).arm_keyword_tips is True
 
 
-def test_every_klee_personal_companion_carries_the_kits_spark_rider():
-    """`EB-418`, the committed tree. Every row on the quarantined sheet that is
-    a Personal Companion of KLEE'S carries `ForCovenSpark`, and no other row
-    does.
+def test_every_hexerei_companion_carries_the_kits_spark_rider():
+    """`EB-418`, the committed tree, retargeted by `EB-642`. Every Companion row
+    on the quarantined sheet carrying the HEXEREI mark carries `ForCovenSpark`,
+    and no other row does.
 
-    THE DENOMINATOR IS THE POINT. The trigger is keyed on the POOL and not on
-    one card (`effects.klee_personal_companion_spark`, `KleeCompanionSpark`),
-    which is how it reached Diona and the coven stand-ins with nobody deciding
-    it should -- so the sentence has to reach the same set by the same read, or
-    the next Personal added to the sheet is the r11 seat's finding again.
+    THE DENOMINATOR IS THE POINT. The trigger is keyed on the MARK and not on
+    one card (`effects.klee_companion_spark`, `KleeCompanionSpark`), so the
+    sentence has to reach the same set by the same read, or the next row to
+    join the family is the r11 seat's finding again.
+
+    R265 PICK 1 MOVED THE SET, both halves of it. Thirteen Universals that
+    print the word gained the rider; eight coven Personals that print no word
+    lost it, because they no longer pay. A row that pays and says nothing, or
+    says something and does not pay, is the r20 defect in one direction or the
+    other.
 
     GOROU IS THE NEGATIVE CASE, and he is a real one: he is a Personal
-    Companion of KOKOMI'S on this same sheet, he walks the engines' identical
-    branch, and Sparks are Klee's resource with no surface of Kokomi's to read
-    them off. The sentence is scoped to the kit that declared it.
+    Companion of KOKOMI'S on this same sheet, he carries no mark, and Sparks
+    are Klee's resource with no surface of Kokomi's to read them off. The
+    sentence is scoped to the kit that declared it.
     """
     owed, carried = set(), set()
     for row in proto._rows():
         if not gen.is_companion(row):
             continue
         cls = gen.pascal(row["id"])
-        if (row.get("character") == "klee"
-                and gen.personal_pool_id(row) == "klee"):
+        if row.get("character") == "klee" and row.get("hexerei"):
             owed.add(cls)
         path = PROTOTYPE_DIR / f"{cls}.cs"
         if path.exists() and "ForCovenSpark" in path.read_text(encoding="utf-8"):
             carried.add(cls)
 
-    assert owed, "no Klee Personal Companion on the sheet is not a read"
+    assert owed, "no Hexerei Companion on the sheet is not a read"
     assert owed == carried
     assert "ProtoMiGorouCrystalCollapse" in {
         gen.pascal(r["id"]) for r in proto._rows()
@@ -271,50 +275,51 @@ def test_every_hexerei_companion_prints_the_family_tag():
             encoding="utf-8"), cls
 
 
-def test_every_personal_companion_of_klees_says_it_is_one_of_her_own():
-    """`EB-554`, the committed tree. Every Companion row whose `personal_pool`
-    names Klee prints "Klee's own" on its own face, and no Universal does.
+def test_the_only_family_mark_on_a_face_is_the_printed_word():
+    """`EB-554` retired by `EB-642`, on the committed tree. Every Companion row
+    carrying `hexerei:` prints the word on its own face, no face prints "Klee's
+    own" any more, and the two sets are the same set.
 
-    THE DEFECT (Klee r20 lane 1, (c) 1). Albedo+ and Razor were played in one
-    turn, both printing `Hexerei`, and Spark stayed at 1: "Nothing on either
-    card face distinguishes 'hers' from not-hers, so as a reader I have no way
-    to predict which Companion pays a Spark. This is the clearest thing I could
-    not resolve all round." The rule was right the whole time -- Razor is a
-    Mondstadt Universal and pays nothing -- and unreadable.
+    THE DEFECT `EB-554` ANSWERED (Klee r20 lane 1, (c) 1). Albedo+ and Razor
+    were played in one turn, both printing `Hexerei`, and Spark stayed at 1:
+    "Nothing on either card face distinguishes 'hers' from not-hers, so as a
+    reader I have no way to predict which Companion pays a Spark." R265 pick 1
+    answered it the other way round -- both pay now -- so the distinction the
+    second mark drew is gone and the mark goes with it. [USER], on his own
+    act-1 run: "the 'Klee's own' text on the Personals is not needed."
 
-    THE DENOMINATOR IS THE POINT, `EB-392`'s test one field over: the mark is
-    derived from the row's own `personal_pool`, which is the SAME pair of
-    reads the two engines' payment gates make, so the face and the Spark
-    cannot disagree and a Personal Companion added tomorrow is marked the day
-    its row exists.
-
-    ONE SENTENCE WHERE A ROW CARRIES BOTH MARKS. "Klee's own Hexerei." is the
-    adjective form, which reads as one fact and is a character shorter than the
-    two-clause spelling -- and a character is what Prune's Hexhunter Chime has
-    at 120 of 120.
+    THE DENOMINATOR IS THE POINT, `EB-392`'s test unchanged: the mark is
+    derived from the row's own `hexerei` key, which is the SAME read both
+    engines' payment gates make under the arm, so the face and the Spark cannot
+    disagree and a row joining the family tomorrow is marked the day it joins.
     """
-    own, printed = set(), set()
+    marked, printed, owned = set(), set(), set()
     for row in proto._rows():
         if not gen.is_companion(row):
             continue
         cls = gen.pascal(row["id"])
-        if gen.personal_pool_id(row) == "klee":
-            own.add(cls)
+        if row.get("hexerei"):
+            marked.add(cls)
         path = PROTOTYPE_DIR / f"{cls}.cs"
         if not path.exists():
             continue
-        if any("Klee's own" in face
-               for face in _descriptions(path.read_text(encoding="utf-8"))):
+        faces = _descriptions(path.read_text(encoding="utf-8"))
+        if any("[gold]Hexerei[/gold]" in face for face in faces):
             printed.add(cls)
+        if any("Klee's own" in face for face in faces):
+            owned.add(cls)
 
-    assert own, "no Personal Companion of Klee's is not a read"
-    assert own == printed
-    # And a Universal Hexerei row prints the word and NOT the ownership, which
-    # is the pair the seat could not tell apart.
-    razor = _descriptions((PROTOTYPE_DIR / "ProtoMcRazorClawAndThunder.cs")
-                          .read_text(encoding="utf-8"))
-    assert razor and all("[gold]Hexerei[/gold]" in f for f in razor)
-    assert all("Klee's own" not in f for f in razor)
+    assert marked, "no Hexerei Companion on the sheet is not a read"
+    assert marked == printed
+    assert not owned, owned
+    # And the pair the r20 seat could not tell apart now reads the same, which
+    # is the whole of the ruling: Razor the Universal and Sinful Hex the
+    # Personal print one word and pay one Spark.
+    for cls in ("ProtoMcRazorClawAndThunder", "ProtoMcFischlSinfulHex"):
+        faces = _descriptions((PROTOTYPE_DIR / f"{cls}.cs")
+                              .read_text(encoding="utf-8"))
+        assert faces and all(f.lstrip('"').startswith("[gold]Hexerei[/gold].")
+                             for f in faces), cls
 
 
 def test_the_hexerei_readers_are_not_tagged_as_members():
