@@ -235,7 +235,17 @@ public static class ArmKeywordTips
             "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
           + " a turn, goes off only when [gold]Set off[/gold], or as a "
           + "[gold]Mine[/gold]. "
-          + "Not an Attack: only [gold]Vulnerable[/gold] and a cap on the "
+          // `EB-400`: BLOCK, NAMED. "Not an Attack: only Vulnerable and a
+          // cap move it" is a true sentence that reads as a false one -- a
+          // list of the only two things that touch the hit, with Block
+          // outside it -- and the r10 seat priced a Set off as unblockable
+          // and was wrong: 12 into 20 HP behind Block 5 left 13. The
+          // explosion passes `ignoreBlock: false`, so Block absorbs it like
+          // anything else, and the `Set off` tip has said so since `EB-443`
+          // in these same three words. The exclusion the sentence is really
+          // about is the ATTACK-keyed debuff, and it still says that.
+          + "Not an Attack, but [gold]Block[/gold] stops it: only "
+          + "[gold]Vulnerable[/gold] and a cap on the "
           + "enemy's HP loss move it. "
           + "If this enemy dies with it still on, it moves to a survivor. "
           + "Your deck opens with a placer.");
@@ -437,7 +447,11 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off before its enemy's hit, "
-          + "which lands in full unless the Mine kills. Only their "
+          + "which lands in full unless the Mine kills. Their "
+          // `EB-400`, the same three words on the same clause: a Mine IS a
+          // Bomb, so a tip that lists what moves the hit and leaves Block out
+          // reads as Block immunity here for the same reason.
+          + "[gold]Block[/gold] stops it, and only their "
           + "[gold]Vulnerable[/gold] and a cap move it. "
           + "If this enemy dies with it still on, it moves to a survivor.");
 

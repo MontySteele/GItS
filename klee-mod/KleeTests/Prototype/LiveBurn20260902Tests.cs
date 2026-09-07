@@ -145,7 +145,9 @@ public class LiveBurn20260902Tests
 
         // `EB-436` spent "Read the badge:" on the hit clause; the terms it
         // introduced are still named, which is what R248 asked for.
-        Assert.Contains("Only their ", body);
+        // `EB-400` moved the clause's opener onto Block and left the two
+        // folded terms where they were.
+        Assert.Contains("[gold]Block[/gold] stops it, and only their ", body);
         Assert.Contains("[gold]Vulnerable[/gold] and a cap move it.", body);
         Assert.DoesNotContain("[gold]Weak[/gold]", body);
 
@@ -183,8 +185,9 @@ public class LiveBurn20260902Tests
 
         // `EB-373`: the same clause, narrowed to the two terms the fold reads.
         // `EB-555` then defined the second of them where it stands.
-        Assert.Contains("Not an Attack: only [gold]Vulnerable[/gold] and a cap "
-                      + "on the ", body);
+        // `EB-400`: and Block, which the sentence used to leave out.
+        Assert.Contains("Not an Attack, but [gold]Block[/gold] stops it: only "
+                      + "[gold]Vulnerable[/gold] and a cap on the ", body);
         Assert.Contains("enemy's HP loss move it.", body);
     }
 

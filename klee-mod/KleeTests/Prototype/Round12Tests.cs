@@ -194,7 +194,8 @@ public class Round12Tests
     {
         // "Read the badge:" is what paid for the new clause; the clause it
         // introduced is untouched, so R248's rule survives whole.
-        Assert.Contains("Only their ", MineTip());
+        // `EB-400` renamed the opener to name Block; both terms survive.
+        Assert.Contains("[gold]Block[/gold] stops it, and only their ", MineTip());
         Assert.Contains("[gold]Vulnerable[/gold] and a cap move it.", MineTip());
         Assert.DoesNotContain("Read the badge", MineTip());
     }

@@ -117,9 +117,11 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
                     "A charge on this enemy that grows at the start of your "
                   + "turn. Every [gold]Bomb[/gold] here goes off as Pyro "
                   + "damage when [gold]Set off[/gold], never by itself. The "
-                  + "hit is not an Attack, so only this enemy's "
-                  + "[gold]Vulnerable[/gold] and a damage cap move it, never a "
-                  + "debuff that answers Attacks and never anything of yours."
+                  + "hit is not an Attack, but their [gold]Block[/gold] "
+                  + "absorbs it, and only this enemy's "
+                  + "[gold]Vulnerable[/gold] and a damage cap move the "
+                  + "number, never a debuff that answers Attacks and never "
+                  + "anything of yours."
                   + MineClause),
             };
             // EB-260, EB-287 and `EB-343`. ROWS, not one row with conditionals

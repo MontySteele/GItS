@@ -254,8 +254,10 @@ public class ArmKeywordTipTests
         // shares the 135 characters with it: "their" and "to a survivor" paid.
         // `EB-555` DEFINED THE CAP inside that clause, because the word was
         // printed on two tips of one screen and defined on neither.
-        Assert.Contains("Not an Attack: only [gold]Vulnerable[/gold] and a cap "
-                      + "on the ", printed);
+        // `EB-400` NAMED BLOCK in the same clause: the list read as the only
+        // two things that touch the hit, and Block was outside it.
+        Assert.Contains("Not an Attack, but [gold]Block[/gold] stops it: only "
+                      + "[gold]Vulnerable[/gold] and a cap on the ", printed);
         Assert.Contains("enemy's HP loss move it.", printed);
         // `EB-574` SPELT RULE 3 OUT. "Kills move it on" read as a promise
         // about the charge doing the killing: the r21 lane-1 seat set off
