@@ -755,50 +755,86 @@ def test_the_shipped_klee_opening_is_untouched_by_the_row():
 
 # --- `EB-554`: WHICH HEXEREI CARDS ARE KLEE'S OWN --------------------------
 
-def test_a_universal_hexerei_play_pays_nothing_and_a_personal_pays_a_spark(
+def test_every_hexerei_play_pays_and_an_unmarked_companion_does_not(
         overhaul):
-    """`EB-554`. THE PAIR THE SEAT COULD NOT TELL APART.
+    """`EB-554`'s pair, re-read under `EB-642`. THE SEAT COULD NOT TELL THEM
+    APART; R265 pick 1 made them the same.
 
     Klee r20 lane 1 played Albedo+ and Razor in one turn -- "both print
     Hexerei" -- and Spark stayed at 1: "Nothing on either card face
     distinguishes 'hers' from not-hers, so as a reader I have no way to predict
-    which Companion pays a Spark. This is the clearest thing I could not
-    resolve all round."
+    which Companion pays a Spark." The rule was right and unreadable, and
+    [USER]'s own act-1 run ruled the rule away instead of the reading: every
+    Hexerei card gives Klee a Spark, Universals included.
 
-    THE RULE WAS RIGHT AND UNREADABLE, which is what this pins: the payment
-    gate is the PERSONAL pool and not the family tag, so a Mondstadt Universal
-    printing `Hexerei` pays nothing and one of Klee's own pays
-    `KLEE_COMPANION_SPARK`. Both faces now say which they are
-    (`gen_klee_cards._family_tags`), and the mark is derived from the same
-    field this gate reads, so the two cannot disagree.
+    SO THE PRINTED WORD IS NECESSARY AND SUFFICIENT, which is both halves of
+    this test: Razor the Universal pays, and Gorou's War Banner -- an Inazuma
+    Universal outside the family -- does not. A row that pays without saying
+    so is the r20 defect pointing the other way, which is also why Klee's own
+    coven carries the mark now (`EB-642`'s follow-up): a Personal of hers that
+    paid and printed nothing would be the same silence.
     """
     from tier0.engine.combat import play_card
     from tier0.tests.conftest import make_state
 
     universal = loader.get_card("proto_mc_razor_claw_and_thunder")
     personal = loader.get_card("proto_mc_fischl_sinful_hex")
-    # The pair is a pair: both are Companions, both are marked Hexerei, and
-    # exactly one of them is Klee's own.
+    unmarked = loader.get_card("proto_mi_gorou_war_banner")
     assert universal.is_companion and personal.is_companion
     assert universal.personal_pool is None
     assert personal.personal_pool == "klee"
+    assert unmarked.is_companion and unmarked.personal_pool is None
+    assert not unmarked.hexerei
+    # ...and a coven Personal, which used to be the negative case here, pays.
+    coven = loader.get_card("proto_mc_noelle_i_got_your_back")
+    assert coven.personal_pool == "klee" and coven.hexerei
 
     state = make_state()
     state.player.character_id = "klee"
     state.player.hand = [universal]
     play_card(state, universal)
-    assert state.player.sparks == 0
+    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
 
+    state.player.sparks = 0
     state.player.hand = [personal]
     play_card(state, personal)
     assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
 
+    state.player.sparks = 0
+    state.player.hand = [coven]
+    play_card(state, coven)
+    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
 
-def test_the_face_says_which_one_it_is(overhaul):
-    """The half the seat actually needed, on the two rows themselves: the
-    Universal prints the family word and nothing about ownership, and the
-    Personal prints both -- as one sentence, because two lead tags read as
-    stuttering and the card ceiling is 120."""
+    state.player.sparks = 0
+    state.player.hand = [unmarked]
+    play_card(state, unmarked)
+    assert state.player.sparks == 0
+
+
+def test_only_klee_is_paid_by_her_own_kit(overhaul):
+    """`EB-434`, written out at last: the grant names the character.
+
+    The old gate asked the CARD's pool against its owner and named nobody, so
+    Kokomi playing her own Personal banked a Spark she has no surface to read.
+    Sparks are Klee's resource; nobody else is paid.
+    """
+    from tier0.engine.combat import play_card
+    from tier0.tests.conftest import make_state
+
+    razor = loader.get_card("proto_mc_razor_claw_and_thunder")
+    state = make_state()
+    state.player.character_id = "kokomi"
+    state.player.hand = [razor]
+    play_card(state, razor)
+    assert state.player.sparks == 0
+
+
+def test_the_face_prints_the_family_word_and_nothing_about_ownership(overhaul):
+    """`EB-642`: one mark, and it is the one the payment reads.
+
+    The ownership lead is gone from every face -- both the bare "Klee's own."
+    and the adjective form -- because the distinction it drew is gone with it.
+    """
     from tools import gen_klee_cards as gen
 
     universal = dict(id="proto_mc_x", star=4, hexerei=True)
@@ -808,18 +844,19 @@ def test_the_face_says_which_one_it_is(overhaul):
 
     assert gen._family_tags(universal, "Deal 8 damage.") == (
         "[gold]Hexerei[/gold]. Deal 8 damage.")
+    # A Personal that carries the mark reads exactly as the Universal does,
+    # which is the ruling.
     assert gen._family_tags(personal, "Deal 8 damage.") == (
-        "Klee's own [gold]Hexerei[/gold]. Deal 8 damage.")
-    assert gen._family_tags(plain_own, "Deal 8 damage.") == (
-        "Klee's own. Deal 8 damage.")
-    # A Universal with neither mark is untouched, which is what keeps the tag
-    # a statement rather than decoration.
+        "[gold]Hexerei[/gold]. Deal 8 damage.")
+    # ...and one that does not carry it says nothing, because it pays nothing.
+    assert gen._family_tags(plain_own, "Deal 8 damage.") == "Deal 8 damage."
+    # A Universal with no mark is untouched, which is what keeps the tag a
+    # statement rather than decoration.
     assert gen._family_tags(dict(id="proto_mc_w", star=4), "Deal 8 damage.") == (
         "Deal 8 damage.")
-    # AND A SHIPPED ROW DOES NOT MOVE, which is R213 B and not taste: a shipped
-    # Personal Companion is Balance-stage content and does not gain a printed
-    # sentence for a prototype arm. The shipped Prune keeps her printed face;
-    # her Spark is the kit's declaration and always was (`EB-219`).
+    # AND A SHIPPED ROW DOES NOT MOVE, which is R213 B and not taste: no
+    # shipped sheet carries the family key at all, so the shipped Prune keeps
+    # her printed face and her Spark stays the kit's declaration (`EB-219`).
     assert gen._family_tags(dict(id="prune_witch_hunt", star=4,
                                  personal_pool="klee"), "Deal 8 damage.") == (
         "Deal 8 damage.")

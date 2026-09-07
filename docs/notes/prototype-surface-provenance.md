@@ -2842,3 +2842,21 @@ time the meter ticks is a dead card on a meter that ticks a few times a turn.
 2 is the floor that makes the slot worth a Rare. Cost 2 and the shipped
 `{cost: -1}` upgrade are unchanged. Rare for Rare, art borrowed (`art_of`,
 R179), shipped sheet unmoved (R213 B).
+
+## the coven's Hexerei mark (`EB-642`, 2026-09-07)
+
+R265 pick 1 made the printed word the whole rule, and the one-word rule would
+otherwise have cut the grant from Klee's OWN coven -- eight Personals that
+paid a Spark and printed no family word -- which the pick did not name as a
+cost.
+
+The family is the coven plus the marked Universals: `hexerei: true` now sits on
+`proto_mc_barbara_front_row_seat`, `proto_mc_diona_shaken_not_purred`,
+`proto_mc_noelle_i_got_your_back`, `proto_mc_kaeya_cold_blooded_strike`,
+`proto_mc_jean_lions_fang`, `proto_mc_sayu_silencers_secret`,
+`proto_mc_qiqi_herald_of_frost` and `proto_mc_yaoyao_yuegui_throwing_mode`,
+so every Companion face of Klee's prints the word and pays it.
+
+The readers (Coven Errand, Witches' Circle, Venti's stand-in) therefore fire on
+a wider set than R244 wrote them against; that widening is read at the audit
+door in pool pass two, not assumed here.

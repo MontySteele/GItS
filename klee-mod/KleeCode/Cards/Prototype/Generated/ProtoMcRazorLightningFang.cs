@@ -49,7 +49,7 @@ public sealed class ProtoMcRazorLightningFang : CustomCardModel, ICompanionCard,
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_razor_lightning_fang");
 

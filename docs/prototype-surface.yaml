@@ -436,7 +436,7 @@
    effects: [{op: block_largest_bomb, cap: 10}]}
 
 - {id: proto_mc_barbara_front_row_seat, name: "Barbara — Front Row Seat", character: klee,
-   authored_by: [claude],
+   authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
    cost: 1, type: skill,
    personal_pool: [klee],
@@ -870,7 +870,7 @@
 # `art_of:` is whose art it wears. In NO pool -- docs/notes/prototype-surface-provenance.md.
 
 - {id: proto_mc_diona_shaken_not_purred, name: "Diona — Shaken, Not Purred", character: klee,
-   authored_by: [claude],
+   authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: skill,
    personal_pool: [klee],
@@ -882,7 +882,7 @@
              {op: apply_power, power: mc_shaken_not_purred, amount: 5, target: self}]}
 
 - {id: proto_mc_noelle_i_got_your_back, name: "Noelle — I Got Your Back", character: klee,
-   authored_by: [claude],
+   authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: geo,
    cost: 1, type: skill,
    personal_pool: [klee],
@@ -894,7 +894,7 @@
 # The marker's stack is a FLAG, so this row states its own upgrade rather than
 # letting the Prototype-stage rule move an amount nothing reads.
 - {id: proto_mc_kaeya_cold_blooded_strike, name: "Kaeya — Cold-Blooded Strike", character: klee,
-   authored_by: [claude],
+   authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: attack,
    personal_pool: [klee],
@@ -905,7 +905,7 @@
              {op: apply_power, power: mc_cold_blooded, amount: 1, target: self}]}
 
 - {id: proto_mc_jean_lions_fang, name: "Jean — Lion's Fang, Fair Protector", character: klee,
-   authored_by: [claude],
+   authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 5, rarity: rare, role_c: buffer, element: anemo,
    cost: 2, type: power,
    personal_pool: [klee],
@@ -1474,7 +1474,7 @@
              {op: apply_power, power: cvn_hexhunter_chime, amount: 1, target: self}]}
 
 - {id: proto_mc_sayu_silencers_secret, name: "Sayu — Yoohoo Art: Silencer's Secret", character: klee,
-   authored_by: [claude],
+   authored_by: [claude], hexerei: true,
    nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
    cost: 0, type: skill, personal_pool: klee,
    description: "[gold]Swirl[/gold] a random enemy. Gain 4 [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, draw 1 card.",
@@ -1484,14 +1484,14 @@
               then: [{op: draw, amount: 1}]}]}
 
 - {id: proto_mc_qiqi_herald_of_frost, name: "Qiqi — Herald of Frost", character: klee,
-   authored_by: [claude],
+   authored_by: [claude], hexerei: true,
    nation: liyue, star: 5, rarity: uncommon, role_c: applier, element: cryo,
    cost: 1, type: skill, exhaust: true, personal_pool: klee,
    description: "For 3 turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 3 [gold]Block[/gold].",
    effects: [{op: apply_power, power: cvn_herald_of_frost, amount: 3, target: self}]}
 
 - {id: proto_mc_yaoyao_yuegui_throwing_mode, name: "Yaoyao — Yuegui: Throwing Mode", character: klee,
-   authored_by: [claude],
+   authored_by: [claude], hexerei: true,
    nation: liyue, star: 4, rarity: uncommon, role_c: trigger,
    cost: 1, type: skill, exhaust: true, personal_pool: klee,
    description: "For 3 turns, at the end of your turn place a [gold]Bomb[/gold] 3 on a random enemy.",

@@ -13,7 +13,7 @@ top level, upgrading the second one -- so she paid 1 / 2 / 2 / 3 Sparks across
 (base, no reaction) / (base, reaction) / (upgraded, no reaction) / (upgraded,
 reaction). Both ops are gone; the grant is Klee's kit declaration
 ("Little Hexenzirkul", `constants.KLEE_COMPANION_SPARK_*`,
-`effects.klee_personal_companion_spark`).
+`effects.klee_companion_spark`).
 
 THE POINT OF THIS FILE IS THE PARITY LOCK. Every one of those four numbers is
 asserted BEFORE/AFTER-style: the "before" side is not a fixture that could drift
@@ -221,4 +221,4 @@ def test_the_kit_trigger_is_the_only_spark_source_prune_touches():
     kinds = [e["event"] for e in state.log if e["event"].endswith("spark")
              or e["event"] == "klee_companion_spark"]
     assert kinds.count("klee_companion_spark") == 1
-    assert effects.klee_personal_companion_spark.__module__.endswith("effects")
+    assert effects.klee_companion_spark.__module__.endswith("effects")

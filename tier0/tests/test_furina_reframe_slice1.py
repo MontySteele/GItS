@@ -297,7 +297,7 @@ def test_a_replay_does_not_double_klees_mint(manual):
     src = (REPO / "tier0" / "engine" / "combat.py").read_text(encoding="utf-8")
     body = src[src.index("for replay_index in range(replays):"):]
     body = body[:body.index("THE AUTOMATIC POWER FLOOR GRANT")]
-    mint = body.index("klee_personal_companion_spark")
+    mint = body.index("klee_companion_spark")
     gate = body.rindex("if replay_index == 0 and card.is_companion:", 0, mint)
     perform = body.index("furina_reframe.companion_play_trigger(state, card)")
     assert perform < gate
