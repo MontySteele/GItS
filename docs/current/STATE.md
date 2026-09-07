@@ -351,7 +351,12 @@ are in [`workstreams.md`](workstreams.md).
   7 on a printed 10 (`EB-599`, D default: the Plan line folds hers and
   nothing of the target's); Shrink reduced a Skill against its gloss
   (`EB-597`); the jellyfish's first turn now prints; no pick;
-  `EB-597`-`EB-599`, built on #413. [USER]'s act-1 run is due on `0.2.2888+proto`. The Kurage
+  `EB-597`-`EB-599`, built on #413. **[USER]'s act-1 run is PLAYED**
+  (2026-09-07, `0.2.2888+proto`,
+  `review/active/kokomi-user-run-1-2026-09-07.md`): "not bad, better than
+  before, but the central loop feels too auto-pilot"; an off-turn is
+  "play all my Plan cards" with nothing to sequence; **one pick** (the
+  carry-out: up to two Plans a turn, default); `EB-623`-`EB-626`. The Kurage
   memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
   **The next assembled round's hypothesis is drafted** (r22 packet §5, from
   the GPT balance review of 2026-09-06): Nereid's over Tide Wall, Ripple and

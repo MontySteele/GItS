@@ -94,6 +94,7 @@ items that survives returns through the reframe's own round packets.
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
+| `kokomi-user-run-1 pick 1` | **Ask:** choose the Bake-Kurage's carry-out (kokomi-user-run-1-2026-09-07 sec.5). **Pick:** (1, default) pool first: order riders and queue-as-resource rows, a dusk/dawn trial, the cap as one lane; (2) the two-Plan cap as the rule now; (3) the shaken queue as the rule now; (4) pivot, Plan supporting. | OPEN — [USER]'s pick; a loop change, played once built | kokomi-user-run-1-2026-09-07 |
 | `klee-user-run-1 pick 2` | **Ask:** choose whether the Hexerei tag earns its place (klee-user-run-1-2026-09-07 sec.5). **Pick:** (1, default) keep it and test the existing package first, a deliberate Hexerei lane in round 24 or 25; (2) keep it and add two Common readers in pool pass two through the audit door; (3) drop the tag: the readers leave or are rewritten, the Spark pays on every Companion play. | OPEN — [USER]'s pick | klee-user-run-1-2026-09-07 |
 | `klee-user-run-1 pick 1` | **Ask:** choose the Hexerei ownership rule (klee-user-run-1-2026-09-07 sec.5). **Pick:** (1, default) every Hexerei card pays the Spark, Universals included, and 'Klee's own' leaves the faces and the tip; (2) keep the rule, drop the face text, the tip says 'a Companion from Klee's coven'; (3) keep both as they are. | OPEN — [USER]'s pick; a rule change, played once built | klee-user-run-1-2026-09-07 |
 
