@@ -194,6 +194,63 @@ public class Round22Tests
         Assert.Contains(calls, c => c == "KleeCardTooltips.Capped");
     }
 
+    // ==================================================================
+    // `EB-603` -- Gorou's Block on a killing blow
+    // ==================================================================
+    //
+    // THE FIND (Furina r16 lane 1). `Gorou - Inuzaka All-Round Defense` took
+    // a 12-HP body off the board and gave 0 Block, twice, both on killing
+    // blows: "I cannot separate 'the clause is broken' from 'the clause does
+    // not fire on a kill'."
+    //
+    // TWO THINGS THE READ FOUND. The number was the SWING and not the loss --
+    // `UnblockedDamage` carries the overkill, and `DamageResult` carries the
+    // overkill as its own field, so subtracting it is a read rather than a
+    // second definition. And a creature with NO combat could wipe the whole
+    // ledger table: `For` drops it whenever the combat differs from the last
+    // one, and a card whose owner is off the board answers null -- which two
+    // speculative call sites can be handed (a face's multiplier lambda, and a
+    // smart description that runs "on every tooltip read"). A wipe between
+    // the hit and the Block is a 0 on a beat that dealt damage.
+    //
+    // The arithmetic is pinned for real in tier0
+    // (`test_eb603_gorou_blocks_on_a_kill.py`); the ledger is a real object
+    // and its guard is exercised here.
+
+    [Fact]
+    public void The_play_total_counts_hp_lost_and_not_the_overkill()
+    {
+        var source = Source("Powers/Prototype/CompanionOverhaulHooks.cs")
+            .Replace("\r\n", "\n");
+
+        Assert.Contains(
+            ".NoteDamage(result.UnblockedDamage - result.OverkillDamage);",
+            source);
+    }
+
+    [Fact]
+    public void A_creature_with_no_combat_does_not_drop_the_ledger_table()
+    {
+        // A REAL LEDGER AND A REAL WIPE. The seat's ledger banks a play's
+        // damage; a read for a creature that is off the board must leave it
+        // standing, because that read is a face refreshing itself and not a
+        // new fight starting.
+        CompanionOverhaulLedger.ResetAll();
+        var seat = Seat.Klee().WithCombatState();
+        var ledger = CompanionOverhaulLedger.For(seat.Creature);
+        ledger.BeginPlay();
+        ledger.NoteDamage(12);
+
+        var offBoard = Seat.Klee().Creature;          // no combat state
+        Assert.Null(offBoard.CombatState);
+        CompanionOverhaulLedger.For(offBoard);
+
+        Assert.Equal(12, CompanionOverhaulLedger.For(seat.Creature)
+                                                .DamageDealtThisPlay);
+        Assert.Same(ledger, CompanionOverhaulLedger.For(seat.Creature));
+        CompanionOverhaulLedger.ResetAll();
+    }
+
     // ------------------------------------------------------------ helpers --
 
     /// <summary>A source file under `klee-mod/KleeCode`.
